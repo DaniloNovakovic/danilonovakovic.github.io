@@ -1,0 +1,99 @@
+/* Custom Stylesheet */
+
+html,
+body {
+    height: 100%;
+    width: 100%;
+    font-family: monospace;
+    font-size: 13pt;
+}
+
+a {
+    color: white;
+}
+
+a:hover {
+    color: rebeccapurple;
+    text-decoration: none;
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* Button Override */
+
+.btn-learn-more {
+    color: #fff;
+    background-color: #ffc107;
+    border-color: #ffc107;
+}
+
+/* Hero */
+
+#hero {
+    background: url(../img/anime-girl-car-drinking-coffee-co.jpg);
+    background-size: cover;
+    background-position: center;
+    color: #fff;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: left;
+    margin-top: -50px;
+    position: relative;
+    z-index: -1;
+}
+
+#hero > h1 {
+    margin-top: -200px;
+    color: #fff;
+    font-size: 42pt
+}
+
+#hero > p {
+    text-align: center;
+}
+
+/* Icon Row */
+
+#iconRow {
+    padding: 60px 0;
+}
+
+
+/* Navigation menu */
+
+.custom-navigation {
+    color: white;
+    background: transparent;
+    height: 50px;
+    width: 100%;
+    z-index: 999999999;
+}
+
+.custom-navigation #logo {
+    padding: 20px 0 0 25px;
+}
+
+.custom-navigation #links,
+#logo {
+    display: inline-block;
+}
+
+.custom-navigation #links {
+    list-style: none;
+    padding: 0;
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 20px 25px 0 0;
+}
+
+.custom-navigation #links > li {
+    display: inline-block;
+    padding-right: 15px;
+}
