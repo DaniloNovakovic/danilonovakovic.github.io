@@ -8,6 +8,15 @@ body {
     font-size: 13pt;
 }
 
+a {
+    color: white;
+}
+
+a:hover {
+    color: rebeccapurple;
+    text-decoration: none;
+}
+
 .text-center {
     text-align: center;
 }
