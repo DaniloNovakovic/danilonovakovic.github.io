@@ -97,3 +97,39 @@ a:hover {
     display: inline-block;
     padding-right: 15px;
 }
+
+/* Footer */
+
+#footer {
+    background: #5A5277;
+    padding: 30px;
+    color: white;
+}
+
+.footerText {
+    text-align: center;
+    padding-top: 60px;
+}
+
+.subP {
+    padding-left: 60px;
+    padding-right: 60px;
+    font-size: 1em;
+    letter-spacing: 1px;
+}
+
+.extraSpace {
+    padding-top: 60px;
+    padding-bottom: 60px;
+}
+
+.centerLinks {
+    padding: 0px;
+    margin: 0px;
+    text-align: center;
+}
+
+.socialIcons img {
+    width: 70px;
+    height: 70px;
+}
