@@ -6,6 +6,8 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+        <!-- Favicon -->
+        <link rel='shortcut icon' type='image/x-icon' href='img/icons/favicon.ico' />
 
         <!-- Font Awesome -->
         <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
@@ -23,13 +25,11 @@
 
     <body>
 
-        <!-- Hero -->
-        <div id="hero">
-            <!-- Navigation -->
+        <header>
             <nav class="custom-navigation">
                 <div id="logo">Danilo Novakovic</div>
                 <!-- Mobile Icons -->
-                <i id="hamburger" class="fa fa-bars" aria-hidden="true"></i>
+                <i id="open-nav" class="fa fa-bars" aria-hidden="true"></i>
                 <i id="close" class="fa fa-times" aria-hidden="true"></i>
 
                 <ul id="links">
@@ -38,20 +38,21 @@
                 </ul>
             </nav>
 
-            <!-- Hero Text -->
-            <div id="hero-text">
+            <!-- Header Text -->
+            <div id="header-text">
                 <h1> DANILO NOVAKOVIC</h1>
                 <p> an software engineer passionate for <br>innovative technology and digital content</p>
                 <a class="btn-learn-more" id="read-more-btn" href="https://www.linkedin.com/in/danilo-novakovi%C4%87-821934167/">Read More</a>
             </div>
-        </div>
+        </header>
 
-        <!-- Icon row -->
-        <div class="container extraSpace">
-            <h1 id="software" style="text-align: left">SOFTWARE</h1>
-            <div id="iconRow" class="row text-center">
+        <main class="container extraSpace">
+           
+            <h2 id="software" style="text-align: left">SOFTWARE</h2>
+            
+            <section id="software-section" class="row text-center">
                 <div class="col-md-4">
-                    <h2>C/C++</h2>
+                    <h3>C/C++</h3>
                     <p>2 years developing efficient low-level algorithms, data structures and small video games in Linux(Ubuntu) terminal and Windows console</p>
                     <a class="project-link" href="https://github.com/DaniloNovakovic/Chesspernado">
                         Chesspernado
@@ -59,7 +60,7 @@
                     <a class="project-link" href="https://github.com/DaniloNovakovic?utf8=%E2%9C%93&tab=repositories&q=&type=&language=c%2B%2B">View all projects</a>
                 </div>
                 <div class="col-md-4 sm-dev-padding">
-                    <h2>C#</h2>
+                    <h3>C#</h3>
                     <p>1 year solving various challanges and recreating programs such as Paint, GPA Calculator etc. in WinForms and WPF, aswell as creating fault-tolerant .NET apps using WCF</p>
                     <a class="project-link" href="https://github.com/DaniloNovakovic/WinFormsFun/tree/master/GPACalculator">
                         GPA Calculator
@@ -67,47 +68,46 @@
                     <a class="project-link" href="https://github.com/DaniloNovakovic?utf8=%E2%9C%93&tab=repositories&q=&type=&language=c%23">View all projects</a>
                 </div>
                 <div class="col-md-4 sm-dev-padding">
-                    <h2>WEB</h2>
+                    <h3>WEB</h3>
                     <p>Experience with HTML, CSS, Javascript and bootstrap to create this responsive website, aswell as creating various simulations/games using frameworks like p5js</p>
                     <a class="project-link" href="https://github.com/DaniloNovakovic/p5js_exercises">
                         p5.js
                     </a> |
                     <a class="project-link" href="https://github.com/DaniloNovakovic?utf8=%E2%9C%93&tab=repositories&q=&type=&language=javascript">View all projects</a>
                 </div>
-            </div>
-        </div>
+            </section>
+        </main>
 
         <div class="clearfix"></div>
 
-        <!-- Footer -->
-        <div id="footer" class="container-fluid">
-            <div class="container extraSpace">
+        <footer class="container-fluid">
+            <section class="container extraSpace">
                 <ul class="centerLinks socialIcons">
                     <li style="display:inline-block">
                         <a href="https://www.youtube.com/channel/UCbIGr_SYiX48TxoY8peiDhA?view_as=subscriber">
-                            <img src="img/icons/youtube.png">
+                            <img src="img/icons/youtube.png" alt="youtube">
                         </a>
                     </li>
                     <li style="display:inline-block">
                         <a href="https://github.com/DaniloNovakovic">
-                            <img src="img/icons/github.png">
+                            <img src="img/icons/github.png" alt="github">
                         </a>
                     </li>
                     <li style="display:inline-block">
                         <a href="https://www.linkedin.com/in/danilo-novakovi%C4%87-821934167/">
-                            <img src="img/icons/linkedIn.png">
+                            <img src="img/icons/linkedIn.png" alt="linkedIn">
                         </a>
                     </li>
                     <li style="display:inline-block">
                         <a href="mailto:dakenzi97@gmail.com">
-                            <img src="img/icons/email.png">
+                            <img src="img/icons/email.png" alt="email">
                         </a>
                     </li>
 
                 </ul>
                 <p class="footerText subP">Email me with any suggestions, collaborations, or just to talk! <br>dakenzi97@gmail.com</p>
-            </div>
-        </div>
+            </section>
+        </footer>
 
         <!-- Optional JavaScript -->
         <!-- jQuery first, then Popper.js, then Bootstrap JS -->

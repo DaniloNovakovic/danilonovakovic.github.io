@@ -1,7 +1,7 @@
 $(document).ready(function() {
     // Mobile nav functionality
-    $('#hamburger,#close').click(function() {
-        $('#hamburger, #close').toggle();
+    $('#open-nav,#close').click(function() {
+        $('#open-nav, #close').toggle();
         $('.custom-navigation #links').toggleClass('visible');
     });
 });
