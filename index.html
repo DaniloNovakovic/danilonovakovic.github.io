@@ -1,90 +1,120 @@
 <!doctype html>
 <html lang="en">
 
-<head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!-- Font Awesome -->
-    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B" crossorigin="anonymous">
+        <!-- Font Awesome -->
+        <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
 
-    <!-- Custom Stylesheet -->
-    <link rel="stylesheet" href="css/style.css">
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B" crossorigin="anonymous">
 
-    <title>Danilo Novakovic</title>
-</head>
+        <!-- Custom Stylesheet -->
+        <link rel="stylesheet" href="css/nav.css">
+        <link rel="stylesheet" href="css/footer.css">
+        <link rel="stylesheet" href="css/style.css">
 
-<body>
+        <title>Danilo Novakovic</title>
+    </head>
 
-    <!-- Navigation -->
-    <nav class="custom-navigation">
-        <div id="logo">Danilo Novakovic</div>
-        <ul id="links">
-            <li> <a href="https://danilonovakovic.github.io/p5js_exercises/">Software</a></li>
-            <li><a href="mailto:dakenzi97@gmail.com">Contact</a></li>
-        </ul>
-    </nav>
+    <body>
 
-    <!-- Hero -->
-    <div id="hero">
-        <h1> DANILO NOVAKOVIC</h1>
-        <p> an software engineer passionate <br>for innovative technology and digital content</p>
-        <button type="button" class="btn btn-learn-more">Read More</button>
-    </div>
+        <!-- Hero -->
+        <div id="hero">
+            <!-- Navigation -->
+            <nav class="custom-navigation">
+                <div id="logo">Danilo Novakovic</div>
+                <!-- Mobile Icons -->
+                <i id="hamburger" class="fa fa-bars" aria-hidden="true"></i>
+                <i id="close" class="fa fa-times" aria-hidden="true"></i>
 
-    <!-- Icon row -->
-    <div class="container extraSpace">
-        <div id="iconRow" class="row text-center">
-            <div class="col-md-4">
-                <h2>C/C++</h2>
-                <p>2 years developing efficient low-level algorithms, data structures and small video games in Linux(Ubuntu) terminal and Windows console</p>
-            </div>
-            <div class="col-md-4">
-                <h2>C#</h2>
-                <p>1 year solving various challanges and recreating programs such as Paint, GPA Calculator etc. in WinForms and WPF, aswell as creating fault-tolerant .NET apps using WCF</p>
-            </div>
-            <div class="col-md-4">
-                <h2>Web</h2>
-                <p>Experience with HTML, CSS, Javascript and bootstrap to create this responsive website, aswell as creating various simulations/games using frameworks like p5js</p>
+                <ul id="links">
+                    <li> <a href="https://danilonovakovic.github.io/p5js_exercises/">Software</a></li>
+                    <li><a href="mailto:dakenzi97@gmail.com">Contact</a></li>
+                </ul>
+            </nav>
+
+            <!-- Hero Text -->
+            <div id="hero-text">
+                <h1> DANILO NOVAKOVIC</h1>
+                <p> an software engineer passionate for <br>innovative technology and digital content</p>
+                <a class="btn-learn-more" id="read-more-btn" href="https://www.linkedin.com/in/danilo-novakovi%C4%87-821934167/">Read More</a>
             </div>
         </div>
-    </div>
 
-    <div class="clearfix"></div>
-
-    <!-- Footer -->
-    <div id="footer" class="container-fluid">
+        <!-- Icon row -->
         <div class="container extraSpace">
-            <ul class="centerLinks socialIcons">
-                <li style="display:inline-block">
-                    <a href="https://www.youtube.com/channel/UCbIGr_SYiX48TxoY8peiDhA?view_as=subscriber">
-                        <img src="img/icons/youtube.png">
-                    </a>
-                </li>
-                <li style="display:inline-block">
-                    <a href="https://github.com/DaniloNovakovic">
-                        <img src="img/icons/github.png">
-                    </a>
-                </li>
-                <li style="display:inline-block">
-                    <a href="mailto:dakenzi97@gmail.com">
-                        <img src="img/icons/email.png">
-                    </a>
-                </li>
-            </ul>
-            <p class="footerText subP">Email me with any suggestions, collaborations, or just to talk! <br>dakenzi97@gmail.com</p>
+            <h1 id="software" style="text-align: left">SOFTWARE</h1>
+            <div id="iconRow" class="row text-center">
+                <div class="col-md-4">
+                    <h2>C/C++</h2>
+                    <p>2 years developing efficient low-level algorithms, data structures and small video games in Linux(Ubuntu) terminal and Windows console</p>
+                    <a class="project-link" href="https://github.com/DaniloNovakovic/Chesspernado">
+                        Chesspernado
+                    </a> |
+                    <a class="project-link" href="https://github.com/DaniloNovakovic?utf8=%E2%9C%93&tab=repositories&q=&type=&language=c%2B%2B">View all projects</a>
+                </div>
+                <div class="col-md-4 sm-dev-padding">
+                    <h2>C#</h2>
+                    <p>1 year solving various challanges and recreating programs such as Paint, GPA Calculator etc. in WinForms and WPF, aswell as creating fault-tolerant .NET apps using WCF</p>
+                    <a class="project-link" href="https://github.com/DaniloNovakovic/WinFormsFun/tree/master/GPACalculator">
+                        GPA Calculator
+                    </a> |
+                    <a class="project-link" href="https://github.com/DaniloNovakovic?utf8=%E2%9C%93&tab=repositories&q=&type=&language=c%23">View all projects</a>
+                </div>
+                <div class="col-md-4 sm-dev-padding">
+                    <h2>WEB</h2>
+                    <p>Experience with HTML, CSS, Javascript and bootstrap to create this responsive website, aswell as creating various simulations/games using frameworks like p5js</p>
+                    <a class="project-link" href="https://github.com/DaniloNovakovic/p5js_exercises">
+                        p5.js
+                    </a> |
+                    <a class="project-link" href="https://github.com/DaniloNovakovic?utf8=%E2%9C%93&tab=repositories&q=&type=&language=javascript">View all projects</a>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <!-- Optional JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js" integrity="sha384-o+RDsa0aLu++PJvFqy8fFScvbHFLtbvScb8AjopnFD+iEQ7wo/CG0xlczd+2O/em" crossorigin="anonymous"></script>
-</body>
+        <div class="clearfix"></div>
+
+        <!-- Footer -->
+        <div id="footer" class="container-fluid">
+            <div class="container extraSpace">
+                <ul class="centerLinks socialIcons">
+                    <li style="display:inline-block">
+                        <a href="https://www.youtube.com/channel/UCbIGr_SYiX48TxoY8peiDhA?view_as=subscriber">
+                            <img src="img/icons/youtube.png">
+                        </a>
+                    </li>
+                    <li style="display:inline-block">
+                        <a href="https://github.com/DaniloNovakovic">
+                            <img src="img/icons/github.png">
+                        </a>
+                    </li>
+                    <li style="display:inline-block">
+                        <a href="https://www.linkedin.com/in/danilo-novakovi%C4%87-821934167/">
+                            <img src="img/icons/linkedIn.png">
+                        </a>
+                    </li>
+                    <li style="display:inline-block">
+                        <a href="mailto:dakenzi97@gmail.com">
+                            <img src="img/icons/email.png">
+                        </a>
+                    </li>
+
+                </ul>
+                <p class="footerText subP">Email me with any suggestions, collaborations, or just to talk! <br>dakenzi97@gmail.com</p>
+            </div>
+        </div>
+
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js" integrity="sha384-o+RDsa0aLu++PJvFqy8fFScvbHFLtbvScb8AjopnFD+iEQ7wo/CG0xlczd+2O/em" crossorigin="anonymous"></script>
+        <script src="scripts/app.js"></script>
+    </body>
 
 </html>
