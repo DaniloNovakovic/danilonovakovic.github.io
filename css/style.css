@@ -1,6 +1,7 @@
 /* Custom Stylesheet */
 
 :root {
+    /* Colors */
     --nav-link-hover-color: rebeccapurple;
     --about-me-bg-color: white;
     --about-me-text-color: #1C0F16;
@@ -10,16 +11,23 @@
     --software-link-hover-color: white; 
     --footer-bg-color: white;
     --footer-text-color: #1C0F16;
+    
+    /* Fonts */
+    --body-font-family: "Gravity-Regular", monospace;
+    --header-font-family: "Gravity-Book", monospace;
 }
 
 html,
 body {
     height: 100%;
     width: 100%;
-    font-family: monospace;
+    font-family: var(--body-font-family);
     font-size: 13pt;
 }
 
+h1 {
+    font-family: var(--header-font-family);
+}
 h1,h2,h3,h4,h5,h6 {
     text-align: center;
     letter-spacing: 5px;
@@ -41,24 +49,6 @@ a:hover, a:visited, a:link, a:active {
 .text-center {
     text-align: center;
 }
-.letter-spaced {
-    letter-spacing: 5px;
-}
-
-.btn-learn-more {
-    text-align: center;
-    margin: 0 20px;
-    padding: 10px;
-    color: #fff;
-    background-color: #ffc107;
-    border-color: #ffc107;
-    border-radius: 50%;
-    transition: transform 0.5s;
-}
-.btn-learn-more:hover {
-    transform: scale(1.3);
-    filter: brightness(105%);
-}
 
 /* Header */
 
@@ -73,7 +63,8 @@ header {
 }
 
 header > #header-text {
-    font-size: 13pt;
+    font-family: var(--header-font-family);
+    font-size: 20pt;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -82,7 +73,7 @@ header > #header-text {
 }
 
 header > #header-text > h1 {
-    margin-top: 80px;
+    margin-top: 50px;
     color: #fff;
     font-size: 42pt
 }
@@ -91,11 +82,30 @@ header > p {
     text-align: center;
 }
 
+.btn-learn-more {
+    font-size: 14pt;
+    text-align: center;
+    margin: 0 20px;
+    padding: 10px;
+    color: #fff;
+    background-color: #ffc107;
+    border-color: #ffc107;
+    border-radius: 50%;
+    transition: transform 0.5s;
+}
+.btn-learn-more:hover {
+    transform: scale(1.3);
+    filter: brightness(105%);
+}
+
+
 /* About me section */
 
 #about-me-section {
     background-color: var(--about-me-bg-color);
     color: var(--about-me-text-color);
+    margin-top: 60px;
+    margin-bottom: 60px;
     padding-top: 60px;
     padding-bottom: 60px;
     display: flex;
@@ -125,6 +135,7 @@ header > p {
     padding: 60px;
 }
 #software-header {
+    letter-spacing: 10px;
     padding-top: 10px;
     padding-left: 70px;
 }
@@ -168,6 +179,18 @@ header > p {
 }
 
 @media(max-width: 765px) {
+    
+    header > #header-text {
+        font-size: 14pt;
+    }
+    
+    header > #header-text > h1 {
+        font-size: 36pt
+    }
+    .btn-learn-more {
+        font-size: 10pt;
+    }
+    
     #about-me-section {
         flex-direction: column;
     }
@@ -212,7 +235,7 @@ header > p {
         font-size:12pt;
     }
     header > #header-text {
-        font-size: 12pt;
+        font-size: 14pt;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -223,7 +246,7 @@ header > p {
     header > #header-text > h1 {
         margin-top: 50px;
         color: #fff;
-        font-size: 32pt
+        font-size: 36pt
     }
 }
 
