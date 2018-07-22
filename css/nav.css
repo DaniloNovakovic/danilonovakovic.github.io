@@ -1,5 +1,10 @@
 /* Navigation menu */
 
+nav  a:hover {
+    color: rebeccapurple;
+    text-decoration: none;
+}
+
 .custom-navigation {
     font-size: 14pt;
     color: white;
