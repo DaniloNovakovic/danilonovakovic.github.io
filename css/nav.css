@@ -1,7 +1,7 @@
 /* Navigation menu */
 
 nav  a:hover {
-    color: rebeccapurple;
+    color: var(--nav-link-hover-color);
     text-decoration: none;
 }
 

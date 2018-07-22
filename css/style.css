@@ -1,6 +1,7 @@
 /* Custom Stylesheet */
 
 :root {
+    --nav-link-hover-color: rebeccapurple;
     --about-me-bg-color: white;
     --about-me-text-color: #1C0F16;
     --software-bg-color: #2a1621;
@@ -21,7 +22,7 @@ body {
 
 h1,h2,h3,h4,h5,h6 {
     text-align: center;
-    letter-spacing:5px;
+    letter-spacing: 5px;
 }
 
 a {
@@ -98,6 +99,7 @@ header > p {
     padding-top: 60px;
     padding-bottom: 60px;
     display: flex;
+    flex-wrap: wrap;
     flex-direction: row;
     justify-content: center;
 }
@@ -120,8 +122,7 @@ header > p {
 #software-section {
     background-color: var(--software-bg-color);
     color: var(--software-text-color);
-    padding-top: 60px;
-    padding-bottom: 60px;
+    padding: 60px;
 }
 #software-header {
     padding-top: 10px;
@@ -145,33 +146,24 @@ header > p {
     color: var(--software-link-hover-color);
 }
 .software-language {
-    margin: 20px;
     width: 30%;
+    margin: 20px;
 }
 
 #open-nav, #close {
     display: none;
 }
 
-
 /* Media Queries */
-@media(max-width: 600px) {
-    header > .custom-navigation {
-        font-size:12pt;
+@media(max-width: 1350px) {
+    .software-language {
+        width: 45%;
+        align-self: center;
     }
-    header > #header-text {
-        font-size: 12pt;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-    }
-
-    header > #header-text > h1 {
-        margin-top: 50px;
-        color: #fff;
-        font-size: 32pt
+}
+@media(max-width: 1100px) {
+    .software-language {
+        width: 40%;
     }
 }
 
@@ -189,7 +181,7 @@ header > p {
         align-self: center;
         width: 70%;
     }
-    
+
     /*Mobile Nav */
     #open-nav, #close {
         display: table-header-group;
@@ -212,8 +204,29 @@ header > p {
 
     .sm-dev-padding {
         padding-top: 60px;
-    }
-    
+    }    
 } 
+
+@media(max-width: 600px) {
+    header > .custom-navigation {
+        font-size:12pt;
+    }
+    header > #header-text {
+        font-size: 12pt;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    header > #header-text > h1 {
+        margin-top: 50px;
+        color: #fff;
+        font-size: 32pt
+    }
+}
+
+
 
 
