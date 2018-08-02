@@ -17,6 +17,9 @@
     --header-font-family: "Gravity-Book", monospace;
 }
 
+body {
+    background-color: #8198E4;
+}
 html,
 body {
     height: 100%;
@@ -61,6 +64,7 @@ header {
     height: 100%;
     width: 100%;
     position: relative;
+    animation: appear-opacity 700ms ease-in-out 0s;
 }
 
 header > #header-text {
@@ -73,7 +77,14 @@ header > #header-text {
     text-align: center;
     animation: appear 1200ms ease-in-out 0s;
 }
-
+@keyframes appear-opacity {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
 @keyframes appear {
     0% {
         opacity: 0;
