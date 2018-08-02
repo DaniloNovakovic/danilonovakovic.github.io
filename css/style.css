@@ -154,6 +154,10 @@ header > p {
 /* Software section */
 
 #software-section {
+    background-image: url('../img/SimpleCostlyGermanspaniel.gif');
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
     background-color: var(--software-bg-color);
     color: var(--software-text-color);
     padding: 60px;;
@@ -164,6 +168,7 @@ header > p {
     padding-left: 70px;
 }
 #software-body{
+    background-color: rgba(20,10,40,0.8);
     display: flex;
     flex-direction: row;
     padding: 60px 0;
