@@ -22,8 +22,8 @@ body {
     height: 100%;
     width: 100%;
     font-family: var(--body-font-family);
-    margin: 0px;
 }
+
 
 h1 {
     font-family: var(--header-font-family);
@@ -71,8 +71,22 @@ header > #header-text {
     align-items: center;
     justify-content: center;
     text-align: center;
+    animation: appear 1200ms ease-in-out 0s;
 }
 
+@keyframes appear {
+    0% {
+        opacity: 0;
+        transform: translateY(-100%);
+    }
+    50% {
+        opacity: 0.2;
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 header > #header-text > h1 {
     margin-top: 50px;
     color: #fff;
@@ -105,10 +119,8 @@ header > p {
 #about-me-section {
     background-color: var(--about-me-bg-color);
     color: var(--about-me-text-color);
-    margin-top: 60px;
-    margin-bottom: 60px;
-    padding-top: 60px;
-    padding-bottom: 60px;
+    padding-top: 120px;
+    padding-bottom: 120px;
     display: flex;
     flex-wrap: wrap;
     flex-direction: row;

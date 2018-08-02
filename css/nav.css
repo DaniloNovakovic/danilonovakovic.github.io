@@ -12,6 +12,7 @@ nav  a:hover {
     height: 50px;
     width: 100%;
     z-index: 999999999;
+    animation: appear 1200ms ease-in-out 0s;
 }
 
 .custom-navigation #logo {
