@@ -6,7 +6,9 @@ $(document).ready(function() {
     });
     $('.custom-navigation #links').click(function() {
        $('.custom-navigation #links').removeClass('visible'); 
-        $('#open-nav').toggle(true);
-        $('#close').toggle(false);
+        if($('#close').is(':visible')) {
+            $('#open-nav').show();
+            $('#close').hide();
+        }
     });
 });
