@@ -1,14 +1,12 @@
-$(document).ready(function() {
-    // Mobile nav functionality
-    $('#open-nav,#close').click(function() {
-        $('#open-nav, #close').toggle();
-        $('.custom-navigation #links').toggleClass('visible');
-    });
-    $('.custom-navigation #links').click(function() {
-       $('.custom-navigation #links').removeClass('visible'); 
-        if($('#close').is(':visible')) {
-            $('#open-nav').show();
-            $('#close').hide();
+const ABOUT_ME = '#about-me';
+
+$(document).ready(function () {
+    $(window).on('resize', function () {
+        if ($(window).height() > $(window).width()) {
+            $(ABOUT_ME).css('grid-column', '1 / span 2');
+        } else {
+            $(ABOUT_ME).css('grid-column','');
         }
     });
+
 });

@@ -1,0 +1,493 @@
+@import 'fluid-typography';
+
+$min_width: 1300px;
+$max_width: 2600px;
+$min_font: 13px;
+$max_font: 35px;
+
+:root {
+    @include fluid-type($min_width, $max_width, $min_font, $max_font);
+}
+
+*,
+*:before,
+*:after {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+    font-family: lato, sans-serif;
+}
+
+$body-color: #777;
+
+$skewY-deg: -7deg;
+
+$main-grad-col-1: rgba(126, 213, 111, 0.8);
+$main-grad-col-2: rgba(40, 180, 133, 0.8);
+$lin-grad-main: linear-gradient(to right bottom, $main-grad-col-1, $main-grad-col-2);
+
+$ability-grad-col-1: rgba(255, 234, 201, 0.9);
+$ability-grad-col-2: rgba(208, 161, 30, 0.86);
+$lin-grad-ability: linear-gradient(to right bottom, $ability-grad-col-1, $ability-grad-col-2);
+
+body {
+    display: block;
+    font-family: lato, sans-serif;
+    font-weight: 400;
+    line-height: 1.7;
+    color: $body-color;
+}
+
+h1 {
+    font-size: 3.5rem;
+    letter-spacing: 1.2rem;
+}
+
+h2 {
+    font-size: 3rem;
+    letter-spacing: 1.1rem;
+}
+
+h3 {
+    font-size: 2rem;
+}
+h4 {
+    font-size: 1.4rem;
+}
+h5 {
+    font-size: 1.25rem;
+}
+h6 {
+    font-size: 1.1rem;
+}
+p {
+    font-size: 1rem;
+}
+@media(max-width: 500px) {
+    * {
+        font-size: 1rem;
+    }
+    h1 {
+        font-size: 2rem;
+    }
+    h2{
+        font-size: 1.625rem;
+    }
+    h3 {
+        font-size: 1.375rem;
+    }
+    h4 {
+        font-size: 1.125rem;
+    }
+}
+
+@media (min-width: 900px) {
+    body {
+        padding: 2em;
+    }
+}
+
+.fill-viewport {
+    width: 100%;
+    min-height: 95vmin;
+    //min-height: 95vh;
+}
+
+section,
+article {
+    position: relative;
+}
+
+.section-header {
+    text-align: center;
+    * {
+        padding: 0px;
+        margin: 0px;
+    }
+}
+
+.card {
+    color: $body-color;
+    background-color: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+/* Landing page */
+
+nav {
+    display: none;
+}
+
+#landing-page {
+    position: relative;
+    background-image: $lin-grad-main, url('../img/hero.jpg');
+    background-size: cover;
+    clip-path: polygon(0 0, 100% 0, 100% 75vmin, 0 100%);
+    color: white;
+}
+
+#header-body {
+    position: absolute;
+    //max-width: 50%; // ?
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: left;
+}
+
+#header-body--main {
+    display: block;
+    font-size: 3rem;
+    letter-spacing: 1rem;
+}
+
+#header-body--sub {
+    display: block;
+    font-size: 1.2rem;
+    letter-spacing: 1.75rem;
+}
+
+/* Profile */
+
+#profile {
+    padding-top: 3em;
+    text-align: center;
+    font-size: 1rem;
+}
+
+#profile-header {
+    * {
+        padding: 0px;
+        margin: 0px;
+    }
+    h2 {
+        color: $main-grad-col-2;
+    }
+}
+
+#profile-body {
+    padding: 4em;
+    position: relative;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    //grid-template-columns: repeat(auto-fit, minmax(15em, 1fr));
+    justify-content: center;
+    align-content: center;
+    grid-gap: 1em;
+    text-align: left;
+}
+
+
+#about-me-header,
+#details-header {
+    text-align: center;
+    margin-bottom: 0.2em;
+}
+
+#profile-pic {
+    position: relative;
+    margin: 3em auto 0;
+    width: 15em;
+    height: 15em;
+    border: 1px solid $ability-grad-col-2;
+    border-radius: 50%;
+    filter: grayscale(40%);
+}
+@media(max-width: 900px) {
+    #profile-body {
+        grid-template-columns: 1fr 1fr;
+    }
+    #about-me {
+      grid-column: 1 / span 2;
+    }
+    .details-info {
+        padding-left: 2em;
+    }
+}
+
+.details-info {
+    * {
+        display: block;
+        padding: 0px;
+        margin: 0px;
+    }
+}
+
+/* Experience */
+
+#experiences {
+    color: white;
+    margin-top: 5rem;
+    margin-bottom: 5rem;
+    padding: 3rem;
+    background-image: $lin-grad-main, url('../img/nat-3-large.jpg');
+    background-size: cover;
+    transform: skewY($skewY-deg);
+}
+
+#experiences-body {
+    padding: 3em;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-gap: 4em;
+    transform: skewY(-$skewY-deg);
+        }
+
+#experiences-header {
+    transform: skewY(-$skewY-deg);
+        }
+
+#education,
+#careers {
+    padding: 1.5rem;
+    text-align: center;
+}
+
+#education-header,
+#careers-header {
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+.experiences-info {
+    display: grid;
+    grid-template-columns: 0.5fr 1fr;
+    grid-gap: 2em;
+    padding: 0 0 1.5rem;
+    text-align: right;
+}
+
+@media (max-width: 720px) {
+    .experiences-info {
+        grid-template-columns: 1fr;
+        text-align: left;
+        grid-gap: 0.3em;
+    }
+}
+@media (max-width: 500px) {
+    .exp-info-des {
+        display: none;
+    }
+}
+
+.exp-info-header {
+    * {
+        padding: 0px;
+        margin: 0px;
+    }
+}
+
+.exp-info-des {
+    text-align: left;
+}
+
+
+/* Abilities */
+
+#abilities {
+    color: white;
+    padding: 3em;
+    background-image: $lin-grad-main;
+    background-size: cover;
+    font-size: 1.1rem;
+}
+
+#abilities-body {
+    background-color: transparent;
+    background-size: cover;
+    padding: 2em;
+}
+
+.ability {
+    background-image: $lin-grad-ability;
+    background-size: cover;
+    padding: 1em;
+    margin-bottom: 1em;
+    box-shadow: 0 3rem 6rem rgba(0, 0, 0, 0.1);
+    text-align: center;
+    border-radius: 1%;
+    text-shadow: 2px 2px 8px #000000;
+    color: white;
+}
+
+#skills {
+    background-image: $lin-grad-ability, url('../img/nat-10.jpg');
+    background-size: cover;
+}
+
+#languages {
+    background-image: $lin-grad-ability, url('../img/nat-1-large.jpg');
+    background-size: cover;
+}
+
+#tools {
+    background-image: $lin-grad-ability, url('../img/nat-5.jpg');
+    background-size: cover;
+}
+
+
+.skills-list {
+    padding: 2em;
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(10em, 0.5fr));
+    text-align: center;
+    justify-content: center;
+    grid-gap: 2em;
+    text-shadow: none;
+
+    li {
+        display: block;
+    }
+}
+
+#see-curr-proj {
+    text-align: center;
+    margin: 1em;
+    * {
+        margin: 1em;
+        padding: 1em;
+    }
+}
+@media(max-width:500px) {
+    #abilities-body {
+        padding: 0.5em;
+    }
+    #abilities {
+        padding: 1em;
+    }
+}
+
+#curr-proj-btn {
+    color: white;
+    background-color: $main-grad-col-1;
+    text-decoration: none;
+}
+
+/* Projects */
+
+#projects-header h2 {
+    color: $main-grad-col-2;
+}
+
+#projects {
+    margin-top: 2rem;
+    padding: 2rem;
+}
+
+$project-card-width: 20em;
+
+#projects-body {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax($project-card-width, 1fr));
+    text-align: center;
+    justify-content: center;
+    grid-gap: 3em;
+    padding: 3em;
+}
+
+$proj-text-col: white;
+$proj-lin-grad: linear-gradient(to right bottom, $main-grad-col-1, $main-grad-col-2);
+
+.project {
+    position: relative !important; // description and img depend on this being relative
+    overflow: hidden !important; // project animation depends on this
+    width: $project-card-width;
+    height: $project-card-width;
+    margin: 0 auto;
+    background-image: $proj-lin-grad;
+    color: $proj-text-col;
+    text-shadow: 2px 2px 8px black;
+    box-shadow: 5px 7px 20px rgba(0, 0, 0, 0.6);
+
+    img {
+        width: 100%;
+        height: 100%;
+    }
+
+    .project-description,
+    figcaption {
+        position: absolute !important; // it needs to be absolute so that we can position it over img
+        top: 0px;
+        left: 0px;
+        padding: 1em;
+        width: 100%;
+        height: 100%;
+
+        a {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            height: 100%;
+            width: 100%;
+            z-index: 1000;
+            font-size: 0;
+            opacity: 0;
+        }
+        p {
+            text-align: left;
+        }
+        header,
+        p {
+            padding-bottom: 0.7em;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 0.2em;
+        }
+    }
+}
+
+.project.effect {
+    * {
+        transition: opacity 200ms ease-in-out, transform 200ms ease-in-out;
+        opacity: 0;
+    }
+    p {
+        transform: translateX(100%);
+    }
+    img {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+
+    &:hover {
+        img {
+            opacity: 0.2;
+            transform: rotate(5deg) scale(1.1);
+        }
+        * {
+            opacity: 1;
+            transform: translateX(0%);
+        }
+    }
+}
+
+
+/* Contacts */
+
+#contact {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-content: center;
+    background-color: #434242;
+    color: white;
+}
+
+#contact-header {
+    margin-bottom: 2rem;
+}
+
+#contact-link {
+    text-align: center;
+}
+
+.social-icon {
+    border-radius: 50%;
+    width: 4.5em;
+    height: 4.5em;
+    margin: 1.2em;
+}
