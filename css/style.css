@@ -1,135 +1,294 @@
 /* Custom Stylesheet */
 
+:root {
+    /* Colors */
+    --nav-link-hover-color: rebeccapurple;
+    --about-me-bg-color: white;
+    --about-me-text-color: #1C0F16;
+    --software-bg-color: #65567D;
+    --software-text-color: white;
+    --software-link-color: rgba(245, 237, 237, 0.51);
+    --software-link-hover-color: white; 
+    --footer-bg-color: white;
+    --footer-text-color: #1C0F16;
+    
+    /* Fonts */
+    --body-font-family: "Gravity-Regular", monospace;
+    --header-font-family: "Gravity-Book", monospace;
+}
+
+body {
+    background-color: #8198E4;
+}
 html,
 body {
     height: 100%;
     width: 100%;
-    font-family: monospace;
-    font-size: 13pt;
+    font-family: var(--body-font-family);
+}
+
+
+h1 {
+    font-family: var(--header-font-family);
+}
+h1,h2,h3,h4,h5,h6 {
+    text-align: center;
+    letter-spacing: 5px;
 }
 
 a {
     color: white;
+    transition: color 0.5s;
+}
+a:hover, a:visited, a:link, a:active {
+    color:white;
+    text-decoration: none;
 }
 
-a:hover {
-    color: rebeccapurple;
-    text-decoration: none;
+.project-link {
+    font-size: 10pt;
 }
 
 .text-center {
     text-align: center;
 }
 
-/* Button Override */
+/* Header */
 
-.btn-learn-more {
-    color: #fff;
-    background-color: #ffc107;
-    border-color: #ffc107;
-}
-
-/* Hero */
-
-#hero {
+header {
     background: url(../img/anime-girl-car-drinking-coffee-co.jpg);
     background-size: cover;
     background-position: center;
+    background-attachment: fixed;
     color: #fff;
     height: 100%;
     width: 100%;
+    position: relative;
+    animation: appear-opacity 700ms ease-in-out 0s;
+}
+
+header > #header-text {
+    font-family: var(--header-font-family);
+    font-size: 20pt;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    text-align: left;
-    margin-top: -50px;
-    position: relative;
-    z-index: -1;
+    text-align: center;
+    animation: appear 1200ms ease-in-out 0s;
 }
-
-#hero > h1 {
-    margin-top: -200px;
+@keyframes appear-opacity {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+@keyframes appear {
+    0% {
+        opacity: 0;
+        transform: translateY(-100%);
+    }
+    50% {
+        opacity: 0.2;
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+header > #header-text > h1 {
+    margin-top: 50px;
     color: #fff;
     font-size: 42pt
 }
 
-#hero > p {
+header > p {
     text-align: center;
 }
 
-/* Icon Row */
+.btn-learn-more {
+    font-size: 14pt;
+    text-align: center;
+    margin: 0 20px;
+    padding: 10px;
+    color: #fff;
+    background-color: #ffc107;
+    border-color: #ffc107;
+    border-radius: 50%;
+    transition: transform 0.5s;
+}
+.btn-learn-more:hover {
+    transform: scale(1.3);
+    filter: brightness(105%);
+}
 
-#iconRow {
+
+/* About me section */
+
+#about-me-section {
+    background-color: var(--about-me-bg-color);
+    color: var(--about-me-text-color);
+    padding-top: 120px;
+    padding-bottom: 120px;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: center;
+}
+#about-me-pic {
+    border-radius: 50%;
+    height: 200px;
+    width: 200px;
+    align-self: center;
+}
+#about-me-text {
+    font-size: 12pt;
+    margin: 20px;
+    margin-left: 30px;
+    width: 50%;
+    align-self: center;
+}
+
+/* Software section */
+
+#software-section {
+    background-image: url('../img/SimpleCostlyGermanspaniel.gif');
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+    background-color: var(--software-bg-color);
+    color: var(--software-text-color);
+    padding: 60px;;
+}
+#software-header {
+    letter-spacing: 10px;
+    padding-top: 10px;
+    padding-left: 70px;
+}
+#software-body{
+    background-color: rgba(20,10,40,0.8);
+    display: flex;
+    flex-direction: row;
     padding: 60px 0;
+    justify-content: space-around;
+}
+#software-body h3 {
+    margin-bottom: 15px;
+}
+
+#software-section .project-link {
+    color: var(--software-link-color);
+    transition: color 0.5s;
+}
+#software-section .project-link:hover {
+    color: var(--software-link-hover-color);
+}
+.software-language {
+    width: 30%;
+    margin: 20px;
+}
+
+#open-nav, #close {
+    display: none;
+    cursor: pointer;
+}
+
+/* Media Queries */
+@media(max-width: 1350px) {
+    .software-language {
+        width: 45%;
+        align-self: center;
+    }
+}
+@media(max-width: 1100px) {
+    .software-language {
+        width: 40%;
+    }
+}
+
+@media(max-width: 765px) {
+    
+    header > #header-text {
+        font-size: 14pt;
+    }
+    
+    header > #header-text > h1 {
+        font-size: 36pt
+    }
+    .btn-learn-more {
+        font-size: 10pt;
+    }
+    
+    #about-me-section {
+        flex-direction: column;
+    }
+    #about-me-text {
+        width: 80%;
+    }
+    #software-body {
+        flex-direction: column;
+    }
+    .software-language {
+        align-self: center;
+        width: 70%;
+    }
+
+    /*Mobile Nav */
+    #open-nav, #close {
+        display: table-header-group;
+        color: #fff;
+        position: absolute;
+        top: 0;
+        right: 0;
+        padding: 20px 25px;
+        z-index: 100;
+    }
+
+    .custom-navigation > #links {
+        display:none;
+        padding: 0px;
+    }
+
+    #close {
+        display: none;
+    }
+
+    .sm-dev-padding {
+        padding-top: 60px;
+    }    
+} 
+
+@media(max-width: 440px) {
+    header > .custom-navigation {
+        font-size:12pt;
+    }
+    header > #header-text {
+        font-size: 14pt;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    header > #header-text > h1 {
+        margin-top: 50px;
+        color: #fff;
+        font-size: 27pt
+    }
+    
+    #software-section {
+        padding: 60px 5px;
+    }
+    #software-header {
+        letter-spacing: 7px;
+        padding-top: 10px;
+        padding-left: 10px;
+    }
 }
 
 
-/* Navigation menu */
 
-.custom-navigation {
-    color: white;
-    background: transparent;
-    height: 50px;
-    width: 100%;
-    z-index: 999999999;
-}
 
-.custom-navigation #logo {
-    padding: 20px 0 0 25px;
-}
-
-.custom-navigation #links,
-#logo {
-    display: inline-block;
-}
-
-.custom-navigation #links {
-    list-style: none;
-    padding: 0;
-    position: absolute;
-    top: 0;
-    right: 0;
-    padding: 20px 25px 0 0;
-}
-
-.custom-navigation #links > li {
-    display: inline-block;
-    padding-right: 15px;
-}
-
-/* Footer */
-
-#footer {
-    background: #5A5277;
-    padding: 30px;
-    color: white;
-}
-
-.footerText {
-    text-align: center;
-    padding-top: 60px;
-}
-
-.subP {
-    padding-left: 60px;
-    padding-right: 60px;
-    font-size: 1em;
-    letter-spacing: 1px;
-}
-
-.extraSpace {
-    padding-top: 60px;
-    padding-bottom: 60px;
-}
-
-.centerLinks {
-    padding: 0px;
-    margin: 0px;
-    text-align: center;
-}
-
-.socialIcons img {
-    width: 70px;
-    height: 70px;
-}
