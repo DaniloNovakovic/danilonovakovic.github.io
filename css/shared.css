@@ -127,8 +127,8 @@ article {
     opacity: 0;
   }
   100% {
-    -webkit-transform: rotate(xx) translateX(0);
-            transform: rotate(xx) translateX(0);
+    -webkit-transform: translateX(0);
+            transform: translateX(0);
     opacity: 1;
   }
 }
@@ -139,8 +139,8 @@ article {
     opacity: 0;
   }
   100% {
-    -webkit-transform: rotate(xx) translateX(0);
-            transform: rotate(xx) translateX(0);
+    -webkit-transform: translateX(0);
+            transform: translateX(0);
     opacity: 1;
   }
 }
@@ -152,8 +152,8 @@ article {
     opacity: 0;
   }
   100% {
-    -webkit-transform: rotate(xx) translateX(0);
-            transform: rotate(xx) translateX(0);
+    -webkit-transform: translateX(0);
+            transform: translateX(0);
     opacity: 1;
   }
 }
@@ -165,8 +165,8 @@ article {
     opacity: 0;
   }
   100% {
-    -webkit-transform: rotate(xx) translateX(0);
-            transform: rotate(xx) translateX(0);
+    -webkit-transform: translateX(0);
+            transform: translateX(0);
     opacity: 1;
   }
 }
@@ -392,109 +392,6 @@ nav {
   }
 }
 
-/* Abilities */
-#abilities {
-  color: white;
-  padding: 3em;
-  background-image: -webkit-gradient(linear, left top, right bottom, from(rgba(126, 213, 111, 0.8)), to(rgba(40, 180, 133, 0.8)));
-  background-image: linear-gradient(to right bottom, rgba(126, 213, 111, 0.8), rgba(40, 180, 133, 0.8));
-  background-size: cover;
-  font-size: 1.1rem;
-}
-
-#abilities-body {
-  background-color: transparent;
-  background-size: cover;
-  padding: 2em;
-}
-
-#abilities-header {
-  margin-top: 1em;
-  margin-bottom: 1em;
-}
-
-.ability {
-  background-image: -webkit-gradient(linear, left top, right bottom, from(rgba(255, 234, 201, 0.9)), to(rgba(208, 161, 30, 0.86)));
-  background-image: linear-gradient(to right bottom, rgba(255, 234, 201, 0.9), rgba(208, 161, 30, 0.86));
-  background-size: cover;
-  padding: 1em;
-  margin-bottom: 1em;
-  -webkit-box-shadow: 0 3rem 6rem rgba(0, 0, 0, 0.1);
-          box-shadow: 0 3rem 6rem rgba(0, 0, 0, 0.1);
-  text-align: center;
-  border-radius: 1%;
-  text-shadow: 2px 2px 8px #000000;
-  color: white;
-}
-
-#skills {
-  background-image: -webkit-gradient(linear, left top, right bottom, from(rgba(255, 234, 201, 0.9)), to(rgba(208, 161, 30, 0.86))), url("../img/nat-10.jpg");
-  background-image: linear-gradient(to right bottom, rgba(255, 234, 201, 0.9), rgba(208, 161, 30, 0.86)), url("../img/nat-10.jpg");
-  background-size: cover;
-}
-
-#languages {
-  background-image: -webkit-gradient(linear, left top, right bottom, from(rgba(255, 234, 201, 0.9)), to(rgba(208, 161, 30, 0.86))), url("../img/nat-1-large.jpg");
-  background-image: linear-gradient(to right bottom, rgba(255, 234, 201, 0.9), rgba(208, 161, 30, 0.86)), url("../img/nat-1-large.jpg");
-  background-size: cover;
-}
-
-#tools {
-  background-image: -webkit-gradient(linear, left top, right bottom, from(rgba(255, 234, 201, 0.9)), to(rgba(208, 161, 30, 0.86))), url("../img/nat-5.jpg");
-  background-image: linear-gradient(to right bottom, rgba(255, 234, 201, 0.9), rgba(208, 161, 30, 0.86)), url("../img/nat-5.jpg");
-  background-size: cover;
-}
-
-.skills-list {
-  padding: 2em;
-  position: relative;
-  display: -ms-grid;
-  display: grid;
-  -ms-grid-columns: (minmax(10em, 0.5fr))[auto-fit];
-      grid-template-columns: repeat(auto-fit, minmax(10em, 0.5fr));
-  text-align: center;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
-  grid-gap: 2em;
-  text-shadow: none;
-}
-
-.skills-list li {
-  display: block;
-}
-
-#see-curr-proj {
-  text-align: center;
-  margin: 1em;
-}
-
-#see-curr-proj * {
-  margin: 1em;
-  padding: 1em;
-}
-
-#curr-proj-btn {
-  color: white;
-  background-color: rgba(126, 213, 111, 0.8);
-  text-decoration: none;
-}
-
-@media (max-width: 500px) {
-  #abilities-body {
-    padding: 0.5em;
-  }
-  #abilities {
-    padding: 1em;
-  }
-}
-
-@media (max-width: 430px) {
-  .skills-list {
-    padding: 2em 0em 2em;
-  }
-}
-
 /* Projects */
 #projects-header h2 {
   color: rgba(40, 180, 133, 0.8);
@@ -609,6 +506,116 @@ nav {
           transform: translateX(0%);
 }
 
+/* Abilities */
+#abilities {
+  color: white;
+  padding: 3em;
+  background-image: -webkit-gradient(linear, left top, right bottom, from(rgba(126, 213, 111, 0.8)), to(rgba(40, 180, 133, 0.8)));
+  background-image: linear-gradient(to right bottom, rgba(126, 213, 111, 0.8), rgba(40, 180, 133, 0.8));
+  background-size: cover;
+  font-size: 1.1rem;
+}
+
+#abilities-body {
+  background-color: transparent;
+  background-size: cover;
+  padding: 2em;
+}
+
+#abilities-header {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.ability {
+  background-image: -webkit-gradient(linear, left top, right bottom, from(rgba(255, 234, 201, 0.9)), to(rgba(208, 161, 30, 0.86)));
+  background-image: linear-gradient(to right bottom, rgba(255, 234, 201, 0.9), rgba(208, 161, 30, 0.86));
+  background-size: cover;
+  padding: 1em;
+  margin-bottom: 1em;
+  -webkit-box-shadow: 0 3rem 6rem rgba(0, 0, 0, 0.1);
+          box-shadow: 0 3rem 6rem rgba(0, 0, 0, 0.1);
+  text-align: center;
+  border-radius: 1%;
+  text-shadow: 2px 2px 8px #000000;
+  color: white;
+}
+
+#skills {
+  background-image: -webkit-gradient(linear, left top, right bottom, from(rgba(255, 234, 201, 0.9)), to(rgba(208, 161, 30, 0.86))), url("../img/nat-10.jpg");
+  background-image: linear-gradient(to right bottom, rgba(255, 234, 201, 0.9), rgba(208, 161, 30, 0.86)), url("../img/nat-10.jpg");
+  background-size: cover;
+}
+
+#languages {
+  background-image: -webkit-gradient(linear, left top, right bottom, from(rgba(255, 234, 201, 0.9)), to(rgba(208, 161, 30, 0.86))), url("../img/nat-1-large.jpg");
+  background-image: linear-gradient(to right bottom, rgba(255, 234, 201, 0.9), rgba(208, 161, 30, 0.86)), url("../img/nat-1-large.jpg");
+  background-size: cover;
+}
+
+#tools {
+  background-image: -webkit-gradient(linear, left top, right bottom, from(rgba(255, 234, 201, 0.9)), to(rgba(208, 161, 30, 0.86))), url("../img/nat-5.jpg");
+  background-image: linear-gradient(to right bottom, rgba(255, 234, 201, 0.9), rgba(208, 161, 30, 0.86)), url("../img/nat-5.jpg");
+  background-size: cover;
+}
+
+.skills-list {
+  padding: 2em;
+  position: relative;
+  display: -ms-grid;
+  display: grid;
+  -ms-grid-columns: (minmax(10em, 0.5fr))[auto-fit];
+      grid-template-columns: repeat(auto-fit, minmax(10em, 0.5fr));
+  text-align: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  grid-gap: 2em;
+  text-shadow: none;
+}
+
+.skills-list li {
+  display: block;
+}
+
+#see-curr-proj {
+  text-align: center;
+  margin: 1em;
+}
+
+#see-curr-proj * {
+  margin: 1em;
+  padding: 1em;
+}
+
+#curr-proj-btn {
+  color: white;
+  background-color: rgba(126, 213, 111, 0.8);
+  text-decoration: none;
+  border-radius: 10px;
+  -webkit-transition: all 300ms;
+  transition: all 300ms;
+}
+
+#curr-proj-btn:hover {
+  background-color: rgba(208, 161, 30, 0.86);
+}
+
+@media (max-width: 500px) {
+  #abilities-body {
+    padding: 0.5em;
+  }
+  #abilities {
+    padding: 1em;
+  }
+}
+
+@media (max-width: 430px) {
+  .skills-list {
+    padding: 2em 0em 2em;
+  }
+}
+
 /* Contacts */
 #contact {
   display: -webkit-box;
@@ -640,6 +647,15 @@ nav {
   width: 4.5em;
   height: 4.5em;
   margin: 1.2em;
+  -webkit-transition: -webkit-transform 300ms;
+  transition: -webkit-transform 300ms;
+  transition: transform 300ms;
+  transition: transform 300ms, -webkit-transform 300ms;
+}
+
+.social-icon:hover {
+  -webkit-transform: scale(1.1);
+          transform: scale(1.1);
 }
 
 @media (max-width: 500px) {
