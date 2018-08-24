@@ -30,6 +30,7 @@ body {
   font-weight: 400;
   line-height: 1.7;
   color: #777;
+  background-color: white;
 }
 
 h1 {
@@ -169,6 +170,10 @@ article {
             transform: translateX(0);
     opacity: 1;
   }
+}
+
+#page {
+  background-color: #f7f7f7;
 }
 
 /* Landing page (Hero) */
@@ -630,7 +635,7 @@ nav {
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
-  background-color: #434242;
+  background-color: #333333;
   color: white;
 }
 

@@ -1,4 +1,4 @@
-@import "fluid-typography";
+@import 'fluid-typography';
 
 $min_width: 1300px;
 $max_width: 2600px;
@@ -19,6 +19,7 @@ $max_font: 35px;
 }
 
 $body-color: #777;
+$page-bg-color: #f7f7f7;
 
 $skewY-deg: -7deg;
 
@@ -43,6 +44,7 @@ body {
   font-weight: 400;
   line-height: 1.7;
   color: $body-color;
+  background-color: white;
 }
 h1 {
   font-size: 3.5rem;
@@ -137,13 +139,16 @@ article {
     opacity: 1;
   }
 }
+#page {
+  background-color: $page-bg-color;
+}
 /* Landing page (Hero) */
 nav {
   display: none;
 }
 #landing-page {
   position: relative;
-  background-image: $lin-grad-main, url("../img/hero.jpg");
+  background-image: $lin-grad-main, url('../img/hero.jpg');
   background-size: cover;
   clip-path: polygon(0 0, 100% 0, 100% 75vmin, 0 100%);
   color: white;
@@ -243,7 +248,7 @@ nav {
   margin-top: 5rem;
   margin-bottom: 5rem;
   padding: 3rem;
-  background-image: $lin-grad-main, url("../img/nat-3-large.jpg");
+  background-image: $lin-grad-main, url('../img/nat-3-large.jpg');
   background-size: cover;
   transform: skewY($skewY-deg);
 }
@@ -431,15 +436,15 @@ $proj-lin-grad: linear-gradient(
   color: white;
 }
 #skills {
-  background-image: $lin-grad-ability, url("../img/nat-10.jpg");
+  background-image: $lin-grad-ability, url('../img/nat-10.jpg');
   background-size: cover;
 }
 #languages {
-  background-image: $lin-grad-ability, url("../img/nat-1-large.jpg");
+  background-image: $lin-grad-ability, url('../img/nat-1-large.jpg');
   background-size: cover;
 }
 #tools {
-  background-image: $lin-grad-ability, url("../img/nat-5.jpg");
+  background-image: $lin-grad-ability, url('../img/nat-5.jpg');
   background-size: cover;
 }
 .skills-list {
@@ -492,7 +497,7 @@ $proj-lin-grad: linear-gradient(
   flex-direction: column;
   align-content: center;
   justify-content: center;
-  background-color: #434242;
+  background-color: #333333;
   color: white;
 }
 #contact-header {
