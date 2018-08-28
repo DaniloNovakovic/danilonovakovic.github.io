@@ -30,6 +30,7 @@ body {
   font-weight: 400;
   line-height: 1.7;
   color: #777;
+  background-color: white;
 }
 
 h1 {
@@ -171,6 +172,10 @@ article {
   }
 }
 
+#page {
+  background-color: #f7f7f7;
+}
+
 /* Landing page (Hero) */
 nav {
   display: none;
@@ -288,6 +293,13 @@ nav {
     -ms-grid-column: 1;
     -ms-grid-column-span: 2;
     grid-column: 1 / span 2;
+  }
+}
+
+@media (max-width: 500px) {
+  #profile-pic {
+    width: 11em;
+    height: 11em;
   }
 }
 
@@ -630,7 +642,7 @@ nav {
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
-  background-color: #434242;
+  background-color: #333333;
   color: white;
 }
 
