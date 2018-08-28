@@ -296,6 +296,13 @@ nav {
   }
 }
 
+@media (max-width: 500px) {
+  #profile-pic {
+    width: 11em;
+    height: 11em;
+  }
+}
+
 .details-info {
   padding: 0.2em 1em 0.2em;
 }
