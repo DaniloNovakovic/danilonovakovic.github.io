@@ -20,14 +20,14 @@ window.onload = function() {
     });
   });
 
-  function closeNav() {
-    classes.remove(NAV_CLOSED_CLASS);
-    classes.add(NAV_OPENED_CLASS);
-    navbar.classList.add('hide');
-  }
   function openNav() {
     classes.remove(NAV_OPENED_CLASS);
     classes.add(NAV_CLOSED_CLASS);
     navbar.classList.remove('hide');
+  }
+  function closeNav() {
+    classes.remove(NAV_CLOSED_CLASS);
+    classes.add(NAV_OPENED_CLASS);
+    navbar.classList.add('hide');
   }
 };

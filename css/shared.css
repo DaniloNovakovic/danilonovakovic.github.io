@@ -21,6 +21,9 @@
           box-sizing: border-box;
   padding: 0;
   margin: 0;
+}
+
+body {
   font-family: lato, sans-serif;
 }
 
@@ -202,6 +205,15 @@ article {
   padding: 1rem;
   font-size: 2.5rem;
   z-index: 100;
+  -webkit-transition: -webkit-transform 400ms ease-in-out 0s;
+  transition: -webkit-transform 400ms ease-in-out 0s;
+  transition: transform 400ms ease-in-out 0s;
+  transition: transform 400ms ease-in-out 0s, -webkit-transform 400ms ease-in-out 0s;
+}
+
+#nav-btn:hover {
+  -webkit-transform: scale(1.05);
+          transform: scale(1.05);
 }
 
 .nav-links {
@@ -236,6 +248,25 @@ article {
 
 .hide {
   display: none;
+}
+
+@media (max-width: 900px) {
+  #nav-btn {
+    top: 5%;
+  }
+}
+
+@media (max-width: 500px) {
+  #nav-btn {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 400px) {
+  #nav-btn {
+    top: 5%;
+    left: 77%;
+  }
 }
 
 /* Landing page (Hero) */
