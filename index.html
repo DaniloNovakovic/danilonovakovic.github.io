@@ -10,8 +10,7 @@
     <link rel='shortcut icon' type='image/x-icon' href='img/icons/favicon.ico' />
 
     <!-- Font Awesome -->
-    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN"
-        crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
 
     <!-- Scripts -->
     <script src="scripts/app.js"></script>
@@ -23,15 +22,19 @@
 
 <body>
     <div id="page">
-        <header id="landing-page" class="fill-viewport">
-            <nav id="navbar">
-                <a class="nav-link" href="#profile">Profile</a>
-                <a class="nav-link" href="#experiences">Experiences</a>
-                <a class="nav-link" href="#abilities">Abilities</a>
-                <a class="nav-link" href="#projects">Projects</a>
-                <a class="nav-link" href="#contact">Contact</a>
-            </nav>
 
+        <i id="nav-btn" class="fa fa-bars"></i>
+        <nav id="navbar" class="hide">
+            <ul class="nav-links">
+                <li><a class="nav-link" href="#profile">Profile</a></li>
+                <li><a class="nav-link" href="#experiences">Experiences</a></li>
+                <li><a class="nav-link" href="#abilities">Abilities</a></li>
+                <li><a class="nav-link" href="#projects">Projects</a></li>
+                <li><a class="nav-link" href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+
+        <header id="landing-page" class="fill-viewport">
             <div id="header-body">
                 <h1 id="header-body--main">Danilo Novakovic</h1>
                 <hr>
