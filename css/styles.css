@@ -1,3 +1,4 @@
+/* Shared properties such as variables, typography and keyframes */
 :root {
   font-size: 13px;
 }
@@ -767,4 +768,4 @@ article {
     height: 3.5em;
   }
 }
-/*# sourceMappingURL=shared.css.map */
+/*# sourceMappingURL=styles.css.map */

@@ -1,0 +1,36 @@
+#landing-page {
+  position: relative;
+  background-image: $lin-grad-main, url('../img/hero.jpg');
+  background-size: cover;
+  clip-path: polygon(0 0, 100% 0, 100% 75vmin, 0 100%);
+  color: white;
+}
+#header-body {
+  position: absolute;
+  // max-width: 50%; // ?
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: left;
+}
+#header-body--main {
+  display: block;
+  font-size: 3rem;
+  letter-spacing: 1rem;
+  animation: appearFromLeft 1100ms forwards 0s ease-in-out;
+}
+#header-body--sub {
+  display: block;
+  font-size: 1.2rem;
+  letter-spacing: 1.75rem;
+  animation: appearFromRight 1100ms forwards 0s ease-in-out;
+}
+@media (max-width: 500px) {
+  #header-body--main {
+    font-size: 2.5rem;
+    letter-spacing: 0.5rem;
+  }
+  #header-body--sub {
+    letter-spacing: 0.5rem;
+  }
+}

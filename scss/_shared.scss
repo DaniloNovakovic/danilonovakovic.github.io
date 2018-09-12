@@ -1,0 +1,127 @@
+@import 'fluid-typography';
+
+$min_width: 1300px;
+$max_width: 2600px;
+$min_font: 13px;
+$max_font: 35px;
+
+:root {
+  @include fluid-type($min_width, $max_width, $min_font, $max_font);
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+body {
+  font-family: lato, sans-serif;
+}
+
+$body-color: #777;
+$page-bg-color: #f7f7f7;
+
+$skewY-deg: -7deg;
+
+$main-grad-col-1: rgba(126, 213, 111, 0.8);
+$main-grad-col-2: rgba(40, 180, 133, 0.8);
+$lin-grad-main: linear-gradient(
+  to right bottom,
+  $main-grad-col-1,
+  $main-grad-col-2
+);
+
+$ability-grad-col-1: rgba(255, 234, 201, 0.9);
+$ability-grad-col-2: rgba(208, 161, 30, 0.86);
+$lin-grad-ability: linear-gradient(
+  to right bottom,
+  $ability-grad-col-1,
+  $ability-grad-col-2
+);
+body {
+  display: block;
+  font-family: lato, sans-serif;
+  font-weight: 400;
+  line-height: 1.7;
+  color: $body-color;
+  background-color: white;
+}
+h1 {
+  font-size: 3.5rem;
+  letter-spacing: 1.2rem;
+}
+h2 {
+  font-size: 3rem;
+  letter-spacing: 1.1rem;
+}
+h3 {
+  font-size: 2rem;
+}
+h4 {
+  font-size: 1.4rem;
+}
+h5 {
+  font-size: 1.25rem;
+}
+h6 {
+  font-size: 1.1rem;
+}
+p {
+  font-size: 1rem;
+}
+@media (max-width: 500px) {
+  * {
+    font-size: 1rem;
+  }
+  h1,
+  h2 {
+    letter-spacing: 0.5rem;
+  }
+  h1 {
+    font-size: 2.2rem;
+  }
+  h2 {
+    font-size: 1.725rem;
+  }
+  h3 {
+    font-size: 1.375rem;
+  }
+  h4 {
+    font-size: 1.125rem;
+  }
+  p {
+    font-size: 0.9rem;
+  }
+}
+@media (min-width: 900px) {
+  body {
+    padding: 2em;
+  }
+}
+.fill-viewport {
+  width: 100%;
+  min-height: 95vmin; // min-height: 95vh;
+}
+section,
+article {
+  position: relative;
+}
+.section-header {
+  text-align: center;
+  * {
+    padding: 0px;
+    margin: 0px;
+  }
+}
+.card {
+  color: $body-color;
+  background-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+/* Keyframes - Animations */
+@import 'keyframes';
+#page {
+  background-color: $page-bg-color;
+}
