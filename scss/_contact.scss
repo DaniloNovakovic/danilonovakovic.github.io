@@ -1,0 +1,33 @@
+#contact {
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  justify-content: center;
+  background-color: #333333;
+  color: white;
+}
+#contact-header {
+  margin-bottom: 2rem;
+}
+#contact-link {
+  text-align: center;
+}
+.social-icon {
+  border-radius: 50%;
+  width: 4.5em;
+  height: 4.5em;
+  margin: 1.2em;
+  transition: transform 300ms;
+  &:hover {
+    transform: scale(1.1);
+  }
+}
+@media (max-width: 500px) {
+  #contact-header {
+    margin: 2rem;
+  }
+  .social-icon {
+    width: 3.5em;
+    height: 3.5em;
+  }
+}

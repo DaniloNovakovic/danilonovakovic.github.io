@@ -1,0 +1,83 @@
+#abilities {
+  color: white;
+  padding: 3em;
+  background-image: $lin-grad-main;
+  background-size: cover;
+  font-size: 1.1rem;
+}
+#abilities-body {
+  background-color: transparent;
+  background-size: cover;
+  padding: 2em;
+}
+#abilities-header {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+.ability {
+  background-image: $lin-grad-ability;
+  background-size: cover;
+  padding: 1em;
+  margin-bottom: 1em;
+  box-shadow: 0 3rem 6rem rgba(0, 0, 0, 0.1);
+  text-align: center;
+  border-radius: 1%;
+  text-shadow: 2px 2px 8px #000000;
+  color: white;
+}
+#skills {
+  background-image: $lin-grad-ability, url('../img/nat-10.jpg');
+  background-size: cover;
+}
+#languages {
+  background-image: $lin-grad-ability, url('../img/nat-1-large.jpg');
+  background-size: cover;
+}
+#tools {
+  background-image: $lin-grad-ability, url('../img/nat-5.jpg');
+  background-size: cover;
+}
+.skills-list {
+  padding: 2em;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10em, 0.5fr));
+  text-align: center;
+  justify-content: center;
+  grid-gap: 2em;
+  text-shadow: none;
+  li {
+    display: block;
+  }
+}
+#see-curr-proj {
+  text-align: center;
+  margin: 1em;
+  * {
+    margin: 1em;
+    padding: 1em;
+  }
+}
+#curr-proj-btn {
+  color: white;
+  background-color: $main-grad-col-1;
+  text-decoration: none;
+  border-radius: 10px;
+  transition: all 300ms;
+  &:hover {
+    background-color: $ability-grad-col-2;
+  }
+}
+@media (max-width: 500px) {
+  #abilities-body {
+    padding: 0.5em;
+  }
+  #abilities {
+    padding: 1em;
+  }
+}
+@media (max-width: 430px) {
+  .skills-list {
+    padding: 2em 0em 2em;
+  }
+}
