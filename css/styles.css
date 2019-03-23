@@ -336,7 +336,7 @@ article {
 }
 
 #profile-body {
-  padding: 4em;
+  padding: 4em 4em 1em 4em;
   position: relative;
   display: -ms-grid;
   display: grid;
