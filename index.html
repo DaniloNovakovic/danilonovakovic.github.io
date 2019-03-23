@@ -1,338 +1,425 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-
-<head>
+  <head>
     <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
 
     <!-- Favicon -->
-    <link rel='shortcut icon' type='image/x-icon' href='img/icons/favicon.ico' />
+    <link
+      rel="shortcut icon"
+      type="image/x-icon"
+      href="img/icons/favicon.ico"
+    />
 
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ"
-        crossorigin="anonymous">
+    <link
+      rel="stylesheet"
+      href="https://use.fontawesome.com/releases/v5.2.0/css/all.css"
+      integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ"
+      crossorigin="anonymous"
+    />
 
     <!-- Scripts -->
     <script src="scripts/app.js"></script>
 
     <!-- Stylesheets -->
-    <link rel="stylesheet" type="text/css" href="css/styles.css">
+    <link rel="stylesheet" type="text/css" href="css/styles.css" />
     <title>Danilo Novakovic</title>
-</head>
+  </head>
 
-<body>
+  <body>
     <div id="page">
+      <i id="nav-btn" class="fa fa-bars"></i>
+      <nav id="navbar" class="hide">
+        <ul class="nav-links">
+          <li><a class="nav-link" href="#profile">Profile</a></li>
+          <li><a class="nav-link" href="#experiences">Experiences</a></li>
+          <li><a class="nav-link" href="#projects">Projects</a></li>
+          <li><a class="nav-link" href="#abilities">Abilities</a></li>
+          <li><a class="nav-link" href="#contact">Contact</a></li>
+        </ul>
+      </nav>
 
-        <i id="nav-btn" class="fa fa-bars"></i>
-        <nav id="navbar" class="hide">
-            <ul class="nav-links">
-                <li><a class="nav-link" href="#profile">Profile</a></li>
-                <li><a class="nav-link" href="#experiences">Experiences</a></li>
-                <li><a class="nav-link" href="#projects">Projects</a></li>
-                <li><a class="nav-link" href="#abilities">Abilities</a></li>
-                <li><a class="nav-link" href="#contact">Contact</a></li>
-            </ul>
-        </nav>
+      <header id="landing-page" class="fill-viewport">
+        <div id="header-body">
+          <h1 id="header-body--main">Danilo Novakovic</h1>
+          <hr />
+          <p id="header-body--sub">interactive resume</p>
+        </div>
+      </header>
+      <main>
+        <section id="profile" class="fill-viewport">
+          <header class="section-header" id="profile-header">
+            <h2>Profile</h2>
+            <p>I'm a creative .net full-stack developer</p>
+          </header>
+          <hr />
+          <div id="profile-body">
+            <article id="about-me">
+              <h3 id="about-me-header">About me</h3>
+              <p>
+                Hello! I am a third year student at the Faculty of Technical
+                Sciences with a thirst for knowledge. Software hobbyist, most of
+                my work is self directed research projects. As addition to my
+                university studies, i have successfully completed freeCodeCamp's
+                Full Stack Developer Certification (representing approximately
+                1800 hours of coursework) and am currently working on their
+                Coding Interview Prep challenges in order to further expand my
+                knowledge and keep my brain happy and sharp. 😊
+                <br />
+                <br />I'm most comfortable with: <br />✔️ Programming Languages:
+                JavaScript, C#, C++; <br />✔️ Databases and directory services:
+                MongoDB; <br />✔️ Front End Frameworks: React; <br />✔️ Back
+                End: Node; <br />✔️ Testing: Mocha & Chai; <br />✔️ Data
+                visualization: Matlab, Python; <br />✔️ Version Control: Git &
+                Github <br />✔️ Module Loader / bundler: Webpack; <br />✔️ IDEs:
+                Visual Studio Code, Visual Studio 2017; <br />✔️ OS: Windows 10;
+              </p>
+            </article>
+            <img class="card" id="profile-pic" src="img/24560296.jpeg" />
+            <article id="details">
+              <h3 id="details-header">Details</h3>
+              <div class="details-info">
+                <h4>Name:</h4>
+                <p>Danilo Novakovic</p>
+              </div>
+              <div class="details-info">
+                <h4>Age:</h4>
+                <p>21</p>
+              </div>
+              <div class="details-info">
+                <h4>Location:</h4>
+                <p>Novi Sad, Serbia, Earth</p>
+              </div>
+            </article>
+          </div>
+        </section>
 
-        <header id="landing-page" class="fill-viewport">
-            <div id="header-body">
-                <h1 id="header-body--main">Danilo Novakovic</h1>
-                <hr>
-                <p id="header-body--sub">interactive resume</p>
+        <section id="experiences" class="fill-viewport">
+          <header id="experiences-header" class="section-header">
+            <h2>Experiences</h2>
+            <p>
+              “Protons give an atom its identity, electrons its personality.”<br />-Bill
+              Bryson, A short history of nearly everything
+            </p>
+          </header>
+          <div id="experiences-body">
+            <div id="education" class="card">
+              <h3 id="education-header">Education</h3>
+              <article class="experiences-info">
+                <div class="exp-info-header">
+                  <h4>Faculty of Technical Science:</h4>
+                  <p>2016 - 2020</p>
+                </div>
+                <div class="exp-info-des">
+                  <span
+                    >Courses: Programming Languages and Data Structures (C,
+                    stack, queue, list, tree,...); Software Tools in Power
+                    Engineering (Matlab, algorithms-Dijkstra,BFS,sorting
+                    algorithms,...); Computer Architecture (Assembly & C);
+                    Object Oriented Programming (C++, C#); Logic Design of
+                    Computer Systems (VHDL, Arduino, MIPS Assembly); Computer
+                    Networking (winsock, winpcap); Operating Systems and
+                    Concurrent Programming (C++11); Math (Algebra, Calculus,
+                    Discrete Math,...); Architecture of Distributed Systems
+                    (WCF); Human-Computer Interaction (WPF); System Modeling and
+                    Simulation (Matlab); Compilers (C, Assembly, Flex & Bison);
+                    Databases (SQL); Web Programming (ASP.NET MVC); Software
+                    development (Testing/Scrum/DevOps); Cloud Computing (Azure);
+                    Multi-tier applications development (UML/Design Patterns);
+                    etc.
+                  </span>
+                </div>
+              </article>
+              <article class="experiences-info">
+                <div class="exp-info-header">
+                  <h4>Free Code Camp:</h4>
+                  <p>2018 - 2018</p>
+                </div>
+                <div class="exp-info-des">
+                  <span>
+                    Full Stack Developement Certification covers an estimated
+                    1800 hours of course work that includes:<br />
+                    - Responsive Web Design (HTML, CSS)<br />
+                    - JavaScript Algorithms and Data Structures<br />
+                    - Front End Libraries (Bootstrap, jQuery, Sass, React,
+                    Redux)<br />
+                    - Data Visualization (D3, JSON APIs, AJAX)<br />
+                    - APIs and Microservices (Npm, Basic Node and Express,
+                    MongoDB, Mongoose <br />
+                    - Information Security and Quality Assurance (HelmetJS, QA
+                    and testing with Chai, Advanced Node and Express)
+                  </span>
+                </div>
+              </article>
             </div>
+            <div id="careers" class="card">
+              <h3 id="careers-header">Careers</h3>
+              <article class="experiences-info">
+                <div class="exp-info-header">
+                  <h4>Demonstrator:</h4>
+                  <p>February 2018 - June 2018</p>
+                </div>
+                <div class="exp-info-des">
+                  <span>
+                    I was a demonstrator (student assistant) in
+                    Object-Oriented-Programming course in Department of Power,
+                    Electronic and Telecommunication Engineering. The general
+                    duties involved the provision of assistance to students
+                    under the guidance of academic members of staff (prof.
+                    Aleksandar Kupusinac and teaching assistants Stefan Varajić
+                    and Ivan Stojić).
+                  </span>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section id="projects" class="fill-viewport">
+          <header id="projects-header" class="section-header">
+            <h2>Projects</h2>
+            <p>
+              “You can do anything you set your mind to.”<br />- Benjamin
+              Franklin
+            </p>
+          </header>
+          <div id="projects-body">
+            <figure class="project effect">
+              <img src="img/DynamicBookmarks.PNG" alt="Dynamic Bookmarks" />
+              <figcaption>
+                <header>
+                  <h3>Dynamic Bookmarks</h3>
+                </header>
+                <p>
+                  Chrome extension which dynamically updates bookmarks based on
+                  the specified regular expression.
+                </p>
+                <p>
+                  <strong>Tags:</strong>
+                  <br />
+                  JS, Chrome-Extension, Webpack, Materialize.css
+                </p>
+                <a
+                  href="https://chrome.google.com/webstore/detail/dynamic-bookmarks/ilhojkjlfkppedidhpecepohnmlndopb"
+                  target="_blank"
+                  >View more</a
+                >
+              </figcaption>
+            </figure>
+
+            <figure class="project effect">
+              <img src="img/ArduinoSimulator.PNG" alt="ArduinoSimulator" />
+              <figcaption>
+                <header>
+                  <h3>Arduino Simulator</h3>
+                </header>
+                <p>
+                  Aimed for students who are learning Arduino on uc32 Basic U/I
+                  Shield
+                </p>
+                <p>
+                  <strong>Tags:</strong>
+                  <br />
+                  C++, STL, Windows
+                </p>
+                <a
+                  href="https://github.com/DaniloNovakovic/Arduino_uc32_basic_ui_shield_simulator"
+                  target="_blank"
+                  >View more
+                </a>
+              </figcaption>
+            </figure>
+            <figure class="project effect">
+              <img src="img/Chesspernado.PNG" alt="Chesspernado" />
+              <figcaption>
+                <header>
+                  <h3>Chesspernado</h3>
+                </header>
+                <p>
+                  Chesspernado is an original game inspired by chess, tetris and
+                  plants vs zombie idea.
+                </p>
+                <p>
+                  <strong>Tags:</strong>
+                  <br />
+                  C, Linux, Game
+                </p>
+                <a
+                  href="https://github.com/DaniloNovakovic/Chesspernado"
+                  target="_blank"
+                  >View more</a
+                >
+              </figcaption>
+            </figure>
+
+            <figure class="project effect">
+              <img src="img/Codepen.PNG" alt="Codepen" />
+              <figcaption>
+                <header>
+                  <h3>Codepen projects</h3>
+                </header>
+                <p>
+                  Collection of smaller projects/apps/games and some challanges
+                  from freeCodeCamp
+                </p>
+                <p>
+                  <strong>Tags:</strong>
+                  <br />
+                  JS, React.js, jQuery, SASS
+                </p>
+                <a href="https://codepen.io/danilonovakovic/" target="_blank"
+                  >View more</a
+                >
+              </figcaption>
+            </figure>
+            <figure class="project effect">
+              <img src="img/Glitch.PNG" alt="Glitch" />
+              <figcaption>
+                <header>
+                  <h3>Glitch projects</h3>
+                </header>
+                <p>
+                  Collection of backend & full-stack projects from freeCodeCamp
+                </p>
+                <p>
+                  <strong>Tags:</strong>
+                  <br />
+                  JS, Node, Security, Testing, Full-Stack
+                </p>
+                <a href="https://glitch.com/@DaniloNovakovic" target="_blank"
+                  >View more</a
+                >
+              </figcaption>
+            </figure>
+          </div>
+        </section>
+
+        <section id="abilities" class="fill-viewport">
+          <header id="abilities-header" class="section-header">
+            <h2>Abilities</h2>
+            <p>
+              "Life without knowledge is death in disquise".<br />-Talib Kwell
+            </p>
+          </header>
+          <div id="abilities-body">
+            <div id="skills" class="ability card">
+              <h3>Skills</h3>
+              <ul id="skills-list" class="skills-list">
+                <li class="card">C</li>
+                <li class="card">C++</li>
+                <li class="card">C#</li>
+                <li class="card">.NET Framework</li>
+                <li class="card">ASP.NET</li>
+                <li class="card">Microsoft Azure</li>
+                <li class="card">WCF</li>
+                <li class="card">WPF</li>
+                <li class="card">XML</li>
+                <li class="card">HTML</li>
+                <li class="card">CSS</li>
+                <li class="card">JavaScript</li>
+                <li class="card">React.js</li>
+                <li class="card">Redux.js</li>
+                <li class="card">Node.js</li>
+                <li class="card">MongoDB</li>
+                <li class="card">SQL</li>
+                <li class="card">LINQ</li>
+                <li class="card">Python</li>
+                <li class="card">Matlab</li>
+              </ul>
+              <div id="see-curr-proj">
+                <p>
+                  This project is built using CSS/HTML/JavaScript from scratch
+                </p>
+                <a
+                  id="curr-proj-btn"
+                  class="card"
+                  href="https://github.com/DaniloNovakovic/danilonovakovic.github.io"
+                  target="_blank"
+                  >See project on Github</a
+                >
+              </div>
+            </div>
+            <div id="languages" class="ability card">
+              <h3>Languages</h3>
+              <ul id="languages-list" class="skills-list">
+                <li class="card">Serbian (Mother tongue)</li>
+                <li class="card">English (Daily use)</li>
+              </ul>
+            </div>
+            <div id="tools" class="ability card">
+              <h3>Tools</h3>
+              <ul id="tools-list" class="skills-list">
+                <li class="card">Visual Studio</li>
+                <li class="card">VS Code</li>
+                <li class="card">Git</li>
+                <li class="card">Chrome</li>
+                <li class="card">Windows</li>
+                <li class="card">npm</li>
+                <li class="card">Webpack</li>
+                <li class="card">Microsoft Office</li>
+                <li class="card">Azure DevOps</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+      </main>
+      <footer id="contact" class="fill-viewport">
+        <header id="contact-header" class="section-header">
+          <h2>Contact</h2>
+          <p>
+            “If I had asked people what they wanted, they would have said faster
+            horses.”<br />- Henry Ford
+          </p>
         </header>
-        <main>
-            <section id="profile" class="fill-viewport">
-                <header class="section-header" id="profile-header">
-                    <h2>Profile</h2>
-                    <p>I'm a creative .net full-stack developer</p>
-                </header>
-                <hr>
-                <div id="profile-body">
-                    <article id="about-me">
-                        <h3 id="about-me-header">About me</h3>
-                        <p>I am a third year software engineering student at at Faculty of Technical Sciences,
-                            University
-                            of Novi Sad. In the past few years i have worked on many independent projects alongside my
-                            formal
-                            education. My goal is to put theoretical knowledge from college into practice by
-                            challanging
-                            myself with various tasks, aswell as solving real life problems using the gained skills. I
-                            have
-                            advanced knowledge in C/C++, C#, JS, as well as experience building this website using
-                            responsive
-                            web technologies from scratch. Additionally, I am a hobbyist musician (mainly jazz guitar
-                            player)
-                            and have been sharing covers on youtube since 2017. I created this site to share my
-                            interests,
-                            as they evolve, and connect with like minded individuals.</p>
-                    </article>
-                    <img class="card" id="profile-pic" src="img/24560296.jpeg">
-                    <article id="details">
-                        <h3 id="details-header">Details</h3>
-                        <div class="details-info">
-                            <h4>Name:</h4>
-                            <p>Danilo Novakovic</p>
-                        </div>
-                        <div class="details-info">
-                            <h4>Age:</h4>
-                            <p>21</p>
-                        </div>
-                        <div class="details-info">
-                            <h4>Location:</h4>
-                            <p>Novi Sad, Serbia, Earth</p>
-                        </div>
-                    </article>
-                </div>
-            </section>
-
-            <section id="experiences" class="fill-viewport">
-                <header id="experiences-header" class="section-header">
-                    <h2>Experiences</h2>
-                    <p>“Protons give an atom its identity, electrons its personality.”<br>-Bill Bryson, A short history
-                        of
-                        nearly everything
-                    </p>
-                </header>
-                <div id="experiences-body">
-                    <div id="education" class="card">
-                        <h3 id="education-header">Education</h3>
-                        <article class="experiences-info">
-                            <div class="exp-info-header">
-                                <h4>Faculty of Technical Science:</h4>
-                                <p>2016 - 2020</p>
-                            </div>
-                            <div class="exp-info-des">
-                                <span>Courses: Programming Languages and Data Structures (C, stack, queue, list,
-                                    tree,...);
-                                    Software Tools in Power Engineering (Matlab, algorithms-Dijkstra,BFS,sorting
-                                    algorithms,...);
-                                    Computer Architecture (Assembly & C); Object Oriented Programming (C++, C#); Logic
-                                    Design
-                                    of Computer Systems (VHDL, Arduino, MIPS Assembly); Computer Networking (winsock,
-                                    winpcap);
-                                    Operating Systems and Concurrent Programming (C++11); Architecture of Distributed
-                                    Systems
-                                    (WCF); Fundamentals of Electrical Engineering; Power Engineering Systems; Math
-                                    (Algebra,
-                                    Calculus, Discrete Math,...);
-                                </span></div>
-                        </article>
-                        <article class="experiences-info">
-                            <div class="exp-info-header">
-                                <h4>Free Code Camp:</h4>
-                                <p>2018 - 2018</p>
-                            </div>
-                            <div class="exp-info-des">
-                                <span>
-                                    Full Stack Developement Certification covers an estimated 1800 hours of course work
-                                    that includes:<br> -
-                                    Responsive Web Design (HTML, CSS)<br> - JavaScript Algorithms and Data Structures<br>
-                                    -
-                                    Front End Libraries (Bootstrap, jQuery, Sass, React, Redux)<br> - Data
-                                    Visualization
-                                    (D3, JSON APIs, AJAX)<br> - APIs and Microservices (Npm, Basic Node and Express,
-                                    MongoDB,
-                                    Mongoose
-                                    <br> - Information Security and Quality Assurance (HelmetJS, QA and testing with
-                                    Chai,
-                                    Advanced Node and Express) </span>
-                            </div>
-                        </article>
-                    </div>
-                    <div id="careers" class="card">
-                        <h3 id="careers-header">Careers</h3>
-                        <article class="experiences-info">
-                            <div class="exp-info-header">
-                                <h4>Demonstrator:</h4>
-                                <p>February 2018 - June 2018</p>
-                            </div>
-                            <div class="exp-info-des">
-                                <span>
-                                    I was a demonstrator (student assistant) in Object-Oriented-Programming course in
-                                    Department of Power, Electronic and Telecommunication
-                                    Engineering. The general duties involved the provision of assistance to students
-                                    under
-                                    the guidance of academic members of staff (prof. Aleksandar Kupusinac and teaching
-                                    assistants
-                                    Stefan Varajić and Ivan Stojić).
-                                </span>
-                            </div>
-                        </article>
-                    </div>
-                </div>
-            </section>
-
-            <section id="projects" class="fill-viewport">
-                <header id="projects-header" class="section-header">
-                    <h2>Projects</h2>
-                    <p>“You can do anything you set your mind to.”<br>- Benjamin Franklin</p>
-                </header>
-                <div id="projects-body">
-                    <figure class="project effect">
-                        <img src="img/DynamicBookmarks.PNG" alt="Dynamic Bookmarks">
-                        <figcaption>
-                            <header>
-                                <h3>Dynamic Bookmarks</h3>
-                            </header>
-                            <p>Chrome extension which dynamically updates bookmarks based on the specified regular
-                                expression.</p>
-                            <p>
-                                <strong>Tags:</strong>
-                                <br> JS, Chrome-Extension, Webpack, Materialize.css
-                            </p>
-                            <a href="https://chrome.google.com/webstore/detail/dynamic-bookmarks/ilhojkjlfkppedidhpecepohnmlndopb"
-                                target="_blank">View more</a>
-                        </figcaption>
-                    </figure>
-
-                    <figure class="project effect">
-                        <img src="img/ArduinoSimulator.PNG" alt="ArduinoSimulator">
-                        <figcaption>
-                            <header>
-                                <h3>Arduino Simulator</h3>
-                            </header>
-                            <p>Aimed for students who are learning Arduino on uc32 Basic U/I Shield</p>
-                            <p>
-                                <strong>Tags:</strong>
-                                <br> C++, STL, Windows
-                            </p>
-                            <a href="https://github.com/DaniloNovakovic/Arduino_uc32_basic_ui_shield_simulator" target="_blank">View
-                                more
-                            </a>
-                        </figcaption>
-                    </figure>
-                    <figure class="project effect">
-                        <img src="img/Chesspernado.PNG" alt="Chesspernado">
-                        <figcaption>
-                            <header>
-                                <h3>Chesspernado</h3>
-                            </header>
-                            <p>Chesspernado is an original game inspired by chess, tetris and plants vs zombie idea.</p>
-                            <p>
-                                <strong>Tags:</strong>
-                                <br> C, Linux, Game
-                            </p>
-                            <a href="https://github.com/DaniloNovakovic/Chesspernado" target="_blank">View more</a>
-                        </figcaption>
-                    </figure>
-
-                    <figure class="project effect">
-                        <img src="img/Codepen.PNG" alt="Codepen">
-                        <figcaption>
-                            <header>
-                                <h3>Codepen projects</h3>
-                            </header>
-                            <p>Collection of smaller projects/apps/games and some challanges from freeCodeCamp</p>
-                            <p>
-                                <strong>Tags:</strong>
-                                <br> JS, React.js, jQuery, SASS
-                            </p>
-                            <a href="https://codepen.io/danilonovakovic/" target="_blank">View more</a>
-                        </figcaption>
-                    </figure>
-                    <figure class="project effect">
-                        <img src="img/Glitch.PNG" alt="Glitch">
-                        <figcaption>
-                            <header>
-                                <h3>Glitch projects</h3>
-                            </header>
-                            <p>Collection of backend & full-stack projects from freeCodeCamp</p>
-                            <p>
-                                <strong>Tags:</strong>
-                                <br> JS, Node, Security, Testing, Full-Stack
-                            </p>
-                            <a href="https://glitch.com/@DaniloNovakovic" target="_blank">View more</a>
-                        </figcaption>
-                    </figure>
-                </div>
-            </section>
-
-            <section id="abilities" class="fill-viewport">
-                <header id="abilities-header" class="section-header">
-                    <h2>Abilities</h2>
-                    <p>"Life without knowledge is death in disquise".<br>-Talib Kwell</p>
-                </header>
-                <div id="abilities-body">
-                    <div id="skills" class="ability card">
-                        <h3>Skills</h3>
-                        <ul id="skills-list" class="skills-list">
-                            <li class="card">C</li>
-                            <li class="card">C++</li>
-                            <li class="card">C#</li>
-                            <li class="card">.NET Framework</li>
-                            <li class="card">WCF</li>
-                            <li class="card">WPF</li>
-                            <li class="card">XML</li>
-                            <li class="card">HTML</li>
-                            <li class="card">SASS/SCSS</li>
-                            <li class="card">JavaScript</li>
-                            <li class="card">jQuery</li>
-                            <li class="card">React.js</li>
-                            <li class="card">Redux.js</li>
-                            <li class="card">D3.js</li>
-                            <li class="card">p5.js</li>
-                            <li class="card">Node.js</li>
-                            <li class="card">MongoDB</li>
-                            <li class="card">Mocha/Chai</li>
-                            <li class="card">GraphQL</li>
-                        </ul>
-                        <div id="see-curr-proj">
-                            <p>This project is built using CSS/HTML/JavaScript from scratch</p>
-                            <a id="curr-proj-btn" class="card" href="https://github.com/DaniloNovakovic/danilonovakovic.github.io"
-                                target="_blank">See
-                                project on Github</a>
-                        </div>
-                    </div>
-                    <div id="languages" class="ability card">
-                        <h3>Languages</h3>
-                        <ul id="languages-list" class="skills-list">
-                            <li class="card">Serbian (Mother tongue)</li>
-                            <li class="card">English (Daily use)</li>
-                        </ul>
-                    </div>
-                    <div id="tools" class="ability card">
-                        <h3>Tools</h3>
-                        <ul id="tools-list" class="skills-list">
-                            <li class="card">Visual Studio</li>
-                            <li class="card">VS Code</li>
-                            <li class="card">Git</li>
-                            <li class="card">Chrome</li>
-                            <li class="card">Windows</li>
-                            <li class="card">npm</li>
-                            <li class="card">Webpack</li>
-                        </ul>
-                    </div>
-                </div>
-            </section>
-
-
-        </main>
-        <footer id="contact" class="fill-viewport">
-            <header id="contact-header" class="section-header">
-                <h2>Contact</h2>
-                <p>“If I had asked people what they wanted, they would have said faster horses.”<br>- Henry Ford</p>
-            </header>
-            <div id="contact-link">
-                <a href="https://github.com/DaniloNovakovic" target="_blank">
-                    <img src="img/icons/github.png" class="social-icon card" alt="github">
-                </a>
-                <a href="https://www.freecodecamp.org/danilonovakovic" target="_blank">
-                    <img src="img/icons/FCC-logo.png" class="social-icon card" alt="freeCodeCamp">
-                </a>
-                <a href="https://www.youtube.com/user/TheDakenzi" target="_blank">
-                    <img src="img/icons/youtube.png" class="social-icon card" alt="youtube">
-                </a>
-                <a href="https://www.linkedin.com/in/danilo-novakovi%C4%87-821934167/" target="_blank">
-                    <img src="img/icons/linkedIn.png" class="social-icon card" alt="linkedin">
-                </a>
-                <a href="mailto:dakenzi97@gmail.com">
-                    <img src="img/icons/email.png" class="social-icon card" alt="linkedin">
-                </a>
-            </div>
-        </footer>
+        <div id="contact-link">
+          <a href="https://github.com/DaniloNovakovic" target="_blank">
+            <img
+              src="img/icons/github.png"
+              class="social-icon card"
+              alt="github"
+            />
+          </a>
+          <a
+            href="https://www.freecodecamp.org/danilonovakovic"
+            target="_blank"
+          >
+            <img
+              src="img/icons/FCC-logo.png"
+              class="social-icon card"
+              alt="freeCodeCamp"
+            />
+          </a>
+          <a href="https://www.youtube.com/user/TheDakenzi" target="_blank">
+            <img
+              src="img/icons/youtube.png"
+              class="social-icon card"
+              alt="youtube"
+            />
+          </a>
+          <a
+            href="https://www.linkedin.com/in/danilo-novakovi%C4%87-821934167/"
+            target="_blank"
+          >
+            <img
+              src="img/icons/linkedIn.png"
+              class="social-icon card"
+              alt="linkedin"
+            />
+          </a>
+          <a href="mailto:dakenzi97@gmail.com">
+            <img
+              src="img/icons/email.png"
+              class="social-icon card"
+              alt="linkedin"
+            />
+          </a>
+        </div>
+      </footer>
     </div>
-</body>
-
+  </body>
 </html>
