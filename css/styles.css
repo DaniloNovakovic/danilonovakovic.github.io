@@ -739,11 +739,11 @@ article {
   margin-bottom: 2rem;
 }
 
-#contact-link {
+#contact-links {
   text-align: center;
 }
 
-.social-icon {
+.my-social-icon {
   border-radius: 50%;
   width: 4.5em;
   height: 4.5em;
@@ -754,7 +754,7 @@ article {
   transition: transform 300ms, -webkit-transform 300ms;
 }
 
-.social-icon:hover {
+.my-social-icon:hover {
   -webkit-transform: scale(1.1);
           transform: scale(1.1);
 }
@@ -763,7 +763,7 @@ article {
   #contact-header {
     margin: 2rem;
   }
-  .social-icon {
+  .my-social-icon {
     width: 3.5em;
     height: 3.5em;
   }
