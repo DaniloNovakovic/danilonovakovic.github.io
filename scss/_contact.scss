@@ -10,14 +10,23 @@
   margin-bottom: 2rem;
 }
 #contact-links {
-  text-align: center;
+  display: flex;
+  flex-direction: row;
+  align-content: center;
+  justify-content: center;
+  flex-wrap: wrap;
+
+  & > * {
+    margin: 2em;
+    list-style: none;
+  }
 }
 .my-social-icon {
   border-radius: 50%;
   width: 4.5em;
   height: 4.5em;
-  margin: 1.2em;
   transition: transform 300ms;
+
   &:hover {
     transform: scale(1.1);
   }
