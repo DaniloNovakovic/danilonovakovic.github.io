@@ -9,15 +9,24 @@
 #contact-header {
   margin-bottom: 2rem;
 }
-#contact-link {
-  text-align: center;
+#contact-links {
+  display: flex;
+  flex-direction: row;
+  align-content: center;
+  justify-content: center;
+  flex-wrap: wrap;
+
+  & > * {
+    margin: 2em;
+    list-style: none;
+  }
 }
-.social-icon {
+.my-social-icon {
   border-radius: 50%;
   width: 4.5em;
   height: 4.5em;
-  margin: 1.2em;
   transition: transform 300ms;
+
   &:hover {
     transform: scale(1.1);
   }
@@ -26,7 +35,7 @@
   #contact-header {
     margin: 2rem;
   }
-  .social-icon {
+  .my-social-icon {
     width: 3.5em;
     height: 3.5em;
   }
