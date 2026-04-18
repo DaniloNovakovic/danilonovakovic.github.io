@@ -24,7 +24,9 @@ function App() {
     <div className="w-screen h-screen bg-[#f4f1ea] flex justify-center items-center relative overflow-hidden" style={{ fontFamily: '"Comic Sans MS", cursive, sans-serif' }}>
       
       {/* Game Container */}
-      <div className="w-[1000px] h-[600px] relative">
+      <div className="w-[1000px] h-[600px] relative overflow-hidden rounded-lg border-4 border-[#1a1a1a] shadow-[12px_12px_0px_0px_rgba(26,26,26,1)]">
+        {/* Paper Texture Overlay */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.03] z-50 bg-[url('https://www.transparenttextures.com/patterns/felt.png')]"></div>
         <Game onInteract={handleInteract} isPaused={!!activeArea} />
       </div>
 

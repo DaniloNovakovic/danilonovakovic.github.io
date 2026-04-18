@@ -58,20 +58,56 @@ export default function Game({ onInteract, isPaused }: GameProps) {
         // Create player texture (hand-drawn B&W style)
         const pg = this.make.graphics({ x: 0, y: 0 });
         pg.lineStyle(4, 0x1a1a1a, 1);
-        pg.strokeRect(4, 4, 24, 40); // Simple body
-        pg.strokeCircle(16, -10, 12); // Head
-        pg.generateTexture('player_idle', 32, 60);
+        // Body with sketchy lines
+        pg.beginPath();
+        pg.moveTo(8, 20);
+        pg.lineTo(24, 20);
+        pg.lineTo(24, 60);
+        pg.lineTo(8, 60);
+        pg.closePath();
+        pg.strokePath();
+        // Head
+        pg.strokeCircle(16, 10, 10);
+        pg.generateTexture('player_idle', 32, 65);
 
-        // Building textures (rough sketch style)
+        // Building textures (rich sketch style)
         const createBuilding = (key: string) => {
           const bg = this.make.graphics({ x: 0, y: 0 });
           bg.lineStyle(6, 0x1a1a1a, 1);
-          bg.strokeRect(4, 4, 240, 300); // Building outline
-          bg.strokeRect(100, 200, 50, 100); // Door
           
+          // Main structure
+          bg.strokeRect(4, 4, 240, 300);
+          
+          // Roof details (shingles)
+          bg.lineStyle(3, 0x1a1a1a, 0.7);
+          for(let y=10; y<60; y+=10) {
+            bg.beginPath();
+            bg.moveTo(4, y);
+            for(let x=4; x<244; x+=20) {
+               bg.lineTo(x+10, y + (Math.random()*4));
+               bg.lineTo(x+20, y);
+            }
+            bg.strokePath();
+          }
+
+          // Door with handle
+          bg.lineStyle(4, 0x1a1a1a, 1);
+          bg.strokeRect(100, 200, 50, 100); 
+          bg.strokeCircle(140, 250, 3);
+          
+          // Windows
+          bg.strokeRect(30, 80, 50, 50);
+          bg.strokeRect(170, 80, 50, 50);
+          bg.beginPath();
+          bg.moveTo(30, 105); bg.lineTo(80, 105);
+          bg.moveTo(55, 80); bg.lineTo(55, 130);
+          bg.moveTo(170, 105); bg.lineTo(220, 105);
+          bg.moveTo(195, 80); bg.lineTo(195, 130);
+          bg.strokePath();
+
           // Sign
+          bg.lineStyle(6, 0x1a1a1a, 1);
           bg.strokeRect(40, 40, 170, 50);
-          bg.fillStyle(0x1a1a1a, 1);
           
           bg.generateTexture(key, 250, 310);
         };
@@ -84,12 +120,30 @@ export default function Game({ onInteract, isPaused }: GameProps) {
         // World bounds (long street)
         this.physics.world.setBounds(0, 0, 3000, 600);
 
+        // --- BACKGROUND PARALLAX (Mountains) ---
+        for(let i=0; i<4; i++) {
+          const m = this.add.graphics();
+          m.lineStyle(2, 0x1a1a1a, 0.2); // Light gray ink
+          m.beginPath();
+          const startX = i * 800;
+          m.moveTo(startX, 550);
+          m.lineTo(startX + 400, 200 + Math.random()*200);
+          m.lineTo(startX + 800, 550);
+          m.strokePath();
+          // Cross-hatching
+          for(let j=0; j<20; j++) {
+            m.moveTo(startX + 300 + j*10, 300 + j*5);
+            m.lineTo(startX + 320 + j*10, 350 + j*5);
+          }
+          m.strokePath();
+          m.setScrollFactor(0.2); // Moves very slowly
+        }
+
         // Ground
         const ground = this.add.graphics();
         ground.lineStyle(4, 0x1a1a1a, 1);
         ground.beginPath();
         ground.moveTo(0, 550);
-        // Wobbly hand-drawn line for ground
         for(let i=0; i<3000; i+=20) {
           ground.lineTo(i, 550 + (Math.random() * 4 - 2));
         }
@@ -103,16 +157,15 @@ export default function Game({ onInteract, isPaused }: GameProps) {
         this.buildings = this.add.group();
         
         hobbies.forEach((h, i) => {
-          const xPos = 400 + (i * 400);
+          const xPos = 400 + (i * 450); // Increased spacing
           const bldg = this.add.sprite(xPos, 395, `building_${h}`);
           
-          // Add handwritten text
-          this.add.text(xPos, 280, h.toUpperCase(), {
+          this.add.text(xPos, 65, h.toUpperCase(), {
             fontFamily: '"Comic Sans MS", cursive, sans-serif',
             fontSize: '24px',
             color: '#1a1a1a',
             fontStyle: 'bold'
-          }).setOrigin(0.5);
+          }).setOrigin(0.5).setScrollFactor(1); // Sign text follows building
 
           bldg.setData('name', h);
           this.buildings.add(bldg);
@@ -124,10 +177,26 @@ export default function Game({ onInteract, isPaused }: GameProps) {
         this.player.setGravityY(800);
         this.physics.add.collider(this.player, groundZone);
 
+        // --- FOREGROUND PARALLAX (Grass & Scribbles) ---
+        for(let i=0; i<50; i++) {
+          const gx = Phaser.Math.Between(0, 3000);
+          const gy = Phaser.Math.Between(560, 590);
+          const grass = this.add.graphics();
+          grass.lineStyle(2, 0x1a1a1a, 0.8);
+          grass.beginPath();
+          grass.moveTo(gx, gy);
+          grass.lineTo(gx - 5, gy - 20);
+          grass.moveTo(gx, gy);
+          grass.lineTo(gx + 5, gy - 15);
+          grass.strokePath();
+          grass.setScrollFactor(1.5); // Moves faster than player
+          grass.setDepth(10);
+        }
+
         // Camera
         this.cameras.main.setBounds(0, 0, 3000, 600);
-        this.cameras.main.startFollow(this.player, true, 0.05, 0.05);
-        this.cameras.main.setFollowOffset(0, 100); // Keep player lower on screen
+        this.cameras.main.startFollow(this.player, true, 0.08, 0.08);
+        this.cameras.main.setFollowOffset(0, 100); 
 
         // Input
         if (this.input.keyboard) {
@@ -146,13 +215,16 @@ export default function Game({ onInteract, isPaused }: GameProps) {
           color: '#1a1a1a',
           backgroundColor: '#ffffff',
           padding: { x: 5, y: 2 }
-        }).setOrigin(0.5).setVisible(false).setDepth(10);
+        }).setOrigin(0.5).setVisible(false).setDepth(20);
 
-        // Add some background clouds (sketchy)
-        for(let i=0; i<10; i++) {
+        // Add background clouds (sketchy)
+        for(let i=0; i<15; i++) {
+          const cx = Phaser.Math.Between(100, 2900);
+          const cy = Phaser.Math.Between(50, 200);
           const cloud = this.add.graphics();
-          cloud.lineStyle(2, 0x1a1a1a, 0.5);
-          cloud.strokeEllipse(Phaser.Math.Between(100, 2900), Phaser.Math.Between(50, 200), Phaser.Math.Between(50, 150), Phaser.Math.Between(20, 60));
+          cloud.lineStyle(2, 0x1a1a1a, 0.3);
+          cloud.strokeEllipse(cx, cy, Phaser.Math.Between(50, 150), Phaser.Math.Between(20, 60));
+          cloud.setScrollFactor(0.5);
         }
       }
 
@@ -166,19 +238,44 @@ export default function Game({ onInteract, isPaused }: GameProps) {
 
         const isSprinting = this.cursors.shift.isDown;
         const speed = isSprinting ? 600 : 300;
+        let isMoving = false;
 
         // Horizontal movement
         if (this.cursors.left.isDown || this.wasd.a.isDown) {
           this.player.setVelocityX(-speed);
+          isMoving = true;
         } else if (this.cursors.right.isDown || this.wasd.d.isDown) {
           this.player.setVelocityX(speed);
+          isMoving = true;
         } else {
           this.player.setVelocityX(0);
+        }
+
+        // Bobbing animation when moving
+        if (isMoving) {
+          this.player.setAngle(Math.sin(this.time.now / 100) * 5);
+          this.player.setY(400 + Math.sin(this.time.now / 50) * 2);
+        } else {
+          this.player.setAngle(0);
         }
 
         // Jumping
         if (this.cursors.up.isDown && this.player.body.touching.down) {
           this.player.setVelocityY(-500);
+        }
+
+        // atmospheric ink particles (drifting slowly)
+        if (Phaser.Math.Between(0, 100) > 95) {
+          const px = this.cameras.main.scrollX + 1100;
+          const py = Phaser.Math.Between(0, 600);
+          const p = this.add.circle(px, py, Phaser.Math.Between(1, 3), 0x1a1a1a, 0.2);
+          this.tweens.add({
+            targets: p,
+            x: px - 1200,
+            y: py + Phaser.Math.Between(-100, 100),
+            duration: Phaser.Math.Between(5000, 10000),
+            onComplete: () => p.destroy()
+          });
         }
 
         // Interaction Check
