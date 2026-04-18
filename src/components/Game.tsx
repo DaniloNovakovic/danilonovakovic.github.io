@@ -3,16 +3,34 @@ import * as Phaser from 'phaser';
 
 interface GameProps {
   onInteract: (area: string) => void;
+  isPaused: boolean;
 }
 
-export default function Game({ onInteract }: GameProps) {
+export default function Game({ onInteract, isPaused }: GameProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
   const interactCallbackRef = useRef(onInteract);
+  const isPausedRef = useRef(isPaused);
 
   useEffect(() => {
     interactCallbackRef.current = onInteract;
   }, [onInteract]);
+
+  useEffect(() => {
+    isPausedRef.current = isPaused;
+    if (gameRef.current) {
+      const scene = gameRef.current.scene.getScene('MainScene') as any;
+      if (scene && scene.input.keyboard) {
+        scene.input.keyboard.enabled = !isPaused;
+        // This prevents Phaser from stealing keys from the browser/React inputs
+        scene.input.keyboard.preventDefault = !isPaused;
+        
+        if (isPaused && scene.player) {
+          scene.player.setVelocityX(0);
+        }
+      }
+    }
+  }, [isPaused]);
 
   useEffect(() => {
     if (!containerRef.current || gameRef.current) return;
@@ -132,6 +150,13 @@ export default function Game({ onInteract }: GameProps) {
       }
 
       update() {
+        if (isPausedRef.current) {
+          if (this.player && this.player.body) {
+            this.player.setVelocityX(0);
+          }
+          return;
+        }
+
         const isSprinting = this.cursors.shift.isDown;
         const speed = isSprinting ? 600 : 300;
 

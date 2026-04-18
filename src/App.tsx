@@ -25,7 +25,7 @@ function App() {
       
       {/* Game Container */}
       <div className="w-[1000px] h-[600px] relative">
-        <Game onInteract={handleInteract} />
+        <Game onInteract={handleInteract} isPaused={!!activeArea} />
       </div>
 
       {/* Interactive Overlay */}
