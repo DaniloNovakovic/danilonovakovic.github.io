@@ -1,4 +1,5 @@
 import type { ComponentType } from 'react';
+import * as Phaser from 'phaser';
 
 export const MiniGameType = {
   REACT_OVERLAY: 'REACT_OVERLAY',
@@ -13,5 +14,6 @@ export interface MiniGamePlugin {
   description: string;
   type: MiniGameTypeValue;
   x: number; // World position X
-  Component: ComponentType; // For React-based mini-games
+  Component?: ComponentType; // For React-based mini-games
+  Scene?: typeof Phaser.Scene; // For Phaser-based mini-games
 }

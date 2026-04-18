@@ -19,14 +19,23 @@ function App() {
   };
 
   const closeOverlay = () => {
-    setState({
-      status: GameState.EXPLORING,
-      activeMiniGameId: null
-    });
+    // If we are in a hobby sub-game, return to the hobbies room
+    const hobbyItems = ['games', 'art', 'music', 'fitness'];
+    if (state.activeMiniGameId && hobbyItems.includes(state.activeMiniGameId)) {
+      setState({
+        status: GameState.IN_MINIGAME,
+        activeMiniGameId: 'hobbies'
+      });
+    } else {
+      setState({
+        status: GameState.EXPLORING,
+        activeMiniGameId: null
+      });
+    }
   };
 
   const activeMiniGame = state.activeMiniGameId ? getMiniGameById(state.activeMiniGameId) : undefined;
-  const isPaused = state.status !== GameState.EXPLORING;
+  const isPaused = state.status === GameState.IN_MINIGAME && activeMiniGame?.type === MiniGameType.REACT_OVERLAY;
 
   return (
     <div className="w-screen h-screen bg-[#f4f1ea] flex justify-center items-center relative overflow-hidden" style={{ fontFamily: '"Comic Sans MS", cursive, sans-serif' }}>
@@ -35,7 +44,12 @@ function App() {
       <div className="w-[1000px] h-[600px] relative overflow-hidden rounded-lg border-4 border-[#1a1a1a] shadow-[12px_12px_0px_0px_rgba(26,26,26,1)]">
         {/* Paper Texture Overlay */}
         <div className="absolute inset-0 pointer-events-none opacity-[0.03] z-50 bg-[url('https://www.transparenttextures.com/patterns/felt.png')]"></div>
-        <Game onInteract={handleInteract} isPaused={isPaused} />
+        <Game 
+          onInteract={handleInteract} 
+          isPaused={isPaused} 
+          activeMiniGameId={state.activeMiniGameId}
+          onClose={closeOverlay}
+        />
       </div>
 
       {/* Interactive Overlay */}
@@ -59,7 +73,7 @@ function App() {
               </p>
               
               <div className="mt-4">
-                <activeMiniGame.Component />
+                {activeMiniGame.Component && <activeMiniGame.Component />}
               </div>
             </div>
           </div>

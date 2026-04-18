@@ -29,17 +29,12 @@ export class OverworldScene extends Phaser.Scene {
 
   setPaused(paused: boolean) {
     this.isPaused = paused;
-    if (this.input.keyboard) {
+    if (this.input && this.input.keyboard) {
       if (paused) {
-        this.input.keyboard.enabled = false;
-        if (this.input.keyboard.clearCaptures) {
-          this.input.keyboard.clearCaptures();
-        }
         if (this.player) this.player.setVelocityX(0);
       } else {
-        this.input.keyboard.enabled = true;
         if (this.input.keyboard.addCapture) {
-          this.input.keyboard.addCapture([16, 32, 37, 38, 39, 40, 65, 68, 69]);
+          this.input.keyboard.addCapture([16, 32, 37, 38, 39, 40, 65, 68, 69, 72]);
         }
       }
     }
@@ -47,7 +42,11 @@ export class OverworldScene extends Phaser.Scene {
 
   preload() {
     TextureGenerator.generatePlayer(this);
-    PORTFOLIO_SECTIONS.forEach((s) => TextureGenerator.generateBuilding(this, s.id));
+    PORTFOLIO_SECTIONS.forEach((s) => {
+      if (s.x !== undefined) {
+        TextureGenerator.generateBuilding(this, s.id);
+      }
+    });
   }
 
   create() {
@@ -65,6 +64,8 @@ export class OverworldScene extends Phaser.Scene {
     // --- BUILDINGS ---
     this.buildings = this.add.group();
     PORTFOLIO_SECTIONS.forEach((s) => {
+      if (s.x === undefined) return;
+      
       const bldg = this.add.sprite(s.x, 395, `building_${s.id}`);
       this.add.text(s.x, 150, s.name.toUpperCase(), {
         fontFamily: '"Comic Sans MS", cursive, sans-serif',
@@ -100,6 +101,10 @@ export class OverworldScene extends Phaser.Scene {
         d: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D),
       };
       this.interactKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+
+      this.input.keyboard.on('keydown-H', () => {
+        if (!this.isPaused) this.onInteract?.('hobbies');
+      });
     }
 
     // --- UI ---

@@ -80,9 +80,15 @@ export class TextureGenerator {
       bg.strokeRect(100, 220, 50, 80);
     } else if (id === 'hobbies') {
       // Park / Playground
+      bg.fillStyle(bFill, 1);
+      bg.fillRect(40, 200, 170, 100);
       bg.lineStyle(4, bLine, 1);
       bg.strokeRect(40, 200, 170, 100); // sandbox/area
-      bg.beginPath(); bg.moveTo(60, 200); bg.lineTo(60, 100); bg.lineTo(190, 150); bg.lineTo(190, 250); bg.strokePath(); // slide
+      
+      bg.beginPath(); bg.moveTo(60, 200); bg.lineTo(60, 100); bg.lineTo(190, 150); bg.lineTo(190, 250); bg.closePath();
+      bg.fillPath(); bg.strokePath(); // slide
+      
+      bg.fillCircle(125, 120, 25);
       bg.strokeCircle(125, 120, 25); // tree top
       bg.beginPath(); bg.moveTo(125, 145); bg.lineTo(125, 200); bg.strokePath(); // tree trunk
       bg.strokeRect(100, 240, 50, 60); // entrance to the park
@@ -104,6 +110,78 @@ export class TextureGenerator {
     }
 
     bg.generateTexture(key, 250, 310);
+    bg.destroy();
+  }
+
+  static generateHobbyItem(scene: Phaser.Scene, id: string) {
+    const bg = scene.make.graphics({ x: 0, y: 0 });
+    const key = `hobby_${id}`;
+    const hLine = 0x1a1a1a;
+    const hFill = 0xfbfbf9;
+
+    bg.fillStyle(hFill, 1);
+    bg.lineStyle(4, hLine, 1);
+
+    if (id === 'games') {
+      // Laptop / Computer
+      bg.fillRect(20, 30, 80, 50);
+      bg.strokeRect(20, 30, 80, 50);
+      // Keyboard base
+      bg.beginPath(); bg.moveTo(10, 90); bg.lineTo(110, 90); bg.lineTo(100, 80); bg.lineTo(20, 80); bg.closePath();
+      bg.fillPath(); bg.strokePath();
+      // Screen stand/connection
+      bg.strokeRect(45, 80, 30, 5);
+      // Screen details (sketchy lines for code)
+      bg.lineStyle(2, hLine, 0.4);
+      for (let i = 0; i < 4; i++) {
+        bg.beginPath(); bg.moveTo(35, 40 + i * 8); bg.lineTo(85, 40 + i * 8); bg.strokePath();
+      }
+    } else if (id === 'art') {
+      // Easel and Canvas
+      // Legs
+      bg.beginPath(); bg.moveTo(60, 10); bg.lineTo(20, 110); bg.strokePath();
+      bg.beginPath(); bg.moveTo(60, 10); bg.lineTo(100, 110); bg.strokePath();
+      bg.beginPath(); bg.moveTo(60, 10); bg.lineTo(60, 110); bg.strokePath();
+      // Canvas
+      bg.fillRect(25, 30, 70, 50);
+      bg.strokeRect(25, 30, 70, 50);
+      // Drawing on canvas (a little mountain/sketch)
+      bg.lineStyle(2, hLine, 0.6);
+      bg.beginPath(); bg.moveTo(35, 70); bg.lineTo(50, 50); bg.lineTo(60, 60); bg.lineTo(80, 40); bg.strokePath();
+    } else if (id === 'music') {
+      // Guitar
+      // Body
+      bg.beginPath(); bg.arc(60, 80, 25, 0, Math.PI * 2); bg.fillPath(); bg.strokePath();
+      bg.beginPath(); bg.arc(60, 55, 18, 0, Math.PI * 2); bg.fillPath(); bg.strokePath();
+      // Sound hole
+      bg.fillStyle(hLine, 1);
+      bg.fillCircle(60, 65, 6);
+      // Neck
+      bg.fillStyle(hFill, 1);
+      bg.fillRect(55, 15, 10, 35);
+      bg.strokeRect(55, 15, 10, 35);
+      // Headstock
+      bg.fillRect(52, 5, 16, 10);
+      bg.strokeRect(52, 5, 16, 10);
+      // Strings
+      bg.lineStyle(1, hLine, 0.5);
+      bg.beginPath(); bg.moveTo(57, 15); bg.lineTo(57, 85); bg.strokePath();
+      bg.beginPath(); bg.moveTo(60, 15); bg.lineTo(60, 85); bg.strokePath();
+      bg.beginPath(); bg.moveTo(63, 15); bg.lineTo(63, 85); bg.strokePath();
+    } else if (id === 'fitness') {
+      // Punching Bag
+      bg.fillRect(35, 20, 50, 80);
+      bg.strokeRect(35, 20, 50, 80);
+      // Chains
+      bg.beginPath(); bg.moveTo(45, 20); bg.lineTo(60, 0); bg.strokePath();
+      bg.beginPath(); bg.moveTo(75, 20); bg.lineTo(60, 0); bg.strokePath();
+      // Wraps / Banding
+      bg.lineStyle(2, hLine, 0.5);
+      bg.beginPath(); bg.moveTo(35, 40); bg.lineTo(85, 40); bg.strokePath();
+      bg.beginPath(); bg.moveTo(35, 65); bg.lineTo(85, 65); bg.strokePath();
+    }
+
+    bg.generateTexture(key, 120, 120);
     bg.destroy();
   }
 }
