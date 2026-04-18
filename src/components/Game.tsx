@@ -21,12 +21,11 @@ export default function Game({ onInteract, isPaused }: GameProps) {
     if (gameRef.current) {
       const scene = gameRef.current.scene.getScene('MainScene') as any;
       if (scene && scene.input.keyboard) {
-        scene.input.keyboard.enabled = !isPaused;
-        // This prevents Phaser from stealing keys from the browser/React inputs
-        scene.input.keyboard.preventDefault = !isPaused;
-        
-        if (isPaused && scene.player) {
-          scene.player.setVelocityX(0);
+        if (isPaused) {
+          scene.input.keyboard.stopListeners();
+          if (scene.player) scene.player.setVelocityX(0);
+        } else {
+          scene.input.keyboard.startListeners();
         }
       }
     }
