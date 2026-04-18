@@ -20,6 +20,7 @@ export default function Game({ onInteract }: GameProps) {
     class MainScene extends Phaser.Scene {
       player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
       cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
+      wasd!: { a: Phaser.Input.Keyboard.Key, d: Phaser.Input.Keyboard.Key };
       interactKey!: Phaser.Input.Keyboard.Key;
       buildings!: Phaser.GameObjects.Group;
       interactPrompt!: Phaser.GameObjects.Text;
@@ -105,6 +106,10 @@ export default function Game({ onInteract }: GameProps) {
         // Input
         if (this.input.keyboard) {
           this.cursors = this.input.keyboard.createCursorKeys();
+          this.wasd = {
+            a: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
+            d: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D),
+          };
           this.interactKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
         }
 
@@ -126,12 +131,13 @@ export default function Game({ onInteract }: GameProps) {
       }
 
       update() {
-        const speed = 300;
+        const isSprinting = this.cursors.shift.isDown;
+        const speed = isSprinting ? 600 : 300;
 
         // Horizontal movement
-        if (this.cursors.left.isDown) {
+        if (this.cursors.left.isDown || this.wasd.a.isDown) {
           this.player.setVelocityX(-speed);
-        } else if (this.cursors.right.isDown) {
+        } else if (this.cursors.right.isDown || this.wasd.d.isDown) {
           this.player.setVelocityX(speed);
         } else {
           this.player.setVelocityX(0);

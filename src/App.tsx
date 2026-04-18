@@ -2,6 +2,10 @@ import { useState } from 'react';
 import Game from './components/Game';
 import DrawingCanvas from './components/DrawingCanvas';
 import GuitarStrings from './components/GuitarStrings';
+import GamesMini from './components/GamesMini';
+import MuayThaiMini from './components/MuayThaiMini';
+import DancingMini from './components/DancingMini';
+import CodingMini from './components/CodingMini';
 import { X } from 'lucide-react';
 
 function App() {
@@ -61,9 +65,7 @@ function App() {
                   <p className="mb-6">
                     I'm a huge fan of video games! Playing them, making them, and analyzing their mechanics.
                   </p>
-                  <div className="border-4 border-dashed border-[#1a1a1a] p-8 flex justify-center items-center text-center">
-                    <span className="font-bold text-2xl">🕹️ Arcade Mini-game coming soon...</span>
-                  </div>
+                  <GamesMini />
                 </>
               )}
 
@@ -72,9 +74,7 @@ function App() {
                   <p className="mb-6">
                     Muay Thai keeps me disciplined and physically sharp. It's the ultimate test of endurance and focus.
                   </p>
-                  <div className="border-4 border-dashed border-[#1a1a1a] p-8 flex justify-center items-center text-center">
-                    <span className="font-bold text-2xl">🥊 Punching Bag Interaction coming soon...</span>
-                  </div>
+                  <MuayThaiMini />
                 </>
               )}
 
@@ -83,9 +83,7 @@ function App() {
                   <p className="mb-6">
                     Dancing is pure joy and rhythm. It's a fun way to stay active and express myself physically.
                   </p>
-                  <div className="border-4 border-dashed border-[#1a1a1a] p-8 flex justify-center items-center text-center">
-                    <span className="font-bold text-2xl">💃 Dance Floor Mini-game coming soon...</span>
-                  </div>
+                  <DancingMini />
                 </>
               )}
 
@@ -94,9 +92,7 @@ function App() {
                   <p className="mb-6">
                     I've been coding since 2016. With deep experience in both Backend and Frontend, I'm now combining engineering with design to build complete, beautiful products.
                   </p>
-                  <div className="border-4 border-dashed border-[#1a1a1a] p-8 flex justify-center items-center text-center">
-                    <span className="font-bold text-2xl">💻 Terminal interaction coming soon...</span>
-                  </div>
+                  <CodingMini />
                 </>
               )}
             </div>
