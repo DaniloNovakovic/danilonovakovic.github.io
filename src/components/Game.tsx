@@ -58,6 +58,12 @@ export default function Game({ onInteract, isPaused }: GameProps) {
       preload() {
         // Create player texture (hand-drawn B&W style)
         const pg = this.make.graphics({ x: 0, y: 0 });
+        
+        // Fill player so it is opaque
+        pg.fillStyle(0xfbfbf9, 1);
+        pg.fillRect(8, 20, 16, 40);
+        pg.fillCircle(16, 10, 10);
+
         pg.lineStyle(4, 0x1a1a1a, 1);
         // Body with sketchy lines
         pg.beginPath();
@@ -74,13 +80,17 @@ export default function Game({ onInteract, isPaused }: GameProps) {
         // Building textures (rich sketch style)
         const createBuilding = (key: string) => {
           const bg = this.make.graphics({ x: 0, y: 0 });
-          bg.lineStyle(6, 0x1a1a1a, 1);
           
+          // Fill building first so it is opaque
+          bg.fillStyle(0xfbfbf9, 1);
+          bg.fillRect(4, 4, 240, 300);
+
+          bg.lineStyle(6, 0x1a1a1a, 1);
           // Main structure
           bg.strokeRect(4, 4, 240, 300);
           
           // Roof details (shingles)
-          bg.lineStyle(3, 0x1a1a1a, 0.7);
+          bg.lineStyle(3, 0x1a1a1a, 0.5);
           for(let y=10; y<60; y+=10) {
             bg.beginPath();
             bg.moveTo(4, y);
@@ -96,7 +106,10 @@ export default function Game({ onInteract, isPaused }: GameProps) {
           bg.strokeRect(100, 200, 50, 100); 
           bg.strokeCircle(140, 250, 3);
           
-          // Windows
+          // Windows (opaque as well)
+          bg.fillStyle(0xfbfbf9, 1);
+          bg.fillRect(30, 80, 50, 50);
+          bg.fillRect(170, 80, 50, 50);
           bg.strokeRect(30, 80, 50, 50);
           bg.strokeRect(170, 80, 50, 50);
           bg.beginPath();
@@ -106,10 +119,14 @@ export default function Game({ onInteract, isPaused }: GameProps) {
           bg.moveTo(195, 80); bg.lineTo(195, 130);
           bg.strokePath();
 
-          // Sign
-          bg.lineStyle(6, 0x1a1a1a, 1);
-          bg.strokeRect(40, 40, 170, 50);
-          
+          // Building shadow (cross-hatching)
+          bg.lineStyle(2, 0x1a1a1a, 0.2);
+          for(let i=0; i<150; i+=10) {
+            bg.moveTo(200, 50 + i);
+            bg.lineTo(240, 70 + i);
+          }
+          bg.strokePath();
+
           bg.generateTexture(key, 250, 310);
         };
 
@@ -158,9 +175,9 @@ export default function Game({ onInteract, isPaused }: GameProps) {
         HOBBIES.forEach((h) => {
           const bldg = this.add.sprite(h.x, 395, `building_${h.id}`);
           
-          this.add.text(h.x, 65, h.name.toUpperCase(), {
+          this.add.text(h.x, 150, h.name.toUpperCase(), {
             fontFamily: '"Comic Sans MS", cursive, sans-serif',
-            fontSize: '24px',
+            fontSize: '22px',
             color: '#1a1a1a',
             fontStyle: 'bold'
           }).setOrigin(0.5).setScrollFactor(1);
