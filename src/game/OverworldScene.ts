@@ -44,88 +44,130 @@ export class OverworldScene extends Phaser.Scene {
   }
 
   preload() {
-    // Create player texture (hand-drawn B&W style)
+    // Create player texture (hand-drawn B&W style, cute hacker/dev)
     const pg = this.make.graphics({ x: 0, y: 0 });
+    const pFill = 0xfbfbf9;
+    const pLine = 0x1a1a1a;
     
-    // Fill player so it is opaque
-    pg.fillStyle(0xfbfbf9, 1);
-    pg.fillRect(8, 20, 16, 40);
-    pg.fillCircle(16, 10, 10);
+    // Shadow
+    pg.fillStyle(0x000000, 0.1);
+    pg.fillEllipse(24, 60, 20, 6);
 
-    pg.lineStyle(4, 0x1a1a1a, 1);
-    // Body with sketchy lines
+    pg.fillStyle(pFill, 1);
+    pg.lineStyle(3, pLine, 1);
+
+    // Legs
     pg.beginPath();
-    pg.moveTo(8, 20);
-    pg.lineTo(24, 20);
-    pg.lineTo(24, 60);
-    pg.lineTo(8, 60);
-    pg.closePath();
+    pg.moveTo(18, 45); pg.lineTo(18, 60);
+    pg.moveTo(30, 45); pg.lineTo(30, 60);
     pg.strokePath();
+
+    // Backpack
+    pg.fillRect(8, 28, 8, 16);
+    pg.strokeRect(8, 28, 8, 16);
+
+    // Body (Hoodie)
+    pg.fillRect(14, 24, 20, 22);
+    pg.strokeRect(14, 24, 20, 22);
+    
     // Head
-    pg.strokeCircle(16, 10, 10);
-    pg.generateTexture('player_idle', 32, 65);
+    pg.fillCircle(24, 16, 12);
+    pg.strokeCircle(24, 16, 12);
 
-    // Building textures (rich sketch style)
-    const createBuilding = (key: string) => {
+    // Eyes (facing right)
+    pg.fillStyle(pLine, 1);
+    pg.fillCircle(26, 14, 2);
+    pg.fillCircle(32, 14, 2);
+
+    pg.generateTexture('player_idle', 48, 65);
+    pg.destroy();
+
+    // Building textures (distinctive silhouettes for each hobby)
+    const createBuilding = (h: {id: string, name: string}) => {
       const bg = this.make.graphics({ x: 0, y: 0 });
+      const key = `building_${h.id}`;
       
-      // Fill building first so it is opaque
-      bg.fillStyle(0xfbfbf9, 1);
-      bg.fillRect(4, 4, 240, 300);
-
-      bg.lineStyle(6, 0x1a1a1a, 1);
-      // Main structure
-      bg.strokeRect(4, 4, 240, 300);
+      const bFill = 0xfbfbf9;
+      const bLine = 0x1a1a1a;
       
-      // Roof details (shingles)
-      bg.lineStyle(3, 0x1a1a1a, 0.5);
-      for(let y=10; y<60; y+=10) {
+      bg.fillStyle(bFill, 1);
+      bg.lineStyle(5, bLine, 1);
+      
+      if (h.id === 'drawing') {
+        // Art studio (Easel shaped)
+        bg.beginPath(); bg.moveTo(125, 20); bg.lineTo(50, 300); bg.lineTo(200, 300); bg.closePath();
+        bg.fillPath(); bg.strokePath();
+        bg.fillRect(80, 100, 90, 120); bg.strokeRect(80, 100, 90, 120);
+        // Palette sign
+        bg.fillCircle(125, 60, 20); bg.strokeCircle(125, 60, 20);
+        bg.fillStyle(bLine, 1); bg.fillCircle(118, 55, 3); bg.fillCircle(132, 55, 3); bg.fillCircle(125, 65, 3);
+        bg.fillStyle(bFill, 1);
+        // Door
+        bg.strokeRect(100, 220, 50, 80);
+      } else if (h.id === 'guitar') {
+        // Amp building
+        bg.fillRect(40, 80, 170, 220); bg.strokeRect(40, 80, 170, 220);
+        bg.strokeCircle(125, 160, 40); bg.strokeCircle(125, 160, 10);
+        bg.strokeRect(50, 90, 150, 25);
+        for(let i=0; i<4; i++) { bg.beginPath(); bg.moveTo(65 + i*30, 102); bg.lineTo(70 + i*30, 97); bg.strokePath(); }
+        bg.strokeRect(100, 220, 50, 80);
+      } else if (h.id === 'games') {
+        // Arcade Cabinet
         bg.beginPath();
-        bg.moveTo(4, y);
-        for(let x=4; x<244; x+=20) {
-           bg.lineTo(x+10, y + (Math.random()*4));
-           bg.lineTo(x+20, y);
-        }
-        bg.strokePath();
+        bg.moveTo(50, 40); bg.lineTo(200, 40);
+        bg.lineTo(200, 120); bg.lineTo(220, 150);
+        bg.lineTo(220, 300); bg.lineTo(30, 300);
+        bg.lineTo(30, 150); bg.lineTo(50, 120);
+        bg.closePath(); bg.fillPath(); bg.strokePath();
+        bg.strokeRect(70, 60, 110, 50); // screen
+        bg.strokeRect(30, 140, 190, 20); // controls
+        bg.fillStyle(bLine, 1); bg.fillCircle(70, 150, 6); bg.fillStyle(bFill, 1);
+        bg.strokeRect(100, 220, 50, 80);
+      } else if (h.id === 'muay thai') {
+        // Boxing Gym
+        bg.fillRect(20, 120, 210, 180); bg.strokeRect(20, 120, 210, 180);
+        bg.fillRect(10, 100, 230, 20); bg.strokeRect(10, 100, 230, 20); // roof
+        bg.strokeRect(180, 140, 25, 60); // punching bag
+        bg.beginPath(); bg.moveTo(192, 120); bg.lineTo(192, 140); bg.strokePath();
+        bg.strokeRect(95, 200, 60, 100);
+      } else if (h.id === 'dancing') {
+        // Boombox
+        bg.fillRect(20, 120, 210, 180); bg.strokeRect(20, 120, 210, 180);
+        bg.strokeRect(60, 80, 130, 40); // handle
+        bg.strokeCircle(70, 200, 35); bg.strokeCircle(180, 200, 35);
+        bg.strokeRect(100, 220, 50, 80);
+      } else if (h.id === 'coding') {
+        // PC Monitor
+        bg.fillRect(30, 80, 190, 140); bg.strokeRect(30, 80, 190, 140);
+        bg.strokeRect(40, 90, 170, 100); // screen
+        bg.fillRect(100, 220, 50, 60); bg.strokeRect(100, 220, 50, 60); // stand
+        bg.fillRect(60, 280, 130, 20); bg.strokeRect(60, 280, 130, 20); // base
+        // door in the stand
+        bg.strokeRect(110, 240, 30, 40);
+      } else {
+        // Default box
+        bg.fillRect(30, 100, 190, 200); bg.strokeRect(30, 100, 190, 200);
+        bg.strokeRect(100, 200, 50, 100);
       }
 
-      // Door with handle
-      bg.lineStyle(4, 0x1a1a1a, 1);
-      bg.strokeRect(100, 200, 50, 100); 
-      bg.strokeCircle(140, 250, 3);
-      
-      // Windows (opaque as well)
-      bg.fillStyle(0xfbfbf9, 1);
-      bg.fillRect(30, 80, 50, 50);
-      bg.fillRect(170, 80, 50, 50);
-      bg.strokeRect(30, 80, 50, 50);
-      bg.strokeRect(170, 80, 50, 50);
-      bg.beginPath();
-      bg.moveTo(30, 105); bg.lineTo(80, 105);
-      bg.moveTo(55, 80); bg.lineTo(55, 130);
-      bg.moveTo(170, 105); bg.lineTo(220, 105);
-      bg.moveTo(195, 80); bg.lineTo(195, 130);
-      bg.strokePath();
-
-      // Building shadow (cross-hatching)
-      bg.lineStyle(2, 0x1a1a1a, 0.2);
-      for(let i=0; i<150; i+=10) {
-        bg.moveTo(200, 50 + i);
-        bg.lineTo(240, 70 + i);
+      // Sketchy Cross-hatching shading on the right side
+      bg.lineStyle(2, bLine, 0.3);
+      for(let i=0; i<150; i+=12) {
+        bg.beginPath(); bg.moveTo(180, 120 + i); bg.lineTo(210, 140 + i); bg.strokePath();
       }
-      bg.strokePath();
 
       bg.generateTexture(key, 250, 310);
+      bg.destroy();
     };
 
-    HOBBIES.forEach((h) => createBuilding(`building_${h.id}`));
+    HOBBIES.forEach((h) => createBuilding(h));
   }
 
   create() {
     // World bounds (long street)
     this.physics.world.setBounds(0, 0, 3000, 600);
 
-    // --- BACKGROUND PARALLAX (Mountains) ---
+    // --- BACKGROUND PARALLAX (Mountains & Trees) ---
     for(let i=0; i<4; i++) {
       const m = this.add.graphics();
       m.lineStyle(2, 0x1a1a1a, 0.2); // Light gray ink
@@ -142,6 +184,21 @@ export class OverworldScene extends Phaser.Scene {
       }
       m.strokePath();
       m.setScrollFactor(0.2); // Moves very slowly
+    }
+
+    // Trees (mid-ground)
+    for(let i=0; i<15; i++) {
+      const t = this.add.graphics();
+      const tx = Phaser.Math.Between(100, 2900);
+      t.lineStyle(3, 0x1a1a1a, 0.5);
+      t.beginPath();
+      t.moveTo(tx, 550);
+      t.lineTo(tx, 450); // trunk
+      t.moveTo(tx - 20, 500); t.lineTo(tx, 450); t.lineTo(tx + 20, 500);
+      t.moveTo(tx - 15, 475); t.lineTo(tx, 430); t.lineTo(tx + 15, 475);
+      t.moveTo(tx - 10, 450); t.lineTo(tx, 410); t.lineTo(tx + 10, 450);
+      t.strokePath();
+      t.setScrollFactor(0.5);
     }
 
     // Ground
@@ -249,9 +306,11 @@ export class OverworldScene extends Phaser.Scene {
     // Horizontal movement
     if (this.cursors.left.isDown || this.wasd.a.isDown) {
       this.player.setVelocityX(-speed);
+      this.player.setFlipX(true);
       isMoving = true;
     } else if (this.cursors.right.isDown || this.wasd.d.isDown) {
       this.player.setVelocityX(speed);
+      this.player.setFlipX(false);
       isMoving = true;
     } else {
       this.player.setVelocityX(0);
