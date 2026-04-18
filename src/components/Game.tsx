@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import * as Phaser from 'phaser';
+import { HOBBIES } from '../config/hobbies';
 
 interface GameProps {
   onInteract: (area: string) => void;
@@ -112,8 +113,7 @@ export default function Game({ onInteract, isPaused }: GameProps) {
           bg.generateTexture(key, 250, 310);
         };
 
-        const hobbies = ['drawing', 'guitar', 'games', 'muay thai', 'dancing', 'coding'];
-        hobbies.forEach((h) => createBuilding(`building_${h}`));
+        HOBBIES.forEach((h) => createBuilding(`building_${h.id}`));
       }
 
       create() {
@@ -153,21 +153,19 @@ export default function Game({ onInteract, isPaused }: GameProps) {
         this.physics.add.existing(groundZone, true);
 
         // Buildings setup
-        const hobbies = ['drawing', 'guitar', 'games', 'muay thai', 'dancing', 'coding'];
         this.buildings = this.add.group();
         
-        hobbies.forEach((h, i) => {
-          const xPos = 400 + (i * 450); // Increased spacing
-          const bldg = this.add.sprite(xPos, 395, `building_${h}`);
+        HOBBIES.forEach((h) => {
+          const bldg = this.add.sprite(h.x, 395, `building_${h.id}`);
           
-          this.add.text(xPos, 65, h.toUpperCase(), {
+          this.add.text(h.x, 65, h.name.toUpperCase(), {
             fontFamily: '"Comic Sans MS", cursive, sans-serif',
             fontSize: '24px',
             color: '#1a1a1a',
             fontStyle: 'bold'
-          }).setOrigin(0.5).setScrollFactor(1); // Sign text follows building
+          }).setOrigin(0.5).setScrollFactor(1);
 
-          bldg.setData('name', h);
+          bldg.setData('name', h.id);
           this.buildings.add(bldg);
         });
 
