@@ -25,7 +25,7 @@ function App() {
     });
   };
 
-  const activeMiniGame = getMiniGameById(state.activeMiniGameId);
+  const activeMiniGame = state.activeMiniGameId ? getMiniGameById(state.activeMiniGameId) : undefined;
   const isPaused = state.status !== GameState.EXPLORING;
 
   return (
