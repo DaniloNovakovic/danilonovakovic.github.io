@@ -72,7 +72,6 @@ export default function Game({ onInteract }: GameProps) {
 
         const groundZone = this.add.zone(1500, 575, 3000, 50);
         this.physics.add.existing(groundZone, true);
-        this.physics.add.collider(this.player, groundZone);
 
         // Buildings setup
         const hobbies = ['drawing', 'guitar', 'games', 'muay thai', 'dancing', 'coding'];
@@ -98,6 +97,7 @@ export default function Game({ onInteract }: GameProps) {
         this.player = this.physics.add.sprite(100, 400, 'player_idle');
         this.player.setCollideWorldBounds(true);
         this.player.setGravityY(800);
+        this.physics.add.collider(this.player, groundZone);
 
         // Camera
         this.cameras.main.setBounds(0, 0, 3000, 600);
