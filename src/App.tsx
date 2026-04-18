@@ -56,9 +56,9 @@ function App() {
 
       {/* Floating UI Hints */}
       {!activeArea && (
-        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-[#fbfbf9] border-4 border-[#1a1a1a] px-6 py-3 shadow-[6px_6px_0px_0px_rgba(26,26,26,1)] animate-bounce">
-          <p className="text-lg font-bold uppercase tracking-widest text-[#1a1a1a]">
-            Use A/D or Arrows to walk. Hold SHIFT to sprint. Press E to enter buildings.
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#fbfbf9]/80 backdrop-blur-sm border-2 border-[#1a1a1a] px-4 py-2 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] opacity-60 hover:opacity-100 transition-opacity">
+          <p className="text-sm font-bold uppercase tracking-widest text-[#1a1a1a]">
+            Use A/D or Arrows to walk • Hold SHIFT to sprint • Press E to enter
           </p>
         </div>
       )}

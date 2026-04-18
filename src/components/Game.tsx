@@ -266,10 +266,9 @@ export default function Game({ onInteract, isPaused }: GameProps) {
           this.player.setVelocityX(0);
         }
 
-        // Bobbing animation when moving
+        // Bobbing animation (tilt only) when moving
         if (isMoving) {
           this.player.setAngle(Math.sin(this.time.now / 100) * 5);
-          this.player.setY(400 + Math.sin(this.time.now / 50) * 2);
         } else {
           this.player.setAngle(0);
         }
