@@ -1,26 +1,73 @@
-# Personal website
+# React + TypeScript + Vite
 
-## Brief
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-The goal is to create a place where I can easily view my interesting personal open-source projects and exercises, while also giving breif info about myself with possiblity of attracting and connecting with like-minded individuals.
+Currently, two official plugins are available:
 
-## Personal log / my thoughts on each version:
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-### v2 (current):
+## React Compiler
 
-- I tried to combine multiple designs/ideas of the pages I liked on the internet instead of making my own design from scratch (because I'm not a graphic designer).
-- Everything scales with em/rem making it very easy with the help of fluid typography for content to look decent on the bigger screens.
-- Got experience in setting up & working with SASS locally, as well as improving my skills in flexbox and css grids
-- Created my first usable component (project card) that i really liked - https://codepen.io/danilonovakovic/full/xJaxjd
-- Each section takes at least 90vh or more which makes it look a lot better compared to v1
-- Navbar is responsive and always accessible
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-### v1:
+## Expanding the ESLint configuration
 
-- This version of site was a very basic one. I was learning how to use github pages, it served as a great project/place to apply knowledge as I was learning it but ultimately I ended up deciding to redo everything from scratch in a new version (v2).
-  <br><br>
-- Things that I disliked in this version(v1):
-  - I used px/pt instead of em/rem making it very hard to change font, make fluid-typography (which i didn't make anyway)
-  - While I did think about smaller/mobile screens I did NOT think about the big screen, which made my site look very bad on big monitors
-  - There weren't a lot of spaces compared to the landing page (for example landing/hero page took whole viewport while other ones just took a small fraction of the screen making it very weird)
-  - I didn't really like that my projects were shown with just words, I feel like it is much more interesting to show snippet of project with a picture and small description then just name of the project in `<a>` tag.
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+
+```js
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
+
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+```
+
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+```
