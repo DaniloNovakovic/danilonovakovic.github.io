@@ -22,10 +22,18 @@ export default function Game({ onInteract, isPaused }: GameProps) {
       const scene = gameRef.current.scene.getScene('MainScene') as any;
       if (scene && scene.input.keyboard) {
         if (isPaused) {
-          scene.input.keyboard.stopListeners();
+          scene.input.keyboard.enabled = false;
+          // This stops Phaser from calling preventDefault() on all keys
+          if (scene.input.keyboard.clearCaptures) {
+            scene.input.keyboard.clearCaptures();
+          }
           if (scene.player) scene.player.setVelocityX(0);
         } else {
-          scene.input.keyboard.startListeners();
+          scene.input.keyboard.enabled = true;
+          // Re-add captures for game keys so they don't scroll the page etc.
+          if (scene.input.keyboard.addCapture) {
+            scene.input.keyboard.addCapture([16, 32, 37, 38, 39, 40, 65, 68, 69]);
+          }
         }
       }
     }
