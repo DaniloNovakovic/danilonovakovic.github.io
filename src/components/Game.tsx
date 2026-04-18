@@ -10,7 +10,6 @@ export default function Game({ onInteract }: GameProps) {
   const gameRef = useRef<Phaser.Game | null>(null);
   const interactCallbackRef = useRef(onInteract);
 
-  // Keep callback fresh to avoid stale closures if onInteract changes
   useEffect(() => {
     interactCallbackRef.current = onInteract;
   }, [onInteract]);
@@ -21,161 +20,164 @@ export default function Game({ onInteract }: GameProps) {
     class MainScene extends Phaser.Scene {
       player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
       cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
-      wasd!: { w: Phaser.Input.Keyboard.Key, a: Phaser.Input.Keyboard.Key, s: Phaser.Input.Keyboard.Key, d: Phaser.Input.Keyboard.Key };
       interactKey!: Phaser.Input.Keyboard.Key;
-      zoneSprites!: Phaser.Physics.Arcade.Sprite[];
+      buildings!: Phaser.GameObjects.Group;
+      interactPrompt!: Phaser.GameObjects.Text;
 
       constructor() {
         super({ key: 'MainScene' });
       }
 
       preload() {
-        // Generate a simple placeholder texture for the player
-        const graphics = this.make.graphics({ x: 0, y: 0 });
-        graphics.fillStyle(0xffd700, 1);
-        graphics.fillCircle(16, 16, 16);
-        graphics.generateTexture('player', 32, 32);
+        // Create player texture (hand-drawn B&W style)
+        const pg = this.make.graphics({ x: 0, y: 0 });
+        pg.lineStyle(4, 0x1a1a1a, 1);
+        pg.strokeRect(4, 4, 24, 40); // Simple body
+        pg.strokeCircle(16, -10, 12); // Head
+        pg.generateTexture('player_idle', 32, 60);
 
-        // Function to create a zone texture
-        const createZoneTexture = (key: string, color: number) => {
-          const g = this.make.graphics({ x:0, y:0 });
-          g.fillStyle(color, 1);
-          g.fillRect(0, 0, 80, 80);
-          g.lineStyle(4, 0xffffff, 0.8);
-          g.strokeRect(0, 0, 80, 80);
-          g.generateTexture(key, 80, 80);
+        // Building textures (rough sketch style)
+        const createBuilding = (key: string) => {
+          const bg = this.make.graphics({ x: 0, y: 0 });
+          bg.lineStyle(6, 0x1a1a1a, 1);
+          bg.strokeRect(4, 4, 240, 300); // Building outline
+          bg.strokeRect(100, 200, 50, 100); // Door
+          
+          // Sign
+          bg.strokeRect(40, 40, 170, 50);
+          bg.fillStyle(0x1a1a1a, 1);
+          
+          bg.generateTexture(key, 250, 310);
         };
 
-        createZoneTexture('drawingZone', 0xff6666); // Red
-        createZoneTexture('guitarZone', 0x66ff66);  // Green
-        createZoneTexture('gamesZone', 0x6666ff);   // Blue
-        createZoneTexture('muayThaiZone', 0xffa500);// Orange
-        createZoneTexture('dancingZone', 0xcc66ff); // Purple
-        createZoneTexture('codingZone', 0x00cccc);  // Cyan
-
-        // Path texture
-        const path = this.make.graphics({ x:0, y:0 });
-        path.fillStyle(0xdcdcdc, 0.6);
-        path.fillRect(0, 0, 50, 50);
-        path.generateTexture('path', 50, 50);
+        const hobbies = ['drawing', 'guitar', 'games', 'muay thai', 'dancing', 'coding'];
+        hobbies.forEach((h) => createBuilding(`building_${h}`));
       }
 
       create() {
-        // Add decorative paths on the floor
-        // Horizontal path
-        this.add.tileSprite(400, 300, 600, 50, 'path');
-        // Vertical path
-        this.add.tileSprite(400, 300, 50, 400, 'path');
+        // World bounds (long street)
+        this.physics.world.setBounds(0, 0, 3000, 600);
 
-        // Setup zones
-        const zones = [
-          { key: 'drawingZone', name: 'drawing', x: 200, y: 150 },
-          { key: 'guitarZone', name: 'guitar', x: 600, y: 150 },
-          { key: 'gamesZone', name: 'games', x: 100, y: 300 },
-          { key: 'muayThaiZone', name: 'muay thai', x: 700, y: 300 },
-          { key: 'dancingZone', name: 'dancing', x: 200, y: 450 },
-          { key: 'codingZone', name: 'coding', x: 600, y: 450 },
-        ];
+        // Ground
+        const ground = this.add.graphics();
+        ground.lineStyle(4, 0x1a1a1a, 1);
+        ground.beginPath();
+        ground.moveTo(0, 550);
+        // Wobbly hand-drawn line for ground
+        for(let i=0; i<3000; i+=20) {
+          ground.lineTo(i, 550 + (Math.random() * 4 - 2));
+        }
+        ground.strokePath();
 
-        this.zoneSprites = [];
+        const groundBody = this.physics.add.staticBody(1500, 575, 3000, 50);
 
-        zones.forEach(z => {
-          // Label above the zone
-          this.add.text(z.x, z.y - 50, z.name.toUpperCase(), { 
-            fontSize: '14px', 
-            color: '#fff', 
-            fontStyle: 'bold',
-            stroke: '#000',
-            strokeThickness: 3
+        // Buildings setup
+        const hobbies = ['drawing', 'guitar', 'games', 'muay thai', 'dancing', 'coding'];
+        this.buildings = this.add.group();
+        
+        hobbies.forEach((h, i) => {
+          const xPos = 400 + (i * 400);
+          const bldg = this.add.sprite(xPos, 395, `building_${h}`);
+          
+          // Add handwritten text
+          this.add.text(xPos, 280, h.toUpperCase(), {
+            fontFamily: '"Comic Sans MS", cursive, sans-serif',
+            fontSize: '24px',
+            color: '#1a1a1a',
+            fontStyle: 'bold'
           }).setOrigin(0.5);
 
-          const sprite = this.physics.add.sprite(z.x, z.y, z.key);
-          sprite.setImmovable(true);
-          sprite.setName(z.name);
-          this.zoneSprites.push(sprite);
+          bldg.setData('name', h);
+          this.buildings.add(bldg);
         });
 
-        // Setup player on top of paths
-        this.player = this.physics.add.sprite(400, 300, 'player');
+        // Player
+        this.player = this.physics.add.sprite(100, 400, 'player_idle');
         this.player.setCollideWorldBounds(true);
+        this.player.setGravityY(800);
+        this.physics.add.collider(this.player, groundBody);
+
+        // Camera
+        this.cameras.main.setBounds(0, 0, 3000, 600);
+        this.cameras.main.startFollow(this.player, true, 0.05, 0.05);
+        this.cameras.main.setFollowOffset(0, 100); // Keep player lower on screen
 
         // Input
         if (this.input.keyboard) {
           this.cursors = this.input.keyboard.createCursorKeys();
-          this.wasd = {
-            w: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
-            a: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
-            s: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),
-            d: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D),
-          };
-          this.interactKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+          this.interactKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
         }
 
-        // Text prompt
-        this.add.text(400, 50, 'Use WASD/Arrows to move', {
-          fontSize: '16px',
-          color: '#ffffff',
-          backgroundColor: '#00000088',
-          padding: { x: 10, y: 5 }
-        }).setOrigin(0.5);
+        // Interaction Prompt
+        this.interactPrompt = this.add.text(0, 0, '[E] ENTER', {
+          fontFamily: '"Comic Sans MS", cursive, sans-serif',
+          fontSize: '18px',
+          color: '#1a1a1a',
+          backgroundColor: '#ffffff',
+          padding: { x: 5, y: 2 }
+        }).setOrigin(0.5).setVisible(false).setDepth(10);
 
-        // Interaction text (hidden by default)
-        const interactPrompt = this.add.text(0, 0, 'Press Space', { fontSize: '14px', color: '#ffffff' }).setOrigin(0.5).setVisible(false);
-
-        this.events.on('update', () => {
-          let canInteractWith: string | null = null;
-          let interactPos: {x: number, y: number} | null = null;
-
-          for (const zone of this.zoneSprites) {
-            if (this.physics.overlap(this.player, zone)) {
-              canInteractWith = zone.name;
-              interactPos = { x: zone.x, y: zone.y - 60 };
-              break;
-            }
-          }
-
-          if (canInteractWith && interactPos) {
-            interactPrompt.setPosition(interactPos.x, interactPos.y).setVisible(true);
-            if (Phaser.Input.Keyboard.JustDown(this.interactKey)) {
-              interactCallbackRef.current(canInteractWith);
-            }
-          } else {
-            interactPrompt.setVisible(false);
-          }
-        });
+        // Add some background clouds (sketchy)
+        for(let i=0; i<10; i++) {
+          const cloud = this.add.graphics();
+          cloud.lineStyle(2, 0x1a1a1a, 0.5);
+          cloud.strokeEllipse(Phaser.Math.Between(100, 2900), Phaser.Math.Between(50, 200), Phaser.Math.Between(50, 150), Phaser.Math.Between(20, 60));
+        }
       }
 
       update() {
-        const speed = 250;
-        let vx = 0;
-        let vy = 0;
+        const speed = 300;
 
-        if (this.cursors.left.isDown || this.wasd.a.isDown) vx = -speed;
-        else if (this.cursors.right.isDown || this.wasd.d.isDown) vx = speed;
-
-        if (this.cursors.up.isDown || this.wasd.w.isDown) vy = -speed;
-        else if (this.cursors.down.isDown || this.wasd.s.isDown) vy = speed;
-
-        // Normalize diagonal movement
-        if (vx !== 0 && vy !== 0) {
-          vx *= 0.7071;
-          vy *= 0.7071;
+        // Horizontal movement
+        if (this.cursors.left.isDown) {
+          this.player.setVelocityX(-speed);
+        } else if (this.cursors.right.isDown) {
+          this.player.setVelocityX(speed);
+        } else {
+          this.player.setVelocityX(0);
         }
 
-        this.player.setVelocity(vx, vy);
+        // Jumping
+        if (this.cursors.up.isDown && this.player.body.touching.down) {
+          this.player.setVelocityY(-500);
+        }
+
+        // Interaction Check
+        let canInteractWith: string | null = null;
+        let interactPos: {x: number, y: number} | null = null;
+
+        const bldgs = this.buildings.getChildren() as Phaser.GameObjects.Sprite[];
+        for (const bldg of bldgs) {
+          // Simple distance check since buildings are background graphics, not physics bodies
+          const dist = Math.abs(this.player.x - bldg.x);
+          if (dist < 80 && this.player.y > 400) { // Near the door
+            canInteractWith = bldg.getData('name');
+            interactPos = { x: bldg.x, y: bldg.y + 40 }; // Over the door
+            break;
+          }
+        }
+
+        if (canInteractWith && interactPos) {
+          this.interactPrompt.setPosition(interactPos.x, interactPos.y).setVisible(true);
+          if (Phaser.Input.Keyboard.JustDown(this.interactKey)) {
+            interactCallbackRef.current(canInteractWith);
+          }
+        } else {
+          this.interactPrompt.setVisible(false);
+        }
       }
     }
 
     const config: Phaser.Types.Core.GameConfig = {
       type: Phaser.AUTO,
       parent: containerRef.current,
-      width: 800,
+      width: 1000,
       height: 600,
-      backgroundColor: '#87CEEB',
+      backgroundColor: '#fbfbf9', // Paper off-white
       physics: {
         default: 'arcade',
         arcade: {
-          gravity: { x: 0, y: 0 },
+          gravity: { x: 0, y: 1000 },
           debug: false
         }
       },
@@ -191,8 +193,9 @@ export default function Game({ onInteract }: GameProps) {
   }, []);
 
   return (
-    <div className="w-full h-full flex justify-center items-center bg-gray-900 rounded-lg overflow-hidden shadow-2xl border border-gray-700">
-      <div ref={containerRef} className="w-[800px] h-[600px] outline-none" />
+    <div className="w-full h-full flex justify-center items-center rounded-lg overflow-hidden border-4 border-neutral-800 shadow-[8px_8px_0px_0px_rgba(26,26,26,1)] bg-[#fbfbf9]">
+      <div ref={containerRef} className="w-[1000px] h-[600px] outline-none" />
     </div>
   );
 }
+

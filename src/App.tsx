@@ -15,98 +15,99 @@ function App() {
   };
 
   return (
-    <div className="w-screen h-screen bg-neutral-900 flex justify-center items-center relative overflow-hidden">
+    <div className="w-screen h-screen bg-[#f4f1ea] flex justify-center items-center relative overflow-hidden" style={{ fontFamily: '"Comic Sans MS", cursive, sans-serif' }}>
       
       {/* Game Container */}
-      <div className="w-[800px] h-[600px] relative">
+      <div className="w-[1000px] h-[600px] relative">
         <Game onInteract={handleInteract} />
       </div>
 
       {/* Interactive Overlay */}
       {activeArea && (
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 transition-all duration-300">
-          <div className="bg-white text-neutral-900 w-[600px] max-w-[90vw] rounded-2xl shadow-2xl p-8 relative animate-in zoom-in-95 fade-in">
+        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50 transition-all duration-300">
+          <div className="bg-[#fbfbf9] text-[#1a1a1a] w-[600px] max-w-[90vw] p-8 relative animate-in zoom-in-95 fade-in border-4 border-[#1a1a1a] shadow-[12px_12px_0px_0px_rgba(26,26,26,1)]">
             <button 
               onClick={closeOverlay}
-              className="absolute top-4 right-4 p-2 bg-neutral-100 hover:bg-neutral-200 rounded-full transition-colors"
+              className="absolute top-4 right-4 p-2 bg-[#f4f1ea] hover:bg-[#e8e5df] border-2 border-[#1a1a1a] rounded-full transition-colors"
             >
-              <X size={20} />
+              <X size={20} color="#1a1a1a" />
             </button>
             
-            <h2 className="text-3xl font-bold mb-4 capitalize">{activeArea}</h2>
+            <h2 className="text-4xl font-bold mb-4 uppercase tracking-wider border-b-4 border-[#1a1a1a] pb-2 inline-block">{activeArea}</h2>
             
-            {activeArea === 'drawing' && (
-              <>
-                <p className="text-lg text-neutral-600 mb-6">
-                  Drawing is one of my core passions. It allows me to express creativity visually. I am currently learning design and bridging the gap between my code and artistic expression.
-                </p>
-                <div className="bg-red-50 rounded-xl h-48 flex justify-center items-center border border-red-100">
-                  <span className="text-red-400 font-medium italic">🎨 Digital Canvas Mini-game coming soon...</span>
-                </div>
-              </>
-            )}
+            <div className="mt-6 text-xl leading-relaxed">
+              {activeArea === 'drawing' && (
+                <>
+                  <p className="mb-6">
+                    Drawing is one of my core passions. It allows me to express creativity visually. I am currently learning design and bridging the gap between my code and artistic expression.
+                  </p>
+                  <div className="border-4 border-dashed border-[#1a1a1a] p-8 flex justify-center items-center text-center">
+                    <span className="font-bold text-2xl">✏️ Digital Canvas Mini-game coming soon...</span>
+                  </div>
+                </>
+              )}
 
-            {activeArea === 'guitar' && (
-              <>
-                <p className="text-lg text-neutral-600 mb-6">
-                  When I step away from the keyboard, I love to play the guitar. It's a great way to disconnect and recharge.
-                </p>
-                <div className="bg-green-50 rounded-xl h-48 flex justify-center items-center border border-green-100">
-                  <span className="text-green-500 font-medium italic">🎸 Rhythm Mini-game coming soon...</span>
-                </div>
-              </>
-            )}
+              {activeArea === 'guitar' && (
+                <>
+                  <p className="mb-6">
+                    When I step away from the keyboard, I love to play the guitar. It's a great way to disconnect and recharge.
+                  </p>
+                  <div className="border-4 border-dashed border-[#1a1a1a] p-8 flex justify-center items-center text-center">
+                    <span className="font-bold text-2xl">🎵 Rhythm Mini-game coming soon...</span>
+                  </div>
+                </>
+              )}
 
-            {activeArea === 'games' && (
-              <>
-                <p className="text-lg text-neutral-600 mb-6">
-                  I'm a huge fan of video games! Playing them, making them, and analyzing their mechanics.
-                </p>
-                <div className="bg-blue-50 rounded-xl h-48 flex justify-center items-center border border-blue-100">
-                  <span className="text-blue-500 font-medium italic">🎮 Arcade Mini-game coming soon...</span>
-                </div>
-              </>
-            )}
+              {activeArea === 'games' && (
+                <>
+                  <p className="mb-6">
+                    I'm a huge fan of video games! Playing them, making them, and analyzing their mechanics.
+                  </p>
+                  <div className="border-4 border-dashed border-[#1a1a1a] p-8 flex justify-center items-center text-center">
+                    <span className="font-bold text-2xl">🕹️ Arcade Mini-game coming soon...</span>
+                  </div>
+                </>
+              )}
 
-            {activeArea === 'muay thai' && (
-              <>
-                <p className="text-lg text-neutral-600 mb-6">
-                  Muay Thai keeps me disciplined and physically sharp. It's the ultimate test of endurance and focus.
-                </p>
-                <div className="bg-orange-50 rounded-xl h-48 flex justify-center items-center border border-orange-100">
-                  <span className="text-orange-500 font-medium italic">🥊 Punching Bag Interaction coming soon...</span>
-                </div>
-              </>
-            )}
+              {activeArea === 'muay thai' && (
+                <>
+                  <p className="mb-6">
+                    Muay Thai keeps me disciplined and physically sharp. It's the ultimate test of endurance and focus.
+                  </p>
+                  <div className="border-4 border-dashed border-[#1a1a1a] p-8 flex justify-center items-center text-center">
+                    <span className="font-bold text-2xl">🥊 Punching Bag Interaction coming soon...</span>
+                  </div>
+                </>
+              )}
 
-            {activeArea === 'dancing' && (
-              <>
-                <p className="text-lg text-neutral-600 mb-6">
-                  Dancing is pure joy and rhythm. It's a fun way to stay active and express myself physically.
-                </p>
-                <div className="bg-purple-50 rounded-xl h-48 flex justify-center items-center border border-purple-100">
-                  <span className="text-purple-500 font-medium italic">🕺 Dance Floor Mini-game coming soon...</span>
-                </div>
-              </>
-            )}
+              {activeArea === 'dancing' && (
+                <>
+                  <p className="mb-6">
+                    Dancing is pure joy and rhythm. It's a fun way to stay active and express myself physically.
+                  </p>
+                  <div className="border-4 border-dashed border-[#1a1a1a] p-8 flex justify-center items-center text-center">
+                    <span className="font-bold text-2xl">💃 Dance Floor Mini-game coming soon...</span>
+                  </div>
+                </>
+              )}
 
-            {activeArea === 'coding' && (
-              <>
-                <p className="text-lg text-neutral-600 mb-6">
-                  I've been coding since 2016. With deep experience in both Backend and Frontend, I'm now combining engineering with design to build complete, beautiful products.
-                </p>
-                <div className="bg-cyan-50 rounded-xl h-48 flex justify-center items-center border border-cyan-100">
-                  <span className="text-cyan-600 font-medium italic">💻 Terminal interaction coming soon...</span>
-                </div>
-              </>
-            )}
-            
+              {activeArea === 'coding' && (
+                <>
+                  <p className="mb-6">
+                    I've been coding since 2016. With deep experience in both Backend and Frontend, I'm now combining engineering with design to build complete, beautiful products.
+                  </p>
+                  <div className="border-4 border-dashed border-[#1a1a1a] p-8 flex justify-center items-center text-center">
+                    <span className="font-bold text-2xl">💻 Terminal interaction coming soon...</span>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}
       
-      <div className="absolute bottom-4 left-4 text-white/50 text-sm pointer-events-none">
-        Use WASD or Arrows to move. Walk to a colored square and press SPACE.
+      <div className="absolute bottom-4 left-4 text-[#1a1a1a] text-lg font-bold bg-[#fbfbf9] px-4 py-2 border-2 border-[#1a1a1a] shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] pointer-events-none">
+        Use A/D or Arrows to walk. Press E to enter buildings.
       </div>
     </div>
   );
