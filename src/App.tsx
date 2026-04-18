@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import Game from './components/Game';
+import DrawingCanvas from './components/DrawingCanvas';
+import GuitarStrings from './components/GuitarStrings';
 import { X } from 'lucide-react';
 
 function App() {
@@ -41,9 +43,7 @@ function App() {
                   <p className="mb-6">
                     Drawing is one of my core passions. It allows me to express creativity visually. I am currently learning design and bridging the gap between my code and artistic expression.
                   </p>
-                  <div className="border-4 border-dashed border-[#1a1a1a] p-8 flex justify-center items-center text-center">
-                    <span className="font-bold text-2xl">✏️ Digital Canvas Mini-game coming soon...</span>
-                  </div>
+                  <DrawingCanvas />
                 </>
               )}
 
@@ -52,9 +52,7 @@ function App() {
                   <p className="mb-6">
                     When I step away from the keyboard, I love to play the guitar. It's a great way to disconnect and recharge.
                   </p>
-                  <div className="border-4 border-dashed border-[#1a1a1a] p-8 flex justify-center items-center text-center">
-                    <span className="font-bold text-2xl">🎵 Rhythm Mini-game coming soon...</span>
-                  </div>
+                  <GuitarStrings />
                 </>
               )}
 
