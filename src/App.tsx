@@ -33,14 +33,73 @@ function App() {
               <X size={20} />
             </button>
             
-            <h2 className="text-3xl font-bold mb-4 capitalize">{activeArea} Room</h2>
-            <p className="text-lg text-neutral-600 mb-6">
-              Welcome to the {activeArea} area! Here you'll be able to learn more about my journey and hobbies.
-            </p>
+            <h2 className="text-3xl font-bold mb-4 capitalize">{activeArea}</h2>
             
-            <div className="bg-neutral-100 rounded-xl h-48 flex justify-center items-center">
-              <span className="text-neutral-400 italic">Content coming soon...</span>
-            </div>
+            {activeArea === 'drawing' && (
+              <>
+                <p className="text-lg text-neutral-600 mb-6">
+                  Drawing is one of my core passions. It allows me to express creativity visually. I am currently learning design and bridging the gap between my code and artistic expression.
+                </p>
+                <div className="bg-red-50 rounded-xl h-48 flex justify-center items-center border border-red-100">
+                  <span className="text-red-400 font-medium italic">🎨 Digital Canvas Mini-game coming soon...</span>
+                </div>
+              </>
+            )}
+
+            {activeArea === 'guitar' && (
+              <>
+                <p className="text-lg text-neutral-600 mb-6">
+                  When I step away from the keyboard, I love to play the guitar. It's a great way to disconnect and recharge.
+                </p>
+                <div className="bg-green-50 rounded-xl h-48 flex justify-center items-center border border-green-100">
+                  <span className="text-green-500 font-medium italic">🎸 Rhythm Mini-game coming soon...</span>
+                </div>
+              </>
+            )}
+
+            {activeArea === 'games' && (
+              <>
+                <p className="text-lg text-neutral-600 mb-6">
+                  I'm a huge fan of video games! Playing them, making them, and analyzing their mechanics.
+                </p>
+                <div className="bg-blue-50 rounded-xl h-48 flex justify-center items-center border border-blue-100">
+                  <span className="text-blue-500 font-medium italic">🎮 Arcade Mini-game coming soon...</span>
+                </div>
+              </>
+            )}
+
+            {activeArea === 'muay thai' && (
+              <>
+                <p className="text-lg text-neutral-600 mb-6">
+                  Muay Thai keeps me disciplined and physically sharp. It's the ultimate test of endurance and focus.
+                </p>
+                <div className="bg-orange-50 rounded-xl h-48 flex justify-center items-center border border-orange-100">
+                  <span className="text-orange-500 font-medium italic">🥊 Punching Bag Interaction coming soon...</span>
+                </div>
+              </>
+            )}
+
+            {activeArea === 'dancing' && (
+              <>
+                <p className="text-lg text-neutral-600 mb-6">
+                  Dancing is pure joy and rhythm. It's a fun way to stay active and express myself physically.
+                </p>
+                <div className="bg-purple-50 rounded-xl h-48 flex justify-center items-center border border-purple-100">
+                  <span className="text-purple-500 font-medium italic">🕺 Dance Floor Mini-game coming soon...</span>
+                </div>
+              </>
+            )}
+
+            {activeArea === 'coding' && (
+              <>
+                <p className="text-lg text-neutral-600 mb-6">
+                  I've been coding since 2016. With deep experience in both Backend and Frontend, I'm now combining engineering with design to build complete, beautiful products.
+                </p>
+                <div className="bg-cyan-50 rounded-xl h-48 flex justify-center items-center border border-cyan-100">
+                  <span className="text-cyan-600 font-medium italic">💻 Terminal interaction coming soon...</span>
+                </div>
+              </>
+            )}
             
           </div>
         </div>

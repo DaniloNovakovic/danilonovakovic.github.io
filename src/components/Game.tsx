@@ -23,6 +23,7 @@ export default function Game({ onInteract }: GameProps) {
       cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
       wasd!: { w: Phaser.Input.Keyboard.Key, a: Phaser.Input.Keyboard.Key, s: Phaser.Input.Keyboard.Key, d: Phaser.Input.Keyboard.Key };
       interactKey!: Phaser.Input.Keyboard.Key;
+      zoneSprites!: Phaser.Physics.Arcade.Sprite[];
 
       constructor() {
         super({ key: 'MainScene' });
@@ -35,31 +36,68 @@ export default function Game({ onInteract }: GameProps) {
         graphics.fillCircle(16, 16, 16);
         graphics.generateTexture('player', 32, 32);
 
-        // Graphics for zones
-        const zoneGraphics = this.make.graphics({ x:0, y:0 });
-        zoneGraphics.fillStyle(0xff6666, 1);
-        zoneGraphics.fillRect(0, 0, 80, 80);
-        zoneGraphics.generateTexture('drawingZone', 80, 80);
+        // Function to create a zone texture
+        const createZoneTexture = (key: string, color: number) => {
+          const g = this.make.graphics({ x:0, y:0 });
+          g.fillStyle(color, 1);
+          g.fillRect(0, 0, 80, 80);
+          g.lineStyle(4, 0xffffff, 0.8);
+          g.strokeRect(0, 0, 80, 80);
+          g.generateTexture(key, 80, 80);
+        };
 
-        const zoneGraphics2 = this.make.graphics({ x:0, y:0 });
-        zoneGraphics2.fillStyle(0x66ff66, 1);
-        zoneGraphics2.fillRect(0, 0, 80, 80);
-        zoneGraphics2.generateTexture('guitarZone', 80, 80);
+        createZoneTexture('drawingZone', 0xff6666); // Red
+        createZoneTexture('guitarZone', 0x66ff66);  // Green
+        createZoneTexture('gamesZone', 0x6666ff);   // Blue
+        createZoneTexture('muayThaiZone', 0xffa500);// Orange
+        createZoneTexture('dancingZone', 0xcc66ff); // Purple
+        createZoneTexture('codingZone', 0x00cccc);  // Cyan
+
+        // Path texture
+        const path = this.make.graphics({ x:0, y:0 });
+        path.fillStyle(0xdcdcdc, 0.6);
+        path.fillRect(0, 0, 50, 50);
+        path.generateTexture('path', 50, 50);
       }
 
       create() {
-        // Setup player
-        this.player = this.physics.add.sprite(400, 300, 'player');
-        this.player.setCollideWorldBounds(true);
+        // Add decorative paths on the floor
+        // Horizontal path
+        this.add.tileSprite(400, 300, 600, 50, 'path');
+        // Vertical path
+        this.add.tileSprite(400, 300, 50, 400, 'path');
 
         // Setup zones
-        const drawingZoneSprite = this.physics.add.sprite(150, 150, 'drawingZone');
-        drawingZoneSprite.setImmovable(true);
-        drawingZoneSprite.setName('drawing');
+        const zones = [
+          { key: 'drawingZone', name: 'drawing', x: 200, y: 150 },
+          { key: 'guitarZone', name: 'guitar', x: 600, y: 150 },
+          { key: 'gamesZone', name: 'games', x: 100, y: 300 },
+          { key: 'muayThaiZone', name: 'muay thai', x: 700, y: 300 },
+          { key: 'dancingZone', name: 'dancing', x: 200, y: 450 },
+          { key: 'codingZone', name: 'coding', x: 600, y: 450 },
+        ];
 
-        const guitarZoneSprite = this.physics.add.sprite(650, 150, 'guitarZone');
-        guitarZoneSprite.setImmovable(true);
-        guitarZoneSprite.setName('guitar');
+        this.zoneSprites = [];
+
+        zones.forEach(z => {
+          // Label above the zone
+          this.add.text(z.x, z.y - 50, z.name.toUpperCase(), { 
+            fontSize: '14px', 
+            color: '#fff', 
+            fontStyle: 'bold',
+            stroke: '#000',
+            strokeThickness: 3
+          }).setOrigin(0.5);
+
+          const sprite = this.physics.add.sprite(z.x, z.y, z.key);
+          sprite.setImmovable(true);
+          sprite.setName(z.name);
+          this.zoneSprites.push(sprite);
+        });
+
+        // Setup player on top of paths
+        this.player = this.physics.add.sprite(400, 300, 'player');
+        this.player.setCollideWorldBounds(true);
 
         // Input
         if (this.input.keyboard) {
@@ -88,12 +126,12 @@ export default function Game({ onInteract }: GameProps) {
           let canInteractWith: string | null = null;
           let interactPos: {x: number, y: number} | null = null;
 
-          if (this.physics.overlap(this.player, drawingZoneSprite)) {
-            canInteractWith = 'drawing';
-            interactPos = { x: drawingZoneSprite.x, y: drawingZoneSprite.y - 60 };
-          } else if (this.physics.overlap(this.player, guitarZoneSprite)) {
-            canInteractWith = 'guitar';
-            interactPos = { x: guitarZoneSprite.x, y: guitarZoneSprite.y - 60 };
+          for (const zone of this.zoneSprites) {
+            if (this.physics.overlap(this.player, zone)) {
+              canInteractWith = zone.name;
+              interactPos = { x: zone.x, y: zone.y - 60 };
+              break;
+            }
           }
 
           if (canInteractWith && interactPos) {
