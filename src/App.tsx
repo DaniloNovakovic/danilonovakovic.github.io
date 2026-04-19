@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import Game from './components/Game';
 import { X } from 'lucide-react';
 import { GameState, type AppState } from './game/gameState';
@@ -124,7 +124,15 @@ function App() {
             <div className="mt-4 text-base leading-relaxed sm:mt-6 sm:text-xl">
               <p className="mb-6 font-medium italic opacity-80 sm:mb-8">{activeMiniGame.description}</p>
 
-              <div className="mt-4">{activeMiniGame.Component && <activeMiniGame.Component />}</div>
+              <div className="mt-4">
+                <Suspense
+                  fallback={
+                    <p className="text-sm font-bold text-[#1a1a1a] opacity-60">{TEXTS.common.loading}</p>
+                  }
+                >
+                  {activeMiniGame.Component && <activeMiniGame.Component />}
+                </Suspense>
+              </div>
             </div>
           </div>
         </div>

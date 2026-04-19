@@ -47,6 +47,7 @@ export const TEXTS = {
     art: "ART",
     music: "MUSIC",
     fitness: "FITNESS",
+    dancing: "DANCE",
   },
   contact: {
     title: "Contact",

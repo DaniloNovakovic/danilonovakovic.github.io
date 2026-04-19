@@ -84,7 +84,7 @@ export const PORTFOLIO_DATA = {
     { name: "GitHub", link: "https://github.com/DaniloNovakovic", icon: "github" },
     { name: "Email", link: "mailto:dakenzi97@gmail.com", icon: "email" }
   ],
-  /** Ids align with `portfolioRegistry` hobby overlays / Hobbies room (`games`, `art`, `music`, `fitness`). */
+  /** Ids align with `portfolioRegistry` hobby overlays / Hobbies room (`games`, `art`, `music`, `fitness`, `dancing`). */
   hobbies: [
     {
       id: 'games',
@@ -105,6 +105,11 @@ export const PORTFOLIO_DATA = {
       id: 'fitness',
       name: 'Muay Thai & fitness',
       description: 'Discipline and physical sharpness through martial arts and training.'
+    },
+    {
+      id: 'dancing',
+      name: 'Dance & rhythm',
+      description: 'Moving to music and learning patterns—coordination as play.'
     }
   ]
 };

@@ -5,6 +5,21 @@ import { PORTFOLIO_SECTIONS } from '../config/portfolioRegistry';
 import { TextureGenerator } from './textures/TextureGenerator';
 import { EnvironmentBuilder } from './textures/EnvironmentBuilder';
 import { TEXTS } from '../config/content';
+import {
+  GAME_DESIGN_HEIGHT,
+  OVERWORLD_GROUND_ZONE,
+  OVERWORLD_INTERACT_DISTANCE_X,
+  OVERWORLD_INTERACT_MIN_PLAYER_Y,
+  OVERWORLD_INTERACT_PROMPT_OFFSET_Y,
+  OVERWORLD_JUMP_VELOCITY_Y,
+  OVERWORLD_PARTICLE_MAX_Y,
+  OVERWORLD_PLAYER_GRAVITY_Y,
+  OVERWORLD_PLAYER_START,
+  OVERWORLD_SPRINT_SPEED,
+  OVERWORLD_WALK_SPEED,
+  OVERWORLD_WIDTH
+} from './config';
+import { setSceneKeyboardPaused } from './sceneKeyboardPause';
 
 export class OverworldScene extends Phaser.Scene {
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -32,18 +47,11 @@ export class OverworldScene extends Phaser.Scene {
 
   setPaused(paused: boolean) {
     this.isPaused = paused;
-    if (this.input && this.input.keyboard) {
-      // Phase 2: Disable keyboard manager when paused to prevent input bleed
-      this.input.keyboard.enabled = !paused;
-      
-      if (paused) {
+    setSceneKeyboardPaused(this, paused, {
+      zeroHorizontalVelocity: () => {
         if (this.player) this.player.setVelocityX(0);
-      } else {
-        if (this.input.keyboard.addCapture) {
-          this.input.keyboard.addCapture([16, 32, 37, 38, 39, 40, 65, 68, 69, 72]);
-        }
       }
-    }
+    });
   }
 
   preload() {
@@ -56,15 +64,20 @@ export class OverworldScene extends Phaser.Scene {
   }
 
   create() {
-    const worldWidth = 3000;
-    this.physics.world.setBounds(0, 0, worldWidth, 600);
+    const worldWidth = OVERWORLD_WIDTH;
+    this.physics.world.setBounds(0, 0, worldWidth, GAME_DESIGN_HEIGHT);
 
     // --- ENVIRONMENT ---
     EnvironmentBuilder.buildMountains(this);
     EnvironmentBuilder.buildTrees(this);
     EnvironmentBuilder.buildGround(this, worldWidth);
     
-    const groundZone = this.add.zone(worldWidth / 2, 575, worldWidth, 50);
+    const groundZone = this.add.zone(
+      worldWidth / 2,
+      OVERWORLD_GROUND_ZONE.centerY,
+      worldWidth,
+      OVERWORLD_GROUND_ZONE.height
+    );
     this.physics.add.existing(groundZone, true);
 
     // --- BUILDINGS ---
@@ -85,9 +98,13 @@ export class OverworldScene extends Phaser.Scene {
     });
 
     // --- PLAYER ---
-    this.player = this.physics.add.sprite(100, 400, 'player_idle');
+    this.player = this.physics.add.sprite(
+      OVERWORLD_PLAYER_START.x,
+      OVERWORLD_PLAYER_START.y,
+      'player_idle'
+    );
     this.player.setCollideWorldBounds(true);
-    this.player.setGravityY(800);
+    this.player.setGravityY(OVERWORLD_PLAYER_GRAVITY_Y);
     this.physics.add.collider(this.player, groundZone);
 
     // --- FOREGROUND ---
@@ -95,7 +112,7 @@ export class OverworldScene extends Phaser.Scene {
     EnvironmentBuilder.buildClouds(this, worldWidth);
 
     // --- CAMERA ---
-    this.cameras.main.setBounds(0, 0, worldWidth, 600);
+    this.cameras.main.setBounds(0, 0, worldWidth, GAME_DESIGN_HEIGHT);
     this.cameras.main.startFollow(this.player, true, 0.08, 0.08);
     this.cameras.main.setFollowOffset(0, 100); 
 
@@ -139,7 +156,7 @@ export class OverworldScene extends Phaser.Scene {
     mobileTouch.interactTap = false;
 
     const isSprinting = this.cursors.shift.isDown;
-    const speed = isSprinting ? 600 : 300;
+    const speed = isSprinting ? OVERWORLD_SPRINT_SPEED : OVERWORLD_WALK_SPEED;
     let isMoving = false;
 
     const left =
@@ -169,13 +186,13 @@ export class OverworldScene extends Phaser.Scene {
       (this.cursors.up.isDown || jumpFromTouch) &&
       this.player.body.touching.down
     ) {
-      this.player.setVelocityY(-500);
+      this.player.setVelocityY(OVERWORLD_JUMP_VELOCITY_Y);
     }
 
     // Atmospheric ink particles
     if (Phaser.Math.Between(0, 100) > 95) {
       const px = this.cameras.main.scrollX + 1100;
-      const py = Phaser.Math.Between(0, 600);
+      const py = Phaser.Math.Between(0, OVERWORLD_PARTICLE_MAX_Y);
       const p = this.add.circle(px, py, Phaser.Math.Between(1, 3), 0x1a1a1a, 0.2);
       this.tweens.add({
         targets: p,
@@ -193,9 +210,9 @@ export class OverworldScene extends Phaser.Scene {
     const bldgs = this.buildings.getChildren() as Phaser.GameObjects.Sprite[];
     for (const bldg of bldgs) {
       const dist = Math.abs(this.player.x - bldg.x);
-      if (dist < 80 && this.player.y > 400) {
+      if (dist < OVERWORLD_INTERACT_DISTANCE_X && this.player.y > OVERWORLD_INTERACT_MIN_PLAYER_Y) {
         canInteractWith = bldg.getData('name');
-        interactPos = { x: bldg.x, y: bldg.y + 40 };
+        interactPos = { x: bldg.x, y: bldg.y + OVERWORLD_INTERACT_PROMPT_OFFSET_Y };
         break;
       }
     }

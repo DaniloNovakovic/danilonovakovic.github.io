@@ -1,15 +1,18 @@
-import ProfileOverlay from '../components/ProfileOverlay';
-import ExperienceOverlay from '../components/ExperienceOverlay';
-import ProjectsOverlay from '../components/ProjectsOverlay';
-import AbilitiesOverlay from '../components/AbilitiesOverlay';
-import ContactOverlay from '../components/ContactOverlay';
+import { lazy } from 'react';
 import { HobbiesScene } from '../game/HobbiesScene';
-import CodingMini from '../components/CodingMini';
-import DrawingCanvas from '../components/DrawingCanvas';
-import GuitarStrings from '../components/GuitarStrings';
-import MuayThaiMini from '../components/MuayThaiMini';
 import type { FeaturePluginDefinition } from './portfolioCompose';
 import { MiniGameType } from '../game/types';
+
+const ProfileOverlay = lazy(() => import('../components/ProfileOverlay'));
+const ExperienceOverlay = lazy(() => import('../components/ExperienceOverlay'));
+const ProjectsOverlay = lazy(() => import('../components/ProjectsOverlay'));
+const AbilitiesOverlay = lazy(() => import('../components/AbilitiesOverlay'));
+const ContactOverlay = lazy(() => import('../components/ContactOverlay'));
+const CodingMini = lazy(() => import('../components/CodingMini'));
+const DrawingCanvas = lazy(() => import('../components/DrawingCanvas'));
+const GuitarStrings = lazy(() => import('../components/GuitarStrings'));
+const MuayThaiMini = lazy(() => import('../components/MuayThaiMini'));
+const DancingMini = lazy(() => import('../components/DancingMini'));
 
 export const FEATURE_PLUGIN_DEFINITIONS: FeaturePluginDefinition[] = [
   {
@@ -83,6 +86,14 @@ export const FEATURE_PLUGIN_DEFINITIONS: FeaturePluginDefinition[] = [
     name: 'Muay Thai & Fitness',
     description: 'Keeping active with Muay Thai and exercise.',
     Component: MuayThaiMini,
+    type: MiniGameType.REACT_OVERLAY,
+    overlayParentId: 'hobbies'
+  },
+  {
+    id: 'dancing',
+    name: 'Dance & rhythm',
+    description: 'Repeat the moves, feel the beat—coordination as a mini-game.',
+    Component: DancingMini,
     type: MiniGameType.REACT_OVERLAY,
     overlayParentId: 'hobbies'
   }

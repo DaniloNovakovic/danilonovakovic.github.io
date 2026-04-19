@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import * as Phaser from 'phaser';
 import { PHASER_SCENE_KEYS } from '../config/featureIds';
 import { getGameConfig } from '../game/config';
@@ -98,27 +98,38 @@ function MobileGameControls({ visible }: { visible: boolean }) {
 export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }: GameProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
+  const bridgeRef = useRef({ onInteract, onClose, isPaused });
+
+  useLayoutEffect(() => {
+    bridgeRef.current = { onInteract, onClose, isPaused };
+  }, [onInteract, onClose, isPaused]);
+
+  const stableOnInteract = useCallback((area: string) => {
+    bridgeRef.current.onInteract(area);
+  }, []);
+
+  const stableOnClose = useCallback(() => {
+    bridgeRef.current.onClose();
+  }, []);
 
   useEffect(() => {
     resetMobileTouch();
   }, [activeMiniGameId]);
 
-  // Update interaction callback when it changes
+  // Keep Phaser scenes wired to latest callbacks without re-mounting the game.
   useEffect(() => {
-    if (gameRef.current) {
-      const mainScene = gameRef.current.scene.getScene(PHASER_SCENE_KEYS.main) as OverworldScene | null;
-      if (mainScene) {
-        mainScene.updateInteractCallback(onInteract);
-      }
-
-      const hobbiesScene = gameRef.current.scene.getScene(PHASER_SCENE_KEYS.hobbies);
-      if (isInteractBridgeScene(hobbiesScene)) {
-        hobbiesScene.updateInteractCallback(onInteract);
-      }
+    if (!gameRef.current) return;
+    const mainScene = gameRef.current.scene.getScene(PHASER_SCENE_KEYS.main) as OverworldScene | null;
+    if (mainScene) {
+      mainScene.updateInteractCallback(stableOnInteract);
     }
-  }, [onInteract]);
 
-  // Handle pause state changes
+    const hobbiesScene = gameRef.current.scene.getScene(PHASER_SCENE_KEYS.hobbies);
+    if (isInteractBridgeScene(hobbiesScene)) {
+      hobbiesScene.updateInteractCallback(stableOnInteract);
+    }
+  }, [stableOnInteract]);
+
   useEffect(() => {
     if (gameRef.current) {
       const scenes = gameRef.current.scene.getScenes(true);
@@ -130,42 +141,45 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
     }
   }, [isPaused]);
 
-  // Handle dynamic scene switching
   useEffect(() => {
     if (gameRef.current && activeMiniGameId) {
       const activeMiniGame = getMiniGameById(activeMiniGameId);
       if (activeMiniGame?.type === MiniGameType.PHASER_SCENE) {
         const sceneKey = activeMiniGame.id;
-        
+
         if (!gameRef.current.scene.isActive(sceneKey)) {
           gameRef.current.scene.stop(PHASER_SCENE_KEYS.main);
-          gameRef.current.scene.start(sceneKey, { onClose, onInteract, isPaused });
+          gameRef.current.scene.start(sceneKey, {
+            onClose: stableOnClose,
+            onInteract: stableOnInteract,
+            isPaused
+          });
         }
       }
     } else if (gameRef.current && !activeMiniGameId) {
-      // Stop all minigame scenes and restart Overworld
       const scenes = gameRef.current.scene.getScenes(false);
       let resetNeeded = false;
-      scenes.forEach(s => {
+      scenes.forEach((s) => {
         if (s.scene.key !== PHASER_SCENE_KEYS.main && gameRef.current?.scene.isActive(s.scene.key)) {
           gameRef.current?.scene.stop(s.scene.key);
           resetNeeded = true;
         }
       });
-      
-      // Only start MainScene if it's not already active or if we just stopped another scene
+
       if (resetNeeded || !gameRef.current.scene.isActive(PHASER_SCENE_KEYS.main)) {
-        gameRef.current.scene.start(PHASER_SCENE_KEYS.main, { onInteract, isPaused });
+        gameRef.current.scene.start(PHASER_SCENE_KEYS.main, {
+          onInteract: stableOnInteract,
+          isPaused
+        });
       }
     }
-  }, [activeMiniGameId, onInteract, isPaused, onClose]);
+  }, [activeMiniGameId, stableOnInteract, stableOnClose, isPaused]);
 
-  // Initialize Phaser game
   useEffect(() => {
     if (!containerRef.current || gameRef.current) return;
 
     const config = getGameConfig(containerRef.current);
-    
+
     const game = new Phaser.Game(config);
     gameRef.current = game;
 
@@ -183,12 +197,13 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
       });
     }
 
-    // Add the main scene
-    game.scene.add(PHASER_SCENE_KEYS.main, OverworldScene, true, { onInteract, isPaused });
+    game.scene.add(PHASER_SCENE_KEYS.main, OverworldScene, true, {
+      onInteract: stableOnInteract,
+      isPaused: bridgeRef.current.isPaused
+    });
 
-    // Pre-add all Phaser-based scenes from the registry
-    const phaserScenes = getAllMiniGames().filter(g => g.type === MiniGameType.PHASER_SCENE && g.Scene);
-    phaserScenes.forEach(s => {
+    const phaserScenes = getAllMiniGames().filter((g) => g.type === MiniGameType.PHASER_SCENE && g.Scene);
+    phaserScenes.forEach((s) => {
       if (s.Scene) {
         game.scene.add(s.id, s.Scene, false);
       }
@@ -199,9 +214,7 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
       game.destroy(true);
       gameRef.current = null;
     };
-    // Phaser Game mounts once; callbacks are refreshed by the other effects above.
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional single mount
-  }, []);
+  }, [stableOnInteract]);
 
   return (
     <div className="relative h-full w-full min-h-0 overflow-hidden rounded-lg border-4 border-neutral-800 bg-[#fbfbf9] shadow-[8px_8px_0px_0px_rgba(26,26,26,1)]">

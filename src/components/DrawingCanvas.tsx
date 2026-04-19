@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useLayoutEffect } from 'react';
 import { Trash2 } from 'lucide-react';
 import { TEXTS } from '../config/content';
 
@@ -6,22 +6,30 @@ export default function DrawingCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [context, setContext] = useState<CanvasRenderingContext2D | null>(null);
-  
-  // Phase 4: Virtual Cursor State
+
+  const cursorRef = useRef({ x: 0, y: 0 });
+  const isKeyboardDrawingRef = useRef(false);
+
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
   const [isKeyboardDrawing, setIsKeyboardDrawing] = useState(false);
   const [isUsingKeyboard, setIsUsingKeyboard] = useState(false);
 
+  useLayoutEffect(() => {
+    cursorRef.current = cursorPos;
+  }, [cursorPos]);
+  useLayoutEffect(() => {
+    isKeyboardDrawingRef.current = isKeyboardDrawing;
+  }, [isKeyboardDrawing]);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (canvas) {
-      // Fix DPI blurriness
       const dpr = window.devicePixelRatio || 1;
       const rect = canvas.getBoundingClientRect();
-      
+
       canvas.width = rect.width * dpr;
       canvas.height = rect.height * dpr;
-      
+
       const ctx = canvas.getContext('2d');
       if (ctx) {
         ctx.scale(dpr, dpr);
@@ -30,65 +38,79 @@ export default function DrawingCanvas() {
         ctx.strokeStyle = '#1a1a1a';
         ctx.lineWidth = 4;
         setContext(ctx);
-        
-        // Init virtual cursor
-        setCursorPos({ x: rect.width / 2, y: rect.height / 2 });
+
+        const cx = rect.width / 2;
+        const cy = rect.height / 2;
+        cursorRef.current = { x: cx, y: cy };
+        setCursorPos({ x: cx, y: cy });
       }
     }
   }, []);
 
-  // Phase 4: Keyboard Drawing Logic
   useEffect(() => {
+    if (!context || !canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const ctx = context;
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!context || !canvasRef.current) return;
-      
       const step = e.shiftKey ? 10 : 5;
-      let newX = cursorPos.x;
-      let newY = cursorPos.y;
+      const pos = cursorRef.current;
+      let newX = pos.x;
+      let newY = pos.y;
       let moved = false;
+      const dpr = window.devicePixelRatio || 1;
+      const maxX = canvas.width / dpr;
+      const maxY = canvas.height / dpr;
 
       switch (e.key) {
         case 'ArrowUp':
-          newY = Math.max(0, cursorPos.y - step);
+          newY = Math.max(0, pos.y - step);
           moved = true;
           break;
         case 'ArrowDown':
-          newY = Math.min(canvasRef.current.height / (window.devicePixelRatio || 1), cursorPos.y + step);
+          newY = Math.min(maxY, pos.y + step);
           moved = true;
           break;
         case 'ArrowLeft':
-          newX = Math.max(0, cursorPos.x - step);
+          newX = Math.max(0, pos.x - step);
           moved = true;
           break;
         case 'ArrowRight':
-          newX = Math.min(canvasRef.current.width / (window.devicePixelRatio || 1), cursorPos.x + step);
+          newX = Math.min(maxX, pos.x + step);
           moved = true;
           break;
         case ' ':
           e.preventDefault();
-          setIsKeyboardDrawing(!isKeyboardDrawing);
-          if (!isKeyboardDrawing) {
-            context.beginPath();
-            context.moveTo(cursorPos.x, cursorPos.y);
-          } else {
-            context.closePath();
+          {
+            const drawing = isKeyboardDrawingRef.current;
+            isKeyboardDrawingRef.current = !drawing;
+            setIsKeyboardDrawing(!drawing);
+            if (!drawing) {
+              ctx.beginPath();
+              ctx.moveTo(pos.x, pos.y);
+            } else {
+              ctx.closePath();
+            }
           }
           return;
+        default:
+          break;
       }
 
       if (moved) {
         setIsUsingKeyboard(true);
-        if (isKeyboardDrawing) {
-          context.lineTo(newX, newY);
-          context.stroke();
+        if (isKeyboardDrawingRef.current) {
+          ctx.lineTo(newX, newY);
+          ctx.stroke();
         }
+        cursorRef.current = { x: newX, y: newY };
         setCursorPos({ x: newX, y: newY });
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [cursorPos, isKeyboardDrawing, context]);
+  }, [context]);
 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (!context) return;
@@ -103,6 +125,7 @@ export default function DrawingCanvas() {
     context.beginPath();
     context.moveTo(offsetX, offsetY);
     setIsDrawing(true);
+    cursorRef.current = { x: offsetX, y: offsetY };
     setCursorPos({ x: offsetX, y: offsetY });
   };
 
@@ -116,6 +139,7 @@ export default function DrawingCanvas() {
     const { offsetX, offsetY } = getCoordinates(e);
     context.lineTo(offsetX, offsetY);
     context.stroke();
+    cursorRef.current = { x: offsetX, y: offsetY };
     setCursorPos({ x: offsetX, y: offsetY });
   };
 

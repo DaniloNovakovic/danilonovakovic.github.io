@@ -11,13 +11,14 @@ export const MINI_GAME_IDS = [
   'games',
   'art',
   'music',
-  'fitness'
+  'fitness',
+  'dancing'
 ] as const;
 
 export type MiniGameId = (typeof MINI_GAME_IDS)[number];
 
 /** React hobby overlays opened from inside the Hobbies Phaser room. */
-export const HOBBY_REACT_OVERLAY_IDS = ['games', 'art', 'music', 'fitness'] as const;
+export const HOBBY_REACT_OVERLAY_IDS = ['games', 'art', 'music', 'fitness', 'dancing'] as const;
 
 export type HobbyReactOverlayId = (typeof HOBBY_REACT_OVERLAY_IDS)[number];
 

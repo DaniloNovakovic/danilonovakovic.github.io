@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect, useCallback, useLayoutEffect } from 'react';
 import { TEXTS } from '../config/content';
 
 const ARROWS = ['UP', 'RIGHT', 'DOWN', 'LEFT'] as const;
@@ -37,7 +37,75 @@ export default function DancingMini() {
   const [activeArrow, setActiveArrow] = useState<string | null>(null);
   const [message, setMessage] = useState(TEXTS.miniGames.dancing.startMessage);
 
+  const sequenceRef = useRef<string[]>([]);
+  const playerSeqRef = useRef<string[]>([]);
+  const isPlayingRef = useRef(false);
+  const messageRef = useRef(message);
+
+  useLayoutEffect(() => {
+    sequenceRef.current = sequence;
+  }, [sequence]);
+  useLayoutEffect(() => {
+    playerSeqRef.current = playerSeq;
+  }, [playerSeq]);
+  useLayoutEffect(() => {
+    isPlayingRef.current = isPlaying;
+  }, [isPlaying]);
+  useLayoutEffect(() => {
+    messageRef.current = message;
+  }, [message]);
+
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  const clearTimers = useCallback(() => {
+    if (intervalRef.current != null) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    timeoutsRef.current.forEach(clearTimeout);
+    timeoutsRef.current = [];
+  }, []);
+
+  useEffect(() => () => clearTimers(), [clearTimers]);
+
+  const playSequence = useCallback(
+    (seq: string[]) => {
+      clearTimers();
+      let i = 0;
+      setMessage(TEXTS.miniGames.dancing.watchMessage);
+      intervalRef.current = setInterval(() => {
+        const idx = i;
+        setActiveArrow(seq[idx] ?? null);
+        const t1 = setTimeout(() => setActiveArrow(null), 400);
+        timeoutsRef.current.push(t1);
+        i++;
+        if (i >= seq.length) {
+          if (intervalRef.current != null) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+          }
+          const t2 = setTimeout(() => setMessage(TEXTS.miniGames.dancing.turnMessage), 500);
+          timeoutsRef.current.push(t2);
+        }
+      }, 800);
+    },
+    [clearTimers]
+  );
+
+  const nextRound = useCallback(
+    (currentSeq: string[]) => {
+      const nextArrow = pickRandomArrow();
+      const newSeq = [...currentSeq, nextArrow];
+      setSequence(newSeq);
+      setPlayerSeq([]);
+      playSequence(newSeq);
+    },
+    [playSequence]
+  );
+
   const startGame = () => {
+    clearTimers();
     setSequence([]);
     setPlayerSeq([]);
     setIsPlaying(true);
@@ -45,53 +113,33 @@ export default function DancingMini() {
     nextRound([]);
   };
 
-  const nextRound = (currentSeq: string[]) => {
-    const nextArrow = pickRandomArrow();
-    const newSeq = [...currentSeq, nextArrow];
-    setSequence(newSeq);
-    setPlayerSeq([]);
-    playSequence(newSeq);
-  };
-
-  const playSequence = (seq: string[]) => {
-    let i = 0;
-    setMessage(TEXTS.miniGames.dancing.watchMessage);
-    const interval = setInterval(() => {
-      setActiveArrow(seq[i]);
-      setTimeout(() => setActiveArrow(null), 400);
-      i++;
-      if (i >= seq.length) {
-        clearInterval(interval);
-        setTimeout(() => setMessage(TEXTS.miniGames.dancing.turnMessage), 500);
-      }
-    }, 800);
-  };
-
   const handleArrowClick = (arrow: string) => {
-    if (!isPlaying || message === TEXTS.miniGames.dancing.watchMessage) return;
+    if (!isPlayingRef.current || messageRef.current === TEXTS.miniGames.dancing.watchMessage) return;
 
     setActiveArrow(arrow);
-    setTimeout(() => setActiveArrow(null), 200);
+    const tFlash = setTimeout(() => setActiveArrow(null), 200);
+    timeoutsRef.current.push(tFlash);
 
-    const newPlayerSeq = [...playerSeq, arrow];
+    const seq = sequenceRef.current;
+    const newPlayerSeq = [...playerSeqRef.current, arrow];
     setPlayerSeq(newPlayerSeq);
 
-    // Check if correct so far
-    const isCorrect = newPlayerSeq.every((val, index) => val === sequence[index]);
+    const isCorrect = newPlayerSeq.every((val, index) => val === seq[index]);
 
     if (!isCorrect) {
-      setMessage(`${TEXTS.common.gameOver} ${TEXTS.common.score} ${sequence.length - 1}`);
+      clearTimers();
+      setMessage(`${TEXTS.common.gameOver} ${TEXTS.common.score} ${seq.length - 1}`);
       setIsPlaying(false);
-    } else if (newPlayerSeq.length === sequence.length) {
+    } else if (newPlayerSeq.length === seq.length) {
       setMessage(TEXTS.miniGames.dancing.successMessage);
-      setTimeout(() => nextRound(sequence), 1000);
+      const tNext = setTimeout(() => nextRound(seq), 1000);
+      timeoutsRef.current.push(tNext);
     }
   };
 
   return (
     <div className="w-full flex flex-col items-center">
       <div className="w-full h-[250px] border-4 border-[#1a1a1a] shadow-[6px_6px_0px_0px_rgba(26,26,26,1)] bg-[#fbfbf9] flex flex-col items-center justify-center relative">
-        
         <div className="absolute top-4 font-bold text-lg">{message}</div>
 
         <div className="grid grid-cols-3 gap-2 mt-8">
@@ -104,11 +152,14 @@ export default function DancingMini() {
         </div>
 
         {!isPlaying && (
-          <button onClick={startGame} className="absolute bottom-4 px-4 py-1 border-2 border-[#1a1a1a] font-bold hover:bg-[#e8e5df]">
+          <button
+            type="button"
+            onClick={startGame}
+            className="absolute bottom-4 px-4 py-1 border-2 border-[#1a1a1a] font-bold hover:bg-[#e8e5df]"
+          >
             {sequence.length > 0 ? TEXTS.common.restart : TEXTS.common.start}
           </button>
         )}
-
       </div>
       <div className="mt-4 text-sm font-bold text-[#1a1a1a] opacity-60">
         {TEXTS.miniGames.dancing.instruction}
@@ -116,4 +167,3 @@ export default function DancingMini() {
     </div>
   );
 }
-

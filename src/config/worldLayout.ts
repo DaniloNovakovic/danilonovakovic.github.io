@@ -1,7 +1,8 @@
 import type { MiniGameId } from './featureIds';
 
 /**
- * Overworld building X positions (3000px-wide street). Decoupled from UI copy and component bindings.
+ * Overworld building X positions (street width `OVERWORLD_WIDTH` in `src/game/config.ts`).
+ * Decoupled from UI copy and component bindings.
  */
 export const OVERWORLD_BUILDING_PLACEMENTS: ReadonlyArray<{ id: MiniGameId; x: number }> = [
   { id: 'profile', x: 400 },
