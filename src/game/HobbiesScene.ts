@@ -11,6 +11,7 @@ import {
   HOBBIES_FLOOR_Y,
   HOBBIES_GROUND_ZONE,
   HOBBIES_INTERACT_RADIUS,
+  HOBBIES_RESUME_CLAMP,
   HOBBIES_ROOM_HEIGHT,
   HOBBIES_ROOM_WIDTH,
   HOBBIES_WALK_SPEED,
@@ -32,15 +33,27 @@ export class HobbiesScene extends Phaser.Scene {
   private onClose?: () => void;
   private onInteract?: (id: string) => void;
   private isPaused: boolean = false;
+  private resumePosition?: { x: number; y: number };
 
   constructor() {
     super({ key: 'hobbies' });
   }
 
-  init(data: { onClose: () => void; onInteract: (id: string) => void; isPaused?: boolean }) {
+  init(data: {
+    onClose: () => void;
+    onInteract: (id: string) => void;
+    isPaused?: boolean;
+    resumePosition?: { x: number; y: number };
+  }) {
     this.onClose = data.onClose;
     this.onInteract = data.onInteract;
     this.isPaused = data.isPaused ?? false;
+    this.resumePosition = data.resumePosition;
+  }
+
+  getResumeCapturePosition(): { x: number; y: number } | null {
+    if (!this.player?.body) return null;
+    return { x: this.player.x, y: this.player.y };
   }
 
   updateInteractCallback(callback: (id: string) => void) {
@@ -164,11 +177,14 @@ export class HobbiesScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
-    this.player = this.physics.add.sprite(
-      width / 2,
-      floorY - HOBBIES_PLAYER_START_OFFSET_Y,
-      'player_idle'
-    );
+    const defaultPlayerX = width / 2;
+    const defaultPlayerY = floorY - HOBBIES_PLAYER_START_OFFSET_Y;
+    const rawX = this.resumePosition?.x ?? defaultPlayerX;
+    const rawY = this.resumePosition?.y ?? defaultPlayerY;
+    const playerX = Phaser.Math.Clamp(rawX, HOBBIES_RESUME_CLAMP.minX, HOBBIES_RESUME_CLAMP.maxX);
+    const playerY = Phaser.Math.Clamp(rawY, HOBBIES_RESUME_CLAMP.minY, HOBBIES_RESUME_CLAMP.maxY);
+
+    this.player = this.physics.add.sprite(playerX, playerY, 'player_idle');
     this.player.setCollideWorldBounds(true);
     this.player.setGravityY(1000);
 

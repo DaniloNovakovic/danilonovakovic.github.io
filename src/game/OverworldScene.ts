@@ -14,7 +14,9 @@ import {
   OVERWORLD_JUMP_VELOCITY_Y,
   OVERWORLD_PARTICLE_MAX_Y,
   OVERWORLD_PLAYER_GRAVITY_Y,
+  OVERWORLD_PLAYER_RESUME_Y_CLAMP,
   OVERWORLD_PLAYER_START,
+  OVERWORLD_PLAYER_SPAWN_MARGIN_X,
   OVERWORLD_SPRINT_SPEED,
   OVERWORLD_WALK_SPEED,
   OVERWORLD_WIDTH
@@ -31,14 +33,26 @@ export class OverworldScene extends Phaser.Scene {
   
   private onInteract?: (area: string) => void;
   private isPaused: boolean = false;
+  /** Optional spawn when (re)starting after leaving another Phaser scene. */
+  private resumePosition?: { x: number; y: number };
 
   constructor() {
     super({ key: 'MainScene' });
   }
 
-  init(data: { onInteract: (area: string) => void, isPaused: boolean }) {
+  init(data: {
+    onInteract: (area: string) => void;
+    isPaused: boolean;
+    resumePosition?: { x: number; y: number };
+  }) {
     this.onInteract = data.onInteract;
     this.isPaused = data.isPaused;
+    this.resumePosition = data.resumePosition;
+  }
+
+  getResumeCapturePosition(): { x: number; y: number } | null {
+    if (!this.player?.body) return null;
+    return { x: this.player.x, y: this.player.y };
   }
 
   updateInteractCallback(callback: (area: string) => void) {
@@ -98,11 +112,21 @@ export class OverworldScene extends Phaser.Scene {
     });
 
     // --- PLAYER ---
-    this.player = this.physics.add.sprite(
-      OVERWORLD_PLAYER_START.x,
-      OVERWORLD_PLAYER_START.y,
-      'player_idle'
-    );
+    const startX = this.resumePosition
+      ? Phaser.Math.Clamp(
+          this.resumePosition.x,
+          OVERWORLD_PLAYER_SPAWN_MARGIN_X,
+          OVERWORLD_WIDTH - OVERWORLD_PLAYER_SPAWN_MARGIN_X
+        )
+      : OVERWORLD_PLAYER_START.x;
+    const startY = this.resumePosition
+      ? Phaser.Math.Clamp(
+          this.resumePosition.y,
+          OVERWORLD_PLAYER_RESUME_Y_CLAMP.min,
+          OVERWORLD_PLAYER_RESUME_Y_CLAMP.max
+        )
+      : OVERWORLD_PLAYER_START.y;
+    this.player = this.physics.add.sprite(startX, startY, 'player_idle');
     this.player.setCollideWorldBounds(true);
     this.player.setGravityY(OVERWORLD_PLAYER_GRAVITY_Y);
     this.physics.add.collider(this.player, groundZone);

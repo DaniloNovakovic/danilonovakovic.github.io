@@ -9,6 +9,10 @@ export const OVERWORLD_WIDTH = 3000;
 
 /** Player spawn and physics tuning — overworld. */
 export const OVERWORLD_PLAYER_START = { x: 100, y: 400 } as const;
+/** Keep spawned player inside world bounds (half-ish sprite width). */
+export const OVERWORLD_PLAYER_SPAWN_MARGIN_X = 48;
+/** Vertical clamp when restoring overworld position (walkable band). */
+export const OVERWORLD_PLAYER_RESUME_Y_CLAMP = { min: 300, max: 550 } as const;
 export const OVERWORLD_PLAYER_GRAVITY_Y = 800;
 export const OVERWORLD_JUMP_VELOCITY_Y = -500;
 export const OVERWORLD_WALK_SPEED = 300;
@@ -29,6 +33,13 @@ export const HOBBIES_ROOM_WIDTH = GAME_DESIGN_WIDTH;
 export const HOBBIES_ROOM_HEIGHT = GAME_DESIGN_HEIGHT;
 export const HOBBIES_FLOOR_Y = 500;
 export const HOBBIES_PLAYER_START_OFFSET_Y = 50;
+/** Clamp restored player position inside the hobbies room (logical px). */
+export const HOBBIES_RESUME_CLAMP = {
+  minX: 40,
+  maxX: HOBBIES_ROOM_WIDTH - 40,
+  minY: 120,
+  maxY: HOBBIES_FLOOR_Y - 20
+} as const;
 export const HOBBIES_WALK_SPEED = 300;
 /** Proximity radius for hobby stations / exit (Phaser distance check). */
 export const HOBBIES_INTERACT_RADIUS = 60;

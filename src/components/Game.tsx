@@ -5,8 +5,20 @@ import { getGameConfig } from '../game/config';
 import { mobileTouch, resetMobileTouch } from '../game/mobileTouchBridge';
 import { OverworldScene } from '../game/OverworldScene';
 import { getAllMiniGames, getMiniGameById } from '../game/miniGameRegistry';
-import { isInteractBridgeScene, isPausableScene } from '../game/sceneContracts';
+import {
+  isInteractBridgeScene,
+  isPausableScene,
+  isResumeCaptureScene
+} from '../game/sceneContracts';
+import { rememberResumePosition, peekResumePosition } from '../game/sceneResumeStore';
 import { MiniGameType } from '../game/types';
+
+function rememberSceneExitIfSupported(scene: Phaser.Scene): void {
+  if (isResumeCaptureScene(scene)) {
+    const p = scene.getResumeCapturePosition();
+    if (p) rememberResumePosition(scene.scene.key, p);
+  }
+}
 
 interface GameProps {
   onInteract: (area: string) => void;
@@ -148,28 +160,38 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
         const sceneKey = activeMiniGame.id;
 
         if (!gameRef.current.scene.isActive(sceneKey)) {
+          const mainScene = gameRef.current.scene.getScene(PHASER_SCENE_KEYS.main);
+          if (mainScene && gameRef.current.scene.isActive(PHASER_SCENE_KEYS.main)) {
+            rememberSceneExitIfSupported(mainScene);
+          }
           gameRef.current.scene.stop(PHASER_SCENE_KEYS.main);
+          const resumeInterior = peekResumePosition(sceneKey);
           gameRef.current.scene.start(sceneKey, {
             onClose: stableOnClose,
             onInteract: stableOnInteract,
-            isPaused
+            isPaused,
+            ...(resumeInterior ? { resumePosition: resumeInterior } : {})
           });
         }
       }
     } else if (gameRef.current && !activeMiniGameId) {
       const scenes = gameRef.current.scene.getScenes(false);
       let resetNeeded = false;
-      scenes.forEach((s) => {
-        if (s.scene.key !== PHASER_SCENE_KEYS.main && gameRef.current?.scene.isActive(s.scene.key)) {
-          gameRef.current?.scene.stop(s.scene.key);
+      for (const s of scenes) {
+        if (s.scene.key === PHASER_SCENE_KEYS.main) continue;
+        if (gameRef.current.scene.isActive(s.scene.key)) {
+          rememberSceneExitIfSupported(s);
+          gameRef.current.scene.stop(s.scene.key);
           resetNeeded = true;
         }
-      });
+      }
 
       if (resetNeeded || !gameRef.current.scene.isActive(PHASER_SCENE_KEYS.main)) {
+        const resumeMain = peekResumePosition(PHASER_SCENE_KEYS.main);
         gameRef.current.scene.start(PHASER_SCENE_KEYS.main, {
           onInteract: stableOnInteract,
-          isPaused
+          isPaused,
+          ...(resumeMain ? { resumePosition: resumeMain } : {})
         });
       }
     }
@@ -199,7 +221,8 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
 
     game.scene.add(PHASER_SCENE_KEYS.main, OverworldScene, true, {
       onInteract: stableOnInteract,
-      isPaused: bridgeRef.current.isPaused
+      isPaused: bridgeRef.current.isPaused,
+      resumePosition: peekResumePosition(PHASER_SCENE_KEYS.main)
     });
 
     const phaserScenes = getAllMiniGames().filter((g) => g.type === MiniGameType.PHASER_SCENE && g.Scene);

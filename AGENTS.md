@@ -25,6 +25,7 @@ This is a hybrid application:
 1. **Phaser World:** A 2D side-scrolling world (3000px wide street) where the player walks and jumps.
 2. **React Overlays:** When the player interacts with a building (presses `E`), a React modal pops up. The mini-games themselves are mostly implemented as React components inside these modals.
 3. **Communication:** React passes an `isPaused` prop to Phaser. When `isPaused` is true, gameplay scenes call `setPaused(true)`, which sets `scene.input.keyboard.enabled = false`, stops movement, and (in **HobbiesScene**) pauses the arcade physics world so keys do not leak into the game while the user types in React inputs. When unpausing, scenes re-enable the keyboard plugin and call `addCapture` with the gameplay keycodes (see `GAMEPLAY_KEYBOARD_CAPTURES` in `src/game/config.ts` and `setSceneKeyboardPaused` in `src/game/sceneKeyboardPause.ts`).
+4. **Phaser scene resume:** When switching between Phaser scenes (e.g. overworld ↔ hobbies), `Game.tsx` saves the player position per `scene.scene.key` via `src/game/sceneResumeStore.ts` and passes `resumePosition` on the next start so you return where you left off. New interior scenes should use the same pattern: implement `getResumeCapturePosition()` (see `ResumeCaptureScene` in `src/game/sceneContracts.ts`) and register the scene with the same key as its `MiniGameId` / `scene.start` key.
 
 ## 📱 Mobile / small screens
 

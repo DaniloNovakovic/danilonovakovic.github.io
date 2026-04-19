@@ -1,4 +1,5 @@
 import type { Scene } from 'phaser';
+import type { SceneResumePosition } from './sceneResumeStore';
 
 /**
  * Scenes that support React-modal pause (keyboard release + movement stop).
@@ -22,4 +23,13 @@ export function isInteractBridgeScene(scene: Scene): scene is InteractBridgeScen
     isPausableScene(scene) &&
     typeof (scene as InteractBridgeScene).updateInteractCallback === 'function'
   );
+}
+
+/** Scenes that can report a player position when switching away (resume / restore). */
+export interface ResumeCaptureScene extends Scene {
+  getResumeCapturePosition(): SceneResumePosition | null;
+}
+
+export function isResumeCaptureScene(scene: Scene): scene is ResumeCaptureScene {
+  return typeof (scene as ResumeCaptureScene).getResumeCapturePosition === 'function';
 }
