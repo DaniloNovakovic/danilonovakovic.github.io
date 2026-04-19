@@ -57,7 +57,7 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
         
         if (!gameRef.current.scene.isActive(sceneKey)) {
           gameRef.current.scene.stop('MainScene');
-          gameRef.current.scene.start(sceneKey, { onClose, onInteract });
+          gameRef.current.scene.start(sceneKey, { onClose, onInteract, isPaused });
         }
       }
     } else if (gameRef.current && !activeMiniGameId) {

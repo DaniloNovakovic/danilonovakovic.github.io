@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Game from './components/Game';
 import { X } from 'lucide-react';
 import { GameState, type AppState } from './game/gameState';
@@ -33,6 +33,20 @@ function App() {
       });
     }
   };
+
+  // Global Escape handler for React Overlays
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && state.status === GameState.IN_MINIGAME) {
+        const activeGame = getMiniGameById(state.activeMiniGameId!);
+        if (activeGame?.type === MiniGameType.REACT_OVERLAY) {
+          closeOverlay();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [state.status, state.activeMiniGameId]);
 
   const activeMiniGame = state.activeMiniGameId ? getMiniGameById(state.activeMiniGameId) : undefined;
   const isPaused = state.status === GameState.IN_MINIGAME && activeMiniGame?.type === MiniGameType.REACT_OVERLAY;

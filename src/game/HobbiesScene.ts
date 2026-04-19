@@ -10,14 +10,16 @@ export class HobbiesScene extends Phaser.Scene {
   
   private onClose?: () => void;
   private onInteract?: (id: string) => void;
+  private isPaused: boolean = false;
 
   constructor() {
     super({ key: 'hobbies' });
   }
 
-  init(data: { onClose: () => void, onInteract: (id: string) => void }) {
+  init(data: { onClose: () => void, onInteract: (id: string) => void, isPaused?: boolean }) {
     this.onClose = data.onClose;
     this.onInteract = data.onInteract;
+    this.isPaused = data.isPaused ?? false;
   }
 
   updateInteractCallback(callback: (id: string) => void) {
@@ -25,8 +27,12 @@ export class HobbiesScene extends Phaser.Scene {
   }
 
   setPaused(paused: boolean) {
+    this.isPaused = paused;
     if (paused) {
       this.physics.world.pause();
+      if (this.player && this.player.body) {
+        this.player.setVelocityX(0);
+      }
     } else {
       this.physics.world.resume();
     }
@@ -130,8 +136,12 @@ export class HobbiesScene extends Phaser.Scene {
       };
       this.interactKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
 
-      this.input.keyboard.on('keydown-H', () => this.onClose?.());
-      this.input.keyboard.on('keydown-ESC', () => this.onClose?.());
+      this.input.keyboard.on('keydown-H', () => {
+        if (!this.isPaused) this.onClose?.();
+      });
+      this.input.keyboard.on('keydown-ESC', () => {
+        if (!this.isPaused) this.onClose?.();
+      });
     }
 
     this.exitPrompt = this.add.text(500, floorY - 150, '[E] INTERACT', {
@@ -143,9 +153,21 @@ export class HobbiesScene extends Phaser.Scene {
     }).setOrigin(0.5).setVisible(false).setDepth(100);
     
     this.cameras.main.setBackgroundColor('#f4f1ea');
+
+    if (this.isPaused) {
+      this.setPaused(true);
+    }
   }
 
   update() {
+    if (this.isPaused) {
+      if (this.player && this.player.body) {
+        this.player.setVelocityX(0);
+      }
+      this.exitPrompt.setVisible(false);
+      return;
+    }
+
     const speed = 300;
 
     if (this.cursors.left.isDown || this.wasd.a.isDown) {

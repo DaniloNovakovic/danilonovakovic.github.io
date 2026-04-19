@@ -13,7 +13,7 @@ export interface MiniGamePlugin {
   name: string;
   description: string;
   type: MiniGameTypeValue;
-  x: number; // World position X
+  x?: number; // World position X
   Component?: ComponentType; // For React-based mini-games
   Scene?: typeof Phaser.Scene; // For Phaser-based mini-games
 }
