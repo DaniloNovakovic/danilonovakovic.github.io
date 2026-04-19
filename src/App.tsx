@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Game from './components/Game';
 import { X } from 'lucide-react';
 import { GameState, type AppState } from './game/gameState';
 import { getMiniGameById } from './game/miniGameRegistry';
 import { MiniGameType } from './game/types';
 import { TEXTS } from './config/content';
+import { isMiniGameId } from './config/featureIds';
 
 function App() {
   const [state, setState] = useState<AppState>({
@@ -14,27 +15,32 @@ function App() {
   const modalRef = useRef<HTMLDivElement>(null);
 
   const handleInteract = (area: string) => {
+    if (!isMiniGameId(area)) return;
     setState({
       status: GameState.IN_MINIGAME,
       activeMiniGameId: area
     });
   };
 
-  const closeOverlay = () => {
-    // If we are in a hobby sub-game, return to the hobbies room
-    const hobbyItems = ['games', 'art', 'music', 'fitness'];
-    if (state.activeMiniGameId && hobbyItems.includes(state.activeMiniGameId)) {
-      setState({
-        status: GameState.IN_MINIGAME,
-        activeMiniGameId: 'hobbies'
-      });
-    } else {
-      setState({
+  const closeOverlay = useCallback(() => {
+    setState((prev) => {
+      const currentId = prev.activeMiniGameId;
+      if (!currentId) {
+        return { status: GameState.EXPLORING, activeMiniGameId: null };
+      }
+      const active = getMiniGameById(currentId);
+      if (active?.overlayParentId) {
+        return {
+          status: GameState.IN_MINIGAME,
+          activeMiniGameId: active.overlayParentId
+        };
+      }
+      return {
         status: GameState.EXPLORING,
         activeMiniGameId: null
-      });
-    }
-  };
+      };
+    });
+  }, []);
 
   // Global Escape handler for React Overlays
   useEffect(() => {
@@ -48,7 +54,7 @@ function App() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [state.status, state.activeMiniGameId]);
+  }, [state.status, state.activeMiniGameId, closeOverlay]);
 
   // Phase 5: Auto-focus modal for keyboard scrollability
   useEffect(() => {

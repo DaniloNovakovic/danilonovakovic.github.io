@@ -1,4 +1,5 @@
 import * as Phaser from 'phaser';
+import type { HobbyReactOverlayId, MiniGameId } from '../../config/featureIds';
 
 export class TextureGenerator {
   static generatePlayer(scene: Phaser.Scene) {
@@ -40,7 +41,7 @@ export class TextureGenerator {
     pg.destroy();
   }
 
-  static generateBuilding(scene: Phaser.Scene, id: string) {
+  static generateBuilding(scene: Phaser.Scene, id: MiniGameId) {
     const bg = scene.make.graphics({ x: 0, y: 0 });
     const key = `building_${id}`;
     
@@ -113,7 +114,7 @@ export class TextureGenerator {
     bg.destroy();
   }
 
-  static generateHobbyItem(scene: Phaser.Scene, id: string) {
+  static generateHobbyItem(scene: Phaser.Scene, id: HobbyReactOverlayId) {
     const bg = scene.make.graphics({ x: 0, y: 0 });
     const key = `hobby_${id}`;
     const hLine = 0x1a1a1a;

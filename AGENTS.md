@@ -27,12 +27,12 @@ This is a hybrid application:
 - **Sprinting:** Hold `SHIFT` to move faster in the world.
 
 ## 🗺 Map Layout (Horizontal)
-Buildings are placed at 400px intervals along the 3000px street:
-- 400: Drawing
-- 800: Guitar
-- 1200: Games
-- 1600: Muay Thai
-- 2000: Dancing
-- 2400: Coding
+Overworld buildings are placed along the 3000px street (see `src/config/worldLayout.ts` / composed `PORTFOLIO_SECTIONS`):
+- **400:** Profile
+- **900:** Experiences
+- **1400:** Projects
+- **1900:** Abilities
+- **2400:** Hobbies (Phaser interior)
+- **2900:** Contact
 
 Please maintain the sketchy, handwritten feel for all new features!

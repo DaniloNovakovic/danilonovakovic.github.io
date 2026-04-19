@@ -1,6 +1,8 @@
 import * as Phaser from 'phaser';
-import { TextureGenerator } from './textures/TextureGenerator';
+import { HOBBY_REACT_OVERLAY_IDS } from '../config/featureIds';
+import { HOBBIES_ROOM_INTERACTABLES } from '../config/hobbiesRoomLayout';
 import { TEXTS } from '../config/content';
+import { TextureGenerator } from './textures/TextureGenerator';
 
 export class HobbiesScene extends Phaser.Scene {
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -53,10 +55,9 @@ export class HobbiesScene extends Phaser.Scene {
     this.physics.world.setBounds(0, 0, width, height);
 
     // --- TEXTURES ---
-    TextureGenerator.generateHobbyItem(this, 'games');
-    TextureGenerator.generateHobbyItem(this, 'art');
-    TextureGenerator.generateHobbyItem(this, 'music');
-    TextureGenerator.generateHobbyItem(this, 'fitness');
+    for (const hobbyId of HOBBY_REACT_OVERLAY_IDS) {
+      TextureGenerator.generateHobbyItem(this, hobbyId);
+    }
 
     // --- FULL BACKGROUND FILL ---
     this.add.rectangle(width/2, height/2, width, height, 0xf4f1ea);
@@ -193,17 +194,14 @@ export class HobbiesScene extends Phaser.Scene {
     }
 
     // Interaction Check
-    const interactables = [
-      { x: 500, id: 'exit' },
-      { x: 200, id: 'games' },
-      { x: 400, id: 'art' },
-      { x: 600, id: 'music' },
-      { x: 800, id: 'fitness' }
-    ];
-
     let nearInteractable = false;
-    for (const item of interactables) {
-      const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, item.x, 450);
+    for (const item of HOBBIES_ROOM_INTERACTABLES) {
+      const dist = Phaser.Math.Distance.Between(
+        this.player.x,
+        this.player.y,
+        item.x,
+        item.distanceAnchorY
+      );
       if (dist < 60) {
         this.exitPrompt.setX(item.x).setVisible(true);
         nearInteractable = true;
@@ -212,7 +210,6 @@ export class HobbiesScene extends Phaser.Scene {
           if (item.id === 'exit') {
             this.onClose?.();
           } else {
-            console.log(`Interacted with ${item.id}`);
             this.onInteract?.(item.id);
           }
         }

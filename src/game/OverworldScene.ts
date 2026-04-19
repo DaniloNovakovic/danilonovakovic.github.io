@@ -1,4 +1,5 @@
 import * as Phaser from 'phaser';
+import { HOBBIES_FEATURE_ID } from '../config/featureIds';
 import { PORTFOLIO_SECTIONS } from '../config/portfolioRegistry';
 import { TextureGenerator } from './textures/TextureGenerator';
 import { EnvironmentBuilder } from './textures/EnvironmentBuilder';
@@ -107,7 +108,7 @@ export class OverworldScene extends Phaser.Scene {
       this.interactKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
 
       this.input.keyboard.on('keydown-H', () => {
-        if (!this.isPaused) this.onInteract?.('hobbies');
+        if (!this.isPaused) this.onInteract?.(HOBBIES_FEATURE_ID);
       });
     }
 

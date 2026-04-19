@@ -19,7 +19,11 @@ export default function GuitarStrings() {
     setTimeout(() => setActiveString(null), 150);
 
     if (!audioCtxRef.current) {
-      audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      type WindowWithWebKitAudio = Window & { webkitAudioContext?: typeof AudioContext };
+      const w = window as WindowWithWebKitAudio;
+      const AudioCtx = window.AudioContext ?? w.webkitAudioContext;
+      if (!AudioCtx) return;
+      audioCtxRef.current = new AudioCtx();
     }
     
     const ctx = audioCtxRef.current;

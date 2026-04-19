@@ -1,7 +1,34 @@
 import { useState } from 'react';
 import { TEXTS } from '../config/content';
 
-const ARROWS = ['UP', 'RIGHT', 'DOWN', 'LEFT'];
+const ARROWS = ['UP', 'RIGHT', 'DOWN', 'LEFT'] as const;
+
+function pickRandomArrow(): (typeof ARROWS)[number] {
+  return ARROWS[Math.floor(Math.random() * ARROWS.length)]!;
+}
+
+function ArrowButton({
+  dir,
+  label,
+  activeArrow,
+  onPress
+}: {
+  dir: string;
+  label: string;
+  activeArrow: string | null;
+  onPress: (dir: string) => void;
+}) {
+  const isActive = activeArrow === dir;
+  return (
+    <button
+      type="button"
+      onClick={() => onPress(dir)}
+      className={`w-16 h-16 border-4 border-[#1a1a1a] font-bold text-2xl flex justify-center items-center transition-colors ${isActive ? 'bg-[#1a1a1a] text-[#fbfbf9]' : 'bg-[#f4f1ea] hover:bg-[#e8e5df]'}`}
+    >
+      {label}
+    </button>
+  );
+}
 
 export default function DancingMini() {
   const [sequence, setSequence] = useState<string[]>([]);
@@ -19,7 +46,7 @@ export default function DancingMini() {
   };
 
   const nextRound = (currentSeq: string[]) => {
-    const nextArrow = ARROWS[Math.floor(Math.random() * ARROWS.length)];
+    const nextArrow = pickRandomArrow();
     const newSeq = [...currentSeq, nextArrow];
     setSequence(newSeq);
     setPlayerSeq([]);
@@ -61,18 +88,6 @@ export default function DancingMini() {
     }
   };
 
-  const ArrowButton = ({ dir, label }: { dir: string, label: string }) => {
-    const isActive = activeArrow === dir;
-    return (
-      <button 
-        onClick={() => handleArrowClick(dir)}
-        className={`w-16 h-16 border-4 border-[#1a1a1a] font-bold text-2xl flex justify-center items-center transition-colors ${isActive ? 'bg-[#1a1a1a] text-[#fbfbf9]' : 'bg-[#f4f1ea] hover:bg-[#e8e5df]'}`}
-      >
-        {label}
-      </button>
-    );
-  };
-
   return (
     <div className="w-full flex flex-col items-center">
       <div className="w-full h-[250px] border-4 border-[#1a1a1a] shadow-[6px_6px_0px_0px_rgba(26,26,26,1)] bg-[#fbfbf9] flex flex-col items-center justify-center relative">
@@ -81,11 +96,11 @@ export default function DancingMini() {
 
         <div className="grid grid-cols-3 gap-2 mt-8">
           <div></div>
-          <ArrowButton dir="UP" label="↑" />
+          <ArrowButton dir="UP" label="↑" activeArrow={activeArrow} onPress={handleArrowClick} />
           <div></div>
-          <ArrowButton dir="LEFT" label="←" />
-          <ArrowButton dir="DOWN" label="↓" />
-          <ArrowButton dir="RIGHT" label="→" />
+          <ArrowButton dir="LEFT" label="←" activeArrow={activeArrow} onPress={handleArrowClick} />
+          <ArrowButton dir="DOWN" label="↓" activeArrow={activeArrow} onPress={handleArrowClick} />
+          <ArrowButton dir="RIGHT" label="→" activeArrow={activeArrow} onPress={handleArrowClick} />
         </div>
 
         {!isPlaying && (

@@ -1,8 +1,10 @@
 import { useEffect, useRef } from 'react';
 import * as Phaser from 'phaser';
+import { PHASER_SCENE_KEYS } from '../config/featureIds';
 import { getGameConfig } from '../game/config';
 import { OverworldScene } from '../game/OverworldScene';
 import { getAllMiniGames, getMiniGameById } from '../game/miniGameRegistry';
+import { isInteractBridgeScene, isPausableScene } from '../game/sceneContracts';
 import { MiniGameType } from '../game/types';
 
 interface GameProps {
@@ -19,19 +21,14 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
   // Update interaction callback when it changes
   useEffect(() => {
     if (gameRef.current) {
-      const mainScene = gameRef.current.scene.getScene('MainScene') as OverworldScene;
+      const mainScene = gameRef.current.scene.getScene(PHASER_SCENE_KEYS.main) as OverworldScene | null;
       if (mainScene) {
         mainScene.updateInteractCallback(onInteract);
       }
-      
-      const hobbiesScene = gameRef.current.scene.getScene('hobbies') as any;
-      if (hobbiesScene && hobbiesScene.init) {
-        // We can't easily call init again without restarting, 
-        // but we can update the property if the scene class allows it.
-        // HobbiesScene.ts should have a method for this similar to OverworldScene.
-        if (typeof hobbiesScene.updateInteractCallback === 'function') {
-          hobbiesScene.updateInteractCallback(onInteract);
-        }
+
+      const hobbiesScene = gameRef.current.scene.getScene(PHASER_SCENE_KEYS.hobbies);
+      if (isInteractBridgeScene(hobbiesScene)) {
+        hobbiesScene.updateInteractCallback(onInteract);
       }
     }
   }, [onInteract]);
@@ -40,9 +37,9 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
   useEffect(() => {
     if (gameRef.current) {
       const scenes = gameRef.current.scene.getScenes(true);
-      scenes.forEach(scene => {
-        if (typeof (scene as any).setPaused === 'function') {
-          (scene as any).setPaused(isPaused);
+      scenes.forEach((scene) => {
+        if (isPausableScene(scene)) {
+          scene.setPaused(isPaused);
         }
       });
     }
@@ -56,7 +53,7 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
         const sceneKey = activeMiniGame.id;
         
         if (!gameRef.current.scene.isActive(sceneKey)) {
-          gameRef.current.scene.stop('MainScene');
+          gameRef.current.scene.stop(PHASER_SCENE_KEYS.main);
           gameRef.current.scene.start(sceneKey, { onClose, onInteract, isPaused });
         }
       }
@@ -65,15 +62,15 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
       const scenes = gameRef.current.scene.getScenes(false);
       let resetNeeded = false;
       scenes.forEach(s => {
-        if (s.scene.key !== 'MainScene' && gameRef.current?.scene.isActive(s.scene.key)) {
+        if (s.scene.key !== PHASER_SCENE_KEYS.main && gameRef.current?.scene.isActive(s.scene.key)) {
           gameRef.current?.scene.stop(s.scene.key);
           resetNeeded = true;
         }
       });
       
       // Only start MainScene if it's not already active or if we just stopped another scene
-      if (resetNeeded || !gameRef.current.scene.isActive('MainScene')) {
-        gameRef.current.scene.start('MainScene', { onInteract, isPaused });
+      if (resetNeeded || !gameRef.current.scene.isActive(PHASER_SCENE_KEYS.main)) {
+        gameRef.current.scene.start(PHASER_SCENE_KEYS.main, { onInteract, isPaused });
       }
     }
   }, [activeMiniGameId, onInteract, isPaused, onClose]);
@@ -88,7 +85,7 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
     gameRef.current = game;
 
     // Add the main scene
-    game.scene.add('MainScene', OverworldScene, true, { onInteract, isPaused });
+    game.scene.add(PHASER_SCENE_KEYS.main, OverworldScene, true, { onInteract, isPaused });
 
     // Pre-add all Phaser-based scenes from the registry
     const phaserScenes = getAllMiniGames().filter(g => g.type === MiniGameType.PHASER_SCENE && g.Scene);
@@ -102,6 +99,8 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
       game.destroy(true);
       gameRef.current = null;
     };
+    // Phaser Game mounts once; callbacks are refreshed by the other effects above.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional single mount
   }, []);
 
   return (
