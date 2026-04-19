@@ -1,5 +1,6 @@
 import * as Phaser from 'phaser';
 import { HOBBIES_FEATURE_ID } from '../config/featureIds';
+import { mobileTouch } from './mobileTouchBridge';
 import { PORTFOLIO_SECTIONS } from '../config/portfolioRegistry';
 import { TextureGenerator } from './textures/TextureGenerator';
 import { EnvironmentBuilder } from './textures/EnvironmentBuilder';
@@ -131,15 +132,26 @@ export class OverworldScene extends Phaser.Scene {
       return;
     }
 
+    const jumpFromTouch = mobileTouch.jumpQueued;
+    mobileTouch.jumpQueued = false;
+
+    const interactFromTouch = mobileTouch.interactTap;
+    mobileTouch.interactTap = false;
+
     const isSprinting = this.cursors.shift.isDown;
     const speed = isSprinting ? 600 : 300;
     let isMoving = false;
 
-    if (this.cursors.left.isDown || this.wasd.a.isDown) {
+    const left =
+      this.cursors.left.isDown || this.wasd.a.isDown || mobileTouch.left;
+    const right =
+      this.cursors.right.isDown || this.wasd.d.isDown || mobileTouch.right;
+
+    if (left && !right) {
       this.player.setVelocityX(-speed);
       this.player.setFlipX(true);
       isMoving = true;
-    } else if (this.cursors.right.isDown || this.wasd.d.isDown) {
+    } else if (right && !left) {
       this.player.setVelocityX(speed);
       this.player.setFlipX(false);
       isMoving = true;
@@ -153,7 +165,10 @@ export class OverworldScene extends Phaser.Scene {
       this.player.setAngle(0);
     }
 
-    if (this.cursors.up.isDown && this.player.body.touching.down) {
+    if (
+      (this.cursors.up.isDown || jumpFromTouch) &&
+      this.player.body.touching.down
+    ) {
       this.player.setVelocityY(-500);
     }
 
@@ -187,7 +202,10 @@ export class OverworldScene extends Phaser.Scene {
 
     if (canInteractWith && interactPos) {
       this.interactPrompt.setPosition(interactPos.x, interactPos.y).setVisible(true);
-      if (Phaser.Input.Keyboard.JustDown(this.interactKey)) {
+      if (
+        Phaser.Input.Keyboard.JustDown(this.interactKey) ||
+        interactFromTouch
+      ) {
         this.onInteract?.(canInteractWith);
       }
     } else {

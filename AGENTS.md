@@ -21,6 +21,10 @@ This is a hybrid application:
 2. **React Overlays:** When the player interacts with a building (presses `E`), a React modal pops up. The mini-games themselves are mostly implemented as React components inside these modals.
 3. **Communication:** React passes a `isPaused` prop to Phaser. When `isPaused` is true, Phaser must stop processing movement and **release the keyboard capture** so the user can type in React inputs.
 
+## 📱 Mobile / small screens
+- The game canvas uses **Phaser `Scale.FIT`** inside a responsive **aspect-ratio** shell (`1000×600` logical size). A **ResizeObserver** calls `game.scale.refresh()` when the container size changes.
+- **Touch row** (`Game.tsx`, hidden `md+`): writes to **`mobileTouchBridge.ts`** (`mobileTouch.left` / `right`, `jumpQueued`, `interactTap`). **OverworldScene** and **HobbiesScene** merge those flags in `update()` — synthetic `KeyboardEvent`s do not work with Phaser’s keyboard plugin in most browsers.
+
 ## ⚠️ Important Implementation Gotchas
 - **Input Capture:** Phaser 3's Keyboard Manager captures keys globally by default. To allow typing in React fields (like the Coding Terminal), you **must** call `scene.input.keyboard.clearCaptures()` and set `scene.input.keyboard.enabled = false` when a modal is open.
 - **Physics Collider Order:** Always initialize the physics collider *after* the player object is instantiated to avoid `ReferenceError` or falling through the floor.

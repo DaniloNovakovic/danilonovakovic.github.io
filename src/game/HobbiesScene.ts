@@ -1,6 +1,7 @@
 import * as Phaser from 'phaser';
 import { HOBBY_REACT_OVERLAY_IDS } from '../config/featureIds';
 import { HOBBIES_ROOM_INTERACTABLES } from '../config/hobbiesRoomLayout';
+import { mobileTouch } from './mobileTouchBridge';
 import { TEXTS } from '../config/content';
 import { TextureGenerator } from './textures/TextureGenerator';
 
@@ -178,13 +179,23 @@ export class HobbiesScene extends Phaser.Scene {
       return;
     }
 
+    mobileTouch.jumpQueued = false;
+
+    const interactFromTouch = mobileTouch.interactTap;
+    mobileTouch.interactTap = false;
+
     const speed = 300;
 
-    if (this.cursors.left.isDown || this.wasd.a.isDown) {
+    const left =
+      this.cursors.left.isDown || this.wasd.a.isDown || mobileTouch.left;
+    const right =
+      this.cursors.right.isDown || this.wasd.d.isDown || mobileTouch.right;
+
+    if (left && !right) {
       this.player.setVelocityX(-speed);
       this.player.setFlipX(true);
       this.player.setAngle(Math.sin(this.time.now / 100) * 5);
-    } else if (this.cursors.right.isDown || this.wasd.d.isDown) {
+    } else if (right && !left) {
       this.player.setVelocityX(speed);
       this.player.setFlipX(false);
       this.player.setAngle(Math.sin(this.time.now / 100) * 5);
@@ -206,7 +217,10 @@ export class HobbiesScene extends Phaser.Scene {
         this.exitPrompt.setX(item.x).setVisible(true);
         nearInteractable = true;
         
-        if (Phaser.Input.Keyboard.JustDown(this.interactKey)) {
+        if (
+          Phaser.Input.Keyboard.JustDown(this.interactKey) ||
+          interactFromTouch
+        ) {
           if (item.id === 'exit') {
             this.onClose?.();
           } else {
