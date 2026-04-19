@@ -1,12 +1,13 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { TEXTS } from '../config/content';
 
 const NOTES = [
-  { note: 'E4', freq: 329.63 },
-  { note: 'B3', freq: 246.94 },
-  { note: 'G3', freq: 196.00 },
-  { note: 'D3', freq: 146.83 },
-  { note: 'A2', freq: 110.00 },
-  { note: 'E2', freq: 82.41 }
+  { note: 'E4', freq: 329.63, key: '1' },
+  { note: 'B3', freq: 246.94, key: '2' },
+  { note: 'G3', freq: 196.00, key: '3' },
+  { note: 'D3', freq: 146.83, key: '4' },
+  { note: 'A2', freq: 110.00, key: '5' },
+  { note: 'E2', freq: 82.41, key: '6' }
 ];
 
 export default function GuitarStrings() {
@@ -40,18 +41,34 @@ export default function GuitarStrings() {
     osc.stop(ctx.currentTime + 1.5);
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const noteIndex = NOTES.findIndex(n => n.key === e.key);
+      if (noteIndex !== -1) {
+        playNote(noteIndex, NOTES[noteIndex].freq);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   return (
     <div className="w-full flex flex-col items-center">
       <div className="w-full h-[200px] border-4 border-[#1a1a1a] shadow-[6px_6px_0px_0px_rgba(26,26,26,1)] bg-[#fbfbf9] p-4 flex flex-col justify-center gap-4 relative">
         {NOTES.map((n, i) => (
           <div 
             key={n.note} 
-            className="w-full h-4 relative cursor-pointer group"
+            className="w-full h-4 relative cursor-pointer group outline-none"
             onMouseEnter={() => playNote(i, n.freq)}
             onClick={() => playNote(i, n.freq)}
+            onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && playNote(i, n.freq)}
+            tabIndex={0}
+            role="button"
+            aria-label={`String ${n.note} (Press ${n.key})`}
           >
-            <div className={`absolute top-1/2 left-0 w-full h-[2px] bg-[#1a1a1a] transition-transform duration-100 ${activeString === i ? 'scale-y-300 translate-y-1' : ''}`}></div>
-            <div className={`absolute -left-2 top-0 text-xs font-bold ${activeString === i ? 'text-black' : 'text-transparent group-hover:text-black'} transition-colors`}>{n.note}</div>
+            <div className={`absolute top-1/2 left-0 w-full h-[2px] bg-[#1a1a1a] transition-transform duration-100 ${activeString === i ? 'scale-y-300 translate-y-1' : ''} group-focus:bg-blue-500`}></div>
+            <div className={`absolute -left-2 top-0 text-xs font-bold ${activeString === i ? 'text-black' : 'text-transparent group-hover:text-black group-focus:text-black'} transition-colors`}>{n.note}</div>
+            <div className="absolute -right-2 top-0 text-[10px] font-mono opacity-30 group-hover:opacity-100 group-focus:opacity-100">[{n.key}]</div>
           </div>
         ))}
         
@@ -59,8 +76,9 @@ export default function GuitarStrings() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border-4 border-[#1a1a1a] opacity-20 pointer-events-none"></div>
       </div>
       <div className="mt-4 text-sm font-bold text-[#1a1a1a] opacity-60">
-        Hover or tap the strings to play!
+        {TEXTS.miniGames.guitar.instruction}
       </div>
     </div>
   );
 }
+

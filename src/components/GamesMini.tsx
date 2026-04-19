@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { TEXTS } from '../config/content';
 
 export default function GamesMini() {
   const [score, setScore] = useState(0);
@@ -41,21 +42,21 @@ export default function GamesMini() {
       <div className="w-full h-[200px] border-4 border-[#1a1a1a] shadow-[6px_6px_0px_0px_rgba(26,26,26,1)] bg-[#fbfbf9] relative overflow-hidden flex flex-col items-center">
         
         <div className="w-full flex justify-between px-4 py-2 border-b-4 border-[#1a1a1a] font-bold text-lg">
-          <span>SCORE: {score}</span>
-          <span>TIME: {timeLeft}s</span>
+          <span>{TEXTS.common.score} {score}</span>
+          <span>{TEXTS.common.time} {timeLeft}s</span>
         </div>
 
         {!isPlaying && timeLeft === 10 && (
           <button onClick={startGame} className="m-auto px-6 py-3 bg-[#1a1a1a] text-[#fbfbf9] font-bold text-xl hover:scale-105 transition-transform">
-            START ARCADE
+            {TEXTS.miniGames.arcade.startLabel}
           </button>
         )}
 
         {!isPlaying && timeLeft === 0 && (
           <div className="m-auto flex flex-col items-center">
-            <span className="font-bold text-2xl mb-2">GAME OVER!</span>
+            <span className="font-bold text-2xl mb-2">{TEXTS.common.gameOver}</span>
             <button onClick={startGame} className="px-4 py-2 border-2 border-[#1a1a1a] hover:bg-[#e8e5df] font-bold transition-colors">
-              PLAY AGAIN
+              {TEXTS.common.playAgain}
             </button>
           </div>
         )}
@@ -72,8 +73,9 @@ export default function GamesMini() {
 
       </div>
       <div className="mt-4 text-sm font-bold text-[#1a1a1a] opacity-60">
-        Click the targets as fast as you can!
+        {TEXTS.miniGames.arcade.instruction}
       </div>
     </div>
   );
 }
+

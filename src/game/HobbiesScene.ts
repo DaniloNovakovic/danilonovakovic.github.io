@@ -1,5 +1,6 @@
 import * as Phaser from 'phaser';
 import { TextureGenerator } from './textures/TextureGenerator';
+import { TEXTS } from '../config/content';
 
 export class HobbiesScene extends Phaser.Scene {
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -28,13 +29,21 @@ export class HobbiesScene extends Phaser.Scene {
 
   setPaused(paused: boolean) {
     this.isPaused = paused;
-    if (paused) {
-      this.physics.world.pause();
-      if (this.player && this.player.body) {
-        this.player.setVelocityX(0);
+    if (this.input && this.input.keyboard) {
+      // Phase 2: Disable keyboard manager when paused to prevent input bleed
+      this.input.keyboard.enabled = !paused;
+
+      if (paused) {
+        this.physics.world.pause();
+        if (this.player && this.player.body) {
+          this.player.setVelocityX(0);
+        }
+      } else {
+        this.physics.world.resume();
+        if (this.input.keyboard.addCapture) {
+          this.input.keyboard.addCapture([16, 32, 37, 38, 39, 40, 65, 68, 69, 72]);
+        }
       }
-    } else {
-      this.physics.world.resume();
     }
   }
 
@@ -94,19 +103,20 @@ export class HobbiesScene extends Phaser.Scene {
     
     // Games / Coding (Laptop)
     this.add.sprite(200, floorY, 'hobby_games').setOrigin(0.5, 1);
-    this.add.text(200, floorY - 140, 'GAMES', { fontFamily: '"Comic Sans MS", cursive', fontSize: '20px', color: '#1a1a1a', fontStyle: 'bold' }).setOrigin(0.5);
+    this.add.text(200, floorY - 140, TEXTS.hobbies.games, { fontFamily: '"Comic Sans MS", cursive', fontSize: '20px', color: '#1a1a1a', fontStyle: 'bold' }).setOrigin(0.5);
 
     // Art (Easel)
     this.add.sprite(400, floorY, 'hobby_art').setOrigin(0.5, 1);
-    this.add.text(400, floorY - 140, 'ART', { fontFamily: '"Comic Sans MS", cursive', fontSize: '20px', color: '#1a1a1a', fontStyle: 'bold' }).setOrigin(0.5);
+    this.add.text(400, floorY - 140, TEXTS.hobbies.art, { fontFamily: '"Comic Sans MS", cursive', fontSize: '20px', color: '#1a1a1a', fontStyle: 'bold' }).setOrigin(0.5);
 
     // Music (Guitar)
     this.add.sprite(600, floorY, 'hobby_music').setOrigin(0.5, 1);
-    this.add.text(600, floorY - 140, 'MUSIC', { fontFamily: '"Comic Sans MS", cursive', fontSize: '20px', color: '#1a1a1a', fontStyle: 'bold' }).setOrigin(0.5);
+    this.add.text(600, floorY - 140, TEXTS.hobbies.music, { fontFamily: '"Comic Sans MS", cursive', fontSize: '20px', color: '#1a1a1a', fontStyle: 'bold' }).setOrigin(0.5);
 
     // Fitness (Punching Bag)
-    this.add.sprite(800, floorY - 20, 'hobby_fitness').setOrigin(0.5, 0.5);
-    this.add.text(800, floorY - 140, 'FITNESS', { fontFamily: '"Comic Sans MS", cursive', fontSize: '20px', color: '#1a1a1a', fontStyle: 'bold' }).setOrigin(0.5);
+    // Phase 3: Move fitness asset up from floorY - 20 to floorY - 60
+    this.add.sprite(800, floorY - 60, 'hobby_fitness').setOrigin(0.5, 0.5);
+    this.add.text(800, floorY - 140, TEXTS.hobbies.fitness, { fontFamily: '"Comic Sans MS", cursive', fontSize: '20px', color: '#1a1a1a', fontStyle: 'bold' }).setOrigin(0.5);
 
     // --- EXIT DOOR ---
     const exitDoor = this.add.graphics();
@@ -116,7 +126,7 @@ export class HobbiesScene extends Phaser.Scene {
     exitDoor.strokeRect(470, floorY - 100, 60, 100);
     // Door handle
     exitDoor.strokeCircle(520, floorY - 50, 3);
-    this.add.text(500, floorY - 120, 'EXIT', { fontFamily: '"Comic Sans MS", cursive', fontSize: '16px', color: '#1a1a1a' }).setOrigin(0.5);
+    this.add.text(500, floorY - 120, TEXTS.navigation.exit, { fontFamily: '"Comic Sans MS", cursive', fontSize: '16px', color: '#1a1a1a' }).setOrigin(0.5);
 
     // --- PLAYER ---
     this.player = this.physics.add.sprite(width / 2, floorY - 50, 'player_idle');
@@ -144,7 +154,7 @@ export class HobbiesScene extends Phaser.Scene {
       });
     }
 
-    this.exitPrompt = this.add.text(500, floorY - 150, '[E] INTERACT', {
+    this.exitPrompt = this.add.text(500, floorY - 150, TEXTS.navigation.interact, {
       fontFamily: '"Comic Sans MS", cursive',
       fontSize: '16px',
       color: '#1a1a1a',
@@ -154,10 +164,9 @@ export class HobbiesScene extends Phaser.Scene {
     
     this.cameras.main.setBackgroundColor('#f4f1ea');
 
-    if (this.isPaused) {
-      this.setPaused(true);
-    }
+    this.setPaused(this.isPaused);
   }
+
 
   update() {
     if (this.isPaused) {

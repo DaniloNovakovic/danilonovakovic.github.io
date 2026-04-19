@@ -1,15 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Game from './components/Game';
 import { X } from 'lucide-react';
 import { GameState, type AppState } from './game/gameState';
 import { getMiniGameById } from './game/miniGameRegistry';
 import { MiniGameType } from './game/types';
+import { TEXTS } from './config/content';
 
 function App() {
   const [state, setState] = useState<AppState>({
     status: GameState.EXPLORING,
     activeMiniGameId: null
   });
+  const modalRef = useRef<HTMLDivElement>(null);
 
   const handleInteract = (area: string) => {
     setState({
@@ -48,6 +50,13 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [state.status, state.activeMiniGameId]);
 
+  // Phase 5: Auto-focus modal for keyboard scrollability
+  useEffect(() => {
+    if (state.status === GameState.IN_MINIGAME && modalRef.current) {
+      modalRef.current.focus();
+    }
+  }, [state.status, state.activeMiniGameId]);
+
   const activeMiniGame = state.activeMiniGameId ? getMiniGameById(state.activeMiniGameId) : undefined;
   const isPaused = state.status === GameState.IN_MINIGAME && activeMiniGame?.type === MiniGameType.REACT_OVERLAY;
 
@@ -69,7 +78,11 @@ function App() {
       {/* Interactive Overlay */}
       {state.status === GameState.IN_MINIGAME && activeMiniGame && activeMiniGame.type === MiniGameType.REACT_OVERLAY && (
         <div className="fixed inset-0 z-50 flex justify-center items-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-300 p-4">
-          <div className="bg-[#fbfbf9] text-[#1a1a1a] w-[600px] max-w-full p-8 relative animate-in zoom-in-95 fade-in border-4 border-[#1a1a1a] shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] max-h-[90vh] overflow-y-auto">
+          <div 
+            ref={modalRef}
+            tabIndex={0}
+            className="bg-[#fbfbf9] text-[#1a1a1a] w-[600px] max-w-full p-8 relative animate-in zoom-in-95 fade-in border-4 border-[#1a1a1a] shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] max-h-[90vh] overflow-y-auto outline-none focus:ring-0"
+          >
             <button 
               onClick={closeOverlay}
               className="absolute top-4 right-4 p-2 bg-[#f4f1ea] hover:bg-[#e8e5df] border-2 border-[#1a1a1a] rounded-full transition-colors z-10"
@@ -98,7 +111,7 @@ function App() {
       {state.status === GameState.EXPLORING && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#fbfbf9]/80 backdrop-blur-sm border-2 border-[#1a1a1a] px-4 py-2 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] opacity-60 hover:opacity-100 transition-opacity">
           <p className="text-sm font-bold uppercase tracking-widest text-[#1a1a1a]">
-            Use A/D or Arrows to walk • Hold SHIFT to sprint • Press E to enter
+            {TEXTS.navigation.hints}
           </p>
         </div>
       )}

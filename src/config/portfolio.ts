@@ -1,3 +1,5 @@
+import { TEXTS } from './content';
+
 export interface Experience {
   title: string;
   company: string;
@@ -21,9 +23,9 @@ export interface Hobby {
 
 export const PORTFOLIO_DATA = {
   profile: {
-    name: "Danilo Novakovic",
-    location: "Serbia",
-    about: "I specialize in frontend development, with a focus on creating consistent, accessible, and performant UIs. Over the years, I've led design system implementations, built core UI components, and worked closely with designers to bridge Figma and code. Outside of work, I practice martial arts and explore creativity through drawing, guitar, and dance."
+    name: TEXTS.profile.details.fullName,
+    location: TEXTS.profile.details.country,
+    about: TEXTS.profile.about
   },
   experiences: [
     {

@@ -1,5 +1,6 @@
 import React from 'react';
 import { PORTFOLIO_DATA } from '../config/portfolio';
+import { TEXTS } from '../config/content';
 
 const ProjectsOverlay: React.FC = () => {
   const { projects } = PORTFOLIO_DATA;
@@ -24,7 +25,7 @@ const ProjectsOverlay: React.FC = () => {
               rel="noopener noreferrer"
               className="mt-auto bg-[#1a1a1a] text-white py-2 px-4 rounded text-center font-bold hover:bg-gray-800 transition-colors text-sm"
             >
-              View More
+              {TEXTS.common.viewMore}
             </a>
           </div>
         ))}
@@ -34,3 +35,4 @@ const ProjectsOverlay: React.FC = () => {
 };
 
 export default ProjectsOverlay;
+

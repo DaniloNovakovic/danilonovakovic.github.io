@@ -1,5 +1,6 @@
 import React from 'react';
 import { PORTFOLIO_DATA } from '../config/portfolio';
+import { TEXTS } from '../config/content';
 
 const HobbiesOverlay: React.FC = () => {
   const { hobbies } = PORTFOLIO_DATA;
@@ -19,9 +20,10 @@ const HobbiesOverlay: React.FC = () => {
           </div>
         ))}
       </div>
-      <p className="mt-8 text-center text-sm text-gray-500 font-mono">[ Press ESC or click X to return ]</p>
+      <p className="mt-8 text-center text-sm text-gray-500 font-mono">{TEXTS.common.pressEsc}</p>
     </div>
   );
 };
 
 export default HobbiesOverlay;
+

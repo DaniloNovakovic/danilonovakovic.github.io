@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { TEXTS } from '../config/content';
 
 const ARROWS = ['UP', 'RIGHT', 'DOWN', 'LEFT'];
 
@@ -7,13 +8,13 @@ export default function DancingMini() {
   const [playerSeq, setPlayerSeq] = useState<string[]>([]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeArrow, setActiveArrow] = useState<string | null>(null);
-  const [message, setMessage] = useState('Press Start to Dance!');
+  const [message, setMessage] = useState(TEXTS.miniGames.dancing.startMessage);
 
   const startGame = () => {
     setSequence([]);
     setPlayerSeq([]);
     setIsPlaying(true);
-    setMessage('Watch the sequence...');
+    setMessage(TEXTS.miniGames.dancing.watchMessage);
     nextRound([]);
   };
 
@@ -27,20 +28,20 @@ export default function DancingMini() {
 
   const playSequence = (seq: string[]) => {
     let i = 0;
-    setMessage('Watch the sequence...');
+    setMessage(TEXTS.miniGames.dancing.watchMessage);
     const interval = setInterval(() => {
       setActiveArrow(seq[i]);
       setTimeout(() => setActiveArrow(null), 400);
       i++;
       if (i >= seq.length) {
         clearInterval(interval);
-        setTimeout(() => setMessage('Your turn!'), 500);
+        setTimeout(() => setMessage(TEXTS.miniGames.dancing.turnMessage), 500);
       }
     }, 800);
   };
 
   const handleArrowClick = (arrow: string) => {
-    if (!isPlaying || message === 'Watch the sequence...') return;
+    if (!isPlaying || message === TEXTS.miniGames.dancing.watchMessage) return;
 
     setActiveArrow(arrow);
     setTimeout(() => setActiveArrow(null), 200);
@@ -52,10 +53,10 @@ export default function DancingMini() {
     const isCorrect = newPlayerSeq.every((val, index) => val === sequence[index]);
 
     if (!isCorrect) {
-      setMessage(`Game Over! Score: ${sequence.length - 1}`);
+      setMessage(`${TEXTS.common.gameOver} ${TEXTS.common.score} ${sequence.length - 1}`);
       setIsPlaying(false);
     } else if (newPlayerSeq.length === sequence.length) {
-      setMessage('Nice Moves! Next Round...');
+      setMessage(TEXTS.miniGames.dancing.successMessage);
       setTimeout(() => nextRound(sequence), 1000);
     }
   };
@@ -89,14 +90,15 @@ export default function DancingMini() {
 
         {!isPlaying && (
           <button onClick={startGame} className="absolute bottom-4 px-4 py-1 border-2 border-[#1a1a1a] font-bold hover:bg-[#e8e5df]">
-            {sequence.length > 0 ? 'RESTART' : 'START'}
+            {sequence.length > 0 ? TEXTS.common.restart : TEXTS.common.start}
           </button>
         )}
 
       </div>
       <div className="mt-4 text-sm font-bold text-[#1a1a1a] opacity-60">
-        Repeat the dance moves!
+        {TEXTS.miniGames.dancing.instruction}
       </div>
     </div>
   );
 }
+

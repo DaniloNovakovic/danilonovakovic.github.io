@@ -1,5 +1,6 @@
 import React from 'react';
 import { PORTFOLIO_DATA } from '../config/portfolio';
+import { TEXTS } from '../config/content';
 
 const ExperienceOverlay: React.FC = () => {
   const { experiences } = PORTFOLIO_DATA;
@@ -20,9 +21,10 @@ const ExperienceOverlay: React.FC = () => {
           </div>
         ))}
       </div>
-      <p className="mt-8 text-center text-sm text-gray-500 font-mono">[ Scroll to see more ]</p>
+      <p className="mt-8 text-center text-sm text-gray-500 font-mono">{TEXTS.common.scrollToSeeMore}</p>
     </div>
   );
 };
 
 export default ExperienceOverlay;
+

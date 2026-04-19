@@ -1,5 +1,6 @@
 import React from 'react';
 import { PORTFOLIO_DATA } from '../config/portfolio';
+import { TEXTS } from '../config/content';
 
 const ContactOverlay: React.FC = () => {
   const { contact } = PORTFOLIO_DATA;
@@ -27,11 +28,12 @@ const ContactOverlay: React.FC = () => {
       </div>
 
       <div className="mt-8 p-4 bg-yellow-50 border-2 border-dashed border-[#1a1a1a] rounded-lg text-center">
-        <p className="text-lg font-bold">“If I had asked people what they wanted, they would have said faster horses.”</p>
-        <p className="mt-1 text-gray-600 text-sm">— Henry Ford</p>
+        <p className="text-lg font-bold">{TEXTS.contact.quote}</p>
+        <p className="mt-1 text-gray-600 text-sm">{TEXTS.contact.quoteAuthor}</p>
       </div>
     </div>
   );
 };
 
 export default ContactOverlay;
+

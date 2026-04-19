@@ -2,6 +2,7 @@ import * as Phaser from 'phaser';
 import { PORTFOLIO_SECTIONS } from '../config/portfolioRegistry';
 import { TextureGenerator } from './textures/TextureGenerator';
 import { EnvironmentBuilder } from './textures/EnvironmentBuilder';
+import { TEXTS } from '../config/content';
 
 export class OverworldScene extends Phaser.Scene {
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -30,6 +31,9 @@ export class OverworldScene extends Phaser.Scene {
   setPaused(paused: boolean) {
     this.isPaused = paused;
     if (this.input && this.input.keyboard) {
+      // Phase 2: Disable keyboard manager when paused to prevent input bleed
+      this.input.keyboard.enabled = !paused;
+      
       if (paused) {
         if (this.player) this.player.setVelocityX(0);
       } else {
@@ -108,7 +112,7 @@ export class OverworldScene extends Phaser.Scene {
     }
 
     // --- UI ---
-    this.interactPrompt = this.add.text(0, 0, '[E] ENTER', {
+    this.interactPrompt = this.add.text(0, 0, TEXTS.navigation.enter, {
       fontFamily: '"Comic Sans MS", cursive, sans-serif',
       fontSize: '18px',
       color: '#1a1a1a',
@@ -118,6 +122,7 @@ export class OverworldScene extends Phaser.Scene {
 
     this.setPaused(this.isPaused);
   }
+
 
   update() {
     if (this.isPaused) {

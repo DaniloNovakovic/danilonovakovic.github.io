@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
+import { TEXTS } from '../config/content';
 
 export default function CodingMini() {
   const [history, setHistory] = useState([
-    "Welcome to DaniloOS v1.0",
-    "Type 'help' to see available commands."
+    TEXTS.miniGames.coding.welcome,
+    TEXTS.miniGames.coding.helpText
   ]);
   const [input, setInput] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -18,13 +19,13 @@ export default function CodingMini() {
 
     switch (trimmed) {
       case 'help':
-        response = 'Available commands: whoami, skills, clear';
+        response = TEXTS.miniGames.coding.helpResponse;
         break;
       case 'whoami':
-        response = 'Danilo Novakovic. Coding since 2016. Lover of logic and design.';
+        response = TEXTS.miniGames.coding.whoamiResponse;
         break;
       case 'skills':
-        response = '> Frontend: React, Vite, Tailwind\n> Backend: Node, APIs, Databases\n> Design: Sketching, UI/UX';
+        response = TEXTS.miniGames.coding.skillsResponse;
         break;
       case 'clear':
         setHistory([]);
@@ -32,7 +33,7 @@ export default function CodingMini() {
       case '':
         return;
       default:
-        response = `Command not found: ${trimmed}`;
+        response = `${TEXTS.miniGames.coding.notFound}${trimmed}`;
     }
 
     setHistory(prev => [...prev, `> ${cmd}`, ...response.split('\n')]);
@@ -48,11 +49,11 @@ export default function CodingMini() {
   return (
     <div className="w-full flex flex-col items-center">
       <div className="w-full h-[250px] border-4 border-[#1a1a1a] shadow-[6px_6px_0px_0px_rgba(26,26,26,1)] bg-[#1a1a1a] text-[#33ff33] p-4 font-mono text-sm overflow-y-auto flex flex-col">
-        
+
         {history.map((line, i) => (
           <div key={i} className="mb-1">{line}</div>
         ))}
-        
+
         <form onSubmit={onSubmit} className="flex mt-2">
           <span className="mr-2">{'>'}</span>
           <input
@@ -68,8 +69,9 @@ export default function CodingMini() {
 
       </div>
       <div className="mt-4 text-sm font-bold text-[#1a1a1a] opacity-60">
-        Hack the mainframe!
+        {TEXTS.miniGames.coding.instruction}
       </div>
     </div>
   );
 }
+
