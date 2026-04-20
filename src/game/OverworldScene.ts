@@ -1,18 +1,19 @@
+/**
+ * OverworldScene — thin orchestrator.
+ * Delegates environment/buildings/particles to street view modules,
+ * and player logic to PlayerController.
+ */
 import * as Phaser from 'phaser';
 import { HOBBIES_FEATURE_ID } from '../config/featureIds';
-import { mobileTouch } from './mobileTouchBridge';
 import { PORTFOLIO_SECTIONS } from '../config/portfolioRegistry';
 import { TextureGenerator } from './textures/TextureGenerator';
-import { EnvironmentBuilder } from './textures/EnvironmentBuilder';
 import { TEXTS } from '../config/content';
 import {
   GAME_DESIGN_HEIGHT,
-  OVERWORLD_GROUND_ZONE,
   OVERWORLD_INTERACT_DISTANCE_X,
   OVERWORLD_INTERACT_MIN_PLAYER_Y,
   OVERWORLD_INTERACT_PROMPT_OFFSET_Y,
   OVERWORLD_JUMP_VELOCITY_Y,
-  OVERWORLD_PARTICLE_MAX_Y,
   OVERWORLD_PLAYER_GRAVITY_Y,
   OVERWORLD_PLAYER_RESUME_Y_CLAMP,
   OVERWORLD_PLAYER_START,
@@ -22,18 +23,27 @@ import {
   OVERWORLD_WIDTH
 } from './config';
 import { setSceneKeyboardPaused } from './sceneKeyboardPause';
+import { bridgeActions, bridgeStore } from '../shared/bridge/store';
+import { PlayerController } from '../core/player/PlayerController';
+import {
+  buildStreetEnvironment,
+  buildStreetForeground,
+  setupStreetCamera
+} from './street/StreetEnvironment';
+import { buildStreetBuildings } from './street/StreetBuildings';
+import { updateStreetParticles } from './street/StreetParticles';
 
 export class OverworldScene extends Phaser.Scene {
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
-  wasd!: { a: Phaser.Input.Keyboard.Key, d: Phaser.Input.Keyboard.Key };
+  wasd!: { a: Phaser.Input.Keyboard.Key; d: Phaser.Input.Keyboard.Key };
   interactKey!: Phaser.Input.Keyboard.Key;
   buildings!: Phaser.GameObjects.Group;
   interactPrompt!: Phaser.GameObjects.Text;
-  
+
+  private controller!: PlayerController;
   private onInteract?: (area: string) => void;
   private isPaused: boolean = false;
-  /** Optional spawn when (re)starting after leaving another Phaser scene. */
   private resumePosition?: { x: number; y: number };
 
   constructor() {
@@ -61,10 +71,11 @@ export class OverworldScene extends Phaser.Scene {
 
   setPaused(paused: boolean) {
     this.isPaused = paused;
+    if (paused) this.controller?.pause();
+    else this.controller?.resume();
     setSceneKeyboardPaused(this, paused, {
-      zeroHorizontalVelocity: () => {
-        if (this.player) this.player.setVelocityX(0);
-      }
+      pausePhysicsWorld: true,
+      zeroHorizontalVelocity: () => this.controller?.zeroVelocity()
     });
   }
 
@@ -78,38 +89,10 @@ export class OverworldScene extends Phaser.Scene {
   }
 
   create() {
-    const worldWidth = OVERWORLD_WIDTH;
-    this.physics.world.setBounds(0, 0, worldWidth, GAME_DESIGN_HEIGHT);
+    this.physics.world.setBounds(0, 0, OVERWORLD_WIDTH, GAME_DESIGN_HEIGHT);
 
-    // --- ENVIRONMENT ---
-    EnvironmentBuilder.buildMountains(this);
-    EnvironmentBuilder.buildTrees(this);
-    EnvironmentBuilder.buildGround(this, worldWidth);
-    
-    const groundZone = this.add.zone(
-      worldWidth / 2,
-      OVERWORLD_GROUND_ZONE.centerY,
-      worldWidth,
-      OVERWORLD_GROUND_ZONE.height
-    );
-    this.physics.add.existing(groundZone, true);
-
-    // --- BUILDINGS ---
-    this.buildings = this.add.group();
-    PORTFOLIO_SECTIONS.forEach((s) => {
-      if (s.x === undefined) return;
-      
-      const bldg = this.add.sprite(s.x, 395, `building_${s.id}`);
-      this.add.text(s.x, 150, s.name.toUpperCase(), {
-        fontFamily: '"Comic Sans MS", cursive, sans-serif',
-        fontSize: '22px',
-        color: '#1a1a1a',
-        fontStyle: 'bold'
-      }).setOrigin(0.5).setScrollFactor(1);
-
-      bldg.setData('name', s.id);
-      this.buildings.add(bldg);
-    });
+    const { groundZone } = buildStreetEnvironment(this);
+    this.buildings = buildStreetBuildings(this);
 
     // --- PLAYER ---
     const startX = this.resumePosition
@@ -126,31 +109,35 @@ export class OverworldScene extends Phaser.Scene {
           OVERWORLD_PLAYER_RESUME_Y_CLAMP.max
         )
       : OVERWORLD_PLAYER_START.y;
+
     this.player = this.physics.add.sprite(startX, startY, 'player_idle');
     this.player.setCollideWorldBounds(true);
     this.player.setGravityY(OVERWORLD_PLAYER_GRAVITY_Y);
     this.physics.add.collider(this.player, groundZone);
 
-    // --- FOREGROUND ---
-    EnvironmentBuilder.buildGrass(this, worldWidth);
-    EnvironmentBuilder.buildClouds(this, worldWidth);
+    this.controller = new PlayerController({
+      walkSpeed: OVERWORLD_WALK_SPEED,
+      sprintSpeed: OVERWORLD_SPRINT_SPEED,
+      jumpVelocityY: OVERWORLD_JUMP_VELOCITY_Y
+    });
+    this.controller.mount(this.player);
 
-    // --- CAMERA ---
-    this.cameras.main.setBounds(0, 0, worldWidth, GAME_DESIGN_HEIGHT);
-    this.cameras.main.startFollow(this.player, true, 0.08, 0.08);
-    this.cameras.main.setFollowOffset(0, 100); 
+    buildStreetForeground(this);
+    setupStreetCamera(this, this.player);
 
     // --- INPUT ---
     if (this.input.keyboard) {
       this.cursors = this.input.keyboard.createCursorKeys();
       this.wasd = {
         a: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
-        d: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D),
+        d: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D)
       };
       this.interactKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
 
-      this.input.keyboard.on('keydown-H', () => {
-        if (!this.isPaused) this.onInteract?.(HOBBIES_FEATURE_ID);
+      const onH = () => { if (!this.isPaused) this.onInteract?.(HOBBIES_FEATURE_ID); };
+      this.input.keyboard.on('keydown-H', onH);
+      this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+        this.input.keyboard?.off('keydown-H', onH);
       });
     }
 
@@ -166,70 +153,31 @@ export class OverworldScene extends Phaser.Scene {
     this.setPaused(this.isPaused);
   }
 
-
   update() {
     if (this.isPaused) {
-      if (this.player && this.player.body) this.player.setVelocityX(0);
+      this.controller.zeroVelocity();
       return;
     }
 
-    const jumpFromTouch = mobileTouch.jumpQueued;
-    mobileTouch.jumpQueued = false;
+    const touchState = bridgeStore.getState().touch;
+    const oneShots = bridgeActions.consumeTouchOneShots();
 
-    const interactFromTouch = mobileTouch.interactTap;
-    mobileTouch.interactTap = false;
+    const step = this.controller.step({
+      left: this.cursors.left.isDown || this.wasd.a.isDown || touchState.left,
+      right: this.cursors.right.isDown || this.wasd.d.isDown || touchState.right,
+      sprint: this.cursors.shift.isDown,
+      jump: this.cursors.up.isDown || oneShots.jumpQueued,
+      interact: Phaser.Input.Keyboard.JustDown(this.interactKey) || oneShots.interactTap
+    });
 
-    const isSprinting = this.cursors.shift.isDown;
-    const speed = isSprinting ? OVERWORLD_SPRINT_SPEED : OVERWORLD_WALK_SPEED;
-    let isMoving = false;
+    this.player.setFlipX(step.facingLeft);
+    this.player.setAngle(step.moving ? Math.sin(this.time.now / 100) * 5 : 0);
 
-    const left =
-      this.cursors.left.isDown || this.wasd.a.isDown || mobileTouch.left;
-    const right =
-      this.cursors.right.isDown || this.wasd.d.isDown || mobileTouch.right;
+    updateStreetParticles(this);
 
-    if (left && !right) {
-      this.player.setVelocityX(-speed);
-      this.player.setFlipX(true);
-      isMoving = true;
-    } else if (right && !left) {
-      this.player.setVelocityX(speed);
-      this.player.setFlipX(false);
-      isMoving = true;
-    } else {
-      this.player.setVelocityX(0);
-    }
-
-    if (isMoving) {
-      this.player.setAngle(Math.sin(this.time.now / 100) * 5);
-    } else {
-      this.player.setAngle(0);
-    }
-
-    if (
-      (this.cursors.up.isDown || jumpFromTouch) &&
-      this.player.body.touching.down
-    ) {
-      this.player.setVelocityY(OVERWORLD_JUMP_VELOCITY_Y);
-    }
-
-    // Atmospheric ink particles
-    if (Phaser.Math.Between(0, 100) > 95) {
-      const px = this.cameras.main.scrollX + 1100;
-      const py = Phaser.Math.Between(0, OVERWORLD_PARTICLE_MAX_Y);
-      const p = this.add.circle(px, py, Phaser.Math.Between(1, 3), 0x1a1a1a, 0.2);
-      this.tweens.add({
-        targets: p,
-        x: px - 1200,
-        y: py + Phaser.Math.Between(-100, 100),
-        duration: Phaser.Math.Between(5000, 10000),
-        onComplete: () => p.destroy()
-      });
-    }
-
-    // Interaction Check
+    // Interaction check
     let canInteractWith: string | null = null;
-    let interactPos: {x: number, y: number} | null = null;
+    let interactPos: { x: number; y: number } | null = null;
 
     const bldgs = this.buildings.getChildren() as Phaser.GameObjects.Sprite[];
     for (const bldg of bldgs) {
@@ -243,10 +191,7 @@ export class OverworldScene extends Phaser.Scene {
 
     if (canInteractWith && interactPos) {
       this.interactPrompt.setPosition(interactPos.x, interactPos.y).setVisible(true);
-      if (
-        Phaser.Input.Keyboard.JustDown(this.interactKey) ||
-        interactFromTouch
-      ) {
+      if (step.interactRequested) {
         this.onInteract?.(canInteractWith);
       }
     } else {

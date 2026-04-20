@@ -61,7 +61,6 @@ export default function CodingMini() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             className="bg-transparent outline-none flex-1 text-[#33ff33]"
-            autoFocus
             spellCheck={false}
           />
         </form>

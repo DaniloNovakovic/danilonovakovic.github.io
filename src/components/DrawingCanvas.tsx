@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect, useLayoutEffect } from 'react';
 import { Trash2 } from 'lucide-react';
 import { TEXTS } from '../config/content';
+import { useOverlayKeys } from './overlays/useOverlayKeys';
 
 export default function DrawingCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -47,70 +48,67 @@ export default function DrawingCanvas() {
     }
   }, []);
 
-  useEffect(() => {
-    if (!context || !canvasRef.current) return;
-    const canvas = canvasRef.current;
-    const ctx = context;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
+  // Arrow keys and Space are handled via useOverlayKeys (preventDefault prevents
+  // overlay scroll conflicts). The hook re-reads the latest ref values each call
+  // so it is safe to pass an inline object.
+  useOverlayKeys({
+    ArrowUp: (e) => {
+      if (!context || !canvasRef.current) return;
       const step = e.shiftKey ? 10 : 5;
       const pos = cursorRef.current;
-      let newX = pos.x;
-      let newY = pos.y;
-      let moved = false;
+      const newY = Math.max(0, pos.y - step);
+      setIsUsingKeyboard(true);
+      if (isKeyboardDrawingRef.current) { context.lineTo(pos.x, newY); context.stroke(); }
+      cursorRef.current = { x: pos.x, y: newY };
+      setCursorPos({ x: pos.x, y: newY });
+    },
+    ArrowDown: (e) => {
+      if (!context || !canvasRef.current) return;
+      const step = e.shiftKey ? 10 : 5;
+      const pos = cursorRef.current;
       const dpr = window.devicePixelRatio || 1;
-      const maxX = canvas.width / dpr;
-      const maxY = canvas.height / dpr;
-
-      switch (e.key) {
-        case 'ArrowUp':
-          newY = Math.max(0, pos.y - step);
-          moved = true;
-          break;
-        case 'ArrowDown':
-          newY = Math.min(maxY, pos.y + step);
-          moved = true;
-          break;
-        case 'ArrowLeft':
-          newX = Math.max(0, pos.x - step);
-          moved = true;
-          break;
-        case 'ArrowRight':
-          newX = Math.min(maxX, pos.x + step);
-          moved = true;
-          break;
-        case ' ':
-          e.preventDefault();
-          {
-            const drawing = isKeyboardDrawingRef.current;
-            isKeyboardDrawingRef.current = !drawing;
-            setIsKeyboardDrawing(!drawing);
-            if (!drawing) {
-              ctx.beginPath();
-              ctx.moveTo(pos.x, pos.y);
-            } else {
-              ctx.closePath();
-            }
-          }
-          return;
-        default:
-          break;
+      const maxY = canvasRef.current.height / dpr;
+      const newY = Math.min(maxY, pos.y + step);
+      setIsUsingKeyboard(true);
+      if (isKeyboardDrawingRef.current) { context.lineTo(pos.x, newY); context.stroke(); }
+      cursorRef.current = { x: pos.x, y: newY };
+      setCursorPos({ x: pos.x, y: newY });
+    },
+    ArrowLeft: (e) => {
+      if (!context || !canvasRef.current) return;
+      const step = e.shiftKey ? 10 : 5;
+      const pos = cursorRef.current;
+      const newX = Math.max(0, pos.x - step);
+      setIsUsingKeyboard(true);
+      if (isKeyboardDrawingRef.current) { context.lineTo(newX, pos.y); context.stroke(); }
+      cursorRef.current = { x: newX, y: pos.y };
+      setCursorPos({ x: newX, y: pos.y });
+    },
+    ArrowRight: (e) => {
+      if (!context || !canvasRef.current) return;
+      const step = e.shiftKey ? 10 : 5;
+      const pos = cursorRef.current;
+      const dpr = window.devicePixelRatio || 1;
+      const maxX = canvasRef.current.width / dpr;
+      const newX = Math.min(maxX, pos.x + step);
+      setIsUsingKeyboard(true);
+      if (isKeyboardDrawingRef.current) { context.lineTo(newX, pos.y); context.stroke(); }
+      cursorRef.current = { x: newX, y: pos.y };
+      setCursorPos({ x: newX, y: pos.y });
+    },
+    ' ': () => {
+      if (!context) return;
+      const drawing = isKeyboardDrawingRef.current;
+      isKeyboardDrawingRef.current = !drawing;
+      setIsKeyboardDrawing(!drawing);
+      if (!drawing) {
+        context.beginPath();
+        context.moveTo(cursorRef.current.x, cursorRef.current.y);
+      } else {
+        context.closePath();
       }
-
-      if (moved) {
-        setIsUsingKeyboard(true);
-        if (isKeyboardDrawingRef.current) {
-          ctx.lineTo(newX, newY);
-          ctx.stroke();
-        }
-        cursorRef.current = { x: newX, y: newY };
-        setCursorPos({ x: newX, y: newY });
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [context]);
+    }
+  });
 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (!context) return;

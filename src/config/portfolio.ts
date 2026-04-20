@@ -15,10 +15,12 @@ export interface Project {
   image?: string;
 }
 
-export interface Hobby {
-  id: string;
+export type ContactIconId = 'linkedin' | 'portfolio' | 'github' | 'email';
+
+export interface ContactLink {
   name: string;
-  description: string;
+  link: string;
+  icon: ContactIconId;
 }
 
 export const PORTFOLIO_DATA = {
@@ -76,14 +78,14 @@ export const PORTFOLIO_DATA = {
   abilities: {
     skills: ["React.js", "TypeScript", "Front-End Development", "Design Systems", "UI Components", "Accessibility (WCAG)", "Storybook", "Figma Token Mapping", "Node.js", "C#", "SQL"],
     languages: ["Serbian (Native or Bilingual)", "English (Full Professional)"],
-    tools: ["Fite", "VS Code", "Git", "Storybook", "Figma", "Liveblocks", "npm"]
+    tools: ["VS Code", "Git", "Storybook", "Figma", "Liveblocks", "npm"]
   },
   contact: [
     { name: "LinkedIn", link: "https://www.linkedin.com/in/danilo-novakovic", icon: "linkedin" },
     { name: "Portfolio", link: "https://danilonovakovic.github.io/", icon: "portfolio" },
     { name: "GitHub", link: "https://github.com/DaniloNovakovic", icon: "github" },
     { name: "Email", link: "mailto:dakenzi97@gmail.com", icon: "email" }
-  ],
+  ] satisfies ContactLink[],
   /** Ids align with `portfolioRegistry` hobby overlays / Hobbies room (`games`, `art`, `music`, `fitness`, `dancing`). */
   hobbies: [
     {

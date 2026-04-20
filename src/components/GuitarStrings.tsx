@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { TEXTS } from '../config/content';
+import { useOverlayKeys } from './overlays/useOverlayKeys';
 
 const NOTES = [
   { note: 'E4', freq: 329.63, key: '1' },
@@ -59,16 +60,11 @@ export default function GuitarStrings() {
     osc.stop(ctx.currentTime + 1.5);
   }, [clearActiveStringTimer]);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const noteIndex = NOTES.findIndex((n) => n.key === e.key);
-      if (noteIndex !== -1) {
-        playNote(noteIndex, NOTES[noteIndex]!.freq);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [playNote]);
+  useOverlayKeys(
+    Object.fromEntries(
+      NOTES.map((n, i) => [n.key, () => playNote(i, n.freq)])
+    )
+  );
 
   return (
     <div className="w-full flex flex-col items-center">
