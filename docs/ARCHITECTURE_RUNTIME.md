@@ -40,6 +40,7 @@ This codebase is in a transitional split:
   - Target home for feature-context modules over time.
 
 Migration rule for new code:
+
 - Add new context/plugin modules under `src/games`.
 - Touch `src/game` only when integrating with existing scene runtime until those scenes are moved.
 

@@ -30,7 +30,7 @@ The aesthetic is a fusion of **Pablo Stanley’s Open Peeps** (modular, clean ch
 ### 4. UI & Interaction
 
 - **Font:** Handwritten/cursive fonts (e.g., *Comic Neue*, *Caveat*, or scribbled margin style).
-- **Buttons/Modals:** Should look like paper cutouts with thick black borders and hard-offset shadows (`shadow-[8px_8px_0px_0px_rgba(26,26,26,1)]`).
+- **Buttons/Modals:** Should look like paper cutouts with thick black borders and hard-offset shadows. The current convention is the arbitrary Tailwind class `shadow-[8px_8px_0px_0px_rgba(26,26,26,1)]` applied inline in overlay components under [`src/components/`](../../src/components/). If this changes, promote it to a shared utility (e.g. a Tailwind plugin or a CSS variable in [`src/index.css`](../../src/index.css)) instead of scattering the literal string across files.
 - **Transitions:** Quick "ink-bleed" or "page-turn" feel.
 
 ---
