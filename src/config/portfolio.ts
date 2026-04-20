@@ -15,6 +15,14 @@ export interface Project {
   image?: string;
 }
 
+export type ContactIconId = 'linkedin' | 'portfolio' | 'github' | 'email';
+
+export interface ContactLink {
+  name: string;
+  link: string;
+  icon: ContactIconId;
+}
+
 export const PORTFOLIO_DATA = {
   profile: {
     name: TEXTS.profile.details.fullName,
@@ -77,7 +85,7 @@ export const PORTFOLIO_DATA = {
     { name: "Portfolio", link: "https://danilonovakovic.github.io/", icon: "portfolio" },
     { name: "GitHub", link: "https://github.com/DaniloNovakovic", icon: "github" },
     { name: "Email", link: "mailto:dakenzi97@gmail.com", icon: "email" }
-  ],
+  ] satisfies ContactLink[],
   /** Ids align with `portfolioRegistry` hobby overlays / Hobbies room (`games`, `art`, `music`, `fitness`, `dancing`). */
   hobbies: [
     {
