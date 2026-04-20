@@ -1,25 +1,14 @@
 import React from 'react';
-import { Globe } from 'lucide-react';
 import { PORTFOLIO_DATA, type ContactIconId } from '../config/portfolio';
 import { TEXTS } from '../config/content';
 
-const CONTACT_ICON_SRC: Record<Exclude<ContactIconId, 'portfolio'>, string> = {
+const CONTACT_ICON_SRC: Record<ContactIconId, string> = {
   linkedin: '/icons/contact/linkedin.png',
   github: '/icons/contact/github.png',
   email: '/icons/contact/email.png',
 };
 
 function ContactLinkIcon({ icon }: { icon: ContactIconId }) {
-  if (icon === 'portfolio') {
-    return (
-      <Globe
-        className="h-6 w-6 shrink-0 text-[#1a1a1a] transition-colors group-hover:text-white"
-        strokeWidth={2}
-        aria-hidden
-      />
-    );
-  }
-
   return (
     <img
       src={CONTACT_ICON_SRC[icon]}
@@ -43,7 +32,7 @@ const ContactOverlay: React.FC = () => {
             href={item.link}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center p-4 bg-white border-2 border-[#1a1a1a] rounded-lg shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] transition-all group"
+            className="group flex cursor-pointer items-center p-4 bg-white border-2 border-[#1a1a1a] rounded-lg shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] transition-all"
           >
             <div className="w-10 h-10 shrink-0 bg-gray-100 rounded border border-[#1a1a1a] flex items-center justify-center mr-4 group-hover:bg-[#1a1a1a] transition-colors">
               <ContactLinkIcon icon={item.icon} />

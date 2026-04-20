@@ -15,7 +15,7 @@ export interface Project {
   image?: string;
 }
 
-export type ContactIconId = 'linkedin' | 'portfolio' | 'github' | 'email';
+export type ContactIconId = 'linkedin' | 'github' | 'email';
 
 export interface ContactLink {
   name: string;
@@ -82,7 +82,6 @@ export const PORTFOLIO_DATA = {
   },
   contact: [
     { name: "LinkedIn", link: "https://www.linkedin.com/in/danilo-novakovic", icon: "linkedin" },
-    { name: "Portfolio", link: "https://danilonovakovic.github.io/", icon: "portfolio" },
     { name: "GitHub", link: "https://github.com/DaniloNovakovic", icon: "github" },
     { name: "Email", link: "mailto:dakenzi97@gmail.com", icon: "email" }
   ] satisfies ContactLink[],
