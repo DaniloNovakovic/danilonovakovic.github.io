@@ -1,52 +1,34 @@
-import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
+import { useEffect, useRef, useCallback, Suspense } from 'react';
 import Game from './components/Game';
 import { X } from 'lucide-react';
-import { GameState, type AppState } from './game/gameState';
+import { GameState } from './game/gameState';
 import { getMiniGameById } from './game/miniGameRegistry';
 import { MiniGameType } from './game/types';
 import { TEXTS } from './config/content';
 import { isMiniGameId } from './config/featureIds';
+import { bridgeActions, useBridgeSelector } from './shared/bridge/store';
 
 function App() {
-  const [state, setState] = useState<AppState>({
-    status: GameState.EXPLORING,
-    activeMiniGameId: null
-  });
+  const appState = useBridgeSelector((current) => ({
+    status: current.status,
+    activeMiniGameId: current.activeMiniGameId
+  }));
   const modalRef = useRef<HTMLDivElement>(null);
 
   const handleInteract = (area: string) => {
     if (!isMiniGameId(area)) return;
-    setState({
-      status: GameState.IN_MINIGAME,
-      activeMiniGameId: area
-    });
+    bridgeActions.requestInteraction(area);
   };
 
   const closeOverlay = useCallback(() => {
-    setState((prev) => {
-      const currentId = prev.activeMiniGameId;
-      if (!currentId) {
-        return { status: GameState.EXPLORING, activeMiniGameId: null };
-      }
-      const active = getMiniGameById(currentId);
-      if (active?.overlayParentId) {
-        return {
-          status: GameState.IN_MINIGAME,
-          activeMiniGameId: active.overlayParentId
-        };
-      }
-      return {
-        status: GameState.EXPLORING,
-        activeMiniGameId: null
-      };
-    });
+    bridgeActions.closeActiveOverlay();
   }, []);
 
   // Global Escape handler for React Overlays
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && state.status === GameState.IN_MINIGAME) {
-        const activeGame = getMiniGameById(state.activeMiniGameId!);
+      if (e.key === 'Escape' && appState.status === GameState.IN_MINIGAME) {
+        const activeGame = getMiniGameById(appState.activeMiniGameId!);
         if (activeGame?.type === MiniGameType.REACT_OVERLAY) {
           closeOverlay();
         }
@@ -54,17 +36,16 @@ function App() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [state.status, state.activeMiniGameId, closeOverlay]);
+  }, [appState.status, appState.activeMiniGameId, closeOverlay]);
 
   // Phase 5: Auto-focus modal for keyboard scrollability
   useEffect(() => {
-    if (state.status === GameState.IN_MINIGAME && modalRef.current) {
+    if (appState.status === GameState.IN_MINIGAME && modalRef.current) {
       modalRef.current.focus();
     }
-  }, [state.status, state.activeMiniGameId]);
+  }, [appState.status, appState.activeMiniGameId]);
 
-  const activeMiniGame = state.activeMiniGameId ? getMiniGameById(state.activeMiniGameId) : undefined;
-  const isPaused = state.status === GameState.IN_MINIGAME && activeMiniGame?.type === MiniGameType.REACT_OVERLAY;
+  const activeMiniGame = appState.activeMiniGameId ? getMiniGameById(appState.activeMiniGameId) : undefined;
 
   return (
     <div
@@ -80,18 +61,13 @@ function App() {
             <div className="absolute inset-0">
               {/* Paper Texture Overlay */}
               <div className="pointer-events-none absolute inset-0 z-[5] bg-[url('https://www.transparenttextures.com/patterns/felt.png')] opacity-[0.03]" />
-              <Game
-                onInteract={handleInteract}
-                isPaused={isPaused}
-                activeMiniGameId={state.activeMiniGameId}
-                onClose={closeOverlay}
-              />
+              <Game onInteract={handleInteract} onClose={closeOverlay} />
             </div>
           </div>
         </div>
 
         {/* Hints below game on small screens (avoids covering touch controls) */}
-        {state.status === GameState.EXPLORING && (
+        {appState.status === GameState.EXPLORING && (
           <div className="mt-2 w-full max-w-lg shrink-0 px-1 text-center md:hidden">
             <p className="text-[11px] font-bold uppercase leading-snug tracking-widest text-[#1a1a1a] opacity-80">
               {TEXTS.navigation.hintsCompact}
@@ -101,7 +77,7 @@ function App() {
       </div>
 
       {/* Interactive Overlay */}
-      {state.status === GameState.IN_MINIGAME && activeMiniGame && activeMiniGame.type === MiniGameType.REACT_OVERLAY && (
+      {appState.status === GameState.IN_MINIGAME && activeMiniGame && activeMiniGame.type === MiniGameType.REACT_OVERLAY && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-2 backdrop-blur-sm animate-in fade-in duration-300 sm:items-center sm:p-4">
           <div
             ref={modalRef}
@@ -139,7 +115,7 @@ function App() {
       )}
 
       {/* Floating UI Hints (desktop / tablet) */}
-      {state.status === GameState.EXPLORING && (
+      {appState.status === GameState.EXPLORING && (
         <div className="fixed bottom-6 left-1/2 z-40 hidden w-auto max-w-lg -translate-x-1/2 border-2 border-[#1a1a1a] bg-[#fbfbf9]/80 px-4 py-2 opacity-60 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] backdrop-blur-sm transition-opacity hover:opacity-100 md:block">
           <p className="text-sm font-bold uppercase tracking-widest text-[#1a1a1a]">
             {TEXTS.navigation.hints}

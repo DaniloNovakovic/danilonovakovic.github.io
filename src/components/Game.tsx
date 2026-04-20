@@ -2,34 +2,25 @@ import { useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import * as Phaser from 'phaser';
 import { PHASER_SCENE_KEYS } from '../config/featureIds';
 import { getGameConfig } from '../game/config';
-import { mobileTouch, resetMobileTouch } from '../game/mobileTouchBridge';
 import { OverworldScene } from '../game/OverworldScene';
-import { getAllMiniGames, getMiniGameById } from '../game/miniGameRegistry';
-import {
-  isInteractBridgeScene,
-  isPausableScene,
-  isResumeCaptureScene
-} from '../game/sceneContracts';
-import { rememberResumePosition, peekResumePosition } from '../game/sceneResumeStore';
+import { getAllMiniGames } from '../game/miniGameRegistry';
 import { MiniGameType } from '../game/types';
-
-function rememberSceneExitIfSupported(scene: Phaser.Scene): void {
-  if (isResumeCaptureScene(scene)) {
-    const p = scene.getResumeCapturePosition();
-    if (p) rememberResumePosition(scene.scene.key, p);
-  }
-}
+import { peekResumePosition } from '../game/sceneResumeStore';
+import { bridgeActions, useBridgeSelector } from '../shared/bridge/store';
+import { SceneManager } from '../core/kernel/SceneManager';
+import { PhaserSceneAdapter } from '../infra/phaser/PhaserSceneAdapter';
+import { GameKernel } from '../core/kernel/GameKernel';
+import { createStreetPlugin } from '../games/plugins/StreetPlugin';
+import { createHobbiesPlugin } from '../games/plugins/HobbiesPlugin';
 
 interface GameProps {
   onInteract: (area: string) => void;
-  isPaused: boolean;
-  activeMiniGameId: string | null;
   onClose: () => void;
 }
 
 function MobileGameControls({ visible }: { visible: boolean }) {
   useEffect(() => {
-    if (!visible) resetMobileTouch();
+    if (!visible) bridgeActions.resetTouch();
   }, [visible]);
 
   if (!visible) return null;
@@ -45,17 +36,17 @@ function MobileGameControls({ visible }: { visible: boolean }) {
         aria-label="Move left"
         onPointerDown={(e) => {
           e.preventDefault();
-          mobileTouch.left = true;
+          bridgeActions.setTouchDirectional('left', true);
         }}
         onPointerUp={(e) => {
           e.preventDefault();
-          mobileTouch.left = false;
+          bridgeActions.setTouchDirectional('left', false);
         }}
         onPointerLeave={() => {
-          mobileTouch.left = false;
+          bridgeActions.setTouchDirectional('left', false);
         }}
         onPointerCancel={() => {
-          mobileTouch.left = false;
+          bridgeActions.setTouchDirectional('left', false);
         }}
       >
         ←
@@ -66,7 +57,7 @@ function MobileGameControls({ visible }: { visible: boolean }) {
         aria-label="Jump"
         onPointerDown={(e) => {
           e.preventDefault();
-          mobileTouch.jumpQueued = true;
+          bridgeActions.queueJump();
         }}
       >
         ↑
@@ -77,17 +68,17 @@ function MobileGameControls({ visible }: { visible: boolean }) {
         aria-label="Move right"
         onPointerDown={(e) => {
           e.preventDefault();
-          mobileTouch.right = true;
+          bridgeActions.setTouchDirectional('right', true);
         }}
         onPointerUp={(e) => {
           e.preventDefault();
-          mobileTouch.right = false;
+          bridgeActions.setTouchDirectional('right', false);
         }}
         onPointerLeave={() => {
-          mobileTouch.right = false;
+          bridgeActions.setTouchDirectional('right', false);
         }}
         onPointerCancel={() => {
-          mobileTouch.right = false;
+          bridgeActions.setTouchDirectional('right', false);
         }}
       >
         →
@@ -98,7 +89,7 @@ function MobileGameControls({ visible }: { visible: boolean }) {
         aria-label="Interact"
         onPointerDown={(e) => {
           e.preventDefault();
-          mobileTouch.interactTap = true;
+          bridgeActions.tapInteract();
         }}
       >
         E
@@ -107,9 +98,11 @@ function MobileGameControls({ visible }: { visible: boolean }) {
   );
 }
 
-export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }: GameProps) {
+export default function Game({ onInteract, onClose }: GameProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
+  const isPaused = useBridgeSelector((state) => state.isPaused);
+  const activeMiniGameId = useBridgeSelector((state) => state.activeMiniGameId);
   const bridgeRef = useRef({ onInteract, onClose, isPaused });
 
   useLayoutEffect(() => {
@@ -125,77 +118,8 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
   }, []);
 
   useEffect(() => {
-    resetMobileTouch();
+    bridgeActions.resetTouch();
   }, [activeMiniGameId]);
-
-  // Keep Phaser scenes wired to latest callbacks without re-mounting the game.
-  useEffect(() => {
-    if (!gameRef.current) return;
-    const mainScene = gameRef.current.scene.getScene(PHASER_SCENE_KEYS.main) as OverworldScene | null;
-    if (mainScene) {
-      mainScene.updateInteractCallback(stableOnInteract);
-    }
-
-    const hobbiesScene = gameRef.current.scene.getScene(PHASER_SCENE_KEYS.hobbies);
-    if (isInteractBridgeScene(hobbiesScene)) {
-      hobbiesScene.updateInteractCallback(stableOnInteract);
-    }
-  }, [stableOnInteract]);
-
-  useEffect(() => {
-    if (gameRef.current) {
-      const scenes = gameRef.current.scene.getScenes(true);
-      scenes.forEach((scene) => {
-        if (isPausableScene(scene)) {
-          scene.setPaused(isPaused);
-        }
-      });
-    }
-  }, [isPaused]);
-
-  useEffect(() => {
-    if (gameRef.current && activeMiniGameId) {
-      const activeMiniGame = getMiniGameById(activeMiniGameId);
-      if (activeMiniGame?.type === MiniGameType.PHASER_SCENE) {
-        const sceneKey = activeMiniGame.id;
-
-        if (!gameRef.current.scene.isActive(sceneKey)) {
-          const mainScene = gameRef.current.scene.getScene(PHASER_SCENE_KEYS.main);
-          if (mainScene && gameRef.current.scene.isActive(PHASER_SCENE_KEYS.main)) {
-            rememberSceneExitIfSupported(mainScene);
-          }
-          gameRef.current.scene.stop(PHASER_SCENE_KEYS.main);
-          const resumeInterior = peekResumePosition(sceneKey);
-          gameRef.current.scene.start(sceneKey, {
-            onClose: stableOnClose,
-            onInteract: stableOnInteract,
-            isPaused,
-            ...(resumeInterior ? { resumePosition: resumeInterior } : {})
-          });
-        }
-      }
-    } else if (gameRef.current && !activeMiniGameId) {
-      const scenes = gameRef.current.scene.getScenes(false);
-      let resetNeeded = false;
-      for (const s of scenes) {
-        if (s.scene.key === PHASER_SCENE_KEYS.main) continue;
-        if (gameRef.current.scene.isActive(s.scene.key)) {
-          rememberSceneExitIfSupported(s);
-          gameRef.current.scene.stop(s.scene.key);
-          resetNeeded = true;
-        }
-      }
-
-      if (resetNeeded || !gameRef.current.scene.isActive(PHASER_SCENE_KEYS.main)) {
-        const resumeMain = peekResumePosition(PHASER_SCENE_KEYS.main);
-        gameRef.current.scene.start(PHASER_SCENE_KEYS.main, {
-          onInteract: stableOnInteract,
-          isPaused,
-          ...(resumeMain ? { resumePosition: resumeMain } : {})
-        });
-      }
-    }
-  }, [activeMiniGameId, stableOnInteract, stableOnClose, isPaused]);
 
   useEffect(() => {
     if (!containerRef.current || gameRef.current) return;
@@ -221,7 +145,7 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
 
     game.scene.add(PHASER_SCENE_KEYS.main, OverworldScene, true, {
       onInteract: stableOnInteract,
-      isPaused: bridgeRef.current.isPaused,
+      isPaused,
       resumePosition: peekResumePosition(PHASER_SCENE_KEYS.main)
     });
 
@@ -232,12 +156,28 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
       }
     });
 
+    const adapter = new PhaserSceneAdapter({
+      getGame: () => gameRef.current,
+      onInteract: stableOnInteract
+    });
+    const sceneManager = new SceneManager(adapter, PHASER_SCENE_KEYS.main);
+    sceneManager.registerContext(createStreetPlugin({ onInteract: stableOnInteract }));
+    sceneManager.registerContext(
+      createHobbiesPlugin({
+        onClose: stableOnClose,
+        onInteract: stableOnInteract
+      })
+    );
+    const kernel = new GameKernel(sceneManager);
+    kernel.start();
+
     return () => {
       ro?.disconnect();
+      kernel.stop();
       game.destroy(true);
       gameRef.current = null;
     };
-  }, [stableOnInteract]);
+  }, [stableOnClose, stableOnInteract]);
 
   return (
     <div className="relative h-full w-full min-h-0 overflow-hidden rounded-lg border-4 border-neutral-800 bg-[#fbfbf9] shadow-[8px_8px_0px_0px_rgba(26,26,26,1)]">

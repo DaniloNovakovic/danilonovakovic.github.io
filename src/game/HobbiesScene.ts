@@ -17,8 +17,8 @@ import {
   HOBBIES_WALK_SPEED,
   HOBBIES_PLAYER_START_OFFSET_Y
 } from './config';
-import { mobileTouch } from './mobileTouchBridge';
 import { setSceneKeyboardPaused } from './sceneKeyboardPause';
+import { bridgeActions, bridgeStore } from '../shared/bridge/store';
 
 const hobbyLabel = (id: HobbyReactOverlayId): string =>
   (TEXTS.hobbies as Record<HobbyReactOverlayId, string>)[id];
@@ -239,15 +239,14 @@ export class HobbiesScene extends Phaser.Scene {
       return;
     }
 
-    mobileTouch.jumpQueued = false;
-
-    const interactFromTouch = mobileTouch.interactTap;
-    mobileTouch.interactTap = false;
+    const touchState = bridgeStore.getState().touch;
+    const oneShots = bridgeActions.consumeTouchOneShots();
+    const interactFromTouch = oneShots.interactTap;
 
     const speed = HOBBIES_WALK_SPEED;
 
-    const left = this.cursors.left.isDown || this.wasd.a.isDown || mobileTouch.left;
-    const right = this.cursors.right.isDown || this.wasd.d.isDown || mobileTouch.right;
+    const left = this.cursors.left.isDown || this.wasd.a.isDown || touchState.left;
+    const right = this.cursors.right.isDown || this.wasd.d.isDown || touchState.right;
 
     if (left && !right) {
       this.player.setVelocityX(-speed);

@@ -1,6 +1,5 @@
 import * as Phaser from 'phaser';
 import { HOBBIES_FEATURE_ID } from '../config/featureIds';
-import { mobileTouch } from './mobileTouchBridge';
 import { PORTFOLIO_SECTIONS } from '../config/portfolioRegistry';
 import { TextureGenerator } from './textures/TextureGenerator';
 import { EnvironmentBuilder } from './textures/EnvironmentBuilder';
@@ -22,6 +21,10 @@ import {
   OVERWORLD_WIDTH
 } from './config';
 import { setSceneKeyboardPaused } from './sceneKeyboardPause';
+import { bridgeActions, bridgeStore } from '../shared/bridge/store';
+import { EcsWorld, type EntityId } from '../core/ecs/world';
+import { createPlayerComponentStores } from '../core/ecs/components/player';
+import { runPlayerInputAndMovementSystems } from '../core/ecs/systems/playerSystems';
 
 export class OverworldScene extends Phaser.Scene {
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -35,6 +38,9 @@ export class OverworldScene extends Phaser.Scene {
   private isPaused: boolean = false;
   /** Optional spawn when (re)starting after leaving another Phaser scene. */
   private resumePosition?: { x: number; y: number };
+  private readonly playerEcsWorld = new EcsWorld();
+  private readonly playerStores = createPlayerComponentStores(this.playerEcsWorld);
+  private playerEntityId: EntityId = 0;
 
   constructor() {
     super({ key: 'MainScene' });
@@ -61,6 +67,9 @@ export class OverworldScene extends Phaser.Scene {
 
   setPaused(paused: boolean) {
     this.isPaused = paused;
+    if (this.playerEntityId) {
+      this.playerEcsWorld.setComponent(this.playerStores.pause, this.playerEntityId, { paused });
+    }
     setSceneKeyboardPaused(this, paused, {
       zeroHorizontalVelocity: () => {
         if (this.player) this.player.setVelocityX(0);
@@ -130,6 +139,39 @@ export class OverworldScene extends Phaser.Scene {
     this.player.setCollideWorldBounds(true);
     this.player.setGravityY(OVERWORLD_PLAYER_GRAVITY_Y);
     this.physics.add.collider(this.player, groundZone);
+    this.playerEntityId = this.playerEcsWorld.createEntity();
+    this.playerEcsWorld.setComponent(this.playerStores.transform, this.playerEntityId, {
+      x: this.player.x,
+      y: this.player.y
+    });
+    this.playerEcsWorld.setComponent(this.playerStores.velocity, this.playerEntityId, { x: 0, y: 0 });
+    this.playerEcsWorld.setComponent(this.playerStores.facing, this.playerEntityId, { flipX: false });
+    this.playerEcsWorld.setComponent(this.playerStores.movement, this.playerEntityId, {
+      walkSpeed: OVERWORLD_WALK_SPEED,
+      sprintSpeed: OVERWORLD_SPRINT_SPEED,
+      jumpVelocityY: OVERWORLD_JUMP_VELOCITY_Y
+    });
+    this.playerEcsWorld.setComponent(this.playerStores.jump, this.playerEntityId, {
+      enabled: true,
+      grounded: true
+    });
+    this.playerEcsWorld.setComponent(this.playerStores.interaction, this.playerEntityId, {
+      requested: false
+    });
+    this.playerEcsWorld.setComponent(this.playerStores.pause, this.playerEntityId, {
+      paused: this.isPaused
+    });
+    this.playerEcsWorld.setComponent(this.playerStores.resume, this.playerEntityId, {
+      x: startX,
+      y: startY
+    });
+    this.playerEcsWorld.setComponent(this.playerStores.input, this.playerEntityId, {
+      left: false,
+      right: false,
+      sprint: false,
+      jump: false,
+      interact: false
+    });
 
     // --- FOREGROUND ---
     EnvironmentBuilder.buildGrass(this, worldWidth);
@@ -173,45 +215,46 @@ export class OverworldScene extends Phaser.Scene {
       return;
     }
 
-    const jumpFromTouch = mobileTouch.jumpQueued;
-    mobileTouch.jumpQueued = false;
+    const touchState = bridgeStore.getState().touch;
+    const oneShots = bridgeActions.consumeTouchOneShots();
+    const left = this.cursors.left.isDown || this.wasd.a.isDown || touchState.left;
+    const right = this.cursors.right.isDown || this.wasd.d.isDown || touchState.right;
+    const jump = this.cursors.up.isDown || oneShots.jumpQueued;
+    const interactPressed = Phaser.Input.Keyboard.JustDown(this.interactKey) || oneShots.interactTap;
+    const grounded = this.player.body.touching.down;
 
-    const interactFromTouch = mobileTouch.interactTap;
-    mobileTouch.interactTap = false;
+    this.playerEcsWorld.setComponent(this.playerStores.jump, this.playerEntityId, {
+      enabled: true,
+      grounded
+    });
+    this.playerEcsWorld.setComponent(this.playerStores.input, this.playerEntityId, {
+      left,
+      right,
+      sprint: this.cursors.shift.isDown,
+      jump,
+      interact: interactPressed
+    });
+    const playerStep = runPlayerInputAndMovementSystems(
+      this.playerEcsWorld,
+      this.playerStores,
+      this.playerEntityId
+    );
+    this.player.setVelocityX(playerStep.velocityX);
+    this.player.setFlipX(playerStep.facingLeft);
 
-    const isSprinting = this.cursors.shift.isDown;
-    const speed = isSprinting ? OVERWORLD_SPRINT_SPEED : OVERWORLD_WALK_SPEED;
-    let isMoving = false;
-
-    const left =
-      this.cursors.left.isDown || this.wasd.a.isDown || mobileTouch.left;
-    const right =
-      this.cursors.right.isDown || this.wasd.d.isDown || mobileTouch.right;
-
-    if (left && !right) {
-      this.player.setVelocityX(-speed);
-      this.player.setFlipX(true);
-      isMoving = true;
-    } else if (right && !left) {
-      this.player.setVelocityX(speed);
-      this.player.setFlipX(false);
-      isMoving = true;
-    } else {
-      this.player.setVelocityX(0);
-    }
-
-    if (isMoving) {
+    if (playerStep.moving) {
       this.player.setAngle(Math.sin(this.time.now / 100) * 5);
     } else {
       this.player.setAngle(0);
     }
 
-    if (
-      (this.cursors.up.isDown || jumpFromTouch) &&
-      this.player.body.touching.down
-    ) {
+    if (playerStep.shouldJump) {
       this.player.setVelocityY(OVERWORLD_JUMP_VELOCITY_Y);
     }
+    this.playerEcsWorld.setComponent(this.playerStores.transform, this.playerEntityId, {
+      x: this.player.x,
+      y: this.player.y
+    });
 
     // Atmospheric ink particles
     if (Phaser.Math.Between(0, 100) > 95) {
@@ -243,10 +286,7 @@ export class OverworldScene extends Phaser.Scene {
 
     if (canInteractWith && interactPos) {
       this.interactPrompt.setPosition(interactPos.x, interactPos.y).setVisible(true);
-      if (
-        Phaser.Input.Keyboard.JustDown(this.interactKey) ||
-        interactFromTouch
-      ) {
+      if (playerStep.interactRequested) {
         this.onInteract?.(canInteractWith);
       }
     } else {
