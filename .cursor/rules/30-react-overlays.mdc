@@ -1,0 +1,30 @@
+---
+description: React overlay rules — bridge store is the only allowed engine↔UI channel; no direct Phaser imports in overlays.
+globs:
+  - src/components/**
+  - src/App.tsx
+alwaysApply: false
+---
+
+# React overlay rules
+
+React is the overlay / menu / mini-game shell. Phaser is the world. The bridge is the only supported channel between them.
+
+## Hard rules
+
+1. **No direct Phaser imports in React overlays.** React components under `src/components/**` must not `import 'phaser'` (or any Phaser symbol) outside of the single bootstrap component that owns the `Phaser.Game` instance (e.g. [`src/components/Game.tsx`](../../src/components/Game.tsx)). Everything else reads/writes engine state via the bridge.
+2. **Bridge in, bridge out.** Read with `useBridgeState` (or a scoped selector); write with `bridgeActions`. Do not subscribe to Phaser's event emitters from React, and do not poll Phaser state. See [`src/shared/bridge/store.ts`](../../src/shared/bridge/store.ts) and [`docs/patterns/observer.md`](../../docs/patterns/observer.md).
+3. **Pause propagation goes through the kernel.** Opening a React-overlay mini-game should set bridge state (`status: IN_MINIGAME`, `activeMiniGameId`) and let [`GameKernel`](../../src/core/kernel/GameKernel.ts) derive `isPaused` via `computePause`. Don't call scene pause methods from React.
+4. **One-shot touch events are consumed, not peeked.** Touch `jumpQueued` / `interactTap` flags are one-shots consumed by `bridgeActions.consumeTouchOneShots()`. If you need a new one-shot, add it next to the existing ones — don't introduce a parallel event channel.
+5. **Service locator, not window.** If a React overlay needs a game service (audio, persistence, analytics), it either (a) gets it via props from the composition root, (b) gets it via React Context, or (c) gets it via the bridge. It does not pluck it from `window`. See [`docs/patterns/service-locator.md`](../../docs/patterns/service-locator.md).
+
+## Why it matters
+
+The bridge is what makes the React-overlays-on-Phaser hybrid tractable. Side-channel couplings (Phaser events into React, `window.*` backdoors, direct DOM manipulation from Phaser scenes) make every mini-game fragile and untestable. The bridge gives us a single, typed, observable surface.
+
+## See also
+
+- [`docs/patterns/observer.md`](../../docs/patterns/observer.md)
+- [`docs/patterns/service-locator.md`](../../docs/patterns/service-locator.md)
+- [`AGENTS.md`](../../AGENTS.md) — overview of the bridge model
+- [`docs/ARCHITECTURE_RUNTIME.md`](../../docs/ARCHITECTURE_RUNTIME.md) — runtime layering

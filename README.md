@@ -39,6 +39,8 @@ Folder ownership note:
 - [`src/game`](src/game) currently contains active scene/runtime implementation.
 - [`src/games`](src/games) contains plugin/context wrappers and is the target location for future feature-module migration.
 
+Architectural patterns used here are anchored to Robert Nystrom's [*Game Programming Patterns*](https://gameprogrammingpatterns.com/); per-pattern notes and adoption status live in [`docs/patterns/`](docs/patterns/README.md).
+
 ## Deploy (GitHub Pages)
 
 Production build outputs to `dist/`. CI runs lint, tests, and build via [`.github/workflows/ci.yml`](.github/workflows/ci.yml). Wire a Pages deploy step there if you want the live site to track `main` automatically.

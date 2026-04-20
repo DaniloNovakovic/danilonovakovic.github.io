@@ -1,0 +1,33 @@
+---
+description: Core project philosophy for src/** — YAGNI, composition, follow existing conventions. Grounded in Nystrom's Game Programming Patterns.
+globs:
+  - src/**
+alwaysApply: true
+---
+
+# Philosophy (applies to all of `src/`)
+
+This project uses Robert Nystrom's [*Game Programming Patterns*](https://gameprogrammingpatterns.com/) as its primary architectural reference. Full notes and adoption status live in [`docs/patterns/`](../../docs/patterns/README.md).
+
+## Hard rules
+
+1. **YAGNI first.** Write the cleanest, most direct solution. Do not add speculative extensibility, abstract base classes, plugin systems, or configuration surfaces unless the current task actually requires them. Over-engineering fills the "mental scratch disk" (Nystrom, Part I) and calcifies the codebase.
+2. **Follow existing conventions before inventing new ones.** Before introducing a new store, bus, global, or lifecycle mechanism, check whether the problem is already solved by the bridge store, the kernel, the scene manager, or ECS. If it is, use that — do not introduce a parallel system.
+3. **Favor composition over inheritance.** Deep class hierarchies are a smell. Prefer small pure functions, discriminated unions, and ECS components over subclassing.
+4. **No new globals.** No module-level `window.foo`, no one-off `export const bar = new Bar()` that everything imports as a backdoor. If it needs to be shared, it goes on the bridge store or is passed in. See [`docs/patterns/singleton.md`](../../docs/patterns/singleton.md) and [`docs/patterns/service-locator.md`](../../docs/patterns/service-locator.md).
+5. **Patterns we intentionally under-apply in this repo:** Data Locality (C++-style hot/cold splitting), Object Pool (no measured GC pressure), Spatial Partition (Arcade Physics does broadphase; tiny entity counts), Bytecode (no user-authored scripting). Do not introduce these without an explicit ask. See [`docs/patterns/README.md`](../../docs/patterns/README.md).
+
+## When proposing a new abstraction
+
+Before adding one, answer out loud:
+
+- Which chapter of `docs/patterns/` is this? If none, pause.
+- Does the bridge store, kernel, scene manager, or ECS already cover this?
+- Will removing this abstraction in two weeks be cheap if we guessed wrong?
+
+If the answer to any is "no / unclear," prefer the direct solution.
+
+## See also
+
+- [`docs/patterns/README.md`](../../docs/patterns/README.md) — full pattern index and adoption map
+- [`AGENTS.md`](../../AGENTS.md), [`docs/ARCHITECTURE_CONSTITUTION.md`](../../docs/ARCHITECTURE_CONSTITUTION.md), [`docs/ARCHITECTURE_RUNTIME.md`](../../docs/ARCHITECTURE_RUNTIME.md)

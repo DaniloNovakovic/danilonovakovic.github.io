@@ -53,3 +53,10 @@ Overworld buildings are placed along the 3000px street (see `src/config/worldLay
 - **2900:** Contact
 
 Please maintain the sketchy, handwritten feel for all new features!
+
+## 📚 Further reading
+
+- **Architectural patterns (primary reference):** `[docs/patterns/](docs/patterns/README.md)` — per-pattern notes anchored to Robert Nystrom's *Game Programming Patterns*, with adoption status and JS/TS + Phaser caveats for this repo.
+- **Scoped AI rules:** `[.cursor/rules/](.cursor/rules/)` — narrow, folder-scoped `.mdc` rules that mirror the patterns folder.
+- **Runtime layering:** `[docs/ARCHITECTURE_RUNTIME.md](docs/ARCHITECTURE_RUNTIME.md)`.
+- **Project constitution:** `[docs/ARCHITECTURE_CONSTITUTION.md](docs/ARCHITECTURE_CONSTITUTION.md)`.
