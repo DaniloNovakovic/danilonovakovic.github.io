@@ -6,7 +6,7 @@ import { OverworldScene } from '../game/OverworldScene';
 import { getAllMiniGames } from '../game/miniGameRegistry';
 import { MiniGameType } from '../game/types';
 import { peekResumePosition } from '../game/sceneResumeStore';
-import { bridgeActions, useBridgeSelector } from '../shared/bridge/store';
+import { bridgeActions } from '../shared/bridge/store';
 import { SceneManager } from '../core/kernel/SceneManager';
 import { PhaserSceneAdapter } from '../infra/phaser/PhaserSceneAdapter';
 import { GameKernel } from '../core/kernel/GameKernel';
@@ -15,6 +15,8 @@ import { createHobbiesPlugin } from '../games/plugins/HobbiesPlugin';
 
 interface GameProps {
   onInteract: (area: string) => void;
+  isPaused: boolean;
+  activeMiniGameId: string | null;
   onClose: () => void;
 }
 
@@ -98,11 +100,9 @@ function MobileGameControls({ visible }: { visible: boolean }) {
   );
 }
 
-export default function Game({ onInteract, onClose }: GameProps) {
+export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }: GameProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
-  const isPaused = useBridgeSelector((state) => state.isPaused);
-  const activeMiniGameId = useBridgeSelector((state) => state.activeMiniGameId);
   const bridgeRef = useRef({ onInteract, onClose, isPaused });
 
   useLayoutEffect(() => {

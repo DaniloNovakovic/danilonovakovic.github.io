@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from 'react';
+import { useEffect, useState } from 'react';
 import { GameState, type GameStateValue } from '../../game/gameState';
 import type { MiniGameId } from '../../config/featureIds';
 import { isReactOverlayMiniGameId } from '../../config/miniGameCategories';
@@ -41,11 +41,22 @@ function computePause(next: Pick<BridgeState, 'status' | 'activeMiniGameId'>): b
 }
 
 function setState(updater: (current: BridgeState) => BridgeState): void {
+  const previous = state;
   const next = updater(state);
-  state = {
+  const candidate: BridgeState = {
     ...next,
     isPaused: computePause(next)
   };
+  const unchanged =
+    previous.status === candidate.status &&
+    previous.activeMiniGameId === candidate.activeMiniGameId &&
+    previous.isPaused === candidate.isPaused &&
+    previous.touch.left === candidate.touch.left &&
+    previous.touch.right === candidate.touch.right &&
+    previous.touch.jumpQueued === candidate.touch.jumpQueued &&
+    previous.touch.interactTap === candidate.touch.interactTap;
+  if (unchanged) return;
+  state = candidate;
   emit();
 }
 
@@ -152,10 +163,14 @@ export const bridgeActions = {
   }
 };
 
-export function useBridgeSelector<T>(selector: (state: BridgeState) => T): T {
-  return useSyncExternalStore(
-    bridgeStore.subscribe,
-    () => selector(bridgeStore.getState()),
-    () => selector(bridgeStore.getState())
-  );
+export function useBridgeState(): BridgeState {
+  const [snapshot, setSnapshot] = useState<BridgeState>(() => bridgeStore.getState());
+
+  useEffect(() => {
+    return bridgeStore.subscribe(() => {
+      setSnapshot(bridgeStore.getState());
+    });
+  }, []);
+
+  return snapshot;
 }
