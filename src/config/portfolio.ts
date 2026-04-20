@@ -15,12 +15,6 @@ export interface Project {
   image?: string;
 }
 
-export interface Hobby {
-  id: string;
-  name: string;
-  description: string;
-}
-
 export const PORTFOLIO_DATA = {
   profile: {
     name: TEXTS.profile.details.fullName,
@@ -76,7 +70,7 @@ export const PORTFOLIO_DATA = {
   abilities: {
     skills: ["React.js", "TypeScript", "Front-End Development", "Design Systems", "UI Components", "Accessibility (WCAG)", "Storybook", "Figma Token Mapping", "Node.js", "C#", "SQL"],
     languages: ["Serbian (Native or Bilingual)", "English (Full Professional)"],
-    tools: ["Fite", "VS Code", "Git", "Storybook", "Figma", "Liveblocks", "npm"]
+    tools: ["VS Code", "Git", "Storybook", "Figma", "Liveblocks", "npm"]
   },
   contact: [
     { name: "LinkedIn", link: "https://www.linkedin.com/in/danilo-novakovic", icon: "linkedin" },

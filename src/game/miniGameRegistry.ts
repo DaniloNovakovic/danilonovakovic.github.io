@@ -8,7 +8,7 @@ import { HOBBIES_ROOM_INTERACTABLES } from '../config/hobbiesRoomLayout';
 import { PORTFOLIO_SECTIONS } from '../config/portfolioRegistry';
 import { OVERWORLD_BUILDING_PLACEMENTS } from '../config/worldLayout';
 import { MiniGameType } from './types';
-import type { MiniGamePlugin, MiniGameTypeValue } from './types';
+import type { MiniGamePlugin } from './types';
 
 function assertPortfolioRegistryInvariants(sections: readonly MiniGamePlugin[]): void {
   const byId = new Map<MiniGameId, MiniGamePlugin>();
@@ -86,6 +86,3 @@ export const getMiniGameById = (id: string | null | undefined): MiniGamePlugin |
   return MINI_GAME_BY_ID.get(id);
 };
 
-export const getMiniGamesByType = (type: MiniGameTypeValue): MiniGamePlugin[] => {
-  return PORTFOLIO_SECTIONS.filter((game) => game.type === type);
-};

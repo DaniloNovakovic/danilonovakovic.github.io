@@ -33,11 +33,6 @@ export interface PauseState {
   paused: boolean;
 }
 
-export interface ResumePosition {
-  x: number;
-  y: number;
-}
-
 export interface PlayerInput {
   left: boolean;
   right: boolean;
@@ -54,7 +49,6 @@ export interface PlayerComponentStores {
   jump: ComponentStore<JumpCapability>;
   interaction: ComponentStore<InteractionProbe>;
   pause: ComponentStore<PauseState>;
-  resume: ComponentStore<ResumePosition>;
   input: ComponentStore<PlayerInput>;
 }
 
@@ -67,7 +61,6 @@ export function createPlayerComponentStores(world: EcsWorld): PlayerComponentSto
     jump: world.registerComponent<JumpCapability>('JumpCapability'),
     interaction: world.registerComponent<InteractionProbe>('InteractionProbe'),
     pause: world.registerComponent<PauseState>('PauseState'),
-    resume: world.registerComponent<ResumePosition>('ResumePosition'),
     input: world.registerComponent<PlayerInput>('PlayerInput')
   };
 }

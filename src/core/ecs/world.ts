@@ -35,4 +35,10 @@ export class EcsWorld {
   getComponent<T>(store: ComponentStore<T>, entity: EntityId): T | undefined {
     return store.values.get(entity);
   }
+
+  /** Clear all component data and reset entity counter. Call at scene (re)start. */
+  reset(): void {
+    this.nextEntityId = 1;
+    this.stores.forEach((store) => store.values.clear());
+  }
 }

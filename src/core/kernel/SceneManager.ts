@@ -1,4 +1,4 @@
-import type { ContextId, ContextPluginDefinition, ResumeSnapshot, TransitionReason } from './types';
+import type { ContextId, ContextPluginDefinition, ResumeSnapshot } from './types';
 
 export interface SceneRuntimeAdapter {
   isSceneActive(sceneKey: string): boolean;
@@ -24,7 +24,7 @@ export class SceneManager {
     def.onRegister?.();
   }
 
-  enter(contextId: ContextId, _reason: TransitionReason = 'sync'): void {
+  enter(contextId: ContextId): void {
     const target = this.contexts.get(contextId);
     if (!target) return;
 

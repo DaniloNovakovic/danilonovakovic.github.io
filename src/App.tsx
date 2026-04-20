@@ -1,19 +1,18 @@
-import { useEffect, useRef, useCallback, Suspense, useState } from 'react';
+import { useCallback, Suspense, useState } from 'react';
 import Game from './components/Game';
-import { X } from 'lucide-react';
 import { GameState, type AppState } from './game/gameState';
 import { getMiniGameById } from './game/miniGameRegistry';
 import { MiniGameType } from './game/types';
 import { TEXTS } from './config/content';
 import { isMiniGameId } from './config/featureIds';
-import { bridgeActions } from './shared/bridge/store';
+import { bridgeActions, bridgeStore } from './shared/bridge/store';
+import { OverlayCard } from './components/overlays/OverlayCard';
 
 function App() {
   const [state, setState] = useState<AppState>({
     status: GameState.EXPLORING,
     activeMiniGameId: null
   });
-  const modalRef = useRef<HTMLDivElement>(null);
 
   const handleInteract = (area: string) => {
     if (!isMiniGameId(area)) return;
@@ -24,47 +23,21 @@ function App() {
     bridgeActions.requestInteraction(area);
   };
 
+  /**
+   * Registry is the single source of truth for overlay parent relationships.
+   * Bridge is driven here — no hardcoded parent map in the store.
+   */
   const closeOverlay = useCallback(() => {
-    setState((prev) => {
-      const currentId = prev.activeMiniGameId;
-      if (!currentId) {
-        return { status: GameState.EXPLORING, activeMiniGameId: null };
-      }
-      const active = getMiniGameById(currentId);
-      if (active?.overlayParentId) {
-        return {
-          status: GameState.IN_MINIGAME,
-          activeMiniGameId: active.overlayParentId
-        };
-      }
-      return {
-        status: GameState.EXPLORING,
-        activeMiniGameId: null
-      };
-    });
-    bridgeActions.closeActiveOverlay();
-  }, []);
-
-  // Global Escape handler for React Overlays
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && state.status === GameState.IN_MINIGAME) {
-        const activeGame = getMiniGameById(state.activeMiniGameId!);
-        if (activeGame?.type === MiniGameType.REACT_OVERLAY) {
-          closeOverlay();
-        }
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [state.status, state.activeMiniGameId, closeOverlay]);
-
-  // Phase 5: Auto-focus modal for keyboard scrollability
-  useEffect(() => {
-    if (state.status === GameState.IN_MINIGAME && modalRef.current) {
-      modalRef.current.focus();
+    const currentId = bridgeStore.getState().activeMiniGameId;
+    const active = currentId ? getMiniGameById(currentId) : undefined;
+    if (active?.overlayParentId) {
+      bridgeActions.requestInteraction(active.overlayParentId);
+      setState({ status: GameState.IN_MINIGAME, activeMiniGameId: active.overlayParentId });
+    } else {
+      bridgeActions.closeActiveOverlay();
+      setState({ status: GameState.EXPLORING, activeMiniGameId: null });
     }
-  }, [state.status, state.activeMiniGameId]);
+  }, []);
 
   const activeMiniGame = state.activeMiniGameId ? getMiniGameById(state.activeMiniGameId) : undefined;
   const isPaused = state.status === GameState.IN_MINIGAME && activeMiniGame?.type === MiniGameType.REACT_OVERLAY;
@@ -106,38 +79,19 @@ function App() {
       {/* Interactive Overlay */}
       {state.status === GameState.IN_MINIGAME && activeMiniGame && activeMiniGame.type === MiniGameType.REACT_OVERLAY && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-2 backdrop-blur-sm animate-in fade-in duration-300 sm:items-center sm:p-4">
-          <div
-            ref={modalRef}
-            tabIndex={0}
-            className="relative max-h-[92dvh] w-full max-w-[600px] overflow-y-auto rounded-t-2xl border-4 border-[#1a1a1a] bg-[#fbfbf9] p-4 text-[#1a1a1a] shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] outline-none animate-in zoom-in-95 fade-in focus:ring-0 sm:rounded-2xl sm:p-8"
+          <OverlayCard
+            title={activeMiniGame.name}
+            description={activeMiniGame.description}
+            onClose={closeOverlay}
           >
-            <button
-              type="button"
-              onClick={closeOverlay}
-              className="absolute right-2 top-2 z-10 rounded-full border-2 border-[#1a1a1a] bg-[#f4f1ea] p-2 transition-colors hover:bg-[#e8e5df] sm:right-4 sm:top-4"
-              aria-label="Close"
+            <Suspense
+              fallback={
+                <p className="text-sm font-bold text-[#1a1a1a] opacity-60">{TEXTS.common.loading}</p>
+              }
             >
-              <X size={20} color="#1a1a1a" />
-            </button>
-
-            <h2 className="mb-3 mt-1 border-b-4 border-[#1a1a1a] pb-2 pr-12 text-2xl font-bold uppercase tracking-wider sm:mb-4 sm:mt-0 sm:pr-0 sm:text-4xl">
-              {activeMiniGame.name}
-            </h2>
-
-            <div className="mt-4 text-base leading-relaxed sm:mt-6 sm:text-xl">
-              <p className="mb-6 font-medium italic opacity-80 sm:mb-8">{activeMiniGame.description}</p>
-
-              <div className="mt-4">
-                <Suspense
-                  fallback={
-                    <p className="text-sm font-bold text-[#1a1a1a] opacity-60">{TEXTS.common.loading}</p>
-                  }
-                >
-                  {activeMiniGame.Component && <activeMiniGame.Component />}
-                </Suspense>
-              </div>
-            </div>
-          </div>
+              {activeMiniGame.Component && <activeMiniGame.Component />}
+            </Suspense>
+          </OverlayCard>
         </div>
       )}
 

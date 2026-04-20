@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback, useLayoutEffect } from 'react';
 import { TEXTS } from '../config/content';
+import { useOverlayKeys } from './overlays/useOverlayKeys';
 
 const ARROWS = ['UP', 'RIGHT', 'DOWN', 'LEFT'] as const;
 
@@ -34,26 +35,19 @@ export default function DancingMini() {
   const [sequence, setSequence] = useState<string[]>([]);
   const [playerSeq, setPlayerSeq] = useState<string[]>([]);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isWatching, setIsWatching] = useState(false);
   const [activeArrow, setActiveArrow] = useState<string | null>(null);
   const [message, setMessage] = useState(TEXTS.miniGames.dancing.startMessage);
 
   const sequenceRef = useRef<string[]>([]);
   const playerSeqRef = useRef<string[]>([]);
   const isPlayingRef = useRef(false);
-  const messageRef = useRef(message);
+  const isWatchingRef = useRef(false);
 
-  useLayoutEffect(() => {
-    sequenceRef.current = sequence;
-  }, [sequence]);
-  useLayoutEffect(() => {
-    playerSeqRef.current = playerSeq;
-  }, [playerSeq]);
-  useLayoutEffect(() => {
-    isPlayingRef.current = isPlaying;
-  }, [isPlaying]);
-  useLayoutEffect(() => {
-    messageRef.current = message;
-  }, [message]);
+  useLayoutEffect(() => { sequenceRef.current = sequence; }, [sequence]);
+  useLayoutEffect(() => { playerSeqRef.current = playerSeq; }, [playerSeq]);
+  useLayoutEffect(() => { isPlayingRef.current = isPlaying; }, [isPlaying]);
+  useLayoutEffect(() => { isWatchingRef.current = isWatching; }, [isWatching]);
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -73,6 +67,7 @@ export default function DancingMini() {
     (seq: string[]) => {
       clearTimers();
       let i = 0;
+      setIsWatching(true);
       setMessage(TEXTS.miniGames.dancing.watchMessage);
       intervalRef.current = setInterval(() => {
         const idx = i;
@@ -85,7 +80,10 @@ export default function DancingMini() {
             clearInterval(intervalRef.current);
             intervalRef.current = null;
           }
-          const t2 = setTimeout(() => setMessage(TEXTS.miniGames.dancing.turnMessage), 500);
+          const t2 = setTimeout(() => {
+            setIsWatching(false);
+            setMessage(TEXTS.miniGames.dancing.turnMessage);
+          }, 500);
           timeoutsRef.current.push(t2);
         }
       }, 800);
@@ -109,12 +107,13 @@ export default function DancingMini() {
     setSequence([]);
     setPlayerSeq([]);
     setIsPlaying(true);
+    setIsWatching(true);
     setMessage(TEXTS.miniGames.dancing.watchMessage);
     nextRound([]);
   };
 
-  const handleArrowClick = (arrow: string) => {
-    if (!isPlayingRef.current || messageRef.current === TEXTS.miniGames.dancing.watchMessage) return;
+  const handleArrowClick = useCallback((arrow: string) => {
+    if (!isPlayingRef.current || isWatchingRef.current) return;
 
     setActiveArrow(arrow);
     const tFlash = setTimeout(() => setActiveArrow(null), 200);
@@ -130,12 +129,20 @@ export default function DancingMini() {
       clearTimers();
       setMessage(`${TEXTS.common.gameOver} ${TEXTS.common.score} ${seq.length - 1}`);
       setIsPlaying(false);
+      setIsWatching(false);
     } else if (newPlayerSeq.length === seq.length) {
       setMessage(TEXTS.miniGames.dancing.successMessage);
       const tNext = setTimeout(() => nextRound(seq), 1000);
       timeoutsRef.current.push(tNext);
     }
-  };
+  }, [clearTimers, nextRound]);
+
+  useOverlayKeys({
+    ArrowUp: () => handleArrowClick('UP'),
+    ArrowDown: () => handleArrowClick('DOWN'),
+    ArrowLeft: () => handleArrowClick('LEFT'),
+    ArrowRight: () => handleArrowClick('RIGHT')
+  });
 
   return (
     <div className="w-full flex flex-col items-center">

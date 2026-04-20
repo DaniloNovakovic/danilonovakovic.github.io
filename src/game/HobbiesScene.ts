@@ -1,12 +1,10 @@
+/**
+ * HobbiesScene — thin orchestrator.
+ * Delegates room layout to HobbiesRoom, player logic to PlayerController.
+ */
 import * as Phaser from 'phaser';
-import { HOBBY_REACT_OVERLAY_IDS, type HobbyReactOverlayId } from '../config/featureIds';
-import {
-  HOBBIES_EXIT_X,
-  HOBBIES_ROOM_INTERACTABLES,
-  HOBBY_STATION_LAYOUT
-} from '../config/hobbiesRoomLayout';
+import { HOBBIES_EXIT_X, HOBBIES_ROOM_INTERACTABLES } from '../config/hobbiesRoomLayout';
 import { TEXTS } from '../config/content';
-import { TextureGenerator } from './textures/TextureGenerator';
 import {
   HOBBIES_FLOOR_Y,
   HOBBIES_GROUND_ZONE,
@@ -19,9 +17,8 @@ import {
 } from './config';
 import { setSceneKeyboardPaused } from './sceneKeyboardPause';
 import { bridgeActions, bridgeStore } from '../shared/bridge/store';
-
-const hobbyLabel = (id: HobbyReactOverlayId): string =>
-  (TEXTS.hobbies as Record<HobbyReactOverlayId, string>)[id];
+import { PlayerController } from '../core/player/PlayerController';
+import { buildHobbiesRoom } from './hobbies/HobbiesRoom';
 
 export class HobbiesScene extends Phaser.Scene {
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -30,6 +27,7 @@ export class HobbiesScene extends Phaser.Scene {
   interactKey!: Phaser.Input.Keyboard.Key;
   exitPrompt!: Phaser.GameObjects.Text;
 
+  private controller!: PlayerController;
   private onClose?: () => void;
   private onInteract?: (id: string) => void;
   private isPaused: boolean = false;
@@ -62,121 +60,24 @@ export class HobbiesScene extends Phaser.Scene {
 
   setPaused(paused: boolean) {
     this.isPaused = paused;
+    if (paused) this.controller?.pause();
+    else this.controller?.resume();
     setSceneKeyboardPaused(this, paused, {
       pausePhysicsWorld: true,
-      zeroHorizontalVelocity: () => {
-        if (this.player && this.player.body) {
-          this.player.setVelocityX(0);
-        }
-      }
+      zeroHorizontalVelocity: () => this.controller?.zeroVelocity()
     });
   }
 
   create() {
     const width = HOBBIES_ROOM_WIDTH;
     const height = HOBBIES_ROOM_HEIGHT;
-    this.physics.world.setBounds(0, 0, width, height);
-
-    for (const hobbyId of HOBBY_REACT_OVERLAY_IDS) {
-      TextureGenerator.generateHobbyItem(this, hobbyId);
-    }
-
-    this.add.rectangle(width / 2, height / 2, width, height, 0xf4f1ea);
-
-    const bg = this.add.graphics();
-    bg.lineStyle(6, 0x1a1a1a, 1);
-    bg.fillStyle(0xfbfbf9, 1);
-    bg.fillRect(50, 50, 900, 500);
-    bg.strokeRect(50, 50, 900, 500);
-
-    bg.lineStyle(2, 0x1a1a1a, 0.2);
-    for (let y = 500; y < 550; y += 15) {
-      bg.beginPath();
-      bg.moveTo(50, y);
-      bg.lineTo(950, y);
-      bg.strokePath();
-    }
-
-    bg.lineStyle(4, 0x1a1a1a, 1);
-    bg.beginPath();
-    bg.moveTo(50, 500);
-    bg.lineTo(950, 500);
-    bg.strokePath();
-
-    bg.lineStyle(2, 0x1a1a1a, 0.3);
-    bg.beginPath();
-    bg.moveTo(50, 420);
-    bg.lineTo(950, 420);
-    bg.strokePath();
-    for (let x = 80; x < 950; x += 40) {
-      bg.beginPath();
-      bg.moveTo(x, 420);
-      bg.lineTo(x, 500);
-      bg.strokePath();
-    }
-
-    bg.lineStyle(4, 0x1a1a1a, 1);
-    bg.strokeRect(150, 150, 120, 120);
-    bg.lineStyle(2, 0x1a1a1a, 0.5);
-    bg.beginPath();
-    bg.moveTo(210, 150);
-    bg.lineTo(210, 270);
-    bg.strokePath();
-    bg.beginPath();
-    bg.moveTo(150, 210);
-    bg.lineTo(270, 210);
-    bg.strokePath();
-
-    bg.lineStyle(4, 0x1a1a1a, 1);
-    bg.strokeRect(730, 150, 120, 120);
-    bg.lineStyle(2, 0x1a1a1a, 0.5);
-    bg.beginPath();
-    bg.moveTo(790, 150);
-    bg.lineTo(790, 270);
-    bg.strokePath();
-    bg.beginPath();
-    bg.moveTo(730, 210);
-    bg.lineTo(850, 210);
-    bg.strokePath();
-
     const floorY = HOBBIES_FLOOR_Y;
 
-    for (const station of HOBBY_STATION_LAYOUT) {
-      const texKey = `hobby_${station.id}`;
-      if (station.spriteMode === 'floor') {
-        this.add
-          .sprite(station.x, floorY + station.yOffsetFromFloor, texKey)
-          .setOrigin(0.5, 1);
-      } else {
-        this.add
-          .sprite(station.x, floorY + station.yOffsetFromFloor, texKey)
-          .setOrigin(0.5, 0.5);
-      }
-      this.add
-        .text(station.x, floorY - 140, hobbyLabel(station.id), {
-          fontFamily: '"Comic Sans MS", cursive',
-          fontSize: '20px',
-          color: '#1a1a1a',
-          fontStyle: 'bold'
-        })
-        .setOrigin(0.5);
-    }
+    this.physics.world.setBounds(0, 0, width, height);
 
-    const exitX = HOBBIES_EXIT_X;
-    const exitDoor = this.add.graphics();
-    exitDoor.lineStyle(4, 0x1a1a1a, 1);
-    exitDoor.fillStyle(0xfbfbf9, 1);
-    exitDoor.fillRect(exitX - 30, floorY - 100, 60, 100);
-    exitDoor.strokeRect(exitX - 30, floorY - 100, 60, 100);
-    exitDoor.strokeCircle(exitX + 20, floorY - 50, 3);
-    this.add
-      .text(exitX, floorY - 120, TEXTS.navigation.exit, {
-        fontFamily: '"Comic Sans MS", cursive',
-        fontSize: '16px',
-        color: '#1a1a1a'
-      })
-      .setOrigin(0.5);
+    buildHobbiesRoom(this);
 
+    // --- PLAYER ---
     const defaultPlayerX = width / 2;
     const defaultPlayerY = floorY - HOBBIES_PLAYER_START_OFFSET_Y;
     const rawX = this.resumePosition?.x ?? defaultPlayerX;
@@ -197,6 +98,14 @@ export class HobbiesScene extends Phaser.Scene {
     this.physics.add.existing(ground, true);
     this.physics.add.collider(this.player, ground);
 
+    this.controller = new PlayerController({
+      walkSpeed: HOBBIES_WALK_SPEED,
+      sprintSpeed: HOBBIES_WALK_SPEED,
+      jumpVelocityY: 0 // No jumping in the hobbies room
+    });
+    this.controller.mount(this.player);
+
+    // --- INPUT ---
     if (this.input.keyboard) {
       this.cursors = this.input.keyboard.createCursorKeys();
       this.wasd = {
@@ -205,16 +114,17 @@ export class HobbiesScene extends Phaser.Scene {
       };
       this.interactKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
 
-      this.input.keyboard.on('keydown-H', () => {
-        if (!this.isPaused) this.onClose?.();
-      });
-      this.input.keyboard.on('keydown-ESC', () => {
-        if (!this.isPaused) this.onClose?.();
+      const onClose = () => { if (!this.isPaused) this.onClose?.(); };
+      this.input.keyboard.on('keydown-H', onClose);
+      this.input.keyboard.on('keydown-ESC', onClose);
+      this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+        this.input.keyboard?.off('keydown-H', onClose);
+        this.input.keyboard?.off('keydown-ESC', onClose);
       });
     }
 
     this.exitPrompt = this.add
-      .text(exitX, floorY - 150, TEXTS.navigation.interact, {
+      .text(HOBBIES_EXIT_X, floorY - 150, TEXTS.navigation.interact, {
         fontFamily: '"Comic Sans MS", cursive',
         fontSize: '16px',
         color: '#1a1a1a',
@@ -232,34 +142,24 @@ export class HobbiesScene extends Phaser.Scene {
 
   update() {
     if (this.isPaused) {
-      if (this.player && this.player.body) {
-        this.player.setVelocityX(0);
-      }
+      this.controller.zeroVelocity();
       this.exitPrompt.setVisible(false);
       return;
     }
 
     const touchState = bridgeStore.getState().touch;
     const oneShots = bridgeActions.consumeTouchOneShots();
-    const interactFromTouch = oneShots.interactTap;
 
-    const speed = HOBBIES_WALK_SPEED;
+    const step = this.controller.step({
+      left: this.cursors.left.isDown || this.wasd.a.isDown || touchState.left,
+      right: this.cursors.right.isDown || this.wasd.d.isDown || touchState.right,
+      sprint: false,
+      jump: false,
+      interact: Phaser.Input.Keyboard.JustDown(this.interactKey) || oneShots.interactTap
+    });
 
-    const left = this.cursors.left.isDown || this.wasd.a.isDown || touchState.left;
-    const right = this.cursors.right.isDown || this.wasd.d.isDown || touchState.right;
-
-    if (left && !right) {
-      this.player.setVelocityX(-speed);
-      this.player.setFlipX(true);
-      this.player.setAngle(Math.sin(this.time.now / 100) * 5);
-    } else if (right && !left) {
-      this.player.setVelocityX(speed);
-      this.player.setFlipX(false);
-      this.player.setAngle(Math.sin(this.time.now / 100) * 5);
-    } else {
-      this.player.setVelocityX(0);
-      this.player.setAngle(0);
-    }
+    this.player.setFlipX(step.facingLeft);
+    this.player.setAngle(step.moving ? Math.sin(this.time.now / 100) * 5 : 0);
 
     let nearInteractable = false;
     for (const item of HOBBIES_ROOM_INTERACTABLES) {
@@ -273,7 +173,7 @@ export class HobbiesScene extends Phaser.Scene {
         this.exitPrompt.setX(item.x).setVisible(true);
         nearInteractable = true;
 
-        if (Phaser.Input.Keyboard.JustDown(this.interactKey) || interactFromTouch) {
+        if (step.interactRequested) {
           if (item.id === 'exit') {
             this.onClose?.();
           } else {

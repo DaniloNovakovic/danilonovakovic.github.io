@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { GameState, type GameStateValue } from '../../game/gameState';
 import type { MiniGameId } from '../../config/featureIds';
-import { isReactOverlayMiniGameId } from '../../config/miniGameCategories';
+import { isOverlayPauseTriggerId } from '../../config/miniGameCategories';
 
 export interface TouchBridgeState {
   left: boolean;
@@ -37,7 +37,7 @@ function emit(): void {
 
 function computePause(next: Pick<BridgeState, 'status' | 'activeMiniGameId'>): boolean {
   if (next.status !== GameState.IN_MINIGAME || !next.activeMiniGameId) return false;
-  return isReactOverlayMiniGameId(next.activeMiniGameId);
+  return isOverlayPauseTriggerId(next.activeMiniGameId);
 }
 
 function setState(updater: (current: BridgeState) => BridgeState): void {
@@ -78,33 +78,14 @@ export const bridgeActions = {
       activeMiniGameId: area
     }));
   },
+  /** Set bridge back to the exploring state. Callers (App.tsx) are responsible for
+   *  routing to a parent overlay via `requestInteraction` if one exists. */
   closeActiveOverlay(): void {
-    setState((current) => {
-      const currentId = current.activeMiniGameId;
-      if (!currentId) {
-        return { ...current, status: GameState.EXPLORING, activeMiniGameId: null };
-      }
-      const overlayParentById: Partial<Record<MiniGameId, MiniGameId>> = {
-        games: 'hobbies',
-        art: 'hobbies',
-        music: 'hobbies',
-        fitness: 'hobbies',
-        dancing: 'hobbies'
-      };
-      const overlayParentId = overlayParentById[currentId];
-      if (overlayParentId) {
-        return {
-          ...current,
-          status: GameState.IN_MINIGAME,
-          activeMiniGameId: overlayParentId
-        };
-      }
-      return {
-        ...current,
-        status: GameState.EXPLORING,
-        activeMiniGameId: null
-      };
-    });
+    setState((current) => ({
+      ...current,
+      status: GameState.EXPLORING,
+      activeMiniGameId: null
+    }));
   },
   setTouchDirectional(direction: 'left' | 'right', pressed: boolean): void {
     setState((current) => ({

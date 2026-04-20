@@ -15,7 +15,3 @@ export function peekResumePosition(sceneKey: string): SceneResumePosition | unde
   const p = lastExitBySceneKey.get(sceneKey);
   return p ? { x: p.x, y: p.y } : undefined;
 }
-
-export function clearResumePosition(sceneKey: string): void {
-  lastExitBySceneKey.delete(sceneKey);
-}

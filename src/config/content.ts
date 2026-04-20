@@ -29,9 +29,6 @@ export const TEXTS = {
       country: "Serbia",
     }
   },
-  experience: {
-    title: "Experience",
-  },
   abilities: {
     title: "Abilities",
     skills: "Skills",

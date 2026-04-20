@@ -10,6 +10,7 @@ export function isPhaserSceneMiniGameId(id: MiniGameId): boolean {
   return (PHASER_SCENE_MINIGAME_IDS as readonly string[]).includes(id);
 }
 
-export function isReactOverlayMiniGameId(id: MiniGameId): boolean {
+/** Returns true for mini-game ids whose activation should pause the Phaser engine. */
+export function isOverlayPauseTriggerId(id: MiniGameId): boolean {
   return (MINI_GAME_IDS as readonly string[]).includes(id) && !isPhaserSceneMiniGameId(id);
 }
