@@ -13,7 +13,7 @@ interface StaticPortfolioProps {
   onSwitchToInteractive: () => void;
 }
 
-const HERO_ICON_SRC: Record<Exclude<ContactIconId, 'portfolio'>, string> = {
+const HERO_ICON_SRC: Record<ContactIconId, string> = {
   linkedin: '/icons/contact/linkedin.png',
   github: '/icons/contact/github.png',
   email: '/icons/contact/email.png'
@@ -29,11 +29,9 @@ function HeroContactLinks() {
             href={item.link}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded border-2 border-[#1a1a1a] bg-[#fbfbf9] px-2.5 py-1 text-xs font-bold uppercase tracking-widest text-[#1a1a1a] shadow-[3px_3px_0px_0px_rgba(26,26,26,1)] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] sm:text-sm"
+            className="inline-flex cursor-pointer items-center gap-1.5 rounded border-2 border-[#1a1a1a] bg-[#fbfbf9] px-2.5 py-1 text-xs font-bold uppercase tracking-widest text-[#1a1a1a] shadow-[3px_3px_0px_0px_rgba(26,26,26,1)] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] sm:text-sm"
           >
-            {item.icon !== 'portfolio' && (
-              <img src={HERO_ICON_SRC[item.icon]} alt="" className="h-4 w-4 object-contain" width={16} height={16} />
-            )}
+            <img src={HERO_ICON_SRC[item.icon]} alt="" className="h-5 w-5 object-contain" width={20} height={20} />
             {item.name}
           </a>
         </li>
@@ -114,10 +112,10 @@ export default function StaticPortfolio({ onSwitchToInteractive }: StaticPortfol
       <button
         type="button"
         onClick={onSwitchToInteractive}
-        className="fixed right-2 top-[max(0.5rem,env(safe-area-inset-top,0px))] z-40 inline-flex items-center gap-1.5 rounded border-2 border-[#1a1a1a] bg-[#fbfbf9]/90 px-2.5 py-1 text-[11px] font-bold uppercase tracking-widest text-[#1a1a1a] shadow-[3px_3px_0px_0px_rgba(26,26,26,1)] backdrop-blur-sm transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] sm:right-4 sm:top-4 sm:px-3 sm:py-1.5 sm:text-xs"
+        className="fixed right-2 top-[max(0.5rem,env(safe-area-inset-top,0px))] z-40 inline-flex cursor-pointer items-center gap-1.5 rounded border-2 border-[#1a1a1a] bg-[#fbfbf9]/90 px-2.5 py-1 text-[11px] font-bold uppercase tracking-widest text-[#1a1a1a] shadow-[3px_3px_0px_0px_rgba(26,26,26,1)] backdrop-blur-sm transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] sm:right-4 sm:top-4 sm:px-3 sm:py-1.5 sm:text-xs"
         aria-label="Switch to interactive portfolio"
       >
-        <Gamepad2 className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+        <Gamepad2 className="h-4 w-4" strokeWidth={2} aria-hidden />
         <span className="hidden sm:inline">Try interactive</span>
         <span className="sm:hidden">Interactive</span>
       </button>
@@ -172,7 +170,7 @@ export default function StaticPortfolio({ onSwitchToInteractive }: StaticPortfol
             <button
               type="button"
               onClick={onSwitchToInteractive}
-              className="underline decoration-dashed underline-offset-2 hover:text-[#1a1a1a]"
+              className="cursor-pointer underline decoration-dashed underline-offset-2 hover:text-[#1a1a1a]"
             >
               Try interactive mode →
             </button>

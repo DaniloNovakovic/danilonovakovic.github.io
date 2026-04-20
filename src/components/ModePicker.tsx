@@ -36,7 +36,7 @@ function ChoiceCard({ title, blurb, icon, recommended, cta, onClick }: ChoiceCar
     <button
       type="button"
       onClick={onClick}
-      className="group relative flex w-full max-w-sm flex-col items-center gap-4 rounded-lg border-4 border-[#1a1a1a] bg-[#fbfbf9] p-6 text-left shadow-[8px_8px_0px_0px_rgba(26,26,26,1)] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[10px_10px_0px_0px_rgba(26,26,26,1)] focus:outline-none focus-visible:-translate-x-0.5 focus-visible:-translate-y-0.5 focus-visible:shadow-[10px_10px_0px_0px_rgba(26,26,26,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] sm:p-8"
+      className="group relative flex w-full max-w-sm cursor-pointer flex-col items-center gap-4 rounded-lg border-4 border-[#1a1a1a] bg-[#fbfbf9] p-6 text-left shadow-[8px_8px_0px_0px_rgba(26,26,26,1)] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[10px_10px_0px_0px_rgba(26,26,26,1)] focus:outline-none focus-visible:-translate-x-0.5 focus-visible:-translate-y-0.5 focus-visible:shadow-[10px_10px_0px_0px_rgba(26,26,26,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] sm:p-8"
     >
       {recommended && (
         <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded border-2 border-[#1a1a1a] bg-yellow-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[#1a1a1a] shadow-[3px_3px_0px_0px_rgba(26,26,26,1)]">
@@ -48,7 +48,7 @@ function ChoiceCard({ title, blurb, icon, recommended, cta, onClick }: ChoiceCar
       </div>
       <h2 className="text-center text-2xl font-bold text-[#1a1a1a] sm:text-3xl">{title}</h2>
       <p className="text-center text-sm leading-relaxed text-[#1a1a1a]/80 sm:text-base">{blurb}</p>
-      <span className="mt-2 inline-block border-2 border-[#1a1a1a] bg-[#1a1a1a] px-4 py-1.5 text-sm font-bold uppercase tracking-widest text-[#fbfbf9] transition-colors group-hover:bg-[#fbfbf9] group-hover:text-[#1a1a1a]">
+      <span className="mt-2 inline-block border-2 border-[#1a1a1a] bg-[#fbfbf9] px-4 py-1.5 text-sm font-bold uppercase tracking-widest text-[#1a1a1a] transition-colors group-hover:bg-[#1a1a1a] group-hover:text-[#fbfbf9] group-focus-visible:bg-[#1a1a1a] group-focus-visible:text-[#fbfbf9]">
         {cta}
       </span>
     </button>
