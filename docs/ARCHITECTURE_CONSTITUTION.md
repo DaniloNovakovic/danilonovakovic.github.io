@@ -59,6 +59,6 @@ This constitution is now partially implemented. Current canonical runtime paths:
 - **Phaser adapter:** `src/infra/phaser/PhaserSceneAdapter.ts`
 - **Context plugins:** `src/games/plugins/StreetPlugin.ts`, `src/games/plugins/HobbiesPlugin.ts`
 - **ECS foundation:** `src/core/ecs/*`
-- **Phaser 4 render guardrails:** `src/infra/phaser/render/renderGuardrails.ts`
+- **Phaser 4 render guardrails:** currently documented as runtime policy; helper module may be reintroduced under `src/infra/phaser/render/` when shared logic is needed.
 
 When proposing future refactors, prefer extending these modules instead of re-introducing callback-only scene orchestration or ad-hoc global state.

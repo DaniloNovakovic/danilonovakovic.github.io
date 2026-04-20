@@ -1,8 +1,7 @@
 import { useSyncExternalStore } from 'react';
-import { getMiniGameById } from '../../game/miniGameRegistry';
 import { GameState, type GameStateValue } from '../../game/gameState';
-import { MiniGameType } from '../../game/types';
 import type { MiniGameId } from '../../config/featureIds';
+import { isReactOverlayMiniGameId } from '../../config/miniGameCategories';
 
 export interface TouchBridgeState {
   left: boolean;
@@ -38,8 +37,7 @@ function emit(): void {
 
 function computePause(next: Pick<BridgeState, 'status' | 'activeMiniGameId'>): boolean {
   if (next.status !== GameState.IN_MINIGAME || !next.activeMiniGameId) return false;
-  const activeMiniGame = getMiniGameById(next.activeMiniGameId);
-  return activeMiniGame?.type === MiniGameType.REACT_OVERLAY;
+  return isReactOverlayMiniGameId(next.activeMiniGameId);
 }
 
 function setState(updater: (current: BridgeState) => BridgeState): void {
@@ -75,12 +73,19 @@ export const bridgeActions = {
       if (!currentId) {
         return { ...current, status: GameState.EXPLORING, activeMiniGameId: null };
       }
-      const active = getMiniGameById(currentId);
-      if (active?.overlayParentId) {
+      const overlayParentById: Partial<Record<MiniGameId, MiniGameId>> = {
+        games: 'hobbies',
+        art: 'hobbies',
+        music: 'hobbies',
+        fitness: 'hobbies',
+        dancing: 'hobbies'
+      };
+      const overlayParentId = overlayParentById[currentId];
+      if (overlayParentId) {
         return {
           ...current,
           status: GameState.IN_MINIGAME,
-          activeMiniGameId: active.overlayParentId
+          activeMiniGameId: overlayParentId
         };
       }
       return {

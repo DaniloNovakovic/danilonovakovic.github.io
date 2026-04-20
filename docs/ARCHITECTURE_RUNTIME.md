@@ -28,6 +28,21 @@ This document describes the current runtime architecture in `src/` after the mic
 - `src/games/plugins/StreetPlugin.ts`, `src/games/plugins/HobbiesPlugin.ts`
   - Context plugin definitions for the two Phaser scene contexts.
 
+## Folder ownership (`game` vs `games`)
+
+This codebase is in a transitional split:
+
+- `src/game`
+  - Legacy/active Phaser runtime code (scenes, texture builders, scene contracts, registry helpers).
+  - Treat as stable runtime area while migration continues.
+- `src/games`
+  - Plugin/context definitions used by kernel scene orchestration.
+  - Target home for feature-context modules over time.
+
+Migration rule for new code:
+- Add new context/plugin modules under `src/games`.
+- Touch `src/game` only when integrating with existing scene runtime until those scenes are moved.
+
 ## ECS migration status
 
 Initial player ECS scaffolding is in place:
@@ -41,10 +56,10 @@ This is an incremental migration: Phaser physics/rendering remains in infra-faci
 
 ## Rendering guardrails (Phaser 4)
 
-See `src/infra/phaser/render/renderGuardrails.ts`:
+Guardrails are currently policy-level (documented) rather than a dedicated utility module:
 
-- `chooseRenderStrategy` for strategy selection (`SpriteBatch`, `DynamicTexture`, `SpriteGPULayer`).
-- `DynamicTextureRenderQueue` to enforce explicit `dynamicTexture.render()` flushes.
-- `exceedsSpriteGpuLayerMutationBudget` to protect against high-frequency GPU buffer churn.
+- Use `SpriteBatch` for interactive entities.
+- Use `DynamicTexture` for composited or stamp-style static textures, with explicit `dynamicTexture.render()` flush calls.
+- Use `SpriteGPULayer` only for dense, mostly static quads; avoid high-frequency member add/remove churn.
 
-Use these helpers when adding render-heavy plugins or effects.
+If repeated render policy code appears, re-introduce a shared helper under `src/infra/phaser/render/`.

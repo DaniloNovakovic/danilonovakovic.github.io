@@ -27,6 +27,7 @@ This is a hybrid application:
 3. **Communication / Bridge:** React and Phaser synchronize via `src/shared/bridge/store.ts` (`bridgeStore`, `bridgeActions`, `useBridgeSelector`). Pause state and touch one-shots (`jumpQueued`, `interactTap`) are derived and consumed there; avoid creating new ad-hoc globals.
 4. **Kernel + Scene lifecycle:** `src/components/Game.tsx` boots Phaser, then delegates transitions to `src/core/kernel/GameKernel.ts` and `src/core/kernel/SceneManager.ts` through `src/infra/phaser/PhaserSceneAdapter.ts`.
 5. **Phaser scene resume:** Resume positions are captured per `scene.scene.key` in `src/game/sceneResumeStore.ts` via adapter/scene-manager flow. New interior scenes should implement `getResumeCapturePosition()` (see `ResumeCaptureScene` in `src/game/sceneContracts.ts`) and use a registry key that matches their scene key.
+6. **Folder ownership (transitional):** `src/game` is still the active scene/runtime home. `src/games` holds plugin/context wrappers and is the preferred location for new context modules during migration.
 
 ## 📱 Mobile / small screens
 
@@ -38,7 +39,7 @@ This is a hybrid application:
 - **Input / React modals:** Phaser’s keyboard plugin can capture keys during gameplay. While a React overlay is open, kernel pause propagation calls scene `setPaused()`, and scenes disable the keyboard manager (`enabled = false`). Reuse `setSceneKeyboardPaused` from `src/game/sceneKeyboardPause.ts` for new pausable scenes.
 - **Physics Collider Order:** Always initialize the physics collider *after* the player object is instantiated to avoid `ReferenceError` or falling through the floor.
 - **Sprinting:** Hold `SHIFT` to move faster in the world.
-- **Phaser 4 render constraints:** Dynamic textures buffer commands and require explicit `render()` flushes. Use `src/infra/phaser/render/renderGuardrails.ts` helpers when adding render-heavy plugins and avoid high-frequency `SpriteGPULayer` mutations.
+- **Phaser 4 render constraints:** Dynamic textures buffer commands and require explicit `render()` flushes. Avoid high-frequency `SpriteGPULayer` mutations; prefer static-ish GPU layers and explicit render flush points.
 
 ## 🗺 Map Layout (Horizontal)
 

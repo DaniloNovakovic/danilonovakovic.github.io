@@ -35,7 +35,9 @@ Runtime architecture now follows a micro-kernel + bridge pattern:
 - Context plugins (street + hobbies): [`src/games/plugins/StreetPlugin.ts`](src/games/plugins/StreetPlugin.ts), [`src/games/plugins/HobbiesPlugin.ts`](src/games/plugins/HobbiesPlugin.ts)
 - ECS primitives and player systems (initial migration): [`src/core/ecs`](src/core/ecs)
 
-Phaser 4 rendering guardrails and strategy helpers live in [`src/infra/phaser/render/renderGuardrails.ts`](src/infra/phaser/render/renderGuardrails.ts), including explicit `DynamicTexture.render()` flush rules and `SpriteGPULayer` mutation budgets.
+Folder ownership note:
+- [`src/game`](src/game) currently contains active scene/runtime implementation.
+- [`src/games`](src/games) contains plugin/context wrappers and is the target location for future feature-module migration.
 
 ## Deploy (GitHub Pages)
 
