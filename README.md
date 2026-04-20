@@ -32,3 +32,9 @@ Full runtime layering and module boundaries are in [`docs/ARCHITECTURE_RUNTIME.m
 ## Deploy (GitHub Pages)
 
 Production build outputs to `dist/`. [`.github/workflows/ci.yml`](.github/workflows/ci.yml) currently runs lint, tests, and build on `push` / `pull_request` against `main`/`master` — **it does not deploy yet**. To track `main` automatically on GitHub Pages, add an `actions/deploy-pages` step to that workflow (TODO).
+
+## Credits & License
+
+- **Code:** Licensed under the [MIT License](LICENSE).
+- **Character Art:** This project uses "Punpun" from *Oyasumi Punpun* by Inio Asano as a placeholder/mascot for non-commercial, personal portfolio purposes (Fair Use). All rights belong to the original copyright owners.
+
