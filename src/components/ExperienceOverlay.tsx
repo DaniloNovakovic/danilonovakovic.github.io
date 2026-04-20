@@ -14,7 +14,21 @@ const ExperienceOverlay: React.FC = () => {
               <h3 className="text-xl font-bold">{exp.title}</h3>
               <span className="text-sm font-mono bg-gray-100 px-3 py-1 rounded-full">{exp.period}</span>
             </div>
-            <p className="text-lg font-semibold text-blue-800 mb-2">{exp.company}</p>
+            <p className="mb-2 text-lg font-semibold">
+              {exp.companyUrl ? (
+                <a
+                  href={exp.companyUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="cursor-pointer rounded-sm text-[#1a1a1a] underline decoration-dashed underline-offset-2 transition-opacity hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1a1a1a]"
+                  aria-label={`${exp.company} (opens in new tab)`}
+                >
+                  {exp.company}
+                </a>
+              ) : (
+                <span className="text-[#1a1a1a]">{exp.company}</span>
+              )}
+            </p>
             <p className="text-base leading-relaxed text-gray-700">
               {exp.description}
             </p>
