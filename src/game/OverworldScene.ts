@@ -6,7 +6,6 @@
 import * as Phaser from 'phaser';
 import { HOBBIES_FEATURE_ID } from '../config/featureIds';
 import { PORTFOLIO_SECTIONS } from '../config/portfolioRegistry';
-import { UI_FONT_FAMILY } from '../config/typography';
 import { TextureGenerator } from './textures/TextureGenerator';
 import { TEXTS } from '../config/content';
 import {
@@ -33,6 +32,7 @@ import {
 } from './street/StreetEnvironment';
 import { buildStreetBuildings } from './street/StreetBuildings';
 import { updateStreetParticles } from './street/StreetParticles';
+import { createUiText } from './text/createUiText';
 
 export class OverworldScene extends Phaser.Scene {
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -143,8 +143,7 @@ export class OverworldScene extends Phaser.Scene {
     }
 
     // --- UI ---
-    this.interactPrompt = this.add.text(0, 0, TEXTS.navigation.enter, {
-      fontFamily: UI_FONT_FAMILY,
+    this.interactPrompt = createUiText(this, 0, 0, TEXTS.navigation.enter, {
       fontSize: '18px',
       color: '#1a1a1a',
       backgroundColor: '#ffffff',

@@ -5,7 +5,6 @@
 import * as Phaser from 'phaser';
 import { HOBBIES_EXIT_X, HOBBIES_ROOM_INTERACTABLES } from '../config/hobbiesRoomLayout';
 import { TEXTS } from '../config/content';
-import { UI_FONT_FAMILY } from '../config/typography';
 import {
   HOBBIES_FLOOR_Y,
   HOBBIES_GROUND_ZONE,
@@ -20,6 +19,7 @@ import { setSceneKeyboardPaused } from './sceneKeyboardPause';
 import { bridgeActions, bridgeStore } from '../shared/bridge/store';
 import { PlayerController } from '../core/player/PlayerController';
 import { buildHobbiesRoom } from './hobbies/HobbiesRoom';
+import { createUiText } from './text/createUiText';
 
 export class HobbiesScene extends Phaser.Scene {
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -124,14 +124,12 @@ export class HobbiesScene extends Phaser.Scene {
       });
     }
 
-    this.exitPrompt = this.add
-      .text(HOBBIES_EXIT_X, floorY - 150, TEXTS.navigation.interact, {
-        fontFamily: UI_FONT_FAMILY,
-        fontSize: '16px',
-        color: '#1a1a1a',
-        backgroundColor: '#ffffff',
-        padding: { x: 5, y: 2 }
-      })
+    this.exitPrompt = createUiText(this, HOBBIES_EXIT_X, floorY - 150, TEXTS.navigation.interact, {
+      fontSize: '16px',
+      color: '#1a1a1a',
+      backgroundColor: '#ffffff',
+      padding: { x: 5, y: 2 }
+    })
       .setOrigin(0.5)
       .setVisible(false)
       .setDepth(100);

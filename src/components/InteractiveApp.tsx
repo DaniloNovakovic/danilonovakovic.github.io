@@ -6,7 +6,6 @@ import { getMiniGameById } from '../game/miniGameRegistry';
 import { MiniGameType } from '../game/types';
 import { TEXTS } from '../config/content';
 import { isMiniGameId } from '../config/featureIds';
-import { UI_FONT_FAMILY } from '../config/typography';
 import { bridgeActions, bridgeStore } from '../shared/bridge/store';
 import { OverlayCard } from './overlays/OverlayCard';
 
@@ -49,10 +48,7 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
   const isPaused = state.status === GameState.IN_MINIGAME && activeMiniGame?.type === MiniGameType.REACT_OVERLAY;
 
   return (
-    <div
-      className="relative flex min-h-[100dvh] min-h-dvh w-full flex-col overflow-x-hidden bg-[#f4f1ea]"
-      style={{ fontFamily: UI_FONT_FAMILY }}
-    >
+    <div className="relative flex min-h-[100dvh] min-h-dvh w-full flex-col overflow-x-hidden bg-[#f4f1ea]">
       {/* Mode switch link — unobtrusive, top-right */}
       <button
         type="button"

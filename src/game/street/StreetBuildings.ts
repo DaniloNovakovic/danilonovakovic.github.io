@@ -4,11 +4,10 @@
  */
 import * as Phaser from 'phaser';
 import { PORTFOLIO_SECTIONS } from '../../config/portfolioRegistry';
-import { UI_FONT_FAMILY } from '../../config/typography';
+import { createUiText } from '../text/createUiText';
 
 const BUILDING_Y = 395;
 const LABEL_Y = 150;
-const LABEL_FONT = UI_FONT_FAMILY;
 
 export function buildStreetBuildings(scene: Phaser.Scene): Phaser.GameObjects.Group {
   const group = scene.add.group();
@@ -17,13 +16,11 @@ export function buildStreetBuildings(scene: Phaser.Scene): Phaser.GameObjects.Gr
     if (s.x === undefined) continue;
 
     const bldg = scene.add.sprite(s.x, BUILDING_Y, `building_${s.id}`);
-    scene.add
-      .text(s.x, LABEL_Y, s.name.toUpperCase(), {
-        fontFamily: LABEL_FONT,
-        fontSize: '22px',
-        color: '#1a1a1a',
-        fontStyle: 'bold'
-      })
+    createUiText(scene, s.x, LABEL_Y, s.name.toUpperCase(), {
+      fontSize: '22px',
+      color: '#1a1a1a',
+      fontStyle: 'bold'
+    })
       .setOrigin(0.5)
       .setScrollFactor(1);
 

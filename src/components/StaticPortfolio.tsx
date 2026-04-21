@@ -2,7 +2,6 @@ import { Suspense, lazy, useMemo } from 'react';
 import { Gamepad2 } from 'lucide-react';
 import { PORTFOLIO_DATA, type ContactIconId } from '../config/portfolio';
 import { TEXTS } from '../config/content';
-import { UI_FONT_FAMILY } from '../config/typography';
 
 const ProfileOverlay = lazy(() => import('./ProfileOverlay'));
 const ExperienceOverlay = lazy(() => import('./ExperienceOverlay'));
@@ -103,10 +102,7 @@ export default function StaticPortfolio({ onSwitchToInteractive }: StaticPortfol
   const year = useMemo(() => new Date().getFullYear(), []);
 
   return (
-    <div
-      className="relative min-h-[100dvh] min-h-dvh w-full overflow-x-hidden bg-[#f4f1ea]"
-      style={{ fontFamily: UI_FONT_FAMILY }}
-    >
+    <div className="relative min-h-[100dvh] min-h-dvh w-full overflow-x-hidden bg-[#f4f1ea]">
       <div className="pointer-events-none fixed inset-0 z-0 bg-[url('https://www.transparenttextures.com/patterns/felt.png')] opacity-[0.05]" />
 
       {/* Mode switch link — sticky, top-right */}
