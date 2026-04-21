@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, useLayoutEffect, useState } from 'react';
+import { useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import * as Phaser from 'phaser';
 import { PHASER_SCENE_KEYS } from '../config/featureIds';
 import { getGameConfig } from '../runtime/config';
@@ -12,6 +12,7 @@ import { PhaserSceneAdapter } from '../infra/phaser/PhaserSceneAdapter';
 import { GameKernel } from '../core/kernel/GameKernel';
 import { createStreetPlugin } from '../contextPlugins/plugins/StreetPlugin';
 import { createHobbiesPlugin } from '../contextPlugins/plugins/HobbiesPlugin';
+import { useTouchGestures } from './useTouchGestures';
 
 interface GameProps {
   onInteract: (area: string) => void;
@@ -24,7 +25,6 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
   const containerRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
   const bridgeRef = useRef({ onInteract, onClose, isPaused });
-  const [dragStart, setDragStart] = useState<number | null>(null);
 
   useLayoutEffect(() => {
     bridgeRef.current = { onInteract, onClose, isPaused };
@@ -38,33 +38,30 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
     bridgeRef.current.onClose();
   }, []);
 
-  const handlePointerDown = (e: React.PointerEvent) => {
-    if (isPaused) return;
-    setDragStart(e.clientX);
-  };
-
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (dragStart === null || isPaused) return;
-    const delta = e.clientX - dragStart;
-    const threshold = 15; // px
-
-    if (delta > threshold) {
-      bridgeActions.setTouchDirectional('right', true);
-      bridgeActions.setTouchDirectional('left', false);
-    } else if (delta < -threshold) {
+  const touchHandlers = useTouchGestures({
+    onSwipeLeft: () => {
+      if (isPaused) return;
       bridgeActions.setTouchDirectional('left', true);
       bridgeActions.setTouchDirectional('right', false);
-    } else {
+    },
+    onSwipeRight: () => {
+      if (isPaused) return;
+      bridgeActions.setTouchDirectional('right', true);
+      bridgeActions.setTouchDirectional('left', false);
+    },
+    onSwipeUp: () => {
+      if (isPaused) return;
+      bridgeActions.queueJump();
+    },
+    onSwipeEnd: () => {
       bridgeActions.setTouchDirectional('left', false);
       bridgeActions.setTouchDirectional('right', false);
-    }
-  };
-
-  const handlePointerUp = () => {
-    setDragStart(null);
-    bridgeActions.setTouchDirectional('left', false);
-    bridgeActions.setTouchDirectional('right', false);
-  };
+    },
+    onTap: () => {
+      if (isPaused) return;
+      bridgeActions.tapInteract();
+    },
+  });
 
   useEffect(() => {
     bridgeActions.resetTouch();
@@ -139,14 +136,10 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
   return (
     <div className="relative h-full w-full min-h-0 overflow-hidden rounded-lg border-4 border-neutral-800 bg-[#fbfbf9] shadow-[8px_8px_0px_0px_rgba(26,26,26,1)]">
       <div ref={containerRef} className="absolute inset-0 outline-none" />
-      {/* Touch surface for swipe movement */}
+      {/* Touch surface for swipe and tap gestures */}
       <div
         className="absolute inset-0 z-10 touch-none md:hidden"
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerUp}
-        onPointerLeave={handlePointerUp}
+        {...touchHandlers}
       />
     </div>
   );

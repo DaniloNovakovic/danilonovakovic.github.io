@@ -14,7 +14,7 @@ export const TEXTS = {
   },
   navigation: {
     hints: "Use A/D or Arrows to walk • Hold SHIFT to sprint • Press E to enter",
-    hintsCompact: "Swipe left/right to move • Tap Jump • Tap Interact (E)",
+    hintsCompact: "Swipe Left/Right to move • Swipe Up to jump • Tap game to interact",
     enter: "[E] ENTER",
     interact: "[E] INTERACT",
     exit: "EXIT",
