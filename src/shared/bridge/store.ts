@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { GameState, type GameStateValue } from '../../game/gameState';
+import { GameState, type GameStateValue } from '../../runtime/gameState';
 import type { MiniGameId } from '../../config/featureIds';
 import { isOverlayPauseTriggerId } from '../../config/miniGameCategories';
 

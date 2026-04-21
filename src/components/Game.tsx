@@ -1,17 +1,17 @@
 import { useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import * as Phaser from 'phaser';
 import { PHASER_SCENE_KEYS } from '../config/featureIds';
-import { getGameConfig } from '../game/config';
-import { OverworldScene } from '../game/OverworldScene';
-import { getAllMiniGames } from '../game/miniGameRegistry';
-import { MiniGameType } from '../game/types';
-import { peekResumePosition } from '../game/sceneResumeStore';
+import { getGameConfig } from '../runtime/config';
+import { OverworldScene } from '../runtime/OverworldScene';
+import { getAllMiniGames } from '../runtime/miniGameRegistry';
+import { MiniGameType } from '../runtime/types';
+import { peekResumePosition } from '../runtime/sceneResumeStore';
 import { bridgeActions } from '../shared/bridge/store';
 import { SceneManager } from '../core/kernel/SceneManager';
 import { PhaserSceneAdapter } from '../infra/phaser/PhaserSceneAdapter';
 import { GameKernel } from '../core/kernel/GameKernel';
-import { createStreetPlugin } from '../games/plugins/StreetPlugin';
-import { createHobbiesPlugin } from '../games/plugins/HobbiesPlugin';
+import { createStreetPlugin } from '../contextPlugins/plugins/StreetPlugin';
+import { createHobbiesPlugin } from '../contextPlugins/plugins/HobbiesPlugin';
 
 interface GameProps {
   onInteract: (area: string) => void;
@@ -143,9 +143,11 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
       });
     }
 
+    // Initial pause comes from ref (updated in useLayoutEffect) so this effect
+    // does not close over `isPaused` — avoids remounting Phaser when pause toggles.
     game.scene.add(PHASER_SCENE_KEYS.main, OverworldScene, true, {
       onInteract: stableOnInteract,
-      isPaused,
+      isPaused: bridgeRef.current.isPaused,
       resumePosition: peekResumePosition(PHASER_SCENE_KEYS.main)
     });
 
@@ -161,11 +163,17 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
       onInteract: stableOnInteract
     });
     const sceneManager = new SceneManager(adapter, PHASER_SCENE_KEYS.main);
-    sceneManager.registerContext(createStreetPlugin({ onInteract: stableOnInteract }));
+    sceneManager.registerContext(
+      createStreetPlugin({
+        onInteract: stableOnInteract,
+        getResumePosition: () => peekResumePosition(PHASER_SCENE_KEYS.main)
+      })
+    );
     sceneManager.registerContext(
       createHobbiesPlugin({
         onClose: stableOnClose,
-        onInteract: stableOnInteract
+        onInteract: stableOnInteract,
+        getResumePosition: () => peekResumePosition(PHASER_SCENE_KEYS.hobbies)
       })
     );
     const kernel = new GameKernel(sceneManager);

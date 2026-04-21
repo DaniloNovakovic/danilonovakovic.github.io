@@ -1,6 +1,6 @@
 import { PHASER_SCENE_KEYS } from '../../config/featureIds';
-import { getMiniGameById } from '../../game/miniGameRegistry';
-import { MiniGameType } from '../../game/types';
+import { getMiniGameById } from '../../runtime/miniGameRegistry';
+import { MiniGameType } from '../../runtime/types';
 import { bridgeStore, type BridgeState } from '../../shared/bridge/store';
 import { SceneManager } from './SceneManager';
 import { KernelEventBus } from './events';

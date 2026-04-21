@@ -1,10 +1,10 @@
 import { PHASER_SCENE_KEYS } from '../../config/featureIds';
-import { peekResumePosition } from '../../game/sceneResumeStore';
 import type { ContextPluginDefinition } from '../../core/kernel/types';
 
 interface HobbiesPluginOptions {
   onClose: () => void;
   onInteract: (area: string) => void;
+  getResumePosition: () => { x: number; y: number } | undefined;
 }
 
 export function createHobbiesPlugin(options: HobbiesPluginOptions): ContextPluginDefinition {
@@ -15,7 +15,7 @@ export function createHobbiesPlugin(options: HobbiesPluginOptions): ContextPlugi
       onClose: options.onClose,
       onInteract: options.onInteract,
       isPaused: false,
-      resumePosition: peekResumePosition(PHASER_SCENE_KEYS.hobbies)
+      resumePosition: options.getResumePosition()
     })
   };
 }

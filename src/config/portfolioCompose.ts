@@ -1,5 +1,5 @@
 import type { MiniGameId } from './featureIds';
-import type { MiniGamePlugin } from '../game/types';
+import type { MiniGamePlugin } from '../runtime/types';
 
 export type FeaturePluginDefinition = Omit<MiniGamePlugin, 'x'>;
 

@@ -1,7 +1,7 @@
 import { lazy } from 'react';
-import { HobbiesScene } from '../game/HobbiesScene';
+import { HobbiesScene } from '../runtime/HobbiesScene';
 import type { FeaturePluginDefinition } from './portfolioCompose';
-import { MiniGameType } from '../game/types';
+import { MiniGameType } from '../runtime/types';
 
 const ProfileOverlay = lazy(() => import('../components/ProfileOverlay'));
 const ExperienceOverlay = lazy(() => import('../components/ExperienceOverlay'));

@@ -1,9 +1,9 @@
 import { PHASER_SCENE_KEYS } from '../../config/featureIds';
-import { peekResumePosition } from '../../game/sceneResumeStore';
 import type { ContextPluginDefinition } from '../../core/kernel/types';
 
 interface StreetPluginOptions {
   onInteract: (area: string) => void;
+  getResumePosition: () => { x: number; y: number } | undefined;
 }
 
 export function createStreetPlugin(options: StreetPluginOptions): ContextPluginDefinition {
@@ -13,7 +13,7 @@ export function createStreetPlugin(options: StreetPluginOptions): ContextPluginD
     getStartData: () => ({
       onInteract: options.onInteract,
       isPaused: false,
-      resumePosition: peekResumePosition(PHASER_SCENE_KEYS.main)
+      resumePosition: options.getResumePosition()
     })
   };
 }

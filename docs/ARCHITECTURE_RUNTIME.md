@@ -25,24 +25,22 @@ This document describes the current runtime architecture in `src/` after the mic
   - Handles scene enter/exit, resume capture, and pause propagation.
 - `src/infra/phaser/PhaserSceneAdapter.ts`
   - Adapter boundary for scene start/stop, active scene pause, callback rebinding, and resume capture.
-- `src/games/plugins/StreetPlugin.ts`, `src/games/plugins/HobbiesPlugin.ts`
+- `src/contextPlugins/plugins/StreetPlugin.ts`, `src/contextPlugins/plugins/HobbiesPlugin.ts`
   - Context plugin definitions for the two Phaser scene contexts.
 
-## Folder ownership (`game` vs `games`)
+## Folder ownership (`runtime` vs `contextPlugins`)
 
-This codebase is in a transitional split:
+Current split:
 
-- `src/game`
-  - Legacy/active Phaser runtime code (scenes, texture builders, scene contracts, registry helpers).
-  - Treat as stable runtime area while migration continues.
-- `src/games`
+- `src/runtime`
+  - Active Phaser runtime code (scenes, texture builders, scene contracts, registry helpers).
+- `src/contextPlugins`
   - Plugin/context definitions used by kernel scene orchestration.
-  - Target home for feature-context modules over time.
 
 Migration rule for new code:
 
-- Add new context/plugin modules under `src/games`.
-- Touch `src/game` only when integrating with existing scene runtime until those scenes are moved.
+- Add new context/plugin modules under `src/contextPlugins`.
+- Touch `src/runtime` when integrating with existing scene runtime.
 
 ## ECS migration status
 
@@ -51,9 +49,21 @@ Initial player ECS scaffolding is in place:
 - `src/core/ecs/world.ts` for entity/component storage.
 - `src/core/ecs/components/player.ts` for player-focused pure data components.
 - `src/core/ecs/systems/playerSystems.ts` for input + movement/jump/interact system logic.
-- `src/game/OverworldScene.ts` uses this ECS layer to drive player decisions, then syncs results into Phaser sprite/body calls.
+- `src/core/ecs/systems/overworldInteractSystems.ts` for pure overworld building interact targeting (called from `OverworldScene`).
+- `src/runtime/OverworldScene.ts` uses this ECS layer to drive player decisions, then syncs results into Phaser sprite/body calls.
 
 This is an incremental migration: Phaser physics/rendering remains in infra-facing scene code while gameplay decisions move into component + system flow.
+
+## Manual smoke verification
+
+After changes that touch Phaser boot, bridge, kernel, scenes, or overlays, run `npm run dev` and confirm:
+
+1. **Overworld** — canvas loads; move left/right, jump, interact near a building.
+2. **Hobbies** — enter hobbies (building or `H` where applicable); walk; interact with an interior target; exit (`H` / `Esc` / close flow) returns to overworld.
+3. **React overlays** — open a building overlay from the street; close it; no stuck keyboard focus in the canvas.
+4. **Pause / input** — with a React overlay open, scene pause propagates (no gameplay input leaking); closing overlay resumes overworld input.
+
+Record pass/fail in the PR or release notes when shipping runtime changes.
 
 ## Rendering guardrails (Phaser 4)
 

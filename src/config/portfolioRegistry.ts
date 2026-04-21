@@ -1,4 +1,4 @@
-import type { MiniGamePlugin } from '../game/types';
+import type { MiniGamePlugin } from '../runtime/types';
 import { composePortfolioSections } from './portfolioCompose';
 import { FEATURE_PLUGIN_DEFINITIONS } from './featurePlugins';
 import { OVERWORLD_BUILDING_PLACEMENTS } from './worldLayout';

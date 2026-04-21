@@ -33,6 +33,7 @@ import {
 import { buildStreetBuildings } from './street/StreetBuildings';
 import { updateStreetParticles } from './street/StreetParticles';
 import { createUiText } from './text/createUiText';
+import { pickOverworldInteractTarget } from '../core/ecs/systems/overworldInteractSystems';
 
 export class OverworldScene extends Phaser.Scene {
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -175,24 +176,22 @@ export class OverworldScene extends Phaser.Scene {
 
     updateStreetParticles(this);
 
-    // Interaction check
-    let canInteractWith: string | null = null;
-    let interactPos: { x: number; y: number } | null = null;
-
     const bldgs = this.buildings.getChildren() as Phaser.GameObjects.Sprite[];
-    for (const bldg of bldgs) {
-      const dist = Math.abs(this.player.x - bldg.x);
-      if (dist < OVERWORLD_INTERACT_DISTANCE_X && this.player.y > OVERWORLD_INTERACT_MIN_PLAYER_Y) {
-        canInteractWith = bldg.getData('name');
-        interactPos = { x: bldg.x, y: bldg.y + OVERWORLD_INTERACT_PROMPT_OFFSET_Y };
-        break;
-      }
-    }
+    const slots = bldgs.map((bldg) => ({
+      buildingId: bldg.getData('name') as string,
+      x: bldg.x,
+      y: bldg.y
+    }));
+    const interact = pickOverworldInteractTarget(this.player.x, this.player.y, slots, {
+      maxDistX: OVERWORLD_INTERACT_DISTANCE_X,
+      minPlayerY: OVERWORLD_INTERACT_MIN_PLAYER_Y,
+      promptOffsetY: OVERWORLD_INTERACT_PROMPT_OFFSET_Y
+    });
 
-    if (canInteractWith && interactPos) {
-      this.interactPrompt.setPosition(interactPos.x, interactPos.y).setVisible(true);
+    if (interact.buildingId != null && interact.promptX != null && interact.promptY != null) {
+      this.interactPrompt.setPosition(interact.promptX, interact.promptY).setVisible(true);
       if (step.interactRequested) {
-        this.onInteract?.(canInteractWith);
+        this.onInteract?.(interact.buildingId);
       }
     } else {
       this.interactPrompt.setVisible(false);

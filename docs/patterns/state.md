@@ -37,9 +37,9 @@ Use a pushdown automaton when you need nested modes that should resume cleanly (
 
 Partially in use, partially planned:
 
-- [`src/game/gameState.ts`](../../src/game/gameState.ts) defines `GameState` (`EXPLORING`, `IN_MINIGAME`), which the bridge tracks — a simple two-state FSM for app mode.
-- [`GameKernel`](../../src/core/kernel/GameKernel.ts) transitions between contexts based on bridge state and mini-game type — a coarse scene-level FSM, implemented ad-hoc.
-- Player movement is currently expressed as booleans (`grounded`, `enabled`) in [`src/core/ecs/components/player.ts`](../../src/core/ecs/components/player.ts) and [`playerSystems.ts`](../../src/core/ecs/systems/playerSystems.ts). **Candidate refactor:** a small `PlayerState` discriminated union (`idle` / `walking` / `jumping` / `interacting`).
+- `[src/runtime/gameState.ts](../../src/runtime/gameState.ts)` defines `GameState` (`EXPLORING`, `IN_MINIGAME`), which the bridge tracks — a simple two-state FSM for app mode.
+- `[GameKernel](../../src/core/kernel/GameKernel.ts)` transitions between contexts based on bridge state and mini-game type — a coarse scene-level FSM, implemented ad-hoc.
+- Player movement is currently expressed as booleans (`grounded`, `enabled`) in `[src/core/ecs/components/player.ts](../../src/core/ecs/components/player.ts)` and `[playerSystems.ts](../../src/core/ecs/systems/playerSystems.ts)`. **Candidate refactor:** a small `PlayerState` discriminated union (`idle` / `walking` / `jumping` / `interacting`).
 - A pushdown automaton isn't needed today because overlay pause is handled at kernel level — but if we add nested modals (e.g. settings *over* a paused mini-game), that's the moment to add one.
 
 ## Status
