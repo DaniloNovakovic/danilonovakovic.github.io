@@ -35,7 +35,8 @@ This project is built on three core pillars to ensure that adding complex miniga
 - **Folder Structure:** Modular by feature:
   - `/src/core` (ECS Engine & Domain)
   - `/src/infra` (Renderer Adapters)
-  - `/src/games` (Isolated minigame logic)
+  - `/src/runtime` (Phaser runtime scenes and registries)
+  - `/src/contextPlugins` (Kernel context plugin definitions)
   - `/src/shared` (State store/The Bridge)
 
 ---
@@ -48,7 +49,7 @@ This constitution is now partially implemented. Current canonical runtime paths:
 - **Kernel:** `src/core/kernel/GameKernel.ts`
 - **Scene manager:** `src/core/kernel/SceneManager.ts`
 - **Phaser adapter:** `src/infra/phaser/PhaserSceneAdapter.ts`
-- **Context plugins:** `src/games/plugins/StreetPlugin.ts`, `src/games/plugins/HobbiesPlugin.ts`
+- **Context plugins:** `src/contextPlugins/plugins/StreetPlugin.ts`, `src/contextPlugins/plugins/HobbiesPlugin.ts`
 - **ECS foundation:** `src/core/ecs/`*
 - **Phaser 4 render guardrails:** currently documented as runtime policy; helper module may be reintroduced under `src/infra/phaser/render/` when shared logic is needed.
 

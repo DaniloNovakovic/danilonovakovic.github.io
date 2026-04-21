@@ -29,8 +29,8 @@ Almost every game uses it in some form.
 
 ## In this repo
 
-- Scene-level update: scenes in [`src/game`](../../src/game) call into ECS systems each frame.
-- Function-style systems: [`runPlayerInputAndMovementSystems`](../../src/core/ecs/systems/playerSystems.ts) is an update method over the player entity's components. It returns a `PlayerStepResult` that the scene then applies to Phaser's physics body — the ECS *decides*, the scene *renders*.
+- Scene-level update: scenes in `[src/runtime](../../src/runtime)` call into ECS systems each frame.
+- Function-style systems: `[runPlayerInputAndMovementSystems](../../src/core/ecs/systems/playerSystems.ts)` is an update method over the player entity's components. It returns a `PlayerStepResult` that the scene then applies to Phaser's physics body — the ECS *decides*, the scene *renders*.
 - There is no per-`GameObject` update method sprinkled across the codebase, and that's deliberate — one update path per scene keeps ordering explicit.
 
 ## Status

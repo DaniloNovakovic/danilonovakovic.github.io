@@ -1,8 +1,8 @@
 ---
 description: Phaser scene runtime rules — game loop, per-frame update, state machines, Phaser 4 render guardrails. Object pooling only when measured.
 globs:
-  - src/game/**
-  - src/games/**/*Scene.ts
+  - src/runtime/**
+  - src/contextPlugins/**
   - src/infra/phaser/**
 alwaysApply: false
 ---
@@ -14,14 +14,14 @@ alwaysApply: false
 1. **Phaser owns the loop; you own `update`.** Don't write your own `requestAnimationFrame` loop. Put per-frame logic in the scene's `update(time, delta)` and delegate to ECS systems. See [`docs/patterns/game-loop.md`](../../docs/patterns/game-loop.md) and [`docs/patterns/update-method.md`](../../docs/patterns/update-method.md).
 2. **No per-frame allocations in hot paths.** Hoist objects, arrays, and closures out of `update()`. This is the only meaningful slice of the Data Locality chapter that applies to V8. See [`docs/patterns/data-locality.md`](../../docs/patterns/data-locality.md).
 3. **State machines over boolean flag webs.** If an entity or scene has more than two booleans tracking mode (`isJumping`, `isGrounded`, `isFalling`…), model it as a discriminated union or FSM. See [`docs/patterns/state.md`](../../docs/patterns/state.md).
-4. **Input / React modals:** Phaser's keyboard plugin captures keys during gameplay. While a React overlay is open, scenes must be paused via kernel pause propagation (`setPaused()`) and use `setSceneKeyboardPaused` from [`src/game/sceneKeyboardPause.ts`](../../src/game/sceneKeyboardPause.ts). Don't invent a second pause mechanism.
+4. **Input / React modals:** Phaser's keyboard plugin captures keys during gameplay. While a React overlay is open, scenes must be paused via kernel pause propagation (`setPaused()`) and use `setSceneKeyboardPaused` from [`src/runtime/sceneKeyboardPause.ts`](../../src/runtime/sceneKeyboardPause.ts). Don't invent a second pause mechanism.
 5. **Physics collider order:** initialize colliders *after* the player and static bodies are instantiated. Getting this wrong causes `ReferenceError` or fall-through-floor bugs.
 6. **Phaser 4 render guardrails** (restated from [`docs/ARCHITECTURE_RUNTIME.md`](../../docs/ARCHITECTURE_RUNTIME.md)):
    - Use `SpriteBatch` for interactive entities.
    - Use `DynamicTexture` for composited/stamp-style textures, with explicit `dynamicTexture.render()` flushes. Mutating and reading a dynamic texture in the same frame without a flush produces stale output (see [`docs/patterns/double-buffer.md`](../../docs/patterns/double-buffer.md)).
    - Use `SpriteGPULayer` only for dense, mostly-static quads. Avoid high-frequency member add/remove churn.
 7. **Object pools only when profiled.** Do not introduce pooling for "future-proofing." If GC pressure from particles/bullets is measured, reach for Phaser `Group.createMultiple` + `getFirstDead` first, not a hand-rolled pool. See [`docs/patterns/object-pool.md`](../../docs/patterns/object-pool.md).
-8. **Scene resume:** new interior scenes that need resume-on-return should implement `getResumeCapturePosition()` (see `ResumeCaptureScene` in [`src/game/sceneContracts.ts`](../../src/game/sceneContracts.ts)) and use a registry key matching their scene key. Reuse [`src/game/sceneResumeStore.ts`](../../src/game/sceneResumeStore.ts); don't reinvent.
+8. **Scene resume:** new interior scenes that need resume-on-return should implement `getResumeCapturePosition()` (see `ResumeCaptureScene` in [`src/runtime/sceneContracts.ts`](../../src/runtime/sceneContracts.ts)) and use a registry key matching their scene key. Reuse [`src/runtime/sceneResumeStore.ts`](../../src/runtime/sceneResumeStore.ts); don't reinvent.
 
 ## When in doubt
 

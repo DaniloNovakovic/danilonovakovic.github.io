@@ -10,7 +10,7 @@
 
 No current usage to record. Likely candidates when we get there:
 
-- Input remapping for `[src/game](../../src/game)` scenes (decouple physical key from action).
+- Input remapping for `[src/runtime](../../src/runtime)` scenes (decouple physical key from action).
 - Undo/redo in any mini-game that edits state (e.g. a terminal or sketching mini-game).
 - Replay or record-and-playback for a guitar/rhythm mini-game.
 

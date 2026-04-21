@@ -2,7 +2,7 @@
 description: Architectural boundaries for core/kernel, ECS, infra adapters, and shared bridge. Enforces kernel/plugin/bridge decoupling and ECS ownership.
 globs:
   - src/core/**
-  - src/games/**
+  - src/contextPlugins/**
   - src/infra/**
   - src/shared/**
 alwaysApply: false
@@ -17,14 +17,14 @@ This codebase uses a micro-kernel + bridge + ECS arrangement. The layering is lo
 1. **`src/core/**` is domain/engine-agnostic.** No `import 'phaser'`, no `import 'react'`, no `window`/`document` access inside `src/core/ecs/**` or the pure parts of `src/core/kernel/**`. The kernel talks to Phaser only through the adapter at [`src/infra/phaser/PhaserSceneAdapter.ts`](../../src/infra/phaser/PhaserSceneAdapter.ts).
 2. **One shared state store: the bridge.** The single source of truth for cross-boundary UI/engine state is [`src/shared/bridge/store.ts`](../../src/shared/bridge/store.ts). Read via `bridgeStore.getState()` / `useBridgeState`; write via `bridgeActions`. Do not add a second store or a freeform `window.*`. See [`docs/patterns/service-locator.md`](../../docs/patterns/service-locator.md).
 3. **Kernel events are the cross-system bus.** When a system needs to react to scene transitions or overlay open/close, subscribe to [`KernelEventBus`](../../src/core/kernel/events.ts). Don't invent a parallel event channel. See [`docs/patterns/observer.md`](../../docs/patterns/observer.md).
-4. **Plugins own a context, not the world.** Each file under `src/games/plugins/**` defines one `ContextPluginDefinition`. A plugin may register scene keys and lifecycle hooks; it must not reach into another plugin's scene or mutate kernel internals.
+4. **Plugins own a context, not the world.** Each file under `src/contextPlugins/plugins/**` defines one `ContextPluginDefinition`. A plugin may register scene keys and lifecycle hooks; it must not reach into another plugin's scene or mutate kernel internals.
 5. **ECS components are pure data.** Files under [`src/core/ecs/components/**`](../../src/core/ecs/components/player.ts) export interfaces over plain objects. No methods, no Phaser types. Logic goes into [`src/core/ecs/systems/**`](../../src/core/ecs/systems/playerSystems.ts) as pure functions over `EcsWorld` + component stores. See [`docs/patterns/component.md`](../../docs/patterns/component.md).
 6. **Upgrade path from Observer to Event Queue is deliberate.** Synchronous `bridgeStore` and `KernelEventBus` are fine for same-frame reactions. If you need time-decoupled or cross-scene delivery, that's when to introduce an [Event Queue](../../docs/patterns/event-queue.md) — don't retrofit existing buses.
 
-## Folder ownership (transitional)
+## Folder ownership
 
-- `src/game` — active Phaser runtime code. Treat as stable while migration continues.
-- `src/games` — plugin/context wrappers; preferred home for new context modules.
+- `src/runtime` — active Phaser runtime code.
+- `src/contextPlugins` — plugin/context wrappers used by kernel scene orchestration.
 - See [`AGENTS.md`](../../AGENTS.md) and [`docs/ARCHITECTURE_RUNTIME.md`](../../docs/ARCHITECTURE_RUNTIME.md) for the current split.
 
 ## See also

@@ -1,9 +1,9 @@
 import { useCallback, Suspense, useState } from 'react';
 import { BookOpen } from 'lucide-react';
 import Game from './Game';
-import { GameState, type AppState } from '../game/gameState';
-import { getMiniGameById } from '../game/miniGameRegistry';
-import { MiniGameType } from '../game/types';
+import { GameState, type AppState } from '../runtime/gameState';
+import { getMiniGameById } from '../runtime/miniGameRegistry';
+import { MiniGameType } from '../runtime/types';
 import { TEXTS } from '../config/content';
 import { isMiniGameId } from '../config/featureIds';
 import { bridgeActions, bridgeStore } from '../shared/bridge/store';

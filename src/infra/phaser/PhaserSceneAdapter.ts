@@ -3,8 +3,8 @@ import {
   isInteractBridgeScene,
   isPausableScene,
   isResumeCaptureScene
-} from '../../game/sceneContracts';
-import { rememberResumePosition } from '../../game/sceneResumeStore';
+} from '../../runtime/sceneContracts';
+import { rememberResumePosition } from '../../runtime/sceneResumeStore';
 import type { ResumeSnapshot } from '../../core/kernel/types';
 import type { SceneRuntimeAdapter } from '../../core/kernel/SceneManager';
 

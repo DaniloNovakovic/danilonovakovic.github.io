@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { HOBBY_REACT_OVERLAY_IDS } from './featureIds';
 import { composePortfolioSections, type FeaturePluginDefinition } from './portfolioCompose';
 import { OVERWORLD_BUILDING_PLACEMENTS } from './worldLayout';
-import { MiniGameType } from '../game/miniGameKind';
+import { MiniGameType } from '../runtime/miniGameKind';
 
 /** Minimal defs for composition tests (no Phaser / React imports). */
 function minimalDefs(): FeaturePluginDefinition[] {

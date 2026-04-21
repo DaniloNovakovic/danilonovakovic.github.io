@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { bridgeActions, bridgeStore } from './store';
-import { GameState } from '../../game/gameState';
+import { GameState } from '../../runtime/gameState';
 
 function resetBridge() {
   bridgeActions.closeActiveOverlay();

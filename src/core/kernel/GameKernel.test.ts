@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // Mock the registry so Phaser (loaded by HobbiesScene) is never imported in node env.
-vi.mock('../../game/miniGameRegistry', () => ({
+vi.mock('../../runtime/miniGameRegistry', () => ({
   getMiniGameById: (id: string) => {
     const REACT_OVERLAY = 'REACT_OVERLAY';
     const PHASER_SCENE = 'PHASER_SCENE';
@@ -14,7 +14,7 @@ vi.mock('../../game/miniGameRegistry', () => ({
   getAllMiniGames: () => []
 }));
 
-vi.mock('../../game/types', () => ({
+vi.mock('../../runtime/types', () => ({
   MiniGameType: { REACT_OVERLAY: 'REACT_OVERLAY', PHASER_SCENE: 'PHASER_SCENE' }
 }));
 
