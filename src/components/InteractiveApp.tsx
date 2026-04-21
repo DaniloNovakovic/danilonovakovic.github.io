@@ -1,6 +1,7 @@
 import { useCallback, Suspense } from 'react';
 import { BookOpen } from 'lucide-react';
 import Game from './Game';
+import { MobileGameControls } from './MobileGameControls';
 import { GameState } from '../runtime/gameState';
 import { getMiniGameById } from '../runtime/miniGameRegistry';
 import { MiniGameType } from '../runtime/types';
@@ -71,12 +72,15 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
           </div>
         </div>
 
-        {/* Hints below game on small screens (avoids covering touch controls) */}
+        {/* Mobile action controls (Jump/Interact) and hints */}
         {bridge.status === GameState.EXPLORING && (
-          <div className="mt-2 w-full max-w-lg shrink-0 px-1 text-center md:hidden">
-            <p className="text-[11px] font-bold uppercase leading-snug tracking-widest text-[#1a1a1a] opacity-80">
-              {TEXTS.navigation.hintsCompact}
-            </p>
+          <div className="mt-8 flex w-full flex-col items-center gap-2 md:hidden">
+            <MobileGameControls visible={!isPaused} />
+            <div className="mt-2 w-full max-w-lg shrink-0 px-1 text-center">
+              <p className="text-[11px] font-bold uppercase leading-snug tracking-widest text-[#1a1a1a] opacity-80">
+                {TEXTS.navigation.hintsCompact}
+              </p>
+            </div>
           </div>
         )}
       </div>
