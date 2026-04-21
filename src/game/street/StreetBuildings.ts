@@ -4,10 +4,11 @@
  */
 import * as Phaser from 'phaser';
 import { PORTFOLIO_SECTIONS } from '../../config/portfolioRegistry';
+import { UI_FONT_FAMILY } from '../../config/typography';
 
 const BUILDING_Y = 395;
 const LABEL_Y = 150;
-const LABEL_FONT = '"Comic Sans MS", cursive, sans-serif';
+const LABEL_FONT = UI_FONT_FAMILY;
 
 export function buildStreetBuildings(scene: Phaser.Scene): Phaser.GameObjects.Group {
   const group = scene.add.group();

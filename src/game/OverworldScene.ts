@@ -6,6 +6,7 @@
 import * as Phaser from 'phaser';
 import { HOBBIES_FEATURE_ID } from '../config/featureIds';
 import { PORTFOLIO_SECTIONS } from '../config/portfolioRegistry';
+import { UI_FONT_FAMILY } from '../config/typography';
 import { TextureGenerator } from './textures/TextureGenerator';
 import { TEXTS } from '../config/content';
 import {
@@ -143,7 +144,7 @@ export class OverworldScene extends Phaser.Scene {
 
     // --- UI ---
     this.interactPrompt = this.add.text(0, 0, TEXTS.navigation.enter, {
-      fontFamily: '"Comic Sans MS", cursive, sans-serif',
+      fontFamily: UI_FONT_FAMILY,
       fontSize: '18px',
       color: '#1a1a1a',
       backgroundColor: '#ffffff',

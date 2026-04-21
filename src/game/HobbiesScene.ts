@@ -5,6 +5,7 @@
 import * as Phaser from 'phaser';
 import { HOBBIES_EXIT_X, HOBBIES_ROOM_INTERACTABLES } from '../config/hobbiesRoomLayout';
 import { TEXTS } from '../config/content';
+import { UI_FONT_FAMILY } from '../config/typography';
 import {
   HOBBIES_FLOOR_Y,
   HOBBIES_GROUND_ZONE,
@@ -125,7 +126,7 @@ export class HobbiesScene extends Phaser.Scene {
 
     this.exitPrompt = this.add
       .text(HOBBIES_EXIT_X, floorY - 150, TEXTS.navigation.interact, {
-        fontFamily: '"Comic Sans MS", cursive',
+        fontFamily: UI_FONT_FAMILY,
         fontSize: '16px',
         color: '#1a1a1a',
         backgroundColor: '#ffffff',

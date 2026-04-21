@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Gamepad2, BookOpen } from 'lucide-react';
+import { UI_FONT_FAMILY } from '../config/typography';
 
 export type AppMode = 'interactive' | 'static';
 
@@ -61,7 +62,7 @@ export default function ModePicker({ onChoose }: ModePickerProps) {
   return (
     <div
       className="relative flex min-h-[100dvh] min-h-dvh w-full flex-col items-center justify-center overflow-x-hidden bg-[#f4f1ea] px-4 py-[max(1.5rem,env(safe-area-inset-top,0px))]"
-      style={{ fontFamily: '"Comic Sans MS", cursive, sans-serif' }}
+      style={{ fontFamily: UI_FONT_FAMILY }}
     >
       <div className="pointer-events-none absolute inset-0 z-0 bg-[url('https://www.transparenttextures.com/patterns/felt.png')] opacity-[0.05]" />
 

@@ -16,6 +16,7 @@ import {
   HOBBIES_ROOM_HEIGHT,
   HOBBIES_ROOM_WIDTH
 } from '../config';
+import { UI_FONT_FAMILY } from '../../config/typography';
 
 const hobbyLabel = (id: HobbyReactOverlayId): string =>
   (TEXTS.hobbies as Record<HobbyReactOverlayId, string>)[id];
@@ -112,7 +113,7 @@ export function buildHobbiesRoom(scene: Phaser.Scene): void {
     }
     scene.add
       .text(station.x, floorY - 140, hobbyLabel(station.id), {
-        fontFamily: '"Comic Sans MS", cursive',
+        fontFamily: UI_FONT_FAMILY,
         fontSize: '20px',
         color: '#1a1a1a',
         fontStyle: 'bold'
@@ -130,7 +131,7 @@ export function buildHobbiesRoom(scene: Phaser.Scene): void {
   exitDoor.strokeCircle(exitX + 20, floorY - 50, 3);
   scene.add
     .text(exitX, floorY - 120, TEXTS.navigation.exit, {
-      fontFamily: '"Comic Sans MS", cursive',
+      fontFamily: UI_FONT_FAMILY,
       fontSize: '16px',
       color: '#1a1a1a'
     })
