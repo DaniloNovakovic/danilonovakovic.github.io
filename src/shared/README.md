@@ -5,6 +5,7 @@
 ## Owns
 
 - Bridge state store and actions (`bridge/store.ts`)
+- `useBridgeState()` for React shells that should mirror bridge truth (see `InteractiveApp`)
 - Bridge tests and synchronization contracts
 
 ## Depends on

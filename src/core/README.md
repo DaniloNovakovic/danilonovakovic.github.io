@@ -13,6 +13,10 @@
 - `shared/bridge/store.ts` for state sync triggers
 - Interface contracts from `infra/` (adapter interfaces only, not concrete Phaser code)
 
+## Related guardrails
+
+- `contextPlugins/` must not import `runtime/` (enforced by ESLint; see `eslint.config.js`).
+
 ## Does not own
 
 - Direct Phaser imports in pure kernel/ECS modules

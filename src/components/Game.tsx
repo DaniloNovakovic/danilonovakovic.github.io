@@ -143,9 +143,11 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
       });
     }
 
+    // Initial pause comes from ref (updated in useLayoutEffect) so this effect
+    // does not close over `isPaused` — avoids remounting Phaser when pause toggles.
     game.scene.add(PHASER_SCENE_KEYS.main, OverworldScene, true, {
       onInteract: stableOnInteract,
-      isPaused,
+      isPaused: bridgeRef.current.isPaused,
       resumePosition: peekResumePosition(PHASER_SCENE_KEYS.main)
     });
 

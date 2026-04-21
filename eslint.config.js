@@ -20,4 +20,21 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
+  {
+    files: ['src/contextPlugins/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['**/runtime', '**/runtime/**'],
+              message:
+                'contextPlugins must not import from runtime; pass values via plugin factory options (kernel boundary).',
+            },
+          ],
+        },
+      ],
+    },
+  },
 ])

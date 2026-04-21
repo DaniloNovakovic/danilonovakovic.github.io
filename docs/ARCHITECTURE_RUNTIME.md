@@ -49,9 +49,21 @@ Initial player ECS scaffolding is in place:
 - `src/core/ecs/world.ts` for entity/component storage.
 - `src/core/ecs/components/player.ts` for player-focused pure data components.
 - `src/core/ecs/systems/playerSystems.ts` for input + movement/jump/interact system logic.
+- `src/core/ecs/systems/overworldInteractSystems.ts` for pure overworld building interact targeting (called from `OverworldScene`).
 - `src/runtime/OverworldScene.ts` uses this ECS layer to drive player decisions, then syncs results into Phaser sprite/body calls.
 
 This is an incremental migration: Phaser physics/rendering remains in infra-facing scene code while gameplay decisions move into component + system flow.
+
+## Manual smoke verification
+
+After changes that touch Phaser boot, bridge, kernel, scenes, or overlays, run `npm run dev` and confirm:
+
+1. **Overworld** — canvas loads; move left/right, jump, interact near a building.
+2. **Hobbies** — enter hobbies (building or `H` where applicable); walk; interact with an interior target; exit (`H` / `Esc` / close flow) returns to overworld.
+3. **React overlays** — open a building overlay from the street; close it; no stuck keyboard focus in the canvas.
+4. **Pause / input** — with a React overlay open, scene pause propagates (no gameplay input leaking); closing overlay resumes overworld input.
+
+Record pass/fail in the PR or release notes when shipping runtime changes.
 
 ## Rendering guardrails (Phaser 4)
 
