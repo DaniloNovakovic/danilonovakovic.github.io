@@ -16,6 +16,7 @@ import {
   HOBBIES_ROOM_HEIGHT,
   HOBBIES_ROOM_WIDTH
 } from '../config';
+import { createUiText } from '../text/createUiText';
 
 const hobbyLabel = (id: HobbyReactOverlayId): string =>
   (TEXTS.hobbies as Record<HobbyReactOverlayId, string>)[id];
@@ -110,13 +111,11 @@ export function buildHobbiesRoom(scene: Phaser.Scene): void {
         .sprite(station.x, floorY + station.yOffsetFromFloor, texKey)
         .setOrigin(0.5, 0.5);
     }
-    scene.add
-      .text(station.x, floorY - 140, hobbyLabel(station.id), {
-        fontFamily: '"Comic Sans MS", cursive',
-        fontSize: '20px',
-        color: '#1a1a1a',
-        fontStyle: 'bold'
-      })
+    createUiText(scene, station.x, floorY - 140, hobbyLabel(station.id), {
+      fontSize: '20px',
+      color: '#1a1a1a',
+      fontStyle: 'bold'
+    })
       .setOrigin(0.5);
   }
 
@@ -128,11 +127,9 @@ export function buildHobbiesRoom(scene: Phaser.Scene): void {
   exitDoor.fillRect(exitX - 30, floorY - 100, 60, 100);
   exitDoor.strokeRect(exitX - 30, floorY - 100, 60, 100);
   exitDoor.strokeCircle(exitX + 20, floorY - 50, 3);
-  scene.add
-    .text(exitX, floorY - 120, TEXTS.navigation.exit, {
-      fontFamily: '"Comic Sans MS", cursive',
-      fontSize: '16px',
-      color: '#1a1a1a'
-    })
+  createUiText(scene, exitX, floorY - 120, TEXTS.navigation.exit, {
+    fontSize: '16px',
+    color: '#1a1a1a'
+  })
     .setOrigin(0.5);
 }

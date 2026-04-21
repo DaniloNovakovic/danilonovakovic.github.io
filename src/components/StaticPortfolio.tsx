@@ -102,10 +102,7 @@ export default function StaticPortfolio({ onSwitchToInteractive }: StaticPortfol
   const year = useMemo(() => new Date().getFullYear(), []);
 
   return (
-    <div
-      className="relative min-h-[100dvh] min-h-dvh w-full overflow-x-hidden bg-[#f4f1ea]"
-      style={{ fontFamily: '"Comic Sans MS", cursive, sans-serif' }}
-    >
+    <div className="relative min-h-[100dvh] min-h-dvh w-full overflow-x-hidden bg-[#f4f1ea]">
       <div className="pointer-events-none fixed inset-0 z-0 bg-[url('https://www.transparenttextures.com/patterns/felt.png')] opacity-[0.05]" />
 
       {/* Mode switch link — sticky, top-right */}
