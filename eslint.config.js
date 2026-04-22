@@ -21,6 +21,12 @@ export default defineConfig([
     },
   },
   {
+    files: ['**/*.test.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
+  {
     files: ['src/contextPlugins/**/*.{ts,tsx}'],
     rules: {
       'no-restricted-imports': [
