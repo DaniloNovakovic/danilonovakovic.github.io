@@ -10,6 +10,9 @@ interface GestureCallbacks {
 
 const THRESHOLD = 15; // px
 const MAX_DRAG = 60; // px
+const MIN_INTENSITY = 0.2;
+const JUMP_TRIGGER_Y = -30; // px relative to touch start
+const JUMP_RESET_Y = -15; // px relative to touch start
 
 /**
  * A custom hook to detect mobile gestures: swipes (L/R/Up) and taps.
@@ -49,12 +52,12 @@ export function useTouchGestures({
       const deltaY = e.clientY - state.startY;
 
       // Handle jump gesture independently
-      if (deltaY < -30) {
+      if (deltaY < JUMP_TRIGGER_Y) {
         if (!state.hasJumped) {
           onSwipeUp();
           state.hasJumped = true;
         }
-      } else if (deltaY > -15) {
+      } else if (deltaY > JUMP_RESET_Y) {
         // Reset jump flag if they bring their finger back down
         state.hasJumped = false;
       }
@@ -62,9 +65,10 @@ export function useTouchGestures({
       // Handle horizontal swipe with dynamic intensity
       if (Math.abs(deltaX) > THRESHOLD) {
         state.hasSwiped = true;
+        const dragRange = MAX_DRAG - THRESHOLD;
         // Calculate intensity between 0.2 and 1.0
-        const rawIntensity = (Math.abs(deltaX) - THRESHOLD) / (MAX_DRAG - THRESHOLD);
-        const intensity = Math.min(Math.max(rawIntensity, 0.2), 1);
+        const rawIntensity = dragRange > 0 ? (Math.abs(deltaX) - THRESHOLD) / dragRange : 1;
+        const intensity = Math.min(Math.max(rawIntensity, MIN_INTENSITY), 1);
 
         if (deltaX > 0) {
           onSwipeRight(intensity);
