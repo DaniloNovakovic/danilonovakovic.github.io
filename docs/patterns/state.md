@@ -35,16 +35,16 @@ Use a pushdown automaton when you need nested modes that should resume cleanly (
 
 ## In this repo
 
-Partially in use, partially planned:
-
 - `[src/runtime/gameState.ts](../../src/runtime/gameState.ts)` defines `GameState` (`EXPLORING`, `IN_MINIGAME`), which the bridge tracks — a simple two-state FSM for app mode.
 - `[GameKernel](../../src/core/kernel/GameKernel.ts)` transitions between contexts based on bridge state and mini-game type — a coarse scene-level FSM, implemented ad-hoc.
-- Player movement is currently expressed as booleans (`grounded`, `enabled`) in `[src/core/ecs/components/player.ts](../../src/core/ecs/components/player.ts)` and `[playerSystems.ts](../../src/core/ecs/systems/playerSystems.ts)`. **Candidate refactor:** a small `PlayerState` discriminated union (`idle` / `walking` / `jumping` / `interacting`).
+- **Player Movement FSM:** Player movement is implemented as an explicit Finite State Machine using a TypeScript discriminated union (`PlayerState`) in `[src/core/ecs/components/player.ts](../../src/core/ecs/components/player.ts)`.
+  - States: `idle`, `walking`, `jumping`, `falling`.
+  - Logic: Managed by `tickFsm` in `[playerSystems.ts](../../src/core/ecs/systems/playerSystems.ts)`.
 - A pushdown automaton isn't needed today because overlay pause is handled at kernel level — but if we add nested modals (e.g. settings *over* a paused mini-game), that's the moment to add one.
 
 ## Status
 
-`planned` — migrate player movement flags to a proper state machine; formalize the kernel's scene FSM.
+`adopted` — player movement migrated to a proper state machine; coarse kernel FSM active.
 
 ## See also
 

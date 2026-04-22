@@ -23,8 +23,8 @@ import {
   OVERWORLD_WIDTH
 } from './config';
 import { setSceneKeyboardPaused } from './sceneKeyboardPause';
-import { bridgeActions, bridgeStore } from '../shared/bridge/store';
 import { PlayerController } from '../core/player/PlayerController';
+import { InputMapper } from './input/InputMapper';
 import {
   buildStreetEnvironment,
   buildStreetForeground,
@@ -44,6 +44,7 @@ export class OverworldScene extends Phaser.Scene {
   interactPrompt!: Phaser.GameObjects.Text;
 
   private controller!: PlayerController;
+  private inputMapper!: InputMapper;
   private onInteract?: (area: string) => void;
   private isPaused: boolean = false;
   private resumePosition?: { x: number; y: number };
@@ -136,6 +137,12 @@ export class OverworldScene extends Phaser.Scene {
       };
       this.interactKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
 
+      this.inputMapper = new InputMapper({
+        cursors: this.cursors,
+        wasd: this.wasd,
+        interactKey: this.interactKey
+      });
+
       const onH = () => { if (!this.isPaused) this.onInteract?.(HOBBIES_FEATURE_ID); };
       this.input.keyboard.on('keydown-H', onH);
       this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
@@ -160,18 +167,8 @@ export class OverworldScene extends Phaser.Scene {
       return;
     }
 
-    const touchState = bridgeStore.getState().touch;
-    const oneShots = bridgeActions.consumeTouchOneShots();
-    const analogX = touchState.right - touchState.left;
-
-    const step = this.controller.step({
-      left: this.cursors.left.isDown || this.wasd.a.isDown,
-      right: this.cursors.right.isDown || this.wasd.d.isDown,
-      sprint: this.cursors.shift.isDown,
-      jump: this.cursors.up.isDown || oneShots.jumpQueued,
-      interact: Phaser.Input.Keyboard.JustDown(this.interactKey) || oneShots.interactTap,
-      analogX
-    });
+    const commands = this.inputMapper?.getCommands(true, true) ?? [];
+    const step = this.controller.step(commands);
 
     this.player.setFlipX(step.facingLeft);
     this.player.setAngle(step.moving ? Math.sin(this.time.now / 100) * 5 : 0);

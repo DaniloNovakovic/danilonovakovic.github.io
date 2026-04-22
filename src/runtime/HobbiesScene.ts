@@ -16,8 +16,8 @@ import {
   HOBBIES_PLAYER_START_OFFSET_Y
 } from './config';
 import { setSceneKeyboardPaused } from './sceneKeyboardPause';
-import { bridgeActions, bridgeStore } from '../shared/bridge/store';
 import { PlayerController } from '../core/player/PlayerController';
+import { InputMapper } from './input/InputMapper';
 import { buildHobbiesRoom } from './hobbies/HobbiesRoom';
 import { createUiText } from './text/createUiText';
 
@@ -29,6 +29,7 @@ export class HobbiesScene extends Phaser.Scene {
   exitPrompt!: Phaser.GameObjects.Text;
 
   private controller!: PlayerController;
+  private inputMapper!: InputMapper;
   private onClose?: () => void;
   private onInteract?: (id: string) => void;
   private isPaused: boolean = false;
@@ -115,6 +116,12 @@ export class HobbiesScene extends Phaser.Scene {
       };
       this.interactKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
 
+      this.inputMapper = new InputMapper({
+        cursors: this.cursors,
+        wasd: this.wasd,
+        interactKey: this.interactKey
+      });
+
       const onClose = () => { if (!this.isPaused) this.onClose?.(); };
       this.input.keyboard.on('keydown-H', onClose);
       this.input.keyboard.on('keydown-ESC', onClose);
@@ -146,18 +153,8 @@ export class HobbiesScene extends Phaser.Scene {
       return;
     }
 
-    const touchState = bridgeStore.getState().touch;
-    const oneShots = bridgeActions.consumeTouchOneShots();
-    const analogX = touchState.right - touchState.left;
-
-    const step = this.controller.step({
-      left: this.cursors.left.isDown || this.wasd.a.isDown,
-      right: this.cursors.right.isDown || this.wasd.d.isDown,
-      sprint: false,
-      jump: false,
-      interact: Phaser.Input.Keyboard.JustDown(this.interactKey) || oneShots.interactTap,
-      analogX
-    });
+    const commands = this.inputMapper?.getCommands(false, false) ?? [];
+    const step = this.controller.step(commands);
 
     this.player.setFlipX(step.facingLeft);
     this.player.setAngle(step.moving ? Math.sin(this.time.now / 100) * 5 : 0);

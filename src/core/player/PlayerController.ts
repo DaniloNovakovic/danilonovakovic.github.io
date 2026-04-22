@@ -13,6 +13,7 @@ import { createPlayerComponentStores } from '../ecs/components/player';
 import { runPlayerInputAndMovementSystems } from '../ecs/systems/playerSystems';
 import type { EntityId } from '../ecs/world';
 import type { PlayerComponentStores } from '../ecs/components/player';
+import type { Command, PlayerInputState } from './input/Command';
 
 /** Minimal physics-sprite interface — satisfied structurally by Phaser sprites. */
 export interface PhysicsSprite {
@@ -28,15 +29,6 @@ export interface PlayerControllerConfig {
   sprintSpeed: number;
   /** Negative — upward impulse applied to the Phaser body on jump. */
   jumpVelocityY: number;
-}
-
-export interface PlayerStepInput {
-  left: boolean;
-  right: boolean;
-  sprint: boolean;
-  jump: boolean;
-  interact: boolean;
-  analogX?: number;
 }
 
 export interface PlayerStepResult {
@@ -59,6 +51,14 @@ export class PlayerController {
   private readonly entityId: EntityId;
   private readonly config: PlayerControllerConfig;
   private sprite: PhysicsSprite | null = null;
+  private readonly inputState: PlayerInputState = {
+    left: false,
+    right: false,
+    sprint: false,
+    jump: false,
+    interact: false,
+    analogX: 0
+  };
 
   constructor(config: PlayerControllerConfig) {
     this.config = config;
@@ -73,7 +73,11 @@ export class PlayerController {
       sprintSpeed: config.sprintSpeed,
       jumpVelocityY: config.jumpVelocityY
     });
-    this.world.setComponent(this.stores.jump, this.entityId, { enabled: true, grounded: false });
+    this.world.setComponent(this.stores.fsm, this.entityId, {
+      current: { kind: 'idle' },
+      jumpEnabled: config.jumpVelocityY !== 0,
+      grounded: false
+    });
     this.world.setComponent(this.stores.interaction, this.entityId, { requested: false });
     this.world.setComponent(this.stores.pause, this.entityId, { paused: false });
     this.world.setComponent(this.stores.input, this.entityId, {
@@ -99,20 +103,36 @@ export class PlayerController {
     this.world.setComponent(this.stores.pause, this.entityId, { paused: false });
   }
 
-  /** Feed raw input and grounded state; apply resulting velocity to the sprite body. */
-  step(input: PlayerStepInput): PlayerStepResult {
+  /** Evaluate commands and apply resulting velocity to the sprite body. */
+  step(commands: readonly Command[]): PlayerStepResult {
     if (!this.sprite) return ZERO_RESULT;
 
     const grounded = this.sprite.body.touching.down;
 
-    this.world.setComponent(this.stores.jump, this.entityId, { enabled: true, grounded });
+    // Reset input state to avoid per-frame allocations
+    this.inputState.left = false;
+    this.inputState.right = false;
+    this.inputState.sprint = false;
+    this.inputState.jump = false;
+    this.inputState.interact = false;
+    this.inputState.analogX = 0;
+
+    for (const command of commands) {
+      command.execute(this.inputState);
+    }
+
+    const fsm = this.world.getComponent(this.stores.fsm, this.entityId);
+    if (fsm) {
+      this.world.setComponent(this.stores.fsm, this.entityId, { ...fsm, grounded });
+    }
+
     this.world.setComponent(this.stores.input, this.entityId, {
-      left: input.left,
-      right: input.right,
-      sprint: input.sprint,
-      jump: input.jump,
-      interact: input.interact,
-      analogX: input.analogX
+      left: this.inputState.left,
+      right: this.inputState.right,
+      sprint: this.inputState.sprint,
+      jump: this.inputState.jump,
+      interact: this.inputState.interact,
+      analogX: this.inputState.analogX
     });
 
     const result = runPlayerInputAndMovementSystems(this.world, this.stores, this.entityId);

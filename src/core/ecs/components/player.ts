@@ -20,8 +20,15 @@ export interface MovementConfig {
   jumpVelocityY: number;
 }
 
-export interface JumpCapability {
-  enabled: boolean;
+export type PlayerState =
+  | { kind: 'idle' }
+  | { kind: 'walking' }
+  | { kind: 'jumping' }
+  | { kind: 'falling' };
+
+export interface PlayerFsmState {
+  current: PlayerState;
+  jumpEnabled: boolean;
   grounded: boolean;
 }
 
@@ -47,7 +54,7 @@ export interface PlayerComponentStores {
   velocity: ComponentStore<Velocity2D>;
   facing: ComponentStore<Facing>;
   movement: ComponentStore<MovementConfig>;
-  jump: ComponentStore<JumpCapability>;
+  fsm: ComponentStore<PlayerFsmState>;
   interaction: ComponentStore<InteractionProbe>;
   pause: ComponentStore<PauseState>;
   input: ComponentStore<PlayerInput>;
@@ -59,7 +66,7 @@ export function createPlayerComponentStores(world: EcsWorld): PlayerComponentSto
     velocity: world.registerComponent<Velocity2D>('Velocity2D'),
     facing: world.registerComponent<Facing>('Facing'),
     movement: world.registerComponent<MovementConfig>('MovementConfig'),
-    jump: world.registerComponent<JumpCapability>('JumpCapability'),
+    fsm: world.registerComponent<PlayerFsmState>('PlayerFsmState'),
     interaction: world.registerComponent<InteractionProbe>('InteractionProbe'),
     pause: world.registerComponent<PauseState>('PauseState'),
     input: world.registerComponent<PlayerInput>('PlayerInput')

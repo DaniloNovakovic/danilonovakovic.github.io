@@ -1,24 +1,26 @@
 # Command
 
-> Stub — expand as you read the chapter.
-
 ## Intent
 
 *(From the book: an object that represents an invocation of a method, so it can be stored, queued, undone, remapped, etc.)*
 
 ## In this repo
 
-No current usage to record. Likely candidates when we get there:
+- **Input Decoupling:** We use the Command pattern to decouple raw hardware input (keyboard, touch gestures) from the player's logical action (`MoveCommand`, `JumpCommand`, `InteractCommand`).
+  - `[InputMapper](../../src/runtime/input/InputMapper.ts)` reads hardware state and translates it into Commands.
+  - `[PlayerController](../../src/core/player/PlayerController.ts)` executes these Commands to update logical `PlayerInputState`.
 
-- Input remapping for `[src/runtime](../../src/runtime)` scenes (decouple physical key from action).
-- Undo/redo in any mini-game that edits state (e.g. a terminal or sketching mini-game).
-- Replay or record-and-playback for a guitar/rhythm mini-game.
+## In JS/TS + Phaser
+
+- **Performance Caveat (Micro-Pooling):** In a pure Command pattern, objects are immutable. However, allocating a `new MoveCommand(...)` 60 times a second creates garbage collection (GC) pressure in JavaScript, which can cause frame stuttering.
+- **The Solution:** We combine the Command pattern with a micro **Object Pool**. The `InputMapper` pre-allocates exactly one instance of each Command and reuses them every frame via a `.set()` method.
+  - The array of commands returned by `getCommands()` is also reused. **Never store references to these commands or the array across frames.**
 
 ## Status
 
-`not yet read`
+`adopted` — applied to player input mapping with zero-allocation optimizations.
 
 ## See also
 
 - Book chapter: [Command](https://gameprogrammingpatterns.com/command.html)
-- Related: [Event Queue](./event-queue.md), [State](./state.md), [Bytecode](./bytecode.md)
+- Related: [Event Queue](./event-queue.md), [State](./state.md), [Bytecode](./bytecode.md), [Object Pool](./object-pool.md)
