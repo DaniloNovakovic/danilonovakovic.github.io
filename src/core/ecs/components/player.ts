@@ -39,6 +39,7 @@ export interface PlayerInput {
   sprint: boolean;
   jump: boolean;
   interact: boolean;
+  analogX?: number;
 }
 
 export interface PlayerComponentStores {

@@ -39,23 +39,23 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
   }, []);
 
   const touchHandlers = useTouchGestures({
-    onSwipeLeft: () => {
+    onSwipeLeft: (intensity) => {
       if (isPaused) return;
-      bridgeActions.setTouchDirectional('left', true);
-      bridgeActions.setTouchDirectional('right', false);
+      bridgeActions.setTouchDirectional('left', intensity);
+      bridgeActions.setTouchDirectional('right', 0);
     },
-    onSwipeRight: () => {
+    onSwipeRight: (intensity) => {
       if (isPaused) return;
-      bridgeActions.setTouchDirectional('right', true);
-      bridgeActions.setTouchDirectional('left', false);
+      bridgeActions.setTouchDirectional('right', intensity);
+      bridgeActions.setTouchDirectional('left', 0);
     },
     onSwipeUp: () => {
       if (isPaused) return;
       bridgeActions.queueJump();
     },
     onSwipeEnd: () => {
-      bridgeActions.setTouchDirectional('left', false);
-      bridgeActions.setTouchDirectional('right', false);
+      bridgeActions.setTouchDirectional('left', 0);
+      bridgeActions.setTouchDirectional('right', 0);
     },
     onTap: () => {
       if (isPaused) return;

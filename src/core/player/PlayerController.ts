@@ -36,6 +36,7 @@ export interface PlayerStepInput {
   sprint: boolean;
   jump: boolean;
   interact: boolean;
+  analogX?: number;
 }
 
 export interface PlayerStepResult {
@@ -110,7 +111,8 @@ export class PlayerController {
       right: input.right,
       sprint: input.sprint,
       jump: input.jump,
-      interact: input.interact
+      interact: input.interact,
+      analogX: input.analogX
     });
 
     const result = runPlayerInputAndMovementSystems(this.world, this.stores, this.entityId);

@@ -81,19 +81,19 @@ describe('bridgeStore', () => {
 
   describe('directional touch state', () => {
     it('sets and clears left/right', () => {
-      bridgeActions.setTouchDirectional('left', true);
-      expect(bridgeStore.getState().touch.left).toBe(true);
-      bridgeActions.setTouchDirectional('left', false);
-      expect(bridgeStore.getState().touch.left).toBe(false);
+      bridgeActions.setTouchDirectional('left', 0.5);
+      expect(bridgeStore.getState().touch.left).toBe(0.5);
+      bridgeActions.setTouchDirectional('left', 0);
+      expect(bridgeStore.getState().touch.left).toBe(0);
     });
 
     it('resetTouch zeroes everything', () => {
-      bridgeActions.setTouchDirectional('right', true);
+      bridgeActions.setTouchDirectional('right', 1.0);
       bridgeActions.queueJump();
       bridgeActions.resetTouch();
       const t = bridgeStore.getState().touch;
-      expect(t.left).toBe(false);
-      expect(t.right).toBe(false);
+      expect(t.left).toBe(0);
+      expect(t.right).toBe(0);
       expect(t.jumpQueued).toBe(false);
       expect(t.interactTap).toBe(false);
     });

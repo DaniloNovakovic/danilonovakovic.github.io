@@ -1,14 +1,15 @@
 import { useRef, useCallback } from 'react';
 
 interface GestureCallbacks {
-  onSwipeLeft: () => void;
-  onSwipeRight: () => void;
+  onSwipeLeft: (intensity: number) => void;
+  onSwipeRight: (intensity: number) => void;
   onSwipeUp: () => void;
   onSwipeEnd: () => void;
   onTap: () => void;
 }
 
 const THRESHOLD = 15; // px
+const MAX_DRAG = 60; // px
 
 /**
  * A custom hook to detect mobile gestures: swipes (L/R/Up) and taps.
@@ -25,6 +26,7 @@ export function useTouchGestures({
     startX: 0,
     startY: 0,
     hasSwiped: false,
+    hasJumped: false,
     isActive: false,
   });
 
@@ -33,6 +35,7 @@ export function useTouchGestures({
       startX: e.clientX,
       startY: e.clientY,
       hasSwiped: false,
+      hasJumped: false,
       isActive: true,
     };
   }, []);
@@ -45,23 +48,31 @@ export function useTouchGestures({
       const deltaX = e.clientX - state.startX;
       const deltaY = e.clientY - state.startY;
 
-      // Prioritize swipe up for jumping
-      if (deltaY < -THRESHOLD && Math.abs(deltaY) > Math.abs(deltaX)) {
-        if (!state.hasSwiped) {
+      // Handle jump gesture independently
+      if (deltaY < -30) {
+        if (!state.hasJumped) {
           onSwipeUp();
-          state.hasSwiped = true;
+          state.hasJumped = true;
         }
-        // Even after swipe up, we don't necessarily want to cancel L/R movement
-        // but for this specific gesture, we mark it as "swiped".
-      } else if (Math.abs(deltaX) > THRESHOLD) {
+      } else if (deltaY > -15) {
+        // Reset jump flag if they bring their finger back down
+        state.hasJumped = false;
+      }
+
+      // Handle horizontal swipe with dynamic intensity
+      if (Math.abs(deltaX) > THRESHOLD) {
         state.hasSwiped = true;
+        // Calculate intensity between 0.2 and 1.0
+        const rawIntensity = (Math.abs(deltaX) - THRESHOLD) / (MAX_DRAG - THRESHOLD);
+        const intensity = Math.min(Math.max(rawIntensity, 0.2), 1);
+
         if (deltaX > 0) {
-          onSwipeRight();
+          onSwipeRight(intensity);
         } else {
-          onSwipeLeft();
+          onSwipeLeft(intensity);
         }
       } else if (state.hasSwiped) {
-        // If we were swiping but moved back to neutral zone
+        // If we were swiping horizontally but moved back to neutral zone
         onSwipeEnd();
       }
     },
@@ -72,7 +83,7 @@ export function useTouchGestures({
     const state = dragRef.current;
     if (!state.isActive) return;
 
-    if (!state.hasSwiped) {
+    if (!state.hasSwiped && !state.hasJumped) {
       onTap();
     }
 
