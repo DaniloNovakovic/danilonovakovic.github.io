@@ -4,8 +4,8 @@ import type { MiniGameId } from '../../config/featureIds';
 import { isOverlayPauseTriggerId } from '../../config/miniGameCategories';
 
 export interface TouchBridgeState {
-  left: boolean;
-  right: boolean;
+  left: number;
+  right: number;
   jumpQueued: boolean;
   interactTap: boolean;
 }
@@ -24,8 +24,8 @@ let state: BridgeState = {
   activeMiniGameId: null,
   isPaused: false,
   touch: {
-    left: false,
-    right: false,
+    left: 0,
+    right: 0,
     jumpQueued: false,
     interactTap: false
   }
@@ -87,12 +87,12 @@ export const bridgeActions = {
       activeMiniGameId: null
     }));
   },
-  setTouchDirectional(direction: 'left' | 'right', pressed: boolean): void {
+  setTouchDirectional(direction: 'left' | 'right', intensity: number): void {
     setState((current) => ({
       ...current,
       touch: {
         ...current.touch,
-        [direction]: pressed
+        [direction]: intensity
       }
     }));
   },
@@ -135,8 +135,8 @@ export const bridgeActions = {
     setState((current) => ({
       ...current,
       touch: {
-        left: false,
-        right: false,
+        left: 0,
+        right: 0,
         jumpQueued: false,
         interactTap: false
       }

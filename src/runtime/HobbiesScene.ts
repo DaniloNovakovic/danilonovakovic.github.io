@@ -148,13 +148,15 @@ export class HobbiesScene extends Phaser.Scene {
 
     const touchState = bridgeStore.getState().touch;
     const oneShots = bridgeActions.consumeTouchOneShots();
+    const analogX = touchState.right - touchState.left;
 
     const step = this.controller.step({
-      left: this.cursors.left.isDown || this.wasd.a.isDown || touchState.left,
-      right: this.cursors.right.isDown || this.wasd.d.isDown || touchState.right,
+      left: this.cursors.left.isDown || this.wasd.a.isDown,
+      right: this.cursors.right.isDown || this.wasd.d.isDown,
       sprint: false,
       jump: false,
-      interact: Phaser.Input.Keyboard.JustDown(this.interactKey) || oneShots.interactTap
+      interact: Phaser.Input.Keyboard.JustDown(this.interactKey) || oneShots.interactTap,
+      analogX
     });
 
     this.player.setFlipX(step.facingLeft);
