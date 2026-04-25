@@ -14,17 +14,6 @@ Never mix orchestration (the "what") with implementation (the "how") in the same
 - **Orchestration Nodes**: high-level functions that call other functions and express domain intent.
 - **Leaf Nodes**: low-level functions that do concrete work (API calls, math, framework/library specifics, transformations).
 
-## Invocation Triggers
-
-Use this skill only when the user explicitly:
-
-- asks for top-down decomposition
-- requests "wishful thinking" or "stubs first"
-- wants abstraction-first TypeScript design
-- wants approval before low-level implementation
-
-Do not infer this skill from ordinary complex work. The repository's normal default remains direct, YAGNI-first implementation through the existing architecture.
-
 ## Workflow
 
 Copy this checklist and keep it updated in-progress:
