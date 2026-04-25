@@ -25,6 +25,7 @@ Key principles (see [LANGUAGE.md](LANGUAGE.md) for the full list):
 - **Deletion test**: imagine deleting the module. If complexity vanishes, it was a pass-through. If complexity reappears across N callers, it was earning its keep.
 - **The interface is the test surface.**
 - **One adapter = hypothetical seam. Two adapters = real seam.**
+- **Dependency category drives testing approach**: classify dependencies using [DEEPENING.md](DEEPENING.md) before proposing seam strategy.
 
 This skill is informed by the repository's existing architecture docs. In this project, use `AGENTS.md`, `.cursor/rules/`, `docs/ARCHITECTURE_RUNTIME.md`, `docs/ARCHITECTURE_CONSTITUTION.md`, and `docs/patterns/` as the source of language and constraints.
 
