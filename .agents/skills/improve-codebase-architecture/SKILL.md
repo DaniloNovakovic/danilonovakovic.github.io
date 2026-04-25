@@ -1,7 +1,7 @@
 ---
-name: improve-codebase-architecture
+
+## name: improve-codebase-architecture
 description: Find deepening opportunities in a codebase, informed by the project's architecture docs (AGENTS.md, docs/adr/, etc.) and domain language. Use when the user wants to improve architecture, find refactoring opportunities, consolidate tightly-coupled modules, or make a codebase more testable and AI-navigable.
----
 
 # Improve Codebase Architecture
 
@@ -67,7 +67,7 @@ Present a numbered list of deepening opportunities. For each candidate:
 
 **Use this repo's vocabulary and [LANGUAGE.md](LANGUAGE.md) vocabulary for the architecture.** Talk about the bridge, kernel, SceneManager, context plugins, runtime modes, ECS systems, and React overlays using names already present in `AGENTS.md` and `docs/`. If `CONTEXT.md` exists, use its vocabulary for the domain.
 
-**ADR conflicts**: if a candidate contradicts an existing ADR, only surface it when the friction is real enough to warrant revisiting the ADR. Mark it clearly (e.g. _"contradicts ADR-0007 — but worth reopening because…"_). Don't list every theoretical refactor an ADR forbids.
+**ADR conflicts**: if a candidate contradicts an existing ADR, only surface it when the friction is real enough to warrant revisiting the ADR. Mark it clearly (e.g. *"contradicts ADR-0007 — but worth reopening because…"*). Don't list every theoretical refactor an ADR forbids.
 
 Do NOT propose interfaces yet. Ask the user: "Which of these would you like to explore?"
 
@@ -79,5 +79,5 @@ Side effects happen inline as decisions crystallize:
 
 - **Naming a deepened module after a concept not in `CONTEXT.md`?** If the repo already uses `CONTEXT.md`, add the term there using the established domain-model conventions.
 - **Sharpening a fuzzy term during the conversation?** If `CONTEXT.md` exists, update it inline.
-- **User rejects the candidate with a load-bearing reason?** If the repo uses ADRs, offer to record it as an ADR: _"Want me to record this as an ADR so future architecture reviews don't re-suggest it?"_ Only offer when the reason would actually be needed by a future explorer to avoid re-suggesting the same thing — skip ephemeral reasons ("not worth it right now") and self-evident ones.
+- **User rejects the candidate with a load-bearing reason?** If the repo uses ADRs, offer to record it as an ADR: *"Want me to record this as an ADR so future architecture reviews don't re-suggest it?"* Only offer when the reason would actually be needed by a future explorer to avoid re-suggesting the same thing — skip ephemeral reasons ("not worth it right now") and self-evident ones.
 - **Want to explore alternative interfaces for the deepened module?** See [INTERFACE-DESIGN.md](INTERFACE-DESIGN.md).
