@@ -1,6 +1,4 @@
 import { PHASER_SCENE_KEYS } from '../../config/featureIds';
-import { getMiniGameById } from '../../runtime/miniGameRegistry';
-import { MiniGameType } from '../../runtime/types';
 import { bridgeStore, type BridgeState } from '../../shared/bridge/store';
 import { SceneManager } from './SceneManager';
 import { KernelEventBus } from './events';
@@ -36,17 +34,16 @@ export class GameKernel {
     this.emitStateEvents(state);
     this.sceneManager.applyPause('all', state.isPaused);
 
-    if (!state.activeMiniGameId) {
+    if (state.mode.kind === 'exploring') {
       this.eventBus.emit({ type: 'SceneTransitionRequested', targetContext: null });
       this.sceneManager.exitTo(PHASER_SCENE_KEYS.main);
       this.previousState = state;
       return;
     }
 
-    const activeMiniGame = getMiniGameById(state.activeMiniGameId);
-    if (activeMiniGame?.type === MiniGameType.PHASER_SCENE) {
-      this.eventBus.emit({ type: 'SceneTransitionRequested', targetContext: activeMiniGame.id });
-      this.sceneManager.enter(activeMiniGame.id);
+    if (state.mode.kind === 'phaserScene') {
+      this.eventBus.emit({ type: 'SceneTransitionRequested', targetContext: state.mode.miniGameId });
+      this.sceneManager.enter(state.mode.miniGameId);
     }
     this.previousState = state;
   }
@@ -61,15 +58,25 @@ export class GameKernel {
       this.eventBus.emit({ type: 'PauseChanged', paused: state.isPaused });
     }
 
-    const previousId = this.previousState.activeMiniGameId;
-    const currentId = state.activeMiniGameId;
-    if (!previousId && currentId) {
-      const active = getMiniGameById(currentId);
-      if (active?.type === MiniGameType.REACT_OVERLAY) {
-        this.eventBus.emit({ type: 'OverlayOpened', miniGameId: currentId });
-      }
-    } else if (previousId && !currentId) {
-      this.eventBus.emit({ type: 'OverlayClosed', toContext: null });
+    const previousMode = this.previousState.mode;
+    const currentMode = state.mode;
+    const modeChanged =
+      previousMode.kind !== currentMode.kind ||
+      (previousMode.kind !== 'exploring' &&
+        currentMode.kind !== 'exploring' &&
+        previousMode.miniGameId !== currentMode.miniGameId);
+
+    if (!modeChanged) return;
+
+    if (previousMode.kind === 'reactOverlay') {
+      this.eventBus.emit({
+        type: 'OverlayClosed',
+        toContext: currentMode.kind === 'exploring' ? null : currentMode.miniGameId
+      });
+    }
+
+    if (currentMode.kind === 'reactOverlay') {
+      this.eventBus.emit({ type: 'OverlayOpened', miniGameId: currentMode.miniGameId });
     }
   }
 }

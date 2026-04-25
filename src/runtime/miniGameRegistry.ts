@@ -60,9 +60,6 @@ function assertPortfolioRegistryInvariants(sections: readonly MiniGamePlugin[]):
   }
 
   for (const row of sections) {
-    if (row.type === MiniGameType.PHASER_SCENE && !row.Scene) {
-      throw new Error(`Portfolio registry: PHASER_SCENE "${row.id}" must define Scene`);
-    }
     if (row.type === MiniGameType.REACT_OVERLAY && !isHobbyReactOverlayId(row.id) && row.x === undefined) {
       throw new Error(
         `Portfolio registry: REACT_OVERLAY "${row.id}" is not a hobby overlay but has no world x`

@@ -43,13 +43,14 @@ Initial ECS is in place and growing:
 - `[src/core/ecs/world.ts](../../src/core/ecs/world.ts)` — minimal `EcsWorld` with entity ids and named component stores (`Map<EntityId, T>`).
 - `[src/core/ecs/components/player.ts](../../src/core/ecs/components/player.ts)` — player-focused data components (input, movement, jump, interaction, facing, velocity, pause).
 - `[src/core/ecs/systems/playerSystems.ts](../../src/core/ecs/systems/playerSystems.ts)` — pure per-frame system that reads components and returns a `PlayerStepResult`. Phaser then applies that result to the body.
+- `[src/core/ecs/systems/roomInteractSystems.ts](../../src/core/ecs/systems/roomInteractSystems.ts)` — pure room interaction picking used by Phaser scenes through plain data slots.
 - Migration rule: new gameplay decisions go into ECS components + systems. Phaser code stays a thin adapter that reads component state and drives sprites/bodies.
 
 Per `[docs/ARCHITECTURE_RUNTIME.md](../ARCHITECTURE_RUNTIME.md)`: Phaser physics/rendering remains in infra-facing scene code while gameplay decisions move into component + system flow.
 
 ## Status
 
-`in use` (partial) — player migration in progress. Other entities (buildings, NPCs) are not yet ECS-shaped.
+`in use` (partial) — player and interaction picking are moving through pure systems. Other entities (buildings, NPCs) are not yet ECS-shaped.
 
 ## See also
 

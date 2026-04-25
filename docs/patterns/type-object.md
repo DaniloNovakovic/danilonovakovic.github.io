@@ -13,14 +13,16 @@
 
 ## In this repo
 
-Candidate usage:
+Current usage:
 
-- Buildings along the street are currently composed via config (see `[src/config/featurePlugins.ts](../../src/config/featurePlugins.ts)`, `[src/config/worldLayout.ts](../../src/config/worldLayout.ts)`, `[src/config/portfolioCompose.ts](../../src/config/portfolioCompose.ts)`). This is already Type-Object-shaped: the "type" lives in config, instances are positioned on the map.
+- Buildings along the street are composed via type-object-shaped config (see `[src/config/featurePlugins.ts](../../src/config/featurePlugins.ts)`, `[src/config/worldLayout.ts](../../src/config/worldLayout.ts)`, `[src/config/portfolioCompose.ts](../../src/config/portfolioCompose.ts)`). The "type" lives in config, and world placement supplies instance data.
+- `[src/runtime/types.ts](../../src/runtime/types.ts)` models React overlays and Phaser scenes as discriminated feature variants with required fields per kind.
+- `[src/config/hobbiesRoomLayout.ts](../../src/config/hobbiesRoomLayout.ts)` models hobby stations and exits as explicit room interactable variants.
 - Any future NPC/enemy variants in mini-games should go the same way (data, not subclasses).
 
 ## Status
 
-`planned`
+`in use` (small) — current feature and interactable kinds are represented as data variants, not subclasses.
 
 ## See also
 

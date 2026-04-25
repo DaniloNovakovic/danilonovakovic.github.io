@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import type * as Phaser from 'phaser';
 import { HOBBY_REACT_OVERLAY_IDS } from './featureIds';
 import { composePortfolioSections, type FeaturePluginDefinition } from './portfolioCompose';
 import { OVERWORLD_BUILDING_PLACEMENTS } from './worldLayout';
@@ -6,17 +7,22 @@ import { MiniGameType } from '../runtime/miniGameKind';
 
 /** Minimal defs for composition tests (no Phaser / React imports). */
 function minimalDefs(): FeaturePluginDefinition[] {
+  const DummyOverlay = () => null;
+  const DummyScene = class {} as unknown as typeof Phaser.Scene;
   const street: FeaturePluginDefinition[] = OVERWORLD_BUILDING_PLACEMENTS.map(({ id }) => ({
     id,
     name: id,
     description: id,
-    type: id === 'hobbies' ? MiniGameType.PHASER_SCENE : MiniGameType.REACT_OVERLAY
+    ...(id === 'hobbies'
+      ? { type: MiniGameType.PHASER_SCENE, Scene: DummyScene }
+      : { type: MiniGameType.REACT_OVERLAY, Component: DummyOverlay })
   }));
   const hobbyRooms: FeaturePluginDefinition[] = HOBBY_REACT_OVERLAY_IDS.map((id) => ({
     id,
     name: id,
     description: id,
     type: MiniGameType.REACT_OVERLAY,
+    Component: DummyOverlay,
     overlayParentId: 'hobbies' as const
   }));
   return [...street, ...hobbyRooms];

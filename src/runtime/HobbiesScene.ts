@@ -20,12 +20,20 @@ import { bridgeActions, bridgeStore } from '../shared/bridge/store';
 import { PlayerController } from '../core/player/PlayerController';
 import { buildHobbiesRoom } from './hobbies/HobbiesRoom';
 import { createUiText } from './text/createUiText';
+import { pickRoomInteractTarget } from '../core/ecs/systems/roomInteractSystems';
+import {
+  commandFrameToPlayerStepInput,
+  createInputCommandFrame
+} from '../core/input/commands';
+import { readSceneInputCommands } from './input/readSceneInputCommands';
 
 export class HobbiesScene extends Phaser.Scene {
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   wasd!: { a: Phaser.Input.Keyboard.Key; d: Phaser.Input.Keyboard.Key };
   interactKey!: Phaser.Input.Keyboard.Key;
+  hKey!: Phaser.Input.Keyboard.Key;
+  escapeKey!: Phaser.Input.Keyboard.Key;
   exitPrompt!: Phaser.GameObjects.Text;
 
   private controller!: PlayerController;
@@ -33,6 +41,7 @@ export class HobbiesScene extends Phaser.Scene {
   private onInteract?: (id: string) => void;
   private isPaused: boolean = false;
   private resumePosition?: { x: number; y: number };
+  private readonly inputFrame = createInputCommandFrame();
 
   constructor() {
     super({ key: 'hobbies' });
@@ -114,14 +123,8 @@ export class HobbiesScene extends Phaser.Scene {
         d: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D)
       };
       this.interactKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
-
-      const onClose = () => { if (!this.isPaused) this.onClose?.(); };
-      this.input.keyboard.on('keydown-H', onClose);
-      this.input.keyboard.on('keydown-ESC', onClose);
-      this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-        this.input.keyboard?.off('keydown-H', onClose);
-        this.input.keyboard?.off('keydown-ESC', onClose);
-      });
+      this.hKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.H);
+      this.escapeKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
     }
 
     this.exitPrompt = createUiText(this, HOBBIES_EXIT_X, floorY - 150, TEXTS.navigation.interact, {
@@ -148,45 +151,44 @@ export class HobbiesScene extends Phaser.Scene {
 
     const touchState = bridgeStore.getState().touch;
     const oneShots = bridgeActions.consumeTouchOneShots();
-    const analogX = touchState.right - touchState.left;
-
-    const step = this.controller.step({
-      left: this.cursors.left.isDown || this.wasd.a.isDown,
-      right: this.cursors.right.isDown || this.wasd.d.isDown,
-      sprint: false,
-      jump: false,
-      interact: Phaser.Input.Keyboard.JustDown(this.interactKey) || oneShots.interactTap,
-      analogX
+    const commands = readSceneInputCommands({
+      frame: this.inputFrame,
+      cursors: this.cursors,
+      wasd: this.wasd,
+      interactKey: this.interactKey,
+      hKey: this.hKey,
+      escapeKey: this.escapeKey,
+      touch: touchState,
+      oneShots,
+      allowJump: false,
+      allowSprint: false
     });
+    if (commands.exitContext) this.onClose?.();
+
+    const step = this.controller.step(commandFrameToPlayerStepInput(commands));
 
     this.player.setFlipX(step.facingLeft);
     this.player.setAngle(step.moving ? Math.sin(this.time.now / 100) * 5 : 0);
 
-    let nearInteractable = false;
-    for (const item of HOBBIES_ROOM_INTERACTABLES) {
-      const dist = Phaser.Math.Distance.Between(
-        this.player.x,
-        this.player.y,
-        item.x,
-        item.distanceAnchorY
-      );
-      if (dist < HOBBIES_INTERACT_RADIUS) {
-        this.exitPrompt.setX(item.x).setVisible(true);
-        nearInteractable = true;
+    const interact = pickRoomInteractTarget(
+      this.player.x,
+      this.player.y,
+      HOBBIES_ROOM_INTERACTABLES,
+      HOBBIES_INTERACT_RADIUS
+    );
 
-        if (step.interactRequested) {
-          if (item.id === 'exit') {
-            this.onClose?.();
-          } else {
-            this.onInteract?.(item.id);
-          }
-        }
-        break;
-      }
+    if (interact.id == null || interact.x == null) {
+      this.exitPrompt.setVisible(false);
+      return;
     }
 
-    if (!nearInteractable) {
-      this.exitPrompt.setVisible(false);
+    this.exitPrompt.setX(interact.x).setVisible(true);
+    if (step.interactRequested) {
+      if (interact.id === 'exit') {
+        this.onClose?.();
+      } else {
+        this.onInteract?.(interact.id);
+      }
     }
   }
 }

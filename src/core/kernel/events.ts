@@ -20,3 +20,26 @@ export class KernelEventBus {
     this.listeners.forEach((listener) => listener(event));
   }
 }
+
+export class KernelEventQueue {
+  private readonly pending: KernelEvent[] = [];
+
+  enqueue(event: KernelEvent): void {
+    this.pending.push(event);
+  }
+
+  flushTo(eventBus: KernelEventBus): void {
+    while (this.pending.length > 0) {
+      const event = this.pending.shift();
+      if (event) eventBus.emit(event);
+    }
+  }
+
+  clear(): void {
+    this.pending.length = 0;
+  }
+
+  get size(): number {
+    return this.pending.length;
+  }
+}
