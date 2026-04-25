@@ -1,6 +1,6 @@
 ---
 name: improve-codebase-architecture
-description: Find deepening opportunities in this codebase. Use when the user wants to improve architecture, find refactoring opportunities, consolidate tightly-coupled modules, or make the repo more testable and AI-navigable.
+description: Find deepening opportunities in a codebase, informed by the domain language in CONTEXT.md and the decisions in docs/adr/. Use when the user wants to improve architecture, find refactoring opportunities, consolidate tightly-coupled modules, or make a codebase more testable and AI-navigable.
 ---
 
 # Improve Codebase Architecture
@@ -26,7 +26,7 @@ Key principles (see [LANGUAGE.md](LANGUAGE.md) for the full list):
 - **The interface is the test surface.**
 - **One adapter = hypothetical seam. Two adapters = real seam.**
 
-This skill is informed by the repository's existing architecture docs. In this project, use `AGENTS.md`, `.cursor/rules/`, `docs/ARCHITECTURE_RUNTIME.md`, `docs/ARCHITECTURE_CONSTITUTION.md`, and `docs/patterns/` as the source of language and constraints.
+This skill is _informed_ by the project's domain model — `CONTEXT.md` and any `docs/adr/`. The domain language gives names to good seams; ADRs record decisions the skill should not re-litigate. See [CONTEXT-FORMAT.md](../domain-model/CONTEXT-FORMAT.md) and [ADR-FORMAT.md](../domain-model/ADR-FORMAT.md).
 
 ## Process
 
@@ -34,11 +34,10 @@ This skill is informed by the repository's existing architecture docs. In this p
 
 Read existing documentation first:
 
-- `AGENTS.md`
-- `.cursor/rules/`
-- `docs/ARCHITECTURE_RUNTIME.md`
-- `docs/ARCHITECTURE_CONSTITUTION.md`
-- `docs/patterns/README.md`
+- `CONTEXT.md` (or `CONTEXT-MAP.md` + each `CONTEXT.md` in a multi-context repo)
+- Relevant ADRs in `docs/adr/` (and any context-scoped `docs/adr/` directories)
+
+If any of these files don't exist, proceed silently — don't flag their absence or suggest creating them upfront.
 
 Then use the Agent tool with `subagent_type=Explore` to walk the codebase. Don't follow rigid heuristics — explore organically and note where you experience friction:
 
@@ -59,9 +58,9 @@ Present a numbered list of deepening opportunities. For each candidate:
 - **Solution** — plain English description of what would change
 - **Benefits** — explained in terms of locality and leverage, and also in how tests would improve
 
-**Use this repo's vocabulary and [LANGUAGE.md](LANGUAGE.md) vocabulary for the architecture.** Talk about the bridge, kernel, SceneManager, context plugins, runtime modes, ECS systems, and React overlays using the names already present in `AGENTS.md` and `docs/`.
+**Use CONTEXT.md vocabulary for the domain, and [LANGUAGE.md](LANGUAGE.md) vocabulary for the architecture.** If `CONTEXT.md` defines "Order," talk about "the Order intake module" — not "the FooBarHandler," and not "the Order service."
 
-**Document conflicts**: if a candidate contradicts existing project guidance, only surface it when the friction is real enough to warrant revisiting that guidance. Mark it clearly and explain why the trade-off may be worth reopening.
+**ADR conflicts**: if a candidate contradicts an existing ADR, only surface it when the friction is real enough to warrant revisiting the ADR. Mark it clearly (e.g. _"contradicts ADR-0007 — but worth reopening because…"_). Don't list every theoretical refactor an ADR forbids.
 
 Do NOT propose interfaces yet. Ask the user: "Which of these would you like to explore?"
 
@@ -69,8 +68,9 @@ Do NOT propose interfaces yet. Ask the user: "Which of these would you like to e
 
 Once the user picks a candidate, drop into a grilling conversation. Walk the design tree with them — constraints, dependencies, the shape of the deepened module, what sits behind the seam, what tests survive.
 
-Side effects happen only when useful:
+Side effects happen inline as decisions crystallize:
 
-- **Sharpening a fuzzy architectural term?** Prefer updating existing docs rather than creating a new documentation system.
-- **User rejects the candidate with a load-bearing reason?** Offer to record it in the most relevant existing architecture doc only if future agents are likely to repeat the same suggestion.
+- **Naming a deepened module after a concept not in `CONTEXT.md`?** Add the term to `CONTEXT.md` — same discipline as `/domain-model` (see [CONTEXT-FORMAT.md](../domain-model/CONTEXT-FORMAT.md)). Create the file lazily if it doesn't exist.
+- **Sharpening a fuzzy term during the conversation?** Update `CONTEXT.md` right there.
+- **User rejects the candidate with a load-bearing reason?** Offer an ADR, framed as: _"Want me to record this as an ADR so future architecture reviews don't re-suggest it?"_ Only offer when the reason would actually be needed by a future explorer to avoid re-suggesting the same thing — skip ephemeral reasons ("not worth it right now") and self-evident ones. See [ADR-FORMAT.md](../domain-model/ADR-FORMAT.md).
 - **Want to explore alternative interfaces for the deepened module?** See [INTERFACE-DESIGN.md](INTERFACE-DESIGN.md).
