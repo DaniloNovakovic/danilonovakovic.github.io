@@ -16,7 +16,7 @@ This document describes the current runtime architecture in `src/` after the mic
   - Single source of truth for:
     - app state (`status`, `activeMiniGameId`, `isPaused`)
     - touch flags (`left`, `right`, `jumpQueued`, `interactTap`)
-  - Exposes `bridgeActions` and `useBridgeSelector`.
+  - Exposes `bridgeActions` and `useBridgeState`.
 - `src/core/kernel/GameKernel.ts`
   - Reacts to bridge state changes.
   - Emits lifecycle events (`SceneTransitionRequested`, `OverlayOpened`, `OverlayClosed`, `PauseChanged`).

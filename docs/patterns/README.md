@@ -65,7 +65,7 @@ A quick scan of which patterns are live, planned, or intentionally parked for th
 
 - **Command** — `in use` (small). `src/core/input/commands.ts` models scene input as intent frames before player movement consumes it.
 - **Flyweight** — `not yet read`. Possible fit for tilemaps / repeated sprites later.
-- **Observer** — `in use`. `[src/shared/bridge/store.ts](../../src/shared/bridge/store.ts)` subscriptions + `useBridgeSelector`.
+- **Observer** — `in use`. [`src/shared/bridge/store.ts`](../../src/shared/bridge/store.ts) subscriptions + `useBridgeState`.
 - **Prototype** — `not yet read`.
 - **Singleton** — `skip-for-now`. Nystrom warns against it; the bridge store covers the legitimate use case as a scoped service locator.
 - **State** — `in use` (small). `src/runtime/gameState.ts` models runtime modes as a discriminated union used by the bridge and kernel.
@@ -75,11 +75,11 @@ A quick scan of which patterns are live, planned, or intentionally parked for th
 - **Bytecode** — `skip-for-now`. Overkill for a portfolio; revisit only if a mini-game needs user-authored scripts.
 - **Subclass Sandbox** — `deferred`. Possible fit if we expose a mini-game authoring surface later.
 - **Type Object** — `in use` (small). Feature, building, and room interactable kinds are data-driven config variants.
-- **Component** — `in use` (partial). `[src/core/ecs](../../src/core/ecs)`; player and interaction-system migration is in progress.
-- **Event Queue** — `in use` (scaffolded). `KernelEventQueue` exists beside the synchronous kernel bus for future time-decoupled side effects.
+- **Component** — `in use` (partial). [`src/core/ecs`](../../src/core/ecs); player and interaction-system migration is in progress.
+- **Event Queue** — `in use` (scaffolded, narrow). `KernelEventQueue` exists beside the synchronous kernel bus for future time-decoupled side effects; same-frame observers remain the default.
 - **Service Locator** — `in use` (scoped). The bridge store *is* the locator; do not introduce new globals.
 - **Data Locality** — `skip-for-now`. V8 hides memory layout; actionable subset is "no per-frame allocations, typed arrays for hot numeric loops."
-- **Dirty Flag** — `planned`. Good fit for React↔Phaser sync and for composited dynamic textures.
+- **Dirty Flag** — `in use` at the bridge/kernel boundary; `planned` for composited dynamic textures.
 - **Object Pool** — `deferred`. Only worth it for particles/bullets after a measured GC problem. Phaser `Group` is already pool-shaped (`createMultiple` / `getFirstDead`).
 - **Spatial Partition** — `skip-for-now`. Arcade Physics already does broadphase; entity counts are tiny.
 
@@ -93,4 +93,4 @@ The AI should not introduce these unprompted in this repo at its current scale. 
 - **Bytecode** — no current user-authored scripting surface.
 - **Singleton (as a convenience global)** — banned. Pass dependencies in, or go through the bridge store / kernel.
 
-See also: `[AGENTS.md](../../AGENTS.md)`, `[docs/ARCHITECTURE_CONSTITUTION.md](../ARCHITECTURE_CONSTITUTION.md)`, `[docs/ARCHITECTURE_RUNTIME.md](../ARCHITECTURE_RUNTIME.md)`.
+See also: [AGENTS.md](../../AGENTS.md), [docs/ARCHITECTURE_CONSTITUTION.md](../ARCHITECTURE_CONSTITUTION.md), [docs/ARCHITECTURE_RUNTIME.md](../ARCHITECTURE_RUNTIME.md).
