@@ -11,7 +11,7 @@ Uses the vocabulary in [LANGUAGE.md](LANGUAGE.md) — **module**, **interface**,
 Before spawning sub-agents, write a user-facing explanation of the problem space for the chosen candidate:
 
 - The constraints any new interface would need to satisfy
-- The dependencies it would rely on, and whether they are domain, runtime, infrastructure, or UI concerns
+- The dependencies it would rely on, and whether they are domain, runtime, infrastructure, or UI concerns (or use dependency categories from [DEEPENING.md](DEEPENING.md))
 - A rough illustrative code sketch to ground the constraints — not a proposal, just a way to make the constraints concrete
 
 Show this to the user, then immediately proceed to Step 2. The user reads and thinks while the sub-agents work in parallel.
@@ -34,7 +34,7 @@ Each sub-agent outputs:
 1. Interface (types, methods, params — plus invariants, ordering, error modes)
 2. Usage example showing how callers use it
 3. What the implementation hides behind the seam
-4. Dependency strategy and adapters
+4. Dependency strategy and adapters (optionally mapped to [DEEPENING.md](DEEPENING.md) categories)
 5. Trade-offs — where leverage is high, where it's thin
 
 ### 3. Present and compare
