@@ -12,11 +12,9 @@ export interface SceneRuntimeAdapter {
 export class SceneManager {
   private readonly contexts = new Map<ContextId, ContextPluginDefinition>();
   private readonly adapter: SceneRuntimeAdapter;
-  private readonly rootContextId: ContextId;
 
-  constructor(adapter: SceneRuntimeAdapter, rootContextId: ContextId) {
+  constructor(adapter: SceneRuntimeAdapter) {
     this.adapter = adapter;
-    this.rootContextId = rootContextId;
   }
 
   registerContext(def: ContextPluginDefinition): void {
@@ -30,12 +28,7 @@ export class SceneManager {
 
     if (this.adapter.isSceneActive(target.sceneKey)) return;
 
-    const root = this.contexts.get(this.rootContextId);
-    if (root && this.adapter.isSceneActive(root.sceneKey) && root.sceneKey !== target.sceneKey) {
-      this.captureResume(this.rootContextId);
-      this.adapter.stopScene(root.sceneKey);
-      root.onExit?.();
-    }
+    this.stopActiveContextsExcept(target.sceneKey);
 
     this.adapter.startScene(target.sceneKey, target.getStartData());
     target.onEnter?.();
@@ -49,10 +42,10 @@ export class SceneManager {
     for (const sceneKey of allKeys) {
       if (sceneKey === target.sceneKey) continue;
       if (!this.adapter.isSceneActive(sceneKey)) continue;
-      this.captureResumeBySceneKey(sceneKey);
+      const resumeSnapshot = this.captureResumeBySceneKey(sceneKey);
       this.adapter.stopScene(sceneKey);
       const context = this.findContextBySceneKey(sceneKey);
-      context?.onExit?.();
+      context?.onExit?.(resumeSnapshot);
     }
 
     if (!this.adapter.isSceneActive(target.sceneKey)) {
@@ -93,5 +86,15 @@ export class SceneManager {
 
   private captureResumeBySceneKey(sceneKey: string): ResumeSnapshot | null {
     return this.adapter.captureResume(sceneKey);
+  }
+
+  private stopActiveContextsExcept(targetSceneKey: string): void {
+    this.contexts.forEach((context) => {
+      if (context.sceneKey === targetSceneKey) return;
+      if (!this.adapter.isSceneActive(context.sceneKey)) return;
+      const resumeSnapshot = this.captureResumeBySceneKey(context.sceneKey);
+      this.adapter.stopScene(context.sceneKey);
+      context.onExit?.(resumeSnapshot);
+    });
   }
 }

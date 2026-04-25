@@ -1,6 +1,5 @@
 import { PHASER_SCENE_KEYS } from '../../config/featureIds';
-import { getMiniGameById } from '../../runtime/miniGameRegistry';
-import { MiniGameType } from '../../runtime/types';
+import { modesEqual } from '../../runtime/gameState';
 import { bridgeStore, type BridgeState } from '../../shared/bridge/store';
 import { SceneManager } from './SceneManager';
 import { KernelEventBus } from './events';
@@ -33,43 +32,65 @@ export class GameKernel {
   }
 
   sync(state: BridgeState): void {
-    this.emitStateEvents(state);
-    this.sceneManager.applyPause('all', state.isPaused);
+    const previousState = this.previousState;
+    const isInitialSync = !previousState;
+    const modeChanged = isInitialSync || !modesEqual(previousState.mode, state.mode);
+    const pauseChanged = isInitialSync || previousState.isPaused !== state.isPaused;
 
-    if (!state.activeMiniGameId) {
-      this.eventBus.emit({ type: 'SceneTransitionRequested', targetContext: null });
-      this.sceneManager.exitTo(PHASER_SCENE_KEYS.main);
+    this.emitStateEvents(state, modeChanged, pauseChanged);
+    if (pauseChanged) {
+      this.sceneManager.applyPause('all', state.isPaused);
+    }
+
+    if (!modeChanged) {
       this.previousState = state;
       return;
     }
 
-    const activeMiniGame = getMiniGameById(state.activeMiniGameId);
-    if (activeMiniGame?.type === MiniGameType.PHASER_SCENE) {
-      this.eventBus.emit({ type: 'SceneTransitionRequested', targetContext: activeMiniGame.id });
-      this.sceneManager.enter(activeMiniGame.id);
-    }
+    this.syncSceneTransition(state);
     this.previousState = state;
   }
 
-  private emitStateEvents(state: BridgeState): void {
-    if (!this.previousState) {
-      this.eventBus.emit({ type: 'PauseChanged', paused: state.isPaused });
+  private syncSceneTransition(state: BridgeState): void {
+    if (state.mode.kind === 'exploring') {
+      this.eventBus.emit({ type: 'SceneTransitionRequested', targetContext: null });
+      this.sceneManager.exitTo(PHASER_SCENE_KEYS.main);
       return;
     }
 
-    if (this.previousState.isPaused !== state.isPaused) {
+    if (state.mode.kind === 'phaserScene') {
+      this.eventBus.emit({ type: 'SceneTransitionRequested', targetContext: state.mode.miniGameId });
+      this.sceneManager.enter(state.mode.miniGameId);
+    }
+  }
+
+  private emitStateEvents(state: BridgeState, modeChanged: boolean, pauseChanged: boolean): void {
+    if (!this.previousState) {
+      this.eventBus.emit({ type: 'PauseChanged', paused: state.isPaused });
+      if (state.mode.kind === 'reactOverlay') {
+        this.eventBus.emit({ type: 'OverlayOpened', miniGameId: state.mode.miniGameId });
+      }
+      return;
+    }
+
+    if (pauseChanged) {
       this.eventBus.emit({ type: 'PauseChanged', paused: state.isPaused });
     }
 
-    const previousId = this.previousState.activeMiniGameId;
-    const currentId = state.activeMiniGameId;
-    if (!previousId && currentId) {
-      const active = getMiniGameById(currentId);
-      if (active?.type === MiniGameType.REACT_OVERLAY) {
-        this.eventBus.emit({ type: 'OverlayOpened', miniGameId: currentId });
-      }
-    } else if (previousId && !currentId) {
-      this.eventBus.emit({ type: 'OverlayClosed', toContext: null });
+    if (!modeChanged) return;
+
+    const previousMode = this.previousState.mode;
+    const currentMode = state.mode;
+
+    if (previousMode.kind === 'reactOverlay') {
+      this.eventBus.emit({
+        type: 'OverlayClosed',
+        toContext: currentMode.kind === 'exploring' ? null : currentMode.miniGameId
+      });
+    }
+
+    if (currentMode.kind === 'reactOverlay') {
+      this.eventBus.emit({ type: 'OverlayOpened', miniGameId: currentMode.miniGameId });
     }
   }
 }

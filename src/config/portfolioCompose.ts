@@ -1,17 +1,27 @@
 import type { MiniGameId } from './featureIds';
 import type { MiniGamePlugin } from '../runtime/types';
 
-export type FeaturePluginDefinition = Omit<MiniGamePlugin, 'x'>;
+export type FeaturePluginDefinition = MiniGamePlugin extends infer T
+  ? T extends MiniGamePlugin
+    ? Omit<T, 'x'>
+    : never
+  : never;
+
+export type OverworldBuildingTypeObject = {
+  kind: 'overworldBuilding';
+  id: MiniGameId;
+  x: number;
+};
 
 /**
  * Merges overworld X positions into feature definitions (single composition step).
  */
 export function composePortfolioSections(
   defs: FeaturePluginDefinition[],
-  placements: ReadonlyArray<{ id: MiniGameId; x: number }>
+  placements: readonly OverworldBuildingTypeObject[]
 ): MiniGamePlugin[] {
   const worldXById = new Map(placements.map((p) => [p.id, p.x]));
-  return defs.map((def) => {
+  return defs.map((def): MiniGamePlugin => {
     const x = worldXById.get(def.id);
     return x !== undefined ? { ...def, x } : { ...def };
   });

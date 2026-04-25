@@ -34,12 +34,18 @@ import { buildStreetBuildings } from './street/StreetBuildings';
 import { updateStreetParticles } from './street/StreetParticles';
 import { createUiText } from './text/createUiText';
 import { pickOverworldInteractTarget } from '../core/ecs/systems/overworldInteractSystems';
+import {
+  commandFrameToPlayerStepInput,
+  createInputCommandFrame
+} from '../core/input/commands';
+import { readSceneInputCommands } from './input/readSceneInputCommands';
 
 export class OverworldScene extends Phaser.Scene {
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   wasd!: { a: Phaser.Input.Keyboard.Key; d: Phaser.Input.Keyboard.Key };
   interactKey!: Phaser.Input.Keyboard.Key;
+  hKey!: Phaser.Input.Keyboard.Key;
   buildings!: Phaser.GameObjects.Group;
   interactPrompt!: Phaser.GameObjects.Text;
 
@@ -47,6 +53,7 @@ export class OverworldScene extends Phaser.Scene {
   private onInteract?: (area: string) => void;
   private isPaused: boolean = false;
   private resumePosition?: { x: number; y: number };
+  private readonly inputFrame = createInputCommandFrame();
 
   constructor() {
     super({ key: 'MainScene' });
@@ -135,12 +142,7 @@ export class OverworldScene extends Phaser.Scene {
         d: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D)
       };
       this.interactKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
-
-      const onH = () => { if (!this.isPaused) this.onInteract?.(HOBBIES_FEATURE_ID); };
-      this.input.keyboard.on('keydown-H', onH);
-      this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-        this.input.keyboard?.off('keydown-H', onH);
-      });
+      this.hKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.H);
     }
 
     // --- UI ---
@@ -162,16 +164,23 @@ export class OverworldScene extends Phaser.Scene {
 
     const touchState = bridgeStore.getState().touch;
     const oneShots = bridgeActions.consumeTouchOneShots();
-    const analogX = touchState.right - touchState.left;
-
-    const step = this.controller.step({
-      left: this.cursors.left.isDown || this.wasd.a.isDown,
-      right: this.cursors.right.isDown || this.wasd.d.isDown,
-      sprint: this.cursors.shift.isDown,
-      jump: this.cursors.up.isDown || oneShots.jumpQueued,
-      interact: Phaser.Input.Keyboard.JustDown(this.interactKey) || oneShots.interactTap,
-      analogX
+    const commands = readSceneInputCommands({
+      frame: this.inputFrame,
+      cursors: this.cursors,
+      wasd: this.wasd,
+      interactKey: this.interactKey,
+      hKey: this.hKey,
+      touch: touchState,
+      oneShots,
+      allowJump: true,
+      allowSprint: true
     });
+    if (commands.exitContext) {
+      this.onInteract?.(HOBBIES_FEATURE_ID);
+      return;
+    }
+
+    const step = this.controller.step(commandFrameToPlayerStepInput(commands));
 
     this.player.setFlipX(step.facingLeft);
     this.player.setAngle(step.moving ? Math.sin(this.time.now / 100) * 5 : 0);

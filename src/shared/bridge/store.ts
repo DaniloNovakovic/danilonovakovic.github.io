@@ -1,7 +1,15 @@
 import { useEffect, useState } from 'react';
-import { GameState, type GameStateValue } from '../../runtime/gameState';
+import {
+  EXPLORING_MODE,
+  closeRuntimeMode,
+  createRuntimeModeForInteraction,
+  deriveGameState,
+  derivePause,
+  modesEqual,
+  type GameStateValue,
+  type RuntimeMode
+} from '../../runtime/gameState';
 import type { MiniGameId } from '../../config/featureIds';
-import { isOverlayPauseTriggerId } from '../../config/miniGameCategories';
 
 export interface TouchBridgeState {
   left: number;
@@ -11,6 +19,7 @@ export interface TouchBridgeState {
 }
 
 export interface BridgeState {
+  mode: RuntimeMode;
   status: GameStateValue;
   activeMiniGameId: MiniGameId | null;
   isPaused: boolean;
@@ -20,8 +29,8 @@ export interface BridgeState {
 const listeners = new Set<() => void>();
 
 let state: BridgeState = {
-  status: GameState.EXPLORING,
-  activeMiniGameId: null,
+  mode: EXPLORING_MODE,
+  ...deriveGameState(EXPLORING_MODE),
   isPaused: false,
   touch: {
     left: 0,
@@ -35,19 +44,17 @@ function emit(): void {
   listeners.forEach((listener) => listener());
 }
 
-function computePause(next: Pick<BridgeState, 'status' | 'activeMiniGameId'>): boolean {
-  if (next.status !== GameState.IN_MINIGAME || !next.activeMiniGameId) return false;
-  return isOverlayPauseTriggerId(next.activeMiniGameId);
-}
-
 function setState(updater: (current: BridgeState) => BridgeState): void {
   const previous = state;
   const next = updater(state);
+  const derived = deriveGameState(next.mode);
   const candidate: BridgeState = {
     ...next,
-    isPaused: computePause(next)
+    ...derived,
+    isPaused: derivePause(next.mode)
   };
   const unchanged =
+    modesEqual(previous.mode, candidate.mode) &&
     previous.status === candidate.status &&
     previous.activeMiniGameId === candidate.activeMiniGameId &&
     previous.isPaused === candidate.isPaused &&
@@ -74,18 +81,18 @@ export const bridgeActions = {
   requestInteraction(area: MiniGameId): void {
     setState((current) => ({
       ...current,
-      status: GameState.IN_MINIGAME,
-      activeMiniGameId: area
+      mode: createRuntimeModeForInteraction(area)
     }));
   },
-  /** Set bridge back to the exploring state. Callers (App.tsx) are responsible for
-   *  routing to a parent overlay via `requestInteraction` if one exists. */
-  closeActiveOverlay(): void {
+  closeActiveMode(resolveParentId?: (miniGameId: MiniGameId) => MiniGameId | null | undefined): void {
     setState((current) => ({
       ...current,
-      status: GameState.EXPLORING,
-      activeMiniGameId: null
+      mode: closeRuntimeMode(current.mode, resolveParentId)
     }));
+  },
+  /** Backward-compatible alias for callers that always return to the overworld. */
+  closeActiveOverlay(): void {
+    bridgeActions.closeActiveMode();
   },
   setTouchDirectional(direction: 'left' | 'right', intensity: number): void {
     setState((current) => ({

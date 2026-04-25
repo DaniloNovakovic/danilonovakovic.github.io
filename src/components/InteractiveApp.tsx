@@ -6,7 +6,7 @@ import { getMiniGameById } from '../runtime/miniGameRegistry';
 import { MiniGameType } from '../runtime/types';
 import { TEXTS } from '../config/content';
 import { isMiniGameId } from '../config/featureIds';
-import { bridgeActions, bridgeStore, useBridgeState } from '../shared/bridge/store';
+import { bridgeActions, useBridgeState } from '../shared/bridge/store';
 import { OverlayCard } from './overlays/OverlayCard';
 
 interface InteractiveAppProps {
@@ -21,18 +21,8 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
     bridgeActions.requestInteraction(area);
   };
 
-  /**
-   * Registry is the single source of truth for overlay parent relationships.
-   * Bridge is driven here — no hardcoded parent map in the store.
-   */
   const closeOverlay = useCallback(() => {
-    const currentId = bridgeStore.getState().activeMiniGameId;
-    const active = currentId ? getMiniGameById(currentId) : undefined;
-    if (active?.overlayParentId) {
-      bridgeActions.requestInteraction(active.overlayParentId);
-    } else {
-      bridgeActions.closeActiveOverlay();
-    }
+    bridgeActions.closeActiveMode((currentId) => getMiniGameById(currentId)?.overlayParentId);
   }, []);
 
   const activeMiniGame = bridge.activeMiniGameId ? getMiniGameById(bridge.activeMiniGameId) : undefined;
@@ -98,7 +88,7 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
                 <p className="text-sm font-bold text-[#1a1a1a] opacity-60">{TEXTS.common.loading}</p>
               }
             >
-              {activeMiniGame.Component && <activeMiniGame.Component />}
+              <activeMiniGame.Component />
             </Suspense>
           </OverlayCard>
         </div>

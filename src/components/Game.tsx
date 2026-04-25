@@ -97,18 +97,16 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
       resumePosition: peekResumePosition(PHASER_SCENE_KEYS.main)
     });
 
-    const phaserScenes = getAllMiniGames().filter((g) => g.type === MiniGameType.PHASER_SCENE && g.Scene);
+    const phaserScenes = getAllMiniGames().filter((g) => g.type === MiniGameType.PHASER_SCENE);
     phaserScenes.forEach((s) => {
-      if (s.Scene) {
-        game.scene.add(s.id, s.Scene, false);
-      }
+      game.scene.add(s.id, s.Scene, false);
     });
 
     const adapter = new PhaserSceneAdapter({
       getGame: () => gameRef.current,
       onInteract: stableOnInteract
     });
-    const sceneManager = new SceneManager(adapter, PHASER_SCENE_KEYS.main);
+    const sceneManager = new SceneManager(adapter);
     sceneManager.registerContext(
       createStreetPlugin({
         onInteract: stableOnInteract,
