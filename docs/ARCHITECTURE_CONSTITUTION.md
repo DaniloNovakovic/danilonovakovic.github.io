@@ -1,6 +1,6 @@
 # Project Constitution: Scalable Browser Game Architecture
 
-This document describes the architectural direction for the project. For what exists in code today, treat [`docs/ARCHITECTURE_RUNTIME.md`](ARCHITECTURE_RUNTIME.md), `AGENTS.md`, and the scoped `.cursor/rules/` files as the current operational guidance.
+This document describes the architectural direction for the project. For what exists in code today, treat [`ARCHITECTURE_RUNTIME.md`](ARCHITECTURE_RUNTIME.md), `AGENTS.md`, and the scoped `.cursor/rules/` files as the current operational guidance.
 
 ## 1. Architectural Philosophy
 
