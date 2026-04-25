@@ -1,13 +1,11 @@
 ---
-
-## name: improve-codebase-architecture
-description: Find deepening opportunities in a codebase, informed by the project's architecture docs (AGENTS.md, docs/adr/, etc.) and domain language. Use when the user wants to improve architecture, find refactoring opportunities, consolidate tightly-coupled modules, or make a codebase more testable and AI-navigable.
+name: improve-codebase-architecture
+description: Find deepening opportunities in this codebase. Use when the user wants to improve architecture, find refactoring opportunities, consolidate tightly-coupled modules, or make the repo more testable and AI-navigable.
+---
 
 # Improve Codebase Architecture
 
 Surface architectural friction and propose **deepening opportunities** — refactors that turn shallow modules into deep ones. The aim is testability and AI-navigability.
-
-In this repo, anchor recommendations to the established Phaser/React runtime architecture (bridge store, kernel, scene lifecycle, runtime modes) before suggesting generic abstractions.
 
 ## Glossary
 
@@ -28,7 +26,7 @@ Key principles (see [LANGUAGE.md](LANGUAGE.md) for the full list):
 - **The interface is the test surface.**
 - **One adapter = hypothetical seam. Two adapters = real seam.**
 
-This skill is informed by the project's existing architecture docs (`AGENTS.md`, `.cursor/rules/`) and, when present, domain-model docs (`CONTEXT.md`, `docs/adr/`). Domain language gives names to good seams; ADRs record decisions the skill should not re-litigate.
+This skill is informed by the repository's existing architecture docs. In this project, use `AGENTS.md`, `.cursor/rules/`, `docs/ARCHITECTURE_RUNTIME.md`, `docs/ARCHITECTURE_CONSTITUTION.md`, and `docs/patterns/` as the source of language and constraints.
 
 ## Process
 
@@ -41,10 +39,6 @@ Read existing documentation first:
 - `docs/ARCHITECTURE_RUNTIME.md`
 - `docs/ARCHITECTURE_CONSTITUTION.md`
 - `docs/patterns/README.md`
-- `CONTEXT.md` (or `CONTEXT-MAP.md` + each `CONTEXT.md` in a multi-context repo), if the repo uses it
-- Relevant ADRs in `docs/adr/` (and any context-scoped `docs/adr/` directories), if present
-
-If any of these files don't exist, proceed silently — don't flag their absence or suggest creating them upfront.
 
 Then use the Agent tool with `subagent_type=Explore` to walk the codebase. Don't follow rigid heuristics — explore organically and note where you experience friction:
 
@@ -65,9 +59,9 @@ Present a numbered list of deepening opportunities. For each candidate:
 - **Solution** — plain English description of what would change
 - **Benefits** — explained in terms of locality and leverage, and also in how tests would improve
 
-**Use this repo's vocabulary and [LANGUAGE.md](LANGUAGE.md) vocabulary for the architecture.** Talk about the bridge, kernel, SceneManager, context plugins, runtime modes, ECS systems, and React overlays using names already present in `AGENTS.md` and `docs/`. If `CONTEXT.md` exists, use its vocabulary for the domain.
+**Use this repo's vocabulary and [LANGUAGE.md](LANGUAGE.md) vocabulary for the architecture.** Talk about the bridge, kernel, SceneManager, context plugins, runtime modes, ECS systems, and React overlays using the names already present in `AGENTS.md` and `docs/`.
 
-**ADR conflicts**: if a candidate contradicts an existing ADR, only surface it when the friction is real enough to warrant revisiting the ADR. Mark it clearly (e.g. *"contradicts ADR-0007 — but worth reopening because…"*). Don't list every theoretical refactor an ADR forbids.
+**Document conflicts**: if a candidate contradicts existing project guidance, only surface it when the friction is real enough to warrant revisiting that guidance. Mark it clearly and explain why the trade-off may be worth reopening.
 
 Do NOT propose interfaces yet. Ask the user: "Which of these would you like to explore?"
 
@@ -75,9 +69,8 @@ Do NOT propose interfaces yet. Ask the user: "Which of these would you like to e
 
 Once the user picks a candidate, drop into a grilling conversation. Walk the design tree with them — constraints, dependencies, the shape of the deepened module, what sits behind the seam, what tests survive.
 
-Side effects happen inline as decisions crystallize:
+Side effects happen only when useful:
 
-- **Naming a deepened module after a concept not in `CONTEXT.md`?** If the repo already uses `CONTEXT.md`, add the term there using the established domain-model conventions.
-- **Sharpening a fuzzy term during the conversation?** If `CONTEXT.md` exists, update it inline.
-- **User rejects the candidate with a load-bearing reason?** If the repo uses ADRs, offer to record it as an ADR: *"Want me to record this as an ADR so future architecture reviews don't re-suggest it?"* Only offer when the reason would actually be needed by a future explorer to avoid re-suggesting the same thing — skip ephemeral reasons ("not worth it right now") and self-evident ones.
+- **Sharpening a fuzzy architectural term?** Prefer updating existing docs rather than creating a new documentation system.
+- **User rejects the candidate with a load-bearing reason?** Offer to record it in the most relevant existing architecture doc only if future agents are likely to repeat the same suggestion.
 - **Want to explore alternative interfaces for the deepened module?** See [INTERFACE-DESIGN.md](INTERFACE-DESIGN.md).
