@@ -1,4 +1,5 @@
 import { PHASER_SCENE_KEYS } from '../../config/featureIds';
+import { modesEqual } from '../../runtime/gameState';
 import { bridgeStore, type BridgeState } from '../../shared/bridge/store';
 import { SceneManager } from './SceneManager';
 import { KernelEventBus } from './events';
@@ -31,13 +32,29 @@ export class GameKernel {
   }
 
   sync(state: BridgeState): void {
-    this.emitStateEvents(state);
-    this.sceneManager.applyPause('all', state.isPaused);
+    const previousState = this.previousState;
+    const isInitialSync = !previousState;
+    const modeChanged = isInitialSync || !modesEqual(previousState.mode, state.mode);
+    const pauseChanged = isInitialSync || previousState.isPaused !== state.isPaused;
 
+    this.emitStateEvents(state, modeChanged, pauseChanged);
+    if (pauseChanged) {
+      this.sceneManager.applyPause('all', state.isPaused);
+    }
+
+    if (!modeChanged) {
+      this.previousState = state;
+      return;
+    }
+
+    this.syncSceneTransition(state);
+    this.previousState = state;
+  }
+
+  private syncSceneTransition(state: BridgeState): void {
     if (state.mode.kind === 'exploring') {
       this.eventBus.emit({ type: 'SceneTransitionRequested', targetContext: null });
       this.sceneManager.exitTo(PHASER_SCENE_KEYS.main);
-      this.previousState = state;
       return;
     }
 
@@ -45,28 +62,22 @@ export class GameKernel {
       this.eventBus.emit({ type: 'SceneTransitionRequested', targetContext: state.mode.miniGameId });
       this.sceneManager.enter(state.mode.miniGameId);
     }
-    this.previousState = state;
   }
 
-  private emitStateEvents(state: BridgeState): void {
+  private emitStateEvents(state: BridgeState, modeChanged: boolean, pauseChanged: boolean): void {
     if (!this.previousState) {
       this.eventBus.emit({ type: 'PauseChanged', paused: state.isPaused });
       return;
     }
 
-    if (this.previousState.isPaused !== state.isPaused) {
+    if (pauseChanged) {
       this.eventBus.emit({ type: 'PauseChanged', paused: state.isPaused });
     }
 
+    if (!modeChanged) return;
+
     const previousMode = this.previousState.mode;
     const currentMode = state.mode;
-    const modeChanged =
-      previousMode.kind !== currentMode.kind ||
-      (previousMode.kind !== 'exploring' &&
-        currentMode.kind !== 'exploring' &&
-        previousMode.miniGameId !== currentMode.miniGameId);
-
-    if (!modeChanged) return;
 
     if (previousMode.kind === 'reactOverlay') {
       this.eventBus.emit({

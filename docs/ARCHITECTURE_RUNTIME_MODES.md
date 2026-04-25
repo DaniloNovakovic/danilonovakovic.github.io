@@ -1,8 +1,7 @@
 # Runtime Modes
 
-This note captures the current high-level runtime transitions before applying
-the Game Programming Patterns refactors. It is intentionally short: the code
-remains the source of truth.
+This note captures the current high-level runtime transitions. It is
+intentionally short: the code remains the source of truth.
 
 ## Modes
 

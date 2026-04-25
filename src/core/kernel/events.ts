@@ -1,8 +1,9 @@
+import type { MiniGameId } from '../../config/featureIds';
 import type { ContextId } from './types';
 
 export type KernelEvent =
   | { type: 'SceneTransitionRequested'; targetContext: ContextId | null }
-  | { type: 'OverlayOpened'; miniGameId: string }
+  | { type: 'OverlayOpened'; miniGameId: MiniGameId }
   | { type: 'OverlayClosed'; toContext: ContextId | null }
   | { type: 'PauseChanged'; paused: boolean };
 

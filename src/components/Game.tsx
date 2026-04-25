@@ -106,7 +106,7 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
       getGame: () => gameRef.current,
       onInteract: stableOnInteract
     });
-    const sceneManager = new SceneManager(adapter, PHASER_SCENE_KEYS.main);
+    const sceneManager = new SceneManager(adapter);
     sceneManager.registerContext(
       createStreetPlugin({
         onInteract: stableOnInteract,

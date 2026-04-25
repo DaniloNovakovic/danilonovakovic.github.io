@@ -31,7 +31,7 @@ Full runtime layering and module boundaries are in [`docs/ARCHITECTURE_RUNTIME.m
 
 ## Deploy (GitHub Pages)
 
-Production build outputs to `dist/`. [`.github/workflows/ci.yml`](.github/workflows/ci.yml) currently runs lint, tests, and build on `push` / `pull_request` against `main`/`master` — **it does not deploy yet**. To track `main` automatically on GitHub Pages, add an `actions/deploy-pages` step to that workflow (TODO).
+Production build outputs to `dist/`. [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs lint, tests, and build on `push` / `pull_request` against `main`/`master`. [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) runs the same quality gates and deploys GitHub Pages from `master`.
 
 ## Credits & License
 

@@ -12,7 +12,7 @@ describe('bridgeStore', () => {
     resetBridge();
   });
 
-  describe('computePause', () => {
+  describe('pause derivation', () => {
     it('is false when exploring', () => {
       expect(bridgeStore.getState().isPaused).toBe(false);
     });

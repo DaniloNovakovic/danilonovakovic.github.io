@@ -15,7 +15,7 @@ This project is built on three core pillars to ensure that adding complex miniga
 
 - **Domain (Core):** Pure TypeScript logic. No `window`, `document`, or engine-specific (`PIXI`, `Phaser`) references.
 - **Infrastructure (Adapters):** The "Body." This is where PixiJS/Phaser, Web Audio API, and DOM Event Listeners live.
-- **The Bridge (Hybrid UI):** Use a shared state store (e.g., Zustand or Signals) as the source of truth between the Game Engine and HTML Modals.
+- **The Bridge (Hybrid UI):** Use the custom bridge store in `src/shared/bridge/store.ts` as the source of truth between the Game Engine and HTML Modals.
 
 ### C. Micro-Kernel (Plugin) Architecture
 

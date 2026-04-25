@@ -3,8 +3,7 @@ import { isPhaserSceneMiniGameId } from '../config/miniGameCategories';
 
 export const GameState = {
   EXPLORING: 'EXPLORING',
-  IN_MINIGAME: 'IN_MINIGAME',
-  LOADING: 'LOADING'
+  IN_MINIGAME: 'IN_MINIGAME'
 } as const;
 
 export type GameStateValue = (typeof GameState)[keyof typeof GameState];
