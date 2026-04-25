@@ -175,7 +175,10 @@ export class OverworldScene extends Phaser.Scene {
       allowJump: true,
       allowSprint: true
     });
-    if (commands.exitContext) this.onInteract?.(HOBBIES_FEATURE_ID);
+    if (commands.exitContext) {
+      this.onInteract?.(HOBBIES_FEATURE_ID);
+      return;
+    }
 
     const step = this.controller.step(commandFrameToPlayerStepInput(commands));
 

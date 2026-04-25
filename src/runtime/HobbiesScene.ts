@@ -163,7 +163,10 @@ export class HobbiesScene extends Phaser.Scene {
       allowJump: false,
       allowSprint: false
     });
-    if (commands.exitContext) this.onClose?.();
+    if (commands.exitContext) {
+      this.onClose?.();
+      return;
+    }
 
     const step = this.controller.step(commandFrameToPlayerStepInput(commands));
 

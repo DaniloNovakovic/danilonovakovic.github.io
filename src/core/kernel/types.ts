@@ -15,6 +15,6 @@ export interface ContextPluginDefinition {
   onEnter?: () => void;
   onPause?: () => void;
   onResume?: () => void;
-  onExit?: () => void;
+  onExit?: (resumeSnapshot: ResumeSnapshot | null) => void;
   onDispose?: () => void;
 }

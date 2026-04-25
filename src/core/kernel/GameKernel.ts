@@ -67,6 +67,9 @@ export class GameKernel {
   private emitStateEvents(state: BridgeState, modeChanged: boolean, pauseChanged: boolean): void {
     if (!this.previousState) {
       this.eventBus.emit({ type: 'PauseChanged', paused: state.isPaused });
+      if (state.mode.kind === 'reactOverlay') {
+        this.eventBus.emit({ type: 'OverlayOpened', miniGameId: state.mode.miniGameId });
+      }
       return;
     }
 

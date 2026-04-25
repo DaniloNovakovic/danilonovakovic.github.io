@@ -61,9 +61,24 @@ describe('SceneManager', () => {
 
     expect(adapter.captureResume).toHaveBeenCalledWith('hobbies');
     expect(adapter.stopScene).toHaveBeenCalledWith('hobbies');
-    expect(hobbiesExit).toHaveBeenCalledTimes(1);
+    expect(hobbiesExit).toHaveBeenCalledWith({ x: 1, y: 2 });
     expect(adapter.startScene).toHaveBeenCalledWith('lab', { id: 'lab' });
     expect(adapter.activeScenes()).toEqual(['lab']);
+  });
+
+  it('passes captured resume snapshots to onExit when exiting to a target context', () => {
+    const adapter = makeFakeAdapter(['hobbies']);
+    const manager = new SceneManager(adapter);
+    const hobbiesExit = vi.fn();
+    manager.registerContext(context('main'));
+    manager.registerContext({ ...context('hobbies'), onExit: hobbiesExit });
+
+    manager.exitTo('main');
+
+    expect(adapter.captureResume).toHaveBeenCalledWith('hobbies');
+    expect(adapter.stopScene).toHaveBeenCalledWith('hobbies');
+    expect(hobbiesExit).toHaveBeenCalledWith({ x: 1, y: 2 });
+    expect(adapter.startScene).toHaveBeenCalledWith('main', { id: 'main' });
   });
 
   it('does not restart a context that is already active', () => {

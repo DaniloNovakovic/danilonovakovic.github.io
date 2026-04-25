@@ -42,10 +42,10 @@ export class SceneManager {
     for (const sceneKey of allKeys) {
       if (sceneKey === target.sceneKey) continue;
       if (!this.adapter.isSceneActive(sceneKey)) continue;
-      this.captureResumeBySceneKey(sceneKey);
+      const resumeSnapshot = this.captureResumeBySceneKey(sceneKey);
       this.adapter.stopScene(sceneKey);
       const context = this.findContextBySceneKey(sceneKey);
-      context?.onExit?.();
+      context?.onExit?.(resumeSnapshot);
     }
 
     if (!this.adapter.isSceneActive(target.sceneKey)) {
@@ -92,9 +92,9 @@ export class SceneManager {
     this.contexts.forEach((context) => {
       if (context.sceneKey === targetSceneKey) return;
       if (!this.adapter.isSceneActive(context.sceneKey)) return;
-      this.captureResumeBySceneKey(context.sceneKey);
+      const resumeSnapshot = this.captureResumeBySceneKey(context.sceneKey);
       this.adapter.stopScene(context.sceneKey);
-      context.onExit?.();
+      context.onExit?.(resumeSnapshot);
     });
   }
 }

@@ -4,7 +4,7 @@ import { GameKernel } from './GameKernel';
 import { KernelEventBus, type KernelEvent } from './events';
 import type { SceneRuntimeAdapter } from './SceneManager';
 import { SceneManager } from './SceneManager';
-import { bridgeActions } from '../../shared/bridge/store';
+import { bridgeActions, bridgeStore } from '../../shared/bridge/store';
 import { PHASER_SCENE_KEYS } from '../../config/featureIds';
 
 interface FakeAdapter extends SceneRuntimeAdapter {
@@ -75,6 +75,20 @@ describe('GameKernel', () => {
     const opened = events.find((e) => e.type === 'OverlayOpened');
     expect(opened).toBeDefined();
     expect((opened as Extract<KernelEvent, { type: 'OverlayOpened' }>).miniGameId).toBe('profile');
+  });
+
+  it('emits OverlayOpened on initial sync when a React overlay is already active', () => {
+    kernel.stop();
+    bridgeActions.requestInteraction('profile');
+    eventBus = new KernelEventBus();
+    events = [];
+    eventBus.subscribe((e) => events.push(e));
+
+    const sceneManager = new SceneManager(makeFakeAdapter());
+    kernel = new GameKernel(sceneManager, eventBus);
+    kernel.sync(bridgeStore.getState());
+
+    expect(events).toContainEqual({ type: 'OverlayOpened', miniGameId: 'profile' });
   });
 
   it('emits OverlayClosed when returning to exploring', () => {
