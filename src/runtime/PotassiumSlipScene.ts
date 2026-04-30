@@ -89,7 +89,6 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.player.setCollideWorldBounds(true);
     this.player.body.setAllowGravity(false); // Double ensure no gravity
     this.player.setDepth(20);
-    this.updateRipenessPhysics();
 
     // Enemy Group
     this.enemies = this.physics.add.group();
@@ -111,6 +110,8 @@ export class PotassiumSlipScene extends Phaser.Scene {
       color: '#1a1a1a',
       align: 'center'
     }).setOrigin(0.5).setDepth(1010);
+
+    this.updateRipenessPhysics();
 
     // Collisions
     this.physics.add.overlap(this.player, this.enemies, (p, e) => {
@@ -298,18 +299,23 @@ export class PotassiumSlipScene extends Phaser.Scene {
 
   private updateRipenessPhysics(): void {
     const config = RIPENESS_CONFIG[this.ripeness];
-    this.player.setDrag(config.drag);
-    this.player.setTexture(`banana_peel_${this.ripeness}`);
-    this.ripenessText.setText('State: ' + this.ripeness.charAt(0).toUpperCase() + this.ripeness.slice(1));
+    if (this.player) {
+      this.player.setDrag(config.drag);
+      this.player.setTexture(`banana_peel_${this.ripeness}`);
+    }
     
-    // Feedback
-    this.tweens.add({
-      targets: this.ripenessText,
-      scale: 1.5,
-      duration: 200,
-      yoyo: true,
-      ease: 'Sine.easeOut'
-    });
+    if (this.ripenessText) {
+      this.ripenessText.setText('State: ' + this.ripeness.charAt(0).toUpperCase() + this.ripeness.slice(1));
+      
+      // Feedback
+      this.tweens.add({
+        targets: this.ripenessText,
+        scale: 1.5,
+        duration: 200,
+        yoyo: true,
+        ease: 'Sine.easeOut'
+      });
+    }
   }
 
   private gameOver(): void {
