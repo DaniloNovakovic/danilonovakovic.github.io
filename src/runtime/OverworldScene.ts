@@ -14,6 +14,7 @@ import {
   OVERWORLD_INTERACT_MIN_PLAYER_Y,
   OVERWORLD_INTERACT_PROMPT_OFFSET_Y,
   OVERWORLD_JUMP_VELOCITY_Y,
+  OVERWORLD_LENS_REVEAL_RADIUS_X,
   OVERWORLD_PLAYER_GRAVITY_Y,
   OVERWORLD_PLAYER_RESUME_Y_CLAMP,
   OVERWORLD_PLAYER_START,
@@ -37,6 +38,7 @@ import {
   pickOverworldInteractTarget,
   type OverworldBuildingSlot
 } from '../core/ecs/systems/overworldInteractSystems';
+import { fillOverworldLensRevealFlags } from '../core/ecs/systems/overworldLensReveal';
 import {
   commandFrameToPlayerStepInput,
   createInputCommandFrame
@@ -66,7 +68,7 @@ export class OverworldScene extends Phaser.Scene {
   private resumePosition?: { x: number; y: number };
   private readonly inputFrame = createInputCommandFrame();
   private readonly buildingSlots: OverworldBuildingSlot[] = [];
-  private lensActive: boolean | null = null;
+  private lensRevealScratch: boolean[] = [];
 
   constructor() {
     super({ key: 'MainScene' });
@@ -124,7 +126,7 @@ export class OverworldScene extends Phaser.Scene {
         y: bldg.y
       });
     }
-    this.applyLensState(bridgeStore.getState().progress.hasGlasses);
+    this.lensRevealScratch = this.streetBuildings.faces.map(() => false);
 
     // --- PLAYER ---
     const startX = this.resumePosition
@@ -177,10 +179,11 @@ export class OverworldScene extends Phaser.Scene {
     }).setOrigin(0.5).setVisible(false).setDepth(20);
 
     this.setPaused(this.isPaused);
+    this.updateLensReveal();
   }
 
   update() {
-    this.applyLensState(bridgeStore.getState().progress.hasGlasses);
+    this.updateLensReveal();
 
     if (this.isPaused) {
       this.controller.zeroVelocity();
@@ -239,10 +242,18 @@ export class OverworldScene extends Phaser.Scene {
     }
   }
 
-  private applyLensState(hasGlasses: boolean): void {
-    if (this.lensActive === hasGlasses) return;
-    this.lensActive = hasGlasses;
-    this.streetBuildings?.setLensActive(hasGlasses);
+  private updateLensReveal(): void {
+    if (!this.streetBuildings?.faces.length) return;
+    const hasGlasses = bridgeStore.getState().progress.hasGlasses;
+    const playerX = this.player?.x ?? 0;
+    fillOverworldLensRevealFlags(
+      hasGlasses,
+      playerX,
+      this.buildingSlots,
+      OVERWORLD_LENS_REVEAL_RADIUS_X,
+      this.lensRevealScratch
+    );
+    this.streetBuildings.applyLensProximityReveal(this.lensRevealScratch);
   }
 
   private createBasementHoleTrigger(): void {

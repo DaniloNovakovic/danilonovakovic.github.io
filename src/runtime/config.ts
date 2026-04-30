@@ -28,6 +28,9 @@ export const OVERWORLD_INTERACT_DISTANCE_X = 80;
 export const OVERWORLD_INTERACT_MIN_PLAYER_Y = 400;
 export const OVERWORLD_INTERACT_PROMPT_OFFSET_Y = 40;
 
+/** Horizontal distance from player to building center for Lens pixel reveal (exclusive). */
+export const OVERWORLD_LENS_REVEAL_RADIUS_X = 220;
+
 /** Hobbies interior uses the same logical height as the canvas. */
 export const HOBBIES_ROOM_WIDTH = GAME_DESIGN_WIDTH;
 export const HOBBIES_ROOM_HEIGHT = GAME_DESIGN_HEIGHT;
