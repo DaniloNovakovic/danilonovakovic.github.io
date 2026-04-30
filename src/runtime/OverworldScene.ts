@@ -33,6 +33,7 @@ import {
 import { buildStreetBuildings, type StreetBuildingLayers } from './street/StreetBuildings';
 import { updateStreetParticles } from './street/StreetParticles';
 import { createUiText } from './text/createUiText';
+import { startTypewriterEffect, type TypewriterEffectHandle } from './text/typewriterEffect';
 import {
   pickGlassesSecretTarget,
   pickOverworldInteractTarget,
@@ -55,9 +56,11 @@ const BASEMENT_HOLE = {
 } as const;
 
 const BANANA_PEEL_CLUE_ID: SecretDiscoveryId = 'banana-peel-clue';
-/** Delay after first-time peel message before opening Potassium (ms). */
-const BANANA_PEEL_WARP_DELAY_MS = 4000;
-/** How long the first-time clue toast stays visible (ms); should cover most of the warp wait. */
+/** Ms between each character for first-peel clue typewriter. */
+const BANANA_PEEL_TYPEWRITER_CHAR_MS = 28;
+/** After the full clue line is typed, wait this long (read time) before opening Potassium. */
+const BANANA_PEEL_POST_TYPEWRITE_WARP_MS = 2000;
+/** How long the clue toast stays visible after typing finishes (ms). */
 const BANANA_PEEL_CLUE_VISIBLE_MS = 4500;
 /** Cancel pending peel warp only after moving this far past slot radius (avoids 1-frame jitter killing the timer). */
 const BANANA_PEEL_WARP_CANCEL_EXTRA_DIST = 36;
@@ -94,7 +97,10 @@ export class OverworldScene extends Phaser.Scene {
   private glassesSecretHint?: Phaser.GameObjects.Text;
   private glassesSecretMessage?: Phaser.GameObjects.Text;
   private glassesSecretMessageHideTimer?: Phaser.Time.TimerEvent;
+  private bananaClueTypewriter?: TypewriterEffectHandle;
   private bananaPeelWarpTimeoutId?: ReturnType<typeof setTimeout>;
+  /** True from first `[E] Peel?` until Potassium opens or the player cancels the peel flow. */
+  private bananaFirstPeelPending = false;
 
   constructor() {
     super({ key: 'MainScene' });
@@ -110,7 +116,7 @@ export class OverworldScene extends Phaser.Scene {
     this.resumePosition = data.resumePosition;
     // Scene instances are reused; force texture sync on each enter.
     this.hasGlassesSprite = null;
-    this.cancelBananaPeelWarpIfAny();
+    this.resetBananaPeelFlow();
   }
 
   getResumeCapturePosition(): { x: number; y: number } | null {
@@ -123,13 +129,13 @@ export class OverworldScene extends Phaser.Scene {
   }
 
   shutdown(): void {
-    this.cancelBananaPeelWarpIfAny();
+    this.resetBananaPeelFlow();
   }
 
   setPaused(paused: boolean) {
     this.isPaused = paused;
     if (paused) {
-      this.cancelBananaPeelWarpIfAny();
+      this.resetBananaPeelFlow();
       this.controller?.pause();
     } else this.controller?.resume();
     setSceneKeyboardPaused(this, paused, {
@@ -278,7 +284,7 @@ export class OverworldScene extends Phaser.Scene {
     const peelSlot = GLASSES_SECRET_SLOTS[0];
     const distToPeel = Math.hypot(this.player.x - peelSlot.x, this.player.y - peelSlot.y);
     if (
-      this.bananaPeelWarpTimeoutId !== undefined &&
+      (this.bananaPeelWarpTimeoutId !== undefined || this.bananaFirstPeelPending) &&
       distToPeel > peelSlot.radius + BANANA_PEEL_WARP_CANCEL_EXTRA_DIST
     ) {
       this.cancelBananaPeelWarpIfAny();
@@ -288,7 +294,7 @@ export class OverworldScene extends Phaser.Scene {
       Math.abs(this.player.x - BASEMENT_HOLE.x) < BASEMENT_HOLE.interactDistanceX &&
       this.player.y > BASEMENT_HOLE.minPlayerY;
     if (isNearBasementHole) {
-      if (this.bananaPeelWarpTimeoutId !== undefined) {
+      if (this.bananaPeelWarpTimeoutId !== undefined || this.bananaFirstPeelPending) {
         this.cancelBananaPeelWarpIfAny();
       }
       this.interactPrompt
@@ -305,8 +311,8 @@ export class OverworldScene extends Phaser.Scene {
       const bananaDiscovered = bridgeStore
         .getState()
         .progress.discoveredSecretIds.includes(BANANA_PEEL_CLUE_ID);
-      // First-time: after E, clue shows and warp is pending — no interact chip (avoids "[E] Peel banana" flash).
-      if (this.bananaPeelWarpTimeoutId !== undefined) {
+      // First-time: after E, typewriter + warp pending — no interact chip (avoids "[E] Peel banana" flash).
+      if (this.bananaPeelWarpTimeoutId !== undefined || this.bananaFirstPeelPending) {
         this.interactPrompt.setVisible(false);
       } else {
         this.interactPrompt
@@ -314,21 +320,26 @@ export class OverworldScene extends Phaser.Scene {
           .setPosition(secret.promptX, secret.promptY)
           .setVisible(true);
       }
-      if (step.interactRequested && this.bananaPeelWarpTimeoutId === undefined) {
+      if (step.interactRequested && !this.bananaFirstPeelPending && this.bananaPeelWarpTimeoutId === undefined) {
         if (bananaDiscovered) {
           this.onInteract?.(POTASSIUM_FEATURE_ID);
         } else {
           bridgeActions.discoverSecret(BANANA_PEEL_CLUE_ID);
+          this.bananaFirstPeelPending = true;
           this.showBananaClueMessage(
             'A tiny banana sticker points east. This city has stranger shortcuts than doors.',
-            BANANA_PEEL_CLUE_VISIBLE_MS
+            BANANA_PEEL_CLUE_VISIBLE_MS,
+            {
+              typewriter: true,
+              onTypewriterComplete: () => {
+                this.bananaPeelWarpTimeoutId = globalThis.setTimeout(() => {
+                  this.bananaPeelWarpTimeoutId = undefined;
+                  this.bananaFirstPeelPending = false;
+                  this.onInteract?.(POTASSIUM_FEATURE_ID);
+                }, BANANA_PEEL_POST_TYPEWRITE_WARP_MS);
+              }
+            }
           );
-          // Use real timers so a one-frame "outside radius" flicker does not cancel the warp,
-          // and the warp still fires if Phaser scene time is finicky during transitions.
-          this.bananaPeelWarpTimeoutId = globalThis.setTimeout(() => {
-            this.bananaPeelWarpTimeoutId = undefined;
-            this.onInteract?.(POTASSIUM_FEATURE_ID);
-          }, BANANA_PEEL_WARP_DELAY_MS);
         }
       }
       return;
@@ -474,28 +485,63 @@ export class OverworldScene extends Phaser.Scene {
     const discovered = bridgeStore.getState().progress.discoveredSecretIds.includes(BANANA_PEEL_CLUE_ID);
     this.glassesSecretHint?.setVisible(hasGlasses && !discovered);
     if (!hasGlasses) {
-      this.cancelBananaPeelWarpIfAny();
-      this.glassesSecretMessageHideTimer?.destroy();
-      this.glassesSecretMessageHideTimer = undefined;
-      this.glassesSecretMessage?.setVisible(false);
+      this.resetBananaPeelFlow();
     }
   }
 
-  private cancelBananaPeelWarpIfAny(): void {
+  private clearBananaClueMessageTimers(): void {
+    this.bananaClueTypewriter?.cancel();
+    this.bananaClueTypewriter = undefined;
+    this.glassesSecretMessageHideTimer?.destroy();
+    this.glassesSecretMessageHideTimer = undefined;
+  }
+
+  /** Clears first-peel timers, typewriter, and clue UI (safe on every overworld init / shutdown). */
+  private resetBananaPeelFlow(): void {
     if (this.bananaPeelWarpTimeoutId !== undefined) {
       globalThis.clearTimeout(this.bananaPeelWarpTimeoutId);
       this.bananaPeelWarpTimeoutId = undefined;
     }
+    this.bananaFirstPeelPending = false;
+    this.clearBananaClueMessageTimers();
+    this.glassesSecretMessage?.setVisible(false);
   }
 
-  private showBananaClueMessage(message: string, visibleMs: number = 2600): void {
-    this.glassesSecretMessage?.setText(message);
-    this.glassesSecretMessage?.setVisible(true);
-    this.glassesSecretMessageHideTimer?.destroy();
-    this.glassesSecretMessageHideTimer = this.time.delayedCall(visibleMs, () => {
-      this.glassesSecretMessage?.setVisible(false);
-      this.glassesSecretMessageHideTimer = undefined;
-    });
+  /** Abort first peel if the player walks away or uses another exit while typewriter / warp is pending. */
+  private cancelBananaPeelWarpIfAny(): void {
+    if (this.bananaPeelWarpTimeoutId === undefined && !this.bananaFirstPeelPending) return;
+    this.resetBananaPeelFlow();
+  }
+
+  private showBananaClueMessage(
+    message: string,
+    visibleMs: number = 2600,
+    opts?: { typewriter?: boolean; onTypewriterComplete?: () => void }
+  ): void {
+    this.clearBananaClueMessageTimers();
+    if (!this.glassesSecretMessage) return;
+
+    const scheduleHide = (): void => {
+      this.glassesSecretMessageHideTimer = this.time.delayedCall(visibleMs, () => {
+        this.glassesSecretMessage?.setVisible(false);
+        this.glassesSecretMessageHideTimer = undefined;
+      });
+    };
+
+    if (opts?.typewriter && message.length > 0) {
+      this.bananaClueTypewriter = startTypewriterEffect(this, this.glassesSecretMessage, message, {
+        charDelayMs: BANANA_PEEL_TYPEWRITER_CHAR_MS,
+        onComplete: () => {
+          this.bananaClueTypewriter = undefined;
+          scheduleHide();
+          opts.onTypewriterComplete?.();
+        }
+      });
+    } else {
+      this.glassesSecretMessage.setText(message);
+      this.glassesSecretMessage.setVisible(true);
+      scheduleHide();
+    }
   }
 
   private createBasementHoleTrigger(): void {
