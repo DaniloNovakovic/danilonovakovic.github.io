@@ -44,6 +44,7 @@ This document serves as a long-term roadmap for implementing the "Artist's Journ
 - The colored-house layer work still exists technically, but it is intentionally disabled in `OverworldScene.ts`.
 - The first discovered clue is `banana-peel-clue`; it points toward the Phase 2 banana/platformer secret without starting that phase yet.
 - Future secret triggers should reuse the same shape: only visible/interactable when glasses are equipped, then recorded in bridge progress if discovered.
+- Current overworld handoff UX: first interaction is inspect clue, subsequent interaction becomes peel-ready prompt for Phase 2 trigger wiring.
 
 ---
 

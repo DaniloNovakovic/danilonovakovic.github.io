@@ -270,10 +270,22 @@ export class OverworldScene extends Phaser.Scene {
       GLASSES_SECRET_SLOTS
     );
     if (secret.secretId != null && secret.promptX != null && secret.promptY != null) {
-      this.interactPrompt.setText('[E] INSPECT').setPosition(secret.promptX, secret.promptY).setVisible(true);
+      const bananaDiscovered = bridgeStore
+        .getState()
+        .progress.discoveredSecretIds.includes(BANANA_PEEL_CLUE_ID);
+      this.interactPrompt
+        .setText(bananaDiscovered ? '[E] PEEL BANANA' : '[E] INSPECT')
+        .setPosition(secret.promptX, secret.promptY)
+        .setVisible(true);
       if (step.interactRequested) {
-        bridgeActions.discoverSecret(BANANA_PEEL_CLUE_ID);
-        this.showBananaClueMessage();
+        if (bananaDiscovered) {
+          this.showBananaClueMessage('The peel is ready. Phase 2 opens this route.');
+        } else {
+          bridgeActions.discoverSecret(BANANA_PEEL_CLUE_ID);
+          this.showBananaClueMessage(
+            'A tiny banana sticker points east. This city has stranger shortcuts than doors.'
+          );
+        }
       }
       return;
     }
@@ -346,7 +358,7 @@ export class OverworldScene extends Phaser.Scene {
       this,
       650,
       430,
-      'A tiny banana sticker points east. This city has stranger shortcuts than doors.',
+      '',
       {
         fontSize: '13px',
         color: '#1a1a1a',
@@ -361,8 +373,9 @@ export class OverworldScene extends Phaser.Scene {
   }
 
   private updateGlassesSecrets(hasGlasses: boolean): void {
-    this.glassesSecretMark?.setVisible(hasGlasses);
-    this.glassesSecretHint?.setVisible(hasGlasses);
+    const discovered = bridgeStore.getState().progress.discoveredSecretIds.includes(BANANA_PEEL_CLUE_ID);
+    this.glassesSecretMark?.setVisible(hasGlasses && !discovered);
+    this.glassesSecretHint?.setVisible(hasGlasses && !discovered);
     if (!hasGlasses) {
       this.glassesSecretMessageHideTimer?.destroy();
       this.glassesSecretMessageHideTimer = undefined;
@@ -370,7 +383,8 @@ export class OverworldScene extends Phaser.Scene {
     }
   }
 
-  private showBananaClueMessage(): void {
+  private showBananaClueMessage(message: string): void {
+    this.glassesSecretMessage?.setText(message);
     this.glassesSecretMessage?.setVisible(true);
     this.glassesSecretMessageHideTimer?.destroy();
     this.glassesSecretMessageHideTimer = this.time.delayedCall(2600, () => {
