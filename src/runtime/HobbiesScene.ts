@@ -12,8 +12,10 @@ import {
   HOBBIES_RESUME_CLAMP,
   HOBBIES_ROOM_HEIGHT,
   HOBBIES_ROOM_WIDTH,
-  HOBBIES_WALK_SPEED,
-  HOBBIES_PLAYER_START_OFFSET_Y
+  HOBBIES_PLAYER_START_OFFSET_Y,
+  OVERWORLD_JUMP_VELOCITY_Y,
+  OVERWORLD_SPRINT_SPEED,
+  OVERWORLD_WALK_SPEED
 } from './config';
 import { setSceneKeyboardPaused } from './sceneKeyboardPause';
 import { bridgeActions, bridgeStore } from '../shared/bridge/store';
@@ -42,6 +44,7 @@ export class HobbiesScene extends Phaser.Scene {
   private isPaused: boolean = false;
   private resumePosition?: { x: number; y: number };
   private readonly inputFrame = createInputCommandFrame();
+  private hasGlassesSprite = false;
 
   constructor() {
     super({ key: 'hobbies' });
@@ -109,9 +112,9 @@ export class HobbiesScene extends Phaser.Scene {
     this.physics.add.collider(this.player, ground);
 
     this.controller = new PlayerController({
-      walkSpeed: HOBBIES_WALK_SPEED,
-      sprintSpeed: HOBBIES_WALK_SPEED,
-      jumpVelocityY: 0 // No jumping in the hobbies room
+      walkSpeed: OVERWORLD_WALK_SPEED,
+      sprintSpeed: OVERWORLD_SPRINT_SPEED,
+      jumpVelocityY: OVERWORLD_JUMP_VELOCITY_Y
     });
     this.controller.mount(this.player);
 
@@ -140,9 +143,11 @@ export class HobbiesScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor('#f4f1ea');
 
     this.setPaused(this.isPaused);
+    this.updatePlayerGlassesAppearance();
   }
 
   update() {
+    this.updatePlayerGlassesAppearance();
     if (this.isPaused) {
       this.controller.zeroVelocity();
       this.exitPrompt.setVisible(false);
@@ -160,8 +165,8 @@ export class HobbiesScene extends Phaser.Scene {
       escapeKey: this.escapeKey,
       touch: touchState,
       oneShots,
-      allowJump: false,
-      allowSprint: false
+      allowJump: true,
+      allowSprint: true
     });
     if (commands.exitContext) {
       this.onClose?.();
@@ -193,5 +198,12 @@ export class HobbiesScene extends Phaser.Scene {
         this.onInteract?.(interact.id);
       }
     }
+  }
+
+  private updatePlayerGlassesAppearance(): void {
+    const hasGlasses = bridgeStore.getState().progress.hasGlasses;
+    if (hasGlasses === this.hasGlassesSprite) return;
+    this.hasGlassesSprite = hasGlasses;
+    this.player.setTexture(hasGlasses ? 'player_glasses' : 'player_idle');
   }
 }

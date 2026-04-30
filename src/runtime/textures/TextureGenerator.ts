@@ -41,6 +41,20 @@ export class TextureGenerator {
     pg.fillCircle(32, 14, 2);
 
     pg.generateTexture('player_idle', 48, 65);
+
+    // Glasses variant
+    pg.lineStyle(2, pLine, 1);
+    pg.strokeCircle(26, 14, 4);
+    pg.strokeCircle(32, 14, 4);
+    pg.beginPath();
+    pg.moveTo(29, 14);
+    pg.lineTo(29, 14);
+    pg.strokePath();
+    pg.beginPath();
+    pg.moveTo(22, 13);
+    pg.lineTo(18, 12);
+    pg.strokePath();
+    pg.generateTexture('player_glasses', 48, 65);
     pg.destroy();
   }
 

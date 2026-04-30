@@ -63,6 +63,16 @@ describe('PlayerController', () => {
       controller.step({ ...noInput, left: true, right: true });
       expect(sprite.vx).toBe(0);
     });
+
+    it('analog movement uses walk speed when sprint is not pressed', () => {
+      controller.step({ ...noInput, analogX: 1 });
+      expect(sprite.vx).toBe(WALK);
+    });
+
+    it('analog movement uses sprint speed when sprint is pressed', () => {
+      controller.step({ ...noInput, analogX: 1, sprint: true });
+      expect(sprite.vx).toBe(SPRINT);
+    });
   });
 
   describe('jumping', () => {

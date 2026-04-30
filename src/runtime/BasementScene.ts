@@ -4,7 +4,9 @@ import {
   GAME_DESIGN_HEIGHT,
   GAME_DESIGN_WIDTH,
   HOBBIES_GROUND_ZONE,
-  HOBBIES_WALK_SPEED
+  OVERWORLD_JUMP_VELOCITY_Y,
+  OVERWORLD_SPRINT_SPEED,
+  OVERWORLD_WALK_SPEED
 } from './config';
 import { setSceneKeyboardPaused } from './sceneKeyboardPause';
 import { bridgeActions, bridgeStore } from '../shared/bridge/store';
@@ -37,6 +39,7 @@ export class BasementScene extends Phaser.Scene {
   private isPaused: boolean = false;
   private resumePosition?: { x: number; y: number };
   private readonly inputFrame = createInputCommandFrame();
+  private hasGlassesSprite = false;
 
   constructor() {
     super({ key: 'basement' });
@@ -87,9 +90,9 @@ export class BasementScene extends Phaser.Scene {
     this.physics.add.collider(this.player, ground);
 
     this.controller = new PlayerController({
-      walkSpeed: HOBBIES_WALK_SPEED,
-      sprintSpeed: HOBBIES_WALK_SPEED,
-      jumpVelocityY: 0
+      walkSpeed: OVERWORLD_WALK_SPEED,
+      sprintSpeed: OVERWORLD_SPRINT_SPEED,
+      jumpVelocityY: OVERWORLD_JUMP_VELOCITY_Y
     });
     this.controller.mount(this.player);
 
@@ -128,10 +131,12 @@ export class BasementScene extends Phaser.Scene {
 
     this.refreshGlassesVisibility();
     this.setPaused(this.isPaused);
+    this.updatePlayerGlassesAppearance();
   }
 
   update() {
     this.refreshGlassesVisibility();
+    this.updatePlayerGlassesAppearance();
 
     if (this.isPaused) {
       this.controller.zeroVelocity();
@@ -150,8 +155,8 @@ export class BasementScene extends Phaser.Scene {
       escapeKey: this.escapeKey,
       touch: touchState,
       oneShots,
-      allowJump: false,
-      allowSprint: false
+      allowJump: true,
+      allowSprint: true
     });
     if (commands.exitContext) {
       this.onClose?.();
@@ -252,5 +257,12 @@ export class BasementScene extends Phaser.Scene {
 
   private refreshGlassesVisibility(): void {
     this.glasses?.setVisible(!bridgeStore.getState().progress.hasGlasses);
+  }
+
+  private updatePlayerGlassesAppearance(): void {
+    const hasGlasses = bridgeStore.getState().progress.hasGlasses;
+    if (hasGlasses === this.hasGlassesSprite) return;
+    this.hasGlassesSprite = hasGlasses;
+    this.player.setTexture(hasGlasses ? 'player_glasses' : 'player_idle');
   }
 }

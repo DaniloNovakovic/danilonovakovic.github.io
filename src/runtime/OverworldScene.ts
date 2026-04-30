@@ -14,7 +14,6 @@ import {
   OVERWORLD_INTERACT_MIN_PLAYER_Y,
   OVERWORLD_INTERACT_PROMPT_OFFSET_Y,
   OVERWORLD_JUMP_VELOCITY_Y,
-  OVERWORLD_LENS_REVEAL_RADIUS_X,
   OVERWORLD_PLAYER_GRAVITY_Y,
   OVERWORLD_PLAYER_RESUME_Y_CLAMP,
   OVERWORLD_PLAYER_START,
@@ -38,7 +37,6 @@ import {
   pickOverworldInteractTarget,
   type OverworldBuildingSlot
 } from '../core/ecs/systems/overworldInteractSystems';
-import { fillOverworldLensRevealFlags } from '../core/ecs/systems/overworldLensReveal';
 import {
   commandFrameToPlayerStepInput,
   createInputCommandFrame
@@ -52,6 +50,8 @@ const BASEMENT_HOLE = {
   interactDistanceX: 70,
   minPlayerY: 400
 } as const;
+
+const PRE_GLASSES_CLEAR_RADIUS = 180;
 
 export class OverworldScene extends Phaser.Scene {
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -69,6 +69,8 @@ export class OverworldScene extends Phaser.Scene {
   private readonly inputFrame = createInputCommandFrame();
   private readonly buildingSlots: OverworldBuildingSlot[] = [];
   private lensRevealScratch: boolean[] = [];
+  private lensFog?: Phaser.GameObjects.Graphics;
+  private hasGlassesSprite = false;
 
   constructor() {
     super({ key: 'MainScene' });
@@ -178,11 +180,14 @@ export class OverworldScene extends Phaser.Scene {
       padding: { x: 5, y: 2 }
     }).setOrigin(0.5).setVisible(false).setDepth(20);
 
+    this.lensFog = this.add.graphics().setDepth(15);
     this.setPaused(this.isPaused);
+    this.updatePlayerGlassesAppearance();
     this.updateLensReveal();
   }
 
   update() {
+    this.updatePlayerGlassesAppearance();
     this.updateLensReveal();
 
     if (this.isPaused) {
@@ -245,15 +250,31 @@ export class OverworldScene extends Phaser.Scene {
   private updateLensReveal(): void {
     if (!this.streetBuildings?.faces.length) return;
     const hasGlasses = bridgeStore.getState().progress.hasGlasses;
-    const playerX = this.player?.x ?? 0;
-    fillOverworldLensRevealFlags(
-      hasGlasses,
-      playerX,
-      this.buildingSlots,
-      OVERWORLD_LENS_REVEAL_RADIUS_X,
-      this.lensRevealScratch
-    );
+    for (let i = 0; i < this.lensRevealScratch.length; i++) {
+      this.lensRevealScratch[i] = hasGlasses;
+    }
     this.streetBuildings.applyLensProximityReveal(this.lensRevealScratch);
+    this.updateLensFog(hasGlasses);
+  }
+
+  private updateLensFog(hasGlasses: boolean): void {
+    if (!this.lensFog) return;
+    this.lensFog.clear();
+    if (hasGlasses) return;
+
+    this.lensFog.fillStyle(0x111111, 0.52);
+    this.lensFog.fillRect(0, 0, OVERWORLD_WIDTH, GAME_DESIGN_HEIGHT);
+    this.lensFog.setBlendMode(Phaser.BlendModes.ERASE);
+    this.lensFog.fillStyle(0xffffff, 1);
+    this.lensFog.fillCircle(this.player.x, this.player.y - 45, PRE_GLASSES_CLEAR_RADIUS);
+    this.lensFog.setBlendMode(Phaser.BlendModes.NORMAL);
+  }
+
+  private updatePlayerGlassesAppearance(): void {
+    const hasGlasses = bridgeStore.getState().progress.hasGlasses;
+    if (hasGlasses === this.hasGlassesSprite) return;
+    this.hasGlassesSprite = hasGlasses;
+    this.player.setTexture(hasGlasses ? 'player_glasses' : 'player_idle');
   }
 
   private createBasementHoleTrigger(): void {

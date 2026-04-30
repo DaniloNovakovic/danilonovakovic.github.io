@@ -47,7 +47,7 @@ export function runPlayerInputAndMovementSystems(
   let moving = false;
 
   if (input.analogX !== undefined && input.analogX !== 0) {
-    velocityX = input.analogX * movement.sprintSpeed;
+    velocityX = input.analogX * speed;
     facingLeft = input.analogX < 0;
     moving = true;
   } else if (input.left && !input.right) {

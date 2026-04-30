@@ -41,7 +41,7 @@ export const HOBBY_STATION_LAYOUT: readonly HobbyStationTypeObject[] = [
   { kind: 'hobbyStation', id: 'games', x: 200, spriteMode: 'floor', yOffsetFromFloor: 0 },
   { kind: 'hobbyStation', id: 'art', x: 340, spriteMode: 'floor', yOffsetFromFloor: 0 },
   { kind: 'hobbyStation', id: 'music', x: 480, spriteMode: 'floor', yOffsetFromFloor: 0 },
-  { kind: 'hobbyStation', id: 'fitness', x: 620, spriteMode: 'mid', yOffsetFromFloor: -60 },
+  { kind: 'hobbyStation', id: 'fitness', x: 620, spriteMode: 'floor', yOffsetFromFloor: 0 },
   { kind: 'hobbyStation', id: 'dancing', x: 760, spriteMode: 'floor', yOffsetFromFloor: 0 }
 ];
 
