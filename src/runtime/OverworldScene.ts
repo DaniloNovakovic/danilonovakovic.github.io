@@ -30,10 +30,13 @@ import {
   buildStreetForeground,
   setupStreetCamera
 } from './street/StreetEnvironment';
-import { buildStreetBuildings } from './street/StreetBuildings';
+import { buildStreetBuildings, type StreetBuildingLayers } from './street/StreetBuildings';
 import { updateStreetParticles } from './street/StreetParticles';
 import { createUiText } from './text/createUiText';
-import { pickOverworldInteractTarget } from '../core/ecs/systems/overworldInteractSystems';
+import {
+  pickOverworldInteractTarget,
+  type OverworldBuildingSlot
+} from '../core/ecs/systems/overworldInteractSystems';
 import {
   commandFrameToPlayerStepInput,
   createInputCommandFrame
@@ -46,7 +49,7 @@ export class OverworldScene extends Phaser.Scene {
   wasd!: { a: Phaser.Input.Keyboard.Key; d: Phaser.Input.Keyboard.Key };
   interactKey!: Phaser.Input.Keyboard.Key;
   hKey!: Phaser.Input.Keyboard.Key;
-  buildings!: Phaser.GameObjects.Group;
+  streetBuildings!: StreetBuildingLayers;
   interactPrompt!: Phaser.GameObjects.Text;
 
   private controller!: PlayerController;
@@ -54,6 +57,8 @@ export class OverworldScene extends Phaser.Scene {
   private isPaused: boolean = false;
   private resumePosition?: { x: number; y: number };
   private readonly inputFrame = createInputCommandFrame();
+  private readonly buildingSlots: OverworldBuildingSlot[] = [];
+  private lensActive: boolean | null = null;
 
   constructor() {
     super({ key: 'MainScene' });
@@ -101,7 +106,16 @@ export class OverworldScene extends Phaser.Scene {
     this.physics.world.setBounds(0, 0, OVERWORLD_WIDTH, GAME_DESIGN_HEIGHT);
 
     const { groundZone } = buildStreetEnvironment(this);
-    this.buildings = buildStreetBuildings(this);
+    this.streetBuildings = buildStreetBuildings(this);
+    this.buildingSlots.length = 0;
+    for (const bldg of this.streetBuildings.interactables.getChildren() as Phaser.GameObjects.Sprite[]) {
+      this.buildingSlots.push({
+        buildingId: bldg.getData('name') as string,
+        x: bldg.x,
+        y: bldg.y
+      });
+    }
+    this.applyLensState(bridgeStore.getState().progress.hasGlasses);
 
     // --- PLAYER ---
     const startX = this.resumePosition
@@ -157,6 +171,8 @@ export class OverworldScene extends Phaser.Scene {
   }
 
   update() {
+    this.applyLensState(bridgeStore.getState().progress.hasGlasses);
+
     if (this.isPaused) {
       this.controller.zeroVelocity();
       return;
@@ -187,13 +203,7 @@ export class OverworldScene extends Phaser.Scene {
 
     updateStreetParticles(this);
 
-    const bldgs = this.buildings.getChildren() as Phaser.GameObjects.Sprite[];
-    const slots = bldgs.map((bldg) => ({
-      buildingId: bldg.getData('name') as string,
-      x: bldg.x,
-      y: bldg.y
-    }));
-    const interact = pickOverworldInteractTarget(this.player.x, this.player.y, slots, {
+    const interact = pickOverworldInteractTarget(this.player.x, this.player.y, this.buildingSlots, {
       maxDistX: OVERWORLD_INTERACT_DISTANCE_X,
       minPlayerY: OVERWORLD_INTERACT_MIN_PLAYER_Y,
       promptOffsetY: OVERWORLD_INTERACT_PROMPT_OFFSET_Y
@@ -207,5 +217,11 @@ export class OverworldScene extends Phaser.Scene {
     } else {
       this.interactPrompt.setVisible(false);
     }
+  }
+
+  private applyLensState(hasGlasses: boolean): void {
+    if (this.lensActive === hasGlasses) return;
+    this.lensActive = hasGlasses;
+    this.streetBuildings?.setLensActive(hasGlasses);
   }
 }

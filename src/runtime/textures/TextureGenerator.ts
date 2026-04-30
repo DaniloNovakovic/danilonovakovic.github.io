@@ -1,6 +1,6 @@
 import * as Phaser from 'phaser';
 import type { HobbyReactOverlayId, MiniGameId } from '../../config/featureIds';
-import { drawOverworldBuildingArt } from './buildingTextures';
+import { drawOverworldBuildingArt, drawPixelOverworldBuildingArt } from './buildingTextures';
 
 export class TextureGenerator {
   static generatePlayer(scene: Phaser.Scene) {
@@ -62,6 +62,11 @@ export class TextureGenerator {
 
     bg.generateTexture(key, 250, 310);
     bg.destroy();
+
+    const pixel = scene.make.graphics({ x: 0, y: 0 });
+    drawPixelOverworldBuildingArt(pixel, id);
+    pixel.generateTexture(`${key}_pixel`, 250, 310);
+    pixel.destroy();
   }
 
   static generateHobbyItem(scene: Phaser.Scene, id: HobbyReactOverlayId) {

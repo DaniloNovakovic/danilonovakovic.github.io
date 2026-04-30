@@ -18,11 +18,16 @@ export interface TouchBridgeState {
   interactTap: boolean;
 }
 
+export interface BridgeProgressState {
+  hasGlasses: boolean;
+}
+
 export interface BridgeState {
   mode: RuntimeMode;
   status: GameStateValue;
   activeMiniGameId: MiniGameId | null;
   isPaused: boolean;
+  progress: BridgeProgressState;
   touch: TouchBridgeState;
 }
 
@@ -32,6 +37,9 @@ let state: BridgeState = {
   mode: EXPLORING_MODE,
   ...deriveGameState(EXPLORING_MODE),
   isPaused: false,
+  progress: {
+    hasGlasses: false
+  },
   touch: {
     left: 0,
     right: 0,
@@ -58,6 +66,7 @@ function setState(updater: (current: BridgeState) => BridgeState): void {
     previous.status === candidate.status &&
     previous.activeMiniGameId === candidate.activeMiniGameId &&
     previous.isPaused === candidate.isPaused &&
+    previous.progress.hasGlasses === candidate.progress.hasGlasses &&
     previous.touch.left === candidate.touch.left &&
     previous.touch.right === candidate.touch.right &&
     previous.touch.jumpQueued === candidate.touch.jumpQueued &&
@@ -93,6 +102,23 @@ export const bridgeActions = {
   /** Backward-compatible alias for callers that always return to the overworld. */
   closeActiveOverlay(): void {
     bridgeActions.closeActiveMode();
+  },
+  collectGlasses(): void {
+    setState((current) => ({
+      ...current,
+      progress: {
+        ...current.progress,
+        hasGlasses: true
+      }
+    }));
+  },
+  resetProgress(): void {
+    setState((current) => ({
+      ...current,
+      progress: {
+        hasGlasses: false
+      }
+    }));
   },
   setTouchDirectional(direction: 'left' | 'right', intensity: number): void {
     setState((current) => ({

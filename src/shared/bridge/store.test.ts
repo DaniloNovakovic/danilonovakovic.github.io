@@ -4,6 +4,7 @@ import { GameState } from '../../runtime/gameState';
 
 function resetBridge() {
   bridgeActions.closeActiveOverlay();
+  bridgeActions.resetProgress();
   bridgeActions.resetTouch();
 }
 
@@ -49,6 +50,32 @@ describe('bridgeStore', () => {
       let calls = 0;
       const unsub = bridgeStore.subscribe(() => { calls++; });
       bridgeActions.closeActiveOverlay(); // already exploring — no change
+      unsub();
+      expect(calls).toBe(0);
+    });
+  });
+
+  describe('progress state', () => {
+    it('starts without glasses', () => {
+      expect(bridgeStore.getState().progress.hasGlasses).toBe(false);
+    });
+
+    it('collectGlasses unlocks the Lens', () => {
+      bridgeActions.collectGlasses();
+      expect(bridgeStore.getState().progress.hasGlasses).toBe(true);
+    });
+
+    it('resetProgress clears glasses progress', () => {
+      bridgeActions.collectGlasses();
+      bridgeActions.resetProgress();
+      expect(bridgeStore.getState().progress.hasGlasses).toBe(false);
+    });
+
+    it('does not emit when glasses are already collected', () => {
+      bridgeActions.collectGlasses();
+      let calls = 0;
+      const unsub = bridgeStore.subscribe(() => { calls++; });
+      bridgeActions.collectGlasses();
       unsub();
       expect(calls).toBe(0);
     });
