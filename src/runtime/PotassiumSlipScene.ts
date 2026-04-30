@@ -61,6 +61,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
 
   create(): void {
     this.physics.world.setBounds(0, 0, GAME_DESIGN_WIDTH, GAME_DESIGN_HEIGHT);
+    this.physics.world.gravity.set(0, 0); // Disable global gravity for this top-down scene
     
     // Background Grid
     const gridG = this.make.graphics({ x: 0, y: 0 });
@@ -76,6 +77,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
       GAME_DESIGN_HEIGHT, 
       'bg_grid'
     );
+    this.bgGrid.setDepth(0);
     this.cameras.main.setBackgroundColor('#f7f5ea');
 
     // Player (Banana Peel)
@@ -85,27 +87,30 @@ export class PotassiumSlipScene extends Phaser.Scene {
       'banana_peel_yellow'
     );
     this.player.setCollideWorldBounds(true);
+    this.player.body.setAllowGravity(false); // Double ensure no gravity
+    this.player.setDepth(20);
     this.updateRipenessPhysics();
 
     // Enemy Group
     this.enemies = this.physics.add.group();
 
     // UI
-    this.scoreText = createUiText(this, 20, 20, 'Score: 0', { fontSize: '24px', color: '#1a1a1a' }).setDepth(100);
-    this.livesText = createUiText(this, 20, 55, 'Lives: ' + LIVES_INITIAL, { fontSize: '20px', color: '#ef4444' }).setDepth(100);
-    this.ripenessText = createUiText(this, GAME_DESIGN_WIDTH - 20, 20, 'State: Yellow', { fontSize: '20px', color: '#1a1a1a' }).setOrigin(1, 0).setDepth(100);
+    const uiStyle = { fontSize: '24px', color: '#1a1a1a', fontStyle: 'bold' };
+    this.scoreText = createUiText(this, 30, 30, 'Score: 0', uiStyle).setDepth(1000);
+    this.livesText = createUiText(this, 30, 70, 'Lives: ' + LIVES_INITIAL, { ...uiStyle, color: '#ef4444' }).setDepth(1000);
+    this.ripenessText = createUiText(this, GAME_DESIGN_WIDTH - 30, 30, 'State: Yellow', uiStyle).setOrigin(1, 0).setDepth(1000);
 
     this.overlayText = createUiText(this, GAME_DESIGN_WIDTH / 2, GAME_DESIGN_HEIGHT / 2 - 40, 'POTASSIUM SLIP', {
       fontSize: '48px',
       color: '#1a1a1a',
       fontStyle: 'bold'
-    }).setOrigin(0.5).setDepth(110);
+    }).setOrigin(0.5).setDepth(1010);
 
-    this.subOverlayText = createUiText(this, GAME_DESIGN_WIDTH / 2, GAME_DESIGN_HEIGHT / 2 + 40, 'TAP TO START\n(Slip the stakeholders!)', {
+    this.subOverlayText = createUiText(this, GAME_DESIGN_WIDTH / 2, GAME_DESIGN_HEIGHT / 2 + 60, 'CLICK OR TAP TO START\n(Slip the stakeholders!)', {
       fontSize: '24px',
       color: '#1a1a1a',
       align: 'center'
-    }).setOrigin(0.5).setDepth(110);
+    }).setOrigin(0.5).setDepth(1010);
 
     // Collisions
     this.physics.add.overlap(this.player, this.enemies, (p, e) => {
@@ -226,6 +231,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
       });
     }
 
+    enemy.body.setAllowGravity(false);
     enemy.setDepth(50);
   }
 
