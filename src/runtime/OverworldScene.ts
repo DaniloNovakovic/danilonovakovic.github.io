@@ -349,18 +349,50 @@ export class OverworldScene extends Phaser.Scene {
     if (!this.bananaFloorIcon) return;
     const g = this.bananaFloorIcon;
     g.clear();
-    g.lineStyle(3, 0x1a1a1a, 0.95);
+    const ink = 0x1a1a1a;
+    const steps = 32;
+
+    // True moon / crescent: two concentric circular arcs + radial segments at the tips (no lens, no fish tail).
+    const cx = 0;
+    const cy = 19;
+    const rOut = 27;
+    const rIn = 16.5;
+    const a0 = Phaser.Math.DegToRad(208);
+    const a1 = Phaser.Math.DegToRad(332);
+
+    const pt = (r: number, a: number) => ({
+      x: cx + r * Math.cos(a),
+      y: cy + r * Math.sin(a)
+    });
+
+    g.lineStyle(3, ink, 0.95);
     g.beginPath();
-    g.arc(0, 0, 16, Phaser.Math.DegToRad(205), Phaser.Math.DegToRad(338));
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      const a = Phaser.Math.Linear(a0, a1, t);
+      const p = pt(rOut, a);
+      if (i === 0) g.moveTo(p.x, p.y);
+      else g.lineTo(p.x, p.y);
+    }
+    const tipR = pt(rOut, a1);
+    const tipInnerR = pt(rIn, a1);
+    g.lineTo(tipInnerR.x, tipInnerR.y);
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      const a = Phaser.Math.Linear(a1, a0, t);
+      const p = pt(rIn, a);
+      g.lineTo(p.x, p.y);
+    }
+    const tipInnerL = pt(rIn, a0);
+    const tipOutL = pt(rOut, a0);
+    g.lineTo(tipOutL.x, tipOutL.y);
     g.strokePath();
+
+    // Stem: one short stroke from the thick crescent tip (no fork).
+    g.lineStyle(3, ink, 0.92);
     g.beginPath();
-    g.arc(0, -1, 10, Phaser.Math.DegToRad(205), Phaser.Math.DegToRad(338));
-    g.strokePath();
-    g.beginPath();
-    g.moveTo(-13, -6);
-    g.lineTo(-17, -8);
-    g.moveTo(13, 7);
-    g.lineTo(17, 10);
+    g.moveTo(tipOutL.x, tipOutL.y);
+    g.lineTo(tipOutL.x - 5, tipOutL.y - 6);
     g.strokePath();
   }
 
@@ -372,7 +404,7 @@ export class OverworldScene extends Phaser.Scene {
     }
     this.bananaFloorIcon
       .setPosition(GLASSES_SECRET_SLOTS[0].x + 2, GLASSES_SECRET_SLOTS[0].y - 2)
-      .setRotation(Phaser.Math.DegToRad(6))
+      .setRotation(Phaser.Math.DegToRad(4))
       .setVisible(true);
   }
 
