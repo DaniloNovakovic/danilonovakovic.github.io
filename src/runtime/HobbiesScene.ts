@@ -201,7 +201,7 @@ export class HobbiesScene extends Phaser.Scene {
   }
 
   private updatePlayerGlassesAppearance(): void {
-    const hasGlasses = bridgeStore.getState().progress.hasGlasses;
+    const hasGlasses = bridgeStore.getState().equipment.equippedItemIds.includes('glasses');
     if (hasGlasses === this.hasGlassesSprite) return;
     this.hasGlassesSprite = hasGlasses;
     this.player.setTexture(hasGlasses ? 'player_glasses' : 'player_idle');

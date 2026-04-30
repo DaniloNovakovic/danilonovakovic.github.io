@@ -42,6 +42,7 @@ import {
   createInputCommandFrame
 } from '../core/input/commands';
 import { readSceneInputCommands } from './input/readSceneInputCommands';
+import { DistanceHazeVision } from './vision/DistanceHazeVision';
 
 const BASEMENT_HOLE = {
   x: 230,
@@ -50,8 +51,6 @@ const BASEMENT_HOLE = {
   interactDistanceX: 70,
   minPlayerY: 400
 } as const;
-
-const PRE_GLASSES_CLEAR_RADIUS = 180;
 
 export class OverworldScene extends Phaser.Scene {
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -69,7 +68,7 @@ export class OverworldScene extends Phaser.Scene {
   private readonly inputFrame = createInputCommandFrame();
   private readonly buildingSlots: OverworldBuildingSlot[] = [];
   private lensRevealScratch: boolean[] = [];
-  private lensFog?: Phaser.GameObjects.Graphics;
+  private preGlassesVision?: DistanceHazeVision;
   private hasGlassesSprite = false;
 
   constructor() {
@@ -147,6 +146,7 @@ export class OverworldScene extends Phaser.Scene {
       : OVERWORLD_PLAYER_START.y;
 
     this.player = this.physics.add.sprite(startX, startY, 'player_idle');
+    this.player.setDepth(25);
     this.player.setCollideWorldBounds(true);
     this.player.setGravityY(OVERWORLD_PLAYER_GRAVITY_Y);
     this.physics.add.collider(this.player, groundZone);
@@ -180,7 +180,15 @@ export class OverworldScene extends Phaser.Scene {
       padding: { x: 5, y: 2 }
     }).setOrigin(0.5).setVisible(false).setDepth(20);
 
-    this.lensFog = this.add.graphics().setDepth(15);
+    this.preGlassesVision = new DistanceHazeVision(this, {
+      depth: 15,
+      color: 0xfbfbf9,
+      tileSize: 30,
+      clearRadius: 120,
+      maxRadius: 560,
+      minAlpha: 0.24,
+      maxAlpha: 0.88
+    });
     this.setPaused(this.isPaused);
     this.updatePlayerGlassesAppearance();
     this.updateLensReveal();
@@ -249,7 +257,7 @@ export class OverworldScene extends Phaser.Scene {
 
   private updateLensReveal(): void {
     if (!this.streetBuildings?.faces.length) return;
-    const hasGlasses = bridgeStore.getState().progress.hasGlasses;
+    const hasGlasses = bridgeStore.getState().equipment.equippedItemIds.includes('glasses');
     for (let i = 0; i < this.lensRevealScratch.length; i++) {
       this.lensRevealScratch[i] = hasGlasses;
     }
@@ -258,20 +266,14 @@ export class OverworldScene extends Phaser.Scene {
   }
 
   private updateLensFog(hasGlasses: boolean): void {
-    if (!this.lensFog) return;
-    this.lensFog.clear();
-    if (hasGlasses) return;
-
-    this.lensFog.fillStyle(0x111111, 0.52);
-    this.lensFog.fillRect(0, 0, OVERWORLD_WIDTH, GAME_DESIGN_HEIGHT);
-    this.lensFog.setBlendMode(Phaser.BlendModes.ERASE);
-    this.lensFog.fillStyle(0xffffff, 1);
-    this.lensFog.fillCircle(this.player.x, this.player.y - 45, PRE_GLASSES_CLEAR_RADIUS);
-    this.lensFog.setBlendMode(Phaser.BlendModes.NORMAL);
+    if (!this.preGlassesVision) return;
+    const centerScreenX = this.player.x - this.cameras.main.scrollX;
+    const centerScreenY = this.player.y - this.cameras.main.scrollY - 45;
+    this.preGlassesVision.render(!hasGlasses, centerScreenX, centerScreenY);
   }
 
   private updatePlayerGlassesAppearance(): void {
-    const hasGlasses = bridgeStore.getState().progress.hasGlasses;
+    const hasGlasses = bridgeStore.getState().equipment.equippedItemIds.includes('glasses');
     if (hasGlasses === this.hasGlassesSprite) return;
     this.hasGlassesSprite = hasGlasses;
     this.player.setTexture(hasGlasses ? 'player_glasses' : 'player_idle');

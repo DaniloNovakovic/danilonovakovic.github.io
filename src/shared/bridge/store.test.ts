@@ -58,17 +58,23 @@ describe('bridgeStore', () => {
   describe('progress state', () => {
     it('starts without glasses', () => {
       expect(bridgeStore.getState().progress.hasGlasses).toBe(false);
+      expect(bridgeStore.getState().inventory.ownedItemIds).toEqual([]);
+      expect(bridgeStore.getState().equipment.equippedItemIds).toEqual([]);
     });
 
     it('collectGlasses unlocks the Lens', () => {
       bridgeActions.collectGlasses();
       expect(bridgeStore.getState().progress.hasGlasses).toBe(true);
+      expect(bridgeStore.getState().inventory.ownedItemIds).toContain('glasses');
+      expect(bridgeStore.getState().equipment.equippedItemIds).toContain('glasses');
     });
 
     it('resetProgress clears glasses progress', () => {
       bridgeActions.collectGlasses();
       bridgeActions.resetProgress();
       expect(bridgeStore.getState().progress.hasGlasses).toBe(false);
+      expect(bridgeStore.getState().inventory.ownedItemIds).toEqual([]);
+      expect(bridgeStore.getState().equipment.equippedItemIds).toEqual([]);
     });
 
     it('does not emit when glasses are already collected', () => {
@@ -78,6 +84,29 @@ describe('bridgeStore', () => {
       bridgeActions.collectGlasses();
       unsub();
       expect(calls).toBe(0);
+    });
+  });
+
+  describe('inventory equipment', () => {
+    it('does not equip item that is not owned', () => {
+      bridgeActions.equipItem('glasses');
+      expect(bridgeStore.getState().equipment.equippedItemIds).toEqual([]);
+    });
+
+    it('collectItem can own without auto-equip', () => {
+      bridgeActions.collectItem('glasses');
+      const s = bridgeStore.getState();
+      expect(s.inventory.ownedItemIds).toContain('glasses');
+      expect(s.equipment.equippedItemIds).toEqual([]);
+      expect(s.progress.hasGlasses).toBe(true);
+    });
+
+    it('toggleItemEquipped unequips and re-equips owned item', () => {
+      bridgeActions.collectGlasses();
+      bridgeActions.toggleItemEquipped('glasses');
+      expect(bridgeStore.getState().equipment.equippedItemIds).toEqual([]);
+      bridgeActions.toggleItemEquipped('glasses');
+      expect(bridgeStore.getState().equipment.equippedItemIds).toContain('glasses');
     });
   });
 

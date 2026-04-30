@@ -118,7 +118,7 @@ export class BasementScene extends Phaser.Scene {
       this,
       GAME_DESIGN_WIDTH / 2,
       78,
-      bridgeStore.getState().progress.hasGlasses
+      bridgeStore.getState().inventory.ownedItemIds.includes('glasses')
         ? 'Lens acquired. The city can be seen differently now.'
         : 'A forgotten dev room hums under the sketch city.',
       {
@@ -168,7 +168,7 @@ export class BasementScene extends Phaser.Scene {
     this.player.setAngle(step.moving ? Math.sin(this.time.now / 100) * 5 : 0);
 
     const nearGlasses =
-      !bridgeStore.getState().progress.hasGlasses &&
+      !bridgeStore.getState().inventory.ownedItemIds.includes('glasses') &&
       Phaser.Math.Distance.Between(this.player.x, this.player.y, GLASSES_PICKUP.x, GLASSES_PICKUP.y) <
         GLASSES_PICKUP.radius;
     if (nearGlasses) {
@@ -256,11 +256,11 @@ export class BasementScene extends Phaser.Scene {
   }
 
   private refreshGlassesVisibility(): void {
-    this.glasses?.setVisible(!bridgeStore.getState().progress.hasGlasses);
+    this.glasses?.setVisible(!bridgeStore.getState().inventory.ownedItemIds.includes('glasses'));
   }
 
   private updatePlayerGlassesAppearance(): void {
-    const hasGlasses = bridgeStore.getState().progress.hasGlasses;
+    const hasGlasses = bridgeStore.getState().equipment.equippedItemIds.includes('glasses');
     if (hasGlasses === this.hasGlassesSprite) return;
     this.hasGlassesSprite = hasGlasses;
     this.player.setTexture(hasGlasses ? 'player_glasses' : 'player_idle');

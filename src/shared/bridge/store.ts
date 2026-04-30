@@ -18,6 +18,17 @@ export interface TouchBridgeState {
   interactTap: boolean;
 }
 
+export const INVENTORY_ITEM_IDS = ['glasses'] as const;
+export type InventoryItemId = (typeof INVENTORY_ITEM_IDS)[number];
+
+export interface BridgeInventoryState {
+  ownedItemIds: InventoryItemId[];
+}
+
+export interface BridgeEquipmentState {
+  equippedItemIds: InventoryItemId[];
+}
+
 export interface BridgeProgressState {
   hasGlasses: boolean;
 }
@@ -27,16 +38,40 @@ export interface BridgeState {
   status: GameStateValue;
   activeMiniGameId: MiniGameId | null;
   isPaused: boolean;
+  inventory: BridgeInventoryState;
+  equipment: BridgeEquipmentState;
   progress: BridgeProgressState;
   touch: TouchBridgeState;
 }
 
 const listeners = new Set<() => void>();
 
+function hasItemOwned(inventory: BridgeInventoryState, itemId: InventoryItemId): boolean {
+  return inventory.ownedItemIds.includes(itemId);
+}
+
+function hasItemEquipped(equipment: BridgeEquipmentState, itemId: InventoryItemId): boolean {
+  return equipment.equippedItemIds.includes(itemId);
+}
+
+function arraysEqual<T>(a: readonly T[], b: readonly T[]): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
 let state: BridgeState = {
   mode: EXPLORING_MODE,
   ...deriveGameState(EXPLORING_MODE),
   isPaused: false,
+  inventory: {
+    ownedItemIds: []
+  },
+  equipment: {
+    equippedItemIds: []
+  },
   progress: {
     hasGlasses: false
   },
@@ -59,6 +94,10 @@ function setState(updater: (current: BridgeState) => BridgeState): void {
   const candidate: BridgeState = {
     ...next,
     ...derived,
+    progress: {
+      ...next.progress,
+      hasGlasses: hasItemOwned(next.inventory, 'glasses')
+    },
     isPaused: derivePause(next.mode)
   };
   const unchanged =
@@ -66,6 +105,8 @@ function setState(updater: (current: BridgeState) => BridgeState): void {
     previous.status === candidate.status &&
     previous.activeMiniGameId === candidate.activeMiniGameId &&
     previous.isPaused === candidate.isPaused &&
+    arraysEqual(previous.inventory.ownedItemIds, candidate.inventory.ownedItemIds) &&
+    arraysEqual(previous.equipment.equippedItemIds, candidate.equipment.equippedItemIds) &&
     previous.progress.hasGlasses === candidate.progress.hasGlasses &&
     previous.touch.left === candidate.touch.left &&
     previous.touch.right === candidate.touch.right &&
@@ -103,18 +144,67 @@ export const bridgeActions = {
   closeActiveOverlay(): void {
     bridgeActions.closeActiveMode();
   },
+  collectItem(itemId: InventoryItemId, autoEquip: boolean = false): void {
+    setState((current) => {
+      const alreadyOwned = hasItemOwned(current.inventory, itemId);
+      const alreadyEquipped = hasItemEquipped(current.equipment, itemId);
+      return {
+        ...current,
+        inventory: alreadyOwned
+          ? current.inventory
+          : {
+              ownedItemIds: [...current.inventory.ownedItemIds, itemId]
+            },
+        equipment: autoEquip && !alreadyEquipped
+          ? {
+              equippedItemIds: [...current.equipment.equippedItemIds, itemId]
+            }
+          : current.equipment
+      };
+    });
+  },
+  equipItem(itemId: InventoryItemId): void {
+    setState((current) => {
+      if (!hasItemOwned(current.inventory, itemId)) return current;
+      if (hasItemEquipped(current.equipment, itemId)) return current;
+      return {
+        ...current,
+        equipment: {
+          equippedItemIds: [...current.equipment.equippedItemIds, itemId]
+        }
+      };
+    });
+  },
+  unequipItem(itemId: InventoryItemId): void {
+    setState((current) => {
+      if (!hasItemEquipped(current.equipment, itemId)) return current;
+      return {
+        ...current,
+        equipment: {
+          equippedItemIds: current.equipment.equippedItemIds.filter((id) => id !== itemId)
+        }
+      };
+    });
+  },
+  toggleItemEquipped(itemId: InventoryItemId): void {
+    if (hasItemEquipped(bridgeStore.getState().equipment, itemId)) {
+      bridgeActions.unequipItem(itemId);
+    } else {
+      bridgeActions.equipItem(itemId);
+    }
+  },
   collectGlasses(): void {
-    setState((current) => ({
-      ...current,
-      progress: {
-        ...current.progress,
-        hasGlasses: true
-      }
-    }));
+    bridgeActions.collectItem('glasses', true);
   },
   resetProgress(): void {
     setState((current) => ({
       ...current,
+      inventory: {
+        ownedItemIds: []
+      },
+      equipment: {
+        equippedItemIds: []
+      },
       progress: {
         hasGlasses: false
       }
@@ -187,4 +277,12 @@ export function useBridgeState(): BridgeState {
   }, []);
 
   return snapshot;
+}
+
+export function isItemOwned(itemId: InventoryItemId): boolean {
+  return hasItemOwned(bridgeStore.getState().inventory, itemId);
+}
+
+export function isItemEquipped(itemId: InventoryItemId): boolean {
+  return hasItemEquipped(bridgeStore.getState().equipment, itemId);
 }
