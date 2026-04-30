@@ -70,6 +70,8 @@ export class OverworldScene extends Phaser.Scene {
   private lensRevealScratch: boolean[] = [];
   private preGlassesVision?: DistanceHazeVision;
   private hasGlassesSprite: boolean | null = null;
+  private glassesSecretMark?: Phaser.GameObjects.Text;
+  private glassesSecretHint?: Phaser.GameObjects.Text;
 
   constructor() {
     super({ key: 'MainScene' });
@@ -191,6 +193,7 @@ export class OverworldScene extends Phaser.Scene {
       minAlpha: 0.24,
       maxAlpha: 0.88
     });
+    this.createGlassesSecret();
     this.setPaused(this.isPaused);
     this.updatePlayerGlassesAppearance();
     this.updateLensReveal();
@@ -261,10 +264,12 @@ export class OverworldScene extends Phaser.Scene {
     if (!this.streetBuildings?.faces.length) return;
     const hasGlasses = bridgeStore.getState().equipment.equippedItemIds.includes('glasses');
     for (let i = 0; i < this.lensRevealScratch.length; i++) {
-      this.lensRevealScratch[i] = hasGlasses;
+      // Keep monochrome sketch style for now.
+      this.lensRevealScratch[i] = false;
     }
     this.streetBuildings.applyLensProximityReveal(this.lensRevealScratch);
     this.updateLensFog(hasGlasses);
+    this.updateGlassesSecrets(hasGlasses);
   }
 
   private updateLensFog(hasGlasses: boolean): void {
@@ -279,6 +284,32 @@ export class OverworldScene extends Phaser.Scene {
     if (hasGlasses === this.hasGlassesSprite) return;
     this.hasGlassesSprite = hasGlasses;
     this.player.setTexture(hasGlasses ? 'player_glasses' : 'player_idle');
+  }
+
+  private createGlassesSecret(): void {
+    this.glassesSecretMark = createUiText(this, 860, 415, '???', {
+      fontSize: '22px',
+      color: '#1a1a1a',
+      backgroundColor: '#fbfbf9',
+      padding: { x: 6, y: 2 }
+    })
+      .setOrigin(0.5)
+      .setDepth(18)
+      .setVisible(false);
+    this.glassesSecretHint = createUiText(this, 860, 445, 'Only visible with glasses', {
+      fontSize: '12px',
+      color: '#1a1a1a',
+      backgroundColor: '#fbfbf9',
+      padding: { x: 4, y: 2 }
+    })
+      .setOrigin(0.5)
+      .setDepth(18)
+      .setVisible(false);
+  }
+
+  private updateGlassesSecrets(hasGlasses: boolean): void {
+    this.glassesSecretMark?.setVisible(hasGlasses);
+    this.glassesSecretHint?.setVisible(hasGlasses);
   }
 
   private createBasementHoleTrigger(): void {
