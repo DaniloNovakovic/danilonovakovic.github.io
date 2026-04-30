@@ -16,15 +16,15 @@ This document serves as a long-term roadmap for implementing the "Artist's Journ
 
 **Goal:** Establish the core visual toggling ("Style Phasing") and the first major discovery (The Glasses).
 
-- [x] **1.1: Core Phaser Layers Setup**
+- **1.1: Core Phaser Layers Setup**
   - Added sketch + pixel building layers in `OverworldScene.ts` via `StreetBuildings`.
   - Implemented glasses/inventory/equipment state in `src/shared/bridge/store.ts` (instead of `gameState.ts`) and wired scene/UI reads through the bridge.
   - Added pre-glasses distance haze and glasses-on/off player appearance switching.
-- [x] **1.2: The Basement & The Glasses**
+- **1.2: The Basement & The Glasses**
   - Added hidden hole trigger in Overworld and registered the `BasementScene`.
   - Implemented basement pickup flow for glasses and return path back to overworld.
   - Added scene resume + movement parity improvements (walk/sprint/jump) in interior scenes.
-- [x] **1.3: Interaction Triggers** *(pivoted after playtest feedback)*
+- **1.3: Interaction Triggers** *(pivoted after playtest feedback)*
   - Original proximity color-reveal prototype was implemented and validated.
   - Direction changed to preserve monochrome world for now; colored-house reveal is disabled.
   - Glasses now primarily: (1) remove haze blindness, (2) reveal hidden secrets.

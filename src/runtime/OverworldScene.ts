@@ -83,7 +83,7 @@ export class OverworldScene extends Phaser.Scene {
   private lensRevealScratch: boolean[] = [];
   private preGlassesVision?: DistanceHazeVision;
   private hasGlassesSprite: boolean | null = null;
-  private glassesSecretMark?: Phaser.GameObjects.Text;
+  private bananaFloorIcon?: Phaser.GameObjects.Graphics;
   private glassesSecretHint?: Phaser.GameObjects.Text;
   private glassesSecretMessage?: Phaser.GameObjects.Text;
   private glassesSecretMessageHideTimer?: Phaser.Time.TimerEvent;
@@ -198,6 +198,8 @@ export class OverworldScene extends Phaser.Scene {
       backgroundColor: '#ffffff',
       padding: { x: 5, y: 2 }
     }).setOrigin(0.5).setVisible(false).setDepth(20);
+    this.bananaFloorIcon = this.add.graphics().setDepth(21).setVisible(false);
+    this.drawBananaFloorIcon();
 
     this.preGlassesVision = new DistanceHazeVision(this, {
       depth: 15,
@@ -243,6 +245,7 @@ export class OverworldScene extends Phaser.Scene {
 
     const step = this.controller.step(commandFrameToPlayerStepInput(commands));
     const hasGlassesEquipped = bridgeStore.getState().equipment.equippedItemIds.includes('glasses');
+    this.setBananaFloorVisible(hasGlassesEquipped);
 
     this.player.setFlipX(step.facingLeft);
     this.player.setAngle(step.moving ? Math.sin(this.time.now / 100) * 5 : 0);
@@ -274,7 +277,7 @@ export class OverworldScene extends Phaser.Scene {
         .getState()
         .progress.discoveredSecretIds.includes(BANANA_PEEL_CLUE_ID);
       this.interactPrompt
-        .setText(bananaDiscovered ? '[E] PEEL BANANA' : '[E] INSPECT')
+        .setText(bananaDiscovered ? 'peel banana' : '[E] peel?')
         .setPosition(secret.promptX, secret.promptY)
         .setVisible(true);
       if (step.interactRequested) {
@@ -310,6 +313,37 @@ export class OverworldScene extends Phaser.Scene {
     }
   }
 
+  private drawBananaFloorIcon(): void {
+    if (!this.bananaFloorIcon) return;
+    const g = this.bananaFloorIcon;
+    g.clear();
+    g.lineStyle(3, 0x1a1a1a, 0.95);
+    g.beginPath();
+    g.arc(0, 0, 16, Phaser.Math.DegToRad(205), Phaser.Math.DegToRad(338));
+    g.strokePath();
+    g.beginPath();
+    g.arc(0, -1, 10, Phaser.Math.DegToRad(205), Phaser.Math.DegToRad(338));
+    g.strokePath();
+    g.beginPath();
+    g.moveTo(-13, -6);
+    g.lineTo(-17, -8);
+    g.moveTo(13, 7);
+    g.lineTo(17, 10);
+    g.strokePath();
+  }
+
+  private setBananaFloorVisible(visible: boolean): void {
+    if (!this.bananaFloorIcon) return;
+    if (!visible) {
+      this.bananaFloorIcon.setVisible(false);
+      return;
+    }
+    this.bananaFloorIcon
+      .setPosition(GLASSES_SECRET_SLOTS[0].x + 2, GLASSES_SECRET_SLOTS[0].y - 2)
+      .setRotation(Phaser.Math.DegToRad(6))
+      .setVisible(true);
+  }
+
   private updateLensReveal(): void {
     if (!this.streetBuildings?.faces.length) return;
     const hasGlasses = bridgeStore.getState().equipment.equippedItemIds.includes('glasses');
@@ -337,16 +371,7 @@ export class OverworldScene extends Phaser.Scene {
   }
 
   private createGlassesSecret(): void {
-    this.glassesSecretMark = createUiText(this, 650, 525, 'PEEL?', {
-      fontSize: '22px',
-      color: '#1a1a1a',
-      backgroundColor: '#fbfbf9',
-      padding: { x: 6, y: 2 }
-    })
-      .setOrigin(0.5)
-      .setDepth(18)
-      .setVisible(false);
-    this.glassesSecretHint = createUiText(this, 650, 555, 'Something was hidden in plain sight.', {
+    this.glassesSecretHint = createUiText(this, 650, 558, 'Something appears in plain sight.', {
       fontSize: '12px',
       color: '#1a1a1a',
       backgroundColor: '#fbfbf9',
@@ -375,7 +400,6 @@ export class OverworldScene extends Phaser.Scene {
 
   private updateGlassesSecrets(hasGlasses: boolean): void {
     const discovered = bridgeStore.getState().progress.discoveredSecretIds.includes(BANANA_PEEL_CLUE_ID);
-    this.glassesSecretMark?.setVisible(hasGlasses && !discovered);
     this.glassesSecretHint?.setVisible(hasGlasses && !discovered);
     if (!hasGlasses) {
       this.glassesSecretMessageHideTimer?.destroy();

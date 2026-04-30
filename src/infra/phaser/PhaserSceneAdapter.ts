@@ -1,4 +1,5 @@
 import * as Phaser from 'phaser';
+import { PHASER_SCENE_KEYS } from '../../config/featureIds';
 import {
   isInteractBridgeScene,
   isPausableScene,
@@ -63,7 +64,10 @@ export class PhaserSceneAdapter implements SceneRuntimeAdapter {
     if (!scene || !isResumeCaptureScene(scene)) return null;
     const position = scene.getResumeCapturePosition();
     if (!position) return null;
-    rememberResumePosition(sceneKey, position);
+    // Secret mini-game: each entry should start fresh (spawn + collectibles), not last exit coords.
+    if (sceneKey !== PHASER_SCENE_KEYS.potassium) {
+      rememberResumePosition(sceneKey, position);
+    }
     return position;
   }
 

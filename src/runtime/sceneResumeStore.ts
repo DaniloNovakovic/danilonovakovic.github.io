@@ -10,6 +10,10 @@ export function rememberResumePosition(sceneKey: string, position: SceneResumePo
   lastExitBySceneKey.set(sceneKey, { x: position.x, y: position.y });
 }
 
+export function forgetResumePosition(sceneKey: string): void {
+  lastExitBySceneKey.delete(sceneKey);
+}
+
 /** Read saved position without removing it (safe with React StrictMode double effects). */
 export function peekResumePosition(sceneKey: string): SceneResumePosition | undefined {
   const p = lastExitBySceneKey.get(sceneKey);

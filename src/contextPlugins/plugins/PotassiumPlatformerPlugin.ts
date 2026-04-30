@@ -1,5 +1,6 @@
 import { PHASER_SCENE_KEYS } from '../../config/featureIds';
 import type { ContextPluginDefinition } from '../../core/kernel/types';
+import { forgetResumePosition } from '../../runtime/sceneResumeStore';
 
 interface PotassiumPlatformerPluginOptions {
   onClose: () => void;
@@ -12,10 +13,13 @@ export function createPotassiumPlatformerPlugin(
   return {
     id: PHASER_SCENE_KEYS.potassium,
     sceneKey: PHASER_SCENE_KEYS.potassium,
-    getStartData: () => ({
-      onClose: options.onClose,
-      isPaused: false,
-      resumePosition: options.getResumePosition()
-    })
+    getStartData: () => {
+      forgetResumePosition(PHASER_SCENE_KEYS.potassium);
+      return {
+        onClose: options.onClose,
+        isPaused: false,
+        resumePosition: options.getResumePosition()
+      };
+    }
   };
 }
