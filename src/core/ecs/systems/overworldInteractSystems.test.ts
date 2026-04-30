@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { pickOverworldInteractTarget } from './overworldInteractSystems';
+import { pickGlassesSecretTarget, pickOverworldInteractTarget } from './overworldInteractSystems';
 
 const opts = {
   maxDistX: 80,
@@ -43,5 +43,28 @@ describe('pickOverworldInteractTarget', () => {
     const r = pickOverworldInteractTarget(330, 450, buildings, opts);
     expect(r.buildingId).toBe('projects');
     expect(r.promptY).toBe(540);
+  });
+});
+
+describe('pickGlassesSecretTarget', () => {
+  const secrets = [{ secretId: 'banana-peel-clue', x: 300, y: 420, radius: 50, promptOffsetY: -40 }];
+
+  it('does not reveal secrets without equipped glasses', () => {
+    const r = pickGlassesSecretTarget(300, 420, false, secrets);
+    expect(r.secretId).toBeNull();
+    expect(r.promptX).toBeNull();
+    expect(r.promptY).toBeNull();
+  });
+
+  it('picks a visible glasses secret when player is inside radius', () => {
+    const r = pickGlassesSecretTarget(310, 420, true, secrets);
+    expect(r.secretId).toBe('banana-peel-clue');
+    expect(r.promptX).toBe(300);
+    expect(r.promptY).toBe(380);
+  });
+
+  it('uses a strict radius check', () => {
+    const r = pickGlassesSecretTarget(350, 420, true, secrets);
+    expect(r.secretId).toBeNull();
   });
 });

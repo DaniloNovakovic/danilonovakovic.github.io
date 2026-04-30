@@ -25,6 +25,20 @@ export interface OverworldInteractPickResult {
   promptY: number | null;
 }
 
+export interface OverworldSecretSlot {
+  secretId: string;
+  x: number;
+  y: number;
+  radius: number;
+  promptOffsetY: number;
+}
+
+export interface OverworldSecretPickResult {
+  secretId: string | null;
+  promptX: number | null;
+  promptY: number | null;
+}
+
 export function pickOverworldInteractTarget(
   playerX: number,
   playerY: number,
@@ -42,4 +56,25 @@ export function pickOverworldInteractTarget(
     }
   }
   return { buildingId: null, promptX: null, promptY: null };
+}
+
+export function pickGlassesSecretTarget(
+  playerX: number,
+  playerY: number,
+  hasGlassesEquipped: boolean,
+  secrets: readonly OverworldSecretSlot[]
+): OverworldSecretPickResult {
+  if (!hasGlassesEquipped) return { secretId: null, promptX: null, promptY: null };
+
+  for (const secret of secrets) {
+    if (Math.hypot(playerX - secret.x, playerY - secret.y) < secret.radius) {
+      return {
+        secretId: secret.secretId,
+        promptX: secret.x,
+        promptY: secret.y + secret.promptOffsetY
+      };
+    }
+  }
+
+  return { secretId: null, promptX: null, promptY: null };
 }

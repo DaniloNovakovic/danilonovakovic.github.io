@@ -21,6 +21,9 @@ export interface TouchBridgeState {
 export const INVENTORY_ITEM_IDS = ['glasses'] as const;
 export type InventoryItemId = (typeof INVENTORY_ITEM_IDS)[number];
 
+export const SECRET_DISCOVERY_IDS = ['banana-peel-clue'] as const;
+export type SecretDiscoveryId = (typeof SECRET_DISCOVERY_IDS)[number];
+
 export interface BridgeInventoryState {
   ownedItemIds: InventoryItemId[];
 }
@@ -31,6 +34,7 @@ export interface BridgeEquipmentState {
 
 export interface BridgeProgressState {
   hasGlasses: boolean;
+  discoveredSecretIds: SecretDiscoveryId[];
 }
 
 export interface BridgeState {
@@ -73,7 +77,8 @@ let state: BridgeState = {
     equippedItemIds: []
   },
   progress: {
-    hasGlasses: false
+    hasGlasses: false,
+    discoveredSecretIds: []
   },
   touch: {
     left: 0,
@@ -108,6 +113,7 @@ function setState(updater: (current: BridgeState) => BridgeState): void {
     arraysEqual(previous.inventory.ownedItemIds, candidate.inventory.ownedItemIds) &&
     arraysEqual(previous.equipment.equippedItemIds, candidate.equipment.equippedItemIds) &&
     previous.progress.hasGlasses === candidate.progress.hasGlasses &&
+    arraysEqual(previous.progress.discoveredSecretIds, candidate.progress.discoveredSecretIds) &&
     previous.touch.left === candidate.touch.left &&
     previous.touch.right === candidate.touch.right &&
     previous.touch.jumpQueued === candidate.touch.jumpQueued &&
@@ -196,6 +202,18 @@ export const bridgeActions = {
   collectGlasses(): void {
     bridgeActions.collectItem('glasses', true);
   },
+  discoverSecret(secretId: SecretDiscoveryId): void {
+    setState((current) => {
+      if (current.progress.discoveredSecretIds.includes(secretId)) return current;
+      return {
+        ...current,
+        progress: {
+          ...current.progress,
+          discoveredSecretIds: [...current.progress.discoveredSecretIds, secretId]
+        }
+      };
+    });
+  },
   resetProgress(): void {
     setState((current) => ({
       ...current,
@@ -206,7 +224,8 @@ export const bridgeActions = {
         equippedItemIds: []
       },
       progress: {
-        hasGlasses: false
+        hasGlasses: false,
+        discoveredSecretIds: []
       }
     }));
   },
@@ -285,4 +304,8 @@ export function isItemOwned(itemId: InventoryItemId): boolean {
 
 export function isItemEquipped(itemId: InventoryItemId): boolean {
   return hasItemEquipped(bridgeStore.getState().equipment, itemId);
+}
+
+export function isSecretDiscovered(secretId: SecretDiscoveryId): boolean {
+  return bridgeStore.getState().progress.discoveredSecretIds.includes(secretId);
 }

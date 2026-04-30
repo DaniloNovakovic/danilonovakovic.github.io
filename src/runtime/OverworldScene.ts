@@ -23,7 +23,7 @@ import {
   OVERWORLD_WIDTH
 } from './config';
 import { setSceneKeyboardPaused } from './sceneKeyboardPause';
-import { bridgeActions, bridgeStore } from '../shared/bridge/store';
+import { bridgeActions, bridgeStore, type SecretDiscoveryId } from '../shared/bridge/store';
 import { PlayerController } from '../core/player/PlayerController';
 import {
   buildStreetEnvironment,
@@ -34,8 +34,10 @@ import { buildStreetBuildings, type StreetBuildingLayers } from './street/Street
 import { updateStreetParticles } from './street/StreetParticles';
 import { createUiText } from './text/createUiText';
 import {
+  pickGlassesSecretTarget,
   pickOverworldInteractTarget,
-  type OverworldBuildingSlot
+  type OverworldBuildingSlot,
+  type OverworldSecretSlot
 } from '../core/ecs/systems/overworldInteractSystems';
 import {
   commandFrameToPlayerStepInput,
@@ -51,6 +53,17 @@ const BASEMENT_HOLE = {
   interactDistanceX: 70,
   minPlayerY: 400
 } as const;
+
+const BANANA_PEEL_CLUE_ID: SecretDiscoveryId = 'banana-peel-clue';
+const GLASSES_SECRET_SLOTS: readonly OverworldSecretSlot[] = [
+  {
+    secretId: BANANA_PEEL_CLUE_ID,
+    x: 650,
+    y: 535,
+    radius: 95,
+    promptOffsetY: -56
+  }
+];
 
 export class OverworldScene extends Phaser.Scene {
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -72,6 +85,8 @@ export class OverworldScene extends Phaser.Scene {
   private hasGlassesSprite: boolean | null = null;
   private glassesSecretMark?: Phaser.GameObjects.Text;
   private glassesSecretHint?: Phaser.GameObjects.Text;
+  private glassesSecretMessage?: Phaser.GameObjects.Text;
+  private glassesSecretMessageHideTimer?: Phaser.Time.TimerEvent;
 
   constructor() {
     super({ key: 'MainScene' });
@@ -227,6 +242,7 @@ export class OverworldScene extends Phaser.Scene {
     }
 
     const step = this.controller.step(commandFrameToPlayerStepInput(commands));
+    const hasGlassesEquipped = bridgeStore.getState().equipment.equippedItemIds.includes('glasses');
 
     this.player.setFlipX(step.facingLeft);
     this.player.setAngle(step.moving ? Math.sin(this.time.now / 100) * 5 : 0);
@@ -237,9 +253,27 @@ export class OverworldScene extends Phaser.Scene {
       Math.abs(this.player.x - BASEMENT_HOLE.x) < BASEMENT_HOLE.interactDistanceX &&
       this.player.y > BASEMENT_HOLE.minPlayerY;
     if (isNearBasementHole) {
-      this.interactPrompt.setPosition(BASEMENT_HOLE.x, BASEMENT_HOLE.promptY).setVisible(true);
+      this.interactPrompt
+        .setText(TEXTS.navigation.interact)
+        .setPosition(BASEMENT_HOLE.x, BASEMENT_HOLE.promptY)
+        .setVisible(true);
       if (step.interactRequested) {
         this.onInteract?.(BASEMENT_FEATURE_ID);
+      }
+      return;
+    }
+
+    const secret = pickGlassesSecretTarget(
+      this.player.x,
+      this.player.y,
+      hasGlassesEquipped,
+      GLASSES_SECRET_SLOTS
+    );
+    if (secret.secretId != null && secret.promptX != null && secret.promptY != null) {
+      this.interactPrompt.setText('[E] INSPECT').setPosition(secret.promptX, secret.promptY).setVisible(true);
+      if (step.interactRequested) {
+        bridgeActions.discoverSecret(BANANA_PEEL_CLUE_ID);
+        this.showBananaClueMessage();
       }
       return;
     }
@@ -251,7 +285,10 @@ export class OverworldScene extends Phaser.Scene {
     });
 
     if (interact.buildingId != null && interact.promptX != null && interact.promptY != null) {
-      this.interactPrompt.setPosition(interact.promptX, interact.promptY).setVisible(true);
+      this.interactPrompt
+        .setText(TEXTS.navigation.enter)
+        .setPosition(interact.promptX, interact.promptY)
+        .setVisible(true);
       if (step.interactRequested) {
         this.onInteract?.(interact.buildingId);
       }
@@ -287,7 +324,7 @@ export class OverworldScene extends Phaser.Scene {
   }
 
   private createGlassesSecret(): void {
-    this.glassesSecretMark = createUiText(this, 860, 415, '???', {
+    this.glassesSecretMark = createUiText(this, 650, 525, 'PEEL?', {
       fontSize: '22px',
       color: '#1a1a1a',
       backgroundColor: '#fbfbf9',
@@ -296,7 +333,7 @@ export class OverworldScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setDepth(18)
       .setVisible(false);
-    this.glassesSecretHint = createUiText(this, 860, 445, 'Only visible with glasses', {
+    this.glassesSecretHint = createUiText(this, 650, 555, 'Something was hidden in plain sight.', {
       fontSize: '12px',
       color: '#1a1a1a',
       backgroundColor: '#fbfbf9',
@@ -305,11 +342,41 @@ export class OverworldScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setDepth(18)
       .setVisible(false);
+    this.glassesSecretMessage = createUiText(
+      this,
+      650,
+      430,
+      'A tiny banana sticker points east. This city has stranger shortcuts than doors.',
+      {
+        fontSize: '13px',
+        color: '#1a1a1a',
+        backgroundColor: '#fbfbf9',
+        padding: { x: 6, y: 3 },
+        wordWrap: { width: 260 }
+      }
+    )
+      .setOrigin(0.5)
+      .setDepth(30)
+      .setVisible(false);
   }
 
   private updateGlassesSecrets(hasGlasses: boolean): void {
     this.glassesSecretMark?.setVisible(hasGlasses);
     this.glassesSecretHint?.setVisible(hasGlasses);
+    if (!hasGlasses) {
+      this.glassesSecretMessageHideTimer?.destroy();
+      this.glassesSecretMessageHideTimer = undefined;
+      this.glassesSecretMessage?.setVisible(false);
+    }
+  }
+
+  private showBananaClueMessage(): void {
+    this.glassesSecretMessage?.setVisible(true);
+    this.glassesSecretMessageHideTimer?.destroy();
+    this.glassesSecretMessageHideTimer = this.time.delayedCall(2600, () => {
+      this.glassesSecretMessage?.setVisible(false);
+      this.glassesSecretMessageHideTimer = undefined;
+    });
   }
 
   private createBasementHoleTrigger(): void {

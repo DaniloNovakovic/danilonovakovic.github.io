@@ -58,6 +58,7 @@ describe('bridgeStore', () => {
   describe('progress state', () => {
     it('starts without glasses', () => {
       expect(bridgeStore.getState().progress.hasGlasses).toBe(false);
+      expect(bridgeStore.getState().progress.discoveredSecretIds).toEqual([]);
       expect(bridgeStore.getState().inventory.ownedItemIds).toEqual([]);
       expect(bridgeStore.getState().equipment.equippedItemIds).toEqual([]);
     });
@@ -73,6 +74,7 @@ describe('bridgeStore', () => {
       bridgeActions.collectGlasses();
       bridgeActions.resetProgress();
       expect(bridgeStore.getState().progress.hasGlasses).toBe(false);
+      expect(bridgeStore.getState().progress.discoveredSecretIds).toEqual([]);
       expect(bridgeStore.getState().inventory.ownedItemIds).toEqual([]);
       expect(bridgeStore.getState().equipment.equippedItemIds).toEqual([]);
     });
@@ -82,6 +84,22 @@ describe('bridgeStore', () => {
       let calls = 0;
       const unsub = bridgeStore.subscribe(() => { calls++; });
       bridgeActions.collectGlasses();
+      unsub();
+      expect(calls).toBe(0);
+    });
+
+    it('tracks discovered secrets until progress reset', () => {
+      bridgeActions.discoverSecret('banana-peel-clue');
+      expect(bridgeStore.getState().progress.discoveredSecretIds).toEqual(['banana-peel-clue']);
+      bridgeActions.resetProgress();
+      expect(bridgeStore.getState().progress.discoveredSecretIds).toEqual([]);
+    });
+
+    it('does not emit when a secret is already discovered', () => {
+      bridgeActions.discoverSecret('banana-peel-clue');
+      let calls = 0;
+      const unsub = bridgeStore.subscribe(() => { calls++; });
+      bridgeActions.discoverSecret('banana-peel-clue');
       unsub();
       expect(calls).toBe(0);
     });

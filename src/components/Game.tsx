@@ -78,6 +78,9 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
 
     const el = containerRef.current;
     const refresh = () => {
+      // During fast remount/HMR teardown, Phaser can lose its canvas parent briefly.
+      if (gameRef.current !== game) return;
+      if (!game.canvas || !game.canvas.parentElement) return;
       game.scale.refresh();
     };
     const ro = el ? new ResizeObserver(() => refresh()) : null;

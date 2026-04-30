@@ -16,16 +16,34 @@ This document serves as a long-term roadmap for implementing the "Artist's Journ
 
 **Goal:** Establish the core visual toggling ("Style Phasing") and the first major discovery (The Glasses).
 
-- **1.1: Core Phaser Layers Setup**
-  - Implement two visual layers in `OverworldScene.ts`: `SketchLayer` and `PixelLayer`.
-  - Add a global `hasGlasses` boolean to `gameState.ts` (store).
-  - Write a masking or visibility toggle logic based on `hasGlasses`.
-- **1.2: The Basement & The Glasses**
-  - Add a hidden "hole" trigger in the Overworld sketch layout.
-  - Create a simple "Basement" mini-scene or modal overlay.
-  - Implement the interaction to pick up the "Glasses," triggering a visual transition.
-- **1.3: Interaction Triggers**
-  - Update the interaction system so that nearby sketch buildings "fill in" with pixel art when the user approaches while wearing glasses.
+- [x] **1.1: Core Phaser Layers Setup**
+  - Added sketch + pixel building layers in `OverworldScene.ts` via `StreetBuildings`.
+  - Implemented glasses/inventory/equipment state in `src/shared/bridge/store.ts` (instead of `gameState.ts`) and wired scene/UI reads through the bridge.
+  - Added pre-glasses distance haze and glasses-on/off player appearance switching.
+- [x] **1.2: The Basement & The Glasses**
+  - Added hidden hole trigger in Overworld and registered the `BasementScene`.
+  - Implemented basement pickup flow for glasses and return path back to overworld.
+  - Added scene resume + movement parity improvements (walk/sprint/jump) in interior scenes.
+- [x] **1.3: Interaction Triggers** *(pivoted after playtest feedback)*
+  - Original proximity color-reveal prototype was implemented and validated.
+  - Direction changed to preserve monochrome world for now; colored-house reveal is disabled.
+  - Glasses now primarily: (1) remove haze blindness, (2) reveal hidden secrets.
+  - Added first glasses-only Overworld clue as a real inspectable secret with bridge-backed discovery state.
+
+### Phase 1 Delivered Scope (Current State)
+
+- Bridge-based inventory/equipment foundation (`collect/equip/unequip/toggle`) with tests.
+- Bridge-based secret discovery foundation for runtime-only glasses clues.
+- Small HUD inventory menu for toggling glasses on/off.
+- Glasses sprite rendering across Overworld/Hobbies/Basement with re-entry sync fix.
+- Basement unlock loop complete and stable for current testing placement.
+- Monochrome art direction preserved while still giving glasses meaningful gameplay impact: haze removal + secret discovery.
+
+### Phase 1 Notes For Phase 2
+
+- The colored-house layer work still exists technically, but it is intentionally disabled in `OverworldScene.ts`.
+- The first discovered clue is `banana-peel-clue`; it points toward the Phase 2 banana/platformer secret without starting that phase yet.
+- Future secret triggers should reuse the same shape: only visible/interactable when glasses are equipped, then recorded in bridge progress if discovered.
 
 ---
 
