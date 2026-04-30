@@ -55,6 +55,11 @@ const BASEMENT_HOLE = {
 } as const;
 
 const BANANA_PEEL_CLUE_ID: SecretDiscoveryId = 'banana-peel-clue';
+/** Delay after first-time peel message before opening Potassium (ms). */
+const BANANA_PEEL_WARP_DELAY_MS = 1100;
+/** Cancel pending peel warp only after moving this far past slot radius (avoids 1-frame jitter killing the timer). */
+const BANANA_PEEL_WARP_CANCEL_EXTRA_DIST = 36;
+
 const GLASSES_SECRET_SLOTS: readonly OverworldSecretSlot[] = [
   {
     secretId: BANANA_PEEL_CLUE_ID,
@@ -87,6 +92,7 @@ export class OverworldScene extends Phaser.Scene {
   private glassesSecretHint?: Phaser.GameObjects.Text;
   private glassesSecretMessage?: Phaser.GameObjects.Text;
   private glassesSecretMessageHideTimer?: Phaser.Time.TimerEvent;
+  private bananaPeelWarpTimeoutId?: ReturnType<typeof setTimeout>;
 
   constructor() {
     super({ key: 'MainScene' });
@@ -102,6 +108,7 @@ export class OverworldScene extends Phaser.Scene {
     this.resumePosition = data.resumePosition;
     // Scene instances are reused; force texture sync on each enter.
     this.hasGlassesSprite = null;
+    this.cancelBananaPeelWarpIfAny();
   }
 
   getResumeCapturePosition(): { x: number; y: number } | null {
@@ -113,10 +120,16 @@ export class OverworldScene extends Phaser.Scene {
     this.onInteract = callback;
   }
 
+  shutdown(): void {
+    this.cancelBananaPeelWarpIfAny();
+  }
+
   setPaused(paused: boolean) {
     this.isPaused = paused;
-    if (paused) this.controller?.pause();
-    else this.controller?.resume();
+    if (paused) {
+      this.cancelBananaPeelWarpIfAny();
+      this.controller?.pause();
+    } else this.controller?.resume();
     setSceneKeyboardPaused(this, paused, {
       pausePhysicsWorld: true,
       zeroHorizontalVelocity: () => this.controller?.zeroVelocity()
@@ -252,10 +265,30 @@ export class OverworldScene extends Phaser.Scene {
 
     updateStreetParticles(this);
 
+    const secret = pickGlassesSecretTarget(
+      this.player.x,
+      this.player.y,
+      hasGlassesEquipped,
+      GLASSES_SECRET_SLOTS
+    );
+    const nearPeel =
+      secret.secretId != null && secret.promptX != null && secret.promptY != null;
+    const peelSlot = GLASSES_SECRET_SLOTS[0];
+    const distToPeel = Math.hypot(this.player.x - peelSlot.x, this.player.y - peelSlot.y);
+    if (
+      this.bananaPeelWarpTimeoutId !== undefined &&
+      distToPeel > peelSlot.radius + BANANA_PEEL_WARP_CANCEL_EXTRA_DIST
+    ) {
+      this.cancelBananaPeelWarpIfAny();
+    }
+
     const isNearBasementHole =
       Math.abs(this.player.x - BASEMENT_HOLE.x) < BASEMENT_HOLE.interactDistanceX &&
       this.player.y > BASEMENT_HOLE.minPlayerY;
     if (isNearBasementHole) {
+      if (this.bananaPeelWarpTimeoutId !== undefined) {
+        this.cancelBananaPeelWarpIfAny();
+      }
       this.interactPrompt
         .setText(TEXTS.navigation.interact)
         .setPosition(BASEMENT_HOLE.x, BASEMENT_HOLE.promptY)
@@ -266,29 +299,28 @@ export class OverworldScene extends Phaser.Scene {
       return;
     }
 
-    const secret = pickGlassesSecretTarget(
-      this.player.x,
-      this.player.y,
-      hasGlassesEquipped,
-      GLASSES_SECRET_SLOTS
-    );
-    if (secret.secretId != null && secret.promptX != null && secret.promptY != null) {
+    if (nearPeel && secret.promptX != null && secret.promptY != null) {
       const bananaDiscovered = bridgeStore
         .getState()
         .progress.discoveredSecretIds.includes(BANANA_PEEL_CLUE_ID);
       this.interactPrompt
-        .setText(bananaDiscovered ? 'peel banana' : '[E] peel?')
+        .setText(bananaDiscovered ? '[E] Peel banana' : '[E] Peel?')
         .setPosition(secret.promptX, secret.promptY)
         .setVisible(true);
-      if (step.interactRequested) {
+      if (step.interactRequested && this.bananaPeelWarpTimeoutId === undefined) {
         if (bananaDiscovered) {
-          this.showBananaClueMessage('Peel route engaged.');
           this.onInteract?.(POTASSIUM_FEATURE_ID);
         } else {
           bridgeActions.discoverSecret(BANANA_PEEL_CLUE_ID);
           this.showBananaClueMessage(
             'A tiny banana sticker points east. This city has stranger shortcuts than doors.'
           );
+          // Use real timers so a one-frame "outside radius" flicker does not cancel the warp,
+          // and the warp still fires if Phaser scene time is finicky during transitions.
+          this.bananaPeelWarpTimeoutId = globalThis.setTimeout(() => {
+            this.bananaPeelWarpTimeoutId = undefined;
+            this.onInteract?.(POTASSIUM_FEATURE_ID);
+          }, BANANA_PEEL_WARP_DELAY_MS);
         }
       }
       return;
@@ -402,9 +434,17 @@ export class OverworldScene extends Phaser.Scene {
     const discovered = bridgeStore.getState().progress.discoveredSecretIds.includes(BANANA_PEEL_CLUE_ID);
     this.glassesSecretHint?.setVisible(hasGlasses && !discovered);
     if (!hasGlasses) {
+      this.cancelBananaPeelWarpIfAny();
       this.glassesSecretMessageHideTimer?.destroy();
       this.glassesSecretMessageHideTimer = undefined;
       this.glassesSecretMessage?.setVisible(false);
+    }
+  }
+
+  private cancelBananaPeelWarpIfAny(): void {
+    if (this.bananaPeelWarpTimeoutId !== undefined) {
+      globalThis.clearTimeout(this.bananaPeelWarpTimeoutId);
+      this.bananaPeelWarpTimeoutId = undefined;
     }
   }
 

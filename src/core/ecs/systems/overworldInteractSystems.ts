@@ -67,7 +67,7 @@ export function pickGlassesSecretTarget(
   if (!hasGlassesEquipped) return { secretId: null, promptX: null, promptY: null };
 
   for (const secret of secrets) {
-    if (Math.hypot(playerX - secret.x, playerY - secret.y) < secret.radius) {
+    if (Math.hypot(playerX - secret.x, playerY - secret.y) <= secret.radius) {
       return {
         secretId: secret.secretId,
         promptX: secret.x,

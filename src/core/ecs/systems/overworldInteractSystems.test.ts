@@ -63,8 +63,8 @@ describe('pickGlassesSecretTarget', () => {
     expect(r.promptY).toBe(380);
   });
 
-  it('uses a strict radius check', () => {
-    const r = pickGlassesSecretTarget(350, 420, true, secrets);
+  it('does not pick when outside radius', () => {
+    const r = pickGlassesSecretTarget(300 + 50 + 1, 420, true, secrets);
     expect(r.secretId).toBeNull();
   });
 });
