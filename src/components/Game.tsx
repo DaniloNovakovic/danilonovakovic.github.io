@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import * as Phaser from 'phaser';
-import { PHASER_SCENE_KEYS } from '../config/featureIds';
+import { isMiniGameId, PHASER_SCENE_KEYS } from '../config/featureIds';
 import { getGameConfig } from '../runtime/config';
 import { OverworldScene } from '../runtime/OverworldScene';
 import { getAllMiniGames } from '../runtime/miniGameRegistry';
@@ -13,6 +13,7 @@ import { GameKernel } from '../core/kernel/GameKernel';
 import { createStreetPlugin } from '../contextPlugins/plugins/StreetPlugin';
 import { createHobbiesPlugin } from '../contextPlugins/plugins/HobbiesPlugin';
 import { createBasementPlugin } from '../contextPlugins/plugins/BasementPlugin';
+import { createPotassiumPlatformerPlugin } from '../contextPlugins/plugins/PotassiumPlatformerPlugin';
 import { useTouchGestures } from './useTouchGestures';
 
 interface GameProps {
@@ -130,8 +131,23 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
         getResumePosition: () => peekResumePosition(PHASER_SCENE_KEYS.basement)
       })
     );
+    sceneManager.registerContext(
+      createPotassiumPlatformerPlugin({
+        onClose: stableOnClose,
+        getResumePosition: () => peekResumePosition(PHASER_SCENE_KEYS.potassium)
+      })
+    );
     const kernel = new GameKernel(sceneManager);
     kernel.start();
+
+    // Dev-only helper: `?startScene=<miniGameId>` (e.g. `potassium`, `hobbies`, `basement`).
+    // Useful for fast iteration without walking to a trigger each reload.
+    if (import.meta.env.DEV) {
+      const startScene = new URLSearchParams(window.location.search).get('startScene');
+      if (startScene && isMiniGameId(startScene)) {
+        bridgeActions.requestInteraction(startScene);
+      }
+    }
 
     return () => {
       ro?.disconnect();

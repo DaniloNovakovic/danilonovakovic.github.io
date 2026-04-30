@@ -4,7 +4,7 @@
  * and player logic to PlayerController.
  */
 import * as Phaser from 'phaser';
-import { BASEMENT_FEATURE_ID, HOBBIES_FEATURE_ID } from '../config/featureIds';
+import { BASEMENT_FEATURE_ID, HOBBIES_FEATURE_ID, POTASSIUM_FEATURE_ID } from '../config/featureIds';
 import { PORTFOLIO_SECTIONS } from '../config/portfolioRegistry';
 import { TextureGenerator } from './textures/TextureGenerator';
 import { TEXTS } from '../config/content';
@@ -279,7 +279,8 @@ export class OverworldScene extends Phaser.Scene {
         .setVisible(true);
       if (step.interactRequested) {
         if (bananaDiscovered) {
-          this.showBananaClueMessage('The peel is ready. Phase 2 opens this route.');
+          this.showBananaClueMessage('Peel route engaged.');
+          this.onInteract?.(POTASSIUM_FEATURE_ID);
         } else {
           bridgeActions.discoverSecret(BANANA_PEEL_CLUE_ID);
           this.showBananaClueMessage(

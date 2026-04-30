@@ -1,6 +1,7 @@
 import { lazy } from 'react';
 import { HobbiesScene } from '../runtime/HobbiesScene';
 import { BasementScene } from '../runtime/BasementScene';
+import { PotassiumPlatformerScene } from '../runtime/PotassiumPlatformerScene';
 import type { FeaturePluginDefinition } from './portfolioCompose';
 import { MiniGameType } from '../runtime/types';
 
@@ -56,6 +57,13 @@ export const FEATURE_PLUGIN_DEFINITIONS: FeaturePluginDefinition[] = [
     name: 'Basement',
     description: 'A hidden developer room where rough sketches become playable.',
     Scene: BasementScene,
+    type: MiniGameType.PHASER_SCENE
+  },
+  {
+    id: 'potassium',
+    name: 'Potassium Platformer',
+    description: 'Peel the hidden route and sprint through a banana-block challenge.',
+    Scene: PotassiumPlatformerScene,
     type: MiniGameType.PHASER_SCENE
   },
   {
