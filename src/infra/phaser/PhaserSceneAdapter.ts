@@ -1,7 +1,6 @@
 import * as Phaser from 'phaser';
 import { PHASER_SCENE_KEYS } from '../../config/featureIds';
 import {
-  isInteractBridgeScene,
   isPausableScene,
   isResumeCaptureScene
 } from '../../runtime/sceneContracts';
@@ -11,7 +10,6 @@ import type { SceneRuntimeAdapter } from '../../core/kernel/SceneManager';
 
 interface PhaserSceneAdapterOptions {
   getGame: () => Phaser.Game | null;
-  onInteract: (area: string) => void;
 }
 
 export class PhaserSceneAdapter implements SceneRuntimeAdapter {
@@ -31,7 +29,6 @@ export class PhaserSceneAdapter implements SceneRuntimeAdapter {
     const game = this.options.getGame();
     if (!game) return;
     game.scene.start(sceneKey, data);
-    this.updateInteractCallbacks(this.options.onInteract);
   }
 
   stopScene(sceneKey: string): void {
@@ -71,14 +68,4 @@ export class PhaserSceneAdapter implements SceneRuntimeAdapter {
     return position;
   }
 
-  updateInteractCallbacks(onInteract: (area: string) => void): void {
-    const game = this.options.getGame();
-    if (!game) return;
-    const scenes = game.scene.getScenes(false);
-    for (const scene of scenes) {
-      if (isInteractBridgeScene(scene)) {
-        scene.updateInteractCallback(onInteract);
-      }
-    }
-  }
 }

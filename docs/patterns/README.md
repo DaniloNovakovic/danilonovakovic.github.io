@@ -76,7 +76,7 @@ A quick scan of which patterns are live, planned, or intentionally parked for th
 - **Subclass Sandbox** — `deferred`. Possible fit if we expose a mini-game authoring surface later.
 - **Type Object** — `in use` (small). Feature, building, and room interactable kinds are data-driven config variants.
 - **Component** — `in use` (partial). [`src/core/ecs`](../../src/core/ecs); player and interaction-system migration is in progress.
-- **Event Queue** — `in use` (scaffolded, narrow). `KernelEventQueue` exists beside the synchronous kernel bus for future time-decoupled side effects; same-frame observers remain the default.
+- **Event Queue** — `deferred` (scaffold only). `KernelEventQueue` is test-covered but not wired into production; same-frame observers remain the default until a real time-decoupling need appears.
 - **Service Locator** — `in use` (scoped). The bridge store *is* the locator; do not introduce new globals.
 - **Data Locality** — `skip-for-now`. V8 hides memory layout; actionable subset is "no per-frame allocations, typed arrays for hot numeric loops."
 - **Dirty Flag** — `in use` at the bridge/kernel boundary; `planned` for composited dynamic textures.

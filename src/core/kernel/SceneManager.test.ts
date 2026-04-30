@@ -81,6 +81,18 @@ describe('SceneManager', () => {
     expect(adapter.startScene).toHaveBeenCalledWith('main', { id: 'main' });
   });
 
+  it('starts the target context from a cold boot with plugin start data', () => {
+    const adapter = makeFakeAdapter();
+    const manager = new SceneManager(adapter);
+    manager.registerContext(context('main'));
+
+    manager.exitTo('main');
+
+    expect(adapter.stopScene).not.toHaveBeenCalled();
+    expect(adapter.startScene).toHaveBeenCalledWith('main', { id: 'main' });
+    expect(adapter.activeScenes()).toEqual(['main']);
+  });
+
   it('does not restart a context that is already active', () => {
     const adapter = makeFakeAdapter(['hobbies']);
     const manager = new SceneManager(adapter);

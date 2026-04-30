@@ -23,7 +23,12 @@ import {
   OVERWORLD_WIDTH
 } from './config';
 import { setSceneKeyboardPaused } from './sceneKeyboardPause';
-import { bridgeActions, bridgeStore, type SecretDiscoveryId } from '../shared/bridge/store';
+import {
+  bridgeActions,
+  isItemEquipped,
+  isSecretDiscovered,
+  type SecretDiscoveryId
+} from '../shared/bridge/store';
 import { PlayerController } from '../core/player/PlayerController';
 import {
   buildStreetEnvironment,
@@ -35,17 +40,18 @@ import { updateStreetParticles } from './street/StreetParticles';
 import { createUiText } from './text/createUiText';
 import { startTypewriterEffect, type TypewriterEffectHandle } from './text/typewriterEffect';
 import {
-  pickGlassesSecretTarget,
-  pickOverworldInteractTarget,
   type OverworldBuildingSlot,
   type OverworldSecretSlot
 } from '../core/ecs/systems/overworldInteractSystems';
-import {
-  commandFrameToPlayerStepInput,
-  createInputCommandFrame
-} from '../core/input/commands';
-import { readSceneInputCommands } from './input/readSceneInputCommands';
+import { createInputCommandFrame } from '../core/input/commands';
+import { readPlayerSceneStep } from './input/scenePlayerInput';
 import { DistanceHazeVision } from './vision/DistanceHazeVision';
+import {
+  createOverworldInteractionState,
+  decideOverworldInteraction,
+  type OverworldInteractionPrompt,
+  type OverworldInteractionState
+} from './overworld/overworldInteractionState';
 
 const BASEMENT_HOLE = {
   x: 230,
@@ -99,8 +105,7 @@ export class OverworldScene extends Phaser.Scene {
   private glassesSecretMessageHideTimer?: Phaser.Time.TimerEvent;
   private bananaClueTypewriter?: TypewriterEffectHandle;
   private bananaPeelWarpTimeoutId?: ReturnType<typeof setTimeout>;
-  /** True from first `[E] Peel?` until Potassium opens or the player cancels the peel flow. */
-  private bananaFirstPeelPending = false;
+  private overworldInteractionState: OverworldInteractionState = createOverworldInteractionState();
 
   constructor() {
     super({ key: 'MainScene' });
@@ -122,10 +127,6 @@ export class OverworldScene extends Phaser.Scene {
   getResumeCapturePosition(): { x: number; y: number } | null {
     if (!this.player?.body) return null;
     return { x: this.player.x, y: this.player.y };
-  }
-
-  updateInteractCallback(callback: (area: string) => void) {
-    this.onInteract = callback;
   }
 
   shutdown(): void {
@@ -246,16 +247,13 @@ export class OverworldScene extends Phaser.Scene {
       return;
     }
 
-    const touchState = bridgeStore.getState().touch;
-    const oneShots = bridgeActions.consumeTouchOneShots();
-    const commands = readSceneInputCommands({
+    const { commands, step } = readPlayerSceneStep({
       frame: this.inputFrame,
+      controller: this.controller,
       cursors: this.cursors,
       wasd: this.wasd,
       interactKey: this.interactKey,
       hKey: this.hKey,
-      touch: touchState,
-      oneShots,
       allowJump: true,
       allowSprint: true
     });
@@ -264,8 +262,7 @@ export class OverworldScene extends Phaser.Scene {
       return;
     }
 
-    const step = this.controller.step(commandFrameToPlayerStepInput(commands));
-    const hasGlassesEquipped = bridgeStore.getState().equipment.equippedItemIds.includes('glasses');
+    const hasGlassesEquipped = isItemEquipped('glasses');
     this.setBananaFloorVisible(hasGlassesEquipped);
 
     this.player.setFlipX(step.facingLeft);
@@ -273,95 +270,55 @@ export class OverworldScene extends Phaser.Scene {
 
     updateStreetParticles(this);
 
-    const secret = pickGlassesSecretTarget(
-      this.player.x,
-      this.player.y,
+    this.updateOverworldInteraction(step.interactRequested, hasGlassesEquipped);
+  }
+
+  private updateOverworldInteraction(interactRequested: boolean, hasGlassesEquipped: boolean): void {
+    const result = decideOverworldInteraction(this.overworldInteractionState, {
+      playerX: this.player.x,
+      playerY: this.player.y,
+      interactRequested,
       hasGlassesEquipped,
-      GLASSES_SECRET_SLOTS
-    );
-    const nearPeel =
-      secret.secretId != null && secret.promptX != null && secret.promptY != null;
-    const peelSlot = GLASSES_SECRET_SLOTS[0];
-    const distToPeel = Math.hypot(this.player.x - peelSlot.x, this.player.y - peelSlot.y);
-    if (
-      (this.bananaPeelWarpTimeoutId !== undefined || this.bananaFirstPeelPending) &&
-      distToPeel > peelSlot.radius + BANANA_PEEL_WARP_CANCEL_EXTRA_DIST
-    ) {
-      this.cancelBananaPeelWarpIfAny();
-    }
-
-    const isNearBasementHole =
-      Math.abs(this.player.x - BASEMENT_HOLE.x) < BASEMENT_HOLE.interactDistanceX &&
-      this.player.y > BASEMENT_HOLE.minPlayerY;
-    if (isNearBasementHole) {
-      if (this.bananaPeelWarpTimeoutId !== undefined || this.bananaFirstPeelPending) {
-        this.cancelBananaPeelWarpIfAny();
+      bananaDiscovered: isSecretDiscovered(BANANA_PEEL_CLUE_ID),
+      bananaWarpScheduled: this.bananaPeelWarpTimeoutId !== undefined,
+      bananaCancelExtraDist: BANANA_PEEL_WARP_CANCEL_EXTRA_DIST,
+      basementFeatureId: BASEMENT_FEATURE_ID,
+      potassiumFeatureId: POTASSIUM_FEATURE_ID,
+      basementHole: BASEMENT_HOLE,
+      secretSlots: GLASSES_SECRET_SLOTS,
+      buildingSlots: this.buildingSlots,
+      buildingPickOptions: {
+        maxDistX: OVERWORLD_INTERACT_DISTANCE_X,
+        minPlayerY: OVERWORLD_INTERACT_MIN_PLAYER_Y,
+        promptOffsetY: OVERWORLD_INTERACT_PROMPT_OFFSET_Y
+      },
+      texts: {
+        basement: TEXTS.navigation.interact,
+        enter: TEXTS.navigation.enter,
+        bananaDiscovered: '[E] Peel banana',
+        bananaUndiscovered: '[E] Peel?'
       }
-      this.interactPrompt
-        .setText(TEXTS.navigation.interact)
-        .setPosition(BASEMENT_HOLE.x, BASEMENT_HOLE.promptY)
-        .setVisible(true);
-      if (step.interactRequested) {
-        this.onInteract?.(BASEMENT_FEATURE_ID);
-      }
-      return;
-    }
-
-    if (nearPeel && secret.promptX != null && secret.promptY != null) {
-      const bananaDiscovered = bridgeStore
-        .getState()
-        .progress.discoveredSecretIds.includes(BANANA_PEEL_CLUE_ID);
-      // First-time: after E, typewriter + warp pending — no interact chip (avoids "[E] Peel banana" flash).
-      if (this.bananaPeelWarpTimeoutId !== undefined || this.bananaFirstPeelPending) {
-        this.interactPrompt.setVisible(false);
-      } else {
-        this.interactPrompt
-          .setText(bananaDiscovered ? '[E] Peel banana' : '[E] Peel?')
-          .setPosition(secret.promptX, secret.promptY)
-          .setVisible(true);
-      }
-      if (step.interactRequested && !this.bananaFirstPeelPending && this.bananaPeelWarpTimeoutId === undefined) {
-        if (bananaDiscovered) {
-          this.onInteract?.(POTASSIUM_FEATURE_ID);
-        } else {
-          bridgeActions.discoverSecret(BANANA_PEEL_CLUE_ID);
-          this.bananaFirstPeelPending = true;
-          this.showBananaClueMessage(
-            'A tiny banana sticker points east. This city has stranger shortcuts than doors.',
-            BANANA_PEEL_CLUE_VISIBLE_MS,
-            {
-              typewriter: true,
-              onTypewriterComplete: () => {
-                this.bananaPeelWarpTimeoutId = globalThis.setTimeout(() => {
-                  this.bananaPeelWarpTimeoutId = undefined;
-                  this.bananaFirstPeelPending = false;
-                  this.onInteract?.(POTASSIUM_FEATURE_ID);
-                }, BANANA_PEEL_POST_TYPEWRITE_WARP_MS);
-              }
-            }
-          );
-        }
-      }
-      return;
-    }
-
-    const interact = pickOverworldInteractTarget(this.player.x, this.player.y, this.buildingSlots, {
-      maxDistX: OVERWORLD_INTERACT_DISTANCE_X,
-      minPlayerY: OVERWORLD_INTERACT_MIN_PLAYER_Y,
-      promptOffsetY: OVERWORLD_INTERACT_PROMPT_OFFSET_Y
     });
 
-    if (interact.buildingId != null && interact.promptX != null && interact.promptY != null) {
-      this.interactPrompt
-        .setText(TEXTS.navigation.enter)
-        .setPosition(interact.promptX, interact.promptY)
-        .setVisible(true);
-      if (step.interactRequested) {
-        this.onInteract?.(interact.buildingId);
+    this.overworldInteractionState = result.state;
+    this.applyOverworldPrompt(result.prompt);
+    for (const effect of result.effects) {
+      if (effect.type === 'cancelBananaPeel') {
+        this.cancelBananaPeelWarpIfAny();
+      } else if (effect.type === 'discoverBananaPeel') {
+        this.startBananaPeelDiscovery();
+      } else {
+        this.onInteract?.(effect.targetId);
       }
-    } else {
-      this.interactPrompt.setVisible(false);
     }
+  }
+
+  private applyOverworldPrompt(prompt: OverworldInteractionPrompt): void {
+    if (!prompt.visible) {
+      this.interactPrompt.setVisible(false);
+      return;
+    }
+    this.interactPrompt.setText(prompt.text).setPosition(prompt.x, prompt.y).setVisible(true);
   }
 
   private drawBananaFloorIcon(): void {
@@ -393,7 +350,6 @@ export class OverworldScene extends Phaser.Scene {
       if (i === 0) g.moveTo(p.x, p.y);
       else g.lineTo(p.x, p.y);
     }
-    const tipR = pt(rOut, a1);
     const tipInnerR = pt(rIn, a1);
     g.lineTo(tipInnerR.x, tipInnerR.y);
     for (let i = 0; i <= steps; i++) {
@@ -402,7 +358,6 @@ export class OverworldScene extends Phaser.Scene {
       const p = pt(rIn, a);
       g.lineTo(p.x, p.y);
     }
-    const tipInnerL = pt(rIn, a0);
     const tipOutL = pt(rOut, a0);
     g.lineTo(tipOutL.x, tipOutL.y);
     g.strokePath();
@@ -429,7 +384,7 @@ export class OverworldScene extends Phaser.Scene {
 
   private updateLensReveal(): void {
     if (!this.streetBuildings?.faces.length) return;
-    const hasGlasses = bridgeStore.getState().equipment.equippedItemIds.includes('glasses');
+    const hasGlasses = isItemEquipped('glasses');
     for (let i = 0; i < this.lensRevealScratch.length; i++) {
       // Keep monochrome sketch style for now.
       this.lensRevealScratch[i] = false;
@@ -447,7 +402,7 @@ export class OverworldScene extends Phaser.Scene {
   }
 
   private updatePlayerGlassesAppearance(): void {
-    const hasGlasses = bridgeStore.getState().equipment.equippedItemIds.includes('glasses');
+    const hasGlasses = isItemEquipped('glasses');
     if (hasGlasses === this.hasGlassesSprite) return;
     this.hasGlassesSprite = hasGlasses;
     this.player.setTexture(hasGlasses ? 'player_glasses' : 'player_idle');
@@ -482,7 +437,7 @@ export class OverworldScene extends Phaser.Scene {
   }
 
   private updateGlassesSecrets(hasGlasses: boolean): void {
-    const discovered = bridgeStore.getState().progress.discoveredSecretIds.includes(BANANA_PEEL_CLUE_ID);
+    const discovered = isSecretDiscovered(BANANA_PEEL_CLUE_ID);
     this.glassesSecretHint?.setVisible(hasGlasses && !discovered);
     if (!hasGlasses) {
       this.resetBananaPeelFlow();
@@ -502,15 +457,36 @@ export class OverworldScene extends Phaser.Scene {
       globalThis.clearTimeout(this.bananaPeelWarpTimeoutId);
       this.bananaPeelWarpTimeoutId = undefined;
     }
-    this.bananaFirstPeelPending = false;
+    this.overworldInteractionState = createOverworldInteractionState();
     this.clearBananaClueMessageTimers();
     this.glassesSecretMessage?.setVisible(false);
   }
 
   /** Abort first peel if the player walks away or uses another exit while typewriter / warp is pending. */
   private cancelBananaPeelWarpIfAny(): void {
-    if (this.bananaPeelWarpTimeoutId === undefined && !this.bananaFirstPeelPending) return;
+    if (
+      this.bananaPeelWarpTimeoutId === undefined &&
+      !this.overworldInteractionState.bananaFirstPeelPending
+    ) return;
     this.resetBananaPeelFlow();
+  }
+
+  private startBananaPeelDiscovery(): void {
+    bridgeActions.discoverSecret(BANANA_PEEL_CLUE_ID);
+    this.showBananaClueMessage(
+      'A tiny banana sticker points east. This city has stranger shortcuts than doors.',
+      BANANA_PEEL_CLUE_VISIBLE_MS,
+      {
+        typewriter: true,
+        onTypewriterComplete: () => {
+          this.bananaPeelWarpTimeoutId = globalThis.setTimeout(() => {
+            this.bananaPeelWarpTimeoutId = undefined;
+            this.overworldInteractionState = createOverworldInteractionState();
+            this.onInteract?.(POTASSIUM_FEATURE_ID);
+          }, BANANA_PEEL_POST_TYPEWRITE_WARP_MS);
+        }
+      }
+    );
   }
 
   private showBananaClueMessage(

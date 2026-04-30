@@ -309,3 +309,7 @@ export function isItemEquipped(itemId: InventoryItemId): boolean {
 export function isSecretDiscovered(secretId: SecretDiscoveryId): boolean {
   return bridgeStore.getState().progress.discoveredSecretIds.includes(secretId);
 }
+
+export function getTouchState(): TouchBridgeState {
+  return bridgeStore.getState().touch;
+}

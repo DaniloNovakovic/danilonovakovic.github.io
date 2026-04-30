@@ -9,14 +9,11 @@ import {
   OVERWORLD_WALK_SPEED
 } from './config';
 import { setSceneKeyboardPaused } from './sceneKeyboardPause';
-import { bridgeActions, bridgeStore } from '../shared/bridge/store';
+import { bridgeActions, isItemEquipped, isItemOwned } from '../shared/bridge/store';
 import { PlayerController } from '../core/player/PlayerController';
 import { createUiText } from './text/createUiText';
-import {
-  commandFrameToPlayerStepInput,
-  createInputCommandFrame
-} from '../core/input/commands';
-import { readSceneInputCommands } from './input/readSceneInputCommands';
+import { createInputCommandFrame } from '../core/input/commands';
+import { readPlayerSceneStep } from './input/scenePlayerInput';
 
 const BASEMENT_FLOOR_Y = 500;
 const BASEMENT_PLAYER_START = { x: 135, y: BASEMENT_FLOOR_Y - 50 } as const;
@@ -120,7 +117,7 @@ export class BasementScene extends Phaser.Scene {
       this,
       GAME_DESIGN_WIDTH / 2,
       78,
-      bridgeStore.getState().inventory.ownedItemIds.includes('glasses')
+      isItemOwned('glasses')
         ? 'Lens acquired. The city can be seen differently now.'
         : 'A forgotten dev room hums under the sketch city.',
       {
@@ -146,17 +143,14 @@ export class BasementScene extends Phaser.Scene {
       return;
     }
 
-    const touchState = bridgeStore.getState().touch;
-    const oneShots = bridgeActions.consumeTouchOneShots();
-    const commands = readSceneInputCommands({
+    const { commands, step } = readPlayerSceneStep({
       frame: this.inputFrame,
+      controller: this.controller,
       cursors: this.cursors,
       wasd: this.wasd,
       interactKey: this.interactKey,
       hKey: this.hKey,
       escapeKey: this.escapeKey,
-      touch: touchState,
-      oneShots,
       allowJump: true,
       allowSprint: true
     });
@@ -165,12 +159,11 @@ export class BasementScene extends Phaser.Scene {
       return;
     }
 
-    const step = this.controller.step(commandFrameToPlayerStepInput(commands));
     this.player.setFlipX(step.facingLeft);
     this.player.setAngle(step.moving ? Math.sin(this.time.now / 100) * 5 : 0);
 
     const nearGlasses =
-      !bridgeStore.getState().inventory.ownedItemIds.includes('glasses') &&
+      !isItemOwned('glasses') &&
       Phaser.Math.Distance.Between(this.player.x, this.player.y, GLASSES_PICKUP.x, GLASSES_PICKUP.y) <
         GLASSES_PICKUP.radius;
     if (nearGlasses) {
@@ -258,11 +251,11 @@ export class BasementScene extends Phaser.Scene {
   }
 
   private refreshGlassesVisibility(): void {
-    this.glasses?.setVisible(!bridgeStore.getState().inventory.ownedItemIds.includes('glasses'));
+    this.glasses?.setVisible(!isItemOwned('glasses'));
   }
 
   private updatePlayerGlassesAppearance(): void {
-    const hasGlasses = bridgeStore.getState().equipment.equippedItemIds.includes('glasses');
+    const hasGlasses = isItemEquipped('glasses');
     if (hasGlasses === this.hasGlassesSprite) return;
     this.hasGlassesSprite = hasGlasses;
     this.player.setTexture(hasGlasses ? 'player_glasses' : 'player_idle');

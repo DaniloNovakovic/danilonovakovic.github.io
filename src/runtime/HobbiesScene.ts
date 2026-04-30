@@ -18,16 +18,13 @@ import {
   OVERWORLD_WALK_SPEED
 } from './config';
 import { setSceneKeyboardPaused } from './sceneKeyboardPause';
-import { bridgeActions, bridgeStore } from '../shared/bridge/store';
+import { isItemEquipped } from '../shared/bridge/store';
 import { PlayerController } from '../core/player/PlayerController';
 import { buildHobbiesRoom } from './hobbies/HobbiesRoom';
 import { createUiText } from './text/createUiText';
 import { pickRoomInteractTarget } from '../core/ecs/systems/roomInteractSystems';
-import {
-  commandFrameToPlayerStepInput,
-  createInputCommandFrame
-} from '../core/input/commands';
-import { readSceneInputCommands } from './input/readSceneInputCommands';
+import { createInputCommandFrame } from '../core/input/commands';
+import { readPlayerSceneStep } from './input/scenePlayerInput';
 
 export class HobbiesScene extends Phaser.Scene {
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -67,10 +64,6 @@ export class HobbiesScene extends Phaser.Scene {
   getResumeCapturePosition(): { x: number; y: number } | null {
     if (!this.player?.body) return null;
     return { x: this.player.x, y: this.player.y };
-  }
-
-  updateInteractCallback(callback: (id: string) => void) {
-    this.onInteract = callback;
   }
 
   setPaused(paused: boolean) {
@@ -156,17 +149,14 @@ export class HobbiesScene extends Phaser.Scene {
       return;
     }
 
-    const touchState = bridgeStore.getState().touch;
-    const oneShots = bridgeActions.consumeTouchOneShots();
-    const commands = readSceneInputCommands({
+    const { commands, step } = readPlayerSceneStep({
       frame: this.inputFrame,
+      controller: this.controller,
       cursors: this.cursors,
       wasd: this.wasd,
       interactKey: this.interactKey,
       hKey: this.hKey,
       escapeKey: this.escapeKey,
-      touch: touchState,
-      oneShots,
       allowJump: true,
       allowSprint: true
     });
@@ -174,8 +164,6 @@ export class HobbiesScene extends Phaser.Scene {
       this.onClose?.();
       return;
     }
-
-    const step = this.controller.step(commandFrameToPlayerStepInput(commands));
 
     this.player.setFlipX(step.facingLeft);
     this.player.setAngle(step.moving ? Math.sin(this.time.now / 100) * 5 : 0);
@@ -203,7 +191,7 @@ export class HobbiesScene extends Phaser.Scene {
   }
 
   private updatePlayerGlassesAppearance(): void {
-    const hasGlasses = bridgeStore.getState().equipment.equippedItemIds.includes('glasses');
+    const hasGlasses = isItemEquipped('glasses');
     if (hasGlasses === this.hasGlassesSprite) return;
     this.hasGlassesSprite = hasGlasses;
     this.player.setTexture(hasGlasses ? 'player_glasses' : 'player_idle');

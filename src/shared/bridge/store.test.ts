@@ -1,5 +1,12 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { bridgeActions, bridgeStore } from './store';
+import {
+  bridgeActions,
+  bridgeStore,
+  getTouchState,
+  isItemEquipped,
+  isItemOwned,
+  isSecretDiscovered
+} from './store';
 import { GameState } from '../../runtime/gameState';
 
 function resetBridge() {
@@ -68,6 +75,8 @@ describe('bridgeStore', () => {
       expect(bridgeStore.getState().progress.hasGlasses).toBe(true);
       expect(bridgeStore.getState().inventory.ownedItemIds).toContain('glasses');
       expect(bridgeStore.getState().equipment.equippedItemIds).toContain('glasses');
+      expect(isItemOwned('glasses')).toBe(true);
+      expect(isItemEquipped('glasses')).toBe(true);
     });
 
     it('resetProgress clears glasses progress', () => {
@@ -91,8 +100,10 @@ describe('bridgeStore', () => {
     it('tracks discovered secrets until progress reset', () => {
       bridgeActions.discoverSecret('banana-peel-clue');
       expect(bridgeStore.getState().progress.discoveredSecretIds).toEqual(['banana-peel-clue']);
+      expect(isSecretDiscovered('banana-peel-clue')).toBe(true);
       bridgeActions.resetProgress();
       expect(bridgeStore.getState().progress.discoveredSecretIds).toEqual([]);
+      expect(isSecretDiscovered('banana-peel-clue')).toBe(false);
     });
 
     it('does not emit when a secret is already discovered', () => {
@@ -170,6 +181,7 @@ describe('bridgeStore', () => {
       expect(t.right).toBe(0);
       expect(t.jumpQueued).toBe(false);
       expect(t.interactTap).toBe(false);
+      expect(getTouchState()).toEqual(t);
     });
   });
 });

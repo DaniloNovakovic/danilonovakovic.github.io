@@ -5,7 +5,7 @@ import { getGameConfig } from '../runtime/config';
 import { OverworldScene } from '../runtime/OverworldScene';
 import { getAllMiniGames } from '../runtime/miniGameRegistry';
 import { MiniGameType } from '../runtime/types';
-import { peekResumePosition } from '../runtime/sceneResumeStore';
+import { forgetResumePosition, peekResumePosition } from '../runtime/sceneResumeStore';
 import { bridgeActions } from '../shared/bridge/store';
 import { SceneManager } from '../core/kernel/SceneManager';
 import { PhaserSceneAdapter } from '../infra/phaser/PhaserSceneAdapter';
@@ -96,11 +96,7 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
 
     // Initial pause comes from ref (updated in useLayoutEffect) so this effect
     // does not close over `isPaused` — avoids remounting Phaser when pause toggles.
-    game.scene.add(PHASER_SCENE_KEYS.main, OverworldScene, true, {
-      onInteract: stableOnInteract,
-      isPaused: bridgeRef.current.isPaused,
-      resumePosition: peekResumePosition(PHASER_SCENE_KEYS.main)
-    });
+    game.scene.add(PHASER_SCENE_KEYS.main, OverworldScene, false);
 
     const phaserScenes = getAllMiniGames().filter((g) => g.type === MiniGameType.PHASER_SCENE);
     phaserScenes.forEach((s) => {
@@ -108,13 +104,13 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
     });
 
     const adapter = new PhaserSceneAdapter({
-      getGame: () => gameRef.current,
-      onInteract: stableOnInteract
+      getGame: () => gameRef.current
     });
     const sceneManager = new SceneManager(adapter);
     sceneManager.registerContext(
       createStreetPlugin({
         onInteract: stableOnInteract,
+        getIsPaused: () => bridgeRef.current.isPaused,
         getResumePosition: () => peekResumePosition(PHASER_SCENE_KEYS.main)
       })
     );
@@ -134,6 +130,7 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
     sceneManager.registerContext(
       createPotassiumPlatformerPlugin({
         onClose: stableOnClose,
+        forgetResumePosition: () => forgetResumePosition(PHASER_SCENE_KEYS.potassium),
         getResumePosition: () => peekResumePosition(PHASER_SCENE_KEYS.potassium)
       })
     );

@@ -7,9 +7,9 @@ import {
 import { PlayerController } from '../core/player/PlayerController';
 import { setSceneKeyboardPaused } from './sceneKeyboardPause';
 import { createUiText } from './text/createUiText';
-import { bridgeActions, bridgeStore } from '../shared/bridge/store';
-import { commandFrameToPlayerStepInput, createInputCommandFrame } from '../core/input/commands';
-import { readSceneInputCommands } from './input/readSceneInputCommands';
+import { isItemEquipped } from '../shared/bridge/store';
+import { createInputCommandFrame } from '../core/input/commands';
+import { readPlayerSceneStep } from './input/scenePlayerInput';
 import { TextureGenerator } from './textures/TextureGenerator';
 
 const FLOOR_Y = 552;
@@ -197,29 +197,23 @@ export class PotassiumPlatformerScene extends Phaser.Scene {
       return;
     }
 
-    const touchState = bridgeStore.getState().touch;
-    const oneShots = bridgeActions.consumeTouchOneShots();
-    const commands = readSceneInputCommands({
+    const { commands, step } = readPlayerSceneStep({
       frame: this.inputFrame,
+      controller: this.controller,
       cursors: this.cursors,
       wasd: this.wasd,
       interactKey: this.interactKey,
       hKey: this.hKey,
       escapeKey: this.escapeKey,
-      touch: touchState,
-      oneShots,
       allowJump: true,
-      allowSprint: true
+      allowSprint: true,
+      nowMs: this.time.now
     });
     if (commands.exitContext) {
       this.onClose?.();
       return;
     }
 
-    const step = this.controller.step({
-      ...commandFrameToPlayerStepInput(commands),
-      nowMs: this.time.now
-    });
     this.player.setFlipX(step.facingLeft);
     this.player.setAngle(step.moving ? Math.sin(this.time.now / 100) * 4 : 0);
     this.updateBananaCollection();
@@ -319,7 +313,7 @@ export class PotassiumPlatformerScene extends Phaser.Scene {
   }
 
   private updatePlayerGlassesAppearance(): void {
-    const hasGlasses = bridgeStore.getState().equipment.equippedItemIds.includes('glasses');
+    const hasGlasses = isItemEquipped('glasses');
     if (hasGlasses === this.hasGlassesSprite) return;
     this.hasGlassesSprite = hasGlasses;
     this.player.setTexture(hasGlasses ? 'player_glasses' : 'player_idle');
