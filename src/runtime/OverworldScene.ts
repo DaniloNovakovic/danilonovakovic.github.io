@@ -56,7 +56,9 @@ const BASEMENT_HOLE = {
 
 const BANANA_PEEL_CLUE_ID: SecretDiscoveryId = 'banana-peel-clue';
 /** Delay after first-time peel message before opening Potassium (ms). */
-const BANANA_PEEL_WARP_DELAY_MS = 1100;
+const BANANA_PEEL_WARP_DELAY_MS = 4000;
+/** How long the first-time clue toast stays visible (ms); should cover most of the warp wait. */
+const BANANA_PEEL_CLUE_VISIBLE_MS = 4500;
 /** Cancel pending peel warp only after moving this far past slot radius (avoids 1-frame jitter killing the timer). */
 const BANANA_PEEL_WARP_CANCEL_EXTRA_DIST = 36;
 
@@ -303,17 +305,23 @@ export class OverworldScene extends Phaser.Scene {
       const bananaDiscovered = bridgeStore
         .getState()
         .progress.discoveredSecretIds.includes(BANANA_PEEL_CLUE_ID);
-      this.interactPrompt
-        .setText(bananaDiscovered ? '[E] Peel banana' : '[E] Peel?')
-        .setPosition(secret.promptX, secret.promptY)
-        .setVisible(true);
+      // First-time: after E, clue shows and warp is pending — no interact chip (avoids "[E] Peel banana" flash).
+      if (this.bananaPeelWarpTimeoutId !== undefined) {
+        this.interactPrompt.setVisible(false);
+      } else {
+        this.interactPrompt
+          .setText(bananaDiscovered ? '[E] Peel banana' : '[E] Peel?')
+          .setPosition(secret.promptX, secret.promptY)
+          .setVisible(true);
+      }
       if (step.interactRequested && this.bananaPeelWarpTimeoutId === undefined) {
         if (bananaDiscovered) {
           this.onInteract?.(POTASSIUM_FEATURE_ID);
         } else {
           bridgeActions.discoverSecret(BANANA_PEEL_CLUE_ID);
           this.showBananaClueMessage(
-            'A tiny banana sticker points east. This city has stranger shortcuts than doors.'
+            'A tiny banana sticker points east. This city has stranger shortcuts than doors.',
+            BANANA_PEEL_CLUE_VISIBLE_MS
           );
           // Use real timers so a one-frame "outside radius" flicker does not cancel the warp,
           // and the warp still fires if Phaser scene time is finicky during transitions.
@@ -480,11 +488,11 @@ export class OverworldScene extends Phaser.Scene {
     }
   }
 
-  private showBananaClueMessage(message: string): void {
+  private showBananaClueMessage(message: string, visibleMs: number = 2600): void {
     this.glassesSecretMessage?.setText(message);
     this.glassesSecretMessage?.setVisible(true);
     this.glassesSecretMessageHideTimer?.destroy();
-    this.glassesSecretMessageHideTimer = this.time.delayedCall(2600, () => {
+    this.glassesSecretMessageHideTimer = this.time.delayedCall(visibleMs, () => {
       this.glassesSecretMessage?.setVisible(false);
       this.glassesSecretMessageHideTimer = undefined;
     });
