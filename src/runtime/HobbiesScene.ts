@@ -44,7 +44,7 @@ export class HobbiesScene extends Phaser.Scene {
   private isPaused: boolean = false;
   private resumePosition?: { x: number; y: number };
   private readonly inputFrame = createInputCommandFrame();
-  private hasGlassesSprite = false;
+  private hasGlassesSprite: boolean | null = null;
 
   constructor() {
     super({ key: 'hobbies' });
@@ -60,6 +60,8 @@ export class HobbiesScene extends Phaser.Scene {
     this.onInteract = data.onInteract;
     this.isPaused = data.isPaused ?? false;
     this.resumePosition = data.resumePosition;
+    // Scene instances are reused; force texture sync on each enter.
+    this.hasGlassesSprite = null;
   }
 
   getResumeCapturePosition(): { x: number; y: number } | null {

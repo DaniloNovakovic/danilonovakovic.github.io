@@ -39,7 +39,7 @@ export class BasementScene extends Phaser.Scene {
   private isPaused: boolean = false;
   private resumePosition?: { x: number; y: number };
   private readonly inputFrame = createInputCommandFrame();
-  private hasGlassesSprite = false;
+  private hasGlassesSprite: boolean | null = null;
 
   constructor() {
     super({ key: 'basement' });
@@ -53,6 +53,8 @@ export class BasementScene extends Phaser.Scene {
     this.onClose = data.onClose;
     this.isPaused = data.isPaused ?? false;
     this.resumePosition = data.resumePosition;
+    // Scene instances are reused; force texture sync on each enter.
+    this.hasGlassesSprite = null;
   }
 
   getResumeCapturePosition(): { x: number; y: number } | null {

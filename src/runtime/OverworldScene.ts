@@ -69,7 +69,7 @@ export class OverworldScene extends Phaser.Scene {
   private readonly buildingSlots: OverworldBuildingSlot[] = [];
   private lensRevealScratch: boolean[] = [];
   private preGlassesVision?: DistanceHazeVision;
-  private hasGlassesSprite = false;
+  private hasGlassesSprite: boolean | null = null;
 
   constructor() {
     super({ key: 'MainScene' });
@@ -83,6 +83,8 @@ export class OverworldScene extends Phaser.Scene {
     this.onInteract = data.onInteract;
     this.isPaused = data.isPaused;
     this.resumePosition = data.resumePosition;
+    // Scene instances are reused; force texture sync on each enter.
+    this.hasGlassesSprite = null;
   }
 
   getResumeCapturePosition(): { x: number; y: number } | null {
