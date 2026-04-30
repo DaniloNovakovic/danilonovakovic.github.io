@@ -12,6 +12,7 @@ import { PhaserSceneAdapter } from '../infra/phaser/PhaserSceneAdapter';
 import { GameKernel } from '../core/kernel/GameKernel';
 import { createStreetPlugin } from '../contextPlugins/plugins/StreetPlugin';
 import { createHobbiesPlugin } from '../contextPlugins/plugins/HobbiesPlugin';
+import { createBasementPlugin } from '../contextPlugins/plugins/BasementPlugin';
 import { useTouchGestures } from './useTouchGestures';
 
 interface GameProps {
@@ -118,6 +119,12 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
         onClose: stableOnClose,
         onInteract: stableOnInteract,
         getResumePosition: () => peekResumePosition(PHASER_SCENE_KEYS.hobbies)
+      })
+    );
+    sceneManager.registerContext(
+      createBasementPlugin({
+        onClose: stableOnClose,
+        getResumePosition: () => peekResumePosition(PHASER_SCENE_KEYS.basement)
       })
     );
     const kernel = new GameKernel(sceneManager);

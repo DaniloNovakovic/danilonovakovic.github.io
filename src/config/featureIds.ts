@@ -7,6 +7,7 @@ export const MINI_GAME_IDS = [
   'projects',
   'abilities',
   'hobbies',
+  'basement',
   'contact',
   'games',
   'art',
@@ -32,9 +33,11 @@ export function isHobbyReactOverlayId(id: string): id is HobbyReactOverlayId {
 
 /** Overworld building + interior Phaser feature id (must match registry). */
 export const HOBBIES_FEATURE_ID = 'hobbies' satisfies MiniGameId;
+export const BASEMENT_FEATURE_ID = 'basement' satisfies MiniGameId;
 
 /** Phaser scene keys (must match `Scene` constructor `super({ key })` and registry `id` for PHASER_SCENE entries). */
 export const PHASER_SCENE_KEYS = {
   main: 'MainScene',
-  hobbies: 'hobbies'
+  hobbies: 'hobbies',
+  basement: 'basement'
 } as const;

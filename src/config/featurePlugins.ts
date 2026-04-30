@@ -1,5 +1,6 @@
 import { lazy } from 'react';
 import { HobbiesScene } from '../runtime/HobbiesScene';
+import { BasementScene } from '../runtime/BasementScene';
 import type { FeaturePluginDefinition } from './portfolioCompose';
 import { MiniGameType } from '../runtime/types';
 
@@ -48,6 +49,13 @@ export const FEATURE_PLUGIN_DEFINITIONS: FeaturePluginDefinition[] = [
     name: 'Hobbies',
     description: 'Step inside to see what I do when I am not coding.',
     Scene: HobbiesScene,
+    type: MiniGameType.PHASER_SCENE
+  },
+  {
+    id: 'basement',
+    name: 'Basement',
+    description: 'A hidden developer room where rough sketches become playable.',
+    Scene: BasementScene,
     type: MiniGameType.PHASER_SCENE
   },
   {

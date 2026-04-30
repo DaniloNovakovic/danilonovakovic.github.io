@@ -4,7 +4,7 @@
  * and player logic to PlayerController.
  */
 import * as Phaser from 'phaser';
-import { HOBBIES_FEATURE_ID } from '../config/featureIds';
+import { BASEMENT_FEATURE_ID, HOBBIES_FEATURE_ID } from '../config/featureIds';
 import { PORTFOLIO_SECTIONS } from '../config/portfolioRegistry';
 import { TextureGenerator } from './textures/TextureGenerator';
 import { TEXTS } from '../config/content';
@@ -42,6 +42,14 @@ import {
   createInputCommandFrame
 } from '../core/input/commands';
 import { readSceneInputCommands } from './input/readSceneInputCommands';
+
+const BASEMENT_HOLE = {
+  x: 230,
+  y: 535,
+  promptY: 485,
+  interactDistanceX: 70,
+  minPlayerY: 400
+} as const;
 
 export class OverworldScene extends Phaser.Scene {
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -107,6 +115,7 @@ export class OverworldScene extends Phaser.Scene {
 
     const { groundZone } = buildStreetEnvironment(this);
     this.streetBuildings = buildStreetBuildings(this);
+    this.createBasementHoleTrigger();
     this.buildingSlots.length = 0;
     for (const bldg of this.streetBuildings.interactables.getChildren() as Phaser.GameObjects.Sprite[]) {
       this.buildingSlots.push({
@@ -203,6 +212,17 @@ export class OverworldScene extends Phaser.Scene {
 
     updateStreetParticles(this);
 
+    const isNearBasementHole =
+      Math.abs(this.player.x - BASEMENT_HOLE.x) < BASEMENT_HOLE.interactDistanceX &&
+      this.player.y > BASEMENT_HOLE.minPlayerY;
+    if (isNearBasementHole) {
+      this.interactPrompt.setPosition(BASEMENT_HOLE.x, BASEMENT_HOLE.promptY).setVisible(true);
+      if (step.interactRequested) {
+        this.onInteract?.(BASEMENT_FEATURE_ID);
+      }
+      return;
+    }
+
     const interact = pickOverworldInteractTarget(this.player.x, this.player.y, this.buildingSlots, {
       maxDistX: OVERWORLD_INTERACT_DISTANCE_X,
       minPlayerY: OVERWORLD_INTERACT_MIN_PLAYER_Y,
@@ -223,5 +243,29 @@ export class OverworldScene extends Phaser.Scene {
     if (this.lensActive === hasGlasses) return;
     this.lensActive = hasGlasses;
     this.streetBuildings?.setLensActive(hasGlasses);
+  }
+
+  private createBasementHoleTrigger(): void {
+    const line = 0x1a1a1a;
+    const hole = this.add.graphics();
+    hole.fillStyle(line, 0.92);
+    hole.fillEllipse(BASEMENT_HOLE.x, BASEMENT_HOLE.y, 120, 28);
+    hole.lineStyle(3, line, 1);
+    hole.strokeEllipse(BASEMENT_HOLE.x, BASEMENT_HOLE.y - 2, 122, 30);
+    hole.lineStyle(2, 0xfbfbf9, 0.35);
+    for (let offset = -45; offset <= 45; offset += 18) {
+      hole.beginPath();
+      hole.moveTo(BASEMENT_HOLE.x + offset, BASEMENT_HOLE.y - 10);
+      hole.lineTo(BASEMENT_HOLE.x + offset + 12, BASEMENT_HOLE.y + 8);
+      hole.strokePath();
+    }
+
+    createUiText(this, BASEMENT_HOLE.x, BASEMENT_HOLE.y - 48, 'TODO?', {
+      fontSize: '18px',
+      color: '#1a1a1a',
+      fontStyle: 'bold',
+      backgroundColor: '#fbfbf9',
+      padding: { x: 6, y: 2 }
+    }).setOrigin(0.5);
   }
 }

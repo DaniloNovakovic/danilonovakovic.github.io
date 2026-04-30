@@ -19,6 +19,10 @@ describe('runtime mode helpers', () => {
       kind: 'phaserScene',
       miniGameId: 'hobbies'
     });
+    expect(createRuntimeModeForInteraction('basement')).toEqual({
+      kind: 'phaserScene',
+      miniGameId: 'basement'
+    });
   });
 
   it('derives legacy bridge state projections from runtime mode', () => {
@@ -35,6 +39,7 @@ describe('runtime mode helpers', () => {
   it('pauses only for React overlays', () => {
     expect(derivePause(EXPLORING_MODE)).toBe(false);
     expect(derivePause({ kind: 'phaserScene', miniGameId: 'hobbies' })).toBe(false);
+    expect(derivePause({ kind: 'phaserScene', miniGameId: 'basement' })).toBe(false);
     expect(derivePause({ kind: 'reactOverlay', miniGameId: 'profile' })).toBe(true);
   });
 
@@ -50,6 +55,7 @@ describe('runtime mode helpers', () => {
   it('closes overlays without parents and Phaser scenes to exploring', () => {
     expect(closeRuntimeMode({ kind: 'reactOverlay', miniGameId: 'profile' })).toBe(EXPLORING_MODE);
     expect(closeRuntimeMode({ kind: 'phaserScene', miniGameId: 'hobbies' })).toBe(EXPLORING_MODE);
+    expect(closeRuntimeMode({ kind: 'phaserScene', miniGameId: 'basement' })).toBe(EXPLORING_MODE);
   });
 
   it('compares modes by kind and mini-game id', () => {
