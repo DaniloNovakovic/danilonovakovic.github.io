@@ -1,7 +1,7 @@
 import { lazy } from 'react';
 import { HobbiesScene } from '../runtime/HobbiesScene';
 import { BasementScene } from '../runtime/BasementScene';
-import { PotassiumPlatformerScene } from '../runtime/PotassiumPlatformerScene';
+import { PotassiumSlipScene } from '../runtime/PotassiumSlipScene';
 import type { FeaturePluginDefinition } from './portfolioCompose';
 import { MiniGameType } from '../runtime/types';
 
@@ -61,9 +61,9 @@ export const FEATURE_PLUGIN_DEFINITIONS: FeaturePluginDefinition[] = [
   },
   {
     id: 'potassium',
-    name: 'Potassium Platformer',
-    description: 'Peel the hidden route and sprint through a banana-block challenge.',
-    Scene: PotassiumPlatformerScene,
+    name: 'Potassium Slip',
+    description: 'Slip the incoming stakeholders and dodge the deadlines in this slippery challenge.',
+    Scene: PotassiumSlipScene,
     type: MiniGameType.PHASER_SCENE
   },
   {

@@ -221,4 +221,127 @@ export class TextureGenerator {
     bg.generateTexture(key, 120, 120);
     bg.destroy();
   }
+
+  static generatePotassiumAssets(scene: Phaser.Scene) {
+    this.generateBananaPeel(scene, 'yellow', 0xf3de72);
+    this.generateBananaPeel(scene, 'green', 0xa4d44d);
+    this.generateBananaPeel(scene, 'brown', 0x8b5a2b);
+    this.generateDeadline(scene);
+    this.generateScopeCreeper(scene);
+    this.generateBug(scene);
+  }
+
+  private static generateBananaPeel(scene: Phaser.Scene, suffix: string, color: number) {
+    const g = scene.make.graphics({ x: 0, y: 0 });
+    const line = 0x1a1a1a;
+
+    g.fillStyle(color, 1);
+    g.lineStyle(3, line, 1);
+
+    // Three-pronged peel shape
+    g.beginPath();
+    g.moveTo(25, 10); // Center stem
+    g.lineTo(15, 45); // Left peel
+    g.lineTo(25, 35);
+    g.lineTo(35, 45); // Right peel
+    g.lineTo(25, 10);
+    g.closePath();
+    g.fillPath();
+    g.strokePath();
+
+    // Top peel (floppy)
+    g.beginPath();
+    g.moveTo(25, 10);
+    g.lineTo(25, 2);
+    g.lineTo(20, 15);
+    g.closePath();
+    g.fillPath();
+    g.strokePath();
+
+    g.generateTexture(`banana_peel_${suffix}`, 50, 50);
+    g.destroy();
+  }
+
+  private static generateDeadline(scene: Phaser.Scene) {
+    const g = scene.make.graphics({ x: 0, y: 0 });
+    const fill = 0xef4444; // Red
+    const line = 0x1a1a1a;
+
+    g.fillStyle(fill, 1);
+    g.lineStyle(3, line, 1);
+    g.fillRect(5, 5, 40, 40);
+    g.strokeRect(5, 5, 40, 40);
+
+    // Calendar "rings"
+    g.fillStyle(line, 1);
+    g.fillCircle(12, 5, 3);
+    g.fillCircle(38, 5, 3);
+
+    // "Time's up" text simplified as a clock hand
+    g.lineStyle(2, 0xffffff, 0.9);
+    g.beginPath();
+    g.moveTo(25, 25);
+    g.lineTo(25, 15);
+    g.moveTo(25, 25);
+    g.lineTo(35, 25);
+    g.strokePath();
+
+    g.generateTexture('enemy_deadline', 50, 50);
+    g.destroy();
+  }
+
+  private static generateScopeCreeper(scene: Phaser.Scene) {
+    const g = scene.make.graphics({ x: 0, y: 0 });
+    const fill = 0x8b5cf6; // Purple
+    const line = 0x1a1a1a;
+
+    g.fillStyle(fill, 1);
+    g.lineStyle(3, line, 1);
+
+    // Wide, amorphous blob (using ellipses for better compatibility)
+    g.fillEllipse(40, 25, 70, 40);
+    g.strokeEllipse(40, 25, 70, 40);
+
+    // Multiple "creepy" eyes
+    g.fillStyle(0xffffff, 1);
+    g.fillCircle(25, 25, 5);
+    g.fillCircle(45, 20, 4);
+    g.fillCircle(60, 28, 5);
+    g.fillStyle(line, 1);
+    g.fillCircle(27, 25, 2);
+    g.fillCircle(46, 20, 2);
+    g.fillCircle(62, 28, 2);
+
+    g.generateTexture('enemy_scope_creeper', 80, 50);
+    g.destroy();
+  }
+
+  private static generateBug(scene: Phaser.Scene) {
+    const g = scene.make.graphics({ x: 0, y: 0 });
+    const fill = 0x22c55e; // Green
+    const line = 0x1a1a1a;
+
+    g.fillStyle(fill, 1);
+    g.lineStyle(2, line, 1);
+
+    // Segmented insect body
+    g.fillCircle(15, 15, 8);
+    g.strokeCircle(15, 15, 8);
+    g.fillCircle(25, 15, 6);
+    g.strokeCircle(25, 15, 6);
+    g.fillCircle(33, 15, 5);
+    g.strokeCircle(33, 15, 5);
+
+    // Antennas
+    g.lineStyle(2, line, 1);
+    g.beginPath();
+    g.moveTo(10, 10);
+    g.lineTo(2, 2);
+    g.moveTo(10, 20);
+    g.lineTo(2, 28);
+    g.strokePath();
+
+    g.generateTexture('enemy_bug', 40, 30);
+    g.destroy();
+  }
 }
