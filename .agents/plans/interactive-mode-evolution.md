@@ -2,7 +2,7 @@
 
 This document serves as a long-term roadmap for implementing the "Artist's Journey" and the Secret Mini-Games. It is designed to be picked up by any AI agent across multiple sessions. 
 
-**Branch:** `feat/multi-session-game-plan`
+**Branch:** `feature/potassium-slip-minigame`
 
 ## Guidelines for AI Agents
 
@@ -42,9 +42,10 @@ This document serves as a long-term roadmap for implementing the "Artist's Journ
 ### Phase 1 Notes For Phase 2
 
 - The colored-house layer work still exists technically, but it is intentionally disabled in `OverworldScene.ts`.
-- The first discovered clue is `banana-peel-clue`; it points toward the Phase 2 banana/platformer secret without starting that phase yet.
+- The first discovered clue is `banana-peel-clue`; it points toward the Phase 2 Potassium Slip secret.
 - Future secret triggers should reuse the same shape: only visible/interactable when glasses are equipped, then recorded in bridge progress if discovered.
-- Current overworld handoff UX: first interaction is inspect clue, subsequent interaction becomes peel-ready prompt for Phase 2 trigger wiring.
+- Current overworld handoff UX: first interaction is inspect clue, subsequent interaction becomes peel-ready prompt that hands off into Potassium Slip.
+- Basement progression update: the Developer Console (`games`) moved from Hobbies to the basement computer and now requires owned glasses to open; pre-glasses interaction shows a player thought line.
 
 ---
 
@@ -53,7 +54,7 @@ This document serves as a long-term roadmap for implementing the "Artist's Journ
 **Goal:** Implement the first secret mini-game hidden in the Overworld—a mobile-friendly top-down physics game.
 
 - [x] **2.1: The Banana Trigger**
-  - Added interaction to the `Banana` object in the Overworld to transition to the mini-game.
+  - Added banana-peel clue/inspect flow in the Overworld, then peel interaction handoff to transition to the mini-game.
 - [x] **2.2: Potassium Slip Mechanics**
   - Created a new top-down Phaser Scene (`PotassiumSlipScene.ts`).
   - Implemented slippery momentum-based movement using `moveToObject`.
@@ -120,4 +121,4 @@ This document serves as a long-term roadmap for implementing the "Artist's Journ
   - Apply the "2-Frame Jitter" to all Sketch assets.
   - Add bit-crushed audio cues near secret entrances.
 - **6.2: Save State & Persistence**
-  - Ensure all unlocked secrets and mini-game completion statuses are persisted in `gameState.ts` and local storage.
+  - Ensure all unlocked secrets and mini-game completion statuses are persisted from bridge state (`src/shared/bridge/store.ts`) to local storage.
