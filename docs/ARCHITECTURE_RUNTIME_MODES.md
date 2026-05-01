@@ -8,7 +8,8 @@ intentionally short: the code remains the source of truth.
 - `exploring`: the player is in the overworld and React overlays are closed.
 - `reactOverlay`: a React mini-game is open and Phaser input/physics are paused
   through the bridge and kernel.
-- `phaserScene`: a Phaser mini-game scene is active, such as the hobbies room.
+- `phaserScene`: a Phaser mini-game scene is active, such as the hobbies room
+  or Developer Basement.
 
 ## Transition Owners
 
@@ -28,4 +29,6 @@ Use this path when checking pattern refactors:
 2. Open and close a React overlay from a building.
 3. Enter and exit the hobbies Phaser scene.
 4. Open and close a hobby overlay from inside the hobbies scene.
-5. Verify mobile touch movement, jump, and interact one-shots.
+5. Enter the Developer Basement, open the computer console, and close it back
+   to the basement scene.
+6. Verify mobile touch movement, jump, and interact one-shots.

@@ -25,8 +25,9 @@ This document describes the current runtime architecture in `src/` after the mic
   - Handles scene enter/exit, resume capture, and pause propagation.
 - `src/infra/phaser/PhaserSceneAdapter.ts`
   - Adapter boundary for scene start/stop, active scene pause, callback rebinding, and resume capture.
-- `src/contextPlugins/plugins/StreetPlugin.ts`, `src/contextPlugins/plugins/HobbiesPlugin.ts`
-  - Context plugin definitions for the two Phaser scene contexts.
+- `src/contextPlugins/plugins/StreetPlugin.ts`, `src/contextPlugins/plugins/HobbiesPlugin.ts`,
+`src/contextPlugins/plugins/BasementPlugin.ts`
+  - Context plugin definitions for the Phaser scene contexts.
 
 ## Folder ownership (`runtime` vs `contextPlugins`)
 
@@ -60,8 +61,9 @@ After changes that touch Phaser boot, bridge, kernel, scenes, or overlays, run `
 
 1. **Overworld** — canvas loads; move left/right, jump, interact near a building.
 2. **Hobbies** — enter hobbies (building or `H` where applicable); walk; interact with an interior target; exit (`H` / `Esc` / close flow) returns to overworld.
-3. **React overlays** — open a building overlay from the street; close it; no stuck keyboard focus in the canvas.
-4. **Pause / input** — with a React overlay open, scene pause propagates (no gameplay input leaking); closing overlay resumes overworld input.
+3. **Basement** — enter the Developer Basement; interact with the computer; closing the Developer Console resumes the basement scene.
+4. **React overlays** — open a building overlay from the street; close it; no stuck keyboard focus in the canvas.
+5. **Pause / input** — with a React overlay open, scene pause propagates (no gameplay input leaking); closing overlay resumes the parent scene or overworld input.
 
 Record pass/fail in the PR or release notes when shipping runtime changes.
 

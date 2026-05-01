@@ -123,6 +123,7 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
     sceneManager.registerContext(
       createBasementPlugin({
         onClose: stableOnClose,
+        onInteract: stableOnInteract,
         getResumePosition: () => peekResumePosition(PHASER_SCENE_KEYS.basement),
         loadScene: () => getPhaserSceneBinding(PHASER_SCENE_KEYS.basement)?.loadScene() ?? Promise.reject()
       })

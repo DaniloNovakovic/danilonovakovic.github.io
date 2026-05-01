@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { HOBBY_REACT_OVERLAY_IDS } from './featureIds';
+import { BASEMENT_REACT_OVERLAY_IDS, HOBBY_REACT_OVERLAY_IDS } from './featureIds';
 import { composePortfolioSections, type FeaturePluginDefinition } from './portfolioCompose';
 import type { FeatureRuntimeBinding } from './featureRuntimeBindings';
 import type { MiniGameId } from './featureIds';
@@ -18,7 +18,13 @@ function minimalDefs(): FeaturePluginDefinition[] {
     description: id,
     overlayParentId: 'hobbies' as const
   }));
-  return [...street, ...hobbyRooms];
+  const basementOverlays: FeaturePluginDefinition[] = BASEMENT_REACT_OVERLAY_IDS.map((id) => ({
+    id,
+    name: id,
+    description: id,
+    overlayParentId: 'basement' as const
+  }));
+  return [...street, ...hobbyRooms, ...basementOverlays];
 }
 
 function minimalBindings(): Record<MiniGameId, FeatureRuntimeBinding> {
@@ -61,6 +67,10 @@ describe('composePortfolioSections', () => {
     for (const id of HOBBY_REACT_OVERLAY_IDS) {
       const row = sections.find((s) => s.id === id);
       expect(row?.overlayParentId).toBe('hobbies');
+    }
+    for (const id of BASEMENT_REACT_OVERLAY_IDS) {
+      const row = sections.find((s) => s.id === id);
+      expect(row?.overlayParentId).toBe('basement');
     }
   });
 

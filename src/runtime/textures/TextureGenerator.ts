@@ -92,27 +92,7 @@ export class TextureGenerator {
     bg.fillStyle(hFill, 1);
     bg.lineStyle(4, hLine, 1);
 
-    if (id === 'games') {
-      // Laptop / Computer
-      bg.fillRect(20, 30, 80, 50);
-      bg.strokeRect(20, 30, 80, 50);
-      bg.beginPath();
-      bg.moveTo(10, 90);
-      bg.lineTo(110, 90);
-      bg.lineTo(100, 80);
-      bg.lineTo(20, 80);
-      bg.closePath();
-      bg.fillPath();
-      bg.strokePath();
-      bg.strokeRect(45, 80, 30, 5);
-      bg.lineStyle(2, hLine, 0.4);
-      for (let i = 0; i < 4; i++) {
-        bg.beginPath();
-        bg.moveTo(35, 40 + i * 8);
-        bg.lineTo(85, 40 + i * 8);
-        bg.strokePath();
-      }
-    } else if (id === 'art') {
+    if (id === 'art') {
       bg.beginPath();
       bg.moveTo(60, 10);
       bg.lineTo(20, 110);

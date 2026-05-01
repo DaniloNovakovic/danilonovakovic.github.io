@@ -46,4 +46,5 @@ To keep these secret but reachable, we'll use the **"Glitch Aesthetic"**:
 
 - **Visual Cues:** A specific object will slightly "jitter" or "flicker" between Sketch and Pixel modes.
 - **Auditory Cues:** A bit-crushed sound effect when near a secret entrance.
-- **The "Dev Menu" Hint:** If the player finds the "Dev Console" secret, they get a cryptic list of "Coordinates" to these games.
+- **The Basement Computer:** The Developer Basement contains an unnamed computer that opens the terminal-style Developer Console.
+- **The "Dev Menu" Hint:** The console can start with `whoami`, `skills`, and `help`, then later reveal cryptic coordinates, cheatsheets, tests, or modifiers for hidden games.

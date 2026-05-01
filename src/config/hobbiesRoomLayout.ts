@@ -38,10 +38,9 @@ export const HOBBIES_EXIT_X = 100;
  * `spriteMode`: `floor` = sprite origin bottom at floorY + yOffset; `mid` = origin center.
  */
 export const HOBBY_STATION_LAYOUT: readonly HobbyStationTypeObject[] = [
-  { kind: 'hobbyStation', id: 'games', x: 200, spriteMode: 'floor', yOffsetFromFloor: 0 },
-  { kind: 'hobbyStation', id: 'art', x: 340, spriteMode: 'floor', yOffsetFromFloor: 0 },
-  { kind: 'hobbyStation', id: 'music', x: 480, spriteMode: 'floor', yOffsetFromFloor: 0 },
-  { kind: 'hobbyStation', id: 'fitness', x: 620, spriteMode: 'floor', yOffsetFromFloor: 0 },
+  { kind: 'hobbyStation', id: 'art', x: 280, spriteMode: 'floor', yOffsetFromFloor: 0 },
+  { kind: 'hobbyStation', id: 'music', x: 440, spriteMode: 'floor', yOffsetFromFloor: 0 },
+  { kind: 'hobbyStation', id: 'fitness', x: 600, spriteMode: 'floor', yOffsetFromFloor: 0 },
   { kind: 'hobbyStation', id: 'dancing', x: 760, spriteMode: 'floor', yOffsetFromFloor: 0 }
 ];
 

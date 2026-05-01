@@ -3,6 +3,7 @@ import type { ContextPluginDefinition } from '../../core/kernel/types';
 
 interface BasementPluginOptions {
   onClose: () => void;
+  onInteract: (id: string) => void;
   getResumePosition: () => { x: number; y: number } | undefined;
   loadScene: () => Promise<unknown>;
 }
@@ -14,6 +15,7 @@ export function createBasementPlugin(options: BasementPluginOptions): ContextPlu
     loadScene: options.loadScene,
     getStartData: () => ({
       onClose: options.onClose,
+      onInteract: options.onInteract,
       isPaused: false,
       resumePosition: options.getResumePosition()
     })

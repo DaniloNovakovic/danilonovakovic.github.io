@@ -18,6 +18,7 @@ import { readPlayerSceneStep } from './input/scenePlayerInput';
 const BASEMENT_FLOOR_Y = 500;
 const BASEMENT_PLAYER_START = { x: 135, y: BASEMENT_FLOOR_Y - 50 } as const;
 const BASEMENT_EXIT = { x: 95, y: BASEMENT_FLOOR_Y - 75, radius: 70 } as const;
+const BASEMENT_COMPUTER = { x: 400, y: BASEMENT_FLOOR_Y - 105, radius: 82 } as const;
 const GLASSES_PICKUP = { x: 610, y: BASEMENT_FLOOR_Y - 95, radius: 70 } as const;
 
 export class BasementScene extends Phaser.Scene {
@@ -33,6 +34,7 @@ export class BasementScene extends Phaser.Scene {
 
   private controller!: PlayerController;
   private onClose?: () => void;
+  private onInteract?: (id: string) => void;
   private isPaused: boolean = false;
   private resumePosition?: { x: number; y: number };
   private readonly inputFrame = createInputCommandFrame();
@@ -44,10 +46,12 @@ export class BasementScene extends Phaser.Scene {
 
   init(data: {
     onClose: () => void;
+    onInteract?: (id: string) => void;
     isPaused?: boolean;
     resumePosition?: { x: number; y: number };
   }) {
     this.onClose = data.onClose;
+    this.onInteract = data.onInteract;
     this.isPaused = data.isPaused ?? false;
     this.resumePosition = data.resumePosition;
     // Scene instances are reused; force texture sync on each enter.
@@ -162,6 +166,21 @@ export class BasementScene extends Phaser.Scene {
     this.player.setFlipX(step.facingLeft);
     this.player.setAngle(step.moving ? Math.sin(this.time.now / 100) * 5 : 0);
 
+    const nearComputer =
+      Phaser.Math.Distance.Between(
+        this.player.x,
+        this.player.y,
+        BASEMENT_COMPUTER.x,
+        BASEMENT_COMPUTER.y
+      ) < BASEMENT_COMPUTER.radius;
+    if (nearComputer) {
+      this.interactPrompt.setPosition(BASEMENT_COMPUTER.x, BASEMENT_COMPUTER.y - 92).setVisible(true);
+      if (step.interactRequested) {
+        this.onInteract?.('games');
+      }
+      return;
+    }
+
     const nearGlasses =
       !isItemOwned('glasses') &&
       Phaser.Math.Distance.Between(this.player.x, this.player.y, GLASSES_PICKUP.x, GLASSES_PICKUP.y) <
@@ -216,6 +235,8 @@ export class BasementScene extends Phaser.Scene {
       g.strokePath();
     }
 
+    this.buildComputer(g);
+
     createUiText(this, GAME_DESIGN_WIDTH / 2, 34, 'DEVELOPER BASEMENT', {
       fontSize: '24px',
       color: '#66ff99',
@@ -248,6 +269,57 @@ export class BasementScene extends Phaser.Scene {
       color: '#66ff99',
       fontStyle: 'bold'
     }).setOrigin(0.5);
+  }
+
+  private buildComputer(g: Phaser.GameObjects.Graphics): void {
+    const { x, y } = BASEMENT_COMPUTER;
+
+    g.fillStyle(0x101010, 1);
+    g.fillRect(x - 88, y + 46, 176, 16);
+    g.lineStyle(3, 0xfbfbf9, 0.78);
+    g.strokeRect(x - 88, y + 46, 176, 16);
+
+    g.fillStyle(0x0b0b0b, 1);
+    g.fillRect(x - 54, y - 44, 108, 72);
+    g.lineStyle(4, 0x66ff99, 0.92);
+    g.strokeRect(x - 54, y - 44, 108, 72);
+
+    g.fillStyle(0x66ff99, 0.1);
+    g.fillRect(x - 47, y - 37, 94, 58);
+    g.lineStyle(2, 0x66ff99, 0.55);
+    for (let i = 0; i < 5; i += 1) {
+      const lineY = y - 25 + i * 10;
+      g.beginPath();
+      g.moveTo(x - 35, lineY);
+      g.lineTo(x + (i % 2 === 0 ? 30 : 18), lineY);
+      g.strokePath();
+    }
+
+    g.lineStyle(3, 0xfbfbf9, 0.7);
+    g.beginPath();
+    g.moveTo(x, y + 28);
+    g.lineTo(x, y + 46);
+    g.moveTo(x - 30, y + 46);
+    g.lineTo(x + 30, y + 46);
+    g.strokePath();
+
+    g.fillStyle(0xfbfbf9, 0.82);
+    g.fillRect(x - 52, y + 68, 104, 14);
+    g.lineStyle(2, 0x1a1a1a, 0.85);
+    g.strokeRect(x - 52, y + 68, 104, 14);
+    for (let keyX = x - 43; keyX <= x + 40; keyX += 14) {
+      g.beginPath();
+      g.moveTo(keyX, y + 70);
+      g.lineTo(keyX + 7, y + 70);
+      g.strokePath();
+    }
+
+    g.lineStyle(2, 0x66ff99, 0.3);
+    g.beginPath();
+    g.moveTo(x + 58, y + 28);
+    g.lineTo(x + 82, y + 50);
+    g.lineTo(x + 72, y + 86);
+    g.strokePath();
   }
 
   private refreshGlassesVisibility(): void {

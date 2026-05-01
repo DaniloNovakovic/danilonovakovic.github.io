@@ -44,11 +44,11 @@ describe('runtime mode helpers', () => {
   });
 
   it('closes overlays to a parent mode when one is provided', () => {
-    const mode = closeRuntimeMode({ kind: 'reactOverlay', miniGameId: 'games' }, () => 'hobbies');
+    const mode = closeRuntimeMode({ kind: 'reactOverlay', miniGameId: 'games' }, () => 'basement');
 
     expect(mode).toEqual({
       kind: 'phaserScene',
-      miniGameId: 'hobbies'
+      miniGameId: 'basement'
     });
   });
 

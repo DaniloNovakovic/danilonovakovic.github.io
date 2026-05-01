@@ -23,8 +23,8 @@
 
 ### Phase 1: The Empty Room
 
-- Only the **PC** is visible.
-- Interacting with the PC allows the player to "Code" a new object into the room (e.g., the Guitar).
+- Personal hobby props are visible as tactile room objects rather than portfolio menu items.
+- The room focuses on lifestyle/play activities; developer-workstation content lives in the basement.
 
 ### Phase 2: The Populated Room
 
@@ -42,5 +42,6 @@
 ## The Basement: The "Dev" Room
 
 - **Visuals:** Matrix-style falling code or raw terminal aesthetic.
-- **Role:** Central hub for "Secrets." Once an item is found in the world, it appears here.
-- **The "Cheat" Terminal:** A terminal where the user can type commands (e.g., `gravity 0.5`) to change game physics.
+- **Role:** Central hub for "Secrets" and developer identity. Once an item is found in the world, it can appear here.
+- **The Computer:** An unnamed workstation with a simple `[E] Interact` prompt. It opens the terminal-style Developer Console.
+- **The "Cheat" Terminal:** The Developer Console can start with commands like `whoami`, `skills`, and `help`, then later grow into cheatsheets, tests, and world modifiers such as `gravity 0.5`.

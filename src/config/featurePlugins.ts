@@ -43,9 +43,9 @@ export const FEATURE_PLUGIN_DEFINITIONS: FeaturePluginDefinition[] = [
   },
   {
     id: 'games',
-    name: 'Game Development',
-    description: 'I love building games and interactive experiences.',
-    overlayParentId: 'hobbies'
+    name: 'Developer Console',
+    description: 'A basement terminal for profile commands, skills, notes and experiments.',
+    overlayParentId: 'basement'
   },
   {
     id: 'art',
