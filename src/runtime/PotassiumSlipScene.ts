@@ -150,7 +150,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
 
       // Move player towards pointer with dead-zone to prevent jitter
       const pointer = this.input.activePointer;
-      if (pointer.isDown || pointer.active) {
+      if (pointer.isDown) {
         const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, pointer.x, pointer.y);
         if (dist < 8) {
           this.player.setVelocity(0, 0);
@@ -239,7 +239,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
       enemy = this.enemies.create(x, -50, 'enemy_bug');
       enemy.setVelocityY(Phaser.Math.Between(300, 500));
       // Erratic movement
-      this.time.addEvent({
+      const moveTimer = this.time.addEvent({
         delay: 500,
         callback: () => {
           if (enemy.active) {
@@ -248,6 +248,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
         },
         loop: true
       });
+      enemy.once(Phaser.GameObjects.Events.DESTROY, () => moveTimer.destroy());
     }
 
     enemy.body.setAllowGravity(false);
@@ -351,12 +352,12 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.isPaused = paused;
     if (paused) {
       this.physics.world.pause();
-      if (this.spawnTimer) this.spawnTimer.paused = true;
-      if (this.ripenessTimer) this.ripenessTimer.paused = true;
+      this.time.paused = true;
+      this.tweens.pauseAll();
     } else {
       this.physics.world.resume();
-      if (this.spawnTimer) this.spawnTimer.paused = false;
-      if (this.ripenessTimer) this.ripenessTimer.paused = false;
+      this.time.paused = false;
+      this.tweens.resumeAll();
     }
   }
 
