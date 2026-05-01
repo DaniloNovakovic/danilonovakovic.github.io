@@ -2,12 +2,12 @@
 
 These are "distilled" versions of classic genres, hidden throughout the world. Each captures the "fun core" of the reference game without requiring full-scale development.
 
-## 1. The "Potassium" Platformer (Mario Homage)
+## 1. Potassium Slip (Slippery Stakeholder Homage)
 
-- **The Vibe:** High-speed 2D platforming.
-- **The Secret:** Find a **Banana** item in the "Sketch" world. Instead of eating it, the player "enters" the banana (it becomes a door).
-- **The Twist:** Everything is banana-themed. The blocks, the clouds, and even the "Goal Pole" which is just a giant banana.
-- **Fun Core:** Tight jumping, a single power-up (e.g., "Banana Peel" dash), and a clear "Goal" at the end.
+- **The Vibe:** Top-down physics-based survival.
+- **The Secret:** Find a **Banana** item in the "Sketch" world while wearing the **Glasses**. Instead of eating it, the player "enters" the slip-zone.
+- **The Twist:** Everything is banana-themed and "slippery." You control a banana peel and must "slip" incoming corporate stakeholders and bugs.
+- **Fun Core:** High-fidelity SVG sprites, slippery momentum-based dragging, and a "Ripeness" mechanic that cycles the physics from high-grip to ultra-chaotic.
 
 ## 2. Muay Thai Mayhem (Street Fighter Homage)
 

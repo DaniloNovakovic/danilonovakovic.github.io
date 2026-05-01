@@ -1,13 +1,23 @@
-import { useCallback, Suspense, useState } from 'react';
+import { lazy, useCallback, Suspense, useState } from 'react';
+import type { ComponentType, LazyExoticComponent } from 'react';
 import { BookOpen, Backpack } from 'lucide-react';
 import Game from './Game';
 import { GameState } from '../runtime/gameState';
+import { getReactOverlayBinding } from '../config/featureRuntimeBindings';
 import { getMiniGameById } from '../runtime/miniGameRegistry';
 import { MiniGameType } from '../runtime/types';
 import { TEXTS } from '../config/content';
-import { isMiniGameId } from '../config/featureIds';
+import { MINI_GAME_IDS, isMiniGameId, type MiniGameId } from '../config/featureIds';
+import type { MiniGameOverlayProps } from '../runtime/types';
 import { bridgeActions, useBridgeState } from '../shared/bridge/store';
 import { OverlayCard } from './overlays/OverlayCard';
+
+const REACT_OVERLAY_COMPONENTS = Object.fromEntries(
+  MINI_GAME_IDS.flatMap((id) => {
+    const binding = getReactOverlayBinding(id);
+    return binding ? [[id, lazy(binding.loadComponent)]] : [];
+  })
+) as Partial<Record<MiniGameId, LazyExoticComponent<ComponentType<MiniGameOverlayProps>>>>;
 
 interface InteractiveAppProps {
   onSwitchToStatic: () => void;
@@ -27,7 +37,10 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
   }, []);
 
   const activeMiniGame = bridge.activeMiniGameId ? getMiniGameById(bridge.activeMiniGameId) : undefined;
-  const isPaused = bridge.isPaused;
+  const ActiveOverlayComponent = bridge.activeMiniGameId
+    ? REACT_OVERLAY_COMPONENTS[bridge.activeMiniGameId]
+    : undefined;
+  const isGameInputBlocked = bridge.isPaused || bridge.loadingMiniGameId !== null;
 
   return (
     <div className="relative flex min-h-[100dvh] min-h-dvh w-full flex-col overflow-x-hidden bg-[#f4f1ea]">
@@ -88,7 +101,7 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
               <div className="pointer-events-none absolute inset-0 z-[5] bg-[url('https://www.transparenttextures.com/patterns/felt.png')] opacity-[0.03]" />
               <Game
                 onInteract={handleInteract}
-                isPaused={isPaused}
+                isPaused={isGameInputBlocked}
                 activeMiniGameId={bridge.activeMiniGameId}
                 onClose={closeOverlay}
               />
@@ -111,7 +124,8 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
       {/* Interactive Overlay */}
       {bridge.status === GameState.IN_MINIGAME &&
         activeMiniGame &&
-        activeMiniGame.type === MiniGameType.REACT_OVERLAY && (
+        activeMiniGame.type === MiniGameType.REACT_OVERLAY &&
+        ActiveOverlayComponent && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-2 backdrop-blur-sm animate-in fade-in duration-300 sm:items-center sm:p-4">
           <OverlayCard
             title={activeMiniGame.name}
@@ -123,9 +137,19 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
                 <p className="text-sm font-bold text-[#1a1a1a] opacity-60">{TEXTS.common.loading}</p>
               }
             >
-              <activeMiniGame.Component />
+              <ActiveOverlayComponent />
             </Suspense>
           </OverlayCard>
+        </div>
+      )}
+
+      {bridge.loadingMiniGameId && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+          <div className="rounded border-4 border-[#1a1a1a] bg-[#fbfbf9] px-5 py-4 text-center shadow-[8px_8px_0px_0px_rgba(26,26,26,1)]">
+            <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#1a1a1a]">
+              Loading scene
+            </p>
+          </div>
         </div>
       )}
 

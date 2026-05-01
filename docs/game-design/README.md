@@ -6,7 +6,8 @@ This directory contains the brainstorming, level design, and technical mechanics
 
 - **[Brainstorming](./BRAINSTORMING.md)**: The core vision ("The Artist's Journey") and the "Lens of Perspective" concept.
 - **[Level Design & Progression](./LEVELS.md)**: Detailed zone breakdowns and how the world evolves as the player explores.
-- **[Secret Mini-Games & Homages](./SECRETS_AND_MINIGAMES.md)**: Deep dive into the hidden genre-bending mini-games (Mario, SF, Rogue-lite, etc.).
+- **[Secret Mini-Games & Homages](./SECRETS_AND_MINIGAMES.md)**: Deep dive into the hidden genre-bending mini-games (Arcade, SF, Rogue-lite, etc.).
+- **[Potassium Slip Manual](./POTASSIUM_SLIP.md)**: Official guide for the first secret mini-game.
 - **[Core Gameplay Mechanics](./MECHANICS.md)**: Technical implementation ideas for Style Phasing, secret triggers, and movement upgrades.
 
 ## Core Pillars

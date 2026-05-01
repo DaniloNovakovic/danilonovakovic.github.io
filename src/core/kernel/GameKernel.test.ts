@@ -8,6 +8,7 @@ import { bridgeActions, bridgeStore } from '../../shared/bridge/store';
 import { PHASER_SCENE_KEYS } from '../../config/featureIds';
 
 interface FakeAdapter extends SceneRuntimeAdapter {
+  registerScene: ReturnType<typeof vi.fn<(k: string, scene: unknown) => void>>;
   startScene: ReturnType<typeof vi.fn<(k: string) => void>>;
   stopScene: ReturnType<typeof vi.fn<(k: string) => void>>;
   setPauseOnActiveScenes: ReturnType<typeof vi.fn<(paused: boolean) => void>>;
@@ -16,11 +17,14 @@ interface FakeAdapter extends SceneRuntimeAdapter {
 
 function makeFakeAdapter(): FakeAdapter {
   const active = new Set<string>();
+  const known = new Set<string>([PHASER_SCENE_KEYS.main, PHASER_SCENE_KEYS.hobbies]);
   return {
+    hasScene: (k) => known.has(k),
+    registerScene: vi.fn((k: string) => { known.add(k); }),
     isSceneActive: (k) => active.has(k),
     startScene: vi.fn((k: string) => { active.add(k); }),
     stopScene: vi.fn((k: string) => { active.delete(k); }),
-    listKnownSceneKeys: () => [PHASER_SCENE_KEYS.main, PHASER_SCENE_KEYS.hobbies],
+    listKnownSceneKeys: () => [...known],
     setPauseOnActiveScenes: vi.fn(),
     captureResume: () => null,
     getActiveScenes: () => [...active]
@@ -107,19 +111,21 @@ describe('GameKernel', () => {
     expect(last.paused).toBe(true);
   });
 
-  it('emits SceneTransitionRequested when returning to overworld', () => {
+  it('emits SceneTransitionRequested when returning to overworld', async () => {
     bridgeActions.requestInteraction('profile');
     events.length = 0;
     bridgeActions.closeActiveOverlay();
+    await Promise.resolve();
     const trans = events.find((e) => e.type === 'SceneTransitionRequested');
     expect(trans).toBeDefined();
     expect((trans as Extract<KernelEvent, { type: 'SceneTransitionRequested' }>).targetContext).toBeNull();
   });
 
-  it('enters a Phaser scene when a PHASER_SCENE mini-game becomes active', () => {
+  it('enters a Phaser scene when a PHASER_SCENE mini-game becomes active', async () => {
     events.length = 0;
 
     bridgeActions.requestInteraction('hobbies');
+    await Promise.resolve();
 
     const trans = events.find((e) => e.type === 'SceneTransitionRequested');
     expect(trans).toBeDefined();

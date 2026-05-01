@@ -1,14 +1,9 @@
 import { MINI_GAME_IDS, type MiniGameId } from './featureIds';
+import { getRuntimeBinding } from './featureRuntimeBindings';
 
-/**
- * Keep this list in sync with Phaser scene plugins.
- * It intentionally lives in config to avoid runtime import cycles.
- */
-export const PHASER_SCENE_MINIGAME_IDS: readonly MiniGameId[] = [
-  'hobbies',
-  'basement',
-  'potassium'
-] as const;
+export const PHASER_SCENE_MINIGAME_IDS: readonly MiniGameId[] = MINI_GAME_IDS.filter(
+  (id) => getRuntimeBinding(id).kind === 'phaserScene'
+);
 
 export function isPhaserSceneMiniGameId(id: MiniGameId): boolean {
   return (PHASER_SCENE_MINIGAME_IDS as readonly string[]).includes(id);

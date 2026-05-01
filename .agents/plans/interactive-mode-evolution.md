@@ -48,19 +48,19 @@ This document serves as a long-term roadmap for implementing the "Artist's Journ
 
 ---
 
-## Phase 2: Secret 1 - The Potassium Platformer (Mario Homage)
+## Phase 2: Secret 1 - Potassium Slip (Slippery Stakeholder Homage)
 
-**Goal:** Implement the first secret mini-game hidden in the Overworld.
+**Goal:** Implement the first secret mini-game hidden in the Overworld—a mobile-friendly top-down physics game.
 
-- **2.1: The Banana Trigger**
-  - Place a `Banana` object in the Overworld.
-  - Add an interaction that transitions the active scene to the `PotassiumPlatformerScene`.
-- **2.2: Platformer Mechanics**
-  - Create a new Phaser Scene (`PotassiumPlatformerScene.ts`).
-  - Implement tight jump physics and horizontal momentum.
-  - Add simple "Banana Blocks" and a "Goal Pole" logic.
-- **2.3: Verification**
-  - Ensure the user can enter the mini-game, complete the stage, and return to the Overworld seamlessly.
+- [x] **2.1: The Banana Trigger**
+  - Added interaction to the `Banana` object in the Overworld to transition to the mini-game.
+- [x] **2.2: Potassium Slip Mechanics**
+  - Created a new top-down Phaser Scene (`PotassiumSlipScene.ts`).
+  - Implemented slippery momentum-based movement using `moveToObject`.
+  - Added a "Ripeness" cycle (Green/Yellow/Brown) that alters physics friction/speed.
+  - Implemented procedural SVG-based enemies (Deadlines, Scope Creepers, Bugs).
+- [x] **2.3: Verification**
+  - Verified game loop, difficulty scaling, and mobile-friendly tap-to-start logic.
 
 ---
 

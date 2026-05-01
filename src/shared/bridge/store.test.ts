@@ -34,6 +34,17 @@ describe('bridgeStore', () => {
       bridgeActions.requestInteraction('hobbies');
       expect(bridgeStore.getState().isPaused).toBe(false);
     });
+
+    it('pauses temporarily while a Phaser scene is loading', () => {
+      bridgeActions.requestInteraction('hobbies');
+      bridgeActions.setSceneLoading('hobbies');
+      expect(bridgeStore.getState().isPaused).toBe(true);
+      expect(bridgeStore.getState().loadingMiniGameId).toBe('hobbies');
+
+      bridgeActions.setSceneLoading(null);
+      expect(bridgeStore.getState().isPaused).toBe(false);
+      expect(bridgeStore.getState().loadingMiniGameId).toBeNull();
+    });
   });
 
   describe('overlay transitions', () => {

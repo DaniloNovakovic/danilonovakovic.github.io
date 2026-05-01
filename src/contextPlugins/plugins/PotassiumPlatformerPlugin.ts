@@ -5,6 +5,7 @@ interface PotassiumPlatformerPluginOptions {
   onClose: () => void;
   forgetResumePosition: () => void;
   getResumePosition: () => { x: number; y: number } | undefined;
+  loadScene: () => Promise<unknown>;
 }
 
 export function createPotassiumPlatformerPlugin(
@@ -13,6 +14,7 @@ export function createPotassiumPlatformerPlugin(
   return {
     id: PHASER_SCENE_KEYS.potassium,
     sceneKey: PHASER_SCENE_KEYS.potassium,
+    loadScene: options.loadScene,
     getStartData: () => {
       options.forgetResumePosition();
       return {

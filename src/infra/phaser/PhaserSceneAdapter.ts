@@ -19,6 +19,19 @@ export class PhaserSceneAdapter implements SceneRuntimeAdapter {
     this.options = options;
   }
 
+  hasScene(sceneKey: string): boolean {
+    const game = this.options.getGame();
+    if (!game) return false;
+    return game.scene.getScenes(false).some((scene) => scene.scene.key === sceneKey);
+  }
+
+  registerScene(sceneKey: string, scene: unknown): void {
+    const game = this.options.getGame();
+    if (!game) return;
+    if (this.hasScene(sceneKey)) return;
+    game.scene.add(sceneKey, scene as typeof Phaser.Scene, false);
+  }
+
   isSceneActive(sceneKey: string): boolean {
     const game = this.options.getGame();
     if (!game) return false;

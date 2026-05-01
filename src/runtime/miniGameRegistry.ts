@@ -44,8 +44,8 @@ function assertPortfolioRegistryInvariants(sections: readonly MiniGamePlugin[]):
         `Portfolio registry: hobby overlay "${id}" must have overlayParentId "hobbies"`
       );
     }
-    if (!row.Component) {
-      throw new Error(`Portfolio registry: hobby overlay "${id}" must define Component`);
+    if (!row.loadComponent) {
+      throw new Error(`Portfolio registry: hobby overlay "${id}" must define loadComponent`);
     }
   }
 

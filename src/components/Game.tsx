@@ -1,10 +1,9 @@
 import { useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import * as Phaser from 'phaser';
 import { isMiniGameId, PHASER_SCENE_KEYS } from '../config/featureIds';
+import { getPhaserSceneBinding } from '../config/featureRuntimeBindings';
 import { getGameConfig } from '../runtime/config';
 import { OverworldScene } from '../runtime/OverworldScene';
-import { getAllMiniGames } from '../runtime/miniGameRegistry';
-import { MiniGameType } from '../runtime/types';
 import { forgetResumePosition, peekResumePosition } from '../runtime/sceneResumeStore';
 import { bridgeActions } from '../shared/bridge/store';
 import { SceneManager } from '../core/kernel/SceneManager';
@@ -98,15 +97,14 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
     // does not close over `isPaused` — avoids remounting Phaser when pause toggles.
     game.scene.add(PHASER_SCENE_KEYS.main, OverworldScene, false);
 
-    const phaserScenes = getAllMiniGames().filter((g) => g.type === MiniGameType.PHASER_SCENE);
-    phaserScenes.forEach((s) => {
-      game.scene.add(s.id, s.Scene, false);
-    });
-
     const adapter = new PhaserSceneAdapter({
       getGame: () => gameRef.current
     });
-    const sceneManager = new SceneManager(adapter);
+    const sceneManager = new SceneManager(adapter, {
+      onSceneLoadingChange: (contextId) => {
+        bridgeActions.setSceneLoading(contextId && isMiniGameId(contextId) ? contextId : null);
+      }
+    });
     sceneManager.registerContext(
       createStreetPlugin({
         onInteract: stableOnInteract,
@@ -118,20 +116,23 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
       createHobbiesPlugin({
         onClose: stableOnClose,
         onInteract: stableOnInteract,
-        getResumePosition: () => peekResumePosition(PHASER_SCENE_KEYS.hobbies)
+        getResumePosition: () => peekResumePosition(PHASER_SCENE_KEYS.hobbies),
+        loadScene: () => getPhaserSceneBinding(PHASER_SCENE_KEYS.hobbies)?.loadScene() ?? Promise.reject()
       })
     );
     sceneManager.registerContext(
       createBasementPlugin({
         onClose: stableOnClose,
-        getResumePosition: () => peekResumePosition(PHASER_SCENE_KEYS.basement)
+        getResumePosition: () => peekResumePosition(PHASER_SCENE_KEYS.basement),
+        loadScene: () => getPhaserSceneBinding(PHASER_SCENE_KEYS.basement)?.loadScene() ?? Promise.reject()
       })
     );
     sceneManager.registerContext(
       createPotassiumPlatformerPlugin({
         onClose: stableOnClose,
         forgetResumePosition: () => forgetResumePosition(PHASER_SCENE_KEYS.potassium),
-        getResumePosition: () => peekResumePosition(PHASER_SCENE_KEYS.potassium)
+        getResumePosition: () => peekResumePosition(PHASER_SCENE_KEYS.potassium),
+        loadScene: () => getPhaserSceneBinding(PHASER_SCENE_KEYS.potassium)?.loadScene() ?? Promise.reject()
       })
     );
     const kernel = new GameKernel(sceneManager);

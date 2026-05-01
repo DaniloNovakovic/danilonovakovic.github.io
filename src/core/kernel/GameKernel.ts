@@ -9,6 +9,7 @@ export class GameKernel {
   private previousState?: BridgeState;
   private readonly sceneManager: SceneManager;
   private readonly eventBus: KernelEventBus;
+  private transitionVersion = 0;
 
   constructor(sceneManager: SceneManager, eventBus: KernelEventBus = new KernelEventBus()) {
     this.sceneManager = sceneManager;
@@ -47,20 +48,23 @@ export class GameKernel {
       return;
     }
 
-    this.syncSceneTransition(state);
+    this.transitionVersion += 1;
+    const transitionVersion = this.transitionVersion;
+    void this.syncSceneTransition(state, transitionVersion).catch(() => undefined);
     this.previousState = state;
   }
 
-  private syncSceneTransition(state: BridgeState): void {
+  private async syncSceneTransition(state: BridgeState, transitionVersion: number): Promise<void> {
     if (state.mode.kind === 'exploring') {
       this.eventBus.emit({ type: 'SceneTransitionRequested', targetContext: null });
-      this.sceneManager.exitTo(PHASER_SCENE_KEYS.main);
+      await this.sceneManager.exitTo(PHASER_SCENE_KEYS.main);
       return;
     }
 
     if (state.mode.kind === 'phaserScene') {
       this.eventBus.emit({ type: 'SceneTransitionRequested', targetContext: state.mode.miniGameId });
-      this.sceneManager.enter(state.mode.miniGameId);
+      await this.sceneManager.enter(state.mode.miniGameId);
+      if (transitionVersion !== this.transitionVersion) return;
     }
   }
 

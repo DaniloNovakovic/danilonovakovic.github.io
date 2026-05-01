@@ -41,6 +41,7 @@ export interface BridgeState {
   mode: RuntimeMode;
   status: GameStateValue;
   activeMiniGameId: MiniGameId | null;
+  loadingMiniGameId: MiniGameId | null;
   isPaused: boolean;
   inventory: BridgeInventoryState;
   equipment: BridgeEquipmentState;
@@ -69,6 +70,7 @@ function arraysEqual<T>(a: readonly T[], b: readonly T[]): boolean {
 let state: BridgeState = {
   mode: EXPLORING_MODE,
   ...deriveGameState(EXPLORING_MODE),
+  loadingMiniGameId: null,
   isPaused: false,
   inventory: {
     ownedItemIds: []
@@ -103,12 +105,13 @@ function setState(updater: (current: BridgeState) => BridgeState): void {
       ...next.progress,
       hasGlasses: hasItemOwned(next.inventory, 'glasses')
     },
-    isPaused: derivePause(next.mode)
+    isPaused: derivePause(next.mode) || next.loadingMiniGameId !== null
   };
   const unchanged =
     modesEqual(previous.mode, candidate.mode) &&
     previous.status === candidate.status &&
     previous.activeMiniGameId === candidate.activeMiniGameId &&
+    previous.loadingMiniGameId === candidate.loadingMiniGameId &&
     previous.isPaused === candidate.isPaused &&
     arraysEqual(previous.inventory.ownedItemIds, candidate.inventory.ownedItemIds) &&
     arraysEqual(previous.equipment.equippedItemIds, candidate.equipment.equippedItemIds) &&
@@ -137,13 +140,15 @@ export const bridgeActions = {
   requestInteraction(area: MiniGameId): void {
     setState((current) => ({
       ...current,
-      mode: createRuntimeModeForInteraction(area)
+      mode: createRuntimeModeForInteraction(area),
+      loadingMiniGameId: null
     }));
   },
   closeActiveMode(resolveParentId?: (miniGameId: MiniGameId) => MiniGameId | null | undefined): void {
     setState((current) => ({
       ...current,
-      mode: closeRuntimeMode(current.mode, resolveParentId)
+      mode: closeRuntimeMode(current.mode, resolveParentId),
+      loadingMiniGameId: null
     }));
   },
   /** Backward-compatible alias for callers that always return to the overworld. */
@@ -227,6 +232,12 @@ export const bridgeActions = {
         hasGlasses: false,
         discoveredSecretIds: []
       }
+    }));
+  },
+  setSceneLoading(miniGameId: MiniGameId | null): void {
+    setState((current) => ({
+      ...current,
+      loadingMiniGameId: miniGameId
     }));
   },
   setTouchDirectional(direction: 'left' | 'right', intensity: number): void {
