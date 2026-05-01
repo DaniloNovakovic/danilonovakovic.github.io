@@ -3,6 +3,7 @@ import { SceneManager, type SceneRuntimeAdapter } from './SceneManager';
 import type { ContextPluginDefinition } from './types';
 
 interface FakeAdapter extends SceneRuntimeAdapter {
+  registerScene: ReturnType<typeof vi.fn<(sceneKey: string, scene: unknown) => void>>;
   startScene: ReturnType<typeof vi.fn<(sceneKey: string) => void>>;
   stopScene: ReturnType<typeof vi.fn<(sceneKey: string) => void>>;
   captureResume: ReturnType<typeof vi.fn<(sceneKey: string) => { x: number; y: number } | null>>;
@@ -11,7 +12,12 @@ interface FakeAdapter extends SceneRuntimeAdapter {
 
 function makeFakeAdapter(initialScenes: readonly string[] = []): FakeAdapter {
   const active = new Set(initialScenes);
+  const known = new Set(['main', 'hobbies', 'lab']);
   return {
+    hasScene: (sceneKey) => known.has(sceneKey),
+    registerScene: vi.fn((sceneKey: string) => {
+      known.add(sceneKey);
+    }),
     isSceneActive: (sceneKey) => active.has(sceneKey),
     startScene: vi.fn((sceneKey: string) => {
       active.add(sceneKey);
@@ -19,7 +25,7 @@ function makeFakeAdapter(initialScenes: readonly string[] = []): FakeAdapter {
     stopScene: vi.fn((sceneKey: string) => {
       active.delete(sceneKey);
     }),
-    listKnownSceneKeys: () => ['main', 'hobbies', 'lab'],
+    listKnownSceneKeys: () => [...known],
     setPauseOnActiveScenes: vi.fn(),
     captureResume: vi.fn(() => ({ x: 1, y: 2 })),
     activeScenes: () => [...active]
@@ -35,13 +41,13 @@ function context(id: string, sceneKey = id): ContextPluginDefinition {
 }
 
 describe('SceneManager', () => {
-  it('stops the active root scene before entering another context', () => {
+  it('stops the active root scene before entering another context', async () => {
     const adapter = makeFakeAdapter(['main']);
     const manager = new SceneManager(adapter);
     manager.registerContext(context('main'));
     manager.registerContext(context('hobbies'));
 
-    manager.enter('hobbies');
+    await manager.enter('hobbies');
 
     expect(adapter.captureResume).toHaveBeenCalledWith('main');
     expect(adapter.stopScene).toHaveBeenCalledWith('main');
@@ -49,7 +55,7 @@ describe('SceneManager', () => {
     expect(adapter.activeScenes()).toEqual(['hobbies']);
   });
 
-  it('stops an active non-root context before entering another context', () => {
+  it('stops an active non-root context before entering another context', async () => {
     const adapter = makeFakeAdapter(['hobbies']);
     const manager = new SceneManager(adapter);
     const hobbiesExit = vi.fn();
@@ -57,7 +63,7 @@ describe('SceneManager', () => {
     manager.registerContext({ ...context('hobbies'), onExit: hobbiesExit });
     manager.registerContext(context('lab'));
 
-    manager.enter('lab');
+    await manager.enter('lab');
 
     expect(adapter.captureResume).toHaveBeenCalledWith('hobbies');
     expect(adapter.stopScene).toHaveBeenCalledWith('hobbies');
@@ -66,14 +72,14 @@ describe('SceneManager', () => {
     expect(adapter.activeScenes()).toEqual(['lab']);
   });
 
-  it('passes captured resume snapshots to onExit when exiting to a target context', () => {
+  it('passes captured resume snapshots to onExit when exiting to a target context', async () => {
     const adapter = makeFakeAdapter(['hobbies']);
     const manager = new SceneManager(adapter);
     const hobbiesExit = vi.fn();
     manager.registerContext(context('main'));
     manager.registerContext({ ...context('hobbies'), onExit: hobbiesExit });
 
-    manager.exitTo('main');
+    await manager.exitTo('main');
 
     expect(adapter.captureResume).toHaveBeenCalledWith('hobbies');
     expect(adapter.stopScene).toHaveBeenCalledWith('hobbies');
@@ -81,15 +87,49 @@ describe('SceneManager', () => {
     expect(adapter.startScene).toHaveBeenCalledWith('main', { id: 'main' });
   });
 
-  it('does not restart a context that is already active', () => {
+  it('starts the target context from a cold boot with plugin start data', async () => {
+    const adapter = makeFakeAdapter();
+    const manager = new SceneManager(adapter);
+    manager.registerContext(context('main'));
+
+    await manager.exitTo('main');
+
+    expect(adapter.stopScene).not.toHaveBeenCalled();
+    expect(adapter.startScene).toHaveBeenCalledWith('main', { id: 'main' });
+    expect(adapter.activeScenes()).toEqual(['main']);
+  });
+
+  it('does not restart a context that is already active', async () => {
     const adapter = makeFakeAdapter(['hobbies']);
     const manager = new SceneManager(adapter);
     manager.registerContext(context('main'));
     manager.registerContext(context('hobbies'));
 
-    manager.enter('hobbies');
+    await manager.enter('hobbies');
 
     expect(adapter.stopScene).not.toHaveBeenCalled();
     expect(adapter.startScene).not.toHaveBeenCalled();
+  });
+
+  it('loads and registers a lazy context before starting it', async () => {
+    const adapter = makeFakeAdapter(['main']);
+    const loadingEvents: Array<string | null> = [];
+    const manager = new SceneManager(adapter, {
+      onSceneLoadingChange: (contextId) => loadingEvents.push(contextId)
+    });
+    const scene = class LazyScene {};
+    const loadScene = vi.fn(async () => scene);
+    manager.registerContext(context('main'));
+    manager.registerContext({
+      ...context('lazy-room'),
+      loadScene
+    });
+
+    await manager.enter('lazy-room');
+
+    expect(loadScene).toHaveBeenCalledTimes(1);
+    expect(adapter.registerScene).toHaveBeenCalledWith('lazy-room', scene);
+    expect(adapter.startScene).toHaveBeenCalledWith('lazy-room', { id: 'lazy-room' });
+    expect(loadingEvents).toEqual(['lazy-room', null]);
   });
 });

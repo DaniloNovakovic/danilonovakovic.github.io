@@ -63,6 +63,16 @@ describe('PlayerController', () => {
       controller.step({ ...noInput, left: true, right: true });
       expect(sprite.vx).toBe(0);
     });
+
+    it('analog movement uses walk speed when sprint is not pressed', () => {
+      controller.step({ ...noInput, analogX: 1 });
+      expect(sprite.vx).toBe(WALK);
+    });
+
+    it('analog movement uses sprint speed when sprint is pressed', () => {
+      controller.step({ ...noInput, analogX: 1, sprint: true });
+      expect(sprite.vx).toBe(SPRINT);
+    });
   });
 
   describe('jumping', () => {
@@ -75,6 +85,65 @@ describe('PlayerController', () => {
       const airSprite = makeSprite(false);
       controller.mount(airSprite);
       controller.step({ ...noInput, jump: true });
+      expect(airSprite.vy).toBe(0);
+    });
+
+    it('uses coyote time shortly after leaving ground when configured', () => {
+      controller = new PlayerController({
+        walkSpeed: WALK,
+        sprintSpeed: SPRINT,
+        jumpVelocityY: JUMP_VY,
+        coyoteTimeMs: 120
+      });
+      controller.mount(sprite);
+      controller.step({ ...noInput, nowMs: 100 });
+      sprite.body.touching.down = false;
+      controller.step({ ...noInput, jump: true, nowMs: 180 });
+      expect(sprite.vy).toBe(JUMP_VY);
+    });
+
+    it('does not use expired coyote time', () => {
+      controller = new PlayerController({
+        walkSpeed: WALK,
+        sprintSpeed: SPRINT,
+        jumpVelocityY: JUMP_VY,
+        coyoteTimeMs: 80
+      });
+      controller.mount(sprite);
+      controller.step({ ...noInput, nowMs: 100 });
+      sprite.body.touching.down = false;
+      controller.step({ ...noInput, jump: true, nowMs: 220 });
+      expect(sprite.vy).toBe(0);
+    });
+
+    it('buffers jump shortly before landing when configured', () => {
+      const airSprite = makeSprite(false);
+      controller = new PlayerController({
+        walkSpeed: WALK,
+        sprintSpeed: SPRINT,
+        jumpVelocityY: JUMP_VY,
+        jumpBufferMs: 120
+      });
+      controller.mount(airSprite);
+      controller.step({ ...noInput, jump: true, nowMs: 100 });
+      expect(airSprite.vy).toBe(0);
+      airSprite.body.touching.down = true;
+      controller.step({ ...noInput, nowMs: 170 });
+      expect(airSprite.vy).toBe(JUMP_VY);
+    });
+
+    it('does not use expired jump buffer', () => {
+      const airSprite = makeSprite(false);
+      controller = new PlayerController({
+        walkSpeed: WALK,
+        sprintSpeed: SPRINT,
+        jumpVelocityY: JUMP_VY,
+        jumpBufferMs: 60
+      });
+      controller.mount(airSprite);
+      controller.step({ ...noInput, jump: true, nowMs: 100 });
+      airSprite.body.touching.down = true;
+      controller.step({ ...noInput, nowMs: 200 });
       expect(airSprite.vy).toBe(0);
     });
   });

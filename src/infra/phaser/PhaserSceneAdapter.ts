@@ -1,6 +1,6 @@
 import * as Phaser from 'phaser';
+import { PHASER_SCENE_KEYS } from '../../config/featureIds';
 import {
-  isInteractBridgeScene,
   isPausableScene,
   isResumeCaptureScene
 } from '../../runtime/sceneContracts';
@@ -10,7 +10,6 @@ import type { SceneRuntimeAdapter } from '../../core/kernel/SceneManager';
 
 interface PhaserSceneAdapterOptions {
   getGame: () => Phaser.Game | null;
-  onInteract: (area: string) => void;
 }
 
 export class PhaserSceneAdapter implements SceneRuntimeAdapter {
@@ -18,6 +17,19 @@ export class PhaserSceneAdapter implements SceneRuntimeAdapter {
 
   constructor(options: PhaserSceneAdapterOptions) {
     this.options = options;
+  }
+
+  hasScene(sceneKey: string): boolean {
+    const game = this.options.getGame();
+    if (!game) return false;
+    return game.scene.getScenes(false).some((scene) => scene.scene.key === sceneKey);
+  }
+
+  registerScene(sceneKey: string, scene: unknown): void {
+    const game = this.options.getGame();
+    if (!game) return;
+    if (this.hasScene(sceneKey)) return;
+    game.scene.add(sceneKey, scene as typeof Phaser.Scene, false);
   }
 
   isSceneActive(sceneKey: string): boolean {
@@ -30,7 +42,6 @@ export class PhaserSceneAdapter implements SceneRuntimeAdapter {
     const game = this.options.getGame();
     if (!game) return;
     game.scene.start(sceneKey, data);
-    this.updateInteractCallbacks(this.options.onInteract);
   }
 
   stopScene(sceneKey: string): void {
@@ -63,18 +74,11 @@ export class PhaserSceneAdapter implements SceneRuntimeAdapter {
     if (!scene || !isResumeCaptureScene(scene)) return null;
     const position = scene.getResumeCapturePosition();
     if (!position) return null;
-    rememberResumePosition(sceneKey, position);
+    // Secret mini-game: each entry should start fresh (spawn + collectibles), not last exit coords.
+    if (sceneKey !== PHASER_SCENE_KEYS.potassium) {
+      rememberResumePosition(sceneKey, position);
+    }
     return position;
   }
 
-  updateInteractCallbacks(onInteract: (area: string) => void): void {
-    const game = this.options.getGame();
-    if (!game) return;
-    const scenes = game.scene.getScenes(false);
-    for (const scene of scenes) {
-      if (isInteractBridgeScene(scene)) {
-        scene.updateInteractCallback(onInteract);
-      }
-    }
-  }
 }

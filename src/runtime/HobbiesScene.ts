@@ -12,20 +12,19 @@ import {
   HOBBIES_RESUME_CLAMP,
   HOBBIES_ROOM_HEIGHT,
   HOBBIES_ROOM_WIDTH,
-  HOBBIES_WALK_SPEED,
-  HOBBIES_PLAYER_START_OFFSET_Y
+  HOBBIES_PLAYER_START_OFFSET_Y,
+  OVERWORLD_JUMP_VELOCITY_Y,
+  OVERWORLD_SPRINT_SPEED,
+  OVERWORLD_WALK_SPEED
 } from './config';
 import { setSceneKeyboardPaused } from './sceneKeyboardPause';
-import { bridgeActions, bridgeStore } from '../shared/bridge/store';
+import { isItemEquipped } from '../shared/bridge/store';
 import { PlayerController } from '../core/player/PlayerController';
 import { buildHobbiesRoom } from './hobbies/HobbiesRoom';
 import { createUiText } from './text/createUiText';
 import { pickRoomInteractTarget } from '../core/ecs/systems/roomInteractSystems';
-import {
-  commandFrameToPlayerStepInput,
-  createInputCommandFrame
-} from '../core/input/commands';
-import { readSceneInputCommands } from './input/readSceneInputCommands';
+import { createInputCommandFrame } from '../core/input/commands';
+import { readPlayerSceneStep } from './input/scenePlayerInput';
 
 export class HobbiesScene extends Phaser.Scene {
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -42,6 +41,7 @@ export class HobbiesScene extends Phaser.Scene {
   private isPaused: boolean = false;
   private resumePosition?: { x: number; y: number };
   private readonly inputFrame = createInputCommandFrame();
+  private hasGlassesSprite: boolean | null = null;
 
   constructor() {
     super({ key: 'hobbies' });
@@ -57,15 +57,13 @@ export class HobbiesScene extends Phaser.Scene {
     this.onInteract = data.onInteract;
     this.isPaused = data.isPaused ?? false;
     this.resumePosition = data.resumePosition;
+    // Scene instances are reused; force texture sync on each enter.
+    this.hasGlassesSprite = null;
   }
 
   getResumeCapturePosition(): { x: number; y: number } | null {
     if (!this.player?.body) return null;
     return { x: this.player.x, y: this.player.y };
-  }
-
-  updateInteractCallback(callback: (id: string) => void) {
-    this.onInteract = callback;
   }
 
   setPaused(paused: boolean) {
@@ -109,9 +107,9 @@ export class HobbiesScene extends Phaser.Scene {
     this.physics.add.collider(this.player, ground);
 
     this.controller = new PlayerController({
-      walkSpeed: HOBBIES_WALK_SPEED,
-      sprintSpeed: HOBBIES_WALK_SPEED,
-      jumpVelocityY: 0 // No jumping in the hobbies room
+      walkSpeed: OVERWORLD_WALK_SPEED,
+      sprintSpeed: OVERWORLD_SPRINT_SPEED,
+      jumpVelocityY: OVERWORLD_JUMP_VELOCITY_Y
     });
     this.controller.mount(this.player);
 
@@ -140,35 +138,32 @@ export class HobbiesScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor('#f4f1ea');
 
     this.setPaused(this.isPaused);
+    this.updatePlayerGlassesAppearance();
   }
 
   update() {
+    this.updatePlayerGlassesAppearance();
     if (this.isPaused) {
       this.controller.zeroVelocity();
       this.exitPrompt.setVisible(false);
       return;
     }
 
-    const touchState = bridgeStore.getState().touch;
-    const oneShots = bridgeActions.consumeTouchOneShots();
-    const commands = readSceneInputCommands({
+    const { commands, step } = readPlayerSceneStep({
       frame: this.inputFrame,
+      controller: this.controller,
       cursors: this.cursors,
       wasd: this.wasd,
       interactKey: this.interactKey,
       hKey: this.hKey,
       escapeKey: this.escapeKey,
-      touch: touchState,
-      oneShots,
-      allowJump: false,
-      allowSprint: false
+      allowJump: true,
+      allowSprint: true
     });
     if (commands.exitContext) {
       this.onClose?.();
       return;
     }
-
-    const step = this.controller.step(commandFrameToPlayerStepInput(commands));
 
     this.player.setFlipX(step.facingLeft);
     this.player.setAngle(step.moving ? Math.sin(this.time.now / 100) * 5 : 0);
@@ -193,5 +188,12 @@ export class HobbiesScene extends Phaser.Scene {
         this.onInteract?.(interact.id);
       }
     }
+  }
+
+  private updatePlayerGlassesAppearance(): void {
+    const hasGlasses = isItemEquipped('glasses');
+    if (hasGlasses === this.hasGlassesSprite) return;
+    this.hasGlassesSprite = hasGlasses;
+    this.player.setTexture(hasGlasses ? 'player_glasses' : 'player_idle');
   }
 }

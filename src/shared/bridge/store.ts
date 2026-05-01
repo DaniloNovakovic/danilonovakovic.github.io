@@ -18,20 +18,70 @@ export interface TouchBridgeState {
   interactTap: boolean;
 }
 
+export const INVENTORY_ITEM_IDS = ['glasses'] as const;
+export type InventoryItemId = (typeof INVENTORY_ITEM_IDS)[number];
+
+export const SECRET_DISCOVERY_IDS = ['banana-peel-clue'] as const;
+export type SecretDiscoveryId = (typeof SECRET_DISCOVERY_IDS)[number];
+
+export interface BridgeInventoryState {
+  ownedItemIds: InventoryItemId[];
+}
+
+export interface BridgeEquipmentState {
+  equippedItemIds: InventoryItemId[];
+}
+
+export interface BridgeProgressState {
+  hasGlasses: boolean;
+  discoveredSecretIds: SecretDiscoveryId[];
+}
+
 export interface BridgeState {
   mode: RuntimeMode;
   status: GameStateValue;
   activeMiniGameId: MiniGameId | null;
+  loadingMiniGameId: MiniGameId | null;
   isPaused: boolean;
+  inventory: BridgeInventoryState;
+  equipment: BridgeEquipmentState;
+  progress: BridgeProgressState;
   touch: TouchBridgeState;
 }
 
 const listeners = new Set<() => void>();
 
+function hasItemOwned(inventory: BridgeInventoryState, itemId: InventoryItemId): boolean {
+  return inventory.ownedItemIds.includes(itemId);
+}
+
+function hasItemEquipped(equipment: BridgeEquipmentState, itemId: InventoryItemId): boolean {
+  return equipment.equippedItemIds.includes(itemId);
+}
+
+function arraysEqual<T>(a: readonly T[], b: readonly T[]): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
 let state: BridgeState = {
   mode: EXPLORING_MODE,
   ...deriveGameState(EXPLORING_MODE),
+  loadingMiniGameId: null,
   isPaused: false,
+  inventory: {
+    ownedItemIds: []
+  },
+  equipment: {
+    equippedItemIds: []
+  },
+  progress: {
+    hasGlasses: false,
+    discoveredSecretIds: []
+  },
   touch: {
     left: 0,
     right: 0,
@@ -51,13 +101,22 @@ function setState(updater: (current: BridgeState) => BridgeState): void {
   const candidate: BridgeState = {
     ...next,
     ...derived,
-    isPaused: derivePause(next.mode)
+    progress: {
+      ...next.progress,
+      hasGlasses: hasItemOwned(next.inventory, 'glasses')
+    },
+    isPaused: derivePause(next.mode) || next.loadingMiniGameId !== null
   };
   const unchanged =
     modesEqual(previous.mode, candidate.mode) &&
     previous.status === candidate.status &&
     previous.activeMiniGameId === candidate.activeMiniGameId &&
+    previous.loadingMiniGameId === candidate.loadingMiniGameId &&
     previous.isPaused === candidate.isPaused &&
+    arraysEqual(previous.inventory.ownedItemIds, candidate.inventory.ownedItemIds) &&
+    arraysEqual(previous.equipment.equippedItemIds, candidate.equipment.equippedItemIds) &&
+    previous.progress.hasGlasses === candidate.progress.hasGlasses &&
+    arraysEqual(previous.progress.discoveredSecretIds, candidate.progress.discoveredSecretIds) &&
     previous.touch.left === candidate.touch.left &&
     previous.touch.right === candidate.touch.right &&
     previous.touch.jumpQueued === candidate.touch.jumpQueued &&
@@ -81,18 +140,105 @@ export const bridgeActions = {
   requestInteraction(area: MiniGameId): void {
     setState((current) => ({
       ...current,
-      mode: createRuntimeModeForInteraction(area)
+      mode: createRuntimeModeForInteraction(area),
+      loadingMiniGameId: null
     }));
   },
   closeActiveMode(resolveParentId?: (miniGameId: MiniGameId) => MiniGameId | null | undefined): void {
     setState((current) => ({
       ...current,
-      mode: closeRuntimeMode(current.mode, resolveParentId)
+      mode: closeRuntimeMode(current.mode, resolveParentId),
+      loadingMiniGameId: null
     }));
   },
   /** Backward-compatible alias for callers that always return to the overworld. */
   closeActiveOverlay(): void {
     bridgeActions.closeActiveMode();
+  },
+  collectItem(itemId: InventoryItemId, autoEquip: boolean = false): void {
+    setState((current) => {
+      const alreadyOwned = hasItemOwned(current.inventory, itemId);
+      const alreadyEquipped = hasItemEquipped(current.equipment, itemId);
+      return {
+        ...current,
+        inventory: alreadyOwned
+          ? current.inventory
+          : {
+              ownedItemIds: [...current.inventory.ownedItemIds, itemId]
+            },
+        equipment: autoEquip && !alreadyEquipped
+          ? {
+              equippedItemIds: [...current.equipment.equippedItemIds, itemId]
+            }
+          : current.equipment
+      };
+    });
+  },
+  equipItem(itemId: InventoryItemId): void {
+    setState((current) => {
+      if (!hasItemOwned(current.inventory, itemId)) return current;
+      if (hasItemEquipped(current.equipment, itemId)) return current;
+      return {
+        ...current,
+        equipment: {
+          equippedItemIds: [...current.equipment.equippedItemIds, itemId]
+        }
+      };
+    });
+  },
+  unequipItem(itemId: InventoryItemId): void {
+    setState((current) => {
+      if (!hasItemEquipped(current.equipment, itemId)) return current;
+      return {
+        ...current,
+        equipment: {
+          equippedItemIds: current.equipment.equippedItemIds.filter((id) => id !== itemId)
+        }
+      };
+    });
+  },
+  toggleItemEquipped(itemId: InventoryItemId): void {
+    if (hasItemEquipped(bridgeStore.getState().equipment, itemId)) {
+      bridgeActions.unequipItem(itemId);
+    } else {
+      bridgeActions.equipItem(itemId);
+    }
+  },
+  collectGlasses(): void {
+    bridgeActions.collectItem('glasses', true);
+  },
+  discoverSecret(secretId: SecretDiscoveryId): void {
+    setState((current) => {
+      if (current.progress.discoveredSecretIds.includes(secretId)) return current;
+      return {
+        ...current,
+        progress: {
+          ...current.progress,
+          discoveredSecretIds: [...current.progress.discoveredSecretIds, secretId]
+        }
+      };
+    });
+  },
+  resetProgress(): void {
+    setState((current) => ({
+      ...current,
+      inventory: {
+        ownedItemIds: []
+      },
+      equipment: {
+        equippedItemIds: []
+      },
+      progress: {
+        hasGlasses: false,
+        discoveredSecretIds: []
+      }
+    }));
+  },
+  setSceneLoading(miniGameId: MiniGameId | null): void {
+    setState((current) => ({
+      ...current,
+      loadingMiniGameId: miniGameId
+    }));
   },
   setTouchDirectional(direction: 'left' | 'right', intensity: number): void {
     setState((current) => ({
@@ -161,4 +307,20 @@ export function useBridgeState(): BridgeState {
   }, []);
 
   return snapshot;
+}
+
+export function isItemOwned(itemId: InventoryItemId): boolean {
+  return hasItemOwned(bridgeStore.getState().inventory, itemId);
+}
+
+export function isItemEquipped(itemId: InventoryItemId): boolean {
+  return hasItemEquipped(bridgeStore.getState().equipment, itemId);
+}
+
+export function isSecretDiscovered(secretId: SecretDiscoveryId): boolean {
+  return bridgeStore.getState().progress.discoveredSecretIds.includes(secretId);
+}
+
+export function getTouchState(): TouchBridgeState {
+  return bridgeStore.getState().touch;
 }

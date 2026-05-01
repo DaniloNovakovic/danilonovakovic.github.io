@@ -4,6 +4,9 @@ import { HOBBY_STATION_LAYOUT, HOBBIES_ROOM_INTERACTABLES } from './hobbiesRoomL
 
 describe('hobbies room layout', () => {
   it('lists every hobby React overlay with a station and matching interactable x', () => {
+    expect(HOBBY_STATION_LAYOUT).toHaveLength(4);
+    expect(HOBBY_STATION_LAYOUT.map((s) => s.id)).not.toContain('games');
+
     for (const id of HOBBY_REACT_OVERLAY_IDS) {
       expect(MINI_GAME_IDS as readonly string[]).toContain(id);
       const station = HOBBY_STATION_LAYOUT.find((s) => s.id === id);

@@ -11,6 +11,7 @@ export interface ContextPluginDefinition {
   id: ContextId;
   sceneKey: string;
   getStartData: () => Record<string, unknown>;
+  loadScene?: () => Promise<unknown>;
   onRegister?: () => void;
   onEnter?: () => void;
   onPause?: () => void;

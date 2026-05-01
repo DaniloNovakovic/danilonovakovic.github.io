@@ -1,5 +1,7 @@
 import {
+  BASEMENT_REACT_OVERLAY_IDS,
   HOBBY_REACT_OVERLAY_IDS,
+  isBasementReactOverlayId,
   isHobbyReactOverlayId,
   isMiniGameId,
   type MiniGameId
@@ -44,8 +46,26 @@ function assertPortfolioRegistryInvariants(sections: readonly MiniGamePlugin[]):
         `Portfolio registry: hobby overlay "${id}" must have overlayParentId "hobbies"`
       );
     }
-    if (!row.Component) {
-      throw new Error(`Portfolio registry: hobby overlay "${id}" must define Component`);
+    if (!row.loadComponent) {
+      throw new Error(`Portfolio registry: hobby overlay "${id}" must define loadComponent`);
+    }
+  }
+
+  for (const id of BASEMENT_REACT_OVERLAY_IDS) {
+    const row = byId.get(id);
+    if (!row) {
+      throw new Error(`Portfolio registry: BASEMENT_REACT_OVERLAY_IDS includes "${id}" but no plugin`);
+    }
+    if (row.type !== MiniGameType.REACT_OVERLAY) {
+      throw new Error(`Portfolio registry: basement overlay "${id}" must be REACT_OVERLAY`);
+    }
+    if (row.overlayParentId !== 'basement') {
+      throw new Error(
+        `Portfolio registry: basement overlay "${id}" must have overlayParentId "basement"`
+      );
+    }
+    if (!row.loadComponent) {
+      throw new Error(`Portfolio registry: basement overlay "${id}" must define loadComponent`);
     }
   }
 
@@ -60,9 +80,11 @@ function assertPortfolioRegistryInvariants(sections: readonly MiniGamePlugin[]):
   }
 
   for (const row of sections) {
-    if (row.type === MiniGameType.REACT_OVERLAY && !isHobbyReactOverlayId(row.id) && row.x === undefined) {
+    const isInteriorOverlay =
+      isHobbyReactOverlayId(row.id) || isBasementReactOverlayId(row.id);
+    if (row.type === MiniGameType.REACT_OVERLAY && !isInteriorOverlay && row.x === undefined) {
       throw new Error(
-        `Portfolio registry: REACT_OVERLAY "${row.id}" is not a hobby overlay but has no world x`
+        `Portfolio registry: REACT_OVERLAY "${row.id}" is not an interior overlay but has no world x`
       );
     }
   }

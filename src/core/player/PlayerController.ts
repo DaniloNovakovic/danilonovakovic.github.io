@@ -28,6 +28,10 @@ export interface PlayerControllerConfig {
   sprintSpeed: number;
   /** Negative — upward impulse applied to the Phaser body on jump. */
   jumpVelocityY: number;
+  /** Optional platformer forgiveness after leaving ground. Defaults to 0. */
+  coyoteTimeMs?: number;
+  /** Optional jump buffering before landing. Defaults to 0. */
+  jumpBufferMs?: number;
 }
 
 export interface PlayerStepInput {
@@ -37,6 +41,8 @@ export interface PlayerStepInput {
   jump: boolean;
   interact: boolean;
   analogX?: number;
+  /** Optional deterministic clock for tests and frame-driven scenes. */
+  nowMs?: number;
 }
 
 export interface PlayerStepResult {
@@ -59,6 +65,8 @@ export class PlayerController {
   private readonly entityId: EntityId;
   private readonly config: PlayerControllerConfig;
   private sprite: PhysicsSprite | null = null;
+  private lastGroundedAtMs: number | null = null;
+  private bufferedJumpUntilMs: number | null = null;
 
   constructor(config: PlayerControllerConfig) {
     this.config = config;
@@ -103,14 +111,38 @@ export class PlayerController {
   step(input: PlayerStepInput): PlayerStepResult {
     if (!this.sprite) return ZERO_RESULT;
 
+    const nowMs = input.nowMs ?? Date.now();
     const grounded = this.sprite.body.touching.down;
+    if (grounded) {
+      this.lastGroundedAtMs = nowMs;
+    }
 
-    this.world.setComponent(this.stores.jump, this.entityId, { enabled: true, grounded });
+    const jumpBufferMs = this.config.jumpBufferMs ?? 0;
+    if (input.jump) {
+      this.bufferedJumpUntilMs = nowMs + jumpBufferMs;
+    } else if (this.bufferedJumpUntilMs !== null && this.bufferedJumpUntilMs < nowMs) {
+      this.bufferedJumpUntilMs = null;
+    }
+
+    const coyoteTimeMs = this.config.coyoteTimeMs ?? 0;
+    const hasCoyoteGround =
+      !grounded &&
+      coyoteTimeMs > 0 &&
+      this.lastGroundedAtMs !== null &&
+      nowMs - this.lastGroundedAtMs <= coyoteTimeMs;
+    const hasBufferedJump =
+      input.jump ||
+      (jumpBufferMs > 0 && this.bufferedJumpUntilMs !== null && this.bufferedJumpUntilMs >= nowMs);
+
+    this.world.setComponent(this.stores.jump, this.entityId, {
+      enabled: true,
+      grounded: grounded || hasCoyoteGround
+    });
     this.world.setComponent(this.stores.input, this.entityId, {
       left: input.left,
       right: input.right,
       sprint: input.sprint,
-      jump: input.jump,
+      jump: hasBufferedJump,
       interact: input.interact,
       analogX: input.analogX
     });
@@ -120,6 +152,8 @@ export class PlayerController {
     this.sprite.setVelocityX(result.velocityX);
     if (result.shouldJump) {
       this.sprite.setVelocityY(this.config.jumpVelocityY);
+      this.bufferedJumpUntilMs = null;
+      this.lastGroundedAtMs = null;
     }
 
     this.world.setComponent(this.stores.transform, this.entityId, {

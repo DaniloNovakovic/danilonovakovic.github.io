@@ -1,9 +1,17 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { bridgeActions, bridgeStore } from './store';
+import {
+  bridgeActions,
+  bridgeStore,
+  getTouchState,
+  isItemEquipped,
+  isItemOwned,
+  isSecretDiscovered
+} from './store';
 import { GameState } from '../../runtime/gameState';
 
 function resetBridge() {
   bridgeActions.closeActiveOverlay();
+  bridgeActions.resetProgress();
   bridgeActions.resetTouch();
 }
 
@@ -25,6 +33,17 @@ describe('bridgeStore', () => {
     it('is false when a PHASER_SCENE mini-game (hobbies) is active', () => {
       bridgeActions.requestInteraction('hobbies');
       expect(bridgeStore.getState().isPaused).toBe(false);
+    });
+
+    it('pauses temporarily while a Phaser scene is loading', () => {
+      bridgeActions.requestInteraction('hobbies');
+      bridgeActions.setSceneLoading('hobbies');
+      expect(bridgeStore.getState().isPaused).toBe(true);
+      expect(bridgeStore.getState().loadingMiniGameId).toBe('hobbies');
+
+      bridgeActions.setSceneLoading(null);
+      expect(bridgeStore.getState().isPaused).toBe(false);
+      expect(bridgeStore.getState().loadingMiniGameId).toBeNull();
     });
   });
 
@@ -51,6 +70,83 @@ describe('bridgeStore', () => {
       bridgeActions.closeActiveOverlay(); // already exploring — no change
       unsub();
       expect(calls).toBe(0);
+    });
+  });
+
+  describe('progress state', () => {
+    it('starts without glasses', () => {
+      expect(bridgeStore.getState().progress.hasGlasses).toBe(false);
+      expect(bridgeStore.getState().progress.discoveredSecretIds).toEqual([]);
+      expect(bridgeStore.getState().inventory.ownedItemIds).toEqual([]);
+      expect(bridgeStore.getState().equipment.equippedItemIds).toEqual([]);
+    });
+
+    it('collectGlasses unlocks the Lens', () => {
+      bridgeActions.collectGlasses();
+      expect(bridgeStore.getState().progress.hasGlasses).toBe(true);
+      expect(bridgeStore.getState().inventory.ownedItemIds).toContain('glasses');
+      expect(bridgeStore.getState().equipment.equippedItemIds).toContain('glasses');
+      expect(isItemOwned('glasses')).toBe(true);
+      expect(isItemEquipped('glasses')).toBe(true);
+    });
+
+    it('resetProgress clears glasses progress', () => {
+      bridgeActions.collectGlasses();
+      bridgeActions.resetProgress();
+      expect(bridgeStore.getState().progress.hasGlasses).toBe(false);
+      expect(bridgeStore.getState().progress.discoveredSecretIds).toEqual([]);
+      expect(bridgeStore.getState().inventory.ownedItemIds).toEqual([]);
+      expect(bridgeStore.getState().equipment.equippedItemIds).toEqual([]);
+    });
+
+    it('does not emit when glasses are already collected', () => {
+      bridgeActions.collectGlasses();
+      let calls = 0;
+      const unsub = bridgeStore.subscribe(() => { calls++; });
+      bridgeActions.collectGlasses();
+      unsub();
+      expect(calls).toBe(0);
+    });
+
+    it('tracks discovered secrets until progress reset', () => {
+      bridgeActions.discoverSecret('banana-peel-clue');
+      expect(bridgeStore.getState().progress.discoveredSecretIds).toEqual(['banana-peel-clue']);
+      expect(isSecretDiscovered('banana-peel-clue')).toBe(true);
+      bridgeActions.resetProgress();
+      expect(bridgeStore.getState().progress.discoveredSecretIds).toEqual([]);
+      expect(isSecretDiscovered('banana-peel-clue')).toBe(false);
+    });
+
+    it('does not emit when a secret is already discovered', () => {
+      bridgeActions.discoverSecret('banana-peel-clue');
+      let calls = 0;
+      const unsub = bridgeStore.subscribe(() => { calls++; });
+      bridgeActions.discoverSecret('banana-peel-clue');
+      unsub();
+      expect(calls).toBe(0);
+    });
+  });
+
+  describe('inventory equipment', () => {
+    it('does not equip item that is not owned', () => {
+      bridgeActions.equipItem('glasses');
+      expect(bridgeStore.getState().equipment.equippedItemIds).toEqual([]);
+    });
+
+    it('collectItem can own without auto-equip', () => {
+      bridgeActions.collectItem('glasses');
+      const s = bridgeStore.getState();
+      expect(s.inventory.ownedItemIds).toContain('glasses');
+      expect(s.equipment.equippedItemIds).toEqual([]);
+      expect(s.progress.hasGlasses).toBe(true);
+    });
+
+    it('toggleItemEquipped unequips and re-equips owned item', () => {
+      bridgeActions.collectGlasses();
+      bridgeActions.toggleItemEquipped('glasses');
+      expect(bridgeStore.getState().equipment.equippedItemIds).toEqual([]);
+      bridgeActions.toggleItemEquipped('glasses');
+      expect(bridgeStore.getState().equipment.equippedItemIds).toContain('glasses');
     });
   });
 
@@ -96,6 +192,7 @@ describe('bridgeStore', () => {
       expect(t.right).toBe(0);
       expect(t.jumpQueued).toBe(false);
       expect(t.interactTap).toBe(false);
+      expect(getTouchState()).toEqual(t);
     });
   });
 });

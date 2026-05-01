@@ -3,6 +3,7 @@ import type { ContextPluginDefinition } from '../../core/kernel/types';
 
 interface StreetPluginOptions {
   onInteract: (area: string) => void;
+  getIsPaused: () => boolean;
   getResumePosition: () => { x: number; y: number } | undefined;
 }
 
@@ -12,7 +13,7 @@ export function createStreetPlugin(options: StreetPluginOptions): ContextPluginD
     sceneKey: PHASER_SCENE_KEYS.main,
     getStartData: () => ({
       onInteract: options.onInteract,
-      isPaused: false,
+      isPaused: options.getIsPaused(),
       resumePosition: options.getResumePosition()
     })
   };

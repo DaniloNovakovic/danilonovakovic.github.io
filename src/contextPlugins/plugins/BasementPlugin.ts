@@ -1,17 +1,17 @@
 import { PHASER_SCENE_KEYS } from '../../config/featureIds';
 import type { ContextPluginDefinition } from '../../core/kernel/types';
 
-interface HobbiesPluginOptions {
+interface BasementPluginOptions {
   onClose: () => void;
-  onInteract: (area: string) => void;
+  onInteract: (id: string) => void;
   getResumePosition: () => { x: number; y: number } | undefined;
   loadScene: () => Promise<unknown>;
 }
 
-export function createHobbiesPlugin(options: HobbiesPluginOptions): ContextPluginDefinition {
+export function createBasementPlugin(options: BasementPluginOptions): ContextPluginDefinition {
   return {
-    id: PHASER_SCENE_KEYS.hobbies,
-    sceneKey: PHASER_SCENE_KEYS.hobbies,
+    id: PHASER_SCENE_KEYS.basement,
+    sceneKey: PHASER_SCENE_KEYS.basement,
     loadScene: options.loadScene,
     getStartData: () => ({
       onClose: options.onClose,

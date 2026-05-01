@@ -1,6 +1,8 @@
 import type { ContextId, ContextPluginDefinition, ResumeSnapshot } from './types';
 
 export interface SceneRuntimeAdapter {
+  hasScene(sceneKey: string): boolean;
+  registerScene(sceneKey: string, scene: unknown): void;
   isSceneActive(sceneKey: string): boolean;
   startScene(sceneKey: string, data: Record<string, unknown>): void;
   stopScene(sceneKey: string): void;
@@ -9,12 +11,18 @@ export interface SceneRuntimeAdapter {
   captureResume(sceneKey: string): ResumeSnapshot | null;
 }
 
+interface SceneManagerOptions {
+  onSceneLoadingChange?: (contextId: ContextId | null) => void;
+}
+
 export class SceneManager {
   private readonly contexts = new Map<ContextId, ContextPluginDefinition>();
   private readonly adapter: SceneRuntimeAdapter;
+  private readonly options: SceneManagerOptions;
 
-  constructor(adapter: SceneRuntimeAdapter) {
+  constructor(adapter: SceneRuntimeAdapter, options: SceneManagerOptions = {}) {
     this.adapter = adapter;
+    this.options = options;
   }
 
   registerContext(def: ContextPluginDefinition): void {
@@ -22,22 +30,24 @@ export class SceneManager {
     def.onRegister?.();
   }
 
-  enter(contextId: ContextId): void {
+  async enter(contextId: ContextId): Promise<void> {
     const target = this.contexts.get(contextId);
     if (!target) return;
 
     if (this.adapter.isSceneActive(target.sceneKey)) return;
 
+    await this.ensureSceneRegistered(target);
     this.stopActiveContextsExcept(target.sceneKey);
 
     this.adapter.startScene(target.sceneKey, target.getStartData());
     target.onEnter?.();
   }
 
-  exitTo(contextId: ContextId): void {
+  async exitTo(contextId: ContextId): Promise<void> {
     const target = this.contexts.get(contextId);
     if (!target) return;
 
+    await this.ensureSceneRegistered(target);
     const allKeys = this.adapter.listKnownSceneKeys();
     for (const sceneKey of allKeys) {
       if (sceneKey === target.sceneKey) continue;
@@ -86,6 +96,19 @@ export class SceneManager {
 
   private captureResumeBySceneKey(sceneKey: string): ResumeSnapshot | null {
     return this.adapter.captureResume(sceneKey);
+  }
+
+  private async ensureSceneRegistered(context: ContextPluginDefinition): Promise<void> {
+    if (this.adapter.hasScene(context.sceneKey)) return;
+    if (!context.loadScene) return;
+
+    this.options.onSceneLoadingChange?.(context.id);
+    try {
+      const scene = await context.loadScene();
+      this.adapter.registerScene(context.sceneKey, scene);
+    } finally {
+      this.options.onSceneLoadingChange?.(null);
+    }
   }
 
   private stopActiveContextsExcept(targetSceneKey: string): void {

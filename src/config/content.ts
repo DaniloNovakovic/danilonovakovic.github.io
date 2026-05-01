@@ -58,7 +58,7 @@ export const TEXTS = {
       helpText: "Type 'help' to see available commands.",
       helpResponse: "Available commands: whoami, skills, clear",
       whoamiResponse: "Danilo Novakovic. Coding since 2016. Lover of logic and design.",
-      skillsResponse: "> Frontend: React, Vite, Tailwind\n> Backend: Node, APIs, Databases\n> Design: Sketching, UI/UX",
+      skillsResponse: "> Frontend & UI: React.js, TypeScript, Tailwind, Storybook, UI Components, Accessibility (WCAG), Redux\n> Backend & Data: Node.js, .NET, Express-style APIs, SQL, MongoDB\n> Additional Languages: C#, C, C++, Python, Matlab\n> Product Design & DX: Design Systems, Figma token mapping, theming, designer-dev handoff, Git, npm",
       notFound: "Command not found: ",
       instruction: "Hack the mainframe!",
     },

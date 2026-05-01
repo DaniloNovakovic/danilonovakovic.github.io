@@ -3,7 +3,7 @@ import type { TouchBridgeState } from '../../shared/bridge/store';
 import type { InputCommandFrame } from '../../core/input/commands';
 import { resetInputCommandFrame } from '../../core/input/commands';
 
-interface SceneInputKeys {
+export interface SceneInputKeys {
   cursors: Phaser.Types.Input.Keyboard.CursorKeys;
   wasd: { a: Phaser.Input.Keyboard.Key; d: Phaser.Input.Keyboard.Key };
   interactKey: Phaser.Input.Keyboard.Key;

@@ -46,7 +46,7 @@ export const HOBBIES_INTERACT_RADIUS = 60;
 /** Ground collider zone relative to floor. */
 export const HOBBIES_GROUND_ZONE = {
   centerOffsetY: 10,
-  width: 900,
+  width: HOBBIES_ROOM_WIDTH,
   height: 20
 } as const;
 

@@ -42,11 +42,11 @@ When in doubt: start with Observer. Upgrade to Event Queue only when you hit tim
 
 ## In this repo
 
-Mostly synchronous today, with a small queued boundary available:
+Synchronous today; keep queued delivery as a deferred option:
 
 - `[bridgeStore](../../src/shared/bridge/store.ts)` — state-change notifications for the UI/engine bridge.
 - `[KernelEventBus](../../src/core/kernel/events.ts)` — typed kernel events (`SceneTransitionRequested`, `OverlayOpened`, `OverlayClosed`, `PauseChanged`), also synchronous.
-- `[KernelEventQueue](../../src/core/kernel/events.ts)` — a minimal FIFO queue that can flush into the kernel bus when a side effect needs time decoupling.
+- `[KernelEventQueue](../../src/core/kernel/events.ts)` — a minimal FIFO scaffold covered by tests, not wired into production.
 
 When we need a queue:
 
@@ -56,7 +56,7 @@ When we need a queue:
 
 ## Status
 
-`in use` (scaffolded) — the queue exists, but synchronous Observer remains the default. Use it only for real cross-frame/cross-scene timing needs.
+`deferred` — the scaffold exists, but no production path currently needs it. Synchronous Observer remains the default; wire the queue only for a demonstrated cross-frame/cross-scene timing need.
 
 ## See also
 

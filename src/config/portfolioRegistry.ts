@@ -1,6 +1,7 @@
 import type { MiniGamePlugin } from '../runtime/types';
 import { composePortfolioSections } from './portfolioCompose';
 import { FEATURE_PLUGIN_DEFINITIONS } from './featurePlugins';
+import { FEATURE_RUNTIME_BINDINGS } from './featureRuntimeBindings';
 import { OVERWORLD_BUILDING_PLACEMENTS } from './worldLayout';
 
 /**
@@ -8,5 +9,6 @@ import { OVERWORLD_BUILDING_PLACEMENTS } from './worldLayout';
  */
 export const PORTFOLIO_SECTIONS: MiniGamePlugin[] = composePortfolioSections(
   FEATURE_PLUGIN_DEFINITIONS,
-  OVERWORLD_BUILDING_PLACEMENTS
+  OVERWORLD_BUILDING_PLACEMENTS,
+  FEATURE_RUNTIME_BINDINGS
 );

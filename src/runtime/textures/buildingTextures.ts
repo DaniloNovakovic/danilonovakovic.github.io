@@ -141,6 +141,15 @@ const OVERWORLD_BUILDING_ART: Partial<Record<MiniGameId, (g: Graphics) => void>>
   contact: drawContactTower
 };
 
+const PIXEL_BUILDING_PALETTES: Partial<Record<MiniGameId, { base: number; accent: number }>> = {
+  profile: { base: 0x89c2ff, accent: 0xffd166 },
+  experiences: { base: 0x9bf6ff, accent: 0x5f6caf },
+  projects: { base: 0xcaffbf, accent: 0xffadad },
+  abilities: { base: 0xfdffb6, accent: 0x8ecae6 },
+  hobbies: { base: 0xffc6ff, accent: 0xbde0fe },
+  contact: { base: 0xd0f4de, accent: 0xffafcc }
+};
+
 /**
  * Draws the footprint art for an overworld building texture (`building_${id}`).
  * Unknown ids (e.g. hobby-only overlays) fall back to a generic block.
@@ -151,5 +160,43 @@ export function drawOverworldBuildingArt(bg: Graphics, id: MiniGameId): void {
     draw(bg);
   } else {
     drawGenericBuilding(bg);
+  }
+}
+
+/**
+ * Draws an intentionally chunky temporary polished layer. Final assets can replace
+ * this texture key without changing the Lens/state wiring.
+ */
+export function drawPixelOverworldBuildingArt(bg: Graphics, id: MiniGameId): void {
+  const palette = PIXEL_BUILDING_PALETTES[id] ?? { base: 0xbde0fe, accent: 0xffd166 };
+  const line = 0x1a1a1a;
+
+  bg.fillStyle(palette.base, 1);
+  bg.lineStyle(4, line, 1);
+  bg.fillRect(30, 80, 190, 220);
+  bg.strokeRect(30, 80, 190, 220);
+
+  bg.fillStyle(palette.accent, 1);
+  bg.fillRect(50, 105, 40, 40);
+  bg.fillRect(110, 105, 40, 40);
+  bg.fillRect(170, 105, 30, 40);
+  bg.fillRect(60, 170, 45, 45);
+  bg.fillRect(145, 170, 45, 45);
+  bg.strokeRect(50, 105, 40, 40);
+  bg.strokeRect(110, 105, 40, 40);
+  bg.strokeRect(170, 105, 30, 40);
+  bg.strokeRect(60, 170, 45, 45);
+  bg.strokeRect(145, 170, 45, 45);
+
+  bg.fillStyle(0xfbfbf9, 1);
+  bg.fillRect(100, 235, 50, 65);
+  bg.strokeRect(100, 235, 50, 65);
+
+  bg.lineStyle(3, 0xffffff, 0.45);
+  for (let y = 95; y < 285; y += 24) {
+    bg.beginPath();
+    bg.moveTo(40, y);
+    bg.lineTo(210, y);
+    bg.strokePath();
   }
 }
