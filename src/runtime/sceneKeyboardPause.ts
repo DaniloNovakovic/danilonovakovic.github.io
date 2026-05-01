@@ -19,10 +19,21 @@ export function setSceneKeyboardPaused(
 ): void {
   const kb = scene.input?.keyboard;
   if (!kb) return;
+  const keyboard = kb as Phaser.Input.Keyboard.KeyboardPlugin & {
+    removeCapture?: (keycode: number | string | Array<number | string>) => void;
+    clearCaptures?: () => void;
+  };
 
   kb.enabled = !paused;
 
   if (paused) {
+    // Release gameplay captures while React overlays are focused so text inputs
+    // can receive A/D/E (and other gameplay keys).
+    if (typeof keyboard.removeCapture === 'function') {
+      keyboard.removeCapture([...GAMEPLAY_KEYBOARD_CAPTURES]);
+    } else if (typeof keyboard.clearCaptures === 'function') {
+      keyboard.clearCaptures();
+    }
     if (opts.pausePhysicsWorld) {
       scene.physics.world.pause();
     }
@@ -31,8 +42,8 @@ export function setSceneKeyboardPaused(
     if (opts.pausePhysicsWorld) {
       scene.physics.world.resume();
     }
-    if (typeof kb.addCapture === 'function') {
-      kb.addCapture([...GAMEPLAY_KEYBOARD_CAPTURES]);
+    if (typeof keyboard.addCapture === 'function') {
+      keyboard.addCapture([...GAMEPLAY_KEYBOARD_CAPTURES]);
     }
   }
 }
