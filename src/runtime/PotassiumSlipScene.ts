@@ -144,10 +144,15 @@ export class PotassiumSlipScene extends Phaser.Scene {
     if (this.gameState === 'PLAYING') {
       this.bgGrid.tilePositionY -= 2; // Scroll background
 
-      // Move player towards pointer
+      // Move player towards pointer with dead-zone to prevent jitter
       const pointer = this.input.activePointer;
       if (pointer.isDown || pointer.active) {
-        this.physics.moveToObject(this.player, pointer, RIPENESS_CONFIG[this.ripeness].speed);
+        const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, pointer.x, pointer.y);
+        if (dist < 8) {
+          this.player.setVelocity(0, 0);
+        } else {
+          this.physics.moveToObject(this.player, pointer, RIPENESS_CONFIG[this.ripeness].speed);
+        }
       }
 
       // Check for enemies passing the bottom
