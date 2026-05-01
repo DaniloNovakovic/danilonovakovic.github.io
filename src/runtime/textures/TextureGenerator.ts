@@ -223,125 +223,64 @@ export class TextureGenerator {
   }
 
   static generatePotassiumAssets(scene: Phaser.Scene) {
-    this.generateBananaPeel(scene, 'yellow', 0xf3de72);
-    this.generateBananaPeel(scene, 'green', 0xa4d44d);
-    this.generateBananaPeel(scene, 'brown', 0x8b5a2b);
-    this.generateDeadline(scene);
-    this.generateScopeCreeper(scene);
-    this.generateBug(scene);
-  }
+    const PEEL_SVG = (colorMain: string, colorLight: string) => `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <path d="M 32 36 C 26 50, 22 62, 32 62 C 42 62, 38 50, 32 36 Z" fill="${colorMain}" stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M 28 30 C 10 24, 4 40, 8 48 C 15 52, 22 40, 28 30 Z" fill="${colorMain}" stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M 36 30 C 54 24, 60 40, 56 48 C 49 52, 42 40, 36 30 Z" fill="${colorMain}" stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M 32 26 C 24 8, 40 8, 32 26 Z" fill="${colorLight}" stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round"/>
+  <circle cx="32" cy="32" r="5" fill="#4a3b32" stroke="#1a1a1a" stroke-width="3"/>
+  <circle cx="32" cy="32" r="2" fill="#2d1c15"/>
+  <path d="M 32 44 L 32 54 M 22 36 L 14 42 M 42 36 L 50 42" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+</svg>`;
 
-  private static generateBananaPeel(scene: Phaser.Scene, suffix: string, color: number) {
-    const g = scene.make.graphics({ x: 0, y: 0 });
-    const line = 0x1a1a1a;
+    const DEADLINE_SVG = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <rect x="12" y="16" width="40" height="38" rx="4" fill="#ef4444" stroke="#1a1a1a" stroke-width="3"/>
+  <rect x="12" y="16" width="40" height="12" rx="4" fill="#dc2626" stroke="#1a1a1a" stroke-width="3"/>
+  <rect x="20" y="8" width="4" height="12" rx="2" fill="#e5e5e5" stroke="#1a1a1a" stroke-width="3"/>
+  <rect x="40" y="8" width="4" height="12" rx="2" fill="#e5e5e5" stroke="#1a1a1a" stroke-width="3"/>
+  <path d="M 20 34 L 28 38 L 24 42 Z" fill="#1a1a1a"/>
+  <path d="M 44 34 L 36 38 L 40 42 Z" fill="#1a1a1a"/>
+  <path d="M 28 46 Q 32 42 36 46" fill="none" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round"/>
+</svg>`;
 
-    g.fillStyle(color, 1);
-    g.lineStyle(3, line, 1);
+    const CREEPER_SVG = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="80" height="80">
+  <path d="M 40 20 C 60 10, 75 30, 70 50 C 65 70, 50 75, 40 72 C 30 75, 15 70, 10 50 C 5 30, 20 10, 40 20 Z" fill="#8b5cf6" stroke="#1a1a1a" stroke-width="3"/>
+  <path d="M 30 15 C 40 5, 55 15, 50 25 C 45 35, 25 35, 30 15 Z" fill="#a78bfa" stroke="#1a1a1a" stroke-width="3"/>
+  <path d="M 15 50 Q 5 60 10 70" fill="none" stroke="#8b5cf6" stroke-width="5" stroke-linecap="round"/>
+  <path d="M 65 50 Q 75 60 70 70" fill="none" stroke="#8b5cf6" stroke-width="5" stroke-linecap="round"/>
+  <path d="M 25 65 Q 25 80 35 75" fill="none" stroke="#8b5cf6" stroke-width="5" stroke-linecap="round"/>
+  <path d="M 55 65 Q 55 80 45 75" fill="none" stroke="#8b5cf6" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="35" cy="40" r="8" fill="#fff" stroke="#1a1a1a" stroke-width="3"/>
+  <circle cx="35" cy="40" r="3" fill="#1a1a1a"/>
+  <circle cx="55" cy="35" r="6" fill="#fff" stroke="#1a1a1a" stroke-width="3"/>
+  <circle cx="55" cy="35" r="2" fill="#1a1a1a"/>
+  <circle cx="20" cy="30" r="5" fill="#fff" stroke="#1a1a1a" stroke-width="3"/>
+  <circle cx="20" cy="30" r="2" fill="#1a1a1a"/>
+</svg>`;
 
-    // Three-pronged peel shape
-    g.beginPath();
-    g.moveTo(25, 10); // Center stem
-    g.lineTo(15, 45); // Left peel
-    g.lineTo(25, 35);
-    g.lineTo(35, 45); // Right peel
-    g.lineTo(25, 10);
-    g.closePath();
-    g.fillPath();
-    g.strokePath();
+    const BUG_SVG = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <path d="M 24 30 L 12 24 L 10 34" fill="none" stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M 40 30 L 52 24 L 54 34" fill="none" stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M 24 40 L 10 42 L 14 52" fill="none" stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M 40 40 L 54 42 L 50 52" fill="none" stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <ellipse cx="32" cy="44" rx="14" ry="12" fill="#22c55e" stroke="#1a1a1a" stroke-width="3"/>
+  <ellipse cx="32" cy="28" rx="12" ry="10" fill="#4ade80" stroke="#1a1a1a" stroke-width="3"/>
+  <circle cx="32" cy="18" r="8" fill="#22c55e" stroke="#1a1a1a" stroke-width="3"/>
+  <path d="M 28 12 Q 24 4 16 8" fill="none" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round"/>
+  <path d="M 36 12 Q 40 4 48 8" fill="none" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="28" cy="16" r="2" fill="#1a1a1a"/>
+  <circle cx="36" cy="16" r="2" fill="#1a1a1a"/>
+</svg>`;
 
-    // Top peel (floppy)
-    g.beginPath();
-    g.moveTo(25, 10);
-    g.lineTo(25, 2);
-    g.lineTo(20, 15);
-    g.closePath();
-    g.fillPath();
-    g.strokePath();
-
-    g.generateTexture(`banana_peel_${suffix}`, 50, 50);
-    g.destroy();
-  }
-
-  private static generateDeadline(scene: Phaser.Scene) {
-    const g = scene.make.graphics({ x: 0, y: 0 });
-    const fill = 0xef4444; // Red
-    const line = 0x1a1a1a;
-
-    g.fillStyle(fill, 1);
-    g.lineStyle(3, line, 1);
-    g.fillRect(5, 5, 40, 40);
-    g.strokeRect(5, 5, 40, 40);
-
-    // Calendar "rings"
-    g.fillStyle(line, 1);
-    g.fillCircle(12, 5, 3);
-    g.fillCircle(38, 5, 3);
-
-    // "Time's up" text simplified as a clock hand
-    g.lineStyle(2, 0xffffff, 0.9);
-    g.beginPath();
-    g.moveTo(25, 25);
-    g.lineTo(25, 15);
-    g.moveTo(25, 25);
-    g.lineTo(35, 25);
-    g.strokePath();
-
-    g.generateTexture('enemy_deadline', 50, 50);
-    g.destroy();
-  }
-
-  private static generateScopeCreeper(scene: Phaser.Scene) {
-    const g = scene.make.graphics({ x: 0, y: 0 });
-    const fill = 0x8b5cf6; // Purple
-    const line = 0x1a1a1a;
-
-    g.fillStyle(fill, 1);
-    g.lineStyle(3, line, 1);
-
-    // Wide, amorphous blob (using ellipses for better compatibility)
-    g.fillEllipse(40, 25, 70, 40);
-    g.strokeEllipse(40, 25, 70, 40);
-
-    // Multiple "creepy" eyes
-    g.fillStyle(0xffffff, 1);
-    g.fillCircle(25, 25, 5);
-    g.fillCircle(45, 20, 4);
-    g.fillCircle(60, 28, 5);
-    g.fillStyle(line, 1);
-    g.fillCircle(27, 25, 2);
-    g.fillCircle(46, 20, 2);
-    g.fillCircle(62, 28, 2);
-
-    g.generateTexture('enemy_scope_creeper', 80, 50);
-    g.destroy();
-  }
-
-  private static generateBug(scene: Phaser.Scene) {
-    const g = scene.make.graphics({ x: 0, y: 0 });
-    const fill = 0x22c55e; // Green
-    const line = 0x1a1a1a;
-
-    g.fillStyle(fill, 1);
-    g.lineStyle(2, line, 1);
-
-    // Segmented insect body
-    g.fillCircle(15, 15, 8);
-    g.strokeCircle(15, 15, 8);
-    g.fillCircle(25, 15, 6);
-    g.strokeCircle(25, 15, 6);
-    g.fillCircle(33, 15, 5);
-    g.strokeCircle(33, 15, 5);
-
-    // Antennas
-    g.lineStyle(2, line, 1);
-    g.beginPath();
-    g.moveTo(10, 10);
-    g.lineTo(2, 2);
-    g.moveTo(10, 20);
-    g.lineTo(2, 28);
-    g.strokePath();
-
-    g.generateTexture('enemy_bug', 40, 30);
-    g.destroy();
+    scene.load.svg('banana_peel_yellow', 'data:image/svg+xml;utf8,' + encodeURIComponent(PEEL_SVG('#F3DE72', '#FCEE98')));
+    scene.load.svg('banana_peel_green', 'data:image/svg+xml;utf8,' + encodeURIComponent(PEEL_SVG('#A4D44D', '#D4F090')));
+    scene.load.svg('banana_peel_brown', 'data:image/svg+xml;utf8,' + encodeURIComponent(PEEL_SVG('#8B5A2B', '#A06D3D')));
+    scene.load.svg('enemy_deadline', 'data:image/svg+xml;utf8,' + encodeURIComponent(DEADLINE_SVG));
+    scene.load.svg('enemy_scope_creeper', 'data:image/svg+xml;utf8,' + encodeURIComponent(CREEPER_SVG));
+    scene.load.svg('enemy_bug', 'data:image/svg+xml;utf8,' + encodeURIComponent(BUG_SVG));
   }
 }
