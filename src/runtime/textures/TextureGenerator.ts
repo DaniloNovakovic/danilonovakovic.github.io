@@ -203,6 +203,8 @@ export class TextureGenerator {
   }
 
   static generatePotassiumAssets(scene: Phaser.Scene) {
+    if (scene.textures.exists('banana_peel_yellow')) return;
+
     const PEEL_SVG = (colorMain: string, colorLight: string) => `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
   <path d="M 32 36 C 26 50, 22 62, 32 62 C 42 62, 38 50, 32 36 Z" fill="${colorMain}" stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round"/>
