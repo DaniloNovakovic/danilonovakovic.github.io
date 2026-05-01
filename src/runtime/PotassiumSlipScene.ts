@@ -4,6 +4,7 @@ import {
   GAME_DESIGN_WIDTH
 } from './config';
 import { createUiText } from './text/createUiText';
+import { bridgeActions } from '../shared/bridge/store';
 import { TextureGenerator } from './textures/TextureGenerator';
 
 type GameState = 'START' | 'PLAYING' | 'GAME_OVER';
@@ -141,6 +142,9 @@ export class PotassiumSlipScene extends Phaser.Scene {
   update(): void {
     if (this.isPaused) return;
 
+    // Consume mobile taps from bridge
+    const { interactTap } = bridgeActions.consumeTouchOneShots();
+
     if (this.gameState === 'PLAYING') {
       this.bgGrid.tilePositionY -= 2; // Scroll background
 
@@ -164,6 +168,15 @@ export class PotassiumSlipScene extends Phaser.Scene {
       });
     } else {
       this.player.setVelocity(0, 0);
+      
+      // If a mobile tap occurred while in START or GAME_OVER, trigger the logic
+      if (interactTap) {
+        if (this.gameState === 'START') {
+          this.startGame();
+        } else if (this.gameState === 'GAME_OVER') {
+          this.onClose?.();
+        }
+      }
     }
   }
 
