@@ -12,6 +12,7 @@ import { setSceneKeyboardPaused } from './sceneKeyboardPause';
 import { bridgeActions, isItemEquipped, isItemOwned } from '../shared/bridge/store';
 import { PlayerController } from '../core/player/PlayerController';
 import { createUiText } from './text/createUiText';
+import { PlayerThoughtText } from './text/PlayerThoughtText';
 import { createInputCommandFrame } from '../core/input/commands';
 import { readPlayerSceneStep } from './input/scenePlayerInput';
 
@@ -31,6 +32,7 @@ export class BasementScene extends Phaser.Scene {
   interactPrompt!: Phaser.GameObjects.Text;
   statusText!: Phaser.GameObjects.Text;
   glasses!: Phaser.GameObjects.Container;
+  playerThought!: PlayerThoughtText;
 
   private controller!: PlayerController;
   private onClose?: () => void;
@@ -82,6 +84,8 @@ export class BasementScene extends Phaser.Scene {
     this.player = this.physics.add.sprite(playerX, playerY, 'player_idle');
     this.player.setCollideWorldBounds(true);
     this.player.setGravityY(1000);
+    this.playerThought = new PlayerThoughtText(this, { target: this.player });
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.playerThought?.destroy());
 
     const ground = this.add.zone(
       GAME_DESIGN_WIDTH / 2,
@@ -165,6 +169,7 @@ export class BasementScene extends Phaser.Scene {
 
     this.player.setFlipX(step.facingLeft);
     this.player.setAngle(step.moving ? Math.sin(this.time.now / 100) * 5 : 0);
+    this.playerThought.update();
 
     const nearComputer =
       Phaser.Math.Distance.Between(
@@ -176,7 +181,11 @@ export class BasementScene extends Phaser.Scene {
     if (nearComputer) {
       this.interactPrompt.setPosition(BASEMENT_COMPUTER.x, BASEMENT_COMPUTER.y - 92).setVisible(true);
       if (step.interactRequested) {
-        this.onInteract?.('games');
+        if (isItemOwned('glasses')) {
+          this.onInteract?.('games');
+        } else {
+          this.playerThought.show("ughh... I can't see");
+        }
       }
       return;
     }

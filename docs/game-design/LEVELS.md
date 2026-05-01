@@ -43,5 +43,5 @@
 
 - **Visuals:** Matrix-style falling code or raw terminal aesthetic.
 - **Role:** Central hub for "Secrets" and developer identity. Once an item is found in the world, it can appear here.
-- **The Computer:** An unnamed workstation with a simple `[E] Interact` prompt. It opens the terminal-style Developer Console.
+- **The Computer:** An unnamed workstation with a simple `[E] Interact` prompt. Before the glasses are collected, interacting produces a character thought (`ughh... I can't see`); after the glasses are owned, it opens the terminal-style Developer Console.
 - **The "Cheat" Terminal:** The Developer Console can start with commands like `whoami`, `skills`, and `help`, then later grow into cheatsheets, tests, and world modifiers such as `gravity 0.5`.

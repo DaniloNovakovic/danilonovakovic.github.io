@@ -28,6 +28,8 @@ This document describes the current runtime architecture in `src/` after the mic
 - `src/contextPlugins/plugins/StreetPlugin.ts`, `src/contextPlugins/plugins/HobbiesPlugin.ts`,
 `src/contextPlugins/plugins/BasementPlugin.ts`
   - Context plugin definitions for the Phaser scene contexts.
+- `src/runtime/text/PlayerThoughtText.ts`
+  - Small scene-local helper for character thoughts that follow a target, reuse the shared typewriter effect, and auto-hide without adding bridge state.
 
 ## Folder ownership (`runtime` vs `contextPlugins`)
 
@@ -61,7 +63,7 @@ After changes that touch Phaser boot, bridge, kernel, scenes, or overlays, run `
 
 1. **Overworld** — canvas loads; move left/right, jump, interact near a building.
 2. **Hobbies** — enter hobbies (building or `H` where applicable); walk; interact with an interior target; exit (`H` / `Esc` / close flow) returns to overworld.
-3. **Basement** — enter the Developer Basement; interact with the computer; closing the Developer Console resumes the basement scene.
+3. **Basement** — enter the Developer Basement; interact with the computer before glasses to see the character thought, then collect glasses and confirm the Developer Console opens and closes back to the basement scene.
 4. **React overlays** — open a building overlay from the street; close it; no stuck keyboard focus in the canvas.
 5. **Pause / input** — with a React overlay open, scene pause propagates (no gameplay input leaking); closing overlay resumes the parent scene or overworld input.
 
