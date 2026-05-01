@@ -1,23 +1,38 @@
-import { lazy, useCallback, Suspense, useState } from 'react';
-import type { ComponentType, LazyExoticComponent } from 'react';
+import { useCallback, useState } from 'react';
+import type { ComponentType } from 'react';
 import { BookOpen, Backpack } from 'lucide-react';
 import Game from './Game';
 import { GameState } from '../runtime/gameState';
-import { getReactOverlayBinding } from '../config/featureRuntimeBindings';
 import { getMiniGameById } from '../runtime/miniGameRegistry';
 import { MiniGameType } from '../runtime/types';
 import { TEXTS } from '../config/content';
-import { MINI_GAME_IDS, isMiniGameId, type MiniGameId } from '../config/featureIds';
+import { isMiniGameId, type MiniGameId } from '../config/featureIds';
 import type { MiniGameOverlayProps } from '../runtime/types';
 import { bridgeActions, useBridgeState } from '../shared/bridge/store';
 import { OverlayCard } from './overlays/OverlayCard';
+import ProfileOverlay from './ProfileOverlay';
+import ExperienceOverlay from './ExperienceOverlay';
+import ProjectsOverlay from './ProjectsOverlay';
+import AbilitiesOverlay from './AbilitiesOverlay';
+import ContactOverlay from './ContactOverlay';
+import CodingMini from './CodingMini';
+import DrawingCanvas from './DrawingCanvas';
+import GuitarStrings from './GuitarStrings';
+import MuayThaiMini from './MuayThaiMini';
+import DancingMini from './DancingMini';
 
-const REACT_OVERLAY_COMPONENTS = Object.fromEntries(
-  MINI_GAME_IDS.flatMap((id) => {
-    const binding = getReactOverlayBinding(id);
-    return binding ? [[id, lazy(binding.loadComponent)]] : [];
-  })
-) as Partial<Record<MiniGameId, LazyExoticComponent<ComponentType<MiniGameOverlayProps>>>>;
+const REACT_OVERLAY_COMPONENTS: Partial<Record<MiniGameId, ComponentType<MiniGameOverlayProps>>> = {
+  profile: ProfileOverlay,
+  experiences: ExperienceOverlay,
+  projects: ProjectsOverlay,
+  abilities: AbilitiesOverlay,
+  contact: ContactOverlay,
+  games: CodingMini,
+  art: DrawingCanvas,
+  music: GuitarStrings,
+  fitness: MuayThaiMini,
+  dancing: DancingMini
+};
 
 interface InteractiveAppProps {
   onSwitchToStatic: () => void;
@@ -132,13 +147,7 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
             description={activeMiniGame.description}
             onClose={closeOverlay}
           >
-            <Suspense
-              fallback={
-                <p className="text-sm font-bold text-[#1a1a1a] opacity-60">{TEXTS.common.loading}</p>
-              }
-            >
-              <ActiveOverlayComponent />
-            </Suspense>
+            <ActiveOverlayComponent />
           </OverlayCard>
         </div>
       )}

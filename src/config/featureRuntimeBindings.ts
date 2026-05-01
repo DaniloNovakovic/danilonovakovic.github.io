@@ -5,6 +5,16 @@ import {
   type MiniGameId
 } from './featureIds';
 import type { MiniGameOverlayProps } from '../runtime/types';
+import ProfileOverlay from '../components/ProfileOverlay';
+import ExperienceOverlay from '../components/ExperienceOverlay';
+import ProjectsOverlay from '../components/ProjectsOverlay';
+import AbilitiesOverlay from '../components/AbilitiesOverlay';
+import ContactOverlay from '../components/ContactOverlay';
+import CodingMini from '../components/CodingMini';
+import DrawingCanvas from '../components/DrawingCanvas';
+import GuitarStrings from '../components/GuitarStrings';
+import MuayThaiMini from '../components/MuayThaiMini';
+import DancingMini from '../components/DancingMini';
 
 export interface ReactOverlayRuntimeBinding {
   kind: 'reactOverlay';
@@ -22,19 +32,19 @@ export type FeatureRuntimeBinding = ReactOverlayRuntimeBinding | PhaserSceneRunt
 export const FEATURE_RUNTIME_BINDINGS: Record<MiniGameId, FeatureRuntimeBinding> = {
   profile: {
     kind: 'reactOverlay',
-    loadComponent: () => import('../components/ProfileOverlay')
+    loadComponent: async () => ({ default: ProfileOverlay })
   },
   experiences: {
     kind: 'reactOverlay',
-    loadComponent: () => import('../components/ExperienceOverlay')
+    loadComponent: async () => ({ default: ExperienceOverlay })
   },
   projects: {
     kind: 'reactOverlay',
-    loadComponent: () => import('../components/ProjectsOverlay')
+    loadComponent: async () => ({ default: ProjectsOverlay })
   },
   abilities: {
     kind: 'reactOverlay',
-    loadComponent: () => import('../components/AbilitiesOverlay')
+    loadComponent: async () => ({ default: AbilitiesOverlay })
   },
   hobbies: {
     kind: 'phaserScene',
@@ -53,27 +63,27 @@ export const FEATURE_RUNTIME_BINDINGS: Record<MiniGameId, FeatureRuntimeBinding>
   },
   contact: {
     kind: 'reactOverlay',
-    loadComponent: () => import('../components/ContactOverlay')
+    loadComponent: async () => ({ default: ContactOverlay })
   },
   games: {
     kind: 'reactOverlay',
-    loadComponent: () => import('../components/CodingMini')
+    loadComponent: async () => ({ default: CodingMini })
   },
   art: {
     kind: 'reactOverlay',
-    loadComponent: () => import('../components/DrawingCanvas')
+    loadComponent: async () => ({ default: DrawingCanvas })
   },
   music: {
     kind: 'reactOverlay',
-    loadComponent: () => import('../components/GuitarStrings')
+    loadComponent: async () => ({ default: GuitarStrings })
   },
   fitness: {
     kind: 'reactOverlay',
-    loadComponent: () => import('../components/MuayThaiMini')
+    loadComponent: async () => ({ default: MuayThaiMini })
   },
   dancing: {
     kind: 'reactOverlay',
-    loadComponent: () => import('../components/DancingMini')
+    loadComponent: async () => ({ default: DancingMini })
   }
 };
 
