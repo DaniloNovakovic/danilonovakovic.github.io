@@ -276,11 +276,15 @@ export class TextureGenerator {
   <circle cx="36" cy="16" r="2" fill="#1a1a1a"/>
 </svg>`;
 
-    scene.load.svg('banana_peel_yellow', 'data:image/svg+xml;utf8,' + encodeURIComponent(PEEL_SVG('#F3DE72', '#FCEE98')));
-    scene.load.svg('banana_peel_green', 'data:image/svg+xml;utf8,' + encodeURIComponent(PEEL_SVG('#A4D44D', '#D4F090')));
-    scene.load.svg('banana_peel_brown', 'data:image/svg+xml;utf8,' + encodeURIComponent(PEEL_SVG('#8B5A2B', '#A06D3D')));
-    scene.load.svg('enemy_deadline', 'data:image/svg+xml;utf8,' + encodeURIComponent(DEADLINE_SVG));
-    scene.load.svg('enemy_scope_creeper', 'data:image/svg+xml;utf8,' + encodeURIComponent(CREEPER_SVG));
-    scene.load.svg('enemy_bug', 'data:image/svg+xml;utf8,' + encodeURIComponent(BUG_SVG));
+    const toBase64 = (svg: string) => {
+      return 'data:image/svg+xml;base64,' + window.btoa(unescape(encodeURIComponent(svg)));
+    };
+
+    scene.load.svg('banana_peel_yellow', toBase64(PEEL_SVG('#F3DE72', '#FCEE98')));
+    scene.load.svg('banana_peel_green', toBase64(PEEL_SVG('#A4D44D', '#D4F090')));
+    scene.load.svg('banana_peel_brown', toBase64(PEEL_SVG('#8B5A2B', '#A06D3D')));
+    scene.load.svg('enemy_deadline', toBase64(DEADLINE_SVG));
+    scene.load.svg('enemy_scope_creeper', toBase64(CREEPER_SVG));
+    scene.load.svg('enemy_bug', toBase64(BUG_SVG));
   }
 }
