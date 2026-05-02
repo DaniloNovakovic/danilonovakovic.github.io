@@ -101,7 +101,8 @@ const UPGRADE_CHOICE_DELAY_MS = 450;
 const POISON_TINT = 0x65a30d;
 const CLONE_EFFECT_MULTIPLIER = 0.5;
 const FIRE_HIT_PATCH_LIFETIME_MS = 900;
-const POISON_SPLASH_RADIUS = 52;
+const POISON_DEATH_SPREAD_RADIUS = 76;
+const POISON_UPGRADED_DAMAGE_MULTIPLIER = 1.25;
 
 const ENEMY_CONFIGS: Record<EnemyKind, EnemyConfig> = {
   intern: {
@@ -196,7 +197,7 @@ function getDraftOptionDescription(option: SkillDraftOption): string {
   if (option.kind === 'poison') {
     return option.action === 'unlock'
       ? 'Hits poison enemies over time.'
-      : 'Poison splashes nearby.';
+      : 'Poisoned enemies spread on death.';
   }
   if (option.kind === 'explosion') {
     return option.action === 'unlock'
@@ -756,7 +757,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
   ): void {
     const canApplyHitProcs = this.canProjectileApplyHitProcs(projectile);
     if (canApplyHitProcs) {
-      this.applyStatusEffects(enemy, enemy.x, enemy.y, effectMultiplier, false);
+      this.applyStatusEffects(enemy, effectMultiplier, false);
     }
 
     if (canApplyHitProcs && this.getSkillRank('fire') >= 2) {
@@ -778,16 +779,11 @@ export class PotassiumSlipScene extends Phaser.Scene {
 
   private applyStatusEffects(
     enemy: EnemySprite,
-    originX: number,
-    originY: number,
     effectMultiplier: number,
     allowExplosionStatus: boolean
   ): void {
     if (this.getSkillRank('poison') > 0) {
       this.applyPoison(enemy, effectMultiplier);
-      if (this.getSkillRank('poison') >= 2) {
-        this.applyPoisonSplash(originX, originY, effectMultiplier);
-      }
     }
     if (allowExplosionStatus && this.getSkillRank('fire') > 0) {
       this.spawnFirePatch(enemy.x, enemy.y, effectMultiplier, FIRE_HIT_PATCH_LIFETIME_MS, 0.58);
@@ -848,11 +844,14 @@ export class PotassiumSlipScene extends Phaser.Scene {
     }
   }
 
-  private applyPoison(enemy: EnemySprite, effectMultiplier: number = 1): void {
+  private applyPoison(enemy: EnemySprite, effectMultiplier: number = 1, applyRankBonus = true): void {
+    const poisonMultiplier = applyRankBonus && this.getSkillRank('poison') >= 2
+      ? effectMultiplier * POISON_UPGRADED_DAMAGE_MULTIPLIER
+      : effectMultiplier;
     const currentExpiresAt = (enemy.getData('poisonExpiresAt') as number | undefined) ?? 0;
-    enemy.setData('poisonExpiresAt', Math.max(currentExpiresAt, this.time.now + POISON_DURATION_MS * effectMultiplier));
+    enemy.setData('poisonExpiresAt', Math.max(currentExpiresAt, this.time.now + POISON_DURATION_MS * poisonMultiplier));
     enemy.setData('poisoned', true);
-    enemy.setData('poisonMultiplier', Math.max((enemy.getData('poisonMultiplier') as number | undefined) ?? 0, effectMultiplier));
+    enemy.setData('poisonMultiplier', Math.max((enemy.getData('poisonMultiplier') as number | undefined) ?? 0, poisonMultiplier));
     enemy.setTint(POISON_TINT);
     const nextTickAt = enemy.getData('poisonNextTickAt') as number | undefined;
     if (nextTickAt === undefined || nextTickAt < this.time.now) {
@@ -860,12 +859,12 @@ export class PotassiumSlipScene extends Phaser.Scene {
     }
   }
 
-  private applyPoisonSplash(x: number, y: number, effectMultiplier: number): void {
+  private spreadPoisonFrom(x: number, y: number, effectMultiplier: number, sourceEnemy?: EnemySprite): void {
     this.enemies.getChildren().forEach((gameObject) => {
       const enemy = gameObject as EnemySprite;
-      if (!enemy.active || enemy.getData('dying')) return;
-      if (Phaser.Math.Distance.Between(x, y, enemy.x, enemy.y) <= POISON_SPLASH_RADIUS) {
-        this.applyPoison(enemy, effectMultiplier);
+      if (enemy === sourceEnemy || !enemy.active || enemy.getData('dying')) return;
+      if (Phaser.Math.Distance.Between(x, y, enemy.x, enemy.y) <= POISON_DEATH_SPREAD_RADIUS) {
+        this.applyPoison(enemy, effectMultiplier, false);
       }
     });
   }
@@ -920,6 +919,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
   private killEnemy(enemy: EnemySprite): void {
     const kind = enemy.getData('kind') as EnemyKind;
     const config = ENEMY_CONFIGS[kind];
+    this.spreadPoisonOnDeath(enemy);
     enemy.setData('dying', true);
     enemy.body.enable = false;
     this.score += config.score;
@@ -938,6 +938,13 @@ export class PotassiumSlipScene extends Phaser.Scene {
         }
       }
     });
+  }
+
+  private spreadPoisonOnDeath(enemy: EnemySprite): void {
+    const poisonExpiresAt = enemy.getData('poisonExpiresAt') as number | undefined;
+    if (this.getSkillRank('poison') < 2 || poisonExpiresAt === undefined || poisonExpiresAt <= this.time.now) return;
+    const effectMultiplier = (enemy.getData('poisonMultiplier') as number | undefined) ?? 1;
+    this.spreadPoisonFrom(enemy.x, enemy.y, effectMultiplier, enemy);
   }
 
   private spawnBananaClones(count: number, lifetimeMs: number): void {
@@ -1064,7 +1071,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
       if (damage > 0) {
         this.damageEnemy(enemy, damage, 'explosion');
         if (rank >= 2) {
-          this.applyStatusEffects(enemy, x, y, effectMultiplier, true);
+          this.applyStatusEffects(enemy, effectMultiplier, true);
         }
       }
     });
@@ -1092,7 +1099,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
       if (inBeam) {
         this.damageEnemy(enemy, 1 * effectMultiplier, 'ghost');
         if (rank >= 2) {
-          this.applyStatusEffects(enemy, enemy.x, enemy.y, effectMultiplier, false);
+          this.applyStatusEffects(enemy, effectMultiplier, false);
         }
       }
     });
