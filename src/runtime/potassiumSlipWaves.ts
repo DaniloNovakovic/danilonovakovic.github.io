@@ -1,11 +1,13 @@
-export type PotassiumEnemyKind = 'intern' | 'scope' | 'meeting' | 'deadline' | 'boss';
-export type PotassiumUpgradeKind = 'split' | 'poison' | 'bomb' | 'rubber' | 'magnet';
+export type PotassiumEnemyKind = 'intern' | 'scope' | 'meeting' | 'deadline' | 'wall' | 'boss';
+export type PotassiumUpgradeKind = 'split' | 'rubber' | 'magnet';
+export type PotassiumBananaModifier = 'normal' | 'poison' | 'bomb';
 
 export interface PotassiumWaveDefinition {
   wave: number;
   title: string;
   enemies: PotassiumEnemyKind[];
   guaranteedUpgrade?: PotassiumUpgradeKind;
+  modifierUnlock?: Exclude<PotassiumBananaModifier, 'normal'>;
 }
 
 export const POTASSIUM_WAVES: readonly PotassiumWaveDefinition[] = [
@@ -21,36 +23,41 @@ export const POTASSIUM_WAVES: readonly PotassiumWaveDefinition[] = [
   },
   {
     wave: 3,
-    title: 'Banana Split Training',
+    title: 'Bruise Certification',
     enemies: ['intern', 'scope', 'intern', 'scope'],
-    guaranteedUpgrade: 'split'
+    modifierUnlock: 'poison'
   },
   {
     wave: 4,
-    title: 'Meeting Brick Wall',
-    enemies: ['meeting', 'intern', 'meeting'],
-    guaranteedUpgrade: 'bomb'
+    title: 'Wall Orientation',
+    enemies: ['wall', 'intern', 'scope']
   },
   {
     wave: 5,
-    title: 'Deadline Uplink',
-    enemies: ['deadline', 'scope', 'deadline', 'intern'],
-    guaranteedUpgrade: 'poison'
+    title: 'Peel Bomb Paperwork',
+    enemies: ['meeting', 'wall', 'intern'],
+    modifierUnlock: 'bomb'
   },
   {
     wave: 6,
-    title: 'Office Blender',
-    enemies: ['meeting', 'deadline', 'scope', 'intern', 'meeting'],
-    guaranteedUpgrade: 'rubber'
+    title: 'Banana Split Training',
+    enemies: ['deadline', 'scope', 'wall', 'intern'],
+    guaranteedUpgrade: 'split'
   },
   {
     wave: 7,
-    title: 'Magnetized Nonsense',
-    enemies: ['deadline', 'scope', 'meeting', 'deadline', 'intern'],
-    guaranteedUpgrade: 'magnet'
+    title: 'Office Blender',
+    enemies: ['meeting', 'deadline', 'wall', 'scope', 'intern', 'meeting'],
+    guaranteedUpgrade: 'rubber'
   },
   {
     wave: 8,
+    title: 'Magnetized Nonsense',
+    enemies: ['deadline', 'scope', 'wall', 'meeting', 'deadline', 'intern'],
+    guaranteedUpgrade: 'magnet'
+  },
+  {
+    wave: 9,
     title: 'Compliance Review',
     enemies: ['boss']
   }
@@ -77,6 +84,16 @@ export function getUnlockedPotassiumUpgrades(wave: number): PotassiumUpgradeKind
     .filter((definition) => definition.wave <= wave)
     .map((definition) => definition.guaranteedUpgrade)
     .filter((upgrade): upgrade is PotassiumUpgradeKind => upgrade !== undefined));
+}
+
+export function getUnlockedPotassiumModifiers(wave: number): PotassiumBananaModifier[] {
+  return unique([
+    'normal',
+    ...POTASSIUM_WAVES
+      .filter((definition) => definition.wave <= wave)
+      .map((definition) => definition.modifierUnlock)
+      .filter((modifier): modifier is Exclude<PotassiumBananaModifier, 'normal'> => modifier !== undefined)
+  ]);
 }
 
 function unique<T>(values: readonly T[]): T[] {
