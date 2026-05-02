@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
   applyPotassiumDraftOption,
+  applyPotassiumGenericDraftOption,
   getPotassiumDuplicateCloneCount,
+  getPotassiumDraftChoices,
   getPotassiumExplosionDamage,
   getPotassiumExplosionRadius,
+  getPotassiumGenericUpgradeRank,
   getPotassiumScaledExplosionRadius,
   getPotassiumEnemyHpMultiplier,
   getPotassiumUpgradeChoices,
@@ -11,10 +14,13 @@ import {
   getScaledPotassiumEnemyHp,
   getUnlockedPotassiumEnemies,
   getUnlockedPotassiumUpgrades,
+  isPotassiumCampaignBossWave,
   isPotassiumBossWave,
   POTASSIUM_BOSS_WAVE,
   POTASSIUM_COLUMN_COUNT,
+  POTASSIUM_ENDLESS_START_WAVE,
   POTASSIUM_NON_BOSS_WAVE_COUNT,
+  POTASSIUM_UPGRADES,
   POTASSIUM_WAVES,
   type PotassiumWaveCell
 } from './potassiumSlipWaves';
@@ -99,14 +105,36 @@ describe('potassium slip waves', () => {
     expect(getPotassiumEnemyHpMultiplier(5)).toBe(1.3);
     expect(getPotassiumEnemyHpMultiplier(7)).toBe(1.45);
     expect(getPotassiumEnemyHpMultiplier(9)).toBe(1.6);
+    expect(getPotassiumEnemyHpMultiplier(POTASSIUM_ENDLESS_START_WAVE)).toBe(1.7);
+    expect(getPotassiumEnemyHpMultiplier(POTASSIUM_ENDLESS_START_WAVE + 99)).toBe(3);
     expect(getScaledPotassiumEnemyHp(2, 9)).toBe(4);
     expect(getScaledPotassiumEnemyHp(3, 9)).toBe(5);
   });
 
-  it('keeps the boss as the final wave', () => {
+  it('keeps the campaign boss at wave 11 and generates endless rows after it', () => {
     expect(isPotassiumBossWave(POTASSIUM_NON_BOSS_WAVE_COUNT)).toBe(false);
     expect(isPotassiumBossWave(POTASSIUM_BOSS_WAVE)).toBe(true);
-    expect(getPotassiumWave(99).title).toBe('Compliance Review');
+    expect(isPotassiumCampaignBossWave(POTASSIUM_BOSS_WAVE)).toBe(true);
+    const endlessWave = getPotassiumWave(POTASSIUM_ENDLESS_START_WAVE);
+    expect(isPotassiumBossWave(POTASSIUM_ENDLESS_START_WAVE)).toBe(false);
+    expect(endlessWave.title).toBe('Endless Audit 1');
+    expect(endlessWave.rows.every((row) => row.length === POTASSIUM_COLUMN_COUNT)).toBe(true);
+    expect(endlessWave.rows.flat()).not.toContain('boss');
+    endlessWave.rows.forEach((row) => {
+      expect(row.filter((cell) => cell === 'wall').length).toBeLessThanOrEqual(2);
+      expect(row.filter((cell) => cell === 'deadline').length).toBeLessThanOrEqual(2);
+      expect(row.some((cell) => cell === null)).toBe(true);
+    });
+  });
+
+  it('offers generic stat drafts after all skills are maxed', () => {
+    const maxedSkills = Object.fromEntries(POTASSIUM_UPGRADES.map((upgrade) => [upgrade, 2]));
+    expect(getPotassiumDraftChoices(maxedSkills, {}, 12, () => 0.999)).toEqual([
+      { type: 'generic', kind: 'damage' },
+      { type: 'generic', kind: 'poison' }
+    ]);
+    expect(getPotassiumGenericUpgradeRank({ damage: 2 }, 'damage')).toBe(2);
+    expect(applyPotassiumGenericDraftOption({ damage: 1 }, { type: 'generic', kind: 'damage' })).toEqual({ damage: 2 });
   });
 });
 

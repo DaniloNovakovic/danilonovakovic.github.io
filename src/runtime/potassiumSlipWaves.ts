@@ -10,11 +10,27 @@ export type PotassiumUpgradeKind =
 export type PotassiumSkillRank = 0 | 1 | 2;
 export type PotassiumSkillRanks = Partial<Record<PotassiumUpgradeKind, PotassiumSkillRank>>;
 export type PotassiumSkillDraftAction = 'unlock' | 'upgrade';
+export type PotassiumGenericUpgradeKind =
+  | 'damage'
+  | 'poison'
+  | 'explosion'
+  | 'cloneTime'
+  | 'bananaSpeed'
+  | 'bonusLife';
+export type PotassiumGenericUpgradeRanks = Partial<Record<PotassiumGenericUpgradeKind, number>>;
 
 export interface PotassiumSkillDraftOption {
+  type?: 'skill';
   kind: PotassiumUpgradeKind;
   action: PotassiumSkillDraftAction;
 }
+
+export interface PotassiumGenericDraftOption {
+  type: 'generic';
+  kind: PotassiumGenericUpgradeKind;
+}
+
+export type PotassiumDraftOption = PotassiumSkillDraftOption | PotassiumGenericDraftOption;
 
 export interface PotassiumWaveDefinition {
   wave: number;
@@ -27,6 +43,7 @@ type RowTemplate = 'single' | 'pair' | 'spread' | 'wallGate' | 'deadlineLane' | 
 export const POTASSIUM_COLUMN_COUNT = 5;
 export const POTASSIUM_NON_BOSS_WAVE_COUNT = 10;
 export const POTASSIUM_BOSS_WAVE = POTASSIUM_NON_BOSS_WAVE_COUNT + 1;
+export const POTASSIUM_ENDLESS_START_WAVE = POTASSIUM_BOSS_WAVE + 1;
 
 export const POTASSIUM_UPGRADES: readonly PotassiumUpgradeKind[] = [
   'fire',
@@ -35,6 +52,15 @@ export const POTASSIUM_UPGRADES: readonly PotassiumUpgradeKind[] = [
   'duplicate',
   'ghostHorizontal',
   'ghostVertical'
+] as const;
+
+export const POTASSIUM_GENERIC_UPGRADES: readonly PotassiumGenericUpgradeKind[] = [
+  'damage',
+  'poison',
+  'explosion',
+  'cloneTime',
+  'bananaSpeed',
+  'bonusLife'
 ] as const;
 
 export const POTASSIUM_WAVES: readonly PotassiumWaveDefinition[] = [
@@ -47,13 +73,18 @@ export const POTASSIUM_WAVES: readonly PotassiumWaveDefinition[] = [
 ] as const;
 
 export function getPotassiumWave(wave: number): PotassiumWaveDefinition {
-  if (wave >= POTASSIUM_BOSS_WAVE) return POTASSIUM_WAVES[POTASSIUM_WAVES.length - 1];
+  if (wave === POTASSIUM_BOSS_WAVE) return POTASSIUM_WAVES[POTASSIUM_WAVES.length - 1];
+  if (wave > POTASSIUM_BOSS_WAVE) return generatePotassiumWave(wave);
   const clampedIndex = Math.max(0, Math.min(POTASSIUM_NON_BOSS_WAVE_COUNT - 1, wave - 1));
   return POTASSIUM_WAVES[clampedIndex];
 }
 
 export function isPotassiumBossWave(wave: number): boolean {
-  return getPotassiumWave(wave).rows.some((row) => row.includes('boss'));
+  return wave === POTASSIUM_BOSS_WAVE;
+}
+
+export function isPotassiumCampaignBossWave(wave: number): boolean {
+  return isPotassiumBossWave(wave);
 }
 
 export function getUnlockedPotassiumEnemies(wave: number): PotassiumEnemyKind[] {
@@ -74,6 +105,22 @@ export function getPotassiumUpgradeChoices(
   return shufflePotassiumDraftOptions(getPotassiumDraftPool(skillRanks), random).slice(0, 2);
 }
 
+export function getPotassiumDraftChoices(
+  skillRanks: PotassiumSkillRanks,
+  genericRanks: PotassiumGenericUpgradeRanks,
+  completedWave: number,
+  random: () => number = Math.random
+): PotassiumDraftOption[] {
+  const skillChoices = getPotassiumUpgradeChoices(skillRanks, completedWave, random);
+  if (skillChoices.length > 0) return skillChoices;
+  return shufflePotassiumGenericOptions(
+    POTASSIUM_GENERIC_UPGRADES.map((kind) => ({ type: 'generic' as const, kind })),
+    random
+  )
+    .sort((left, right) => getPotassiumGenericUpgradeRank(genericRanks, left.kind) - getPotassiumGenericUpgradeRank(genericRanks, right.kind))
+    .slice(0, 2);
+}
+
 export function getUnlockedPotassiumUpgrades(skillRanks: PotassiumSkillRanks): PotassiumUpgradeKind[] {
   return POTASSIUM_UPGRADES.filter((upgrade) => getPotassiumSkillRank(skillRanks, upgrade) > 0);
 }
@@ -92,6 +139,23 @@ export function getPotassiumDraftPool(skillRanks: PotassiumSkillRanks): Potassiu
     if (rank === 1) return [{ kind: upgrade, action: 'upgrade' as const }];
     return [];
   });
+}
+
+export function getPotassiumGenericUpgradeRank(
+  genericRanks: PotassiumGenericUpgradeRanks,
+  upgrade: PotassiumGenericUpgradeKind
+): number {
+  return genericRanks[upgrade] ?? 0;
+}
+
+export function applyPotassiumGenericDraftOption(
+  genericRanks: PotassiumGenericUpgradeRanks,
+  option: PotassiumGenericDraftOption
+): PotassiumGenericUpgradeRanks {
+  return {
+    ...genericRanks,
+    [option.kind]: getPotassiumGenericUpgradeRank(genericRanks, option.kind) + 1
+  };
 }
 
 function getStructuredPotassiumUpgradeChoices(
@@ -158,6 +222,7 @@ export function getPotassiumExplosionDamage(
 }
 
 export function getPotassiumEnemyHpMultiplier(wave: number): number {
+  if (wave > POTASSIUM_BOSS_WAVE) return Math.min(3, 1.7 + (wave - POTASSIUM_ENDLESS_START_WAVE) * 0.1);
   if (wave >= 9) return 1.6;
   if (wave >= 7) return 1.45;
   if (wave >= 5) return 1.3;
@@ -184,6 +249,7 @@ function generatePotassiumWave(wave: number): PotassiumWaveDefinition {
 }
 
 function getGeneratedRowCount(wave: number): number {
+  if (wave > POTASSIUM_BOSS_WAVE) return Math.min(42, 24 + (wave - POTASSIUM_ENDLESS_START_WAVE) * 2);
   if (wave === 1) return 7;
   if (wave <= 2) return 8 + wave * 2;
   if (wave <= 6) return 12 + wave * 2;
@@ -274,6 +340,7 @@ function emptyRow(): PotassiumWaveCell[] {
 }
 
 function getGeneratedWaveTitle(wave: number): string {
+  if (wave > POTASSIUM_BOSS_WAVE) return `Endless Audit ${wave - POTASSIUM_BOSS_WAVE}`;
   if (wave <= 2) return `Orientation Stack ${wave}`;
   if (wave <= 4) return `Wall Pattern ${wave}`;
   if (wave <= 6) return `Office Pressure ${wave}`;
@@ -288,6 +355,18 @@ function shufflePotassiumDraftOptions(
   options: readonly PotassiumSkillDraftOption[],
   random: () => number
 ): PotassiumSkillDraftOption[] {
+  const shuffled = [...options];
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(clampRandomUnit(random) * (index + 1));
+    [shuffled[index], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[index]];
+  }
+  return shuffled;
+}
+
+function shufflePotassiumGenericOptions(
+  options: readonly PotassiumGenericDraftOption[],
+  random: () => number
+): PotassiumGenericDraftOption[] {
   const shuffled = [...options];
   for (let index = shuffled.length - 1; index > 0; index -= 1) {
     const randomIndex = Math.floor(clampRandomUnit(random) * (index + 1));

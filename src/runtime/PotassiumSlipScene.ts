@@ -8,25 +8,37 @@ import { bridgeActions } from '../shared/bridge/store';
 import { TextureGenerator } from './textures/TextureGenerator';
 import {
   applyPotassiumDraftOption,
+  applyPotassiumGenericDraftOption,
+  getPotassiumDraftChoices,
   getPotassiumDuplicateCloneCount,
   getPotassiumExplosionDamage,
+  getPotassiumGenericUpgradeRank,
   getPotassiumScaledExplosionRadius,
   getPotassiumSkillRank,
-  getPotassiumUpgradeChoices,
   getPotassiumWave,
   getScaledPotassiumEnemyHp,
   isPotassiumBossWave,
   POTASSIUM_COLUMN_COUNT,
-  type PotassiumSkillDraftOption as SkillDraftOption,
+  type PotassiumDraftOption as DraftOption,
+  type PotassiumGenericDraftOption as GenericDraftOption,
+  type PotassiumGenericUpgradeKind as GenericUpgradeKind,
+  type PotassiumGenericUpgradeRanks as GenericRanks,
   type PotassiumSkillRanks as SkillRanks,
   type PotassiumSkillRank as SkillRank,
   type PotassiumWaveCell as WaveCell,
   type PotassiumEnemyKind as EnemyKind,
   type PotassiumUpgradeKind as UpgradeKind
 } from './potassiumSlipWaves';
+import {
+  getPotassiumLeaderboardTop,
+  savePotassiumRunRecord,
+  type PotassiumRunMode as RunMode,
+  type PotassiumRunOutcome as RunOutcome
+} from './potassiumSlipLeaderboard';
 
 type GameState = 'START' | 'PLAYING' | 'UPGRADE' | 'WON' | 'GAME_OVER';
 type ControlState = 'idle' | 'aiming' | 'recalling';
+type TerminalAction = 'retry' | 'return' | 'endless';
 type EnemySprite = Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
 type ProjectileSprite = Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
 
@@ -46,10 +58,16 @@ interface UpgradeConfig {
 }
 
 interface UpgradeChoiceButton {
-  option: SkillDraftOption;
+  option: DraftOption;
   panel: Phaser.GameObjects.Rectangle;
   label: Phaser.GameObjects.Text;
   description: Phaser.GameObjects.Text;
+}
+
+interface TerminalButton {
+  action: TerminalAction;
+  panel: Phaser.GameObjects.Rectangle;
+  label: Phaser.GameObjects.Text;
 }
 
 const ARENA = {
@@ -103,6 +121,39 @@ const CLONE_EFFECT_MULTIPLIER = 0.5;
 const FIRE_HIT_PATCH_LIFETIME_MS = 900;
 const POISON_DEATH_SPREAD_RADIUS = 76;
 const POISON_UPGRADED_DAMAGE_MULTIPLIER = 1.25;
+
+const GENERIC_UPGRADE_CONFIGS: Record<GenericUpgradeKind, UpgradeConfig> = {
+  damage: {
+    label: 'Damage +',
+    color: '#1a1a1a',
+    description: '+12% banana and beam damage.'
+  },
+  poison: {
+    label: 'Poison +',
+    color: '#65a30d',
+    description: '+10% poison tick strength.'
+  },
+  explosion: {
+    label: 'Explosion +',
+    color: '#ef4444',
+    description: '+6% blast radius.'
+  },
+  cloneTime: {
+    label: 'Clone Time +',
+    color: '#facc15',
+    description: '+300ms clone lifetime.'
+  },
+  bananaSpeed: {
+    label: 'Banana Speed +',
+    color: '#38bdf8',
+    description: '+5% launch speed.'
+  },
+  bonusLife: {
+    label: 'Bonus Life',
+    color: '#a855f7',
+    description: '+1 life right now.'
+  }
+};
 
 const ENEMY_CONFIGS: Record<EnemyKind, EnemyConfig> = {
   intern: {
@@ -188,7 +239,12 @@ const UPGRADE_CONFIGS: Record<UpgradeKind, UpgradeConfig> = {
   }
 };
 
-function getDraftOptionDescription(option: SkillDraftOption): string {
+function isGenericDraftOption(option: DraftOption): option is GenericDraftOption {
+  return option.type === 'generic';
+}
+
+function getDraftOptionDescription(option: DraftOption): string {
+  if (isGenericDraftOption(option)) return GENERIC_UPGRADE_CONFIGS[option.kind].description;
   if (option.kind === 'fire') {
     return option.action === 'unlock'
       ? 'Moving bananas leave fire.'
@@ -219,7 +275,8 @@ function getDraftOptionDescription(option: SkillDraftOption): string {
     : 'Column beams apply statuses.';
 }
 
-function getDraftOptionTitle(option: SkillDraftOption): string {
+function getDraftOptionTitle(option: DraftOption): string {
+  if (isGenericDraftOption(option)) return GENERIC_UPGRADE_CONFIGS[option.kind].label;
   const label = UPGRADE_CONFIGS[option.kind].label;
   return option.action === 'upgrade' ? `${label} +` : label;
 }
@@ -242,9 +299,14 @@ export class PotassiumSlipScene extends Phaser.Scene {
   private pendingRows: number = 0;
   private aimPointerId: number | null = null;
   private skillRanks: SkillRanks = {};
+  private genericRanks: GenericRanks = {};
+  private runMode: RunMode = 'campaign';
+  private runRecordCompletedAt?: string;
   private upgradeChoiceButtons: UpgradeChoiceButton[] = [];
   private upgradeChoiceBackdrop?: Phaser.GameObjects.Rectangle;
   private upgradeChoiceTitle?: Phaser.GameObjects.Text;
+  private terminalButtons: TerminalButton[] = [];
+  private recordsText?: Phaser.GameObjects.Text;
 
   private hudText!: Phaser.GameObjects.Text;
   private scoreText!: Phaser.GameObjects.Text;
@@ -318,6 +380,9 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.pendingRows = 0;
     this.aimPointerId = null;
     this.skillRanks = {};
+    this.genericRanks = {};
+    this.runMode = 'campaign';
+    this.runRecordCompletedAt = undefined;
   }
 
   private createPotassiumTextures(): void {
@@ -450,7 +515,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
         return;
       }
       if (this.gameState === 'WON' || this.gameState === 'GAME_OVER') {
-        this.onClose?.();
+        this.handleTerminalPointer(pointer);
         return;
       }
       if (this.gameState !== 'PLAYING') return;
@@ -476,6 +541,18 @@ export class PotassiumSlipScene extends Phaser.Scene {
       }
     });
 
+    this.input.keyboard?.on('keydown-R', () => {
+      if (this.gameState === 'WON' || this.gameState === 'GAME_OVER') {
+        this.startGame();
+      }
+    });
+
+    this.input.keyboard?.on('keydown-SPACE', () => {
+      if (this.gameState === 'WON') {
+        this.startEndlessMode();
+      }
+    });
+
     this.input.keyboard?.on('keydown-ESC', () => {
       this.onClose?.();
     });
@@ -486,9 +563,25 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.gameState = 'PLAYING';
     this.overlayText.setVisible(false);
     this.subOverlayText.setVisible(false);
+    this.clearTerminalOverlay();
     this.resetBoardObjects();
     bridgeActions.setSceneHintText('Drag toward a target • Hold to recall');
     this.spawnWave(1);
+    this.updateHud();
+  }
+
+  private startEndlessMode(): void {
+    if (this.gameState !== 'WON') return;
+    this.runMode = 'endless';
+    this.gameState = 'PLAYING';
+    this.waveAdvancing = false;
+    this.pendingRows = 0;
+    this.overlayText.setVisible(false);
+    this.subOverlayText.setVisible(false);
+    this.clearTerminalOverlay();
+    this.resetBoardObjects();
+    bridgeActions.setSceneHintText('Endless audit • The nonsense keeps filing');
+    this.spawnWave(12);
     this.updateHud();
   }
 
@@ -509,6 +602,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.aimLine?.clear();
     this.tetherLine?.clear();
     this.clearUpgradeChoiceOverlay();
+    this.clearTerminalOverlay();
   }
 
   private beginAiming(pointer: Phaser.Input.Pointer): void {
@@ -633,11 +727,31 @@ export class PotassiumSlipScene extends Phaser.Scene {
   }
 
   private getMaxBananaSpeed(): number {
-    return MAIN_BANANA_MAX_SPEED;
+    return MAIN_BANANA_MAX_SPEED * (1 + this.getGenericRank('bananaSpeed') * 0.05);
   }
 
   private getSkillRank(upgrade: UpgradeKind): SkillRank {
     return getPotassiumSkillRank(this.skillRanks, upgrade);
+  }
+
+  private getGenericRank(upgrade: GenericUpgradeKind): number {
+    return getPotassiumGenericUpgradeRank(this.genericRanks, upgrade);
+  }
+
+  private getDamageMultiplier(): number {
+    return 1 + this.getGenericRank('damage') * 0.12;
+  }
+
+  private getPoisonGenericMultiplier(): number {
+    return 1 + this.getGenericRank('poison') * 0.1;
+  }
+
+  private getExplosionRadiusMultiplier(): number {
+    return 1 + this.getGenericRank('explosion') * 0.06;
+  }
+
+  private getCloneLifetimeMs(): number {
+    return DUPLICATE_CLONE_LIFETIME_MS + this.getGenericRank('cloneTime') * 300;
   }
 
   private getProjectileEffectMultiplier(projectile: ProjectileSprite): number {
@@ -739,7 +853,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
 
     const isMainRecall = projectile === this.banana && this.controlState === 'recalling';
     const effectMultiplier = this.getProjectileEffectMultiplier(projectile);
-    this.damageEnemy(enemy, (isMainRecall ? RECALL_DAMAGE : 1) * effectMultiplier, 'banana');
+    this.damageEnemy(enemy, (isMainRecall ? RECALL_DAMAGE : 1) * effectMultiplier * this.getDamageMultiplier(), 'banana');
     if (isMainRecall) {
       projectile.setVelocity(projectile.body.velocity.x * 1.01, projectile.body.velocity.y * 1.01);
     } else {
@@ -767,7 +881,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
       this.explodeAt(enemy.x, enemy.y, effectMultiplier, this.getProjectileExplosionRadiusMultiplier(projectile));
     }
     if (!isMainRecall && projectile.getData('canDuplicate') && this.getSkillRank('duplicate') > 0) {
-      this.spawnBananaClones(getPotassiumDuplicateCloneCount(this.getSkillRank('duplicate')), DUPLICATE_CLONE_LIFETIME_MS);
+      this.spawnBananaClones(getPotassiumDuplicateCloneCount(this.getSkillRank('duplicate')), this.getCloneLifetimeMs());
     }
     if (!isMainRecall && this.getSkillRank('ghostHorizontal') > 0) {
       this.spawnGhostBeam(enemy.x, enemy.y, 'horizontal', effectMultiplier);
@@ -846,7 +960,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
 
   private applyPoison(enemy: EnemySprite, effectMultiplier: number = 1, applyRankBonus = true): void {
     const poisonMultiplier = applyRankBonus && this.getSkillRank('poison') >= 2
-      ? effectMultiplier * POISON_UPGRADED_DAMAGE_MULTIPLIER
+      ? effectMultiplier * POISON_UPGRADED_DAMAGE_MULTIPLIER * this.getPoisonGenericMultiplier()
       : effectMultiplier;
     const currentExpiresAt = (enemy.getData('poisonExpiresAt') as number | undefined) ?? 0;
     enemy.setData('poisonExpiresAt', Math.max(currentExpiresAt, this.time.now + POISON_DURATION_MS * poisonMultiplier));
@@ -1053,7 +1167,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
 
   private explodeAt(x: number, y: number, effectMultiplier: number, radiusMultiplier: number): void {
     const rank = this.getSkillRank('explosion');
-    const radius = getPotassiumScaledExplosionRadius(rank, radiusMultiplier);
+    const radius = getPotassiumScaledExplosionRadius(rank, radiusMultiplier * this.getExplosionRadiusMultiplier());
     const blast = this.add.circle(x, y, 18, 0xf97316, 0.22)
       .setStrokeStyle(5, 0x1a1a1a, 1)
       .setDepth(940);
@@ -1067,7 +1181,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.enemies.getChildren().forEach((gameObject) => {
       const enemy = gameObject as EnemySprite;
       const distance = Phaser.Math.Distance.Between(x, y, enemy.x, enemy.y);
-      const damage = getPotassiumExplosionDamage(distance, radius, effectMultiplier);
+      const damage = getPotassiumExplosionDamage(distance, radius, effectMultiplier * this.getDamageMultiplier());
       if (damage > 0) {
         this.damageEnemy(enemy, damage, 'explosion');
         if (rank >= 2) {
@@ -1097,7 +1211,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
         ? Math.abs(enemy.y - y) <= 28
         : Math.abs(enemy.x - x) <= 28;
       if (inBeam) {
-        this.damageEnemy(enemy, 1 * effectMultiplier, 'ghost');
+        this.damageEnemy(enemy, 1 * effectMultiplier * this.getDamageMultiplier(), 'ghost');
         if (rank >= 2) {
           this.applyStatusEffects(enemy, effectMultiplier, false);
         }
@@ -1239,7 +1353,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
   }
 
   private showUpgradeChoices(): void {
-    const choices = getPotassiumUpgradeChoices(this.skillRanks, this.wave);
+    const choices = getPotassiumDraftChoices(this.skillRanks, this.genericRanks, this.wave);
     if (choices.length === 0) {
       this.advanceToNextWave();
       return;
@@ -1264,7 +1378,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
     const buttonHeight = 82;
     const startX = choices.length === 1 ? GAME_DESIGN_WIDTH / 2 : GAME_DESIGN_WIDTH / 2 - 88;
     this.upgradeChoiceButtons = choices.map((option, index) => {
-      const config = UPGRADE_CONFIGS[option.kind];
+      const config = isGenericDraftOption(option) ? GENERIC_UPGRADE_CONFIGS[option.kind] : UPGRADE_CONFIGS[option.kind];
       const x = startX + index * 176;
       const panel = this.add.rectangle(x, 312, buttonWidth, buttonHeight, 0xffffff, 0.92)
         .setStrokeStyle(3, 0x1a1a1a, 0.75)
@@ -1298,7 +1412,17 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.advanceToNextWave();
   }
 
-  private applyDraftChoice(option: SkillDraftOption): void {
+  private applyDraftChoice(option: DraftOption): void {
+    if (isGenericDraftOption(option)) {
+      this.genericRanks = applyPotassiumGenericDraftOption(this.genericRanks, option);
+      if (option.kind === 'bonusLife') {
+        this.lives += 1;
+      }
+      bridgeActions.setSceneHintText(`${GENERIC_UPGRADE_CONFIGS[option.kind].label} stacked • Endless paperwork trembles`);
+      this.updateHud();
+      return;
+    }
+
     this.skillRanks = applyPotassiumDraftOption(this.skillRanks, option);
     const actionLabel = option.action === 'unlock' ? 'unlocked' : 'upgraded';
     bridgeActions.setSceneHintText(`${UPGRADE_CONFIGS[option.kind].label} ${actionLabel} • It stacks forever`);
@@ -1367,13 +1491,18 @@ export class PotassiumSlipScene extends Phaser.Scene {
   private getActiveUpgradeText(): string {
     const unlocked = Object.entries(this.skillRanks)
       .filter(([, rank]) => rank !== undefined && rank > 0) as Array<[UpgradeKind, SkillRank]>;
-    if (unlocked.length === 0) return 'no nonsense yet';
-    return unlocked
+    const skillText = unlocked
       .map(([upgrade, rank]) => `${UPGRADE_CONFIGS[upgrade].label.replace(' Damage', '').replace(' Trail', '').toLowerCase()}${rank >= 2 ? '+' : ''}`)
       .join(' + ');
+    const genericText = Object.entries(this.genericRanks)
+      .filter(([, rank]) => rank !== undefined && rank > 0)
+      .map(([upgrade, rank]) => `${GENERIC_UPGRADE_CONFIGS[upgrade as GenericUpgradeKind].label.toLowerCase()}x${rank}`)
+      .join(' + ');
+    return [skillText, genericText].filter(Boolean).join(' + ') || 'no nonsense yet';
   }
 
   private getWaveHint(wave: number): string {
+    if (wave > 11) return 'endless paperwork escalation';
     if (wave === 1) return 'launch and bounce';
     if (wave === 2) return 'multi-hit blobs';
     if (wave === 3) return 'walls block angles';
@@ -1390,10 +1519,14 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.clones.clear(true, true);
     this.trailZones.clear(true, true);
     this.clearUpgradeChoiceOverlay();
-    bridgeActions.collectItem('circuit');
+    if (this.runMode === 'campaign') {
+      bridgeActions.collectItem('circuit');
+    }
+    this.saveRunRecord('won');
     bridgeActions.setSceneHintText(null);
     this.overlayText.setFontSize(26).setText('CIRCUIT ACQUIRED').setPosition(GAME_DESIGN_WIDTH / 2, 255).setVisible(true);
-    this.subOverlayText.setFontSize(15).setText(`Final Score: ${this.score}\n[E] RETURN TO CITY`).setPosition(GAME_DESIGN_WIDTH / 2, 320).setVisible(true);
+    this.subOverlayText.setFontSize(15).setText(`Final Score: ${this.score}`).setPosition(GAME_DESIGN_WIDTH / 2, 308).setVisible(true);
+    this.createTerminalOverlay('won');
   }
 
   private gameOver(): void {
@@ -1403,9 +1536,90 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.trailZones.clear(true, true);
     this.banana.setVelocity(0, 0);
     this.clearUpgradeChoiceOverlay();
+    this.saveRunRecord('game_over');
     bridgeActions.setSceneHintText(null);
     this.overlayText.setFontSize(24).setText('BANANA BANKRUPTCY').setPosition(GAME_DESIGN_WIDTH / 2, 255).setVisible(true);
-    this.subOverlayText.setFontSize(15).setText(`Final Score: ${this.score}\n[E] RETURN TO CITY`).setPosition(GAME_DESIGN_WIDTH / 2, 320).setVisible(true);
+    this.subOverlayText.setFontSize(15).setText(`Final Score: ${this.score}`).setPosition(GAME_DESIGN_WIDTH / 2, 308).setVisible(true);
+    this.createTerminalOverlay('game_over');
+  }
+
+  private saveRunRecord(outcome: RunOutcome): void {
+    this.runRecordCompletedAt ??= new Date().toISOString();
+    savePotassiumRunRecord({
+      score: this.score,
+      wave: this.wave,
+      mode: this.runMode,
+      outcome,
+      completedAt: this.runRecordCompletedAt
+    });
+  }
+
+  private createTerminalOverlay(outcome: RunOutcome): void {
+    this.clearTerminalOverlay();
+    const buttons: Array<{ action: TerminalAction; label: string }> = outcome === 'won'
+      ? [
+        { action: 'endless', label: 'ENDLESS MODE' },
+        { action: 'return', label: 'RETURN TO CITY' }
+      ]
+      : [
+        { action: 'retry', label: 'RETRY' },
+        { action: 'return', label: 'RETURN TO CITY' }
+      ];
+    const startX = GAME_DESIGN_WIDTH / 2 - 88;
+    this.terminalButtons = buttons.map((button, index) => {
+      const x = startX + index * 176;
+      const panel = this.add.rectangle(x, 360, 156, 36, 0xffffff, 0.96)
+        .setStrokeStyle(3, 0x1a1a1a, 0.88)
+        .setDepth(1210);
+      const label = createUiText(this, x, 360, button.label, {
+        fontSize: '10px',
+        color: '#1a1a1a',
+        fontStyle: 'bold',
+        align: 'center'
+      }).setOrigin(0.5).setDepth(1211);
+      return { action: button.action, panel, label };
+    });
+
+    this.recordsText = createUiText(this, GAME_DESIGN_WIDTH / 2, 424, this.getRecordsOverlayText(), {
+      fontSize: '9px',
+      color: '#1a1a1a',
+      fontStyle: 'bold',
+      align: 'center',
+      wordWrap: { width: ARENA.width - 72, useAdvancedWrap: true }
+    }).setOrigin(0.5, 0).setDepth(1210);
+  }
+
+  private getRecordsOverlayText(): string {
+    const records = getPotassiumLeaderboardTop(3);
+    if (records.length === 0) return 'RECORDS\nNo banana paperwork filed yet.';
+    return [
+      'RECORDS',
+      ...records.map((record, index) => (
+        `${index + 1}. ${record.score} • W${record.wave} • ${record.mode === 'endless' ? 'endless' : record.outcome}`
+      ))
+    ].join('\n');
+  }
+
+  private handleTerminalPointer(pointer: Phaser.Input.Pointer): void {
+    const button = this.terminalButtons.find((candidate) => candidate.panel.getBounds().contains(pointer.x, pointer.y));
+    if (!button) return;
+    if (button.action === 'return') {
+      this.onClose?.();
+    } else if (button.action === 'retry') {
+      this.startGame();
+    } else {
+      this.startEndlessMode();
+    }
+  }
+
+  private clearTerminalOverlay(): void {
+    this.terminalButtons.forEach((button) => {
+      button.panel.destroy();
+      button.label.destroy();
+    });
+    this.terminalButtons = [];
+    this.recordsText?.destroy();
+    this.recordsText = undefined;
   }
 
   private createInternTexture(): void {
