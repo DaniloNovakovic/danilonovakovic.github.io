@@ -4,7 +4,7 @@ import { isMiniGameId, PHASER_SCENE_KEYS } from '../config/featureIds';
 import { getPhaserSceneBinding } from '../config/featureRuntimeBindings';
 import { getGameConfig } from '../runtime/config';
 import { OverworldScene } from '../runtime/OverworldScene';
-import { forgetResumePosition, peekResumePosition } from '../runtime/sceneResumeStore';
+import { getSceneStartResume, prepareSceneStart } from '../runtime/sceneResumePolicy';
 import { bridgeActions } from '../shared/bridge/store';
 import { SceneManager } from '../core/kernel/SceneManager';
 import { PhaserSceneAdapter } from '../infra/phaser/PhaserSceneAdapter';
@@ -106,8 +106,8 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
       onInteract: stableOnInteract,
       onClose: stableOnClose,
       getIsPaused: () => bridgeRef.current.isPaused,
-      getResumePosition: (sceneKey) => peekResumePosition(sceneKey),
-      forgetResumePosition: (sceneKey) => forgetResumePosition(sceneKey),
+      prepareSceneStart: (sceneKey) => prepareSceneStart(sceneKey),
+      getSceneStartResume: (sceneKey) => getSceneStartResume(sceneKey),
       loadPhaserScene: (id) => getPhaserSceneBinding(id)?.loadScene()
     });
     contextPlugins.forEach((plugin) => sceneManager.registerContext(plugin));

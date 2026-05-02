@@ -9,8 +9,8 @@ export interface ContextPluginAssemblyDeps {
   onInteract: (area: string) => void;
   onClose: () => void;
   getIsPaused: () => boolean;
-  getResumePosition: (sceneKey: string) => ResumeSnapshot | undefined;
-  forgetResumePosition: (sceneKey: string) => void;
+  prepareSceneStart: (sceneKey: string) => void;
+  getSceneStartResume: (sceneKey: string) => ResumeSnapshot | undefined;
   loadPhaserScene: (id: MiniGameId) => Promise<unknown> | undefined;
 }
 
@@ -24,29 +24,32 @@ export function createContextPlugins(
     }
     return scene;
   };
+  const getPreparedResume = (sceneKey: string) => () => {
+    deps.prepareSceneStart(sceneKey);
+    return deps.getSceneStartResume(sceneKey);
+  };
 
   return [
     createStreetPlugin({
       onInteract: deps.onInteract,
       getIsPaused: deps.getIsPaused,
-      getResumePosition: () => deps.getResumePosition(PHASER_SCENE_KEYS.main)
+      getResumePosition: getPreparedResume(PHASER_SCENE_KEYS.main)
     }),
     createHobbiesPlugin({
       onClose: deps.onClose,
       onInteract: deps.onInteract,
-      getResumePosition: () => deps.getResumePosition(PHASER_SCENE_KEYS.hobbies),
+      getResumePosition: getPreparedResume(PHASER_SCENE_KEYS.hobbies),
       loadScene: loadScene(PHASER_SCENE_KEYS.hobbies)
     }),
     createBasementPlugin({
       onClose: deps.onClose,
       onInteract: deps.onInteract,
-      getResumePosition: () => deps.getResumePosition(PHASER_SCENE_KEYS.basement),
+      getResumePosition: getPreparedResume(PHASER_SCENE_KEYS.basement),
       loadScene: loadScene(PHASER_SCENE_KEYS.basement)
     }),
     createPotassiumPlatformerPlugin({
       onClose: deps.onClose,
-      forgetResumePosition: () => deps.forgetResumePosition(PHASER_SCENE_KEYS.potassium),
-      getResumePosition: () => deps.getResumePosition(PHASER_SCENE_KEYS.potassium),
+      getResumePosition: getPreparedResume(PHASER_SCENE_KEYS.potassium),
       loadScene: loadScene(PHASER_SCENE_KEYS.potassium)
     })
   ];

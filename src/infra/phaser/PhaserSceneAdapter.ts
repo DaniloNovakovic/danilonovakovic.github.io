@@ -1,10 +1,9 @@
 import * as Phaser from 'phaser';
-import { PHASER_SCENE_KEYS } from '../../config/featureIds';
 import {
   isPausableScene,
   isResumeCaptureScene
 } from '../../runtime/sceneContracts';
-import { rememberResumePosition } from '../../runtime/sceneResumeStore';
+import { recordSceneExitResume } from '../../runtime/sceneResumePolicy';
 import type { ResumeSnapshot } from '../../core/kernel/types';
 import type { SceneRuntimeAdapter } from '../../core/kernel/SceneManager';
 
@@ -73,12 +72,7 @@ export class PhaserSceneAdapter implements SceneRuntimeAdapter {
     const scene = game.scene.getScene(sceneKey);
     if (!scene || !isResumeCaptureScene(scene)) return null;
     const position = scene.getResumeCapturePosition();
-    if (!position) return null;
-    // Secret mini-game: each entry should start fresh (spawn + collectibles), not last exit coords.
-    if (sceneKey !== PHASER_SCENE_KEYS.potassium) {
-      rememberResumePosition(sceneKey, position);
-    }
-    return position;
+    return recordSceneExitResume(sceneKey, position);
   }
 
 }

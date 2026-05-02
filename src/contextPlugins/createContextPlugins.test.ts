@@ -9,8 +9,8 @@ function makeDeps(
     onInteract: vi.fn(),
     onClose: vi.fn(),
     getIsPaused: vi.fn(() => true),
-    getResumePosition: vi.fn((sceneKey: string) => ({ x: sceneKey.length, y: 2 })),
-    forgetResumePosition: vi.fn(),
+    prepareSceneStart: vi.fn(),
+    getSceneStartResume: vi.fn((sceneKey: string) => ({ x: sceneKey.length, y: 2 })),
     loadPhaserScene: vi.fn(async (id: MiniGameId) => ({ id })),
     ...overrides
   };
@@ -30,22 +30,22 @@ describe('createContextPlugins', () => {
 
   it('builds street start data from current bridge and resume deps', () => {
     const onInteract = vi.fn();
-    const getResumePosition = vi.fn(() => ({ x: 3, y: 4 }));
-    const plugins = createContextPlugins(makeDeps({ onInteract, getResumePosition }));
+    const getSceneStartResume = vi.fn(() => ({ x: 3, y: 4 }));
+    const plugins = createContextPlugins(makeDeps({ onInteract, getSceneStartResume }));
 
     expect(plugins[0].getStartData()).toEqual({
       onInteract,
       isPaused: true,
       resumePosition: { x: 3, y: 4 }
     });
-    expect(getResumePosition).toHaveBeenCalledWith(PHASER_SCENE_KEYS.main);
+    expect(getSceneStartResume).toHaveBeenCalledWith(PHASER_SCENE_KEYS.main);
   });
 
   it('builds hobbies and basement start data with shared close and interact deps', () => {
     const onClose = vi.fn();
     const onInteract = vi.fn();
-    const getResumePosition = vi.fn((sceneKey: string) => ({ x: sceneKey.length, y: 9 }));
-    const plugins = createContextPlugins(makeDeps({ onClose, onInteract, getResumePosition }));
+    const getSceneStartResume = vi.fn((sceneKey: string) => ({ x: sceneKey.length, y: 9 }));
+    const plugins = createContextPlugins(makeDeps({ onClose, onInteract, getSceneStartResume }));
 
     expect(plugins[1].getStartData()).toEqual({
       onClose,
@@ -59,20 +59,20 @@ describe('createContextPlugins', () => {
       isPaused: false,
       resumePosition: { x: PHASER_SCENE_KEYS.basement.length, y: 9 }
     });
-    expect(getResumePosition).toHaveBeenCalledWith(PHASER_SCENE_KEYS.hobbies);
-    expect(getResumePosition).toHaveBeenCalledWith(PHASER_SCENE_KEYS.basement);
+    expect(getSceneStartResume).toHaveBeenCalledWith(PHASER_SCENE_KEYS.hobbies);
+    expect(getSceneStartResume).toHaveBeenCalledWith(PHASER_SCENE_KEYS.basement);
   });
 
-  it('forgets potassium resume before reading potassium start position', () => {
+  it('prepares potassium start before reading potassium start position', () => {
     const calls: string[] = [];
-    const forgetResumePosition = vi.fn((sceneKey: string) => {
-      calls.push(`forget:${sceneKey}`);
+    const prepareSceneStart = vi.fn((sceneKey: string) => {
+      calls.push(`prepare:${sceneKey}`);
     });
-    const getResumePosition = vi.fn((sceneKey: string) => {
+    const getSceneStartResume = vi.fn((sceneKey: string) => {
       calls.push(`get:${sceneKey}`);
       return { x: 8, y: 13 };
     });
-    const plugins = createContextPlugins(makeDeps({ forgetResumePosition, getResumePosition }));
+    const plugins = createContextPlugins(makeDeps({ prepareSceneStart, getSceneStartResume }));
 
     expect(plugins[3].getStartData()).toEqual({
       onClose: expect.any(Function),
@@ -80,7 +80,32 @@ describe('createContextPlugins', () => {
       resumePosition: { x: 8, y: 13 }
     });
     expect(calls).toEqual([
-      `forget:${PHASER_SCENE_KEYS.potassium}`,
+      `prepare:${PHASER_SCENE_KEYS.potassium}`,
+      `get:${PHASER_SCENE_KEYS.potassium}`
+    ]);
+  });
+
+  it('prepares each scene start before reading its resume position', () => {
+    const calls: string[] = [];
+    const prepareSceneStart = vi.fn((sceneKey: string) => {
+      calls.push(`prepare:${sceneKey}`);
+    });
+    const getSceneStartResume = vi.fn((sceneKey: string) => {
+      calls.push(`get:${sceneKey}`);
+      return undefined;
+    });
+    const plugins = createContextPlugins(makeDeps({ prepareSceneStart, getSceneStartResume }));
+
+    plugins.forEach((plugin) => plugin.getStartData());
+
+    expect(calls).toEqual([
+      `prepare:${PHASER_SCENE_KEYS.main}`,
+      `get:${PHASER_SCENE_KEYS.main}`,
+      `prepare:${PHASER_SCENE_KEYS.hobbies}`,
+      `get:${PHASER_SCENE_KEYS.hobbies}`,
+      `prepare:${PHASER_SCENE_KEYS.basement}`,
+      `get:${PHASER_SCENE_KEYS.basement}`,
+      `prepare:${PHASER_SCENE_KEYS.potassium}`,
       `get:${PHASER_SCENE_KEYS.potassium}`
     ]);
   });
