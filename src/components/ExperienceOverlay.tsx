@@ -1,6 +1,7 @@
 import React from 'react';
 import { PORTFOLIO_DATA } from '../config/portfolio';
 import { TEXTS } from '../config/content';
+import { Badge, Card, LinkButton } from '../ui';
 
 const ExperienceOverlay: React.FC = () => {
   const { experiences } = PORTFOLIO_DATA;
@@ -9,22 +10,23 @@ const ExperienceOverlay: React.FC = () => {
     <div className="text-[#1a1a1a]">
       <div className="space-y-8">
         {experiences.map((exp, index) => (
-          <div key={index} className="bg-white p-6 rounded-lg border-4 border-[#1a1a1a] shadow-[8px_8px_0px_0px_rgba(26,26,26,1)]">
+          <Card key={index}>
             <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 border-b-2 border-gray-100 pb-2">
               <h3 className="text-xl font-bold">{exp.title}</h3>
-              <span className="text-sm font-mono bg-gray-100 px-3 py-1 rounded-full">{exp.period}</span>
+              <Badge shape="pill" className="font-mono text-sm normal-case tracking-normal">{exp.period}</Badge>
             </div>
             <p className="mb-2 text-lg font-semibold">
               {exp.companyUrl ? (
-                <a
+                <LinkButton
                   href={exp.companyUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="cursor-pointer rounded-sm text-[#1a1a1a] underline decoration-dashed underline-offset-2 transition-opacity hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1a1a1a]"
+                  variant="quiet"
+                  className="inline p-0 text-lg normal-case tracking-normal"
                   aria-label={`${exp.company} (opens in new tab)`}
                 >
                   {exp.company}
-                </a>
+                </LinkButton>
               ) : (
                 <span className="text-[#1a1a1a]">{exp.company}</span>
               )}
@@ -32,7 +34,7 @@ const ExperienceOverlay: React.FC = () => {
             <p className="text-base leading-relaxed text-gray-700">
               {exp.description}
             </p>
-          </div>
+          </Card>
         ))}
       </div>
       <p className="mt-8 text-center text-sm text-gray-500 font-mono">{TEXTS.common.scrollToSeeMore}</p>
@@ -41,4 +43,3 @@ const ExperienceOverlay: React.FC = () => {
 };
 
 export default ExperienceOverlay;
-
