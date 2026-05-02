@@ -7,18 +7,28 @@ import { createUiText, snapUiTextCoordinate } from './text/createUiText';
 import { bridgeActions } from '../shared/bridge/store';
 import { TextureGenerator } from './textures/TextureGenerator';
 import {
+  applyPotassiumDraftOption,
+  getPotassiumDuplicateCloneCount,
+  getPotassiumExplosionDamage,
+  getPotassiumScaledExplosionRadius,
+  getPotassiumSkillRank,
+  getPotassiumUpgradeChoices,
   getPotassiumWave,
+  getScaledPotassiumEnemyHp,
   isPotassiumBossWave,
-  type PotassiumBananaModifier as BananaModifier,
+  POTASSIUM_COLUMN_COUNT,
+  type PotassiumSkillDraftOption as SkillDraftOption,
+  type PotassiumSkillRanks as SkillRanks,
+  type PotassiumSkillRank as SkillRank,
+  type PotassiumWaveCell as WaveCell,
   type PotassiumEnemyKind as EnemyKind,
   type PotassiumUpgradeKind as UpgradeKind
 } from './potassiumSlipWaves';
 
-type GameState = 'START' | 'PLAYING' | 'WON' | 'GAME_OVER';
+type GameState = 'START' | 'PLAYING' | 'UPGRADE' | 'WON' | 'GAME_OVER';
 type ControlState = 'idle' | 'aiming' | 'recalling';
 type EnemySprite = Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
 type ProjectileSprite = Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
-type PickupSprite = Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
 
 interface EnemyConfig {
   label: string;
@@ -31,21 +41,15 @@ interface EnemyConfig {
 
 interface UpgradeConfig {
   label: string;
-  texture: string;
   color: string;
+  description: string;
 }
 
-interface ModifierConfig {
-  label: string;
-  tint: number;
-  textColor: string;
-  shortcut: string;
-}
-
-interface ModifierChip {
-  modifier: BananaModifier;
-  box: Phaser.GameObjects.Rectangle;
+interface UpgradeChoiceButton {
+  option: SkillDraftOption;
+  panel: Phaser.GameObjects.Rectangle;
   label: Phaser.GameObjects.Text;
+  description: Phaser.GameObjects.Text;
 }
 
 const ARENA = {
@@ -83,16 +87,26 @@ const SIDE_BOUNCE_MARGIN = 32;
 const BANANA_RICOCHET_MIN_SPEED = 360;
 const BANANA_RICOCHET_BOOST = 1.08;
 const CLONE_RICOCHET_MAX_SPEED = 660;
-const POISON_TRAIL_INTERVAL_MS = 320;
-const MODIFIER_CHIPS_Y = ARENA.top + 54;
-const MODIFIER_CHIP_WIDTH = 52;
-const MODIFIER_CHIP_HEIGHT = 17;
-const MODIFIER_CHIP_GAP = 7;
+const NON_BOSS_ENEMY_SPEED = 64;
+const ROW_SPAWN_DELAY_MS = 900;
+const TRAIL_DROP_INTERVAL_MS = 180;
+const FIRE_TRAIL_LIFETIME_MS = 1500;
+const FIRE_TICK_COOLDOWN_MS = 420;
+const POISON_TICK_INTERVAL_MS = 500;
+const POISON_DURATION_MS = 2500;
+const DUPLICATE_CLONE_LIFETIME_MS = 3000;
+const GHOST_BEAM_LIFETIME_MS = 190;
+const GHOST_STATUS_FIELD_LIFETIME_MS = 680;
+const UPGRADE_CHOICE_DELAY_MS = 450;
+const POISON_TINT = 0x65a30d;
+const CLONE_EFFECT_MULTIPLIER = 0.5;
+const FIRE_HIT_PATCH_LIFETIME_MS = 900;
+const POISON_SPLASH_RADIUS = 52;
 
 const ENEMY_CONFIGS: Record<EnemyKind, EnemyConfig> = {
   intern: {
     label: 'Intern Bug',
-    hp: 1,
+    hp: 2,
     score: 1,
     speed: 74,
     texture: 'potassium_enemy_intern',
@@ -100,7 +114,7 @@ const ENEMY_CONFIGS: Record<EnemyKind, EnemyConfig> = {
   },
   scope: {
     label: 'Scope Blob',
-    hp: 2,
+    hp: 4,
     score: 2,
     speed: 54,
     texture: 'potassium_enemy_scope',
@@ -108,7 +122,7 @@ const ENEMY_CONFIGS: Record<EnemyKind, EnemyConfig> = {
   },
   meeting: {
     label: 'Meeting Brick',
-    hp: 3,
+    hp: 6,
     score: 3,
     speed: 38,
     texture: 'potassium_enemy_meeting',
@@ -116,7 +130,7 @@ const ENEMY_CONFIGS: Record<EnemyKind, EnemyConfig> = {
   },
   deadline: {
     label: 'Deadline Drone',
-    hp: 1,
+    hp: 3,
     score: 2,
     speed: 104,
     texture: 'potassium_enemy_deadline',
@@ -124,67 +138,96 @@ const ENEMY_CONFIGS: Record<EnemyKind, EnemyConfig> = {
   },
   wall: {
     label: 'Filing Wall',
-    hp: 10,
+    hp: 14,
     score: 4,
     speed: 30,
     texture: 'potassium_enemy_wall',
-    scale: 1
+    scale: 0.78
   },
   boss: {
     label: 'Potassium Compliance Officer',
-    hp: 16,
+    hp: 34,
     score: 12,
-    speed: 42,
+    speed: 34,
     texture: 'potassium_enemy_boss',
-    scale: 1.16
+    scale: 0.72
   }
 };
 
 const UPGRADE_CONFIGS: Record<UpgradeKind, UpgradeConfig> = {
-  split: {
-    label: 'Banana Split',
-    texture: 'potassium_pickup_split',
-    color: '#facc15'
+  fire: {
+    label: 'Fire Trail',
+    color: '#f97316',
+    description: 'Moving bananas leave hot nonsense.'
   },
-  rubber: {
-    label: 'Rubber Rind',
-    texture: 'potassium_pickup_rubber',
-    color: '#38bdf8'
+  poison: {
+    label: 'Poison Damage',
+    color: '#a855f7',
+    description: 'Hits tick for 1 dmg every 500ms.'
   },
-  magnet: {
-    label: 'Lunchbox Magnet',
-    texture: 'potassium_pickup_magnet',
-    color: '#22d3ee'
+  explosion: {
+    label: 'Explosion Damage',
+    color: '#ef4444',
+    description: 'Every hit pops nearby paperwork.'
+  },
+  duplicate: {
+    label: 'Duplicate',
+    color: '#facc15',
+    description: 'Main hits spawn two tiny bananas.'
+  },
+  ghostHorizontal: {
+    label: 'Horizontal Ghost',
+    color: '#38bdf8',
+    description: 'Hits sweep a blue row beam.'
+  },
+  ghostVertical: {
+    label: 'Vertical Ghost',
+    color: '#60a5fa',
+    description: 'Hits sweep a blue column beam.'
   }
 };
 
-const MODIFIER_CONFIGS: Record<BananaModifier, ModifierConfig> = {
-  normal: {
-    label: 'Normal',
-    tint: 0xffffff,
-    textColor: '#1a1a1a',
-    shortcut: '1'
-  },
-  poison: {
-    label: 'Poison',
-    tint: 0xa3e635,
-    textColor: '#4c1d95',
-    shortcut: '2'
-  },
-  bomb: {
-    label: 'Bomb',
-    tint: 0xfb923c,
-    textColor: '#9a3412',
-    shortcut: '3'
+function getDraftOptionDescription(option: SkillDraftOption): string {
+  if (option.kind === 'fire') {
+    return option.action === 'unlock'
+      ? 'Moving bananas leave fire.'
+      : 'Hits drop extra fire patches.';
   }
-};
+  if (option.kind === 'poison') {
+    return option.action === 'unlock'
+      ? 'Hits poison enemies over time.'
+      : 'Poison splashes nearby.';
+  }
+  if (option.kind === 'explosion') {
+    return option.action === 'unlock'
+      ? 'Hits explode with falloff damage.'
+      : 'Bigger blasts apply statuses.';
+  }
+  if (option.kind === 'duplicate') {
+    return option.action === 'unlock'
+      ? 'Main hits spawn 2 small bananas.'
+      : 'Clones apply half-strength procs and spawn +1.';
+  }
+  if (option.kind === 'ghostHorizontal') {
+    return option.action === 'unlock'
+      ? 'Hits fire a blue row beam.'
+      : 'Row beams apply statuses.';
+  }
+  return option.action === 'unlock'
+    ? 'Hits fire a blue column beam.'
+    : 'Column beams apply statuses.';
+}
+
+function getDraftOptionTitle(option: SkillDraftOption): string {
+  const label = UPGRADE_CONFIGS[option.kind].label;
+  return option.action === 'upgrade' ? `${label} +` : label;
+}
 
 export class PotassiumSlipScene extends Phaser.Scene {
   private banana!: ProjectileSprite;
   private enemies!: Phaser.Physics.Arcade.Group;
   private clones!: Phaser.Physics.Arcade.Group;
-  private pickups!: Phaser.Physics.Arcade.Group;
-  private poisonZones!: Phaser.Physics.Arcade.Group;
+  private trailZones!: Phaser.Physics.Arcade.Group;
   private fieldInk!: Phaser.GameObjects.Graphics;
   private aimLine!: Phaser.GameObjects.Graphics;
   private tetherLine!: Phaser.GameObjects.Graphics;
@@ -195,13 +238,12 @@ export class PotassiumSlipScene extends Phaser.Scene {
   private lives: number = LIVES_INITIAL;
   private wave: number = 1;
   private waveAdvancing: boolean = false;
+  private pendingRows: number = 0;
   private aimPointerId: number | null = null;
-  private rubberUntil: number = 0;
-  private magnetUntil: number = 0;
-  private unlockedModifiers: Set<BananaModifier> = new Set(['normal']);
-  private queuedModifier: BananaModifier = 'normal';
-  private activeModifier: BananaModifier = 'normal';
-  private modifierChips: ModifierChip[] = [];
+  private skillRanks: SkillRanks = {};
+  private upgradeChoiceButtons: UpgradeChoiceButton[] = [];
+  private upgradeChoiceBackdrop?: Phaser.GameObjects.Rectangle;
+  private upgradeChoiceTitle?: Phaser.GameObjects.Text;
 
   private hudText!: Phaser.GameObjects.Text;
   private scoreText!: Phaser.GameObjects.Text;
@@ -237,8 +279,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.createBanana();
     this.enemies = this.physics.add.group();
     this.clones = this.physics.add.group();
-    this.pickups = this.physics.add.group();
-    this.poisonZones = this.physics.add.group();
+    this.trailZones = this.physics.add.group();
     this.aimLine = this.add.graphics().setDepth(950);
     this.tetherLine = this.add.graphics().setDepth(949);
     this.createHud();
@@ -258,9 +299,8 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.updateControlState();
     this.updateBananaDrag(delta);
     this.updateEnemyLabels();
-    this.updatePickupLabels();
-    this.updateMagnet(time);
-    this.updatePoisonTrail(time);
+    this.updatePoisonStatuses(time);
+    this.updateFireTrail(time);
     this.enforceSideWalls();
     this.checkEnemyEscapes();
     this.checkWaveClear();
@@ -274,12 +314,9 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.lives = LIVES_INITIAL;
     this.wave = 1;
     this.waveAdvancing = false;
+    this.pendingRows = 0;
     this.aimPointerId = null;
-    this.rubberUntil = 0;
-    this.magnetUntil = 0;
-    this.unlockedModifiers = new Set(['normal']);
-    this.queuedModifier = 'normal';
-    this.activeModifier = 'normal';
+    this.skillRanks = {};
   }
 
   private createPotassiumTextures(): void {
@@ -291,8 +328,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.createDeadlineTexture();
     this.createWallTexture();
     this.createBossTexture();
-    this.createPickupTextures();
-    this.createPoisonTexture();
+    this.createFireTexture();
   }
 
   private drawField(): void {
@@ -337,7 +373,9 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.banana.setDrag(12, 12);
     this.banana.body.setAllowGravity(false);
     this.banana.body.setCircle(25, 7, 7);
-    this.setProjectileModifier(this.banana, this.activeModifier);
+    this.banana.setData('canDuplicate', true);
+    this.banana.setData('effectMultiplier', 1);
+    this.banana.setData('canApplyHitProcs', true);
   }
 
   private createHud(): void {
@@ -361,31 +399,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
       color: '#1a1a1a',
       fontStyle: 'bold'
     }).setOrigin(0.5, 0).setDepth(1000);
-    this.createModifierChips();
     this.updateHud();
-  }
-
-  private createModifierChips(): void {
-    const modifiers: BananaModifier[] = ['normal', 'poison', 'bomb'];
-    const totalWidth = modifiers.length * MODIFIER_CHIP_WIDTH + (modifiers.length - 1) * MODIFIER_CHIP_GAP;
-    const startX = GAME_DESIGN_WIDTH / 2 - totalWidth / 2 + MODIFIER_CHIP_WIDTH / 2;
-
-    this.modifierChips = modifiers.map((modifier, index) => {
-      const config = MODIFIER_CONFIGS[modifier];
-      const x = startX + index * (MODIFIER_CHIP_WIDTH + MODIFIER_CHIP_GAP);
-      const box = this.add.rectangle(x, MODIFIER_CHIPS_Y, MODIFIER_CHIP_WIDTH, MODIFIER_CHIP_HEIGHT, 0xfbfbf9, 0.92)
-        .setStrokeStyle(2, 0x1a1a1a, 0.75)
-        .setDepth(1002)
-        .setInteractive({ useHandCursor: true });
-      const label = createUiText(this, x, MODIFIER_CHIPS_Y, `${config.shortcut} ${config.label}`, {
-        fontSize: '7px',
-        color: config.textColor,
-        fontStyle: 'bold',
-        align: 'center'
-      }).setOrigin(0.5).setDepth(1003);
-      box.on('pointerdown', () => this.queueModifier(modifier));
-      return { modifier, box, label };
-    });
   }
 
   private createOverlays(): void {
@@ -419,17 +433,17 @@ export class PotassiumSlipScene extends Phaser.Scene {
       const projectile = clone as ProjectileSprite;
       this.hitEnemy(enemy as EnemySprite, projectile, `clone-${projectile.name}`);
     });
-    this.physics.add.overlap(this.banana, this.pickups, (_banana, pickup) => {
-      this.collectUpgrade(pickup as PickupSprite);
-    });
-    this.physics.add.overlap(this.poisonZones, this.enemies, (_zone, enemy) => {
-      this.damageEnemy(enemy as EnemySprite, 1, 'poison');
+    this.physics.add.overlap(this.trailZones, this.enemies, (_zone, enemy) => {
+      this.damageEnemy(enemy as EnemySprite, this.getProjectileEffectMultiplier(_zone as ProjectileSprite), 'fire');
     });
   }
 
   private registerInput(): void {
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-      if (this.handleModifierPointer(pointer)) return;
+      if (this.gameState === 'UPGRADE') {
+        this.handleUpgradeChoicePointer(pointer);
+        return;
+      }
       if (this.gameState === 'START') {
         this.startGame();
         return;
@@ -464,69 +478,6 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.input.keyboard?.on('keydown-ESC', () => {
       this.onClose?.();
     });
-
-    this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
-      if (event.key === '1') this.queueModifier('normal');
-      if (event.key === '2') this.queueModifier('poison');
-      if (event.key === '3') this.queueModifier('bomb');
-    });
-  }
-
-  private handleModifierPointer(pointer: Phaser.Input.Pointer): boolean {
-    const hitChip = this.modifierChips.find((chip) => {
-      const left = chip.box.x - MODIFIER_CHIP_WIDTH / 2;
-      const right = chip.box.x + MODIFIER_CHIP_WIDTH / 2;
-      const top = chip.box.y - MODIFIER_CHIP_HEIGHT / 2;
-      const bottom = chip.box.y + MODIFIER_CHIP_HEIGHT / 2;
-      return pointer.x >= left && pointer.x <= right && pointer.y >= top && pointer.y <= bottom;
-    });
-    if (!hitChip) return false;
-    if (this.gameState === 'PLAYING') {
-      this.queueModifier(hitChip.modifier);
-    }
-    return true;
-  }
-
-  private queueModifier(modifier: BananaModifier): void {
-    if (this.gameState !== 'PLAYING' || !this.unlockedModifiers.has(modifier)) return;
-    this.queuedModifier = modifier;
-    if (this.canApplyQueuedModifierImmediately()) {
-      this.activeModifier = modifier;
-      this.setProjectileModifier(this.banana, modifier);
-    }
-    bridgeActions.setSceneHintText(`${MODIFIER_CONFIGS[modifier].label} queued • Next launch uses it`);
-    this.updateModifierChips();
-    this.updateHud();
-  }
-
-  private unlockModifier(modifier: Exclude<BananaModifier, 'normal'>): void {
-    if (this.unlockedModifiers.has(modifier)) return;
-    this.unlockedModifiers.add(modifier);
-    this.queuedModifier = modifier;
-    bridgeActions.setSceneHintText(`${MODIFIER_CONFIGS[modifier].label} unlocked • Select it before launch`);
-    this.updateModifierChips();
-    this.updateHud();
-  }
-
-  private setProjectileModifier(projectile: ProjectileSprite, modifier: BananaModifier): void {
-    projectile.setData('modifier', modifier);
-    projectile.setData('bombSpent', false);
-    projectile.setData('nextPoisonDropAt', 0);
-    const tint = MODIFIER_CONFIGS[modifier].tint;
-    if (tint === 0xffffff) {
-      projectile.clearTint();
-    } else {
-      projectile.setTint(tint);
-    }
-  }
-
-  private getProjectileModifier(projectile: ProjectileSprite): BananaModifier {
-    return (projectile.getData('modifier') as BananaModifier | undefined) ?? 'normal';
-  }
-
-  private canApplyQueuedModifierImmediately(): boolean {
-    if (!this.isBananaInLaunchZone() || this.controlState === 'recalling') return false;
-    return this.controlState === 'aiming' || this.banana.body.velocity.length() < 45;
   }
 
   private startGame(): void {
@@ -543,17 +494,20 @@ export class PotassiumSlipScene extends Phaser.Scene {
   private resetBoardObjects(): void {
     this.enemies?.clear(true, true);
     this.clones?.clear(true, true);
-    this.pickups?.clear(true, true);
-    this.poisonZones?.clear(true, true);
+    this.trailZones?.clear(true, true);
     this.banana.setPosition(LAUNCH_PAD.x, LAUNCH_PAD.y);
     this.banana.setVelocity(0, 0);
     this.banana.setAngularVelocity(0);
     this.banana.setTexture('banana_peel_yellow');
+    this.banana.clearTint();
     this.banana.setScale(0.9);
-    this.activeModifier = this.queuedModifier;
-    this.setProjectileModifier(this.banana, this.activeModifier);
+    this.banana.setData('canDuplicate', true);
+    this.banana.setData('nextTrailDropAt', 0);
+    this.banana.setData('effectMultiplier', 1);
+    this.banana.setData('canApplyHitProcs', true);
     this.aimLine?.clear();
     this.tetherLine?.clear();
+    this.clearUpgradeChoiceOverlay();
   }
 
   private beginAiming(pointer: Phaser.Input.Pointer): void {
@@ -562,8 +516,10 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.banana.setPosition(LAUNCH_PAD.x, LAUNCH_PAD.y);
     this.banana.setVelocity(0, 0);
     this.banana.setAngularVelocity(0);
-    this.activeModifier = this.queuedModifier;
-    this.setProjectileModifier(this.banana, this.activeModifier);
+    this.banana.setData('canDuplicate', true);
+    this.banana.setData('nextTrailDropAt', 0);
+    this.banana.setData('effectMultiplier', 1);
+    this.banana.setData('canApplyHitProcs', true);
   }
 
   private beginRecall(pointer: Phaser.Input.Pointer): void {
@@ -580,8 +536,6 @@ export class PotassiumSlipScene extends Phaser.Scene {
     }
     const speed = Phaser.Math.Clamp(dragLength * LAUNCH_POWER, 210, this.getMaxBananaSpeed());
     dragVector.normalize();
-    this.activeModifier = this.queuedModifier;
-    this.setProjectileModifier(this.banana, this.activeModifier);
     this.banana.setVelocity(dragVector.x * speed, dragVector.y * speed);
     this.banana.setAngularVelocity(Phaser.Math.Between(-520, 520));
     this.cancelControl();
@@ -668,7 +622,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
       this.banana.setAngularVelocity(0);
       return;
     }
-    const dragFactor = this.rubberUntil > this.time.now ? 0.9992 : 0.9975;
+    const dragFactor = 0.9975;
     const frameFactor = Math.pow(dragFactor, delta / 16.67);
     this.banana.setVelocity(velocity.x * frameFactor, velocity.y * frameFactor);
   }
@@ -678,7 +632,23 @@ export class PotassiumSlipScene extends Phaser.Scene {
   }
 
   private getMaxBananaSpeed(): number {
-    return this.rubberUntil > this.time.now ? 980 : MAIN_BANANA_MAX_SPEED;
+    return MAIN_BANANA_MAX_SPEED;
+  }
+
+  private getSkillRank(upgrade: UpgradeKind): SkillRank {
+    return getPotassiumSkillRank(this.skillRanks, upgrade);
+  }
+
+  private getProjectileEffectMultiplier(projectile: ProjectileSprite): number {
+    return (projectile.getData('effectMultiplier') as number | undefined) ?? 1;
+  }
+
+  private canProjectileApplyHitProcs(projectile: ProjectileSprite): boolean {
+    return (projectile.getData('canApplyHitProcs') as boolean | undefined) ?? false;
+  }
+
+  private getProjectileExplosionRadiusMultiplier(projectile: ProjectileSprite): number {
+    return projectile === this.banana ? 1 : CLONE_EFFECT_MULTIPLIER;
   }
 
   private spawnWave(waveNumber: number): void {
@@ -693,33 +663,29 @@ export class PotassiumSlipScene extends Phaser.Scene {
       return;
     }
 
-    if (wave.modifierUnlock) {
-      this.unlockModifier(wave.modifierUnlock);
-    }
-
-    wave.enemies.forEach((kind, index) => {
-      this.time.delayedCall(index * 520, () => this.spawnEnemy(kind, index));
+    this.pendingRows = wave.rows.length;
+    wave.rows.forEach((row, rowIndex) => {
+      this.time.delayedCall(rowIndex * ROW_SPAWN_DELAY_MS, () => this.spawnEnemyRow(row));
     });
-
-    const guaranteedUpgrade = wave.guaranteedUpgrade;
-    if (guaranteedUpgrade) {
-      this.time.delayedCall(Math.max(650, wave.enemies.length * 420), () => {
-        this.spawnUpgrade(LAUNCH_PAD.x, LAUNCH_PAD.y - 122, guaranteedUpgrade);
-      });
-    }
-
-    if (!wave.modifierUnlock) {
-      bridgeActions.setSceneHintText(`${wave.title}: ${this.getWaveHint(waveNumber)}`);
-    }
+    bridgeActions.setSceneHintText(`${wave.title}: ${this.getWaveHint(waveNumber)}`);
   }
 
-  private spawnEnemy(kind: EnemyKind, index: number): void {
+  private spawnEnemyRow(row: readonly WaveCell[]): void {
+    if (this.gameState !== 'PLAYING') return;
+    this.pendingRows = Math.max(0, this.pendingRows - 1);
+    row.forEach((kind, columnIndex) => {
+      if (kind === null) return;
+      this.spawnEnemy(kind, columnIndex);
+    });
+  }
+
+  private spawnEnemy(kind: EnemyKind, columnIndex: number = 0): void {
     if (this.gameState !== 'PLAYING') return;
     const config = ENEMY_CONFIGS[kind];
-    const x = Phaser.Math.Linear(ARENA.left + 64, ARENA.right - 64, ((index % 5) + 0.5) / 5);
+    const x = Phaser.Math.Linear(ARENA.left + 64, ARENA.right - 64, (columnIndex + 0.5) / POTASSIUM_COLUMN_COUNT);
     const y = kind === 'boss' ? SAFE.top + 60 : SAFE.top + 12;
     const enemy = this.enemies.create(x, y, config.texture) as EnemySprite;
-    this.configureEnemy(enemy, kind);
+    this.configureEnemy(enemy, kind, this.wave);
 
     if (kind === 'boss') {
       enemy.setPosition(LAUNCH_PAD.x, SAFE.top + 60);
@@ -727,19 +693,21 @@ export class PotassiumSlipScene extends Phaser.Scene {
       enemy.setBounce(1, 1);
       this.cameras.main.shake(250, 0.008);
     } else {
-      enemy.setVelocity(0, config.speed);
+      enemy.setVelocity(0, NON_BOSS_ENEMY_SPEED);
     }
   }
 
-  private configureEnemy(enemy: EnemySprite, kind: EnemyKind): void {
+  private configureEnemy(enemy: EnemySprite, kind: EnemyKind, wave: number): void {
     const config = ENEMY_CONFIGS[kind];
+    const hp = kind === 'boss' ? config.hp : getScaledPotassiumEnemyHp(config.hp, wave);
     enemy.setDepth(kind === 'boss' ? 80 : 60);
     enemy.setScale(config.scale);
     enemy.body.setAllowGravity(false);
     enemy.setBounce(1, 1);
     enemy.setData('kind', kind);
-    enemy.setData('hp', config.hp);
-    enemy.setData('maxHp', config.hp);
+    enemy.setData('hp', hp);
+    enemy.setData('maxHp', hp);
+    enemy.setData('poisoned', false);
     enemy.setData('labelText', this.createEnemyLabel(enemy, config));
 
     if (kind === 'scope') {
@@ -769,17 +737,60 @@ export class PotassiumSlipScene extends Phaser.Scene {
     enemy.setData(cooldownKey, this.time.now + HIT_COOLDOWN_MS);
 
     const isMainRecall = projectile === this.banana && this.controlState === 'recalling';
-    const modifier = this.getProjectileModifier(projectile);
-    this.damageEnemy(enemy, isMainRecall ? RECALL_DAMAGE : 1, 'banana');
+    const effectMultiplier = this.getProjectileEffectMultiplier(projectile);
+    this.damageEnemy(enemy, (isMainRecall ? RECALL_DAMAGE : 1) * effectMultiplier, 'banana');
     if (isMainRecall) {
       projectile.setVelocity(projectile.body.velocity.x * 1.01, projectile.body.velocity.y * 1.01);
     } else {
       this.ricochetProjectileFromEnemy(projectile, enemy);
     }
 
-    if (modifier === 'bomb' && !isMainRecall && !projectile.getData('bombSpent')) {
-      projectile.setData('bombSpent', true);
-      this.explodeAt(enemy.x, enemy.y);
+    this.applyUnlockedHitEffects(projectile, enemy, isMainRecall, effectMultiplier);
+  }
+
+  private applyUnlockedHitEffects(
+    projectile: ProjectileSprite,
+    enemy: EnemySprite,
+    isMainRecall: boolean,
+    effectMultiplier: number
+  ): void {
+    const canApplyHitProcs = this.canProjectileApplyHitProcs(projectile);
+    if (canApplyHitProcs) {
+      this.applyStatusEffects(enemy, enemy.x, enemy.y, effectMultiplier, false);
+    }
+
+    if (canApplyHitProcs && this.getSkillRank('fire') >= 2) {
+      this.spawnFirePatch(enemy.x, enemy.y, effectMultiplier, FIRE_HIT_PATCH_LIFETIME_MS, projectile === this.banana ? 0.7 : 0.5);
+    }
+    if (canApplyHitProcs && !isMainRecall && this.getSkillRank('explosion') > 0) {
+      this.explodeAt(enemy.x, enemy.y, effectMultiplier, this.getProjectileExplosionRadiusMultiplier(projectile));
+    }
+    if (!isMainRecall && projectile.getData('canDuplicate') && this.getSkillRank('duplicate') > 0) {
+      this.spawnBananaClones(getPotassiumDuplicateCloneCount(this.getSkillRank('duplicate')), DUPLICATE_CLONE_LIFETIME_MS);
+    }
+    if (!isMainRecall && this.getSkillRank('ghostHorizontal') > 0) {
+      this.spawnGhostBeam(enemy.x, enemy.y, 'horizontal', effectMultiplier);
+    }
+    if (!isMainRecall && this.getSkillRank('ghostVertical') > 0) {
+      this.spawnGhostBeam(enemy.x, enemy.y, 'vertical', effectMultiplier);
+    }
+  }
+
+  private applyStatusEffects(
+    enemy: EnemySprite,
+    originX: number,
+    originY: number,
+    effectMultiplier: number,
+    allowExplosionStatus: boolean
+  ): void {
+    if (this.getSkillRank('poison') > 0) {
+      this.applyPoison(enemy, effectMultiplier);
+      if (this.getSkillRank('poison') >= 2) {
+        this.applyPoisonSplash(originX, originY, effectMultiplier);
+      }
+    }
+    if (allowExplosionStatus && this.getSkillRank('fire') > 0) {
+      this.spawnFirePatch(enemy.x, enemy.y, effectMultiplier, FIRE_HIT_PATCH_LIFETIME_MS, 0.58);
     }
   }
 
@@ -821,20 +832,47 @@ export class PotassiumSlipScene extends Phaser.Scene {
     projectile.setAngularVelocity(Phaser.Math.Clamp(ricochet.x * 1.4, -720, 720));
   }
 
-  private damageEnemy(enemy: EnemySprite, amount: number, source: 'banana' | 'poison' | 'explosion'): void {
+  private damageEnemy(enemy: EnemySprite, amount: number, source: 'banana' | 'fire' | 'poison' | 'explosion' | 'ghost'): void {
     if (!enemy.active || enemy.getData('dying')) return;
-    if (source === 'poison') {
-      const poisonUntil = enemy.getData('poisonTickUntil') as number | undefined;
-      if (poisonUntil !== undefined && poisonUntil > this.time.now) return;
-      enemy.setData('poisonTickUntil', this.time.now + 620);
+    if (source === 'fire') {
+      const fireUntil = enemy.getData('fireTickUntil') as number | undefined;
+      if (fireUntil !== undefined && fireUntil > this.time.now) return;
+      enemy.setData('fireTickUntil', this.time.now + FIRE_TICK_COOLDOWN_MS);
     }
 
     const hp = Math.max(0, (enemy.getData('hp') as number) - amount);
     enemy.setData('hp', hp);
-    this.flashEnemy(enemy);
+    this.showDamageCue(enemy, source);
     if (hp <= 0) {
       this.killEnemy(enemy);
     }
+  }
+
+  private applyPoison(enemy: EnemySprite, effectMultiplier: number = 1): void {
+    const currentExpiresAt = (enemy.getData('poisonExpiresAt') as number | undefined) ?? 0;
+    enemy.setData('poisonExpiresAt', Math.max(currentExpiresAt, this.time.now + POISON_DURATION_MS * effectMultiplier));
+    enemy.setData('poisoned', true);
+    enemy.setData('poisonMultiplier', Math.max((enemy.getData('poisonMultiplier') as number | undefined) ?? 0, effectMultiplier));
+    enemy.setTint(POISON_TINT);
+    const nextTickAt = enemy.getData('poisonNextTickAt') as number | undefined;
+    if (nextTickAt === undefined || nextTickAt < this.time.now) {
+      enemy.setData('poisonNextTickAt', this.time.now + POISON_TICK_INTERVAL_MS);
+    }
+  }
+
+  private applyPoisonSplash(x: number, y: number, effectMultiplier: number): void {
+    this.enemies.getChildren().forEach((gameObject) => {
+      const enemy = gameObject as EnemySprite;
+      if (!enemy.active || enemy.getData('dying')) return;
+      if (Phaser.Math.Distance.Between(x, y, enemy.x, enemy.y) <= POISON_SPLASH_RADIUS) {
+        this.applyPoison(enemy, effectMultiplier);
+      }
+    });
+  }
+
+  private showDamageCue(enemy: EnemySprite, source: 'banana' | 'fire' | 'poison' | 'explosion' | 'ghost'): void {
+    this.flashEnemy(enemy);
+    this.showDamageRing(enemy, source);
   }
 
   private flashEnemy(enemy: EnemySprite): void {
@@ -844,6 +882,38 @@ export class PotassiumSlipScene extends Phaser.Scene {
       duration: 45,
       yoyo: true,
       repeat: 1
+    });
+  }
+
+  private showDamageRing(enemy: EnemySprite, source: 'banana' | 'fire' | 'poison' | 'explosion' | 'ghost'): void {
+    const color = source === 'poison'
+      ? POISON_TINT
+      : source === 'fire'
+        ? 0xf97316
+        : source === 'explosion'
+          ? 0xef4444
+          : source === 'ghost'
+            ? 0x38bdf8
+            : 0x1a1a1a;
+    const radius = Math.max(18, enemy.displayWidth * 0.42);
+    const ring = this.add.circle(enemy.x, enemy.y, radius, color, 0.08)
+      .setStrokeStyle(3, color, 0.58)
+      .setDepth(930);
+    this.tweens.add({
+      targets: ring,
+      radius: radius + 10,
+      alpha: 0,
+      duration: 180,
+      ease: 'Sine.easeOut',
+      onComplete: () => ring.destroy()
+    });
+    this.tweens.add({
+      targets: enemy,
+      scaleX: enemy.scaleX * 1.06,
+      scaleY: enemy.scaleY * 1.06,
+      duration: 55,
+      yoyo: true,
+      ease: 'Sine.easeOut'
     });
   }
 
@@ -870,41 +940,8 @@ export class PotassiumSlipScene extends Phaser.Scene {
     });
   }
 
-  private spawnUpgrade(x: number, y: number, kind: UpgradeKind): void {
-    const config = UPGRADE_CONFIGS[kind];
-    const pickup = this.pickups.create(x, y, config.texture) as PickupSprite;
-    pickup.setDepth(70);
-    pickup.setData('kind', kind);
-    pickup.body.setAllowGravity(false);
-    pickup.setVelocity(Phaser.Math.Between(-35, 35), Phaser.Math.Between(-24, 24));
-    pickup.setBounce(1, 1);
-    const label = createUiText(this, x, y - 30, config.label, {
-      fontSize: '9px',
-      color: config.color,
-      fontStyle: 'bold'
-    }).setOrigin(0.5).setDepth(920);
-    pickup.setData('labelText', label);
-    pickup.once(Phaser.GameObjects.Events.DESTROY, () => label.destroy());
-  }
-
-  private collectUpgrade(pickup: PickupSprite): void {
-    if (!pickup.active) return;
-    const kind = pickup.getData('kind') as UpgradeKind;
-    pickup.destroy();
-
-    if (kind === 'split') {
-      this.spawnBananaClones();
-    } else if (kind === 'rubber') {
-      this.rubberUntil = this.time.now + 7600;
-      this.banana.setVelocity(this.banana.body.velocity.x * 1.2, this.banana.body.velocity.y * 1.2);
-    } else if (kind === 'magnet') {
-      this.magnetUntil = this.time.now + 7600;
-    }
-    this.updateHud();
-  }
-
-  private spawnBananaClones(): void {
-    for (let i = 0; i < 4; i += 1) {
+  private spawnBananaClones(count: number, lifetimeMs: number): void {
+    for (let i = 0; i < count; i += 1) {
       const clone = this.clones.create(this.banana.x, this.banana.y, 'banana_peel_yellow') as ProjectileSprite;
       clone.name = `${this.time.now}-${i}`;
       clone.setDepth(90);
@@ -913,11 +950,14 @@ export class PotassiumSlipScene extends Phaser.Scene {
       clone.setBounce(1, 1);
       clone.body.setAllowGravity(false);
       clone.body.setCircle(16, 16, 16);
-      this.setProjectileModifier(clone, this.activeModifier);
+      clone.setData('canDuplicate', false);
+      clone.setData('effectMultiplier', CLONE_EFFECT_MULTIPLIER);
+      clone.setData('canApplyHitProcs', this.getSkillRank('duplicate') >= 2);
+      clone.setData('nextTrailDropAt', 0);
       const angle = Phaser.Math.FloatBetween(0, Math.PI * 2);
       clone.setVelocity(Math.cos(angle) * 430, Math.sin(angle) * 430);
       clone.setAngularVelocity(Phaser.Math.Between(-600, 600));
-      this.time.delayedCall(5200, () => {
+      this.time.delayedCall(lifetimeMs, () => {
         if (!clone.active) return;
         this.tweens.add({
           targets: clone,
@@ -930,26 +970,44 @@ export class PotassiumSlipScene extends Phaser.Scene {
     }
   }
 
-  private updatePoisonTrail(time: number): void {
-    this.dropPoisonTrailForProjectile(this.banana, time);
+  private updateFireTrail(time: number): void {
+    if (this.getSkillRank('fire') <= 0) return;
+    this.dropFireTrailForProjectile(this.banana, time);
     this.clones.getChildren().forEach((gameObject) => {
-      this.dropPoisonTrailForProjectile(gameObject as ProjectileSprite, time);
+      this.dropFireTrailForProjectile(gameObject as ProjectileSprite, time);
     });
   }
 
-  private dropPoisonTrailForProjectile(projectile: ProjectileSprite, time: number): void {
-    if (!projectile.active || !projectile.body || this.getProjectileModifier(projectile) !== 'poison') return;
-    const nextDropAt = (projectile.getData('nextPoisonDropAt') as number | undefined) ?? 0;
+  private dropFireTrailForProjectile(projectile: ProjectileSprite, time: number): void {
+    if (!projectile.active || !projectile.body) return;
+    const nextDropAt = (projectile.getData('nextTrailDropAt') as number | undefined) ?? 0;
     if (time < nextDropAt || projectile.body.velocity.length() < 120) return;
-    projectile.setData('nextPoisonDropAt', time + POISON_TRAIL_INTERVAL_MS);
-    const zone = this.poisonZones.create(projectile.x, projectile.y, 'potassium_poison') as ProjectileSprite;
+    projectile.setData('nextTrailDropAt', time + TRAIL_DROP_INTERVAL_MS);
+    this.spawnFirePatch(
+      projectile.x,
+      projectile.y,
+      this.getProjectileEffectMultiplier(projectile),
+      FIRE_TRAIL_LIFETIME_MS,
+      projectile === this.banana ? 0.86 : 0.56
+    );
+  }
+
+  private spawnFirePatch(
+    x: number,
+    y: number,
+    effectMultiplier: number,
+    lifetimeMs: number,
+    scale: number
+  ): void {
+    const zone = this.trailZones.create(x, y, 'potassium_fire') as ProjectileSprite;
     zone.setDepth(30);
-    zone.setAlpha(0.55);
-    zone.setScale(projectile === this.banana ? 0.72 : 0.45);
+    zone.setAlpha(0.62);
+    zone.setScale(scale);
     zone.body.setAllowGravity(false);
     zone.body.setImmovable(true);
+    zone.setData('effectMultiplier', effectMultiplier);
     zone.setVelocity(0, 0);
-    this.time.delayedCall(2200, () => {
+    this.time.delayedCall(lifetimeMs, () => {
       if (!zone.active) return;
       this.tweens.add({
         targets: zone,
@@ -960,35 +1018,129 @@ export class PotassiumSlipScene extends Phaser.Scene {
     });
   }
 
-  private explodeAt(x: number, y: number): void {
+  private updatePoisonStatuses(time: number): void {
+    if (this.getSkillRank('poison') <= 0) return;
+    this.enemies.getChildren().forEach((gameObject) => {
+      const enemy = gameObject as EnemySprite;
+      const expiresAt = enemy.getData('poisonExpiresAt') as number | undefined;
+      if (!enemy.active || expiresAt === undefined) return;
+      if (expiresAt <= time) {
+        this.clearPoison(enemy);
+        return;
+      }
+      const nextTickAt = (enemy.getData('poisonNextTickAt') as number | undefined) ?? time;
+      if (nextTickAt > time) return;
+      enemy.setData('poisonNextTickAt', time + POISON_TICK_INTERVAL_MS);
+      this.damageEnemy(enemy, (enemy.getData('poisonMultiplier') as number | undefined) ?? 1, 'poison');
+    });
+  }
+
+  private clearPoison(enemy: EnemySprite): void {
+    if (!enemy.active) return;
+    enemy.setData('poisonExpiresAt', undefined);
+    enemy.setData('poisonNextTickAt', undefined);
+    enemy.setData('poisonMultiplier', undefined);
+    enemy.setData('poisoned', false);
+    enemy.clearTint();
+  }
+
+  private explodeAt(x: number, y: number, effectMultiplier: number, radiusMultiplier: number): void {
+    const rank = this.getSkillRank('explosion');
+    const radius = getPotassiumScaledExplosionRadius(rank, radiusMultiplier);
     const blast = this.add.circle(x, y, 18, 0xf97316, 0.22)
       .setStrokeStyle(5, 0x1a1a1a, 1)
       .setDepth(940);
     this.tweens.add({
       targets: blast,
-      radius: 88,
+      radius,
       alpha: 0,
       duration: 240,
       onComplete: () => blast.destroy()
     });
     this.enemies.getChildren().forEach((gameObject) => {
       const enemy = gameObject as EnemySprite;
-      if (Phaser.Math.Distance.Between(x, y, enemy.x, enemy.y) <= 92) {
-        this.damageEnemy(enemy, 2, 'explosion');
+      const distance = Phaser.Math.Distance.Between(x, y, enemy.x, enemy.y);
+      const damage = getPotassiumExplosionDamage(distance, radius, effectMultiplier);
+      if (damage > 0) {
+        this.damageEnemy(enemy, damage, 'explosion');
+        if (rank >= 2) {
+          this.applyStatusEffects(enemy, x, y, effectMultiplier, true);
+        }
       }
     });
     this.cameras.main.shake(130, 0.006);
   }
 
-  private updateMagnet(time: number): void {
-    if (this.magnetUntil <= time) return;
-    this.pickups.getChildren().forEach((gameObject) => {
-      const pickup = gameObject as PickupSprite;
-      const dist = Phaser.Math.Distance.Between(pickup.x, pickup.y, this.banana.x, this.banana.y);
-      if (dist < 260) {
-        this.physics.moveToObject(pickup, this.banana, 165);
+  private spawnGhostBeam(x: number, y: number, direction: 'horizontal' | 'vertical', effectMultiplier: number): void {
+    const isHorizontal = direction === 'horizontal';
+    const rank = this.getSkillRank(isHorizontal ? 'ghostHorizontal' : 'ghostVertical');
+    const width = isHorizontal ? ARENA.width - 42 : 24;
+    const height = isHorizontal ? 24 : ARENA.height - 128;
+    const beam = this.add.rectangle(
+      isHorizontal ? GAME_DESIGN_WIDTH / 2 : x,
+      isHorizontal ? y : ARENA.top + 92 + height / 2,
+      width,
+      height,
+      0x38bdf8,
+      0.24
+    ).setStrokeStyle(4, 0x1a1a1a, 0.82).setDepth(935);
+    this.enemies.getChildren().forEach((gameObject) => {
+      const enemy = gameObject as EnemySprite;
+      const inBeam = isHorizontal
+        ? Math.abs(enemy.y - y) <= 28
+        : Math.abs(enemy.x - x) <= 28;
+      if (inBeam) {
+        this.damageEnemy(enemy, 1 * effectMultiplier, 'ghost');
+        if (rank >= 2) {
+          this.applyStatusEffects(enemy, enemy.x, enemy.y, effectMultiplier, false);
+        }
       }
     });
+    if (rank >= 2) {
+      this.spawnGhostStatusField(x, y, direction, effectMultiplier, width, height);
+    }
+    this.tweens.add({
+      targets: beam,
+      alpha: 0,
+      duration: GHOST_BEAM_LIFETIME_MS,
+      onComplete: () => beam.destroy()
+    });
+  }
+
+  private spawnGhostStatusField(
+    x: number,
+    y: number,
+    direction: 'horizontal' | 'vertical',
+    effectMultiplier: number,
+    width: number,
+    height: number
+  ): void {
+    if (this.getSkillRank('fire') > 0) {
+      const isHorizontal = direction === 'horizontal';
+      const patchCount = isHorizontal ? 5 : 7;
+      for (let index = 0; index < patchCount; index += 1) {
+        const t = patchCount <= 1 ? 0.5 : index / (patchCount - 1);
+        const patchX = isHorizontal ? Phaser.Math.Linear(ARENA.left + 46, ARENA.right - 46, t) : x;
+        const patchY = isHorizontal ? y : Phaser.Math.Linear(ARENA.top + 112, ARENA.bottom - 92, t);
+        this.spawnFirePatch(patchX, patchY, effectMultiplier, GHOST_STATUS_FIELD_LIFETIME_MS, 0.46);
+      }
+    }
+    if (this.getSkillRank('poison') > 0) {
+      const field = this.add.rectangle(
+        direction === 'horizontal' ? GAME_DESIGN_WIDTH / 2 : x,
+        direction === 'horizontal' ? y : ARENA.top + 92 + height / 2,
+        width,
+        height,
+        POISON_TINT,
+        0.12
+      ).setStrokeStyle(2, POISON_TINT, 0.42).setDepth(934);
+      this.tweens.add({
+        targets: field,
+        alpha: 0,
+        duration: GHOST_STATUS_FIELD_LIFETIME_MS,
+        onComplete: () => field.destroy()
+      });
+    }
   }
 
   private enforceSideWalls(): void {
@@ -1000,9 +1152,6 @@ export class PotassiumSlipScene extends Phaser.Scene {
       } else {
         this.clampEnemyInsideArena(enemy, SIDE_BOUNCE_MARGIN);
       }
-    });
-    this.pickups.getChildren().forEach((gameObject) => {
-      this.bounceObjectInsideArena(gameObject as ProjectileSprite, SIDE_BOUNCE_MARGIN);
     });
     this.clones.getChildren().forEach((gameObject) => {
       this.bounceObjectInsideArena(gameObject as ProjectileSprite, SIDE_BOUNCE_MARGIN);
@@ -1067,13 +1216,103 @@ export class PotassiumSlipScene extends Phaser.Scene {
 
   private checkWaveClear(): void {
     if (this.waveAdvancing || this.gameState !== 'PLAYING' || isPotassiumBossWave(this.wave)) return;
+    if (this.pendingRows > 0) return;
     const hasLivingEnemies = this.enemies.getChildren().some((gameObject) => {
       const enemy = gameObject as EnemySprite;
       return enemy.active && !enemy.getData('dying');
     });
     if (hasLivingEnemies) return;
     this.waveAdvancing = true;
-    bridgeActions.setSceneHintText('Wave clear • Banana paperwork reloads');
+    bridgeActions.setSceneHintText('Wave clear • Choose fresh banana nonsense');
+    this.time.delayedCall(UPGRADE_CHOICE_DELAY_MS, () => {
+      if (this.gameState === 'PLAYING') {
+        this.showUpgradeChoices();
+      }
+    });
+  }
+
+  private showUpgradeChoices(): void {
+    const choices = getPotassiumUpgradeChoices(this.skillRanks, this.wave);
+    if (choices.length === 0) {
+      this.advanceToNextWave();
+      return;
+    }
+
+    this.gameState = 'UPGRADE';
+    this.banana.setVelocity(0, 0);
+    this.banana.setAngularVelocity(0);
+    this.clearUpgradeChoiceOverlay();
+
+    this.upgradeChoiceBackdrop = this.add.rectangle(GAME_DESIGN_WIDTH / 2, 305, ARENA.width - 76, 176, 0xfbfbf9, 0.96)
+      .setStrokeStyle(5, 0x1a1a1a, 0.9)
+      .setDepth(1200);
+    this.upgradeChoiceTitle = createUiText(this, GAME_DESIGN_WIDTH / 2, 238, 'CHOOSE BANANA NONSENSE', {
+      fontSize: '15px',
+      color: '#1a1a1a',
+      fontStyle: 'bold',
+      align: 'center'
+    }).setOrigin(0.5).setDepth(1201);
+
+    const buttonWidth = 164;
+    const buttonHeight = 82;
+    const startX = choices.length === 1 ? GAME_DESIGN_WIDTH / 2 : GAME_DESIGN_WIDTH / 2 - 88;
+    this.upgradeChoiceButtons = choices.map((option, index) => {
+      const config = UPGRADE_CONFIGS[option.kind];
+      const x = startX + index * 176;
+      const panel = this.add.rectangle(x, 312, buttonWidth, buttonHeight, 0xffffff, 0.92)
+        .setStrokeStyle(3, 0x1a1a1a, 0.75)
+        .setDepth(1201);
+      const label = createUiText(this, x, 286, getDraftOptionTitle(option), {
+        fontSize: '11px',
+        color: config.color,
+        fontStyle: 'bold',
+        align: 'center',
+        wordWrap: { width: buttonWidth - 16, useAdvancedWrap: true }
+      }).setOrigin(0.5).setDepth(1202);
+      const description = createUiText(this, x, 326, getDraftOptionDescription(option), {
+        fontSize: '8px',
+        color: '#1a1a1a',
+        fontStyle: 'bold',
+        align: 'center',
+        wordWrap: { width: buttonWidth - 18, useAdvancedWrap: true }
+      }).setOrigin(0.5).setDepth(1202);
+      return { option, panel, label, description };
+    });
+  }
+
+  private handleUpgradeChoicePointer(pointer: Phaser.Input.Pointer): void {
+    const choice = this.upgradeChoiceButtons.find((button) => {
+      const bounds = button.panel.getBounds();
+      return bounds.contains(pointer.x, pointer.y);
+    });
+    if (!choice) return;
+    this.applyDraftChoice(choice.option);
+    this.clearUpgradeChoiceOverlay();
+    this.advanceToNextWave();
+  }
+
+  private applyDraftChoice(option: SkillDraftOption): void {
+    this.skillRanks = applyPotassiumDraftOption(this.skillRanks, option);
+    const actionLabel = option.action === 'unlock' ? 'unlocked' : 'upgraded';
+    bridgeActions.setSceneHintText(`${UPGRADE_CONFIGS[option.kind].label} ${actionLabel} • It stacks forever`);
+    this.updateHud();
+  }
+
+  private clearUpgradeChoiceOverlay(): void {
+    this.upgradeChoiceBackdrop?.destroy();
+    this.upgradeChoiceTitle?.destroy();
+    this.upgradeChoiceBackdrop = undefined;
+    this.upgradeChoiceTitle = undefined;
+    this.upgradeChoiceButtons.forEach((button) => {
+      button.panel.destroy();
+      button.label.destroy();
+      button.description.destroy();
+    });
+    this.upgradeChoiceButtons = [];
+  }
+
+  private advanceToNextWave(): void {
+    this.gameState = 'PLAYING';
     this.time.delayedCall(WAVE_ADVANCE_DELAY_MS, () => {
       if (this.gameState === 'PLAYING') {
         this.spawnWave(this.wave + 1);
@@ -1094,38 +1333,12 @@ export class PotassiumSlipScene extends Phaser.Scene {
     });
   }
 
-  private updatePickupLabels(): void {
-    this.pickups.getChildren().forEach((gameObject) => {
-      const pickup = gameObject as PickupSprite;
-      const label = pickup.getData('labelText') as Phaser.GameObjects.Text | undefined;
-      if (label) {
-        this.positionFloatingLabel(label, pickup.x, pickup.y - 30);
-      }
-    });
-  }
-
   private updateHud(): void {
     const wave = getPotassiumWave(this.wave);
     this.hudText?.setText(`W${this.wave} ${wave.title}`);
     this.scoreText?.setText(`Score ${this.score}`);
     this.livesText?.setText(`Lives ${this.lives}`);
     this.activeText?.setText(this.getActiveUpgradeText());
-    this.updateModifierChips();
-  }
-
-  private updateModifierChips(): void {
-    this.modifierChips.forEach((chip) => {
-      const unlocked = this.unlockedModifiers.has(chip.modifier);
-      const queued = this.queuedModifier === chip.modifier;
-      const active = this.activeModifier === chip.modifier;
-      chip.box
-        .setAlpha(unlocked ? 1 : 0.28)
-        .setFillStyle(queued ? MODIFIER_CONFIGS[chip.modifier].tint : 0xfbfbf9, queued ? 0.34 : 0.92)
-        .setStrokeStyle(active ? 3 : 2, 0x1a1a1a, unlocked ? 0.9 : 0.35);
-      chip.label
-        .setAlpha(unlocked ? 1 : 0.35)
-        .setText(`${MODIFIER_CONFIGS[chip.modifier].shortcut} ${MODIFIER_CONFIGS[chip.modifier].label}`);
-    });
   }
 
   private getShortEnemyLabel(kind: EnemyKind, hp: number, maxHp: number): string {
@@ -1145,24 +1358,21 @@ export class PotassiumSlipScene extends Phaser.Scene {
   }
 
   private getActiveUpgradeText(): string {
-    const active: string[] = [];
-    const queuedLabel = MODIFIER_CONFIGS[this.queuedModifier].label.toLowerCase();
-    const activeLabel = MODIFIER_CONFIGS[this.activeModifier].label.toLowerCase();
-    active.push(this.queuedModifier === this.activeModifier ? `${activeLabel} active` : `${queuedLabel} queued`);
-    if (this.rubberUntil > this.time.now) active.push('rubber');
-    if (this.magnetUntil > this.time.now) active.push('magnet');
-    return active.join(' + ');
+    const unlocked = Object.entries(this.skillRanks)
+      .filter(([, rank]) => rank !== undefined && rank > 0) as Array<[UpgradeKind, SkillRank]>;
+    if (unlocked.length === 0) return 'no nonsense yet';
+    return unlocked
+      .map(([upgrade, rank]) => `${UPGRADE_CONFIGS[upgrade].label.replace(' Damage', '').replace(' Trail', '').toLowerCase()}${rank >= 2 ? '+' : ''}`)
+      .join(' + ');
   }
 
   private getWaveHint(wave: number): string {
     if (wave === 1) return 'launch and bounce';
     if (wave === 2) return 'multi-hit blobs';
-    if (wave === 3) return 'poison unlocked';
+    if (wave === 3) return 'walls block angles';
     if (wave === 4) return 'walls block angles';
-    if (wave === 5) return 'bomb unlocked';
-    if (wave === 6) return 'grab split';
-    if (wave === 7) return 'rubber chaos';
-    if (wave === 8) return 'magnet pickups';
+    if (wave === 5) return 'stack your choices';
+    if (wave === 6) return 'final paperwork rain';
     return 'boss time';
   }
 
@@ -1171,8 +1381,8 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.banana.setVelocity(0, 0);
     this.enemies.clear(true, true);
     this.clones.clear(true, true);
-    this.pickups.clear(true, true);
-    this.poisonZones.clear(true, true);
+    this.trailZones.clear(true, true);
+    this.clearUpgradeChoiceOverlay();
     bridgeActions.collectItem('circuit');
     bridgeActions.setSceneHintText(null);
     this.overlayText.setFontSize(26).setText('CIRCUIT ACQUIRED').setPosition(GAME_DESIGN_WIDTH / 2, 255).setVisible(true);
@@ -1183,9 +1393,9 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.gameState = 'GAME_OVER';
     this.enemies.clear(true, true);
     this.clones.clear(true, true);
-    this.pickups.clear(true, true);
-    this.poisonZones.clear(true, true);
+    this.trailZones.clear(true, true);
     this.banana.setVelocity(0, 0);
+    this.clearUpgradeChoiceOverlay();
     bridgeActions.setSceneHintText(null);
     this.overlayText.setFontSize(24).setText('BANANA BANKRUPTCY').setPosition(GAME_DESIGN_WIDTH / 2, 255).setVisible(true);
     this.subOverlayText.setFontSize(15).setText(`Final Score: ${this.score}\n[E] RETURN TO CITY`).setPosition(GAME_DESIGN_WIDTH / 2, 320).setVisible(true);
@@ -1318,42 +1528,15 @@ export class PotassiumSlipScene extends Phaser.Scene {
     g.destroy();
   }
 
-  private createPickupTextures(): void {
-    this.createPickupTexture('potassium_pickup_split', 0xfacc15, 'split');
-    this.createPickupTexture('potassium_pickup_rubber', 0x38bdf8, 'rubber');
-    this.createPickupTexture('potassium_pickup_magnet', 0x22d3ee, 'magnet');
-  }
-
-  private createPickupTexture(key: string, color: number, kind: UpgradeKind): void {
+  private createFireTexture(): void {
     const g = this.make.graphics({ x: 0, y: 0 });
-    g.fillStyle(color, 0.9);
-    g.lineStyle(4, 0x1a1a1a, 1);
-    if (kind === 'rubber') {
-      g.strokeCircle(24, 24, 18);
-      g.strokeCircle(24, 24, 9);
-    } else if (kind === 'magnet') {
-      g.strokeRoundedRect(10, 8, 28, 32, 12);
-      g.fillRect(8, 30, 12, 10);
-      g.fillRect(30, 30, 12, 10);
-    } else {
-      g.fillCircle(18, 24, 9);
-      g.fillCircle(30, 18, 8);
-      g.fillCircle(31, 31, 7);
-      g.strokeCircle(18, 24, 9);
-      g.strokeCircle(30, 18, 8);
-      g.strokeCircle(31, 31, 7);
-    }
-    g.generateTexture(key, 48, 48);
-    g.destroy();
-  }
-
-  private createPoisonTexture(): void {
-    const g = this.make.graphics({ x: 0, y: 0 });
-    g.fillStyle(0xa855f7, 0.38);
-    g.lineStyle(3, 0x1a1a1a, 0.45);
+    g.fillStyle(0xf97316, 0.34);
+    g.lineStyle(3, 0x1a1a1a, 0.42);
     g.fillEllipse(30, 18, 56, 24);
     g.strokeEllipse(30, 18, 56, 24);
-    g.generateTexture('potassium_poison', 60, 36);
+    g.fillStyle(0xfacc15, 0.38);
+    g.fillEllipse(30, 16, 34, 14);
+    g.generateTexture('potassium_fire', 60, 36);
     g.destroy();
   }
 
