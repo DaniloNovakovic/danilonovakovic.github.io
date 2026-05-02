@@ -5,6 +5,8 @@ import { Button } from './Button';
 const FOCUSABLE =
   'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
+const dialogStack: HTMLElement[] = [];
+
 interface DialogCardProps {
   title: string;
   description?: string;
@@ -19,6 +21,17 @@ export function DialogCard({ title, description, onClose, children }: DialogCard
   useEffect(() => {
     const first = cardRef.current?.querySelector<HTMLElement>(FOCUSABLE);
     (first ?? cardRef.current)?.focus();
+  }, []);
+
+  useEffect(() => {
+    const modal = cardRef.current;
+    if (!modal) return;
+
+    dialogStack.push(modal);
+    return () => {
+      const index = dialogStack.indexOf(modal);
+      if (index >= 0) dialogStack.splice(index, 1);
+    };
   }, []);
 
   useEffect(() => {
@@ -47,8 +60,15 @@ export function DialogCard({ title, description, onClose, children }: DialogCard
   }, []);
 
   useEffect(() => {
+    const modal = cardRef.current;
+    if (!modal) return;
+
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      const isTopDialog = dialogStack.at(-1) === modal;
+      if (e.key === 'Escape' && !e.defaultPrevented && isTopDialog) {
+        e.preventDefault();
+        onClose();
+      }
     };
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
