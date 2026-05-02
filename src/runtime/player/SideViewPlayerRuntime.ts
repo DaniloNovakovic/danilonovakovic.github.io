@@ -17,9 +17,15 @@ export interface SideViewPlayerResumeClamp {
   maxY: number;
 }
 
+/**
+ * Shared lifecycle config for side-view Phaser scenes. Scenes still own layout,
+ * colliders, room props, and interaction effects; this runtime owns player spawn,
+ * input, pause propagation, controller updates, appearance sync, and resume capture.
+ */
 export interface SideViewPlayerRuntimeOptions {
   scene: Phaser.Scene;
   start: ResumeSnapshot;
+  /** Optional restored position; clamped before sprite creation when resumeClamp is set. */
   resumePosition?: ResumeSnapshot;
   resumeClamp?: SideViewPlayerResumeClamp;
   sprite?: {

@@ -1,5 +1,7 @@
 # Level Design & Progression
 
+> Concept / future-design notes unless a section explicitly says it is implemented. For current shipped level behavior, see [`PLAYER_MANUAL.md`](./PLAYER_MANUAL.md).
+
 ## Overworld: The "Sketch" City
 
 ### Zone 1: The Outskirts (Starting Area)

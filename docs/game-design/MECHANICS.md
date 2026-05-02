@@ -1,5 +1,7 @@
 # Core Gameplay Mechanics
 
+> Concept / future-design notes. This document can mention mechanics that are not implemented yet. For current player-facing controls and shipped level behavior, see [`PLAYER_MANUAL.md`](./PLAYER_MANUAL.md).
+
 ## 1. Style Phasing (The "Lens")
 
 - **Implementation:** 
@@ -17,7 +19,7 @@
 ## 3. Secret Triggers
 
 - **Hidden Flags:** Certain actions (e.g., jumping 3 times on a specific spot) trigger a "Secret Found" event.
-- **Persistence:** Secrets found are saved in the `gameState.ts` (currently exists) so they persist across sessions.
+- **Persistence:** Future secrets should persist through the bridge/runtime state model or a dedicated save Module when implemented; do not treat `gameState.ts` as a persistence store.
 
 ## 4. Movement Upgrades
 

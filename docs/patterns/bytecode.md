@@ -1,6 +1,6 @@
 # Bytecode
 
-> Stub — expand as you read the chapter.
+> Low-priority reference. This pattern is intentionally skipped at current scope.
 
 ## Intent
 

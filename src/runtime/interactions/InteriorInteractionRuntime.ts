@@ -5,14 +5,23 @@ export interface InteriorInteractionPrompt {
   y: number;
 }
 
+/**
+ * Plain target facts for an interior prop. Scenes own Phaser objects and side effects;
+ * this runtime only decides active target, prompt placement, and typed effect commands.
+ */
 export interface InteriorInteractionTarget<Id extends string, Effect> {
   id: Id;
   kind: string;
+  /** X coordinate used for proximity checks. */
   x: number;
+  /** Y coordinate used for proximity checks, usually the prop's player-facing anchor. */
   distanceAnchorY: number;
+  /** Overrides the room default radius for targets with larger/smaller hotspots. */
   interactRadius?: number;
   prompt: InteriorInteractionPrompt;
+  /** Disabled targets are ignored for both prompt display and effects. */
   enabled?: () => boolean;
+  /** Function effects are resolved at interaction time so gates can read current state. */
   effect: Effect | (() => Effect);
 }
 
@@ -71,6 +80,11 @@ function pickInteriorInteractionTarget<Id extends string, Effect>(
   return null;
 }
 
+/**
+ * Creates a Phaser-free interaction runtime for interior rooms. Exit requests take
+ * precedence over target effects, and prompt visibility is returned as data for the
+ * scene to apply to its own text objects.
+ */
 export function createInteriorInteractionRuntime<Id extends string, Effect>(
   options: InteriorInteractionRuntimeOptions<Id, Effect>
 ): InteriorInteractionRuntime<Id, Effect> {

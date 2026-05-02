@@ -7,11 +7,13 @@ This folder is a living companion to Robert Nystrom's *[Game Programming Pattern
 - whether/how it is used in this repo,
 - and its adoption status.
 
+These notes are decision aids, not an implementation checklist. Prefer the `improve-codebase-architecture` lens first: look for duplicated caller knowledge, poor Locality, shallow Modules, and weak Interfaces. Use patterns to name a useful shape after the problem is real.
+
 ## How to use this folder
 
 1. Read a chapter in the book (or on [gameprogrammingpatterns.com](https://gameprogrammingpatterns.com/)).
 2. Open the matching file in this folder.
-3. If it is a stub (`Status: not yet read`), expand it with your own notes. You can also ask the AI to draft one for you from the chapter.
+3. If it is a low-priority note (`Status: not yet read`), treat it as reference material only. Expand it when the pattern becomes relevant.
 4. If the pattern lands in the repo, update the **In this repo** section with a link to the code that uses it, and bump the **Status**.
 5. If the pattern is deliberately not a fit, set **Status** to `skip-for-now` with a one-line reason. That reason is load-bearing — it prevents the AI from introducing it unprompted.
 
@@ -21,7 +23,7 @@ Status values used across all chapter files:
 - `planned` — there is a clear place for it but it is not wired up yet.
 - `deferred` — probably useful eventually, not today.
 - `skip-for-now` — intentionally not applied at current scale; re-evaluate later.
-- `not yet read` — stub; expand as you read the chapter.
+- `not yet read` — low-priority reference; do not use as guidance until expanded.
 
 ## Table of contents (mirrors the book)
 
@@ -64,9 +66,9 @@ Status values used across all chapter files:
 A quick scan of which patterns are live, planned, or intentionally parked for this repo's current scale (React + Phaser 4 portfolio with a 3000px street and a small number of entities).
 
 - **Command** — `in use` (small). `src/core/input/commands.ts` models scene input as intent frames before player movement consumes it.
-- **Flyweight** — `not yet read`. Possible fit for tilemaps / repeated sprites later.
+- **Flyweight** — `not yet read`. Low-priority reference; possible fit for tilemaps / repeated sprites later.
 - **Observer** — `in use`. [`src/shared/bridge/store.ts`](../../src/shared/bridge/store.ts) subscriptions + `useBridgeState`.
-- **Prototype** — `not yet read`.
+- **Prototype** — `not yet read`. Low-priority reference.
 - **Singleton** — `skip-for-now`. Nystrom warns against it; the bridge store covers the legitimate use case as a scoped service locator.
 - **State** — `in use` (small). `src/runtime/gameState.ts` models runtime modes as a discriminated union used by the bridge and kernel.
 - **Double Buffer** — `deferred`. Phaser handles frame presentation; revisit only if we author composite dynamic textures that get read mid-mutation.

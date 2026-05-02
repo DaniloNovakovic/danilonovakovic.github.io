@@ -1,6 +1,6 @@
 # Flyweight
 
-> Stub — expand as you read the chapter.
+> Low-priority reference. Do not introduce this pattern unless repeated shared data becomes a real problem.
 
 ## Intent
 
@@ -20,7 +20,7 @@ No current explicit flyweight. Candidate fits later:
 
 ## Status
 
-`not yet read`
+`not yet read` — reference only.
 
 ## See also
 

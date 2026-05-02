@@ -27,7 +27,7 @@ Key principles (see [LANGUAGE.md](LANGUAGE.md) for the full list):
 - **One adapter = hypothetical seam. Two adapters = real seam.**
 - **Dependency category drives testing approach**: classify dependencies using [DEEPENING.md](DEEPENING.md) before proposing seam strategy.
 
-This skill is informed by the repository's existing architecture docs. In this project, use `AGENTS.md`, `.cursor/rules/`, `docs/ARCHITECTURE_RUNTIME.md`, `docs/ARCHITECTURE_CONSTITUTION.md`, and `docs/patterns/` as the source of language and constraints.
+This skill is informed by the repository's existing architecture docs. In this project, use `AGENTS.md`, `.agents/rules/`, `docs/ARCHITECTURE_RUNTIME.md`, `docs/ARCHITECTURE_CONSTITUTION.md`, and `docs/patterns/` as the source of language and constraints.
 
 ## Process
 
@@ -36,7 +36,7 @@ This skill is informed by the repository's existing architecture docs. In this p
 Read existing documentation first:
 
 - `AGENTS.md`
-- `.cursor/rules/`
+- `.agents/rules/`
 - `docs/ARCHITECTURE_RUNTIME.md`
 - `docs/ARCHITECTURE_CONSTITUTION.md`
 - `docs/patterns/README.md`

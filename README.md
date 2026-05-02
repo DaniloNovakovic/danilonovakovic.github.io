@@ -25,9 +25,9 @@ npm run build
 
 ## Architecture
 
-Runtime layering follows a micro-kernel + bridge pattern. Feature list and world positions are composed from [`src/config/featurePlugins.ts`](src/config/featurePlugins.ts), [`src/config/worldLayout.ts`](src/config/worldLayout.ts), and [`src/config/portfolioCompose.ts`](src/config/portfolioCompose.ts) into [`src/config/portfolioRegistry.ts`](src/config/portfolioRegistry.ts).
+Runtime layering follows a micro-kernel + bridge pattern. Feature runtime lookup lives in [`src/runtime/miniGameRegistry.ts`](src/runtime/miniGameRegistry.ts), with source facts composed from [`src/config/portfolio.ts`](src/config/portfolio.ts), [`src/config/worldLayout.ts`](src/config/worldLayout.ts), and runtime bindings.
 
-Full runtime layering and module boundaries are in [`docs/ARCHITECTURE_RUNTIME.md`](docs/ARCHITECTURE_RUNTIME.md). Architectural patterns used here are anchored to Robert Nystrom's *[Game Programming Patterns](https://gameprogrammingpatterns.com/)*; per-pattern notes and adoption status live in [`docs/patterns/`](docs/patterns/README.md).
+Full runtime layering and Module seams are in [`docs/ARCHITECTURE_RUNTIME.md`](docs/ARCHITECTURE_RUNTIME.md). Agent rules live in [`.agents/rules/`](.agents/rules/). Architectural patterns are decision aids, not an implementation checklist; per-pattern notes and adoption status live in [`docs/patterns/`](docs/patterns/README.md).
 
 ## Deploy (GitHub Pages)
 
@@ -37,4 +37,3 @@ Production build outputs to `dist/`. [`.github/workflows/ci.yml`](.github/workfl
 
 - **Code:** Licensed under the [MIT License](LICENSE).
 - **Character Art:** This project uses "Punpun" from *Oyasumi Punpun* by Inio Asano as a placeholder/mascot for non-commercial, personal portfolio purposes (Fair Use). All rights belong to the original copyright owners.
-
