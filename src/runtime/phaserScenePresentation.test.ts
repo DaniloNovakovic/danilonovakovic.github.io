@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { isFullBoardPhaserScene } from './phaserScenePresentation';
+import {
+  getPhaserScenePresentationMode,
+  isFullBoardPhaserScene
+} from './phaserScenePresentation';
 
 describe('isFullBoardPhaserScene', () => {
   it('marks Potassium as a full-board scene', () => {
@@ -10,5 +13,12 @@ describe('isFullBoardPhaserScene', () => {
     expect(isFullBoardPhaserScene('hobbies')).toBe(false);
     expect(isFullBoardPhaserScene('basement')).toBe(false);
     expect(isFullBoardPhaserScene(null)).toBe(false);
+  });
+
+  it('returns the presentation mode for Phaser scene ids', () => {
+    expect(getPhaserScenePresentationMode('potassium')).toBe('full-board');
+    expect(getPhaserScenePresentationMode('hobbies')).toBe('portrait-cover');
+    expect(getPhaserScenePresentationMode('basement')).toBe('portrait-cover');
+    expect(getPhaserScenePresentationMode(null)).toBe('portrait-cover');
   });
 });

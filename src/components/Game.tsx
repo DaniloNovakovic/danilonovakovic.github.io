@@ -11,23 +11,27 @@ import { PhaserSceneAdapter } from '../infra/phaser/PhaserSceneAdapter';
 import { GameKernel } from '../core/kernel/GameKernel';
 import { createContextPlugins } from '../contextPlugins/createContextPlugins';
 import { useTouchGestures } from './useTouchGestures';
-import { isFullBoardPhaserScene } from '../runtime/phaserScenePresentation';
+import type { PhaserScenePresentationMode } from '../runtime/phaserScenePresentation';
 
 interface GameProps {
   onInteract: (area: string) => void;
   isPaused: boolean;
   activeMiniGameId: string | null;
+  presentationMode: PhaserScenePresentationMode;
   onClose: () => void;
 }
 
-export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }: GameProps) {
+export default function Game({
+  onInteract,
+  isPaused,
+  activeMiniGameId,
+  presentationMode,
+  onClose
+}: GameProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
   const bridgeRef = useRef({ onInteract, onClose, isPaused });
-  const startSceneParam = new URLSearchParams(window.location.search).get('startScene');
-  const presentationMiniGameId =
-    activeMiniGameId ?? (startSceneParam && isMiniGameId(startSceneParam) ? startSceneParam : null);
-  const shouldUseGestureOverlay = !isFullBoardPhaserScene(presentationMiniGameId);
+  const shouldUseGestureOverlay = presentationMode !== 'full-board';
 
   useLayoutEffect(() => {
     bridgeRef.current = { onInteract, onClose, isPaused };
@@ -69,6 +73,27 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
   useEffect(() => {
     bridgeActions.resetTouch();
   }, [activeMiniGameId]);
+
+  useEffect(() => {
+    bridgeActions.resetTouch();
+    const game = gameRef.current;
+    if (!game) return;
+
+    let secondFrameId: number | undefined;
+    const firstFrameId = requestAnimationFrame(() => {
+      game.scale.refresh();
+      secondFrameId = requestAnimationFrame(() => {
+        game.scale.refresh();
+      });
+    });
+
+    return () => {
+      cancelAnimationFrame(firstFrameId);
+      if (secondFrameId !== undefined) {
+        cancelAnimationFrame(secondFrameId);
+      }
+    };
+  }, [presentationMode]);
 
   useEffect(() => {
     if (!containerRef.current || gameRef.current) return;
@@ -125,6 +150,9 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
       const startScene = new URLSearchParams(window.location.search).get('startScene');
       if (startScene && isMiniGameId(startScene)) {
         bridgeActions.requestInteraction(startScene);
+        const url = new URL(window.location.href);
+        url.searchParams.delete('startScene');
+        window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
       }
     }
 

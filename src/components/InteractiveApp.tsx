@@ -12,7 +12,10 @@ import { TEXTS } from '../config/content';
 import { isMiniGameId } from '../config/featureIds';
 import { bridgeActions, useBridgeState } from '../shared/bridge/store';
 import { OverlayCard } from './overlays/OverlayCard';
-import { isFullBoardPhaserScene } from '../runtime/phaserScenePresentation';
+import {
+  getPhaserScenePresentationMode,
+  type PhaserScenePresentationMode
+} from '../runtime/phaserScenePresentation';
 
 interface InteractiveAppProps {
   onSwitchToStatic: () => void;
@@ -35,14 +38,17 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
   const activeOverlayMiniGame = getReactOverlayMiniGameById(bridge.activeMiniGameId);
   const ActiveOverlayComponent = activeOverlayMiniGame?.component;
   const isGameInputBlocked = bridge.isPaused || bridge.loadingMiniGameId !== null;
+  const activeMiniGameId = bridge.activeMiniGameId;
   const startSceneParam = new URLSearchParams(window.location.search).get('startScene');
+  const initialStartSceneId = startSceneParam && isMiniGameId(startSceneParam) ? startSceneParam : null;
   const presentationMiniGameId =
-    bridge.activeMiniGameId ?? (startSceneParam && isMiniGameId(startSceneParam) ? startSceneParam : null);
-  const isFullBoardScene = isFullBoardPhaserScene(presentationMiniGameId);
-  const gameShellWidthClass = isFullBoardScene
+    activeMiniGameId ?? initialStartSceneId;
+  const presentationMode: PhaserScenePresentationMode =
+    getPhaserScenePresentationMode(presentationMiniGameId);
+  const gameShellWidthClass = presentationMode === 'full-board'
     ? 'w-[min(100%,1000px,calc((100dvh-7.75rem)*1000/600))] md:w-[min(100%,calc(min(88dvh,600px)*1000/600))]'
     : 'w-[min(100%,450px,calc((100dvh-7.75rem)*3/4))] md:w-[min(100%,calc(min(88dvh,600px)*1000/600))]';
-  const gameFrameAspectClass = isFullBoardScene
+  const gameFrameAspectClass = presentationMode === 'full-board'
     ? 'aspect-[1000/600]'
     : 'aspect-[3/4] md:aspect-[1000/600]';
 
@@ -107,6 +113,7 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
                 onInteract={handleInteract}
                 isPaused={isGameInputBlocked}
                 activeMiniGameId={bridge.activeMiniGameId}
+                presentationMode={presentationMode}
                 onClose={closeOverlay}
               />
             </div>
