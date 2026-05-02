@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect, useLayoutEffect } from 'react';
 import { Trash2 } from 'lucide-react';
 import { TEXTS } from '../config/content';
 import { useOverlayKeys } from './overlays/useOverlayKeys';
+import { Button, Panel } from '../ui';
 
 export default function DrawingCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -173,7 +174,7 @@ export default function DrawingCanvas() {
 
   return (
     <div className="flex flex-col items-center w-full">
-      <div className="relative w-full h-[250px] border-4 border-[#1a1a1a] shadow-[6px_6px_0px_0px_rgba(26,26,26,1)] bg-[#fbfbf9] overflow-hidden group">
+      <Panel border="thick" className="group relative h-[250px] w-full overflow-hidden p-0 shadow-[6px_6px_0px_0px_rgba(26,26,26,1)]">
         <canvas
           ref={canvasRef}
           className="w-full h-full cursor-crosshair touch-none"
@@ -201,7 +202,7 @@ export default function DrawingCanvas() {
         <div className="absolute top-0 right-0 w-4 h-4 border-b-2 border-l-2 border-[#1a1a1a] opacity-30"></div>
         <div className="absolute bottom-0 left-0 w-4 h-4 border-t-2 border-r-2 border-[#1a1a1a] opacity-30"></div>
         <div className="absolute bottom-0 right-0 w-4 h-4 border-t-2 border-l-2 border-[#1a1a1a] opacity-30"></div>
-      </div>
+      </Panel>
       
       <div className="mt-4 flex justify-between w-full items-center">
         <div className="flex flex-col">
@@ -212,15 +213,15 @@ export default function DrawingCanvas() {
             [Arrows to move • Space to draw • Shift to speed up]
           </span>
         </div>
-        <button
+        <Button
           onClick={clearCanvas}
-          className="flex items-center gap-2 px-4 py-2 bg-[#f4f1ea] border-2 border-[#1a1a1a] shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] hover:translate-y-[2px] hover:shadow-none transition-all active:scale-95 font-bold"
+          variant="secondary"
+          className="shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] hover:translate-y-[2px] hover:shadow-none active:scale-95"
         >
           <Trash2 size={16} />
           {TEXTS.miniGames.drawing.erase}
-        </button>
+        </Button>
       </div>
     </div>
   );
 }
-

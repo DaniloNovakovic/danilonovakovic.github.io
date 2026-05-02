@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback, useLayoutEffect } from 'react';
 import { TEXTS } from '../config/content';
 import { useOverlayKeys } from './overlays/useOverlayKeys';
+import { Button, Panel } from '../ui';
 
 const ARROWS = ['UP', 'RIGHT', 'DOWN', 'LEFT'] as const;
 
@@ -21,13 +22,13 @@ function ArrowButton({
 }) {
   const isActive = activeArrow === dir;
   return (
-    <button
-      type="button"
+    <Button
+      variant="control"
       onClick={() => onPress(dir)}
-      className={`w-16 h-16 border-4 border-[#1a1a1a] font-bold text-2xl flex justify-center items-center transition-colors ${isActive ? 'bg-[#1a1a1a] text-[#fbfbf9]' : 'bg-[#f4f1ea] hover:bg-[#e8e5df]'}`}
+      className={`h-16 w-16 p-0 text-2xl ${isActive ? 'bg-[#1a1a1a] text-[#fbfbf9]' : 'bg-[#f4f1ea] hover:bg-[#e8e5df]'}`}
     >
       {label}
-    </button>
+    </Button>
   );
 }
 
@@ -146,7 +147,7 @@ export default function DancingMini() {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <div className="w-full h-[250px] border-4 border-[#1a1a1a] shadow-[6px_6px_0px_0px_rgba(26,26,26,1)] bg-[#fbfbf9] flex flex-col items-center justify-center relative">
+      <Panel border="thick" className="relative flex h-[250px] w-full flex-col items-center justify-center shadow-[6px_6px_0px_0px_rgba(26,26,26,1)]">
         <div className="absolute top-4 font-bold text-lg">{message}</div>
 
         <div className="grid grid-cols-3 gap-2 mt-8">
@@ -159,15 +160,16 @@ export default function DancingMini() {
         </div>
 
         {!isPlaying && (
-          <button
-            type="button"
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={startGame}
-            className="absolute bottom-4 px-4 py-1 border-2 border-[#1a1a1a] font-bold hover:bg-[#e8e5df]"
+            className="absolute bottom-4"
           >
             {sequence.length > 0 ? TEXTS.common.restart : TEXTS.common.start}
-          </button>
+          </Button>
         )}
-      </div>
+      </Panel>
       <div className="mt-4 text-sm font-bold text-[#1a1a1a] opacity-60">
         {TEXTS.miniGames.dancing.instruction}
       </div>

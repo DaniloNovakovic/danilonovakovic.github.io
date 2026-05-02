@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { TEXTS } from '../config/content';
+import { Panel } from '../ui';
 
 export default function MuayThaiMini() {
   const [hits, setHits] = useState(0);
@@ -34,7 +35,7 @@ export default function MuayThaiMini() {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <div className="w-full h-[250px] border-4 border-[#1a1a1a] shadow-[6px_6px_0px_0px_rgba(26,26,26,1)] bg-[#fbfbf9] relative flex justify-center items-end pb-8">
+      <Panel border="thick" className="relative flex h-[250px] w-full items-end justify-center pb-8 shadow-[6px_6px_0px_0px_rgba(26,26,26,1)]">
         <div className="absolute top-4 left-4 font-bold text-2xl">
           {TEXTS.common.combo} {hits}
         </div>
@@ -59,7 +60,7 @@ export default function MuayThaiMini() {
             </div>
           )}
         </div>
-      </div>
+      </Panel>
       <div className="mt-4 text-sm font-bold text-[#1a1a1a] opacity-60">
         {TEXTS.miniGames.muayThai.instruction}
       </div>

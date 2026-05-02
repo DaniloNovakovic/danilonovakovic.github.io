@@ -12,6 +12,7 @@ import { TEXTS } from '../config/content';
 import { isMiniGameId } from '../config/featureIds';
 import { bridgeActions, useBridgeState } from '../shared/bridge/store';
 import { OverlayCard } from './overlays/OverlayCard';
+import { Button, Card, Panel } from '../ui';
 
 interface InteractiveAppProps {
   onSwitchToStatic: () => void;
@@ -38,29 +39,31 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
   return (
     <div className="relative flex min-h-[100dvh] min-h-dvh w-full flex-col overflow-x-hidden bg-[#f4f1ea]">
       {/* Mode switch link — unobtrusive, top-right */}
-      <button
-        type="button"
+      <Button
+        variant="floating"
+        size="sm"
         onClick={onSwitchToStatic}
-        className="fixed right-2 top-[max(0.5rem,env(safe-area-inset-top,0px))] z-40 inline-flex items-center gap-1.5 rounded border-2 border-[#1a1a1a] bg-[#fbfbf9]/90 px-2.5 py-1 text-[11px] font-bold uppercase tracking-widest text-[#1a1a1a] shadow-[3px_3px_0px_0px_rgba(26,26,26,1)] backdrop-blur-sm transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] sm:right-4 sm:top-4 sm:px-3 sm:py-1.5 sm:text-xs"
+        className="fixed right-2 top-[max(0.5rem,env(safe-area-inset-top,0px))] z-40 sm:right-4 sm:top-4 sm:px-3 sm:py-1.5 sm:text-xs"
         aria-label="Switch to static portfolio"
       >
         <BookOpen className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
         <span className="hidden sm:inline">Static mode</span>
         <span className="sm:hidden">Static</span>
-      </button>
+      </Button>
 
       <div className="fixed left-2 top-[max(0.5rem,env(safe-area-inset-top,0px))] z-40 sm:left-4 sm:top-4">
-        <button
-          type="button"
+        <Button
+          variant="floating"
+          size="sm"
           onClick={() => setInventoryOpen((v) => !v)}
-          className="inline-flex items-center gap-1.5 rounded border-2 border-[#1a1a1a] bg-[#fbfbf9]/90 px-2.5 py-1 text-[11px] font-bold uppercase tracking-widest text-[#1a1a1a] shadow-[3px_3px_0px_0px_rgba(26,26,26,1)] backdrop-blur-sm transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] sm:px-3 sm:py-1.5 sm:text-xs"
+          className="sm:px-3 sm:py-1.5 sm:text-xs"
           aria-label="Toggle inventory"
         >
           <Backpack className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
           <span>Inventory</span>
-        </button>
+        </Button>
         {inventoryOpen && (
-          <div className="mt-2 w-52 rounded border-2 border-[#1a1a1a] bg-[#fbfbf9]/95 p-2 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] backdrop-blur-sm">
+          <Panel className="mt-2 w-52 bg-[#fbfbf9]/95 p-2 backdrop-blur-sm">
             <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-[#1a1a1a]">
               Equipment
             </p>
@@ -79,7 +82,7 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
                 No items yet
               </p>
             )}
-          </div>
+          </Panel>
         )}
       </div>
 
@@ -132,21 +135,21 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
 
       {bridge.loadingMiniGameId && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
-          <div className="rounded border-4 border-[#1a1a1a] bg-[#fbfbf9] px-5 py-4 text-center shadow-[8px_8px_0px_0px_rgba(26,26,26,1)]">
+          <Card tone="paper" className="px-5 py-4 text-center">
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#1a1a1a]">
               Loading scene
             </p>
-          </div>
+          </Card>
         </div>
       )}
 
       {/* Floating UI Hints (desktop / tablet) */}
       {bridge.status === GameState.EXPLORING && (
-        <div className="fixed bottom-6 left-1/2 z-40 hidden w-auto max-w-lg -translate-x-1/2 border-2 border-[#1a1a1a] bg-[#fbfbf9]/80 px-4 py-2 opacity-60 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] backdrop-blur-sm transition-opacity hover:opacity-100 md:block">
+        <Panel className="fixed bottom-6 left-1/2 z-40 hidden w-auto max-w-lg -translate-x-1/2 bg-[#fbfbf9]/80 px-4 py-2 opacity-60 backdrop-blur-sm transition-opacity hover:opacity-100 md:block">
           <p className="text-sm font-bold uppercase tracking-widest text-[#1a1a1a]">
             {TEXTS.navigation.hints}
           </p>
-        </div>
+        </Panel>
       )}
     </div>
   );

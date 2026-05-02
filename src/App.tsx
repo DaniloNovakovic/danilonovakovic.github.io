@@ -2,6 +2,7 @@ import { Suspense, lazy, useCallback, useEffect, useState } from 'react';
 import ModePicker, { type AppMode } from './components/ModePicker';
 import StaticPortfolio from './components/StaticPortfolio';
 import { TEXTS } from './config/content';
+import { Card } from './ui';
 
 const InteractiveApp = lazy(() => import('./components/InteractiveApp'));
 
@@ -29,11 +30,11 @@ function writeModeToUrl(mode: RouteState) {
 function LoadingFallback() {
   return (
     <div className="flex min-h-[100dvh] min-h-dvh w-full items-center justify-center bg-[#f4f1ea]">
-      <div className="rounded-lg border-4 border-[#1a1a1a] bg-[#fbfbf9] px-6 py-4 shadow-[8px_8px_0px_0px_rgba(26,26,26,1)]">
+      <Card tone="paper" className="px-6 py-4">
         <p className="text-sm font-bold uppercase tracking-widest text-[#1a1a1a]">
           {TEXTS.common.loading}
         </p>
-      </div>
+      </Card>
     </div>
   );
 }

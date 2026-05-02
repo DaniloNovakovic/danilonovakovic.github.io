@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { TEXTS } from '../config/content';
 import { useOverlayKeys } from './overlays/useOverlayKeys';
+import { Panel } from '../ui';
 
 const NOTES = [
   { note: 'E4', freq: 329.63, key: '1' },
@@ -68,7 +69,7 @@ export default function GuitarStrings() {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <div className="w-full h-[200px] border-4 border-[#1a1a1a] shadow-[6px_6px_0px_0px_rgba(26,26,26,1)] bg-[#fbfbf9] p-4 flex flex-col justify-center gap-4 relative">
+      <Panel border="thick" className="relative flex h-[200px] w-full flex-col justify-center gap-4 p-4 shadow-[6px_6px_0px_0px_rgba(26,26,26,1)]">
         {NOTES.map((n, i) => (
           <div
             key={n.note}
@@ -95,7 +96,7 @@ export default function GuitarStrings() {
         ))}
 
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border-4 border-[#1a1a1a] opacity-20 pointer-events-none"></div>
-      </div>
+      </Panel>
       <div className="mt-4 text-sm font-bold text-[#1a1a1a] opacity-60">
         {TEXTS.miniGames.guitar.instruction}
       </div>

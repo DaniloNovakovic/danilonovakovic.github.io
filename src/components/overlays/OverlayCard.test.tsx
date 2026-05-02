@@ -56,6 +56,28 @@ describe('OverlayCard', () => {
       await userEvent.keyboard('{Escape}');
       expect(onClose).toHaveBeenCalledTimes(1);
     });
+
+    it('only closes the top-most dialog when multiple dialogs are mounted', async () => {
+      const firstOnClose = vi.fn();
+      const secondOnClose = vi.fn();
+
+      render(
+        <>
+          <OverlayCard title="First Overlay" onClose={firstOnClose}>
+            <button>First dialog button</button>
+          </OverlayCard>
+          <OverlayCard title="Second Overlay" onClose={secondOnClose}>
+            <button>Second dialog button</button>
+          </OverlayCard>
+        </>
+      );
+      await new Promise((r) => setTimeout(r, 0));
+
+      await userEvent.keyboard('{Escape}');
+
+      expect(firstOnClose).not.toHaveBeenCalled();
+      expect(secondOnClose).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('focus trap', () => {
