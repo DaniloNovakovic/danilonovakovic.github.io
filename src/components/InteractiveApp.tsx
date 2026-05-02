@@ -12,7 +12,12 @@ import { TEXTS } from '../config/content';
 import { isMiniGameId } from '../config/featureIds';
 import { bridgeActions, useBridgeState } from '../shared/bridge/store';
 import { OverlayCard } from './overlays/OverlayCard';
+import {
+  getPhaserScenePresentationMode,
+  type PhaserScenePresentationMode
+} from '../runtime/phaserScenePresentation';
 import { Button, Card, Panel } from '../ui';
+import { getInteractiveGameShellLayout } from './interactive/gameShellLayout';
 
 interface InteractiveAppProps {
   onSwitchToStatic: () => void;
@@ -35,6 +40,14 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
   const activeOverlayMiniGame = getReactOverlayMiniGameById(bridge.activeMiniGameId);
   const ActiveOverlayComponent = activeOverlayMiniGame?.component;
   const isGameInputBlocked = bridge.isPaused || bridge.loadingMiniGameId !== null;
+  const activeMiniGameId = bridge.activeMiniGameId;
+  const startSceneParam = new URLSearchParams(window.location.search).get('startScene');
+  const initialStartSceneId = startSceneParam && isMiniGameId(startSceneParam) ? startSceneParam : null;
+  const presentationMiniGameId =
+    activeMiniGameId ?? initialStartSceneId;
+  const presentationMode: PhaserScenePresentationMode =
+    getPhaserScenePresentationMode(presentationMiniGameId);
+  const gameShellLayout = getInteractiveGameShellLayout(presentationMode);
 
   return (
     <div className="relative flex min-h-[100dvh] min-h-dvh w-full flex-col overflow-x-hidden bg-[#f4f1ea]">
@@ -87,10 +100,14 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
       </div>
 
       {/* Game area: scales down on narrow viewports; leaves room for hints + safe areas */}
-      <div className="flex min-h-0 flex-1 w-full flex-col items-center justify-center px-2 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] pt-[max(0.5rem,env(safe-area-inset-top,0px))] sm:px-4 sm:pb-24 sm:pt-2">
-        <div className="relative w-full max-w-[1000px] shrink-0 shadow-[12px_12px_0px_0px_rgba(26,26,26,1)]">
+      <div className="flex min-h-0 flex-1 w-full flex-col items-center justify-center px-1 pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-[max(1rem,env(safe-area-inset-top,0px))] sm:px-3 md:px-4 md:pb-24 md:pt-2">
+        <div
+          className={`relative max-w-[1000px] shrink-0 shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] ${gameShellLayout.shellClassName}`}
+          style={gameShellLayout.shellStyle}
+        >
           <div
-            className="relative w-full overflow-hidden rounded-lg border-4 border-[#1a1a1a] bg-[#fbfbf9] aspect-[1000/600] max-h-[min(82dvh,calc(100dvh-8.5rem))] sm:max-h-[min(88dvh,600px)]"
+            className={`relative w-full overflow-hidden rounded-lg border-4 border-[#1a1a1a] bg-[#fbfbf9] md:max-h-[min(88dvh,600px)] ${gameShellLayout.frameClassName}`}
+            style={gameShellLayout.frameStyle}
           >
             <div className="absolute inset-0">
               {/* Paper Texture Overlay */}
@@ -99,22 +116,12 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
                 onInteract={handleInteract}
                 isPaused={isGameInputBlocked}
                 activeMiniGameId={bridge.activeMiniGameId}
+                presentationMode={presentationMode}
                 onClose={closeOverlay}
               />
             </div>
           </div>
         </div>
-
-        {/* Mobile hints (gesture-based) */}
-        {bridge.status === GameState.EXPLORING && (
-          <div className="mt-8 flex w-full flex-col items-center gap-2 md:hidden">
-            <div className="mt-2 w-full max-w-lg shrink-0 px-1 text-center">
-              <p className="text-[11px] font-bold uppercase leading-snug tracking-widest text-[#1a1a1a] opacity-80">
-                {TEXTS.navigation.hintsCompact}
-              </p>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Interactive Overlay */}
@@ -144,9 +151,12 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
       )}
 
       {/* Floating UI Hints (desktop / tablet) */}
-      {bridge.status === GameState.EXPLORING && (
-        <Panel className="fixed bottom-6 left-1/2 z-40 hidden w-auto max-w-lg -translate-x-1/2 bg-[#fbfbf9]/80 px-4 py-2 opacity-60 backdrop-blur-sm transition-opacity hover:opacity-100 md:block">
-          <p className="text-sm font-bold uppercase tracking-widest text-[#1a1a1a]">
+      {bridge.status === GameState.EXPLORING && !presentationMiniGameId && (
+        <Panel className="fixed bottom-[max(1rem,env(safe-area-inset-bottom,0px))] left-1/2 z-40 w-[min(calc(100%_-_1.5rem),26rem)] -translate-x-1/2 bg-[#fbfbf9]/85 px-3 py-2 text-center opacity-80 backdrop-blur-sm transition-opacity hover:opacity-100 md:bottom-6 md:w-auto md:max-w-lg md:px-4">
+          <p className="text-[10px] font-bold uppercase leading-snug tracking-widest text-[#1a1a1a] md:hidden">
+            {TEXTS.navigation.hintsCompact}
+          </p>
+          <p className="hidden text-sm font-bold uppercase tracking-widest text-[#1a1a1a] md:block">
             {TEXTS.navigation.hints}
           </p>
         </Panel>
