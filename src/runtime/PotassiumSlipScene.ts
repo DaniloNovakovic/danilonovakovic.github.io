@@ -3,7 +3,7 @@ import {
   GAME_DESIGN_HEIGHT,
   GAME_DESIGN_WIDTH
 } from './config';
-import { createUiText } from './text/createUiText';
+import { createUiText, snapUiTextCoordinate } from './text/createUiText';
 import { bridgeActions } from '../shared/bridge/store';
 import { TextureGenerator } from './textures/TextureGenerator';
 import {
@@ -322,7 +322,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
 
   private createOverlays(): void {
     this.overlayText = createUiText(this, GAME_DESIGN_WIDTH / 2, 245, 'POTASSIUM SLIP', {
-      fontSize: '34px',
+      fontSize: '32px',
       color: '#1a1a1a',
       fontStyle: 'bold',
       wordWrap: { width: ARENA.width - 64, useAdvancedWrap: true }
@@ -919,8 +919,8 @@ export class PotassiumSlipScene extends Phaser.Scene {
 
   private positionFloatingLabel(label: Phaser.GameObjects.Text, x: number, y: number): void {
     label.setPosition(
-      Phaser.Math.Clamp(x, SAFE.left, SAFE.right),
-      Phaser.Math.Clamp(y, SAFE.labelTop, SAFE.bottom)
+      snapUiTextCoordinate(Phaser.Math.Clamp(x, SAFE.left, SAFE.right)),
+      snapUiTextCoordinate(Phaser.Math.Clamp(y, SAFE.labelTop, SAFE.bottom))
     );
   }
 
@@ -953,7 +953,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.poisonZones.clear(true, true);
     bridgeActions.collectItem('circuit');
     bridgeActions.setSceneHintText(null);
-    this.overlayText.setFontSize(28).setText('CIRCUIT ACQUIRED').setPosition(GAME_DESIGN_WIDTH / 2, 255).setVisible(true);
+    this.overlayText.setFontSize(26).setText('CIRCUIT ACQUIRED').setPosition(GAME_DESIGN_WIDTH / 2, 255).setVisible(true);
     this.subOverlayText.setFontSize(15).setText(`Final Score: ${this.score}\n[E] RETURN TO CITY`).setPosition(GAME_DESIGN_WIDTH / 2, 320).setVisible(true);
   }
 
@@ -965,7 +965,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.poisonZones.clear(true, true);
     this.banana.setVelocity(0, 0);
     bridgeActions.setSceneHintText(null);
-    this.overlayText.setFontSize(26).setText('BANANA BANKRUPTCY').setPosition(GAME_DESIGN_WIDTH / 2, 255).setVisible(true);
+    this.overlayText.setFontSize(24).setText('BANANA BANKRUPTCY').setPosition(GAME_DESIGN_WIDTH / 2, 255).setVisible(true);
     this.subOverlayText.setFontSize(15).setText(`Final Score: ${this.score}\n[E] RETURN TO CITY`).setPosition(GAME_DESIGN_WIDTH / 2, 320).setVisible(true);
   }
 
