@@ -10,7 +10,11 @@ import { HOBBIES_ROOM_INTERACTABLES } from '../config/hobbiesRoomLayout';
 import { PORTFOLIO_SECTIONS } from '../config/portfolioRegistry';
 import { OVERWORLD_BUILDING_PLACEMENTS } from '../config/worldLayout';
 import { MiniGameType } from './types';
-import type { MiniGamePlugin } from './types';
+import type {
+  MiniGamePlugin,
+  PhaserSceneMiniGamePlugin,
+  ReactOverlayMiniGamePlugin
+} from './types';
 
 function assertPortfolioRegistryInvariants(sections: readonly MiniGamePlugin[]): void {
   const byId = new Map<MiniGameId, MiniGamePlugin>();
@@ -105,3 +109,28 @@ export const getMiniGameById = (id: string | null | undefined): MiniGamePlugin |
   return MINI_GAME_BY_ID.get(id);
 };
 
+export function getReactOverlayMiniGameById(
+  id: string | null | undefined
+): ReactOverlayMiniGamePlugin | undefined {
+  const miniGame = getMiniGameById(id);
+  return miniGame?.type === MiniGameType.REACT_OVERLAY ? miniGame : undefined;
+}
+
+export function getPhaserSceneMiniGameById(
+  id: string | null | undefined
+): PhaserSceneMiniGamePlugin | undefined {
+  const miniGame = getMiniGameById(id);
+  return miniGame?.type === MiniGameType.PHASER_SCENE ? miniGame : undefined;
+}
+
+export function getOverlayParentId(id: string | null | undefined): MiniGameId | null {
+  return getReactOverlayMiniGameById(id)?.overlayParentId ?? null;
+}
+
+export function isReactOverlayMiniGame(id: string | null | undefined): boolean {
+  return getReactOverlayMiniGameById(id) !== undefined;
+}
+
+export function isPhaserSceneMiniGame(id: string | null | undefined): boolean {
+  return getPhaserSceneMiniGameById(id) !== undefined;
+}

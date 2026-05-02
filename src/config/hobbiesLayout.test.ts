@@ -13,6 +13,7 @@ describe('hobbies room layout', () => {
       expect(station).toBeDefined();
       const hit = HOBBIES_ROOM_INTERACTABLES.find((i) => i.id === id);
       expect(hit?.x).toBe(station!.x);
+      expect(hit?.prompt.x).toBe(station!.x);
     }
   });
 
@@ -20,5 +21,6 @@ describe('hobbies room layout', () => {
     const ids = HOBBIES_ROOM_INTERACTABLES.map((i) => i.id);
     expect(ids).toContain('exit');
     expect(new Set(ids).size).toBe(ids.length);
+    expect(HOBBIES_ROOM_INTERACTABLES.every((i) => Number.isFinite(i.prompt.y))).toBe(true);
   });
 });

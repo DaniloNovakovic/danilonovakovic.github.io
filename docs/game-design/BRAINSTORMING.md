@@ -1,5 +1,7 @@
 # Game Design Brainstorming: Interactive Mode Evolution
 
+> Concept / future-design notes. For current shipped controls and level behavior, see [`PLAYER_MANUAL.md`](./PLAYER_MANUAL.md).
+
 ## 1. The Vision: "The Artist's Journey"
 
 The game starts as a literal "blank canvas" or a "rough sketch." As the user explores, they find tools/artifacts that evolve the world visually and mechanically. This mirrors the professional journey: starting with raw ideas (sketches) and moving toward polished products (full-featured app).

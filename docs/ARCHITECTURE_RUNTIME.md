@@ -1,6 +1,6 @@
 # Runtime Architecture (Current)
 
-This document describes the current runtime architecture in `src/` after the micro-kernel, bridge, and ECS migration steps.
+This document describes the current runtime architecture in `src/`. It is the developer-facing top-down map of how the app works today.
 
 ## High-level flow
 
@@ -25,11 +25,29 @@ This document describes the current runtime architecture in `src/` after the mic
   - Handles scene enter/exit, resume capture, and pause propagation.
 - `src/infra/phaser/PhaserSceneAdapter.ts`
   - Adapter boundary for scene start/stop, active scene pause, callback rebinding, and resume capture.
+- `src/contextPlugins/createContextPlugins.ts`
+  - Assembles the ordered Phaser context plugins and injects runtime callbacks, lazy scene loading, pause state, and resume policy.
 - `src/contextPlugins/plugins/StreetPlugin.ts`, `src/contextPlugins/plugins/HobbiesPlugin.ts`,
 `src/contextPlugins/plugins/BasementPlugin.ts`
   - Context plugin definitions for the Phaser scene contexts.
+- `src/runtime/miniGameRegistry.ts`
+  - Runtime feature catalog for mini-game lookup, React overlay component resolution, overlay parent returns, and React/Phaser kind checks.
+- `src/runtime/sceneResumePolicy.ts`
+  - Resume policy over the low-level store. The Phaser adapter captures raw positions; the policy decides whether to persist, clear, or restore by scene key.
+- `src/runtime/player/SideViewPlayerRuntime.ts`
+  - Shared side-view player lifecycle for Phaser scenes: spawn/resume placement, controller mounting, input frame updates, pause propagation, appearance sync, sprite animation, and resume capture.
+- `src/runtime/interactions/InteriorInteractionRuntime.ts`
+  - Pure interior prop interaction runtime. It resolves active targets, prompt placement facts, exit requests, and typed effect commands while scenes keep Phaser objects and side effects.
 - `src/runtime/text/PlayerThoughtText.ts`
   - Small scene-local helper for character thoughts that follow a target, reuse the shared typewriter effect, and auto-hide without adding bridge state.
+
+## Runtime seams for new scenes
+
+- Feature presentation facts belong in the feature catalog. Avoid local React overlay maps or ad hoc runtime-kind checks in React/Phaser callers.
+- Add Phaser context registration through `createContextPlugins`; keep `Game.tsx` focused on Phaser boot, adapters, kernel wiring, resizing, and touch controls.
+- Use `sceneResumePolicy` for resume persistence and reset rules. The low-level resume store should not be imported directly by scenes or adapters.
+- Side-view player scenes should compose `SideViewPlayerRuntime` before creating colliders against `runtime.player`.
+- Interior rooms should describe prop targets and effect commands, then let `InteriorInteractionRuntime` choose the active target and prompt/effect result. Phaser text mutation, bridge writes, and scene-local helpers stay in the scene.
 
 ## Folder ownership (`runtime` vs `contextPlugins`)
 
@@ -45,17 +63,17 @@ Migration rule for new code:
 - Add new context/plugin modules under `src/contextPlugins`.
 - Touch `src/runtime` when integrating with existing scene runtime.
 
-## ECS migration status
+## Pure Decision Modules
 
-Initial player ECS scaffolding is in place:
+Pure decision code exists where it buys leverage, but the app is not trying to migrate all runtime code into ECS. Use the smallest Interface that concentrates repeated knowledge.
 
 - `src/core/ecs/world.ts` for entity/component storage.
 - `src/core/ecs/components/player.ts` for player-focused pure data components.
 - `src/core/ecs/systems/playerSystems.ts` for input + movement/jump/interact system logic.
 - `src/core/ecs/systems/overworldInteractSystems.ts` for pure overworld building interact targeting (called from `OverworldScene`).
-- `src/runtime/OverworldScene.ts` uses this ECS layer to drive player decisions, then syncs results into Phaser sprite/body calls.
+- `src/core/ecs/systems/roomInteractSystems.ts` for lower-level room target picking.
 
-This is an incremental migration: Phaser physics/rendering remains in infra-facing scene code while gameplay decisions move into component + system flow.
+Runtime Modules such as `SideViewPlayerRuntime`, `InteriorInteractionRuntime`, and `sceneResumePolicy` are equally valid when the repeated knowledge is lifecycle, policy, or orchestration rather than entity iteration.
 
 ## Manual smoke verification
 

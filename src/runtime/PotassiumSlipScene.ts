@@ -227,7 +227,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
       enemy = this.enemies.create(x, -50, 'enemy_scope_creeper');
       enemy.setVelocityY(Phaser.Math.Between(150, 250));
       // Zig zag
-      this.tweens.add({
+      const zigZagTween = this.tweens.add({
         targets: enemy,
         x: x + (x > GAME_DESIGN_WIDTH / 2 ? -150 : 150),
         duration: 1500,
@@ -235,6 +235,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
         repeat: -1,
         ease: 'Sine.easeInOut'
       });
+      enemy.once(Phaser.GameObjects.Events.DESTROY, () => zigZagTween.stop());
     } else {
       enemy = this.enemies.create(x, -50, 'enemy_bug');
       enemy.setVelocityY(Phaser.Math.Between(300, 500));

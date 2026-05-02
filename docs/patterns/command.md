@@ -1,10 +1,8 @@
 # Command
 
-> Stub — expand as you read the chapter.
-
 ## Intent
 
-*(From the book: an object that represents an invocation of a method, so it can be stored, queued, undone, remapped, etc.)*
+Represent an action as data so it can be stored, queued, remapped, replayed, or consumed by code that does not know where the action came from.
 
 ## In JS/TS + Phaser
 

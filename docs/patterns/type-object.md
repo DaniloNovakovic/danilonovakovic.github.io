@@ -1,23 +1,22 @@
 # Type Object
 
-> Stub — expand as you read the chapter.
-
 ## Intent
 
-*(From the book: represent "kinds" of things as data — instances of a `Type` class — rather than as separate subclasses. Each game object carries a reference to its type object.)*
+Represent "kinds" of things as data instead of subclasses. In TypeScript this is usually a discriminated union or a plain config object with a stable `kind` / `id`.
 
-## In JS/TS + Phaser (notes to verify)
+## In JS/TS + Phaser
 
 - Extremely natural fit in TS: a `BuildingKind` / `NpcKind` is a plain data object; each instance holds a reference to one.
 - Avoids a subclass explosion when you want many small variants.
+- Pairs well with runtime catalogs: config owns static facts, while runtime Modules resolve behavior through typed variants.
 
 ## In this repo
 
 Current usage:
 
-- Buildings along the street are composed via type-object-shaped config (see `[src/config/featurePlugins.ts](../../src/config/featurePlugins.ts)`, `[src/config/worldLayout.ts](../../src/config/worldLayout.ts)`, `[src/config/portfolioCompose.ts](../../src/config/portfolioCompose.ts)`). The "type" lives in config, and world placement supplies instance data.
+- Feature definitions are type-object-shaped config composed into the runtime feature catalog (see `[src/config/portfolio.ts](../../src/config/portfolio.ts)`, `[src/config/featureRuntimeBindings.ts](../../src/config/featureRuntimeBindings.ts)`, and `[src/runtime/miniGameRegistry.ts](../../src/runtime/miniGameRegistry.ts)`).
 - `[src/runtime/types.ts](../../src/runtime/types.ts)` models React overlays and Phaser scenes as discriminated feature variants with required fields per kind.
-- `[src/config/hobbiesRoomLayout.ts](../../src/config/hobbiesRoomLayout.ts)` models hobby stations and exits as explicit room interactable variants.
+- `[src/config/hobbiesRoomLayout.ts](../../src/config/hobbiesRoomLayout.ts)` and `[src/config/basementRoomLayout.ts](../../src/config/basementRoomLayout.ts)` model room interactables as explicit variants consumed by runtime interaction Modules.
 - Any future NPC/enemy variants in mini-games should go the same way (data, not subclasses).
 
 ## Status

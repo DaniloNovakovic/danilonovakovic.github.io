@@ -1,6 +1,6 @@
 # Project Constitution: Scalable Browser Game Architecture
 
-This document describes the architectural direction for the project. For what exists in code today, treat [`ARCHITECTURE_RUNTIME.md`](ARCHITECTURE_RUNTIME.md), `AGENTS.md`, and the scoped `.cursor/rules/` files as the current operational guidance.
+This document describes the architectural direction for the project. For what exists in code today, treat [`ARCHITECTURE_RUNTIME.md`](ARCHITECTURE_RUNTIME.md), `AGENTS.md`, and the scoped `.agents/rules/` files as the current operational guidance.
 
 ## 1. Architectural Philosophy
 
@@ -11,7 +11,7 @@ This project is built on three core pillars to ensure that adding future complex
 - **Entities:** Numeric IDs representing game objects (e.g., The Player, an NPC, a Note).
 - **Components:** Pure Data objects (no methods). Examples: `Transform`, `Velocity`, `Appearance`, `Health`.
 - **Systems:** Logic loops that process entities with specific component sets. 
-- **Goal:** Logic is decoupled from data. If the player is in the street, scene runtime applies physics-backed systems; if a mini-game is a React overlay, it should stay in the UI layer and avoid Phaser coupling.
+- **Goal:** Use ECS where pure gameplay decision logic benefits from data/logic separation. This is not an "ECS everything" mandate; deep runtime Modules remain preferred when they concentrate scene lifecycle, interaction, or policy knowledge behind a small Interface.
 
 ### B. Hexagonal (Clean) Architecture
 
@@ -43,16 +43,17 @@ This project is built on three core pillars to ensure that adding future complex
 
 ---
 
-## 3. Current Implementation Status (v3)
+## 3. Directional Implementation Anchors
 
-This constitution is now partially implemented. Current canonical runtime paths:
+This constitution is directional. For exact current implementation details, prefer `docs/ARCHITECTURE_RUNTIME.md`. Current canonical runtime anchors:
 
 - **Bridge store:** `src/shared/bridge/store.ts`
 - **Kernel:** `src/core/kernel/GameKernel.ts`
 - **Scene manager:** `src/core/kernel/SceneManager.ts`
 - **Phaser adapter:** `src/infra/phaser/PhaserSceneAdapter.ts`
-- **Context plugins:** `src/contextPlugins/plugins/StreetPlugin.ts`, `src/contextPlugins/plugins/HobbiesPlugin.ts`
+- **Context plugin assembly:** `src/contextPlugins/createContextPlugins.ts`
 - **ECS foundation:** `src/core/ecs/`*
+- **Shared runtime Modules:** `src/runtime/player/SideViewPlayerRuntime.ts`, `src/runtime/interactions/InteriorInteractionRuntime.ts`, `src/runtime/sceneResumePolicy.ts`
 - **Phaser 4 render guardrails:** currently documented as runtime policy; helper module may be reintroduced under `src/infra/phaser/render/` when shared logic is needed.
 
 When proposing future refactors, prefer extending these modules instead of re-introducing callback-only scene orchestration or ad-hoc global state.
@@ -61,4 +62,4 @@ When proposing future refactors, prefer extending these modules instead of re-in
 
 ## 4. Pattern Reference
 
-Architectural decisions in this project are anchored to Robert Nystrom's *[Game Programming Patterns](https://gameprogrammingpatterns.com/)*. Per-pattern notes, adoption status, and JS/TS + Phaser caveats live in [docs/patterns/](./patterns/README.md). Scoped AI rules that mirror those patterns live under [.cursor/rules/](../.cursor/rules/).
+Architectural decisions in this project are anchored to Robert Nystrom's *[Game Programming Patterns](https://gameprogrammingpatterns.com/)*. Per-pattern notes, adoption status, and JS/TS + Phaser caveats live in [docs/patterns/](./patterns/README.md). Scoped AI rules that mirror those patterns live under [.agents/rules/](../.agents/rules/).

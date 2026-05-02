@@ -1,6 +1,6 @@
 # Subclass Sandbox
 
-> Stub — expand as you read the chapter.
+> Low-priority reference. Prefer composition and runtime objects unless a restricted authoring surface becomes real.
 
 ## Intent
 

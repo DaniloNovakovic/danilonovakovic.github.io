@@ -1,5 +1,7 @@
 # Secret Mini-Games & Homages
 
+> Concept / future-design notes. For shipped secret behavior and current controls, see [`PLAYER_MANUAL.md`](./PLAYER_MANUAL.md) and [`POTASSIUM_SLIP.md`](./POTASSIUM_SLIP.md).
+
 These are "distilled" versions of classic genres, hidden throughout the world. Each captures the "fun core" of the reference game without requiring full-scale development.
 
 ## 1. Potassium Slip (Slippery Stakeholder Homage)

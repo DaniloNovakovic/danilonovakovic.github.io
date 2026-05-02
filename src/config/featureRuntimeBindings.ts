@@ -18,6 +18,7 @@ import DancingMini from '../components/DancingMini';
 
 export interface ReactOverlayRuntimeBinding {
   kind: 'reactOverlay';
+  component: ComponentType<MiniGameOverlayProps>;
   loadComponent: () => Promise<{ default: ComponentType<MiniGameOverlayProps> }>;
 }
 
@@ -32,18 +33,22 @@ export type FeatureRuntimeBinding = ReactOverlayRuntimeBinding | PhaserSceneRunt
 export const FEATURE_RUNTIME_BINDINGS: Record<MiniGameId, FeatureRuntimeBinding> = {
   profile: {
     kind: 'reactOverlay',
+    component: ProfileOverlay,
     loadComponent: async () => ({ default: ProfileOverlay })
   },
   experiences: {
     kind: 'reactOverlay',
+    component: ExperienceOverlay,
     loadComponent: async () => ({ default: ExperienceOverlay })
   },
   projects: {
     kind: 'reactOverlay',
+    component: ProjectsOverlay,
     loadComponent: async () => ({ default: ProjectsOverlay })
   },
   abilities: {
     kind: 'reactOverlay',
+    component: AbilitiesOverlay,
     loadComponent: async () => ({ default: AbilitiesOverlay })
   },
   hobbies: {
@@ -63,26 +68,32 @@ export const FEATURE_RUNTIME_BINDINGS: Record<MiniGameId, FeatureRuntimeBinding>
   },
   contact: {
     kind: 'reactOverlay',
+    component: ContactOverlay,
     loadComponent: async () => ({ default: ContactOverlay })
   },
   games: {
     kind: 'reactOverlay',
+    component: CodingMini,
     loadComponent: async () => ({ default: CodingMini })
   },
   art: {
     kind: 'reactOverlay',
+    component: DrawingCanvas,
     loadComponent: async () => ({ default: DrawingCanvas })
   },
   music: {
     kind: 'reactOverlay',
+    component: GuitarStrings,
     loadComponent: async () => ({ default: GuitarStrings })
   },
   fitness: {
     kind: 'reactOverlay',
+    component: MuayThaiMini,
     loadComponent: async () => ({ default: MuayThaiMini })
   },
   dancing: {
     kind: 'reactOverlay',
+    component: DancingMini,
     loadComponent: async () => ({ default: DancingMini })
   }
 };

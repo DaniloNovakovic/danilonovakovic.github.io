@@ -25,5 +25,6 @@ ESLint (`no-restricted-imports` in `eslint.config.js`) forbids importing from `r
 
 ## Common entrypoints
 
+- `createContextPlugins.ts`
 - `plugins/StreetPlugin.ts`
 - `plugins/HobbiesPlugin.ts`

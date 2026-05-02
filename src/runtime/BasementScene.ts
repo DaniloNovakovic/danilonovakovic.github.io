@@ -1,4 +1,14 @@
 import * as Phaser from 'phaser';
+import {
+  BASEMENT_COMPUTER,
+  BASEMENT_EXIT,
+  BASEMENT_FLOOR_Y,
+  BASEMENT_PLAYER_START,
+  createBasementInteractionTargets,
+  GLASSES_PICKUP,
+  type BasementInteractionEffect,
+  type BasementRoomInteractableId
+} from '../config/basementRoomLayout';
 import { TEXTS } from '../config/content';
 import {
   GAME_DESIGN_HEIGHT,
@@ -8,39 +18,34 @@ import {
   OVERWORLD_SPRINT_SPEED,
   OVERWORLD_WALK_SPEED
 } from './config';
-import { setSceneKeyboardPaused } from './sceneKeyboardPause';
 import { bridgeActions, isItemEquipped, isItemOwned } from '../shared/bridge/store';
-import { PlayerController } from '../core/player/PlayerController';
 import { createUiText } from './text/createUiText';
 import { PlayerThoughtText } from './text/PlayerThoughtText';
-import { createInputCommandFrame } from '../core/input/commands';
-import { readPlayerSceneStep } from './input/scenePlayerInput';
-
-const BASEMENT_FLOOR_Y = 500;
-const BASEMENT_PLAYER_START = { x: 135, y: BASEMENT_FLOOR_Y - 50 } as const;
-const BASEMENT_EXIT = { x: 95, y: BASEMENT_FLOOR_Y - 75, radius: 70 } as const;
-const BASEMENT_COMPUTER = { x: 400, y: BASEMENT_FLOOR_Y - 105, radius: 82 } as const;
-const GLASSES_PICKUP = { x: 610, y: BASEMENT_FLOOR_Y - 95, radius: 70 } as const;
+import {
+  createSideViewPlayerRuntime,
+  type SideViewPlayerRuntime
+} from './player/SideViewPlayerRuntime';
+import {
+  createInteriorInteractionRuntime,
+  type InteriorInteractionRuntime
+} from './interactions/InteriorInteractionRuntime';
 
 export class BasementScene extends Phaser.Scene {
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
-  cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
-  wasd!: { a: Phaser.Input.Keyboard.Key; d: Phaser.Input.Keyboard.Key };
-  interactKey!: Phaser.Input.Keyboard.Key;
-  hKey!: Phaser.Input.Keyboard.Key;
-  escapeKey!: Phaser.Input.Keyboard.Key;
   interactPrompt!: Phaser.GameObjects.Text;
   statusText!: Phaser.GameObjects.Text;
   glasses!: Phaser.GameObjects.Container;
   playerThought!: PlayerThoughtText;
 
-  private controller!: PlayerController;
+  private playerRuntime?: SideViewPlayerRuntime;
+  private interactionRuntime?: InteriorInteractionRuntime<
+    BasementRoomInteractableId,
+    BasementInteractionEffect
+  >;
   private onClose?: () => void;
   private onInteract?: (id: string) => void;
   private isPaused: boolean = false;
   private resumePosition?: { x: number; y: number };
-  private readonly inputFrame = createInputCommandFrame();
-  private hasGlassesSprite: boolean | null = null;
 
   constructor() {
     super({ key: 'basement' });
@@ -56,34 +61,45 @@ export class BasementScene extends Phaser.Scene {
     this.onInteract = data.onInteract;
     this.isPaused = data.isPaused ?? false;
     this.resumePosition = data.resumePosition;
-    // Scene instances are reused; force texture sync on each enter.
-    this.hasGlassesSprite = null;
   }
 
   getResumeCapturePosition(): { x: number; y: number } | null {
-    if (!this.player?.body) return null;
-    return { x: this.player.x, y: this.player.y };
+    return this.playerRuntime?.captureResume() ?? null;
   }
 
   setPaused(paused: boolean) {
     this.isPaused = paused;
-    if (paused) this.controller?.pause();
-    else this.controller?.resume();
-    setSceneKeyboardPaused(this, paused, {
-      pausePhysicsWorld: true,
-      zeroHorizontalVelocity: () => this.controller?.zeroVelocity()
-    });
+    this.playerRuntime?.setPaused(paused);
   }
 
   create() {
     this.physics.world.setBounds(0, 0, GAME_DESIGN_WIDTH, GAME_DESIGN_HEIGHT);
     this.buildRoom();
 
-    const playerX = this.resumePosition?.x ?? BASEMENT_PLAYER_START.x;
-    const playerY = this.resumePosition?.y ?? BASEMENT_PLAYER_START.y;
-    this.player = this.physics.add.sprite(playerX, playerY, 'player_idle');
-    this.player.setCollideWorldBounds(true);
-    this.player.setGravityY(1000);
+    this.playerRuntime = createSideViewPlayerRuntime({
+      scene: this,
+      start: BASEMENT_PLAYER_START,
+      resumePosition: this.resumePosition,
+      sprite: {
+        gravityY: 1000
+      },
+      movement: {
+        walkSpeed: OVERWORLD_WALK_SPEED,
+        sprintSpeed: OVERWORLD_SPRINT_SPEED,
+        jumpVelocityY: OVERWORLD_JUMP_VELOCITY_Y
+      },
+      input: {
+        allowJump: true,
+        allowSprint: true,
+        includeEscapeKey: true
+      },
+      appearance: {
+        isGlassesEquipped: () => isItemEquipped('glasses'),
+        idleTextureKey: 'player_idle',
+        glassesTextureKey: 'player_glasses'
+      }
+    });
+    this.player = this.playerRuntime.player;
     this.playerThought = new PlayerThoughtText(this, { target: this.player });
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.playerThought?.destroy());
 
@@ -95,24 +111,6 @@ export class BasementScene extends Phaser.Scene {
     );
     this.physics.add.existing(ground, true);
     this.physics.add.collider(this.player, ground);
-
-    this.controller = new PlayerController({
-      walkSpeed: OVERWORLD_WALK_SPEED,
-      sprintSpeed: OVERWORLD_SPRINT_SPEED,
-      jumpVelocityY: OVERWORLD_JUMP_VELOCITY_Y
-    });
-    this.controller.mount(this.player);
-
-    if (this.input.keyboard) {
-      this.cursors = this.input.keyboard.createCursorKeys();
-      this.wasd = {
-        a: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
-        d: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D)
-      };
-      this.interactKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
-      this.hKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.H);
-      this.escapeKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
-    }
 
     this.interactPrompt = createUiText(this, 0, 0, TEXTS.navigation.interact, {
       fontSize: '16px',
@@ -136,86 +134,53 @@ export class BasementScene extends Phaser.Scene {
       }
     ).setOrigin(0.5).setDepth(100);
 
+    this.interactionRuntime = createInteriorInteractionRuntime({
+      interactRadius: 0,
+      exitEffect: { kind: 'close' },
+      targets: createBasementInteractionTargets({ isGlassesOwned: () => isItemOwned('glasses') }).map((target) => ({
+        ...target,
+        interactRadius: target.radius
+      }))
+    });
+
     this.refreshGlassesVisibility();
     this.setPaused(this.isPaused);
-    this.updatePlayerGlassesAppearance();
+    this.playerRuntime.syncAppearance();
   }
 
   update() {
     this.refreshGlassesVisibility();
-    this.updatePlayerGlassesAppearance();
 
-    if (this.isPaused) {
-      this.controller.zeroVelocity();
+    const playerUpdate = this.playerRuntime?.update();
+    if (!playerUpdate || playerUpdate.paused) {
       this.interactPrompt.setVisible(false);
       return;
     }
 
-    const { commands, step } = readPlayerSceneStep({
-      frame: this.inputFrame,
-      controller: this.controller,
-      cursors: this.cursors,
-      wasd: this.wasd,
-      interactKey: this.interactKey,
-      hKey: this.hKey,
-      escapeKey: this.escapeKey,
-      allowJump: true,
-      allowSprint: true
+    const { commands, step } = playerUpdate;
+    const interaction = this.interactionRuntime?.update({
+      playerX: this.player.x,
+      playerY: this.player.y,
+      interactRequested: step.interactRequested,
+      exitRequested: commands.exitContext
     });
-    if (commands.exitContext) {
-      this.onClose?.();
+
+    if (interaction?.effect?.kind === 'close') {
+      this.applyBasementInteractionEffect(interaction.effect);
       return;
     }
 
-    this.player.setFlipX(step.facingLeft);
-    this.player.setAngle(step.moving ? Math.sin(this.time.now / 100) * 5 : 0);
     this.playerThought.update();
 
-    const nearComputer =
-      Phaser.Math.Distance.Between(
-        this.player.x,
-        this.player.y,
-        BASEMENT_COMPUTER.x,
-        BASEMENT_COMPUTER.y
-      ) < BASEMENT_COMPUTER.radius;
-    if (nearComputer) {
-      this.interactPrompt.setPosition(BASEMENT_COMPUTER.x, BASEMENT_COMPUTER.y - 92).setVisible(true);
-      if (step.interactRequested) {
-        if (isItemOwned('glasses')) {
-          this.onInteract?.('games');
-        } else {
-          this.playerThought.show("ughh... I can't see");
-        }
-      }
+    if (!interaction || !interaction.prompt.visible) {
+      this.interactPrompt.setVisible(false);
       return;
     }
 
-    const nearGlasses =
-      !isItemOwned('glasses') &&
-      Phaser.Math.Distance.Between(this.player.x, this.player.y, GLASSES_PICKUP.x, GLASSES_PICKUP.y) <
-        GLASSES_PICKUP.radius;
-    if (nearGlasses) {
-      this.interactPrompt.setPosition(GLASSES_PICKUP.x, GLASSES_PICKUP.y - 70).setVisible(true);
-      if (step.interactRequested) {
-        bridgeActions.collectGlasses();
-        this.statusText.setText('Glasses acquired. The sketch city flickers into focus.');
-        this.refreshGlassesVisibility();
-      }
-      return;
+    this.interactPrompt.setPosition(interaction.prompt.x, interaction.prompt.y).setVisible(true);
+    if (interaction.effect) {
+      this.applyBasementInteractionEffect(interaction.effect);
     }
-
-    const nearExit =
-      Phaser.Math.Distance.Between(this.player.x, this.player.y, BASEMENT_EXIT.x, BASEMENT_EXIT.y) <
-      BASEMENT_EXIT.radius;
-    if (nearExit) {
-      this.interactPrompt.setPosition(BASEMENT_EXIT.x, BASEMENT_EXIT.y - 60).setVisible(true);
-      if (step.interactRequested) {
-        this.onClose?.();
-      }
-      return;
-    }
-
-    this.interactPrompt.setVisible(false);
   }
 
   private buildRoom(): void {
@@ -335,10 +300,22 @@ export class BasementScene extends Phaser.Scene {
     this.glasses?.setVisible(!isItemOwned('glasses'));
   }
 
-  private updatePlayerGlassesAppearance(): void {
-    const hasGlasses = isItemEquipped('glasses');
-    if (hasGlasses === this.hasGlassesSprite) return;
-    this.hasGlassesSprite = hasGlasses;
-    this.player.setTexture(hasGlasses ? 'player_glasses' : 'player_idle');
+  private applyBasementInteractionEffect(effect: BasementInteractionEffect): void {
+    switch (effect.kind) {
+      case 'close':
+        this.onClose?.();
+        break;
+      case 'openOverlay':
+        this.onInteract?.(effect.id);
+        break;
+      case 'collectGlasses':
+        bridgeActions.collectGlasses();
+        this.statusText.setText('Glasses acquired. The sketch city flickers into focus.');
+        this.refreshGlassesVisibility();
+        break;
+      case 'showThought':
+        this.playerThought.show(effect.text);
+        break;
+    }
   }
 }

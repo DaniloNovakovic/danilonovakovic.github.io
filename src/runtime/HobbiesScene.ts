@@ -5,6 +5,7 @@
 import * as Phaser from 'phaser';
 import { HOBBIES_EXIT_X, HOBBIES_ROOM_INTERACTABLES } from '../config/hobbiesRoomLayout';
 import { TEXTS } from '../config/content';
+import type { HobbyReactOverlayId } from '../config/featureIds';
 import {
   HOBBIES_FLOOR_Y,
   HOBBIES_GROUND_ZONE,
@@ -17,31 +18,34 @@ import {
   OVERWORLD_SPRINT_SPEED,
   OVERWORLD_WALK_SPEED
 } from './config';
-import { setSceneKeyboardPaused } from './sceneKeyboardPause';
 import { isItemEquipped } from '../shared/bridge/store';
-import { PlayerController } from '../core/player/PlayerController';
 import { buildHobbiesRoom } from './hobbies/HobbiesRoom';
 import { createUiText } from './text/createUiText';
-import { pickRoomInteractTarget } from '../core/ecs/systems/roomInteractSystems';
-import { createInputCommandFrame } from '../core/input/commands';
-import { readPlayerSceneStep } from './input/scenePlayerInput';
+import {
+  createSideViewPlayerRuntime,
+  type SideViewPlayerRuntime
+} from './player/SideViewPlayerRuntime';
+import {
+  createInteriorInteractionRuntime,
+  type InteriorInteractionRuntime
+} from './interactions/InteriorInteractionRuntime';
+
+type HobbiesInteractionEffect =
+  | { kind: 'close' }
+  | { kind: 'openOverlay'; id: HobbyReactOverlayId };
+
+type HobbiesInteractionId = 'exit' | HobbyReactOverlayId;
 
 export class HobbiesScene extends Phaser.Scene {
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
-  cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
-  wasd!: { a: Phaser.Input.Keyboard.Key; d: Phaser.Input.Keyboard.Key };
-  interactKey!: Phaser.Input.Keyboard.Key;
-  hKey!: Phaser.Input.Keyboard.Key;
-  escapeKey!: Phaser.Input.Keyboard.Key;
   exitPrompt!: Phaser.GameObjects.Text;
 
-  private controller!: PlayerController;
+  private playerRuntime?: SideViewPlayerRuntime;
+  private interactionRuntime?: InteriorInteractionRuntime<HobbiesInteractionId, HobbiesInteractionEffect>;
   private onClose?: () => void;
   private onInteract?: (id: string) => void;
   private isPaused: boolean = false;
   private resumePosition?: { x: number; y: number };
-  private readonly inputFrame = createInputCommandFrame();
-  private hasGlassesSprite: boolean | null = null;
 
   constructor() {
     super({ key: 'hobbies' });
@@ -57,23 +61,15 @@ export class HobbiesScene extends Phaser.Scene {
     this.onInteract = data.onInteract;
     this.isPaused = data.isPaused ?? false;
     this.resumePosition = data.resumePosition;
-    // Scene instances are reused; force texture sync on each enter.
-    this.hasGlassesSprite = null;
   }
 
   getResumeCapturePosition(): { x: number; y: number } | null {
-    if (!this.player?.body) return null;
-    return { x: this.player.x, y: this.player.y };
+    return this.playerRuntime?.captureResume() ?? null;
   }
 
   setPaused(paused: boolean) {
     this.isPaused = paused;
-    if (paused) this.controller?.pause();
-    else this.controller?.resume();
-    setSceneKeyboardPaused(this, paused, {
-      pausePhysicsWorld: true,
-      zeroHorizontalVelocity: () => this.controller?.zeroVelocity()
-    });
+    this.playerRuntime?.setPaused(paused);
   }
 
   create() {
@@ -85,17 +81,31 @@ export class HobbiesScene extends Phaser.Scene {
 
     buildHobbiesRoom(this);
 
-    // --- PLAYER ---
-    const defaultPlayerX = width / 2;
-    const defaultPlayerY = floorY - HOBBIES_PLAYER_START_OFFSET_Y;
-    const rawX = this.resumePosition?.x ?? defaultPlayerX;
-    const rawY = this.resumePosition?.y ?? defaultPlayerY;
-    const playerX = Phaser.Math.Clamp(rawX, HOBBIES_RESUME_CLAMP.minX, HOBBIES_RESUME_CLAMP.maxX);
-    const playerY = Phaser.Math.Clamp(rawY, HOBBIES_RESUME_CLAMP.minY, HOBBIES_RESUME_CLAMP.maxY);
-
-    this.player = this.physics.add.sprite(playerX, playerY, 'player_idle');
-    this.player.setCollideWorldBounds(true);
-    this.player.setGravityY(1000);
+    this.playerRuntime = createSideViewPlayerRuntime({
+      scene: this,
+      start: { x: width / 2, y: floorY - HOBBIES_PLAYER_START_OFFSET_Y },
+      resumePosition: this.resumePosition,
+      resumeClamp: HOBBIES_RESUME_CLAMP,
+      sprite: {
+        gravityY: 1000
+      },
+      movement: {
+        walkSpeed: OVERWORLD_WALK_SPEED,
+        sprintSpeed: OVERWORLD_SPRINT_SPEED,
+        jumpVelocityY: OVERWORLD_JUMP_VELOCITY_Y
+      },
+      input: {
+        allowJump: true,
+        allowSprint: true,
+        includeEscapeKey: true
+      },
+      appearance: {
+        isGlassesEquipped: () => isItemEquipped('glasses'),
+        idleTextureKey: 'player_idle',
+        glassesTextureKey: 'player_glasses'
+      }
+    });
+    this.player = this.playerRuntime.player;
 
     const ground = this.add.zone(
       width / 2,
@@ -105,25 +115,6 @@ export class HobbiesScene extends Phaser.Scene {
     );
     this.physics.add.existing(ground, true);
     this.physics.add.collider(this.player, ground);
-
-    this.controller = new PlayerController({
-      walkSpeed: OVERWORLD_WALK_SPEED,
-      sprintSpeed: OVERWORLD_SPRINT_SPEED,
-      jumpVelocityY: OVERWORLD_JUMP_VELOCITY_Y
-    });
-    this.controller.mount(this.player);
-
-    // --- INPUT ---
-    if (this.input.keyboard) {
-      this.cursors = this.input.keyboard.createCursorKeys();
-      this.wasd = {
-        a: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
-        d: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D)
-      };
-      this.interactKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
-      this.hKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.H);
-      this.escapeKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
-    }
 
     this.exitPrompt = createUiText(this, HOBBIES_EXIT_X, floorY - 150, TEXTS.navigation.interact, {
       fontSize: '16px',
@@ -135,65 +126,56 @@ export class HobbiesScene extends Phaser.Scene {
       .setVisible(false)
       .setDepth(100);
 
+    this.interactionRuntime = createInteriorInteractionRuntime({
+      interactRadius: HOBBIES_INTERACT_RADIUS,
+      exitEffect: { kind: 'close' },
+      targets: HOBBIES_ROOM_INTERACTABLES.map((target) => ({
+        ...target,
+        effect:
+          target.kind === 'exit'
+            ? ({ kind: 'close' } satisfies HobbiesInteractionEffect)
+            : ({ kind: 'openOverlay', id: target.id } satisfies HobbiesInteractionEffect)
+      }))
+    });
+
     this.cameras.main.setBackgroundColor('#f4f1ea');
 
     this.setPaused(this.isPaused);
-    this.updatePlayerGlassesAppearance();
+    this.playerRuntime.syncAppearance();
   }
 
   update() {
-    this.updatePlayerGlassesAppearance();
-    if (this.isPaused) {
-      this.controller.zeroVelocity();
+    const playerUpdate = this.playerRuntime?.update();
+    if (!playerUpdate || playerUpdate.paused) {
       this.exitPrompt.setVisible(false);
       return;
     }
 
-    const { commands, step } = readPlayerSceneStep({
-      frame: this.inputFrame,
-      controller: this.controller,
-      cursors: this.cursors,
-      wasd: this.wasd,
-      interactKey: this.interactKey,
-      hKey: this.hKey,
-      escapeKey: this.escapeKey,
-      allowJump: true,
-      allowSprint: true
+    const { commands, step } = playerUpdate;
+    const interaction = this.interactionRuntime?.update({
+      playerX: this.player.x,
+      playerY: this.player.y,
+      interactRequested: step.interactRequested,
+      exitRequested: commands.exitContext
     });
-    if (commands.exitContext) {
+
+    if (interaction?.effect?.kind === 'close') {
       this.onClose?.();
       return;
     }
 
-    this.player.setFlipX(step.facingLeft);
-    this.player.setAngle(step.moving ? Math.sin(this.time.now / 100) * 5 : 0);
-
-    const interact = pickRoomInteractTarget(
-      this.player.x,
-      this.player.y,
-      HOBBIES_ROOM_INTERACTABLES,
-      HOBBIES_INTERACT_RADIUS
-    );
-
-    if (interact.id == null || interact.x == null) {
+    if (!interaction || !interaction.prompt.visible) {
       this.exitPrompt.setVisible(false);
       return;
     }
 
-    this.exitPrompt.setX(interact.x).setVisible(true);
-    if (step.interactRequested) {
-      if (interact.id === 'exit') {
-        this.onClose?.();
-      } else {
-        this.onInteract?.(interact.id);
+    this.exitPrompt.setPosition(interaction.prompt.x, interaction.prompt.y).setVisible(true);
+    if (interaction.effect) {
+      switch (interaction.effect.kind) {
+        case 'openOverlay':
+          this.onInteract?.(interaction.effect.id);
+          break;
       }
     }
-  }
-
-  private updatePlayerGlassesAppearance(): void {
-    const hasGlasses = isItemEquipped('glasses');
-    if (hasGlasses === this.hasGlassesSprite) return;
-    this.hasGlassesSprite = hasGlasses;
-    this.player.setTexture(hasGlasses ? 'player_glasses' : 'player_idle');
   }
 }

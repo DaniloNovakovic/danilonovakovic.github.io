@@ -1,6 +1,6 @@
 # Prototype
 
-> Stub — expand as you read the chapter.
+> Low-priority reference. Type Object is usually the better fit in this repo.
 
 ## Intent
 
@@ -17,7 +17,7 @@ No current explicit usage.
 
 ## Status
 
-`not yet read`
+`not yet read` — reference only.
 
 ## See also
 
