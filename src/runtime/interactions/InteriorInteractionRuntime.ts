@@ -1,5 +1,3 @@
-import { pickRoomInteractTarget } from '../../core/ecs/systems/roomInteractSystems';
-
 export interface InteriorInteractionPrompt {
   x: number;
   y: number;
@@ -63,16 +61,13 @@ function pickInteriorInteractionTarget<Id extends string, Effect>(
   targets: readonly InteriorInteractionTarget<Id, Effect>[],
   interactRadius: number
 ): InteriorInteractionTarget<Id, Effect> | null {
-  const hasTargetRadius = targets.some((target) => target.interactRadius !== undefined);
-  if (!hasTargetRadius) {
-    const picked = pickRoomInteractTarget(playerX, playerY, targets, interactRadius);
-    return picked.id ? targets.find((target) => target.id === picked.id) ?? null : null;
-  }
-
   for (const target of targets) {
+    if (target.enabled && !target.enabled()) continue;
+
     const dx = playerX - target.x;
     const dy = playerY - target.distanceAnchorY;
-    if (Math.hypot(dx, dy) < (target.interactRadius ?? interactRadius)) {
+    const radius = target.interactRadius ?? interactRadius;
+    if (dx * dx + dy * dy < radius * radius) {
       return target;
     }
   }
@@ -98,11 +93,10 @@ export function createInteriorInteractionRuntime<Id extends string, Effect>(
         };
       }
 
-      const enabledTargets = options.targets.filter((target) => target.enabled?.() ?? true);
       const activeTarget = pickInteriorInteractionTarget(
         frame.playerX,
         frame.playerY,
-        enabledTargets,
+        options.targets,
         options.interactRadius
       );
 

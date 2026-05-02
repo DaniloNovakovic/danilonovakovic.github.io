@@ -61,6 +61,8 @@ export interface SideViewPlayerRuntime {
 }
 
 const DEFAULT_TEXTURE_KEY = 'player_idle';
+const WALK_BOB_PERIOD_MS = 100;
+const WALK_BOB_ANGLE_DEGREES = 5;
 
 function noOpKey(): Phaser.Input.Keyboard.Key {
   return { isDown: false } as Phaser.Input.Keyboard.Key;
@@ -164,7 +166,11 @@ class PhaserSideViewPlayerRuntime implements SideViewPlayerRuntime {
     });
 
     this.player.setFlipX(step.facingLeft);
-    this.player.setAngle(step.moving ? Math.sin(this.options.scene.time.now / 100) * 5 : 0);
+    this.player.setAngle(
+      step.moving
+        ? Math.sin(this.options.scene.time.now / WALK_BOB_PERIOD_MS) * WALK_BOB_ANGLE_DEGREES
+        : 0
+    );
 
     return { paused: false, commands, step };
   }
