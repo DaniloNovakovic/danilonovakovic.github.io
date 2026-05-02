@@ -36,17 +36,32 @@ This document describes the current runtime architecture in `src/`. It is the de
   - Resume policy over the low-level store. The Phaser adapter captures raw positions; the policy decides whether to persist, clear, or restore by scene key.
 - `src/runtime/player/SideViewPlayerRuntime.ts`
   - Shared side-view player lifecycle for Phaser scenes: spawn/resume placement, controller mounting, input frame updates, pause propagation, appearance sync, sprite animation, and resume capture.
+- `src/runtime/camera/sideViewCameraRuntime.ts`
+  - Shared side-view camera lifecycle. It applies follow target, zoom, follow offset, camera bounds, portrait cover crop padding, Phaser scale resize re-application, and shutdown cleanup.
+- `src/runtime/phaserScenePresentation.ts`
+  - Scene presentation policy for the React shell. Side-view Phaser scenes use `portrait-cover`; full-board arcade scenes such as Potassium use `full-board`.
+- `src/components/interactive/gameShellLayout.ts`
+  - React shell layout helper for presentation-mode-specific canvas aspect and max-size rules. Phaser still keeps the fixed logical design size from `src/runtime/config.ts`.
 - `src/runtime/interactions/InteriorInteractionRuntime.ts`
   - Pure interior prop interaction runtime. It resolves active targets, prompt placement facts, exit requests, and typed effect commands while scenes keep Phaser objects and side effects.
 - `src/runtime/text/PlayerThoughtText.ts`
   - Small scene-local helper for character thoughts that follow a target, reuse the shared typewriter effect, and auto-hide without adding bridge state.
+
+## Scene presentation and camera
+
+Phaser runs at the fixed design size from `src/runtime/config.ts` and scales with `Scale.ENVELOP`. React owns the visible shell aspect ratio:
+
+- `portrait-cover` is the default for side-view player scenes on phones. The shell is portrait, overflow is clipped, and the shared side-view camera runtime follows/clamps the player so cover-mode crop does not reveal off-world space.
+- `full-board` is for arcade scenes where the whole board must remain visible. Potassium uses this mode on mobile, keeps a landscape frame, and lets Phaser receive direct pointer input instead of the React swipe/tap gesture overlay.
+
+When a scene changes presentation mode, `Game.tsx` keeps the existing Phaser instance mounted and calls `game.scale.refresh()` after the new DOM size lands. Side-view camera runtimes listen for Phaser scale resize and re-apply camera bounds/profile math.
 
 ## Runtime seams for new scenes
 
 - Feature presentation facts belong in the feature catalog. Avoid local React overlay maps or ad hoc runtime-kind checks in React/Phaser callers.
 - Add Phaser context registration through `createContextPlugins`; keep `Game.tsx` focused on Phaser boot, adapters, kernel wiring, resizing, and touch controls.
 - Use `sceneResumePolicy` for resume persistence and reset rules. The low-level resume store should not be imported directly by scenes or adapters.
-- Side-view player scenes should compose `SideViewPlayerRuntime` before creating colliders against `runtime.player`.
+- Side-view player scenes should compose `SideViewPlayerRuntime` before creating colliders against `runtime.player`; pass its camera config when the scene should follow and clamp the player.
 - Interior rooms should describe prop targets and effect commands, then let `InteriorInteractionRuntime` choose the active target and prompt/effect result. Phaser text mutation, bridge writes, and scene-local helpers stay in the scene.
 
 ## Folder ownership (`runtime` vs `contextPlugins`)
