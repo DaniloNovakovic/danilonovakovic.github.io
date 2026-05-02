@@ -9,6 +9,14 @@ import {
 import type { ResumeSnapshot } from '../../core/kernel/types';
 import { readPlayerSceneStep } from '../input/scenePlayerInput';
 import { setSceneKeyboardPaused } from '../sceneKeyboardPause';
+import {
+  createSideViewCameraRuntime,
+  type SideViewCameraDesignSize,
+  type SideViewCameraProfile,
+  type SideViewCameraRuntime,
+  type SideViewCameraViewportSize,
+  type SideViewCameraWorldBounds
+} from '../camera/sideViewCameraRuntime';
 
 export interface SideViewPlayerResumeClamp {
   minX: number;
@@ -20,7 +28,7 @@ export interface SideViewPlayerResumeClamp {
 /**
  * Shared lifecycle config for side-view Phaser scenes. Scenes still own layout,
  * colliders, room props, and interaction effects; this runtime owns player spawn,
- * input, pause propagation, controller updates, appearance sync, and resume capture.
+ * input, optional camera follow, pause propagation, controller updates, appearance sync, and resume capture.
  */
 export interface SideViewPlayerRuntimeOptions {
   scene: Phaser.Scene;
@@ -45,6 +53,12 @@ export interface SideViewPlayerRuntimeOptions {
     idleTextureKey: string;
     glassesTextureKey: string;
   };
+  camera?: {
+    worldBounds: SideViewCameraWorldBounds;
+    designSize: SideViewCameraDesignSize;
+    resolveProfile?: (viewport: SideViewCameraViewportSize) => SideViewCameraProfile;
+    profile?: SideViewCameraProfile;
+  };
 }
 
 export type SideViewPlayerRuntimeUpdate =
@@ -54,6 +68,7 @@ export type SideViewPlayerRuntimeUpdate =
 export interface SideViewPlayerRuntime {
   readonly player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   readonly controller: PlayerController;
+  readonly cameraRuntime?: SideViewCameraRuntime;
   setPaused(paused: boolean): void;
   captureResume(): ResumeSnapshot | null;
   update(): SideViewPlayerRuntimeUpdate;
@@ -91,6 +106,7 @@ function resolveStartPosition(options: SideViewPlayerRuntimeOptions): ResumeSnap
 class PhaserSideViewPlayerRuntime implements SideViewPlayerRuntime {
   readonly player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   readonly controller: PlayerController;
+  readonly cameraRuntime?: SideViewCameraRuntime;
 
   private readonly options: SideViewPlayerRuntimeOptions;
   private readonly inputFrame = createInputCommandFrame();
@@ -117,6 +133,7 @@ class PhaserSideViewPlayerRuntime implements SideViewPlayerRuntime {
 
     this.controller = new PlayerController(options.movement);
     this.controller.mount(this.player);
+    this.cameraRuntime = createPlayerCameraRuntime(options, this.player);
 
     const keyboard = scene.input.keyboard;
     this.cursors = keyboard?.createCursorKeys() ?? noOpCursors();
@@ -186,6 +203,22 @@ class PhaserSideViewPlayerRuntime implements SideViewPlayerRuntime {
         : this.options.appearance.idleTextureKey
     );
   }
+}
+
+function createPlayerCameraRuntime(
+  options: SideViewPlayerRuntimeOptions,
+  player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody
+): SideViewCameraRuntime | undefined {
+  if (!options.camera) return undefined;
+  const profile = options.camera.profile ?? { zoom: 1, followOffsetY: 0 };
+
+  return createSideViewCameraRuntime({
+    scene: options.scene,
+    followTarget: player,
+    worldBounds: options.camera.worldBounds,
+    designSize: options.camera.designSize,
+    resolveProfile: options.camera.resolveProfile ?? (() => profile)
+  });
 }
 
 export function createSideViewPlayerRuntime(

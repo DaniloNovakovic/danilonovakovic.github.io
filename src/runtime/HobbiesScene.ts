@@ -7,6 +7,8 @@ import { HOBBIES_EXIT_X, HOBBIES_ROOM_INTERACTABLES } from '../config/hobbiesRoo
 import { TEXTS } from '../config/content';
 import type { HobbyReactOverlayId } from '../config/featureIds';
 import {
+  GAME_DESIGN_HEIGHT,
+  GAME_DESIGN_WIDTH,
   HOBBIES_FLOOR_Y,
   HOBBIES_GROUND_ZONE,
   HOBBIES_INTERACT_RADIUS,
@@ -103,6 +105,22 @@ export class HobbiesScene extends Phaser.Scene {
         isGlassesEquipped: () => isItemEquipped('glasses'),
         idleTextureKey: 'player_idle',
         glassesTextureKey: 'player_glasses'
+      },
+      camera: {
+        worldBounds: {
+          x: 0,
+          y: 0,
+          width,
+          height
+        },
+        designSize: {
+          width: GAME_DESIGN_WIDTH,
+          height: GAME_DESIGN_HEIGHT
+        },
+        profile: {
+          zoom: 1,
+          followOffsetY: 0
+        }
       }
     });
     this.player = this.playerRuntime.player;

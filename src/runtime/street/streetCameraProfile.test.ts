@@ -7,10 +7,9 @@ import {
 
 describe('getStreetCameraProfile', () => {
   it('uses portrait viewport tuning for portrait phone displays', () => {
-    expect(getStreetCameraProfile({ displayWidth: 390, displayHeight: 844 })).toEqual({
-      ...MOBILE_STREET_CAMERA_PROFILE,
-      zoom: 1
-    });
+    expect(getStreetCameraProfile({ displayWidth: 390, displayHeight: 520 })).toEqual(
+      MOBILE_STREET_CAMERA_PROFILE
+    );
   });
 
   it('uses the default profile for desktop and tablet displays', () => {

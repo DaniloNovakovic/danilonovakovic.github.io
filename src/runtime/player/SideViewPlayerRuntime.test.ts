@@ -20,7 +20,15 @@ vi.mock('phaser', () => ({
   }
 }));
 
+vi.mock('../camera/sideViewCameraRuntime', () => ({
+  createSideViewCameraRuntime: vi.fn(() => ({
+    refresh: vi.fn(),
+    destroy: vi.fn()
+  }))
+}));
+
 import { createSideViewPlayerRuntime } from './SideViewPlayerRuntime';
+import { createSideViewCameraRuntime } from '../camera/sideViewCameraRuntime';
 
 type FakeKey = Phaser.Input.Keyboard.Key & { justDown?: boolean };
 
@@ -104,6 +112,7 @@ const movement = {
 describe('SideViewPlayerRuntime', () => {
   beforeEach(() => {
     bridgeActions.resetTouch();
+    vi.mocked(createSideViewCameraRuntime).mockClear();
   });
 
   it('spawns at the default start when no resume exists', () => {
@@ -240,5 +249,32 @@ describe('SideViewPlayerRuntime', () => {
 
     sprite.body = undefined as unknown as typeof sprite.body;
     expect(runtime.captureResume()).toBeNull();
+  });
+
+  it('starts the shared camera runtime when camera config is provided', () => {
+    const { scene, sprite } = createScene();
+
+    const runtime = createSideViewPlayerRuntime({
+      scene,
+      start: { x: 10, y: 20 },
+      sprite: { gravityY: 1000 },
+      movement,
+      input: { allowJump: true, allowSprint: true },
+      camera: {
+        worldBounds: { x: 0, y: 0, width: 1000, height: 600 },
+        designSize: { width: 1000, height: 600 },
+        profile: { zoom: 1, followOffsetY: 0 }
+      }
+    });
+
+    expect(createSideViewCameraRuntime).toHaveBeenCalledWith(
+      expect.objectContaining({
+        scene,
+        followTarget: sprite,
+        worldBounds: { x: 0, y: 0, width: 1000, height: 600 },
+        designSize: { width: 1000, height: 600 }
+      })
+    );
+    expect(runtime.cameraRuntime).toBeDefined();
   });
 });

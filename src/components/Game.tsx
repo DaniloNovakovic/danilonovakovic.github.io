@@ -11,6 +11,7 @@ import { PhaserSceneAdapter } from '../infra/phaser/PhaserSceneAdapter';
 import { GameKernel } from '../core/kernel/GameKernel';
 import { createContextPlugins } from '../contextPlugins/createContextPlugins';
 import { useTouchGestures } from './useTouchGestures';
+import { isFullBoardPhaserScene } from '../runtime/phaserScenePresentation';
 
 interface GameProps {
   onInteract: (area: string) => void;
@@ -23,6 +24,10 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
   const containerRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
   const bridgeRef = useRef({ onInteract, onClose, isPaused });
+  const startSceneParam = new URLSearchParams(window.location.search).get('startScene');
+  const presentationMiniGameId =
+    activeMiniGameId ?? (startSceneParam && isMiniGameId(startSceneParam) ? startSceneParam : null);
+  const shouldUseGestureOverlay = !isFullBoardPhaserScene(presentationMiniGameId);
 
   useLayoutEffect(() => {
     bridgeRef.current = { onInteract, onClose, isPaused };
@@ -134,11 +139,12 @@ export default function Game({ onInteract, isPaused, activeMiniGameId, onClose }
   return (
     <div className="relative h-full w-full min-h-0 overflow-hidden rounded-lg border-4 border-neutral-800 bg-[#fbfbf9] shadow-[8px_8px_0px_0px_rgba(26,26,26,1)]">
       <div ref={containerRef} className="absolute inset-0 outline-none" />
-      {/* Touch surface for swipe and tap gestures */}
-      <div
-        className="absolute inset-0 z-10 touch-none md:hidden"
-        {...touchHandlers}
-      />
+      {shouldUseGestureOverlay && (
+        <div
+          className="absolute inset-0 z-10 touch-none md:hidden"
+          {...touchHandlers}
+        />
+      )}
     </div>
   );
 }

@@ -12,6 +12,7 @@ import { TEXTS } from '../config/content';
 import { isMiniGameId } from '../config/featureIds';
 import { bridgeActions, useBridgeState } from '../shared/bridge/store';
 import { OverlayCard } from './overlays/OverlayCard';
+import { isFullBoardPhaserScene } from '../runtime/phaserScenePresentation';
 
 interface InteractiveAppProps {
   onSwitchToStatic: () => void;
@@ -34,6 +35,16 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
   const activeOverlayMiniGame = getReactOverlayMiniGameById(bridge.activeMiniGameId);
   const ActiveOverlayComponent = activeOverlayMiniGame?.component;
   const isGameInputBlocked = bridge.isPaused || bridge.loadingMiniGameId !== null;
+  const startSceneParam = new URLSearchParams(window.location.search).get('startScene');
+  const presentationMiniGameId =
+    bridge.activeMiniGameId ?? (startSceneParam && isMiniGameId(startSceneParam) ? startSceneParam : null);
+  const isFullBoardScene = isFullBoardPhaserScene(presentationMiniGameId);
+  const gameShellWidthClass = isFullBoardScene
+    ? 'w-[min(100%,1000px,calc((100dvh-7.75rem)*1000/600))] md:w-[min(100%,calc(min(88dvh,600px)*1000/600))]'
+    : 'w-[min(100%,450px,calc((100dvh-7.75rem)*3/4))] md:w-[min(100%,calc(min(88dvh,600px)*1000/600))]';
+  const gameFrameAspectClass = isFullBoardScene
+    ? 'aspect-[1000/600]'
+    : 'aspect-[3/4] md:aspect-[1000/600]';
 
   return (
     <div className="relative flex min-h-[100dvh] min-h-dvh w-full flex-col overflow-x-hidden bg-[#f4f1ea]">
@@ -85,9 +96,9 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
 
       {/* Game area: scales down on narrow viewports; leaves room for hints + safe areas */}
       <div className="flex min-h-0 flex-1 w-full flex-col items-center justify-center px-1 py-[max(1rem,env(safe-area-inset-bottom,0px))] sm:px-3 md:px-4 md:pb-24 md:pt-2">
-        <div className="relative w-[min(100%,450px,calc((100dvh-7.75rem)*3/4))] max-w-[1000px] shrink-0 shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] md:w-[min(100%,calc(min(88dvh,600px)*1000/600))]">
+        <div className={`relative max-w-[1000px] shrink-0 shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] ${gameShellWidthClass}`}>
           <div
-            className="relative w-full overflow-hidden rounded-lg border-4 border-[#1a1a1a] bg-[#fbfbf9] aspect-[3/4] md:aspect-[1000/600] md:max-h-[min(88dvh,600px)]"
+            className={`relative w-full overflow-hidden rounded-lg border-4 border-[#1a1a1a] bg-[#fbfbf9] md:max-h-[min(88dvh,600px)] ${gameFrameAspectClass}`}
           >
             <div className="absolute inset-0">
               {/* Paper Texture Overlay */}
@@ -130,7 +141,7 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
       )}
 
       {/* Floating UI Hints (desktop / tablet) */}
-      {bridge.status === GameState.EXPLORING && (
+      {bridge.status === GameState.EXPLORING && !presentationMiniGameId && (
         <div className="fixed bottom-[max(1rem,env(safe-area-inset-bottom,0px))] left-1/2 z-40 w-[min(calc(100%_-_1.5rem),26rem)] -translate-x-1/2 border-2 border-[#1a1a1a] bg-[#fbfbf9]/85 px-3 py-2 text-center opacity-80 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] backdrop-blur-sm transition-opacity hover:opacity-100 md:bottom-6 md:w-auto md:max-w-lg md:px-4">
           <p className="text-[10px] font-bold uppercase leading-snug tracking-widest text-[#1a1a1a] md:hidden">
             {TEXTS.navigation.hintsCompact}

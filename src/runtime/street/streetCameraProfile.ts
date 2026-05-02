@@ -6,19 +6,16 @@ export interface StreetCameraViewport {
 export interface StreetCameraProfile {
   zoom: number;
   followOffsetY: number;
-  boundsPaddingX: number;
 }
 
 export const DEFAULT_STREET_CAMERA_PROFILE: StreetCameraProfile = {
   zoom: 1,
-  followOffsetY: 100,
-  boundsPaddingX: 0
+  followOffsetY: 100
 };
 
 export const MOBILE_STREET_CAMERA_PROFILE: StreetCameraProfile = {
   zoom: 1,
-  followOffsetY: 76,
-  boundsPaddingX: 420
+  followOffsetY: 76
 };
 
 const MOBILE_MAX_DISPLAY_WIDTH = 767;
