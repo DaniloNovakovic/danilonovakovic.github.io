@@ -17,6 +17,7 @@ import {
   type PhaserScenePresentationMode
 } from '../runtime/phaserScenePresentation';
 import { Button, Card, Panel } from '../ui';
+import { getInteractiveGameShellLayout } from './interactive/gameShellLayout';
 
 interface InteractiveAppProps {
   onSwitchToStatic: () => void;
@@ -46,12 +47,7 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
     activeMiniGameId ?? initialStartSceneId;
   const presentationMode: PhaserScenePresentationMode =
     getPhaserScenePresentationMode(presentationMiniGameId);
-  const gameShellWidthClass = presentationMode === 'full-board'
-    ? 'w-[min(100%,1000px,calc((100dvh-7.75rem)*1000/600))] md:w-[min(100%,calc(min(88dvh,600px)*1000/600))]'
-    : 'w-[min(100%,450px,calc((100dvh-7.75rem)*3/4))] md:w-[min(100%,calc(min(88dvh,600px)*1000/600))]';
-  const gameFrameAspectClass = presentationMode === 'full-board'
-    ? 'aspect-[1000/600]'
-    : 'aspect-[3/4] md:aspect-[1000/600]';
+  const gameShellLayout = getInteractiveGameShellLayout(presentationMode);
 
   return (
     <div className="relative flex min-h-[100dvh] min-h-dvh w-full flex-col overflow-x-hidden bg-[#f4f1ea]">
@@ -104,10 +100,14 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
       </div>
 
       {/* Game area: scales down on narrow viewports; leaves room for hints + safe areas */}
-      <div className="flex min-h-0 flex-1 w-full flex-col items-center justify-center px-1 py-[max(1rem,env(safe-area-inset-bottom,0px))] sm:px-3 md:px-4 md:pb-24 md:pt-2">
-        <div className={`relative max-w-[1000px] shrink-0 shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] ${gameShellWidthClass}`}>
+      <div className="flex min-h-0 flex-1 w-full flex-col items-center justify-center px-1 pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-[max(1rem,env(safe-area-inset-top,0px))] sm:px-3 md:px-4 md:pb-24 md:pt-2">
+        <div
+          className={`relative max-w-[1000px] shrink-0 shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] ${gameShellLayout.shellClassName}`}
+          style={gameShellLayout.shellStyle}
+        >
           <div
-            className={`relative w-full overflow-hidden rounded-lg border-4 border-[#1a1a1a] bg-[#fbfbf9] md:max-h-[min(88dvh,600px)] ${gameFrameAspectClass}`}
+            className={`relative w-full overflow-hidden rounded-lg border-4 border-[#1a1a1a] bg-[#fbfbf9] md:max-h-[min(88dvh,600px)] ${gameShellLayout.frameClassName}`}
+            style={gameShellLayout.frameStyle}
           >
             <div className="absolute inset-0">
               {/* Paper Texture Overlay */}
