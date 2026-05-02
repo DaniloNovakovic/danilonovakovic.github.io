@@ -22,14 +22,12 @@ import {
   OVERWORLD_WALK_SPEED,
   OVERWORLD_WIDTH
 } from './config';
-import { setSceneKeyboardPaused } from './sceneKeyboardPause';
 import {
   bridgeActions,
   isItemEquipped,
   isSecretDiscovered,
   type SecretDiscoveryId
 } from '../shared/bridge/store';
-import { PlayerController } from '../core/player/PlayerController';
 import {
   buildStreetEnvironment,
   buildStreetForeground,
@@ -43,8 +41,6 @@ import {
   type OverworldBuildingSlot,
   type OverworldSecretSlot
 } from '../core/ecs/systems/overworldInteractSystems';
-import { createInputCommandFrame } from '../core/input/commands';
-import { readPlayerSceneStep } from './input/scenePlayerInput';
 import { DistanceHazeVision } from './vision/DistanceHazeVision';
 import {
   createOverworldInteractionState,
@@ -52,6 +48,10 @@ import {
   type OverworldInteractionPrompt,
   type OverworldInteractionState
 } from './overworld/overworldInteractionState';
+import {
+  createSideViewPlayerRuntime,
+  type SideViewPlayerRuntime
+} from './player/SideViewPlayerRuntime';
 
 const BASEMENT_HOLE = {
   x: 230,
@@ -83,22 +83,16 @@ const GLASSES_SECRET_SLOTS: readonly OverworldSecretSlot[] = [
 
 export class OverworldScene extends Phaser.Scene {
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
-  cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
-  wasd!: { a: Phaser.Input.Keyboard.Key; d: Phaser.Input.Keyboard.Key };
-  interactKey!: Phaser.Input.Keyboard.Key;
-  hKey!: Phaser.Input.Keyboard.Key;
   streetBuildings!: StreetBuildingLayers;
   interactPrompt!: Phaser.GameObjects.Text;
 
-  private controller!: PlayerController;
+  private playerRuntime?: SideViewPlayerRuntime;
   private onInteract?: (area: string) => void;
   private isPaused: boolean = false;
   private resumePosition?: { x: number; y: number };
-  private readonly inputFrame = createInputCommandFrame();
   private readonly buildingSlots: OverworldBuildingSlot[] = [];
   private lensRevealScratch: boolean[] = [];
   private preGlassesVision?: DistanceHazeVision;
-  private hasGlassesSprite: boolean | null = null;
   private bananaFloorIcon?: Phaser.GameObjects.Graphics;
   private glassesSecretHint?: Phaser.GameObjects.Text;
   private glassesSecretMessage?: Phaser.GameObjects.Text;
@@ -119,14 +113,11 @@ export class OverworldScene extends Phaser.Scene {
     this.onInteract = data.onInteract;
     this.isPaused = data.isPaused;
     this.resumePosition = data.resumePosition;
-    // Scene instances are reused; force texture sync on each enter.
-    this.hasGlassesSprite = null;
     this.resetBananaPeelFlow();
   }
 
   getResumeCapturePosition(): { x: number; y: number } | null {
-    if (!this.player?.body) return null;
-    return { x: this.player.x, y: this.player.y };
+    return this.playerRuntime?.captureResume() ?? null;
   }
 
   shutdown(): void {
@@ -137,12 +128,8 @@ export class OverworldScene extends Phaser.Scene {
     this.isPaused = paused;
     if (paused) {
       this.resetBananaPeelFlow();
-      this.controller?.pause();
-    } else this.controller?.resume();
-    setSceneKeyboardPaused(this, paused, {
-      pausePhysicsWorld: true,
-      zeroHorizontalVelocity: () => this.controller?.zeroVelocity()
-    });
+    }
+    this.playerRuntime?.setPaused(paused);
   }
 
   preload() {
@@ -170,48 +157,40 @@ export class OverworldScene extends Phaser.Scene {
     }
     this.lensRevealScratch = this.streetBuildings.faces.map(() => false);
 
-    // --- PLAYER ---
-    const startX = this.resumePosition
-      ? Phaser.Math.Clamp(
-          this.resumePosition.x,
-          OVERWORLD_PLAYER_SPAWN_MARGIN_X,
-          OVERWORLD_WIDTH - OVERWORLD_PLAYER_SPAWN_MARGIN_X
-        )
-      : OVERWORLD_PLAYER_START.x;
-    const startY = this.resumePosition
-      ? Phaser.Math.Clamp(
-          this.resumePosition.y,
-          OVERWORLD_PLAYER_RESUME_Y_CLAMP.min,
-          OVERWORLD_PLAYER_RESUME_Y_CLAMP.max
-        )
-      : OVERWORLD_PLAYER_START.y;
-
-    this.player = this.physics.add.sprite(startX, startY, 'player_idle');
-    this.player.setDepth(25);
-    this.player.setCollideWorldBounds(true);
-    this.player.setGravityY(OVERWORLD_PLAYER_GRAVITY_Y);
-    this.physics.add.collider(this.player, groundZone);
-
-    this.controller = new PlayerController({
-      walkSpeed: OVERWORLD_WALK_SPEED,
-      sprintSpeed: OVERWORLD_SPRINT_SPEED,
-      jumpVelocityY: OVERWORLD_JUMP_VELOCITY_Y
+    this.playerRuntime = createSideViewPlayerRuntime({
+      scene: this,
+      start: OVERWORLD_PLAYER_START,
+      resumePosition: this.resumePosition,
+      resumeClamp: {
+        minX: OVERWORLD_PLAYER_SPAWN_MARGIN_X,
+        maxX: OVERWORLD_WIDTH - OVERWORLD_PLAYER_SPAWN_MARGIN_X,
+        minY: OVERWORLD_PLAYER_RESUME_Y_CLAMP.min,
+        maxY: OVERWORLD_PLAYER_RESUME_Y_CLAMP.max
+      },
+      sprite: {
+        depth: 25,
+        gravityY: OVERWORLD_PLAYER_GRAVITY_Y
+      },
+      movement: {
+        walkSpeed: OVERWORLD_WALK_SPEED,
+        sprintSpeed: OVERWORLD_SPRINT_SPEED,
+        jumpVelocityY: OVERWORLD_JUMP_VELOCITY_Y
+      },
+      input: {
+        allowJump: true,
+        allowSprint: true
+      },
+      appearance: {
+        isGlassesEquipped: () => isItemEquipped('glasses'),
+        idleTextureKey: 'player_idle',
+        glassesTextureKey: 'player_glasses'
+      }
     });
-    this.controller.mount(this.player);
+    this.player = this.playerRuntime.player;
+    this.physics.add.collider(this.player, groundZone);
 
     buildStreetForeground(this);
     setupStreetCamera(this, this.player);
-
-    // --- INPUT ---
-    if (this.input.keyboard) {
-      this.cursors = this.input.keyboard.createCursorKeys();
-      this.wasd = {
-        a: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
-        d: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D)
-      };
-      this.interactKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
-      this.hKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.H);
-    }
 
     // --- UI ---
     this.interactPrompt = createUiText(this, 0, 0, TEXTS.navigation.enter, {
@@ -234,29 +213,19 @@ export class OverworldScene extends Phaser.Scene {
     });
     this.createGlassesSecret();
     this.setPaused(this.isPaused);
-    this.updatePlayerGlassesAppearance();
+    this.playerRuntime.syncAppearance();
     this.updateLensReveal();
   }
 
   update() {
-    this.updatePlayerGlassesAppearance();
+    const playerUpdate = this.playerRuntime?.update();
     this.updateLensReveal();
 
-    if (this.isPaused) {
-      this.controller.zeroVelocity();
+    if (!playerUpdate || playerUpdate.paused) {
       return;
     }
 
-    const { commands, step } = readPlayerSceneStep({
-      frame: this.inputFrame,
-      controller: this.controller,
-      cursors: this.cursors,
-      wasd: this.wasd,
-      interactKey: this.interactKey,
-      hKey: this.hKey,
-      allowJump: true,
-      allowSprint: true
-    });
+    const { commands, step } = playerUpdate;
     if (commands.exitContext) {
       this.onInteract?.(HOBBIES_FEATURE_ID);
       return;
@@ -264,9 +233,6 @@ export class OverworldScene extends Phaser.Scene {
 
     const hasGlassesEquipped = isItemEquipped('glasses');
     this.setBananaFloorVisible(hasGlassesEquipped);
-
-    this.player.setFlipX(step.facingLeft);
-    this.player.setAngle(step.moving ? Math.sin(this.time.now / 100) * 5 : 0);
 
     updateStreetParticles(this);
 
@@ -399,13 +365,6 @@ export class OverworldScene extends Phaser.Scene {
     const centerScreenX = this.player.x - this.cameras.main.scrollX;
     const centerScreenY = this.player.y - this.cameras.main.scrollY - 45;
     this.preGlassesVision.render(!hasGlasses, centerScreenX, centerScreenY);
-  }
-
-  private updatePlayerGlassesAppearance(): void {
-    const hasGlasses = isItemEquipped('glasses');
-    if (hasGlasses === this.hasGlassesSprite) return;
-    this.hasGlassesSprite = hasGlasses;
-    this.player.setTexture(hasGlasses ? 'player_glasses' : 'player_idle');
   }
 
   private createGlassesSecret(): void {
