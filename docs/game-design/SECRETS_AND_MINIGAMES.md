@@ -6,10 +6,10 @@ These are "distilled" versions of classic genres, hidden throughout the world. E
 
 ## 1. Potassium Slip (Slippery Stakeholder Homage)
 
-- **The Vibe:** Top-down physics-based survival.
+- **The Vibe:** Tall ricochet roguelite and Ball x Pit homage.
 - **The Secret:** Find a **Banana** item in the "Sketch" world while wearing the **Glasses**. Instead of eating it, the player "enters" the slip-zone.
-- **The Twist:** Everything is banana-themed and "slippery." You control a banana peel and must "slip" incoming corporate stakeholders and bugs.
-- **Fun Core:** High-fidelity SVG sprites, slippery momentum-based dragging, and a "Ripeness" mechanic that cycles the physics from high-grip to ultra-chaotic.
+- **The Twist:** Everything is banana-themed paperwork chaos. You launch one banana, yo-yo it back, and draft stackable nonsense skills between waves.
+- **Fun Core:** Ricochet combat, falling 5-column waves, enemy bounce shots, ranked passive upgrades, boss reward, endless mode, and local records.
 
 ## 2. Muay Thai Mayhem (Street Fighter Homage)
 

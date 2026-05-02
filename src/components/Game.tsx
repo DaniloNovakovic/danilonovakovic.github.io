@@ -31,7 +31,7 @@ export default function Game({
   const containerRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
   const bridgeRef = useRef({ onInteract, onClose, isPaused });
-  const shouldUseGestureOverlay = presentationMode !== 'full-board';
+  const shouldUseGestureOverlay = presentationMode === 'portrait-cover';
 
   useLayoutEffect(() => {
     bridgeRef.current = { onInteract, onClose, isPaused };

@@ -49,19 +49,19 @@ This document serves as a long-term roadmap for implementing the "Artist's Journ
 
 ---
 
-## Phase 2: Secret 1 - Potassium Slip (Slippery Stakeholder Homage)
+## Phase 2: Secret 1 - Potassium Slip (Ball x Pit Homage)
 
-**Goal:** Implement the first secret mini-game hidden in the Overworld—a mobile-friendly top-down physics game.
+**Goal:** Implement the first secret mini-game hidden in the Overworld: a mobile-friendly tall ricochet roguelite about launching one banana through falling office nonsense.
 
 - [x] **2.1: The Banana Trigger**
   - Added banana-peel clue/inspect flow in the Overworld, then peel interaction handoff to transition to the mini-game.
 - [x] **2.2: Potassium Slip Mechanics**
   - Created a new top-down Phaser Scene (`PotassiumSlipScene.ts`).
-  - Implemented slippery momentum-based movement using `moveToObject`.
-  - Added a "Ripeness" cycle (Green/Yellow/Brown) that alters physics friction/speed.
-  - Implemented procedural SVG-based enemies (Deadlines, Scope Creepers, Bugs).
+  - Pivoted from slippery movement into a Ball x Pit-inspired ricochet loop: drag-to-launch, yo-yo recall, enemy ricochets, and tall vertical board presentation.
+  - Added deterministic procedural 5-column waves, scaled enemy HP, wall blockers, boss reward flow, endless mode, and a local records list.
+  - Added stacked ranked skills: fire, poison, explosion, duplicate, horizontal ghost, and vertical ghost, followed by repeatable generic endless upgrades.
 - [x] **2.3: Verification**
-  - Verified game loop, difficulty scaling, and mobile-friendly tap-to-start logic.
+  - Verified game loop, difficulty scaling, upgrade drafting, boss reward, endless continuation, records helpers, and mobile-friendly pointer input.
 
 ---
 
@@ -82,21 +82,17 @@ This document serves as a long-term roadmap for implementing the "Artist's Journ
 
 ---
 
-## Phase 4: Secret 3 - Ball x Pit Homage
+## Phase 4: Secret 3 - Old TV Follow-Up
 
-**Goal:** Implement the Survival Roguelite brick-breaking hybrid.
+**Goal:** Use the Circuit item to unlock a follow-up secret at the Old TV. Potassium Slip now covers the Ball x Pit homage, so this phase should become a sequel/remix rather than a duplicate first implementation.
 
 - **4.1: The Old TV Trigger**
   - Place an `Old TV` in the Overworld.
   - Add a requirement for a "Circuit" item to activate it.
-- **4.2: Vertical Pit Mechanics**
-  - Create `BallXPitScene.ts`.
-  - Implement vertical gravity and bouncy physics.
-  - Add a player-controlled top-launcher that fires balls downward.
-- **4.3: Ball Fusion & Enemies**
-  - Spawn geometric enemy waves moving upwards.
-  - Implement "Data Bits" drop on enemy death.
-  - Add a rudimentary fusion system (e.g., collecting 5 bits splits the ball into 3).
+- **4.2: Sequel Direction**
+  - Decide whether the Old TV opens a harder Potassium remix, a narrative reward scene, or a different mini-game genre that uses the Circuit.
+- **4.3: Avoid Duplicate Scope**
+  - Do not recreate Potassium's banana ricochet, ranked skill drafts, or endless leaderboard loop unless the remix intentionally builds on them.
 
 ---
 

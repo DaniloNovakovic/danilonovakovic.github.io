@@ -16,7 +16,7 @@ describe('isFullBoardPhaserScene', () => {
   });
 
   it('returns the presentation mode for Phaser scene ids', () => {
-    expect(getPhaserScenePresentationMode('potassium')).toBe('full-board');
+    expect(getPhaserScenePresentationMode('potassium')).toBe('vertical-board');
     expect(getPhaserScenePresentationMode('hobbies')).toBe('portrait-cover');
     expect(getPhaserScenePresentationMode('basement')).toBe('portrait-cover');
     expect(getPhaserScenePresentationMode(null)).toBe('portrait-cover');

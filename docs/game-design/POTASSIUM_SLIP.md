@@ -1,30 +1,66 @@
 # Potassium Slip: Mini-Game Manual
 
 ## Overview
-**Potassium Slip** is a chaotic, top-down physics "slip-em-up" mini-game. It serves as a silly, mobile-friendly homage to classic arcade survival games, themed around the project's "Potassium" (Banana) secret.
 
-## The Goal
-Control a **Banana Peel** to intercept and "slip" incoming corporate stakeholders and project bugs. Prevent them from reaching the bottom of the screen (the "Deadline") to survive as long as possible and achieve a high score.
+**Potassium Slip** is the first secret mini-game: a tall banana ricochet arena and affectionate **Ball x Pit homage** filtered through office nonsense. The player launches one main banana, recalls it yo-yo style, bounces it through falling enemies, drafts stackable upgrades, defeats the **Potassium Compliance Officer**, and earns the **Circuit** item.
+
+## Goal
+
+Clear 10 procedural campaign waves, defeat the boss on wave 11, and collect the Circuit. After winning, the player can return to the city or continue the same run into endless mode.
 
 ## Controls
-- **Desktop:** Click and drag with your mouse. The Banana Peel will slide toward your cursor with slippery physics momentum.
-- **Mobile:** Touch and drag your thumb. The game is optimized for tactile, slide-based movement.
-- **Start/Restart:** Click or Tap the screen to begin a run or exit from the Game Over screen.
 
-## Ripeness States
-The Banana Peel's physics and appearance cycle every 10 seconds, changing the "game feel":
+- **Launch:** Click/touch near the banana, drag toward the target, and release.
+- **Recall:** Hold anywhere while the banana is flying to pull it back toward the launch pad.
+- **Relaunch:** Keep holding as the banana reaches the launch pad, aim, and release again.
+- **Retry:** Press `R` or choose `Retry` after game over.
+- **Return:** Press `E`, choose `Return to City`, or press `Esc`.
+- **Endless:** Press `Space` or choose `Endless Mode` after winning.
 
-1. **Green (Unripe):** High friction and grip. Slower top speed, but very precise control.
-2. **Yellow (Ripe):** Standard arcade physics. Balanced speed and drift.
-3. **Brown (Overripe):** Extreme speed and very low friction. The peel becomes very slippery and chaotic, requiring wide "drifting" motions to control.
+## Core Loop
 
-## The Enemies
-- **The Deadline:** A red calendar monster. Moves fast and straight down. 
-- **The Scope Creeper:** A purple amorphous blob with tentacles. Moves slower but zig-zags horizontally, taking up more space.
-- **The Bug:** A green segmented insect. Moves erratically, jumping and changing direction frequently.
+- Enemies and wall blockers spawn in 5-column rows and fall straight down.
+- The banana bounces off arena walls and ricochets off enemies.
+- Regular enemies cost lives if they reach the bottom. Filing Walls do not hurt the player. The boss instantly ends the run if it reaches the bottom.
+- The player starts with 5 lives.
+- After each cleared non-boss wave, the player chooses one of two upgrade drafts.
 
-## Gameplay Mechanics
-- **Slipping:** Colliding with an enemy causes them to spin out wildly and explode into points.
-- **Lives:** You start with 3 lives. If an enemy reaches the bottom of the screen, you lose a life.
-- **Difficulty Scaling:** The game speeds up and spawns enemies more frequently as your score increases.
-- **Visual Style:** High-fidelity SVG vector sprites with a vibrant, neon-arcade color palette (revealed only when wearing the **Glasses**).
+## Waves And Modes
+
+- **Campaign:** Waves 1-10 are deterministic procedural row waves that grow denser and tankier over time.
+- **Boss:** Wave 11 is the Potassium Compliance Officer. Defeating it grants the Circuit once.
+- **Endless:** Wave 12+ continues the same run with existing score, lives, skills, and escalating procedural waves.
+- **Records:** Finished runs are saved to a local top-5 leaderboard in browser storage.
+
+## Enemies
+
+- **Intern Bug:** Basic small target.
+- **Scope Blob:** Round multi-hit target.
+- **Meeting Brick:** Chunkier blocker-like enemy.
+- **Deadline Drone:** Faster falling hazard.
+- **Filing Wall:** High-HP non-damaging blocker that forces ricochet angles.
+- **Potassium Compliance Officer:** Campaign boss with diagonal drift and high HP.
+
+## Skill Drafts
+
+Each main skill has two ranks: unlock and `+`. Skills stack permanently for the current run.
+
+- **Fire Trail:** Moving bananas leave fire. `Fire Trail +` makes hits drop fire patches.
+- **Poison Damage:** Hits poison enemies over time. `Poison Damage +` makes poisoned enemies spread poison on death.
+- **Explosion Damage:** Hits explode with falloff damage. `Explosion Damage +` makes bigger blasts apply statuses.
+- **Duplicate:** Main hits spawn small bananas. `Duplicate +` adds one clone and lets clones apply half-strength procs.
+- **Horizontal Ghost:** Hits fire a blue row beam. `Horizontal Ghost +` makes row beams apply statuses.
+- **Vertical Ghost:** Hits fire a blue column beam. `Vertical Ghost +` makes column beams apply statuses.
+
+When all six skills are fully upgraded, drafts switch to repeatable generic upgrades:
+
+- **Damage +**
+- **Poison +**
+- **Explosion +**
+- **Clone Time +**
+- **Banana Speed +**
+- **Bonus Life**
+
+## Presentation
+
+Potassium uses a dedicated `vertical-board` presentation. Phaser still runs at the fixed global design resolution, but the React shell frames a tall portrait board and the playable arena uses the central vertical slice directly. The contextual hint lives below the board like the overworld status panel.

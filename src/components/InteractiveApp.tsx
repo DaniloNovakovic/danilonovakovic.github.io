@@ -1,9 +1,10 @@
 import { useCallback, useState } from 'react';
-import { BookOpen, Backpack } from 'lucide-react';
+import { BookOpen, Backpack, Bug } from 'lucide-react';
 import Game from './Game';
 import { GameState } from '../runtime/gameState';
 import {
   getMiniGameById,
+  getAllMiniGames,
   getOverlayParentId,
   getReactOverlayMiniGameById
 } from '../runtime/miniGameRegistry';
@@ -26,6 +27,7 @@ interface InteractiveAppProps {
 export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps) {
   const bridge = useBridgeState();
   const [inventoryOpen, setInventoryOpen] = useState(false);
+  const [devSwitcherOpen, setDevSwitcherOpen] = useState(false);
 
   const handleInteract = (area: string) => {
     if (!isMiniGameId(area)) return;
@@ -35,6 +37,16 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
   const closeOverlay = useCallback(() => {
     bridgeActions.closeActiveMode(getOverlayParentId);
   }, []);
+
+  const jumpToDevTarget = (area: string | null) => {
+    setDevSwitcherOpen(false);
+    if (area === null) {
+      bridgeActions.closeActiveMode();
+      return;
+    }
+    if (!isMiniGameId(area)) return;
+    bridgeActions.requestInteraction(area);
+  };
 
   const activeMiniGame = bridge.activeMiniGameId ? getMiniGameById(bridge.activeMiniGameId) : undefined;
   const activeOverlayMiniGame = getReactOverlayMiniGameById(bridge.activeMiniGameId);
@@ -48,6 +60,8 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
   const presentationMode: PhaserScenePresentationMode =
     getPhaserScenePresentationMode(presentationMiniGameId);
   const gameShellLayout = getInteractiveGameShellLayout(presentationMode);
+  const shouldReserveSceneHint = presentationMiniGameId === 'potassium';
+  const sceneHintText = bridge.sceneHintText ?? 'Drag toward a target • Hold to recall';
 
   return (
     <div className="relative flex min-h-[100dvh] min-h-dvh w-full flex-col overflow-x-hidden bg-[#f4f1ea]">
@@ -65,16 +79,30 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
       </Button>
 
       <div className="fixed left-2 top-[max(0.5rem,env(safe-area-inset-top,0px))] z-40 sm:left-4 sm:top-4">
-        <Button
-          variant="floating"
-          size="sm"
-          onClick={() => setInventoryOpen((v) => !v)}
-          className="sm:px-3 sm:py-1.5 sm:text-xs"
-          aria-label="Toggle inventory"
-        >
-          <Backpack className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
-          <span>Inventory</span>
-        </Button>
+        <div className="flex items-start gap-2">
+          <Button
+            variant="floating"
+            size="sm"
+            onClick={() => setInventoryOpen((v) => !v)}
+            className="sm:px-3 sm:py-1.5 sm:text-xs"
+            aria-label="Toggle inventory"
+          >
+            <Backpack className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+            <span>Inventory</span>
+          </Button>
+          {import.meta.env.DEV && (
+            <Button
+              variant="floating"
+              size="sm"
+              onClick={() => setDevSwitcherOpen((v) => !v)}
+              className="sm:px-3 sm:py-1.5 sm:text-xs"
+              aria-label="Open dev scene switcher"
+            >
+              <Bug className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+              <span>Dev</span>
+            </Button>
+          )}
+        </div>
         {inventoryOpen && (
           <Panel className="mt-2 w-52 bg-[#fbfbf9]/95 p-2 backdrop-blur-sm">
             <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-[#1a1a1a]">
@@ -90,23 +118,54 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
                   className="h-3.5 w-3.5 accent-[#1a1a1a]"
                 />
               </label>
-            ) : (
+            ) : bridge.inventory.ownedItemIds.length === 0 ? (
               <p className="text-[11px] font-bold uppercase tracking-wide text-[#1a1a1a]/60">
                 No items yet
               </p>
+            ) : null}
+            {bridge.inventory.ownedItemIds.includes('circuit') && (
+              <div className="mt-1 rounded border border-[#1a1a1a]/40 bg-white/50 px-2 py-1.5 text-xs font-bold uppercase tracking-wide text-[#1a1a1a]">
+                Circuit
+              </div>
             )}
+          </Panel>
+        )}
+        {import.meta.env.DEV && devSwitcherOpen && (
+          <Panel className="mt-2 w-64 bg-[#fbfbf9]/95 p-2 backdrop-blur-sm">
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#1a1a1a]">
+              Dev scene switcher
+            </p>
+            <div className="grid grid-cols-2 gap-1.5">
+              <button
+                type="button"
+                onClick={() => jumpToDevTarget(null)}
+                className="rounded border border-[#1a1a1a]/40 bg-white/60 px-2 py-1.5 text-left text-[11px] font-bold uppercase tracking-wide text-[#1a1a1a] hover:bg-white"
+              >
+                City
+              </button>
+              {getAllMiniGames().map((miniGame) => (
+                <button
+                  key={miniGame.id}
+                  type="button"
+                  onClick={() => jumpToDevTarget(miniGame.id)}
+                  className="rounded border border-[#1a1a1a]/40 bg-white/60 px-2 py-1.5 text-left text-[11px] font-bold uppercase tracking-wide text-[#1a1a1a] hover:bg-white"
+                >
+                  {miniGame.name}
+                </button>
+              ))}
+            </div>
           </Panel>
         )}
       </div>
 
       {/* Game area: scales down on narrow viewports; leaves room for hints + safe areas */}
-      <div className="flex min-h-0 flex-1 w-full flex-col items-center justify-center px-1 pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-[max(1rem,env(safe-area-inset-top,0px))] sm:px-3 md:px-4 md:pb-24 md:pt-2">
+      <div className="flex min-h-0 flex-1 w-full flex-col items-center justify-center px-1 pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-[max(5.75rem,env(safe-area-inset-top,0px))] sm:px-3 md:px-4 md:pb-24 md:pt-[6.25rem]">
         <div
           className={`relative max-w-[1000px] shrink-0 shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] ${gameShellLayout.shellClassName}`}
           style={gameShellLayout.shellStyle}
         >
           <div
-            className={`relative w-full overflow-hidden rounded-lg border-4 border-[#1a1a1a] bg-[#fbfbf9] md:max-h-[min(88dvh,600px)] ${gameShellLayout.frameClassName}`}
+            className={`relative w-full overflow-hidden rounded-lg border-4 border-[#1a1a1a] bg-[#fbfbf9] ${gameShellLayout.frameClassName}`}
             style={gameShellLayout.frameStyle}
           >
             <div className="absolute inset-0">
@@ -121,6 +180,13 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
               />
             </div>
           </div>
+          {shouldReserveSceneHint && (
+            <Panel className="mt-4 bg-[#fbfbf9]/90 px-3 py-2 text-center backdrop-blur-sm">
+              <p className="text-[10px] font-bold uppercase leading-snug tracking-widest text-[#1a1a1a] md:text-xs">
+                {sceneHintText}
+              </p>
+            </Panel>
+          )}
         </div>
       </div>
 
