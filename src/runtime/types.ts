@@ -23,6 +23,7 @@ export interface ReactOverlayMiniGamePlugin extends MiniGamePluginBase {
   type: typeof MiniGameType.REACT_OVERLAY;
   /** When set, closing this React overlay returns here instead of the overworld. */
   overlayParentId?: MiniGameId;
+  component: ComponentType<MiniGameOverlayProps>;
   loadComponent: () => Promise<{ default: ComponentType<MiniGameOverlayProps> }>;
   sceneKey?: never;
   loadScene?: never;

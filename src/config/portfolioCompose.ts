@@ -45,6 +45,7 @@ export function composePortfolioSections(
     return {
       ...metadata,
       type: MiniGameType.REACT_OVERLAY,
+      component: binding.component,
       loadComponent: binding.loadComponent
     };
   });

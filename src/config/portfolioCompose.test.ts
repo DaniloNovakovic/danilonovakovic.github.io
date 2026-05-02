@@ -6,6 +6,10 @@ import type { MiniGameId } from './featureIds';
 import { OVERWORLD_BUILDING_PLACEMENTS } from './worldLayout';
 import { MiniGameType } from '../runtime/miniGameKind';
 
+function NullOverlay() {
+  return null;
+}
+
 function minimalDefs(): FeaturePluginDefinition[] {
   const street: FeaturePluginDefinition[] = OVERWORLD_BUILDING_PLACEMENTS.map(({ id }) => ({
     id,
@@ -39,7 +43,8 @@ function minimalBindings(): Record<MiniGameId, FeatureRuntimeBinding> {
           }
         : {
             kind: 'reactOverlay',
-            loadComponent: async () => ({ default: () => null })
+            component: NullOverlay,
+            loadComponent: async () => ({ default: NullOverlay })
           }
     ])
   ) as Record<MiniGameId, FeatureRuntimeBinding>;

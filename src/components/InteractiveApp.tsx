@@ -1,38 +1,17 @@
 import { useCallback, useState } from 'react';
-import type { ComponentType } from 'react';
 import { BookOpen, Backpack } from 'lucide-react';
 import Game from './Game';
 import { GameState } from '../runtime/gameState';
-import { getMiniGameById } from '../runtime/miniGameRegistry';
+import {
+  getMiniGameById,
+  getOverlayParentId,
+  getReactOverlayMiniGameById
+} from '../runtime/miniGameRegistry';
 import { MiniGameType } from '../runtime/types';
 import { TEXTS } from '../config/content';
-import { isMiniGameId, type MiniGameId } from '../config/featureIds';
-import type { MiniGameOverlayProps } from '../runtime/types';
+import { isMiniGameId } from '../config/featureIds';
 import { bridgeActions, useBridgeState } from '../shared/bridge/store';
 import { OverlayCard } from './overlays/OverlayCard';
-import ProfileOverlay from './ProfileOverlay';
-import ExperienceOverlay from './ExperienceOverlay';
-import ProjectsOverlay from './ProjectsOverlay';
-import AbilitiesOverlay from './AbilitiesOverlay';
-import ContactOverlay from './ContactOverlay';
-import CodingMini from './CodingMini';
-import DrawingCanvas from './DrawingCanvas';
-import GuitarStrings from './GuitarStrings';
-import MuayThaiMini from './MuayThaiMini';
-import DancingMini from './DancingMini';
-
-const REACT_OVERLAY_COMPONENTS: Partial<Record<MiniGameId, ComponentType<MiniGameOverlayProps>>> = {
-  profile: ProfileOverlay,
-  experiences: ExperienceOverlay,
-  projects: ProjectsOverlay,
-  abilities: AbilitiesOverlay,
-  contact: ContactOverlay,
-  games: CodingMini,
-  art: DrawingCanvas,
-  music: GuitarStrings,
-  fitness: MuayThaiMini,
-  dancing: DancingMini
-};
 
 interface InteractiveAppProps {
   onSwitchToStatic: () => void;
@@ -48,13 +27,12 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
   };
 
   const closeOverlay = useCallback(() => {
-    bridgeActions.closeActiveMode((currentId) => getMiniGameById(currentId)?.overlayParentId);
+    bridgeActions.closeActiveMode(getOverlayParentId);
   }, []);
 
   const activeMiniGame = bridge.activeMiniGameId ? getMiniGameById(bridge.activeMiniGameId) : undefined;
-  const ActiveOverlayComponent = bridge.activeMiniGameId
-    ? REACT_OVERLAY_COMPONENTS[bridge.activeMiniGameId]
-    : undefined;
+  const activeOverlayMiniGame = getReactOverlayMiniGameById(bridge.activeMiniGameId);
+  const ActiveOverlayComponent = activeOverlayMiniGame?.component;
   const isGameInputBlocked = bridge.isPaused || bridge.loadingMiniGameId !== null;
 
   return (
