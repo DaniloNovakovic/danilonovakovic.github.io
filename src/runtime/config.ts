@@ -68,7 +68,7 @@ export const getGameConfig = (container: HTMLElement): Phaser.Types.Core.GameCon
   height: GAME_DESIGN_HEIGHT,
   backgroundColor: '#fbfbf9', // Paper off-white
   scale: {
-    mode: Phaser.Scale.FIT,
+    mode: Phaser.Scale.ENVELOP,
     autoCenter: Phaser.Scale.CENTER_BOTH
   },
   physics: {

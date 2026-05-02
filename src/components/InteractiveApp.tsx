@@ -84,10 +84,10 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
       </div>
 
       {/* Game area: scales down on narrow viewports; leaves room for hints + safe areas */}
-      <div className="flex min-h-0 flex-1 w-full flex-col items-center justify-center px-2 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] pt-[max(0.5rem,env(safe-area-inset-top,0px))] sm:px-4 sm:pb-24 sm:pt-2">
-        <div className="relative w-full max-w-[1000px] shrink-0 shadow-[12px_12px_0px_0px_rgba(26,26,26,1)]">
+      <div className="flex min-h-0 flex-1 w-full flex-col items-center justify-center px-1 py-[max(1rem,env(safe-area-inset-bottom,0px))] sm:px-3 md:px-4 md:pb-24 md:pt-2">
+        <div className="relative w-[min(100%,450px,calc((100dvh-7.75rem)*3/4))] max-w-[1000px] shrink-0 shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] md:w-[min(100%,calc(min(88dvh,600px)*1000/600))]">
           <div
-            className="relative w-full overflow-hidden rounded-lg border-4 border-[#1a1a1a] bg-[#fbfbf9] aspect-[1000/600] max-h-[min(82dvh,calc(100dvh-8.5rem))] sm:max-h-[min(88dvh,600px)]"
+            className="relative w-full overflow-hidden rounded-lg border-4 border-[#1a1a1a] bg-[#fbfbf9] aspect-[3/4] md:aspect-[1000/600] md:max-h-[min(88dvh,600px)]"
           >
             <div className="absolute inset-0">
               {/* Paper Texture Overlay */}
@@ -101,17 +101,6 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
             </div>
           </div>
         </div>
-
-        {/* Mobile hints (gesture-based) */}
-        {bridge.status === GameState.EXPLORING && (
-          <div className="mt-8 flex w-full flex-col items-center gap-2 md:hidden">
-            <div className="mt-2 w-full max-w-lg shrink-0 px-1 text-center">
-              <p className="text-[11px] font-bold uppercase leading-snug tracking-widest text-[#1a1a1a] opacity-80">
-                {TEXTS.navigation.hintsCompact}
-              </p>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Interactive Overlay */}
@@ -142,8 +131,11 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
 
       {/* Floating UI Hints (desktop / tablet) */}
       {bridge.status === GameState.EXPLORING && (
-        <div className="fixed bottom-6 left-1/2 z-40 hidden w-auto max-w-lg -translate-x-1/2 border-2 border-[#1a1a1a] bg-[#fbfbf9]/80 px-4 py-2 opacity-60 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] backdrop-blur-sm transition-opacity hover:opacity-100 md:block">
-          <p className="text-sm font-bold uppercase tracking-widest text-[#1a1a1a]">
+        <div className="fixed bottom-[max(1rem,env(safe-area-inset-bottom,0px))] left-1/2 z-40 w-[min(calc(100%_-_1.5rem),26rem)] -translate-x-1/2 border-2 border-[#1a1a1a] bg-[#fbfbf9]/85 px-3 py-2 text-center opacity-80 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] backdrop-blur-sm transition-opacity hover:opacity-100 md:bottom-6 md:w-auto md:max-w-lg md:px-4">
+          <p className="text-[10px] font-bold uppercase leading-snug tracking-widest text-[#1a1a1a] md:hidden">
+            {TEXTS.navigation.hintsCompact}
+          </p>
+          <p className="hidden text-sm font-bold uppercase tracking-widest text-[#1a1a1a] md:block">
             {TEXTS.navigation.hints}
           </p>
         </div>
