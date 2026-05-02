@@ -5,6 +5,7 @@
 import * as Phaser from 'phaser';
 import { HOBBIES_EXIT_X, HOBBIES_ROOM_INTERACTABLES } from '../config/hobbiesRoomLayout';
 import { TEXTS } from '../config/content';
+import type { HobbyReactOverlayId } from '../config/featureIds';
 import {
   HOBBIES_FLOOR_Y,
   HOBBIES_GROUND_ZONE,
@@ -20,17 +21,27 @@ import {
 import { isItemEquipped } from '../shared/bridge/store';
 import { buildHobbiesRoom } from './hobbies/HobbiesRoom';
 import { createUiText } from './text/createUiText';
-import { pickRoomInteractTarget } from '../core/ecs/systems/roomInteractSystems';
 import {
   createSideViewPlayerRuntime,
   type SideViewPlayerRuntime
 } from './player/SideViewPlayerRuntime';
+import {
+  createInteriorInteractionRuntime,
+  type InteriorInteractionRuntime
+} from './interactions/InteriorInteractionRuntime';
+
+type HobbiesInteractionEffect =
+  | { kind: 'close' }
+  | { kind: 'openOverlay'; id: HobbyReactOverlayId };
+
+type HobbiesInteractionId = 'exit' | HobbyReactOverlayId;
 
 export class HobbiesScene extends Phaser.Scene {
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   exitPrompt!: Phaser.GameObjects.Text;
 
   private playerRuntime?: SideViewPlayerRuntime;
+  private interactionRuntime?: InteriorInteractionRuntime<HobbiesInteractionId, HobbiesInteractionEffect>;
   private onClose?: () => void;
   private onInteract?: (id: string) => void;
   private isPaused: boolean = false;
@@ -115,6 +126,18 @@ export class HobbiesScene extends Phaser.Scene {
       .setVisible(false)
       .setDepth(100);
 
+    this.interactionRuntime = createInteriorInteractionRuntime({
+      interactRadius: HOBBIES_INTERACT_RADIUS,
+      exitEffect: { kind: 'close' },
+      targets: HOBBIES_ROOM_INTERACTABLES.map((target) => ({
+        ...target,
+        effect:
+          target.kind === 'exit'
+            ? ({ kind: 'close' } satisfies HobbiesInteractionEffect)
+            : ({ kind: 'openOverlay', id: target.id } satisfies HobbiesInteractionEffect)
+      }))
+    });
+
     this.cameras.main.setBackgroundColor('#f4f1ea');
 
     this.setPaused(this.isPaused);
@@ -129,29 +152,29 @@ export class HobbiesScene extends Phaser.Scene {
     }
 
     const { commands, step } = playerUpdate;
-    if (commands.exitContext) {
+    const interaction = this.interactionRuntime?.update({
+      playerX: this.player.x,
+      playerY: this.player.y,
+      interactRequested: step.interactRequested,
+      exitRequested: commands.exitContext
+    });
+
+    if (interaction?.effect?.kind === 'close') {
       this.onClose?.();
       return;
     }
 
-    const interact = pickRoomInteractTarget(
-      this.player.x,
-      this.player.y,
-      HOBBIES_ROOM_INTERACTABLES,
-      HOBBIES_INTERACT_RADIUS
-    );
-
-    if (interact.id == null || interact.x == null) {
+    if (!interaction || !interaction.prompt.visible) {
       this.exitPrompt.setVisible(false);
       return;
     }
 
-    this.exitPrompt.setX(interact.x).setVisible(true);
-    if (step.interactRequested) {
-      if (interact.id === 'exit') {
-        this.onClose?.();
-      } else {
-        this.onInteract?.(interact.id);
+    this.exitPrompt.setPosition(interaction.prompt.x, interaction.prompt.y).setVisible(true);
+    if (interaction.effect) {
+      switch (interaction.effect.kind) {
+        case 'openOverlay':
+          this.onInteract?.(interaction.effect.id);
+          break;
       }
     }
   }

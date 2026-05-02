@@ -1,4 +1,14 @@
 import * as Phaser from 'phaser';
+import {
+  BASEMENT_COMPUTER,
+  BASEMENT_EXIT,
+  BASEMENT_FLOOR_Y,
+  BASEMENT_PLAYER_START,
+  createBasementInteractionTargets,
+  GLASSES_PICKUP,
+  type BasementInteractionEffect,
+  type BasementRoomInteractableId
+} from '../config/basementRoomLayout';
 import { TEXTS } from '../config/content';
 import {
   GAME_DESIGN_HEIGHT,
@@ -15,12 +25,10 @@ import {
   createSideViewPlayerRuntime,
   type SideViewPlayerRuntime
 } from './player/SideViewPlayerRuntime';
-
-const BASEMENT_FLOOR_Y = 500;
-const BASEMENT_PLAYER_START = { x: 135, y: BASEMENT_FLOOR_Y - 50 } as const;
-const BASEMENT_EXIT = { x: 95, y: BASEMENT_FLOOR_Y - 75, radius: 70 } as const;
-const BASEMENT_COMPUTER = { x: 400, y: BASEMENT_FLOOR_Y - 105, radius: 82 } as const;
-const GLASSES_PICKUP = { x: 610, y: BASEMENT_FLOOR_Y - 95, radius: 70 } as const;
+import {
+  createInteriorInteractionRuntime,
+  type InteriorInteractionRuntime
+} from './interactions/InteriorInteractionRuntime';
 
 export class BasementScene extends Phaser.Scene {
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -30,6 +38,10 @@ export class BasementScene extends Phaser.Scene {
   playerThought!: PlayerThoughtText;
 
   private playerRuntime?: SideViewPlayerRuntime;
+  private interactionRuntime?: InteriorInteractionRuntime<
+    BasementRoomInteractableId,
+    BasementInteractionEffect
+  >;
   private onClose?: () => void;
   private onInteract?: (id: string) => void;
   private isPaused: boolean = false;
@@ -122,6 +134,15 @@ export class BasementScene extends Phaser.Scene {
       }
     ).setOrigin(0.5).setDepth(100);
 
+    this.interactionRuntime = createInteriorInteractionRuntime({
+      interactRadius: 0,
+      exitEffect: { kind: 'close' },
+      targets: createBasementInteractionTargets({ isGlassesOwned: () => isItemOwned('glasses') }).map((target) => ({
+        ...target,
+        interactRadius: target.radius
+      }))
+    });
+
     this.refreshGlassesVisibility();
     this.setPaused(this.isPaused);
     this.playerRuntime.syncAppearance();
@@ -137,57 +158,29 @@ export class BasementScene extends Phaser.Scene {
     }
 
     const { commands, step } = playerUpdate;
-    if (commands.exitContext) {
-      this.onClose?.();
+    const interaction = this.interactionRuntime?.update({
+      playerX: this.player.x,
+      playerY: this.player.y,
+      interactRequested: step.interactRequested,
+      exitRequested: commands.exitContext
+    });
+
+    if (interaction?.effect?.kind === 'close') {
+      this.applyBasementInteractionEffect(interaction.effect);
       return;
     }
+
     this.playerThought.update();
 
-    const nearComputer =
-      Phaser.Math.Distance.Between(
-        this.player.x,
-        this.player.y,
-        BASEMENT_COMPUTER.x,
-        BASEMENT_COMPUTER.y
-      ) < BASEMENT_COMPUTER.radius;
-    if (nearComputer) {
-      this.interactPrompt.setPosition(BASEMENT_COMPUTER.x, BASEMENT_COMPUTER.y - 92).setVisible(true);
-      if (step.interactRequested) {
-        if (isItemOwned('glasses')) {
-          this.onInteract?.('games');
-        } else {
-          this.playerThought.show("ughh... I can't see");
-        }
-      }
+    if (!interaction || !interaction.prompt.visible) {
+      this.interactPrompt.setVisible(false);
       return;
     }
 
-    const nearGlasses =
-      !isItemOwned('glasses') &&
-      Phaser.Math.Distance.Between(this.player.x, this.player.y, GLASSES_PICKUP.x, GLASSES_PICKUP.y) <
-        GLASSES_PICKUP.radius;
-    if (nearGlasses) {
-      this.interactPrompt.setPosition(GLASSES_PICKUP.x, GLASSES_PICKUP.y - 70).setVisible(true);
-      if (step.interactRequested) {
-        bridgeActions.collectGlasses();
-        this.statusText.setText('Glasses acquired. The sketch city flickers into focus.');
-        this.refreshGlassesVisibility();
-      }
-      return;
+    this.interactPrompt.setPosition(interaction.prompt.x, interaction.prompt.y).setVisible(true);
+    if (interaction.effect) {
+      this.applyBasementInteractionEffect(interaction.effect);
     }
-
-    const nearExit =
-      Phaser.Math.Distance.Between(this.player.x, this.player.y, BASEMENT_EXIT.x, BASEMENT_EXIT.y) <
-      BASEMENT_EXIT.radius;
-    if (nearExit) {
-      this.interactPrompt.setPosition(BASEMENT_EXIT.x, BASEMENT_EXIT.y - 60).setVisible(true);
-      if (step.interactRequested) {
-        this.onClose?.();
-      }
-      return;
-    }
-
-    this.interactPrompt.setVisible(false);
   }
 
   private buildRoom(): void {
@@ -305,5 +298,24 @@ export class BasementScene extends Phaser.Scene {
 
   private refreshGlassesVisibility(): void {
     this.glasses?.setVisible(!isItemOwned('glasses'));
+  }
+
+  private applyBasementInteractionEffect(effect: BasementInteractionEffect): void {
+    switch (effect.kind) {
+      case 'close':
+        this.onClose?.();
+        break;
+      case 'openOverlay':
+        this.onInteract?.(effect.id);
+        break;
+      case 'collectGlasses':
+        bridgeActions.collectGlasses();
+        this.statusText.setText('Glasses acquired. The sketch city flickers into focus.');
+        this.refreshGlassesVisibility();
+        break;
+      case 'showThought':
+        this.playerThought.show(effect.text);
+        break;
+    }
   }
 }
