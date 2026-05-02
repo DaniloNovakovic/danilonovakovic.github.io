@@ -46,6 +46,7 @@ export interface BridgeState {
   inventory: BridgeInventoryState;
   equipment: BridgeEquipmentState;
   progress: BridgeProgressState;
+  sceneHintText: string | null;
   touch: TouchBridgeState;
 }
 
@@ -82,6 +83,7 @@ let state: BridgeState = {
     hasGlasses: false,
     discoveredSecretIds: []
   },
+  sceneHintText: null,
   touch: {
     left: 0,
     right: 0,
@@ -117,6 +119,7 @@ function setState(updater: (current: BridgeState) => BridgeState): void {
     arraysEqual(previous.equipment.equippedItemIds, candidate.equipment.equippedItemIds) &&
     previous.progress.hasGlasses === candidate.progress.hasGlasses &&
     arraysEqual(previous.progress.discoveredSecretIds, candidate.progress.discoveredSecretIds) &&
+    previous.sceneHintText === candidate.sceneHintText &&
     previous.touch.left === candidate.touch.left &&
     previous.touch.right === candidate.touch.right &&
     previous.touch.jumpQueued === candidate.touch.jumpQueued &&
@@ -141,14 +144,16 @@ export const bridgeActions = {
     setState((current) => ({
       ...current,
       mode: createRuntimeModeForInteraction(area),
-      loadingMiniGameId: null
+      loadingMiniGameId: null,
+      sceneHintText: null
     }));
   },
   closeActiveMode(resolveParentId?: (miniGameId: MiniGameId) => MiniGameId | null | undefined): void {
     setState((current) => ({
       ...current,
       mode: closeRuntimeMode(current.mode, resolveParentId),
-      loadingMiniGameId: null
+      loadingMiniGameId: null,
+      sceneHintText: null
     }));
   },
   /** Backward-compatible alias for callers that always return to the overworld. */
@@ -238,6 +243,12 @@ export const bridgeActions = {
     setState((current) => ({
       ...current,
       loadingMiniGameId: miniGameId
+    }));
+  },
+  setSceneHintText(text: string | null): void {
+    setState((current) => ({
+      ...current,
+      sceneHintText: text
     }));
   },
   setTouchDirectional(direction: 'left' | 'right', intensity: number): void {

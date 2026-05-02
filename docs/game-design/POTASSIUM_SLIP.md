@@ -40,4 +40,4 @@ Potassium teaches one piece of chaos at a time:
 - **Lunchbox Magnet:** Pulls pickups toward the banana.
 
 ## Presentation
-Potassium uses a dedicated tall board presentation. The global Phaser canvas stays fixed, but the outer React shell is portrait-shaped and the playable arena uses the central vertical slice directly, avoiding the old board-inside-board look.
+Potassium uses a dedicated tall board presentation with a compact two-row HUD, safe label bounds, and side-wall bounces. The global Phaser canvas stays fixed, but the outer React shell is portrait-shaped and the playable arena uses the central vertical slice directly, avoiding the old board-inside-board look.

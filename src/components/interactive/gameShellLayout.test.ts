@@ -27,11 +27,11 @@ describe('getInteractiveGameShellLayout', () => {
     expect(layout.shellStyle['--mobile-game-shell-width']).toContain('560px');
     expect(layout.shellStyle['--mobile-game-shell-width']).toContain('* 0.75');
     expect(layout.shellStyle['--desktop-game-shell-width']).toBe(
-      'min(100%, calc(min(88dvh, 760px) * 0.75))'
+      'min(100%, calc(min(88dvh, 680px) * 0.75))'
     );
     expect(layout.frameStyle['--mobile-game-frame-aspect']).toBe('3 / 4');
     expect(layout.frameStyle['--desktop-game-frame-aspect']).toBe('3 / 4');
-    expect(layout.frameStyle['--desktop-game-frame-max-height']).toBe('min(88dvh, 760px)');
+    expect(layout.frameStyle['--desktop-game-frame-max-height']).toBe('min(88dvh, 680px)');
   });
 
   it('keeps desktop sizing tied to the Phaser design resolution', () => {

@@ -60,6 +60,8 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
   const presentationMode: PhaserScenePresentationMode =
     getPhaserScenePresentationMode(presentationMiniGameId);
   const gameShellLayout = getInteractiveGameShellLayout(presentationMode);
+  const shouldReserveSceneHint = presentationMiniGameId === 'potassium';
+  const sceneHintText = bridge.sceneHintText ?? 'Drag toward a target • Hold to recall';
 
   return (
     <div className="relative flex min-h-[100dvh] min-h-dvh w-full flex-col overflow-x-hidden bg-[#f4f1ea]">
@@ -157,7 +159,7 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
       </div>
 
       {/* Game area: scales down on narrow viewports; leaves room for hints + safe areas */}
-      <div className="flex min-h-0 flex-1 w-full flex-col items-center justify-center px-1 pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-[max(1rem,env(safe-area-inset-top,0px))] sm:px-3 md:px-4 md:pb-24 md:pt-2">
+      <div className="flex min-h-0 flex-1 w-full flex-col items-center justify-center px-1 pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-[max(5.75rem,env(safe-area-inset-top,0px))] sm:px-3 md:px-4 md:pb-24 md:pt-[6.25rem]">
         <div
           className={`relative max-w-[1000px] shrink-0 shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] ${gameShellLayout.shellClassName}`}
           style={gameShellLayout.shellStyle}
@@ -178,6 +180,13 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
               />
             </div>
           </div>
+          {shouldReserveSceneHint && (
+            <Panel className="mt-4 bg-[#fbfbf9]/90 px-3 py-2 text-center backdrop-blur-sm">
+              <p className="text-[10px] font-bold uppercase leading-snug tracking-widest text-[#1a1a1a] md:text-xs">
+                {sceneHintText}
+              </p>
+            </Panel>
+          )}
         </div>
       </div>
 

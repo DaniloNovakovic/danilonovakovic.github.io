@@ -43,10 +43,18 @@ const ARENA = {
   height: GAME_DESIGN_HEIGHT
 } as const;
 
+const SAFE = {
+  left: ARENA.left + 36,
+  right: ARENA.right - 36,
+  top: ARENA.top + 84,
+  bottom: ARENA.bottom - 96,
+  labelTop: ARENA.top + 78
+} as const;
+
 const LAUNCH_PAD = {
   x: GAME_DESIGN_WIDTH / 2,
   y: ARENA.bottom - 62,
-  radius: 58
+  radius: 44
 } as const;
 
 const LIVES_INITIAL = 5;
@@ -57,6 +65,7 @@ const HIT_COOLDOWN_MS = 180;
 const RECALL_SPEED = 720;
 const RECALL_DAMAGE = 0.65;
 const WAVE_ADVANCE_DELAY_MS = 900;
+const SIDE_BOUNCE_MARGIN = 32;
 
 const ENEMY_CONFIGS: Record<EnemyKind, EnemyConfig> = {
   intern: {
@@ -153,8 +162,9 @@ export class PotassiumSlipScene extends Phaser.Scene {
   private poisonUntil: number = 0;
 
   private hudText!: Phaser.GameObjects.Text;
+  private scoreText!: Phaser.GameObjects.Text;
+  private livesText!: Phaser.GameObjects.Text;
   private activeText!: Phaser.GameObjects.Text;
-  private promptText!: Phaser.GameObjects.Text;
   private overlayText!: Phaser.GameObjects.Text;
   private subOverlayText!: Phaser.GameObjects.Text;
 
@@ -209,6 +219,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.updatePickupLabels();
     this.updateMagnet(time);
     this.updatePoisonTrail(time);
+    this.enforceSideWalls();
     this.checkEnemyEscapes();
     this.checkWaveClear();
     this.updateHud();
@@ -262,13 +273,13 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.fieldInk.strokePath();
 
     this.fieldInk.fillStyle(0x1a1a1a, 0.04);
-    this.fieldInk.fillRect(ARENA.left + 12, ARENA.top, ARENA.width - 24, 54);
+    this.fieldInk.fillRect(ARENA.left + 12, ARENA.top, ARENA.width - 24, 78);
     this.fieldInk.fillRect(ARENA.left + 12, ARENA.bottom - 82, ARENA.width - 24, 82);
-    this.fieldInk.lineStyle(3, 0x1a1a1a, 0.45);
+    this.fieldInk.lineStyle(3, 0x1a1a1a, 0.32);
     this.fieldInk.strokeCircle(LAUNCH_PAD.x, LAUNCH_PAD.y, LAUNCH_PAD.radius);
 
-    createUiText(this, ARENA.left + 22, ARENA.top + 38, 'PANIC LINE', {
-      fontSize: '14px',
+    createUiText(this, ARENA.left + 22, ARENA.top + 60, 'PANIC LINE', {
+      fontSize: '12px',
       color: '#1a1a1a',
       fontStyle: 'bold'
     }).setDepth(20);
@@ -286,41 +297,48 @@ export class PotassiumSlipScene extends Phaser.Scene {
   }
 
   private createHud(): void {
-    this.hudText = createUiText(this, ARENA.left + 22, ARENA.top + 13, '', {
-      fontSize: '15px',
+    this.hudText = createUiText(this, ARENA.left + 24, ARENA.top + 11, '', {
+      fontSize: '12px',
       color: '#1a1a1a',
       fontStyle: 'bold'
     }).setDepth(1000);
-    this.activeText = createUiText(this, ARENA.right - 22, ARENA.top + 13, '', {
-      fontSize: '15px',
+    this.scoreText = createUiText(this, GAME_DESIGN_WIDTH / 2, ARENA.top + 11, '', {
+      fontSize: '12px',
+      color: '#1a1a1a',
+      fontStyle: 'bold'
+    }).setOrigin(0.5, 0).setDepth(1000);
+    this.livesText = createUiText(this, ARENA.right - 24, ARENA.top + 11, '', {
+      fontSize: '12px',
       color: '#1a1a1a',
       fontStyle: 'bold'
     }).setOrigin(1, 0).setDepth(1000);
-    this.promptText = createUiText(this, GAME_DESIGN_WIDTH / 2, ARENA.bottom - 30, 'Hold to recall. Drag to relaunch.', {
-      fontSize: '13px',
+    this.activeText = createUiText(this, GAME_DESIGN_WIDTH / 2, ARENA.top + 35, '', {
+      fontSize: '11px',
       color: '#1a1a1a',
       fontStyle: 'bold'
-    }).setOrigin(0.5).setDepth(1000);
+    }).setOrigin(0.5, 0).setDepth(1000);
     this.updateHud();
   }
 
   private createOverlays(): void {
-    this.overlayText = createUiText(this, GAME_DESIGN_WIDTH / 2, 250, 'POTASSIUM SLIP', {
-      fontSize: '42px',
+    this.overlayText = createUiText(this, GAME_DESIGN_WIDTH / 2, 245, 'POTASSIUM SLIP', {
+      fontSize: '34px',
       color: '#1a1a1a',
-      fontStyle: 'bold'
+      fontStyle: 'bold',
+      wordWrap: { width: ARENA.width - 64, useAdvancedWrap: true }
     }).setOrigin(0.5).setDepth(1010);
 
     this.subOverlayText = createUiText(
       this,
       GAME_DESIGN_WIDTH / 2,
-      330,
+      320,
       'DRAG TOWARD A TARGET. RELEASE BANANA.\nHOLD ANYWHERE TO YO-YO IT HOME.\nCLEAR WAVES. STEAL THE CIRCUIT.',
       {
-        fontSize: '18px',
+        fontSize: '14px',
         color: '#1a1a1a',
         align: 'center',
-        fontStyle: 'bold'
+        fontStyle: 'bold',
+        wordWrap: { width: ARENA.width - 70, useAdvancedWrap: true }
       }
     ).setOrigin(0.5).setDepth(1010);
   }
@@ -385,6 +403,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.overlayText.setVisible(false);
     this.subOverlayText.setVisible(false);
     this.resetBoardObjects();
+    bridgeActions.setSceneHintText('Drag toward a target • Hold to recall');
     this.spawnWave(1);
     this.updateHud();
   }
@@ -532,7 +551,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
     const wave = getPotassiumWave(waveNumber);
     if (isPotassiumBossWave(waveNumber)) {
       this.time.delayedCall(350, () => this.spawnEnemy('boss', 0));
-      this.promptText.setText('Boss wave. Recall, relaunch, survive.');
+      bridgeActions.setSceneHintText('Boss wave • Stop the audit before it lands');
       return;
     }
 
@@ -547,23 +566,22 @@ export class PotassiumSlipScene extends Phaser.Scene {
       });
     }
 
-    this.promptText.setText(`${wave.title}: ${this.getWaveHint(waveNumber)}`);
+    bridgeActions.setSceneHintText(`${wave.title}: ${this.getWaveHint(waveNumber)}`);
   }
 
   private spawnEnemy(kind: EnemyKind, index: number): void {
     if (this.gameState !== 'PLAYING') return;
     const config = ENEMY_CONFIGS[kind];
     const x = Phaser.Math.Linear(ARENA.left + 64, ARENA.right - 64, ((index % 5) + 0.5) / 5);
-    const y = kind === 'deadline' ? ARENA.bottom + 34 : ARENA.top - 38;
+    const y = kind === 'deadline' ? ARENA.bottom + 34 : SAFE.top + 12;
     const enemy = this.enemies.create(x, y, config.texture) as EnemySprite;
     this.configureEnemy(enemy, kind);
 
     if (kind === 'deadline') {
       enemy.setVelocity(Phaser.Math.Between(-16, 16), -config.speed);
     } else if (kind === 'boss') {
-      enemy.setPosition(LAUNCH_PAD.x, ARENA.top + 92);
+      enemy.setPosition(LAUNCH_PAD.x, SAFE.top + 60);
       enemy.setVelocity(64, config.speed);
-      enemy.setCollideWorldBounds(true);
       enemy.setBounce(1, 1);
       this.cameras.main.shake(250, 0.008);
     } else {
@@ -576,6 +594,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
     enemy.setDepth(kind === 'boss' ? 80 : 60);
     enemy.setScale(config.scale);
     enemy.body.setAllowGravity(false);
+    enemy.setBounce(1, 1);
     enemy.setData('kind', kind);
     enemy.setData('hp', config.hp);
     enemy.setData('maxHp', config.hp);
@@ -591,7 +610,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
 
   private createEnemyLabel(enemy: EnemySprite, config: EnemyConfig): Phaser.GameObjects.Text {
     const label = createUiText(this, enemy.x, enemy.y - 34, `${config.label} ${config.hp}/${config.hp}`, {
-      fontSize: '10px',
+      fontSize: '9px',
       color: '#1a1a1a',
       fontStyle: 'bold',
       align: 'center'
@@ -674,9 +693,8 @@ export class PotassiumSlipScene extends Phaser.Scene {
     pickup.body.setAllowGravity(false);
     pickup.setVelocity(Phaser.Math.Between(-35, 35), Phaser.Math.Between(-24, 24));
     pickup.setBounce(1, 1);
-    pickup.setCollideWorldBounds(true);
     const label = createUiText(this, x, y - 30, config.label, {
-      fontSize: '10px',
+      fontSize: '9px',
       color: config.color,
       fontStyle: 'bold'
     }).setOrigin(0.5).setDepth(920);
@@ -712,7 +730,6 @@ export class PotassiumSlipScene extends Phaser.Scene {
       clone.setDepth(90);
       clone.setScale(0.48);
       clone.setAlpha(0.82);
-      clone.setCollideWorldBounds(true);
       clone.setBounce(1, 1);
       clone.body.setAllowGravity(false);
       clone.body.setCircle(16, 16, 16);
@@ -784,11 +801,42 @@ export class PotassiumSlipScene extends Phaser.Scene {
     });
   }
 
+  private enforceSideWalls(): void {
+    this.enemies.getChildren().forEach((gameObject) => {
+      this.bounceObjectInsideArena(gameObject as ProjectileSprite, SIDE_BOUNCE_MARGIN);
+    });
+    this.pickups.getChildren().forEach((gameObject) => {
+      this.bounceObjectInsideArena(gameObject as ProjectileSprite, SIDE_BOUNCE_MARGIN);
+    });
+    this.clones.getChildren().forEach((gameObject) => {
+      this.bounceObjectInsideArena(gameObject as ProjectileSprite, SIDE_BOUNCE_MARGIN);
+    });
+  }
+
+  private bounceObjectInsideArena(object: ProjectileSprite, margin: number): void {
+    if (!object.active || !object.body) return;
+    const minX = ARENA.left + margin;
+    const maxX = ARENA.right - margin;
+    const velocity = object.body.velocity;
+    if (object.x < minX) {
+      object.setX(minX);
+      object.setVelocityX(Math.abs(velocity.x) || 40);
+    } else if (object.x > maxX) {
+      object.setX(maxX);
+      object.setVelocityX(-Math.abs(velocity.x) || -40);
+    }
+  }
+
   private checkEnemyEscapes(): void {
     this.enemies.getChildren().forEach((gameObject) => {
       const enemy = gameObject as EnemySprite;
       const kind = enemy.getData('kind') as EnemyKind;
-      if (kind === 'boss') return;
+      if (kind === 'boss') {
+        if (enemy.y > ARENA.bottom + 45) {
+          this.handleBossEscape(enemy);
+        }
+        return;
+      }
       const escaped = kind === 'deadline'
         ? enemy.y < ARENA.top - 45
         : enemy.y > ARENA.bottom + 45;
@@ -796,6 +844,13 @@ export class PotassiumSlipScene extends Phaser.Scene {
         this.handleEnemyEscape(enemy);
       }
     });
+  }
+
+  private handleBossEscape(enemy: EnemySprite): void {
+    enemy.destroy();
+    this.lives = 0;
+    this.cameras.main.shake(320, 0.014);
+    this.gameOver();
   }
 
   private handleEnemyEscape(enemy: EnemySprite): void {
@@ -815,7 +870,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
     });
     if (hasLivingEnemies) return;
     this.waveAdvancing = true;
-    this.promptText.setText('Wave clear. Banana paperwork reloads...');
+    bridgeActions.setSceneHintText('Wave clear • Banana paperwork reloads');
     this.time.delayedCall(WAVE_ADVANCE_DELAY_MS, () => {
       if (this.gameState === 'PLAYING') {
         this.spawnWave(this.wave + 1);
@@ -831,8 +886,8 @@ export class PotassiumSlipScene extends Phaser.Scene {
       const kind = enemy.getData('kind') as EnemyKind;
       const hp = Math.ceil(enemy.getData('hp') as number);
       const maxHp = enemy.getData('maxHp') as number;
-      label.setText(kind === 'boss' ? `${hp}/${maxHp}` : `${ENEMY_CONFIGS[kind].label} ${hp}/${maxHp}`);
-      label.setPosition(enemy.x, enemy.y - 34 * enemy.scale);
+      label.setText(kind === 'boss' ? `${hp}/${maxHp}` : this.getShortEnemyLabel(kind, hp, maxHp));
+      this.positionFloatingLabel(label, enemy.x, enemy.y - 34 * enemy.scale);
     });
   }
 
@@ -840,14 +895,33 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.pickups.getChildren().forEach((gameObject) => {
       const pickup = gameObject as PickupSprite;
       const label = pickup.getData('labelText') as Phaser.GameObjects.Text | undefined;
-      label?.setPosition(pickup.x, pickup.y - 30);
+      if (label) {
+        this.positionFloatingLabel(label, pickup.x, pickup.y - 30);
+      }
     });
   }
 
   private updateHud(): void {
     const wave = getPotassiumWave(this.wave);
-    this.hudText?.setText(`W${this.wave} ${wave.title}  |  Score ${this.score}  |  Lives ${this.lives}`);
+    this.hudText?.setText(`W${this.wave} ${wave.title}`);
+    this.scoreText?.setText(`Score ${this.score}`);
+    this.livesText?.setText(`Lives ${this.lives}`);
     this.activeText?.setText(this.getActiveUpgradeText());
+  }
+
+  private getShortEnemyLabel(kind: EnemyKind, hp: number, maxHp: number): string {
+    if (kind === 'intern') return `${hp}/${maxHp}`;
+    if (kind === 'scope') return `Blob ${hp}/${maxHp}`;
+    if (kind === 'meeting') return `Brick ${hp}/${maxHp}`;
+    if (kind === 'deadline') return `Due ${hp}/${maxHp}`;
+    return `${hp}/${maxHp}`;
+  }
+
+  private positionFloatingLabel(label: Phaser.GameObjects.Text, x: number, y: number): void {
+    label.setPosition(
+      Phaser.Math.Clamp(x, SAFE.left, SAFE.right),
+      Phaser.Math.Clamp(y, SAFE.labelTop, SAFE.bottom)
+    );
   }
 
   private getActiveUpgradeText(): string {
@@ -878,8 +952,9 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.pickups.clear(true, true);
     this.poisonZones.clear(true, true);
     bridgeActions.collectItem('circuit');
-    this.overlayText.setText('CIRCUIT ACQUIRED').setVisible(true);
-    this.subOverlayText.setText(`Final Score: ${this.score}\n[E] RETURN TO CITY`).setVisible(true);
+    bridgeActions.setSceneHintText(null);
+    this.overlayText.setFontSize(28).setText('CIRCUIT ACQUIRED').setPosition(GAME_DESIGN_WIDTH / 2, 255).setVisible(true);
+    this.subOverlayText.setFontSize(15).setText(`Final Score: ${this.score}\n[E] RETURN TO CITY`).setPosition(GAME_DESIGN_WIDTH / 2, 320).setVisible(true);
   }
 
   private gameOver(): void {
@@ -889,8 +964,9 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.pickups.clear(true, true);
     this.poisonZones.clear(true, true);
     this.banana.setVelocity(0, 0);
-    this.overlayText.setText('BANANA BANKRUPTCY').setVisible(true);
-    this.subOverlayText.setText(`Final Score: ${this.score}\n[E] RETURN TO CITY`).setVisible(true);
+    bridgeActions.setSceneHintText(null);
+    this.overlayText.setFontSize(26).setText('BANANA BANKRUPTCY').setPosition(GAME_DESIGN_WIDTH / 2, 255).setVisible(true);
+    this.subOverlayText.setFontSize(15).setText(`Final Score: ${this.score}\n[E] RETURN TO CITY`).setPosition(GAME_DESIGN_WIDTH / 2, 320).setVisible(true);
   }
 
   private createInternTexture(): void {

@@ -64,6 +64,16 @@ describe('bridgeStore', () => {
       expect(s.isPaused).toBe(false);
     });
 
+    it('clears scene hint text when changing modes', () => {
+      bridgeActions.setSceneHintText('Boss wave');
+      expect(bridgeStore.getState().sceneHintText).toBe('Boss wave');
+      bridgeActions.requestInteraction('potassium');
+      expect(bridgeStore.getState().sceneHintText).toBeNull();
+      bridgeActions.setSceneHintText('Wave clear');
+      bridgeActions.closeActiveOverlay();
+      expect(bridgeStore.getState().sceneHintText).toBeNull();
+    });
+
     it('does not emit if state is unchanged', () => {
       let calls = 0;
       const unsub = bridgeStore.subscribe(() => { calls++; });
@@ -202,6 +212,17 @@ describe('bridgeStore', () => {
       expect(t.jumpQueued).toBe(false);
       expect(t.interactTap).toBe(false);
       expect(getTouchState()).toEqual(t);
+    });
+  });
+
+  describe('scene hint text', () => {
+    it('sets, updates, and clears scene hint text', () => {
+      bridgeActions.setSceneHintText('Drag toward a target');
+      expect(bridgeStore.getState().sceneHintText).toBe('Drag toward a target');
+      bridgeActions.setSceneHintText('Wave clear');
+      expect(bridgeStore.getState().sceneHintText).toBe('Wave clear');
+      bridgeActions.setSceneHintText(null);
+      expect(bridgeStore.getState().sceneHintText).toBeNull();
     });
   });
 });
