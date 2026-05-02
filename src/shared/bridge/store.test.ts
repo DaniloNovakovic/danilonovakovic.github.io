@@ -141,6 +141,15 @@ describe('bridgeStore', () => {
       expect(s.progress.hasGlasses).toBe(true);
     });
 
+    it('collectItem can own the circuit without equipping it', () => {
+      bridgeActions.collectItem('circuit');
+      const s = bridgeStore.getState();
+      expect(s.inventory.ownedItemIds).toContain('circuit');
+      expect(s.equipment.equippedItemIds).toEqual([]);
+      expect(s.progress.hasGlasses).toBe(false);
+      expect(isItemOwned('circuit')).toBe(true);
+    });
+
     it('toggleItemEquipped unequips and re-equips owned item', () => {
       bridgeActions.collectGlasses();
       bridgeActions.toggleItemEquipped('glasses');

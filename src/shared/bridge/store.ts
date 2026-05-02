@@ -18,7 +18,7 @@ export interface TouchBridgeState {
   interactTap: boolean;
 }
 
-export const INVENTORY_ITEM_IDS = ['glasses'] as const;
+export const INVENTORY_ITEM_IDS = ['glasses', 'circuit'] as const;
 export type InventoryItemId = (typeof INVENTORY_ITEM_IDS)[number];
 
 export const SECRET_DISCOVERY_IDS = ['banana-peel-clue'] as const;
