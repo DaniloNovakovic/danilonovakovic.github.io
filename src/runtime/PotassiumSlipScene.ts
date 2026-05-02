@@ -721,17 +721,13 @@ export class PotassiumSlipScene extends Phaser.Scene {
     const enemy = this.enemies.create(x, y, config.texture) as EnemySprite;
     this.configureEnemy(enemy, kind);
 
-    if (kind === 'deadline') {
-      enemy.setVelocity(Phaser.Math.Between(-20, 20), config.speed);
-    } else if (kind === 'boss') {
+    if (kind === 'boss') {
       enemy.setPosition(LAUNCH_PAD.x, SAFE.top + 60);
       enemy.setVelocity(64, config.speed);
       enemy.setBounce(1, 1);
       this.cameras.main.shake(250, 0.008);
-    } else if (kind === 'wall') {
-      enemy.setVelocity(Phaser.Math.Between(-10, 10), config.speed);
     } else {
-      enemy.setVelocity(Phaser.Math.Between(-24, 24), config.speed);
+      enemy.setVelocity(0, config.speed);
     }
   }
 
@@ -997,7 +993,13 @@ export class PotassiumSlipScene extends Phaser.Scene {
 
   private enforceSideWalls(): void {
     this.enemies.getChildren().forEach((gameObject) => {
-      this.bounceObjectInsideArena(gameObject as ProjectileSprite, SIDE_BOUNCE_MARGIN);
+      const enemy = gameObject as EnemySprite;
+      const kind = enemy.getData('kind') as EnemyKind;
+      if (kind === 'boss') {
+        this.bounceObjectInsideArena(enemy, SIDE_BOUNCE_MARGIN);
+      } else {
+        this.clampEnemyInsideArena(enemy, SIDE_BOUNCE_MARGIN);
+      }
     });
     this.pickups.getChildren().forEach((gameObject) => {
       this.bounceObjectInsideArena(gameObject as ProjectileSprite, SIDE_BOUNCE_MARGIN);
@@ -1019,6 +1021,12 @@ export class PotassiumSlipScene extends Phaser.Scene {
       object.setX(maxX);
       object.setVelocityX(-Math.abs(velocity.x) || -40);
     }
+  }
+
+  private clampEnemyInsideArena(enemy: EnemySprite, margin: number): void {
+    if (!enemy.active || !enemy.body) return;
+    enemy.setX(Phaser.Math.Clamp(enemy.x, ARENA.left + margin, ARENA.right - margin));
+    enemy.setVelocityX(0);
   }
 
   private checkEnemyEscapes(): void {
