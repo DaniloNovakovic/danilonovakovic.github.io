@@ -39,7 +39,7 @@ This document describes the current runtime architecture in `src/`. It is the de
 - `src/runtime/camera/sideViewCameraRuntime.ts`
   - Shared side-view camera lifecycle. It applies follow target, zoom, follow offset, camera bounds, portrait cover crop padding, Phaser scale resize re-application, and shutdown cleanup.
 - `src/runtime/phaserScenePresentation.ts`
-  - Scene presentation policy for the React shell. Side-view Phaser scenes use `portrait-cover`; full-board arcade scenes such as Potassium use `full-board`.
+  - Scene presentation policy for the React shell. Side-view Phaser scenes use `portrait-cover`; Potassium uses a dedicated `vertical-board` arcade presentation.
 - `src/components/interactive/gameShellLayout.ts`
   - React shell layout helper for presentation-mode-specific canvas aspect and max-size rules. Phaser still keeps the fixed logical design size from `src/runtime/config.ts`.
 - `src/runtime/interactions/InteriorInteractionRuntime.ts`
@@ -52,7 +52,8 @@ This document describes the current runtime architecture in `src/`. It is the de
 Phaser runs at the fixed design size from `src/runtime/config.ts` and scales with `Scale.ENVELOP`. React owns the visible shell aspect ratio:
 
 - `portrait-cover` is the default for side-view player scenes on phones. The shell is portrait, overflow is clipped, and the shared side-view camera runtime follows/clamps the player so cover-mode crop does not reveal off-world space.
-- `full-board` is for arcade scenes where the whole board must remain visible. Potassium uses this mode on mobile, keeps a landscape frame, and lets Phaser receive direct pointer input instead of the React swipe/tap gesture overlay.
+- `full-board` is for arcade scenes where the whole landscape board must remain visible.
+- `vertical-board` is for portrait arcade scenes such as Potassium. The shell is tall, Phaser still uses the fixed logical design size with `Scale.ENVELOP`, and direct Phaser pointer input is preserved instead of the React swipe/tap gesture overlay.
 
 When a scene changes presentation mode, `Game.tsx` keeps the existing Phaser instance mounted and calls `game.scale.refresh()` after the new DOM size lands. Side-view camera runtimes listen for Phaser scale resize and re-apply camera bounds/profile math.
 

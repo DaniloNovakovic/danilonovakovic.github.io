@@ -1300,7 +1300,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
   }
 
   private checkEnemyEscapes(): void {
-    this.enemies.getChildren().forEach((gameObject) => {
+    [...this.enemies.getChildren()].forEach((gameObject) => {
       const enemy = gameObject as EnemySprite;
       const kind = enemy.getData('kind') as EnemyKind;
       if (kind === 'boss') {

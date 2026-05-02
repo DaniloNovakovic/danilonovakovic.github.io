@@ -54,11 +54,13 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
 
 - Potassium Slip is a Phaser mini-game reached from the banana peel secret.
 - Start a run with `E` on desktop or a tap on mobile.
-- Move the banana peel by holding and dragging the pointer/touch target.
-- Slip incoming enemies before they pass the bottom of the screen.
-- You start with 3 lives; losing all lives ends the run.
-- Ripeness changes every 10 seconds and changes movement feel.
-- Press `Esc` to return to the city. On game over, press `E` or tap to return.
+- Launch the banana by dragging toward a target and releasing.
+- Hold while the banana is moving to yo-yo it back to the launch pad, then relaunch.
+- Clear falling 5-column enemy waves, draft stackable upgrades, and defeat the boss for the Circuit.
+- You start with 5 lives; losing all lives ends the run.
+- After game over, choose `Retry` or `Return to City`. After winning, choose `Endless Mode` or `Return to City`.
+- Potassium keeps a local top-5 records list for finished runs.
+- Press `R` to retry after a terminal screen, `E` to return, `Space` to continue into endless after winning, or `Esc` to return to the city.
 
 ## Runtime Notes For Playtesting
 
