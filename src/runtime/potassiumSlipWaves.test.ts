@@ -83,11 +83,21 @@ describe('potassium slip waves', () => {
     expect(isPotassiumShieldedHit('left', -8, 2)).toBe(true);
     expect(isPotassiumShieldedHit('right', 8, 2)).toBe(true);
     expect(isPotassiumShieldedHit('right', -8, 2)).toBe(false);
-    expect(getPotassiumSplitterSpawnColumns(0)).toEqual([1]);
-    expect(getPotassiumSplitterSpawnColumns(2)).toEqual([1, 3]);
-    expect(getPotassiumSplitterSpawnColumns(4)).toEqual([3]);
+    expect(getPotassiumSplitterSpawnColumns(0)).toEqual([0, 1]);
+    expect(getPotassiumSplitterSpawnColumns(2)).toEqual([2, 3]);
+    expect(getPotassiumSplitterSpawnColumns(4)).toEqual([4]);
     expect(getPotassiumFireCellKey(276, 84, { left: 275, width: 450, top: 84, bottom: 504 }, 48)).toBe('0:0');
     expect(getPotassiumFireCellKey(724, 503, { left: 275, width: 450, top: 84, bottom: 504 }, 48)).toBe('4:8');
+  });
+
+  it('places splitters as two-column enemies with a reserved right lane', () => {
+    [...getNonBossRows(), ...getPotassiumWave(POTASSIUM_ENDLESS_START_WAVE).rows].forEach((row) => {
+      row.forEach((cell, index) => {
+        if (cell !== 'splitter') return;
+        expect(index).toBeLessThan(POTASSIUM_COLUMN_COUNT - 1);
+        expect(row[index + 1]).toBeNull();
+      });
+    });
   });
 
   it('offers random unlock and rank-up choices without repeating completed skills', () => {

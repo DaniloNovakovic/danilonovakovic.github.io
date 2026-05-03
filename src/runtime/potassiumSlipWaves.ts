@@ -274,7 +274,7 @@ export function isPotassiumShieldedHit(
 }
 
 export function getPotassiumSplitterSpawnColumns(columnIndex: number): number[] {
-  return [columnIndex - 1, columnIndex + 1]
+  return [columnIndex, columnIndex + 1]
     .filter((column) => column >= 0 && column < POTASSIUM_COLUMN_COUNT);
 }
 
@@ -331,38 +331,54 @@ function getTemplateCycle(wave: number): RowTemplate[] {
 function buildTemplateRow(template: RowTemplate, wave: number, rowIndex: number): PotassiumWaveCell[] {
   const row = emptyRow();
   if (template === 'single') {
-    row[pickLane(wave, rowIndex, 0)] = pickBasicEnemy(wave, rowIndex);
+    placeEnemyInRow(row, pickLane(wave, rowIndex, 0), pickBasicEnemy(wave, rowIndex));
   } else if (template === 'pair') {
     const first = pickLane(wave, rowIndex, 1);
     const second = (first + 2 + ((wave + rowIndex) % 2)) % POTASSIUM_COLUMN_COUNT;
-    row[first] = pickBasicEnemy(wave, rowIndex);
-    row[second] = pickBasicEnemy(wave, rowIndex + 1);
+    placeEnemyInRow(row, first, pickBasicEnemy(wave, rowIndex));
+    placeEnemyInRow(row, second, pickBasicEnemy(wave, rowIndex + 1));
   } else if (template === 'spread') {
     const lanes = (wave + rowIndex) % 2 === 0 ? [0, 2, 4] : [1, 3, 4];
     lanes.forEach((lane, index) => {
-      row[lane] = pickBasicEnemy(wave, rowIndex + index);
+      placeEnemyInRow(row, lane, pickBasicEnemy(wave, rowIndex + index));
     });
   } else if (template === 'wallGate') {
     const wallLane = pickLane(wave, rowIndex, 2);
-    row[wallLane] = 'wall';
+    placeEnemyInRow(row, wallLane, 'wall');
     if (wave >= 5 && (wave + rowIndex) % 3 === 0) {
-      row[(wallLane + 2) % POTASSIUM_COLUMN_COUNT] = 'wall';
+      placeEnemyInRow(row, (wallLane + 2) % POTASSIUM_COLUMN_COUNT, 'wall');
     }
-    row[(wallLane + 1) % POTASSIUM_COLUMN_COUNT] = pickBasicEnemy(wave, rowIndex);
+    placeEnemyInRow(row, (wallLane + 1) % POTASSIUM_COLUMN_COUNT, pickBasicEnemy(wave, rowIndex));
   } else if (template === 'deadlineLane') {
     const deadlineLane = pickLane(wave, rowIndex, 3);
-    row[deadlineLane] = 'deadline';
-    row[(deadlineLane + 2) % POTASSIUM_COLUMN_COUNT] = pickBasicEnemy(wave, rowIndex);
+    placeEnemyInRow(row, deadlineLane, 'deadline');
+    placeEnemyInRow(row, (deadlineLane + 2) % POTASSIUM_COLUMN_COUNT, pickBasicEnemy(wave, rowIndex));
     if ((wave + rowIndex) % 2 === 0) {
-      row[(deadlineLane + 4) % POTASSIUM_COLUMN_COUNT] = 'deadline';
+      placeEnemyInRow(row, (deadlineLane + 4) % POTASSIUM_COLUMN_COUNT, 'deadline');
     }
   } else {
     const lanes = [0, 1, 3, 4].filter((lane) => lane !== ((wave + rowIndex) % POTASSIUM_COLUMN_COUNT));
     lanes.slice(0, wave >= 8 ? 4 : 3).forEach((lane, index) => {
-      row[lane] = pickPressureEnemy(wave, rowIndex + index);
+      placeEnemyInRow(row, lane, pickPressureEnemy(wave, rowIndex + index));
     });
   }
   return enforceRowSafety(row);
+}
+
+function placeEnemyInRow(row: PotassiumWaveCell[], lane: number, kind: PotassiumEnemyKind): boolean {
+  if (lane < 0 || lane >= POTASSIUM_COLUMN_COUNT || row[lane] !== null || isReservedBySplitter(row, lane)) {
+    return false;
+  }
+  if (kind !== 'splitter') {
+    row[lane] = kind;
+    return true;
+  }
+  if (lane >= POTASSIUM_COLUMN_COUNT - 1 || row[lane + 1] !== null) {
+    row[lane] = 'scope';
+    return true;
+  }
+  row[lane] = 'splitter';
+  return true;
 }
 
 function pickBasicEnemy(wave: number, seed: number): PotassiumEnemyKind {
@@ -388,6 +404,11 @@ function pickLane(wave: number, rowIndex: number, salt: number): number {
 
 function enforceRowSafety(row: PotassiumWaveCell[]): PotassiumWaveCell[] {
   const safeRow = [...row];
+  safeRow.forEach((cell, index) => {
+    if (cell === 'splitter' && (index >= POTASSIUM_COLUMN_COUNT - 1 || safeRow[index + 1] !== null)) {
+      safeRow[index] = 'scope';
+    }
+  });
   while (safeRow.filter((cell) => cell === 'wall' || cell === 'hardWall').length > 2) {
     const hardWallIndex = safeRow.lastIndexOf('hardWall');
     if (hardWallIndex >= 0) {
@@ -399,11 +420,15 @@ function enforceRowSafety(row: PotassiumWaveCell[]): PotassiumWaveCell[] {
   while (safeRow.filter((cell) => cell === 'deadline').length > 2) {
     safeRow[safeRow.lastIndexOf('deadline')] = 'scope';
   }
-  const hasOpenLane = safeRow.some((cell) => cell === null);
+  const hasOpenLane = safeRow.some((cell, index) => cell === null && !isReservedBySplitter(safeRow, index));
   if (!hasOpenLane) {
     safeRow[2] = null;
   }
   return safeRow;
+}
+
+function isReservedBySplitter(row: readonly PotassiumWaveCell[], lane: number): boolean {
+  return lane > 0 && row[lane - 1] === 'splitter';
 }
 
 function emptyRow(): PotassiumWaveCell[] {
