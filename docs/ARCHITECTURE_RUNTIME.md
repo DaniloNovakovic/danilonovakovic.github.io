@@ -46,6 +46,12 @@ This document describes the current runtime architecture in `src/`. It is the de
   - Pure interior prop interaction runtime. It resolves active targets, prompt placement facts, exit requests, and typed effect commands while scenes keep Phaser objects and side effects.
 - `src/runtime/text/PlayerThoughtText.ts`
   - Small scene-local helper for character thoughts that follow a target, reuse the shared typewriter effect, and auto-hide without adding bridge state.
+- `src/runtime/potassiumSlipCommandAdapter.ts`
+  - Phaser-backed Potassium command Adapter. It interprets session, combat, and boss commands, extracts combat facts from Phaser objects, applies recursive combat results, and receives bridge/renderer/timer/leaderboard effects through injected ports.
+- `src/runtime/potassiumSlipProjectileControl.ts`
+  - Pure Potassium launch/recall control Module. It owns pointer control state, launch threshold/speed math, recall transitions, and idle drag decisions as commands for the scene to apply.
+- `src/runtime/potassiumSlipEnemyFactory.ts`
+  - Potassium enemy setup Module. It owns enemy kind facts, lane placement, HP scaling, body profiles, shield/splitter/boss setup facts, and renderer attachment facts while the scene still creates Phaser sprites.
 
 ## Scene presentation and camera
 
@@ -90,6 +96,12 @@ Pure decision code exists where it buys leverage, but the app is not trying to m
 - `src/core/ecs/systems/roomInteractSystems.ts` for lower-level room target picking.
 
 Runtime Modules such as `SideViewPlayerRuntime`, `InteriorInteractionRuntime`, and `sceneResumePolicy` are equally valid when the repeated knowledge is lifecycle, policy, or orchestration rather than entity iteration.
+
+Potassium uses three focused runtime Modules to keep the large arcade scene navigable without moving Phaser ownership out of the scene:
+
+- `potassiumSlipCommandAdapter` is the command seam between pure session/combat/boss decisions and mutable Phaser/bridge/renderer side effects.
+- `potassiumSlipProjectileControl` is the pure control-state seam for banana launch, recall, and drag feel.
+- `potassiumSlipEnemyFactory` is the enemy setup seam for kind facts, spawn placement, and body/attachment setup.
 
 ## Manual smoke verification
 
