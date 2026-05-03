@@ -8,6 +8,7 @@ import { TextureGenerator } from './textures/TextureGenerator';
 import {
   getPotassiumFireCellKey,
   type PotassiumGenericUpgradeKind as GenericUpgradeKind,
+  type PotassiumScheduledWaveRow,
   type PotassiumSkillRank as SkillRank,
   type PotassiumWaveCell as WaveCell,
   type PotassiumEnemyKind as EnemyKind,
@@ -95,15 +96,12 @@ const LAUNCH_PAD = {
   radius: 44
 } as const;
 
-const LAUNCH_MAX_DRAG = POTASSIUM_PROJECTILE_CONTROL_DEFAULTS.launchMaxDrag;
 const HIT_COOLDOWN_MS = 180;
 const WAVE_ADVANCE_DELAY_MS = 900;
 const SIDE_BOUNCE_MARGIN = 32;
 const BANANA_RICOCHET_MIN_SPEED = 360;
 const BANANA_RICOCHET_BOOST = 1.08;
 const CLONE_RICOCHET_MAX_SPEED = 660;
-const ROW_SPAWN_DELAY_MS = 900;
-const MID_GAME_ROW_SPAWN_DELAY_MS = 1050;
 const TRAIL_DROP_INTERVAL_MS = 180;
 const FIRE_TRAIL_LIFETIME_MS = 1500;
 const GHOST_BEAM_LIFETIME_MS = 190;
@@ -121,8 +119,6 @@ export class PotassiumSlipScene extends Phaser.Scene {
   private clones!: Phaser.Physics.Arcade.Group;
   private trailZones!: Phaser.Physics.Arcade.Group;
   private bossBlockers!: Phaser.Physics.Arcade.Group;
-  private aimLine!: Phaser.GameObjects.Graphics;
-  private tetherLine!: Phaser.GameObjects.Graphics;
   private potassiumRenderer!: PotassiumSlipRenderer;
   private projectileControl: PotassiumProjectileControl;
   private commandAdapter: PotassiumCommandAdapter;
@@ -170,7 +166,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
       clearUpgradeChoiceOverlay: () => this.clearUpgradeChoiceOverlay(),
       spawnWave: (wave) => this.spawnWave(wave),
       spawnBossDelayed: () => this.time.delayedCall(350, () => this.spawnEnemy('boss', 0)),
-      scheduleWaveRows: (rows) => this.scheduleWaveRows(rows),
+      scheduleWaveRows: (schedule) => this.scheduleWaveRows(schedule),
       scheduleUpgradeChoices: () => this.time.delayedCall(UPGRADE_CHOICE_DELAY_MS, () => {
         if (this.session.gameState === 'PLAYING') {
           this.showUpgradeChoices();
@@ -193,13 +189,13 @@ export class PotassiumSlipScene extends Phaser.Scene {
       clearBoardForOutcome: () => this.clearBoardForOutcome(),
       showDamageCue: (enemy, source) => this.potassiumRenderer.showDamageCue(enemy as EnemySprite, source),
       spawnFirePatch: (x, y, effectMultiplier, lifetimeMs, scale) => this.spawnFirePatch(x, y, effectMultiplier, lifetimeMs, scale),
-      showExplosionVisual: (x, y, radius) => this.showExplosionVisual(x, y, radius),
+      showExplosionVisual: (x, y, radius) => this.potassiumRenderer.showExplosionVisual(x, y, radius),
       shakeCamera: (durationMs, intensity) => this.cameras.main.shake(durationMs, intensity),
       showGhostBeam: (input) => this.potassiumRenderer.showGhostBeam(input),
       showGhostStatusField: (input) => this.potassiumRenderer.showGhostStatusField(input),
       spawnBananaClones: (count, lifetimeMs) => this.spawnBananaClones(count, lifetimeMs),
       spawnSplitterChildren: (enemy) => this.spawnSplitterChildren(enemy as EnemySprite),
-      animateEnemyDeath: (enemy, onComplete) => this.animateEnemyDeath(enemy as EnemySprite, onComplete),
+      animateEnemyDeath: (enemy, onComplete) => this.potassiumRenderer.animateEnemyDeath(enemy as EnemySprite, onComplete),
       spawnBossOrbitBlockers: (boss) => this.spawnBossOrbitBlockers(boss as EnemySprite),
       updateBossOrbitBlockers: (boss, time) => this.updateBossOrbitBlockers(boss as EnemySprite, time),
       setBossStoneVisual: (boss, active) => this.setBossStoneVisual(boss as EnemySprite, active),
@@ -257,8 +253,6 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.clones = this.physics.add.group();
     this.trailZones = this.physics.add.group();
     this.bossBlockers = this.physics.add.group();
-    this.aimLine = this.add.graphics().setDepth(950);
-    this.tetherLine = this.add.graphics().setDepth(949);
     this.createHud();
     this.createOverlays();
     this.registerCollisions();
@@ -482,8 +476,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.banana.setData('canApplyHitProcs', true);
     this.banana.setData('recallVisual', false);
     this.refreshBananaUpgradeVisuals(this.banana);
-    this.aimLine?.clear();
-    this.tetherLine?.clear();
+    this.potassiumRenderer.clearControlFeedback();
     this.clearUpgradeChoiceOverlay();
     this.clearTerminalOverlay();
   }
@@ -530,13 +523,13 @@ export class PotassiumSlipScene extends Phaser.Scene {
   private applyProjectileControlCommands(commands: readonly PotassiumProjectileControlCommand[]): void {
     commands.forEach((command) => {
       if (command.type === 'clearAim') {
-        this.aimLine.clear();
+        this.potassiumRenderer.clearAim();
       } else if (command.type === 'clearTether') {
-        this.tetherLine.clear();
+        this.potassiumRenderer.clearTether();
       } else if (command.type === 'drawAim') {
-        this.drawAimArrow(command.from.x, command.from.y, command.to.x, command.to.y);
+        this.potassiumRenderer.drawAimArrow(command.from, command.to);
       } else if (command.type === 'drawRecallTether') {
-        this.drawRecallTether();
+        this.potassiumRenderer.drawRecallTether(this.banana);
       } else if (command.type === 'setRecallVisual') {
         this.setBananaRecallVisual(command.active);
       } else if (command.type === 'resetBananaForAim') {
@@ -574,49 +567,6 @@ export class PotassiumSlipScene extends Phaser.Scene {
       velocity: { x: this.banana.body.velocity.x, y: this.banana.body.velocity.y },
       activePointer: { id: pointer.id, x: pointer.x, y: pointer.y }
     }));
-  }
-
-  private drawAimArrow(fromX: number, fromY: number, toX: number, toY: number): void {
-    const angle = Phaser.Math.Angle.Between(fromX, fromY, toX, toY);
-    const distance = Phaser.Math.Distance.Between(fromX, fromY, toX, toY);
-    const arrowLength = Phaser.Math.Clamp(distance, 24, LAUNCH_MAX_DRAG);
-    const endX = fromX + Math.cos(angle) * arrowLength;
-    const endY = fromY + Math.sin(angle) * arrowLength;
-    const headLength = 18;
-    const wingA = angle + Math.PI * 0.78;
-    const wingB = angle - Math.PI * 0.78;
-
-    this.aimLine.lineStyle(7, 0x1a1a1a, 0.9);
-    this.aimLine.beginPath();
-    this.aimLine.moveTo(fromX, fromY);
-    this.aimLine.lineTo(endX, endY);
-    this.aimLine.strokePath();
-
-    this.aimLine.lineStyle(4, 0xfacc15, 0.95);
-    this.aimLine.beginPath();
-    this.aimLine.moveTo(fromX, fromY);
-    this.aimLine.lineTo(endX, endY);
-    this.aimLine.strokePath();
-
-    this.aimLine.fillStyle(0xfacc15, 0.95);
-    this.aimLine.lineStyle(4, 0x1a1a1a, 0.95);
-    this.aimLine.beginPath();
-    this.aimLine.moveTo(endX, endY);
-    this.aimLine.lineTo(endX + Math.cos(wingA) * headLength, endY + Math.sin(wingA) * headLength);
-    this.aimLine.lineTo(endX + Math.cos(wingB) * headLength, endY + Math.sin(wingB) * headLength);
-    this.aimLine.closePath();
-    this.aimLine.fillPath();
-    this.aimLine.strokePath();
-  }
-
-  private drawRecallTether(): void {
-    this.aimLine.clear();
-    this.tetherLine.clear();
-    this.tetherLine.lineStyle(3, 0x1a1a1a, 0.75);
-    this.tetherLine.beginPath();
-    this.tetherLine.moveTo(this.banana.x, this.banana.y);
-    this.tetherLine.lineTo(LAUNCH_PAD.x, LAUNCH_PAD.y);
-    this.tetherLine.strokePath();
   }
 
   private updateBananaDrag(delta: number): void {
@@ -701,21 +651,15 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.rowSpawnTimers = [];
   }
 
-  private scheduleWaveRows(rows: readonly WaveCell[][]): void {
+  private scheduleWaveRows(schedule: readonly PotassiumScheduledWaveRow[]): void {
     this.clearScheduledWaveRows();
-    rows.forEach((row, rowIndex) => {
-      const timer = this.time.delayedCall(rowIndex * this.getRowSpawnDelayMs(), () => {
+    schedule.forEach((entry) => {
+      const timer = this.time.delayedCall(entry.delayMs, () => {
         this.rowSpawnTimers = this.rowSpawnTimers.filter((entry) => entry !== timer);
-        this.spawnEnemyRow(row, rowIndex);
+        this.spawnEnemyRow(entry.row, entry.rowIndex);
       });
       this.rowSpawnTimers.push(timer);
     });
-  }
-
-  private getRowSpawnDelayMs(): number {
-    return this.session.wave >= 5 && this.session.wave <= 6
-      ? MID_GAME_ROW_SPAWN_DELAY_MS
-      : ROW_SPAWN_DELAY_MS;
   }
 
   private spawnEnemyRow(row: readonly WaveCell[], rowIndex: number = 0): void {
@@ -798,18 +742,6 @@ export class PotassiumSlipScene extends Phaser.Scene {
       skillRanks: this.session.skillRanks,
       genericRanks: this.session.genericRanks
     }), this.commandAdapter.createCombatContext([enemy], [projectile]));
-  }
-
-  private animateEnemyDeath(enemy: EnemySprite, onComplete: () => void): void {
-    this.tweens.add({
-      targets: enemy,
-      angle: enemy.angle + 720,
-      scale: 0,
-      alpha: 0,
-      duration: 260,
-      ease: 'Back.easeIn',
-      onComplete
-    });
   }
 
   private spawnSplitterChildren(enemy: EnemySprite): void {
@@ -939,19 +871,6 @@ export class PotassiumSlipScene extends Phaser.Scene {
         enemy: this.commandAdapter.getEnemyCombatFacts(enemy),
         poisonUnlocked: this.getSkillRank('poison') > 0
       }), this.commandAdapter.createCombatContext([enemy]));
-    });
-  }
-
-  private showExplosionVisual(x: number, y: number, radius: number): void {
-    const blast = this.add.circle(x, y, 18, 0xf97316, 0.22)
-      .setStrokeStyle(5, 0x1a1a1a, 1)
-      .setDepth(940);
-    this.tweens.add({
-      targets: blast,
-      radius,
-      alpha: 0,
-      duration: 240,
-      onComplete: () => blast.destroy()
     });
   }
 

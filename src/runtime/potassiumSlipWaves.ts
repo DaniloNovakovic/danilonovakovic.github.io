@@ -48,12 +48,20 @@ export interface PotassiumWaveDefinition {
   rows: PotassiumWaveCell[][];
 }
 
+export interface PotassiumScheduledWaveRow {
+  row: readonly PotassiumWaveCell[];
+  rowIndex: number;
+  delayMs: number;
+}
+
 type RowTemplate = 'single' | 'pair' | 'spread' | 'wallGate' | 'deadlineLane' | 'mixedPressure';
 
 export const POTASSIUM_COLUMN_COUNT = 5;
 export const POTASSIUM_NON_BOSS_WAVE_COUNT = 10;
 export const POTASSIUM_BOSS_WAVE = POTASSIUM_NON_BOSS_WAVE_COUNT + 1;
 export const POTASSIUM_ENDLESS_START_WAVE = POTASSIUM_BOSS_WAVE + 1;
+export const POTASSIUM_ROW_SPAWN_DELAY_MS = 900;
+export const POTASSIUM_MID_GAME_ROW_SPAWN_DELAY_MS = 1050;
 
 export const POTASSIUM_UPGRADES: readonly PotassiumUpgradeKind[] = [
   'fire',
@@ -95,6 +103,24 @@ export function isPotassiumBossWave(wave: number): boolean {
 
 export function isPotassiumCampaignBossWave(wave: number): boolean {
   return isPotassiumBossWave(wave);
+}
+
+export function getPotassiumRowSpawnDelayMs(wave: number): number {
+  return wave >= 5 && wave <= 6
+    ? POTASSIUM_MID_GAME_ROW_SPAWN_DELAY_MS
+    : POTASSIUM_ROW_SPAWN_DELAY_MS;
+}
+
+export function getPotassiumWaveRowSchedule(
+  wave: number,
+  rows: readonly (readonly PotassiumWaveCell[])[]
+): PotassiumScheduledWaveRow[] {
+  const rowDelayMs = getPotassiumRowSpawnDelayMs(wave);
+  return rows.map((row, rowIndex) => ({
+    row,
+    rowIndex,
+    delayMs: rowIndex * rowDelayMs
+  }));
 }
 
 export function getUnlockedPotassiumEnemies(wave: number): PotassiumEnemyKind[] {

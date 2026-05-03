@@ -1,5 +1,6 @@
 import * as Phaser from 'phaser';
 import { GAME_DESIGN_WIDTH } from './config';
+import { POTASSIUM_PROJECTILE_CONTROL_DEFAULTS } from './potassiumSlipProjectileControl';
 import { createUiText, snapUiTextCoordinate } from './text/createUiText';
 import type {
   PotassiumDraftOption,
@@ -49,6 +50,11 @@ export interface PotassiumUpgradeChoiceView {
   color: string;
 }
 
+export interface PotassiumRendererPoint {
+  x: number;
+  y: number;
+}
+
 interface UpgradeChoiceButton {
   option: PotassiumDraftOption;
   panel: Phaser.GameObjects.Rectangle;
@@ -88,6 +94,8 @@ export class PotassiumSlipRenderer {
   private upgradeChoiceTitle?: Phaser.GameObjects.Text;
   private terminalButtons: TerminalButton[] = [];
   private recordsText?: Phaser.GameObjects.Text;
+  private aimLine?: Phaser.GameObjects.Graphics;
+  private tetherLine?: Phaser.GameObjects.Graphics;
 
   constructor(scene: Phaser.Scene, layout: PotassiumRendererLayout) {
     this.scene = scene;
@@ -142,6 +150,96 @@ export class PotassiumSlipRenderer {
     this.fieldInk.fillRect(arena.left + 12, arena.bottom - 82, arena.width - 24, 82);
     this.fieldInk.lineStyle(3, 0x1a1a1a, 0.32);
     this.fieldInk.strokeCircle(launchPad.x, launchPad.y, launchPad.radius);
+  }
+
+  clearAim(): void {
+    this.aimLine?.clear();
+  }
+
+  clearTether(): void {
+    this.tetherLine?.clear();
+  }
+
+  clearControlFeedback(): void {
+    this.clearAim();
+    this.clearTether();
+  }
+
+  drawAimArrow(from: PotassiumRendererPoint, to: PotassiumRendererPoint): void {
+    const aimLine = this.getAimLine();
+    const angle = Phaser.Math.Angle.Between(from.x, from.y, to.x, to.y);
+    const distance = Phaser.Math.Distance.Between(from.x, from.y, to.x, to.y);
+    const arrowLength = Phaser.Math.Clamp(
+      distance,
+      24,
+      POTASSIUM_PROJECTILE_CONTROL_DEFAULTS.launchMaxDrag
+    );
+    const endX = from.x + Math.cos(angle) * arrowLength;
+    const endY = from.y + Math.sin(angle) * arrowLength;
+    const headLength = 18;
+    const wingA = angle + Math.PI * 0.78;
+    const wingB = angle - Math.PI * 0.78;
+
+    aimLine.lineStyle(7, 0x1a1a1a, 0.9);
+    aimLine.beginPath();
+    aimLine.moveTo(from.x, from.y);
+    aimLine.lineTo(endX, endY);
+    aimLine.strokePath();
+
+    aimLine.lineStyle(4, 0xfacc15, 0.95);
+    aimLine.beginPath();
+    aimLine.moveTo(from.x, from.y);
+    aimLine.lineTo(endX, endY);
+    aimLine.strokePath();
+
+    aimLine.fillStyle(0xfacc15, 0.95);
+    aimLine.lineStyle(4, 0x1a1a1a, 0.95);
+    aimLine.beginPath();
+    aimLine.moveTo(endX, endY);
+    aimLine.lineTo(endX + Math.cos(wingA) * headLength, endY + Math.sin(wingA) * headLength);
+    aimLine.lineTo(endX + Math.cos(wingB) * headLength, endY + Math.sin(wingB) * headLength);
+    aimLine.closePath();
+    aimLine.fillPath();
+    aimLine.strokePath();
+  }
+
+  drawRecallTether(from: PotassiumRendererPoint): void {
+    const tetherLine = this.getTetherLine();
+    this.clearAim();
+    tetherLine.clear();
+    tetherLine.lineStyle(3, 0x1a1a1a, 0.75);
+    tetherLine.beginPath();
+    tetherLine.moveTo(from.x, from.y);
+    tetherLine.lineTo(this.layout.launchPad.x, this.layout.launchPad.y);
+    tetherLine.strokePath();
+  }
+
+  showExplosionVisual(x: number, y: number, radius: number): void {
+    const blast = this.scene.add.circle(x, y, 18, 0xf97316, 0.22)
+      .setStrokeStyle(5, 0x1a1a1a, 1)
+      .setDepth(940);
+    this.scene.tweens.add({
+      targets: blast,
+      radius,
+      alpha: 0,
+      duration: 240,
+      onComplete: () => blast.destroy()
+    });
+  }
+
+  animateEnemyDeath(
+    enemy: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
+    onComplete: () => void
+  ): void {
+    this.scene.tweens.add({
+      targets: enemy,
+      angle: enemy.angle + 720,
+      scale: 0,
+      alpha: 0,
+      duration: 260,
+      ease: 'Back.easeIn',
+      onComplete
+    });
   }
 
   createHud(): void {
@@ -543,6 +641,20 @@ export class PotassiumSlipRenderer {
       snapUiTextCoordinate(Phaser.Math.Clamp(x, this.layout.safe.left, this.layout.safe.right)),
       snapUiTextCoordinate(Phaser.Math.Clamp(y, this.layout.safe.labelTop, this.layout.safe.bottom))
     );
+  }
+
+  private getAimLine(): Phaser.GameObjects.Graphics {
+    if (!this.aimLine) {
+      this.aimLine = this.scene.add.graphics().setDepth(950);
+    }
+    return this.aimLine;
+  }
+
+  private getTetherLine(): Phaser.GameObjects.Graphics {
+    if (!this.tetherLine) {
+      this.tetherLine = this.scene.add.graphics().setDepth(949);
+    }
+    return this.tetherLine;
   }
 
   private drawBananaUpgradeAccents(

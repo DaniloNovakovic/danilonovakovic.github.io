@@ -35,10 +35,10 @@ import {
   getPotassiumExplosionRadius,
   type PotassiumEnemyKind,
   type PotassiumGenericUpgradeKind,
+  type PotassiumScheduledWaveRow,
   type PotassiumShieldSide,
   type PotassiumSkillRank,
-  type PotassiumUpgradeKind,
-  type PotassiumWaveCell
+  type PotassiumUpgradeKind
 } from './potassiumSlipWaves';
 
 export interface PotassiumCommandBody {
@@ -101,7 +101,7 @@ export interface PotassiumCommandAdapterPorts {
   clearUpgradeChoiceOverlay(): void;
   spawnWave(wave: number): void;
   spawnBossDelayed(): void;
-  scheduleWaveRows(rows: readonly PotassiumWaveCell[][]): void;
+  scheduleWaveRows(schedule: readonly PotassiumScheduledWaveRow[]): void;
   scheduleUpgradeChoices(): void;
   showUpgradeChoices(choices: readonly PotassiumDraftChoiceView[]): void;
   advanceWaveAfterDelay(wave: number): void;
@@ -199,7 +199,7 @@ export class PotassiumCommandAdapter {
       } else if (command.type === 'spawnBoss') {
         this.ports.spawnBossDelayed();
       } else if (command.type === 'scheduleWaveRows') {
-        this.ports.scheduleWaveRows(command.rows);
+        this.ports.scheduleWaveRows(command.schedule);
       } else if (command.type === 'scheduleUpgradeChoices') {
         this.ports.scheduleUpgradeChoices();
       } else if (command.type === 'showUpgradeChoices') {
