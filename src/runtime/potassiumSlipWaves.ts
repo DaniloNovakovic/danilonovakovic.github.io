@@ -1,7 +1,6 @@
 export type PotassiumEnemyKind =
   | 'intern'
   | 'scope'
-  | 'meeting'
   | 'deadline'
   | 'wall'
   | 'hardWall'
@@ -357,8 +356,8 @@ function buildTemplateRow(template: RowTemplate, wave: number, rowIndex: number)
       placeEnemyInRow(row, (deadlineLane + 4) % POTASSIUM_COLUMN_COUNT, 'deadline');
     }
   } else {
-    const lanes = [0, 1, 3, 4].filter((lane) => lane !== ((wave + rowIndex) % POTASSIUM_COLUMN_COUNT));
-    lanes.slice(0, wave >= 8 ? 4 : 3).forEach((lane, index) => {
+    const lanes = getPressureLanes(wave, rowIndex);
+    lanes.forEach((lane, index) => {
       placeEnemyInRow(row, lane, pickPressureEnemy(wave, rowIndex + index));
     });
   }
@@ -384,18 +383,32 @@ function placeEnemyInRow(row: PotassiumWaveCell[], lane: number, kind: Potassium
 function pickBasicEnemy(wave: number, seed: number): PotassiumEnemyKind {
   if (wave <= 1) return 'intern';
   if (wave <= 4) return (seed + wave) % 3 === 0 ? 'scope' : 'intern';
-  if (wave <= 6) return ['intern', 'scope', 'meeting', 'splitter'][(seed + wave) % 4] as PotassiumEnemyKind;
-  if (wave <= 7) return ['intern', 'scope', 'meeting', 'deadline', 'splitter'][(seed + wave) % 5] as PotassiumEnemyKind;
-  return ['intern', 'scope', 'meeting', 'deadline', 'splitter', 'shield'][(seed + wave) % 6] as PotassiumEnemyKind;
+  if (wave <= 6) return ['intern', 'scope', 'splitter'][(seed + wave) % 3] as PotassiumEnemyKind;
+  if (wave <= 7) return ['intern', 'scope', 'deadline', 'splitter'][(seed + wave) % 4] as PotassiumEnemyKind;
+  return ['intern', 'scope', 'deadline', 'splitter', 'shield'][(seed + wave) % 5] as PotassiumEnemyKind;
 }
 
 function pickPressureEnemy(wave: number, seed: number): PotassiumEnemyKind {
+  if (wave >= 9 && (wave + seed) % 3 === 0) return 'hardWall';
+  if (wave >= 8 && (wave + seed) % 7 === 0) return 'hardWall';
   const pool: PotassiumEnemyKind[] = wave >= 8
-    ? ['scope', 'meeting', 'deadline', 'wall', 'hardWall', 'splitter', 'shield']
+    ? ['scope', 'deadline', 'wall', 'splitter', 'shield']
     : wave >= 7
-      ? ['scope', 'meeting', 'deadline', 'wall', 'splitter', 'shield']
-      : ['intern', 'scope', 'meeting', 'wall', 'splitter'];
+      ? ['scope', 'deadline', 'wall', 'splitter', 'shield']
+      : ['intern', 'scope', 'wall', 'splitter'];
   return pool[(seed * 3 + wave) % pool.length];
+}
+
+function getPressureLanes(wave: number, rowIndex: number): number[] {
+  const reservedLane = (wave * 2 + rowIndex) % POTASSIUM_COLUMN_COUNT;
+  const lanes = emptyRow()
+    .map((_, lane) => lane)
+    .filter((lane) => lane !== reservedLane);
+  const offset = (wave + rowIndex) % lanes.length;
+  return [
+    ...lanes.slice(offset),
+    ...lanes.slice(0, offset)
+  ].slice(0, wave >= 8 ? 4 : 3);
 }
 
 function pickLane(wave: number, rowIndex: number, salt: number): number {
