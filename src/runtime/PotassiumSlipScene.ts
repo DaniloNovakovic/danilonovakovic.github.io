@@ -530,9 +530,9 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.banana.setVelocity(0, 0);
   }
 
-  private beginAiming(pointer: Phaser.Input.Pointer): void {
+  private beginAiming(pointer: Phaser.Input.Pointer, pointerId: number = pointer.id): void {
     this.controlState = 'aiming';
-    this.aimPointerId = pointer.id;
+    this.aimPointerId = pointerId;
     this.setBananaRecallVisual(false);
     this.banana.setPosition(LAUNCH_PAD.x, LAUNCH_PAD.y);
     this.banana.setVelocity(0, 0);
@@ -591,7 +591,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
         this.banana.setVelocity(0, 0);
       }
       if (this.isBananaInLaunchZone(34)) {
-        this.beginAiming(this.input.activePointer);
+        this.beginAiming(this.input.activePointer, this.aimPointerId ?? this.input.activePointer.id);
       }
       return;
     }
