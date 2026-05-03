@@ -32,9 +32,7 @@ export function ModalShell({
 }: ModalShellProps) {
   const modalId = useRef(Symbol('modal'));
   const dialogRef = useRef<HTMLDivElement>(null);
-  const openerRef = useRef<HTMLElement | null>(
-    typeof document === 'undefined' ? null : document.activeElement instanceof HTMLElement ? document.activeElement : null
-  );
+  const openerRef = useRef<HTMLElement | null>(null);
   const titleId = useId();
   const descriptionId = useId();
   const ariaDescriptionId = hasDescription ? descriptionId : undefined;
@@ -64,17 +62,20 @@ export function ModalShell({
   }, []);
 
   useEffect(() => {
-    const first = dialogRef.current?.querySelector<HTMLElement>(FOCUSABLE);
-    (first ?? dialogRef.current)?.focus();
+    if (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement) {
+      openerRef.current = document.activeElement;
+    }
+
+    return () => {
+      if (openerRef.current?.isConnected) {
+        openerRef.current.focus();
+      }
+    };
   }, []);
 
   useEffect(() => {
-    const opener = openerRef.current;
-    return () => {
-      if (opener?.isConnected) {
-        opener.focus();
-      }
-    };
+    const first = dialogRef.current?.querySelector<HTMLElement>(FOCUSABLE);
+    (first ?? dialogRef.current)?.focus();
   }, []);
 
   useEffect(() => {

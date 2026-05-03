@@ -364,6 +364,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
   private upgradeChoiceTitle?: Phaser.GameObjects.Text;
   private terminalButtons: TerminalButton[] = [];
   private recordsText?: Phaser.GameObjects.Text;
+  private activeBoss?: EnemySprite;
 
   private hudText!: Phaser.GameObjects.Text;
   private scoreText!: Phaser.GameObjects.Text;
@@ -664,6 +665,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.clones?.clear(true, true);
     this.trailZones?.clear(true, true);
     this.bossBlockers?.clear(true, true);
+    this.activeBoss = undefined;
     this.fireCells.clear();
     this.banana.setPosition(LAUNCH_PAD.x, LAUNCH_PAD.y);
     this.banana.setVelocity(0, 0);
@@ -1027,6 +1029,12 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.configureEnemy(enemy, kind, this.wave, columnIndex, rowIndex);
 
     if (kind === 'boss') {
+      this.activeBoss = enemy;
+      enemy.once(Phaser.GameObjects.Events.DESTROY, () => {
+        if (this.activeBoss === enemy) {
+          this.activeBoss = undefined;
+        }
+      });
       enemy.setPosition(LAUNCH_PAD.x, SAFE.top + 132);
       enemy.setVelocity(BOSS_PATROL_SPEED, BOSS_PHASE_1_DRIFT);
       enemy.setBounce(1, 1);
@@ -1619,9 +1627,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
   }
 
   private updateBossFight(time: number): void {
-    const boss = this.enemies.getChildren().find((gameObject) => (
-      (gameObject as EnemySprite).active && (gameObject as EnemySprite).getData('kind') === 'boss'
-    )) as EnemySprite | undefined;
+    const boss = this.activeBoss;
     if (!boss || boss.getData('dying')) {
       this.bossBlockers.getChildren().forEach((gameObject) => gameObject.destroy());
       return;
@@ -1948,10 +1954,9 @@ export class PotassiumSlipScene extends Phaser.Scene {
       this.positionEnemyAttachments(enemy);
       const label = enemy.getData('labelText') as Phaser.GameObjects.Text | undefined;
       if (!label) return;
-      const kind = enemy.getData('kind') as EnemyKind;
       const hp = Math.ceil(enemy.getData('hp') as number);
       const maxHp = enemy.getData('maxHp') as number;
-      label.setText(kind === 'boss' ? `${hp}/${maxHp}` : '');
+      label.setText(`${hp}/${maxHp}`);
       this.positionFloatingLabel(label, enemy.x, enemy.y - 34 * enemy.scale);
     });
   }

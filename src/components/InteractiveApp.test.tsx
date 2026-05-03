@@ -71,7 +71,7 @@ describe('InteractiveApp', () => {
     render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
 
     const devButton = screen.queryByRole('button', { name: /open dev scene switcher/i });
-    expect(devButton).toBeDefined();
+    expect(devButton).not.toBeNull();
     if (!devButton) return;
 
     await userEvent.click(devButton);
