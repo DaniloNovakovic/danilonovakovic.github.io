@@ -24,10 +24,11 @@ Clear 10 procedural campaign waves, defeat the boss on wave 11, and collect the 
 - Regular enemies cost lives if they reach the bottom. Filing Walls do not hurt the player. The boss instantly ends the run if it reaches the bottom.
 - The player starts with 5 lives.
 - After each cleared non-boss wave, the player chooses one of two upgrade drafts.
+- Normal enemies do not show floating HP labels. Their damage state is shown through cracks, scuffs, and bandage marks.
 
 ## Waves And Modes
 
-- **Campaign:** Waves 1-10 are deterministic procedural row waves that grow denser and tankier over time.
+- **Campaign:** Waves 1-10 are deterministic procedural row waves that grow denser, tankier, and more mechanically varied over time.
 - **Boss:** Wave 11 is the Potassium Compliance Officer. Defeating it grants the Circuit once.
 - **Endless:** Wave 12+ continues the same run with existing score, lives, skills, and escalating procedural waves.
 - **Records:** Finished runs are saved to a local top-5 leaderboard in browser storage.
@@ -38,8 +39,21 @@ Clear 10 procedural campaign waves, defeat the boss on wave 11, and collect the 
 - **Scope Blob:** Round multi-hit target.
 - **Meeting Brick:** Chunkier blocker-like enemy.
 - **Deadline Drone:** Faster falling hazard.
-- **Filing Wall:** High-HP non-damaging blocker that forces ricochet angles.
-- **Potassium Compliance Officer:** Campaign boss with diagonal drift and high HP.
+- **Filing Wall:** High-HP one-cell non-damaging blocker that forces ricochet angles.
+- **Hard Filing Wall:** Indestructible one-cell blocker introduced later. It never costs lives, but it refuses to become paperwork.
+- **Splitter Memo:** Medium target that splits into two smaller bugs on death when nearby lanes are available.
+- **Shielded Form:** Beefy target with a visible shield plate. Hits from the shielded side ricochet without damage.
+- **Potassium Compliance Officer:** Campaign boss with patrol phases, orbiting indestructible blockers, stone armor windows, and summons.
+
+## Boss Fight
+
+The boss is intentionally more of a fight than a falling target:
+
+- **Phase 1:** patrols across the upper-middle board and drifts down slowly.
+- **Phase 2:** adds rotating indestructible blockers around itself.
+- **Phase 3:** enters short stone/armored windows and summons extra falling enemies.
+
+The boss is tankier than normal enemies so stacked upgrades have room to shine without instantly ending the encounter.
 
 ## Skill Drafts
 
@@ -64,3 +78,7 @@ When all six skills are fully upgraded, drafts switch to repeatable generic upgr
 ## Presentation
 
 Potassium uses a dedicated `vertical-board` presentation. Phaser still runs at the fixed global design resolution, but the React shell frames a tall portrait board and the playable arena uses the central vertical slice directly. The contextual hint lives below the board like the overworld status panel.
+
+## Current Experimental Feel
+
+The yo-yo recall uses an elastic pull model: holding recall continuously pulls the banana toward the launch pad while still allowing enemy/blocker ricochets. Releasing recall returns the banana to normal bounce physics.

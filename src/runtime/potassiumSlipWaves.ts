@@ -1,5 +1,16 @@
-export type PotassiumEnemyKind = 'intern' | 'scope' | 'meeting' | 'deadline' | 'wall' | 'boss';
+export type PotassiumEnemyKind =
+  | 'intern'
+  | 'scope'
+  | 'meeting'
+  | 'deadline'
+  | 'wall'
+  | 'hardWall'
+  | 'splitter'
+  | 'shield'
+  | 'boss';
 export type PotassiumWaveCell = PotassiumEnemyKind | null;
+export type PotassiumEnemyHealthState = 'healthy' | 'cracked' | 'critical';
+export type PotassiumShieldSide = 'bottom' | 'left' | 'right';
 export type PotassiumUpgradeKind =
   | 'fire'
   | 'poison'
@@ -234,6 +245,58 @@ export function getScaledPotassiumEnemyHp(baseHp: number, wave: number): number 
   return Math.ceil(baseHp * getPotassiumEnemyHpMultiplier(wave));
 }
 
+export function getPotassiumEnemyHealthState(hp: number, maxHp: number): PotassiumEnemyHealthState {
+  if (maxHp <= 0) return 'healthy';
+  const ratio = hp / maxHp;
+  if (ratio <= 0.3) return 'critical';
+  if (ratio <= 0.6) return 'cracked';
+  return 'healthy';
+}
+
+export function getPotassiumShieldSide(
+  wave: number,
+  rowIndex: number,
+  columnIndex: number
+): PotassiumShieldSide {
+  return (['bottom', 'left', 'right'] as const)[Math.abs(wave + rowIndex * 2 + columnIndex) % 3];
+}
+
+export function isPotassiumShieldedHit(
+  shieldSide: PotassiumShieldSide,
+  deltaX: number,
+  deltaY: number
+): boolean {
+  const absX = Math.abs(deltaX);
+  const absY = Math.abs(deltaY);
+  if (shieldSide === 'bottom') return deltaY >= absX;
+  if (shieldSide === 'left') return -deltaX >= absY;
+  return deltaX >= absY;
+}
+
+export function getPotassiumSplitterSpawnColumns(columnIndex: number): number[] {
+  return [columnIndex - 1, columnIndex + 1]
+    .filter((column) => column >= 0 && column < POTASSIUM_COLUMN_COUNT);
+}
+
+export function getPotassiumFireCellKey(
+  x: number,
+  y: number,
+  arena: { left: number; width: number; top: number; bottom: number },
+  rowHeight: number
+): string {
+  const column = clampInteger(
+    Math.floor(((x - arena.left) / arena.width) * POTASSIUM_COLUMN_COUNT),
+    0,
+    POTASSIUM_COLUMN_COUNT - 1
+  );
+  const row = clampInteger(
+    Math.floor((y - arena.top) / rowHeight),
+    0,
+    Math.ceil((arena.bottom - arena.top) / rowHeight)
+  );
+  return `${column}:${row}`;
+}
+
 function generatePotassiumWave(wave: number): PotassiumWaveDefinition {
   const rowCount = getGeneratedRowCount(wave);
   const templates = getTemplateCycle(wave);
@@ -305,14 +368,17 @@ function buildTemplateRow(template: RowTemplate, wave: number, rowIndex: number)
 function pickBasicEnemy(wave: number, seed: number): PotassiumEnemyKind {
   if (wave <= 1) return 'intern';
   if (wave <= 4) return (seed + wave) % 3 === 0 ? 'scope' : 'intern';
-  if (wave <= 6) return ['intern', 'scope', 'meeting'][(seed + wave) % 3] as PotassiumEnemyKind;
-  return ['intern', 'scope', 'meeting', 'deadline'][(seed + wave) % 4] as PotassiumEnemyKind;
+  if (wave <= 6) return ['intern', 'scope', 'meeting', 'splitter'][(seed + wave) % 4] as PotassiumEnemyKind;
+  if (wave <= 7) return ['intern', 'scope', 'meeting', 'deadline', 'splitter'][(seed + wave) % 5] as PotassiumEnemyKind;
+  return ['intern', 'scope', 'meeting', 'deadline', 'splitter', 'shield'][(seed + wave) % 6] as PotassiumEnemyKind;
 }
 
 function pickPressureEnemy(wave: number, seed: number): PotassiumEnemyKind {
-  const pool: PotassiumEnemyKind[] = wave >= 7
-    ? ['scope', 'meeting', 'deadline', 'wall']
-    : ['intern', 'scope', 'meeting', 'wall'];
+  const pool: PotassiumEnemyKind[] = wave >= 8
+    ? ['scope', 'meeting', 'deadline', 'wall', 'hardWall', 'splitter', 'shield']
+    : wave >= 7
+      ? ['scope', 'meeting', 'deadline', 'wall', 'splitter', 'shield']
+      : ['intern', 'scope', 'meeting', 'wall', 'splitter'];
   return pool[(seed * 3 + wave) % pool.length];
 }
 
@@ -322,8 +388,13 @@ function pickLane(wave: number, rowIndex: number, salt: number): number {
 
 function enforceRowSafety(row: PotassiumWaveCell[]): PotassiumWaveCell[] {
   const safeRow = [...row];
-  while (safeRow.filter((cell) => cell === 'wall').length > 2) {
-    safeRow[safeRow.lastIndexOf('wall')] = null;
+  while (safeRow.filter((cell) => cell === 'wall' || cell === 'hardWall').length > 2) {
+    const hardWallIndex = safeRow.lastIndexOf('hardWall');
+    if (hardWallIndex >= 0) {
+      safeRow[hardWallIndex] = null;
+    } else {
+      safeRow[safeRow.lastIndexOf('wall')] = null;
+    }
   }
   while (safeRow.filter((cell) => cell === 'deadline').length > 2) {
     safeRow[safeRow.lastIndexOf('deadline')] = 'scope';
@@ -379,4 +450,8 @@ function clampRandomUnit(random: () => number): number {
   const value = random();
   if (!Number.isFinite(value)) return 0;
   return Math.max(0, Math.min(0.999999, value));
+}
+
+function clampInteger(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
 }

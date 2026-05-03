@@ -4,16 +4,21 @@ import {
   applyPotassiumGenericDraftOption,
   getPotassiumDuplicateCloneCount,
   getPotassiumDraftChoices,
+  getPotassiumEnemyHealthState,
   getPotassiumExplosionDamage,
   getPotassiumExplosionRadius,
+  getPotassiumFireCellKey,
   getPotassiumGenericUpgradeRank,
   getPotassiumScaledExplosionRadius,
   getPotassiumEnemyHpMultiplier,
+  getPotassiumShieldSide,
+  getPotassiumSplitterSpawnColumns,
   getPotassiumUpgradeChoices,
   getPotassiumWave,
   getScaledPotassiumEnemyHp,
   getUnlockedPotassiumEnemies,
   getUnlockedPotassiumUpgrades,
+  isPotassiumShieldedHit,
   isPotassiumCampaignBossWave,
   isPotassiumBossWave,
   POTASSIUM_BOSS_WAVE,
@@ -46,7 +51,7 @@ describe('potassium slip waves', () => {
 
   it('respects row safety limits', () => {
     getNonBossRows().forEach((row) => {
-      expect(row.filter((cell) => cell === 'wall').length).toBeLessThanOrEqual(2);
+      expect(row.filter((cell) => cell === 'wall' || cell === 'hardWall').length).toBeLessThanOrEqual(2);
       expect(row.filter((cell) => cell === 'deadline').length).toBeLessThanOrEqual(2);
       expect(row.some((cell) => cell === null)).toBe(true);
     });
@@ -57,7 +62,32 @@ describe('potassium slip waves', () => {
     expect(getUnlockedPotassiumEnemies(2)).toContain('scope');
     expect(getUnlockedPotassiumEnemies(3)).toContain('wall');
     expect(getUnlockedPotassiumEnemies(5)).toContain('meeting');
+    expect(getUnlockedPotassiumEnemies(5)).toContain('splitter');
     expect(getUnlockedPotassiumEnemies(7)).toContain('deadline');
+    expect(getUnlockedPotassiumEnemies(8)).toContain('shield');
+    expect(getUnlockedPotassiumEnemies(8)).toContain('hardWall');
+  });
+
+  it('keeps later-stage enemies out of the opening tutorial waves', () => {
+    expect(getPotassiumWave(1).rows.flat()).not.toContain('splitter');
+    expect(getPotassiumWave(2).rows.flat()).not.toContain('hardWall');
+    expect(getPotassiumWave(4).rows.flat()).not.toContain('shield');
+  });
+
+  it('defines readable enemy helper behavior', () => {
+    expect(getPotassiumEnemyHealthState(7, 10)).toBe('healthy');
+    expect(getPotassiumEnemyHealthState(6, 10)).toBe('cracked');
+    expect(getPotassiumEnemyHealthState(3, 10)).toBe('critical');
+    expect(getPotassiumShieldSide(7, 0, 0)).toBe('left');
+    expect(isPotassiumShieldedHit('bottom', 2, 8)).toBe(true);
+    expect(isPotassiumShieldedHit('left', -8, 2)).toBe(true);
+    expect(isPotassiumShieldedHit('right', 8, 2)).toBe(true);
+    expect(isPotassiumShieldedHit('right', -8, 2)).toBe(false);
+    expect(getPotassiumSplitterSpawnColumns(0)).toEqual([1]);
+    expect(getPotassiumSplitterSpawnColumns(2)).toEqual([1, 3]);
+    expect(getPotassiumSplitterSpawnColumns(4)).toEqual([3]);
+    expect(getPotassiumFireCellKey(276, 84, { left: 275, width: 450, top: 84, bottom: 504 }, 48)).toBe('0:0');
+    expect(getPotassiumFireCellKey(724, 503, { left: 275, width: 450, top: 84, bottom: 504 }, 48)).toBe('4:8');
   });
 
   it('offers random unlock and rank-up choices without repeating completed skills', () => {
@@ -121,7 +151,7 @@ describe('potassium slip waves', () => {
     expect(endlessWave.rows.every((row) => row.length === POTASSIUM_COLUMN_COUNT)).toBe(true);
     expect(endlessWave.rows.flat()).not.toContain('boss');
     endlessWave.rows.forEach((row) => {
-      expect(row.filter((cell) => cell === 'wall').length).toBeLessThanOrEqual(2);
+      expect(row.filter((cell) => cell === 'wall' || cell === 'hardWall').length).toBeLessThanOrEqual(2);
       expect(row.filter((cell) => cell === 'deadline').length).toBeLessThanOrEqual(2);
       expect(row.some((cell) => cell === null)).toBe(true);
     });
