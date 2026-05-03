@@ -95,7 +95,7 @@ describe('SceneTransitionCoordinator', () => {
     expect(adapter.registerScene).toHaveBeenCalledWith('hobbies', expect.any(Function));
     expect(adapter.startScene).not.toHaveBeenCalledWith('hobbies', { id: 'hobbies' });
     expect(adapter.activeScenes()).toEqual(['MainScene']);
-    expect(loadingEvents).toEqual(['hobbies']);
+    expect(loadingEvents).toEqual(['hobbies', null]);
     expect(events).toContainEqual({ type: 'SceneTransitionRequested', targetContext: null });
   });
 
@@ -130,6 +130,7 @@ describe('SceneTransitionCoordinator', () => {
   });
 
   it('clears loading and swallows failed current lazy loads', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     const loadHobbies = deferred<unknown>();
     const adapter = makeFakeAdapter();
     const loadingEvents: Array<string | null> = [];
@@ -146,5 +147,7 @@ describe('SceneTransitionCoordinator', () => {
 
     expect(loadingEvents).toEqual(['hobbies', null]);
     expect(adapter.startScene).not.toHaveBeenCalledWith('hobbies', { id: 'hobbies' });
+    expect(warnSpy).toHaveBeenCalledWith('Scene transition failed', expect.any(Error));
+    warnSpy.mockRestore();
   });
 });

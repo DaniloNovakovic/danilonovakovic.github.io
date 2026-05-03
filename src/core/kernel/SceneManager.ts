@@ -36,12 +36,21 @@ export class SceneManager {
 
   async enter(contextId: ContextId, guard?: SceneTransitionGuard): Promise<void> {
     const target = this.contexts.get(contextId);
-    if (!target) return;
+    if (!target) {
+      this.clearLoadingIfCurrent(guard);
+      return;
+    }
 
-    if (this.adapter.isSceneActive(target.sceneKey)) return;
+    if (this.adapter.isSceneActive(target.sceneKey)) {
+      this.clearLoadingIfCurrent(guard);
+      return;
+    }
 
-    await this.ensureSceneRegistered(target, guard);
+    const loadedScene = await this.ensureSceneRegistered(target, guard);
     if (guard && !guard.isCurrent()) return;
+    if (!loadedScene) {
+      this.clearLoadingIfCurrent(guard);
+    }
     this.stopActiveContextsExcept(target.sceneKey);
 
     this.adapter.startScene(target.sceneKey, target.getStartData());
@@ -50,10 +59,16 @@ export class SceneManager {
 
   async exitTo(contextId: ContextId, guard?: SceneTransitionGuard): Promise<void> {
     const target = this.contexts.get(contextId);
-    if (!target) return;
+    if (!target) {
+      this.clearLoadingIfCurrent(guard);
+      return;
+    }
 
-    await this.ensureSceneRegistered(target, guard);
+    const loadedScene = await this.ensureSceneRegistered(target, guard);
     if (guard && !guard.isCurrent()) return;
+    if (!loadedScene) {
+      this.clearLoadingIfCurrent(guard);
+    }
     const allKeys = this.adapter.listKnownSceneKeys();
     for (const sceneKey of allKeys) {
       if (sceneKey === target.sceneKey) continue;
@@ -107,19 +122,23 @@ export class SceneManager {
   private async ensureSceneRegistered(
     context: ContextPluginDefinition,
     guard?: SceneTransitionGuard
-  ): Promise<void> {
-    if (this.adapter.hasScene(context.sceneKey)) return;
-    if (!context.loadScene) return;
+  ): Promise<boolean> {
+    if (this.adapter.hasScene(context.sceneKey)) return false;
+    if (!context.loadScene) return false;
 
     this.options.onSceneLoadingChange?.(context.id);
     try {
       const scene = await context.loadScene();
       this.adapter.registerScene(context.sceneKey, scene);
+      return true;
     } finally {
-      if (!guard || guard.isCurrent()) {
-        this.options.onSceneLoadingChange?.(null);
-      }
+      this.clearLoadingIfCurrent(guard);
     }
+  }
+
+  private clearLoadingIfCurrent(guard?: SceneTransitionGuard): void {
+    if (guard && !guard.isCurrent()) return;
+    this.options.onSceneLoadingChange?.(null);
   }
 
   private stopActiveContextsExcept(targetSceneKey: string): void {

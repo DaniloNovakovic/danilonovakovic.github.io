@@ -21,13 +21,13 @@ export class SceneTransitionCoordinator {
 
     if (mode.kind === 'exploring') {
       this.eventBus.emit({ type: 'SceneTransitionRequested', targetContext: null });
-      void this.sceneManager.exitTo(PHASER_SCENE_KEYS.main, guard).catch(() => undefined);
+      this.runTransition(this.sceneManager.exitTo(PHASER_SCENE_KEYS.main, guard));
       return;
     }
 
     if (mode.kind === 'phaserScene') {
       this.eventBus.emit({ type: 'SceneTransitionRequested', targetContext: mode.miniGameId });
-      void this.sceneManager.enter(mode.miniGameId, guard).catch(() => undefined);
+      this.runTransition(this.sceneManager.enter(mode.miniGameId, guard));
     }
   }
 
@@ -38,5 +38,11 @@ export class SceneTransitionCoordinator {
   private nextRequestId(): number {
     this.requestId += 1;
     return this.requestId;
+  }
+
+  private runTransition(transition: Promise<void>): void {
+    void transition.catch((error: unknown) => {
+      console.warn('Scene transition failed', error);
+    });
   }
 }
