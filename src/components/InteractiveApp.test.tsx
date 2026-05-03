@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import InteractiveApp from './InteractiveApp';
 import { bridgeActions, bridgeStore } from '../shared/bridge/store';
@@ -9,6 +9,21 @@ import { TEXTS } from '../config/content';
 vi.mock('./Game', () => ({
   default: () => <div data-testid="game-surface" />
 }));
+
+let resizeObserverCallback: ResizeObserverCallback | undefined;
+let resizeObserverInstance: ResizeObserver | undefined;
+const originalResizeObserver = globalThis.ResizeObserver;
+
+class MockResizeObserver {
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
+
+  constructor(callback: ResizeObserverCallback) {
+    resizeObserverCallback = callback;
+    resizeObserverInstance = this as unknown as ResizeObserver;
+  }
+}
 
 function resetBridge() {
   bridgeActions.closeActiveMode();
@@ -20,6 +35,9 @@ function resetBridge() {
 
 describe('InteractiveApp', () => {
   beforeEach(() => {
+    resizeObserverCallback = undefined;
+    resizeObserverInstance = undefined;
+    globalThis.ResizeObserver = MockResizeObserver as unknown as typeof ResizeObserver;
     resetBridge();
   });
 
@@ -27,6 +45,7 @@ describe('InteractiveApp', () => {
     cleanup();
     resetBridge();
     document.body.style.overflow = '';
+    globalThis.ResizeObserver = originalResizeObserver;
   });
 
   it('renders interactive controls in normal flow', () => {
@@ -49,6 +68,24 @@ describe('InteractiveApp', () => {
     expect(footer.className).not.toContain('fixed');
     expect(screen.getByText(TEXTS.navigation.hintsCompact)).toBeDefined();
     expect(screen.getByText(TEXTS.navigation.hintsCompact).closest('.fixed')).toBeNull();
+  });
+
+  it('caps game shell width from the measured content row height', async () => {
+    render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
+
+    await waitFor(() => expect(resizeObserverCallback).toBeDefined());
+    act(() => {
+      resizeObserverCallback?.(
+        [{ contentRect: { height: 320 } } as ResizeObserverEntry],
+        resizeObserverInstance!
+      );
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('interactive-game-shell').style.getPropertyValue(
+        '--mobile-game-shell-height-capped-width'
+      )).toBe('min(450px, 240px)');
+    });
   });
 
   it('opens and closes inventory as a dialog that pauses UI state', async () => {

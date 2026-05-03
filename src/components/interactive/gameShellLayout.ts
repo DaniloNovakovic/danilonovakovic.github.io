@@ -17,6 +17,7 @@ const PORTRAIT_WIDTH_PER_HEIGHT = '0.75';
 
 type GameShellStyle = CSSProperties & {
   '--mobile-game-shell-max-width': string;
+  '--mobile-game-shell-height-capped-width': string;
   '--desktop-game-shell-width': string;
 };
 
@@ -34,7 +35,8 @@ interface InteractiveGameShellLayout {
 }
 
 export function getInteractiveGameShellLayout(
-  presentationMode: PhaserScenePresentationMode
+  presentationMode: PhaserScenePresentationMode,
+  contentRowHeight?: number
 ): InteractiveGameShellLayout {
   const mobileMaxWidth =
     presentationMode === 'full-board'
@@ -44,6 +46,8 @@ export function getInteractiveGameShellLayout(
         : MOBILE_PORTRAIT_MAX_WIDTH;
   const desktopWidthPerHeight =
     presentationMode === 'vertical-board' ? PORTRAIT_WIDTH_PER_HEIGHT : DESIGN_WIDTH_PER_HEIGHT;
+  const mobileWidthPerHeight =
+    presentationMode === 'full-board' ? DESIGN_WIDTH_PER_HEIGHT : PORTRAIT_WIDTH_PER_HEIGHT;
   const mobileAspect =
     presentationMode === 'full-board'
       ? DESIGN_ASPECT_RATIO
@@ -60,9 +64,13 @@ export function getInteractiveGameShellLayout(
       : `min(${DESKTOP_VIEWPORT_HEIGHT_LIMIT}, ${DESKTOP_MAX_GAME_HEIGHT})`;
 
   return {
-    shellClassName: 'w-full max-w-[var(--mobile-game-shell-max-width)] md:w-[var(--desktop-game-shell-width)] md:max-w-none',
+    shellClassName: 'w-full max-w-[var(--mobile-game-shell-height-capped-width)] md:w-[var(--desktop-game-shell-width)] md:max-w-none',
     shellStyle: {
       '--mobile-game-shell-max-width': mobileMaxWidth,
+      '--mobile-game-shell-height-capped-width':
+        contentRowHeight && contentRowHeight > 0
+          ? `min(${mobileMaxWidth}, ${formatPixels(contentRowHeight * Number(mobileWidthPerHeight))})`
+          : mobileMaxWidth,
       '--desktop-game-shell-width':
         `min(100%, calc(min(${DESKTOP_VIEWPORT_HEIGHT_LIMIT}, ${desktopHeightLimit}) * ${desktopWidthPerHeight}))`
     },
@@ -73,4 +81,8 @@ export function getInteractiveGameShellLayout(
       '--desktop-game-frame-max-height': desktopFrameMaxHeight
     }
   };
+}
+
+function formatPixels(value: number): string {
+  return `${Number(value.toFixed(2))}px`;
 }

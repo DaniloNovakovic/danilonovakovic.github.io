@@ -19,6 +19,7 @@ import {
 } from '../runtime/phaserScenePresentation';
 import { Button, Card, DialogCard, ModalShell, Panel } from '../ui';
 import { getInteractiveGameShellLayout } from './interactive/gameShellLayout';
+import { useResizeObserver } from './useResizeObserver';
 
 interface InteractiveAppProps {
   onSwitchToStatic: () => void;
@@ -26,6 +27,7 @@ interface InteractiveAppProps {
 
 export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps) {
   const bridge = useBridgeState();
+  const { ref: contentRowRef, height: contentRowHeight } = useResizeObserver<HTMLElement>();
 
   const handleInteract = (area: string) => {
     if (!isMiniGameId(area)) return;
@@ -57,7 +59,7 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
     activeMiniGameId ?? initialStartSceneId;
   const presentationMode: PhaserScenePresentationMode =
     getPhaserScenePresentationMode(presentationMiniGameId);
-  const gameShellLayout = getInteractiveGameShellLayout(presentationMode);
+  const gameShellLayout = getInteractiveGameShellLayout(presentationMode, contentRowHeight);
   const shouldReserveSceneHint = presentationMiniGameId === 'potassium';
   const sceneHintText = bridge.sceneHintText ?? 'Drag toward a target • Hold to recall';
   const shouldShowNavigationHint = bridge.status === GameState.EXPLORING && !presentationMiniGameId;
@@ -122,8 +124,9 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
         </nav>
       </header>
 
-      <main className="col-start-2 row-start-2 flex min-h-0 min-w-0 items-center justify-center">
+      <main ref={contentRowRef} className="col-start-2 row-start-2 flex min-h-0 min-w-0 items-center justify-center">
         <div
+          data-testid="interactive-game-shell"
           className={`relative shrink-0 shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] ${gameShellLayout.shellClassName}`}
           style={gameShellLayout.shellStyle}
         >
