@@ -3,16 +3,27 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { OverlayCard } from './OverlayCard';
+import { ModalShell } from '../../ui';
 
 afterEach(cleanup);
 
 async function renderCard(onClose = vi.fn()) {
   render(
-    <OverlayCard title="Test Overlay" description="A description." onClose={onClose}>
-      <button>First child button</button>
-      <input placeholder="text input" />
-      <button>Last child button</button>
-    </OverlayCard>
+    <ModalShell title="Test Overlay" hasDescription onClose={onClose}>
+      {({ titleId, descriptionId }) => (
+        <OverlayCard
+          title="Test Overlay"
+          description="A description."
+          onClose={onClose}
+          titleId={titleId}
+          descriptionId={descriptionId}
+        >
+          <button>First child button</button>
+          <input placeholder="text input" />
+          <button>Last child button</button>
+        </OverlayCard>
+      )}
+    </ModalShell>
   );
   // Let the initial-focus useEffect run
   await new Promise((r) => setTimeout(r, 0));
@@ -63,12 +74,20 @@ describe('OverlayCard', () => {
 
       render(
         <>
-          <OverlayCard title="First Overlay" onClose={firstOnClose}>
-            <button>First dialog button</button>
-          </OverlayCard>
-          <OverlayCard title="Second Overlay" onClose={secondOnClose}>
-            <button>Second dialog button</button>
-          </OverlayCard>
+          <ModalShell title="First Overlay" onClose={firstOnClose}>
+            {({ titleId }) => (
+              <OverlayCard title="First Overlay" onClose={firstOnClose} titleId={titleId}>
+                <button>First dialog button</button>
+              </OverlayCard>
+            )}
+          </ModalShell>
+          <ModalShell title="Second Overlay" onClose={secondOnClose}>
+            {({ titleId }) => (
+              <OverlayCard title="Second Overlay" onClose={secondOnClose} titleId={titleId}>
+                <button>Second dialog button</button>
+              </OverlayCard>
+            )}
+          </ModalShell>
         </>
       );
       await new Promise((r) => setTimeout(r, 0));

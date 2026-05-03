@@ -1,4 +1,5 @@
 import type { HTMLAttributes } from 'react';
+import { sketchFocusVisible } from './tokens';
 import { cn } from './utils';
 
 type BadgeTone = 'neutral' | 'paper' | 'highlight' | 'ink';
@@ -28,6 +29,7 @@ export function Badge({
         'inline-flex items-center border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide',
         shape === 'pill' ? 'rounded-full px-3 py-1' : 'rounded',
         toneClasses[tone],
+        sketchFocusVisible,
         className
       )}
       {...props}

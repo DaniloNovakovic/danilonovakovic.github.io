@@ -1,5 +1,5 @@
 import type { HTMLAttributes } from 'react';
-import { sketchBorders, sketchShadows } from './tokens';
+import { sketchBorders, sketchFocusVisible, sketchShadows } from './tokens';
 import { cn } from './utils';
 
 type CardPadding = 'none' | 'sm' | 'md' | 'lg';
@@ -60,6 +60,7 @@ export function Card({
         toneClasses[tone],
         paddingClasses[padding],
         shadowClasses[shadow],
+        sketchFocusVisible,
         className
       )}
       {...props}

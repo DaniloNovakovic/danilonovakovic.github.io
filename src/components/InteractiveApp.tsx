@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { BookOpen, Backpack, Bug } from 'lucide-react';
 import Game from './Game';
 import { GameState } from '../runtime/gameState';
@@ -17,8 +17,9 @@ import {
   getPhaserScenePresentationMode,
   type PhaserScenePresentationMode
 } from '../runtime/phaserScenePresentation';
-import { Button, Card, Panel } from '../ui';
+import { Button, Card, DialogCard, ModalShell, Panel } from '../ui';
 import { getInteractiveGameShellLayout } from './interactive/gameShellLayout';
+import { useResizeObserver } from './useResizeObserver';
 
 interface InteractiveAppProps {
   onSwitchToStatic: () => void;
@@ -26,8 +27,7 @@ interface InteractiveAppProps {
 
 export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps) {
   const bridge = useBridgeState();
-  const [inventoryOpen, setInventoryOpen] = useState(false);
-  const [devSwitcherOpen, setDevSwitcherOpen] = useState(false);
+  const { ref: contentRowRef, height: contentRowHeight } = useResizeObserver<HTMLElement>();
 
   const handleInteract = (area: string) => {
     if (!isMiniGameId(area)) return;
@@ -39,7 +39,7 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
   }, []);
 
   const jumpToDevTarget = (area: string | null) => {
-    setDevSwitcherOpen(false);
+    bridgeActions.closeUiDialog();
     if (area === null) {
       bridgeActions.closeActiveMode();
       return;
@@ -59,109 +59,75 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
     activeMiniGameId ?? initialStartSceneId;
   const presentationMode: PhaserScenePresentationMode =
     getPhaserScenePresentationMode(presentationMiniGameId);
-  const gameShellLayout = getInteractiveGameShellLayout(presentationMode);
+  const gameShellLayout = getInteractiveGameShellLayout(presentationMode, contentRowHeight);
   const shouldReserveSceneHint = presentationMiniGameId === 'potassium';
   const sceneHintText = bridge.sceneHintText ?? 'Drag toward a target • Hold to recall';
+  const shouldShowNavigationHint = bridge.status === GameState.EXPLORING && !presentationMiniGameId;
+  const shouldShowFooterHint = shouldReserveSceneHint || shouldShowNavigationHint;
 
   return (
-    <div className="relative flex min-h-[100dvh] min-h-dvh w-full flex-col overflow-x-hidden bg-[#f4f1ea]">
-      {/* Mode switch link — unobtrusive, top-right */}
-      <Button
-        variant="floating"
-        size="sm"
-        onClick={onSwitchToStatic}
-        className="fixed right-2 top-[max(0.5rem,env(safe-area-inset-top,0px))] z-40 sm:right-4 sm:top-4 sm:px-3 sm:py-1.5 sm:text-xs"
-        aria-label="Switch to static portfolio"
-      >
-        <BookOpen className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
-        <span className="hidden sm:inline">Static mode</span>
-        <span className="sm:hidden">Static</span>
-      </Button>
-
-      <div className="fixed left-2 top-[max(0.5rem,env(safe-area-inset-top,0px))] z-40 sm:left-4 sm:top-4">
-        <div className="flex items-start gap-2">
-          <Button
-            variant="floating"
-            size="sm"
-            onClick={() => setInventoryOpen((v) => !v)}
-            className="sm:px-3 sm:py-1.5 sm:text-xs"
-            aria-label="Toggle inventory"
-          >
-            <Backpack className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
-            <span>Inventory</span>
-          </Button>
-          {import.meta.env.DEV && (
+    <div
+      className="relative grid min-h-[100dvh] min-h-dvh w-full overflow-x-hidden bg-[#f4f1ea]"
+      style={{
+        gridTemplateRows: shouldShowFooterHint ? 'auto minmax(0, 1fr) auto' : 'auto minmax(0, 1fr)',
+        gridTemplateColumns: 'minmax(20px, 1fr) minmax(0, 1000px) minmax(20px, 1fr)',
+        rowGap: '0.75rem',
+        columnGap: '0.75rem',
+        paddingBlockStart: 'max(0.5rem, env(safe-area-inset-top, 0px))',
+        paddingBlockEnd: 'max(0.75rem, env(safe-area-inset-bottom, 0px))'
+      }}
+    >
+      <header className="col-start-2 row-start-1 min-w-0">
+        <nav
+          className="flex min-w-0 items-center justify-between gap-2"
+          aria-label="Interactive controls"
+        >
+          <div className="flex min-w-0 items-center gap-2">
             <Button
               variant="floating"
               size="sm"
-              onClick={() => setDevSwitcherOpen((v) => !v)}
+              onClick={() => bridgeActions.openUiDialog('inventory')}
               className="sm:px-3 sm:py-1.5 sm:text-xs"
-              aria-label="Open dev scene switcher"
+              aria-haspopup="dialog"
+              aria-expanded={bridge.activeUiDialogId === 'inventory'}
+              aria-label="Open inventory"
             >
-              <Bug className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
-              <span>Dev</span>
+              <Backpack className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+              <span>Inventory</span>
             </Button>
-          )}
-        </div>
-        {inventoryOpen && (
-          <Panel className="mt-2 w-52 bg-[#fbfbf9]/95 p-2 backdrop-blur-sm">
-            <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-[#1a1a1a]">
-              Equipment
-            </p>
-            {bridge.inventory.ownedItemIds.includes('glasses') ? (
-              <label className="flex cursor-pointer items-center justify-between gap-2 rounded border border-[#1a1a1a]/40 bg-white/50 px-2 py-1.5 text-xs font-bold uppercase tracking-wide text-[#1a1a1a]">
-                <span>Glasses</span>
-                <input
-                  type="checkbox"
-                  checked={bridge.equipment.equippedItemIds.includes('glasses')}
-                  onChange={() => bridgeActions.toggleItemEquipped('glasses')}
-                  className="h-3.5 w-3.5 accent-[#1a1a1a]"
-                />
-              </label>
-            ) : bridge.inventory.ownedItemIds.length === 0 ? (
-              <p className="text-[11px] font-bold uppercase tracking-wide text-[#1a1a1a]/60">
-                No items yet
-              </p>
-            ) : null}
-            {bridge.inventory.ownedItemIds.includes('circuit') && (
-              <div className="mt-1 rounded border border-[#1a1a1a]/40 bg-white/50 px-2 py-1.5 text-xs font-bold uppercase tracking-wide text-[#1a1a1a]">
-                Circuit
-              </div>
-            )}
-          </Panel>
-        )}
-        {import.meta.env.DEV && devSwitcherOpen && (
-          <Panel className="mt-2 w-64 bg-[#fbfbf9]/95 p-2 backdrop-blur-sm">
-            <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#1a1a1a]">
-              Dev scene switcher
-            </p>
-            <div className="grid grid-cols-2 gap-1.5">
-              <button
-                type="button"
-                onClick={() => jumpToDevTarget(null)}
-                className="rounded border border-[#1a1a1a]/40 bg-white/60 px-2 py-1.5 text-left text-[11px] font-bold uppercase tracking-wide text-[#1a1a1a] hover:bg-white"
+            {import.meta.env.DEV && (
+              <Button
+                variant="floating"
+                size="sm"
+                onClick={() => bridgeActions.openUiDialog('devSwitcher')}
+                className="sm:px-3 sm:py-1.5 sm:text-xs"
+                aria-haspopup="dialog"
+                aria-expanded={bridge.activeUiDialogId === 'devSwitcher'}
+                aria-label="Open dev scene switcher"
               >
-                City
-              </button>
-              {getAllMiniGames().map((miniGame) => (
-                <button
-                  key={miniGame.id}
-                  type="button"
-                  onClick={() => jumpToDevTarget(miniGame.id)}
-                  className="rounded border border-[#1a1a1a]/40 bg-white/60 px-2 py-1.5 text-left text-[11px] font-bold uppercase tracking-wide text-[#1a1a1a] hover:bg-white"
-                >
-                  {miniGame.name}
-                </button>
-              ))}
-            </div>
-          </Panel>
-        )}
-      </div>
+                <Bug className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+                <span>Dev</span>
+              </Button>
+            )}
+          </div>
+          <Button
+            variant="floating"
+            size="sm"
+            onClick={onSwitchToStatic}
+            className="sm:px-3 sm:py-1.5 sm:text-xs"
+            aria-label="Switch to static portfolio"
+          >
+            <BookOpen className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+            <span className="hidden sm:inline">Static mode</span>
+            <span className="sm:hidden">Static</span>
+          </Button>
+        </nav>
+      </header>
 
-      {/* Game area: scales down on narrow viewports; leaves room for hints + safe areas */}
-      <div className="flex min-h-0 flex-1 w-full flex-col items-center justify-center px-1 pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-[max(5.75rem,env(safe-area-inset-top,0px))] sm:px-3 md:px-4 md:pb-24 md:pt-[6.25rem]">
+      <main ref={contentRowRef} className="col-start-2 row-start-2 flex min-h-0 min-w-0 items-center justify-center">
         <div
-          className={`relative max-w-[1000px] shrink-0 shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] ${gameShellLayout.shellClassName}`}
+          data-testid="interactive-game-shell"
+          className={`relative shrink-0 shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] ${gameShellLayout.shellClassName}`}
           style={gameShellLayout.shellStyle}
         >
           <div
@@ -180,30 +146,114 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
               />
             </div>
           </div>
-          {shouldReserveSceneHint && (
-            <Panel className="mt-4 bg-[#fbfbf9]/90 px-3 py-2 text-center backdrop-blur-sm">
+        </div>
+      </main>
+
+      {shouldShowFooterHint && (
+        <footer className="col-start-2 row-start-3 min-w-0">
+          <Panel className="mx-auto w-full max-w-lg bg-[#fbfbf9]/85 px-3 py-2 text-center opacity-80 backdrop-blur-sm transition-opacity hover:opacity-100 md:px-4">
+            {shouldReserveSceneHint ? (
               <p className="text-[10px] font-bold uppercase leading-snug tracking-widest text-[#1a1a1a] md:text-xs">
                 {sceneHintText}
               </p>
-            </Panel>
-          )}
-        </div>
-      </div>
+            ) : (
+              <>
+                <p className="text-[10px] font-bold uppercase leading-snug tracking-widest text-[#1a1a1a] md:hidden">
+                  {TEXTS.navigation.hintsCompact}
+                </p>
+                <p className="hidden text-sm font-bold uppercase tracking-widest text-[#1a1a1a] md:block">
+                  {TEXTS.navigation.hints}
+                </p>
+              </>
+            )}
+          </Panel>
+        </footer>
+      )}
 
       {/* Interactive Overlay */}
       {bridge.status === GameState.IN_MINIGAME &&
         activeMiniGame &&
         activeMiniGame.type === MiniGameType.REACT_OVERLAY &&
         ActiveOverlayComponent && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-2 backdrop-blur-sm animate-in fade-in duration-300 sm:items-center sm:p-4">
-          <OverlayCard
-            title={activeMiniGame.name}
-            description={activeMiniGame.description}
-            onClose={closeOverlay}
-          >
-            <ActiveOverlayComponent />
-          </OverlayCard>
-        </div>
+        <ModalShell
+          title={activeMiniGame.name}
+          hasDescription={Boolean(activeMiniGame.description)}
+          onClose={closeOverlay}
+        >
+          {({ titleId, descriptionId }) => (
+            <OverlayCard
+              title={activeMiniGame.name}
+              description={activeMiniGame.description}
+              onClose={closeOverlay}
+              titleId={titleId}
+              descriptionId={descriptionId}
+            >
+              <ActiveOverlayComponent />
+            </OverlayCard>
+          )}
+        </ModalShell>
+      )}
+
+      {bridge.activeUiDialogId === 'inventory' && (
+        <ModalShell title="Inventory" onClose={() => bridgeActions.closeUiDialog()}>
+          {({ titleId }) => (
+            <DialogCard title="Inventory" onClose={() => bridgeActions.closeUiDialog()} titleId={titleId}>
+              <div className="grid gap-2">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[#1a1a1a]">
+                  Equipment
+                </p>
+                {bridge.inventory.ownedItemIds.includes('glasses') ? (
+                  <label className="flex cursor-pointer items-center justify-between gap-2 rounded border border-[#1a1a1a]/40 bg-white/50 px-3 py-2 text-xs font-bold uppercase tracking-wide text-[#1a1a1a]">
+                    <span>Glasses</span>
+                    <input
+                      type="checkbox"
+                      checked={bridge.equipment.equippedItemIds.includes('glasses')}
+                      onChange={() => bridgeActions.toggleItemEquipped('glasses')}
+                      className="h-4 w-4 accent-[#1a1a1a]"
+                    />
+                  </label>
+                ) : bridge.inventory.ownedItemIds.length === 0 ? (
+                  <p className="text-[11px] font-bold uppercase tracking-wide text-[#1a1a1a]/60">
+                    No items yet
+                  </p>
+                ) : null}
+                {bridge.inventory.ownedItemIds.includes('circuit') && (
+                  <div className="rounded border border-[#1a1a1a]/40 bg-white/50 px-3 py-2 text-xs font-bold uppercase tracking-wide text-[#1a1a1a]">
+                    Circuit
+                  </div>
+                )}
+              </div>
+            </DialogCard>
+          )}
+        </ModalShell>
+      )}
+
+      {import.meta.env.DEV && bridge.activeUiDialogId === 'devSwitcher' && (
+        <ModalShell title="Dev scene switcher" onClose={() => bridgeActions.closeUiDialog()}>
+          {({ titleId }) => (
+            <DialogCard title="Dev scene switcher" onClose={() => bridgeActions.closeUiDialog()} titleId={titleId}>
+              <div className="grid grid-cols-2 gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => jumpToDevTarget(null)}
+                  className="rounded border border-[#1a1a1a]/40 bg-white/60 px-2 py-1.5 text-left text-[11px] font-bold uppercase tracking-wide text-[#1a1a1a] hover:bg-white"
+                >
+                  City
+                </button>
+                {getAllMiniGames().map((miniGame) => (
+                  <button
+                    key={miniGame.id}
+                    type="button"
+                    onClick={() => jumpToDevTarget(miniGame.id)}
+                    className="rounded border border-[#1a1a1a]/40 bg-white/60 px-2 py-1.5 text-left text-[11px] font-bold uppercase tracking-wide text-[#1a1a1a] hover:bg-white"
+                  >
+                    {miniGame.name}
+                  </button>
+                ))}
+              </div>
+            </DialogCard>
+          )}
+        </ModalShell>
       )}
 
       {bridge.loadingMiniGameId && (
@@ -216,17 +266,6 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
         </div>
       )}
 
-      {/* Floating UI Hints (desktop / tablet) */}
-      {bridge.status === GameState.EXPLORING && !presentationMiniGameId && (
-        <Panel className="fixed bottom-[max(1rem,env(safe-area-inset-bottom,0px))] left-1/2 z-40 w-[min(calc(100%_-_1.5rem),26rem)] -translate-x-1/2 bg-[#fbfbf9]/85 px-3 py-2 text-center opacity-80 backdrop-blur-sm transition-opacity hover:opacity-100 md:bottom-6 md:w-auto md:max-w-lg md:px-4">
-          <p className="text-[10px] font-bold uppercase leading-snug tracking-widest text-[#1a1a1a] md:hidden">
-            {TEXTS.navigation.hintsCompact}
-          </p>
-          <p className="hidden text-sm font-bold uppercase tracking-widest text-[#1a1a1a] md:block">
-            {TEXTS.navigation.hints}
-          </p>
-        </Panel>
-      )}
     </div>
   );
 }
