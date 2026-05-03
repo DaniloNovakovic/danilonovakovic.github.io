@@ -250,6 +250,21 @@ export function resolvePotassiumWaveClear(input: PotassiumWaveClearInput): Potas
   };
 }
 
+export function resolvePotassiumDevSkipWave(state: PotassiumSessionState): PotassiumSessionResult {
+  if (state.gameState !== 'PLAYING' || isPotassiumBossWave(state.wave)) {
+    return { state, commands: [] };
+  }
+  const nextState = {
+    ...state,
+    pendingRows: 0,
+    waveAdvancing: true
+  };
+  return withHud(nextState, [
+    { type: 'setHint', text: 'Dev skip • Choose a test upgrade' },
+    { type: 'scheduleUpgradeChoices' }
+  ]);
+}
+
 export function showPotassiumDraftChoices(state: PotassiumSessionState): PotassiumSessionResult {
   const choices = getPotassiumDraftChoices(state.skillRanks, state.genericRanks, state.wave);
   if (choices.length === 0) {

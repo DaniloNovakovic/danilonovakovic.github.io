@@ -61,7 +61,6 @@ describe('potassium slip waves', () => {
     expect(getUnlockedPotassiumEnemies(1)).toEqual(['intern']);
     expect(getUnlockedPotassiumEnemies(2)).toContain('scope');
     expect(getUnlockedPotassiumEnemies(3)).toContain('wall');
-    expect(getUnlockedPotassiumEnemies(5)).toContain('meeting');
     expect(getUnlockedPotassiumEnemies(5)).toContain('splitter');
     expect(getUnlockedPotassiumEnemies(7)).toContain('deadline');
     expect(getUnlockedPotassiumEnemies(8)).toContain('shield');

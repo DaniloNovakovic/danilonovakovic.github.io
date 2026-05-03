@@ -97,7 +97,6 @@ export class PotassiumSlipRenderer {
   ensureTextures(): void {
     if (!this.scene.textures.exists('potassium_enemy_intern')) this.createInternTexture();
     if (!this.scene.textures.exists('potassium_enemy_scope')) this.createScopeTexture();
-    if (!this.scene.textures.exists('potassium_enemy_meeting')) this.createMeetingTexture();
     if (!this.scene.textures.exists('potassium_enemy_deadline')) this.createDeadlineTexture();
     if (!this.scene.textures.exists('potassium_enemy_wall')) this.createWallTexture();
     if (!this.scene.textures.exists('potassium_enemy_hard_wall')) this.createHardWallTexture();
@@ -314,6 +313,8 @@ export class PotassiumSlipRenderer {
     config: PotassiumEnemyAttachmentConfig
   ): void {
     enemy.setData('damageState', 'healthy' satisfies PotassiumEnemyHealthState);
+    enemy.setData('damageCueBaseScaleX', enemy.scaleX);
+    enemy.setData('damageCueBaseScaleY', enemy.scaleY);
     enemy.setData('damageOverlay', this.createDamageOverlay(enemy));
     if (config.shieldSide) {
       enemy.setData('shieldSide', config.shieldSide);
@@ -377,14 +378,26 @@ export class PotassiumSlipRenderer {
       ease: 'Sine.easeOut',
       onComplete: () => ring.destroy()
     });
-    this.scene.tweens.add({
+    const baseScaleX = (enemy.getData('damageCueBaseScaleX') as number | undefined) ?? enemy.scaleX;
+    const baseScaleY = (enemy.getData('damageCueBaseScaleY') as number | undefined) ?? enemy.scaleY;
+    const previousPulse = enemy.getData('damageCueTween') as Phaser.Tweens.Tween | undefined;
+    previousPulse?.stop();
+    enemy.setScale(baseScaleX, baseScaleY);
+    const pulse = this.scene.tweens.add({
       targets: enemy,
-      scaleX: enemy.scaleX * 1.06,
-      scaleY: enemy.scaleY * 1.06,
+      scaleX: baseScaleX * 1.06,
+      scaleY: baseScaleY * 1.06,
       duration: 55,
       yoyo: true,
-      ease: 'Sine.easeOut'
+      ease: 'Sine.easeOut',
+      onComplete: () => {
+        if (enemy.active && !enemy.getData('dying')) {
+          enemy.setScale(baseScaleX, baseScaleY);
+        }
+        enemy.setData('damageCueTween', undefined);
+      }
     });
+    enemy.setData('damageCueTween', pulse);
   }
 
   refreshProjectileVisuals(
@@ -641,23 +654,6 @@ export class PotassiumSlipRenderer {
     g.destroy();
   }
 
-  private createMeetingTexture(): void {
-    const g = this.scene.make.graphics({ x: 0, y: 0 });
-    g.fillStyle(0xe5e7eb, 1);
-    g.lineStyle(5, 0x1a1a1a, 1);
-    g.fillRoundedRect(4, 8, 70, 44, 4);
-    g.strokeRoundedRect(4, 8, 70, 44, 4);
-    g.lineStyle(2, 0x1a1a1a, 0.55);
-    g.beginPath();
-    g.moveTo(14, 22);
-    g.lineTo(64, 22);
-    g.moveTo(14, 34);
-    g.lineTo(52, 34);
-    g.strokePath();
-    g.generateTexture('potassium_enemy_meeting', 78, 60);
-    g.destroy();
-  }
-
   private createDeadlineTexture(): void {
     const g = this.scene.make.graphics({ x: 0, y: 0 });
     g.fillStyle(0xf97316, 0.9);
@@ -714,19 +710,26 @@ export class PotassiumSlipRenderer {
     const g = this.scene.make.graphics({ x: 0, y: 0 });
     g.fillStyle(0x1a1a1a, 0.08);
     g.fillRoundedRect(7, 5, 66, 52, 5);
-    g.fillStyle(0xa8a29e, 1);
+    g.fillStyle(0xfbfbf9, 1);
     g.lineStyle(5, 0x1a1a1a, 1);
     g.fillRoundedRect(5, 7, 70, 48, 5);
     g.strokeRoundedRect(5, 7, 70, 48, 5);
-    g.lineStyle(3, 0x1a1a1a, 0.75);
+    g.fillStyle(0x1a1a1a, 0.12);
+    g.fillRoundedRect(11, 13, 58, 36, 4);
+    g.lineStyle(3, 0x1a1a1a, 0.9);
     g.beginPath();
     g.moveTo(18, 17);
     g.lineTo(62, 45);
     g.moveTo(62, 17);
     g.lineTo(18, 45);
     g.strokePath();
-    g.fillStyle(0xfbfbf9, 0.68);
-    g.fillRect(22, 25, 36, 12);
+    g.fillStyle(0xfacc15, 0.9);
+    g.fillRoundedRect(19, 23, 42, 16, 3);
+    g.lineStyle(2, 0x1a1a1a, 0.95);
+    g.strokeRoundedRect(19, 23, 42, 16, 3);
+    g.fillStyle(0x1a1a1a, 1);
+    g.fillRect(31, 27, 4, 8);
+    g.fillRect(45, 27, 4, 8);
     g.generateTexture('potassium_enemy_hard_wall', 80, 62);
     g.destroy();
   }

@@ -3,6 +3,7 @@ import {
   createPotassiumSession,
   markPotassiumRowSpawned,
   resolvePotassiumDraftChoice,
+  resolvePotassiumDevSkipWave,
   resolvePotassiumEnemyEscaped,
   resolvePotassiumEnemyKilled,
   resolvePotassiumOutcome,
@@ -104,6 +105,25 @@ describe('potassium slip session', () => {
     const clear = resolvePotassiumWaveClear({ state: noPendingRows, hasLivingEnemies: false });
     expect(clear.state.waveAdvancing).toBe(true);
     expect(commandTypes(clear.commands)).toEqual(['setHint', 'scheduleUpgradeChoices']);
+  });
+
+  it('dev wave skip guards current wave and schedules draft choices', () => {
+    const result = resolvePotassiumDevSkipWave({
+      ...createPotassiumSession(),
+      gameState: 'PLAYING',
+      wave: 5,
+      pendingRows: 3
+    });
+
+    expect(result.state).toMatchObject({
+      pendingRows: 0,
+      waveAdvancing: true
+    });
+    expect(commandTypes(result.commands)).toEqual([
+      'setHint',
+      'scheduleUpgradeChoices',
+      'updateHud'
+    ]);
   });
 
   it('falls back to generic drafts when all skill choices are maxed', () => {

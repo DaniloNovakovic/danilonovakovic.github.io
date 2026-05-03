@@ -1,7 +1,6 @@
 export type PotassiumEnemyKind =
   | 'intern'
   | 'scope'
-  | 'meeting'
   | 'deadline'
   | 'wall'
   | 'hardWall'
@@ -384,17 +383,17 @@ function placeEnemyInRow(row: PotassiumWaveCell[], lane: number, kind: Potassium
 function pickBasicEnemy(wave: number, seed: number): PotassiumEnemyKind {
   if (wave <= 1) return 'intern';
   if (wave <= 4) return (seed + wave) % 3 === 0 ? 'scope' : 'intern';
-  if (wave <= 6) return ['intern', 'scope', 'meeting', 'splitter'][(seed + wave) % 4] as PotassiumEnemyKind;
-  if (wave <= 7) return ['intern', 'scope', 'meeting', 'deadline', 'splitter'][(seed + wave) % 5] as PotassiumEnemyKind;
-  return ['intern', 'scope', 'meeting', 'deadline', 'splitter', 'shield'][(seed + wave) % 6] as PotassiumEnemyKind;
+  if (wave <= 6) return ['intern', 'scope', 'splitter'][(seed + wave) % 3] as PotassiumEnemyKind;
+  if (wave <= 7) return ['intern', 'scope', 'deadline', 'splitter'][(seed + wave) % 4] as PotassiumEnemyKind;
+  return ['intern', 'scope', 'deadline', 'splitter', 'shield'][(seed + wave) % 5] as PotassiumEnemyKind;
 }
 
 function pickPressureEnemy(wave: number, seed: number): PotassiumEnemyKind {
   const pool: PotassiumEnemyKind[] = wave >= 8
-    ? ['scope', 'meeting', 'deadline', 'wall', 'hardWall', 'splitter', 'shield']
+    ? ['scope', 'deadline', 'hardWall', 'wall', 'splitter', 'shield']
     : wave >= 7
-      ? ['scope', 'meeting', 'deadline', 'wall', 'splitter', 'shield']
-      : ['intern', 'scope', 'meeting', 'wall', 'splitter'];
+      ? ['scope', 'deadline', 'wall', 'splitter', 'shield']
+      : ['intern', 'scope', 'wall', 'splitter'];
   return pool[(seed * 3 + wave) % pool.length];
 }
 

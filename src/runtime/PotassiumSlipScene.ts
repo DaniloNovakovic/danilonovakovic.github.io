@@ -60,6 +60,7 @@ import {
   getPotassiumSessionSkillRank,
   markPotassiumRowSpawned,
   resolvePotassiumDraftChoice,
+  resolvePotassiumDevSkipWave,
   resolvePotassiumEnemyEscaped,
   resolvePotassiumEnemyKilled,
   resolvePotassiumTerminalAction,
@@ -124,8 +125,9 @@ const SIDE_BOUNCE_MARGIN = 32;
 const BANANA_RICOCHET_MIN_SPEED = 360;
 const BANANA_RICOCHET_BOOST = 1.08;
 const CLONE_RICOCHET_MAX_SPEED = 660;
-const NON_BOSS_ENEMY_SPEED = 64;
+const NON_BOSS_ENEMY_SPEED = 54;
 const ROW_SPAWN_DELAY_MS = 900;
+const MID_GAME_ROW_SPAWN_DELAY_MS = 1050;
 const TRAIL_DROP_INTERVAL_MS = 180;
 const FIRE_TRAIL_LIFETIME_MS = 1500;
 const GHOST_BEAM_LIFETIME_MS = 190;
@@ -154,14 +156,6 @@ const ENEMY_CONFIGS: Record<EnemyKind, EnemyConfig> = {
     texture: 'potassium_enemy_scope',
     scale: 0.95
   },
-  meeting: {
-    label: 'Meeting Brick',
-    hp: 6,
-    score: 3,
-    speed: 38,
-    texture: 'potassium_enemy_meeting',
-    scale: 1
-  },
   deadline: {
     label: 'Deadline Drone',
     hp: 3,
@@ -171,7 +165,7 @@ const ENEMY_CONFIGS: Record<EnemyKind, EnemyConfig> = {
     scale: 0.9
   },
   wall: {
-    label: 'Filing Wall',
+    label: 'Wooden Wall',
     hp: 14,
     score: 4,
     speed: 30,
@@ -179,7 +173,7 @@ const ENEMY_CONFIGS: Record<EnemyKind, EnemyConfig> = {
     scale: 0.78
   },
   hardWall: {
-    label: 'Hard Filing Wall',
+    label: 'Unbreakable Wall',
     hp: 999,
     score: 0,
     speed: 30,
@@ -231,6 +225,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
   private fireCells = new Set<string>();
   private activeBoss?: EnemySprite;
   private bossState?: PotassiumBossState;
+  private rowSpawnTimers: Phaser.Time.TimerEvent[] = [];
   private combatIdCounter: number = 0;
 
   private onClose?: () => void;
@@ -410,6 +405,12 @@ export class PotassiumSlipScene extends Phaser.Scene {
       }
     });
 
+    if (import.meta.env.DEV) {
+      this.input.keyboard?.on('keydown-N', () => {
+        this.skipCurrentWaveForDev();
+      });
+    }
+
     this.input.keyboard?.on('keydown-ESC', () => {
       this.onClose?.();
     });
@@ -424,6 +425,19 @@ export class PotassiumSlipScene extends Phaser.Scene {
 
   private startEndlessMode(): void {
     this.applySessionResult(startPotassiumEndless(this.session));
+  }
+
+  private skipCurrentWaveForDev(): void {
+    if (this.session.gameState !== 'PLAYING') return;
+    const result = resolvePotassiumDevSkipWave(this.session);
+    if (result.commands.length === 0) return;
+    this.cancelControl();
+    this.clearScheduledWaveRows();
+    this.enemies.clear(true, true);
+    this.bossBlockers.clear(true, true);
+    this.activeBoss = undefined;
+    this.bossState = undefined;
+    this.applySessionResult(result);
   }
 
   private applySessionResult(result: { state: PotassiumSessionState; commands: readonly PotassiumSessionCommand[] }): void {
@@ -448,8 +462,13 @@ export class PotassiumSlipScene extends Phaser.Scene {
       } else if (command.type === 'spawnBoss') {
         this.time.delayedCall(350, () => this.spawnEnemy('boss', 0));
       } else if (command.type === 'scheduleWaveRows') {
+        this.clearScheduledWaveRows();
         command.rows.forEach((row, rowIndex) => {
-          this.time.delayedCall(rowIndex * ROW_SPAWN_DELAY_MS, () => this.spawnEnemyRow(row, rowIndex));
+          const timer = this.time.delayedCall(rowIndex * this.getRowSpawnDelayMs(), () => {
+            this.rowSpawnTimers = this.rowSpawnTimers.filter((entry) => entry !== timer);
+            this.spawnEnemyRow(row, rowIndex);
+          });
+          this.rowSpawnTimers.push(timer);
         });
       } else if (command.type === 'scheduleUpgradeChoices') {
         this.time.delayedCall(UPGRADE_CHOICE_DELAY_MS, () => {
@@ -493,6 +512,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
   }
 
   private resetBoardObjects(): void {
+    this.clearScheduledWaveRows();
     this.destroyProjectileVisuals(this.banana);
     this.destroyAllCloneVisuals();
     this.enemies?.clear(true, true);
@@ -521,6 +541,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
 
   private clearBoardForOutcome(): void {
     this.setBananaRecallVisual(false);
+    this.clearScheduledWaveRows();
     this.destroyAllCloneVisuals();
     this.enemies.clear(true, true);
     this.clones.clear(true, true);
@@ -746,7 +767,19 @@ export class PotassiumSlipScene extends Phaser.Scene {
 
   private spawnWave(waveNumber: number): void {
     this.cancelControl();
+    this.clearScheduledWaveRows();
     this.applySessionResult(spawnPotassiumWave(this.session, waveNumber));
+  }
+
+  private clearScheduledWaveRows(): void {
+    this.rowSpawnTimers.forEach((timer) => timer.remove(false));
+    this.rowSpawnTimers = [];
+  }
+
+  private getRowSpawnDelayMs(): number {
+    return this.session.wave >= 5 && this.session.wave <= 6
+      ? MID_GAME_ROW_SPAWN_DELAY_MS
+      : ROW_SPAWN_DELAY_MS;
   }
 
   private spawnEnemyRow(row: readonly WaveCell[], rowIndex: number = 0): void {
@@ -831,7 +864,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
     if (kind === 'scope') {
       enemy.setAngularVelocity(Phaser.Math.Between(-70, 70));
     }
-    if (kind === 'meeting' || kind === 'wall' || kind === 'hardWall') {
+    if (kind === 'wall' || kind === 'hardWall') {
       enemy.setImmovable(true);
     }
     this.fitEnemyBodyToOneCell(enemy, kind);
@@ -1062,6 +1095,8 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.spreadPoisonOnDeath(enemy);
     this.spawnSplitterChildren(enemy);
     enemy.setData('dying', true);
+    const damageCueTween = enemy.getData('damageCueTween') as Phaser.Tweens.Tween | undefined;
+    damageCueTween?.stop();
     enemy.body.enable = false;
     const killResult = resolvePotassiumEnemyKilled(this.session, config.score, kind);
     if (kind !== 'boss') {
