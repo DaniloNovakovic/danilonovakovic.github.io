@@ -8,10 +8,6 @@ import { TextureGenerator } from './textures/TextureGenerator';
 import {
   getPotassiumExplosionRadius,
   getPotassiumFireCellKey,
-  getPotassiumShieldSide,
-  getPotassiumSplitterSpawnColumns,
-  getScaledPotassiumEnemyHp,
-  POTASSIUM_COLUMN_COUNT,
   type PotassiumShieldSide as ShieldSide,
   type PotassiumGenericUpgradeKind as GenericUpgradeKind,
   type PotassiumSkillRank as SkillRank,
@@ -72,22 +68,22 @@ import {
   type PotassiumSessionCommand,
   type PotassiumSessionState
 } from './potassiumSlipSession';
+import {
+  getPotassiumEnemyConfig,
+  POTASSIUM_NON_BOSS_ENEMY_SPEED,
+  resolvePotassiumEnemySetupFacts,
+  resolvePotassiumEnemySpawnFacts,
+  resolvePotassiumSplitterChildFacts
+} from './potassiumSlipEnemyFactory';
+import {
+  createPotassiumProjectileControl,
+  POTASSIUM_PROJECTILE_CONTROL_DEFAULTS,
+  type PotassiumProjectileControl,
+  type PotassiumProjectileControlCommand
+} from './potassiumSlipProjectileControl';
 
-type ControlState = 'idle' | 'aiming' | 'recalling';
 type EnemySprite = Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
 type ProjectileSprite = Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
-
-interface EnemyConfig {
-  label: string;
-  hp: number;
-  score: number;
-  speed: number;
-  texture: string;
-  scale: number;
-  indestructible?: boolean;
-  splitsOnDeath?: boolean;
-  shielded?: boolean;
-}
 
 const ARENA = {
   left: 275,
@@ -112,20 +108,13 @@ const LAUNCH_PAD = {
   radius: 44
 } as const;
 
-const MAIN_BANANA_MAX_SPEED = 760;
-const LAUNCH_POWER = 6.2;
-const LAUNCH_MAX_DRAG = 130;
+const LAUNCH_MAX_DRAG = POTASSIUM_PROJECTILE_CONTROL_DEFAULTS.launchMaxDrag;
 const HIT_COOLDOWN_MS = 180;
-const RECALL_SPEED = 720;
-const RECALL_MODE: 'direct' | 'elastic' = 'direct';
-const RECALL_ELASTIC_PULL = 980;
-const RECALL_ELASTIC_MAX_SPEED = 780;
 const WAVE_ADVANCE_DELAY_MS = 900;
 const SIDE_BOUNCE_MARGIN = 32;
 const BANANA_RICOCHET_MIN_SPEED = 360;
 const BANANA_RICOCHET_BOOST = 1.08;
 const CLONE_RICOCHET_MAX_SPEED = 660;
-const NON_BOSS_ENEMY_SPEED = 54;
 const ROW_SPAWN_DELAY_MS = 900;
 const MID_GAME_ROW_SPAWN_DELAY_MS = 1050;
 const TRAIL_DROP_INTERVAL_MS = 180;
@@ -139,76 +128,6 @@ const CELL_FIRE_ROW_HEIGHT = 48;
 const BOSS_ORBIT_RADIUS = 78;
 const BOSS_ORBIT_SPEED = 0.0017;
 
-const ENEMY_CONFIGS: Record<EnemyKind, EnemyConfig> = {
-  intern: {
-    label: 'Intern Bug',
-    hp: 2,
-    score: 1,
-    speed: 74,
-    texture: 'potassium_enemy_intern',
-    scale: 0.92
-  },
-  scope: {
-    label: 'Scope Blob',
-    hp: 4,
-    score: 2,
-    speed: 54,
-    texture: 'potassium_enemy_scope',
-    scale: 0.95
-  },
-  deadline: {
-    label: 'Deadline Drone',
-    hp: 3,
-    score: 2,
-    speed: 104,
-    texture: 'potassium_enemy_deadline',
-    scale: 0.9
-  },
-  wall: {
-    label: 'Wooden Wall',
-    hp: 14,
-    score: 4,
-    speed: 30,
-    texture: 'potassium_enemy_wall',
-    scale: 0.78
-  },
-  hardWall: {
-    label: 'Unbreakable Wall',
-    hp: 999,
-    score: 0,
-    speed: 30,
-    texture: 'potassium_enemy_hard_wall',
-    scale: 0.78,
-    indestructible: true
-  },
-  splitter: {
-    label: 'Splitter Memo',
-    hp: 5,
-    score: 3,
-    speed: 54,
-    texture: 'potassium_enemy_splitter',
-    scale: 0.9,
-    splitsOnDeath: true
-  },
-  shield: {
-    label: 'Shielded Form',
-    hp: 7,
-    score: 4,
-    speed: 46,
-    texture: 'potassium_enemy_shield',
-    scale: 0.92,
-    shielded: true
-  },
-  boss: {
-    label: 'Potassium Compliance Officer',
-    hp: 92,
-    score: 12,
-    speed: 8,
-    texture: 'potassium_enemy_boss',
-    scale: 0.72
-  }
-};
-
 export class PotassiumSlipScene extends Phaser.Scene {
   private banana!: ProjectileSprite;
   private enemies!: Phaser.Physics.Arcade.Group;
@@ -218,10 +137,9 @@ export class PotassiumSlipScene extends Phaser.Scene {
   private aimLine!: Phaser.GameObjects.Graphics;
   private tetherLine!: Phaser.GameObjects.Graphics;
   private potassiumRenderer!: PotassiumSlipRenderer;
+  private projectileControl: PotassiumProjectileControl;
 
   private session: PotassiumSessionState = createPotassiumSession();
-  private controlState: ControlState = 'idle';
-  private aimPointerId: number | null = null;
   private fireCells = new Set<string>();
   private activeBoss?: EnemySprite;
   private bossState?: PotassiumBossState;
@@ -233,6 +151,10 @@ export class PotassiumSlipScene extends Phaser.Scene {
 
   constructor() {
     super({ key: 'potassium' });
+    this.projectileControl = createPotassiumProjectileControl({
+      launchPad: LAUNCH_PAD,
+      ...POTASSIUM_PROJECTILE_CONTROL_DEFAULTS
+    });
   }
 
   preload(): void {
@@ -293,8 +215,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
 
   private resetRunState(): void {
     this.session = createPotassiumSession();
-    this.controlState = 'idle';
-    this.aimPointerId = null;
+    this.projectileControl.reset();
     this.combatIdCounter = 0;
     this.bossState = undefined;
     this.fireCells.clear();
@@ -344,7 +265,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
       this.damageEnemy(enemy as EnemySprite, this.getProjectileEffectMultiplier(_zone as ProjectileSprite), 'fire');
     });
     this.physics.add.overlap(this.banana, this.bossBlockers, (_banana, blocker) => {
-      if (this.controlState === 'recalling') {
+      if (this.projectileControl.isRecalling()) {
         this.banana.setVelocity(this.banana.body.velocity.x * 1.01, this.banana.body.velocity.y * 1.01);
         return;
       }
@@ -378,10 +299,10 @@ export class PotassiumSlipScene extends Phaser.Scene {
     });
 
     this.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
-      if (this.aimPointerId !== pointer.id) return;
-      if (this.controlState === 'aiming') {
+      if (this.projectileControl.getSnapshot().pointerId !== pointer.id) return;
+      if (this.projectileControl.isAiming()) {
         this.releaseBanana(pointer);
-      } else if (this.controlState === 'recalling') {
+      } else if (this.projectileControl.isRecalling()) {
         this.cancelControl();
         this.setBananaRecallVisual(false);
       }
@@ -417,8 +338,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
   }
 
   private startGame(): void {
-    this.controlState = 'idle';
-    this.aimPointerId = null;
+    this.projectileControl.reset();
     this.combatIdCounter = 0;
     this.applySessionResult(startPotassiumCampaign(this.session));
   }
@@ -552,44 +472,24 @@ export class PotassiumSlipScene extends Phaser.Scene {
   }
 
   private beginAiming(pointer: Phaser.Input.Pointer, pointerId: number = pointer.id): void {
-    this.controlState = 'aiming';
-    this.aimPointerId = pointerId;
-    this.setBananaRecallVisual(false);
-    this.banana.setPosition(LAUNCH_PAD.x, LAUNCH_PAD.y);
-    this.banana.setVelocity(0, 0);
-    this.banana.setAngularVelocity(0);
-    this.banana.setData('canDuplicate', true);
-    this.banana.setData('nextTrailDropAt', 0);
-    this.banana.setData('effectMultiplier', 1);
-    this.banana.setData('canApplyHitProcs', true);
+    void pointer;
+    this.applyProjectileControlCommands(this.projectileControl.beginAiming(pointerId));
   }
 
   private beginRecall(pointer: Phaser.Input.Pointer): void {
-    this.controlState = 'recalling';
-    this.aimPointerId = pointer.id;
-    this.setBananaRecallVisual(true);
+    this.applyProjectileControlCommands(this.projectileControl.beginRecall(pointer.id));
   }
 
   private releaseBanana(pointer: Phaser.Input.Pointer): void {
-    const dragVector = new Phaser.Math.Vector2(pointer.x - this.banana.x, pointer.y - this.banana.y);
-    const dragLength = Phaser.Math.Clamp(dragVector.length(), 20, LAUNCH_MAX_DRAG);
-    if (dragVector.length() < 18) {
-      this.cancelControl();
-      return;
-    }
-    const speed = Phaser.Math.Clamp(dragLength * LAUNCH_POWER, 210, this.getMaxBananaSpeed());
-    dragVector.normalize();
-    this.banana.setVelocity(dragVector.x * speed, dragVector.y * speed);
-    this.banana.setAngularVelocity(Phaser.Math.Between(-520, 520));
-    this.cancelControl();
-    this.setBananaRecallVisual(false);
+    this.applyProjectileControlCommands(this.projectileControl.release({
+      pointer: { x: pointer.x, y: pointer.y },
+      banana: { x: this.banana.x, y: this.banana.y },
+      maxSpeed: this.getMaxBananaSpeed()
+    }));
   }
 
   private cancelControl(): void {
-    this.controlState = 'idle';
-    this.aimPointerId = null;
-    this.aimLine.clear();
-    this.tetherLine.clear();
+    this.applyProjectileControlCommands(this.projectileControl.cancel());
   }
 
   private setBananaRecallVisual(active: boolean): void {
@@ -598,50 +498,53 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.refreshBananaUpgradeVisuals(this.banana);
   }
 
-  private updateControlState(): void {
-    if (this.controlState === 'recalling') {
-      if (RECALL_MODE === 'direct') {
-        this.physics.moveTo(this.banana, LAUNCH_PAD.x, LAUNCH_PAD.y, RECALL_SPEED);
-      } else {
-        this.applyElasticRecall();
-      }
-      this.banana.setAngularVelocity(Phaser.Math.Clamp(this.banana.body.velocity.x * 2, -520, 520));
-      this.drawRecallTether();
-      if (this.banana.y >= LAUNCH_PAD.y - 4 && Phaser.Math.Distance.Between(this.banana.x, this.banana.y, LAUNCH_PAD.x, LAUNCH_PAD.y) <= 52) {
+  private applyProjectileControlCommands(commands: readonly PotassiumProjectileControlCommand[]): void {
+    commands.forEach((command) => {
+      if (command.type === 'clearAim') {
+        this.aimLine.clear();
+      } else if (command.type === 'clearTether') {
+        this.tetherLine.clear();
+      } else if (command.type === 'drawAim') {
+        this.drawAimArrow(command.from.x, command.from.y, command.to.x, command.to.y);
+      } else if (command.type === 'drawRecallTether') {
+        this.drawRecallTether();
+      } else if (command.type === 'setRecallVisual') {
+        this.setBananaRecallVisual(command.active);
+      } else if (command.type === 'resetBananaForAim') {
         this.banana.setPosition(LAUNCH_PAD.x, LAUNCH_PAD.y);
         this.banana.setVelocity(0, 0);
+        this.banana.setAngularVelocity(0);
+        this.banana.setData('canDuplicate', true);
+        this.banana.setData('nextTrailDropAt', 0);
+        this.banana.setData('effectMultiplier', 1);
+        this.banana.setData('canApplyHitProcs', true);
+      } else if (command.type === 'setBananaPosition') {
+        this.banana.setPosition(command.x, command.y);
+      } else if (command.type === 'setBananaVelocity') {
+        this.banana.setVelocity(command.x, command.y);
+      } else if (command.type === 'setBananaAngularVelocity') {
+        this.banana.setAngularVelocity(command.value);
+      } else if (command.type === 'setBananaAngularVelocityFromX') {
+        this.banana.setAngularVelocity(Phaser.Math.Clamp(
+          this.banana.body.velocity.x * command.multiplier,
+          command.min,
+          command.max
+        ));
+      } else if (command.type === 'setBananaAngularVelocityRandom') {
+        this.banana.setAngularVelocity(Phaser.Math.Between(command.min, command.max));
+      } else if (command.type === 'moveBananaToLaunchPad') {
+        this.physics.moveTo(this.banana, LAUNCH_PAD.x, LAUNCH_PAD.y, command.speed);
       }
-      if (this.isBananaInLaunchZone(34)) {
-        this.beginAiming(this.input.activePointer, this.aimPointerId ?? this.input.activePointer.id);
-      }
-      return;
-    }
-
-    this.tetherLine.clear();
-    this.updateAimingLine();
+    });
   }
 
-  private applyElasticRecall(): void {
-    const toPad = new Phaser.Math.Vector2(LAUNCH_PAD.x - this.banana.x, LAUNCH_PAD.y - this.banana.y);
-    if (toPad.lengthSq() <= 1) {
-      this.banana.setVelocity(0, 0);
-      return;
-    }
-    toPad.normalize();
-    const velocity = this.banana.body.velocity.clone();
-    velocity.x += toPad.x * RECALL_ELASTIC_PULL * (1 / 60);
-    velocity.y += toPad.y * RECALL_ELASTIC_PULL * (1 / 60);
-    if (velocity.length() > RECALL_ELASTIC_MAX_SPEED) {
-      velocity.normalize().scale(RECALL_ELASTIC_MAX_SPEED);
-    }
-    this.banana.setVelocity(velocity.x, velocity.y);
-  }
-
-  private updateAimingLine(): void {
-    if (this.controlState !== 'aiming') return;
+  private updateControlState(): void {
     const pointer = this.input.activePointer;
-    this.aimLine.clear();
-    this.drawAimArrow(this.banana.x, this.banana.y, pointer.x, pointer.y);
+    this.applyProjectileControlCommands(this.projectileControl.update({
+      banana: { x: this.banana.x, y: this.banana.y },
+      velocity: { x: this.banana.body.velocity.x, y: this.banana.body.velocity.y },
+      activePointer: { id: pointer.id, x: pointer.x, y: pointer.y }
+    }));
   }
 
   private drawAimArrow(fromX: number, fromY: number, toX: number, toY: number): void {
@@ -688,25 +591,18 @@ export class PotassiumSlipScene extends Phaser.Scene {
   }
 
   private updateBananaDrag(delta: number): void {
-    if (this.controlState === 'aiming' || this.controlState === 'recalling') return;
-    const velocity = this.banana.body.velocity;
-    const speed = velocity.length();
-    if (speed <= 45) {
-      this.banana.setVelocity(0, 0);
-      this.banana.setAngularVelocity(0);
-      return;
-    }
-    const dragFactor = 0.9975;
-    const frameFactor = Math.pow(dragFactor, delta / 16.67);
-    this.banana.setVelocity(velocity.x * frameFactor, velocity.y * frameFactor);
+    this.applyProjectileControlCommands(this.projectileControl.applyIdleDrag({
+      velocity: { x: this.banana.body.velocity.x, y: this.banana.body.velocity.y },
+      deltaMs: delta
+    }));
   }
 
   private isBananaInLaunchZone(radius: number = LAUNCH_PAD.radius): boolean {
-    return Phaser.Math.Distance.Between(this.banana.x, this.banana.y, LAUNCH_PAD.x, LAUNCH_PAD.y) <= radius;
+    return this.projectileControl.isInLaunchZone(this.banana, radius);
   }
 
   private getMaxBananaSpeed(): number {
-    return MAIN_BANANA_MAX_SPEED * (1 + this.getGenericRank('bananaSpeed') * 0.05);
+    return POTASSIUM_PROJECTILE_CONTROL_DEFAULTS.mainMaxSpeed * (1 + this.getGenericRank('bananaSpeed') * 0.05);
   }
 
   private getSkillRank(upgrade: UpgradeKind): SkillRank {
@@ -793,10 +689,17 @@ export class PotassiumSlipScene extends Phaser.Scene {
 
   private spawnEnemy(kind: EnemyKind, columnIndex: number = 0, rowIndex: number = 0, yOverride?: number): EnemySprite | undefined {
     if (this.session.gameState !== 'PLAYING') return;
-    const config = ENEMY_CONFIGS[kind];
-    const x = this.getEnemySpawnX(kind, columnIndex);
-    const y = yOverride ?? (kind === 'boss' ? SAFE.top + 60 : SAFE.top + 12);
-    const enemy = this.enemies.create(x, y, config.texture) as EnemySprite;
+    const spawn = resolvePotassiumEnemySpawnFacts({
+      layout: {
+        arenaLeft: ARENA.left,
+        arenaRight: ARENA.right,
+        safeTop: SAFE.top
+      },
+      kind,
+      columnIndex,
+      yOverride
+    });
+    const enemy = this.enemies.create(spawn.x, spawn.y, spawn.texture) as EnemySprite;
     this.configureEnemy(enemy, kind, this.session.wave, columnIndex, rowIndex);
 
     if (kind === 'boss') {
@@ -813,75 +716,31 @@ export class PotassiumSlipScene extends Phaser.Scene {
       enemy.setBounce(1, 1);
       this.cameras.main.shake(250, 0.008);
     } else {
-      enemy.setVelocity(0, NON_BOSS_ENEMY_SPEED);
+      enemy.setVelocity(0, POTASSIUM_NON_BOSS_ENEMY_SPEED);
     }
     return enemy;
   }
 
-  private getEnemySpawnX(kind: EnemyKind, columnIndex: number): number {
-    const clampedColumn = Phaser.Math.Clamp(columnIndex, 0, POTASSIUM_COLUMN_COUNT - 1);
-    if (kind === 'splitter') {
-      return (this.getLaneCenterX(clampedColumn) + this.getLaneCenterX(Math.min(POTASSIUM_COLUMN_COUNT - 1, clampedColumn + 1))) / 2;
-    }
-    return this.getLaneCenterX(clampedColumn);
-  }
-
-  private getLaneCenterX(columnIndex: number): number {
-    return Phaser.Math.Linear(ARENA.left + 64, ARENA.right - 64, (columnIndex + 0.5) / POTASSIUM_COLUMN_COUNT);
-  }
-
   private configureEnemy(enemy: EnemySprite, kind: EnemyKind, wave: number, columnIndex: number, rowIndex: number): void {
-    const config = ENEMY_CONFIGS[kind];
-    const hp = kind === 'boss' ? config.hp : getScaledPotassiumEnemyHp(config.hp, wave);
-    enemy.setDepth(kind === 'boss' ? 80 : 60);
-    enemy.setScale(config.scale);
+    const setup = resolvePotassiumEnemySetupFacts({ kind, wave, columnIndex, rowIndex });
+    enemy.setDepth(setup.depth);
+    enemy.setScale(setup.scale);
     enemy.body.setAllowGravity(false);
     enemy.setBounce(1, 1);
-    enemy.setData('kind', kind);
-    enemy.setData('hp', hp);
-    enemy.setData('maxHp', hp);
-    enemy.setData('poisoned', false);
-    enemy.setData('columnIndex', columnIndex);
-    enemy.setData('rowIndex', rowIndex);
-    enemy.setData('columnSpan', kind === 'splitter' ? 2 : 1);
-    enemy.setData('occupiedColumns', kind === 'splitter' ? getPotassiumSplitterSpawnColumns(columnIndex) : [columnIndex]);
-    enemy.setData('indestructible', config.indestructible ?? false);
-    enemy.setData('splitsOnDeath', config.splitsOnDeath ?? false);
-    let shieldSide: ShieldSide | undefined;
-    if (config.shielded) {
-      shieldSide = getPotassiumShieldSide(wave, rowIndex, columnIndex);
-    }
-    this.potassiumRenderer.createEnemyAttachments(enemy, {
-      kind,
-      label: config.label,
-      hp,
-      shieldSide
+    Object.entries(setup.data).forEach(([key, value]) => {
+      enemy.setData(key, value);
     });
-    if (kind === 'boss') {
-      enemy.setData('bossPhase', 1);
+    this.potassiumRenderer.createEnemyAttachments(enemy, setup.attachment);
+    if (setup.angularVelocityRange) {
+      enemy.setAngularVelocity(
+        Phaser.Math.Between(setup.angularVelocityRange.min, setup.angularVelocityRange.max)
+      );
     }
-
-    if (kind === 'scope') {
-      enemy.setAngularVelocity(Phaser.Math.Between(-70, 70));
-    }
-    if (kind === 'wall' || kind === 'hardWall') {
+    if (setup.immovable) {
       enemy.setImmovable(true);
     }
-    this.fitEnemyBodyToOneCell(enemy, kind);
-  }
-
-  private fitEnemyBodyToOneCell(enemy: EnemySprite, kind: EnemyKind): void {
-    if (!enemy.body) return;
-    if (kind === 'wall' || kind === 'hardWall') {
-      enemy.body.setSize(68, 52, true);
-      return;
-    }
-    if (kind === 'splitter') {
-      enemy.body.setSize(118, 52, true);
-      return;
-    }
-    if (kind === 'shield') {
-      enemy.body.setSize(54, 54, true);
+    if (setup.bodyProfile && enemy.body) {
+      enemy.body.setSize(setup.bodyProfile.width, setup.bodyProfile.height, true);
     }
   }
 
@@ -926,7 +785,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
     return {
       id: this.getCombatId(projectile, projectile === this.banana ? 'main' : 'projectile'),
       isMain: projectile === this.banana,
-      isRecall: projectile === this.banana && this.controlState === 'recalling',
+      isRecall: projectile === this.banana && this.projectileControl.isRecalling(),
       x: projectile.x,
       y: projectile.y,
       effectMultiplier: this.getProjectileEffectMultiplier(projectile),
@@ -1091,7 +950,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
 
   private killEnemy(enemy: EnemySprite): void {
     const kind = enemy.getData('kind') as EnemyKind;
-    const config = ENEMY_CONFIGS[kind];
+    const config = getPotassiumEnemyConfig(kind);
     enemy.setData('dying', true);
     const damageCueTween = enemy.getData('damageCueTween') as Phaser.Tweens.Tween | undefined;
     damageCueTween?.stop();
@@ -1121,16 +980,18 @@ export class PotassiumSlipScene extends Phaser.Scene {
     if (!enemy.getData('splitsOnDeath')) return;
     const columnIndex = (enemy.getData('columnIndex') as number | undefined) ?? 2;
     const rowIndex = ((enemy.getData('rowIndex') as number | undefined) ?? 0) + 1;
-    const occupiedColumns = (enemy.getData('occupiedColumns') as number[] | undefined) ?? getPotassiumSplitterSpawnColumns(columnIndex);
+    const occupiedColumns = (enemy.getData('occupiedColumns') as number[] | undefined) ?? [columnIndex];
     occupiedColumns
       .forEach((column) => {
         const child = this.spawnEnemy('intern', column, rowIndex, enemy.y + 26);
         if (!child) return;
-        child.setScale(0.62);
-        child.setData('hp', Math.max(1, Math.ceil(((child.getData('hp') as number) || 1) * 0.55)));
-        child.setData('maxHp', child.getData('hp') as number);
-        child.setVelocity(0, NON_BOSS_ENEMY_SPEED + 18);
-        this.fitEnemyBodyToOneCell(child, 'intern');
+        const childFacts = resolvePotassiumSplitterChildFacts({
+          hp: (child.getData('hp') as number | undefined) ?? 1
+        });
+        child.setScale(childFacts.scale);
+        child.setData('hp', childFacts.hp);
+        child.setData('maxHp', childFacts.hp);
+        child.setVelocity(0, childFacts.speed);
       });
   }
 
