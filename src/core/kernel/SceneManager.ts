@@ -105,6 +105,7 @@ export class SceneManager {
   }
 
   dispose(): void {
+    this.options.onSceneLoadingChange?.(null);
     this.contexts.forEach((context) => context.onDispose?.());
   }
 

@@ -157,4 +157,33 @@ describe('SceneManager', () => {
     expect(adapter.activeScenes()).toEqual(['main']);
     expect(loadingEvents).toEqual(['lazy-room']);
   });
+
+  it('clears loading state on dispose even when a guarded load is in flight', async () => {
+    const adapter = makeFakeAdapter(['main']);
+    const loadingEvents: Array<string | null> = [];
+    const manager = new SceneManager(adapter, {
+      onSceneLoadingChange: (contextId) => loadingEvents.push(contextId)
+    });
+    let resolveScene!: (scene: unknown) => void;
+    const loadScene = new Promise<unknown>((resolve) => {
+      resolveScene = resolve;
+    });
+    let current = true;
+    manager.registerContext(context('main'));
+    manager.registerContext({
+      ...context('lazy-room'),
+      loadScene: () => loadScene
+    });
+
+    const enterPromise = manager.enter('lazy-room', { isCurrent: () => current });
+    await Promise.resolve();
+    current = false;
+    manager.dispose();
+    resolveScene(class LazyScene {});
+    await enterPromise;
+
+    expect(adapter.registerScene).toHaveBeenCalledWith('lazy-room', expect.any(Function));
+    expect(adapter.startScene).not.toHaveBeenCalledWith('lazy-room', { id: 'lazy-room' });
+    expect(loadingEvents).toEqual(['lazy-room', null]);
+  });
 });
