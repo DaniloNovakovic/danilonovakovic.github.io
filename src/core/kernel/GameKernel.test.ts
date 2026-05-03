@@ -9,7 +9,7 @@ import { PHASER_SCENE_KEYS } from '../../config/featureIds';
 
 interface FakeAdapter extends SceneRuntimeAdapter {
   registerScene: ReturnType<typeof vi.fn<(k: string, scene: unknown) => void>>;
-  startScene: ReturnType<typeof vi.fn<(k: string) => void>>;
+  startScene: ReturnType<typeof vi.fn<(k: string, data: Record<string, unknown>) => void>>;
   stopScene: ReturnType<typeof vi.fn<(k: string) => void>>;
   setPauseOnActiveScenes: ReturnType<typeof vi.fn<(paused: boolean) => void>>;
   getActiveScenes: () => string[];
@@ -41,6 +41,7 @@ describe('GameKernel', () => {
   let eventBus: KernelEventBus;
   let events: KernelEvent[];
   let adapter: FakeAdapter;
+  let sceneManager: SceneManager;
 
   afterEach(() => {
     kernel.stop();
@@ -54,7 +55,7 @@ describe('GameKernel', () => {
     eventBus.subscribe((e) => events.push(e));
 
     adapter = makeFakeAdapter();
-    const sceneManager = new SceneManager(adapter);
+    sceneManager = new SceneManager(adapter);
     sceneManager.registerContext({
       id: PHASER_SCENE_KEYS.main,
       sceneKey: PHASER_SCENE_KEYS.main,
@@ -123,6 +124,7 @@ describe('GameKernel', () => {
 
   it('enters a Phaser scene when a PHASER_SCENE mini-game becomes active', async () => {
     events.length = 0;
+    const enterSpy = vi.spyOn(sceneManager, 'enter');
 
     bridgeActions.requestInteraction('hobbies');
     await Promise.resolve();
@@ -132,6 +134,7 @@ describe('GameKernel', () => {
     expect((trans as Extract<KernelEvent, { type: 'SceneTransitionRequested' }>).targetContext).toBe(
       'hobbies'
     );
+    expect(enterSpy).toHaveBeenCalledWith('hobbies', { isCurrent: expect.any(Function) });
     expect(adapter.getActiveScenes()).toEqual(['hobbies']);
   });
 

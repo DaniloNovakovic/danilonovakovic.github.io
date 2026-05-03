@@ -1,7 +1,7 @@
-import { PHASER_SCENE_KEYS } from '../../config/featureIds';
 import { modesEqual } from '../../runtime/gameState';
 import { bridgeStore, type BridgeState } from '../../shared/bridge/store';
 import { SceneManager } from './SceneManager';
+import { SceneTransitionCoordinator } from './SceneTransitionCoordinator';
 import { KernelEventBus } from './events';
 
 export class GameKernel {
@@ -9,11 +9,12 @@ export class GameKernel {
   private previousState?: BridgeState;
   private readonly sceneManager: SceneManager;
   private readonly eventBus: KernelEventBus;
-  private transitionVersion = 0;
+  private readonly transitionCoordinator: SceneTransitionCoordinator;
 
   constructor(sceneManager: SceneManager, eventBus: KernelEventBus = new KernelEventBus()) {
     this.sceneManager = sceneManager;
     this.eventBus = eventBus;
+    this.transitionCoordinator = new SceneTransitionCoordinator(sceneManager, eventBus);
   }
 
   start(): void {
@@ -25,6 +26,7 @@ export class GameKernel {
 
   stop(): void {
     this.unsubscribeStore?.();
+    this.transitionCoordinator.invalidate();
     this.sceneManager.dispose();
   }
 
@@ -48,24 +50,8 @@ export class GameKernel {
       return;
     }
 
-    this.transitionVersion += 1;
-    const transitionVersion = this.transitionVersion;
-    void this.syncSceneTransition(state, transitionVersion).catch(() => undefined);
+    this.transitionCoordinator.request(state.mode);
     this.previousState = state;
-  }
-
-  private async syncSceneTransition(state: BridgeState, transitionVersion: number): Promise<void> {
-    if (state.mode.kind === 'exploring') {
-      this.eventBus.emit({ type: 'SceneTransitionRequested', targetContext: null });
-      await this.sceneManager.exitTo(PHASER_SCENE_KEYS.main);
-      return;
-    }
-
-    if (state.mode.kind === 'phaserScene') {
-      this.eventBus.emit({ type: 'SceneTransitionRequested', targetContext: state.mode.miniGameId });
-      await this.sceneManager.enter(state.mode.miniGameId);
-      if (transitionVersion !== this.transitionVersion) return;
-    }
   }
 
   private emitStateEvents(state: BridgeState, modeChanged: boolean, pauseChanged: boolean): void {

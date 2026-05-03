@@ -15,6 +15,10 @@ interface SceneManagerOptions {
   onSceneLoadingChange?: (contextId: ContextId | null) => void;
 }
 
+export interface SceneTransitionGuard {
+  isCurrent: () => boolean;
+}
+
 export class SceneManager {
   private readonly contexts = new Map<ContextId, ContextPluginDefinition>();
   private readonly adapter: SceneRuntimeAdapter;
@@ -30,24 +34,26 @@ export class SceneManager {
     def.onRegister?.();
   }
 
-  async enter(contextId: ContextId): Promise<void> {
+  async enter(contextId: ContextId, guard?: SceneTransitionGuard): Promise<void> {
     const target = this.contexts.get(contextId);
     if (!target) return;
 
     if (this.adapter.isSceneActive(target.sceneKey)) return;
 
-    await this.ensureSceneRegistered(target);
+    await this.ensureSceneRegistered(target, guard);
+    if (guard && !guard.isCurrent()) return;
     this.stopActiveContextsExcept(target.sceneKey);
 
     this.adapter.startScene(target.sceneKey, target.getStartData());
     target.onEnter?.();
   }
 
-  async exitTo(contextId: ContextId): Promise<void> {
+  async exitTo(contextId: ContextId, guard?: SceneTransitionGuard): Promise<void> {
     const target = this.contexts.get(contextId);
     if (!target) return;
 
-    await this.ensureSceneRegistered(target);
+    await this.ensureSceneRegistered(target, guard);
+    if (guard && !guard.isCurrent()) return;
     const allKeys = this.adapter.listKnownSceneKeys();
     for (const sceneKey of allKeys) {
       if (sceneKey === target.sceneKey) continue;
@@ -98,7 +104,10 @@ export class SceneManager {
     return this.adapter.captureResume(sceneKey);
   }
 
-  private async ensureSceneRegistered(context: ContextPluginDefinition): Promise<void> {
+  private async ensureSceneRegistered(
+    context: ContextPluginDefinition,
+    guard?: SceneTransitionGuard
+  ): Promise<void> {
     if (this.adapter.hasScene(context.sceneKey)) return;
     if (!context.loadScene) return;
 
@@ -107,7 +116,9 @@ export class SceneManager {
       const scene = await context.loadScene();
       this.adapter.registerScene(context.sceneKey, scene);
     } finally {
-      this.options.onSceneLoadingChange?.(null);
+      if (!guard || guard.isCurrent()) {
+        this.options.onSceneLoadingChange?.(null);
+      }
     }
   }
 
