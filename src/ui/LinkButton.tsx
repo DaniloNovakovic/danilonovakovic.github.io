@@ -1,4 +1,5 @@
 import type { AnchorHTMLAttributes, ReactNode } from 'react';
+import { sketchFocusVisible } from './tokens';
 import { cn } from './utils';
 
 type LinkButtonVariant = 'secondary' | 'primary' | 'quiet';
@@ -27,7 +28,8 @@ export function LinkButton({
   return (
     <a
       className={cn(
-        'inline-flex cursor-pointer items-center justify-center gap-1.5 rounded px-2.5 py-1 text-xs font-bold uppercase tracking-widest transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1a1a1a] sm:text-sm',
+        'inline-flex cursor-pointer items-center justify-center gap-1.5 rounded px-2.5 py-1 text-xs font-bold uppercase tracking-widest transition-all sm:text-sm',
+        sketchFocusVisible,
         variantClasses[variant],
         className
       )}

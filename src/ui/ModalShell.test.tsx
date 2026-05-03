@@ -77,6 +77,45 @@ describe('ModalShell', () => {
     expect(secondOnClose).toHaveBeenCalledTimes(1);
   });
 
+  it('closes on Escape even when a child stops key propagation', async () => {
+    const onClose = vi.fn();
+
+    render(
+      <ModalShell title="Propagation Test" onClose={onClose}>
+        {({ titleId }) => (
+          <div>
+            <h2 id={titleId}>Propagation Test</h2>
+            <button onKeyDown={(event) => event.stopPropagation()}>Stops propagation</button>
+          </div>
+        )}
+      </ModalShell>
+    );
+
+    await userEvent.keyboard('{Escape}');
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not close on Escape when a child prevents default handling', async () => {
+    const onClose = vi.fn();
+
+    render(
+      <ModalShell title="Default Handling Test" onClose={onClose}>
+        {({ titleId }) => (
+          <div>
+            <h2 id={titleId}>Default Handling Test</h2>
+            <button onKeyDown={(event) => event.preventDefault()}>Prevents default</button>
+          </div>
+        )}
+      </ModalShell>
+    );
+
+    await userEvent.keyboard('{Escape}');
+
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+
   it('closes on backdrop click but not inside click', async () => {
     const onClose = vi.fn();
     render(<TestModal onClose={onClose} />);

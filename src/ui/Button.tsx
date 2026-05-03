@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import { sketchFocusVisible } from './tokens';
 import { cn } from './utils';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'floating' | 'icon' | 'control';
@@ -11,7 +12,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const baseClass =
-  'inline-flex cursor-pointer items-center justify-center gap-1.5 font-bold text-[#1a1a1a] transition-all focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1a1a1a] disabled:cursor-not-allowed disabled:opacity-50';
+  'inline-flex cursor-pointer items-center justify-center gap-1.5 font-bold text-[#1a1a1a] transition-all disabled:cursor-not-allowed disabled:opacity-50';
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
@@ -45,7 +46,7 @@ export function Button({
   return (
     <button
       type="button"
-      className={cn(baseClass, variantClasses[variant], sizeClasses[size], className)}
+      className={cn(baseClass, sketchFocusVisible, variantClasses[variant], sizeClasses[size], className)}
       {...props}
     >
       {icon}

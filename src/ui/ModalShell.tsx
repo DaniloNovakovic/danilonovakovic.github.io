@@ -83,8 +83,11 @@ export function ModalShell({
       if (modalStack.at(-1) !== modalId.current) return;
 
       if (event.key === 'Escape' && !event.defaultPrevented) {
-        event.preventDefault();
-        onClose();
+        queueMicrotask(() => {
+          if (event.defaultPrevented || modalStack.at(-1) !== modalId.current) return;
+          event.preventDefault();
+          onClose();
+        });
         return;
       }
 
@@ -108,8 +111,8 @@ export function ModalShell({
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown, { capture: true });
+    return () => window.removeEventListener('keydown', handleKeyDown, { capture: true });
   }, [onClose]);
 
   return (

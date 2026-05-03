@@ -18,3 +18,6 @@ export const sketchBorders = {
   medium: 'border-2 border-[#1a1a1a]',
   thick: 'border-4 border-[#1a1a1a]'
 } as const;
+
+export const sketchFocusVisible =
+  'focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1a1a1a] focus-visible:ring-2 focus-visible:ring-[#fbfbf9]';
