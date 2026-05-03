@@ -3,7 +3,6 @@ import type { PhaserScenePresentationMode } from '../../runtime/phaserScenePrese
 
 const PHASER_DESIGN_WIDTH = 1000;
 const PHASER_DESIGN_HEIGHT = 600;
-const MOBILE_CHROME_RESERVE_HEIGHT = '7.75rem';
 const MOBILE_PORTRAIT_ASPECT_RATIO = '3 / 4';
 const MOBILE_PORTRAIT_MAX_WIDTH = '450px';
 const VERTICAL_BOARD_MAX_WIDTH = '560px';
@@ -13,11 +12,11 @@ const DESKTOP_MAX_GAME_HEIGHT = `${PHASER_DESIGN_HEIGHT}px`;
 const VERTICAL_BOARD_DESKTOP_MAX_HEIGHT = '680px';
 const DESKTOP_VIEWPORT_HEIGHT_LIMIT = '88dvh';
 const DESIGN_ASPECT_RATIO = `${PHASER_DESIGN_WIDTH} / ${PHASER_DESIGN_HEIGHT}`;
-const DESIGN_WIDTH_PER_HEIGHT = formatRatio(PHASER_DESIGN_WIDTH / PHASER_DESIGN_HEIGHT);
-const PORTRAIT_WIDTH_PER_HEIGHT = formatRatio(3 / 4);
+const DESIGN_WIDTH_PER_HEIGHT = '1.666667';
+const PORTRAIT_WIDTH_PER_HEIGHT = '0.75';
 
 type GameShellStyle = CSSProperties & {
-  '--mobile-game-shell-width': string;
+  '--mobile-game-shell-max-width': string;
   '--desktop-game-shell-width': string;
 };
 
@@ -43,8 +42,6 @@ export function getInteractiveGameShellLayout(
       : presentationMode === 'vertical-board'
         ? VERTICAL_BOARD_MAX_WIDTH
         : MOBILE_PORTRAIT_MAX_WIDTH;
-  const mobileWidthPerHeight =
-    presentationMode === 'full-board' ? DESIGN_WIDTH_PER_HEIGHT : PORTRAIT_WIDTH_PER_HEIGHT;
   const desktopWidthPerHeight =
     presentationMode === 'vertical-board' ? PORTRAIT_WIDTH_PER_HEIGHT : DESIGN_WIDTH_PER_HEIGHT;
   const mobileAspect =
@@ -63,10 +60,9 @@ export function getInteractiveGameShellLayout(
       : `min(${DESKTOP_VIEWPORT_HEIGHT_LIMIT}, ${DESKTOP_MAX_GAME_HEIGHT})`;
 
   return {
-    shellClassName: 'w-[var(--mobile-game-shell-width)] md:w-[var(--desktop-game-shell-width)]',
+    shellClassName: 'w-full max-w-[var(--mobile-game-shell-max-width)] md:w-[var(--desktop-game-shell-width)] md:max-w-none',
     shellStyle: {
-      '--mobile-game-shell-width':
-        `min(100%, ${mobileMaxWidth}, calc((100dvh - ${MOBILE_CHROME_RESERVE_HEIGHT}) * ${mobileWidthPerHeight}))`,
+      '--mobile-game-shell-max-width': mobileMaxWidth,
       '--desktop-game-shell-width':
         `min(100%, calc(min(${DESKTOP_VIEWPORT_HEIGHT_LIMIT}, ${desktopHeightLimit}) * ${desktopWidthPerHeight}))`
     },
@@ -77,8 +73,4 @@ export function getInteractiveGameShellLayout(
       '--desktop-game-frame-max-height': desktopFrameMaxHeight
     }
   };
-}
-
-function formatRatio(value: number): string {
-  return Number(value.toFixed(6)).toString();
 }

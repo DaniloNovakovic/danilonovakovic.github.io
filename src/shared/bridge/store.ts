@@ -23,6 +23,7 @@ export type InventoryItemId = (typeof INVENTORY_ITEM_IDS)[number];
 
 export const SECRET_DISCOVERY_IDS = ['banana-peel-clue'] as const;
 export type SecretDiscoveryId = (typeof SECRET_DISCOVERY_IDS)[number];
+export type UiDialogId = 'inventory' | 'devSwitcher';
 
 export interface BridgeInventoryState {
   ownedItemIds: InventoryItemId[];
@@ -42,6 +43,7 @@ export interface BridgeState {
   status: GameStateValue;
   activeMiniGameId: MiniGameId | null;
   loadingMiniGameId: MiniGameId | null;
+  activeUiDialogId: UiDialogId | null;
   isPaused: boolean;
   inventory: BridgeInventoryState;
   equipment: BridgeEquipmentState;
@@ -72,6 +74,7 @@ let state: BridgeState = {
   mode: EXPLORING_MODE,
   ...deriveGameState(EXPLORING_MODE),
   loadingMiniGameId: null,
+  activeUiDialogId: null,
   isPaused: false,
   inventory: {
     ownedItemIds: []
@@ -107,13 +110,14 @@ function setState(updater: (current: BridgeState) => BridgeState): void {
       ...next.progress,
       hasGlasses: hasItemOwned(next.inventory, 'glasses')
     },
-    isPaused: derivePause(next.mode) || next.loadingMiniGameId !== null
+    isPaused: derivePause(next.mode) || next.loadingMiniGameId !== null || next.activeUiDialogId !== null
   };
   const unchanged =
     modesEqual(previous.mode, candidate.mode) &&
     previous.status === candidate.status &&
     previous.activeMiniGameId === candidate.activeMiniGameId &&
     previous.loadingMiniGameId === candidate.loadingMiniGameId &&
+    previous.activeUiDialogId === candidate.activeUiDialogId &&
     previous.isPaused === candidate.isPaused &&
     arraysEqual(previous.inventory.ownedItemIds, candidate.inventory.ownedItemIds) &&
     arraysEqual(previous.equipment.equippedItemIds, candidate.equipment.equippedItemIds) &&
@@ -145,6 +149,7 @@ export const bridgeActions = {
       ...current,
       mode: createRuntimeModeForInteraction(area),
       loadingMiniGameId: null,
+      activeUiDialogId: null,
       sceneHintText: null
     }));
   },
@@ -153,6 +158,7 @@ export const bridgeActions = {
       ...current,
       mode: closeRuntimeMode(current.mode, resolveParentId),
       loadingMiniGameId: null,
+      activeUiDialogId: null,
       sceneHintText: null
     }));
   },
@@ -243,6 +249,18 @@ export const bridgeActions = {
     setState((current) => ({
       ...current,
       loadingMiniGameId: miniGameId
+    }));
+  },
+  openUiDialog(dialogId: UiDialogId): void {
+    setState((current) => ({
+      ...current,
+      activeUiDialogId: dialogId
+    }));
+  },
+  closeUiDialog(): void {
+    setState((current) => ({
+      ...current,
+      activeUiDialogId: null
     }));
   },
   setSceneHintText(text: string | null): void {

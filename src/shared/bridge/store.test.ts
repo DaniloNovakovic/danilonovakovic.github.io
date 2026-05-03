@@ -11,6 +11,7 @@ import { GameState } from '../../runtime/gameState';
 
 function resetBridge() {
   bridgeActions.closeActiveOverlay();
+  bridgeActions.closeUiDialog();
   bridgeActions.resetProgress();
   bridgeActions.resetTouch();
 }
@@ -44,6 +45,27 @@ describe('bridgeStore', () => {
       bridgeActions.setSceneLoading(null);
       expect(bridgeStore.getState().isPaused).toBe(false);
       expect(bridgeStore.getState().loadingMiniGameId).toBeNull();
+    });
+
+    it('pauses while a UI dialog is open', () => {
+      bridgeActions.openUiDialog('inventory');
+      expect(bridgeStore.getState().activeUiDialogId).toBe('inventory');
+      expect(bridgeStore.getState().isPaused).toBe(true);
+
+      bridgeActions.closeUiDialog();
+      expect(bridgeStore.getState().activeUiDialogId).toBeNull();
+      expect(bridgeStore.getState().isPaused).toBe(false);
+    });
+
+    it('keeps Phaser scene pause derived from loading after UI dialog closes', () => {
+      bridgeActions.requestInteraction('hobbies');
+      bridgeActions.setSceneLoading('hobbies');
+      bridgeActions.openUiDialog('devSwitcher');
+      bridgeActions.closeUiDialog();
+
+      expect(bridgeStore.getState().activeUiDialogId).toBeNull();
+      expect(bridgeStore.getState().loadingMiniGameId).toBe('hobbies');
+      expect(bridgeStore.getState().isPaused).toBe(true);
     });
   });
 
