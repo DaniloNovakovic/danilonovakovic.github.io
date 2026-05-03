@@ -54,6 +54,8 @@ This document describes the current runtime architecture in `src/`. It is the de
   - Pure Potassium launch/recall control Module. It owns pointer control state, launch threshold/speed math, recall transitions, and idle drag decisions as commands for the scene to apply.
 - `src/runtime/potassiumSlipEnemyFactory.ts`
   - Potassium enemy setup Module. It owns enemy kind facts, lane placement, HP scaling, body profiles, shield/splitter/boss setup facts, and renderer attachment facts while the scene still creates Phaser sprites.
+- `src/runtime/potassiumSlipPhaserData.ts`
+  - Typed Potassium Phaser data helper Module. It centralizes `getData` / `setData` keys and helpers for combat IDs, hit cooldowns, enemy health/status facts, projectile proc flags, trail timing, and renderer attachment metadata.
 
 ## Scene presentation and camera
 
@@ -105,6 +107,7 @@ Potassium uses focused runtime Modules to keep the large arcade scene navigable 
 - `potassiumSlipRenderer` is the visual seam for field/HUD/overlay drawing, attachment positioning, and transient Phaser graphics/tweens.
 - `potassiumSlipProjectileControl` is the pure control-state seam for banana launch, recall, and drag feel.
 - `potassiumSlipEnemyFactory` is the enemy setup seam for kind facts, spawn placement, and body/attachment setup.
+- `potassiumSlipPhaserData` is the typed data seam for Potassium-specific Phaser object metadata.
 
 ## Manual smoke verification
 

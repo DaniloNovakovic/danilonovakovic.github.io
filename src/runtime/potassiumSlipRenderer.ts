@@ -11,6 +11,16 @@ import type {
   PotassiumSkillRank,
   PotassiumUpgradeKind
 } from './potassiumSlipWaves';
+import {
+  getPotassiumData,
+  getPotassiumEnemyHp,
+  getPotassiumEnemyKind,
+  getPotassiumEnemyMaxHp,
+  getPotassiumShieldSide,
+  isPotassiumEnemyDying,
+  POTASSIUM_DATA_KEYS,
+  setPotassiumData
+} from './potassiumSlipPhaserData';
 
 export type PotassiumTerminalAction = 'retry' | 'return' | 'endless';
 
@@ -410,24 +420,24 @@ export class PotassiumSlipRenderer {
     enemy: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
     config: PotassiumEnemyAttachmentConfig
   ): void {
-    enemy.setData('damageState', 'healthy' satisfies PotassiumEnemyHealthState);
-    enemy.setData('damageCueBaseScaleX', enemy.scaleX);
-    enemy.setData('damageCueBaseScaleY', enemy.scaleY);
-    enemy.setData('damageOverlay', this.createDamageOverlay(enemy));
+    setPotassiumData(enemy, POTASSIUM_DATA_KEYS.damageState, 'healthy' satisfies PotassiumEnemyHealthState);
+    setPotassiumData(enemy, POTASSIUM_DATA_KEYS.damageCueBaseScaleX, enemy.scaleX);
+    setPotassiumData(enemy, POTASSIUM_DATA_KEYS.damageCueBaseScaleY, enemy.scaleY);
+    setPotassiumData(enemy, POTASSIUM_DATA_KEYS.damageOverlay, this.createDamageOverlay(enemy));
     if (config.shieldSide) {
-      enemy.setData('shieldSide', config.shieldSide);
-      enemy.setData('shieldPlate', this.createShieldPlate(enemy, config.shieldSide));
+      setPotassiumData(enemy, POTASSIUM_DATA_KEYS.shieldSide, config.shieldSide);
+      setPotassiumData(enemy, POTASSIUM_DATA_KEYS.shieldPlate, this.createShieldPlate(enemy, config.shieldSide));
     }
     if (config.kind === 'boss') {
-      enemy.setData('labelText', this.createEnemyLabel(enemy, config.label, config.hp));
+      setPotassiumData(enemy, POTASSIUM_DATA_KEYS.labelText, this.createEnemyLabel(enemy, config.label, config.hp));
     }
   }
 
   positionEnemyAttachments(enemy: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody): void {
-    const overlay = enemy.getData('damageOverlay') as Phaser.GameObjects.Sprite | undefined;
+    const overlay = getPotassiumData<Phaser.GameObjects.Sprite>(enemy, POTASSIUM_DATA_KEYS.damageOverlay);
     if (overlay) {
-      const state = enemy.getData('damageState') as PotassiumEnemyHealthState | undefined;
-      const kind = enemy.getData('kind') as PotassiumEnemyKind;
+      const state = getPotassiumData<PotassiumEnemyHealthState>(enemy, POTASSIUM_DATA_KEYS.damageState);
+      const kind = getPotassiumEnemyKind(enemy);
       const isWall = kind === 'wall';
       overlay.setPosition(enemy.x, enemy.y)
         .setScale(enemy.displayWidth / (isWall ? 80 : 76), enemy.displayHeight / 62)
@@ -437,15 +447,15 @@ export class PotassiumSlipRenderer {
         ? state === 'critical' ? 'potassium_wall_damage_critical' : 'potassium_wall_damage_cracked'
         : state === 'critical' ? 'potassium_damage_critical' : 'potassium_damage_cracked');
     }
-    const shieldPlate = enemy.getData('shieldPlate') as Phaser.GameObjects.Rectangle | undefined;
-    const shieldSide = enemy.getData('shieldSide') as PotassiumShieldSide | undefined;
+    const shieldPlate = getPotassiumData<Phaser.GameObjects.Rectangle>(enemy, POTASSIUM_DATA_KEYS.shieldPlate);
+    const shieldSide = getPotassiumShieldSide(enemy);
     if (shieldPlate && shieldSide) {
       this.positionShieldPlate(enemy, shieldPlate, shieldSide);
     }
-    const label = enemy.getData('labelText') as Phaser.GameObjects.Text | undefined;
+    const label = getPotassiumData<Phaser.GameObjects.Text>(enemy, POTASSIUM_DATA_KEYS.labelText);
     if (label) {
-      const hp = Math.ceil(enemy.getData('hp') as number);
-      const maxHp = enemy.getData('maxHp') as number;
+      const hp = Math.ceil(getPotassiumEnemyHp(enemy));
+      const maxHp = getPotassiumEnemyMaxHp(enemy);
       label.setText(`${hp}/${maxHp}`);
       this.positionFloatingLabel(label, enemy.x, enemy.y - 34 * enemy.scale);
     }
@@ -476,9 +486,9 @@ export class PotassiumSlipRenderer {
       ease: 'Sine.easeOut',
       onComplete: () => ring.destroy()
     });
-    const baseScaleX = (enemy.getData('damageCueBaseScaleX') as number | undefined) ?? enemy.scaleX;
-    const baseScaleY = (enemy.getData('damageCueBaseScaleY') as number | undefined) ?? enemy.scaleY;
-    const previousPulse = enemy.getData('damageCueTween') as Phaser.Tweens.Tween | undefined;
+    const baseScaleX = getPotassiumData<number>(enemy, POTASSIUM_DATA_KEYS.damageCueBaseScaleX) ?? enemy.scaleX;
+    const baseScaleY = getPotassiumData<number>(enemy, POTASSIUM_DATA_KEYS.damageCueBaseScaleY) ?? enemy.scaleY;
+    const previousPulse = getPotassiumData<Phaser.Tweens.Tween>(enemy, POTASSIUM_DATA_KEYS.damageCueTween);
     previousPulse?.stop();
     enemy.setScale(baseScaleX, baseScaleY);
     const pulse = this.scene.tweens.add({
@@ -489,13 +499,13 @@ export class PotassiumSlipRenderer {
       yoyo: true,
       ease: 'Sine.easeOut',
       onComplete: () => {
-        if (enemy.active && !enemy.getData('dying')) {
+        if (enemy.active && !isPotassiumEnemyDying(enemy)) {
           enemy.setScale(baseScaleX, baseScaleY);
         }
-        enemy.setData('damageCueTween', undefined);
+        setPotassiumData(enemy, POTASSIUM_DATA_KEYS.damageCueTween, undefined);
       }
     });
-    enemy.setData('damageCueTween', pulse);
+    setPotassiumData(enemy, POTASSIUM_DATA_KEYS.damageCueTween, pulse);
   }
 
   refreshProjectileVisuals(
@@ -515,12 +525,12 @@ export class PotassiumSlipRenderer {
     const behind = this.scene.add.graphics().setDepth(projectile.depth - 1);
     const front = this.scene.add.graphics().setDepth(projectile.depth + 1);
     this.drawBananaUpgradeAccents(behind, front, skillRanks, isClone);
-    projectile.setData('bananaVisuals', { behind, front } satisfies BananaVisuals);
+    setPotassiumData(projectile, POTASSIUM_DATA_KEYS.bananaVisuals, { behind, front } satisfies BananaVisuals);
     this.positionProjectileVisuals(projectile);
   }
 
   positionProjectileVisuals(projectile: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody): void {
-    const visuals = projectile.getData('bananaVisuals') as BananaVisuals | undefined;
+    const visuals = getPotassiumData<BananaVisuals>(projectile, POTASSIUM_DATA_KEYS.bananaVisuals);
     if (!visuals) return;
     visuals.behind.setPosition(projectile.x, projectile.y).setRotation(projectile.rotation).setVisible(projectile.active);
     visuals.front.setPosition(projectile.x, projectile.y).setRotation(projectile.rotation).setVisible(projectile.active);
@@ -528,10 +538,10 @@ export class PotassiumSlipRenderer {
 
   destroyProjectileVisuals(projectile?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody): void {
     if (!projectile) return;
-    const visuals = projectile.getData('bananaVisuals') as BananaVisuals | undefined;
+    const visuals = getPotassiumData<BananaVisuals>(projectile, POTASSIUM_DATA_KEYS.bananaVisuals);
     visuals?.behind.destroy();
     visuals?.front.destroy();
-    projectile.setData('bananaVisuals', undefined);
+    setPotassiumData(projectile, POTASSIUM_DATA_KEYS.bananaVisuals, undefined);
   }
 
   showGhostStatusField(input: {
@@ -602,7 +612,7 @@ export class PotassiumSlipRenderer {
   }
 
   private createDamageOverlay(enemy: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody): Phaser.GameObjects.Sprite {
-    const kind = enemy.getData('kind') as PotassiumEnemyKind;
+    const kind = getPotassiumEnemyKind(enemy);
     const overlay = this.scene.add.sprite(enemy.x, enemy.y, kind === 'wall' ? 'potassium_wall_damage_cracked' : 'potassium_damage_cracked')
       .setDepth(enemy.depth + 1)
       .setOrigin(0.5)

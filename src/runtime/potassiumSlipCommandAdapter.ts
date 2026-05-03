@@ -36,10 +36,27 @@ import {
   type PotassiumEnemyKind,
   type PotassiumGenericUpgradeKind,
   type PotassiumScheduledWaveRow,
-  type PotassiumShieldSide,
   type PotassiumSkillRank,
   type PotassiumUpgradeKind
 } from './potassiumSlipWaves';
+import {
+  canPotassiumProjectileApplyHitProcs,
+  canPotassiumProjectileDuplicate,
+  getPotassiumCombatId,
+  getPotassiumData,
+  getPotassiumEnemyHp,
+  getPotassiumEnemyKind,
+  getPotassiumEnemyMaxHp,
+  getPotassiumProjectileEffectMultiplier,
+  getPotassiumShieldSide,
+  isPotassiumEnemyDying,
+  isPotassiumProjectileRecallVisual,
+  POTASSIUM_DATA_KEYS,
+  setPotassiumCombatId,
+  setPotassiumData,
+  setPotassiumEnemyDying,
+  setPotassiumEnemyHealth
+} from './potassiumSlipPhaserData';
 
 export interface PotassiumCommandBody {
   velocity: { x: number; y: number };
@@ -75,44 +92,64 @@ export interface PotassiumCombatContext {
   projectiles: Map<string, PotassiumCommandObject>;
 }
 
-export interface PotassiumCommandAdapterPorts {
+export interface PotassiumCommandAdapterRuntimePorts {
   getNow(): number;
   getSession(): PotassiumSessionState;
   applySessionResult(result: PotassiumSessionResult): void;
+  getSkillRank(upgrade: PotassiumUpgradeKind): number;
+  getGenericRank(upgrade: PotassiumGenericUpgradeKind): number;
+  setHint(text: string | null): void;
+  collectCircuit(): void;
+  saveRunRecord(record: PotassiumRunRecord): void;
+  closeScene(): void;
+}
+
+export interface PotassiumCommandAdapterObjectPorts {
   getEnemies(): PotassiumCommandObject[];
   getProjectiles(): PotassiumCommandObject[];
   getMainProjectile(): PotassiumCommandObject;
   isMainProjectile(projectile: PotassiumCommandObject): boolean;
   isMainProjectileRecalling(): boolean;
-  getProjectileEffectMultiplier(projectile: PotassiumCommandObject): number;
-  canProjectileApplyHitProcs(projectile: PotassiumCommandObject): boolean;
   getProjectileExplosionRadiusMultiplier(projectile: PotassiumCommandObject): number;
   getMaxMainProjectileSpeed(): number;
-  getSkillRank(upgrade: PotassiumUpgradeKind): number;
-  getGenericRank(upgrade: PotassiumGenericUpgradeKind): number;
   getExplosionRadiusMultiplier(): number;
-  setHint(text: string | null): void;
-  collectCircuit(): void;
-  saveRunRecord(record: PotassiumRunRecord): void;
-  closeScene(): void;
+  getExplosionHits(x: number, y: number): Array<{ enemy: PotassiumCommandObject; distance: number }>;
+  getGhostBeamHits(
+    x: number,
+    y: number,
+    direction: PotassiumGhostBeamDirection
+  ): Array<{ enemy: PotassiumCommandObject; inBeam: boolean }>;
+}
+
+export interface PotassiumCommandAdapterBoardPorts {
   resetBoardObjects(): void;
-  hideMainOverlay(): void;
-  clearTerminalOverlay(): void;
-  clearUpgradeChoiceOverlay(): void;
   spawnWave(wave: number): void;
   spawnBossDelayed(): void;
   scheduleWaveRows(schedule: readonly PotassiumScheduledWaveRow[]): void;
   scheduleUpgradeChoices(): void;
-  showUpgradeChoices(choices: readonly PotassiumDraftChoiceView[]): void;
   advanceWaveAfterDelay(wave: number): void;
+  stopMainProjectile(): void;
+  clearBoardForOutcome(): void;
+  spawnFirePatch(x: number, y: number, effectMultiplier: number, lifetimeMs: number, scale: number): void;
+  spawnBananaClones(count: number, lifetimeMs: number): void;
+  spawnSplitterChildren(enemy: PotassiumCommandObject): void;
+  spawnBossOrbitBlockers(boss: PotassiumCommandObject): void;
+  updateBossOrbitBlockers(boss: PotassiumCommandObject, time: number): void;
+  setBossStoneVisual(boss: PotassiumCommandObject, active: boolean): void;
+  spawnBossSummons(summons: readonly PotassiumBossSummonFacts[]): void;
+  clearOrbitBlockers(): void;
+}
+
+export interface PotassiumCommandAdapterRendererPorts {
+  hideMainOverlay(): void;
+  clearTerminalOverlay(): void;
+  clearUpgradeChoiceOverlay(): void;
+  showUpgradeChoices(choices: readonly PotassiumDraftChoiceView[]): void;
   refreshAllProjectileVisuals(): void;
   updateHud(hud: PotassiumHudFacts): void;
   showOutcomeOverlay(input: { title: string; score: number; titleFontSize: number }): void;
   showTerminal(outcome: PotassiumRunOutcome): void;
-  stopMainProjectile(): void;
-  clearBoardForOutcome(): void;
   showDamageCue(enemy: PotassiumCommandObject, source: PotassiumDamageSource): void;
-  spawnFirePatch(x: number, y: number, effectMultiplier: number, lifetimeMs: number, scale: number): void;
   showExplosionVisual(x: number, y: number, radius: number): void;
   shakeCamera(durationMs: number, intensity: number): void;
   showGhostBeam(input: {
@@ -128,21 +165,21 @@ export interface PotassiumCommandAdapterPorts {
     poisonActive: boolean;
     durationMs: number;
   }): void;
-  spawnBananaClones(count: number, lifetimeMs: number): void;
-  spawnSplitterChildren(enemy: PotassiumCommandObject): void;
   animateEnemyDeath(enemy: PotassiumCommandObject, onComplete: () => void): void;
-  spawnBossOrbitBlockers(boss: PotassiumCommandObject): void;
-  updateBossOrbitBlockers(boss: PotassiumCommandObject, time: number): void;
-  setBossStoneVisual(boss: PotassiumCommandObject, active: boolean): void;
-  spawnBossSummons(summons: readonly PotassiumBossSummonFacts[]): void;
-  clearOrbitBlockers(): void;
-  getExplosionHits(x: number, y: number): Array<{ enemy: PotassiumCommandObject; distance: number }>;
-  getGhostBeamHits(
-    x: number,
-    y: number,
-    direction: PotassiumGhostBeamDirection
-  ): Array<{ enemy: PotassiumCommandObject; inBeam: boolean }>;
 }
+
+export interface PotassiumCommandAdapterPorts {
+  runtime: PotassiumCommandAdapterRuntimePorts;
+  objects: PotassiumCommandAdapterObjectPorts;
+  board: PotassiumCommandAdapterBoardPorts;
+  renderer: PotassiumCommandAdapterRendererPorts;
+}
+
+interface PotassiumCommandAdapterFlatPorts
+  extends PotassiumCommandAdapterRuntimePorts,
+    PotassiumCommandAdapterObjectPorts,
+    PotassiumCommandAdapterBoardPorts,
+    PotassiumCommandAdapterRendererPorts {}
 
 export interface PotassiumCommandAdapterOptions {
   arena: {
@@ -161,12 +198,17 @@ export interface PotassiumCommandAdapterOptions {
 }
 
 export class PotassiumCommandAdapter {
-  private readonly ports: PotassiumCommandAdapterPorts;
+  private readonly ports: PotassiumCommandAdapterFlatPorts;
   private readonly options: PotassiumCommandAdapterOptions;
   private combatIdCounter = 0;
 
   constructor(ports: PotassiumCommandAdapterPorts, options: PotassiumCommandAdapterOptions) {
-    this.ports = ports;
+    this.ports = {
+      ...ports.runtime,
+      ...ports.objects,
+      ...ports.board,
+      ...ports.renderer
+    };
     this.options = options;
   }
 
@@ -231,21 +273,21 @@ export class PotassiumCommandAdapter {
   getEnemyCombatFacts(enemy: PotassiumCommandObject): PotassiumEnemyCombatFacts {
     return {
       id: this.getCombatId(enemy, 'enemy'),
-      kind: enemy.getData('kind') as PotassiumEnemyKind,
+      kind: getPotassiumEnemyKind(enemy),
       active: enemy.active,
-      dying: Boolean(enemy.getData('dying')),
-      hp: (enemy.getData('hp') as number | undefined) ?? 0,
-      maxHp: (enemy.getData('maxHp') as number | undefined) ?? 0,
+      dying: isPotassiumEnemyDying(enemy),
+      hp: getPotassiumEnemyHp(enemy),
+      maxHp: getPotassiumEnemyMaxHp(enemy),
       x: enemy.x,
       y: enemy.y,
-      indestructible: Boolean(enemy.getData('indestructible')),
-      splitsOnDeath: Boolean(enemy.getData('splitsOnDeath')),
-      poisonExpiresAt: enemy.getData('poisonExpiresAt') as number | undefined,
-      poisonMultiplier: enemy.getData('poisonMultiplier') as number | undefined,
-      poisonNextTickAt: enemy.getData('poisonNextTickAt') as number | undefined,
-      fireTickUntil: enemy.getData('fireTickUntil') as number | undefined,
-      shieldSide: enemy.getData('shieldSide') as PotassiumShieldSide | undefined,
-      stoneUntil: enemy.getData('stoneUntil') as number | undefined
+      indestructible: Boolean(getPotassiumData<boolean>(enemy, POTASSIUM_DATA_KEYS.indestructible)),
+      splitsOnDeath: Boolean(getPotassiumData<boolean>(enemy, POTASSIUM_DATA_KEYS.splitsOnDeath)),
+      poisonExpiresAt: getPotassiumData<number>(enemy, POTASSIUM_DATA_KEYS.poisonExpiresAt),
+      poisonMultiplier: getPotassiumData<number>(enemy, POTASSIUM_DATA_KEYS.poisonMultiplier),
+      poisonNextTickAt: getPotassiumData<number>(enemy, POTASSIUM_DATA_KEYS.poisonNextTickAt),
+      fireTickUntil: getPotassiumData<number>(enemy, POTASSIUM_DATA_KEYS.fireTickUntil),
+      shieldSide: getPotassiumShieldSide(enemy),
+      stoneUntil: getPotassiumData<number>(enemy, POTASSIUM_DATA_KEYS.stoneUntil)
     };
   }
 
@@ -253,12 +295,13 @@ export class PotassiumCommandAdapter {
     return {
       id: this.getCombatId(projectile, this.ports.isMainProjectile(projectile) ? 'main' : 'projectile'),
       isMain: this.ports.isMainProjectile(projectile),
-      isRecall: this.ports.isMainProjectile(projectile) && this.ports.isMainProjectileRecalling(),
+      isRecall: this.ports.isMainProjectile(projectile)
+        && (this.ports.isMainProjectileRecalling() || isPotassiumProjectileRecallVisual(projectile)),
       x: projectile.x,
       y: projectile.y,
-      effectMultiplier: this.ports.getProjectileEffectMultiplier(projectile),
-      canApplyHitProcs: this.ports.canProjectileApplyHitProcs(projectile),
-      canDuplicate: Boolean(projectile.getData('canDuplicate')),
+      effectMultiplier: getPotassiumProjectileEffectMultiplier(projectile),
+      canApplyHitProcs: canPotassiumProjectileApplyHitProcs(projectile),
+      canDuplicate: canPotassiumProjectileDuplicate(projectile),
       explosionRadiusMultiplier: this.ports.getProjectileExplosionRadiusMultiplier(projectile)
     };
   }
@@ -266,9 +309,9 @@ export class PotassiumCommandAdapter {
   getBossFacts(boss: PotassiumCommandObject): PotassiumBossFacts {
     return {
       active: boss.active,
-      dying: Boolean(boss.getData('dying')),
-      hp: (boss.getData('hp') as number | undefined) ?? 0,
-      maxHp: (boss.getData('maxHp') as number | undefined) ?? 0,
+      dying: isPotassiumEnemyDying(boss),
+      hp: getPotassiumEnemyHp(boss),
+      maxHp: getPotassiumEnemyMaxHp(boss),
       x: boss.x,
       y: boss.y,
       velocityX: boss.body.velocity.x
@@ -298,12 +341,11 @@ export class PotassiumCommandAdapter {
       if (command.type === 'damageEnemy') {
         if (enemy) this.damageEnemy(enemy, command.amount, command.source);
       } else if (command.type === 'setEnemyHp') {
-        enemy?.setData('hp', command.hp);
-        enemy?.setData('damageState', command.damageState);
+        if (enemy) setPotassiumEnemyHealth(enemy, command.hp, command.damageState);
       } else if (command.type === 'setFireTickUntil') {
-        enemy?.setData('fireTickUntil', command.fireTickUntil);
+        if (enemy) setPotassiumData(enemy, POTASSIUM_DATA_KEYS.fireTickUntil, command.fireTickUntil);
       } else if (command.type === 'setPoisonNextTickAt') {
-        enemy?.setData('poisonNextTickAt', command.poisonNextTickAt);
+        if (enemy) setPotassiumData(enemy, POTASSIUM_DATA_KEYS.poisonNextTickAt, command.poisonNextTickAt);
       } else if (command.type === 'showDamageCue') {
         if (enemy) this.ports.showDamageCue(enemy, command.source);
       } else if (command.type === 'ricochetProjectile') {
@@ -348,7 +390,7 @@ export class PotassiumCommandAdapter {
   applyBossCommands(commands: readonly PotassiumBossCommand[], boss?: PotassiumCommandObject): void {
     commands.forEach((command) => {
       if (command.type === 'setBossPhase') {
-        boss?.setData('bossPhase', command.phase);
+        if (boss) setPotassiumData(boss, POTASSIUM_DATA_KEYS.bossPhase, command.phase);
       } else if (command.type === 'setBossVelocity') {
         if (!boss) return;
         if (command.x !== undefined) boss.setX(command.x);
@@ -363,9 +405,9 @@ export class PotassiumCommandAdapter {
       } else if (command.type === 'updateOrbitBlockers') {
         if (boss) this.ports.updateBossOrbitBlockers(boss, command.now);
       } else if (command.type === 'startStone') {
-        boss?.setData('stoneUntil', command.stoneUntil);
+        if (boss) setPotassiumData(boss, POTASSIUM_DATA_KEYS.stoneUntil, command.stoneUntil);
       } else if (command.type === 'endStone') {
-        boss?.setData('stoneUntil', undefined);
+        if (boss) setPotassiumData(boss, POTASSIUM_DATA_KEYS.stoneUntil, undefined);
       } else if (command.type === 'setStoneVisual') {
         if (boss) this.ports.setBossStoneVisual(boss, command.active);
       } else if (command.type === 'spawnSummons') {
@@ -377,11 +419,11 @@ export class PotassiumCommandAdapter {
   }
 
   private getCombatId(object: PotassiumCommandObject, prefix: string): string {
-    const existingId = object.getData('combatId') as string | undefined;
+    const existingId = getPotassiumCombatId(object);
     if (existingId) return existingId;
     const id = `${prefix}-${this.combatIdCounter}`;
     this.combatIdCounter += 1;
-    object.setData('combatId', id);
+    setPotassiumCombatId(object, id);
     return id;
   }
 
@@ -429,19 +471,19 @@ export class PotassiumCommandAdapter {
       clamp(projectile.y + normal.y * 8, this.options.arena.top + 28, this.options.arena.bottom - 28)
     );
     projectile.setVelocity(ricochet.x, ricochet.y);
-    projectile.setData('angularVelocity', clamp(ricochet.x * 1.4, -720, 720));
+    setPotassiumData(projectile, POTASSIUM_DATA_KEYS.angularVelocity, clamp(ricochet.x * 1.4, -720, 720));
     if ('setAngularVelocity' in projectile && typeof projectile.setAngularVelocity === 'function') {
       projectile.setAngularVelocity(clamp(ricochet.x * 1.4, -720, 720));
     }
   }
 
   private applyPoisonCommand(enemy: PotassiumCommandObject, command: PotassiumApplyPoisonCommand): void {
-    enemy.setData('poisonExpiresAt', command.expiresAt);
-    enemy.setData('poisoned', true);
-    enemy.setData('poisonMultiplier', command.poisonMultiplier);
+    setPotassiumData(enemy, POTASSIUM_DATA_KEYS.poisonExpiresAt, command.expiresAt);
+    setPotassiumData(enemy, POTASSIUM_DATA_KEYS.poisoned, true);
+    setPotassiumData(enemy, POTASSIUM_DATA_KEYS.poisonMultiplier, command.poisonMultiplier);
     enemy.setTint(this.options.poisonTint);
     if (command.nextTickAt !== undefined) {
-      enemy.setData('poisonNextTickAt', command.nextTickAt);
+      setPotassiumData(enemy, POTASSIUM_DATA_KEYS.poisonNextTickAt, command.nextTickAt);
     }
   }
 
@@ -452,18 +494,21 @@ export class PotassiumCommandAdapter {
     sourceEnemy?: PotassiumCommandObject
   ): void {
     this.ports.getEnemies().forEach((enemy) => {
-      if (enemy === sourceEnemy || !enemy.active || enemy.getData('dying')) return;
+      if (enemy === sourceEnemy || !enemy.active || isPotassiumEnemyDying(enemy)) return;
       if (distance({ x, y }, enemy) <= this.options.poisonDeathSpreadRadius) {
         this.applyPoisonCommand(enemy, {
           type: 'applyPoison',
           enemyId: this.getCombatId(enemy, 'enemy'),
           effectMultiplier,
-          poisonMultiplier: Math.max((enemy.getData('poisonMultiplier') as number | undefined) ?? 0, effectMultiplier),
+          poisonMultiplier: Math.max(
+            getPotassiumData<number>(enemy, POTASSIUM_DATA_KEYS.poisonMultiplier) ?? 0,
+            effectMultiplier
+          ),
           expiresAt: Math.max(
-            (enemy.getData('poisonExpiresAt') as number | undefined) ?? 0,
+            getPotassiumData<number>(enemy, POTASSIUM_DATA_KEYS.poisonExpiresAt) ?? 0,
             this.ports.getNow() + POTASSIUM_POISON_DURATION_MS * effectMultiplier
           ),
-          nextTickAt: ((enemy.getData('poisonNextTickAt') as number | undefined) ?? 0) < this.ports.getNow()
+          nextTickAt: (getPotassiumData<number>(enemy, POTASSIUM_DATA_KEYS.poisonNextTickAt) ?? 0) < this.ports.getNow()
             ? this.ports.getNow() + POTASSIUM_POISON_TICK_INTERVAL_MS
             : undefined
         });
@@ -473,11 +518,11 @@ export class PotassiumCommandAdapter {
 
   private clearPoison(enemy: PotassiumCommandObject): void {
     if (!enemy.active) return;
-    enemy.setData('poisonExpiresAt', undefined);
-    enemy.setData('poisonNextTickAt', undefined);
-    enemy.setData('poisonMultiplier', undefined);
-    enemy.setData('poisoned', false);
-    if (enemy.getData('stoneActive')) {
+    setPotassiumData(enemy, POTASSIUM_DATA_KEYS.poisonExpiresAt, undefined);
+    setPotassiumData(enemy, POTASSIUM_DATA_KEYS.poisonNextTickAt, undefined);
+    setPotassiumData(enemy, POTASSIUM_DATA_KEYS.poisonMultiplier, undefined);
+    setPotassiumData(enemy, POTASSIUM_DATA_KEYS.poisoned, false);
+    if (getPotassiumData<boolean>(enemy, POTASSIUM_DATA_KEYS.stoneActive)) {
       enemy.setTint(0x78716c);
     } else {
       enemy.clearTint();
@@ -485,10 +530,10 @@ export class PotassiumCommandAdapter {
   }
 
   private killEnemy(enemy: PotassiumCommandObject): void {
-    const kind = enemy.getData('kind') as PotassiumEnemyKind;
+    const kind = getPotassiumEnemyKind(enemy);
     const config = getPotassiumEnemyConfig(kind);
-    enemy.setData('dying', true);
-    const damageCueTween = enemy.getData('damageCueTween') as { stop?: () => void } | undefined;
+    setPotassiumEnemyDying(enemy, true);
+    const damageCueTween = getPotassiumData<{ stop?: () => void }>(enemy, POTASSIUM_DATA_KEYS.damageCueTween);
     damageCueTween?.stop?.();
     enemy.body.enable = false;
     const killResult = resolvePotassiumEnemyKilled(this.ports.getSession(), config.score, kind);

@@ -6,6 +6,7 @@ import {
   type PotassiumEnemyKind,
   type PotassiumShieldSide
 } from './potassiumSlipWaves';
+import { POTASSIUM_DATA_KEYS } from './potassiumSlipPhaserData';
 
 export interface PotassiumEnemyConfig {
   label: string;
@@ -184,19 +185,19 @@ export function resolvePotassiumEnemySetupFacts(input: {
     scale: config.scale,
     hp,
     data: {
-      kind,
-      hp,
-      maxHp: hp,
-      poisoned: false,
-      columnIndex,
-      rowIndex,
-      columnSpan: kind === 'splitter' ? 2 : 1,
-      occupiedColumns: kind === 'splitter'
+      [POTASSIUM_DATA_KEYS.kind]: kind,
+      [POTASSIUM_DATA_KEYS.hp]: hp,
+      [POTASSIUM_DATA_KEYS.maxHp]: hp,
+      [POTASSIUM_DATA_KEYS.poisoned]: false,
+      [POTASSIUM_DATA_KEYS.columnIndex]: columnIndex,
+      [POTASSIUM_DATA_KEYS.rowIndex]: rowIndex,
+      [POTASSIUM_DATA_KEYS.columnSpan]: kind === 'splitter' ? 2 : 1,
+      [POTASSIUM_DATA_KEYS.occupiedColumns]: kind === 'splitter'
         ? getPotassiumSplitterSpawnColumns(columnIndex)
         : [columnIndex],
-      indestructible: config.indestructible ?? false,
-      splitsOnDeath: config.splitsOnDeath ?? false,
-      ...(kind === 'boss' ? { bossPhase: 1 } : {})
+      [POTASSIUM_DATA_KEYS.indestructible]: config.indestructible ?? false,
+      [POTASSIUM_DATA_KEYS.splitsOnDeath]: config.splitsOnDeath ?? false,
+      ...(kind === 'boss' ? { [POTASSIUM_DATA_KEYS.bossPhase]: 1 } : {})
     },
     attachment: {
       kind,

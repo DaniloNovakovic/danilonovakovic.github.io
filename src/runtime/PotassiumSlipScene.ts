@@ -69,6 +69,25 @@ import {
   PotassiumCommandAdapter,
   type PotassiumCommandObject
 } from './potassiumSlipCommandAdapter';
+import {
+  canPotassiumProjectileApplyHitProcs,
+  getPotassiumCombatId,
+  getPotassiumData,
+  getPotassiumEnemyHp,
+  getPotassiumEnemyKind,
+  getPotassiumHitCooldownUntil,
+  getPotassiumProjectileEffectMultiplier,
+  getPotassiumProjectileNextTrailDropAt,
+  isPotassiumEnemyDying,
+  isPotassiumProjectileRecallVisual,
+  POTASSIUM_DATA_KEYS,
+  setPotassiumData,
+  setPotassiumEnemyHp,
+  setPotassiumEnemyMaxHp,
+  setPotassiumHitCooldownUntil,
+  setPotassiumProjectileDefaults,
+  setPotassiumProjectileNextTrailDropAt
+} from './potassiumSlipPhaserData';
 
 type EnemySprite = Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
 type ProjectileSprite = Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -305,9 +324,11 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.banana.setDrag(12, 12);
     this.banana.body.setAllowGravity(false);
     this.banana.body.setCircle(25, 7, 7);
-    this.banana.setData('canDuplicate', true);
-    this.banana.setData('effectMultiplier', 1);
-    this.banana.setData('canApplyHitProcs', true);
+    setPotassiumProjectileDefaults(this.banana, {
+      canDuplicate: true,
+      effectMultiplier: 1,
+      canApplyHitProcs: true
+    });
     this.refreshBananaUpgradeVisuals(this.banana);
   }
 
@@ -341,14 +362,14 @@ export class PotassiumSlipScene extends Phaser.Scene {
       if (this.projectileControl.isRecalling()) {
         this.commandAdapter.applyCombatCommands([{
           type: 'boostRecallVelocity',
-          projectileId: this.banana.getData('combatId') as string
+          projectileId: getPotassiumCombatId(this.banana) ?? ''
         }], context);
         return;
       }
       this.commandAdapter.applyCombatCommands([{
         type: 'ricochetProjectile',
-        projectileId: this.banana.getData('combatId') as string,
-        enemyId: bossBlocker.getData('combatId') as string
+        projectileId: getPotassiumCombatId(this.banana) ?? '',
+        enemyId: getPotassiumCombatId(bossBlocker) ?? ''
       }], context);
     });
     this.physics.add.overlap(this.clones, this.bossBlockers, (clone, blocker) => {
@@ -357,8 +378,8 @@ export class PotassiumSlipScene extends Phaser.Scene {
       const context = this.commandAdapter.createCombatContext([bossBlocker], [projectile]);
       this.commandAdapter.applyCombatCommands([{
         type: 'ricochetProjectile',
-        projectileId: projectile.getData('combatId') as string,
-        enemyId: bossBlocker.getData('combatId') as string
+        projectileId: getPotassiumCombatId(projectile) ?? '',
+        enemyId: getPotassiumCombatId(bossBlocker) ?? ''
       }], context);
     });
   }
@@ -470,11 +491,13 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.banana.setAngularVelocity(0);
     this.banana.setBounce(1, 1);
     this.banana.setScale(0.9);
-    this.banana.setData('canDuplicate', true);
-    this.banana.setData('nextTrailDropAt', 0);
-    this.banana.setData('effectMultiplier', 1);
-    this.banana.setData('canApplyHitProcs', true);
-    this.banana.setData('recallVisual', false);
+    setPotassiumProjectileDefaults(this.banana, {
+      canDuplicate: true,
+      nextTrailDropAt: 0,
+      effectMultiplier: 1,
+      canApplyHitProcs: true,
+      recallVisual: false
+    });
     this.refreshBananaUpgradeVisuals(this.banana);
     this.potassiumRenderer.clearControlFeedback();
     this.clearUpgradeChoiceOverlay();
@@ -515,7 +538,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
   }
 
   private setBananaRecallVisual(active: boolean): void {
-    this.banana.setData('recallVisual', active);
+    setPotassiumData(this.banana, POTASSIUM_DATA_KEYS.recallVisual, active);
     this.banana.setBounce(active ? 0.15 : 1, active ? 0.15 : 1);
     this.refreshBananaUpgradeVisuals(this.banana);
   }
@@ -536,10 +559,12 @@ export class PotassiumSlipScene extends Phaser.Scene {
         this.banana.setPosition(LAUNCH_PAD.x, LAUNCH_PAD.y);
         this.banana.setVelocity(0, 0);
         this.banana.setAngularVelocity(0);
-        this.banana.setData('canDuplicate', true);
-        this.banana.setData('nextTrailDropAt', 0);
-        this.banana.setData('effectMultiplier', 1);
-        this.banana.setData('canApplyHitProcs', true);
+        setPotassiumProjectileDefaults(this.banana, {
+          canDuplicate: true,
+          nextTrailDropAt: 0,
+          effectMultiplier: 1,
+          canApplyHitProcs: true
+        });
       } else if (command.type === 'setBananaPosition') {
         this.banana.setPosition(command.x, command.y);
       } else if (command.type === 'setBananaVelocity') {
@@ -597,11 +622,11 @@ export class PotassiumSlipScene extends Phaser.Scene {
   }
 
   private getProjectileEffectMultiplier(projectile: ProjectileSprite): number {
-    return (projectile.getData('effectMultiplier') as number | undefined) ?? 1;
+    return getPotassiumProjectileEffectMultiplier(projectile);
   }
 
   private canProjectileApplyHitProcs(projectile: ProjectileSprite): boolean {
-    return (projectile.getData('canApplyHitProcs') as boolean | undefined) ?? false;
+    return canPotassiumProjectileApplyHitProcs(projectile);
   }
 
   private getProjectileExplosionRadiusMultiplier(projectile: ProjectileSprite): number {
@@ -612,7 +637,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.potassiumRenderer.refreshProjectileVisuals(projectile, this.session.skillRanks, {
       isClone: options.isClone,
       isMain: projectile === this.banana,
-      isRecall: projectile === this.banana && ((projectile.getData('recallVisual') as boolean | undefined) ?? false)
+      isRecall: projectile === this.banana && isPotassiumProjectileRecallVisual(projectile)
     });
   }
 
@@ -730,10 +755,9 @@ export class PotassiumSlipScene extends Phaser.Scene {
 
   private hitEnemy(enemy: EnemySprite, projectile: ProjectileSprite, hitKey: string): void {
     if (this.session.gameState !== 'PLAYING' || !enemy.active) return;
-    const cooldownKey = `hitUntil:${hitKey}`;
-    const hitUntil = enemy.getData(cooldownKey) as number | undefined;
+    const hitUntil = getPotassiumHitCooldownUntil(enemy, hitKey);
     if (hitUntil !== undefined && hitUntil > this.time.now) return;
-    enemy.setData(cooldownKey, this.time.now + HIT_COOLDOWN_MS);
+    setPotassiumHitCooldownUntil(enemy, hitKey, this.time.now + HIT_COOLDOWN_MS);
 
     this.commandAdapter.applyCombatCommands(resolvePotassiumProjectileHit({
       now: this.time.now,
@@ -745,20 +769,20 @@ export class PotassiumSlipScene extends Phaser.Scene {
   }
 
   private spawnSplitterChildren(enemy: EnemySprite): void {
-    if (!enemy.getData('splitsOnDeath')) return;
-    const columnIndex = (enemy.getData('columnIndex') as number | undefined) ?? 2;
-    const rowIndex = ((enemy.getData('rowIndex') as number | undefined) ?? 0) + 1;
-    const occupiedColumns = (enemy.getData('occupiedColumns') as number[] | undefined) ?? [columnIndex];
+    if (!getPotassiumData<boolean>(enemy, POTASSIUM_DATA_KEYS.splitsOnDeath)) return;
+    const columnIndex = getPotassiumData<number>(enemy, POTASSIUM_DATA_KEYS.columnIndex) ?? 2;
+    const rowIndex = (getPotassiumData<number>(enemy, POTASSIUM_DATA_KEYS.rowIndex) ?? 0) + 1;
+    const occupiedColumns = getPotassiumData<number[]>(enemy, POTASSIUM_DATA_KEYS.occupiedColumns) ?? [columnIndex];
     occupiedColumns
       .forEach((column) => {
         const child = this.spawnEnemy('intern', column, rowIndex, enemy.y + 26);
         if (!child) return;
         const childFacts = resolvePotassiumSplitterChildFacts({
-          hp: (child.getData('hp') as number | undefined) ?? 1
+          hp: getPotassiumEnemyHp(child) || 1
         });
         child.setScale(childFacts.scale);
-        child.setData('hp', childFacts.hp);
-        child.setData('maxHp', childFacts.hp);
+        setPotassiumEnemyHp(child, childFacts.hp);
+        setPotassiumEnemyMaxHp(child, childFacts.hp);
         child.setVelocity(0, childFacts.speed);
       });
   }
@@ -773,20 +797,22 @@ export class PotassiumSlipScene extends Phaser.Scene {
       clone.setBounce(1, 1);
       clone.body.setAllowGravity(false);
       clone.body.setCircle(16, 16, 16);
-      clone.setData('canDuplicate', false);
-      clone.setData('effectMultiplier', CLONE_EFFECT_MULTIPLIER);
-      clone.setData('canApplyHitProcs', this.getSkillRank('duplicate') >= 2);
-      clone.setData('nextTrailDropAt', 0);
+      setPotassiumProjectileDefaults(clone, {
+        canDuplicate: false,
+        effectMultiplier: CLONE_EFFECT_MULTIPLIER,
+        canApplyHitProcs: this.getSkillRank('duplicate') >= 2,
+        nextTrailDropAt: 0
+      });
       const angle = Phaser.Math.FloatBetween(0, Math.PI * 2);
       clone.setVelocity(Math.cos(angle) * 430, Math.sin(angle) * 430);
       clone.setAngularVelocity(Phaser.Math.Between(-600, 600));
       this.refreshBananaUpgradeVisuals(clone, { isClone: true });
       this.time.delayedCall(lifetimeMs, () => {
         if (!clone.active) return;
-        const visuals = clone.getData('bananaVisuals') as {
+        const visuals = getPotassiumData<{
           behind?: Phaser.GameObjects.Graphics;
           front?: Phaser.GameObjects.Graphics;
-        } | undefined;
+        }>(clone, POTASSIUM_DATA_KEYS.bananaVisuals);
         this.tweens.add({
           targets: [clone, visuals?.behind, visuals?.front].filter(Boolean),
           alpha: 0,
@@ -811,9 +837,9 @@ export class PotassiumSlipScene extends Phaser.Scene {
 
   private dropFireTrailForProjectile(projectile: ProjectileSprite, time: number): void {
     if (!projectile.active || !projectile.body) return;
-    const nextDropAt = (projectile.getData('nextTrailDropAt') as number | undefined) ?? 0;
+    const nextDropAt = getPotassiumProjectileNextTrailDropAt(projectile);
     if (time < nextDropAt || projectile.body.velocity.length() < 120) return;
-    projectile.setData('nextTrailDropAt', time + TRAIL_DROP_INTERVAL_MS);
+    setPotassiumProjectileNextTrailDropAt(projectile, time + TRAIL_DROP_INTERVAL_MS);
     this.spawnFirePatch(
       projectile.x,
       projectile.y,
@@ -839,7 +865,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
     zone.setScale(scale);
     zone.body.setAllowGravity(false);
     zone.body.setImmovable(true);
-    zone.setData('effectMultiplier', effectMultiplier);
+    setPotassiumData(zone, POTASSIUM_DATA_KEYS.effectMultiplier, effectMultiplier);
     zone.setVelocity(0, 0);
     this.time.delayedCall(lifetimeMs, () => {
       this.fireCells.delete(cellKey);
@@ -904,14 +930,14 @@ export class PotassiumSlipScene extends Phaser.Scene {
       blocker.body.setAllowGravity(false);
       blocker.body.setImmovable(true);
       blocker.body.setSize(58, 42, true);
-      blocker.setData('orbitIndex', index);
+      setPotassiumData(blocker, POTASSIUM_DATA_KEYS.orbitIndex, index);
     }
   }
 
   private updateBossOrbitBlockers(boss: EnemySprite, time: number): void {
     this.bossBlockers.getChildren().forEach((gameObject) => {
       const blocker = gameObject as EnemySprite;
-      const index = (blocker.getData('orbitIndex') as number | undefined) ?? 0;
+      const index = getPotassiumData<number>(blocker, POTASSIUM_DATA_KEYS.orbitIndex) ?? 0;
       const angle = time * BOSS_ORBIT_SPEED + index * ((Math.PI * 2) / 3);
       blocker.setPosition(
         boss.x + Math.cos(angle) * BOSS_ORBIT_RADIUS,
@@ -925,12 +951,12 @@ export class PotassiumSlipScene extends Phaser.Scene {
   private setBossStoneVisual(boss: EnemySprite, active: boolean): void {
     if (active) {
       boss.setTint(0x78716c);
-      boss.setData('stoneActive', true);
+      setPotassiumData(boss, POTASSIUM_DATA_KEYS.stoneActive, true);
       return;
     }
-    if (!boss.getData('stoneActive')) return;
-    boss.setData('stoneActive', false);
-    if (boss.getData('poisoned')) {
+    if (!getPotassiumData<boolean>(boss, POTASSIUM_DATA_KEYS.stoneActive)) return;
+    setPotassiumData(boss, POTASSIUM_DATA_KEYS.stoneActive, false);
+    if (getPotassiumData<boolean>(boss, POTASSIUM_DATA_KEYS.poisoned)) {
       boss.setTint(POISON_TINT);
     } else {
       boss.clearTint();
@@ -947,7 +973,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
   private enforceSideWalls(): void {
     this.enemies.getChildren().forEach((gameObject) => {
       const enemy = gameObject as EnemySprite;
-      const kind = enemy.getData('kind') as EnemyKind;
+      const kind = getPotassiumEnemyKind(enemy);
       if (kind === 'boss') {
         this.bounceObjectInsideArena(enemy, SIDE_BOUNCE_MARGIN);
       } else {
@@ -982,7 +1008,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
   private checkEnemyEscapes(): void {
     [...this.enemies.getChildren()].forEach((gameObject) => {
       const enemy = gameObject as EnemySprite;
-      const kind = enemy.getData('kind') as EnemyKind;
+      const kind = getPotassiumEnemyKind(enemy);
       if (kind === 'boss') {
         if (enemy.y > ARENA.bottom + 45) {
           this.handleBossEscape(enemy);
@@ -1006,7 +1032,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
   }
 
   private handleEnemyEscape(enemy: EnemySprite): void {
-    const kind = enemy.getData('kind') as EnemyKind;
+    const kind = getPotassiumEnemyKind(enemy);
     enemy.destroy();
     this.cameras.main.shake(180, 0.008);
     this.applySessionResult(resolvePotassiumEnemyEscaped(this.session, kind));
@@ -1015,7 +1041,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
   private checkWaveClear(): void {
     const hasLivingEnemies = this.enemies.getChildren().some((gameObject) => {
       const enemy = gameObject as EnemySprite;
-      return enemy.active && !enemy.getData('dying');
+      return enemy.active && !isPotassiumEnemyDying(enemy);
     });
     this.applySessionResult(resolvePotassiumWaveClear({
       state: this.session,
