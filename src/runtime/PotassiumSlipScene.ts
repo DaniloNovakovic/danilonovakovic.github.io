@@ -1092,8 +1092,6 @@ export class PotassiumSlipScene extends Phaser.Scene {
   private killEnemy(enemy: EnemySprite): void {
     const kind = enemy.getData('kind') as EnemyKind;
     const config = ENEMY_CONFIGS[kind];
-    this.spreadPoisonOnDeath(enemy);
-    this.spawnSplitterChildren(enemy);
     enemy.setData('dying', true);
     const damageCueTween = enemy.getData('damageCueTween') as Phaser.Tweens.Tween | undefined;
     damageCueTween?.stop();
@@ -1117,13 +1115,6 @@ export class PotassiumSlipScene extends Phaser.Scene {
         }
       }
     });
-  }
-
-  private spreadPoisonOnDeath(enemy: EnemySprite): void {
-    const poisonExpiresAt = enemy.getData('poisonExpiresAt') as number | undefined;
-    if (this.getSkillRank('poison') < 2 || poisonExpiresAt === undefined || poisonExpiresAt <= this.time.now) return;
-    const effectMultiplier = (enemy.getData('poisonMultiplier') as number | undefined) ?? 1;
-    this.spreadPoisonFrom(enemy.x, enemy.y, effectMultiplier, enemy);
   }
 
   private spawnSplitterChildren(enemy: EnemySprite): void {
