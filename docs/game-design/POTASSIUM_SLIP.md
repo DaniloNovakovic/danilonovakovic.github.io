@@ -19,12 +19,12 @@ Clear 10 procedural campaign waves, defeat the boss on wave 11, and collect the 
 
 ## Core Loop
 
-- Enemies and wall blockers spawn in 5-column rows and fall straight down.
+- Enemies and wall blockers spawn in 5-column rows and fall straight down. Splitter Memos reserve two adjacent columns.
 - The banana bounces off arena walls and ricochets off enemies.
-- Regular enemies cost lives if they reach the bottom. Filing Walls do not hurt the player. The boss instantly ends the run if it reaches the bottom.
+- Regular enemies cost lives if they reach the bottom. Wooden Walls and Hard Filing Walls do not hurt the player. The boss instantly ends the run if it reaches the bottom.
 - The player starts with 5 lives.
 - After each cleared non-boss wave, the player chooses one of two upgrade drafts.
-- Normal enemies do not show floating HP labels. Their damage state is shown through cracks, scuffs, and bandage marks.
+- Normal enemies do not show floating HP labels. Characters show cracks/scuffs/bandages as they weaken; wooden walls use crack/splinter-only damage marks.
 
 ## Waves And Modes
 
@@ -39,9 +39,9 @@ Clear 10 procedural campaign waves, defeat the boss on wave 11, and collect the 
 - **Scope Blob:** Round multi-hit target.
 - **Meeting Brick:** Chunkier blocker-like enemy.
 - **Deadline Drone:** Faster falling hazard.
-- **Filing Wall:** High-HP one-cell non-damaging blocker that forces ricochet angles.
+- **Wooden Wall:** High-HP one-cell destructible blocker that forces ricochet angles. It shows wood planks and crack/splinter damage, not bandages.
 - **Hard Filing Wall:** Indestructible one-cell blocker introduced later. It never costs lives, but it refuses to become paperwork.
-- **Splitter Memo:** Medium target that splits into two smaller bugs on death when nearby lanes are available.
+- **Splitter Memo:** Two-column target that splits into two smaller bugs on death, one from each occupied lane.
 - **Shielded Form:** Beefy target with a visible shield plate. Hits from the shielded side ricochet without damage.
 - **Potassium Compliance Officer:** Campaign boss with patrol phases, orbiting indestructible blockers, stone armor windows, and summons.
 
@@ -79,6 +79,15 @@ When all six skills are fully upgraded, drafts switch to repeatable generic upgr
 
 Potassium uses a dedicated `vertical-board` presentation. Phaser still runs at the fixed global design resolution, but the React shell frames a tall portrait board and the playable arena uses the central vertical slice directly. The contextual hint lives below the board like the overworld status panel.
 
+The HUD intentionally stays compact: wave, score, and lives only. Active upgrades are communicated through stacked banana visuals instead of a long text list:
+
+- Poison turns the banana green.
+- Fire adds a warm aura.
+- Explosion adds a red/orange spark.
+- Duplicate adds yellow echo marks.
+- Horizontal and vertical ghost upgrades add cyan shimmer lines.
+- Recall uses opacity only, so it reads as a control state without conflicting with upgrade colors.
+
 ## Current Experimental Feel
 
-The yo-yo recall uses an elastic pull model: holding recall continuously pulls the banana toward the launch pad while still allowing enemy/blocker ricochets. Releasing recall returns the banana to normal bounce physics.
+The yo-yo recall uses a direct pull-back model: holding recall pulls the banana toward the launch pad and slightly reduces its bounce so it does not chatter against the bottom wall. Releasing recall returns the banana to normal bounce physics.
