@@ -10,18 +10,14 @@ import {
   applyPotassiumDraftOption,
   applyPotassiumGenericDraftOption,
   getPotassiumDraftChoices,
-  getPotassiumDuplicateCloneCount,
-  getPotassiumEnemyHealthState,
+  getPotassiumExplosionRadius,
   getPotassiumFireCellKey,
-  getPotassiumExplosionDamage,
   getPotassiumGenericUpgradeRank,
-  getPotassiumScaledExplosionRadius,
   getPotassiumShieldSide,
   getPotassiumSkillRank,
   getPotassiumWave,
   getPotassiumSplitterSpawnColumns,
   getScaledPotassiumEnemyHp,
-  isPotassiumShieldedHit,
   isPotassiumBossWave,
   POTASSIUM_COLUMN_COUNT,
   type PotassiumDraftOption as DraftOption,
@@ -36,6 +32,22 @@ import {
   type PotassiumEnemyKind as EnemyKind,
   type PotassiumUpgradeKind as UpgradeKind
 } from './potassiumSlipWaves';
+import {
+  POTASSIUM_GHOST_STATUS_FIELD_LIFETIME_MS,
+  POTASSIUM_POISON_DURATION_MS,
+  POTASSIUM_POISON_TICK_INTERVAL_MS,
+  resolvePotassiumDamage,
+  resolvePotassiumExplosion,
+  resolvePotassiumGhostBeam,
+  resolvePotassiumPoisonTick,
+  resolvePotassiumProjectileHit,
+  type PotassiumCombatCommand,
+  type PotassiumDamageSource,
+  type PotassiumEnemyCombatFacts,
+  type PotassiumGhostBeamDirection,
+  type PotassiumApplyPoisonCommand,
+  type PotassiumProjectileCombatFacts
+} from './potassiumSlipCombat';
 import {
   getPotassiumLeaderboardTop,
   savePotassiumRunRecord,
@@ -117,7 +129,6 @@ const RECALL_SPEED = 720;
 const RECALL_MODE: 'direct' | 'elastic' = 'direct';
 const RECALL_ELASTIC_PULL = 980;
 const RECALL_ELASTIC_MAX_SPEED = 780;
-const RECALL_DAMAGE = 0.65;
 const WAVE_ADVANCE_DELAY_MS = 900;
 const SIDE_BOUNCE_MARGIN = 32;
 const BANANA_RICOCHET_MIN_SPEED = 360;
@@ -127,18 +138,11 @@ const NON_BOSS_ENEMY_SPEED = 64;
 const ROW_SPAWN_DELAY_MS = 900;
 const TRAIL_DROP_INTERVAL_MS = 180;
 const FIRE_TRAIL_LIFETIME_MS = 1500;
-const FIRE_TICK_COOLDOWN_MS = 420;
-const POISON_TICK_INTERVAL_MS = 500;
-const POISON_DURATION_MS = 2500;
-const DUPLICATE_CLONE_LIFETIME_MS = 3000;
 const GHOST_BEAM_LIFETIME_MS = 190;
-const GHOST_STATUS_FIELD_LIFETIME_MS = 680;
 const UPGRADE_CHOICE_DELAY_MS = 450;
 const POISON_TINT = 0x65a30d;
 const CLONE_EFFECT_MULTIPLIER = 0.5;
-const FIRE_HIT_PATCH_LIFETIME_MS = 900;
 const POISON_DEATH_SPREAD_RADIUS = 76;
-const POISON_UPGRADED_DAMAGE_MULTIPLIER = 1.25;
 const CELL_FIRE_ROW_HEIGHT = 48;
 const BOSS_PATROL_SPEED = 54;
 const BOSS_PHASE_1_DRIFT = 4;
@@ -365,6 +369,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
   private terminalButtons: TerminalButton[] = [];
   private recordsText?: Phaser.GameObjects.Text;
   private activeBoss?: EnemySprite;
+  private combatIdCounter: number = 0;
 
   private hudText!: Phaser.GameObjects.Text;
   private scoreText!: Phaser.GameObjects.Text;
@@ -443,6 +448,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.genericRanks = {};
     this.runMode = 'campaign';
     this.runRecordCompletedAt = undefined;
+    this.combatIdCounter = 0;
     this.fireCells.clear();
   }
 
@@ -850,20 +856,8 @@ export class PotassiumSlipScene extends Phaser.Scene {
     return getPotassiumGenericUpgradeRank(this.genericRanks, upgrade);
   }
 
-  private getDamageMultiplier(): number {
-    return 1 + this.getGenericRank('damage') * 0.12;
-  }
-
-  private getPoisonGenericMultiplier(): number {
-    return 1 + this.getGenericRank('poison') * 0.1;
-  }
-
   private getExplosionRadiusMultiplier(): number {
     return 1 + this.getGenericRank('explosion') * 0.06;
-  }
-
-  private getCloneLifetimeMs(): number {
-    return DUPLICATE_CLONE_LIFETIME_MS + this.getGenericRank('cloneTime') * 300;
   }
 
   private getProjectileEffectMultiplier(projectile: ProjectileSprite): number {
@@ -1150,78 +1144,116 @@ export class PotassiumSlipScene extends Phaser.Scene {
     if (hitUntil !== undefined && hitUntil > this.time.now) return;
     enemy.setData(cooldownKey, this.time.now + HIT_COOLDOWN_MS);
 
-    const isMainRecall = projectile === this.banana && this.controlState === 'recalling';
-    const effectMultiplier = this.getProjectileEffectMultiplier(projectile);
-    if (this.isBossStoneProtected(enemy) || this.isShieldProtectedHit(enemy, projectile)) {
-      this.showDamageRing(enemy, 'ghost');
-      if (isMainRecall) {
-        projectile.setVelocity(projectile.body.velocity.x * 1.01, projectile.body.velocity.y * 1.01);
-      } else {
-        this.ricochetProjectileFromEnemy(projectile, enemy);
+    this.applyCombatCommands(resolvePotassiumProjectileHit({
+      now: this.time.now,
+      enemy: this.getEnemyCombatFacts(enemy),
+      projectile: this.getProjectileCombatFacts(projectile),
+      skillRanks: this.skillRanks,
+      genericRanks: this.genericRanks
+    }), this.createCombatContext([enemy], [projectile]));
+  }
+
+  private getEnemyCombatFacts(enemy: EnemySprite): PotassiumEnemyCombatFacts {
+    return {
+      id: this.getCombatId(enemy, 'enemy'),
+      kind: enemy.getData('kind') as EnemyKind,
+      active: enemy.active,
+      dying: Boolean(enemy.getData('dying')),
+      hp: (enemy.getData('hp') as number | undefined) ?? 0,
+      maxHp: (enemy.getData('maxHp') as number | undefined) ?? 0,
+      x: enemy.x,
+      y: enemy.y,
+      indestructible: Boolean(enemy.getData('indestructible')),
+      splitsOnDeath: Boolean(enemy.getData('splitsOnDeath')),
+      poisonExpiresAt: enemy.getData('poisonExpiresAt') as number | undefined,
+      poisonMultiplier: enemy.getData('poisonMultiplier') as number | undefined,
+      poisonNextTickAt: enemy.getData('poisonNextTickAt') as number | undefined,
+      fireTickUntil: enemy.getData('fireTickUntil') as number | undefined,
+      shieldSide: enemy.getData('shieldSide') as ShieldSide | undefined,
+      stoneUntil: enemy.getData('stoneUntil') as number | undefined
+    };
+  }
+
+  private getProjectileCombatFacts(projectile: ProjectileSprite): PotassiumProjectileCombatFacts {
+    return {
+      id: this.getCombatId(projectile, projectile === this.banana ? 'main' : 'projectile'),
+      isMain: projectile === this.banana,
+      isRecall: projectile === this.banana && this.controlState === 'recalling',
+      x: projectile.x,
+      y: projectile.y,
+      effectMultiplier: this.getProjectileEffectMultiplier(projectile),
+      canApplyHitProcs: this.canProjectileApplyHitProcs(projectile),
+      canDuplicate: Boolean(projectile.getData('canDuplicate')),
+      explosionRadiusMultiplier: this.getProjectileExplosionRadiusMultiplier(projectile)
+    };
+  }
+
+  private getCombatId(object: Phaser.GameObjects.GameObject, prefix: string): string {
+    const existingId = object.getData('combatId') as string | undefined;
+    if (existingId) return existingId;
+    const id = `${prefix}-${this.combatIdCounter}`;
+    this.combatIdCounter += 1;
+    object.setData('combatId', id);
+    return id;
+  }
+
+  private createCombatContext(
+    enemies: EnemySprite[] = this.enemies.getChildren() as EnemySprite[],
+    projectiles: ProjectileSprite[] = [this.banana, ...(this.clones.getChildren() as ProjectileSprite[])]
+  ): {
+    enemies: Map<string, EnemySprite>;
+    projectiles: Map<string, ProjectileSprite>;
+  } {
+    return {
+      enemies: new Map(enemies.map((enemy) => [this.getCombatId(enemy, 'enemy'), enemy])),
+      projectiles: new Map(projectiles.map((projectile) => [this.getCombatId(projectile, projectile === this.banana ? 'main' : 'projectile'), projectile]))
+    };
+  }
+
+  private applyCombatCommands(
+    commands: readonly PotassiumCombatCommand[],
+    context = this.createCombatContext()
+  ): void {
+    commands.forEach((command) => {
+      const enemy = 'enemyId' in command ? context.enemies.get(command.enemyId) : undefined;
+      const projectile = 'projectileId' in command ? context.projectiles.get(command.projectileId) : undefined;
+      if (command.type === 'damageEnemy') {
+        if (enemy) this.damageEnemy(enemy, command.amount, command.source);
+      } else if (command.type === 'setEnemyHp') {
+        enemy?.setData('hp', command.hp);
+        enemy?.setData('damageState', command.damageState);
+      } else if (command.type === 'setFireTickUntil') {
+        enemy?.setData('fireTickUntil', command.fireTickUntil);
+      } else if (command.type === 'setPoisonNextTickAt') {
+        enemy?.setData('poisonNextTickAt', command.poisonNextTickAt);
+      } else if (command.type === 'showDamageCue') {
+        if (enemy) this.showDamageCue(enemy, command.source);
+      } else if (command.type === 'ricochetProjectile') {
+        if (projectile && enemy) this.ricochetProjectileFromEnemy(projectile, enemy);
+      } else if (command.type === 'boostRecallVelocity') {
+        projectile?.setVelocity(projectile.body.velocity.x * 1.01, projectile.body.velocity.y * 1.01);
+      } else if (command.type === 'applyPoison') {
+        if (enemy) this.applyPoisonCommand(enemy, command);
+      } else if (command.type === 'clearPoison') {
+        if (enemy) this.clearPoison(enemy);
+      } else if (command.type === 'spawnFirePatch') {
+        this.spawnFirePatch(command.x, command.y, command.effectMultiplier, command.lifetimeMs, command.scale);
+      } else if (command.type === 'explodeAt') {
+        this.explodeAt(command.x, command.y, command.effectMultiplier, command.radiusMultiplier);
+      } else if (command.type === 'spawnBananaClones') {
+        this.spawnBananaClones(command.count, command.lifetimeMs);
+      } else if (command.type === 'spawnGhostBeam') {
+        this.spawnGhostBeam(command.x, command.y, command.direction, command.effectMultiplier);
+      } else if (command.type === 'spawnGhostStatusField') {
+        this.spawnGhostStatusField(command.x, command.y, command.direction, command.effectMultiplier);
+      } else if (command.type === 'spreadPoisonFrom') {
+        this.spreadPoisonFrom(command.x, command.y, command.effectMultiplier, context.enemies.get(command.sourceEnemyId));
+      } else if (command.type === 'spawnSplitterChildren') {
+        if (enemy) this.spawnSplitterChildren(enemy);
+      } else if (command.type === 'killEnemy') {
+        if (enemy) this.killEnemy(enemy);
       }
-      return;
-    }
-    this.damageEnemy(enemy, (isMainRecall ? RECALL_DAMAGE : 1) * effectMultiplier * this.getDamageMultiplier(), 'banana');
-    if (isMainRecall) {
-      projectile.setVelocity(projectile.body.velocity.x * 1.01, projectile.body.velocity.y * 1.01);
-    } else {
-      this.ricochetProjectileFromEnemy(projectile, enemy);
-    }
-
-    this.applyUnlockedHitEffects(projectile, enemy, isMainRecall, effectMultiplier);
-  }
-
-  private isBossStoneProtected(enemy: EnemySprite): boolean {
-    if ((enemy.getData('kind') as EnemyKind) !== 'boss') return false;
-    const stoneUntil = enemy.getData('stoneUntil') as number | undefined;
-    return stoneUntil !== undefined && stoneUntil > this.time.now;
-  }
-
-  private isShieldProtectedHit(enemy: EnemySprite, projectile: ProjectileSprite): boolean {
-    const shieldSide = enemy.getData('shieldSide') as ShieldSide | undefined;
-    if (!shieldSide) return false;
-    return isPotassiumShieldedHit(shieldSide, projectile.x - enemy.x, projectile.y - enemy.y);
-  }
-
-  private applyUnlockedHitEffects(
-    projectile: ProjectileSprite,
-    enemy: EnemySprite,
-    isMainRecall: boolean,
-    effectMultiplier: number
-  ): void {
-    const canApplyHitProcs = this.canProjectileApplyHitProcs(projectile);
-    if (canApplyHitProcs) {
-      this.applyStatusEffects(enemy, effectMultiplier, false);
-    }
-
-    if (canApplyHitProcs && this.getSkillRank('fire') >= 2) {
-      this.spawnFirePatch(enemy.x, enemy.y, effectMultiplier, FIRE_HIT_PATCH_LIFETIME_MS, projectile === this.banana ? 0.7 : 0.5);
-    }
-    if (canApplyHitProcs && !isMainRecall && this.getSkillRank('explosion') > 0) {
-      this.explodeAt(enemy.x, enemy.y, effectMultiplier, this.getProjectileExplosionRadiusMultiplier(projectile));
-    }
-    if (!isMainRecall && projectile.getData('canDuplicate') && this.getSkillRank('duplicate') > 0) {
-      this.spawnBananaClones(getPotassiumDuplicateCloneCount(this.getSkillRank('duplicate')), this.getCloneLifetimeMs());
-    }
-    if (!isMainRecall && this.getSkillRank('ghostHorizontal') > 0) {
-      this.spawnGhostBeam(enemy.x, enemy.y, 'horizontal', effectMultiplier);
-    }
-    if (!isMainRecall && this.getSkillRank('ghostVertical') > 0) {
-      this.spawnGhostBeam(enemy.x, enemy.y, 'vertical', effectMultiplier);
-    }
-  }
-
-  private applyStatusEffects(
-    enemy: EnemySprite,
-    effectMultiplier: number,
-    allowExplosionStatus: boolean
-  ): void {
-    if (this.getSkillRank('poison') > 0) {
-      this.applyPoison(enemy, effectMultiplier);
-    }
-    if (allowExplosionStatus && this.getSkillRank('fire') > 0) {
-      this.spawnFirePatch(enemy.x, enemy.y, effectMultiplier, FIRE_HIT_PATCH_LIFETIME_MS, 0.58);
-    }
+    });
   }
 
   private ricochetProjectileFromEnemy(projectile: ProjectileSprite, enemy: EnemySprite): void {
@@ -1262,47 +1294,24 @@ export class PotassiumSlipScene extends Phaser.Scene {
     projectile.setAngularVelocity(Phaser.Math.Clamp(ricochet.x * 1.4, -720, 720));
   }
 
-  private damageEnemy(enemy: EnemySprite, amount: number, source: 'banana' | 'fire' | 'poison' | 'explosion' | 'ghost'): void {
-    if (!enemy.active || enemy.getData('dying')) return;
-    if (source === 'fire') {
-      const fireUntil = enemy.getData('fireTickUntil') as number | undefined;
-      if (fireUntil !== undefined && fireUntil > this.time.now) return;
-      enemy.setData('fireTickUntil', this.time.now + FIRE_TICK_COOLDOWN_MS);
-    }
-    if (enemy.getData('indestructible')) {
-      this.showDamageCue(enemy, source);
-      return;
-    }
-
-    const hp = Math.max(0, (enemy.getData('hp') as number) - amount);
-    enemy.setData('hp', hp);
-    this.updateEnemyDamageState(enemy);
-    this.showDamageCue(enemy, source);
-    if (hp <= 0) {
-      this.killEnemy(enemy);
-    }
+  private damageEnemy(enemy: EnemySprite, amount: number, source: PotassiumDamageSource): void {
+    this.applyCombatCommands(resolvePotassiumDamage({
+      now: this.time.now,
+      enemy: this.getEnemyCombatFacts(enemy),
+      amount,
+      source,
+      skillRanks: this.skillRanks,
+      genericRanks: this.genericRanks
+    }), this.createCombatContext());
   }
 
-  private updateEnemyDamageState(enemy: EnemySprite): void {
-    const state = getPotassiumEnemyHealthState(
-      enemy.getData('hp') as number,
-      enemy.getData('maxHp') as number
-    );
-    enemy.setData('damageState', state);
-  }
-
-  private applyPoison(enemy: EnemySprite, effectMultiplier: number = 1, applyRankBonus = true): void {
-    const poisonMultiplier = applyRankBonus && this.getSkillRank('poison') >= 2
-      ? effectMultiplier * POISON_UPGRADED_DAMAGE_MULTIPLIER * this.getPoisonGenericMultiplier()
-      : effectMultiplier;
-    const currentExpiresAt = (enemy.getData('poisonExpiresAt') as number | undefined) ?? 0;
-    enemy.setData('poisonExpiresAt', Math.max(currentExpiresAt, this.time.now + POISON_DURATION_MS * poisonMultiplier));
+  private applyPoisonCommand(enemy: EnemySprite, command: PotassiumApplyPoisonCommand): void {
+    enemy.setData('poisonExpiresAt', command.expiresAt);
     enemy.setData('poisoned', true);
-    enemy.setData('poisonMultiplier', Math.max((enemy.getData('poisonMultiplier') as number | undefined) ?? 0, poisonMultiplier));
+    enemy.setData('poisonMultiplier', command.poisonMultiplier);
     enemy.setTint(POISON_TINT);
-    const nextTickAt = enemy.getData('poisonNextTickAt') as number | undefined;
-    if (nextTickAt === undefined || nextTickAt < this.time.now) {
-      enemy.setData('poisonNextTickAt', this.time.now + POISON_TICK_INTERVAL_MS);
+    if (command.nextTickAt !== undefined) {
+      enemy.setData('poisonNextTickAt', command.nextTickAt);
     }
   }
 
@@ -1311,7 +1320,19 @@ export class PotassiumSlipScene extends Phaser.Scene {
       const enemy = gameObject as EnemySprite;
       if (enemy === sourceEnemy || !enemy.active || enemy.getData('dying')) return;
       if (Phaser.Math.Distance.Between(x, y, enemy.x, enemy.y) <= POISON_DEATH_SPREAD_RADIUS) {
-        this.applyPoison(enemy, effectMultiplier, false);
+        this.applyPoisonCommand(enemy, {
+          type: 'applyPoison',
+          enemyId: this.getCombatId(enemy, 'enemy'),
+          effectMultiplier,
+          poisonMultiplier: Math.max((enemy.getData('poisonMultiplier') as number | undefined) ?? 0, effectMultiplier),
+          expiresAt: Math.max(
+            (enemy.getData('poisonExpiresAt') as number | undefined) ?? 0,
+            this.time.now + POTASSIUM_POISON_DURATION_MS * effectMultiplier
+          ),
+          nextTickAt: ((enemy.getData('poisonNextTickAt') as number | undefined) ?? 0) < this.time.now
+            ? this.time.now + POTASSIUM_POISON_TICK_INTERVAL_MS
+            : undefined
+        });
       }
     });
   }
@@ -1501,16 +1522,11 @@ export class PotassiumSlipScene extends Phaser.Scene {
     if (this.getSkillRank('poison') <= 0) return;
     this.enemies.getChildren().forEach((gameObject) => {
       const enemy = gameObject as EnemySprite;
-      const expiresAt = enemy.getData('poisonExpiresAt') as number | undefined;
-      if (!enemy.active || expiresAt === undefined) return;
-      if (expiresAt <= time) {
-        this.clearPoison(enemy);
-        return;
-      }
-      const nextTickAt = (enemy.getData('poisonNextTickAt') as number | undefined) ?? time;
-      if (nextTickAt > time) return;
-      enemy.setData('poisonNextTickAt', time + POISON_TICK_INTERVAL_MS);
-      this.damageEnemy(enemy, (enemy.getData('poisonMultiplier') as number | undefined) ?? 1, 'poison');
+      this.applyCombatCommands(resolvePotassiumPoisonTick({
+        now: time,
+        enemy: this.getEnemyCombatFacts(enemy),
+        poisonUnlocked: this.getSkillRank('poison') > 0
+      }), this.createCombatContext([enemy]));
     });
   }
 
@@ -1529,7 +1545,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
 
   private explodeAt(x: number, y: number, effectMultiplier: number, radiusMultiplier: number): void {
     const rank = this.getSkillRank('explosion');
-    const radius = getPotassiumScaledExplosionRadius(rank, radiusMultiplier * this.getExplosionRadiusMultiplier());
+    const radius = getPotassiumExplosionRadius(rank) * radiusMultiplier * this.getExplosionRadiusMultiplier();
     const blast = this.add.circle(x, y, 18, 0xf97316, 0.22)
       .setStrokeStyle(5, 0x1a1a1a, 1)
       .setDepth(940);
@@ -1540,23 +1556,25 @@ export class PotassiumSlipScene extends Phaser.Scene {
       duration: 240,
       onComplete: () => blast.destroy()
     });
-    this.enemies.getChildren().forEach((gameObject) => {
-      const enemy = gameObject as EnemySprite;
-      const distance = Phaser.Math.Distance.Between(x, y, enemy.x, enemy.y);
-      const damage = getPotassiumExplosionDamage(distance, radius, effectMultiplier * this.getDamageMultiplier());
-      if (damage > 0) {
-        this.damageEnemy(enemy, damage, 'explosion');
-        if (rank >= 2) {
-          this.applyStatusEffects(enemy, effectMultiplier, true);
-        }
-      }
-    });
+    const enemies = this.enemies.getChildren() as EnemySprite[];
+    this.applyCombatCommands(resolvePotassiumExplosion({
+      now: this.time.now,
+      x,
+      y,
+      effectMultiplier,
+      radiusMultiplier,
+      hits: enemies.map((enemy) => ({
+        enemy: this.getEnemyCombatFacts(enemy),
+        distance: Phaser.Math.Distance.Between(x, y, enemy.x, enemy.y)
+      })),
+      skillRanks: this.skillRanks,
+      genericRanks: this.genericRanks
+    }), this.createCombatContext(enemies));
     this.cameras.main.shake(130, 0.006);
   }
 
   private spawnGhostBeam(x: number, y: number, direction: 'horizontal' | 'vertical', effectMultiplier: number): void {
     const isHorizontal = direction === 'horizontal';
-    const rank = this.getSkillRank(isHorizontal ? 'ghostHorizontal' : 'ghostVertical');
     const width = isHorizontal ? ARENA.width - 42 : 24;
     const height = isHorizontal ? 24 : ARENA.height - 128;
     const beam = this.add.rectangle(
@@ -1567,21 +1585,22 @@ export class PotassiumSlipScene extends Phaser.Scene {
       0x38bdf8,
       0.24
     ).setStrokeStyle(4, 0x1a1a1a, 0.82).setDepth(935);
-    this.enemies.getChildren().forEach((gameObject) => {
-      const enemy = gameObject as EnemySprite;
-      const inBeam = isHorizontal
-        ? Math.abs(enemy.y - y) <= 28
-        : Math.abs(enemy.x - x) <= 28;
-      if (inBeam) {
-        this.damageEnemy(enemy, 1 * effectMultiplier * this.getDamageMultiplier(), 'ghost');
-        if (rank >= 2) {
-          this.applyStatusEffects(enemy, effectMultiplier, false);
-        }
-      }
-    });
-    if (rank >= 2) {
-      this.spawnGhostStatusField(x, y, direction, effectMultiplier, width, height);
-    }
+    const enemies = this.enemies.getChildren() as EnemySprite[];
+    this.applyCombatCommands(resolvePotassiumGhostBeam({
+      now: this.time.now,
+      x,
+      y,
+      direction,
+      effectMultiplier,
+      hits: enemies.map((enemy) => ({
+        enemy: this.getEnemyCombatFacts(enemy),
+        inBeam: isHorizontal
+          ? Math.abs(enemy.y - y) <= 28
+          : Math.abs(enemy.x - x) <= 28
+      })),
+      skillRanks: this.skillRanks,
+      genericRanks: this.genericRanks
+    }), this.createCombatContext(enemies));
     this.tweens.add({
       targets: beam,
       alpha: 0,
@@ -1593,19 +1612,19 @@ export class PotassiumSlipScene extends Phaser.Scene {
   private spawnGhostStatusField(
     x: number,
     y: number,
-    direction: 'horizontal' | 'vertical',
-    effectMultiplier: number,
-    width: number,
-    height: number
+    direction: PotassiumGhostBeamDirection,
+    effectMultiplier: number
   ): void {
+    const isHorizontal = direction === 'horizontal';
+    const width = isHorizontal ? ARENA.width - 42 : 24;
+    const height = isHorizontal ? 24 : ARENA.height - 128;
     if (this.getSkillRank('fire') > 0) {
-      const isHorizontal = direction === 'horizontal';
       const patchCount = isHorizontal ? 5 : 7;
       for (let index = 0; index < patchCount; index += 1) {
         const t = patchCount <= 1 ? 0.5 : index / (patchCount - 1);
         const patchX = isHorizontal ? Phaser.Math.Linear(ARENA.left + 46, ARENA.right - 46, t) : x;
         const patchY = isHorizontal ? y : Phaser.Math.Linear(ARENA.top + 112, ARENA.bottom - 92, t);
-        this.spawnFirePatch(patchX, patchY, effectMultiplier, GHOST_STATUS_FIELD_LIFETIME_MS, 0.46);
+        this.spawnFirePatch(patchX, patchY, effectMultiplier, POTASSIUM_GHOST_STATUS_FIELD_LIFETIME_MS, 0.46);
       }
     }
     if (this.getSkillRank('poison') > 0) {
@@ -1620,7 +1639,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
       this.tweens.add({
         targets: field,
         alpha: 0,
-        duration: GHOST_STATUS_FIELD_LIFETIME_MS,
+        duration: POTASSIUM_GHOST_STATUS_FIELD_LIFETIME_MS,
         onComplete: () => field.destroy()
       });
     }
