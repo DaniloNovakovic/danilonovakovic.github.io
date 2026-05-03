@@ -716,20 +716,13 @@ export class PotassiumSlipRenderer {
     g.strokeRoundedRect(5, 7, 70, 48, 5);
     g.fillStyle(0x1a1a1a, 0.12);
     g.fillRoundedRect(11, 13, 58, 36, 4);
-    g.lineStyle(3, 0x1a1a1a, 0.9);
+    g.lineStyle(6, 0x1a1a1a, 0.92);
     g.beginPath();
     g.moveTo(18, 17);
     g.lineTo(62, 45);
     g.moveTo(62, 17);
     g.lineTo(18, 45);
     g.strokePath();
-    g.fillStyle(0xfacc15, 0.9);
-    g.fillRoundedRect(19, 23, 42, 16, 3);
-    g.lineStyle(2, 0x1a1a1a, 0.95);
-    g.strokeRoundedRect(19, 23, 42, 16, 3);
-    g.fillStyle(0x1a1a1a, 1);
-    g.fillRect(31, 27, 4, 8);
-    g.fillRect(45, 27, 4, 8);
     g.generateTexture('potassium_enemy_hard_wall', 80, 62);
     g.destroy();
   }

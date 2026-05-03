@@ -73,6 +73,17 @@ describe('potassium slip waves', () => {
     expect(getPotassiumWave(4).rows.flat()).not.toContain('shield');
   });
 
+  it('leans more on unbreakable walls in later pressure waves', () => {
+    expect(countKind(getPotassiumWave(9).rows, 'hardWall')).toBeGreaterThan(
+      countKind(getPotassiumWave(8).rows, 'hardWall')
+    );
+  });
+
+  it('spreads late unbreakable walls across multiple columns', () => {
+    expect(occupiedColumns(getPotassiumWave(9).rows, 'hardWall').size).toBeGreaterThanOrEqual(3);
+    expect(occupiedColumns(getPotassiumWave(10).rows, 'hardWall').size).toBeGreaterThanOrEqual(3);
+  });
+
   it('defines readable enemy helper behavior', () => {
     expect(getPotassiumEnemyHealthState(7, 10)).toBe('healthy');
     expect(getPotassiumEnemyHealthState(6, 10)).toBe('cracked');
@@ -185,4 +196,18 @@ function getNonBossRows(): PotassiumWaveCell[][] {
 
 function countEnemies(rows: readonly PotassiumWaveCell[][]): number {
   return rows.flat().filter((cell) => cell !== null).length;
+}
+
+function countKind(rows: readonly PotassiumWaveCell[][], kind: PotassiumWaveCell): number {
+  return rows.flat().filter((cell) => cell === kind).length;
+}
+
+function occupiedColumns(rows: readonly PotassiumWaveCell[][], kind: PotassiumWaveCell): Set<number> {
+  const columns = new Set<number>();
+  rows.forEach((row) => {
+    row.forEach((cell, column) => {
+      if (cell === kind) columns.add(column);
+    });
+  });
+  return columns;
 }
