@@ -44,6 +44,16 @@ import {
   PotassiumSlipRenderer
 } from './potassiumSlipRenderer';
 import {
+  createPotassiumBossState,
+  POTASSIUM_BOSS_PHASE_1_DRIFT,
+  POTASSIUM_BOSS_PATROL_SPEED,
+  resolvePotassiumBossFrame,
+  type PotassiumBossCommand,
+  type PotassiumBossFacts,
+  type PotassiumBossState,
+  type PotassiumBossSummonFacts
+} from './potassiumSlipBoss';
+import {
   createPotassiumSession,
   getPotassiumSessionGenericRank,
   getPotassiumSessionHud,
@@ -124,13 +134,6 @@ const POISON_TINT = 0x65a30d;
 const CLONE_EFFECT_MULTIPLIER = 0.5;
 const POISON_DEATH_SPREAD_RADIUS = 76;
 const CELL_FIRE_ROW_HEIGHT = 48;
-const BOSS_PATROL_SPEED = 54;
-const BOSS_PHASE_1_DRIFT = 4;
-const BOSS_PHASE_2_DRIFT = 6;
-const BOSS_PHASE_3_DRIFT = 3;
-const BOSS_STONE_DURATION_MS = 1350;
-const BOSS_STONE_INTERVAL_MS = 4300;
-const BOSS_SUMMON_INTERVAL_MS = 3600;
 const BOSS_ORBIT_RADIUS = 78;
 const BOSS_ORBIT_SPEED = 0.0017;
 
@@ -227,6 +230,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
   private aimPointerId: number | null = null;
   private fireCells = new Set<string>();
   private activeBoss?: EnemySprite;
+  private bossState?: PotassiumBossState;
   private combatIdCounter: number = 0;
 
   private onClose?: () => void;
@@ -297,6 +301,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.controlState = 'idle';
     this.aimPointerId = null;
     this.combatIdCounter = 0;
+    this.bossState = undefined;
     this.fireCells.clear();
   }
 
@@ -495,6 +500,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.trailZones?.clear(true, true);
     this.bossBlockers?.clear(true, true);
     this.activeBoss = undefined;
+    this.bossState = undefined;
     this.fireCells.clear();
     this.banana.setPosition(LAUNCH_PAD.x, LAUNCH_PAD.y);
     this.banana.setVelocity(0, 0);
@@ -520,6 +526,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.clones.clear(true, true);
     this.trailZones.clear(true, true);
     this.bossBlockers.clear(true, true);
+    this.bossState = undefined;
     this.banana.setVelocity(0, 0);
   }
 
@@ -761,13 +768,15 @@ export class PotassiumSlipScene extends Phaser.Scene {
 
     if (kind === 'boss') {
       this.activeBoss = enemy;
+      this.bossState = createPotassiumBossState(this.time.now);
       enemy.once(Phaser.GameObjects.Events.DESTROY, () => {
         if (this.activeBoss === enemy) {
           this.activeBoss = undefined;
+          this.bossState = undefined;
         }
       });
       enemy.setPosition(LAUNCH_PAD.x, SAFE.top + 132);
-      enemy.setVelocity(BOSS_PATROL_SPEED, BOSS_PHASE_1_DRIFT);
+      enemy.setVelocity(POTASSIUM_BOSS_PATROL_SPEED, POTASSIUM_BOSS_PHASE_1_DRIFT);
       enemy.setBounce(1, 1);
       this.cameras.main.shake(250, 0.008);
     } else {
@@ -817,9 +826,6 @@ export class PotassiumSlipScene extends Phaser.Scene {
     });
     if (kind === 'boss') {
       enemy.setData('bossPhase', 1);
-      enemy.setData('nextStoneAt', this.time.now + BOSS_STONE_INTERVAL_MS);
-      enemy.setData('nextSummonAt', this.time.now + BOSS_SUMMON_INTERVAL_MS);
-      enemy.setData('orbitStarted', false);
     }
 
     if (kind === 'scope') {
@@ -1306,59 +1312,66 @@ export class PotassiumSlipScene extends Phaser.Scene {
 
   private updateBossFight(time: number): void {
     const boss = this.activeBoss;
-    if (!boss || boss.getData('dying')) {
-      this.bossBlockers.getChildren().forEach((gameObject) => gameObject.destroy());
-      return;
-    }
-
-    const phase = this.getBossPhase(boss);
-    const previousPhase = (boss.getData('bossPhase') as number | undefined) ?? 1;
-    if (phase !== previousPhase) {
-      boss.setData('bossPhase', phase);
-      this.cameras.main.shake(220, 0.007);
-      bridgeActions.setSceneHintText(phase === 2
-        ? 'Boss phase 2 • Orbiting walls hate angles'
-        : 'Boss phase 3 • Stone audits summon witnesses');
-    }
-
-    this.updateBossPatrol(boss, phase);
-    if (phase >= 2 && !boss.getData('orbitStarted')) {
-      this.spawnBossOrbitBlockers(boss);
-      boss.setData('orbitStarted', true);
-    }
-    if (phase >= 2) {
-      this.updateBossOrbitBlockers(boss, time);
-    }
-    if (phase >= 3) {
-      this.updateBossStoneAndSummons(boss, time);
-    } else {
-      this.setBossStoneVisual(boss, false);
-    }
+    const result = resolvePotassiumBossFrame({
+      now: time,
+      state: this.bossState,
+      boss: boss ? this.getBossFacts(boss) : undefined,
+      patrolBounds: {
+        left: SAFE.left + 42,
+        right: SAFE.right - 42
+      },
+      summonLayout: {
+        arenaLeft: ARENA.left,
+        arenaWidth: ARENA.width,
+        safeTop: SAFE.top,
+        safeBottom: SAFE.bottom
+      }
+    });
+    this.bossState = result.state;
+    this.applyBossCommands(result.commands, boss);
   }
 
-  private getBossPhase(boss: EnemySprite): number {
-    const hp = boss.getData('hp') as number;
-    const maxHp = boss.getData('maxHp') as number;
-    const ratio = maxHp > 0 ? hp / maxHp : 1;
-    if (ratio <= 0.3) return 3;
-    if (ratio <= 0.6) return 2;
-    return 1;
+  private getBossFacts(boss: EnemySprite): PotassiumBossFacts {
+    return {
+      active: boss.active,
+      dying: Boolean(boss.getData('dying')),
+      hp: (boss.getData('hp') as number | undefined) ?? 0,
+      maxHp: (boss.getData('maxHp') as number | undefined) ?? 0,
+      x: boss.x,
+      y: boss.y,
+      velocityX: boss.body.velocity.x
+    };
   }
 
-  private updateBossPatrol(boss: EnemySprite, phase: number): void {
-    const left = SAFE.left + 42;
-    const right = SAFE.right - 42;
-    if (boss.x <= left) {
-      boss.setX(left);
-      boss.setVelocityX(BOSS_PATROL_SPEED);
-    } else if (boss.x >= right) {
-      boss.setX(right);
-      boss.setVelocityX(-BOSS_PATROL_SPEED);
-    } else if (Math.abs(boss.body.velocity.x) < 10) {
-      boss.setVelocityX(BOSS_PATROL_SPEED);
-    }
-    const drift = phase === 1 ? BOSS_PHASE_1_DRIFT : phase === 2 ? BOSS_PHASE_2_DRIFT : BOSS_PHASE_3_DRIFT;
-    boss.setVelocityY(drift);
+  private applyBossCommands(commands: readonly PotassiumBossCommand[], boss?: EnemySprite): void {
+    commands.forEach((command) => {
+      if (command.type === 'setBossPhase') {
+        boss?.setData('bossPhase', command.phase);
+      } else if (command.type === 'setBossVelocity') {
+        if (!boss) return;
+        if (command.x !== undefined) boss.setX(command.x);
+        if (command.velocityX !== undefined) boss.setVelocityX(command.velocityX);
+        boss.setVelocityY(command.velocityY);
+      } else if (command.type === 'setBossHint') {
+        bridgeActions.setSceneHintText(command.text);
+      } else if (command.type === 'shakeCamera') {
+        this.cameras.main.shake(command.durationMs, command.intensity);
+      } else if (command.type === 'spawnOrbitBlockers') {
+        if (boss) this.spawnBossOrbitBlockers(boss);
+      } else if (command.type === 'updateOrbitBlockers') {
+        if (boss) this.updateBossOrbitBlockers(boss, command.now);
+      } else if (command.type === 'startStone') {
+        boss?.setData('stoneUntil', command.stoneUntil);
+      } else if (command.type === 'endStone') {
+        boss?.setData('stoneUntil', undefined);
+      } else if (command.type === 'setStoneVisual') {
+        if (boss) this.setBossStoneVisual(boss, command.active);
+      } else if (command.type === 'spawnSummons') {
+        this.spawnBossSummons(command.summons);
+      } else if (command.type === 'clearOrbitBlockers') {
+        this.bossBlockers.getChildren().forEach((gameObject) => gameObject.destroy());
+      }
+    });
   }
 
   private spawnBossOrbitBlockers(boss: EnemySprite): void {
@@ -1388,26 +1401,6 @@ export class PotassiumSlipScene extends Phaser.Scene {
     });
   }
 
-  private updateBossStoneAndSummons(boss: EnemySprite, time: number): void {
-    const stoneUntil = boss.getData('stoneUntil') as number | undefined;
-    if (stoneUntil !== undefined && stoneUntil > time) {
-      this.setBossStoneVisual(boss, true);
-    } else {
-      this.setBossStoneVisual(boss, false);
-      const nextStoneAt = (boss.getData('nextStoneAt') as number | undefined) ?? 0;
-      if (time >= nextStoneAt) {
-        boss.setData('stoneUntil', time + BOSS_STONE_DURATION_MS);
-        boss.setData('nextStoneAt', time + BOSS_STONE_INTERVAL_MS);
-      }
-    }
-
-    const nextSummonAt = (boss.getData('nextSummonAt') as number | undefined) ?? 0;
-    if (time >= nextSummonAt) {
-      this.spawnBossSummons(boss);
-      boss.setData('nextSummonAt', time + BOSS_SUMMON_INTERVAL_MS);
-    }
-  }
-
   private setBossStoneVisual(boss: EnemySprite, active: boolean): void {
     if (active) {
       boss.setTint(0x78716c);
@@ -1423,18 +1416,10 @@ export class PotassiumSlipScene extends Phaser.Scene {
     }
   }
 
-  private spawnBossSummons(boss: EnemySprite): void {
-    const centerColumn = Phaser.Math.Clamp(
-      Math.round(((boss.x - ARENA.left) / ARENA.width) * POTASSIUM_COLUMN_COUNT - 0.5),
-      0,
-      POTASSIUM_COLUMN_COUNT - 1
-    );
-    const columns = getPotassiumSplitterSpawnColumns(centerColumn);
-    const y = Phaser.Math.Clamp(boss.y + 76, SAFE.top + 24, SAFE.bottom - 120);
-    columns.forEach((column, index) => {
-      const kind: EnemyKind = index % 2 === 0 ? 'scope' : 'deadline';
-      const enemy = this.spawnEnemy(kind, column, 0, y);
-      enemy?.setVelocity(0, NON_BOSS_ENEMY_SPEED + 10);
+  private spawnBossSummons(summons: readonly PotassiumBossSummonFacts[]): void {
+    summons.forEach((summon) => {
+      const enemy = this.spawnEnemy(summon.kind, summon.column, 0, summon.y);
+      enemy?.setVelocity(0, summon.velocityY);
     });
   }
 
