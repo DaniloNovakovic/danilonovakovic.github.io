@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
+  formatPotassiumLeaderboardRecords,
+  getPotassiumLeaderboardOverlayText,
   getPotassiumLeaderboardTop,
   loadPotassiumLeaderboard,
   savePotassiumRunRecord,
@@ -45,6 +47,22 @@ describe('potassium slip leaderboard', () => {
     expect(loadPotassiumLeaderboard(storage)).toEqual([
       makeRecord(80, 1, { completedAt, mode: 'endless', outcome: 'game_over', wave: 14 })
     ]);
+  });
+
+  it('formats terminal records text for empty and populated leaderboards', () => {
+    const storage = new MemoryStorage();
+    expect(getPotassiumLeaderboardOverlayText(3, storage)).toBe('RECORDS\nNo banana paperwork filed yet.');
+
+    const records = [
+      makeRecord(80, 0, { mode: 'endless', outcome: 'game_over', wave: 14 }),
+      makeRecord(40, 1, { mode: 'campaign', outcome: 'won', wave: 11 })
+    ];
+
+    expect(formatPotassiumLeaderboardRecords(records)).toBe([
+      'RECORDS',
+      '1. 80 • W14 • endless',
+      '2. 40 • W11 • won'
+    ].join('\n'));
   });
 });
 

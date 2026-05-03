@@ -33,7 +33,6 @@ import type {
 } from './potassiumSlipSession';
 import {
   getPotassiumExplosionRadius,
-  type PotassiumEnemyKind,
   type PotassiumGenericUpgradeKind,
   type PotassiumScheduledWaveRow,
   type PotassiumSkillRank,

@@ -69,65 +69,76 @@ function makeAdapter(overrides: Partial<PotassiumCommandAdapterPorts> = {}) {
   const main = makeObject({ data: { canDuplicate: true, effectMultiplier: 1, canApplyHitProcs: true } });
   projectiles.push(main);
 
+  const basePorts: PotassiumCommandAdapterPorts = {
+    runtime: {
+      getNow: () => 1000,
+      getSession: () => session,
+      applySessionResult: (result) => {
+        session = result.state;
+        calls.push('applySessionResult');
+      },
+      getSkillRank: (upgrade) => session.skillRanks[upgrade] ?? 0,
+      getGenericRank: (upgrade) => session.genericRanks[upgrade] ?? 0,
+      setHint: (text) => calls.push(`hint:${text ?? ''}`),
+      collectCircuit: () => calls.push('collectCircuit'),
+      saveRunRecord: () => calls.push('saveRunRecord'),
+      closeScene: () => calls.push('closeScene')
+    },
+    objects: {
+      getEnemies: () => enemies,
+      getProjectiles: () => projectiles,
+      getMainProjectile: () => main,
+      isMainProjectile: (projectile) => projectile === main,
+      isMainProjectileRecalling: () => false,
+      getProjectileExplosionRadiusMultiplier: (projectile) => projectile === main ? 1 : 0.5,
+      getMaxMainProjectileSpeed: () => 760,
+      getExplosionRadiusMultiplier: () => 1,
+      getExplosionHits: () => enemies.map((enemy) => ({ enemy, distance: 0 })),
+      getGhostBeamHits: () => enemies.map((enemy) => ({ enemy, inBeam: true }))
+    },
+    board: {
+      resetBoardObjects: () => calls.push('resetBoardObjects'),
+      spawnWave: (wave) => calls.push(`spawnWave:${wave}`),
+      spawnBossDelayed: () => calls.push('spawnBossDelayed'),
+      scheduleWaveRows: () => calls.push('scheduleWaveRows'),
+      scheduleUpgradeChoices: () => calls.push('scheduleUpgradeChoices'),
+      advanceWaveAfterDelay: (wave) => calls.push(`advanceWave:${wave}`),
+      stopMainProjectile: () => calls.push('stopMainProjectile'),
+      clearBoardForOutcome: () => calls.push('clearBoardForOutcome'),
+      spawnFirePatch: () => calls.push('spawnFirePatch'),
+      spawnBananaClones: () => calls.push('spawnBananaClones'),
+      spawnSplitterChildren: () => calls.push('spawnSplitterChildren'),
+      spawnBossOrbitBlockers: () => calls.push('spawnBossOrbitBlockers'),
+      updateBossOrbitBlockers: () => calls.push('updateBossOrbitBlockers'),
+      setBossStoneVisual: () => calls.push('setBossStoneVisual'),
+      spawnBossSummons: () => calls.push('spawnBossSummons'),
+      clearOrbitBlockers: () => calls.push('clearOrbitBlockers')
+    },
+    renderer: {
+      hideMainOverlay: () => calls.push('hideMainOverlay'),
+      clearTerminalOverlay: () => calls.push('clearTerminalOverlay'),
+      clearUpgradeChoiceOverlay: () => calls.push('clearUpgradeChoiceOverlay'),
+      showUpgradeChoices: () => calls.push('showUpgradeChoices'),
+      refreshAllProjectileVisuals: () => calls.push('refreshAllProjectileVisuals'),
+      updateHud: () => calls.push('updateHud'),
+      showOutcomeOverlay: () => calls.push('showOutcomeOverlay'),
+      showTerminal: () => calls.push('showTerminal'),
+      showDamageCue: () => calls.push('showDamageCue'),
+      showExplosionVisual: () => calls.push('showExplosionVisual'),
+      shakeCamera: () => calls.push('shakeCamera'),
+      showGhostBeam: () => calls.push('showGhostBeam'),
+      showGhostStatusField: () => calls.push('showGhostStatusField'),
+      animateEnemyDeath: (_enemy, onComplete) => {
+        calls.push('animateEnemyDeath');
+        onComplete();
+      }
+    }
+  };
   const ports: PotassiumCommandAdapterPorts = {
-    getNow: () => 1000,
-    getSession: () => session,
-    applySessionResult: (result) => {
-      session = result.state;
-      calls.push('applySessionResult');
-    },
-    getEnemies: () => enemies,
-    getProjectiles: () => projectiles,
-    getMainProjectile: () => main,
-    isMainProjectile: (projectile) => projectile === main,
-    isMainProjectileRecalling: () => false,
-    getProjectileEffectMultiplier: (projectile) => (projectile.getData('effectMultiplier') as number | undefined) ?? 1,
-    canProjectileApplyHitProcs: (projectile) => (projectile.getData('canApplyHitProcs') as boolean | undefined) ?? false,
-    getProjectileExplosionRadiusMultiplier: (projectile) => projectile === main ? 1 : 0.5,
-    getMaxMainProjectileSpeed: () => 760,
-    getSkillRank: (upgrade) => session.skillRanks[upgrade] ?? 0,
-    getGenericRank: (upgrade) => session.genericRanks[upgrade] ?? 0,
-    getExplosionRadiusMultiplier: () => 1,
-    setHint: (text) => calls.push(`hint:${text ?? ''}`),
-    collectCircuit: () => calls.push('collectCircuit'),
-    saveRunRecord: () => calls.push('saveRunRecord'),
-    closeScene: () => calls.push('closeScene'),
-    resetBoardObjects: () => calls.push('resetBoardObjects'),
-    hideMainOverlay: () => calls.push('hideMainOverlay'),
-    clearTerminalOverlay: () => calls.push('clearTerminalOverlay'),
-    clearUpgradeChoiceOverlay: () => calls.push('clearUpgradeChoiceOverlay'),
-    spawnWave: (wave) => calls.push(`spawnWave:${wave}`),
-    spawnBossDelayed: () => calls.push('spawnBossDelayed'),
-    scheduleWaveRows: () => calls.push('scheduleWaveRows'),
-    scheduleUpgradeChoices: () => calls.push('scheduleUpgradeChoices'),
-    showUpgradeChoices: () => calls.push('showUpgradeChoices'),
-    advanceWaveAfterDelay: (wave) => calls.push(`advanceWave:${wave}`),
-    refreshAllProjectileVisuals: () => calls.push('refreshAllProjectileVisuals'),
-    updateHud: () => calls.push('updateHud'),
-    showOutcomeOverlay: () => calls.push('showOutcomeOverlay'),
-    showTerminal: () => calls.push('showTerminal'),
-    stopMainProjectile: () => calls.push('stopMainProjectile'),
-    clearBoardForOutcome: () => calls.push('clearBoardForOutcome'),
-    showDamageCue: () => calls.push('showDamageCue'),
-    spawnFirePatch: () => calls.push('spawnFirePatch'),
-    showExplosionVisual: () => calls.push('showExplosionVisual'),
-    shakeCamera: () => calls.push('shakeCamera'),
-    showGhostBeam: () => calls.push('showGhostBeam'),
-    showGhostStatusField: () => calls.push('showGhostStatusField'),
-    spawnBananaClones: () => calls.push('spawnBananaClones'),
-    spawnSplitterChildren: () => calls.push('spawnSplitterChildren'),
-    animateEnemyDeath: (_enemy, onComplete) => {
-      calls.push('animateEnemyDeath');
-      onComplete();
-    },
-    spawnBossOrbitBlockers: () => calls.push('spawnBossOrbitBlockers'),
-    updateBossOrbitBlockers: () => calls.push('updateBossOrbitBlockers'),
-    setBossStoneVisual: () => calls.push('setBossStoneVisual'),
-    spawnBossSummons: () => calls.push('spawnBossSummons'),
-    clearOrbitBlockers: () => calls.push('clearOrbitBlockers'),
-    getExplosionHits: () => enemies.map((enemy) => ({ enemy, distance: 0 })),
-    getGhostBeamHits: () => enemies.map((enemy) => ({ enemy, inBeam: true })),
-    ...overrides
+    runtime: { ...basePorts.runtime, ...overrides.runtime },
+    objects: { ...basePorts.objects, ...overrides.objects },
+    board: { ...basePorts.board, ...overrides.board },
+    renderer: { ...basePorts.renderer, ...overrides.renderer }
   };
 
   const adapter = new PotassiumCommandAdapter(ports, {

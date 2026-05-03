@@ -47,7 +47,7 @@ This document describes the current runtime architecture in `src/`. It is the de
 - `src/runtime/text/PlayerThoughtText.ts`
   - Small scene-local helper for character thoughts that follow a target, reuse the shared typewriter effect, and auto-hide without adding bridge state.
 - `src/runtime/potassiumSlipCommandAdapter.ts`
-  - Phaser-backed Potassium command Adapter. It interprets session, combat, and boss commands, extracts combat facts from Phaser objects, applies recursive combat results, and receives bridge/renderer/timer/leaderboard effects through injected ports.
+  - Phaser-backed Potassium command Adapter. It interprets session, combat, and boss commands, extracts combat facts from Phaser objects, applies recursive combat results, and receives grouped runtime/object/board/renderer ports for bridge, timer, leaderboard, Phaser mutation, and visual effects.
 - `src/runtime/potassiumSlipRenderer.ts`
   - Phaser-backed Potassium renderer Module. It owns field/HUD/overlay drawing, enemy/projectile attachment visuals, and transient control/combat effects such as aim arrows, recall tethers, explosions, and death tweens.
 - `src/runtime/potassiumSlipProjectileControl.ts`
