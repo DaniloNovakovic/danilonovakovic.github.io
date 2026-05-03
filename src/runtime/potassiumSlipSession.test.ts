@@ -150,6 +150,23 @@ describe('potassium slip session', () => {
     expect(result.commands).toContainEqual({ type: 'advanceWaveAfterDelay', wave: 3 });
   });
 
+  it('keeps wave advancement guarded after a draft choice until the next wave spawns', () => {
+    const draft = resolvePotassiumDraftChoice({
+      ...createPotassiumSession(),
+      gameState: 'UPGRADE',
+      wave: 1
+    }, { kind: 'fire', action: 'unlock' });
+
+    expect(draft.state.waveAdvancing).toBe(true);
+
+    const clear = resolvePotassiumWaveClear({
+      state: draft.state,
+      hasLivingEnemies: false
+    });
+
+    expect(clear.commands).toEqual([]);
+  });
+
   it('updates generic bonus life drafts and emits HUD and hint commands', () => {
     const result = resolvePotassiumDraftChoice({
       ...createPotassiumSession(),

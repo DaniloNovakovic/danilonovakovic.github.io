@@ -419,7 +419,7 @@ function advancePotassiumWaveState(state: PotassiumSessionState): PotassiumSessi
   return {
     ...state,
     gameState: 'PLAYING',
-    waveAdvancing: false
+    waveAdvancing: true
   };
 }
 
