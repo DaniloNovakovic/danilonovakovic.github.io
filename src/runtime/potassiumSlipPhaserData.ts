@@ -10,7 +10,6 @@ export interface PotassiumDataObject {
 }
 
 export const POTASSIUM_DATA_KEYS = {
-  angularVelocity: 'angularVelocity',
   bananaVisuals: 'bananaVisuals',
   canApplyHitProcs: 'canApplyHitProcs',
   canDuplicate: 'canDuplicate',

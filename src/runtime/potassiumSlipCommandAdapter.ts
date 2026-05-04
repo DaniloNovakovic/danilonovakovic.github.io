@@ -470,7 +470,6 @@ export class PotassiumCommandAdapter {
       clamp(projectile.y + normal.y * 8, this.options.arena.top + 28, this.options.arena.bottom - 28)
     );
     projectile.setVelocity(ricochet.x, ricochet.y);
-    setPotassiumData(projectile, POTASSIUM_DATA_KEYS.angularVelocity, clamp(ricochet.x * 1.4, -720, 720));
     if ('setAngularVelocity' in projectile && typeof projectile.setAngularVelocity === 'function') {
       projectile.setAngularVelocity(clamp(ricochet.x * 1.4, -720, 720));
     }
