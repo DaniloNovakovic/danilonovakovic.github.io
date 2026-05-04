@@ -25,7 +25,7 @@ npm run build
 
 ## Architecture
 
-Runtime layering follows a micro-kernel + bridge pattern. Feature runtime lookup lives in [`src/game/runtime/miniGameRegistry.ts`](src/game/runtime/miniGameRegistry.ts), with source facts owned by [`src/features`](src/features) and composed through the feature catalog and registry helpers.
+Runtime layering follows a micro-kernel + bridge pattern. Game runtime lookup lives in [`src/game/runtime/miniGameRegistry.ts`](src/game/runtime/miniGameRegistry.ts), with source facts owned by [`src/game/scenes`](src/game/scenes), [`src/game/portfolio`](src/game/portfolio), and composed through the game registry helpers.
 
 Full runtime layering and Module seams are in [`docs/ARCHITECTURE_RUNTIME.md`](docs/ARCHITECTURE_RUNTIME.md). Agent rules live in [`.agents/rules/`](.agents/rules/). Architectural patterns are decision aids, not an implementation checklist; per-pattern notes and adoption status live in [`docs/patterns/`](docs/patterns/README.md).
 

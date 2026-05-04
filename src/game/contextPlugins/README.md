@@ -10,7 +10,7 @@
 
 ## Depends on
 
-- `core/kernel/types.ts` and `config/featureIds.ts`
+- `kernel/types.ts` and `game/registry/featureIds.ts`
 - Runtime data passed in from callers (for example resume getters) instead of directly importing runtime internals
 
 ## Lint boundary

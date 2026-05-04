@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { PHASER_SCENE_KEYS, type MiniGameId } from '@config/featureIds';
+import { PHASER_SCENE_KEYS, type MiniGameId } from '@game/registry/featureIds';
 import { createContextPlugins, type ContextPluginAssemblyDeps } from './createContextPlugins';
 
 function makeDeps(

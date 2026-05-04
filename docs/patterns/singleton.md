@@ -30,11 +30,11 @@ Legitimate-ish cases: true singletons of the environment (the browser `window`, 
 ## In JS/TS
 
 - `export const foo = new Foo()` at module scope is a module-level singleton. It's still a singleton, even if it doesn't use `getInstance()`. Use with care for the same reasons.
-- Prefer a factory at the composition root (e.g. `[src/app/App.tsx](../../src/app/App.tsx)` / `[src/app/modes/interactive/Game.tsx](../../src/app/modes/interactive/Game.tsx)`) that wires dependencies and hands them down.
+- Prefer a factory at the composition root (e.g. `[src/app/App.tsx](../../src/app/App.tsx)` / `[src/game/shell/Game.tsx](../../src/game/shell/Game.tsx)`) that wires dependencies and hands them down.
 
 ## In this repo
 
-- **No classic Singleton classes.** The closest thing is the module-level `bridgeStore` in `[src/shared/bridge/store.ts](../../src/shared/bridge/store.ts)` — but that is deliberately framed as a **service locator**, not a Singleton-the-pattern. See `[service-locator.md](./service-locator.md)`.
+- **No classic Singleton classes.** The closest thing is the module-level `bridgeStore` in `[src/game/bridge/store.ts](../../src/game/bridge/store.ts)` — but that is deliberately framed as a **service locator**, not a Singleton-the-pattern. See `[service-locator.md](./service-locator.md)`.
 - Rule for this codebase: **do not introduce new globals.** If a component or system needs a dependency, pass it into the constructor or read it from the bridge.
 
 ## Status

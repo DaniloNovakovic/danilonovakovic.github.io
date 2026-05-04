@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type * as Phaser from 'phaser';
-import { bridgeActions } from '@shared/bridge/store';
+import { bridgeActions } from '@game/bridge/store';
 
 vi.mock('phaser', () => ({
   Math: {

@@ -67,7 +67,7 @@ A quick scan of which patterns are live, planned, or intentionally parked for th
 
 - **Command** — `in use` (small). `src/game/core/input/commands.ts` models scene input as intent frames before player movement consumes it.
 - **Flyweight** — `not yet read`. Low-priority reference; possible fit for tilemaps / repeated sprites later.
-- **Observer** — `in use`. [`src/shared/bridge/store.ts`](../../src/shared/bridge/store.ts) subscriptions + `useBridgeState`.
+- **Observer** — `in use`. [`src/game/bridge/store.ts`](../../src/game/bridge/store.ts) subscriptions + `useBridgeState`.
 - **Prototype** — `not yet read`. Low-priority reference.
 - **Singleton** — `skip-for-now`. Nystrom warns against it; the bridge store covers the legitimate use case as a scoped service locator.
 - **State** — `in use` (small). `src/game/runtime/gameState.ts` models runtime modes as a discriminated union used by the bridge and kernel.

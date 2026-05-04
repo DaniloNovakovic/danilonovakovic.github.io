@@ -1,5 +1,5 @@
-import { PHASER_SCENE_KEYS } from '@config/featureIds';
-import type { ResumeSnapshot } from '../core/kernel/types';
+import { PHASER_SCENE_KEYS } from '@game/registry/featureIds';
+import type { ResumeSnapshot } from '../kernel/types';
 import {
   forgetResumePosition,
   peekResumePosition,

@@ -9,7 +9,7 @@
 
 ## Depends on
 
-- `core/kernel` adapter interfaces
+- `kernel` adapter interfaces
 - `runtime/` scene contracts when runtime capabilities must be detected
 
 ## Does not own

@@ -17,7 +17,7 @@ under `features/*/runtime`.
 
 ## Does not own
 
-- Kernel orchestration (`core/kernel`)
+- Kernel orchestration (`kernel`)
 - Adapter boundary implementations (`infra/`)
 - Context plugin definitions (`contextPlugins/`)
 

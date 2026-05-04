@@ -6,7 +6,7 @@ import {
   type PlayerControllerConfig,
   type PlayerStepResult
 } from '../../core/player/PlayerController';
-import type { ResumeSnapshot } from '../../core/kernel/types';
+import type { ResumeSnapshot } from '../../kernel/types';
 import { readPlayerSceneStep } from '../input/scenePlayerInput';
 import { setSceneKeyboardPaused } from '../sceneKeyboardPause';
 import {

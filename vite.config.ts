@@ -9,9 +9,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@app': fileURLToPath(new URL('./src/app', import.meta.url)),
-      '@config': fileURLToPath(new URL('./src/config', import.meta.url)),
-      '@features': fileURLToPath(new URL('./src/features', import.meta.url)),
       '@game': fileURLToPath(new URL('./src/game', import.meta.url)),
+      '@static': fileURLToPath(new URL('./src/static', import.meta.url)),
       '@shared/ui': fileURLToPath(new URL('./src/shared/ui/index.ts', import.meta.url)),
       '@shared': fileURLToPath(new URL('./src/shared', import.meta.url)),
     },

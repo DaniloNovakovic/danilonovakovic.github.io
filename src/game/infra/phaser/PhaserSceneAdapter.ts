@@ -4,8 +4,8 @@ import {
   isResumeCaptureScene
 } from '../../runtime/sceneContracts';
 import { recordSceneExitResume } from '../../runtime/sceneResumePolicy';
-import type { ResumeSnapshot } from '../../core/kernel/types';
-import type { SceneRuntimeAdapter } from '../../core/kernel/SceneManager';
+import type { ResumeSnapshot } from '../../kernel/types';
+import type { SceneRuntimeAdapter } from '../../kernel/SceneManager';
 
 interface PhaserSceneAdapterOptions {
   getGame: () => Phaser.Game | null;

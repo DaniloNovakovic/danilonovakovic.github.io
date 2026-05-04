@@ -17,7 +17,7 @@ This project is built on three core pillars to ensure that adding future complex
 
 - **Domain (Core):** Pure TypeScript logic. No `window`, `document`, or engine-specific (`PIXI`, `Phaser`) references.
 - **Infrastructure (Adapters):** The "Body." This is where Phaser, Web Audio API, and DOM event listeners live.
-- **The Bridge (Hybrid UI):** Use the custom bridge store in `src/shared/bridge/store.ts` as the source of truth between the Game Engine and HTML Modals.
+- **The Bridge (Hybrid UI):** Use the custom bridge store in `src/game/bridge/store.ts` as the source of truth between the Game Engine and HTML Modals.
 
 ### C. Micro-Kernel (Plugin) Architecture
 
@@ -36,8 +36,9 @@ This project is built on three core pillars to ensure that adding future complex
 - **Asset Naming:** `[entity]_[state]_[direction]_[frame].png` (e.g., `peep_walk_left_01.png`). Always lowercase.
 - **Folder Structure:** Modular by feature:
   - `/src/app` (thin React mode shells)
-  - `/src/features` (feature-owned overlays and presentation modules)
-  - `/src/shared` (Bridge, shared UI, hooks, and cross-boundary helpers)
+  - `/src/static` (static portfolio surface)
+  - `/src/game` (playable mode shell, bridge, registry, scenes, runtime, kernel, and adapters)
+  - `/src/shared` (shared UI, hooks, content, and config reused by static and game)
   - `/src/game/core` (ECS Engine & Domain)
   - `/src/game/infra` (Renderer Adapters)
   - `/src/game/runtime` (Phaser runtime scenes and registries)
@@ -49,9 +50,9 @@ This project is built on three core pillars to ensure that adding future complex
 
 This constitution is directional. For exact current implementation details, prefer `docs/ARCHITECTURE_RUNTIME.md`. Current canonical runtime anchors:
 
-- **Bridge store:** `src/shared/bridge/store.ts`
-- **Kernel:** `src/game/core/kernel/GameKernel.ts`
-- **Scene manager:** `src/game/core/kernel/SceneManager.ts`
+- **Bridge store:** `src/game/bridge/store.ts`
+- **Kernel:** `src/game/kernel/GameKernel.ts`
+- **Scene manager:** `src/game/kernel/SceneManager.ts`
 - **Phaser adapter:** `src/game/infra/phaser/PhaserSceneAdapter.ts`
 - **Context plugin assembly:** `src/game/contextPlugins/createContextPlugins.ts`
 - **ECS foundation:** `src/game/core/ecs/`*

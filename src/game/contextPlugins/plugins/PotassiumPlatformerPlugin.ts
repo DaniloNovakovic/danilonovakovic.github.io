@@ -1,5 +1,5 @@
-import { PHASER_SCENE_KEYS } from '@config/featureIds';
-import type { ContextPluginDefinition } from '../../core/kernel/types';
+import { PHASER_SCENE_KEYS } from '@game/registry/featureIds';
+import type { ContextPluginDefinition } from '../../kernel/types';
 
 interface PotassiumPlatformerPluginOptions {
   onClose: () => void;

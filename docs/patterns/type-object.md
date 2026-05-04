@@ -14,9 +14,9 @@ Represent "kinds" of things as data instead of subclasses. In TypeScript this is
 
 Current usage:
 
-- Feature definitions are type-object-shaped catalog entries composed into the runtime feature catalog (see `[src/features/catalog.ts](../../src/features/catalog.ts)`, compatibility exports in `[src/config/featureRuntimeBindings.ts](../../src/config/featureRuntimeBindings.ts)`, and `[src/game/runtime/miniGameRegistry.ts](../../src/game/runtime/miniGameRegistry.ts)`).
+- Feature definitions are type-object-shaped catalog entries composed into the runtime feature catalog (see `[src/game/registry/catalog.ts](../../src/game/registry/catalog.ts)`, compatibility exports in `[src/game/registry/featureRuntimeBindings.ts](../../src/game/registry/featureRuntimeBindings.ts)`, and `[src/game/runtime/miniGameRegistry.ts](../../src/game/runtime/miniGameRegistry.ts)`).
 - `[src/game/runtime/types.ts](../../src/game/runtime/types.ts)` models React overlays and Phaser scenes as discriminated feature variants with required fields per kind.
-- `[src/features/hobbies/roomLayout.ts](../../src/features/hobbies/roomLayout.ts)` and `[src/features/basement/roomLayout.ts](../../src/features/basement/roomLayout.ts)` model room interactables as explicit variants consumed by runtime interaction Modules.
+- `[src/game/scenes/hobbies/roomLayout.ts](../../src/game/scenes/hobbies/roomLayout.ts)` and `[src/game/scenes/basement/roomLayout.ts](../../src/game/scenes/basement/roomLayout.ts)` model room interactables as explicit variants consumed by runtime interaction Modules.
 - Any future NPC/enemy variants in mini-games should go the same way (data, not subclasses).
 
 ## Status

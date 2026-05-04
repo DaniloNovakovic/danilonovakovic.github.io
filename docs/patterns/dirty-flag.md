@@ -32,8 +32,8 @@ A piece of derived state is expensive to compute. Compute it only when the input
 
 Implicit but worth making explicit:
 
-- [`bridgeStore`](../../src/shared/bridge/store.ts)'s `setState` already does a dirty check — it compares fields against the previous snapshot and skips `emit()` if nothing changed. That's Dirty Flag at the store level; it keeps React renders cheap.
-- [`GameKernel.sync`](../../src/game/core/kernel/GameKernel.ts) similarly avoids emitting `PauseChanged` / overlay events unless they actually flipped.
+- [`bridgeStore`](../../src/game/bridge/store.ts)'s `setState` already does a dirty check — it compares fields against the previous snapshot and skips `emit()` if nothing changed. That's Dirty Flag at the store level; it keeps React renders cheap.
+- [`GameKernel.sync`](../../src/game/kernel/GameKernel.ts) similarly avoids emitting `PauseChanged` / overlay events unless they actually flipped.
 
 **Planned fits:**
 

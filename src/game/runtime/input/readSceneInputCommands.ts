@@ -1,5 +1,5 @@
 import * as Phaser from 'phaser';
-import type { TouchBridgeState } from '@shared/bridge/store';
+import type { TouchBridgeState } from '@game/bridge/store';
 import type { InputCommandFrame } from '../../core/input/commands';
 import { resetInputCommandFrame } from '../../core/input/commands';
 

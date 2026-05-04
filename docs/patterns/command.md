@@ -15,7 +15,7 @@ Small current usage:
 
 - `[src/game/core/input/commands.ts](../../src/game/core/input/commands.ts)` defines `InputCommandFrame`, the shared intent frame for movement, jump, interact, sprint, and exit.
 - `[src/game/runtime/input/readSceneInputCommands.ts](../../src/game/runtime/input/readSceneInputCommands.ts)` maps Phaser keyboard state plus bridge touch one-shots into that command frame.
-- `[src/features/overworld/runtime/OverworldScene.ts](../../src/features/overworld/runtime/OverworldScene.ts)` and `[src/features/hobbies/runtime/HobbiesScene.ts](../../src/features/hobbies/runtime/HobbiesScene.ts)` now feed commands into `PlayerController` instead of rebuilding raw booleans independently.
+- `[src/game/scenes/overworld/runtime/OverworldScene.ts](../../src/game/scenes/overworld/runtime/OverworldScene.ts)` and `[src/game/scenes/hobbies/runtime/HobbiesScene.ts](../../src/game/scenes/hobbies/runtime/HobbiesScene.ts)` now feed commands into `PlayerController` instead of rebuilding raw booleans independently.
 
 Future candidates:
 

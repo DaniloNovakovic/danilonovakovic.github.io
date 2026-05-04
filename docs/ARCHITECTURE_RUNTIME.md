@@ -5,22 +5,22 @@ This document describes the current runtime architecture in `src/`. It is the de
 ## High-level flow
 
 1. `App` renders the selected mode shell.
-2. Shared state lives in `src/shared/bridge/store.ts`.
+2. Shared state lives in `src/game/bridge/store.ts`.
 3. `Game` boots Phaser and wires the kernel runtime.
 4. `GameKernel` subscribes to bridge state and delegates transitions/pause to `SceneManager`.
 5. `SceneManager` manages context plugins via a Phaser adapter boundary.
 
 ## Core modules
 
-- `src/shared/bridge/store.ts`
+- `src/game/bridge/store.ts`
   - Single source of truth for:
     - app state (`status`, `activeMiniGameId`, `isPaused`)
     - touch flags (`left`, `right`, `jumpQueued`, `interactTap`)
   - Exposes `bridgeActions` and `useBridgeState`.
-- `src/game/core/kernel/GameKernel.ts`
+- `src/game/kernel/GameKernel.ts`
   - Reacts to bridge state changes.
   - Emits lifecycle events (`SceneTransitionRequested`, `OverlayOpened`, `OverlayClosed`, `PauseChanged`).
-- `src/game/core/kernel/SceneManager.ts`
+- `src/game/kernel/SceneManager.ts`
   - Registers context plugins.
   - Handles scene enter/exit, resume capture, and pause propagation.
 - `src/game/infra/phaser/PhaserSceneAdapter.ts`
@@ -30,10 +30,10 @@ This document describes the current runtime architecture in `src/`. It is the de
 - `src/game/contextPlugins/plugins/StreetPlugin.ts`, `src/game/contextPlugins/plugins/HobbiesPlugin.ts`,
 `src/game/contextPlugins/plugins/BasementPlugin.ts`
   - Context plugin definitions for the Phaser scene contexts.
-- `src/features/catalog.ts`
-  - Feature-owned catalog entry composition. Individual feature folders own display metadata and runtime bindings for their overlays/scenes.
+- `src/game/registry/catalog.ts`
+  - Game-owned catalog entry composition. Scene folders and `game/portfolio` own display metadata and runtime bindings for overlays/scenes.
 - `src/game/runtime/miniGameRegistry.ts`
-  - Runtime feature catalog for mini-game lookup, React overlay component resolution, overlay parent returns, and React/Phaser kind checks.
+  - Runtime game catalog for mini-game lookup, React overlay component resolution, overlay parent returns, and React/Phaser kind checks.
 - `src/game/runtime/sceneResumePolicy.ts`
   - Resume policy over the low-level store. The Phaser adapter captures raw positions; the policy decides whether to persist, clear, or restore by scene key.
 - `src/game/runtime/player/SideViewPlayerRuntime.ts`
@@ -42,21 +42,21 @@ This document describes the current runtime architecture in `src/`. It is the de
   - Shared side-view camera lifecycle. It applies follow target, zoom, follow offset, camera bounds, portrait cover crop padding, Phaser scale resize re-application, and shutdown cleanup.
 - `src/game/runtime/phaserScenePresentation.ts`
   - Scene presentation policy for the React shell. Side-view Phaser scenes use `portrait-cover`; Potassium uses a dedicated `vertical-board` arcade presentation.
-- `src/app/modes/interactive/gameShellLayout.ts`
+- `src/game/shell/gameShellLayout.ts`
   - React shell layout helper for presentation-mode-specific canvas aspect and max-size rules. Phaser still keeps the fixed logical design size from `src/game/runtime/config.ts`.
 - `src/game/runtime/interactions/InteriorInteractionRuntime.ts`
   - Pure interior prop interaction runtime. It resolves active targets, prompt placement facts, exit requests, and typed effect commands while scenes keep Phaser objects and side effects.
 - `src/game/runtime/text/PlayerThoughtText.ts`
   - Small scene-local helper for character thoughts that follow a target, reuse the shared typewriter effect, and auto-hide without adding bridge state.
-- `src/features/potassiumSlip/runtime/potassiumSlipCommandAdapter.ts`
+- `src/game/scenes/potassiumSlip/runtime/potassiumSlipCommandAdapter.ts`
   - Phaser-backed Potassium command Adapter. It interprets session, combat, and boss commands, extracts combat facts from Phaser objects, applies recursive combat results, and receives grouped runtime/object/board/renderer ports for bridge, timer, leaderboard, Phaser mutation, and visual effects.
-- `src/features/potassiumSlip/runtime/potassiumSlipRenderer.ts`
+- `src/game/scenes/potassiumSlip/runtime/potassiumSlipRenderer.ts`
   - Phaser-backed Potassium renderer Module. It owns field/HUD/overlay drawing, enemy/projectile attachment visuals, and transient control/combat effects such as aim arrows, recall tethers, explosions, and death tweens.
-- `src/features/potassiumSlip/runtime/potassiumSlipProjectileControl.ts`
+- `src/game/scenes/potassiumSlip/runtime/potassiumSlipProjectileControl.ts`
   - Pure Potassium launch/recall control Module. It owns pointer control state, launch threshold/speed math, recall transitions, and idle drag decisions as commands for the scene to apply.
-- `src/features/potassiumSlip/runtime/potassiumSlipEnemyFactory.ts`
+- `src/game/scenes/potassiumSlip/runtime/potassiumSlipEnemyFactory.ts`
   - Potassium enemy setup Module. It owns enemy kind facts, lane placement, HP scaling, body profiles, shield/splitter/boss setup facts, and renderer attachment facts while the scene still creates Phaser sprites.
-- `src/features/potassiumSlip/runtime/potassiumSlipPhaserData.ts`
+- `src/game/scenes/potassiumSlip/runtime/potassiumSlipPhaserData.ts`
   - Typed Potassium Phaser data helper Module. It centralizes `getData` / `setData` keys and helpers for combat IDs, hit cooldowns, enemy health/status facts, projectile proc flags, trail timing, and renderer attachment metadata.
 
 ## Scene presentation and camera
@@ -67,12 +67,12 @@ Phaser runs at the fixed design size from `src/game/runtime/config.ts` and scale
 - `full-board` is for arcade scenes where the whole landscape board must remain visible.
 - `vertical-board` is for portrait arcade scenes such as Potassium. The shell is tall, Phaser still uses the fixed logical design size with `Scale.ENVELOP`, and direct Phaser pointer input is preserved instead of the React swipe/tap gesture overlay.
 
-When a scene changes presentation mode, `src/app/modes/interactive/Game.tsx` keeps the existing Phaser instance mounted and calls `game.scale.refresh()` after the new DOM size lands. Side-view camera runtimes listen for Phaser scale resize and re-apply camera bounds/profile math.
+When a scene changes presentation mode, `src/game/shell/Game.tsx` keeps the existing Phaser instance mounted and calls `game.scale.refresh()` after the new DOM size lands. Side-view camera runtimes listen for Phaser scale resize and re-apply camera bounds/profile math.
 
 ## Runtime seams for new scenes
 
-- Feature presentation facts and runtime bindings belong in feature-owned catalog modules composed by `src/features/catalog.ts`. Avoid local React overlay maps or ad hoc runtime-kind checks in React/Phaser callers.
-- Add Phaser context registration through `createContextPlugins`; keep `src/app/modes/interactive/Game.tsx` focused on Phaser boot, adapters, kernel wiring, resizing, and touch controls.
+- Game presentation facts and runtime bindings belong in scene-owned or game-portfolio catalog modules composed by `src/game/registry/catalog.ts`. Avoid local React overlay maps or ad hoc runtime-kind checks in React/Phaser callers.
+- Add Phaser context registration through `createContextPlugins`; keep `src/game/shell/Game.tsx` focused on Phaser boot, adapters, kernel wiring, resizing, and touch controls.
 - Use `sceneResumePolicy` for resume persistence and reset rules. The low-level resume store should not be imported directly by scenes or adapters.
 - Side-view player scenes should compose `SideViewPlayerRuntime` before creating colliders against `runtime.player`; pass its camera config when the scene should follow and clamp the player.
 - Interior rooms should describe prop targets and effect commands, then let `InteriorInteractionRuntime` choose the active target and prompt/effect result. Phaser text mutation, bridge writes, and scene-local helpers stay in the scene.
@@ -82,24 +82,23 @@ When a scene changes presentation mode, `src/app/modes/interactive/Game.tsx` kee
 Current split:
 
 - `src/app`
-  - Thin React app and mode shells. Interactive mode owns the Phaser canvas shell; static mode owns the non-game portfolio page.
-- `src/features`
-  - Feature-owned React overlays and mini-game presentation modules. Portfolio section overlays, hobby overlays, and basement overlays live here.
+  - App entry and mode routing only.
+- `src/static`
+  - Static, non-game portfolio surface.
+- `src/game`
+  - Playable mode shell, bridge, scene registry, Phaser scenes, kernel, shared runtime, context plugins, and engine adapters.
 - `src/shared`
-  - Shared bridge state, UI primitives, hooks, and cross-boundary helpers. Import shared UI primitives through the `@shared/ui` alias.
-- `src/game/runtime`
-  - Shared Phaser runtime code, texture builders, scene contracts, and registry helpers.
-- `src/game/contextPlugins`
-  - Plugin/context definitions used by kernel scene orchestration.
+  - Code reused by static and game: UI primitives, generic hooks, shared content, and shared config. Import shared UI primitives through the `@shared/ui` alias.
 
 Migration rule for new code:
 
-- Add new app shell code under `src/app/modes`.
-- Add feature-specific React overlays under `src/features`.
-- Add shared UI/hooks under `src/shared`.
+- Keep `src/app` thin; add surface implementation under `src/static` or `src/game`.
+- Add static-only portfolio presentation under `src/static/portfolio`.
+- Add playable-mode overlays and scenes under `src/game`.
+- Add code reused by static and game under `src/shared`.
 - Add new context/plugin modules under `src/game/contextPlugins`.
-- Add feature-specific Phaser runtime under `src/features/*/runtime` when there is a clear feature owner; touch `src/game/runtime` for shared scene runtime or registry integration.
-- Use ownership aliases for cross-folder imports: `@app/*`, `@features/*`, `@game/*`, `@shared/*`, and `@config/*`. Keep short local relative imports inside a module folder.
+- Add scene-specific Phaser runtime under `src/game/scenes/*/runtime`; touch `src/game/runtime` only for reusable game machinery.
+- Use ownership aliases for cross-folder imports: `@app/*`, `@static/*`, `@game/*`, and `@shared/*`. Keep short local relative imports inside a module folder.
 - Import shared UI primitives through `@shared/ui`.
 
 ## Pure Decision Modules

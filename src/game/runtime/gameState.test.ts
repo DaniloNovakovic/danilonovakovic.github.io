@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { MINI_GAME_IDS } from '@config/featureIds';
-import { getRuntimeBinding } from '@config/featureRuntimeBindings';
+import { MINI_GAME_IDS } from '@game/registry/featureIds';
+import { getRuntimeBinding } from '@game/registry/featureRuntimeBindings';
 import {
   EXPLORING_MODE,
   GameState,

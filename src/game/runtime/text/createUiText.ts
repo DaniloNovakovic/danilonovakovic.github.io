@@ -1,5 +1,5 @@
 import type * as Phaser from 'phaser';
-import { UI_FONT_FAMILY } from '@config/typography';
+import { UI_FONT_FAMILY } from '@shared/config/typography';
 
 export const MAX_UI_TEXT_RESOLUTION = 2;
 

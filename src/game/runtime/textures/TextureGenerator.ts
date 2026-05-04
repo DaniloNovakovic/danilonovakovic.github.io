@@ -1,5 +1,5 @@
 import * as Phaser from 'phaser';
-import type { HobbyReactOverlayId, MiniGameId } from '@config/featureIds';
+import type { HobbyReactOverlayId, MiniGameId } from '@game/registry/featureIds';
 import { drawOverworldBuildingArt, drawPixelOverworldBuildingArt } from './buildingTextures';
 
 export class TextureGenerator {

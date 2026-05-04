@@ -1,10 +1,10 @@
 import { Suspense, lazy, useCallback, useEffect, useState } from 'react';
-import ModePicker, { type AppMode } from './modes/picker/ModePicker';
-import StaticPortfolio from './modes/static/StaticPortfolio';
-import { TEXTS } from '@config/content';
+import ModePicker, { type AppMode } from './modePicker/ModePicker';
+import StaticPortfolio from '@static/portfolio/StaticPortfolio';
+import { TEXTS } from '@shared/content/content';
 import { Card } from '@shared/ui';
 
-const InteractiveApp = lazy(() => import('./modes/interactive/InteractiveApp'));
+const InteractiveApp = lazy(() => import('@game/shell/InteractiveApp'));
 
 type RouteState = 'picker' | AppMode;
 
