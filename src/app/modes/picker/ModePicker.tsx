@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Gamepad2, BookOpen } from 'lucide-react';
-import { Badge, Button } from '../ui';
+import { Badge, Button } from '@shared/ui';
 
 export type AppMode = 'interactive' | 'static';
 

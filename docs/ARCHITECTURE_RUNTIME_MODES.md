@@ -16,7 +16,7 @@ intentionally short: the code remains the source of truth.
 - `src/shared/bridge/store.ts` owns the observable cross-boundary state.
 - `src/core/kernel/GameKernel.ts` maps bridge mode changes to scene manager
   transitions and pause events.
-- `src/components/InteractiveApp.tsx` renders React overlays from the active
+- `src/app/modes/interactive/InteractiveApp.tsx` renders React overlays from the active
   registry entry.
 - Phaser scenes keep local pause state only as a scene runtime concern; they do
   not decide whether an overlay should pause the engine.

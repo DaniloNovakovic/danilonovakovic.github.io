@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { TEXTS } from '../config/content';
+import { TEXTS } from '../../../../config/content';
 
 export default function CodingMini() {
   const [history, setHistory] = useState([
@@ -82,4 +82,3 @@ export default function CodingMini() {
     </div>
   );
 }
-

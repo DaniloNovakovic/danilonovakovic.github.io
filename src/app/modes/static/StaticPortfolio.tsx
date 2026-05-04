@@ -1,14 +1,14 @@
 import { Suspense, lazy, useMemo } from 'react';
 import { Gamepad2 } from 'lucide-react';
-import { PORTFOLIO_DATA, type ContactIconId } from '../config/portfolio';
-import { TEXTS } from '../config/content';
-import { Button, Card, LinkButton, SketchSection } from '../ui';
+import { PORTFOLIO_DATA, type ContactIconId } from '../../../config/portfolio';
+import { TEXTS } from '../../../config/content';
+import { Button, Card, LinkButton, SketchSection } from '@shared/ui';
 
-const ProfileOverlay = lazy(() => import('./ProfileOverlay'));
-const ExperienceOverlay = lazy(() => import('./ExperienceOverlay'));
-const ProjectsOverlay = lazy(() => import('./ProjectsOverlay'));
-const AbilitiesOverlay = lazy(() => import('./AbilitiesOverlay'));
-const ContactOverlay = lazy(() => import('./ContactOverlay'));
+const ProfileOverlay = lazy(() => import('../../../features/portfolio/profile/ProfileOverlay'));
+const ExperienceOverlay = lazy(() => import('../../../features/portfolio/experience/ExperienceOverlay'));
+const ProjectsOverlay = lazy(() => import('../../../features/portfolio/projects/ProjectsOverlay'));
+const AbilitiesOverlay = lazy(() => import('../../../features/portfolio/abilities/AbilitiesOverlay'));
+const ContactOverlay = lazy(() => import('../../../features/portfolio/contact/ContactOverlay'));
 
 interface StaticPortfolioProps {
   onSwitchToInteractive: () => void;

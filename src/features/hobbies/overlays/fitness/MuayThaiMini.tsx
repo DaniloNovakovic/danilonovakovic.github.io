@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { TEXTS } from '../config/content';
-import { Panel } from '../ui';
+import { TEXTS } from '../../../../config/content';
+import { Panel } from '@shared/ui';
 
 export default function MuayThaiMini() {
   const [hits, setHits] = useState(0);

@@ -1,17 +1,17 @@
 import { useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import * as Phaser from 'phaser';
-import { isMiniGameId, PHASER_SCENE_KEYS } from '../config/featureIds';
-import { getPhaserSceneBinding } from '../config/featureRuntimeBindings';
-import { getGameConfig } from '../runtime/config';
-import { OverworldScene } from '../runtime/OverworldScene';
-import { getSceneStartResume, prepareSceneStart } from '../runtime/sceneResumePolicy';
-import { bridgeActions } from '../shared/bridge/store';
-import { SceneManager } from '../core/kernel/SceneManager';
-import { PhaserSceneAdapter } from '../infra/phaser/PhaserSceneAdapter';
-import { GameKernel } from '../core/kernel/GameKernel';
-import { createContextPlugins } from '../contextPlugins/createContextPlugins';
-import { useTouchGestures } from './useTouchGestures';
-import type { PhaserScenePresentationMode } from '../runtime/phaserScenePresentation';
+import { isMiniGameId, PHASER_SCENE_KEYS } from '../../../config/featureIds';
+import { getPhaserSceneBinding } from '../../../config/featureRuntimeBindings';
+import { getGameConfig } from '../../../runtime/config';
+import { OverworldScene } from '../../../runtime/OverworldScene';
+import { getSceneStartResume, prepareSceneStart } from '../../../runtime/sceneResumePolicy';
+import { bridgeActions } from '../../../shared/bridge/store';
+import { SceneManager } from '../../../core/kernel/SceneManager';
+import { PhaserSceneAdapter } from '../../../infra/phaser/PhaserSceneAdapter';
+import { GameKernel } from '../../../core/kernel/GameKernel';
+import { createContextPlugins } from '../../../contextPlugins/createContextPlugins';
+import { useTouchGestures } from '../../../shared/hooks/useTouchGestures';
+import type { PhaserScenePresentationMode } from '../../../runtime/phaserScenePresentation';
 
 interface GameProps {
   onInteract: (area: string) => void;

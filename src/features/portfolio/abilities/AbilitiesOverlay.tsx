@@ -1,7 +1,7 @@
 import React from 'react';
-import { PORTFOLIO_DATA } from '../config/portfolio';
-import { TEXTS } from '../config/content';
-import { Card, Tag } from '../ui';
+import { PORTFOLIO_DATA } from '../../../config/portfolio';
+import { TEXTS } from '../../../config/content';
+import { Card, Tag } from '@shared/ui';
 
 const AbilitiesOverlay: React.FC = () => {
   const { abilities } = PORTFOLIO_DATA;

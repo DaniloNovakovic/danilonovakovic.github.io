@@ -35,11 +35,13 @@ This project is built on three core pillars to ensure that adding future complex
 - **Visual Architecture:** Modular "Paper-Doll" Peeps. Characters are layered textures (Head + Body + Hair + Accessory).
 - **Asset Naming:** `[entity]_[state]_[direction]_[frame].png` (e.g., `peep_walk_left_01.png`). Always lowercase.
 - **Folder Structure:** Modular by feature:
+  - `/src/app` (thin React mode shells)
+  - `/src/features` (feature-owned overlays and presentation modules)
+  - `/src/shared` (Bridge, shared UI, hooks, and cross-boundary helpers)
   - `/src/core` (ECS Engine & Domain)
   - `/src/infra` (Renderer Adapters)
   - `/src/runtime` (Phaser runtime scenes and registries)
   - `/src/contextPlugins` (Kernel context plugin definitions)
-  - `/src/shared` (State store/The Bridge)
 
 ---
 

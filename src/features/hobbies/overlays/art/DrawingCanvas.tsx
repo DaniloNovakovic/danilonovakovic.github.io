@@ -1,8 +1,8 @@
 import React, { useRef, useState, useEffect, useLayoutEffect } from 'react';
 import { Trash2 } from 'lucide-react';
-import { TEXTS } from '../config/content';
-import { useOverlayKeys } from './overlays/useOverlayKeys';
-import { Button, Panel } from '../ui';
+import { TEXTS } from '../../../../config/content';
+import { useOverlayKeys } from '../../../../shared/hooks/useOverlayKeys';
+import { Button, Panel } from '@shared/ui';
 
 export default function DrawingCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback, useLayoutEffect } from 'react';
-import { TEXTS } from '../config/content';
-import { useOverlayKeys } from './overlays/useOverlayKeys';
-import { Button, Panel } from '../ui';
+import { TEXTS } from '../../../../config/content';
+import { useOverlayKeys } from '../../../../shared/hooks/useOverlayKeys';
+import { Button, Panel } from '@shared/ui';
 
 const ARROWS = ['UP', 'RIGHT', 'DOWN', 'LEFT'] as const;
 

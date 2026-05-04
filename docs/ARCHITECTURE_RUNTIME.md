@@ -4,7 +4,7 @@ This document describes the current runtime architecture in `src/`. It is the de
 
 ## High-level flow
 
-1. `App` renders the game shell and overlays.
+1. `App` renders the selected mode shell.
 2. Shared state lives in `src/shared/bridge/store.ts`.
 3. `Game` boots Phaser and wires the kernel runtime.
 4. `GameKernel` subscribes to bridge state and delegates transitions/pause to `SceneManager`.
@@ -40,7 +40,7 @@ This document describes the current runtime architecture in `src/`. It is the de
   - Shared side-view camera lifecycle. It applies follow target, zoom, follow offset, camera bounds, portrait cover crop padding, Phaser scale resize re-application, and shutdown cleanup.
 - `src/runtime/phaserScenePresentation.ts`
   - Scene presentation policy for the React shell. Side-view Phaser scenes use `portrait-cover`; Potassium uses a dedicated `vertical-board` arcade presentation.
-- `src/components/interactive/gameShellLayout.ts`
+- `src/app/modes/interactive/gameShellLayout.ts`
   - React shell layout helper for presentation-mode-specific canvas aspect and max-size rules. Phaser still keeps the fixed logical design size from `src/runtime/config.ts`.
 - `src/runtime/interactions/InteriorInteractionRuntime.ts`
   - Pure interior prop interaction runtime. It resolves active targets, prompt placement facts, exit requests, and typed effect commands while scenes keep Phaser objects and side effects.
@@ -65,20 +65,26 @@ Phaser runs at the fixed design size from `src/runtime/config.ts` and scales wit
 - `full-board` is for arcade scenes where the whole landscape board must remain visible.
 - `vertical-board` is for portrait arcade scenes such as Potassium. The shell is tall, Phaser still uses the fixed logical design size with `Scale.ENVELOP`, and direct Phaser pointer input is preserved instead of the React swipe/tap gesture overlay.
 
-When a scene changes presentation mode, `Game.tsx` keeps the existing Phaser instance mounted and calls `game.scale.refresh()` after the new DOM size lands. Side-view camera runtimes listen for Phaser scale resize and re-apply camera bounds/profile math.
+When a scene changes presentation mode, `src/app/modes/interactive/Game.tsx` keeps the existing Phaser instance mounted and calls `game.scale.refresh()` after the new DOM size lands. Side-view camera runtimes listen for Phaser scale resize and re-apply camera bounds/profile math.
 
 ## Runtime seams for new scenes
 
 - Feature presentation facts belong in the feature catalog. Avoid local React overlay maps or ad hoc runtime-kind checks in React/Phaser callers.
-- Add Phaser context registration through `createContextPlugins`; keep `Game.tsx` focused on Phaser boot, adapters, kernel wiring, resizing, and touch controls.
+- Add Phaser context registration through `createContextPlugins`; keep `src/app/modes/interactive/Game.tsx` focused on Phaser boot, adapters, kernel wiring, resizing, and touch controls.
 - Use `sceneResumePolicy` for resume persistence and reset rules. The low-level resume store should not be imported directly by scenes or adapters.
 - Side-view player scenes should compose `SideViewPlayerRuntime` before creating colliders against `runtime.player`; pass its camera config when the scene should follow and clamp the player.
 - Interior rooms should describe prop targets and effect commands, then let `InteriorInteractionRuntime` choose the active target and prompt/effect result. Phaser text mutation, bridge writes, and scene-local helpers stay in the scene.
 
-## Folder ownership (`runtime` vs `contextPlugins`)
+## Folder ownership
 
 Current split:
 
+- `src/app`
+  - Thin React app and mode shells. Interactive mode owns the Phaser canvas shell; static mode owns the non-game portfolio page.
+- `src/features`
+  - Feature-owned React overlays and mini-game presentation modules. Portfolio section overlays, hobby overlays, and basement overlays live here.
+- `src/shared`
+  - Shared bridge state, UI primitives, hooks, and cross-boundary helpers. Import shared UI primitives through the `@shared/ui` alias.
 - `src/runtime`
   - Active Phaser runtime code (scenes, texture builders, scene contracts, registry helpers).
 - `src/contextPlugins`
@@ -86,6 +92,9 @@ Current split:
 
 Migration rule for new code:
 
+- Add new app shell code under `src/app/modes`.
+- Add feature-specific React overlays under `src/features`.
+- Add shared UI/hooks under `src/shared`.
 - Add new context/plugin modules under `src/contextPlugins`.
 - Touch `src/runtime` when integrating with existing scene runtime.
 

@@ -5,16 +5,16 @@ import {
   type MiniGameId
 } from './featureIds';
 import type { MiniGameOverlayProps } from '../runtime/types';
-import ProfileOverlay from '../components/ProfileOverlay';
-import ExperienceOverlay from '../components/ExperienceOverlay';
-import ProjectsOverlay from '../components/ProjectsOverlay';
-import AbilitiesOverlay from '../components/AbilitiesOverlay';
-import ContactOverlay from '../components/ContactOverlay';
-import CodingMini from '../components/CodingMini';
-import DrawingCanvas from '../components/DrawingCanvas';
-import GuitarStrings from '../components/GuitarStrings';
-import MuayThaiMini from '../components/MuayThaiMini';
-import DancingMini from '../components/DancingMini';
+import ProfileOverlay from '../features/portfolio/profile/ProfileOverlay';
+import ExperienceOverlay from '../features/portfolio/experience/ExperienceOverlay';
+import ProjectsOverlay from '../features/portfolio/projects/ProjectsOverlay';
+import AbilitiesOverlay from '../features/portfolio/abilities/AbilitiesOverlay';
+import ContactOverlay from '../features/portfolio/contact/ContactOverlay';
+import CodingMini from '../features/basement/overlays/developerConsole/CodingMini';
+import DrawingCanvas from '../features/hobbies/overlays/art/DrawingCanvas';
+import GuitarStrings from '../features/hobbies/overlays/music/GuitarStrings';
+import MuayThaiMini from '../features/hobbies/overlays/fitness/MuayThaiMini';
+import DancingMini from '../features/hobbies/overlays/dancing/DancingMini';
 
 export interface ReactOverlayRuntimeBinding {
   kind: 'reactOverlay';

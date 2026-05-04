@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { TEXTS } from '../config/content';
-import { useOverlayKeys } from './overlays/useOverlayKeys';
-import { Panel } from '../ui';
+import { TEXTS } from '../../../../config/content';
+import { useOverlayKeys } from '../../../../shared/hooks/useOverlayKeys';
+import { Panel } from '@shared/ui';
 
 const NOTES = [
   { note: 'E4', freq: 329.63, key: '1' },

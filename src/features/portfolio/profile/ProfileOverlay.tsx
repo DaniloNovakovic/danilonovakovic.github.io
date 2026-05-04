@@ -1,7 +1,7 @@
 import React from 'react';
-import { PORTFOLIO_DATA } from '../config/portfolio';
-import { TEXTS } from '../config/content';
-import { Card } from '../ui';
+import { PORTFOLIO_DATA } from '../../../config/portfolio';
+import { TEXTS } from '../../../config/content';
+import { Card } from '@shared/ui';
 
 const ProfileOverlay: React.FC = () => {
   const { profile } = PORTFOLIO_DATA;
