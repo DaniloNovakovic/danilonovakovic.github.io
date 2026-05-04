@@ -26,11 +26,11 @@
 
 - `OverworldScene.ts`
 - `HobbiesScene.ts`
-- `PotassiumSlipScene.ts`
-- `potassiumSlipCommandAdapter.ts`
-- `potassiumSlipRenderer.ts`
-- `potassiumSlipPhaserData.ts`
-- `potassiumSlipProjectileControl.ts`
-- `potassiumSlipEnemyFactory.ts`
+- `potassiumSlip/PotassiumSlipScene.ts`
+- `potassiumSlip/potassiumSlipCommandAdapter.ts`
+- `potassiumSlip/potassiumSlipRenderer.ts`
+- `potassiumSlip/potassiumSlipPhaserData.ts`
+- `potassiumSlip/potassiumSlipProjectileControl.ts`
+- `potassiumSlip/potassiumSlipEnemyFactory.ts`
 - `miniGameRegistry.ts`
 - `sceneResumeStore.ts`

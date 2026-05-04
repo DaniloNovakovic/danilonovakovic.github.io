@@ -2,9 +2,9 @@ import * as Phaser from 'phaser';
 import {
   GAME_DESIGN_HEIGHT,
   GAME_DESIGN_WIDTH
-} from './config';
-import { bridgeActions } from '../shared/bridge/store';
-import { TextureGenerator } from './textures/TextureGenerator';
+} from '../config';
+import { bridgeActions } from '../../shared/bridge/store';
+import { TextureGenerator } from '../textures/TextureGenerator';
 import {
   getPotassiumFireCellKey,
   type PotassiumGenericUpgradeKind as GenericUpgradeKind,

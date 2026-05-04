@@ -46,15 +46,15 @@ This document describes the current runtime architecture in `src/`. It is the de
   - Pure interior prop interaction runtime. It resolves active targets, prompt placement facts, exit requests, and typed effect commands while scenes keep Phaser objects and side effects.
 - `src/runtime/text/PlayerThoughtText.ts`
   - Small scene-local helper for character thoughts that follow a target, reuse the shared typewriter effect, and auto-hide without adding bridge state.
-- `src/runtime/potassiumSlipCommandAdapter.ts`
+- `src/runtime/potassiumSlip/potassiumSlipCommandAdapter.ts`
   - Phaser-backed Potassium command Adapter. It interprets session, combat, and boss commands, extracts combat facts from Phaser objects, applies recursive combat results, and receives grouped runtime/object/board/renderer ports for bridge, timer, leaderboard, Phaser mutation, and visual effects.
-- `src/runtime/potassiumSlipRenderer.ts`
+- `src/runtime/potassiumSlip/potassiumSlipRenderer.ts`
   - Phaser-backed Potassium renderer Module. It owns field/HUD/overlay drawing, enemy/projectile attachment visuals, and transient control/combat effects such as aim arrows, recall tethers, explosions, and death tweens.
-- `src/runtime/potassiumSlipProjectileControl.ts`
+- `src/runtime/potassiumSlip/potassiumSlipProjectileControl.ts`
   - Pure Potassium launch/recall control Module. It owns pointer control state, launch threshold/speed math, recall transitions, and idle drag decisions as commands for the scene to apply.
-- `src/runtime/potassiumSlipEnemyFactory.ts`
+- `src/runtime/potassiumSlip/potassiumSlipEnemyFactory.ts`
   - Potassium enemy setup Module. It owns enemy kind facts, lane placement, HP scaling, body profiles, shield/splitter/boss setup facts, and renderer attachment facts while the scene still creates Phaser sprites.
-- `src/runtime/potassiumSlipPhaserData.ts`
+- `src/runtime/potassiumSlip/potassiumSlipPhaserData.ts`
   - Typed Potassium Phaser data helper Module. It centralizes `getData` / `setData` keys and helpers for combat IDs, hit cooldowns, enemy health/status facts, projectile proc flags, trail timing, and renderer attachment metadata.
 
 ## Scene presentation and camera
