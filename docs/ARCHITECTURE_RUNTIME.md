@@ -88,7 +88,7 @@ Current split:
 - `src/shared`
   - Shared bridge state, UI primitives, hooks, and cross-boundary helpers. Import shared UI primitives through the `@shared/ui` alias.
 - `src/runtime`
-  - Shared Phaser runtime code, compatibility scene/module re-exports, texture builders, scene contracts, and registry helpers.
+  - Shared Phaser runtime code, texture builders, scene contracts, and registry helpers.
 - `src/contextPlugins`
   - Plugin/context definitions used by kernel scene orchestration.
 

@@ -1,15 +1,13 @@
 # Runtime Folder
 
-`runtime/` is the shared Phaser runtime home. Feature-owned Phaser scenes can live under
-`features/*/runtime` with compatibility re-exports here during migration.
+`runtime/` is the shared Phaser runtime home. Feature-owned Phaser scenes and modules live
+under `features/*/runtime`.
 
 ## Owns
 
-- Compatibility scene re-exports
 - Scene helpers (keyboard pause, resume store, contracts)
 - Runtime registries and runtime-oriented types/config
 - Shared scene-specific rendering/build modules (`textures/`, `text/`)
-- Compatibility re-exports for feature-owned Phaser runtime Modules during migration
 
 ## Depends on
 
@@ -25,8 +23,5 @@
 
 ## Common entrypoints
 
-- `OverworldScene.ts` (compatibility re-export for `features/overworld/runtime/OverworldScene.ts`)
-- `HobbiesScene.ts` (compatibility re-export for `features/hobbies/runtime/HobbiesScene.ts`)
-- `potassiumSlip/*` (compatibility re-exports for `features/potassiumSlip/runtime/*`)
 - `miniGameRegistry.ts`
 - `sceneResumeStore.ts`
