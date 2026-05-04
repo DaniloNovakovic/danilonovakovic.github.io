@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { HOBBY_REACT_OVERLAY_IDS, MINI_GAME_IDS } from './featureIds';
-import { HOBBY_STATION_LAYOUT, HOBBIES_ROOM_INTERACTABLES } from './hobbiesRoomLayout';
+import { HOBBY_REACT_OVERLAY_IDS, MINI_GAME_IDS } from '../../config/featureIds';
+import { HOBBY_STATION_LAYOUT, HOBBIES_ROOM_INTERACTABLES } from './roomLayout';
 
 describe('hobbies room layout', () => {
   it('lists every hobby React overlay with a station and matching interactable x', () => {

@@ -1,6 +1,6 @@
 /**
  * HobbiesRoom — builds the visual layout of the hobbies interior room.
- * Source of truth for positions remains in src/config/hobbiesRoomLayout.ts;
+ * Source of truth for positions remains in src/features/hobbies/roomLayout.ts;
  * this module reads from it and emits Phaser game objects.
  */
 import * as Phaser from 'phaser';
