@@ -54,6 +54,23 @@ export function getPotassiumLeaderboardTop(
   return loadPotassiumLeaderboard(storage).slice(0, limit);
 }
 
+export function getPotassiumLeaderboardOverlayText(
+  limit: number = 3,
+  storage: StorageLike | null = getBrowserStorage()
+): string {
+  return formatPotassiumLeaderboardRecords(getPotassiumLeaderboardTop(limit, storage));
+}
+
+export function formatPotassiumLeaderboardRecords(records: readonly PotassiumRunRecord[]): string {
+  if (records.length === 0) return 'RECORDS\nNo banana paperwork filed yet.';
+  return [
+    'RECORDS',
+    ...records.map((record, index) => (
+      `${index + 1}. ${record.score} • W${record.wave} • ${record.mode === 'endless' ? 'endless' : record.outcome}`
+    ))
+  ].join('\n');
+}
+
 function sanitizePotassiumRecords(records: unknown[]): PotassiumRunRecord[] {
   return normalizePotassiumRecords(records.filter(isPotassiumRunRecord));
 }

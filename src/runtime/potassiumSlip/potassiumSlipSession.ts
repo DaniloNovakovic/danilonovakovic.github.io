@@ -5,6 +5,7 @@ import {
   getPotassiumGenericUpgradeRank,
   getPotassiumSkillRank,
   getPotassiumWave,
+  getPotassiumWaveRowSchedule,
   isPotassiumBossWave,
   POTASSIUM_ENDLESS_START_WAVE,
   type PotassiumDraftOption,
@@ -12,9 +13,9 @@ import {
   type PotassiumGenericDraftOption,
   type PotassiumGenericUpgradeKind,
   type PotassiumGenericUpgradeRanks,
+  type PotassiumScheduledWaveRow,
   type PotassiumSkillRanks,
-  type PotassiumUpgradeKind,
-  type PotassiumWaveCell
+  type PotassiumUpgradeKind
 } from './potassiumSlipWaves';
 import type {
   PotassiumRunMode,
@@ -59,7 +60,7 @@ export type PotassiumSessionCommand =
   | { type: 'setHint'; text: string | null }
   | { type: 'spawnWave'; wave: number }
   | { type: 'spawnBoss' }
-  | { type: 'scheduleWaveRows'; rows: readonly PotassiumWaveCell[][] }
+  | { type: 'scheduleWaveRows'; schedule: readonly PotassiumScheduledWaveRow[] }
   | { type: 'scheduleUpgradeChoices' }
   | { type: 'showUpgradeChoices'; choices: readonly PotassiumDraftChoiceView[] }
   | { type: 'advanceWaveAfterDelay'; wave: number }
@@ -214,7 +215,7 @@ export function spawnPotassiumWave(state: PotassiumSessionState, waveNumber: num
     ]);
   }
   return withHud(nextState, [
-    { type: 'scheduleWaveRows', rows: wave.rows },
+    { type: 'scheduleWaveRows', schedule: getPotassiumWaveRowSchedule(waveNumber, wave.rows) },
     { type: 'setHint', text: `${wave.title}: ${getWaveHint(waveNumber)}` }
   ]);
 }

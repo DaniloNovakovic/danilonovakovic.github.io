@@ -64,7 +64,7 @@ export const FEATURE_RUNTIME_BINDINGS: Record<MiniGameId, FeatureRuntimeBinding>
   potassium: {
     kind: 'phaserScene',
     sceneKey: PHASER_SCENE_KEYS.potassium,
-    loadScene: () => import('../runtime/PotassiumSlipScene').then((m) => m.PotassiumSlipScene)
+    loadScene: () => import('../runtime/potassiumSlip/PotassiumSlipScene').then((m) => m.PotassiumSlipScene)
   },
   contact: {
     kind: 'reactOverlay',

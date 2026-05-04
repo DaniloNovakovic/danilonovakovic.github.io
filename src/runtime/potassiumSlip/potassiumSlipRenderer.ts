@@ -1,6 +1,7 @@
 import * as Phaser from 'phaser';
-import { GAME_DESIGN_WIDTH } from './config';
-import { createUiText, snapUiTextCoordinate } from './text/createUiText';
+import { GAME_DESIGN_WIDTH } from '../config';
+import { POTASSIUM_PROJECTILE_CONTROL_DEFAULTS } from './potassiumSlipProjectileControl';
+import { createUiText, snapUiTextCoordinate } from '../text/createUiText';
 import type {
   PotassiumDraftOption,
   PotassiumEnemyHealthState,
@@ -10,6 +11,16 @@ import type {
   PotassiumSkillRank,
   PotassiumUpgradeKind
 } from './potassiumSlipWaves';
+import {
+  getPotassiumData,
+  getPotassiumEnemyHp,
+  getPotassiumEnemyKind,
+  getPotassiumEnemyMaxHp,
+  getPotassiumShieldSide,
+  isPotassiumEnemyDying,
+  POTASSIUM_DATA_KEYS,
+  setPotassiumData
+} from './potassiumSlipPhaserData';
 
 export type PotassiumTerminalAction = 'retry' | 'return' | 'endless';
 
@@ -47,6 +58,11 @@ export interface PotassiumUpgradeChoiceView {
   title: string;
   description: string;
   color: string;
+}
+
+export interface PotassiumRendererPoint {
+  x: number;
+  y: number;
 }
 
 interface UpgradeChoiceButton {
@@ -88,6 +104,8 @@ export class PotassiumSlipRenderer {
   private upgradeChoiceTitle?: Phaser.GameObjects.Text;
   private terminalButtons: TerminalButton[] = [];
   private recordsText?: Phaser.GameObjects.Text;
+  private aimLine?: Phaser.GameObjects.Graphics;
+  private tetherLine?: Phaser.GameObjects.Graphics;
 
   constructor(scene: Phaser.Scene, layout: PotassiumRendererLayout) {
     this.scene = scene;
@@ -142,6 +160,96 @@ export class PotassiumSlipRenderer {
     this.fieldInk.fillRect(arena.left + 12, arena.bottom - 82, arena.width - 24, 82);
     this.fieldInk.lineStyle(3, 0x1a1a1a, 0.32);
     this.fieldInk.strokeCircle(launchPad.x, launchPad.y, launchPad.radius);
+  }
+
+  clearAim(): void {
+    this.aimLine?.clear();
+  }
+
+  clearTether(): void {
+    this.tetherLine?.clear();
+  }
+
+  clearControlFeedback(): void {
+    this.clearAim();
+    this.clearTether();
+  }
+
+  drawAimArrow(from: PotassiumRendererPoint, to: PotassiumRendererPoint): void {
+    const aimLine = this.getAimLine();
+    const angle = Phaser.Math.Angle.Between(from.x, from.y, to.x, to.y);
+    const distance = Phaser.Math.Distance.Between(from.x, from.y, to.x, to.y);
+    const arrowLength = Phaser.Math.Clamp(
+      distance,
+      24,
+      POTASSIUM_PROJECTILE_CONTROL_DEFAULTS.launchMaxDrag
+    );
+    const endX = from.x + Math.cos(angle) * arrowLength;
+    const endY = from.y + Math.sin(angle) * arrowLength;
+    const headLength = 18;
+    const wingA = angle + Math.PI * 0.78;
+    const wingB = angle - Math.PI * 0.78;
+
+    aimLine.lineStyle(7, 0x1a1a1a, 0.9);
+    aimLine.beginPath();
+    aimLine.moveTo(from.x, from.y);
+    aimLine.lineTo(endX, endY);
+    aimLine.strokePath();
+
+    aimLine.lineStyle(4, 0xfacc15, 0.95);
+    aimLine.beginPath();
+    aimLine.moveTo(from.x, from.y);
+    aimLine.lineTo(endX, endY);
+    aimLine.strokePath();
+
+    aimLine.fillStyle(0xfacc15, 0.95);
+    aimLine.lineStyle(4, 0x1a1a1a, 0.95);
+    aimLine.beginPath();
+    aimLine.moveTo(endX, endY);
+    aimLine.lineTo(endX + Math.cos(wingA) * headLength, endY + Math.sin(wingA) * headLength);
+    aimLine.lineTo(endX + Math.cos(wingB) * headLength, endY + Math.sin(wingB) * headLength);
+    aimLine.closePath();
+    aimLine.fillPath();
+    aimLine.strokePath();
+  }
+
+  drawRecallTether(from: PotassiumRendererPoint): void {
+    const tetherLine = this.getTetherLine();
+    this.clearAim();
+    tetherLine.clear();
+    tetherLine.lineStyle(3, 0x1a1a1a, 0.75);
+    tetherLine.beginPath();
+    tetherLine.moveTo(from.x, from.y);
+    tetherLine.lineTo(this.layout.launchPad.x, this.layout.launchPad.y);
+    tetherLine.strokePath();
+  }
+
+  showExplosionVisual(x: number, y: number, radius: number): void {
+    const blast = this.scene.add.circle(x, y, 18, 0xf97316, 0.22)
+      .setStrokeStyle(5, 0x1a1a1a, 1)
+      .setDepth(940);
+    this.scene.tweens.add({
+      targets: blast,
+      radius,
+      alpha: 0,
+      duration: 240,
+      onComplete: () => blast.destroy()
+    });
+  }
+
+  animateEnemyDeath(
+    enemy: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
+    onComplete: () => void
+  ): void {
+    this.scene.tweens.add({
+      targets: enemy,
+      angle: enemy.angle + 720,
+      scale: 0,
+      alpha: 0,
+      duration: 260,
+      ease: 'Back.easeIn',
+      onComplete
+    });
   }
 
   createHud(): void {
@@ -312,24 +420,24 @@ export class PotassiumSlipRenderer {
     enemy: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
     config: PotassiumEnemyAttachmentConfig
   ): void {
-    enemy.setData('damageState', 'healthy' satisfies PotassiumEnemyHealthState);
-    enemy.setData('damageCueBaseScaleX', enemy.scaleX);
-    enemy.setData('damageCueBaseScaleY', enemy.scaleY);
-    enemy.setData('damageOverlay', this.createDamageOverlay(enemy));
+    setPotassiumData(enemy, POTASSIUM_DATA_KEYS.damageState, 'healthy' satisfies PotassiumEnemyHealthState);
+    setPotassiumData(enemy, POTASSIUM_DATA_KEYS.damageCueBaseScaleX, enemy.scaleX);
+    setPotassiumData(enemy, POTASSIUM_DATA_KEYS.damageCueBaseScaleY, enemy.scaleY);
+    setPotassiumData(enemy, POTASSIUM_DATA_KEYS.damageOverlay, this.createDamageOverlay(enemy));
     if (config.shieldSide) {
-      enemy.setData('shieldSide', config.shieldSide);
-      enemy.setData('shieldPlate', this.createShieldPlate(enemy, config.shieldSide));
+      setPotassiumData(enemy, POTASSIUM_DATA_KEYS.shieldSide, config.shieldSide);
+      setPotassiumData(enemy, POTASSIUM_DATA_KEYS.shieldPlate, this.createShieldPlate(enemy, config.shieldSide));
     }
     if (config.kind === 'boss') {
-      enemy.setData('labelText', this.createEnemyLabel(enemy, config.label, config.hp));
+      setPotassiumData(enemy, POTASSIUM_DATA_KEYS.labelText, this.createEnemyLabel(enemy, config.label, config.hp));
     }
   }
 
   positionEnemyAttachments(enemy: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody): void {
-    const overlay = enemy.getData('damageOverlay') as Phaser.GameObjects.Sprite | undefined;
+    const overlay = getPotassiumData<Phaser.GameObjects.Sprite>(enemy, POTASSIUM_DATA_KEYS.damageOverlay);
     if (overlay) {
-      const state = enemy.getData('damageState') as PotassiumEnemyHealthState | undefined;
-      const kind = enemy.getData('kind') as PotassiumEnemyKind;
+      const state = getPotassiumData<PotassiumEnemyHealthState>(enemy, POTASSIUM_DATA_KEYS.damageState);
+      const kind = getPotassiumEnemyKind(enemy);
       const isWall = kind === 'wall';
       overlay.setPosition(enemy.x, enemy.y)
         .setScale(enemy.displayWidth / (isWall ? 80 : 76), enemy.displayHeight / 62)
@@ -339,15 +447,15 @@ export class PotassiumSlipRenderer {
         ? state === 'critical' ? 'potassium_wall_damage_critical' : 'potassium_wall_damage_cracked'
         : state === 'critical' ? 'potassium_damage_critical' : 'potassium_damage_cracked');
     }
-    const shieldPlate = enemy.getData('shieldPlate') as Phaser.GameObjects.Rectangle | undefined;
-    const shieldSide = enemy.getData('shieldSide') as PotassiumShieldSide | undefined;
+    const shieldPlate = getPotassiumData<Phaser.GameObjects.Rectangle>(enemy, POTASSIUM_DATA_KEYS.shieldPlate);
+    const shieldSide = getPotassiumShieldSide(enemy);
     if (shieldPlate && shieldSide) {
       this.positionShieldPlate(enemy, shieldPlate, shieldSide);
     }
-    const label = enemy.getData('labelText') as Phaser.GameObjects.Text | undefined;
+    const label = getPotassiumData<Phaser.GameObjects.Text>(enemy, POTASSIUM_DATA_KEYS.labelText);
     if (label) {
-      const hp = Math.ceil(enemy.getData('hp') as number);
-      const maxHp = enemy.getData('maxHp') as number;
+      const hp = Math.ceil(getPotassiumEnemyHp(enemy));
+      const maxHp = getPotassiumEnemyMaxHp(enemy);
       label.setText(`${hp}/${maxHp}`);
       this.positionFloatingLabel(label, enemy.x, enemy.y - 34 * enemy.scale);
     }
@@ -378,9 +486,9 @@ export class PotassiumSlipRenderer {
       ease: 'Sine.easeOut',
       onComplete: () => ring.destroy()
     });
-    const baseScaleX = (enemy.getData('damageCueBaseScaleX') as number | undefined) ?? enemy.scaleX;
-    const baseScaleY = (enemy.getData('damageCueBaseScaleY') as number | undefined) ?? enemy.scaleY;
-    const previousPulse = enemy.getData('damageCueTween') as Phaser.Tweens.Tween | undefined;
+    const baseScaleX = getPotassiumData<number>(enemy, POTASSIUM_DATA_KEYS.damageCueBaseScaleX) ?? enemy.scaleX;
+    const baseScaleY = getPotassiumData<number>(enemy, POTASSIUM_DATA_KEYS.damageCueBaseScaleY) ?? enemy.scaleY;
+    const previousPulse = getPotassiumData<Phaser.Tweens.Tween>(enemy, POTASSIUM_DATA_KEYS.damageCueTween);
     previousPulse?.stop();
     enemy.setScale(baseScaleX, baseScaleY);
     const pulse = this.scene.tweens.add({
@@ -391,13 +499,13 @@ export class PotassiumSlipRenderer {
       yoyo: true,
       ease: 'Sine.easeOut',
       onComplete: () => {
-        if (enemy.active && !enemy.getData('dying')) {
+        if (enemy.active && !isPotassiumEnemyDying(enemy)) {
           enemy.setScale(baseScaleX, baseScaleY);
         }
-        enemy.setData('damageCueTween', undefined);
+        setPotassiumData(enemy, POTASSIUM_DATA_KEYS.damageCueTween, undefined);
       }
     });
-    enemy.setData('damageCueTween', pulse);
+    setPotassiumData(enemy, POTASSIUM_DATA_KEYS.damageCueTween, pulse);
   }
 
   refreshProjectileVisuals(
@@ -417,12 +525,12 @@ export class PotassiumSlipRenderer {
     const behind = this.scene.add.graphics().setDepth(projectile.depth - 1);
     const front = this.scene.add.graphics().setDepth(projectile.depth + 1);
     this.drawBananaUpgradeAccents(behind, front, skillRanks, isClone);
-    projectile.setData('bananaVisuals', { behind, front } satisfies BananaVisuals);
+    setPotassiumData(projectile, POTASSIUM_DATA_KEYS.bananaVisuals, { behind, front } satisfies BananaVisuals);
     this.positionProjectileVisuals(projectile);
   }
 
   positionProjectileVisuals(projectile: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody): void {
-    const visuals = projectile.getData('bananaVisuals') as BananaVisuals | undefined;
+    const visuals = getPotassiumData<BananaVisuals>(projectile, POTASSIUM_DATA_KEYS.bananaVisuals);
     if (!visuals) return;
     visuals.behind.setPosition(projectile.x, projectile.y).setRotation(projectile.rotation).setVisible(projectile.active);
     visuals.front.setPosition(projectile.x, projectile.y).setRotation(projectile.rotation).setVisible(projectile.active);
@@ -430,10 +538,10 @@ export class PotassiumSlipRenderer {
 
   destroyProjectileVisuals(projectile?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody): void {
     if (!projectile) return;
-    const visuals = projectile.getData('bananaVisuals') as BananaVisuals | undefined;
+    const visuals = getPotassiumData<BananaVisuals>(projectile, POTASSIUM_DATA_KEYS.bananaVisuals);
     visuals?.behind.destroy();
     visuals?.front.destroy();
-    projectile.setData('bananaVisuals', undefined);
+    setPotassiumData(projectile, POTASSIUM_DATA_KEYS.bananaVisuals, undefined);
   }
 
   showGhostStatusField(input: {
@@ -504,7 +612,7 @@ export class PotassiumSlipRenderer {
   }
 
   private createDamageOverlay(enemy: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody): Phaser.GameObjects.Sprite {
-    const kind = enemy.getData('kind') as PotassiumEnemyKind;
+    const kind = getPotassiumEnemyKind(enemy);
     const overlay = this.scene.add.sprite(enemy.x, enemy.y, kind === 'wall' ? 'potassium_wall_damage_cracked' : 'potassium_damage_cracked')
       .setDepth(enemy.depth + 1)
       .setOrigin(0.5)
@@ -543,6 +651,20 @@ export class PotassiumSlipRenderer {
       snapUiTextCoordinate(Phaser.Math.Clamp(x, this.layout.safe.left, this.layout.safe.right)),
       snapUiTextCoordinate(Phaser.Math.Clamp(y, this.layout.safe.labelTop, this.layout.safe.bottom))
     );
+  }
+
+  private getAimLine(): Phaser.GameObjects.Graphics {
+    if (!this.aimLine) {
+      this.aimLine = this.scene.add.graphics().setDepth(950);
+    }
+    return this.aimLine;
+  }
+
+  private getTetherLine(): Phaser.GameObjects.Graphics {
+    if (!this.tetherLine) {
+      this.tetherLine = this.scene.add.graphics().setDepth(949);
+    }
+    return this.tetherLine;
   }
 
   private drawBananaUpgradeAccents(

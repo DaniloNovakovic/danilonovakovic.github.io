@@ -11,10 +11,12 @@ import {
   getPotassiumGenericUpgradeRank,
   getPotassiumScaledExplosionRadius,
   getPotassiumEnemyHpMultiplier,
+  getPotassiumRowSpawnDelayMs,
   getPotassiumShieldSide,
   getPotassiumSplitterSpawnColumns,
   getPotassiumUpgradeChoices,
   getPotassiumWave,
+  getPotassiumWaveRowSchedule,
   getScaledPotassiumEnemyHp,
   getUnlockedPotassiumEnemies,
   getUnlockedPotassiumUpgrades,
@@ -175,6 +177,20 @@ describe('potassium slip waves', () => {
       expect(row.filter((cell) => cell === 'deadline').length).toBeLessThanOrEqual(2);
       expect(row.some((cell) => cell === null)).toBe(true);
     });
+  });
+
+  it('resolves row spawn schedule facts beside wave policy', () => {
+    const rows = getPotassiumWave(5).rows.slice(0, 3);
+    expect(getPotassiumRowSpawnDelayMs(4)).toBe(900);
+    expect(getPotassiumRowSpawnDelayMs(5)).toBe(1050);
+    expect(getPotassiumRowSpawnDelayMs(6)).toBe(1050);
+    expect(getPotassiumRowSpawnDelayMs(7)).toBe(900);
+
+    expect(getPotassiumWaveRowSchedule(5, rows)).toEqual([
+      { row: rows[0], rowIndex: 0, delayMs: 0 },
+      { row: rows[1], rowIndex: 1, delayMs: 1050 },
+      { row: rows[2], rowIndex: 2, delayMs: 2100 }
+    ]);
   });
 
   it('offers generic stat drafts after all skills are maxed', () => {
