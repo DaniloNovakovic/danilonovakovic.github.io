@@ -1,6 +1,6 @@
 import React from 'react';
 import { PORTFOLIO_DATA } from '../data';
-import { TEXTS } from '../../../config/content';
+import { TEXTS } from '@config/content';
 import { Badge, Card, LinkButton } from '@shared/ui';
 
 const ExperienceOverlay: React.FC = () => {

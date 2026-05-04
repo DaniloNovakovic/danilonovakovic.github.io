@@ -37,10 +37,10 @@ Use a pushdown automaton when you need nested modes that should resume cleanly (
 
 In use for runtime modes; still a candidate for deeper player movement:
 
-- `[src/runtime/gameState.ts](../../src/runtime/gameState.ts)` defines `RuntimeMode` as a discriminated union (`exploring`, `reactOverlay`, `phaserScene`) plus pure helpers for interaction, close, and pause derivation.
+- `[src/game/runtime/gameState.ts](../../src/game/runtime/gameState.ts)` defines `RuntimeMode` as a discriminated union (`exploring`, `reactOverlay`, `phaserScene`) plus pure helpers for interaction, close, and pause derivation.
 - `[src/shared/bridge/store.ts](../../src/shared/bridge/store.ts)` keeps the current mode as the bridge's cross-boundary source of truth while preserving legacy `status` / `activeMiniGameId` projections.
-- `[GameKernel](../../src/core/kernel/GameKernel.ts)` transitions between contexts based on explicit runtime mode instead of loose mini-game id checks.
-- Player movement is currently expressed as booleans (`grounded`, `enabled`) in `[src/core/ecs/components/player.ts](../../src/core/ecs/components/player.ts)` and `[playerSystems.ts](../../src/core/ecs/systems/playerSystems.ts)`. **Candidate refactor:** a small `PlayerState` discriminated union (`idle` / `walking` / `jumping` / `interacting`).
+- `[GameKernel](../../src/game/core/kernel/GameKernel.ts)` transitions between contexts based on explicit runtime mode instead of loose mini-game id checks.
+- Player movement is currently expressed as booleans (`grounded`, `enabled`) in `[src/game/core/ecs/components/player.ts](../../src/game/core/ecs/components/player.ts)` and `[playerSystems.ts](../../src/game/core/ecs/systems/playerSystems.ts)`. **Candidate refactor:** a small `PlayerState` discriminated union (`idle` / `walking` / `jumping` / `interacting`).
 - A pushdown automaton isn't needed today because overlay pause is handled at kernel level — but if we add nested modals (e.g. settings *over* a paused mini-game), that's the moment to add one.
 
 ## Status

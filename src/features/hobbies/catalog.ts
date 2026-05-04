@@ -1,4 +1,4 @@
-import { PHASER_SCENE_KEYS } from '../../config/featureIds';
+import { PHASER_SCENE_KEYS } from '@config/featureIds';
 import type { FeatureCatalogEntry } from '../catalogTypes';
 import DrawingCanvas from './overlays/art/DrawingCanvas';
 import DancingMini from './overlays/dancing/DancingMini';

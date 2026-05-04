@@ -1,4 +1,4 @@
-import { PHASER_SCENE_KEYS } from '../../config/featureIds';
+import { PHASER_SCENE_KEYS } from '@config/featureIds';
 import type { FeatureCatalogEntry } from '../catalogTypes';
 import CodingMini from './overlays/developerConsole/CodingMini';
 

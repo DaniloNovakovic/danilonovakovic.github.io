@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { HOBBIES_TEXT } from '../../text';
-import { useOverlayKeys } from '../../../../shared/hooks/useOverlayKeys';
+import { useOverlayKeys } from '@shared/hooks/useOverlayKeys';
 import { Panel } from '@shared/ui';
 
 const NOTES = [

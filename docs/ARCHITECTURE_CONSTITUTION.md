@@ -38,10 +38,10 @@ This project is built on three core pillars to ensure that adding future complex
   - `/src/app` (thin React mode shells)
   - `/src/features` (feature-owned overlays and presentation modules)
   - `/src/shared` (Bridge, shared UI, hooks, and cross-boundary helpers)
-  - `/src/core` (ECS Engine & Domain)
-  - `/src/infra` (Renderer Adapters)
-  - `/src/runtime` (Phaser runtime scenes and registries)
-  - `/src/contextPlugins` (Kernel context plugin definitions)
+  - `/src/game/core` (ECS Engine & Domain)
+  - `/src/game/infra` (Renderer Adapters)
+  - `/src/game/runtime` (Phaser runtime scenes and registries)
+  - `/src/game/contextPlugins` (Kernel context plugin definitions)
 
 ---
 
@@ -50,13 +50,13 @@ This project is built on three core pillars to ensure that adding future complex
 This constitution is directional. For exact current implementation details, prefer `docs/ARCHITECTURE_RUNTIME.md`. Current canonical runtime anchors:
 
 - **Bridge store:** `src/shared/bridge/store.ts`
-- **Kernel:** `src/core/kernel/GameKernel.ts`
-- **Scene manager:** `src/core/kernel/SceneManager.ts`
-- **Phaser adapter:** `src/infra/phaser/PhaserSceneAdapter.ts`
-- **Context plugin assembly:** `src/contextPlugins/createContextPlugins.ts`
-- **ECS foundation:** `src/core/ecs/`*
-- **Shared runtime Modules:** `src/runtime/player/SideViewPlayerRuntime.ts`, `src/runtime/interactions/InteriorInteractionRuntime.ts`, `src/runtime/sceneResumePolicy.ts`
-- **Phaser 4 render guardrails:** currently documented as runtime policy; helper module may be reintroduced under `src/infra/phaser/render/` when shared logic is needed.
+- **Kernel:** `src/game/core/kernel/GameKernel.ts`
+- **Scene manager:** `src/game/core/kernel/SceneManager.ts`
+- **Phaser adapter:** `src/game/infra/phaser/PhaserSceneAdapter.ts`
+- **Context plugin assembly:** `src/game/contextPlugins/createContextPlugins.ts`
+- **ECS foundation:** `src/game/core/ecs/`*
+- **Shared runtime Modules:** `src/game/runtime/player/SideViewPlayerRuntime.ts`, `src/game/runtime/interactions/InteriorInteractionRuntime.ts`, `src/game/runtime/sceneResumePolicy.ts`
+- **Phaser 4 render guardrails:** currently documented as runtime policy; helper module may be reintroduced under `src/game/infra/phaser/render/` when shared logic is needed.
 
 When proposing future refactors, prefer extending these modules instead of re-introducing callback-only scene orchestration or ad-hoc global state.
 

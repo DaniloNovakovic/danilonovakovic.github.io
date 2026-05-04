@@ -1,4 +1,4 @@
-import { PHASER_SCENE_KEYS } from '../../config/featureIds';
+import { PHASER_SCENE_KEYS } from '@config/featureIds';
 import type { FeatureCatalogEntry } from '../catalogTypes';
 
 export const POTASSIUM_SLIP_FEATURE_CATALOG_ENTRIES: FeatureCatalogEntry[] = [

@@ -14,7 +14,7 @@ intentionally short: the code remains the source of truth.
 ## Transition Owners
 
 - `src/shared/bridge/store.ts` owns the observable cross-boundary state.
-- `src/core/kernel/GameKernel.ts` maps bridge mode changes to scene manager
+- `src/game/core/kernel/GameKernel.ts` maps bridge mode changes to scene manager
   transitions and pause events.
 - `src/app/modes/interactive/InteractiveApp.tsx` renders React overlays from the active
   registry entry.

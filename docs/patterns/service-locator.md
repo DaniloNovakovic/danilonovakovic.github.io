@@ -38,7 +38,7 @@ The [`bridgeStore`](../../src/shared/bridge/store.ts) **is** our service locator
 - **Observed** — readers subscribe, they don't poll.
 - **Typed** — `BridgeState` is a single, documented contract.
 
-The kernel-level bus [`KernelEventBus`](../../src/core/kernel/events.ts) is another small locator-shaped thing: one registration point, many consumers, typed events. Both are examples of the pattern applied in the smallest useful shape.
+The kernel-level bus [`KernelEventBus`](../../src/game/core/kernel/events.ts) is another small locator-shaped thing: one registration point, many consumers, typed events. Both are examples of the pattern applied in the smallest useful shape.
 
 **Rule for this codebase:** do not introduce new globals. If you want a new service, decide whether (a) it belongs on the bridge (shared UI/engine state), (b) it belongs on the kernel (scene lifecycle events), or (c) it's local enough to be passed in. A brand-new `window.*` or module-level `export const foo = new Foo()` that everybody reaches into is not the answer.
 

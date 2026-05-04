@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect, useLayoutEffect } from 'react';
 import { Trash2 } from 'lucide-react';
 import { HOBBIES_TEXT } from '../../text';
-import { useOverlayKeys } from '../../../../shared/hooks/useOverlayKeys';
+import { useOverlayKeys } from '@shared/hooks/useOverlayKeys';
 import { Button, Panel } from '@shared/ui';
 
 export default function DrawingCanvas() {

@@ -4,8 +4,8 @@
  */
 import * as Phaser from 'phaser';
 import { HOBBIES_EXIT_X, HOBBIES_ROOM_INTERACTABLES } from '../roomLayout';
-import { TEXTS } from '../../../config/content';
-import type { HobbyReactOverlayId } from '../../../config/featureIds';
+import { TEXTS } from '@config/content';
+import type { HobbyReactOverlayId } from '@config/featureIds';
 import {
   GAME_DESIGN_HEIGHT,
   GAME_DESIGN_WIDTH,
@@ -19,18 +19,18 @@ import {
   OVERWORLD_JUMP_VELOCITY_Y,
   OVERWORLD_SPRINT_SPEED,
   OVERWORLD_WALK_SPEED
-} from '../../../runtime/config';
-import { isItemEquipped } from '../../../shared/bridge/store';
+} from '@game/runtime/config';
+import { isItemEquipped } from '@shared/bridge/store';
 import { buildHobbiesRoom } from './HobbiesRoom';
-import { createUiText } from '../../../runtime/text/createUiText';
+import { createUiText } from '@game/runtime/text/createUiText';
 import {
   createSideViewPlayerRuntime,
   type SideViewPlayerRuntime
-} from '../../../runtime/player/SideViewPlayerRuntime';
+} from '@game/runtime/player/SideViewPlayerRuntime';
 import {
   createInteriorInteractionRuntime,
   type InteriorInteractionRuntime
-} from '../../../runtime/interactions/InteriorInteractionRuntime';
+} from '@game/runtime/interactions/InteriorInteractionRuntime';
 
 type HobbiesInteractionEffect =
   | { kind: 'close' }

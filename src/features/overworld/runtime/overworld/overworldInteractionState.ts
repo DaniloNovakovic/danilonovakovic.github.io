@@ -4,7 +4,7 @@ import {
   type OverworldBuildingSlot,
   type OverworldInteractPickOptions,
   type OverworldSecretSlot
-} from '../../../../core/ecs/systems/overworldInteractSystems';
+} from '@game/core/ecs/systems/overworldInteractSystems';
 
 export interface OverworldInteractionState {
   bananaFirstPeelPending: boolean;

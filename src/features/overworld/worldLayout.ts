@@ -1,7 +1,7 @@
-import type { OverworldBuildingTypeObject } from '../../config/portfolioCompose';
+import type { OverworldBuildingTypeObject } from '@config/portfolioCompose';
 
 /**
- * Overworld building X positions (street width `OVERWORLD_WIDTH` in `src/runtime/config.ts`).
+ * Overworld building X positions (street width `OVERWORLD_WIDTH` in `src/game/runtime/config.ts`).
  * Decoupled from UI copy and component bindings.
  */
 export const OVERWORLD_BUILDING_PLACEMENTS: readonly OverworldBuildingTypeObject[] = [

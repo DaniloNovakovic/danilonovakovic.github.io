@@ -1,6 +1,6 @@
-import { BASEMENT_TEXT } from '../features/basement/text';
-import { HOBBIES_TEXT } from '../features/hobbies/text';
-import { PORTFOLIO_TEXT } from '../features/portfolio/text';
+import { BASEMENT_TEXT } from '@features/basement/text';
+import { HOBBIES_TEXT } from '@features/hobbies/text';
+import { PORTFOLIO_TEXT } from '@features/portfolio/text';
 
 export const TEXTS = {
   common: {

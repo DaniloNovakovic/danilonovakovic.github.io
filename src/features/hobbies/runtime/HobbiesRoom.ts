@@ -4,20 +4,20 @@
  * this module reads from it and emits Phaser game objects.
  */
 import * as Phaser from 'phaser';
-import { HOBBY_REACT_OVERLAY_IDS, type HobbyReactOverlayId } from '../../../config/featureIds';
+import { HOBBY_REACT_OVERLAY_IDS, type HobbyReactOverlayId } from '@config/featureIds';
 import {
   HOBBIES_EXIT_X,
   HOBBY_STATION_LAYOUT
 } from '../roomLayout';
-import { TEXTS } from '../../../config/content';
+import { TEXTS } from '@config/content';
 import { HOBBIES_TEXT } from '../text';
-import { TextureGenerator } from '../../../runtime/textures/TextureGenerator';
+import { TextureGenerator } from '@game/runtime/textures/TextureGenerator';
 import {
   HOBBIES_FLOOR_Y,
   HOBBIES_ROOM_HEIGHT,
   HOBBIES_ROOM_WIDTH
-} from '../../../runtime/config';
-import { createUiText } from '../../../runtime/text/createUiText';
+} from '@game/runtime/config';
+import { createUiText } from '@game/runtime/text/createUiText';
 
 const hobbyLabel = (id: HobbyReactOverlayId): string =>
   HOBBIES_TEXT.labels[id];

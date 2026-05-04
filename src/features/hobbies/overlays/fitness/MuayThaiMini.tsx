@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { TEXTS } from '../../../../config/content';
+import { TEXTS } from '@config/content';
 import { HOBBIES_TEXT } from '../../text';
 import { Panel } from '@shared/ui';
 

@@ -17,36 +17,36 @@ This document describes the current runtime architecture in `src/`. It is the de
     - app state (`status`, `activeMiniGameId`, `isPaused`)
     - touch flags (`left`, `right`, `jumpQueued`, `interactTap`)
   - Exposes `bridgeActions` and `useBridgeState`.
-- `src/core/kernel/GameKernel.ts`
+- `src/game/core/kernel/GameKernel.ts`
   - Reacts to bridge state changes.
   - Emits lifecycle events (`SceneTransitionRequested`, `OverlayOpened`, `OverlayClosed`, `PauseChanged`).
-- `src/core/kernel/SceneManager.ts`
+- `src/game/core/kernel/SceneManager.ts`
   - Registers context plugins.
   - Handles scene enter/exit, resume capture, and pause propagation.
-- `src/infra/phaser/PhaserSceneAdapter.ts`
+- `src/game/infra/phaser/PhaserSceneAdapter.ts`
   - Adapter boundary for scene start/stop, active scene pause, callback rebinding, and resume capture.
-- `src/contextPlugins/createContextPlugins.ts`
+- `src/game/contextPlugins/createContextPlugins.ts`
   - Assembles the ordered Phaser context plugins and injects runtime callbacks, lazy scene loading, pause state, and resume policy.
-- `src/contextPlugins/plugins/StreetPlugin.ts`, `src/contextPlugins/plugins/HobbiesPlugin.ts`,
-`src/contextPlugins/plugins/BasementPlugin.ts`
+- `src/game/contextPlugins/plugins/StreetPlugin.ts`, `src/game/contextPlugins/plugins/HobbiesPlugin.ts`,
+`src/game/contextPlugins/plugins/BasementPlugin.ts`
   - Context plugin definitions for the Phaser scene contexts.
 - `src/features/catalog.ts`
   - Feature-owned catalog entry composition. Individual feature folders own display metadata and runtime bindings for their overlays/scenes.
-- `src/runtime/miniGameRegistry.ts`
+- `src/game/runtime/miniGameRegistry.ts`
   - Runtime feature catalog for mini-game lookup, React overlay component resolution, overlay parent returns, and React/Phaser kind checks.
-- `src/runtime/sceneResumePolicy.ts`
+- `src/game/runtime/sceneResumePolicy.ts`
   - Resume policy over the low-level store. The Phaser adapter captures raw positions; the policy decides whether to persist, clear, or restore by scene key.
-- `src/runtime/player/SideViewPlayerRuntime.ts`
+- `src/game/runtime/player/SideViewPlayerRuntime.ts`
   - Shared side-view player lifecycle for Phaser scenes: spawn/resume placement, controller mounting, input frame updates, pause propagation, appearance sync, sprite animation, and resume capture.
-- `src/runtime/camera/sideViewCameraRuntime.ts`
+- `src/game/runtime/camera/sideViewCameraRuntime.ts`
   - Shared side-view camera lifecycle. It applies follow target, zoom, follow offset, camera bounds, portrait cover crop padding, Phaser scale resize re-application, and shutdown cleanup.
-- `src/runtime/phaserScenePresentation.ts`
+- `src/game/runtime/phaserScenePresentation.ts`
   - Scene presentation policy for the React shell. Side-view Phaser scenes use `portrait-cover`; Potassium uses a dedicated `vertical-board` arcade presentation.
 - `src/app/modes/interactive/gameShellLayout.ts`
-  - React shell layout helper for presentation-mode-specific canvas aspect and max-size rules. Phaser still keeps the fixed logical design size from `src/runtime/config.ts`.
-- `src/runtime/interactions/InteriorInteractionRuntime.ts`
+  - React shell layout helper for presentation-mode-specific canvas aspect and max-size rules. Phaser still keeps the fixed logical design size from `src/game/runtime/config.ts`.
+- `src/game/runtime/interactions/InteriorInteractionRuntime.ts`
   - Pure interior prop interaction runtime. It resolves active targets, prompt placement facts, exit requests, and typed effect commands while scenes keep Phaser objects and side effects.
-- `src/runtime/text/PlayerThoughtText.ts`
+- `src/game/runtime/text/PlayerThoughtText.ts`
   - Small scene-local helper for character thoughts that follow a target, reuse the shared typewriter effect, and auto-hide without adding bridge state.
 - `src/features/potassiumSlip/runtime/potassiumSlipCommandAdapter.ts`
   - Phaser-backed Potassium command Adapter. It interprets session, combat, and boss commands, extracts combat facts from Phaser objects, applies recursive combat results, and receives grouped runtime/object/board/renderer ports for bridge, timer, leaderboard, Phaser mutation, and visual effects.
@@ -61,7 +61,7 @@ This document describes the current runtime architecture in `src/`. It is the de
 
 ## Scene presentation and camera
 
-Phaser runs at the fixed design size from `src/runtime/config.ts` and scales with `Scale.ENVELOP`. React owns the visible shell aspect ratio:
+Phaser runs at the fixed design size from `src/game/runtime/config.ts` and scales with `Scale.ENVELOP`. React owns the visible shell aspect ratio:
 
 - `portrait-cover` is the default for side-view player scenes on phones. The shell is portrait, overflow is clipped, and the shared side-view camera runtime follows/clamps the player so cover-mode crop does not reveal off-world space.
 - `full-board` is for arcade scenes where the whole landscape board must remain visible.
@@ -87,9 +87,9 @@ Current split:
   - Feature-owned React overlays and mini-game presentation modules. Portfolio section overlays, hobby overlays, and basement overlays live here.
 - `src/shared`
   - Shared bridge state, UI primitives, hooks, and cross-boundary helpers. Import shared UI primitives through the `@shared/ui` alias.
-- `src/runtime`
+- `src/game/runtime`
   - Shared Phaser runtime code, texture builders, scene contracts, and registry helpers.
-- `src/contextPlugins`
+- `src/game/contextPlugins`
   - Plugin/context definitions used by kernel scene orchestration.
 
 Migration rule for new code:
@@ -97,18 +97,20 @@ Migration rule for new code:
 - Add new app shell code under `src/app/modes`.
 - Add feature-specific React overlays under `src/features`.
 - Add shared UI/hooks under `src/shared`.
-- Add new context/plugin modules under `src/contextPlugins`.
-- Add feature-specific Phaser runtime under `src/features/*/runtime` when there is a clear feature owner; touch `src/runtime` for shared scene runtime or registry integration.
+- Add new context/plugin modules under `src/game/contextPlugins`.
+- Add feature-specific Phaser runtime under `src/features/*/runtime` when there is a clear feature owner; touch `src/game/runtime` for shared scene runtime or registry integration.
+- Use ownership aliases for cross-folder imports: `@app/*`, `@features/*`, `@game/*`, `@shared/*`, and `@config/*`. Keep short local relative imports inside a module folder.
+- Import shared UI primitives through `@shared/ui`.
 
 ## Pure Decision Modules
 
 Pure decision code exists where it buys leverage, but the app is not trying to migrate all runtime code into ECS. Use the smallest Interface that concentrates repeated knowledge.
 
-- `src/core/ecs/world.ts` for entity/component storage.
-- `src/core/ecs/components/player.ts` for player-focused pure data components.
-- `src/core/ecs/systems/playerSystems.ts` for input + movement/jump/interact system logic.
-- `src/core/ecs/systems/overworldInteractSystems.ts` for pure overworld building interact targeting (called from `OverworldScene`).
-- `src/core/ecs/systems/roomInteractSystems.ts` for lower-level room target picking.
+- `src/game/core/ecs/world.ts` for entity/component storage.
+- `src/game/core/ecs/components/player.ts` for player-focused pure data components.
+- `src/game/core/ecs/systems/playerSystems.ts` for input + movement/jump/interact system logic.
+- `src/game/core/ecs/systems/overworldInteractSystems.ts` for pure overworld building interact targeting (called from `OverworldScene`).
+- `src/game/core/ecs/systems/roomInteractSystems.ts` for lower-level room target picking.
 
 Runtime Modules such as `SideViewPlayerRuntime`, `InteriorInteractionRuntime`, and `sceneResumePolicy` are equally valid when the repeated knowledge is lifecycle, policy, or orchestration rather than entity iteration.
 
@@ -140,4 +142,4 @@ Guardrails are currently policy-level (documented) rather than a dedicated utili
 - Use `DynamicTexture` for composited or stamp-style static textures, with explicit `dynamicTexture.render()` flush calls.
 - Use `SpriteGPULayer` only for dense, mostly static quads; avoid high-frequency member add/remove churn.
 
-If repeated render policy code appears, re-introduce a shared helper under `src/infra/phaser/render/`.
+If repeated render policy code appears, re-introduce a shared helper under `src/game/infra/phaser/render/`.

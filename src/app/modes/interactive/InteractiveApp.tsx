@@ -1,25 +1,25 @@
 import { useCallback } from 'react';
 import { BookOpen, Backpack, Bug } from 'lucide-react';
 import Game from './Game';
-import { GameState } from '../../../runtime/gameState';
+import { GameState } from '@game/runtime/gameState';
 import {
   getMiniGameById,
   getAllMiniGames,
   getOverlayParentId,
   getReactOverlayMiniGameById
-} from '../../../runtime/miniGameRegistry';
-import { MiniGameType } from '../../../runtime/types';
-import { TEXTS } from '../../../config/content';
-import { isMiniGameId } from '../../../config/featureIds';
-import { bridgeActions, useBridgeState } from '../../../shared/bridge/store';
+} from '@game/runtime/miniGameRegistry';
+import { MiniGameType } from '@game/runtime/types';
+import { TEXTS } from '@config/content';
+import { isMiniGameId } from '@config/featureIds';
+import { bridgeActions, useBridgeState } from '@shared/bridge/store';
 import { OverlayCard } from './overlays/OverlayCard';
 import {
   getPhaserScenePresentationMode,
   type PhaserScenePresentationMode
-} from '../../../runtime/phaserScenePresentation';
+} from '@game/runtime/phaserScenePresentation';
 import { Button, Card, DialogCard, ModalShell, Panel } from '@shared/ui';
 import { getInteractiveGameShellLayout } from './gameShellLayout';
-import { useResizeObserver } from '../../../shared/hooks/useResizeObserver';
+import { useResizeObserver } from '@shared/hooks/useResizeObserver';
 
 interface InteractiveAppProps {
   onSwitchToStatic: () => void;

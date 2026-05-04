@@ -1,6 +1,6 @@
 import type { MiniGameId } from './featureIds';
-import type { MiniGamePlugin } from '../runtime/types';
-import { MiniGameType } from '../runtime/miniGameKind';
+import type { MiniGamePlugin } from '@game/runtime/types';
+import { MiniGameType } from '@game/runtime/miniGameKind';
 import type { FeatureRuntimeBinding } from './featureRuntimeBindings';
 
 export interface FeaturePluginDefinition {

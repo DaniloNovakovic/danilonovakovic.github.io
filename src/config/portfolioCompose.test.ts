@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { BASEMENT_REACT_OVERLAY_IDS, HOBBY_REACT_OVERLAY_IDS } from './featureIds';
-import { OVERWORLD_BUILDING_PLACEMENTS } from '../features/overworld/worldLayout';
+import { OVERWORLD_BUILDING_PLACEMENTS } from '@features/overworld/worldLayout';
 import { composePortfolioSections, type FeaturePluginDefinition } from './portfolioCompose';
 import type { FeatureRuntimeBinding } from './featureRuntimeBindings';
 import type { MiniGameId } from './featureIds';
-import { MiniGameType } from '../runtime/miniGameKind';
+import { MiniGameType } from '@game/runtime/miniGameKind';
 
 function NullOverlay() {
   return null;

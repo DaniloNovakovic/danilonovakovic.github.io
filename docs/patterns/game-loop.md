@@ -31,9 +31,9 @@ A loop that runs forever: read input → update simulation → render → (maybe
 
 ## In this repo
 
-- Phaser's loop drives everything. Scenes in `[src/runtime](../../src/runtime)` implement `update(time, delta)`.
-- `[GameKernel.sync](../../src/core/kernel/GameKernel.ts)` is **not** in the loop — it runs only when bridge state changes (via `bridgeStore.subscribe`). That's intentional: scene/context transitions are event-driven, not per-frame.
-- ECS systems like `runPlayerInputAndMovementSystems` in `[src/core/ecs/systems/playerSystems.ts](../../src/core/ecs/systems/playerSystems.ts)` are *called from* a scene's `update` each frame. The scene is the adapter; ECS is the decision layer.
+- Phaser's loop drives everything. Scenes in `[src/game/runtime](../../src/game/runtime)` implement `update(time, delta)`.
+- `[GameKernel.sync](../../src/game/core/kernel/GameKernel.ts)` is **not** in the loop — it runs only when bridge state changes (via `bridgeStore.subscribe`). That's intentional: scene/context transitions are event-driven, not per-frame.
+- ECS systems like `runPlayerInputAndMovementSystems` in `[src/game/core/ecs/systems/playerSystems.ts](../../src/game/core/ecs/systems/playerSystems.ts)` are *called from* a scene's `update` each frame. The scene is the adapter; ECS is the decision layer.
 
 ## Status
 

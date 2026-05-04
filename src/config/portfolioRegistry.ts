@@ -1,5 +1,5 @@
-import type { MiniGamePlugin } from '../runtime/types';
-import { OVERWORLD_BUILDING_PLACEMENTS } from '../features/overworld/worldLayout';
+import type { MiniGamePlugin } from '@game/runtime/types';
+import { OVERWORLD_BUILDING_PLACEMENTS } from '@features/overworld/worldLayout';
 import { composePortfolioSections } from './portfolioCompose';
 import { FEATURE_PLUGIN_DEFINITIONS } from './featurePlugins';
 import { FEATURE_RUNTIME_BINDINGS } from './featureRuntimeBindings';

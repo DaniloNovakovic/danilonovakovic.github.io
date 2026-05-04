@@ -9,7 +9,7 @@ import {
   type BasementInteractionEffect,
   type BasementRoomInteractableId
 } from '../roomLayout';
-import { TEXTS } from '../../../config/content';
+import { TEXTS } from '@config/content';
 import {
   GAME_DESIGN_HEIGHT,
   GAME_DESIGN_WIDTH,
@@ -17,18 +17,18 @@ import {
   OVERWORLD_JUMP_VELOCITY_Y,
   OVERWORLD_SPRINT_SPEED,
   OVERWORLD_WALK_SPEED
-} from '../../../runtime/config';
-import { bridgeActions, isItemEquipped, isItemOwned } from '../../../shared/bridge/store';
-import { createUiText } from '../../../runtime/text/createUiText';
-import { PlayerThoughtText } from '../../../runtime/text/PlayerThoughtText';
+} from '@game/runtime/config';
+import { bridgeActions, isItemEquipped, isItemOwned } from '@shared/bridge/store';
+import { createUiText } from '@game/runtime/text/createUiText';
+import { PlayerThoughtText } from '@game/runtime/text/PlayerThoughtText';
 import {
   createSideViewPlayerRuntime,
   type SideViewPlayerRuntime
-} from '../../../runtime/player/SideViewPlayerRuntime';
+} from '@game/runtime/player/SideViewPlayerRuntime';
 import {
   createInteriorInteractionRuntime,
   type InteriorInteractionRuntime
-} from '../../../runtime/interactions/InteriorInteractionRuntime';
+} from '@game/runtime/interactions/InteriorInteractionRuntime';
 
 export class BasementScene extends Phaser.Scene {
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;

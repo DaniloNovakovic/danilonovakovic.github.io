@@ -1,4 +1,4 @@
-import type { HobbyReactOverlayId, MiniGameId } from '../../config/featureIds';
+import type { HobbyReactOverlayId, MiniGameId } from '@config/featureIds';
 
 export type HobbiesRoomInteractableId = MiniGameId | 'exit';
 

@@ -15,7 +15,12 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "paths": {
-      "@shared/ui": ["./src/shared/ui/index.ts"]
+      "@app/*": ["./src/app/*"],
+      "@config/*": ["./src/config/*"],
+      "@features/*": ["./src/features/*"],
+      "@game/*": ["./src/game/*"],
+      "@shared/ui": ["./src/shared/ui/index.ts"],
+      "@shared/*": ["./src/shared/*"]
     },
 
     /* Linting */

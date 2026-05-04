@@ -27,7 +27,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['src/contextPlugins/**/*.{ts,tsx}'],
+    files: ['src/game/contextPlugins/**/*.{ts,tsx}'],
     rules: {
       'no-restricted-imports': [
         'error',

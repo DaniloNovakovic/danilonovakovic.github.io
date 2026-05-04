@@ -1,7 +1,7 @@
 import { Suspense, lazy, useCallback, useEffect, useState } from 'react';
 import ModePicker, { type AppMode } from './modes/picker/ModePicker';
 import StaticPortfolio from './modes/static/StaticPortfolio';
-import { TEXTS } from '../config/content';
+import { TEXTS } from '@config/content';
 import { Card } from '@shared/ui';
 
 const InteractiveApp = lazy(() => import('./modes/interactive/InteractiveApp'));

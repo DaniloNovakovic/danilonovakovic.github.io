@@ -3,8 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import InteractiveApp from './InteractiveApp';
-import { bridgeActions, bridgeStore } from '../../../shared/bridge/store';
-import { TEXTS } from '../../../config/content';
+import { bridgeActions, bridgeStore } from '@shared/bridge/store';
+import { TEXTS } from '@config/content';
 
 vi.mock('./Game', () => ({
   default: () => <div data-testid="game-surface" />
