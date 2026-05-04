@@ -14,7 +14,7 @@ Represent "kinds" of things as data instead of subclasses. In TypeScript this is
 
 Current usage:
 
-- Feature definitions are type-object-shaped config composed into the runtime feature catalog (see `[src/config/portfolio.ts](../../src/config/portfolio.ts)`, `[src/config/featureRuntimeBindings.ts](../../src/config/featureRuntimeBindings.ts)`, and `[src/runtime/miniGameRegistry.ts](../../src/runtime/miniGameRegistry.ts)`).
+- Feature definitions are type-object-shaped catalog entries composed into the runtime feature catalog (see `[src/features/catalog.ts](../../src/features/catalog.ts)`, compatibility exports in `[src/config/featureRuntimeBindings.ts](../../src/config/featureRuntimeBindings.ts)`, and `[src/runtime/miniGameRegistry.ts](../../src/runtime/miniGameRegistry.ts)`).
 - `[src/runtime/types.ts](../../src/runtime/types.ts)` models React overlays and Phaser scenes as discriminated feature variants with required fields per kind.
 - `[src/config/hobbiesRoomLayout.ts](../../src/config/hobbiesRoomLayout.ts)` and `[src/config/basementRoomLayout.ts](../../src/config/basementRoomLayout.ts)` model room interactables as explicit variants consumed by runtime interaction Modules.
 - Any future NPC/enemy variants in mini-games should go the same way (data, not subclasses).

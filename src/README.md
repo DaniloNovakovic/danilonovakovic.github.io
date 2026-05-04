@@ -5,7 +5,7 @@ This folder contains the app shells, feature modules, shared UI, and game runtim
 ## Folder guide
 
 - `app/` - Thin React entry shells for mode routing, interactive mode, static mode, and the mode picker.
-- `features/` - Feature-owned React overlays, mini-game UI, and colocated domain presentation code.
+- `features/` - Feature-owned React overlays, mini-game UI, catalog entries, and colocated domain presentation code.
 - `runtime/` - Phaser scene runtime, registries, scene contracts, and gameplay-facing modules.
 - `contextPlugins/` - Kernel context plugin definitions that describe scene entry/exit behavior.
 - `core/` - Domain-first kernel and ECS logic.

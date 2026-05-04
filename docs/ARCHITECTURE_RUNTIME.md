@@ -30,6 +30,8 @@ This document describes the current runtime architecture in `src/`. It is the de
 - `src/contextPlugins/plugins/StreetPlugin.ts`, `src/contextPlugins/plugins/HobbiesPlugin.ts`,
 `src/contextPlugins/plugins/BasementPlugin.ts`
   - Context plugin definitions for the Phaser scene contexts.
+- `src/features/catalog.ts`
+  - Feature-owned catalog entry composition. Individual feature folders own display metadata and runtime bindings for their overlays/scenes.
 - `src/runtime/miniGameRegistry.ts`
   - Runtime feature catalog for mini-game lookup, React overlay component resolution, overlay parent returns, and React/Phaser kind checks.
 - `src/runtime/sceneResumePolicy.ts`
@@ -69,7 +71,7 @@ When a scene changes presentation mode, `src/app/modes/interactive/Game.tsx` kee
 
 ## Runtime seams for new scenes
 
-- Feature presentation facts belong in the feature catalog. Avoid local React overlay maps or ad hoc runtime-kind checks in React/Phaser callers.
+- Feature presentation facts and runtime bindings belong in feature-owned catalog modules composed by `src/features/catalog.ts`. Avoid local React overlay maps or ad hoc runtime-kind checks in React/Phaser callers.
 - Add Phaser context registration through `createContextPlugins`; keep `src/app/modes/interactive/Game.tsx` focused on Phaser boot, adapters, kernel wiring, resizing, and touch controls.
 - Use `sceneResumePolicy` for resume persistence and reset rules. The low-level resume store should not be imported directly by scenes or adapters.
 - Side-view player scenes should compose `SideViewPlayerRuntime` before creating colliders against `runtime.player`; pass its camera config when the scene should follow and clamp the player.
