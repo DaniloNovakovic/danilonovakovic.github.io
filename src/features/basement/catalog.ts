@@ -10,7 +10,7 @@ export const BASEMENT_FEATURE_CATALOG_ENTRIES: FeatureCatalogEntry[] = [
     runtime: {
       kind: 'phaserScene',
       sceneKey: PHASER_SCENE_KEYS.basement,
-      loadScene: () => import('../../runtime/BasementScene').then((m) => m.BasementScene)
+      loadScene: () => import('./runtime/BasementScene').then((m) => m.BasementScene)
     }
   },
   {

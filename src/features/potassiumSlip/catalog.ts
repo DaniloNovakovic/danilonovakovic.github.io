@@ -10,7 +10,7 @@ export const POTASSIUM_SLIP_FEATURE_CATALOG_ENTRIES: FeatureCatalogEntry[] = [
       kind: 'phaserScene',
       sceneKey: PHASER_SCENE_KEYS.potassium,
       loadScene: () =>
-        import('../../runtime/potassiumSlip/PotassiumSlipScene').then((m) => m.PotassiumSlipScene)
+        import('./runtime/PotassiumSlipScene').then((m) => m.PotassiumSlipScene)
     }
   }
 ];

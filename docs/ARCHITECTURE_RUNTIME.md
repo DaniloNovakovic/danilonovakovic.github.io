@@ -48,15 +48,15 @@ This document describes the current runtime architecture in `src/`. It is the de
   - Pure interior prop interaction runtime. It resolves active targets, prompt placement facts, exit requests, and typed effect commands while scenes keep Phaser objects and side effects.
 - `src/runtime/text/PlayerThoughtText.ts`
   - Small scene-local helper for character thoughts that follow a target, reuse the shared typewriter effect, and auto-hide without adding bridge state.
-- `src/runtime/potassiumSlip/potassiumSlipCommandAdapter.ts`
+- `src/features/potassiumSlip/runtime/potassiumSlipCommandAdapter.ts`
   - Phaser-backed Potassium command Adapter. It interprets session, combat, and boss commands, extracts combat facts from Phaser objects, applies recursive combat results, and receives grouped runtime/object/board/renderer ports for bridge, timer, leaderboard, Phaser mutation, and visual effects.
-- `src/runtime/potassiumSlip/potassiumSlipRenderer.ts`
+- `src/features/potassiumSlip/runtime/potassiumSlipRenderer.ts`
   - Phaser-backed Potassium renderer Module. It owns field/HUD/overlay drawing, enemy/projectile attachment visuals, and transient control/combat effects such as aim arrows, recall tethers, explosions, and death tweens.
-- `src/runtime/potassiumSlip/potassiumSlipProjectileControl.ts`
+- `src/features/potassiumSlip/runtime/potassiumSlipProjectileControl.ts`
   - Pure Potassium launch/recall control Module. It owns pointer control state, launch threshold/speed math, recall transitions, and idle drag decisions as commands for the scene to apply.
-- `src/runtime/potassiumSlip/potassiumSlipEnemyFactory.ts`
+- `src/features/potassiumSlip/runtime/potassiumSlipEnemyFactory.ts`
   - Potassium enemy setup Module. It owns enemy kind facts, lane placement, HP scaling, body profiles, shield/splitter/boss setup facts, and renderer attachment facts while the scene still creates Phaser sprites.
-- `src/runtime/potassiumSlip/potassiumSlipPhaserData.ts`
+- `src/features/potassiumSlip/runtime/potassiumSlipPhaserData.ts`
   - Typed Potassium Phaser data helper Module. It centralizes `getData` / `setData` keys and helpers for combat IDs, hit cooldowns, enemy health/status facts, projectile proc flags, trail timing, and renderer attachment metadata.
 
 ## Scene presentation and camera
@@ -88,7 +88,7 @@ Current split:
 - `src/shared`
   - Shared bridge state, UI primitives, hooks, and cross-boundary helpers. Import shared UI primitives through the `@shared/ui` alias.
 - `src/runtime`
-  - Active Phaser runtime code (scenes, texture builders, scene contracts, registry helpers).
+  - Shared Phaser runtime code, compatibility scene/module re-exports, texture builders, scene contracts, and registry helpers.
 - `src/contextPlugins`
   - Plugin/context definitions used by kernel scene orchestration.
 
@@ -98,7 +98,7 @@ Migration rule for new code:
 - Add feature-specific React overlays under `src/features`.
 - Add shared UI/hooks under `src/shared`.
 - Add new context/plugin modules under `src/contextPlugins`.
-- Touch `src/runtime` when integrating with existing scene runtime.
+- Add feature-specific Phaser runtime under `src/features/*/runtime` when there is a clear feature owner; touch `src/runtime` for shared scene runtime, compatibility exports, or registry integration.
 
 ## Pure Decision Modules
 

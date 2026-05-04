@@ -9,7 +9,7 @@
 - Scene helpers (keyboard pause, resume store, contracts)
 - Runtime registries and runtime-oriented types/config
 - Shared scene-specific rendering/build modules (`street/`, `textures/`, `text/`)
-- Focused Phaser runtime Modules such as Potassium command adaptation, renderer effects, typed Phaser data helpers, projectile control, and enemy setup decisions
+- Compatibility re-exports for feature-owned Phaser runtime Modules during migration
 
 ## Depends on
 
@@ -27,11 +27,6 @@
 
 - `OverworldScene.ts`
 - `HobbiesScene.ts` (compatibility re-export for `features/hobbies/runtime/HobbiesScene.ts`)
-- `potassiumSlip/PotassiumSlipScene.ts`
-- `potassiumSlip/potassiumSlipCommandAdapter.ts`
-- `potassiumSlip/potassiumSlipRenderer.ts`
-- `potassiumSlip/potassiumSlipPhaserData.ts`
-- `potassiumSlip/potassiumSlipProjectileControl.ts`
-- `potassiumSlip/potassiumSlipEnemyFactory.ts`
+- `potassiumSlip/*` (compatibility re-exports for `features/potassiumSlip/runtime/*`)
 - `miniGameRegistry.ts`
 - `sceneResumeStore.ts`
