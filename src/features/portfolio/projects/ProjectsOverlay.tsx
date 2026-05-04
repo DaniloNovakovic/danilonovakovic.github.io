@@ -1,5 +1,5 @@
 import React from 'react';
-import { PORTFOLIO_DATA } from '../../../config/portfolio';
+import { PORTFOLIO_DATA } from '../data';
 import { TEXTS } from '../../../config/content';
 import { Card, LinkButton, Badge } from '@shared/ui';
 

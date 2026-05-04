@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback, useLayoutEffect } from 'react';
 import { TEXTS } from '../../../../config/content';
+import { HOBBIES_TEXT } from '../../text';
 import { useOverlayKeys } from '../../../../shared/hooks/useOverlayKeys';
 import { Button, Panel } from '@shared/ui';
 
@@ -38,7 +39,7 @@ export default function DancingMini() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isWatching, setIsWatching] = useState(false);
   const [activeArrow, setActiveArrow] = useState<string | null>(null);
-  const [message, setMessage] = useState(TEXTS.miniGames.dancing.startMessage);
+  const [message, setMessage] = useState(HOBBIES_TEXT.miniGames.dancing.startMessage);
 
   const sequenceRef = useRef<string[]>([]);
   const playerSeqRef = useRef<string[]>([]);
@@ -69,7 +70,7 @@ export default function DancingMini() {
       clearTimers();
       let i = 0;
       setIsWatching(true);
-      setMessage(TEXTS.miniGames.dancing.watchMessage);
+      setMessage(HOBBIES_TEXT.miniGames.dancing.watchMessage);
       intervalRef.current = setInterval(() => {
         const idx = i;
         setActiveArrow(seq[idx] ?? null);
@@ -83,7 +84,7 @@ export default function DancingMini() {
           }
           const t2 = setTimeout(() => {
             setIsWatching(false);
-            setMessage(TEXTS.miniGames.dancing.turnMessage);
+            setMessage(HOBBIES_TEXT.miniGames.dancing.turnMessage);
           }, 500);
           timeoutsRef.current.push(t2);
         }
@@ -109,7 +110,7 @@ export default function DancingMini() {
     setPlayerSeq([]);
     setIsPlaying(true);
     setIsWatching(true);
-    setMessage(TEXTS.miniGames.dancing.watchMessage);
+    setMessage(HOBBIES_TEXT.miniGames.dancing.watchMessage);
     nextRound([]);
   };
 
@@ -132,7 +133,7 @@ export default function DancingMini() {
       setIsPlaying(false);
       setIsWatching(false);
     } else if (newPlayerSeq.length === seq.length) {
-      setMessage(TEXTS.miniGames.dancing.successMessage);
+      setMessage(HOBBIES_TEXT.miniGames.dancing.successMessage);
       const tNext = setTimeout(() => nextRound(seq), 1000);
       timeoutsRef.current.push(tNext);
     }
@@ -171,7 +172,7 @@ export default function DancingMini() {
         )}
       </Panel>
       <div className="mt-4 text-sm font-bold text-[#1a1a1a] opacity-60">
-        {TEXTS.miniGames.dancing.instruction}
+        {HOBBIES_TEXT.miniGames.dancing.instruction}
       </div>
     </div>
   );

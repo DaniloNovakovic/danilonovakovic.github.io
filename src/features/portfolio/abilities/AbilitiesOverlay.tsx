@@ -1,6 +1,6 @@
 import React from 'react';
-import { PORTFOLIO_DATA } from '../../../config/portfolio';
-import { TEXTS } from '../../../config/content';
+import { PORTFOLIO_DATA } from '../data';
+import { PORTFOLIO_TEXT } from '../text';
 import { Card, Tag } from '@shared/ui';
 
 const AbilitiesOverlay: React.FC = () => {
@@ -11,7 +11,7 @@ const AbilitiesOverlay: React.FC = () => {
       <div className="grid grid-cols-1 gap-6">
         {/* Skills */}
         <Card>
-          <h3 className="text-xl font-bold mb-4 border-b-2 border-gray-100 pb-2">{TEXTS.abilities.skills}</h3>
+          <h3 className="text-xl font-bold mb-4 border-b-2 border-gray-100 pb-2">{PORTFOLIO_TEXT.abilities.skills}</h3>
           <div className="flex flex-wrap gap-2">
             {abilities.skills.map((skill, index) => (
               <Tag key={index}>
@@ -23,7 +23,7 @@ const AbilitiesOverlay: React.FC = () => {
 
         {/* Tools */}
         <Card>
-          <h3 className="text-xl font-bold mb-4 border-b-2 border-gray-100 pb-2">{TEXTS.abilities.tools}</h3>
+          <h3 className="text-xl font-bold mb-4 border-b-2 border-gray-100 pb-2">{PORTFOLIO_TEXT.abilities.tools}</h3>
           <div className="flex flex-wrap gap-2">
             {abilities.tools.map((tool, index) => (
               <Tag key={index}>
@@ -35,7 +35,7 @@ const AbilitiesOverlay: React.FC = () => {
 
         {/* Languages */}
         <Card>
-          <h3 className="text-xl font-bold mb-4 border-b-2 border-gray-100 pb-2">{TEXTS.abilities.languages}</h3>
+          <h3 className="text-xl font-bold mb-4 border-b-2 border-gray-100 pb-2">{PORTFOLIO_TEXT.abilities.languages}</h3>
           <ul className="space-y-2">
             {abilities.languages.map((lang, index) => (
               <li key={index} className="text-base flex items-center gap-2">

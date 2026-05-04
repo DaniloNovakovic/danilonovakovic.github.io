@@ -1,3 +1,7 @@
+import { BASEMENT_TEXT } from '../features/basement/text';
+import { HOBBIES_TEXT } from '../features/hobbies/text';
+import { PORTFOLIO_TEXT } from '../features/portfolio/text';
+
 export const TEXTS = {
   common: {
     pressEsc: "[ Press ESC or click X to return ]",
@@ -19,71 +23,17 @@ export const TEXTS = {
     interact: "[E] INTERACT",
     exit: "EXIT",
   },
-  profile: {
-    title: "About Me",
-    name: "Name:",
-    location: "Location:",
-    about: "I specialize in frontend development, with a focus on creating consistent, accessible, and performant UIs. Over the years, I've led design system implementations, built core UI components, and worked closely with designers to bridge Figma and code. Outside of work, I practice martial arts and explore creativity through drawing, guitar, and dance.",
-    details: {
-      fullName: "Danilo Novakovic",
-      country: "Serbia",
-    }
-  },
-  abilities: {
-    title: "Abilities",
-    skills: "Skills",
-    tools: "Tools",
-    languages: "Languages",
-  },
-  projects: {
-    title: "Projects",
-  },
-  hobbies: {
-    title: "Hobbies",
-    games: "GAMES",
-    art: "ART",
-    music: "MUSIC",
-    fitness: "FITNESS",
-    dancing: "DANCE",
-  },
-  contact: {
-    title: "Contact",
-    quote: "“If I had asked people what they wanted, they would have said faster horses.”",
-    quoteAuthor: "— Henry Ford",
-  },
+  profile: PORTFOLIO_TEXT.profile,
+  abilities: PORTFOLIO_TEXT.abilities,
+  projects: PORTFOLIO_TEXT.projects,
+  hobbies: HOBBIES_TEXT.labels,
+  contact: PORTFOLIO_TEXT.contact,
   miniGames: {
-    coding: {
-      title: "Coding",
-      welcome: "Welcome to DaniloOS v1.0",
-      helpText: "Type 'help' to see available commands.",
-      helpResponse: "Available commands: whoami, skills, clear",
-      whoamiResponse: "Danilo Novakovic. Coding since 2016. Lover of logic and design.",
-      skillsResponse: "> Frontend & UI: React.js, TypeScript, Tailwind, Storybook, UI Components, Accessibility (WCAG), Redux\n> Backend & Data: Node.js, .NET, Express-style APIs, SQL, MongoDB\n> Additional Languages: C#, C, C++, Python, Matlab\n> Product Design & DX: Design Systems, Figma token mapping, theming, designer-dev handoff, Git, npm",
-      notFound: "Command not found: ",
-      instruction: "Hack the mainframe!",
-    },
-    muayThai: {
-      title: "Muay Thai & Fitness",
-      instruction: "Click the bag to strike!",
-      bam: "BAM!",
-    },
-    guitar: {
-      title: "Guitar",
-      instruction: "Hover or tap the strings to play!",
-    },
-    drawing: {
-      title: "Drawing",
-      instruction: "Try it! Doodle something.",
-      erase: "Erase All",
-    },
-    dancing: {
-      title: "Dancing",
-      instruction: "Repeat the dance moves!",
-      startMessage: "Press Start to Dance!",
-      watchMessage: "Watch the sequence...",
-      turnMessage: "Your turn!",
-      successMessage: "Nice Moves! Next Round...",
-    },
+    coding: BASEMENT_TEXT.miniGames.coding,
+    muayThai: HOBBIES_TEXT.miniGames.muayThai,
+    guitar: HOBBIES_TEXT.miniGames.guitar,
+    drawing: HOBBIES_TEXT.miniGames.drawing,
+    dancing: HOBBIES_TEXT.miniGames.dancing,
     arcade: {
       title: "Arcade",
       instruction: "Click the targets as fast as you can!",

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { TEXTS } from '../../../../config/content';
+import { HOBBIES_TEXT } from '../../text';
 import { useOverlayKeys } from '../../../../shared/hooks/useOverlayKeys';
 import { Panel } from '@shared/ui';
 
@@ -98,7 +98,7 @@ export default function GuitarStrings() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border-4 border-[#1a1a1a] opacity-20 pointer-events-none"></div>
       </Panel>
       <div className="mt-4 text-sm font-bold text-[#1a1a1a] opacity-60">
-        {TEXTS.miniGames.guitar.instruction}
+        {HOBBIES_TEXT.miniGames.guitar.instruction}
       </div>
     </div>
   );

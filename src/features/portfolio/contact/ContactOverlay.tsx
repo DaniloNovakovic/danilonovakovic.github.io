@@ -1,6 +1,6 @@
 import React from 'react';
-import { PORTFOLIO_DATA, type ContactIconId } from '../../../config/portfolio';
-import { TEXTS } from '../../../config/content';
+import { PORTFOLIO_DATA, type ContactIconId } from '../data';
+import { PORTFOLIO_TEXT } from '../text';
 import { Card, LinkButton } from '@shared/ui';
 
 const CONTACT_ICON_SRC: Record<ContactIconId, string> = {
@@ -47,8 +47,8 @@ const ContactOverlay: React.FC = () => {
       </div>
 
       <Card border="medium" shadow="none" className="mt-8 border-dashed bg-yellow-50 p-4 text-center">
-        <p className="text-lg font-bold">{TEXTS.contact.quote}</p>
-        <p className="mt-1 text-gray-600 text-sm">{TEXTS.contact.quoteAuthor}</p>
+        <p className="text-lg font-bold">{PORTFOLIO_TEXT.contact.quote}</p>
+        <p className="mt-1 text-gray-600 text-sm">{PORTFOLIO_TEXT.contact.quoteAuthor}</p>
       </Card>
     </div>
   );

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { TEXTS } from '../../../../config/content';
+import { HOBBIES_TEXT } from '../../text';
 import { Panel } from '@shared/ui';
 
 export default function MuayThaiMini() {
@@ -56,13 +57,13 @@ export default function MuayThaiMini() {
 
           {isHit && (
             <div className="absolute top-1/2 left-0 -translate-x-12 -translate-y-1/2 font-bold text-xl rotate-12">
-              {TEXTS.miniGames.muayThai.bam}
+              {HOBBIES_TEXT.miniGames.muayThai.bam}
             </div>
           )}
         </div>
       </Panel>
       <div className="mt-4 text-sm font-bold text-[#1a1a1a] opacity-60">
-        {TEXTS.miniGames.muayThai.instruction}
+        {HOBBIES_TEXT.miniGames.muayThai.instruction}
       </div>
     </div>
   );

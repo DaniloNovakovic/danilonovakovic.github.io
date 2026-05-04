@@ -1,5 +1,6 @@
 import React from 'react';
-import { PORTFOLIO_DATA } from '../../../config/portfolio';
+import { PORTFOLIO_DATA } from '../data';
+import { PORTFOLIO_TEXT } from '../text';
 import { TEXTS } from '../../../config/content';
 import { Card } from '@shared/ui';
 
@@ -9,17 +10,17 @@ const ProfileOverlay: React.FC = () => {
   return (
     <div className="text-[#1a1a1a]">
       <Card className="mb-4">
-        <h3 className="text-2xl font-bold mb-4">{TEXTS.profile.title}</h3>
+        <h3 className="text-2xl font-bold mb-4">{PORTFOLIO_TEXT.profile.title}</h3>
         <p className="text-lg leading-relaxed mb-6 italic">
           "{profile.about}"
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <span className="font-bold text-gray-600">{TEXTS.profile.name}</span>
+            <span className="font-bold text-gray-600">{PORTFOLIO_TEXT.profile.name}</span>
             <p className="text-xl">{profile.name}</p>
           </div>
           <div>
-            <span className="font-bold text-gray-600">{TEXTS.profile.location}</span>
+            <span className="font-bold text-gray-600">{PORTFOLIO_TEXT.profile.location}</span>
             <p className="text-xl">{profile.location}</p>
           </div>
         </div>

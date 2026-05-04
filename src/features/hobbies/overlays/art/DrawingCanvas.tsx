@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useLayoutEffect } from 'react';
 import { Trash2 } from 'lucide-react';
-import { TEXTS } from '../../../../config/content';
+import { HOBBIES_TEXT } from '../../text';
 import { useOverlayKeys } from '../../../../shared/hooks/useOverlayKeys';
 import { Button, Panel } from '@shared/ui';
 
@@ -207,7 +207,7 @@ export default function DrawingCanvas() {
       <div className="mt-4 flex justify-between w-full items-center">
         <div className="flex flex-col">
           <span className="text-sm font-bold text-[#1a1a1a] opacity-60">
-            {TEXTS.miniGames.drawing.instruction}
+            {HOBBIES_TEXT.miniGames.drawing.instruction}
           </span>
           <span className="text-[10px] font-mono opacity-40">
             [Arrows to move • Space to draw • Shift to speed up]
@@ -219,7 +219,7 @@ export default function DrawingCanvas() {
           className="shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] hover:translate-y-[2px] hover:shadow-none active:scale-95"
         >
           <Trash2 size={16} />
-          {TEXTS.miniGames.drawing.erase}
+          {HOBBIES_TEXT.miniGames.drawing.erase}
         </Button>
       </div>
     </div>
