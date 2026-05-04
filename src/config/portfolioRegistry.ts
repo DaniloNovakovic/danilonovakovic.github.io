@@ -1,11 +1,11 @@
 import type { MiniGamePlugin } from '../runtime/types';
+import { OVERWORLD_BUILDING_PLACEMENTS } from '../features/overworld/worldLayout';
 import { composePortfolioSections } from './portfolioCompose';
 import { FEATURE_PLUGIN_DEFINITIONS } from './featurePlugins';
 import { FEATURE_RUNTIME_BINDINGS } from './featureRuntimeBindings';
-import { OVERWORLD_BUILDING_PLACEMENTS } from './worldLayout';
 
 /**
- * Single composed catalog: world positions from `worldLayout`, bindings and copy from `featurePlugins`.
+ * Single composed catalog: overworld positions from feature layout, bindings and metadata from feature plugins.
  */
 export const PORTFOLIO_SECTIONS: MiniGamePlugin[] = composePortfolioSections(
   FEATURE_PLUGIN_DEFINITIONS,

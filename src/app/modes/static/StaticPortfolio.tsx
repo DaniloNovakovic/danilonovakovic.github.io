@@ -1,6 +1,6 @@
 import { Suspense, lazy, useMemo } from 'react';
 import { Gamepad2 } from 'lucide-react';
-import { PORTFOLIO_DATA, type ContactIconId } from '../../../config/portfolio';
+import { PORTFOLIO_DATA, type ContactIconId } from '../../../features/portfolio/data';
 import { TEXTS } from '../../../config/content';
 import { Button, Card, LinkButton, SketchSection } from '@shared/ui';
 

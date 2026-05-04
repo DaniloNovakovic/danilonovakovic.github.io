@@ -98,7 +98,7 @@ Migration rule for new code:
 - Add feature-specific React overlays under `src/features`.
 - Add shared UI/hooks under `src/shared`.
 - Add new context/plugin modules under `src/contextPlugins`.
-- Add feature-specific Phaser runtime under `src/features/*/runtime` when there is a clear feature owner; touch `src/runtime` for shared scene runtime, compatibility exports, or registry integration.
+- Add feature-specific Phaser runtime under `src/features/*/runtime` when there is a clear feature owner; touch `src/runtime` for shared scene runtime or registry integration.
 
 ## Pure Decision Modules
 

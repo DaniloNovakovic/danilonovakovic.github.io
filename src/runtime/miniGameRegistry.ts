@@ -6,9 +6,9 @@ import {
   isMiniGameId,
   type MiniGameId
 } from '../config/featureIds';
-import { HOBBIES_ROOM_INTERACTABLES } from '../config/hobbiesRoomLayout';
 import { PORTFOLIO_SECTIONS } from '../config/portfolioRegistry';
-import { OVERWORLD_BUILDING_PLACEMENTS } from '../config/worldLayout';
+import { HOBBIES_ROOM_INTERACTABLES } from '../features/hobbies/roomLayout';
+import { OVERWORLD_BUILDING_PLACEMENTS } from '../features/overworld/worldLayout';
 import { MiniGameType } from './types';
 import type {
   MiniGamePlugin,
