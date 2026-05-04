@@ -1,13 +1,14 @@
 # Runtime Folder
 
-`runtime/` is the Phaser runtime home.
+`runtime/` is the shared Phaser runtime home. Feature-owned Phaser scenes can live under
+`features/*/runtime` with compatibility re-exports here during migration.
 
 ## Owns
 
-- Scene classes (`OverworldScene`, `HobbiesScene`)
+- Shared scene classes (`OverworldScene`) and compatibility scene re-exports
 - Scene helpers (keyboard pause, resume store, contracts)
 - Runtime registries and runtime-oriented types/config
-- Scene-specific rendering/build modules (`street/`, `hobbies/`, `textures/`, `text/`)
+- Shared scene-specific rendering/build modules (`street/`, `textures/`, `text/`)
 - Focused Phaser runtime Modules such as Potassium command adaptation, renderer effects, typed Phaser data helpers, projectile control, and enemy setup decisions
 
 ## Depends on
@@ -25,7 +26,7 @@
 ## Common entrypoints
 
 - `OverworldScene.ts`
-- `HobbiesScene.ts`
+- `HobbiesScene.ts` (compatibility re-export for `features/hobbies/runtime/HobbiesScene.ts`)
 - `potassiumSlip/PotassiumSlipScene.ts`
 - `potassiumSlip/potassiumSlipCommandAdapter.ts`
 - `potassiumSlip/potassiumSlipRenderer.ts`

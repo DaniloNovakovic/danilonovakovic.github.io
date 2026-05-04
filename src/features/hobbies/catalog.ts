@@ -13,7 +13,7 @@ export const HOBBIES_FEATURE_CATALOG_ENTRIES: FeatureCatalogEntry[] = [
     runtime: {
       kind: 'phaserScene',
       sceneKey: PHASER_SCENE_KEYS.hobbies,
-      loadScene: () => import('../../runtime/HobbiesScene').then((m) => m.HobbiesScene)
+      loadScene: () => import('./runtime/HobbiesScene').then((m) => m.HobbiesScene)
     }
   },
   {
