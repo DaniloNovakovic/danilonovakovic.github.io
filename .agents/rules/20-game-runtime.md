@@ -1,6 +1,6 @@
 # Game Runtime Rules
 
-Applies to Phaser scenes, adapters, context plugins, and per-frame runtime code.
+Applies to Phaser scenes, adapters, scene contexts, and per-frame runtime code.
 
 ## Hard Rules
 

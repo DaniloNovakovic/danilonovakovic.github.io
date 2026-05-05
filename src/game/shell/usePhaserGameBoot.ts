@@ -1,7 +1,7 @@
 import { useEffect, type RefObject } from 'react';
 import * as Phaser from 'phaser';
 import { bridgeActions } from '@/game/bridge/store';
-import { createContextPlugins } from '@/game/contextPlugins/createContextPlugins';
+import { createSceneContexts } from '@/game/sceneContexts/createSceneContexts';
 import { OverworldScene } from '@/game/scenes/overworld/runtime';
 import { PHASER_SCENE_KEYS, isMiniGameId } from '@/game/registry/featureIds';
 import { getPhaserSceneBinding } from '@/game/registry/featureRuntimeBindings';
@@ -66,7 +66,7 @@ export function usePhaserGameBoot({
         bridgeActions.setSceneLoading(contextId && isMiniGameId(contextId) ? contextId : null);
       }
     });
-    const contextPlugins = createContextPlugins({
+    const sceneContexts = createSceneContexts({
       onInteract: stableOnInteract,
       onClose: stableOnClose,
       getIsPaused: () => bridgeRef.current.isPaused,
@@ -74,7 +74,7 @@ export function usePhaserGameBoot({
       getSceneStartResume: (sceneKey) => getSceneStartResume(sceneKey),
       loadPhaserScene: (id) => getPhaserSceneBinding(id)?.loadScene()
     });
-    contextPlugins.forEach((plugin) => sceneManager.registerContext(plugin));
+    sceneContexts.forEach((context) => sceneManager.registerContext(context));
     const kernel = new GameKernel(sceneManager);
     kernel.start();
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { MINI_GAME_IDS } from './featureIds';
-import { FEATURE_PLUGIN_DEFINITIONS } from './featurePlugins';
+import { FEATURE_DEFINITIONS } from './featureDefinitions';
 import {
   FEATURE_RUNTIME_BINDINGS,
   getRuntimeBinding
@@ -23,7 +23,7 @@ describe('feature runtime bindings', () => {
 
   it('keeps feature metadata and runtime bindings aligned', () => {
     expect(FEATURE_CATALOG_ENTRIES.map((entry) => entry.id).sort()).toEqual([...MINI_GAME_IDS].sort());
-    expect(FEATURE_PLUGIN_DEFINITIONS.map((def) => def.id).sort()).toEqual([...MINI_GAME_IDS].sort());
+    expect(FEATURE_DEFINITIONS.map((def) => def.id).sort()).toEqual([...MINI_GAME_IDS].sort());
     expect(Object.keys(FEATURE_RUNTIME_BINDINGS).sort()).toEqual([...MINI_GAME_IDS].sort());
   });
 

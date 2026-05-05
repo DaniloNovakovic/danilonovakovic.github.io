@@ -15,7 +15,7 @@
 
 ## Related guardrails
 
-- `contextPlugins/` must not import `runtime/` (enforced by ESLint; see `eslint.config.js`).
+- `sceneContexts/` and scene-owned `sceneContext.ts` files must not import `runtime/` (enforced by ESLint; see `eslint.config.js`).
 
 ## Does not own
 

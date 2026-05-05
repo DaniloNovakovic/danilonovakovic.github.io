@@ -4,7 +4,7 @@ import { EXPLORING_MODE, type RuntimeMode } from '../runtime/gameState';
 import { SceneManager, type SceneRuntimeAdapter } from './SceneManager';
 import { SceneTransitionCoordinator } from './SceneTransitionCoordinator';
 import { KernelEventBus, type KernelEvent } from './events';
-import type { ContextPluginDefinition } from './types';
+import type { SceneContextDefinition } from './types';
 
 interface FakeAdapter extends SceneRuntimeAdapter {
   registerScene: ReturnType<typeof vi.fn<(sceneKey: string, scene: unknown) => void>>;
@@ -53,8 +53,8 @@ function makeFakeAdapter(initialScenes: readonly string[] = ['MainScene']): Fake
 
 function context(
   id: string,
-  options: Partial<ContextPluginDefinition> = {}
-): ContextPluginDefinition {
+  options: Partial<SceneContextDefinition> = {}
+): SceneContextDefinition {
   return {
     id,
     sceneKey: id === 'main' ? 'MainScene' : id,

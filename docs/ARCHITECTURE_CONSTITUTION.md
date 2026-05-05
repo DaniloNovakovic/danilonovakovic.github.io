@@ -22,7 +22,7 @@ This project is built on three core pillars to ensure that adding future complex
 ### C. Micro-Kernel (Plugin) Architecture
 
 - **Kernel:** Handles global lifecycle, scene/context orchestration, and typed kernel events. Asset loading remains owned by the Phaser runtime and scene/plugin code unless a dedicated asset pipeline is introduced.
-- **Plugins (Contexts):** Each Phaser context is isolated behind a plugin definition. React-overlay buildings remain registry-driven overlays rather than kernel plugins unless they need Phaser scene lifecycle.
+- **Scene Contexts:** Each Phaser scene lifecycle entry is isolated behind a scene context definition. React-overlay buildings remain registry-driven overlays rather than scene contexts unless they need Phaser scene lifecycle.
   - *Street:* Side-scrolling world logic.
   - *Hobbies:* Interior Phaser scene logic.
   - *Future rhythm or terminal games:* Add only when their runtime needs justify a new context.
@@ -42,7 +42,7 @@ This project is built on three core pillars to ensure that adding future complex
   - `/src/game/core` (ECS Engine & Domain)
   - `/src/game/infra` (Renderer Adapters)
   - `/src/game/runtime` (Phaser runtime scenes and registries)
-  - `/src/game/contextPlugins` (Kernel context plugin definitions)
+  - `/src/game/sceneContexts` and `/src/game/scenes/*/sceneContext.ts` (Kernel scene context assembly and scene-owned lifecycle definitions)
 
 ---
 
@@ -54,7 +54,7 @@ This constitution is directional. For exact current implementation details, pref
 - **Kernel:** `src/game/kernel/GameKernel.ts`
 - **Scene manager:** `src/game/kernel/SceneManager.ts`
 - **Phaser adapter:** `src/game/infra/phaser/PhaserSceneAdapter.ts`
-- **Context plugin assembly:** `src/game/contextPlugins/createContextPlugins.ts`
+- **Scene context assembly:** `src/game/sceneContexts/createSceneContexts.ts`
 - **ECS foundation:** `src/game/core/ecs/`*
 - **Shared runtime Modules:** `src/game/runtime/player/SideViewPlayerRuntime.ts`, `src/game/runtime/interactions/InteriorInteractionRuntime.ts`, `src/game/runtime/sceneResumePolicy.ts`
 - **Phaser 4 render guardrails:** currently documented as runtime policy; introduce a shared render helper only when repeated policy code appears.

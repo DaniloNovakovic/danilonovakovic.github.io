@@ -14,7 +14,7 @@ Rules should describe stable seams, decision process, and things that would be e
 ## Rule Files
 
 - [`00-philosophy.md`](00-philosophy.md) — repo-wide engineering philosophy.
-- [`10-architecture.md`](10-architecture.md) — core/kernel, ECS, infra adapter, context plugin, and bridge seams.
+- [`10-architecture.md`](10-architecture.md) — core/kernel, ECS, infra adapter, scene context, and bridge seams.
 - [`20-game-runtime.md`](20-game-runtime.md) — Phaser runtime, scene lifecycle, pause/input, resume, and shared runtime modules.
 - [`30-react-overlays.md`](30-react-overlays.md) — React overlay rules and bridge-only UI/engine communication.
 

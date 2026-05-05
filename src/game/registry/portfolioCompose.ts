@@ -3,7 +3,7 @@ import type { MiniGamePlugin } from '@/game/runtime/types';
 import { MiniGameType } from '@/game/runtime/miniGameKind';
 import type { FeatureRuntimeBinding } from './featureRuntimeBindings';
 
-export interface FeaturePluginDefinition {
+export interface FeatureDefinition {
   id: MiniGameId;
   name: string;
   description: string;
@@ -20,7 +20,7 @@ export type OverworldBuildingTypeObject = {
  * Merges overworld X positions into feature definitions (single composition step).
  */
 export function composePortfolioSections(
-  defs: FeaturePluginDefinition[],
+  defs: FeatureDefinition[],
   placements: readonly OverworldBuildingTypeObject[],
   bindings: Readonly<Record<MiniGameId, FeatureRuntimeBinding>>
 ): MiniGamePlugin[] {

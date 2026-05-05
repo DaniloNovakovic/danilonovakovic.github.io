@@ -8,13 +8,13 @@ This document describes the current runtime architecture in `src/`. It is the de
 2. Shared state lives in `src/game/bridge/store.ts`.
 3. `Game` boots Phaser and wires the kernel runtime.
 4. `GameKernel` subscribes to bridge state and delegates transitions/pause to `SceneManager`.
-5. `SceneManager` manages context plugins via a Phaser adapter boundary.
+5. `SceneManager` manages scene contexts via a Phaser adapter boundary.
 
 ## Runtime subsystems
 
 - **Bridge state** - `src/game/bridge/store.ts` is the observable React/Phaser state boundary. It owns runtime mode projections, pause derivation, inventory/progress, scene hint text, and touch input one-shots. Volatile action semantics live in JSDoc next to `bridgeActions`.
 - **Kernel orchestration** - `src/game/kernel/GameKernel.ts` observes bridge state and delegates scene transitions, pause propagation, resume capture, and lifecycle notifications through `SceneManager`.
-- **Phaser adapter and context plugins** - `src/game/infra/phaser/PhaserSceneAdapter.ts` keeps Phaser-specific scene control behind an adapter. `src/game/contextPlugins/createContextPlugins.ts` assembles the known context plugins and injects runtime callbacks.
+- **Phaser adapter and scene contexts** - `src/game/infra/phaser/PhaserSceneAdapter.ts` keeps Phaser-specific scene control behind an adapter. `src/game/sceneContexts/createSceneContexts.ts` assembles known scene contexts and injects runtime callbacks.
 - **Registry and runtime lookup** - `src/game/registry/catalog.ts` composes game-owned catalog facts from scene and portfolio modules. `src/game/runtime/miniGameRegistry.ts` is the caller-facing lookup surface for overlay/scene resolution and parent returns.
 - **Shared scene runtime** - reusable Phaser scene machinery lives in `src/game/runtime`: side-view player lifecycle, side-view camera policy, scene presentation, scene resume policy, keyboard pause, interior interactions, and shared text helpers. Symbol-level behavior belongs in JSDoc near each runtime export.
 - **Scene-owned runtime modules** - scene folders own local layout, Phaser objects, catalog facts, text, and heavy mini-game modules. For example, Potassium keeps its command, renderer, projectile, enemy, session, combat, and data seams under its own scene runtime rather than expanding global docs with a file inventory.
@@ -31,8 +31,8 @@ When a scene changes presentation mode, `src/game/shell/Game.tsx` keeps the exis
 
 ## Runtime seams for new scenes
 
-- Game presentation facts and runtime bindings belong in scene-owned or game-portfolio catalog modules composed by `src/game/registry/catalog.ts`. Avoid local React overlay maps or ad hoc runtime-kind checks in React/Phaser callers.
-- Add Phaser context registration through `createContextPlugins`; keep `src/game/shell/Game.tsx` as the DOM host and put Phaser boot, bridge callbacks, resizing, and touch controls in focused shell hooks.
+- Game presentation facts and runtime bindings belong in scene-owned or game-portfolio catalog modules composed by `src/game/registry/catalog.ts`. Catalogs answer what playable feature exists and how it is resolved. Avoid local React overlay maps or ad hoc runtime-kind checks in React/Phaser callers.
+- Add Phaser scene lifecycle wiring through scene-owned `sceneContext.ts` files and compose them in `createSceneContexts`; keep `src/game/shell/Game.tsx` as the DOM host and put Phaser boot, bridge callbacks, resizing, and touch controls in focused shell hooks.
 - Import scene-owned public facts across folders through `src/game/scenes/*/index.ts` barrels. Import Phaser scene classes/builders through `src/game/scenes/*/runtime/index.ts` barrels so registry/catalog tests stay headless. Scene-internal runtime modules can keep local direct imports.
 - Use `sceneResumePolicy` for resume persistence and reset rules. The low-level resume store should not be imported directly by scenes or adapters.
 - Side-view player scenes should compose `SideViewPlayerRuntime` before creating colliders against `runtime.player`; pass its camera config when the scene should follow and clamp the player.
@@ -47,7 +47,7 @@ Current split:
 - `src/static`
   - Static, non-game portfolio surface.
 - `src/game`
-  - Playable mode shell, bridge, scene registry, Phaser scenes, kernel, shared runtime, context plugins, and engine adapters.
+  - Playable mode shell, bridge, scene registry, Phaser scenes, scene contexts, kernel, shared runtime, and engine adapters.
 - `src/shared`
   - Code reused by static and game: UI primitives, generic hooks, shared content, and shared config. Import shared UI primitives through the `@/shared/ui` alias.
 
@@ -57,7 +57,7 @@ Migration rule for new code:
 - Add static-only portfolio presentation under `src/static`.
 - Add playable-mode overlays and scenes under `src/game`.
 - Add code reused by static and game under `src/shared`.
-- Add new context/plugin modules under `src/game/contextPlugins`.
+- Add new Phaser scene lifecycle wiring in the owning scene folder as `sceneContext.ts`, then include it from `src/game/sceneContexts/createSceneContexts.ts`.
 - Add scene-specific Phaser runtime under `src/game/scenes/*/runtime`; touch `src/game/runtime` only for reusable game machinery.
 - Use the source-root alias for cross-folder imports: `@/*` resolves to `src/*`. Keep short local relative imports inside a module folder.
 - Import shared UI primitives through `@/shared/ui`.

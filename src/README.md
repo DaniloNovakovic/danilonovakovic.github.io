@@ -24,6 +24,7 @@ This folder is organized by surface ownership.
 ## Game Conventions
 
 - `game/scenes/*/catalog.ts` - Game registry facts for a scene or game-owned overlay group.
+- `game/scenes/*/sceneContext.ts` - Kernel lifecycle/start-data contract for a Phaser scene.
 - `game/scenes/*/text.ts` - Game-only display strings.
 - `game/scenes/*/index.ts` - Public scene barrel for cross-folder scene facts.
 - `game/scenes/*/runtime` - Scene-specific Phaser code and scene-local modules.
@@ -32,4 +33,9 @@ This folder is organized by surface ownership.
 - `game/portfolio` - Portfolio overlays as they appear inside the playable mode.
 - `game/registry` - IDs, runtime bindings, catalog composition, and registry-facing type objects.
 - `game/runtime` - Reusable game machinery shared by multiple scenes.
+
+## Catalog vs Scene Context
+
+- `catalog.ts` answers what playable feature exists and how it is resolved by the registry. It covers React overlays and Phaser scene feature entries.
+- `sceneContext.ts` answers how an actual Phaser scene enters, exits, lazy-loads, and receives start data from the kernel.
 - `shared/ui/<Component>/` - UI primitive component, stories, tests, and local `index.ts` grouped together.

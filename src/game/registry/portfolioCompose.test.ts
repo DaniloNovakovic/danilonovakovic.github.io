@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { BASEMENT_REACT_OVERLAY_IDS, HOBBY_REACT_OVERLAY_IDS } from './featureIds';
 import { OVERWORLD_BUILDING_PLACEMENTS } from '@/game/scenes/overworld';
-import { composePortfolioSections, type FeaturePluginDefinition } from './portfolioCompose';
+import { composePortfolioSections, type FeatureDefinition } from './portfolioCompose';
 import type { FeatureRuntimeBinding } from './featureRuntimeBindings';
 import type { MiniGameId } from './featureIds';
 import { MiniGameType } from '@/game/runtime/miniGameKind';
@@ -10,19 +10,19 @@ function NullOverlay() {
   return null;
 }
 
-function minimalDefs(): FeaturePluginDefinition[] {
-  const street: FeaturePluginDefinition[] = OVERWORLD_BUILDING_PLACEMENTS.map(({ id }) => ({
+function minimalDefs(): FeatureDefinition[] {
+  const street: FeatureDefinition[] = OVERWORLD_BUILDING_PLACEMENTS.map(({ id }) => ({
     id,
     name: id,
     description: id
   }));
-  const hobbyRooms: FeaturePluginDefinition[] = HOBBY_REACT_OVERLAY_IDS.map((id) => ({
+  const hobbyRooms: FeatureDefinition[] = HOBBY_REACT_OVERLAY_IDS.map((id) => ({
     id,
     name: id,
     description: id,
     overlayParentId: 'hobbies' as const
   }));
-  const basementOverlays: FeaturePluginDefinition[] = BASEMENT_REACT_OVERLAY_IDS.map((id) => ({
+  const basementOverlays: FeatureDefinition[] = BASEMENT_REACT_OVERLAY_IDS.map((id) => ({
     id,
     name: id,
     description: id,

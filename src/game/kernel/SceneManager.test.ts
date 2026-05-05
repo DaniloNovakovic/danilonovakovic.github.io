@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { SceneManager, type SceneRuntimeAdapter } from './SceneManager';
-import type { ContextPluginDefinition } from './types';
+import type { SceneContextDefinition } from './types';
 
 interface FakeAdapter extends SceneRuntimeAdapter {
   registerScene: ReturnType<typeof vi.fn<(sceneKey: string, scene: unknown) => void>>;
@@ -32,7 +32,7 @@ function makeFakeAdapter(initialScenes: readonly string[] = []): FakeAdapter {
   };
 }
 
-function context(id: string, sceneKey = id): ContextPluginDefinition {
+function context(id: string, sceneKey = id): SceneContextDefinition {
   return {
     id,
     sceneKey,

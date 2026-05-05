@@ -1,4 +1,4 @@
-import type { ContextId, ContextPluginDefinition, ResumeSnapshot } from './types';
+import type { ContextId, ResumeSnapshot, SceneContextDefinition } from './types';
 
 export interface SceneRuntimeAdapter {
   hasScene(sceneKey: string): boolean;
@@ -20,7 +20,7 @@ export interface SceneTransitionGuard {
 }
 
 export class SceneManager {
-  private readonly contexts = new Map<ContextId, ContextPluginDefinition>();
+  private readonly contexts = new Map<ContextId, SceneContextDefinition>();
   private readonly adapter: SceneRuntimeAdapter;
   private readonly options: SceneManagerOptions;
 
@@ -29,7 +29,7 @@ export class SceneManager {
     this.options = options;
   }
 
-  registerContext(def: ContextPluginDefinition): void {
+  registerContext(def: SceneContextDefinition): void {
     this.contexts.set(def.id, def);
     def.onRegister?.();
   }
@@ -109,7 +109,7 @@ export class SceneManager {
     this.contexts.forEach((context) => context.onDispose?.());
   }
 
-  private findContextBySceneKey(sceneKey: string): ContextPluginDefinition | undefined {
+  private findContextBySceneKey(sceneKey: string): SceneContextDefinition | undefined {
     for (const context of this.contexts.values()) {
       if (context.sceneKey === sceneKey) return context;
     }
@@ -121,7 +121,7 @@ export class SceneManager {
   }
 
   private async ensureSceneRegistered(
-    context: ContextPluginDefinition,
+    context: SceneContextDefinition,
     guard?: SceneTransitionGuard
   ): Promise<boolean> {
     if (this.adapter.hasScene(context.sceneKey)) return false;

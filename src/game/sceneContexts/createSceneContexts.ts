@@ -1,11 +1,11 @@
 import { PHASER_SCENE_KEYS, type MiniGameId } from '@/game/registry/featureIds';
-import type { ContextPluginDefinition, ResumeSnapshot } from '../kernel/types';
-import { createBasementPlugin } from './plugins/BasementPlugin';
-import { createHobbiesPlugin } from './plugins/HobbiesPlugin';
-import { createPotassiumPlatformerPlugin } from './plugins/PotassiumPlatformerPlugin';
-import { createStreetPlugin } from './plugins/StreetPlugin';
+import { createBasementSceneContext } from '@/game/scenes/basement/sceneContext';
+import { createHobbiesSceneContext } from '@/game/scenes/hobbies/sceneContext';
+import { createOverworldSceneContext } from '@/game/scenes/overworld/sceneContext';
+import { createPotassiumSlipSceneContext } from '@/game/scenes/potassiumSlip/sceneContext';
+import type { ResumeSnapshot, SceneContextDefinition } from '../kernel/types';
 
-export interface ContextPluginAssemblyDeps {
+export interface SceneContextAssemblyDeps {
   onInteract: (area: string) => void;
   onClose: () => void;
   getIsPaused: () => boolean;
@@ -15,17 +15,17 @@ export interface ContextPluginAssemblyDeps {
 }
 
 /**
- * Builds the complete set of scene context plugins known by the game shell.
+ * Builds the complete set of scene contexts known by the game shell.
  *
- * A context plugin is a small scene entry contract for `SceneManager`: it names
- * the context id, points to the Phaser scene key, optionally lazy-loads the
- * scene class, and composes the start data that scene needs. Keeping this here
- * lets `Game.tsx` boot Phaser once without knowing every scene's constructor
- * data, resume behavior, or close/interact callbacks.
+ * A scene context is a small kernel lifecycle contract for `SceneManager`: it
+ * names the context id, points to the Phaser scene key, optionally lazy-loads
+ * the scene class, and composes the start data that scene needs. Keeping
+ * assembly here lets `Game.tsx` boot Phaser once without knowing every scene's
+ * constructor data, resume behavior, or close/interact callbacks.
  */
-export function createContextPlugins(
-  deps: ContextPluginAssemblyDeps
-): ContextPluginDefinition[] {
+export function createSceneContexts(
+  deps: SceneContextAssemblyDeps
+): SceneContextDefinition[] {
   const loadScene = (id: MiniGameId) => () => {
     const scene = deps.loadPhaserScene(id);
     if (!scene) {
@@ -39,24 +39,24 @@ export function createContextPlugins(
   };
 
   return [
-    createStreetPlugin({
+    createOverworldSceneContext({
       onInteract: deps.onInteract,
       getIsPaused: deps.getIsPaused,
       getResumePosition: getPreparedResume(PHASER_SCENE_KEYS.main)
     }),
-    createHobbiesPlugin({
+    createHobbiesSceneContext({
       onClose: deps.onClose,
       onInteract: deps.onInteract,
       getResumePosition: getPreparedResume(PHASER_SCENE_KEYS.hobbies),
       loadScene: loadScene(PHASER_SCENE_KEYS.hobbies)
     }),
-    createBasementPlugin({
+    createBasementSceneContext({
       onClose: deps.onClose,
       onInteract: deps.onInteract,
       getResumePosition: getPreparedResume(PHASER_SCENE_KEYS.basement),
       loadScene: loadScene(PHASER_SCENE_KEYS.basement)
     }),
-    createPotassiumPlatformerPlugin({
+    createPotassiumSlipSceneContext({
       onClose: deps.onClose,
       getResumePosition: getPreparedResume(PHASER_SCENE_KEYS.potassium),
       loadScene: loadScene(PHASER_SCENE_KEYS.potassium)

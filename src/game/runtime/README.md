@@ -19,7 +19,7 @@ under `features/*/runtime`.
 
 - Kernel orchestration (`kernel`)
 - Adapter boundary implementations (`infra/`)
-- Context plugin definitions (`contextPlugins/`)
+- Scene context definitions (`sceneContexts/` and scene-owned `sceneContext.ts`)
 
 ## Common entrypoints
 
