@@ -37,7 +37,7 @@ export function ModalShell({
   const descriptionId = useId();
   const ariaDescriptionId = hasDescription ? descriptionId : undefined;
 
-  useEffect(() => {
+  useEffect(function registerModalInStack() {
     const currentModalId = modalId.current;
     modalStack.push(currentModalId);
     return () => {
@@ -46,7 +46,7 @@ export function ModalShell({
     };
   }, []);
 
-  useEffect(() => {
+  useEffect(function lockBodyScrollWhileModalIsOpen() {
     if (lockedModalCount === 0) {
       previousBodyOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
@@ -61,7 +61,7 @@ export function ModalShell({
     };
   }, []);
 
-  useEffect(() => {
+  useEffect(function captureAndRestoreModalOpenerFocus() {
     if (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement) {
       openerRef.current = document.activeElement;
     }
@@ -73,12 +73,12 @@ export function ModalShell({
     };
   }, []);
 
-  useEffect(() => {
+  useEffect(function focusInitialModalElement() {
     const first = dialogRef.current?.querySelector<HTMLElement>(FOCUSABLE);
     (first ?? dialogRef.current)?.focus();
   }, []);
 
-  useEffect(() => {
+  useEffect(function bindModalKeyboardControls() {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (modalStack.at(-1) !== modalId.current) return;
 

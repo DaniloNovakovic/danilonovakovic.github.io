@@ -17,7 +17,7 @@ export function useOverlayKeys(handlers: KeyHandlers): void {
     handlersRef.current = handlers;
   });
 
-  useEffect(() => {
+  useEffect(function bindOverlayKeyboardHandlers() {
     const onKeyDown = (e: KeyboardEvent) => {
       const handler = handlersRef.current[e.key];
       if (handler) {

@@ -1,4 +1,4 @@
-import type { ComponentType } from 'react';
+import type { ComponentType, LazyExoticComponent } from 'react';
 import type * as Phaser from 'phaser';
 import type { MiniGameId } from '@game/registry/featureIds';
 import type { MiniGameTypeValue } from './miniGameKind';
@@ -23,7 +23,7 @@ export interface ReactOverlayMiniGamePlugin extends MiniGamePluginBase {
   type: typeof MiniGameType.REACT_OVERLAY;
   /** When set, closing this React overlay returns here instead of the overworld. */
   overlayParentId?: MiniGameId;
-  component: ComponentType<MiniGameOverlayProps>;
+  component: ComponentType<MiniGameOverlayProps> | LazyExoticComponent<ComponentType<MiniGameOverlayProps>>;
   loadComponent: () => Promise<{ default: ComponentType<MiniGameOverlayProps> }>;
   sceneKey?: never;
   loadScene?: never;

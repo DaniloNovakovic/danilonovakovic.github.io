@@ -10,11 +10,11 @@ export default function CodingMini() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
+  useEffect(function scrollTerminalHistoryToBottom() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [history]);
 
-  useEffect(() => {
+  useEffect(function focusTerminalInputOnMount() {
     const raf = requestAnimationFrame(() => {
       inputRef.current?.focus();
     });

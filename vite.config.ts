@@ -8,7 +8,6 @@ export default defineConfig({
   plugins: [tailwindcss(), react()],
   resolve: {
     alias: {
-      '@app': fileURLToPath(new URL('./src/app', import.meta.url)),
       '@game': fileURLToPath(new URL('./src/game', import.meta.url)),
       '@static': fileURLToPath(new URL('./src/static', import.meta.url)),
       '@shared/ui': fileURLToPath(new URL('./src/shared/ui/index.ts', import.meta.url)),

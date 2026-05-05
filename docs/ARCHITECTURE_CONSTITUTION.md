@@ -35,7 +35,7 @@ This project is built on three core pillars to ensure that adding future complex
 - **Visual Architecture:** Modular "Paper-Doll" Peeps. Characters are layered textures (Head + Body + Hair + Accessory).
 - **Asset Naming:** `[entity]_[state]_[direction]_[frame].png` (e.g., `peep_walk_left_01.png`). Always lowercase.
 - **Folder Structure:** Modular by feature:
-  - `/src/app` (thin React mode shells)
+  - `/src/App.tsx` and `/src/modePicker` (thin React mode routing)
   - `/src/static` (static portfolio surface)
   - `/src/game` (playable mode shell, bridge, registry, scenes, runtime, kernel, and adapters)
   - `/src/shared` (shared UI, hooks, content, and config reused by static and game)

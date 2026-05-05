@@ -24,7 +24,9 @@ export default function GuitarStrings() {
     }
   }, []);
 
-  useEffect(() => () => clearActiveStringTimer(), [clearActiveStringTimer]);
+  useEffect(function clearActiveStringTimerOnUnmount() {
+    return () => clearActiveStringTimer();
+  }, [clearActiveStringTimer]);
 
   const playNote = useCallback((index: number, freq: number) => {
     clearActiveStringTimer();

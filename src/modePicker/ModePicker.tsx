@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 import { Gamepad2, BookOpen } from 'lucide-react';
 import { Badge, Button } from '@shared/ui';
+import { useIsTouchLike } from './useIsTouchLike';
 
 export type AppMode = 'interactive' | 'static';
 
@@ -8,25 +9,10 @@ interface ModePickerProps {
   onChoose: (mode: AppMode) => void;
 }
 
-function useIsTouchLike(): boolean {
-  const [isTouch, setIsTouch] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return;
-    const mql = window.matchMedia('(hover: none) and (pointer: coarse)');
-    const update = () => setIsTouch(mql.matches);
-    update();
-    mql.addEventListener?.('change', update);
-    return () => mql.removeEventListener?.('change', update);
-  }, []);
-
-  return isTouch;
-}
-
 interface ChoiceCardProps {
   title: string;
   blurb: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   recommended: boolean;
   cta: string;
   onClick: () => void;

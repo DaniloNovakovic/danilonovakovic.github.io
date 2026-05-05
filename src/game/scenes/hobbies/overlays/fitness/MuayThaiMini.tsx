@@ -15,7 +15,9 @@ export default function MuayThaiMini() {
     }
   }, []);
 
-  useEffect(() => () => clearHitTimer(), [clearHitTimer]);
+  useEffect(function clearHitTimerOnUnmount() {
+    return () => clearHitTimer();
+  }, [clearHitTimer]);
 
   const punch = () => {
     clearHitTimer();

@@ -63,7 +63,9 @@ export default function DancingMini() {
     timeoutsRef.current = [];
   }, []);
 
-  useEffect(() => () => clearTimers(), [clearTimers]);
+  useEffect(function clearDanceTimersOnUnmount() {
+    return () => clearTimers();
+  }, [clearTimers]);
 
   const playSequence = useCallback(
     (seq: string[]) => {

@@ -23,7 +23,7 @@ export default function DrawingCanvas() {
     isKeyboardDrawingRef.current = isKeyboardDrawing;
   }, [isKeyboardDrawing]);
 
-  useEffect(() => {
+  useEffect(function initializeCanvasDrawingContext() {
     const canvas = canvasRef.current;
     if (canvas) {
       const dpr = window.devicePixelRatio || 1;

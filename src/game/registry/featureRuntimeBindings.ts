@@ -1,4 +1,4 @@
-import type { ComponentType } from 'react';
+import type { ComponentType, LazyExoticComponent } from 'react';
 import type * as Phaser from 'phaser';
 import type { MiniGameId } from './featureIds';
 import type { MiniGameOverlayProps } from '@game/runtime/types';
@@ -6,7 +6,7 @@ import { FEATURE_CATALOG_ENTRIES } from '@game/registry/catalog';
 
 export interface ReactOverlayRuntimeBinding {
   kind: 'reactOverlay';
-  component: ComponentType<MiniGameOverlayProps>;
+  component: ComponentType<MiniGameOverlayProps> | LazyExoticComponent<ComponentType<MiniGameOverlayProps>>;
   loadComponent: () => Promise<{ default: ComponentType<MiniGameOverlayProps> }>;
 }
 

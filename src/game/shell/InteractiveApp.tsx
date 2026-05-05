@@ -12,7 +12,6 @@ import { MiniGameType } from '@game/runtime/types';
 import { TEXTS } from '@game/registry/content';
 import { isMiniGameId } from '@game/registry/featureIds';
 import { bridgeActions, useBridgeState } from '@game/bridge/store';
-import { OverlayCard } from './overlays/OverlayCard';
 import {
   getPhaserScenePresentationMode,
   type PhaserScenePresentationMode
@@ -181,7 +180,7 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
           onClose={closeOverlay}
         >
           {({ titleId, descriptionId }) => (
-            <OverlayCard
+            <DialogCard
               title={activeMiniGame.name}
               description={activeMiniGame.description}
               onClose={closeOverlay}
@@ -189,7 +188,7 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
               descriptionId={descriptionId}
             >
               <ActiveOverlayComponent />
-            </OverlayCard>
+            </DialogCard>
           )}
         </ModalShell>
       )}

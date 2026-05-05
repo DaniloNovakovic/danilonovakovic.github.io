@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { BASEMENT_REACT_OVERLAY_IDS, HOBBY_REACT_OVERLAY_IDS } from './featureIds';
-import { OVERWORLD_BUILDING_PLACEMENTS } from '@game/scenes/overworld/worldLayout';
+import { OVERWORLD_BUILDING_PLACEMENTS } from '@game/scenes/overworld';
 import { composePortfolioSections, type FeaturePluginDefinition } from './portfolioCompose';
 import type { FeatureRuntimeBinding } from './featureRuntimeBindings';
 import type { MiniGameId } from './featureIds';

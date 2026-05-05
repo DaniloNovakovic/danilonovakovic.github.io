@@ -21,7 +21,7 @@ export function useResizeObserver<T extends Element>(): UseResizeObserverResult<
     setElement(node);
   }, []);
 
-  useEffect(() => {
+  useEffect(function observeElementSize() {
     if (!element) return;
 
     const updateSize = (nextSize: ResizeObserverSize) => {

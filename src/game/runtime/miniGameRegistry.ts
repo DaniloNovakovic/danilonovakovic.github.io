@@ -7,8 +7,8 @@ import {
   type MiniGameId
 } from '@game/registry/featureIds';
 import { PORTFOLIO_SECTIONS } from '@game/registry/portfolioRegistry';
-import { HOBBIES_ROOM_INTERACTABLES } from '@game/scenes/hobbies/roomLayout';
-import { OVERWORLD_BUILDING_PLACEMENTS } from '@game/scenes/overworld/worldLayout';
+import { HOBBIES_ROOM_INTERACTABLES } from '@game/scenes/hobbies';
+import { OVERWORLD_BUILDING_PLACEMENTS } from '@game/scenes/overworld';
 import { MiniGameType } from './types';
 import type {
   MiniGamePlugin,

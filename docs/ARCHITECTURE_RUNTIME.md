@@ -72,7 +72,8 @@ When a scene changes presentation mode, `src/game/shell/Game.tsx` keeps the exis
 ## Runtime seams for new scenes
 
 - Game presentation facts and runtime bindings belong in scene-owned or game-portfolio catalog modules composed by `src/game/registry/catalog.ts`. Avoid local React overlay maps or ad hoc runtime-kind checks in React/Phaser callers.
-- Add Phaser context registration through `createContextPlugins`; keep `src/game/shell/Game.tsx` focused on Phaser boot, adapters, kernel wiring, resizing, and touch controls.
+- Add Phaser context registration through `createContextPlugins`; keep `src/game/shell/Game.tsx` as the DOM host and put Phaser boot, bridge callbacks, resizing, and touch controls in focused shell hooks.
+- Import scene-owned public facts across folders through `src/game/scenes/*/index.ts` barrels. Import Phaser scene classes/builders through `src/game/scenes/*/runtime/index.ts` barrels so registry/catalog tests stay headless. Scene-internal runtime modules can keep local direct imports.
 - Use `sceneResumePolicy` for resume persistence and reset rules. The low-level resume store should not be imported directly by scenes or adapters.
 - Side-view player scenes should compose `SideViewPlayerRuntime` before creating colliders against `runtime.player`; pass its camera config when the scene should follow and clamp the player.
 - Interior rooms should describe prop targets and effect commands, then let `InteriorInteractionRuntime` choose the active target and prompt/effect result. Phaser text mutation, bridge writes, and scene-local helpers stay in the scene.
@@ -81,8 +82,8 @@ When a scene changes presentation mode, `src/game/shell/Game.tsx` keeps the exis
 
 Current split:
 
-- `src/app`
-  - App entry and mode routing only.
+- `src/App.tsx` and `src/modePicker`
+  - App entry and mode routing UI only.
 - `src/static`
   - Static, non-game portfolio surface.
 - `src/game`
@@ -92,13 +93,13 @@ Current split:
 
 Migration rule for new code:
 
-- Keep `src/app` thin; add surface implementation under `src/static` or `src/game`.
-- Add static-only portfolio presentation under `src/static/portfolio`.
+- Keep `src/App.tsx` thin; add surface implementation under `src/static` or `src/game`.
+- Add static-only portfolio presentation under `src/static`.
 - Add playable-mode overlays and scenes under `src/game`.
 - Add code reused by static and game under `src/shared`.
 - Add new context/plugin modules under `src/game/contextPlugins`.
 - Add scene-specific Phaser runtime under `src/game/scenes/*/runtime`; touch `src/game/runtime` only for reusable game machinery.
-- Use ownership aliases for cross-folder imports: `@app/*`, `@static/*`, `@game/*`, and `@shared/*`. Keep short local relative imports inside a module folder.
+- Use ownership aliases for cross-folder imports: `@static/*`, `@game/*`, and `@shared/*`. Keep short local relative imports inside a module folder.
 - Import shared UI primitives through `@shared/ui`.
 
 ## Pure Decision Modules

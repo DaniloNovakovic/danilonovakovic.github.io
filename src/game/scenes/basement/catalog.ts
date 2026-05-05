@@ -1,6 +1,13 @@
+import { createElement, lazy } from 'react';
 import { PHASER_SCENE_KEYS } from '@game/registry/featureIds';
 import type { FeatureCatalogEntry } from '@game/registry/catalogTypes';
-import CodingMini from './overlays/developerConsole/CodingMini';
+import type { MiniGameOverlayProps } from '@game/runtime/types';
+
+const LazyCodingMini = lazy(() => import('./overlays/developerConsole/CodingMini'));
+
+function CodingMini(props: MiniGameOverlayProps) {
+  return createElement(LazyCodingMini, props);
+}
 
 export const BASEMENT_FEATURE_CATALOG_ENTRIES: FeatureCatalogEntry[] = [
   {
@@ -21,7 +28,7 @@ export const BASEMENT_FEATURE_CATALOG_ENTRIES: FeatureCatalogEntry[] = [
     runtime: {
       kind: 'reactOverlay',
       component: CodingMini,
-      loadComponent: async () => ({ default: CodingMini })
+      loadComponent: () => import('./overlays/developerConsole/CodingMini')
     }
   }
 ];

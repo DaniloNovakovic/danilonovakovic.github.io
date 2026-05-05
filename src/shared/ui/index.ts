@@ -3,6 +3,7 @@ export { Button } from './Button';
 export { Card, Panel } from './Card';
 export { DialogCard } from './DialogCard';
 export { LinkButton } from './LinkButton';
+export { LoadingFallback } from './LoadingFallback';
 export { ModalShell } from './ModalShell';
 export { SectionHeader } from './SectionHeader';
 export { SketchSection } from './SketchSection';

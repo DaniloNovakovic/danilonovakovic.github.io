@@ -15,7 +15,6 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "paths": {
-      "@app/*": ["./src/app/*"],
       "@game/*": ["./src/game/*"],
       "@static/*": ["./src/static/*"],
       "@shared/ui": ["./src/shared/ui/index.ts"],

@@ -329,7 +329,7 @@ export const bridgeActions = {
 export function useBridgeState(): BridgeState {
   const [snapshot, setSnapshot] = useState<BridgeState>(() => bridgeStore.getState());
 
-  useEffect(() => {
+  useEffect(function subscribeToBridgeStore() {
     return bridgeStore.subscribe(() => {
       setSnapshot(bridgeStore.getState());
     });

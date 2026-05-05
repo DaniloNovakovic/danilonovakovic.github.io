@@ -30,7 +30,7 @@ Legitimate-ish cases: true singletons of the environment (the browser `window`, 
 ## In JS/TS
 
 - `export const foo = new Foo()` at module scope is a module-level singleton. It's still a singleton, even if it doesn't use `getInstance()`. Use with care for the same reasons.
-- Prefer a factory at the composition root (e.g. `[src/app/App.tsx](../../src/app/App.tsx)` / `[src/game/shell/Game.tsx](../../src/game/shell/Game.tsx)`) that wires dependencies and hands them down.
+- Prefer a factory at the composition root (e.g. [`src/App.tsx`](../../src/App.tsx) / [`src/game/shell/Game.tsx`](../../src/game/shell/Game.tsx)) that wires dependencies and hands them down.
 
 ## In this repo
 

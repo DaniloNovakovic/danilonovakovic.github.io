@@ -14,8 +14,15 @@ This codebase uses a micro-kernel + bridge + ECS arrangement. The layering is lo
 ## Folder Ownership
 
 - `src/game/runtime` — shared Phaser runtime code and runtime Modules.
+- `src/game/scenes/*/index.ts` — public scene-owned fact barrels for cross-folder imports.
+- `src/game/scenes/*/runtime/index.ts` — public Phaser runtime barrels for cross-folder scene classes/builders.
+- `src/game/shell/use*.ts` — focused shell hooks for Phaser boot, scale refresh, bridge callbacks, and touch controls.
 - `src/game/contextPlugins` — context wrappers and assembly used by kernel scene orchestration.
 - `src/game/infra` — concrete adapters to engine/browser infrastructure.
 - `src/game/core` — engine-agnostic kernel, ECS, input, and player logic.
 
 See [`AGENTS.md`](../../AGENTS.md) and [`docs/ARCHITECTURE_RUNTIME.md`](../../docs/ARCHITECTURE_RUNTIME.md) for the current runtime split.
+
+## React Effects
+
+Write React effects with a named function expression: `useEffect(function syncThing() { ... }, deps)`. The name should describe the effect's reason to exist; if naming it feels awkward, extract a focused hook or split the effect.

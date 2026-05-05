@@ -1,9 +1,28 @@
+import { createElement, lazy } from 'react';
 import { PHASER_SCENE_KEYS } from '@game/registry/featureIds';
 import type { FeatureCatalogEntry } from '@game/registry/catalogTypes';
-import DrawingCanvas from './overlays/art/DrawingCanvas';
-import DancingMini from './overlays/dancing/DancingMini';
-import MuayThaiMini from './overlays/fitness/MuayThaiMini';
-import GuitarStrings from './overlays/music/GuitarStrings';
+import type { MiniGameOverlayProps } from '@game/runtime/types';
+
+const LazyDrawingCanvas = lazy(() => import('./overlays/art/DrawingCanvas'));
+const LazyDancingMini = lazy(() => import('./overlays/dancing/DancingMini'));
+const LazyMuayThaiMini = lazy(() => import('./overlays/fitness/MuayThaiMini'));
+const LazyGuitarStrings = lazy(() => import('./overlays/music/GuitarStrings'));
+
+function DrawingCanvas(props: MiniGameOverlayProps) {
+  return createElement(LazyDrawingCanvas, props);
+}
+
+function DancingMini(props: MiniGameOverlayProps) {
+  return createElement(LazyDancingMini, props);
+}
+
+function MuayThaiMini(props: MiniGameOverlayProps) {
+  return createElement(LazyMuayThaiMini, props);
+}
+
+function GuitarStrings(props: MiniGameOverlayProps) {
+  return createElement(LazyGuitarStrings, props);
+}
 
 export const HOBBIES_FEATURE_CATALOG_ENTRIES: FeatureCatalogEntry[] = [
   {
@@ -24,7 +43,7 @@ export const HOBBIES_FEATURE_CATALOG_ENTRIES: FeatureCatalogEntry[] = [
     runtime: {
       kind: 'reactOverlay',
       component: DrawingCanvas,
-      loadComponent: async () => ({ default: DrawingCanvas })
+      loadComponent: () => import('./overlays/art/DrawingCanvas')
     }
   },
   {
@@ -35,7 +54,7 @@ export const HOBBIES_FEATURE_CATALOG_ENTRIES: FeatureCatalogEntry[] = [
     runtime: {
       kind: 'reactOverlay',
       component: GuitarStrings,
-      loadComponent: async () => ({ default: GuitarStrings })
+      loadComponent: () => import('./overlays/music/GuitarStrings')
     }
   },
   {
@@ -46,7 +65,7 @@ export const HOBBIES_FEATURE_CATALOG_ENTRIES: FeatureCatalogEntry[] = [
     runtime: {
       kind: 'reactOverlay',
       component: MuayThaiMini,
-      loadComponent: async () => ({ default: MuayThaiMini })
+      loadComponent: () => import('./overlays/fitness/MuayThaiMini')
     }
   },
   {
@@ -57,7 +76,7 @@ export const HOBBIES_FEATURE_CATALOG_ENTRIES: FeatureCatalogEntry[] = [
     runtime: {
       kind: 'reactOverlay',
       component: DancingMini,
-      loadComponent: async () => ({ default: DancingMini })
+      loadComponent: () => import('./overlays/dancing/DancingMini')
     }
   }
 ];

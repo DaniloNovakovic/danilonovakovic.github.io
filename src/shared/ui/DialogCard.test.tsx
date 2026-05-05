@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { OverlayCard } from './OverlayCard';
-import { ModalShell } from '@shared/ui';
+import { DialogCard } from './DialogCard';
+import { ModalShell } from './ModalShell';
 
 afterEach(cleanup);
 
@@ -11,7 +11,7 @@ async function renderCard(onClose = vi.fn()) {
   render(
     <ModalShell title="Test Overlay" hasDescription onClose={onClose}>
       {({ titleId, descriptionId }) => (
-        <OverlayCard
+        <DialogCard
           title="Test Overlay"
           description="A description."
           onClose={onClose}
@@ -21,15 +21,14 @@ async function renderCard(onClose = vi.fn()) {
           <button>First child button</button>
           <input placeholder="text input" />
           <button>Last child button</button>
-        </OverlayCard>
+        </DialogCard>
       )}
     </ModalShell>
   );
-  // Let the initial-focus useEffect run
-  await new Promise((r) => setTimeout(r, 0));
+  await new Promise((resolve) => setTimeout(resolve, 0));
 }
 
-describe('OverlayCard', () => {
+describe('DialogCard inside ModalShell', () => {
   describe('aria attributes', () => {
     it('has role="dialog"', async () => {
       await renderCard();
@@ -53,10 +52,10 @@ describe('OverlayCard', () => {
   });
 
   describe('initial focus', () => {
-    it('moves focus to the first focusable element (close button)', async () => {
+    it('moves focus to the first focusable element', async () => {
       await renderCard();
-      const closeBtn = screen.getByRole('button', { name: /close/i });
-      expect(document.activeElement).toBe(closeBtn);
+      const closeButton = screen.getByRole('button', { name: /close/i });
+      expect(document.activeElement).toBe(closeButton);
     });
   });
 
@@ -76,21 +75,21 @@ describe('OverlayCard', () => {
         <>
           <ModalShell title="First Overlay" onClose={firstOnClose}>
             {({ titleId }) => (
-              <OverlayCard title="First Overlay" onClose={firstOnClose} titleId={titleId}>
+              <DialogCard title="First Overlay" onClose={firstOnClose} titleId={titleId}>
                 <button>First dialog button</button>
-              </OverlayCard>
+              </DialogCard>
             )}
           </ModalShell>
           <ModalShell title="Second Overlay" onClose={secondOnClose}>
             {({ titleId }) => (
-              <OverlayCard title="Second Overlay" onClose={secondOnClose} titleId={titleId}>
+              <DialogCard title="Second Overlay" onClose={secondOnClose} titleId={titleId}>
                 <button>Second dialog button</button>
-              </OverlayCard>
+              </DialogCard>
             )}
           </ModalShell>
         </>
       );
-      await new Promise((r) => setTimeout(r, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       await userEvent.keyboard('{Escape}');
 
@@ -102,21 +101,20 @@ describe('OverlayCard', () => {
   describe('focus trap', () => {
     it('wraps Tab from last element back to close button', async () => {
       await renderCard();
-      // Focus the last button manually
-      const lastBtn = screen.getByRole('button', { name: /last child button/i });
-      lastBtn.focus();
+      const lastButton = screen.getByRole('button', { name: /last child button/i });
+      lastButton.focus();
       await userEvent.tab();
-      const closeBtn = screen.getByRole('button', { name: /close/i });
-      expect(document.activeElement).toBe(closeBtn);
+      const closeButton = screen.getByRole('button', { name: /close/i });
+      expect(document.activeElement).toBe(closeButton);
     });
 
     it('wraps Shift+Tab from close button to last element', async () => {
       await renderCard();
-      const closeBtn = screen.getByRole('button', { name: /close/i });
-      closeBtn.focus();
+      const closeButton = screen.getByRole('button', { name: /close/i });
+      closeButton.focus();
       await userEvent.tab({ shift: true });
-      const lastBtn = screen.getByRole('button', { name: /last child button/i });
-      expect(document.activeElement).toBe(lastBtn);
+      const lastButton = screen.getByRole('button', { name: /last child button/i });
+      expect(document.activeElement).toBe(lastButton);
     });
   });
 });

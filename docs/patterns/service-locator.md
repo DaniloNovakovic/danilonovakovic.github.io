@@ -21,7 +21,7 @@ For local dependencies, prefer passing them in. Service Locator is a *last resor
 - It's still global state. Test hygiene: always reset the locator between tests.
 - Implicit coupling: a function that reaches into the locator hides its dependency from its signature. That's the cost you pay for the convenience.
 - Always have a **null-object** fallback. If audio isn't registered, a missing-service null-object keeps the game playable; throwing crashes everything.
-- Don't register implementations at random call sites. Do it once, at the composition root (here: [`src/app/App.tsx`](../../src/app/App.tsx) / [`src/game/shell/Game.tsx`](../../src/game/shell/Game.tsx)).
+- Don't register implementations at random call sites. Do it once, at the composition root (here: [`src/App.tsx`](../../src/App.tsx) / [`src/game/shell/Game.tsx`](../../src/game/shell/Game.tsx)).
 
 ## In JS/TS + Phaser
 
