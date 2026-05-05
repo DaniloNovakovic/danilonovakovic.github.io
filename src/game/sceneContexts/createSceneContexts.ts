@@ -14,6 +14,15 @@ export interface ContextPluginAssemblyDeps {
   loadPhaserScene: (id: MiniGameId) => Promise<unknown> | undefined;
 }
 
+/**
+ * Builds the complete set of scene context plugins known by the game shell.
+ *
+ * A context plugin is a small scene entry contract for `SceneManager`: it names
+ * the context id, points to the Phaser scene key, optionally lazy-loads the
+ * scene class, and composes the start data that scene needs. Keeping this here
+ * lets `Game.tsx` boot Phaser once without knowing every scene's constructor
+ * data, resume behavior, or close/interact callbacks.
+ */
 export function createContextPlugins(
   deps: ContextPluginAssemblyDeps
 ): ContextPluginDefinition[] {

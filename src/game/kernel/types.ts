@@ -7,6 +7,14 @@ export interface ResumeSnapshot {
   y: number;
 }
 
+/**
+ * Declarative lifecycle contract for a scene context known to `SceneManager`.
+ *
+ * Context plugins keep scene-specific wiring out of the shell: the manager can
+ * register/load/start/pause/exit contexts through this interface without
+ * knowing whether a context is the overworld, an interior room, or a standalone
+ * Phaser mini-game.
+ */
 export interface ContextPluginDefinition {
   id: ContextId;
   sceneKey: string;

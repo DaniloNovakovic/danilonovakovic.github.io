@@ -32,7 +32,7 @@ Hybrid Phaser + React application:
 
 ## Mobile / small screens
 
-- The canvas uses fixed Phaser logical dimensions from [`src/game/runtime/config.ts`](src/game/runtime/config.ts) with **Phaser `Scale.ENVELOP`** inside a responsive React shell. The shell chooses a scene presentation mode via [`src/game/runtime/phaserScenePresentation.ts`](src/game/runtime/phaserScenePresentation.ts): side-view scenes use `portrait-cover` on phones, while full-board arcade scenes such as Potassium use `full-board`.
+- The canvas uses fixed Phaser logical dimensions from [`src/game/runtime/config.ts`](src/game/runtime/config.ts) with **Phaser `Scale.ENVELOP`** inside a responsive React shell. The shell chooses a scene presentation mode via [`src/game/runtime/phaserScenePresentation.ts`](src/game/runtime/phaserScenePresentation.ts): side-view scenes use `portrait-cover` on phones, landscape board scenes use `full-board`, and portrait arcade scenes such as Potassium use `vertical-board`.
 - Presentation sizing for the interactive shell lives in [`src/game/shell/gameShellLayout.ts`](src/game/shell/gameShellLayout.ts). When presentation mode or container size changes, [`src/game/shell/Game.tsx`](src/game/shell/Game.tsx) refreshes Phaser scale after the DOM layout settles; do not recreate the Phaser game just to switch shell aspect ratios.
 - **Touch controls** (hidden `md+`): the touch surface in [`src/game/shell/Game.tsx`](src/game/shell/Game.tsx) writes through `bridgeActions`. Side-view scenes read bridge touch state and consume one-shot flags via `consumeTouchOneShots()`. Full-board Phaser scenes should opt out of the React gesture overlay when they need direct Phaser pointer input.
 
