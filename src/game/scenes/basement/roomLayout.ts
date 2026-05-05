@@ -1,4 +1,4 @@
-import type { BasementReactOverlayId } from '@game/registry/featureIds';
+import type { BasementReactOverlayId } from '@/game/registry/featureIds';
 
 export type BasementRoomInteractableId = 'exit' | 'computer' | 'glasses';
 

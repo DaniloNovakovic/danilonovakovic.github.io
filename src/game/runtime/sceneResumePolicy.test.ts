@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { PHASER_SCENE_KEYS } from '@game/registry/featureIds';
+import { PHASER_SCENE_KEYS } from '@/game/registry/featureIds';
 import {
   getSceneStartResume,
   prepareSceneStart,

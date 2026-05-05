@@ -1,4 +1,4 @@
-import { POTASSIUM_FEATURE_ID, type MiniGameId } from '@game/registry/featureIds';
+import { POTASSIUM_FEATURE_ID, type MiniGameId } from '@/game/registry/featureIds';
 
 const FULL_BOARD_PHASER_SCENE_IDS = new Set<MiniGameId>([POTASSIUM_FEATURE_ID]);
 

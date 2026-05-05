@@ -1,6 +1,6 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
-import { sketchFocusVisible } from './tokens';
-import { cn } from './utils';
+import { sketchFocusVisible } from '../tokens';
+import { cn } from '../utils';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'floating' | 'icon' | 'control';
 type ButtonSize = 'sm' | 'md' | 'lg';

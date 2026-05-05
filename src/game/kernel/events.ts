@@ -1,4 +1,4 @@
-import type { MiniGameId } from '@game/registry/featureIds';
+import type { MiniGameId } from '@/game/registry/featureIds';
 import type { ContextId } from './types';
 
 export type KernelEvent =

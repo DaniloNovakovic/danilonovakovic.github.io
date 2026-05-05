@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { MiniGameId } from '@game/registry/featureIds';
+import type { MiniGameId } from '@/game/registry/featureIds';
 import { EXPLORING_MODE, type RuntimeMode } from '../runtime/gameState';
 import { SceneManager, type SceneRuntimeAdapter } from './SceneManager';
 import { SceneTransitionCoordinator } from './SceneTransitionCoordinator';

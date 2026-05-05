@@ -1,5 +1,5 @@
-import { PHASER_SCENE_KEYS } from '@game/registry/featureIds';
-import type { FeatureCatalogEntry } from '@game/registry/catalogTypes';
+import { PHASER_SCENE_KEYS } from '@/game/registry/featureIds';
+import type { FeatureCatalogEntry } from '@/game/registry/catalogTypes';
 
 export const POTASSIUM_SLIP_FEATURE_CATALOG_ENTRIES: FeatureCatalogEntry[] = [
   {

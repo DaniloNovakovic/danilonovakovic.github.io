@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { HOBBY_REACT_OVERLAY_IDS, MINI_GAME_IDS } from '@game/registry/featureIds';
+import { HOBBY_REACT_OVERLAY_IDS, MINI_GAME_IDS } from '@/game/registry/featureIds';
 import { HOBBY_STATION_LAYOUT, HOBBIES_ROOM_INTERACTABLES } from './roomLayout';
 
 describe('hobbies room layout', () => {

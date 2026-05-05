@@ -1,4 +1,4 @@
-import { PHASER_SCENE_KEYS } from '@game/registry/featureIds';
+import { PHASER_SCENE_KEYS } from '@/game/registry/featureIds';
 import type { RuntimeMode } from '../runtime/gameState';
 import { SceneManager, type SceneTransitionGuard } from './SceneManager';
 import { KernelEventBus } from './events';

@@ -1,6 +1,6 @@
 import type { ComponentType, LazyExoticComponent } from 'react';
 import type * as Phaser from 'phaser';
-import type { MiniGameId } from '@game/registry/featureIds';
+import type { MiniGameId } from '@/game/registry/featureIds';
 import type { MiniGameTypeValue } from './miniGameKind';
 import { MiniGameType } from './miniGameKind';
 

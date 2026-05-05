@@ -49,7 +49,7 @@ Current split:
 - `src/game`
   - Playable mode shell, bridge, scene registry, Phaser scenes, kernel, shared runtime, context plugins, and engine adapters.
 - `src/shared`
-  - Code reused by static and game: UI primitives, generic hooks, shared content, and shared config. Import shared UI primitives through the `@shared/ui` alias.
+  - Code reused by static and game: UI primitives, generic hooks, shared content, and shared config. Import shared UI primitives through the `@/shared/ui` alias.
 
 Migration rule for new code:
 
@@ -59,8 +59,8 @@ Migration rule for new code:
 - Add code reused by static and game under `src/shared`.
 - Add new context/plugin modules under `src/game/contextPlugins`.
 - Add scene-specific Phaser runtime under `src/game/scenes/*/runtime`; touch `src/game/runtime` only for reusable game machinery.
-- Use ownership aliases for cross-folder imports: `@static/*`, `@game/*`, and `@shared/*`. Keep short local relative imports inside a module folder.
-- Import shared UI primitives through `@shared/ui`.
+- Use the source-root alias for cross-folder imports: `@/*` resolves to `src/*`. Keep short local relative imports inside a module folder.
+- Import shared UI primitives through `@/shared/ui`.
 
 ## Pure decision modules
 

@@ -1,5 +1,5 @@
-import { PORTFOLIO_DATA } from '@shared/content/portfolio/data';
-import { LinkButton } from '@shared/ui';
+import { PORTFOLIO_DATA } from '@/shared/content/portfolio/data';
+import { LinkButton } from '@/shared/ui';
 import { CONTACT_ICON_SRC } from './contactIcons';
 
 export function HeroContactLinks() {

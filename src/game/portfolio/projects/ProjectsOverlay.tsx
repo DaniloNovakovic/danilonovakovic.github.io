@@ -1,7 +1,7 @@
 import React from 'react';
-import { PORTFOLIO_DATA } from '@shared/content/portfolio/data';
-import { TEXTS } from '@game/registry/content';
-import { Card, LinkButton, Badge } from '@shared/ui';
+import { PORTFOLIO_DATA } from '@/shared/content/portfolio/data';
+import { TEXTS } from '@/game/registry/content';
+import { Card, LinkButton, Badge } from '@/shared/ui';
 
 const ProjectsOverlay: React.FC = () => {
   const { projects } = PORTFOLIO_DATA;

@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Gamepad2 } from 'lucide-react';
-import { PORTFOLIO_DATA } from '@shared/content/portfolio/data';
-import { Button } from '@shared/ui';
+import { PORTFOLIO_DATA } from '@/shared/content/portfolio/data';
+import { Button } from '@/shared/ui';
 import { HeroContactLinks } from './HeroContactLinks';
 import { AbilitiesSection } from './sections/AbilitiesSection';
 import { AboutSection } from './sections/AboutSection';

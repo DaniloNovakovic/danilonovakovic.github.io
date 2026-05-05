@@ -1,7 +1,7 @@
 import { createElement, lazy } from 'react';
-import { PHASER_SCENE_KEYS } from '@game/registry/featureIds';
-import type { FeatureCatalogEntry } from '@game/registry/catalogTypes';
-import type { MiniGameOverlayProps } from '@game/runtime/types';
+import { PHASER_SCENE_KEYS } from '@/game/registry/featureIds';
+import type { FeatureCatalogEntry } from '@/game/registry/catalogTypes';
+import type { MiniGameOverlayProps } from '@/game/runtime/types';
 
 const LazyCodingMini = lazy(() => import('./overlays/developerConsole/CodingMini'));
 

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { HOBBIES_TEXT } from '../../text';
-import { useOverlayKeys } from '@shared/hooks/useOverlayKeys';
-import { Panel } from '@shared/ui';
+import { useOverlayKeys } from '@/shared/hooks/useOverlayKeys';
+import { Panel } from '@/shared/ui';
 
 const NOTES = [
   { note: 'E4', freq: 329.63, key: '1' },

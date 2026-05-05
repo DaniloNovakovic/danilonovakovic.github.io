@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { SketchSection } from './SketchSection';
-import { Card } from './Card';
+import { SketchSection } from '../SketchSection';
+import { Card } from '../Card';
 
 const meta = {
   title: 'UI/SectionHeader',

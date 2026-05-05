@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Gamepad2, BookOpen } from 'lucide-react';
-import { Badge, Button } from '@shared/ui';
+import { Badge, Button } from '@/shared/ui';
 import { useIsTouchLike } from './useIsTouchLike';
 
 export type AppMode = 'interactive' | 'static';

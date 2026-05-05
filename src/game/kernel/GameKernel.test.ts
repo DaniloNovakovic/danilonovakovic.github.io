@@ -4,8 +4,8 @@ import { GameKernel } from './GameKernel';
 import { KernelEventBus, type KernelEvent } from './events';
 import type { SceneRuntimeAdapter } from './SceneManager';
 import { SceneManager } from './SceneManager';
-import { bridgeActions, bridgeStore } from '@game/bridge/store';
-import { PHASER_SCENE_KEYS } from '@game/registry/featureIds';
+import { bridgeActions, bridgeStore } from '@/game/bridge/store';
+import { PHASER_SCENE_KEYS } from '@/game/registry/featureIds';
 
 interface FakeAdapter extends SceneRuntimeAdapter {
   registerScene: ReturnType<typeof vi.fn<(k: string, scene: unknown) => void>>;

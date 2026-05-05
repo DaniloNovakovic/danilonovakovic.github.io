@@ -1,15 +1,15 @@
 import { useEffect, type RefObject } from 'react';
 import * as Phaser from 'phaser';
-import { bridgeActions } from '@game/bridge/store';
-import { createContextPlugins } from '@game/contextPlugins/createContextPlugins';
-import { OverworldScene } from '@game/scenes/overworld/runtime';
-import { PHASER_SCENE_KEYS, isMiniGameId } from '@game/registry/featureIds';
-import { getPhaserSceneBinding } from '@game/registry/featureRuntimeBindings';
-import { PhaserSceneAdapter } from '@game/infra/phaser/PhaserSceneAdapter';
-import { GameKernel } from '@game/kernel/GameKernel';
-import { SceneManager } from '@game/kernel/SceneManager';
-import { getGameConfig } from '@game/runtime/config';
-import { getSceneStartResume, prepareSceneStart } from '@game/runtime/sceneResumePolicy';
+import { bridgeActions } from '@/game/bridge/store';
+import { createContextPlugins } from '@/game/contextPlugins/createContextPlugins';
+import { OverworldScene } from '@/game/scenes/overworld/runtime';
+import { PHASER_SCENE_KEYS, isMiniGameId } from '@/game/registry/featureIds';
+import { getPhaserSceneBinding } from '@/game/registry/featureRuntimeBindings';
+import { PhaserSceneAdapter } from '@/game/infra/phaser/PhaserSceneAdapter';
+import { GameKernel } from '@/game/kernel/GameKernel';
+import { SceneManager } from '@/game/kernel/SceneManager';
+import { getGameConfig } from '@/game/runtime/config';
+import { getSceneStartResume, prepareSceneStart } from '@/game/runtime/sceneResumePolicy';
 
 interface UsePhaserGameBootOptions {
   bridgeRef: RefObject<{

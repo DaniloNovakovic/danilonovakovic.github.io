@@ -1,6 +1,6 @@
-import { PORTFOLIO_DATA } from '@shared/content/portfolio/data';
-import { PORTFOLIO_TEXT } from '@shared/content/portfolio/text';
-import { Card, LinkButton, SketchSection } from '@shared/ui';
+import { PORTFOLIO_DATA } from '@/shared/content/portfolio/data';
+import { PORTFOLIO_TEXT } from '@/shared/content/portfolio/text';
+import { Card, LinkButton, SketchSection } from '@/shared/ui';
 import { CONTACT_ICON_SRC } from '../contactIcons';
 
 export function ContactSection() {

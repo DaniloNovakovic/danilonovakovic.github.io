@@ -6,9 +6,9 @@ import {
   getRuntimeBinding
 } from './featureRuntimeBindings';
 import { PHASER_SCENE_MINIGAME_IDS } from './miniGameCategories';
-import { MiniGameType } from '@game/runtime/miniGameKind';
+import { MiniGameType } from '@/game/runtime/miniGameKind';
 import { PORTFOLIO_SECTIONS } from './portfolioRegistry';
-import { FEATURE_CATALOG_ENTRIES } from '@game/registry/catalog';
+import { FEATURE_CATALOG_ENTRIES } from '@/game/registry/catalog';
 
 describe('feature runtime bindings', () => {
   it('defines exactly one runtime binding for every feature id', () => {

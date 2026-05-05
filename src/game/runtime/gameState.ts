@@ -1,5 +1,5 @@
-import type { MiniGameId } from '@game/registry/featureIds';
-import { isPhaserSceneMiniGameId } from '@game/registry/miniGameCategories';
+import type { MiniGameId } from '@/game/registry/featureIds';
+import { isPhaserSceneMiniGameId } from '@/game/registry/miniGameCategories';
 
 export const GameState = {
   EXPLORING: 'EXPLORING',

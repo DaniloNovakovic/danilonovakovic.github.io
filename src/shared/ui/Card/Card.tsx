@@ -1,6 +1,6 @@
 import type { HTMLAttributes } from 'react';
-import { sketchBorders, sketchFocusVisible, sketchShadows } from './tokens';
-import { cn } from './utils';
+import { sketchBorders, sketchFocusVisible, sketchShadows } from '../tokens';
+import { cn } from '../utils';
 
 type CardPadding = 'none' | 'sm' | 'md' | 'lg';
 type CardShadow = 'none' | 'sm' | 'md' | 'lg' | 'xl';

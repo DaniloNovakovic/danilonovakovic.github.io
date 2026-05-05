@@ -4,7 +4,7 @@ import { useGameBridgeCallbacks } from './useGameBridgeCallbacks';
 import { useGameTouchControls } from './useGameTouchControls';
 import { usePhaserGameBoot } from './usePhaserGameBoot';
 import { usePhaserScaleRefresh } from './usePhaserScaleRefresh';
-import type { PhaserScenePresentationMode } from '@game/runtime/phaserScenePresentation';
+import type { PhaserScenePresentationMode } from '@/game/runtime/phaserScenePresentation';
 
 interface GameProps {
   onInteract: (area: string) => void;

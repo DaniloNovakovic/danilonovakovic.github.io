@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { AppMode } from '../../modePicker/ModePicker';
+import type { AppMode } from '../../modePicker';
 
 export type RouteState = 'picker' | AppMode;
 

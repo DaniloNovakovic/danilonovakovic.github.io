@@ -1,24 +1,26 @@
 # Shared Folder
 
-`shared/` hosts cross-boundary primitives used by both React UI and Phaser runtime.
+`shared/` hosts code reused by both the static portfolio and playable game surfaces.
 
 ## Owns
 
-- Bridge state store and actions (`bridge/store.ts`)
-- `useBridgeState()` for React shells that should mirror bridge truth (see `InteractiveApp`)
-- Bridge tests and synchronization contracts
+- UI primitives under `ui/`, grouped as `Component/Component.tsx`, optional tests/stories, and `Component/index.ts`.
+- Generic hooks under `hooks/`.
+- Shared authored content under `content/`.
+- Shared config under `config/`.
 
 ## Depends on
 
-- Stable domain/config enums and IDs
+- React and generic browser APIs where needed.
 
 ## Does not own
 
-- Scene transition orchestration (kernel)
-- Direct scene object manipulation
-- React presentation components
+- Game bridge state, scene transition orchestration, Phaser runtime code, or game registry facts.
+- Static-only portfolio presentation.
 
 ## Common entrypoints
 
-- `bridge/store.ts`
-- `bridge/store.test.ts`
+- `ui/index.ts`
+- `hooks/*`
+- `content/*`
+- `config/*`

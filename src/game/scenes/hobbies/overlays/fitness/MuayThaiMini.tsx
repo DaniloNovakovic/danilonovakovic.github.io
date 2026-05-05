@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { TEXTS } from '@game/registry/content';
+import { TEXTS } from '@/game/registry/content';
 import { HOBBIES_TEXT } from '../../text';
-import { Panel } from '@shared/ui';
+import { Panel } from '@/shared/ui';
 
 export default function MuayThaiMini() {
   const [hits, setHits] = useState(0);

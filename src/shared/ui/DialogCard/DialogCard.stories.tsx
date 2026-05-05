@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { DialogCard } from './DialogCard';
-import { Button } from './Button';
-import { Badge } from './Badge';
-import { ModalShell } from './ModalShell';
+import { Button } from '../Button';
+import { Badge } from '../Badge';
+import { ModalShell } from '../ModalShell';
 
 const meta = {
   title: 'UI/DialogCard',

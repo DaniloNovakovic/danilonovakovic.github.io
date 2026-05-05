@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type * as Phaser from 'phaser';
 import { createInputCommandFrame } from '../../core/input/commands';
-import type { TouchBridgeState } from '@game/bridge/store';
+import type { TouchBridgeState } from '@/game/bridge/store';
 
 vi.mock('phaser', () => ({
   Input: {

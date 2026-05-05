@@ -17,8 +17,9 @@ This folder is organized by surface ownership.
 - If both static and game need it, put it in `shared/`.
 - Keep `App.tsx` thin: route between picker, static, and game; do not put surface implementation there.
 - Keep app routing state in `shared/hooks/useReadMode.ts`; keep generic loading UI in `shared/ui/LoadingFallback.tsx`.
-- Import shared UI primitives with `@shared/ui`.
-- Use ownership aliases for cross-folder imports: `@static/*`, `@game/*`, and `@shared/*`.
+- Import shared UI primitives with `@/shared/ui`.
+- Use the source-root alias for cross-folder imports: `@/*` resolves to `src/*`.
+- Folder `index.ts` files mark public boundaries; cross-folder imports should prefer those barrels when they exist.
 
 ## Game Conventions
 
@@ -31,3 +32,4 @@ This folder is organized by surface ownership.
 - `game/portfolio` - Portfolio overlays as they appear inside the playable mode.
 - `game/registry` - IDs, runtime bindings, catalog composition, and registry-facing type objects.
 - `game/runtime` - Reusable game machinery shared by multiple scenes.
+- `shared/ui/<Component>/` - UI primitive component, stories, tests, and local `index.ts` grouped together.

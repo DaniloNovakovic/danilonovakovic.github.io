@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DialogCard } from './DialogCard';
-import { ModalShell } from './ModalShell';
+import { ModalShell } from '../ModalShell';
 
 afterEach(cleanup);
 

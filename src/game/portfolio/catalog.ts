@@ -1,4 +1,4 @@
-import type { FeatureCatalogEntry } from '@game/registry/catalogTypes';
+import type { FeatureCatalogEntry } from '@/game/registry/catalogTypes';
 import ProfileOverlay from './profile/ProfileOverlay';
 import ExperienceOverlay from './experience/ExperienceOverlay';
 import ProjectsOverlay from './projects/ProjectsOverlay';

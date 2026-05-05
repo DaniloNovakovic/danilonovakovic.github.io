@@ -4,10 +4,10 @@
  * and player logic to PlayerController.
  */
 import * as Phaser from 'phaser';
-import { BASEMENT_FEATURE_ID, HOBBIES_FEATURE_ID, POTASSIUM_FEATURE_ID } from '@game/registry/featureIds';
-import { PORTFOLIO_SECTIONS } from '@game/registry/portfolioRegistry';
-import { TextureGenerator } from '@game/runtime/textures/TextureGenerator';
-import { TEXTS } from '@game/registry/content';
+import { BASEMENT_FEATURE_ID, HOBBIES_FEATURE_ID, POTASSIUM_FEATURE_ID } from '@/game/registry/featureIds';
+import { PORTFOLIO_SECTIONS } from '@/game/registry/portfolioRegistry';
+import { TextureGenerator } from '@/game/runtime/textures/TextureGenerator';
+import { TEXTS } from '@/game/registry/content';
 import {
   GAME_DESIGN_HEIGHT,
   OVERWORLD_INTERACT_DISTANCE_X,
@@ -21,13 +21,13 @@ import {
   OVERWORLD_SPRINT_SPEED,
   OVERWORLD_WALK_SPEED,
   OVERWORLD_WIDTH
-} from '@game/runtime/config';
+} from '@/game/runtime/config';
 import {
   bridgeActions,
   isItemEquipped,
   isSecretDiscovered,
   type SecretDiscoveryId
-} from '@game/bridge/store';
+} from '@/game/bridge/store';
 import {
   buildStreetEnvironment,
   buildStreetForeground,
@@ -35,13 +35,13 @@ import {
 } from './street/StreetEnvironment';
 import { buildStreetBuildings, type StreetBuildingLayers } from './street/StreetBuildings';
 import { updateStreetParticles } from './street/StreetParticles';
-import { createUiText } from '@game/runtime/text/createUiText';
-import { startTypewriterEffect, type TypewriterEffectHandle } from '@game/runtime/text/typewriterEffect';
+import { createUiText } from '@/game/runtime/text/createUiText';
+import { startTypewriterEffect, type TypewriterEffectHandle } from '@/game/runtime/text/typewriterEffect';
 import {
   type OverworldBuildingSlot,
   type OverworldSecretSlot
-} from '@game/core/ecs/systems/overworldInteractSystems';
-import { DistanceHazeVision } from '@game/runtime/vision/DistanceHazeVision';
+} from '@/game/core/ecs/systems/overworldInteractSystems';
+import { DistanceHazeVision } from '@/game/runtime/vision/DistanceHazeVision';
 import {
   createOverworldInteractionState,
   decideOverworldInteraction,
@@ -51,7 +51,7 @@ import {
 import {
   createSideViewPlayerRuntime,
   type SideViewPlayerRuntime
-} from '@game/runtime/player/SideViewPlayerRuntime';
+} from '@/game/runtime/player/SideViewPlayerRuntime';
 
 const BASEMENT_HOLE = {
   x: 230,

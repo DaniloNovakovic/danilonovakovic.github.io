@@ -1,7 +1,7 @@
 import React from 'react';
-import { PORTFOLIO_DATA, type ContactIconId } from '@shared/content/portfolio/data';
-import { PORTFOLIO_TEXT } from '@shared/content/portfolio/text';
-import { Card, LinkButton } from '@shared/ui';
+import { PORTFOLIO_DATA, type ContactIconId } from '@/shared/content/portfolio/data';
+import { PORTFOLIO_TEXT } from '@/shared/content/portfolio/text';
+import { Card, LinkButton } from '@/shared/ui';
 
 const CONTACT_ICON_SRC: Record<ContactIconId, string> = {
   linkedin: '/icons/contact/linkedin.png',

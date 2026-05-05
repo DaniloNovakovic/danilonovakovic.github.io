@@ -1,4 +1,4 @@
-import { PHASER_SCENE_KEYS, type MiniGameId } from '@game/registry/featureIds';
+import { PHASER_SCENE_KEYS, type MiniGameId } from '@/game/registry/featureIds';
 import type { ContextPluginDefinition, ResumeSnapshot } from '../kernel/types';
 import { createBasementPlugin } from './plugins/BasementPlugin';
 import { createHobbiesPlugin } from './plugins/HobbiesPlugin';

@@ -1,7 +1,7 @@
 import type { InputCommandFrame } from '../../core/input/commands';
 import { commandFrameToPlayerStepInput } from '../../core/input/commands';
 import type { PlayerController, PlayerStepResult } from '../../core/player/PlayerController';
-import { bridgeActions, getTouchState } from '@game/bridge/store';
+import { bridgeActions, getTouchState } from '@/game/bridge/store';
 import { readSceneInputCommands, type SceneInputKeys } from './readSceneInputCommands';
 
 interface ReadPlayerSceneStepOptions extends SceneInputKeys {

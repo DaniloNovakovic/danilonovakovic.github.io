@@ -21,6 +21,8 @@ This codebase uses a micro-kernel + bridge + ECS arrangement. The layering is lo
 - `src/game/infra` — concrete adapters to engine/browser infrastructure.
 - `src/game/core` — engine-agnostic kernel, ECS, input, and player logic.
 
+Folder `index.ts` files are public boundaries. Cross-folder imports should prefer a folder barrel when it exists, and implementation helpers should stay unexported unless they are intentionally public. UI primitives under `src/shared/ui` are colocated in component folders.
+
 See [`AGENTS.md`](../../AGENTS.md) and [`docs/ARCHITECTURE_RUNTIME.md`](../../docs/ARCHITECTURE_RUNTIME.md) for the current runtime split.
 
 ## React Effects

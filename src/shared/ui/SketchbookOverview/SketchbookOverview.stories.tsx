@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { BookOpen, Gamepad2 } from 'lucide-react';
-import { Badge } from './Badge';
-import { Button } from './Button';
-import { Card, Panel } from './Card';
-import { LinkButton } from './LinkButton';
-import { SketchSection } from './SketchSection';
+import { Badge } from '../Badge';
+import { Button } from '../Button';
+import { Card, Panel } from '../Card';
+import { LinkButton } from '../LinkButton';
+import { SketchSection } from '../SketchSection';
 
 const meta = {
   title: 'UI/Sketchbook Overview'

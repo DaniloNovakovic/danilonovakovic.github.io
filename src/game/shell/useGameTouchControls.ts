@@ -1,5 +1,5 @@
-import { bridgeActions } from '@game/bridge/store';
-import { useTouchGestures } from '@shared/hooks/useTouchGestures';
+import { bridgeActions } from '@/game/bridge/store';
+import { useTouchGestures } from '@/shared/hooks/useTouchGestures';
 
 interface UseGameTouchControlsOptions {
   isPaused: boolean;

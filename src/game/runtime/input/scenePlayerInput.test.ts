@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type * as Phaser from 'phaser';
 import { createInputCommandFrame } from '../../core/input/commands';
 import type { PlayerController } from '../../core/player/PlayerController';
-import { bridgeActions } from '@game/bridge/store';
+import { bridgeActions } from '@/game/bridge/store';
 
 vi.mock('phaser', () => ({
   Input: {

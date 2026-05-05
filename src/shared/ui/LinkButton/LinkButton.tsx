@@ -1,6 +1,6 @@
 import type { AnchorHTMLAttributes, ReactNode } from 'react';
-import { sketchFocusVisible } from './tokens';
-import { cn } from './utils';
+import { sketchFocusVisible } from '../tokens';
+import { cn } from '../utils';
 
 type LinkButtonVariant = 'secondary' | 'primary' | 'quiet';
 

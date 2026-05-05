@@ -3,8 +3,8 @@
  * Extracted from OverworldScene so the scene is a thin orchestrator.
  */
 import * as Phaser from 'phaser';
-import { PORTFOLIO_SECTIONS } from '@game/registry/portfolioRegistry';
-import { createUiText } from '@game/runtime/text/createUiText';
+import { PORTFOLIO_SECTIONS } from '@/game/registry/portfolioRegistry';
+import { createUiText } from '@/game/runtime/text/createUiText';
 
 const BUILDING_Y = 395;
 const LABEL_Y = 150;

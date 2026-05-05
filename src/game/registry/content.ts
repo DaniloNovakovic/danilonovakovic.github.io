@@ -1,7 +1,7 @@
-import { TEXTS as SHARED_TEXTS } from '@shared/content/content';
-import { PORTFOLIO_TEXT } from '@shared/content/portfolio/text';
-import { BASEMENT_TEXT } from '@game/scenes/basement';
-import { HOBBIES_TEXT } from '@game/scenes/hobbies';
+import { TEXTS as SHARED_TEXTS } from '@/shared/content/content';
+import { PORTFOLIO_TEXT } from '@/shared/content/portfolio/text';
+import { BASEMENT_TEXT } from '@/game/scenes/basement';
+import { HOBBIES_TEXT } from '@/game/scenes/hobbies';
 
 export const TEXTS = {
   ...SHARED_TEXTS,

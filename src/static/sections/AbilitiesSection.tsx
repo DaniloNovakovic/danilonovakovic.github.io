@@ -1,6 +1,6 @@
-import { PORTFOLIO_DATA } from '@shared/content/portfolio/data';
-import { PORTFOLIO_TEXT } from '@shared/content/portfolio/text';
-import { Card, SketchSection, Tag } from '@shared/ui';
+import { PORTFOLIO_DATA } from '@/shared/content/portfolio/data';
+import { PORTFOLIO_TEXT } from '@/shared/content/portfolio/text';
+import { Card, SketchSection, Tag } from '@/shared/ui';
 
 export function AbilitiesSection() {
   const { abilities } = PORTFOLIO_DATA;

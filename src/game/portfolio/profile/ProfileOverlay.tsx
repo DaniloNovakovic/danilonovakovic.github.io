@@ -1,8 +1,8 @@
 import React from 'react';
-import { PORTFOLIO_DATA } from '@shared/content/portfolio/data';
-import { PORTFOLIO_TEXT } from '@shared/content/portfolio/text';
-import { TEXTS } from '@game/registry/content';
-import { Card } from '@shared/ui';
+import { PORTFOLIO_DATA } from '@/shared/content/portfolio/data';
+import { PORTFOLIO_TEXT } from '@/shared/content/portfolio/text';
+import { TEXTS } from '@/game/registry/content';
+import { Card } from '@/shared/ui';
 
 const ProfileOverlay: React.FC = () => {
   const { profile } = PORTFOLIO_DATA;

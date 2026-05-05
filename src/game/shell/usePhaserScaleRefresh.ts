@@ -1,7 +1,7 @@
 import { useEffect, type RefObject } from 'react';
 import type * as Phaser from 'phaser';
-import { bridgeActions } from '@game/bridge/store';
-import type { PhaserScenePresentationMode } from '@game/runtime/phaserScenePresentation';
+import { bridgeActions } from '@/game/bridge/store';
+import type { PhaserScenePresentationMode } from '@/game/runtime/phaserScenePresentation';
 
 interface UsePhaserScaleRefreshOptions {
   activeMiniGameId: string | null;

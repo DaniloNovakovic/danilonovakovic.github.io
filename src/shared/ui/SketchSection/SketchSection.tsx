@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { SectionHeader } from './SectionHeader';
+import { SectionHeader } from '../SectionHeader';
 
 interface SketchSectionProps {
   id: string;

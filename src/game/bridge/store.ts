@@ -8,8 +8,8 @@ import {
   modesEqual,
   type GameStateValue,
   type RuntimeMode
-} from '@game/runtime/gameState';
-import type { MiniGameId } from '@game/registry/featureIds';
+} from '@/game/runtime/gameState';
+import type { MiniGameId } from '@/game/registry/featureIds';
 
 export interface TouchBridgeState {
   left: number;

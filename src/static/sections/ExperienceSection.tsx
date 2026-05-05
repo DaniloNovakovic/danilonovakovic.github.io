@@ -1,5 +1,5 @@
-import { PORTFOLIO_DATA } from '@shared/content/portfolio/data';
-import { Badge, Card, LinkButton, SketchSection } from '@shared/ui';
+import { PORTFOLIO_DATA } from '@/shared/content/portfolio/data';
+import { Badge, Card, LinkButton, SketchSection } from '@/shared/ui';
 
 export function ExperienceSection() {
   const { experiences } = PORTFOLIO_DATA;

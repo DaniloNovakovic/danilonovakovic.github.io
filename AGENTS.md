@@ -50,9 +50,11 @@ Hybrid Phaser + React application:
 
 Current ownership follows the surface rule: code that only exists for the playable mode belongs in [`src/game`](src/game), code that only exists for the static portfolio belongs in [`src/static`](src/static), and code reused by both surfaces belongs in [`src/shared`](src/shared). [`src/App.tsx`](src/App.tsx) is only the app entry and mode router.
 
-Use ownership aliases for cross-folder imports: `@static/*`, `@game/*`, and `@shared/*`. Keep short local relative imports within a module folder, and import shared UI primitives through `@shared/ui`.
+Use the source-root alias for cross-folder imports: `@/static/*`, `@/game/*`, and `@/shared/*` all resolve under `src/`. Keep short local relative imports within a module folder, and import shared UI primitives through `@/shared/ui`.
 
 Game conventions: scene registry facts live in `src/game/scenes/*/catalog.ts`, game-only scene text lives in `src/game/scenes/*/text.ts`, shared portfolio records/text live in `src/shared/content/portfolio`, and reusable game machinery lives in `src/game/runtime`. Cross-folder imports of scene-owned public facts should go through `src/game/scenes/*/index.ts` barrels; Phaser scene classes and room builders should go through `src/game/scenes/*/runtime/index.ts` barrels so registry tests do not import Phaser. Keep scene-internal imports local.
+
+Folder `index.ts` files are public boundaries: export only what other folders should use. Keep component internals, shell hooks, and implementation helpers unexported unless they are intentionally part of that folder's public API. UI primitives under `src/shared/ui` are colocated as `Component/Component.tsx`, optional tests/stories, and `Component/index.ts`.
 
 React effects should use a named function expression, e.g. `useEffect(function syncThing() { ... }, deps)`, unless the effect is being removed or extracted into a focused hook. The name should describe the effect's intent so oversized or misplaced effects are easier to spot during review.
 

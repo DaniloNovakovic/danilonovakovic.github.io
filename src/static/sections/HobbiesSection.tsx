@@ -1,5 +1,5 @@
-import { PORTFOLIO_DATA } from '@shared/content/portfolio/data';
-import { Card, SketchSection } from '@shared/ui';
+import { PORTFOLIO_DATA } from '@/shared/content/portfolio/data';
+import { Card, SketchSection } from '@/shared/ui';
 
 export function HobbiesSection() {
   const { hobbies } = PORTFOLIO_DATA;

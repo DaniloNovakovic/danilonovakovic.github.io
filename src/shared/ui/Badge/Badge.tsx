@@ -1,6 +1,6 @@
 import type { HTMLAttributes } from 'react';
-import { sketchFocusVisible } from './tokens';
-import { cn } from './utils';
+import { sketchFocusVisible } from '../tokens';
+import { cn } from '../utils';
 
 type BadgeTone = 'neutral' | 'paper' | 'highlight' | 'ink';
 type BadgeShape = 'square' | 'pill';

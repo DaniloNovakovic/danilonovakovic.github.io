@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect, useCallback, useLayoutEffect } from 'react';
-import { TEXTS } from '@game/registry/content';
+import { TEXTS } from '@/game/registry/content';
 import { HOBBIES_TEXT } from '../../text';
-import { useOverlayKeys } from '@shared/hooks/useOverlayKeys';
-import { Button, Panel } from '@shared/ui';
+import { useOverlayKeys } from '@/shared/hooks/useOverlayKeys';
+import { Button, Panel } from '@/shared/ui';
 
 const ARROWS = ['UP', 'RIGHT', 'DOWN', 'LEFT'] as const;
 

@@ -1,8 +1,8 @@
-import { BASEMENT_FEATURE_CATALOG_ENTRIES } from '@game/scenes/basement';
+import { BASEMENT_FEATURE_CATALOG_ENTRIES } from '@/game/scenes/basement';
 import type { FeatureCatalogEntry } from './catalogTypes';
-import { HOBBIES_FEATURE_CATALOG_ENTRIES } from '@game/scenes/hobbies';
-import { PORTFOLIO_FEATURE_CATALOG_ENTRIES } from '@game/portfolio/catalog';
-import { POTASSIUM_SLIP_FEATURE_CATALOG_ENTRIES } from '@game/scenes/potassiumSlip';
+import { HOBBIES_FEATURE_CATALOG_ENTRIES } from '@/game/scenes/hobbies';
+import { PORTFOLIO_FEATURE_CATALOG_ENTRIES } from '@/game/portfolio/catalog';
+import { POTASSIUM_SLIP_FEATURE_CATALOG_ENTRIES } from '@/game/scenes/potassiumSlip';
 
 export type { FeatureCatalogEntry } from './catalogTypes';
 

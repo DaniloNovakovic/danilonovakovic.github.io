@@ -1,5 +1,5 @@
 import { modesEqual } from '../runtime/gameState';
-import { bridgeStore, type BridgeState } from '@game/bridge/store';
+import { bridgeStore, type BridgeState } from '@/game/bridge/store';
 import { SceneManager } from './SceneManager';
 import { SceneTransitionCoordinator } from './SceneTransitionCoordinator';
 import { KernelEventBus } from './events';

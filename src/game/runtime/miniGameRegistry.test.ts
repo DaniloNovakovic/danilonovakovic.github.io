@@ -3,7 +3,7 @@ import {
   BASEMENT_REACT_OVERLAY_IDS,
   HOBBY_REACT_OVERLAY_IDS,
   MINI_GAME_IDS
-} from '@game/registry/featureIds';
+} from '@/game/registry/featureIds';
 import { MiniGameType } from './miniGameKind';
 import {
   getAllMiniGames,

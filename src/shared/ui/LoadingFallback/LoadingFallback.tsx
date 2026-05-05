@@ -1,5 +1,5 @@
-import { TEXTS } from '@shared/content/content';
-import { Card } from '@shared/ui';
+import { TEXTS } from '@/shared/content/content';
+import { Card } from '../Card';
 
 export function LoadingFallback() {
   return (

@@ -1,5 +1,5 @@
 import type Phaser from 'phaser';
-import type { MiniGameId } from '@game/registry/featureIds';
+import type { MiniGameId } from '@/game/registry/featureIds';
 
 type Graphics = Phaser.GameObjects.Graphics;
 

@@ -7,7 +7,7 @@ import {
   isItemOwned,
   isSecretDiscovered
 } from './store';
-import { GameState } from '@game/runtime/gameState';
+import { GameState } from '@/game/runtime/gameState';
 
 function resetBridge() {
   bridgeActions.closeActiveOverlay();

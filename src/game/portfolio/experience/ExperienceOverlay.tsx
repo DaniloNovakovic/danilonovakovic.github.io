@@ -1,7 +1,7 @@
 import React from 'react';
-import { PORTFOLIO_DATA } from '@shared/content/portfolio/data';
-import { TEXTS } from '@game/registry/content';
-import { Badge, Card, LinkButton } from '@shared/ui';
+import { PORTFOLIO_DATA } from '@/shared/content/portfolio/data';
+import { TEXTS } from '@/game/registry/content';
+import { Badge, Card, LinkButton } from '@/shared/ui';
 
 const ExperienceOverlay: React.FC = () => {
   const { experiences } = PORTFOLIO_DATA;

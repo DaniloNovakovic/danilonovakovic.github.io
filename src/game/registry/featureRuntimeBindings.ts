@@ -1,8 +1,8 @@
 import type { ComponentType, LazyExoticComponent } from 'react';
 import type * as Phaser from 'phaser';
 import type { MiniGameId } from './featureIds';
-import type { MiniGameOverlayProps } from '@game/runtime/types';
-import { FEATURE_CATALOG_ENTRIES } from '@game/registry/catalog';
+import type { MiniGameOverlayProps } from '@/game/runtime/types';
+import { FEATURE_CATALOG_ENTRIES } from '@/game/registry/catalog';
 
 export interface ReactOverlayRuntimeBinding {
   kind: 'reactOverlay';

@@ -1,10 +1,10 @@
 import { Suspense, lazy } from 'react';
-import ModePicker from './modePicker/ModePicker';
-import { useReadMode } from '@shared/hooks/useReadMode';
-import { LoadingFallback } from '@shared/ui';
-import StaticPortfolio from '@static/StaticPortfolio';
+import { ModePicker } from './modePicker';
+import { useReadMode } from '@/shared/hooks/useReadMode';
+import { LoadingFallback } from '@/shared/ui';
+import { StaticPortfolio } from '@/static';
 
-const InteractiveApp = lazy(() => import('@game/shell/InteractiveApp'));
+const InteractiveApp = lazy(() => import('@/game/shell'));
 
 function App() {
   const { route, setMode } = useReadMode();

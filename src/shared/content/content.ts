@@ -1,4 +1,4 @@
-import { PORTFOLIO_TEXT } from '@shared/content/portfolio/text';
+import { PORTFOLIO_TEXT } from '@/shared/content/portfolio/text';
 
 export const TEXTS = {
   common: {
