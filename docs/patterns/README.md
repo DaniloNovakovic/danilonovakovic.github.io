@@ -65,19 +65,19 @@ Status values used across all chapter files:
 
 A quick scan of which patterns are live, planned, or intentionally parked for this repo's current scale (React + Phaser 4 portfolio with a 3000px street and a small number of entities).
 
-- **Command** — `in use` (small). `src/game/core/input/commands.ts` models scene input as intent frames before player movement consumes it.
+- **Command** — `in use` (small). Scene input is normalized into intent frames before player movement consumes it.
 - **Flyweight** — `not yet read`. Low-priority reference; possible fit for tilemaps / repeated sprites later.
-- **Observer** — `in use`. [`src/game/bridge/store.ts`](../../src/game/bridge/store.ts) subscriptions + `useBridgeState`.
+- **Observer** — `in use`. The bridge store subscription API and React hook are the canonical example.
 - **Prototype** — `not yet read`. Low-priority reference.
 - **Singleton** — `skip-for-now`. Nystrom warns against it; the bridge store covers the legitimate use case as a scoped service locator.
-- **State** — `in use` (small). `src/game/runtime/gameState.ts` models runtime modes as a discriminated union used by the bridge and kernel.
+- **State** — `in use` (small). Runtime modes are modeled as a discriminated union used by the bridge and kernel.
 - **Double Buffer** — `deferred`. Phaser handles frame presentation; revisit only if we author composite dynamic textures that get read mid-mutation.
 - **Game Loop** — `in use` (via Phaser). We read from it, we don't reinvent it.
 - **Update Method** — `in use`. Scenes implement `update(time, delta)`; ECS systems run per-frame from there.
 - **Bytecode** — `skip-for-now`. Overkill for a portfolio; revisit only if a mini-game needs user-authored scripts.
 - **Subclass Sandbox** — `deferred`. Possible fit if we expose a mini-game authoring surface later.
 - **Type Object** — `in use` (small). Feature, building, and room interactable kinds are data-driven config variants.
-- **Component** — `in use` (partial). [`src/game/core/ecs`](../../src/game/core/ecs); player and interaction-system migration is in progress.
+- **Component** — `in use` (partial). The ECS core is the canonical anchor; player and interaction-system migration is in progress.
 - **Event Queue** — `deferred` (scaffold only). `KernelEventQueue` is test-covered but not wired into production; same-frame observers remain the default until a real time-decoupling need appears.
 - **Service Locator** — `in use` (scoped). The bridge store *is* the locator; do not introduce new globals.
 - **Data Locality** — `skip-for-now`. V8 hides memory layout; actionable subset is "no per-frame allocations, typed arrays for hot numeric loops."

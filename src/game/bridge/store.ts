@@ -14,7 +14,9 @@ import type { MiniGameId } from '@game/registry/featureIds';
 export interface TouchBridgeState {
   left: number;
   right: number;
+  /** One-shot jump request set by React touch controls and cleared by scene input readers. */
   jumpQueued: boolean;
+  /** One-shot interact request set by React touch controls and cleared by scene input readers. */
   interactTap: boolean;
 }
 
@@ -39,6 +41,7 @@ export interface BridgeProgressState {
 }
 
 export interface BridgeState {
+  /** Canonical runtime mode; legacy projections below are derived from this value. */
   mode: RuntimeMode;
   status: GameStateValue;
   activeMiniGameId: MiniGameId | null;
@@ -133,6 +136,11 @@ function setState(updater: (current: BridgeState) => BridgeState): void {
   emit();
 }
 
+/**
+ * Observable state boundary shared by React overlays and Phaser runtime code.
+ * Callers should mutate state through `bridgeActions` so derived pause/projection
+ * fields and dirty checks stay centralized.
+ */
 export const bridgeStore = {
   subscribe(listener: () => void): () => void {
     listeners.add(listener);
@@ -143,7 +151,13 @@ export const bridgeStore = {
   }
 };
 
+/**
+ * Bridge mutations for cross-boundary gameplay state. Actions intentionally derive
+ * `status`, `activeMiniGameId`, `isPaused`, and progress facts in one place instead
+ * of letting React or Phaser callers maintain parallel state.
+ */
 export const bridgeActions = {
+  /** Opens either a React overlay or Phaser scene based on the runtime catalog kind. */
   requestInteraction(area: MiniGameId): void {
     setState((current) => ({
       ...current,
@@ -153,6 +167,10 @@ export const bridgeActions = {
       sceneHintText: null
     }));
   },
+  /**
+   * Closes the active runtime mode. Interior React overlays may resolve to a parent
+   * Phaser scene; otherwise closing returns to overworld exploration.
+   */
   closeActiveMode(resolveParentId?: (miniGameId: MiniGameId) => MiniGameId | null | undefined): void {
     setState((current) => ({
       ...current,
@@ -278,6 +296,7 @@ export const bridgeActions = {
       }
     }));
   },
+  /** Queues a jump for the next scene input read; consumers must call `consumeTouchOneShots`. */
   queueJump(): void {
     setState((current) => ({
       ...current,
@@ -287,6 +306,7 @@ export const bridgeActions = {
       }
     }));
   },
+  /** Queues an interact tap for the next scene input read; consumers must call `consumeTouchOneShots`. */
   tapInteract(): void {
     setState((current) => ({
       ...current,
@@ -296,6 +316,10 @@ export const bridgeActions = {
       }
     }));
   },
+  /**
+   * Reads and clears touch one-shots atomically from the caller's perspective.
+   * Directional intensities are durable until `setTouchDirectional` or `resetTouch`.
+   */
   consumeTouchOneShots(): { jumpQueued: boolean; interactTap: boolean } {
     const current = bridgeStore.getState();
     const oneShots = {

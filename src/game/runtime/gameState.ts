@@ -20,12 +20,17 @@ export interface AppState {
 
 export const EXPLORING_MODE: RuntimeMode = { kind: 'exploring' };
 
+/** Resolves a catalog id into the canonical runtime mode for interaction requests. */
 export function createRuntimeModeForInteraction(miniGameId: MiniGameId): RuntimeMode {
   return isPhaserSceneMiniGameId(miniGameId)
     ? { kind: 'phaserScene', miniGameId }
     : { kind: 'reactOverlay', miniGameId };
 }
 
+/**
+ * Projects canonical runtime mode into the legacy app state shape still consumed
+ * by some UI and kernel callers.
+ */
 export function deriveGameState(mode: RuntimeMode): AppState {
   if (mode.kind === 'exploring') {
     return {
@@ -40,10 +45,15 @@ export function deriveGameState(mode: RuntimeMode): AppState {
   };
 }
 
+/** React overlays pause the underlying Phaser scene; Phaser scene modes remain active. */
 export function derivePause(mode: RuntimeMode): boolean {
   return mode.kind === 'reactOverlay';
 }
 
+/**
+ * Closes the current mode. React overlays may close back to a catalog parent scene;
+ * non-overlay modes close to overworld exploration.
+ */
 export function closeRuntimeMode(
   mode: RuntimeMode,
   resolveParentId?: (miniGameId: MiniGameId) => MiniGameId | null | undefined

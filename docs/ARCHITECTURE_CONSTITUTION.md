@@ -57,7 +57,7 @@ This constitution is directional. For exact current implementation details, pref
 - **Context plugin assembly:** `src/game/contextPlugins/createContextPlugins.ts`
 - **ECS foundation:** `src/game/core/ecs/`*
 - **Shared runtime Modules:** `src/game/runtime/player/SideViewPlayerRuntime.ts`, `src/game/runtime/interactions/InteriorInteractionRuntime.ts`, `src/game/runtime/sceneResumePolicy.ts`
-- **Phaser 4 render guardrails:** currently documented as runtime policy; helper module may be reintroduced under `src/game/infra/phaser/render/` when shared logic is needed.
+- **Phaser 4 render guardrails:** currently documented as runtime policy; introduce a shared render helper only when repeated policy code appears.
 
 When proposing future refactors, prefer extending these modules instead of re-introducing callback-only scene orchestration or ad-hoc global state.
 

@@ -10,7 +10,9 @@ export type SceneKeyboardPauseOptions = {
 
 /**
  * Shared policy: disable Phaser keyboard plugin while React overlays are focused,
- * and re-enable key capture when returning to gameplay.
+ * and re-enable key capture when returning to gameplay. Use this from pausable
+ * scenes instead of toggling keyboard capture directly so overlay text inputs and
+ * scene physics pause stay consistent.
  */
 export function setSceneKeyboardPaused(
   scene: Phaser.Scene,

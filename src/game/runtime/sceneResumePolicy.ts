@@ -8,6 +8,10 @@ import {
 
 const FRESH_START_SCENE_KEYS = new Set<string>([PHASER_SCENE_KEYS.potassium]);
 
+/**
+ * Persists a scene exit position unless the scene is intentionally fresh-start.
+ * Adapters capture raw positions; this policy owns the persist-or-discard decision.
+ */
 export function recordSceneExitResume(
   sceneKey: string,
   position: ResumeSnapshot | null | undefined
@@ -21,12 +25,14 @@ export function recordSceneExitResume(
   return position;
 }
 
+/** Applies per-scene reset rules before a scene starts. */
 export function prepareSceneStart(sceneKey: string): void {
   if (FRESH_START_SCENE_KEYS.has(sceneKey)) {
     forgetResumePosition(sceneKey);
   }
 }
 
+/** Reads the resume position selected by policy for this scene start. */
 export function getSceneStartResume(sceneKey: string): ResumeSnapshot | undefined {
   return peekResumePosition(sceneKey);
 }

@@ -1,11 +1,11 @@
-import { useEffect, type MutableRefObject } from 'react';
+import { useEffect, type RefObject } from 'react';
 import type * as Phaser from 'phaser';
 import { bridgeActions } from '@game/bridge/store';
 import type { PhaserScenePresentationMode } from '@game/runtime/phaserScenePresentation';
 
 interface UsePhaserScaleRefreshOptions {
   activeMiniGameId: string | null;
-  gameRef: MutableRefObject<Phaser.Game | null>;
+  gameRef: RefObject<Phaser.Game | null>;
   presentationMode: PhaserScenePresentationMode;
 }
 

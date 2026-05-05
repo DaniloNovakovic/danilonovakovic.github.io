@@ -221,6 +221,10 @@ function createPlayerCameraRuntime(
   });
 }
 
+/**
+ * Creates the shared side-view player runtime. Scenes must create physics colliders
+ * after this returns so they can attach colliders to `runtime.player`.
+ */
 export function createSideViewPlayerRuntime(
   options: SideViewPlayerRuntimeOptions
 ): SideViewPlayerRuntime {

@@ -100,15 +100,18 @@ const MINI_GAME_BY_ID: ReadonlyMap<MiniGameId, MiniGamePlugin> = new Map(
   PORTFOLIO_SECTIONS.map((game) => [game.id, game])
 );
 
+/** Returns the composed runtime catalog; callers must treat entries as read-only facts. */
 export const getAllMiniGames = (): MiniGamePlugin[] => {
   return PORTFOLIO_SECTIONS;
 };
 
+/** Looks up any catalog entry by id while safely ignoring null, undefined, and unknown ids. */
 export const getMiniGameById = (id: string | null | undefined): MiniGamePlugin | undefined => {
   if (id == null || !isMiniGameId(id)) return undefined;
   return MINI_GAME_BY_ID.get(id);
 };
 
+/** Resolves only React overlay entries, including overlays that return to an interior parent scene. */
 export function getReactOverlayMiniGameById(
   id: string | null | undefined
 ): ReactOverlayMiniGamePlugin | undefined {
@@ -116,6 +119,7 @@ export function getReactOverlayMiniGameById(
   return miniGame?.type === MiniGameType.REACT_OVERLAY ? miniGame : undefined;
 }
 
+/** Resolves only Phaser scene entries. Use this instead of local id allow-lists. */
 export function getPhaserSceneMiniGameById(
   id: string | null | undefined
 ): PhaserSceneMiniGamePlugin | undefined {
@@ -123,6 +127,7 @@ export function getPhaserSceneMiniGameById(
   return miniGame?.type === MiniGameType.PHASER_SCENE ? miniGame : undefined;
 }
 
+/** Returns the parent runtime id used when an interior React overlay closes. */
 export function getOverlayParentId(id: string | null | undefined): MiniGameId | null {
   return getReactOverlayMiniGameById(id)?.overlayParentId ?? null;
 }

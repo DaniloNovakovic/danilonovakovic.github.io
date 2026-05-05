@@ -1,4 +1,4 @@
-import { useEffect, type MutableRefObject } from 'react';
+import { useEffect, type RefObject } from 'react';
 import * as Phaser from 'phaser';
 import { bridgeActions } from '@game/bridge/store';
 import { createContextPlugins } from '@game/contextPlugins/createContextPlugins';
@@ -12,13 +12,13 @@ import { getGameConfig } from '@game/runtime/config';
 import { getSceneStartResume, prepareSceneStart } from '@game/runtime/sceneResumePolicy';
 
 interface UsePhaserGameBootOptions {
-  bridgeRef: MutableRefObject<{
+  bridgeRef: RefObject<{
     onInteract: (area: string) => void;
     onClose: () => void;
     isPaused: boolean;
   }>;
-  containerRef: MutableRefObject<HTMLDivElement | null>;
-  gameRef: MutableRefObject<Phaser.Game | null>;
+  containerRef: RefObject<HTMLDivElement | null>;
+  gameRef: RefObject<Phaser.Game | null>;
   stableOnClose: () => void;
   stableOnInteract: (area: string) => void;
 }

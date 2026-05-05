@@ -4,6 +4,13 @@ Tool-agnostic rules for AI coding agents working in this repo. These files are t
 
 Rules should describe stable seams, decision process, and things that would be expensive to get wrong. Avoid copying implementation walkthroughs from developer docs; link to those docs instead.
 
+## Documentation Freshness Policy
+
+- Global docs explain stable concepts, policies, cross-folder flows, and canonical entrypoints.
+- JSDoc explains volatile symbol behavior, side effects, lifecycle order, and misuse risks near the code that changes.
+- Local READMEs map complex folders only; avoid per-file inventories unless the files are stable landmarks.
+- Exact file links are useful for canonical anchors, but avoid implementation walkthroughs that must be manually synchronized across docs and code.
+
 ## Rule Files
 
 - [`00-philosophy.md`](00-philosophy.md) — repo-wide engineering philosophy.

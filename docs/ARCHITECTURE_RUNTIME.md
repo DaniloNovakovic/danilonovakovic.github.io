@@ -10,54 +10,14 @@ This document describes the current runtime architecture in `src/`. It is the de
 4. `GameKernel` subscribes to bridge state and delegates transitions/pause to `SceneManager`.
 5. `SceneManager` manages context plugins via a Phaser adapter boundary.
 
-## Core modules
+## Runtime subsystems
 
-- `src/game/bridge/store.ts`
-  - Single source of truth for:
-    - app state (`status`, `activeMiniGameId`, `isPaused`)
-    - touch flags (`left`, `right`, `jumpQueued`, `interactTap`)
-  - Exposes `bridgeActions` and `useBridgeState`.
-- `src/game/kernel/GameKernel.ts`
-  - Reacts to bridge state changes.
-  - Emits lifecycle events (`SceneTransitionRequested`, `OverlayOpened`, `OverlayClosed`, `PauseChanged`).
-- `src/game/kernel/SceneManager.ts`
-  - Registers context plugins.
-  - Handles scene enter/exit, resume capture, and pause propagation.
-- `src/game/infra/phaser/PhaserSceneAdapter.ts`
-  - Adapter boundary for scene start/stop, active scene pause, callback rebinding, and resume capture.
-- `src/game/contextPlugins/createContextPlugins.ts`
-  - Assembles the ordered Phaser context plugins and injects runtime callbacks, lazy scene loading, pause state, and resume policy.
-- `src/game/contextPlugins/plugins/StreetPlugin.ts`, `src/game/contextPlugins/plugins/HobbiesPlugin.ts`,
-`src/game/contextPlugins/plugins/BasementPlugin.ts`
-  - Context plugin definitions for the Phaser scene contexts.
-- `src/game/registry/catalog.ts`
-  - Game-owned catalog entry composition. Scene folders and `game/portfolio` own display metadata and runtime bindings for overlays/scenes.
-- `src/game/runtime/miniGameRegistry.ts`
-  - Runtime game catalog for mini-game lookup, React overlay component resolution, overlay parent returns, and React/Phaser kind checks.
-- `src/game/runtime/sceneResumePolicy.ts`
-  - Resume policy over the low-level store. The Phaser adapter captures raw positions; the policy decides whether to persist, clear, or restore by scene key.
-- `src/game/runtime/player/SideViewPlayerRuntime.ts`
-  - Shared side-view player lifecycle for Phaser scenes: spawn/resume placement, controller mounting, input frame updates, pause propagation, appearance sync, sprite animation, and resume capture.
-- `src/game/runtime/camera/sideViewCameraRuntime.ts`
-  - Shared side-view camera lifecycle. It applies follow target, zoom, follow offset, camera bounds, portrait cover crop padding, Phaser scale resize re-application, and shutdown cleanup.
-- `src/game/runtime/phaserScenePresentation.ts`
-  - Scene presentation policy for the React shell. Side-view Phaser scenes use `portrait-cover`; Potassium uses a dedicated `vertical-board` arcade presentation.
-- `src/game/shell/gameShellLayout.ts`
-  - React shell layout helper for presentation-mode-specific canvas aspect and max-size rules. Phaser still keeps the fixed logical design size from `src/game/runtime/config.ts`.
-- `src/game/runtime/interactions/InteriorInteractionRuntime.ts`
-  - Pure interior prop interaction runtime. It resolves active targets, prompt placement facts, exit requests, and typed effect commands while scenes keep Phaser objects and side effects.
-- `src/game/runtime/text/PlayerThoughtText.ts`
-  - Small scene-local helper for character thoughts that follow a target, reuse the shared typewriter effect, and auto-hide without adding bridge state.
-- `src/game/scenes/potassiumSlip/runtime/potassiumSlipCommandAdapter.ts`
-  - Phaser-backed Potassium command Adapter. It interprets session, combat, and boss commands, extracts combat facts from Phaser objects, applies recursive combat results, and receives grouped runtime/object/board/renderer ports for bridge, timer, leaderboard, Phaser mutation, and visual effects.
-- `src/game/scenes/potassiumSlip/runtime/potassiumSlipRenderer.ts`
-  - Phaser-backed Potassium renderer Module. It owns field/HUD/overlay drawing, enemy/projectile attachment visuals, and transient control/combat effects such as aim arrows, recall tethers, explosions, and death tweens.
-- `src/game/scenes/potassiumSlip/runtime/potassiumSlipProjectileControl.ts`
-  - Pure Potassium launch/recall control Module. It owns pointer control state, launch threshold/speed math, recall transitions, and idle drag decisions as commands for the scene to apply.
-- `src/game/scenes/potassiumSlip/runtime/potassiumSlipEnemyFactory.ts`
-  - Potassium enemy setup Module. It owns enemy kind facts, lane placement, HP scaling, body profiles, shield/splitter/boss setup facts, and renderer attachment facts while the scene still creates Phaser sprites.
-- `src/game/scenes/potassiumSlip/runtime/potassiumSlipPhaserData.ts`
-  - Typed Potassium Phaser data helper Module. It centralizes `getData` / `setData` keys and helpers for combat IDs, hit cooldowns, enemy health/status facts, projectile proc flags, trail timing, and renderer attachment metadata.
+- **Bridge state** - `src/game/bridge/store.ts` is the observable React/Phaser state boundary. It owns runtime mode projections, pause derivation, inventory/progress, scene hint text, and touch input one-shots. Volatile action semantics live in JSDoc next to `bridgeActions`.
+- **Kernel orchestration** - `src/game/kernel/GameKernel.ts` observes bridge state and delegates scene transitions, pause propagation, resume capture, and lifecycle notifications through `SceneManager`.
+- **Phaser adapter and context plugins** - `src/game/infra/phaser/PhaserSceneAdapter.ts` keeps Phaser-specific scene control behind an adapter. `src/game/contextPlugins/createContextPlugins.ts` assembles the known context plugins and injects runtime callbacks.
+- **Registry and runtime lookup** - `src/game/registry/catalog.ts` composes game-owned catalog facts from scene and portfolio modules. `src/game/runtime/miniGameRegistry.ts` is the caller-facing lookup surface for overlay/scene resolution and parent returns.
+- **Shared scene runtime** - reusable Phaser scene machinery lives in `src/game/runtime`: side-view player lifecycle, side-view camera policy, scene presentation, scene resume policy, keyboard pause, interior interactions, and shared text helpers. Symbol-level behavior belongs in JSDoc near each runtime export.
+- **Scene-owned runtime modules** - scene folders own local layout, Phaser objects, catalog facts, text, and heavy mini-game modules. For example, Potassium keeps its command, renderer, projectile, enemy, session, combat, and data seams under its own scene runtime rather than expanding global docs with a file inventory.
 
 ## Scene presentation and camera
 
@@ -102,15 +62,11 @@ Migration rule for new code:
 - Use ownership aliases for cross-folder imports: `@static/*`, `@game/*`, and `@shared/*`. Keep short local relative imports inside a module folder.
 - Import shared UI primitives through `@shared/ui`.
 
-## Pure Decision Modules
+## Pure decision modules
 
 Pure decision code exists where it buys leverage, but the app is not trying to migrate all runtime code into ECS. Use the smallest Interface that concentrates repeated knowledge.
 
-- `src/game/core/ecs/world.ts` for entity/component storage.
-- `src/game/core/ecs/components/player.ts` for player-focused pure data components.
-- `src/game/core/ecs/systems/playerSystems.ts` for input + movement/jump/interact system logic.
-- `src/game/core/ecs/systems/overworldInteractSystems.ts` for pure overworld building interact targeting (called from `OverworldScene`).
-- `src/game/core/ecs/systems/roomInteractSystems.ts` for lower-level room target picking.
+The ECS foundation under `src/game/core/ecs` is the canonical anchor for pure entity/component decisions. It covers player movement/input decisions and low-level interaction picking without importing Phaser or React.
 
 Runtime Modules such as `SideViewPlayerRuntime`, `InteriorInteractionRuntime`, and `sceneResumePolicy` are equally valid when the repeated knowledge is lifecycle, policy, or orchestration rather than entity iteration.
 
@@ -142,4 +98,4 @@ Guardrails are currently policy-level (documented) rather than a dedicated utili
 - Use `DynamicTexture` for composited or stamp-style static textures, with explicit `dynamicTexture.render()` flush calls.
 - Use `SpriteGPULayer` only for dense, mostly static quads; avoid high-frequency member add/remove churn.
 
-If repeated render policy code appears, re-introduce a shared helper under `src/game/infra/phaser/render/`.
+If repeated render policy code appears, introduce a shared helper under the Phaser infra layer.
