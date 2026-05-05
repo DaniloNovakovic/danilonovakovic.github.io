@@ -6,6 +6,20 @@ Rules and gotchas for agents working on this gamified portfolio. Descriptive doc
 
 `AGENTS.md` is the high-level, tool-agnostic instruction file for agents. Detailed reusable agent rules live in [`.agents/rules/`](.agents/rules/) and are the canonical source for scoped AI rules. If another AI tool needs its own entry file (for example `CLAUDE.md`), keep it as a thin pointer back to this file and `.agents/rules/`.
 
+## Agent skills
+
+### Issue tracker
+
+Issues and PRDs are tracked in GitHub Issues for `DaniloNovakovic/danilonovakovic.github.io`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Uses the default mattpocock/skills triage labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, and `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context repo: read root `CONTEXT.md` and `docs/adr/` when present. See `docs/agents/domain.md`.
+
 ## Tech stack
 
 - **Frontend Framework:** React (Vite)
