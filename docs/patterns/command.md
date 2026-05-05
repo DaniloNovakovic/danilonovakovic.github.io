@@ -19,7 +19,7 @@ Small current usage:
 
 Future candidates:
 
-- Input remapping for `[src/game/runtime](../../src/game/runtime)` scenes.
+- Input remapping for Phaser scenes that consume `src/game/runtime/input` helpers.
 - Undo/redo in any mini-game that edits state (e.g. a terminal or sketching mini-game).
 - Replay or record-and-playback for a guitar/rhythm mini-game.
 

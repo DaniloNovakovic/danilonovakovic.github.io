@@ -32,7 +32,10 @@ This folder is organized by surface ownership.
 - `game/shell/use*.ts` - Focused React hooks for Phaser boot, bridge callbacks, touch controls, and scale refresh.
 - `game/portfolio` - Portfolio overlays as they appear inside the playable mode.
 - `game/registry` - IDs, runtime bindings, catalog composition, and registry-facing type objects.
-- `game/runtime` - Reusable game machinery shared by multiple scenes.
+- `game/kernel` - Runtime mode and scene lifecycle orchestration.
+- `game/runtime` - Reusable Phaser-facing machinery shared by multiple scenes.
+- `game/core` - Pure ECS, input, and player decision logic with no Phaser/React/browser imports.
+- `game/infra` - Concrete adapters to external engines/APIs, such as the Phaser scene adapter.
 
 ## Catalog vs Scene Context
 

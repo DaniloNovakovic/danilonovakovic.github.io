@@ -17,6 +17,8 @@ This document describes the current runtime architecture in `src/`. It is the de
 - **Phaser adapter and scene contexts** - `src/game/infra/phaser/PhaserSceneAdapter.ts` keeps Phaser-specific scene control behind an adapter. `src/game/sceneContexts/createSceneContexts.ts` assembles known scene contexts and injects runtime callbacks.
 - **Registry and runtime lookup** - `src/game/registry/catalog.ts` composes game-owned catalog facts from scene and portfolio modules. `src/game/runtime/miniGameRegistry.ts` is the caller-facing lookup surface for overlay/scene resolution and parent returns.
 - **Shared scene runtime** - reusable Phaser scene machinery lives in `src/game/runtime`: side-view player lifecycle, side-view camera policy, scene presentation, scene resume policy, keyboard pause, interior interactions, and shared text helpers. Symbol-level behavior belongs in JSDoc near each runtime export.
+- **Pure gameplay decisions** - `src/game/core` contains deterministic ECS, input, and player logic that can be tested without Phaser, React, browser globals, or bridge state.
+- **Concrete adapters** - `src/game/infra` contains adapters to concrete external APIs. Today, `PhaserSceneAdapter` is the adapter from kernel scene requests to Phaser scene APIs.
 - **Scene-owned runtime modules** - scene folders own local layout, Phaser objects, catalog facts, text, and heavy mini-game modules. For example, Potassium keeps its command, renderer, projectile, enemy, session, combat, and data seams under its own scene runtime rather than expanding global docs with a file inventory.
 
 ## Scene presentation and camera
@@ -59,6 +61,7 @@ Migration rule for new code:
 - Add code reused by static and game under `src/shared`.
 - Add new Phaser scene lifecycle wiring in the owning scene folder as `sceneContext.ts`, then include it from `src/game/sceneContexts/createSceneContexts.ts`.
 - Add scene-specific Phaser runtime under `src/game/scenes/*/runtime`; touch `src/game/runtime` only for reusable game machinery.
+- Add pure deterministic gameplay decisions under `src/game/core`; put Phaser-facing reuse under `src/game/runtime`, lifecycle orchestration under `src/game/kernel`, and concrete external adapters under `src/game/infra`.
 - Use the source-root alias for cross-folder imports: `@/*` resolves to `src/*`. Keep short local relative imports inside a module folder.
 - Import shared UI primitives through `@/shared/ui`.
 

@@ -1,17 +1,24 @@
 # Core Folder
 
-`core/` contains engine-agnostic game domain logic.
+`core/` contains pure game decision logic. Code here should be testable without
+Phaser, React, browser globals, or scene lifecycle state.
+
+Use this folder when repeated gameplay decisions can be expressed as plain data
+and deterministic functions/classes. Do not put orchestration here just because
+it feels important; mode transitions belong to `kernel/`, Phaser-facing scene
+machinery belongs to `runtime/`, and concrete engine adapters belong to
+`infra/`.
 
 ## Owns
 
-- Kernel orchestration (`kernel/`)
-- ECS data model and systems (`ecs/`)
-- Shared domain-level player logic (`player/`)
+- ECS data model and pure systems (`ecs/`)
+- Input command frames and pure input-to-player translation (`input/`)
+- Engine-agnostic player decision logic (`player/`)
 
 ## Depends on
 
-- `shared/bridge/store.ts` for state sync triggers
-- Interface contracts from `infra/` (adapter interfaces only, not concrete Phaser code)
+- Other `core/` modules
+- Plain TypeScript types that do not import Phaser, React, or browser APIs
 
 ## Related guardrails
 
@@ -19,13 +26,15 @@
 
 ## Does not own
 
-- Direct Phaser imports in pure kernel/ECS modules
+- Kernel orchestration (`../kernel`)
+- Direct Phaser imports
 - React component rendering
-- Scene asset creation and rendering details
+- Bridge state or browser state
+- Scene asset creation, rendering details, or Phaser lifecycle hooks
 
 ## Common entrypoints
 
-- `kernel/GameKernel.ts`
-- `kernel/SceneManager.ts`
 - `ecs/world.ts`
+- `ecs/systems/playerSystems.ts`
+- `input/commands.ts`
 - `player/PlayerController.ts`

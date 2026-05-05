@@ -39,9 +39,9 @@ This project is built on three core pillars to ensure that adding future complex
   - `/src/static` (static portfolio surface)
   - `/src/game` (playable mode shell, bridge, registry, scenes, runtime, kernel, and adapters)
   - `/src/shared` (shared UI, hooks, content, and config reused by static and game)
-  - `/src/game/core` (ECS Engine & Domain)
-  - `/src/game/infra` (Renderer Adapters)
-  - `/src/game/runtime` (Phaser runtime scenes and registries)
+  - `/src/game/core` (pure ECS, input, and player decisions)
+  - `/src/game/infra` (concrete engine/browser adapters)
+  - `/src/game/runtime` (shared Phaser-facing runtime machinery)
   - `/src/game/sceneContexts` and `/src/game/scenes/*/sceneContext.ts` (Kernel scene context assembly and scene-owned lifecycle definitions)
 
 ---
@@ -55,7 +55,7 @@ This constitution is directional. For exact current implementation details, pref
 - **Scene manager:** `src/game/kernel/SceneManager.ts`
 - **Phaser adapter:** `src/game/infra/phaser/PhaserSceneAdapter.ts`
 - **Scene context assembly:** `src/game/sceneContexts/createSceneContexts.ts`
-- **ECS foundation:** `src/game/core/ecs/`*
+- **ECS foundation:** `src/game/core/ecs/`
 - **Shared runtime Modules:** `src/game/runtime/player/SideViewPlayerRuntime.ts`, `src/game/runtime/interactions/InteriorInteractionRuntime.ts`, `src/game/runtime/sceneResumePolicy.ts`
 - **Phaser 4 render guardrails:** currently documented as runtime policy; introduce a shared render helper only when repeated policy code appears.
 
