@@ -27,7 +27,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['src/contextPlugins/**/*.{ts,tsx}'],
+    files: ['src/game/sceneContexts/**/*.{ts,tsx}', 'src/game/scenes/**/sceneContext.ts'],
     rules: {
       'no-restricted-imports': [
         'error',
@@ -36,7 +36,7 @@ export default defineConfig([
             {
               group: ['**/runtime', '**/runtime/**'],
               message:
-                'contextPlugins must not import from runtime; pass values via plugin factory options (kernel boundary).',
+                'scene contexts must not import from runtime; pass runtime-derived values via scene context options (kernel boundary).',
             },
           ],
         },

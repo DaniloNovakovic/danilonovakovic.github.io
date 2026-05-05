@@ -60,7 +60,7 @@ Present a numbered list of deepening opportunities. For each candidate:
 - **Solution** — plain English description of what would change
 - **Benefits** — explained in terms of locality and leverage, and also in how tests would improve
 
-**Use this repo's vocabulary and [LANGUAGE.md](LANGUAGE.md) vocabulary for the architecture.** Talk about the bridge, kernel, SceneManager, context plugins, runtime modes, ECS systems, and React overlays using the names already present in `AGENTS.md` and `docs/`.
+**Use this repo's vocabulary and [LANGUAGE.md](LANGUAGE.md) vocabulary for the architecture.** Talk about the bridge, kernel, SceneManager, scene contexts, runtime modes, ECS systems, and React overlays using the names already present in `AGENTS.md` and `docs/`.
 
 **Document conflicts**: if a candidate contradicts existing project guidance, only surface it when the friction is real enough to warrant revisiting that guidance. Mark it clearly and explain why the trade-off may be worth reopening.
 

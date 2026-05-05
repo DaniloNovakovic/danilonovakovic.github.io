@@ -1,57 +1,13 @@
-import { Suspense, lazy, useCallback, useEffect, useState } from 'react';
-import ModePicker, { type AppMode } from './components/ModePicker';
-import StaticPortfolio from './components/StaticPortfolio';
-import { TEXTS } from './config/content';
-import { Card } from './ui';
+import { Suspense, lazy } from 'react';
+import { ModePicker } from './modePicker';
+import { useReadMode } from '@/shared/hooks/useReadMode';
+import { LoadingFallback } from '@/shared/ui';
+import { StaticPortfolio } from '@/static';
 
-const InteractiveApp = lazy(() => import('./components/InteractiveApp'));
-
-type RouteState = 'picker' | AppMode;
-
-function readModeFromUrl(): RouteState {
-  if (typeof window === 'undefined') return 'picker';
-  const params = new URLSearchParams(window.location.search);
-  const mode = params.get('mode');
-  if (mode === 'interactive' || mode === 'static') return mode;
-  return 'picker';
-}
-
-function writeModeToUrl(mode: RouteState) {
-  if (typeof window === 'undefined') return;
-  const url = new URL(window.location.href);
-  if (mode === 'picker') {
-    url.searchParams.delete('mode');
-  } else {
-    url.searchParams.set('mode', mode);
-  }
-  window.history.replaceState({}, '', url.toString());
-}
-
-function LoadingFallback() {
-  return (
-    <div className="flex min-h-[100dvh] min-h-dvh w-full items-center justify-center bg-[#f4f1ea]">
-      <Card tone="paper" className="px-6 py-4">
-        <p className="text-sm font-bold uppercase tracking-widest text-[#1a1a1a]">
-          {TEXTS.common.loading}
-        </p>
-      </Card>
-    </div>
-  );
-}
+const InteractiveApp = lazy(() => import('@/game/shell'));
 
 function App() {
-  const [route, setRoute] = useState<RouteState>(() => readModeFromUrl());
-
-  const setMode = useCallback((next: RouteState) => {
-    setRoute(next);
-    writeModeToUrl(next);
-  }, []);
-
-  useEffect(() => {
-    const onPopState = () => setRoute(readModeFromUrl());
-    window.addEventListener('popstate', onPopState);
-    return () => window.removeEventListener('popstate', onPopState);
-  }, []);
+  const { route, setMode } = useReadMode();
 
   if (route === 'picker') {
     return <ModePicker onChoose={setMode} />;

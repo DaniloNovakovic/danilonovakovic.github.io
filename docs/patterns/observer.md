@@ -30,9 +30,9 @@ A **subject** holds a list of **observer** callbacks. When the subject's state c
 
 ## In this repo
 
-Core example: `[src/shared/bridge/store.ts](../../src/shared/bridge/store.ts)` — the `bridgeStore` keeps a `Set<() => void>` of listeners, `emit()` fires them on any state change, and `useBridgeState` adapts that for React. `[GameKernel](../../src/core/kernel/GameKernel.ts)` itself is just an observer of the bridge: `start()` calls `bridgeStore.subscribe(() => this.sync(bridgeStore.getState()))`.
+Core example: `[src/game/bridge/store.ts](../../src/game/bridge/store.ts)` — the `bridgeStore` keeps a `Set<() => void>` of listeners, `emit()` fires them on any state change, and `useBridgeState` adapts that for React. `[GameKernel](../../src/game/kernel/GameKernel.ts)` itself is just an observer of the bridge: `start()` calls `bridgeStore.subscribe(() => this.sync(bridgeStore.getState()))`.
 
-The kernel also exposes its own synchronous bus — `[KernelEventBus](../../src/core/kernel/events.ts)` — for a narrower set of typed events (`SceneTransitionRequested`, `OverlayOpened`, `OverlayClosed`, `PauseChanged`). Same pattern, one abstraction layer up.
+The kernel also exposes its own synchronous bus — `[KernelEventBus](../../src/game/kernel/events.ts)` — for a narrower set of typed events (`SceneTransitionRequested`, `OverlayOpened`, `OverlayClosed`, `PauseChanged`). Same pattern, one abstraction layer up.
 
 ## Status
 

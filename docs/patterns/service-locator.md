@@ -21,7 +21,7 @@ For local dependencies, prefer passing them in. Service Locator is a *last resor
 - It's still global state. Test hygiene: always reset the locator between tests.
 - Implicit coupling: a function that reaches into the locator hides its dependency from its signature. That's the cost you pay for the convenience.
 - Always have a **null-object** fallback. If audio isn't registered, a missing-service null-object keeps the game playable; throwing crashes everything.
-- Don't register implementations at random call sites. Do it once, at the composition root (here: [`src/App.tsx`](../../src/App.tsx) / [`src/components/Game.tsx`](../../src/components/Game.tsx)).
+- Don't register implementations at random call sites. Do it once, at the composition root (here: [`src/App.tsx`](../../src/App.tsx) / [`src/game/shell/Game.tsx`](../../src/game/shell/Game.tsx)).
 
 ## In JS/TS + Phaser
 
@@ -31,14 +31,14 @@ For local dependencies, prefer passing them in. Service Locator is a *last resor
 
 ## In this repo
 
-The [`bridgeStore`](../../src/shared/bridge/store.ts) **is** our service locator for shared UI/engine state. It is:
+The [`bridgeStore`](../../src/game/bridge/store.ts) **is** our service locator for shared UI/engine state. It is:
 
 - **Module-scoped** — not a class, no `getInstance()` ceremony, not a Singleton-the-pattern.
 - **Narrow** — exposes `subscribe`, `getState`, and a curated `bridgeActions` surface. Not a free-for-all dictionary.
 - **Observed** — readers subscribe, they don't poll.
 - **Typed** — `BridgeState` is a single, documented contract.
 
-The kernel-level bus [`KernelEventBus`](../../src/core/kernel/events.ts) is another small locator-shaped thing: one registration point, many consumers, typed events. Both are examples of the pattern applied in the smallest useful shape.
+The kernel-level bus [`KernelEventBus`](../../src/game/kernel/events.ts) is another small locator-shaped thing: one registration point, many consumers, typed events. Both are examples of the pattern applied in the smallest useful shape.
 
 **Rule for this codebase:** do not introduce new globals. If you want a new service, decide whether (a) it belongs on the bridge (shared UI/engine state), (b) it belongs on the kernel (scene lifecycle events), or (c) it's local enough to be passed in. A brand-new `window.*` or module-level `export const foo = new Foo()` that everybody reaches into is not the answer.
 

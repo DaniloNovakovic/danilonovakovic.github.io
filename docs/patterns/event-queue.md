@@ -44,9 +44,9 @@ When in doubt: start with Observer. Upgrade to Event Queue only when you hit tim
 
 Synchronous today; keep queued delivery as a deferred option:
 
-- `[bridgeStore](../../src/shared/bridge/store.ts)` — state-change notifications for the UI/engine bridge.
-- `[KernelEventBus](../../src/core/kernel/events.ts)` — typed kernel events (`SceneTransitionRequested`, `OverlayOpened`, `OverlayClosed`, `PauseChanged`), also synchronous.
-- `[KernelEventQueue](../../src/core/kernel/events.ts)` — a minimal FIFO scaffold covered by tests, not wired into production.
+- `[bridgeStore](../../src/game/bridge/store.ts)` — state-change notifications for the UI/engine bridge.
+- `[KernelEventBus](../../src/game/kernel/events.ts)` — typed kernel events (`SceneTransitionRequested`, `OverlayOpened`, `OverlayClosed`, `PauseChanged`), also synchronous.
+- `[KernelEventQueue](../../src/game/kernel/events.ts)` — a minimal FIFO scaffold covered by tests, not wired into production.
 
 When we need a queue:
 

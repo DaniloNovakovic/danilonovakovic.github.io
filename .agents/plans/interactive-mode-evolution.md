@@ -18,7 +18,7 @@ This document serves as a long-term roadmap for implementing the "Artist's Journ
 
 - **1.1: Core Phaser Layers Setup**
   - Added sketch + pixel building layers in `OverworldScene.ts` via `StreetBuildings`.
-  - Implemented glasses/inventory/equipment state in `src/shared/bridge/store.ts` (instead of `gameState.ts`) and wired scene/UI reads through the bridge.
+  - Implemented glasses/inventory/equipment state in `src/game/bridge/store.ts` (instead of `gameState.ts`) and wired scene/UI reads through the bridge.
   - Added pre-glasses distance haze and glasses-on/off player appearance switching.
 - **1.2: The Basement & The Glasses**
   - Added hidden hole trigger in Overworld and registered the `BasementScene`.
@@ -117,4 +117,4 @@ This document serves as a long-term roadmap for implementing the "Artist's Journ
   - Apply the "2-Frame Jitter" to all Sketch assets.
   - Add bit-crushed audio cues near secret entrances.
 - **6.2: Save State & Persistence**
-  - Ensure all unlocked secrets and mini-game completion statuses are persisted from bridge state (`src/shared/bridge/store.ts`) to local storage.
+  - Ensure all unlocked secrets and mini-game completion statuses are persisted from bridge state (`src/game/bridge/store.ts`) to local storage.
