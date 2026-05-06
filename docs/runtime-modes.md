@@ -22,6 +22,8 @@ for fast iteration. Current useful targets include `hobbies`, `basement`,
 
 - `src/game/bridge/store.ts` owns observable cross-boundary state and actions:
   `enterScene`, `returnToOverworld`, `openOverlay`, and `closeOverlay`.
+  `openOverlay(overlayId, options)` can carry overlay params and return-scene
+  intent from Phaser scenes to React overlays.
 - `src/game/sceneLifecycle/SceneLifecycleController.ts` maps bridge scene changes to
   `SceneManager` transitions and maps pause changes to active Phaser scenes.
 - `src/game/overlays/OverlayHost.tsx` renders React overlays from the active
@@ -39,6 +41,9 @@ Use this path when checking pattern refactors:
 4. Open and close a hobby overlay from inside the hobbies scene.
 5. Enter the Developer Basement, open the computer console, and close it back
    to the basement scene.
-6. Boot `?startScene=ridge`; verify the Ridge shell renders and movement works.
+6. Boot `?startScene=ridge`; verify the Ridge shell renders, movement works,
+   and walking near a Stampede/Telegraph/Domino prop shows `[E] INTERACT`.
+   Interact to open the Trail Card, confirm its primary action is disabled while
+   the target scene is unavailable, then close back to Ridge.
 7. Open inventory from the overworld and from a child scene.
 8. Verify mobile touch movement, jump, and interact one-shots.

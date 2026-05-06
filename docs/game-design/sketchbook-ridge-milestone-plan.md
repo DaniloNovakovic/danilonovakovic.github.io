@@ -19,6 +19,22 @@ The first complete milestone should prove:
 
 Anything beyond that is future scope unless a slice explicitly pulls it in.
 
+## Current Implementation Status
+
+- **M1 Ridge Shell** is complete for the current placeholder slice: Ridge can
+  boot directly with `?startScene=ridge`, uses shared side-view movement, shows
+  the Relay Spire, Cicka's first perch, a static Ridge Guide, and three Trail
+  Card props.
+- **M2 Trail Card and Manual Overlay Surface** has started: the reusable global
+  Trail Card overlay and Ridge trigger contract are in place. Remaining M2 work
+  is the Manual Page overlay decision, mobile/readability pass, and surface
+  polish.
+- **M3 Art and Audio Research Pack** can run in parallel as spec work. It should
+  guide Cicka, Guide, Trail Card, Manual Page, Stampede, Relay Spire, and audio
+  direction without blocking rough engineering prototypes.
+- **M4 Stampede Sketch Prototype** should start after M2 is stable enough to
+  enable a movement-only Stampede scene from the Stampede Trail Card.
+
 ## Production Crew
 
 Role contracts and activation phrases live in
