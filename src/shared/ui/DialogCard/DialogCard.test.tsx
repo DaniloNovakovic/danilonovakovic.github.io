@@ -9,7 +9,7 @@ afterEach(cleanup);
 
 async function renderCard(onClose = vi.fn()) {
   render(
-    <ModalShell title="Test Overlay" hasDescription onClose={onClose}>
+    <ModalShell onClose={onClose}>
       {({ titleId, descriptionId }) => (
         <DialogCard
           title="Test Overlay"
@@ -73,14 +73,14 @@ describe('DialogCard inside ModalShell', () => {
 
       render(
         <>
-          <ModalShell title="First Overlay" onClose={firstOnClose}>
+          <ModalShell onClose={firstOnClose}>
             {({ titleId }) => (
               <DialogCard title="First Overlay" onClose={firstOnClose} titleId={titleId}>
                 <button>First dialog button</button>
               </DialogCard>
             )}
           </ModalShell>
-          <ModalShell title="Second Overlay" onClose={secondOnClose}>
+          <ModalShell onClose={secondOnClose}>
             {({ titleId }) => (
               <DialogCard title="Second Overlay" onClose={secondOnClose} titleId={titleId}>
                 <button>Second dialog button</button>

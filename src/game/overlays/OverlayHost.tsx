@@ -1,34 +1,35 @@
-import { Suspense } from 'react';
+import { lazy, Suspense, useMemo } from 'react';
 import { useBridgeState, bridgeActions } from '@/game/bridge/store';
-import { DialogCard, ModalShell } from '@/shared/ui';
+import { ModalShell } from '@/shared/ui';
 import { getOverlayDefinition } from './overlayRegistry';
 
 export function OverlayHost() {
-  const { activeOverlayId } = useBridgeState();
-  if (!activeOverlayId) return null;
+  const { activeOverlay } = useBridgeState();
+  const ActiveOverlayComponent = useMemo(
+    () => activeOverlay ? lazy(getOverlayDefinition(activeOverlay.id).load) : null,
+    [activeOverlay]
+  );
 
-  const overlay = getOverlayDefinition(activeOverlayId);
-  const ActiveOverlayComponent = overlay.component;
+  if (!activeOverlay || !ActiveOverlayComponent) return null;
+
   const closeOverlay = () => bridgeActions.closeOverlay();
 
   return (
     <ModalShell
-      title={overlay.title}
-      hasDescription={Boolean(overlay.description)}
       onClose={closeOverlay}
+      closeOnEscape={activeOverlay.closeOnEscape}
+      closeOnBackdrop={activeOverlay.closeOnBackdrop}
     >
       {({ titleId, descriptionId }) => (
-        <DialogCard
-          title={overlay.title}
-          description={overlay.description}
-          onClose={closeOverlay}
-          titleId={titleId}
-          descriptionId={descriptionId}
-        >
-          <Suspense fallback={null}>
-            <ActiveOverlayComponent />
-          </Suspense>
-        </DialogCard>
+        <Suspense fallback={null}>
+          <ActiveOverlayComponent
+            params={activeOverlay.params}
+            close={closeOverlay}
+            openOverlay={bridgeActions.openOverlay}
+            titleId={titleId}
+            descriptionId={descriptionId}
+          />
+        </Suspense>
       )}
     </ModalShell>
   );

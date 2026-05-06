@@ -23,7 +23,3 @@ export function getOverlayDefinition(id: OverlayId): OverlayDefinition {
   }
   return overlay;
 }
-
-export function getDevSwitcherOverlays(): readonly OverlayDefinition[] {
-  return OVERLAY_DEFINITIONS.filter((overlay) => overlay.includeInDevSwitcher);
-}

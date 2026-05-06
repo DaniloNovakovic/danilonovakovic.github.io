@@ -94,7 +94,7 @@ describe('InteractiveApp', () => {
 
     await userEvent.click(screen.getByRole('button', { name: /open inventory/i }));
 
-    expect(screen.getByRole('dialog', { name: /inventory/i })).toBeDefined();
+    expect(await screen.findByRole('dialog', { name: /inventory/i })).toBeDefined();
     expect(bridgeStore.getState().activeOverlayId).toBe('inventory');
     expect(bridgeStore.getState().isPaused).toBe(true);
 
@@ -113,7 +113,7 @@ describe('InteractiveApp', () => {
     if (!devButton) return;
 
     await userEvent.click(devButton);
-    expect(screen.getByRole('dialog', { name: /dev scene switcher/i })).toBeDefined();
+    expect(await screen.findByRole('dialog', { name: /dev scene switcher/i })).toBeDefined();
     expect(bridgeStore.getState().activeOverlayId).toBe('devSwitcher');
 
     await userEvent.click(screen.getByRole('button', { name: /^city$/i }));

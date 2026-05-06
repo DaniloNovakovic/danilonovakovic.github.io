@@ -17,7 +17,7 @@ interface TestModalProps {
 
 function TestModal({ onClose = vi.fn(), title = 'Test Modal' }: TestModalProps) {
   return (
-    <ModalShell title={title} hasDescription onClose={onClose}>
+    <ModalShell onClose={onClose}>
       {({ titleId, descriptionId }) => (
         <div>
           <h2 id={titleId}>{title}</h2>
@@ -81,7 +81,7 @@ describe('ModalShell', () => {
     const onClose = vi.fn();
 
     render(
-      <ModalShell title="Propagation Test" onClose={onClose}>
+      <ModalShell onClose={onClose}>
         {({ titleId }) => (
           <div>
             <h2 id={titleId}>Propagation Test</h2>
@@ -100,11 +100,30 @@ describe('ModalShell', () => {
     const onClose = vi.fn();
 
     render(
-      <ModalShell title="Default Handling Test" onClose={onClose}>
+      <ModalShell onClose={onClose}>
         {({ titleId }) => (
           <div>
             <h2 id={titleId}>Default Handling Test</h2>
             <button onKeyDown={(event) => event.preventDefault()}>Prevents default</button>
+          </div>
+        )}
+      </ModalShell>
+    );
+
+    await userEvent.keyboard('{Escape}');
+
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('does not close on Escape when disabled', async () => {
+    const onClose = vi.fn();
+
+    render(
+      <ModalShell onClose={onClose} closeOnEscape={false}>
+        {({ titleId }) => (
+          <div>
+            <h2 id={titleId}>Locked Modal</h2>
+            <button>Inside</button>
           </div>
         )}
       </ModalShell>
@@ -125,6 +144,23 @@ describe('ModalShell', () => {
 
     await userEvent.click(screen.getByRole('dialog').parentElement!);
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not close on backdrop click when disabled', async () => {
+    const onClose = vi.fn();
+    render(
+      <ModalShell onClose={onClose} closeOnBackdrop={false}>
+        {({ titleId }) => (
+          <div>
+            <h2 id={titleId}>Backdrop Locked Modal</h2>
+            <button>Inside</button>
+          </div>
+        )}
+      </ModalShell>
+    );
+
+    await userEvent.click(screen.getByRole('dialog').parentElement!);
+    expect(onClose).not.toHaveBeenCalled();
   });
 
   it('returns focus to the opener when closed', async () => {

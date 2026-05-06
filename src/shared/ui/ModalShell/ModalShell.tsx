@@ -10,24 +10,22 @@ let previousBodyOverflow = '';
 
 interface ModalShellRenderProps {
   titleId: string;
-  descriptionId: string | undefined;
+  descriptionId: string;
 }
 
 interface ModalShellProps {
-  title: string;
-  hasDescription?: boolean;
   onClose: () => void;
   children: (props: ModalShellRenderProps) => ReactNode;
   className?: string;
+  closeOnEscape?: boolean;
   closeOnBackdrop?: boolean;
 }
 
 export function ModalShell({
-  title,
-  hasDescription = false,
   onClose,
   children,
   className,
+  closeOnEscape = true,
   closeOnBackdrop = true
 }: ModalShellProps) {
   const modalId = useRef(Symbol('modal'));
@@ -35,7 +33,6 @@ export function ModalShell({
   const openerRef = useRef<HTMLElement | null>(null);
   const titleId = useId();
   const descriptionId = useId();
-  const ariaDescriptionId = hasDescription ? descriptionId : undefined;
 
   useEffect(function registerModalInStack() {
     const currentModalId = modalId.current;
@@ -82,7 +79,7 @@ export function ModalShell({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (modalStack.at(-1) !== modalId.current) return;
 
-      if (event.key === 'Escape' && !event.defaultPrevented) {
+      if (event.key === 'Escape' && closeOnEscape && !event.defaultPrevented) {
         queueMicrotask(() => {
           if (event.defaultPrevented || modalStack.at(-1) !== modalId.current) return;
           event.preventDefault();
@@ -113,7 +110,7 @@ export function ModalShell({
 
     window.addEventListener('keydown', handleKeyDown, { capture: true });
     return () => window.removeEventListener('keydown', handleKeyDown, { capture: true });
-  }, [onClose]);
+  }, [closeOnEscape, onClose]);
 
   return (
     <div
@@ -131,14 +128,13 @@ export function ModalShell({
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
-        aria-label={title}
         aria-labelledby={titleId}
-        aria-describedby={ariaDescriptionId}
+        aria-describedby={descriptionId}
         tabIndex={-1}
-        className="w-full max-w-[600px] outline-none"
+        className="w-full outline-none"
         onMouseDown={(event) => event.stopPropagation()}
       >
-        {children({ titleId, descriptionId: ariaDescriptionId })}
+        {children({ titleId, descriptionId })}
       </div>
     </div>
   );

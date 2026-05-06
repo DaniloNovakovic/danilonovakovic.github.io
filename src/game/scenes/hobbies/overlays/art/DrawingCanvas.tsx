@@ -1,10 +1,12 @@
 import React, { useRef, useState, useEffect, useLayoutEffect } from 'react';
 import { Trash2 } from 'lucide-react';
+import { OverlayDialogFrame } from '@/game/overlays/OverlayDialogFrame';
+import type { OverlayControllerProps } from '@/game/overlays/types';
 import { useMessages } from '@/shared/i18n';
 import { useOverlayKeys } from '@/shared/hooks/useOverlayKeys';
 import { Button, Panel } from '@/shared/ui';
 
-export default function DrawingCanvas() {
+export default function DrawingCanvas({ close, titleId, descriptionId }: OverlayControllerProps) {
   const messages = useMessages();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -174,55 +176,61 @@ export default function DrawingCanvas() {
   };
 
   return (
-    <div className="flex flex-col items-center w-full">
-      <Panel border="thick" className="group relative h-[250px] w-full overflow-hidden p-0 shadow-[6px_6px_0px_0px_rgba(26,26,26,1)]">
-        <canvas
-          ref={canvasRef}
-          className="w-full h-full cursor-crosshair touch-none"
-          onMouseDown={startDrawing}
-          onMouseMove={draw}
-          onMouseUp={stopDrawing}
-          onMouseOut={stopDrawing}
-          onTouchStart={startDrawing}
-          onTouchMove={draw}
-          onTouchEnd={stopDrawing}
-        />
+    <OverlayDialogFrame
+      title={messages.catalog.hobbies.art.name}
+      description={messages.catalog.hobbies.art.description}
+      close={close}
+      titleId={titleId}
+      descriptionId={descriptionId}
+    >
+      <div className="flex flex-col items-center w-full">
+        <Panel border="thick" className="group relative h-[250px] w-full overflow-hidden p-0 shadow-[6px_6px_0px_0px_rgba(26,26,26,1)]">
+          <canvas
+            ref={canvasRef}
+            className="w-full h-full cursor-crosshair touch-none"
+            onMouseDown={startDrawing}
+            onMouseMove={draw}
+            onMouseUp={stopDrawing}
+            onMouseOut={stopDrawing}
+            onTouchStart={startDrawing}
+            onTouchMove={draw}
+            onTouchEnd={stopDrawing}
+          />
 
-        {/* Phase 4: Virtual Cursor Indicator */}
-        {isUsingKeyboard && (
-          <div 
-            className={`absolute pointer-events-none w-4 h-4 border-2 rounded-full -translate-x-1/2 -translate-y-1/2 transition-colors duration-100 ${isKeyboardDrawing ? 'bg-red-500 border-black' : 'bg-transparent border-blue-500'}`}
-            style={{ left: cursorPos.x, top: cursorPos.y }}
-          >
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-1 bg-black rounded-full" />
-          </div>
-        )}
+          {isUsingKeyboard && (
+            <div 
+              className={`absolute pointer-events-none w-4 h-4 border-2 rounded-full -translate-x-1/2 -translate-y-1/2 transition-colors duration-100 ${isKeyboardDrawing ? 'bg-red-500 border-black' : 'bg-transparent border-blue-500'}`}
+              style={{ left: cursorPos.x, top: cursorPos.y }}
+            >
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-1 bg-black rounded-full" />
+            </div>
+          )}
+          
+          <div className="absolute top-0 left-0 w-4 h-4 border-b-2 border-r-2 border-[#1a1a1a] opacity-30"></div>
+          <div className="absolute top-0 right-0 w-4 h-4 border-b-2 border-l-2 border-[#1a1a1a] opacity-30"></div>
+          <div className="absolute bottom-0 left-0 w-4 h-4 border-t-2 border-r-2 border-[#1a1a1a] opacity-30"></div>
+          <div className="absolute bottom-0 right-0 w-4 h-4 border-t-2 border-l-2 border-[#1a1a1a] opacity-30"></div>
+        </Panel>
         
-        {/* Subtle decorative corners to look like a canvas/sketchbook page */}
-        <div className="absolute top-0 left-0 w-4 h-4 border-b-2 border-r-2 border-[#1a1a1a] opacity-30"></div>
-        <div className="absolute top-0 right-0 w-4 h-4 border-b-2 border-l-2 border-[#1a1a1a] opacity-30"></div>
-        <div className="absolute bottom-0 left-0 w-4 h-4 border-t-2 border-r-2 border-[#1a1a1a] opacity-30"></div>
-        <div className="absolute bottom-0 right-0 w-4 h-4 border-t-2 border-l-2 border-[#1a1a1a] opacity-30"></div>
-      </Panel>
-      
-      <div className="mt-4 flex justify-between w-full items-center">
-        <div className="flex flex-col">
-          <span className="text-sm font-bold text-[#1a1a1a] opacity-60">
-            {messages.miniGames.drawing.instruction}
-          </span>
-          <span className="text-[10px] font-mono opacity-40">
-            {messages.miniGames.drawing.keyboardHint}
-          </span>
+        <div className="mt-4 flex justify-between w-full items-center">
+          <div className="flex flex-col">
+            <span className="text-sm font-bold text-[#1a1a1a] opacity-60">
+              {messages.miniGames.drawing.instruction}
+            </span>
+            <span className="text-[10px] font-mono opacity-40">
+              {messages.miniGames.drawing.keyboardHint}
+            </span>
+          </div>
+          <Button
+            onClick={clearCanvas}
+            variant="secondary"
+            className="shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] hover:translate-y-[2px] hover:shadow-none active:scale-95"
+          >
+            <Trash2 size={16} />
+            {messages.miniGames.drawing.erase}
+          </Button>
         </div>
-        <Button
-          onClick={clearCanvas}
-          variant="secondary"
-          className="shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] hover:translate-y-[2px] hover:shadow-none active:scale-95"
-        >
-          <Trash2 size={16} />
-          {messages.miniGames.drawing.erase}
-        </Button>
       </div>
-    </div>
+    </OverlayDialogFrame>
   );
 }

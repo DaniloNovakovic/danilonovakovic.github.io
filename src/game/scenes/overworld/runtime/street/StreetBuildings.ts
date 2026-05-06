@@ -3,8 +3,9 @@
  * Extracted from OverworldScene so the scene is a thin orchestrator.
  */
 import * as Phaser from 'phaser';
+import type { OverlayId } from '@/game/overlays/overlayIds';
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
-import { getOverlayDefinition } from '@/game/overlays/overlayRegistry';
+import { getMessages } from '@/shared/i18n';
 import { getSceneDefinition } from '@/game/scenes/sceneRegistry';
 import { OVERWORLD_BUILDING_TRIGGERS, type OverworldBuildingTrigger } from '../../worldLayout';
 
@@ -86,6 +87,24 @@ export function buildStreetBuildings(scene: Phaser.Scene): StreetBuildingLayers 
 
 function getBuildingLabel(trigger: OverworldBuildingTrigger): string {
   return trigger.action.kind === 'openOverlay'
-    ? getOverlayDefinition(trigger.action.overlayId).title
+    ? getOverworldOverlayLabel(trigger.action.overlayId)
     : getSceneDefinition(trigger.action.sceneId).title;
+}
+
+function getOverworldOverlayLabel(overlayId: OverlayId): string {
+  const messages = getMessages();
+  switch (overlayId) {
+    case 'profile':
+      return messages.catalog.portfolio.profile.name;
+    case 'experiences':
+      return messages.catalog.portfolio.experiences.name;
+    case 'projects':
+      return messages.catalog.portfolio.projects.name;
+    case 'abilities':
+      return messages.catalog.portfolio.abilities.name;
+    case 'contact':
+      return messages.catalog.portfolio.contact.name;
+    default:
+      return overlayId;
+  }
 }

@@ -1,15 +1,18 @@
-import type { ComponentType, LazyExoticComponent } from 'react';
+import type { ComponentType } from 'react';
+import type { OpenOverlayOptions } from '@/game/bridge/store';
 import type { OverlayId } from './overlayIds';
 
-// Extend this when overlay components need shared host props.
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface OverlayComponentProps {}
+export interface OverlayControllerProps {
+  params?: unknown;
+  close: () => void;
+  openOverlay: (overlayId: OverlayId, options?: OpenOverlayOptions) => void;
+  titleId: string;
+  descriptionId: string;
+}
+
+export type OverlayComponent = ComponentType<OverlayControllerProps>;
 
 export interface OverlayDefinition {
   id: OverlayId;
-  title: string;
-  description?: string;
-  component: ComponentType<OverlayComponentProps> | LazyExoticComponent<ComponentType<OverlayComponentProps>>;
-  loadComponent: () => Promise<{ default: ComponentType<OverlayComponentProps> }>;
-  includeInDevSwitcher?: boolean;
+  load: () => Promise<{ default: OverlayComponent }>;
 }

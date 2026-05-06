@@ -1,21 +1,8 @@
-import { createElement, lazy } from 'react';
-import type { OverlayDefinition, OverlayComponentProps } from '@/game/overlays/types';
-import { getMessages } from '@/shared/i18n';
-
-const LazyCodingOverlay = lazy(() => import('./overlays/developerConsole/CodingOverlay'));
-const messages = getMessages();
-
-function CodingOverlay(props: OverlayComponentProps) {
-  return createElement(LazyCodingOverlay, props);
-}
+import type { OverlayDefinition } from '@/game/overlays/types';
 
 export const BASEMENT_OVERLAY_DEFINITIONS: readonly OverlayDefinition[] = [
   {
     id: 'games',
-    title: messages.catalog.basement.games.name,
-    description: messages.catalog.basement.games.description,
-    component: CodingOverlay,
-    loadComponent: () => import('./overlays/developerConsole/CodingOverlay'),
-    includeInDevSwitcher: true
+    load: () => import('./overlays/developerConsole/CodingOverlay')
   }
 ];

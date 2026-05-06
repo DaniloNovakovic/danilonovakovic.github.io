@@ -30,8 +30,24 @@ export interface BridgeProgressState {
   discoveredSecretIds: SecretDiscoveryId[];
 }
 
+export interface OverlayRequest {
+  id: OverlayId;
+  params?: unknown;
+  returnToSceneId?: SceneId;
+  closeOnEscape: boolean;
+  closeOnBackdrop: boolean;
+}
+
+export interface OpenOverlayOptions {
+  params?: unknown;
+  returnToSceneId?: SceneId;
+  closeOnEscape?: boolean;
+  closeOnBackdrop?: boolean;
+}
+
 export interface BridgeState {
   activeSceneId: SceneId;
+  activeOverlay: OverlayRequest | null;
   activeOverlayId: OverlayId | null;
   loadingSceneId: SceneId | null;
   isPaused: boolean;
@@ -60,8 +76,24 @@ function arraysEqual<T>(a: readonly T[], b: readonly T[]): boolean {
   return true;
 }
 
+function overlayRequestsEqual(
+  a: OverlayRequest | null,
+  b: OverlayRequest | null
+): boolean {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  return (
+    a.id === b.id &&
+    a.params === b.params &&
+    a.returnToSceneId === b.returnToSceneId &&
+    a.closeOnEscape === b.closeOnEscape &&
+    a.closeOnBackdrop === b.closeOnBackdrop
+  );
+}
+
 let state: BridgeState = {
   activeSceneId: OVERWORLD_SCENE_ID,
+  activeOverlay: null,
   activeOverlayId: null,
   loadingSceneId: null,
   isPaused: false,
@@ -93,14 +125,16 @@ function setState(updater: (current: BridgeState) => BridgeState): void {
   const next = updater(state);
   const candidate: BridgeState = {
     ...next,
+    activeOverlayId: next.activeOverlay?.id ?? null,
     progress: {
       ...next.progress,
       hasGlasses: hasItemOwned(next.inventory, 'glasses')
     },
-    isPaused: next.activeOverlayId !== null || next.loadingSceneId !== null
+    isPaused: next.activeOverlay !== null || next.loadingSceneId !== null
   };
   const unchanged =
     previous.activeSceneId === candidate.activeSceneId &&
+    overlayRequestsEqual(previous.activeOverlay, candidate.activeOverlay) &&
     previous.activeOverlayId === candidate.activeOverlayId &&
     previous.loadingSceneId === candidate.loadingSceneId &&
     previous.isPaused === candidate.isPaused &&
@@ -143,7 +177,7 @@ export const bridgeActions = {
     setState((current) => ({
       ...current,
       activeSceneId: sceneId,
-      activeOverlayId: null,
+      activeOverlay: null,
       loadingSceneId: null,
       sceneHintText: null
     }));
@@ -153,19 +187,25 @@ export const bridgeActions = {
   },
   openOverlay(
     overlayId: OverlayId,
-    options: { returnToSceneId?: SceneId } = {}
+    options: OpenOverlayOptions = {}
   ): void {
     setState((current) => ({
       ...current,
       activeSceneId: options.returnToSceneId ?? current.activeSceneId,
-      activeOverlayId: overlayId,
+      activeOverlay: {
+        id: overlayId,
+        params: options.params,
+        returnToSceneId: options.returnToSceneId,
+        closeOnEscape: options.closeOnEscape ?? true,
+        closeOnBackdrop: options.closeOnBackdrop ?? true
+      },
       sceneHintText: null
     }));
   },
   closeOverlay(): void {
     setState((current) => ({
       ...current,
-      activeOverlayId: null,
+      activeOverlay: null,
       sceneHintText: null
     }));
   },

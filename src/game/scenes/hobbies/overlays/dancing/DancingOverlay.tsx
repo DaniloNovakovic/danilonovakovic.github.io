@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect, useCallback, useLayoutEffect } from 'react';
+import { OverlayDialogFrame } from '@/game/overlays/OverlayDialogFrame';
+import type { OverlayControllerProps } from '@/game/overlays/types';
 import { useMessages } from '@/shared/i18n';
 import { useOverlayKeys } from '@/shared/hooks/useOverlayKeys';
 import { Button, Panel } from '@/shared/ui';
@@ -32,7 +34,7 @@ function ArrowButton({
   );
 }
 
-export default function DancingOverlay() {
+export default function DancingOverlay({ close, titleId, descriptionId }: OverlayControllerProps) {
   const messages = useMessages();
   const copy = messages.miniGames.dancing;
   const [sequence, setSequence] = useState<string[]>([]);
@@ -150,33 +152,41 @@ export default function DancingOverlay() {
   });
 
   return (
-    <div className="w-full flex flex-col items-center">
-      <Panel border="thick" className="relative flex h-[250px] w-full flex-col items-center justify-center shadow-[6px_6px_0px_0px_rgba(26,26,26,1)]">
-        <div className="absolute top-4 font-bold text-lg">{message}</div>
+    <OverlayDialogFrame
+      title={messages.catalog.hobbies.dancing.name}
+      description={messages.catalog.hobbies.dancing.description}
+      close={close}
+      titleId={titleId}
+      descriptionId={descriptionId}
+    >
+      <div className="w-full flex flex-col items-center">
+        <Panel border="thick" className="relative flex h-[250px] w-full flex-col items-center justify-center shadow-[6px_6px_0px_0px_rgba(26,26,26,1)]">
+          <div className="absolute top-4 font-bold text-lg">{message}</div>
 
-        <div className="grid grid-cols-3 gap-2 mt-8">
-          <div></div>
-          <ArrowButton dir="UP" label="↑" activeArrow={activeArrow} onPress={handleArrowClick} />
-          <div></div>
-          <ArrowButton dir="LEFT" label="←" activeArrow={activeArrow} onPress={handleArrowClick} />
-          <ArrowButton dir="DOWN" label="↓" activeArrow={activeArrow} onPress={handleArrowClick} />
-          <ArrowButton dir="RIGHT" label="→" activeArrow={activeArrow} onPress={handleArrowClick} />
+          <div className="grid grid-cols-3 gap-2 mt-8">
+            <div></div>
+            <ArrowButton dir="UP" label="↑" activeArrow={activeArrow} onPress={handleArrowClick} />
+            <div></div>
+            <ArrowButton dir="LEFT" label="←" activeArrow={activeArrow} onPress={handleArrowClick} />
+            <ArrowButton dir="DOWN" label="↓" activeArrow={activeArrow} onPress={handleArrowClick} />
+            <ArrowButton dir="RIGHT" label="→" activeArrow={activeArrow} onPress={handleArrowClick} />
+          </div>
+
+          {!isPlaying && (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={startGame}
+              className="absolute bottom-4"
+            >
+              {sequence.length > 0 ? messages.common.restart : messages.common.start}
+            </Button>
+          )}
+        </Panel>
+        <div className="mt-4 text-sm font-bold text-[#1a1a1a] opacity-60">
+          {copy.instruction}
         </div>
-
-        {!isPlaying && (
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={startGame}
-            className="absolute bottom-4"
-          >
-            {sequence.length > 0 ? messages.common.restart : messages.common.start}
-          </Button>
-        )}
-      </Panel>
-      <div className="mt-4 text-sm font-bold text-[#1a1a1a] opacity-60">
-        {copy.instruction}
       </div>
-    </div>
+    </OverlayDialogFrame>
   );
 }

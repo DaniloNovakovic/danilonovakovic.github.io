@@ -23,7 +23,7 @@ type Story = StoryObj<typeof meta>;
 
 export const OverlayShell: Story = {
   render: () => (
-    <ModalShell title="Projects" hasDescription onClose={() => undefined}>
+    <ModalShell onClose={() => undefined}>
       {({ titleId, descriptionId }) => (
         <DialogCard
           title="Projects"

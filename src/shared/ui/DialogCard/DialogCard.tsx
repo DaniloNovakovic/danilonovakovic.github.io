@@ -44,9 +44,11 @@ export function DialogCard({
       </h2>
 
       <div className="mt-4 text-base leading-relaxed sm:mt-6 sm:text-xl">
-        {description && (
+        {description ? (
           <p id={descriptionId} className="mb-6 font-medium italic opacity-80 sm:mb-8">{description}</p>
-        )}
+        ) : descriptionId ? (
+          <p id={descriptionId} className="sr-only">{title}</p>
+        ) : null}
 
         <div className="mt-4">{children}</div>
       </div>

@@ -1,45 +1,55 @@
 import React from 'react';
+import { OverlayDialogFrame } from '@/game/overlays/OverlayDialogFrame';
+import type { OverlayControllerProps } from '@/game/overlays/types';
 import { useMessages } from '@/shared/i18n';
 import { getPortfolioData } from '@/shared/portfolio';
 import { Badge, Card, LinkButton } from '@/shared/ui';
 
-const ExperienceOverlay: React.FC = () => {
+const ExperienceOverlay: React.FC<OverlayControllerProps> = ({ close, titleId, descriptionId }) => {
   const messages = useMessages();
   const { experiences } = getPortfolioData(messages);
   
   return (
-    <div className="text-[#1a1a1a]">
-      <div className="space-y-8">
-        {experiences.map((exp, index) => (
-          <Card key={index}>
-            <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 border-b-2 border-gray-100 pb-2">
-              <h3 className="text-xl font-bold">{exp.title}</h3>
-              <Badge shape="pill" className="font-mono text-sm normal-case tracking-normal">{exp.period}</Badge>
-            </div>
-            <p className="mb-2 text-lg font-semibold">
-              {exp.companyUrl ? (
-                <LinkButton
-                  href={exp.companyUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  variant="quiet"
-                  className="inline p-0 text-lg normal-case tracking-normal"
-                  aria-label={messages.navigation.opensInNewTab(exp.company)}
-                >
-                  {exp.company}
-                </LinkButton>
-              ) : (
-                <span className="text-[#1a1a1a]">{exp.company}</span>
-              )}
-            </p>
-            <p className="text-base leading-relaxed text-gray-700">
-              {exp.description}
-            </p>
-          </Card>
-        ))}
+    <OverlayDialogFrame
+      title={messages.catalog.portfolio.experiences.name}
+      description={messages.catalog.portfolio.experiences.description}
+      close={close}
+      titleId={titleId}
+      descriptionId={descriptionId}
+    >
+      <div className="text-[#1a1a1a]">
+        <div className="space-y-8">
+          {experiences.map((exp, index) => (
+            <Card key={index}>
+              <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 border-b-2 border-gray-100 pb-2">
+                <h3 className="text-xl font-bold">{exp.title}</h3>
+                <Badge shape="pill" className="font-mono text-sm normal-case tracking-normal">{exp.period}</Badge>
+              </div>
+              <p className="mb-2 text-lg font-semibold">
+                {exp.companyUrl ? (
+                  <LinkButton
+                    href={exp.companyUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    variant="quiet"
+                    className="inline p-0 text-lg normal-case tracking-normal"
+                    aria-label={messages.navigation.opensInNewTab(exp.company)}
+                  >
+                    {exp.company}
+                  </LinkButton>
+                ) : (
+                  <span className="text-[#1a1a1a]">{exp.company}</span>
+                )}
+              </p>
+              <p className="text-base leading-relaxed text-gray-700">
+                {exp.description}
+              </p>
+            </Card>
+          ))}
+        </div>
+        <p className="mt-8 text-center text-sm text-gray-500 font-mono">{messages.common.scrollToSeeMore}</p>
       </div>
-      <p className="mt-8 text-center text-sm text-gray-500 font-mono">{messages.common.scrollToSeeMore}</p>
-    </div>
+    </OverlayDialogFrame>
   );
 };
 

@@ -31,6 +31,11 @@ describe('bridgeStore', () => {
 
     it('is true when an overlay is active', () => {
       bridgeActions.openOverlay('profile');
+      expect(bridgeStore.getState().activeOverlay).toMatchObject({
+        id: 'profile',
+        closeOnEscape: true,
+        closeOnBackdrop: true
+      });
       expect(bridgeStore.getState().activeOverlayId).toBe('profile');
       expect(bridgeStore.getState().isPaused).toBe(true);
     });
@@ -78,7 +83,32 @@ describe('bridgeStore', () => {
       bridgeActions.openOverlay('games', { returnToSceneId: 'basement' });
       const s = bridgeStore.getState();
       expect(s.activeSceneId).toBe('basement');
+      expect(s.activeOverlay).toMatchObject({
+        id: 'games',
+        returnToSceneId: 'basement',
+        closeOnEscape: true,
+        closeOnBackdrop: true
+      });
       expect(s.activeOverlayId).toBe('games');
+    });
+
+    it('stores overlay params and close policy from the request', () => {
+      const params = { source: 'test' };
+      bridgeActions.openOverlay('profile', {
+        params,
+        closeOnEscape: false,
+        closeOnBackdrop: false
+      });
+      const s = bridgeStore.getState();
+      expect(s.activeOverlay).toEqual({
+        id: 'profile',
+        params,
+        returnToSceneId: undefined,
+        closeOnEscape: false,
+        closeOnBackdrop: false
+      });
+      expect(s.activeOverlayId).toBe('profile');
+      expect(s.isPaused).toBe(true);
     });
 
     it('closeOverlay keeps the active scene and unpauses', () => {
@@ -87,6 +117,7 @@ describe('bridgeStore', () => {
       bridgeActions.closeOverlay();
       const s = bridgeStore.getState();
       expect(s.activeSceneId).toBe('basement');
+      expect(s.activeOverlay).toBeNull();
       expect(s.activeOverlayId).toBeNull();
       expect(s.isPaused).toBe(false);
     });
