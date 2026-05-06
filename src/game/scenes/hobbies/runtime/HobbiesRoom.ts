@@ -4,13 +4,12 @@
  * this module reads from it and emits Phaser game objects.
  */
 import * as Phaser from 'phaser';
-import { HOBBY_REACT_OVERLAY_IDS, type HobbyReactOverlayId } from '@/game/registry/featureIds';
+import { HOBBY_REACT_OVERLAY_IDS } from '@/game/registry/featureIds';
 import {
   HOBBIES_EXIT_X,
   HOBBY_STATION_LAYOUT
 } from '../roomLayout';
-import { TEXTS } from '@/game/registry/content';
-import { HOBBIES_TEXT } from '../text';
+import { getMessages } from '@/shared/i18n';
 import { TextureGenerator } from '@/game/runtime/textures/TextureGenerator';
 import {
   HOBBIES_FLOOR_Y,
@@ -19,14 +18,12 @@ import {
 } from '@/game/runtime/config';
 import { createUiText } from '@/game/runtime/text/createUiText';
 
-const hobbyLabel = (id: HobbyReactOverlayId): string =>
-  HOBBIES_TEXT.labels[id];
-
 /**
  * Generates hobby item textures, draws room background, stations, and exit door.
  * Must be called from HobbiesScene.create() before the player sprite is added.
  */
 export function buildHobbiesRoom(scene: Phaser.Scene): void {
+  const messages = getMessages();
   const width = HOBBIES_ROOM_WIDTH;
   const height = HOBBIES_ROOM_HEIGHT;
   const floorY = HOBBIES_FLOOR_Y;
@@ -112,7 +109,7 @@ export function buildHobbiesRoom(scene: Phaser.Scene): void {
         .sprite(station.x, floorY + station.yOffsetFromFloor, texKey)
         .setOrigin(0.5, 0.5);
     }
-    createUiText(scene, station.x, floorY - 140, hobbyLabel(station.id), {
+    createUiText(scene, station.x, floorY - 140, messages.scenes.hobbies.labels[station.id], {
       fontSize: '20px',
       color: '#1a1a1a',
       fontStyle: 'bold'
@@ -128,7 +125,7 @@ export function buildHobbiesRoom(scene: Phaser.Scene): void {
   exitDoor.fillRect(exitX - 30, floorY - 100, 60, 100);
   exitDoor.strokeRect(exitX - 30, floorY - 100, 60, 100);
   exitDoor.strokeCircle(exitX + 20, floorY - 50, 3);
-  createUiText(scene, exitX, floorY - 120, TEXTS.navigation.exit, {
+  createUiText(scene, exitX, floorY - 120, messages.navigation.exit, {
     fontSize: '16px',
     color: '#1a1a1a'
   })

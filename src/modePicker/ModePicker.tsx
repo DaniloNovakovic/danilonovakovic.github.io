@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Gamepad2, BookOpen } from 'lucide-react';
+import { useMessages } from '@/shared/i18n';
 import { Badge, Button } from '@/shared/ui';
 import { useIsTouchLike } from './useIsTouchLike';
 
@@ -14,11 +15,12 @@ interface ChoiceCardProps {
   blurb: string;
   icon: ReactNode;
   recommended: boolean;
+  recommendedLabel: string;
   cta: string;
   onClick: () => void;
 }
 
-function ChoiceCard({ title, blurb, icon, recommended, cta, onClick }: ChoiceCardProps) {
+function ChoiceCard({ title, blurb, icon, recommended, recommendedLabel, cta, onClick }: ChoiceCardProps) {
   return (
     <Button
       variant="secondary"
@@ -27,7 +29,7 @@ function ChoiceCard({ title, blurb, icon, recommended, cta, onClick }: ChoiceCar
     >
       {recommended && (
         <Badge tone="highlight" className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap shadow-[3px_3px_0px_0px_rgba(26,26,26,1)]">
-          Recommended
+          {recommendedLabel}
         </Badge>
       )}
       <div className="flex h-16 w-16 items-center justify-center rounded-lg border-2 border-[#1a1a1a] bg-[#f4f1ea] text-[#1a1a1a] sm:h-20 sm:w-20">
@@ -44,6 +46,7 @@ function ChoiceCard({ title, blurb, icon, recommended, cta, onClick }: ChoiceCar
 
 export default function ModePicker({ onChoose }: ModePickerProps) {
   const isTouch = useIsTouchLike();
+  const messages = useMessages();
 
   return (
     <div className="relative flex min-h-[100dvh] min-h-dvh w-full flex-col items-center justify-center overflow-x-hidden bg-[#f4f1ea] px-4 py-[max(1.5rem,env(safe-area-inset-top,0px))]">
@@ -52,35 +55,37 @@ export default function ModePicker({ onChoose }: ModePickerProps) {
       <div className="relative z-10 flex w-full max-w-4xl flex-col items-center gap-8">
         <header className="flex flex-col items-center gap-2 text-center">
           <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#1a1a1a]/60">
-            Danilo Novakovic — Portfolio
+            {messages.modePicker.eyebrow}
           </p>
-          <h1 className="text-4xl font-bold text-[#1a1a1a] sm:text-5xl">Pick your path</h1>
+          <h1 className="text-4xl font-bold text-[#1a1a1a] sm:text-5xl">{messages.modePicker.title}</h1>
           <p className="max-w-md text-sm text-[#1a1a1a]/80 sm:text-base">
-            Two ways to explore: walk around a sketchbook city, or flip through a quiet paper version.
+            {messages.modePicker.blurb}
           </p>
         </header>
 
         <div className="grid w-full grid-cols-1 place-items-center gap-8 pt-2 sm:grid-cols-2 sm:gap-6">
           <ChoiceCard
-            title="Interactive"
-            blurb="Walk a hand-drawn street, peek into buildings, play little mini-games. Works best with a keyboard."
+            title={messages.modePicker.interactive.title}
+            blurb={messages.modePicker.interactive.blurb}
             icon={<Gamepad2 className="h-10 w-10 sm:h-12 sm:w-12" strokeWidth={2} aria-hidden />}
             recommended={!isTouch}
-            cta="Start walking"
+            recommendedLabel={messages.modePicker.recommended}
+            cta={messages.modePicker.interactive.cta}
             onClick={() => onChoose('interactive')}
           />
           <ChoiceCard
-            title="Static"
-            blurb="A calm, scrollable version of the portfolio. Fast to load, easy to read, great on phones."
+            title={messages.modePicker.static.title}
+            blurb={messages.modePicker.static.blurb}
             icon={<BookOpen className="h-10 w-10 sm:h-12 sm:w-12" strokeWidth={2} aria-hidden />}
             recommended={isTouch}
-            cta="Read the page"
+            recommendedLabel={messages.modePicker.recommended}
+            cta={messages.modePicker.static.cta}
             onClick={() => onChoose('static')}
           />
         </div>
 
         <p className="max-w-md text-center text-xs text-[#1a1a1a]/60">
-          You can switch between the two at any time.
+          {messages.modePicker.switchHint}
         </p>
       </div>
     </div>

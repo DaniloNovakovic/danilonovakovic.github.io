@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { HOBBIES_TEXT } from '../../text';
+import { useMessages } from '@/shared/i18n';
 import { useOverlayKeys } from '@/shared/hooks/useOverlayKeys';
 import { Panel } from '@/shared/ui';
 
@@ -13,6 +13,7 @@ const NOTES = [
 ];
 
 export default function GuitarStrings() {
+  const messages = useMessages();
   const [activeString, setActiveString] = useState<number | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const activeStringTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -81,7 +82,7 @@ export default function GuitarStrings() {
             onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && playNote(i, n.freq)}
             tabIndex={0}
             role="button"
-            aria-label={`String ${n.note} (Press ${n.key})`}
+            aria-label={messages.miniGames.guitar.stringLabel(n.note, n.key)}
           >
             <div
               className={`absolute top-1/2 left-0 w-full h-[2px] bg-[#1a1a1a] transition-transform duration-100 ${activeString === i ? 'scale-y-300 translate-y-1' : ''} group-focus:bg-blue-500`}
@@ -100,7 +101,7 @@ export default function GuitarStrings() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border-4 border-[#1a1a1a] opacity-20 pointer-events-none"></div>
       </Panel>
       <div className="mt-4 text-sm font-bold text-[#1a1a1a] opacity-60">
-        {HOBBIES_TEXT.miniGames.guitar.instruction}
+        {messages.miniGames.guitar.instruction}
       </div>
     </div>
   );

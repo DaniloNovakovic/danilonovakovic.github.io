@@ -7,7 +7,7 @@ import * as Phaser from 'phaser';
 import { BASEMENT_FEATURE_ID, HOBBIES_FEATURE_ID, POTASSIUM_FEATURE_ID } from '@/game/registry/featureIds';
 import { PORTFOLIO_SECTIONS } from '@/game/registry/portfolioRegistry';
 import { TextureGenerator } from '@/game/runtime/textures/TextureGenerator';
-import { TEXTS } from '@/game/registry/content';
+import { getMessages } from '@/shared/i18n';
 import {
   GAME_DESIGN_HEIGHT,
   OVERWORLD_INTERACT_DISTANCE_X,
@@ -142,6 +142,7 @@ export class OverworldScene extends Phaser.Scene {
   }
 
   create() {
+    const messages = getMessages();
     this.physics.world.setBounds(0, 0, OVERWORLD_WIDTH, GAME_DESIGN_HEIGHT);
 
     const { groundZone } = buildStreetEnvironment(this);
@@ -193,7 +194,7 @@ export class OverworldScene extends Phaser.Scene {
     setupStreetCamera(this, this.player);
 
     // --- UI ---
-    this.interactPrompt = createUiText(this, 0, 0, TEXTS.navigation.enter, {
+    this.interactPrompt = createUiText(this, 0, 0, messages.navigation.enter, {
       fontSize: '18px',
       color: '#1a1a1a',
       backgroundColor: '#ffffff',
@@ -259,10 +260,10 @@ export class OverworldScene extends Phaser.Scene {
         promptOffsetY: OVERWORLD_INTERACT_PROMPT_OFFSET_Y
       },
       texts: {
-        basement: TEXTS.navigation.interact,
-        enter: TEXTS.navigation.enter,
-        bananaDiscovered: '[E] Peel banana',
-        bananaUndiscovered: '[E] Peel?'
+        basement: getMessages().navigation.interact,
+        enter: getMessages().navigation.enter,
+        bananaDiscovered: getMessages().scenes.overworld.bananaDiscoveredPrompt,
+        bananaUndiscovered: getMessages().scenes.overworld.bananaUndiscoveredPrompt
       }
     });
 
@@ -368,7 +369,8 @@ export class OverworldScene extends Phaser.Scene {
   }
 
   private createGlassesSecret(): void {
-    this.glassesSecretHint = createUiText(this, 650, 558, 'Something appears in plain sight.', {
+    const messages = getMessages();
+    this.glassesSecretHint = createUiText(this, 650, 558, messages.scenes.overworld.glassesSecretHint, {
       fontSize: '12px',
       color: '#1a1a1a',
       backgroundColor: '#fbfbf9',
@@ -431,9 +433,10 @@ export class OverworldScene extends Phaser.Scene {
   }
 
   private startBananaPeelDiscovery(): void {
+    const messages = getMessages();
     bridgeActions.discoverSecret(BANANA_PEEL_CLUE_ID);
     this.showBananaClueMessage(
-      'A tiny banana sticker points east. This city has stranger shortcuts than doors.',
+      messages.scenes.overworld.bananaDiscovery,
       BANANA_PEEL_CLUE_VISIBLE_MS,
       {
         typewriter: true,
@@ -480,6 +483,7 @@ export class OverworldScene extends Phaser.Scene {
   }
 
   private createBasementHoleTrigger(): void {
+    const messages = getMessages();
     const line = 0x1a1a1a;
     const hole = this.add.graphics();
     hole.fillStyle(line, 0.92);
@@ -494,7 +498,7 @@ export class OverworldScene extends Phaser.Scene {
       hole.strokePath();
     }
 
-    createUiText(this, BASEMENT_HOLE.x, BASEMENT_HOLE.y - 48, 'TODO?', {
+    createUiText(this, BASEMENT_HOLE.x, BASEMENT_HOLE.y - 48, messages.scenes.overworld.basementHole, {
       fontSize: '18px',
       color: '#1a1a1a',
       fontStyle: 'bold',

@@ -4,7 +4,7 @@
 
 The goal is to create a place where I can easily surface interesting personal open-source projects and exercises, share a bit about myself, and maybe attract and connect with like-minded people.
 
-**This repository (v3)** is a gamified portfolio: a **Phaser** overworld plus **React** overlays for sections and mini-games. Stack: **Vite**, **React 19**, **TypeScript**, **Tailwind CSS v4**. Design direction lives in [`docs/design/STYLE_GUIDE.md`](docs/design/STYLE_GUIDE.md); agent-oriented notes in [`AGENTS.md`](AGENTS.md).
+**This repository (v3)** is a gamified portfolio: a **Phaser** overworld plus **React** overlays for sections and mini-games. Stack: **Vite**, **React 19**, **TypeScript**, **Tailwind CSS v4**. Design direction lives in [`docs/design/style-guide.md`](docs/design/style-guide.md); agent-oriented notes in [`AGENTS.md`](AGENTS.md).
 
 **Personal log / opinions by version:** see [`CHANGELOG.md`](CHANGELOG.md) (v1 → v2 → current v3).
 
@@ -27,7 +27,9 @@ npm run build
 
 Runtime layering follows a micro-kernel + bridge pattern. Game runtime lookup lives in [`src/game/runtime/miniGameRegistry.ts`](src/game/runtime/miniGameRegistry.ts), with source facts owned by [`src/game/scenes`](src/game/scenes), [`src/game/portfolio`](src/game/portfolio), and composed through the game registry helpers.
 
-Full runtime layering and Module seams are in [`docs/ARCHITECTURE_RUNTIME.md`](docs/ARCHITECTURE_RUNTIME.md). Agent rules live in [`.agents/rules/`](.agents/rules/). Architectural patterns are decision aids, not an implementation checklist; per-pattern notes and adoption status live in [`docs/patterns/`](docs/patterns/README.md).
+User-facing copy is centralized in the typed i18n catalog under [`src/shared/i18n/messages/en`](src/shared/i18n/messages/en). React surfaces read it through `useMessages()` for live locale updates, while Phaser/runtime code reads the active catalog with `getMessages()` and refreshes on scene restart or re-entry. Non-copy portfolio facts live in [`src/shared/portfolio`](src/shared/portfolio) and are combined with localized messages by selectors.
+
+Full runtime layering and Module seams are in [`docs/runtime-architecture.md`](docs/runtime-architecture.md). Agent rules live in [`.agents/rules/`](.agents/rules/).
 
 ## Deploy (GitHub Pages)
 

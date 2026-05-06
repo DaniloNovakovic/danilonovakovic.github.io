@@ -7,6 +7,9 @@ import {
   type PotassiumShieldSide
 } from './potassiumSlipWaves';
 import { POTASSIUM_DATA_KEYS } from './potassiumSlipPhaserData';
+import { getMessages } from '@/shared/i18n';
+
+const messages = getMessages();
 
 export interface PotassiumEnemyConfig {
   label: string;
@@ -61,7 +64,7 @@ export const POTASSIUM_SPLITTER_CHILD_SPEED = POTASSIUM_NON_BOSS_ENEMY_SPEED + 1
 
 const ENEMY_CONFIGS: Record<PotassiumEnemyKind, PotassiumEnemyConfig> = {
   intern: {
-    label: 'Intern Bug',
+    label: messages.potassiumSlip.enemies.intern,
     hp: 2,
     score: 1,
     speed: 74,
@@ -69,7 +72,7 @@ const ENEMY_CONFIGS: Record<PotassiumEnemyKind, PotassiumEnemyConfig> = {
     scale: 0.92
   },
   scope: {
-    label: 'Scope Blob',
+    label: messages.potassiumSlip.enemies.scope,
     hp: 4,
     score: 2,
     speed: 54,
@@ -77,7 +80,7 @@ const ENEMY_CONFIGS: Record<PotassiumEnemyKind, PotassiumEnemyConfig> = {
     scale: 0.95
   },
   deadline: {
-    label: 'Deadline Drone',
+    label: messages.potassiumSlip.enemies.deadline,
     hp: 3,
     score: 2,
     speed: 104,
@@ -85,7 +88,7 @@ const ENEMY_CONFIGS: Record<PotassiumEnemyKind, PotassiumEnemyConfig> = {
     scale: 0.9
   },
   wall: {
-    label: 'Wooden Wall',
+    label: messages.potassiumSlip.enemies.wall,
     hp: 14,
     score: 4,
     speed: 30,
@@ -93,7 +96,7 @@ const ENEMY_CONFIGS: Record<PotassiumEnemyKind, PotassiumEnemyConfig> = {
     scale: 0.78
   },
   hardWall: {
-    label: 'Unbreakable Wall',
+    label: messages.potassiumSlip.enemies.hardWall,
     hp: 999,
     score: 0,
     speed: 30,
@@ -102,7 +105,7 @@ const ENEMY_CONFIGS: Record<PotassiumEnemyKind, PotassiumEnemyConfig> = {
     indestructible: true
   },
   splitter: {
-    label: 'Splitter Memo',
+    label: messages.potassiumSlip.enemies.splitter,
     hp: 5,
     score: 3,
     speed: 54,
@@ -111,7 +114,7 @@ const ENEMY_CONFIGS: Record<PotassiumEnemyKind, PotassiumEnemyConfig> = {
     splitsOnDeath: true
   },
   shield: {
-    label: 'Shielded Form',
+    label: messages.potassiumSlip.enemies.shield,
     hp: 7,
     score: 4,
     speed: 46,
@@ -120,7 +123,7 @@ const ENEMY_CONFIGS: Record<PotassiumEnemyKind, PotassiumEnemyConfig> = {
     shielded: true
   },
   boss: {
-    label: 'Potassium Compliance Officer',
+    label: messages.potassiumSlip.enemies.boss,
     hp: 92,
     score: 12,
     speed: 8,

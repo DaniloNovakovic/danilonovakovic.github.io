@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { TEXTS } from '@/game/registry/content';
-import { HOBBIES_TEXT } from '../../text';
+import { useMessages } from '@/shared/i18n';
 import { Panel } from '@/shared/ui';
 
 export default function MuayThaiMini() {
+  const messages = useMessages();
   const [hits, setHits] = useState(0);
   const [isHit, setIsHit] = useState(false);
   const hitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -40,7 +40,7 @@ export default function MuayThaiMini() {
     <div className="w-full flex flex-col items-center">
       <Panel border="thick" className="relative flex h-[250px] w-full items-end justify-center pb-8 shadow-[6px_6px_0px_0px_rgba(26,26,26,1)]">
         <div className="absolute top-4 left-4 font-bold text-2xl">
-          {TEXTS.common.combo} {hits}
+          {messages.common.combo} {hits}
         </div>
 
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1 h-16 border-l-4 border-dashed border-[#1a1a1a]"></div>
@@ -52,20 +52,20 @@ export default function MuayThaiMini() {
           className={`w-24 h-40 border-4 border-[#1a1a1a] bg-[#e8e5df] rounded-b-2xl rounded-t-lg cursor-pointer flex flex-col items-center pt-2 transition-transform duration-100 ${isHit ? '-rotate-12 translate-x-4 -translate-y-2' : 'rotate-0 origin-top'} outline-none focus:ring-4 focus:ring-blue-400 focus:ring-opacity-50`}
           style={{ transformOrigin: 'top center' }}
           role="button"
-          aria-label="Punching Bag"
+          aria-label={messages.miniGames.muayThai.punchingBag}
         >
           <div className="w-16 h-4 border-2 border-[#1a1a1a] mb-2 opacity-50"></div>
           <div className="w-16 h-4 border-2 border-[#1a1a1a] opacity-50"></div>
 
           {isHit && (
             <div className="absolute top-1/2 left-0 -translate-x-12 -translate-y-1/2 font-bold text-xl rotate-12">
-              {HOBBIES_TEXT.miniGames.muayThai.bam}
+              {messages.miniGames.muayThai.bam}
             </div>
           )}
         </div>
       </Panel>
       <div className="mt-4 text-sm font-bold text-[#1a1a1a] opacity-60">
-        {HOBBIES_TEXT.miniGames.muayThai.instruction}
+        {messages.miniGames.muayThai.instruction}
       </div>
     </div>
   );

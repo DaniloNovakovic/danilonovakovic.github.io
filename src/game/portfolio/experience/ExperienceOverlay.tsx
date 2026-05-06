@@ -1,10 +1,11 @@
 import React from 'react';
-import { PORTFOLIO_DATA } from '@/shared/content/portfolio/data';
-import { TEXTS } from '@/game/registry/content';
+import { useMessages } from '@/shared/i18n';
+import { getPortfolioData } from '@/shared/portfolio';
 import { Badge, Card, LinkButton } from '@/shared/ui';
 
 const ExperienceOverlay: React.FC = () => {
-  const { experiences } = PORTFOLIO_DATA;
+  const messages = useMessages();
+  const { experiences } = getPortfolioData(messages);
   
   return (
     <div className="text-[#1a1a1a]">
@@ -23,7 +24,7 @@ const ExperienceOverlay: React.FC = () => {
                   rel="noopener noreferrer"
                   variant="quiet"
                   className="inline p-0 text-lg normal-case tracking-normal"
-                  aria-label={`${exp.company} (opens in new tab)`}
+                  aria-label={messages.navigation.opensInNewTab(exp.company)}
                 >
                   {exp.company}
                 </LinkButton>
@@ -37,7 +38,7 @@ const ExperienceOverlay: React.FC = () => {
           </Card>
         ))}
       </div>
-      <p className="mt-8 text-center text-sm text-gray-500 font-mono">{TEXTS.common.scrollToSeeMore}</p>
+      <p className="mt-8 text-center text-sm text-gray-500 font-mono">{messages.common.scrollToSeeMore}</p>
     </div>
   );
 };

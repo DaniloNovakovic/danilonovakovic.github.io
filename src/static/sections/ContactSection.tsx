@@ -1,13 +1,14 @@
-import { PORTFOLIO_DATA } from '@/shared/content/portfolio/data';
-import { PORTFOLIO_TEXT } from '@/shared/content/portfolio/text';
+import { useMessages } from '@/shared/i18n';
+import { getPortfolioData } from '@/shared/portfolio';
 import { Card, LinkButton, SketchSection } from '@/shared/ui';
 import { CONTACT_ICON_SRC } from '../contactIcons';
 
 export function ContactSection() {
-  const { contact } = PORTFOLIO_DATA;
+  const messages = useMessages();
+  const { contact } = getPortfolioData(messages);
 
   return (
-    <SketchSection id="contact" title={PORTFOLIO_TEXT.contact.title}>
+    <SketchSection id="contact" title={messages.portfolio.contact.title}>
       <div className="grid grid-cols-1 gap-4">
         {contact.map((item) => (
           <LinkButton
@@ -29,8 +30,8 @@ export function ContactSection() {
       </div>
 
       <Card border="medium" shadow="none" className="mt-8 border-dashed bg-yellow-50 p-4 text-center">
-        <p className="text-lg font-bold">{PORTFOLIO_TEXT.contact.quote}</p>
-        <p className="mt-1 text-sm text-gray-600">{PORTFOLIO_TEXT.contact.quoteAuthor}</p>
+        <p className="text-lg font-bold">{messages.portfolio.contact.quote}</p>
+        <p className="mt-1 text-sm text-gray-600">{messages.portfolio.contact.quoteAuthor}</p>
       </Card>
     </SketchSection>
   );

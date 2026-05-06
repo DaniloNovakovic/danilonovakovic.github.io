@@ -2,11 +2,13 @@ import { createElement, lazy } from 'react';
 import { PHASER_SCENE_KEYS } from '@/game/registry/featureIds';
 import type { FeatureCatalogEntry } from '@/game/registry/catalogTypes';
 import type { MiniGameOverlayProps } from '@/game/runtime/types';
+import { getMessages } from '@/shared/i18n';
 
 const LazyDrawingCanvas = lazy(() => import('./overlays/art/DrawingCanvas'));
 const LazyDancingMini = lazy(() => import('./overlays/dancing/DancingMini'));
 const LazyMuayThaiMini = lazy(() => import('./overlays/fitness/MuayThaiMini'));
 const LazyGuitarStrings = lazy(() => import('./overlays/music/GuitarStrings'));
+const messages = getMessages();
 
 function DrawingCanvas(props: MiniGameOverlayProps) {
   return createElement(LazyDrawingCanvas, props);
@@ -27,8 +29,8 @@ function GuitarStrings(props: MiniGameOverlayProps) {
 export const HOBBIES_FEATURE_CATALOG_ENTRIES: FeatureCatalogEntry[] = [
   {
     id: 'hobbies',
-    name: 'Hobbies',
-    description: 'Step inside to see what I do when I am not coding.',
+    name: messages.catalog.hobbies.hobbies.name,
+    description: messages.catalog.hobbies.hobbies.description,
     runtime: {
       kind: 'phaserScene',
       sceneKey: PHASER_SCENE_KEYS.hobbies,
@@ -37,8 +39,8 @@ export const HOBBIES_FEATURE_CATALOG_ENTRIES: FeatureCatalogEntry[] = [
   },
   {
     id: 'art',
-    name: 'Digital Art',
-    description: 'Sketching and drawing is how I relax.',
+    name: messages.catalog.hobbies.art.name,
+    description: messages.catalog.hobbies.art.description,
     overlayParentId: 'hobbies',
     runtime: {
       kind: 'reactOverlay',
@@ -48,8 +50,8 @@ export const HOBBIES_FEATURE_CATALOG_ENTRIES: FeatureCatalogEntry[] = [
   },
   {
     id: 'music',
-    name: 'Music Performance',
-    description: 'Playing guitar and making music.',
+    name: messages.catalog.hobbies.music.name,
+    description: messages.catalog.hobbies.music.description,
     overlayParentId: 'hobbies',
     runtime: {
       kind: 'reactOverlay',
@@ -59,8 +61,8 @@ export const HOBBIES_FEATURE_CATALOG_ENTRIES: FeatureCatalogEntry[] = [
   },
   {
     id: 'fitness',
-    name: 'Muay Thai & Fitness',
-    description: 'Keeping active with Muay Thai and exercise.',
+    name: messages.catalog.hobbies.fitness.name,
+    description: messages.catalog.hobbies.fitness.description,
     overlayParentId: 'hobbies',
     runtime: {
       kind: 'reactOverlay',
@@ -70,8 +72,8 @@ export const HOBBIES_FEATURE_CATALOG_ENTRIES: FeatureCatalogEntry[] = [
   },
   {
     id: 'dancing',
-    name: 'Dance & rhythm',
-    description: 'Repeat the moves, feel the beat—coordination as a mini-game.',
+    name: messages.catalog.hobbies.dancing.name,
+    description: messages.catalog.hobbies.dancing.description,
     overlayParentId: 'hobbies',
     runtime: {
       kind: 'reactOverlay',

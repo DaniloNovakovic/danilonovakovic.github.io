@@ -8,6 +8,9 @@ const ignoredDirs = new Set([
   'node_modules',
   'storybook-static'
 ]);
+const ignoredRelativeDirs = new Set([
+  '.agents/skills'
+]);
 const markdownLinkPattern = /(?<!!)\[[^\]]*]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
 const inlinePathPattern = /(?<![\w./-])(?:src|docs|\.agents)\/[A-Za-z0-9_./*-]+/g;
 const markdownFiles = [];
@@ -18,6 +21,8 @@ function walk(dir) {
     if (ignoredDirs.has(entry.name)) continue;
     const fullPath = path.join(dir, entry.name);
     if (entry.isDirectory()) {
+      const relativePath = path.relative(repoRoot, fullPath);
+      if (ignoredRelativeDirs.has(relativePath)) continue;
       walk(fullPath);
     } else if (entry.isFile() && entry.name.endsWith('.md')) {
       markdownFiles.push(fullPath);

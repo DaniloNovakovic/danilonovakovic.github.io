@@ -1,6 +1,6 @@
 # Core Gameplay Mechanics
 
-> Concept / future-design notes. This document can mention mechanics that are not implemented yet. For current player-facing controls and shipped level behavior, see [`PLAYER_MANUAL.md`](./PLAYER_MANUAL.md).
+> Concept / future-design notes. This document can mention mechanics that are not implemented yet. For current player-facing controls and shipped level behavior, see [`player-manual.md`](./player-manual.md).
 
 ## 1. Style Phasing (The "Lens")
 

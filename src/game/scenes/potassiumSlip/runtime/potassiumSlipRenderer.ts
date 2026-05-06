@@ -2,6 +2,7 @@ import * as Phaser from 'phaser';
 import { GAME_DESIGN_WIDTH } from '@/game/runtime/config';
 import { POTASSIUM_PROJECTILE_CONTROL_DEFAULTS } from './potassiumSlipProjectileControl';
 import { createUiText, snapUiTextCoordinate } from '@/game/runtime/text/createUiText';
+import { getMessages } from '@/shared/i18n';
 import type {
   PotassiumDraftOption,
   PotassiumEnemyHealthState,
@@ -272,14 +273,16 @@ export class PotassiumSlipRenderer {
   }
 
   updateHud(input: { waveLabel: string; score: number; lives: number }): void {
+    const messages = getMessages();
     this.hudText?.setText(input.waveLabel);
-    this.scoreText?.setText(`Score ${input.score}`);
-    this.livesText?.setText(`Lives ${input.lives}`);
+    this.scoreText?.setText(messages.potassiumSlip.hud.score(input.score));
+    this.livesText?.setText(messages.potassiumSlip.hud.lives(input.lives));
   }
 
   createStartOverlay(): void {
+    const messages = getMessages();
     const { arena } = this.layout;
-    this.overlayText = createUiText(this.scene, GAME_DESIGN_WIDTH / 2, 245, 'POTASSIUM SLIP', {
+    this.overlayText = createUiText(this.scene, GAME_DESIGN_WIDTH / 2, 245, messages.potassiumSlip.title, {
       fontSize: '32px',
       color: '#1a1a1a',
       fontStyle: 'bold',
@@ -290,7 +293,7 @@ export class PotassiumSlipRenderer {
       this.scene,
       GAME_DESIGN_WIDTH / 2,
       320,
-      'DRAG TOWARD A TARGET. RELEASE BANANA.\nHOLD ANYWHERE TO YO-YO IT HOME.\nCLEAR WAVES. STEAL THE CIRCUIT.',
+      messages.potassiumSlip.instructions,
       {
         fontSize: '14px',
         color: '#1a1a1a',
@@ -307,17 +310,19 @@ export class PotassiumSlipRenderer {
   }
 
   showOutcomeOverlay(input: { title: string; score: number; titleFontSize: number }): void {
+    const messages = getMessages();
     this.overlayText?.setFontSize(input.titleFontSize).setText(input.title).setPosition(GAME_DESIGN_WIDTH / 2, 255).setVisible(true);
-    this.subOverlayText?.setFontSize(15).setText(`Final Score: ${input.score}`).setPosition(GAME_DESIGN_WIDTH / 2, 308).setVisible(true);
+    this.subOverlayText?.setFontSize(15).setText(messages.potassiumSlip.finalScore(input.score)).setPosition(GAME_DESIGN_WIDTH / 2, 308).setVisible(true);
   }
 
   showUpgradeChoices(choices: PotassiumUpgradeChoiceView[]): void {
+    const messages = getMessages();
     const { arena } = this.layout;
     this.clearUpgradeChoices();
     this.upgradeChoiceBackdrop = this.scene.add.rectangle(GAME_DESIGN_WIDTH / 2, 305, arena.width - 76, 176, 0xfbfbf9, 0.96)
       .setStrokeStyle(5, 0x1a1a1a, 0.9)
       .setDepth(1200);
-    this.upgradeChoiceTitle = createUiText(this.scene, GAME_DESIGN_WIDTH / 2, 238, 'CHOOSE BANANA NONSENSE', {
+    this.upgradeChoiceTitle = createUiText(this.scene, GAME_DESIGN_WIDTH / 2, 238, messages.potassiumSlip.chooseUpgrade, {
       fontSize: '15px',
       color: '#1a1a1a',
       fontStyle: 'bold',
@@ -368,15 +373,16 @@ export class PotassiumSlipRenderer {
   }
 
   showTerminal(outcome: 'won' | 'game_over', records: string): void {
+    const messages = getMessages();
     this.clearTerminal();
     const buttons: Array<{ action: PotassiumTerminalAction; label: string }> = outcome === 'won'
       ? [
-        { action: 'endless', label: 'ENDLESS MODE' },
-        { action: 'return', label: 'RETURN TO CITY' }
+        { action: 'endless', label: messages.potassiumSlip.terminal.endlessMode },
+        { action: 'return', label: messages.potassiumSlip.terminal.returnToCity }
       ]
       : [
-        { action: 'retry', label: 'RETRY' },
-        { action: 'return', label: 'RETURN TO CITY' }
+        { action: 'retry', label: messages.potassiumSlip.terminal.retry },
+        { action: 'return', label: messages.potassiumSlip.terminal.returnToCity }
       ];
     const startX = GAME_DESIGN_WIDTH / 2 - 88;
     this.terminalButtons = buttons.map((button, index) => {
@@ -454,9 +460,10 @@ export class PotassiumSlipRenderer {
     }
     const label = getPotassiumData<Phaser.GameObjects.Text>(enemy, POTASSIUM_DATA_KEYS.labelText);
     if (label) {
+      const messages = getMessages();
       const hp = Math.ceil(getPotassiumEnemyHp(enemy));
       const maxHp = getPotassiumEnemyMaxHp(enemy);
-      label.setText(`${hp}/${maxHp}`);
+      label.setText(messages.potassiumSlip.enemies.health(hp, maxHp));
       this.positionFloatingLabel(label, enemy.x, enemy.y - 34 * enemy.scale);
     }
   }
@@ -601,7 +608,8 @@ export class PotassiumSlipRenderer {
     labelText: string,
     hp: number
   ): Phaser.GameObjects.Text {
-    const label = createUiText(this.scene, enemy.x, enemy.y - 34, `${labelText} ${hp}/${hp}`, {
+    const messages = getMessages();
+    const label = createUiText(this.scene, enemy.x, enemy.y - 34, messages.potassiumSlip.enemies.labelledHealth(labelText, hp), {
       fontSize: '9px',
       color: '#1a1a1a',
       fontStyle: 'bold',

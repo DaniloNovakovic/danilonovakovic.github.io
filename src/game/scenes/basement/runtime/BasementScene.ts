@@ -9,7 +9,7 @@ import {
   type BasementInteractionEffect,
   type BasementRoomInteractableId
 } from '../roomLayout';
-import { TEXTS } from '@/game/registry/content';
+import { getMessages } from '@/shared/i18n';
 import {
   GAME_DESIGN_HEIGHT,
   GAME_DESIGN_WIDTH,
@@ -73,6 +73,7 @@ export class BasementScene extends Phaser.Scene {
   }
 
   create() {
+    const messages = getMessages();
     this.physics.world.setBounds(0, 0, GAME_DESIGN_WIDTH, GAME_DESIGN_HEIGHT);
     this.buildRoom();
 
@@ -128,7 +129,7 @@ export class BasementScene extends Phaser.Scene {
     this.physics.add.existing(ground, true);
     this.physics.add.collider(this.player, ground);
 
-    this.interactPrompt = createUiText(this, 0, 0, TEXTS.navigation.interact, {
+    this.interactPrompt = createUiText(this, 0, 0, messages.navigation.interact, {
       fontSize: '16px',
       color: '#fbfbf9',
       backgroundColor: '#1a1a1a',
@@ -200,6 +201,7 @@ export class BasementScene extends Phaser.Scene {
   }
 
   private buildRoom(): void {
+    const messages = getMessages();
     this.cameras.main.setBackgroundColor('#151515');
 
     const g = this.add.graphics();
@@ -227,13 +229,13 @@ export class BasementScene extends Phaser.Scene {
 
     this.buildComputer(g);
 
-    createUiText(this, GAME_DESIGN_WIDTH / 2, 34, 'DEVELOPER BASEMENT', {
+    createUiText(this, GAME_DESIGN_WIDTH / 2, 34, messages.scenes.basement.title, {
       fontSize: '24px',
       color: '#66ff99',
       fontStyle: 'bold'
     }).setOrigin(0.5);
 
-    createUiText(this, BASEMENT_EXIT.x, BASEMENT_EXIT.y - 92, 'LADDER UP', {
+    createUiText(this, BASEMENT_EXIT.x, BASEMENT_EXIT.y - 92, messages.scenes.basement.ladderUp, {
       fontSize: '15px',
       color: '#fbfbf9',
       backgroundColor: '#1a1a1a',
@@ -254,7 +256,7 @@ export class BasementScene extends Phaser.Scene {
     const bridge = this.add.rectangle(0, 0, 12, 4, 0x66ff99, 1);
     const glow = this.add.ellipse(0, 0, 104, 56, 0x66ff99, 0.08);
     this.glasses.add([glow, leftLens, rightLens, bridge]);
-    createUiText(this, GLASSES_PICKUP.x, GLASSES_PICKUP.y + 42, 'GLASSES', {
+    createUiText(this, GLASSES_PICKUP.x, GLASSES_PICKUP.y + 42, messages.scenes.basement.glasses, {
       fontSize: '14px',
       color: '#66ff99',
       fontStyle: 'bold'
@@ -317,6 +319,7 @@ export class BasementScene extends Phaser.Scene {
   }
 
   private applyBasementInteractionEffect(effect: BasementInteractionEffect): void {
+    const messages = getMessages();
     switch (effect.kind) {
       case 'close':
         this.onClose?.();
@@ -326,7 +329,7 @@ export class BasementScene extends Phaser.Scene {
         break;
       case 'collectGlasses':
         bridgeActions.collectGlasses();
-        this.statusText.setText('Glasses acquired. The sketch city flickers into focus.');
+        this.statusText.setText(messages.scenes.basement.glassesAcquired);
         this.refreshGlassesVisibility();
         break;
       case 'showThought':

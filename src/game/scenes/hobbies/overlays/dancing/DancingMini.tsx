@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect, useCallback, useLayoutEffect } from 'react';
-import { TEXTS } from '@/game/registry/content';
-import { HOBBIES_TEXT } from '../../text';
+import { useMessages } from '@/shared/i18n';
 import { useOverlayKeys } from '@/shared/hooks/useOverlayKeys';
 import { Button, Panel } from '@/shared/ui';
 
@@ -34,12 +33,14 @@ function ArrowButton({
 }
 
 export default function DancingMini() {
+  const messages = useMessages();
+  const copy = messages.miniGames.dancing;
   const [sequence, setSequence] = useState<string[]>([]);
   const [playerSeq, setPlayerSeq] = useState<string[]>([]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isWatching, setIsWatching] = useState(false);
   const [activeArrow, setActiveArrow] = useState<string | null>(null);
-  const [message, setMessage] = useState(HOBBIES_TEXT.miniGames.dancing.startMessage);
+  const [message, setMessage] = useState<string>(copy.startMessage);
 
   const sequenceRef = useRef<string[]>([]);
   const playerSeqRef = useRef<string[]>([]);
@@ -72,7 +73,7 @@ export default function DancingMini() {
       clearTimers();
       let i = 0;
       setIsWatching(true);
-      setMessage(HOBBIES_TEXT.miniGames.dancing.watchMessage);
+      setMessage(copy.watchMessage);
       intervalRef.current = setInterval(() => {
         const idx = i;
         setActiveArrow(seq[idx] ?? null);
@@ -86,13 +87,13 @@ export default function DancingMini() {
           }
           const t2 = setTimeout(() => {
             setIsWatching(false);
-            setMessage(HOBBIES_TEXT.miniGames.dancing.turnMessage);
+            setMessage(copy.turnMessage);
           }, 500);
           timeoutsRef.current.push(t2);
         }
       }, 800);
     },
-    [clearTimers]
+    [clearTimers, copy]
   );
 
   const nextRound = useCallback(
@@ -112,7 +113,7 @@ export default function DancingMini() {
     setPlayerSeq([]);
     setIsPlaying(true);
     setIsWatching(true);
-    setMessage(HOBBIES_TEXT.miniGames.dancing.watchMessage);
+    setMessage(copy.watchMessage);
     nextRound([]);
   };
 
@@ -131,15 +132,15 @@ export default function DancingMini() {
 
     if (!isCorrect) {
       clearTimers();
-      setMessage(`${TEXTS.common.gameOver} ${TEXTS.common.score} ${seq.length - 1}`);
+      setMessage(copy.gameOverWithScore(seq.length - 1));
       setIsPlaying(false);
       setIsWatching(false);
     } else if (newPlayerSeq.length === seq.length) {
-      setMessage(HOBBIES_TEXT.miniGames.dancing.successMessage);
+      setMessage(copy.successMessage);
       const tNext = setTimeout(() => nextRound(seq), 1000);
       timeoutsRef.current.push(tNext);
     }
-  }, [clearTimers, nextRound]);
+  }, [clearTimers, copy, nextRound]);
 
   useOverlayKeys({
     ArrowUp: () => handleArrowClick('UP'),
@@ -169,12 +170,12 @@ export default function DancingMini() {
             onClick={startGame}
             className="absolute bottom-4"
           >
-            {sequence.length > 0 ? TEXTS.common.restart : TEXTS.common.start}
+            {sequence.length > 0 ? messages.common.restart : messages.common.start}
           </Button>
         )}
       </Panel>
       <div className="mt-4 text-sm font-bold text-[#1a1a1a] opacity-60">
-        {HOBBIES_TEXT.miniGames.dancing.instruction}
+        {copy.instruction}
       </div>
     </div>
   );

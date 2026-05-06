@@ -4,7 +4,7 @@
  */
 import * as Phaser from 'phaser';
 import { HOBBIES_EXIT_X, HOBBIES_ROOM_INTERACTABLES } from '../roomLayout';
-import { TEXTS } from '@/game/registry/content';
+import { getMessages } from '@/shared/i18n';
 import type { HobbyReactOverlayId } from '@/game/registry/featureIds';
 import {
   GAME_DESIGN_HEIGHT,
@@ -75,6 +75,7 @@ export class HobbiesScene extends Phaser.Scene {
   }
 
   create() {
+    const messages = getMessages();
     const width = HOBBIES_ROOM_WIDTH;
     const height = HOBBIES_ROOM_HEIGHT;
     const floorY = HOBBIES_FLOOR_Y;
@@ -134,7 +135,7 @@ export class HobbiesScene extends Phaser.Scene {
     this.physics.add.existing(ground, true);
     this.physics.add.collider(this.player, ground);
 
-    this.exitPrompt = createUiText(this, HOBBIES_EXIT_X, floorY - 150, TEXTS.navigation.interact, {
+    this.exitPrompt = createUiText(this, HOBBIES_EXIT_X, floorY - 150, messages.navigation.interact, {
       fontSize: '16px',
       color: '#1a1a1a',
       backgroundColor: '#ffffff',

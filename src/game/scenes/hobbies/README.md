@@ -14,4 +14,4 @@ This folder owns the Hobbies interior scene and its React hobby overlays.
 - Put reusable side-view player behavior in `src/game/runtime`; keep Hobbies-only colliders, prompts, and bridge mutations local.
 - Cross-folder imports should use this folder's public barrels, not runtime internals.
 
-See `docs/ARCHITECTURE_RUNTIME.md`, `.agents/rules/20-game-runtime.md`, and `.agents/rules/30-react-overlays.md` for the global runtime rules.
+See `docs/runtime-architecture.md`, `.agents/rules/20-game-runtime.md`, and `.agents/rules/30-react-overlays.md` for the global runtime rules.

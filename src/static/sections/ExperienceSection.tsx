@@ -1,11 +1,13 @@
-import { PORTFOLIO_DATA } from '@/shared/content/portfolio/data';
+import { useMessages } from '@/shared/i18n';
+import { getPortfolioData } from '@/shared/portfolio';
 import { Badge, Card, LinkButton, SketchSection } from '@/shared/ui';
 
 export function ExperienceSection() {
-  const { experiences } = PORTFOLIO_DATA;
+  const messages = useMessages();
+  const { experiences } = getPortfolioData(messages);
 
   return (
-    <SketchSection id="experience" title="Experience">
+    <SketchSection id="experience" title={messages.portfolio.experience.title}>
       <div className="space-y-8">
         {experiences.map((exp) => (
           <Card key={`${exp.company}-${exp.period}`}>
@@ -21,7 +23,7 @@ export function ExperienceSection() {
                   rel="noopener noreferrer"
                   variant="quiet"
                   className="inline p-0 text-lg normal-case tracking-normal"
-                  aria-label={`${exp.company} (opens in new tab)`}
+                  aria-label={messages.navigation.opensInNewTab(exp.company)}
                 >
                   {exp.company}
                 </LinkButton>

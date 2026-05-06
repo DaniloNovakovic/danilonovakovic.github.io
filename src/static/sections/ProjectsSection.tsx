@@ -1,12 +1,13 @@
-import { PORTFOLIO_DATA } from '@/shared/content/portfolio/data';
-import { PORTFOLIO_TEXT } from '@/shared/content/portfolio/text';
+import { useMessages } from '@/shared/i18n';
+import { getPortfolioData } from '@/shared/portfolio';
 import { Badge, Card, LinkButton, SketchSection } from '@/shared/ui';
 
 export function ProjectsSection() {
-  const { projects } = PORTFOLIO_DATA;
+  const messages = useMessages();
+  const { projects } = getPortfolioData(messages);
 
   return (
-    <SketchSection id="projects" title={PORTFOLIO_TEXT.projects.title}>
+    <SketchSection id="projects" title={messages.portfolio.projects.title}>
       <div className="grid grid-cols-1 gap-6">
         {projects.map((project) => (
           <Card key={project.title} className="flex flex-col">
@@ -24,7 +25,7 @@ export function ProjectsSection() {
               variant="primary"
               className="mt-auto py-2 text-sm"
             >
-              View More
+              {messages.common.viewMore}
             </LinkButton>
           </Card>
         ))}

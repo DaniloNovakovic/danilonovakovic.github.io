@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { X } from 'lucide-react';
+import { useMessages } from '@/shared/i18n';
 import { Button } from '../Button';
 
 interface DialogCardProps {
@@ -19,6 +20,8 @@ export function DialogCard({
   titleId,
   descriptionId
 }: DialogCardProps) {
+  const messages = useMessages();
+
   return (
     <div
       className="relative max-h-[92dvh] w-full max-w-[600px] overflow-y-auto rounded-t-2xl border-4 border-[#1a1a1a] bg-[#fbfbf9] p-4 text-[#1a1a1a] shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] outline-none animate-in zoom-in-95 fade-in sm:rounded-2xl sm:p-8"
@@ -28,7 +31,7 @@ export function DialogCard({
         size="sm"
         onClick={onClose}
         className="absolute right-2 top-2 z-10 p-2 sm:right-4 sm:top-4"
-        aria-label="Close"
+        aria-label={messages.common.close}
       >
         <X size={20} color="#1a1a1a" />
       </Button>

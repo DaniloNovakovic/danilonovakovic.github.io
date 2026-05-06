@@ -1,4 +1,4 @@
-import type { ContactIconId } from '@/shared/content/portfolio/data';
+import type { ContactIconId } from '@/shared/portfolio';
 
 export const CONTACT_ICON_SRC: Record<ContactIconId, string> = {
   linkedin: '/icons/contact/linkedin.png',

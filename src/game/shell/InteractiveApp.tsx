@@ -9,7 +9,6 @@ import {
   getReactOverlayMiniGameById
 } from '@/game/runtime/miniGameRegistry';
 import { MiniGameType } from '@/game/runtime/types';
-import { TEXTS } from '@/game/registry/content';
 import { isMiniGameId } from '@/game/registry/featureIds';
 import { bridgeActions, useBridgeState } from '@/game/bridge/store';
 import {
@@ -19,6 +18,7 @@ import {
 import { Button, Card, DialogCard, ModalShell, Panel } from '@/shared/ui';
 import { getInteractiveGameShellLayout } from './gameShellLayout';
 import { useResizeObserver } from '@/shared/hooks/useResizeObserver';
+import { useMessages } from '@/shared/i18n';
 
 interface InteractiveAppProps {
   onSwitchToStatic: () => void;
@@ -26,6 +26,7 @@ interface InteractiveAppProps {
 
 export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps) {
   const bridge = useBridgeState();
+  const messages = useMessages();
   const { ref: contentRowRef, height: contentRowHeight } = useResizeObserver<HTMLElement>();
 
   const handleInteract = (area: string) => {
@@ -60,7 +61,7 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
     getPhaserScenePresentationMode(presentationMiniGameId);
   const gameShellLayout = getInteractiveGameShellLayout(presentationMode, contentRowHeight);
   const shouldReserveSceneHint = presentationMiniGameId === 'potassium';
-  const sceneHintText = bridge.sceneHintText ?? 'Drag toward a target • Hold to recall';
+  const sceneHintText = bridge.sceneHintText ?? messages.potassiumSlip.hints.start;
   const shouldShowNavigationHint = bridge.status === GameState.EXPLORING && !presentationMiniGameId;
   const shouldShowFooterHint = shouldReserveSceneHint || shouldShowNavigationHint;
 
@@ -79,7 +80,7 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
       <header className="col-start-2 row-start-1 min-w-0">
         <nav
           className="flex min-w-0 items-center justify-between gap-2"
-          aria-label="Interactive controls"
+          aria-label={messages.gameShell.controlsLabel}
         >
           <div className="flex min-w-0 items-center gap-2">
             <Button
@@ -89,10 +90,10 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
               className="sm:px-3 sm:py-1.5 sm:text-xs"
               aria-haspopup="dialog"
               aria-expanded={bridge.activeUiDialogId === 'inventory'}
-              aria-label="Open inventory"
+              aria-label={messages.gameShell.openInventory}
             >
               <Backpack className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
-              <span>Inventory</span>
+              <span>{messages.gameShell.inventory}</span>
             </Button>
             {import.meta.env.DEV && (
               <Button
@@ -102,10 +103,10 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
                 className="sm:px-3 sm:py-1.5 sm:text-xs"
                 aria-haspopup="dialog"
                 aria-expanded={bridge.activeUiDialogId === 'devSwitcher'}
-                aria-label="Open dev scene switcher"
+                aria-label={messages.gameShell.openDevSwitcher}
               >
                 <Bug className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
-                <span>Dev</span>
+                <span>{messages.gameShell.dev}</span>
               </Button>
             )}
           </div>
@@ -114,11 +115,11 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
             size="sm"
             onClick={onSwitchToStatic}
             className="sm:px-3 sm:py-1.5 sm:text-xs"
-            aria-label="Switch to static portfolio"
+            aria-label={messages.gameShell.switchToStatic}
           >
             <BookOpen className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
-            <span className="hidden sm:inline">Static mode</span>
-            <span className="sm:hidden">Static</span>
+            <span className="hidden sm:inline">{messages.gameShell.staticMode}</span>
+            <span className="sm:hidden">{messages.gameShell.static}</span>
           </Button>
         </nav>
       </header>
@@ -158,10 +159,10 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
             ) : (
               <>
                 <p className="text-[10px] font-bold uppercase leading-snug tracking-widest text-[#1a1a1a] md:hidden">
-                  {TEXTS.navigation.hintsCompact}
+                  {messages.navigation.hintsCompact}
                 </p>
                 <p className="hidden text-sm font-bold uppercase tracking-widest text-[#1a1a1a] md:block">
-                  {TEXTS.navigation.hints}
+                  {messages.navigation.hints}
                 </p>
               </>
             )}
@@ -194,16 +195,16 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
       )}
 
       {bridge.activeUiDialogId === 'inventory' && (
-        <ModalShell title="Inventory" onClose={() => bridgeActions.closeUiDialog()}>
+        <ModalShell title={messages.inventory.title} onClose={() => bridgeActions.closeUiDialog()}>
           {({ titleId }) => (
-            <DialogCard title="Inventory" onClose={() => bridgeActions.closeUiDialog()} titleId={titleId}>
+            <DialogCard title={messages.inventory.title} onClose={() => bridgeActions.closeUiDialog()} titleId={titleId}>
               <div className="grid gap-2">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-[#1a1a1a]">
-                  Equipment
+                  {messages.inventory.equipment}
                 </p>
                 {bridge.inventory.ownedItemIds.includes('glasses') ? (
                   <label className="flex cursor-pointer items-center justify-between gap-2 rounded border border-[#1a1a1a]/40 bg-white/50 px-3 py-2 text-xs font-bold uppercase tracking-wide text-[#1a1a1a]">
-                    <span>Glasses</span>
+                    <span>{messages.inventory.glasses}</span>
                     <input
                       type="checkbox"
                       checked={bridge.equipment.equippedItemIds.includes('glasses')}
@@ -213,12 +214,12 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
                   </label>
                 ) : bridge.inventory.ownedItemIds.length === 0 ? (
                   <p className="text-[11px] font-bold uppercase tracking-wide text-[#1a1a1a]/60">
-                    No items yet
+                    {messages.inventory.noItemsYet}
                   </p>
                 ) : null}
                 {bridge.inventory.ownedItemIds.includes('circuit') && (
                   <div className="rounded border border-[#1a1a1a]/40 bg-white/50 px-3 py-2 text-xs font-bold uppercase tracking-wide text-[#1a1a1a]">
-                    Circuit
+                    {messages.inventory.circuit}
                   </div>
                 )}
               </div>
@@ -228,16 +229,16 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
       )}
 
       {import.meta.env.DEV && bridge.activeUiDialogId === 'devSwitcher' && (
-        <ModalShell title="Dev scene switcher" onClose={() => bridgeActions.closeUiDialog()}>
+        <ModalShell title={messages.gameShell.devSwitcher} onClose={() => bridgeActions.closeUiDialog()}>
           {({ titleId }) => (
-            <DialogCard title="Dev scene switcher" onClose={() => bridgeActions.closeUiDialog()} titleId={titleId}>
+            <DialogCard title={messages.gameShell.devSwitcher} onClose={() => bridgeActions.closeUiDialog()} titleId={titleId}>
               <div className="grid grid-cols-2 gap-1.5">
                 <button
                   type="button"
                   onClick={() => jumpToDevTarget(null)}
                   className="rounded border border-[#1a1a1a]/40 bg-white/60 px-2 py-1.5 text-left text-[11px] font-bold uppercase tracking-wide text-[#1a1a1a] hover:bg-white"
                 >
-                  City
+                  {messages.gameShell.city}
                 </button>
                 {getAllMiniGames().map((miniGame) => (
                   <button
@@ -259,7 +260,7 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
           <Card tone="paper" className="px-5 py-4 text-center">
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#1a1a1a]">
-              Loading scene
+              {messages.gameShell.loadingScene}
             </p>
           </Card>
         </div>

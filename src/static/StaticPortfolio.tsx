@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Gamepad2 } from 'lucide-react';
-import { PORTFOLIO_DATA } from '@/shared/content/portfolio/data';
+import { getPortfolioData } from '@/shared/portfolio';
+import { useMessages } from '@/shared/i18n';
 import { Button } from '@/shared/ui';
 import { HeroContactLinks } from './HeroContactLinks';
 import { AbilitiesSection } from './sections/AbilitiesSection';
@@ -15,7 +16,8 @@ interface StaticPortfolioProps {
 }
 
 export default function StaticPortfolio({ onSwitchToInteractive }: StaticPortfolioProps) {
-  const { profile } = PORTFOLIO_DATA;
+  const messages = useMessages();
+  const { profile } = getPortfolioData(messages);
   const year = useMemo(() => new Date().getFullYear(), []);
 
   return (
@@ -27,17 +29,17 @@ export default function StaticPortfolio({ onSwitchToInteractive }: StaticPortfol
         size="sm"
         onClick={onSwitchToInteractive}
         className="fixed right-2 top-[max(0.5rem,env(safe-area-inset-top,0px))] z-40 sm:right-4 sm:top-4 sm:px-3 sm:py-1.5 sm:text-xs"
-        aria-label="Switch to interactive portfolio"
+        aria-label={messages.staticPortfolio.switchToInteractive}
       >
         <Gamepad2 className="h-4 w-4" strokeWidth={2} aria-hidden />
-        <span className="hidden sm:inline">Try interactive</span>
-        <span className="sm:hidden">Interactive</span>
+        <span className="hidden sm:inline">{messages.staticPortfolio.tryInteractive}</span>
+        <span className="sm:hidden">{messages.staticPortfolio.interactive}</span>
       </Button>
 
       <main className="relative z-10 mx-auto w-full max-w-3xl px-4 pb-[max(3rem,env(safe-area-inset-bottom,0px))] pt-[max(3rem,env(safe-area-inset-top,0px))] sm:px-6 sm:pt-16">
         <header className="mb-12 flex flex-col items-center gap-4 text-center sm:mb-16">
           <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#1a1a1a]/60">
-            Portfolio — Static edition
+            {messages.staticPortfolio.eyebrow}
           </p>
           <h1 className="text-4xl font-bold text-[#1a1a1a] sm:text-6xl">{profile.name}</h1>
           <p className="text-sm font-bold uppercase tracking-widest text-[#1a1a1a]/70 sm:text-base">
@@ -62,17 +64,17 @@ export default function StaticPortfolio({ onSwitchToInteractive }: StaticPortfol
 
         <footer className="mt-16 flex flex-col items-center gap-3 border-t-2 border-dashed border-[#1a1a1a]/30 pt-6 text-center text-xs text-[#1a1a1a]/60 sm:mt-24">
           <p>
-            Prefer the playful version?{' '}
+            {messages.staticPortfolio.footerPrompt}{' '}
             <Button
               variant="ghost"
               size="sm"
               onClick={onSwitchToInteractive}
               className="p-0 text-xs"
             >
-              Try interactive mode →
+              {messages.staticPortfolio.footerCta}
             </Button>
           </p>
-          <p>© {year} {profile.name}</p>
+          <p>{messages.staticPortfolio.copyright(year, profile.name)}</p>
         </footer>
       </main>
     </div>

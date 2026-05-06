@@ -1,11 +1,13 @@
-import { PORTFOLIO_DATA } from '@/shared/content/portfolio/data';
+import { useMessages } from '@/shared/i18n';
+import { getPortfolioData } from '@/shared/portfolio';
 import { Card, SketchSection } from '@/shared/ui';
 
 export function HobbiesSection() {
-  const { hobbies } = PORTFOLIO_DATA;
+  const messages = useMessages();
+  const { hobbies } = getPortfolioData(messages);
 
   return (
-    <SketchSection id="hobbies" title="Hobbies">
+    <SketchSection id="hobbies" title={messages.portfolio.hobbies.title}>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {hobbies.map((hobby) => (
           <Card as="article" key={hobby.id} padding="md">

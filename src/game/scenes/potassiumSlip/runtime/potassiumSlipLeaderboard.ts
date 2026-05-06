@@ -1,3 +1,5 @@
+import { getMessages } from '@/shared/i18n';
+
 export type PotassiumRunMode = 'campaign' | 'endless';
 export type PotassiumRunOutcome = 'won' | 'game_over';
 
@@ -62,11 +64,17 @@ export function getPotassiumLeaderboardOverlayText(
 }
 
 export function formatPotassiumLeaderboardRecords(records: readonly PotassiumRunRecord[]): string {
-  if (records.length === 0) return 'RECORDS\nNo banana paperwork filed yet.';
+  const messages = getMessages();
+  if (records.length === 0) return `${messages.potassiumSlip.leaderboard.title}\n${messages.potassiumSlip.leaderboard.empty}`;
   return [
-    'RECORDS',
+    messages.potassiumSlip.leaderboard.title,
     ...records.map((record, index) => (
-      `${index + 1}. ${record.score} • W${record.wave} • ${record.mode === 'endless' ? 'endless' : record.outcome}`
+      messages.potassiumSlip.leaderboard.recordLine(
+        index + 1,
+        record.score,
+        record.wave,
+        messages.potassiumSlip.leaderboard.modeLabel(record.mode, record.outcome)
+      )
     ))
   ].join('\n');
 }

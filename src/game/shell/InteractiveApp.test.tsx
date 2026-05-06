@@ -4,7 +4,7 @@ import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import InteractiveApp from './InteractiveApp';
 import { bridgeActions, bridgeStore } from '@/game/bridge/store';
-import { TEXTS } from '@/game/registry/content';
+import { getMessages } from '@/shared/i18n';
 
 vi.mock('./Game', () => ({
   default: () => <div data-testid="game-surface" />
@@ -63,11 +63,12 @@ describe('InteractiveApp', () => {
 
   it('renders navigation hints in a normal-flow footer', () => {
     render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
+    const messages = getMessages();
 
     const footer = screen.getByRole('contentinfo');
     expect(footer.className).not.toContain('fixed');
-    expect(screen.getByText(TEXTS.navigation.hintsCompact)).toBeDefined();
-    expect(screen.getByText(TEXTS.navigation.hintsCompact).closest('.fixed')).toBeNull();
+    expect(screen.getByText(messages.navigation.hintsCompact)).toBeDefined();
+    expect(screen.getByText(messages.navigation.hintsCompact).closest('.fixed')).toBeNull();
   });
 
   it('caps game shell width from the measured content row height', async () => {

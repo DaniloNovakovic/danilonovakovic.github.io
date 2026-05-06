@@ -13,20 +13,4 @@ This codebase uses a micro-kernel + bridge + ECS arrangement. The layering is lo
 
 ## Folder Ownership
 
-- `src/game/kernel` — runtime mode and scene lifecycle orchestration.
-- `src/game/runtime` — shared Phaser-facing runtime code and runtime Modules.
-- `src/game/scenes/*/index.ts` — public scene-owned fact barrels for cross-folder imports.
-- `src/game/scenes/*/runtime/index.ts` — public Phaser runtime barrels for cross-folder scene classes/builders.
-- `src/game/shell/use*.ts` — focused shell hooks for Phaser boot, scale refresh, bridge callbacks, and touch controls.
-- `src/game/sceneContexts` — assembly of scene-owned lifecycle contexts used by kernel scene orchestration.
-- `src/game/scenes/*/sceneContext.ts` — scene-owned lifecycle/start-data contracts for Phaser scenes.
-- `src/game/infra` — concrete adapters to engine/browser infrastructure. The kernel talks to Phaser through [`src/game/infra/phaser/PhaserSceneAdapter.ts`](../../src/game/infra/phaser/PhaserSceneAdapter.ts).
-- `src/game/core` — pure ECS, input, and player decision logic.
-
-Folder `index.ts` files are public boundaries: export only what other folders should use. Keep component internals, shell hooks, and implementation helpers unexported unless they are intentionally part of that folder's public API. UI primitives under `src/shared/ui` are colocated in component folders.
-
-See [`AGENTS.md`](../../AGENTS.md) and [`docs/ARCHITECTURE_RUNTIME.md`](../../docs/ARCHITECTURE_RUNTIME.md) for the current runtime split.
-
-## React Effects
-
-Write React effects with a named function expression: `useEffect(function syncThing() { ... }, deps)`. The name should describe the effect's reason to exist; if naming it feels awkward, extract a focused hook or split the effect.
+Use [`docs/runtime-architecture.md`](../../docs/runtime-architecture.md) and [`src/README.md`](../../src/README.md) for the full source map. The agent-specific rule is narrower: cross-folder imports should respect the public `index.ts` barrels when they exist, and internals should stay unexported unless another folder intentionally depends on them.
