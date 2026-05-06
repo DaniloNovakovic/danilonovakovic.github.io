@@ -134,6 +134,17 @@ describe('ModalShell', () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
+  it('centers a shrink-wrapped dialog instead of stretching it across the viewport', () => {
+    render(<TestModal />);
+
+    const dialog = screen.getByRole('dialog', { name: 'Test Modal' });
+    const dialogClasses = dialog.className.split(' ');
+    const backdropClasses = dialog.parentElement?.className.split(' ') ?? [];
+    expect(dialogClasses).not.toContain('w-full');
+    expect(dialogClasses).toContain('max-w-full');
+    expect(backdropClasses).toContain('items-center');
+    expect(backdropClasses).not.toContain('items-end');
+  });
 
   it('closes on backdrop click but not inside click', async () => {
     const onClose = vi.fn();

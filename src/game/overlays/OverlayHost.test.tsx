@@ -92,6 +92,16 @@ describe('OverlayHost', () => {
     expect(bridgeStore.getState().activeOverlayId).toBe('profile');
   });
 
+  it('closes on backdrop click by default', async () => {
+    bridgeActions.openOverlay('profile');
+    render(<OverlayHost />);
+
+    const dialog = await screen.findByRole('dialog', { name: /mock profile/i });
+    await userEvent.click(dialog.parentElement!);
+
+    await waitFor(() => expect(bridgeStore.getState().activeOverlay).toBeNull());
+  });
+
   it('does not close on backdrop click when the request disables it', async () => {
     bridgeActions.openOverlay('profile', { closeOnBackdrop: false });
     render(<OverlayHost />);

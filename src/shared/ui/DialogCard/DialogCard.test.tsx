@@ -51,6 +51,18 @@ describe('DialogCard inside ModalShell', () => {
     });
   });
 
+  describe('layout', () => {
+    it('keeps title text padded away from the close button at every breakpoint', async () => {
+      await renderCard();
+
+      const heading = screen.getByRole('heading', { name: /test overlay/i });
+      const headingClasses = heading.className.split(' ');
+      expect(headingClasses).toContain('pr-14');
+      expect(headingClasses).toContain('sm:pr-16');
+      expect(headingClasses).not.toContain('sm:pr-0');
+    });
+  });
+
   describe('initial focus', () => {
     it('moves focus to the first focusable element', async () => {
       await renderCard();

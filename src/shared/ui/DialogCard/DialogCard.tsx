@@ -38,7 +38,7 @@ export function DialogCard({
 
       <h2
         id={titleId}
-        className="mb-3 mt-1 border-b-4 border-[#1a1a1a] pb-2 pr-12 text-2xl font-bold uppercase tracking-wider sm:mb-4 sm:mt-0 sm:pr-0 sm:text-4xl"
+        className="mb-3 mt-1 border-b-4 border-[#1a1a1a] pb-2 pr-14 text-2xl font-bold uppercase tracking-wider sm:mb-4 sm:mt-0 sm:pr-16 sm:text-4xl"
       >
         {title}
       </h2>

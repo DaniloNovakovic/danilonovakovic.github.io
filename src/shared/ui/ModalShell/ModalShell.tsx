@@ -115,7 +115,7 @@ export function ModalShell({
   return (
     <div
       className={cn(
-        'fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-2 backdrop-blur-sm animate-in fade-in duration-300 sm:items-center sm:p-4',
+        'fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2 backdrop-blur-sm animate-in fade-in duration-300 sm:p-4',
         className
       )}
       onMouseDown={(event) => {
@@ -131,7 +131,7 @@ export function ModalShell({
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
         tabIndex={-1}
-        className="w-full outline-none"
+        className="max-w-full outline-none"
         onMouseDown={(event) => event.stopPropagation()}
       >
         {children({ titleId, descriptionId })}
