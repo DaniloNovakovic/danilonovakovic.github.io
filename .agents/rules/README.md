@@ -4,6 +4,8 @@ Tool-agnostic rules for AI coding agents working in this repo. These files are t
 
 Rules should describe stable seams, decision process, and things that would be expensive to get wrong. Avoid copying implementation walkthroughs from developer docs; link to those docs instead.
 
+`AGENTS.md` should stay a thin entrypoint and should not restate these scoped rules.
+
 ## Documentation Freshness Policy
 
 - Global docs explain stable concepts, policies, cross-folder flows, and canonical entrypoints.
