@@ -2,6 +2,7 @@ import { catalogMessages } from './catalog';
 import { commonMessages } from './common';
 import { gameShellMessages } from './gameShell';
 import { inventoryMessages } from './inventory';
+import { manualPageMessages } from './manualPage';
 import { miniGameMessages } from './miniGames';
 import { modePickerMessages } from './modePicker';
 import { navigationMessages } from './navigation';
@@ -18,6 +19,7 @@ export const enMessages = {
   staticPortfolio: staticPortfolioMessages,
   gameShell: gameShellMessages,
   inventory: inventoryMessages,
+  manualPage: manualPageMessages,
   portfolio: portfolioMessages,
   catalog: catalogMessages,
   scenes: sceneMessages,

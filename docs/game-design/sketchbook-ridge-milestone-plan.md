@@ -26,9 +26,9 @@ Anything beyond that is future scope unless a slice explicitly pulls it in.
   the Relay Spire, Cicka's first perch, a static Ridge Guide, and three Trail
   Card props.
 - **M2 Trail Card and Manual Overlay Surface** has started: the reusable global
-  Trail Card overlay and Ridge trigger contract are in place. Remaining M2 work
-  is the Manual Page overlay decision, mobile/readability pass, and surface
-  polish.
+  Trail Card overlay, reusable Manual Page overlay shape, and Ridge trigger
+  contract are in place. Remaining M2 work is the mobile/readability pass and
+  surface polish.
 - **M3 Art and Audio Research Pack** can run in parallel as spec work. It should
   guide Cicka, Guide, Trail Card, Manual Page, Stampede, Relay Spire, and audio
   direction without blocking rough engineering prototypes.

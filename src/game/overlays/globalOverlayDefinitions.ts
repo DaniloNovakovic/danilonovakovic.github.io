@@ -13,5 +13,9 @@ export const GLOBAL_OVERLAY_DEFINITIONS: readonly OverlayDefinition[] = [
   {
     id: 'trailCard',
     component: lazyOverlay(() => import('./trailCard/TrailCardOverlay'))
+  },
+  {
+    id: 'manualPage',
+    component: lazyOverlay(() => import('./manualPage/ManualPageOverlay'))
   }
 ];
