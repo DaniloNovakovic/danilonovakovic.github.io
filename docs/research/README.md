@@ -1,0 +1,1 @@
+This folder serves as reference / research on existing games and what makes them fun
