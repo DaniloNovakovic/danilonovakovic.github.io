@@ -36,7 +36,7 @@ export default function ManualPageOverlay({
       titleId={titleId}
       descriptionId={descriptionId}
     >
-      <div className="grid gap-3 text-[#1a1a1a]">
+      <div className="grid gap-3 text-[#1a1a1a] [overflow-wrap:anywhere]">
         <section
           aria-label={messages.manualPage.clue}
           className="relative min-h-36 overflow-hidden rounded border border-[#1a1a1a]/35 bg-[#fffdf4] px-4 py-5"
@@ -50,11 +50,13 @@ export default function ManualPageOverlay({
           <p className="text-[10px] font-bold uppercase tracking-widest text-[#1a1a1a]/60">
             {messages.manualPage.marginNote}
           </p>
-          <p className="text-xs font-bold uppercase tracking-wide">{manualPage.marginNote}</p>
+          <p className="text-xs font-bold uppercase leading-relaxed tracking-wide">
+            {manualPage.marginNote}
+          </p>
         </aside>
 
-        <div className="flex justify-end">
-          <Button variant="secondary" size="sm" onClick={close}>
+        <div className="grid grid-cols-1 sm:flex sm:justify-end">
+          <Button variant="secondary" size="sm" className="w-full sm:w-auto" onClick={close}>
             {messages.manualPage.close}
           </Button>
         </div>
