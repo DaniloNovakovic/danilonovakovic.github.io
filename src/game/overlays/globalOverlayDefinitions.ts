@@ -1,12 +1,13 @@
 import type { OverlayDefinition } from './types';
+import { lazyOverlay } from './lazyOverlay';
 
 export const GLOBAL_OVERLAY_DEFINITIONS: readonly OverlayDefinition[] = [
   {
     id: 'inventory',
-    load: () => import('./inventory/InventoryOverlay')
+    component: lazyOverlay(() => import('./inventory/InventoryOverlay'))
   },
   {
     id: 'devSwitcher',
-    load: () => import('./devSwitcher/DevSwitcherOverlay')
+    component: lazyOverlay(() => import('./devSwitcher/DevSwitcherOverlay'))
   }
 ];

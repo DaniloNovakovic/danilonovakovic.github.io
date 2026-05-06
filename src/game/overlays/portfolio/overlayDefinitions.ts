@@ -1,24 +1,25 @@
 import type { OverlayDefinition } from '@/game/overlays/types';
+import { lazyOverlay } from '@/game/overlays/lazyOverlay';
 
 export const PORTFOLIO_OVERLAY_DEFINITIONS: readonly OverlayDefinition[] = [
   {
     id: 'profile',
-    load: () => import('./profile/ProfileOverlay')
+    component: lazyOverlay(() => import('./profile/ProfileOverlay'))
   },
   {
     id: 'experiences',
-    load: () => import('./experience/ExperienceOverlay')
+    component: lazyOverlay(() => import('./experience/ExperienceOverlay'))
   },
   {
     id: 'projects',
-    load: () => import('./projects/ProjectsOverlay')
+    component: lazyOverlay(() => import('./projects/ProjectsOverlay'))
   },
   {
     id: 'abilities',
-    load: () => import('./abilities/AbilitiesOverlay')
+    component: lazyOverlay(() => import('./abilities/AbilitiesOverlay'))
   },
   {
     id: 'contact',
-    load: () => import('./contact/ContactOverlay')
+    component: lazyOverlay(() => import('./contact/ContactOverlay'))
   }
 ];

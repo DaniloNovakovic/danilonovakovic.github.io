@@ -14,5 +14,5 @@ export type OverlayComponent = ComponentType<OverlayControllerProps>;
 
 export interface OverlayDefinition {
   id: OverlayId;
-  load: () => Promise<{ default: OverlayComponent }>;
+  component: OverlayComponent;
 }

@@ -1,20 +1,21 @@
 import type { OverlayDefinition } from '@/game/overlays/types';
+import { lazyOverlay } from '@/game/overlays/lazyOverlay';
 
 export const HOBBIES_OVERLAY_DEFINITIONS: readonly OverlayDefinition[] = [
   {
     id: 'art',
-    load: () => import('./overlays/art/DrawingCanvas')
+    component: lazyOverlay(() => import('./overlays/art/DrawingCanvas'))
   },
   {
     id: 'music',
-    load: () => import('./overlays/music/GuitarStrings')
+    component: lazyOverlay(() => import('./overlays/music/GuitarStrings'))
   },
   {
     id: 'fitness',
-    load: () => import('./overlays/fitness/MuayThaiOverlay')
+    component: lazyOverlay(() => import('./overlays/fitness/MuayThaiOverlay'))
   },
   {
     id: 'dancing',
-    load: () => import('./overlays/dancing/DancingOverlay')
+    component: lazyOverlay(() => import('./overlays/dancing/DancingOverlay'))
   }
 ];
