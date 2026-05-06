@@ -119,6 +119,10 @@ Goal: make the main game shape playable with placeholders.
 
 Owner: Ridge scene.
 
+Start Ridge as a separate `ridge` scene first. Keep the current overworld as
+the default route until the Ridge shell feels good. During development, boot
+directly into Ridge with `?startScene=ridge` for fast iteration.
+
 Outputs:
 
 - `src/game/scenes/ridge/**`.

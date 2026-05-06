@@ -1,4 +1,4 @@
-export const SCENE_IDS = ['overworld', 'hobbies', 'basement', 'potassium'] as const;
+export const SCENE_IDS = ['overworld', 'hobbies', 'basement', 'potassium', 'ridge'] as const;
 
 export type SceneId = (typeof SCENE_IDS)[number];
 
@@ -6,12 +6,14 @@ export const OVERWORLD_SCENE_ID = 'overworld' satisfies SceneId;
 export const HOBBIES_SCENE_ID = 'hobbies' satisfies SceneId;
 export const BASEMENT_SCENE_ID = 'basement' satisfies SceneId;
 export const POTASSIUM_SCENE_ID = 'potassium' satisfies SceneId;
+export const RIDGE_SCENE_ID = 'ridge' satisfies SceneId;
 
 export const PHASER_SCENE_KEYS = {
   overworld: 'MainScene',
   hobbies: HOBBIES_SCENE_ID,
   basement: BASEMENT_SCENE_ID,
-  potassium: POTASSIUM_SCENE_ID
+  potassium: POTASSIUM_SCENE_ID,
+  ridge: RIDGE_SCENE_ID
 } as const;
 
 export function isSceneId(id: string | null | undefined): id is SceneId {

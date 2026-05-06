@@ -3,6 +3,7 @@ import {
   HOBBIES_SCENE_ID,
   PHASER_SCENE_KEYS,
   POTASSIUM_SCENE_ID,
+  RIDGE_SCENE_ID,
   type SceneId
 } from '@/game/scenes/sceneIds';
 import type { OverlayId } from '@/game/overlays/overlayIds';
@@ -10,6 +11,7 @@ import { createBasementSceneContext } from '@/game/scenes/basement/sceneContext'
 import { createHobbiesSceneContext } from '@/game/scenes/hobbies/sceneContext';
 import { createOverworldSceneContext } from '@/game/scenes/overworld/sceneContext';
 import { createPotassiumSlipSceneContext } from '@/game/scenes/potassiumSlip/sceneContext';
+import { createRidgeSceneContext } from '@/game/scenes/ridge/sceneContext';
 import type { ResumeSnapshot, SceneContextDefinition } from '../types';
 
 export interface SceneContextAssemblyDeps {
@@ -69,6 +71,12 @@ export function createSceneContexts(
       onClose: deps.onReturnToOverworld,
       getResumePosition: getPreparedResume(PHASER_SCENE_KEYS.potassium),
       loadScene: loadScene(POTASSIUM_SCENE_ID)
+    }),
+    createRidgeSceneContext({
+      onClose: deps.onReturnToOverworld,
+      onOpenOverlay: deps.onOpenOverlay,
+      getResumePosition: getPreparedResume(PHASER_SCENE_KEYS.ridge),
+      loadScene: loadScene(RIDGE_SCENE_ID)
     })
   ];
 }
