@@ -19,7 +19,7 @@ import {
   OVERWORLD_SPRINT_SPEED,
   OVERWORLD_WALK_SPEED
 } from '@/game/sharedSceneRuntime/config';
-import { bridgeActions, isItemEquipped, isItemOwned } from '@/game/bridge/store';
+import { bridgeActions, isItemEquipped, isItemOwned, type OpenOverlayOptions } from '@/game/bridge/store';
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
 import { PlayerThoughtText } from '@/game/sharedSceneRuntime/text/PlayerThoughtText';
 import {
@@ -44,7 +44,7 @@ export class BasementScene extends Phaser.Scene {
     BasementInteractionEffect
   >;
   private onClose?: () => void;
-  private onOpenOverlay?: (overlayId: OverlayId) => void;
+  private onOpenOverlay?: (overlayId: OverlayId, options?: OpenOverlayOptions) => void;
   private isPaused: boolean = false;
   private resumePosition?: { x: number; y: number };
 
@@ -54,7 +54,7 @@ export class BasementScene extends Phaser.Scene {
 
   init(data: {
     onClose: () => void;
-    onOpenOverlay?: (overlayId: OverlayId) => void;
+    onOpenOverlay?: (overlayId: OverlayId, options?: OpenOverlayOptions) => void;
     isPaused?: boolean;
     resumePosition?: { x: number; y: number };
   }) {

@@ -4,6 +4,7 @@ import {
   RIDGE_LANDMARKS,
   RIDGE_PLAYER_RESUME_CLAMP,
   RIDGE_PLAYER_START,
+  RIDGE_TRAIL_CARD_TARGETS,
   RIDGE_WORLD_WIDTH
 } from './worldLayout';
 
@@ -31,5 +32,19 @@ describe('ridge world layout', () => {
 
     expect(relay?.x).toBeGreaterThan(0);
     expect(relay?.x).toBeLessThan(1100);
+  });
+
+  it('defines exactly three Trail Card targets for the first trigger contract', () => {
+    expect(RIDGE_TRAIL_CARD_TARGETS.map((target) => target.id)).toEqual([
+      'stampede-sketch',
+      'telegraph-terrace',
+      'domino-desk'
+    ]);
+    expect(RIDGE_TRAIL_CARD_TARGETS.map((target) => target.landmarkKind)).toEqual([
+      'stampede-blanket',
+      'telegraph-bag',
+      'domino-desk'
+    ]);
+    expect(RIDGE_TRAIL_CARD_TARGETS.every((target) => target.card.unavailableReason.length > 0)).toBe(true);
   });
 });

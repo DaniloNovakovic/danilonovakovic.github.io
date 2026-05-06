@@ -9,5 +9,9 @@ export const GLOBAL_OVERLAY_DEFINITIONS: readonly OverlayDefinition[] = [
   {
     id: 'devSwitcher',
     component: lazyOverlay(() => import('./devSwitcher/DevSwitcherOverlay'))
+  },
+  {
+    id: 'trailCard',
+    component: lazyOverlay(() => import('./trailCard/TrailCardOverlay'))
   }
 ];

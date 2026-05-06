@@ -9,6 +9,7 @@ import { portfolioMessages } from './portfolio';
 import { potassiumSlipMessages } from './potassiumSlip';
 import { sceneMessages } from './scenes';
 import { staticPortfolioMessages } from './staticPortfolio';
+import { trailCardMessages } from './trailCard';
 
 export const enMessages = {
   common: commonMessages,
@@ -22,4 +23,5 @@ export const enMessages = {
   scenes: sceneMessages,
   miniGames: miniGameMessages,
   potassiumSlip: potassiumSlipMessages,
+  trailCard: trailCardMessages,
 } as const;

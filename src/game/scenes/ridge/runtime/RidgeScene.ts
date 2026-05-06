@@ -1,6 +1,8 @@
 import * as Phaser from 'phaser';
 import { PHASER_SCENE_KEYS } from '@/game/scenes/sceneIds';
-import { isItemEquipped } from '@/game/bridge/store';
+import { isItemEquipped, type OpenOverlayOptions } from '@/game/bridge/store';
+import { TRAIL_CARD_OVERLAY_ID, type OverlayId } from '@/game/overlays/overlayIds';
+import { getMessages } from '@/shared/i18n';
 import {
   GAME_DESIGN_HEIGHT,
   GAME_DESIGN_WIDTH,
@@ -14,26 +16,42 @@ import {
   type SideViewPlayerRuntime
 } from '@/game/sharedSceneRuntime/player/SideViewPlayerRuntime';
 import { TextureGenerator } from '@/game/sharedSceneRuntime/textures/TextureGenerator';
+import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
+import {
+  createInteriorInteractionRuntime,
+  type InteriorInteractionRuntime
+} from '@/game/sharedSceneRuntime/interactions/InteriorInteractionRuntime';
 import {
   RIDGE_FLOOR_Y,
   RIDGE_LANDMARKS,
   RIDGE_PLAYER_RESUME_CLAMP,
   RIDGE_PLAYER_START,
+  RIDGE_TRAIL_CARD_TARGETS,
   RIDGE_WORLD_WIDTH,
+  type RidgeTrailCardTargetId,
   type RidgeLandmark
 } from '../worldLayout';
+import type { TrailCardOverlayParams } from '@/game/overlays/trailCard/types';
 
 interface RidgeSceneStartData {
   onClose?: () => void;
+  onOpenOverlay?: (overlayId: OverlayId, options?: OpenOverlayOptions) => void;
   isPaused?: boolean;
   resumePosition?: { x: number; y: number };
 }
 
+type RidgeInteractionEffect =
+  | { kind: 'close' }
+  | { kind: 'openTrailCard'; params: TrailCardOverlayParams };
+
 export class RidgeScene extends Phaser.Scene {
   player?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+  interactPrompt?: Phaser.GameObjects.Text;
 
   private playerRuntime?: SideViewPlayerRuntime;
+  private interactionRuntime?: InteriorInteractionRuntime<RidgeTrailCardTargetId, RidgeInteractionEffect>;
   private onClose: () => void = () => {};
+  private onOpenOverlay?: (overlayId: OverlayId, options?: OpenOverlayOptions) => void;
   private isPaused = false;
   private resumePosition?: { x: number; y: number };
 
@@ -43,6 +61,7 @@ export class RidgeScene extends Phaser.Scene {
 
   init(data: RidgeSceneStartData = {}): void {
     this.onClose = data.onClose ?? (() => {});
+    this.onOpenOverlay = data.onOpenOverlay;
     this.isPaused = data.isPaused ?? false;
     this.resumePosition = data.resumePosition;
   }
@@ -64,6 +83,8 @@ export class RidgeScene extends Phaser.Scene {
 
   create(data: RidgeSceneStartData = {}): void {
     this.onClose = data.onClose ?? this.onClose;
+    this.onOpenOverlay = data.onOpenOverlay ?? this.onOpenOverlay;
+    const messages = getMessages();
 
     this.cameras.main.setBackgroundColor('#f7f1df');
     this.physics.world.setBounds(0, 0, RIDGE_WORLD_WIDTH, GAME_DESIGN_HEIGHT);
@@ -74,6 +95,7 @@ export class RidgeScene extends Phaser.Scene {
     this.addLandmarks();
     this.addPlaceholderCopy();
     this.createPlayer(ground);
+    this.createTrailCardInteractions(messages.navigation.interact);
     this.setPaused(this.isPaused);
     this.playerRuntime?.syncAppearance();
   }
@@ -84,6 +106,27 @@ export class RidgeScene extends Phaser.Scene {
 
     if (playerUpdate.commands.exitContext) {
       this.onClose();
+      return;
+    }
+
+    const interaction = this.interactionRuntime?.update({
+      playerX: this.player?.x ?? 0,
+      playerY: this.player?.y ?? 0,
+      interactRequested: playerUpdate.step.interactRequested,
+      exitRequested: playerUpdate.commands.exitContext
+    });
+
+    if (!interaction || !interaction.prompt.visible) {
+      this.interactPrompt?.setVisible(false);
+      return;
+    }
+
+    this.interactPrompt?.setPosition(interaction.prompt.x, interaction.prompt.y).setVisible(true);
+    if (interaction.effect?.kind === 'openTrailCard') {
+      this.onOpenOverlay?.(TRAIL_CARD_OVERLAY_ID, {
+        params: interaction.effect.params,
+        returnToSceneId: PHASER_SCENE_KEYS.ridge
+      });
     }
   }
 
@@ -165,6 +208,34 @@ export class RidgeScene extends Phaser.Scene {
     });
     this.player = this.playerRuntime.player;
     this.physics.add.collider(this.player, ground);
+  }
+
+  private createTrailCardInteractions(promptText: string): void {
+    this.interactPrompt = createUiText(this, 0, 0, promptText, {
+      fontSize: '16px',
+      color: '#1a1a1a',
+      backgroundColor: '#ffffff',
+      padding: { x: 5, y: 2 }
+    }).setOrigin(0.5).setDepth(100).setVisible(false);
+
+    this.interactionRuntime = createInteriorInteractionRuntime<
+      RidgeTrailCardTargetId,
+      RidgeInteractionEffect
+    >({
+      interactRadius: 72,
+      exitEffect: { kind: 'close' },
+      targets: RIDGE_TRAIL_CARD_TARGETS.map((target) => ({
+        id: target.id,
+        kind: 'trail-card',
+        x: target.x,
+        distanceAnchorY: target.distanceAnchorY,
+        prompt: target.prompt,
+        effect: {
+          kind: 'openTrailCard',
+          params: target.card
+        } satisfies RidgeInteractionEffect
+      }))
+    });
   }
 
   private addRelaySpire(x: number): void {

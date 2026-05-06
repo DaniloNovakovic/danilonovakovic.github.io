@@ -1,10 +1,11 @@
 import { useCallback, useLayoutEffect, useRef } from 'react';
 import type { OverlayId } from '@/game/overlays/overlayIds';
 import type { SceneId } from '@/game/scenes/sceneIds';
+import type { OpenOverlayOptions } from '@/game/bridge/store';
 
 interface GameBridgeCallbacks {
   onEnterScene: (sceneId: SceneId) => void;
-  onOpenOverlay: (overlayId: OverlayId) => void;
+  onOpenOverlay: (overlayId: OverlayId, options?: OpenOverlayOptions) => void;
   onReturnToOverworld: () => void;
   isPaused: boolean;
 }
@@ -25,8 +26,8 @@ export function useGameBridgeCallbacks({
     bridgeRef.current.onEnterScene(sceneId);
   }, []);
 
-  const stableOnOpenOverlay = useCallback((overlayId: OverlayId) => {
-    bridgeRef.current.onOpenOverlay(overlayId);
+  const stableOnOpenOverlay = useCallback((overlayId: OverlayId, options?: OpenOverlayOptions) => {
+    bridgeRef.current.onOpenOverlay(overlayId, options);
   }, []);
 
   const stableOnReturnToOverworld = useCallback(() => {

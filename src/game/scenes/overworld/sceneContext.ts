@@ -1,10 +1,11 @@
 import { OVERWORLD_SCENE_ID, PHASER_SCENE_KEYS, type SceneId } from '@/game/scenes/sceneIds';
 import type { OverlayId } from '@/game/overlays/overlayIds';
+import type { OpenOverlayOptions } from '@/game/bridge/store';
 import type { SceneContextDefinition } from '@/game/sceneLifecycle/types';
 
 interface OverworldSceneContextOptions {
   onEnterScene: (sceneId: SceneId) => void;
-  onOpenOverlay: (overlayId: OverlayId) => void;
+  onOpenOverlay: (overlayId: OverlayId, options?: OpenOverlayOptions) => void;
   getIsPaused: () => boolean;
   getResumePosition: () => { x: number; y: number } | undefined;
 }

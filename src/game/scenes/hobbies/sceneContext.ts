@@ -1,10 +1,11 @@
 import { HOBBIES_SCENE_ID, PHASER_SCENE_KEYS } from '@/game/scenes/sceneIds';
 import type { OverlayId } from '@/game/overlays/overlayIds';
+import type { OpenOverlayOptions } from '@/game/bridge/store';
 import type { SceneContextDefinition } from '@/game/sceneLifecycle/types';
 
 interface HobbiesSceneContextOptions {
   onClose: () => void;
-  onOpenOverlay: (overlayId: OverlayId) => void;
+  onOpenOverlay: (overlayId: OverlayId, options?: OpenOverlayOptions) => void;
   getResumePosition: () => { x: number; y: number } | undefined;
   loadScene: () => Promise<unknown>;
 }

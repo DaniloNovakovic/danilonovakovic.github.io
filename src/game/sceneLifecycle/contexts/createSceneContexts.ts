@@ -7,6 +7,7 @@ import {
   type SceneId
 } from '@/game/scenes/sceneIds';
 import type { OverlayId } from '@/game/overlays/overlayIds';
+import type { OpenOverlayOptions } from '@/game/bridge/store';
 import { createBasementSceneContext } from '@/game/scenes/basement/sceneContext';
 import { createHobbiesSceneContext } from '@/game/scenes/hobbies/sceneContext';
 import { createOverworldSceneContext } from '@/game/scenes/overworld/sceneContext';
@@ -16,7 +17,7 @@ import type { ResumeSnapshot, SceneContextDefinition } from '../types';
 
 export interface SceneContextAssemblyDeps {
   onEnterScene: (sceneId: SceneId) => void;
-  onOpenOverlay: (overlayId: OverlayId) => void;
+  onOpenOverlay: (overlayId: OverlayId, options?: OpenOverlayOptions) => void;
   onReturnToOverworld: () => void;
   getIsPaused: () => boolean;
   prepareSceneStart: (sceneKey: string) => void;

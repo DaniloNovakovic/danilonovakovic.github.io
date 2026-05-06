@@ -1,6 +1,6 @@
 import { BookOpen, Backpack, Bug } from 'lucide-react';
 import Game from './Game';
-import { bridgeActions, useBridgeState } from '@/game/bridge/store';
+import { bridgeActions, useBridgeState, type OpenOverlayOptions } from '@/game/bridge/store';
 import {
   getPhaserScenePresentationMode,
   type PhaserScenePresentationMode
@@ -39,7 +39,7 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
   const shouldShowFooterHint = shouldReserveSceneHint || shouldShowNavigationHint;
 
   const enterScene = (sceneId: SceneId) => bridgeActions.enterScene(sceneId);
-  const openOverlay = (overlayId: OverlayId) => bridgeActions.openOverlay(overlayId);
+  const openOverlay = (overlayId: OverlayId, options?: OpenOverlayOptions) => bridgeActions.openOverlay(overlayId, options);
   const returnToOverworld = () => bridgeActions.returnToOverworld();
 
   return (

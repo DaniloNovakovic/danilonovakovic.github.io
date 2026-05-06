@@ -75,6 +75,19 @@ describe('createSceneContexts', () => {
     expect(getSceneStartResume).toHaveBeenCalledWith(PHASER_SCENE_KEYS.basement);
   });
 
+  it('passes overlay options through scene start callbacks', () => {
+    const onOpenOverlay = vi.fn();
+    const contexts = createSceneContexts(makeDeps({ onOpenOverlay }));
+    const ridgeStartData = contexts[4].getStartData() as {
+      onOpenOverlay: (overlayId: 'trailCard', options?: { params?: unknown }) => void;
+    };
+    const params = { title: 'Stampede Sketch' };
+
+    ridgeStartData.onOpenOverlay('trailCard', { params });
+
+    expect(onOpenOverlay).toHaveBeenCalledWith('trailCard', { params });
+  });
+
   it('prepares potassium start before reading potassium start position', () => {
     const calls: string[] = [];
     const prepareSceneStart = vi.fn((sceneKey: string) => {

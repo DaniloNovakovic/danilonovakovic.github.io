@@ -7,10 +7,11 @@ import { usePhaserScaleRefresh } from './usePhaserScaleRefresh';
 import type { PhaserScenePresentationMode } from '@/game/sharedSceneRuntime/phaserScenePresentation';
 import type { SceneId } from '@/game/scenes/sceneIds';
 import type { OverlayId } from '@/game/overlays/overlayIds';
+import type { OpenOverlayOptions } from '@/game/bridge/store';
 
 interface GameProps {
   onEnterScene: (sceneId: SceneId) => void;
-  onOpenOverlay: (overlayId: OverlayId) => void;
+  onOpenOverlay: (overlayId: OverlayId, options?: OpenOverlayOptions) => void;
   isPaused: boolean;
   activeSceneId: SceneId;
   presentationMode: PhaserScenePresentationMode;
