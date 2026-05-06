@@ -1,4 +1,5 @@
 import * as Phaser from 'phaser';
+import type { OverlayId } from '@/game/overlays/overlayIds';
 import {
   BASEMENT_COMPUTER,
   BASEMENT_EXIT,
@@ -17,18 +18,18 @@ import {
   OVERWORLD_JUMP_VELOCITY_Y,
   OVERWORLD_SPRINT_SPEED,
   OVERWORLD_WALK_SPEED
-} from '@/game/runtime/config';
+} from '@/game/sharedSceneRuntime/config';
 import { bridgeActions, isItemEquipped, isItemOwned } from '@/game/bridge/store';
-import { createUiText } from '@/game/runtime/text/createUiText';
-import { PlayerThoughtText } from '@/game/runtime/text/PlayerThoughtText';
+import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
+import { PlayerThoughtText } from '@/game/sharedSceneRuntime/text/PlayerThoughtText';
 import {
   createSideViewPlayerRuntime,
   type SideViewPlayerRuntime
-} from '@/game/runtime/player/SideViewPlayerRuntime';
+} from '@/game/sharedSceneRuntime/player/SideViewPlayerRuntime';
 import {
   createInteriorInteractionRuntime,
   type InteriorInteractionRuntime
-} from '@/game/runtime/interactions/InteriorInteractionRuntime';
+} from '@/game/sharedSceneRuntime/interactions/InteriorInteractionRuntime';
 
 export class BasementScene extends Phaser.Scene {
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -43,7 +44,7 @@ export class BasementScene extends Phaser.Scene {
     BasementInteractionEffect
   >;
   private onClose?: () => void;
-  private onInteract?: (id: string) => void;
+  private onOpenOverlay?: (overlayId: OverlayId) => void;
   private isPaused: boolean = false;
   private resumePosition?: { x: number; y: number };
 
@@ -53,12 +54,12 @@ export class BasementScene extends Phaser.Scene {
 
   init(data: {
     onClose: () => void;
-    onInteract?: (id: string) => void;
+    onOpenOverlay?: (overlayId: OverlayId) => void;
     isPaused?: boolean;
     resumePosition?: { x: number; y: number };
   }) {
     this.onClose = data.onClose;
-    this.onInteract = data.onInteract;
+    this.onOpenOverlay = data.onOpenOverlay;
     this.isPaused = data.isPaused ?? false;
     this.resumePosition = data.resumePosition;
   }
@@ -325,7 +326,7 @@ export class BasementScene extends Phaser.Scene {
         this.onClose?.();
         break;
       case 'openOverlay':
-        this.onInteract?.(effect.id);
+        this.onOpenOverlay?.(effect.id);
         break;
       case 'collectGlasses':
         bridgeActions.collectGlasses();

@@ -1,29 +1,42 @@
 import { useCallback, useLayoutEffect, useRef } from 'react';
+import type { OverlayId } from '@/game/overlays/overlayIds';
+import type { SceneId } from '@/game/scenes/sceneIds';
 
 interface GameBridgeCallbacks {
-  onInteract: (area: string) => void;
-  onClose: () => void;
+  onEnterScene: (sceneId: SceneId) => void;
+  onOpenOverlay: (overlayId: OverlayId) => void;
+  onReturnToOverworld: () => void;
   isPaused: boolean;
 }
 
-export function useGameBridgeCallbacks({ onInteract, onClose, isPaused }: GameBridgeCallbacks) {
-  const bridgeRef = useRef({ onInteract, onClose, isPaused });
+export function useGameBridgeCallbacks({
+  onEnterScene,
+  onOpenOverlay,
+  onReturnToOverworld,
+  isPaused
+}: GameBridgeCallbacks) {
+  const bridgeRef = useRef({ onEnterScene, onOpenOverlay, onReturnToOverworld, isPaused });
 
   useLayoutEffect(function syncGameBridgeCallbacks() {
-    bridgeRef.current = { onInteract, onClose, isPaused };
-  }, [onInteract, onClose, isPaused]);
+    bridgeRef.current = { onEnterScene, onOpenOverlay, onReturnToOverworld, isPaused };
+  }, [onEnterScene, onOpenOverlay, onReturnToOverworld, isPaused]);
 
-  const stableOnInteract = useCallback((area: string) => {
-    bridgeRef.current.onInteract(area);
+  const stableOnEnterScene = useCallback((sceneId: SceneId) => {
+    bridgeRef.current.onEnterScene(sceneId);
   }, []);
 
-  const stableOnClose = useCallback(() => {
-    bridgeRef.current.onClose();
+  const stableOnOpenOverlay = useCallback((overlayId: OverlayId) => {
+    bridgeRef.current.onOpenOverlay(overlayId);
+  }, []);
+
+  const stableOnReturnToOverworld = useCallback(() => {
+    bridgeRef.current.onReturnToOverworld();
   }, []);
 
   return {
     bridgeRef,
-    stableOnInteract,
-    stableOnClose
+    stableOnEnterScene,
+    stableOnOpenOverlay,
+    stableOnReturnToOverworld
   };
 }

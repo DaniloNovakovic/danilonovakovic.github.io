@@ -1,22 +1,23 @@
 import { useEffect, type RefObject } from 'react';
 import type * as Phaser from 'phaser';
 import { bridgeActions } from '@/game/bridge/store';
-import type { PhaserScenePresentationMode } from '@/game/runtime/phaserScenePresentation';
+import type { PhaserScenePresentationMode } from '@/game/sharedSceneRuntime/phaserScenePresentation';
+import type { SceneId } from '@/game/scenes/sceneIds';
 
 interface UsePhaserScaleRefreshOptions {
-  activeMiniGameId: string | null;
+  activeSceneId: SceneId;
   gameRef: RefObject<Phaser.Game | null>;
   presentationMode: PhaserScenePresentationMode;
 }
 
 export function usePhaserScaleRefresh({
-  activeMiniGameId,
+  activeSceneId,
   gameRef,
   presentationMode
 }: UsePhaserScaleRefreshOptions) {
   useEffect(function resetTouchWhenActiveModeChanges() {
     bridgeActions.resetTouch();
-  }, [activeMiniGameId]);
+  }, [activeSceneId]);
 
   useEffect(function refreshPhaserScaleForPresentationMode() {
     bridgeActions.resetTouch();

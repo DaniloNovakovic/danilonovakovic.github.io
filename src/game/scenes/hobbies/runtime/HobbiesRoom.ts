@@ -4,19 +4,19 @@
  * this module reads from it and emits Phaser game objects.
  */
 import * as Phaser from 'phaser';
-import { HOBBY_REACT_OVERLAY_IDS } from '@/game/registry/featureIds';
+import { HOBBIES_OVERLAY_IDS } from '@/game/overlays/overlayIds';
 import {
   HOBBIES_EXIT_X,
   HOBBY_STATION_LAYOUT
 } from '../roomLayout';
 import { getMessages } from '@/shared/i18n';
-import { TextureGenerator } from '@/game/runtime/textures/TextureGenerator';
+import { TextureGenerator } from '@/game/sharedSceneRuntime/textures/TextureGenerator';
 import {
   HOBBIES_FLOOR_Y,
   HOBBIES_ROOM_HEIGHT,
   HOBBIES_ROOM_WIDTH
-} from '@/game/runtime/config';
-import { createUiText } from '@/game/runtime/text/createUiText';
+} from '@/game/sharedSceneRuntime/config';
+import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
 
 /**
  * Generates hobby item textures, draws room background, stations, and exit door.
@@ -28,7 +28,7 @@ export function buildHobbiesRoom(scene: Phaser.Scene): void {
   const height = HOBBIES_ROOM_HEIGHT;
   const floorY = HOBBIES_FLOOR_Y;
 
-  for (const hobbyId of HOBBY_REACT_OVERLAY_IDS) {
+  for (const hobbyId of HOBBIES_OVERLAY_IDS) {
     TextureGenerator.generateHobbyItem(scene, hobbyId);
   }
 

@@ -33,8 +33,8 @@ export interface OverworldInteractionInput {
   bananaDiscovered: boolean;
   bananaWarpScheduled: boolean;
   bananaCancelExtraDist: number;
-  basementFeatureId: string;
-  potassiumFeatureId: string;
+  basementSceneId: string;
+  potassiumSceneId: string;
   basementHole: BasementHoleInteraction;
   secretSlots: readonly OverworldSecretSlot[];
   buildingSlots: readonly OverworldBuildingSlot[];
@@ -83,7 +83,7 @@ export function decideOverworldInteraction(
       effects.push({ type: 'cancelBananaPeel' });
     }
     if (input.interactRequested) {
-      effects.push({ type: 'enter', targetId: input.basementFeatureId });
+      effects.push({ type: 'enter', targetId: input.basementSceneId });
     }
     return {
       state: nextState,
@@ -112,7 +112,7 @@ export function decideOverworldInteraction(
       !input.bananaWarpScheduled
     ) {
       if (input.bananaDiscovered) {
-        effects.push({ type: 'enter', targetId: input.potassiumFeatureId });
+        effects.push({ type: 'enter', targetId: input.potassiumSceneId });
       } else {
         nextState.bananaFirstPeelPending = true;
         effects.push({ type: 'discoverBananaPeel' });

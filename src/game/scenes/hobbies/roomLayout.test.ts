@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { HOBBY_REACT_OVERLAY_IDS, MINI_GAME_IDS } from '@/game/registry/featureIds';
+import { HOBBIES_OVERLAY_IDS, OVERLAY_IDS } from '@/game/overlays/overlayIds';
 import { HOBBY_STATION_LAYOUT, HOBBIES_ROOM_INTERACTABLES } from './roomLayout';
 
 describe('hobbies room layout', () => {
@@ -7,8 +7,8 @@ describe('hobbies room layout', () => {
     expect(HOBBY_STATION_LAYOUT).toHaveLength(4);
     expect(HOBBY_STATION_LAYOUT.map((s) => s.id)).not.toContain('games');
 
-    for (const id of HOBBY_REACT_OVERLAY_IDS) {
-      expect(MINI_GAME_IDS as readonly string[]).toContain(id);
+    for (const id of HOBBIES_OVERLAY_IDS) {
+      expect(OVERLAY_IDS as readonly string[]).toContain(id);
       const station = HOBBY_STATION_LAYOUT.find((s) => s.id === id);
       expect(station).toBeDefined();
       const hit = HOBBIES_ROOM_INTERACTABLES.find((i) => i.id === id);

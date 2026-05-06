@@ -4,9 +4,9 @@ This folder owns the Developer Basement interior scene, its room layout, and bas
 
 ## Ownership
 
-- Scene catalog facts and game-only text live beside the scene.
+- Scene-local overlay definitions and game-only text live beside the scene.
 - Room layout data describes basement props; runtime code owns Phaser objects, prompts, item gates, and bridge mutations.
-- Basement overlays return to the Basement scene through the runtime catalog parent id.
+- Basement overlays are opened by Basement-owned triggers. Closing the overlay resumes the active Basement scene because the trigger opens the overlay without changing scenes.
 
 ## Extension Points
 

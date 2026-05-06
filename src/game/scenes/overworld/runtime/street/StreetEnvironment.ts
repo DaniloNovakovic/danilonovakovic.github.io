@@ -3,15 +3,15 @@
  * Extracted from OverworldScene so the scene is a thin orchestrator.
  */
 import * as Phaser from 'phaser';
-import { EnvironmentBuilder } from '@/game/runtime/textures/EnvironmentBuilder';
+import { EnvironmentBuilder } from '@/game/sharedSceneRuntime/textures/EnvironmentBuilder';
 import {
   GAME_DESIGN_HEIGHT,
   GAME_DESIGN_WIDTH,
   OVERWORLD_GROUND_ZONE,
   OVERWORLD_WIDTH
-} from '@/game/runtime/config';
+} from '@/game/sharedSceneRuntime/config';
 import { getStreetCameraProfile } from './streetCameraProfile';
-import { createSideViewCameraRuntime } from '@/game/runtime/camera/sideViewCameraRuntime';
+import { createSideViewCameraRuntime } from '@/game/sharedSceneRuntime/camera/sideViewCameraRuntime';
 
 export interface StreetEnvironmentHandles {
   groundZone: Phaser.GameObjects.Zone;

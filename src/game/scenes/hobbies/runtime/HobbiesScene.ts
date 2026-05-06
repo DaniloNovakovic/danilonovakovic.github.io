@@ -5,7 +5,7 @@
 import * as Phaser from 'phaser';
 import { HOBBIES_EXIT_X, HOBBIES_ROOM_INTERACTABLES } from '../roomLayout';
 import { getMessages } from '@/shared/i18n';
-import type { HobbyReactOverlayId } from '@/game/registry/featureIds';
+import type { HobbiesOverlayId, OverlayId } from '@/game/overlays/overlayIds';
 import {
   GAME_DESIGN_HEIGHT,
   GAME_DESIGN_WIDTH,
@@ -19,24 +19,24 @@ import {
   OVERWORLD_JUMP_VELOCITY_Y,
   OVERWORLD_SPRINT_SPEED,
   OVERWORLD_WALK_SPEED
-} from '@/game/runtime/config';
+} from '@/game/sharedSceneRuntime/config';
 import { isItemEquipped } from '@/game/bridge/store';
 import { buildHobbiesRoom } from './HobbiesRoom';
-import { createUiText } from '@/game/runtime/text/createUiText';
+import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
 import {
   createSideViewPlayerRuntime,
   type SideViewPlayerRuntime
-} from '@/game/runtime/player/SideViewPlayerRuntime';
+} from '@/game/sharedSceneRuntime/player/SideViewPlayerRuntime';
 import {
   createInteriorInteractionRuntime,
   type InteriorInteractionRuntime
-} from '@/game/runtime/interactions/InteriorInteractionRuntime';
+} from '@/game/sharedSceneRuntime/interactions/InteriorInteractionRuntime';
 
 type HobbiesInteractionEffect =
   | { kind: 'close' }
-  | { kind: 'openOverlay'; id: HobbyReactOverlayId };
+  | { kind: 'openOverlay'; id: HobbiesOverlayId };
 
-type HobbiesInteractionId = 'exit' | HobbyReactOverlayId;
+type HobbiesInteractionId = 'exit' | HobbiesOverlayId;
 
 export class HobbiesScene extends Phaser.Scene {
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -45,7 +45,7 @@ export class HobbiesScene extends Phaser.Scene {
   private playerRuntime?: SideViewPlayerRuntime;
   private interactionRuntime?: InteriorInteractionRuntime<HobbiesInteractionId, HobbiesInteractionEffect>;
   private onClose?: () => void;
-  private onInteract?: (id: string) => void;
+  private onOpenOverlay?: (overlayId: OverlayId) => void;
   private isPaused: boolean = false;
   private resumePosition?: { x: number; y: number };
 
@@ -55,12 +55,12 @@ export class HobbiesScene extends Phaser.Scene {
 
   init(data: {
     onClose: () => void;
-    onInteract: (id: string) => void;
+    onOpenOverlay: (overlayId: OverlayId) => void;
     isPaused?: boolean;
     resumePosition?: { x: number; y: number };
   }) {
     this.onClose = data.onClose;
-    this.onInteract = data.onInteract;
+    this.onOpenOverlay = data.onOpenOverlay;
     this.isPaused = data.isPaused ?? false;
     this.resumePosition = data.resumePosition;
   }
@@ -192,7 +192,7 @@ export class HobbiesScene extends Phaser.Scene {
     if (interaction.effect) {
       switch (interaction.effect.kind) {
         case 'openOverlay':
-          this.onInteract?.(interaction.effect.id);
+          this.onOpenOverlay?.(interaction.effect.id);
           break;
       }
     }

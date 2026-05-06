@@ -1,7 +1,7 @@
 import * as Phaser from 'phaser';
-import { GAME_DESIGN_WIDTH } from '@/game/runtime/config';
+import { GAME_DESIGN_WIDTH } from '@/game/sharedSceneRuntime/config';
 import { POTASSIUM_PROJECTILE_CONTROL_DEFAULTS } from './potassiumSlipProjectileControl';
-import { createUiText, snapUiTextCoordinate } from '@/game/runtime/text/createUiText';
+import { createUiText, snapUiTextCoordinate } from '@/game/sharedSceneRuntime/text/createUiText';
 import { getMessages } from '@/shared/i18n';
 import type {
   PotassiumDraftOption,

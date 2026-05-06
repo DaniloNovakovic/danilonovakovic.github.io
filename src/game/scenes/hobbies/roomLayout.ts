@@ -1,10 +1,10 @@
-import type { HobbyReactOverlayId, MiniGameId } from '@/game/registry/featureIds';
+import type { HobbiesOverlayId, OverlayId } from '@/game/overlays/overlayIds';
 
-export type HobbiesRoomInteractableId = MiniGameId | 'exit';
+export type HobbiesRoomInteractableId = OverlayId | 'exit';
 
 export interface HobbyStationTypeObject {
   kind: 'hobbyStation';
-  id: HobbyReactOverlayId;
+  id: HobbiesOverlayId;
   x: number;
   spriteMode: 'floor' | 'mid';
   /** Extra offset from floorY (negative draws upward). */
@@ -22,7 +22,7 @@ export type HobbiesRoomInteractableTypeObject =
     }
   | {
       kind: 'hobbyStation';
-      id: HobbyReactOverlayId;
+      id: HobbiesOverlayId;
       x: number;
       /** Anchor Y for proximity checks. */
       distanceAnchorY: number;
@@ -50,7 +50,8 @@ export const HOBBY_STATION_LAYOUT: readonly HobbyStationTypeObject[] = [
 ];
 
 /**
- * Interaction hotspots inside the Hobbies Phaser room. Kept with the feature so layout stays aligned with registry hobby ids.
+ * Interaction hotspots inside the Hobbies Phaser room. The scene owns these
+ * triggers and opens the matching scene-local overlay ids.
  */
 export const HOBBIES_ROOM_INTERACTABLES: readonly HobbiesRoomInteractableTypeObject[] = [
   {

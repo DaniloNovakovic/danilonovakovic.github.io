@@ -1,5 +1,5 @@
-import { PHASER_SCENE_KEYS } from '@/game/registry/featureIds';
-import type { SceneContextDefinition } from '@/game/kernel/types';
+import { PHASER_SCENE_KEYS, POTASSIUM_SCENE_ID } from '@/game/scenes/sceneIds';
+import type { SceneContextDefinition } from '@/game/sceneLifecycle/types';
 
 interface PotassiumSlipSceneContextOptions {
   onClose: () => void;
@@ -8,17 +8,17 @@ interface PotassiumSlipSceneContextOptions {
 }
 
 /**
- * Kernel lifecycle contract for the Potassium Slip Phaser mini-game.
+ * Scene lifecycle contract for the Potassium Slip Phaser scene.
  *
  * Potassium is a full-board Phaser scene rather than a React overlay. This
- * context gives the kernel the lazy scene loader plus the close/resume data
+ * context gives scene lifecycle the lazy scene loader plus the close/resume data
  * that lets the game return through the same scene lifecycle path as interiors.
  */
 export function createPotassiumSlipSceneContext(
   options: PotassiumSlipSceneContextOptions
 ): SceneContextDefinition {
   return {
-    id: PHASER_SCENE_KEYS.potassium,
+    id: POTASSIUM_SCENE_ID,
     sceneKey: PHASER_SCENE_KEYS.potassium,
     loadScene: options.loadScene,
     getStartData: () => ({

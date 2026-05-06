@@ -4,7 +4,7 @@
  */
 
 export interface OverworldBuildingSlot {
-  /** Building / feature id (from sprite data `name`). */
+  /** Building trigger id (from sprite data `name`). */
   buildingId: string;
   x: number;
   y: number;

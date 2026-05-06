@@ -1,2 +1,2 @@
-export { OVERWORLD_BUILDING_PLACEMENTS } from './worldLayout';
+export { OVERWORLD_BUILDING_TRIGGERS, getOverworldBuildingTrigger } from './worldLayout';
 export { createOverworldSceneContext } from './sceneContext';

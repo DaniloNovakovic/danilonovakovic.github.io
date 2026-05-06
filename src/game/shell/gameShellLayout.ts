@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import type { PhaserScenePresentationMode } from '@/game/runtime/phaserScenePresentation';
+import type { PhaserScenePresentationMode } from '@/game/sharedSceneRuntime/phaserScenePresentation';
 
 const PHASER_DESIGN_WIDTH = 1000;
 const PHASER_DESIGN_HEIGHT = 600;
