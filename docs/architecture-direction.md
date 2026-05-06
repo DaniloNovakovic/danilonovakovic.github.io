@@ -1,6 +1,6 @@
-# Project Constitution: Scalable Browser Game Architecture
+# Architecture Direction
 
-This document describes the architectural direction for the project. For what exists in code today, treat [`ARCHITECTURE_RUNTIME.md`](ARCHITECTURE_RUNTIME.md), `AGENTS.md`, and the scoped `.agents/rules/` files as the current operational guidance.
+This document describes the current architectural direction for the project. For what exists in code today, treat [`runtime-architecture.md`](runtime-architecture.md), `AGENTS.md`, and the scoped `.agents/rules/` files as the operational guidance.
 
 ## 1. Architectural Philosophy
 
@@ -48,7 +48,7 @@ This project is built on three core pillars to ensure that adding future complex
 
 ## 3. Directional Implementation Anchors
 
-This constitution is directional. For exact current implementation details, prefer `docs/ARCHITECTURE_RUNTIME.md`. Current canonical runtime anchors:
+This document is directional. For exact current implementation details, prefer [`runtime-architecture.md`](runtime-architecture.md). Current runtime anchors:
 
 - **Bridge store:** `src/game/bridge/store.ts`
 - **Kernel:** `src/game/kernel/GameKernel.ts`
@@ -65,4 +65,4 @@ When proposing future refactors, prefer extending these modules instead of re-in
 
 ## 4. Agent Guidance
 
-For implementation work, prefer the smallest change that fits the nearby code. Use [`ARCHITECTURE_RUNTIME.md`](ARCHITECTURE_RUNTIME.md), `AGENTS.md`, and [`.agents/rules/`](../.agents/rules/) for current operational guidance.
+For implementation work, prefer the smallest change that fits the nearby code. Use [`runtime-architecture.md`](runtime-architecture.md), `AGENTS.md`, and [`.agents/rules/`](../.agents/rules/) for current operational guidance.

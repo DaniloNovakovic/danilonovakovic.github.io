@@ -1,6 +1,6 @@
 # Level Design & Progression
 
-> Concept / future-design notes unless a section explicitly says it is implemented. For current shipped level behavior, see [`PLAYER_MANUAL.md`](./PLAYER_MANUAL.md).
+> Concept / future-design notes unless a section explicitly says it is implemented. For current shipped level behavior, see [`player-manual.md`](./player-manual.md).
 
 ## Overworld: The "Sketch" City
 

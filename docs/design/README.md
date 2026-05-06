@@ -1,6 +1,6 @@
 # Design assets & prompts
 
-Companion to [`STYLE_GUIDE.md`](STYLE_GUIDE.md). The style guide is the source of truth for the visual identity; this file is for asset-generation prompts and other production helpers.
+Companion to [`style-guide.md`](style-guide.md). The style guide is the source of truth for the visual identity; this file is for asset-generation prompts and other production helpers.
 
 ## Image prompt for character assets
 

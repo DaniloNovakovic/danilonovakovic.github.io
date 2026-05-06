@@ -14,4 +14,4 @@ This folder owns the Potassium Slip Phaser mini-game and its scene-local gamepla
 - Use the runtime catalog and presentation helpers for app-level integration instead of local React/Phaser kind checks.
 - Add shared runtime code only when another scene genuinely needs the same lifecycle or policy.
 
-See `docs/ARCHITECTURE_RUNTIME.md` and `.agents/rules/20-game-runtime.md` for the global runtime rules.
+See `docs/runtime-architecture.md` and `.agents/rules/20-game-runtime.md` for the global runtime rules.

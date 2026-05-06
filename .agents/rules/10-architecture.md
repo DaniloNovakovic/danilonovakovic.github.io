@@ -25,7 +25,7 @@ This codebase uses a micro-kernel + bridge + ECS arrangement. The layering is lo
 
 Folder `index.ts` files are public boundaries: export only what other folders should use. Keep component internals, shell hooks, and implementation helpers unexported unless they are intentionally part of that folder's public API. UI primitives under `src/shared/ui` are colocated in component folders.
 
-See [`AGENTS.md`](../../AGENTS.md) and [`docs/ARCHITECTURE_RUNTIME.md`](../../docs/ARCHITECTURE_RUNTIME.md) for the current runtime split.
+See [`AGENTS.md`](../../AGENTS.md) and [`docs/runtime-architecture.md`](../../docs/runtime-architecture.md) for the current runtime split.
 
 ## React Effects
 

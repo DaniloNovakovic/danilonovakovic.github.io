@@ -1,6 +1,6 @@
 # Agent Instructions & Project Context
 
-Rules and gotchas for agents working on this gamified portfolio. Descriptive docs (what the project *is*) live in [`README.md`](README.md) and [`docs/ARCHITECTURE_RUNTIME.md`](docs/ARCHITECTURE_RUNTIME.md). This file is for things that, if ignored, will break something.
+Rules and gotchas for agents working on this gamified portfolio. Descriptive docs (what the project *is*) live in [`README.md`](README.md) and [`docs/runtime-architecture.md`](docs/runtime-architecture.md). This file is for things that, if ignored, will break something.
 
 ## AI tool entry points
 
@@ -30,7 +30,7 @@ Single-context repo: read root `CONTEXT.md` and `docs/adr/` when present. See `d
 
 ## Visual identity
 
-Strict **"Digital Sketchbook"** aesthetic — high-contrast monochromatic, hand-drawn ink, inspired by Open Peeps and Life is Strange journal pages. All visual rules live in [`docs/design/STYLE_GUIDE.md`](docs/design/STYLE_GUIDE.md); do not re-state them here.
+Strict **"Digital Sketchbook"** aesthetic — high-contrast monochromatic, hand-drawn ink, inspired by Open Peeps and Life is Strange journal pages. All visual rules live in [`docs/design/style-guide.md`](docs/design/style-guide.md); do not re-state them here.
 
 ## Architecture
 
@@ -39,7 +39,7 @@ Hybrid Phaser + React application:
 1. **Phaser world** — a 2D side-scrolling street where the player walks and jumps. World dimensions and physics constants live in [`src/game/runtime/config.ts`](src/game/runtime/config.ts); building placements live in [`src/game/scenes/overworld/worldLayout.ts`](src/game/scenes/overworld/worldLayout.ts).
 2. **React overlays** — when the player interacts with a building or supported interior prop, a React modal opens. Most mini-games are React components inside these modals.
 3. **Bridge** — React and Phaser synchronize via [`src/game/bridge/store.ts`](src/game/bridge/store.ts) (`bridgeStore`, `bridgeActions`, `useBridgeState`). Pause state and touch one-shots (`jumpQueued`, `interactTap`) are derived and consumed there. **Do not introduce new ad-hoc globals** — see [`.agents/rules/10-architecture.md`](.agents/rules/10-architecture.md).
-4. **Runtime modes** — mode transitions live in [`src/game/runtime/gameState.ts`](src/game/runtime/gameState.ts) as a small discriminated union (`exploring`, `reactOverlay`, `phaserScene`) and are projected through the bridge. React overlays may close back to an interior parent scene such as `hobbies` or `basement` via registry `overlayParentId`; do not re-derive app mode from loose `activeMiniGameId` checks in new code. See [`docs/ARCHITECTURE_RUNTIME_MODES.md`](docs/ARCHITECTURE_RUNTIME_MODES.md).
+4. **Runtime modes** — mode transitions live in [`src/game/runtime/gameState.ts`](src/game/runtime/gameState.ts) as a small discriminated union (`exploring`, `reactOverlay`, `phaserScene`) and are projected through the bridge. React overlays may close back to an interior parent scene such as `hobbies` or `basement` via registry `overlayParentId`; do not re-derive app mode from loose `activeMiniGameId` checks in new code. See [`docs/runtime-modes.md`](docs/runtime-modes.md).
 5. **Kernel + scene lifecycle** — [`src/game/shell/Game.tsx`](src/game/shell/Game.tsx) renders the Phaser host and composes shell hooks for Phaser boot, scale refresh, touch controls, and bridge callbacks. Boot still delegates transitions to [`src/game/kernel/GameKernel.ts`](src/game/kernel/GameKernel.ts) and [`src/game/kernel/SceneManager.ts`](src/game/kernel/SceneManager.ts) through [`src/game/infra/phaser/PhaserSceneAdapter.ts`](src/game/infra/phaser/PhaserSceneAdapter.ts). Known Phaser scene contexts are assembled by [`src/game/sceneContexts/createSceneContexts.ts`](src/game/sceneContexts/createSceneContexts.ts); add new scene lifecycle wiring in scene-owned `sceneContext.ts` files rather than expanding `Game.tsx`.
 6. **Runtime catalogs** — game-owned catalog entries live in [`src/game/registry/catalog.ts`](src/game/registry/catalog.ts), with runtime binding exports in [`src/game/registry/featureRuntimeBindings.ts`](src/game/registry/featureRuntimeBindings.ts) and runtime lookup helpers in [`src/game/runtime/miniGameRegistry.ts`](src/game/runtime/miniGameRegistry.ts). Catalogs answer "what playable feature exists and how is it resolved?"; scene contexts answer "how does this Phaser scene enter/exit the kernel lifecycle?" React overlay resolution, parent returns, and Phaser/React kind checks should go through the catalog helpers instead of local maps.
 7. **Scene resume** — new interior scenes should implement `getResumeCapturePosition()` (see `ResumeCaptureScene` in [`src/game/runtime/sceneContracts.ts`](src/game/runtime/sceneContracts.ts)) and use a registry key matching the scene key. Resume persistence and reset rules go through [`src/game/runtime/sceneResumePolicy.ts`](src/game/runtime/sceneResumePolicy.ts); [`src/game/runtime/sceneResumeStore.ts`](src/game/runtime/sceneResumeStore.ts) is low-level storage behind that policy.
@@ -58,7 +58,7 @@ Hybrid Phaser + React application:
 - **Scene input commands** — lower-level input helpers live in [`src/game/core/input/commands.ts`](src/game/core/input/commands.ts), [`src/game/runtime/input/readSceneInputCommands.ts`](src/game/runtime/input/readSceneInputCommands.ts), and [`src/game/runtime/input/scenePlayerInput.ts`](src/game/runtime/input/scenePlayerInput.ts). Use them inside runtime Modules rather than duplicating raw cursor/WASD/touch one-shot assembly in scenes.
 - **Kernel event timing** — [`KernelEventBus`](src/game/kernel/events.ts) is synchronous and remains the default. [`KernelEventQueue`](src/game/kernel/events.ts) is an unwired scaffold for demonstrated time-decoupling needs such as cross-scene side effects, audio one-shots, or analytics; do not use it as a generic global bus.
 - **Physics collider order** — always initialize the physics collider *after* the player object is instantiated. Otherwise: `ReferenceError` or fall-through-floor.
-- **Phaser 4 render constraints** — `DynamicTexture` buffers draw commands and requires explicit `render()` flushes. Avoid high-frequency `SpriteGPULayer` mutations; prefer static-ish GPU layers and explicit flush points. See [`docs/ARCHITECTURE_RUNTIME.md`](docs/ARCHITECTURE_RUNTIME.md).
+- **Phaser 4 render constraints** — `DynamicTexture` buffers draw commands and requires explicit `render()` flushes. Avoid high-frequency `SpriteGPULayer` mutations; prefer static-ish GPU layers and explicit flush points. See [`docs/runtime-architecture.md`](docs/runtime-architecture.md).
 
 ## Folder ownership
 
@@ -75,6 +75,6 @@ React effects should use a named function expression, e.g. `useEffect(function s
 ## Further reading
 
 - **Scoped AI rules:** [`.agents/rules/`](.agents/rules/) — canonical reusable rules for any coding agent.
-- **Runtime layering:** [`docs/ARCHITECTURE_RUNTIME.md`](docs/ARCHITECTURE_RUNTIME.md).
-- **Project constitution:** [`docs/ARCHITECTURE_CONSTITUTION.md`](docs/ARCHITECTURE_CONSTITUTION.md).
-- **Visual style guide:** [`docs/design/STYLE_GUIDE.md`](docs/design/STYLE_GUIDE.md).
+- **Runtime architecture:** [`docs/runtime-architecture.md`](docs/runtime-architecture.md).
+- **Architecture direction:** [`docs/architecture-direction.md`](docs/architecture-direction.md).
+- **Visual style guide:** [`docs/design/style-guide.md`](docs/design/style-guide.md).

@@ -1,6 +1,6 @@
 # Game Design Brainstorming: Interactive Mode Evolution
 
-> Concept / future-design notes. For current shipped controls and level behavior, see [`PLAYER_MANUAL.md`](./PLAYER_MANUAL.md).
+> Concept / future-design notes. For current shipped controls and level behavior, see [`player-manual.md`](./player-manual.md).
 
 ## 1. The Vision: "The Artist's Journey"
 

@@ -14,4 +14,4 @@ This folder owns the Developer Basement interior scene, its room layout, and bas
 - Keep inventory/progress writes behind bridge actions.
 - Keep Phaser scene classes and builders behind the runtime barrel for cross-folder imports.
 
-See `docs/ARCHITECTURE_RUNTIME.md`, `.agents/rules/20-game-runtime.md`, and `.agents/rules/30-react-overlays.md` for the global runtime rules.
+See `docs/runtime-architecture.md`, `.agents/rules/20-game-runtime.md`, and `.agents/rules/30-react-overlays.md` for the global runtime rules.
