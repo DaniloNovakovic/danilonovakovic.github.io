@@ -26,6 +26,12 @@ Uses the default mattpocock/skills triage labels: `needs-triage`, `needs-info`, 
 
 Single-context repo: read root `CONTEXT.md` and `docs/adr/` when present. See [`docs/agents/domain.md`](docs/agents/domain.md). Missing context and ADR files are allowed; create them lazily only when real terminology or durable decisions need recording.
 
+### Sketchbook Ridge team roles
+
+When Danilo invokes named helpers such as "Hey Mira", use [`docs/agents/sketchbook-ridge-team.md`](docs/agents/sketchbook-ridge-team.md) for the role contract and activation rules.
+
+When Danilo invokes Mira specifically, use [`.agents/skills/mira-producer/SKILL.md`](.agents/skills/mira-producer/SKILL.md) for the repeatable producer workflow.
+
 ## Tech stack
 
 - **Frontend Framework:** React (Vite)
