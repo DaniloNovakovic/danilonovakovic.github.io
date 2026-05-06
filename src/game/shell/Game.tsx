@@ -4,35 +4,52 @@ import { useGameBridgeCallbacks } from './useGameBridgeCallbacks';
 import { useGameTouchControls } from './useGameTouchControls';
 import { usePhaserGameBoot } from './usePhaserGameBoot';
 import { usePhaserScaleRefresh } from './usePhaserScaleRefresh';
-import type { PhaserScenePresentationMode } from '@/game/runtime/phaserScenePresentation';
+import type { PhaserScenePresentationMode } from '@/game/sharedSceneRuntime/phaserScenePresentation';
+import type { SceneId } from '@/game/scenes/sceneIds';
+import type { OverlayId } from '@/game/overlays/overlayIds';
 
 interface GameProps {
-  onInteract: (area: string) => void;
+  onEnterScene: (sceneId: SceneId) => void;
+  onOpenOverlay: (overlayId: OverlayId) => void;
   isPaused: boolean;
-  activeMiniGameId: string | null;
+  activeSceneId: SceneId;
   presentationMode: PhaserScenePresentationMode;
-  onClose: () => void;
+  onReturnToOverworld: () => void;
 }
 
 export default function Game({
-  onInteract,
+  onEnterScene,
+  onOpenOverlay,
   isPaused,
-  activeMiniGameId,
+  activeSceneId,
   presentationMode,
-  onClose
+  onReturnToOverworld
 }: GameProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
   const shouldUseGestureOverlay = presentationMode === 'portrait-cover';
-  const { bridgeRef, stableOnInteract, stableOnClose } = useGameBridgeCallbacks({
-    onInteract,
-    onClose,
+  const {
+    bridgeRef,
+    stableOnEnterScene,
+    stableOnOpenOverlay,
+    stableOnReturnToOverworld
+  } = useGameBridgeCallbacks({
+    onEnterScene,
+    onOpenOverlay,
+    onReturnToOverworld,
     isPaused
   });
 
   const touchHandlers = useGameTouchControls({ isPaused });
-  usePhaserScaleRefresh({ activeMiniGameId, gameRef, presentationMode });
-  usePhaserGameBoot({ bridgeRef, containerRef, gameRef, stableOnClose, stableOnInteract });
+  usePhaserScaleRefresh({ activeSceneId, gameRef, presentationMode });
+  usePhaserGameBoot({
+    bridgeRef,
+    containerRef,
+    gameRef,
+    stableOnEnterScene,
+    stableOnOpenOverlay,
+    stableOnReturnToOverworld
+  });
 
   return (
     <div className="relative h-full w-full min-h-0 overflow-hidden rounded-lg border-4 border-neutral-800 bg-[#fbfbf9] shadow-[8px_8px_0px_0px_rgba(26,26,26,1)]">

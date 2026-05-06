@@ -27,16 +27,16 @@ export default defineConfig([
     },
   },
   {
-    files: ['src/game/sceneContexts/**/*.{ts,tsx}', 'src/game/scenes/**/sceneContext.ts'],
+    files: ['src/game/sceneLifecycle/contexts/**/*.{ts,tsx}', 'src/game/scenes/**/sceneContext.ts'],
     rules: {
       'no-restricted-imports': [
         'error',
         {
           patterns: [
             {
-              group: ['**/runtime', '**/runtime/**'],
+              group: ['**/sharedSceneRuntime', '**/sharedSceneRuntime/**'],
               message:
-                'scene contexts must not import from runtime; pass runtime-derived values via scene context options (kernel boundary).',
+                'scene contexts must not import from sharedSceneRuntime; pass shared runtime values through scene context options.',
             },
           ],
         },

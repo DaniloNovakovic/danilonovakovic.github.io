@@ -26,8 +26,8 @@ class MockResizeObserver {
 }
 
 function resetBridge() {
-  bridgeActions.closeActiveMode();
-  bridgeActions.closeUiDialog();
+  bridgeActions.returnToOverworld();
+  bridgeActions.closeOverlay();
   bridgeActions.resetProgress();
   bridgeActions.resetTouch();
   bridgeActions.setSceneLoading(null);
@@ -94,14 +94,14 @@ describe('InteractiveApp', () => {
 
     await userEvent.click(screen.getByRole('button', { name: /open inventory/i }));
 
-    expect(screen.getByRole('dialog', { name: /inventory/i })).toBeDefined();
-    expect(bridgeStore.getState().activeUiDialogId).toBe('inventory');
+    expect(await screen.findByRole('dialog', { name: /inventory/i })).toBeDefined();
+    expect(bridgeStore.getState().activeOverlayId).toBe('inventory');
     expect(bridgeStore.getState().isPaused).toBe(true);
 
     await userEvent.click(screen.getByRole('button', { name: /close/i }));
 
     await waitFor(() => expect(screen.queryByRole('dialog', { name: /inventory/i })).toBeNull());
-    expect(bridgeStore.getState().activeUiDialogId).toBeNull();
+    expect(bridgeStore.getState().activeOverlayId).toBeNull();
     expect(bridgeStore.getState().isPaused).toBe(false);
   });
 
@@ -113,13 +113,13 @@ describe('InteractiveApp', () => {
     if (!devButton) return;
 
     await userEvent.click(devButton);
-    expect(screen.getByRole('dialog', { name: /dev scene switcher/i })).toBeDefined();
-    expect(bridgeStore.getState().activeUiDialogId).toBe('devSwitcher');
+    expect(await screen.findByRole('dialog', { name: /dev scene switcher/i })).toBeDefined();
+    expect(bridgeStore.getState().activeOverlayId).toBe('devSwitcher');
 
     await userEvent.click(screen.getByRole('button', { name: /^city$/i }));
 
     await waitFor(() => expect(screen.queryByRole('dialog', { name: /dev scene switcher/i })).toBeNull());
-    expect(bridgeStore.getState().activeUiDialogId).toBeNull();
+    expect(bridgeStore.getState().activeOverlayId).toBeNull();
   });
 
   it('switches to static mode directly from the toolbar', async () => {

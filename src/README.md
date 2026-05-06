@@ -7,7 +7,7 @@ This folder is organized by surface ownership.
 - `App.tsx` - App entry and mode routing only.
 - `modePicker/` - Entry routing UI for choosing static or playable mode.
 - `static/` - Static, non-game portfolio surface.
-- `game/` - Playable mode: shell, bridge, scenes, registry, kernel, shared runtime, and Phaser infrastructure.
+- `game/` - Playable mode: shell, bridge, scenes, overlays, scene lifecycle, shared scene runtime, core, and adapters.
 - `shared/` - Code reused by static and game, such as UI primitives, generic hooks, shared portfolio facts, shared i18n, and shared config.
 
 ## Rules Of Thumb
@@ -23,22 +23,27 @@ This folder is organized by surface ownership.
 
 ## Game Conventions
 
-- `game/scenes/*/catalog.ts` - Game registry facts for a scene or game-owned overlay group.
-- `game/scenes/*/sceneContext.ts` - Kernel lifecycle/start-data contract for a Phaser scene.
-- `shared/i18n/messages/en/` - English user-facing copy for React and Phaser. `index.ts` composes the locale from domain files. Add new display strings here first; do not add scene `text.ts` compatibility shims.
+- `game/scenes/sceneIds.ts` - Canonical scene ids and Phaser scene keys.
+- `game/scenes/sceneRegistry.ts` - Loadable scene lookup and dev-switcher scene metadata.
+- `game/scenes/*/sceneContext.ts` - Scene lifecycle/start-data contract for a Phaser scene.
+- `game/scenes/*/worldLayout.ts` or `roomLayout.ts` - Scene-owned trigger and layout facts.
+- `game/scenes/*/overlays` - React overlays owned by a specific scene.
+- `game/scenes/*/overlayDefinitions.ts` - Public overlay definitions exported by that scene.
 - `game/scenes/*/index.ts` - Public scene barrel for cross-folder scene facts.
 - `game/scenes/*/runtime` - Scene-specific Phaser code and scene-local modules.
 - `game/scenes/*/runtime/index.ts` - Public runtime barrel for cross-folder Phaser scene classes and builders.
+- `game/overlays` - Shared overlay ids, overlay registry, `OverlayHost`, global overlays, and portfolio overlays.
 - `game/shell/use*.ts` - Focused React hooks for Phaser boot, bridge callbacks, touch controls, and scale refresh.
-- `game/portfolio` - Portfolio overlays as they appear inside the playable mode.
-- `game/registry` - IDs, runtime bindings, catalog composition, and registry-facing type objects.
-- `game/kernel` - Runtime mode and scene lifecycle orchestration.
-- `game/runtime` - Reusable Phaser-facing machinery shared by multiple scenes.
+- `game/sceneLifecycle` - Scene lifecycle orchestration, scene manager, lifecycle events, and context assembly.
+- `game/sharedSceneRuntime` - Reusable Phaser-facing machinery shared by multiple scenes.
 - `game/core` - Pure ECS, input, and player decision logic with no Phaser/React/browser imports.
-- `game/infra` - Concrete adapters to external engines/APIs, such as the Phaser scene adapter.
+- `game/adapters` - Concrete adapters to external engines/APIs, such as the Phaser scene adapter.
+- `shared/i18n/messages/en/` - English user-facing copy for React and Phaser. `index.ts` composes the locale from domain files. Add new display strings here first; do not add scene `text.ts` compatibility shims.
 
-## Catalog vs Scene Context
+## Scene vs Overlay
 
-- `catalog.ts` answers what playable feature exists and how it is resolved by the registry. It covers React overlays and Phaser scene feature entries.
-- `sceneContext.ts` answers how an actual Phaser scene enters, exits, lazy-loads, and receives start data from the kernel.
+- A **scene** is a Phaser world entered through scene lifecycle.
+- An **overlay** is a React surface rendered by `game/overlays/OverlayHost.tsx`.
+- A **trigger** is an interaction point owned by a scene. Triggers call `enterScene(sceneId)` or `openOverlay(overlayId, options)` through bridge callbacks.
+- `sceneContext.ts` answers how an actual Phaser scene enters, exits, lazy-loads, and receives start data from scene lifecycle.
 - `shared/ui/<Component>/` - UI primitive component, stories, tests, and local `index.ts` grouped together.

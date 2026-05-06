@@ -5,9 +5,9 @@ Phaser, React, browser globals, or scene lifecycle state.
 
 Use this folder when repeated gameplay decisions can be expressed as plain data
 and deterministic functions/classes. Do not put orchestration here just because
-it feels important; mode transitions belong to `kernel/`, Phaser-facing scene
-machinery belongs to `runtime/`, and concrete engine adapters belong to
-`infra/`.
+it feels important; scene transitions belong to `sceneLifecycle/`,
+Phaser-facing scene machinery belongs to `sharedSceneRuntime/`, and concrete
+engine adapters belong to `adapters/`.
 
 ## Owns
 
@@ -22,11 +22,11 @@ machinery belongs to `runtime/`, and concrete engine adapters belong to
 
 ## Related guardrails
 
-- `sceneContexts/` and scene-owned `sceneContext.ts` files must not import `runtime/` (enforced by ESLint; see `eslint.config.js`).
+- `sceneLifecycle/contexts/` and scene-owned `sceneContext.ts` files must not import `sharedSceneRuntime/` (enforced by ESLint; see `eslint.config.js`).
 
 ## Does not own
 
-- Kernel orchestration (`../kernel`)
+- Scene lifecycle orchestration (`../sceneLifecycle`)
 - Direct Phaser imports
 - React component rendering
 - Bridge state or browser state

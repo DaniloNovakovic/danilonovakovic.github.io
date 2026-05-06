@@ -1,15 +1,6 @@
 import { useEffect, useState } from 'react';
-import {
-  EXPLORING_MODE,
-  closeRuntimeMode,
-  createRuntimeModeForInteraction,
-  deriveGameState,
-  derivePause,
-  modesEqual,
-  type GameStateValue,
-  type RuntimeMode
-} from '@/game/runtime/gameState';
-import type { MiniGameId } from '@/game/registry/featureIds';
+import { OVERWORLD_SCENE_ID, type SceneId } from '@/game/scenes/sceneIds';
+import type { OverlayId } from '@/game/overlays/overlayIds';
 
 export interface TouchBridgeState {
   left: number;
@@ -25,7 +16,6 @@ export type InventoryItemId = (typeof INVENTORY_ITEM_IDS)[number];
 
 export const SECRET_DISCOVERY_IDS = ['banana-peel-clue'] as const;
 export type SecretDiscoveryId = (typeof SECRET_DISCOVERY_IDS)[number];
-export type UiDialogId = 'inventory' | 'devSwitcher';
 
 export interface BridgeInventoryState {
   ownedItemIds: InventoryItemId[];
@@ -40,13 +30,26 @@ export interface BridgeProgressState {
   discoveredSecretIds: SecretDiscoveryId[];
 }
 
+export interface OverlayRequest {
+  id: OverlayId;
+  params?: unknown;
+  returnToSceneId?: SceneId;
+  closeOnEscape: boolean;
+  closeOnBackdrop: boolean;
+}
+
+export interface OpenOverlayOptions {
+  params?: unknown;
+  returnToSceneId?: SceneId;
+  closeOnEscape?: boolean;
+  closeOnBackdrop?: boolean;
+}
+
 export interface BridgeState {
-  /** Canonical runtime mode; legacy projections below are derived from this value. */
-  mode: RuntimeMode;
-  status: GameStateValue;
-  activeMiniGameId: MiniGameId | null;
-  loadingMiniGameId: MiniGameId | null;
-  activeUiDialogId: UiDialogId | null;
+  activeSceneId: SceneId;
+  activeOverlay: OverlayRequest | null;
+  activeOverlayId: OverlayId | null;
+  loadingSceneId: SceneId | null;
   isPaused: boolean;
   inventory: BridgeInventoryState;
   equipment: BridgeEquipmentState;
@@ -73,11 +76,26 @@ function arraysEqual<T>(a: readonly T[], b: readonly T[]): boolean {
   return true;
 }
 
+function overlayRequestsEqual(
+  a: OverlayRequest | null,
+  b: OverlayRequest | null
+): boolean {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  return (
+    a.id === b.id &&
+    a.params === b.params &&
+    a.returnToSceneId === b.returnToSceneId &&
+    a.closeOnEscape === b.closeOnEscape &&
+    a.closeOnBackdrop === b.closeOnBackdrop
+  );
+}
+
 let state: BridgeState = {
-  mode: EXPLORING_MODE,
-  ...deriveGameState(EXPLORING_MODE),
-  loadingMiniGameId: null,
-  activeUiDialogId: null,
+  activeSceneId: OVERWORLD_SCENE_ID,
+  activeOverlay: null,
+  activeOverlayId: null,
+  loadingSceneId: null,
   isPaused: false,
   inventory: {
     ownedItemIds: []
@@ -105,22 +123,20 @@ function emit(): void {
 function setState(updater: (current: BridgeState) => BridgeState): void {
   const previous = state;
   const next = updater(state);
-  const derived = deriveGameState(next.mode);
   const candidate: BridgeState = {
     ...next,
-    ...derived,
+    activeOverlayId: next.activeOverlay?.id ?? null,
     progress: {
       ...next.progress,
       hasGlasses: hasItemOwned(next.inventory, 'glasses')
     },
-    isPaused: derivePause(next.mode) || next.loadingMiniGameId !== null || next.activeUiDialogId !== null
+    isPaused: next.activeOverlay !== null || next.loadingSceneId !== null
   };
   const unchanged =
-    modesEqual(previous.mode, candidate.mode) &&
-    previous.status === candidate.status &&
-    previous.activeMiniGameId === candidate.activeMiniGameId &&
-    previous.loadingMiniGameId === candidate.loadingMiniGameId &&
-    previous.activeUiDialogId === candidate.activeUiDialogId &&
+    previous.activeSceneId === candidate.activeSceneId &&
+    overlayRequestsEqual(previous.activeOverlay, candidate.activeOverlay) &&
+    previous.activeOverlayId === candidate.activeOverlayId &&
+    previous.loadingSceneId === candidate.loadingSceneId &&
     previous.isPaused === candidate.isPaused &&
     arraysEqual(previous.inventory.ownedItemIds, candidate.inventory.ownedItemIds) &&
     arraysEqual(previous.equipment.equippedItemIds, candidate.equipment.equippedItemIds) &&
@@ -153,36 +169,45 @@ export const bridgeStore = {
 
 /**
  * Bridge mutations for cross-boundary gameplay state. Actions intentionally derive
- * `status`, `activeMiniGameId`, `isPaused`, and progress facts in one place instead
- * of letting React or Phaser callers maintain parallel state.
+ * scene, overlay, pause, and progress facts in one place instead of letting React
+ * or Phaser callers maintain parallel state.
  */
 export const bridgeActions = {
-  /** Opens either a React overlay or Phaser scene based on the runtime catalog kind. */
-  requestInteraction(area: MiniGameId): void {
+  enterScene(sceneId: SceneId): void {
     setState((current) => ({
       ...current,
-      mode: createRuntimeModeForInteraction(area),
-      loadingMiniGameId: null,
-      activeUiDialogId: null,
+      activeSceneId: sceneId,
+      activeOverlay: null,
+      loadingSceneId: null,
       sceneHintText: null
     }));
   },
-  /**
-   * Closes the active runtime mode. Interior React overlays may resolve to a parent
-   * Phaser scene; otherwise closing returns to overworld exploration.
-   */
-  closeActiveMode(resolveParentId?: (miniGameId: MiniGameId) => MiniGameId | null | undefined): void {
+  returnToOverworld(): void {
+    bridgeActions.enterScene(OVERWORLD_SCENE_ID);
+  },
+  openOverlay(
+    overlayId: OverlayId,
+    options: OpenOverlayOptions = {}
+  ): void {
     setState((current) => ({
       ...current,
-      mode: closeRuntimeMode(current.mode, resolveParentId),
-      loadingMiniGameId: null,
-      activeUiDialogId: null,
+      activeSceneId: options.returnToSceneId ?? current.activeSceneId,
+      activeOverlay: {
+        id: overlayId,
+        params: options.params,
+        returnToSceneId: options.returnToSceneId,
+        closeOnEscape: options.closeOnEscape ?? true,
+        closeOnBackdrop: options.closeOnBackdrop ?? true
+      },
       sceneHintText: null
     }));
   },
-  /** Backward-compatible alias for callers that always return to the overworld. */
-  closeActiveOverlay(): void {
-    bridgeActions.closeActiveMode();
+  closeOverlay(): void {
+    setState((current) => ({
+      ...current,
+      activeOverlay: null,
+      sceneHintText: null
+    }));
   },
   collectItem(itemId: InventoryItemId, autoEquip: boolean = false): void {
     setState((current) => {
@@ -263,22 +288,10 @@ export const bridgeActions = {
       }
     }));
   },
-  setSceneLoading(miniGameId: MiniGameId | null): void {
+  setSceneLoading(sceneId: SceneId | null): void {
     setState((current) => ({
       ...current,
-      loadingMiniGameId: miniGameId
-    }));
-  },
-  openUiDialog(dialogId: UiDialogId): void {
-    setState((current) => ({
-      ...current,
-      activeUiDialogId: dialogId
-    }));
-  },
-  closeUiDialog(): void {
-    setState((current) => ({
-      ...current,
-      activeUiDialogId: null
+      loadingSceneId: sceneId
     }));
   },
   setSceneHintText(text: string | null): void {

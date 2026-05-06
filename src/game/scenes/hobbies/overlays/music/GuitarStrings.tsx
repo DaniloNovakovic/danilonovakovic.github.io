@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { OverlayDialogFrame } from '@/game/overlays/OverlayDialogFrame';
+import type { OverlayControllerProps } from '@/game/overlays/types';
 import { useMessages } from '@/shared/i18n';
 import { useOverlayKeys } from '@/shared/hooks/useOverlayKeys';
 import { Panel } from '@/shared/ui';
@@ -12,7 +14,7 @@ const NOTES = [
   { note: 'E2', freq: 82.41, key: '6' }
 ];
 
-export default function GuitarStrings() {
+export default function GuitarStrings({ close, titleId, descriptionId }: OverlayControllerProps) {
   const messages = useMessages();
   const [activeString, setActiveString] = useState<number | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -71,38 +73,46 @@ export default function GuitarStrings() {
   );
 
   return (
-    <div className="w-full flex flex-col items-center">
-      <Panel border="thick" className="relative flex h-[200px] w-full flex-col justify-center gap-4 p-4 shadow-[6px_6px_0px_0px_rgba(26,26,26,1)]">
-        {NOTES.map((n, i) => (
-          <div
-            key={n.note}
-            className="w-full h-4 relative cursor-pointer group outline-none"
-            onMouseEnter={() => playNote(i, n.freq)}
-            onClick={() => playNote(i, n.freq)}
-            onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && playNote(i, n.freq)}
-            tabIndex={0}
-            role="button"
-            aria-label={messages.miniGames.guitar.stringLabel(n.note, n.key)}
-          >
+    <OverlayDialogFrame
+      title={messages.catalog.hobbies.music.name}
+      description={messages.catalog.hobbies.music.description}
+      close={close}
+      titleId={titleId}
+      descriptionId={descriptionId}
+    >
+      <div className="w-full flex flex-col items-center">
+        <Panel border="thick" className="relative flex h-[200px] w-full flex-col justify-center gap-4 p-4 shadow-[6px_6px_0px_0px_rgba(26,26,26,1)]">
+          {NOTES.map((n, i) => (
             <div
-              className={`absolute top-1/2 left-0 w-full h-[2px] bg-[#1a1a1a] transition-transform duration-100 ${activeString === i ? 'scale-y-300 translate-y-1' : ''} group-focus:bg-blue-500`}
-            ></div>
-            <div
-              className={`absolute -left-2 top-0 text-xs font-bold ${activeString === i ? 'text-black' : 'text-transparent group-hover:text-black group-focus:text-black'} transition-colors`}
+              key={n.note}
+              className="w-full h-4 relative cursor-pointer group outline-none"
+              onMouseEnter={() => playNote(i, n.freq)}
+              onClick={() => playNote(i, n.freq)}
+              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && playNote(i, n.freq)}
+              tabIndex={0}
+              role="button"
+              aria-label={messages.miniGames.guitar.stringLabel(n.note, n.key)}
             >
-              {n.note}
+              <div
+                className={`absolute top-1/2 left-0 w-full h-[2px] bg-[#1a1a1a] transition-transform duration-100 ${activeString === i ? 'scale-y-300 translate-y-1' : ''} group-focus:bg-blue-500`}
+              ></div>
+              <div
+                className={`absolute -left-2 top-0 text-xs font-bold ${activeString === i ? 'text-black' : 'text-transparent group-hover:text-black group-focus:text-black'} transition-colors`}
+              >
+                {n.note}
+              </div>
+              <div className="absolute -right-2 top-0 text-[10px] font-mono opacity-30 group-hover:opacity-100 group-focus:opacity-100">
+                [{n.key}]
+              </div>
             </div>
-            <div className="absolute -right-2 top-0 text-[10px] font-mono opacity-30 group-hover:opacity-100 group-focus:opacity-100">
-              [{n.key}]
-            </div>
-          </div>
-        ))}
+          ))}
 
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border-4 border-[#1a1a1a] opacity-20 pointer-events-none"></div>
-      </Panel>
-      <div className="mt-4 text-sm font-bold text-[#1a1a1a] opacity-60">
-        {messages.miniGames.guitar.instruction}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border-4 border-[#1a1a1a] opacity-20 pointer-events-none"></div>
+        </Panel>
+        <div className="mt-4 text-sm font-bold text-[#1a1a1a] opacity-60">
+          {messages.miniGames.guitar.instruction}
+        </div>
       </div>
-    </div>
+    </OverlayDialogFrame>
   );
 }

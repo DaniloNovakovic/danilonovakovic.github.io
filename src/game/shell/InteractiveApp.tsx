@@ -1,21 +1,14 @@
-import { useCallback } from 'react';
 import { BookOpen, Backpack, Bug } from 'lucide-react';
 import Game from './Game';
-import { GameState } from '@/game/runtime/gameState';
-import {
-  getMiniGameById,
-  getAllMiniGames,
-  getOverlayParentId,
-  getReactOverlayMiniGameById
-} from '@/game/runtime/miniGameRegistry';
-import { MiniGameType } from '@/game/runtime/types';
-import { isMiniGameId } from '@/game/registry/featureIds';
 import { bridgeActions, useBridgeState } from '@/game/bridge/store';
 import {
   getPhaserScenePresentationMode,
   type PhaserScenePresentationMode
-} from '@/game/runtime/phaserScenePresentation';
-import { Button, Card, DialogCard, ModalShell, Panel } from '@/shared/ui';
+} from '@/game/sharedSceneRuntime/phaserScenePresentation';
+import { DEV_SWITCHER_OVERLAY_ID, INVENTORY_OVERLAY_ID, type OverlayId } from '@/game/overlays/overlayIds';
+import { OverlayHost } from '@/game/overlays/OverlayHost';
+import { isSceneId, OVERWORLD_SCENE_ID, POTASSIUM_SCENE_ID, type SceneId } from '@/game/scenes/sceneIds';
+import { Button, Card, Panel } from '@/shared/ui';
 import { getInteractiveGameShellLayout } from './gameShellLayout';
 import { useResizeObserver } from '@/shared/hooks/useResizeObserver';
 import { useMessages } from '@/shared/i18n';
@@ -29,41 +22,25 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
   const messages = useMessages();
   const { ref: contentRowRef, height: contentRowHeight } = useResizeObserver<HTMLElement>();
 
-  const handleInteract = (area: string) => {
-    if (!isMiniGameId(area)) return;
-    bridgeActions.requestInteraction(area);
-  };
-
-  const closeOverlay = useCallback(() => {
-    bridgeActions.closeActiveMode(getOverlayParentId);
-  }, []);
-
-  const jumpToDevTarget = (area: string | null) => {
-    bridgeActions.closeUiDialog();
-    if (area === null) {
-      bridgeActions.closeActiveMode();
-      return;
-    }
-    if (!isMiniGameId(area)) return;
-    bridgeActions.requestInteraction(area);
-  };
-
-  const activeMiniGame = bridge.activeMiniGameId ? getMiniGameById(bridge.activeMiniGameId) : undefined;
-  const activeOverlayMiniGame = getReactOverlayMiniGameById(bridge.activeMiniGameId);
-  const ActiveOverlayComponent = activeOverlayMiniGame?.component;
-  const isGameInputBlocked = bridge.isPaused || bridge.loadingMiniGameId !== null;
-  const activeMiniGameId = bridge.activeMiniGameId;
   const startSceneParam = new URLSearchParams(window.location.search).get('startScene');
-  const initialStartSceneId = startSceneParam && isMiniGameId(startSceneParam) ? startSceneParam : null;
-  const presentationMiniGameId =
-    activeMiniGameId ?? initialStartSceneId;
+  const initialStartSceneId = startSceneParam && isSceneId(startSceneParam) ? startSceneParam : null;
+  const presentationSceneId =
+    bridge.activeSceneId === OVERWORLD_SCENE_ID && initialStartSceneId
+      ? initialStartSceneId
+      : bridge.activeSceneId;
   const presentationMode: PhaserScenePresentationMode =
-    getPhaserScenePresentationMode(presentationMiniGameId);
+    getPhaserScenePresentationMode(presentationSceneId);
   const gameShellLayout = getInteractiveGameShellLayout(presentationMode, contentRowHeight);
-  const shouldReserveSceneHint = presentationMiniGameId === 'potassium';
+  const isGameInputBlocked = bridge.isPaused || bridge.loadingSceneId !== null;
+  const shouldReserveSceneHint = presentationSceneId === POTASSIUM_SCENE_ID;
   const sceneHintText = bridge.sceneHintText ?? messages.potassiumSlip.hints.start;
-  const shouldShowNavigationHint = bridge.status === GameState.EXPLORING && !presentationMiniGameId;
+  const shouldShowNavigationHint =
+    bridge.activeSceneId === OVERWORLD_SCENE_ID && bridge.activeOverlayId === null;
   const shouldShowFooterHint = shouldReserveSceneHint || shouldShowNavigationHint;
+
+  const enterScene = (sceneId: SceneId) => bridgeActions.enterScene(sceneId);
+  const openOverlay = (overlayId: OverlayId) => bridgeActions.openOverlay(overlayId);
+  const returnToOverworld = () => bridgeActions.returnToOverworld();
 
   return (
     <div
@@ -86,10 +63,10 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
             <Button
               variant="floating"
               size="sm"
-              onClick={() => bridgeActions.openUiDialog('inventory')}
+              onClick={() => bridgeActions.openOverlay(INVENTORY_OVERLAY_ID)}
               className="sm:px-3 sm:py-1.5 sm:text-xs"
               aria-haspopup="dialog"
-              aria-expanded={bridge.activeUiDialogId === 'inventory'}
+              aria-expanded={bridge.activeOverlayId === INVENTORY_OVERLAY_ID}
               aria-label={messages.gameShell.openInventory}
             >
               <Backpack className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
@@ -99,10 +76,10 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
               <Button
                 variant="floating"
                 size="sm"
-                onClick={() => bridgeActions.openUiDialog('devSwitcher')}
+                onClick={() => bridgeActions.openOverlay(DEV_SWITCHER_OVERLAY_ID)}
                 className="sm:px-3 sm:py-1.5 sm:text-xs"
                 aria-haspopup="dialog"
-                aria-expanded={bridge.activeUiDialogId === 'devSwitcher'}
+                aria-expanded={bridge.activeOverlayId === DEV_SWITCHER_OVERLAY_ID}
                 aria-label={messages.gameShell.openDevSwitcher}
               >
                 <Bug className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
@@ -135,14 +112,14 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
             style={gameShellLayout.frameStyle}
           >
             <div className="absolute inset-0">
-              {/* Paper Texture Overlay */}
               <div className="pointer-events-none absolute inset-0 z-[5] bg-[url('https://www.transparenttextures.com/patterns/felt.png')] opacity-[0.03]" />
               <Game
-                onInteract={handleInteract}
+                onEnterScene={enterScene}
+                onOpenOverlay={openOverlay}
                 isPaused={isGameInputBlocked}
-                activeMiniGameId={bridge.activeMiniGameId}
+                activeSceneId={bridge.activeSceneId}
                 presentationMode={presentationMode}
-                onClose={closeOverlay}
+                onReturnToOverworld={returnToOverworld}
               />
             </div>
           </div>
@@ -170,93 +147,9 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
         </footer>
       )}
 
-      {/* Interactive Overlay */}
-      {bridge.status === GameState.IN_MINIGAME &&
-        activeMiniGame &&
-        activeMiniGame.type === MiniGameType.REACT_OVERLAY &&
-        ActiveOverlayComponent && (
-        <ModalShell
-          title={activeMiniGame.name}
-          hasDescription={Boolean(activeMiniGame.description)}
-          onClose={closeOverlay}
-        >
-          {({ titleId, descriptionId }) => (
-            <DialogCard
-              title={activeMiniGame.name}
-              description={activeMiniGame.description}
-              onClose={closeOverlay}
-              titleId={titleId}
-              descriptionId={descriptionId}
-            >
-              <ActiveOverlayComponent />
-            </DialogCard>
-          )}
-        </ModalShell>
-      )}
+      <OverlayHost />
 
-      {bridge.activeUiDialogId === 'inventory' && (
-        <ModalShell title={messages.inventory.title} onClose={() => bridgeActions.closeUiDialog()}>
-          {({ titleId }) => (
-            <DialogCard title={messages.inventory.title} onClose={() => bridgeActions.closeUiDialog()} titleId={titleId}>
-              <div className="grid gap-2">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-[#1a1a1a]">
-                  {messages.inventory.equipment}
-                </p>
-                {bridge.inventory.ownedItemIds.includes('glasses') ? (
-                  <label className="flex cursor-pointer items-center justify-between gap-2 rounded border border-[#1a1a1a]/40 bg-white/50 px-3 py-2 text-xs font-bold uppercase tracking-wide text-[#1a1a1a]">
-                    <span>{messages.inventory.glasses}</span>
-                    <input
-                      type="checkbox"
-                      checked={bridge.equipment.equippedItemIds.includes('glasses')}
-                      onChange={() => bridgeActions.toggleItemEquipped('glasses')}
-                      className="h-4 w-4 accent-[#1a1a1a]"
-                    />
-                  </label>
-                ) : bridge.inventory.ownedItemIds.length === 0 ? (
-                  <p className="text-[11px] font-bold uppercase tracking-wide text-[#1a1a1a]/60">
-                    {messages.inventory.noItemsYet}
-                  </p>
-                ) : null}
-                {bridge.inventory.ownedItemIds.includes('circuit') && (
-                  <div className="rounded border border-[#1a1a1a]/40 bg-white/50 px-3 py-2 text-xs font-bold uppercase tracking-wide text-[#1a1a1a]">
-                    {messages.inventory.circuit}
-                  </div>
-                )}
-              </div>
-            </DialogCard>
-          )}
-        </ModalShell>
-      )}
-
-      {import.meta.env.DEV && bridge.activeUiDialogId === 'devSwitcher' && (
-        <ModalShell title={messages.gameShell.devSwitcher} onClose={() => bridgeActions.closeUiDialog()}>
-          {({ titleId }) => (
-            <DialogCard title={messages.gameShell.devSwitcher} onClose={() => bridgeActions.closeUiDialog()} titleId={titleId}>
-              <div className="grid grid-cols-2 gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => jumpToDevTarget(null)}
-                  className="rounded border border-[#1a1a1a]/40 bg-white/60 px-2 py-1.5 text-left text-[11px] font-bold uppercase tracking-wide text-[#1a1a1a] hover:bg-white"
-                >
-                  {messages.gameShell.city}
-                </button>
-                {getAllMiniGames().map((miniGame) => (
-                  <button
-                    key={miniGame.id}
-                    type="button"
-                    onClick={() => jumpToDevTarget(miniGame.id)}
-                    className="rounded border border-[#1a1a1a]/40 bg-white/60 px-2 py-1.5 text-left text-[11px] font-bold uppercase tracking-wide text-[#1a1a1a] hover:bg-white"
-                  >
-                    {miniGame.name}
-                  </button>
-                ))}
-              </div>
-            </DialogCard>
-          )}
-        </ModalShell>
-      )}
-
-      {bridge.loadingMiniGameId && (
+      {bridge.loadingSceneId && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
           <Card tone="paper" className="px-5 py-4 text-center">
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#1a1a1a]">
@@ -265,7 +158,6 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
           </Card>
         </div>
       )}
-
     </div>
   );
 }

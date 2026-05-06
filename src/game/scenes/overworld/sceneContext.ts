@@ -1,14 +1,16 @@
-import { PHASER_SCENE_KEYS } from '@/game/registry/featureIds';
-import type { SceneContextDefinition } from '@/game/kernel/types';
+import { OVERWORLD_SCENE_ID, PHASER_SCENE_KEYS, type SceneId } from '@/game/scenes/sceneIds';
+import type { OverlayId } from '@/game/overlays/overlayIds';
+import type { SceneContextDefinition } from '@/game/sceneLifecycle/types';
 
 interface OverworldSceneContextOptions {
-  onInteract: (area: string) => void;
+  onEnterScene: (sceneId: SceneId) => void;
+  onOpenOverlay: (overlayId: OverlayId) => void;
   getIsPaused: () => boolean;
   getResumePosition: () => { x: number; y: number } | undefined;
 }
 
 /**
- * Kernel lifecycle contract for the overworld street scene.
+ * Scene lifecycle contract for the overworld street scene.
  *
  * The overworld is registered during Phaser boot, so this context only supplies
  * scene start data: bridge interaction callback, current pause state, and any
@@ -18,10 +20,11 @@ export function createOverworldSceneContext(
   options: OverworldSceneContextOptions
 ): SceneContextDefinition {
   return {
-    id: PHASER_SCENE_KEYS.main,
-    sceneKey: PHASER_SCENE_KEYS.main,
+    id: OVERWORLD_SCENE_ID,
+    sceneKey: PHASER_SCENE_KEYS.overworld,
     getStartData: () => ({
-      onInteract: options.onInteract,
+      onEnterScene: options.onEnterScene,
+      onOpenOverlay: options.onOpenOverlay,
       isPaused: options.getIsPaused(),
       resumePosition: options.getResumePosition()
     })

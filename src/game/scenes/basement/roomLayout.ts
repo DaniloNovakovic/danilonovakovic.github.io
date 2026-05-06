@@ -1,4 +1,4 @@
-import type { BasementReactOverlayId } from '@/game/registry/featureIds';
+import { BASEMENT_CONSOLE_OVERLAY_ID } from '@/game/overlays/overlayIds';
 import { getMessages } from '@/shared/i18n';
 
 export type BasementRoomInteractableId = 'exit' | 'computer' | 'glasses';
@@ -33,7 +33,7 @@ export interface BasementInteractionTargetDeps {
 
 export const BASEMENT_FLOOR_Y = 500;
 export const BASEMENT_PLAYER_START = { x: 135, y: BASEMENT_FLOOR_Y - 50 } as const;
-export const BASEMENT_GAMES_OVERLAY_ID = 'games' satisfies BasementReactOverlayId;
+export const BASEMENT_GAMES_OVERLAY_ID = BASEMENT_CONSOLE_OVERLAY_ID;
 
 export const BASEMENT_EXIT = {
   kind: 'exit',

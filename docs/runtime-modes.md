@@ -1,23 +1,25 @@
 # Runtime Modes
 
-This note captures the current high-level runtime transitions. It is
-intentionally short: the code remains the source of truth.
+This note captures the current high-level scene and overlay transitions. The
+code remains the source of truth.
 
-## Modes
+## State
 
-- `exploring`: the player is in the overworld and React overlays are closed.
-- `reactOverlay`: a React mini-game is open and Phaser input/physics are paused
-  through the bridge and kernel.
-- `phaserScene`: a Phaser mini-game scene is active, such as the hobbies room
-  or Developer Basement.
+- `activeSceneId`: the Phaser scene world currently owned by scene lifecycle.
+  `overworld` is the default scene.
+- `activeOverlayId`: the React overlay currently rendered by `OverlayHost`, or
+  `null` when no overlay is open.
+- `loadingSceneId`: the scene currently being lazy-loaded, or `null`.
+- `isPaused`: derived in the bridge from active overlay or scene loading state.
 
 ## Transition Owners
 
-- `src/game/bridge/store.ts` owns the observable cross-boundary state.
-- `src/game/kernel/GameKernel.ts` maps bridge mode changes to scene manager
-  transitions and pause events.
-- `src/game/shell/InteractiveApp.tsx` renders React overlays from the active
-  registry entry.
+- `src/game/bridge/store.ts` owns observable cross-boundary state and actions:
+  `enterScene`, `returnToOverworld`, `openOverlay`, and `closeOverlay`.
+- `src/game/sceneLifecycle/SceneLifecycleController.ts` maps bridge scene changes to
+  `SceneManager` transitions and maps pause changes to active Phaser scenes.
+- `src/game/overlays/OverlayHost.tsx` renders React overlays from the active
+  overlay id.
 - Phaser scenes keep local pause state only as a scene runtime concern; they do
   not decide whether an overlay should pause the engine.
 
@@ -31,4 +33,5 @@ Use this path when checking pattern refactors:
 4. Open and close a hobby overlay from inside the hobbies scene.
 5. Enter the Developer Basement, open the computer console, and close it back
    to the basement scene.
-6. Verify mobile touch movement, jump, and interact one-shots.
+6. Open inventory from the overworld and from a child scene.
+7. Verify mobile touch movement, jump, and interact one-shots.

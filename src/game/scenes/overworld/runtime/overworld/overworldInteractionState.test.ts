@@ -13,8 +13,8 @@ const baseInput: OverworldInteractionInput = {
   bananaDiscovered: false,
   bananaWarpScheduled: false,
   bananaCancelExtraDist: 36,
-  basementFeatureId: 'basement',
-  potassiumFeatureId: 'potassium',
+  basementSceneId: 'basement',
+  potassiumSceneId: 'potassium',
   basementHole: {
     x: 230,
     y: 535,

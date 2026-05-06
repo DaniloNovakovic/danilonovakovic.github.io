@@ -1,30 +1,31 @@
-import { PHASER_SCENE_KEYS } from '@/game/registry/featureIds';
-import type { SceneContextDefinition } from '@/game/kernel/types';
+import { HOBBIES_SCENE_ID, PHASER_SCENE_KEYS } from '@/game/scenes/sceneIds';
+import type { OverlayId } from '@/game/overlays/overlayIds';
+import type { SceneContextDefinition } from '@/game/sceneLifecycle/types';
 
 interface HobbiesSceneContextOptions {
   onClose: () => void;
-  onInteract: (area: string) => void;
+  onOpenOverlay: (overlayId: OverlayId) => void;
   getResumePosition: () => { x: number; y: number } | undefined;
   loadScene: () => Promise<unknown>;
 }
 
 /**
- * Kernel lifecycle contract for the Hobbies interior scene.
+ * Scene lifecycle contract for the Hobbies interior scene.
  *
- * The scene is lazy-loaded through the registry, then started with callbacks
- * for closing back to the parent context, opening hobby overlays, and restoring
- * the last captured player position.
+ * The scene is lazy-loaded through the scene registry, then started with
+ * callbacks for closing back to the overworld, opening hobby overlays, and
+ * restoring the last captured player position.
  */
 export function createHobbiesSceneContext(
   options: HobbiesSceneContextOptions
 ): SceneContextDefinition {
   return {
-    id: PHASER_SCENE_KEYS.hobbies,
+    id: HOBBIES_SCENE_ID,
     sceneKey: PHASER_SCENE_KEYS.hobbies,
     loadScene: options.loadScene,
     getStartData: () => ({
       onClose: options.onClose,
-      onInteract: options.onInteract,
+      onOpenOverlay: options.onOpenOverlay,
       isPaused: false,
       resumePosition: options.getResumePosition()
     })

@@ -1,15 +1,16 @@
-import { PHASER_SCENE_KEYS } from '@/game/registry/featureIds';
-import type { SceneContextDefinition } from '@/game/kernel/types';
+import { BASEMENT_SCENE_ID, PHASER_SCENE_KEYS } from '@/game/scenes/sceneIds';
+import type { OverlayId } from '@/game/overlays/overlayIds';
+import type { SceneContextDefinition } from '@/game/sceneLifecycle/types';
 
 interface BasementSceneContextOptions {
   onClose: () => void;
-  onInteract: (id: string) => void;
+  onOpenOverlay: (overlayId: OverlayId) => void;
   getResumePosition: () => { x: number; y: number } | undefined;
   loadScene: () => Promise<unknown>;
 }
 
 /**
- * Kernel lifecycle contract for the Basement interior scene.
+ * Scene lifecycle contract for the Basement interior scene.
  *
  * Basement follows the same interior contract as Hobbies: lazy-load the Phaser
  * scene, provide close/interact callbacks, and include a prepared resume
@@ -19,12 +20,12 @@ export function createBasementSceneContext(
   options: BasementSceneContextOptions
 ): SceneContextDefinition {
   return {
-    id: PHASER_SCENE_KEYS.basement,
+    id: BASEMENT_SCENE_ID,
     sceneKey: PHASER_SCENE_KEYS.basement,
     loadScene: options.loadScene,
     getStartData: () => ({
       onClose: options.onClose,
-      onInteract: options.onInteract,
+      onOpenOverlay: options.onOpenOverlay,
       isPaused: false,
       resumePosition: options.getResumePosition()
     })

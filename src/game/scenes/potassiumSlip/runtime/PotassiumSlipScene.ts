@@ -2,9 +2,9 @@ import * as Phaser from 'phaser';
 import {
   GAME_DESIGN_HEIGHT,
   GAME_DESIGN_WIDTH
-} from '@/game/runtime/config';
+} from '@/game/sharedSceneRuntime/config';
 import { bridgeActions } from '@/game/bridge/store';
-import { TextureGenerator } from '@/game/runtime/textures/TextureGenerator';
+import { TextureGenerator } from '@/game/sharedSceneRuntime/textures/TextureGenerator';
 import {
   getPotassiumFireCellKey,
   type PotassiumGenericUpgradeKind as GenericUpgradeKind,
@@ -13,20 +13,20 @@ import {
   type PotassiumWaveCell as WaveCell,
   type PotassiumEnemyKind as EnemyKind,
   type PotassiumUpgradeKind as UpgradeKind
-} from './potassiumSlipWaves';
+} from './waves';
 import {
   POTASSIUM_GHOST_STATUS_FIELD_LIFETIME_MS,
   resolvePotassiumPoisonTick,
   resolvePotassiumProjectileHit
-} from './potassiumSlipCombat';
+} from './combat';
 import {
   getPotassiumLeaderboardOverlayText,
   savePotassiumRunRecord,
   type PotassiumRunOutcome
-} from './potassiumSlipLeaderboard';
+} from './leaderboard';
 import {
   PotassiumSlipRenderer
-} from './potassiumSlipRenderer';
+} from './renderer';
 import {
   createPotassiumBossState,
   POTASSIUM_BOSS_PHASE_1_DRIFT,
@@ -34,7 +34,7 @@ import {
   resolvePotassiumBossFrame,
   type PotassiumBossState,
   type PotassiumBossSummonFacts
-} from './potassiumSlipBoss';
+} from './boss';
 import {
   createPotassiumSession,
   getPotassiumSessionGenericRank,
@@ -52,23 +52,23 @@ import {
   startPotassiumEndless,
   type PotassiumSessionCommand,
   type PotassiumSessionState
-} from './potassiumSlipSession';
+} from './session';
 import {
   POTASSIUM_NON_BOSS_ENEMY_SPEED,
   resolvePotassiumEnemySetupFacts,
   resolvePotassiumEnemySpawnFacts,
   resolvePotassiumSplitterChildFacts
-} from './potassiumSlipEnemyFactory';
+} from './enemyFactory';
 import {
   createPotassiumProjectileControl,
   POTASSIUM_PROJECTILE_CONTROL_DEFAULTS,
   type PotassiumProjectileControl,
   type PotassiumProjectileControlCommand
-} from './potassiumSlipProjectileControl';
+} from './projectileControl';
 import {
   PotassiumCommandAdapter,
   type PotassiumCommandObject
-} from './potassiumSlipCommandAdapter';
+} from './commandAdapter';
 import {
   getPotassiumCombatId,
   getPotassiumData,
@@ -86,7 +86,7 @@ import {
   setPotassiumHitCooldownUntil,
   setPotassiumProjectileDefaults,
   setPotassiumProjectileNextTrailDropAt
-} from './potassiumSlipPhaserData';
+} from './phaserData';
 
 type EnemySprite = Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
 type ProjectileSprite = Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;

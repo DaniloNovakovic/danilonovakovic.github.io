@@ -4,9 +4,19 @@
  * and player logic to PlayerController.
  */
 import * as Phaser from 'phaser';
-import { BASEMENT_FEATURE_ID, HOBBIES_FEATURE_ID, POTASSIUM_FEATURE_ID } from '@/game/registry/featureIds';
-import { PORTFOLIO_SECTIONS } from '@/game/registry/portfolioRegistry';
-import { TextureGenerator } from '@/game/runtime/textures/TextureGenerator';
+import { TextureGenerator } from '@/game/sharedSceneRuntime/textures/TextureGenerator';
+import {
+  BASEMENT_SCENE_ID,
+  HOBBIES_SCENE_ID,
+  POTASSIUM_SCENE_ID,
+  type SceneId
+} from '@/game/scenes/sceneIds';
+import type { OverlayId } from '@/game/overlays/overlayIds';
+import {
+  getOverworldBuildingTrigger,
+  OVERWORLD_BUILDING_TRIGGERS,
+  type OverworldTriggerAction
+} from '../worldLayout';
 import { getMessages } from '@/shared/i18n';
 import {
   GAME_DESIGN_HEIGHT,
@@ -21,7 +31,7 @@ import {
   OVERWORLD_SPRINT_SPEED,
   OVERWORLD_WALK_SPEED,
   OVERWORLD_WIDTH
-} from '@/game/runtime/config';
+} from '@/game/sharedSceneRuntime/config';
 import {
   bridgeActions,
   isItemEquipped,
@@ -35,13 +45,13 @@ import {
 } from './street/StreetEnvironment';
 import { buildStreetBuildings, type StreetBuildingLayers } from './street/StreetBuildings';
 import { updateStreetParticles } from './street/StreetParticles';
-import { createUiText } from '@/game/runtime/text/createUiText';
-import { startTypewriterEffect, type TypewriterEffectHandle } from '@/game/runtime/text/typewriterEffect';
+import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
+import { startTypewriterEffect, type TypewriterEffectHandle } from '@/game/sharedSceneRuntime/text/typewriterEffect';
 import {
   type OverworldBuildingSlot,
   type OverworldSecretSlot
 } from '@/game/core/ecs/systems/overworldInteractSystems';
-import { DistanceHazeVision } from '@/game/runtime/vision/DistanceHazeVision';
+import { DistanceHazeVision } from '@/game/sharedSceneRuntime/vision/DistanceHazeVision';
 import {
   createOverworldInteractionState,
   decideOverworldInteraction,
@@ -51,7 +61,7 @@ import {
 import {
   createSideViewPlayerRuntime,
   type SideViewPlayerRuntime
-} from '@/game/runtime/player/SideViewPlayerRuntime';
+} from '@/game/sharedSceneRuntime/player/SideViewPlayerRuntime';
 
 const BASEMENT_HOLE = {
   x: 230,
@@ -87,7 +97,8 @@ export class OverworldScene extends Phaser.Scene {
   interactPrompt!: Phaser.GameObjects.Text;
 
   private playerRuntime?: SideViewPlayerRuntime;
-  private onInteract?: (area: string) => void;
+  private onEnterScene?: (sceneId: SceneId) => void;
+  private onOpenOverlay?: (overlayId: OverlayId) => void;
   private isPaused: boolean = false;
   private resumePosition?: { x: number; y: number };
   private readonly buildingSlots: OverworldBuildingSlot[] = [];
@@ -106,11 +117,13 @@ export class OverworldScene extends Phaser.Scene {
   }
 
   init(data: {
-    onInteract: (area: string) => void;
+    onEnterScene: (sceneId: SceneId) => void;
+    onOpenOverlay: (overlayId: OverlayId) => void;
     isPaused: boolean;
     resumePosition?: { x: number; y: number };
   }) {
-    this.onInteract = data.onInteract;
+    this.onEnterScene = data.onEnterScene;
+    this.onOpenOverlay = data.onOpenOverlay;
     this.isPaused = data.isPaused;
     this.resumePosition = data.resumePosition;
     this.resetBananaPeelFlow();
@@ -134,10 +147,8 @@ export class OverworldScene extends Phaser.Scene {
 
   preload() {
     TextureGenerator.generatePlayer(this);
-    PORTFOLIO_SECTIONS.forEach((s) => {
-      if (s.x !== undefined) {
-        TextureGenerator.generateBuilding(this, s.id);
-      }
+    OVERWORLD_BUILDING_TRIGGERS.forEach((trigger) => {
+      TextureGenerator.generateBuilding(this, trigger.id);
     });
   }
 
@@ -228,7 +239,7 @@ export class OverworldScene extends Phaser.Scene {
 
     const { commands, step } = playerUpdate;
     if (commands.exitContext) {
-      this.onInteract?.(HOBBIES_FEATURE_ID);
+      this.onEnterScene?.(HOBBIES_SCENE_ID);
       return;
     }
 
@@ -249,8 +260,8 @@ export class OverworldScene extends Phaser.Scene {
       bananaDiscovered: isSecretDiscovered(BANANA_PEEL_CLUE_ID),
       bananaWarpScheduled: this.bananaPeelWarpTimeoutId !== undefined,
       bananaCancelExtraDist: BANANA_PEEL_WARP_CANCEL_EXTRA_DIST,
-      basementFeatureId: BASEMENT_FEATURE_ID,
-      potassiumFeatureId: POTASSIUM_FEATURE_ID,
+      basementSceneId: BASEMENT_SCENE_ID,
+      potassiumSceneId: POTASSIUM_SCENE_ID,
       basementHole: BASEMENT_HOLE,
       secretSlots: GLASSES_SECRET_SLOTS,
       buildingSlots: this.buildingSlots,
@@ -275,7 +286,8 @@ export class OverworldScene extends Phaser.Scene {
       } else if (effect.type === 'discoverBananaPeel') {
         this.startBananaPeelDiscovery();
       } else {
-        this.onInteract?.(effect.targetId);
+        const trigger = getOverworldBuildingTrigger(effect.targetId);
+        this.applyOverworldTriggerAction(trigger?.action ?? { kind: 'enterScene', sceneId: effect.targetId as SceneId });
       }
     }
   }
@@ -444,7 +456,7 @@ export class OverworldScene extends Phaser.Scene {
           this.bananaPeelWarpTimeoutId = globalThis.setTimeout(() => {
             this.bananaPeelWarpTimeoutId = undefined;
             this.overworldInteractionState = createOverworldInteractionState();
-            this.onInteract?.(POTASSIUM_FEATURE_ID);
+            this.onEnterScene?.(POTASSIUM_SCENE_ID);
           }, BANANA_PEEL_POST_TYPEWRITE_WARP_MS);
         }
       }
@@ -505,5 +517,13 @@ export class OverworldScene extends Phaser.Scene {
       backgroundColor: '#fbfbf9',
       padding: { x: 6, y: 2 }
     }).setOrigin(0.5);
+  }
+
+  private applyOverworldTriggerAction(action: OverworldTriggerAction): void {
+    if (action.kind === 'openOverlay') {
+      this.onOpenOverlay?.(action.overlayId);
+    } else {
+      this.onEnterScene?.(action.sceneId);
+    }
   }
 }

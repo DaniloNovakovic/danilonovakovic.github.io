@@ -38,15 +38,17 @@ export function DialogCard({
 
       <h2
         id={titleId}
-        className="mb-3 mt-1 border-b-4 border-[#1a1a1a] pb-2 pr-12 text-2xl font-bold uppercase tracking-wider sm:mb-4 sm:mt-0 sm:pr-0 sm:text-4xl"
+        className="mb-3 mt-1 border-b-4 border-[#1a1a1a] pb-2 pr-14 text-2xl font-bold uppercase tracking-wider sm:mb-4 sm:mt-0 sm:pr-16 sm:text-4xl"
       >
         {title}
       </h2>
 
       <div className="mt-4 text-base leading-relaxed sm:mt-6 sm:text-xl">
-        {description && (
+        {description ? (
           <p id={descriptionId} className="mb-6 font-medium italic opacity-80 sm:mb-8">{description}</p>
-        )}
+        ) : descriptionId ? (
+          <p id={descriptionId} className="sr-only">{title}</p>
+        ) : null}
 
         <div className="mt-4">{children}</div>
       </div>

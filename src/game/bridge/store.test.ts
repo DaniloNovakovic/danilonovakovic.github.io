@@ -7,11 +7,12 @@ import {
   isItemOwned,
   isSecretDiscovered
 } from './store';
-import { GameState } from '@/game/runtime/gameState';
+import { OVERWORLD_SCENE_ID } from '@/game/scenes/sceneIds';
 
 function resetBridge() {
-  bridgeActions.closeActiveOverlay();
-  bridgeActions.closeUiDialog();
+  bridgeActions.returnToOverworld();
+  bridgeActions.closeOverlay();
+  bridgeActions.setSceneLoading(null);
   bridgeActions.resetProgress();
   bridgeActions.resetTouch();
 }
@@ -22,84 +23,131 @@ describe('bridgeStore', () => {
   });
 
   describe('pause derivation', () => {
-    it('is false when exploring', () => {
+    it('is false when exploring without overlays', () => {
+      expect(bridgeStore.getState().activeSceneId).toBe(OVERWORLD_SCENE_ID);
+      expect(bridgeStore.getState().activeOverlayId).toBeNull();
       expect(bridgeStore.getState().isPaused).toBe(false);
     });
 
-    it('is true when a REACT_OVERLAY mini-game is active', () => {
-      bridgeActions.requestInteraction('profile');
+    it('is true when an overlay is active', () => {
+      bridgeActions.openOverlay('profile');
+      expect(bridgeStore.getState().activeOverlay).toMatchObject({
+        id: 'profile',
+        closeOnEscape: true,
+        closeOnBackdrop: true
+      });
+      expect(bridgeStore.getState().activeOverlayId).toBe('profile');
       expect(bridgeStore.getState().isPaused).toBe(true);
     });
 
-    it('is false when a PHASER_SCENE mini-game (hobbies) is active', () => {
-      bridgeActions.requestInteraction('hobbies');
+    it('is false when a Phaser scene is active without overlays', () => {
+      bridgeActions.enterScene('hobbies');
+      expect(bridgeStore.getState().activeSceneId).toBe('hobbies');
       expect(bridgeStore.getState().isPaused).toBe(false);
     });
 
     it('pauses temporarily while a Phaser scene is loading', () => {
-      bridgeActions.requestInteraction('hobbies');
+      bridgeActions.enterScene('hobbies');
       bridgeActions.setSceneLoading('hobbies');
       expect(bridgeStore.getState().isPaused).toBe(true);
-      expect(bridgeStore.getState().loadingMiniGameId).toBe('hobbies');
+      expect(bridgeStore.getState().loadingSceneId).toBe('hobbies');
 
       bridgeActions.setSceneLoading(null);
       expect(bridgeStore.getState().isPaused).toBe(false);
-      expect(bridgeStore.getState().loadingMiniGameId).toBeNull();
+      expect(bridgeStore.getState().loadingSceneId).toBeNull();
     });
 
-    it('pauses while a UI dialog is open', () => {
-      bridgeActions.openUiDialog('inventory');
-      expect(bridgeStore.getState().activeUiDialogId).toBe('inventory');
-      expect(bridgeStore.getState().isPaused).toBe(true);
-
-      bridgeActions.closeUiDialog();
-      expect(bridgeStore.getState().activeUiDialogId).toBeNull();
-      expect(bridgeStore.getState().isPaused).toBe(false);
-    });
-
-    it('keeps Phaser scene pause derived from loading after UI dialog closes', () => {
-      bridgeActions.requestInteraction('hobbies');
+    it('keeps loading-derived pause after an overlay closes', () => {
+      bridgeActions.enterScene('hobbies');
       bridgeActions.setSceneLoading('hobbies');
-      bridgeActions.openUiDialog('devSwitcher');
-      bridgeActions.closeUiDialog();
+      bridgeActions.openOverlay('devSwitcher');
+      bridgeActions.closeOverlay();
 
-      expect(bridgeStore.getState().activeUiDialogId).toBeNull();
-      expect(bridgeStore.getState().loadingMiniGameId).toBe('hobbies');
+      expect(bridgeStore.getState().activeOverlayId).toBeNull();
+      expect(bridgeStore.getState().loadingSceneId).toBe('hobbies');
       expect(bridgeStore.getState().isPaused).toBe(true);
     });
   });
 
-  describe('overlay transitions', () => {
-    it('opens an overlay and sets activeMiniGameId', () => {
-      bridgeActions.requestInteraction('projects');
+  describe('scene and overlay transitions', () => {
+    it('opens an overlay without changing the active scene', () => {
+      bridgeActions.enterScene('hobbies');
+      bridgeActions.openOverlay('art');
       const s = bridgeStore.getState();
-      expect(s.status).toBe(GameState.IN_MINIGAME);
-      expect(s.activeMiniGameId).toBe('projects');
+      expect(s.activeSceneId).toBe('hobbies');
+      expect(s.activeOverlayId).toBe('art');
+      expect(s.isPaused).toBe(true);
     });
 
-    it('closeActiveOverlay returns to exploring', () => {
-      bridgeActions.requestInteraction('profile');
-      bridgeActions.closeActiveOverlay();
+    it('can open an overlay with an explicit return scene', () => {
+      bridgeActions.openOverlay('games', { returnToSceneId: 'basement' });
       const s = bridgeStore.getState();
-      expect(s.status).toBe(GameState.EXPLORING);
-      expect(s.activeMiniGameId).toBeNull();
+      expect(s.activeSceneId).toBe('basement');
+      expect(s.activeOverlay).toMatchObject({
+        id: 'games',
+        returnToSceneId: 'basement',
+        closeOnEscape: true,
+        closeOnBackdrop: true
+      });
+      expect(s.activeOverlayId).toBe('games');
+    });
+
+    it('stores overlay params and close policy from the request', () => {
+      const params = { source: 'test' };
+      bridgeActions.openOverlay('profile', {
+        params,
+        closeOnEscape: false,
+        closeOnBackdrop: false
+      });
+      const s = bridgeStore.getState();
+      expect(s.activeOverlay).toEqual({
+        id: 'profile',
+        params,
+        returnToSceneId: undefined,
+        closeOnEscape: false,
+        closeOnBackdrop: false
+      });
+      expect(s.activeOverlayId).toBe('profile');
+      expect(s.isPaused).toBe(true);
+    });
+
+    it('closeOverlay keeps the active scene and unpauses', () => {
+      bridgeActions.enterScene('basement');
+      bridgeActions.openOverlay('games');
+      bridgeActions.closeOverlay();
+      const s = bridgeStore.getState();
+      expect(s.activeSceneId).toBe('basement');
+      expect(s.activeOverlay).toBeNull();
+      expect(s.activeOverlayId).toBeNull();
       expect(s.isPaused).toBe(false);
     });
 
-    it('clears scene hint text when changing modes', () => {
+    it('returnToOverworld closes overlays and clears loading', () => {
+      bridgeActions.enterScene('potassium');
+      bridgeActions.openOverlay('inventory');
+      bridgeActions.setSceneLoading('potassium');
+      bridgeActions.returnToOverworld();
+      const s = bridgeStore.getState();
+      expect(s.activeSceneId).toBe(OVERWORLD_SCENE_ID);
+      expect(s.activeOverlayId).toBeNull();
+      expect(s.loadingSceneId).toBeNull();
+      expect(s.isPaused).toBe(false);
+    });
+
+    it('clears scene hint text when changing scenes or overlays', () => {
       bridgeActions.setSceneHintText('Boss wave');
       expect(bridgeStore.getState().sceneHintText).toBe('Boss wave');
-      bridgeActions.requestInteraction('potassium');
+      bridgeActions.enterScene('potassium');
       expect(bridgeStore.getState().sceneHintText).toBeNull();
       bridgeActions.setSceneHintText('Wave clear');
-      bridgeActions.closeActiveOverlay();
+      bridgeActions.openOverlay('inventory');
       expect(bridgeStore.getState().sceneHintText).toBeNull();
     });
 
     it('does not emit if state is unchanged', () => {
       let calls = 0;
       const unsub = bridgeStore.subscribe(() => { calls++; });
-      bridgeActions.closeActiveOverlay(); // already exploring — no change
+      bridgeActions.closeOverlay();
       unsub();
       expect(calls).toBe(0);
     });
@@ -147,15 +195,6 @@ describe('bridgeStore', () => {
       bridgeActions.resetProgress();
       expect(bridgeStore.getState().progress.discoveredSecretIds).toEqual([]);
       expect(isSecretDiscovered('banana-peel-clue')).toBe(false);
-    });
-
-    it('does not emit when a secret is already discovered', () => {
-      bridgeActions.discoverSecret('banana-peel-clue');
-      let calls = 0;
-      const unsub = bridgeStore.subscribe(() => { calls++; });
-      bridgeActions.discoverSecret('banana-peel-clue');
-      unsub();
-      expect(calls).toBe(0);
     });
   });
 

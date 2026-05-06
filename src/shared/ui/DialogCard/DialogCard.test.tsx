@@ -9,7 +9,7 @@ afterEach(cleanup);
 
 async function renderCard(onClose = vi.fn()) {
   render(
-    <ModalShell title="Test Overlay" hasDescription onClose={onClose}>
+    <ModalShell onClose={onClose}>
       {({ titleId, descriptionId }) => (
         <DialogCard
           title="Test Overlay"
@@ -51,6 +51,18 @@ describe('DialogCard inside ModalShell', () => {
     });
   });
 
+  describe('layout', () => {
+    it('keeps title text padded away from the close button at every breakpoint', async () => {
+      await renderCard();
+
+      const heading = screen.getByRole('heading', { name: /test overlay/i });
+      const headingClasses = heading.className.split(' ');
+      expect(headingClasses).toContain('pr-14');
+      expect(headingClasses).toContain('sm:pr-16');
+      expect(headingClasses).not.toContain('sm:pr-0');
+    });
+  });
+
   describe('initial focus', () => {
     it('moves focus to the first focusable element', async () => {
       await renderCard();
@@ -73,14 +85,14 @@ describe('DialogCard inside ModalShell', () => {
 
       render(
         <>
-          <ModalShell title="First Overlay" onClose={firstOnClose}>
+          <ModalShell onClose={firstOnClose}>
             {({ titleId }) => (
               <DialogCard title="First Overlay" onClose={firstOnClose} titleId={titleId}>
                 <button>First dialog button</button>
               </DialogCard>
             )}
           </ModalShell>
-          <ModalShell title="Second Overlay" onClose={secondOnClose}>
+          <ModalShell onClose={secondOnClose}>
             {({ titleId }) => (
               <DialogCard title="Second Overlay" onClose={secondOnClose} titleId={titleId}>
                 <button>Second dialog button</button>
