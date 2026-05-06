@@ -22,7 +22,9 @@ import type {
   PotassiumRunOutcome,
   PotassiumRunRecord
 } from './potassiumSlipLeaderboard';
-import { messages } from '@/shared/i18n';
+import { getMessages } from '@/shared/i18n';
+
+const messages = getMessages();
 
 export type PotassiumSessionGameState = 'START' | 'PLAYING' | 'UPGRADE' | 'WON' | 'GAME_OVER';
 export type PotassiumTerminalAction = 'return' | 'retry' | 'endless';

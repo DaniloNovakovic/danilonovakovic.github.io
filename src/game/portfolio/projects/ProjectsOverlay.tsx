@@ -1,10 +1,11 @@
 import React from 'react';
-import { PORTFOLIO_DATA } from '@/shared/content/portfolio/data';
-import { TEXTS } from '@/game/registry/content';
+import { useMessages } from '@/shared/i18n';
+import { getPortfolioData } from '@/shared/portfolio';
 import { Card, LinkButton, Badge } from '@/shared/ui';
 
 const ProjectsOverlay: React.FC = () => {
-  const { projects } = PORTFOLIO_DATA;
+  const messages = useMessages();
+  const { projects } = getPortfolioData(messages);
   
   return (
     <div className="text-[#1a1a1a]">
@@ -27,7 +28,7 @@ const ProjectsOverlay: React.FC = () => {
               variant="primary"
               className="mt-auto py-2 text-sm"
             >
-              {TEXTS.common.viewMore}
+              {messages.common.viewMore}
             </LinkButton>
           </Card>
         ))}

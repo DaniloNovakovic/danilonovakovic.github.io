@@ -6,4 +6,3 @@ export type {
   HobbiesRoomInteractableTypeObject,
   HobbyStationTypeObject
 } from './roomLayout';
-export { HOBBIES_TEXT } from './text';

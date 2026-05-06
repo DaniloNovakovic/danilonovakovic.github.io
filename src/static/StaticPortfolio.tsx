@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Gamepad2 } from 'lucide-react';
-import { PORTFOLIO_DATA } from '@/shared/content/portfolio/data';
-import { messages } from '@/shared/i18n';
+import { getPortfolioData } from '@/shared/portfolio';
+import { useMessages } from '@/shared/i18n';
 import { Button } from '@/shared/ui';
 import { HeroContactLinks } from './HeroContactLinks';
 import { AbilitiesSection } from './sections/AbilitiesSection';
@@ -16,7 +16,8 @@ interface StaticPortfolioProps {
 }
 
 export default function StaticPortfolio({ onSwitchToInteractive }: StaticPortfolioProps) {
-  const { profile } = PORTFOLIO_DATA;
+  const messages = useMessages();
+  const { profile } = getPortfolioData(messages);
   const year = useMemo(() => new Date().getFullYear(), []);
 
   return (

@@ -7,7 +7,9 @@ import {
   type PotassiumShieldSide
 } from './potassiumSlipWaves';
 import { POTASSIUM_DATA_KEYS } from './potassiumSlipPhaserData';
-import { messages } from '@/shared/i18n';
+import { getMessages } from '@/shared/i18n';
+
+const messages = getMessages();
 
 export interface PotassiumEnemyConfig {
   label: string;

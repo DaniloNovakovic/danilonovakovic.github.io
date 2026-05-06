@@ -1,9 +1,10 @@
-import { PORTFOLIO_DATA } from '@/shared/content/portfolio/data';
-import { messages } from '@/shared/i18n';
+import { useMessages } from '@/shared/i18n';
+import { getPortfolioData } from '@/shared/portfolio';
 import { Badge, Card, LinkButton, SketchSection } from '@/shared/ui';
 
 export function ExperienceSection() {
-  const { experiences } = PORTFOLIO_DATA;
+  const messages = useMessages();
+  const { experiences } = getPortfolioData(messages);
 
   return (
     <SketchSection id="experience" title={messages.portfolio.experience.title}>

@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
-import { BASEMENT_TEXT } from '../../text';
+import { useMessages } from '@/shared/i18n';
 
 export default function CodingMini() {
+  const messages = useMessages();
+  const copy = messages.miniGames.coding;
   const [history, setHistory] = useState<string[]>([
-    BASEMENT_TEXT.miniGames.coding.welcome,
-    BASEMENT_TEXT.miniGames.coding.helpText
+    copy.welcome,
+    copy.helpText
   ]);
   const [input, setInput] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -27,13 +29,13 @@ export default function CodingMini() {
 
     switch (trimmed) {
       case 'help':
-        response = BASEMENT_TEXT.miniGames.coding.helpResponse;
+        response = copy.helpResponse;
         break;
       case 'whoami':
-        response = BASEMENT_TEXT.miniGames.coding.whoamiResponse;
+        response = copy.whoamiResponse;
         break;
       case 'skills':
-        response = BASEMENT_TEXT.miniGames.coding.skillsResponse;
+        response = copy.skillsResponse;
         break;
       case 'clear':
         setHistory([]);
@@ -41,7 +43,7 @@ export default function CodingMini() {
       case '':
         return;
       default:
-        response = BASEMENT_TEXT.miniGames.coding.commandNotFound(trimmed);
+        response = copy.commandNotFound(trimmed);
     }
 
     setHistory(prev => [...prev, `> ${cmd}`, ...response.split('\n')]);
@@ -77,7 +79,7 @@ export default function CodingMini() {
 
       </div>
       <div className="mt-4 text-sm font-bold text-[#1a1a1a] opacity-60">
-        {BASEMENT_TEXT.miniGames.coding.instruction}
+        {copy.instruction}
       </div>
     </div>
   );

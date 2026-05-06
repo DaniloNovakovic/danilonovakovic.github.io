@@ -8,4 +8,3 @@ export type {
   BasementRoomInteractableId,
   BasementRoomInteractableTypeObject
 } from './roomLayout';
-export { BASEMENT_TEXT } from './text';

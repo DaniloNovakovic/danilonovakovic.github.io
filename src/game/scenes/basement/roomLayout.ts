@@ -1,5 +1,5 @@
 import type { BasementReactOverlayId } from '@/game/registry/featureIds';
-import { messages } from '@/shared/i18n';
+import { getMessages } from '@/shared/i18n';
 
 export type BasementRoomInteractableId = 'exit' | 'computer' | 'glasses';
 
@@ -85,6 +85,7 @@ function createBasementInteractionEffect(
   id: BasementRoomInteractableId,
   deps: BasementInteractionTargetDeps
 ): BasementInteractionEffect | (() => BasementInteractionEffect) {
+  const messages = getMessages();
   switch (id) {
     case 'computer':
       return () =>

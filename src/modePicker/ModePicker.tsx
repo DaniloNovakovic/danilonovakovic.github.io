@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Gamepad2, BookOpen } from 'lucide-react';
-import { messages } from '@/shared/i18n';
+import { useMessages } from '@/shared/i18n';
 import { Badge, Button } from '@/shared/ui';
 import { useIsTouchLike } from './useIsTouchLike';
 
@@ -15,11 +15,12 @@ interface ChoiceCardProps {
   blurb: string;
   icon: ReactNode;
   recommended: boolean;
+  recommendedLabel: string;
   cta: string;
   onClick: () => void;
 }
 
-function ChoiceCard({ title, blurb, icon, recommended, cta, onClick }: ChoiceCardProps) {
+function ChoiceCard({ title, blurb, icon, recommended, recommendedLabel, cta, onClick }: ChoiceCardProps) {
   return (
     <Button
       variant="secondary"
@@ -28,7 +29,7 @@ function ChoiceCard({ title, blurb, icon, recommended, cta, onClick }: ChoiceCar
     >
       {recommended && (
         <Badge tone="highlight" className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap shadow-[3px_3px_0px_0px_rgba(26,26,26,1)]">
-          {messages.modePicker.recommended}
+          {recommendedLabel}
         </Badge>
       )}
       <div className="flex h-16 w-16 items-center justify-center rounded-lg border-2 border-[#1a1a1a] bg-[#f4f1ea] text-[#1a1a1a] sm:h-20 sm:w-20">
@@ -45,6 +46,7 @@ function ChoiceCard({ title, blurb, icon, recommended, cta, onClick }: ChoiceCar
 
 export default function ModePicker({ onChoose }: ModePickerProps) {
   const isTouch = useIsTouchLike();
+  const messages = useMessages();
 
   return (
     <div className="relative flex min-h-[100dvh] min-h-dvh w-full flex-col items-center justify-center overflow-x-hidden bg-[#f4f1ea] px-4 py-[max(1.5rem,env(safe-area-inset-top,0px))]">
@@ -67,6 +69,7 @@ export default function ModePicker({ onChoose }: ModePickerProps) {
             blurb={messages.modePicker.interactive.blurb}
             icon={<Gamepad2 className="h-10 w-10 sm:h-12 sm:w-12" strokeWidth={2} aria-hidden />}
             recommended={!isTouch}
+            recommendedLabel={messages.modePicker.recommended}
             cta={messages.modePicker.interactive.cta}
             onClick={() => onChoose('interactive')}
           />
@@ -75,6 +78,7 @@ export default function ModePicker({ onChoose }: ModePickerProps) {
             blurb={messages.modePicker.static.blurb}
             icon={<BookOpen className="h-10 w-10 sm:h-12 sm:w-12" strokeWidth={2} aria-hidden />}
             recommended={isTouch}
+            recommendedLabel={messages.modePicker.recommended}
             cta={messages.modePicker.static.cta}
             onClick={() => onChoose('static')}
           />

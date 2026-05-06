@@ -9,7 +9,6 @@ import {
   getReactOverlayMiniGameById
 } from '@/game/runtime/miniGameRegistry';
 import { MiniGameType } from '@/game/runtime/types';
-import { TEXTS } from '@/game/registry/content';
 import { isMiniGameId } from '@/game/registry/featureIds';
 import { bridgeActions, useBridgeState } from '@/game/bridge/store';
 import {
@@ -19,7 +18,7 @@ import {
 import { Button, Card, DialogCard, ModalShell, Panel } from '@/shared/ui';
 import { getInteractiveGameShellLayout } from './gameShellLayout';
 import { useResizeObserver } from '@/shared/hooks/useResizeObserver';
-import { messages } from '@/shared/i18n';
+import { useMessages } from '@/shared/i18n';
 
 interface InteractiveAppProps {
   onSwitchToStatic: () => void;
@@ -27,6 +26,7 @@ interface InteractiveAppProps {
 
 export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps) {
   const bridge = useBridgeState();
+  const messages = useMessages();
   const { ref: contentRowRef, height: contentRowHeight } = useResizeObserver<HTMLElement>();
 
   const handleInteract = (area: string) => {
@@ -159,10 +159,10 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
             ) : (
               <>
                 <p className="text-[10px] font-bold uppercase leading-snug tracking-widest text-[#1a1a1a] md:hidden">
-                  {TEXTS.navigation.hintsCompact}
+                  {messages.navigation.hintsCompact}
                 </p>
                 <p className="hidden text-sm font-bold uppercase tracking-widest text-[#1a1a1a] md:block">
-                  {TEXTS.navigation.hints}
+                  {messages.navigation.hints}
                 </p>
               </>
             )}

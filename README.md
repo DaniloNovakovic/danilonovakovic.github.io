@@ -27,6 +27,8 @@ npm run build
 
 Runtime layering follows a micro-kernel + bridge pattern. Game runtime lookup lives in [`src/game/runtime/miniGameRegistry.ts`](src/game/runtime/miniGameRegistry.ts), with source facts owned by [`src/game/scenes`](src/game/scenes), [`src/game/portfolio`](src/game/portfolio), and composed through the game registry helpers.
 
+User-facing copy is centralized in the typed i18n catalog under [`src/shared/i18n/messages/en`](src/shared/i18n/messages/en). React surfaces read it through `useMessages()` for live locale updates, while Phaser/runtime code reads the active catalog with `getMessages()` and refreshes on scene restart or re-entry. Non-copy portfolio facts live in [`src/shared/portfolio`](src/shared/portfolio) and are combined with localized messages by selectors.
+
 Full runtime layering and Module seams are in [`docs/ARCHITECTURE_RUNTIME.md`](docs/ARCHITECTURE_RUNTIME.md). Agent rules live in [`.agents/rules/`](.agents/rules/). Architectural patterns are decision aids, not an implementation checklist; per-pattern notes and adoption status live in [`docs/patterns/`](docs/patterns/README.md).
 
 ## Deploy (GitHub Pages)

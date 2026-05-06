@@ -1,9 +1,11 @@
-import { PORTFOLIO_DATA } from '@/shared/content/portfolio/data';
+import { getPortfolioData } from '@/shared/portfolio';
+import { useMessages } from '@/shared/i18n';
 import { LinkButton } from '@/shared/ui';
 import { CONTACT_ICON_SRC } from './contactIcons';
 
 export function HeroContactLinks() {
-  const { contact } = PORTFOLIO_DATA;
+  const messages = useMessages();
+  const { contact } = getPortfolioData(messages);
 
   return (
     <ul className="flex flex-wrap items-center justify-center gap-2">

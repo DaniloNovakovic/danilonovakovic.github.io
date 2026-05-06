@@ -9,8 +9,7 @@ import {
   type BasementInteractionEffect,
   type BasementRoomInteractableId
 } from '../roomLayout';
-import { TEXTS } from '@/game/registry/content';
-import { messages } from '@/shared/i18n';
+import { getMessages } from '@/shared/i18n';
 import {
   GAME_DESIGN_HEIGHT,
   GAME_DESIGN_WIDTH,
@@ -74,6 +73,7 @@ export class BasementScene extends Phaser.Scene {
   }
 
   create() {
+    const messages = getMessages();
     this.physics.world.setBounds(0, 0, GAME_DESIGN_WIDTH, GAME_DESIGN_HEIGHT);
     this.buildRoom();
 
@@ -129,7 +129,7 @@ export class BasementScene extends Phaser.Scene {
     this.physics.add.existing(ground, true);
     this.physics.add.collider(this.player, ground);
 
-    this.interactPrompt = createUiText(this, 0, 0, TEXTS.navigation.interact, {
+    this.interactPrompt = createUiText(this, 0, 0, messages.navigation.interact, {
       fontSize: '16px',
       color: '#fbfbf9',
       backgroundColor: '#1a1a1a',
@@ -201,6 +201,7 @@ export class BasementScene extends Phaser.Scene {
   }
 
   private buildRoom(): void {
+    const messages = getMessages();
     this.cameras.main.setBackgroundColor('#151515');
 
     const g = this.add.graphics();
@@ -318,6 +319,7 @@ export class BasementScene extends Phaser.Scene {
   }
 
   private applyBasementInteractionEffect(effect: BasementInteractionEffect): void {
+    const messages = getMessages();
     switch (effect.kind) {
       case 'close':
         this.onClose?.();

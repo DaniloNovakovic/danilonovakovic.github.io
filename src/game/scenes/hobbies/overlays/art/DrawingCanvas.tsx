@@ -1,10 +1,11 @@
 import React, { useRef, useState, useEffect, useLayoutEffect } from 'react';
 import { Trash2 } from 'lucide-react';
-import { HOBBIES_TEXT } from '../../text';
+import { useMessages } from '@/shared/i18n';
 import { useOverlayKeys } from '@/shared/hooks/useOverlayKeys';
 import { Button, Panel } from '@/shared/ui';
 
 export default function DrawingCanvas() {
+  const messages = useMessages();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [context, setContext] = useState<CanvasRenderingContext2D | null>(null);
@@ -207,10 +208,10 @@ export default function DrawingCanvas() {
       <div className="mt-4 flex justify-between w-full items-center">
         <div className="flex flex-col">
           <span className="text-sm font-bold text-[#1a1a1a] opacity-60">
-            {HOBBIES_TEXT.miniGames.drawing.instruction}
+            {messages.miniGames.drawing.instruction}
           </span>
           <span className="text-[10px] font-mono opacity-40">
-            {HOBBIES_TEXT.miniGames.drawing.keyboardHint}
+            {messages.miniGames.drawing.keyboardHint}
           </span>
         </div>
         <Button
@@ -219,7 +220,7 @@ export default function DrawingCanvas() {
           className="shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] hover:translate-y-[2px] hover:shadow-none active:scale-95"
         >
           <Trash2 size={16} />
-          {HOBBIES_TEXT.miniGames.drawing.erase}
+          {messages.miniGames.drawing.erase}
         </Button>
       </div>
     </div>

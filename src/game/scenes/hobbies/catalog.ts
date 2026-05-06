@@ -2,12 +2,13 @@ import { createElement, lazy } from 'react';
 import { PHASER_SCENE_KEYS } from '@/game/registry/featureIds';
 import type { FeatureCatalogEntry } from '@/game/registry/catalogTypes';
 import type { MiniGameOverlayProps } from '@/game/runtime/types';
-import { messages } from '@/shared/i18n';
+import { getMessages } from '@/shared/i18n';
 
 const LazyDrawingCanvas = lazy(() => import('./overlays/art/DrawingCanvas'));
 const LazyDancingMini = lazy(() => import('./overlays/dancing/DancingMini'));
 const LazyMuayThaiMini = lazy(() => import('./overlays/fitness/MuayThaiMini'));
 const LazyGuitarStrings = lazy(() => import('./overlays/music/GuitarStrings'));
+const messages = getMessages();
 
 function DrawingCanvas(props: MiniGameOverlayProps) {
   return createElement(LazyDrawingCanvas, props);

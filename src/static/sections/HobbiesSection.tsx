@@ -1,9 +1,10 @@
-import { PORTFOLIO_DATA } from '@/shared/content/portfolio/data';
-import { messages } from '@/shared/i18n';
+import { useMessages } from '@/shared/i18n';
+import { getPortfolioData } from '@/shared/portfolio';
 import { Card, SketchSection } from '@/shared/ui';
 
 export function HobbiesSection() {
-  const { hobbies } = PORTFOLIO_DATA;
+  const messages = useMessages();
+  const { hobbies } = getPortfolioData(messages);
 
   return (
     <SketchSection id="hobbies" title={messages.portfolio.hobbies.title}>

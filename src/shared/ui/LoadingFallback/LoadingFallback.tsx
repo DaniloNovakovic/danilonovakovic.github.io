@@ -1,7 +1,9 @@
-import { messages } from '@/shared/i18n';
+import { useMessages } from '@/shared/i18n';
 import { Card } from '../Card';
 
 export function LoadingFallback() {
+  const messages = useMessages();
+
   return (
     <div className="flex min-h-[100dvh] min-h-dvh w-full items-center justify-center bg-[#f4f1ea]">
       <Card tone="paper" className="px-6 py-4">

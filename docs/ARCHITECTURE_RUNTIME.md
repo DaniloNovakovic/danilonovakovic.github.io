@@ -51,7 +51,7 @@ Current split:
 - `src/game`
   - Playable mode shell, bridge, scene registry, Phaser scenes, scene contexts, kernel, shared runtime, and engine adapters.
 - `src/shared`
-  - Code reused by static and game: UI primitives, generic hooks, shared content, shared i18n, and shared config. Import shared UI primitives through the `@/shared/ui` alias.
+- Code reused by static and game: UI primitives, generic hooks, shared portfolio facts, shared i18n, and shared config. User-facing copy belongs in `src/shared/i18n/messages/en/`; non-copy portfolio facts belong in `src/shared/portfolio`. React reads localized copy through `useMessages()` and updates live; Phaser/runtime reads through `getMessages()` and picks up locale changes when scenes restart/re-enter. Import shared UI primitives through the `@/shared/ui` alias.
 
 Migration rule for new code:
 

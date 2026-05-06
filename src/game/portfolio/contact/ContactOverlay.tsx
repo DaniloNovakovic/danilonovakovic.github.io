@@ -1,6 +1,6 @@
 import React from 'react';
-import { PORTFOLIO_DATA, type ContactIconId } from '@/shared/content/portfolio/data';
-import { PORTFOLIO_TEXT } from '@/shared/content/portfolio/text';
+import { useMessages } from '@/shared/i18n';
+import { getPortfolioData, type ContactIconId } from '@/shared/portfolio';
 import { Card, LinkButton } from '@/shared/ui';
 
 const CONTACT_ICON_SRC: Record<ContactIconId, string> = {
@@ -22,7 +22,8 @@ function ContactLinkIcon({ icon }: { icon: ContactIconId }) {
 }
 
 const ContactOverlay: React.FC = () => {
-  const { contact } = PORTFOLIO_DATA;
+  const messages = useMessages();
+  const { contact } = getPortfolioData(messages);
 
   return (
     <div className="text-[#1a1a1a]">
@@ -47,8 +48,8 @@ const ContactOverlay: React.FC = () => {
       </div>
 
       <Card border="medium" shadow="none" className="mt-8 border-dashed bg-yellow-50 p-4 text-center">
-        <p className="text-lg font-bold">{PORTFOLIO_TEXT.contact.quote}</p>
-        <p className="mt-1 text-gray-600 text-sm">{PORTFOLIO_TEXT.contact.quoteAuthor}</p>
+        <p className="text-lg font-bold">{messages.portfolio.contact.quote}</p>
+        <p className="mt-1 text-gray-600 text-sm">{messages.portfolio.contact.quoteAuthor}</p>
       </Card>
     </div>
   );

@@ -1,17 +1,18 @@
 import React from 'react';
-import { PORTFOLIO_DATA } from '@/shared/content/portfolio/data';
-import { PORTFOLIO_TEXT } from '@/shared/content/portfolio/text';
+import { useMessages } from '@/shared/i18n';
+import { getPortfolioData } from '@/shared/portfolio';
 import { Card, Tag } from '@/shared/ui';
 
 const AbilitiesOverlay: React.FC = () => {
-  const { abilities } = PORTFOLIO_DATA;
+  const messages = useMessages();
+  const { abilities } = getPortfolioData(messages);
   
   return (
     <div className="text-[#1a1a1a]">
       <div className="grid grid-cols-1 gap-6">
         {/* Skills */}
         <Card>
-          <h3 className="text-xl font-bold mb-4 border-b-2 border-gray-100 pb-2">{PORTFOLIO_TEXT.abilities.skills}</h3>
+          <h3 className="text-xl font-bold mb-4 border-b-2 border-gray-100 pb-2">{messages.portfolio.abilities.skills}</h3>
           <div className="flex flex-wrap gap-2">
             {abilities.skills.map((skill, index) => (
               <Tag key={index}>
@@ -23,7 +24,7 @@ const AbilitiesOverlay: React.FC = () => {
 
         {/* Tools */}
         <Card>
-          <h3 className="text-xl font-bold mb-4 border-b-2 border-gray-100 pb-2">{PORTFOLIO_TEXT.abilities.tools}</h3>
+          <h3 className="text-xl font-bold mb-4 border-b-2 border-gray-100 pb-2">{messages.portfolio.abilities.tools}</h3>
           <div className="flex flex-wrap gap-2">
             {abilities.tools.map((tool, index) => (
               <Tag key={index}>
@@ -35,7 +36,7 @@ const AbilitiesOverlay: React.FC = () => {
 
         {/* Languages */}
         <Card>
-          <h3 className="text-xl font-bold mb-4 border-b-2 border-gray-100 pb-2">{PORTFOLIO_TEXT.abilities.languages}</h3>
+          <h3 className="text-xl font-bold mb-4 border-b-2 border-gray-100 pb-2">{messages.portfolio.abilities.languages}</h3>
           <ul className="space-y-2">
             {abilities.languages.map((lang, index) => (
               <li key={index} className="text-base flex items-center gap-2">

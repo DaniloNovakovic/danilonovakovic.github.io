@@ -1,6 +1,8 @@
 import { PHASER_SCENE_KEYS } from '@/game/registry/featureIds';
 import type { FeatureCatalogEntry } from '@/game/registry/catalogTypes';
-import { messages } from '@/shared/i18n';
+import { getMessages } from '@/shared/i18n';
+
+const messages = getMessages();
 
 export const POTASSIUM_SLIP_FEATURE_CATALOG_ENTRIES: FeatureCatalogEntry[] = [
   {

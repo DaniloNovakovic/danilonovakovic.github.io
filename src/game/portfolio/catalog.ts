@@ -1,10 +1,12 @@
 import type { FeatureCatalogEntry } from '@/game/registry/catalogTypes';
-import { messages } from '@/shared/i18n';
+import { getMessages } from '@/shared/i18n';
 import ProfileOverlay from './profile/ProfileOverlay';
 import ExperienceOverlay from './experience/ExperienceOverlay';
 import ProjectsOverlay from './projects/ProjectsOverlay';
 import AbilitiesOverlay from './abilities/AbilitiesOverlay';
 import ContactOverlay from './contact/ContactOverlay';
+
+const messages = getMessages();
 
 export const PORTFOLIO_FEATURE_CATALOG_ENTRIES: FeatureCatalogEntry[] = [
   {

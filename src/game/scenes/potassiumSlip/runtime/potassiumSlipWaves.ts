@@ -1,4 +1,6 @@
-import { messages } from '@/shared/i18n';
+import { getMessages } from '@/shared/i18n';
+
+const messages = getMessages();
 
 export type PotassiumEnemyKind =
   | 'intern'

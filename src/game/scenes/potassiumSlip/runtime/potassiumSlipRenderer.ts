@@ -2,7 +2,7 @@ import * as Phaser from 'phaser';
 import { GAME_DESIGN_WIDTH } from '@/game/runtime/config';
 import { POTASSIUM_PROJECTILE_CONTROL_DEFAULTS } from './potassiumSlipProjectileControl';
 import { createUiText, snapUiTextCoordinate } from '@/game/runtime/text/createUiText';
-import { messages } from '@/shared/i18n';
+import { getMessages } from '@/shared/i18n';
 import type {
   PotassiumDraftOption,
   PotassiumEnemyHealthState,
@@ -273,12 +273,14 @@ export class PotassiumSlipRenderer {
   }
 
   updateHud(input: { waveLabel: string; score: number; lives: number }): void {
+    const messages = getMessages();
     this.hudText?.setText(input.waveLabel);
     this.scoreText?.setText(messages.potassiumSlip.hud.score(input.score));
     this.livesText?.setText(messages.potassiumSlip.hud.lives(input.lives));
   }
 
   createStartOverlay(): void {
+    const messages = getMessages();
     const { arena } = this.layout;
     this.overlayText = createUiText(this.scene, GAME_DESIGN_WIDTH / 2, 245, messages.potassiumSlip.title, {
       fontSize: '32px',
@@ -308,11 +310,13 @@ export class PotassiumSlipRenderer {
   }
 
   showOutcomeOverlay(input: { title: string; score: number; titleFontSize: number }): void {
+    const messages = getMessages();
     this.overlayText?.setFontSize(input.titleFontSize).setText(input.title).setPosition(GAME_DESIGN_WIDTH / 2, 255).setVisible(true);
     this.subOverlayText?.setFontSize(15).setText(messages.potassiumSlip.finalScore(input.score)).setPosition(GAME_DESIGN_WIDTH / 2, 308).setVisible(true);
   }
 
   showUpgradeChoices(choices: PotassiumUpgradeChoiceView[]): void {
+    const messages = getMessages();
     const { arena } = this.layout;
     this.clearUpgradeChoices();
     this.upgradeChoiceBackdrop = this.scene.add.rectangle(GAME_DESIGN_WIDTH / 2, 305, arena.width - 76, 176, 0xfbfbf9, 0.96)
@@ -369,6 +373,7 @@ export class PotassiumSlipRenderer {
   }
 
   showTerminal(outcome: 'won' | 'game_over', records: string): void {
+    const messages = getMessages();
     this.clearTerminal();
     const buttons: Array<{ action: PotassiumTerminalAction; label: string }> = outcome === 'won'
       ? [
@@ -455,6 +460,7 @@ export class PotassiumSlipRenderer {
     }
     const label = getPotassiumData<Phaser.GameObjects.Text>(enemy, POTASSIUM_DATA_KEYS.labelText);
     if (label) {
+      const messages = getMessages();
       const hp = Math.ceil(getPotassiumEnemyHp(enemy));
       const maxHp = getPotassiumEnemyMaxHp(enemy);
       label.setText(messages.potassiumSlip.enemies.health(hp, maxHp));
@@ -602,6 +608,7 @@ export class PotassiumSlipRenderer {
     labelText: string,
     hp: number
   ): Phaser.GameObjects.Text {
+    const messages = getMessages();
     const label = createUiText(this.scene, enemy.x, enemy.y - 34, messages.potassiumSlip.enemies.labelledHealth(labelText, hp), {
       fontSize: '9px',
       color: '#1a1a1a',
