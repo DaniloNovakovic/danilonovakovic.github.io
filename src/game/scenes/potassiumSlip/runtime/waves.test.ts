@@ -30,7 +30,7 @@ import {
   POTASSIUM_UPGRADES,
   POTASSIUM_WAVES,
   type PotassiumWaveCell
-} from './potassiumSlipWaves';
+} from './waves';
 
 describe('potassium slip waves', () => {
   it('generates deterministic 5-column non-boss waves', () => {

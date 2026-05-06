@@ -5,8 +5,8 @@ import {
   POTASSIUM_COLUMN_COUNT,
   type PotassiumEnemyKind,
   type PotassiumShieldSide
-} from './potassiumSlipWaves';
-import { POTASSIUM_DATA_KEYS } from './potassiumSlipPhaserData';
+} from './waves';
+import { POTASSIUM_DATA_KEYS } from './phaserData';
 import { getMessages } from '@/shared/i18n';
 
 const messages = getMessages();

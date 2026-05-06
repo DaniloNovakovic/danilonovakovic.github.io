@@ -2,7 +2,7 @@ import type {
   PotassiumEnemyHealthState,
   PotassiumEnemyKind,
   PotassiumShieldSide
-} from './potassiumSlipWaves';
+} from './waves';
 
 export interface PotassiumDataObject {
   getData(key: string): unknown;

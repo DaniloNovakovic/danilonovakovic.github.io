@@ -3,8 +3,8 @@ import {
   PotassiumCommandAdapter,
   type PotassiumCommandAdapterPorts,
   type PotassiumCommandObject
-} from './potassiumSlipCommandAdapter';
-import { createPotassiumSession, type PotassiumSessionState } from './potassiumSlipSession';
+} from './commandAdapter';
+import { createPotassiumSession, type PotassiumSessionState } from './session';
 
 function makeObject(overrides: Partial<PotassiumCommandObject> & { data?: Record<string, unknown> } = {}): PotassiumCommandObject {
   const data = new Map<string, unknown>(Object.entries(overrides.data ?? {}));

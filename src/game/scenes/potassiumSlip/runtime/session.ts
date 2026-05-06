@@ -16,12 +16,12 @@ import {
   type PotassiumScheduledWaveRow,
   type PotassiumSkillRanks,
   type PotassiumUpgradeKind
-} from './potassiumSlipWaves';
+} from './waves';
 import type {
   PotassiumRunMode,
   PotassiumRunOutcome,
   PotassiumRunRecord
-} from './potassiumSlipLeaderboard';
+} from './leaderboard';
 import { getMessages } from '@/shared/i18n';
 
 const messages = getMessages();

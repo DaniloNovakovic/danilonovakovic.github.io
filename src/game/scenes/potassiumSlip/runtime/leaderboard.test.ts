@@ -6,7 +6,7 @@ import {
   loadPotassiumLeaderboard,
   savePotassiumRunRecord,
   type PotassiumRunRecord
-} from './potassiumSlipLeaderboard';
+} from './leaderboard';
 
 class MemoryStorage {
   private readonly items = new Map<string, string>();

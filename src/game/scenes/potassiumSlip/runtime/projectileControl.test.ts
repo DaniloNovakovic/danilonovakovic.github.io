@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   createPotassiumProjectileControl,
   POTASSIUM_PROJECTILE_CONTROL_DEFAULTS
-} from './potassiumSlipProjectileControl';
+} from './projectileControl';
 
 const launchPad = { x: 500, y: 538, radius: 44 };
 

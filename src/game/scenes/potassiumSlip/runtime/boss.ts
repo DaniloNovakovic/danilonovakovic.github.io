@@ -2,7 +2,7 @@ import {
   getPotassiumSplitterSpawnColumns,
   POTASSIUM_COLUMN_COUNT,
   type PotassiumEnemyKind
-} from './potassiumSlipWaves';
+} from './waves';
 
 export type PotassiumBossPhase = 1 | 2 | 3;
 

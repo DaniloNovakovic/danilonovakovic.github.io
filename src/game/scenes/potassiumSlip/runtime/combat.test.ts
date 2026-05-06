@@ -9,7 +9,7 @@ import {
   resolvePotassiumProjectileHit,
   type PotassiumEnemyCombatFacts,
   type PotassiumProjectileCombatFacts
-} from './potassiumSlipCombat';
+} from './combat';
 
 describe('potassium slip combat', () => {
   it('resolves normal hit damage, deflection, and unlocked effects', () => {

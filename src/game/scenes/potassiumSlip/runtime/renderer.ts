@@ -1,6 +1,6 @@
 import * as Phaser from 'phaser';
 import { GAME_DESIGN_WIDTH } from '@/game/sharedSceneRuntime/config';
-import { POTASSIUM_PROJECTILE_CONTROL_DEFAULTS } from './potassiumSlipProjectileControl';
+import { POTASSIUM_PROJECTILE_CONTROL_DEFAULTS } from './projectileControl';
 import { createUiText, snapUiTextCoordinate } from '@/game/sharedSceneRuntime/text/createUiText';
 import { getMessages } from '@/shared/i18n';
 import type {
@@ -11,7 +11,7 @@ import type {
   PotassiumSkillRanks,
   PotassiumSkillRank,
   PotassiumUpgradeKind
-} from './potassiumSlipWaves';
+} from './waves';
 import {
   getPotassiumData,
   getPotassiumEnemyHp,
@@ -21,7 +21,7 @@ import {
   isPotassiumEnemyDying,
   POTASSIUM_DATA_KEYS,
   setPotassiumData
-} from './potassiumSlipPhaserData';
+} from './phaserData';
 
 export type PotassiumTerminalAction = 'retry' | 'return' | 'endless';
 

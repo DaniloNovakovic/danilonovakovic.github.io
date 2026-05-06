@@ -10,34 +10,34 @@ import {
   type PotassiumEnemyCombatFacts,
   type PotassiumGhostBeamDirection,
   type PotassiumProjectileCombatFacts
-} from './potassiumSlipCombat';
-import { getPotassiumEnemyConfig } from './potassiumSlipEnemyFactory';
+} from './combat';
+import { getPotassiumEnemyConfig } from './enemyFactory';
 import type {
   PotassiumRunRecord,
   PotassiumRunOutcome
-} from './potassiumSlipLeaderboard';
+} from './leaderboard';
 import {
   resolvePotassiumEnemyKilled,
   type PotassiumSessionCommand,
   type PotassiumSessionResult,
   type PotassiumSessionState
-} from './potassiumSlipSession';
+} from './session';
 import type {
   PotassiumBossCommand,
   PotassiumBossFacts,
   PotassiumBossSummonFacts
-} from './potassiumSlipBoss';
+} from './boss';
 import type {
   PotassiumDraftChoiceView,
   PotassiumHudFacts
-} from './potassiumSlipSession';
+} from './session';
 import {
   getPotassiumExplosionRadius,
   type PotassiumGenericUpgradeKind,
   type PotassiumScheduledWaveRow,
   type PotassiumSkillRank,
   type PotassiumUpgradeKind
-} from './potassiumSlipWaves';
+} from './waves';
 import {
   canPotassiumProjectileApplyHitProcs,
   canPotassiumProjectileDuplicate,
@@ -55,7 +55,7 @@ import {
   setPotassiumData,
   setPotassiumEnemyDying,
   setPotassiumEnemyHealth
-} from './potassiumSlipPhaserData';
+} from './phaserData';
 
 export interface PotassiumCommandBody {
   velocity: { x: number; y: number };

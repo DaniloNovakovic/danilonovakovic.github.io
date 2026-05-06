@@ -13,7 +13,7 @@ import {
   setPotassiumEnemyHealth,
   setPotassiumHitCooldownUntil,
   setPotassiumProjectileDefaults
-} from './potassiumSlipPhaserData';
+} from './phaserData';
 
 function makeDataObject() {
   const data = new Map<string, unknown>();

@@ -12,7 +12,7 @@ import {
   resolvePotassiumBossFrame,
   type PotassiumBossFacts,
   type PotassiumBossFrameInput
-} from './potassiumSlipBoss';
+} from './boss';
 
 describe('potassium slip boss', () => {
   it('resolves phase 1, 2, and 3 from hp thresholds', () => {

@@ -6,8 +6,8 @@ import {
   resolvePotassiumEnemySpawnFacts,
   resolvePotassiumEnemySpawnX,
   resolvePotassiumSplitterChildFacts
-} from './potassiumSlipEnemyFactory';
-import { POTASSIUM_COLUMN_COUNT } from './potassiumSlipWaves';
+} from './enemyFactory';
+import { POTASSIUM_COLUMN_COUNT } from './waves';
 
 const layout = {
   arenaLeft: 275,

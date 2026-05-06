@@ -15,12 +15,12 @@ import {
   startPotassiumEndless,
   type PotassiumSessionCommand,
   type PotassiumSessionState
-} from './potassiumSlipSession';
+} from './session';
 import {
   POTASSIUM_BOSS_WAVE,
   POTASSIUM_ENDLESS_START_WAVE,
   POTASSIUM_UPGRADES
-} from './potassiumSlipWaves';
+} from './waves';
 
 describe('potassium slip session', () => {
   it('starts a fresh campaign with board reset, hint, wave spawn, and HUD commands', () => {

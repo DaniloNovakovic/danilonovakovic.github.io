@@ -14,7 +14,7 @@ import {
   type PotassiumSkillRanks,
   type PotassiumSkillRank,
   type PotassiumUpgradeKind
-} from './potassiumSlipWaves';
+} from './waves';
 
 export type PotassiumDamageSource = 'banana' | 'fire' | 'poison' | 'explosion' | 'ghost';
 export type PotassiumGhostBeamDirection = 'horizontal' | 'vertical';
