@@ -7,7 +7,7 @@ This file is a **personal log** of how the site evolved across major versions. I
 ## v3 (current) — Gamified portfolio
 
 - Rebuilt as a **React + Vite** app with a **Phaser** side-scrolling world and **React** overlays for sections and mini-games (instead of static section scrolling).
-- **Tailwind CSS v4** for layout and the “digital sketchbook” look (see `docs/design/STYLE_GUIDE.md`).
+- **Tailwind CSS v4** for layout and the “digital sketchbook” look (see [`docs/design/style-guide.md`](docs/design/style-guide.md)).
 - Content and world features are **catalog/data-driven** so adding a building or hobby is mostly data plus one component or scene, not a full layout rewrite.
 - Tooling: TypeScript, ESLint, Vitest for a small regression suite, GitHub Actions CI.
 
