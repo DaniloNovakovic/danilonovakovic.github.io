@@ -1,4 +1,5 @@
 import type { BasementReactOverlayId } from '@/game/registry/featureIds';
+import { messages } from '@/shared/i18n';
 
 export type BasementRoomInteractableId = 'exit' | 'computer' | 'glasses';
 
@@ -89,7 +90,7 @@ function createBasementInteractionEffect(
       return () =>
         deps.isGlassesOwned()
           ? { kind: 'openOverlay', id: BASEMENT_GAMES_OVERLAY_ID }
-          : { kind: 'showThought', text: "ughh... I can't see" };
+          : { kind: 'showThought', text: messages.scenes.basement.cannotSeeThought };
     case 'glasses':
       return { kind: 'collectGlasses' };
     case 'exit':

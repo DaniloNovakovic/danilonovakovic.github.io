@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { X } from 'lucide-react';
+import { messages } from '@/shared/i18n';
 import { Button } from '../Button';
 
 interface DialogCardProps {
@@ -28,7 +29,7 @@ export function DialogCard({
         size="sm"
         onClick={onClose}
         className="absolute right-2 top-2 z-10 p-2 sm:right-4 sm:top-4"
-        aria-label="Close"
+        aria-label={messages.common.close}
       >
         <X size={20} color="#1a1a1a" />
       </Button>

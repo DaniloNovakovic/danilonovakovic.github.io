@@ -39,7 +39,7 @@ export default function DancingMini() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isWatching, setIsWatching] = useState(false);
   const [activeArrow, setActiveArrow] = useState<string | null>(null);
-  const [message, setMessage] = useState(HOBBIES_TEXT.miniGames.dancing.startMessage);
+  const [message, setMessage] = useState<string>(HOBBIES_TEXT.miniGames.dancing.startMessage);
 
   const sequenceRef = useRef<string[]>([]);
   const playerSeqRef = useRef<string[]>([]);
@@ -131,7 +131,7 @@ export default function DancingMini() {
 
     if (!isCorrect) {
       clearTimers();
-      setMessage(`${TEXTS.common.gameOver} ${TEXTS.common.score} ${seq.length - 1}`);
+      setMessage(HOBBIES_TEXT.miniGames.dancing.gameOverWithScore(seq.length - 1));
       setIsPlaying(false);
       setIsWatching(false);
     } else if (newPlayerSeq.length === seq.length) {

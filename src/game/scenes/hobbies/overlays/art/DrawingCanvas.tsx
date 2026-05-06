@@ -210,7 +210,7 @@ export default function DrawingCanvas() {
             {HOBBIES_TEXT.miniGames.drawing.instruction}
           </span>
           <span className="text-[10px] font-mono opacity-40">
-            [Arrows to move • Space to draw • Shift to speed up]
+            {HOBBIES_TEXT.miniGames.drawing.keyboardHint}
           </span>
         </div>
         <Button

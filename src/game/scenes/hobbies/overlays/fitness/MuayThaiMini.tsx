@@ -52,7 +52,7 @@ export default function MuayThaiMini() {
           className={`w-24 h-40 border-4 border-[#1a1a1a] bg-[#e8e5df] rounded-b-2xl rounded-t-lg cursor-pointer flex flex-col items-center pt-2 transition-transform duration-100 ${isHit ? '-rotate-12 translate-x-4 -translate-y-2' : 'rotate-0 origin-top'} outline-none focus:ring-4 focus:ring-blue-400 focus:ring-opacity-50`}
           style={{ transformOrigin: 'top center' }}
           role="button"
-          aria-label="Punching Bag"
+          aria-label={HOBBIES_TEXT.miniGames.muayThai.punchingBag}
         >
           <div className="w-16 h-4 border-2 border-[#1a1a1a] mb-2 opacity-50"></div>
           <div className="w-16 h-4 border-2 border-[#1a1a1a] opacity-50"></div>

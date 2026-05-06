@@ -1,4 +1,5 @@
 import { PORTFOLIO_TEXT } from './text';
+import { messages } from '@/shared/i18n';
 
 export interface Experience {
   title: string;
@@ -33,50 +34,50 @@ export const PORTFOLIO_DATA = {
   },
   experiences: [
     {
-      title: "Software Engineer",
-      company: "Hummingbird",
+      title: messages.portfolio.experiences.hummingbird.title,
+      company: messages.portfolio.experiences.hummingbird.company,
       companyUrl: "https://hummingbird.rs/",
-      period: "April 2024 - Present",
-      description: "Built web applications in the financial sector for US clients. Led the implementation of a shared UI design system (Storybook, Theme Provider, Figma tokens). Developed core UI components and ensured WCAG-compliant accessibility. Contributed to innovative features like a finance AI chatbot and real-time collaboration using Liveblocks."
+      period: messages.portfolio.experiences.hummingbird.period,
+      description: messages.portfolio.experiences.hummingbird.description
     },
     {
-      title: "Software Engineer",
-      company: "Vega IT",
+      title: messages.portfolio.experiences.vegaEngineer.title,
+      company: messages.portfolio.experiences.vegaEngineer.company,
       companyUrl: "https://www.vegaitglobal.com/",
-      period: "October 2019 - April 2024",
-      description: "Played a pivotal role in feature development for a social network app (Timeline, Chat, Teams). Collaborated on an apartment reservation app. Developed a custom UI library and enhanced code quality with custom eslint plugins and advanced TypeScript rules. Mentored in React to foster team growth."
+      period: messages.portfolio.experiences.vegaEngineer.period,
+      description: messages.portfolio.experiences.vegaEngineer.description
     },
     {
-      title: "Software Engineer Intern",
-      company: "Vega IT",
+      title: messages.portfolio.experiences.vegaIntern.title,
+      company: messages.portfolio.experiences.vegaIntern.company,
       companyUrl: "https://www.vegaitglobal.com/",
-      period: "September 2019 - October 2019",
-      description: "Worked on a Recreational Basketball League app. Optimized import algorithm for large data sets (92% faster) and improved team name correction using Levenshtein distance algorithm."
+      period: messages.portfolio.experiences.vegaIntern.period,
+      description: messages.portfolio.experiences.vegaIntern.description
     },
     {
-      title: "Student Assistant",
-      company: "Faculty of Technical Sciences",
+      title: messages.portfolio.experiences.facultyAssistant.title,
+      company: messages.portfolio.experiences.facultyAssistant.company,
       companyUrl: "https://ftn.uns.ac.rs/engfaculty-of-technical-sciences-eng/",
-      period: "February 2018 - June 2018",
-      description: "Demonstrator in Object-Oriented-Programming course. Provided assistance to students under the guidance of academic staff."
+      period: messages.portfolio.experiences.facultyAssistant.period,
+      description: messages.portfolio.experiences.facultyAssistant.description
     }
   ],
   projects: [
     {
-      title: "Dynamic Bookmarks",
-      description: "Chrome extension which dynamically updates bookmarks based on the specified regular expression.",
+      title: messages.portfolio.projectsData.dynamicBookmarks.title,
+      description: messages.portfolio.projectsData.dynamicBookmarks.description,
       tags: ["JS", "Chrome-Extension", "Webpack", "Materialize.css"],
       link: "https://chrome.google.com/webstore/detail/dynamic-bookmarks/ilhojkjlfkppedidhpecepohnmlndopb"
     },
     {
-      title: "Arduino Simulator",
-      description: "Aimed for students who are learning Arduino on uc32 Basic U/I Shield",
+      title: messages.portfolio.projectsData.arduinoSimulator.title,
+      description: messages.portfolio.projectsData.arduinoSimulator.description,
       tags: ["C++", "STL", "Windows"],
       link: "https://github.com/DaniloNovakovic/Arduino_uc32_basic_ui_shield_simulator"
     },
     {
-      title: "Chesspernado",
-      description: "Chesspernado is an original game inspired by chess, tetris and plants vs zombie idea.",
+      title: messages.portfolio.projectsData.chesspernado.title,
+      description: messages.portfolio.projectsData.chesspernado.description,
       tags: ["C", "Linux", "Game"],
       link: "https://github.com/DaniloNovakovic/Chesspernado"
     }
@@ -87,36 +88,36 @@ export const PORTFOLIO_DATA = {
     tools: ["VS Code", "Git", "Storybook", "Figma", "Liveblocks", "npm"]
   },
   contact: [
-    { name: "LinkedIn", link: "https://www.linkedin.com/in/danilo-novakovic", icon: "linkedin" },
-    { name: "GitHub", link: "https://github.com/DaniloNovakovic", icon: "github" },
-    { name: "Email", link: "mailto:dakenzi97@gmail.com", icon: "email" }
+    { name: messages.portfolio.contacts.linkedin, link: "https://www.linkedin.com/in/danilo-novakovic", icon: "linkedin" },
+    { name: messages.portfolio.contacts.github, link: "https://github.com/DaniloNovakovic", icon: "github" },
+    { name: messages.portfolio.contacts.email, link: "mailto:dakenzi97@gmail.com", icon: "email" }
   ] satisfies ContactLink[],
   /** Ids align with `portfolioRegistry` hobby overlays / Hobbies room (`games`, `art`, `music`, `fitness`, `dancing`). */
   hobbies: [
     {
       id: 'games',
-      name: 'Games & dev',
-      description: 'Building games, analyzing mechanics, and enjoying immersive worlds.'
+      name: messages.portfolio.hobbiesData.games.name,
+      description: messages.portfolio.hobbiesData.games.description
     },
     {
       id: 'art',
-      name: 'Drawing & art',
-      description: 'Sketching and digital art—creativity away from the keyboard.'
+      name: messages.portfolio.hobbiesData.art.name,
+      description: messages.portfolio.hobbiesData.art.description
     },
     {
       id: 'music',
-      name: 'Guitar',
-      description: 'Playing guitar and recharging through music.'
+      name: messages.portfolio.hobbiesData.music.name,
+      description: messages.portfolio.hobbiesData.music.description
     },
     {
       id: 'fitness',
-      name: 'Muay Thai & fitness',
-      description: 'Discipline and physical sharpness through martial arts and training.'
+      name: messages.portfolio.hobbiesData.fitness.name,
+      description: messages.portfolio.hobbiesData.fitness.description
     },
     {
       id: 'dancing',
-      name: 'Dance & rhythm',
-      description: 'Moving to music and learning patterns—coordination as play.'
+      name: messages.portfolio.hobbiesData.dancing.name,
+      description: messages.portfolio.hobbiesData.dancing.description
     }
   ]
 };

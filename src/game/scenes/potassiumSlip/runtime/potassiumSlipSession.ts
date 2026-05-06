@@ -22,6 +22,7 @@ import type {
   PotassiumRunOutcome,
   PotassiumRunRecord
 } from './potassiumSlipLeaderboard';
+import { messages } from '@/shared/i18n';
 
 export type PotassiumSessionGameState = 'START' | 'PLAYING' | 'UPGRADE' | 'WON' | 'GAME_OVER';
 export type PotassiumTerminalAction = 'return' | 'retry' | 'endless';
@@ -88,67 +89,67 @@ const LIVES_INITIAL = 5;
 
 const GENERIC_UPGRADE_CONFIGS: Record<PotassiumGenericUpgradeKind, { label: string; color: string; description: string }> = {
   damage: {
-    label: 'Damage +',
+    label: messages.potassiumSlip.upgrades.generic.damage.label,
     color: '#1a1a1a',
-    description: '+12% banana and beam damage.'
+    description: messages.potassiumSlip.upgrades.generic.damage.description
   },
   poison: {
-    label: 'Poison +',
+    label: messages.potassiumSlip.upgrades.generic.poison.label,
     color: '#65a30d',
-    description: '+10% poison tick strength.'
+    description: messages.potassiumSlip.upgrades.generic.poison.description
   },
   explosion: {
-    label: 'Explosion +',
+    label: messages.potassiumSlip.upgrades.generic.explosion.label,
     color: '#ef4444',
-    description: '+6% blast radius.'
+    description: messages.potassiumSlip.upgrades.generic.explosion.description
   },
   cloneTime: {
-    label: 'Clone Time +',
+    label: messages.potassiumSlip.upgrades.generic.cloneTime.label,
     color: '#facc15',
-    description: '+300ms clone lifetime.'
+    description: messages.potassiumSlip.upgrades.generic.cloneTime.description
   },
   bananaSpeed: {
-    label: 'Banana Speed +',
+    label: messages.potassiumSlip.upgrades.generic.bananaSpeed.label,
     color: '#38bdf8',
-    description: '+5% launch speed.'
+    description: messages.potassiumSlip.upgrades.generic.bananaSpeed.description
   },
   bonusLife: {
-    label: 'Bonus Life',
+    label: messages.potassiumSlip.upgrades.generic.bonusLife.label,
     color: '#a855f7',
-    description: '+1 life right now.'
+    description: messages.potassiumSlip.upgrades.generic.bonusLife.description
   }
 };
 
 const UPGRADE_CONFIGS: Record<PotassiumUpgradeKind, { label: string; color: string; description: string }> = {
   fire: {
-    label: 'Fire Trail',
+    label: messages.potassiumSlip.upgrades.skills.fire.label,
     color: '#f97316',
-    description: 'Moving bananas leave hot nonsense.'
+    description: messages.potassiumSlip.upgrades.skills.fire.description
   },
   poison: {
-    label: 'Poison Damage',
+    label: messages.potassiumSlip.upgrades.skills.poison.label,
     color: '#65a30d',
-    description: 'Hits tick for 1 dmg every 500ms.'
+    description: messages.potassiumSlip.upgrades.skills.poison.description
   },
   explosion: {
-    label: 'Explosion Damage',
+    label: messages.potassiumSlip.upgrades.skills.explosion.label,
     color: '#ef4444',
-    description: 'Every hit pops nearby paperwork.'
+    description: messages.potassiumSlip.upgrades.skills.explosion.description
   },
   duplicate: {
-    label: 'Duplicate',
+    label: messages.potassiumSlip.upgrades.skills.duplicate.label,
     color: '#facc15',
-    description: 'Main hits spawn two tiny bananas.'
+    description: messages.potassiumSlip.upgrades.skills.duplicate.description
   },
   ghostHorizontal: {
-    label: 'Horizontal Ghost',
+    label: messages.potassiumSlip.upgrades.skills.ghostHorizontal.label,
     color: '#38bdf8',
-    description: 'Hits sweep a blue row beam.'
+    description: messages.potassiumSlip.upgrades.skills.ghostHorizontal.description
   },
   ghostVertical: {
-    label: 'Vertical Ghost',
+    label: messages.potassiumSlip.upgrades.skills.ghostVertical.label,
     color: '#60a5fa',
-    description: 'Hits sweep a blue column beam.'
+    description: messages.potassiumSlip.upgrades.skills.ghostVertical.description
   }
 };
 
@@ -177,7 +178,7 @@ export function startPotassiumCampaign(state: PotassiumSessionState): PotassiumS
     { type: 'hideMainOverlay' },
     { type: 'clearTerminal' },
     { type: 'resetBoard' },
-    { type: 'setHint', text: 'Drag toward a target • Hold to recall' },
+    { type: 'setHint', text: messages.potassiumSlip.hints.start },
     { type: 'spawnWave', wave: 1 }
   ]);
 }
@@ -195,7 +196,7 @@ export function startPotassiumEndless(state: PotassiumSessionState): PotassiumSe
     { type: 'hideMainOverlay' },
     { type: 'clearTerminal' },
     { type: 'resetBoard' },
-    { type: 'setHint', text: 'Endless audit • The nonsense keeps filing' },
+    { type: 'setHint', text: messages.potassiumSlip.hints.endlessStart },
     { type: 'spawnWave', wave: POTASSIUM_ENDLESS_START_WAVE }
   ]);
 }
@@ -211,12 +212,12 @@ export function spawnPotassiumWave(state: PotassiumSessionState, waveNumber: num
   if (isPotassiumBossWave(waveNumber)) {
     return withHud(nextState, [
       { type: 'spawnBoss' },
-      { type: 'setHint', text: 'Boss wave • Stop the audit before it lands' }
+      { type: 'setHint', text: messages.potassiumSlip.hints.bossWave }
     ]);
   }
   return withHud(nextState, [
     { type: 'scheduleWaveRows', schedule: getPotassiumWaveRowSchedule(waveNumber, wave.rows) },
-    { type: 'setHint', text: `${wave.title}: ${getWaveHint(waveNumber)}` }
+    { type: 'setHint', text: messages.potassiumSlip.hints.wave(wave.title, getWaveHint(waveNumber)) }
   ]);
 }
 
@@ -245,7 +246,7 @@ export function resolvePotassiumWaveClear(input: PotassiumWaveClearInput): Potas
   return {
     state: nextState,
     commands: [
-      { type: 'setHint', text: 'Wave clear • Choose fresh banana nonsense' },
+      { type: 'setHint', text: messages.potassiumSlip.hints.waveClear },
       { type: 'scheduleUpgradeChoices' }
     ]
   };
@@ -261,7 +262,7 @@ export function resolvePotassiumDevSkipWave(state: PotassiumSessionState): Potas
     waveAdvancing: true
   };
   return withHud(nextState, [
-    { type: 'setHint', text: 'Dev skip • Choose a test upgrade' },
+    { type: 'setHint', text: messages.potassiumSlip.hints.devSkip },
     { type: 'scheduleUpgradeChoices' }
   ]);
 }
@@ -297,7 +298,7 @@ export function resolvePotassiumDraftChoice(
       lives: option.kind === 'bonusLife' ? state.lives + 1 : state.lives
     };
     return withHud(advancePotassiumWaveState(nextState), [
-      { type: 'setHint', text: `${GENERIC_UPGRADE_CONFIGS[option.kind].label} stacked • Endless paperwork trembles` },
+      { type: 'setHint', text: messages.potassiumSlip.hints.genericStacked(GENERIC_UPGRADE_CONFIGS[option.kind].label) },
       { type: 'clearUpgradeChoices' },
       { type: 'advanceWaveAfterDelay', wave: state.wave + 1 }
     ]);
@@ -310,7 +311,7 @@ export function resolvePotassiumDraftChoice(
   });
   const actionLabel = option.action === 'unlock' ? 'unlocked' : 'upgraded';
   return withHud(nextState, [
-    { type: 'setHint', text: `${UPGRADE_CONFIGS[option.kind].label} ${actionLabel} • It stacks forever` },
+    { type: 'setHint', text: messages.potassiumSlip.hints.skillApplied(UPGRADE_CONFIGS[option.kind].label, actionLabel) },
     { type: 'refreshProjectileVisuals' },
     { type: 'clearUpgradeChoices' },
     { type: 'advanceWaveAfterDelay', wave: state.wave + 1 }
@@ -378,7 +379,7 @@ export function resolvePotassiumOutcome(
     { type: 'setHint', text: null },
     {
       type: 'showOutcome',
-      title: outcome === 'won' ? 'CIRCUIT ACQUIRED' : 'BANANA BANKRUPTCY',
+      title: outcome === 'won' ? messages.potassiumSlip.outcomes.won : messages.potassiumSlip.outcomes.gameOver,
       score: nextState.score,
       titleFontSize: outcome === 'won' ? 26 : 24
     },
@@ -403,7 +404,7 @@ export function resolvePotassiumTerminalAction(
 export function getPotassiumSessionHud(state: PotassiumSessionState): PotassiumHudFacts {
   const wave = getPotassiumWave(state.wave);
   return {
-    waveLabel: `W${state.wave} ${wave.title}`,
+    waveLabel: messages.potassiumSlip.hud.waveLabel(state.wave, wave.title),
     score: state.score,
     lives: state.lives
   };
@@ -470,49 +471,49 @@ function getDraftOptionDescription(option: PotassiumDraftOption): string {
   if (isGenericDraftOption(option)) return GENERIC_UPGRADE_CONFIGS[option.kind].description;
   if (option.kind === 'fire') {
     return option.action === 'unlock'
-      ? 'Moving bananas leave fire.'
-      : 'Hits drop extra fire patches.';
+      ? messages.potassiumSlip.upgrades.skills.fire.unlockDescription
+      : messages.potassiumSlip.upgrades.skills.fire.upgradeDescription;
   }
   if (option.kind === 'poison') {
     return option.action === 'unlock'
-      ? 'Hits poison enemies over time.'
-      : 'Poisoned enemies spread on death.';
+      ? messages.potassiumSlip.upgrades.skills.poison.unlockDescription
+      : messages.potassiumSlip.upgrades.skills.poison.upgradeDescription;
   }
   if (option.kind === 'explosion') {
     return option.action === 'unlock'
-      ? 'Hits explode with falloff damage.'
-      : 'Bigger blasts apply statuses.';
+      ? messages.potassiumSlip.upgrades.skills.explosion.unlockDescription
+      : messages.potassiumSlip.upgrades.skills.explosion.upgradeDescription;
   }
   if (option.kind === 'duplicate') {
     return option.action === 'unlock'
-      ? 'Main hits spawn 2 small bananas.'
-      : 'Clones apply half-strength procs and spawn +1.';
+      ? messages.potassiumSlip.upgrades.skills.duplicate.unlockDescription
+      : messages.potassiumSlip.upgrades.skills.duplicate.upgradeDescription;
   }
   if (option.kind === 'ghostHorizontal') {
     return option.action === 'unlock'
-      ? 'Hits fire a blue row beam.'
-      : 'Row beams apply statuses.';
+      ? messages.potassiumSlip.upgrades.skills.ghostHorizontal.unlockDescription
+      : messages.potassiumSlip.upgrades.skills.ghostHorizontal.upgradeDescription;
   }
   return option.action === 'unlock'
-    ? 'Hits fire a blue column beam.'
-    : 'Column beams apply statuses.';
+    ? messages.potassiumSlip.upgrades.skills.ghostVertical.unlockDescription
+    : messages.potassiumSlip.upgrades.skills.ghostVertical.upgradeDescription;
 }
 
 function getDraftOptionTitle(option: PotassiumDraftOption): string {
   if (isGenericDraftOption(option)) return GENERIC_UPGRADE_CONFIGS[option.kind].label;
   const label = UPGRADE_CONFIGS[option.kind].label;
-  return option.action === 'upgrade' ? `${label} +` : label;
+  return option.action === 'upgrade' ? messages.potassiumSlip.upgrades.upgradedTitle(label) : label;
 }
 
 function getWaveHint(wave: number): string {
-  if (wave > 11) return 'endless paperwork escalation';
-  if (wave === 1) return 'launch and bounce';
-  if (wave === 2) return 'multi-hit blobs';
-  if (wave === 3) return 'walls block angles';
-  if (wave === 4) return 'walls block angles';
-  if (wave === 5) return 'splitter memos make smaller problems';
-  if (wave === 6) return 'stack your choices';
-  if (wave === 7) return 'shield plates reject bad angles';
-  if (wave >= 8 && wave <= 10) return 'hard walls ignore banana law';
-  return 'boss time';
+  if (wave > 11) return messages.potassiumSlip.waveHints.endlessEscalation;
+  if (wave === 1) return messages.potassiumSlip.waveHints.launchAndBounce;
+  if (wave === 2) return messages.potassiumSlip.waveHints.multiHitBlobs;
+  if (wave === 3) return messages.potassiumSlip.waveHints.wallsBlockAngles;
+  if (wave === 4) return messages.potassiumSlip.waveHints.wallsBlockAngles;
+  if (wave === 5) return messages.potassiumSlip.waveHints.splitterMemos;
+  if (wave === 6) return messages.potassiumSlip.waveHints.stackChoices;
+  if (wave === 7) return messages.potassiumSlip.waveHints.shieldPlates;
+  if (wave >= 8 && wave <= 10) return messages.potassiumSlip.waveHints.hardWalls;
+  return messages.potassiumSlip.waveHints.bossTime;
 }

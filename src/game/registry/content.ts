@@ -1,21 +1,19 @@
-import { TEXTS as SHARED_TEXTS } from '@/shared/content/content';
-import { PORTFOLIO_TEXT } from '@/shared/content/portfolio/text';
-import { BASEMENT_TEXT } from '@/game/scenes/basement';
-import { HOBBIES_TEXT } from '@/game/scenes/hobbies';
+import { messages } from '@/shared/i18n';
 
 export const TEXTS = {
-  ...SHARED_TEXTS,
-  profile: PORTFOLIO_TEXT.profile,
-  abilities: PORTFOLIO_TEXT.abilities,
-  projects: PORTFOLIO_TEXT.projects,
-  hobbies: HOBBIES_TEXT.labels,
-  contact: PORTFOLIO_TEXT.contact,
+  common: messages.common,
+  navigation: messages.navigation,
+  profile: messages.portfolio.profile,
+  abilities: messages.portfolio.abilities,
+  projects: messages.portfolio.projects,
+  hobbies: messages.scenes.hobbies.labels,
+  contact: messages.portfolio.contact,
   miniGames: {
-    ...SHARED_TEXTS.miniGames,
-    coding: BASEMENT_TEXT.miniGames.coding,
-    muayThai: HOBBIES_TEXT.miniGames.muayThai,
-    guitar: HOBBIES_TEXT.miniGames.guitar,
-    drawing: HOBBIES_TEXT.miniGames.drawing,
-    dancing: HOBBIES_TEXT.miniGames.dancing,
+    arcade: messages.miniGames.arcade,
+    coding: messages.miniGames.coding,
+    muayThai: messages.miniGames.muayThai,
+    guitar: messages.miniGames.guitar,
+    drawing: messages.miniGames.drawing,
+    dancing: messages.miniGames.dancing,
   },
 };

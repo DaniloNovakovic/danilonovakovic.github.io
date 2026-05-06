@@ -8,6 +8,7 @@ import { BASEMENT_FEATURE_ID, HOBBIES_FEATURE_ID, POTASSIUM_FEATURE_ID } from '@
 import { PORTFOLIO_SECTIONS } from '@/game/registry/portfolioRegistry';
 import { TextureGenerator } from '@/game/runtime/textures/TextureGenerator';
 import { TEXTS } from '@/game/registry/content';
+import { messages } from '@/shared/i18n';
 import {
   GAME_DESIGN_HEIGHT,
   OVERWORLD_INTERACT_DISTANCE_X,
@@ -368,7 +369,7 @@ export class OverworldScene extends Phaser.Scene {
   }
 
   private createGlassesSecret(): void {
-    this.glassesSecretHint = createUiText(this, 650, 558, 'Something appears in plain sight.', {
+    this.glassesSecretHint = createUiText(this, 650, 558, messages.scenes.overworld.glassesSecretHint, {
       fontSize: '12px',
       color: '#1a1a1a',
       backgroundColor: '#fbfbf9',
@@ -494,7 +495,7 @@ export class OverworldScene extends Phaser.Scene {
       hole.strokePath();
     }
 
-    createUiText(this, BASEMENT_HOLE.x, BASEMENT_HOLE.y - 48, 'TODO?', {
+    createUiText(this, BASEMENT_HOLE.x, BASEMENT_HOLE.y - 48, messages.scenes.overworld.basementHole, {
       fontSize: '18px',
       color: '#1a1a1a',
       fontStyle: 'bold',

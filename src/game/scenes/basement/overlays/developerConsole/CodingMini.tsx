@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { BASEMENT_TEXT } from '../../text';
 
 export default function CodingMini() {
-  const [history, setHistory] = useState([
+  const [history, setHistory] = useState<string[]>([
     BASEMENT_TEXT.miniGames.coding.welcome,
     BASEMENT_TEXT.miniGames.coding.helpText
   ]);
@@ -41,7 +41,7 @@ export default function CodingMini() {
       case '':
         return;
       default:
-        response = `${BASEMENT_TEXT.miniGames.coding.notFound}${trimmed}`;
+        response = BASEMENT_TEXT.miniGames.coding.commandNotFound(trimmed);
     }
 
     setHistory(prev => [...prev, `> ${cmd}`, ...response.split('\n')]);

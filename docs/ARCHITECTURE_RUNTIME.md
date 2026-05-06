@@ -51,7 +51,7 @@ Current split:
 - `src/game`
   - Playable mode shell, bridge, scene registry, Phaser scenes, scene contexts, kernel, shared runtime, and engine adapters.
 - `src/shared`
-  - Code reused by static and game: UI primitives, generic hooks, shared content, and shared config. Import shared UI primitives through the `@/shared/ui` alias.
+  - Code reused by static and game: UI primitives, generic hooks, shared content, shared i18n, and shared config. Import shared UI primitives through the `@/shared/ui` alias.
 
 Migration rule for new code:
 

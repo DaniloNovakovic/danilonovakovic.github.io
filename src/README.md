@@ -8,7 +8,7 @@ This folder is organized by surface ownership.
 - `modePicker/` - Entry routing UI for choosing static or playable mode.
 - `static/` - Static, non-game portfolio surface.
 - `game/` - Playable mode: shell, bridge, scenes, registry, kernel, shared runtime, and Phaser infrastructure.
-- `shared/` - Code reused by static and game, such as UI primitives, generic hooks, shared content, and shared config.
+- `shared/` - Code reused by static and game, such as UI primitives, generic hooks, shared content, shared i18n, and shared config.
 
 ## Rules Of Thumb
 
@@ -25,7 +25,7 @@ This folder is organized by surface ownership.
 
 - `game/scenes/*/catalog.ts` - Game registry facts for a scene or game-owned overlay group.
 - `game/scenes/*/sceneContext.ts` - Kernel lifecycle/start-data contract for a Phaser scene.
-- `game/scenes/*/text.ts` - Game-only display strings.
+- `shared/i18n/messages/en.ts` - English user-facing copy for React and Phaser. Add new display strings here first; scene `text.ts` files are compatibility shims only.
 - `game/scenes/*/index.ts` - Public scene barrel for cross-folder scene facts.
 - `game/scenes/*/runtime` - Scene-specific Phaser code and scene-local modules.
 - `game/scenes/*/runtime/index.ts` - Public runtime barrel for cross-folder Phaser scene classes and builders.

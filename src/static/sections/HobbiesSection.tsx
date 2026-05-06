@@ -1,11 +1,12 @@
 import { PORTFOLIO_DATA } from '@/shared/content/portfolio/data';
+import { messages } from '@/shared/i18n';
 import { Card, SketchSection } from '@/shared/ui';
 
 export function HobbiesSection() {
   const { hobbies } = PORTFOLIO_DATA;
 
   return (
-    <SketchSection id="hobbies" title="Hobbies">
+    <SketchSection id="hobbies" title={messages.portfolio.hobbies.title}>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {hobbies.map((hobby) => (
           <Card as="article" key={hobby.id} padding="md">

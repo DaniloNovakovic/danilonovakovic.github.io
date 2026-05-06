@@ -1,6 +1,7 @@
 import React from 'react';
 import { PORTFOLIO_DATA } from '@/shared/content/portfolio/data';
 import { TEXTS } from '@/game/registry/content';
+import { messages } from '@/shared/i18n';
 import { Badge, Card, LinkButton } from '@/shared/ui';
 
 const ExperienceOverlay: React.FC = () => {
@@ -23,7 +24,7 @@ const ExperienceOverlay: React.FC = () => {
                   rel="noopener noreferrer"
                   variant="quiet"
                   className="inline p-0 text-lg normal-case tracking-normal"
-                  aria-label={`${exp.company} (opens in new tab)`}
+                  aria-label={messages.navigation.opensInNewTab(exp.company)}
                 >
                   {exp.company}
                 </LinkButton>

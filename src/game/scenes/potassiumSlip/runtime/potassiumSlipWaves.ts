@@ -1,3 +1,5 @@
+import { messages } from '@/shared/i18n';
+
 export type PotassiumEnemyKind =
   | 'intern'
   | 'scope'
@@ -85,7 +87,7 @@ export const POTASSIUM_WAVES: readonly PotassiumWaveDefinition[] = [
   ...Array.from({ length: POTASSIUM_NON_BOSS_WAVE_COUNT }, (_, index) => generatePotassiumWave(index + 1)),
   {
     wave: POTASSIUM_BOSS_WAVE,
-    title: 'Compliance Review',
+    title: messages.potassiumSlip.waveTitles.boss,
     rows: [['boss']]
   }
 ] as const;
@@ -475,11 +477,11 @@ function emptyRow(): PotassiumWaveCell[] {
 }
 
 function getGeneratedWaveTitle(wave: number): string {
-  if (wave > POTASSIUM_BOSS_WAVE) return `Endless Audit ${wave - POTASSIUM_BOSS_WAVE}`;
-  if (wave <= 2) return `Orientation Stack ${wave}`;
-  if (wave <= 4) return `Wall Pattern ${wave}`;
-  if (wave <= 6) return `Office Pressure ${wave}`;
-  return `Deadline Weather ${wave}`;
+  if (wave > POTASSIUM_BOSS_WAVE) return messages.potassiumSlip.waveTitles.endlessAudit(wave - POTASSIUM_BOSS_WAVE);
+  if (wave <= 2) return messages.potassiumSlip.waveTitles.orientationStack(wave);
+  if (wave <= 4) return messages.potassiumSlip.waveTitles.wallPattern(wave);
+  if (wave <= 6) return messages.potassiumSlip.waveTitles.officePressure(wave);
+  return messages.potassiumSlip.waveTitles.deadlineWeather(wave);
 }
 
 function unique<T>(values: readonly T[]): T[] {

@@ -81,7 +81,7 @@ export default function GuitarStrings() {
             onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && playNote(i, n.freq)}
             tabIndex={0}
             role="button"
-            aria-label={`String ${n.note} (Press ${n.key})`}
+            aria-label={HOBBIES_TEXT.miniGames.guitar.stringLabel(n.note, n.key)}
           >
             <div
               className={`absolute top-1/2 left-0 w-full h-[2px] bg-[#1a1a1a] transition-transform duration-100 ${activeString === i ? 'scale-y-300 translate-y-1' : ''} group-focus:bg-blue-500`}
