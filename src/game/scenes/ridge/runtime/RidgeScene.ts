@@ -14,22 +14,20 @@ import {
   type SideViewPlayerRuntime
 } from '@/game/sharedSceneRuntime/player/SideViewPlayerRuntime';
 import { TextureGenerator } from '@/game/sharedSceneRuntime/textures/TextureGenerator';
+import {
+  RIDGE_FLOOR_Y,
+  RIDGE_LANDMARKS,
+  RIDGE_PLAYER_RESUME_CLAMP,
+  RIDGE_PLAYER_START,
+  RIDGE_WORLD_WIDTH,
+  type RidgeLandmark
+} from '../worldLayout';
 
 interface RidgeSceneStartData {
   onClose?: () => void;
   isPaused?: boolean;
   resumePosition?: { x: number; y: number };
 }
-
-const RIDGE_WORLD_WIDTH = 1800;
-const RIDGE_FLOOR_Y = 520;
-const RIDGE_PLAYER_START = { x: 120, y: RIDGE_FLOOR_Y - 80 } as const;
-const RIDGE_PLAYER_RESUME_CLAMP = {
-  minX: 48,
-  maxX: RIDGE_WORLD_WIDTH - 48,
-  minY: 120,
-  maxY: RIDGE_FLOOR_Y - 20
-} as const;
 
 export class RidgeScene extends Phaser.Scene {
   player?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -72,8 +70,8 @@ export class RidgeScene extends Phaser.Scene {
 
     const ground = this.createGround();
 
-    this.addRelaySpire();
-    this.addTrailMarkers();
+    this.addBackdrop();
+    this.addLandmarks();
     this.addPlaceholderCopy();
     this.createPlayer(ground);
     this.setPaused(this.isPaused);
@@ -110,6 +108,17 @@ export class RidgeScene extends Phaser.Scene {
     const ground = this.add.zone(RIDGE_WORLD_WIDTH / 2, RIDGE_FLOOR_Y + 24, RIDGE_WORLD_WIDTH, 48);
     this.physics.add.existing(ground, true);
     return ground;
+  }
+
+  private addBackdrop(): void {
+    for (let x = 120; x < RIDGE_WORLD_WIDTH; x += 260) {
+      const y = 420 + Math.sin(x / 160) * 18;
+      this.add.line(x, y, -130, 24, 130, -24, 0x1f1f1d, 0.18).setLineWidth(4);
+      this.add.line(x + 36, y + 34, -80, 14, 80, -14, 0x1f1f1d, 0.12).setLineWidth(3);
+    }
+
+    this.add.rectangle(RIDGE_WORLD_WIDTH / 2, RIDGE_FLOOR_Y - 78, RIDGE_WORLD_WIDTH, 8, 0x1f1f1d, 0.12);
+    this.add.rectangle(RIDGE_WORLD_WIDTH / 2, RIDGE_FLOOR_Y - 6, RIDGE_WORLD_WIDTH, 5, 0x1f1f1d, 0.16);
   }
 
   private createPlayer(ground: Phaser.GameObjects.Zone): void {
@@ -158,29 +167,103 @@ export class RidgeScene extends Phaser.Scene {
     this.physics.add.collider(this.player, ground);
   }
 
-  private addRelaySpire(): void {
-    const x = 1510;
+  private addRelaySpire(x: number): void {
     this.add.triangle(x, 205, 0, 180, 46, 0, 92, 180, 0x1c1a18, 0.82);
     this.add.rectangle(x + 46, 330, 34, 250, 0x1c1a18, 0.82);
     this.add.line(x + 46, 205, -80, 35, 80, 35, 0x1c1a18, 0.5).setLineWidth(3);
+    this.add.circle(x + 46, 166, 12, 0xf0d35f, 0.9);
   }
 
-  private addTrailMarkers(): void {
-    const markers = [
-      { x: 170, label: 'Cicka perch' },
-      { x: 400, label: 'Trail Card' },
-      { x: 760, label: 'NPC placeholder' },
-      { x: 1280, label: 'Relay view' }
-    ];
-
-    markers.forEach((marker) => {
-      this.add.circle(marker.x, GAME_DESIGN_HEIGHT - 132, 18, 0x1f1f1d, 0.92);
-      this.add.text(marker.x - 58, GAME_DESIGN_HEIGHT - 108, marker.label, {
-        fontFamily: 'monospace',
-        fontSize: '16px',
-        color: '#1f1f1d'
-      });
+  private addLandmarks(): void {
+    RIDGE_LANDMARKS.forEach((landmark) => {
+      switch (landmark.kind) {
+        case 'cicka-perch':
+          this.addCickaPerch(landmark);
+          break;
+        case 'stampede-blanket':
+          this.addStampedeBlanket(landmark);
+          break;
+        case 'telegraph-bag':
+          this.addTelegraphBag(landmark);
+          break;
+        case 'ridge-guide':
+          this.addRidgeGuide(landmark);
+          break;
+        case 'relay-spire':
+          this.addRelaySpire(landmark.x);
+          break;
+        case 'domino-desk':
+          this.addDominoDesk(landmark);
+          break;
+      }
+      this.addLandmarkLabel(landmark);
     });
+  }
+
+  private addCickaPerch(landmark: RidgeLandmark): void {
+    const x = landmark.x;
+    const y = RIDGE_FLOOR_Y - 74;
+    this.add.rectangle(x, y + 28, 10, 86, 0x1f1f1d, 0.88);
+    this.add.rectangle(x, y - 12, 86, 10, 0x1f1f1d, 0.88);
+    this.add.ellipse(x + 16, y - 36, 54, 28, 0x1f1f1d, 0.95);
+    this.add.triangle(x - 8, y - 50, 0, 14, 12, 0, 22, 14, 0x1f1f1d, 0.95);
+    this.add.triangle(x + 18, y - 50, 0, 14, 12, 0, 22, 14, 0x1f1f1d, 0.95);
+    this.add.circle(x + 30, y - 38, 3, 0xf7f1df, 1);
+    this.add.line(x - 18, y - 32, -30, 0, -54, -10, 0x1f1f1d, 0.9).setLineWidth(5);
+  }
+
+  private addStampedeBlanket(landmark: RidgeLandmark): void {
+    const x = landmark.x;
+    const y = RIDGE_FLOOR_Y - 46;
+    this.add.rectangle(x, y, 104, 32, 0xb85f5a, 0.9);
+    this.add.rectangle(x - 26, y, 18, 32, 0xf7f1df, 0.7);
+    this.add.rectangle(x + 26, y, 18, 32, 0xf7f1df, 0.7);
+    this.add.circle(x - 22, y - 26, 11, 0x1f1f1d, 0.92);
+    this.add.circle(x + 28, y - 20, 9, 0x1f1f1d, 0.75);
+    this.add.line(x, y - 42, -34, 6, 34, -6, 0x1f1f1d, 0.32).setLineWidth(3);
+  }
+
+  private addTelegraphBag(landmark: RidgeLandmark): void {
+    const x = landmark.x;
+    const y = RIDGE_FLOOR_Y - 58;
+    this.add.rectangle(x, y, 70, 54, 0x596f8f, 0.84);
+    this.add.rectangle(x, y - 34, 48, 16, 0x1f1f1d, 0.88);
+    this.add.arc(x, y - 40, 36, Math.PI, Math.PI * 2, false, 0x1f1f1d, 0.2).setStrokeStyle(4, 0x1f1f1d, 0.7);
+    this.add.line(x + 62, y - 18, -30, -20, 30, 20, 0x1f1f1d, 0.7).setLineWidth(4);
+  }
+
+  private addRidgeGuide(landmark: RidgeLandmark): void {
+    const x = landmark.x;
+    const y = RIDGE_FLOOR_Y - 72;
+    this.add.circle(x, y - 28, 16, 0xf7f1df, 1).setStrokeStyle(3, 0x1f1f1d, 1);
+    this.add.rectangle(x, y + 8, 32, 58, 0xf7f1df, 1).setStrokeStyle(3, 0x1f1f1d, 1);
+    this.add.line(x - 8, y + 2, -30, -16, -52, -28, 0x1f1f1d, 1).setLineWidth(4);
+    this.add.rectangle(x + 42, y - 8, 42, 28, 0xf0d35f, 0.9).setStrokeStyle(3, 0x1f1f1d, 1);
+    this.add.text(x + 29, y - 17, '?', {
+      fontFamily: 'monospace',
+      fontSize: '22px',
+      color: '#1f1f1d'
+    });
+  }
+
+  private addDominoDesk(landmark: RidgeLandmark): void {
+    const x = landmark.x;
+    const y = RIDGE_FLOOR_Y - 62;
+    this.add.rectangle(x, y, 108, 50, 0xd7c78f, 0.96).setStrokeStyle(4, 0x1f1f1d, 1);
+    this.add.rectangle(x + 70, y - 40, 46, 94, 0xf7f1df, 1).setStrokeStyle(4, 0x1f1f1d, 1);
+    this.add.circle(x - 28, y - 16, 7, 0x1f1f1d, 1);
+    this.add.circle(x, y - 16, 7, 0x1f1f1d, 1);
+    this.add.circle(x + 28, y - 16, 7, 0x1f1f1d, 1);
+  }
+
+  private addLandmarkLabel(landmark: RidgeLandmark): void {
+    this.add.text(landmark.x, RIDGE_FLOOR_Y - 14, landmark.label, {
+      fontFamily: 'monospace',
+      fontSize: '13px',
+      color: '#1f1f1d',
+      backgroundColor: '#f7f1dfcc',
+      padding: { x: 3, y: 1 }
+    }).setOrigin(0.5);
   }
 
   private addPlaceholderCopy(): void {

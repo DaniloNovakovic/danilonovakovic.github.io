@@ -123,6 +123,9 @@ Start Ridge as a separate `ridge` scene first. Keep the current overworld as
 the default route until the Ridge shell feels good. During development, boot
 directly into Ridge with `?startScene=ridge` for fast iteration.
 
+Keep the first movement shell flat and readable. Use visual height changes,
+landmark silhouettes, and prop staging before adding real vertical traversal.
+
 Outputs:
 
 - `src/game/scenes/ridge/**`.

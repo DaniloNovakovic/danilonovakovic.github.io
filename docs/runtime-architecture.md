@@ -106,8 +106,9 @@ After changes that touch Phaser boot, bridge, scene lifecycle, scenes, or overla
 1. **Overworld** — canvas loads; move left/right, jump, interact near a building.
 2. **Hobbies** — enter hobbies (building or `H` where applicable); walk; interact with an interior target; exit (`H` / `Esc` / close flow) returns to overworld.
 3. **Basement** — enter the Developer Basement; interact with the computer before glasses to see the character thought, then collect glasses and confirm the Developer Console opens and closes back to the basement scene.
-4. **React overlays** — open a building overlay from the street; close it; no stuck keyboard focus in the canvas.
-5. **Pause / input** — with a React overlay open, scene pause propagates (no gameplay input leaking); closing overlay resumes the parent scene or overworld input.
+4. **Ridge** — in development, boot `?startScene=ridge`; confirm the separate Ridge shell renders, uses shared side-view movement, and does not replace the default overworld.
+5. **React overlays** — open a building overlay from the street; close it; no stuck keyboard focus in the canvas.
+6. **Pause / input** — with a React overlay open, scene pause propagates (no gameplay input leaking); closing overlay resumes the parent scene or overworld input.
 
 Record pass/fail in the PR or release notes when shipping runtime changes.
 

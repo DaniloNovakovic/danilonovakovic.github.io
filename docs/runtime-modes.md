@@ -12,6 +12,12 @@ code remains the source of truth.
 - `loadingSceneId`: the scene currently being lazy-loaded, or `null`.
 - `isPaused`: derived in the bridge from active overlay or scene loading state.
 
+## Dev Starts
+
+In development, `?startScene=<sceneId>` can boot directly into a Phaser scene
+for fast iteration. Current useful targets include `hobbies`, `basement`,
+`potassium`, and `ridge`.
+
 ## Transition Owners
 
 - `src/game/bridge/store.ts` owns observable cross-boundary state and actions:
@@ -33,5 +39,6 @@ Use this path when checking pattern refactors:
 4. Open and close a hobby overlay from inside the hobbies scene.
 5. Enter the Developer Basement, open the computer console, and close it back
    to the basement scene.
-6. Open inventory from the overworld and from a child scene.
-7. Verify mobile touch movement, jump, and interact one-shots.
+6. Boot `?startScene=ridge`; verify the Ridge shell renders and movement works.
+7. Open inventory from the overworld and from a child scene.
+8. Verify mobile touch movement, jump, and interact one-shots.
