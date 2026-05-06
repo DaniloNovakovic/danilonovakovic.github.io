@@ -63,6 +63,6 @@ When proposing future refactors, prefer extending these modules instead of re-in
 
 ---
 
-## 4. Pattern Reference
+## 4. Agent Guidance
 
-Architectural decisions in this project are anchored to Robert Nystrom's *[Game Programming Patterns](https://gameprogrammingpatterns.com/)*. Per-pattern notes, adoption status, and JS/TS + Phaser caveats live in [docs/patterns/](./patterns/README.md). Scoped AI rules that mirror those patterns live under [.agents/rules/](../.agents/rules/).
+For implementation work, prefer the smallest change that fits the nearby code. Use [`ARCHITECTURE_RUNTIME.md`](ARCHITECTURE_RUNTIME.md), `AGENTS.md`, and [`.agents/rules/`](../.agents/rules/) for current operational guidance.

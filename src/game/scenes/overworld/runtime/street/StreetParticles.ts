@@ -2,7 +2,7 @@
  * StreetParticles — atmospheric ink particle effect for the overworld.
  * Call `updateStreetParticles(scene)` each frame from OverworldScene.update.
  *
- * perf: candidate for Phaser Group pool, see docs/patterns/object-pool.md
+ * perf: candidate for Phaser Group pooling if profiling shows GC pressure.
  */
 import * as Phaser from 'phaser';
 import { OVERWORLD_PARTICLE_MAX_Y } from '@/game/runtime/config';
