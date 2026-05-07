@@ -11,6 +11,15 @@ import {
   drawStampedeArena
 } from './arenaPresentation';
 import {
+  createStampedeFeedbackRuntime,
+  type StampedeFeedbackRuntime
+} from './feedbackPresentation';
+import {
+  createStampedeHudRuntime,
+  createStampedeHudSnapshot,
+  type StampedeHudRuntime
+} from './hudPresentation';
+import {
   createStampedeInputRuntime,
   type StampedeInputRuntime
 } from './input';
@@ -18,6 +27,17 @@ import {
   clampStampedePosition,
   type StampedeVelocity
 } from './movement';
+import {
+  resolveStampedePressure,
+  type StampedePressureSnapshot
+} from './pressure';
+import {
+  advanceStampedeSession,
+  createStampedeSession,
+  readStampedeSessionSnapshot,
+  resolveStampedeContact,
+  type StampedeSession
+} from './session';
 import {
   createStampedeSwarmRuntime,
   type StampedeSwarmRuntime
@@ -32,6 +52,9 @@ export class StampedeSketchScene extends Phaser.Scene {
   private player?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   private inputRuntime?: StampedeInputRuntime;
   private swarmRuntime?: StampedeSwarmRuntime;
+  private hudRuntime?: StampedeHudRuntime;
+  private feedbackRuntime?: StampedeFeedbackRuntime;
+  private session: StampedeSession = createStampedeSession();
   private isPaused = false;
   private onClose: () => void = () => {};
 
@@ -65,6 +88,10 @@ export class StampedeSketchScene extends Phaser.Scene {
       backBounds: STAMPEDE_BACK_BOUNDS
     });
     this.swarmRuntime = createStampedeSwarmRuntime({ scene: this });
+    this.hudRuntime = createStampedeHudRuntime({ scene: this });
+    this.feedbackRuntime = createStampedeFeedbackRuntime({ scene: this });
+    this.session = createStampedeSession();
+    this.updateHud();
     this.setPaused(this.isPaused);
   }
 
@@ -82,7 +109,7 @@ export class StampedeSketchScene extends Phaser.Scene {
   }
 
   update(time: number, delta: number): void {
-    if (!this.player || !this.inputRuntime) return;
+    if (!this.player || !this.inputRuntime || !this.swarmRuntime) return;
     if (this.isPaused) {
       this.player.setVelocity(0, 0);
       return;
@@ -93,11 +120,36 @@ export class StampedeSketchScene extends Phaser.Scene {
       return;
     }
 
+    this.session = advanceStampedeSession(this.session, delta);
+    if (this.session.phase !== 'playing') {
+      this.player.setVelocity(0, 0);
+      this.swarmRuntime.update(this.player, delta, {
+        mode: 'recover',
+        pressure: this.session.phase === 'failed' ? 1 : 0.08
+      });
+      this.inputRuntime.updateStickVisuals();
+      this.updateHud();
+      this.announceTerminalPhase();
+      return;
+    }
+
     const velocity = this.inputRuntime.readVelocity();
     this.player.setVelocity(velocity.x, velocity.y);
     this.clampPlayer();
     this.updatePlayerInkTilt(time, velocity);
-    this.swarmRuntime?.update(this.player, delta);
+
+    const pressure = this.resolvePressureSnapshot();
+    if (pressure.canContact) {
+      this.session = resolveStampedeContact(this.session, this.session.elapsedMs);
+      this.feedbackRuntime?.showContact(this.player, pressure.nearestContactCandidate);
+    }
+
+    this.swarmRuntime.update(this.player, delta, {
+      mode: pressure.band,
+      pressure: pressure.pressure
+    });
+    this.updateHud(pressure);
+    this.announceTerminalPhase();
     this.inputRuntime.updateStickVisuals();
   }
 
@@ -115,6 +167,42 @@ export class StampedeSketchScene extends Phaser.Scene {
   private closeToRidge(): void {
     this.player?.setVelocity(0, 0);
     this.onClose();
+  }
+
+  private resolvePressureSnapshot(): StampedePressureSnapshot {
+    const player = this.player;
+    const swarm = this.swarmRuntime;
+    if (!player || !swarm) {
+      return resolveStampedePressure({
+        elapsedMs: this.session.elapsedMs,
+        durationMs: this.session.durationMs,
+        player: { x: 0, y: 0 },
+        candidates: [],
+        lastContactAtMs: this.session.lastContactAtMs
+      });
+    }
+
+    return resolveStampedePressure({
+      elapsedMs: this.session.elapsedMs,
+      durationMs: this.session.durationMs,
+      player: {
+        x: player.x,
+        y: player.y,
+        radius: 24
+      },
+      candidates: swarm.getContactCandidates(),
+      lastContactAtMs: this.session.lastContactAtMs
+    });
+  }
+
+  private updateHud(pressure?: StampedePressureSnapshot): void {
+    this.hudRuntime?.update(
+      createStampedeHudSnapshot(readStampedeSessionSnapshot(this.session), pressure)
+    );
+  }
+
+  private announceTerminalPhase(): void {
+    this.feedbackRuntime?.announceTerminal(this.session.phase, this.player);
   }
 
   private clampPlayer(): void {
