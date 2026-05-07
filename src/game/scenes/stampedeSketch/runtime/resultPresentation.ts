@@ -1,5 +1,11 @@
 import type * as Phaser from 'phaser';
 import { STAMPEDE_ARENA } from './movement';
+import {
+  createStampedeResultActionGate,
+  resolveStampedeResultKeyAction,
+  resolveStampedeResultPointerAction,
+  type StampedeResultActionGate
+} from './resultActions';
 
 export type StampedeResultPhase = 'cleared' | 'failed';
 export type StampedeResultActionId = 'backToRidge' | 'retry';
@@ -127,7 +133,8 @@ class PhaserStampedeResultPresentationRuntime
   private readonly scene: Phaser.Scene;
   private root?: Phaser.GameObjects.Container;
   private buttonBounds: StampedeResultButtonBounds[] = [];
-  private actionFired = false;
+  private readonly actionGate: StampedeResultActionGate =
+    createStampedeResultActionGate();
   private pointerDownHandler?: (pointer: Phaser.Input.Pointer) => void;
   private pointerUpHandler?: (pointer: Phaser.Input.Pointer) => void;
   private canvasPointerHandler?: (event: PointerEvent | MouseEvent) => void;
@@ -201,7 +208,7 @@ class PhaserStampedeResultPresentationRuntime
     this.root?.destroy(true);
     this.root = undefined;
     this.buttonBounds = [];
-    this.actionFired = false;
+    this.actionGate.reset();
   }
 
   destroy(): void {
@@ -319,12 +326,13 @@ class PhaserStampedeResultPresentationRuntime
   private registerPointerRouting(input: StampedeResultPresentationShowInput): void {
     this.unregisterPointerRouting();
     const pointerHandler = (pointer: Phaser.Input.Pointer) => {
-      const action = this.buttonBounds.find((bounds) =>
-        pointIsWithinBounds(pointer.worldX, pointer.worldY, bounds)
+      const actionId = resolveStampedeResultPointerAction(
+        { x: pointer.worldX, y: pointer.worldY },
+        this.buttonBounds
       );
-      if (!action) return;
+      if (!actionId) return;
 
-      this.fireAction(action.id, input);
+      this.fireAction(actionId, input);
     };
     this.pointerDownHandler = pointerHandler;
     this.pointerUpHandler = pointerHandler;
@@ -333,13 +341,13 @@ class PhaserStampedeResultPresentationRuntime
 
     const canvas = this.scene.game.canvas;
     this.canvasPointerHandler = (event: PointerEvent | MouseEvent) => {
-      const point = resolveCanvasPoint(event, canvas);
-      const action = this.buttonBounds.find((bounds) =>
-        pointIsWithinBounds(point.x, point.y, bounds)
+      const actionId = resolveStampedeResultPointerAction(
+        resolveCanvasPoint(event, canvas),
+        this.buttonBounds
       );
-      if (!action) return;
+      if (!actionId) return;
 
-      this.fireAction(action.id, input);
+      this.fireAction(actionId, input);
     };
     canvas.addEventListener('pointerdown', this.canvasPointerHandler);
     canvas.addEventListener('pointerup', this.canvasPointerHandler);
@@ -370,8 +378,7 @@ class PhaserStampedeResultPresentationRuntime
     actionId: StampedeResultActionId,
     callbacks: StampedeResultPresentationCallbacks
   ): void {
-    if (this.actionFired) return;
-    this.actionFired = true;
+    if (!this.actionGate.tryFire(actionId)) return;
 
     if (actionId === 'retry') {
       callbacks.onRetry();
@@ -384,24 +391,14 @@ class PhaserStampedeResultPresentationRuntime
   private registerKeyboardRouting(input: StampedeResultPresentationCallbacks): void {
     this.unregisterKeyboardRouting();
     this.keyboardHandler = (event: KeyboardEvent) => {
-      if (event.repeat) return;
+      const actionId = resolveStampedeResultKeyAction({
+        key: event.key,
+        repeat: event.repeat
+      });
+      if (!actionId) return;
 
-      switch (event.key.toLowerCase()) {
-        case 'r':
-        case 'enter':
-        case ' ':
-          event.preventDefault();
-          this.fireAction('retry', input);
-          return;
-        case 'e':
-        case 'h':
-        case 'escape':
-          event.preventDefault();
-          this.fireAction('backToRidge', input);
-          return;
-        default:
-          return;
-      }
+      event.preventDefault();
+      this.fireAction(actionId, input);
     };
     window.addEventListener('keydown', this.keyboardHandler);
   }
@@ -424,19 +421,6 @@ function formatResultTime(elapsedMs: number, durationMs: number): string {
 
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
-}
-
-function pointIsWithinBounds(
-  x: number,
-  y: number,
-  bounds: StampedeResultButtonBounds
-): boolean {
-  return (
-    x >= bounds.x &&
-    x <= bounds.x + bounds.width &&
-    y >= bounds.y &&
-    y <= bounds.y + bounds.height
-  );
 }
 
 function resolveCanvasPoint(
