@@ -27,15 +27,14 @@ import {
   clampStampedePosition,
   type StampedeVelocity
 } from './movement';
+import type { StampedePressureSnapshot } from './pressure';
 import {
-  resolveStampedePressure,
-  type StampedePressureSnapshot
-} from './pressure';
+  resolveStampedeRunFrame,
+  STAMPEDE_PLAYER_CONTACT_RADIUS
+} from './runFlow';
 import {
-  advanceStampedeSession,
   createStampedeSession,
   readStampedeSessionSnapshot,
-  resolveStampedeContact,
   type StampedeSession
 } from './session';
 import {
@@ -115,42 +114,44 @@ export class StampedeSketchScene extends Phaser.Scene {
       return;
     }
 
-    if (this.inputRuntime.closeRequested()) {
-      this.closeToRidge();
-      return;
-    }
-
-    this.session = advanceStampedeSession(this.session, delta);
-    if (this.session.phase !== 'playing') {
-      this.player.setVelocity(0, 0);
-      this.swarmRuntime.update(this.player, delta, {
-        mode: 'recover',
-        pressure: this.session.phase === 'failed' ? 1 : 0.08
-      });
-      this.inputRuntime.updateStickVisuals();
-      this.updateHud();
-      this.announceTerminalPhase();
-      return;
-    }
-
-    const velocity = this.inputRuntime.readVelocity();
-    this.player.setVelocity(velocity.x, velocity.y);
-    this.clampPlayer();
-    this.updatePlayerInkTilt(time, velocity);
-
-    const pressure = this.resolvePressureSnapshot();
-    if (pressure.canContact) {
-      this.session = resolveStampedeContact(this.session, this.session.elapsedMs);
-      this.feedbackRuntime?.showContact(this.player, pressure.nearestContactCandidate);
-    }
-
-    this.swarmRuntime.update(this.player, delta, {
-      mode: pressure.band,
-      pressure: pressure.pressure
+    const frame = resolveStampedeRunFrame({
+      session: this.session,
+      deltaMs: delta,
+      closeRequested: this.inputRuntime.closeRequested(),
+      velocity: this.inputRuntime.readVelocity(),
+      player: {
+        x: this.player.x,
+        y: this.player.y,
+        radius: STAMPEDE_PLAYER_CONTACT_RADIUS
+      },
+      contactCandidates: this.swarmRuntime.getContactCandidates()
     });
-    this.updateHud(pressure);
-    this.announceTerminalPhase();
-    this.inputRuntime.updateStickVisuals();
+
+    this.session = frame.session;
+    switch (frame.kind) {
+      case 'close':
+        this.closeToRidge();
+        return;
+      case 'terminal':
+        this.player.setVelocity(0, 0);
+        this.swarmRuntime.update(this.player, delta, frame.swarm);
+        this.inputRuntime.updateStickVisuals();
+        this.updateHud();
+        this.announceTerminalPhase();
+        return;
+      case 'playing':
+        this.player.setVelocity(frame.velocity.x, frame.velocity.y);
+        this.player.setPosition(frame.player.x, frame.player.y);
+        this.updatePlayerInkTilt(time, frame.velocity);
+        if (frame.contactCandidate) {
+          this.feedbackRuntime?.showContact(this.player, frame.contactCandidate);
+        }
+        this.swarmRuntime.update(this.player, delta, frame.swarm);
+        this.updateHud(frame.pressure);
+        this.announceTerminalPhase();
+        this.inputRuntime.updateStickVisuals();
+        return;
+    }
   }
 
   private createPlayer(): void {
@@ -169,32 +170,6 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.onClose();
   }
 
-  private resolvePressureSnapshot(): StampedePressureSnapshot {
-    const player = this.player;
-    const swarm = this.swarmRuntime;
-    if (!player || !swarm) {
-      return resolveStampedePressure({
-        elapsedMs: this.session.elapsedMs,
-        durationMs: this.session.durationMs,
-        player: { x: 0, y: 0 },
-        candidates: [],
-        lastContactAtMs: this.session.lastContactAtMs
-      });
-    }
-
-    return resolveStampedePressure({
-      elapsedMs: this.session.elapsedMs,
-      durationMs: this.session.durationMs,
-      player: {
-        x: player.x,
-        y: player.y,
-        radius: 24
-      },
-      candidates: swarm.getContactCandidates(),
-      lastContactAtMs: this.session.lastContactAtMs
-    });
-  }
-
   private updateHud(pressure?: StampedePressureSnapshot): void {
     this.hudRuntime?.update(
       createStampedeHudSnapshot(readStampedeSessionSnapshot(this.session), pressure)
@@ -203,12 +178,6 @@ export class StampedeSketchScene extends Phaser.Scene {
 
   private announceTerminalPhase(): void {
     this.feedbackRuntime?.announceTerminal(this.session.phase, this.player);
-  }
-
-  private clampPlayer(): void {
-    if (!this.player) return;
-    const clamped = clampStampedePosition({ x: this.player.x, y: this.player.y });
-    this.player.setPosition(clamped.x, clamped.y);
   }
 
   private updatePlayerInkTilt(time: number, velocity: StampedeVelocity): void {

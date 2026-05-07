@@ -1,5 +1,9 @@
 import * as Phaser from 'phaser';
 import { clampStampedePosition } from './movement';
+import {
+  getStampedeSwarmMotion,
+  resolveStampedeSwarmTarget
+} from './swarmMotion';
 
 interface StampedeSwarmDot {
   shape: Phaser.GameObjects.Arc;
@@ -74,11 +78,19 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
   update(target: { x: number; y: number }, delta: number, options: StampedeSwarmUpdateOptions = {}): void {
     const deltaSeconds = delta / 1000;
     const pressure = Phaser.Math.Clamp(options.pressure ?? 0, 0, 1);
-    const motion = getSwarmMotion(options.mode ?? 'calm', pressure);
+    const mode = options.mode ?? 'calm';
+    const motion = getStampedeSwarmMotion(mode, pressure);
 
     this.dots.forEach((dot) => {
-      const dx = target.x - dot.shape.x;
-      const dy = target.y - dot.shape.y;
+      const chaseTarget = resolveStampedeSwarmTarget({
+        target,
+        phase: dot.phase,
+        mode,
+        pressure,
+        nowMs: this.scene.time.now
+      });
+      const dx = chaseTarget.x - dot.shape.x;
+      const dy = chaseTarget.y - dot.shape.y;
       const distance = Math.max(1, Math.hypot(dx, dy));
       const wobbleX = Math.sin(this.scene.time.now / 380 + dot.phase) * 8 * motion.wobbleMultiplier;
       const wobbleY = Math.cos(this.scene.time.now / 420 + dot.phase) * 6 * motion.wobbleMultiplier;
@@ -98,42 +110,5 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
       y: dot.shape.y,
       radius: dot.shape.radius * dot.shape.scaleX
     }));
-  }
-}
-
-function getSwarmMotion(
-  mode: StampedeSwarmMode,
-  pressure: number
-): { speedMultiplier: number; wobbleMultiplier: number; alphaMultiplier: number; scaleMultiplier: number } {
-  switch (mode) {
-    case 'build':
-      return {
-        speedMultiplier: 1.15 + pressure * 0.35,
-        wobbleMultiplier: 1.1 + pressure * 0.35,
-        alphaMultiplier: 1.05 + pressure * 0.18,
-        scaleMultiplier: 1 + pressure * 0.08
-      };
-    case 'surge':
-      return {
-        speedMultiplier: 1.55 + pressure * 0.45,
-        wobbleMultiplier: 1.45 + pressure * 0.4,
-        alphaMultiplier: 1.2 + pressure * 0.24,
-        scaleMultiplier: 1.08 + pressure * 0.16
-      };
-    case 'recover':
-      return {
-        speedMultiplier: 0.82 + pressure * 0.12,
-        wobbleMultiplier: 0.86,
-        alphaMultiplier: 0.92,
-        scaleMultiplier: 0.96
-      };
-    case 'calm':
-    default:
-      return {
-        speedMultiplier: 1,
-        wobbleMultiplier: 1,
-        alphaMultiplier: 1,
-        scaleMultiplier: 1
-      };
   }
 }
