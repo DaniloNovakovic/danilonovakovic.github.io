@@ -1,4 +1,5 @@
 import * as Phaser from 'phaser';
+import { STAMPEDE_ARENA } from './movement';
 import type { StampedePressureSnapshot } from './pressure';
 import type { StampedeSessionSnapshot } from './session';
 
@@ -50,23 +51,24 @@ class PhaserStampedeHudRuntime implements StampedeHudRuntime {
   private readonly noiseFill: Phaser.GameObjects.Rectangle;
 
   constructor(scene: Phaser.Scene) {
-    const x = 624;
-    const y = 70;
-    const panel = scene.add.rectangle(0, 0, 190, 94, 0xfbfbf9, 0.88)
+    const width = 340;
+    const x = STAMPEDE_ARENA.safeLeft + 16;
+    const y = 140;
+    const panel = scene.add.rectangle(0, 0, width, 38, 0xfbfbf9, 0.88)
       .setOrigin(0, 0)
       .setStrokeStyle(3, 0x1a1a1a, 0.86);
 
     this.timerText = createHudText(scene, 12, 10, '0:00', 17, '#1a1a1a');
-    this.phaseText = createHudText(scene, 12, 32, 'Calm', 13, '#4b4337');
-    this.noiseText = createHudText(scene, 12, 54, 'Page noise', 12, '#4b4337');
+    this.phaseText = createHudText(scene, 74, 12, 'Kite ideas', 12, '#4b4337');
+    this.noiseText = createHudText(scene, 198, 12, 'Noise', 12, '#4b4337');
 
-    const noiseTrack = scene.add.rectangle(92, 61, 82, 8, 0xf4f1ea, 1)
+    const noiseTrack = scene.add.rectangle(248, 19, 74, 8, 0xf4f1ea, 1)
       .setOrigin(0, 0.5)
       .setStrokeStyle(2, 0x1a1a1a, 0.62);
-    this.noiseFill = scene.add.rectangle(94, 61, 0, 4, 0x1a1a1a, 0.78)
+    this.noiseFill = scene.add.rectangle(250, 19, 0, 4, 0x1a1a1a, 0.78)
       .setOrigin(0, 0.5);
 
-    this.feedbackText = createHudText(scene, 12, 73, '', 13, '#1a1a1a');
+    this.feedbackText = createHudText(scene, 74, 25, '', 10, '#1a1a1a');
     this.root = scene.add.container(x, y, [
       panel,
       this.timerText,
@@ -84,7 +86,7 @@ class PhaserStampedeHudRuntime implements StampedeHudRuntime {
 
     this.timerText.setText(formatTimer(seconds));
     this.phaseText.setText(snapshot.phaseLabel ?? 'Calm');
-    this.noiseFill.width = Math.round(78 * noise);
+    this.noiseFill.width = Math.round(70 * noise);
     this.feedbackText.setText(formatFeedback(snapshot.feedback));
   }
 
@@ -149,14 +151,14 @@ function resolvePhaseLabel(
 
   switch (pressure?.band) {
     case 'build':
-      return 'Page noise rising';
+      return 'Noise rising';
     case 'surge':
-      return 'Idea surge';
+      return 'Surge';
     case 'recover':
-      return 'Catch breath';
+      return 'Breather';
     case 'calm':
     default:
-      return 'Kite the ideas';
+      return 'Kite ideas';
   }
 }
 
