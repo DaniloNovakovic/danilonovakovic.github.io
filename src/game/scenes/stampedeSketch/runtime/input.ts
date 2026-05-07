@@ -13,11 +13,11 @@ interface StampedePointerControl {
 
 interface StampedeInputRuntimeOptions {
   scene: Phaser.Scene;
-  backBounds: Phaser.Geom.Rectangle;
 }
 
 export interface StampedeInputRuntime {
   readVelocity(): StampedeVelocity;
+  startRequested(): boolean;
   closeRequested(): boolean;
   retryRequested(): boolean;
   setPointerControlEnabled(enabled: boolean): void;
@@ -33,7 +33,6 @@ export function createStampedeInputRuntime(
 
 class PhaserStampedeInputRuntime implements StampedeInputRuntime {
   private readonly scene: Phaser.Scene;
-  private readonly backBounds: Phaser.Geom.Rectangle;
   private readonly cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
   private readonly keyW?: Phaser.Input.Keyboard.Key;
   private readonly keyA?: Phaser.Input.Keyboard.Key;
@@ -49,6 +48,7 @@ class PhaserStampedeInputRuntime implements StampedeInputRuntime {
   private readonly stickKnob: Phaser.GameObjects.Arc;
   private readonly stickLine: Phaser.GameObjects.Line;
   private pointerControlsEnabled = true;
+  private startTapQueued = false;
 
   private pointerControl: StampedePointerControl = {
     active: false,
@@ -57,9 +57,8 @@ class PhaserStampedeInputRuntime implements StampedeInputRuntime {
     anchorY: 0
   };
 
-  constructor({ scene, backBounds }: StampedeInputRuntimeOptions) {
+  constructor({ scene }: StampedeInputRuntimeOptions) {
     this.scene = scene;
-    this.backBounds = backBounds;
 
     const keyboard = scene.input.keyboard;
     this.cursors = keyboard?.createCursorKeys();
@@ -94,6 +93,18 @@ class PhaserStampedeInputRuntime implements StampedeInputRuntime {
       keyboard: this.readKeyboardAxis(),
       pointer: this.readPointerInput()
     });
+  }
+
+  startRequested(): boolean {
+    const justDown = Phaser.Input.Keyboard.JustDown;
+    const keyboardStart = Boolean(
+      (this.keyEnter && justDown(this.keyEnter)) ||
+        (this.keySpace && justDown(this.keySpace))
+    );
+    const pointerStart = this.startTapQueued;
+    this.startTapQueued = false;
+
+    return keyboardStart || pointerStart;
   }
 
   closeRequested(): boolean {
@@ -161,7 +172,7 @@ class PhaserStampedeInputRuntime implements StampedeInputRuntime {
   private registerPointerControls(): void {
     this.scene.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       if (!this.pointerControlsEnabled) return;
-      if (this.isPointerInBackTarget(pointer)) return;
+      this.startTapQueued = true;
       this.pointerControl = {
         active: true,
         pointerId: pointer.id,
@@ -208,9 +219,5 @@ class PhaserStampedeInputRuntime implements StampedeInputRuntime {
       deltaX: pointer.worldX - this.pointerControl.anchorX,
       deltaY: pointer.worldY - this.pointerControl.anchorY
     };
-  }
-
-  private isPointerInBackTarget(pointer: Phaser.Input.Pointer): boolean {
-    return Phaser.Geom.Rectangle.Contains(this.backBounds, pointer.worldX, pointer.worldY);
   }
 }

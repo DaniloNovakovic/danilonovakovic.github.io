@@ -1,5 +1,8 @@
 import * as Phaser from 'phaser';
-import { clampStampedePosition } from './movement';
+import {
+  STAMPEDE_ARENA,
+  clampStampedePosition
+} from './movement';
 import {
   getStampedeSwarmMotion,
   resolveStampedeSwarmTarget
@@ -42,22 +45,29 @@ export interface StampedeSwarmRuntime {
   reset(): void;
 }
 
+const STAMPEDE_SWARM_BOUNDS = {
+  safeLeft: STAMPEDE_ARENA.left + 12,
+  safeRight: STAMPEDE_ARENA.right - 12,
+  safeTop: STAMPEDE_ARENA.top + 24,
+  safeBottom: STAMPEDE_ARENA.bottom - 24
+} as const;
+
 export function createStampedeSwarmRuntime(
   options: StampedeSwarmRuntimeOptions
 ): StampedeSwarmRuntime {
   const spawnPoints = [
-    { x: 330, y: 202 },
-    { x: 392, y: 158 },
-    { x: 608, y: 164 },
-    { x: 668, y: 214 },
-    { x: 684, y: 438 },
-    { x: 612, y: 506 },
-    { x: 388, y: 510 },
-    { x: 318, y: 426 },
-    { x: 330, y: 292 },
-    { x: 672, y: 302 },
-    { x: 478, y: 144 },
-    { x: 524, y: 514 }
+    { x: 292, y: 236 },
+    { x: 344, y: 84 },
+    { x: 468, y: 72 },
+    { x: 612, y: 84 },
+    { x: 708, y: 220 },
+    { x: 708, y: 388 },
+    { x: 624, y: 520 },
+    { x: 504, y: 568 },
+    { x: 372, y: 520 },
+    { x: 292, y: 388 },
+    { x: 292, y: 512 },
+    { x: 708, y: 512 }
   ];
   const dots = spawnPoints.map((point, index) => ({
     id: `mark-${index + 1}`,
@@ -120,7 +130,10 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
       dot.shape.x += (dx / distance) * dot.speed * motion.speedMultiplier * deltaSeconds + wobbleX * deltaSeconds;
       dot.shape.y += (dy / distance) * dot.speed * motion.speedMultiplier * deltaSeconds + wobbleY * deltaSeconds;
 
-      const clamped = clampStampedePosition({ x: dot.shape.x, y: dot.shape.y });
+      const clamped = clampStampedePosition(
+        { x: dot.shape.x, y: dot.shape.y },
+        STAMPEDE_SWARM_BOUNDS
+      );
       dot.shape.setPosition(clamped.x, clamped.y);
       const isNear = distance < 38;
       dot.shape.setScale((isNear ? 1.35 : 1) * motion.scaleMultiplier);

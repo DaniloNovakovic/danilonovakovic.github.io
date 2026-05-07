@@ -1,4 +1,4 @@
-import { BookOpen, Backpack, Bug } from 'lucide-react';
+import { ArrowLeft, BookOpen, Backpack, Bug } from 'lucide-react';
 import Game from './Game';
 import { bridgeActions, useBridgeState, type OpenOverlayOptions } from '@/game/bridge/store';
 import {
@@ -7,7 +7,14 @@ import {
 } from '@/game/sharedSceneRuntime/phaserScenePresentation';
 import { DEV_SWITCHER_OVERLAY_ID, INVENTORY_OVERLAY_ID, type OverlayId } from '@/game/overlays/overlayIds';
 import { OverlayHost } from '@/game/overlays/OverlayHost';
-import { isSceneId, OVERWORLD_SCENE_ID, POTASSIUM_SCENE_ID, type SceneId } from '@/game/scenes/sceneIds';
+import {
+  isSceneId,
+  OVERWORLD_SCENE_ID,
+  POTASSIUM_SCENE_ID,
+  RIDGE_SCENE_ID,
+  STAMPEDE_SKETCH_SCENE_ID,
+  type SceneId
+} from '@/game/scenes/sceneIds';
 import { Button, Card, Panel } from '@/shared/ui';
 import { getInteractiveGameShellLayout } from './gameShellLayout';
 import { useResizeObserver } from '@/shared/hooks/useResizeObserver';
@@ -37,10 +44,12 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
   const shouldShowNavigationHint =
     bridge.activeSceneId === OVERWORLD_SCENE_ID && bridge.activeOverlayId === null;
   const shouldShowFooterHint = shouldReserveSceneHint || shouldShowNavigationHint;
+  const isStampedePresentation = presentationSceneId === STAMPEDE_SKETCH_SCENE_ID;
 
   const enterScene = (sceneId: SceneId) => bridgeActions.enterScene(sceneId);
   const openOverlay = (overlayId: OverlayId, options?: OpenOverlayOptions) => bridgeActions.openOverlay(overlayId, options);
   const returnToOverworld = () => bridgeActions.returnToOverworld();
+  const returnToRidge = () => bridgeActions.enterScene(RIDGE_SCENE_ID);
 
   return (
     <div
@@ -60,31 +69,46 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
           aria-label={messages.gameShell.controlsLabel}
         >
           <div className="flex min-w-0 items-center gap-2">
-            <Button
-              variant="floating"
-              size="sm"
-              onClick={() => bridgeActions.openOverlay(INVENTORY_OVERLAY_ID)}
-              className="sm:px-3 sm:py-1.5 sm:text-xs"
-              aria-haspopup="dialog"
-              aria-expanded={bridge.activeOverlayId === INVENTORY_OVERLAY_ID}
-              aria-label={messages.gameShell.openInventory}
-            >
-              <Backpack className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
-              <span>{messages.gameShell.inventory}</span>
-            </Button>
-            {import.meta.env.DEV && (
+            {isStampedePresentation ? (
               <Button
                 variant="floating"
                 size="sm"
-                onClick={() => bridgeActions.openOverlay(DEV_SWITCHER_OVERLAY_ID)}
+                onClick={returnToRidge}
                 className="sm:px-3 sm:py-1.5 sm:text-xs"
-                aria-haspopup="dialog"
-                aria-expanded={bridge.activeOverlayId === DEV_SWITCHER_OVERLAY_ID}
-                aria-label={messages.gameShell.openDevSwitcher}
+                aria-label={messages.gameShell.backToRidge}
               >
-                <Bug className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
-                <span>{messages.gameShell.dev}</span>
+                <ArrowLeft className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+                <span>{messages.gameShell.back}</span>
               </Button>
+            ) : (
+              <>
+                <Button
+                  variant="floating"
+                  size="sm"
+                  onClick={() => bridgeActions.openOverlay(INVENTORY_OVERLAY_ID)}
+                  className="sm:px-3 sm:py-1.5 sm:text-xs"
+                  aria-haspopup="dialog"
+                  aria-expanded={bridge.activeOverlayId === INVENTORY_OVERLAY_ID}
+                  aria-label={messages.gameShell.openInventory}
+                >
+                  <Backpack className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+                  <span>{messages.gameShell.inventory}</span>
+                </Button>
+                {import.meta.env.DEV && (
+                  <Button
+                    variant="floating"
+                    size="sm"
+                    onClick={() => bridgeActions.openOverlay(DEV_SWITCHER_OVERLAY_ID)}
+                    className="sm:px-3 sm:py-1.5 sm:text-xs"
+                    aria-haspopup="dialog"
+                    aria-expanded={bridge.activeOverlayId === DEV_SWITCHER_OVERLAY_ID}
+                    aria-label={messages.gameShell.openDevSwitcher}
+                  >
+                    <Bug className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+                    <span>{messages.gameShell.dev}</span>
+                  </Button>
+                )}
+              </>
             )}
           </div>
           <Button

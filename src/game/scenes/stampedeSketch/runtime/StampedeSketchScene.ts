@@ -15,10 +15,7 @@ import {
   createStampedeAutoAttackPresentationRuntime,
   type StampedeAutoAttackPresentationRuntime
 } from './autoAttackPresentation';
-import {
-  STAMPEDE_BACK_BOUNDS,
-  drawStampedeArena
-} from './arenaPresentation';
+import { drawStampedeArena } from './arenaPresentation';
 import {
   createStampedeFeedbackRuntime,
   type StampedeFeedbackRuntime
@@ -53,6 +50,10 @@ import {
   type StampedeSessionPhase
 } from './session';
 import {
+  createStampedeStartPromptRuntime,
+  type StampedeStartPromptRuntime
+} from './startPromptPresentation';
+import {
   createStampedeSwarmRuntime,
   type StampedeSwarmRuntime
 } from './swarmPresentation';
@@ -70,9 +71,11 @@ export class StampedeSketchScene extends Phaser.Scene {
   private feedbackRuntime?: StampedeFeedbackRuntime;
   private resultRuntime?: StampedeResultPresentationRuntime;
   private autoAttackRuntime?: StampedeAutoAttackPresentationRuntime;
+  private startPromptRuntime?: StampedeStartPromptRuntime;
   private session: StampedeSession = createStampedeSession();
   private autoAttackState: StampedeAutoAttackState = createStampedeAutoAttackState();
   private shownResultPhase?: Exclude<StampedeSessionPhase, 'playing'>;
+  private hasRunStarted = false;
   private isPaused = false;
   private onClose: () => void = () => {};
 
@@ -95,25 +98,25 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.onClose = data.onClose ?? this.onClose;
     this.isPaused = data.isPaused ?? this.isPaused;
 
-    this.cameras.main.setBackgroundColor('#fbfbf9');
+    this.cameras.main.setBackgroundColor('#ffffff');
     this.physics.world.setBounds(0, 0, GAME_DESIGN_WIDTH, GAME_DESIGN_HEIGHT);
     this.physics.world.gravity.set(0, 0);
 
-    drawStampedeArena(this, () => this.closeToRidge());
+    drawStampedeArena(this);
     this.createPlayer();
-    this.inputRuntime = createStampedeInputRuntime({
-      scene: this,
-      backBounds: STAMPEDE_BACK_BOUNDS
-    });
+    this.inputRuntime = createStampedeInputRuntime({ scene: this });
     this.swarmRuntime = createStampedeSwarmRuntime({ scene: this });
     this.hudRuntime = createStampedeHudRuntime({ scene: this });
     this.feedbackRuntime = createStampedeFeedbackRuntime({ scene: this });
     this.resultRuntime = createStampedeResultPresentationRuntime({ scene: this });
     this.autoAttackRuntime = createStampedeAutoAttackPresentationRuntime({ scene: this });
+    this.startPromptRuntime = createStampedeStartPromptRuntime({ scene: this });
     this.session = createStampedeSession();
     this.autoAttackState = createStampedeAutoAttackState();
     this.shownResultPhase = undefined;
+    this.hasRunStarted = false;
     this.updateHud();
+    this.startPromptRuntime?.show();
     this.setPaused(this.isPaused);
   }
 
@@ -138,6 +141,10 @@ export class StampedeSketchScene extends Phaser.Scene {
     }
 
     const closeRequested = this.inputRuntime.closeRequested();
+    if (!this.hasRunStarted) {
+      this.updateReadyFrame(closeRequested);
+      return;
+    }
     if (this.session.phase !== 'playing' && this.inputRuntime.retryRequested()) {
       this.restartRun();
       return;
@@ -197,6 +204,7 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.player?.setVelocity(0, 0);
     this.resultRuntime?.hide();
     this.autoAttackRuntime?.reset();
+    this.startPromptRuntime?.hide();
     this.onClose();
   }
 
@@ -204,8 +212,10 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.session = createStampedeSession();
     this.autoAttackState = createStampedeAutoAttackState();
     this.shownResultPhase = undefined;
+    this.hasRunStarted = true;
     this.resultRuntime?.hide();
     this.autoAttackRuntime?.reset();
+    this.startPromptRuntime?.hide();
     this.feedbackRuntime?.reset();
     this.swarmRuntime?.reset();
     this.inputRuntime?.setPointerControlEnabled(true);
@@ -221,6 +231,24 @@ export class StampedeSketchScene extends Phaser.Scene {
 
     this.updateHud();
     this.inputRuntime?.updateStickVisuals();
+  }
+
+  private updateReadyFrame(closeRequested: boolean): void {
+    if (!this.player || !this.inputRuntime) return;
+    if (closeRequested) {
+      this.closeToRidge();
+      return;
+    }
+    if (this.inputRuntime.startRequested()) {
+      this.hasRunStarted = true;
+      this.startPromptRuntime?.hide();
+      this.inputRuntime.clearPointerControl();
+      this.inputRuntime.updateStickVisuals();
+      return;
+    }
+
+    this.player.setVelocity(0, 0);
+    this.inputRuntime.updateStickVisuals();
   }
 
   private showTerminalFrame(

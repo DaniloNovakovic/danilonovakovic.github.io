@@ -4,6 +4,7 @@ import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import InteractiveApp from './InteractiveApp';
 import { bridgeActions, bridgeStore } from '@/game/bridge/store';
+import { RIDGE_SCENE_ID, STAMPEDE_SKETCH_SCENE_ID } from '@/game/scenes/sceneIds';
 import { getMessages } from '@/shared/i18n';
 
 vi.mock('./Game', () => ({
@@ -120,6 +121,19 @@ describe('InteractiveApp', () => {
 
     await waitFor(() => expect(screen.queryByRole('dialog', { name: /dev scene switcher/i })).toBeNull());
     expect(bridgeStore.getState().activeOverlayId).toBeNull();
+  });
+
+  it('replaces inventory and dev controls with Back during Stampede Sketch', async () => {
+    bridgeActions.enterScene(STAMPEDE_SKETCH_SCENE_ID);
+    render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
+
+    expect(screen.getByRole('button', { name: /back to ridge/i })).toBeDefined();
+    expect(screen.queryByRole('button', { name: /open inventory/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /open dev scene switcher/i })).toBeNull();
+
+    await userEvent.click(screen.getByRole('button', { name: /back to ridge/i }));
+
+    expect(bridgeStore.getState().activeSceneId).toBe(RIDGE_SCENE_ID);
   });
 
   it('switches to static mode directly from the toolbar', async () => {

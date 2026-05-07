@@ -7,6 +7,8 @@ export const gameShellMessages = {
   switchToStatic: "Switch to static portfolio",
   staticMode: "Static mode",
   static: "Static",
+  backToRidge: "Back to Ridge",
+  back: "Back",
   devSwitcher: "Dev scene switcher",
   city: "City",
   loadingScene: "Loading scene",
