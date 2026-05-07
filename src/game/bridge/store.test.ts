@@ -10,7 +10,12 @@ import {
   isRidgeShortcutUnlocked,
   isSecretDiscovered
 } from './store';
-import { OVERWORLD_SCENE_ID, RIDGE_SCENE_ID, STAMPEDE_SKETCH_SCENE_ID } from '@/game/scenes/sceneIds';
+import {
+  OVERWORLD_SCENE_ID,
+  POTASSIUM_SCENE_ID,
+  RIDGE_SCENE_ID,
+  STAMPEDE_SKETCH_SCENE_ID
+} from '@/game/scenes/sceneIds';
 
 function resetBridge() {
   bridgeActions.returnToOverworld();
@@ -380,16 +385,18 @@ describe('bridgeStore', () => {
     });
 
     it('dispatches and consumes one-shot scene UI actions', () => {
-      bridgeActions.dispatchSceneUiAction(STAMPEDE_SKETCH_SCENE_ID, 'start');
+      const params = { option: { kind: 'fire', action: 'unlock' } };
+      bridgeActions.dispatchSceneUiAction(POTASSIUM_SCENE_ID, 'potassiumDraftChoice', params);
 
-      const action = bridgeActions.consumeSceneUiAction(STAMPEDE_SKETCH_SCENE_ID);
+      const action = bridgeActions.consumeSceneUiAction(POTASSIUM_SCENE_ID);
       expect(action).toMatchObject({
-        ownerSceneId: STAMPEDE_SKETCH_SCENE_ID,
-        action: 'start'
+        ownerSceneId: POTASSIUM_SCENE_ID,
+        action: 'potassiumDraftChoice',
+        params
       });
       expect(action?.sequence).toBeGreaterThan(0);
       expect(bridgeStore.getState().sceneUi.lastAction).toBeNull();
-      expect(bridgeActions.consumeSceneUiAction(STAMPEDE_SKETCH_SCENE_ID)).toBeNull();
+      expect(bridgeActions.consumeSceneUiAction(POTASSIUM_SCENE_ID)).toBeNull();
     });
 
     it('guards clears and action consumption by owner scene', () => {

@@ -146,6 +146,7 @@ function sceneUiActionsEqual(
   return (
     a.ownerSceneId === b.ownerSceneId &&
     a.action === b.action &&
+    a.params === b.params &&
     a.sequence === b.sequence
   );
 }
@@ -533,7 +534,7 @@ export const bridgeActions = {
       };
     });
   },
-  dispatchSceneUiAction(ownerSceneId: SceneId, action: SceneUiActionId): void {
+  dispatchSceneUiAction(ownerSceneId: SceneId, action: SceneUiActionId, params?: unknown): void {
     const sequence = nextSceneUiActionSequence++;
     setState((current) => ({
       ...current,
@@ -542,6 +543,7 @@ export const bridgeActions = {
         lastAction: {
           ownerSceneId,
           action,
+          params,
           sequence
         }
       }

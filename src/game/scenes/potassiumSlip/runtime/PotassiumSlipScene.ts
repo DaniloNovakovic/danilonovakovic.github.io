@@ -4,9 +4,12 @@ import {
   GAME_DESIGN_WIDTH
 } from '@/game/sharedSceneRuntime/config';
 import { bridgeActions } from '@/game/bridge/store';
+import { POTASSIUM_SCENE_ID } from '@/game/scenes/sceneIds';
 import { TextureGenerator } from '@/game/sharedSceneRuntime/textures/TextureGenerator';
+import { getMessages } from '@/shared/i18n';
 import {
   getPotassiumFireCellKey,
+  type PotassiumDraftOption,
   type PotassiumGenericUpgradeKind as GenericUpgradeKind,
   type PotassiumScheduledWaveRow,
   type PotassiumSkillRank as SkillRank,
@@ -50,8 +53,10 @@ import {
   spawnPotassiumWave,
   startPotassiumCampaign,
   startPotassiumEndless,
+  type PotassiumDraftChoiceView,
   type PotassiumSessionCommand,
-  type PotassiumSessionState
+  type PotassiumSessionState,
+  type PotassiumTerminalAction
 } from './session';
 import {
   POTASSIUM_NON_BOSS_ENEMY_SPEED,
@@ -146,6 +151,11 @@ export class PotassiumSlipScene extends Phaser.Scene {
   private activeBoss?: EnemySprite;
   private bossState?: PotassiumBossState;
   private rowSpawnTimers: Phaser.Time.TimerEvent[] = [];
+  private pendingTerminalView?: {
+    title: string;
+    score: number;
+    titleFontSize: number;
+  };
 
   private onClose?: () => void;
   private isPaused: boolean = false;
@@ -226,10 +236,12 @@ export class PotassiumSlipScene extends Phaser.Scene {
         hideMainOverlay: () => this.potassiumRenderer.hideMainOverlay(),
         clearTerminalOverlay: () => this.clearTerminalOverlay(),
         clearUpgradeChoiceOverlay: () => this.clearUpgradeChoiceOverlay(),
-        showUpgradeChoices: (choices) => this.potassiumRenderer.showUpgradeChoices([...choices]),
+        showUpgradeChoices: (choices) => this.showUpgradeChoicesPanel(choices),
         refreshAllProjectileVisuals: () => this.refreshAllProjectileVisuals(),
         updateHud: (hud) => this.potassiumRenderer.updateHud(hud),
-        showOutcomeOverlay: (input) => this.potassiumRenderer.showOutcomeOverlay(input),
+        showOutcomeOverlay: (input) => {
+          this.pendingTerminalView = input;
+        },
         showTerminal: (outcome) => this.createTerminalOverlay(outcome),
         showDamageCue: (enemy, source) => this.potassiumRenderer.showDamageCue(enemy as EnemySprite, source),
         showExplosionVisual: (x, y, radius) => this.potassiumRenderer.showExplosionVisual(x, y, radius),
@@ -281,10 +293,15 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.createOverlays();
     this.registerCollisions();
     this.registerInput();
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      bridgeActions.clearSceneUi(POTASSIUM_SCENE_ID);
+    });
   }
 
   update(time: number, delta: number): void {
     if (this.isPaused) return;
+
+    this.consumeSceneUiAction();
 
     if (this.session.gameState !== 'PLAYING') {
       this.banana.setVelocity(0, 0);
@@ -309,6 +326,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.projectileControl.reset();
     this.commandAdapter.resetCombatIds();
     this.bossState = undefined;
+    this.pendingTerminalView = undefined;
     this.fireCells.clear();
   }
 
@@ -1054,6 +1072,12 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.applySessionResult(showPotassiumDraftChoices(this.session));
   }
 
+  private showUpgradeChoicesPanel(choices: readonly PotassiumDraftChoiceView[]): void {
+    bridgeActions.setSceneUiPanel(POTASSIUM_SCENE_ID, 'potassiumUpgradeChoices', {
+      choices: [...choices]
+    });
+  }
+
   private handleUpgradeChoicePointer(pointer: Phaser.Input.Pointer): void {
     const choice = this.potassiumRenderer.getUpgradeChoiceAt(pointer.x, pointer.y);
     if (!choice) return;
@@ -1062,6 +1086,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
 
   private clearUpgradeChoiceOverlay(): void {
     this.potassiumRenderer.clearUpgradeChoices();
+    bridgeActions.clearSceneUiPanel(POTASSIUM_SCENE_ID);
   }
 
   private updateEnemyVisuals(): void {
@@ -1075,7 +1100,47 @@ export class PotassiumSlipScene extends Phaser.Scene {
   }
 
   private createTerminalOverlay(outcome: PotassiumRunOutcome): void {
-    this.potassiumRenderer.showTerminal(outcome, getPotassiumLeaderboardOverlayText());
+    const messages = getMessages();
+    const pending = this.pendingTerminalView;
+    const title = pending?.title ?? (
+      outcome === 'won'
+        ? messages.potassiumSlip.outcomes.won
+        : messages.potassiumSlip.outcomes.gameOver
+    );
+    const score = pending?.score ?? this.session.score;
+    const actions: Array<{ action: PotassiumTerminalAction; label: string; priority: 'primary' | 'secondary' }> =
+      outcome === 'won'
+        ? [
+            {
+              action: 'endless',
+              label: messages.potassiumSlip.terminal.endlessMode,
+              priority: 'primary'
+            },
+            {
+              action: 'return',
+              label: messages.potassiumSlip.terminal.returnToCity,
+              priority: 'secondary'
+            }
+          ]
+        : [
+            {
+              action: 'retry',
+              label: messages.potassiumSlip.terminal.retry,
+              priority: 'primary'
+            },
+            {
+              action: 'return',
+              label: messages.potassiumSlip.terminal.returnToCity,
+              priority: 'secondary'
+            }
+          ];
+
+    bridgeActions.setSceneUiPanel(POTASSIUM_SCENE_ID, 'potassiumTerminal', {
+      title,
+      score,
+      records: getPotassiumLeaderboardOverlayText(),
+      actions
+    });
   }
 
   private handleTerminalPointer(pointer: Phaser.Input.Pointer): void {
@@ -1086,6 +1151,29 @@ export class PotassiumSlipScene extends Phaser.Scene {
 
   private clearTerminalOverlay(): void {
     this.potassiumRenderer.clearTerminal();
+    this.pendingTerminalView = undefined;
+    bridgeActions.clearSceneUiPanel(POTASSIUM_SCENE_ID);
+  }
+
+  private consumeSceneUiAction(): void {
+    const action = bridgeActions.consumeSceneUiAction(POTASSIUM_SCENE_ID);
+    if (!action) return;
+
+    if (action.action === 'potassiumDraftChoice' && this.session.gameState === 'UPGRADE') {
+      const option = readPotassiumDraftChoiceActionParams(action.params);
+      if (!option) return;
+      this.applySessionResult(resolvePotassiumDraftChoice(this.session, option));
+      return;
+    }
+
+    if (
+      action.action === 'potassiumTerminalAction' &&
+      (this.session.gameState === 'WON' || this.session.gameState === 'GAME_OVER')
+    ) {
+      const terminalAction = readPotassiumTerminalActionParams(action.params);
+      if (!terminalAction) return;
+      this.applySessionResult(resolvePotassiumTerminalAction(this.session, terminalAction));
+    }
   }
 
   setPaused(paused: boolean): void {
@@ -1104,4 +1192,19 @@ export class PotassiumSlipScene extends Phaser.Scene {
   getResumeCapturePosition(): { x: number; y: number } | null {
     return null;
   }
+}
+
+function readPotassiumDraftChoiceActionParams(params: unknown): PotassiumDraftOption | null {
+  if (!params || typeof params !== 'object') return null;
+  const option = (params as { option?: unknown }).option;
+  if (!option || typeof option !== 'object') return null;
+  return option as PotassiumDraftOption;
+}
+
+function readPotassiumTerminalActionParams(params: unknown): PotassiumTerminalAction | null {
+  if (!params || typeof params !== 'object') return null;
+  const action = (params as { action?: unknown }).action;
+  return action === 'return' || action === 'retry' || action === 'endless'
+    ? action
+    : null;
 }

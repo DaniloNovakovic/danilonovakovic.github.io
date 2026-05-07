@@ -3,12 +3,19 @@ import type { SceneId } from '@/game/scenes/sceneIds';
 export const SCENE_UI_SURFACE_IDS = [
   'stampedeStatus',
   'stampedeStartPrompt',
-  'stampedeResult'
+  'stampedeResult',
+  'potassiumUpgradeChoices',
+  'potassiumTerminal'
 ] as const;
 
 export type SceneUiSurfaceId = (typeof SCENE_UI_SURFACE_IDS)[number];
 
-export type SceneUiActionId = 'start' | 'retry' | 'backToRidge';
+export type SceneUiActionId =
+  | 'start'
+  | 'retry'
+  | 'backToRidge'
+  | 'potassiumDraftChoice'
+  | 'potassiumTerminalAction';
 
 export interface SceneUiSurfaceRequest {
   ownerSceneId: SceneId;
@@ -19,6 +26,7 @@ export interface SceneUiSurfaceRequest {
 export interface SceneUiActionRequest {
   ownerSceneId: SceneId;
   action: SceneUiActionId;
+  params?: unknown;
   sequence: number;
 }
 

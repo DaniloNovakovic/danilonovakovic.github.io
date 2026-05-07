@@ -68,7 +68,11 @@ re-apply camera bounds/profile math.
 - Use `src/game/sceneUi/SceneUiHost.tsx` for scene-owned React status/panels
   when the UI belongs to the active Phaser scene but should be rendered as DOM.
   Keep gameplay state in the scene/runtime; React sends only one-shot scene UI
-  actions back through the bridge.
+  actions back through the bridge. Panel surfaces mount above the clipped Phaser
+  frame so dialog-style UI can remain centered without being cropped by the
+  game card. Stampede uses this for status/start/result UI; Potassium uses it
+  for draft choices and terminal actions while Phaser keeps the active HUD and
+  gameplay field.
 - Use shell header chrome policy for app navigation controls that belong
   outside the Phaser card, such as Back buttons for arcade scenes. Do not push
   those controls through scene-owned UI unless they need scene gameplay state.

@@ -33,8 +33,8 @@ for fast iteration. Current useful targets include `hobbies`, `basement`,
   overlay id.
 - `src/game/sceneUi/SceneUiHost.tsx` renders scene-owned React UI from bridge
   `sceneUi` state. Status surfaces can live in the shell footer, while panel
-  surfaces can sit over the game card; the owning scene gates gameplay and
-  consumes UI actions.
+  surfaces sit above the game card without being clipped by the Phaser frame;
+  the owning scene gates gameplay and consumes UI actions.
 - `src/game/shell/sceneHeaderChrome.ts` maps presentation scenes to shell-owned
   header controls. Stampede returns to Ridge from the header Back button;
   Potassium returns to the City/Overworld.
@@ -58,4 +58,7 @@ Use this path when checking pattern refactors:
    card, move in the arena, and return to Ridge. Telegraph and Domino cards
    should still keep primary entry disabled.
 7. Open inventory from the overworld and from a child scene.
-8. Verify mobile touch movement, jump, and interact one-shots.
+8. In Potassium, clear or dev-skip a wave and confirm the upgrade-choice panel
+   is a React scene UI panel above the card; choose an upgrade and confirm play
+   continues. Confirm terminal Retry/Return actions work from the React panel.
+9. Verify mobile touch movement, jump, and interact one-shots.

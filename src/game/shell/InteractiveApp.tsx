@@ -153,9 +153,9 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
                 presentationMode={presentationMode}
                 onReturnToOverworld={returnToOverworld}
               />
-              <SceneUiHost placement="panel" />
             </div>
           </div>
+          <SceneUiHost placement="panel" />
         </div>
       </main>
 

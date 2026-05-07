@@ -215,6 +215,55 @@ describe('InteractiveApp', () => {
     });
   });
 
+  it('dispatches Potassium upgrade choice actions through scene UI', async () => {
+    const option = { kind: 'fire', action: 'unlock' };
+    bridgeActions.enterScene(POTASSIUM_SCENE_ID);
+    bridgeActions.setSceneUiPanel(POTASSIUM_SCENE_ID, 'potassiumUpgradeChoices', {
+      choices: [
+        {
+          option,
+          title: 'Fire Trail',
+          description: 'Moving bananas leave fire.',
+          color: '#f97316'
+        }
+      ]
+    });
+    render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
+
+    await userEvent.click(screen.getByRole('button', { name: /fire trail/i }));
+
+    expect(bridgeStore.getState().sceneUi.lastAction).toMatchObject({
+      ownerSceneId: POTASSIUM_SCENE_ID,
+      action: 'potassiumDraftChoice',
+      params: { option }
+    });
+  });
+
+  it('dispatches Potassium terminal actions through scene UI', async () => {
+    bridgeActions.enterScene(POTASSIUM_SCENE_ID);
+    bridgeActions.setSceneUiPanel(POTASSIUM_SCENE_ID, 'potassiumTerminal', {
+      title: 'Banana Bankruptcy',
+      score: 3,
+      records: 'Records\n1. 3 - W1 - game_over',
+      actions: [
+        { action: 'retry', label: 'Retry', priority: 'primary' },
+        { action: 'return', label: 'Return to City', priority: 'secondary' }
+      ]
+    });
+    render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
+
+    const terminalDialog = screen.getByRole('dialog', { name: /banana bankruptcy/i });
+    expect(within(terminalDialog).getByRole('button', { name: /return to city/i })).toBeDefined();
+
+    await userEvent.click(within(terminalDialog).getByRole('button', { name: /^retry$/i }));
+
+    expect(bridgeStore.getState().sceneUi.lastAction).toMatchObject({
+      ownerSceneId: POTASSIUM_SCENE_ID,
+      action: 'potassiumTerminalAction',
+      params: { action: 'retry' }
+    });
+  });
+
   it('switches to static mode directly from the toolbar', async () => {
     const onSwitchToStatic = vi.fn();
     render(<InteractiveApp onSwitchToStatic={onSwitchToStatic} />);

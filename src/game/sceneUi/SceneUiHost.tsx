@@ -12,8 +12,8 @@ export function SceneUiHost({ placement }: SceneUiHostProps) {
   if (!request) return null;
 
   const Surface = getSceneUiSurfaceDefinition(request.id).component;
-  const dispatchAction = (action: SceneUiActionId) => {
-    bridgeActions.dispatchSceneUiAction(request.ownerSceneId, action);
+  const dispatchAction = (action: SceneUiActionId, params?: unknown) => {
+    bridgeActions.dispatchSceneUiAction(request.ownerSceneId, action, params);
   };
 
   if (placement === 'status') {
@@ -27,8 +27,8 @@ export function SceneUiHost({ placement }: SceneUiHostProps) {
   }
 
   return (
-    <div className="absolute inset-0 z-20 overflow-y-auto overscroll-contain p-2 sm:p-3">
-      <div className="flex min-h-full items-start justify-center py-2 sm:items-center sm:py-0">
+    <div className="absolute inset-0 z-30 flex items-center justify-center overflow-visible p-2 sm:p-3">
+      <div className="pointer-events-auto flex w-full justify-center">
         <Surface
           ownerSceneId={request.ownerSceneId}
           params={request.params}

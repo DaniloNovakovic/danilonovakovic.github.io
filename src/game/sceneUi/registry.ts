@@ -2,11 +2,12 @@ import type { ComponentType } from 'react';
 import type { SceneId } from '@/game/scenes/sceneIds';
 import type { SceneUiActionId, SceneUiSurfaceId } from './types';
 import { STAMPEDE_SCENE_UI_DEFINITIONS } from '@/game/scenes/stampedeSketch/sceneUi/definitions';
+import { POTASSIUM_SCENE_UI_DEFINITIONS } from '@/game/scenes/potassiumSlip/sceneUi/definitions';
 
 export interface SceneUiSurfaceProps {
   ownerSceneId: SceneId;
   params?: unknown;
-  dispatchAction: (action: SceneUiActionId) => void;
+  dispatchAction: (action: SceneUiActionId, params?: unknown) => void;
 }
 
 export type SceneUiSurfaceComponent = ComponentType<SceneUiSurfaceProps>;
@@ -17,7 +18,8 @@ export interface SceneUiSurfaceDefinition {
 }
 
 export const SCENE_UI_DEFINITIONS: readonly SceneUiSurfaceDefinition[] = [
-  ...STAMPEDE_SCENE_UI_DEFINITIONS
+  ...STAMPEDE_SCENE_UI_DEFINITIONS,
+  ...POTASSIUM_SCENE_UI_DEFINITIONS
 ];
 
 const SCENE_UI_BY_ID: ReadonlyMap<SceneUiSurfaceId, SceneUiSurfaceDefinition> = new Map(
