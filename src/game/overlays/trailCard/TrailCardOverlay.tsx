@@ -1,5 +1,7 @@
 import { Button } from '@/shared/ui';
 import { getMessages } from '@/shared/i18n';
+import { bridgeActions } from '@/game/bridge/store';
+import { isSceneId } from '@/game/scenes/sceneIds';
 import { OverlayDialogFrame } from '@/game/overlays/OverlayDialogFrame';
 import type { OverlayControllerProps } from '@/game/overlays/types';
 import type { TrailCardOverlayParams } from './types';
@@ -12,7 +14,8 @@ function isTrailCardOverlayParams(params: unknown): params is TrailCardOverlayPa
     typeof candidate.mood === 'string' &&
     typeof candidate.timeEstimate === 'string' &&
     typeof candidate.rewardPreview === 'string' &&
-    typeof candidate.unavailableReason === 'string'
+    (candidate.unavailableReason === undefined || typeof candidate.unavailableReason === 'string') &&
+    (candidate.enterSceneId === undefined || (typeof candidate.enterSceneId === 'string' && isSceneId(candidate.enterSceneId)))
   );
 }
 
@@ -32,6 +35,12 @@ export default function TrailCardOverlay({
         rewardPreview: '',
         unavailableReason: messages.trailCard.unavailableFallback
       };
+  const enterSceneId = trailCard.enterSceneId;
+  const canEnter = !trailCard.unavailableReason && enterSceneId !== undefined;
+  const enterTrail = () => {
+    if (!canEnter || !enterSceneId) return;
+    bridgeActions.enterScene(enterSceneId);
+  };
 
   return (
     <OverlayDialogFrame
@@ -66,21 +75,29 @@ export default function TrailCardOverlay({
               </dd>
             </div>
           </div>
-          <div className="rounded border border-dashed border-[#1a1a1a]/40 bg-[#f4f1ea]/75 px-3 py-2">
-            <dt className="text-[10px] font-bold uppercase tracking-widest text-[#1a1a1a]/60">
-              {messages.trailCard.unavailable}
-            </dt>
-            <dd className="text-xs font-bold uppercase leading-relaxed tracking-wide">
-              {trailCard.unavailableReason}
-            </dd>
-          </div>
+          {trailCard.unavailableReason && (
+            <div className="rounded border border-dashed border-[#1a1a1a]/40 bg-[#f4f1ea]/75 px-3 py-2">
+              <dt className="text-[10px] font-bold uppercase tracking-widest text-[#1a1a1a]/60">
+                {messages.trailCard.unavailable}
+              </dt>
+              <dd className="text-xs font-bold uppercase leading-relaxed tracking-wide">
+                {trailCard.unavailableReason}
+              </dd>
+            </div>
+          )}
         </dl>
 
         <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:justify-end">
           <Button variant="secondary" size="sm" className="w-full sm:w-auto" onClick={close}>
             {messages.trailCard.back}
           </Button>
-          <Button variant="primary" size="sm" className="w-full sm:w-auto" disabled>
+          <Button
+            variant="primary"
+            size="sm"
+            className="w-full sm:w-auto"
+            disabled={!canEnter}
+            onClick={enterTrail}
+          >
             {messages.trailCard.enter}
           </Button>
         </div>

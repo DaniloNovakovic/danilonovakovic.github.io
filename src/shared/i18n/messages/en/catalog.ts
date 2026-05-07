@@ -65,4 +65,10 @@ export const catalogMessages = {
       description: "A compact ridge route toward the Relay Spire.",
     },
   },
+  stampedeSketch: {
+    stampedeSketch: {
+      name: "Stampede Sketch",
+      description: "A movement-only ink swarm prototype around a picnic blanket.",
+    },
+  },
 } as const;

@@ -7,6 +7,7 @@ import {
   RIDGE_TRAIL_CARD_TARGETS,
   RIDGE_WORLD_WIDTH
 } from './worldLayout';
+import { STAMPEDE_SKETCH_SCENE_ID } from '@/game/scenes/sceneIds';
 
 describe('ridge world layout', () => {
   it('keeps the first movement shell flat and inside world bounds', () => {
@@ -45,6 +46,14 @@ describe('ridge world layout', () => {
       'telegraph-bag',
       'domino-desk'
     ]);
-    expect(RIDGE_TRAIL_CARD_TARGETS.every((target) => target.card.unavailableReason.length > 0)).toBe(true);
+  });
+
+  it('enables only the Stampede Trail Card for the movement-only prototype', () => {
+    const stampede = RIDGE_TRAIL_CARD_TARGETS.find((target) => target.id === 'stampede-sketch');
+    const unavailable = RIDGE_TRAIL_CARD_TARGETS.filter((target) => target.id !== 'stampede-sketch');
+
+    expect(stampede?.card.enterSceneId).toBe(STAMPEDE_SKETCH_SCENE_ID);
+    expect(stampede?.card.unavailableReason).toBeUndefined();
+    expect(unavailable.every((target) => target.card.unavailableReason && !target.card.enterSceneId)).toBe(true);
   });
 });

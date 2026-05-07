@@ -1,4 +1,5 @@
 import type { TrailCardOverlayParams } from '@/game/overlays/trailCard/types';
+import { STAMPEDE_SKETCH_SCENE_ID } from '@/game/scenes/sceneIds';
 
 export const RIDGE_WORLD_WIDTH = 1800;
 export const RIDGE_FLOOR_Y = 520;
@@ -93,10 +94,10 @@ export const RIDGE_TRAIL_CARD_TARGETS: readonly RidgeTrailCardTarget[] = [
     },
     card: {
       title: 'Stampede Sketch',
-      mood: 'Move-only ink swarm around a picnic blanket.',
+      mood: 'Kite overexcited ink ideas around a picnic blanket.',
       timeEstimate: '60-90 seconds',
       rewardPreview: 'Stamp + glide pip',
-      unavailableReason: 'Stampede is not wired yet.'
+      enterSceneId: STAMPEDE_SKETCH_SCENE_ID
     }
   },
   {

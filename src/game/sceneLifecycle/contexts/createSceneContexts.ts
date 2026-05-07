@@ -4,6 +4,7 @@ import {
   PHASER_SCENE_KEYS,
   POTASSIUM_SCENE_ID,
   RIDGE_SCENE_ID,
+  STAMPEDE_SKETCH_SCENE_ID,
   type SceneId
 } from '@/game/scenes/sceneIds';
 import type { OverlayId } from '@/game/overlays/overlayIds';
@@ -13,6 +14,7 @@ import { createHobbiesSceneContext } from '@/game/scenes/hobbies/sceneContext';
 import { createOverworldSceneContext } from '@/game/scenes/overworld/sceneContext';
 import { createPotassiumSlipSceneContext } from '@/game/scenes/potassiumSlip/sceneContext';
 import { createRidgeSceneContext } from '@/game/scenes/ridge/sceneContext';
+import { createStampedeSketchSceneContext } from '@/game/scenes/stampedeSketch/sceneContext';
 import type { ResumeSnapshot, SceneContextDefinition } from '../types';
 
 export interface SceneContextAssemblyDeps {
@@ -78,6 +80,10 @@ export function createSceneContexts(
       onOpenOverlay: deps.onOpenOverlay,
       getResumePosition: getPreparedResume(PHASER_SCENE_KEYS.ridge),
       loadScene: loadScene(RIDGE_SCENE_ID)
+    }),
+    createStampedeSketchSceneContext({
+      onClose: () => deps.onEnterScene(RIDGE_SCENE_ID),
+      loadScene: loadScene(STAMPEDE_SKETCH_SCENE_ID)
     })
   ];
 }

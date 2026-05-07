@@ -34,7 +34,10 @@ and scales with `Scale.ENVELOP`. React owns the visible shell aspect ratio:
 
 - `portrait-cover` is the default for side-view player scenes on phones. The shell is portrait, overflow is clipped, and the shared side-view camera runtime follows/clamps the player so cover-mode crop does not reveal off-world space.
 - `full-board` is for arcade scenes where the whole landscape board must remain visible.
-- `vertical-board` is for portrait arcade scenes such as Potassium. The shell is tall, Phaser still uses the fixed logical design size with `Scale.ENVELOP`, and direct Phaser pointer input is preserved instead of the React swipe/tap gesture overlay.
+- `vertical-board` is for portrait arcade scenes such as Potassium and the
+  first Stampede movement prototype. The shell is tall, Phaser still uses the
+  fixed logical design size with `Scale.ENVELOP`, and direct Phaser pointer
+  input is preserved instead of the React swipe/tap gesture overlay.
 
 When a scene changes presentation mode, `src/game/shell/Game.tsx` keeps the
 existing Phaser instance mounted and calls `game.scale.refresh()` after the new
@@ -46,8 +49,9 @@ re-apply camera bounds/profile math.
 - Add new Phaser worlds under `src/game/scenes/<scene>/` with a scene context and, when loadable, a scene registry entry.
 - Keep scene triggers in the owning scene. A trigger should call `enterScene(sceneId)` or `openOverlay(overlayId, options)` through the bridge callback it receives at scene start.
 - Use overlay options for scene-owned overlay params and return intent. Ridge
-  Trail Cards use this path to show reusable entry cards while mini-game entry
-  stays disabled until the target scene exists.
+  Trail Cards use this path to show reusable entry cards. Stampede can enter
+  its movement prototype from the Trail Card, while later Ridge props stay
+  disabled until their target scenes exist.
 - Put scene-local overlays under `src/game/scenes/<scene>/overlays` and export overlay definitions from that scene. Put shared/global overlays under `src/game/overlays`.
 - Use `src/game/overlays/OverlayHost.tsx` for overlay rendering. Do not add local React overlay maps to shell or scene code.
 - Use `sceneResumePolicy` for resume persistence and reset rules. The low-level resume store should not be imported directly by scenes or adapters.
@@ -109,7 +113,7 @@ After changes that touch Phaser boot, bridge, scene lifecycle, scenes, or overla
 1. **Overworld** — canvas loads; move left/right, jump, interact near a building.
 2. **Hobbies** — enter hobbies (building or `H` where applicable); walk; interact with an interior target; exit (`H` / `Esc` / close flow) returns to overworld.
 3. **Basement** — enter the Developer Basement; interact with the computer before glasses to see the character thought, then collect glasses and confirm the Developer Console opens and closes back to the basement scene.
-4. **Ridge** — in development, boot `?startScene=ridge`; confirm the separate Ridge shell renders, uses shared side-view movement, and does not replace the default overworld. Walk near a Trail Card prop, interact, confirm the card opens with a disabled primary action, then close back to Ridge.
+4. **Ridge / Stampede** — in development, boot `?startScene=ridge`; confirm the separate Ridge shell renders, uses shared side-view movement, and does not replace the default overworld. Walk near the Stampede Trail Card prop, interact, confirm the card opens and `Enter` starts Stampede Sketch. Move in the Stampede arena, return to Ridge, then confirm Telegraph/Domino Trail Cards remain unavailable.
 5. **React overlays** — open a building overlay from the street; close it; no stuck keyboard focus in the canvas.
 6. **Pause / input** — with a React overlay open, scene pause propagates (no gameplay input leaking); closing overlay resumes the parent scene or overworld input.
 

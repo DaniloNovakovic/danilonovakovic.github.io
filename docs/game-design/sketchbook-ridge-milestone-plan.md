@@ -33,9 +33,9 @@ Anything beyond that is future scope unless a slice explicitly pulls it in.
   audio direction packs now guide Cicka, Guide, Trail Card, Manual Page,
   Stampede, Relay Spire, and Ridge audio without blocking rough engineering
   prototypes.
-- **M4 Stampede Sketch Prototype** should start after Danilo reviews the key M3
-  taste calls, with a movement-only Stampede scene enabled from the Stampede
-  Trail Card once the empty scene exists.
+- **M4 Stampede Sketch Prototype** has started with the M4a movement-feel
+  tracer bullet: the Stampede Trail Card can enter a movement-only arena, while
+  rewards, attacks, XP, upgrades, and results remain future M4 slices.
 
 ## Production Crew
 
@@ -205,7 +205,9 @@ Owner: Stampede scene.
 Outputs:
 
 - `src/game/scenes/stampedeSketch/**`.
-- 60-90 second move-only survivor prototype.
+- 60-90 second move-only survivor prototype. First slice is M4a movement feel:
+  direct entry from the Stampede Trail Card, top-down 8-way movement, pointer
+  drag steering, harmless capped swarm pressure, and return to Ridge.
 - capped enemies.
 - auto-attacks.
 - XP pickups.

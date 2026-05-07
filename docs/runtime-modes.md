@@ -16,7 +16,7 @@ code remains the source of truth.
 
 In development, `?startScene=<sceneId>` can boot directly into a Phaser scene
 for fast iteration. Current useful targets include `hobbies`, `basement`,
-`potassium`, and `ridge`.
+`potassium`, `ridge`, and `stampedeSketch`.
 
 ## Transition Owners
 
@@ -43,7 +43,8 @@ Use this path when checking pattern refactors:
    to the basement scene.
 6. Boot `?startScene=ridge`; verify the Ridge shell renders, movement works,
    and walking near a Stampede/Telegraph/Domino prop shows `[E] INTERACT`.
-   Interact to open the Trail Card, confirm its primary action is disabled while
-   the target scene is unavailable, then close back to Ridge.
+   Interact with the Stampede prop to open its Trail Card, confirm `Enter`
+   starts Stampede Sketch, move in the arena, and return to Ridge. Telegraph and
+   Domino cards should still keep primary entry disabled.
 7. Open inventory from the overworld and from a child scene.
 8. Verify mobile touch movement, jump, and interact one-shots.
