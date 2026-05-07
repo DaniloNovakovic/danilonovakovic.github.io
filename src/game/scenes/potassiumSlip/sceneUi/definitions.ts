@@ -5,10 +5,12 @@ import { PotassiumUpgradeChoicesPanel } from './PotassiumUpgradeChoicesPanel';
 export const POTASSIUM_SCENE_UI_DEFINITIONS: readonly SceneUiSurfaceDefinition[] = [
   {
     id: 'potassiumUpgradeChoices',
-    component: PotassiumUpgradeChoicesPanel
+    component: PotassiumUpgradeChoicesPanel,
+    panelChrome: 'overlay'
   },
   {
     id: 'potassiumTerminal',
-    component: PotassiumTerminalPanel
+    component: PotassiumTerminalPanel,
+    panelChrome: 'overlay'
   }
 ];

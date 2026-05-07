@@ -33,7 +33,7 @@ export function PotassiumTerminalPanel({ params, dispatchAction }: SceneUiSurfac
       border="thick"
       shadow="lg"
       padding="md"
-      className="w-[min(35rem,calc(100vw-1rem))] p-3 text-center sm:p-5"
+      className="max-h-[min(78dvh,calc(100dvh-8rem))] w-full overflow-y-auto p-3 text-center sm:p-5"
     >
       <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-[#4b4337] sm:text-xs">
         Run ended
@@ -53,7 +53,7 @@ export function PotassiumTerminalPanel({ params, dispatchAction }: SceneUiSurfac
             key={action.action}
             variant={action.priority === 'primary' ? 'primary' : 'secondary'}
             size="lg"
-            className="min-h-11 w-full px-2 font-mono text-[11px] uppercase tracking-wider sm:min-h-14 sm:px-5 sm:text-sm sm:tracking-widest"
+            className="min-h-11 w-full px-2 font-mono text-[11px] uppercase leading-tight tracking-wider sm:min-h-14 sm:px-5 sm:text-sm sm:tracking-widest"
             onClick={() => dispatchAction('potassiumTerminalAction', { action: action.action })}
           >
             {action.label}

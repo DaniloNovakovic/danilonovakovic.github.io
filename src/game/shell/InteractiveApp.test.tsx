@@ -217,6 +217,7 @@ describe('InteractiveApp', () => {
 
   it('dispatches Potassium upgrade choice actions through scene UI', async () => {
     const option = { kind: 'fire', action: 'unlock' };
+    const secondOption = { kind: 'ghost', axis: 'horizontal' };
     bridgeActions.enterScene(POTASSIUM_SCENE_ID);
     bridgeActions.setSceneUiPanel(POTASSIUM_SCENE_ID, 'potassiumUpgradeChoices', {
       choices: [
@@ -225,10 +226,22 @@ describe('InteractiveApp', () => {
           title: 'Fire Trail',
           description: 'Moving bananas leave fire.',
           color: '#f97316'
+        },
+        {
+          option: secondOption,
+          title: 'Horizontal Ghost',
+          description: 'Hits fire a blue row beam.',
+          color: '#38bdf8'
         }
       ]
     });
     render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
+
+    const overlayHost = screen.getByTestId('scene-ui-panel-overlay');
+    expect(overlayHost.className).toContain('w-[min(46rem,calc(100vw-1rem))]');
+    expect(overlayHost.className).toContain('overflow-y-auto');
+    expect(screen.getByRole('dialog', { name: /choose banana nonsense/i })).toBeDefined();
+    expect(screen.getByRole('button', { name: /horizontal ghost/i })).toBeDefined();
 
     await userEvent.click(screen.getByRole('button', { name: /fire trail/i }));
 
@@ -253,6 +266,8 @@ describe('InteractiveApp', () => {
     render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
 
     const terminalDialog = screen.getByRole('dialog', { name: /banana bankruptcy/i });
+    expect(screen.getByTestId('scene-ui-panel-overlay').contains(terminalDialog)).toBe(true);
+    expect(terminalDialog.className).toContain('max-h-[min(78dvh,calc(100dvh-8rem))]');
     expect(within(terminalDialog).getByRole('button', { name: /return to city/i })).toBeDefined();
 
     await userEvent.click(within(terminalDialog).getByRole('button', { name: /^retry$/i }));

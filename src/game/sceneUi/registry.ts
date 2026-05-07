@@ -15,6 +15,7 @@ export type SceneUiSurfaceComponent = ComponentType<SceneUiSurfaceProps>;
 export interface SceneUiSurfaceDefinition {
   id: SceneUiSurfaceId;
   component: SceneUiSurfaceComponent;
+  panelChrome?: 'default' | 'overlay';
 }
 
 export const SCENE_UI_DEFINITIONS: readonly SceneUiSurfaceDefinition[] = [
