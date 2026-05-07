@@ -10,7 +10,12 @@ import {
   isRidgeShortcutUnlocked,
   isSecretDiscovered
 } from './store';
-import { OVERWORLD_SCENE_ID } from '@/game/scenes/sceneIds';
+import {
+  OVERWORLD_SCENE_ID,
+  POTASSIUM_SCENE_ID,
+  RIDGE_SCENE_ID,
+  STAMPEDE_SKETCH_SCENE_ID
+} from '@/game/scenes/sceneIds';
 
 function resetBridge() {
   bridgeActions.returnToOverworld();
@@ -341,6 +346,77 @@ describe('bridgeStore', () => {
       expect(bridgeStore.getState().sceneHintText).toBe('Wave clear');
       bridgeActions.setSceneHintText(null);
       expect(bridgeStore.getState().sceneHintText).toBeNull();
+    });
+  });
+
+  describe('scene UI', () => {
+    it('sets and clears scene-owned status surfaces', () => {
+      const params = { timerSeconds: 64 };
+      bridgeActions.setSceneUiStatus(
+        STAMPEDE_SKETCH_SCENE_ID,
+        'stampedeStatus',
+        params
+      );
+
+      expect(bridgeStore.getState().sceneUi.status).toEqual({
+        ownerSceneId: STAMPEDE_SKETCH_SCENE_ID,
+        id: 'stampedeStatus',
+        params
+      });
+
+      bridgeActions.clearSceneUiStatus(STAMPEDE_SKETCH_SCENE_ID);
+      expect(bridgeStore.getState().sceneUi.status).toBeNull();
+    });
+
+    it('sets and clears scene-owned panel surfaces', () => {
+      bridgeActions.setSceneUiPanel(
+        STAMPEDE_SKETCH_SCENE_ID,
+        'stampedeStartPrompt',
+        { title: 'Ready?' }
+      );
+
+      expect(bridgeStore.getState().sceneUi.panel).toMatchObject({
+        ownerSceneId: STAMPEDE_SKETCH_SCENE_ID,
+        id: 'stampedeStartPrompt'
+      });
+
+      bridgeActions.clearSceneUiPanel(STAMPEDE_SKETCH_SCENE_ID);
+      expect(bridgeStore.getState().sceneUi.panel).toBeNull();
+    });
+
+    it('dispatches and consumes one-shot scene UI actions', () => {
+      const params = { option: { kind: 'fire', action: 'unlock' } };
+      bridgeActions.dispatchSceneUiAction(POTASSIUM_SCENE_ID, 'potassiumDraftChoice', params);
+
+      const action = bridgeActions.consumeSceneUiAction(POTASSIUM_SCENE_ID);
+      expect(action).toMatchObject({
+        ownerSceneId: POTASSIUM_SCENE_ID,
+        action: 'potassiumDraftChoice',
+        params
+      });
+      expect(action?.sequence).toBeGreaterThan(0);
+      expect(bridgeStore.getState().sceneUi.lastAction).toBeNull();
+      expect(bridgeActions.consumeSceneUiAction(POTASSIUM_SCENE_ID)).toBeNull();
+    });
+
+    it('guards clears and action consumption by owner scene', () => {
+      bridgeActions.setSceneUiStatus(
+        STAMPEDE_SKETCH_SCENE_ID,
+        'stampedeStatus'
+      );
+      bridgeActions.setSceneUiPanel(
+        STAMPEDE_SKETCH_SCENE_ID,
+        'stampedeResult'
+      );
+      bridgeActions.dispatchSceneUiAction(STAMPEDE_SKETCH_SCENE_ID, 'retry');
+
+      bridgeActions.clearSceneUiStatus(RIDGE_SCENE_ID);
+      bridgeActions.clearSceneUiPanel(RIDGE_SCENE_ID);
+
+      expect(bridgeStore.getState().sceneUi.status?.ownerSceneId).toBe(STAMPEDE_SKETCH_SCENE_ID);
+      expect(bridgeStore.getState().sceneUi.panel?.ownerSceneId).toBe(STAMPEDE_SKETCH_SCENE_ID);
+      expect(bridgeActions.consumeSceneUiAction(RIDGE_SCENE_ID)).toBeNull();
+      expect(bridgeStore.getState().sceneUi.lastAction?.ownerSceneId).toBe(STAMPEDE_SKETCH_SCENE_ID);
     });
   });
 });

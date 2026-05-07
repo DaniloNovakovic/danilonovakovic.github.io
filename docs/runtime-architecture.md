@@ -5,6 +5,8 @@ game vocabulary is explicit:
 
 - **Scenes** are Phaser worlds.
 - **Overlays** are React surfaces rendered above the game.
+- **Scene UI** is scene-owned React status/panel UI rendered by the shell
+  without using the global overlay pause path.
 - **Triggers** are scene-owned interaction points that enter scenes or open overlays.
 
 ## High-level flow
@@ -15,14 +17,23 @@ game vocabulary is explicit:
 4. `SceneLifecycleController` observes bridge scene/overlay state and delegates scene transitions/pause to `SceneManager`.
 5. `SceneManager` manages scene contexts through the Phaser adapter.
 6. `OverlayHost` renders the active React overlay from the overlay registry.
+7. `SceneUiHost` renders scene-owned React status/panel surfaces from bridge
+   `sceneUi` requests.
 
 ## Runtime subsystems
 
-- **Bridge state** - `src/game/bridge/store.ts` is the observable React/Phaser state seam. It owns active scene id, active overlay id, loading scene id, pause derivation, inventory/progress, scene hint text, and touch input one-shots.
+- **Bridge state** - `src/game/bridge/store.ts` is the observable React/Phaser state seam. It owns active scene id, active overlay id, loading scene id, pause derivation, scene-owned UI requests/actions, inventory/progress, scene hint text, and touch input one-shots.
 - **Scene lifecycle** - `src/game/sceneLifecycle` owns `SceneLifecycleController`, `SceneManager`, scene transition coordination, lifecycle events, and scene context assembly.
 - **Phaser adapter** - `src/game/adapters/phaser/PhaserSceneAdapter.ts` translates scene lifecycle requests into concrete Phaser scene API calls.
 - **Scene ids and lookup** - `src/game/scenes/sceneIds.ts` names Phaser scene ids and keys. `src/game/scenes/sceneRegistry.ts` answers how loadable scenes are resolved.
 - **Overlay ids and lookup** - `src/game/overlays/overlayIds.ts` names React overlay ids. `src/game/overlays/overlayRegistry.ts` answers how overlay components and display metadata are resolved. `OverlayHost` is the only shared React overlay renderer.
+- **Scene UI lookup** - `src/game/sceneUi` hosts scene-owned React UI surfaces
+  for non-global, scene-controlled status and panels. These surfaces do not
+  pause Phaser automatically; the owning scene decides whether gameplay is
+  gated and consumes one-shot UI actions through the bridge.
+- **Scene header chrome** - `src/game/shell/sceneHeaderChrome.ts` owns the
+  small shell-level policy for replacing default Inventory/Dev controls with a
+  scene navigation control in presentation-heavy arcade scenes.
 - **Shared scene runtime** - reusable Phaser-facing machinery lives in `src/game/sharedSceneRuntime`: side-view player lifecycle, camera policy, scene presentation, resume policy, keyboard pause, interior interactions, text, textures, and vision helpers.
 - **Pure gameplay decisions** - `src/game/core` contains deterministic ECS, input, and player logic that can be tested without Phaser, React, browser globals, or bridge state.
 - **Scene-owned modules** - scene folders own local layout, triggers, Phaser objects, scene contexts, scene-local overlays, and heavy scene runtime modules.
@@ -54,6 +65,17 @@ re-apply camera bounds/profile math.
   disabled until their target scenes exist.
 - Put scene-local overlays under `src/game/scenes/<scene>/overlays` and export overlay definitions from that scene. Put shared/global overlays under `src/game/overlays`.
 - Use `src/game/overlays/OverlayHost.tsx` for overlay rendering. Do not add local React overlay maps to shell or scene code.
+- Use `src/game/sceneUi/SceneUiHost.tsx` for scene-owned React status/panels
+  when the UI belongs to the active Phaser scene but should be rendered as DOM.
+  Keep gameplay state in the scene/runtime; React sends only one-shot scene UI
+  actions back through the bridge. Panel surfaces mount above the clipped Phaser
+  frame so dialog-style UI can remain centered without being cropped by the
+  game card. Stampede uses this for status/start/result UI; Potassium uses it
+  for draft choices and terminal actions while Phaser keeps the active HUD and
+  gameplay field.
+- Use shell header chrome policy for app navigation controls that belong
+  outside the Phaser card, such as Back buttons for arcade scenes. Do not push
+  those controls through scene-owned UI unless they need scene gameplay state.
 - Use `sceneResumePolicy` for resume persistence and reset rules. The low-level resume store should not be imported directly by scenes or adapters.
 - Side-view player scenes should compose `SideViewPlayerRuntime` before creating colliders against `runtime.player`; pass its camera config when the scene should follow and clamp the player.
 - Interior rooms should describe prop targets and effect commands, then let `InteriorInteractionRuntime` choose the active target and prompt/effect result. Phaser text mutation, bridge writes, and scene-local helpers stay in the scene.
