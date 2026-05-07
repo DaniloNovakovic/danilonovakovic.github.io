@@ -7,6 +7,15 @@ import {
 import { setSceneKeyboardPaused } from '@/game/sharedSceneRuntime/sceneKeyboardPause';
 import { TextureGenerator } from '@/game/sharedSceneRuntime/textures/TextureGenerator';
 import {
+  createStampedeAutoAttackState,
+  type StampedeAutoAttackEvent,
+  type StampedeAutoAttackState
+} from './autoAttack';
+import {
+  createStampedeAutoAttackPresentationRuntime,
+  type StampedeAutoAttackPresentationRuntime
+} from './autoAttackPresentation';
+import {
   STAMPEDE_BACK_BOUNDS,
   drawStampedeArena
 } from './arenaPresentation';
@@ -60,7 +69,9 @@ export class StampedeSketchScene extends Phaser.Scene {
   private hudRuntime?: StampedeHudRuntime;
   private feedbackRuntime?: StampedeFeedbackRuntime;
   private resultRuntime?: StampedeResultPresentationRuntime;
+  private autoAttackRuntime?: StampedeAutoAttackPresentationRuntime;
   private session: StampedeSession = createStampedeSession();
+  private autoAttackState: StampedeAutoAttackState = createStampedeAutoAttackState();
   private shownResultPhase?: Exclude<StampedeSessionPhase, 'playing'>;
   private isPaused = false;
   private onClose: () => void = () => {};
@@ -98,7 +109,9 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.hudRuntime = createStampedeHudRuntime({ scene: this });
     this.feedbackRuntime = createStampedeFeedbackRuntime({ scene: this });
     this.resultRuntime = createStampedeResultPresentationRuntime({ scene: this });
+    this.autoAttackRuntime = createStampedeAutoAttackPresentationRuntime({ scene: this });
     this.session = createStampedeSession();
+    this.autoAttackState = createStampedeAutoAttackState();
     this.shownResultPhase = undefined;
     this.updateHud();
     this.setPaused(this.isPaused);
@@ -132,6 +145,7 @@ export class StampedeSketchScene extends Phaser.Scene {
 
     const frame = resolveStampedeRunFrame({
       session: this.session,
+      autoAttackState: this.autoAttackState,
       deltaMs: delta,
       closeRequested,
       velocity: this.inputRuntime.readVelocity(),
@@ -144,6 +158,7 @@ export class StampedeSketchScene extends Phaser.Scene {
     });
 
     this.session = frame.session;
+    this.autoAttackState = frame.autoAttackState ?? this.autoAttackState;
     switch (frame.kind) {
       case 'close':
         this.closeToRidge();
@@ -155,6 +170,7 @@ export class StampedeSketchScene extends Phaser.Scene {
         this.player.setVelocity(frame.velocity.x, frame.velocity.y);
         this.player.setPosition(frame.player.x, frame.player.y);
         this.updatePlayerInkTilt(time, frame.velocity);
+        this.applyAutoAttack(frame.attack);
         if (frame.contactCandidate) {
           this.feedbackRuntime?.showContact(this.player, frame.contactCandidate);
         }
@@ -180,13 +196,16 @@ export class StampedeSketchScene extends Phaser.Scene {
   private closeToRidge(): void {
     this.player?.setVelocity(0, 0);
     this.resultRuntime?.hide();
+    this.autoAttackRuntime?.reset();
     this.onClose();
   }
 
   private restartRun(): void {
     this.session = createStampedeSession();
+    this.autoAttackState = createStampedeAutoAttackState();
     this.shownResultPhase = undefined;
     this.resultRuntime?.hide();
+    this.autoAttackRuntime?.reset();
     this.feedbackRuntime?.reset();
     this.swarmRuntime?.reset();
     this.inputRuntime?.setPointerControlEnabled(true);
@@ -216,6 +235,7 @@ export class StampedeSketchScene extends Phaser.Scene {
     if (frame.contactCandidate) {
       this.feedbackRuntime?.showContact(this.player, frame.contactCandidate);
     }
+    this.applyAutoAttack(frame.attack);
 
     this.player.setVelocity(0, 0);
     this.inputRuntime.setPointerControlEnabled(false);
@@ -250,6 +270,15 @@ export class StampedeSketchScene extends Phaser.Scene {
 
   private announceTerminalPhase(): void {
     this.feedbackRuntime?.announceTerminal(this.session.phase, this.player);
+  }
+
+  private applyAutoAttack(
+    attack: StampedeAutoAttackEvent | null | undefined
+  ): void {
+    if (!attack) return;
+
+    this.swarmRuntime?.clearMarks(attack.hitIds);
+    this.autoAttackRuntime?.show(attack);
   }
 
   private updatePlayerInkTilt(time: number, velocity: StampedeVelocity): void {

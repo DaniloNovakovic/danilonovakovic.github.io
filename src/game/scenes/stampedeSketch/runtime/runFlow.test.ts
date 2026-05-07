@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  STAMPEDE_AUTO_ATTACK_COOLDOWN_MS,
+  createStampedeAutoAttackState
+} from './autoAttack';
+import {
   STAMPEDE_PLAYER_CONTACT_RADIUS,
   resolveStampedeRunFrame
 } from './runFlow';
@@ -123,5 +127,147 @@ describe('stampede run flow', () => {
     expect(frame.kind).toBe('terminal');
     if (frame.kind !== 'terminal') return;
     expect(frame.phase).toBe('failed');
+  });
+
+  it('can emit an auto attack while the run continues', () => {
+    const frame = resolveStampedeRunFrame({
+      session: createStampedeSession(),
+      autoAttackState: createStampedeAutoAttackState(),
+      deltaMs: STAMPEDE_AUTO_ATTACK_COOLDOWN_MS,
+      closeRequested: false,
+      velocity: baseVelocity,
+      player: basePlayer,
+      contactCandidates: [{
+        id: 'mark-a',
+        x: basePlayer.x + 60,
+        y: basePlayer.y,
+        radius: 10
+      }]
+    });
+
+    expect(frame.kind).toBe('playing');
+    if (frame.kind !== 'playing') return;
+    expect(frame.attack?.hitIds).toEqual(['mark-a']);
+    expect(frame.autoAttackState?.nextFireAtMs).toBe(
+      STAMPEDE_AUTO_ATTACK_COOLDOWN_MS * 2
+    );
+  });
+
+  it('excludes attack-cleared marks from same-frame contact checks', () => {
+    const frame = resolveStampedeRunFrame({
+      session: createStampedeSession(),
+      autoAttackState: createStampedeAutoAttackState(),
+      deltaMs: STAMPEDE_AUTO_ATTACK_COOLDOWN_MS,
+      closeRequested: false,
+      velocity: baseVelocity,
+      player: basePlayer,
+      contactCandidates: [{
+        id: 'mark-a',
+        ...basePlayer,
+        radius: 10
+      }]
+    });
+
+    expect(frame.kind).toBe('playing');
+    if (frame.kind !== 'playing') return;
+    expect(frame.attack?.hitIds).toEqual(['mark-a']);
+    expect(frame.contactCandidate).toBeNull();
+    expect(frame.session.contacts).toBe(0);
+  });
+
+  it('still applies contact from uncleared candidates', () => {
+    const uncleared = {
+      ...basePlayer,
+      radius: 10
+    };
+    const frame = resolveStampedeRunFrame({
+      session: createStampedeSession(),
+      autoAttackState: createStampedeAutoAttackState(),
+      deltaMs: STAMPEDE_AUTO_ATTACK_COOLDOWN_MS,
+      closeRequested: false,
+      velocity: baseVelocity,
+      player: basePlayer,
+      contactCandidates: [
+        {
+          id: 'mark-a',
+          x: basePlayer.x + 60,
+          y: basePlayer.y,
+          radius: 10
+        },
+        {
+          id: 'mark-b',
+          x: basePlayer.x + 80,
+          y: basePlayer.y,
+          radius: 10
+        },
+        uncleared
+      ]
+    });
+
+    expect(frame.kind).toBe('playing');
+    if (frame.kind !== 'playing') return;
+    expect(frame.attack?.hitIds).toEqual(['mark-a', 'mark-b']);
+    expect(frame.contactCandidate).toBe(uncleared);
+    expect(frame.session.contacts).toBe(1);
+  });
+
+  it('does not emit attacks for terminal timer frames', () => {
+    const frame = resolveStampedeRunFrame({
+      session: createStampedeSession({ durationMs: 100 }),
+      autoAttackState: createStampedeAutoAttackState({ nextFireAtMs: 100 }),
+      deltaMs: 100,
+      closeRequested: false,
+      velocity: baseVelocity,
+      player: basePlayer,
+      contactCandidates: [{
+        id: 'mark-a',
+        ...basePlayer,
+        radius: 10
+      }]
+    });
+
+    expect(frame.kind).toBe('terminal');
+    if (frame.kind !== 'terminal') return;
+    expect(frame.phase).toBe('cleared');
+    expect(frame.attack).toBeNull();
+  });
+
+  it('does not emit attacks for terminal contact frames', () => {
+    let session = createStampedeSession();
+    for (let index = 0; index < STAMPEDE_CONTACT_LIMIT - 1; index += 1) {
+      session = resolveStampedeContact(session, index * 1_000);
+    }
+
+    const frame = resolveStampedeRunFrame({
+      session,
+      autoAttackState: createStampedeAutoAttackState(),
+      deltaMs: STAMPEDE_AUTO_ATTACK_COOLDOWN_MS,
+      closeRequested: false,
+      velocity: baseVelocity,
+      player: basePlayer,
+      contactCandidates: [
+        {
+          id: 'mark-a',
+          x: basePlayer.x + 60,
+          y: basePlayer.y,
+          radius: 10
+        },
+        {
+          id: 'mark-b',
+          x: basePlayer.x + 80,
+          y: basePlayer.y,
+          radius: 10
+        },
+        {
+          ...basePlayer,
+          radius: 10
+        }
+      ]
+    });
+
+    expect(frame.kind).toBe('terminal');
+    if (frame.kind !== 'terminal') return;
+    expect(frame.phase).toBe('failed');
+    expect(frame.attack).toBeNull();
   });
 });

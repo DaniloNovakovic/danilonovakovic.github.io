@@ -29,7 +29,7 @@ export function drawStampedeArena(scene: Phaser.Scene, onBack: () => void): void
     fontSize: '26px',
     color: '#1a1a1a'
   }).setOrigin(0.5);
-  scene.add.text(centerX, 120, 'M4c: hold the blanket, no rewards yet.', {
+  scene.add.text(centerX, 120, 'M4d: auto pencil swipe, no rewards yet.', {
     fontFamily: 'monospace',
     fontSize: '14px',
     color: '#4b4337'
