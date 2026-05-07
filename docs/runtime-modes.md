@@ -11,6 +11,9 @@ code remains the source of truth.
   `null` when no overlay is open.
 - `loadingSceneId`: the scene currently being lazy-loaded, or `null`.
 - `isPaused`: derived in the bridge from active overlay or scene loading state.
+- `sceneUi`: optional scene-owned React status/panel requests plus a one-shot
+  action from React UI back to the owning Phaser scene. This path does not
+  derive pause by itself.
 
 ## Dev Starts
 
@@ -28,6 +31,10 @@ for fast iteration. Current useful targets include `hobbies`, `basement`,
   `SceneManager` transitions and maps pause changes to active Phaser scenes.
 - `src/game/overlays/OverlayHost.tsx` renders React overlays from the active
   overlay id.
+- `src/game/sceneUi/SceneUiHost.tsx` renders scene-owned React UI from bridge
+  `sceneUi` state. Status surfaces can live in the shell footer, while panel
+  surfaces can sit over the game card; the owning scene gates gameplay and
+  consumes UI actions.
 - Phaser scenes keep local pause state only as a scene runtime concern; they do
   not decide whether an overlay should pause the engine.
 
@@ -44,7 +51,8 @@ Use this path when checking pattern refactors:
 6. Boot `?startScene=ridge`; verify the Ridge shell renders, movement works,
    and walking near a Stampede/Telegraph/Domino prop shows `[E] INTERACT`.
    Interact with the Stampede prop to open its Trail Card, confirm `Enter`
-   starts Stampede Sketch, move in the arena, and return to Ridge. Telegraph and
-   Domino cards should still keep primary entry disabled.
+   starts Stampede Sketch, confirm the Stampede status strip renders below the
+   card, move in the arena, and return to Ridge. Telegraph and Domino cards
+   should still keep primary entry disabled.
 7. Open inventory from the overworld and from a child scene.
 8. Verify mobile touch movement, jump, and interact one-shots.

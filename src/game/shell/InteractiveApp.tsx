@@ -7,6 +7,7 @@ import {
 } from '@/game/sharedSceneRuntime/phaserScenePresentation';
 import { DEV_SWITCHER_OVERLAY_ID, INVENTORY_OVERLAY_ID, type OverlayId } from '@/game/overlays/overlayIds';
 import { OverlayHost } from '@/game/overlays/OverlayHost';
+import { SceneUiHost } from '@/game/sceneUi/SceneUiHost';
 import {
   isSceneId,
   OVERWORLD_SCENE_ID,
@@ -43,7 +44,8 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
   const sceneHintText = bridge.sceneHintText ?? messages.potassiumSlip.hints.start;
   const shouldShowNavigationHint =
     bridge.activeSceneId === OVERWORLD_SCENE_ID && bridge.activeOverlayId === null;
-  const shouldShowFooterHint = shouldReserveSceneHint || shouldShowNavigationHint;
+  const shouldShowSceneUiStatus = bridge.sceneUi.status !== null;
+  const shouldShowFooterHint = shouldShowSceneUiStatus || shouldReserveSceneHint || shouldShowNavigationHint;
   const isStampedePresentation = presentationSceneId === STAMPEDE_SKETCH_SCENE_ID;
 
   const enterScene = (sceneId: SceneId) => bridgeActions.enterScene(sceneId);
@@ -145,6 +147,7 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
                 presentationMode={presentationMode}
                 onReturnToOverworld={returnToOverworld}
               />
+              <SceneUiHost placement="panel" />
             </div>
           </div>
         </div>
@@ -153,7 +156,9 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
       {shouldShowFooterHint && (
         <footer className="col-start-2 row-start-3 min-w-0">
           <Panel className="mx-auto w-full max-w-lg bg-[#fbfbf9]/85 px-3 py-2 text-center opacity-80 backdrop-blur-sm transition-opacity hover:opacity-100 md:px-4">
-            {shouldReserveSceneHint ? (
+            {shouldShowSceneUiStatus ? (
+              <SceneUiHost placement="status" />
+            ) : shouldReserveSceneHint ? (
               <p className="text-[10px] font-bold uppercase leading-snug tracking-widest text-[#1a1a1a] md:text-xs">
                 {sceneHintText}
               </p>

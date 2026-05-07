@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import InteractiveApp from './InteractiveApp';
 import { bridgeActions, bridgeStore } from '@/game/bridge/store';
 import { RIDGE_SCENE_ID, STAMPEDE_SKETCH_SCENE_ID } from '@/game/scenes/sceneIds';
+import { createStampedeResultViewModel } from '@/game/scenes/stampedeSketch/runtime/resultPresentation';
 import { getMessages } from '@/shared/i18n';
 
 vi.mock('./Game', () => ({
@@ -32,6 +33,7 @@ function resetBridge() {
   bridgeActions.resetProgress();
   bridgeActions.resetTouch();
   bridgeActions.setSceneLoading(null);
+  bridgeActions.clearSceneUi();
 }
 
 describe('InteractiveApp', () => {
@@ -134,6 +136,62 @@ describe('InteractiveApp', () => {
     await userEvent.click(screen.getByRole('button', { name: /back to ridge/i }));
 
     expect(bridgeStore.getState().activeSceneId).toBe(RIDGE_SCENE_ID);
+  });
+
+  it('renders Stampede scene status below the game card', () => {
+    bridgeActions.enterScene(STAMPEDE_SKETCH_SCENE_ID);
+    bridgeActions.setSceneUiStatus(STAMPEDE_SKETCH_SCENE_ID, 'stampedeStatus', {
+      timeRemainingSeconds: 68,
+      phaseLabel: 'Breather',
+      pageNoise: 0.4
+    });
+    render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
+
+    const footer = screen.getByRole('contentinfo');
+    expect(footer.contains(screen.getByText('1:08'))).toBe(true);
+    expect(footer.contains(screen.getByText('Breather'))).toBe(true);
+    expect(screen.getByRole('progressbar', { name: /page noise/i }).getAttribute('aria-valuenow')).toBe('40');
+  });
+
+  it('dispatches Stampede start panel actions through scene UI', async () => {
+    bridgeActions.enterScene(STAMPEDE_SKETCH_SCENE_ID);
+    bridgeActions.setSceneUiPanel(STAMPEDE_SKETCH_SCENE_ID, 'stampedeStartPrompt');
+    render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
+
+    await userEvent.click(screen.getByRole('button', { name: /^start$/i }));
+
+    expect(bridgeStore.getState().sceneUi.lastAction).toMatchObject({
+      ownerSceneId: STAMPEDE_SKETCH_SCENE_ID,
+      action: 'start'
+    });
+  });
+
+  it('dispatches Stampede result retry and back actions through scene UI', async () => {
+    bridgeActions.enterScene(STAMPEDE_SKETCH_SCENE_ID);
+    bridgeActions.setSceneUiPanel(
+      STAMPEDE_SKETCH_SCENE_ID,
+      'stampedeResult',
+      createStampedeResultViewModel({
+        phase: 'failed',
+        elapsedMs: 34_000,
+        durationMs: 90_000,
+        contacts: 3
+      })
+    );
+    render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
+    const resultDialog = screen.getByRole('dialog', { name: /page got crowded/i });
+
+    await userEvent.click(within(resultDialog).getByRole('button', { name: /^retry$/i }));
+    expect(bridgeStore.getState().sceneUi.lastAction).toMatchObject({
+      ownerSceneId: STAMPEDE_SKETCH_SCENE_ID,
+      action: 'retry'
+    });
+
+    await userEvent.click(within(resultDialog).getByRole('button', { name: /back to ridge/i }));
+    expect(bridgeStore.getState().sceneUi.lastAction).toMatchObject({
+      ownerSceneId: STAMPEDE_SKETCH_SCENE_ID,
+      action: 'backToRidge'
+    });
   });
 
   it('switches to static mode directly from the toolbar', async () => {

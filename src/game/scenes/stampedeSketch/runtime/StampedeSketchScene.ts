@@ -1,5 +1,7 @@
 import * as Phaser from 'phaser';
-import { PHASER_SCENE_KEYS } from '@/game/scenes/sceneIds';
+import { bridgeActions } from '@/game/bridge/store';
+import { PHASER_SCENE_KEYS, STAMPEDE_SKETCH_SCENE_ID } from '@/game/scenes/sceneIds';
+import type { SceneUiActionId } from '@/game/sceneUi/types';
 import {
   GAME_DESIGN_HEIGHT,
   GAME_DESIGN_WIDTH
@@ -21,9 +23,8 @@ import {
   type StampedeFeedbackRuntime
 } from './feedbackPresentation';
 import {
-  createStampedeHudRuntime,
   createStampedeHudSnapshot,
-  type StampedeHudRuntime
+  type StampedeHudSnapshot
 } from './hudPresentation';
 import {
   createStampedeInputRuntime,
@@ -39,9 +40,8 @@ import {
   STAMPEDE_PLAYER_CONTACT_RADIUS
 } from './runFlow';
 import {
-  createStampedeResultPresentationRuntime,
   createStampedeResultViewModel,
-  type StampedeResultPresentationRuntime
+  type StampedeResultViewModel
 } from './resultPresentation';
 import {
   createStampedeSession,
@@ -49,10 +49,6 @@ import {
   type StampedeSession,
   type StampedeSessionPhase
 } from './session';
-import {
-  createStampedeStartPromptRuntime,
-  type StampedeStartPromptRuntime
-} from './startPromptPresentation';
 import {
   createStampedeSwarmRuntime,
   type StampedeSwarmRuntime
@@ -67,14 +63,12 @@ export class StampedeSketchScene extends Phaser.Scene {
   private player?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   private inputRuntime?: StampedeInputRuntime;
   private swarmRuntime?: StampedeSwarmRuntime;
-  private hudRuntime?: StampedeHudRuntime;
   private feedbackRuntime?: StampedeFeedbackRuntime;
-  private resultRuntime?: StampedeResultPresentationRuntime;
   private autoAttackRuntime?: StampedeAutoAttackPresentationRuntime;
-  private startPromptRuntime?: StampedeStartPromptRuntime;
   private session: StampedeSession = createStampedeSession();
   private autoAttackState: StampedeAutoAttackState = createStampedeAutoAttackState();
   private shownResultPhase?: Exclude<StampedeSessionPhase, 'playing'>;
+  private lastPublishedStatusKey = '';
   private hasRunStarted = false;
   private isPaused = false;
   private onClose: () => void = () => {};
@@ -106,17 +100,18 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.createPlayer();
     this.inputRuntime = createStampedeInputRuntime({ scene: this });
     this.swarmRuntime = createStampedeSwarmRuntime({ scene: this });
-    this.hudRuntime = createStampedeHudRuntime({ scene: this });
     this.feedbackRuntime = createStampedeFeedbackRuntime({ scene: this });
-    this.resultRuntime = createStampedeResultPresentationRuntime({ scene: this });
     this.autoAttackRuntime = createStampedeAutoAttackPresentationRuntime({ scene: this });
-    this.startPromptRuntime = createStampedeStartPromptRuntime({ scene: this });
     this.session = createStampedeSession();
     this.autoAttackState = createStampedeAutoAttackState();
     this.shownResultPhase = undefined;
+    this.lastPublishedStatusKey = '';
     this.hasRunStarted = false;
     this.updateHud();
-    this.startPromptRuntime?.show();
+    this.showStartPrompt();
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      bridgeActions.clearSceneUi(STAMPEDE_SKETCH_SCENE_ID);
+    });
     this.setPaused(this.isPaused);
   }
 
@@ -137,6 +132,12 @@ export class StampedeSketchScene extends Phaser.Scene {
     if (!this.player || !this.inputRuntime || !this.swarmRuntime) return;
     if (this.isPaused) {
       this.player.setVelocity(0, 0);
+      return;
+    }
+
+    const sceneUiAction = bridgeActions.consumeSceneUiAction(STAMPEDE_SKETCH_SCENE_ID);
+    if (sceneUiAction) {
+      this.handleSceneUiAction(sceneUiAction.action);
       return;
     }
 
@@ -202,9 +203,8 @@ export class StampedeSketchScene extends Phaser.Scene {
 
   private closeToRidge(): void {
     this.player?.setVelocity(0, 0);
-    this.resultRuntime?.hide();
     this.autoAttackRuntime?.reset();
-    this.startPromptRuntime?.hide();
+    bridgeActions.clearSceneUi(STAMPEDE_SKETCH_SCENE_ID);
     this.onClose();
   }
 
@@ -212,10 +212,10 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.session = createStampedeSession();
     this.autoAttackState = createStampedeAutoAttackState();
     this.shownResultPhase = undefined;
+    this.lastPublishedStatusKey = '';
     this.hasRunStarted = true;
-    this.resultRuntime?.hide();
+    bridgeActions.clearSceneUiPanel(STAMPEDE_SKETCH_SCENE_ID);
     this.autoAttackRuntime?.reset();
-    this.startPromptRuntime?.hide();
     this.feedbackRuntime?.reset();
     this.swarmRuntime?.reset();
     this.inputRuntime?.setPointerControlEnabled(true);
@@ -240,10 +240,7 @@ export class StampedeSketchScene extends Phaser.Scene {
       return;
     }
     if (this.inputRuntime.startRequested()) {
-      this.hasRunStarted = true;
-      this.startPromptRuntime?.hide();
-      this.inputRuntime.clearPointerControl();
-      this.inputRuntime.updateStickVisuals();
+      this.startRun();
       return;
     }
 
@@ -278,22 +275,21 @@ export class StampedeSketchScene extends Phaser.Scene {
     if (this.shownResultPhase === phase) return;
     this.shownResultPhase = phase;
 
-    this.resultRuntime?.show({
-      view: createStampedeResultViewModel({
-        phase,
-        elapsedMs: this.session.elapsedMs,
-        durationMs: this.session.durationMs,
-        contacts: this.session.contacts
-      }),
-      onRetry: () => this.restartRun(),
-      onBack: () => this.closeToRidge()
+    const view = createStampedeResultViewModel({
+      phase,
+      elapsedMs: this.session.elapsedMs,
+      durationMs: this.session.durationMs,
+      contacts: this.session.contacts
     });
+    this.showResultPanel(view);
   }
 
   private updateHud(pressure?: StampedePressureSnapshot): void {
-    this.hudRuntime?.update(
-      createStampedeHudSnapshot(readStampedeSessionSnapshot(this.session), pressure)
+    const snapshot = createStampedeHudSnapshot(
+      readStampedeSessionSnapshot(this.session),
+      pressure
     );
+    this.publishStatus(snapshot);
   }
 
   private announceTerminalPhase(): void {
@@ -323,5 +319,62 @@ export class StampedeSketchScene extends Phaser.Scene {
       x: GAME_DESIGN_WIDTH / 2,
       y: GAME_DESIGN_HEIGHT / 2 + 36
     });
+  }
+
+  private handleSceneUiAction(action: SceneUiActionId): void {
+    switch (action) {
+      case 'start':
+        if (!this.hasRunStarted) {
+          this.startRun();
+        }
+        return;
+      case 'retry':
+        if (this.session.phase !== 'playing') {
+          this.restartRun();
+        }
+        return;
+      case 'backToRidge':
+        this.closeToRidge();
+        return;
+    }
+  }
+
+  private startRun(): void {
+    this.hasRunStarted = true;
+    bridgeActions.clearSceneUiPanel(STAMPEDE_SKETCH_SCENE_ID);
+    this.inputRuntime?.clearPointerControl();
+    this.inputRuntime?.updateStickVisuals();
+  }
+
+  private showStartPrompt(): void {
+    bridgeActions.setSceneUiPanel(
+      STAMPEDE_SKETCH_SCENE_ID,
+      'stampedeStartPrompt'
+    );
+  }
+
+  private showResultPanel(view: StampedeResultViewModel): void {
+    bridgeActions.setSceneUiPanel(
+      STAMPEDE_SKETCH_SCENE_ID,
+      'stampedeResult',
+      view
+    );
+  }
+
+  private publishStatus(snapshot: StampedeHudSnapshot): void {
+    const statusKey = [
+      Math.ceil(snapshot.timeRemainingSeconds ?? snapshot.timerSeconds ?? 0),
+      Math.round((snapshot.pageNoise ?? 0) * 100),
+      snapshot.phaseLabel ?? '',
+      snapshot.feedback ?? ''
+    ].join('|');
+
+    if (statusKey === this.lastPublishedStatusKey) return;
+    this.lastPublishedStatusKey = statusKey;
+    bridgeActions.setSceneUiStatus(
+      STAMPEDE_SKETCH_SCENE_ID,
+      'stampedeStatus',
+      snapshot
+    );
   }
 }

@@ -1,6 +1,13 @@
 import { useEffect, useState } from 'react';
 import { OVERWORLD_SCENE_ID, type SceneId } from '@/game/scenes/sceneIds';
 import type { OverlayId } from '@/game/overlays/overlayIds';
+import type {
+  SceneUiActionId,
+  SceneUiActionRequest,
+  SceneUiState,
+  SceneUiSurfaceId,
+  SceneUiSurfaceRequest
+} from '@/game/sceneUi/types';
 
 export interface TouchBridgeState {
   left: number;
@@ -65,6 +72,7 @@ export interface BridgeState {
   activeOverlayId: OverlayId | null;
   loadingSceneId: SceneId | null;
   isPaused: boolean;
+  sceneUi: SceneUiState;
   inventory: BridgeInventoryState;
   equipment: BridgeEquipmentState;
   progress: BridgeProgressState;
@@ -116,12 +124,47 @@ function overlayRequestsEqual(
   );
 }
 
+function sceneUiSurfacesEqual(
+  a: SceneUiSurfaceRequest | null,
+  b: SceneUiSurfaceRequest | null
+): boolean {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  return (
+    a.ownerSceneId === b.ownerSceneId &&
+    a.id === b.id &&
+    a.params === b.params
+  );
+}
+
+function sceneUiActionsEqual(
+  a: SceneUiActionRequest | null,
+  b: SceneUiActionRequest | null
+): boolean {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  return (
+    a.ownerSceneId === b.ownerSceneId &&
+    a.action === b.action &&
+    a.sequence === b.sequence
+  );
+}
+
+function clearSceneUiState(): SceneUiState {
+  return {
+    status: null,
+    panel: null,
+    lastAction: null
+  };
+}
+
 let state: BridgeState = {
   activeSceneId: OVERWORLD_SCENE_ID,
   activeOverlay: null,
   activeOverlayId: null,
   loadingSceneId: null,
   isPaused: false,
+  sceneUi: clearSceneUiState(),
   inventory: {
     ownedItemIds: []
   },
@@ -141,6 +184,7 @@ let state: BridgeState = {
     interactTap: false
   }
 };
+let nextSceneUiActionSequence = 1;
 
 function emit(): void {
   listeners.forEach((listener) => listener());
@@ -164,6 +208,9 @@ function setState(updater: (current: BridgeState) => BridgeState): void {
     previous.activeOverlayId === candidate.activeOverlayId &&
     previous.loadingSceneId === candidate.loadingSceneId &&
     previous.isPaused === candidate.isPaused &&
+    sceneUiSurfacesEqual(previous.sceneUi.status, candidate.sceneUi.status) &&
+    sceneUiSurfacesEqual(previous.sceneUi.panel, candidate.sceneUi.panel) &&
+    sceneUiActionsEqual(previous.sceneUi.lastAction, candidate.sceneUi.lastAction) &&
     arraysEqual(previous.inventory.ownedItemIds, candidate.inventory.ownedItemIds) &&
     arraysEqual(previous.equipment.equippedItemIds, candidate.equipment.equippedItemIds) &&
     previous.progress.hasGlasses === candidate.progress.hasGlasses &&
@@ -209,6 +256,7 @@ export const bridgeActions = {
       activeSceneId: sceneId,
       activeOverlay: null,
       loadingSceneId: null,
+      sceneUi: clearSceneUiState(),
       sceneHintText: null
     }));
   },
@@ -391,6 +439,127 @@ export const bridgeActions = {
       ...current,
       sceneHintText: text
     }));
+  },
+  setSceneUiStatus(
+    ownerSceneId: SceneId,
+    id: SceneUiSurfaceId,
+    params?: unknown
+  ): void {
+    setState((current) => ({
+      ...current,
+      sceneUi: {
+        ...current.sceneUi,
+        status: {
+          ownerSceneId,
+          id,
+          params
+        }
+      }
+    }));
+  },
+  clearSceneUiStatus(ownerSceneId?: SceneId): void {
+    setState((current) => {
+      if (
+        ownerSceneId &&
+        current.sceneUi.status?.ownerSceneId !== ownerSceneId
+      ) {
+        return current;
+      }
+      return {
+        ...current,
+        sceneUi: {
+          ...current.sceneUi,
+          status: null
+        }
+      };
+    });
+  },
+  setSceneUiPanel(
+    ownerSceneId: SceneId,
+    id: SceneUiSurfaceId,
+    params?: unknown
+  ): void {
+    setState((current) => ({
+      ...current,
+      sceneUi: {
+        ...current.sceneUi,
+        panel: {
+          ownerSceneId,
+          id,
+          params
+        }
+      }
+    }));
+  },
+  clearSceneUiPanel(ownerSceneId?: SceneId): void {
+    setState((current) => {
+      if (
+        ownerSceneId &&
+        current.sceneUi.panel?.ownerSceneId !== ownerSceneId
+      ) {
+        return current;
+      }
+      return {
+        ...current,
+        sceneUi: {
+          ...current.sceneUi,
+          panel: null
+        }
+      };
+    });
+  },
+  clearSceneUi(ownerSceneId?: SceneId): void {
+    setState((current) => {
+      if (!ownerSceneId) {
+        return {
+          ...current,
+          sceneUi: clearSceneUiState()
+        };
+      }
+
+      const keepStatus = current.sceneUi.status?.ownerSceneId !== ownerSceneId;
+      const keepPanel = current.sceneUi.panel?.ownerSceneId !== ownerSceneId;
+      const keepAction = current.sceneUi.lastAction?.ownerSceneId !== ownerSceneId;
+
+      if (keepStatus && keepPanel && keepAction) return current;
+
+      return {
+        ...current,
+        sceneUi: {
+          status: keepStatus ? current.sceneUi.status : null,
+          panel: keepPanel ? current.sceneUi.panel : null,
+          lastAction: keepAction ? current.sceneUi.lastAction : null
+        }
+      };
+    });
+  },
+  dispatchSceneUiAction(ownerSceneId: SceneId, action: SceneUiActionId): void {
+    const sequence = nextSceneUiActionSequence++;
+    setState((current) => ({
+      ...current,
+      sceneUi: {
+        ...current.sceneUi,
+        lastAction: {
+          ownerSceneId,
+          action,
+          sequence
+        }
+      }
+    }));
+  },
+  consumeSceneUiAction(ownerSceneId: SceneId): SceneUiActionRequest | null {
+    const current = bridgeStore.getState();
+    const action = current.sceneUi.lastAction;
+    if (!action || action.ownerSceneId !== ownerSceneId) return null;
+
+    setState((next) => ({
+      ...next,
+      sceneUi: {
+        ...next.sceneUi,
+        lastAction: null
+      }
+    }));
+    return action;
   },
   setTouchDirectional(direction: 'left' | 'right', intensity: number): void {
     setState((current) => ({

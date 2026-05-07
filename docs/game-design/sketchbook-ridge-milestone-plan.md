@@ -230,18 +230,19 @@ Current checkpoint:
 - **M4b Pressure Loop** accepted for prototype continuation: session timer,
   page-noise cadence, pressure HUD, capped swarm surges, contact limit, soft
   contact feedback, and pressure-aware swarm motion are in place.
+- **M4c/M4d prototype shell** is being hardened: run ending surfaces, Retry/Back
+  routing, the first automatic pencil swipe, and the Stampede scene-owned React
+  UI pilot are in place or under active review. Text-heavy Stampede status and
+  panels now use the bridge-backed scene UI path instead of Phaser canvas text.
 - Scene architecture is intentionally scene-local. `StampedeSketchScene` should
   remain the Phaser adapter/orchestrator while run decisions live behind
   `runtime/runFlow.ts` and swarm steering lives behind `runtime/swarmMotion.ts`.
 
 Next implementation slices:
 
-1. **M4c Run Ending Shell**: add a scene-local end surface for `Blanket held`
-   and `Page got crowded`, with Retry and Back to Ridge actions. Keep rewards
-   disabled.
-2. **M4d First Auto-Attack Toy**: add one automatic pencil swipe or ink orbit
-   that can clear pressure marks. Do not add XP or upgrade drafting yet.
-3. **M4e Pickup / Upgrade Draft**: add the first XP pickup loop and a rough
+1. **M4d Scene-Owned React UI QA**: verify the below-card status strip,
+   start/result panels, mobile start, Retry, and Back to Ridge behavior.
+2. **M4e Pickup / Upgrade Draft**: add the first XP pickup loop and a rough
    three-choice upgrade draft once the attack toy feels readable.
 
 Hold until later:
