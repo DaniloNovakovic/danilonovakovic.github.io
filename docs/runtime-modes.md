@@ -12,10 +12,18 @@ code remains the source of truth.
 - `loadingSceneId`: the scene currently being lazy-loaded, or `null`.
 - `isPaused`: derived in the bridge from active overlay or scene loading state.
 
+## Dev Starts
+
+In development, `?startScene=<sceneId>` can boot directly into a Phaser scene
+for fast iteration. Current useful targets include `hobbies`, `basement`,
+`potassium`, `ridge`, and `stampedeSketch`.
+
 ## Transition Owners
 
 - `src/game/bridge/store.ts` owns observable cross-boundary state and actions:
   `enterScene`, `returnToOverworld`, `openOverlay`, and `closeOverlay`.
+  `openOverlay(overlayId, options)` can carry overlay params and return-scene
+  intent from Phaser scenes to React overlays.
 - `src/game/sceneLifecycle/SceneLifecycleController.ts` maps bridge scene changes to
   `SceneManager` transitions and maps pause changes to active Phaser scenes.
 - `src/game/overlays/OverlayHost.tsx` renders React overlays from the active
@@ -33,5 +41,10 @@ Use this path when checking pattern refactors:
 4. Open and close a hobby overlay from inside the hobbies scene.
 5. Enter the Developer Basement, open the computer console, and close it back
    to the basement scene.
-6. Open inventory from the overworld and from a child scene.
-7. Verify mobile touch movement, jump, and interact one-shots.
+6. Boot `?startScene=ridge`; verify the Ridge shell renders, movement works,
+   and walking near a Stampede/Telegraph/Domino prop shows `[E] INTERACT`.
+   Interact with the Stampede prop to open its Trail Card, confirm `Enter`
+   starts Stampede Sketch, move in the arena, and return to Ridge. Telegraph and
+   Domino cards should still keep primary entry disabled.
+7. Open inventory from the overworld and from a child scene.
+8. Verify mobile touch movement, jump, and interact one-shots.

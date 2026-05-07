@@ -36,6 +36,7 @@ import {
   bridgeActions,
   isItemEquipped,
   isSecretDiscovered,
+  type OpenOverlayOptions,
   type SecretDiscoveryId
 } from '@/game/bridge/store';
 import {
@@ -98,7 +99,7 @@ export class OverworldScene extends Phaser.Scene {
 
   private playerRuntime?: SideViewPlayerRuntime;
   private onEnterScene?: (sceneId: SceneId) => void;
-  private onOpenOverlay?: (overlayId: OverlayId) => void;
+  private onOpenOverlay?: (overlayId: OverlayId, options?: OpenOverlayOptions) => void;
   private isPaused: boolean = false;
   private resumePosition?: { x: number; y: number };
   private readonly buildingSlots: OverworldBuildingSlot[] = [];
@@ -118,7 +119,7 @@ export class OverworldScene extends Phaser.Scene {
 
   init(data: {
     onEnterScene: (sceneId: SceneId) => void;
-    onOpenOverlay: (overlayId: OverlayId) => void;
+    onOpenOverlay: (overlayId: OverlayId, options?: OpenOverlayOptions) => void;
     isPaused: boolean;
     resumePosition?: { x: number; y: number };
   }) {

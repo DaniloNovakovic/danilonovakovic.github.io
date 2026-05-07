@@ -33,6 +33,22 @@ Clear 10 procedural campaign waves, defeat the boss on wave 11, and collect the 
 - **Endless:** Wave 12+ continues the same run with existing score, lives, skills, and escalating procedural waves.
 - **Records:** Finished runs are saved to a local top-5 leaderboard in browser storage.
 
+## Ridge Anchor Contract
+
+Potassium Slip is the existing arcade anchor for Sketchbook Ridge. It owns the
+ricochet lane and should remain the benchmark for a deep opt-in mini-game, not
+the template every future mini-game must match.
+
+The Circuit is Potassium's durable world reward and the alternate key for the
+first Relay Spire gate. Future Ridge gate code should check existing inventory
+ownership with `isItemOwned('circuit')`, or the equivalent bridge inventory read,
+instead of adding a separate Ridge progress flag such as `circuitOwned`.
+
+Ridge signs, Trail Cards, NPCs, and stickers may acknowledge Potassium and the
+Circuit, but Potassium run behavior should stay scene-owned: fresh-start entry,
+campaign victory grants the Circuit once, and endless mode continues only inside
+the Potassium scene.
+
 ## Enemies
 
 - **Intern Bug:** Basic small target.

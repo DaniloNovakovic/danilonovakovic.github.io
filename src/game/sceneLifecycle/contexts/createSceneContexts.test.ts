@@ -25,7 +25,9 @@ describe('createSceneContexts', () => {
       PHASER_SCENE_KEYS.overworld,
       PHASER_SCENE_KEYS.hobbies,
       PHASER_SCENE_KEYS.basement,
-      PHASER_SCENE_KEYS.potassium
+      PHASER_SCENE_KEYS.potassium,
+      PHASER_SCENE_KEYS.ridge,
+      PHASER_SCENE_KEYS.stampedeSketch
     ]);
   });
 
@@ -74,6 +76,19 @@ describe('createSceneContexts', () => {
     expect(getSceneStartResume).toHaveBeenCalledWith(PHASER_SCENE_KEYS.basement);
   });
 
+  it('passes overlay options through scene start callbacks', () => {
+    const onOpenOverlay = vi.fn();
+    const contexts = createSceneContexts(makeDeps({ onOpenOverlay }));
+    const ridgeStartData = contexts[4].getStartData() as {
+      onOpenOverlay: (overlayId: 'trailCard', options?: { params?: unknown }) => void;
+    };
+    const params = { title: 'Stampede Sketch' };
+
+    ridgeStartData.onOpenOverlay('trailCard', { params });
+
+    expect(onOpenOverlay).toHaveBeenCalledWith('trailCard', { params });
+  });
+
   it('prepares potassium start before reading potassium start position', () => {
     const calls: string[] = [];
     const prepareSceneStart = vi.fn((sceneKey: string) => {
@@ -117,7 +132,9 @@ describe('createSceneContexts', () => {
       `prepare:${PHASER_SCENE_KEYS.basement}`,
       `get:${PHASER_SCENE_KEYS.basement}`,
       `prepare:${PHASER_SCENE_KEYS.potassium}`,
-      `get:${PHASER_SCENE_KEYS.potassium}`
+      `get:${PHASER_SCENE_KEYS.potassium}`,
+      `prepare:${PHASER_SCENE_KEYS.ridge}`,
+      `get:${PHASER_SCENE_KEYS.ridge}`
     ]);
   });
 
@@ -128,9 +145,23 @@ describe('createSceneContexts', () => {
     await expect(contexts[1].loadScene?.()).resolves.toEqual({ id: 'hobbies' });
     await expect(contexts[2].loadScene?.()).resolves.toEqual({ id: 'basement' });
     await expect(contexts[3].loadScene?.()).resolves.toEqual({ id: 'potassium' });
+    await expect(contexts[4].loadScene?.()).resolves.toEqual({ id: 'ridge' });
+    await expect(contexts[5].loadScene?.()).resolves.toEqual({ id: 'stampedeSketch' });
     expect(loadPhaserScene).toHaveBeenNthCalledWith(1, 'hobbies');
     expect(loadPhaserScene).toHaveBeenNthCalledWith(2, 'basement');
     expect(loadPhaserScene).toHaveBeenNthCalledWith(3, 'potassium');
+    expect(loadPhaserScene).toHaveBeenNthCalledWith(4, 'ridge');
+    expect(loadPhaserScene).toHaveBeenNthCalledWith(5, 'stampedeSketch');
+  });
+
+  it('returns from Stampede Sketch to Ridge', () => {
+    const onEnterScene = vi.fn();
+    const contexts = createSceneContexts(makeDeps({ onEnterScene }));
+    const stampedeStartData = contexts[5].getStartData() as { onClose: () => void };
+
+    stampedeStartData.onClose();
+
+    expect(onEnterScene).toHaveBeenCalledWith('ridge');
   });
 
   it('rejects lazy loading with a descriptive error when a scene binding is missing', async () => {

@@ -1,6 +1,6 @@
 import { useEffect, type RefObject } from 'react';
 import * as Phaser from 'phaser';
-import { bridgeActions } from '@/game/bridge/store';
+import { bridgeActions, type OpenOverlayOptions } from '@/game/bridge/store';
 import { createSceneContexts } from '@/game/sceneLifecycle/contexts/createSceneContexts';
 import { OverworldScene } from '@/game/scenes/overworld/runtime';
 import { PHASER_SCENE_KEYS, isSceneId, type SceneId } from '@/game/scenes/sceneIds';
@@ -16,13 +16,13 @@ interface UsePhaserGameBootOptions {
   bridgeRef: RefObject<{
     isPaused: boolean;
     onEnterScene: (sceneId: SceneId) => void;
-    onOpenOverlay: (overlayId: OverlayId) => void;
+    onOpenOverlay: (overlayId: OverlayId, options?: OpenOverlayOptions) => void;
     onReturnToOverworld: () => void;
   }>;
   containerRef: RefObject<HTMLDivElement | null>;
   gameRef: RefObject<Phaser.Game | null>;
   stableOnEnterScene: (sceneId: SceneId) => void;
-  stableOnOpenOverlay: (overlayId: OverlayId) => void;
+  stableOnOpenOverlay: (overlayId: OverlayId, options?: OpenOverlayOptions) => void;
   stableOnReturnToOverworld: () => void;
 }
 

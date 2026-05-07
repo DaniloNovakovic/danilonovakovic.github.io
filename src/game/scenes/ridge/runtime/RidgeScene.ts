@@ -1,0 +1,357 @@
+import * as Phaser from 'phaser';
+import { PHASER_SCENE_KEYS } from '@/game/scenes/sceneIds';
+import { isItemEquipped, type OpenOverlayOptions } from '@/game/bridge/store';
+import { TRAIL_CARD_OVERLAY_ID, type OverlayId } from '@/game/overlays/overlayIds';
+import { getMessages } from '@/shared/i18n';
+import {
+  GAME_DESIGN_HEIGHT,
+  GAME_DESIGN_WIDTH,
+  OVERWORLD_JUMP_VELOCITY_Y,
+  OVERWORLD_PLAYER_GRAVITY_Y,
+  OVERWORLD_SPRINT_SPEED,
+  OVERWORLD_WALK_SPEED
+} from '@/game/sharedSceneRuntime/config';
+import {
+  createSideViewPlayerRuntime,
+  type SideViewPlayerRuntime
+} from '@/game/sharedSceneRuntime/player/SideViewPlayerRuntime';
+import { TextureGenerator } from '@/game/sharedSceneRuntime/textures/TextureGenerator';
+import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
+import {
+  createInteriorInteractionRuntime,
+  type InteriorInteractionRuntime
+} from '@/game/sharedSceneRuntime/interactions/InteriorInteractionRuntime';
+import {
+  RIDGE_FLOOR_Y,
+  RIDGE_LANDMARKS,
+  RIDGE_PLAYER_RESUME_CLAMP,
+  RIDGE_PLAYER_START,
+  RIDGE_TRAIL_CARD_TARGETS,
+  RIDGE_WORLD_WIDTH,
+  type RidgeTrailCardTargetId,
+  type RidgeLandmark
+} from '../worldLayout';
+import type { TrailCardOverlayParams } from '@/game/overlays/trailCard/types';
+
+interface RidgeSceneStartData {
+  onClose?: () => void;
+  onOpenOverlay?: (overlayId: OverlayId, options?: OpenOverlayOptions) => void;
+  isPaused?: boolean;
+  resumePosition?: { x: number; y: number };
+}
+
+type RidgeInteractionEffect =
+  | { kind: 'close' }
+  | { kind: 'openTrailCard'; params: TrailCardOverlayParams };
+
+export class RidgeScene extends Phaser.Scene {
+  player?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+  interactPrompt?: Phaser.GameObjects.Text;
+
+  private playerRuntime?: SideViewPlayerRuntime;
+  private interactionRuntime?: InteriorInteractionRuntime<RidgeTrailCardTargetId, RidgeInteractionEffect>;
+  private onClose: () => void = () => {};
+  private onOpenOverlay?: (overlayId: OverlayId, options?: OpenOverlayOptions) => void;
+  private isPaused = false;
+  private resumePosition?: { x: number; y: number };
+
+  constructor() {
+    super(PHASER_SCENE_KEYS.ridge);
+  }
+
+  init(data: RidgeSceneStartData = {}): void {
+    this.onClose = data.onClose ?? (() => {});
+    this.onOpenOverlay = data.onOpenOverlay;
+    this.isPaused = data.isPaused ?? false;
+    this.resumePosition = data.resumePosition;
+  }
+
+  preload(): void {
+    if (!this.textures.exists('player_idle')) {
+      TextureGenerator.generatePlayer(this);
+    }
+  }
+
+  getResumeCapturePosition(): { x: number; y: number } | null {
+    return this.playerRuntime?.captureResume() ?? null;
+  }
+
+  setPaused(paused: boolean): void {
+    this.isPaused = paused;
+    this.playerRuntime?.setPaused(paused);
+  }
+
+  create(data: RidgeSceneStartData = {}): void {
+    this.onClose = data.onClose ?? this.onClose;
+    this.onOpenOverlay = data.onOpenOverlay ?? this.onOpenOverlay;
+    const messages = getMessages();
+
+    this.cameras.main.setBackgroundColor('#f7f1df');
+    this.physics.world.setBounds(0, 0, RIDGE_WORLD_WIDTH, GAME_DESIGN_HEIGHT);
+
+    const ground = this.createGround();
+
+    this.addBackdrop();
+    this.addLandmarks();
+    this.addPlaceholderCopy();
+    this.createPlayer(ground);
+    this.createTrailCardInteractions(messages.navigation.interact);
+    this.setPaused(this.isPaused);
+    this.playerRuntime?.syncAppearance();
+  }
+
+  update(): void {
+    const playerUpdate = this.playerRuntime?.update();
+    if (!playerUpdate || playerUpdate.paused) return;
+
+    if (playerUpdate.commands.exitContext) {
+      this.onClose();
+      return;
+    }
+
+    const interaction = this.interactionRuntime?.update({
+      playerX: this.player?.x ?? 0,
+      playerY: this.player?.y ?? 0,
+      interactRequested: playerUpdate.step.interactRequested,
+      exitRequested: playerUpdate.commands.exitContext
+    });
+
+    if (!interaction || !interaction.prompt.visible) {
+      this.interactPrompt?.setVisible(false);
+      return;
+    }
+
+    this.interactPrompt?.setPosition(interaction.prompt.x, interaction.prompt.y).setVisible(true);
+    if (interaction.effect?.kind === 'openTrailCard') {
+      this.onOpenOverlay?.(TRAIL_CARD_OVERLAY_ID, {
+        params: interaction.effect.params,
+        returnToSceneId: PHASER_SCENE_KEYS.ridge
+      });
+    }
+  }
+
+  private createGround(): Phaser.GameObjects.Zone {
+    this.add.rectangle(
+      RIDGE_WORLD_WIDTH / 2,
+      GAME_DESIGN_HEIGHT - 42,
+      RIDGE_WORLD_WIDTH,
+      84,
+      0x2f4736,
+      1
+    );
+    this.add.rectangle(
+      RIDGE_WORLD_WIDTH / 2,
+      GAME_DESIGN_HEIGHT - 88,
+      RIDGE_WORLD_WIDTH,
+      44,
+      0xd7c78f,
+      1
+    );
+
+    const ground = this.add.zone(RIDGE_WORLD_WIDTH / 2, RIDGE_FLOOR_Y + 24, RIDGE_WORLD_WIDTH, 48);
+    this.physics.add.existing(ground, true);
+    return ground;
+  }
+
+  private addBackdrop(): void {
+    for (let x = 120; x < RIDGE_WORLD_WIDTH; x += 260) {
+      const y = 420 + Math.sin(x / 160) * 18;
+      this.add.line(x, y, -130, 24, 130, -24, 0x1f1f1d, 0.18).setLineWidth(4);
+      this.add.line(x + 36, y + 34, -80, 14, 80, -14, 0x1f1f1d, 0.12).setLineWidth(3);
+    }
+
+    this.add.rectangle(RIDGE_WORLD_WIDTH / 2, RIDGE_FLOOR_Y - 78, RIDGE_WORLD_WIDTH, 8, 0x1f1f1d, 0.12);
+    this.add.rectangle(RIDGE_WORLD_WIDTH / 2, RIDGE_FLOOR_Y - 6, RIDGE_WORLD_WIDTH, 5, 0x1f1f1d, 0.16);
+  }
+
+  private createPlayer(ground: Phaser.GameObjects.Zone): void {
+    this.playerRuntime = createSideViewPlayerRuntime({
+      scene: this,
+      start: RIDGE_PLAYER_START,
+      resumePosition: this.resumePosition,
+      resumeClamp: RIDGE_PLAYER_RESUME_CLAMP,
+      sprite: {
+        depth: 30,
+        gravityY: OVERWORLD_PLAYER_GRAVITY_Y
+      },
+      movement: {
+        walkSpeed: OVERWORLD_WALK_SPEED,
+        sprintSpeed: OVERWORLD_SPRINT_SPEED,
+        jumpVelocityY: OVERWORLD_JUMP_VELOCITY_Y
+      },
+      input: {
+        allowJump: true,
+        allowSprint: true,
+        includeEscapeKey: true
+      },
+      appearance: {
+        isGlassesEquipped: () => isItemEquipped('glasses'),
+        idleTextureKey: 'player_idle',
+        glassesTextureKey: 'player_glasses'
+      },
+      camera: {
+        worldBounds: {
+          x: 0,
+          y: 0,
+          width: RIDGE_WORLD_WIDTH,
+          height: GAME_DESIGN_HEIGHT
+        },
+        designSize: {
+          width: GAME_DESIGN_WIDTH,
+          height: GAME_DESIGN_HEIGHT
+        },
+        profile: {
+          zoom: 1,
+          followOffsetY: 0
+        }
+      }
+    });
+    this.player = this.playerRuntime.player;
+    this.physics.add.collider(this.player, ground);
+  }
+
+  private createTrailCardInteractions(promptText: string): void {
+    this.interactPrompt = createUiText(this, 0, 0, promptText, {
+      fontSize: '16px',
+      color: '#1a1a1a',
+      backgroundColor: '#ffffff',
+      padding: { x: 5, y: 2 }
+    }).setOrigin(0.5).setDepth(100).setVisible(false);
+
+    this.interactionRuntime = createInteriorInteractionRuntime<
+      RidgeTrailCardTargetId,
+      RidgeInteractionEffect
+    >({
+      interactRadius: 72,
+      exitEffect: { kind: 'close' },
+      targets: RIDGE_TRAIL_CARD_TARGETS.map((target) => ({
+        id: target.id,
+        kind: 'trail-card',
+        x: target.x,
+        distanceAnchorY: target.distanceAnchorY,
+        prompt: target.prompt,
+        effect: {
+          kind: 'openTrailCard',
+          params: target.card
+        } satisfies RidgeInteractionEffect
+      }))
+    });
+  }
+
+  private addRelaySpire(x: number): void {
+    this.add.triangle(x, 205, 0, 180, 46, 0, 92, 180, 0x1c1a18, 0.82);
+    this.add.rectangle(x + 46, 330, 34, 250, 0x1c1a18, 0.82);
+    this.add.line(x + 46, 205, -80, 35, 80, 35, 0x1c1a18, 0.5).setLineWidth(3);
+    this.add.circle(x + 46, 166, 12, 0xf0d35f, 0.9);
+  }
+
+  private addLandmarks(): void {
+    RIDGE_LANDMARKS.forEach((landmark) => {
+      switch (landmark.kind) {
+        case 'cicka-perch':
+          this.addCickaPerch(landmark);
+          break;
+        case 'stampede-blanket':
+          this.addStampedeBlanket(landmark);
+          break;
+        case 'telegraph-bag':
+          this.addTelegraphBag(landmark);
+          break;
+        case 'ridge-guide':
+          this.addRidgeGuide(landmark);
+          break;
+        case 'relay-spire':
+          this.addRelaySpire(landmark.x);
+          break;
+        case 'domino-desk':
+          this.addDominoDesk(landmark);
+          break;
+      }
+      this.addLandmarkLabel(landmark);
+    });
+  }
+
+  private addCickaPerch(landmark: RidgeLandmark): void {
+    const x = landmark.x;
+    const y = RIDGE_FLOOR_Y - 74;
+    this.add.rectangle(x, y + 28, 10, 86, 0x1f1f1d, 0.88);
+    this.add.rectangle(x, y - 12, 86, 10, 0x1f1f1d, 0.88);
+    this.add.ellipse(x + 16, y - 36, 54, 28, 0x1f1f1d, 0.95);
+    this.add.triangle(x - 8, y - 50, 0, 14, 12, 0, 22, 14, 0x1f1f1d, 0.95);
+    this.add.triangle(x + 18, y - 50, 0, 14, 12, 0, 22, 14, 0x1f1f1d, 0.95);
+    this.add.circle(x + 30, y - 38, 3, 0xf7f1df, 1);
+    this.add.line(x - 18, y - 32, -30, 0, -54, -10, 0x1f1f1d, 0.9).setLineWidth(5);
+  }
+
+  private addStampedeBlanket(landmark: RidgeLandmark): void {
+    const x = landmark.x;
+    const y = RIDGE_FLOOR_Y - 46;
+    this.add.rectangle(x, y, 104, 32, 0xb85f5a, 0.9);
+    this.add.rectangle(x - 26, y, 18, 32, 0xf7f1df, 0.7);
+    this.add.rectangle(x + 26, y, 18, 32, 0xf7f1df, 0.7);
+    this.add.circle(x - 22, y - 26, 11, 0x1f1f1d, 0.92);
+    this.add.circle(x + 28, y - 20, 9, 0x1f1f1d, 0.75);
+    this.add.line(x, y - 42, -34, 6, 34, -6, 0x1f1f1d, 0.32).setLineWidth(3);
+  }
+
+  private addTelegraphBag(landmark: RidgeLandmark): void {
+    const x = landmark.x;
+    const y = RIDGE_FLOOR_Y - 58;
+    this.add.rectangle(x, y, 70, 54, 0x596f8f, 0.84);
+    this.add.rectangle(x, y - 34, 48, 16, 0x1f1f1d, 0.88);
+    this.add.arc(x, y - 40, 36, Math.PI, Math.PI * 2, false, 0x1f1f1d, 0.2).setStrokeStyle(4, 0x1f1f1d, 0.7);
+    this.add.line(x + 62, y - 18, -30, -20, 30, 20, 0x1f1f1d, 0.7).setLineWidth(4);
+  }
+
+  private addRidgeGuide(landmark: RidgeLandmark): void {
+    const x = landmark.x;
+    const y = RIDGE_FLOOR_Y - 72;
+    this.add.circle(x, y - 28, 16, 0xf7f1df, 1).setStrokeStyle(3, 0x1f1f1d, 1);
+    this.add.rectangle(x, y + 8, 32, 58, 0xf7f1df, 1).setStrokeStyle(3, 0x1f1f1d, 1);
+    this.add.line(x - 8, y + 2, -30, -16, -52, -28, 0x1f1f1d, 1).setLineWidth(4);
+    this.add.rectangle(x + 42, y - 8, 42, 28, 0xf0d35f, 0.9).setStrokeStyle(3, 0x1f1f1d, 1);
+    this.add.text(x + 29, y - 17, '?', {
+      fontFamily: 'monospace',
+      fontSize: '22px',
+      color: '#1f1f1d'
+    });
+  }
+
+  private addDominoDesk(landmark: RidgeLandmark): void {
+    const x = landmark.x;
+    const y = RIDGE_FLOOR_Y - 62;
+    this.add.rectangle(x, y, 108, 50, 0xd7c78f, 0.96).setStrokeStyle(4, 0x1f1f1d, 1);
+    this.add.rectangle(x + 70, y - 40, 46, 94, 0xf7f1df, 1).setStrokeStyle(4, 0x1f1f1d, 1);
+    this.add.circle(x - 28, y - 16, 7, 0x1f1f1d, 1);
+    this.add.circle(x, y - 16, 7, 0x1f1f1d, 1);
+    this.add.circle(x + 28, y - 16, 7, 0x1f1f1d, 1);
+  }
+
+  private addLandmarkLabel(landmark: RidgeLandmark): void {
+    this.add.text(landmark.x, RIDGE_FLOOR_Y - 14, landmark.label, {
+      fontFamily: 'monospace',
+      fontSize: '13px',
+      color: '#1f1f1d',
+      backgroundColor: '#f7f1dfcc',
+      padding: { x: 3, y: 1 }
+    }).setOrigin(0.5);
+  }
+
+  private addPlaceholderCopy(): void {
+    this.add.text(48, 48, 'Sketchbook Ridge', {
+      fontFamily: 'monospace',
+      fontSize: '34px',
+      color: '#1f1f1d'
+    });
+    this.add.text(50, 94, 'M1 shell placeholder. The old overworld stays default for now.', {
+      fontFamily: 'monospace',
+      fontSize: '16px',
+      color: '#4b4337'
+    });
+    this.add.text(50, 122, 'Move with arrows/WASD, sprint with Shift, jump with Up, exit with H or Esc.', {
+      fontFamily: 'monospace',
+      fontSize: '16px',
+      color: '#4b4337'
+    });
+  }
+}

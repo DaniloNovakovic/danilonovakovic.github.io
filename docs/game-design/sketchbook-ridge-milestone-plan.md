@@ -19,6 +19,27 @@ The first complete milestone should prove:
 
 Anything beyond that is future scope unless a slice explicitly pulls it in.
 
+## Current Implementation Status
+
+- **M1 Ridge Shell** is complete for the current placeholder slice: Ridge can
+  boot directly with `?startScene=ridge`, uses shared side-view movement, shows
+  the Relay Spire, Cicka's first perch, a static Ridge Guide, and three Trail
+  Card props.
+- **M2 Trail Card and Manual Overlay Surface** is complete for the current
+  prototype slice: the reusable global Trail Card overlay, reusable Manual Page
+  overlay shape, Ridge trigger contract, and mobile/readability polish are in
+  place.
+- **M3 Art and Audio Research Pack** is in review: visual, overlay/manual, and
+  audio direction packs now guide Cicka, Guide, Trail Card, Manual Page,
+  Stampede, Relay Spire, and Ridge audio without blocking rough engineering
+  prototypes.
+- **M4 Stampede Sketch Prototype** is underway with M4a movement accepted and
+  M4b pressure loop accepted as good enough for the current prototype slice:
+  the Stampede Trail Card can enter a scene-local arena with timer,
+  page-noise cadence, pressure HUD, capped swarm surges, pressure-aware swarm
+  motion, soft contact feedback, and return to Ridge. Rewards, attacks, XP,
+  upgrades, and result overlays remain future M4 slices.
+
 ## Production Crew
 
 Role contracts and activation phrases live in
@@ -119,6 +140,13 @@ Goal: make the main game shape playable with placeholders.
 
 Owner: Ridge scene.
 
+Start Ridge as a separate `ridge` scene first. Keep the current overworld as
+the default route until the Ridge shell feels good. During development, boot
+directly into Ridge with `?startScene=ridge` for fast iteration.
+
+Keep the first movement shell flat and readable. Use visual height changes,
+landmark silhouettes, and prop staging before adding real vertical traversal.
+
 Outputs:
 
 - `src/game/scenes/ridge/**`.
@@ -162,6 +190,12 @@ Outputs:
 - Trail Card and Manual Page visual specs.
 - Ridge audio palette, Cicka SFX language, Potassium acknowledgement micro-pack, Stampede prototype audio notes.
 
+Current review packs:
+
+- [`sketchbook-ridge-m3-visual-pack.md`](./sketchbook-ridge-m3-visual-pack.md)
+- [`sketchbook-ridge-m3-overlay-pack.md`](./sketchbook-ridge-m3-overlay-pack.md)
+- [`sketchbook-ridge-m3-audio-pack.md`](./sketchbook-ridge-m3-audio-pack.md)
+
 These are research/spec deliverables. They should not block engineering beyond
 basic silhouette placeholders.
 
@@ -174,7 +208,10 @@ Owner: Stampede scene.
 Outputs:
 
 - `src/game/scenes/stampedeSketch/**`.
-- 60-90 second move-only survivor prototype.
+- 60-90 second survivor prototype. M4a movement feel covers direct entry from
+  the Stampede Trail Card, top-down 8-way movement, pointer drag steering, and
+  return to Ridge. M4b adds a scene-local page-noise cadence, pressure HUD,
+  capped swarm surges, and soft contact feedback before reward wiring.
 - capped enemies.
 - auto-attacks.
 - XP pickups.
@@ -184,6 +221,34 @@ Outputs:
 
 Depends on M0 and the Ridge trigger contract from M1. Most scene internals can
 be built independently.
+
+Current checkpoint:
+
+- **M4a Movement Feel** accepted: direct entry from the Stampede Trail Card,
+  top-down 8-way movement, pointer drag steering, vertical-board presentation,
+  and return to Ridge are in place.
+- **M4b Pressure Loop** accepted for prototype continuation: session timer,
+  page-noise cadence, pressure HUD, capped swarm surges, contact limit, soft
+  contact feedback, and pressure-aware swarm motion are in place.
+- Scene architecture is intentionally scene-local. `StampedeSketchScene` should
+  remain the Phaser adapter/orchestrator while run decisions live behind
+  `runtime/runFlow.ts` and swarm steering lives behind `runtime/swarmMotion.ts`.
+
+Next implementation slices:
+
+1. **M4c Run Ending Shell**: add a scene-local end surface for `Blanket held`
+   and `Page got crowded`, with Retry and Back to Ridge actions. Keep rewards
+   disabled.
+2. **M4d First Auto-Attack Toy**: add one automatic pencil swipe or ink orbit
+   that can clear pressure marks. Do not add XP or upgrade drafting yet.
+3. **M4e Pickup / Upgrade Draft**: add the first XP pickup loop and a rough
+   three-choice upgrade draft once the attack toy feels readable.
+
+Hold until later:
+
+- Enemy-enemy avoidance beyond pressure-aware steering.
+- Durable reward ids, first-clear stamp, glide pip, and Ridge memory rendering.
+- Player manual updates; Stampede is still dev/prototype behavior.
 
 ### M5: Ridge Memory
 
@@ -329,9 +394,15 @@ What to build:
 - Cicka mini kit spec.
 - landmark silhouette board.
 - sticker/ink-memory vocabulary.
-- one Trail Card and one Manual Page visual mock.
+- Trail Card and Manual Page visual direction.
 
-Human review required because visual taste and Cicka personality matter.
+Current draft:
+[`sketchbook-ridge-m3-visual-pack.md`](./sketchbook-ridge-m3-visual-pack.md)
+and
+[`sketchbook-ridge-m3-overlay-pack.md`](./sketchbook-ridge-m3-overlay-pack.md).
+
+Human review required because visual taste, overlay tone, and Cicka personality
+matter.
 
 ### 8. Produce Ridge Audio Direction Pack
 
@@ -345,6 +416,9 @@ What to build:
 - Potassium acknowledgement micro-pack.
 - Stampede prototype audio notes.
 - Telegraph timing cue notes.
+
+Current draft:
+[`sketchbook-ridge-m3-audio-pack.md`](./sketchbook-ridge-m3-audio-pack.md).
 
 Human review required before committing to music direction.
 

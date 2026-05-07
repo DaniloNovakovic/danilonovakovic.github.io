@@ -93,4 +93,21 @@ describe('readSceneInputCommands', () => {
 
     expect(frame.exitContext).toBe(true);
   });
+
+  it('does not map held H or Escape to exit context', () => {
+    const frame = readSceneInputCommands({
+      frame: createInputCommandFrame(),
+      cursors: cursors(),
+      wasd: { a: key(), d: key() },
+      interactKey: key(),
+      hKey: key(true),
+      escapeKey: key(),
+      touch: neutralTouch,
+      oneShots: { jumpQueued: false, interactTap: false },
+      allowJump: false,
+      allowSprint: false
+    });
+
+    expect(frame.exitContext).toBe(false);
+  });
 });

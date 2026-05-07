@@ -20,7 +20,7 @@ import {
   OVERWORLD_SPRINT_SPEED,
   OVERWORLD_WALK_SPEED
 } from '@/game/sharedSceneRuntime/config';
-import { isItemEquipped } from '@/game/bridge/store';
+import { isItemEquipped, type OpenOverlayOptions } from '@/game/bridge/store';
 import { buildHobbiesRoom } from './HobbiesRoom';
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
 import {
@@ -45,7 +45,7 @@ export class HobbiesScene extends Phaser.Scene {
   private playerRuntime?: SideViewPlayerRuntime;
   private interactionRuntime?: InteriorInteractionRuntime<HobbiesInteractionId, HobbiesInteractionEffect>;
   private onClose?: () => void;
-  private onOpenOverlay?: (overlayId: OverlayId) => void;
+  private onOpenOverlay?: (overlayId: OverlayId, options?: OpenOverlayOptions) => void;
   private isPaused: boolean = false;
   private resumePosition?: { x: number; y: number };
 
@@ -55,7 +55,7 @@ export class HobbiesScene extends Phaser.Scene {
 
   init(data: {
     onClose: () => void;
-    onOpenOverlay: (overlayId: OverlayId) => void;
+    onOpenOverlay: (overlayId: OverlayId, options?: OpenOverlayOptions) => void;
     isPaused?: boolean;
     resumePosition?: { x: number; y: number };
   }) {

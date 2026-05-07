@@ -6,6 +6,8 @@ import {
   OVERWORLD_SCENE_ID,
   PHASER_SCENE_KEYS,
   POTASSIUM_SCENE_ID,
+  RIDGE_SCENE_ID,
+  STAMPEDE_SKETCH_SCENE_ID,
   type SceneId
 } from './sceneIds';
 
@@ -51,6 +53,22 @@ export const SCENE_DEFINITIONS: readonly SceneDefinition[] = [
     description: messages.catalog.potassiumSlip.potassium.description,
     includeInDevSwitcher: true,
     loadScene: () => import('./potassiumSlip/runtime/PotassiumSlipScene').then((m) => m.PotassiumSlipScene)
+  },
+  {
+    id: RIDGE_SCENE_ID,
+    sceneKey: PHASER_SCENE_KEYS.ridge,
+    title: messages.catalog.ridge.ridge.name,
+    description: messages.catalog.ridge.ridge.description,
+    includeInDevSwitcher: true,
+    loadScene: () => import('./ridge/runtime/RidgeScene').then((m) => m.RidgeScene)
+  },
+  {
+    id: STAMPEDE_SKETCH_SCENE_ID,
+    sceneKey: PHASER_SCENE_KEYS.stampedeSketch,
+    title: messages.catalog.stampedeSketch.stampedeSketch.name,
+    description: messages.catalog.stampedeSketch.stampedeSketch.description,
+    includeInDevSwitcher: true,
+    loadScene: () => import('./stampedeSketch/runtime/StampedeSketchScene').then((m) => m.StampedeSketchScene)
   }
 ];
 

@@ -3,8 +3,11 @@ import {
   bridgeActions,
   bridgeStore,
   getTouchState,
+  hasRidgeManualPage,
+  hasRidgeStamp,
   isItemEquipped,
   isItemOwned,
+  isRidgeShortcutUnlocked,
   isSecretDiscovered
 } from './store';
 import { OVERWORLD_SCENE_ID } from '@/game/scenes/sceneIds';
@@ -157,6 +160,14 @@ describe('bridgeStore', () => {
     it('starts without glasses', () => {
       expect(bridgeStore.getState().progress.hasGlasses).toBe(false);
       expect(bridgeStore.getState().progress.discoveredSecretIds).toEqual([]);
+      expect(bridgeStore.getState().progress.ridge).toEqual({
+        stampIds: [],
+        manualPageIds: [],
+        mobility: {
+          glidePips: 0
+        },
+        shortcutIds: []
+      });
       expect(bridgeStore.getState().inventory.ownedItemIds).toEqual([]);
       expect(bridgeStore.getState().equipment.equippedItemIds).toEqual([]);
     });
@@ -175,6 +186,14 @@ describe('bridgeStore', () => {
       bridgeActions.resetProgress();
       expect(bridgeStore.getState().progress.hasGlasses).toBe(false);
       expect(bridgeStore.getState().progress.discoveredSecretIds).toEqual([]);
+      expect(bridgeStore.getState().progress.ridge).toEqual({
+        stampIds: [],
+        manualPageIds: [],
+        mobility: {
+          glidePips: 0
+        },
+        shortcutIds: []
+      });
       expect(bridgeStore.getState().inventory.ownedItemIds).toEqual([]);
       expect(bridgeStore.getState().equipment.equippedItemIds).toEqual([]);
     });
@@ -195,6 +214,44 @@ describe('bridgeStore', () => {
       bridgeActions.resetProgress();
       expect(bridgeStore.getState().progress.discoveredSecretIds).toEqual([]);
       expect(isSecretDiscovered('banana-peel-clue')).toBe(false);
+    });
+
+    it('awards Ridge stamps once by id', () => {
+      bridgeActions.awardRidgeStamp('stampede-sketch');
+      bridgeActions.awardRidgeStamp('stampede-sketch');
+      expect(bridgeStore.getState().progress.ridge.stampIds).toEqual(['stampede-sketch']);
+      expect(hasRidgeStamp('stampede-sketch')).toBe(true);
+    });
+
+    it('awards Ridge manual pages once by id', () => {
+      bridgeActions.awardRidgeManualPage('relay-sign');
+      bridgeActions.awardRidgeManualPage('relay-sign');
+      expect(bridgeStore.getState().progress.ridge.manualPageIds).toEqual(['relay-sign']);
+      expect(hasRidgeManualPage('relay-sign')).toBe(true);
+    });
+
+    it('adds Ridge glide pips from explicit reward actions', () => {
+      bridgeActions.awardRidgeGlidePip();
+      bridgeActions.awardRidgeGlidePip(2);
+      bridgeActions.awardRidgeGlidePip(0);
+      expect(bridgeStore.getState().progress.ridge.mobility.glidePips).toBe(3);
+    });
+
+    it('unlocks Ridge shortcuts once by id', () => {
+      bridgeActions.unlockRidgeShortcut('outskirts-lift');
+      bridgeActions.unlockRidgeShortcut('outskirts-lift');
+      expect(bridgeStore.getState().progress.ridge.shortcutIds).toEqual(['outskirts-lift']);
+      expect(isRidgeShortcutUnlocked('outskirts-lift')).toBe(true);
+    });
+
+    it('keeps Potassium Circuit ownership derived from inventory', () => {
+      bridgeActions.awardRidgeStamp('stampede-sketch');
+      expect(isItemOwned('circuit')).toBe(false);
+      expect(bridgeStore.getState().progress.ridge).not.toHaveProperty('circuitOwned');
+
+      bridgeActions.collectItem('circuit');
+      expect(isItemOwned('circuit')).toBe(true);
+      expect(bridgeStore.getState().progress.ridge).not.toHaveProperty('circuitOwned');
     });
   });
 

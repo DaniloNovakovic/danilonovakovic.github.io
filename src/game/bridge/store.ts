@@ -25,9 +25,23 @@ export interface BridgeEquipmentState {
   equippedItemIds: InventoryItemId[];
 }
 
+export type RidgeStampId = string;
+export type RidgeManualPageId = string;
+export type RidgeShortcutId = string;
+
+export interface BridgeRidgeProgressState {
+  stampIds: RidgeStampId[];
+  manualPageIds: RidgeManualPageId[];
+  mobility: {
+    glidePips: number;
+  };
+  shortcutIds: RidgeShortcutId[];
+}
+
 export interface BridgeProgressState {
   hasGlasses: boolean;
   discoveredSecretIds: SecretDiscoveryId[];
+  ridge: BridgeRidgeProgressState;
 }
 
 export interface OverlayRequest {
@@ -76,6 +90,17 @@ function arraysEqual<T>(a: readonly T[], b: readonly T[]): boolean {
   return true;
 }
 
+function createInitialRidgeProgress(): BridgeRidgeProgressState {
+  return {
+    stampIds: [],
+    manualPageIds: [],
+    mobility: {
+      glidePips: 0
+    },
+    shortcutIds: []
+  };
+}
+
 function overlayRequestsEqual(
   a: OverlayRequest | null,
   b: OverlayRequest | null
@@ -105,7 +130,8 @@ let state: BridgeState = {
   },
   progress: {
     hasGlasses: false,
-    discoveredSecretIds: []
+    discoveredSecretIds: [],
+    ridge: createInitialRidgeProgress()
   },
   sceneHintText: null,
   touch: {
@@ -142,6 +168,10 @@ function setState(updater: (current: BridgeState) => BridgeState): void {
     arraysEqual(previous.equipment.equippedItemIds, candidate.equipment.equippedItemIds) &&
     previous.progress.hasGlasses === candidate.progress.hasGlasses &&
     arraysEqual(previous.progress.discoveredSecretIds, candidate.progress.discoveredSecretIds) &&
+    arraysEqual(previous.progress.ridge.stampIds, candidate.progress.ridge.stampIds) &&
+    arraysEqual(previous.progress.ridge.manualPageIds, candidate.progress.ridge.manualPageIds) &&
+    previous.progress.ridge.mobility.glidePips === candidate.progress.ridge.mobility.glidePips &&
+    arraysEqual(previous.progress.ridge.shortcutIds, candidate.progress.ridge.shortcutIds) &&
     previous.sceneHintText === candidate.sceneHintText &&
     previous.touch.left === candidate.touch.left &&
     previous.touch.right === candidate.touch.right &&
@@ -273,6 +303,67 @@ export const bridgeActions = {
       };
     });
   },
+  awardRidgeStamp(stampId: RidgeStampId): void {
+    setState((current) => {
+      if (current.progress.ridge.stampIds.includes(stampId)) return current;
+      return {
+        ...current,
+        progress: {
+          ...current.progress,
+          ridge: {
+            ...current.progress.ridge,
+            stampIds: [...current.progress.ridge.stampIds, stampId]
+          }
+        }
+      };
+    });
+  },
+  awardRidgeManualPage(manualPageId: RidgeManualPageId): void {
+    setState((current) => {
+      if (current.progress.ridge.manualPageIds.includes(manualPageId)) return current;
+      return {
+        ...current,
+        progress: {
+          ...current.progress,
+          ridge: {
+            ...current.progress.ridge,
+            manualPageIds: [...current.progress.ridge.manualPageIds, manualPageId]
+          }
+        }
+      };
+    });
+  },
+  awardRidgeGlidePip(count: number = 1): void {
+    const wholeCount = Math.trunc(count);
+    if (!Number.isFinite(wholeCount) || wholeCount <= 0) return;
+    setState((current) => ({
+      ...current,
+      progress: {
+        ...current.progress,
+        ridge: {
+          ...current.progress.ridge,
+          mobility: {
+            glidePips: current.progress.ridge.mobility.glidePips + wholeCount
+          }
+        }
+      }
+    }));
+  },
+  unlockRidgeShortcut(shortcutId: RidgeShortcutId): void {
+    setState((current) => {
+      if (current.progress.ridge.shortcutIds.includes(shortcutId)) return current;
+      return {
+        ...current,
+        progress: {
+          ...current.progress,
+          ridge: {
+            ...current.progress.ridge,
+            shortcutIds: [...current.progress.ridge.shortcutIds, shortcutId]
+          }
+        }
+      };
+    });
+  },
   resetProgress(): void {
     setState((current) => ({
       ...current,
@@ -284,7 +375,8 @@ export const bridgeActions = {
       },
       progress: {
         hasGlasses: false,
-        discoveredSecretIds: []
+        discoveredSecretIds: [],
+        ridge: createInitialRidgeProgress()
       }
     }));
   },
@@ -385,6 +477,18 @@ export function isItemEquipped(itemId: InventoryItemId): boolean {
 
 export function isSecretDiscovered(secretId: SecretDiscoveryId): boolean {
   return bridgeStore.getState().progress.discoveredSecretIds.includes(secretId);
+}
+
+export function hasRidgeStamp(stampId: RidgeStampId): boolean {
+  return bridgeStore.getState().progress.ridge.stampIds.includes(stampId);
+}
+
+export function hasRidgeManualPage(manualPageId: RidgeManualPageId): boolean {
+  return bridgeStore.getState().progress.ridge.manualPageIds.includes(manualPageId);
+}
+
+export function isRidgeShortcutUnlocked(shortcutId: RidgeShortcutId): boolean {
+  return bridgeStore.getState().progress.ridge.shortcutIds.includes(shortcutId);
 }
 
 export function getTouchState(): TouchBridgeState {

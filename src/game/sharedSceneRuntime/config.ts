@@ -55,10 +55,10 @@ export const OVERWORLD_PARTICLE_MAX_Y = GAME_DESIGN_HEIGHT;
 
 /**
  * Keycodes passed to Phaser `addCapture` when gameplay resumes after a React overlay.
- * Shift, Space, Arrows, A, D, E, H.
+ * Shift, Space, Arrows, W, A, S, D, E, H.
  */
 export const GAMEPLAY_KEYBOARD_CAPTURES = [
-  16, 32, 37, 38, 39, 40, 65, 68, 69, 72
+  16, 32, 37, 38, 39, 40, 65, 68, 69, 72, 83, 87
 ] as const;
 
 export const getGameConfig = (container: HTMLElement): Phaser.Types.Core.GameConfig => ({

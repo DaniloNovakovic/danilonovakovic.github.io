@@ -59,4 +59,16 @@ export const catalogMessages = {
       description: "Slip the incoming stakeholders and dodge the deadlines in this slippery challenge.",
     },
   },
+  ridge: {
+    ridge: {
+      name: "Sketchbook Ridge",
+      description: "A compact ridge route toward the Relay Spire.",
+    },
+  },
+  stampedeSketch: {
+    stampedeSketch: {
+      name: "Stampede Sketch",
+      description: "A movement-only ink swarm prototype around a picnic blanket.",
+    },
+  },
 } as const;

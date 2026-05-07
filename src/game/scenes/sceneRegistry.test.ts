@@ -19,6 +19,8 @@ describe('sceneRegistry', () => {
     expect(getLoadableScene('hobbies')?.loadScene).toBeDefined();
     expect(getLoadableScene('basement')?.loadScene).toBeDefined();
     expect(getLoadableScene('potassium')?.loadScene).toBeDefined();
+    expect(getLoadableScene('ridge')?.loadScene).toBeDefined();
+    expect(getLoadableScene('stampedeSketch')?.loadScene).toBeDefined();
   });
 
   it('exposes scene targets for the dev switcher', () => {
