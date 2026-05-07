@@ -8,6 +8,9 @@ This directory separates shipped player-facing behavior from future design conce
 - **[Potassium Slip Manual](./potassium-slip.md)**: Focused guide for the Potassium Slip mini-game.
 - **[Sketchbook Ridge Summit](./sketchbook-ridge-summit.md)**: Post-competition production vision and development plan for the Ridge overworld and opt-in mini-games.
 - **[Sketchbook Ridge Milestone Plan](./sketchbook-ridge-milestone-plan.md)**: Implementation milestone, branch, ownership, and issue-planning map for Ridge Summit.
+- **[Sketchbook Ridge M3 Visual Pack](./sketchbook-ridge-m3-visual-pack.md)**: Rade/Milena visual direction for Cicka, NPCs, landmarks, stickers, and M4 placeholders.
+- **[Sketchbook Ridge M3 Overlay Pack](./sketchbook-ridge-m3-overlay-pack.md)**: Aleksandra's Trail Card, Manual Page, mobile readability, and monochrome reward-state spec.
+- **[Sketchbook Ridge M3 Audio Pack](./sketchbook-ridge-m3-audio-pack.md)**: Django's Ridge, Cicka, Potassium acknowledgement, Stampede, and Telegraph audio direction.
 - **[AI Game Design Competition Archive](./ai-competition/README.md)**: Closed provenance for the competition that produced the current Ridge Summit direction.
 
 ## Core Pillars

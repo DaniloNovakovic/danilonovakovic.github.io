@@ -25,15 +25,17 @@ Anything beyond that is future scope unless a slice explicitly pulls it in.
   boot directly with `?startScene=ridge`, uses shared side-view movement, shows
   the Relay Spire, Cicka's first perch, a static Ridge Guide, and three Trail
   Card props.
-- **M2 Trail Card and Manual Overlay Surface** has started: the reusable global
-  Trail Card overlay, reusable Manual Page overlay shape, and Ridge trigger
-  contract are in place. Remaining M2 work is the mobile/readability pass and
-  surface polish.
-- **M3 Art and Audio Research Pack** can run in parallel as spec work. It should
-  guide Cicka, Guide, Trail Card, Manual Page, Stampede, Relay Spire, and audio
-  direction without blocking rough engineering prototypes.
-- **M4 Stampede Sketch Prototype** should start after M2 is stable enough to
-  enable a movement-only Stampede scene from the Stampede Trail Card.
+- **M2 Trail Card and Manual Overlay Surface** is complete for the current
+  prototype slice: the reusable global Trail Card overlay, reusable Manual Page
+  overlay shape, Ridge trigger contract, and mobile/readability polish are in
+  place.
+- **M3 Art and Audio Research Pack** is in review: visual, overlay/manual, and
+  audio direction packs now guide Cicka, Guide, Trail Card, Manual Page,
+  Stampede, Relay Spire, and Ridge audio without blocking rough engineering
+  prototypes.
+- **M4 Stampede Sketch Prototype** should start after Danilo reviews the key M3
+  taste calls, with a movement-only Stampede scene enabled from the Stampede
+  Trail Card once the empty scene exists.
 
 ## Production Crew
 
@@ -184,6 +186,12 @@ Outputs:
 - sticker / ink-memory vocabulary.
 - Trail Card and Manual Page visual specs.
 - Ridge audio palette, Cicka SFX language, Potassium acknowledgement micro-pack, Stampede prototype audio notes.
+
+Current review packs:
+
+- [`sketchbook-ridge-m3-visual-pack.md`](./sketchbook-ridge-m3-visual-pack.md)
+- [`sketchbook-ridge-m3-overlay-pack.md`](./sketchbook-ridge-m3-overlay-pack.md)
+- [`sketchbook-ridge-m3-audio-pack.md`](./sketchbook-ridge-m3-audio-pack.md)
 
 These are research/spec deliverables. They should not block engineering beyond
 basic silhouette placeholders.
@@ -352,9 +360,15 @@ What to build:
 - Cicka mini kit spec.
 - landmark silhouette board.
 - sticker/ink-memory vocabulary.
-- one Trail Card and one Manual Page visual mock.
+- Trail Card and Manual Page visual direction.
 
-Human review required because visual taste and Cicka personality matter.
+Current draft:
+[`sketchbook-ridge-m3-visual-pack.md`](./sketchbook-ridge-m3-visual-pack.md)
+and
+[`sketchbook-ridge-m3-overlay-pack.md`](./sketchbook-ridge-m3-overlay-pack.md).
+
+Human review required because visual taste, overlay tone, and Cicka personality
+matter.
 
 ### 8. Produce Ridge Audio Direction Pack
 
@@ -368,6 +382,9 @@ What to build:
 - Potassium acknowledgement micro-pack.
 - Stampede prototype audio notes.
 - Telegraph timing cue notes.
+
+Current draft:
+[`sketchbook-ridge-m3-audio-pack.md`](./sketchbook-ridge-m3-audio-pack.md).
 
 Human review required before committing to music direction.
 
