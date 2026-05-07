@@ -77,7 +77,7 @@ describe('stampede run flow', () => {
     expect(frame.pressure.canContact).toBe(true);
   });
 
-  it('keeps terminal failure behind the run frame seam after the contact limit', () => {
+  it('returns a terminal failure frame when a contact reaches the limit', () => {
     let session = createStampedeSession();
     for (let index = 0; index < STAMPEDE_CONTACT_LIMIT - 1; index += 1) {
       session = resolveStampedeContact(session, index * 1_000);
@@ -92,10 +92,36 @@ describe('stampede run flow', () => {
       contactCandidates: [{ ...basePlayer, radius: 10 }]
     });
 
-    expect(frame.kind).toBe('playing');
-    if (frame.kind !== 'playing') return;
+    expect(frame.kind).toBe('terminal');
+    if (frame.kind !== 'terminal') return;
+    expect(frame.phase).toBe('failed');
     expect(frame.session.phase).toBe('failed');
     expect(frame.session.contacts).toBe(STAMPEDE_CONTACT_LIMIT);
     expect(frame.contactCandidate).toEqual({ ...basePlayer, radius: 10 });
+    expect(frame.swarm).toEqual({
+      mode: 'recover',
+      pressure: 1
+    });
+  });
+
+  it('keeps terminal sessions terminal on the next frame', () => {
+    const frame = resolveStampedeRunFrame({
+      session: resolveStampedeContact(
+        resolveStampedeContact(
+          resolveStampedeContact(createStampedeSession(), 0),
+          100
+        ),
+        200
+      ),
+      deltaMs: 1_000,
+      closeRequested: false,
+      velocity: baseVelocity,
+      player: basePlayer,
+      contactCandidates: [{ ...basePlayer, radius: 10 }]
+    });
+
+    expect(frame.kind).toBe('terminal');
+    if (frame.kind !== 'terminal') return;
+    expect(frame.phase).toBe('failed');
   });
 });

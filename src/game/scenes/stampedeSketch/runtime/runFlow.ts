@@ -41,6 +41,9 @@ export type StampedeRunFrame =
     kind: 'terminal';
     session: StampedeSession;
     phase: Exclude<StampedeSessionPhase, 'playing'>;
+    player?: StampedePressurePoint;
+    pressure?: StampedePressureSnapshot;
+    contactCandidate?: StampedeContactCandidate | null;
     swarm: StampedeRunSwarmFrame;
   }
   | {
@@ -95,6 +98,21 @@ export function resolveStampedeRunFrame({
   const nextSession = pressure.canContact
     ? resolveStampedeContact(advancedSession, advancedSession.elapsedMs)
     : advancedSession;
+
+  if (nextSession.phase !== 'playing') {
+    return {
+      kind: 'terminal',
+      session: nextSession,
+      phase: nextSession.phase,
+      player: clampedPlayer,
+      pressure,
+      contactCandidate: pressure.canContact ? pressure.nearestContactCandidate : null,
+      swarm: {
+        mode: 'recover',
+        pressure: 1
+      }
+    };
+  }
 
   return {
     kind: 'playing',

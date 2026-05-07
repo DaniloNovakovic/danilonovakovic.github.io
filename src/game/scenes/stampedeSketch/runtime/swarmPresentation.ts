@@ -7,6 +7,10 @@ import {
 
 interface StampedeSwarmDot {
   shape: Phaser.GameObjects.Arc;
+  homeX: number;
+  homeY: number;
+  homeRadius: number;
+  homeAlpha: number;
   speed: number;
   phase: number;
 }
@@ -31,6 +35,7 @@ interface StampedeSwarmRuntimeOptions {
 export interface StampedeSwarmRuntime {
   update(target: { x: number; y: number }, delta: number, options?: StampedeSwarmUpdateOptions): void;
   getContactCandidates(): readonly StampedeSwarmContactCandidate[];
+  reset(): void;
 }
 
 export function createStampedeSwarmRuntime(
@@ -56,6 +61,10 @@ export function createStampedeSwarmRuntime(
       0x1a1a1a,
       0.68
     ).setDepth(20),
+    homeX: point.x,
+    homeY: point.y,
+    homeRadius: index % 3 === 0 ? 7 : 5,
+    homeAlpha: 0.68,
     speed: 18 + index * 2,
     phase: index * 0.7
   }));
@@ -111,5 +120,16 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
       y: dot.shape.y,
       radius: dot.shape.radius * dot.shape.scaleX
     }));
+  }
+
+  reset(): void {
+    this.dots.forEach((dot) => {
+      this.scene.tweens.killTweensOf(dot.shape);
+      dot.shape
+        .setPosition(dot.homeX, dot.homeY)
+        .setRadius(dot.homeRadius)
+        .setScale(1)
+        .setAlpha(dot.homeAlpha);
+    });
   }
 }

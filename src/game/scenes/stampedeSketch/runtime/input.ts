@@ -19,6 +19,8 @@ interface StampedeInputRuntimeOptions {
 export interface StampedeInputRuntime {
   readVelocity(): StampedeVelocity;
   closeRequested(): boolean;
+  retryRequested(): boolean;
+  setPointerControlEnabled(enabled: boolean): void;
   clearPointerControl(): void;
   updateStickVisuals(): void;
 }
@@ -40,9 +42,13 @@ class PhaserStampedeInputRuntime implements StampedeInputRuntime {
   private readonly keyE?: Phaser.Input.Keyboard.Key;
   private readonly keyH?: Phaser.Input.Keyboard.Key;
   private readonly keyEsc?: Phaser.Input.Keyboard.Key;
+  private readonly keyR?: Phaser.Input.Keyboard.Key;
+  private readonly keyEnter?: Phaser.Input.Keyboard.Key;
+  private readonly keySpace?: Phaser.Input.Keyboard.Key;
   private readonly stickBase: Phaser.GameObjects.Arc;
   private readonly stickKnob: Phaser.GameObjects.Arc;
   private readonly stickLine: Phaser.GameObjects.Line;
+  private pointerControlsEnabled = true;
 
   private pointerControl: StampedePointerControl = {
     active: false,
@@ -64,6 +70,9 @@ class PhaserStampedeInputRuntime implements StampedeInputRuntime {
     this.keyE = keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.E);
     this.keyH = keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.H);
     this.keyEsc = keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+    this.keyR = keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.R);
+    this.keyEnter = keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+    this.keySpace = keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
     this.stickBase = scene.add.circle(0, 0, 34, 0xfbfbf9, 0.72)
       .setStrokeStyle(3, 0x1a1a1a, 0.75)
@@ -96,6 +105,23 @@ class PhaserStampedeInputRuntime implements StampedeInputRuntime {
     );
   }
 
+  retryRequested(): boolean {
+    const justDown = Phaser.Input.Keyboard.JustDown;
+    return Boolean(
+      (this.keyR && justDown(this.keyR)) ||
+        (this.keyEnter && justDown(this.keyEnter)) ||
+        (this.keySpace && justDown(this.keySpace))
+    );
+  }
+
+  setPointerControlEnabled(enabled: boolean): void {
+    this.pointerControlsEnabled = enabled;
+    if (!enabled) {
+      this.clearPointerControl();
+      this.updateStickVisuals();
+    }
+  }
+
   clearPointerControl(): void {
     this.pointerControl = {
       active: false,
@@ -108,6 +134,7 @@ class PhaserStampedeInputRuntime implements StampedeInputRuntime {
   updateStickVisuals(): void {
     const pointer = this.scene.input.activePointer;
     const active =
+      this.pointerControlsEnabled &&
       this.pointerControl.active &&
       this.pointerControl.pointerId === pointer.id &&
       pointer.isDown;
@@ -133,6 +160,7 @@ class PhaserStampedeInputRuntime implements StampedeInputRuntime {
 
   private registerPointerControls(): void {
     this.scene.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      if (!this.pointerControlsEnabled) return;
       if (this.isPointerInBackTarget(pointer)) return;
       this.pointerControl = {
         active: true,
@@ -165,6 +193,7 @@ class PhaserStampedeInputRuntime implements StampedeInputRuntime {
   private readPointerInput(): { active: boolean; deltaX: number; deltaY: number } {
     const pointer = this.scene.input.activePointer;
     const active =
+      this.pointerControlsEnabled &&
       this.pointerControl.active &&
       this.pointerControl.pointerId === pointer.id &&
       pointer.isDown;

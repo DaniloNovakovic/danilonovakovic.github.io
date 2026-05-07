@@ -15,6 +15,7 @@ export interface StampedeFeedbackRuntime {
     phase: StampedeSessionPhase,
     player?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody
   ): void;
+  reset(): void;
 }
 
 export function createStampedeFeedbackRuntime(
@@ -78,5 +79,9 @@ class PhaserStampedeFeedbackRuntime implements StampedeFeedbackRuntime {
       duration: 120,
       ease: 'Sine.easeOut'
     });
+  }
+
+  reset(): void {
+    this.lastAnnouncedPhase = undefined;
   }
 }

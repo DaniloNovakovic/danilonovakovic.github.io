@@ -33,9 +33,15 @@ import {
   STAMPEDE_PLAYER_CONTACT_RADIUS
 } from './runFlow';
 import {
+  createStampedeResultPresentationRuntime,
+  createStampedeResultViewModel,
+  type StampedeResultPresentationRuntime
+} from './resultPresentation';
+import {
   createStampedeSession,
   readStampedeSessionSnapshot,
-  type StampedeSession
+  type StampedeSession,
+  type StampedeSessionPhase
 } from './session';
 import {
   createStampedeSwarmRuntime,
@@ -53,7 +59,9 @@ export class StampedeSketchScene extends Phaser.Scene {
   private swarmRuntime?: StampedeSwarmRuntime;
   private hudRuntime?: StampedeHudRuntime;
   private feedbackRuntime?: StampedeFeedbackRuntime;
+  private resultRuntime?: StampedeResultPresentationRuntime;
   private session: StampedeSession = createStampedeSession();
+  private shownResultPhase?: Exclude<StampedeSessionPhase, 'playing'>;
   private isPaused = false;
   private onClose: () => void = () => {};
 
@@ -89,7 +97,9 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.swarmRuntime = createStampedeSwarmRuntime({ scene: this });
     this.hudRuntime = createStampedeHudRuntime({ scene: this });
     this.feedbackRuntime = createStampedeFeedbackRuntime({ scene: this });
+    this.resultRuntime = createStampedeResultPresentationRuntime({ scene: this });
     this.session = createStampedeSession();
+    this.shownResultPhase = undefined;
     this.updateHud();
     this.setPaused(this.isPaused);
   }
@@ -114,10 +124,16 @@ export class StampedeSketchScene extends Phaser.Scene {
       return;
     }
 
+    const closeRequested = this.inputRuntime.closeRequested();
+    if (this.session.phase !== 'playing' && this.inputRuntime.retryRequested()) {
+      this.restartRun();
+      return;
+    }
+
     const frame = resolveStampedeRunFrame({
       session: this.session,
       deltaMs: delta,
-      closeRequested: this.inputRuntime.closeRequested(),
+      closeRequested,
       velocity: this.inputRuntime.readVelocity(),
       player: {
         x: this.player.x,
@@ -133,11 +149,7 @@ export class StampedeSketchScene extends Phaser.Scene {
         this.closeToRidge();
         return;
       case 'terminal':
-        this.player.setVelocity(0, 0);
-        this.swarmRuntime.update(this.player, delta, frame.swarm);
-        this.inputRuntime.updateStickVisuals();
-        this.updateHud();
-        this.announceTerminalPhase();
+        this.showTerminalFrame(frame, delta);
         return;
       case 'playing':
         this.player.setVelocity(frame.velocity.x, frame.velocity.y);
@@ -155,7 +167,7 @@ export class StampedeSketchScene extends Phaser.Scene {
   }
 
   private createPlayer(): void {
-    const start = clampStampedePosition({ x: GAME_DESIGN_WIDTH / 2, y: GAME_DESIGN_HEIGHT / 2 + 36 });
+    const start = this.readPlayerStartPosition();
     this.player = this.physics.add.sprite(start.x, start.y, 'player_idle');
     this.player.setDepth(30);
     this.player.setScale(0.82);
@@ -167,7 +179,67 @@ export class StampedeSketchScene extends Phaser.Scene {
 
   private closeToRidge(): void {
     this.player?.setVelocity(0, 0);
+    this.resultRuntime?.hide();
     this.onClose();
+  }
+
+  private restartRun(): void {
+    this.session = createStampedeSession();
+    this.shownResultPhase = undefined;
+    this.resultRuntime?.hide();
+    this.feedbackRuntime?.reset();
+    this.swarmRuntime?.reset();
+    this.inputRuntime?.setPointerControlEnabled(true);
+    this.inputRuntime?.clearPointerControl();
+
+    const start = this.readPlayerStartPosition();
+    this.player
+      ?.setPosition(start.x, start.y)
+      .setVelocity(0, 0)
+      .setAlpha(1)
+      .setScale(0.82)
+      .setAngle(0);
+
+    this.updateHud();
+    this.inputRuntime?.updateStickVisuals();
+  }
+
+  private showTerminalFrame(
+    frame: Extract<ReturnType<typeof resolveStampedeRunFrame>, { kind: 'terminal' }>,
+    delta: number
+  ): void {
+    if (!this.player || !this.inputRuntime || !this.swarmRuntime) return;
+
+    if (frame.player) {
+      this.player.setPosition(frame.player.x, frame.player.y);
+    }
+    if (frame.contactCandidate) {
+      this.feedbackRuntime?.showContact(this.player, frame.contactCandidate);
+    }
+
+    this.player.setVelocity(0, 0);
+    this.inputRuntime.setPointerControlEnabled(false);
+    this.swarmRuntime.update(this.player, delta, frame.swarm);
+    this.inputRuntime.updateStickVisuals();
+    this.updateHud(frame.pressure);
+    this.announceTerminalPhase();
+    this.showResult(frame.phase);
+  }
+
+  private showResult(phase: Exclude<StampedeSessionPhase, 'playing'>): void {
+    if (this.shownResultPhase === phase) return;
+    this.shownResultPhase = phase;
+
+    this.resultRuntime?.show({
+      view: createStampedeResultViewModel({
+        phase,
+        elapsedMs: this.session.elapsedMs,
+        durationMs: this.session.durationMs,
+        contacts: this.session.contacts
+      }),
+      onRetry: () => this.restartRun(),
+      onBack: () => this.closeToRidge()
+    });
   }
 
   private updateHud(pressure?: StampedePressureSnapshot): void {
@@ -187,5 +259,12 @@ export class StampedeSketchScene extends Phaser.Scene {
     if (velocity.x !== 0) {
       this.player.setFlipX(velocity.x < 0);
     }
+  }
+
+  private readPlayerStartPosition(): { x: number; y: number } {
+    return clampStampedePosition({
+      x: GAME_DESIGN_WIDTH / 2,
+      y: GAME_DESIGN_HEIGHT / 2 + 36
+    });
   }
 }
