@@ -99,8 +99,9 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
 
       const clamped = clampStampedePosition({ x: dot.shape.x, y: dot.shape.y });
       dot.shape.setPosition(clamped.x, clamped.y);
-      dot.shape.setScale((distance < 38 ? 1.35 : 1) * motion.scaleMultiplier);
-      dot.shape.setAlpha(Math.min(distance < 38 ? 0.96 : 0.82, (distance < 38 ? 0.9 : 0.62) * motion.alphaMultiplier));
+      const isNear = distance < 38;
+      dot.shape.setScale((isNear ? 1.35 : 1) * motion.scaleMultiplier);
+      dot.shape.setAlpha(Math.min(isNear ? 0.96 : 0.82, (isNear ? 0.9 : 0.62) * motion.alphaMultiplier));
     });
   }
 

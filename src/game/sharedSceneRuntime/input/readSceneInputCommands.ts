@@ -31,8 +31,8 @@ export function readSceneInputCommands(options: ReadSceneInputOptions): InputCom
   frame.jump = options.allowJump && (cursors.up.isDown || oneShots.jumpQueued);
   frame.interact = Phaser.Input.Keyboard.JustDown(interactKey) || oneShots.interactTap;
   frame.exitContext =
-    (hKey ? hKey.isDown || Phaser.Input.Keyboard.JustDown(hKey) : false) ||
-    (escapeKey ? escapeKey.isDown || Phaser.Input.Keyboard.JustDown(escapeKey) : false);
+    (hKey ? Phaser.Input.Keyboard.JustDown(hKey) : false) ||
+    (escapeKey ? Phaser.Input.Keyboard.JustDown(escapeKey) : false);
 
   return frame;
 }

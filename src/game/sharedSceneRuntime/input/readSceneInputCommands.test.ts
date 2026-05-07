@@ -94,7 +94,7 @@ describe('readSceneInputCommands', () => {
     expect(frame.exitContext).toBe(true);
   });
 
-  it('maps held H or Escape to exit context', () => {
+  it('does not map held H or Escape to exit context', () => {
     const frame = readSceneInputCommands({
       frame: createInputCommandFrame(),
       cursors: cursors(),
@@ -108,6 +108,6 @@ describe('readSceneInputCommands', () => {
       allowSprint: false
     });
 
-    expect(frame.exitContext).toBe(true);
+    expect(frame.exitContext).toBe(false);
   });
 });
