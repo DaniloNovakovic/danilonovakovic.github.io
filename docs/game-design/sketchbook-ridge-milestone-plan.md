@@ -33,11 +33,12 @@ Anything beyond that is future scope unless a slice explicitly pulls it in.
   audio direction packs now guide Cicka, Guide, Trail Card, Manual Page,
   Stampede, Relay Spire, and Ridge audio without blocking rough engineering
   prototypes.
-- **M4 Stampede Sketch Prototype** has started with M4a movement accepted and
-  M4b pressure-loop work in progress: the Stampede Trail Card can enter a
-  scene-local arena with timer, page-noise cadence, soft contact feedback, and
-  return to Ridge, while rewards, attacks, XP, upgrades, and result overlays
-  remain future M4 slices.
+- **M4 Stampede Sketch Prototype** is underway with M4a movement accepted and
+  M4b pressure loop accepted as good enough for the current prototype slice:
+  the Stampede Trail Card can enter a scene-local arena with timer,
+  page-noise cadence, pressure HUD, capped swarm surges, pressure-aware swarm
+  motion, soft contact feedback, and return to Ridge. Rewards, attacks, XP,
+  upgrades, and result overlays remain future M4 slices.
 
 ## Production Crew
 
@@ -220,6 +221,34 @@ Outputs:
 
 Depends on M0 and the Ridge trigger contract from M1. Most scene internals can
 be built independently.
+
+Current checkpoint:
+
+- **M4a Movement Feel** accepted: direct entry from the Stampede Trail Card,
+  top-down 8-way movement, pointer drag steering, vertical-board presentation,
+  and return to Ridge are in place.
+- **M4b Pressure Loop** accepted for prototype continuation: session timer,
+  page-noise cadence, pressure HUD, capped swarm surges, contact limit, soft
+  contact feedback, and pressure-aware swarm motion are in place.
+- Scene architecture is intentionally scene-local. `StampedeSketchScene` should
+  remain the Phaser adapter/orchestrator while run decisions live behind
+  `runtime/runFlow.ts` and swarm steering lives behind `runtime/swarmMotion.ts`.
+
+Next implementation slices:
+
+1. **M4c Run Ending Shell**: add a scene-local end surface for `Blanket held`
+   and `Page got crowded`, with Retry and Back to Ridge actions. Keep rewards
+   disabled.
+2. **M4d First Auto-Attack Toy**: add one automatic pencil swipe or ink orbit
+   that can clear pressure marks. Do not add XP or upgrade drafting yet.
+3. **M4e Pickup / Upgrade Draft**: add the first XP pickup loop and a rough
+   three-choice upgrade draft once the attack toy feels readable.
+
+Hold until later:
+
+- Enemy-enemy avoidance beyond pressure-aware steering.
+- Durable reward ids, first-clear stamp, glide pip, and Ridge memory rendering.
+- Player manual updates; Stampede is still dev/prototype behavior.
 
 ### M5: Ridge Memory
 
