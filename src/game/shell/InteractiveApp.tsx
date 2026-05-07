@@ -12,12 +12,11 @@ import {
   isSceneId,
   OVERWORLD_SCENE_ID,
   POTASSIUM_SCENE_ID,
-  RIDGE_SCENE_ID,
-  STAMPEDE_SKETCH_SCENE_ID,
   type SceneId
 } from '@/game/scenes/sceneIds';
 import { Button, Card, Panel } from '@/shared/ui';
 import { getInteractiveGameShellLayout } from './gameShellLayout';
+import { getSceneHeaderChrome } from './sceneHeaderChrome';
 import { useResizeObserver } from '@/shared/hooks/useResizeObserver';
 import { useMessages } from '@/shared/i18n';
 
@@ -46,12 +45,19 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
     bridge.activeSceneId === OVERWORLD_SCENE_ID && bridge.activeOverlayId === null;
   const shouldShowSceneUiStatus = bridge.sceneUi.status !== null;
   const shouldShowFooterHint = shouldShowSceneUiStatus || shouldReserveSceneHint || shouldShowNavigationHint;
-  const isStampedePresentation = presentationSceneId === STAMPEDE_SKETCH_SCENE_ID;
+  const sceneHeaderChrome = getSceneHeaderChrome(presentationSceneId);
 
   const enterScene = (sceneId: SceneId) => bridgeActions.enterScene(sceneId);
   const openOverlay = (overlayId: OverlayId, options?: OpenOverlayOptions) => bridgeActions.openOverlay(overlayId, options);
   const returnToOverworld = () => bridgeActions.returnToOverworld();
-  const returnToRidge = () => bridgeActions.enterScene(RIDGE_SCENE_ID);
+  const returnToScene = (sceneId: SceneId) => {
+    if (sceneId === OVERWORLD_SCENE_ID) {
+      bridgeActions.returnToOverworld();
+      return;
+    }
+
+    bridgeActions.enterScene(sceneId);
+  };
 
   return (
     <div
@@ -71,13 +77,13 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
           aria-label={messages.gameShell.controlsLabel}
         >
           <div className="flex min-w-0 items-center gap-2">
-            {isStampedePresentation ? (
+            {sceneHeaderChrome.left === 'back' ? (
               <Button
                 variant="floating"
                 size="sm"
-                onClick={returnToRidge}
+                onClick={() => returnToScene(sceneHeaderChrome.targetSceneId)}
                 className="sm:px-3 sm:py-1.5 sm:text-xs"
-                aria-label={messages.gameShell.backToRidge}
+                aria-label={messages.gameShell[sceneHeaderChrome.ariaLabelKey]}
               >
                 <ArrowLeft className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
                 <span>{messages.gameShell.back}</span>

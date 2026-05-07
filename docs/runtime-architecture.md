@@ -31,6 +31,9 @@ game vocabulary is explicit:
   for non-global, scene-controlled status and panels. These surfaces do not
   pause Phaser automatically; the owning scene decides whether gameplay is
   gated and consumes one-shot UI actions through the bridge.
+- **Scene header chrome** - `src/game/shell/sceneHeaderChrome.ts` owns the
+  small shell-level policy for replacing default Inventory/Dev controls with a
+  scene navigation control in presentation-heavy arcade scenes.
 - **Shared scene runtime** - reusable Phaser-facing machinery lives in `src/game/sharedSceneRuntime`: side-view player lifecycle, camera policy, scene presentation, resume policy, keyboard pause, interior interactions, text, textures, and vision helpers.
 - **Pure gameplay decisions** - `src/game/core` contains deterministic ECS, input, and player logic that can be tested without Phaser, React, browser globals, or bridge state.
 - **Scene-owned modules** - scene folders own local layout, triggers, Phaser objects, scene contexts, scene-local overlays, and heavy scene runtime modules.
@@ -66,6 +69,9 @@ re-apply camera bounds/profile math.
   when the UI belongs to the active Phaser scene but should be rendered as DOM.
   Keep gameplay state in the scene/runtime; React sends only one-shot scene UI
   actions back through the bridge.
+- Use shell header chrome policy for app navigation controls that belong
+  outside the Phaser card, such as Back buttons for arcade scenes. Do not push
+  those controls through scene-owned UI unless they need scene gameplay state.
 - Use `sceneResumePolicy` for resume persistence and reset rules. The low-level resume store should not be imported directly by scenes or adapters.
 - Side-view player scenes should compose `SideViewPlayerRuntime` before creating colliders against `runtime.player`; pass its camera config when the scene should follow and clamp the player.
 - Interior rooms should describe prop targets and effect commands, then let `InteriorInteractionRuntime` choose the active target and prompt/effect result. Phaser text mutation, bridge writes, and scene-local helpers stay in the scene.

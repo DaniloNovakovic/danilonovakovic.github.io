@@ -4,7 +4,12 @@ import { act, cleanup, render, screen, waitFor, within } from '@testing-library/
 import userEvent from '@testing-library/user-event';
 import InteractiveApp from './InteractiveApp';
 import { bridgeActions, bridgeStore } from '@/game/bridge/store';
-import { RIDGE_SCENE_ID, STAMPEDE_SKETCH_SCENE_ID } from '@/game/scenes/sceneIds';
+import {
+  OVERWORLD_SCENE_ID,
+  POTASSIUM_SCENE_ID,
+  RIDGE_SCENE_ID,
+  STAMPEDE_SKETCH_SCENE_ID
+} from '@/game/scenes/sceneIds';
 import { createStampedeResultViewModel } from '@/game/scenes/stampedeSketch/runtime/resultPresentation';
 import { getMessages } from '@/shared/i18n';
 
@@ -138,6 +143,19 @@ describe('InteractiveApp', () => {
     expect(bridgeStore.getState().activeSceneId).toBe(RIDGE_SCENE_ID);
   });
 
+  it('replaces inventory and dev controls with Back during Potassium Slip', async () => {
+    bridgeActions.enterScene(POTASSIUM_SCENE_ID);
+    render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
+
+    expect(screen.getByRole('button', { name: /back to city/i })).toBeDefined();
+    expect(screen.queryByRole('button', { name: /open inventory/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /open dev scene switcher/i })).toBeNull();
+
+    await userEvent.click(screen.getByRole('button', { name: /back to city/i }));
+
+    expect(bridgeStore.getState().activeSceneId).toBe(OVERWORLD_SCENE_ID);
+  });
+
   it('renders Stampede scene status below the game card', () => {
     bridgeActions.enterScene(STAMPEDE_SKETCH_SCENE_ID);
     bridgeActions.setSceneUiStatus(STAMPEDE_SKETCH_SCENE_ID, 'stampedeStatus', {
@@ -180,6 +198,9 @@ describe('InteractiveApp', () => {
     );
     render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
     const resultDialog = screen.getByRole('dialog', { name: /page got crowded/i });
+
+    expect(within(resultDialog).getByRole('button', { name: /^retry$/i })).toBeDefined();
+    expect(within(resultDialog).getByRole('button', { name: /back to ridge/i })).toBeDefined();
 
     await userEvent.click(within(resultDialog).getByRole('button', { name: /^retry$/i }));
     expect(bridgeStore.getState().sceneUi.lastAction).toMatchObject({

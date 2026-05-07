@@ -35,6 +35,9 @@ for fast iteration. Current useful targets include `hobbies`, `basement`,
   `sceneUi` state. Status surfaces can live in the shell footer, while panel
   surfaces can sit over the game card; the owning scene gates gameplay and
   consumes UI actions.
+- `src/game/shell/sceneHeaderChrome.ts` maps presentation scenes to shell-owned
+  header controls. Stampede returns to Ridge from the header Back button;
+  Potassium returns to the City/Overworld.
 - Phaser scenes keep local pause state only as a scene runtime concern; they do
   not decide whether an overlay should pause the engine.
 

@@ -27,12 +27,14 @@ export function SceneUiHost({ placement }: SceneUiHostProps) {
   }
 
   return (
-    <div className="absolute inset-0 z-20 flex items-center justify-center p-3">
-      <Surface
-        ownerSceneId={request.ownerSceneId}
-        params={request.params}
-        dispatchAction={dispatchAction}
-      />
+    <div className="absolute inset-0 z-20 overflow-y-auto overscroll-contain p-2 sm:p-3">
+      <div className="flex min-h-full items-start justify-center py-2 sm:items-center sm:py-0">
+        <Surface
+          ownerSceneId={request.ownerSceneId}
+          params={request.params}
+          dispatchAction={dispatchAction}
+        />
+      </div>
     </div>
   );
 }
