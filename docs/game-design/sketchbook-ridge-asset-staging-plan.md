@@ -95,6 +95,8 @@ Current homes:
 - `public/assets/characters/cicka/`
 - `public/assets/potassium-slip/**`
 - `public/assets/stampede-sketch/enemies/**`
+- `public/assets/stampede-sketch/player-guardian/`
+- `public/assets/stampede-sketch/calm-patch/`
 
 Rules:
 
@@ -153,17 +155,23 @@ Recommended slice:
 - if integrated, keep it lightweight: perch, blink, loaf, suspicious turn, and
   one movement read are enough
 
-### 2. Stampede Enemy Visual Pass
+### 2. Stampede Objective Visual Pass
 
 Reason:
 
 - Stampede is the current active mini-game milestone
 - enemy silhouettes affect readability and tone directly
 - scene-local integration is safer than a cross-game art push
+- the current design now depends on a readable central calm patch plus a
+  tethered guardian, not a player carrying the whole blanket
 
 Recommended slice:
 
 - finish M4d.5 responsive shell/input decisions first
+- wire the `calm-patch` prop as a central or near-central objective
+- wire the `player-guardian` sprite with `tether-guard` as its objective-link
+  feedback state
+- add the proximity aggro rule before adopting the full enemy art set
 - then pick one default enemy presentation tier for the prototype:
   minimal, body, or body-plus-fx
 - wire one enemy family cleanly before adopting the full set
@@ -233,17 +241,17 @@ Riskier work that should be serialized:
 1. Add folder-local documentation for `public/assets/characters/cicka/`.
 2. Keep the long-term topology ideas doc as planning-only and out of milestone
    requirements.
-3. Open a small implementation slice for either Cicka adoption in Ridge or one
-   Stampede enemy presentation tier, but not both plus Potassium at once.
+3. Open a small implementation slice for either Cicka adoption in Ridge or the
+   Stampede calm-patch / proximity-aggro pass, but not both plus Potassium at
+   once.
 
 ## Decision Needed From Danilo
 
 The highest-leverage taste/production call is:
 
 - should the next asset integration slice be **Cicka in Ridge** or
-  **Stampede enemy presentation**
+  **Stampede calm patch + proximity aggro**
 
 My recommendation is **Cicka first for warmth**, unless you want the current
-active gameplay slice to stay purely on Stampede, in which case **Stampede
-enemy presentation** is the better follow-through.
-
+active gameplay slice to stay purely on Stampede, in which case **Stampede calm
+patch + proximity aggro** is the better follow-through.

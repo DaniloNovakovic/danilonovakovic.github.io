@@ -1,0 +1,105 @@
+{
+  "slug": "calm-patch",
+  "assetClass": "prop",
+  "sourceKeyed": "source-keyed.png",
+  "source": "source.png",
+  "spritesheet": "calm-patch-spritesheet.png",
+  "frameWidth": 256,
+  "frameHeight": 192,
+  "frameCount": 8,
+  "grid": {
+    "columns": 4,
+    "rows": 2
+  },
+  "origin": {
+    "x": 0.5,
+    "y": 0.5
+  },
+  "runtimeScale": 0.72,
+  "frames": [
+    {
+      "index": 0,
+      "state": "idle-calm",
+      "file": "frames/00-idle-calm.png",
+      "sourceFile": "source-frames/00-idle-calm.png"
+    },
+    {
+      "index": 1,
+      "state": "soft-wobble",
+      "file": "frames/01-soft-wobble.png",
+      "sourceFile": "source-frames/01-soft-wobble.png"
+    },
+    {
+      "index": 2,
+      "state": "crowded-edge",
+      "file": "frames/02-crowded-edge.png",
+      "sourceFile": "source-frames/02-crowded-edge.png"
+    },
+    {
+      "index": 3,
+      "state": "protected-breath",
+      "file": "frames/03-protected-breath.png",
+      "sourceFile": "source-frames/03-protected-breath.png"
+    },
+    {
+      "index": 4,
+      "state": "corner-smudge",
+      "file": "frames/04-corner-smudge.png",
+      "sourceFile": "source-frames/04-corner-smudge.png"
+    },
+    {
+      "index": 5,
+      "state": "calm-restored",
+      "file": "frames/05-calm-restored.png",
+      "sourceFile": "source-frames/05-calm-restored.png"
+    },
+    {
+      "index": 6,
+      "state": "clear-ready",
+      "file": "frames/06-clear-ready.png",
+      "sourceFile": "source-frames/06-clear-ready.png"
+    },
+    {
+      "index": 7,
+      "state": "arena-anchor",
+      "file": "frames/07-arena-anchor.png",
+      "sourceFile": "source-frames/07-arena-anchor.png"
+    }
+  ],
+  "animations": {
+    "idle": [
+      0,
+      1
+    ],
+    "crowded": [
+      2,
+      4
+    ],
+    "protected": [
+      3,
+      5
+    ],
+    "clear": [
+      6
+    ],
+    "anchor": [
+      7
+    ]
+  },
+  "body": {
+    "type": "static-visual",
+    "notes": "Protected calm patch prop. Keep collisions separate from player/enemy contact."
+  },
+  "objectiveRole": {
+    "kind": "protected-center",
+    "recommendedPlacement": "arena-center-or-near-center",
+    "aggroRule": "Nearby enemies prioritize the player. Enemies outside the player's guardian radius may drift toward and crowd this patch.",
+    "damageRead": "Crowding should increase page noise or calm loss rather than read as physical violence."
+  },
+  "hitboxCompatibility": {
+    "shape": "none",
+    "notes": "Visual objective anchor, not an Arcade Physics contact body by default."
+  },
+  "debugContact": "calm-patch-debug-contact.png",
+  "notes": "Generated Stampede Sketch asset. Not loaded by runtime yet."
+}

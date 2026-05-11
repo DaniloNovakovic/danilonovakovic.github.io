@@ -224,6 +224,8 @@ Outputs:
   return to Ridge. M4b adds a scene-local page-noise cadence, pressure HUD,
   capped swarm surges, and soft contact feedback before reward wiring.
 - capped enemies.
+- central or near-central calm patch objective with proximity aggro: nearby
+  enemies chase the player, distant enemies may crowd the blanket.
 - auto-attacks.
 - XP pickups.
 - three-choice upgrade draft.

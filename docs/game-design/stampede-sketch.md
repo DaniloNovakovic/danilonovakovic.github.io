@@ -15,6 +15,8 @@ long enough for the page to calm down.
 
 The player is a blanket guardian: small, scrappy, and mobile, protecting a calm
 sketchbook picnic space through movement rather than direct manual attacking.
+The blanket stays in the arena as a protected landmark; the player may carry a
+small tether, corner string, charm, or pencil that visually links them to it.
 
 Good player reads:
 
@@ -75,8 +77,24 @@ For the first player asset, create a Stampede-specific guardian sprite sheet:
 - `move-side-1`
 - `move-side-2`
 - `smudged`
-- `blanket-held`
+- `tether-guard`
 - `respawn`
 
 Use transparent final PNGs, fixed frame dimensions, center origin, and a
 separate FX layer for noisy sketch marks when possible.
+
+## Blanket Aggro Rule
+
+Stampede should keep the chase-first survivor feel, but the blanket should make
+the scene more specific than a pure survival arena.
+
+Default rule:
+
+- enemies inside the player's guardian radius prioritize the player
+- enemies outside that radius may drift toward the calm patch
+- returning near the calm patch should pull attention back to the player
+- blanket crowding increases page noise or calm loss
+- direct player contact still creates smudge/contact feedback
+
+This lets the player kite, collect, and dodge like a survivor game while still
+making the mission "protect the calm patch," not merely "do not get touched."

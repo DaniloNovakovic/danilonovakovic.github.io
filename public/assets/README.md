@@ -30,8 +30,14 @@ Examples:
 - `public/assets/characters/cicka/`
 - `public/assets/potassium-slip/**`
 - `public/assets/stampede-sketch/enemies/**`
+- `public/assets/stampede-sketch/player-guardian/`
+- `public/assets/stampede-sketch/calm-patch/`
 
 Prepared does not automatically mean "currently loaded by Phaser."
+
+For Stampede Sketch, `player-guardian` and `calm-patch` are designed as a pair:
+the blanket stays separate in the arena, while the player only carries a small
+tether/charm/pencil read that explains why nearby enemies focus on them.
 
 ### Runtime-Wired Assets
 
@@ -49,4 +55,3 @@ Prepared asset folders should answer:
 4. whether the current runtime loads it
 
 If that information is missing, add a small folder-local `README.md`.
-
