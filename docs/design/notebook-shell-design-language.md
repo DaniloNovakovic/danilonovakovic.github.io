@@ -41,7 +41,10 @@ clear during normal play.
 | Tab | Global navigation such as Back or compact Menu. |
 | Margin note | Low-density status, objective, or reward memory. |
 | Loose sheet | Blocking scene panel such as start, result, upgrade, or Trail Card. |
-| Torn footer | Compact status or hint on portrait layouts. |
+| Hint slip | Compact controls/context hint, usually in the reserved footer slot. |
+| Status slip | Live timer, score, phase, feedback, or meter. |
+| Choice card | Upgrade, route, or result choice with enough copy to be readable outside canvas. |
+| Menu sheet | Compact shell menu for Static Mode, inventory, dev tools, and settings. |
 | Control mat | Shell-level touch surface larger than the visible canvas. |
 
 ## Shadow Roles
@@ -71,9 +74,13 @@ The first runtime slice should prove `ruledBoardPage` and `survivalPage`.
 
 - Desktop/tablet landscape can use either a spread or a Focus page. Arcade
   scenes should prefer Focus when notes would steal useful play/control space.
-- Phone portrait uses a single page with tabs and a torn footer/status surface.
+- Phone portrait uses a single page with tabs and a reserved hint/status slip.
 - Phone landscape uses edge chips and compact tabs; persistent footers usually
   disappear.
+- Arcade scenes default to one live status locus: live state in the page chip,
+  footer slip for hints/context only.
+- Footer slips reserve layout space by default. Floating footers are opt-in for
+  intentional overlays only.
 - Panels center in the viewport/shell stage, not inside the canvas.
 - Panels have max height, internal scrolling, and sticky or reachable actions.
 - Touch targets should stay at least 44 px high/wide when rendered as controls.

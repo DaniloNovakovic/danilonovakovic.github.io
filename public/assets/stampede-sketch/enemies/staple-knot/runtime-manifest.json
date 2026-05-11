@@ -1,0 +1,125 @@
+{
+  "slug": "staple-knot",
+  "displayName": "Staple Knot",
+  "assetClass": "enemy",
+  "sourceManifest": "manifest.json",
+  "mode": "clean-runtime-split",
+  "frameWidth": 192,
+  "frameHeight": 192,
+  "origin": {
+    "x": 0.5,
+    "y": 0.5
+  },
+  "runtimeScale": 0.32,
+  "body": {
+    "spritesheet": "staple-knot-body-spritesheet.png",
+    "frameCount": 4,
+    "frames": [
+      {
+        "index": 0,
+        "state": "idle_shield_front",
+        "file": "body-frames/00-idle_shield_front.png",
+        "sourceFrame": "frames/00-idle_shield_front.png"
+      },
+      {
+        "index": 1,
+        "state": "shield_left",
+        "file": "body-frames/01-shield_left.png",
+        "sourceFrame": "frames/01-shield_left.png"
+      },
+      {
+        "index": 2,
+        "state": "shield_right",
+        "file": "body-frames/02-shield_right.png",
+        "sourceFrame": "frames/02-shield_right.png"
+      },
+      {
+        "index": 3,
+        "state": "shove_forward",
+        "file": "body-frames/03-shove_forward.png",
+        "sourceFrame": "frames/03-shove_forward.png"
+      }
+    ],
+    "animations": {
+      "idle": [
+        0,
+        1,
+        0,
+        2
+      ],
+      "move": [
+        1,
+        3,
+        2,
+        3
+      ]
+    },
+    "recommendedFrameRate": 8
+  },
+  "fx": {
+    "spritesheet": "staple-knot-fx-spritesheet.png",
+    "frameCount": 4,
+    "frames": [
+      {
+        "index": 0,
+        "state": "shield_flash",
+        "file": "fx-frames/00-shield_flash.png",
+        "sourceFrame": "frames/06-shield_flash.png"
+      },
+      {
+        "index": 1,
+        "state": "hit_shield",
+        "file": "fx-frames/01-hit_shield.png",
+        "sourceFrame": "frames/08-hit_shield.png"
+      },
+      {
+        "index": 2,
+        "state": "hit_body",
+        "file": "fx-frames/02-hit_body.png",
+        "sourceFrame": "frames/09-hit_body.png"
+      },
+      {
+        "index": 3,
+        "state": "clear_unravel",
+        "file": "fx-frames/03-clear_unravel.png",
+        "sourceFrame": "frames/10-cleared_unravel.png"
+      }
+    ],
+    "recommendedFrameRate": 10,
+    "notes": "Spawn these as short-lived overlays for hit, clear, pressure, and respawn moments."
+  },
+  "hitboxCompatibility": {
+    "shape": "circle",
+    "radiusPxAtRuntimeScale": 22,
+    "origin": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "notes": "Floating Stampede enemy body. Tune against contact pressure before replacing placeholder circles."
+  },
+  "bodyPhysics": {
+    "type": "arcade-circle",
+    "radius": 22,
+    "offset": {
+      "x": 0,
+      "y": 0
+    }
+  },
+  "debugContact": {
+    "body": "staple-knot-body-debug-contact.png",
+    "fx": "staple-knot-fx-debug-contact.png"
+  },
+  "minimal": {
+    "spritesheet": "staple-knot-minimal-spritesheet.png",
+    "frameCount": 1,
+    "frames": [
+      {
+        "index": 0,
+        "state": "idle",
+        "file": "minimal-frames/00-idle.png",
+        "sourceFrame": "frames/00-idle_shield_front.png"
+      }
+    ],
+    "recommendedUse": "Default high-count swarm rendering. Add movement with Phaser wobble, scale, tint, or rotation tweens."
+  }
+}

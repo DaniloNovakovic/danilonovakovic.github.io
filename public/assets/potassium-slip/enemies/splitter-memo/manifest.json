@@ -1,6 +1,6 @@
 {
   "slug": "splitter-memo",
-  "source": "ig_00b17f34b896528e016a0252ee3e548191b49785192bf92488.png",
+  "source": "source.png",
   "sourceKeyed": "source-keyed.png",
   "spritesheet": "splitter-memo-spritesheet.png",
   "frameWidth": 126,
@@ -62,5 +62,7 @@
       "sourceFile": "source-frames/07-child-right-source.png"
     }
   ],
-  "debugContact": "splitter-memo-debug-contact.png"
+  "debugContact": "splitter-memo-debug-contact.png",
+  "runtimeScale": 0.9,
+  "sourceOriginal": "ig_00b17f34b896528e016a0252ee3e548191b49785192bf92488.png"
 }

@@ -1,0 +1,57 @@
+{
+  "scene": "stampede-sketch",
+  "assetClass": "enemy",
+  "mode": "clean-runtime-split",
+  "notes": "Use body spritesheets for normal gameplay and fx spritesheets for transient noisy sketch effects.",
+  "frameWidth": 192,
+  "frameHeight": 192,
+  "origin": {
+    "x": 0.5,
+    "y": 0.5
+  },
+  "enemies": [
+    {
+      "slug": "current-swarm-dot",
+      "runtimeManifest": "current-swarm-dot/runtime-manifest.json",
+      "bodySpritesheet": "current-swarm-dot/current-swarm-dot-body-spritesheet.png",
+      "fxSpritesheet": "current-swarm-dot/current-swarm-dot-fx-spritesheet.png",
+      "minimalSpritesheet": "current-swarm-dot/current-swarm-dot-minimal-spritesheet.png"
+    },
+    {
+      "slug": "skitter-fleck",
+      "runtimeManifest": "skitter-fleck/runtime-manifest.json",
+      "bodySpritesheet": "skitter-fleck/skitter-fleck-body-spritesheet.png",
+      "fxSpritesheet": "skitter-fleck/skitter-fleck-fx-spritesheet.png",
+      "minimalSpritesheet": "skitter-fleck/skitter-fleck-minimal-spritesheet.png"
+    },
+    {
+      "slug": "splat-bloom",
+      "runtimeManifest": "splat-bloom/runtime-manifest.json",
+      "bodySpritesheet": "splat-bloom/splat-bloom-body-spritesheet.png",
+      "fxSpritesheet": "splat-bloom/splat-bloom-fx-spritesheet.png",
+      "minimalSpritesheet": "splat-bloom/splat-bloom-minimal-spritesheet.png"
+    },
+    {
+      "slug": "staple-knot",
+      "runtimeManifest": "staple-knot/runtime-manifest.json",
+      "bodySpritesheet": "staple-knot/staple-knot-body-spritesheet.png",
+      "fxSpritesheet": "staple-knot/staple-knot-fx-spritesheet.png",
+      "minimalSpritesheet": "staple-knot/staple-knot-minimal-spritesheet.png"
+    },
+    {
+      "slug": "needle-thought",
+      "runtimeManifest": "needle-thought/runtime-manifest.json",
+      "bodySpritesheet": "needle-thought/needle-thought-body-spritesheet.png",
+      "fxSpritesheet": "needle-thought/needle-thought-fx-spritesheet.png",
+      "minimalSpritesheet": "needle-thought/needle-thought-minimal-spritesheet.png"
+    },
+    {
+      "slug": "pressure-clump",
+      "runtimeManifest": "pressure-clump/runtime-manifest.json",
+      "bodySpritesheet": "pressure-clump/pressure-clump-body-spritesheet.png",
+      "fxSpritesheet": "pressure-clump/pressure-clump-fx-spritesheet.png",
+      "minimalSpritesheet": "pressure-clump/pressure-clump-minimal-spritesheet.png"
+    }
+  ],
+  "recommendedDefault": "minimal spritesheet for high-count gameplay; body spritesheet for close-up/prototype animation; fx spritesheet for transient effects."
+}

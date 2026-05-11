@@ -1,0 +1,113 @@
+{
+  "slug": "staple-knot",
+  "displayName": "Staple Knot",
+  "assetClass": "enemy",
+  "sourceKeyed": "source-keyed.png",
+  "source": "source.png",
+  "spritesheet": "staple-knot-spritesheet.png",
+  "frameWidth": 192,
+  "frameHeight": 192,
+  "frameCount": 12,
+  "grid": {
+    "columns": 4,
+    "rows": 3
+  },
+  "origin": {
+    "x": 0.5,
+    "y": 0.5
+  },
+  "runtimeScale": 0.32,
+  "runtimeDisplayMaxPx": 40,
+  "frames": [
+    {
+      "index": 0,
+      "state": "idle_shield_front",
+      "file": "frames/00-idle_shield_front.png",
+      "sourceFile": "source-frames/00-idle_shield_front.png"
+    },
+    {
+      "index": 1,
+      "state": "shield_left",
+      "file": "frames/01-shield_left.png",
+      "sourceFile": "source-frames/01-shield_left.png"
+    },
+    {
+      "index": 2,
+      "state": "shield_right",
+      "file": "frames/02-shield_right.png",
+      "sourceFile": "source-frames/02-shield_right.png"
+    },
+    {
+      "index": 3,
+      "state": "shove_forward",
+      "file": "frames/03-shove_forward.png",
+      "sourceFile": "source-frames/03-shove_forward.png"
+    },
+    {
+      "index": 4,
+      "state": "brace",
+      "file": "frames/04-brace.png",
+      "sourceFile": "source-frames/04-brace.png"
+    },
+    {
+      "index": 5,
+      "state": "wobble",
+      "file": "frames/05-wobble.png",
+      "sourceFile": "source-frames/05-wobble.png"
+    },
+    {
+      "index": 6,
+      "state": "shield_flash",
+      "file": "frames/06-shield_flash.png",
+      "sourceFile": "source-frames/06-shield_flash.png"
+    },
+    {
+      "index": 7,
+      "state": "exposed_back",
+      "file": "frames/07-exposed_back.png",
+      "sourceFile": "source-frames/07-exposed_back.png"
+    },
+    {
+      "index": 8,
+      "state": "hit_shield",
+      "file": "frames/08-hit_shield.png",
+      "sourceFile": "source-frames/08-hit_shield.png"
+    },
+    {
+      "index": 9,
+      "state": "hit_body",
+      "file": "frames/09-hit_body.png",
+      "sourceFile": "source-frames/09-hit_body.png"
+    },
+    {
+      "index": 10,
+      "state": "cleared_unravel",
+      "file": "frames/10-cleared_unravel.png",
+      "sourceFile": "source-frames/10-cleared_unravel.png"
+    },
+    {
+      "index": 11,
+      "state": "respawn_tighten",
+      "file": "frames/11-respawn_tighten.png",
+      "sourceFile": "source-frames/11-respawn_tighten.png"
+    }
+  ],
+  "hitboxCompatibility": {
+    "shape": "circle",
+    "radiusPxAtRuntimeScale": 22,
+    "origin": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "notes": "Floating Stampede enemy body. Tune against contact pressure before replacing placeholder circles."
+  },
+  "body": {
+    "type": "arcade-circle",
+    "radius": 22,
+    "offset": {
+      "x": 0,
+      "y": 0
+    }
+  },
+  "debugContact": "staple-knot-debug-contact.png"
+}

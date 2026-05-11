@@ -49,17 +49,72 @@ Circuit, but Potassium run behavior should stay scene-owned: fresh-start entry,
 campaign victory grants the Circuit once, and endless mode continues only inside
 the Potassium scene.
 
+## Narrative Contract
+
+Potassium Slip is the Ridge's secret **joy audit**. After Danilo finds the
+Glasses, the overworld becomes readable enough to reveal the hidden banana.
+Peeling it opens a ridiculous compliance test where the sketchbook asks whether
+fun is allowed to count as real progress.
+
+The banana is the player's counter-argument: an unserious toy that turns
+pressure into signal through ricochet, recall, and escalating upgrade nonsense.
+The enemies are not literal monsters; they are anxious office artifacts produced
+by the Potassium Compliance Officer to prove that play should be scoped,
+approved, filed, and made sensible before it can help the Ridge.
+
+The campaign reward should stay the **Circuit**. Fictionally, the Compliance
+Officer has withheld it because the Relay Spire signal is "not properly
+approved." Beating the boss recovers the Circuit and lets Potassium act as the
+alternate key to the first Relay Spire gate.
+
+On return to the Ridge, Potassium should leave a visible memory rather than only
+an inventory flag. Good first candidates are:
+
+- a tiny circuit sticker on or near the Relay route
+- a doodled banana warning sign that has been crossed out or re-captioned
+- one Relay Spire light flickering on after the Circuit is owned
+- a Ridge Guide or Cicka margin note quietly acknowledging the nonsense
+
+Tone target: silly substory seriousness. The joke should stay warm and
+practical: Danilo did not defeat paperwork by becoming less playful; he defeated
+it by making the playful thing useful.
+
 ## Enemies
 
-- **Intern Bug:** Basic small target.
-- **Scope Blob:** Round multi-hit target.
-- **Meeting Brick:** Chunkier blocker-like enemy.
+- **Intern Bug:** Small anxious request. It is easy to clear, but it makes the
+  first rows feel alive.
+- **Scope Blob:** Round multi-hit scope creep. It should read as soft,
+  expanding, and stubborn.
 - **Deadline Drone:** Faster falling hazard.
-- **Wooden Wall:** High-HP one-cell destructible blocker that forces ricochet angles. It shows wood planks and crack/splinter damage, not bandages.
-- **Hard Filing Wall:** Indestructible one-cell blocker introduced later. It never costs lives, but it refuses to become paperwork.
-- **Splitter Memo:** Two-column target that splits into two smaller bugs on death, one from each occupied lane.
-- **Shielded Form:** Beefy target with a visible shield plate. Hits from the shielded side ricochet without damage.
-- **Potassium Compliance Officer:** Campaign boss with patrol phases, orbiting indestructible blockers, stone armor windows, and summons.
+- **Wooden Wall:** High-HP one-cell destructible blocker that forces ricochet
+  angles. It shows wood planks and crack/splinter damage, not bandages.
+- **Hard Filing Wall:** Indestructible one-cell blocker introduced later. It
+  never costs lives, but it refuses to become paperwork.
+- **Splitter Memo:** Two-column follow-up memo that splits into two smaller bugs
+  on death, one from each occupied lane.
+- **Shielded Form:** Protected requirement with a visible shield plate. Hits
+  from the shielded side ricochet without damage.
+- **Potassium Compliance Officer:** Campaign boss with patrol phases, orbiting
+  indestructible blockers, stone armor windows, and summons. It owns the audit
+  fiction and the withheld Circuit.
+
+## Asset Direction
+
+Future Potassium enemy art should preserve the current hitbox families and make
+the audit fiction legible at silhouette distance. Enemies should read as
+paperwork, office pressure, and over-processed requirements before they read as
+generic monsters.
+
+Useful sprite motifs:
+
+- stamped forms, bent memo corners, binder clips, file tabs, checkboxes, and
+  taped-on shield plates
+- damage states shown through scuffs, cracks, ink leaks, splinters, and loosened
+  stationery rather than gore or heavy facial distress
+- the boss carrying or locking away a small Circuit mark so the reward feels
+  related to the final encounter
+- banana upgrade effects staying joyful and bright enough to contrast the
+  paperwork enemies without breaking the sketchbook style
 
 ## Boss Fight
 

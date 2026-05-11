@@ -1,0 +1,109 @@
+{
+  "slug": "wooden-wall",
+  "potassiumEnemyKind": "wall",
+  "assetClass": "enemy",
+  "sourceManifest": "manifest.json",
+  "phaserTextureKey": "potassium_enemy_wall",
+  "spritesheet": "wooden-wall-spritesheet.png",
+  "frameWidth": 80,
+  "frameHeight": 62,
+  "frameCount": 6,
+  "origin": {
+    "x": 0.5,
+    "y": 0.5
+  },
+  "runtimeScale": 0.78,
+  "states": [
+    {
+      "index": 0,
+      "state": "intact",
+      "file": "frames/00-intact.png"
+    },
+    {
+      "index": 1,
+      "state": "tilt-left",
+      "file": "frames/01-tilt-left.png"
+    },
+    {
+      "index": 2,
+      "state": "tilt-right",
+      "file": "frames/02-tilt-right.png"
+    },
+    {
+      "index": 3,
+      "state": "cracked",
+      "file": "frames/03-cracked.png"
+    },
+    {
+      "index": 4,
+      "state": "critical",
+      "file": "frames/04-critical.png"
+    },
+    {
+      "index": 5,
+      "state": "break",
+      "file": "frames/05-break.png"
+    }
+  ],
+  "animations": {
+    "idle": {
+      "key": "potassium_enemy_wall_idle",
+      "frames": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "frameRate": 8,
+      "repeat": -1
+    },
+    "cracked": {
+      "key": "potassium_enemy_wall_cracked",
+      "frames": [
+        3
+      ],
+      "frameRate": 8,
+      "repeat": 0
+    },
+    "critical": {
+      "key": "potassium_enemy_wall_critical",
+      "frames": [
+        4
+      ],
+      "frameRate": 8,
+      "repeat": 0
+    },
+    "break": {
+      "key": "potassium_enemy_wall_break",
+      "frames": [
+        5
+      ],
+      "frameRate": 10,
+      "repeat": 0
+    }
+  },
+  "hitboxCompatibility": {
+    "kind": "bodyProfile",
+    "currentTexture": "potassium_enemy_wall",
+    "runtimeScale": 0.78,
+    "body": {
+      "width": 68,
+      "height": 52
+    }
+  },
+  "bodyPhysics": {
+    "type": "arcade-rectangle",
+    "width": 68,
+    "height": 52
+  },
+  "debugContact": "wooden-wall-debug-contact.png",
+  "preload": {
+    "method": "spritesheet",
+    "key": "potassium_enemy_wall",
+    "url": "/assets/potassium-slip/enemies/wooden-wall/wooden-wall-spritesheet.png",
+    "config": {
+      "frameWidth": 80,
+      "frameHeight": 62
+    }
+  }
+}

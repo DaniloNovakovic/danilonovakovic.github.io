@@ -1,0 +1,125 @@
+{
+  "slug": "current-swarm-dot",
+  "displayName": "Current Swarm Dot",
+  "assetClass": "enemy",
+  "sourceManifest": "manifest.json",
+  "mode": "clean-runtime-split",
+  "frameWidth": 192,
+  "frameHeight": 192,
+  "origin": {
+    "x": 0.5,
+    "y": 0.5
+  },
+  "runtimeScale": 0.32,
+  "body": {
+    "spritesheet": "current-swarm-dot-body-spritesheet.png",
+    "frameCount": 4,
+    "frames": [
+      {
+        "index": 0,
+        "state": "idle",
+        "file": "body-frames/00-idle.png",
+        "sourceFrame": "frames/00-idle_compact.png"
+      },
+      {
+        "index": 1,
+        "state": "wobble_left",
+        "file": "body-frames/01-wobble_left.png",
+        "sourceFrame": "frames/01-wobble_left.png"
+      },
+      {
+        "index": 2,
+        "state": "wobble_right",
+        "file": "body-frames/02-wobble_right.png",
+        "sourceFrame": "frames/02-wobble_right.png"
+      },
+      {
+        "index": 3,
+        "state": "bounce",
+        "file": "body-frames/03-bounce.png",
+        "sourceFrame": "frames/04-compressed_bounce.png"
+      }
+    ],
+    "animations": {
+      "idle": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "move": [
+        0,
+        3,
+        1,
+        2
+      ]
+    },
+    "recommendedFrameRate": 8
+  },
+  "fx": {
+    "spritesheet": "current-swarm-dot-fx-spritesheet.png",
+    "frameCount": 4,
+    "frames": [
+      {
+        "index": 0,
+        "state": "hit_squish",
+        "file": "fx-frames/00-hit_squish.png",
+        "sourceFrame": "frames/05-hit_squish.png"
+      },
+      {
+        "index": 1,
+        "state": "clear_puff",
+        "file": "fx-frames/01-clear_puff.png",
+        "sourceFrame": "frames/06-clearing_puff.png"
+      },
+      {
+        "index": 2,
+        "state": "pressure_surge",
+        "file": "fx-frames/02-pressure_surge.png",
+        "sourceFrame": "frames/07-pressure_surge.png"
+      },
+      {
+        "index": 3,
+        "state": "respawn",
+        "file": "fx-frames/03-respawn.png",
+        "sourceFrame": "frames/11-respawn_reforming.png"
+      }
+    ],
+    "recommendedFrameRate": 10,
+    "notes": "Spawn these as short-lived overlays for hit, clear, pressure, and respawn moments."
+  },
+  "hitboxCompatibility": {
+    "shape": "circle",
+    "radiusPxAtRuntimeScale": 15,
+    "origin": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "notes": "Floating Stampede enemy body. Tune against contact pressure before replacing placeholder circles."
+  },
+  "bodyPhysics": {
+    "type": "arcade-circle",
+    "radius": 15,
+    "offset": {
+      "x": 0,
+      "y": 0
+    }
+  },
+  "debugContact": {
+    "body": "current-swarm-dot-body-debug-contact.png",
+    "fx": "current-swarm-dot-fx-debug-contact.png"
+  },
+  "minimal": {
+    "spritesheet": "current-swarm-dot-minimal-spritesheet.png",
+    "frameCount": 1,
+    "frames": [
+      {
+        "index": 0,
+        "state": "idle",
+        "file": "minimal-frames/00-idle.png",
+        "sourceFrame": "frames/00-idle_compact.png"
+      }
+    ],
+    "recommendedUse": "Default high-count swarm rendering. Add movement with Phaser wobble, scale, tint, or rotation tweens."
+  }
+}

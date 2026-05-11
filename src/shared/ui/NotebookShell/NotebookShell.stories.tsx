@@ -2,10 +2,15 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import type { ReactElement } from 'react';
 import {
   ControlMat,
+  NotebookMenuSheet,
   NotebookHeaderChrome,
   NotebookPageFrame,
+  NotebookScrapNote,
   NotebookShellStage,
   NotebookSpread,
+  SceneChoiceCard,
+  SceneChoiceGrid,
+  SceneHintSlip,
   ScenePanelSheet,
   SceneStatusSlip,
   type NotebookSceneProfile,
@@ -52,7 +57,7 @@ function ArcadePreview({
         profile={profile}
         viewport={viewport}
         header={<NotebookHeaderChrome />}
-        footer={shouldShowFooter ? <SceneStatusSlip metric={title} label={footer} meterValue={meterValue} /> : undefined}
+        footer={shouldShowFooter ? <SceneHintSlip label={footer} /> : undefined}
         panel={panel}
       >
         <ControlMat
@@ -62,9 +67,9 @@ function ArcadePreview({
           <NotebookPageFrame
             profile={profile}
             className={cn(
-              'absolute inset-x-8 bottom-16 top-20',
+              'absolute inset-x-8 bottom-8 top-20',
               viewport === 'phoneLandscape' ? 'inset-x-24 bottom-5 top-14' : '',
-              viewport === 'phonePortrait' ? 'inset-x-5 bottom-16 top-20' : ''
+              viewport === 'phonePortrait' ? 'inset-x-5 bottom-12 top-20' : ''
             )}
             status={
               <SceneStatusSlip
@@ -102,8 +107,8 @@ function NotesBlock({
   scrap: string;
 }) {
   return (
-    <div className="grid h-full grid-rows-[auto_minmax(0,1fr)_auto] gap-4 font-mono">
-      <div className="grid gap-3 text-sm font-bold leading-relaxed text-[#5a554f]">
+    <div className="grid content-start gap-2 font-mono">
+      <div className="grid gap-2 text-xs font-bold leading-relaxed text-[#5a554f]">
         <strong className="text-base uppercase tracking-widest text-[#1a1a1a]">{title}</strong>
         {lines.map((line) => (
           <span key={line}>{line}</span>
@@ -112,9 +117,7 @@ function NotesBlock({
       <div className="border-l-4 border-[#1a1a1a]/75 pl-3 text-xs font-bold uppercase tracking-widest text-[#5a554f]">
         Quiet notes only. No permanent clutter in the danger space.
       </div>
-      <div className={cn('w-fit rotate-[-2deg] border-2 border-[#1a1a1a] bg-[#d9c276] p-3 text-xs uppercase', notebookShadowRoles.control)}>
-        {scrap}
-      </div>
+      <NotebookScrapNote>{scrap}</NotebookScrapNote>
     </div>
   );
 }
@@ -221,12 +224,21 @@ export const PotassiumUpgradePanel: Story = {
       panel={
         <ScenePanelSheet
           title="Choose Banana Nonsense"
-          body="Upgrade sheets can stretch wider than the board because choosing is a paused, text-heavy moment."
+          body={
+            <SceneChoiceGrid>
+              <SceneChoiceCard
+                title="Duplicate"
+                description="Main hits spawn 2 small bananas."
+                tone="yellow"
+              />
+              <SceneChoiceCard
+                title="Fire Trail"
+                description="Moving bananas leave fire."
+                tone="red"
+              />
+            </SceneChoiceGrid>
+          }
           placement="wide"
-          actions={[
-            { label: 'Duplicate', variant: 'primary' },
-            { label: 'Fire Trail', variant: 'secondary' }
-          ]}
         />
       }
     >
@@ -248,6 +260,7 @@ export const PotassiumTerminalPanel: Story = {
         <ScenePanelSheet
           title="Banana Bankrupt"
           body="Final score 8. Terminal actions stay reachable on narrow screens."
+          actionsLayout="stack"
           placement="mobileStacked"
           actions={[
             { label: 'Retry', variant: 'primary' },
@@ -318,6 +331,7 @@ export const StampedeStartPanel: Story = {
         <ScenePanelSheet
           title="Ready?"
           body="Start sheets are allowed because gameplay has not begun yet."
+          actionsLayout="stack"
           placement="mobileStacked"
           actions={[
             { label: 'Start', variant: 'primary' },
@@ -343,6 +357,7 @@ export const StampedeResultPanel: Story = {
         <ScenePanelSheet
           title="Page Got Crowded"
           body="A result sheet can dominate the page because the run is paused."
+          actionsLayout="auto"
           placement="centered"
           actions={[
             { label: 'Retry', variant: 'primary' },
@@ -364,9 +379,9 @@ export const RidgeOverworldDesktopSpread: Story = {
         layout="spread"
         viewport="desktopSpread"
         header={<NotebookHeaderChrome />}
-        footer={<SceneStatusSlip metric="Trail" label="side-view page, not an arcade board" />}
+        footer={<SceneHintSlip label="side-view page, not an arcade board" />}
       >
-        <ControlMat label="walk and interact on paper">
+        <ControlMat label="walk and interact on paper" showGuide={false}>
           <NotebookSpread
             profile="sideViewPage"
             notes={
@@ -386,6 +401,48 @@ export const RidgeOverworldDesktopSpread: Story = {
           </NotebookSpread>
         </ControlMat>
       </NotebookShellStage>
+    </StoryPad>
+  )
+};
+
+export const ChoiceAndHintAtoms: Story = {
+  render: () => (
+    <StoryPad>
+      <div className="grid w-[min(52rem,calc(100vw-2rem))] gap-5 rounded-lg border-4 border-[#1a1a1a] bg-[#fbfbf9] p-5 font-mono">
+        <h2 className="text-2xl font-black uppercase tracking-widest">Choice + Hint Atoms</h2>
+        <SceneChoiceGrid>
+          <SceneChoiceCard
+            title="Horizontal Ghost"
+            description="Hits fire a blue row beam."
+            tone="blue"
+            selected
+          />
+          <SceneChoiceCard
+            title="Explosion Damage"
+            description="Hits explode with falloff damage."
+            tone="red"
+          />
+        </SceneChoiceGrid>
+        <SceneHintSlip label="wave clear - choose fresh banana nonsense" />
+      </div>
+    </StoryPad>
+  )
+};
+
+export const MenuAndScrapAtoms: Story = {
+  render: () => (
+    <StoryPad>
+      <div className="grid w-[min(44rem,calc(100vw-2rem))] justify-items-center gap-5 rounded-lg border-4 border-[#1a1a1a] bg-[#f4f1ea] p-5 font-mono">
+        <NotebookMenuSheet
+          title="Menu"
+          items={[
+            { label: 'Static Mode', detail: 'Open the readable portfolio page.' },
+            { label: 'Inventory', detail: 'Pocket notes and collected stamps.' },
+            { label: 'Dev', detail: 'Prototype tools.' }
+          ]}
+        />
+        <NotebookScrapNote>Only content-bearing scraps make it into v1.</NotebookScrapNote>
+      </div>
     </StoryPad>
   )
 };

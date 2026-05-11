@@ -6,11 +6,12 @@ import type {
 } from 'react';
 import { ArrowLeft, Menu } from 'lucide-react';
 import { Button } from '../Button';
-import { notebookShadowRoles } from '../tokens';
+import { notebookShadowRoles, sketchFocusVisible } from '../tokens';
 import { cn } from '../utils';
 
 export type NotebookSceneProfile = 'sideViewPage' | 'ruledBoardPage' | 'survivalPage';
 export type NotebookShellLayout = 'focus' | 'spread';
+export type NotebookFooterMode = 'reserved' | 'floating';
 export type NotebookViewport =
   | 'desktopFocus'
   | 'desktopSpread'
@@ -19,11 +20,15 @@ export type NotebookViewport =
   | 'tablet'
   | 'tabletLandscape';
 export type NotebookPanelPlacement = 'centered' | 'wide' | 'mobileStacked';
+export type NotebookPanelActionsLayout = 'auto' | 'row' | 'stack';
+export type NotebookChoiceTone = 'ink' | 'yellow' | 'blue' | 'red';
+export type NotebookScrapTone = 'paper' | 'yellow' | 'blue';
 
 interface NotebookShellStageProps extends HTMLAttributes<HTMLDivElement> {
   profile: NotebookSceneProfile;
   layout?: NotebookShellLayout;
   viewport?: NotebookViewport;
+  footerMode?: NotebookFooterMode;
   header?: ReactNode;
   panel?: ReactNode;
   footer?: ReactNode;
@@ -66,7 +71,8 @@ interface ScenePanelSheetAction {
 interface ScenePanelSheetProps extends HTMLAttributes<HTMLElement> {
   title: string;
   body: ReactNode;
-  actions: readonly ScenePanelSheetAction[];
+  actions?: readonly ScenePanelSheetAction[];
+  actionsLayout?: NotebookPanelActionsLayout;
   placement?: NotebookPanelPlacement;
 }
 
@@ -75,7 +81,39 @@ interface SceneStatusSlipProps extends HTMLAttributes<HTMLDivElement> {
   label: string;
   detail?: string;
   meterValue?: number;
-  variant?: 'footer' | 'chip';
+  variant?: 'bar' | 'chip' | 'footer';
+}
+
+interface SceneHintSlipProps extends HTMLAttributes<HTMLDivElement> {
+  label: string;
+  detail?: string;
+}
+
+interface SceneChoiceCardProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  title: string;
+  description: string;
+  tone?: NotebookChoiceTone;
+  selected?: boolean;
+}
+
+interface SceneChoiceGridProps extends HTMLAttributes<HTMLDivElement> {
+  columns?: NotebookPanelActionsLayout;
+}
+
+interface NotebookScrapNoteProps extends HTMLAttributes<HTMLElement> {
+  tone?: NotebookScrapTone;
+}
+
+interface NotebookMenuSheetItem {
+  label: string;
+  detail?: string;
+  onClick?: ButtonHTMLAttributes<HTMLButtonElement>['onClick'];
+  disabled?: boolean;
+}
+
+interface NotebookMenuSheetProps extends HTMLAttributes<HTMLElement> {
+  title: string;
+  items: readonly NotebookMenuSheetItem[];
 }
 
 const stageViewportStyles: Record<NotebookViewport, CSSProperties> = {
@@ -145,10 +183,32 @@ const panelPlacementStyles: Record<NotebookPanelPlacement, CSSProperties> = {
   }
 };
 
+const actionGridStyles: Record<NotebookPanelActionsLayout, CSSProperties | undefined> = {
+  auto: {
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(13rem, 100%), 1fr))'
+  },
+  row: undefined,
+  stack: undefined
+};
+
+const choiceToneClasses: Record<NotebookChoiceTone, string> = {
+  ink: 'text-[#1a1a1a]',
+  yellow: 'text-[#c7a51b]',
+  blue: 'text-[#37aee7]',
+  red: 'text-[#f05a5a]'
+};
+
+const scrapToneClasses: Record<NotebookScrapTone, string> = {
+  paper: 'bg-[#fbfbf9]',
+  yellow: 'bg-[#d9c276]',
+  blue: 'bg-[#b8d8f1]'
+};
+
 export function NotebookShellStage({
   profile,
   layout = 'focus',
   viewport = layout === 'spread' ? 'desktopSpread' : 'desktopFocus',
+  footerMode = 'reserved',
   header,
   panel,
   footer,
@@ -157,11 +217,13 @@ export function NotebookShellStage({
   style,
   ...props
 }: NotebookShellStageProps) {
+  const footerSpace = footer && footerMode === 'reserved' ? '4.75rem' : '0px';
   return (
     <div
       data-profile={profile}
       data-layout={layout}
       data-viewport={viewport}
+      data-footer-mode={footerMode}
       className={cn(
         'relative overflow-hidden rounded-br-[1.75rem] border-4 border-[#1a1a1a] bg-[#f4f1ea] text-[#1a1a1a]',
         'font-[var(--font-ui)]',
@@ -171,15 +233,25 @@ export function NotebookShellStage({
       style={{
         background:
           'linear-gradient(rgba(26,26,26,0.025) 1px, transparent 1px) 0 0 / 100% 2.5rem, #f4f1ea',
+        '--notebook-footer-space': footerSpace,
         ...stageViewportStyles[viewport],
         ...style
-      }}
+      } as CSSProperties}
       {...props}
     >
       {header}
       {children}
       {panel}
-      {footer ? <div className="absolute inset-x-3 bottom-3 z-20 flex justify-center">{footer}</div> : null}
+      {footer ? (
+        <div
+          className={cn(
+            'absolute inset-x-3 bottom-3 flex justify-center',
+            footerMode === 'floating' ? 'z-40' : 'z-20'
+          )}
+        >
+          {footer}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -235,14 +307,16 @@ export function ControlMat({
   showGuide = true,
   children,
   className,
+  style,
   ...props
 }: ControlMatProps) {
   return (
     <div
       className={cn(
-        'absolute inset-x-3 bottom-3 top-16 rounded-[1.375rem] bg-[#fbfbf9]/20 outline outline-2 -outline-offset-8 outline-[#1a1a1a]/10',
+        'absolute inset-x-3 top-16 rounded-[1.375rem] bg-[#fbfbf9]/20 outline outline-2 -outline-offset-8 outline-[#1a1a1a]/10',
         className
       )}
+      style={{ bottom: 'calc(0.75rem + var(--notebook-footer-space, 0px))', ...style }}
       {...props}
     >
       {children}
@@ -319,12 +393,16 @@ export function NotebookSpread({
 export function ScenePanelSheet({
   title,
   body,
-  actions,
+  actions = [],
+  actionsLayout = 'auto',
   placement = 'centered',
   className,
   style,
   ...props
 }: ScenePanelSheetProps) {
+  const actionGridClass =
+    actionsLayout === 'row' ? 'grid-cols-2' : actionsLayout === 'stack' ? 'grid-cols-1' : '';
+
   return (
     <section
       role="dialog"
@@ -338,27 +416,89 @@ export function ScenePanelSheet({
       style={{ ...panelPlacementStyles[placement], ...style }}
       {...props}
     >
-      <h2 className="font-mono text-3xl font-black uppercase leading-none tracking-wider text-[#1a1a1a]">
+      <h2
+        className="font-mono font-black uppercase leading-none tracking-wider text-[#1a1a1a]"
+        style={{ fontSize: 'clamp(1.6rem, 7vw, 3rem)' }}
+      >
         {title}
       </h2>
       <div className="min-h-0 overflow-y-auto font-mono text-sm font-bold leading-relaxed text-[#5a554f]">
         {body}
       </div>
-      <div className={cn('grid gap-3', placement === 'mobileStacked' ? 'grid-cols-1' : 'grid-cols-2')}>
-        {actions.map((action) => (
-          <Button
-            key={action.label}
-            disabled={action.disabled}
-            onClick={action.onClick}
-            size="lg"
-            variant={action.variant === 'primary' ? 'primary' : 'secondary'}
-            className="min-h-12 w-full font-mono uppercase tracking-widest"
-          >
-            {action.label}
-          </Button>
-        ))}
-      </div>
+      {actions.length > 0 ? (
+        <div
+          className={cn('grid gap-3', actionGridClass)}
+          data-actions-layout={actionsLayout}
+          style={actionGridStyles[actionsLayout]}
+        >
+          {actions.map((action) => (
+            <Button
+              key={action.label}
+              disabled={action.disabled}
+              onClick={action.onClick}
+              size="lg"
+              variant={action.variant === 'primary' ? 'primary' : 'secondary'}
+              className="min-h-12 w-full font-mono uppercase tracking-widest"
+            >
+              {action.label}
+            </Button>
+          ))}
+        </div>
+      ) : null}
     </section>
+  );
+}
+
+export function SceneChoiceGrid({
+  columns = 'auto',
+  children,
+  className,
+  style,
+  ...props
+}: SceneChoiceGridProps) {
+  const gridClass = columns === 'row' ? 'grid-cols-2' : columns === 'stack' ? 'grid-cols-1' : '';
+
+  return (
+    <div
+      className={cn('grid gap-3', gridClass, className)}
+      data-choice-grid={columns}
+      style={{ ...actionGridStyles[columns], ...style }}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+}
+
+export function SceneChoiceCard({
+  title,
+  description,
+  tone = 'ink',
+  selected = false,
+  className,
+  ...props
+}: SceneChoiceCardProps) {
+  return (
+    <button
+      type="button"
+      aria-pressed={selected}
+      className={cn(
+        'grid min-h-32 cursor-pointer gap-3 rounded-md border-2 border-[#1a1a1a] bg-[#fbfbf9] p-4 text-center font-mono transition-all',
+        'hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-[1px] active:translate-y-[1px]',
+        sketchFocusVisible,
+        selected ? 'outline outline-2 outline-offset-2 outline-[#1a1a1a]' : '',
+        notebookShadowRoles.control,
+        className
+      )}
+      {...props}
+    >
+      <strong className={cn('text-xl font-black leading-tight', choiceToneClasses[tone])}>
+        {title}
+      </strong>
+      <span className="self-end text-sm font-bold leading-relaxed text-[#1a1a1a]">
+        {description}
+      </span>
+    </button>
   );
 }
 
@@ -367,7 +507,7 @@ export function SceneStatusSlip({
   label,
   detail,
   meterValue = 0,
-  variant = 'footer',
+  variant = 'bar',
   className,
   ...props
 }: SceneStatusSlipProps) {
@@ -398,5 +538,88 @@ export function SceneStatusSlip({
       </span>
       {detail ? <span className="col-span-full text-[10px] text-[#5a554f]">{detail}</span> : null}
     </div>
+  );
+}
+
+export function SceneHintSlip({
+  label,
+  detail,
+  className,
+  ...props
+}: SceneHintSlipProps) {
+  return (
+    <div
+      className={cn(
+        'grid w-[min(38rem,100%)] gap-1 rounded-xl border-2 border-[#1a1a1a] bg-[#fbfbf9]/95 px-4 py-2 text-center font-mono uppercase tracking-widest text-[#5a554f]',
+        notebookShadowRoles.control,
+        className
+      )}
+      {...props}
+    >
+      <strong className="text-xs leading-tight">{label}</strong>
+      {detail ? <span className="text-[10px] leading-tight text-[#5a554f]/80">{detail}</span> : null}
+    </div>
+  );
+}
+
+export function NotebookScrapNote({
+  tone = 'yellow',
+  children,
+  className,
+  ...props
+}: NotebookScrapNoteProps) {
+  return (
+    <aside
+      className={cn(
+        'w-fit max-w-52 rotate-[-2deg] border-2 border-[#1a1a1a] p-3 font-mono text-xs font-bold uppercase leading-relaxed tracking-wide text-[#1a1a1a]',
+        notebookShadowRoles.control,
+        scrapToneClasses[tone],
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </aside>
+  );
+}
+
+export function NotebookMenuSheet({
+  title,
+  items,
+  className,
+  ...props
+}: NotebookMenuSheetProps) {
+  return (
+    <section
+      role="dialog"
+      aria-label={title}
+      className={cn(
+        'grid w-[min(22rem,calc(100vw-2rem))] gap-3 rounded-lg border-4 border-[#1a1a1a] bg-[#fbfbf9] p-4 font-mono',
+        notebookShadowRoles.sheet,
+        className
+      )}
+      {...props}
+    >
+      <h2 className="text-2xl font-black uppercase tracking-widest text-[#1a1a1a]">
+        {title}
+      </h2>
+      <div className="grid gap-2">
+        {items.map((item) => (
+          <Button
+            key={item.label}
+            disabled={item.disabled}
+            onClick={item.onClick}
+            size="md"
+            variant="secondary"
+            className="grid min-h-12 justify-items-start gap-1 text-left font-mono uppercase tracking-widest"
+          >
+            <span>{item.label}</span>
+            {item.detail ? (
+              <span className="text-[10px] font-bold tracking-wide text-[#5a554f]">{item.detail}</span>
+            ) : null}
+          </Button>
+        ))}
+      </div>
+    </section>
   );
 }

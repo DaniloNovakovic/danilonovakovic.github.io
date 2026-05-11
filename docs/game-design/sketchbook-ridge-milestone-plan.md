@@ -41,6 +41,11 @@ Anything beyond that is future scope unless a slice explicitly pulls it in.
   pickups/upgrades, run a short M4d.5 responsive shell/input spike so mobile
   landscape and arcade touch surfaces do not keep inheriting card-only
   constraints.
+- **Asset staging is now an active coordination concern**: prepared POC assets
+  exist for Cicka, Potassium, and Stampede enemy families. Keep them documented
+  and adopt them in small scene-owned slices instead of turning them into a
+  broad art-integration branch. See
+  [`sketchbook-ridge-asset-staging-plan.md`](./sketchbook-ridge-asset-staging-plan.md).
 
 ## Production Crew
 
@@ -206,6 +211,10 @@ basic silhouette placeholders.
 Goal: ship the first new opt-in mini-game.
 
 Owner: Stampede scene.
+
+Purpose: protect one calm picnic-blanket patch from a stampede of runaway ideas.
+Use [`stampede-sketch.md`](./stampede-sketch.md) for player-guardian and enemy
+intent before generating or wiring final Stampede art.
 
 Outputs:
 

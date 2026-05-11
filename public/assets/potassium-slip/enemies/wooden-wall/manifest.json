@@ -1,6 +1,6 @@
 {
   "slug": "wooden-wall",
-  "source": "ig_00b17f34b896528e016a02528e06e8819187bf958029b99e7d.png",
+  "source": "source.png",
   "sourceKeyed": "source-keyed.png",
   "spritesheet": "wooden-wall-spritesheet.png",
   "frameWidth": 80,
@@ -51,5 +51,7 @@
       "sourceFile": "source-frames/05-break-source.png"
     }
   ],
-  "debugContact": "wooden-wall-debug-contact.png"
+  "debugContact": "wooden-wall-debug-contact.png",
+  "runtimeScale": 0.78,
+  "sourceOriginal": "ig_00b17f34b896528e016a02528e06e8819187bf958029b99e7d.png"
 }

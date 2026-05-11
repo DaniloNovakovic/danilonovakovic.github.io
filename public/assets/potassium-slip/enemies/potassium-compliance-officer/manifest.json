@@ -1,6 +1,6 @@
 {
   "slug": "potassium-compliance-officer",
-  "source": "ig_00b17f34b896528e016a02536a479481918c079a79bbec4c4f.png",
+  "source": "source.png",
   "sourceKeyed": "source-keyed.png",
   "spritesheet": "potassium-compliance-officer-spritesheet.png",
   "frameWidth": 124,
@@ -52,5 +52,7 @@
       "sourceFile": "source-frames/06-defeated-source.png"
     }
   ],
-  "debugContact": "potassium-compliance-officer-debug-contact.png"
+  "debugContact": "potassium-compliance-officer-debug-contact.png",
+  "runtimeScale": 0.72,
+  "sourceOriginal": "ig_00b17f34b896528e016a02536a479481918c079a79bbec4c4f.png"
 }

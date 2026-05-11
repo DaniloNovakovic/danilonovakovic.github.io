@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { OverlayDialogFrame } from '@/game/overlays/OverlayDialogFrame';
 import type { OverlayControllerProps } from '@/game/overlays/types';
 import { useMessages } from '@/shared/i18n';
+import { bridgeActions } from '@/game/bridge/store';
+import { executeDeveloperConsoleCommand } from './commands';
 
 export default function CodingOverlay({ close, titleId, descriptionId }: OverlayControllerProps) {
   const messages = useMessages();
@@ -26,29 +28,20 @@ export default function CodingOverlay({ close, titleId, descriptionId }: Overlay
   }, []);
 
   const handleCommand = (cmd: string) => {
-    const trimmed = cmd.trim().toLowerCase();
-    let response = '';
+    const result = executeDeveloperConsoleCommand(cmd, copy, {
+      enterScene: (sceneId) => bridgeActions.enterScene(sceneId)
+    });
 
-    switch (trimmed) {
-      case 'help':
-        response = copy.helpResponse;
-        break;
-      case 'whoami':
-        response = copy.whoamiResponse;
-        break;
-      case 'skills':
-        response = copy.skillsResponse;
-        break;
-      case 'clear':
-        setHistory([]);
-        return;
-      case '':
-        return;
-      default:
-        response = copy.commandNotFound(trimmed);
+    if (result.clearHistory) {
+      setHistory([]);
+      return;
     }
 
-    setHistory(prev => [...prev, `> ${cmd}`, ...response.split('\n')]);
+    if (!result.responseLines?.length) {
+      return;
+    }
+
+    setHistory(prev => [...prev, `> ${cmd}`, ...result.responseLines]);
   };
 
   const onSubmit = (e: React.FormEvent) => {

@@ -1,0 +1,37 @@
+{
+  "scene": "stampede-sketch",
+  "assetClass": "enemy",
+  "notes": "Generated transparent enemy sprite assets prepared from concept sheets. Not loaded by runtime yet.",
+  "enemies": [
+    {
+      "slug": "current-swarm-dot",
+      "manifest": "current-swarm-dot/manifest.json",
+      "spritesheet": "current-swarm-dot/current-swarm-dot-spritesheet.png"
+    },
+    {
+      "slug": "skitter-fleck",
+      "manifest": "skitter-fleck/manifest.json",
+      "spritesheet": "skitter-fleck/skitter-fleck-spritesheet.png"
+    },
+    {
+      "slug": "splat-bloom",
+      "manifest": "splat-bloom/manifest.json",
+      "spritesheet": "splat-bloom/splat-bloom-spritesheet.png"
+    },
+    {
+      "slug": "staple-knot",
+      "manifest": "staple-knot/manifest.json",
+      "spritesheet": "staple-knot/staple-knot-spritesheet.png"
+    },
+    {
+      "slug": "needle-thought",
+      "manifest": "needle-thought/manifest.json",
+      "spritesheet": "needle-thought/needle-thought-spritesheet.png"
+    },
+    {
+      "slug": "pressure-clump",
+      "manifest": "pressure-clump/manifest.json",
+      "spritesheet": "pressure-clump/pressure-clump-spritesheet.png"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "slug": "shielded-form",
-  "source": "ig_00b17f34b896528e016a02532677688191a3fb4815587d651b.png",
+  "source": "source.png",
   "sourceKeyed": "source-keyed.png",
   "spritesheet": "shielded-form-spritesheet.png",
   "frameWidth": 68,
@@ -61,5 +61,7 @@
       "sourceFile": "source-frames/06-death-source.png"
     }
   ],
-  "debugContact": "shielded-form-debug-contact.png"
+  "debugContact": "shielded-form-debug-contact.png",
+  "runtimeScale": 0.92,
+  "sourceOriginal": "ig_00b17f34b896528e016a02532677688191a3fb4815587d651b.png"
 }

@@ -1,6 +1,6 @@
 {
   "slug": "hard-filing-wall",
-  "source": "ig_00b17f34b896528e016a0252beca5c81919d73d6d2688bab52.png",
+  "source": "source.png",
   "sourceKeyed": "source-keyed.png",
   "spritesheet": "hard-filing-wall-spritesheet.png",
   "frameWidth": 80,
@@ -47,5 +47,7 @@
       "sourceFile": "source-frames/04-invulnerable-source.png"
     }
   ],
-  "debugContact": "hard-filing-wall-debug-contact.png"
+  "debugContact": "hard-filing-wall-debug-contact.png",
+  "runtimeScale": 0.78,
+  "sourceOriginal": "ig_00b17f34b896528e016a0252beca5c81919d73d6d2688bab52.png"
 }

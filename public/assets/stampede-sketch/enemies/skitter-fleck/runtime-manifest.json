@@ -1,0 +1,125 @@
+{
+  "slug": "skitter-fleck",
+  "displayName": "Skitter Fleck",
+  "assetClass": "enemy",
+  "sourceManifest": "manifest.json",
+  "mode": "clean-runtime-split",
+  "frameWidth": 192,
+  "frameHeight": 192,
+  "origin": {
+    "x": 0.5,
+    "y": 0.5
+  },
+  "runtimeScale": 0.32,
+  "body": {
+    "spritesheet": "skitter-fleck-body-spritesheet.png",
+    "frameCount": 4,
+    "frames": [
+      {
+        "index": 0,
+        "state": "idle",
+        "file": "body-frames/00-idle.png",
+        "sourceFrame": "frames/00-idle.png"
+      },
+      {
+        "index": 1,
+        "state": "lean_left",
+        "file": "body-frames/01-lean_left.png",
+        "sourceFrame": "frames/01-lean_left.png"
+      },
+      {
+        "index": 2,
+        "state": "lean_right",
+        "file": "body-frames/02-lean_right.png",
+        "sourceFrame": "frames/02-lean_right.png"
+      },
+      {
+        "index": 3,
+        "state": "run",
+        "file": "body-frames/03-run.png",
+        "sourceFrame": "frames/03-run_a.png"
+      }
+    ],
+    "animations": {
+      "idle": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "move": [
+        1,
+        3,
+        2,
+        3
+      ]
+    },
+    "recommendedFrameRate": 8
+  },
+  "fx": {
+    "spritesheet": "skitter-fleck-fx-spritesheet.png",
+    "frameCount": 4,
+    "frames": [
+      {
+        "index": 0,
+        "state": "dash_stretch",
+        "file": "fx-frames/00-dash_stretch.png",
+        "sourceFrame": "frames/05-dash_stretch.png"
+      },
+      {
+        "index": 1,
+        "state": "hit_squish",
+        "file": "fx-frames/01-hit_squish.png",
+        "sourceFrame": "frames/08-hit_squish.png"
+      },
+      {
+        "index": 2,
+        "state": "clear_puff",
+        "file": "fx-frames/02-clear_puff.png",
+        "sourceFrame": "frames/10-cleared_puff.png"
+      },
+      {
+        "index": 3,
+        "state": "respawn_smear",
+        "file": "fx-frames/03-respawn_smear.png",
+        "sourceFrame": "frames/11-respawn_smear.png"
+      }
+    ],
+    "recommendedFrameRate": 10,
+    "notes": "Spawn these as short-lived overlays for hit, clear, pressure, and respawn moments."
+  },
+  "hitboxCompatibility": {
+    "shape": "circle",
+    "radiusPxAtRuntimeScale": 18,
+    "origin": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "notes": "Floating Stampede enemy body. Tune against contact pressure before replacing placeholder circles."
+  },
+  "bodyPhysics": {
+    "type": "arcade-circle",
+    "radius": 18,
+    "offset": {
+      "x": 0,
+      "y": 0
+    }
+  },
+  "debugContact": {
+    "body": "skitter-fleck-body-debug-contact.png",
+    "fx": "skitter-fleck-fx-debug-contact.png"
+  },
+  "minimal": {
+    "spritesheet": "skitter-fleck-minimal-spritesheet.png",
+    "frameCount": 1,
+    "frames": [
+      {
+        "index": 0,
+        "state": "idle",
+        "file": "minimal-frames/00-idle.png",
+        "sourceFrame": "frames/00-idle.png"
+      }
+    ],
+    "recommendedUse": "Default high-count swarm rendering. Add movement with Phaser wobble, scale, tint, or rotation tweens."
+  }
+}

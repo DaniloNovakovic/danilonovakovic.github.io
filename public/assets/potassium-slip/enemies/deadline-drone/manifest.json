@@ -1,6 +1,6 @@
 {
   "slug": "deadline-drone",
-  "source": "ig_00b17f34b896528e016a02525a405c819185ddc1aaf633a73d.png",
+  "source": "source.png",
   "sourceKeyed": "source-keyed.png",
   "spritesheet": "deadline-drone-spritesheet.png",
   "frameWidth": 56,
@@ -52,5 +52,7 @@
       "sourceFile": "source-frames/06-death-source.png"
     }
   ],
-  "debugContact": "deadline-drone-debug-contact.png"
+  "debugContact": "deadline-drone-debug-contact.png",
+  "runtimeScale": 0.9,
+  "sourceOriginal": "ig_00b17f34b896528e016a02525a405c819185ddc1aaf633a73d.png"
 }

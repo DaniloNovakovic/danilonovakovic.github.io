@@ -1,6 +1,6 @@
 {
   "slug": "scope-blob",
-  "source": "ig_00b17f34b896528e016a02522aeaa48191a5edb87c7842cf41.png",
+  "source": "source.png",
   "sourceKeyed": "source-keyed.png",
   "spritesheet": "scope-blob-spritesheet.png",
   "frameWidth": 68,
@@ -51,5 +51,7 @@
       "sourceFile": "source-frames/05-critical-source.png"
     }
   ],
-  "debugContact": "scope-blob-debug-contact.png"
+  "debugContact": "scope-blob-debug-contact.png",
+  "runtimeScale": 0.95,
+  "sourceOriginal": "ig_00b17f34b896528e016a02522aeaa48191a5edb87c7842cf41.png"
 }

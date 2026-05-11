@@ -1,0 +1,64 @@
+{
+  "slug": "banana-overlays",
+  "assetClass": "prop",
+  "source": "source.png",
+  "sourceKeyed": "source-keyed.png",
+  "spritesheet": "banana-overlays-spritesheet.png",
+  "frameWidth": 96,
+  "frameHeight": 96,
+  "frameCount": 8,
+  "origin": {
+    "x": 0.5,
+    "y": 0.5
+  },
+  "runtimeScale": 1,
+  "hitboxCompatibility": {
+    "body": "none",
+    "origin": "centered on projectile",
+    "drawDepth": "behind/front depending on effect"
+  },
+  "frames": [
+    {
+      "state": "fire-aura",
+      "file": "frames/00-fire-aura.png",
+      "sourceFile": "source-frames/00-fire-aura-source.png"
+    },
+    {
+      "state": "fire-aura-plus",
+      "file": "frames/01-fire-aura-plus.png",
+      "sourceFile": "source-frames/01-fire-aura-plus-source.png"
+    },
+    {
+      "state": "duplicate-echo",
+      "file": "frames/02-duplicate-echo.png",
+      "sourceFile": "source-frames/02-duplicate-echo-source.png"
+    },
+    {
+      "state": "duplicate-echo-plus",
+      "file": "frames/03-duplicate-echo-plus.png",
+      "sourceFile": "source-frames/03-duplicate-echo-plus-source.png"
+    },
+    {
+      "state": "explosion-spark",
+      "file": "frames/04-explosion-spark.png",
+      "sourceFile": "source-frames/04-explosion-spark-source.png"
+    },
+    {
+      "state": "explosion-spark-plus",
+      "file": "frames/05-explosion-spark-plus.png",
+      "sourceFile": "source-frames/05-explosion-spark-plus-source.png"
+    },
+    {
+      "state": "ghost-horizontal",
+      "file": "frames/06-ghost-horizontal.png",
+      "sourceFile": "source-frames/06-ghost-horizontal-source.png"
+    },
+    {
+      "state": "ghost-vertical",
+      "file": "frames/07-ghost-vertical.png",
+      "sourceFile": "source-frames/07-ghost-vertical-source.png"
+    }
+  ],
+  "debugContact": "banana-overlays-debug-contact.png",
+  "note": "Composable visual overlays intended to be positioned at the banana center and rotated with the projectile only where useful."
+}

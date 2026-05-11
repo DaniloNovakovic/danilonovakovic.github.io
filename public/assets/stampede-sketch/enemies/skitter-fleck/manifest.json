@@ -1,0 +1,113 @@
+{
+  "slug": "skitter-fleck",
+  "displayName": "Skitter Fleck",
+  "assetClass": "enemy",
+  "sourceKeyed": "source-keyed.png",
+  "source": "source.png",
+  "spritesheet": "skitter-fleck-spritesheet.png",
+  "frameWidth": 192,
+  "frameHeight": 192,
+  "frameCount": 12,
+  "grid": {
+    "columns": 4,
+    "rows": 3
+  },
+  "origin": {
+    "x": 0.5,
+    "y": 0.5
+  },
+  "runtimeScale": 0.32,
+  "runtimeDisplayMaxPx": 35,
+  "frames": [
+    {
+      "index": 0,
+      "state": "idle",
+      "file": "frames/00-idle.png",
+      "sourceFile": "source-frames/00-idle.png"
+    },
+    {
+      "index": 1,
+      "state": "lean_left",
+      "file": "frames/01-lean_left.png",
+      "sourceFile": "source-frames/01-lean_left.png"
+    },
+    {
+      "index": 2,
+      "state": "lean_right",
+      "file": "frames/02-lean_right.png",
+      "sourceFile": "source-frames/02-lean_right.png"
+    },
+    {
+      "index": 3,
+      "state": "run_a",
+      "file": "frames/03-run_a.png",
+      "sourceFile": "source-frames/03-run_a.png"
+    },
+    {
+      "index": 4,
+      "state": "run_b",
+      "file": "frames/04-run_b.png",
+      "sourceFile": "source-frames/04-run_b.png"
+    },
+    {
+      "index": 5,
+      "state": "dash_stretch",
+      "file": "frames/05-dash_stretch.png",
+      "sourceFile": "source-frames/05-dash_stretch.png"
+    },
+    {
+      "index": 6,
+      "state": "sudden_stop",
+      "file": "frames/06-sudden_stop.png",
+      "sourceFile": "source-frames/06-sudden_stop.png"
+    },
+    {
+      "index": 7,
+      "state": "turn_around",
+      "file": "frames/07-turn_around.png",
+      "sourceFile": "source-frames/07-turn_around.png"
+    },
+    {
+      "index": 8,
+      "state": "hit_squish",
+      "file": "frames/08-hit_squish.png",
+      "sourceFile": "source-frames/08-hit_squish.png"
+    },
+    {
+      "index": 9,
+      "state": "panic_wobble",
+      "file": "frames/09-panic_wobble.png",
+      "sourceFile": "source-frames/09-panic_wobble.png"
+    },
+    {
+      "index": 10,
+      "state": "cleared_puff",
+      "file": "frames/10-cleared_puff.png",
+      "sourceFile": "source-frames/10-cleared_puff.png"
+    },
+    {
+      "index": 11,
+      "state": "respawn_smear",
+      "file": "frames/11-respawn_smear.png",
+      "sourceFile": "source-frames/11-respawn_smear.png"
+    }
+  ],
+  "hitboxCompatibility": {
+    "shape": "circle",
+    "radiusPxAtRuntimeScale": 18,
+    "origin": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "notes": "Floating Stampede enemy body. Tune against contact pressure before replacing placeholder circles."
+  },
+  "body": {
+    "type": "arcade-circle",
+    "radius": 18,
+    "offset": {
+      "x": 0,
+      "y": 0
+    }
+  },
+  "debugContact": "skitter-fleck-debug-contact.png"
+}

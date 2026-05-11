@@ -193,6 +193,10 @@ Inspiration: *Vampire Survivors*.
 
 Theme: Danilo is chased by inky ideas, deadline icons, and overexcited notebook creatures around a picnic blanket.
 
+Purpose: protect one calm picnic-blanket patch from a stampede of runaway ideas.
+See [`stampede-sketch.md`](./stampede-sketch.md) for the active narrative and
+asset brief.
+
 Core verb: **Kite**.
 
 Controls:

@@ -1,0 +1,129 @@
+{
+  "slug": "splitter-memo",
+  "potassiumEnemyKind": "splitter",
+  "assetClass": "enemy",
+  "sourceManifest": "manifest.json",
+  "phaserTextureKey": "potassium_enemy_splitter",
+  "spritesheet": "splitter-memo-spritesheet.png",
+  "frameWidth": 126,
+  "frameHeight": 58,
+  "frameCount": 8,
+  "origin": {
+    "x": 0.5,
+    "y": 0.5
+  },
+  "runtimeScale": 0.9,
+  "states": [
+    {
+      "index": 0,
+      "state": "intact",
+      "file": "frames/00-intact.png"
+    },
+    {
+      "index": 1,
+      "state": "wobble-left",
+      "file": "frames/01-wobble-left.png"
+    },
+    {
+      "index": 2,
+      "state": "wobble-right",
+      "file": "frames/02-wobble-right.png"
+    },
+    {
+      "index": 3,
+      "state": "hit",
+      "file": "frames/03-hit.png"
+    },
+    {
+      "index": 4,
+      "state": "critical",
+      "file": "frames/04-critical.png"
+    },
+    {
+      "index": 5,
+      "state": "split",
+      "file": "frames/05-split.png"
+    },
+    {
+      "index": 6,
+      "state": "child-left",
+      "file": "frames/06-child-left.png"
+    },
+    {
+      "index": 7,
+      "state": "child-right",
+      "file": "frames/07-child-right.png"
+    }
+  ],
+  "animations": {
+    "idle": {
+      "key": "potassium_enemy_splitter_idle",
+      "frames": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "frameRate": 8,
+      "repeat": -1
+    },
+    "hit": {
+      "key": "potassium_enemy_splitter_hit",
+      "frames": [
+        3
+      ],
+      "frameRate": 12,
+      "repeat": 0
+    },
+    "critical": {
+      "key": "potassium_enemy_splitter_critical",
+      "frames": [
+        4
+      ],
+      "frameRate": 8,
+      "repeat": 0
+    },
+    "split": {
+      "key": "potassium_enemy_splitter_split",
+      "frames": [
+        5
+      ],
+      "frameRate": 10,
+      "repeat": 0
+    },
+    "child": {
+      "key": "potassium_enemy_splitter_child",
+      "frames": [
+        6,
+        7
+      ],
+      "frameRate": 8,
+      "repeat": -1
+    }
+  },
+  "hitboxCompatibility": {
+    "kind": "bodyProfile",
+    "currentTexture": "potassium_enemy_splitter",
+    "runtimeScale": 0.9,
+    "body": {
+      "width": 118,
+      "height": 52
+    },
+    "columnSpan": 2
+  },
+  "bodyPhysics": {
+    "type": "arcade-rectangle",
+    "width": 118,
+    "height": 52
+  },
+  "debugContact": "splitter-memo-debug-contact.png",
+  "preload": {
+    "method": "spritesheet",
+    "key": "potassium_enemy_splitter",
+    "url": "/assets/potassium-slip/enemies/splitter-memo/splitter-memo-spritesheet.png",
+    "config": {
+      "frameWidth": 126,
+      "frameHeight": 58
+    }
+  }
+}

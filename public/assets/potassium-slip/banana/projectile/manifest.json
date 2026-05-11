@@ -1,0 +1,70 @@
+{
+  "slug": "banana-projectile",
+  "assetClass": "pickup",
+  "source": "source.png",
+  "sourceKeyed": "source-keyed.png",
+  "spritesheet": "banana-projectile-spritesheet.png",
+  "frameWidth": 64,
+  "frameHeight": 64,
+  "frameCount": 6,
+  "origin": {
+    "x": 0.5,
+    "y": 0.5
+  },
+  "runtimeScale": 0.9,
+  "hitboxCompatibility": {
+    "currentTextures": [
+      "banana_peel_yellow",
+      "banana_peel_green",
+      "banana_peel_brown"
+    ],
+    "mainBody": {
+      "shape": "circle",
+      "radius": 25,
+      "offsetX": 7,
+      "offsetY": 7,
+      "runtimeScale": 0.9
+    },
+    "cloneBody": {
+      "shape": "circle",
+      "radius": 16,
+      "offsetX": 16,
+      "offsetY": 16,
+      "runtimeScale": 0.48
+    }
+  },
+  "frames": [
+    {
+      "state": "yellow-base",
+      "file": "frames/00-yellow-base.png",
+      "sourceFile": "source-frames/00-yellow-base-source.png"
+    },
+    {
+      "state": "yellow-scuffed",
+      "file": "frames/01-yellow-scuffed.png",
+      "sourceFile": "source-frames/01-yellow-scuffed-source.png"
+    },
+    {
+      "state": "poison-green",
+      "file": "frames/02-poison-green.png",
+      "sourceFile": "source-frames/02-poison-green-source.png"
+    },
+    {
+      "state": "fire-touched",
+      "file": "frames/03-fire-touched.png",
+      "sourceFile": "source-frames/03-fire-touched-source.png"
+    },
+    {
+      "state": "ghost-charged",
+      "file": "frames/04-ghost-charged.png",
+      "sourceFile": "source-frames/04-ghost-charged-source.png"
+    },
+    {
+      "state": "clone-echo",
+      "file": "frames/05-clone-echo.png",
+      "sourceFile": "source-frames/05-clone-echo-source.png"
+    }
+  ],
+  "debugContact": "banana-projectile-debug-contact.png",
+  "note": "Base projectile variants. Large upgrade effects should stay layered via overlays instead of baked into these frames."
+}

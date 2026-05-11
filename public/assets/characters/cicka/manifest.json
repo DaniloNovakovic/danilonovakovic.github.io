@@ -1,0 +1,92 @@
+{
+  "slug": "cicka",
+  "source": "source.png",
+  "sourceKeyed": "source-keyed.png",
+  "spritesheet": "cicka-spritesheet.png",
+  "frameWidth": 128,
+  "frameHeight": 96,
+  "frameCount": 12,
+  "origin": {
+    "x": 0.5,
+    "y": 1
+  },
+  "runtimeScale": 0.58,
+  "body": {
+    "width": 58,
+    "height": 34,
+    "offsetY": 10
+  },
+  "frames": [
+    {
+      "state": "perch-sit",
+      "file": "frames/00-perch-sit.png",
+      "sourceFile": "source-frames/00-perch-sit-source.png"
+    },
+    {
+      "state": "perch-blink",
+      "file": "frames/01-perch-blink.png",
+      "sourceFile": "source-frames/01-perch-blink-source.png"
+    },
+    {
+      "state": "loaf-content",
+      "file": "frames/02-loaf-content.png",
+      "sourceFile": "source-frames/02-loaf-content-source.png"
+    },
+    {
+      "state": "suspicious-turn",
+      "file": "frames/03-suspicious-turn.png",
+      "sourceFile": "source-frames/03-suspicious-turn-source.png"
+    },
+    {
+      "state": "tail-alert",
+      "file": "frames/04-tail-alert.png",
+      "sourceFile": "source-frames/04-tail-alert-source.png"
+    },
+    {
+      "state": "tail-point",
+      "file": "frames/05-tail-point.png",
+      "sourceFile": "source-frames/05-tail-point-source.png"
+    },
+    {
+      "state": "tail-question",
+      "file": "frames/06-tail-question.png",
+      "sourceFile": "source-frames/06-tail-question-source.png"
+    },
+    {
+      "state": "tiny-hop",
+      "file": "frames/07-tiny-hop.png",
+      "sourceFile": "source-frames/07-tiny-hop-source.png"
+    },
+    {
+      "state": "stretch",
+      "file": "frames/08-stretch.png",
+      "sourceFile": "source-frames/08-stretch-source.png"
+    },
+    {
+      "state": "walk-1",
+      "file": "frames/09-walk-1.png",
+      "sourceFile": "source-frames/09-walk-1-source.png"
+    },
+    {
+      "state": "walk-2",
+      "file": "frames/10-walk-2.png",
+      "sourceFile": "source-frames/10-walk-2-source.png"
+    },
+    {
+      "state": "sleep-curl",
+      "file": "frames/11-sleep-curl.png",
+      "sourceFile": "source-frames/11-sleep-curl-source.png"
+    }
+  ],
+  "animations": {
+    "perchIdle": ["perch-sit", "perch-blink"],
+    "loaf": ["loaf-content"],
+    "notice": ["tail-alert", "tail-point"],
+    "suspicious": ["suspicious-turn", "tail-question"],
+    "hop": ["tiny-hop"],
+    "stretch": ["stretch"],
+    "walk": ["walk-1", "walk-2"],
+    "sleep": ["sleep-curl"]
+  },
+  "debugContact": "cicka-debug-contact.png"
+}
