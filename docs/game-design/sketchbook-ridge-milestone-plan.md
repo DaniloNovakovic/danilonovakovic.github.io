@@ -33,12 +33,14 @@ Anything beyond that is future scope unless a slice explicitly pulls it in.
   audio direction packs now guide Cicka, Guide, Trail Card, Manual Page,
   Stampede, Relay Spire, and Ridge audio without blocking rough engineering
   prototypes.
-- **M4 Stampede Sketch Prototype** is underway with M4a movement accepted and
-  M4b pressure loop accepted as good enough for the current prototype slice:
-  the Stampede Trail Card can enter a scene-local arena with timer,
-  page-noise cadence, pressure HUD, capped swarm surges, pressure-aware swarm
-  motion, soft contact feedback, and return to Ridge. Rewards, attacks, XP,
-  upgrades, and result overlays remain future M4 slices.
+- **M4 Stampede Sketch Prototype** is underway with M4a movement, M4b pressure
+  loop, and the M4c/M4d prototype shell accepted for continuation: the Stampede
+  Trail Card can enter a scene-local arena with timer, page-noise cadence,
+  capped swarm surges, pressure-aware swarm motion, soft contact feedback,
+  automatic pencil swipe, run ending UI, and return to Ridge. Before M4e
+  pickups/upgrades, run a short M4d.5 responsive shell/input spike so mobile
+  landscape and arcade touch surfaces do not keep inheriting card-only
+  constraints.
 
 ## Production Crew
 
@@ -236,13 +238,24 @@ Current checkpoint:
   and panels now render through React scene UI instead of Phaser canvas text,
   and Potassium uses the same scene UI path for draft-choice and terminal
   panels.
+- **M4d.5 Responsive Shell/Input Spike** is the recommended pre-M4e slice:
+  analyze card-only layout limits, refine the Notebook Hybrid shell candidate,
+  and choose how arcade scenes use larger touch surfaces plus mobile-landscape
+  scene UI before adding more Stampede upgrade UI. Stable Hybrid remains the
+  practical fallback.
 - Scene architecture is intentionally scene-local. `StampedeSketchScene` should
   remain the Phaser adapter/orchestrator while run decisions live behind
   `runtime/runFlow.ts` and swarm steering lives behind `runtime/swarmMotion.ts`.
 
 Next implementation slices:
 
-1. **M4e Pickup / Upgrade Draft**: add the first XP pickup loop and a rough
+1. **M4d.5 Responsive Shell / Input Surface**: refine and implement the
+   Notebook Hybrid shell candidate for Stampede and Potassium, define the
+   smallest scene layout profile policy, make arcade touch/control area
+   intentionally larger than the visible canvas, and verify mobile landscape
+   plus tablet landscape. Keep Stable Hybrid as the practical fallback if the
+   notebook treatment becomes too noisy or brittle.
+2. **M4e Pickup / Upgrade Draft**: add the first XP pickup loop and a rough
    three-choice upgrade draft once the attack toy feels readable.
 
 Hold until later:
