@@ -135,6 +135,20 @@ Those were folded into the two current coded candidates below. As of May 11,
 2026, **Notebook Hybrid is Danilo's favorite candidate so far**. Stable Hybrid
 remains the practical baseline/fallback.
 
+The next refinement artifact is the template tournament:
+
+- [`notebook-hybrid-template-tournament.md`](./notebook-hybrid-template-tournament.md)
+  records the scene-template matrix, judging rubric, current winners, and mood
+  frame prompts.
+- [`docs/prototypes/interactive-shell/tournament.html`](../prototypes/interactive-shell/tournament.html)
+  previews Current Overworld, Ridge, Potassium, Stampede, Telegraph, and Domino
+  across practical, expressive, and mobile-first variants.
+- [`docs/prototypes/interactive-shell/notebook-template-tournament-moodboard.png`](../prototypes/interactive-shell/notebook-template-tournament-moodboard.png)
+  captures the four-panel mood direction from the tournament pass.
+- [`docs/design/notebook-shell-design-language.md`](../design/notebook-shell-design-language.md)
+  captures the reusable shell primitives and profile families to consider
+  before runtime or Storybook work.
+
 ## Practical Baseline: Hybrid Shell
 
 This combines the strongest parts of C and D:
@@ -351,3 +365,10 @@ For each POC, test:
 - overlay state: panel centers and scrolls when needed;
 - gameplay state: normal play keeps center and lower-middle playfield clear;
 - implementation risk: minimal bridge/shared runtime churn.
+
+For the tournament pass, also judge:
+
+- whether a scene can reuse one of the named profile families;
+- whether the notebook treatment explains input instead of adding decoration;
+- whether a generated mood frame can be translated into static HTML rules;
+- whether the winning variant still has a Stable Hybrid fallback.

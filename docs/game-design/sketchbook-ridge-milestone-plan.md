@@ -241,8 +241,9 @@ Current checkpoint:
 - **M4d.5 Responsive Shell/Input Spike** is the recommended pre-M4e slice:
   analyze card-only layout limits, refine the Notebook Hybrid shell candidate,
   and choose how arcade scenes use larger touch surfaces plus mobile-landscape
-  scene UI before adding more Stampede upgrade UI. Stable Hybrid remains the
-  practical fallback.
+  scene UI before adding more Stampede upgrade UI. The template tournament now
+  records scene variants, judging, mood frames, and reusable Notebook Shell
+  language. Stable Hybrid remains the practical fallback.
 - Scene architecture is intentionally scene-local. `StampedeSketchScene` should
   remain the Phaser adapter/orchestrator while run decisions live behind
   `runtime/runFlow.ts` and swarm steering lives behind `runtime/swarmMotion.ts`.
