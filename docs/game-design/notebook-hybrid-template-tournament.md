@@ -42,6 +42,24 @@ Image generation should be used for mood frames only. Exact UI composition,
 hit areas, responsive behavior, and implementation contracts should be proven
 with static HTML/CSS prototypes and then runtime tests.
 
+## Hardened PoC Review
+
+The preferred Notebook Hybrid candidate now uses explicit prototype states:
+Normal Play, Start Panel, Result Panel, Upgrade Panel, and Long Panel. Normal
+Play is the default review state so the shell can be judged without a modal
+covering the page. Loose sheets are reserved for blocking scene-owned moments
+such as Trail Cards, ready prompts, upgrade choices, and terminal results.
+
+Runtime extraction should wait until this hardened PoC survives normal/panel
+state review across desktop, phone portrait, phone landscape, tablet, and
+tablet landscape. The current extraction path is Storybook first: visual-only
+components with mock data prove the notebook language, then one runtime slice
+proves profile selection, panel staging, status slots, and control-mat input.
+
+Desktop Focus is now a first-class arcade review mode. Potassium and Stampede
+do not need to spend desktop width on a notes page when the better answer is a
+larger playable page plus a wider touch/control surface.
+
 ## Evaluation Rubric
 
 Score out of 100. Higher implementation-cost score means cheaper and safer to
@@ -74,22 +92,22 @@ Hybrid survives as fallback, and Mobile-First becomes the test discipline.
 | Scene | Variant | Page Format | Playfield Shape | Touch/Control Surface | Status Placement | Panel/Overlay Placement | Header/Back/Menu | Portrait | Landscape |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Current Overworld / Outskirts | Practical | Default side-view profile | Wide horizontal strip | Existing swipe/tap shell gestures | Thin footer hint | Global overlays | Current policy | Current rhythm | Cropped side-view, minimal chrome |
-| Current Overworld / Outskirts | Expressive | Single rough trail page | Ink street across page | Whole paper strip accepts walk/interact | Margin note or torn footer | Trail Cards/manual as taped sheets | Page tabs | One page, footer prompt | Sideways page with tiny notes |
+| Current Overworld / Outskirts | Expressive | Single rough trail page | Ink street across page | Whole paper strip accepts walk/interact | Margin note or torn footer | Trail Cards/manual as loose sheets | Page tabs | One page, footer prompt | Sideways page with tiny notes |
 | Current Overworld / Outskirts | Mobile-first | Phone-first side-view page | Tall-safe horizontal strip | Lower paper control mat | Bottom torn prompt | Viewport modal | Back primary, menu compact | Readable prompts | Hide nonessential chrome |
 | Ridge / Hobby Ridge | Practical | Side-view world profile | 3-5 screen ridge strip | Shared movement/interact gestures | Compact route/stamp strip | Trail Cards/manual overlays | Back to parent, compact menu | One trail page | Left/right status chips |
-| Ridge / Hobby Ridge | Expressive | Open notebook spread | Ridge on playable page, notes on side page | Paper around trail accepts movement | Notes page or margin stickers | Trail Cards as taped sheets | Page tabs, Static in menu | Single page | Central trail plus slim notes |
+| Ridge / Hobby Ridge | Expressive | Open notebook spread | Ridge on playable page, notes on side page | Paper around trail accepts movement | Notes page or margin stickers | Trail Cards as loose sheets | Page tabs, Static in menu | Single page | Central trail plus slim notes |
 | Ridge / Hobby Ridge | Mobile-first | Single-page trailhead | Wide side-view crop | Thumb-safe lower mat | Bottom stamp/pip strip | Full-viewport card | Back visible, menu subdued | Prompt/status stack | Side chips for objective |
 | Potassium Slip | Practical | Vertical arcade board | Tall 5-column ruled board | Large mat around visible board | Wave/score/lives top or side | Draft/terminal scene UI | Back/menu compact | Board centered | Board plus status chip |
-| Potassium Slip | Expressive | Ruled notebook board | Tall lane page with banana-law scraps | Whole ruled page supports drag/recall | Clipboard margin note | Draft as taped compliance form | Back tab high priority | Tall page, footer hint | Sideways notebook, tall board |
+| Potassium Slip | Expressive | Ruled notebook board | Tall lane page with banana-law scraps | Whole ruled page supports drag/recall | Clipboard margin note | Draft as loose compliance form | Back tab high priority | Tall page, footer hint | Sideways notebook, tall board |
 | Potassium Slip | Mobile-first | Portrait board first | Maximum-height board | Drag/recall mat excludes UI | Top mini HUD | Bottom/center sheet | Back small, menu tab | Board nearly fills viewport | Board plus narrow status rail |
 | Stampede Sketch | Practical | Clean arcade page | Large survival field | Mat larger than canvas | Timer/pressure edge chip | Start/result/upgrade viewport panel | Back/menu compact | Field plus bottom status | Central field, status edge |
-| Stampede Sketch | Expressive | Full-page survival sketch | Open paper arena around picnic mark | Whole page drag/floating stick | Margin pressure scribble | Taped sheet | Page tabs | Single page, torn footer | Spread with tiny left notes |
+| Stampede Sketch | Expressive | Full-page survival sketch | Open paper arena around picnic mark | Whole page drag/floating stick | Margin pressure scribble | Loose sheet | Page tabs | Single page, torn footer | Spread with tiny left notes |
 | Stampede Sketch | Mobile-first | Touch-first arena page | Largest clean arena | Full lower/center drag field | Bottom compact HUD | Sticky modal actions | Back visible, menu secondary | Big thumb-safe arena | Central arena, edge HUD only |
 | Telegraph Terrace | Practical | Timing-lane profile | Cliff/bag lane | One large parry surface | Tempo/confidence top edge | Manual/result viewport panel | Back/menu compact | Parry below lane | Lane center, parry edge |
 | Telegraph Terrace | Expressive | Terrace practice page | Heavy bag with three timing marks | Page tap/parry surface | Tempo ticks in margin | Manual glyph sheet | Page tabs | Oversized parry area | Sideways page, readable marks |
 | Telegraph Terrace | Mobile-first | One-button portrait sheet | Vertical timing stack | Thumb-sized parry surface | Top tempo strip | Short panel, sticky actions | Back primary, menu tucked | Button dominates lower half | Bag left, parry right |
 | Domino Desk | Practical | Puzzle-board profile | Compact desk grid | Tap-select, swipe-slide, undo | Moves/undo top or side | Hint/result viewport panel | Back/menu compact | Grid centered | Grid center, edge controls |
-| Domino Desk | Expressive | Messy desk insert | Dominoes on taped desk scrap | Whole scrap accepts tap/swipe | Coffee-ring move counter | Sticky hint, permit result | Page tabs | Large tiles | Grid plus slim rules margin |
+| Domino Desk | Expressive | Messy desk insert | Dominoes on desk scrap | Whole scrap accepts tap/swipe | Coffee-ring move counter | Sticky hint, permit result | Page tabs | Large tiles | Grid plus slim rules margin |
 | Domino Desk | Mobile-first | Puzzle-first page | Stable square grid | Tap/swipe grid, undo reachable | Tiny top strip | Bottom hint/result sheet | Back visible, menu compact | Square grid, bottom controls | Grid left/center, controls right |
 
 ## Winners By Scene
@@ -121,7 +139,7 @@ Mood frame for a hand-drawn Notebook Hybrid browser-game shell: an open
 sketchbook spread fills the viewport, off-white paper, black ink, thick
 imperfect outlines, faint graphite smudges showing the larger touch/control
 surface. One playable page carries a living drawing; the opposite page holds
-sparse margin status, tabs, scraps, and one loose modal sheet taped over the
+sparse margin status, tabs, scraps, and one loose modal sheet floating over the
 spread. Spacious, readable, tactile, indie journal mood, paper-as-interface,
 scene pages sharing one visual system.
 
@@ -134,9 +152,9 @@ fantasy borders, tiny text, decorative clutter, and color-dependent hierarchy.
 ```text
 Mood frame for Potassium as a board-like notebook page: ruled paper lanes,
 top-to-bottom arcade flow, banana-law ricochet doodles, clipboard compliance
-marks, rebound arcs, caution tape used sparingly, a clear central drag/play mat
+marks, rebound arcs, warning scraps used sparingly, a clear central drag/play mat
 extending beyond the visible board. Black ink on cream paper, strong
-silhouettes, hard paper shadows, a few taped notes and stamps implying upgrades
+silhouettes, hard paper shadows, a few loose notes and stamps implying upgrades
 without becoming menus.
 
 Avoid literal polished game boards, busy rule diagrams, too many arrows,
@@ -180,9 +198,16 @@ UI, colorful stickers, and crowded landmark clusters.
 - Keep black/white/cream first; color is sparse material tint only.
 - Never place decorative scraps inside the active danger/readability zone.
 - Tabs are navigation, not general-purpose ornament.
+- Loose sheets mean temporary blocking UI; they should not be persistent
+  normal-play decoration.
+- Every doodle, scrap, tint, and paper mark needs a job: do, touch, remember,
+  read, or avoid.
 - Each scene gets one primary status locus and one primary panel/action locus.
 - Touch/control surfaces may be larger than the visible canvas, but UI buttons,
   panels, tabs, and menus always sit above and block gameplay input.
 - Phone landscape is a required review mode, not an afterthought.
-- Do not move this to Storybook until the shell language survives at least one
-  runtime implementation slice.
+- Keep tape out of v1 unless it communicates temporary attachment, blocking
+  state, or authored evidence.
+- Move the hardened visual language into Storybook with mock data before
+  runtime wiring. Storybook proves look and responsive composition; runtime
+  proves input and bridge behavior.

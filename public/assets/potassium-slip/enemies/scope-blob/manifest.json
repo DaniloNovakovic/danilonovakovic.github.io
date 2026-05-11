@@ -1,0 +1,55 @@
+{
+  "slug": "scope-blob",
+  "source": "ig_00b17f34b896528e016a02522aeaa48191a5edb87c7842cf41.png",
+  "sourceKeyed": "source-keyed.png",
+  "spritesheet": "scope-blob-spritesheet.png",
+  "frameWidth": 68,
+  "frameHeight": 64,
+  "frameCount": 6,
+  "origin": {
+    "x": 0.5,
+    "y": 0.5
+  },
+  "hitboxCompatibility": {
+    "kind": "implicitTexture",
+    "currentTexture": "potassium_enemy_scope",
+    "runtimeScale": 0.95,
+    "angularVelocityRange": {
+      "min": -70,
+      "max": 70
+    }
+  },
+  "frames": [
+    {
+      "state": "neutral",
+      "file": "frames/00-neutral.png",
+      "sourceFile": "source-frames/00-neutral-source.png"
+    },
+    {
+      "state": "rotate-left",
+      "file": "frames/01-rotate-left.png",
+      "sourceFile": "source-frames/01-rotate-left-source.png"
+    },
+    {
+      "state": "rotate-right",
+      "file": "frames/02-rotate-right.png",
+      "sourceFile": "source-frames/02-rotate-right-source.png"
+    },
+    {
+      "state": "hit-squash",
+      "file": "frames/03-hit-squash.png",
+      "sourceFile": "source-frames/03-hit-squash-source.png"
+    },
+    {
+      "state": "cracked",
+      "file": "frames/04-cracked.png",
+      "sourceFile": "source-frames/04-cracked-source.png"
+    },
+    {
+      "state": "critical",
+      "file": "frames/05-critical.png",
+      "sourceFile": "source-frames/05-critical-source.png"
+    }
+  ],
+  "debugContact": "scope-blob-debug-contact.png"
+}

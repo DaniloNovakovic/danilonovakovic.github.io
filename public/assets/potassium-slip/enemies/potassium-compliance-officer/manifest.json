@@ -1,0 +1,56 @@
+{
+  "slug": "potassium-compliance-officer",
+  "source": "ig_00b17f34b896528e016a02536a479481918c079a79bbec4c4f.png",
+  "sourceKeyed": "source-keyed.png",
+  "spritesheet": "potassium-compliance-officer-spritesheet.png",
+  "frameWidth": 124,
+  "frameHeight": 90,
+  "frameCount": 7,
+  "origin": {
+    "x": 0.5,
+    "y": 0.5
+  },
+  "hitboxCompatibility": {
+    "kind": "implicitTexture",
+    "currentTexture": "potassium_enemy_boss",
+    "runtimeScale": 0.72
+  },
+  "frames": [
+    {
+      "state": "neutral",
+      "file": "frames/00-neutral.png",
+      "sourceFile": "source-frames/00-neutral-source.png"
+    },
+    {
+      "state": "patrol-left",
+      "file": "frames/01-patrol-left.png",
+      "sourceFile": "source-frames/01-patrol-left-source.png"
+    },
+    {
+      "state": "patrol-right",
+      "file": "frames/02-patrol-right.png",
+      "sourceFile": "source-frames/02-patrol-right-source.png"
+    },
+    {
+      "state": "summon",
+      "file": "frames/03-summon.png",
+      "sourceFile": "source-frames/03-summon-source.png"
+    },
+    {
+      "state": "armored",
+      "file": "frames/04-armored.png",
+      "sourceFile": "source-frames/04-armored-source.png"
+    },
+    {
+      "state": "hit",
+      "file": "frames/05-hit.png",
+      "sourceFile": "source-frames/05-hit-source.png"
+    },
+    {
+      "state": "defeated",
+      "file": "frames/06-defeated.png",
+      "sourceFile": "source-frames/06-defeated-source.png"
+    }
+  ],
+  "debugContact": "potassium-compliance-officer-debug-contact.png"
+}

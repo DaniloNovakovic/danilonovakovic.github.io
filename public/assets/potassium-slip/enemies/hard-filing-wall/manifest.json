@@ -1,0 +1,51 @@
+{
+  "slug": "hard-filing-wall",
+  "source": "ig_00b17f34b896528e016a0252beca5c81919d73d6d2688bab52.png",
+  "sourceKeyed": "source-keyed.png",
+  "spritesheet": "hard-filing-wall-spritesheet.png",
+  "frameWidth": 80,
+  "frameHeight": 62,
+  "frameCount": 5,
+  "origin": {
+    "x": 0.5,
+    "y": 0.5
+  },
+  "hitboxCompatibility": {
+    "kind": "bodyProfile",
+    "currentTexture": "potassium_enemy_hard_wall",
+    "runtimeScale": 0.78,
+    "body": {
+      "width": 68,
+      "height": 52
+    },
+    "indestructible": true
+  },
+  "frames": [
+    {
+      "state": "intact",
+      "file": "frames/00-intact.png",
+      "sourceFile": "source-frames/00-intact-source.png"
+    },
+    {
+      "state": "tilt-left",
+      "file": "frames/01-tilt-left.png",
+      "sourceFile": "source-frames/01-tilt-left-source.png"
+    },
+    {
+      "state": "tilt-right",
+      "file": "frames/02-tilt-right.png",
+      "sourceFile": "source-frames/02-tilt-right-source.png"
+    },
+    {
+      "state": "deflect",
+      "file": "frames/03-deflect.png",
+      "sourceFile": "source-frames/03-deflect-source.png"
+    },
+    {
+      "state": "invulnerable",
+      "file": "frames/04-invulnerable.png",
+      "sourceFile": "source-frames/04-invulnerable-source.png"
+    }
+  ],
+  "debugContact": "hard-filing-wall-debug-contact.png"
+}

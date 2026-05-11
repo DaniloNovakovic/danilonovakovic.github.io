@@ -13,6 +13,14 @@ export const sketchShadows = {
   xl: 'shadow-[12px_12px_0px_0px_rgba(26,26,26,1)]'
 } as const;
 
+export const notebookShadowRoles = {
+  pressed: sketchShadows.xs,
+  control: sketchShadows.sm,
+  sheet: sketchShadows.md,
+  page: sketchShadows.lg,
+  stage: sketchShadows.xl
+} as const;
+
 export const sketchBorders = {
   thin: 'border border-[#1a1a1a]',
   medium: 'border-2 border-[#1a1a1a]',

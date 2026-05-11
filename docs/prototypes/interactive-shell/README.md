@@ -28,7 +28,8 @@ gets too noisy, brittle, or hard to implement.
 ## Next Refinement Targets
 
 - Make phone landscape as strong as the mood frame.
-- Keep tape, notes, page tabs, and ruled-paper details restrained.
+- Keep notes, page tabs, and ruled-paper details restrained; tape is deferred
+  until it has a specific UI job.
 - Preserve a large touch/control surface outside the visible canvas.
 - Ensure buttons, panels, and page tabs sit above and block gameplay input.
 - Test Stampede as a clean survival page and Potassium as a board-like ruled

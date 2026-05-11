@@ -5,7 +5,22 @@ export { DialogCard } from './DialogCard';
 export { LinkButton } from './LinkButton';
 export { LoadingFallback } from './LoadingFallback';
 export { ModalShell } from './ModalShell';
+export {
+  ControlMat,
+  NotebookHeaderChrome,
+  NotebookPageFrame,
+  NotebookShellStage,
+  NotebookSpread,
+  ScenePanelSheet,
+  SceneStatusSlip
+} from './NotebookShell';
+export type {
+  NotebookPanelPlacement,
+  NotebookSceneProfile,
+  NotebookShellLayout,
+  NotebookViewport
+} from './NotebookShell';
 export { SectionHeader } from './SectionHeader';
 export { SketchSection } from './SketchSection';
-export { sketchBorders, sketchColors, sketchShadows } from './tokens';
+export { notebookShadowRoles, sketchBorders, sketchColors, sketchShadows } from './tokens';
 export { cn } from './utils';

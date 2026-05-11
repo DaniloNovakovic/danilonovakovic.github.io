@@ -1,0 +1,56 @@
+{
+  "slug": "deadline-drone",
+  "source": "ig_00b17f34b896528e016a02525a405c819185ddc1aaf633a73d.png",
+  "sourceKeyed": "source-keyed.png",
+  "spritesheet": "deadline-drone-spritesheet.png",
+  "frameWidth": 56,
+  "frameHeight": 62,
+  "frameCount": 7,
+  "origin": {
+    "x": 0.5,
+    "y": 0.5
+  },
+  "hitboxCompatibility": {
+    "kind": "implicitTexture",
+    "currentTexture": "potassium_enemy_deadline",
+    "runtimeScale": 0.9
+  },
+  "frames": [
+    {
+      "state": "neutral",
+      "file": "frames/00-neutral.png",
+      "sourceFile": "source-frames/00-neutral-source.png"
+    },
+    {
+      "state": "bank-left",
+      "file": "frames/01-bank-left.png",
+      "sourceFile": "source-frames/01-bank-left-source.png"
+    },
+    {
+      "state": "bank-right",
+      "file": "frames/02-bank-right.png",
+      "sourceFile": "source-frames/02-bank-right-source.png"
+    },
+    {
+      "state": "dive",
+      "file": "frames/03-dive.png",
+      "sourceFile": "source-frames/03-dive-source.png"
+    },
+    {
+      "state": "hit",
+      "file": "frames/04-hit.png",
+      "sourceFile": "source-frames/04-hit-source.png"
+    },
+    {
+      "state": "critical",
+      "file": "frames/05-critical.png",
+      "sourceFile": "source-frames/05-critical-source.png"
+    },
+    {
+      "state": "death",
+      "file": "frames/06-death.png",
+      "sourceFile": "source-frames/06-death-source.png"
+    }
+  ],
+  "debugContact": "deadline-drone-debug-contact.png"
+}

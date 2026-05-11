@@ -1,0 +1,65 @@
+{
+  "slug": "shielded-form",
+  "source": "ig_00b17f34b896528e016a02532677688191a3fb4815587d651b.png",
+  "sourceKeyed": "source-keyed.png",
+  "spritesheet": "shielded-form-spritesheet.png",
+  "frameWidth": 68,
+  "frameHeight": 66,
+  "frameCount": 7,
+  "origin": {
+    "x": 0.5,
+    "y": 0.5
+  },
+  "hitboxCompatibility": {
+    "kind": "bodyProfile",
+    "currentTexture": "potassium_enemy_shield",
+    "runtimeScale": 0.92,
+    "body": {
+      "width": 54,
+      "height": 54
+    },
+    "shieldSides": [
+      "bottom",
+      "left",
+      "right"
+    ]
+  },
+  "frames": [
+    {
+      "state": "shield-bottom",
+      "file": "frames/00-shield-bottom.png",
+      "sourceFile": "source-frames/00-shield-bottom-source.png"
+    },
+    {
+      "state": "shield-left",
+      "file": "frames/01-shield-left.png",
+      "sourceFile": "source-frames/01-shield-left-source.png"
+    },
+    {
+      "state": "shield-right",
+      "file": "frames/02-shield-right.png",
+      "sourceFile": "source-frames/02-shield-right-source.png"
+    },
+    {
+      "state": "protected-hit",
+      "file": "frames/03-protected-hit.png",
+      "sourceFile": "source-frames/03-protected-hit-source.png"
+    },
+    {
+      "state": "exposed-hit",
+      "file": "frames/04-exposed-hit.png",
+      "sourceFile": "source-frames/04-exposed-hit-source.png"
+    },
+    {
+      "state": "critical",
+      "file": "frames/05-critical.png",
+      "sourceFile": "source-frames/05-critical-source.png"
+    },
+    {
+      "state": "death",
+      "file": "frames/06-death.png",
+      "sourceFile": "source-frames/06-death-source.png"
+    }
+  ],
+  "debugContact": "shielded-form-debug-contact.png"
+}

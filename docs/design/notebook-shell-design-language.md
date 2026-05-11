@@ -18,9 +18,16 @@ things clearer:
 
 - Paper is the base surface: off-white, lightly ruled or smudged when useful.
 - Ink owns gameplay readability: dark contours, high contrast, few accents.
-- Shadows are hard offset paper shadows, not blur-heavy app shadows.
-- Tape, tabs, scraps, ruled lines, and margin notes are functional props.
+- Shadows use one down-right sketchbook light source. Depth changes by semantic
+  elevation, not random direction.
+- Tabs, loose sheets, scraps, ruled lines, and margin notes are functional props.
 - Color is sparse material tint. It should not become a new scene palette.
+- Tape is deferred for v1 unless it communicates temporary attachment, blocking
+  state, or authored evidence. Do not use tape as generic decoration.
+
+Anti-slop rule: every notebook primitive must explain something the player can
+do, touch, remember, read, or avoid. If a doodle, stain, scrap, or tint cannot
+answer that, it should not ship as reusable shell language.
 
 Avoid over-themed notebook clutter. The center and lower-middle playfield stay
 clear during normal play.
@@ -33,9 +40,19 @@ clear during normal play.
 | Spread | Desktop/tablet layout with a playable page and a notes/status page. |
 | Tab | Global navigation such as Back or compact Menu. |
 | Margin note | Low-density status, objective, or reward memory. |
-| Taped sheet | Blocking scene panel such as start, result, upgrade, or Trail Card. |
+| Loose sheet | Blocking scene panel such as start, result, upgrade, or Trail Card. |
 | Torn footer | Compact status or hint on portrait layouts. |
 | Control mat | Shell-level touch surface larger than the visible canvas. |
+
+## Shadow Roles
+
+| Role | Use |
+| --- | --- |
+| `pressed` | Active/pressed state, nearly flush with the page. |
+| `control` | Buttons, tabs, scraps, and compact status slips. |
+| `sheet` | Blocking scene panels and loose sheets. |
+| `page` | Page/spread frames above the notebook paper. |
+| `stage` | The full notebook shell against the browser background. |
 
 ## Profile Families
 
@@ -52,7 +69,8 @@ The first runtime slice should prove `ruledBoardPage` and `survivalPage`.
 
 ## Responsive Rules
 
-- Desktop/tablet landscape can use a spread, but side pages must remain quiet.
+- Desktop/tablet landscape can use either a spread or a Focus page. Arcade
+  scenes should prefer Focus when notes would steal useful play/control space.
 - Phone portrait uses a single page with tabs and a torn footer/status surface.
 - Phone landscape uses edge chips and compact tabs; persistent footers usually
   disappear.
@@ -84,11 +102,15 @@ instead of React state updates per frame.
 
 ## Storybook Readiness
 
-Do not start Storybook from the static tournament alone. Start it after one
-runtime implementation proves these primitives:
+Storybook can prove the visual component language before runtime wiring, but it
+must stay mock-data-only until one runtime slice proves the interaction seams.
+The first Storybook extraction should cover:
 
 - scene profile selection;
 - page/spread shell wrapper;
 - viewport scene panel placement;
 - control mat input gating;
 - responsive header chrome.
+
+Runtime adoption comes after the Storybook slice feels good across Potassium,
+Stampede, and Ridge/Overworld examples.
