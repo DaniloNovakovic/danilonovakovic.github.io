@@ -19,10 +19,12 @@ game vocabulary is explicit:
 6. `OverlayHost` renders the active React overlay from the overlay registry.
 7. `SceneUiHost` renders scene-owned React status/panel surfaces from bridge
    `sceneUi` requests.
+8. Notebook shell profile policy can wrap selected presentation scenes in the
+   shared notebook layout primitives while the Phaser scene still owns gameplay.
 
 ## Runtime subsystems
 
-- **Bridge state** - `src/game/bridge/store.ts` is the observable React/Phaser state seam. It owns active scene id, active overlay id, loading scene id, pause derivation, scene-owned UI requests/actions, inventory/progress, scene hint text, and touch input one-shots.
+- **Bridge state** - `src/game/bridge/store.ts` is the observable React/Phaser state seam. It owns active scene id, active overlay id, loading scene id, pause derivation, scene-owned UI requests/actions, inventory/progress, scene hint text, touch input one-shots, and opt-in scene control pointer events.
 - **Scene lifecycle** - `src/game/sceneLifecycle` owns `SceneLifecycleController`, `SceneManager`, scene transition coordination, lifecycle events, and scene context assembly.
 - **Phaser adapter** - `src/game/adapters/phaser/PhaserSceneAdapter.ts` translates scene lifecycle requests into concrete Phaser scene API calls.
 - **Scene ids and lookup** - `src/game/scenes/sceneIds.ts` names Phaser scene ids and keys. `src/game/scenes/sceneRegistry.ts` answers how loadable scenes are resolved.
@@ -34,6 +36,10 @@ game vocabulary is explicit:
 - **Scene header chrome** - `src/game/shell/sceneHeaderChrome.ts` owns the
   small shell-level policy for replacing default Inventory/Dev controls with a
   scene navigation control in presentation-heavy arcade scenes.
+- **Notebook shell profile policy** - `src/game/shell/notebookShellProfile.ts`
+  maps runtime scenes onto shared Notebook Shell layout primitives. Potassium
+  is the first runtime proof and keeps its scene-specific panels colocated in
+  the Potassium scene folder.
 - **Shared scene runtime** - reusable Phaser-facing machinery lives in `src/game/sharedSceneRuntime`: side-view player lifecycle, camera policy, scene presentation, resume policy, keyboard pause, interior interactions, text, textures, and vision helpers.
 - **Pure gameplay decisions** - `src/game/core` contains deterministic ECS, input, and player logic that can be tested without Phaser, React, browser globals, or bridge state.
 - **Scene-owned modules** - scene folders own local layout, triggers, Phaser objects, scene contexts, scene-local overlays, and heavy scene runtime modules.
@@ -49,6 +55,9 @@ and scales with `Scale.ENVELOP`. React owns the visible shell aspect ratio:
   first Stampede movement prototype. The shell is tall, Phaser still uses the
   fixed logical design size with `Scale.ENVELOP`, and direct Phaser pointer
   input is preserved instead of the React swipe/tap gesture overlay.
+- Potassium additionally opts into the Notebook Shell `ruledBoardPage` focus
+  layout. Its shell-level control mat can forward pointer events outside the
+  visible canvas back to the Potassium scene in Phaser design coordinates.
 
 When a scene changes presentation mode, `src/game/shell/Game.tsx` keeps the
 existing Phaser instance mounted and calls `game.scale.refresh()` after the new
@@ -76,6 +85,10 @@ re-apply camera bounds/profile math.
 - Use shell header chrome policy for app navigation controls that belong
   outside the Phaser card, such as Back buttons for arcade scenes. Do not push
   those controls through scene-owned UI unless they need scene gameplay state.
+- Use the scene control pointer bridge only for explicit shell-level control
+  mats. Potassium consumes these events to extend launch/recall drag input
+  beyond the visible canvas; other scenes should opt in through profile policy
+  instead of reading those events opportunistically.
 - Use `sceneResumePolicy` for resume persistence and reset rules. The low-level resume store should not be imported directly by scenes or adapters.
 - Side-view player scenes should compose `SideViewPlayerRuntime` before creating colliders against `runtime.player`; pass its camera config when the scene should follow and clamp the player.
 - Interior rooms should describe prop targets and effect commands, then let `InteriorInteractionRuntime` choose the active target and prompt/effect result. Phaser text mutation, bridge writes, and scene-local helpers stay in the scene.

@@ -14,6 +14,9 @@ code remains the source of truth.
 - `sceneUi`: optional scene-owned React status/panel requests plus a one-shot
   action from React UI back to the owning Phaser scene. This path does not
   derive pause by itself.
+- `sceneControlPointerEvents`: optional owner-scoped pointer event queue for
+  shell-level control mats. Potassium uses this to extend drag input outside
+  the visible Phaser canvas.
 
 ## Dev Starts
 
@@ -38,6 +41,9 @@ for fast iteration. Current useful targets include `hobbies`, `basement`,
 - `src/game/shell/sceneHeaderChrome.ts` maps presentation scenes to shell-owned
   header controls. Stampede returns to Ridge from the header Back button;
   Potassium returns to the City/Overworld.
+- `src/game/shell/notebookShellProfile.ts` maps selected presentation scenes to
+  Notebook Shell runtime profiles. Potassium is the first mapped runtime scene
+  and uses the `ruledBoardPage` focus profile.
 - Phaser scenes keep local pause state only as a scene runtime concern; they do
   not decide whether an overlay should pause the engine.
 
@@ -58,7 +64,10 @@ Use this path when checking pattern refactors:
    card, move in the arena, and return to Ridge. Telegraph and Domino cards
    should still keep primary entry disabled.
 7. Open inventory from the overworld and from a child scene.
-8. In Potassium, clear or dev-skip a wave and confirm the upgrade-choice panel
-   is a React scene UI panel above the card; choose an upgrade and confirm play
-   continues. Confirm terminal Retry/Return actions work from the React panel.
+8. In Potassium, confirm the Notebook shell renders with Back and Static Mode,
+   then drag/release from outside the visible board area and confirm launch or
+   recall still works. Clear or dev-skip a wave and confirm the upgrade-choice
+   panel is a React scene UI panel above the notebook stage; choose an upgrade
+   and confirm play continues. Confirm terminal Retry/Return actions work from
+   the React panel.
 9. Verify mobile touch movement, jump, and interact one-shots.

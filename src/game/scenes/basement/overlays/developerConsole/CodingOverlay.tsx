@@ -41,7 +41,7 @@ export default function CodingOverlay({ close, titleId, descriptionId }: Overlay
       return;
     }
 
-    setHistory(prev => [...prev, `> ${cmd}`, ...result.responseLines]);
+    setHistory(prev => [...prev, `> ${cmd}`, ...(result.responseLines || [])]);
   };
 
   const onSubmit = (e: React.FormEvent) => {

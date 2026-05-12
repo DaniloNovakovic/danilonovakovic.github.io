@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, cleanup, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import InteractiveApp from './InteractiveApp';
 import { bridgeActions, bridgeStore } from '@/game/bridge/store';
@@ -41,10 +41,24 @@ function resetBridge() {
   bridgeActions.clearSceneUi();
 }
 
+function setViewportSize(width: number, height: number) {
+  Object.defineProperty(window, 'innerWidth', {
+    configurable: true,
+    writable: true,
+    value: width
+  });
+  Object.defineProperty(window, 'innerHeight', {
+    configurable: true,
+    writable: true,
+    value: height
+  });
+}
+
 describe('InteractiveApp', () => {
   beforeEach(() => {
     resizeObserverCallback = undefined;
     resizeObserverInstance = undefined;
+    setViewportSize(1024, 768);
     globalThis.ResizeObserver = MockResizeObserver as unknown as typeof ResizeObserver;
     resetBridge();
   });
@@ -154,6 +168,116 @@ describe('InteractiveApp', () => {
     await userEvent.click(screen.getByRole('button', { name: /back to city/i }));
 
     expect(bridgeStore.getState().activeSceneId).toBe(OVERWORLD_SCENE_ID);
+  });
+
+  it('renders Potassium inside the Notebook shell with Back and Static Mode chrome', async () => {
+    const onSwitchToStatic = vi.fn();
+    bridgeActions.enterScene(POTASSIUM_SCENE_ID);
+    render(<InteractiveApp onSwitchToStatic={onSwitchToStatic} />);
+
+    expect(screen.getByTestId('notebook-game-shell')).toBeDefined();
+    expect(screen.queryByTestId('interactive-game-shell')).toBeNull();
+    expect(screen.getByTestId('notebook-game-shell').getAttribute('data-profile')).toBe('ruledBoardPage');
+    const pageFrame = screen.getByTestId('potassium-notebook-page-frame');
+    expect(pageFrame.getAttribute('data-board-safe-aspect')).toBe('0.75');
+    expect(pageFrame.className).toContain('potassium-notebook-page-frame');
+    expect(screen.getByRole('button', { name: /back to city/i })).toBeDefined();
+    expect(screen.getByRole('button', { name: /switch to static portfolio/i })).toBeDefined();
+    expect(screen.queryByRole('button', { name: /menu/i })).toBeNull();
+
+    await userEvent.click(screen.getByRole('button', { name: /switch to static portfolio/i }));
+
+    expect(onSwitchToStatic).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the Potassium page frame at the board-safe aspect on narrow phones', () => {
+    setViewportSize(390, 844);
+    bridgeActions.enterScene(POTASSIUM_SCENE_ID);
+    render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
+
+    const pageFrame = screen.getByTestId('potassium-notebook-page-frame');
+
+    expect(pageFrame.getAttribute('data-board-safe-aspect')).toBe('0.75');
+    expect(pageFrame.getAttribute('data-frame-aspect')).toBe('0.75');
+    expect(pageFrame.getAttribute('data-frame-width')).toBe('326');
+    expect(pageFrame.style.width).toBe('326px');
+  });
+
+  it('queues Potassium control-mat pointer events in Phaser design space', () => {
+    bridgeActions.enterScene(POTASSIUM_SCENE_ID);
+    render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
+    const frame = screen.getByTestId('potassium-notebook-game-frame');
+    const mat = screen.getByTestId('potassium-control-mat');
+    vi.spyOn(frame, 'getBoundingClientRect').mockReturnValue({
+      bottom: 500,
+      height: 300,
+      left: 100,
+      right: 600,
+      top: 200,
+      width: 500,
+      x: 100,
+      y: 200,
+      toJSON: () => ({})
+    } as DOMRect);
+
+    fireEvent.pointerDown(mat, {
+      clientX: 350,
+      clientY: 350,
+      pointerId: 11,
+      timeStamp: 18
+    });
+    fireEvent.pointerUp(mat, {
+      clientX: 350,
+      clientY: 560,
+      pointerId: 11,
+      timeStamp: 32
+    });
+
+    expect(bridgeStore.getState().sceneControlPointerEvents).toMatchObject([
+      {
+        ownerSceneId: POTASSIUM_SCENE_ID,
+        kind: 'down',
+        pointerId: 11,
+        x: 500,
+        y: 300
+      },
+      {
+        ownerSceneId: POTASSIUM_SCENE_ID,
+        kind: 'up',
+        pointerId: 11,
+        x: 500,
+        y: 720
+      }
+    ]);
+  });
+
+  it('does not queue Potassium control-mat events while a scene panel is open', () => {
+    bridgeActions.enterScene(POTASSIUM_SCENE_ID);
+    bridgeActions.setSceneUiPanel(POTASSIUM_SCENE_ID, 'potassiumUpgradeChoices', {
+      choices: []
+    });
+    render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
+    const frame = screen.getByTestId('potassium-notebook-game-frame');
+    const mat = screen.getByTestId('potassium-control-mat');
+    vi.spyOn(frame, 'getBoundingClientRect').mockReturnValue({
+      bottom: 500,
+      height: 300,
+      left: 100,
+      right: 600,
+      top: 200,
+      width: 500,
+      x: 100,
+      y: 200,
+      toJSON: () => ({})
+    } as DOMRect);
+
+    fireEvent.pointerDown(mat, {
+      clientX: 350,
+      clientY: 350,
+      pointerId: 12
+    });
+
+    expect(bridgeStore.getState().sceneControlPointerEvents).toEqual([]);
   });
 
   it('renders Stampede scene status below the game card', () => {

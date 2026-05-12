@@ -85,8 +85,8 @@ as a card wrapped around another card.
 | `timingPage` | Telegraph Terrace | One readable timing subject and one obvious parry surface. |
 | `puzzleDeskPage` | Domino Desk | Stable grid, reachable undo, optional desk-paper trim. |
 
-The first runtime slice should prove `ruledBoardPage` and `survivalPage`.
-`sideViewPage` can enter the profile system without a major visual rework.
+Potassium is the first runtime proof for `ruledBoardPage`. `survivalPage` and
+`sideViewPage` should enter runtime only after that tracer bullet feels stable.
 
 ## Responsive Rules
 
@@ -112,13 +112,17 @@ Input priority should be:
 3. shell-level scene control mat;
 4. Phaser canvas fallback.
 
-High-frequency pointer movement should go through an imperative input adapter
-instead of React state updates per frame.
+High-frequency pointer movement should eventually go through an imperative
+input adapter if profiling shows React bridge churn. The first Potassium
+runtime tracer uses a narrow owner-scoped bridge queue so the control-mat
+contract stays testable before broader extraction.
 
 ## Scene Notes
 
 - Potassium should feel board-like, with ruled paper lanes and drag support that
-  continues outside the visible canvas.
+  continues outside the visible canvas. Its upgrade and terminal panels remain
+  scene-owned under `src/game/scenes/potassiumSlip/sceneUi`, not shared
+  Notebook Shell content.
 - Stampede should feel like a clean survival page, with pressure and status at
   the edge and almost no center decoration.
 - Ridge should sell the notebook fantasy through landmarks, stickers, Trail

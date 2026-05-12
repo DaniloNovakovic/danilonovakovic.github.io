@@ -17,6 +17,8 @@ import {
 import { Button, Card, Panel } from '@/shared/ui';
 import { getInteractiveGameShellLayout } from './gameShellLayout';
 import { getSceneHeaderChrome } from './sceneHeaderChrome';
+import { getNotebookRuntimeShellProfile } from './notebookShellProfile';
+import { PotassiumNotebookShell } from './PotassiumNotebookShell';
 import { useResizeObserver } from '@/shared/hooks/useResizeObserver';
 import { useMessages } from '@/shared/i18n';
 
@@ -46,6 +48,7 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
   const shouldShowSceneUiStatus = bridge.sceneUi.status !== null;
   const shouldShowFooterHint = shouldShowSceneUiStatus || shouldReserveSceneHint || shouldShowNavigationHint;
   const sceneHeaderChrome = getSceneHeaderChrome(presentationSceneId);
+  const notebookShellProfile = getNotebookRuntimeShellProfile(presentationSceneId);
 
   const enterScene = (sceneId: SceneId) => bridgeActions.enterScene(sceneId);
   const openOverlay = (overlayId: OverlayId, options?: OpenOverlayOptions) => bridgeActions.openOverlay(overlayId, options);
@@ -58,6 +61,24 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
 
     bridgeActions.enterScene(sceneId);
   };
+
+  if (notebookShellProfile) {
+    return (
+      <PotassiumNotebookShell
+        activeSceneId={bridge.activeSceneId}
+        isGameInputBlocked={isGameInputBlocked}
+        isScenePanelOpen={bridge.sceneUi.panel !== null}
+        loadingSceneId={bridge.loadingSceneId}
+        onEnterScene={enterScene}
+        onOpenOverlay={openOverlay}
+        onReturnToOverworld={returnToOverworld}
+        onSwitchToStatic={onSwitchToStatic}
+        presentationMode={presentationMode}
+        profile={notebookShellProfile}
+        sceneHintText={sceneHintText}
+      />
+    );
+  }
 
   return (
     <div

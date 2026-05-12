@@ -338,6 +338,50 @@ describe('bridgeStore', () => {
     });
   });
 
+  describe('scene control pointer events', () => {
+    it('queues and consumes owner-scoped pointer events in order', () => {
+      bridgeActions.enterScene(POTASSIUM_SCENE_ID);
+      bridgeActions.dispatchSceneControlPointerEvent(POTASSIUM_SCENE_ID, {
+        kind: 'down',
+        pointerId: 7,
+        x: 500,
+        y: 540,
+        timestamp: 12
+      });
+      bridgeActions.dispatchSceneControlPointerEvent(POTASSIUM_SCENE_ID, {
+        kind: 'up',
+        pointerId: 7,
+        x: 520,
+        y: 620,
+        timestamp: 24
+      });
+
+      const events = bridgeActions.consumeSceneControlPointerEvents(POTASSIUM_SCENE_ID);
+      expect(events.map((event) => event.kind)).toEqual(['down', 'up']);
+      expect(events[0]).toMatchObject({
+        ownerSceneId: POTASSIUM_SCENE_ID,
+        pointerId: 7,
+        x: 500,
+        y: 540
+      });
+      expect(events[0].sequence).toBeGreaterThan(0);
+      expect(bridgeActions.consumeSceneControlPointerEvents(POTASSIUM_SCENE_ID)).toEqual([]);
+    });
+
+    it('ignores pointer events for inactive scenes', () => {
+      bridgeActions.enterScene(RIDGE_SCENE_ID);
+      bridgeActions.dispatchSceneControlPointerEvent(POTASSIUM_SCENE_ID, {
+        kind: 'down',
+        pointerId: 1,
+        x: 500,
+        y: 500,
+        timestamp: 10
+      });
+
+      expect(bridgeStore.getState().sceneControlPointerEvents).toEqual([]);
+    });
+  });
+
   describe('scene hint text', () => {
     it('sets, updates, and clears scene hint text', () => {
       bridgeActions.setSceneHintText('Drag toward a target');
