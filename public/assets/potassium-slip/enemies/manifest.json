@@ -1,6 +1,5 @@
 {
   "note": "Transparent Potassium Slip enemy pose assets generated from chroma-key pose sheets. Exact frames mirror current Potassium renderer texture dimensions so later Phaser integration can preserve existing scale/body assumptions. Source frames are larger transparent crops for manual cleanup or re-export.",
-  "sourceDirectory": "/Users/TestUser/.codex/generated_images/019e18f6-46f2-7880-8a2a-c3af6a875c1d",
   "enemies": {
     "intern-bug": {
       "slug": "intern-bug",

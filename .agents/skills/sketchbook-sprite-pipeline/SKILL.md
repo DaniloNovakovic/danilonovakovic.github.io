@@ -27,7 +27,7 @@ Scene-specific art can bend the style only when the scene already does, such as 
 5. Remove chroma key with the system imagegen helper:
 
    ```bash
-   python3 /Users/TestUser/.codex/skills/.system/imagegen/scripts/remove_chroma_key.py \
+   python3 $CODEX_HOME/skills/.system/imagegen/scripts/remove_chroma_key.py \
      --input <source-keyed.png> \
      --out <transparent-source.png> \
      --auto-key border \

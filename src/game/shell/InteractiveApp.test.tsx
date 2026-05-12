@@ -54,6 +54,24 @@ function setViewportSize(width: number, height: number) {
   });
 }
 
+function makeDomRect(left: number, top: number, width: number, height: number): DOMRect {
+  return {
+    bottom: top + height,
+    height,
+    left,
+    right: left + width,
+    top,
+    width,
+    x: left,
+    y: top,
+    toJSON: () => ({})
+  } as DOMRect;
+}
+
+function mockElementRect(element: Element, rect: DOMRect) {
+  vi.spyOn(element, 'getBoundingClientRect').mockReturnValue(rect);
+}
+
 describe('InteractiveApp', () => {
   beforeEach(() => {
     resizeObserverCallback = undefined;
@@ -68,6 +86,7 @@ describe('InteractiveApp', () => {
     resetBridge();
     document.body.style.overflow = '';
     globalThis.ResizeObserver = originalResizeObserver;
+    vi.restoreAllMocks();
   });
 
   it('renders interactive controls in normal flow', () => {
@@ -238,34 +257,30 @@ describe('InteractiveApp', () => {
     expect(pageFrame.style.width).toBeTruthy();
   });
 
-  it('queues Potassium control-mat pointer events in Phaser design space', () => {
+  it('queues Potassium control-mat pointer events in cropped Phaser design space', () => {
     bridgeActions.enterScene(POTASSIUM_SCENE_ID);
     render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
     const frame = screen.getByTestId('potassium-notebook-game-frame');
     const mat = screen.getByTestId('potassium-control-mat');
-    vi.spyOn(frame, 'getBoundingClientRect').mockReturnValue({
-      bottom: 500,
-      height: 300,
-      left: 100,
-      right: 600,
-      top: 200,
-      width: 500,
-      x: 100,
-      y: 200,
-      toJSON: () => ({})
-    } as DOMRect);
+    mockElementRect(frame, makeDomRect(100, 200, 450, 600));
 
     fireEvent.pointerDown(mat, {
-      clientX: 350,
-      clientY: 350,
+      clientX: 100,
+      clientY: 500,
       pointerId: 11,
       timeStamp: 18
     });
     fireEvent.pointerUp(mat, {
-      clientX: 350,
-      clientY: 560,
+      clientX: 325,
+      clientY: 920,
       pointerId: 11,
       timeStamp: 32
+    });
+    fireEvent.pointerDown(mat, {
+      clientX: 550,
+      clientY: 500,
+      pointerId: 12,
+      timeStamp: 40
     });
 
     expect(bridgeStore.getState().sceneControlPointerEvents).toMatchObject([
@@ -273,7 +288,7 @@ describe('InteractiveApp', () => {
         ownerSceneId: POTASSIUM_SCENE_ID,
         kind: 'down',
         pointerId: 11,
-        x: 500,
+        x: 275,
         y: 300
       },
       {
@@ -282,6 +297,13 @@ describe('InteractiveApp', () => {
         pointerId: 11,
         x: 500,
         y: 720
+      },
+      {
+        ownerSceneId: POTASSIUM_SCENE_ID,
+        kind: 'down',
+        pointerId: 12,
+        x: 725,
+        y: 300
       }
     ]);
   });
@@ -315,34 +337,50 @@ describe('InteractiveApp', () => {
     expect(bridgeStore.getState().sceneControlPointerEvents).toEqual([]);
   });
 
-  it('queues Stampede control-mat pointer events in Phaser design space', () => {
+  it('coalesces Stampede control-mat pointer moves in cropped Phaser design space', () => {
+    const rafCallbacks: FrameRequestCallback[] = [];
+    vi.spyOn(globalThis, 'requestAnimationFrame').mockImplementation((callback) => {
+      rafCallbacks.push(callback);
+      return rafCallbacks.length;
+    });
+    vi.spyOn(globalThis, 'cancelAnimationFrame').mockImplementation(() => undefined);
     bridgeActions.enterScene(STAMPEDE_SKETCH_SCENE_ID);
     render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
     const frame = screen.getByTestId('stampede-notebook-game-frame');
     const mat = screen.getByTestId('stampede-control-mat');
-    vi.spyOn(frame, 'getBoundingClientRect').mockReturnValue({
-      bottom: 500,
-      height: 300,
-      left: 100,
-      right: 600,
-      top: 200,
-      width: 500,
-      x: 100,
-      y: 200,
-      toJSON: () => ({})
-    } as DOMRect);
+    mockElementRect(frame, makeDomRect(100, 200, 450, 600));
 
     fireEvent.pointerDown(mat, {
-      clientX: 350,
-      clientY: 350,
+      clientX: 325,
+      clientY: 500,
       pointerId: 21,
       timeStamp: 18
     });
     fireEvent.pointerMove(mat, {
-      clientX: 400,
-      clientY: 320,
+      clientX: 340,
+      clientY: 470,
       pointerId: 21,
       timeStamp: 24
+    });
+    fireEvent.pointerMove(mat, {
+      clientX: 360,
+      clientY: 440,
+      pointerId: 21,
+      timeStamp: 30
+    });
+
+    expect(bridgeStore.getState().sceneControlPointerEvents).toMatchObject([
+      {
+        ownerSceneId: STAMPEDE_SKETCH_SCENE_ID,
+        kind: 'down',
+        pointerId: 21,
+        x: 500,
+        y: 300
+      }
+    ]);
+
+    act(() => {
+      rafCallbacks[0]?.(64);
     });
 
     expect(bridgeStore.getState().sceneControlPointerEvents).toMatchObject([
@@ -357,7 +395,7 @@ describe('InteractiveApp', () => {
         ownerSceneId: STAMPEDE_SKETCH_SCENE_ID,
         kind: 'move',
         pointerId: 21,
-        x: 600,
+        x: 535,
         y: 240
       }
     ]);
@@ -415,6 +453,46 @@ describe('InteractiveApp', () => {
     });
 
     expect(screen.queryByTestId('stampede-control-mat-drag-indicator')).toBeNull();
+  });
+
+  it('cancels active Stampede control-mat input when a scene panel opens', () => {
+    bridgeActions.enterScene(STAMPEDE_SKETCH_SCENE_ID);
+    render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
+    const frame = screen.getByTestId('stampede-notebook-game-frame');
+    const mat = screen.getByTestId('stampede-control-mat');
+    mockElementRect(frame, makeDomRect(100, 200, 450, 600));
+    mockElementRect(mat, makeDomRect(40, 100, 800, 540));
+
+    fireEvent.pointerDown(mat, {
+      clientX: 325,
+      clientY: 500,
+      pointerId: 25,
+      timeStamp: 18
+    });
+
+    expect(screen.getByTestId('stampede-control-mat-drag-indicator')).toBeDefined();
+
+    act(() => {
+      bridgeActions.setSceneUiPanel(STAMPEDE_SKETCH_SCENE_ID, 'stampedeStartPrompt');
+    });
+
+    expect(screen.queryByTestId('stampede-control-mat-drag-indicator')).toBeNull();
+    expect(bridgeStore.getState().sceneControlPointerEvents).toMatchObject([
+      {
+        ownerSceneId: STAMPEDE_SKETCH_SCENE_ID,
+        kind: 'down',
+        pointerId: 25,
+        x: 500,
+        y: 300
+      },
+      {
+        ownerSceneId: STAMPEDE_SKETCH_SCENE_ID,
+        kind: 'cancel',
+        pointerId: 25,
+        x: 500,
+        y: 300
+      }
+    ]);
   });
 
   it('does not render a shell drag indicator for Potassium control-mat input', () => {
