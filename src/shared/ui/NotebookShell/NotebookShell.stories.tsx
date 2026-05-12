@@ -15,7 +15,6 @@ import {
   SceneStatusSlip,
   type NotebookSceneProfile
 } from './NotebookShell';
-import { notebookShadowRoles } from '../tokens';
 import { cn } from '../utils';
 
 const meta = {
@@ -372,26 +371,6 @@ export const MenuAndScrapAtoms: Story = {
           ]}
         />
         <NotebookScrapNote>Only content-bearing scraps make it into v1.</NotebookScrapNote>
-      </section>
-    </StoryCanvas>
-  )
-};
-
-export const ShadowElevationRoles: Story = {
-  render: () => (
-    <StoryCanvas>
-      <section className="grid w-full max-w-5xl gap-4 p-4 font-mono">
-        <h2 className="text-2xl font-black uppercase tracking-widest">Shadow Roles</h2>
-        <p className="text-sm font-bold text-[#5a554f]">
-          One down-right light source. Depth changes by semantic elevation, not random direction.
-        </p>
-        <div className="grid gap-4 sm:grid-cols-5">
-          {Object.entries(notebookShadowRoles).map(([role, shadow]) => (
-            <div key={role} className={cn('rounded border-2 border-[#1a1a1a] bg-[#fbfbf9] p-3 text-center uppercase', shadow)}>
-              {role}
-            </div>
-          ))}
-        </div>
       </section>
     </StoryCanvas>
   )

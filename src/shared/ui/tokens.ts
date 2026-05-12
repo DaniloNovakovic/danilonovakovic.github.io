@@ -14,10 +14,15 @@ export const sketchShadows = {
 } as const;
 
 export const notebookShadowRoles = {
+  /** Active or selected controls that should feel nearly flush. */
   pressed: sketchShadows.xs,
+  /** Buttons, tabs, chips, scraps, and compact status UI. */
   control: sketchShadows.sm,
+  /** Blocking panels, loose sheets, menus, and elevated overlays. */
   sheet: sketchShadows.md,
+  /** Primary page or board frames above the notebook paper. */
   page: sketchShadows.lg,
+  /** Quiet base notebook surface behind shell chrome. */
   stage: 'shadow-none'
 } as const;
 
