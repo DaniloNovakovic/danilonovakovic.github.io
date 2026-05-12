@@ -3,7 +3,6 @@ import type { ReactElement } from 'react';
 import {
   ControlMat,
   NotebookHeaderChrome,
-  NotebookMenuSheet,
   NotebookPageFrame,
   NotebookScrapNote,
   NotebookShellStage,
@@ -14,11 +13,11 @@ import {
   ScenePanelSheet,
   SceneStatusSlip,
   type NotebookSceneProfile
-} from './NotebookShell';
+} from '.';
 import { cn } from '../utils';
 
 const meta = {
-  title: 'Game Shell/Notebook Shell',
+  title: 'Game Shell/Notebook Shell/Scene Profiles',
   parameters: {
     layout: 'fullscreen'
   }
@@ -330,48 +329,6 @@ export const SideViewSpread: Story = {
           </NotebookSpread>
         </ControlMat>
       </NotebookShellStage>
-    </StoryCanvas>
-  )
-};
-
-export const ChoiceAndHintAtoms: Story = {
-  render: () => (
-    <StoryCanvas>
-      <section className="grid w-full max-w-5xl gap-5 p-4 font-mono">
-        <h2 className="text-2xl font-black uppercase tracking-widest">Choice + Hint Atoms</h2>
-        <SceneChoiceGrid>
-          <SceneChoiceCard
-            title="Choice A"
-            description="Selected option with concise supporting copy."
-            tone="blue"
-            selected
-          />
-          <SceneChoiceCard
-            title="Choice B"
-            description="Unselected option with comparable copy."
-            tone="red"
-          />
-        </SceneChoiceGrid>
-        <SceneHintSlip label="context hint for the current state" />
-      </section>
-    </StoryCanvas>
-  )
-};
-
-export const MenuAndScrapAtoms: Story = {
-  render: () => (
-    <StoryCanvas>
-      <section className="grid w-full max-w-3xl justify-items-center gap-5 p-4 font-mono">
-        <NotebookMenuSheet
-          title="Menu"
-          items={[
-            { label: 'Static Mode', detail: 'Open the readable portfolio page.' },
-            { label: 'Inventory', detail: 'Pocket notes and collected stamps.' },
-            { label: 'Dev', detail: 'Prototype tools.' }
-          ]}
-        />
-        <NotebookScrapNote>Only content-bearing scraps make it into v1.</NotebookScrapNote>
-      </section>
     </StoryCanvas>
   )
 };

@@ -18,6 +18,10 @@ const variantClasses: Record<LinkButtonVariant, string> = {
     'text-[#1a1a1a] underline decoration-dashed underline-offset-2 hover:opacity-80'
 };
 
+/**
+ * Anchor styled like a sketchbook button.
+ * Use for real navigation or external links; use `Button` for non-link actions.
+ */
 export function LinkButton({
   variant = 'secondary',
   icon,

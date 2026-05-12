@@ -7,6 +7,10 @@ interface SketchSectionProps {
   children: ReactNode;
 }
 
+/**
+ * Static portfolio section wrapper that pairs a section landmark with `SectionHeader`.
+ * Use for readable portfolio sections, not for game scene shell layout.
+ */
 export function SketchSection({ id, title, children }: SketchSectionProps) {
   return (
     <section id={id} aria-labelledby={`${id}-heading`} className="w-full scroll-mt-20">

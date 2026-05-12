@@ -42,6 +42,10 @@ const borderClasses = {
   thick: sketchBorders.thick
 } as const;
 
+/**
+ * General paper surface for static portfolio and overlay content.
+ * Use for standalone content blocks that need an ink border and optional shadow.
+ */
 export function Card({
   as = 'div',
   padding = 'lg',
@@ -68,6 +72,10 @@ export function Card({
   );
 }
 
+/**
+ * Lighter paper panel for secondary grouped content.
+ * Use for compact hints, inventories, and supporting surfaces inside larger layouts.
+ */
 export function Panel(props: CardProps) {
   return <Card tone="paper" border="medium" shadow="md" padding="md" {...props} />;
 }

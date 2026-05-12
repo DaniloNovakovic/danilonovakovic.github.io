@@ -35,6 +35,10 @@ const sizeClasses: Record<ButtonSize, string> = {
   lg: 'px-5 py-3 text-base'
 };
 
+/**
+ * Primary sketchbook button primitive for in-app actions.
+ * Use for commands, controls, and menu actions; use `LinkButton` for navigation.
+ */
 export function Button({
   variant = 'secondary',
   size = 'md',

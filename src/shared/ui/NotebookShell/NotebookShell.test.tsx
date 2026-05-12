@@ -14,7 +14,7 @@ import {
   SceneHintSlip,
   ScenePanelSheet,
   SceneStatusSlip
-} from './NotebookShell';
+} from '.';
 
 afterEach(cleanup);
 

@@ -12,6 +12,10 @@ interface DialogCardProps {
   descriptionId?: string;
 }
 
+/**
+ * Inner card for modal dialogs with a title, optional description, and close button.
+ * Use inside `ModalShell`; do not use it alone as a full modal overlay.
+ */
 export function DialogCard({
   title,
   description,

@@ -1,17 +1,39 @@
 export {
-  ControlMat,
-  NotebookMenuSheet,
-  NotebookHeaderChrome,
-  NotebookPageFrame,
-  NotebookScrapNote,
-  NotebookShellStage,
-  NotebookSpread,
-  SceneChoiceCard,
-  SceneChoiceGrid,
-  SceneHintSlip,
-  ScenePanelSheet,
+  ControlMat
+} from './chrome/ControlMat';
+export {
+  NotebookHeaderChrome
+} from './chrome/NotebookHeaderChrome';
+export {
+  SceneHintSlip
+} from './chrome/SceneHintSlip';
+export {
   SceneStatusSlip
-} from './NotebookShell';
+} from './chrome/SceneStatusSlip';
+export {
+  NotebookPageFrame
+} from './layout/NotebookPageFrame';
+export {
+  NotebookShellStage
+} from './layout/NotebookShellStage';
+export {
+  NotebookSpread
+} from './layout/NotebookSpread';
+export {
+  NotebookMenuSheet
+} from './panels/NotebookMenuSheet';
+export {
+  NotebookScrapNote
+} from './panels/NotebookScrapNote';
+export {
+  SceneChoiceCard
+} from './panels/SceneChoiceCard';
+export {
+  SceneChoiceGrid
+} from './panels/SceneChoiceGrid';
+export {
+  ScenePanelSheet
+} from './panels/ScenePanelSheet';
 export type {
   NotebookChoiceTone,
   NotebookFooterMode,
@@ -20,4 +42,4 @@ export type {
   NotebookScrapTone,
   NotebookSceneProfile,
   NotebookShellLayout
-} from './NotebookShell';
+} from './types';
