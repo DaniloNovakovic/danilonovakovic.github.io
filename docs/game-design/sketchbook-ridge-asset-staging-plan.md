@@ -7,8 +7,8 @@
 Active sources: `sketchbook-ridge-summit.md`,
 `sketchbook-ridge-milestone-plan.md`, `sketchbook-ridge-m3-visual-pack.md`,
 `sketchbook-ridge-m3-overlay-pack.md`, `sketchbook-ridge-m3-audio-pack.md`,
-`docs/design/style-guide.md`, and the current asset readmes under
-`public/assets/**`.
+`docs/design/style-guide.md`, the current asset readmes under
+`public/assets/**`, and raw source readmes under `asset-sources/**`.
 
 ## Why This Exists
 
@@ -78,11 +78,12 @@ Purpose: preserve source ideation before prep.
 
 Current home:
 
-- `public/assets/stampede-sketch/generated-concepts/`
+- `asset-sources/stampede-sketch/generated-concepts/`
 
 Rules:
 
 - keep the original generated PNGs
+- keep raw generated concepts outside `public` so Vite does not deploy them
 - do not point runtime code at these directly
 - use them as source material for prep, comparison, or regeneration
 
@@ -122,8 +123,8 @@ Rules:
 
 As of this planning pass:
 
-- `public/assets/stampede-sketch/generated-concepts/` is clearly marked as
-  raw concept source, not runtime input.
+- `asset-sources/stampede-sketch/generated-concepts/` is clearly marked as raw
+  concept source, not runtime input.
 - `public/assets/stampede-sketch/enemies/README.md` documents prepared enemy
   sprites as runtime candidates, but also says they are not loaded yet.
 - `public/assets/potassium-slip/README.md` documents prepared Potassium enemy

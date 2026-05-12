@@ -14,11 +14,12 @@ themselves.
 ### Raw Generated Concepts
 
 Use these as preserved source ideation only. They are not loaded directly by
-the game runtime.
+the game runtime, and they live outside `public` so Vite does not copy them into
+production builds.
 
 Example:
 
-- `public/assets/stampede-sketch/generated-concepts/`
+- `asset-sources/stampede-sketch/generated-concepts/`
 
 ### Prepared Runtime Candidates
 

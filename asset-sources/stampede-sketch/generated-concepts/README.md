@@ -3,8 +3,9 @@
 Generated source sheets for Stampede Sketch enemy, weapon, upgrade, pickup, and
 reward art exploration.
 
-These files are intentionally parked here as raw generated PNGs. They are not
-loaded by the game runtime yet.
+These files are intentionally parked under `asset-sources/**` as raw generated
+PNGs. They are not loaded by the game runtime and should not be moved into
+`public/assets/**` until a prepared runtime asset pass needs them there.
 
 Before using them in Phaser, run an asset-prep pass:
 

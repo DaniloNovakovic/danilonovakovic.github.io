@@ -7,6 +7,12 @@ description: Generate, convert, normalize, and QA transparent sprite assets for 
 
 Turn pretty generated art into Phaser-ready sprites. Do not stop at "looks good"; produce normalized frames, manifests, and QA artifacts.
 
+## Path Conventions
+
+All project paths in this skill are repository-relative. When running commands
+manually, run them from the repository root or prefix paths with your checkout
+path. The workflow should not depend on a Codex-specific home directory.
+
 ## Style Lock
 
 Before prompting or editing, read `docs/design/style-guide.md`. For Ridge/Basement characters prefer:
@@ -23,11 +29,11 @@ Scene-specific art can bend the style only when the scene already does, such as 
 1. Choose the asset class: `player`, `playerVariant`, `npc`, `enemy`, `prop`, or `pickup`.
 2. Define a fixed frame contract before generation: frame names, grid layout, facing direction, baseline/origin, expected runtime size, and output folder.
 3. Generate source art on a flat `#ff00ff` chroma-key background unless the image is already transparent. Prompt: no shadows, no labels, no grid lines, no scenery, consistent baseline, generous padding.
-4. Copy the keyed source into the project. Never leave a project asset only under `$CODEX_HOME/generated_images`.
-5. Remove chroma key with the system imagegen helper:
+4. Copy the keyed source into `asset-sources/<scene-or-domain>/...` first. Never leave a project asset only in a local generated-image cache outside the repo.
+5. Remove chroma key with the project helper:
 
    ```bash
-   python3 $CODEX_HOME/skills/.system/imagegen/scripts/remove_chroma_key.py \
+   python3 .agents/skills/sketchbook-sprite-pipeline/scripts/remove_chroma_key.py \
      --input <source-keyed.png> \
      --out <transparent-source.png> \
      --auto-key border \
@@ -43,6 +49,7 @@ Scene-specific art can bend the style only when the scene already does, such as 
 9. Write `manifest.json`.
 10. Generate or update a debug/contact sheet showing frame boundaries, names, and any body/hitbox assumptions.
 11. Validate alpha, dimensions, bbox drift, and manifest consistency before finishing.
+12. Promote the prepared runtime bundle into `public/assets/<scene-or-domain>/<slug>/` only when it is intentionally deployable.
 
 ## Existing Image Conversion
 
@@ -61,6 +68,16 @@ Use this when Danilo already likes a generated image.
 
 ## Output Shape
 
+Keep raw generated concepts and bulky source ideation outside Vite's deployable
+`public` tree:
+
+```text
+asset-sources/<scene-or-domain>/<slug-or-concept-set>/
+├── source-keyed.png
+├── source.png
+└── notes-or-readme.md
+```
+
 Prefer this structure for production assets:
 
 ```text
@@ -74,7 +91,10 @@ public/assets/<scene-or-domain>/<slug>/
 └── manifest.json
 ```
 
-For quick concept assets under `public/assets/characters`, existing flat folders are acceptable, but production integration should migrate to the structure above.
+For quick concept assets, use `asset-sources/**`. `public/assets/**` is for
+assets that are runtime-wired or intentionally deployable runtime candidates.
+Existing prepared flat folders under `public/assets/characters` are acceptable,
+but production integration should migrate to the structure above.
 
 ## Manifest Minimum
 
