@@ -1,8 +1,8 @@
 # Notebook Shell Design Language
 
 > Draft design language for the Notebook Hybrid shell. This guides M4d.5
-> prototypes and future runtime profile work; it is not a shipped behavior
-> manual.
+> prototypes, Storybook specimens, and runtime profile work; it is not a
+> shipped behavior manual.
 
 ## Core Idea
 
@@ -85,8 +85,10 @@ as a card wrapped around another card.
 | `timingPage` | Telegraph Terrace | One readable timing subject and one obvious parry surface. |
 | `puzzleDeskPage` | Domino Desk | Stable grid, reachable undo, optional desk-paper trim. |
 
-Potassium is the first runtime proof for `ruledBoardPage`. `survivalPage` and
-`sideViewPage` should enter runtime only after that tracer bullet feels stable.
+Potassium is the first runtime proof for `ruledBoardPage`. Stampede is the
+first runtime proof for `survivalPage`. `sideViewPage` should enter runtime
+later, when Ridge/Overworld visual rework has product value instead of being a
+matching exercise.
 
 ## Responsive Rules
 
@@ -113,9 +115,9 @@ Input priority should be:
 4. Phaser canvas fallback.
 
 High-frequency pointer movement should eventually go through an imperative
-input adapter if profiling shows React bridge churn. The first Potassium
-runtime tracer uses a narrow owner-scoped bridge queue so the control-mat
-contract stays testable before broader extraction.
+input adapter if profiling shows React bridge churn. The current Potassium and
+Stampede runtime proofs use a narrow owner-scoped bridge queue so the
+control-mat contract stays testable before broader extraction.
 
 ## Scene Notes
 
@@ -131,12 +133,13 @@ contract stays testable before broader extraction.
 
 ## Storybook Readiness
 
-Storybook can prove the visual component language before runtime wiring, but it
-must stay mock-data-only until one runtime slice proves the interaction seams.
+Storybook proved the visual component language before runtime wiring, and it
+should stay mock-data-only unless a future story is explicitly about a shared
+component state.
 Use Storybook viewport controls as the source of responsive review. Do not add
 fake phone, tablet, or landscape wrapper stories that mask whether the component
 itself responds to the preview viewport.
-The first Storybook extraction should cover:
+The first Storybook extraction covered:
 
 - scene profile selection;
 - page/spread shell wrapper;
@@ -144,7 +147,6 @@ The first Storybook extraction should cover:
 - control mat input gating;
 - responsive header chrome.
 
-Runtime adoption comes after the Storybook slice feels good across Potassium,
-Stampede, and Ridge/Overworld examples.
-Those real scenes should be reviewed through runtime integrations; the
-Notebook Shell stories themselves should remain scene-agnostic.
+Runtime adoption has begun with Potassium and Stampede. Those real scenes
+should continue to be reviewed through runtime integrations; the Notebook Shell
+stories themselves should remain scene-agnostic.

@@ -16,7 +16,8 @@ code remains the source of truth.
   derive pause by itself.
 - `sceneControlPointerEvents`: optional owner-scoped pointer event queue for
   shell-level control mats. Potassium uses this to extend drag input outside
-  the visible Phaser canvas.
+  the visible Phaser canvas; Stampede uses it to extend drag-to-move outside
+  the visible survival page.
 
 ## Dev Starts
 

@@ -16,6 +16,21 @@ This directory separates shipped player-facing behavior from future design conce
 - **[Sketchbook Ridge M3 Audio Pack](./sketchbook-ridge-m3-audio-pack.md)**: Django's Ridge, Cicka, Potassium acknowledgement, Stampede, and Telegraph audio direction.
 - **[AI Game Design Competition Archive](./ai-competition/README.md)**: Closed provenance for the competition that produced the current Ridge Summit direction.
 
+## Document Status
+
+- **Shipped behavior:** `player-manual.md`.
+- **Active product/design source:** `sketchbook-ridge-summit.md`,
+  `sketchbook-ridge-milestone-plan.md`, `potassium-slip.md`, and
+  `stampede-sketch.md`.
+- **Active implementation source:** `../runtime-architecture.md`,
+  `../runtime-modes.md`, and scoped rules under `../../.agents/rules/`.
+- **Reference/provenance:** M3 visual/audio/overlay packs, asset staging,
+  long-term topology, Notebook Shell spike/tournament docs, and prototype HTML.
+  These can guide future work, but should not override the active milestone or
+  runtime docs.
+- **Archive:** `ai-competition/` is closed competition history. Do not treat it
+  as an active roadmap.
+
 ## Core Pillars
 
 1. **Discovery:** The world is full of hidden artifacts that change how you see and interact with it.

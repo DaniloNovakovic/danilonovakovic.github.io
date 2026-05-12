@@ -1,6 +1,8 @@
 # Notebook Hybrid Template Tournament
 
-> Design spike artifact for M4d.5. This is not shipped behavior.
+> Completed design spike artifact for M4d.5. This is not shipped behavior; use
+> it as provenance for the Notebook Shell direction, not as the current runtime
+> contract.
 
 ## Purpose
 
@@ -50,11 +52,10 @@ Play is the default review state so the shell can be judged without a modal
 covering the page. Loose sheets are reserved for blocking scene-owned moments
 such as Trail Cards, ready prompts, upgrade choices, and terminal results.
 
-Runtime extraction should wait until this hardened PoC survives normal/panel
-state review across desktop, phone portrait, phone landscape, tablet, and
-tablet landscape. The current extraction path is Storybook first: visual-only
-components with mock data prove the notebook language, then one runtime slice
-proves profile selection, panel staging, status slots, and control-mat input.
+Runtime extraction followed the recommended path: visual-only Storybook
+components with mock data proved the notebook language, then the Potassium and
+Stampede runtime slices proved profile selection, panel staging, status slots,
+and control-mat input.
 
 Desktop Focus is now a first-class arcade review mode. Potassium and Stampede
 do not need to spend desktop width on a notes page when the better answer is a
@@ -208,6 +209,6 @@ UI, colorful stickers, and crowded landmark clusters.
 - Phone landscape is a required review mode, not an afterthought.
 - Keep tape out of v1 unless it communicates temporary attachment, blocking
   state, or authored evidence.
-- Move the hardened visual language into Storybook with mock data before
-  runtime wiring. Storybook proves look and responsive composition; runtime
-  proves input and bridge behavior.
+- Move new profile families through Storybook with mock data before runtime
+  wiring. Storybook proves look and responsive composition; runtime proves
+  input and bridge behavior.

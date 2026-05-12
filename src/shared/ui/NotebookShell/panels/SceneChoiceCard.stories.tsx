@@ -11,6 +11,10 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Options: Story = {
+  args: {
+    title: 'Choice A',
+    description: 'Selected option with concise supporting copy.'
+  },
   render: () => (
     <div className="flex min-h-64 items-center justify-center bg-[#f4f1ea] p-6">
       <SceneChoiceGrid>

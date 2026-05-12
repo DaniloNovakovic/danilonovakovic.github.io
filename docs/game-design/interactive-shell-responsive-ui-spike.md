@@ -1,7 +1,7 @@
 # Interactive Shell Responsive UI Spike
 
 > Design spike for the playable portfolio shell. This is not shipped player
-> behavior; it is a planning and prototype note for M4d.5.
+> behavior; it is a planning/provenance note for M4d.5.
 
 ## Why This Exists
 
@@ -242,7 +242,7 @@ Risks:
 - still needs disciplined scene profiles so every scene does not invent a new
   notebook rule set.
 
-Current static trial:
+Static trial:
 
 - [`docs/prototypes/interactive-shell/index.html`](../prototypes/interactive-shell/index.html)
   includes a `Notebook Hybrid` concept toggle beside the stable hybrid. The
@@ -250,7 +250,7 @@ Current static trial:
 - [`docs/prototypes/interactive-shell/notebook-shell-moodboard.png`](../prototypes/interactive-shell/notebook-shell-moodboard.png)
   is the generated mood frame used as the visual north star.
 
-Refinement focus before runtime implementation:
+Refinement focus that drove the first runtime implementation:
 
 - make phone landscape feel as strong as the mood frame without shrinking tap
   targets too much;
@@ -312,7 +312,7 @@ Avoid generic fantasy frames, ornate gold borders, sci-fi HUDs, neon
 glassmorphism, dark blurred backgrounds, tiny readable text, and too many sticky
 notes competing with gameplay.
 
-## Recommended Next Slice
+## Implemented Runtime Slice
 
 Add **M4d.5 Responsive Shell and Input Surface** before M4e.
 
@@ -356,12 +356,12 @@ Decided on May 11, 2026:
   should name and protect the current side-view behavior without forcing arcade
   layout changes onto exploration scenes.
 
-Remaining implementation question:
+Resolved implementation question:
 
 - Should the first arcade touch field be literally whole-shell, or a large
   shell-level "control mat" that excludes header/menu/panel/status hit areas?
-  The recommended first implementation is the control mat because it is easier
-  to test and less likely to fight browser scrolling or UI buttons.
+  The first implementation uses a control mat because it is easier to test and
+  less likely to fight browser scrolling or UI buttons.
 
 ## Suggested Evaluation Checklist
 

@@ -5,10 +5,12 @@
 > likely long-term overworld direction so future planning can borrow from it
 > deliberately instead of reinventing it from memory.
 
-Active sources: `sketchbook-ridge-summit.md`,
-`sketchbook-ridge-milestone-plan.md`, `docs/design/style-guide.md`,
-`docs/research/Analyzing A Short Hike's Fun.md`, and the current Ridge role
-contracts in `docs/agents/sketchbook-ridge-team.md`.
+Active sources: [`sketchbook-ridge-summit.md`](./sketchbook-ridge-summit.md),
+[`sketchbook-ridge-milestone-plan.md`](./sketchbook-ridge-milestone-plan.md),
+[`docs/design/style-guide.md`](../design/style-guide.md),
+[`A Short Hike` research note](../research/Analyzing%20A%20Short%20Hike's%20Fun.md),
+and the current Ridge role contracts in
+[`docs/agents/sketchbook-ridge-team.md`](../agents/sketchbook-ridge-team.md).
 
 ## Intent
 
@@ -291,4 +293,3 @@ Do not use this document as:
 - a promise that all landmarks or layers will ship
 - a replacement for the active milestone plan
 - justification for inflating the current Ridge slice before the loop is proven
-

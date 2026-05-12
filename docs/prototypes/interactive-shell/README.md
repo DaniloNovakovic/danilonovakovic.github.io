@@ -2,8 +2,10 @@
 
 Current favorite candidate: **Notebook Hybrid**.
 
-Use this folder to continue the M4d.5 responsive shell/input design spike
-without touching runtime code.
+Use this folder as M4d.5 responsive shell/input design-spike provenance. The
+first runtime adoption now lives in the Potassium and Stampede Notebook Shell
+integrations; these prototypes remain useful for future profile exploration,
+not as the source of current runtime truth.
 
 ## Files
 
@@ -21,18 +23,17 @@ without touching runtime code.
 
 ## Current Decision
 
-As of May 11, 2026, Danilo prefers **Notebook Hybrid** as the direction to keep
-refining. Stable Hybrid remains the practical fallback if the notebook treatment
-gets too noisy, brittle, or hard to implement.
+As of May 11, 2026, Danilo selected **Notebook Hybrid** as the preferred
+direction. Potassium and Stampede now prove the first runtime version. Stable
+Hybrid remains the practical fallback if later profile families get too noisy,
+brittle, or hard to implement.
 
-## Next Refinement Targets
+## Future Refinement Targets
 
 - Make phone landscape as strong as the mood frame.
 - Keep notes, page tabs, and ruled-paper details restrained; tape is deferred
   until it has a specific UI job.
 - Preserve a large touch/control surface outside the visible canvas.
 - Ensure buttons, panels, and page tabs sit above and block gameplay input.
-- Test Stampede as a clean survival page and Potassium as a board-like ruled
-  page using the same notebook-shell rules.
-- Use the tournament page to judge planned scenes before extracting real
+- Use the tournament page to judge future planned scenes before extracting new
   runtime profiles or Storybook components.
