@@ -19,7 +19,9 @@ import { useMessages } from '@/shared/i18n';
 import type { NotebookRuntimeShellProfile } from './notebookShellProfile';
 import { useSceneControlMatPointerBridge } from './useSceneControlMatPointerBridge';
 
-const POTASSIUM_BOARD_SAFE_ASPECT = '0.75';
+const POTASSIUM_BOARD_WIDTH = 450;
+const POTASSIUM_BOARD_HEIGHT = 600;
+const POTASSIUM_BOARD_ASPECT = POTASSIUM_BOARD_WIDTH / POTASSIUM_BOARD_HEIGHT;
 const NOTEBOOK_STAGE_MAX_WIDTH = 1180;
 // The page frame is positioned inside ControlMat, so viewport-safe center math
 // needs the same top offset that the mat uses on screen.
@@ -119,7 +121,7 @@ export function PotassiumNotebookShell({
           style={{ bottom: '0.75rem', top: CONTROL_MAT_TOP_OFFSET_PX }}
         >
           <NotebookPageFrame
-            data-board-safe-aspect={POTASSIUM_BOARD_SAFE_ASPECT}
+            data-board-aspect={POTASSIUM_BOARD_ASPECT}
             data-frame-aspect={frameLayout.aspect}
             data-frame-center-y={frameLayout.centerY}
             data-frame-relative-center-y={frameLayout.relativeCenterY}
@@ -171,7 +173,7 @@ function usePotassiumBoardFrameLayout(): PotassiumBoardFrameLayout {
   const isShort = viewport.height <= 420;
   const isDesktopLike = viewport.width >= 768 && !isShort;
   const isTabletLike = viewport.width >= 640 && !isShort;
-  const aspect = isShort ? 1.05 : isDesktopLike ? 1.2 : isTabletLike ? 0.95 : Number(POTASSIUM_BOARD_SAFE_ASPECT);
+  const aspect = POTASSIUM_BOARD_ASPECT;
   const shellWidth = Math.min(viewport.width - 16, NOTEBOOK_STAGE_MAX_WIDTH);
   const horizontalReserve = isShort ? 128 : isDesktopLike ? 144 : isTabletLike ? 80 : 48;
   const headerBottom = isShort ? 56 : isDesktopLike ? 128 : 120;
