@@ -6,8 +6,12 @@
   "spritesheet": "player-guardian-spritesheet.png",
   "frameWidth": 192,
   "frameHeight": 192,
-  "frameCount": 12,
+  "frameCount": 10,
   "grid": {
+    "columns": 10,
+    "rows": 1
+  },
+  "sourceGrid": {
     "columns": 4,
     "rows": 3
   },
@@ -49,45 +53,35 @@
     },
     {
       "index": 5,
-      "state": "move-up-1",
-      "file": "frames/05-move-up-1.png",
-      "sourceFile": "source-frames/05-move-up-1.png"
+      "state": "move-up",
+      "file": "frames/05-move-up.png",
+      "sourceFile": "source-frames/05-move-up.png",
+      "derivedFrom": "move-up-2"
     },
     {
       "index": 6,
-      "state": "move-up-2",
-      "file": "frames/06-move-up-2.png",
-      "sourceFile": "source-frames/06-move-up-2.png"
+      "state": "move-side",
+      "file": "frames/06-move-side.png",
+      "sourceFile": "source-frames/06-move-side.png",
+      "derivedFrom": "move-side-2"
     },
     {
       "index": 7,
-      "state": "move-side-1",
-      "file": "frames/07-move-side-1.png",
-      "sourceFile": "source-frames/07-move-side-1.png"
+      "state": "smudged",
+      "file": "frames/07-smudged.png",
+      "sourceFile": "source-frames/07-smudged.png"
     },
     {
       "index": 8,
-      "state": "move-side-2",
-      "file": "frames/08-move-side-2.png",
-      "sourceFile": "source-frames/08-move-side-2.png"
+      "state": "tether-guard",
+      "file": "frames/08-tether-guard.png",
+      "sourceFile": "source-frames/08-tether-guard.png"
     },
     {
       "index": 9,
-      "state": "smudged",
-      "file": "frames/09-smudged.png",
-      "sourceFile": "source-frames/09-smudged.png"
-    },
-    {
-      "index": 10,
-      "state": "tether-guard",
-      "file": "frames/10-tether-guard.png",
-      "sourceFile": "source-frames/10-tether-guard.png"
-    },
-    {
-      "index": 11,
       "state": "respawn",
-      "file": "frames/11-respawn.png",
-      "sourceFile": "source-frames/11-respawn.png"
+      "file": "frames/09-respawn.png",
+      "sourceFile": "source-frames/09-respawn.png"
     }
   ],
   "animations": {
@@ -105,21 +99,19 @@
       4
     ],
     "moveUp": [
-      5,
-      6
+      5
     ],
     "moveSide": [
-      7,
-      8
+      6
     ],
     "smudged": [
-      9
+      7
     ],
     "tetherGuard": [
-      10
+      8
     ],
     "respawn": [
-      11
+      9
     ]
   },
   "body": {
@@ -144,5 +136,13 @@
     "protectedAsset": "../calm-patch/manifest.json",
     "notes": "Player may show a pencil, charm, pin, or tether that links them to the calm patch. Do not treat this frame as carrying the whole blanket."
   },
+  "heldToolRead": {
+    "tool": "pencil",
+    "orientation": "sharpened-point-up, eraser-down"
+  },
+  "removedFrames": [
+    "move-up-1",
+    "move-side-1"
+  ],
   "notes": "Generated Stampede Sketch asset. Not loaded by runtime yet."
 }

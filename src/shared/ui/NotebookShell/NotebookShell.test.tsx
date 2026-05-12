@@ -19,12 +19,11 @@ import {
 afterEach(cleanup);
 
 describe('NotebookShell components', () => {
-  it('marks the stage with the chosen scene profile, layout, and viewport', () => {
+  it('marks the stage with the chosen scene profile and layout', () => {
     render(
       <NotebookShellStage
         profile="ruledBoardPage"
         layout="focus"
-        viewport="desktopFocus"
         data-testid="stage"
       >
         <NotebookPageFrame profile="ruledBoardPage">Board</NotebookPageFrame>
@@ -34,7 +33,7 @@ describe('NotebookShell components', () => {
     const stage = screen.getByTestId('stage');
     expect(stage.getAttribute('data-profile')).toBe('ruledBoardPage');
     expect(stage.getAttribute('data-layout')).toBe('focus');
-    expect(stage.getAttribute('data-viewport')).toBe('desktopFocus');
+    expect(stage.dataset.viewport).toBeUndefined();
   });
 
   it('reserves footer space by default and can opt into floating footers', () => {
@@ -71,72 +70,72 @@ describe('NotebookShell components', () => {
     render(
       <NotebookSpread
         profile="sideViewPage"
-        notes={<p>Quiet Ridge notes</p>}
-        status={<SceneStatusSlip metric="Trail" label="quiet route" variant="chip" />}
+        notes={<p>Quiet profile notes</p>}
+        status={<SceneStatusSlip metric="Status" label="quiet state" variant="chip" />}
       >
-        <div>Playable Ridge</div>
+        <div>Playable page</div>
       </NotebookSpread>
     );
 
-    expect(screen.getByText('Quiet Ridge notes')).toBeDefined();
-    expect(screen.getByText('Playable Ridge')).toBeDefined();
+    expect(screen.getByText('Quiet profile notes')).toBeDefined();
+    expect(screen.getByText('Playable page')).toBeDefined();
     expect(screen.getByRole('meter')).toBeDefined();
   });
 
   it('supports auto, row, and stack panel action layouts', () => {
     const { rerender } = render(
       <ScenePanelSheet
-        title="Choose Banana Nonsense"
-        body="Pick one upgrade."
+        title="Choose Option"
+        body="Pick one option."
         actionsLayout="auto"
         actions={[
-          { label: 'Duplicate', variant: 'primary' },
-          { label: 'Fire Trail', variant: 'secondary' }
+          { label: 'Primary', variant: 'primary' },
+          { label: 'Secondary', variant: 'secondary' }
         ]}
       />
     );
 
-    const dialog = screen.getByRole('dialog', { name: 'Choose Banana Nonsense' });
+    const dialog = screen.getByRole('dialog', { name: 'Choose Option' });
     const actions = dialog.querySelector('div:last-child');
-    expect(screen.getByRole('button', { name: 'Duplicate' })).toBeDefined();
-    expect(screen.getByRole('button', { name: 'Fire Trail' })).toBeDefined();
+    expect(screen.getByRole('button', { name: 'Primary' })).toBeDefined();
+    expect(screen.getByRole('button', { name: 'Secondary' })).toBeDefined();
     expect(actions?.getAttribute('data-actions-layout')).toBe('auto');
     expect(actions?.getAttribute('style')).toContain('auto-fit');
 
     rerender(
       <ScenePanelSheet
-        title="Choose Banana Nonsense"
-        body="Pick one upgrade."
+        title="Choose Option"
+        body="Pick one option."
         actionsLayout="row"
         actions={[
-          { label: 'Duplicate', variant: 'primary' },
-          { label: 'Fire Trail', variant: 'secondary' }
+          { label: 'Primary', variant: 'primary' },
+          { label: 'Secondary', variant: 'secondary' }
         ]}
       />
     );
 
     expect(
       screen
-        .getByRole('dialog', { name: 'Choose Banana Nonsense' })
+        .getByRole('dialog', { name: 'Choose Option' })
         .querySelector('div:last-child')
         ?.className.split(' ')
     ).toContain('grid-cols-2');
 
     rerender(
       <ScenePanelSheet
-        title="Choose Banana Nonsense"
-        body="Pick one upgrade."
+        title="Choose Option"
+        body="Pick one option."
         actionsLayout="stack"
         actions={[
-          { label: 'Duplicate', variant: 'primary' },
-          { label: 'Fire Trail', variant: 'secondary' }
+          { label: 'Primary', variant: 'primary' },
+          { label: 'Secondary', variant: 'secondary' }
         ]}
       />
     );
 
     expect(
       screen
-        .getByRole('dialog', { name: 'Choose Banana Nonsense' })
+        .getByRole('dialog', { name: 'Choose Option' })
         .querySelector('div:last-child')
         ?.className.split(' ')
     ).toContain('grid-cols-1');
@@ -153,13 +152,15 @@ describe('NotebookShell components', () => {
   it('renders selectable scene choice cards inside a choice grid', () => {
     render(
       <SceneChoiceGrid columns="stack">
-        <SceneChoiceCard title="Duplicate" description="Main hits spawn 2 small bananas." selected />
-        <SceneChoiceCard title="Fire Trail" description="Moving bananas leave fire." />
+        <SceneChoiceCard title="Choice A" description="Selected paper option." selected />
+        <SceneChoiceCard title="Choice B" description="Unselected paper option." />
       </SceneChoiceGrid>
     );
 
-    expect(screen.getByRole('button', { name: /Duplicate/ }).getAttribute('aria-pressed')).toBe('true');
-    expect(screen.getByRole('button', { name: /Fire Trail/ })).toBeDefined();
+    const selectedChoice = screen.getByRole('button', { name: /Choice A/ });
+    expect(selectedChoice.getAttribute('aria-pressed')).toBe('true');
+    expect(selectedChoice.className).toContain('ring-inset');
+    expect(screen.getByRole('button', { name: /Choice B/ })).toBeDefined();
   });
 
   it('renders content-bearing notebook notes and menu sheets', () => {

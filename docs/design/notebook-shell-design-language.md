@@ -47,6 +47,20 @@ clear during normal play.
 | Menu sheet | Compact shell menu for Static Mode, inventory, dev tools, and settings. |
 | Control mat | Shell-level touch surface larger than the visible canvas. |
 
+Choice cards are selectable paper options, not floating action cards. Hover
+should clarify that the option is pressable without making the card jump off the
+page.
+
+Storybook scene stories should prove shell layout, spacing, and reusable
+component behavior with generic mock state. Avoid scene-specific copy or
+decorative gameplay details unless the story is explicitly testing that scene's
+visual language.
+
+Storybook stories are profile specimens, not scene mocks. Scene names, shipped
+copy, rewards, enemy art, and exact gameplay labels belong in runtime scene
+integrations. Runtime adoption must map real scenes onto these profiles instead
+of copying Storybook mock labels or placeholder marks.
+
 ## Shadow Roles
 
 | Role | Use |
@@ -55,7 +69,11 @@ clear during normal play.
 | `control` | Buttons, tabs, scraps, and compact status slips. |
 | `sheet` | Blocking scene panels and loose sheets. |
 | `page` | Page/spread frames above the notebook paper. |
-| `stage` | The full notebook shell against the browser background. |
+| `stage` | Quiet notebook paper behind shell chrome; no heavy card shadow by default. |
+
+The stage is structural, not the main visual card. The strongest ink border
+belongs to the current page, board, or blocking sheet so the shell does not read
+as a card wrapped around another card.
 
 ## Profile Families
 
@@ -111,6 +129,9 @@ instead of React state updates per frame.
 
 Storybook can prove the visual component language before runtime wiring, but it
 must stay mock-data-only until one runtime slice proves the interaction seams.
+Use Storybook viewport controls as the source of responsive review. Do not add
+fake phone, tablet, or landscape wrapper stories that mask whether the component
+itself responds to the preview viewport.
 The first Storybook extraction should cover:
 
 - scene profile selection;
@@ -121,3 +142,5 @@ The first Storybook extraction should cover:
 
 Runtime adoption comes after the Storybook slice feels good across Potassium,
 Stampede, and Ridge/Overworld examples.
+Those real scenes should be reviewed through runtime integrations; the
+Notebook Shell stories themselves should remain scene-agnostic.

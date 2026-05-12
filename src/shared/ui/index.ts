@@ -26,8 +26,7 @@ export type {
   NotebookPanelPlacement,
   NotebookScrapTone,
   NotebookSceneProfile,
-  NotebookShellLayout,
-  NotebookViewport
+  NotebookShellLayout
 } from './NotebookShell';
 export { SectionHeader } from './SectionHeader';
 export { SketchSection } from './SketchSection';

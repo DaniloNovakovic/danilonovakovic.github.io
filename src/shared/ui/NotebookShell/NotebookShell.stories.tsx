@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import type { ReactElement } from 'react';
 import {
   ControlMat,
-  NotebookMenuSheet,
   NotebookHeaderChrome,
+  NotebookMenuSheet,
   NotebookPageFrame,
   NotebookScrapNote,
   NotebookShellStage,
@@ -13,8 +13,7 @@ import {
   SceneHintSlip,
   ScenePanelSheet,
   SceneStatusSlip,
-  type NotebookSceneProfile,
-  type NotebookViewport
+  type NotebookSceneProfile
 } from './NotebookShell';
 import { notebookShadowRoles } from '../tokens';
 import { cn } from '../utils';
@@ -31,7 +30,6 @@ type Story = StoryObj<typeof meta>;
 
 interface ArcadePreviewProps {
   profile: NotebookSceneProfile;
-  viewport?: NotebookViewport;
   title: string;
   status: string;
   meterValue: number;
@@ -42,7 +40,6 @@ interface ArcadePreviewProps {
 
 function ArcadePreview({
   profile,
-  viewport = 'desktopFocus',
   title,
   status,
   meterValue,
@@ -50,26 +47,23 @@ function ArcadePreview({
   panel,
   children
 }: ArcadePreviewProps) {
-  const shouldShowFooter = viewport !== 'phoneLandscape';
   return (
-    <StoryPad>
+    <StoryCanvas>
       <NotebookShellStage
         profile={profile}
-        viewport={viewport}
+        layout="focus"
         header={<NotebookHeaderChrome />}
-        footer={shouldShowFooter ? <SceneHintSlip label={footer} /> : undefined}
+        footer={<SceneHintSlip label={footer} />}
         panel={panel}
       >
         <ControlMat
-          label={profile === 'ruledBoardPage' ? 'drag mat wider than board' : 'whole page is playable'}
-          showGuide={viewport !== 'phoneLandscape'}
+          label={profile === 'ruledBoardPage' ? 'input mat wider than board' : 'full surface input zone'}
         >
           <NotebookPageFrame
             profile={profile}
             className={cn(
-              'absolute inset-x-8 bottom-8 top-20',
-              viewport === 'phoneLandscape' ? 'inset-x-24 bottom-5 top-14' : '',
-              viewport === 'phonePortrait' ? 'inset-x-5 bottom-12 top-20' : ''
+              'absolute inset-x-5 bottom-12 top-20 sm:inset-x-8 sm:bottom-8 md:inset-x-16',
+              '[@media(max-height:420px)]:inset-x-24 [@media(max-height:420px)]:bottom-5 [@media(max-height:420px)]:top-14'
             )}
             status={
               <SceneStatusSlip
@@ -77,7 +71,7 @@ function ArcadePreview({
                 label={status}
                 meterValue={meterValue}
                 variant="chip"
-                className="absolute left-5 top-5 z-10"
+                className="absolute left-4 top-4 z-10"
               />
             }
           >
@@ -85,13 +79,19 @@ function ArcadePreview({
           </NotebookPageFrame>
         </ControlMat>
       </NotebookShellStage>
-    </StoryPad>
+    </StoryCanvas>
   );
 }
 
-function StoryPad({ children }: { children: ReactElement }) {
+function StoryCanvas({
+  children,
+  className
+}: {
+  children: ReactElement;
+  className?: string;
+}) {
   return (
-    <div className="grid min-h-dvh place-items-center bg-[#f4f1ea] p-6">
+    <div className={cn('flex min-h-dvh w-full items-center justify-center bg-[#f4f1ea]', className)}>
       {children}
     </div>
   );
@@ -115,23 +115,16 @@ function NotesBlock({
         ))}
       </div>
       <div className="border-l-4 border-[#1a1a1a]/75 pl-3 text-xs font-bold uppercase tracking-widest text-[#5a554f]">
-        Quiet notes only. No permanent clutter in the danger space.
+        Notes explain state without crowding the active page.
       </div>
       <NotebookScrapNote>{scrap}</NotebookScrapNote>
     </div>
   );
 }
 
-function PotassiumPlayfield() {
+function RuledBoardMockPlayfield() {
   return (
     <div className="absolute inset-0">
-      {[18, 30, 42, 54, 66, 78].map((top) => (
-        <span
-          key={top}
-          className="absolute left-[6%] right-[6%] h-0.5 bg-[#1a1a1a]/20"
-          style={{ top: `${top}%` }}
-        />
-      ))}
       <span className="absolute left-[35%] top-[30%] h-5 w-5 rounded-full bg-[#1a1a1a]/55" />
       <span className="absolute left-[64%] top-[42%] h-4 w-4 rounded-full bg-[#1a1a1a]/45" />
       <span className="absolute left-[47%] top-[57%] h-5 w-5 rounded-full bg-[#1a1a1a]/55" />
@@ -142,7 +135,7 @@ function PotassiumPlayfield() {
   );
 }
 
-function StampedePlayfield() {
+function SurvivalMockPlayfield() {
   return (
     <div className="absolute inset-0">
       <span className="absolute left-[24%] top-[33%] h-4 w-4 rounded-full bg-[#1a1a1a]/55" />
@@ -157,7 +150,7 @@ function StampedePlayfield() {
   );
 }
 
-function RidgePlayfield() {
+function SideViewMockPlayfield() {
   return (
     <div className="absolute inset-0">
       <span className="absolute bottom-[28%] left-[6%] right-[6%] h-1 rotate-[-4deg] rounded-full bg-[#1a1a1a]/80" />
@@ -169,71 +162,41 @@ function RidgePlayfield() {
   );
 }
 
-export const PotassiumDesktopFocus: Story = {
+export const RuledBoardFocus: Story = {
   render: () => (
     <ArcadePreview
       profile="ruledBoardPage"
-      title="W1"
-      status="score 8"
+      title="Phase"
+      status="stable state"
       meterValue={42}
-      footer="drag toward a target, hold to recall"
+      footer="input hint"
     >
-      <PotassiumPlayfield />
+      <RuledBoardMockPlayfield />
     </ArcadePreview>
   )
 };
 
-export const PotassiumPhonePortrait: Story = {
+export const RuledBoardChoicePanel: Story = {
   render: () => (
     <ArcadePreview
       profile="ruledBoardPage"
-      viewport="phonePortrait"
-      title="W1"
-      status="score 8"
-      meterValue={42}
-      footer="drag toward a target"
-    >
-      <PotassiumPlayfield />
-    </ArcadePreview>
-  )
-};
-
-export const PotassiumPhoneLandscape: Story = {
-  render: () => (
-    <ArcadePreview
-      profile="ruledBoardPage"
-      viewport="phoneLandscape"
-      title="W1"
-      status="score 8"
-      meterValue={42}
-      footer="drag mat wider than board"
-    >
-      <PotassiumPlayfield />
-    </ArcadePreview>
-  )
-};
-
-export const PotassiumUpgradePanel: Story = {
-  render: () => (
-    <ArcadePreview
-      profile="ruledBoardPage"
-      title="W1"
-      status="score 9"
+      title="Phase"
+      status="choice pending"
       meterValue={62}
-      footer="wave clear"
+      footer="choice state"
       panel={
         <ScenePanelSheet
-          title="Choose Banana Nonsense"
+          title="Choose Option"
           body={
             <SceneChoiceGrid>
               <SceneChoiceCard
-                title="Duplicate"
-                description="Main hits spawn 2 small bananas."
+                title="Choice A"
+                description="Primary option with a short readable effect."
                 tone="yellow"
               />
               <SceneChoiceCard
-                title="Fire Trail"
-                description="Moving bananas leave fire."
+                title="Choice B"
+                description="Secondary option with comparable copy length."
                 tone="red"
               />
             </SceneChoiceGrid>
@@ -242,26 +205,25 @@ export const PotassiumUpgradePanel: Story = {
         />
       }
     >
-      <PotassiumPlayfield />
+      <RuledBoardMockPlayfield />
     </ArcadePreview>
   )
 };
 
-export const PotassiumTerminalPanel: Story = {
+export const RuledBoardTerminalPanel: Story = {
   render: () => (
     <ArcadePreview
       profile="ruledBoardPage"
-      viewport="phonePortrait"
-      title="W1"
-      status="lives 0"
+      title="Phase"
+      status="complete"
       meterValue={100}
-      footer="banana bankruptcy"
+      footer="run summary"
       panel={
         <ScenePanelSheet
-          title="Banana Bankrupt"
-          body="Final score 8. Terminal actions stay reachable on narrow screens."
-          actionsLayout="stack"
-          placement="mobileStacked"
+          title="Run Ended"
+          body="Summary copy stays readable and actions remain reachable on narrow screens."
+          actionsLayout="auto"
+          placement="centered"
           actions={[
             { label: 'Retry', variant: 'primary' },
             { label: 'Return', variant: 'secondary' }
@@ -269,61 +231,30 @@ export const PotassiumTerminalPanel: Story = {
         />
       }
     >
-      <PotassiumPlayfield />
+      <RuledBoardMockPlayfield />
     </ArcadePreview>
   )
 };
 
-export const StampedeDesktopFocus: Story = {
+export const SurvivalFocus: Story = {
   render: () => (
     <ArcadePreview
       profile="survivalPage"
-      title="1:08"
-      status="kite ideas"
+      title="Timer"
+      status="active"
       meterValue={38}
-      footer="whole page is your playground"
+      footer="full surface input zone"
     >
-      <StampedePlayfield />
+      <SurvivalMockPlayfield />
     </ArcadePreview>
   )
 };
 
-export const StampedePhonePortrait: Story = {
+export const SurvivalStartPanel: Story = {
   render: () => (
     <ArcadePreview
       profile="survivalPage"
-      viewport="phonePortrait"
-      title="1:08"
-      status="kite ideas"
-      meterValue={38}
-      footer="tap or drag anywhere"
-    >
-      <StampedePlayfield />
-    </ArcadePreview>
-  )
-};
-
-export const StampedePhoneLandscape: Story = {
-  render: () => (
-    <ArcadePreview
-      profile="survivalPage"
-      viewport="phoneLandscape"
-      title="1:08"
-      status="kite ideas"
-      meterValue={38}
-      footer="edge status only"
-    >
-      <StampedePlayfield />
-    </ArcadePreview>
-  )
-};
-
-export const StampedeStartPanel: Story = {
-  render: () => (
-    <ArcadePreview
-      profile="survivalPage"
-      viewport="phonePortrait"
-      title="1:15"
+      title="Timer"
       status="ready"
       meterValue={0}
       footer="tap to start"
@@ -331,8 +262,8 @@ export const StampedeStartPanel: Story = {
         <ScenePanelSheet
           title="Ready?"
           body="Start sheets are allowed because gameplay has not begun yet."
-          actionsLayout="stack"
-          placement="mobileStacked"
+          actionsLayout="auto"
+          placement="centered"
           actions={[
             { label: 'Start', variant: 'primary' },
             { label: 'Back', variant: 'secondary' }
@@ -340,22 +271,22 @@ export const StampedeStartPanel: Story = {
         />
       }
     >
-      <StampedePlayfield />
+      <SurvivalMockPlayfield />
     </ArcadePreview>
   )
 };
 
-export const StampedeResultPanel: Story = {
+export const SurvivalResultPanel: Story = {
   render: () => (
     <ArcadePreview
       profile="survivalPage"
-      title="0:34"
-      status="crowded"
+      title="Timer"
+      status="complete"
       meterValue={100}
-      footer="page got crowded"
+      footer="result summary"
       panel={
         <ScenePanelSheet
-          title="Page Got Crowded"
+          title="Result Panel"
           body="A result sheet can dominate the page because the run is paused."
           actionsLayout="auto"
           placement="centered"
@@ -366,73 +297,72 @@ export const StampedeResultPanel: Story = {
         />
       }
     >
-      <StampedePlayfield />
+      <SurvivalMockPlayfield />
     </ArcadePreview>
   )
 };
 
-export const RidgeOverworldDesktopSpread: Story = {
+export const SideViewSpread: Story = {
   render: () => (
-    <StoryPad>
+    <StoryCanvas>
       <NotebookShellStage
         profile="sideViewPage"
         layout="spread"
-        viewport="desktopSpread"
         header={<NotebookHeaderChrome />}
-        footer={<SceneHintSlip label="side-view page, not an arcade board" />}
+        footer={<SceneHintSlip label="side-view profile hint" />}
       >
-        <ControlMat label="walk and interact on paper" showGuide={false}>
+        <ControlMat label="side-view interaction surface" showGuide={false}>
           <NotebookSpread
             profile="sideViewPage"
             notes={
               <NotesBlock
-                title="Ridge / Overworld"
+                title="Side-View Notes"
                 lines={[
-                  'Spread works when notes remember route state.',
-                  'The playable page stays quiet during normal movement.',
-                  'Trail Cards appear as blocking loose sheets only.'
+                  'Spread works when notes carry low-density state.',
+                  'The playable page stays quiet during movement.',
+                  'Blocking panels appear as loose sheets only.'
                 ]}
-                scrap="static mode hides in menu"
+                scrap="compact menu holds secondary actions"
               />
             }
-            status={<SceneStatusSlip metric="Trail" label="quiet route" meterValue={24} variant="chip" className="absolute left-5 top-5 z-10" />}
+            status={<SceneStatusSlip metric="Status" label="quiet state" meterValue={24} variant="chip" className="absolute left-5 top-5 z-10" />}
           >
-            <RidgePlayfield />
+            <SideViewMockPlayfield />
           </NotebookSpread>
         </ControlMat>
       </NotebookShellStage>
-    </StoryPad>
+    </StoryCanvas>
   )
 };
 
 export const ChoiceAndHintAtoms: Story = {
   render: () => (
-    <StoryPad>
-      <div className="grid w-[min(52rem,calc(100vw-2rem))] gap-5 rounded-lg border-4 border-[#1a1a1a] bg-[#fbfbf9] p-5 font-mono">
+    <StoryCanvas>
+      <section className="grid w-full max-w-5xl gap-5 p-4 font-mono">
         <h2 className="text-2xl font-black uppercase tracking-widest">Choice + Hint Atoms</h2>
         <SceneChoiceGrid>
           <SceneChoiceCard
-            title="Horizontal Ghost"
-            description="Hits fire a blue row beam."
+            title="Choice A"
+            description="Selected option with concise supporting copy."
             tone="blue"
             selected
           />
           <SceneChoiceCard
-            title="Explosion Damage"
-            description="Hits explode with falloff damage."
+            title="Choice B"
+            description="Unselected option with comparable copy."
             tone="red"
           />
         </SceneChoiceGrid>
-        <SceneHintSlip label="wave clear - choose fresh banana nonsense" />
-      </div>
-    </StoryPad>
+        <SceneHintSlip label="context hint for the current state" />
+      </section>
+    </StoryCanvas>
   )
 };
 
 export const MenuAndScrapAtoms: Story = {
   render: () => (
-    <StoryPad>
-      <div className="grid w-[min(44rem,calc(100vw-2rem))] justify-items-center gap-5 rounded-lg border-4 border-[#1a1a1a] bg-[#f4f1ea] p-5 font-mono">
+    <StoryCanvas>
+      <section className="grid w-full max-w-3xl justify-items-center gap-5 p-4 font-mono">
         <NotebookMenuSheet
           title="Menu"
           items={[
@@ -442,15 +372,15 @@ export const MenuAndScrapAtoms: Story = {
           ]}
         />
         <NotebookScrapNote>Only content-bearing scraps make it into v1.</NotebookScrapNote>
-      </div>
-    </StoryPad>
+      </section>
+    </StoryCanvas>
   )
 };
 
 export const ShadowElevationRoles: Story = {
   render: () => (
-    <StoryPad>
-      <div className="grid w-[min(52rem,calc(100vw-2rem))] gap-4 rounded-lg border-4 border-[#1a1a1a] bg-[#fbfbf9] p-5 font-mono">
+    <StoryCanvas>
+      <section className="grid w-full max-w-5xl gap-4 p-4 font-mono">
         <h2 className="text-2xl font-black uppercase tracking-widest">Shadow Roles</h2>
         <p className="text-sm font-bold text-[#5a554f]">
           One down-right light source. Depth changes by semantic elevation, not random direction.
@@ -462,7 +392,7 @@ export const ShadowElevationRoles: Story = {
             </div>
           ))}
         </div>
-      </div>
-    </StoryPad>
+      </section>
+    </StoryCanvas>
   )
 };

@@ -19,6 +19,5 @@ export type {
   NotebookPanelPlacement,
   NotebookScrapTone,
   NotebookSceneProfile,
-  NotebookShellLayout,
-  NotebookViewport
+  NotebookShellLayout
 } from './NotebookShell';

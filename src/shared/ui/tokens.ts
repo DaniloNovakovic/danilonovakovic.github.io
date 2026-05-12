@@ -18,7 +18,7 @@ export const notebookShadowRoles = {
   control: sketchShadows.sm,
   sheet: sketchShadows.md,
   page: sketchShadows.lg,
-  stage: sketchShadows.xl
+  stage: 'shadow-none'
 } as const;
 
 export const sketchBorders = {

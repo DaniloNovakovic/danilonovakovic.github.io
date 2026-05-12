@@ -72,10 +72,8 @@ For the first player asset, create a Stampede-specific guardian sprite sheet:
 - `idle-side`
 - `move-down-1`
 - `move-down-2`
-- `move-up-1`
-- `move-up-2`
-- `move-side-1`
-- `move-side-2`
+- `move-up`
+- `move-side`
 - `smudged`
 - `tether-guard`
 - `respawn`

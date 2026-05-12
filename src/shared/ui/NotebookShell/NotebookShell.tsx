@@ -12,13 +12,6 @@ import { cn } from '../utils';
 export type NotebookSceneProfile = 'sideViewPage' | 'ruledBoardPage' | 'survivalPage';
 export type NotebookShellLayout = 'focus' | 'spread';
 export type NotebookFooterMode = 'reserved' | 'floating';
-export type NotebookViewport =
-  | 'desktopFocus'
-  | 'desktopSpread'
-  | 'phonePortrait'
-  | 'phoneLandscape'
-  | 'tablet'
-  | 'tabletLandscape';
 export type NotebookPanelPlacement = 'centered' | 'wide' | 'mobileStacked';
 export type NotebookPanelActionsLayout = 'auto' | 'row' | 'stack';
 export type NotebookChoiceTone = 'ink' | 'yellow' | 'blue' | 'red';
@@ -27,7 +20,6 @@ export type NotebookScrapTone = 'paper' | 'yellow' | 'blue';
 interface NotebookShellStageProps extends HTMLAttributes<HTMLDivElement> {
   profile: NotebookSceneProfile;
   layout?: NotebookShellLayout;
-  viewport?: NotebookViewport;
   footerMode?: NotebookFooterMode;
   header?: ReactNode;
   panel?: ReactNode;
@@ -116,36 +108,18 @@ interface NotebookMenuSheetProps extends HTMLAttributes<HTMLElement> {
   items: readonly NotebookMenuSheetItem[];
 }
 
-const stageViewportStyles: Record<NotebookViewport, CSSProperties> = {
-  desktopFocus: {
-    width: 'min(1180px, calc(100vw - 2rem))',
-    height: 'min(760px, calc(100dvh - 9rem))',
-    minHeight: '20rem'
+const stageLayoutStyles: Record<NotebookShellLayout, CSSProperties> = {
+  focus: {
+    width: 'min(1180px, calc(100vw - 1rem))',
+    height: '100dvh',
+    minWidth: 'min(20rem, calc(100vw - 1rem))',
+    minHeight: 'min(18rem, calc(100dvh - 1rem))'
   },
-  desktopSpread: {
-    width: 'min(1180px, calc(100vw - 2rem))',
-    height: 'min(760px, calc(100dvh - 9rem))',
-    minHeight: '20rem'
-  },
-  phonePortrait: {
-    width: 'min(390px, calc(100vw - 2rem))',
-    height: 'min(780px, calc(100dvh - 4rem))',
-    minHeight: '38rem'
-  },
-  phoneLandscape: {
-    width: 'min(790px, calc(100vw - 2rem))',
-    height: 'min(360px, calc(100dvh - 3.2rem))',
-    minHeight: '18rem'
-  },
-  tablet: {
-    width: 'min(820px, calc(100vw - 2rem))',
-    height: 'min(980px, calc(100dvh - 4rem))',
-    minHeight: '42rem'
-  },
-  tabletLandscape: {
-    width: 'min(1024px, calc(100vw - 2rem))',
-    height: 'min(720px, calc(100dvh - 4rem))',
-    minHeight: '34rem'
+  spread: {
+    width: 'min(1180px, calc(100vw - 1rem))',
+    height: '100dvh',
+    minWidth: 'min(20rem, calc(100vw - 1rem))',
+    minHeight: 'min(18rem, calc(100dvh - 1rem))'
   }
 };
 
@@ -207,7 +181,6 @@ const scrapToneClasses: Record<NotebookScrapTone, string> = {
 export function NotebookShellStage({
   profile,
   layout = 'focus',
-  viewport = layout === 'spread' ? 'desktopSpread' : 'desktopFocus',
   footerMode = 'reserved',
   header,
   panel,
@@ -222,10 +195,9 @@ export function NotebookShellStage({
     <div
       data-profile={profile}
       data-layout={layout}
-      data-viewport={viewport}
       data-footer-mode={footerMode}
       className={cn(
-        'relative overflow-hidden rounded-br-[1.75rem] border-4 border-[#1a1a1a] bg-[#f4f1ea] text-[#1a1a1a]',
+        'relative overflow-hidden rounded-br-[1.75rem] bg-[#f4f1ea] text-[#1a1a1a]',
         'font-[var(--font-ui)]',
         notebookShadowRoles.stage,
         className
@@ -234,7 +206,7 @@ export function NotebookShellStage({
         background:
           'linear-gradient(rgba(26,26,26,0.025) 1px, transparent 1px) 0 0 / 100% 2.5rem, #f4f1ea',
         '--notebook-footer-space': footerSpace,
-        ...stageViewportStyles[viewport],
+        ...stageLayoutStyles[layout],
         ...style
       } as CSSProperties}
       {...props}
@@ -245,7 +217,7 @@ export function NotebookShellStage({
       {footer ? (
         <div
           className={cn(
-            'absolute inset-x-3 bottom-3 flex justify-center',
+            'absolute inset-x-3 bottom-3 flex justify-center [@media(max-height:420px)]:hidden',
             footerMode === 'floating' ? 'z-40' : 'z-20'
           )}
         >
@@ -313,7 +285,7 @@ export function ControlMat({
   return (
     <div
       className={cn(
-        'absolute inset-x-3 top-16 rounded-[1.375rem] bg-[#fbfbf9]/20 outline outline-2 -outline-offset-8 outline-[#1a1a1a]/10',
+        'absolute inset-x-3 top-16 rounded-[1.375rem] bg-[#fbfbf9]/20 outline outline-2 -outline-offset-8 outline-[#1a1a1a]/10 [@media(max-height:420px)]:!bottom-3',
         className
       )}
       style={{ bottom: 'calc(0.75rem + var(--notebook-footer-space, 0px))', ...style }}
@@ -366,18 +338,18 @@ export function NotebookSpread({
   return (
     <div
       className={cn(
-        'absolute inset-x-4 bottom-4 top-16 grid grid-cols-[minmax(12rem,0.76fr)_minmax(0,1.36fr)]',
+        'absolute inset-x-4 bottom-4 top-16 grid grid-cols-1 md:grid-cols-[minmax(12rem,0.76fr)_minmax(0,1.36fr)]',
         notebookShadowRoles.page,
         className
       )}
       {...props}
     >
-      <NotebookPageFrame profile={profile} kind="notes">
+      <NotebookPageFrame profile={profile} kind="notes" className="hidden md:block">
         {notes}
       </NotebookPageFrame>
       <NotebookPageFrame
         profile={profile}
-        className="rounded-l-none border-l-2"
+        className="rounded-2xl md:rounded-l-none md:border-l-2"
         status={status}
       >
         <span
@@ -409,7 +381,7 @@ export function ScenePanelSheet({
       aria-modal="false"
       aria-label={title}
       className={cn(
-        'absolute left-1/2 top-1/2 z-30 grid -translate-x-1/2 -translate-y-1/2 rotate-[-0.4deg] grid-rows-[auto_minmax(0,1fr)_auto] gap-3 overflow-hidden rounded-lg border-4 border-[#1a1a1a] bg-[#fbfbf9]/95 p-4 text-center',
+        'absolute left-1/2 top-1/2 z-30 grid -translate-x-1/2 -translate-y-1/2 grid-rows-[auto_minmax(0,1fr)_auto] gap-3 overflow-hidden rounded-lg border-4 border-[#1a1a1a] bg-[#fbfbf9]/95 p-4 text-center',
         notebookShadowRoles.sheet,
         className
       )}
@@ -483,10 +455,10 @@ export function SceneChoiceCard({
       type="button"
       aria-pressed={selected}
       className={cn(
-        'grid min-h-32 cursor-pointer gap-3 rounded-md border-2 border-[#1a1a1a] bg-[#fbfbf9] p-4 text-center font-mono transition-all',
-        'hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-[1px] active:translate-y-[1px]',
+        'grid min-h-32 cursor-pointer gap-3 rounded-md border-2 border-[#1a1a1a] bg-[#fbfbf9] p-4 text-center font-mono transition-colors',
+        'hover:bg-[#f4f1ea] active:bg-[#e8e5df]',
         sketchFocusVisible,
-        selected ? 'outline outline-2 outline-offset-2 outline-[#1a1a1a]' : '',
+        selected ? 'bg-[#f8f2d8] ring-2 ring-inset ring-[#1a1a1a]/75' : '',
         notebookShadowRoles.control,
         className
       )}
