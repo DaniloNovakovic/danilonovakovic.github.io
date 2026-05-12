@@ -3,6 +3,9 @@
 This directory stores generated art that should stay in the repository but
 should not be copied into the production Vite build.
 
+See [`asset-readiness-triage.md`](asset-readiness-triage.md) for the current
+keep/defer/cleanup read on the staged PNGs.
+
 ## Raw Concepts
 
 Raw generated sheets and ideation live in scene-owned folders such as

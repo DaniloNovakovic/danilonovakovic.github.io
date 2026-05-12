@@ -8,8 +8,8 @@ Active sources: `sketchbook-ridge-summit.md`,
 `sketchbook-ridge-milestone-plan.md`, `sketchbook-ridge-m3-visual-pack.md`,
 `sketchbook-ridge-m3-overlay-pack.md`, `sketchbook-ridge-m3-audio-pack.md`,
 `docs/design/style-guide.md`, the current generated/prepared asset readmes
-under `asset-sources/**`, and runtime asset readmes under `public/assets/**`
-when assets are promoted.
+under `asset-sources/**`, `asset-sources/asset-readiness-triage.md`, and runtime
+asset readmes under `public/assets/**` when assets are promoted.
 
 ## Why This Exists
 
