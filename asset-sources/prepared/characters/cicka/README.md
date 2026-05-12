@@ -32,4 +32,3 @@ Intended first-use reads:
 
 If Ridge adopts this kit, keep the first slice small and warmth-focused. Do not
 block on full navigation behavior or a large pet-system interpretation.
-

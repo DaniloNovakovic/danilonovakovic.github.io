@@ -111,30 +111,30 @@ Target: **8-12 major landmarks** with 1-2 smaller connective curiosities each.
 
 Likely landmark set:
 
-1. **Outskirts / Trailhead**  
+1. **Outskirts / Trailhead**
    Current street edge, current-world bridge, and first orientation beat.
-2. **Glasses Moment**  
+2. **Glasses Moment**
    First "re-read the world" unlock that teaches marginal reality changes.
-3. **Cicka First Perch**  
+3. **Cicka First Perch**
    Early residency signal and first hint that notice matters.
-4. **Stampede Picnic Blanket Meadow**  
+4. **Stampede Picnic Blanket Meadow**
    Friendly social node with chaos nearby.
-5. **Printer Bluff**  
+5. **Printer Bluff**
    Manual scraps, prophecy joke energy, and under-route opportunities.
-6. **Binder Clip Pass**  
+6. **Binder Clip Pass**
    A memorable choke point that later becomes easier or faster.
-7. **Coffee-Ring Overlook**  
+7. **Coffee-Ring Overlook**
    A scenic loop node that feels personal rather than epic.
-8. **Domino Desk / Service Elevator**  
+8. **Domino Desk / Service Elevator**
    Deterministic puzzle hook and major route-compression unlock.
-9. **Telegraph Terrace**  
+9. **Telegraph Terrace**
    Visible sparring landmark with rhythmic identity.
-10. **Potassium Hint Site**  
+10. **Potassium Hint Site**
    Secret-adjacent acknowledgement without turning the Ridge into a second
    ricochet zone.
-11. **High Shelf Outlook**  
+11. **High Shelf Outlook**
    Late mobility payoff node.
-12. **Relay Spire / Contact Peak**  
+12. **Relay Spire / Contact Peak**
    Final destination, visible early and emotionally legible throughout.
 
 ## Shortcut Vocabulary
