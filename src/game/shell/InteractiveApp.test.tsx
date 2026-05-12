@@ -181,6 +181,7 @@ describe('InteractiveApp', () => {
     const pageFrame = screen.getByTestId('potassium-notebook-page-frame');
     expect(pageFrame.getAttribute('data-board-safe-aspect')).toBe('0.75');
     expect(pageFrame.className).toContain('potassium-notebook-page-frame');
+    expect(screen.getByTestId('potassium-control-mat').style.bottom).toBe('0.75rem');
     expect(screen.getByRole('button', { name: /back to city/i })).toBeDefined();
     expect(screen.getByRole('button', { name: /switch to static portfolio/i })).toBeDefined();
     expect(screen.queryByRole('button', { name: /menu/i })).toBeNull();
@@ -199,8 +200,25 @@ describe('InteractiveApp', () => {
 
     expect(pageFrame.getAttribute('data-board-safe-aspect')).toBe('0.75');
     expect(pageFrame.getAttribute('data-frame-aspect')).toBe('0.75');
+    expect(pageFrame.getAttribute('data-frame-center-y')).toBe('438');
+    expect(pageFrame.getAttribute('data-frame-relative-center-y')).toBe('374');
     expect(pageFrame.getAttribute('data-frame-width')).toBe('326');
+    expect(pageFrame.style.top).toBe('374px');
     expect(pageFrame.style.width).toBe('326px');
+  });
+
+  it('pushes the Potassium page frame below header chrome on mid-height phones', () => {
+    setViewportSize(884, 756);
+    bridgeActions.enterScene(POTASSIUM_SCENE_ID);
+    render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
+
+    const pageFrame = screen.getByTestId('potassium-notebook-page-frame');
+
+    expect(pageFrame.getAttribute('data-frame-aspect')).toBe('1.2');
+    expect(pageFrame.getAttribute('data-frame-center-y')).toBe('398');
+    expect(pageFrame.getAttribute('data-frame-relative-center-y')).toBe('334');
+    expect(pageFrame.getAttribute('data-frame-width')).toBe('648');
+    expect(pageFrame.style.top).toBe('334px');
   });
 
   it('queues Potassium control-mat pointer events in Phaser design space', () => {

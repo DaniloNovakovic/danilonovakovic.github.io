@@ -2,6 +2,7 @@ import type { HTMLAttributes } from 'react';
 import { cn } from '../../utils';
 
 interface ControlMatProps extends HTMLAttributes<HTMLDivElement> {
+  debugOutline?: boolean;
   label?: string;
   showGuide?: boolean;
 }
@@ -11,6 +12,7 @@ interface ControlMatProps extends HTMLAttributes<HTMLDivElement> {
  * Use when touch or drag gestures need a larger hit area than the visible canvas.
  */
 export function ControlMat({
+  debugOutline = true,
   label = 'shell-level control mat',
   showGuide = true,
   children,
@@ -21,7 +23,10 @@ export function ControlMat({
   return (
     <div
       className={cn(
-        'absolute inset-x-3 top-16 rounded-[1.375rem] bg-[#fbfbf9]/20 outline outline-2 -outline-offset-8 outline-[#1a1a1a]/10 [@media(max-height:420px)]:!bottom-3',
+        'absolute inset-x-3 top-16 rounded-[1.375rem] [@media(max-height:420px)]:!bottom-3',
+        debugOutline
+          ? 'bg-[#fbfbf9]/20 outline outline-2 -outline-offset-8 outline-[#1a1a1a]/10'
+          : 'bg-transparent outline-none',
         className
       )}
       style={{ bottom: 'calc(0.75rem + var(--notebook-footer-space, 0px))', ...style }}

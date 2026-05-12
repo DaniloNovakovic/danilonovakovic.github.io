@@ -21,9 +21,14 @@ import { useSceneControlMatPointerBridge } from './useSceneControlMatPointerBrid
 
 const POTASSIUM_BOARD_SAFE_ASPECT = '0.75';
 const NOTEBOOK_STAGE_MAX_WIDTH = 1180;
+// The page frame is positioned inside ControlMat, so viewport-safe center math
+// needs the same top offset that the mat uses on screen.
+const CONTROL_MAT_TOP_OFFSET_PX = 64;
 
 interface PotassiumBoardFrameLayout {
   aspect: string;
+  centerY: number;
+  relativeCenterY: number;
   style: CSSProperties;
   width: number;
 }
@@ -108,16 +113,20 @@ export function PotassiumNotebookShell({
           aria-label="Potassium input mat"
           className="touch-none"
           data-testid="potassium-control-mat"
+          debugOutline={import.meta.env.DEV}
           label={profile.controlMatLabel}
           showGuide={false}
+          style={{ bottom: '0.75rem', top: CONTROL_MAT_TOP_OFFSET_PX }}
         >
           <NotebookPageFrame
             data-board-safe-aspect={POTASSIUM_BOARD_SAFE_ASPECT}
             data-frame-aspect={frameLayout.aspect}
+            data-frame-center-y={frameLayout.centerY}
+            data-frame-relative-center-y={frameLayout.relativeCenterY}
             data-frame-width={frameLayout.width}
             data-testid="potassium-notebook-page-frame"
             profile={profile.profile}
-            className="potassium-notebook-page-frame absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 shadow-[12px_12px_0px_0px_rgba(26,26,26,1)]"
+            className="potassium-notebook-page-frame absolute left-1/2 -translate-x-1/2 -translate-y-1/2 shadow-[12px_12px_0px_0px_rgba(26,26,26,1)]"
             style={frameLayout.style}
           >
             <div ref={gameFrameRef} className="absolute inset-0" data-testid="potassium-notebook-game-frame">
@@ -165,15 +174,30 @@ function usePotassiumBoardFrameLayout(): PotassiumBoardFrameLayout {
   const aspect = isShort ? 1.05 : isDesktopLike ? 1.2 : isTabletLike ? 0.95 : Number(POTASSIUM_BOARD_SAFE_ASPECT);
   const shellWidth = Math.min(viewport.width - 16, NOTEBOOK_STAGE_MAX_WIDTH);
   const horizontalReserve = isShort ? 128 : isDesktopLike ? 144 : isTabletLike ? 80 : 48;
-  const verticalReserve = isShort ? 88 : isDesktopLike ? 160 : isTabletLike ? 112 : 96;
+  const headerBottom = isShort ? 56 : isDesktopLike ? 128 : 120;
+  const footerTop = isShort ? viewport.height - 32 : viewport.height - 88;
   const maxWidth = Math.max(220, shellWidth - horizontalReserve);
-  const maxHeight = Math.max(240, viewport.height - verticalReserve);
-  const width = Math.round(Math.min(maxWidth, maxHeight * aspect));
+  const maxHeight = Math.max(180, footerTop - headerBottom);
+  const width = Math.floor(Math.min(maxWidth, maxHeight * aspect));
+  const height = width / aspect;
+  const safeCenterY = (headerBottom + footerTop) / 2;
+  const halfHeight = height / 2;
+  const minCenterY = headerBottom + halfHeight;
+  const maxCenterY = footerTop - halfHeight;
+  const centerY = Math.round(
+    minCenterY <= maxCenterY
+      ? clamp(safeCenterY, minCenterY, maxCenterY)
+      : Math.max(safeCenterY, minCenterY)
+  );
+  const relativeCenterY = centerY - CONTROL_MAT_TOP_OFFSET_PX;
 
   return {
     aspect: String(aspect),
+    centerY,
+    relativeCenterY,
     style: {
       aspectRatio: `${aspect} / 1`,
+      top: relativeCenterY,
       width
     },
     width
@@ -185,4 +209,8 @@ function readViewportSize() {
     width: typeof window === 'undefined' ? 1024 : window.innerWidth,
     height: typeof window === 'undefined' ? 768 : window.innerHeight
   };
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
 }
