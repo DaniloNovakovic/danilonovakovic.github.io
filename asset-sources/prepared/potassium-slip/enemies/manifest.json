@@ -1,0 +1,460 @@
+{
+  "note": "Transparent Potassium Slip enemy pose assets generated from chroma-key pose sheets. Exact frames mirror current Potassium renderer texture dimensions so later Phaser integration can preserve existing scale/body assumptions. Source frames are larger transparent crops for manual cleanup or re-export.",
+  "enemies": {
+    "intern-bug": {
+      "slug": "intern-bug",
+      "source": "ig_00b17f34b896528e016a0251fcf1148191a2a171633bb63fb0.png",
+      "sourceKeyed": "source-keyed.png",
+      "spritesheet": "intern-bug-spritesheet.png",
+      "frameWidth": 48,
+      "frameHeight": 46,
+      "frameCount": 6,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "hitboxCompatibility": {
+        "kind": "implicitTextureCircleApprox",
+        "currentTexture": "potassium_enemy_intern",
+        "runtimeScale": 0.92
+      },
+      "frames": [
+        {
+          "state": "neutral",
+          "file": "frames/00-neutral.png",
+          "sourceFile": "source-frames/00-neutral-source.png"
+        },
+        {
+          "state": "wobble-left",
+          "file": "frames/01-wobble-left.png",
+          "sourceFile": "source-frames/01-wobble-left-source.png"
+        },
+        {
+          "state": "wobble-right",
+          "file": "frames/02-wobble-right.png",
+          "sourceFile": "source-frames/02-wobble-right-source.png"
+        },
+        {
+          "state": "hit",
+          "file": "frames/03-hit.png",
+          "sourceFile": "source-frames/03-hit-source.png"
+        },
+        {
+          "state": "critical",
+          "file": "frames/04-critical.png",
+          "sourceFile": "source-frames/04-critical-source.png"
+        },
+        {
+          "state": "death",
+          "file": "frames/05-death.png",
+          "sourceFile": "source-frames/05-death-source.png"
+        }
+      ],
+      "debugContact": "intern-bug-debug-contact.png"
+    },
+    "scope-blob": {
+      "slug": "scope-blob",
+      "source": "ig_00b17f34b896528e016a02522aeaa48191a5edb87c7842cf41.png",
+      "sourceKeyed": "source-keyed.png",
+      "spritesheet": "scope-blob-spritesheet.png",
+      "frameWidth": 68,
+      "frameHeight": 64,
+      "frameCount": 6,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "hitboxCompatibility": {
+        "kind": "implicitTexture",
+        "currentTexture": "potassium_enemy_scope",
+        "runtimeScale": 0.95,
+        "angularVelocityRange": {
+          "min": -70,
+          "max": 70
+        }
+      },
+      "frames": [
+        {
+          "state": "neutral",
+          "file": "frames/00-neutral.png",
+          "sourceFile": "source-frames/00-neutral-source.png"
+        },
+        {
+          "state": "rotate-left",
+          "file": "frames/01-rotate-left.png",
+          "sourceFile": "source-frames/01-rotate-left-source.png"
+        },
+        {
+          "state": "rotate-right",
+          "file": "frames/02-rotate-right.png",
+          "sourceFile": "source-frames/02-rotate-right-source.png"
+        },
+        {
+          "state": "hit-squash",
+          "file": "frames/03-hit-squash.png",
+          "sourceFile": "source-frames/03-hit-squash-source.png"
+        },
+        {
+          "state": "cracked",
+          "file": "frames/04-cracked.png",
+          "sourceFile": "source-frames/04-cracked-source.png"
+        },
+        {
+          "state": "critical",
+          "file": "frames/05-critical.png",
+          "sourceFile": "source-frames/05-critical-source.png"
+        }
+      ],
+      "debugContact": "scope-blob-debug-contact.png"
+    },
+    "deadline-drone": {
+      "slug": "deadline-drone",
+      "source": "ig_00b17f34b896528e016a02525a405c819185ddc1aaf633a73d.png",
+      "sourceKeyed": "source-keyed.png",
+      "spritesheet": "deadline-drone-spritesheet.png",
+      "frameWidth": 56,
+      "frameHeight": 62,
+      "frameCount": 7,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "hitboxCompatibility": {
+        "kind": "implicitTexture",
+        "currentTexture": "potassium_enemy_deadline",
+        "runtimeScale": 0.9
+      },
+      "frames": [
+        {
+          "state": "neutral",
+          "file": "frames/00-neutral.png",
+          "sourceFile": "source-frames/00-neutral-source.png"
+        },
+        {
+          "state": "bank-left",
+          "file": "frames/01-bank-left.png",
+          "sourceFile": "source-frames/01-bank-left-source.png"
+        },
+        {
+          "state": "bank-right",
+          "file": "frames/02-bank-right.png",
+          "sourceFile": "source-frames/02-bank-right-source.png"
+        },
+        {
+          "state": "dive",
+          "file": "frames/03-dive.png",
+          "sourceFile": "source-frames/03-dive-source.png"
+        },
+        {
+          "state": "hit",
+          "file": "frames/04-hit.png",
+          "sourceFile": "source-frames/04-hit-source.png"
+        },
+        {
+          "state": "critical",
+          "file": "frames/05-critical.png",
+          "sourceFile": "source-frames/05-critical-source.png"
+        },
+        {
+          "state": "death",
+          "file": "frames/06-death.png",
+          "sourceFile": "source-frames/06-death-source.png"
+        }
+      ],
+      "debugContact": "deadline-drone-debug-contact.png"
+    },
+    "wooden-wall": {
+      "slug": "wooden-wall",
+      "source": "ig_00b17f34b896528e016a02528e06e8819187bf958029b99e7d.png",
+      "sourceKeyed": "source-keyed.png",
+      "spritesheet": "wooden-wall-spritesheet.png",
+      "frameWidth": 80,
+      "frameHeight": 62,
+      "frameCount": 6,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "hitboxCompatibility": {
+        "kind": "bodyProfile",
+        "currentTexture": "potassium_enemy_wall",
+        "runtimeScale": 0.78,
+        "body": {
+          "width": 68,
+          "height": 52
+        }
+      },
+      "frames": [
+        {
+          "state": "intact",
+          "file": "frames/00-intact.png",
+          "sourceFile": "source-frames/00-intact-source.png"
+        },
+        {
+          "state": "tilt-left",
+          "file": "frames/01-tilt-left.png",
+          "sourceFile": "source-frames/01-tilt-left-source.png"
+        },
+        {
+          "state": "tilt-right",
+          "file": "frames/02-tilt-right.png",
+          "sourceFile": "source-frames/02-tilt-right-source.png"
+        },
+        {
+          "state": "cracked",
+          "file": "frames/03-cracked.png",
+          "sourceFile": "source-frames/03-cracked-source.png"
+        },
+        {
+          "state": "critical",
+          "file": "frames/04-critical.png",
+          "sourceFile": "source-frames/04-critical-source.png"
+        },
+        {
+          "state": "break",
+          "file": "frames/05-break.png",
+          "sourceFile": "source-frames/05-break-source.png"
+        }
+      ],
+      "debugContact": "wooden-wall-debug-contact.png"
+    },
+    "hard-filing-wall": {
+      "slug": "hard-filing-wall",
+      "source": "ig_00b17f34b896528e016a0252beca5c81919d73d6d2688bab52.png",
+      "sourceKeyed": "source-keyed.png",
+      "spritesheet": "hard-filing-wall-spritesheet.png",
+      "frameWidth": 80,
+      "frameHeight": 62,
+      "frameCount": 5,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "hitboxCompatibility": {
+        "kind": "bodyProfile",
+        "currentTexture": "potassium_enemy_hard_wall",
+        "runtimeScale": 0.78,
+        "body": {
+          "width": 68,
+          "height": 52
+        },
+        "indestructible": true
+      },
+      "frames": [
+        {
+          "state": "intact",
+          "file": "frames/00-intact.png",
+          "sourceFile": "source-frames/00-intact-source.png"
+        },
+        {
+          "state": "tilt-left",
+          "file": "frames/01-tilt-left.png",
+          "sourceFile": "source-frames/01-tilt-left-source.png"
+        },
+        {
+          "state": "tilt-right",
+          "file": "frames/02-tilt-right.png",
+          "sourceFile": "source-frames/02-tilt-right-source.png"
+        },
+        {
+          "state": "deflect",
+          "file": "frames/03-deflect.png",
+          "sourceFile": "source-frames/03-deflect-source.png"
+        },
+        {
+          "state": "invulnerable",
+          "file": "frames/04-invulnerable.png",
+          "sourceFile": "source-frames/04-invulnerable-source.png"
+        }
+      ],
+      "debugContact": "hard-filing-wall-debug-contact.png"
+    },
+    "splitter-memo": {
+      "slug": "splitter-memo",
+      "source": "ig_00b17f34b896528e016a0252ee3e548191b49785192bf92488.png",
+      "sourceKeyed": "source-keyed.png",
+      "spritesheet": "splitter-memo-spritesheet.png",
+      "frameWidth": 126,
+      "frameHeight": 58,
+      "frameCount": 8,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "hitboxCompatibility": {
+        "kind": "bodyProfile",
+        "currentTexture": "potassium_enemy_splitter",
+        "runtimeScale": 0.9,
+        "body": {
+          "width": 118,
+          "height": 52
+        },
+        "columnSpan": 2
+      },
+      "frames": [
+        {
+          "state": "intact",
+          "file": "frames/00-intact.png",
+          "sourceFile": "source-frames/00-intact-source.png"
+        },
+        {
+          "state": "wobble-left",
+          "file": "frames/01-wobble-left.png",
+          "sourceFile": "source-frames/01-wobble-left-source.png"
+        },
+        {
+          "state": "wobble-right",
+          "file": "frames/02-wobble-right.png",
+          "sourceFile": "source-frames/02-wobble-right-source.png"
+        },
+        {
+          "state": "hit",
+          "file": "frames/03-hit.png",
+          "sourceFile": "source-frames/03-hit-source.png"
+        },
+        {
+          "state": "critical",
+          "file": "frames/04-critical.png",
+          "sourceFile": "source-frames/04-critical-source.png"
+        },
+        {
+          "state": "split",
+          "file": "frames/05-split.png",
+          "sourceFile": "source-frames/05-split-source.png"
+        },
+        {
+          "state": "child-left",
+          "file": "frames/06-child-left.png",
+          "sourceFile": "source-frames/06-child-left-source.png"
+        },
+        {
+          "state": "child-right",
+          "file": "frames/07-child-right.png",
+          "sourceFile": "source-frames/07-child-right-source.png"
+        }
+      ],
+      "debugContact": "splitter-memo-debug-contact.png"
+    },
+    "shielded-form": {
+      "slug": "shielded-form",
+      "source": "ig_00b17f34b896528e016a02532677688191a3fb4815587d651b.png",
+      "sourceKeyed": "source-keyed.png",
+      "spritesheet": "shielded-form-spritesheet.png",
+      "frameWidth": 68,
+      "frameHeight": 66,
+      "frameCount": 7,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "hitboxCompatibility": {
+        "kind": "bodyProfile",
+        "currentTexture": "potassium_enemy_shield",
+        "runtimeScale": 0.92,
+        "body": {
+          "width": 54,
+          "height": 54
+        },
+        "shieldSides": [
+          "bottom",
+          "left",
+          "right"
+        ]
+      },
+      "frames": [
+        {
+          "state": "shield-bottom",
+          "file": "frames/00-shield-bottom.png",
+          "sourceFile": "source-frames/00-shield-bottom-source.png"
+        },
+        {
+          "state": "shield-left",
+          "file": "frames/01-shield-left.png",
+          "sourceFile": "source-frames/01-shield-left-source.png"
+        },
+        {
+          "state": "shield-right",
+          "file": "frames/02-shield-right.png",
+          "sourceFile": "source-frames/02-shield-right-source.png"
+        },
+        {
+          "state": "protected-hit",
+          "file": "frames/03-protected-hit.png",
+          "sourceFile": "source-frames/03-protected-hit-source.png"
+        },
+        {
+          "state": "exposed-hit",
+          "file": "frames/04-exposed-hit.png",
+          "sourceFile": "source-frames/04-exposed-hit-source.png"
+        },
+        {
+          "state": "critical",
+          "file": "frames/05-critical.png",
+          "sourceFile": "source-frames/05-critical-source.png"
+        },
+        {
+          "state": "death",
+          "file": "frames/06-death.png",
+          "sourceFile": "source-frames/06-death-source.png"
+        }
+      ],
+      "debugContact": "shielded-form-debug-contact.png"
+    },
+    "potassium-compliance-officer": {
+      "slug": "potassium-compliance-officer",
+      "source": "ig_00b17f34b896528e016a02536a479481918c079a79bbec4c4f.png",
+      "sourceKeyed": "source-keyed.png",
+      "spritesheet": "potassium-compliance-officer-spritesheet.png",
+      "frameWidth": 124,
+      "frameHeight": 90,
+      "frameCount": 7,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "hitboxCompatibility": {
+        "kind": "implicitTexture",
+        "currentTexture": "potassium_enemy_boss",
+        "runtimeScale": 0.72
+      },
+      "frames": [
+        {
+          "state": "neutral",
+          "file": "frames/00-neutral.png",
+          "sourceFile": "source-frames/00-neutral-source.png"
+        },
+        {
+          "state": "patrol-left",
+          "file": "frames/01-patrol-left.png",
+          "sourceFile": "source-frames/01-patrol-left-source.png"
+        },
+        {
+          "state": "patrol-right",
+          "file": "frames/02-patrol-right.png",
+          "sourceFile": "source-frames/02-patrol-right-source.png"
+        },
+        {
+          "state": "summon",
+          "file": "frames/03-summon.png",
+          "sourceFile": "source-frames/03-summon-source.png"
+        },
+        {
+          "state": "armored",
+          "file": "frames/04-armored.png",
+          "sourceFile": "source-frames/04-armored-source.png"
+        },
+        {
+          "state": "hit",
+          "file": "frames/05-hit.png",
+          "sourceFile": "source-frames/05-hit-source.png"
+        },
+        {
+          "state": "defeated",
+          "file": "frames/06-defeated.png",
+          "sourceFile": "source-frames/06-defeated-source.png"
+        }
+      ],
+      "debugContact": "potassium-compliance-officer-debug-contact.png"
+    }
+  }
+}

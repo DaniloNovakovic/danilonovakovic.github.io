@@ -1,0 +1,125 @@
+{
+  "slug": "splat-bloom",
+  "displayName": "Splat Bloom",
+  "assetClass": "enemy",
+  "sourceManifest": "manifest.json",
+  "mode": "clean-runtime-split",
+  "frameWidth": 192,
+  "frameHeight": 192,
+  "origin": {
+    "x": 0.5,
+    "y": 0.5
+  },
+  "runtimeScale": 0.32,
+  "body": {
+    "spritesheet": "splat-bloom-body-spritesheet.png",
+    "frameCount": 4,
+    "frames": [
+      {
+        "index": 0,
+        "state": "idle",
+        "file": "body-frames/00-idle.png",
+        "sourceFrame": "frames/00-idle_splat.png"
+      },
+      {
+        "index": 1,
+        "state": "drift_left",
+        "file": "body-frames/01-drift_left.png",
+        "sourceFrame": "frames/01-drift_left.png"
+      },
+      {
+        "index": 2,
+        "state": "drift_right",
+        "file": "body-frames/02-drift_right.png",
+        "sourceFrame": "frames/02-drift_right.png"
+      },
+      {
+        "index": 3,
+        "state": "settle",
+        "file": "body-frames/03-settle.png",
+        "sourceFrame": "frames/04-deflate.png"
+      }
+    ],
+    "animations": {
+      "idle": [
+        0,
+        3,
+        0,
+        3
+      ],
+      "move": [
+        1,
+        0,
+        2,
+        0
+      ]
+    },
+    "recommendedFrameRate": 8
+  },
+  "fx": {
+    "spritesheet": "splat-bloom-fx-spritesheet.png",
+    "frameCount": 4,
+    "frames": [
+      {
+        "index": 0,
+        "state": "warning_pulse",
+        "file": "fx-frames/00-warning_pulse.png",
+        "sourceFrame": "frames/07-warning_pulse.png"
+      },
+      {
+        "index": 1,
+        "state": "hit_ripple",
+        "file": "fx-frames/01-hit_ripple.png",
+        "sourceFrame": "frames/08-hit_ripple.png"
+      },
+      {
+        "index": 2,
+        "state": "clear_evaporate",
+        "file": "fx-frames/02-clear_evaporate.png",
+        "sourceFrame": "frames/09-clearing_evaporate.png"
+      },
+      {
+        "index": 3,
+        "state": "pressure_surge",
+        "file": "fx-frames/03-pressure_surge.png",
+        "sourceFrame": "frames/10-pressure_surge.png"
+      }
+    ],
+    "recommendedFrameRate": 10,
+    "notes": "Spawn these as short-lived overlays for hit, clear, pressure, and respawn moments."
+  },
+  "hitboxCompatibility": {
+    "shape": "circle",
+    "radiusPxAtRuntimeScale": 23,
+    "origin": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "notes": "Floating Stampede enemy body. Tune against contact pressure before replacing placeholder circles."
+  },
+  "bodyPhysics": {
+    "type": "arcade-circle",
+    "radius": 23,
+    "offset": {
+      "x": 0,
+      "y": 0
+    }
+  },
+  "debugContact": {
+    "body": "splat-bloom-body-debug-contact.png",
+    "fx": "splat-bloom-fx-debug-contact.png"
+  },
+  "minimal": {
+    "spritesheet": "splat-bloom-minimal-spritesheet.png",
+    "frameCount": 1,
+    "frames": [
+      {
+        "index": 0,
+        "state": "idle",
+        "file": "minimal-frames/00-idle.png",
+        "sourceFrame": "frames/00-idle_splat.png"
+      }
+    ],
+    "recommendedUse": "Default high-count swarm rendering. Add movement with Phaser wobble, scale, tint, or rotation tweens."
+  }
+}

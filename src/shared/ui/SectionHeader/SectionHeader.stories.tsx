@@ -1,30 +1,22 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { SketchSection } from '../SketchSection';
-import { Card } from '../Card';
+import { SectionHeader } from './SectionHeader';
 
 const meta = {
   title: 'UI/SectionHeader',
-  component: SketchSection,
+  component: SectionHeader,
   args: {
-    id: 'about',
-    title: 'About',
-    children: null
+    id: 'section-heading',
+    children: 'About'
   }
-} satisfies Meta<typeof SketchSection>;
+} satisfies Meta<typeof SectionHeader>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const StaticSection: Story = {
-  render: () => (
+export const Default: Story = {
+  render: (args) => (
     <div className="max-w-3xl p-6">
-      <SketchSection id="about" title="About">
-        <Card>
-          <p className="text-base leading-relaxed text-gray-700">
-            Static portfolio sections share the same ruled heading treatment.
-          </p>
-        </Card>
-      </SketchSection>
+      <SectionHeader {...args} />
     </div>
   )
 };

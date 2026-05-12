@@ -3,12 +3,22 @@ import {
   resolveStampedeVelocity,
   type StampedeVelocity
 } from './movement';
+import {
+  beginStampedePointerControl,
+  createStampedePointerControlState,
+  endStampedePointerControl,
+  moveStampedePointerControl,
+  readStampedePointerInput,
+  type StampedePointerControlState
+} from './pointerControl';
 
-interface StampedePointerControl {
-  active: boolean;
-  pointerId: number | null;
-  anchorX: number;
-  anchorY: number;
+export type StampedeControlPointerEventKind = 'down' | 'move' | 'up' | 'cancel';
+
+export interface StampedeControlPointerEvent {
+  kind: StampedeControlPointerEventKind;
+  pointerId: number;
+  x: number;
+  y: number;
 }
 
 interface StampedeInputRuntimeOptions {
@@ -20,6 +30,7 @@ export interface StampedeInputRuntime {
   startRequested(): boolean;
   closeRequested(): boolean;
   retryRequested(): boolean;
+  handleControlPointerEvent(event: StampedeControlPointerEvent): void;
   setPointerControlEnabled(enabled: boolean): void;
   clearPointerControl(): void;
   updateStickVisuals(): void;
@@ -49,13 +60,8 @@ class PhaserStampedeInputRuntime implements StampedeInputRuntime {
   private readonly stickLine: Phaser.GameObjects.Line;
   private pointerControlsEnabled = true;
   private startTapQueued = false;
-
-  private pointerControl: StampedePointerControl = {
-    active: false,
-    pointerId: null,
-    anchorX: 0,
-    anchorY: 0
-  };
+  private shellPointerVisualActive = false;
+  private pointerControl: StampedePointerControlState = createStampedePointerControlState();
 
   constructor({ scene }: StampedeInputRuntimeOptions) {
     this.scene = scene;
@@ -125,6 +131,28 @@ class PhaserStampedeInputRuntime implements StampedeInputRuntime {
     );
   }
 
+  handleControlPointerEvent(event: StampedeControlPointerEvent): void {
+    if (!this.pointerControlsEnabled && event.kind !== 'cancel' && event.kind !== 'up') return;
+
+    switch (event.kind) {
+      case 'down':
+        this.shellPointerVisualActive = true;
+        this.startTapQueued = true;
+        this.beginPointerControl(event.pointerId, event.x, event.y);
+        return;
+      case 'move':
+        this.shellPointerVisualActive = true;
+        this.movePointerControl(event.pointerId, event.x, event.y);
+        return;
+      case 'up':
+      case 'cancel':
+        this.shellPointerVisualActive = true;
+        this.endPointerControl(event.pointerId);
+        this.shellPointerVisualActive = false;
+        return;
+    }
+  }
+
   setPointerControlEnabled(enabled: boolean): void {
     this.pointerControlsEnabled = enabled;
     if (!enabled) {
@@ -134,29 +162,22 @@ class PhaserStampedeInputRuntime implements StampedeInputRuntime {
   }
 
   clearPointerControl(): void {
-    this.pointerControl = {
-      active: false,
-      pointerId: null,
-      anchorX: 0,
-      anchorY: 0
-    };
+    this.pointerControl = createStampedePointerControlState();
   }
 
   updateStickVisuals(): void {
-    const pointer = this.scene.input.activePointer;
-    const active =
-      this.pointerControlsEnabled &&
-      this.pointerControl.active &&
-      this.pointerControl.pointerId === pointer.id &&
-      pointer.isDown;
+    const pointerInput = this.pointerControlsEnabled
+      ? readStampedePointerInput(this.pointerControl)
+      : { active: false, deltaX: 0, deltaY: 0 };
 
-    this.stickBase.setVisible(active);
-    this.stickLine.setVisible(active);
-    this.stickKnob.setVisible(active);
-    if (!active) return;
+    const showStick = pointerInput.active && !this.shellPointerVisualActive;
+    this.stickBase.setVisible(showStick);
+    this.stickLine.setVisible(showStick);
+    this.stickKnob.setVisible(showStick);
+    if (!showStick) return;
 
-    const dx = pointer.worldX - this.pointerControl.anchorX;
-    const dy = pointer.worldY - this.pointerControl.anchorY;
+    const dx = pointerInput.deltaX;
+    const dy = pointerInput.deltaY;
     const distance = Math.hypot(dx, dy);
     const maxDistance = 44;
     const scale = distance > maxDistance ? maxDistance / distance : 1;
@@ -173,19 +194,15 @@ class PhaserStampedeInputRuntime implements StampedeInputRuntime {
     this.scene.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       if (!this.pointerControlsEnabled) return;
       this.startTapQueued = true;
-      this.pointerControl = {
-        active: true,
-        pointerId: pointer.id,
-        anchorX: pointer.worldX,
-        anchorY: pointer.worldY
-      };
-      this.updateStickVisuals();
+      this.beginPointerControl(pointer.id, pointer.worldX, pointer.worldY);
+    });
+
+    this.scene.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+      this.movePointerControl(pointer.id, pointer.worldX, pointer.worldY);
     });
 
     this.scene.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
-      if (this.pointerControl.pointerId !== pointer.id) return;
-      this.clearPointerControl();
-      this.updateStickVisuals();
+      this.endPointerControl(pointer.id);
     });
   }
 
@@ -202,22 +219,32 @@ class PhaserStampedeInputRuntime implements StampedeInputRuntime {
   }
 
   private readPointerInput(): { active: boolean; deltaX: number; deltaY: number } {
-    const pointer = this.scene.input.activePointer;
-    const active =
-      this.pointerControlsEnabled &&
-      this.pointerControl.active &&
-      this.pointerControl.pointerId === pointer.id &&
-      pointer.isDown;
-
-    if (!active) {
-      if (this.pointerControl.active) this.clearPointerControl();
+    if (!this.pointerControlsEnabled) {
+      if (this.pointerControl.active) {
+        this.clearPointerControl();
+      }
       return { active: false, deltaX: 0, deltaY: 0 };
     }
 
-    return {
-      active: true,
-      deltaX: pointer.worldX - this.pointerControl.anchorX,
-      deltaY: pointer.worldY - this.pointerControl.anchorY
-    };
+    return readStampedePointerInput(this.pointerControl);
+  }
+
+  private beginPointerControl(pointerId: number, x: number, y: number): void {
+    this.pointerControl = beginStampedePointerControl({ pointerId, x, y });
+    this.updateStickVisuals();
+  }
+
+  private movePointerControl(pointerId: number, x: number, y: number): void {
+    const next = moveStampedePointerControl(this.pointerControl, { pointerId, x, y });
+    if (next === this.pointerControl) return;
+    this.pointerControl = next;
+    this.updateStickVisuals();
+  }
+
+  private endPointerControl(pointerId: number): void {
+    const next = endStampedePointerControl(this.pointerControl, pointerId);
+    if (next === this.pointerControl) return;
+    this.pointerControl = next;
+    this.updateStickVisuals();
   }
 }

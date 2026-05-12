@@ -1,0 +1,125 @@
+{
+  "slug": "pressure-clump",
+  "displayName": "Pressure Clump",
+  "assetClass": "enemy",
+  "sourceManifest": "manifest.json",
+  "mode": "clean-runtime-split",
+  "frameWidth": 192,
+  "frameHeight": 192,
+  "origin": {
+    "x": 0.5,
+    "y": 0.5
+  },
+  "runtimeScale": 0.32,
+  "body": {
+    "spritesheet": "pressure-clump-body-spritesheet.png",
+    "frameCount": 4,
+    "frames": [
+      {
+        "index": 0,
+        "state": "idle_cloud",
+        "file": "body-frames/00-idle_cloud.png",
+        "sourceFrame": "frames/00-idle_cloud.png"
+      },
+      {
+        "index": 1,
+        "state": "slow_drift",
+        "file": "body-frames/01-slow_drift.png",
+        "sourceFrame": "frames/01-slow_drift.png"
+      },
+      {
+        "index": 2,
+        "state": "pulse_larger",
+        "file": "body-frames/02-pulse_larger.png",
+        "sourceFrame": "frames/03-pulse_larger.png"
+      },
+      {
+        "index": 3,
+        "state": "pulse_smaller",
+        "file": "body-frames/03-pulse_smaller.png",
+        "sourceFrame": "frames/04-pulse_smaller.png"
+      }
+    ],
+    "animations": {
+      "idle": [
+        0,
+        2,
+        3,
+        2
+      ],
+      "move": [
+        1,
+        0,
+        2,
+        0
+      ]
+    },
+    "recommendedFrameRate": 8
+  },
+  "fx": {
+    "spritesheet": "pressure-clump-fx-spritesheet.png",
+    "frameCount": 4,
+    "frames": [
+      {
+        "index": 0,
+        "state": "split_hints",
+        "file": "fx-frames/00-split_hints.png",
+        "sourceFrame": "frames/06-split_hints.png"
+      },
+      {
+        "index": 1,
+        "state": "hit_recoil",
+        "file": "fx-frames/01-hit_recoil.png",
+        "sourceFrame": "frames/07-hit_recoil.png"
+      },
+      {
+        "index": 2,
+        "state": "clear_burst",
+        "file": "fx-frames/02-clear_burst.png",
+        "sourceFrame": "frames/09-clearing_burst.png"
+      },
+      {
+        "index": 3,
+        "state": "reform_dots",
+        "file": "fx-frames/03-reform_dots.png",
+        "sourceFrame": "frames/10-reforming_dots.png"
+      }
+    ],
+    "recommendedFrameRate": 10,
+    "notes": "Spawn these as short-lived overlays for hit, clear, pressure, and respawn moments."
+  },
+  "hitboxCompatibility": {
+    "shape": "circle",
+    "radiusPxAtRuntimeScale": 26,
+    "origin": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "notes": "Floating Stampede enemy body. Tune against contact pressure before replacing placeholder circles."
+  },
+  "bodyPhysics": {
+    "type": "arcade-circle",
+    "radius": 26,
+    "offset": {
+      "x": 0,
+      "y": 0
+    }
+  },
+  "debugContact": {
+    "body": "pressure-clump-body-debug-contact.png",
+    "fx": "pressure-clump-fx-debug-contact.png"
+  },
+  "minimal": {
+    "spritesheet": "pressure-clump-minimal-spritesheet.png",
+    "frameCount": 1,
+    "frames": [
+      {
+        "index": 0,
+        "state": "idle",
+        "file": "minimal-frames/00-idle.png",
+        "sourceFrame": "frames/00-idle_cloud.png"
+      }
+    ],
+    "recommendedUse": "Default high-count swarm rendering. Add movement with Phaser wobble, scale, tint, or rotation tweens."
+  }
+}

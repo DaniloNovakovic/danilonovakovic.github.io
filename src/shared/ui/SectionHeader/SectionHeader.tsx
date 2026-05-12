@@ -7,6 +7,10 @@ interface SectionHeaderProps {
   className?: string;
 }
 
+/**
+ * Portfolio section heading with the shared ink rule treatment.
+ * Use for top-level static sections that need an `id` target for `aria-labelledby`.
+ */
 export function SectionHeader({ id, children, className }: SectionHeaderProps) {
   return (
     <div className={cn('mb-6 flex items-end gap-3', className)}>

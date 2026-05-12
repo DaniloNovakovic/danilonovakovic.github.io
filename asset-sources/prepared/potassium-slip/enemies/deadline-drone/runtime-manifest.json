@@ -1,0 +1,109 @@
+{
+  "slug": "deadline-drone",
+  "potassiumEnemyKind": "deadline",
+  "assetClass": "enemy",
+  "sourceManifest": "manifest.json",
+  "phaserTextureKey": "potassium_enemy_deadline",
+  "spritesheet": "deadline-drone-spritesheet.png",
+  "frameWidth": 56,
+  "frameHeight": 62,
+  "frameCount": 7,
+  "origin": {
+    "x": 0.5,
+    "y": 0.5
+  },
+  "runtimeScale": 0.9,
+  "states": [
+    {
+      "index": 0,
+      "state": "neutral",
+      "file": "frames/00-neutral.png"
+    },
+    {
+      "index": 1,
+      "state": "bank-left",
+      "file": "frames/01-bank-left.png"
+    },
+    {
+      "index": 2,
+      "state": "bank-right",
+      "file": "frames/02-bank-right.png"
+    },
+    {
+      "index": 3,
+      "state": "dive",
+      "file": "frames/03-dive.png"
+    },
+    {
+      "index": 4,
+      "state": "hit",
+      "file": "frames/04-hit.png"
+    },
+    {
+      "index": 5,
+      "state": "critical",
+      "file": "frames/05-critical.png"
+    },
+    {
+      "index": 6,
+      "state": "death",
+      "file": "frames/06-death.png"
+    }
+  ],
+  "animations": {
+    "idle": {
+      "key": "potassium_enemy_deadline_idle",
+      "frames": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "frameRate": 8,
+      "repeat": -1
+    },
+    "hit": {
+      "key": "potassium_enemy_deadline_hit",
+      "frames": [
+        4
+      ],
+      "frameRate": 12,
+      "repeat": 0
+    },
+    "critical": {
+      "key": "potassium_enemy_deadline_critical",
+      "frames": [
+        5
+      ],
+      "frameRate": 8,
+      "repeat": 0
+    },
+    "death": {
+      "key": "potassium_enemy_deadline_death",
+      "frames": [
+        6
+      ],
+      "frameRate": 10,
+      "repeat": 0
+    }
+  },
+  "hitboxCompatibility": {
+    "kind": "implicitTexture",
+    "currentTexture": "potassium_enemy_deadline",
+    "runtimeScale": 0.9
+  },
+  "bodyPhysics": {
+    "type": "implicit-texture",
+    "notes": "Matches current generated texture dimensions."
+  },
+  "debugContact": "deadline-drone-debug-contact.png",
+  "preload": {
+    "method": "spritesheet",
+    "key": "potassium_enemy_deadline",
+    "publicUrlAfterPromotion": "/assets/potassium-slip/enemies/deadline-drone/deadline-drone-spritesheet.png",
+    "config": {
+      "frameWidth": 56,
+      "frameHeight": 62
+    }
+  }
+}

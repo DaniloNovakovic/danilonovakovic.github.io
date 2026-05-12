@@ -18,6 +18,18 @@ export interface TouchBridgeState {
   interactTap: boolean;
 }
 
+export type SceneControlPointerEventKind = 'down' | 'move' | 'up' | 'cancel';
+
+export interface SceneControlPointerEvent {
+  ownerSceneId: SceneId;
+  kind: SceneControlPointerEventKind;
+  pointerId: number;
+  x: number;
+  y: number;
+  sequence: number;
+  timestamp: number;
+}
+
 export const INVENTORY_ITEM_IDS = ['glasses', 'circuit'] as const;
 export type InventoryItemId = (typeof INVENTORY_ITEM_IDS)[number];
 
@@ -78,6 +90,7 @@ export interface BridgeState {
   progress: BridgeProgressState;
   sceneHintText: string | null;
   touch: TouchBridgeState;
+  sceneControlPointerEvents: SceneControlPointerEvent[];
 }
 
 const listeners = new Set<() => void>();
@@ -151,6 +164,29 @@ function sceneUiActionsEqual(
   );
 }
 
+function sceneControlPointerEventsEqual(
+  a: readonly SceneControlPointerEvent[],
+  b: readonly SceneControlPointerEvent[]
+): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    const left = a[i];
+    const right = b[i];
+    if (
+      left.ownerSceneId !== right.ownerSceneId ||
+      left.kind !== right.kind ||
+      left.pointerId !== right.pointerId ||
+      left.x !== right.x ||
+      left.y !== right.y ||
+      left.sequence !== right.sequence ||
+      left.timestamp !== right.timestamp
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
 function clearSceneUiState(): SceneUiState {
   return {
     status: null,
@@ -183,9 +219,11 @@ let state: BridgeState = {
     right: 0,
     jumpQueued: false,
     interactTap: false
-  }
+  },
+  sceneControlPointerEvents: []
 };
 let nextSceneUiActionSequence = 1;
+let nextSceneControlPointerSequence = 1;
 
 function emit(): void {
   listeners.forEach((listener) => listener());
@@ -224,7 +262,11 @@ function setState(updater: (current: BridgeState) => BridgeState): void {
     previous.touch.left === candidate.touch.left &&
     previous.touch.right === candidate.touch.right &&
     previous.touch.jumpQueued === candidate.touch.jumpQueued &&
-    previous.touch.interactTap === candidate.touch.interactTap;
+    previous.touch.interactTap === candidate.touch.interactTap &&
+    sceneControlPointerEventsEqual(
+      previous.sceneControlPointerEvents,
+      candidate.sceneControlPointerEvents
+    );
   if (unchanged) return;
   state = candidate;
   emit();
@@ -258,7 +300,8 @@ export const bridgeActions = {
       activeOverlay: null,
       loadingSceneId: null,
       sceneUi: clearSceneUiState(),
-      sceneHintText: null
+      sceneHintText: null,
+      sceneControlPointerEvents: []
     }));
   },
   returnToOverworld(): void {
@@ -549,6 +592,54 @@ export const bridgeActions = {
       }
     }));
   },
+  dispatchSceneControlPointerEvent(
+    ownerSceneId: SceneId,
+    event: Omit<SceneControlPointerEvent, 'ownerSceneId' | 'sequence'>
+  ): void {
+    const sequence = nextSceneControlPointerSequence++;
+    setState((current) => {
+      if (current.activeSceneId !== ownerSceneId) return current;
+      return {
+        ...current,
+        sceneControlPointerEvents: [
+          ...current.sceneControlPointerEvents,
+          {
+            ...event,
+            ownerSceneId,
+            sequence
+          }
+        ]
+      };
+    });
+  },
+  consumeSceneControlPointerEvents(ownerSceneId: SceneId): SceneControlPointerEvent[] {
+    const current = bridgeStore.getState();
+    const events = current.sceneControlPointerEvents.filter((event) => event.ownerSceneId === ownerSceneId);
+    if (!events.length) return [];
+
+    setState((next) => ({
+      ...next,
+      sceneControlPointerEvents: next.sceneControlPointerEvents.filter((event) => event.ownerSceneId !== ownerSceneId)
+    }));
+    return events;
+  },
+  clearSceneControlPointerEvents(ownerSceneId?: SceneId): void {
+    setState((current) => {
+      if (!ownerSceneId) {
+        if (!current.sceneControlPointerEvents.length) return current;
+        return {
+          ...current,
+          sceneControlPointerEvents: []
+        };
+      }
+      const nextEvents = current.sceneControlPointerEvents.filter((event) => event.ownerSceneId !== ownerSceneId);
+      if (nextEvents.length === current.sceneControlPointerEvents.length) return current;
+      return {
+        ...current,
+        sceneControlPointerEvents: nextEvents
+      };
+    });
+  },
   consumeSceneUiAction(ownerSceneId: SceneId): SceneUiActionRequest | null {
     const current = bridgeStore.getState();
     const action = current.sceneUi.lastAction;
@@ -621,7 +712,8 @@ export const bridgeActions = {
         right: 0,
         jumpQueued: false,
         interactTap: false
-      }
+      },
+      sceneControlPointerEvents: []
     }));
   }
 };

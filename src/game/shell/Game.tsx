@@ -16,6 +16,7 @@ interface GameProps {
   activeSceneId: SceneId;
   presentationMode: PhaserScenePresentationMode;
   onReturnToOverworld: () => void;
+  chrome?: 'framed' | 'bare';
 }
 
 export default function Game({
@@ -24,7 +25,8 @@ export default function Game({
   isPaused,
   activeSceneId,
   presentationMode,
-  onReturnToOverworld
+  onReturnToOverworld,
+  chrome = 'framed'
 }: GameProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
@@ -52,8 +54,12 @@ export default function Game({
     stableOnReturnToOverworld
   });
 
+  const frameClassName = chrome === 'framed'
+    ? 'relative h-full w-full min-h-0 overflow-hidden rounded-lg border-4 border-neutral-800 bg-[#fbfbf9] shadow-[8px_8px_0px_0px_rgba(26,26,26,1)]'
+    : 'relative h-full w-full min-h-0 overflow-hidden bg-[#fbfbf9]';
+
   return (
-    <div className="relative h-full w-full min-h-0 overflow-hidden rounded-lg border-4 border-neutral-800 bg-[#fbfbf9] shadow-[8px_8px_0px_0px_rgba(26,26,26,1)]">
+    <div className={frameClassName}>
       <div ref={containerRef} className="absolute inset-0 outline-none" />
       {shouldUseGestureOverlay && (
         <div

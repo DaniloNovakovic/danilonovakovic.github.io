@@ -1,0 +1,20 @@
+{
+  "source": "../sketchbook-player-glasses-spritesheet.png",
+  "spritesheet": {
+    "width": 1536,
+    "height": 1024,
+    "columns": 4,
+    "rows": 3
+  },
+  "note": "Glasses variant of the player movement set. Use the individual PNG frames as the source of truth; the generated sheet height does not divide evenly into three rows.",
+  "animations": {
+    "idle": ["idle-1.png", "idle-2.png"],
+    "lookUp": ["look-up.png"],
+    "interact": ["interact.png"],
+    "walk": ["walk-1.png", "walk-2.png", "walk-3.png", "walk-4.png"],
+    "jump": ["jump.png"],
+    "fall": ["fall.png"],
+    "land": ["land.png"],
+    "climb": ["climb.png"]
+  }
+}

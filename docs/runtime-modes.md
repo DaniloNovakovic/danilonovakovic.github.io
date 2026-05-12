@@ -14,6 +14,10 @@ code remains the source of truth.
 - `sceneUi`: optional scene-owned React status/panel requests plus a one-shot
   action from React UI back to the owning Phaser scene. This path does not
   derive pause by itself.
+- `sceneControlPointerEvents`: optional owner-scoped pointer event queue for
+  shell-level control mats. Potassium uses this to extend drag input outside
+  the visible Phaser canvas; Stampede uses it to extend drag-to-move outside
+  the visible survival page.
 
 ## Dev Starts
 
@@ -38,6 +42,9 @@ for fast iteration. Current useful targets include `hobbies`, `basement`,
 - `src/game/shell/sceneHeaderChrome.ts` maps presentation scenes to shell-owned
   header controls. Stampede returns to Ridge from the header Back button;
   Potassium returns to the City/Overworld.
+- `src/game/shell/notebookShellProfile.ts` maps selected presentation scenes to
+  Notebook Shell runtime profiles. Potassium uses the `ruledBoardPage` focus
+  profile, and Stampede uses the `survivalPage` focus profile.
 - Phaser scenes keep local pause state only as a scene runtime concern; they do
   not decide whether an overlay should pause the engine.
 
@@ -54,11 +61,14 @@ Use this path when checking pattern refactors:
 6. Boot `?startScene=ridge`; verify the Ridge shell renders, movement works,
    and walking near a Stampede/Telegraph/Domino prop shows `[E] INTERACT`.
    Interact with the Stampede prop to open its Trail Card, confirm `Enter`
-   starts Stampede Sketch, confirm the Stampede status strip renders below the
-   card, move in the arena, and return to Ridge. Telegraph and Domino cards
-   should still keep primary entry disabled.
+   starts Stampede Sketch, confirm the Stampede Notebook shell renders, drag
+   from outside the visible page to move, and return to Ridge. Telegraph and
+   Domino cards should still keep primary entry disabled.
 7. Open inventory from the overworld and from a child scene.
-8. In Potassium, clear or dev-skip a wave and confirm the upgrade-choice panel
-   is a React scene UI panel above the card; choose an upgrade and confirm play
-   continues. Confirm terminal Retry/Return actions work from the React panel.
+8. In Potassium, confirm the Notebook shell renders with Back and Static Mode,
+   then drag/release from outside the visible board area and confirm launch or
+   recall still works. Clear or dev-skip a wave and confirm the upgrade-choice
+   panel is a React scene UI panel above the notebook stage; choose an upgrade
+   and confirm play continues. Confirm terminal Retry/Return actions work from
+   the React panel.
 9. Verify mobile touch movement, jump, and interact one-shots.

@@ -57,6 +57,23 @@ describe('potassium slip projectile control', () => {
     expect(control.getSnapshot()).toEqual({ state: 'idle', pointerId: null });
   });
 
+  it('supports release coordinates outside the visible board', () => {
+    const control = createControl();
+    control.beginAiming(7);
+
+    expect(control.release({
+      pointer: { x: 500, y: 720 },
+      banana: launchPad,
+      maxSpeed: 760
+    })).toEqual([
+      { type: 'setBananaVelocity', x: 0, y: 760 },
+      { type: 'setBananaAngularVelocityRandom', min: -520, max: 520 },
+      { type: 'clearAim' },
+      { type: 'clearTether' },
+      { type: 'setRecallVisual', active: false }
+    ]);
+  });
+
   it('begins recall and transitions to aiming when banana returns to launch zone', () => {
     const control = createControl();
 

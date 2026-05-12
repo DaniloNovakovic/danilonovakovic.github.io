@@ -32,6 +32,10 @@ When Danilo invokes named helpers such as "Hey Mira", use [`docs/agents/sketchbo
 
 When Danilo invokes Mira specifically, use [`.agents/skills/mira-producer/SKILL.md`](.agents/skills/mira-producer/SKILL.md) for the repeatable producer workflow.
 
+### Sprite asset pipeline
+
+When generating or converting sprite assets for Phaser scenes, use [`.agents/skills/sketchbook-sprite-pipeline/SKILL.md`](.agents/skills/sketchbook-sprite-pipeline/SKILL.md) to preserve the Digital Sketchbook style while producing normalized runtime frames, manifests, and QA sheets.
+
 ## Tech stack
 
 - **Frontend Framework:** React (Vite)

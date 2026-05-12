@@ -1,0 +1,148 @@
+{
+  "slug": "player-guardian",
+  "assetClass": "player",
+  "sourceKeyed": "source-keyed.png",
+  "source": "source.png",
+  "spritesheet": "player-guardian-spritesheet.png",
+  "frameWidth": 192,
+  "frameHeight": 192,
+  "frameCount": 10,
+  "grid": {
+    "columns": 10,
+    "rows": 1
+  },
+  "sourceGrid": {
+    "columns": 4,
+    "rows": 3
+  },
+  "origin": {
+    "x": 0.5,
+    "y": 0.5
+  },
+  "runtimeScale": 0.48,
+  "frames": [
+    {
+      "index": 0,
+      "state": "idle-down",
+      "file": "frames/00-idle-down.png",
+      "sourceFile": "source-frames/00-idle-down.png"
+    },
+    {
+      "index": 1,
+      "state": "idle-up",
+      "file": "frames/01-idle-up.png",
+      "sourceFile": "source-frames/01-idle-up.png"
+    },
+    {
+      "index": 2,
+      "state": "idle-side",
+      "file": "frames/02-idle-side.png",
+      "sourceFile": "source-frames/02-idle-side.png"
+    },
+    {
+      "index": 3,
+      "state": "move-down-1",
+      "file": "frames/03-move-down-1.png",
+      "sourceFile": "source-frames/03-move-down-1.png"
+    },
+    {
+      "index": 4,
+      "state": "move-down-2",
+      "file": "frames/04-move-down-2.png",
+      "sourceFile": "source-frames/04-move-down-2.png"
+    },
+    {
+      "index": 5,
+      "state": "move-up",
+      "file": "frames/05-move-up.png",
+      "sourceFile": "source-frames/05-move-up.png",
+      "derivedFrom": "move-up-2"
+    },
+    {
+      "index": 6,
+      "state": "move-side",
+      "file": "frames/06-move-side.png",
+      "sourceFile": "source-frames/06-move-side.png",
+      "derivedFrom": "move-side-2"
+    },
+    {
+      "index": 7,
+      "state": "smudged",
+      "file": "frames/07-smudged.png",
+      "sourceFile": "source-frames/07-smudged.png"
+    },
+    {
+      "index": 8,
+      "state": "tether-guard",
+      "file": "frames/08-tether-guard.png",
+      "sourceFile": "source-frames/08-tether-guard.png"
+    },
+    {
+      "index": 9,
+      "state": "respawn",
+      "file": "frames/09-respawn.png",
+      "sourceFile": "source-frames/09-respawn.png"
+    }
+  ],
+  "animations": {
+    "idleDown": [
+      0
+    ],
+    "idleUp": [
+      1
+    ],
+    "idleSide": [
+      2
+    ],
+    "moveDown": [
+      3,
+      4
+    ],
+    "moveUp": [
+      5
+    ],
+    "moveSide": [
+      6
+    ],
+    "smudged": [
+      7
+    ],
+    "tetherGuard": [
+      8
+    ],
+    "respawn": [
+      9
+    ]
+  },
+  "body": {
+    "type": "arcade-circle",
+    "radius": 20,
+    "offset": {
+      "x": 0,
+      "y": 0
+    }
+  },
+  "hitboxCompatibility": {
+    "shape": "circle",
+    "radiusPxAtRuntimeScale": 20,
+    "origin": {
+      "x": 0.5,
+      "y": 0.5
+    }
+  },
+  "debugContact": "player-guardian-debug-contact.png",
+  "objectiveRelationship": {
+    "role": "mobile-guardian",
+    "protectedAsset": "../calm-patch/manifest.json",
+    "notes": "Player may show a pencil, charm, pin, or tether that links them to the calm patch. Do not treat this frame as carrying the whole blanket."
+  },
+  "heldToolRead": {
+    "tool": "pencil",
+    "orientation": "sharpened-point-up, eraser-down"
+  },
+  "removedFrames": [
+    "move-up-1",
+    "move-side-1"
+  ],
+  "notes": "Generated Stampede Sketch asset. Not loaded by runtime yet."
+}

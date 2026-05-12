@@ -36,6 +36,7 @@ export class BasementScene extends Phaser.Scene {
   interactPrompt!: Phaser.GameObjects.Text;
   statusText!: Phaser.GameObjects.Text;
   glasses!: Phaser.GameObjects.Container;
+  glassesLabel?: Phaser.GameObjects.Text;
   playerThought!: PlayerThoughtText;
 
   private playerRuntime?: SideViewPlayerRuntime;
@@ -257,7 +258,7 @@ export class BasementScene extends Phaser.Scene {
     const bridge = this.add.rectangle(0, 0, 12, 4, 0x66ff99, 1);
     const glow = this.add.ellipse(0, 0, 104, 56, 0x66ff99, 0.08);
     this.glasses.add([glow, leftLens, rightLens, bridge]);
-    createUiText(this, GLASSES_PICKUP.x, GLASSES_PICKUP.y + 42, messages.scenes.basement.glasses, {
+    this.glassesLabel = createUiText(this, GLASSES_PICKUP.x, GLASSES_PICKUP.y + 42, messages.scenes.basement.glasses, {
       fontSize: '14px',
       color: '#66ff99',
       fontStyle: 'bold'
@@ -316,7 +317,9 @@ export class BasementScene extends Phaser.Scene {
   }
 
   private refreshGlassesVisibility(): void {
-    this.glasses?.setVisible(!isItemOwned('glasses'));
+    const visible = !isItemOwned('glasses');
+    this.glasses?.setVisible(visible);
+    this.glassesLabel?.setVisible(visible);
   }
 
   private applyBasementInteractionEffect(effect: BasementInteractionEffect): void {

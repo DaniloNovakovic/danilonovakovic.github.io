@@ -3,7 +3,7 @@ import {
   GAME_DESIGN_HEIGHT,
   GAME_DESIGN_WIDTH
 } from '@/game/sharedSceneRuntime/config';
-import { bridgeActions } from '@/game/bridge/store';
+import { bridgeActions, type SceneControlPointerEvent } from '@/game/bridge/store';
 import { POTASSIUM_SCENE_ID } from '@/game/scenes/sceneIds';
 import { TextureGenerator } from '@/game/sharedSceneRuntime/textures/TextureGenerator';
 import { getMessages } from '@/shared/i18n';
@@ -95,6 +95,7 @@ import {
 
 type EnemySprite = Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
 type ProjectileSprite = Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+type PotassiumInputPointer = Pick<Phaser.Input.Pointer, 'id' | 'x' | 'y'>;
 
 const ARENA = {
   left: 275,
@@ -156,6 +157,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
     score: number;
     titleFontSize: number;
   };
+  private externalControlPointer: PotassiumInputPointer | null = null;
 
   private onClose?: () => void;
   private isPaused: boolean = false;
@@ -302,6 +304,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
     if (this.isPaused) return;
 
     this.consumeSceneUiAction();
+    this.consumeSceneControlPointerEvents();
 
     if (this.session.gameState !== 'PLAYING') {
       this.banana.setVelocity(0, 0);
@@ -327,6 +330,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.commandAdapter.resetCombatIds();
     this.bossState = undefined;
     this.pendingTerminalView = undefined;
+    this.externalControlPointer = null;
     this.fireCells.clear();
   }
 
@@ -539,16 +543,16 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.banana.setVelocity(0, 0);
   }
 
-  private beginAiming(pointer: Phaser.Input.Pointer, pointerId: number = pointer.id): void {
+  private beginAiming(pointer: PotassiumInputPointer, pointerId: number = pointer.id): void {
     void pointer;
     this.applyProjectileControlCommands(this.projectileControl.beginAiming(pointerId));
   }
 
-  private beginRecall(pointer: Phaser.Input.Pointer): void {
+  private beginRecall(pointer: PotassiumInputPointer): void {
     this.applyProjectileControlCommands(this.projectileControl.beginRecall(pointer.id));
   }
 
-  private releaseBanana(pointer: Phaser.Input.Pointer): void {
+  private releaseBanana(pointer: PotassiumInputPointer): void {
     this.applyProjectileControlCommands(this.projectileControl.release({
       pointer: { x: pointer.x, y: pointer.y },
       banana: { x: this.banana.x, y: this.banana.y },
@@ -609,7 +613,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
   }
 
   private updateControlState(): void {
-    const pointer = this.input.activePointer;
+    const pointer = this.externalControlPointer ?? this.input.activePointer;
     this.applyProjectileControlCommands(this.projectileControl.update({
       banana: { x: this.banana.x, y: this.banana.y },
       velocity: { x: this.banana.body.velocity.x, y: this.banana.body.velocity.y },
@@ -1174,6 +1178,55 @@ export class PotassiumSlipScene extends Phaser.Scene {
       if (!terminalAction) return;
       this.applySessionResult(resolvePotassiumTerminalAction(this.session, terminalAction));
     }
+  }
+
+  private consumeSceneControlPointerEvents(): void {
+    const events = bridgeActions.consumeSceneControlPointerEvents(POTASSIUM_SCENE_ID);
+    events.forEach((event) => this.handleSceneControlPointerEvent(event));
+  }
+
+  private handleSceneControlPointerEvent(event: SceneControlPointerEvent): void {
+    const pointer = { id: event.pointerId, x: event.x, y: event.y };
+
+    if (event.kind === 'down') {
+      this.externalControlPointer = pointer;
+      if (this.session.gameState === 'START') {
+        this.startGame();
+        return;
+      }
+      if (this.session.gameState !== 'PLAYING') return;
+
+      if (this.isBananaInLaunchZone()) {
+        this.beginAiming(pointer);
+      } else {
+        this.beginRecall(pointer);
+      }
+      return;
+    }
+
+    if (this.externalControlPointer?.id !== event.pointerId) return;
+
+    if (event.kind === 'move') {
+      this.externalControlPointer = pointer;
+      return;
+    }
+
+    if (event.kind === 'up') {
+      if (this.projectileControl.getSnapshot().pointerId === event.pointerId) {
+        if (this.projectileControl.isAiming()) {
+          this.releaseBanana(pointer);
+        } else if (this.projectileControl.isRecalling()) {
+          this.cancelControl();
+          this.setBananaRecallVisual(false);
+        }
+      }
+      this.externalControlPointer = null;
+      return;
+    }
+
+    this.cancelControl();
+    this.setBananaRecallVisual(false);
+    this.externalControlPointer = null;
   }
 
   setPaused(paused: boolean): void {

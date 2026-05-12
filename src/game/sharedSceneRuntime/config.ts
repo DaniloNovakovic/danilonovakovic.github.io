@@ -1,8 +1,7 @@
 import * as Phaser from 'phaser';
+import { GAME_DESIGN_HEIGHT, GAME_DESIGN_WIDTH } from './designSize';
 
-/** Fixed internal resolution; canvas is scaled to cover the responsive parent. */
-export const GAME_DESIGN_WIDTH = 1000;
-export const GAME_DESIGN_HEIGHT = 600;
+export { GAME_DESIGN_HEIGHT, GAME_DESIGN_WIDTH } from './designSize';
 
 /** Overworld street width (logical px). */
 export const OVERWORLD_WIDTH = 3000;

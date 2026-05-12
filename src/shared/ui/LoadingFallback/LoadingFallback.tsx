@@ -1,6 +1,10 @@
 import { useMessages } from '@/shared/i18n';
 import { Card } from '../Card';
 
+/**
+ * Full-screen app loading state using the shared sketchbook paper treatment.
+ * Use as a suspense or route fallback while app-level data or bundles load.
+ */
 export function LoadingFallback() {
   const messages = useMessages();
 

@@ -21,6 +21,10 @@ interface ModalShellProps {
   closeOnBackdrop?: boolean;
 }
 
+/**
+ * Accessible modal overlay shell with focus management, escape handling, and scroll lock.
+ * Use as the outer layer for blocking React overlays; render dialog content via children.
+ */
 export function ModalShell({
   onClose,
   children,

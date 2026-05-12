@@ -1,0 +1,1067 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Interactive Shell Hybrid Candidate</title>
+    <style>
+      :root {
+        --paper: #f4f1ea;
+        --paper-bright: #fbfbf9;
+        --ink: #1a1a1a;
+        --muted-ink: #56514a;
+        --soft-line: rgba(26, 26, 26, 0.18);
+        --shadow-sm: 5px 5px 0 var(--ink);
+        --shadow-md: 9px 9px 0 var(--ink);
+        --shadow-lg: 14px 14px 0 var(--ink);
+        color-scheme: light;
+        font-family:
+          "Comic Sans MS",
+          "Comic Neue",
+          "Bradley Hand",
+          ui-monospace,
+          monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          linear-gradient(rgba(26, 26, 26, 0.025) 1px, transparent 1px) 0 0 / 100% 38px,
+          var(--paper);
+        color: var(--ink);
+      }
+
+      button {
+        font: inherit;
+      }
+
+      .lab {
+        min-height: 100dvh;
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+      }
+
+      .labHeader {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 1rem;
+        align-items: end;
+        padding: 1rem clamp(1rem, 3vw, 2rem);
+        border-bottom: 4px solid var(--ink);
+        background: rgba(251, 251, 249, 0.92);
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: clamp(1.2rem, 3vw, 2.2rem);
+        line-height: 1;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .intro {
+        max-width: 58rem;
+        margin-top: 0.35rem;
+        color: var(--muted-ink);
+        font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+        font-size: 0.84rem;
+        line-height: 1.5;
+      }
+
+      .controlGroup {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 0.45rem;
+      }
+
+      .controlStack {
+        display: grid;
+        gap: 0.5rem;
+      }
+
+      .chip,
+      .shellButton,
+      .actionButton,
+      .choiceButton {
+        border: 3px solid var(--ink);
+        border-radius: 7px;
+        background: var(--paper-bright);
+        color: var(--ink);
+        box-shadow: var(--shadow-sm);
+        cursor: pointer;
+        text-transform: uppercase;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+      }
+
+      .chip {
+        min-height: 2.25rem;
+        padding: 0.35rem 0.7rem;
+        font-size: 0.75rem;
+      }
+
+      .chip[aria-pressed="true"] {
+        background: var(--ink);
+        color: var(--paper-bright);
+        transform: translate(2px, 2px);
+        box-shadow: 2px 2px 0 var(--ink);
+      }
+
+      .previewWrap {
+        min-height: 0;
+        overflow: auto;
+        display: grid;
+        place-items: center;
+        padding: clamp(0.75rem, 2vw, 1.5rem);
+      }
+
+      .viewport {
+        position: relative;
+        overflow: hidden;
+        width: min(1120px, calc(100vw - 2rem));
+        height: min(760px, calc(100dvh - 9rem));
+        min-height: 380px;
+        border: 5px solid var(--ink);
+        border-radius: 0 0 28px 0;
+        background:
+          radial-gradient(circle at 50% 46%, rgba(26, 26, 26, 0.018), transparent 36%),
+          var(--paper);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .viewport.phonePortrait {
+        width: min(390px, calc(100vw - 2rem));
+        height: min(780px, calc(100dvh - 4rem));
+      }
+
+      .viewport.phoneLandscape {
+        width: min(790px, calc(100vw - 2rem));
+        height: min(410px, calc(100dvh - 4rem));
+      }
+
+      .viewport.tablet {
+        width: min(820px, calc(100vw - 2rem));
+        height: min(980px, calc(100dvh - 4rem));
+      }
+
+      .viewport.tabletLandscape {
+        width: min(1024px, calc(100vw - 2rem));
+        height: min(720px, calc(100dvh - 4rem));
+      }
+
+      .candidate {
+        position: absolute;
+        inset: 0;
+        display: none;
+      }
+
+      .candidate.active {
+        display: block;
+      }
+
+      .shellChrome {
+        position: absolute;
+        z-index: 30;
+        top: max(0.65rem, env(safe-area-inset-top, 0px));
+        left: 0.9rem;
+        right: 0.9rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.6rem;
+        pointer-events: none;
+      }
+
+      .shellButton {
+        min-height: 2.55rem;
+        padding: 0.4rem 0.8rem;
+        pointer-events: auto;
+        white-space: nowrap;
+      }
+
+      .menuButton {
+        opacity: 0.76;
+      }
+
+      .touchField {
+        position: absolute;
+        inset: 3.9rem 0.7rem 0.7rem;
+        border: 0;
+        border-radius: 18px;
+        background:
+          radial-gradient(circle at 50% 56%, rgba(26, 26, 26, 0.045), transparent 34%),
+          linear-gradient(135deg, transparent 0 46%, rgba(26, 26, 26, 0.06) 47% 48%, transparent 49% 100%);
+      }
+
+      .touchLabel {
+        position: absolute;
+        left: 1.35rem;
+        bottom: 1rem;
+        color: rgba(26, 26, 26, 0.5);
+        font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .hybridLayout {
+        position: absolute;
+        inset: 4.8rem 1rem 1rem;
+        display: grid;
+        grid-template-columns: minmax(5.5rem, 0.36fr) minmax(0, 1.95fr) minmax(5.5rem, 0.36fr);
+        gap: 0.8rem;
+        align-items: stretch;
+      }
+
+      .playSlot {
+        position: relative;
+        min-width: 0;
+        min-height: 0;
+        display: grid;
+        place-items: center;
+      }
+
+      .gameCard {
+        position: relative;
+        overflow: hidden;
+        width: min(100%, calc((100vh - 7.2rem) * 0.75), 32rem);
+        height: min(100%, calc(100vh - 7.2rem), 42rem);
+        aspect-ratio: 3 / 4;
+        border: 5px solid var(--ink);
+        border-radius: 9px;
+        background: var(--paper-bright);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .gameCard::after {
+        content: "";
+        position: absolute;
+        inset: 0.45rem;
+        pointer-events: none;
+        border: 2px solid rgba(26, 26, 26, 0.16);
+        border-radius: 5px;
+      }
+
+      .playfield {
+        position: absolute;
+        inset: 0;
+        background: var(--paper-bright);
+      }
+
+      .marginChrome {
+        display: grid;
+        gap: 0.7rem;
+        align-content: center;
+        padding: 0.2rem;
+      }
+
+      .statusNote {
+        display: grid;
+        gap: 0.38rem;
+        border-left: 4px solid rgba(26, 26, 26, 0.82);
+        padding: 0.25rem 0 0.25rem 0.55rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .statusNote strong {
+        font-size: 1.35rem;
+        line-height: 1;
+      }
+
+      .meter {
+        width: min(5rem, 100%);
+        height: 0.82rem;
+        border: 3px solid var(--ink);
+        background: var(--paper-bright);
+        padding: 0.12rem;
+      }
+
+      .meter span {
+        display: block;
+        height: 100%;
+        width: var(--fill, 48%);
+        background: rgba(26, 26, 26, 0.72);
+      }
+
+      .actionRail {
+        align-content: end;
+        pointer-events: none;
+      }
+
+      .actionButton,
+      .choiceButton {
+        min-height: 2.8rem;
+        padding: 0.35rem 0.5rem;
+        background: rgba(251, 251, 249, 0.92);
+      }
+
+      .actionButton.primary,
+      .choiceButton.primary {
+        background: var(--ink);
+        color: var(--paper-bright);
+      }
+
+      .mobileStatus {
+        display: none;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 0.75rem;
+        border: 4px solid var(--ink);
+        border-radius: 8px;
+        background: rgba(251, 251, 249, 0.9);
+        box-shadow: var(--shadow-md);
+        padding: 0.55rem 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .overlayStage {
+        position: absolute;
+        z-index: 25;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        padding: 4.7rem 1rem 1rem;
+        pointer-events: none;
+      }
+
+      .modalPanel {
+        display: grid;
+        grid-template-rows: auto minmax(0, auto) auto;
+        gap: 0.9rem;
+        width: min(40rem, calc(100% - 2rem));
+        max-height: min(78dvh, 33rem);
+        overflow: hidden;
+        border: 4px solid var(--ink);
+        border-radius: 8px;
+        background: rgba(251, 251, 249, 0.96);
+        box-shadow: var(--shadow-md);
+        padding: clamp(1rem, 3vw, 1.55rem);
+        text-align: center;
+        pointer-events: auto;
+      }
+
+      .modalPanel h2 {
+        font-size: clamp(1.8rem, 5vw, 3rem);
+        line-height: 1;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+
+      .modalPanel p {
+        color: var(--muted-ink);
+        font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+        font-size: 0.85rem;
+        line-height: 1.45;
+      }
+
+      .modalBody {
+        min-height: 0;
+        overflow: auto;
+      }
+
+      .actionRow {
+        position: sticky;
+        bottom: 0;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.7rem;
+        background: rgba(251, 251, 249, 0.96);
+      }
+
+      .mark {
+        position: absolute;
+        width: var(--s, 1rem);
+        height: var(--s, 1rem);
+        border-radius: 999px;
+        background: rgba(26, 26, 26, var(--a, 0.58));
+        transform: translate(-50%, -50%);
+      }
+
+      .avatar {
+        position: absolute;
+        left: 50%;
+        top: 56%;
+        width: 2rem;
+        height: 3rem;
+        transform: translate(-50%, -50%);
+        border: 4px solid var(--ink);
+        border-radius: 12px 12px 4px 4px;
+        background: var(--paper-bright);
+        box-shadow: 0.36rem 0 0 rgba(26, 26, 26, 0.14);
+      }
+
+      .avatar::before {
+        content: "";
+        position: absolute;
+        right: -0.45rem;
+        top: 0.4rem;
+        width: 0.65rem;
+        height: 0.65rem;
+        border-radius: 999px;
+        background: var(--ink);
+        box-shadow: -0.55rem 0.15rem 0 -0.1rem var(--ink);
+      }
+
+      .phonePortrait .labHeader,
+      .phoneLandscape .labHeader {
+        display: none;
+      }
+
+      .phonePortrait .shellButton,
+      .phoneLandscape .shellButton {
+        min-height: 2.25rem;
+        padding: 0.35rem 0.58rem;
+        font-size: 0.78rem;
+      }
+
+      .phoneLandscape .shellChrome {
+        top: 0.45rem;
+      }
+
+      .phonePortrait .menuButton,
+      .phoneLandscape .menuButton {
+        opacity: 0.55;
+      }
+
+      .phonePortrait .hybridLayout,
+      .tablet .hybridLayout {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: minmax(0, 1fr) auto;
+        inset: 4.4rem 0.85rem 0.85rem;
+      }
+
+      .phonePortrait .sideStatus,
+      .phonePortrait .actionRail,
+      .tablet .sideStatus,
+      .tablet .actionRail {
+        display: none;
+      }
+
+      .phonePortrait .mobileStatus,
+      .tablet .mobileStatus {
+        display: grid;
+      }
+
+      .phonePortrait .gameCard {
+        width: min(100%, 33rem);
+        height: auto;
+      }
+
+      .tablet .gameCard {
+        width: auto;
+        height: min(100%, 34rem);
+        max-width: 100%;
+      }
+
+      .tabletLandscape .hybridLayout {
+        grid-template-columns: minmax(6rem, 0.34fr) minmax(0, 1.9fr) minmax(6rem, 0.34fr);
+      }
+
+      .tabletLandscape .gameCard {
+        width: min(100%, calc((100vh - 7rem) * 0.75), 31rem);
+        height: min(100%, calc(100vh - 7rem), 41rem);
+      }
+
+      .tabletLandscape .actionRail {
+        display: block;
+      }
+
+      .phonePortrait .overlayStage {
+        padding: 4rem 0.55rem 0.55rem;
+      }
+
+      .phonePortrait .actionRow {
+        grid-template-columns: 1fr;
+      }
+
+      .phoneLandscape .hybridLayout {
+        inset: 3.55rem 0.7rem 0.7rem;
+        grid-template-columns: 5.25rem minmax(0, 1fr) 3.6rem;
+        gap: 0.45rem;
+      }
+
+      .phoneLandscape .gameCard {
+        width: min(100%, calc((100vh - 5rem) * 0.75));
+        height: min(100%, calc(100vh - 5rem));
+      }
+
+      .phoneLandscape .marginChrome {
+        padding: 0.1rem;
+        gap: 0.4rem;
+      }
+
+      .phoneLandscape .statusNote strong {
+        font-size: 1rem;
+      }
+
+      .phoneLandscape .statusNote,
+      .phoneLandscape .actionButton {
+        font-size: 0.7rem;
+      }
+
+      .phoneLandscape .actionButton {
+        min-height: 2.35rem;
+      }
+
+      .phoneLandscape .overlayStage {
+        padding: 3.25rem 0.5rem 0.5rem;
+      }
+
+      .phoneLandscape .modalPanel {
+        width: min(30rem, calc(100% - 1rem));
+        max-height: calc(100% - 1rem);
+        padding: 0.85rem;
+      }
+
+      .phoneLandscape .modalPanel h2 {
+        font-size: 1.7rem;
+      }
+
+      .notebookCandidate {
+        background:
+          radial-gradient(circle at 18% 72%, rgba(69, 130, 190, 0.12), transparent 12rem),
+          radial-gradient(circle at 82% 24%, rgba(202, 55, 55, 0.1), transparent 10rem),
+          linear-gradient(rgba(26, 26, 26, 0.028) 1px, transparent 1px) 0 0 / 100% 2.4rem,
+          var(--paper);
+      }
+
+      .notebookTouchField {
+        position: absolute;
+        inset: 3.3rem 0.65rem 0.65rem;
+        border-radius: 22px;
+        background:
+          radial-gradient(circle at 50% 55%, rgba(26, 26, 26, 0.055), transparent 38%),
+          radial-gradient(circle at 20% 48%, rgba(26, 26, 26, 0.035), transparent 20%),
+          radial-gradient(circle at 78% 42%, rgba(26, 26, 26, 0.03), transparent 18%);
+      }
+
+      .notebookTabs {
+        position: absolute;
+        z-index: 35;
+        top: 0.75rem;
+        left: 1rem;
+        right: 1rem;
+        display: flex;
+        justify-content: space-between;
+        pointer-events: none;
+      }
+
+      .pageTab {
+        min-height: 2.4rem;
+        min-width: 4.1rem;
+        border: 3px solid var(--ink);
+        border-radius: 8px 8px 5px 5px;
+        background: #f7df81;
+        box-shadow: var(--shadow-sm);
+        color: var(--ink);
+        padding: 0.35rem 0.7rem;
+        pointer-events: auto;
+        text-transform: uppercase;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+      }
+
+      .pageTab.backTab {
+        background: #fbfbf9;
+      }
+
+      .pageTab.menuTab {
+        background: #b8d8f1;
+      }
+
+      .notebookSpread {
+        position: absolute;
+        inset: 4.15rem 1rem 1rem;
+        display: grid;
+        grid-template-columns: minmax(11rem, 0.75fr) minmax(0, 1.35fr);
+        gap: 0;
+        filter: drop-shadow(12px 12px 0 var(--ink));
+      }
+
+      .notebookPage {
+        position: relative;
+        overflow: hidden;
+        min-width: 0;
+        min-height: 0;
+        border: 4px solid var(--ink);
+        background:
+          linear-gradient(90deg, rgba(202, 55, 55, 0.22) 0 2px, transparent 2px 100%) 2.2rem 0 / 100% 100%,
+          linear-gradient(rgba(26, 26, 26, 0.1) 1px, transparent 1px) 0 3.4rem / 100% 3.5rem,
+          var(--paper-bright);
+      }
+
+      .notebookPage.leftPage {
+        border-radius: 16px 0 0 16px;
+        border-right-width: 2px;
+        padding: 3.4rem 1rem 1rem 1.2rem;
+      }
+
+      .notebookPage.rightPage {
+        border-radius: 0 16px 16px 0;
+        border-left-width: 2px;
+      }
+
+      .notebookFold {
+        position: absolute;
+        z-index: 3;
+        top: 0;
+        bottom: 0;
+        left: -0.35rem;
+        width: 0.7rem;
+        background:
+          linear-gradient(90deg, rgba(26, 26, 26, 0.22), rgba(26, 26, 26, 0.04), rgba(26, 26, 26, 0.18));
+        pointer-events: none;
+      }
+
+      .notebookNoteList {
+        display: grid;
+        gap: 0.65rem;
+        color: var(--muted-ink);
+        font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+        font-size: 0.72rem;
+        line-height: 1.35;
+      }
+
+      .notebookNoteList strong {
+        color: var(--ink);
+        font-family: inherit;
+        text-transform: uppercase;
+      }
+
+      .tapedPhoto,
+      .stickyScrap {
+        border: 3px solid var(--ink);
+        background: rgba(251, 251, 249, 0.9);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .tapedPhoto {
+        margin-top: 1rem;
+        width: 6rem;
+        aspect-ratio: 1 / 0.82;
+        transform: rotate(-4deg);
+        background:
+          linear-gradient(rgba(26, 26, 26, 0.08) 1px, transparent 1px) 0 0 / 100% 1rem,
+          #fbfbf9;
+      }
+
+      .stickyScrap {
+        margin-top: auto;
+        width: 7rem;
+        padding: 0.55rem;
+        background: #fff1a8;
+        transform: rotate(-3deg);
+        font-size: 0.68rem;
+        text-transform: uppercase;
+      }
+
+      .notebookPlayfield {
+        position: absolute;
+        inset: 0;
+      }
+
+      .notebookStatus {
+        position: absolute;
+        z-index: 8;
+        left: 1rem;
+        top: 1rem;
+        display: grid;
+        gap: 0.32rem;
+        width: 6.2rem;
+        color: var(--ink);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .notebookStatus .meter {
+        width: 4.7rem;
+      }
+
+      .notebookModal {
+        position: absolute;
+        z-index: 25;
+        left: 50%;
+        top: 50%;
+        display: grid;
+        grid-template-rows: auto minmax(0, auto) auto;
+        gap: 0.8rem;
+        width: min(31rem, calc(100% - 2rem));
+        max-height: min(78dvh, 28rem);
+        overflow: hidden;
+        transform: translate(-50%, -50%) rotate(-0.5deg);
+        border: 4px solid var(--ink);
+        border-radius: 8px;
+        background: rgba(251, 251, 249, 0.97);
+        box-shadow: var(--shadow-md);
+        padding: clamp(1rem, 2.8vw, 1.45rem);
+        text-align: center;
+        pointer-events: auto;
+      }
+
+      .notebookModal::before,
+      .notebookModal::after {
+        content: "";
+        position: absolute;
+        top: -0.55rem;
+        width: 4.8rem;
+        height: 1.2rem;
+        border: 2px solid rgba(26, 26, 26, 0.32);
+        background: rgba(232, 211, 157, 0.84);
+      }
+
+      .notebookModal::before {
+        left: 1.2rem;
+        transform: rotate(-5deg);
+      }
+
+      .notebookModal::after {
+        right: 1.2rem;
+        transform: rotate(5deg);
+      }
+
+      .notebookModal h2 {
+        font-size: clamp(1.7rem, 4.8vw, 2.8rem);
+        line-height: 1;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+
+      .notebookModal p {
+        color: var(--muted-ink);
+        font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+        font-size: 0.84rem;
+        line-height: 1.45;
+      }
+
+      .notebookFooter {
+        position: absolute;
+        z-index: 18;
+        left: 50%;
+        bottom: 0.85rem;
+        width: min(31rem, calc(100% - 2rem));
+        transform: translateX(-50%);
+        border: 3px solid var(--ink);
+        border-radius: 999px;
+        background: rgba(251, 251, 249, 0.84);
+        box-shadow: var(--shadow-sm);
+        padding: 0.45rem 0.8rem;
+        text-align: center;
+        color: var(--muted-ink);
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .notebookCandidate .mark {
+        background: rgba(26, 26, 26, var(--a, 0.52));
+      }
+
+      .notebookCandidate .avatar {
+        top: 66%;
+      }
+
+      .notebookCandidate .mobileStatus {
+        position: absolute;
+        left: 0.75rem;
+        right: 0.75rem;
+        bottom: 0.75rem;
+        display: none;
+      }
+
+      .phonePortrait .notebookSpread,
+      .tablet .notebookSpread {
+        grid-template-columns: minmax(0, 1fr);
+        inset: 3.95rem 0.85rem 0.85rem;
+      }
+
+      .phonePortrait .leftPage,
+      .tablet .leftPage {
+        display: none;
+      }
+
+      .phonePortrait .rightPage,
+      .tablet .rightPage {
+        border-radius: 16px;
+        border-left-width: 4px;
+      }
+
+      .phonePortrait .notebookStatus,
+      .tablet .notebookStatus {
+        display: none;
+      }
+
+      .phonePortrait .notebookCandidate .mobileStatus,
+      .tablet .notebookCandidate .mobileStatus {
+        display: grid;
+      }
+
+      .phonePortrait .notebookModal {
+        width: min(22rem, calc(100% - 1.2rem));
+        max-height: min(72dvh, 32rem);
+      }
+
+      .phoneLandscape .notebookSpread {
+        inset: 3.4rem 0.8rem 0.75rem;
+        grid-template-columns: 5.2rem minmax(0, 1fr);
+      }
+
+      .phoneLandscape .notebookPage.leftPage {
+        display: block;
+        padding: 2.6rem 0.35rem 0.5rem;
+      }
+
+      .phoneLandscape .notebookPage.leftPage .notebookNoteList,
+      .phoneLandscape .tapedPhoto,
+      .phoneLandscape .stickyScrap {
+        display: none;
+      }
+
+      .phoneLandscape .notebookPage.rightPage {
+        border-radius: 0 14px 14px 0;
+      }
+
+      .phoneLandscape .notebookStatus {
+        left: 0.55rem;
+        top: 0.7rem;
+        width: 4.3rem;
+        font-size: 0.68rem;
+      }
+
+      .phoneLandscape .notebookStatus .meter {
+        width: 3.2rem;
+      }
+
+      .phoneLandscape .notebookModal {
+        width: min(26rem, calc(100% - 1rem));
+        max-height: calc(100% - 1rem);
+        padding: 0.8rem;
+      }
+
+      .phoneLandscape .notebookModal h2 {
+        font-size: 1.6rem;
+      }
+
+      .phoneLandscape .notebookFooter {
+        display: none;
+      }
+
+      .tabletLandscape .notebookSpread {
+        grid-template-columns: minmax(12rem, 0.72fr) minmax(0, 1.35fr);
+      }
+
+      @media (max-width: 760px) {
+        .labHeader {
+          grid-template-columns: 1fr;
+          align-items: start;
+        }
+
+        .controlGroup {
+          justify-content: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="lab">
+      <header class="labHeader">
+        <div>
+          <h1>Shell Candidate Lab</h1>
+          <p class="intro">
+            Compare the practical Hybrid Shell with a more expressive Notebook
+            Hybrid that keeps the same core rules: viewport panels, compact
+            chrome, and a touch surface larger than the visible game area.
+            Use tournament.html for the scene-template matrix.
+          </p>
+        </div>
+        <div class="controlStack">
+          <div class="controlGroup" aria-label="Concept previews">
+            <button class="chip" data-concept-button="stable" aria-pressed="true">Stable Hybrid</button>
+            <button class="chip" data-concept-button="notebook" aria-pressed="false">Notebook Hybrid</button>
+          </div>
+          <div class="controlGroup" aria-label="Viewport previews">
+            <button class="chip" data-size-button="desktop" aria-pressed="true">Desktop</button>
+            <button class="chip" data-size-button="phonePortrait" aria-pressed="false">Phone Portrait</button>
+            <button class="chip" data-size-button="phoneLandscape" aria-pressed="false">Phone Landscape</button>
+            <button class="chip" data-size-button="tablet" aria-pressed="false">Tablet</button>
+            <button class="chip" data-size-button="tabletLandscape" aria-pressed="false">Tablet Landscape</button>
+          </div>
+        </div>
+      </header>
+
+      <main class="previewWrap">
+        <div id="viewport" class="viewport desktop" aria-label="Hybrid shell candidate preview">
+          <section class="candidate stableCandidate active" data-concept="stable" aria-label="Stable hybrid shell">
+            <div class="shellChrome">
+              <button class="shellButton">&lt; Back</button>
+              <button class="shellButton menuButton">Menu</button>
+            </div>
+
+            <div class="touchField">
+              <span class="touchLabel">Shell-level arcade touch field</span>
+            </div>
+
+            <div class="hybridLayout">
+              <aside class="marginChrome sideStatus" aria-label="Run status">
+                <div class="statusNote">
+                  <strong>1:08</strong>
+                  <span>Kite ideas</span>
+                  <span class="meter" aria-hidden="true"><span></span></span>
+                </div>
+              </aside>
+
+              <div class="playSlot">
+                <div class="gameCard" aria-label="Game card">
+                  <div class="playfield"></div>
+                  <span class="mark" style="left: 27%; top: 35%; --s: 1.05rem"></span>
+                  <span class="mark" style="left: 65%; top: 34%; --s: 0.78rem; --a: 0.45"></span>
+                  <span class="mark" style="left: 41%; top: 56%; --s: 1.3rem"></span>
+                  <span class="mark" style="left: 69%; top: 67%; --s: 0.85rem; --a: 0.5"></span>
+                  <span class="mark" style="left: 52%; top: 78%; --s: 0.72rem; --a: 0.42"></span>
+                  <div class="avatar"></div>
+                </div>
+              </div>
+
+              <aside class="marginChrome actionRail" aria-hidden="true"></aside>
+
+              <div class="mobileStatus" aria-label="Run status">
+                <strong>1:08</strong>
+                <span>Kite ideas</span>
+                <span class="meter" aria-hidden="true"><span></span></span>
+              </div>
+            </div>
+
+            <div class="overlayStage">
+              <section class="modalPanel" aria-label="Scene panel">
+                <h2>Choose Upgrade</h2>
+                <div class="modalBody">
+                  <p>
+                    Scene panels live in a viewport overlay layer, while the game
+                    card stays clean underneath.
+                  </p>
+                </div>
+                <div class="actionRow">
+                  <button class="choiceButton primary">Pencil Sweep</button>
+                  <button class="choiceButton">Ink Magnet</button>
+                </div>
+              </section>
+            </div>
+          </section>
+
+          <section class="candidate notebookCandidate" data-concept="notebook" aria-label="Notebook hybrid shell">
+            <div class="notebookTabs">
+              <button class="pageTab backTab">&lt; Back</button>
+              <button class="pageTab menuTab">Menu</button>
+            </div>
+
+            <div class="notebookTouchField"></div>
+
+            <div class="notebookSpread">
+              <aside class="notebookPage leftPage" aria-label="Notebook notes page">
+                <div class="notebookNoteList">
+                  <strong>Today</strong>
+                  <span>* survive the sketch</span>
+                  <span>* keep page clean</span>
+                  <span>* chase the smudges</span>
+                </div>
+                <div class="tapedPhoto" aria-hidden="true"></div>
+                <div class="stickyScrap">whole page is input</div>
+              </aside>
+
+              <div class="notebookPage rightPage" aria-label="Notebook game page">
+                <div class="notebookFold" aria-hidden="true"></div>
+                <div class="notebookPlayfield">
+                  <div class="notebookStatus" aria-label="Run status">
+                    <strong>1:08</strong>
+                    <span>Kite</span>
+                    <span class="meter" aria-hidden="true"><span></span></span>
+                  </div>
+                  <span class="mark" style="left: 23%; top: 32%; --s: 1.05rem"></span>
+                  <span class="mark" style="left: 62%; top: 27%; --s: 0.78rem; --a: 0.45"></span>
+                  <span class="mark" style="left: 48%; top: 49%; --s: 1.3rem"></span>
+                  <span class="mark" style="left: 71%; top: 65%; --s: 0.85rem; --a: 0.5"></span>
+                  <span class="mark" style="left: 36%; top: 75%; --s: 0.72rem; --a: 0.42"></span>
+                  <div class="avatar"></div>
+                </div>
+                <div class="mobileStatus" aria-label="Run status">
+                  <strong>1:08</strong>
+                  <span>Kite ideas</span>
+                  <span class="meter" aria-hidden="true"><span></span></span>
+                </div>
+              </div>
+            </div>
+
+            <section class="notebookModal" aria-label="Notebook scene panel">
+              <h2>Choose Upgrade</h2>
+              <div class="modalBody">
+                <p>
+                  A taped sheet floats over the notebook page. The paper around
+                  it still explains the bigger touch surface.
+                </p>
+              </div>
+              <div class="actionRow">
+                <button class="choiceButton primary">Pencil Sweep</button>
+                <button class="choiceButton">Ink Magnet</button>
+              </div>
+            </section>
+
+            <div class="notebookFooter">whole page is your playground</div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      const sizeCopy = {
+        desktop: "Desktop",
+        phonePortrait: "Phone Portrait",
+        phoneLandscape: "Phone Landscape",
+        tablet: "Tablet",
+        tabletLandscape: "Tablet Landscape"
+      };
+
+      const viewport = document.querySelector("#viewport");
+      const conceptCopy = {
+        stable: "Hybrid shell candidate",
+        notebook: "Notebook hybrid shell candidate"
+      };
+
+      document.querySelectorAll("[data-concept-button]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const concept = button.dataset.conceptButton;
+          document.querySelectorAll("[data-concept-button]").forEach((item) => {
+            item.setAttribute("aria-pressed", String(item === button));
+          });
+          document.querySelectorAll("[data-concept]").forEach((candidate) => {
+            candidate.classList.toggle("active", candidate.dataset.concept === concept);
+          });
+          viewport.setAttribute("aria-label", conceptCopy[concept]);
+        });
+      });
+
+      document.querySelectorAll("[data-size-button]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const size = button.dataset.sizeButton;
+          document.querySelectorAll("[data-size-button]").forEach((item) => {
+            item.setAttribute("aria-pressed", String(item === button));
+          });
+          viewport.className = `viewport ${size}`;
+          viewport.setAttribute("aria-label", `${sizeCopy[size]} hybrid shell preview`);
+        });
+      });
+    </script>
+  </body>
+</html>

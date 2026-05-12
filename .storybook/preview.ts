@@ -1,5 +1,5 @@
 import type { Preview } from '@storybook/react-vite';
-import { UI_FONT_FAMILY } from '../src/config/typography';
+import { UI_FONT_FAMILY } from '../src/shared/config/typography';
 import '../src/index.css';
 
 document.documentElement.style.setProperty('--font-ui', UI_FONT_FAMILY);

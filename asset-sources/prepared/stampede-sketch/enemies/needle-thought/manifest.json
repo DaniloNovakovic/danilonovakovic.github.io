@@ -1,0 +1,113 @@
+{
+  "slug": "needle-thought",
+  "displayName": "Needle Thought",
+  "assetClass": "enemy",
+  "sourceKeyed": "source-keyed.png",
+  "source": "source.png",
+  "spritesheet": "needle-thought-spritesheet.png",
+  "frameWidth": 192,
+  "frameHeight": 192,
+  "frameCount": 12,
+  "grid": {
+    "columns": 4,
+    "rows": 3
+  },
+  "origin": {
+    "x": 0.5,
+    "y": 0.5
+  },
+  "runtimeScale": 0.32,
+  "runtimeDisplayMaxPx": 36,
+  "frames": [
+    {
+      "index": 0,
+      "state": "idle_mark",
+      "file": "frames/00-idle_mark.png",
+      "sourceFile": "source-frames/00-idle_mark.png"
+    },
+    {
+      "index": 1,
+      "state": "aim_left",
+      "file": "frames/01-aim_left.png",
+      "sourceFile": "source-frames/01-aim_left.png"
+    },
+    {
+      "index": 2,
+      "state": "aim_right",
+      "file": "frames/02-aim_right.png",
+      "sourceFile": "source-frames/02-aim_right.png"
+    },
+    {
+      "index": 3,
+      "state": "aim_up",
+      "file": "frames/03-aim_up.png",
+      "sourceFile": "source-frames/03-aim_up.png"
+    },
+    {
+      "index": 4,
+      "state": "aim_down",
+      "file": "frames/04-aim_down.png",
+      "sourceFile": "source-frames/04-aim_down.png"
+    },
+    {
+      "index": 5,
+      "state": "dash_stretch",
+      "file": "frames/05-dash_stretch.png",
+      "sourceFile": "source-frames/05-dash_stretch.png"
+    },
+    {
+      "index": 6,
+      "state": "overshoot_smear",
+      "file": "frames/06-overshoot_smear.png",
+      "sourceFile": "source-frames/06-overshoot_smear.png"
+    },
+    {
+      "index": 7,
+      "state": "turn_windup",
+      "file": "frames/07-turn_windup.png",
+      "sourceFile": "source-frames/07-turn_windup.png"
+    },
+    {
+      "index": 8,
+      "state": "warning_tremble",
+      "file": "frames/08-warning_tremble.png",
+      "sourceFile": "source-frames/08-warning_tremble.png"
+    },
+    {
+      "index": 9,
+      "state": "hit_snap",
+      "file": "frames/09-hit_snap.png",
+      "sourceFile": "source-frames/09-hit_snap.png"
+    },
+    {
+      "index": 10,
+      "state": "cleared_broken",
+      "file": "frames/10-cleared_broken.png",
+      "sourceFile": "source-frames/10-cleared_broken.png"
+    },
+    {
+      "index": 11,
+      "state": "respawn_sharpen",
+      "file": "frames/11-respawn_sharpen.png",
+      "sourceFile": "source-frames/11-respawn_sharpen.png"
+    }
+  ],
+  "hitboxCompatibility": {
+    "shape": "circle",
+    "radiusPxAtRuntimeScale": 16,
+    "origin": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "notes": "Floating Stampede enemy body. Tune against contact pressure before replacing placeholder circles."
+  },
+  "body": {
+    "type": "arcade-circle",
+    "radius": 16,
+    "offset": {
+      "x": 0,
+      "y": 0
+    }
+  },
+  "debugContact": "needle-thought-debug-contact.png"
+}
