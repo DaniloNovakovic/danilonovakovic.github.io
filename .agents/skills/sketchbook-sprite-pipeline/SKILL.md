@@ -49,7 +49,8 @@ Scene-specific art can bend the style only when the scene already does, such as 
 9. Write `manifest.json`.
 10. Generate or update a debug/contact sheet showing frame boundaries, names, and any body/hitbox assumptions.
 11. Validate alpha, dimensions, bbox drift, and manifest consistency before finishing.
-12. Promote the prepared runtime bundle into `public/assets/<scene-or-domain>/<slug>/` only when it is intentionally deployable.
+12. Keep the prepared runtime bundle in `asset-sources/prepared/<scene-or-domain>/<slug>/` until scene code actually loads it.
+13. Promote the loaded bundle into `public/assets/<scene-or-domain>/<slug>/` as part of the runtime integration slice.
 
 ## Existing Image Conversion
 
@@ -78,10 +79,10 @@ asset-sources/<scene-or-domain>/<slug-or-concept-set>/
 └── notes-or-readme.md
 ```
 
-Prefer this structure for production assets:
+Prefer this structure for prepared runtime candidates:
 
 ```text
-public/assets/<scene-or-domain>/<slug>/
+asset-sources/prepared/<scene-or-domain>/<slug>/
 ├── source-keyed.png            # if chroma-keyed
 ├── source.png                  # transparent source sheet or still
 ├── source-frames/*.png         # larger rough transparent crops
@@ -92,9 +93,9 @@ public/assets/<scene-or-domain>/<slug>/
 ```
 
 For quick concept assets, use `asset-sources/**`. `public/assets/**` is for
-assets that are runtime-wired or intentionally deployable runtime candidates.
-Existing prepared flat folders under `public/assets/characters` are acceptable,
-but production integration should migrate to the structure above.
+assets that are runtime-wired. Existing prepared flat folders under
+`asset-sources/prepared/characters` are acceptable, but production integration
+should migrate to the structure above.
 
 ## Manifest Minimum
 

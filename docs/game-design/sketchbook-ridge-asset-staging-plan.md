@@ -7,8 +7,9 @@
 Active sources: `sketchbook-ridge-summit.md`,
 `sketchbook-ridge-milestone-plan.md`, `sketchbook-ridge-m3-visual-pack.md`,
 `sketchbook-ridge-m3-overlay-pack.md`, `sketchbook-ridge-m3-audio-pack.md`,
-`docs/design/style-guide.md`, the current asset readmes under
-`public/assets/**`, and raw source readmes under `asset-sources/**`.
+`docs/design/style-guide.md`, the current generated/prepared asset readmes
+under `asset-sources/**`, and runtime asset readmes under `public/assets/**`
+when assets are promoted.
 
 ## Why This Exists
 
@@ -93,11 +94,11 @@ Purpose: transparent, normalized, scene-specific art that is close to usable.
 
 Current homes:
 
-- `public/assets/characters/cicka/`
-- `public/assets/potassium-slip/**`
-- `public/assets/stampede-sketch/enemies/**`
-- `public/assets/stampede-sketch/player-guardian/`
-- `public/assets/stampede-sketch/calm-patch/`
+- `asset-sources/prepared/characters/cicka/`
+- `asset-sources/prepared/potassium-slip/**`
+- `asset-sources/prepared/stampede-sketch/enemies/**`
+- `asset-sources/prepared/stampede-sketch/player-guardian/`
+- `asset-sources/prepared/stampede-sketch/calm-patch/`
 
 Rules:
 
@@ -105,6 +106,7 @@ Rules:
 - frame sizing, origin, and runtime scale belong here
 - these assets are **candidates**, not automatic commitments
 - scene code may adopt them slice by slice
+- do not keep candidates in `public/assets/**` unless runtime code loads them
 
 ### Lane 4: Runtime-Wired Assets
 
@@ -125,16 +127,16 @@ As of this planning pass:
 
 - `asset-sources/stampede-sketch/generated-concepts/` is clearly marked as raw
   concept source, not runtime input.
-- `public/assets/stampede-sketch/enemies/README.md` documents prepared enemy
-  sprites as runtime candidates, but also says they are not loaded yet.
-- `public/assets/potassium-slip/README.md` documents prepared Potassium enemy
-  and banana assets as runtime candidates, not wired defaults.
-- `public/assets/characters/cicka/` now exists as a prepared prototype set,
-  but it does not yet have folder-local readme language describing intended use
-  or whether the scene currently loads it.
+- `asset-sources/prepared/stampede-sketch/enemies/README.md` documents
+  prepared enemy sprites as runtime candidates, but also says they are not
+  loaded yet.
+- `asset-sources/prepared/potassium-slip/README.md` documents prepared
+  Potassium enemy and banana assets as runtime candidates, not wired defaults.
+- `asset-sources/prepared/characters/cicka/` documents the prepared Cicka
+  prototype set and its first-use reads.
 
-That means the repo is not in bad shape, but the character lane is less
-documented than the Potassium and Stampede lanes.
+That means the repo keeps source/prepared art available without shipping it
+until a scene-owned adoption slice promotes it.
 
 ## Recommended Adoption Order
 
@@ -151,7 +153,7 @@ Reason:
 
 Recommended slice:
 
-- document `public/assets/characters/cicka/`
+- review `asset-sources/prepared/characters/cicka/`
 - decide whether it is a prepared prototype or active runtime source
 - if integrated, keep it lightweight: perch, blink, loaf, suspicious turn, and
   one movement read are enough
@@ -217,7 +219,10 @@ Each prepared asset family should have enough local documentation to answer:
 
 - `docs/design/**` explains style and prompting direction
 - `docs/game-design/**` explains milestone relevance and adoption order
-- `public/assets/**/README.md` explains folder-local asset state and contract
+- `asset-sources/**/README.md` explains generated/prepared asset state and
+  contract
+- `public/assets/**/README.md` explains runtime-wired asset state after
+  promotion
 
 Do not duplicate long prep instructions across all three layers.
 
@@ -227,7 +232,7 @@ Low if we stay disciplined.
 
 Safe parallel work:
 
-- asset prep inside `public/assets/**`
+- asset prep inside `asset-sources/**`
 - scene-local visual experiments
 - docs and readmes
 
@@ -239,10 +244,9 @@ Riskier work that should be serialized:
 
 ## Recommended Next 1-3 Tasks
 
-1. Add folder-local documentation for `public/assets/characters/cicka/`.
-2. Keep the long-term topology ideas doc as planning-only and out of milestone
+1. Keep the long-term topology ideas doc as planning-only and out of milestone
    requirements.
-3. Open a small implementation slice for either Cicka adoption in Ridge or the
+2. Open a small implementation slice for either Cicka adoption in Ridge or the
    Stampede calm-patch / proximity-aggro pass, but not both plus Potassium at
    once.
 
