@@ -1,4 +1,8 @@
-import { POTASSIUM_SCENE_ID, type SceneId } from '@/game/scenes/sceneIds';
+import {
+  POTASSIUM_SCENE_ID,
+  STAMPEDE_SKETCH_SCENE_ID,
+  type SceneId
+} from '@/game/scenes/sceneIds';
 import type {
   NotebookFooterMode,
   NotebookSceneProfile,
@@ -21,6 +25,16 @@ export function getNotebookRuntimeShellProfile(sceneId: SceneId): NotebookRuntim
       layout: 'focus',
       footerMode: 'reserved',
       controlMatLabel: 'input mat wider than board'
+    };
+  }
+
+  if (sceneId === STAMPEDE_SKETCH_SCENE_ID) {
+    return {
+      ownerSceneId: STAMPEDE_SKETCH_SCENE_ID,
+      profile: 'survivalPage',
+      layout: 'focus',
+      footerMode: 'reserved',
+      controlMatLabel: 'input mat wider than survival page'
     };
   }
 

@@ -1,8 +1,9 @@
+import { SceneUiHost } from '@/game/sceneUi/SceneUiHost';
 import type { OpenOverlayOptions } from '@/game/bridge/store';
 import type { OverlayId } from '@/game/overlays/overlayIds';
 import type { PhaserScenePresentationMode } from '@/game/sharedSceneRuntime/phaserScenePresentation';
-import type { SceneId } from '@/game/scenes/sceneIds';
-import { SceneHintSlip } from '@/shared/ui';
+import { RIDGE_SCENE_ID, type SceneId } from '@/game/scenes/sceneIds';
+import { STAMPEDE_ARENA } from '@/game/scenes/stampedeSketch/runtime/movement';
 import { useMessages } from '@/shared/i18n';
 import type { NotebookRuntimeShellProfile } from './notebookShellProfile';
 import { NotebookRuntimeShell } from './NotebookRuntimeShell';
@@ -11,10 +12,11 @@ import {
   useNotebookFocusPageFrameLayout
 } from './notebookFocusLayout';
 
-const POTASSIUM_BOARD_WIDTH = 450;
-const POTASSIUM_BOARD_HEIGHT = 600;
-const POTASSIUM_BOARD_ASPECT = POTASSIUM_BOARD_WIDTH / POTASSIUM_BOARD_HEIGHT;
-interface PotassiumNotebookShellProps {
+const STAMPEDE_ARENA_WIDTH = STAMPEDE_ARENA.right - STAMPEDE_ARENA.left;
+const STAMPEDE_ARENA_HEIGHT = STAMPEDE_ARENA.bottom - STAMPEDE_ARENA.top;
+const STAMPEDE_ARENA_ASPECT = STAMPEDE_ARENA_WIDTH / STAMPEDE_ARENA_HEIGHT;
+
+interface StampedeNotebookShellProps {
   activeSceneId: SceneId;
   isGameInputBlocked: boolean;
   isScenePanelOpen: boolean;
@@ -25,10 +27,9 @@ interface PotassiumNotebookShellProps {
   onSwitchToStatic: () => void;
   presentationMode: PhaserScenePresentationMode;
   profile: NotebookRuntimeShellProfile;
-  sceneHintText: string;
 }
 
-export function PotassiumNotebookShell({
+export function StampedeNotebookShell({
   activeSceneId,
   isGameInputBlocked,
   isScenePanelOpen,
@@ -38,50 +39,47 @@ export function PotassiumNotebookShell({
   onReturnToOverworld,
   onSwitchToStatic,
   presentationMode,
-  profile,
-  sceneHintText
-}: PotassiumNotebookShellProps) {
+  profile
+}: StampedeNotebookShellProps) {
   const messages = useMessages();
-  const frameLayout = usePotassiumBoardFrameLayout();
+  const frameLayout = useNotebookFocusPageFrameLayout(STAMPEDE_ARENA_ASPECT);
 
   return (
     <NotebookRuntimeShell
       activeSceneId={activeSceneId}
-      backAriaLabel={messages.gameShell.backToCity}
+      backAriaLabel={messages.gameShell.backToRidge}
       controlMat={{
-        ariaLabel: 'Potassium input mat',
+        ariaLabel: 'Stampede input mat',
         className: 'touch-none',
+        showDragIndicator: true,
         style: { bottom: '0.75rem', top: NOTEBOOK_CONTROL_MAT_TOP_OFFSET_PX },
-        testId: 'potassium-control-mat'
+        testId: 'stampede-control-mat'
       }}
-      footer={<SceneHintSlip label={sceneHintText} />}
+      footer={<SceneUiHost placement="status" />}
       isGameInputBlocked={isGameInputBlocked}
       isScenePanelOpen={isScenePanelOpen}
       loadingSceneId={loadingSceneId}
-      onBack={onReturnToOverworld}
+      onBack={() => onEnterScene(RIDGE_SCENE_ID)}
       onEnterScene={onEnterScene}
       onOpenOverlay={onOpenOverlay}
       onReturnToOverworld={onReturnToOverworld}
       onSwitchToStatic={onSwitchToStatic}
       pageFrame={{
         attributes: {
-          'data-board-aspect': POTASSIUM_BOARD_ASPECT,
+          'data-arena-aspect': STAMPEDE_ARENA_ASPECT,
           'data-frame-aspect': frameLayout.aspect,
           'data-frame-center-y': frameLayout.centerY,
           'data-frame-relative-center-y': frameLayout.relativeCenterY,
           'data-frame-width': frameLayout.width
         },
-        className: 'potassium-notebook-page-frame absolute left-1/2 -translate-x-1/2 -translate-y-1/2 shadow-[12px_12px_0px_0px_rgba(26,26,26,1)]',
-        gameFrameTestId: 'potassium-notebook-game-frame',
+        className: 'stampede-notebook-page-frame absolute left-1/2 -translate-x-1/2 -translate-y-1/2 shadow-[12px_12px_0px_0px_rgba(26,26,26,1)]',
+        gameFrameTestId: 'stampede-notebook-game-frame',
         style: frameLayout.style,
-        testId: 'potassium-notebook-page-frame'
+        testId: 'stampede-notebook-page-frame'
       }}
       presentationMode={presentationMode}
       profile={profile}
+      shortHeaderCenter={<SceneUiHost placement="status" />}
     />
   );
-}
-
-function usePotassiumBoardFrameLayout() {
-  return useNotebookFocusPageFrameLayout(POTASSIUM_BOARD_ASPECT);
 }

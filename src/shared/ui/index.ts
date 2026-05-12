@@ -7,6 +7,7 @@ export { LoadingFallback } from './LoadingFallback';
 export { ModalShell } from './ModalShell';
 export {
   ControlMat,
+  ControlMatDragIndicator,
   NotebookMenuSheet,
   NotebookHeaderChrome,
   NotebookPageFrame,
@@ -20,6 +21,7 @@ export {
   SceneStatusSlip
 } from './NotebookShell';
 export type {
+  ControlMatDragIndicatorState,
   NotebookChoiceTone,
   NotebookFooterMode,
   NotebookPanelActionsLayout,

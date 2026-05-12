@@ -1,5 +1,5 @@
 import * as Phaser from 'phaser';
-import { bridgeActions } from '@/game/bridge/store';
+import { bridgeActions, type SceneControlPointerEvent } from '@/game/bridge/store';
 import { PHASER_SCENE_KEYS, STAMPEDE_SKETCH_SCENE_ID } from '@/game/scenes/sceneIds';
 import type { SceneUiActionId } from '@/game/sceneUi/types';
 import {
@@ -111,6 +111,7 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.showStartPrompt();
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       bridgeActions.clearSceneUi(STAMPEDE_SKETCH_SCENE_ID);
+      bridgeActions.clearSceneControlPointerEvents(STAMPEDE_SKETCH_SCENE_ID);
     });
     this.setPaused(this.isPaused);
   }
@@ -140,6 +141,8 @@ export class StampedeSketchScene extends Phaser.Scene {
       this.handleSceneUiAction(sceneUiAction.action);
       return;
     }
+
+    this.consumeSceneControlPointerEvents();
 
     const closeRequested = this.inputRuntime.closeRequested();
     if (!this.hasRunStarted) {
@@ -376,5 +379,19 @@ export class StampedeSketchScene extends Phaser.Scene {
       'stampedeStatus',
       snapshot
     );
+  }
+
+  private consumeSceneControlPointerEvents(): void {
+    const events = bridgeActions.consumeSceneControlPointerEvents(STAMPEDE_SKETCH_SCENE_ID);
+    events.forEach((event) => this.handleSceneControlPointerEvent(event));
+  }
+
+  private handleSceneControlPointerEvent(event: SceneControlPointerEvent): void {
+    this.inputRuntime?.handleControlPointerEvent({
+      kind: event.kind,
+      pointerId: event.pointerId,
+      x: event.x,
+      y: event.y
+    });
   }
 }

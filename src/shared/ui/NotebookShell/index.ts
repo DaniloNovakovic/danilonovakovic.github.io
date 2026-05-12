@@ -2,6 +2,12 @@ export {
   ControlMat
 } from './chrome/ControlMat';
 export {
+  ControlMatDragIndicator
+} from './chrome/ControlMatDragIndicator';
+export type {
+  ControlMatDragIndicatorState
+} from './chrome/ControlMatDragIndicator';
+export {
   NotebookHeaderChrome
 } from './chrome/NotebookHeaderChrome';
 export {

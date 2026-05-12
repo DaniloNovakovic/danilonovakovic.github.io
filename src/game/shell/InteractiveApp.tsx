@@ -12,6 +12,7 @@ import {
   isSceneId,
   OVERWORLD_SCENE_ID,
   POTASSIUM_SCENE_ID,
+  STAMPEDE_SKETCH_SCENE_ID,
   type SceneId
 } from '@/game/scenes/sceneIds';
 import { Button, Card, Panel } from '@/shared/ui';
@@ -19,6 +20,7 @@ import { getInteractiveGameShellLayout } from './gameShellLayout';
 import { getSceneHeaderChrome } from './sceneHeaderChrome';
 import { getNotebookRuntimeShellProfile } from './notebookShellProfile';
 import { PotassiumNotebookShell } from './PotassiumNotebookShell';
+import { StampedeNotebookShell } from './StampedeNotebookShell';
 import { useResizeObserver } from '@/shared/hooks/useResizeObserver';
 import { useMessages } from '@/shared/i18n';
 
@@ -62,7 +64,7 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
     bridgeActions.enterScene(sceneId);
   };
 
-  if (notebookShellProfile) {
+  if (notebookShellProfile?.ownerSceneId === POTASSIUM_SCENE_ID) {
     return (
       <PotassiumNotebookShell
         activeSceneId={bridge.activeSceneId}
@@ -76,6 +78,23 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
         presentationMode={presentationMode}
         profile={notebookShellProfile}
         sceneHintText={sceneHintText}
+      />
+    );
+  }
+
+  if (notebookShellProfile?.ownerSceneId === STAMPEDE_SKETCH_SCENE_ID) {
+    return (
+      <StampedeNotebookShell
+        activeSceneId={bridge.activeSceneId}
+        isGameInputBlocked={isGameInputBlocked}
+        isScenePanelOpen={bridge.sceneUi.panel !== null}
+        loadingSceneId={bridge.loadingSceneId}
+        onEnterScene={enterScene}
+        onOpenOverlay={openOverlay}
+        onReturnToOverworld={returnToOverworld}
+        onSwitchToStatic={onSwitchToStatic}
+        presentationMode={presentationMode}
+        profile={notebookShellProfile}
       />
     );
   }

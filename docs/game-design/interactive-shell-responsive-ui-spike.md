@@ -329,6 +329,14 @@ Do not migrate every scene in the same slice. Stampede and Potassium are enough
 to validate the pattern because they already exercise arcade input, scene UI
 panels, footer/status, and scene-aware Back chrome.
 
+Runtime checkpoint:
+
+- Potassium is the first `ruledBoardPage` runtime client and keeps its visible
+  board frame separate from the wider shell control mat.
+- Stampede is the first `survivalPage` runtime client and reuses the same
+  owner-scoped control-mat pointer bridge for drag-to-move outside the visible
+  page.
+
 ## Decisions From Review
 
 Decided on May 11, 2026:

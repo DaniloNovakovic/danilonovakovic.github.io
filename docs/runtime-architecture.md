@@ -38,8 +38,8 @@ game vocabulary is explicit:
   scene navigation control in presentation-heavy arcade scenes.
 - **Notebook shell profile policy** - `src/game/shell/notebookShellProfile.ts`
   maps runtime scenes onto shared Notebook Shell layout primitives. Potassium
-  is the first runtime proof and keeps its scene-specific panels colocated in
-  the Potassium scene folder.
+  uses the `ruledBoardPage` focus profile; Stampede uses the `survivalPage`
+  focus profile. Scene-specific panels stay colocated with their owning scenes.
 - **Shared scene runtime** - reusable Phaser-facing machinery lives in `src/game/sharedSceneRuntime`: side-view player lifecycle, camera policy, scene presentation, resume policy, keyboard pause, interior interactions, text, textures, and vision helpers.
 - **Pure gameplay decisions** - `src/game/core` contains deterministic ECS, input, and player logic that can be tested without Phaser, React, browser globals, or bridge state.
 - **Scene-owned modules** - scene folders own local layout, triggers, Phaser objects, scene contexts, scene-local overlays, and heavy scene runtime modules.
@@ -56,8 +56,9 @@ and scales with `Scale.ENVELOP`. React owns the visible shell aspect ratio:
   fixed logical design size with `Scale.ENVELOP`, and direct Phaser pointer
   input is preserved instead of the React swipe/tap gesture overlay.
 - Potassium additionally opts into the Notebook Shell `ruledBoardPage` focus
-  layout. Its shell-level control mat can forward pointer events outside the
-  visible canvas back to the Potassium scene in Phaser design coordinates.
+  layout. Stampede opts into the Notebook Shell `survivalPage` focus layout.
+  Their shell-level control mats can forward pointer events outside the visible
+  canvas back to the owning scene in Phaser design coordinates.
 
 When a scene changes presentation mode, `src/game/shell/Game.tsx` keeps the
 existing Phaser instance mounted and calls `game.scale.refresh()` after the new
@@ -87,7 +88,8 @@ re-apply camera bounds/profile math.
   those controls through scene-owned UI unless they need scene gameplay state.
 - Use the scene control pointer bridge only for explicit shell-level control
   mats. Potassium consumes these events to extend launch/recall drag input
-  beyond the visible canvas; other scenes should opt in through profile policy
+  beyond the visible canvas; Stampede consumes them to extend drag-to-move
+  beyond the visible survival page. Other scenes should opt in through profile policy
   instead of reading those events opportunistically.
 - Use `sceneResumePolicy` for resume persistence and reset rules. The low-level resume store should not be imported directly by scenes or adapters.
 - Side-view player scenes should compose `SideViewPlayerRuntime` before creating colliders against `runtime.player`; pass its camera config when the scene should follow and clamp the player.

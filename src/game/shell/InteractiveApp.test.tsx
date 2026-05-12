@@ -191,6 +191,27 @@ describe('InteractiveApp', () => {
     expect(onSwitchToStatic).toHaveBeenCalledTimes(1);
   });
 
+  it('renders Stampede inside the Notebook shell with Back and Static Mode chrome', async () => {
+    const onSwitchToStatic = vi.fn();
+    bridgeActions.enterScene(STAMPEDE_SKETCH_SCENE_ID);
+    render(<InteractiveApp onSwitchToStatic={onSwitchToStatic} />);
+
+    expect(screen.getByTestId('notebook-game-shell')).toBeDefined();
+    expect(screen.queryByTestId('interactive-game-shell')).toBeNull();
+    expect(screen.getByTestId('notebook-game-shell').getAttribute('data-profile')).toBe('survivalPage');
+    const pageFrame = screen.getByTestId('stampede-notebook-page-frame');
+    expect(pageFrame.getAttribute('data-arena-aspect')).toBe('0.75');
+    expect(pageFrame.className).toContain('stampede-notebook-page-frame');
+    expect(screen.getByTestId('stampede-control-mat').style.bottom).toBe('0.75rem');
+    expect(screen.getByRole('button', { name: /back to ridge/i })).toBeDefined();
+    expect(screen.getByRole('button', { name: /switch to static portfolio/i })).toBeDefined();
+    expect(screen.queryByRole('button', { name: /menu/i })).toBeNull();
+
+    await userEvent.click(screen.getByRole('button', { name: /switch to static portfolio/i }));
+
+    expect(onSwitchToStatic).toHaveBeenCalledTimes(1);
+  });
+
   it('keeps the Potassium page frame at the board aspect on narrow phones', () => {
     setViewportSize(390, 844);
     bridgeActions.enterScene(POTASSIUM_SCENE_ID);
@@ -294,7 +315,164 @@ describe('InteractiveApp', () => {
     expect(bridgeStore.getState().sceneControlPointerEvents).toEqual([]);
   });
 
-  it('renders Stampede scene status below the game card', () => {
+  it('queues Stampede control-mat pointer events in Phaser design space', () => {
+    bridgeActions.enterScene(STAMPEDE_SKETCH_SCENE_ID);
+    render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
+    const frame = screen.getByTestId('stampede-notebook-game-frame');
+    const mat = screen.getByTestId('stampede-control-mat');
+    vi.spyOn(frame, 'getBoundingClientRect').mockReturnValue({
+      bottom: 500,
+      height: 300,
+      left: 100,
+      right: 600,
+      top: 200,
+      width: 500,
+      x: 100,
+      y: 200,
+      toJSON: () => ({})
+    } as DOMRect);
+
+    fireEvent.pointerDown(mat, {
+      clientX: 350,
+      clientY: 350,
+      pointerId: 21,
+      timeStamp: 18
+    });
+    fireEvent.pointerMove(mat, {
+      clientX: 400,
+      clientY: 320,
+      pointerId: 21,
+      timeStamp: 24
+    });
+
+    expect(bridgeStore.getState().sceneControlPointerEvents).toMatchObject([
+      {
+        ownerSceneId: STAMPEDE_SKETCH_SCENE_ID,
+        kind: 'down',
+        pointerId: 21,
+        x: 500,
+        y: 300
+      },
+      {
+        ownerSceneId: STAMPEDE_SKETCH_SCENE_ID,
+        kind: 'move',
+        pointerId: 21,
+        x: 600,
+        y: 240
+      }
+    ]);
+  });
+
+  it('renders and clears the Stampede shell drag indicator from control-mat input', () => {
+    bridgeActions.enterScene(STAMPEDE_SKETCH_SCENE_ID);
+    render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
+    const frame = screen.getByTestId('stampede-notebook-game-frame');
+    const mat = screen.getByTestId('stampede-control-mat');
+    vi.spyOn(frame, 'getBoundingClientRect').mockReturnValue({
+      bottom: 500,
+      height: 300,
+      left: 100,
+      right: 600,
+      top: 200,
+      width: 500,
+      x: 100,
+      y: 200,
+      toJSON: () => ({})
+    } as DOMRect);
+    vi.spyOn(mat, 'getBoundingClientRect').mockReturnValue({
+      bottom: 640,
+      height: 540,
+      left: 40,
+      right: 840,
+      top: 100,
+      width: 800,
+      x: 40,
+      y: 100,
+      toJSON: () => ({})
+    } as DOMRect);
+
+    fireEvent.pointerDown(mat, {
+      clientX: 80,
+      clientY: 180,
+      pointerId: 23
+    });
+    fireEvent.pointerMove(mat, {
+      clientX: 120,
+      clientY: 210,
+      pointerId: 23
+    });
+
+    const indicator = screen.getByTestId('stampede-control-mat-drag-indicator');
+    expect(indicator.getAttribute('data-anchor-x')).toBe('40');
+    expect(indicator.getAttribute('data-anchor-y')).toBe('80');
+    expect(indicator.getAttribute('data-current-x')).toBe('80');
+    expect(indicator.getAttribute('data-current-y')).toBe('110');
+
+    fireEvent.pointerUp(mat, {
+      clientX: 120,
+      clientY: 210,
+      pointerId: 23
+    });
+
+    expect(screen.queryByTestId('stampede-control-mat-drag-indicator')).toBeNull();
+  });
+
+  it('does not render a shell drag indicator for Potassium control-mat input', () => {
+    bridgeActions.enterScene(POTASSIUM_SCENE_ID);
+    render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
+    const frame = screen.getByTestId('potassium-notebook-game-frame');
+    const mat = screen.getByTestId('potassium-control-mat');
+    vi.spyOn(frame, 'getBoundingClientRect').mockReturnValue({
+      bottom: 500,
+      height: 300,
+      left: 100,
+      right: 600,
+      top: 200,
+      width: 500,
+      x: 100,
+      y: 200,
+      toJSON: () => ({})
+    } as DOMRect);
+
+    fireEvent.pointerDown(mat, {
+      clientX: 350,
+      clientY: 350,
+      pointerId: 24
+    });
+
+    expect(screen.queryByTestId('potassium-control-mat-drag-indicator')).toBeNull();
+    expect(screen.queryByTestId('stampede-control-mat-drag-indicator')).toBeNull();
+  });
+
+  it('does not queue Stampede control-mat events while a scene panel is open', () => {
+    bridgeActions.enterScene(STAMPEDE_SKETCH_SCENE_ID);
+    bridgeActions.setSceneUiPanel(STAMPEDE_SKETCH_SCENE_ID, 'stampedeStartPrompt');
+    render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
+    const frame = screen.getByTestId('stampede-notebook-game-frame');
+    const mat = screen.getByTestId('stampede-control-mat');
+    vi.spyOn(frame, 'getBoundingClientRect').mockReturnValue({
+      bottom: 500,
+      height: 300,
+      left: 100,
+      right: 600,
+      top: 200,
+      width: 500,
+      x: 100,
+      y: 200,
+      toJSON: () => ({})
+    } as DOMRect);
+
+    fireEvent.pointerDown(mat, {
+      clientX: 350,
+      clientY: 350,
+      pointerId: 22
+    });
+
+    expect(bridgeStore.getState().sceneControlPointerEvents).toEqual([]);
+    expect(screen.queryByTestId('stampede-control-mat-drag-indicator')).toBeNull();
+  });
+
+  it('renders Stampede scene status in the Notebook shell footer', () => {
     bridgeActions.enterScene(STAMPEDE_SKETCH_SCENE_ID);
     bridgeActions.setSceneUiStatus(STAMPEDE_SKETCH_SCENE_ID, 'stampedeStatus', {
       timeRemainingSeconds: 68,
@@ -303,9 +481,9 @@ describe('InteractiveApp', () => {
     });
     render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
 
-    const footer = screen.getByRole('contentinfo');
-    expect(footer.contains(screen.getByText('1:08'))).toBe(true);
-    expect(footer.contains(screen.getByText('Breather'))).toBe(true);
+    expect(screen.getByTestId('notebook-game-shell').getAttribute('data-profile')).toBe('survivalPage');
+    expect(screen.getByText('1:08')).toBeDefined();
+    expect(screen.getByText('Breather')).toBeDefined();
     expect(screen.getByRole('progressbar', { name: /page noise/i }).getAttribute('aria-valuenow')).toBe('40');
   });
 

@@ -42,8 +42,8 @@ for fast iteration. Current useful targets include `hobbies`, `basement`,
   header controls. Stampede returns to Ridge from the header Back button;
   Potassium returns to the City/Overworld.
 - `src/game/shell/notebookShellProfile.ts` maps selected presentation scenes to
-  Notebook Shell runtime profiles. Potassium is the first mapped runtime scene
-  and uses the `ruledBoardPage` focus profile.
+  Notebook Shell runtime profiles. Potassium uses the `ruledBoardPage` focus
+  profile, and Stampede uses the `survivalPage` focus profile.
 - Phaser scenes keep local pause state only as a scene runtime concern; they do
   not decide whether an overlay should pause the engine.
 
@@ -60,9 +60,9 @@ Use this path when checking pattern refactors:
 6. Boot `?startScene=ridge`; verify the Ridge shell renders, movement works,
    and walking near a Stampede/Telegraph/Domino prop shows `[E] INTERACT`.
    Interact with the Stampede prop to open its Trail Card, confirm `Enter`
-   starts Stampede Sketch, confirm the Stampede status strip renders below the
-   card, move in the arena, and return to Ridge. Telegraph and Domino cards
-   should still keep primary entry disabled.
+   starts Stampede Sketch, confirm the Stampede Notebook shell renders, drag
+   from outside the visible page to move, and return to Ridge. Telegraph and
+   Domino cards should still keep primary entry disabled.
 7. Open inventory from the overworld and from a child scene.
 8. In Potassium, confirm the Notebook shell renders with Back and Static Mode,
    then drag/release from outside the visible board area and confirm launch or
