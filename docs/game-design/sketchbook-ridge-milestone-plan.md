@@ -42,8 +42,9 @@ Anything beyond that is future scope unless a slice explicitly pulls it in.
   arcade control mats shared with Potassium, and a first scene-local
   pickup/upgrade draft. First M4e playtest tuning widened the true arena to
   match the visible notebook page, added HP/contact readability, softened the
-  contact limit, and added respawn telegraphs. Continue playtesting pickup
-  cadence, upgrade clarity, and touch feel before durable reward wiring.
+  contact limit, and added respawn telegraphs. The tuning pass is accepted for
+  continuation; the respawn warning improved fairness and added useful route
+  planning. Durable reward wiring remains held for the next slice.
 - **Asset staging is now an active coordination concern**: prepared POC assets
   exist for Cicka, Potassium, and Stampede enemy families. Keep them documented
   and adopt them in small scene-owned slices instead of turning them into a
@@ -258,12 +259,14 @@ Current checkpoint:
   variants, judging, mood frames, and reusable Notebook Shell language. Stable
   Hybrid remains the practical fallback if future polish makes the notebook
   treatment too noisy or brittle.
-- **M4e Pickup / Upgrade Draft** implemented for review: cleared marks spawn
+- **M4e Pickup / Upgrade Draft** accepted for continuation: cleared marks spawn
   simple scrap pickups, collecting the first threshold opens a scene UI upgrade
   draft, and one selected upgrade can make the pencil faster, the swipe wider,
   or the guardian slightly quicker. First tuning feedback also made the playable
   arena fill the notebook page more honestly, exposed HP/contact radius in the
   HUD/scene, raised prototype survivability, and telegraphed mark respawns.
+  The respawn warning is now part of the prototype loop because it creates
+  fairer avoidance and direction-planning decisions.
   This remains prototype behavior and does not award durable Ridge progress.
 - Scene architecture is intentionally scene-local. `StampedeSketchScene` should
   remain the Phaser adapter/orchestrator while run decisions live behind
@@ -271,14 +274,14 @@ Current checkpoint:
 
 Next implementation slices:
 
-1. **M4e Playtest / Tuning Pass**: re-test the widened arena, HP/contact
-   readability, respawn warning, pickup cadence, draft timing, upgrade
-   readability, and touch feel before adding durable Stampede rewards.
+1. **M4f Stampede Durable Rewards Draft**: wire first-clear Stampede reward ids,
+   one stamp, one glide pip, and the smallest Ridge memory response now that the
+   scene-local loop feels fair enough to reward.
 
 Hold until later:
 
 - Enemy-enemy avoidance beyond pressure-aware steering.
-- Durable reward ids, first-clear stamp, glide pip, and Ridge memory rendering.
+- Broad Ridge memory rendering beyond the one Stampede first-clear response.
 - Player manual updates; Stampede is still dev/prototype behavior.
 
 ### M5: Ridge Memory
