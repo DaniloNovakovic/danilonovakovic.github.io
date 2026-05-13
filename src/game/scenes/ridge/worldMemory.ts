@@ -1,11 +1,11 @@
 import { STAMPEDE_SKETCH_RIDGE_STAMP_ID } from '@/game/bridge/ridgeProgressIds';
-import type { BridgeRidgeProgressState } from '@/game/bridge/store';
+import type { BridgeRidgeProgressState, RidgeStampId } from '@/game/bridge/store';
 import type { RidgeLandmark, RidgeLandmarkKind } from './worldLayout';
 
 type RidgeMemorySource =
   | {
       kind: 'stamp';
-      id: typeof STAMPEDE_SKETCH_RIDGE_STAMP_ID;
+      id: RidgeStampId;
     };
 
 export type RidgeWorldMemoryId =
@@ -27,7 +27,7 @@ export interface RidgeWorldMemory {
   source: RidgeMemorySource;
 }
 
-const STAMPEDE_FIRST_CLEAR_MEMORIES: readonly RidgeWorldMemory[] = [
+const RIDGE_WORLD_MEMORIES: readonly RidgeWorldMemory[] = [
   {
     id: 'stampede-held-sticker',
     kind: 'reward-sticker',
@@ -69,10 +69,9 @@ const STAMPEDE_FIRST_CLEAR_MEMORIES: readonly RidgeWorldMemory[] = [
 export function getRidgeWorldMemories(
   ridgeProgress: Pick<BridgeRidgeProgressState, 'stampIds'>
 ): readonly RidgeWorldMemory[] {
-  if (!ridgeProgress.stampIds.includes(STAMPEDE_SKETCH_RIDGE_STAMP_ID)) {
-    return [];
-  }
-  return STAMPEDE_FIRST_CLEAR_MEMORIES;
+  return RIDGE_WORLD_MEMORIES.filter((memory) =>
+    ridgeProgress.stampIds.includes(memory.source.id)
+  );
 }
 
 export function getRidgeLandmarkMemories(

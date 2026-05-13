@@ -12,6 +12,10 @@ describe('ridge world memory', () => {
     expect(getRidgeWorldMemories({ stampIds: [] })).toEqual([]);
   });
 
+  it('ignores unrelated stamp ids', () => {
+    expect(getRidgeWorldMemories({ stampIds: ['future-stamp'] })).toEqual([]);
+  });
+
   it('derives the Stampede blanket memory layer from the first-clear stamp', () => {
     const memories = getRidgeWorldMemories({
       stampIds: [STAMPEDE_SKETCH_RIDGE_STAMP_ID]
