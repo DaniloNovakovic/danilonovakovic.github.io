@@ -317,21 +317,29 @@ Current checkpoint:
   storing sticker ids.
 - **M5b Cicka Memory + Dev Stamp Seed** accepted: `stampede-sketch` also derives
   the `cicka-stampede-note` memory at Cicka's perch, Ridge renders the tiny
-  `mrrp?` tease, and local dev can seed the known stamp with
+  Cicka memory tease, and local dev can seed the known stamp with
   `?mode=interactive&startScene=ridge&devRidgeStamp=stampede-sketch`.
+- **M5c Cicka Walk-By Memory** accepted for continuation: after the Stampede
+  stamp, Cicka gives one tiny walk-by bark per Ridge entry without stored Cicka
+  state.
+- **M5d Cicka First Interaction** is the current follow-up: Cicka can answer a
+  deliberate interact with pre-translator meow punctuation, while the permanent
+  Cicka memory becomes a paw/scratch decal instead of duplicate speech text;
+  the same PR includes a small primitive readability polish pass for Cicka,
+  her speech bubble, and the memory decal.
 
 Next implementation slices:
 
-1. **M5c First Ridge Shortcut**: add one scene-owned shortcut derived from
-   durable progress. Keep it small and avoid Ridge glide.
-2. **Later Cicka Interaction**: let Cicka acknowledge the player when they walk
-   by or choose to talk, using short barks rather than a dialogue tree.
-3. **Ridge-Only Glide**: keep this as a separate HITL slice because input feel
+1. **Later First Ridge Shortcut**: wait until the Ridge has enough repeat
+   traversal to make a shortcut feel like real relief rather than a proof of
+   concept.
+2. **Ridge-Only Glide**: keep this as a separate HITL slice because input feel
    and touch behavior need review.
+3. **Translator / Cicka Daydream**: keep translated Cicka subtitles and the
+   Cicka daydream mini-slice for later, after Ridge Memory proves return play.
 
 Do not add stored sticker state. Do not add Stampede upgrades, endless mode,
-shared memory architecture, or functional shortcuts inside purely visual memory
-slices.
+shared memory architecture, or Ridge shortcuts inside Cicka memory slices.
 
 ### M6: Relay Spire First Ending
 

@@ -10,6 +10,7 @@ import {
 import { STAMPEDE_SKETCH_RIDGE_STAMP_ID } from '@/game/bridge/ridgeProgressIds';
 import { STAMPEDE_SKETCH_SCENE_ID } from '@/game/scenes/sceneIds';
 import { getRidgeLandmarkMemories } from './worldMemory';
+import { CICKA_INTERACTION_TARGET_ID } from './cickaInteraction';
 
 describe('ridge world layout', () => {
   it('keeps the first movement shell flat and inside world bounds', () => {
@@ -43,6 +44,9 @@ describe('ridge world layout', () => {
       'telegraph-terrace',
       'domino-desk'
     ]);
+    expect(RIDGE_TRAIL_CARD_TARGETS.map((target) => target.id)).not.toContain(
+      CICKA_INTERACTION_TARGET_ID
+    );
     expect(RIDGE_TRAIL_CARD_TARGETS.map((target) => target.landmarkKind)).toEqual([
       'stampede-blanket',
       'telegraph-bag',
