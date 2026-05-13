@@ -40,6 +40,11 @@ import {
   hasRidgeWorldMemory,
   type RidgeWorldMemory
 } from '../worldMemory';
+import {
+  createCickaWalkByState,
+  updateCickaWalkBy,
+  type CickaWalkByState
+} from '../cickaWalkBy';
 import type { TrailCardOverlayParams } from '@/game/overlays/trailCard/types';
 
 interface RidgeSceneStartData {
@@ -53,12 +58,21 @@ type RidgeInteractionEffect =
   | { kind: 'close' }
   | { kind: 'openTrailCard'; params: TrailCardOverlayParams };
 
+const CICKA_WALK_BY_ANCHOR_Y = RIDGE_FLOOR_Y - 74;
+
 export class RidgeScene extends Phaser.Scene {
   player?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   interactPrompt?: Phaser.GameObjects.Text;
 
   private playerRuntime?: SideViewPlayerRuntime;
   private interactionRuntime?: InteriorInteractionRuntime<RidgeTrailCardTargetId, RidgeInteractionEffect>;
+  private cickaWalkByBubble?: Phaser.GameObjects.Container;
+  private cickaWalkByEnabled = false;
+  private cickaWalkByState: CickaWalkByState = createCickaWalkByState();
+  private cickaWalkByAnchor = {
+    x: RIDGE_PLAYER_START.x,
+    y: CICKA_WALK_BY_ANCHOR_Y
+  };
   private onClose: () => void = () => {};
   private onOpenOverlay?: (overlayId: OverlayId, options?: OpenOverlayOptions) => void;
   private isPaused = false;
@@ -99,12 +113,17 @@ export class RidgeScene extends Phaser.Scene {
     this.physics.world.setBounds(0, 0, RIDGE_WORLD_WIDTH, GAME_DESIGN_HEIGHT);
 
     const ground = this.createGround();
+    const worldMemories = getRidgeWorldMemories(bridgeStore.getState().progress.ridge);
+
+    this.configureCickaWalkByMemory(worldMemories);
 
     this.addBackdrop();
     this.addLandmarks(
       messages.scenes.ridge.memory.stampedeFirstClearLabel,
-      messages.scenes.ridge.memory.cickaStampedeNoteLabel
+      messages.scenes.ridge.memory.cickaStampedeNoteLabel,
+      worldMemories
     );
+    this.addCickaWalkByBubble(messages.scenes.ridge.memory.cickaWalkByBark);
     this.addPlaceholderCopy();
     this.createPlayer(ground);
     this.createTrailCardInteractions(messages.navigation.interact);
@@ -120,6 +139,8 @@ export class RidgeScene extends Phaser.Scene {
       this.onClose();
       return;
     }
+
+    this.updateCickaWalkByMemory();
 
     const interaction = this.interactionRuntime?.update({
       playerX: this.player?.x ?? 0,
@@ -140,6 +161,37 @@ export class RidgeScene extends Phaser.Scene {
         returnToSceneId: PHASER_SCENE_KEYS.ridge
       });
     }
+  }
+
+  private configureCickaWalkByMemory(memories: readonly RidgeWorldMemory[]): void {
+    const cickaPerch = RIDGE_LANDMARKS.find((landmark) => landmark.kind === 'cicka-perch');
+    this.cickaWalkByState = createCickaWalkByState();
+    this.cickaWalkByEnabled = hasRidgeWorldMemory(memories, 'cicka-stampede-note') && !!cickaPerch;
+    this.cickaWalkByBubble = undefined;
+    if (!cickaPerch) return;
+    this.cickaWalkByAnchor = {
+      x: cickaPerch.x,
+      y: CICKA_WALK_BY_ANCHOR_Y
+    };
+  }
+
+  private updateCickaWalkByMemory(): void {
+    if (!this.player) {
+      this.cickaWalkByBubble?.setVisible(false);
+      return;
+    }
+
+    const walkByUpdate = updateCickaWalkBy(this.cickaWalkByState, {
+      enabled: this.cickaWalkByEnabled,
+      playerX: this.player.x,
+      playerY: this.player.y,
+      cickaX: this.cickaWalkByAnchor.x,
+      cickaY: this.cickaWalkByAnchor.y,
+      nowMs: this.time.now
+    });
+
+    this.cickaWalkByState = walkByUpdate.state;
+    this.cickaWalkByBubble?.setVisible(walkByUpdate.visible);
   }
 
   private createGround(): Phaser.GameObjects.Zone {
@@ -259,10 +311,9 @@ export class RidgeScene extends Phaser.Scene {
 
   private addLandmarks(
     stampedeFirstClearLabel: string,
-    cickaStampedeNoteLabel: string
+    cickaStampedeNoteLabel: string,
+    worldMemories: readonly RidgeWorldMemory[]
   ): void {
-    const worldMemories = getRidgeWorldMemories(bridgeStore.getState().progress.ridge);
-
     RIDGE_LANDMARKS.forEach((landmark) => {
       const landmarkMemories = worldMemories.filter(
         (memory) => memory.landmarkKind === landmark.kind
@@ -290,6 +341,25 @@ export class RidgeScene extends Phaser.Scene {
       }
       this.addLandmarkLabel(landmark);
     });
+  }
+
+  private addCickaWalkByBubble(cickaWalkByBark: string): void {
+    if (!this.cickaWalkByEnabled) return;
+    const bubble = this.add.container(
+      this.cickaWalkByAnchor.x - 18,
+      this.cickaWalkByAnchor.y - 92
+    ).setDepth(45).setVisible(false);
+    const panel = this.add.rectangle(0, 0, 54, 24, 0xf7f1df, 1)
+      .setStrokeStyle(2, 0x1f1f1d, 0.88);
+    const tail = this.add.line(20, 12, 0, 0, 12, 12, 0x1f1f1d, 0.5).setLineWidth(2);
+    const label = this.add.text(0, -1, cickaWalkByBark, {
+      fontFamily: 'monospace',
+      fontSize: '11px',
+      color: '#1f1f1d'
+    }).setOrigin(0.5);
+
+    bubble.add([panel, tail, label]);
+    this.cickaWalkByBubble = bubble;
   }
 
   private addCickaPerch(

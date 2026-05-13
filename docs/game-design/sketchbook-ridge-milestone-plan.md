@@ -322,16 +322,17 @@ Current checkpoint:
 
 Next implementation slices:
 
-1. **M5c First Ridge Shortcut**: add one scene-owned shortcut derived from
-   durable progress. Keep it small and avoid Ridge glide.
-2. **Later Cicka Interaction**: let Cicka acknowledge the player when they walk
-   by or choose to talk, using short barks rather than a dialogue tree.
+1. **M5c Cicka Walk-By Memory**: let Cicka acknowledge the player with one tiny
+   walk-by bark derived from the `stampede-sketch` stamp and the existing Cicka
+   memory. Keep it scene-owned and avoid a dialogue tree.
+2. **Later First Ridge Shortcut**: wait until the Ridge has enough repeat
+   traversal to make a shortcut feel like real relief rather than a proof of
+   concept.
 3. **Ridge-Only Glide**: keep this as a separate HITL slice because input feel
    and touch behavior need review.
 
 Do not add stored sticker state. Do not add Stampede upgrades, endless mode,
-shared memory architecture, or functional shortcuts inside purely visual memory
-slices.
+shared memory architecture, or Ridge shortcuts inside Cicka memory slices.
 
 ### M6: Relay Spire First Ending
 

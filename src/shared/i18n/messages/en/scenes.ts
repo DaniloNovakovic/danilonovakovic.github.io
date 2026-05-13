@@ -28,6 +28,7 @@ export const sceneMessages = {
     memory: {
       stampedeFirstClearLabel: "HELD",
       cickaStampedeNoteLabel: "mrrp?",
+      cickaWalkByBark: "mrrp.",
     },
   },
   stampedeSketch: {
