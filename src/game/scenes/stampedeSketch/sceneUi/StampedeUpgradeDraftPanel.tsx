@@ -19,7 +19,7 @@ export function StampedeUpgradeDraftPanel({ params, dispatchAction }: SceneUiSur
   return (
     <Card
       role="dialog"
-      aria-modal="false"
+      aria-modal="true"
       aria-labelledby={titleId}
       aria-describedby={descriptionId}
       tone="paper"

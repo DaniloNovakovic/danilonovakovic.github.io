@@ -19,6 +19,10 @@ export interface StampedeUpgradeChoiceView {
   color: string;
 }
 
+const STAMPEDE_QUICK_PENCIL_COOLDOWN_MS = 1_800;
+const STAMPEDE_WIDE_SWIPE_HALF_WIDTH = 38;
+const STAMPEDE_SWIFT_GUARDIAN_SPEED_BONUS = 35;
+
 const STAMPEDE_UPGRADE_CHOICES: readonly StampedeUpgradeChoiceView[] = [
   {
     id: 'quickPencil',
@@ -57,10 +61,10 @@ export function resolveStampedeAutoAttackProfile(
   return {
     ...DEFAULT_STAMPEDE_AUTO_ATTACK_PROFILE,
     cooldownMs: upgrades.includes('quickPencil')
-      ? 1_800
+      ? STAMPEDE_QUICK_PENCIL_COOLDOWN_MS
       : DEFAULT_STAMPEDE_AUTO_ATTACK_PROFILE.cooldownMs,
     halfWidth: upgrades.includes('wideSwipe')
-      ? 38
+      ? STAMPEDE_WIDE_SWIPE_HALF_WIDTH
       : DEFAULT_STAMPEDE_AUTO_ATTACK_PROFILE.halfWidth
   };
 }
@@ -69,6 +73,6 @@ export function resolveStampedeGuardianSpeed(
   upgrades: readonly StampedeUpgradeId[]
 ): number {
   return upgrades.includes('swiftGuardian')
-    ? STAMPEDE_PLAYER_SPEED + 35
+    ? STAMPEDE_PLAYER_SPEED + STAMPEDE_SWIFT_GUARDIAN_SPEED_BONUS
     : STAMPEDE_PLAYER_SPEED;
 }
