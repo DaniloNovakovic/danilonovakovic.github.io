@@ -149,9 +149,9 @@ Ending beat:
 - The player understands she is going somewhere the player cannot follow.
 - The farewell is tender but not literal-heavy: no on-screen death scene, no long grief speech.
 - Cicka leaves a final paw mark or page mark, and the Ridge remains replayable after the ending.
-- Micka, a small kitten/child presence, appears only after the player returns to the normal Ridge, not during the ending sequence.
-- Micka first appears when the player returns to the Ridge after completing or
-  replaying one mini-game post-ending.
+- Micka, a small kitten/child presence, appears only after the player returns
+  to the normal Ridge and completes or replays one mini-game post-ending, not
+  during the ending sequence.
 
 ## Main Loop
 

@@ -323,7 +323,7 @@ Current checkpoint:
   stamp, Cicka gives one tiny walk-by bark per Ridge entry without stored Cicka
   state.
 - **M5d Cicka First Interaction** accepted for continuation: Cicka can answer a
-  deliberate interact with pre-translator meow punctuation, while the permanent
+  deliberate interaction with pre-translator meow punctuation, while the permanent
   Cicka memory becomes a paw/scratch decal instead of duplicate speech text;
   the same PR includes a small primitive readability polish pass for Cicka,
   her speech bubble, and the memory decal.
@@ -335,7 +335,7 @@ Next implementation slices:
    first asset adoption standard without creating a broad asset framework.
 2. **Ridge / Outskirts Topology Spike**: design and lightly prototype how the
    current Overworld becomes Outskirts/Trailhead and Ridge becomes a connected
-   Hollow-Knight-topology side-view world. Do not fully replace the default
+   Hollow Knight topology side-view world. Do not fully replace the default
    Overworld in the same PR.
 3. **Later First Ridge Shortcut / Ridge-Only Glide**: revisit these after the
    topology spike gives shortcuts and movement rewards a real route shape.
