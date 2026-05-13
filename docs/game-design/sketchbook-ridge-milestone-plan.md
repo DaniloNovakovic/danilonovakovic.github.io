@@ -267,16 +267,19 @@ Current checkpoint:
   HUD/scene, raised prototype survivability, and telegraphed mark respawns.
   The respawn warning is now part of the prototype loop because it creates
   fairer avoidance and direction-planning decisions.
-  This remains prototype behavior and does not award durable Ridge progress.
+- **M4f Durable Rewards Draft** accepted for continuation: first Stampede clear
+  now awards the `stampede-sketch` Ridge stamp and one glide pip through bridge
+  progress, repeat clears do not duplicate the reward, the result panel reports
+  earned/already-owned reward state, and Ridge renders one small Stampede blanket
+  memory mark derived from the stamp.
 - Scene architecture is intentionally scene-local. `StampedeSketchScene` should
   remain the Phaser adapter/orchestrator while run decisions live behind
   `runtime/runFlow.ts` and swarm steering lives behind `runtime/swarmMotion.ts`.
 
 Next implementation slices:
 
-1. **M4f Stampede Durable Rewards Draft**: wire first-clear Stampede reward ids,
-   one stamp, one glide pip, and the smallest Ridge memory response now that the
-   scene-local loop feels fair enough to reward.
+1. **M5 Ridge Memory**: broaden reward memory from the one Stampede first-clear
+   response into the planned Ridge sticker/world-change layer.
 
 Hold until later:
 

@@ -5,8 +5,10 @@ import {
   RIDGE_PLAYER_RESUME_CLAMP,
   RIDGE_PLAYER_START,
   RIDGE_TRAIL_CARD_TARGETS,
-  RIDGE_WORLD_WIDTH
+  RIDGE_WORLD_WIDTH,
+  getRidgeLandmarkMemory
 } from './worldLayout';
+import { STAMPEDE_SKETCH_RIDGE_STAMP_ID } from '@/game/bridge/ridgeProgressIds';
 import { STAMPEDE_SKETCH_SCENE_ID } from '@/game/scenes/sceneIds';
 
 describe('ridge world layout', () => {
@@ -55,5 +57,22 @@ describe('ridge world layout', () => {
     expect(stampede?.card.enterSceneId).toBe(STAMPEDE_SKETCH_SCENE_ID);
     expect(stampede?.card.unavailableReason).toBeUndefined();
     expect(unavailable.every((target) => target.card.unavailableReason && !target.card.enterSceneId)).toBe(true);
+  });
+
+  it('derives the Stampede blanket memory from the first-clear stamp', () => {
+    const stampedeBlanket = RIDGE_LANDMARKS.find((landmark) => landmark.kind === 'stampede-blanket');
+    const telegraphBag = RIDGE_LANDMARKS.find((landmark) => landmark.kind === 'telegraph-bag');
+
+    expect(stampedeBlanket).toBeDefined();
+    expect(telegraphBag).toBeDefined();
+    if (!stampedeBlanket || !telegraphBag) return;
+
+    expect(getRidgeLandmarkMemory(stampedeBlanket, { stampIds: [] })).toBeNull();
+    expect(getRidgeLandmarkMemory(stampedeBlanket, {
+      stampIds: [STAMPEDE_SKETCH_RIDGE_STAMP_ID]
+    })).toBe('stampede-first-clear');
+    expect(getRidgeLandmarkMemory(telegraphBag, {
+      stampIds: [STAMPEDE_SKETCH_RIDGE_STAMP_ID]
+    })).toBeNull();
   });
 });

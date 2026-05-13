@@ -1,12 +1,14 @@
 export type StampedeResultPhase = 'cleared' | 'failed';
 export type StampedeResultActionId = 'backToRidge' | 'retry';
 export type StampedeResultActionPriority = 'primary' | 'secondary';
+export type StampedeRewardStatus = 'earned' | 'alreadyOwned' | 'unavailable';
 
 export interface StampedeResultViewModelInput {
   phase: StampedeResultPhase;
   elapsedMs: number;
   durationMs: number;
   contacts: number;
+  rewardStatus?: StampedeRewardStatus;
 }
 
 export interface StampedeResultStatViewModel {
@@ -51,7 +53,7 @@ export function createStampedeResultViewModel(
     body: clear
       ? 'The sketch stayed calm through the whole stampede.'
       : 'Too many marks landed before the timer ran out.',
-    rewardNote: 'No stamp yet. Rewards are still taped over.',
+    rewardNote: getRewardNote(input.rewardStatus ?? 'unavailable', clear),
     stats: [
       {
         id: 'time',
@@ -90,6 +92,20 @@ export function createStampedeResultViewModel(
           }
         ]
   };
+}
+
+function getRewardNote(status: StampedeRewardStatus, clear: boolean): string {
+  if (!clear) {
+    return 'Hold the blanket to earn the Stampede stamp and glide pip.';
+  }
+  switch (status) {
+    case 'earned':
+      return 'Stamp earned. One glide pip tucked into the Ridge.';
+    case 'alreadyOwned':
+      return 'Stamp already owned. Glide pip already tucked into the Ridge.';
+    case 'unavailable':
+      return 'No stamp yet. Rewards are still taped over.';
+  }
 }
 
 function formatResultTime(elapsedMs: number, durationMs: number): string {
