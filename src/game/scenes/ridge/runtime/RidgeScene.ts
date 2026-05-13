@@ -144,8 +144,7 @@ export class RidgeScene extends Phaser.Scene {
     this.createPlayer(ground);
     this.createRidgeInteractions(
       messages.navigation.interact,
-      messages.scenes.ridge.cicka.interaction,
-      worldMemories
+      messages.scenes.ridge.cicka.interaction
     );
     this.setPaused(this.isPaused);
     this.playerRuntime?.syncAppearance();
@@ -202,6 +201,7 @@ export class RidgeScene extends Phaser.Scene {
     const cickaPerch = RIDGE_LANDMARKS.find((landmark) => landmark.kind === 'cicka-perch');
     this.cickaWalkByState = createCickaWalkByState();
     this.cickaWalkByEnabled = hasRidgeWorldMemory(memories, 'cicka-stampede-note') && !!cickaPerch;
+    this.cickaSpeechBubble?.destroy();
     this.cickaSpeechBubble = undefined;
     this.cickaSpeechBubbleLabel = undefined;
     this.cickaSpeechVisibleUntilMs = 0;
@@ -333,9 +333,10 @@ export class RidgeScene extends Phaser.Scene {
 
   private createRidgeInteractions(
     promptText: string,
-    cickaInteractionCopy: CickaInteractionCopy,
-    worldMemories: readonly RidgeWorldMemory[]
+    cickaInteractionCopy: CickaInteractionCopy
   ): void {
+    this.interactPrompt?.destroy();
+
     this.interactPrompt = createUiText(this, 0, 0, promptText, {
       fontSize: '16px',
       color: '#1a1a1a',
@@ -362,7 +363,10 @@ export class RidgeScene extends Phaser.Scene {
           interactRadius: 78,
           effect: (): RidgeInteractionEffect => ({
             kind: 'showCickaResponse',
-            response: getCickaInteractionResponse(worldMemories, cickaInteractionCopy)
+            response: getCickaInteractionResponse(
+              getRidgeWorldMemories(bridgeStore.getState().progress.ridge),
+              cickaInteractionCopy
+            )
           })
         },
         ...RIDGE_TRAIL_CARD_TARGETS.map((target) => ({
@@ -421,6 +425,8 @@ export class RidgeScene extends Phaser.Scene {
   }
 
   private addCickaSpeechBubble(): void {
+    this.cickaSpeechBubble?.destroy();
+
     const bubble = this.add.container(
       this.cickaWalkByAnchor.x - 20,
       this.cickaWalkByAnchor.y - 98
