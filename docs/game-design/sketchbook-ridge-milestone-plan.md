@@ -44,7 +44,16 @@ Anything beyond that is future scope unless a slice explicitly pulls it in.
   match the visible notebook page, added HP/contact readability, softened the
   contact limit, and added respawn telegraphs. The tuning pass is accepted for
   continuation; the respawn warning improved fairness and added useful route
-  planning. Durable reward wiring remains held for the next slice.
+  planning. M4f durable rewards are accepted for continuation: first clear
+  awards the `stampede-sketch` Ridge stamp and one glide pip, repeat clears do
+  not duplicate rewards, and the result panel reports earned/already-owned
+  reward state.
+- **M5 Ridge Memory** has its first visual slices accepted for continuation:
+  M5a derives Ridge-owned sticker/world-change memories from durable progress
+  without stored sticker state, and M5b adds the first Cicka note/translator
+  tease plus a dev-only `devRidgeStamp=stampede-sketch` seed for fast local
+  testing. Cicka proximity chatter or direct talk interaction is desired, but
+  held for a later Cicka interaction slice.
 - **Asset staging is now an active coordination concern**: prepared POC assets
   exist for Cicka, Potassium, and Stampede enemy families. Keep them documented
   and adopt them in small scene-owned slices instead of turning them into a
@@ -278,13 +287,13 @@ Current checkpoint:
 
 Next implementation slices:
 
-1. **M5 Ridge Memory**: broaden reward memory from the one Stampede first-clear
-   response into the planned Ridge sticker/world-change layer.
+1. **M5 Ridge Memory continuation**: add the first small Ridge shortcut or the
+   first Cicka proximity/talk interaction as its own scene-owned slice.
 
 Hold until later:
 
 - Enemy-enemy avoidance beyond pressure-aware steering.
-- Broad Ridge memory rendering beyond the one Stampede first-clear response.
+- More Stampede upgrades and endless mode.
 - Player manual updates; Stampede is still dev/prototype behavior.
 
 ### M5: Ridge Memory
@@ -300,7 +309,29 @@ Outputs:
 - Ridge-only glide behavior.
 - first Cicka Note or translator tease.
 
-Do not start until reward ids and first real reward are stable.
+Current checkpoint:
+
+- **M5a Durable Sticker Layer** accepted: `worldMemory.ts` derives visible
+  Ridge memory ids from durable progress, empty progress returns no memories,
+  and the `stampede-sketch` stamp renders Stampede blanket memories without
+  storing sticker ids.
+- **M5b Cicka Memory + Dev Stamp Seed** accepted: `stampede-sketch` also derives
+  the `cicka-stampede-note` memory at Cicka's perch, Ridge renders the tiny
+  `mrrp?` tease, and local dev can seed the known stamp with
+  `?mode=interactive&startScene=ridge&devRidgeStamp=stampede-sketch`.
+
+Next implementation slices:
+
+1. **M5c First Ridge Shortcut**: add one scene-owned shortcut derived from
+   durable progress. Keep it small and avoid Ridge glide.
+2. **Later Cicka Interaction**: let Cicka acknowledge the player when they walk
+   by or choose to talk, using short barks rather than a dialogue tree.
+3. **Ridge-Only Glide**: keep this as a separate HITL slice because input feel
+   and touch behavior need review.
+
+Do not add stored sticker state. Do not add Stampede upgrades, endless mode,
+shared memory architecture, or functional shortcuts inside purely visual memory
+slices.
 
 ### M6: Relay Spire First Ending
 
