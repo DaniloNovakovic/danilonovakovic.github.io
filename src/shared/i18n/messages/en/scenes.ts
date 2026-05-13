@@ -24,4 +24,39 @@ export const sceneMessages = {
       dancing: "DANCE",
     },
   },
+  ridge: {
+    memory: {
+      stampedeFirstClearLabel: "HELD",
+    },
+  },
+  stampedeSketch: {
+    result: {
+      eyebrow: {
+        cleared: "Run complete",
+        failed: "Run ended",
+      },
+      title: {
+        cleared: "Blanket held",
+        failed: "Page got crowded",
+      },
+      body: {
+        cleared: "The sketch stayed calm through the whole stampede.",
+        failed: "Too many marks landed before the timer ran out.",
+      },
+      rewardNote: {
+        earned: "Stamp earned. One glide pip tucked into the Ridge.",
+        alreadyOwned: "Stamp already owned. Glide pip already tucked into the Ridge.",
+        unavailable: "No stamp yet. Rewards are still taped over.",
+        failed: "Hold the blanket to earn the Stampede stamp and glide pip.",
+      },
+      stats: {
+        time: "Time",
+        contacts: "Contacts",
+      },
+      actions: {
+        backToRidge: "Back to Ridge",
+        retry: "Retry",
+      },
+    },
+  },
 } as const;

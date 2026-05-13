@@ -97,7 +97,7 @@ export class RidgeScene extends Phaser.Scene {
     const ground = this.createGround();
 
     this.addBackdrop();
-    this.addLandmarks();
+    this.addLandmarks(messages.scenes.ridge.memory.stampedeFirstClearLabel);
     this.addPlaceholderCopy();
     this.createPlayer(ground);
     this.createTrailCardInteractions(messages.navigation.interact);
@@ -250,14 +250,14 @@ export class RidgeScene extends Phaser.Scene {
     this.add.circle(x + 46, 166, 12, 0xf0d35f, 0.9);
   }
 
-  private addLandmarks(): void {
+  private addLandmarks(stampedeFirstClearLabel: string): void {
     RIDGE_LANDMARKS.forEach((landmark) => {
       switch (landmark.kind) {
         case 'cicka-perch':
           this.addCickaPerch(landmark);
           break;
         case 'stampede-blanket':
-          this.addStampedeBlanket(landmark);
+          this.addStampedeBlanket(landmark, stampedeFirstClearLabel);
           break;
         case 'telegraph-bag':
           this.addTelegraphBag(landmark);
@@ -288,7 +288,10 @@ export class RidgeScene extends Phaser.Scene {
     this.add.line(x - 18, y - 32, -30, 0, -54, -10, 0x1f1f1d, 0.9).setLineWidth(5);
   }
 
-  private addStampedeBlanket(landmark: RidgeLandmark): void {
+  private addStampedeBlanket(
+    landmark: RidgeLandmark,
+    stampedeFirstClearLabel: string
+  ): void {
     const x = landmark.x;
     const y = RIDGE_FLOOR_Y - 46;
     const memory = getRidgeLandmarkMemory(
@@ -302,15 +305,19 @@ export class RidgeScene extends Phaser.Scene {
     this.add.circle(x + 28, y - 20, 9, 0x1f1f1d, 0.75);
     this.add.line(x, y - 42, -34, 6, 34, -6, 0x1f1f1d, 0.32).setLineWidth(3);
     if (memory === 'stampede-first-clear') {
-      this.addStampedeBlanketMemory(x, y);
+      this.addStampedeBlanketMemory(x, y, stampedeFirstClearLabel);
     }
   }
 
-  private addStampedeBlanketMemory(x: number, y: number): void {
+  private addStampedeBlanketMemory(
+    x: number,
+    y: number,
+    stampedeFirstClearLabel: string
+  ): void {
     this.add.rectangle(x + 42, y - 48, 58, 26, 0xf7f1df, 1)
       .setStrokeStyle(3, 0x1f1f1d, 0.95)
       .setAngle(-8);
-    this.add.text(x + 20, y - 57, 'HELD', {
+    this.add.text(x + 20, y - 57, stampedeFirstClearLabel, {
       fontFamily: 'monospace',
       fontSize: '12px',
       color: '#1f1f1d'

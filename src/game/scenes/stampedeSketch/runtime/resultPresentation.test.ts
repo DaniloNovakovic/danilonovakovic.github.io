@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
+import { getMessages } from '@/shared/i18n';
 import { createStampedeResultViewModel } from './resultPresentation';
 
 describe('stampede result presentation view model', () => {
+  const copy = getMessages().scenes.stampedeSketch.result;
+
   it('prioritizes returning to Ridge after a clear', () => {
     const view = createStampedeResultViewModel({
       phase: 'cleared',
@@ -11,19 +14,19 @@ describe('stampede result presentation view model', () => {
       rewardStatus: 'earned'
     });
 
-    expect(view.title).toBe('Blanket held');
-    expect(view.eyebrow).toBe('Run complete');
-    expect(view.body).toBe('The sketch stayed calm through the whole stampede.');
-    expect(view.rewardNote).toBe('Stamp earned. One glide pip tucked into the Ridge.');
+    expect(view.title).toBe(copy.title.cleared);
+    expect(view.eyebrow).toBe(copy.eyebrow.cleared);
+    expect(view.body).toBe(copy.body.cleared);
+    expect(view.rewardNote).toBe(copy.rewardNote.earned);
     expect(view.actions).toEqual([
       {
         id: 'backToRidge',
-        label: 'Back to Ridge',
+        label: copy.actions.backToRidge,
         priority: 'primary'
       },
       {
         id: 'retry',
-        label: 'Retry',
+        label: copy.actions.retry,
         priority: 'secondary'
       }
     ]);
@@ -38,9 +41,7 @@ describe('stampede result presentation view model', () => {
       rewardStatus: 'alreadyOwned'
     });
 
-    expect(view.rewardNote).toBe(
-      'Stamp already owned. Glide pip already tucked into the Ridge.'
-    );
+    expect(view.rewardNote).toBe(copy.rewardNote.alreadyOwned);
   });
 
   it('prioritizes retry after a failure', () => {
@@ -51,21 +52,19 @@ describe('stampede result presentation view model', () => {
       contacts: 3
     });
 
-    expect(view.title).toBe('Page got crowded');
-    expect(view.eyebrow).toBe('Run ended');
-    expect(view.body).toBe('Too many marks landed before the timer ran out.');
-    expect(view.rewardNote).toBe(
-      'Hold the blanket to earn the Stampede stamp and glide pip.'
-    );
+    expect(view.title).toBe(copy.title.failed);
+    expect(view.eyebrow).toBe(copy.eyebrow.failed);
+    expect(view.body).toBe(copy.body.failed);
+    expect(view.rewardNote).toBe(copy.rewardNote.failed);
     expect(view.actions).toEqual([
       {
         id: 'retry',
-        label: 'Retry',
+        label: copy.actions.retry,
         priority: 'primary'
       },
       {
         id: 'backToRidge',
-        label: 'Back to Ridge',
+        label: copy.actions.backToRidge,
         priority: 'secondary'
       }
     ]);
@@ -82,12 +81,12 @@ describe('stampede result presentation view model', () => {
     expect(view.stats).toEqual([
       {
         id: 'time',
-        label: 'Time',
+        label: copy.stats.time,
         value: '1:02'
       },
       {
         id: 'contacts',
-        label: 'Contacts',
+        label: copy.stats.contacts,
         value: '2'
       }
     ]);
