@@ -3,6 +3,7 @@ import {
   STAMPEDE_AUTO_ATTACK_COOLDOWN_MS,
   createStampedeAutoAttackState
 } from './autoAttack';
+import { STAMPEDE_ARENA } from './movement';
 import {
   STAMPEDE_PLAYER_CONTACT_RADIUS,
   resolveStampedeRunFrame
@@ -56,8 +57,8 @@ describe('stampede run flow', () => {
 
   it('clamps player facts and applies one contact when a candidate reaches the player', () => {
     const candidate = {
-      x: 315,
-      y: 526,
+      x: STAMPEDE_ARENA.safeLeft,
+      y: STAMPEDE_ARENA.safeBottom,
       radius: 10
     };
     const frame = resolveStampedeRunFrame({
@@ -65,15 +66,15 @@ describe('stampede run flow', () => {
       deltaMs: 500,
       closeRequested: false,
       velocity: baseVelocity,
-      player: { x: 100, y: 900 },
+      player: { x: -100, y: 900 },
       contactCandidates: [candidate]
     });
 
     expect(frame.kind).toBe('playing');
     if (frame.kind !== 'playing') return;
     expect(frame.player).toEqual({
-      x: 315,
-      y: 526,
+      x: STAMPEDE_ARENA.safeLeft,
+      y: STAMPEDE_ARENA.safeBottom,
       radius: STAMPEDE_PLAYER_CONTACT_RADIUS
     });
     expect(frame.contactCandidate).toBe(candidate);
@@ -109,14 +110,13 @@ describe('stampede run flow', () => {
   });
 
   it('keeps terminal sessions terminal on the next frame', () => {
+    let session = createStampedeSession();
+    for (let index = 0; index < STAMPEDE_CONTACT_LIMIT; index += 1) {
+      session = resolveStampedeContact(session, index * 100);
+    }
+
     const frame = resolveStampedeRunFrame({
-      session: resolveStampedeContact(
-        resolveStampedeContact(
-          resolveStampedeContact(createStampedeSession(), 0),
-          100
-        ),
-        200
-      ),
+      session,
       deltaMs: 1_000,
       closeRequested: false,
       velocity: baseVelocity,

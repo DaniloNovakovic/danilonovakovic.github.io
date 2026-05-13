@@ -78,6 +78,7 @@ interface StampedeSketchSceneStartData {
 
 export class StampedeSketchScene extends Phaser.Scene {
   private player?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+  private playerContactRing?: Phaser.GameObjects.Arc;
   private inputRuntime?: StampedeInputRuntime;
   private swarmRuntime?: StampedeSwarmRuntime;
   private feedbackRuntime?: StampedeFeedbackRuntime;
@@ -213,6 +214,7 @@ export class StampedeSketchScene extends Phaser.Scene {
       case 'playing':
         this.player.setVelocity(frame.velocity.x, frame.velocity.y);
         this.player.setPosition(frame.player.x, frame.player.y);
+        this.updatePlayerContactRing(frame.pressure);
         this.updatePlayerInkTilt(time, frame.velocity);
         this.applyAutoAttack(frame.attack);
         if (this.collectPickups(frame.player, frame.pressure)) {
@@ -221,6 +223,7 @@ export class StampedeSketchScene extends Phaser.Scene {
         }
         if (frame.contactCandidate) {
           this.feedbackRuntime?.showContact(this.player, frame.contactCandidate);
+          this.updatePlayerContactRing(frame.pressure);
         }
         this.swarmRuntime.update(this.player, delta, frame.swarm);
         this.updateHud(frame.pressure);
@@ -239,6 +242,13 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.player.body.setAllowGravity(false);
     this.player.setCollideWorldBounds(false);
     this.player.body.setCircle(24, 8, 8);
+    this.playerContactRing = this.add.circle(
+      start.x,
+      start.y,
+      STAMPEDE_PLAYER_CONTACT_RADIUS,
+      0xffffff,
+      0
+    ).setStrokeStyle(2, 0x1a1a1a, 0.32).setDepth(29);
   }
 
   private closeToRidge(): void {
@@ -271,6 +281,7 @@ export class StampedeSketchScene extends Phaser.Scene {
       .setAlpha(1)
       .setScale(0.82)
       .setAngle(0);
+    this.updatePlayerContactRing();
 
     this.updateHud();
     this.inputRuntime?.updateStickVisuals();
@@ -288,6 +299,7 @@ export class StampedeSketchScene extends Phaser.Scene {
     }
 
     this.player.setVelocity(0, 0);
+    this.updatePlayerContactRing();
     this.inputRuntime.updateStickVisuals();
   }
 
@@ -300,8 +312,10 @@ export class StampedeSketchScene extends Phaser.Scene {
     if (frame.player) {
       this.player.setPosition(frame.player.x, frame.player.y);
     }
+    this.updatePlayerContactRing(frame.pressure);
     if (frame.contactCandidate) {
       this.feedbackRuntime?.showContact(this.player, frame.contactCandidate);
+      this.updatePlayerContactRing(frame.pressure);
     }
     this.applyAutoAttack(frame.attack);
 
@@ -377,6 +391,26 @@ export class StampedeSketchScene extends Phaser.Scene {
     if (velocity.x !== 0) {
       this.player.setFlipX(velocity.x < 0);
     }
+  }
+
+  private updatePlayerContactRing(pressure?: StampedePressureSnapshot): void {
+    if (!this.player || !this.playerContactRing) return;
+
+    const nearestDistance = pressure?.nearestContactDistance ?? Number.POSITIVE_INFINITY;
+    const danger =
+      pressure?.withinContactRadius === true ||
+      this.session.recentContact ||
+      nearestDistance < 24;
+
+    this.playerContactRing
+      .setPosition(this.player.x, this.player.y)
+      .setRadius(STAMPEDE_PLAYER_CONTACT_RADIUS)
+      .setScale(danger ? 1.08 : 1)
+      .setStrokeStyle(
+        danger ? 3 : 2,
+        danger ? 0xb4533d : 0x1a1a1a,
+        danger ? 0.82 : 0.32
+      );
   }
 
   private readPlayerStartPosition(): { x: number; y: number } {
@@ -475,6 +509,9 @@ export class StampedeSketchScene extends Phaser.Scene {
       Math.round((snapshot.pageNoise ?? 0) * 100),
       snapshot.phaseLabel ?? '',
       snapshot.feedback ?? '',
+      snapshot.contacts ?? '',
+      snapshot.contactLimit ?? '',
+      snapshot.healthRemaining ?? '',
       snapshot.scrapsCollected ?? '',
       snapshot.scrapGoal ?? ''
     ].join('|');

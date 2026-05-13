@@ -40,8 +40,10 @@ Anything beyond that is future scope unless a slice explicitly pulls it in.
   soft contact feedback, automatic pencil swipe, run ending UI, return to
   Ridge, bridge-backed React scene UI, Notebook shell presentation, enlarged
   arcade control mats shared with Potassium, and a first scene-local
-  pickup/upgrade draft. M4e should now be playtested for pickup cadence,
-  upgrade clarity, and touch feel before durable reward wiring.
+  pickup/upgrade draft. First M4e playtest tuning widened the true arena to
+  match the visible notebook page, added HP/contact readability, softened the
+  contact limit, and added respawn telegraphs. Continue playtesting pickup
+  cadence, upgrade clarity, and touch feel before durable reward wiring.
 - **Asset staging is now an active coordination concern**: prepared POC assets
   exist for Cicka, Potassium, and Stampede enemy families. Keep them documented
   and adopt them in small scene-owned slices instead of turning them into a
@@ -259,15 +261,18 @@ Current checkpoint:
 - **M4e Pickup / Upgrade Draft** implemented for review: cleared marks spawn
   simple scrap pickups, collecting the first threshold opens a scene UI upgrade
   draft, and one selected upgrade can make the pencil faster, the swipe wider,
-  or the guardian slightly quicker. This remains prototype behavior and does
-  not award durable Ridge progress.
+  or the guardian slightly quicker. First tuning feedback also made the playable
+  arena fill the notebook page more honestly, exposed HP/contact radius in the
+  HUD/scene, raised prototype survivability, and telegraphed mark respawns.
+  This remains prototype behavior and does not award durable Ridge progress.
 - Scene architecture is intentionally scene-local. `StampedeSketchScene` should
   remain the Phaser adapter/orchestrator while run decisions live behind
   `runtime/runFlow.ts` and swarm steering lives behind `runtime/swarmMotion.ts`.
 
 Next implementation slices:
 
-1. **M4e Playtest / Tuning Pass**: verify pickup cadence, draft timing, upgrade
+1. **M4e Playtest / Tuning Pass**: re-test the widened arena, HP/contact
+   readability, respawn warning, pickup cadence, draft timing, upgrade
    readability, and touch feel before adding durable Stampede rewards.
 
 Hold until later:

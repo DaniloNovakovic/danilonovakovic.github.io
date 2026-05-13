@@ -1,12 +1,17 @@
+import {
+  GAME_DESIGN_HEIGHT,
+  GAME_DESIGN_WIDTH
+} from '@/game/sharedSceneRuntime/designSize';
+
 export const STAMPEDE_ARENA = {
-  left: 275,
-  right: 725,
-  top: 0,
-  bottom: 600,
-  safeLeft: 315,
-  safeRight: 685,
-  safeTop: 74,
-  safeBottom: 526
+  left: 16,
+  right: GAME_DESIGN_WIDTH - 16,
+  top: 16,
+  bottom: GAME_DESIGN_HEIGHT - 16,
+  safeLeft: 52,
+  safeRight: GAME_DESIGN_WIDTH - 52,
+  safeTop: 52,
+  safeBottom: GAME_DESIGN_HEIGHT - 52
 } as const;
 
 export const STAMPEDE_PLAYER_SPEED = 210;

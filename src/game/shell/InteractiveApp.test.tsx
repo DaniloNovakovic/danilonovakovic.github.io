@@ -10,6 +10,7 @@ import {
   RIDGE_SCENE_ID,
   STAMPEDE_SKETCH_SCENE_ID
 } from '@/game/scenes/sceneIds';
+import { STAMPEDE_ARENA } from '@/game/scenes/stampedeSketch/runtime/movement';
 import { createStampedeResultViewModel } from '@/game/scenes/stampedeSketch/runtime/resultPresentation';
 import { getStampedeUpgradeChoices } from '@/game/scenes/stampedeSketch/runtime/upgrades';
 import { getMessages } from '@/shared/i18n';
@@ -220,7 +221,9 @@ describe('InteractiveApp', () => {
     expect(screen.queryByTestId('interactive-game-shell')).toBeNull();
     expect(screen.getByTestId('notebook-game-shell').getAttribute('data-profile')).toBe('survivalPage');
     const pageFrame = screen.getByTestId('stampede-notebook-page-frame');
-    expect(pageFrame.getAttribute('data-arena-aspect')).toBe('0.75');
+    const arenaAspect = (STAMPEDE_ARENA.right - STAMPEDE_ARENA.left) /
+      (STAMPEDE_ARENA.bottom - STAMPEDE_ARENA.top);
+    expect(pageFrame.getAttribute('data-arena-aspect')).toBe(String(arenaAspect));
     expect(pageFrame.className).toContain('stampede-notebook-page-frame');
     expect(screen.getByTestId('stampede-control-mat').style.bottom).toBe('0.75rem');
     expect(screen.getByRole('button', { name: /back to ridge/i })).toBeDefined();
@@ -556,12 +559,16 @@ describe('InteractiveApp', () => {
     bridgeActions.setSceneUiStatus(STAMPEDE_SKETCH_SCENE_ID, 'stampedeStatus', {
       timeRemainingSeconds: 68,
       phaseLabel: 'Breather',
-      pageNoise: 0.4
+      pageNoise: 0.4,
+      healthRemaining: 4,
+      contactLimit: 5
     });
     render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
 
     expect(screen.getByTestId('notebook-game-shell').getAttribute('data-profile')).toBe('survivalPage');
     expect(screen.getByText('1:08')).toBeDefined();
+    expect(screen.getByText('4/5')).toBeDefined();
+    expect(screen.getByLabelText('HP 4 of 5')).toBeDefined();
     expect(screen.getByText('Breather')).toBeDefined();
     expect(screen.getByRole('progressbar', { name: /page noise/i }).getAttribute('aria-valuenow')).toBe('40');
   });
