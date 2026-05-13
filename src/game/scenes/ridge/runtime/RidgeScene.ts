@@ -85,7 +85,7 @@ export class RidgeScene extends Phaser.Scene {
   private cickaWalkByEnabled = false;
   private cickaWalkByBark = '';
   private cickaWalkByState: CickaWalkByState = createCickaWalkByState();
-  private cickaWalkByAnchor = {
+  private cickaWalkByAnchor: { x: number; y: number } = {
     x: RIDGE_PLAYER_START.x,
     y: CICKA_WALK_BY_ANCHOR_Y
   };
