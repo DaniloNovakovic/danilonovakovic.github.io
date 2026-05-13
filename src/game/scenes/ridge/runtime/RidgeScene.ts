@@ -36,7 +36,7 @@ import {
   type RidgeLandmark
 } from '../worldLayout';
 import {
-  getRidgeLandmarkMemories,
+  getRidgeWorldMemories,
   hasRidgeWorldMemory,
   type RidgeWorldMemory
 } from '../worldMemory';
@@ -261,13 +261,19 @@ export class RidgeScene extends Phaser.Scene {
     stampedeFirstClearLabel: string,
     cickaStampedeNoteLabel: string
   ): void {
+    const worldMemories = getRidgeWorldMemories(bridgeStore.getState().progress.ridge);
+
     RIDGE_LANDMARKS.forEach((landmark) => {
+      const landmarkMemories = worldMemories.filter(
+        (memory) => memory.landmarkKind === landmark.kind
+      );
+
       switch (landmark.kind) {
         case 'cicka-perch':
-          this.addCickaPerch(landmark, cickaStampedeNoteLabel);
+          this.addCickaPerch(landmark, cickaStampedeNoteLabel, landmarkMemories);
           break;
         case 'stampede-blanket':
-          this.addStampedeBlanket(landmark, stampedeFirstClearLabel);
+          this.addStampedeBlanket(landmark, stampedeFirstClearLabel, landmarkMemories);
           break;
         case 'telegraph-bag':
           this.addTelegraphBag(landmark);
@@ -288,14 +294,11 @@ export class RidgeScene extends Phaser.Scene {
 
   private addCickaPerch(
     landmark: RidgeLandmark,
-    cickaStampedeNoteLabel: string
+    cickaStampedeNoteLabel: string,
+    memories: readonly RidgeWorldMemory[]
   ): void {
     const x = landmark.x;
     const y = RIDGE_FLOOR_Y - 74;
-    const memories = getRidgeLandmarkMemories(
-      landmark,
-      bridgeStore.getState().progress.ridge
-    );
     this.add.rectangle(x, y + 28, 10, 86, 0x1f1f1d, 0.88);
     this.add.rectangle(x, y - 12, 86, 10, 0x1f1f1d, 0.88);
     this.add.ellipse(x + 16, y - 36, 54, 28, 0x1f1f1d, 0.95);
@@ -326,14 +329,11 @@ export class RidgeScene extends Phaser.Scene {
 
   private addStampedeBlanket(
     landmark: RidgeLandmark,
-    stampedeFirstClearLabel: string
+    stampedeFirstClearLabel: string,
+    memories: readonly RidgeWorldMemory[]
   ): void {
     const x = landmark.x;
     const y = RIDGE_FLOOR_Y - 46;
-    const memories = getRidgeLandmarkMemories(
-      landmark,
-      bridgeStore.getState().progress.ridge
-    );
     this.add.rectangle(x, y, 104, 32, 0xb85f5a, 0.9);
     this.add.rectangle(x - 26, y, 18, 32, 0xf7f1df, 0.7);
     this.add.rectangle(x + 26, y, 18, 32, 0xf7f1df, 0.7);
