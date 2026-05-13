@@ -32,7 +32,7 @@ describe('stampede movement', () => {
   });
 
   it('clamps the player inside the safe arena', () => {
-    expect(clampStampedePosition({ x: 100, y: 900 })).toEqual({
+    expect(clampStampedePosition({ x: -100, y: 900 })).toEqual({
       x: STAMPEDE_ARENA.safeLeft,
       y: STAMPEDE_ARENA.safeBottom
     });

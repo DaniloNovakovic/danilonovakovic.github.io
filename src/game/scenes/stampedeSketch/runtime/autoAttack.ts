@@ -4,6 +4,22 @@ export const STAMPEDE_AUTO_ATTACK_LENGTH = 120;
 export const STAMPEDE_AUTO_ATTACK_HALF_WIDTH = 22;
 export const STAMPEDE_AUTO_ATTACK_MAX_HITS = 2;
 
+export interface StampedeAutoAttackProfile {
+  cooldownMs: number;
+  range: number;
+  length: number;
+  halfWidth: number;
+  maxHits: number;
+}
+
+export const DEFAULT_STAMPEDE_AUTO_ATTACK_PROFILE: StampedeAutoAttackProfile = {
+  cooldownMs: STAMPEDE_AUTO_ATTACK_COOLDOWN_MS,
+  range: STAMPEDE_AUTO_ATTACK_RANGE,
+  length: STAMPEDE_AUTO_ATTACK_LENGTH,
+  halfWidth: STAMPEDE_AUTO_ATTACK_HALF_WIDTH,
+  maxHits: STAMPEDE_AUTO_ATTACK_MAX_HITS
+};
+
 export interface StampedeAutoAttackPoint {
   x: number;
   y: number;
@@ -25,6 +41,7 @@ export interface StampedeAutoAttackInput {
   player: StampedeAutoAttackPoint;
   velocity: StampedeAutoAttackPoint;
   candidates: readonly StampedeAutoAttackCandidate[];
+  profile?: StampedeAutoAttackProfile;
 }
 
 export interface StampedeAutoAttackEvent {
@@ -55,7 +72,8 @@ export function resolveStampedeAutoAttackFrame({
   elapsedMs,
   player,
   velocity,
-  candidates
+  candidates,
+  profile = DEFAULT_STAMPEDE_AUTO_ATTACK_PROFILE
 }: StampedeAutoAttackInput): StampedeAutoAttackFrame {
   const lastDirection = resolveLastDirection(state.lastDirection, velocity);
 
@@ -70,7 +88,7 @@ export function resolveStampedeAutoAttackFrame({
     };
   }
 
-  const targetCandidate = resolveNearestCandidate(player, candidates);
+  const targetCandidate = resolveNearestCandidate(player, candidates, profile);
   const direction = targetCandidate
     ? normalizeDirection({
       x: targetCandidate.x - player.x,
@@ -78,22 +96,23 @@ export function resolveStampedeAutoAttackFrame({
     })
     : lastDirection;
   const target = {
-    x: player.x + direction.x * STAMPEDE_AUTO_ATTACK_LENGTH,
-    y: player.y + direction.y * STAMPEDE_AUTO_ATTACK_LENGTH
+    x: player.x + direction.x * profile.length,
+    y: player.y + direction.y * profile.length
   };
   const hitIds = resolveSwipeHitIds({
     player,
     direction,
     targetCandidateId: targetCandidate?.id ?? null,
-    candidates
+    candidates,
+    profile
   });
   const hitIdSet = new Set(hitIds);
 
   return {
     state: {
       nextFireAtMs: Math.max(
-        state.nextFireAtMs + STAMPEDE_AUTO_ATTACK_COOLDOWN_MS,
-        elapsedMs + STAMPEDE_AUTO_ATTACK_COOLDOWN_MS
+        state.nextFireAtMs + profile.cooldownMs,
+        elapsedMs + profile.cooldownMs
       ),
       lastDirection
     },
@@ -110,14 +129,15 @@ export function resolveStampedeAutoAttackFrame({
 
 function resolveNearestCandidate(
   player: StampedeAutoAttackPoint,
-  candidates: readonly StampedeAutoAttackCandidate[]
+  candidates: readonly StampedeAutoAttackCandidate[],
+  profile: StampedeAutoAttackProfile = DEFAULT_STAMPEDE_AUTO_ATTACK_PROFILE
 ): StampedeAutoAttackCandidate | null {
   let nearest: StampedeAutoAttackCandidate | null = null;
   let nearestDistance = Infinity;
 
   candidates.forEach((candidate) => {
     const distance = Math.hypot(candidate.x - player.x, candidate.y - player.y);
-    if (distance > STAMPEDE_AUTO_ATTACK_RANGE + candidate.radius) return;
+    if (distance > profile.range + candidate.radius) return;
     if (distance >= nearestDistance) return;
 
     nearest = candidate;
@@ -131,44 +151,48 @@ function resolveSwipeHitIds({
   player,
   direction,
   targetCandidateId,
-  candidates
+  candidates,
+  profile
 }: {
   player: StampedeAutoAttackPoint;
   direction: StampedeAutoAttackPoint;
   targetCandidateId: string | null;
   candidates: readonly StampedeAutoAttackCandidate[];
+  profile: StampedeAutoAttackProfile;
 }): readonly string[] {
   return candidates
     .filter((candidate) => (
       candidate.id === targetCandidateId ||
-      isCandidateInSwipe({ player, direction, candidate })
+      isCandidateInSwipe({ player, direction, candidate, profile })
     ))
     .sort((left, right) => (
       Math.hypot(left.x - player.x, left.y - player.y) -
       Math.hypot(right.x - player.x, right.y - player.y)
     ))
-    .slice(0, STAMPEDE_AUTO_ATTACK_MAX_HITS)
+    .slice(0, profile.maxHits)
     .map((candidate) => candidate.id);
 }
 
 function isCandidateInSwipe({
   player,
   direction,
-  candidate
+  candidate,
+  profile
 }: {
   player: StampedeAutoAttackPoint;
   direction: StampedeAutoAttackPoint;
   candidate: StampedeAutoAttackCandidate;
+  profile: StampedeAutoAttackProfile;
 }): boolean {
   const dx = candidate.x - player.x;
   const dy = candidate.y - player.y;
   const projection = dx * direction.x + dy * direction.y;
-  if (projection < 0 || projection > STAMPEDE_AUTO_ATTACK_LENGTH + candidate.radius) {
+  if (projection < 0 || projection > profile.length + candidate.radius) {
     return false;
   }
 
   const perpendicular = Math.abs(dx * direction.y - dy * direction.x);
-  return perpendicular <= STAMPEDE_AUTO_ATTACK_HALF_WIDTH + candidate.radius;
+  return perpendicular <= profile.halfWidth + candidate.radius;
 }
 
 function resolveLastDirection(

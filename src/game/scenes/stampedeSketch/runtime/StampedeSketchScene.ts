@@ -34,7 +34,18 @@ import {
   clampStampedePosition,
   type StampedeVelocity
 } from './movement';
+import {
+  createStampedePickupRuntime,
+  type StampedePickupRuntime
+} from './pickupPresentation';
 import type { StampedePressureSnapshot } from './pressure';
+import {
+  applyStampedeUpgradeChoice,
+  collectStampedePickups,
+  createStampedeProgressionState,
+  spawnStampedePickupsFromClearedMarks,
+  type StampedeProgressionState
+} from './progression';
 import {
   resolveStampedeRunFrame,
   STAMPEDE_PLAYER_CONTACT_RADIUS
@@ -53,6 +64,12 @@ import {
   createStampedeSwarmRuntime,
   type StampedeSwarmRuntime
 } from './swarmPresentation';
+import {
+  getStampedeUpgradeChoices,
+  isStampedeUpgradeId,
+  resolveStampedeAutoAttackProfile,
+  resolveStampedeGuardianSpeed
+} from './upgrades';
 
 interface StampedeSketchSceneStartData {
   onClose?: () => void;
@@ -61,15 +78,19 @@ interface StampedeSketchSceneStartData {
 
 export class StampedeSketchScene extends Phaser.Scene {
   private player?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+  private playerContactRing?: Phaser.GameObjects.Arc;
   private inputRuntime?: StampedeInputRuntime;
   private swarmRuntime?: StampedeSwarmRuntime;
   private feedbackRuntime?: StampedeFeedbackRuntime;
   private autoAttackRuntime?: StampedeAutoAttackPresentationRuntime;
+  private pickupRuntime?: StampedePickupRuntime;
   private session: StampedeSession = createStampedeSession();
   private autoAttackState: StampedeAutoAttackState = createStampedeAutoAttackState();
+  private progression: StampedeProgressionState = createStampedeProgressionState();
   private shownResultPhase?: Exclude<StampedeSessionPhase, 'playing'>;
   private lastPublishedStatusKey = '';
   private hasRunStarted = false;
+  private isUpgradeDraftOpen = false;
   private isPaused = false;
   private onClose: () => void = () => {};
 
@@ -102,16 +123,20 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.swarmRuntime = createStampedeSwarmRuntime({ scene: this });
     this.feedbackRuntime = createStampedeFeedbackRuntime({ scene: this });
     this.autoAttackRuntime = createStampedeAutoAttackPresentationRuntime({ scene: this });
+    this.pickupRuntime = createStampedePickupRuntime({ scene: this });
     this.session = createStampedeSession();
     this.autoAttackState = createStampedeAutoAttackState();
+    this.progression = createStampedeProgressionState();
     this.shownResultPhase = undefined;
     this.lastPublishedStatusKey = '';
     this.hasRunStarted = false;
+    this.isUpgradeDraftOpen = false;
     this.updateHud();
     this.showStartPrompt();
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       bridgeActions.clearSceneUi(STAMPEDE_SKETCH_SCENE_ID);
       bridgeActions.clearSceneControlPointerEvents(STAMPEDE_SKETCH_SCENE_ID);
+      this.pickupRuntime?.reset();
     });
     this.setPaused(this.isPaused);
   }
@@ -138,7 +163,13 @@ export class StampedeSketchScene extends Phaser.Scene {
 
     const sceneUiAction = bridgeActions.consumeSceneUiAction(STAMPEDE_SKETCH_SCENE_ID);
     if (sceneUiAction) {
-      this.handleSceneUiAction(sceneUiAction.action);
+      this.handleSceneUiAction(sceneUiAction.action, sceneUiAction.params);
+      return;
+    }
+
+    if (this.isUpgradeDraftOpen) {
+      this.player.setVelocity(0, 0);
+      this.inputRuntime.updateStickVisuals();
       return;
     }
 
@@ -157,9 +188,12 @@ export class StampedeSketchScene extends Phaser.Scene {
     const frame = resolveStampedeRunFrame({
       session: this.session,
       autoAttackState: this.autoAttackState,
+      autoAttackProfile: resolveStampedeAutoAttackProfile(this.progression.appliedUpgradeIds),
       deltaMs: delta,
       closeRequested,
-      velocity: this.inputRuntime.readVelocity(),
+      velocity: this.inputRuntime.readVelocity({
+        speed: resolveStampedeGuardianSpeed(this.progression.appliedUpgradeIds)
+      }),
       player: {
         x: this.player.x,
         y: this.player.y,
@@ -180,10 +214,16 @@ export class StampedeSketchScene extends Phaser.Scene {
       case 'playing':
         this.player.setVelocity(frame.velocity.x, frame.velocity.y);
         this.player.setPosition(frame.player.x, frame.player.y);
+        this.updatePlayerContactRing(frame.pressure);
         this.updatePlayerInkTilt(time, frame.velocity);
         this.applyAutoAttack(frame.attack);
+        if (this.collectPickups(frame.player, frame.pressure)) {
+          this.inputRuntime.updateStickVisuals();
+          return;
+        }
         if (frame.contactCandidate) {
           this.feedbackRuntime?.showContact(this.player, frame.contactCandidate);
+          this.updatePlayerContactRing(frame.pressure);
         }
         this.swarmRuntime.update(this.player, delta, frame.swarm);
         this.updateHud(frame.pressure);
@@ -202,6 +242,13 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.player.body.setAllowGravity(false);
     this.player.setCollideWorldBounds(false);
     this.player.body.setCircle(24, 8, 8);
+    this.playerContactRing = this.add.circle(
+      start.x,
+      start.y,
+      STAMPEDE_PLAYER_CONTACT_RADIUS,
+      0xffffff,
+      0
+    ).setStrokeStyle(2, 0x1a1a1a, 0.32).setDepth(29);
   }
 
   private closeToRidge(): void {
@@ -214,13 +261,16 @@ export class StampedeSketchScene extends Phaser.Scene {
   private restartRun(): void {
     this.session = createStampedeSession();
     this.autoAttackState = createStampedeAutoAttackState();
+    this.progression = createStampedeProgressionState();
     this.shownResultPhase = undefined;
     this.lastPublishedStatusKey = '';
     this.hasRunStarted = true;
+    this.isUpgradeDraftOpen = false;
     bridgeActions.clearSceneUiPanel(STAMPEDE_SKETCH_SCENE_ID);
     this.autoAttackRuntime?.reset();
     this.feedbackRuntime?.reset();
     this.swarmRuntime?.reset();
+    this.pickupRuntime?.reset();
     this.inputRuntime?.setPointerControlEnabled(true);
     this.inputRuntime?.clearPointerControl();
 
@@ -231,6 +281,7 @@ export class StampedeSketchScene extends Phaser.Scene {
       .setAlpha(1)
       .setScale(0.82)
       .setAngle(0);
+    this.updatePlayerContactRing();
 
     this.updateHud();
     this.inputRuntime?.updateStickVisuals();
@@ -248,6 +299,7 @@ export class StampedeSketchScene extends Phaser.Scene {
     }
 
     this.player.setVelocity(0, 0);
+    this.updatePlayerContactRing();
     this.inputRuntime.updateStickVisuals();
   }
 
@@ -260,8 +312,10 @@ export class StampedeSketchScene extends Phaser.Scene {
     if (frame.player) {
       this.player.setPosition(frame.player.x, frame.player.y);
     }
+    this.updatePlayerContactRing(frame.pressure);
     if (frame.contactCandidate) {
       this.feedbackRuntime?.showContact(this.player, frame.contactCandidate);
+      this.updatePlayerContactRing(frame.pressure);
     }
     this.applyAutoAttack(frame.attack);
 
@@ -290,7 +344,8 @@ export class StampedeSketchScene extends Phaser.Scene {
   private updateHud(pressure?: StampedePressureSnapshot): void {
     const snapshot = createStampedeHudSnapshot(
       readStampedeSessionSnapshot(this.session),
-      pressure
+      pressure,
+      this.progression
     );
     this.publishStatus(snapshot);
   }
@@ -304,8 +359,29 @@ export class StampedeSketchScene extends Phaser.Scene {
   ): void {
     if (!attack) return;
 
-    this.swarmRuntime?.clearMarks(attack.hitIds);
+    const clearedMarks = this.swarmRuntime?.clearMarks(attack.hitIds) ?? [];
+    this.progression = spawnStampedePickupsFromClearedMarks(
+      this.progression,
+      clearedMarks
+    );
+    this.pickupRuntime?.sync(this.progression.pickups);
     this.autoAttackRuntime?.show(attack);
+  }
+
+  private collectPickups(
+    player: { x: number; y: number; radius?: number },
+    pressure?: StampedePressureSnapshot
+  ): boolean {
+    const frame = collectStampedePickups(this.progression, player);
+    if (frame.collected.length === 0) return false;
+
+    this.progression = frame.state;
+    this.pickupRuntime?.sync(this.progression.pickups);
+    this.updateHud(pressure);
+
+    if (this.progression.upgradeDraftStatus !== 'pending') return false;
+    this.showUpgradeDraft();
+    return true;
   }
 
   private updatePlayerInkTilt(time: number, velocity: StampedeVelocity): void {
@@ -317,6 +393,26 @@ export class StampedeSketchScene extends Phaser.Scene {
     }
   }
 
+  private updatePlayerContactRing(pressure?: StampedePressureSnapshot): void {
+    if (!this.player || !this.playerContactRing) return;
+
+    const nearestDistance = pressure?.nearestContactDistance ?? Number.POSITIVE_INFINITY;
+    const danger =
+      pressure?.withinContactRadius === true ||
+      this.session.recentContact ||
+      nearestDistance < 24;
+
+    this.playerContactRing
+      .setPosition(this.player.x, this.player.y)
+      .setRadius(STAMPEDE_PLAYER_CONTACT_RADIUS)
+      .setScale(danger ? 1.08 : 1)
+      .setStrokeStyle(
+        danger ? 3 : 2,
+        danger ? 0xb4533d : 0x1a1a1a,
+        danger ? 0.82 : 0.32
+      );
+  }
+
   private readPlayerStartPosition(): { x: number; y: number } {
     return clampStampedePosition({
       x: GAME_DESIGN_WIDTH / 2,
@@ -324,12 +420,15 @@ export class StampedeSketchScene extends Phaser.Scene {
     });
   }
 
-  private handleSceneUiAction(action: SceneUiActionId): void {
+  private handleSceneUiAction(action: SceneUiActionId, params?: unknown): void {
     switch (action) {
       case 'start':
         if (!this.hasRunStarted) {
           this.startRun();
         }
+        return;
+      case 'stampedeUpgradeChoice':
+        this.handleUpgradeChoice(params);
         return;
       case 'retry':
         if (this.session.phase !== 'playing') {
@@ -345,8 +444,48 @@ export class StampedeSketchScene extends Phaser.Scene {
   private startRun(): void {
     this.hasRunStarted = true;
     bridgeActions.clearSceneUiPanel(STAMPEDE_SKETCH_SCENE_ID);
+    this.inputRuntime?.setPointerControlEnabled(true);
     this.inputRuntime?.clearPointerControl();
     this.inputRuntime?.updateStickVisuals();
+  }
+
+  private handleUpgradeChoice(params: unknown): void {
+    if (!this.isUpgradeDraftOpen) return;
+    const upgradeId = readUpgradeId(params);
+    if (!isStampedeUpgradeId(upgradeId)) return;
+
+    this.progression = applyStampedeUpgradeChoice(this.progression, upgradeId);
+    const profile = resolveStampedeAutoAttackProfile(this.progression.appliedUpgradeIds);
+    this.autoAttackState = {
+      ...this.autoAttackState,
+      nextFireAtMs: Math.min(
+        this.autoAttackState.nextFireAtMs,
+        this.session.elapsedMs + profile.cooldownMs
+      )
+    };
+    this.isUpgradeDraftOpen = false;
+    bridgeActions.clearSceneUiPanel(STAMPEDE_SKETCH_SCENE_ID);
+    this.inputRuntime?.setPointerControlEnabled(true);
+    this.inputRuntime?.clearPointerControl();
+    this.inputRuntime?.updateStickVisuals();
+    this.updateHud();
+  }
+
+  private showUpgradeDraft(): void {
+    if (this.isUpgradeDraftOpen) return;
+
+    this.isUpgradeDraftOpen = true;
+    this.player?.setVelocity(0, 0);
+    this.inputRuntime?.setPointerControlEnabled(false);
+    bridgeActions.setSceneUiPanel(
+      STAMPEDE_SKETCH_SCENE_ID,
+      'stampedeUpgradeDraft',
+      {
+        choices: getStampedeUpgradeChoices(),
+        scrapsCollected: this.progression.scrapsCollected,
+        scrapGoal: this.progression.scrapGoal
+      }
+    );
   }
 
   private showStartPrompt(): void {
@@ -369,7 +508,12 @@ export class StampedeSketchScene extends Phaser.Scene {
       Math.ceil(snapshot.timeRemainingSeconds ?? snapshot.timerSeconds ?? 0),
       Math.round((snapshot.pageNoise ?? 0) * 100),
       snapshot.phaseLabel ?? '',
-      snapshot.feedback ?? ''
+      snapshot.feedback ?? '',
+      snapshot.contacts ?? '',
+      snapshot.contactLimit ?? '',
+      snapshot.healthRemaining ?? '',
+      snapshot.scrapsCollected ?? '',
+      snapshot.scrapGoal ?? ''
     ].join('|');
 
     if (statusKey === this.lastPublishedStatusKey) return;
@@ -394,4 +538,9 @@ export class StampedeSketchScene extends Phaser.Scene {
       y: event.y
     });
   }
+}
+
+function readUpgradeId(params: unknown): unknown {
+  if (!params || typeof params !== 'object') return undefined;
+  return (params as { upgradeId?: unknown }).upgradeId;
 }

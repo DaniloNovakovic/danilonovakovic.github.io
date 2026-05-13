@@ -5,12 +5,40 @@ export function StampedeStatusStrip({ params }: SceneUiSurfaceProps) {
   const snapshot = readStatusParams(params);
   const noise = clamp(snapshot.pageNoise ?? 0, 0, 1);
   const feedback = formatFeedback(snapshot.feedback);
+  const contactLimit = Math.max(0, snapshot.contactLimit ?? 0);
+  const healthRemaining = Math.max(
+    0,
+    Math.min(contactLimit, snapshot.healthRemaining ?? contactLimit)
+  );
 
   return (
     <div className="mx-auto flex w-full max-w-xl flex-wrap items-center justify-between gap-x-4 gap-y-2 text-[#1a1a1a] [@media(max-height:420px)]:max-w-sm [@media(max-height:420px)]:gap-x-2 [@media(max-height:420px)]:gap-y-0">
       <p className="font-mono text-xl font-bold leading-none [@media(max-height:420px)]:text-base md:text-2xl">
         {formatTimer(snapshot.timeRemainingSeconds ?? snapshot.timerSeconds ?? 0)}
       </p>
+      {contactLimit > 0 ? (
+        <div
+          className="flex items-center gap-1.5 [@media(max-height:420px)]:gap-1"
+          aria-label={`HP ${healthRemaining} of ${contactLimit}`}
+        >
+          <span className="font-mono text-xs font-bold uppercase tracking-widest text-[#4b4337] [@media(max-height:420px)]:text-[10px] md:text-sm">
+            HP
+          </span>
+          <span className="font-mono text-xs font-bold tabular-nums text-[#1a1a1a] [@media(max-height:420px)]:text-[10px] md:text-sm">
+            {healthRemaining}/{contactLimit}
+          </span>
+          <span className="flex gap-1" aria-hidden="true">
+            {Array.from({ length: contactLimit }, (_, index) => (
+              <span
+                key={index}
+                className={`h-2.5 w-2.5 rounded-full border-2 border-[#1a1a1a] [@media(max-height:420px)]:h-2 [@media(max-height:420px)]:w-2 ${
+                  index < healthRemaining ? 'bg-[#1a1a1a]' : 'bg-white opacity-45'
+                }`}
+              />
+            ))}
+          </span>
+        </div>
+      ) : null}
       <div className="min-w-[8rem] flex-1 text-left [@media(max-height:420px)]:min-w-[5.5rem]">
         <p className="font-mono text-xs font-bold uppercase leading-tight tracking-widest text-[#4b4337] [@media(max-height:420px)]:text-[10px] md:text-sm">
           {snapshot.phaseLabel ?? 'Kite ideas'}
@@ -39,6 +67,11 @@ export function StampedeStatusStrip({ params }: SceneUiSurfaceProps) {
           />
         </div>
       </div>
+      {typeof snapshot.scrapsCollected === 'number' && typeof snapshot.scrapGoal === 'number' ? (
+        <p className="font-mono text-xs font-bold uppercase leading-tight tracking-widest text-[#4b4337] [@media(max-height:420px)]:hidden md:text-sm">
+          Scraps {snapshot.scrapsCollected}/{snapshot.scrapGoal}
+        </p>
+      ) : null}
     </div>
   );
 }
