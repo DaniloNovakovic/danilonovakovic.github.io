@@ -32,10 +32,14 @@ import {
   RIDGE_PLAYER_START,
   RIDGE_TRAIL_CARD_TARGETS,
   RIDGE_WORLD_WIDTH,
-  getRidgeLandmarkMemory,
   type RidgeTrailCardTargetId,
   type RidgeLandmark
 } from '../worldLayout';
+import {
+  getRidgeLandmarkMemories,
+  hasRidgeWorldMemory,
+  type RidgeWorldMemory
+} from '../worldMemory';
 import type { TrailCardOverlayParams } from '@/game/overlays/trailCard/types';
 
 interface RidgeSceneStartData {
@@ -97,7 +101,10 @@ export class RidgeScene extends Phaser.Scene {
     const ground = this.createGround();
 
     this.addBackdrop();
-    this.addLandmarks(messages.scenes.ridge.memory.stampedeFirstClearLabel);
+    this.addLandmarks(
+      messages.scenes.ridge.memory.stampedeFirstClearLabel,
+      messages.scenes.ridge.memory.cickaStampedeNoteLabel
+    );
     this.addPlaceholderCopy();
     this.createPlayer(ground);
     this.createTrailCardInteractions(messages.navigation.interact);
@@ -250,11 +257,14 @@ export class RidgeScene extends Phaser.Scene {
     this.add.circle(x + 46, 166, 12, 0xf0d35f, 0.9);
   }
 
-  private addLandmarks(stampedeFirstClearLabel: string): void {
+  private addLandmarks(
+    stampedeFirstClearLabel: string,
+    cickaStampedeNoteLabel: string
+  ): void {
     RIDGE_LANDMARKS.forEach((landmark) => {
       switch (landmark.kind) {
         case 'cicka-perch':
-          this.addCickaPerch(landmark);
+          this.addCickaPerch(landmark, cickaStampedeNoteLabel);
           break;
         case 'stampede-blanket':
           this.addStampedeBlanket(landmark, stampedeFirstClearLabel);
@@ -276,9 +286,16 @@ export class RidgeScene extends Phaser.Scene {
     });
   }
 
-  private addCickaPerch(landmark: RidgeLandmark): void {
+  private addCickaPerch(
+    landmark: RidgeLandmark,
+    cickaStampedeNoteLabel: string
+  ): void {
     const x = landmark.x;
     const y = RIDGE_FLOOR_Y - 74;
+    const memories = getRidgeLandmarkMemories(
+      landmark,
+      bridgeStore.getState().progress.ridge
+    );
     this.add.rectangle(x, y + 28, 10, 86, 0x1f1f1d, 0.88);
     this.add.rectangle(x, y - 12, 86, 10, 0x1f1f1d, 0.88);
     this.add.ellipse(x + 16, y - 36, 54, 28, 0x1f1f1d, 0.95);
@@ -286,6 +303,25 @@ export class RidgeScene extends Phaser.Scene {
     this.add.triangle(x + 18, y - 50, 0, 14, 12, 0, 22, 14, 0x1f1f1d, 0.95);
     this.add.circle(x + 30, y - 38, 3, 0xf7f1df, 1);
     this.add.line(x - 18, y - 32, -30, 0, -54, -10, 0x1f1f1d, 0.9).setLineWidth(5);
+    if (hasRidgeWorldMemory(memories, 'cicka-stampede-note')) {
+      this.addCickaStampedeNoteMemory(x, y, cickaStampedeNoteLabel);
+    }
+  }
+
+  private addCickaStampedeNoteMemory(
+    x: number,
+    y: number,
+    cickaStampedeNoteLabel: string
+  ): void {
+    this.add.rectangle(x + 58, y - 70, 50, 24, 0xf7f1df, 1)
+      .setStrokeStyle(2, 0x1f1f1d, 0.88)
+      .setAngle(5);
+    this.add.text(x + 38, y - 78, cickaStampedeNoteLabel, {
+      fontFamily: 'monospace',
+      fontSize: '11px',
+      color: '#1f1f1d'
+    }).setAngle(5).setDepth(5);
+    this.add.line(x + 35, y - 51, -8, 8, 12, -6, 0x1f1f1d, 0.38).setLineWidth(2);
   }
 
   private addStampedeBlanket(
@@ -294,7 +330,7 @@ export class RidgeScene extends Phaser.Scene {
   ): void {
     const x = landmark.x;
     const y = RIDGE_FLOOR_Y - 46;
-    const memory = getRidgeLandmarkMemory(
+    const memories = getRidgeLandmarkMemories(
       landmark,
       bridgeStore.getState().progress.ridge
     );
@@ -304,12 +340,29 @@ export class RidgeScene extends Phaser.Scene {
     this.add.circle(x - 22, y - 26, 11, 0x1f1f1d, 0.92);
     this.add.circle(x + 28, y - 20, 9, 0x1f1f1d, 0.75);
     this.add.line(x, y - 42, -34, 6, 34, -6, 0x1f1f1d, 0.32).setLineWidth(3);
-    if (memory === 'stampede-first-clear') {
-      this.addStampedeBlanketMemory(x, y, stampedeFirstClearLabel);
+    if (memories.length) {
+      this.addStampedeBlanketMemories(x, y, stampedeFirstClearLabel, memories);
     }
   }
 
-  private addStampedeBlanketMemory(
+  private addStampedeBlanketMemories(
+    x: number,
+    y: number,
+    stampedeFirstClearLabel: string,
+    memories: readonly RidgeWorldMemory[]
+  ): void {
+    if (hasRidgeWorldMemory(memories, 'stampede-settled-swarm')) {
+      this.addStampedeSettledSwarmMemory(x, y);
+    }
+    if (hasRidgeWorldMemory(memories, 'stampede-held-sticker')) {
+      this.addStampedeHeldStickerMemory(x, y, stampedeFirstClearLabel);
+    }
+    if (hasRidgeWorldMemory(memories, 'stampede-glide-pip-decal')) {
+      this.addStampedeGlidePipMemory(x, y);
+    }
+  }
+
+  private addStampedeHeldStickerMemory(
     x: number,
     y: number,
     stampedeFirstClearLabel: string
@@ -323,6 +376,27 @@ export class RidgeScene extends Phaser.Scene {
       color: '#1f1f1d'
     }).setAngle(-8).setDepth(5);
     this.add.line(x + 9, y - 32, -12, 10, 12, -10, 0x1f1f1d, 0.52).setLineWidth(2);
+  }
+
+  private addStampedeSettledSwarmMemory(x: number, y: number): void {
+    [
+      { x: -55, y: -36, radius: 4 },
+      { x: -42, y: -49, radius: 3 },
+      { x: -30, y: -39, radius: 2 },
+      { x: 54, y: -30, radius: 3 },
+      { x: 66, y: -43, radius: 2 }
+    ].forEach((dot) => {
+      this.add.circle(x + dot.x, y + dot.y, dot.radius, 0x1f1f1d, 0.24);
+    });
+    this.add.line(x - 64, y - 24, -12, 4, 12, -4, 0x1f1f1d, 0.22).setLineWidth(2);
+    this.add.line(x + 58, y - 18, -10, -3, 10, 3, 0x1f1f1d, 0.2).setLineWidth(2);
+  }
+
+  private addStampedeGlidePipMemory(x: number, y: number): void {
+    this.add.circle(x + 74, y - 18, 11, 0xf7f1df, 1)
+      .setStrokeStyle(2, 0x1f1f1d, 0.9);
+    this.add.line(x + 74, y - 18, -6, 6, 6, -6, 0x1f1f1d, 0.85).setLineWidth(2);
+    this.add.circle(x + 80, y - 24, 2, 0x1f1f1d, 0.85);
   }
 
   private addTelegraphBag(landmark: RidgeLandmark): void {

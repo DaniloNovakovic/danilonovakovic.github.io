@@ -5,11 +5,11 @@ import {
   RIDGE_PLAYER_RESUME_CLAMP,
   RIDGE_PLAYER_START,
   RIDGE_TRAIL_CARD_TARGETS,
-  RIDGE_WORLD_WIDTH,
-  getRidgeLandmarkMemory
+  RIDGE_WORLD_WIDTH
 } from './worldLayout';
 import { STAMPEDE_SKETCH_RIDGE_STAMP_ID } from '@/game/bridge/ridgeProgressIds';
 import { STAMPEDE_SKETCH_SCENE_ID } from '@/game/scenes/sceneIds';
+import { getRidgeLandmarkMemories } from './worldMemory';
 
 describe('ridge world layout', () => {
   it('keeps the first movement shell flat and inside world bounds', () => {
@@ -59,20 +59,32 @@ describe('ridge world layout', () => {
     expect(unavailable.every((target) => target.card.unavailableReason && !target.card.enterSceneId)).toBe(true);
   });
 
-  it('derives the Stampede blanket memory from the first-clear stamp', () => {
+  it('keeps Ridge memory derivation anchored to the Stampede landmark', () => {
+    const cickaPerch = RIDGE_LANDMARKS.find((landmark) => landmark.kind === 'cicka-perch');
     const stampedeBlanket = RIDGE_LANDMARKS.find((landmark) => landmark.kind === 'stampede-blanket');
     const telegraphBag = RIDGE_LANDMARKS.find((landmark) => landmark.kind === 'telegraph-bag');
 
+    expect(cickaPerch).toBeDefined();
     expect(stampedeBlanket).toBeDefined();
     expect(telegraphBag).toBeDefined();
-    if (!stampedeBlanket || !telegraphBag) return;
+    if (!cickaPerch || !stampedeBlanket || !telegraphBag) return;
 
-    expect(getRidgeLandmarkMemory(stampedeBlanket, { stampIds: [] })).toBeNull();
-    expect(getRidgeLandmarkMemory(stampedeBlanket, {
+    expect(getRidgeLandmarkMemories(stampedeBlanket, { stampIds: [] })).toEqual([]);
+    expect(getRidgeLandmarkMemories(cickaPerch, { stampIds: [] })).toEqual([]);
+    expect(getRidgeLandmarkMemories(stampedeBlanket, {
       stampIds: [STAMPEDE_SKETCH_RIDGE_STAMP_ID]
-    })).toBe('stampede-first-clear');
-    expect(getRidgeLandmarkMemory(telegraphBag, {
+    }).map((memory) => memory.id)).toEqual([
+      'stampede-held-sticker',
+      'stampede-settled-swarm',
+      'stampede-glide-pip-decal'
+    ]);
+    expect(getRidgeLandmarkMemories(cickaPerch, {
       stampIds: [STAMPEDE_SKETCH_RIDGE_STAMP_ID]
-    })).toBeNull();
+    }).map((memory) => memory.id)).toEqual([
+      'cicka-stampede-note'
+    ]);
+    expect(getRidgeLandmarkMemories(telegraphBag, {
+      stampIds: [STAMPEDE_SKETCH_RIDGE_STAMP_ID]
+    })).toEqual([]);
   });
 });

@@ -249,6 +249,17 @@ describe('bridgeStore', () => {
       expect(isRidgeShortcutUnlocked('outskirts-lift')).toBe(true);
     });
 
+    it('keeps Ridge stickers derived instead of stored', () => {
+      bridgeActions.awardRidgeStamp('stampede-sketch');
+      expect(bridgeStore.getState().progress.ridge).not.toHaveProperty('stickerIds');
+      expect(Object.keys(bridgeStore.getState().progress.ridge).sort()).toEqual([
+        'manualPageIds',
+        'mobility',
+        'shortcutIds',
+        'stampIds'
+      ]);
+    });
+
     it('keeps Potassium Circuit ownership derived from inventory', () => {
       bridgeActions.awardRidgeStamp('stampede-sketch');
       expect(isItemOwned('circuit')).toBe(false);
