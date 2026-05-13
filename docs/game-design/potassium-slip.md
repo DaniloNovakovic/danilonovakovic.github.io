@@ -39,10 +39,11 @@ Potassium Slip is the existing arcade anchor for Sketchbook Ridge. It owns the
 ricochet lane and should remain the benchmark for a deep opt-in mini-game, not
 the template every future mini-game must match.
 
-The Circuit is Potassium's durable world reward and the alternate key for the
-first Relay Spire gate. Future Ridge gate code should check existing inventory
-ownership with `isItemOwned('circuit')`, or the equivalent bridge inventory read,
-instead of adding a separate Ridge progress flag such as `circuitOwned`.
+The Circuit is Potassium's durable world reward and one major proof toward the
+first Relay Spire gate, not a solo bypass. Future Ridge gate code should check
+existing inventory ownership with `isItemOwned('circuit')`, or the equivalent
+bridge inventory read, instead of adding a separate Ridge progress flag such as
+`circuitOwned`.
 
 Ridge signs, Trail Cards, NPCs, and stickers may acknowledge Potassium and the
 Circuit, but Potassium run behavior should stay scene-owned: fresh-start entry,
@@ -64,8 +65,8 @@ approved, filed, and made sensible before it can help the Ridge.
 
 The campaign reward should stay the **Circuit**. Fictionally, the Compliance
 Officer has withheld it because the Relay Spire signal is "not properly
-approved." Beating the boss recovers the Circuit and lets Potassium act as the
-alternate key to the first Relay Spire gate.
+approved." Beating the boss recovers the Circuit and lets Potassium count as one
+major proof toward the first Relay Spire gate.
 
 On return to the Ridge, Potassium should leave a visible memory rather than only
 an inventory flag. Good first candidates are:

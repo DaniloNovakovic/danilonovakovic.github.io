@@ -52,8 +52,8 @@ Anything beyond that is future scope unless a slice explicitly pulls it in.
   M5a derives Ridge-owned sticker/world-change memories from durable progress
   without stored sticker state, and M5b adds the first Cicka note/translator
   tease plus a dev-only `devRidgeStamp=stampede-sketch` seed for fast local
-  testing. Cicka proximity chatter or direct talk interaction is desired, but
-  held for a later Cicka interaction slice.
+  testing. M5c/M5d add Cicka's Stampede-gated walk-by bark, first deliberate
+  pre-translator interaction, and a primitive readability polish pass.
 - **Asset staging is now an active coordination concern**: prepared POC assets
   exist for Cicka, Potassium, and Stampede enemy families. Keep them documented
   and adopt them in small scene-owned slices instead of turning them into a
@@ -307,7 +307,7 @@ Outputs:
 - sticker/world-change rendering from stamps and manual pages.
 - one shortcut.
 - Ridge-only glide behavior.
-- first Cicka Note or translator tease.
+- first Cicka Note, memory reaction, or pre-translator interaction.
 
 Current checkpoint:
 
@@ -322,20 +322,24 @@ Current checkpoint:
 - **M5c Cicka Walk-By Memory** accepted for continuation: after the Stampede
   stamp, Cicka gives one tiny walk-by bark per Ridge entry without stored Cicka
   state.
-- **M5d Cicka First Interaction** is the current follow-up: Cicka can answer a
-  deliberate interact with pre-translator meow punctuation, while the permanent
+- **M5d Cicka First Interaction** accepted for continuation: Cicka can answer a
+  deliberate interaction with pre-translator meow punctuation, while the permanent
   Cicka memory becomes a paw/scratch decal instead of duplicate speech text;
   the same PR includes a small primitive readability polish pass for Cicka,
   her speech bubble, and the memory decal.
 
 Next implementation slices:
 
-1. **Later First Ridge Shortcut**: wait until the Ridge has enough repeat
-   traversal to make a shortcut feel like real relief rather than a proof of
-   concept.
-2. **Ridge-Only Glide**: keep this as a separate HITL slice because input feel
-   and touch behavior need review.
-3. **Translator / Cicka Daydream**: keep translated Cicka subtitles and the
+1. **Cicka Runtime Asset Adoption**: promote the prepared Cicka runtime
+   candidate into Ridge in a small scene-owned slice. Use this to establish the
+   first asset adoption standard without creating a broad asset framework.
+2. **Ridge / Outskirts Topology Spike**: design and lightly prototype how the
+   current Overworld becomes Outskirts/Trailhead and Ridge becomes a connected
+   Hollow Knight topology side-view world. Do not fully replace the default
+   Overworld in the same PR.
+3. **Later First Ridge Shortcut / Ridge-Only Glide**: revisit these after the
+   topology spike gives shortcuts and movement rewards a real route shape.
+4. **Translator / Cicka Daydream**: keep translated Cicka subtitles and the
    Cicka daydream mini-slice for later, after Ridge Memory proves return play.
 
 Do not add stored sticker state. Do not add Stampede upgrades, endless mode,
@@ -349,9 +353,12 @@ Owner: integration + Ridge.
 
 Outputs:
 
-- final gate: any three stamps or Circuit, plus one manual insight.
+- final gate: at least three major clears / proofs, with Potassium Circuit
+  counting as one proof, plus one Cicka / translator / manual insight.
 - short ending/contact overlay.
 - return to Ridge after ending.
+- post-ending Ridge state where Micka first appears after the player completes
+  or replays one mini-game and returns.
 - player manual updated when behavior ships.
 
 ### M7: Telegraph Terrace Prototype
@@ -400,7 +407,8 @@ Blocked by: none
 
 What to build:
 
-- Update docs so Potassium's Circuit is clearly the alternate finale key.
+- Update docs so Potassium's Circuit is clearly one major proof toward the
+  Relay Spire gate, not a solo ending bypass.
 - Record the exact ownership check future Ridge gates should use.
 - Keep Potassium behavior unchanged.
 
@@ -531,7 +539,7 @@ What to build:
 
 - Render placeholder sticker/world changes from progress.
 - Add one shortcut.
-- Add first Cicka Note or translator tease.
+- Add first Cicka Note, memory reaction, or pre-translator interaction.
 
 ### 12. Add Ridge-Only Glide
 
@@ -553,7 +561,8 @@ Blocked by: issues 6, 10, and 11
 
 What to build:
 
-- Gate on any three stamps or Circuit, plus one manual insight.
+- Gate on at least three major clears / proofs, with Potassium Circuit counting
+  as one proof, plus one Cicka / translator / manual insight.
 - Add short ending/contact overlay.
 - Return to Ridge after ending.
 

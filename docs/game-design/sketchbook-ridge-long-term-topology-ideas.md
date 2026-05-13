@@ -29,6 +29,11 @@ grow into a denser tiny overworld with:
 - *Hollow Knight* shortcut relief and route compression
 - *Tunic* reinterpretation secrets and "oh, wait" moments
 
+The locked long-term world direction is **2D side-view interconnected Ridge**.
+This means Hollow Knight-style topology is the structural reference, not a
+top-down/isometric/3D-like pivot. The mood remains gentle and personal, and the
+re-reading layer remains closer to Tunic than to a combat metroidvania.
+
 The key rule is: expand **density**, not **size**.
 
 ## Long-Term World Thesis
@@ -40,16 +45,21 @@ It should not become:
 
 - a huge metroidvania map
 - a biome tour
+- a top-down or isometric world unless a dedicated future spike proves the cost
+  is worth it
 - a puzzle-box that hides progress behind obscure logic
 - a lore-heavy world that forgets Danilo is the primary audience
 
 It should become:
 
 - one memorable summit route
+- an interconnected 2D side-view map with loops, shafts, and compressed returns
 - several hidden parallel strata
 - a web of satisfying shortcuts
 - a place where old landmarks gain new meaning after mobility, manual, or
   Cicka discoveries
+- eventual movement flavors such as wall cling and double jump, treated as
+  optional or later topology payoffs before they ever become main-ending gates
 
 Late-game, the player should be able to cross the Ridge quickly, but still feel
 there are a few corners worth revisiting.
@@ -218,7 +228,7 @@ Good uses:
 - banana-law signage
 - rebound diagrams as jokes
 - NPC commentary
-- alternate finale key recognition through the Circuit
+- major-proof recognition through the Circuit
 
 Avoid:
 
