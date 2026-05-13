@@ -40,11 +40,15 @@ Danilo explores a compact hand-drawn ridge inside his own sketchbook, climbing t
 
 This is **Danilo's tiny private mountain**, not a portfolio theme park.
 
-The goal is to reach the **Relay Spire** and "send the sketchbook." On paper, that means shipping the portfolio. Emotionally, it means noticing that the unfinished jokes, hobbies, game tastes, tools, and half-serious obsessions already form a coherent world.
+The goal is to reach the **Relay Spire** and "send the sketchbook." On paper, that means shipping the portfolio. Emotionally, it means noticing that the unfinished jokes, hobbies, game tastes, tools, and half-serious obsessions already form a coherent world. Cicka is the emotional spine of that realization: she starts as a tiny resident, becomes the guide who teaches the player how to notice the Ridge, and makes the first ending a quiet farewell and tribute rather than only a contact/credits beat.
 
 The ending should not say "you became perfect." It should say:
 
 > You shipped something alive.
+
+It should also say, softly:
+
+> Thank you for walking with me.
 
 ## Fun Pillars
 
@@ -71,7 +75,16 @@ The ending should not say "you became perfect." It should say:
 
 ## Overworld Plan
 
-The overworld is a side-view ridge that can be crossed quickly once learned. The player sees the Relay Spire early, like a destination silhouette.
+The overworld is a side-view ridge that can be crossed quickly once learned.
+Long-term, it should use **Hollow Knight topology, A Short Hike mood, and
+Tunic re-reading**: connected 2D side-view rooms/screens, vertical shafts,
+shortcut relief, gentle movement rewards, and old props becoming newly legible.
+The player sees the Relay Spire early, like a destination silhouette.
+
+Do not pivot the main world toward top-down, isometric, or 3D-like exploration
+without a deliberate future spike. Phaser's 2D strengths fit a layered
+side-view Ridge better, and the current Ridge shell should grow into that
+direction rather than being discarded.
 
 ### Zone 1: Outskirts / Trailhead
 
@@ -110,17 +123,35 @@ Level shape:
 - one late vertical shortcut shaft
 - no separate biomes in v1
 - palette shifts through ink density, paper texture, and stickers rather than new tile sets
+- future expansion can add double-jump / wall-cling style mobility, but the
+  main path should stay low-cortisol and mobile-feasible
+- the first Cicka farewell ending should not require wall cling or double jump;
+  save those as optional or later topology payoffs unless a mobile control
+  spike proves they are effortless
 
-### Zone 3: Relay Spire / Contact Peak
+### Zone 3: Relay Spire / Farewell Peak
 
-Purpose: final shipping/contact/credits route.
+Purpose: final shipping/contact/credits route, and the first Cicka farewell.
 
 Gate:
 
-- any three hobby stamps **or** Potassium Circuit
-- plus one manual-page insight that decodes the Relay sign
+- at least three major clears / proofs, with Potassium Circuit counting as one
+  proof rather than a solo bypass
+- plus one Cicka / translator / manual insight that decodes the Relay sign
 
-The gate should feel like a knowledge nudge, not a puzzle wall. If Danilo has played around, the answer should feel obvious in retrospect.
+The gate should feel earned but not tedious. It should not require every
+mini-game or every optional mastery scene, but it should ask the player to spend
+real time with the Ridge before the farewell.
+
+Ending beat:
+
+- Cicka is present at the Relay Spire as a guide to a threshold.
+- The player understands she is going somewhere the player cannot follow.
+- The farewell is tender but not literal-heavy: no on-screen death scene, no long grief speech.
+- Cicka leaves a final paw mark or page mark, and the Ridge remains replayable after the ending.
+- Micka, a small kitten/child presence, appears only after the player returns to the normal Ridge, not during the ending sequence.
+- Micka first appears when the player returns to the Ridge after completing or
+  replaying one mini-game post-ending.
 
 ## Main Loop
 
@@ -458,12 +489,22 @@ Behavior:
 - sometimes blocks a path for no reason until the player returns with a sticker or manual clue
 - reacts to cleared mini-games with new "meow" punctuation
 - leaves paw-print margin marks near hidden details
+- grows from side resident into the emotional guide for the first ending
+- leaves through a symbolic farewell at the Relay Spire, toward somewhere the player cannot follow
 
 Design:
 
 - small black-ink silhouette with very readable tail shapes
 - stepped animation: blink, loaf, stretch, suspicious turn, tiny hop
 - subtitles should use paper-cut dialogue bubbles, but only after the translator moment
+
+Ending and tribute rule:
+
+- Cicka's farewell is a tribute beat, not a literal death scene.
+- Use presence, absence, paw marks, and one or two translated lines instead of heavy exposition.
+- After the ending, the Ridge remains open for replay, and Cicka's final mark should persist.
+- Micka appears after the player returns to the Ridge from completing or
+  replaying one post-ending mini-game. She is continuity, not replacement.
 
 Translator fantasy:
 
@@ -506,6 +547,10 @@ Use the *Oyasumi Punpun* taste signal carefully. The goal is not to make the por
 6. No main-path jump should require precision platforming.
 7. Optional mastery paths can be hard, but must be clearly optional.
 8. A mobile player should be able to reach the first Trail Card within one minute.
+9. Long-term topology should stay 2D side-view and interconnected, not
+   top-down/isometric by default.
+10. Wall cling / double jump are desirable long-term movement flavors, but not
+    required gates for the first farewell ending.
 
 ## Architecture Rules For This Plan
 
@@ -628,20 +673,24 @@ Done when:
 
 ### Slice 5: Relay Spire First Ending
 
-Goal: close the loop.
+Goal: close the loop with Cicka as the emotional spine.
 
 Tasks:
 
 - add final gate logic
-- allow any three stamps or Circuit as path
-- require one manual insight
-- add short ending overlay
+- require at least three major clears / proofs, with Potassium Circuit counting
+  as one proof
+- require one Cicka / translator / manual insight
+- add short ending overlay / paper-cut farewell beat
 - return player to Ridge after ending
+- keep mini-games replayable after the ending
+- introduce Micka after the player returns from completing or replaying one
+  post-ending mini-game, not inside the ending sequence
 
 Done when:
 
 - Danilo can finish a complete route in roughly 20 to 35 minutes
-- the ending feels like shipping a living sketchbook
+- the ending feels like shipping a living sketchbook and saying goodbye with care
 
 ## Design Validation
 
@@ -665,6 +714,7 @@ Cut or defer these until the core loop is proven:
 - full Tunic cipher language
 - second ricochet mini-game
 - large overworld map
+- top-down/isometric overworld pivot before a dedicated spike
 - multi-biome asset set
 - generic mini-game framework
 - meta-progression shop

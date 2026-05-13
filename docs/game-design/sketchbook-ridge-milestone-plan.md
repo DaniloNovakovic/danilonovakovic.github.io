@@ -330,12 +330,16 @@ Current checkpoint:
 
 Next implementation slices:
 
-1. **Later First Ridge Shortcut**: wait until the Ridge has enough repeat
-   traversal to make a shortcut feel like real relief rather than a proof of
-   concept.
-2. **Ridge-Only Glide**: keep this as a separate HITL slice because input feel
-   and touch behavior need review.
-3. **Translator / Cicka Daydream**: keep translated Cicka subtitles and the
+1. **Cicka Runtime Asset Adoption**: promote the prepared Cicka runtime
+   candidate into Ridge in a small scene-owned slice. Use this to establish the
+   first asset adoption standard without creating a broad asset framework.
+2. **Ridge / Outskirts Topology Spike**: design and lightly prototype how the
+   current Overworld becomes Outskirts/Trailhead and Ridge becomes a connected
+   Hollow-Knight-topology side-view world. Do not fully replace the default
+   Overworld in the same PR.
+3. **Later First Ridge Shortcut / Ridge-Only Glide**: revisit these after the
+   topology spike gives shortcuts and movement rewards a real route shape.
+4. **Translator / Cicka Daydream**: keep translated Cicka subtitles and the
    Cicka daydream mini-slice for later, after Ridge Memory proves return play.
 
 Do not add stored sticker state. Do not add Stampede upgrades, endless mode,
@@ -349,9 +353,12 @@ Owner: integration + Ridge.
 
 Outputs:
 
-- final gate: any three stamps or Circuit, plus one manual insight.
+- final gate: at least three major clears / proofs, with Potassium Circuit
+  counting as one proof, plus one Cicka / translator / manual insight.
 - short ending/contact overlay.
 - return to Ridge after ending.
+- post-ending Ridge state where Micka first appears after the player completes
+  or replays one mini-game and returns.
 - player manual updated when behavior ships.
 
 ### M7: Telegraph Terrace Prototype
@@ -553,7 +560,8 @@ Blocked by: issues 6, 10, and 11
 
 What to build:
 
-- Gate on any three stamps or Circuit, plus one manual insight.
+- Gate on at least three major clears / proofs, with Potassium Circuit counting
+  as one proof, plus one Cicka / translator / manual insight.
 - Add short ending/contact overlay.
 - Return to Ridge after ending.
 

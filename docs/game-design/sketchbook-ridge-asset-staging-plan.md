@@ -154,9 +154,13 @@ Reason:
 Recommended slice:
 
 - review `asset-sources/prepared/characters/cicka/`
-- decide whether it is a prepared prototype or active runtime source
+- promote only the chosen Cicka frames into runtime-wired Ridge assets
+- use the slice to establish the first scene-owned asset adoption pattern:
+  runtime asset location, manifest/key naming, preload ownership, and local
+  README expectations
 - if integrated, keep it lightweight: perch, blink, loaf, suspicious turn, and
   one movement read are enough
+- do not build a global asset framework from the first adoption slice
 
 ### 2. Stampede Objective Visual Pass
 
@@ -244,19 +248,14 @@ Riskier work that should be serialized:
 
 ## Recommended Next 1-3 Tasks
 
-1. Keep the long-term topology ideas doc as planning-only and out of milestone
-   requirements.
-2. Open a small implementation slice for either Cicka adoption in Ridge or the
-   Stampede calm-patch / proximity-aggro pass, but not both plus Potassium at
-   once.
+1. Open **Cicka Runtime Asset Adoption** as the next asset implementation slice.
+2. Follow with a **Ridge / Outskirts Topology Spike** before committing to
+   shortcut, glide, wall-cling, or full Overworld replacement behavior.
+3. Keep Stampede calm-patch / proximity-aggro and Potassium visual upgrades as
+   later scene-owned asset slices.
 
 ## Decision Needed From Danilo
 
-The highest-leverage taste/production call is:
-
-- should the next asset integration slice be **Cicka in Ridge** or
-  **Stampede calm patch + proximity aggro**
-
-My recommendation is **Cicka first for warmth**, unless you want the current
-active gameplay slice to stay purely on Stampede, in which case **Stampede calm
-patch + proximity aggro** is the better follow-through.
+Current decision: **Cicka first**, then Ridge / Outskirts topology. Stampede and
+Potassium asset adoption stay queued until those two slices clarify the main
+world and asset standard.
