@@ -45,6 +45,14 @@ import {
   updateCickaWalkBy,
   type CickaWalkByState
 } from '../cickaWalkBy';
+import {
+  CICKA_INTERACTION_RESPONSE_DURATION_MS,
+  CICKA_INTERACTION_TARGET_ID,
+  getCickaInteractionResponse,
+  shouldShowCickaInteractionPrompt,
+  type CickaInteractionCopy,
+  type CickaInteractionResponse
+} from '../cickaInteraction';
 import type { TrailCardOverlayParams } from '@/game/overlays/trailCard/types';
 
 interface RidgeSceneStartData {
@@ -56,7 +64,12 @@ interface RidgeSceneStartData {
 
 type RidgeInteractionEffect =
   | { kind: 'close' }
-  | { kind: 'openTrailCard'; params: TrailCardOverlayParams };
+  | { kind: 'openTrailCard'; params: TrailCardOverlayParams }
+  | { kind: 'showCickaResponse'; response: CickaInteractionResponse };
+
+type RidgeInteractionTargetId =
+  | RidgeTrailCardTargetId
+  | typeof CICKA_INTERACTION_TARGET_ID;
 
 const CICKA_WALK_BY_ANCHOR_Y = RIDGE_FLOOR_Y - 74;
 
@@ -65,9 +78,12 @@ export class RidgeScene extends Phaser.Scene {
   interactPrompt?: Phaser.GameObjects.Text;
 
   private playerRuntime?: SideViewPlayerRuntime;
-  private interactionRuntime?: InteriorInteractionRuntime<RidgeTrailCardTargetId, RidgeInteractionEffect>;
-  private cickaWalkByBubble?: Phaser.GameObjects.Container;
+  private interactionRuntime?: InteriorInteractionRuntime<RidgeInteractionTargetId, RidgeInteractionEffect>;
+  private cickaSpeechBubble?: Phaser.GameObjects.Container;
+  private cickaSpeechBubbleLabel?: Phaser.GameObjects.Text;
+  private cickaSpeechVisibleUntilMs = 0;
   private cickaWalkByEnabled = false;
+  private cickaWalkByBark = '';
   private cickaWalkByState: CickaWalkByState = createCickaWalkByState();
   private cickaWalkByAnchor = {
     x: RIDGE_PLAYER_START.x,
@@ -120,13 +136,17 @@ export class RidgeScene extends Phaser.Scene {
     this.addBackdrop();
     this.addLandmarks(
       messages.scenes.ridge.memory.stampedeFirstClearLabel,
-      messages.scenes.ridge.memory.cickaStampedeNoteLabel,
       worldMemories
     );
-    this.addCickaWalkByBubble(messages.scenes.ridge.memory.cickaWalkByBark);
+    this.cickaWalkByBark = messages.scenes.ridge.memory.cickaWalkByBark;
+    this.addCickaSpeechBubble();
     this.addPlaceholderCopy();
     this.createPlayer(ground);
-    this.createTrailCardInteractions(messages.navigation.interact);
+    this.createRidgeInteractions(
+      messages.navigation.interact,
+      messages.scenes.ridge.cicka.interaction,
+      worldMemories
+    );
     this.setPaused(this.isPaused);
     this.playerRuntime?.syncAppearance();
   }
@@ -141,6 +161,7 @@ export class RidgeScene extends Phaser.Scene {
     }
 
     this.updateCickaWalkByMemory();
+    this.updateCickaSpeechBubble();
 
     const interaction = this.interactionRuntime?.update({
       playerX: this.player?.x ?? 0,
@@ -149,25 +170,41 @@ export class RidgeScene extends Phaser.Scene {
       exitRequested: playerUpdate.commands.exitContext
     });
 
-    if (!interaction || !interaction.prompt.visible) {
+    if (!interaction) {
       this.interactPrompt?.setVisible(false);
       return;
     }
 
-    this.interactPrompt?.setPosition(interaction.prompt.x, interaction.prompt.y).setVisible(true);
     if (interaction.effect?.kind === 'openTrailCard') {
       this.onOpenOverlay?.(TRAIL_CARD_OVERLAY_ID, {
         params: interaction.effect.params,
         returnToSceneId: PHASER_SCENE_KEYS.ridge
       });
+    } else if (interaction.effect?.kind === 'showCickaResponse') {
+      this.showCickaSpeechBubble(interaction.effect.response.line);
     }
+
+    if (
+      !interaction.prompt.visible ||
+      !shouldShowCickaInteractionPrompt({
+        activeTargetId: interaction.activeTarget?.id ?? null,
+        responseVisible: this.isCickaSpeechBubbleVisible()
+      })
+    ) {
+      this.interactPrompt?.setVisible(false);
+      return;
+    }
+
+    this.interactPrompt?.setPosition(interaction.prompt.x, interaction.prompt.y).setVisible(true);
   }
 
   private configureCickaWalkByMemory(memories: readonly RidgeWorldMemory[]): void {
     const cickaPerch = RIDGE_LANDMARKS.find((landmark) => landmark.kind === 'cicka-perch');
     this.cickaWalkByState = createCickaWalkByState();
     this.cickaWalkByEnabled = hasRidgeWorldMemory(memories, 'cicka-stampede-note') && !!cickaPerch;
-    this.cickaWalkByBubble = undefined;
+    this.cickaSpeechBubble = undefined;
+    this.cickaSpeechBubbleLabel = undefined;
+    this.cickaSpeechVisibleUntilMs = 0;
     if (!cickaPerch) return;
     this.cickaWalkByAnchor = {
       x: cickaPerch.x,
@@ -177,7 +214,7 @@ export class RidgeScene extends Phaser.Scene {
 
   private updateCickaWalkByMemory(): void {
     if (!this.player) {
-      this.cickaWalkByBubble?.setVisible(false);
+      this.cickaSpeechBubble?.setVisible(false);
       return;
     }
 
@@ -191,7 +228,27 @@ export class RidgeScene extends Phaser.Scene {
     });
 
     this.cickaWalkByState = walkByUpdate.state;
-    this.cickaWalkByBubble?.setVisible(walkByUpdate.visible);
+    if (walkByUpdate.triggered) {
+      this.showCickaSpeechBubble(this.cickaWalkByBark, walkByUpdate.state.visibleUntilMs);
+    }
+  }
+
+  private showCickaSpeechBubble(
+    line: string,
+    visibleUntilMs: number = this.time.now + CICKA_INTERACTION_RESPONSE_DURATION_MS
+  ): void {
+    if (!this.cickaSpeechBubble || !this.cickaSpeechBubbleLabel) return;
+    this.cickaSpeechBubbleLabel.setText(line);
+    this.cickaSpeechVisibleUntilMs = visibleUntilMs;
+    this.cickaSpeechBubble.setVisible(true);
+  }
+
+  private updateCickaSpeechBubble(): void {
+    this.cickaSpeechBubble?.setVisible(this.isCickaSpeechBubbleVisible());
+  }
+
+  private isCickaSpeechBubbleVisible(): boolean {
+    return this.time.now < this.cickaSpeechVisibleUntilMs;
   }
 
   private createGround(): Phaser.GameObjects.Zone {
@@ -274,7 +331,11 @@ export class RidgeScene extends Phaser.Scene {
     this.physics.add.collider(this.player, ground);
   }
 
-  private createTrailCardInteractions(promptText: string): void {
+  private createRidgeInteractions(
+    promptText: string,
+    cickaInteractionCopy: CickaInteractionCopy,
+    worldMemories: readonly RidgeWorldMemory[]
+  ): void {
     this.interactPrompt = createUiText(this, 0, 0, promptText, {
       fontSize: '16px',
       color: '#1a1a1a',
@@ -283,22 +344,39 @@ export class RidgeScene extends Phaser.Scene {
     }).setOrigin(0.5).setDepth(100).setVisible(false);
 
     this.interactionRuntime = createInteriorInteractionRuntime<
-      RidgeTrailCardTargetId,
+      RidgeInteractionTargetId,
       RidgeInteractionEffect
     >({
       interactRadius: 72,
       exitEffect: { kind: 'close' },
-      targets: RIDGE_TRAIL_CARD_TARGETS.map((target) => ({
-        id: target.id,
-        kind: 'trail-card',
-        x: target.x,
-        distanceAnchorY: target.distanceAnchorY,
-        prompt: target.prompt,
-        effect: {
-          kind: 'openTrailCard',
-          params: target.card
-        } satisfies RidgeInteractionEffect
-      }))
+      targets: [
+        {
+          id: CICKA_INTERACTION_TARGET_ID,
+          kind: 'cicka',
+          x: this.cickaWalkByAnchor.x,
+          distanceAnchorY: this.cickaWalkByAnchor.y,
+          prompt: {
+            x: this.cickaWalkByAnchor.x,
+            y: this.cickaWalkByAnchor.y - 86
+          },
+          interactRadius: 78,
+          effect: (): RidgeInteractionEffect => ({
+            kind: 'showCickaResponse',
+            response: getCickaInteractionResponse(worldMemories, cickaInteractionCopy)
+          })
+        },
+        ...RIDGE_TRAIL_CARD_TARGETS.map((target) => ({
+          id: target.id,
+          kind: 'trail-card',
+          x: target.x,
+          distanceAnchorY: target.distanceAnchorY,
+          prompt: target.prompt,
+          effect: {
+            kind: 'openTrailCard',
+            params: target.card
+          } satisfies RidgeInteractionEffect
+        }))
+      ]
     });
   }
 
@@ -311,7 +389,6 @@ export class RidgeScene extends Phaser.Scene {
 
   private addLandmarks(
     stampedeFirstClearLabel: string,
-    cickaStampedeNoteLabel: string,
     worldMemories: readonly RidgeWorldMemory[]
   ): void {
     RIDGE_LANDMARKS.forEach((landmark) => {
@@ -321,7 +398,7 @@ export class RidgeScene extends Phaser.Scene {
 
       switch (landmark.kind) {
         case 'cicka-perch':
-          this.addCickaPerch(landmark, cickaStampedeNoteLabel, landmarkMemories);
+          this.addCickaPerch(landmark, landmarkMemories);
           break;
         case 'stampede-blanket':
           this.addStampedeBlanket(landmark, stampedeFirstClearLabel, landmarkMemories);
@@ -343,8 +420,7 @@ export class RidgeScene extends Phaser.Scene {
     });
   }
 
-  private addCickaWalkByBubble(cickaWalkByBark: string): void {
-    if (!this.cickaWalkByEnabled) return;
+  private addCickaSpeechBubble(): void {
     const bubble = this.add.container(
       this.cickaWalkByAnchor.x - 18,
       this.cickaWalkByAnchor.y - 92
@@ -352,19 +428,19 @@ export class RidgeScene extends Phaser.Scene {
     const panel = this.add.rectangle(0, 0, 54, 24, 0xf7f1df, 1)
       .setStrokeStyle(2, 0x1f1f1d, 0.88);
     const tail = this.add.line(20, 12, 0, 0, 12, 12, 0x1f1f1d, 0.5).setLineWidth(2);
-    const label = this.add.text(0, -1, cickaWalkByBark, {
+    const label = this.add.text(0, -1, '', {
       fontFamily: 'monospace',
       fontSize: '11px',
       color: '#1f1f1d'
     }).setOrigin(0.5);
 
     bubble.add([panel, tail, label]);
-    this.cickaWalkByBubble = bubble;
+    this.cickaSpeechBubble = bubble;
+    this.cickaSpeechBubbleLabel = label;
   }
 
   private addCickaPerch(
     landmark: RidgeLandmark,
-    cickaStampedeNoteLabel: string,
     memories: readonly RidgeWorldMemory[]
   ): void {
     const x = landmark.x;
@@ -377,24 +453,23 @@ export class RidgeScene extends Phaser.Scene {
     this.add.circle(x + 30, y - 38, 3, 0xf7f1df, 1);
     this.add.line(x - 18, y - 32, -30, 0, -54, -10, 0x1f1f1d, 0.9).setLineWidth(5);
     if (hasRidgeWorldMemory(memories, 'cicka-stampede-note')) {
-      this.addCickaStampedeNoteMemory(x, y, cickaStampedeNoteLabel);
+      this.addCickaStampedeNoteMemory(x, y);
     }
   }
 
   private addCickaStampedeNoteMemory(
     x: number,
-    y: number,
-    cickaStampedeNoteLabel: string
+    y: number
   ): void {
-    this.add.rectangle(x + 58, y - 70, 50, 24, 0xf7f1df, 1)
+    this.add.rectangle(x + 58, y - 70, 34, 24, 0xf7f1df, 1)
       .setStrokeStyle(2, 0x1f1f1d, 0.88)
       .setAngle(5);
-    this.add.text(x + 38, y - 78, cickaStampedeNoteLabel, {
-      fontFamily: 'monospace',
-      fontSize: '11px',
-      color: '#1f1f1d'
-    }).setAngle(5).setDepth(5);
-    this.add.line(x + 35, y - 51, -8, 8, 12, -6, 0x1f1f1d, 0.38).setLineWidth(2);
+    this.add.circle(x + 56, y - 68, 4, 0x1f1f1d, 0.72);
+    this.add.circle(x + 50, y - 76, 2, 0x1f1f1d, 0.72);
+    this.add.circle(x + 56, y - 78, 2, 0x1f1f1d, 0.72);
+    this.add.circle(x + 62, y - 76, 2, 0x1f1f1d, 0.72);
+    this.add.line(x + 70, y - 66, -6, 4, 8, -4, 0x1f1f1d, 0.42).setLineWidth(2);
+    this.add.line(x + 70, y - 60, -5, 3, 7, -3, 0x1f1f1d, 0.34).setLineWidth(2);
   }
 
   private addStampedeBlanket(

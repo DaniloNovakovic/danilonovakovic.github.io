@@ -27,8 +27,13 @@ export const sceneMessages = {
   ridge: {
     memory: {
       stampedeFirstClearLabel: "HELD",
-      cickaStampedeNoteLabel: "mrrp?",
       cickaWalkByBark: "mrrp.",
+    },
+    cicka: {
+      interaction: {
+        fresh: "meow.",
+        stampedeMemory: "mrrp!",
+      },
     },
   },
   stampedeSketch: {

@@ -317,19 +317,24 @@ Current checkpoint:
   storing sticker ids.
 - **M5b Cicka Memory + Dev Stamp Seed** accepted: `stampede-sketch` also derives
   the `cicka-stampede-note` memory at Cicka's perch, Ridge renders the tiny
-  `mrrp?` tease, and local dev can seed the known stamp with
+  Cicka memory tease, and local dev can seed the known stamp with
   `?mode=interactive&startScene=ridge&devRidgeStamp=stampede-sketch`.
+- **M5c Cicka Walk-By Memory** accepted for continuation: after the Stampede
+  stamp, Cicka gives one tiny walk-by bark per Ridge entry without stored Cicka
+  state.
+- **M5d Cicka First Interaction** is the current follow-up: Cicka can answer a
+  deliberate interact with pre-translator meow punctuation, while the permanent
+  Cicka memory becomes a paw/scratch decal instead of duplicate speech text.
 
 Next implementation slices:
 
-1. **M5c Cicka Walk-By Memory**: let Cicka acknowledge the player with one tiny
-   walk-by bark derived from the `stampede-sketch` stamp and the existing Cicka
-   memory. Keep it scene-owned and avoid a dialogue tree.
-2. **Later First Ridge Shortcut**: wait until the Ridge has enough repeat
+1. **Later First Ridge Shortcut**: wait until the Ridge has enough repeat
    traversal to make a shortcut feel like real relief rather than a proof of
    concept.
-3. **Ridge-Only Glide**: keep this as a separate HITL slice because input feel
+2. **Ridge-Only Glide**: keep this as a separate HITL slice because input feel
    and touch behavior need review.
+3. **Translator / Cicka Daydream**: keep translated Cicka subtitles and the
+   Cicka daydream mini-slice for later, after Ridge Memory proves return play.
 
 Do not add stored sticker state. Do not add Stampede upgrades, endless mode,
 shared memory architecture, or Ridge shortcuts inside Cicka memory slices.
