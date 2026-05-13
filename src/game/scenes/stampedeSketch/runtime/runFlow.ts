@@ -6,6 +6,7 @@ import {
   resolveStampedeAutoAttackFrame,
   type StampedeAutoAttackCandidate,
   type StampedeAutoAttackEvent,
+  type StampedeAutoAttackProfile,
   type StampedeAutoAttackState
 } from './autoAttack';
 import {
@@ -27,6 +28,7 @@ export const STAMPEDE_PLAYER_CONTACT_RADIUS = 24;
 export interface StampedeRunFrameInput {
   session: StampedeSession;
   autoAttackState?: StampedeAutoAttackState;
+  autoAttackProfile?: StampedeAutoAttackProfile;
   deltaMs: number;
   closeRequested: boolean;
   velocity: StampedeVelocity;
@@ -75,6 +77,7 @@ export type StampedeRunFrame =
 export function resolveStampedeRunFrame({
   session,
   autoAttackState,
+  autoAttackProfile,
   deltaMs,
   closeRequested,
   velocity,
@@ -114,7 +117,8 @@ export function resolveStampedeRunFrame({
       elapsedMs: advancedSession.elapsedMs,
       player: clampedPlayer,
       velocity,
-      candidates: contactCandidates.filter(hasStampedeCandidateId)
+      candidates: contactCandidates.filter(hasStampedeCandidateId),
+      profile: autoAttackProfile
     })
     : null;
   const pressureCandidates = removeHitCandidates(

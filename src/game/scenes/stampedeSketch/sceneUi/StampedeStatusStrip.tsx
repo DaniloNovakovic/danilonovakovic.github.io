@@ -39,6 +39,11 @@ export function StampedeStatusStrip({ params }: SceneUiSurfaceProps) {
           />
         </div>
       </div>
+      {typeof snapshot.scrapsCollected === 'number' && typeof snapshot.scrapGoal === 'number' ? (
+        <p className="font-mono text-xs font-bold uppercase leading-tight tracking-widest text-[#4b4337] [@media(max-height:420px)]:hidden md:text-sm">
+          Scraps {snapshot.scrapsCollected}/{snapshot.scrapGoal}
+        </p>
+      ) : null}
     </div>
   );
 }

@@ -7,6 +7,7 @@ import {
   getStampedeSwarmMotion,
   resolveStampedeSwarmTarget
 } from './swarmMotion';
+import type { StampedeClearedMarkPoint } from './progression';
 
 interface StampedeSwarmDot {
   id: string;
@@ -41,7 +42,7 @@ interface StampedeSwarmRuntimeOptions {
 export interface StampedeSwarmRuntime {
   update(target: { x: number; y: number }, delta: number, options?: StampedeSwarmUpdateOptions): void;
   getContactCandidates(): readonly StampedeSwarmContactCandidate[];
-  clearMarks(ids: readonly string[]): void;
+  clearMarks(ids: readonly string[]): readonly StampedeClearedMarkPoint[];
   reset(): void;
 }
 
@@ -150,12 +151,20 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
     }));
   }
 
-  clearMarks(ids: readonly string[]): void {
-    if (ids.length === 0) return;
+  clearMarks(ids: readonly string[]): readonly StampedeClearedMarkPoint[] {
+    if (ids.length === 0) return [];
 
     const hitIds = new Set(ids);
+    const clearedMarks: StampedeClearedMarkPoint[] = [];
     this.dots.forEach((dot) => {
       if (!hitIds.has(dot.id)) return;
+      if (dot.clearedUntilMs !== null) return;
+
+      clearedMarks.push({
+        id: dot.id,
+        x: dot.shape.x,
+        y: dot.shape.y
+      });
 
       dot.clearedUntilMs = this.scene.time.now + 3_000;
       this.scene.tweens.killTweensOf(dot.shape);
@@ -173,6 +182,8 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
         }
       });
     });
+
+    return clearedMarks;
   }
 
   reset(): void {

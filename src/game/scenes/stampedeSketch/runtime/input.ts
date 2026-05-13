@@ -21,12 +21,16 @@ export interface StampedeControlPointerEvent {
   y: number;
 }
 
+export interface StampedeReadVelocityOptions {
+  speed?: number;
+}
+
 interface StampedeInputRuntimeOptions {
   scene: Phaser.Scene;
 }
 
 export interface StampedeInputRuntime {
-  readVelocity(): StampedeVelocity;
+  readVelocity(options?: StampedeReadVelocityOptions): StampedeVelocity;
   startRequested(): boolean;
   closeRequested(): boolean;
   retryRequested(): boolean;
@@ -94,10 +98,11 @@ class PhaserStampedeInputRuntime implements StampedeInputRuntime {
     this.registerPointerControls();
   }
 
-  readVelocity(): StampedeVelocity {
+  readVelocity(options: StampedeReadVelocityOptions = {}): StampedeVelocity {
     return resolveStampedeVelocity({
       keyboard: this.readKeyboardAxis(),
-      pointer: this.readPointerInput()
+      pointer: this.readPointerInput(),
+      speed: options.speed
     });
   }
 

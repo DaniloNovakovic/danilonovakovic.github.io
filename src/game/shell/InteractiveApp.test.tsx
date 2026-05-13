@@ -11,6 +11,7 @@ import {
   STAMPEDE_SKETCH_SCENE_ID
 } from '@/game/scenes/sceneIds';
 import { createStampedeResultViewModel } from '@/game/scenes/stampedeSketch/runtime/resultPresentation';
+import { getStampedeUpgradeChoices } from '@/game/scenes/stampedeSketch/runtime/upgrades';
 import { getMessages } from '@/shared/i18n';
 
 vi.mock('./Game', () => ({
@@ -575,6 +576,27 @@ describe('InteractiveApp', () => {
     expect(bridgeStore.getState().sceneUi.lastAction).toMatchObject({
       ownerSceneId: STAMPEDE_SKETCH_SCENE_ID,
       action: 'start'
+    });
+  });
+
+  it('dispatches Stampede upgrade draft choices through scene UI', async () => {
+    bridgeActions.enterScene(STAMPEDE_SKETCH_SCENE_ID);
+    bridgeActions.setSceneUiPanel(STAMPEDE_SKETCH_SCENE_ID, 'stampedeUpgradeDraft', {
+      choices: getStampedeUpgradeChoices(),
+      scrapsCollected: 3,
+      scrapGoal: 3
+    });
+    render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
+
+    expect(screen.getByTestId('scene-ui-panel-overlay')).toBeDefined();
+    expect(screen.getByRole('dialog', { name: /pick a page trick/i })).toBeDefined();
+
+    await userEvent.click(screen.getByRole('button', { name: /wider scribble/i }));
+
+    expect(bridgeStore.getState().sceneUi.lastAction).toMatchObject({
+      ownerSceneId: STAMPEDE_SKETCH_SCENE_ID,
+      action: 'stampedeUpgradeChoice',
+      params: { upgradeId: 'wideSwipe' }
     });
   });
 

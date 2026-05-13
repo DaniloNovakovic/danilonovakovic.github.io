@@ -170,7 +170,7 @@ Reason:
 
 Recommended slice:
 
-- finish M4d.5 responsive shell/input decisions first
+- continue from the accepted M4d.5 responsive shell/input direction
 - wire the `calm-patch` prop as a central or near-central objective
 - wire the `player-guardian` sprite with `tether-guard` as its objective-link
   feedback state

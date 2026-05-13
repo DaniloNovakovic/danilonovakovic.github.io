@@ -1,4 +1,5 @@
 import type { StampedePressureSnapshot } from './pressure';
+import type { StampedeProgressionState } from './progression';
 import type { StampedeSessionSnapshot } from './session';
 
 export type StampedeHudFeedback = 'smudged' | 'blanketHeld' | 'crowded' | string;
@@ -9,11 +10,14 @@ export interface StampedeHudSnapshot {
   pageNoise?: number;
   phaseLabel?: string;
   feedback?: StampedeHudFeedback;
+  scrapsCollected?: number;
+  scrapGoal?: number;
 }
 
 export function createStampedeHudSnapshot(
   session: StampedeSessionSnapshot,
-  pressure?: StampedePressureSnapshot
+  pressure?: StampedePressureSnapshot,
+  progression?: StampedeProgressionState
 ): StampedeHudSnapshot {
   const remainingMs = Math.max(0, session.durationMs - session.elapsedMs);
 
@@ -21,7 +25,9 @@ export function createStampedeHudSnapshot(
     timeRemainingSeconds: remainingMs / 1000,
     pageNoise: resolveHudNoise(session, pressure),
     phaseLabel: resolvePhaseLabel(session, pressure),
-    feedback: resolveHudFeedback(session)
+    feedback: resolveHudFeedback(session),
+    scrapsCollected: progression?.scrapsCollected,
+    scrapGoal: progression?.scrapGoal
   };
 }
 
