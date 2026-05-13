@@ -123,7 +123,7 @@ Do not:
 - Add ricochet-heavy sounds to the Ridge; Potassium owns that lane.
 - Make the Circuit stinger louder than a Stampede clear.
 - Add stored Ridge flags for Circuit audio. Implementation should read existing
-  inventory ownership, same as the Ridge gate direction.
+  inventory ownership, same as the Ridge major-proof gate direction.
 
 Suggested names:
 

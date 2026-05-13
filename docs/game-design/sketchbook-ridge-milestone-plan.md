@@ -52,8 +52,8 @@ Anything beyond that is future scope unless a slice explicitly pulls it in.
   M5a derives Ridge-owned sticker/world-change memories from durable progress
   without stored sticker state, and M5b adds the first Cicka note/translator
   tease plus a dev-only `devRidgeStamp=stampede-sketch` seed for fast local
-  testing. Cicka proximity chatter or direct talk interaction is desired, but
-  held for a later Cicka interaction slice.
+  testing. M5c/M5d add Cicka's Stampede-gated walk-by bark, first deliberate
+  pre-translator interaction, and a primitive readability polish pass.
 - **Asset staging is now an active coordination concern**: prepared POC assets
   exist for Cicka, Potassium, and Stampede enemy families. Keep them documented
   and adopt them in small scene-owned slices instead of turning them into a
@@ -307,7 +307,7 @@ Outputs:
 - sticker/world-change rendering from stamps and manual pages.
 - one shortcut.
 - Ridge-only glide behavior.
-- first Cicka Note or translator tease.
+- first Cicka Note, memory reaction, or pre-translator interaction.
 
 Current checkpoint:
 
@@ -322,7 +322,7 @@ Current checkpoint:
 - **M5c Cicka Walk-By Memory** accepted for continuation: after the Stampede
   stamp, Cicka gives one tiny walk-by bark per Ridge entry without stored Cicka
   state.
-- **M5d Cicka First Interaction** is the current follow-up: Cicka can answer a
+- **M5d Cicka First Interaction** accepted for continuation: Cicka can answer a
   deliberate interact with pre-translator meow punctuation, while the permanent
   Cicka memory becomes a paw/scratch decal instead of duplicate speech text;
   the same PR includes a small primitive readability polish pass for Cicka,
@@ -407,7 +407,8 @@ Blocked by: none
 
 What to build:
 
-- Update docs so Potassium's Circuit is clearly the alternate finale key.
+- Update docs so Potassium's Circuit is clearly one major proof toward the
+  Relay Spire gate, not a solo ending bypass.
 - Record the exact ownership check future Ridge gates should use.
 - Keep Potassium behavior unchanged.
 
@@ -538,7 +539,7 @@ What to build:
 
 - Render placeholder sticker/world changes from progress.
 - Add one shortcut.
-- Add first Cicka Note or translator tease.
+- Add first Cicka Note, memory reaction, or pre-translator interaction.
 
 ### 12. Add Ridge-Only Glide
 

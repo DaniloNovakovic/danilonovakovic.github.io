@@ -228,7 +228,7 @@ Good uses:
 - banana-law signage
 - rebound diagrams as jokes
 - NPC commentary
-- alternate finale key recognition through the Circuit
+- major-proof recognition through the Circuit
 
 Avoid:
 

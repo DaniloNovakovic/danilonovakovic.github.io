@@ -29,7 +29,9 @@ This directory separates shipped player-facing behavior from future design conce
   These can guide future work, but should not override the active milestone or
   runtime docs.
 - **Archive:** `ai-competition/` is closed competition history. Do not treat it
-  as an active roadmap.
+  as an active roadmap or current source of truth. Search hits from
+  `ai-competition/archive/**` are historical by default; use the active Summit,
+  milestone, and runtime docs for current planning.
 
 ## Core Pillars
 

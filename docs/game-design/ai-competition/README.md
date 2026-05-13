@@ -7,7 +7,9 @@ The active production plan is now:
 - [Sketchbook Ridge Summit](../sketchbook-ridge-summit.md)
 
 Keep this folder as provenance for how the current direction was chosen. Do not
-treat these files as the source of truth for implementation planning.
+edit it to match current planning, and do not treat search hits from this
+archive as implementation guidance. Use the active Summit, milestone, and
+runtime docs for current work.
 
 ## Archived Rounds
 

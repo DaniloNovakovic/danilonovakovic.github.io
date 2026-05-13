@@ -173,7 +173,7 @@ The repeatable pleasure is not just "new content." It is returning to the same p
 - **Manual Pages**: one-screen clues that reinterpret a route, sign, or mechanic.
 - **Glide Pips**: movement upgrades inspired by *A Short Hike* feathers.
 - **Shortcuts**: route changes inspired by *Hollow Knight* relief moments.
-- **Circuit**: Potassium Slip's major reward and alternate finale key. Derive this from the existing inventory item instead of duplicating `potassium.circuitOwned` in progress.
+- **Circuit**: Potassium Slip's major reward and one major proof toward the Relay Spire gate. Derive this from the existing inventory item instead of duplicating `potassium.circuitOwned` in progress.
 - **Cicka Notes**: tiny cat-side observations that reinterpret nearby props without becoming a full language system.
 
 Bridge-owned progress should stay small and serializable. Exact naming should follow the current bridge store shape. A likely implementation is to extend `BridgeProgressState` with a `ridge` object and add explicit award actions:
@@ -201,12 +201,12 @@ Role:
 
 - anchor secret
 - Ball x Pit fun already captured
-- alternate finale key through Circuit
+- one major proof toward the first ending through Circuit
 - benchmark for mini-game depth and documentation
 
 Do:
 
-- integrate the Circuit into Ridge progression
+- integrate the Circuit into Ridge progression as one major proof
 - let Ridge signs and NPCs acknowledge Potassium
 - preserve vertical-board controls
 
@@ -645,7 +645,8 @@ Tasks:
 - one shortcut opens
 - glide pip affects overworld movement
 - manual page overlay explains one existing sign
-- first Cicka Note or translator tease makes an old prop feel newly readable
+- first Cicka Note, memory reaction, or pre-translator interaction makes an old
+  prop feel newly readable
 
 Done when:
 
