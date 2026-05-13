@@ -1,4 +1,6 @@
 import type { TrailCardOverlayParams } from '@/game/overlays/trailCard/types';
+import { STAMPEDE_SKETCH_RIDGE_STAMP_ID } from '@/game/bridge/ridgeProgressIds';
+import type { BridgeRidgeProgressState } from '@/game/bridge/store';
 import { STAMPEDE_SKETCH_SCENE_ID } from '@/game/scenes/sceneIds';
 
 export const RIDGE_WORLD_WIDTH = 1800;
@@ -27,9 +29,11 @@ export interface RidgeLandmark {
 }
 
 export type RidgeTrailCardTargetId =
-  | 'stampede-sketch'
+  | typeof STAMPEDE_SKETCH_RIDGE_STAMP_ID
   | 'telegraph-terrace'
   | 'domino-desk';
+
+export type RidgeLandmarkMemoryKind = 'stampede-first-clear';
 
 export interface RidgeTrailCardTarget {
   id: RidgeTrailCardTargetId;
@@ -41,6 +45,19 @@ export interface RidgeTrailCardTarget {
     y: number;
   };
   card: TrailCardOverlayParams;
+}
+
+export function getRidgeLandmarkMemory(
+  landmark: Pick<RidgeLandmark, 'kind'>,
+  ridgeProgress: Pick<BridgeRidgeProgressState, 'stampIds'>
+): RidgeLandmarkMemoryKind | null {
+  if (
+    landmark.kind === 'stampede-blanket' &&
+    ridgeProgress.stampIds.includes(STAMPEDE_SKETCH_RIDGE_STAMP_ID)
+  ) {
+    return 'stampede-first-clear';
+  }
+  return null;
 }
 
 export const RIDGE_LANDMARKS: readonly RidgeLandmark[] = [
@@ -84,7 +101,7 @@ export const RIDGE_LANDMARKS: readonly RidgeLandmark[] = [
 
 export const RIDGE_TRAIL_CARD_TARGETS: readonly RidgeTrailCardTarget[] = [
   {
-    id: 'stampede-sketch',
+    id: STAMPEDE_SKETCH_RIDGE_STAMP_ID,
     landmarkKind: 'stampede-blanket',
     x: 430,
     distanceAnchorY: RIDGE_FLOOR_Y - 56,

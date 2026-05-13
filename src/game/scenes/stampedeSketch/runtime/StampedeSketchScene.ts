@@ -50,6 +50,7 @@ import {
   resolveStampedeRunFrame,
   STAMPEDE_PLAYER_CONTACT_RADIUS
 } from './runFlow';
+import { claimStampedeFirstClearReward } from './rewards';
 import {
   createStampedeResultViewModel,
   type StampedeResultViewModel
@@ -336,7 +337,10 @@ export class StampedeSketchScene extends Phaser.Scene {
       phase,
       elapsedMs: this.session.elapsedMs,
       durationMs: this.session.durationMs,
-      contacts: this.session.contacts
+      contacts: this.session.contacts,
+      rewardStatus: phase === 'cleared'
+        ? claimStampedeFirstClearReward()
+        : 'unavailable'
     });
     this.showResultPanel(view);
   }

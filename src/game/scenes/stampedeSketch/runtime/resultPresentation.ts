@@ -1,12 +1,17 @@
+import { getMessages } from '@/shared/i18n';
+
 export type StampedeResultPhase = 'cleared' | 'failed';
 export type StampedeResultActionId = 'backToRidge' | 'retry';
 export type StampedeResultActionPriority = 'primary' | 'secondary';
+export type StampedeRewardStatus = 'earned' | 'alreadyOwned' | 'unavailable';
+export type StampedeResultCopy = ReturnType<typeof getMessages>['scenes']['stampedeSketch']['result'];
 
 export interface StampedeResultViewModelInput {
   phase: StampedeResultPhase;
   elapsedMs: number;
   durationMs: number;
   contacts: number;
+  rewardStatus?: StampedeRewardStatus;
 }
 
 export interface StampedeResultStatViewModel {
@@ -43,24 +48,25 @@ export function createStampedeResultViewModel(
   input: StampedeResultViewModelInput
 ): StampedeResultViewModel {
   const clear = input.phase === 'cleared';
+  const copy = getMessages().scenes.stampedeSketch.result;
 
   return {
     phase: input.phase,
-    eyebrow: clear ? 'Run complete' : 'Run ended',
-    title: clear ? 'Blanket held' : 'Page got crowded',
+    eyebrow: clear ? copy.eyebrow.cleared : copy.eyebrow.failed,
+    title: clear ? copy.title.cleared : copy.title.failed,
     body: clear
-      ? 'The sketch stayed calm through the whole stampede.'
-      : 'Too many marks landed before the timer ran out.',
-    rewardNote: 'No stamp yet. Rewards are still taped over.',
+      ? copy.body.cleared
+      : copy.body.failed,
+    rewardNote: getRewardNote(input.rewardStatus ?? 'unavailable', clear, copy),
     stats: [
       {
         id: 'time',
-        label: 'Time',
+        label: copy.stats.time,
         value: formatResultTime(input.elapsedMs, input.durationMs)
       },
       {
         id: 'contacts',
-        label: 'Contacts',
+        label: copy.stats.contacts,
         value: `${Math.max(0, input.contacts)}`
       }
     ],
@@ -68,28 +74,46 @@ export function createStampedeResultViewModel(
       ? [
           {
             id: 'backToRidge',
-            label: 'Back to Ridge',
+            label: copy.actions.backToRidge,
             priority: 'primary'
           },
           {
             id: 'retry',
-            label: 'Retry',
+            label: copy.actions.retry,
             priority: 'secondary'
           }
         ]
       : [
           {
             id: 'retry',
-            label: 'Retry',
+            label: copy.actions.retry,
             priority: 'primary'
           },
           {
             id: 'backToRidge',
-            label: 'Back to Ridge',
+            label: copy.actions.backToRidge,
             priority: 'secondary'
           }
         ]
   };
+}
+
+function getRewardNote(
+  status: StampedeRewardStatus,
+  clear: boolean,
+  copy: StampedeResultCopy
+): string {
+  if (!clear) {
+    return copy.rewardNote.failed;
+  }
+  switch (status) {
+    case 'earned':
+      return copy.rewardNote.earned;
+    case 'alreadyOwned':
+      return copy.rewardNote.alreadyOwned;
+    case 'unavailable':
+      return copy.rewardNote.unavailable;
+  }
 }
 
 function formatResultTime(elapsedMs: number, durationMs: number): string {
