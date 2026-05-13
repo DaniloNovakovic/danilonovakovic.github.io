@@ -11,6 +11,7 @@ import { SceneLifecycleController } from '@/game/sceneLifecycle/SceneLifecycleCo
 import { SceneManager } from '@/game/sceneLifecycle/SceneManager';
 import { getGameConfig } from '@/game/sharedSceneRuntime/config';
 import { getSceneStartResume, prepareSceneStart } from '@/game/sharedSceneRuntime/sceneResumePolicy';
+import { getDevRidgeProgressSeed } from './devRidgeProgressParams';
 
 interface UsePhaserGameBootOptions {
   bridgeRef: RefObject<{
@@ -83,14 +84,28 @@ export function usePhaserGameBoot({
     const sceneLifecycle = new SceneLifecycleController(sceneManager);
     sceneLifecycle.start();
 
-    // Dev-only helper: `?startScene=<sceneId>` (e.g. `potassium`, `hobbies`, `basement`).
-    // Useful for fast iteration without walking to a trigger each reload.
+    // Dev-only helpers: seed progress and/or start scenes without walking to triggers.
     if (import.meta.env.DEV) {
-      const startScene = new URLSearchParams(window.location.search).get('startScene');
+      const url = new URL(window.location.href);
+      let shouldReplaceUrl = false;
+
+      const ridgeProgressSeed = getDevRidgeProgressSeed(url.searchParams);
+      ridgeProgressSeed.stampIds.forEach((stampId) => {
+        bridgeActions.awardRidgeStamp(stampId);
+      });
+      ridgeProgressSeed.consumedParams.forEach((param) => {
+        url.searchParams.delete(param);
+        shouldReplaceUrl = true;
+      });
+
+      const startScene = url.searchParams.get('startScene');
       if (startScene && isSceneId(startScene)) {
         bridgeActions.enterScene(startScene);
-        const url = new URL(window.location.href);
         url.searchParams.delete('startScene');
+        shouldReplaceUrl = true;
+      }
+
+      if (shouldReplaceUrl) {
         window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
       }
     }

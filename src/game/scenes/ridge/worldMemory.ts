@@ -11,17 +11,19 @@ type RidgeMemorySource =
 export type RidgeWorldMemoryId =
   | 'stampede-held-sticker'
   | 'stampede-settled-swarm'
-  | 'stampede-glide-pip-decal';
+  | 'stampede-glide-pip-decal'
+  | 'cicka-stampede-note';
 
 export type RidgeWorldMemoryKind =
   | 'reward-sticker'
   | 'settled-swarm'
-  | 'glide-pip-decal';
+  | 'glide-pip-decal'
+  | 'cicka-note';
 
 export interface RidgeWorldMemory {
   id: RidgeWorldMemoryId;
   kind: RidgeWorldMemoryKind;
-  landmarkKind: Extract<RidgeLandmarkKind, 'stampede-blanket'>;
+  landmarkKind: Extract<RidgeLandmarkKind, 'cicka-perch' | 'stampede-blanket'>;
   source: RidgeMemorySource;
 }
 
@@ -48,6 +50,15 @@ const STAMPEDE_FIRST_CLEAR_MEMORIES: readonly RidgeWorldMemory[] = [
     id: 'stampede-glide-pip-decal',
     kind: 'glide-pip-decal',
     landmarkKind: 'stampede-blanket',
+    source: {
+      kind: 'stamp',
+      id: STAMPEDE_SKETCH_RIDGE_STAMP_ID
+    }
+  },
+  {
+    id: 'cicka-stampede-note',
+    kind: 'cicka-note',
+    landmarkKind: 'cicka-perch',
     source: {
       kind: 'stamp',
       id: STAMPEDE_SKETCH_RIDGE_STAMP_ID

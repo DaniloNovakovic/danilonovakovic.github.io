@@ -20,19 +20,22 @@ describe('ridge world memory', () => {
     expect(memories.map((memory) => memory.id)).toEqual([
       'stampede-held-sticker',
       'stampede-settled-swarm',
-      'stampede-glide-pip-decal'
+      'stampede-glide-pip-decal',
+      'cicka-stampede-note'
     ]);
-    expect(memories.every((memory) => memory.landmarkKind === 'stampede-blanket')).toBe(true);
     expect(hasRidgeWorldMemory(memories, 'stampede-held-sticker')).toBe(true);
+    expect(hasRidgeWorldMemory(memories, 'cicka-stampede-note')).toBe(true);
   });
 
-  it('anchors Stampede memories to the blanket without changing unrelated landmarks', () => {
+  it('anchors Stampede memories to the blanket and Cicka perch without changing unrelated landmarks', () => {
+    const cickaPerch = RIDGE_LANDMARKS.find((landmark) => landmark.kind === 'cicka-perch');
     const stampedeBlanket = RIDGE_LANDMARKS.find((landmark) => landmark.kind === 'stampede-blanket');
     const telegraphBag = RIDGE_LANDMARKS.find((landmark) => landmark.kind === 'telegraph-bag');
 
+    expect(cickaPerch).toBeDefined();
     expect(stampedeBlanket).toBeDefined();
     expect(telegraphBag).toBeDefined();
-    if (!stampedeBlanket || !telegraphBag) return;
+    if (!cickaPerch || !stampedeBlanket || !telegraphBag) return;
 
     const ridgeProgress = {
       stampIds: [STAMPEDE_SKETCH_RIDGE_STAMP_ID]
@@ -42,6 +45,9 @@ describe('ridge world memory', () => {
       'stampede-held-sticker',
       'stampede-settled-swarm',
       'stampede-glide-pip-decal'
+    ]);
+    expect(getRidgeLandmarkMemories(cickaPerch, ridgeProgress).map((memory) => memory.id)).toEqual([
+      'cicka-stampede-note'
     ]);
     expect(getRidgeLandmarkMemories(telegraphBag, ridgeProgress)).toEqual([]);
   });

@@ -101,7 +101,10 @@ export class RidgeScene extends Phaser.Scene {
     const ground = this.createGround();
 
     this.addBackdrop();
-    this.addLandmarks(messages.scenes.ridge.memory.stampedeFirstClearLabel);
+    this.addLandmarks(
+      messages.scenes.ridge.memory.stampedeFirstClearLabel,
+      messages.scenes.ridge.memory.cickaStampedeNoteLabel
+    );
     this.addPlaceholderCopy();
     this.createPlayer(ground);
     this.createTrailCardInteractions(messages.navigation.interact);
@@ -254,11 +257,14 @@ export class RidgeScene extends Phaser.Scene {
     this.add.circle(x + 46, 166, 12, 0xf0d35f, 0.9);
   }
 
-  private addLandmarks(stampedeFirstClearLabel: string): void {
+  private addLandmarks(
+    stampedeFirstClearLabel: string,
+    cickaStampedeNoteLabel: string
+  ): void {
     RIDGE_LANDMARKS.forEach((landmark) => {
       switch (landmark.kind) {
         case 'cicka-perch':
-          this.addCickaPerch(landmark);
+          this.addCickaPerch(landmark, cickaStampedeNoteLabel);
           break;
         case 'stampede-blanket':
           this.addStampedeBlanket(landmark, stampedeFirstClearLabel);
@@ -280,9 +286,16 @@ export class RidgeScene extends Phaser.Scene {
     });
   }
 
-  private addCickaPerch(landmark: RidgeLandmark): void {
+  private addCickaPerch(
+    landmark: RidgeLandmark,
+    cickaStampedeNoteLabel: string
+  ): void {
     const x = landmark.x;
     const y = RIDGE_FLOOR_Y - 74;
+    const memories = getRidgeLandmarkMemories(
+      landmark,
+      bridgeStore.getState().progress.ridge
+    );
     this.add.rectangle(x, y + 28, 10, 86, 0x1f1f1d, 0.88);
     this.add.rectangle(x, y - 12, 86, 10, 0x1f1f1d, 0.88);
     this.add.ellipse(x + 16, y - 36, 54, 28, 0x1f1f1d, 0.95);
@@ -290,6 +303,25 @@ export class RidgeScene extends Phaser.Scene {
     this.add.triangle(x + 18, y - 50, 0, 14, 12, 0, 22, 14, 0x1f1f1d, 0.95);
     this.add.circle(x + 30, y - 38, 3, 0xf7f1df, 1);
     this.add.line(x - 18, y - 32, -30, 0, -54, -10, 0x1f1f1d, 0.9).setLineWidth(5);
+    if (hasRidgeWorldMemory(memories, 'cicka-stampede-note')) {
+      this.addCickaStampedeNoteMemory(x, y, cickaStampedeNoteLabel);
+    }
+  }
+
+  private addCickaStampedeNoteMemory(
+    x: number,
+    y: number,
+    cickaStampedeNoteLabel: string
+  ): void {
+    this.add.rectangle(x + 58, y - 70, 50, 24, 0xf7f1df, 1)
+      .setStrokeStyle(2, 0x1f1f1d, 0.88)
+      .setAngle(5);
+    this.add.text(x + 38, y - 78, cickaStampedeNoteLabel, {
+      fontFamily: 'monospace',
+      fontSize: '11px',
+      color: '#1f1f1d'
+    }).setAngle(5).setDepth(5);
+    this.add.line(x + 35, y - 51, -8, 8, 12, -6, 0x1f1f1d, 0.38).setLineWidth(2);
   }
 
   private addStampedeBlanket(
