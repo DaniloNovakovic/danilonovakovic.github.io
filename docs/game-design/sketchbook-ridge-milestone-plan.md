@@ -324,7 +324,9 @@ Current checkpoint:
   state.
 - **M5d Cicka First Interaction** is the current follow-up: Cicka can answer a
   deliberate interact with pre-translator meow punctuation, while the permanent
-  Cicka memory becomes a paw/scratch decal instead of duplicate speech text.
+  Cicka memory becomes a paw/scratch decal instead of duplicate speech text;
+  the same PR includes a small primitive readability polish pass for Cicka,
+  her speech bubble, and the memory decal.
 
 Next implementation slices:
 

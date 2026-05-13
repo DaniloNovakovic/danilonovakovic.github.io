@@ -422,15 +422,15 @@ export class RidgeScene extends Phaser.Scene {
 
   private addCickaSpeechBubble(): void {
     const bubble = this.add.container(
-      this.cickaWalkByAnchor.x - 18,
-      this.cickaWalkByAnchor.y - 92
+      this.cickaWalkByAnchor.x - 20,
+      this.cickaWalkByAnchor.y - 98
     ).setDepth(45).setVisible(false);
-    const panel = this.add.rectangle(0, 0, 54, 24, 0xf7f1df, 1)
+    const panel = this.add.rectangle(0, 0, 66, 28, 0xf7f1df, 1)
       .setStrokeStyle(2, 0x1f1f1d, 0.88);
-    const tail = this.add.line(20, 12, 0, 0, 12, 12, 0x1f1f1d, 0.5).setLineWidth(2);
+    const tail = this.add.line(22, 14, 0, 0, 13, 13, 0x1f1f1d, 0.5).setLineWidth(2);
     const label = this.add.text(0, -1, '', {
       fontFamily: 'monospace',
-      fontSize: '11px',
+      fontSize: '12px',
       color: '#1f1f1d'
     }).setOrigin(0.5);
 
@@ -447,11 +447,21 @@ export class RidgeScene extends Phaser.Scene {
     const y = RIDGE_FLOOR_Y - 74;
     this.add.rectangle(x, y + 28, 10, 86, 0x1f1f1d, 0.88);
     this.add.rectangle(x, y - 12, 86, 10, 0x1f1f1d, 0.88);
-    this.add.ellipse(x + 16, y - 36, 54, 28, 0x1f1f1d, 0.95);
-    this.add.triangle(x - 8, y - 50, 0, 14, 12, 0, 22, 14, 0x1f1f1d, 0.95);
-    this.add.triangle(x + 18, y - 50, 0, 14, 12, 0, 22, 14, 0x1f1f1d, 0.95);
+    this.add.rectangle(x + 18, y - 32, 72, 32, 0xf7f1df, 0.94)
+      .setStrokeStyle(2, 0x1f1f1d, 0.22)
+      .setAngle(-2);
+    this.add.line(x + 8, y - 42, -20, 0, 20, 0, 0x1f1f1d, 0.16).setLineWidth(2);
+    this.add.line(x + 8, y - 31, -22, 0, 18, 0, 0x1f1f1d, 0.12).setLineWidth(2);
+    this.add.line(x - 10, y - 36, 0, 0, -28, -13, 0x1f1f1d, 0.9).setLineWidth(5);
+    this.add.line(x - 38, y - 49, 0, 0, -16, 11, 0x1f1f1d, 0.9).setLineWidth(5);
+    this.add.circle(x - 55, y - 37, 3, 0xf7f1df, 0.9);
+    this.add.ellipse(x + 16, y - 36, 56, 29, 0x1f1f1d, 0.96);
+    this.add.triangle(x - 8, y - 51, 0, 15, 12, 0, 23, 15, 0x1f1f1d, 0.96);
+    this.add.triangle(x + 19, y - 51, 0, 15, 12, 0, 23, 15, 0x1f1f1d, 0.96);
     this.add.circle(x + 30, y - 38, 3, 0xf7f1df, 1);
-    this.add.line(x - 18, y - 32, -30, 0, -54, -10, 0x1f1f1d, 0.9).setLineWidth(5);
+    this.add.ellipse(x + 9, y - 30, 6, 3, 0xf7f1df, 0.88).setAngle(-10);
+    this.add.circle(x + 4, y - 23, 2, 0xf7f1df, 0.9);
+    this.add.circle(x + 21, y - 23, 2, 0xf7f1df, 0.9);
     if (hasRidgeWorldMemory(memories, 'cicka-stampede-note')) {
       this.addCickaStampedeNoteMemory(x, y);
     }
@@ -461,15 +471,16 @@ export class RidgeScene extends Phaser.Scene {
     x: number,
     y: number
   ): void {
-    this.add.rectangle(x + 58, y - 70, 34, 24, 0xf7f1df, 1)
+    this.add.rectangle(x + 62, y - 72, 42, 30, 0xf7f1df, 1)
       .setStrokeStyle(2, 0x1f1f1d, 0.88)
       .setAngle(5);
-    this.add.circle(x + 56, y - 68, 4, 0x1f1f1d, 0.72);
-    this.add.circle(x + 50, y - 76, 2, 0x1f1f1d, 0.72);
-    this.add.circle(x + 56, y - 78, 2, 0x1f1f1d, 0.72);
-    this.add.circle(x + 62, y - 76, 2, 0x1f1f1d, 0.72);
-    this.add.line(x + 70, y - 66, -6, 4, 8, -4, 0x1f1f1d, 0.42).setLineWidth(2);
-    this.add.line(x + 70, y - 60, -5, 3, 7, -3, 0x1f1f1d, 0.34).setLineWidth(2);
+    this.add.line(x + 42, y - 63, -8, 5, 8, -5, 0x1f1f1d, 0.3).setLineWidth(2);
+    this.add.circle(x + 59, y - 70, 5, 0x1f1f1d, 0.72);
+    this.add.circle(x + 51, y - 81, 3, 0x1f1f1d, 0.72);
+    this.add.circle(x + 60, y - 84, 3, 0x1f1f1d, 0.72);
+    this.add.circle(x + 69, y - 81, 3, 0x1f1f1d, 0.72);
+    this.add.line(x + 78, y - 70, -7, 5, 10, -5, 0x1f1f1d, 0.48).setLineWidth(2);
+    this.add.line(x + 79, y - 63, -6, 4, 9, -4, 0x1f1f1d, 0.38).setLineWidth(2);
   }
 
   private addStampedeBlanket(
