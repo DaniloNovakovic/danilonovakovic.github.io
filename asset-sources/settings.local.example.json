@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "assetInboxPath": "asset-sources/inbox",
+  "generatedConceptsPath": "asset-sources/generated-concepts",
+  "preparedPath": "asset-sources/prepared",
+  "archiveMirrorPath": "asset-sources/archive-mirror",
+  "defaultArchive": "project-main",
+  "externalArchives": {
+    "project-main": {
+      "provider": "google-drive",
+      "displayName": "Sketchbook Ridge Assets",
+      "webUrl": "https://drive.google.com/drive/folders/<folder-id>",
+      "notes": "Main project asset archive. Copy this file to asset-sources/settings.local.json and fill in the real Drive location. Do not add credentials."
+    },
+    "prepared-assets": {
+      "provider": "google-drive",
+      "displayName": "Prepared Sprite Candidates",
+      "webUrl": "https://drive.google.com/drive/folders/<prepared-folder-id>",
+      "notes": "Archive mirror for asset-sources/prepared. Keep folder structure stable so tracked manifests can reference archiveKey plus relativePath."
+    },
+    "generated-concepts": {
+      "provider": "google-drive",
+      "displayName": "Generated Concept Sheets",
+      "webUrl": "https://drive.google.com/drive/folders/<generated-concepts-folder-id>",
+      "notes": "Reference-only archive for raw generated concept sheets. Prefer prepared-assets for adoption when a prepared candidate exists."
+    }
+  }
+}

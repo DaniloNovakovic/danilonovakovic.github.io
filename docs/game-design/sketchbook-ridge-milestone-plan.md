@@ -53,7 +53,10 @@ Anything beyond that is future scope unless a slice explicitly pulls it in.
   without stored sticker state, and M5b adds the first Cicka note/translator
   tease plus a dev-only `devRidgeStamp=stampede-sketch` seed for fast local
   testing. M5c/M5d add Cicka's Stampede-gated walk-by bark, first deliberate
-  pre-translator interaction, and a primitive readability polish pass.
+  pre-translator interaction, and a primitive readability polish pass. M5e
+  promotes the prepared Cicka prototype spritesheet into Ridge as the first
+  runtime-wired AI sprite adoption proof, with audit notes and refined pipeline
+  gates.
 - **Asset staging is now an active coordination concern**: prepared POC assets
   exist for Cicka, Potassium, and Stampede enemy families. Keep them documented
   and adopt them in small scene-owned slices instead of turning them into a
@@ -327,19 +330,21 @@ Current checkpoint:
   Cicka memory becomes a paw/scratch decal instead of duplicate speech text;
   the same PR includes a small primitive readability polish pass for Cicka,
   her speech bubble, and the memory decal.
+- **M5e Cicka Runtime Asset Adoption** accepted for continuation: the prepared
+  Cicka spritesheet is promoted into `public/assets/ridge/cicka/`, Ridge loads
+  it as a display-only perch NPC with tiny idle/notice animation, and the first
+  AI sprite audit records frame stability, runtime risks, and future review
+  gates.
 
 Next implementation slices:
 
-1. **Cicka Runtime Asset Adoption**: promote the prepared Cicka runtime
-   candidate into Ridge in a small scene-owned slice. Use this to establish the
-   first asset adoption standard without creating a broad asset framework.
-2. **Ridge / Outskirts Topology Spike**: design and lightly prototype how the
+1. **Ridge / Outskirts Topology Spike**: design and lightly prototype how the
    current Overworld becomes Outskirts/Trailhead and Ridge becomes a connected
    Hollow Knight topology side-view world. Do not fully replace the default
    Overworld in the same PR.
-3. **Later First Ridge Shortcut / Ridge-Only Glide**: revisit these after the
+2. **Later First Ridge Shortcut / Ridge-Only Glide**: revisit these after the
    topology spike gives shortcuts and movement rewards a real route shape.
-4. **Translator / Cicka Daydream**: keep translated Cicka subtitles and the
+3. **Translator / Cicka Daydream**: keep translated Cicka subtitles and the
    Cicka daydream mini-slice for later, after Ridge Memory proves return play.
 
 Do not add stored sticker state. Do not add Stampede upgrades, endless mode,

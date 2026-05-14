@@ -12,6 +12,16 @@ Rules should describe stable seams, decision process, and things that would be e
 - JSDoc explains volatile symbol behavior, side effects, lifecycle order, and misuse risks near the code that changes.
 - Local READMEs map complex folders only; avoid per-file inventories unless the files are stable landmarks.
 - Exact file links are useful for canonical anchors, but avoid implementation walkthroughs that must be manually synchronized across docs and code.
+- Archive, staging, and generated-source folders must have a lifecycle state,
+  owner/source-of-truth pointer, and deletion trigger. Do not keep bulky files
+  or old docs only because they might be useful someday; summarize the durable
+  decision and delete or prune the bulk when it no longer serves active
+  provenance, regeneration, audit, or comparison work.
+- For asset intake, use `asset-sources/` as the single non-runtime asset
+  workbench. Check `asset-sources/settings.local.json` when it exists. It is
+  machine-local and gitignored, used for private Google Drive/archive locations
+  and local inbox paths. Do not commit credentials, personal Drive shortcuts, or
+  temporary asset dumps.
 
 ## Rule Files
 

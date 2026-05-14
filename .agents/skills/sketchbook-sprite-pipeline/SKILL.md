@@ -24,12 +24,21 @@ Before prompting or editing, read `docs/design/style-guide.md`. For Ridge/Baseme
 
 Scene-specific art can bend the style only when the scene already does, such as Potassium Slip's more colorful arcade assets.
 
+For first-time AI art adoption, generated asset review, approval gates, or
+pipeline design, also read
+`references/sprite-generation-system.md`.
+
 ## New Sprite Workflow
 
 1. Choose the asset class: `player`, `playerVariant`, `npc`, `enemy`, `prop`, or `pickup`.
 2. Define a fixed frame contract before generation: frame names, grid layout, facing direction, baseline/origin, expected runtime size, and output folder.
-3. Generate source art on a flat `#ff00ff` chroma-key background unless the image is already transparent. Prompt: no shadows, no labels, no grid lines, no scenery, consistent baseline, generous padding.
-4. Copy the keyed source into `asset-sources/<scene-or-domain>/...` first. Never leave a project asset only in a local generated-image cache outside the repo.
+3. Generate source art on a flat `#ff00ff` chroma-key background unless the image is already transparent. Prompt: no shadows, no labels, no grid lines, no scenery, consistent baseline, generous padding, one asset family only. Generate props/perches separately unless the frame contract explicitly says they are baked into every pose.
+4. Put exploratory or not-yet-adopted source in the gitignored
+   `asset-sources/inbox/` and/or the external archive recorded in
+   `asset-sources/settings.local.json`. Never leave a project asset only in a
+   tool-specific generated-image cache. Once selected as a project candidate,
+   keep it in `asset-sources/prepared/**` locally or record a stable external
+   source pointer in the adopting asset's tracked README/manifest.
 5. Remove chroma key with the project helper:
 
    ```bash
@@ -48,13 +57,15 @@ Scene-specific art can bend the style only when the scene already does, such as 
 8. Build a runtime spritesheet from `frames/`.
 9. Write `manifest.json`.
 10. Generate or update a debug/contact sheet showing frame boundaries, names, and any body/hitbox assumptions.
-11. Validate alpha, dimensions, bbox drift, and manifest consistency before finishing.
-12. Keep the prepared runtime bundle in `asset-sources/prepared/<scene-or-domain>/<slug>/` until scene code actually loads it.
+11. Validate alpha, dimensions, bbox drift, spritesheet dimensions, and manifest consistency before finishing.
+12. Keep the prepared runtime bundle in the external archive and local ignored
+    mirror at `asset-sources/prepared/<scene-or-domain>/<slug>/` until scene
+    code actually loads it.
 13. Promote the loaded bundle into `public/assets/<scene-or-domain>/<slug>/` as part of the runtime integration slice.
 
 ## Existing Image Conversion
 
-Use this when Danilo already likes a generated image.
+Use this when the project author or asset owner already likes a generated image.
 
 1. Preserve the original as `source.png` or `source-keyed.png`.
 2. If it has a background, remove it; if removal is messy, isolate the subject manually or regenerate only the matte/source, not the design.
@@ -70,14 +81,22 @@ Use this when Danilo already likes a generated image.
 ## Output Shape
 
 Keep raw generated concepts and bulky source ideation outside Vite's deployable
-`public` tree:
+`public` tree. For private experimental intake, use:
 
 ```text
-asset-sources/<scene-or-domain>/<slug-or-concept-set>/
-├── source-keyed.png
-├── source.png
-└── notes-or-readme.md
+asset-sources/
+├── settings.local.json
+└── inbox/<date-slug>/
+    ├── source.png
+    ├── prompt.md
+    └── notes.md
 ```
+
+Those paths are gitignored. When a source becomes durable project provenance,
+prefer a stable external source pointer in the adopting folder README/manifest.
+Do not add source material under `asset-sources/**` to Git unless the project
+author or asset owner explicitly asks for that PR; the default system keeps
+source and prepared work out of normal Git until runtime adoption.
 
 Prefer this structure for prepared runtime candidates:
 
@@ -92,10 +111,16 @@ asset-sources/prepared/<scene-or-domain>/<slug>/
 └── manifest.json
 ```
 
-For quick concept assets, use `asset-sources/**`. `public/assets/**` is for
-assets that are runtime-wired. Existing prepared flat folders under
-`asset-sources/prepared/characters` are acceptable, but production integration
-should migrate to the structure above.
+For quick concept assets, use the ignored `asset-sources/inbox/**` workbench or
+a task-specific ignored folder under `asset-sources/**`. `public/assets/**` is
+for assets that are runtime-wired.
+
+Prefer external archive storage for large rejected variants, raw AI batches,
+layered source files, and prompt experiments. The repo should keep what ships,
+what is being actively prepared, and the durable provenance needed to remake or
+audit the asset. When both raw generated concepts and prepared candidates exist,
+prefer the prepared candidate archive for adoption work and treat the raw
+concept archive as reference-only.
 
 ## Manifest Minimum
 
@@ -114,7 +139,19 @@ Include:
 Run:
 
 ```bash
-python3 .agents/skills/sketchbook-sprite-pipeline/scripts/audit_frames.py <frame-dir>
+python3 .agents/skills/sketchbook-sprite-pipeline/scripts/audit_frames.py \
+  <frame-dir> \
+  --manifest <manifest.json> \
+  --spritesheet <spritesheet.png>
+```
+
+After runtime promotion, when individual frame PNGs have been pruned, audit the
+horizontal runtime sheet directly:
+
+```bash
+python3 .agents/skills/sketchbook-sprite-pipeline/scripts/audit_frames.py \
+  --manifest <manifest.json> \
+  --spritesheet <spritesheet.png>
 ```
 
 Check:
@@ -123,8 +160,19 @@ Check:
 - runtime frames share identical dimensions
 - grounded animation bottom padding changes only intentionally
 - center/foot anchor drift is small
-- source frames are preserved for manual cleanup
+- source frames are preserved for manual cleanup only until runtime promotion
 - spritesheet dimensions equal `frameWidth * frameCount` by `frameHeight` for horizontal sheets
 - manifest matches files on disk
 
 If the art is attractive but fails QA, keep it as source art and normalize from it. Do not discard good taste because the first export is not game-ready.
+
+## Adoption Rule
+
+Adopt the smallest runtime proof first. For a character, a display-only idle NPC
+is usually safer than a physics actor; for an enemy, one family is safer than a
+whole pack; for a prop, one static readable object is safer than an animated set.
+Do not promote assets into `public/assets/**` until code preloads them and a
+folder-local README explains ownership, source, frame contract, and runtime use.
+After promotion, remove duplicate runtime outputs from `asset-sources/**` and
+leave a deletion trigger for any source/prepared files that remain in the
+external archive or local ignored mirror.

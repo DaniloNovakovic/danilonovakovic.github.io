@@ -11,6 +11,24 @@ edit it to match current planning, and do not treat search hits from this
 archive as implementation guidance. Use the active Summit, milestone, and
 runtime docs for current work.
 
+## Retention Rule
+
+This archive is allowed to exist because it records the closed decision process
+that selected Sketchbook Ridge. It is not a general parking lot.
+
+At milestone or planning-cleanup time, delete archived material when it no
+longer answers one of these questions:
+
+- what options were considered
+- why Sketchbook Ridge won
+- which specific idea was promoted into the active Summit plan
+- what provenance an active doc explicitly links back to
+
+If a large archived subtree is only "interesting history," replace it with a
+short summary and links to any surviving canonical outcome docs, or delete it.
+Do not add new files here unless they belong to a deliberately closed
+competition round with a clear outcome.
+
 ## Archived Rounds
 
 - [Round 001: Tiny Hike, Big Toy Box](archive/round-001/README.md)

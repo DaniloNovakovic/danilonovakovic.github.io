@@ -10,6 +10,7 @@ This directory separates shipped player-facing behavior from future design conce
 - **[Sketchbook Ridge Summit](./sketchbook-ridge-summit.md)**: Post-competition production vision and development plan for the Ridge overworld and opt-in mini-games.
 - **[Sketchbook Ridge Milestone Plan](./sketchbook-ridge-milestone-plan.md)**: Implementation milestone, branch, ownership, and issue-planning map for Ridge Summit.
 - **[Sketchbook Ridge Asset Staging Plan](./sketchbook-ridge-asset-staging-plan.md)**: Planning and organization guide for POC assets, prepared runtime candidates, and milestone-safe adoption order.
+- **[Cicka Runtime Asset Audit](./sketchbook-ridge-cicka-runtime-asset-audit.md)**: First AI-generated sprite adoption review, including Cicka QA results and follow-up gates.
 - **[Sketchbook Ridge Long-Term Topology Ideas](./sketchbook-ridge-long-term-topology-ideas.md)**: Exploratory long-term map, shortcut, and secret-direction companion for Ridge after the current milestone is proven.
 - **[Sketchbook Ridge M3 Visual Pack](./sketchbook-ridge-m3-visual-pack.md)**: Rade/Milena visual direction for Cicka, NPCs, landmarks, stickers, and M4 placeholders.
 - **[Sketchbook Ridge M3 Overlay Pack](./sketchbook-ridge-m3-overlay-pack.md)**: Aleksandra's Trail Card, Manual Page, mobile readability, and monochrome reward-state spec.
@@ -32,6 +33,9 @@ This directory separates shipped player-facing behavior from future design conce
   as an active roadmap or current source of truth. Search hits from
   `ai-competition/archive/**` are historical by default; use the active Summit,
   milestone, and runtime docs for current planning.
+- **Retention:** archive and staging folders must earn their keep. If a folder
+  is no longer active, it needs a clear provenance reason and deletion trigger;
+  otherwise summarize the useful decision and remove the bulk.
 
 ## Core Pillars
 
