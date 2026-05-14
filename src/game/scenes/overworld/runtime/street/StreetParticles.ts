@@ -5,7 +5,7 @@
  * perf: candidate for Phaser Group pooling if profiling shows GC pressure.
  */
 import * as Phaser from 'phaser';
-import { OVERWORLD_PARTICLE_MAX_Y } from '@/game/sharedSceneRuntime/config';
+import { OVERWORLD_PARTICLE_MAX_Y } from '../../worldLayout';
 
 const SPAWN_CHANCE_THRESHOLD = 95; // spawn when random(0..100) > this value (~5%)
 

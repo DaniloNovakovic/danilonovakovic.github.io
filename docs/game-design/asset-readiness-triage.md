@@ -138,8 +138,9 @@ Recommended next issue/task:
 
 1. Keep this triage note as the source of truth for asset readiness.
 2. Optionally run a small duplicate cleanup branch limited to source duplicates.
-3. After cleanup, pick one adoption slice: Cicka in Ridge or Stampede
-   calm-patch/player-guardian.
+3. After cleanup, pick the next non-Cicka adoption slice, likely Stampede
+   calm-patch/player-guardian. Cicka's Ridge runtime copy already lives in
+   `public/assets/ridge/cicka/`.
 
 Acceptance criteria for duplicate cleanup:
 

@@ -4,7 +4,7 @@ import {
   createCickaWalkByState,
   updateCickaWalkBy,
   type CickaWalkByFrame
-} from './cickaWalkBy';
+} from './walkBy';
 
 function createFrame(overrides: Partial<CickaWalkByFrame> = {}): CickaWalkByFrame {
   return {

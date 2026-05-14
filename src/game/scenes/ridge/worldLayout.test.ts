@@ -10,7 +10,7 @@ import {
 import { STAMPEDE_SKETCH_RIDGE_STAMP_ID } from '@/game/bridge/ridgeProgressIds';
 import { STAMPEDE_SKETCH_SCENE_ID } from '@/game/scenes/sceneIds';
 import { getRidgeLandmarkMemories } from './worldMemory';
-import { CICKA_INTERACTION_TARGET_ID } from './cickaInteraction';
+import { CICKA_INTERACTION_TARGET_ID } from './cicka/interaction';
 
 describe('ridge world layout', () => {
   it('keeps the first movement shell flat and inside world bounds', () => {

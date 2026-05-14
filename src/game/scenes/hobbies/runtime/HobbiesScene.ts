@@ -16,9 +16,9 @@ import {
   HOBBIES_ROOM_HEIGHT,
   HOBBIES_ROOM_WIDTH,
   HOBBIES_PLAYER_START_OFFSET_Y,
-  OVERWORLD_JUMP_VELOCITY_Y,
-  OVERWORLD_SPRINT_SPEED,
-  OVERWORLD_WALK_SPEED
+  SIDE_VIEW_JUMP_VELOCITY_Y,
+  SIDE_VIEW_SPRINT_SPEED,
+  SIDE_VIEW_WALK_SPEED
 } from '@/game/sharedSceneRuntime/config';
 import { isItemEquipped, type OpenOverlayOptions } from '@/game/bridge/store';
 import { buildHobbiesRoom } from './HobbiesRoom';
@@ -93,9 +93,9 @@ export class HobbiesScene extends Phaser.Scene {
         gravityY: 1000
       },
       movement: {
-        walkSpeed: OVERWORLD_WALK_SPEED,
-        sprintSpeed: OVERWORLD_SPRINT_SPEED,
-        jumpVelocityY: OVERWORLD_JUMP_VELOCITY_Y
+        walkSpeed: SIDE_VIEW_WALK_SPEED,
+        sprintSpeed: SIDE_VIEW_SPRINT_SPEED,
+        jumpVelocityY: SIDE_VIEW_JUMP_VELOCITY_Y
       },
       input: {
         allowJump: true,

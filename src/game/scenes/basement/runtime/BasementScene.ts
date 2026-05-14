@@ -15,9 +15,9 @@ import {
   GAME_DESIGN_HEIGHT,
   GAME_DESIGN_WIDTH,
   HOBBIES_GROUND_ZONE,
-  OVERWORLD_JUMP_VELOCITY_Y,
-  OVERWORLD_SPRINT_SPEED,
-  OVERWORLD_WALK_SPEED
+  SIDE_VIEW_JUMP_VELOCITY_Y,
+  SIDE_VIEW_SPRINT_SPEED,
+  SIDE_VIEW_WALK_SPEED
 } from '@/game/sharedSceneRuntime/config';
 import { bridgeActions, isItemEquipped, isItemOwned, type OpenOverlayOptions } from '@/game/bridge/store';
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
@@ -87,9 +87,9 @@ export class BasementScene extends Phaser.Scene {
         gravityY: 1000
       },
       movement: {
-        walkSpeed: OVERWORLD_WALK_SPEED,
-        sprintSpeed: OVERWORLD_SPRINT_SPEED,
-        jumpVelocityY: OVERWORLD_JUMP_VELOCITY_Y
+        walkSpeed: SIDE_VIEW_WALK_SPEED,
+        sprintSpeed: SIDE_VIEW_SPRINT_SPEED,
+        jumpVelocityY: SIDE_VIEW_JUMP_VELOCITY_Y
       },
       input: {
         allowJump: true,
