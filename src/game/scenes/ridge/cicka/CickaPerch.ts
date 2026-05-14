@@ -72,6 +72,24 @@ export function createCickaPerch(options: CreateCickaPerchOptions): CickaPerch {
     return gameObject;
   };
 
+  track(scene.add.rectangle(x, y + 78, 156, 20, 0xd7c78f, 0.96)
+    .setStrokeStyle(3, 0x1f1f1d, 0.72));
+  track(scene.add.rectangle(x - 58, y + 104, 12, 52, 0x1f1f1d, 0.66));
+  track(scene.add.rectangle(x + 58, y + 104, 12, 52, 0x1f1f1d, 0.66));
+  track(scene.add.rectangle(x + 82, y - 58, 82, 64, 0xf7f1df, 0.9)
+    .setStrokeStyle(3, 0x1f1f1d, 0.28)
+    .setAngle(2));
+  track(scene.add.circle(x + 54, y - 78, 4, 0x1f1f1d, 0.52));
+  track(scene.add.circle(x + 105, y - 74, 4, 0x1f1f1d, 0.52));
+  track(scene.add.rectangle(x + 72, y - 52, 24, 18, 0xf0d35f, 0.38)
+    .setStrokeStyle(1, 0x1f1f1d, 0.24)
+    .setAngle(-6));
+  track(scene.add.rectangle(x + 100, y - 39, 22, 16, 0xb85f5a, 0.28)
+    .setStrokeStyle(1, 0x1f1f1d, 0.2)
+    .setAngle(8));
+  track(scene.add.rectangle(x - 46, y + 55, 38, 22, 0xf7f1df, 0.88)
+    .setStrokeStyle(2, 0x1f1f1d, 0.34)
+    .setAngle(4));
   track(scene.add.rectangle(x, y + 28, 10, 86, 0x1f1f1d, 0.88));
   track(scene.add.rectangle(x, y - 12, 86, 10, 0x1f1f1d, 0.88));
   track(scene.add.rectangle(x + 18, y - 32, 72, 32, 0xf7f1df, 0.94)

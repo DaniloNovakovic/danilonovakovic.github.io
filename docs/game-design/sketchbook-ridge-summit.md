@@ -42,6 +42,14 @@ This is **Danilo's tiny private mountain**, not a portfolio theme park.
 
 The goal is to reach the **Relay Spire** and "send the sketchbook." On paper, that means shipping the portfolio. Emotionally, it means noticing that the unfinished jokes, hobbies, game tastes, tools, and half-serious obsessions already form a coherent world. Cicka is the emotional spine of that realization: she starts as a tiny resident, becomes the guide who teaches the player how to notice the Ridge, and makes the first ending a quiet farewell and tribute rather than only a contact/credits beat.
 
+The current static portfolio-building model is not the long-term fantasy. The
+better version is a **scrambled sketchbook**: Danilo's pages, tools, memories,
+and proofs are out of order. The player learns Danilo by restoring meaning
+through play, not by opening resume modals. Basement, Potassium Slip, and the
+Glasses re-read effect are strong anchors; generic information buildings should
+eventually be absorbed into artifacts, mini-games, Cicka notes, manual pages,
+and visible Cicka Home changes.
+
 The ending should not say "you became perfect." It should say:
 
 > You shipped something alive.
@@ -73,6 +81,11 @@ It should also say, softly:
 7. **Never Hike Alone**  
    The ridge should have a small cast of memorable NPCs and one very important cat presence, so exploration feels companionable instead of empty.
 
+8. **Learn Danilo By Restoring The Sketchbook**  
+   Portfolio facts should be discovered as objects, mementos, skills, jokes,
+   manual insights, and lived scenes. Avoid turning the Ridge into buildings
+   that open static information modals.
+
 ## Overworld Plan
 
 The overworld is a side-view ridge that can be crossed quickly once learned.
@@ -96,12 +109,18 @@ Landmarks:
 - Developer Basement hatch
 - Glasses pickup and "re-read the world" moment
 - Potassium hint object
+- early scrambled-sketchbook artifacts that replace generic portfolio buildings
 - Cicka's first perch
 - first distant view of Relay Spire
 
 Design beat:
 
 The current street should become the **Outskirts** rather than being replaced immediately. Before Glasses, the ridge feels like a rough sketch with a few obvious prompts. After Glasses, certain props jitter, margin notes appear, and the banana/Potassium path becomes legible.
+
+The current building/modal portfolio pattern should be treated as transitional.
+Outskirts should eventually teach Danilo through found objects and playable
+memory beats: tools on the ground, half-labeled project artifacts, Cicka
+reactions, and manual scraps that make old props readable after a return.
 
 ### Zone 2: Hobby Ridge
 
@@ -157,12 +176,13 @@ Ending beat:
 
 1. Walk the ridge.
 2. Notice a landmark.
-3. Interact with a prop.
-4. Read a **Trail Card** overlay: title, mood, time estimate, reward.
-5. Enter the mini-game or keep hiking.
+3. Find an artifact, prop, or scrambled memory.
+4. Read a **Trail Card** overlay when the prop leads to an opt-in scene.
+5. Enter the mini-game, inspect the artifact, or keep hiking.
 6. Clear, fail, or quit back to ridge.
-7. Receive a stamp, manual page, sticker, shortcut, or glide pip.
-8. Revisit the ridge and see that it changed.
+7. Receive a stamp, manual page, sticker, memento, shortcut, or glide pip.
+8. Return to Cicka Home or revisit the landmark and see that the sketchbook
+   changed.
 
 The repeatable pleasure is not just "new content." It is returning to the same place and feeling that the sketchbook remembers.
 
@@ -171,10 +191,20 @@ The repeatable pleasure is not just "new content." It is returning to the same p
 - **Stamps**: durable proof that a hobby scene was cleared.
 - **Stickers**: visible world changes. These are the emotional reward.
 - **Manual Pages**: one-screen clues that reinterpret a route, sign, or mechanic.
+- **Artifacts**: found personal objects, tools, scraps, or odd props that teach
+  Danilo through context instead of static profile text. Major work/project
+  artifacts should be easy to notice; smaller skill scraps such as languages,
+  libraries, and tools can be tucked into optional re-read details.
+- **Mementos**: small proof objects from mini-games that physically change
+  Cicka Home. They are memory and relationship, not currency.
 - **Glide Pips**: movement upgrades inspired by *A Short Hike* feathers.
 - **Shortcuts**: route changes inspired by *Hollow Knight* relief moments.
 - **Circuit**: Potassium Slip's major reward and one major proof toward the Relay Spire gate. Derive this from the existing inventory item instead of duplicating `potassium.circuitOwned` in progress.
 - **Cicka Notes**: tiny cat-side observations that reinterpret nearby props without becoming a full language system.
+- **Developer Laptop**: a future portable or Cicka Home-adjacent terminal that
+  extends the Basement computer fantasy. It may support debug/dev commands and
+  artifact inspection after the player has the right key and Glasses, but it
+  should not make typing mandatory for mobile progression.
 
 Bridge-owned progress should stay small and serializable. Exact naming should follow the current bridge store shape. A likely implementation is to extend `BridgeProgressState` with a `ridge` object and add explicit award actions:
 

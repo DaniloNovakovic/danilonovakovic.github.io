@@ -343,8 +343,10 @@ Next implementation slices:
 
 1. **Ridge / Outskirts Topology Spike**: design and lightly prototype how the
    current Overworld becomes Outskirts/Trailhead and Ridge becomes a connected
-   Hollow Knight topology side-view world. Do not fully replace the default
-   Overworld in the same PR.
+   Hollow Knight topology side-view world. Use
+   [`sketchbook-ridge-topology-spike.md`](./sketchbook-ridge-topology-spike.md)
+   as the active M5 map brief. Do not fully replace the default Overworld in
+   the same PR.
 2. **Later First Ridge Shortcut / Ridge-Only Glide**: revisit these after the
    topology spike gives shortcuts and movement rewards a real route shape.
 3. **Translator / Cicka Daydream**: keep translated Cicka subtitles and the
