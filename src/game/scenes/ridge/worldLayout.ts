@@ -13,12 +13,15 @@ export const RIDGE_PLAYER_RESUME_CLAMP = {
 } as const;
 
 export type RidgeLandmarkKind =
+  | 'outskirts-artifact'
   | 'cicka-perch'
   | 'stampede-blanket'
   | 'telegraph-bag'
   | 'ridge-guide'
   | 'domino-desk'
-  | 'relay-spire';
+  | 'relay-spire'
+  | 'high-ledge-teaser'
+  | 'relay-gate';
 
 export interface RidgeLandmark {
   id: string;
@@ -44,35 +47,69 @@ export interface RidgeTrailCardTarget {
   card: TrailCardOverlayParams;
 }
 
+export interface RidgeShortcut {
+  id: string;
+  sourceStampId: typeof STAMPEDE_SKETCH_RIDGE_STAMP_ID;
+  startX: number;
+  endX: number;
+  y: number;
+  width: number;
+  height: number;
+  label: string;
+}
+
+export const RIDGE_STAMPEDE_SHORTCUT = {
+  id: 'stampede-paper-fold',
+  sourceStampId: STAMPEDE_SKETCH_RIDGE_STAMP_ID,
+  startX: 520,
+  endX: 282,
+  y: RIDGE_FLOOR_Y - 134,
+  width: 280,
+  height: 18,
+  label: 'Stampede paper fold'
+} as const satisfies RidgeShortcut;
+
+export function isRidgeStampedeShortcutAvailable(
+  ridgeProgress: { stampIds: readonly string[] }
+): boolean {
+  return ridgeProgress.stampIds.includes(RIDGE_STAMPEDE_SHORTCUT.sourceStampId);
+}
+
 export const RIDGE_LANDMARKS: readonly RidgeLandmark[] = [
+  {
+    id: 'outskirts-artifact-slot',
+    kind: 'outskirts-artifact',
+    x: 120,
+    label: 'Outskirts'
+  },
   {
     id: 'cicka-first-perch',
     kind: 'cicka-perch',
-    x: 220,
-    label: 'Cicka perch'
+    x: 280,
+    label: 'Cicka Home'
   },
   {
     id: 'stampede-sketch-blanket',
     kind: 'stampede-blanket',
-    x: 430,
+    x: 520,
     label: 'Stampede'
   },
   {
     id: 'telegraph-terrace-bag',
     kind: 'telegraph-bag',
-    x: 650,
+    x: 735,
     label: 'Telegraph'
   },
   {
     id: 'ridge-guide',
     kind: 'ridge-guide',
-    x: 790,
+    x: 900,
     label: 'Guide'
   },
   {
     id: 'relay-spire',
     kind: 'relay-spire',
-    x: 890,
+    x: 980,
     label: 'Relay Spire'
   },
   {
@@ -80,6 +117,18 @@ export const RIDGE_LANDMARKS: readonly RidgeLandmark[] = [
     kind: 'domino-desk',
     x: 1240,
     label: 'Domino Desk'
+  },
+  {
+    id: 'paper-high-ledge-teaser',
+    kind: 'high-ledge-teaser',
+    x: 1440,
+    label: 'High Ledge'
+  },
+  {
+    id: 'relay-gate',
+    kind: 'relay-gate',
+    x: 1640,
+    label: 'Relay Gate'
   }
 ];
 
@@ -87,10 +136,10 @@ export const RIDGE_TRAIL_CARD_TARGETS: readonly RidgeTrailCardTarget[] = [
   {
     id: STAMPEDE_SKETCH_RIDGE_STAMP_ID,
     landmarkKind: 'stampede-blanket',
-    x: 430,
+    x: 520,
     distanceAnchorY: RIDGE_FLOOR_Y - 56,
     prompt: {
-      x: 430,
+      x: 520,
       y: RIDGE_FLOOR_Y - 118
     },
     card: {
@@ -104,10 +153,10 @@ export const RIDGE_TRAIL_CARD_TARGETS: readonly RidgeTrailCardTarget[] = [
   {
     id: 'telegraph-terrace',
     landmarkKind: 'telegraph-bag',
-    x: 650,
+    x: 735,
     distanceAnchorY: RIDGE_FLOOR_Y - 58,
     prompt: {
-      x: 650,
+      x: 735,
       y: RIDGE_FLOOR_Y - 130
     },
     card: {

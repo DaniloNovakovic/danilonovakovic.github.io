@@ -4,8 +4,10 @@ import {
   RIDGE_LANDMARKS,
   RIDGE_PLAYER_RESUME_CLAMP,
   RIDGE_PLAYER_START,
+  RIDGE_STAMPEDE_SHORTCUT,
   RIDGE_TRAIL_CARD_TARGETS,
-  RIDGE_WORLD_WIDTH
+  RIDGE_WORLD_WIDTH,
+  isRidgeStampedeShortcutAvailable
 } from './worldLayout';
 import { STAMPEDE_SKETCH_RIDGE_STAMP_ID } from '@/game/bridge/ridgeProgressIds';
 import { STAMPEDE_SKETCH_SCENE_ID } from '@/game/scenes/sceneIds';
@@ -22,20 +24,38 @@ describe('ridge world layout', () => {
 
   it('stages the first Ridge shell landmarks in dependency order', () => {
     expect(RIDGE_LANDMARKS.map((landmark) => landmark.kind)).toEqual([
+      'outskirts-artifact',
       'cicka-perch',
       'stampede-blanket',
       'telegraph-bag',
       'ridge-guide',
       'relay-spire',
-      'domino-desk'
+      'domino-desk',
+      'high-ledge-teaser',
+      'relay-gate'
     ]);
+    expect(RIDGE_LANDMARKS.find((landmark) => landmark.kind === 'cicka-perch')?.label).toBe(
+      'Cicka Home'
+    );
   });
 
-  it('keeps Relay Spire visible early in the first route', () => {
+  it('keeps Relay Spire visible early and reserves a later Relay Gate', () => {
     const relay = RIDGE_LANDMARKS.find((landmark) => landmark.kind === 'relay-spire');
+    const relayGate = RIDGE_LANDMARKS.find((landmark) => landmark.kind === 'relay-gate');
 
     expect(relay?.x).toBeGreaterThan(0);
     expect(relay?.x).toBeLessThan(1100);
+    expect(relayGate?.x).toBeGreaterThan(relay?.x ?? 0);
+    expect(relayGate?.x).toBeLessThan(RIDGE_WORLD_WIDTH);
+  });
+
+  it('makes the Stampede paper-fold shortcut available from Stampede progress only', () => {
+    expect(RIDGE_STAMPEDE_SHORTCUT.sourceStampId).toBe(STAMPEDE_SKETCH_RIDGE_STAMP_ID);
+    expect(RIDGE_STAMPEDE_SHORTCUT.startX).toBeGreaterThan(RIDGE_STAMPEDE_SHORTCUT.endX);
+    expect(isRidgeStampedeShortcutAvailable({ stampIds: [] })).toBe(false);
+    expect(isRidgeStampedeShortcutAvailable({
+      stampIds: [STAMPEDE_SKETCH_RIDGE_STAMP_ID]
+    })).toBe(true);
   });
 
   it('defines exactly three Trail Card targets for the first trigger contract', () => {
