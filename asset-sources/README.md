@@ -39,11 +39,7 @@ asset-sources/
 ├── README.md
 ├── settings.local.example.json
 ├── settings.local.json          # ignored
-├── inbox/                       # ignored temporary handoff
 ├── prepared/                    # ignored local mirror of prepared assets
-├── stampede-sketch/
-│   └── generated-concepts/      # ignored reference mirror
-└── archive-mirror/              # ignored optional downloads
 ```
 
 Use `inbox/` for temporary handoff files. Use `prepared/` when working from an

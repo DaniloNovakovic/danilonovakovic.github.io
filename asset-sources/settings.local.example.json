@@ -1,7 +1,7 @@
 {
   "version": 1,
   "assetInboxPath": "asset-sources/inbox",
-  "generatedConceptsPath": "asset-sources/stampede-sketch/generated-concepts",
+  "generatedConceptsPath": "asset-sources/generated-concepts",
   "preparedPath": "asset-sources/prepared",
   "archiveMirrorPath": "asset-sources/archive-mirror",
   "defaultArchive": "project-main",
