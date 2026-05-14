@@ -5,10 +5,12 @@ beats.
 
 Current state:
 
-- this folder is a **prepared runtime candidate**
-- it is not automatically the canonical runtime source unless Ridge explicitly
-  preloads it
-- it exists to support a small Cicka adoption slice without requiring final art
+- this folder is the **prepared source bundle** for the first Ridge runtime
+  Cicka adoption slice
+- `public/assets/ridge/cicka/` contains the promoted runtime copy that Ridge
+  explicitly preloads
+- the art is approved only for a small display-only NPC/perch read; it is not a
+  proven full locomotion, collision, or pet-system asset set
 
 Contents:
 
@@ -32,3 +34,17 @@ Intended first-use reads:
 
 If Ridge adopts this kit, keep the first slice small and warmth-focused. Do not
 block on full navigation behavior or a large pet-system interpretation.
+
+## First Runtime Audit
+
+The runtime frames pass the sprite-pipeline audit:
+
+- all frames are `128x96` RGBA PNGs
+- all frame centers stay within `63.5-64.5`
+- all bottom padding is `10px`
+- the horizontal spritesheet is `1536x96`
+
+The asset is visually detailed because of the hatching, so future use should
+continue through small review gates. Prefer perch/idle/notice poses first; treat
+walk, hop, and sleep as candidates until they are reviewed in motion inside the
+actual Ridge camera.

@@ -133,7 +133,8 @@ As of this planning pass:
 - `asset-sources/prepared/potassium-slip/README.md` documents prepared
   Potassium enemy and banana assets as runtime candidates, not wired defaults.
 - `asset-sources/prepared/characters/cicka/` documents the prepared Cicka
-  prototype set and its first-use reads.
+  prototype set and its first-use reads. The first runtime adoption slice now
+  promotes a small display-only Ridge copy under `public/assets/ridge/cicka/`.
 
 That means the repo keeps source/prepared art available without shipping it
 until a scene-owned adoption slice promotes it.
@@ -153,11 +154,14 @@ Reason:
 
 Recommended slice:
 
-- review `asset-sources/prepared/characters/cicka/`
-- promote only the chosen Cicka frames into runtime-wired Ridge assets
+- review `asset-sources/prepared/characters/cicka/` **(done for the first
+  perch proof)**
+- promote only the chosen Cicka frames into runtime-wired Ridge assets **(done
+  through `public/assets/ridge/cicka/`)**
 - use the slice to establish the first scene-owned asset adoption pattern:
   runtime asset location, manifest/key naming, preload ownership, and local
-  README expectations
+  README expectations **(done through the Cicka audit and sprite-pipeline skill
+  refinement)**
 - if integrated, keep it lightweight: perch, blink, loaf, suspicious turn, and
   one movement read are enough
 - do not build a global asset framework from the first adoption slice
@@ -248,14 +252,16 @@ Riskier work that should be serialized:
 
 ## Recommended Next 1-3 Tasks
 
-1. Open **Cicka Runtime Asset Adoption** as the next asset implementation slice.
-2. Follow with a **Ridge / Outskirts Topology Spike** before committing to
+1. Follow with a **Ridge / Outskirts Topology Spike** before committing to
    shortcut, glide, wall-cling, or full Overworld replacement behavior.
-3. Keep Stampede calm-patch / proximity-aggro and Potassium visual upgrades as
+2. Keep Stampede calm-patch / proximity-aggro and Potassium visual upgrades as
    later scene-owned asset slices.
+3. Expand Cicka animation only after desktop/mobile screenshots prove the
+   hatching and scale remain readable in the actual Ridge camera.
 
 ## Decision Needed From Danilo
 
-Current decision: **Cicka first**, then Ridge / Outskirts topology. Stampede and
-Potassium asset adoption stay queued until those two slices clarify the main
+Current decision: **Ridge / Outskirts topology next**. Cicka's first runtime
+proof is in place; Stampede and Potassium asset adoption stay queued until the
+topology slice clarifies the main
 world and asset standard.

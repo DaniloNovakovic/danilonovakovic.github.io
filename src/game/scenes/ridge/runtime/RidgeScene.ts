@@ -53,6 +53,15 @@ import {
   type CickaInteractionCopy,
   type CickaInteractionResponse
 } from '../cickaInteraction';
+import {
+  CICKA_ANIMATION_KEYS,
+  CICKA_FRAME_INDEX,
+  CICKA_ORIGIN,
+  CICKA_RUNTIME_SCALE,
+  CICKA_TEXTURE_KEY,
+  createCickaAnimations,
+  preloadCickaAssets
+} from '../cickaAssets';
 import type { TrailCardOverlayParams } from '@/game/overlays/trailCard/types';
 
 interface RidgeSceneStartData {
@@ -81,6 +90,7 @@ export class RidgeScene extends Phaser.Scene {
   private interactionRuntime?: InteriorInteractionRuntime<RidgeInteractionTargetId, RidgeInteractionEffect>;
   private cickaSpeechBubble?: Phaser.GameObjects.Container;
   private cickaSpeechBubbleLabel?: Phaser.GameObjects.Text;
+  private cickaSprite?: Phaser.GameObjects.Sprite;
   private cickaSpeechVisibleUntilMs = 0;
   private cickaWalkByEnabled = false;
   private cickaWalkByBark = '';
@@ -109,6 +119,7 @@ export class RidgeScene extends Phaser.Scene {
     if (!this.textures.exists('player_idle')) {
       TextureGenerator.generatePlayer(this);
     }
+    preloadCickaAssets(this);
   }
 
   getResumeCapturePosition(): { x: number; y: number } | null {
@@ -127,6 +138,7 @@ export class RidgeScene extends Phaser.Scene {
 
     this.cameras.main.setBackgroundColor('#f7f1df');
     this.physics.world.setBounds(0, 0, RIDGE_WORLD_WIDTH, GAME_DESIGN_HEIGHT);
+    createCickaAnimations(this);
 
     const ground = this.createGround();
     const worldMemories = getRidgeWorldMemories(bridgeStore.getState().progress.ridge);
@@ -241,10 +253,15 @@ export class RidgeScene extends Phaser.Scene {
     this.cickaSpeechBubbleLabel.setText(line);
     this.cickaSpeechVisibleUntilMs = visibleUntilMs;
     this.cickaSpeechBubble.setVisible(true);
+    this.cickaSprite?.play(CICKA_ANIMATION_KEYS.notice, true);
   }
 
   private updateCickaSpeechBubble(): void {
-    this.cickaSpeechBubble?.setVisible(this.isCickaSpeechBubbleVisible());
+    const isVisible = this.isCickaSpeechBubbleVisible();
+    this.cickaSpeechBubble?.setVisible(isVisible);
+    if (!isVisible) {
+      this.cickaSprite?.play(CICKA_ANIMATION_KEYS.perchIdle, true);
+    }
   }
 
   private isCickaSpeechBubbleVisible(): boolean {
@@ -458,16 +475,16 @@ export class RidgeScene extends Phaser.Scene {
       .setAngle(-2);
     this.add.line(x + 8, y - 42, -20, 0, 20, 0, 0x1f1f1d, 0.16).setLineWidth(2);
     this.add.line(x + 8, y - 31, -22, 0, 18, 0, 0x1f1f1d, 0.12).setLineWidth(2);
-    this.add.line(x - 10, y - 36, 0, 0, -28, -13, 0x1f1f1d, 0.9).setLineWidth(5);
-    this.add.line(x - 38, y - 49, 0, 0, -16, 11, 0x1f1f1d, 0.9).setLineWidth(5);
-    this.add.circle(x - 55, y - 37, 3, 0xf7f1df, 0.9);
-    this.add.ellipse(x + 16, y - 36, 56, 29, 0x1f1f1d, 0.96);
-    this.add.triangle(x - 8, y - 51, 0, 15, 12, 0, 23, 15, 0x1f1f1d, 0.96);
-    this.add.triangle(x + 19, y - 51, 0, 15, 12, 0, 23, 15, 0x1f1f1d, 0.96);
-    this.add.circle(x + 30, y - 38, 3, 0xf7f1df, 1);
-    this.add.ellipse(x + 9, y - 30, 6, 3, 0xf7f1df, 0.88).setAngle(-10);
-    this.add.circle(x + 4, y - 23, 2, 0xf7f1df, 0.9);
-    this.add.circle(x + 21, y - 23, 2, 0xf7f1df, 0.9);
+    this.cickaSprite = this.add.sprite(
+      x + 14,
+      y - 14,
+      CICKA_TEXTURE_KEY,
+      CICKA_FRAME_INDEX.perchSit
+    )
+      .setOrigin(CICKA_ORIGIN.x, CICKA_ORIGIN.y)
+      .setScale(CICKA_RUNTIME_SCALE)
+      .setDepth(26);
+    this.cickaSprite.play(CICKA_ANIMATION_KEYS.perchIdle);
     if (hasRidgeWorldMemory(memories, 'cicka-stampede-note')) {
       this.addCickaStampedeNoteMemory(x, y);
     }

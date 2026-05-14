@@ -1,0 +1,80 @@
+{
+  "slug": "cicka",
+  "sourceBundle": "asset-sources/prepared/characters/cicka/",
+  "spritesheet": "cicka-spritesheet.png",
+  "frameWidth": 128,
+  "frameHeight": 96,
+  "frameCount": 12,
+  "origin": {
+    "x": 0.5,
+    "y": 1
+  },
+  "runtimeScale": 0.58,
+  "body": {
+    "status": "review-only",
+    "width": 58,
+    "height": 34,
+    "offsetY": 10
+  },
+  "frames": [
+    {
+      "state": "perch-sit",
+      "index": 0
+    },
+    {
+      "state": "perch-blink",
+      "index": 1
+    },
+    {
+      "state": "loaf-content",
+      "index": 2
+    },
+    {
+      "state": "suspicious-turn",
+      "index": 3
+    },
+    {
+      "state": "tail-alert",
+      "index": 4
+    },
+    {
+      "state": "tail-point",
+      "index": 5
+    },
+    {
+      "state": "tail-question",
+      "index": 6
+    },
+    {
+      "state": "tiny-hop",
+      "index": 7
+    },
+    {
+      "state": "stretch",
+      "index": 8
+    },
+    {
+      "state": "walk-1",
+      "index": 9
+    },
+    {
+      "state": "walk-2",
+      "index": 10
+    },
+    {
+      "state": "sleep-curl",
+      "index": 11
+    }
+  ],
+  "animations": {
+    "perchIdle": ["perch-sit", "perch-blink"],
+    "loaf": ["loaf-content"],
+    "notice": ["tail-alert", "tail-point"],
+    "suspicious": ["suspicious-turn", "tail-question"],
+    "hop": ["tiny-hop"],
+    "stretch": ["stretch"],
+    "walk": ["walk-1", "walk-2"],
+    "sleep": ["sleep-curl"]
+  },
+  "debugContact": "cicka-debug-contact.png"
+}

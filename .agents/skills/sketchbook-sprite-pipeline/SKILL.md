@@ -24,11 +24,15 @@ Before prompting or editing, read `docs/design/style-guide.md`. For Ridge/Baseme
 
 Scene-specific art can bend the style only when the scene already does, such as Potassium Slip's more colorful arcade assets.
 
+For first-time AI art adoption, generated asset review, approval gates, or
+pipeline design, also read
+`references/sprite-generation-system.md`.
+
 ## New Sprite Workflow
 
 1. Choose the asset class: `player`, `playerVariant`, `npc`, `enemy`, `prop`, or `pickup`.
 2. Define a fixed frame contract before generation: frame names, grid layout, facing direction, baseline/origin, expected runtime size, and output folder.
-3. Generate source art on a flat `#ff00ff` chroma-key background unless the image is already transparent. Prompt: no shadows, no labels, no grid lines, no scenery, consistent baseline, generous padding.
+3. Generate source art on a flat `#ff00ff` chroma-key background unless the image is already transparent. Prompt: no shadows, no labels, no grid lines, no scenery, consistent baseline, generous padding, one asset family only. Generate props/perches separately unless the frame contract explicitly says they are baked into every pose.
 4. Copy the keyed source into `asset-sources/<scene-or-domain>/...` first. Never leave a project asset only in a local generated-image cache outside the repo.
 5. Remove chroma key with the project helper:
 
@@ -48,7 +52,7 @@ Scene-specific art can bend the style only when the scene already does, such as 
 8. Build a runtime spritesheet from `frames/`.
 9. Write `manifest.json`.
 10. Generate or update a debug/contact sheet showing frame boundaries, names, and any body/hitbox assumptions.
-11. Validate alpha, dimensions, bbox drift, and manifest consistency before finishing.
+11. Validate alpha, dimensions, bbox drift, spritesheet dimensions, and manifest consistency before finishing.
 12. Keep the prepared runtime bundle in `asset-sources/prepared/<scene-or-domain>/<slug>/` until scene code actually loads it.
 13. Promote the loaded bundle into `public/assets/<scene-or-domain>/<slug>/` as part of the runtime integration slice.
 
@@ -114,7 +118,10 @@ Include:
 Run:
 
 ```bash
-python3 .agents/skills/sketchbook-sprite-pipeline/scripts/audit_frames.py <frame-dir>
+python3 .agents/skills/sketchbook-sprite-pipeline/scripts/audit_frames.py \
+  <frame-dir> \
+  --manifest <manifest.json> \
+  --spritesheet <spritesheet.png>
 ```
 
 Check:
@@ -128,3 +135,11 @@ Check:
 - manifest matches files on disk
 
 If the art is attractive but fails QA, keep it as source art and normalize from it. Do not discard good taste because the first export is not game-ready.
+
+## Adoption Rule
+
+Adopt the smallest runtime proof first. For a character, a display-only idle NPC
+is usually safer than a physics actor; for an enemy, one family is safer than a
+whole pack; for a prop, one static readable object is safer than an animated set.
+Do not promote assets into `public/assets/**` until code preloads them and a
+folder-local README explains ownership, source, frame contract, and runtime use.
