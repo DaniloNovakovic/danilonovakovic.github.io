@@ -17,33 +17,29 @@ def load_image(path: Path):
     return source, image
 
 
-def alpha_bbox(path: Path):
-    _, image = load_image(path)
-    return image, image.getchannel("A").getbbox()
-
-
 def count_alpha_pixels(image: Image.Image) -> tuple[int, int]:
     alpha = image.getchannel("A")
-    opaque = 0
-    translucent = 0
-    alpha_values = (
-        alpha.get_flattened_data()
-        if hasattr(alpha, "get_flattened_data")
-        else alpha.getdata()
-    )
-    for value in alpha_values:
-        if value >= 250:
-            opaque += 1
-        elif value > 0:
-            translucent += 1
+    histogram = alpha.histogram()
+    opaque = sum(histogram[250:])
+    translucent = sum(histogram[1:250])
     return opaque, translucent
 
 
 def read_manifest(path: Path | None) -> dict | None:
     if path is None:
         return None
-    with path.open("r", encoding="utf-8") as file:
-        return json.load(file)
+    if not path.exists():
+        raise SystemExit(f"Manifest not found: {path}")
+    try:
+        with path.open("r", encoding="utf-8") as file:
+            manifest = json.load(file)
+    except json.JSONDecodeError as error:
+        raise SystemExit(f"Failed to parse manifest {path}: {error}") from error
+    except OSError as error:
+        raise SystemExit(f"Failed to read manifest {path}: {error}") from error
+    if not isinstance(manifest, dict):
+        raise SystemExit(f"Manifest must contain a JSON object: {path}")
+    return manifest
 
 
 def load_frame_dir(frame_dir: Path) -> list[FrameRecord]:
