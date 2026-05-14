@@ -20,6 +20,6 @@ interaction target remains the gameplay affordance.
 - runtime scale: `0.58`
 - initial animations: perch idle and notice
 
-`manifest.json` is the runtime-facing contract and points back to the prepared
-source bundle. `cicka-debug-contact.png` is retained here as the promoted
-runtime QA sheet because this is the first AI sprite adoption slice.
+`manifest.json` is the runtime-facing contract and points back to the retained
+source sheet. `cicka-debug-contact.png` is retained here as the promoted runtime
+QA sheet because this is the first AI sprite adoption slice.

@@ -29,8 +29,7 @@ Command:
 
 ```bash
 python3 .agents/skills/sketchbook-sprite-pipeline/scripts/audit_frames.py \
-  asset-sources/prepared/characters/cicka/frames \
-  --manifest asset-sources/prepared/characters/cicka/manifest.json \
+  --manifest public/assets/ridge/cicka/manifest.json \
   --spritesheet public/assets/ridge/cicka/cicka-spritesheet.png
 ```
 
@@ -44,6 +43,9 @@ Results:
 - no alpha bbox touches the frame edge
 - duplicate prepared-folder copies of the runtime spritesheet and QA sheet were
   deleted after promotion; `public/assets/ridge/cicka/` is the runtime owner
+- `asset-sources/prepared/characters/cicka/` was pruned to `README.md` and
+  `source.png`; source crops, normalized frame PNGs, and chroma-key source were
+  deleted because they are reproducible intermediates
 
 ## Risks
 

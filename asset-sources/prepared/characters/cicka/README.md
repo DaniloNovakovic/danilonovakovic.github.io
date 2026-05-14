@@ -1,28 +1,24 @@
-# Cicka Prototype Sprite Kit
+# Cicka Prototype Source
 
-Prepared Cicka prototype sprites for Ridge exploration and small interaction
-beats.
+Transparent source sheet for the Cicka Ridge runtime sprite proof.
 
 Current state:
 
-- this folder is the **prepared source bundle** for the first Ridge runtime
+- this folder is the **minimal retained source** for the first Ridge runtime
   Cicka adoption slice
 - `public/assets/ridge/cicka/` contains the promoted runtime copy that Ridge
   explicitly preloads
-- duplicate runtime output PNGs were pruned from this folder after promotion;
-  use the `runtimeBundle` paths in `manifest.json` for the loaded spritesheet
-  and QA sheet
+- duplicate runtime outputs, chroma-key source, intermediate source crops, and
+  normalized frame PNGs were pruned after promotion
+- use `public/assets/ridge/cicka/manifest.json` for the loaded spritesheet,
+  frame contract, and QA sheet
 - the art is approved only for a small display-only NPC/perch read; it is not a
   proven full locomotion, collision, or pet-system asset set
 
 Contents:
 
-- `source-keyed.png` - keyed generated source sheet
-- `source.png` - transparent source sheet
-- `source-frames/` - larger source crops
-- `frames/` - normalized runtime candidate frames
-- `manifest.json` - source/prepared frame contract, pointing to promoted
-  runtime outputs
+- `source.png` - transparent original source sheet retained only for short-term
+  regeneration, comparison, and animation review
 
 Intended first-use reads:
 
@@ -39,7 +35,7 @@ block on full navigation behavior or a large pet-system interpretation.
 
 ## First Runtime Audit
 
-The runtime frames pass the sprite-pipeline audit:
+The promoted runtime spritesheet passes the sprite-pipeline audit:
 
 - all frames are `128x96` RGBA PNGs
 - all frame centers stay within `63.5-64.5`
@@ -50,3 +46,7 @@ The asset is visually detailed because of the hatching, so future use should
 continue through small review gates. Prefer perch/idle/notice poses first; treat
 walk, hop, and sleep as candidates until they are reviewed in motion inside the
 actual Ridge camera.
+
+Deletion trigger: delete this source folder when Cicka is accepted as final
+enough for the Ridge proof or when a replacement Cicka sheet is generated and
+adopted.

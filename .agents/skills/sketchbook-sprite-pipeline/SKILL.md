@@ -124,13 +124,22 @@ python3 .agents/skills/sketchbook-sprite-pipeline/scripts/audit_frames.py \
   --spritesheet <spritesheet.png>
 ```
 
+After runtime promotion, when individual frame PNGs have been pruned, audit the
+horizontal runtime sheet directly:
+
+```bash
+python3 .agents/skills/sketchbook-sprite-pipeline/scripts/audit_frames.py \
+  --manifest <manifest.json> \
+  --spritesheet <spritesheet.png>
+```
+
 Check:
 
 - all runtime frames are RGBA PNGs
 - runtime frames share identical dimensions
 - grounded animation bottom padding changes only intentionally
 - center/foot anchor drift is small
-- source frames are preserved for manual cleanup
+- source frames are preserved for manual cleanup only until runtime promotion
 - spritesheet dimensions equal `frameWidth * frameCount` by `frameHeight` for horizontal sheets
 - manifest matches files on disk
 
