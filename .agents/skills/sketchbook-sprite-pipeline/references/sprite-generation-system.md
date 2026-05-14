@@ -11,8 +11,12 @@ or adopted into runtime.
 2. **Generation**: create source art that satisfies the contract. Use one asset
    family per sheet. Keep props, perches, scenery, labels, shadows, and UI text
    out of character sheets unless deliberately part of every frame.
-3. **Source archive**: store raw/keyed/transparent source under `asset-sources/**`.
-   Nothing generated should exist only in a local image cache.
+3. **Source archive**: store exploratory source in the gitignored
+   `asset-sources/inbox/` and/or the external archive recorded by
+   `asset-sources/settings.local.json`. Nothing generated should exist only in
+   a tool-specific local image cache. When an asset becomes a project candidate,
+   keep it in ignored `asset-sources/prepared/**` locally or record a stable
+   external source pointer in the adopting asset's tracked README/manifest.
 4. **Preparation**: remove backgrounds, slice source frames, normalize runtime
    frames, build a spritesheet, write `manifest.json`, and create a debug/contact
    sheet.
@@ -95,6 +99,11 @@ it in a debug/contact sheet before wiring physics.
 
 Asset folders are not permanent archives. Use these states:
 
+- `local intake`: private handoff in `asset-sources/inbox/`; delete or archive
+  outside Git once reviewed.
+- `external archive`: Google Drive/cloud storage for raw batches, rejected
+  variants, layered files, and experiments; tracked repo files may point to it
+  when the pointer is durable provenance.
 - `raw concept`: keep only while it informs taste, comparison, or regeneration.
 - `prepared candidate`: keep until accepted, rejected, or superseded.
 - `promoted runtime source`: runtime files live in `public/assets/**`; source

@@ -17,6 +17,11 @@ Rules should describe stable seams, decision process, and things that would be e
   or old docs only because they might be useful someday; summarize the durable
   decision and delete or prune the bulk when it no longer serves active
   provenance, regeneration, audit, or comparison work.
+- For asset intake, use `asset-sources/` as the single non-runtime asset
+  workbench. Check `asset-sources/settings.local.json` when it exists. It is
+  machine-local and gitignored, used for private Google Drive/archive locations
+  and local inbox paths. Do not commit credentials, personal Drive shortcuts, or
+  temporary asset dumps.
 
 ## Rule Files
 

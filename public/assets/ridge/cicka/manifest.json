@@ -1,6 +1,11 @@
 {
   "slug": "cicka",
   "sourceBundle": "asset-sources/prepared/characters/cicka/",
+  "sourceArchive": {
+    "archiveKey": "prepared-assets",
+    "relativePath": "characters/cicka/",
+    "settings": "asset-sources/settings.local.json"
+  },
   "spritesheet": "cicka-spritesheet.png",
   "frameWidth": 128,
   "frameHeight": 96,

@@ -6,7 +6,8 @@ Active references:
 
 - `docs/design/style-guide.md`
 - `docs/game-design/sketchbook-ridge-asset-staging-plan.md`
-- `asset-sources/prepared/characters/cicka/README.md`
+- external prepared archive key `prepared-assets`, relative path
+  `characters/cicka/`
 - `.agents/skills/sketchbook-sprite-pipeline/SKILL.md`
 
 ## Decision
@@ -43,9 +44,11 @@ Results:
 - no alpha bbox touches the frame edge
 - duplicate prepared-folder copies of the runtime spritesheet and QA sheet were
   deleted after promotion; `public/assets/ridge/cicka/` is the runtime owner
-- `asset-sources/prepared/characters/cicka/` was pruned to `README.md` and
-  `source.png`; source crops, normalized frame PNGs, and chroma-key source were
-  deleted because they are reproducible intermediates
+- the local `asset-sources/prepared/characters/cicka/` copy was pruned to
+  `README.md` and `source.png`; source crops, normalized frame PNGs, and
+  chroma-key source were deleted because they are reproducible intermediates
+- `asset-sources/prepared/**` is now treated as an ignored local mirror of the
+  external prepared archive rather than repo-owned source
 
 ## Risks
 

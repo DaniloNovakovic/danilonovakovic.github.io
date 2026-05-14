@@ -8,7 +8,7 @@ Active sources: `sketchbook-ridge-summit.md`,
 `sketchbook-ridge-milestone-plan.md`, `sketchbook-ridge-m3-visual-pack.md`,
 `sketchbook-ridge-m3-overlay-pack.md`, `sketchbook-ridge-m3-audio-pack.md`,
 `docs/design/style-guide.md`, the current generated/prepared asset readmes
-under `asset-sources/**`, `asset-sources/asset-readiness-triage.md`, and runtime
+under `asset-sources/**`, `docs/game-design/asset-readiness-triage.md`, and runtime
 asset readmes under `public/assets/**` when assets are promoted.
 
 ## Why This Exists
@@ -77,28 +77,37 @@ an asset is ready to load in Phaser.
 
 Purpose: preserve source ideation before prep.
 
-Current home:
+Current local mirror home:
 
 - `asset-sources/stampede-sketch/generated-concepts/`
 
+External archive key: `generated-concepts` in
+`asset-sources/settings.local.json`.
+
 Rules:
 
-- keep the original generated PNGs
+- keep the original generated PNGs in the external archive and local ignored
+  mirror
 - keep raw generated concepts outside `public` so Vite does not deploy them
 - do not point runtime code at these directly
-- use them as source material for prep, comparison, or regeneration
+- treat them as reference-only once a prepared candidate exists
+- prefer `prepared-assets/stampede-sketch/**` for Stampede adoption work
+- do not commit raw generated concept batches by default
 
 ### Lane 3: Prepared Runtime Candidates
 
 Purpose: transparent, normalized, scene-specific art that is close to usable.
 
-Current homes:
+Current local mirror homes:
 
 - `asset-sources/prepared/characters/cicka/`
 - `asset-sources/prepared/potassium-slip/**`
 - `asset-sources/prepared/stampede-sketch/enemies/**`
 - `asset-sources/prepared/stampede-sketch/player-guardian/`
 - `asset-sources/prepared/stampede-sketch/calm-patch/`
+
+External archive key: `prepared-assets` in
+`asset-sources/settings.local.json`.
 
 Rules:
 
@@ -107,6 +116,8 @@ Rules:
 - these assets are **candidates**, not automatic commitments
 - scene code may adopt them slice by slice
 - do not keep candidates in `public/assets/**` unless runtime code loads them
+- do not commit prepared candidates by default; keep them in the external
+  archive and local ignored mirror
 
 ### Lane 4: Runtime-Wired Assets
 
@@ -125,19 +136,24 @@ Rules:
 
 As of this planning pass:
 
-- `asset-sources/stampede-sketch/generated-concepts/` is clearly marked as raw
-  concept source, not runtime input.
+- `asset-sources/stampede-sketch/generated-concepts/` is raw concept source,
+  not runtime input. This is now local mirror content backed by
+  `generated-concepts`, and is reference-only because prepared Stampede assets
+  are the more likely adoption path.
 - `asset-sources/prepared/stampede-sketch/enemies/README.md` documents
   prepared enemy sprites as runtime candidates, but also says they are not
-  loaded yet.
+  loaded yet. This is now local mirror content backed by `prepared-assets`.
 - `asset-sources/prepared/potassium-slip/README.md` documents prepared
   Potassium enemy and banana assets as runtime candidates, not wired defaults.
+  This is now local mirror content backed by `prepared-assets`.
 - `asset-sources/prepared/characters/cicka/` documents the prepared Cicka
   prototype set and its first-use reads. The first runtime adoption slice now
   promotes a small display-only Ridge copy under `public/assets/ridge/cicka/`.
+  This source folder is now local mirror content backed by `prepared-assets`.
 
-That means the repo keeps source/prepared art available without shipping it
-until a scene-owned adoption slice promotes it.
+That means the external archive keeps source/prepared art available without
+shipping it until a scene-owned adoption slice promotes it into tracked runtime
+assets.
 
 ## Recommended Adoption Order
 

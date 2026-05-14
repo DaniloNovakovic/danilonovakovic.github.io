@@ -12,6 +12,13 @@ dist
 dist-ssr
 storybook-static
 *.local
+*.local.json
+
+# Local asset source workbench
+/asset-sources/**
+!/asset-sources/
+!/asset-sources/README.md
+!/asset-sources/*.example.*
 
 # Editor directories and files
 .vscode/*
@@ -23,7 +30,7 @@ storybook-static
 *.njsproj
 *.sln
 *.sw?
-.local
+.local/
 
 # Local AI/tooling state
 .codex/
