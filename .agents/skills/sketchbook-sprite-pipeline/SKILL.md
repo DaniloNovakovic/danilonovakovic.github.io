@@ -143,3 +143,5 @@ is usually safer than a physics actor; for an enemy, one family is safer than a
 whole pack; for a prop, one static readable object is safer than an animated set.
 Do not promote assets into `public/assets/**` until code preloads them and a
 folder-local README explains ownership, source, frame contract, and runtime use.
+After promotion, remove duplicate runtime outputs from `asset-sources/**` and
+leave a deletion trigger for any source/prepared files that remain.

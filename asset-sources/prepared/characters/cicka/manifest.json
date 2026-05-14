@@ -1,8 +1,10 @@
 {
   "slug": "cicka",
+  "state": "promoted-runtime-source",
+  "runtimeBundle": "../../../../public/assets/ridge/cicka/",
   "source": "source.png",
   "sourceKeyed": "source-keyed.png",
-  "spritesheet": "cicka-spritesheet.png",
+  "spritesheet": "../../../../public/assets/ridge/cicka/cicka-spritesheet.png",
   "frameWidth": 128,
   "frameHeight": 96,
   "frameCount": 12,
@@ -88,5 +90,5 @@
     "walk": ["walk-1", "walk-2"],
     "sleep": ["sleep-curl"]
   },
-  "debugContact": "cicka-debug-contact.png"
+  "debugContact": "../../../../public/assets/ridge/cicka/cicka-debug-contact.png"
 }

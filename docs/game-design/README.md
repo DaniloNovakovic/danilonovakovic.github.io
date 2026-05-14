@@ -33,6 +33,9 @@ This directory separates shipped player-facing behavior from future design conce
   as an active roadmap or current source of truth. Search hits from
   `ai-competition/archive/**` are historical by default; use the active Summit,
   milestone, and runtime docs for current planning.
+- **Retention:** archive and staging folders must earn their keep. If a folder
+  is no longer active, it needs a clear provenance reason and deletion trigger;
+  otherwise summarize the useful decision and remove the bulk.
 
 ## Core Pillars
 

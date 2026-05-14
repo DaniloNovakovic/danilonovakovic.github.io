@@ -41,12 +41,17 @@ regeneration, or a scene-owned adoption slice.
 The only near-term cleanup candidate is exact duplicate source baggage where
 manifests and readmes can be updated without weakening the source contract.
 
+Do not let this become an archive dump. Each asset area needs a lifecycle state
+and a deletion trigger. The default is not "keep forever"; the default is
+"keep while it answers a current source, comparison, regeneration, or audit
+question."
+
 ## Triage Table
 
 | Asset area | Readiness | Decision | Notes |
 | --- | --- | --- | --- |
 | `stampede-sketch/generated-concepts/` | Raw concept source | Keep | Useful source and comparison material. Do not load directly in runtime. |
-| `prepared/characters/cicka/` | Prepared candidate | Keep; good next adoption candidate | Strong milestone fit for Ridge warmth. Frames are normalized and documented. |
+| `prepared/characters/cicka/` | Promoted runtime source | Keep source/rework files; delete duplicate runtime outputs | Ridge now loads `public/assets/ridge/cicka/**`. The source bundle remains for regeneration and animation review, but runtime-owned spritesheet/debug copies do not belong here. |
 | `prepared/characters/sketchbook-player/` | Prepared candidate | Keep; defer adoption | Useful Ridge character source, but not the immediate asset risk. |
 | `prepared/characters/sketchbook-player-glasses/` | Prepared candidate | Keep; defer adoption | Variant source. Keep until player presentation direction is settled. |
 | `prepared/characters/sketchbook-npcs/` | Prepared candidate | Keep; defer adoption | Useful NPC seed material. Needs scene-specific selection before runtime use. |
@@ -85,6 +90,23 @@ Do not rewrite Git history for this cleanup. Deleting duplicates later reduces
 the current checkout and future tree weight, but old blobs remain in repository
 history unless history is rewritten. A history rewrite is not worth it for this
 repo size.
+
+## Retention Triggers
+
+Use these triggers during asset adoption and milestone cleanup:
+
+- **Delete immediately**: exact duplicate runtime outputs in `asset-sources/**`
+  after a `public/assets/**` owner exists and readmes/manifests point to it.
+- **Delete at adoption close**: candidates rejected by the adopting scene owner,
+  unless a short note is more useful than the files.
+- **Review at milestone close**: raw concepts and prepared candidates that did
+  not feed the milestone. Keep only if they have a named next slice or are
+  still useful comparison material.
+- **Review at size checkpoint**: any asset family above `25 MB`, and all of
+  `asset-sources/**` at the thresholds below.
+
+Each kept folder should answer: who owns it, what state it is in, what would
+cause deletion, and which runtime folder supersedes it if promoted.
 
 ## Asset Size Policy
 

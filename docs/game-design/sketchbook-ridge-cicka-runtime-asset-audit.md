@@ -31,7 +31,7 @@ Command:
 python3 .agents/skills/sketchbook-sprite-pipeline/scripts/audit_frames.py \
   asset-sources/prepared/characters/cicka/frames \
   --manifest asset-sources/prepared/characters/cicka/manifest.json \
-  --spritesheet asset-sources/prepared/characters/cicka/cicka-spritesheet.png
+  --spritesheet public/assets/ridge/cicka/cicka-spritesheet.png
 ```
 
 Results:
@@ -42,6 +42,8 @@ Results:
 - manifest frame count matches `12`
 - horizontal spritesheet size matches `1536x96`
 - no alpha bbox touches the frame edge
+- duplicate prepared-folder copies of the runtime spritesheet and QA sheet were
+  deleted after promotion; `public/assets/ridge/cicka/` is the runtime owner
 
 ## Risks
 
