@@ -65,7 +65,7 @@ pipeline design, also read
 
 ## Existing Image Conversion
 
-Use this when Danilo already likes a generated image.
+Use this when the project author or asset owner already likes a generated image.
 
 1. Preserve the original as `source.png` or `source-keyed.png`.
 2. If it has a background, remove it; if removal is messy, isolate the subject manually or regenerate only the matte/source, not the design.
@@ -93,15 +93,10 @@ asset-sources/
 ```
 
 Those paths are gitignored. When a source becomes durable project provenance,
-add a stable external source pointer in the adopting folder README/manifest or,
-for a short-lived exception, force-add a small curated source file:
-
-```text
-asset-sources/<scene-or-domain>/<slug-or-concept-set>/
-├── source-keyed.png
-├── source.png
-└── notes-or-readme.md
-```
+prefer a stable external source pointer in the adopting folder README/manifest.
+Do not add source material under `asset-sources/**` to Git unless the project
+author or asset owner explicitly asks for that PR; the default system keeps
+source and prepared work out of normal Git until runtime adoption.
 
 Prefer this structure for prepared runtime candidates:
 
@@ -116,10 +111,9 @@ asset-sources/prepared/<scene-or-domain>/<slug>/
 └── manifest.json
 ```
 
-For quick concept assets, use the ignored `asset-sources/inbox/**` workbench.
-`public/assets/**` is for assets that are runtime-wired. Existing prepared flat
-folders under `asset-sources/prepared/characters` are legacy backlog and should
-migrate to external archive or runtime ownership during cleanup.
+For quick concept assets, use the ignored `asset-sources/inbox/**` workbench or
+a task-specific ignored folder under `asset-sources/**`. `public/assets/**` is
+for assets that are runtime-wired.
 
 Prefer external archive storage for large rejected variants, raw AI batches,
 layered source files, and prompt experiments. The repo should keep what ships,

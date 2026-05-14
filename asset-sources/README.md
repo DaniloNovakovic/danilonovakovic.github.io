@@ -16,6 +16,22 @@ Only these files are normally tracked:
 Everything else should stay local or live in the external asset archive until a
 runtime adoption slice promotes final outputs into `public/assets/**`.
 
+## Lifecycle
+
+Default flow:
+
+1. Generate or collect exploratory art in ignored `asset-sources/inbox/**`,
+   another ignored folder under `asset-sources/**`, or the external archive.
+2. When a candidate is worth keeping, back it up in Google Drive or another
+   external archive. Mirror it locally only while reviewing or preparing it.
+3. Prepare and QA selected candidates in ignored `asset-sources/prepared/**` or
+   an equivalent task-specific folder.
+4. When product code actually uses the asset, copy only optimized runtime files
+   into `public/assets/**`. Starting there, the asset is tracked in Git.
+5. After adoption, remove duplicate runtime outputs from the local workbench.
+   Keep bulky source/history externally only while it supports rework,
+   comparison, audit, or regeneration.
+
 ## Local Settings
 
 Copy `settings.local.example.json` to `settings.local.json` and fill in your
@@ -39,7 +55,9 @@ asset-sources/
 ├── README.md
 ├── settings.local.example.json
 ├── settings.local.json          # ignored
+├── inbox/                       # ignored temporary handoff
 ├── prepared/                    # ignored local mirror of prepared assets
+└── <task-specific>/             # ignored, optional
 ```
 
 Use `inbox/` for temporary handoff files. Use `prepared/` when working from an

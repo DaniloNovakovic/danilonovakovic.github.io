@@ -7,9 +7,10 @@
 Active sources: `sketchbook-ridge-summit.md`,
 `sketchbook-ridge-milestone-plan.md`, `sketchbook-ridge-m3-visual-pack.md`,
 `sketchbook-ridge-m3-overlay-pack.md`, `sketchbook-ridge-m3-audio-pack.md`,
-`docs/design/style-guide.md`, the current generated/prepared asset readmes
-under `asset-sources/**`, `docs/game-design/asset-readiness-triage.md`, and runtime
-asset readmes under `public/assets/**` when assets are promoted.
+`docs/design/style-guide.md`, local generated/prepared asset readmes under
+ignored `asset-sources/**` when present,
+`docs/game-design/asset-readiness-triage.md`, and runtime asset readmes under
+`public/assets/**` when assets are promoted.
 
 ## Why This Exists
 
@@ -243,8 +244,9 @@ Each prepared asset family should have enough local documentation to answer:
 
 - `docs/design/**` explains style and prompting direction
 - `docs/game-design/**` explains milestone relevance and adoption order
-- `asset-sources/**/README.md` explains generated/prepared asset state and
-  contract
+- `asset-sources/README.md` explains the local workbench contract
+- optional ignored `asset-sources/**/README.md` files explain temporary or
+  prepared asset state when useful
 - `public/assets/**/README.md` explains runtime-wired asset state after
   promotion
 
