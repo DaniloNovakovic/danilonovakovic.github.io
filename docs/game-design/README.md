@@ -11,6 +11,7 @@ This directory separates shipped player-facing behavior from future design conce
 - **[Sketchbook Ridge Milestone Plan](./sketchbook-ridge-milestone-plan.md)**: Implementation milestone, branch, ownership, and issue-planning map for Ridge Summit.
 - **[Sketchbook Ridge Asset Staging Plan](./sketchbook-ridge-asset-staging-plan.md)**: Planning and organization guide for POC assets, prepared runtime candidates, and milestone-safe adoption order.
 - **[Cicka Runtime Asset Audit](./sketchbook-ridge-cicka-runtime-asset-audit.md)**: First AI-generated sprite adoption review, including Cicka QA results and follow-up gates.
+- **[Sketchbook Ridge Topology Spike](./sketchbook-ridge-topology-spike.md)**: Active M5 map-design brief for turning the current Overworld into Outskirts, making Cicka Home the return anchor, and proving the first folded Ridge route.
 - **[Sketchbook Ridge Long-Term Topology Ideas](./sketchbook-ridge-long-term-topology-ideas.md)**: Exploratory long-term map, shortcut, and secret-direction companion for Ridge after the current milestone is proven.
 - **[Sketchbook Ridge M3 Visual Pack](./sketchbook-ridge-m3-visual-pack.md)**: Rade/Milena visual direction for Cicka, NPCs, landmarks, stickers, and M4 placeholders.
 - **[Sketchbook Ridge M3 Overlay Pack](./sketchbook-ridge-m3-overlay-pack.md)**: Aleksandra's Trail Card, Manual Page, mobile readability, and monochrome reward-state spec.
@@ -21,7 +22,8 @@ This directory separates shipped player-facing behavior from future design conce
 
 - **Shipped behavior:** `player-manual.md`.
 - **Active product/design source:** `sketchbook-ridge-summit.md`,
-  `sketchbook-ridge-milestone-plan.md`, `potassium-slip.md`, and
+  `sketchbook-ridge-milestone-plan.md`,
+  `sketchbook-ridge-topology-spike.md`, `potassium-slip.md`, and
   `stampede-sketch.md`.
 - **Active implementation source:** `../runtime-architecture.md`,
   `../runtime-modes.md`, and scoped rules under `../../.agents/rules/`.
