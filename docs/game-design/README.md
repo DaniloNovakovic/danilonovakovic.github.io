@@ -16,6 +16,7 @@ This directory separates shipped player-facing behavior from future design conce
 - **[Ridge Map Inventory Canvas](./ridge-map-inventory-canvas.html)**: Standalone topology sketch that visualizes Ridge as an in-game map screen with first-walk routes, earned Cicka-return shortcuts, future loops, and artifact beats.
 - **[Ridge Map Language](./ridge-map-language.md)**: Text-first blockout language for designing Ridge room beats, environment tags, traversal primitives, and future greybox generation.
 - **[Ridge Blockout Source](./ridge.blockout.txt)**: First full text skeleton for the seamless Ridge world, written in the Ridge Map Language.
+- **[Ridge Blockout Fun Review](./ridge-blockout-fun-review.md)**: Design-quality review of the first blockout skeleton against 2D map design, Lucky Luna, and Nine Sols research.
 - **[Sketchbook Ridge Long-Term Topology Ideas](./sketchbook-ridge-long-term-topology-ideas.md)**: Exploratory long-term map, shortcut, and secret-direction companion for Ridge after the current milestone is proven.
 - **[Sketchbook Ridge M3 Visual Pack](./sketchbook-ridge-m3-visual-pack.md)**: Rade/Milena visual direction for Cicka, NPCs, landmarks, stickers, and M4 placeholders.
 - **[Sketchbook Ridge M3 Overlay Pack](./sketchbook-ridge-m3-overlay-pack.md)**: Aleksandra's Trail Card, Manual Page, mobile readability, and monochrome reward-state spec.
@@ -30,7 +31,7 @@ This directory separates shipped player-facing behavior from future design conce
   `sketchbook-ridge-topology-spike.md`,
   `sketchbook-ridge-proper-map-plan.md`,
   `ridge-map-inventory-canvas.html`, `ridge-map-language.md`,
-  `ridge.blockout.txt`, `potassium-slip.md`, and
+  `ridge.blockout.txt`, `ridge-blockout-fun-review.md`, `potassium-slip.md`, and
   `stampede-sketch.md`.
 - **Active implementation source:** `../runtime-architecture.md`,
   `../runtime-modes.md`, and scoped rules under `../../.agents/rules/`.

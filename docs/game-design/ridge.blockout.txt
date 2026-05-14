@@ -5,15 +5,21 @@ title Folded Desk Ridge
 spawn room=outskirts anchor=1
 
 route first_walk outskirts -> cicka_home -> work_artifact -> stampede_blanket -> switchback_shelf -> telegraph_terrace -> guide_overlook -> relay_gate -> domino_desk
-shortcut stampede_sketch from=switchback_shelf to=cicka_home kind=fold_drop
+optional_pocket early_skill_scrap room=work_artifact kind=side_shelf
+shortcut stampede_sketch from=switchback_shelf to=cicka_home kind=fall_steer_fold_drop
 shortcut telegraph_clear from=telegraph_terrace to=cicka_home kind=cord_drop
 future_route cicka_underpath outskirts -> underpath -> cicka_home
 future_route drop_pocket guide_overlook -> drop_pocket -> stampede_blanket
 future_route high_ledge domino_desk -> high_ledge
+home_mutation work_artifact adds=work_display
+home_mutation stampede_sketch adds=stampede_note opens=fold_drop_landing
+home_mutation telegraph_clear adds=signal_cord_drop
+home_mutation relay_gate_seen adds=proof_slot_glow
+home_mutation domino_future adds=desk_lift_switch
 
 room outskirts
 title Outskirts
-place x=2 y=62
+place x=0 y=72
 size 32x12
 theme city_edge_paper
 mood curious
@@ -37,12 +43,12 @@ grid
 anchor 1 player_spawn id=start
 anchor 2 exit to=cicka_home label=paper_stairs
 anchor A artifact id=city_edge_memory
-rect distant_relay_view x=21 y=0 w=9 h=5
+rect sightline_to_relay x=21 y=0 w=9 h=5
 rect future_basement_hatch x=4 y=9 w=7 h=2
 
 room cicka_home
 title Cicka Home
-place x=18 y=52
+place x=36 y=64
 size 32x14
 theme desk_nest
 mood safe
@@ -77,7 +83,7 @@ rect stampede_return_landing x=16 y=11 w=10 h=2
 
 room work_artifact
 title Work Artifact Ledge
-place x=28 y=42
+place x=46 y=50
 size 32x12
 theme desk_paper_artifacts
 mood discovery
@@ -88,7 +94,7 @@ grid
 ................................
 ......................2.........
 ..................____..........
-..............___...............
+..............___.....3.........
 ....A......................1....
 .....____.......................
 .....................____.......
@@ -100,12 +106,14 @@ grid
 
 anchor 1 exit to=stampede_blanket label=wide_jump
 anchor 2 exit to=cicka_home label=paper_steps_down
+anchor 3 optional_pocket id=early_skill_scrap reward=minor_skill_scrap
 anchor A artifact id=major_work_artifact
 rect artifact_focus x=2 y=2 w=10 h=5
+rect sightline_to_cicka x=0 y=7 w=9 h=4
 
 room stampede_blanket
 title Stampede Blanket
-place x=46 y=41
+place x=84 y=49
 size 32x14
 theme picnic_ink_paper
 mood tense_playful
@@ -113,13 +121,14 @@ links left:work_artifact up:switchback_shelf optional:drop_pocket
 props picnic_blanket, ink_swarm, crumbs, loose_pages, folded_paper_shortcut
 minigame stampede_sketch
 reward stampede_sketch
+after stampede_sketch opens fold_drop_chute via=switchback_shelf to=cicka_home
 
 grid
 ................................
 ....................2...........
 ................._______........
 ................................
-.....____.......................
+.....____.................?.....
 .1.........~~~~~~~..............
 ########...#######.......____...
 ########.................####...
@@ -132,6 +141,7 @@ grid
 
 anchor 1 exit to=work_artifact label=wide_jump_back
 anchor 2 exit to=switchback_shelf label=climb_out
+anchor ? shortcut_preview to=cicka_home requires=stampede_sketch via=switchback_shelf
 anchor * minigame id=stampede_sketch
 anchor A artifact id=stampede_proof
 rect ink_swarm_zone x=10 y=4 w=10 h=4
@@ -139,13 +149,13 @@ rect fold_shortcut_preview x=21 y=5 w=8 h=4
 
 room switchback_shelf
 title Switchback Shelf
-place x=42 y=31
+place x=84 y=35
 size 32x12
 theme folded_paper_shelf
 mood aha
 links down:stampede_blanket left:telegraph_terrace shortcut:cicka_home
 props paper_fold, paw_scratches, cicka_view_below, loose_page_bridge
-after stampede_sketch unlocks shortcut_to=cicka_home
+after stampede_sketch unlocks shortcut_to=cicka_home kind=fall_steer_fold_drop
 
 grid
 ................................
@@ -157,7 +167,7 @@ grid
 ................____............
 .........____...................
 ..######################........
-................................
+.............~~~~~..............
 ...............?................
 ################################
 
@@ -166,11 +176,11 @@ anchor 2 exit to=telegraph_terrace label=back_left
 anchor A artifact id=cicka_view_note
 anchor ? shortcut to=cicka_home requires=stampede_sketch label=fold_drop_home
 rect cicka_view x=3 y=4 w=16 h=5
-rect fold_drop x=13 y=8 w=5 h=3
+rect fold_drop_chute x=12 y=8 w=7 h=4 to=cicka_home requires=stampede_sketch kind=fall_steer
 
 room telegraph_terrace
 title Telegraph Terrace
-place x=22 y=25
+place x=44 y=32
 size 32x13
 theme cord_terrace
 mood focused
@@ -200,10 +210,11 @@ anchor N npc id=todo_ai_dummy
 anchor * minigame id=telegraph_future
 anchor A artifact id=signal_note
 rect cord_drop x=4 y=9 w=5 h=3 to=cicka_home requires=telegraph_clear
+rect sightline_to_cicka x=0 y=8 w=10 h=4
 
 room guide_overlook
 title Guide Overlook
-place x=50 y=20
+place x=84 y=21
 size 32x11
 theme windy_overlook
 mood reorientation
@@ -227,12 +238,12 @@ anchor 1 exit to=telegraph_terrace label=cord_down
 anchor 2 exit to=relay_gate label=final_shelf
 anchor N npc id=ridge_guide
 anchor A artifact id=relay_view_memory
-rect relay_view x=17 y=0 w=12 h=5
+rect sightline_to_relay x=17 y=0 w=12 h=5
 rect wind_hint x=4 y=3 w=22 h=4
 
 room relay_gate
 title Relay Gate
-place x=38 y=11
+place x=44 y=10
 size 32x12
 theme signal_gate
 mood destination
@@ -258,11 +269,11 @@ anchor 1 exit to=guide_overlook label=final_shelf_back
 anchor 2 exit to=domino_desk label=lift_promise
 anchor A artifact id=proof_slot_marker
 anchor ? gate id=relay_proof_slots
-rect relay_view_back x=2 y=1 w=18 h=5
+rect sightline_view_back x=2 y=1 w=18 h=5
 
 room domino_desk
 title Domino Desk
-place x=65 y=10
+place x=84 y=8
 size 32x12
 theme desk_machine
 mood mechanical
@@ -292,7 +303,7 @@ rect lift_travel x=20 y=4 w=3 h=7
 
 room high_ledge
 title High Ledge
-place x=68 y=3
+place x=118 y=2
 size 32x8
 theme moon_paper_high
 mood aspirational
@@ -316,7 +327,7 @@ rect high_view x=0 y=0 w=32 h=4
 
 room underpath
 title Paw Underpath
-place x=10 y=55
+place x=0 y=60
 size 32x10
 theme paw_scratch_secret
 mood secret
@@ -343,7 +354,7 @@ rect crawl_space x=3 y=3 w=25 h=4
 
 room drop_pocket
 title Lucky Luna Drop Pocket
-place x=76 y=34
+place x=120 y=38
 size 32x16
 theme falling_scraps
 mood playful_descent

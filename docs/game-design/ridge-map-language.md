@@ -82,6 +82,33 @@ collider symbol inside grids.
 
 ## Core Shape
 
+Each blockout file can declare global route logic before room beats:
+
+```txt
+language ridge-v0
+cell 48
+world folded_desk_ridge
+title Folded Desk Ridge
+spawn room=outskirts anchor=1
+
+route first_walk outskirts -> cicka_home -> work_artifact
+optional_pocket early_skill_scrap room=work_artifact kind=side_shelf
+shortcut stampede_sketch from=switchback_shelf to=cicka_home kind=fall_steer_fold_drop
+home_mutation stampede_sketch adds=stampede_note opens=fold_drop_landing
+future_route cicka_underpath outskirts -> underpath -> cicka_home
+```
+
+Global declarations:
+
+| Declaration | Meaning |
+| --- | --- |
+| `spawn` | default player start |
+| `route` | named intended traversal route |
+| `shortcut` | route opened by progress |
+| `future_route` | teased or not-yet-runtime route |
+| `optional_pocket` | small curiosity branch that is not required for progression |
+| `home_mutation` | visible/mechanical Cicka Home change caused by progress |
+
 Each room beat should have metadata plus a grid:
 
 ```txt
@@ -163,6 +190,11 @@ Design-only v0 symbols:
 
 Parser rule: unknown symbols should fail with a clear error unless the room opts
 into a newer language version.
+
+Seamless-world QA rule: runtime-active, non-empty cells from different room
+beats should not overlap unless the map explicitly declares a merge rule. v0
+should avoid merge rules and treat conflicting non-empty overlap as a validation
+error.
 
 ## Open Questions
 
