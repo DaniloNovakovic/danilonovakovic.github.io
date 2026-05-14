@@ -2,7 +2,7 @@
 
 Owner: `src/game/scenes/ridge/**`
 
-Runtime loader: `src/game/scenes/ridge/cickaAssets.ts`
+Runtime loader: `src/game/scenes/ridge/cicka/assets.ts`
 
 Promoted from: `asset-sources/prepared/characters/cicka/`
 

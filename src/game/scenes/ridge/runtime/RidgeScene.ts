@@ -46,15 +46,15 @@ import {
   shouldShowCickaInteractionPrompt,
   type CickaInteractionCopy,
   type CickaInteractionResponse
-} from '../cickaInteraction';
+} from '../cicka/interaction';
 import {
   createCickaAnimations,
   preloadCickaAssets
-} from '../cickaAssets';
+} from '../cicka/assets';
 import {
   createCickaPerch,
   type CickaPerch
-} from './objects/CickaPerch';
+} from '../cicka/CickaPerch';
 import type { TrailCardOverlayParams } from '@/game/overlays/trailCard/types';
 
 interface RidgeSceneStartData {

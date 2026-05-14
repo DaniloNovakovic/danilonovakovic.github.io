@@ -3,8 +3,8 @@ import {
   CICKA_INTERACTION_TARGET_ID,
   getCickaInteractionResponse,
   shouldShowCickaInteractionPrompt
-} from './cickaInteraction';
-import { getRidgeWorldMemories } from './worldMemory';
+} from './interaction';
+import { getRidgeWorldMemories } from '../worldMemory';
 import { STAMPEDE_SKETCH_RIDGE_STAMP_ID } from '@/game/bridge/ridgeProgressIds';
 
 const copy = {

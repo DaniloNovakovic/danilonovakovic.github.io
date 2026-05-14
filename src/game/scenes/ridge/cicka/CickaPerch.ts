@@ -5,17 +5,17 @@ import {
   CICKA_ORIGIN,
   CICKA_RUNTIME_SCALE,
   CICKA_TEXTURE_KEY
-} from '../../cickaAssets';
+} from './assets';
 import {
   CICKA_INTERACTION_RESPONSE_DURATION_MS,
   CICKA_INTERACTION_TARGET_ID
-} from '../../cickaInteraction';
+} from './interaction';
 import {
   createCickaWalkByState,
   updateCickaWalkBy,
   type CickaWalkByState
-} from '../../cickaWalkBy';
-import { RIDGE_FLOOR_Y, type RidgeLandmark } from '../../worldLayout';
+} from './walkBy';
+import { RIDGE_FLOOR_Y, type RidgeLandmark } from '../worldLayout';
 
 const CICKA_PERCH_ANCHOR_Y = RIDGE_FLOOR_Y - 74;
 const CICKA_INTERACT_RADIUS = 78;

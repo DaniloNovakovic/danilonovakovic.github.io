@@ -1,4 +1,4 @@
-import type { RidgeWorldMemory, RidgeWorldMemoryId } from './worldMemory';
+import type { RidgeWorldMemory, RidgeWorldMemoryId } from '../worldMemory';
 
 export const CICKA_INTERACTION_TARGET_ID = 'cicka-perch' as const;
 export const CICKA_INTERACTION_RESPONSE_DURATION_MS = 2600;
