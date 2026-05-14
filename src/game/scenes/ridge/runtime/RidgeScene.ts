@@ -10,10 +10,10 @@ import { getMessages } from '@/shared/i18n';
 import {
   GAME_DESIGN_HEIGHT,
   GAME_DESIGN_WIDTH,
-  OVERWORLD_JUMP_VELOCITY_Y,
-  OVERWORLD_PLAYER_GRAVITY_Y,
-  OVERWORLD_SPRINT_SPEED,
-  OVERWORLD_WALK_SPEED
+  SIDE_VIEW_JUMP_VELOCITY_Y,
+  SIDE_VIEW_PLAYER_GRAVITY_Y,
+  SIDE_VIEW_SPRINT_SPEED,
+  SIDE_VIEW_WALK_SPEED
 } from '@/game/sharedSceneRuntime/config';
 import {
   createSideViewPlayerRuntime,
@@ -232,12 +232,12 @@ export class RidgeScene extends Phaser.Scene {
       resumeClamp: RIDGE_PLAYER_RESUME_CLAMP,
       sprite: {
         depth: 30,
-        gravityY: OVERWORLD_PLAYER_GRAVITY_Y
+        gravityY: SIDE_VIEW_PLAYER_GRAVITY_Y
       },
       movement: {
-        walkSpeed: OVERWORLD_WALK_SPEED,
-        sprintSpeed: OVERWORLD_SPRINT_SPEED,
-        jumpVelocityY: OVERWORLD_JUMP_VELOCITY_Y
+        walkSpeed: SIDE_VIEW_WALK_SPEED,
+        sprintSpeed: SIDE_VIEW_SPRINT_SPEED,
+        jumpVelocityY: SIDE_VIEW_JUMP_VELOCITY_Y
       },
       input: {
         allowJump: true,

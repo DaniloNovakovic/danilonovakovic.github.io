@@ -13,31 +13,33 @@ import {
 } from '@/game/scenes/sceneIds';
 import type { OverlayId } from '@/game/overlays/overlayIds';
 import {
+  BANANA_PEEL_CLUE_ID,
   getOverworldBuildingTrigger,
+  OVERWORLD_BASEMENT_HOLE,
   OVERWORLD_BUILDING_TRIGGERS,
+  OVERWORLD_GLASSES_SECRET_SLOTS,
+  OVERWORLD_INTERACT_DISTANCE_X,
+  OVERWORLD_INTERACT_MIN_PLAYER_Y,
+  OVERWORLD_INTERACT_PROMPT_OFFSET_Y,
+  OVERWORLD_PLAYER_RESUME_Y_CLAMP,
+  OVERWORLD_PLAYER_SPAWN_MARGIN_X,
+  OVERWORLD_PLAYER_START,
+  OVERWORLD_WIDTH,
   type OverworldTriggerAction
 } from '../worldLayout';
 import { getMessages } from '@/shared/i18n';
 import {
   GAME_DESIGN_HEIGHT,
-  OVERWORLD_INTERACT_DISTANCE_X,
-  OVERWORLD_INTERACT_MIN_PLAYER_Y,
-  OVERWORLD_INTERACT_PROMPT_OFFSET_Y,
-  OVERWORLD_JUMP_VELOCITY_Y,
-  OVERWORLD_PLAYER_GRAVITY_Y,
-  OVERWORLD_PLAYER_RESUME_Y_CLAMP,
-  OVERWORLD_PLAYER_START,
-  OVERWORLD_PLAYER_SPAWN_MARGIN_X,
-  OVERWORLD_SPRINT_SPEED,
-  OVERWORLD_WALK_SPEED,
-  OVERWORLD_WIDTH
+  SIDE_VIEW_JUMP_VELOCITY_Y,
+  SIDE_VIEW_PLAYER_GRAVITY_Y,
+  SIDE_VIEW_SPRINT_SPEED,
+  SIDE_VIEW_WALK_SPEED
 } from '@/game/sharedSceneRuntime/config';
 import {
   bridgeActions,
   isItemEquipped,
   isSecretDiscovered,
-  type OpenOverlayOptions,
-  type SecretDiscoveryId
+  type OpenOverlayOptions
 } from '@/game/bridge/store';
 import {
   buildStreetEnvironment,
@@ -48,10 +50,7 @@ import { buildStreetBuildings, type StreetBuildingLayers } from './street/Street
 import { updateStreetParticles } from './street/StreetParticles';
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
 import { startTypewriterEffect, type TypewriterEffectHandle } from '@/game/sharedSceneRuntime/text/typewriterEffect';
-import {
-  type OverworldBuildingSlot,
-  type OverworldSecretSlot
-} from '@/game/core/ecs/systems/overworldInteractSystems';
+import type { OverworldBuildingSlot } from '@/game/core/ecs/systems/overworldInteractSystems';
 import { DistanceHazeVision } from '@/game/sharedSceneRuntime/vision/DistanceHazeVision';
 import {
   createOverworldInteractionState,
@@ -64,15 +63,6 @@ import {
   type SideViewPlayerRuntime
 } from '@/game/sharedSceneRuntime/player/SideViewPlayerRuntime';
 
-const BASEMENT_HOLE = {
-  x: 230,
-  y: 535,
-  promptY: 485,
-  interactDistanceX: 70,
-  minPlayerY: 400
-} as const;
-
-const BANANA_PEEL_CLUE_ID: SecretDiscoveryId = 'banana-peel-clue';
 /** Ms between each character for first-peel clue typewriter. */
 const BANANA_PEEL_TYPEWRITER_CHAR_MS = 28;
 /** After the full clue line is typed, wait this long (read time) before opening Potassium. */
@@ -81,16 +71,6 @@ const BANANA_PEEL_POST_TYPEWRITE_WARP_MS = 2000;
 const BANANA_PEEL_CLUE_VISIBLE_MS = 4500;
 /** Cancel pending peel warp only after moving this far past slot radius (avoids 1-frame jitter killing the timer). */
 const BANANA_PEEL_WARP_CANCEL_EXTRA_DIST = 36;
-
-const GLASSES_SECRET_SLOTS: readonly OverworldSecretSlot[] = [
-  {
-    secretId: BANANA_PEEL_CLUE_ID,
-    x: 650,
-    y: 535,
-    radius: 95,
-    promptOffsetY: -56
-  }
-];
 
 export class OverworldScene extends Phaser.Scene {
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -182,12 +162,12 @@ export class OverworldScene extends Phaser.Scene {
       },
       sprite: {
         depth: 25,
-        gravityY: OVERWORLD_PLAYER_GRAVITY_Y
+        gravityY: SIDE_VIEW_PLAYER_GRAVITY_Y
       },
       movement: {
-        walkSpeed: OVERWORLD_WALK_SPEED,
-        sprintSpeed: OVERWORLD_SPRINT_SPEED,
-        jumpVelocityY: OVERWORLD_JUMP_VELOCITY_Y
+        walkSpeed: SIDE_VIEW_WALK_SPEED,
+        sprintSpeed: SIDE_VIEW_SPRINT_SPEED,
+        jumpVelocityY: SIDE_VIEW_JUMP_VELOCITY_Y
       },
       input: {
         allowJump: true,
@@ -263,8 +243,8 @@ export class OverworldScene extends Phaser.Scene {
       bananaCancelExtraDist: BANANA_PEEL_WARP_CANCEL_EXTRA_DIST,
       basementSceneId: BASEMENT_SCENE_ID,
       potassiumSceneId: POTASSIUM_SCENE_ID,
-      basementHole: BASEMENT_HOLE,
-      secretSlots: GLASSES_SECRET_SLOTS,
+      basementHole: OVERWORLD_BASEMENT_HOLE,
+      secretSlots: OVERWORLD_GLASSES_SECRET_SLOTS,
       buildingSlots: this.buildingSlots,
       buildingPickOptions: {
         maxDistX: OVERWORLD_INTERACT_DISTANCE_X,
@@ -357,7 +337,10 @@ export class OverworldScene extends Phaser.Scene {
       return;
     }
     this.bananaFloorIcon
-      .setPosition(GLASSES_SECRET_SLOTS[0].x + 2, GLASSES_SECRET_SLOTS[0].y - 2)
+      .setPosition(
+        OVERWORLD_GLASSES_SECRET_SLOTS[0].x + 2,
+        OVERWORLD_GLASSES_SECRET_SLOTS[0].y - 2
+      )
       .setRotation(Phaser.Math.DegToRad(4))
       .setVisible(true);
   }
@@ -383,19 +366,26 @@ export class OverworldScene extends Phaser.Scene {
 
   private createGlassesSecret(): void {
     const messages = getMessages();
-    this.glassesSecretHint = createUiText(this, 650, 558, messages.scenes.overworld.glassesSecretHint, {
-      fontSize: '12px',
-      color: '#1a1a1a',
-      backgroundColor: '#fbfbf9',
-      padding: { x: 4, y: 2 }
-    })
+    const bananaSecret = OVERWORLD_GLASSES_SECRET_SLOTS[0];
+    this.glassesSecretHint = createUiText(
+      this,
+      bananaSecret.x,
+      bananaSecret.y + 23,
+      messages.scenes.overworld.glassesSecretHint,
+      {
+        fontSize: '12px',
+        color: '#1a1a1a',
+        backgroundColor: '#fbfbf9',
+        padding: { x: 4, y: 2 }
+      }
+    )
       .setOrigin(0.5)
       .setDepth(18)
       .setVisible(false);
     this.glassesSecretMessage = createUiText(
       this,
-      650,
-      430,
+      bananaSecret.x,
+      bananaSecret.y - 105,
       '',
       {
         fontSize: '13px',
@@ -500,24 +490,30 @@ export class OverworldScene extends Phaser.Scene {
     const line = 0x1a1a1a;
     const hole = this.add.graphics();
     hole.fillStyle(line, 0.92);
-    hole.fillEllipse(BASEMENT_HOLE.x, BASEMENT_HOLE.y, 120, 28);
+    hole.fillEllipse(OVERWORLD_BASEMENT_HOLE.x, OVERWORLD_BASEMENT_HOLE.y, 120, 28);
     hole.lineStyle(3, line, 1);
-    hole.strokeEllipse(BASEMENT_HOLE.x, BASEMENT_HOLE.y - 2, 122, 30);
+    hole.strokeEllipse(OVERWORLD_BASEMENT_HOLE.x, OVERWORLD_BASEMENT_HOLE.y - 2, 122, 30);
     hole.lineStyle(2, 0xfbfbf9, 0.35);
     for (let offset = -45; offset <= 45; offset += 18) {
       hole.beginPath();
-      hole.moveTo(BASEMENT_HOLE.x + offset, BASEMENT_HOLE.y - 10);
-      hole.lineTo(BASEMENT_HOLE.x + offset + 12, BASEMENT_HOLE.y + 8);
+      hole.moveTo(OVERWORLD_BASEMENT_HOLE.x + offset, OVERWORLD_BASEMENT_HOLE.y - 10);
+      hole.lineTo(OVERWORLD_BASEMENT_HOLE.x + offset + 12, OVERWORLD_BASEMENT_HOLE.y + 8);
       hole.strokePath();
     }
 
-    createUiText(this, BASEMENT_HOLE.x, BASEMENT_HOLE.y - 48, messages.scenes.overworld.basementHole, {
-      fontSize: '18px',
-      color: '#1a1a1a',
-      fontStyle: 'bold',
-      backgroundColor: '#fbfbf9',
-      padding: { x: 6, y: 2 }
-    }).setOrigin(0.5);
+    createUiText(
+      this,
+      OVERWORLD_BASEMENT_HOLE.x,
+      OVERWORLD_BASEMENT_HOLE.y - 48,
+      messages.scenes.overworld.basementHole,
+      {
+        fontSize: '18px',
+        color: '#1a1a1a',
+        fontStyle: 'bold',
+        backgroundColor: '#fbfbf9',
+        padding: { x: 6, y: 2 }
+      }
+    ).setOrigin(0.5);
   }
 
   private applyOverworldTriggerAction(action: OverworldTriggerAction): void {

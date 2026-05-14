@@ -3,29 +3,11 @@ import { GAME_DESIGN_HEIGHT, GAME_DESIGN_WIDTH } from './designSize';
 
 export { GAME_DESIGN_HEIGHT, GAME_DESIGN_WIDTH } from './designSize';
 
-/** Overworld street width (logical px). */
-export const OVERWORLD_WIDTH = 3000;
-
-/** Player spawn and physics tuning — overworld. */
-export const OVERWORLD_PLAYER_START = { x: 100, y: 400 } as const;
-/** Keep spawned player inside world bounds (half-ish sprite width). */
-export const OVERWORLD_PLAYER_SPAWN_MARGIN_X = 48;
-/** Vertical clamp when restoring overworld position (walkable band). */
-export const OVERWORLD_PLAYER_RESUME_Y_CLAMP = { min: 300, max: 550 } as const;
-export const OVERWORLD_PLAYER_GRAVITY_Y = 800;
-export const OVERWORLD_JUMP_VELOCITY_Y = -500;
-export const OVERWORLD_WALK_SPEED = 300;
-export const OVERWORLD_SPRINT_SPEED = 600;
-/** Ground zone for collider (center x/y, width, height). */
-export const OVERWORLD_GROUND_ZONE = {
-  centerY: 575,
-  height: 50
-} as const;
-
-/** Building interaction: max horizontal distance to sprite center, min player Y. */
-export const OVERWORLD_INTERACT_DISTANCE_X = 80;
-export const OVERWORLD_INTERACT_MIN_PLAYER_Y = 400;
-export const OVERWORLD_INTERACT_PROMPT_OFFSET_Y = 40;
+/** Shared side-view player physics and movement tuning. */
+export const SIDE_VIEW_PLAYER_GRAVITY_Y = 800;
+export const SIDE_VIEW_JUMP_VELOCITY_Y = -500;
+export const SIDE_VIEW_WALK_SPEED = 300;
+export const SIDE_VIEW_SPRINT_SPEED = 600;
 
 /** Hobbies interior uses the same logical height as the canvas. */
 export const HOBBIES_ROOM_WIDTH = GAME_DESIGN_WIDTH;
@@ -48,9 +30,6 @@ export const HOBBIES_GROUND_ZONE = {
   width: HOBBIES_ROOM_WIDTH,
   height: 20
 } as const;
-
-/** Ink particle spawn band (overworld ambience). */
-export const OVERWORLD_PARTICLE_MAX_Y = GAME_DESIGN_HEIGHT;
 
 /**
  * Keycodes passed to Phaser `addCapture` when gameplay resumes after a React overlay.
