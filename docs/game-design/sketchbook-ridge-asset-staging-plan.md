@@ -148,13 +148,15 @@ As of this planning pass:
   Potassium enemy and banana assets as runtime candidates, not wired defaults.
   This is now local mirror content backed by `prepared-assets`.
 - `asset-sources/prepared/characters/cicka/` documents the prepared Cicka
-  prototype set and its first-use reads. The first runtime adoption slice now
-  promotes a small display-only Ridge copy under `public/assets/ridge/cicka/`.
-  This source folder is now local mirror content backed by `prepared-assets`.
+  prototype set and its first-use reads. The adopted runtime copy now lives
+  under `public/assets/ridge/cicka/`, where Ridge loads it as Cicka's
+  display-only perch NPC sprite. This source folder is now provenance/source
+  material in the local ignored mirror backed by `prepared-assets`, not a
+  pending runtime adoption target.
 
 That means the external archive keeps source/prepared art available without
-shipping it until a scene-owned adoption slice promotes it into tracked runtime
-assets.
+shipping it. Runtime ownership starts only when a scene-owned adoption slice
+promotes selected files into tracked `public/assets/**`, as Cicka now does.
 
 ## Recommended Adoption Order
 

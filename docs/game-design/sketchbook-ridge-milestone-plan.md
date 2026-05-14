@@ -53,14 +53,17 @@ Anything beyond that is future scope unless a slice explicitly pulls it in.
   without stored sticker state, and M5b adds the first Cicka note/translator
   tease plus a dev-only `devRidgeStamp=stampede-sketch` seed for fast local
   testing. M5c/M5d add Cicka's Stampede-gated walk-by bark, first deliberate
-  pre-translator interaction, and a primitive readability polish pass. M5e
-  promotes the prepared Cicka prototype spritesheet into Ridge as the first
-  runtime-wired AI sprite adoption proof, with audit notes and refined pipeline
-  gates.
+  pre-translator interaction, and a primitive readability polish pass. M5e has
+  promoted the prepared Cicka prototype spritesheet into
+  `public/assets/ridge/cicka/` as the first runtime-wired AI sprite adoption
+  proof, with audit notes and refined pipeline gates.
 - **Asset staging is now an active coordination concern**: prepared POC assets
-  exist for Cicka, Potassium, and Stampede enemy families. Keep them documented
-  and adopt them in small scene-owned slices instead of turning them into a
-  broad art-integration branch. See
+  still exist for Potassium, Stampede, and future Ridge character/prop families.
+  Cicka's adopted runtime copy now lives under `public/assets/ridge/cicka/`;
+  its external prepared archive is provenance/source material, not a pending
+  runtime adoption target. Keep remaining candidates documented and adopt them
+  in small scene-owned slices instead of turning them into a broad
+  art-integration branch. See
   [`sketchbook-ridge-asset-staging-plan.md`](./sketchbook-ridge-asset-staging-plan.md).
 
 ## Production Crew
@@ -331,10 +334,10 @@ Current checkpoint:
   the same PR includes a small primitive readability polish pass for Cicka,
   her speech bubble, and the memory decal.
 - **M5e Cicka Runtime Asset Adoption** accepted for continuation: the prepared
-  Cicka spritesheet is promoted into `public/assets/ridge/cicka/`, Ridge loads
-  it as a display-only perch NPC with tiny idle/notice animation, and the first
-  AI sprite audit records frame stability, runtime risks, and future review
-  gates.
+  Cicka spritesheet has been promoted into `public/assets/ridge/cicka/`, Ridge
+  loads it as a display-only perch NPC with tiny idle/notice animation, and the
+  first AI sprite audit records frame stability, runtime risks, and future
+  review gates.
 
 Next implementation slices:
 
