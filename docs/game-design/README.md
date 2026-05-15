@@ -18,9 +18,9 @@ This directory separates shipped player-facing behavior from future design conce
 - **[Ridge Blockout Source](./ridge.blockout.txt)**: First full text skeleton for the seamless Ridge world, written in the Ridge Map Language.
 - **[Ridge Blockout Fun Review](./ridge-blockout-fun-review.md)**: Design-quality review of the first blockout skeleton against 2D map design, Lucky Luna, and Nine Sols research.
 - **[Sketchbook Ridge Long-Term Topology Ideas](./sketchbook-ridge-long-term-topology-ideas.md)**: Exploratory long-term map, shortcut, and secret-direction companion for Ridge after the current milestone is proven.
-- **[Sketchbook Ridge M3 Visual Pack](./sketchbook-ridge-m3-visual-pack.md)**: Rade/Milena visual direction for Cicka, NPCs, landmarks, stickers, and M4 placeholders.
-- **[Sketchbook Ridge M3 Overlay Pack](./sketchbook-ridge-m3-overlay-pack.md)**: Aleksandra's Trail Card, Manual Page, mobile readability, and monochrome reward-state spec.
-- **[Sketchbook Ridge M3 Audio Pack](./sketchbook-ridge-m3-audio-pack.md)**: Django's Ridge, Cicka, Potassium acknowledgement, Stampede, and Telegraph audio direction.
+- **[Sketchbook Ridge M3 Visual Pack](./sketchbook-ridge-m3-visual-pack.md)**: Visual Direction Artist and Character Designer direction for Cicka, NPCs, landmarks, stickers, and M4 placeholders.
+- **[Sketchbook Ridge M3 Overlay Pack](./sketchbook-ridge-m3-overlay-pack.md)**: Overlay Readability Designer's Trail Card, Manual Page, mobile readability, and monochrome reward-state spec.
+- **[Sketchbook Ridge M3 Audio Pack](./sketchbook-ridge-m3-audio-pack.md)**: Audio Designer's Ridge, Cicka, Potassium acknowledgement, Stampede, and Telegraph audio direction.
 - **[AI Game Design Competition Archive](./ai-competition/README.md)**: Closed provenance for the competition that produced the current Ridge Summit direction.
 
 ## Document Status

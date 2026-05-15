@@ -1,8 +1,8 @@
 # Sketchbook Ridge M3 Visual Pack
 
-Rade visual direction with Milena character input. This pack is implementation
-guidance, not a final art bible. M4 should be able to ship rough placeholders
-from these specs without waiting for polished drawings.
+Visual Direction Artist guidance with Character Designer input. This pack is
+implementation guidance, not a final art bible. M4 should be able to ship rough
+placeholders from these specs without waiting for polished drawings.
 
 Active sources: `sketchbook-ridge-summit.md`, `sketchbook-ridge-milestone-plan.md`,
 `docs/design/style-guide.md`, current runtime docs, scoped agent rules, and

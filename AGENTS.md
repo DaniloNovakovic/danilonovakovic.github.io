@@ -28,9 +28,9 @@ Single-context repo: read root `CONTEXT.md` and `docs/adr/` when present. See [`
 
 ### Sketchbook Ridge team roles
 
-When Danilo invokes named helpers such as "Hey Mira", use [`docs/agents/sketchbook-ridge-team.md`](docs/agents/sketchbook-ridge-team.md) for the role contract and activation rules.
+When Danilo invokes helper roles such as "Producer", "Level Designer", or "Audio Designer", use [`docs/agents/sketchbook-ridge-team.md`](docs/agents/sketchbook-ridge-team.md) for the role contract and activation rules.
 
-When Danilo invokes Mira specifically, use [`.agents/skills/mira-producer/SKILL.md`](.agents/skills/mira-producer/SKILL.md) for the repeatable producer workflow.
+When Danilo invokes the Producer specifically, use [`.agents/skills/producer/SKILL.md`](.agents/skills/producer/SKILL.md) for the repeatable producer workflow.
 
 ### Sprite asset pipeline
 

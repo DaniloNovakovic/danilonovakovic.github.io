@@ -1,6 +1,6 @@
 # Sketchbook Ridge M3 Overlay Pack
 
-> Aleksandra's overlay and manual-page visual readability pack for M3.
+> Overlay Readability Designer's overlay and manual-page visual readability pack for M3.
 > This is a practical spec for Trail Cards, Manual Pages, and monochrome
 > reward/locked language. It should guide implementation without creating final
 > art pressure.
