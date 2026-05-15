@@ -10,4 +10,4 @@ For named Sketchbook Ridge helpers such as "Hey Mira", read:
 
 For Mira's repeatable producer workflow, read:
 
-- [`.agents/skills/mira-producer/SKILL.md`](.agents/skills/mira-producer/SKILL.md)
+- [`.agents/skills/producer/SKILL.md`](.agents/skills/producer/SKILL.md)
