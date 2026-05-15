@@ -26,16 +26,20 @@ import {
   type InteriorInteractionRuntime
 } from '@/game/sharedSceneRuntime/interactions/InteriorInteractionRuntime';
 import {
-  RIDGE_FLOOR_Y,
-  RIDGE_LANDMARKS,
-  RIDGE_PLAYER_RESUME_CLAMP,
-  RIDGE_PLAYER_START,
-  RIDGE_STAMPEDE_SHORTCUT,
+  RIDGE_BLOCKOUT,
+  deriveRidgeBlockoutGeometry,
+  findRidgeBlockoutRoom,
+  getRidgeBlockoutAnchorPoint,
+  type RidgeBlockoutAnchorPoint,
+  type RidgeBlockoutBounds,
+  type RidgeBlockoutCollider,
+  type RidgeBlockoutGeometry,
+  type RidgeBlockoutMap,
+  type RidgeBlockoutRoomBounds
+} from '../blockout';
+import {
   RIDGE_TRAIL_CARD_TARGETS,
-  RIDGE_WORLD_WIDTH,
-  isRidgeStampedeShortcutAvailable,
-  type RidgeTrailCardTargetId,
-  type RidgeLandmark
+  type RidgeTrailCardTargetId
 } from '../worldLayout';
 import {
   getRidgeWorldMemories,
@@ -74,6 +78,13 @@ type RidgeInteractionEffect =
 type RidgeInteractionTargetId =
   | RidgeTrailCardTargetId
   | typeof CICKA_INTERACTION_TARGET_ID;
+
+const PLAYER_SPAWN_OFFSET_Y = -80;
+const CICKA_PERCH_OFFSET_Y = -10;
+const TRAIL_CARD_PROMPT_OFFSET_Y = -86;
+const RIDGE_PLAYER_EDGE_PADDING = 48;
+const RIDGE_COYOTE_TIME_MS = 120;
+const RIDGE_JUMP_BUFFER_MS = 120;
 
 export class RidgeScene extends Phaser.Scene {
   player?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -118,28 +129,40 @@ export class RidgeScene extends Phaser.Scene {
     this.onClose = data.onClose ?? this.onClose;
     this.onOpenOverlay = data.onOpenOverlay ?? this.onOpenOverlay;
     const messages = getMessages();
+    const ridgeProgress = bridgeStore.getState().progress.ridge;
+    const blockout = RIDGE_BLOCKOUT;
+    const geometry = deriveRidgeBlockoutGeometry(blockout, {
+      stampIds: ridgeProgress.stampIds
+    });
 
     this.cameras.main.setBackgroundColor('#f7f1df');
-    this.physics.world.setBounds(0, 0, RIDGE_WORLD_WIDTH, GAME_DESIGN_HEIGHT);
+    this.physics.world.setBounds(
+      geometry.bounds.x,
+      geometry.bounds.y,
+      geometry.bounds.width,
+      geometry.bounds.height
+    );
     createCickaAnimations(this);
 
-    const ridgeProgress = bridgeStore.getState().progress.ridge;
-    const ground = this.createGround();
     const worldMemories = getRidgeWorldMemories(ridgeProgress);
-    const shortcutAvailable = isRidgeStampedeShortcutAvailable(ridgeProgress);
-
-    this.addBackdrop();
-    this.addLandmarks(
+    this.addBackdrop(geometry.bounds);
+    this.addRoomBounds(geometry.roomBounds);
+    this.addFutureRoutePromises(blockout, geometry);
+    const platforms = this.addBlockoutColliders(geometry);
+    this.addShortcutPromises(geometry);
+    this.addAnchorMarkers(geometry);
+    this.addLandmarksFromBlockout(
+      geometry,
       messages.scenes.ridge.memory.stampedeFirstClearLabel,
       messages.scenes.ridge.memory.cickaWalkByBark,
       worldMemories
     );
-    const shortcutPlatforms = this.addStampedeShortcut(shortcutAvailable);
-    this.addPlaceholderCopy();
-    this.createPlayer([ground, ...shortcutPlatforms]);
+    this.addPlaceholderCopy(blockout, geometry);
+    this.createPlayer(platforms, blockout, geometry);
     this.createRidgeInteractions(
       messages.navigation.interact,
-      messages.scenes.ridge.cicka.interaction
+      messages.scenes.ridge.cicka.interaction,
+      geometry
     );
     this.setPaused(this.isPaused);
     this.playerRuntime?.syncAppearance();
@@ -195,46 +218,254 @@ export class RidgeScene extends Phaser.Scene {
     this.interactPrompt?.setPosition(interaction.prompt.x, interaction.prompt.y).setVisible(true);
   }
 
-  private createGround(): Phaser.GameObjects.Zone {
+  private addBackdrop(bounds: RidgeBlockoutBounds): void {
     this.add.rectangle(
-      RIDGE_WORLD_WIDTH / 2,
-      GAME_DESIGN_HEIGHT - 42,
-      RIDGE_WORLD_WIDTH,
-      84,
-      0x2f4736,
+      bounds.width / 2,
+      bounds.height / 2,
+      bounds.width,
+      bounds.height,
+      0xf7f1df,
       1
-    );
-    this.add.rectangle(
-      RIDGE_WORLD_WIDTH / 2,
-      GAME_DESIGN_HEIGHT - 88,
-      RIDGE_WORLD_WIDTH,
-      44,
-      0xd7c78f,
-      1
-    );
+    ).setDepth(-100);
 
-    const ground = this.add.zone(RIDGE_WORLD_WIDTH / 2, RIDGE_FLOOR_Y + 24, RIDGE_WORLD_WIDTH, 48);
-    this.physics.add.existing(ground, true);
-    return ground;
-  }
-
-  private addBackdrop(): void {
-    for (let x = 120; x < RIDGE_WORLD_WIDTH; x += 260) {
-      const y = 420 + Math.sin(x / 160) * 18;
-      this.add.line(x, y, -130, 24, 130, -24, 0x1f1f1d, 0.18).setLineWidth(4);
-      this.add.line(x + 36, y + 34, -80, 14, 80, -14, 0x1f1f1d, 0.12).setLineWidth(3);
+    for (let y = 160; y < bounds.height; y += 420) {
+      this.add.line(bounds.width / 2, y, -bounds.width / 2, 0, bounds.width / 2, 0, 0x1f1f1d, 0.06)
+        .setLineWidth(3)
+        .setDepth(-90);
     }
 
-    this.add.rectangle(RIDGE_WORLD_WIDTH / 2, RIDGE_FLOOR_Y - 78, RIDGE_WORLD_WIDTH, 8, 0x1f1f1d, 0.12);
-    this.add.rectangle(RIDGE_WORLD_WIDTH / 2, RIDGE_FLOOR_Y - 6, RIDGE_WORLD_WIDTH, 5, 0x1f1f1d, 0.16);
+    for (let x = 180; x < bounds.width; x += 420) {
+      const y = 260 + Math.sin(x / 180) * 34;
+      this.add.line(x, y, -150, 34, 150, -34, 0x1f1f1d, 0.12).setLineWidth(4).setDepth(-80);
+      this.add.line(x + 44, y + 42, -96, 18, 96, -18, 0x1f1f1d, 0.09).setLineWidth(3).setDepth(-80);
+    }
   }
 
-  private createPlayer(platforms: readonly Phaser.GameObjects.Zone[]): void {
+  private addRoomBounds(roomBounds: readonly RidgeBlockoutRoomBounds[]): void {
+    roomBounds.forEach((room) => {
+      this.add.rectangle(
+        room.x + room.width / 2,
+        room.y + room.height / 2,
+        room.width,
+        room.height,
+        0xf7f1df,
+        0.03
+      )
+        .setStrokeStyle(2, 0x1f1f1d, 0.12)
+        .setDepth(-20);
+      this.add.text(room.x + 12, room.y + 12, room.title, {
+        fontFamily: 'monospace',
+        fontSize: '16px',
+        color: '#4b4337',
+        backgroundColor: '#f7f1dfcc',
+        padding: { x: 4, y: 2 }
+      }).setDepth(20);
+    });
+  }
+
+  private addFutureRoutePromises(
+    blockout: RidgeBlockoutMap,
+    geometry: RidgeBlockoutGeometry
+  ): void {
+    const graphics = this.add.graphics().setDepth(-8);
+    graphics.lineStyle(3, 0x596f8f, 0.18);
+
+    blockout.futureRoutes.forEach((route) => {
+      route.roomIds.slice(0, -1).forEach((roomId, index) => {
+        const from = this.getRoomCenter(geometry, roomId);
+        const to = this.getRoomCenter(geometry, route.roomIds[index + 1] ?? '');
+        if (!from || !to) return;
+        graphics.strokeLineShape(new Phaser.Geom.Line(from.x, from.y, to.x, to.y));
+      });
+    });
+  }
+
+  private addBlockoutColliders(
+    geometry: RidgeBlockoutGeometry
+  ): Phaser.GameObjects.Zone[] {
+    return geometry.colliders.map((collider) => {
+      this.addColliderVisual(collider);
+      const zone = this.add.zone(collider.x, collider.y, collider.width, collider.height);
+      this.physics.add.existing(zone, true);
+      return zone;
+    });
+  }
+
+  private addColliderVisual(collider: RidgeBlockoutCollider): void {
+    const style = getColliderStyle(collider);
+    this.add.rectangle(
+      collider.x,
+      collider.y,
+      collider.width,
+      collider.height,
+      style.fill,
+      style.alpha
+    )
+      .setStrokeStyle(style.strokeWidth, 0x1f1f1d, style.strokeAlpha)
+      .setDepth(style.depth);
+  }
+
+  private addShortcutPromises(geometry: RidgeBlockoutGeometry): void {
+    geometry.shortcutConnections.forEach((connection) => {
+      const graphics = this.add.graphics().setDepth(6);
+      graphics.lineStyle(4, connection.unlocked ? 0xf0d35f : 0x1f1f1d, connection.unlocked ? 0.34 : 0.16);
+      graphics.strokeLineShape(new Phaser.Geom.Line(
+        connection.from.x,
+        connection.from.y,
+        connection.to.x,
+        connection.to.y
+      ));
+
+      if (!connection.unlocked) {
+        const centerX = (connection.from.x + connection.to.x) / 2;
+        const centerY = (connection.from.y + connection.to.y) / 2;
+        this.add.rectangle(centerX, centerY, 96, 18, 0xf7f1df, 0.24)
+          .setStrokeStyle(2, 0x1f1f1d, 0.18)
+          .setAngle(-4)
+          .setDepth(7);
+      }
+    });
+  }
+
+  private addAnchorMarkers(geometry: RidgeBlockoutGeometry): void {
+    geometry.anchorPoints.forEach((anchor) => {
+      if (!['A', '*', '?', '^', 'N', 'M'].includes(anchor.symbol)) return;
+      this.add.circle(anchor.x, anchor.y, 9, getAnchorColor(anchor), 0.58)
+        .setStrokeStyle(2, 0x1f1f1d, 0.45)
+        .setDepth(14);
+      this.add.text(anchor.x + 12, anchor.y - 14, anchor.symbol, {
+        fontFamily: 'monospace',
+        fontSize: '13px',
+        color: '#1f1f1d',
+        backgroundColor: '#f7f1df99',
+        padding: { x: 2, y: 1 }
+      }).setDepth(15);
+    });
+  }
+
+  private addLandmarksFromBlockout(
+    geometry: RidgeBlockoutGeometry,
+    stampedeFirstClearLabel: string,
+    cickaWalkByLine: string,
+    worldMemories: readonly RidgeWorldMemory[]
+  ): void {
+    this.cickaPerch = undefined;
+
+    const cickaPoint = this.findAnchorPoint(geometry, {
+      roomId: 'cicka_home',
+      symbol: 'C',
+      kind: 'npc',
+      attrId: 'cicka'
+    });
+    if (cickaPoint) {
+      this.cickaPerch = createCickaPerch({
+        scene: this,
+        landmark: {
+          x: cickaPoint.x,
+          y: cickaPoint.y + CICKA_PERCH_OFFSET_Y
+        },
+        hasStampedeNoteMemory: hasRidgeWorldMemory(
+          worldMemories.filter((memory) => memory.landmarkKind === 'cicka-perch'),
+          'cicka-stampede-note'
+        ),
+        walkByLine: cickaWalkByLine
+      });
+    }
+
+    const outskirtsArtifact = this.findAnchorPoint(geometry, {
+      roomId: 'outskirts',
+      symbol: 'A',
+      attrId: 'city_edge_memory'
+    });
+    if (outskirtsArtifact) {
+      this.addOutskirtsArtifactSlot(outskirtsArtifact.x, outskirtsArtifact.y);
+    }
+
+    const stampedePoint = this.findAnchorPoint(geometry, {
+      roomId: 'stampede_blanket',
+      symbol: '*',
+      kind: 'minigame',
+      attrId: 'stampede_sketch'
+    });
+    if (stampedePoint) {
+      this.addStampedeBlanket(
+        stampedePoint.x,
+        stampedePoint.y,
+        stampedeFirstClearLabel,
+        worldMemories.filter((memory) => memory.landmarkKind === 'stampede-blanket')
+      );
+    }
+
+    const telegraphPoint = this.findAnchorPoint(geometry, {
+      roomId: 'telegraph_terrace',
+      symbol: '*',
+      kind: 'minigame',
+      attrId: 'telegraph_future'
+    });
+    if (telegraphPoint) {
+      this.addTelegraphBag(telegraphPoint.x, telegraphPoint.y);
+    }
+
+    const guidePoint = this.findAnchorPoint(geometry, {
+      roomId: 'guide_overlook',
+      symbol: 'N',
+      kind: 'npc',
+      attrId: 'ridge_guide'
+    });
+    if (guidePoint) {
+      this.addRidgeGuide(guidePoint.x, guidePoint.y);
+    }
+
+    const relayPoint = this.findAnchorPoint(geometry, {
+      roomId: 'relay_gate',
+      symbol: '?',
+      kind: 'gate',
+      attrId: 'relay_proof_slots'
+    });
+    if (relayPoint) {
+      this.addRelayGate(relayPoint.x, relayPoint.y);
+      this.addRelaySpire(relayPoint.x + 230, relayPoint.y - 180);
+    }
+
+    const dominoPoint = this.findAnchorPoint(geometry, {
+      roomId: 'domino_desk',
+      symbol: 'A',
+      attrId: 'domino_project_scrap'
+    });
+    if (dominoPoint) {
+      this.addDominoDesk(dominoPoint.x, dominoPoint.y);
+    }
+
+    const highLedgePoint = this.findAnchorPoint(geometry, {
+      roomId: 'high_ledge',
+      symbol: '?',
+      kind: 'gate',
+      attrId: 'movement_reward_tease'
+    });
+    if (highLedgePoint) {
+      this.addHighLedgeTeaser(highLedgePoint.x, highLedgePoint.y);
+    }
+  }
+
+  private createPlayer(
+    platforms: readonly Phaser.GameObjects.Zone[],
+    blockout: RidgeBlockoutMap,
+    geometry: RidgeBlockoutGeometry
+  ): void {
+    const spawn = getSpawnPoint(blockout);
     const playerRuntime = createSideViewPlayerRuntime({
       scene: this,
-      start: RIDGE_PLAYER_START,
+      start: {
+        x: spawn.x,
+        y: spawn.y + PLAYER_SPAWN_OFFSET_Y
+      },
       resumePosition: this.resumePosition,
-      resumeClamp: RIDGE_PLAYER_RESUME_CLAMP,
+      resumeClamp: {
+        minX: geometry.bounds.x + RIDGE_PLAYER_EDGE_PADDING,
+        maxX: geometry.bounds.x + geometry.bounds.width - RIDGE_PLAYER_EDGE_PADDING,
+        minY: geometry.bounds.y + RIDGE_PLAYER_EDGE_PADDING,
+        maxY: geometry.bounds.y + geometry.bounds.height - RIDGE_PLAYER_EDGE_PADDING
+      },
       sprite: {
         depth: 30,
         gravityY: SIDE_VIEW_PLAYER_GRAVITY_Y
@@ -242,7 +473,9 @@ export class RidgeScene extends Phaser.Scene {
       movement: {
         walkSpeed: SIDE_VIEW_WALK_SPEED,
         sprintSpeed: SIDE_VIEW_SPRINT_SPEED,
-        jumpVelocityY: SIDE_VIEW_JUMP_VELOCITY_Y
+        jumpVelocityY: SIDE_VIEW_JUMP_VELOCITY_Y,
+        coyoteTimeMs: RIDGE_COYOTE_TIME_MS,
+        jumpBufferMs: RIDGE_JUMP_BUFFER_MS
       },
       input: {
         allowJump: true,
@@ -255,12 +488,7 @@ export class RidgeScene extends Phaser.Scene {
         glassesTextureKey: 'player_glasses'
       },
       camera: {
-        worldBounds: {
-          x: 0,
-          y: 0,
-          width: RIDGE_WORLD_WIDTH,
-          height: GAME_DESIGN_HEIGHT
-        },
+        worldBounds: geometry.bounds,
         designSize: {
           width: GAME_DESIGN_WIDTH,
           height: GAME_DESIGN_HEIGHT
@@ -281,7 +509,8 @@ export class RidgeScene extends Phaser.Scene {
 
   private createRidgeInteractions(
     promptText: string,
-    cickaInteractionCopy: CickaInteractionCopy
+    cickaInteractionCopy: CickaInteractionCopy,
+    geometry: RidgeBlockoutGeometry
   ): void {
     this.interactPrompt?.destroy();
 
@@ -309,115 +538,127 @@ export class RidgeScene extends Phaser.Scene {
             )
           })
         }] : []),
-        ...RIDGE_TRAIL_CARD_TARGETS.map((target) => ({
-          id: target.id,
-          kind: 'trail-card',
-          x: target.x,
-          distanceAnchorY: target.distanceAnchorY,
-          prompt: target.prompt,
-          effect: {
-            kind: 'openTrailCard',
-            params: target.card
-          } satisfies RidgeInteractionEffect
-        }))
+        ...this.createTrailCardTargets(geometry)
       ]
     });
   }
 
-  private addRelaySpire(x: number): void {
-    this.add.triangle(x, 205, 0, 180, 46, 0, 92, 180, 0x1c1a18, 0.82);
-    this.add.rectangle(x + 46, 330, 34, 250, 0x1c1a18, 0.82);
-    this.add.line(x + 46, 205, -80, 35, 80, 35, 0x1c1a18, 0.5).setLineWidth(3);
-    this.add.circle(x + 46, 166, 12, 0xf0d35f, 0.9);
-  }
-
-  private addLandmarks(
-    stampedeFirstClearLabel: string,
-    cickaWalkByLine: string,
-    worldMemories: readonly RidgeWorldMemory[]
-  ): void {
-    this.cickaPerch = undefined;
-    RIDGE_LANDMARKS.forEach((landmark) => {
-      const landmarkMemories = worldMemories.filter(
-        (memory) => memory.landmarkKind === landmark.kind
-      );
-
-      switch (landmark.kind) {
-        case 'outskirts-artifact':
-          this.addOutskirtsArtifactSlot(landmark);
-          break;
-        case 'cicka-perch':
-          this.addCickaPerch(landmark, landmarkMemories, cickaWalkByLine);
-          break;
-        case 'stampede-blanket':
-          this.addStampedeBlanket(landmark, stampedeFirstClearLabel, landmarkMemories);
-          break;
-        case 'telegraph-bag':
-          this.addTelegraphBag(landmark);
-          break;
-        case 'ridge-guide':
-          this.addRidgeGuide(landmark);
-          break;
-        case 'relay-spire':
-          this.addRelaySpire(landmark.x);
-          break;
-        case 'domino-desk':
-          this.addDominoDesk(landmark);
-          break;
-        case 'high-ledge-teaser':
-          this.addHighLedgeTeaser(landmark);
-          break;
-        case 'relay-gate':
-          this.addRelayGate(landmark);
-          break;
-      }
-      this.addLandmarkLabel(landmark);
+  private createTrailCardTargets(
+    geometry: RidgeBlockoutGeometry
+  ): Array<{
+    id: RidgeTrailCardTargetId;
+    kind: 'trail-card';
+    x: number;
+    distanceAnchorY: number;
+    prompt: { x: number; y: number };
+    effect: RidgeInteractionEffect;
+  }> {
+    return RIDGE_TRAIL_CARD_TARGETS.map((target) => {
+      const anchorPoint = this.getTrailCardAnchorPoint(geometry, target.id);
+      const x = anchorPoint?.x ?? target.x;
+      const y = anchorPoint?.y ?? target.distanceAnchorY;
+      return {
+        id: target.id,
+        kind: 'trail-card',
+        x,
+        distanceAnchorY: y,
+        prompt: {
+          x,
+          y: y + TRAIL_CARD_PROMPT_OFFSET_Y
+        },
+        effect: {
+          kind: 'openTrailCard',
+          params: target.card
+        }
+      };
     });
   }
 
-  private addOutskirtsArtifactSlot(landmark: RidgeLandmark): void {
-    const x = landmark.x;
-    const y = RIDGE_FLOOR_Y - 62;
-    this.add.rectangle(x - 44, y + 22, 92, 8, 0x1f1f1d, 0.2);
+  private getTrailCardAnchorPoint(
+    geometry: RidgeBlockoutGeometry,
+    targetId: RidgeTrailCardTargetId
+  ): RidgeBlockoutAnchorPoint | undefined {
+    switch (targetId) {
+      case 'stampede-sketch':
+        return this.findAnchorPoint(geometry, {
+          roomId: 'stampede_blanket',
+          symbol: '*',
+          kind: 'minigame',
+          attrId: 'stampede_sketch'
+        });
+      case 'telegraph-terrace':
+        return this.findAnchorPoint(geometry, {
+          roomId: 'telegraph_terrace',
+          symbol: '*',
+          kind: 'minigame',
+          attrId: 'telegraph_future'
+        });
+      case 'domino-desk':
+        return this.findAnchorPoint(geometry, {
+          roomId: 'domino_desk',
+          symbol: 'A',
+          attrId: 'domino_project_scrap'
+        });
+    }
+  }
+
+  private findAnchorPoint(
+    geometry: RidgeBlockoutGeometry,
+    filter: {
+      roomId: string;
+      symbol: string;
+      kind?: string;
+      attrId?: string;
+    }
+  ): RidgeBlockoutAnchorPoint | undefined {
+    return geometry.anchorPoints.find((point) =>
+      point.roomId === filter.roomId &&
+      point.symbol === filter.symbol &&
+      (!filter.kind || point.kind === filter.kind) &&
+      (!filter.attrId || point.attrs.id === filter.attrId)
+    );
+  }
+
+  private getRoomCenter(
+    geometry: RidgeBlockoutGeometry,
+    roomId: string
+  ): { x: number; y: number } | undefined {
+    const room = geometry.roomBounds.find((candidate) => candidate.roomId === roomId);
+    return room
+      ? {
+        x: room.x + room.width / 2,
+        y: room.y + room.height / 2
+      }
+      : undefined;
+  }
+
+  private addOutskirtsArtifactSlot(x: number, y: number): void {
+    this.add.rectangle(x - 44, y + 22, 92, 8, 0x1f1f1d, 0.2).setDepth(18);
     this.add.rectangle(x - 18, y - 4, 58, 36, 0xf7f1df, 0.94)
       .setStrokeStyle(3, 0x1f1f1d, 0.72)
-      .setAngle(-5);
+      .setAngle(-5)
+      .setDepth(18);
     this.add.rectangle(x + 34, y - 16, 34, 24, 0xf0d35f, 0.82)
       .setStrokeStyle(2, 0x1f1f1d, 0.72)
-      .setAngle(7);
-    this.add.line(x - 42, y - 28, -18, 7, 22, -8, 0x1f1f1d, 0.36).setLineWidth(3);
-    this.add.circle(x + 34, y - 16, 4, 0x1f1f1d, 0.76);
-    this.add.circle(x + 44, y - 10, 3, 0x1f1f1d, 0.76);
-  }
-
-  private addCickaPerch(
-    landmark: RidgeLandmark,
-    memories: readonly RidgeWorldMemory[],
-    walkByLine: string
-  ): void {
-    this.cickaPerch = createCickaPerch({
-      scene: this,
-      landmark,
-      hasStampedeNoteMemory: hasRidgeWorldMemory(memories, 'cicka-stampede-note'),
-      walkByLine
-    });
+      .setAngle(7)
+      .setDepth(18);
+    this.add.circle(x + 34, y - 16, 4, 0x1f1f1d, 0.76).setDepth(19);
+    this.add.circle(x + 44, y - 10, 3, 0x1f1f1d, 0.76).setDepth(19);
   }
 
   private addStampedeBlanket(
-    landmark: RidgeLandmark,
+    x: number,
+    y: number,
     stampedeFirstClearLabel: string,
     memories: readonly RidgeWorldMemory[]
   ): void {
-    const x = landmark.x;
-    const y = RIDGE_FLOOR_Y - 46;
-    this.add.rectangle(x, y, 104, 32, 0xb85f5a, 0.9);
-    this.add.rectangle(x - 26, y, 18, 32, 0xf7f1df, 0.7);
-    this.add.rectangle(x + 26, y, 18, 32, 0xf7f1df, 0.7);
-    this.add.circle(x - 22, y - 26, 11, 0x1f1f1d, 0.92);
-    this.add.circle(x + 28, y - 20, 9, 0x1f1f1d, 0.75);
-    this.add.line(x, y - 42, -34, 6, 34, -6, 0x1f1f1d, 0.32).setLineWidth(3);
+    this.add.rectangle(x, y + 22, 104, 32, 0xb85f5a, 0.9).setDepth(16);
+    this.add.rectangle(x - 26, y + 22, 18, 32, 0xf7f1df, 0.7).setDepth(17);
+    this.add.rectangle(x + 26, y + 22, 18, 32, 0xf7f1df, 0.7).setDepth(17);
+    this.add.circle(x - 22, y - 4, 11, 0x1f1f1d, 0.92).setDepth(17);
+    this.add.circle(x + 28, y + 2, 9, 0x1f1f1d, 0.75).setDepth(17);
     if (memories.length) {
-      this.addStampedeBlanketMemories(x, y, stampedeFirstClearLabel, memories);
+      this.addStampedeBlanketMemories(x, y + 22, stampedeFirstClearLabel, memories);
     }
   }
 
@@ -428,170 +669,154 @@ export class RidgeScene extends Phaser.Scene {
     memories: readonly RidgeWorldMemory[]
   ): void {
     if (hasRidgeWorldMemory(memories, 'stampede-settled-swarm')) {
-      this.addStampedeSettledSwarmMemory(x, y);
+      [
+        { x: -55, y: -36, radius: 4 },
+        { x: -42, y: -49, radius: 3 },
+        { x: -30, y: -39, radius: 2 },
+        { x: 54, y: -30, radius: 3 },
+        { x: 66, y: -43, radius: 2 }
+      ].forEach((dot) => {
+        this.add.circle(x + dot.x, y + dot.y, dot.radius, 0x1f1f1d, 0.24).setDepth(18);
+      });
     }
     if (hasRidgeWorldMemory(memories, 'stampede-held-sticker')) {
-      this.addStampedeHeldStickerMemory(x, y, stampedeFirstClearLabel);
+      this.add.rectangle(x + 42, y - 48, 58, 26, 0xf7f1df, 1)
+        .setStrokeStyle(3, 0x1f1f1d, 0.95)
+        .setAngle(-8)
+        .setDepth(19);
+      this.add.text(x + 20, y - 57, stampedeFirstClearLabel, {
+        fontFamily: 'monospace',
+        fontSize: '12px',
+        color: '#1f1f1d'
+      }).setAngle(-8).setDepth(20);
     }
     if (hasRidgeWorldMemory(memories, 'stampede-glide-pip-decal')) {
-      this.addStampedeGlidePipMemory(x, y);
+      this.add.circle(x + 74, y - 18, 11, 0xf7f1df, 1)
+        .setStrokeStyle(2, 0x1f1f1d, 0.9)
+        .setDepth(19);
+      this.add.line(x + 74, y - 18, -6, 6, 6, -6, 0x1f1f1d, 0.85).setLineWidth(2).setDepth(20);
     }
   }
 
-  private addStampedeHeldStickerMemory(
-    x: number,
-    y: number,
-    stampedeFirstClearLabel: string
-  ): void {
-    this.add.rectangle(x + 42, y - 48, 58, 26, 0xf7f1df, 1)
-      .setStrokeStyle(3, 0x1f1f1d, 0.95)
-      .setAngle(-8);
-    this.add.text(x + 20, y - 57, stampedeFirstClearLabel, {
-      fontFamily: 'monospace',
-      fontSize: '12px',
-      color: '#1f1f1d'
-    }).setAngle(-8).setDepth(5);
-    this.add.line(x + 9, y - 32, -12, 10, 12, -10, 0x1f1f1d, 0.52).setLineWidth(2);
+  private addTelegraphBag(x: number, y: number): void {
+    this.add.rectangle(x, y, 70, 54, 0x596f8f, 0.84).setDepth(16);
+    this.add.rectangle(x, y - 34, 48, 16, 0x1f1f1d, 0.88).setDepth(17);
+    this.add.arc(x, y - 40, 36, Math.PI, Math.PI * 2, false, 0x1f1f1d, 0.2)
+      .setStrokeStyle(4, 0x1f1f1d, 0.7)
+      .setDepth(17);
+    this.add.line(x + 62, y - 18, -30, -20, 30, 20, 0x1f1f1d, 0.7).setLineWidth(4).setDepth(18);
   }
 
-  private addStampedeSettledSwarmMemory(x: number, y: number): void {
-    [
-      { x: -55, y: -36, radius: 4 },
-      { x: -42, y: -49, radius: 3 },
-      { x: -30, y: -39, radius: 2 },
-      { x: 54, y: -30, radius: 3 },
-      { x: 66, y: -43, radius: 2 }
-    ].forEach((dot) => {
-      this.add.circle(x + dot.x, y + dot.y, dot.radius, 0x1f1f1d, 0.24);
-    });
-    this.add.line(x - 64, y - 24, -12, 4, 12, -4, 0x1f1f1d, 0.22).setLineWidth(2);
-    this.add.line(x + 58, y - 18, -10, -3, 10, 3, 0x1f1f1d, 0.2).setLineWidth(2);
-  }
-
-  private addStampedeGlidePipMemory(x: number, y: number): void {
-    this.add.circle(x + 74, y - 18, 11, 0xf7f1df, 1)
-      .setStrokeStyle(2, 0x1f1f1d, 0.9);
-    this.add.line(x + 74, y - 18, -6, 6, 6, -6, 0x1f1f1d, 0.85).setLineWidth(2);
-    this.add.circle(x + 80, y - 24, 2, 0x1f1f1d, 0.85);
-  }
-
-  private addStampedeShortcut(available: boolean): Phaser.GameObjects.Zone[] {
-    const shortcut = RIDGE_STAMPEDE_SHORTCUT;
-    const centerX = (shortcut.startX + shortcut.endX) / 2;
-    const y = shortcut.y;
-
-    this.add.line(shortcut.startX, y + 36, -18, 0, -76, 46, 0x1f1f1d, 0.22).setLineWidth(3);
-    this.add.line(shortcut.startX - 28, y + 54, -12, 0, -52, 34, 0x1f1f1d, 0.16).setLineWidth(2);
-    this.add.circle(shortcut.startX - 44, y + 40, 4, 0x1f1f1d, 0.22);
-    this.add.circle(shortcut.startX - 58, y + 50, 3, 0x1f1f1d, 0.2);
-    this.add.circle(shortcut.startX - 69, y + 42, 3, 0x1f1f1d, 0.18);
-
-    if (!available) {
-      this.add.rectangle(centerX, y, shortcut.width, shortcut.height, 0xf7f1df, 0.18)
-        .setStrokeStyle(2, 0x1f1f1d, 0.18)
-        .setAngle(-1);
-      this.add.line(centerX, y, -shortcut.width / 2, 0, shortcut.width / 2, 0, 0x1f1f1d, 0.2)
-        .setLineWidth(3);
-      return [];
-    }
-
-    this.add.rectangle(centerX, y, shortcut.width, shortcut.height, 0xf7f1df, 0.96)
-      .setStrokeStyle(3, 0x1f1f1d, 0.82);
-    this.add.rectangle(centerX - 64, y - 5, 78, 6, 0xf0d35f, 0.72).setAngle(-2);
-    this.add.rectangle(centerX + 52, y + 5, 92, 6, 0xb85f5a, 0.62).setAngle(2);
-    this.add.line(centerX - 128, y + 22, -14, -20, -4, 18, 0x1f1f1d, 0.42).setLineWidth(3);
-    this.add.line(centerX + 128, y + 22, 10, -18, 4, 18, 0x1f1f1d, 0.42).setLineWidth(3);
-
-    const platform = this.add.zone(centerX, y, shortcut.width, shortcut.height);
-    this.physics.add.existing(platform, true);
-    return [platform];
-  }
-
-  private addTelegraphBag(landmark: RidgeLandmark): void {
-    const x = landmark.x;
-    const y = RIDGE_FLOOR_Y - 58;
-    this.add.rectangle(x, y, 70, 54, 0x596f8f, 0.84);
-    this.add.rectangle(x, y - 34, 48, 16, 0x1f1f1d, 0.88);
-    this.add.arc(x, y - 40, 36, Math.PI, Math.PI * 2, false, 0x1f1f1d, 0.2).setStrokeStyle(4, 0x1f1f1d, 0.7);
-    this.add.line(x + 62, y - 18, -30, -20, 30, 20, 0x1f1f1d, 0.7).setLineWidth(4);
-  }
-
-  private addRidgeGuide(landmark: RidgeLandmark): void {
-    const x = landmark.x;
-    const y = RIDGE_FLOOR_Y - 72;
-    this.add.circle(x, y - 28, 16, 0xf7f1df, 1).setStrokeStyle(3, 0x1f1f1d, 1);
-    this.add.rectangle(x, y + 8, 32, 58, 0xf7f1df, 1).setStrokeStyle(3, 0x1f1f1d, 1);
-    this.add.line(x - 8, y + 2, -30, -16, -52, -28, 0x1f1f1d, 1).setLineWidth(4);
-    this.add.rectangle(x + 42, y - 8, 42, 28, 0xf0d35f, 0.9).setStrokeStyle(3, 0x1f1f1d, 1);
+  private addRidgeGuide(x: number, y: number): void {
+    this.add.circle(x, y - 28, 16, 0xf7f1df, 1).setStrokeStyle(3, 0x1f1f1d, 1).setDepth(18);
+    this.add.rectangle(x, y + 8, 32, 58, 0xf7f1df, 1).setStrokeStyle(3, 0x1f1f1d, 1).setDepth(18);
+    this.add.line(x - 8, y + 2, -30, -16, -52, -28, 0x1f1f1d, 1).setLineWidth(4).setDepth(19);
+    this.add.rectangle(x + 42, y - 8, 42, 28, 0xf0d35f, 0.9).setStrokeStyle(3, 0x1f1f1d, 1).setDepth(18);
     this.add.text(x + 29, y - 17, '?', {
       fontFamily: 'monospace',
       fontSize: '22px',
       color: '#1f1f1d'
-    });
+    }).setDepth(19);
   }
 
-  private addDominoDesk(landmark: RidgeLandmark): void {
-    const x = landmark.x;
-    const y = RIDGE_FLOOR_Y - 62;
-    this.add.rectangle(x, y, 108, 50, 0xd7c78f, 0.96).setStrokeStyle(4, 0x1f1f1d, 1);
-    this.add.rectangle(x + 70, y - 40, 46, 94, 0xf7f1df, 1).setStrokeStyle(4, 0x1f1f1d, 1);
-    this.add.circle(x - 28, y - 16, 7, 0x1f1f1d, 1);
-    this.add.circle(x, y - 16, 7, 0x1f1f1d, 1);
-    this.add.circle(x + 28, y - 16, 7, 0x1f1f1d, 1);
+  private addRelayGate(x: number, y: number): void {
+    this.add.rectangle(x, y, 108, 128, 0xf7f1df, 0.86)
+      .setStrokeStyle(5, 0x1f1f1d, 0.86)
+      .setDepth(16);
+    this.add.rectangle(x, y + 6, 66, 98, 0x1f1f1d, 0.18)
+      .setStrokeStyle(3, 0x1f1f1d, 0.58)
+      .setDepth(17);
+    this.add.circle(x, y - 62, 16, 0xf0d35f, 0.86)
+      .setStrokeStyle(3, 0x1f1f1d, 0.72)
+      .setDepth(18);
   }
 
-  private addHighLedgeTeaser(landmark: RidgeLandmark): void {
-    const x = landmark.x;
-    const y = RIDGE_FLOOR_Y - 184;
+  private addRelaySpire(x: number, y: number): void {
+    this.add.triangle(x, y, 0, 180, 46, 0, 92, 180, 0x1c1a18, 0.56).setDepth(9);
+    this.add.rectangle(x + 46, y + 125, 34, 250, 0x1c1a18, 0.56).setDepth(9);
+    this.add.line(x + 46, y, -80, 35, 80, 35, 0x1c1a18, 0.34).setLineWidth(3).setDepth(9);
+    this.add.circle(x + 46, y - 39, 12, 0xf0d35f, 0.84).setDepth(10);
+  }
+
+  private addDominoDesk(x: number, y: number): void {
+    this.add.rectangle(x, y, 108, 50, 0xd7c78f, 0.96).setStrokeStyle(4, 0x1f1f1d, 1).setDepth(16);
+    this.add.rectangle(x + 70, y - 40, 46, 94, 0xf7f1df, 1).setStrokeStyle(4, 0x1f1f1d, 1).setDepth(16);
+    this.add.circle(x - 28, y - 16, 7, 0x1f1f1d, 1).setDepth(17);
+    this.add.circle(x, y - 16, 7, 0x1f1f1d, 1).setDepth(17);
+    this.add.circle(x + 28, y - 16, 7, 0x1f1f1d, 1).setDepth(17);
+  }
+
+  private addHighLedgeTeaser(x: number, y: number): void {
     this.add.rectangle(x, y, 142, 18, 0xf7f1df, 0.92)
-      .setStrokeStyle(3, 0x1f1f1d, 0.72);
+      .setStrokeStyle(3, 0x1f1f1d, 0.72)
+      .setDepth(16);
     this.add.rectangle(x - 42, y - 18, 48, 26, 0xf0d35f, 0.76)
       .setStrokeStyle(2, 0x1f1f1d, 0.62)
-      .setAngle(-7);
-    this.add.line(x + 40, y + 32, -22, -38, 24, -8, 0x1f1f1d, 0.28).setLineWidth(4);
-    this.add.circle(x + 44, y - 32, 6, 0x1f1f1d, 0.68);
-    this.add.circle(x + 60, y - 37, 4, 0x1f1f1d, 0.58);
+      .setAngle(-7)
+      .setDepth(17);
+    this.add.circle(x + 44, y - 32, 6, 0x1f1f1d, 0.68).setDepth(17);
+    this.add.circle(x + 60, y - 37, 4, 0x1f1f1d, 0.58).setDepth(17);
   }
 
-  private addRelayGate(landmark: RidgeLandmark): void {
-    const x = landmark.x;
-    const y = RIDGE_FLOOR_Y - 84;
-    this.add.rectangle(x, y, 108, 128, 0xf7f1df, 0.86)
-      .setStrokeStyle(5, 0x1f1f1d, 0.86);
-    this.add.rectangle(x, y + 6, 66, 98, 0x1f1f1d, 0.18)
-      .setStrokeStyle(3, 0x1f1f1d, 0.58);
-    this.add.circle(x, y - 62, 16, 0xf0d35f, 0.86)
-      .setStrokeStyle(3, 0x1f1f1d, 0.72);
-    this.add.line(x - 92, y - 54, -56, 12, 56, -12, 0x1f1f1d, 0.28).setLineWidth(4);
-    this.add.triangle(x + 132, y - 72, 0, 90, 28, 0, 56, 90, 0x1c1a18, 0.42);
-    this.add.rectangle(x + 160, y + 2, 18, 134, 0x1c1a18, 0.42);
-  }
-
-  private addLandmarkLabel(landmark: RidgeLandmark): void {
-    this.add.text(landmark.x, RIDGE_FLOOR_Y - 14, landmark.label, {
-      fontFamily: 'monospace',
-      fontSize: '13px',
-      color: '#1f1f1d',
-      backgroundColor: '#f7f1dfcc',
-      padding: { x: 3, y: 1 }
-    }).setOrigin(0.5);
-  }
-
-  private addPlaceholderCopy(): void {
-    this.add.text(48, 48, 'Sketchbook Ridge', {
+  private addPlaceholderCopy(
+    blockout: RidgeBlockoutMap,
+    geometry: RidgeBlockoutGeometry
+  ): void {
+    const spawn = getSpawnPoint(blockout);
+    this.add.text(spawn.x, spawn.y - 260, 'Sketchbook Ridge', {
       fontFamily: 'monospace',
       fontSize: '34px',
       color: '#1f1f1d'
-    });
-    this.add.text(50, 94, 'Outskirts -> Cicka Home -> Stampede -> Relay-view blockout.', {
+    }).setOrigin(0.5).setDepth(60);
+    this.add.text(spawn.x, spawn.y - 214, `${blockout.title} - parsed ${geometry.roomBounds.length} room beats`, {
       fontFamily: 'monospace',
       fontSize: '16px',
       color: '#4b4337'
-    });
-    this.add.text(50, 122, 'Move with arrows/WASD, sprint with Shift, jump with Up, exit with H or Esc.', {
-      fontFamily: 'monospace',
-      fontSize: '16px',
-      color: '#4b4337'
-    });
+    }).setOrigin(0.5).setDepth(60);
   }
+}
+
+function getColliderStyle(collider: RidgeBlockoutCollider): {
+  fill: number;
+  alpha: number;
+  strokeWidth: number;
+  strokeAlpha: number;
+  depth: number;
+} {
+  switch (collider.kind) {
+    case 'solid':
+      return { fill: 0x2f4736, alpha: 0.94, strokeWidth: 1, strokeAlpha: 0.16, depth: 1 };
+    case 'platform':
+      return { fill: 0xd7c78f, alpha: 0.94, strokeWidth: 2, strokeAlpha: 0.42, depth: 4 };
+    case 'route-connector':
+      return { fill: 0xf7f1df, alpha: 0.96, strokeWidth: 2, strokeAlpha: 0.52, depth: 5 };
+    case 'shortcut-connector':
+      return { fill: 0xf0d35f, alpha: 0.82, strokeWidth: 2, strokeAlpha: 0.6, depth: 6 };
+  }
+}
+
+function getAnchorColor(anchor: RidgeBlockoutAnchorPoint): number {
+  switch (anchor.symbol) {
+    case '*':
+      return 0xb85f5a;
+    case '?':
+      return 0x596f8f;
+    case '^':
+      return 0xf0d35f;
+    case 'A':
+      return 0xd7c78f;
+    default:
+      return 0xf7f1df;
+  }
+}
+
+function getSpawnPoint(blockout: RidgeBlockoutMap): { x: number; y: number } {
+  const spawnRoom = findRidgeBlockoutRoom(blockout, blockout.spawn.roomId);
+  const spawnAnchor = spawnRoom?.anchors.find(
+    (anchor) => anchor.symbol === blockout.spawn.anchorSymbol
+  );
+  const point = spawnRoom && spawnAnchor
+    ? getRidgeBlockoutAnchorPoint(blockout, spawnRoom, spawnAnchor)
+    : undefined;
+  return point ?? { x: 120, y: 420 };
 }
