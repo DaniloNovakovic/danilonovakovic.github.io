@@ -28,17 +28,17 @@ import {
 } from '@/game/sharedSceneRuntime/interactions/InteriorInteractionRuntime';
 import {
   RIDGE_BLOCKOUT,
+  compileRidgeBlockoutFacts,
   deriveRidgeBlockoutGeometry,
-  findRidgeBlockoutAnchorPoint,
-  getRidgeBlockoutSpawnPoint,
-  type RidgeBlockoutAnchorSelector,
   type RidgeBlockoutAnchorPoint,
   type RidgeBlockoutAssistZone,
   type RidgeBlockoutBounds,
   type RidgeBlockoutCollider,
   type RidgeBlockoutGeometry,
-  type RidgeBlockoutMap,
-  type RidgeBlockoutRoomBounds
+  type RidgeBlockoutFacts,
+  type RidgeBlockoutRoomBounds,
+  type RidgeAnchorFact,
+  findRidgeBlockoutFactAnchor
 } from '../blockout';
 import {
   RIDGE_TRAIL_CARD_TARGETS,
@@ -172,6 +172,10 @@ export class RidgeScene extends Phaser.Scene {
     const geometry = deriveRidgeBlockoutGeometry(blockout, {
       stampIds: ridgeProgress.stampIds
     });
+    const facts = compileRidgeBlockoutFacts(blockout, {
+      stampIds: ridgeProgress.stampIds,
+      geometry
+    });
     this.ridgeGeometry = geometry;
     this.ridgeSolidBlockers = geometry.gridColliders.filter(isSolidCollider);
     this.ridgeMantleTargets = geometry.colliders.filter(isMantleTargetCollider);
@@ -190,23 +194,23 @@ export class RidgeScene extends Phaser.Scene {
     const worldMemories = getRidgeWorldMemories(ridgeProgress);
     this.addBackdrop(geometry.bounds);
     this.addRoomBounds(geometry.roomBounds);
-    this.addFutureRoutePromises(blockout, geometry);
+    this.addFutureRoutePromises(facts);
     this.addTraversalConnectorVisuals(geometry);
     const platforms = this.addBlockoutColliders(geometry);
-    this.addShortcutPromises(geometry);
+    this.addShortcutPromises(facts);
     this.addAnchorMarkers(geometry);
     this.addLandmarksFromBlockout(
-      geometry,
+      facts,
       messages.scenes.ridge.memory.stampedeFirstClearLabel,
       messages.scenes.ridge.memory.cickaWalkByBark,
       worldMemories
     );
-    this.addPlaceholderCopy(blockout, geometry);
-    this.createPlayer(platforms, blockout, geometry);
+    this.addPlaceholderCopy(facts);
+    this.createPlayer(platforms, facts, geometry);
     this.createRidgeInteractions(
       messages.navigation.interact,
       messages.scenes.ridge.cicka.interaction,
-      geometry
+      facts
     );
     this.setPaused(this.isPaused);
     this.playerRuntime?.syncAppearance();
@@ -312,17 +316,14 @@ export class RidgeScene extends Phaser.Scene {
     });
   }
 
-  private addFutureRoutePromises(
-    blockout: RidgeBlockoutMap,
-    geometry: RidgeBlockoutGeometry
-  ): void {
+  private addFutureRoutePromises(facts: RidgeBlockoutFacts): void {
     const graphics = this.add.graphics().setDepth(-8);
     graphics.lineStyle(3, 0x596f8f, 0.18);
 
-    blockout.futureRoutes.forEach((route) => {
-      route.roomIds.slice(0, -1).forEach((roomId, index) => {
-        const from = this.getRoomCenter(geometry, roomId);
-        const to = this.getRoomCenter(geometry, route.roomIds[index + 1] ?? '');
+    facts.futureRoutes.forEach((route) => {
+      route.links.forEach((link) => {
+        const from = this.getRoomCenter(facts, link.fromRoomId);
+        const to = this.getRoomCenter(facts, link.toRoomId);
         if (!from || !to) return;
         graphics.strokeLineShape(new Phaser.Geom.Line(from.x, from.y, to.x, to.y));
       });
@@ -390,10 +391,11 @@ export class RidgeScene extends Phaser.Scene {
       .setDepth(style.depth);
   }
 
-  private addShortcutPromises(geometry: RidgeBlockoutGeometry): void {
-    geometry.shortcutConnections.forEach((connection) => {
+  private addShortcutPromises(facts: RidgeBlockoutFacts): void {
+    facts.shortcuts.forEach((connection) => {
+      if (!connection.from) return;
       const graphics = this.add.graphics().setDepth(6);
-      graphics.lineStyle(4, connection.unlocked ? 0xf0d35f : 0x1f1f1d, connection.unlocked ? 0.34 : 0.16);
+      graphics.lineStyle(4, connection.available ? 0xf0d35f : 0x1f1f1d, connection.available ? 0.34 : 0.16);
       graphics.strokeLineShape(new Phaser.Geom.Line(
         connection.from.x,
         connection.from.y,
@@ -401,7 +403,7 @@ export class RidgeScene extends Phaser.Scene {
         connection.to.y
       ));
 
-      if (!connection.unlocked) {
+      if (!connection.available) {
         const centerX = (connection.from.x + connection.to.x) / 2;
         const centerY = (connection.from.y + connection.to.y) / 2;
         this.add.rectangle(centerX, centerY, 96, 18, 0xf7f1df, 0.24)
@@ -429,14 +431,14 @@ export class RidgeScene extends Phaser.Scene {
   }
 
   private addLandmarksFromBlockout(
-    geometry: RidgeBlockoutGeometry,
+    facts: RidgeBlockoutFacts,
     stampedeFirstClearLabel: string,
     cickaWalkByLine: string,
     worldMemories: readonly RidgeWorldMemory[]
   ): void {
     this.cickaPerch = undefined;
 
-    const cickaPoint = requireRidgeBlockoutAnchorPoint(geometry, {
+    const cickaPoint = requireRidgeBlockoutFactAnchor(facts, {
       roomId: 'cicka_home',
       symbol: 'C',
       kind: 'npc',
@@ -455,14 +457,14 @@ export class RidgeScene extends Phaser.Scene {
       walkByLine: cickaWalkByLine
     });
 
-    const outskirtsArtifact = requireRidgeBlockoutAnchorPoint(geometry, {
+    const outskirtsArtifact = requireRidgeBlockoutFactAnchor(facts, {
       roomId: 'outskirts',
       symbol: 'A',
       attrId: 'city_edge_memory'
     }, 'Outskirts artifact');
     this.addOutskirtsArtifactSlot(outskirtsArtifact.x, outskirtsArtifact.y);
 
-    const stampedePoint = requireRidgeBlockoutAnchorPoint(geometry, {
+    const stampedePoint = requireRidgeBlockoutFactAnchor(facts, {
       roomId: 'stampede_blanket',
       symbol: '*',
       kind: 'minigame',
@@ -475,7 +477,7 @@ export class RidgeScene extends Phaser.Scene {
       worldMemories.filter((memory) => memory.landmarkKind === 'stampede-blanket')
     );
 
-    const telegraphPoint = requireRidgeBlockoutAnchorPoint(geometry, {
+    const telegraphPoint = requireRidgeBlockoutFactAnchor(facts, {
       roomId: 'telegraph_terrace',
       symbol: '*',
       kind: 'minigame',
@@ -483,7 +485,7 @@ export class RidgeScene extends Phaser.Scene {
     }, 'Telegraph Terrace bag');
     this.addTelegraphBag(telegraphPoint.x, telegraphPoint.y);
 
-    const guidePoint = requireRidgeBlockoutAnchorPoint(geometry, {
+    const guidePoint = requireRidgeBlockoutFactAnchor(facts, {
       roomId: 'guide_overlook',
       symbol: 'N',
       kind: 'npc',
@@ -491,7 +493,7 @@ export class RidgeScene extends Phaser.Scene {
     }, 'Ridge guide');
     this.addRidgeGuide(guidePoint.x, guidePoint.y);
 
-    const relayPoint = requireRidgeBlockoutAnchorPoint(geometry, {
+    const relayPoint = requireRidgeBlockoutFactAnchor(facts, {
       roomId: 'relay_gate',
       symbol: '?',
       kind: 'gate',
@@ -500,14 +502,14 @@ export class RidgeScene extends Phaser.Scene {
     this.addRelayGate(relayPoint.x, relayPoint.y);
     this.addRelaySpire(relayPoint.x + 230, relayPoint.y - 180);
 
-    const dominoPoint = requireRidgeBlockoutAnchorPoint(geometry, {
+    const dominoPoint = requireRidgeBlockoutFactAnchor(facts, {
       roomId: 'domino_desk',
       symbol: 'A',
       attrId: 'domino_project_scrap'
     }, 'Domino Desk');
     this.addDominoDesk(dominoPoint.x, dominoPoint.y);
 
-    const highLedgePoint = requireRidgeBlockoutAnchorPoint(geometry, {
+    const highLedgePoint = requireRidgeBlockoutFactAnchor(facts, {
       roomId: 'high_ledge',
       symbol: '?',
       kind: 'gate',
@@ -518,10 +520,10 @@ export class RidgeScene extends Phaser.Scene {
 
   private createPlayer(
     platforms: readonly Phaser.GameObjects.Zone[],
-    blockout: RidgeBlockoutMap,
+    facts: RidgeBlockoutFacts,
     geometry: RidgeBlockoutGeometry
   ): void {
-    const spawn = getRidgeBlockoutSpawnPoint(blockout);
+    const spawn = facts.spawn;
     const playerRuntime = createSideViewPlayerRuntime({
       scene: this,
       start: {
@@ -880,7 +882,7 @@ export class RidgeScene extends Phaser.Scene {
   private createRidgeInteractions(
     promptText: string,
     cickaInteractionCopy: CickaInteractionCopy,
-    geometry: RidgeBlockoutGeometry
+    facts: RidgeBlockoutFacts
   ): void {
     this.interactPrompt?.destroy();
 
@@ -908,13 +910,13 @@ export class RidgeScene extends Phaser.Scene {
             )
           })
         }] : []),
-        ...this.createTrailCardTargets(geometry)
+        ...this.createTrailCardTargets(facts)
       ]
     });
   }
 
   private createTrailCardTargets(
-    geometry: RidgeBlockoutGeometry
+    facts: RidgeBlockoutFacts
   ): Array<{
     id: RidgeTrailCardTargetId;
     kind: 'trail-card';
@@ -924,8 +926,8 @@ export class RidgeScene extends Phaser.Scene {
     effect: RidgeInteractionEffect;
   }> {
     return RIDGE_TRAIL_CARD_TARGETS.map((target) => {
-      const anchorPoint = requireRidgeBlockoutAnchorPoint(
-        geometry,
+      const anchorPoint = requireRidgeBlockoutFactAnchor(
+        facts,
         target.anchor,
         `${target.id} Trail Card`
       );
@@ -947,14 +949,14 @@ export class RidgeScene extends Phaser.Scene {
   }
 
   private getRoomCenter(
-    geometry: RidgeBlockoutGeometry,
+    facts: Pick<RidgeBlockoutFacts, 'rooms'>,
     roomId: string
   ): { x: number; y: number } | undefined {
-    const room = geometry.roomBounds.find((candidate) => candidate.roomId === roomId);
+    const room = facts.rooms.find((candidate) => candidate.id === roomId);
     return room
       ? {
-        x: room.x + room.width / 2,
-        y: room.y + room.height / 2
+        x: room.bounds.x + room.bounds.width / 2,
+        y: room.bounds.y + room.bounds.height / 2
       }
       : undefined;
   }
@@ -1085,17 +1087,14 @@ export class RidgeScene extends Phaser.Scene {
     this.add.circle(x + 60, y - 37, 4, 0x1f1f1d, 0.58).setDepth(17);
   }
 
-  private addPlaceholderCopy(
-    blockout: RidgeBlockoutMap,
-    geometry: RidgeBlockoutGeometry
-  ): void {
-    const spawn = getRidgeBlockoutSpawnPoint(blockout);
+  private addPlaceholderCopy(facts: RidgeBlockoutFacts): void {
+    const spawn = facts.spawn;
     this.add.text(spawn.x, spawn.y - 260, 'Sketchbook Ridge', {
       fontFamily: 'monospace',
       fontSize: '34px',
       color: '#1f1f1d'
     }).setOrigin(0.5).setDepth(60);
-    this.add.text(spawn.x, spawn.y - 214, `${blockout.title} - parsed ${geometry.roomBounds.length} room beats`, {
+    this.add.text(spawn.x, spawn.y - 214, `${facts.title} - parsed ${facts.rooms.length} room beats`, {
       fontFamily: 'monospace',
       fontSize: '16px',
       color: '#4b4337'
@@ -1229,12 +1228,17 @@ function getColliderTop(collider: RidgeBlockoutCollider): number {
   return collider.y - collider.height / 2;
 }
 
-function requireRidgeBlockoutAnchorPoint(
-  geometry: RidgeBlockoutGeometry,
-  selector: RidgeBlockoutAnchorSelector,
+function requireRidgeBlockoutFactAnchor(
+  facts: RidgeBlockoutFacts,
+  selector: {
+    roomId: string;
+    symbol?: string;
+    kind?: string;
+    attrId?: string;
+  },
   label: string
-): RidgeBlockoutAnchorPoint {
-  const point = findRidgeBlockoutAnchorPoint(geometry, selector);
+): RidgeAnchorFact {
+  const point = findRidgeBlockoutFactAnchor(facts, selector);
   if (!point) {
     throw new Error(
       `Ridge blockout anchor for ${label} could not be resolved in room "${selector.roomId}"`

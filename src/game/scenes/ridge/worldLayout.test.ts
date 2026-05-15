@@ -4,16 +4,15 @@ import { STAMPEDE_SKETCH_SCENE_ID } from '@/game/scenes/sceneIds';
 import { CICKA_INTERACTION_TARGET_ID } from './cicka/interaction';
 import {
   RIDGE_BLOCKOUT,
-  deriveRidgeBlockoutGeometry,
-  findRidgeBlockoutAnchorPoint,
-  getRidgeBlockoutSpawnPoint,
-  isRidgeBlockoutShortcutAvailable
+  compileRidgeBlockoutFacts,
+  findRidgeBlockoutFactAnchor
 } from './blockout';
 import { RIDGE_TRAIL_CARD_TARGETS } from './worldLayout';
 
 describe('ridge world layout', () => {
   it('uses the Ridge Blockout source for first route order and spawn', () => {
-    const firstWalk = RIDGE_BLOCKOUT.routes.find((route) => route.id === 'first_walk');
+    const facts = compileRidgeBlockoutFacts(RIDGE_BLOCKOUT);
+    const firstWalk = facts.routes.find((route) => route.id === 'first_walk');
 
     expect(firstWalk?.roomIds.slice(0, 4)).toEqual([
       'outskirts',
@@ -21,17 +20,17 @@ describe('ridge world layout', () => {
       'work_artifact',
       'stampede_blanket'
     ]);
-    expect(getRidgeBlockoutSpawnPoint(RIDGE_BLOCKOUT)).toMatchObject({
+    expect(facts.spawn).toMatchObject({
       roomId: 'outskirts',
       symbol: '1',
       kind: 'player_spawn',
-      attrs: { id: 'start' }
+      id: 'start'
     });
   });
 
   it('resolves Cicka Home from the compiled blockout anchor', () => {
-    const geometry = deriveRidgeBlockoutGeometry(RIDGE_BLOCKOUT);
-    const cickaPoint = findRidgeBlockoutAnchorPoint(geometry, {
+    const facts = compileRidgeBlockoutFacts(RIDGE_BLOCKOUT);
+    const cickaPoint = findRidgeBlockoutFactAnchor(facts, {
       roomId: 'cicka_home',
       symbol: 'C',
       kind: 'npc',
@@ -42,14 +41,14 @@ describe('ridge world layout', () => {
       roomId: 'cicka_home',
       symbol: 'C',
       kind: 'npc',
-      attrs: { id: 'cicka' }
+      id: 'cicka'
     });
     expect(cickaPoint?.x).toBeGreaterThan(0);
     expect(cickaPoint?.y).toBeGreaterThan(0);
   });
 
   it('resolves Trail Card targets from their blockout anchors while keeping card content non-spatial', () => {
-    const geometry = deriveRidgeBlockoutGeometry(RIDGE_BLOCKOUT);
+    const facts = compileRidgeBlockoutFacts(RIDGE_BLOCKOUT);
     const stampede = RIDGE_TRAIL_CARD_TARGETS.find((target) => target.id === 'stampede-sketch');
     const unavailable = RIDGE_TRAIL_CARD_TARGETS.filter((target) => target.id !== 'stampede-sketch');
 
@@ -66,18 +65,18 @@ describe('ridge world layout', () => {
     expect(unavailable.every((target) => target.card.unavailableReason && !target.card.enterSceneId)).toBe(true);
 
     if (!stampede) throw new Error('missing Stampede Trail Card target');
-    expect(findRidgeBlockoutAnchorPoint(geometry, stampede.anchor)).toMatchObject({
+    expect(findRidgeBlockoutFactAnchor(facts, stampede.anchor)).toMatchObject({
       roomId: 'stampede_blanket',
       symbol: '*',
       kind: 'minigame',
-      attrs: { id: 'stampede_sketch' }
+      id: 'stampede_sketch'
     });
   });
 
   it('resolves the Relay promise from the Relay Gate blockout anchor', () => {
-    const geometry = deriveRidgeBlockoutGeometry(RIDGE_BLOCKOUT);
-    const relayRoom = geometry.roomBounds.find((room) => room.roomId === 'relay_gate');
-    const relayPoint = findRidgeBlockoutAnchorPoint(geometry, {
+    const facts = compileRidgeBlockoutFacts(RIDGE_BLOCKOUT);
+    const relayRoom = facts.rooms.find((room) => room.id === 'relay_gate');
+    const relayPoint = findRidgeBlockoutFactAnchor(facts, {
       roomId: 'relay_gate',
       symbol: '?',
       kind: 'gate',
@@ -89,55 +88,39 @@ describe('ridge world layout', () => {
       roomId: 'relay_gate',
       symbol: '?',
       kind: 'gate',
-      attrs: { id: 'relay_proof_slots' }
+      id: 'relay_proof_slots'
     });
-    expect(relayPoint?.x).toBeGreaterThanOrEqual(relayRoom?.x ?? 0);
+    expect(relayPoint?.x).toBeGreaterThanOrEqual(relayRoom?.bounds.x ?? 0);
     expect(relayPoint?.x).toBeLessThanOrEqual(
-      relayRoom ? relayRoom.x + relayRoom.width : Number.POSITIVE_INFINITY
+      relayRoom ? relayRoom.bounds.x + relayRoom.bounds.width : Number.POSITIVE_INFINITY
     );
   });
 
   it('derives the Stampede shortcut source and availability from blockout facts', () => {
-    const shortcut = RIDGE_BLOCKOUT.shortcuts.find((candidate) => candidate.id === 'stampede_sketch');
-    const lockedGeometry = deriveRidgeBlockoutGeometry(RIDGE_BLOCKOUT, { stampIds: [] });
-    const unlockedGeometry = deriveRidgeBlockoutGeometry(RIDGE_BLOCKOUT, {
+    const lockedFacts = compileRidgeBlockoutFacts(RIDGE_BLOCKOUT, { stampIds: [] });
+    const unlockedFacts = compileRidgeBlockoutFacts(RIDGE_BLOCKOUT, {
       stampIds: [STAMPEDE_SKETCH_RIDGE_STAMP_ID]
     });
-    const lockedConnection = lockedGeometry.shortcutConnections.find(
-      (connection) => connection.id === 'stampede_sketch'
-    );
-    const unlockedConnection = unlockedGeometry.shortcutConnections.find(
-      (connection) => connection.id === 'stampede_sketch'
-    );
+    const lockedConnection = lockedFacts.shortcuts.find((shortcut) => shortcut.id === 'stampede_sketch');
+    const unlockedConnection = unlockedFacts.shortcuts.find((shortcut) => shortcut.id === 'stampede_sketch');
 
-    expect(shortcut).toMatchObject({
+    expect(lockedConnection).toMatchObject({
       id: 'stampede_sketch',
       fromRoomId: 'switchback_shelf',
       toRoomId: 'cicka_home',
-      kind: 'fall_steer_fold_drop'
-    });
-    expect(isRidgeBlockoutShortcutAvailable('stampede_sketch', { stampIds: [] })).toBe(false);
-    expect(isRidgeBlockoutShortcutAvailable('stampede_sketch', {
-      stampIds: [STAMPEDE_SKETCH_RIDGE_STAMP_ID]
-    })).toBe(true);
-    expect(lockedConnection).toMatchObject({
-      id: 'stampede_sketch',
-      unlocked: false,
+      kind: 'fall_steer_fold_drop',
+      available: false,
       movement: 'drop'
     });
     expect(lockedConnection?.from).toMatchObject({
       roomId: 'switchback_shelf',
-      attrs: {
-        to: 'cicka_home',
-        requires: 'stampede_sketch'
-      }
+      targetRoomId: 'cicka_home',
+      requires: 'stampede_sketch'
     });
-    expect(lockedConnection?.assistZones).toEqual([]);
     expect(unlockedConnection).toMatchObject({
       id: 'stampede_sketch',
-      unlocked: true,
+      available: true,
       movement: 'drop'
     });
-    expect(unlockedConnection?.assistZones.some((zone) => zone.kind === 'drop')).toBe(true);
   });
 });

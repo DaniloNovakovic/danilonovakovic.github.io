@@ -1,4 +1,3 @@
-import { STAMPEDE_SKETCH_RIDGE_STAMP_ID } from '@/game/bridge/ridgeProgressIds';
 import {
   RIDGE_BLOCKOUT_LADDER_SYMBOL,
   RIDGE_BLOCKOUT_TRAVERSAL_MOVEMENTS,
@@ -10,6 +9,8 @@ import {
   type RidgeBlockoutRect,
   type RidgeBlockoutRoom
 } from './parser';
+export { isRidgeBlockoutShortcutAvailable } from './progress';
+import { isRidgeBlockoutShortcutAvailable } from './progress';
 
 export type RidgeBlockoutColliderKind =
   | 'solid'
@@ -130,10 +131,6 @@ export interface RidgeBlockoutGeometryOptions {
 }
 
 const COLLIDER_SYMBOLS = new Set(['#', '_']);
-const SHORTCUT_STAMP_IDS: Readonly<Record<string, string>> = {
-  stampede_sketch: STAMPEDE_SKETCH_RIDGE_STAMP_ID
-};
-
 export function deriveRidgeBlockoutGeometry(
   map: RidgeBlockoutMap,
   options: RidgeBlockoutGeometryOptions = {}
@@ -234,14 +231,6 @@ export function getRidgeBlockoutSpawnPoint(map: RidgeBlockoutMap): RidgeBlockout
   }
 
   return point;
-}
-
-export function isRidgeBlockoutShortcutAvailable(
-  shortcutId: string,
-  progress: { stampIds: readonly string[] }
-): boolean {
-  const stampId = SHORTCUT_STAMP_IDS[shortcutId];
-  return stampId ? progress.stampIds.includes(stampId) : false;
 }
 
 function deriveRoomBounds(map: RidgeBlockoutMap): readonly RidgeBlockoutRoomBounds[] {
