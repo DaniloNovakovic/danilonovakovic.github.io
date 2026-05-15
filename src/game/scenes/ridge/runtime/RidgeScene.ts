@@ -1,6 +1,5 @@
 import * as Phaser from 'phaser';
 import { PHASER_SCENE_KEYS } from '@/game/scenes/sceneIds';
-import type { InputCommandFrame } from '@/game/core/input/commands';
 import {
   bridgeStore,
   isItemEquipped,
@@ -66,20 +65,9 @@ import {
 } from '../cicka/CickaPerch';
 import type { TrailCardOverlayParams } from '@/game/overlays/trailCard/types';
 import {
-  canMantleLedge,
-  canStepUp,
-  chooseFallRecovery,
-  getClimbProgressDelta,
-  getFrameRateIndependentLerpAlpha,
-  getLedgeTop,
-  getPointOnTraversalSegment,
-  isMantleTargetCollider,
-  isPointNearTraversalLine,
-  isTraversalPathOccludedBySolid,
-  projectPointToSegmentT,
-  resolveWalkableRampSurfaceY,
-  shouldMaintainClimbAttachment
-} from './traversalComfort';
+  createRidgeTraversalRuntime,
+  type RidgeTraversalRuntime
+} from './ridgeTraversalRuntime';
 
 interface RidgeSceneStartData {
   onClose?: () => void;
@@ -103,38 +91,19 @@ const TRAIL_CARD_PROMPT_OFFSET_Y = -86;
 const RIDGE_PLAYER_EDGE_PADDING = 48;
 const RIDGE_COYOTE_TIME_MS = 120;
 const RIDGE_JUMP_BUFFER_MS = 120;
-const RIDGE_RAMP_SNAP = {
-  maxSnapDownY: 28,
-  maxSnapUpY: 8
-} as const;
-const RIDGE_CLIMB_ATTACH_DISTANCE = 22;
-const RIDGE_DROP_ATTACH_DISTANCE = 28;
-const RIDGE_MANTLE_HORIZONTAL_DISTANCE = 32;
-const RIDGE_MANTLE_MIN_VERTICAL_DELTA = 24;
-const RIDGE_MANTLE_MAX_VERTICAL_DELTA = 96;
-const RIDGE_MANTLE_MIN_VELOCITY_Y = -20;
-const RIDGE_STEP_UP_MAX_HEIGHT = 18;
-const RIDGE_STEP_UP_HORIZONTAL_DISTANCE = 22;
-const RIDGE_CLIMB_PROGRESS_PER_SECOND = 0.36;
-const RIDGE_DROP_LERP_ALPHA_AT_60FPS = 0.08;
-const RIDGE_FALL_RECOVERY_THRESHOLD_Y = 48;
 
 export class RidgeScene extends Phaser.Scene {
   player?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   interactPrompt?: Phaser.GameObjects.Text;
 
   private playerRuntime?: SideViewPlayerRuntime;
+  private traversalRuntime?: RidgeTraversalRuntime;
   private interactionRuntime?: InteriorInteractionRuntime<RidgeInteractionTargetId, RidgeInteractionEffect>;
   private cickaPerch?: CickaPerch;
   private onClose: () => void = () => {};
   private onOpenOverlay?: (overlayId: OverlayId, options?: OpenOverlayOptions) => void;
   private isPaused = false;
   private resumePosition?: { x: number; y: number };
-  private ridgeGeometry?: RidgeBlockoutGeometry;
-  private ridgeSolidBlockers: readonly RidgeBlockoutCollider[] = [];
-  private ridgeMantleTargets: readonly RidgeBlockoutCollider[] = [];
-  private lastSafePosition?: { x: number; y: number };
-  private activeClimbZoneId: string | null = null;
 
   constructor() {
     super(PHASER_SCENE_KEYS.ridge);
@@ -176,11 +145,7 @@ export class RidgeScene extends Phaser.Scene {
       stampIds: ridgeProgress.stampIds,
       geometry
     });
-    this.ridgeGeometry = geometry;
-    this.ridgeSolidBlockers = geometry.gridColliders.filter(isSolidCollider);
-    this.ridgeMantleTargets = geometry.colliders.filter(isMantleTargetCollider);
-    this.lastSafePosition = undefined;
-    this.activeClimbZoneId = null;
+    this.traversalRuntime = undefined;
 
     this.cameras.main.setBackgroundColor('#f7f1df');
     this.physics.world.setBounds(
@@ -217,7 +182,9 @@ export class RidgeScene extends Phaser.Scene {
   }
 
   update(_time: number, delta: number): void {
-    this.primeTraversalGrounding();
+    if (this.player) {
+      this.traversalRuntime?.primeGrounding(this.player);
+    }
     const playerUpdate = this.playerRuntime?.update();
     if (!playerUpdate || playerUpdate.paused) return;
 
@@ -226,7 +193,13 @@ export class RidgeScene extends Phaser.Scene {
       return;
     }
 
-    this.applyTraversalComfort(playerUpdate.commands, delta);
+    if (this.player) {
+      this.traversalRuntime?.update({
+        player: this.player,
+        commands: playerUpdate.commands,
+        deltaMs: delta
+      });
+    }
 
     this.cickaPerch?.update({
       playerX: this.player?.x ?? 0,
@@ -576,307 +549,10 @@ export class RidgeScene extends Phaser.Scene {
     platforms.forEach((platform) => {
       this.physics.add.collider(player, platform);
     });
-    this.lastSafePosition = { x: player.x, y: player.y };
-  }
-
-  private primeTraversalGrounding(): void {
-    const player = this.player;
-    const geometry = this.ridgeGeometry;
-    if (!player?.body || !geometry) return;
-
-    const body = player.body;
-    const bottomY = getPlayerBottomY(player);
-    const ramp = resolveWalkableRampSurfaceY(
-      geometry.assistZones,
-      { x: player.x, y: bottomY },
-      RIDGE_RAMP_SNAP
-    );
-    const climb = geometry.assistZones.find((zone) =>
-      zone.kind === 'climb' &&
-      this.isNearTraversalLine(zone, { x: player.x, y: bottomY }, RIDGE_CLIMB_ATTACH_DISTANCE)
-    );
-
-    if (ramp || climb) {
-      markBodyGrounded(body);
-    }
-  }
-
-  private applyTraversalComfort(commands: InputCommandFrame, deltaMs: number): void {
-    const player = this.player;
-    const geometry = this.ridgeGeometry;
-    if (!player?.body || !geometry) return;
-
-    const didClimb = this.applyClimbAssist(commands, geometry.assistZones, deltaMs);
-    if (!didClimb) {
-      this.releaseClimbAttachment();
-      this.applyRampAssist(commands, geometry.assistZones);
-      this.applyDropAssist(geometry.assistZones, deltaMs);
-      this.applyStepUpAssist(commands, geometry.colliders);
-      this.applyMantleAssist(commands);
-    }
-    this.recoverFromWorldBottom(geometry);
-    this.captureLastSafePosition(geometry);
-  }
-
-  private applyRampAssist(
-    commands: InputCommandFrame,
-    zones: readonly RidgeBlockoutAssistZone[]
-  ): boolean {
-    const player = this.player;
-    if (!player?.body || commands.jump) return false;
-
-    const body = player.body;
-    const bottomY = getPlayerBottomY(player);
-    const ramp = resolveWalkableRampSurfaceY(
-      zones,
-      { x: player.x, y: bottomY },
-      RIDGE_RAMP_SNAP
-    );
-    if (!ramp || body.velocity.y < -60) return false;
-
-    const target = { x: player.x, y: ramp.y - body.height / 2 };
-    if (this.isAssistPathOccluded(target)) return false;
-
-    player.y = target.y;
-    player.setVelocityY(0);
-    markBodyGrounded(body);
-    return true;
-  }
-
-  private applyClimbAssist(
-    commands: InputCommandFrame,
-    zones: readonly RidgeBlockoutAssistZone[],
-    deltaMs: number
-  ): boolean {
-    const player = this.player;
-    if (!player?.body) return false;
-
-    const zone = zones.find((candidate) =>
-      candidate.kind === 'climb' &&
-      this.isNearTraversalLine(
-        candidate,
-        { x: player.x, y: getPlayerBottomY(player) },
-        RIDGE_CLIMB_ATTACH_DISTANCE
-      )
-    );
-    const isAttached = this.activeClimbZoneId !== null;
-    if (!zone) return false;
-    if (
-      commands.verticalAxis === 0 &&
-      !shouldMaintainClimbAttachment({
-        attached: isAttached,
-        jump: commands.jump,
-        horizontalAxis: commands.moveAxis,
-        nearClimbLine: true
-      })
-    ) {
-      return false;
-    }
-    if (commands.jump) return false;
-
-    const currentT = projectPointToSegmentT(
-      { x: player.x, y: getPlayerBottomY(player) },
-      zone
-    );
-    const nextT = Phaser.Math.Clamp(
-      currentT + getClimbProgressDelta({
-        verticalAxis: commands.verticalAxis,
-        fromY: zone.from.y,
-        toY: zone.to.y,
-        progressPerSecond: RIDGE_CLIMB_PROGRESS_PER_SECOND,
-        deltaMs
-      }),
-      0,
-      1
-    );
-    const point = getPointOnTraversalSegment(zone, nextT);
-    const target = { x: point.x, y: point.y - player.body.height / 2 };
-    if (this.isAssistPathOccluded(target)) return false;
-
-    this.activeClimbZoneId = zone.id;
-    player.body.setAllowGravity(false);
-    player.x = target.x;
-    player.y = target.y;
-    player.setVelocityX(0);
-    player.setVelocityY(0);
-    markBodyGrounded(player.body);
-    return true;
-  }
-
-  private releaseClimbAttachment(): void {
-    if (!this.activeClimbZoneId) return;
-    this.activeClimbZoneId = null;
-    this.player?.body?.setAllowGravity(true);
-  }
-
-  private applyDropAssist(
-    zones: readonly RidgeBlockoutAssistZone[],
-    deltaMs: number
-  ): boolean {
-    const player = this.player;
-    if (!player?.body || player.body.velocity.y <= 0) return false;
-
-    const zone = zones.find((candidate) =>
-      candidate.kind === 'drop' &&
-      this.isNearTraversalLine(candidate, { x: player.x, y: player.y }, RIDGE_DROP_ATTACH_DISTANCE)
-    );
-    if (!zone) return false;
-
-    const t = projectPointToSegmentT({ x: player.x, y: player.y }, zone);
-    const point = getPointOnTraversalSegment(zone, t);
-    const target = {
-      x: Phaser.Math.Linear(
-        player.x,
-        point.x,
-        getFrameRateIndependentLerpAlpha(RIDGE_DROP_LERP_ALPHA_AT_60FPS, deltaMs)
-      ),
-      y: player.y
-    };
-    if (this.isAssistPathOccluded(target)) return false;
-
-    player.x = target.x;
-    return true;
-  }
-
-  private applyStepUpAssist(
-    commands: InputCommandFrame,
-    colliders: readonly RidgeBlockoutCollider[]
-  ): boolean {
-    const player = this.player;
-    if (!player?.body || commands.moveAxis === 0 || !isBodyGrounded(player.body)) return false;
-
-    const direction = Math.sign(commands.moveAxis);
-    const bottomY = getPlayerBottomY(player);
-    const candidate = findClosestLedge(colliders, player.x, direction, RIDGE_STEP_UP_HORIZONTAL_DISTANCE)
-      ?.collider;
-    if (!candidate) return false;
-
-    const topY = getColliderTop(candidate);
-    if (!canStepUp({
-      playerBottomY: bottomY,
-      obstacleTopY: topY,
-      maxStepHeight: RIDGE_STEP_UP_MAX_HEIGHT
-    })) {
-      return false;
-    }
-
-    const target = {
-      x: player.x + direction * 18,
-      y: topY - player.body.height / 2
-    };
-    if (this.isAssistPathOccluded(target)) return false;
-
-    player.x = target.x;
-    player.y = target.y;
-    player.setVelocityY(0);
-    markBodyGrounded(player.body);
-    return true;
-  }
-
-  private applyMantleAssist(
-    commands: InputCommandFrame
-  ): boolean {
-    const player = this.player;
-    if (!player?.body || commands.moveAxis === 0) return false;
-    if (isBodyGrounded(player.body)) return false;
-    if (player.body.velocity.y < RIDGE_MANTLE_MIN_VELOCITY_Y) return false;
-
-    const direction = Math.sign(commands.moveAxis);
-    const bottomY = getPlayerBottomY(player);
-    const ledges = this.ridgeMantleTargets
-      .map((collider) => ({ collider, distance: getHorizontalLedgeDistance(collider, player.x, direction) }))
-      .filter((candidate) =>
-        candidate.distance >= 0 &&
-        canMantleLedge({
-          playerX: player.x,
-          playerBottomY: bottomY,
-          moveAxis: commands.moveAxis,
-          ledge: candidate.collider,
-          maxHorizontalDistance: RIDGE_MANTLE_HORIZONTAL_DISTANCE,
-          minVerticalDelta: RIDGE_MANTLE_MIN_VERTICAL_DELTA,
-          maxVerticalDelta: RIDGE_MANTLE_MAX_VERTICAL_DELTA
-        })
-      )
-      .sort((a, b) => a.distance - b.distance);
-
-    const target = ledges[0]?.collider;
-    if (!target) return false;
-
-    const topY = getLedgeTop(target);
-    const nextPosition = {
-      x: direction > 0
-        ? target.x - target.width / 2 + player.body.width / 2 + 6
-        : target.x + target.width / 2 - player.body.width / 2 - 6,
-      y: topY - player.body.height / 2
-    };
-    if (this.isAssistPathOccluded(nextPosition)) return false;
-
-    player.x = nextPosition.x;
-    player.y = nextPosition.y;
-    player.setVelocityY(0);
-    markBodyGrounded(player.body);
-    return true;
-  }
-
-  private isNearTraversalLine(
-    zone: RidgeBlockoutAssistZone,
-    point: { x: number; y: number },
-    maxDistance: number
-  ): boolean {
-    return (
-      isPointNearTraversalLine(zone, point, maxDistance)
-    );
-  }
-
-  private isAssistPathOccluded(target: { x: number; y: number }): boolean {
-    const player = this.player;
-    if (!player?.body) return false;
-
-    return isTraversalPathOccludedBySolid({
-      from: { x: player.x, y: player.y },
-      to: target,
-      bodySize: {
-        width: player.body.width,
-        height: player.body.height
-      },
-      solidRects: this.ridgeSolidBlockers
+    this.traversalRuntime = createRidgeTraversalRuntime({
+      geometry,
+      initialSafePosition: { x: player.x, y: player.y }
     });
-  }
-
-  private recoverFromWorldBottom(geometry: RidgeBlockoutGeometry): void {
-    const player = this.player;
-    if (!player?.body) return;
-
-    const recovery = chooseFallRecovery({
-      playerY: player.y,
-      worldBottomY: geometry.bounds.y + geometry.bounds.height,
-      thresholdY: RIDGE_FALL_RECOVERY_THRESHOLD_Y,
-      lastSafePosition: this.lastSafePosition
-    });
-    if (!recovery) return;
-
-    player.x = recovery.x;
-    player.y = recovery.y;
-    player.setVelocityX(0);
-    player.setVelocityY(0);
-  }
-
-  private captureLastSafePosition(geometry: RidgeBlockoutGeometry): void {
-    const player = this.player;
-    if (!player?.body) return;
-
-    const bottomBandY = geometry.bounds.y + geometry.bounds.height - RIDGE_FALL_RECOVERY_THRESHOLD_Y;
-    if (player.y >= bottomBandY) return;
-
-    const bottomY = getPlayerBottomY(player);
-    const ramp = resolveWalkableRampSurfaceY(
-      geometry.assistZones,
-      { x: player.x, y: bottomY },
-      RIDGE_RAMP_SNAP
-    );
-    if (isBodyGrounded(player.body) || ramp) {
-      this.lastSafePosition = { x: player.x, y: player.y };
-    }
   }
 
   private createRidgeInteractions(
@@ -1179,53 +855,6 @@ function drawLadderVisual(
       y
     ));
   }
-}
-
-function isSolidCollider(collider: RidgeBlockoutCollider): boolean {
-  return collider.kind === 'solid';
-}
-
-function getPlayerBottomY(player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody): number {
-  return player.body.bottom;
-}
-
-function markBodyGrounded(body: Phaser.Physics.Arcade.Body): void {
-  body.touching.down = true;
-  body.blocked.down = true;
-}
-
-function isBodyGrounded(body: Phaser.Physics.Arcade.Body): boolean {
-  return body.touching.down || body.blocked.down;
-}
-
-function findClosestLedge(
-  colliders: readonly RidgeBlockoutCollider[],
-  playerX: number,
-  direction: number,
-  maxDistance: number
-): { collider: RidgeBlockoutCollider; distance: number } | undefined {
-  return colliders
-    .map((collider) => ({
-      collider,
-      distance: getHorizontalLedgeDistance(collider, playerX, direction)
-    }))
-    .filter((candidate) => candidate.distance >= 0 && candidate.distance <= maxDistance)
-    .sort((a, b) => a.distance - b.distance)[0];
-}
-
-function getHorizontalLedgeDistance(
-  collider: RidgeBlockoutCollider,
-  playerX: number,
-  direction: number
-): number {
-  const left = collider.x - collider.width / 2;
-  const right = collider.x + collider.width / 2;
-  if (direction > 0) return left - playerX;
-  return playerX - right;
-}
-
-function getColliderTop(collider: RidgeBlockoutCollider): number {
-  return collider.y - collider.height / 2;
 }
 
 function requireRidgeBlockoutFactAnchor(
