@@ -86,6 +86,14 @@ The Producer should not:
 
 Purpose: prevent merge-conflict mountains and architecture drift.
 
+The Architect has two useful workflow skills:
+
+- [`.agents/skills/zoom-out/SKILL.md`](../../.agents/skills/zoom-out/SKILL.md)
+  for mapping unfamiliar modules and callers before making a sequencing call.
+- [`.agents/skills/improve-codebase-architecture/SKILL.md`](../../.agents/skills/improve-codebase-architecture/SKILL.md)
+  for deeper architecture reviews that look for better module depth,
+  leverage, locality, and test seams.
+
 The Architect owns:
 
 - shared seam sequencing
