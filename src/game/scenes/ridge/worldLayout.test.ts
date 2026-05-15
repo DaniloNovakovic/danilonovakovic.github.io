@@ -1,64 +1,58 @@
 import { describe, expect, it } from 'vitest';
-import {
-  RIDGE_FLOOR_Y,
-  RIDGE_LANDMARKS,
-  RIDGE_PLAYER_RESUME_CLAMP,
-  RIDGE_PLAYER_START,
-  RIDGE_STAMPEDE_SHORTCUT,
-  RIDGE_TRAIL_CARD_TARGETS,
-  RIDGE_WORLD_WIDTH,
-  isRidgeStampedeShortcutAvailable
-} from './worldLayout';
 import { STAMPEDE_SKETCH_RIDGE_STAMP_ID } from '@/game/bridge/ridgeProgressIds';
 import { STAMPEDE_SKETCH_SCENE_ID } from '@/game/scenes/sceneIds';
-import { getRidgeLandmarkMemories } from './worldMemory';
 import { CICKA_INTERACTION_TARGET_ID } from './cicka/interaction';
+import {
+  RIDGE_BLOCKOUT,
+  deriveRidgeBlockoutGeometry,
+  findRidgeBlockoutAnchorPoint,
+  getRidgeBlockoutSpawnPoint,
+  isRidgeBlockoutShortcutAvailable
+} from './blockout';
+import { RIDGE_TRAIL_CARD_TARGETS } from './worldLayout';
 
 describe('ridge world layout', () => {
-  it('keeps the first movement shell flat and inside world bounds', () => {
-    expect(RIDGE_PLAYER_START.y).toBeLessThan(RIDGE_FLOOR_Y);
-    expect(RIDGE_PLAYER_RESUME_CLAMP.minX).toBeGreaterThan(0);
-    expect(RIDGE_PLAYER_RESUME_CLAMP.maxX).toBeLessThan(RIDGE_WORLD_WIDTH);
-    expect(RIDGE_PLAYER_RESUME_CLAMP.maxY).toBeLessThan(RIDGE_FLOOR_Y);
-  });
+  it('uses the Ridge Blockout source for first route order and spawn', () => {
+    const firstWalk = RIDGE_BLOCKOUT.routes.find((route) => route.id === 'first_walk');
 
-  it('stages the first Ridge shell landmarks in dependency order', () => {
-    expect(RIDGE_LANDMARKS.map((landmark) => landmark.kind)).toEqual([
-      'outskirts-artifact',
-      'cicka-perch',
-      'stampede-blanket',
-      'telegraph-bag',
-      'ridge-guide',
-      'relay-spire',
-      'domino-desk',
-      'high-ledge-teaser',
-      'relay-gate'
+    expect(firstWalk?.roomIds.slice(0, 4)).toEqual([
+      'outskirts',
+      'cicka_home',
+      'work_artifact',
+      'stampede_blanket'
     ]);
-    expect(RIDGE_LANDMARKS.find((landmark) => landmark.kind === 'cicka-perch')?.label).toBe(
-      'Cicka Home'
-    );
+    expect(getRidgeBlockoutSpawnPoint(RIDGE_BLOCKOUT)).toMatchObject({
+      roomId: 'outskirts',
+      symbol: '1',
+      kind: 'player_spawn',
+      attrs: { id: 'start' }
+    });
   });
 
-  it('keeps Relay Spire visible early and reserves a later Relay Gate', () => {
-    const relay = RIDGE_LANDMARKS.find((landmark) => landmark.kind === 'relay-spire');
-    const relayGate = RIDGE_LANDMARKS.find((landmark) => landmark.kind === 'relay-gate');
+  it('resolves Cicka Home from the compiled blockout anchor', () => {
+    const geometry = deriveRidgeBlockoutGeometry(RIDGE_BLOCKOUT);
+    const cickaPoint = findRidgeBlockoutAnchorPoint(geometry, {
+      roomId: 'cicka_home',
+      symbol: 'C',
+      kind: 'npc',
+      attrId: 'cicka'
+    });
 
-    expect(relay?.x).toBeGreaterThan(0);
-    expect(relay?.x).toBeLessThan(1100);
-    expect(relayGate?.x).toBeGreaterThan(relay?.x ?? 0);
-    expect(relayGate?.x).toBeLessThan(RIDGE_WORLD_WIDTH);
+    expect(cickaPoint).toMatchObject({
+      roomId: 'cicka_home',
+      symbol: 'C',
+      kind: 'npc',
+      attrs: { id: 'cicka' }
+    });
+    expect(cickaPoint?.x).toBeGreaterThan(0);
+    expect(cickaPoint?.y).toBeGreaterThan(0);
   });
 
-  it('makes the Stampede paper-fold shortcut available from Stampede progress only', () => {
-    expect(RIDGE_STAMPEDE_SHORTCUT.sourceStampId).toBe(STAMPEDE_SKETCH_RIDGE_STAMP_ID);
-    expect(RIDGE_STAMPEDE_SHORTCUT.startX).toBeGreaterThan(RIDGE_STAMPEDE_SHORTCUT.endX);
-    expect(isRidgeStampedeShortcutAvailable({ stampIds: [] })).toBe(false);
-    expect(isRidgeStampedeShortcutAvailable({
-      stampIds: [STAMPEDE_SKETCH_RIDGE_STAMP_ID]
-    })).toBe(true);
-  });
+  it('resolves Trail Card targets from their blockout anchors while keeping card content non-spatial', () => {
+    const geometry = deriveRidgeBlockoutGeometry(RIDGE_BLOCKOUT);
+    const stampede = RIDGE_TRAIL_CARD_TARGETS.find((target) => target.id === 'stampede-sketch');
+    const unavailable = RIDGE_TRAIL_CARD_TARGETS.filter((target) => target.id !== 'stampede-sketch');
 
-  it('defines exactly three Trail Card targets for the first trigger contract', () => {
     expect(RIDGE_TRAIL_CARD_TARGETS.map((target) => target.id)).toEqual([
       'stampede-sketch',
       'telegraph-terrace',
@@ -67,48 +61,83 @@ describe('ridge world layout', () => {
     expect(RIDGE_TRAIL_CARD_TARGETS.map((target) => target.id)).not.toContain(
       CICKA_INTERACTION_TARGET_ID
     );
-    expect(RIDGE_TRAIL_CARD_TARGETS.map((target) => target.landmarkKind)).toEqual([
-      'stampede-blanket',
-      'telegraph-bag',
-      'domino-desk'
-    ]);
-  });
-
-  it('enables only the Stampede Trail Card for the movement-only prototype', () => {
-    const stampede = RIDGE_TRAIL_CARD_TARGETS.find((target) => target.id === 'stampede-sketch');
-    const unavailable = RIDGE_TRAIL_CARD_TARGETS.filter((target) => target.id !== 'stampede-sketch');
-
     expect(stampede?.card.enterSceneId).toBe(STAMPEDE_SKETCH_SCENE_ID);
     expect(stampede?.card.unavailableReason).toBeUndefined();
     expect(unavailable.every((target) => target.card.unavailableReason && !target.card.enterSceneId)).toBe(true);
+
+    if (!stampede) throw new Error('missing Stampede Trail Card target');
+    expect(findRidgeBlockoutAnchorPoint(geometry, stampede.anchor)).toMatchObject({
+      roomId: 'stampede_blanket',
+      symbol: '*',
+      kind: 'minigame',
+      attrs: { id: 'stampede_sketch' }
+    });
   });
 
-  it('keeps Ridge memory derivation anchored to the Stampede landmark', () => {
-    const cickaPerch = RIDGE_LANDMARKS.find((landmark) => landmark.kind === 'cicka-perch');
-    const stampedeBlanket = RIDGE_LANDMARKS.find((landmark) => landmark.kind === 'stampede-blanket');
-    const telegraphBag = RIDGE_LANDMARKS.find((landmark) => landmark.kind === 'telegraph-bag');
+  it('resolves the Relay promise from the Relay Gate blockout anchor', () => {
+    const geometry = deriveRidgeBlockoutGeometry(RIDGE_BLOCKOUT);
+    const relayRoom = geometry.roomBounds.find((room) => room.roomId === 'relay_gate');
+    const relayPoint = findRidgeBlockoutAnchorPoint(geometry, {
+      roomId: 'relay_gate',
+      symbol: '?',
+      kind: 'gate',
+      attrId: 'relay_proof_slots'
+    });
 
-    expect(cickaPerch).toBeDefined();
-    expect(stampedeBlanket).toBeDefined();
-    expect(telegraphBag).toBeDefined();
-    if (!cickaPerch || !stampedeBlanket || !telegraphBag) return;
+    expect(relayRoom).toBeDefined();
+    expect(relayPoint).toMatchObject({
+      roomId: 'relay_gate',
+      symbol: '?',
+      kind: 'gate',
+      attrs: { id: 'relay_proof_slots' }
+    });
+    expect(relayPoint?.x).toBeGreaterThanOrEqual(relayRoom?.x ?? 0);
+    expect(relayPoint?.x).toBeLessThanOrEqual(
+      relayRoom ? relayRoom.x + relayRoom.width : Number.POSITIVE_INFINITY
+    );
+  });
 
-    expect(getRidgeLandmarkMemories(stampedeBlanket, { stampIds: [] })).toEqual([]);
-    expect(getRidgeLandmarkMemories(cickaPerch, { stampIds: [] })).toEqual([]);
-    expect(getRidgeLandmarkMemories(stampedeBlanket, {
+  it('derives the Stampede shortcut source and availability from blockout facts', () => {
+    const shortcut = RIDGE_BLOCKOUT.shortcuts.find((candidate) => candidate.id === 'stampede_sketch');
+    const lockedGeometry = deriveRidgeBlockoutGeometry(RIDGE_BLOCKOUT, { stampIds: [] });
+    const unlockedGeometry = deriveRidgeBlockoutGeometry(RIDGE_BLOCKOUT, {
       stampIds: [STAMPEDE_SKETCH_RIDGE_STAMP_ID]
-    }).map((memory) => memory.id)).toEqual([
-      'stampede-held-sticker',
-      'stampede-settled-swarm',
-      'stampede-glide-pip-decal'
-    ]);
-    expect(getRidgeLandmarkMemories(cickaPerch, {
+    });
+    const lockedConnection = lockedGeometry.shortcutConnections.find(
+      (connection) => connection.id === 'stampede_sketch'
+    );
+    const unlockedConnection = unlockedGeometry.shortcutConnections.find(
+      (connection) => connection.id === 'stampede_sketch'
+    );
+
+    expect(shortcut).toMatchObject({
+      id: 'stampede_sketch',
+      fromRoomId: 'switchback_shelf',
+      toRoomId: 'cicka_home',
+      kind: 'fall_steer_fold_drop'
+    });
+    expect(isRidgeBlockoutShortcutAvailable('stampede_sketch', { stampIds: [] })).toBe(false);
+    expect(isRidgeBlockoutShortcutAvailable('stampede_sketch', {
       stampIds: [STAMPEDE_SKETCH_RIDGE_STAMP_ID]
-    }).map((memory) => memory.id)).toEqual([
-      'cicka-stampede-note'
-    ]);
-    expect(getRidgeLandmarkMemories(telegraphBag, {
-      stampIds: [STAMPEDE_SKETCH_RIDGE_STAMP_ID]
-    })).toEqual([]);
+    })).toBe(true);
+    expect(lockedConnection).toMatchObject({
+      id: 'stampede_sketch',
+      unlocked: false,
+      movement: 'drop'
+    });
+    expect(lockedConnection?.from).toMatchObject({
+      roomId: 'switchback_shelf',
+      attrs: {
+        to: 'cicka_home',
+        requires: 'stampede_sketch'
+      }
+    });
+    expect(lockedConnection?.assistZones).toEqual([]);
+    expect(unlockedConnection).toMatchObject({
+      id: 'stampede_sketch',
+      unlocked: true,
+      movement: 'drop'
+    });
+    expect(unlockedConnection?.assistZones.some((zone) => zone.kind === 'drop')).toBe(true);
   });
 });

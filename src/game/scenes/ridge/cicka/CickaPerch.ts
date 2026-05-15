@@ -15,9 +15,7 @@ import {
   updateCickaWalkBy,
   type CickaWalkByState
 } from './walkBy';
-import { RIDGE_FLOOR_Y } from '../worldLayout';
 
-const CICKA_PERCH_ANCHOR_Y = RIDGE_FLOOR_Y - 74;
 const CICKA_INTERACT_RADIUS = 78;
 const CICKA_PROMPT_OFFSET_Y = -86;
 const CICKA_SPEECH_BUBBLE_OFFSET = { x: -20, y: -98 } as const;
@@ -51,7 +49,7 @@ export interface CickaPerch {
 
 export interface CreateCickaPerchOptions {
   scene: Phaser.Scene;
-  landmark: { x: number; y?: number };
+  landmark: { x: number; y: number };
   hasStampedeNoteMemory: boolean;
   walkByLine: string;
 }
@@ -59,7 +57,7 @@ export interface CreateCickaPerchOptions {
 export function createCickaPerch(options: CreateCickaPerchOptions): CickaPerch {
   const { scene, landmark, hasStampedeNoteMemory, walkByLine } = options;
   const x = landmark.x;
-  const y = landmark.y ?? CICKA_PERCH_ANCHOR_Y;
+  const y = landmark.y;
   const ownedObjects: Phaser.GameObjects.GameObject[] = [];
   let walkByState: CickaWalkByState = createCickaWalkByState();
   let speechVisibleUntilMs = 0;
