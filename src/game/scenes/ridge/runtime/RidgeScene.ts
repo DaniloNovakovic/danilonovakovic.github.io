@@ -29,8 +29,9 @@ import {
 import {
   RIDGE_BLOCKOUT,
   deriveRidgeBlockoutGeometry,
-  findRidgeBlockoutRoom,
-  getRidgeBlockoutAnchorPoint,
+  findRidgeBlockoutAnchorPoint,
+  getRidgeBlockoutSpawnPoint,
+  type RidgeBlockoutAnchorSelector,
   type RidgeBlockoutAnchorPoint,
   type RidgeBlockoutAssistZone,
   type RidgeBlockoutBounds,
@@ -435,100 +436,84 @@ export class RidgeScene extends Phaser.Scene {
   ): void {
     this.cickaPerch = undefined;
 
-    const cickaPoint = this.findAnchorPoint(geometry, {
+    const cickaPoint = requireRidgeBlockoutAnchorPoint(geometry, {
       roomId: 'cicka_home',
       symbol: 'C',
       kind: 'npc',
       attrId: 'cicka'
+    }, 'Cicka Home perch');
+    this.cickaPerch = createCickaPerch({
+      scene: this,
+      landmark: {
+        x: cickaPoint.x,
+        y: cickaPoint.y + CICKA_PERCH_OFFSET_Y
+      },
+      hasStampedeNoteMemory: hasRidgeWorldMemory(
+        worldMemories.filter((memory) => memory.landmarkKind === 'cicka-perch'),
+        'cicka-stampede-note'
+      ),
+      walkByLine: cickaWalkByLine
     });
-    if (cickaPoint) {
-      this.cickaPerch = createCickaPerch({
-        scene: this,
-        landmark: {
-          x: cickaPoint.x,
-          y: cickaPoint.y + CICKA_PERCH_OFFSET_Y
-        },
-        hasStampedeNoteMemory: hasRidgeWorldMemory(
-          worldMemories.filter((memory) => memory.landmarkKind === 'cicka-perch'),
-          'cicka-stampede-note'
-        ),
-        walkByLine: cickaWalkByLine
-      });
-    }
 
-    const outskirtsArtifact = this.findAnchorPoint(geometry, {
+    const outskirtsArtifact = requireRidgeBlockoutAnchorPoint(geometry, {
       roomId: 'outskirts',
       symbol: 'A',
       attrId: 'city_edge_memory'
-    });
-    if (outskirtsArtifact) {
-      this.addOutskirtsArtifactSlot(outskirtsArtifact.x, outskirtsArtifact.y);
-    }
+    }, 'Outskirts artifact');
+    this.addOutskirtsArtifactSlot(outskirtsArtifact.x, outskirtsArtifact.y);
 
-    const stampedePoint = this.findAnchorPoint(geometry, {
+    const stampedePoint = requireRidgeBlockoutAnchorPoint(geometry, {
       roomId: 'stampede_blanket',
       symbol: '*',
       kind: 'minigame',
       attrId: 'stampede_sketch'
-    });
-    if (stampedePoint) {
-      this.addStampedeBlanket(
-        stampedePoint.x,
-        stampedePoint.y,
-        stampedeFirstClearLabel,
-        worldMemories.filter((memory) => memory.landmarkKind === 'stampede-blanket')
-      );
-    }
+    }, 'Stampede blanket');
+    this.addStampedeBlanket(
+      stampedePoint.x,
+      stampedePoint.y,
+      stampedeFirstClearLabel,
+      worldMemories.filter((memory) => memory.landmarkKind === 'stampede-blanket')
+    );
 
-    const telegraphPoint = this.findAnchorPoint(geometry, {
+    const telegraphPoint = requireRidgeBlockoutAnchorPoint(geometry, {
       roomId: 'telegraph_terrace',
       symbol: '*',
       kind: 'minigame',
       attrId: 'telegraph_future'
-    });
-    if (telegraphPoint) {
-      this.addTelegraphBag(telegraphPoint.x, telegraphPoint.y);
-    }
+    }, 'Telegraph Terrace bag');
+    this.addTelegraphBag(telegraphPoint.x, telegraphPoint.y);
 
-    const guidePoint = this.findAnchorPoint(geometry, {
+    const guidePoint = requireRidgeBlockoutAnchorPoint(geometry, {
       roomId: 'guide_overlook',
       symbol: 'N',
       kind: 'npc',
       attrId: 'ridge_guide'
-    });
-    if (guidePoint) {
-      this.addRidgeGuide(guidePoint.x, guidePoint.y);
-    }
+    }, 'Ridge guide');
+    this.addRidgeGuide(guidePoint.x, guidePoint.y);
 
-    const relayPoint = this.findAnchorPoint(geometry, {
+    const relayPoint = requireRidgeBlockoutAnchorPoint(geometry, {
       roomId: 'relay_gate',
       symbol: '?',
       kind: 'gate',
       attrId: 'relay_proof_slots'
-    });
-    if (relayPoint) {
-      this.addRelayGate(relayPoint.x, relayPoint.y);
-      this.addRelaySpire(relayPoint.x + 230, relayPoint.y - 180);
-    }
+    }, 'Relay Gate');
+    this.addRelayGate(relayPoint.x, relayPoint.y);
+    this.addRelaySpire(relayPoint.x + 230, relayPoint.y - 180);
 
-    const dominoPoint = this.findAnchorPoint(geometry, {
+    const dominoPoint = requireRidgeBlockoutAnchorPoint(geometry, {
       roomId: 'domino_desk',
       symbol: 'A',
       attrId: 'domino_project_scrap'
-    });
-    if (dominoPoint) {
-      this.addDominoDesk(dominoPoint.x, dominoPoint.y);
-    }
+    }, 'Domino Desk');
+    this.addDominoDesk(dominoPoint.x, dominoPoint.y);
 
-    const highLedgePoint = this.findAnchorPoint(geometry, {
+    const highLedgePoint = requireRidgeBlockoutAnchorPoint(geometry, {
       roomId: 'high_ledge',
       symbol: '?',
       kind: 'gate',
       attrId: 'movement_reward_tease'
-    });
-    if (highLedgePoint) {
-      this.addHighLedgeTeaser(highLedgePoint.x, highLedgePoint.y);
-    }
+    }, 'High Ledge teaser');
+    this.addHighLedgeTeaser(highLedgePoint.x, highLedgePoint.y);
   }
 
   private createPlayer(
@@ -536,7 +521,7 @@ export class RidgeScene extends Phaser.Scene {
     blockout: RidgeBlockoutMap,
     geometry: RidgeBlockoutGeometry
   ): void {
-    const spawn = getSpawnPoint(blockout);
+    const spawn = getRidgeBlockoutSpawnPoint(blockout);
     const playerRuntime = createSideViewPlayerRuntime({
       scene: this,
       start: {
@@ -939,17 +924,19 @@ export class RidgeScene extends Phaser.Scene {
     effect: RidgeInteractionEffect;
   }> {
     return RIDGE_TRAIL_CARD_TARGETS.map((target) => {
-      const anchorPoint = this.getTrailCardAnchorPoint(geometry, target.id);
-      const x = anchorPoint?.x ?? target.x;
-      const y = anchorPoint?.y ?? target.distanceAnchorY;
+      const anchorPoint = requireRidgeBlockoutAnchorPoint(
+        geometry,
+        target.anchor,
+        `${target.id} Trail Card`
+      );
       return {
         id: target.id,
         kind: 'trail-card',
-        x,
-        distanceAnchorY: y,
+        x: anchorPoint.x,
+        distanceAnchorY: anchorPoint.y,
         prompt: {
-          x,
-          y: y + TRAIL_CARD_PROMPT_OFFSET_Y
+          x: anchorPoint.x,
+          y: anchorPoint.y + TRAIL_CARD_PROMPT_OFFSET_Y
         },
         effect: {
           kind: 'openTrailCard',
@@ -957,51 +944,6 @@ export class RidgeScene extends Phaser.Scene {
         }
       };
     });
-  }
-
-  private getTrailCardAnchorPoint(
-    geometry: RidgeBlockoutGeometry,
-    targetId: RidgeTrailCardTargetId
-  ): RidgeBlockoutAnchorPoint | undefined {
-    switch (targetId) {
-      case 'stampede-sketch':
-        return this.findAnchorPoint(geometry, {
-          roomId: 'stampede_blanket',
-          symbol: '*',
-          kind: 'minigame',
-          attrId: 'stampede_sketch'
-        });
-      case 'telegraph-terrace':
-        return this.findAnchorPoint(geometry, {
-          roomId: 'telegraph_terrace',
-          symbol: '*',
-          kind: 'minigame',
-          attrId: 'telegraph_future'
-        });
-      case 'domino-desk':
-        return this.findAnchorPoint(geometry, {
-          roomId: 'domino_desk',
-          symbol: 'A',
-          attrId: 'domino_project_scrap'
-        });
-    }
-  }
-
-  private findAnchorPoint(
-    geometry: RidgeBlockoutGeometry,
-    filter: {
-      roomId: string;
-      symbol: string;
-      kind?: string;
-      attrId?: string;
-    }
-  ): RidgeBlockoutAnchorPoint | undefined {
-    return geometry.anchorPoints.find((point) =>
-      point.roomId === filter.roomId &&
-      point.symbol === filter.symbol &&
-      (!filter.kind || point.kind === filter.kind) &&
-      (!filter.attrId || point.attrs.id === filter.attrId)
-    );
   }
 
   private getRoomCenter(
@@ -1147,7 +1089,7 @@ export class RidgeScene extends Phaser.Scene {
     blockout: RidgeBlockoutMap,
     geometry: RidgeBlockoutGeometry
   ): void {
-    const spawn = getSpawnPoint(blockout);
+    const spawn = getRidgeBlockoutSpawnPoint(blockout);
     this.add.text(spawn.x, spawn.y - 260, 'Sketchbook Ridge', {
       fontFamily: 'monospace',
       fontSize: '34px',
@@ -1287,13 +1229,16 @@ function getColliderTop(collider: RidgeBlockoutCollider): number {
   return collider.y - collider.height / 2;
 }
 
-function getSpawnPoint(blockout: RidgeBlockoutMap): { x: number; y: number } {
-  const spawnRoom = findRidgeBlockoutRoom(blockout, blockout.spawn.roomId);
-  const spawnAnchor = spawnRoom?.anchors.find(
-    (anchor) => anchor.symbol === blockout.spawn.anchorSymbol
-  );
-  const point = spawnRoom && spawnAnchor
-    ? getRidgeBlockoutAnchorPoint(blockout, spawnRoom, spawnAnchor)
-    : undefined;
-  return point ?? { x: 120, y: 420 };
+function requireRidgeBlockoutAnchorPoint(
+  geometry: RidgeBlockoutGeometry,
+  selector: RidgeBlockoutAnchorSelector,
+  label: string
+): RidgeBlockoutAnchorPoint {
+  const point = findRidgeBlockoutAnchorPoint(geometry, selector);
+  if (!point) {
+    throw new Error(
+      `Ridge blockout anchor for ${label} could not be resolved in room "${selector.roomId}"`
+    );
+  }
+  return point;
 }

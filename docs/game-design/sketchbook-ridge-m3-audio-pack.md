@@ -1,6 +1,6 @@
 # Sketchbook Ridge M3 Audio Direction Pack
 
-Owner mode: Django, Music / Sound Designer.
+Owner mode: Audio Designer.
 
 Purpose: implementation-facing audio research for the Ridge, Cicka, Potassium
 acknowledgements, Stampede Sketch, and Telegraph Terrace. This is a spec pack,

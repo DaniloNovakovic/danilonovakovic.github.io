@@ -6,10 +6,10 @@
 
 ## Team Frame
 
-- **Aleksa, lead level designer**: owns the playable world, pacing, and scope.
-- **Iva, emotional/world design**: protects warmth, manga sketchbook tone, and the feeling that the world remembers Danilo.
-- **Vuk, systems/production design**: protects input simplicity, Phaser/React boundaries, and build order.
-- **Milena, character designer**: protects NPC silhouettes, interaction charm, and the feeling that the ridge is inhabited.
+- **Level Designer**: owns the playable world, pacing, and scope.
+- **Story / Tone Designer**: protects warmth, manga sketchbook tone, and the feeling that the world remembers Danilo.
+- **Systems / Production Designer**: protects input simplicity, Phaser/React boundaries, and build order.
+- **Character Designer**: protects NPC silhouettes, interaction charm, and the feeling that the ridge is inhabited.
 
 The competition winner remains **Sketchbook Ridge**. The production direction is:
 
@@ -462,7 +462,7 @@ This should be small and slightly spicy. It should never block the main ending.
 
 The tone is **warm weirdos with tiny stakes delivered like destiny**.
 
-Milena's character-design rule: every NPC should be readable by silhouette first, voice second, and function third. If an NPC exists only to explain a menu, it should be a sign instead.
+Character Designer rule: every NPC should be readable by silhouette first, voice second, and function third. If an NPC exists only to explain a menu, it should be a sign instead.
 
 Examples:
 
@@ -764,7 +764,7 @@ These are the choices to iterate on next:
 - **Cicka timing**: default to first perch in Slice 1, translator/daydream after Ridge Memory proves return play.
 - **World scale**: default to one ridge before any new area.
 
-## Aleksa Verdict
+## Level Designer Verdict
 
 Build the smallest version that already feels like the real game:
 

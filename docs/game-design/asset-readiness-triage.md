@@ -72,11 +72,11 @@ question."
 
 ## Recommended Specialist Read
 
-- Mira: keep this bounded to readiness, not production art overhaul.
-- Rade: review silhouettes and style fit before each adoption slice.
-- Vuk: check whether each asset supports the current gameplay loop.
-- Zoran: own duplicate cleanup and manifest safety.
-- Milena: review Cicka and NPC assets before Ridge character adoption.
+- Producer: keep this bounded to readiness, not production art overhaul.
+- Visual Direction Artist: review silhouettes and style fit before each adoption slice.
+- Systems / Production Designer: check whether each asset supports the current gameplay loop.
+- Architect: own duplicate cleanup and manifest safety.
+- Character Designer: review Cicka and NPC assets before Ridge character adoption.
 
 Do not bring in the whole team at once. Four specialist reads are enough for
 this phase.

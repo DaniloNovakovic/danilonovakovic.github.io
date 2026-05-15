@@ -1,6 +1,6 @@
 import { STAMPEDE_SKETCH_RIDGE_STAMP_ID } from '@/game/bridge/ridgeProgressIds';
 import type { BridgeRidgeProgressState, RidgeStampId } from '@/game/bridge/store';
-import type { RidgeLandmark, RidgeLandmarkKind } from './worldLayout';
+import type { RidgeLandmarkKind } from './worldLayout';
 
 type RidgeMemorySource =
   | {
@@ -75,11 +75,11 @@ export function getRidgeWorldMemories(
 }
 
 export function getRidgeLandmarkMemories(
-  landmark: Pick<RidgeLandmark, 'kind'>,
+  landmarkKind: RidgeLandmarkKind,
   ridgeProgress: Pick<BridgeRidgeProgressState, 'stampIds'>
 ): readonly RidgeWorldMemory[] {
   return getRidgeWorldMemories(ridgeProgress).filter(
-    (memory) => memory.landmarkKind === landmark.kind
+    (memory) => memory.landmarkKind === landmarkKind
   );
 }
 

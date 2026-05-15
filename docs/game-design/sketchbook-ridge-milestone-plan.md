@@ -71,14 +71,14 @@ Anything beyond that is future scope unless a slice explicitly pulls it in.
 Role contracts and activation phrases live in
 [`docs/agents/sketchbook-ridge-team.md`](../agents/sketchbook-ridge-team.md).
 
-- **Aleksa**: level design and milestone shape.
-- **Iva**: emotional/story tone.
-- **Vuk**: systems and production constraints.
-- **Milena**: NPC/character design.
-- **Zoran**: architecture and branch conflict control.
-- **Rade**: character and environment art research.
-- **Aleksandra**: overlay, manual, and mobile visual readability.
-- **Django**: music and sound design research.
+- **Level Designer**: level design and milestone shape.
+- **Story / Tone Designer**: emotional/story tone.
+- **Systems / Production Designer**: systems and production constraints.
+- **Character Designer**: NPC/character design.
+- **Architect**: architecture and branch conflict control.
+- **Visual Direction Artist**: character and environment art research.
+- **Overlay Readability Designer**: overlay, manual, and mobile visual readability.
+- **Audio Designer**: music and sound design research.
 
 ## Reference Stack
 
@@ -97,7 +97,7 @@ Use [`potassium-slip.md`](./potassium-slip.md) for Potassium-specific behavior.
 
 ## Conflict Strategy
 
-Zoran's rule:
+Architect's rule:
 
 > Parallelize scene internals. Serialize shared seams.
 
@@ -205,7 +205,7 @@ Registry wiring should be serialized through the integration branch.
 
 Goal: unblock implementation without creating final-asset pressure.
 
-Owners: Rade, Aleksandra, Django.
+Owners: Visual Direction Artist, Overlay Readability Designer, Audio Designer.
 
 Outputs:
 

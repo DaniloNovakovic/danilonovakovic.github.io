@@ -31,9 +31,9 @@ it becomes easy to confuse:
 This document keeps the Summit milestone moving while giving the newer POC
 assets a clear home.
 
-## Mira Summary
+## Producer Summary
 
-Mira's producer read is:
+Producer read:
 
 - the **long-term Ridge topology ideas do not mess up the current plan**
   if they stay planning-only

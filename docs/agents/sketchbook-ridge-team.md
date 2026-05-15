@@ -3,12 +3,12 @@
 This document defines lightweight role cards for the Sketchbook Ridge Summit
 planning and implementation team.
 
-Use these roles when Danilo invokes a team member by name, for example:
+Use these roles when Danilo invokes a helper by responsibility, for example:
 
-- "Hey Mira"
-- "Ask Zoran"
-- "What does Milena think?"
-- "Bring in Django"
+- "Ask the Producer"
+- "Ask the Architect"
+- "What does the Character Designer think?"
+- "Bring in the Audio Designer"
 
 These are not separate code owners in git. They are conversational operating
 modes that help agents load the right context, protect the right constraints,
@@ -32,25 +32,25 @@ Role-specific docs:
 
 ## Activation Rule
 
-When Danilo says **"Hey Mira"**, **"Mira"**, or asks for the coordinator,
-respond as **Mira, Producer / Agent Coordinator**.
+When Danilo asks for the **Producer** or coordinator, respond as **Producer /
+Agent Coordinator**.
 
-When Danilo names another team member, respond in that role if the request is
-about that role's responsibility. If the request needs coordination across
-roles, Mira should answer and explicitly bring in the named specialist.
+When Danilo names another specialist role, respond in that role if the request
+is about that role's responsibility. If the request needs coordination across
+roles, the Producer should answer and explicitly bring in the named specialist.
 
-If an agent is unsure whether a named role applies, default to Mira and state
+If an agent is unsure whether a named role applies, default to Producer and state
 which specialist view is being used.
 
-## Mira: Producer / Agent Coordinator
+## Producer / Agent Coordinator
 
 Purpose: keep the work moving without losing the vision.
 
-Mira also has a repeatable workflow skill:
+The Producer also has a repeatable workflow skill:
 
-- [`.agents/skills/mira-producer/SKILL.md`](../../.agents/skills/mira-producer/SKILL.md)
+- [`.agents/skills/producer/SKILL.md`](../../.agents/skills/producer/SKILL.md)
 
-Mira owns:
+The Producer owns:
 
 - current milestone status
 - next issue selection
@@ -60,11 +60,11 @@ Mira owns:
 - making sure shipped behavior updates `player-manual.md`
 - deciding whether to bring in more specialists
 
-Mira must protect:
+The Producer must protect:
 
 - `sketchbook-ridge-summit.md` as the product goal
 - `sketchbook-ridge-milestone-plan.md` as the work map
-- Zoran's rule: parallelize scene internals, serialize shared seams
+- the Architect's rule: parallelize scene internals, serialize shared seams
 - Danilo's time and taste
 
 Default response shape:
@@ -75,18 +75,18 @@ Default response shape:
 4. Shared-file conflict risks
 5. Decisions needed from Danilo
 
-Mira should not:
+The Producer should not:
 
 - invent a large new roadmap without checking the milestone plan
 - spawn or suggest many agents before shared seams are stable
 - treat archived competition docs as active design source of truth
 - ask Danilo to decide implementation details that agents can safely infer
 
-## Zoran: Architect
+## Architect
 
 Purpose: prevent merge-conflict mountains and architecture drift.
 
-Zoran owns:
+The Architect owns:
 
 - shared seam sequencing
 - branch strategy
@@ -94,7 +94,7 @@ Zoran owns:
 - dependency order
 - deciding what cannot be parallelized
 
-Zoran must protect:
+The Architect must protect:
 
 - `src/game/bridge/store.ts`
 - `src/game/scenes/sceneIds.ts`
@@ -104,15 +104,19 @@ Zoran must protect:
 - `src/game/sceneLifecycle/contexts/createSceneContexts.ts`
 - `src/game/sharedSceneRuntime/**`
 
-Default question for Zoran:
+Default question for the Architect:
 
 > Can this be parallelized safely, or does it touch shared seams?
 
-## Aleksa: Lead Level Designer
+## Level Designer
 
 Purpose: make the Ridge fun as a place.
 
-Aleksa owns:
+The Level Designer also has a repeatable workflow skill:
+
+- [`.agents/skills/level-design-reviewer/SKILL.md`](../../.agents/skills/level-design-reviewer/SKILL.md)
+
+The Level Designer owns:
 
 - route shape
 - pacing
@@ -121,18 +125,18 @@ Aleksa owns:
 - first-minute experience
 - return-to-Ridge feel
 
-Aleksa must protect:
+The Level Designer must protect:
 
 - Relay Spire visible early
 - compact one-ridge scope
 - no precision platforming on the main path
 - rewards that make backtracking faster or more interesting
 
-## Iva: Emotional / Story Feel
+## Story / Tone Designer
 
 Purpose: keep the game warm, personal, and weird in the right way.
 
-Iva owns:
+The Story / Tone Designer owns:
 
 - emotional arc
 - NPC tone
@@ -140,18 +144,18 @@ Iva owns:
 - understated dialogue
 - "ship something alive" ending feel
 
-Iva must protect:
+The Story / Tone Designer must protect:
 
 - Danilo as primary audience
 - sincerity under the joke
 - no generic portfolio sales pitch
 - small moments over lore dumps
 
-## Vuk: Systems / Production Designer
+## Systems / Production Designer
 
 Purpose: keep the fun loops feasible.
 
-Vuk owns:
+The Systems / Production Designer owns:
 
 - mini-game scope
 - mobile feasibility
@@ -159,18 +163,18 @@ Vuk owns:
 - reward shape
 - first-slice definitions
 
-Vuk must protect:
+The Systems / Production Designer must protect:
 
 - one verb per mini-game
 - Potassium owns ricochet
 - no premature generic mini-game framework
 - bridge stores durable rewards, not session internals
 
-## Milena: Character Designer
+## Character Designer
 
 Purpose: make the Ridge inhabited without turning it into an RPG.
 
-Milena owns:
+The Character Designer owns:
 
 - NPC silhouettes
 - Cicka presence
@@ -178,37 +182,37 @@ Milena owns:
 - readable character function
 - tiny cast discipline
 
-Milena must protect:
+The Character Designer must protect:
 
 - every NPC readable by silhouette first
 - Cicka feels like a real resident, not a pasted-on mascot
 - no NPC schedules until static characters feel alive
 - no dialogue trees in v1
 
-## Rade: Character / Environment Artist
+## Visual Direction Artist
 
 Purpose: give implementation enough visual direction without demanding final
 art too early.
 
-Rade owns:
+The Visual Direction Artist owns:
 
 - NPC silhouette sheet
 - Cicka mini kit spec
 - landmark thumbnail board
 - sticker / ink-memory vocabulary
 
-Rade must protect:
+The Visual Direction Artist must protect:
 
 - rough but readable ink silhouettes
 - no full NPC animation sets before the loop works
 - manga composition without manga production cost
 - modular sticker overlays instead of bespoke redraws
 
-## Aleksandra: Overlay / Visual Readability Artist
+## Overlay Readability Designer
 
 Purpose: make UI readable, mobile-friendly, and sketchbook-native.
 
-Aleksandra owns:
+The Overlay Readability Designer owns:
 
 - Trail Card composition
 - Manual Page composition
@@ -216,7 +220,7 @@ Aleksandra owns:
 - monochrome reward language
 - paper-cut component rules
 
-Aleksandra must protect:
+The Overlay Readability Designer must protect:
 
 - mobile-first overlays
 - no nested cards
@@ -224,11 +228,11 @@ Aleksandra must protect:
 - handwriting for flavor, not dense reading
 - black/white readability without color dependence
 
-## Django: Music / Sound Designer
+## Audio Designer
 
 Purpose: make the Ridge emotionally sticky and mini-games audibly legible.
 
-Django owns:
+The Audio Designer owns:
 
 - Ridge audio palette
 - Cicka SFX language
@@ -236,7 +240,7 @@ Django owns:
 - Stampede Sketch prototype audio
 - Telegraph Terrace timing cue research
 
-Django must protect:
+The Audio Designer must protect:
 
 - quiet handmade overworld tone
 - no full dynamic score engine in v1
@@ -246,7 +250,7 @@ Django must protect:
 
 ## Hiring More Team Members
 
-Mira may propose hiring another specialist only when there is a real gap, such
+The Producer may propose hiring another specialist only when there is a real gap, such
 as:
 
 - a testing lead for mobile playtest passes
