@@ -24,6 +24,13 @@ describe('ridge blockout parser', () => {
     ]);
   });
 
+  it('parses traversal movement metadata on exit anchors', () => {
+    const outskirts = findRidgeBlockoutRoom(RIDGE_BLOCKOUT, 'outskirts');
+    const cickaExit = outskirts?.anchors.find((anchor) => anchor.attrs.to === 'cicka_home');
+
+    expect(cickaExit?.attrs.movement).toBe('ramp');
+  });
+
   it('requires every room grid to match the declared size', () => {
     RIDGE_BLOCKOUT.rooms.forEach((room) => {
       expect(room.grid).toHaveLength(room.size.height);
@@ -53,6 +60,31 @@ anchor 1 player_spawn id=start
 `);
 
     expect(parsed.validationErrors).toContain('room "test" has unknown symbol "X" at 1,0');
+  });
+
+  it('fails validation when an anchor uses an unknown traversal movement', () => {
+    const parsed = parseRidgeBlockout(`
+language ridge-v0
+cell 48
+world broken
+title Broken
+spawn room=test anchor=1
+
+room test
+title Test
+place x=0 y=0
+size 2x1
+
+grid
+12
+
+anchor 1 player_spawn id=start
+anchor 2 exit to=missing movement=teleport
+`);
+
+    expect(parsed.validationErrors).toContain(
+      'room "test" anchor "2" has unknown movement "teleport"'
+    );
   });
 
   it('rejects runtime-active overlaps between room beats', () => {

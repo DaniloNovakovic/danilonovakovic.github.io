@@ -1,5 +1,6 @@
 import * as Phaser from 'phaser';
 import { PHASER_SCENE_KEYS } from '@/game/scenes/sceneIds';
+import type { InputCommandFrame } from '@/game/core/input/commands';
 import {
   bridgeStore,
   isItemEquipped,
@@ -31,6 +32,7 @@ import {
   findRidgeBlockoutRoom,
   getRidgeBlockoutAnchorPoint,
   type RidgeBlockoutAnchorPoint,
+  type RidgeBlockoutAssistZone,
   type RidgeBlockoutBounds,
   type RidgeBlockoutCollider,
   type RidgeBlockoutGeometry,
@@ -62,6 +64,16 @@ import {
   type CickaPerch
 } from '../cicka/CickaPerch';
 import type { TrailCardOverlayParams } from '@/game/overlays/trailCard/types';
+import {
+  canMantleLedge,
+  canStepUp,
+  chooseFallRecovery,
+  getLedgeTop,
+  getPointOnTraversalSegment,
+  isPointNearTraversalLine,
+  projectPointToSegmentT,
+  resolveWalkableRampSurfaceY
+} from './traversalComfort';
 
 interface RidgeSceneStartData {
   onClose?: () => void;
@@ -85,6 +97,20 @@ const TRAIL_CARD_PROMPT_OFFSET_Y = -86;
 const RIDGE_PLAYER_EDGE_PADDING = 48;
 const RIDGE_COYOTE_TIME_MS = 120;
 const RIDGE_JUMP_BUFFER_MS = 120;
+const RIDGE_RAMP_SNAP = {
+  maxSnapDownY: 28,
+  maxSnapUpY: 8
+} as const;
+const RIDGE_CLIMB_ATTACH_DISTANCE = 22;
+const RIDGE_DROP_ATTACH_DISTANCE = 28;
+const RIDGE_MANTLE_HORIZONTAL_DISTANCE = 32;
+const RIDGE_MANTLE_MIN_VERTICAL_DELTA = 24;
+const RIDGE_MANTLE_MAX_VERTICAL_DELTA = 96;
+const RIDGE_MANTLE_MIN_VELOCITY_Y = -20;
+const RIDGE_STEP_UP_MAX_HEIGHT = 18;
+const RIDGE_STEP_UP_HORIZONTAL_DISTANCE = 22;
+const RIDGE_CLIMB_PROGRESS_PER_FRAME = 0.022;
+const RIDGE_FALL_RECOVERY_THRESHOLD_Y = 48;
 
 export class RidgeScene extends Phaser.Scene {
   player?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -97,6 +123,8 @@ export class RidgeScene extends Phaser.Scene {
   private onOpenOverlay?: (overlayId: OverlayId, options?: OpenOverlayOptions) => void;
   private isPaused = false;
   private resumePosition?: { x: number; y: number };
+  private ridgeGeometry?: RidgeBlockoutGeometry;
+  private lastSafePosition?: { x: number; y: number };
 
   constructor() {
     super(PHASER_SCENE_KEYS.ridge);
@@ -134,6 +162,8 @@ export class RidgeScene extends Phaser.Scene {
     const geometry = deriveRidgeBlockoutGeometry(blockout, {
       stampIds: ridgeProgress.stampIds
     });
+    this.ridgeGeometry = geometry;
+    this.lastSafePosition = undefined;
 
     this.cameras.main.setBackgroundColor('#f7f1df');
     this.physics.world.setBounds(
@@ -148,6 +178,7 @@ export class RidgeScene extends Phaser.Scene {
     this.addBackdrop(geometry.bounds);
     this.addRoomBounds(geometry.roomBounds);
     this.addFutureRoutePromises(blockout, geometry);
+    this.addTraversalConnectorVisuals(geometry);
     const platforms = this.addBlockoutColliders(geometry);
     this.addShortcutPromises(geometry);
     this.addAnchorMarkers(geometry);
@@ -169,6 +200,7 @@ export class RidgeScene extends Phaser.Scene {
   }
 
   update(): void {
+    this.primeTraversalGrounding();
     const playerUpdate = this.playerRuntime?.update();
     if (!playerUpdate || playerUpdate.paused) return;
 
@@ -176,6 +208,8 @@ export class RidgeScene extends Phaser.Scene {
       this.onClose();
       return;
     }
+
+    this.applyTraversalComfort(playerUpdate.commands);
 
     this.cickaPerch?.update({
       playerX: this.player?.x ?? 0,
@@ -276,6 +310,40 @@ export class RidgeScene extends Phaser.Scene {
         const to = this.getRoomCenter(geometry, route.roomIds[index + 1] ?? '');
         if (!from || !to) return;
         graphics.strokeLineShape(new Phaser.Geom.Line(from.x, from.y, to.x, to.y));
+      });
+    });
+  }
+
+  private addTraversalConnectorVisuals(geometry: RidgeBlockoutGeometry): void {
+    const graphics = this.add.graphics().setDepth(3);
+    geometry.routeConnectors.forEach((connector) => {
+      connector.assistZones.forEach((zone) => {
+        const color = getAssistZoneColor(zone);
+        graphics.lineStyle(zone.kind === 'climb' ? 5 : 8, color, zone.kind === 'drop' ? 0.24 : 0.38);
+        graphics.strokeLineShape(new Phaser.Geom.Line(
+          zone.from.x,
+          zone.from.y,
+          zone.to.x,
+          zone.to.y
+        ));
+
+        if (zone.kind === 'climb') {
+          this.add.rectangle(zone.x, zone.y, 18, zone.height, 0x1f1f1d, 0.08)
+            .setStrokeStyle(2, color, 0.28)
+            .setDepth(2);
+        }
+      });
+    });
+
+    geometry.shortcutConnections.forEach((connection) => {
+      connection.assistZones.forEach((zone) => {
+        graphics.lineStyle(6, getAssistZoneColor(zone), 0.3);
+        graphics.strokeLineShape(new Phaser.Geom.Line(
+          zone.from.x,
+          zone.from.y,
+          zone.to.x,
+          zone.to.y
+        ));
       });
     });
   }
@@ -505,6 +573,235 @@ export class RidgeScene extends Phaser.Scene {
     platforms.forEach((platform) => {
       this.physics.add.collider(player, platform);
     });
+    this.lastSafePosition = { x: player.x, y: player.y };
+  }
+
+  private primeTraversalGrounding(): void {
+    const player = this.player;
+    const geometry = this.ridgeGeometry;
+    if (!player?.body || !geometry) return;
+
+    const body = player.body;
+    const bottomY = getPlayerBottomY(player);
+    const ramp = resolveWalkableRampSurfaceY(
+      geometry.assistZones,
+      { x: player.x, y: bottomY },
+      RIDGE_RAMP_SNAP
+    );
+    const climb = geometry.assistZones.find((zone) =>
+      zone.kind === 'climb' &&
+      this.isNearTraversalLine(zone, { x: player.x, y: bottomY }, RIDGE_CLIMB_ATTACH_DISTANCE)
+    );
+
+    if (ramp || climb) {
+      markBodyGrounded(body);
+    }
+  }
+
+  private applyTraversalComfort(commands: InputCommandFrame): void {
+    const player = this.player;
+    const geometry = this.ridgeGeometry;
+    if (!player?.body || !geometry) return;
+
+    const didClimb = this.applyClimbAssist(commands, geometry.assistZones);
+    if (!didClimb) {
+      this.applyRampAssist(commands, geometry.assistZones);
+      this.applyDropAssist(geometry.assistZones);
+    }
+    this.applyStepUpAssist(commands, geometry.colliders);
+    this.applyMantleAssist(commands, geometry.colliders);
+    this.recoverFromWorldBottom(geometry);
+    this.captureLastSafePosition(geometry);
+  }
+
+  private applyRampAssist(
+    commands: InputCommandFrame,
+    zones: readonly RidgeBlockoutAssistZone[]
+  ): boolean {
+    const player = this.player;
+    if (!player?.body || commands.jump) return false;
+
+    const body = player.body;
+    const bottomY = getPlayerBottomY(player);
+    const ramp = resolveWalkableRampSurfaceY(
+      zones,
+      { x: player.x, y: bottomY },
+      RIDGE_RAMP_SNAP
+    );
+    if (!ramp || body.velocity.y < -60) return false;
+
+    player.y = ramp.y - body.height / 2;
+    player.setVelocityY(0);
+    markBodyGrounded(body);
+    return true;
+  }
+
+  private applyClimbAssist(
+    commands: InputCommandFrame,
+    zones: readonly RidgeBlockoutAssistZone[]
+  ): boolean {
+    const player = this.player;
+    if (!player?.body || commands.moveAxis === 0) return false;
+
+    const zone = zones.find((candidate) =>
+      candidate.kind === 'climb' &&
+      this.isNearTraversalLine(
+        candidate,
+        { x: player.x, y: getPlayerBottomY(player) },
+        RIDGE_CLIMB_ATTACH_DISTANCE
+      )
+    );
+    if (!zone) return false;
+
+    const directionX = Math.sign(zone.to.x - zone.from.x) || 1;
+    const currentT = projectPointToSegmentT(
+      { x: player.x, y: getPlayerBottomY(player) },
+      zone
+    );
+    const nextT = Phaser.Math.Clamp(
+      currentT + commands.moveAxis * directionX * RIDGE_CLIMB_PROGRESS_PER_FRAME,
+      0,
+      1
+    );
+    const point = getPointOnTraversalSegment(zone, nextT);
+    player.x = point.x;
+    player.y = point.y - player.body.height / 2;
+    player.setVelocityX(0);
+    player.setVelocityY(0);
+    markBodyGrounded(player.body);
+    return true;
+  }
+
+  private applyDropAssist(zones: readonly RidgeBlockoutAssistZone[]): boolean {
+    const player = this.player;
+    if (!player?.body || player.body.velocity.y <= 0) return false;
+
+    const zone = zones.find((candidate) =>
+      candidate.kind === 'drop' &&
+      this.isNearTraversalLine(candidate, { x: player.x, y: player.y }, RIDGE_DROP_ATTACH_DISTANCE)
+    );
+    if (!zone) return false;
+
+    const t = projectPointToSegmentT({ x: player.x, y: player.y }, zone);
+    const point = getPointOnTraversalSegment(zone, t);
+    player.x = Phaser.Math.Linear(player.x, point.x, 0.08);
+    return true;
+  }
+
+  private applyStepUpAssist(
+    commands: InputCommandFrame,
+    colliders: readonly RidgeBlockoutCollider[]
+  ): boolean {
+    const player = this.player;
+    if (!player?.body || commands.moveAxis === 0 || !isBodyGrounded(player.body)) return false;
+
+    const direction = Math.sign(commands.moveAxis);
+    const bottomY = getPlayerBottomY(player);
+    const candidate = findClosestLedge(colliders, player.x, direction, RIDGE_STEP_UP_HORIZONTAL_DISTANCE)
+      ?.collider;
+    if (!candidate) return false;
+
+    const topY = getColliderTop(candidate);
+    if (!canStepUp({
+      playerBottomY: bottomY,
+      obstacleTopY: topY,
+      maxStepHeight: RIDGE_STEP_UP_MAX_HEIGHT
+    })) {
+      return false;
+    }
+
+    player.x += direction * 18;
+    player.y = topY - player.body.height / 2;
+    player.setVelocityY(0);
+    markBodyGrounded(player.body);
+    return true;
+  }
+
+  private applyMantleAssist(
+    commands: InputCommandFrame,
+    colliders: readonly RidgeBlockoutCollider[]
+  ): boolean {
+    const player = this.player;
+    if (!player?.body || commands.moveAxis === 0) return false;
+    if (isBodyGrounded(player.body)) return false;
+    if (player.body.velocity.y < RIDGE_MANTLE_MIN_VELOCITY_Y) return false;
+
+    const direction = Math.sign(commands.moveAxis);
+    const bottomY = getPlayerBottomY(player);
+    const ledges = colliders
+      .filter((collider) => collider.kind !== 'solid' || collider.height <= 64)
+      .map((collider) => ({ collider, distance: getHorizontalLedgeDistance(collider, player.x, direction) }))
+      .filter((candidate) =>
+        candidate.distance >= 0 &&
+        canMantleLedge({
+          playerX: player.x,
+          playerBottomY: bottomY,
+          moveAxis: commands.moveAxis,
+          ledge: candidate.collider,
+          maxHorizontalDistance: RIDGE_MANTLE_HORIZONTAL_DISTANCE,
+          minVerticalDelta: RIDGE_MANTLE_MIN_VERTICAL_DELTA,
+          maxVerticalDelta: RIDGE_MANTLE_MAX_VERTICAL_DELTA
+        })
+      )
+      .sort((a, b) => a.distance - b.distance);
+
+    const target = ledges[0]?.collider;
+    if (!target) return false;
+
+    const topY = getLedgeTop(target);
+    player.x = direction > 0
+      ? target.x - target.width / 2 + player.body.width / 2 + 6
+      : target.x + target.width / 2 - player.body.width / 2 - 6;
+    player.y = topY - player.body.height / 2;
+    player.setVelocityY(0);
+    markBodyGrounded(player.body);
+    return true;
+  }
+
+  private isNearTraversalLine(
+    zone: RidgeBlockoutAssistZone,
+    point: { x: number; y: number },
+    maxDistance: number
+  ): boolean {
+    return (
+      isPointNearTraversalLine(zone, point, maxDistance)
+    );
+  }
+
+  private recoverFromWorldBottom(geometry: RidgeBlockoutGeometry): void {
+    const player = this.player;
+    if (!player?.body) return;
+
+    const recovery = chooseFallRecovery({
+      playerY: player.y,
+      worldBottomY: geometry.bounds.y + geometry.bounds.height,
+      thresholdY: RIDGE_FALL_RECOVERY_THRESHOLD_Y,
+      lastSafePosition: this.lastSafePosition
+    });
+    if (!recovery) return;
+
+    player.x = recovery.x;
+    player.y = recovery.y;
+    player.setVelocityX(0);
+    player.setVelocityY(0);
+  }
+
+  private captureLastSafePosition(geometry: RidgeBlockoutGeometry): void {
+    const player = this.player;
+    if (!player?.body) return;
+
+    const bottomBandY = geometry.bounds.y + geometry.bounds.height - RIDGE_FALL_RECOVERY_THRESHOLD_Y;
+    if (player.y >= bottomBandY) return;
+
+    const bottomY = getPlayerBottomY(player);
+    const ramp = resolveWalkableRampSurfaceY(
+      geometry.assistZones,
+      { x: player.x, y: bottomY },
+      RIDGE_RAMP_SNAP
+    );
+    if (isBodyGrounded(player.body) || ramp) {
+      this.lastSafePosition = { x: player.x, y: player.y };
+    }
   }
 
   private createRidgeInteractions(
@@ -808,6 +1105,60 @@ function getAnchorColor(anchor: RidgeBlockoutAnchorPoint): number {
     default:
       return 0xf7f1df;
   }
+}
+
+function getAssistZoneColor(zone: RidgeBlockoutAssistZone): number {
+  switch (zone.kind) {
+    case 'ramp':
+      return 0xd7c78f;
+    case 'climb':
+      return 0x596f8f;
+    case 'drop':
+      return 0xf0d35f;
+  }
+}
+
+function getPlayerBottomY(player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody): number {
+  return player.y + player.body.height / 2;
+}
+
+function markBodyGrounded(body: Phaser.Physics.Arcade.Body): void {
+  body.touching.down = true;
+  body.blocked.down = true;
+}
+
+function isBodyGrounded(body: Phaser.Physics.Arcade.Body): boolean {
+  return body.touching.down || body.blocked.down;
+}
+
+function findClosestLedge(
+  colliders: readonly RidgeBlockoutCollider[],
+  playerX: number,
+  direction: number,
+  maxDistance: number
+): { collider: RidgeBlockoutCollider; distance: number } | undefined {
+  return colliders
+    .map((collider) => ({
+      collider,
+      distance: getHorizontalLedgeDistance(collider, playerX, direction)
+    }))
+    .filter((candidate) => candidate.distance >= 0 && candidate.distance <= maxDistance)
+    .sort((a, b) => a.distance - b.distance)[0];
+}
+
+function getHorizontalLedgeDistance(
+  collider: RidgeBlockoutCollider,
+  playerX: number,
+  direction: number
+): number {
+  const left = collider.x - collider.width / 2;
+  const right = collider.x + collider.width / 2;
+  if (direction > 0) return left - playerX;
+  return playerX - right;
+}
+
+function getColliderTop(collider: RidgeBlockoutCollider): number {
+  return collider.y - collider.height / 2;
 }
 
 function getSpawnPoint(blockout: RidgeBlockoutMap): { x: number; y: number } {

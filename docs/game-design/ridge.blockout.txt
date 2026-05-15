@@ -41,7 +41,7 @@ grid
 ################################
 
 anchor 1 player_spawn id=start
-anchor 2 exit to=cicka_home label=paper_stairs
+anchor 2 exit to=cicka_home label=paper_stairs movement=ramp
 anchor A artifact id=city_edge_memory
 rect sightline_to_relay x=21 y=0 w=9 h=5
 rect future_basement_hatch x=4 y=9 w=7 h=2
@@ -72,9 +72,9 @@ grid
 ..2.........................1...
 ################################
 
-anchor 1 exit to=work_artifact label=paper_steps
-anchor 2 exit to=outskirts label=stairs_down
-anchor 3 shortcut_from=telegraph_terrace label=cord_drop_home
+anchor 1 exit to=work_artifact label=paper_steps movement=ramp
+anchor 2 exit to=outskirts label=stairs_down movement=ramp
+anchor 3 shortcut_from=telegraph_terrace label=cord_drop_home movement=drop
 anchor C npc id=cicka
 anchor A artifact id=home_memento_slot
 anchor ? secret to=underpath requires=cicka_translator
@@ -104,8 +104,8 @@ grid
 ################################
 ################################
 
-anchor 1 exit to=stampede_blanket label=wide_jump
-anchor 2 exit to=cicka_home label=paper_steps_down
+anchor 1 exit to=stampede_blanket label=wide_jump movement=jump
+anchor 2 exit to=cicka_home label=paper_steps_down movement=ramp
 anchor 3 optional_pocket id=early_skill_scrap reward=minor_skill_scrap
 anchor A artifact id=major_work_artifact
 rect artifact_focus x=2 y=2 w=10 h=5
@@ -139,9 +139,9 @@ grid
 ################################
 ################################
 
-anchor 1 exit to=work_artifact label=wide_jump_back
-anchor 2 exit to=switchback_shelf label=climb_out
-anchor ? shortcut_preview to=cicka_home requires=stampede_sketch via=switchback_shelf
+anchor 1 exit to=work_artifact label=wide_jump_back movement=jump
+anchor 2 exit to=switchback_shelf label=climb_out movement=climb
+anchor ? shortcut_preview to=cicka_home requires=stampede_sketch via=switchback_shelf movement=drop
 anchor * minigame id=stampede_sketch
 anchor A artifact id=stampede_proof
 rect ink_swarm_zone x=10 y=4 w=10 h=4
@@ -171,10 +171,10 @@ grid
 ...............?................
 ################################
 
-anchor 1 exit to=stampede_blanket label=climb_down
-anchor 2 exit to=telegraph_terrace label=back_left
+anchor 1 exit to=stampede_blanket label=climb_down movement=climb
+anchor 2 exit to=telegraph_terrace label=back_left movement=ramp
 anchor A artifact id=cicka_view_note
-anchor ? shortcut to=cicka_home requires=stampede_sketch label=fold_drop_home
+anchor ? shortcut to=cicka_home requires=stampede_sketch label=fold_drop_home movement=drop
 rect cicka_view x=3 y=4 w=16 h=5
 rect fold_drop_chute x=12 y=8 w=7 h=4 to=cicka_home requires=stampede_sketch kind=fall_steer
 
@@ -204,8 +204,8 @@ grid
 ................................
 ################################
 
-anchor 1 exit to=switchback_shelf label=back_right
-anchor 2 exit to=guide_overlook label=cord_climb
+anchor 1 exit to=switchback_shelf label=back_right movement=ramp
+anchor 2 exit to=guide_overlook label=cord_climb movement=climb
 anchor N npc id=todo_ai_dummy
 anchor * minigame id=telegraph_future
 anchor A artifact id=signal_note
@@ -234,8 +234,8 @@ grid
 .....######################.....
 ################################
 
-anchor 1 exit to=telegraph_terrace label=cord_down
-anchor 2 exit to=relay_gate label=final_shelf
+anchor 1 exit to=telegraph_terrace label=cord_down movement=climb
+anchor 2 exit to=relay_gate label=final_shelf movement=ramp
 anchor N npc id=ridge_guide
 anchor A artifact id=relay_view_memory
 rect sightline_to_relay x=17 y=0 w=12 h=5
@@ -265,8 +265,8 @@ grid
 .....######################.....
 ################################
 
-anchor 1 exit to=guide_overlook label=final_shelf_back
-anchor 2 exit to=domino_desk label=lift_promise
+anchor 1 exit to=guide_overlook label=final_shelf_back movement=ramp
+anchor 2 exit to=domino_desk label=lift_promise movement=ramp
 anchor A artifact id=proof_slot_marker
 anchor ? gate id=relay_proof_slots
 rect sightline_view_back x=2 y=1 w=18 h=5
@@ -295,8 +295,8 @@ grid
 .....######################.....
 ################################
 
-anchor 1 exit to=relay_gate label=lift_promise_back
-anchor 2 exit to=high_ledge label=future_lift
+anchor 1 exit to=relay_gate label=lift_promise_back movement=ramp
+anchor 2 exit to=high_ledge label=future_lift movement=climb
 anchor ^ lift id=desk_lift to=cicka_home requires=domino_future
 anchor A artifact id=domino_project_scrap
 rect lift_travel x=20 y=4 w=3 h=7
@@ -347,8 +347,8 @@ grid
 ################################
 ################################
 
-anchor 1 exit to=outskirts label=secret_start_return
-anchor 2 exit to=cicka_home label=secret_home_return
+anchor 1 exit to=outskirts label=secret_start_return movement=ramp
+anchor 2 exit to=cicka_home label=secret_home_return movement=ramp
 anchor ? secret id=cicka_translation_mark
 rect crawl_space x=3 y=3 w=25 h=4
 
@@ -380,7 +380,7 @@ grid
 .....######################.....
 ################################
 
-anchor 1 exit to=guide_overlook label=optional_descent
-anchor 2 exit to=stampede_blanket label=return_near_stampede
+anchor 1 exit to=guide_overlook label=optional_descent movement=drop
+anchor 2 exit to=stampede_blanket label=return_near_stampede movement=drop
 anchor A artifact id=hidden_keycap_scrap
 rect fall_shaft x=8 y=2 w=16 h=10

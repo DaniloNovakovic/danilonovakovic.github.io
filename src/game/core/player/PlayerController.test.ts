@@ -11,7 +11,7 @@ function makeSprite(grounded = true): PhysicsSprite & { vx: number; vy: number }
     y: 500,
     vx: 0,
     vy: 0,
-    body: { touching: { down: grounded } },
+    body: { touching: { down: grounded }, blocked: { down: false } },
     setVelocityX(v: number) { this.vx = v; },
     setVelocityY(v: number) { this.vy = v; }
   };
@@ -86,6 +86,14 @@ describe('PlayerController', () => {
       controller.mount(airSprite);
       controller.step({ ...noInput, jump: true });
       expect(airSprite.vy).toBe(0);
+    });
+
+    it('applies jump velocity when blocked down by world or assisted terrain', () => {
+      const blockedSprite = makeSprite(false);
+      blockedSprite.body.blocked.down = true;
+      controller.mount(blockedSprite);
+      controller.step({ ...noInput, jump: true });
+      expect(blockedSprite.vy).toBe(JUMP_VY);
     });
 
     it('uses coyote time shortly after leaving ground when configured', () => {

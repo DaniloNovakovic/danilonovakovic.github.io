@@ -20,6 +20,19 @@ export const RIDGE_BLOCKOUT_RUNTIME_SYMBOLS = new Set([
 
 export const RIDGE_BLOCKOUT_DESIGN_SYMBOLS = new Set(['=', '~', 'N', 'M']);
 
+export const RIDGE_BLOCKOUT_TRAVERSAL_MOVEMENTS = new Set([
+  'ramp',
+  'jump',
+  'climb',
+  'drop'
+]);
+
+export type RidgeBlockoutTraversalMovement =
+  | 'ramp'
+  | 'jump'
+  | 'climb'
+  | 'drop';
+
 export interface RidgeBlockoutPoint {
   x: number;
   y: number;
@@ -321,6 +334,14 @@ export function validateRidgeBlockout(map: RidgeBlockoutMap): readonly string[] 
     room.anchors.forEach((anchor) => {
       if (!room.grid.some((row) => row.includes(anchor.symbol))) {
         errors.push(`room "${room.id}" anchor "${anchor.symbol}" has no matching grid cell`);
+      }
+      if (
+        anchor.attrs.movement !== undefined &&
+        !RIDGE_BLOCKOUT_TRAVERSAL_MOVEMENTS.has(anchor.attrs.movement)
+      ) {
+        errors.push(
+          `room "${room.id}" anchor "${anchor.symbol}" has unknown movement "${anchor.attrs.movement}"`
+        );
       }
     });
   });

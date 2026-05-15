@@ -193,6 +193,13 @@ Design-only v0 symbols:
 Parser rule: unknown symbols should fail with a clear error unless the room opts
 into a newer language version.
 
+Exit anchors may include `movement=` to choose the generated traversal
+connector. v0 supports `ramp`, `jump`, `climb`, and `drop`; unknown movement
+values fail validation. These are blockout semantics, not final ability names:
+ramps/stairs are assisted walking strips, jumps create sparse forgiving
+platforms, climbs create cord/lift assist zones, and drops create safe return
+zones when unlocked.
+
 Seamless-world QA rule: runtime-active, non-empty cells from different room
 beats should not overlap unless the map explicitly declares a merge rule. v0
 should avoid merge rules and treat conflicting non-empty overlap as a validation
@@ -202,5 +209,6 @@ error.
 
 `src/game/scenes/ridge/blockout/` parses this file directly through Vite raw
 imports. `RidgeScene` renders every room into one whole-world greybox by
-default, while future routes and locked shortcuts render as visual promises
-without colliders.
+default, derives typed traversal connectors from `movement=` metadata, and
+keeps future routes / locked shortcuts as visual promises without active
+colliders or assist zones.

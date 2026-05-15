@@ -20,7 +20,10 @@ export interface PhysicsSprite {
   y: number;
   setVelocityX(vx: number): void;
   setVelocityY(vy: number): void;
-  body: { touching: { down: boolean } };
+  body: {
+    touching: { down: boolean };
+    blocked?: { down: boolean };
+  };
 }
 
 export interface PlayerControllerConfig {
@@ -112,7 +115,7 @@ export class PlayerController {
     if (!this.sprite) return ZERO_RESULT;
 
     const nowMs = input.nowMs ?? Date.now();
-    const grounded = this.sprite.body.touching.down;
+    const grounded = this.sprite.body.touching.down || this.sprite.body.blocked?.down === true;
     if (grounded) {
       this.lastGroundedAtMs = nowMs;
     }

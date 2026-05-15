@@ -1,8 +1,10 @@
 import { STAMPEDE_SKETCH_RIDGE_STAMP_ID } from '@/game/bridge/ridgeProgressIds';
 import {
+  RIDGE_BLOCKOUT_TRAVERSAL_MOVEMENTS,
   findRidgeBlockoutAnchor,
   findRidgeBlockoutRoom,
   type RidgeBlockoutAnchor,
+  type RidgeBlockoutTraversalMovement,
   type RidgeBlockoutMap,
   type RidgeBlockoutRect,
   type RidgeBlockoutRoom
@@ -14,6 +16,13 @@ export type RidgeBlockoutColliderKind =
   | 'route-connector'
   | 'shortcut-connector';
 
+export type RidgeTraversalMovement = RidgeBlockoutTraversalMovement;
+
+export type RidgeBlockoutAssistZoneKind =
+  | 'ramp'
+  | 'climb'
+  | 'drop';
+
 export interface RidgeBlockoutBounds {
   x: number;
   y: number;
@@ -24,9 +33,30 @@ export interface RidgeBlockoutBounds {
 export interface RidgeBlockoutCollider {
   id: string;
   kind: RidgeBlockoutColliderKind;
+  movement?: RidgeTraversalMovement;
   roomId?: string;
   routeId?: string;
   shortcutId?: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export interface RidgeBlockoutAssistZone {
+  id: string;
+  kind: RidgeBlockoutAssistZoneKind;
+  movement: RidgeTraversalMovement;
+  routeId?: string;
+  shortcutId?: string;
+  from: {
+    x: number;
+    y: number;
+  };
+  to: {
+    x: number;
+    y: number;
+  };
   x: number;
   y: number;
   width: number;
@@ -54,12 +84,26 @@ export interface RidgeBlockoutRoomBounds {
 export interface RidgeBlockoutShortcutConnection {
   id: string;
   unlocked: boolean;
+  movement: RidgeTraversalMovement;
   from: RidgeBlockoutAnchorPoint;
   to: {
     x: number;
     y: number;
   };
+  colliders: readonly RidgeBlockoutCollider[];
+  assistZones: readonly RidgeBlockoutAssistZone[];
   platforms: readonly RidgeBlockoutCollider[];
+}
+
+export interface RidgeBlockoutTraversalConnector {
+  id: string;
+  movement: RidgeTraversalMovement;
+  routeId?: string;
+  shortcutId?: string;
+  from: RidgeBlockoutAnchorPoint;
+  to: RidgeBlockoutAnchorPoint | { x: number; y: number };
+  colliders: readonly RidgeBlockoutCollider[];
+  assistZones: readonly RidgeBlockoutAssistZone[];
 }
 
 export interface RidgeBlockoutGeometry {
@@ -67,8 +111,9 @@ export interface RidgeBlockoutGeometry {
   roomBounds: readonly RidgeBlockoutRoomBounds[];
   anchorPoints: readonly RidgeBlockoutAnchorPoint[];
   gridColliders: readonly RidgeBlockoutCollider[];
-  routeConnectors: readonly RidgeBlockoutCollider[];
+  routeConnectors: readonly RidgeBlockoutTraversalConnector[];
   shortcutConnections: readonly RidgeBlockoutShortcutConnection[];
+  assistZones: readonly RidgeBlockoutAssistZone[];
   colliders: readonly RidgeBlockoutCollider[];
 }
 
@@ -87,8 +132,13 @@ export function deriveRidgeBlockoutGeometry(
 ): RidgeBlockoutGeometry {
   const gridColliders = deriveGridColliders(map);
   const routeConnectors = deriveFirstWalkRouteConnectors(map);
+  const routeColliders = routeConnectors.flatMap((connection) => connection.colliders);
   const shortcutConnections = deriveShortcutConnections(map, options);
-  const shortcutColliders = shortcutConnections.flatMap((connection) => connection.platforms);
+  const shortcutColliders = shortcutConnections.flatMap((connection) => connection.colliders);
+  const assistZones = [
+    ...routeConnectors.flatMap((connection) => connection.assistZones),
+    ...shortcutConnections.flatMap((connection) => connection.assistZones)
+  ];
   return {
     bounds: deriveRidgeBlockoutBounds(map),
     roomBounds: deriveRoomBounds(map),
@@ -96,7 +146,8 @@ export function deriveRidgeBlockoutGeometry(
     gridColliders,
     routeConnectors,
     shortcutConnections,
-    colliders: [...gridColliders, ...routeConnectors, ...shortcutColliders]
+    assistZones,
+    colliders: [...gridColliders, ...routeColliders, ...shortcutColliders]
   };
 }
 
@@ -209,24 +260,27 @@ function deriveGridColliders(map: RidgeBlockoutMap): readonly RidgeBlockoutColli
   });
 }
 
-function deriveFirstWalkRouteConnectors(map: RidgeBlockoutMap): readonly RidgeBlockoutCollider[] {
+function deriveFirstWalkRouteConnectors(
+  map: RidgeBlockoutMap
+): readonly RidgeBlockoutTraversalConnector[] {
   const firstWalk = map.routes.find((route) => route.id === 'first_walk');
   if (!firstWalk) return [];
 
   return firstWalk.roomIds.flatMap((roomId, index) => {
     const nextRoomId = firstWalk.roomIds[index + 1];
     if (!nextRoomId) return [];
-    const from = getRouteExitPoint(map, roomId, nextRoomId);
-    const to = getRouteExitPoint(map, nextRoomId, roomId);
+    const from = getRouteExit(map, roomId, nextRoomId);
+    const to = getRouteExit(map, nextRoomId, roomId);
     if (!from || !to) return [];
-    return createSteppedPlatforms({
+    return [createTraversalConnector({
       cell: map.cell,
       idPrefix: `route:${firstWalk.id}:${roomId}:${nextRoomId}`,
-      kind: 'route-connector',
+      colliderKind: 'route-connector',
       routeId: firstWalk.id,
-      start: from,
-      end: to
-    });
+      start: from.point,
+      end: to.point,
+      movement: resolveTraversalMovement(from.anchor, to.anchor, from.point, to.point, map.cell)
+    })];
   });
 }
 
@@ -248,41 +302,58 @@ function deriveShortcutConnections(
     if (!from) return [];
 
     const target = getShortcutTargetPoint(map, targetRoom, shortcut.id);
+    const movement = resolveShortcutMovement(shortcut.kind);
     const unlocked = isRidgeBlockoutShortcutAvailable(shortcut.id, {
       stampIds: options.stampIds ?? []
     });
-    const platforms = unlocked
-      ? createSteppedPlatforms({
+    const connection = unlocked
+      ? createTraversalConnector({
         cell: map.cell,
         idPrefix: `shortcut:${shortcut.id}`,
-        kind: 'shortcut-connector',
+        colliderKind: 'shortcut-connector',
         shortcutId: shortcut.id,
         start: from,
-        end: target
+        end: target,
+        movement
       })
-      : [];
+      : createEmptyTraversalConnector({
+        idPrefix: `shortcut:${shortcut.id}`,
+        shortcutId: shortcut.id,
+        start: from,
+        end: target,
+        movement
+      });
 
     return [{
       id: shortcut.id,
       unlocked,
+      movement,
       from,
       to: target,
-      platforms
+      colliders: connection.colliders,
+      assistZones: connection.assistZones,
+      platforms: connection.colliders
     }];
   });
 }
 
-function getRouteExitPoint(
+interface RidgeRouteExit {
+  anchor: RidgeBlockoutAnchor;
+  point: RidgeBlockoutAnchorPoint;
+}
+
+function getRouteExit(
   map: RidgeBlockoutMap,
   roomId: string,
   toRoomId: string
-): RidgeBlockoutAnchorPoint | undefined {
+): RidgeRouteExit | undefined {
   const room = findRidgeBlockoutRoom(map, roomId);
   if (!room) return undefined;
   const anchor = findRidgeBlockoutAnchor(room, (candidate) =>
     candidate.kind === 'exit' && candidate.attrs.to === toRoomId
   );
-  return anchor ? getRidgeBlockoutAnchorPoint(map, room, anchor) : undefined;
+  const point = anchor ? getRidgeBlockoutAnchorPoint(map, room, anchor) : undefined;
+  return anchor && point ? { anchor, point } : undefined;
 }
 
 function getShortcutTargetPoint(
@@ -314,7 +385,100 @@ function getRectCenterPoint(
   };
 }
 
-function createSteppedPlatforms({
+function createTraversalConnector({
+  cell,
+  idPrefix,
+  colliderKind,
+  routeId,
+  shortcutId,
+  start,
+  end,
+  movement
+}: {
+  cell: number;
+  idPrefix: string;
+  colliderKind: Extract<RidgeBlockoutColliderKind, 'route-connector' | 'shortcut-connector'>;
+  routeId?: string;
+  shortcutId?: string;
+  start: { x: number; y: number };
+  end: { x: number; y: number };
+  movement: RidgeTraversalMovement;
+}): RidgeBlockoutTraversalConnector {
+  if (movement === 'jump') {
+    return {
+      id: idPrefix,
+      movement,
+      routeId,
+      shortcutId,
+      from: start as RidgeBlockoutAnchorPoint,
+      to: end,
+      colliders: createJumpPlatforms({
+        cell,
+        idPrefix,
+        kind: colliderKind,
+        routeId,
+        shortcutId,
+        start,
+        end
+      }),
+      assistZones: []
+    };
+  }
+
+  const zoneKind = movement === 'ramp'
+    ? 'ramp'
+    : movement === 'climb'
+      ? 'climb'
+      : 'drop';
+  return {
+    id: idPrefix,
+    movement,
+    routeId,
+    shortcutId,
+    from: start as RidgeBlockoutAnchorPoint,
+    to: end,
+    colliders: [],
+    assistZones: [createAssistZone({
+      cell,
+      id: idPrefix,
+      kind: zoneKind,
+      movement,
+      routeId,
+      shortcutId,
+      start: toSurfacePoint(start, cell, movement),
+      end: toSurfacePoint(end, cell, movement)
+    })]
+  };
+}
+
+function createEmptyTraversalConnector({
+  idPrefix,
+  routeId,
+  shortcutId,
+  start,
+  end,
+  movement
+}: {
+  idPrefix: string;
+  routeId?: string;
+  shortcutId?: string;
+  start: RidgeBlockoutAnchorPoint;
+  end: { x: number; y: number };
+  movement: RidgeTraversalMovement;
+}): RidgeBlockoutTraversalConnector {
+  return {
+    id: idPrefix,
+    movement,
+    routeId,
+    shortcutId,
+    from: start,
+    to: end,
+    colliders: [],
+    assistZones: []
+  };
+}
+
+function createJumpPlatforms({
   cell,
   idPrefix,
   kind,
@@ -334,23 +498,99 @@ function createSteppedPlatforms({
   const distanceX = Math.abs(end.x - start.x);
   const distanceY = Math.abs(end.y - start.y);
   const steps = Math.max(
-    2,
-    Math.min(18, Math.ceil(Math.max(distanceX / (cell * 1.55), distanceY / (cell * 1.2))))
+    1,
+    Math.min(2, Math.ceil(Math.max(distanceX / (cell * 11), distanceY / (cell * 4))))
   );
 
-  return Array.from({ length: steps - 1 }, (_, index) => {
-    const t = (index + 1) / steps;
+  return Array.from({ length: steps }, (_, index) => {
+    const t = (index + 1) / (steps + 1);
     return {
       id: `${idPrefix}:${index + 1}`,
       kind,
+      movement: 'jump',
       routeId,
       shortcutId,
       x: lerp(start.x, end.x, t),
-      y: lerp(start.y, end.y, t) + Math.sin(t * Math.PI) * cell * 0.18,
-      width: Math.max(60, Math.round(cell * 1.35)),
+      y: lerp(start.y, end.y, t) + cell * 0.56,
+      width: Math.max(Math.round(cell * 3.4), Math.min(Math.round(distanceX * 0.34), Math.round(cell * 7))),
       height: Math.max(12, Math.round(cell * 0.24))
     };
   });
+}
+
+function createAssistZone({
+  cell,
+  id,
+  kind,
+  movement,
+  routeId,
+  shortcutId,
+  start,
+  end
+}: {
+  cell: number;
+  id: string;
+  kind: RidgeBlockoutAssistZoneKind;
+  movement: RidgeTraversalMovement;
+  routeId?: string;
+  shortcutId?: string;
+  start: { x: number; y: number };
+  end: { x: number; y: number };
+}): RidgeBlockoutAssistZone {
+  const paddingX = kind === 'climb' ? cell * 1.25 : cell * 1.75;
+  const paddingY = kind === 'ramp' ? cell * 1.9 : cell * 2.4;
+  const minX = Math.min(start.x, end.x);
+  const maxX = Math.max(start.x, end.x);
+  const minY = Math.min(start.y, end.y);
+  const maxY = Math.max(start.y, end.y);
+  return {
+    id,
+    kind,
+    movement,
+    routeId,
+    shortcutId,
+    from: start,
+    to: end,
+    x: (minX + maxX) / 2,
+    y: (minY + maxY) / 2,
+    width: Math.max(cell * 2, maxX - minX + paddingX * 2),
+    height: Math.max(cell * 2, maxY - minY + paddingY * 2)
+  };
+}
+
+function resolveTraversalMovement(
+  fromAnchor: RidgeBlockoutAnchor,
+  toAnchor: RidgeBlockoutAnchor,
+  from: { x: number; y: number },
+  to: { x: number; y: number },
+  cell: number
+): RidgeTraversalMovement {
+  const explicit = parseTraversalMovement(fromAnchor.attrs.movement ?? toAnchor.attrs.movement);
+  if (explicit) return explicit;
+  if (Math.abs(to.y - from.y) > cell * 4) return 'climb';
+  if (Math.abs(to.x - from.x) > cell * 8 && Math.abs(to.y - from.y) < cell * 2) return 'jump';
+  return 'ramp';
+}
+
+function resolveShortcutMovement(kind: string | undefined): RidgeTraversalMovement {
+  if (kind?.includes('drop') || kind?.includes('fall')) return 'drop';
+  return parseTraversalMovement(kind) ?? 'ramp';
+}
+
+function parseTraversalMovement(value: string | undefined): RidgeTraversalMovement | undefined {
+  return value && RIDGE_BLOCKOUT_TRAVERSAL_MOVEMENTS.has(value)
+    ? value as RidgeTraversalMovement
+    : undefined;
+}
+
+function toSurfacePoint(
+  point: { x: number; y: number },
+  cell: number,
+  movement: RidgeTraversalMovement
+): { x: number; y: number } {
+  if (movement === 'climb') return point;
+  if (movement === 'drop') return { x: point.x, y: point.y + cell * 0.2 };
+  return { x: point.x, y: point.y + cell * 0.58 };
 }
 
 function lerp(start: number, end: number, t: number): number {
