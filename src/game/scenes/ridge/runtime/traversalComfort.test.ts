@@ -5,6 +5,7 @@ import {
   chooseFallRecovery,
   getClimbProgressDelta,
   getDistanceToTraversalSegment,
+  getFrameRateIndependentLerpAlpha,
   getPointOnTraversalSegment,
   getRampSurfaceYAtX,
   isMantleTargetCollider,
@@ -138,32 +139,51 @@ describe('Ridge traversal comfort helpers', () => {
       verticalAxis: -1,
       fromY: 300,
       toY: 100,
-      progressPerFrame: 0.02
+      progressPerSecond: 1.2,
+      deltaMs: 1000 / 60
     })).toBeCloseTo(0.02);
     expect(getClimbProgressDelta({
       verticalAxis: 1,
       fromY: 300,
       toY: 100,
-      progressPerFrame: 0.02
+      progressPerSecond: 1.2,
+      deltaMs: 1000 / 60
     })).toBeCloseTo(-0.02);
   });
 
-  it('keeps ladder attachment while input is released but detaches on jump or distance', () => {
+  it('keeps ladder attachment while input is released but detaches on jump, movement, or distance', () => {
     expect(shouldMaintainClimbAttachment({
       attached: true,
       jump: false,
+      horizontalAxis: 0,
       nearClimbLine: true
     })).toBe(true);
     expect(shouldMaintainClimbAttachment({
       attached: true,
       jump: true,
+      horizontalAxis: 0,
       nearClimbLine: true
     })).toBe(false);
     expect(shouldMaintainClimbAttachment({
       attached: true,
       jump: false,
+      horizontalAxis: 1,
+      nearClimbLine: true
+    })).toBe(false);
+    expect(shouldMaintainClimbAttachment({
+      attached: true,
+      jump: false,
+      horizontalAxis: 0,
       nearClimbLine: false
     })).toBe(false);
+  });
+
+  it('converts per-frame lerp into stable delta-scaled alpha', () => {
+    const frameAlpha = getFrameRateIndependentLerpAlpha(0.08, 1000 / 60);
+    const halfFrameAlpha = getFrameRateIndependentLerpAlpha(0.08, 1000 / 120);
+
+    expect(frameAlpha).toBeCloseTo(0.08);
+    expect(1 - ((1 - halfFrameAlpha) ** 2)).toBeCloseTo(frameAlpha);
   });
 
   it('rejects assist paths that cross solid walls', () => {

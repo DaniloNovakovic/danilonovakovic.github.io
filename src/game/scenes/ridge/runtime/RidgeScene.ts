@@ -69,6 +69,7 @@ import {
   canStepUp,
   chooseFallRecovery,
   getClimbProgressDelta,
+  getFrameRateIndependentLerpAlpha,
   getLedgeTop,
   getPointOnTraversalSegment,
   isMantleTargetCollider,
@@ -113,7 +114,8 @@ const RIDGE_MANTLE_MAX_VERTICAL_DELTA = 96;
 const RIDGE_MANTLE_MIN_VELOCITY_Y = -20;
 const RIDGE_STEP_UP_MAX_HEIGHT = 18;
 const RIDGE_STEP_UP_HORIZONTAL_DISTANCE = 22;
-const RIDGE_CLIMB_PROGRESS_PER_FRAME = 0.006;
+const RIDGE_CLIMB_PROGRESS_PER_SECOND = 0.36;
+const RIDGE_DROP_LERP_ALPHA_AT_60FPS = 0.08;
 const RIDGE_FALL_RECOVERY_THRESHOLD_Y = 48;
 
 export class RidgeScene extends Phaser.Scene {
@@ -129,6 +131,7 @@ export class RidgeScene extends Phaser.Scene {
   private resumePosition?: { x: number; y: number };
   private ridgeGeometry?: RidgeBlockoutGeometry;
   private ridgeSolidBlockers: readonly RidgeBlockoutCollider[] = [];
+  private ridgeMantleTargets: readonly RidgeBlockoutCollider[] = [];
   private lastSafePosition?: { x: number; y: number };
   private activeClimbZoneId: string | null = null;
 
@@ -170,6 +173,7 @@ export class RidgeScene extends Phaser.Scene {
     });
     this.ridgeGeometry = geometry;
     this.ridgeSolidBlockers = geometry.gridColliders.filter(isSolidCollider);
+    this.ridgeMantleTargets = geometry.colliders.filter(isMantleTargetCollider);
     this.lastSafePosition = undefined;
     this.activeClimbZoneId = null;
 
@@ -207,7 +211,7 @@ export class RidgeScene extends Phaser.Scene {
     this.playerRuntime?.syncAppearance();
   }
 
-  update(): void {
+  update(_time: number, delta: number): void {
     this.primeTraversalGrounding();
     const playerUpdate = this.playerRuntime?.update();
     if (!playerUpdate || playerUpdate.paused) return;
@@ -217,7 +221,7 @@ export class RidgeScene extends Phaser.Scene {
       return;
     }
 
-    this.applyTraversalComfort(playerUpdate.commands);
+    this.applyTraversalComfort(playerUpdate.commands, delta);
 
     this.cickaPerch?.update({
       playerX: this.player?.x ?? 0,
@@ -270,16 +274,18 @@ export class RidgeScene extends Phaser.Scene {
       1
     ).setDepth(-100);
 
+    const graphics = this.add.graphics().setDepth(-90);
+    graphics.lineStyle(3, 0x1f1f1d, 0.06);
     for (let y = 160; y < bounds.height; y += 420) {
-      this.add.line(bounds.width / 2, y, -bounds.width / 2, 0, bounds.width / 2, 0, 0x1f1f1d, 0.06)
-        .setLineWidth(3)
-        .setDepth(-90);
+      graphics.strokeLineShape(new Phaser.Geom.Line(0, y, bounds.width, y));
     }
 
     for (let x = 180; x < bounds.width; x += 420) {
       const y = 260 + Math.sin(x / 180) * 34;
-      this.add.line(x, y, -150, 34, 150, -34, 0x1f1f1d, 0.12).setLineWidth(4).setDepth(-80);
-      this.add.line(x + 44, y + 42, -96, 18, 96, -18, 0x1f1f1d, 0.09).setLineWidth(3).setDepth(-80);
+      graphics.lineStyle(4, 0x1f1f1d, 0.12);
+      graphics.strokeLineShape(new Phaser.Geom.Line(x - 150, y + 34, x + 150, y - 34));
+      graphics.lineStyle(3, 0x1f1f1d, 0.09);
+      graphics.strokeLineShape(new Phaser.Geom.Line(x - 52, y + 60, x + 140, y + 24));
     }
   }
 
@@ -608,18 +614,18 @@ export class RidgeScene extends Phaser.Scene {
     }
   }
 
-  private applyTraversalComfort(commands: InputCommandFrame): void {
+  private applyTraversalComfort(commands: InputCommandFrame, deltaMs: number): void {
     const player = this.player;
     const geometry = this.ridgeGeometry;
     if (!player?.body || !geometry) return;
 
-    const didClimb = this.applyClimbAssist(commands, geometry.assistZones);
+    const didClimb = this.applyClimbAssist(commands, geometry.assistZones, deltaMs);
     if (!didClimb) {
       this.releaseClimbAttachment();
       this.applyRampAssist(commands, geometry.assistZones);
-      this.applyDropAssist(geometry.assistZones);
+      this.applyDropAssist(geometry.assistZones, deltaMs);
       this.applyStepUpAssist(commands, geometry.colliders);
-      this.applyMantleAssist(commands, geometry.colliders);
+      this.applyMantleAssist(commands);
     }
     this.recoverFromWorldBottom(geometry);
     this.captureLastSafePosition(geometry);
@@ -652,7 +658,8 @@ export class RidgeScene extends Phaser.Scene {
 
   private applyClimbAssist(
     commands: InputCommandFrame,
-    zones: readonly RidgeBlockoutAssistZone[]
+    zones: readonly RidgeBlockoutAssistZone[],
+    deltaMs: number
   ): boolean {
     const player = this.player;
     if (!player?.body) return false;
@@ -672,6 +679,7 @@ export class RidgeScene extends Phaser.Scene {
       !shouldMaintainClimbAttachment({
         attached: isAttached,
         jump: commands.jump,
+        horizontalAxis: commands.moveAxis,
         nearClimbLine: true
       })
     ) {
@@ -688,7 +696,8 @@ export class RidgeScene extends Phaser.Scene {
         verticalAxis: commands.verticalAxis,
         fromY: zone.from.y,
         toY: zone.to.y,
-        progressPerFrame: RIDGE_CLIMB_PROGRESS_PER_FRAME
+        progressPerSecond: RIDGE_CLIMB_PROGRESS_PER_SECOND,
+        deltaMs
       }),
       0,
       1
@@ -713,7 +722,10 @@ export class RidgeScene extends Phaser.Scene {
     this.player?.body?.setAllowGravity(true);
   }
 
-  private applyDropAssist(zones: readonly RidgeBlockoutAssistZone[]): boolean {
+  private applyDropAssist(
+    zones: readonly RidgeBlockoutAssistZone[],
+    deltaMs: number
+  ): boolean {
     const player = this.player;
     if (!player?.body || player.body.velocity.y <= 0) return false;
 
@@ -726,7 +738,11 @@ export class RidgeScene extends Phaser.Scene {
     const t = projectPointToSegmentT({ x: player.x, y: player.y }, zone);
     const point = getPointOnTraversalSegment(zone, t);
     const target = {
-      x: Phaser.Math.Linear(player.x, point.x, 0.08),
+      x: Phaser.Math.Linear(
+        player.x,
+        point.x,
+        getFrameRateIndependentLerpAlpha(RIDGE_DROP_LERP_ALPHA_AT_60FPS, deltaMs)
+      ),
       y: player.y
     };
     if (this.isAssistPathOccluded(target)) return false;
@@ -771,8 +787,7 @@ export class RidgeScene extends Phaser.Scene {
   }
 
   private applyMantleAssist(
-    commands: InputCommandFrame,
-    colliders: readonly RidgeBlockoutCollider[]
+    commands: InputCommandFrame
   ): boolean {
     const player = this.player;
     if (!player?.body || commands.moveAxis === 0) return false;
@@ -781,8 +796,7 @@ export class RidgeScene extends Phaser.Scene {
 
     const direction = Math.sign(commands.moveAxis);
     const bottomY = getPlayerBottomY(player);
-    const ledges = colliders
-      .filter(isMantleTargetCollider)
+    const ledges = this.ridgeMantleTargets
       .map((collider) => ({ collider, distance: getHorizontalLedgeDistance(collider, player.x, direction) }))
       .filter((candidate) =>
         candidate.distance >= 0 &&
@@ -1231,7 +1245,7 @@ function isSolidCollider(collider: RidgeBlockoutCollider): boolean {
 }
 
 function getPlayerBottomY(player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody): number {
-  return player.y + player.body.height / 2;
+  return player.body.bottom;
 }
 
 function markBodyGrounded(body: Phaser.Physics.Arcade.Body): void {

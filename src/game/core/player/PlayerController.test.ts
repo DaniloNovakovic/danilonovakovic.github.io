@@ -90,7 +90,7 @@ describe('PlayerController', () => {
 
     it('applies jump velocity when blocked down by world or assisted terrain', () => {
       const blockedSprite = makeSprite(false);
-      blockedSprite.body.blocked.down = true;
+      blockedSprite.body.blocked = { down: true };
       controller.mount(blockedSprite);
       controller.step({ ...noInput, jump: true });
       expect(blockedSprite.vy).toBe(JUMP_VY);

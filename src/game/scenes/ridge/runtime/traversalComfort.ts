@@ -206,19 +206,31 @@ export function getClimbProgressDelta(input: {
   verticalAxis: number;
   fromY: number;
   toY: number;
-  progressPerFrame: number;
+  progressPerSecond: number;
+  deltaMs: number;
 }): number {
   if (input.verticalAxis === 0) return 0;
   const directionY = Math.sign(input.toY - input.fromY) || 1;
-  return input.verticalAxis * directionY * input.progressPerFrame;
+  return input.verticalAxis * directionY * input.progressPerSecond * getClampedDeltaSeconds(input.deltaMs);
 }
 
 export function shouldMaintainClimbAttachment(input: {
   attached: boolean;
   jump: boolean;
+  horizontalAxis: number;
   nearClimbLine: boolean;
 }): boolean {
-  return input.attached && !input.jump && input.nearClimbLine;
+  return input.attached && !input.jump && input.horizontalAxis === 0 && input.nearClimbLine;
+}
+
+export function getFrameRateIndependentLerpAlpha(
+  referenceFrameAlpha: number,
+  deltaMs: number
+): number {
+  const clampedAlpha = clamp(referenceFrameAlpha, 0, 1);
+  if (clampedAlpha === 0 || clampedAlpha === 1) return clampedAlpha;
+  const referenceFrames = getClampedDeltaSeconds(deltaMs) / (1 / 60);
+  return 1 - ((1 - clampedAlpha) ** referenceFrames);
 }
 
 export function isTraversalPathOccludedBySolid(input: {
@@ -257,6 +269,10 @@ function lerp(start: number, end: number, t: number): number {
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
+}
+
+function getClampedDeltaSeconds(deltaMs: number): number {
+  return clamp(deltaMs, 0, 50) / 1000;
 }
 
 function inflateRect(
