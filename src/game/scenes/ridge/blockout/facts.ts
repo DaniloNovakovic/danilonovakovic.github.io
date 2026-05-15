@@ -100,8 +100,15 @@ export function compileRidgeBlockoutFacts(
     stampIds: options.stampIds
   });
   const anchors = geometry.anchorPoints.map(toAnchorFact);
+  const anchorsByRoomId = groupAnchorsByRoomId(anchors);
+  const roomBoundsById = new Map(
+    geometry.roomBounds.map((bounds) => [bounds.roomId, bounds])
+  );
+  const shortcutConnectionsById = new Map(
+    geometry.shortcutConnections.map((connection) => [connection.id, connection])
+  );
   const rooms = map.rooms.map((room) => {
-    const bounds = geometry.roomBounds.find((candidate) => candidate.roomId === room.id);
+    const bounds = roomBoundsById.get(room.id);
     if (!bounds) {
       throw new Error(`Ridge blockout room "${room.id}" could not be compiled into facts`);
     }
@@ -114,7 +121,7 @@ export function compileRidgeBlockoutFacts(
       props: room.props,
       declarations: room.declarations,
       bounds,
-      anchors: anchors.filter((anchor) => anchor.roomId === room.id)
+      anchors: anchorsByRoomId.get(room.id) ?? []
     };
   });
   const spawn = findRidgeBlockoutFactAnchor({ anchors }, {
@@ -138,7 +145,7 @@ export function compileRidgeBlockoutFacts(
     routes: map.routes.map((route) => toRouteFact(route, 'route')),
     futureRoutes: map.futureRoutes.map((route) => toRouteFact(route, 'future_route')),
     shortcuts: map.shortcuts.map((shortcut) => {
-      const connection = geometry.shortcutConnections.find((candidate) => candidate.id === shortcut.id);
+      const connection = shortcutConnectionsById.get(shortcut.id);
       const source = anchors.find((anchor) =>
         anchor.roomId === shortcut.fromRoomId &&
         anchor.targetRoomId === shortcut.toRoomId &&
@@ -154,11 +161,11 @@ export function compileRidgeBlockoutFacts(
         fromRoomId: shortcut.fromRoomId,
         toRoomId: shortcut.toRoomId,
         kind: shortcut.kind,
-        movement: connection?.movement ?? 'ramp',
+        movement: connection?.movement ?? resolveShortcutFallbackMovement(shortcut.kind),
         requiredStampId: getRidgeBlockoutShortcutRequiredStampId(shortcut.id),
         available,
         from: source,
-        to: connection?.to ?? getRoomCenter(geometry, shortcut.toRoomId) ?? { x: 0, y: 0 }
+        to: connection?.to ?? getRequiredRoomCenter(geometry, shortcut.toRoomId, shortcut.id)
       };
     }),
     homeMutations: map.homeMutations.map((mutation) => ({
@@ -204,15 +211,48 @@ function toRouteFact(
     roomIds: route.roomIds,
     links: route.roomIds.slice(0, -1).map((roomId, index) => ({
       fromRoomId: roomId,
-      toRoomId: route.roomIds[index + 1] ?? ''
+      toRoomId: route.roomIds[index + 1]
     }))
   };
+}
+
+function resolveShortcutFallbackMovement(
+  kind: string | undefined
+): RidgeBlockoutTraversalMovement {
+  if (kind?.includes('drop') || kind?.includes('fall')) return 'drop';
+  return parseTraversalMovement(kind) ?? 'ramp';
 }
 
 function parseTraversalMovement(value: string | undefined): RidgeBlockoutTraversalMovement | undefined {
   return value && RIDGE_BLOCKOUT_TRAVERSAL_MOVEMENTS.has(value)
     ? value as RidgeBlockoutTraversalMovement
     : undefined;
+}
+
+function groupAnchorsByRoomId(
+  anchors: readonly RidgeAnchorFact[]
+): Map<string, readonly RidgeAnchorFact[]> {
+  const anchorsByRoomId = new Map<string, RidgeAnchorFact[]>();
+  anchors.forEach((anchor) => {
+    const roomAnchors = anchorsByRoomId.get(anchor.roomId) ?? [];
+    roomAnchors.push(anchor);
+    anchorsByRoomId.set(anchor.roomId, roomAnchors);
+  });
+  return anchorsByRoomId;
+}
+
+function getRequiredRoomCenter(
+  geometry: Pick<RidgeBlockoutGeometry, 'roomBounds'>,
+  roomId: string,
+  shortcutId: string
+): { x: number; y: number } {
+  const center = getRoomCenter(geometry, roomId);
+  if (!center) {
+    throw new Error(
+      `Ridge blockout shortcut "${shortcutId}" target room "${roomId}" could not be compiled into facts`
+    );
+  }
+  return center;
 }
 
 function getRoomCenter(

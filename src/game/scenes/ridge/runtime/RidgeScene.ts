@@ -30,6 +30,7 @@ import {
   compileRidgeBlockoutFacts,
   deriveRidgeBlockoutGeometry,
   type RidgeBlockoutAnchorPoint,
+  type RidgeBlockoutAnchorSelector,
   type RidgeBlockoutAssistZone,
   type RidgeBlockoutBounds,
   type RidgeBlockoutCollider,
@@ -142,7 +143,6 @@ export class RidgeScene extends Phaser.Scene {
       stampIds: ridgeProgress.stampIds
     });
     const facts = compileRidgeBlockoutFacts(blockout, {
-      stampIds: ridgeProgress.stampIds,
       geometry
     });
     this.traversalRuntime = undefined;
@@ -170,7 +170,7 @@ export class RidgeScene extends Phaser.Scene {
       messages.scenes.ridge.memory.cickaWalkByBark,
       worldMemories
     );
-    this.addPlaceholderCopy(facts);
+    this.addPlaceholderCopy(facts, messages.catalog.ridge.ridge.name);
     this.createPlayer(platforms, facts, geometry);
     this.createRidgeInteractions(
       messages.navigation.interact,
@@ -763,9 +763,9 @@ export class RidgeScene extends Phaser.Scene {
     this.add.circle(x + 60, y - 37, 4, 0x1f1f1d, 0.58).setDepth(17);
   }
 
-  private addPlaceholderCopy(facts: RidgeBlockoutFacts): void {
+  private addPlaceholderCopy(facts: RidgeBlockoutFacts, title: string): void {
     const spawn = facts.spawn;
-    this.add.text(spawn.x, spawn.y - 260, 'Sketchbook Ridge', {
+    this.add.text(spawn.x, spawn.y - 260, title, {
       fontFamily: 'monospace',
       fontSize: '34px',
       color: '#1f1f1d'
@@ -859,12 +859,7 @@ function drawLadderVisual(
 
 function requireRidgeBlockoutFactAnchor(
   facts: RidgeBlockoutFacts,
-  selector: {
-    roomId: string;
-    symbol?: string;
-    kind?: string;
-    attrId?: string;
-  },
+  selector: RidgeBlockoutAnchorSelector,
   label: string
 ): RidgeAnchorFact {
   const point = findRidgeBlockoutFactAnchor(facts, selector);

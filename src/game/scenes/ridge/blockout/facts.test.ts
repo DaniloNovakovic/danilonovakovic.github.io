@@ -127,6 +127,39 @@ describe('ridge blockout facts', () => {
     });
   });
 
+  it('preserves drop shortcut movement when geometry cannot build a connection', () => {
+    const facts = compileRidgeBlockoutFacts({
+      ...RIDGE_BLOCKOUT,
+      shortcuts: [{
+        id: 'missing_anchor_drop',
+        fromRoomId: 'outskirts',
+        toRoomId: 'cicka_home',
+        kind: 'fall_test_drop'
+      }]
+    });
+
+    expect(facts.shortcuts[0]).toMatchObject({
+      id: 'missing_anchor_drop',
+      movement: 'drop',
+      toRoomId: 'cicka_home'
+    });
+    expect(facts.shortcuts[0]?.to).not.toEqual({ x: 0, y: 0 });
+  });
+
+  it('fails loudly when a shortcut target cannot resolve', () => {
+    expect(() => compileRidgeBlockoutFacts({
+      ...RIDGE_BLOCKOUT,
+      shortcuts: [{
+        id: 'missing_target',
+        fromRoomId: 'outskirts',
+        toRoomId: 'missing_room',
+        kind: 'ramp'
+      }]
+    })).toThrow(
+      'Ridge blockout shortcut "missing_target" target room "missing_room" could not be compiled into facts'
+    );
+  });
+
   it('exposes Cicka Home mutation declarations as typed facts', () => {
     const facts = compileRidgeBlockoutFacts(RIDGE_BLOCKOUT);
 
