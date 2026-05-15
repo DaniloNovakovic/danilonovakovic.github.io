@@ -75,7 +75,8 @@ import {
   isPointNearTraversalLine,
   isTraversalPathOccludedBySolid,
   projectPointToSegmentT,
-  resolveWalkableRampSurfaceY
+  resolveWalkableRampSurfaceY,
+  shouldMaintainClimbAttachment
 } from './traversalComfort';
 
 interface RidgeSceneStartData {
@@ -112,7 +113,7 @@ const RIDGE_MANTLE_MAX_VERTICAL_DELTA = 96;
 const RIDGE_MANTLE_MIN_VELOCITY_Y = -20;
 const RIDGE_STEP_UP_MAX_HEIGHT = 18;
 const RIDGE_STEP_UP_HORIZONTAL_DISTANCE = 22;
-const RIDGE_CLIMB_PROGRESS_PER_FRAME = 0.022;
+const RIDGE_CLIMB_PROGRESS_PER_FRAME = 0.006;
 const RIDGE_FALL_RECOVERY_THRESHOLD_Y = 48;
 
 export class RidgeScene extends Phaser.Scene {
@@ -129,6 +130,7 @@ export class RidgeScene extends Phaser.Scene {
   private ridgeGeometry?: RidgeBlockoutGeometry;
   private ridgeSolidBlockers: readonly RidgeBlockoutCollider[] = [];
   private lastSafePosition?: { x: number; y: number };
+  private activeClimbZoneId: string | null = null;
 
   constructor() {
     super(PHASER_SCENE_KEYS.ridge);
@@ -169,6 +171,7 @@ export class RidgeScene extends Phaser.Scene {
     this.ridgeGeometry = geometry;
     this.ridgeSolidBlockers = geometry.gridColliders.filter(isSolidCollider);
     this.lastSafePosition = undefined;
+    this.activeClimbZoneId = null;
 
     this.cameras.main.setBackgroundColor('#f7f1df');
     this.physics.world.setBounds(
@@ -612,11 +615,12 @@ export class RidgeScene extends Phaser.Scene {
 
     const didClimb = this.applyClimbAssist(commands, geometry.assistZones);
     if (!didClimb) {
+      this.releaseClimbAttachment();
       this.applyRampAssist(commands, geometry.assistZones);
       this.applyDropAssist(geometry.assistZones);
+      this.applyStepUpAssist(commands, geometry.colliders);
+      this.applyMantleAssist(commands, geometry.colliders);
     }
-    this.applyStepUpAssist(commands, geometry.colliders);
-    this.applyMantleAssist(commands, geometry.colliders);
     this.recoverFromWorldBottom(geometry);
     this.captureLastSafePosition(geometry);
   }
@@ -651,7 +655,7 @@ export class RidgeScene extends Phaser.Scene {
     zones: readonly RidgeBlockoutAssistZone[]
   ): boolean {
     const player = this.player;
-    if (!player?.body || commands.verticalAxis === 0 || commands.jump) return false;
+    if (!player?.body) return false;
 
     const zone = zones.find((candidate) =>
       candidate.kind === 'climb' &&
@@ -661,7 +665,19 @@ export class RidgeScene extends Phaser.Scene {
         RIDGE_CLIMB_ATTACH_DISTANCE
       )
     );
+    const isAttached = this.activeClimbZoneId !== null;
     if (!zone) return false;
+    if (
+      commands.verticalAxis === 0 &&
+      !shouldMaintainClimbAttachment({
+        attached: isAttached,
+        jump: commands.jump,
+        nearClimbLine: true
+      })
+    ) {
+      return false;
+    }
+    if (commands.jump) return false;
 
     const currentT = projectPointToSegmentT(
       { x: player.x, y: getPlayerBottomY(player) },
@@ -681,12 +697,20 @@ export class RidgeScene extends Phaser.Scene {
     const target = { x: point.x, y: point.y - player.body.height / 2 };
     if (this.isAssistPathOccluded(target)) return false;
 
+    this.activeClimbZoneId = zone.id;
+    player.body.setAllowGravity(false);
     player.x = target.x;
     player.y = target.y;
     player.setVelocityX(0);
     player.setVelocityY(0);
     markBodyGrounded(player.body);
     return true;
+  }
+
+  private releaseClimbAttachment(): void {
+    if (!this.activeClimbZoneId) return;
+    this.activeClimbZoneId = null;
+    this.player?.body?.setAllowGravity(true);
   }
 
   private applyDropAssist(zones: readonly RidgeBlockoutAssistZone[]): boolean {

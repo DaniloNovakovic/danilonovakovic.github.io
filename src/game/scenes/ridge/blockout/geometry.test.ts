@@ -133,7 +133,7 @@ describe('ridge blockout geometry', () => {
     expect(chamberColliders.every((collider) => !isMantleTargetCollider(collider))).toBe(true);
   });
 
-  it('keeps Cicka reachable from the lower Cicka Home floor in the greybox', () => {
+  it('keeps Cicka reachable on the Cicka Home perch shelf in the greybox', () => {
     const geometry = deriveRidgeBlockoutGeometry(RIDGE_BLOCKOUT);
     const cickaHome = findRidgeBlockoutRoom(RIDGE_BLOCKOUT, 'cicka_home');
     const cickaAnchor = cickaHome?.anchors.find((anchor) => anchor.attrs.id === 'cicka');
@@ -151,7 +151,7 @@ describe('ridge blockout geometry', () => {
     );
 
     expect(cickaPoint).toBeDefined();
-    expect(supportingFloor?.id).toBe('cicka_home:13:0:#');
+    expect(supportingFloor?.id).toBe('cicka_home:6:5:#');
   });
 
   it('uses a climb connector from Cicka Home toward Work Artifact instead of an unusable steep ramp', () => {

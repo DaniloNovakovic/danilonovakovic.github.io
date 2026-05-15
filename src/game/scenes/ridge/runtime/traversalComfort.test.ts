@@ -12,7 +12,8 @@ import {
   isTraversalPathOccludedBySolid,
   projectPointToSegmentT,
   resolveRampSurfaceY,
-  resolveWalkableRampSurfaceY
+  resolveWalkableRampSurfaceY,
+  shouldMaintainClimbAttachment
 } from './traversalComfort';
 
 const ramp = {
@@ -145,6 +146,24 @@ describe('Ridge traversal comfort helpers', () => {
       toY: 100,
       progressPerFrame: 0.02
     })).toBeCloseTo(-0.02);
+  });
+
+  it('keeps ladder attachment while input is released but detaches on jump or distance', () => {
+    expect(shouldMaintainClimbAttachment({
+      attached: true,
+      jump: false,
+      nearClimbLine: true
+    })).toBe(true);
+    expect(shouldMaintainClimbAttachment({
+      attached: true,
+      jump: true,
+      nearClimbLine: true
+    })).toBe(false);
+    expect(shouldMaintainClimbAttachment({
+      attached: true,
+      jump: false,
+      nearClimbLine: false
+    })).toBe(false);
   });
 
   it('rejects assist paths that cross solid walls', () => {

@@ -1,3 +1,4 @@
+import { useRef, useState } from 'react';
 import { bridgeActions } from '@/game/bridge/store';
 import { useTouchGestures } from '@/shared/hooks/useTouchGestures';
 import type { PointerEvent } from 'react';
@@ -8,10 +9,24 @@ interface UseGameTouchControlsOptions {
 
 type TouchDirection = 'left' | 'right' | 'up' | 'down';
 
+const JOYSTICK_RADIUS_PX = 48;
+const JOYSTICK_KNOB_RADIUS_PX = 34;
+const JOYSTICK_DEADZONE = 0.18;
+
 export function useGameTouchControls({ isPaused }: UseGameTouchControlsOptions) {
+  const joystickPointerId = useRef<number | null>(null);
+  const [joystickOffset, setJoystickOffset] = useState({ x: 0, y: 0 });
+
   function setDirection(direction: TouchDirection, intensity: number): void {
     if (isPaused && intensity > 0) return;
     bridgeActions.setTouchDirectional(direction, intensity);
+  }
+
+  function setDirectionalAxes(horizontalAxis: number, verticalAxis: number): void {
+    setDirection('left', Math.max(0, -horizontalAxis));
+    setDirection('right', Math.max(0, horizontalAxis));
+    setDirection('up', Math.max(0, -verticalAxis));
+    setDirection('down', Math.max(0, verticalAxis));
   }
 
   function stopPointer(e: PointerEvent): void {
@@ -66,6 +81,63 @@ export function useGameTouchControls({ isPaused }: UseGameTouchControlsOptions) 
     };
   }
 
+  function updateJoystick(e: PointerEvent<HTMLDivElement>): void {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const rawX = (e.clientX - centerX) / JOYSTICK_RADIUS_PX;
+    const rawY = (e.clientY - centerY) / JOYSTICK_RADIUS_PX;
+    const length = Math.hypot(rawX, rawY);
+    const scale = length > 1 ? 1 / length : 1;
+    const clampedX = rawX * scale;
+    const clampedY = rawY * scale;
+    const active = length >= JOYSTICK_DEADZONE;
+    const axisX = active ? clampedX : 0;
+    const axisY = active ? clampedY : 0;
+
+    setDirectionalAxes(axisX, axisY);
+    setJoystickOffset({
+      x: axisX * JOYSTICK_KNOB_RADIUS_PX,
+      y: axisY * JOYSTICK_KNOB_RADIUS_PX
+    });
+  }
+
+  function releaseJoystick(): void {
+    joystickPointerId.current = null;
+    setDirectionalAxes(0, 0);
+    setJoystickOffset({ x: 0, y: 0 });
+  }
+
+  const joystickHandlers = {
+    onPointerDown: (e: PointerEvent<HTMLDivElement>) => {
+      stopPointer(e);
+      if (isPaused) return;
+      joystickPointerId.current = e.pointerId;
+      e.currentTarget.setPointerCapture(e.pointerId);
+      updateJoystick(e);
+    },
+    onPointerMove: (e: PointerEvent<HTMLDivElement>) => {
+      if (joystickPointerId.current !== e.pointerId) return;
+      stopPointer(e);
+      updateJoystick(e);
+    },
+    onPointerUp: (e: PointerEvent<HTMLDivElement>) => {
+      if (joystickPointerId.current !== e.pointerId) return;
+      stopPointer(e);
+      releaseJoystick();
+    },
+    onPointerCancel: (e: PointerEvent<HTMLDivElement>) => {
+      if (joystickPointerId.current !== e.pointerId) return;
+      stopPointer(e);
+      releaseJoystick();
+    },
+    onPointerLeave: (e: PointerEvent<HTMLDivElement>) => {
+      if (joystickPointerId.current !== e.pointerId) return;
+      stopPointer(e);
+      releaseJoystick();
+    }
+  };
+
   const jumpButtonHandlers = {
     onPointerDown: (e: PointerEvent<HTMLButtonElement>) => {
       stopPointer(e);
@@ -83,6 +155,8 @@ export function useGameTouchControls({ isPaused }: UseGameTouchControlsOptions) 
   return {
     gestureHandlers,
     getDirectionalButtonHandlers,
+    joystickHandlers,
+    joystickOffset,
     jumpButtonHandlers,
     interactButtonHandlers
   };

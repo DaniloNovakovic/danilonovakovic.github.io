@@ -213,6 +213,14 @@ export function getClimbProgressDelta(input: {
   return input.verticalAxis * directionY * input.progressPerFrame;
 }
 
+export function shouldMaintainClimbAttachment(input: {
+  attached: boolean;
+  jump: boolean;
+  nearClimbLine: boolean;
+}): boolean {
+  return input.attached && !input.jump && input.nearClimbLine;
+}
+
 export function isTraversalPathOccludedBySolid(input: {
   from: RidgeTraversalPoint;
   to: RidgeTraversalPoint;
