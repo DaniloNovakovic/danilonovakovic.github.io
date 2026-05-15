@@ -7,6 +7,7 @@ import {
   getRidgeBlockoutAnchorPoint,
   isRidgeBlockoutShortcutAvailable
 } from './index';
+import { isMantleTargetCollider } from '../runtime/traversalComfort';
 
 describe('ridge blockout geometry', () => {
   it('derives horizontal collider runs from solid and platform cells', () => {
@@ -105,5 +106,27 @@ describe('ridge blockout geometry', () => {
       x: 360,
       y: 3768
     });
+  });
+
+  it('keeps the Cicka Home secret chamber enclosed by solid wall colliders', () => {
+    const geometry = deriveRidgeBlockoutGeometry(RIDGE_BLOCKOUT);
+    const chamberColliders = geometry.gridColliders.filter((collider) =>
+      collider.roomId === 'cicka_home' &&
+      collider.kind === 'solid' &&
+      (
+        collider.id === 'cicka_home:6:5:#' ||
+        collider.id === 'cicka_home:10:5:#' ||
+        collider.id === 'cicka_home:8:5:#' ||
+        collider.id === 'cicka_home:8:26:#'
+      )
+    );
+
+    expect(chamberColliders.map((collider) => collider.id).sort()).toEqual([
+      'cicka_home:10:5:#',
+      'cicka_home:6:5:#',
+      'cicka_home:8:26:#',
+      'cicka_home:8:5:#'
+    ]);
+    expect(chamberColliders.every((collider) => !isMantleTargetCollider(collider))).toBe(true);
   });
 });

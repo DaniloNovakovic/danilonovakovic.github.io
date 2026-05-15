@@ -26,6 +26,18 @@ export interface RidgeSafePosition {
   y: number;
 }
 
+export interface RidgeTraversalSize {
+  width: number;
+  height: number;
+}
+
+export interface RidgeTraversalRect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 export interface RidgeRampSnapOptions {
   maxSnapDownY: number;
   maxSnapUpY: number;
@@ -126,6 +138,14 @@ export function canMantleLedge(input: {
   );
 }
 
+export function isMantleTargetCollider(collider: { kind: string }): boolean {
+  return (
+    collider.kind === 'platform' ||
+    collider.kind === 'route-connector' ||
+    collider.kind === 'shortcut-connector'
+  );
+}
+
 export function canStepUp(input: {
   playerBottomY: number;
   obstacleTopY: number;
@@ -182,6 +202,22 @@ export function isPointNearTraversalLine(
   );
 }
 
+export function isTraversalPathOccludedBySolid(input: {
+  from: RidgeTraversalPoint;
+  to: RidgeTraversalPoint;
+  bodySize: RidgeTraversalSize;
+  solidRects: readonly RidgeTraversalRect[];
+  skin?: number;
+}): boolean {
+  const skin = input.skin ?? 4;
+  const inflateX = Math.max(0, input.bodySize.width / 2 - skin);
+  const inflateY = Math.max(0, input.bodySize.height / 2 - skin);
+
+  return input.solidRects.some((rect) =>
+    doesSegmentIntersectRect(input.from, input.to, inflateRect(rect, inflateX, inflateY))
+  );
+}
+
 export function getPointOnTraversalSegment(
   segment: Pick<RidgeTraversalLineZone, 'from' | 'to'>,
   t: number
@@ -202,4 +238,72 @@ function lerp(start: number, end: number, t: number): number {
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
+}
+
+function inflateRect(
+  rect: RidgeTraversalRect,
+  inflateX: number,
+  inflateY: number
+): RidgeTraversalRect {
+  return {
+    x: rect.x,
+    y: rect.y,
+    width: rect.width + inflateX * 2,
+    height: rect.height + inflateY * 2
+  };
+}
+
+function doesSegmentIntersectRect(
+  from: RidgeTraversalPoint,
+  to: RidgeTraversalPoint,
+  rect: RidgeTraversalRect
+): boolean {
+  if (isPointInsideRect(from, rect) || isPointInsideRect(to, rect)) return true;
+
+  const left = rect.x - rect.width / 2;
+  const right = rect.x + rect.width / 2;
+  const top = rect.y - rect.height / 2;
+  const bottom = rect.y + rect.height / 2;
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  let tMin = 0;
+  let tMax = 1;
+
+  const clippedX = clipSegmentAxis(from.x, dx, left, right, tMin, tMax);
+  if (!clippedX) return false;
+  tMin = clippedX.tMin;
+  tMax = clippedX.tMax;
+
+  const clippedY = clipSegmentAxis(from.y, dy, top, bottom, tMin, tMax);
+  return clippedY !== undefined;
+}
+
+function clipSegmentAxis(
+  start: number,
+  delta: number,
+  min: number,
+  max: number,
+  tMin: number,
+  tMax: number
+): { tMin: number; tMax: number } | undefined {
+  if (Math.abs(delta) < 0.001) {
+    return start >= min && start <= max ? { tMin, tMax } : undefined;
+  }
+
+  const t1 = (min - start) / delta;
+  const t2 = (max - start) / delta;
+  const axisMin = Math.min(t1, t2);
+  const axisMax = Math.max(t1, t2);
+  const nextMin = Math.max(tMin, axisMin);
+  const nextMax = Math.min(tMax, axisMax);
+  return nextMin <= nextMax ? { tMin: nextMin, tMax: nextMax } : undefined;
+}
+
+function isPointInsideRect(point: RidgeTraversalPoint, rect: RidgeTraversalRect): boolean {
+  return (
+    point.x >= rect.x - rect.width / 2 &&
+    point.x <= rect.x + rect.width / 2 &&
+    point.y >= rect.y - rect.height / 2 &&
+    point.y <= rect.y + rect.height / 2
+  );
 }

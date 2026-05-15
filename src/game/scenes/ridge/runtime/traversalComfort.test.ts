@@ -6,7 +6,9 @@ import {
   getDistanceToTraversalSegment,
   getPointOnTraversalSegment,
   getRampSurfaceYAtX,
+  isMantleTargetCollider,
   isPointNearTraversalLine,
+  isTraversalPathOccludedBySolid,
   projectPointToSegmentT,
   resolveRampSurfaceY,
   resolveWalkableRampSurfaceY
@@ -74,6 +76,13 @@ describe('Ridge traversal comfort helpers', () => {
     })).toBe(false);
   });
 
+  it('allows mantle targets only for platforms and connector platforms', () => {
+    expect(isMantleTargetCollider({ kind: 'solid' })).toBe(false);
+    expect(isMantleTargetCollider({ kind: 'platform' })).toBe(true);
+    expect(isMantleTargetCollider({ kind: 'route-connector' })).toBe(true);
+    expect(isMantleTargetCollider({ kind: 'shortcut-connector' })).toBe(true);
+  });
+
   it('allows small step-ups but rejects tall walls', () => {
     expect(canStepUp({ playerBottomY: 300, obstacleTopY: 256, maxStepHeight: 56 })).toBe(true);
     expect(canStepUp({ playerBottomY: 300, obstacleTopY: 220, maxStepHeight: 56 })).toBe(false);
@@ -120,5 +129,33 @@ describe('Ridge traversal comfort helpers', () => {
 
     expect(isPointNearTraversalLine(segment, { x: 50, y: 50 }, 18)).toBe(true);
     expect(isPointNearTraversalLine(segment, { x: 50, y: 80 }, 18)).toBe(false);
+  });
+
+  it('rejects assist paths that cross solid walls', () => {
+    const wall = { x: 50, y: 50, width: 10, height: 100 };
+
+    expect(isTraversalPathOccludedBySolid({
+      from: { x: 0, y: 50 },
+      to: { x: 100, y: 50 },
+      bodySize: { width: 10, height: 10 },
+      solidRects: [wall],
+      skin: 0
+    })).toBe(true);
+    expect(isTraversalPathOccludedBySolid({
+      from: { x: 0, y: -20 },
+      to: { x: 100, y: -20 },
+      bodySize: { width: 10, height: 10 },
+      solidRects: [wall],
+      skin: 0
+    })).toBe(false);
+  });
+
+  it('does not treat standing on top of a solid floor as an occluded assist path', () => {
+    expect(isTraversalPathOccludedBySolid({
+      from: { x: 0, y: 80 },
+      to: { x: 100, y: 80 },
+      bodySize: { width: 20, height: 20 },
+      solidRects: [{ x: 50, y: 100, width: 120, height: 20 }]
+    })).toBe(false);
   });
 });

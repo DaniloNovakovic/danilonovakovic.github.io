@@ -70,7 +70,9 @@ import {
   chooseFallRecovery,
   getLedgeTop,
   getPointOnTraversalSegment,
+  isMantleTargetCollider,
   isPointNearTraversalLine,
+  isTraversalPathOccludedBySolid,
   projectPointToSegmentT,
   resolveWalkableRampSurfaceY
 } from './traversalComfort';
@@ -124,6 +126,7 @@ export class RidgeScene extends Phaser.Scene {
   private isPaused = false;
   private resumePosition?: { x: number; y: number };
   private ridgeGeometry?: RidgeBlockoutGeometry;
+  private ridgeSolidBlockers: readonly RidgeBlockoutCollider[] = [];
   private lastSafePosition?: { x: number; y: number };
 
   constructor() {
@@ -163,6 +166,7 @@ export class RidgeScene extends Phaser.Scene {
       stampIds: ridgeProgress.stampIds
     });
     this.ridgeGeometry = geometry;
+    this.ridgeSolidBlockers = geometry.gridColliders.filter(isSolidCollider);
     this.lastSafePosition = undefined;
 
     this.cameras.main.setBackgroundColor('#f7f1df');
@@ -630,7 +634,10 @@ export class RidgeScene extends Phaser.Scene {
     );
     if (!ramp || body.velocity.y < -60) return false;
 
-    player.y = ramp.y - body.height / 2;
+    const target = { x: player.x, y: ramp.y - body.height / 2 };
+    if (this.isAssistPathOccluded(target)) return false;
+
+    player.y = target.y;
     player.setVelocityY(0);
     markBodyGrounded(body);
     return true;
@@ -664,8 +671,11 @@ export class RidgeScene extends Phaser.Scene {
       1
     );
     const point = getPointOnTraversalSegment(zone, nextT);
-    player.x = point.x;
-    player.y = point.y - player.body.height / 2;
+    const target = { x: point.x, y: point.y - player.body.height / 2 };
+    if (this.isAssistPathOccluded(target)) return false;
+
+    player.x = target.x;
+    player.y = target.y;
     player.setVelocityX(0);
     player.setVelocityY(0);
     markBodyGrounded(player.body);
@@ -684,7 +694,13 @@ export class RidgeScene extends Phaser.Scene {
 
     const t = projectPointToSegmentT({ x: player.x, y: player.y }, zone);
     const point = getPointOnTraversalSegment(zone, t);
-    player.x = Phaser.Math.Linear(player.x, point.x, 0.08);
+    const target = {
+      x: Phaser.Math.Linear(player.x, point.x, 0.08),
+      y: player.y
+    };
+    if (this.isAssistPathOccluded(target)) return false;
+
+    player.x = target.x;
     return true;
   }
 
@@ -710,8 +726,14 @@ export class RidgeScene extends Phaser.Scene {
       return false;
     }
 
-    player.x += direction * 18;
-    player.y = topY - player.body.height / 2;
+    const target = {
+      x: player.x + direction * 18,
+      y: topY - player.body.height / 2
+    };
+    if (this.isAssistPathOccluded(target)) return false;
+
+    player.x = target.x;
+    player.y = target.y;
     player.setVelocityY(0);
     markBodyGrounded(player.body);
     return true;
@@ -729,7 +751,7 @@ export class RidgeScene extends Phaser.Scene {
     const direction = Math.sign(commands.moveAxis);
     const bottomY = getPlayerBottomY(player);
     const ledges = colliders
-      .filter((collider) => collider.kind !== 'solid' || collider.height <= 64)
+      .filter(isMantleTargetCollider)
       .map((collider) => ({ collider, distance: getHorizontalLedgeDistance(collider, player.x, direction) }))
       .filter((candidate) =>
         candidate.distance >= 0 &&
@@ -749,10 +771,16 @@ export class RidgeScene extends Phaser.Scene {
     if (!target) return false;
 
     const topY = getLedgeTop(target);
-    player.x = direction > 0
-      ? target.x - target.width / 2 + player.body.width / 2 + 6
-      : target.x + target.width / 2 - player.body.width / 2 - 6;
-    player.y = topY - player.body.height / 2;
+    const nextPosition = {
+      x: direction > 0
+        ? target.x - target.width / 2 + player.body.width / 2 + 6
+        : target.x + target.width / 2 - player.body.width / 2 - 6,
+      y: topY - player.body.height / 2
+    };
+    if (this.isAssistPathOccluded(nextPosition)) return false;
+
+    player.x = nextPosition.x;
+    player.y = nextPosition.y;
     player.setVelocityY(0);
     markBodyGrounded(player.body);
     return true;
@@ -766,6 +794,21 @@ export class RidgeScene extends Phaser.Scene {
     return (
       isPointNearTraversalLine(zone, point, maxDistance)
     );
+  }
+
+  private isAssistPathOccluded(target: { x: number; y: number }): boolean {
+    const player = this.player;
+    if (!player?.body) return false;
+
+    return isTraversalPathOccludedBySolid({
+      from: { x: player.x, y: player.y },
+      to: target,
+      bodySize: {
+        width: player.body.width,
+        height: player.body.height
+      },
+      solidRects: this.ridgeSolidBlockers
+    });
   }
 
   private recoverFromWorldBottom(geometry: RidgeBlockoutGeometry): void {
@@ -1116,6 +1159,10 @@ function getAssistZoneColor(zone: RidgeBlockoutAssistZone): number {
     case 'drop':
       return 0xf0d35f;
   }
+}
+
+function isSolidCollider(collider: RidgeBlockoutCollider): boolean {
+  return collider.kind === 'solid';
 }
 
 function getPlayerBottomY(player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody): number {
