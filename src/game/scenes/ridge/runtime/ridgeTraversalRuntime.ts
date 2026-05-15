@@ -1,6 +1,5 @@
 import type { InputCommandFrame } from '@/game/core/input/commands';
 import type {
-  RidgeBlockoutAssistZone,
   RidgeBlockoutCollider,
   RidgeBlockoutGeometry
 } from '../blockout';
@@ -8,6 +7,7 @@ import {
   canMantleLedge,
   canStepUp,
   chooseFallRecovery,
+  clamp,
   getClimbProgressDelta,
   getFrameRateIndependentLerpAlpha,
   getLedgeTop,
@@ -15,6 +15,7 @@ import {
   isMantleTargetCollider,
   isPointNearTraversalLine,
   isTraversalPathOccludedBySolid,
+  lerp,
   projectPointToSegmentT,
   resolveWalkableRampSurfaceY,
   shouldMaintainClimbAttachment,
@@ -137,7 +138,7 @@ class RidgeTraversalRuntimeImpl implements RidgeTraversalRuntime {
     );
     const climb = this.geometry.assistZones.find((zone) =>
       zone.kind === 'climb' &&
-      isNearTraversalLine(zone, { x: player.x, y: bottomY }, RIDGE_CLIMB_ATTACH_DISTANCE)
+      isPointNearTraversalLine(zone, { x: player.x, y: bottomY }, RIDGE_CLIMB_ATTACH_DISTANCE)
     );
 
     if (!ramp && !climb) {
@@ -221,7 +222,7 @@ class RidgeTraversalRuntimeImpl implements RidgeTraversalRuntime {
     const { player, commands, deltaMs } = frame;
     const zone = this.geometry.assistZones.find((candidate) =>
       candidate.kind === 'climb' &&
-      isNearTraversalLine(
+      isPointNearTraversalLine(
         candidate,
         { x: player.x, y: getPlayerBottomY(player) },
         RIDGE_CLIMB_ATTACH_DISTANCE
@@ -291,14 +292,14 @@ class RidgeTraversalRuntimeImpl implements RidgeTraversalRuntime {
 
     const zone = this.geometry.assistZones.find((candidate) =>
       candidate.kind === 'drop' &&
-      isNearTraversalLine(candidate, { x: player.x, y: player.y }, RIDGE_DROP_ATTACH_DISTANCE)
+      isPointNearTraversalLine(candidate, { x: player.x, y: player.y }, RIDGE_DROP_ATTACH_DISTANCE)
     );
     if (!zone) return false;
 
     const t = projectPointToSegmentT({ x: player.x, y: player.y }, zone);
     const point = getPointOnTraversalSegment(zone, t);
     const target = {
-      x: linear(
+      x: lerp(
         player.x,
         point.x,
         getFrameRateIndependentLerpAlpha(RIDGE_DROP_LERP_ALPHA_AT_60FPS, deltaMs)
@@ -363,26 +364,28 @@ class RidgeTraversalRuntimeImpl implements RidgeTraversalRuntime {
 
     const direction = Math.sign(commands.moveAxis);
     const bottomY = getPlayerBottomY(player);
-    const ledges = this.mantleTargets
-      .map((collider) => ({
-        collider,
-        distance: getHorizontalLedgeDistance(collider, player.x, direction)
-      }))
-      .filter((candidate) =>
-        candidate.distance >= 0 &&
-        canMantleLedge({
-          playerX: player.x,
-          playerBottomY: bottomY,
-          moveAxis: commands.moveAxis,
-          ledge: candidate.collider,
-          maxHorizontalDistance: RIDGE_MANTLE_HORIZONTAL_DISTANCE,
-          minVerticalDelta: RIDGE_MANTLE_MIN_VERTICAL_DELTA,
-          maxVerticalDelta: RIDGE_MANTLE_MAX_VERTICAL_DELTA
-        })
-      )
-      .sort((a, b) => a.distance - b.distance);
+    let closest:
+      | { collider: RidgeBlockoutCollider; distance: number }
+      | undefined;
+    for (const collider of this.mantleTargets) {
+      const distance = getHorizontalLedgeDistance(collider, player.x, direction);
+      if (distance < 0 || (closest && distance >= closest.distance)) continue;
+      if (!canMantleLedge({
+        playerX: player.x,
+        playerBottomY: bottomY,
+        moveAxis: commands.moveAxis,
+        ledge: collider,
+        maxHorizontalDistance: RIDGE_MANTLE_HORIZONTAL_DISTANCE,
+        minVerticalDelta: RIDGE_MANTLE_MIN_VERTICAL_DELTA,
+        maxVerticalDelta: RIDGE_MANTLE_MAX_VERTICAL_DELTA
+      })) {
+        continue;
+      }
 
-    const target = ledges[0]?.collider;
+      closest = { collider, distance };
+    }
+
+    const target = closest?.collider;
     if (!target) return false;
 
     const topY = getLedgeTop(target);
@@ -460,14 +463,6 @@ class RidgeTraversalRuntimeImpl implements RidgeTraversalRuntime {
   }
 }
 
-function isNearTraversalLine(
-  zone: RidgeBlockoutAssistZone,
-  point: { x: number; y: number },
-  maxDistance: number
-): boolean {
-  return isPointNearTraversalLine(zone, point, maxDistance);
-}
-
 function isSolidCollider(collider: RidgeBlockoutCollider): boolean {
   return collider.kind === 'solid';
 }
@@ -491,13 +486,15 @@ function findClosestLedge(
   direction: number,
   maxDistance: number
 ): { collider: RidgeBlockoutCollider; distance: number } | undefined {
-  return colliders
-    .map((collider) => ({
-      collider,
-      distance: getHorizontalLedgeDistance(collider, playerX, direction)
-    }))
-    .filter((candidate) => candidate.distance >= 0 && candidate.distance <= maxDistance)
-    .sort((a, b) => a.distance - b.distance)[0];
+  let closest: { collider: RidgeBlockoutCollider; distance: number } | undefined;
+  for (const collider of colliders) {
+    const distance = getHorizontalLedgeDistance(collider, playerX, direction);
+    if (distance < 0 || distance > maxDistance) continue;
+    if (!closest || distance < closest.distance) {
+      closest = { collider, distance };
+    }
+  }
+  return closest;
 }
 
 function getHorizontalLedgeDistance(
@@ -513,12 +510,4 @@ function getHorizontalLedgeDistance(
 
 function getColliderTop(collider: RidgeBlockoutCollider): number {
   return collider.y - collider.height / 2;
-}
-
-function linear(start: number, end: number, amount: number): number {
-  return start + (end - start) * amount;
-}
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max);
 }
