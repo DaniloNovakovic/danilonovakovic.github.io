@@ -202,6 +202,17 @@ export function isPointNearTraversalLine(
   );
 }
 
+export function getClimbProgressDelta(input: {
+  verticalAxis: number;
+  fromY: number;
+  toY: number;
+  progressPerFrame: number;
+}): number {
+  if (input.verticalAxis === 0) return 0;
+  const directionY = Math.sign(input.toY - input.fromY) || 1;
+  return input.verticalAxis * directionY * input.progressPerFrame;
+}
+
 export function isTraversalPathOccludedBySolid(input: {
   from: RidgeTraversalPoint;
   to: RidgeTraversalPoint;

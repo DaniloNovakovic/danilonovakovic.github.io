@@ -19,6 +19,7 @@ export const RIDGE_BLOCKOUT_RUNTIME_SYMBOLS = new Set([
 ]);
 
 export const RIDGE_BLOCKOUT_DESIGN_SYMBOLS = new Set(['=', '~', 'N', 'M']);
+export const RIDGE_BLOCKOUT_LADDER_SYMBOL = 'L';
 
 export const RIDGE_BLOCKOUT_TRAVERSAL_MOVEMENTS = new Set([
   'ramp',
@@ -502,7 +503,11 @@ function stripGeometryAttrs(attrs: Readonly<Record<string, string>>): Record<str
 }
 
 function isKnownRidgeBlockoutSymbol(symbol: string): boolean {
-  return RIDGE_BLOCKOUT_RUNTIME_SYMBOLS.has(symbol) || RIDGE_BLOCKOUT_DESIGN_SYMBOLS.has(symbol);
+  return (
+    RIDGE_BLOCKOUT_RUNTIME_SYMBOLS.has(symbol) ||
+    RIDGE_BLOCKOUT_DESIGN_SYMBOLS.has(symbol) ||
+    symbol === RIDGE_BLOCKOUT_LADDER_SYMBOL
+  );
 }
 
 function validateRuntimeCellOverlaps(map: RidgeBlockoutMap): readonly string[] {

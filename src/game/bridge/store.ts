@@ -12,6 +12,8 @@ import type {
 export interface TouchBridgeState {
   left: number;
   right: number;
+  up: number;
+  down: number;
   /** One-shot jump request set by React touch controls and cleared by scene input readers. */
   jumpQueued: boolean;
   /** One-shot interact request set by React touch controls and cleared by scene input readers. */
@@ -217,6 +219,8 @@ let state: BridgeState = {
   touch: {
     left: 0,
     right: 0,
+    up: 0,
+    down: 0,
     jumpQueued: false,
     interactTap: false
   },
@@ -261,6 +265,8 @@ function setState(updater: (current: BridgeState) => BridgeState): void {
     previous.sceneHintText === candidate.sceneHintText &&
     previous.touch.left === candidate.touch.left &&
     previous.touch.right === candidate.touch.right &&
+    previous.touch.up === candidate.touch.up &&
+    previous.touch.down === candidate.touch.down &&
     previous.touch.jumpQueued === candidate.touch.jumpQueued &&
     previous.touch.interactTap === candidate.touch.interactTap &&
     sceneControlPointerEventsEqual(
@@ -654,7 +660,7 @@ export const bridgeActions = {
     }));
     return action;
   },
-  setTouchDirectional(direction: 'left' | 'right', intensity: number): void {
+  setTouchDirectional(direction: 'left' | 'right' | 'up' | 'down', intensity: number): void {
     setState((current) => ({
       ...current,
       touch: {
@@ -710,6 +716,8 @@ export const bridgeActions = {
       touch: {
         left: 0,
         right: 0,
+        up: 0,
+        down: 0,
         jumpQueued: false,
         interactTap: false
       },

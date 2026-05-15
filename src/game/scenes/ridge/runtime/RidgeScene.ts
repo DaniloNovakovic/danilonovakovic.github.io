@@ -68,6 +68,7 @@ import {
   canMantleLedge,
   canStepUp,
   chooseFallRecovery,
+  getClimbProgressDelta,
   getLedgeTop,
   getPointOnTraversalSegment,
   isMantleTargetCollider,
@@ -323,19 +324,21 @@ export class RidgeScene extends Phaser.Scene {
     geometry.routeConnectors.forEach((connector) => {
       connector.assistZones.forEach((zone) => {
         const color = getAssistZoneColor(zone);
-        graphics.lineStyle(zone.kind === 'climb' ? 5 : 8, color, zone.kind === 'drop' ? 0.24 : 0.38);
+        if (zone.kind === 'climb') {
+          drawLadderVisual(graphics, zone, color);
+          this.add.rectangle(zone.x, zone.y, 24, zone.height, 0x1f1f1d, 0.08)
+            .setStrokeStyle(2, color, 0.28)
+            .setDepth(2);
+          return;
+        }
+
+        graphics.lineStyle(8, color, zone.kind === 'drop' ? 0.24 : 0.38);
         graphics.strokeLineShape(new Phaser.Geom.Line(
           zone.from.x,
           zone.from.y,
           zone.to.x,
           zone.to.y
         ));
-
-        if (zone.kind === 'climb') {
-          this.add.rectangle(zone.x, zone.y, 18, zone.height, 0x1f1f1d, 0.08)
-            .setStrokeStyle(2, color, 0.28)
-            .setDepth(2);
-        }
       });
     });
 
@@ -648,7 +651,7 @@ export class RidgeScene extends Phaser.Scene {
     zones: readonly RidgeBlockoutAssistZone[]
   ): boolean {
     const player = this.player;
-    if (!player?.body || commands.moveAxis === 0) return false;
+    if (!player?.body || commands.verticalAxis === 0 || commands.jump) return false;
 
     const zone = zones.find((candidate) =>
       candidate.kind === 'climb' &&
@@ -660,13 +663,17 @@ export class RidgeScene extends Phaser.Scene {
     );
     if (!zone) return false;
 
-    const directionX = Math.sign(zone.to.x - zone.from.x) || 1;
     const currentT = projectPointToSegmentT(
       { x: player.x, y: getPlayerBottomY(player) },
       zone
     );
     const nextT = Phaser.Math.Clamp(
-      currentT + commands.moveAxis * directionX * RIDGE_CLIMB_PROGRESS_PER_FRAME,
+      currentT + getClimbProgressDelta({
+        verticalAxis: commands.verticalAxis,
+        fromY: zone.from.y,
+        toY: zone.to.y,
+        progressPerFrame: RIDGE_CLIMB_PROGRESS_PER_FRAME
+      }),
       0,
       1
     );
@@ -1158,6 +1165,40 @@ function getAssistZoneColor(zone: RidgeBlockoutAssistZone): number {
       return 0x596f8f;
     case 'drop':
       return 0xf0d35f;
+  }
+}
+
+function drawLadderVisual(
+  graphics: Phaser.GameObjects.Graphics,
+  zone: RidgeBlockoutAssistZone,
+  color: number
+): void {
+  const railOffset = 9;
+  const minY = Math.min(zone.from.y, zone.to.y);
+  const maxY = Math.max(zone.from.y, zone.to.y);
+
+  graphics.lineStyle(4, color, 0.5);
+  graphics.strokeLineShape(new Phaser.Geom.Line(
+    zone.from.x - railOffset,
+    zone.from.y,
+    zone.to.x - railOffset,
+    zone.to.y
+  ));
+  graphics.strokeLineShape(new Phaser.Geom.Line(
+    zone.from.x + railOffset,
+    zone.from.y,
+    zone.to.x + railOffset,
+    zone.to.y
+  ));
+
+  graphics.lineStyle(3, 0x1f1f1d, 0.22);
+  for (let y = minY + 20; y < maxY; y += 34) {
+    graphics.strokeLineShape(new Phaser.Geom.Line(
+      zone.from.x - railOffset - 4,
+      y,
+      zone.from.x + railOffset + 4,
+      y
+    ));
   }
 }
 

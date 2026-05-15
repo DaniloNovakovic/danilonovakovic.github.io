@@ -7,7 +7,10 @@ import {
   getRidgeBlockoutAnchorPoint,
   isRidgeBlockoutShortcutAvailable
 } from './index';
-import { isMantleTargetCollider } from '../runtime/traversalComfort';
+import {
+  isMantleTargetCollider,
+  isTraversalPathOccludedBySolid
+} from '../runtime/traversalComfort';
 
 describe('ridge blockout geometry', () => {
   it('derives horizontal collider runs from solid and platform cells', () => {
@@ -128,5 +131,57 @@ describe('ridge blockout geometry', () => {
       'cicka_home:8:5:#'
     ]);
     expect(chamberColliders.every((collider) => !isMantleTargetCollider(collider))).toBe(true);
+  });
+
+  it('keeps Cicka reachable from the lower Cicka Home floor in the greybox', () => {
+    const geometry = deriveRidgeBlockoutGeometry(RIDGE_BLOCKOUT);
+    const cickaHome = findRidgeBlockoutRoom(RIDGE_BLOCKOUT, 'cicka_home');
+    const cickaAnchor = cickaHome?.anchors.find((anchor) => anchor.attrs.id === 'cicka');
+    if (!cickaHome || !cickaAnchor) throw new Error('missing Cicka Home anchor');
+
+    const cickaPoint = getRidgeBlockoutAnchorPoint(RIDGE_BLOCKOUT, cickaHome, cickaAnchor);
+    const supportingFloor = geometry.gridColliders.find((collider) =>
+      collider.roomId === 'cicka_home' &&
+      collider.kind === 'solid' &&
+      cickaPoint !== undefined &&
+      cickaPoint.x >= collider.x - collider.width / 2 &&
+      cickaPoint.x <= collider.x + collider.width / 2 &&
+      cickaPoint.y < collider.y &&
+      collider.y - cickaPoint.y <= RIDGE_BLOCKOUT.cell * 1.5
+    );
+
+    expect(cickaPoint).toBeDefined();
+    expect(supportingFloor?.id).toBe('cicka_home:13:0:#');
+  });
+
+  it('uses a climb connector from Cicka Home toward Work Artifact instead of an unusable steep ramp', () => {
+    const geometry = deriveRidgeBlockoutGeometry(RIDGE_BLOCKOUT);
+    const cickaToWork = geometry.routeConnectors.find(
+      (connector) => connector.id === 'route:first_walk:cicka_home:work_artifact'
+    );
+
+    expect(cickaToWork?.movement).toBe('climb');
+    expect(cickaToWork?.assistZones).toHaveLength(1);
+    expect(cickaToWork?.assistZones[0]?.kind).toBe('climb');
+    expect(cickaToWork?.assistZones[0]?.from.x).toBe(cickaToWork?.assistZones[0]?.to.x);
+    const cickaFloor = geometry.gridColliders.find((collider) =>
+      collider.id === 'cicka_home:13:0:#'
+    );
+    expect(cickaToWork?.assistZones[0]?.from.y).toBe(
+      cickaFloor ? cickaFloor.y - cickaFloor.height / 2 : undefined
+    );
+    expect(isTraversalPathOccludedBySolid({
+      from: {
+        x: cickaToWork?.assistZones[0]?.from.x ?? 0,
+        y: (cickaToWork?.assistZones[0]?.from.y ?? 0) - 31
+      },
+      to: {
+        x: cickaToWork?.assistZones[0]?.to.x ?? 0,
+        y: (cickaToWork?.assistZones[0]?.to.y ?? 0) - 31
+      },
+      bodySize: { width: 34, height: 62 },
+      solidRects: geometry.gridColliders.filter((collider) => collider.kind === 'solid')
+    })).toBe(false);
+    expect(cickaToWork?.colliders).toEqual([]);
   });
 });

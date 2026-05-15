@@ -1,33 +1,89 @@
 import { bridgeActions } from '@/game/bridge/store';
 import { useTouchGestures } from '@/shared/hooks/useTouchGestures';
+import type { PointerEvent } from 'react';
 
 interface UseGameTouchControlsOptions {
   isPaused: boolean;
 }
 
+type TouchDirection = 'left' | 'right' | 'up' | 'down';
+
 export function useGameTouchControls({ isPaused }: UseGameTouchControlsOptions) {
-  return useTouchGestures({
+  function setDirection(direction: TouchDirection, intensity: number): void {
+    if (isPaused && intensity > 0) return;
+    bridgeActions.setTouchDirectional(direction, intensity);
+  }
+
+  function stopPointer(e: PointerEvent): void {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  const gestureHandlers = useTouchGestures({
     onSwipeLeft: (intensity) => {
-      if (isPaused) return;
-      bridgeActions.setTouchDirectional('left', intensity);
-      bridgeActions.setTouchDirectional('right', 0);
+      setDirection('left', intensity);
+      setDirection('right', 0);
     },
     onSwipeRight: (intensity) => {
-      if (isPaused) return;
-      bridgeActions.setTouchDirectional('right', intensity);
-      bridgeActions.setTouchDirectional('left', 0);
+      setDirection('right', intensity);
+      setDirection('left', 0);
     },
     onSwipeUp: () => {
       if (isPaused) return;
       bridgeActions.queueJump();
     },
     onSwipeEnd: () => {
-      bridgeActions.setTouchDirectional('left', 0);
-      bridgeActions.setTouchDirectional('right', 0);
+      setDirection('left', 0);
+      setDirection('right', 0);
+      setDirection('up', 0);
+      setDirection('down', 0);
     },
     onTap: () => {
       if (isPaused) return;
       bridgeActions.tapInteract();
     }
   });
+
+  function getDirectionalButtonHandlers(direction: TouchDirection) {
+    return {
+      onPointerDown: (e: PointerEvent<HTMLButtonElement>) => {
+        stopPointer(e);
+        e.currentTarget.setPointerCapture(e.pointerId);
+        setDirection(direction, 1);
+      },
+      onPointerUp: (e: PointerEvent<HTMLButtonElement>) => {
+        stopPointer(e);
+        setDirection(direction, 0);
+      },
+      onPointerCancel: (e: PointerEvent<HTMLButtonElement>) => {
+        stopPointer(e);
+        setDirection(direction, 0);
+      },
+      onPointerLeave: (e: PointerEvent<HTMLButtonElement>) => {
+        stopPointer(e);
+        setDirection(direction, 0);
+      }
+    };
+  }
+
+  const jumpButtonHandlers = {
+    onPointerDown: (e: PointerEvent<HTMLButtonElement>) => {
+      stopPointer(e);
+      if (!isPaused) bridgeActions.queueJump();
+    }
+  };
+
+  const interactButtonHandlers = {
+    onPointerDown: (e: PointerEvent<HTMLButtonElement>) => {
+      stopPointer(e);
+      if (!isPaused) bridgeActions.tapInteract();
+    }
+  };
+
+  return {
+    gestureHandlers,
+    getDirectionalButtonHandlers,
+    jumpButtonHandlers,
+    interactButtonHandlers
+  };
 }

@@ -1,5 +1,6 @@
 import { STAMPEDE_SKETCH_RIDGE_STAMP_ID } from '@/game/bridge/ridgeProgressIds';
 import {
+  RIDGE_BLOCKOUT_LADDER_SYMBOL,
   RIDGE_BLOCKOUT_TRAVERSAL_MOVEMENTS,
   findRidgeBlockoutAnchor,
   findRidgeBlockoutRoom,
@@ -271,7 +272,18 @@ function deriveFirstWalkRouteConnectors(
     if (!nextRoomId) return [];
     const from = getRouteExit(map, roomId, nextRoomId);
     const to = getRouteExit(map, nextRoomId, roomId);
-    if (!from || !to) return [];
+    const fromRoom = findRidgeBlockoutRoom(map, roomId);
+    const toRoom = findRidgeBlockoutRoom(map, nextRoomId);
+    if (!from || !to || !fromRoom || !toRoom) return [];
+    const movement = resolveTraversalMovement(from.anchor, to.anchor, from.point, to.point, map.cell);
+    const ladderSegment = movement === 'climb'
+      ? resolveLadderClimbSegment({
+        map,
+        rooms: [fromRoom, toRoom],
+        start: from.point,
+        end: to.point
+      })
+      : undefined;
     return [createTraversalConnector({
       cell: map.cell,
       idPrefix: `route:${firstWalk.id}:${roomId}:${nextRoomId}`,
@@ -279,7 +291,9 @@ function deriveFirstWalkRouteConnectors(
       routeId: firstWalk.id,
       start: from.point,
       end: to.point,
-      movement: resolveTraversalMovement(from.anchor, to.anchor, from.point, to.point, map.cell)
+      movement,
+      assistStart: ladderSegment?.start,
+      assistEnd: ladderSegment?.end
     })];
   });
 }
@@ -393,7 +407,9 @@ function createTraversalConnector({
   shortcutId,
   start,
   end,
-  movement
+  movement,
+  assistStart,
+  assistEnd
 }: {
   cell: number;
   idPrefix: string;
@@ -403,6 +419,8 @@ function createTraversalConnector({
   start: { x: number; y: number };
   end: { x: number; y: number };
   movement: RidgeTraversalMovement;
+  assistStart?: { x: number; y: number };
+  assistEnd?: { x: number; y: number };
 }): RidgeBlockoutTraversalConnector {
   if (movement === 'jump') {
     return {
@@ -445,10 +463,51 @@ function createTraversalConnector({
       movement,
       routeId,
       shortcutId,
-      start: toSurfacePoint(start, cell, movement),
-      end: toSurfacePoint(end, cell, movement)
+      start: assistStart ?? toSurfacePoint(start, cell, movement),
+      end: assistEnd ?? toSurfacePoint(end, cell, movement)
     })]
   };
+}
+
+function resolveLadderClimbSegment({
+  map,
+  rooms,
+  start,
+  end
+}: {
+  map: RidgeBlockoutMap;
+  rooms: readonly RidgeBlockoutRoom[];
+  start: { x: number; y: number };
+  end: { x: number; y: number };
+}): { start: { x: number; y: number }; end: { x: number; y: number } } | undefined {
+  const cells = rooms.flatMap((room) => getLadderCells(map, room));
+  if (cells.length === 0) return undefined;
+
+  const midpointX = (start.x + end.x) / 2;
+  const x = cells.reduce((best, cell) =>
+    Math.abs(cell.x - midpointX) < Math.abs(best.x - midpointX) ? cell : best
+  ).x;
+
+  return {
+    start: { x, y: toSurfacePoint(start, map.cell, 'climb').y },
+    end: { x, y: toSurfacePoint(end, map.cell, 'climb').y }
+  };
+}
+
+function getLadderCells(
+  map: RidgeBlockoutMap,
+  room: RidgeBlockoutRoom
+): readonly { x: number; y: number }[] {
+  return room.grid.flatMap((row, rowIndex) =>
+    [...row].flatMap((symbol, columnIndex) =>
+      symbol === RIDGE_BLOCKOUT_LADDER_SYMBOL
+        ? [{
+          x: (room.place.x + columnIndex + 0.5) * map.cell,
+          y: (room.place.y + rowIndex + 0.5) * map.cell
+        }]
+        : []
+    )
+  );
 }
 
 function createEmptyTraversalConnector({
@@ -588,7 +647,7 @@ function toSurfacePoint(
   cell: number,
   movement: RidgeTraversalMovement
 ): { x: number; y: number } {
-  if (movement === 'climb') return point;
+  if (movement === 'climb') return { x: point.x, y: point.y + cell * 0.5 };
   if (movement === 'drop') return { x: point.x, y: point.y + cell * 0.2 };
   return { x: point.x, y: point.y + cell * 0.58 };
 }

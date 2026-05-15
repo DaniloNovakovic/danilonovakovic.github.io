@@ -3,6 +3,7 @@ import {
   canMantleLedge,
   canStepUp,
   chooseFallRecovery,
+  getClimbProgressDelta,
   getDistanceToTraversalSegment,
   getPointOnTraversalSegment,
   getRampSurfaceYAtX,
@@ -129,6 +130,21 @@ describe('Ridge traversal comfort helpers', () => {
 
     expect(isPointNearTraversalLine(segment, { x: 50, y: 50 }, 18)).toBe(true);
     expect(isPointNearTraversalLine(segment, { x: 50, y: 80 }, 18)).toBe(false);
+  });
+
+  it('moves ladder progress with vertical input instead of horizontal input', () => {
+    expect(getClimbProgressDelta({
+      verticalAxis: -1,
+      fromY: 300,
+      toY: 100,
+      progressPerFrame: 0.02
+    })).toBeCloseTo(0.02);
+    expect(getClimbProgressDelta({
+      verticalAxis: 1,
+      fromY: 300,
+      toY: 100,
+      progressPerFrame: 0.02
+    })).toBeCloseTo(-0.02);
   });
 
   it('rejects assist paths that cross solid walls', () => {

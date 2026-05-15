@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { RIDGE_BLOCKOUT } from './ridgeBlockout';
 import {
+  RIDGE_BLOCKOUT_LADDER_SYMBOL,
   findRidgeBlockoutRoom,
   parseRidgeBlockout
 } from './parser';
@@ -29,6 +30,21 @@ describe('ridge blockout parser', () => {
     const cickaExit = outskirts?.anchors.find((anchor) => anchor.attrs.to === 'cicka_home');
 
     expect(cickaExit?.attrs.movement).toBe('ramp');
+  });
+
+  it('accepts the single-cell ladder marker in grids', () => {
+    expect(RIDGE_BLOCKOUT_LADDER_SYMBOL).toBe('L');
+    const cickaHome = findRidgeBlockoutRoom(RIDGE_BLOCKOUT, 'cicka_home');
+
+    expect(cickaHome?.grid.some((row) => row.includes(RIDGE_BLOCKOUT_LADDER_SYMBOL))).toBe(true);
+    expect(RIDGE_BLOCKOUT.validationErrors.some((error) => error.includes('unknown symbol "L"'))).toBe(false);
+  });
+
+  it('keeps the Cicka Home climb out of the lower floor explicit', () => {
+    const cickaHome = findRidgeBlockoutRoom(RIDGE_BLOCKOUT, 'cicka_home');
+    const workExit = cickaHome?.anchors.find((anchor) => anchor.attrs.to === 'work_artifact');
+
+    expect(workExit?.attrs.movement).toBe('climb');
   });
 
   it('requires every room grid to match the declared size', () => {

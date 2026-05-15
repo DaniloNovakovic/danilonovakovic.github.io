@@ -111,7 +111,12 @@ class PhaserSideViewPlayerRuntime implements SideViewPlayerRuntime {
   private readonly options: SideViewPlayerRuntimeOptions;
   private readonly inputFrame = createInputCommandFrame();
   private readonly cursors: Phaser.Types.Input.Keyboard.CursorKeys;
-  private readonly wasd: { a: Phaser.Input.Keyboard.Key; d: Phaser.Input.Keyboard.Key };
+  private readonly wasd: {
+    a: Phaser.Input.Keyboard.Key;
+    d: Phaser.Input.Keyboard.Key;
+    w: Phaser.Input.Keyboard.Key;
+    s: Phaser.Input.Keyboard.Key;
+  };
   private readonly interactKey: Phaser.Input.Keyboard.Key;
   private readonly hKey: Phaser.Input.Keyboard.Key;
   private readonly escapeKey?: Phaser.Input.Keyboard.Key;
@@ -139,7 +144,9 @@ class PhaserSideViewPlayerRuntime implements SideViewPlayerRuntime {
     this.cursors = keyboard?.createCursorKeys() ?? noOpCursors();
     this.wasd = {
       a: keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.A) ?? noOpKey(),
-      d: keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.D) ?? noOpKey()
+      d: keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.D) ?? noOpKey(),
+      w: keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.W) ?? noOpKey(),
+      s: keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.S) ?? noOpKey()
     };
     this.interactKey = keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.E) ?? noOpKey();
     this.hKey = keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.H) ?? noOpKey();
