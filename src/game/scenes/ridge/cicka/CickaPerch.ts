@@ -15,7 +15,7 @@ import {
   updateCickaWalkBy,
   type CickaWalkByState
 } from './walkBy';
-import { RIDGE_FLOOR_Y, type RidgeLandmark } from '../worldLayout';
+import { RIDGE_FLOOR_Y } from '../worldLayout';
 
 const CICKA_PERCH_ANCHOR_Y = RIDGE_FLOOR_Y - 74;
 const CICKA_INTERACT_RADIUS = 78;
@@ -51,7 +51,7 @@ export interface CickaPerch {
 
 export interface CreateCickaPerchOptions {
   scene: Phaser.Scene;
-  landmark: Pick<RidgeLandmark, 'x'>;
+  landmark: { x: number; y?: number };
   hasStampedeNoteMemory: boolean;
   walkByLine: string;
 }
@@ -59,7 +59,7 @@ export interface CreateCickaPerchOptions {
 export function createCickaPerch(options: CreateCickaPerchOptions): CickaPerch {
   const { scene, landmark, hasStampedeNoteMemory, walkByLine } = options;
   const x = landmark.x;
-  const y = CICKA_PERCH_ANCHOR_Y;
+  const y = landmark.y ?? CICKA_PERCH_ANCHOR_Y;
   const ownedObjects: Phaser.GameObjects.GameObject[] = [];
   let walkByState: CickaWalkByState = createCickaWalkByState();
   let speechVisibleUntilMs = 0;

@@ -19,15 +19,15 @@ function key(isDown = false, justDown = false): Phaser.Input.Keyboard.Key {
 }
 
 function cursors(
-  overrides: Partial<Record<'left' | 'right' | 'up' | 'shift', Phaser.Input.Keyboard.Key>> = {}
+  overrides: Partial<Record<'left' | 'right' | 'up' | 'down' | 'space' | 'shift', Phaser.Input.Keyboard.Key>> = {}
 ): Phaser.Types.Input.Keyboard.CursorKeys {
   return {
     left: overrides.left ?? key(),
     right: overrides.right ?? key(),
     up: overrides.up ?? key(),
     shift: overrides.shift ?? key(),
-    down: key(),
-    space: key()
+    down: overrides.down ?? key(),
+    space: overrides.space ?? key()
   } as Phaser.Types.Input.Keyboard.CursorKeys;
 }
 
@@ -35,6 +35,7 @@ describe('readPlayerSceneStep', () => {
   it('reads bridge touch before consuming one-shots and steps controller once', () => {
     bridgeActions.resetTouch();
     bridgeActions.setTouchDirectional('right', 0.75);
+    bridgeActions.setTouchDirectional('up', 1);
     bridgeActions.queueJump();
     bridgeActions.tapInteract();
     const step = vi.fn(() => ({
@@ -48,7 +49,7 @@ describe('readPlayerSceneStep', () => {
       frame: createInputCommandFrame(),
       controller: { step } as unknown as PlayerController,
       cursors: cursors({ left: key(true) }),
-      wasd: { a: key(), d: key() },
+      wasd: { a: key(), d: key(), w: key(), s: key() },
       interactKey: key(),
       allowJump: true,
       allowSprint: false,
@@ -56,6 +57,7 @@ describe('readPlayerSceneStep', () => {
     });
 
     expect(result.commands.moveAxis).toBe(0.75);
+    expect(result.commands.verticalAxis).toBe(-1);
     expect(result.commands.jump).toBe(true);
     expect(result.commands.interact).toBe(true);
     expect(step).toHaveBeenCalledWith({

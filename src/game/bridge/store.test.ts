@@ -329,11 +329,15 @@ describe('bridgeStore', () => {
   });
 
   describe('directional touch state', () => {
-    it('sets and clears left/right', () => {
+    it('sets and clears directional axes', () => {
       bridgeActions.setTouchDirectional('left', 0.5);
       expect(bridgeStore.getState().touch.left).toBe(0.5);
       bridgeActions.setTouchDirectional('left', 0);
       expect(bridgeStore.getState().touch.left).toBe(0);
+      bridgeActions.setTouchDirectional('up', 1);
+      expect(bridgeStore.getState().touch.up).toBe(1);
+      bridgeActions.setTouchDirectional('up', 0);
+      expect(bridgeStore.getState().touch.up).toBe(0);
     });
 
     it('resetTouch zeroes everything', () => {
@@ -343,6 +347,8 @@ describe('bridgeStore', () => {
       const t = bridgeStore.getState().touch;
       expect(t.left).toBe(0);
       expect(t.right).toBe(0);
+      expect(t.up).toBe(0);
+      expect(t.down).toBe(0);
       expect(t.jumpQueued).toBe(false);
       expect(t.interactTap).toBe(false);
       expect(getTouchState()).toEqual(t);

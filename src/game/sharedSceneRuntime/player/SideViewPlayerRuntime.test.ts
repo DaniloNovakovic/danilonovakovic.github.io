@@ -11,9 +11,12 @@ vi.mock('phaser', () => ({
       KeyCodes: {
         A: 65,
         D: 68,
+        W: 87,
+        S: 83,
         E: 69,
         H: 72,
-        ESC: 27
+        ESC: 27,
+        SPACE: 32
       },
       JustDown: (key: { justDown?: boolean }) => key.justDown === true
     }

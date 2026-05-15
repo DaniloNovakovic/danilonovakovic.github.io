@@ -51,11 +51,10 @@ Room blockouts use a **hybrid, grid-first** model:
   as wind zones, camera hints, trigger areas, elevator travel ranges, and
   shortcut gates.
 
-First supported output should be primitive:
+First supported output is primitive:
 
 - solid ground
 - platforms
-- one-way platforms
 - exits
 - NPC anchors
 - mini-game anchors
@@ -64,8 +63,11 @@ First supported output should be primitive:
 - prop markers
 - environment tags
 
-Final art, sprite placement polish, particles, sound, and bespoke encounter
-logic stay outside v0.
+Parser v0 renders the whole seamless world into a Phaser greybox. It groups
+`#` and `_` cells into horizontal collider runs, generates first-walk connector
+platforms from route exit anchors, and only adds shortcut colliders when the
+matching Ridge progress exists. Final art, sprite placement polish, particles,
+sound, one-way platform behavior, and bespoke encounter logic stay outside v0.
 
 ## Design Goals
 
@@ -191,12 +193,22 @@ Design-only v0 symbols:
 Parser rule: unknown symbols should fail with a clear error unless the room opts
 into a newer language version.
 
+Exit anchors may include `movement=` to choose the generated traversal
+connector. v0 supports `ramp`, `jump`, `climb`, and `drop`; unknown movement
+values fail validation. These are blockout semantics, not final ability names:
+ramps/stairs are assisted walking strips, jumps create sparse forgiving
+platforms, climbs create cord/lift assist zones, and drops create safe return
+zones when unlocked.
+
 Seamless-world QA rule: runtime-active, non-empty cells from different room
 beats should not overlap unless the map explicitly declares a merge rule. v0
 should avoid merge rules and treat conflicting non-empty overlap as a validation
 error.
 
-## Open Questions
+## Current Runtime Output
 
-- Should parser v0 render every room into one world immediately, or render only
-  one room at a time first for easier debugging?
+`src/game/scenes/ridge/blockout/` parses this file directly through Vite raw
+imports. `RidgeScene` renders every room into one whole-world greybox by
+default, derives typed traversal connectors from `movement=` metadata, and
+keeps future routes / locked shortcuts as visual promises without active
+colliders or assist zones.

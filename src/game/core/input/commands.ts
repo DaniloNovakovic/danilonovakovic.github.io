@@ -2,6 +2,7 @@ import type { PlayerStepInput } from '../player/PlayerController';
 
 export interface InputCommandFrame {
   moveAxis: number;
+  verticalAxis: number;
   sprint: boolean;
   jump: boolean;
   interact: boolean;
@@ -11,6 +12,7 @@ export interface InputCommandFrame {
 export function createInputCommandFrame(): InputCommandFrame {
   return {
     moveAxis: 0,
+    verticalAxis: 0,
     sprint: false,
     jump: false,
     interact: false,
@@ -20,6 +22,7 @@ export function createInputCommandFrame(): InputCommandFrame {
 
 export function resetInputCommandFrame(frame: InputCommandFrame): void {
   frame.moveAxis = 0;
+  frame.verticalAxis = 0;
   frame.sprint = false;
   frame.jump = false;
   frame.interact = false;

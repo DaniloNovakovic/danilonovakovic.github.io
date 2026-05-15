@@ -16,6 +16,8 @@ import { readSceneInputCommands } from './readSceneInputCommands';
 const neutralTouch: TouchBridgeState = {
   left: 0,
   right: 0,
+  up: 0,
+  down: 0,
   jumpQueued: false,
   interactTap: false
 };
@@ -25,24 +27,24 @@ function key(isDown = false, justDown = false): Phaser.Input.Keyboard.Key {
 }
 
 function cursors(
-  overrides: Partial<Record<'left' | 'right' | 'up' | 'shift', Phaser.Input.Keyboard.Key>> = {}
+  overrides: Partial<Record<'left' | 'right' | 'up' | 'down' | 'space' | 'shift', Phaser.Input.Keyboard.Key>> = {}
 ): Phaser.Types.Input.Keyboard.CursorKeys {
   return {
     left: overrides.left ?? key(),
     right: overrides.right ?? key(),
     up: overrides.up ?? key(),
     shift: overrides.shift ?? key(),
-    down: key(),
-    space: key()
+    down: overrides.down ?? key(),
+    space: overrides.space ?? key()
   } as Phaser.Types.Input.Keyboard.CursorKeys;
 }
 
 describe('readSceneInputCommands', () => {
-  it('maps keyboard movement, sprint, jump, and interact to commands', () => {
+  it('maps keyboard movement, climb, sprint, jump, and interact to commands', () => {
     const frame = readSceneInputCommands({
       frame: createInputCommandFrame(),
-      cursors: cursors({ left: key(true), up: key(true), shift: key(true) }),
-      wasd: { a: key(), d: key() },
+      cursors: cursors({ left: key(true), up: key(true), space: key(true), shift: key(true) }),
+      wasd: { a: key(), d: key(), w: key(), s: key() },
       interactKey: key(false, true),
       touch: neutralTouch,
       oneShots: { jumpQueued: false, interactTap: false },
@@ -52,6 +54,7 @@ describe('readSceneInputCommands', () => {
 
     expect(frame).toEqual({
       moveAxis: -1,
+      verticalAxis: -1,
       sprint: true,
       jump: true,
       interact: true,
@@ -63,15 +66,16 @@ describe('readSceneInputCommands', () => {
     const frame = readSceneInputCommands({
       frame: createInputCommandFrame(),
       cursors: cursors({ left: key(true) }),
-      wasd: { a: key(), d: key() },
+      wasd: { a: key(), d: key(), w: key(), s: key() },
       interactKey: key(),
-      touch: { ...neutralTouch, right: 0.5 },
+      touch: { ...neutralTouch, right: 0.5, down: 1 },
       oneShots: { jumpQueued: true, interactTap: true },
       allowJump: true,
       allowSprint: false
     });
 
     expect(frame.moveAxis).toBe(0.5);
+    expect(frame.verticalAxis).toBe(1);
     expect(frame.sprint).toBe(false);
     expect(frame.jump).toBe(true);
     expect(frame.interact).toBe(true);
@@ -81,7 +85,7 @@ describe('readSceneInputCommands', () => {
     const frame = readSceneInputCommands({
       frame: createInputCommandFrame(),
       cursors: cursors(),
-      wasd: { a: key(), d: key() },
+      wasd: { a: key(), d: key(), w: key(), s: key() },
       interactKey: key(),
       hKey: key(false, true),
       escapeKey: key(),
@@ -98,7 +102,7 @@ describe('readSceneInputCommands', () => {
     const frame = readSceneInputCommands({
       frame: createInputCommandFrame(),
       cursors: cursors(),
-      wasd: { a: key(), d: key() },
+      wasd: { a: key(), d: key(), w: key(), s: key() },
       interactKey: key(),
       hKey: key(true),
       escapeKey: key(),
