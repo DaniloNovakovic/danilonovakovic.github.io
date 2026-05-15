@@ -10,6 +10,37 @@ import {
 } from '../blockout';
 import { getRidgeBlockoutRoomCenter } from './ridgePresentationFacts';
 
+const BACKDROP_BASE_DEPTH = -100;
+const BACKDROP_SKETCH_DEPTH = -90;
+const BACKDROP_RULED_LINE = {
+  startY: 160,
+  spacingY: 420,
+  width: 3,
+  color: 0x1f1f1d,
+  alpha: 0.06
+} as const;
+const BACKDROP_DIAGONAL_SCRAPS = {
+  startX: 180,
+  spacingX: 420,
+  waveBaseY: 260,
+  waveDivisor: 180,
+  waveAmplitude: 34,
+  primary: {
+    width: 4,
+    color: 0x1f1f1d,
+    alpha: 0.12,
+    from: { x: -150, y: 34 },
+    to: { x: 150, y: -34 }
+  },
+  secondary: {
+    width: 3,
+    color: 0x1f1f1d,
+    alpha: 0.09,
+    from: { x: -52, y: 60 },
+    to: { x: 140, y: 24 }
+  }
+} as const;
+
 export interface RidgeBlockoutPresentationOptions {
   scene: Phaser.Scene;
   facts: RidgeBlockoutFacts;
@@ -44,20 +75,48 @@ function addBackdrop(scene: Phaser.Scene, bounds: RidgeBlockoutBounds): void {
     bounds.height,
     0xf7f1df,
     1
-  ).setDepth(-100);
+  ).setDepth(BACKDROP_BASE_DEPTH);
 
-  const graphics = scene.add.graphics().setDepth(-90);
-  graphics.lineStyle(3, 0x1f1f1d, 0.06);
-  for (let y = 160; y < bounds.height; y += 420) {
+  const graphics = scene.add.graphics().setDepth(BACKDROP_SKETCH_DEPTH);
+  graphics.lineStyle(
+    BACKDROP_RULED_LINE.width,
+    BACKDROP_RULED_LINE.color,
+    BACKDROP_RULED_LINE.alpha
+  );
+  for (let y = BACKDROP_RULED_LINE.startY; y < bounds.height; y += BACKDROP_RULED_LINE.spacingY) {
     graphics.strokeLineShape(new Phaser.Geom.Line(0, y, bounds.width, y));
   }
 
-  for (let x = 180; x < bounds.width; x += 420) {
-    const y = 260 + Math.sin(x / 180) * 34;
-    graphics.lineStyle(4, 0x1f1f1d, 0.12);
-    graphics.strokeLineShape(new Phaser.Geom.Line(x - 150, y + 34, x + 150, y - 34));
-    graphics.lineStyle(3, 0x1f1f1d, 0.09);
-    graphics.strokeLineShape(new Phaser.Geom.Line(x - 52, y + 60, x + 140, y + 24));
+  for (
+    let x = BACKDROP_DIAGONAL_SCRAPS.startX;
+    x < bounds.width;
+    x += BACKDROP_DIAGONAL_SCRAPS.spacingX
+  ) {
+    const y = BACKDROP_DIAGONAL_SCRAPS.waveBaseY +
+      Math.sin(x / BACKDROP_DIAGONAL_SCRAPS.waveDivisor) *
+      BACKDROP_DIAGONAL_SCRAPS.waveAmplitude;
+    graphics.lineStyle(
+      BACKDROP_DIAGONAL_SCRAPS.primary.width,
+      BACKDROP_DIAGONAL_SCRAPS.primary.color,
+      BACKDROP_DIAGONAL_SCRAPS.primary.alpha
+    );
+    graphics.strokeLineShape(new Phaser.Geom.Line(
+      x + BACKDROP_DIAGONAL_SCRAPS.primary.from.x,
+      y + BACKDROP_DIAGONAL_SCRAPS.primary.from.y,
+      x + BACKDROP_DIAGONAL_SCRAPS.primary.to.x,
+      y + BACKDROP_DIAGONAL_SCRAPS.primary.to.y
+    ));
+    graphics.lineStyle(
+      BACKDROP_DIAGONAL_SCRAPS.secondary.width,
+      BACKDROP_DIAGONAL_SCRAPS.secondary.color,
+      BACKDROP_DIAGONAL_SCRAPS.secondary.alpha
+    );
+    graphics.strokeLineShape(new Phaser.Geom.Line(
+      x + BACKDROP_DIAGONAL_SCRAPS.secondary.from.x,
+      y + BACKDROP_DIAGONAL_SCRAPS.secondary.from.y,
+      x + BACKDROP_DIAGONAL_SCRAPS.secondary.to.x,
+      y + BACKDROP_DIAGONAL_SCRAPS.secondary.to.y
+    ));
   }
 }
 

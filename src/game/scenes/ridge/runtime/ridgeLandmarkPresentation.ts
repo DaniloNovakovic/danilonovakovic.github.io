@@ -15,6 +15,7 @@ import {
 import { requireRidgeBlockoutFactAnchor } from './ridgePresentationFacts';
 
 const CICKA_PERCH_OFFSET_Y = -10;
+const RELAY_SPIRE_OFFSET = { x: 230, y: -180 } as const;
 
 export const RIDGE_LANDMARK_ANCHOR_SELECTORS = {
   cicka: {
@@ -116,10 +117,14 @@ export function createRidgeLandmarkPresentation(
   addTelegraphBag(scene, anchors.telegraph.x, anchors.telegraph.y);
   addRidgeGuide(scene, anchors.guide.x, anchors.guide.y);
   addRelayGate(scene, anchors.relay.x, anchors.relay.y);
-  addRelaySpire(scene, anchors.relay.x + 230, anchors.relay.y - 180);
+  addRelaySpire(
+    scene,
+    anchors.relay.x + RELAY_SPIRE_OFFSET.x,
+    anchors.relay.y + RELAY_SPIRE_OFFSET.y
+  );
   addDominoDesk(scene, anchors.domino.x, anchors.domino.y);
   addHighLedgeTeaser(scene, anchors.highLedge.x, anchors.highLedge.y);
-  addPlaceholderCopy(scene, facts, copy.title);
+  addPlaceholderCopy(scene, facts.spawn, copy.title);
 
   return { cickaPerch };
 }
@@ -301,18 +306,12 @@ function addHighLedgeTeaser(scene: Phaser.Scene, x: number, y: number): void {
 
 function addPlaceholderCopy(
   scene: Phaser.Scene,
-  facts: RidgeBlockoutFacts,
+  spawn: RidgeAnchorFact,
   title: string
 ): void {
-  const spawn = facts.spawn;
   scene.add.text(spawn.x, spawn.y - 260, title, {
     fontFamily: 'monospace',
     fontSize: '34px',
     color: '#1f1f1d'
-  }).setOrigin(0.5).setDepth(60);
-  scene.add.text(spawn.x, spawn.y - 214, `${facts.title} - parsed ${facts.rooms.length} room beats`, {
-    fontFamily: 'monospace',
-    fontSize: '16px',
-    color: '#4b4337'
   }).setOrigin(0.5).setDepth(60);
 }
