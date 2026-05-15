@@ -58,13 +58,18 @@ export interface RidgeShortcut {
   label: string;
 }
 
+const RIDGE_STAMPEDE_SHORTCUT_START_X = 520;
+const RIDGE_STAMPEDE_SHORTCUT_END_X = 282;
+const RIDGE_STAMPEDE_SHORTCUT_FORGIVENESS_WIDTH = 42;
+
 export const RIDGE_STAMPEDE_SHORTCUT = {
   id: 'stampede-paper-fold',
   sourceStampId: STAMPEDE_SKETCH_RIDGE_STAMP_ID,
-  startX: 520,
-  endX: 282,
+  startX: RIDGE_STAMPEDE_SHORTCUT_START_X,
+  endX: RIDGE_STAMPEDE_SHORTCUT_END_X,
   y: RIDGE_FLOOR_Y - 134,
-  width: 280,
+  width: Math.abs(RIDGE_STAMPEDE_SHORTCUT_START_X - RIDGE_STAMPEDE_SHORTCUT_END_X)
+    + RIDGE_STAMPEDE_SHORTCUT_FORGIVENESS_WIDTH,
   height: 18,
   label: 'Stampede paper fold'
 } as const satisfies RidgeShortcut;

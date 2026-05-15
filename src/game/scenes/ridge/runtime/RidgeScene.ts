@@ -230,7 +230,7 @@ export class RidgeScene extends Phaser.Scene {
   }
 
   private createPlayer(platforms: readonly Phaser.GameObjects.Zone[]): void {
-    this.playerRuntime = createSideViewPlayerRuntime({
+    const playerRuntime = createSideViewPlayerRuntime({
       scene: this,
       start: RIDGE_PLAYER_START,
       resumePosition: this.resumePosition,
@@ -271,9 +271,11 @@ export class RidgeScene extends Phaser.Scene {
         }
       }
     });
-    this.player = this.playerRuntime.player;
+    this.playerRuntime = playerRuntime;
+    const player = playerRuntime.player;
+    this.player = player;
     platforms.forEach((platform) => {
-      this.physics.add.collider(this.player, platform);
+      this.physics.add.collider(player, platform);
     });
   }
 
