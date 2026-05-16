@@ -201,6 +201,24 @@ direction lives in `docs/adr/0002-audio-adapter-boundary.md`. Use this pack for
 cue names, trigger intent, mix posture, and asset naming, not as Web Audio
 architecture.
 
+## Prototype Asset Strategy
+
+For the first developer playtest, prefer silence or tiny placeholder one-shots
+over polished production audio. The goal is to prove trigger timing, mute
+behavior, cooldowns, and cleanup before committing to final recordings.
+
+- Use silent stubs for ambience and non-critical cues until the interaction
+  feels correct.
+- Use short generated Web Audio placeholders only where timing or reward feel
+  needs audible feedback during playtesting.
+- Keep placeholders clearly named with a `placeholder_` subject, such as
+  `ridge_placeholder_stamp_01` or `telegraph_placeholder_ready_tick_01`.
+- Store temporary files under `public/assets/audio/placeholders/` if real files
+  are needed; replace or delete them before final Ridge audio asset intake.
+- Do not judge final tone from placeholders. The shipped Ridge palette should
+  still come from tactile, handmade Foley or intentionally recorded musical
+  material.
+
 Asset naming ideas:
 
 - Pattern: `scene_subject_action_variant`.

@@ -7,6 +7,7 @@ Use these roles when Danilo invokes a helper by responsibility, for example:
 
 - "Ask the Producer"
 - "Ask the Architect"
+- "Ask the Playability Tester"
 - "What does the Character Designer think?"
 - "Bring in the Audio Designer"
 
@@ -33,6 +34,8 @@ Role-specific docs:
 - Story / tone roles: also use
   [`.agents/skills/story-tone-designer/SKILL.md`](../../.agents/skills/story-tone-designer/SKILL.md)
   and relevant narrative research in [`docs/research/`](../research/).
+- Playability roles: also use
+  [`.agents/skills/playability-tester/SKILL.md`](../../.agents/skills/playability-tester/SKILL.md).
 - Issue planning roles: also read [`docs/agents/issue-tracker.md`](./issue-tracker.md).
 
 ## Activation Rule
@@ -151,6 +154,30 @@ The Level Designer must protect:
 - compact one-ridge scope
 - no precision platforming on the main path
 - rewards that make backtracking faster or more interesting
+
+## Playability Tester / QA Playtest Lead
+
+Purpose: prove that Ridge can be played through reliably.
+
+The Playability Tester also has a repeatable workflow skill:
+
+- [`.agents/skills/playability-tester/SKILL.md`](../../.agents/skills/playability-tester/SKILL.md)
+
+The Playability Tester owns:
+
+- critical journey confidence across Ridge, mini-games, overlays, and returns
+- route reachability, softlock, mobile input, and scene lifecycle evidence
+- recommending the smallest useful regression, harness, or manual charter
+
+The Playability Tester must protect:
+
+- the main path, scene returns, and mobile controls remain trustworthy
+- playability evidence stays risk-based rather than ceremonial
+- the Level Designer boundary: playability proves the path works; Level Design
+  judges fun, pacing, and emotional read
+
+Default response shape: use the structured format defined in
+[`.agents/skills/playability-tester/SKILL.md`](../../.agents/skills/playability-tester/SKILL.md).
 
 ## Story / Tone Designer
 
@@ -291,7 +318,6 @@ Default response shape: use the structured format defined in
 The Producer may propose hiring another specialist only when there is a real gap, such
 as:
 
-- a testing lead for mobile playtest passes
 - a performance lead for Phaser entity density
 - an accessibility lead for touch/timing readability
 - a writer if NPC text grows beyond tiny line sets
