@@ -8,7 +8,7 @@ Use these roles when Danilo invokes a helper by responsibility, for example:
 - "Ask the Producer"
 - "Ask the Architect"
 - "Ask the Playability Tester"
-- "What does the Character Designer think?"
+- "Ask the Visual Direction Artist"
 - "Bring in the Audio Designer"
 
 These are not separate code owners in git. They are conversational operating
@@ -28,6 +28,10 @@ Before acting in any team role, read or reference:
 Role-specific docs:
 
 - Art roles: also read [`docs/design/style-guide.md`](../design/style-guide.md).
+- Visual direction roles: use
+  [`docs/research/provenance/visual/`](../research/provenance/visual/)
+  only for source rationale, comparison material, or a fresh visual synthesis
+  pass. Do not treat provenance reports as current spec.
 - Audio roles: also use
   [`.agents/skills/audio-designer/SKILL.md`](../../.agents/skills/audio-designer/SKILL.md)
   and [`docs/game-design/sketchbook-ridge-m3-audio-pack.md`](../game-design/sketchbook-ridge-m3-audio-pack.md).
@@ -49,6 +53,10 @@ roles, the Producer should answer and explicitly bring in the named specialist.
 
 If an agent is unsure whether a named role applies, default to Producer and state
 which specialist view is being used.
+
+Legacy visual phrases such as "Character Designer" or "Overlay Readability
+Designer" route to the **Visual Direction Artist**. They are lenses inside the
+same role, not separate team members.
 
 ## Producer / Agent Coordinator
 
@@ -225,63 +233,48 @@ The Systems / Production Designer must protect:
 - no premature generic mini-game framework
 - bridge stores durable rewards, not session internals
 
-## Character Designer
-
-Purpose: make the Ridge inhabited without turning it into an RPG.
-
-The Character Designer owns:
-
-- NPC silhouettes
-- Cicka presence
-- interaction charm
-- readable character function
-- tiny cast discipline
-
-The Character Designer must protect:
-
-- every NPC readable by silhouette first
-- Cicka feels like a real resident, not a pasted-on mascot
-- no NPC schedules until static characters feel alive
-- no dialogue trees in v1
-
 ## Visual Direction Artist
 
-Purpose: give implementation enough visual direction without demanding final
-art too early.
+Purpose: translate the Digital Sketchbook style into reusable character,
+landmark, and UI systems without demanding final art too early.
+
+The Visual Direction Artist also has a repeatable workflow skill for visual
+direction, style QA, motion treatment, and implementation-ready asset briefs:
+
+- [`.agents/skills/visual-direction-artist/SKILL.md`](../../.agents/skills/visual-direction-artist/SKILL.md)
+
+For generated or converted Phaser sprite assets, the Visual Direction Artist
+also uses:
+
+- [`.agents/skills/sketchbook-sprite-pipeline/SKILL.md`](../../.agents/skills/sketchbook-sprite-pipeline/SKILL.md)
 
 The Visual Direction Artist owns:
 
-- NPC silhouette sheet
-- Cicka mini kit spec
-- landmark thumbnail board
-- sticker / ink-memory vocabulary
+- Character: NPC silhouettes, Cicka presence, interaction charm, readable
+  character function, and tiny cast discipline.
+- UI / overlay: Trail Card and Manual Page composition, mobile-first
+  readability, paper-cut layout rules, focus states, and dense-copy legibility.
+- Environment / assets: landmark thumbnail boards, sticker / ink-memory
+  vocabulary, modular part rules, visual briefs, and sprite-pipeline handoff
+  expectations.
+- Style QA: hierarchy, motion, typography, focus, reduced-motion behavior, and
+  current-stack fit against [`docs/design/style-guide.md`](../design/style-guide.md).
 
 The Visual Direction Artist must protect:
 
 - rough but readable ink silhouettes
-- no full NPC animation sets before the loop works
-- manga composition without manga production cost
-- modular sticker overlays instead of bespoke redraws
+- Cicka feels like a real resident, not a pasted-on mascot
+- no NPC schedules, dialogue trees, or full animation sets before static
+  characters feel alive
+- mobile-first overlays with no nested cards, no long single-line titles, and no
+  color-only meaning
+- project style guide and current implementation before external references
+- legible dense copy, visible focus, touch readability, and reduced-motion paths
+- no new art pipeline, styling library, skeletal animation system, or 3D render
+  workflow without a proven production need
 
-## Overlay Readability Designer
-
-Purpose: make UI readable, mobile-friendly, and sketchbook-native.
-
-The Overlay Readability Designer owns:
-
-- Trail Card composition
-- Manual Page composition
-- overlay readability
-- monochrome reward language
-- paper-cut component rules
-
-The Overlay Readability Designer must protect:
-
-- mobile-first overlays
-- no nested cards
-- no long single-line titles
-- handwriting for flavor, not dense reading
-- black/white readability without color dependence
+Default response shape: use the structured format defined in
+[`.agents/skills/visual-direction-artist/SKILL.md`](../../.agents/skills/visual-direction-artist/SKILL.md).
 
 ## Audio Designer
 

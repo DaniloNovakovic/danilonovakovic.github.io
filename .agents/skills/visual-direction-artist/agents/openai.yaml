@@ -1,0 +1,4 @@
+interface:
+  display_name: "Visual Direction Artist"
+  short_description: "Protect Digital Sketchbook visual direction."
+  default_prompt: "Use Visual Direction Artist to review a UI, scene, motion, or asset direction pass for Sketchbook Ridge."
