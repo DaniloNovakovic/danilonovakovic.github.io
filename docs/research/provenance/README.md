@@ -12,5 +12,5 @@ source rationale, comparison material, or a fresh synthesis pass.
 - `agents/`: deep research reports that informed specialist agent/skill design.
 - `audio/`: background audio research and Audio Designer provenance.
 - `narrative/`: background narrative and tribute writing research.
-- `visual/`: background visual-direction, asset-pipeline, and style-system
-  research.
+- `visual/`: background visual-direction, character-design, asset-pipeline, and
+  style-system research.

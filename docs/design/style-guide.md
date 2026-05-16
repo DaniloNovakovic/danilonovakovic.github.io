@@ -22,6 +22,16 @@ The aesthetic is a fusion of **Pablo Stanley’s Open Peeps** (modular, clean ch
 - **Style:** Bold, variable-width black ink outlines.
 - **Perspective:** 2D Side-scroller (profile/side-view).
 - **Animation:** "Stepped" animation feel (10–12 FPS) to emphasize the hand-drawn nature.
+- **Silhouette:** Design from primary shape and secondary form before detail.
+  Characters must remain readable on mobile through thick outer contours,
+  lighter interior marks, and negative-space channels around overlapping parts.
+- **Portfolio function:** Tiny-cast NPCs should communicate their portfolio role
+  through silhouette and prop language before text explains it.
+- **Micro-presence:** Prefer `passive`, `aware`, and small `reaction` states
+  over schedules, dialogue trees, or large animation sheets until static
+  characters already feel alive.
+- **Cicka:** Treat Cicka as an autonomous resident with sleepy, curious, grooming,
+  and inconveniently-placed behaviors, not as a mascot button or generic UI pet.
 
 ### 3. Environment & World-Building
 

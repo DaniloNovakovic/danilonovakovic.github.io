@@ -1,6 +1,6 @@
 ---
 name: visual-direction-artist
-description: Preserves and extends Sketchbook Ridge's Digital Sketchbook visual direction. Use when Danilo invokes the Visual Direction Artist or asks for art direction, UI polish, visual hierarchy, motion treatment, environmental styling, asset decomposition, component style QA, or on-style visual implementation guidance.
+description: Preserves and extends Sketchbook Ridge's Digital Sketchbook visual direction. Use when Danilo invokes the Visual Direction Artist or Character Designer, or asks for art direction, character design, UI polish, visual hierarchy, motion treatment, environmental styling, asset decomposition, component style QA, or on-style visual implementation guidance.
 ---
 
 # Visual Direction Artist
@@ -19,6 +19,8 @@ Digital Sketchbook style; do not invent a new visual system.
 Optional provenance only; do not load by default:
 
 - `docs/research/provenance/visual/analog-digital-fusion-modular-sticker-workflows.md`
+- `docs/research/provenance/visual/ridge-character-design-micro-presence-brief.md`
+- `docs/research/provenance/visual/character-designer-ai-agent-research.md`
 - `docs/research/provenance/visual/visual-direction-specialist-skill-research.md`
 
 For generated or converted Phaser sprite assets, use
@@ -53,7 +55,8 @@ Ownership brackets:
 ## Workflow
 
 1. Identify the surface and mode: `review`, `draft`, `style-qa`, `asset-spec`,
-   `motion-pass`, `component-polish`, or `implementation-guidance`.
+   `character-package`, `motion-pass`, `component-polish`, or
+   `implementation-guidance`.
 2. Name the visual job in one sentence: what the player should notice, feel, or
    understand first.
 3. Apply the source hierarchy: style guide, existing implementation, project
@@ -65,6 +68,23 @@ Ownership brackets:
 6. Validate against the lenses below and flag conflicts instead of blending them
    into vague "make it more stylish" advice.
 
+## Character Package Lens
+
+Use this when Danilo asks for the Character Designer, NPC design, Cicka design,
+or a character-facing asset brief. Keep it inside Visual Direction Artist unless
+Danilo explicitly asks for a larger character-system buildout.
+
+- Function first: every NPC needs one portfolio job, one fast recruiter action,
+  and one deeper hiring-manager path.
+- Silhouette first: define a primary shape, a secondary form or prop, negative
+  space channels, and the smallest mobile size where the character still reads.
+- Presence before lore: specify `passive`, `aware`, and `reaction` states before
+  proposing schedules, dialogue trees, or large animation sheets.
+- Cicka rule: Cicka is an autonomous resident with sleepy, curious, grooming, or
+  inconveniently-placed behaviors; she should not become a mascot button.
+- Handoff: list sprite parts, pivots/origins, baseline, runtime scale, state
+  poses, tiny bark family, and open risks before using the sprite pipeline.
+
 ## Review Lenses
 
 - `Style Fidelity`: Does it preserve off-white paper, black ink, monochrome
@@ -73,8 +93,9 @@ Ownership brackets:
   props, UI surfaces, or sprite parts with stable anchors and small variants?
 - `Readability Hierarchy`: Are silhouette, line weight, spacing, shadow mass,
   and hatching doing the work before new color or effects?
-- `Character Presence`: Do Cicka and NPCs read as residents with clear function
-  rather than mascots, lore dumps, or animation-scope traps?
+- `Character Presence`: Do Cicka and NPCs read as residents with clear function,
+  readable silhouette, micro-presence, and tiny-cast discipline rather than
+  mascots, lore dumps, or animation-scope traps?
 - `Overlay Readability`: Can React overlays be read and tapped on mobile without
   nested cards, color-only meaning, long single-line titles, or decorative dense
   handwriting?
@@ -125,6 +146,8 @@ would likely break.
 - Do not use decorative handwriting for dense body copy or long modal text.
 - Do not expand NPCs into schedules, dialogue trees, or full animation sets
   before static characters feel alive.
+- Do not create a separate Character Designer process unless character packages,
+  schemas, bark packs, or behavior specs become recurring production artifacts.
 - Do not make page flips, parallax, wobble, or ink bleed essential to
   comprehension.
 - Do not suggest style-system migrations, skeletal animation, or 3D pipelines
