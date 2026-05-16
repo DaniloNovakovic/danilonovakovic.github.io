@@ -60,6 +60,7 @@ This document is directional. For exact current implementation details, prefer [
 - **Overlay ids/lookup:** `src/game/overlays/overlayIds.ts`, `src/game/overlays/overlayRegistry.ts`, `src/game/overlays/OverlayHost.tsx`
 - **ECS foundation:** `src/game/core/ecs/`
 - **Shared scene runtime Modules:** `src/game/sharedSceneRuntime/player/SideViewPlayerRuntime.ts`, `src/game/sharedSceneRuntime/interactions/InteriorInteractionRuntime.ts`, `src/game/sharedSceneRuntime/sceneResumePolicy.ts`
+- **Ridge Exploration Map modules:** `src/game/scenes/ridge/blockout/` owns Ridge Map Language parsing, geometry, progress-gated shortcuts, and compiled facts. Ridge runtime modules own blockout presentation, traversal assists, landmark presentation, interaction targets, and Cicka Home mutation resolution.
 - **Phaser 4 render guardrails:** currently documented as runtime policy; introduce a shared render helper only when repeated policy code appears.
 
 When proposing future refactors, prefer extending these modules instead of re-introducing callback-only scene orchestration, ad-hoc overlay maps, or ad-hoc global state.

@@ -31,6 +31,7 @@ function createTestCickaPerch(): CickaPerch {
       prompt: { x: 120, y: 80 },
       interactRadius: 78
     },
+    trackOwnedObject: (gameObject) => gameObject,
     update: () => {},
     showLine: () => {},
     isSpeechVisible: () => false,

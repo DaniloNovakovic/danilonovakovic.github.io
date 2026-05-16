@@ -5,11 +5,15 @@ This context defines the game-design language for the gamified portfolio and its
 ## Language
 
 **Ridge Map Language**:
-A human-editable text notation that describes Ridge topology, room blockouts, traversal primitives, and environment tags as source data.
+A human-editable text notation that describes Ridge topology, room blockouts,
+traversal primitives, shortcuts, anchors, and Cicka Home mutation declarations
+as source data.
 _Avoid_: map editor, final art map
 
 **Ridge Blockout**:
-A playable primitive Ridge map generated from the Ridge Map Language before final assets are placed.
+A playable primitive Ridge map generated from the Ridge Map Language before
+final assets are placed. The current blockout compiles into typed facts,
+geometry, connectors, and presentation inputs.
 _Avoid_: final map, finished level
 
 **Grid Cell**:
@@ -40,17 +44,27 @@ A scene-owned movement model for an opt-in mini-game, tuned around that
 mini-game's primary toy and input needs.
 _Avoid_: shared overworld movement
 
+**Cicka Home Mutation**:
+A Ridge-owned declaration that a durable progress source can change Cicka Home,
+such as adding a Stampede note or opening a return fold. Declarations without a
+real progress source stay typed as future promises instead of rendering.
+_Avoid_: stored sticker state, generic landmark memory
+
 ## Relationships
 
 - A **Topology Map** defines the route logic between **Room Beats**.
 - The **Ridge Map Language** describes **Room Beats** in a parseable text file.
-- The **Ridge Map Language** produces a **Ridge Blockout**.
+- The **Ridge Map Language** produces a **Ridge Blockout** and a compiled fact
+  layer for routes, anchors, shortcuts, and Cicka Home mutations.
 - A **Grid Cell** gives **Room Beats** their scale in the **Ridge Blockout**.
 - A **Ridge Blockout** is replaced or enriched by final assets after traversal feels good.
 - The current **Ridge Blockout** is the prototype **Exploration Map**.
 - The **Exploration Map** uses **Exploration Traversal**.
 - A mini-game may use its own **Mini-Game Movement System** instead of
   **Exploration Traversal**.
+- **Cicka Home Mutations** resolve compiled Ridge facts against durable Ridge
+  progress; active mutations can render Cicka Home changes, while unresolved
+  future mutations remain data only.
 - The old Overworld and Hobbies scenes are transitional surfaces. Long-term,
   their best content should fold into the **Exploration Map** as artifacts,
   entrances, Cicka reactions, Basement/Potassium paths, and mini-game props.

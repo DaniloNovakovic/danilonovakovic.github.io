@@ -57,6 +57,12 @@ Anything beyond that is future scope unless a slice explicitly pulls it in.
   promoted the prepared Cicka prototype spritesheet into
   `public/assets/ridge/cicka/` as the first runtime-wired AI sprite adoption
   proof, with audit notes and refined pipeline gates.
+- **Ridge Architecture Deepening (#60-#64)** is implemented as the current Ridge
+  architecture direction: #60 made the blockout the spatial source of truth,
+  #61 consolidated traversal comfort, #62 added compiled blockout facts, #63
+  slimmed `RidgeScene` into lifecycle glue, and #64 made Cicka Home mutation
+  resolution data-driven. #65 is the documentation cleanup slice that records
+  this final shape.
 - **Asset staging is now an active coordination concern**: prepared POC assets
   still exist for Potassium, Stampede, and future Ridge character/prop families.
   Cicka's adopted runtime copy now lives under `public/assets/ridge/cicka/`;
@@ -316,6 +322,12 @@ Outputs:
 - first Cicka Note, memory reaction, or pre-translator interaction.
 
 Current checkpoint:
+
+- **Architecture-deepening child issues #60-#64 are represented in code**:
+  spatial facts now derive from the Ridge Blockout, traversal assists are owned
+  by the Ridge traversal runtime, Ridge scene presentation is split into
+  blockout/landmark modules, and Cicka Home mutations resolve from compiled
+  facts plus durable Ridge progress.
 
 - **M5a Durable Sticker Layer** accepted: `worldMemory.ts` derives visible
   Ridge memory ids from durable progress, empty progress returns no memories,

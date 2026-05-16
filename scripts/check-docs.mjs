@@ -21,7 +21,7 @@ function walk(dir) {
     if (ignoredDirs.has(entry.name)) continue;
     const fullPath = path.join(dir, entry.name);
     if (entry.isDirectory()) {
-      const relativePath = path.relative(repoRoot, fullPath);
+      const relativePath = path.relative(repoRoot, fullPath).split(path.sep).join('/');
       if (ignoredRelativeDirs.has(relativePath)) continue;
       walk(fullPath);
     } else if (entry.isFile() && entry.name.endsWith('.md')) {
