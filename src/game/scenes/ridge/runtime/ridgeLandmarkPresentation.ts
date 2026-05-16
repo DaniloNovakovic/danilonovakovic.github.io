@@ -112,7 +112,8 @@ export function createRidgeLandmarkPresentation(
   addCickaHomeMutationPresentation({
     scene,
     landmark: cickaLandmark,
-    mutations: cickaHomeMutations
+    mutations: cickaHomeMutations,
+    track: cickaPerch.trackOwnedObject
   });
 
   addOutskirtsArtifactSlot(scene, anchors.outskirtsArtifact.x, anchors.outskirtsArtifact.y);

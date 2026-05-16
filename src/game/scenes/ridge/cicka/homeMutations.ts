@@ -52,11 +52,19 @@ export function resolveCickaHomeMutations(
       return;
     }
 
-    if (source.kind === 'stamp' && ridgeProgress.stampIds.includes(source.id)) {
-      active.push({
-        ...mutation,
-        source
-      });
+    switch (source.kind) {
+      case 'stamp':
+        if (ridgeProgress.stampIds.includes(source.id)) {
+          active.push({
+            ...mutation,
+            source
+          });
+        }
+        break;
+      default: {
+        const exhaustiveSource: never = source;
+        return exhaustiveSource;
+      }
     }
   });
 

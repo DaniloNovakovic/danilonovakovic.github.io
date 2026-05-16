@@ -41,6 +41,9 @@ export interface CickaPerchUpdateFrame {
 
 export interface CickaPerch {
   interactionFacts: CickaPerchInteractionFacts;
+  trackOwnedObject<GameObject extends Phaser.GameObjects.GameObject>(
+    gameObject: GameObject
+  ): GameObject;
   update(frame: CickaPerchUpdateFrame): void;
   showLine(line: string, nowMs: number, durationMs?: number): void;
   isSpeechVisible(nowMs: number): boolean;
@@ -176,6 +179,7 @@ export function createCickaPerch(options: CreateCickaPerchOptions): CickaPerch {
 
   return {
     interactionFacts,
+    trackOwnedObject: track,
     update,
     showLine,
     isSpeechVisible,
