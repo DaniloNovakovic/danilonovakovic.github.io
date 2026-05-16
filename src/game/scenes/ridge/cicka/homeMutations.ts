@@ -26,12 +26,23 @@ export interface CickaHomeMutationResolution {
   promises: readonly CickaHomeMutationPromise[];
 }
 
+type CickaHomeMutationProgressSourceActiveChecks = {
+  [Kind in CickaHomeMutationProgressSource['kind']]: (
+    source: Extract<CickaHomeMutationProgressSource, { kind: Kind }>,
+    ridgeProgress: BridgeRidgeProgressState
+  ) => boolean;
+};
+
 const CICKA_HOME_MUTATION_PROGRESS_SOURCES: Readonly<Record<string, CickaHomeMutationProgressSource>> = {
   stampede_sketch: {
     kind: 'stamp',
     id: STAMPEDE_SKETCH_RIDGE_STAMP_ID
   }
 };
+
+const CICKA_HOME_MUTATION_PROGRESS_SOURCE_ACTIVE_CHECKS = {
+  stamp: (source, ridgeProgress) => ridgeProgress.stampIds.includes(source.id)
+} satisfies CickaHomeMutationProgressSourceActiveChecks;
 
 export function resolveCickaHomeMutations(
   homeMutations: readonly RidgeHomeMutationFact[],
@@ -52,23 +63,25 @@ export function resolveCickaHomeMutations(
       return;
     }
 
-    switch (source.kind) {
-      case 'stamp':
-        if (ridgeProgress.stampIds.includes(source.id)) {
-          active.push({
-            ...mutation,
-            source
-          });
-        }
-        break;
-      default: {
-        const exhaustiveSource: never = source;
-        return exhaustiveSource;
-      }
+    if (isCickaHomeMutationSourceActive(source, ridgeProgress)) {
+      active.push({
+        ...mutation,
+        source
+      });
     }
   });
 
   return { active, promises };
+}
+
+function isCickaHomeMutationSourceActive(
+  source: CickaHomeMutationProgressSource,
+  ridgeProgress: BridgeRidgeProgressState
+): boolean {
+  switch (source.kind) {
+    case 'stamp':
+      return CICKA_HOME_MUTATION_PROGRESS_SOURCE_ACTIVE_CHECKS.stamp(source, ridgeProgress);
+  }
 }
 
 export function hasCickaHomeMutationAdd(
