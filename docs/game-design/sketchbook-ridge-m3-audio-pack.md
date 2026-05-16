@@ -2,9 +2,9 @@
 
 Owner mode: Audio Designer.
 
-Purpose: implementation-facing audio research for the Ridge, Cicka, Potassium
+Purpose: active audio direction for the Ridge, Cicka, Potassium
 acknowledgements, Stampede Sketch, and Telegraph Terrace. This is a spec pack,
-not final asset direction.
+not final asset direction or runtime architecture.
 
 Active references:
 
@@ -194,27 +194,12 @@ Assist mode concerns:
 - Avoid cue language where higher pitch always means "press now"; players with
   limited hearing still need shape, motion, and contrast.
 
-## Web Audio Implementation Constraints For V1
+## Runtime Boundary
 
-Keep v1 boring technically so the project can ship the feel.
-
-- Create or resume `AudioContext` only after a player gesture. Mobile browsers
-  may keep it suspended until touch/click.
-- Keep Web Audio adapters scene-owned at first, or under `src/game/adapters`
-  once at least two scenes share the same need. Do not put browser audio code in
-  `src/game/core`.
-- No full dynamic music graph in v1. Use named loops, one-shots, simple gain
-  ramps, and per-sound cooldowns.
-- Prefer short compressed assets for final SFX (`.ogg` with fallback only if the
-  target browser check proves it necessary). Generated oscillators are fine for
-  prototype beeps but should not define final Ridge tone.
-- Decode/load audio during scene preload or first intentional entry, not during
-  per-frame update.
-- Every repeating or dense cue needs an instance limit and a cooldown.
-- React overlays should request audio through bridge/adapter-facing actions only
-  if needed later; do not import Phaser into React overlays.
-- When overlays pause a scene, action SFX should stop or duck with the scene.
-  UI confirmation sounds may continue if they are overlay-owned.
+Runtime hard rules live in `.agents/rules/40-audio-runtime.md`; adapter boundary
+direction lives in `docs/adr/0002-audio-adapter-boundary.md`. Use this pack for
+cue names, trigger intent, mix posture, and asset naming, not as Web Audio
+architecture.
 
 Asset naming ideas:
 

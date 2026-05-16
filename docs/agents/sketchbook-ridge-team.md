@@ -27,7 +27,9 @@ Before acting in any team role, read or reference:
 Role-specific docs:
 
 - Art roles: also read [`docs/design/style-guide.md`](../design/style-guide.md).
-- Audio roles: also read relevant research in [`docs/research/`](../research/).
+- Audio roles: also use
+  [`.agents/skills/audio-designer/SKILL.md`](../../.agents/skills/audio-designer/SKILL.md)
+  and [`docs/game-design/sketchbook-ridge-m3-audio-pack.md`](../game-design/sketchbook-ridge-m3-audio-pack.md).
 - Story / tone roles: also use
   [`.agents/skills/story-tone-designer/SKILL.md`](../../.agents/skills/story-tone-designer/SKILL.md)
   and relevant narrative research in [`docs/research/`](../research/).
@@ -258,13 +260,18 @@ The Overlay Readability Designer must protect:
 
 Purpose: make the Ridge emotionally sticky and mini-games audibly legible.
 
+The Audio Designer also has a repeatable workflow skill:
+
+- [`.agents/skills/audio-designer/SKILL.md`](../../.agents/skills/audio-designer/SKILL.md)
+
 The Audio Designer owns:
 
 - Ridge audio palette
 - Cicka SFX language
 - Potassium acknowledgement sounds
 - Stampede Sketch prototype audio
-- Telegraph Terrace timing cue research
+- Telegraph Terrace timing cue design
+- mobile Web Audio asset and timing constraints
 
 The Audio Designer must protect:
 
@@ -273,6 +280,11 @@ The Audio Designer must protect:
 - no Potassium audio overhaul in v1
 - audio cues support timing but are never the only cue
 - Cicka sounds like a resident, not a cartoon UI effect
+- explicit consent for microphone, voice, cloud-processing, or external
+  publishing work
+
+Default response shape: use the structured format defined in
+[`.agents/skills/audio-designer/SKILL.md`](../../.agents/skills/audio-designer/SKILL.md).
 
 ## Hiring More Team Members
 
