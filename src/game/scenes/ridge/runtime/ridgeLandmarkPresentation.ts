@@ -8,6 +8,11 @@ import {
   createCickaPerch,
   type CickaPerch
 } from '../cicka/CickaPerch';
+import { addCickaHomeMutationPresentation } from '../cicka/homeMutationPresentation';
+import {
+  hasCickaHomeMutationAdd,
+  type CickaHomeMutation
+} from '../cicka/homeMutations';
 import {
   hasRidgeWorldMemory,
   type RidgeWorldMemory
@@ -81,6 +86,7 @@ export interface RidgeLandmarkPresentationOptions {
   facts: RidgeBlockoutFacts;
   copy: RidgeLandmarkPresentationCopy;
   worldMemories: readonly RidgeWorldMemory[];
+  cickaHomeMutations: readonly CickaHomeMutation[];
 }
 
 export interface RidgeLandmarkPresentation {
@@ -90,20 +96,23 @@ export interface RidgeLandmarkPresentation {
 export function createRidgeLandmarkPresentation(
   options: RidgeLandmarkPresentationOptions
 ): RidgeLandmarkPresentation {
-  const { scene, facts, copy, worldMemories } = options;
+  const { scene, facts, copy, worldMemories, cickaHomeMutations } = options;
   const anchors = resolveRidgeLandmarkAnchors(facts);
+  const cickaLandmark = {
+    x: anchors.cicka.x,
+    y: anchors.cicka.y + CICKA_PERCH_OFFSET_Y
+  };
 
   const cickaPerch = createCickaPerch({
     scene,
-    landmark: {
-      x: anchors.cicka.x,
-      y: anchors.cicka.y + CICKA_PERCH_OFFSET_Y
-    },
-    hasStampedeNoteMemory: hasRidgeWorldMemory(
-      worldMemories.filter((memory) => memory.landmarkKind === 'cicka-perch'),
-      'cicka-stampede-note'
-    ),
+    landmark: cickaLandmark,
+    hasStampedeNoteMutation: hasCickaHomeMutationAdd(cickaHomeMutations, 'stampede_note'),
     walkByLine: copy.cickaWalkByLine
+  });
+  addCickaHomeMutationPresentation({
+    scene,
+    landmark: cickaLandmark,
+    mutations: cickaHomeMutations
   });
 
   addOutskirtsArtifactSlot(scene, anchors.outskirtsArtifact.x, anchors.outskirtsArtifact.y);

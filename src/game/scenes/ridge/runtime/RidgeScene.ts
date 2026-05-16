@@ -42,6 +42,7 @@ import {
   preloadCickaAssets
 } from '../cicka/assets';
 import type { CickaPerch } from '../cicka/CickaPerch';
+import { resolveCickaHomeMutations } from '../cicka/homeMutations';
 import {
   createRidgeTraversalRuntime,
   type RidgeTraversalRuntime
@@ -118,6 +119,10 @@ export class RidgeScene extends Phaser.Scene {
     const facts = compileRidgeBlockoutFacts(blockout, {
       geometry
     });
+    const cickaHomeMutations = resolveCickaHomeMutations(
+      facts.homeMutations,
+      ridgeProgress
+    );
     this.traversalRuntime = undefined;
 
     this.cameras.main.setBackgroundColor('#f7f1df');
@@ -142,7 +147,8 @@ export class RidgeScene extends Phaser.Scene {
         stampedeFirstClearLabel: messages.scenes.ridge.memory.stampedeFirstClearLabel,
         cickaWalkByLine: messages.scenes.ridge.memory.cickaWalkByBark
       },
-      worldMemories: getRidgeWorldMemories(ridgeProgress)
+      worldMemories: getRidgeWorldMemories(ridgeProgress),
+      cickaHomeMutations: cickaHomeMutations.active
     });
     this.cickaPerch = landmarkPresentation.cickaPerch;
     this.createPlayer(blockoutPresentation.platforms, facts, geometry);

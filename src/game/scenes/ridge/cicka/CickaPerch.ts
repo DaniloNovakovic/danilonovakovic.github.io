@@ -50,12 +50,12 @@ export interface CickaPerch {
 export interface CreateCickaPerchOptions {
   scene: Phaser.Scene;
   landmark: { x: number; y: number };
-  hasStampedeNoteMemory: boolean;
+  hasStampedeNoteMutation: boolean;
   walkByLine: string;
 }
 
 export function createCickaPerch(options: CreateCickaPerchOptions): CickaPerch {
-  const { scene, landmark, hasStampedeNoteMemory, walkByLine } = options;
+  const { scene, landmark, hasStampedeNoteMutation, walkByLine } = options;
   const x = landmark.x;
   const y = landmark.y;
   const ownedObjects: Phaser.GameObjects.GameObject[] = [];
@@ -107,10 +107,6 @@ export function createCickaPerch(options: CreateCickaPerchOptions): CickaPerch {
     .setDepth(26));
   sprite.play(CICKA_ANIMATION_KEYS.perchIdle);
 
-  if (hasStampedeNoteMemory) {
-    addCickaStampedeNoteMemory(scene, track, x, y);
-  }
-
   const speechBubble = createCickaSpeechBubble(
     scene,
     track,
@@ -147,7 +143,7 @@ export function createCickaPerch(options: CreateCickaPerchOptions): CickaPerch {
 
   function update(frame: CickaPerchUpdateFrame): void {
     const walkByUpdate = updateCickaWalkBy(walkByState, {
-      enabled: hasStampedeNoteMemory,
+      enabled: hasStampedeNoteMutation,
       playerX: frame.playerX,
       playerY: frame.playerY,
       cickaX: x,
@@ -207,20 +203,3 @@ function createCickaSpeechBubble(
   return { container, label };
 }
 
-function addCickaStampedeNoteMemory(
-  scene: Phaser.Scene,
-  track: <GameObject extends Phaser.GameObjects.GameObject>(gameObject: GameObject) => GameObject,
-  x: number,
-  y: number
-): void {
-  track(scene.add.rectangle(x + 62, y - 72, 42, 30, 0xf7f1df, 1)
-    .setStrokeStyle(2, 0x1f1f1d, 0.88)
-    .setAngle(5));
-  track(scene.add.line(x + 42, y - 63, -8, 5, 8, -5, 0x1f1f1d, 0.3).setLineWidth(2));
-  track(scene.add.circle(x + 59, y - 70, 5, 0x1f1f1d, 0.72));
-  track(scene.add.circle(x + 51, y - 81, 3, 0x1f1f1d, 0.72));
-  track(scene.add.circle(x + 60, y - 84, 3, 0x1f1f1d, 0.72));
-  track(scene.add.circle(x + 69, y - 81, 3, 0x1f1f1d, 0.72));
-  track(scene.add.line(x + 78, y - 70, -7, 5, 10, -5, 0x1f1f1d, 0.48).setLineWidth(2));
-  track(scene.add.line(x + 79, y - 63, -6, 4, 9, -4, 0x1f1f1d, 0.38).setLineWidth(2));
-}
