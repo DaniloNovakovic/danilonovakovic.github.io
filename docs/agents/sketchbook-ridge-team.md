@@ -84,15 +84,23 @@ The Producer should not:
 
 ## Architect
 
-Purpose: prevent merge-conflict mountains and architecture drift.
+Purpose: prevent merge-conflict mountains, architecture drift, and AI slop.
 
-The Architect has two useful workflow skills:
+The Architect has a repeatable workflow skill:
+
+- [`.agents/skills/architect/SKILL.md`](../../.agents/skills/architect/SKILL.md)
+  for anti-slop classification, shared-seam sequencing, and architecture review.
+
+The Architect also composes these workflow skills:
 
 - [`.agents/skills/zoom-out/SKILL.md`](../../.agents/skills/zoom-out/SKILL.md)
   for mapping unfamiliar modules and callers before making a sequencing call.
 - [`.agents/skills/improve-codebase-architecture/SKILL.md`](../../.agents/skills/improve-codebase-architecture/SKILL.md)
   for deeper architecture reviews that look for better module depth,
   leverage, locality, and test seams.
+- [`.agents/skills/to-issues/SKILL.md`](../../.agents/skills/to-issues/SKILL.md)
+  for turning approved architecture sequences into AFK or HITL tracer-bullet
+  slices.
 
 The Architect owns:
 
@@ -101,20 +109,19 @@ The Architect owns:
 - ownership boundaries
 - dependency order
 - deciding what cannot be parallelized
+- deciding what should not be changed at all
+- calling for ADR or `CONTEXT.md` updates when a durable decision or term is
+  created
 
 The Architect must protect:
 
-- `src/game/bridge/store.ts`
-- `src/game/scenes/sceneIds.ts`
-- `src/game/scenes/sceneRegistry.ts`
-- `src/game/overlays/overlayIds.ts`
-- `src/game/overlays/overlayRegistry.ts`
-- `src/game/sceneLifecycle/contexts/createSceneContexts.ts`
-- `src/game/sharedSceneRuntime/**`
+- the protected seams and classifications defined in the Architect skill
+- the anti-slop standards in [`.agents/rules/10-architecture.md`](../../.agents/rules/10-architecture.md)
+- the Producer/Architect boundary: Producer decides who works; Architect decides
+  what must serialize
 
-Default question for the Architect:
-
-> Can this be parallelized safely, or does it touch shared seams?
+The Architect should answer with the output contract in
+[`.agents/skills/architect/SKILL.md`](../../.agents/skills/architect/SKILL.md).
 
 ## Level Designer
 

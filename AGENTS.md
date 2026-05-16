@@ -32,6 +32,8 @@ When Danilo invokes helper roles such as "Producer", "Level Designer", or "Audio
 
 When Danilo invokes the Producer specifically, use [`.agents/skills/producer/SKILL.md`](.agents/skills/producer/SKILL.md) for the repeatable producer workflow.
 
+When Danilo invokes the Architect specifically, use [`.agents/skills/architect/SKILL.md`](.agents/skills/architect/SKILL.md) for the repeatable anti-slop and shared-seam review workflow.
+
 ### Sprite asset pipeline
 
 When generating or converting sprite assets for Phaser scenes, use [`.agents/skills/sketchbook-sprite-pipeline/SKILL.md`](.agents/skills/sketchbook-sprite-pipeline/SKILL.md) to preserve the Digital Sketchbook style while producing normalized runtime frames, manifests, and QA sheets.

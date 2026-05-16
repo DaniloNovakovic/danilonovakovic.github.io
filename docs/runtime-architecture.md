@@ -125,20 +125,16 @@ Migration rule for new code:
 - Use the source-root alias for cross-folder imports: `@/*` resolves to `src/*`. Keep short local relative imports inside a module folder.
 - Import shared UI primitives through `@/shared/ui`.
 
-## Pure decision modules
+## Pure decision and runtime modules
 
-Pure decision code exists where it buys leverage, but the app is not trying to
-migrate all scene code into ECS. Use the smallest interface that concentrates
-repeated knowledge.
+Current pure decision and shared runtime seams:
 
-The ECS foundation under `src/game/core/ecs` is the canonical anchor for pure
-entity/component decisions. It covers player movement/input decisions and
-low-level interaction picking without importing Phaser or React.
-
-Shared scene runtime modules such as `SideViewPlayerRuntime`,
-`InteriorInteractionRuntime`, and `sceneResumePolicy` are equally valid when the
-repeated knowledge is lifecycle, policy, or orchestration rather than entity
-iteration.
+- `src/game/core/ecs` is the canonical anchor for pure entity/component
+  decisions. It covers player movement/input decisions and low-level
+  interaction picking without importing Phaser or React.
+- `SideViewPlayerRuntime`, `InteriorInteractionRuntime`, and
+  `sceneResumePolicy` are shared runtime modules for repeated lifecycle,
+  policy, or orchestration knowledge.
 
 Potassium uses focused runtime modules to keep the large arcade scene navigable:
 
@@ -164,16 +160,10 @@ Ridge uses focused runtime modules to keep the Exploration Map editable:
 
 ## Manual smoke verification
 
-After changes that touch Phaser boot, bridge, scene lifecycle, scenes, or overlays, run `npm run dev` and confirm:
-
-1. **Overworld** — canvas loads; move left/right, jump, interact near a building.
-2. **Hobbies** — enter hobbies (building or `H` where applicable); walk; interact with an interior target; exit (`H` / `Esc` / close flow) returns to overworld.
-3. **Basement** — enter the Developer Basement; interact with the computer before glasses to see the character thought, then collect glasses and confirm the Developer Console opens and closes back to the basement scene.
-4. **Ridge / Stampede** — in development, boot `?startScene=ridge`; confirm the separate Ridge shell renders, uses shared side-view movement, and does not replace the default overworld. Walk near the Stampede Trail Card prop, interact, confirm the card opens and `Enter` starts Stampede Sketch. Move in the Stampede arena, return to Ridge, then confirm Telegraph/Domino Trail Cards remain unavailable.
-5. **React overlays** — open a building overlay from the street; close it; no stuck keyboard focus in the canvas.
-6. **Pause / input** — with a React overlay open, scene pause propagates (no gameplay input leaking); closing overlay resumes the parent scene or overworld input.
-
-Record pass/fail in the PR or release notes when shipping runtime changes.
+After changes that touch Phaser boot, bridge, scene lifecycle, scenes, overlays,
+or scene UI, run `npm run dev` and use the canonical
+[`runtime-modes.md` smoke path](runtime-modes.md#smoke-path). Record pass/fail
+in the PR or release notes when shipping runtime changes.
 
 ## Rendering guardrails (Phaser 4)
 

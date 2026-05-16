@@ -12,6 +12,18 @@ This codebase uses scene lifecycle + bridge + ECS arrangement. The layering is l
 6. **Scenes own triggers.** Scene interaction points should call `enterScene` or `openOverlay` through bridge callbacks. Do not recreate a catalog of scene/overlay parent facts.
 7. **Upgrade from Observer to Event Queue deliberately.** Synchronous bridge/scene lifecycle events are fine for same-frame reactions. Introduce an Event Queue only for demonstrated time-decoupled delivery such as delayed cross-scene side effects, audio one-shots, analytics, or ordering that must not fire synchronously.
 
+## Anti-Slop Standards
+
+Use these checks before adding modules, wrappers, interfaces, or cross-folder seams:
+
+1. **Prefer deep modules over shallow wrappers.** A module should hide meaningful decisions or volatility, not just rename another call.
+2. **Apply the deletion test.** If deleting a proposed abstraction would make the code simpler without losing a real boundary, do not add it.
+3. **Treat the interface as the test surface.** Test behavior through the boundary callers rely on; avoid tests that only preserve internal scaffolding.
+4. **Count adapters honestly.** One adapter is a hypothetical seam; two adapters are evidence that the seam may be real.
+5. **Prefer locality.** Keep change, bugs, knowledge, and verification concentrated unless separation gives clear leverage.
+6. **Reject knowledge-leaking interfaces.** Do not add interfaces that require callers to understand more lifecycle, ordering, or implementation detail than before.
+7. **Keep Ridge spatial truth in Ridge Map Language and compiled facts.** Follow ADR-0001 instead of recreating parent/route/spatial catalogs in runtime code.
+
 ## Folder Ownership
 
 Use [`docs/runtime-architecture.md`](../../docs/runtime-architecture.md) and [`src/README.md`](../../src/README.md) for the full source map. The agent-specific rule is narrower: cross-folder imports should respect the public `index.ts` barrels when they exist, and internals should stay unexported unless another folder intentionally depends on them.
