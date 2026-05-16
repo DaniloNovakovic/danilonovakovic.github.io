@@ -28,6 +28,9 @@ Role-specific docs:
 
 - Art roles: also read [`docs/design/style-guide.md`](../design/style-guide.md).
 - Audio roles: also read relevant research in [`docs/research/`](../research/).
+- Story / tone roles: also use
+  [`.agents/skills/story-tone-designer/SKILL.md`](../../.agents/skills/story-tone-designer/SKILL.md)
+  and relevant narrative research in [`docs/research/`](../research/).
 - Issue planning roles: also read [`docs/agents/issue-tracker.md`](./issue-tracker.md).
 
 ## Activation Rule
@@ -151,6 +154,10 @@ The Level Designer must protect:
 
 Purpose: keep the game warm, personal, and weird in the right way.
 
+The Story / Tone Designer also has a repeatable workflow skill:
+
+- [`.agents/skills/story-tone-designer/SKILL.md`](../../.agents/skills/story-tone-designer/SKILL.md)
+
 The Story / Tone Designer owns:
 
 - emotional arc
@@ -158,13 +165,17 @@ The Story / Tone Designer owns:
 - funny-sad margin notes
 - understated dialogue
 - "ship something alive" ending feel
+- tone-card extraction for story beats, NPC lines, manual pages, and
+  return-state memories
 
 The Story / Tone Designer must protect:
 
-- Danilo as primary audience
-- sincerity under the joke
-- no generic portfolio sales pitch
-- small moments over lore dumps
+- Danilo as the primary audience
+- the Ridge's warm, personal, funny-sad voice
+- existing meaning and tribute intent unless Danilo explicitly asks to change it
+
+Default response shape: use the structured format defined in
+[`.agents/skills/story-tone-designer/SKILL.md`](../../.agents/skills/story-tone-designer/SKILL.md).
 
 ## Systems / Production Designer
 
