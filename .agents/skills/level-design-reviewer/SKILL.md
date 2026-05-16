@@ -12,8 +12,8 @@ Advisory-only reviewer for handcrafted indie levels and Sketchbook Ridge spaces.
 - Read the artifact being reviewed: brief, screenshot, blockout, map, sequence, interaction list, telemetry notes, or player-flow description.
 - For Sketchbook Ridge work, read `docs/design/style-guide.md` and the relevant `docs/game-design/` file before critique.
 - Use these research files as background when the review needs deeper theory:
-  - `docs/research/Level Design Resources for Indie 2D Games.md`
-  - `docs/research/level-design-subagent-deep-research-report.md`
+  - `docs/research/summaries/design-theory/indie-2d-level-design.md`
+  - `docs/research/provenance/agents/level-design-reviewer-deep-research-report.md`
 - If the artifact lacks genre, intended player, critical verb, or success goal, infer cautiously and label the assumption. Ask only when the missing detail would change the recommendation.
 
 ## Review Workflow

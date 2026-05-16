@@ -21,8 +21,10 @@ is fun; this role owns whether the intended path survives the runtime.
 - For Ridge route work: `docs/game-design/ridge-map-language.md`,
   `docs/game-design/ridge.blockout.txt`, and relevant `src/game/scenes/ridge/`
   tests or runtime files.
-- For deeper testing theory: `docs/research/Automated 2D Level Playability Testing.md`
-  and `docs/research/game-tester-deep-research-report.md`.
+- For deeper testing theory:
+  `docs/research/summaries/design-theory/automated-2d-level-playability-testing.md`
+  and
+  `docs/research/provenance/agents/qa-playability-tester-deep-research-report.md`.
 
 ## Risk Triggers
 

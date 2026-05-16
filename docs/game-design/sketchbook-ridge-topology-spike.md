@@ -118,11 +118,11 @@ Use these docs as inspiration, not hard scope:
   Cicka arc, mini-game reward language, and mobile constraints.
 - [`sketchbook-ridge-long-term-topology-ideas.md`](./sketchbook-ridge-long-term-topology-ideas.md):
   compact three-layer mountain, shortcut vocabulary, and secret families.
-- [`../research/Deep Dive_ 2D Map Design Principles.md`](../research/Deep%20Dive_%202D%20Map%20Design%20Principles.md):
+- [`../research/summaries/design-theory/2d-map-design-principles.md`](../research/summaries/design-theory/2d-map-design-principles.md):
   loops, landmarks, mental mapping, and earned shortcut relief.
-- [`../research/Analyzing Lucky Luna's Gameplay Essence.md`](../research/Analyzing%20Lucky%20Luna's%20Gameplay%20Essence.md):
+- [`../research/summaries/game-inspirations/lucky-luna.md`](../research/summaries/game-inspirations/lucky-luna.md):
   mobile-native falling/descent ideas for optional later pockets.
-- [`../research/Nine Sols Game Design Inquiry.md`](../research/Nine%20Sols%20Game%20Design%20Inquiry.md):
+- [`../research/summaries/game-inspirations/nine-sols.md`](../research/summaries/game-inspirations/nine-sols.md):
   evolving home anchor, mementos, and restorative return space.
 
 ## Weighted Options

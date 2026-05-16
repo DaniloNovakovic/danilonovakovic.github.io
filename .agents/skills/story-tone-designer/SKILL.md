@@ -17,8 +17,8 @@ Advisory and drafting mode for keeping Sketchbook Ridge warm, personal, funny-sa
 
 Use these research files as background when tone work needs deeper theory:
 
-- `docs/research/story-tone-designer-deep-research-report.md`
-- `docs/research/Game Narrative Research for Tribute.md`
+- `docs/research/provenance/agents/story-tone-designer-deep-research-report.md`
+- `docs/research/provenance/narrative/game-narrative-tribute-research.md`
 
 ## Default Ridge Tone Card
 

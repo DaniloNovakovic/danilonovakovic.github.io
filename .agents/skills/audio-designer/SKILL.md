@@ -18,7 +18,7 @@ Advisory and drafting mode for making Sketchbook Ridge sound handmade, quiet, le
 
 Optional provenance only; do not load by default:
 
-- `docs/research/provenance/audio/Game Audio Research for Indie Project.md`
+- `docs/research/provenance/audio/game-audio-research-for-indie-project.md`
 - `docs/research/provenance/audio/audio-designer-deep-research-report.md`
 
 ## Default Ridge Audio Card
