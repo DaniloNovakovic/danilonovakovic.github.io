@@ -9,8 +9,7 @@ Active sources: `sketchbook-ridge-summit.md`,
 `sketchbook-ridge-m3-overlay-pack.md`, `sketchbook-ridge-m3-audio-pack.md`,
 `docs/design/style-guide.md`, local generated/prepared asset readmes under
 ignored `asset-sources/**` when present,
-`docs/game-design/asset-readiness-triage.md`, and runtime asset readmes under
-`public/assets/**` when assets are promoted.
+and runtime asset readmes under `public/assets/**` when assets are promoted.
 
 ## Why This Exists
 
@@ -269,19 +268,3 @@ Riskier work that should be serialized:
 - changing shared preload assumptions
 - changing shared scene runtime presentation policy
 - changing bridge-owned reward state at the same time as art adoption
-
-## Recommended Next 1-3 Tasks
-
-1. Follow with a **Ridge / Outskirts Topology Spike** before committing to
-   shortcut, glide, wall-cling, or full Overworld replacement behavior.
-2. Keep Stampede calm-patch / proximity-aggro and Potassium visual upgrades as
-   later scene-owned asset slices.
-3. Expand Cicka animation only after desktop/mobile screenshots prove the
-   hatching and scale remain readable in the actual Ridge camera.
-
-## Decision Needed From Danilo
-
-Current decision: **Ridge / Outskirts topology next**. Cicka's first runtime
-proof is in place; Stampede and Potassium asset adoption stay queued until the
-topology slice clarifies the main
-world and asset standard.
