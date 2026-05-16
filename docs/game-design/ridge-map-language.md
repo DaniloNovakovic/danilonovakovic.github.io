@@ -1,15 +1,16 @@
 # Ridge Map Language
 
-Status: active design tool.
+Status: active runtime source and design tool.
 
 The Ridge Map Language is a small text format for designing Ridge room beats
 before final assets exist. It should be readable by Danilo, easy for agents to
-edit, and strict enough that a parser can generate a Phaser greybox later.
+edit, and strict enough that the parser can generate a Phaser greybox, typed
+facts, traversal connectors, and progress-gated presentation inputs.
 
 ## Decision
 
-`ridge.blockout.txt` is intended to become the runtime source for Ridge greybox
-generation. It is not only design prose.
+`ridge.blockout.txt` is the runtime source for Ridge greybox generation. It is
+not only design prose.
 
 The first full skeleton lives in [`ridge.blockout.txt`](./ridge.blockout.txt).
 Parser work should use that file, not a toy example, so the language evolves
@@ -63,11 +64,11 @@ First supported output is primitive:
 - prop markers
 - environment tags
 
-Parser v0 renders the whole seamless world into a Phaser greybox. It groups
-`#` and `_` cells into horizontal collider runs, generates first-walk connector
-platforms from route exit anchors, and only adds shortcut colliders when the
-matching Ridge progress exists. Final art, sprite placement polish, particles,
-sound, one-way platform behavior, and bespoke encounter logic stay outside v0.
+Parser v0 feeds the whole seamless world into a Phaser greybox. It groups `#`
+and `_` cells into horizontal collider runs, generates first-walk connectors
+from route exit anchors, and only adds shortcut colliders when the matching
+Ridge progress exists. Final art, sprite placement polish, particles, sound,
+one-way platform behavior, and bespoke encounter logic stay outside v0.
 
 ## Design Goals
 
@@ -108,8 +109,8 @@ Global declarations:
 | `route` | named intended traversal route |
 | `shortcut` | route opened by progress |
 | `future_route` | teased or not-yet-runtime route |
-| `optional_pocket` | small curiosity branch that is not required for progression |
-| `home_mutation` | visible/mechanical Cicka Home change caused by progress |
+| `optional_pocket` | parsed small curiosity branch; currently design data |
+| `home_mutation` | Cicka Home change declaration resolved against progress |
 
 Each room beat should have metadata plus a grid:
 
@@ -148,6 +149,30 @@ rect cicka_safe_zone x=8 y=3 w=14 h=7
 
 Discrete room transitions can still be used later for interiors, mini-games,
 basement pockets, or scenes that intentionally leave the Ridge world.
+
+## Compiled Facts
+
+The runtime compiles parser output into typed facts before callers use it.
+Current fact groups are:
+
+| Fact | Runtime role |
+| --- | --- |
+| Room beats | room id, title, theme/mood, links, props, declarations, bounds, and anchors |
+| Anchors | world-space anchor points with typed common attrs such as `id`, `to`, `requires`, `movement`, and `reward` |
+| Routes | ordered room links for active first-walk topology |
+| Future routes | route promises drawn as inactive future topology |
+| Shortcuts | progress-gated route facts with availability, movement, source anchor, and target landing |
+| Home mutations | Cicka Home mutation facts with `adds`, `opens`, and raw attrs preserved |
+
+Shortcut availability is derived from durable Ridge progress, not stored in the
+blockout. The current Stampede shortcut maps `stampede_sketch` to the durable
+`stampede-sketch` stamp. Locked shortcuts remain visible promises without
+active colliders or assist zones.
+
+Home mutations follow the same data-first rule. `stampede_sketch` currently
+activates the `stampede_note` addition and `fold_drop_landing` opening when the
+durable Stampede stamp exists. Other declarations, such as `work_artifact`,
+remain typed future promises until a real progress source exists.
 
 ## Symbol Draft
 
@@ -209,6 +234,7 @@ error.
 
 `src/game/scenes/ridge/blockout/` parses this file directly through Vite raw
 imports. `RidgeScene` renders every room into one whole-world greybox by
-default, derives typed traversal connectors from `movement=` metadata, and
-keeps future routes / locked shortcuts as visual promises without active
-colliders or assist zones.
+default, derives typed traversal connectors from `movement=` metadata, compiles
+typed facts for presentation/interaction modules, resolves shortcuts from
+durable Ridge progress, and keeps future routes, locked shortcuts, and future
+Cicka Home mutations as inactive promises until their progress source exists.
