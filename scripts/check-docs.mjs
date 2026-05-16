@@ -13,6 +13,7 @@ const ignoredRelativeDirs = new Set([
 ]);
 const markdownLinkPattern = /(?<!!)\[[^\]]*]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
 const inlinePathPattern = /(?<![\w./-])(?:src|docs|\.agents)\/[A-Za-z0-9_./*-]+/g;
+const generatedCitationSpanTargetPattern = /^(?:start|end)\\?_span$/;
 const markdownFiles = [];
 const failures = [];
 
@@ -39,6 +40,7 @@ function shouldSkipTarget(target) {
   return (
     target === '' ||
     target.startsWith('#') ||
+    generatedCitationSpanTargetPattern.test(target) ||
     /^[a-z][a-z0-9+.-]*:/i.test(target)
   );
 }
