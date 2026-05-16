@@ -1,7 +1,7 @@
 # Visual Research Provenance
 
-This folder stores source research and background reports for Sketchbook Ridge
-visual direction. These notes are not the current visual spec.
+This folder stores retained source research and background rationale for
+Sketchbook Ridge visual direction. These notes are not the current visual spec.
 
 Start from [`docs/design/style-guide.md`](../../../design/style-guide.md) and
 the art-role cards in

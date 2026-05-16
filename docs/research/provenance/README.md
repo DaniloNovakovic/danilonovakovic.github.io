@@ -14,3 +14,8 @@ source rationale, comparison material, or a fresh synthesis pass.
 - `narrative/`: background narrative and tribute writing research.
 - `visual/`: background visual-direction, character-design, asset-pipeline, and
   style-system research.
+
+These reports are intentionally optional. They are useful when revisiting the
+thinking behind a specialist role or doing a fresh synthesis, but current
+`docs/game-design/`, `.agents/skills/`, and `.agents/rules/` files remain the
+operational contracts.

@@ -21,7 +21,6 @@ This directory separates shipped player-facing behavior from future design conce
 - **[Sketchbook Ridge M3 Visual Pack](./sketchbook-ridge-m3-visual-pack.md)**: Visual Direction Artist and Character Designer direction for Cicka, NPCs, landmarks, stickers, and M4 placeholders.
 - **[Sketchbook Ridge M3 Overlay Pack](./sketchbook-ridge-m3-overlay-pack.md)**: Overlay Readability Designer's Trail Card, Manual Page, mobile readability, and monochrome reward-state spec.
 - **[Sketchbook Ridge M3 Audio Pack](./sketchbook-ridge-m3-audio-pack.md)**: Audio Designer's Ridge, Cicka, Potassium acknowledgement, Stampede, and Telegraph audio direction.
-- **[AI Game Design Competition Archive](./ai-competition/README.md)**: Closed provenance for the competition that produced the current Ridge Summit direction.
 
 ## Document Status
 
@@ -39,10 +38,6 @@ This directory separates shipped player-facing behavior from future design conce
   long-term topology, Notebook Shell spike/tournament docs, and prototype HTML.
   These can guide future work, but should not override the active milestone or
   runtime docs.
-- **Archive:** `ai-competition/` is closed competition history. Do not treat it
-  as an active roadmap or current source of truth. Search hits from
-  `ai-competition/archive/**` are historical by default; use the active Summit,
-  milestone, and runtime docs for current planning.
 - **Retention:** archive and staging folders must earn their keep. If a folder
   is no longer active, it needs a clear provenance reason and deletion trigger;
   otherwise summarize the useful decision and remove the bulk.
