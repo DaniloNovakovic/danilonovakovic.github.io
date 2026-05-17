@@ -5,7 +5,7 @@
 Active references:
 
 - `docs/design/style-guide.md`
-- `docs/game-design/sketchbook-ridge-asset-staging-plan.md`
+- `docs/game-design/ridge/reference/asset-staging-plan.md`
 - external prepared archive key `prepared-assets`, relative path
   `characters/cicka/`
 - `.agents/skills/sketchbook-sprite-pipeline/SKILL.md`

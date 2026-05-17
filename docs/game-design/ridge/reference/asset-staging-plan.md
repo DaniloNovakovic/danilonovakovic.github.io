@@ -4,9 +4,9 @@
 > This is an organization and adoption guide, not a final art bible and not a
 > promise that every prepared asset will ship unchanged.
 
-Active sources: `sketchbook-ridge-summit.md`,
-`sketchbook-ridge-milestone-plan.md`, `sketchbook-ridge-m3-visual-pack.md`,
-`sketchbook-ridge-m3-overlay-pack.md`, `sketchbook-ridge-m3-audio-pack.md`,
+Active sources: `../summit.md`,
+`../milestone-plan.md`, `m3-visual-pack.md`,
+`m3-overlay-pack.md`, `m3-audio-pack.md`,
 `docs/design/style-guide.md`, local generated/prepared asset readmes under
 ignored `asset-sources/**` when present,
 and runtime asset readmes under `public/assets/**` when assets are promoted.
@@ -67,7 +67,7 @@ Current homes:
 
 - `docs/design/style-guide.md`
 - `docs/design/README.md`
-- `docs/game-design/sketchbook-ridge-m3-visual-pack.md`
+- `docs/game-design/ridge/reference/m3-visual-pack.md`
 - related research/design docs
 
 These files answer "what should this feel like?" They do not by themselves mean

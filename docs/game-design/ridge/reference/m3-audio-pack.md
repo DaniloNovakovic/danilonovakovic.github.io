@@ -8,7 +8,7 @@ not final asset direction or runtime architecture.
 
 Active references:
 
-- `sketchbook-ridge-summit.md`: low-cortisol Ridge, high-spice mini-games,
+- `../summit.md`: low-cortisol Ridge, high-spice mini-games,
   stickers/world memory, Cicka as resident.
 - `style-guide.md`: off-white paper, black ink, stepped handmade feel.
 - `A Short Hike`: calm musical-map layering and movement reward.

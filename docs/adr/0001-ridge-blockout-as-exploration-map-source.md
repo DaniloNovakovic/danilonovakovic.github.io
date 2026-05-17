@@ -8,3 +8,7 @@ The implemented Ridge direction now compiles blockout source into typed room,
 route, anchor, shortcut, and home-mutation facts before runtime presentation and
 interaction modules consume it. This deepens the original decision rather than
 superseding it.
+
+The active blockout source now lives beside the Ridge blockout parser at
+`src/game/scenes/ridge/blockout/maps/folded-desk-ridge.blockout.txt`. The
+language documentation remains in `docs/game-design/ridge/map-language.md`.

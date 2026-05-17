@@ -4,7 +4,7 @@ Companion to [`style-guide.md`](style-guide.md). The style guide is the source o
 
 Planning for how generated concepts, prepared runtime candidates, and
 milestone-safe asset adoption are organized lives in
-[`../game-design/sketchbook-ridge-asset-staging-plan.md`](../game-design/sketchbook-ridge-asset-staging-plan.md).
+[`../game-design/ridge/reference/asset-staging-plan.md`](../game-design/ridge/reference/asset-staging-plan.md).
 
 ## Image prompt for character assets
 

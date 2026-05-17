@@ -43,7 +43,12 @@ game vocabulary is explicit:
 - **Shared scene runtime** - reusable Phaser-facing machinery lives in `src/game/sharedSceneRuntime`: side-view player lifecycle, camera policy, scene presentation, resume policy, keyboard pause, interior interactions, text, textures, and vision helpers.
 - **Pure gameplay decisions** - `src/game/core` contains deterministic ECS, input, and player logic that can be tested without Phaser, React, browser globals, or bridge state.
 - **Scene-owned modules** - scene folders own local layout, triggers, Phaser objects, scene contexts, scene-local overlays, and heavy scene runtime modules.
-- **Ridge exploration runtime** - Ridge treats `docs/game-design/ridge.blockout.txt` as runtime source data. The Ridge scene parses the blockout, derives geometry, compiles typed facts, resolves durable progress, and hands those outputs to scene-owned presentation, traversal, interaction, and Cicka Home mutation modules.
+- **Ridge exploration runtime** - Ridge treats
+  `src/game/scenes/ridge/blockout/maps/folded-desk-ridge.blockout.txt` as
+  runtime source data. The Ridge scene parses the blockout, derives geometry,
+  compiles typed facts, resolves durable progress, and hands those outputs to
+  scene-owned presentation, traversal, interaction, and Cicka Home mutation
+  modules.
 
 ## Scene presentation and camera
 

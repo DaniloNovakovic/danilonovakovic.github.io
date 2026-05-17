@@ -1,6 +1,6 @@
 # Sketchbook Ridge Proper Map Plan
 
-> Follow-up to [`sketchbook-ridge-topology-spike.md`](./sketchbook-ridge-topology-spike.md).
+> Follow-up to [`topology-spike.md`](./topology-spike.md).
 > Issue #54 proved the current Ridge can change visually, but the route is still
 > a short prop line. This document defines the first real Ridge map before the
 > next implementation pass.
@@ -87,7 +87,8 @@ Main route should be **up, across, down, up**, not just right.
 
 ## Topology Visual
 
-Standalone visual: [`ridge-map-inventory-canvas.html`](./ridge-map-inventory-canvas.html)
+The old standalone inventory canvas was removed after this plan became the
+current map target.
 draws the same plan as an in-game map-screen style canvas with first-walk,
 shortcut, and future-route layers.
 

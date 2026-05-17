@@ -19,8 +19,9 @@ and delegate work cleanly.
 
 Before acting in any team role, read or reference:
 
-- [`docs/game-design/sketchbook-ridge-summit.md`](../game-design/sketchbook-ridge-summit.md)
-- [`docs/game-design/sketchbook-ridge-milestone-plan.md`](../game-design/sketchbook-ridge-milestone-plan.md)
+- [`docs/game-design/ridge/summit.md`](../game-design/ridge/summit.md)
+- [`docs/game-design/ridge/current-level.md`](../game-design/ridge/current-level.md)
+- [`docs/game-design/ridge/milestone-plan.md`](../game-design/ridge/milestone-plan.md)
 - [`docs/runtime-architecture.md`](../runtime-architecture.md)
 - [`docs/runtime-modes.md`](../runtime-modes.md)
 - [`.agents/rules/`](../../.agents/rules/)
@@ -34,7 +35,7 @@ Role-specific docs:
   pass. Do not treat provenance reports as current spec.
 - Audio roles: also use
   [`.agents/skills/audio-designer/SKILL.md`](../../.agents/skills/audio-designer/SKILL.md)
-  and [`docs/game-design/sketchbook-ridge-m3-audio-pack.md`](../game-design/sketchbook-ridge-m3-audio-pack.md).
+  and [`docs/game-design/ridge/reference/m3-audio-pack.md`](../game-design/ridge/reference/m3-audio-pack.md).
 - Story / tone roles: also use
   [`.agents/skills/story-tone-designer/SKILL.md`](../../.agents/skills/story-tone-designer/SKILL.md)
   and relevant narrative research in [`docs/research/`](../research/).
@@ -69,6 +70,7 @@ The Producer also has a repeatable workflow skill:
 The Producer owns:
 
 - current milestone status
+- current Ridge level reality
 - next issue selection
 - delegation plan
 - branch and conflict awareness
@@ -78,8 +80,10 @@ The Producer owns:
 
 The Producer must protect:
 
-- `sketchbook-ridge-summit.md` as the product goal
-- `sketchbook-ridge-milestone-plan.md` as the work map
+- `ridge/summit.md` as the product goal
+- `ridge/current-level.md` as the current level snapshot
+- `ridge/milestone-plan.md` as the milestone and shared-seam map
+- GitHub Issues as the live PRD, backlog, triage, and agent-brief source
 - the Architect's rule: parallelize scene internals, serialize shared seams
 - Danilo's time and taste
 

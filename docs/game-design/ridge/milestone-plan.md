@@ -1,8 +1,16 @@
 # Sketchbook Ridge Milestone Plan
 
-> Planning companion for [`sketchbook-ridge-summit.md`](./sketchbook-ridge-summit.md).
+> Planning companion for [`summit.md`](./summit.md).
 > The Summit doc is the product vision. This file is the implementation and
 > milestone map for agents working across branches.
+
+This is not the live issue tracker. PRDs, implementation issues, triage state,
+current backlog, and agent-ready briefs live in GitHub Issues through the
+workflow in [`docs/agents/issue-tracker.md`](../../agents/issue-tracker.md).
+
+Use this file for durable milestone shape, ownership boundaries, branch/seam
+strategy, and reference stacks. Use [`current-level.md`](./current-level.md)
+for the current human-readable Ridge level snapshot.
 
 ## Active Goal
 
@@ -20,6 +28,10 @@ The first complete milestone should prove:
 Anything beyond that is future scope unless a slice explicitly pulls it in.
 
 ## Current Implementation Status
+
+This section is a milestone snapshot for orientation. Do not mirror every
+GitHub issue update here; update it only when the milestone-level reality or
+current shipped/prototype capability changes.
 
 - **M1 Ridge Shell** is complete for the current placeholder slice: Ridge can
   boot directly with `?startScene=ridge`, uses shared side-view movement, shows
@@ -70,12 +82,12 @@ Anything beyond that is future scope unless a slice explicitly pulls it in.
   runtime adoption target. Keep remaining candidates documented and adopt them
   in small scene-owned slices instead of turning them into a broad
   art-integration branch. See
-  [`sketchbook-ridge-asset-staging-plan.md`](./sketchbook-ridge-asset-staging-plan.md).
+  [`asset-staging-plan.md`](./reference/asset-staging-plan.md).
 
 ## Production Crew
 
 Role contracts and activation phrases live in
-[`docs/agents/sketchbook-ridge-team.md`](../agents/sketchbook-ridge-team.md).
+[`docs/agents/sketchbook-ridge-team.md`](../../agents/sketchbook-ridge-team.md).
 
 - **Level Designer**: level design and milestone shape.
 - **Story / Tone Designer**: emotional/story tone.
@@ -88,18 +100,22 @@ Role contracts and activation phrases live in
 
 ## Reference Stack
 
-Every implementation issue should link these:
+Every GitHub implementation issue should link the relevant subset of these:
 
-- [`sketchbook-ridge-summit.md`](./sketchbook-ridge-summit.md)
-- [`runtime-architecture.md`](../runtime-architecture.md)
-- [`runtime-modes.md`](../runtime-modes.md)
-- [`architecture-direction.md`](../architecture-direction.md)
-- [`../design/style-guide.md`](../design/style-guide.md)
-- [`../../.agents/rules/10-architecture.md`](../../.agents/rules/10-architecture.md)
-- [`../../.agents/rules/20-game-runtime.md`](../../.agents/rules/20-game-runtime.md)
-- [`../../.agents/rules/30-react-overlays.md`](../../.agents/rules/30-react-overlays.md)
+- [`summit.md`](./summit.md)
+- [`current-level.md`](./current-level.md)
+- [`runtime-architecture.md`](../../runtime-architecture.md)
+- [`runtime-modes.md`](../../runtime-modes.md)
+- [`architecture-direction.md`](../../architecture-direction.md)
+- [`style-guide.md`](../../design/style-guide.md)
+- [`10-architecture.md`](../../../.agents/rules/10-architecture.md)
+- [`20-game-runtime.md`](../../../.agents/rules/20-game-runtime.md)
+- [`30-react-overlays.md`](../../../.agents/rules/30-react-overlays.md)
 
-Use [`potassium-slip.md`](./potassium-slip.md) for Potassium-specific behavior.
+Use [`potassium-slip.md`](../mini-games/potassium-slip.md) for Potassium-specific behavior,
+[`stampede-sketch.md`](../mini-games/stampede-sketch.md) for Stampede-specific behavior,
+and [`mini-games/README.md`](../mini-games/README.md) as the mini-game routing
+index.
 
 ## Conflict Strategy
 
@@ -224,9 +240,9 @@ Outputs:
 
 Current review packs:
 
-- [`sketchbook-ridge-m3-visual-pack.md`](./sketchbook-ridge-m3-visual-pack.md)
-- [`sketchbook-ridge-m3-overlay-pack.md`](./sketchbook-ridge-m3-overlay-pack.md)
-- [`sketchbook-ridge-m3-audio-pack.md`](./sketchbook-ridge-m3-audio-pack.md)
+- [`m3-visual-pack.md`](./reference/m3-visual-pack.md)
+- [`m3-overlay-pack.md`](./reference/m3-overlay-pack.md)
+- [`m3-audio-pack.md`](./reference/m3-audio-pack.md)
 
 These are research/spec deliverables. They should not block engineering beyond
 basic silhouette placeholders.
@@ -238,7 +254,7 @@ Goal: ship the first new opt-in mini-game.
 Owner: Stampede scene.
 
 Purpose: protect one calm picnic-blanket patch from a stampede of runaway ideas.
-Use [`stampede-sketch.md`](./stampede-sketch.md) for player-guardian and enemy
+Use [`stampede-sketch.md`](../mini-games/stampede-sketch.md) for player-guardian and enemy
 intent before generating or wiring final Stampede art.
 
 Outputs:
@@ -277,7 +293,7 @@ Current checkpoint:
 - **M4d.5 Responsive Shell/Input Spike** accepted for prototype continuation:
   Notebook shell presentation, scene UI panels, and larger control mats are in
   place for Stampede and Potassium. Reusable Notebook Shell language now lives
-  in [`../design/notebook-shell-design-language.md`](../design/notebook-shell-design-language.md).
+  in [`notebook-shell-design-language.md`](../../design/notebook-shell-design-language.md).
   Keep the notebook treatment restrained if future polish makes it too noisy or
   brittle.
 - **M4e Pickup / Upgrade Draft** accepted for continuation: cleared marks spawn
@@ -297,7 +313,10 @@ Current checkpoint:
   remain the Phaser adapter/orchestrator while run decisions live behind
   `runtime/runFlow.ts` and swarm steering lives behind `runtime/swarmMotion.ts`.
 
-Next implementation slices:
+Potential next implementation slices:
+
+These are local planning notes. Publish approved work as GitHub Issues before
+assigning an AFK agent.
 
 1. **M5 Ridge Memory continuation**: add the first small Ridge shortcut or the
    first Cicka proximity/talk interaction as its own scene-owned slice.
@@ -351,12 +370,15 @@ Current checkpoint:
   first AI sprite audit records frame stability, runtime risks, and future
   review gates.
 
-Next implementation slices:
+Potential next implementation slices:
+
+These are local planning notes. Publish approved work as GitHub Issues before
+assigning an AFK agent.
 
 1. **Ridge / Outskirts Topology Spike**: design and lightly prototype how the
    current Overworld becomes Outskirts/Trailhead and Ridge becomes a connected
    Hollow Knight topology side-view world. Use
-   [`sketchbook-ridge-topology-spike.md`](./sketchbook-ridge-topology-spike.md)
+   [`topology-spike.md`](./map-plans/topology-spike.md)
    as the active M5 map brief. Do not fully replace the default Overworld in
    the same PR.
 2. **Later First Ridge Shortcut / Ridge-Only Glide**: revisit these after the

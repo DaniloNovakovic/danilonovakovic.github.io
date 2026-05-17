@@ -1,5 +1,7 @@
 # Stampede Sketch
 
+> Mini-game design brief and Ridge reward contract.
+
 Stampede Sketch is the first new opt-in mini-game for Sketchbook Ridge.
 
 ## Core Purpose

@@ -9,12 +9,18 @@ facts, traversal connectors, and progress-gated presentation inputs.
 
 ## Decision
 
-`ridge.blockout.txt` is the runtime source for Ridge greybox generation. It is
-not only design prose.
+`folded-desk-ridge.blockout.txt` is the runtime source for Ridge greybox
+generation. It is not design prose.
 
-The first full skeleton lives in [`ridge.blockout.txt`](./ridge.blockout.txt).
+The first full skeleton lives in
+[`src/game/scenes/ridge/blockout/maps/folded-desk-ridge.blockout.txt`](../../../src/game/scenes/ridge/blockout/maps/folded-desk-ridge.blockout.txt).
 Parser work should use that file, not a toy example, so the language evolves
 against the real Ridge topology.
+
+Location note: the blockout used to live under `docs/game-design/` because the
+language started as a design artifact. It now lives beside the Ridge blockout
+parser because the build imports it as raw runtime data. If it moves again,
+update the Vite raw import, this document, and ADR-0001 in the same migration.
 
 The default grid cell size is **48px**, declared at the file level instead of
 hard-coded into the runtime:

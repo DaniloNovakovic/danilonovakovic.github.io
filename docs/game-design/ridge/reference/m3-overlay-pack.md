@@ -9,8 +9,8 @@
 
 Use this pack with:
 
-- `docs/game-design/sketchbook-ridge-summit.md`
-- `docs/game-design/sketchbook-ridge-milestone-plan.md`
+- `docs/game-design/ridge/summit.md`
+- `docs/game-design/ridge/milestone-plan.md`
 - `docs/design/style-guide.md`
 - `.agents/rules/30-react-overlays.md`
 - the current `OverlayDialogFrame`, `DialogCard`, `TrailCardOverlay`, and

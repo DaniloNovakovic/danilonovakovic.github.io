@@ -10,8 +10,8 @@ Advisory and drafting mode for making Sketchbook Ridge sound handmade, quiet, le
 ## Load First
 
 - `docs/agents/sketchbook-ridge-team.md`
-- `docs/game-design/sketchbook-ridge-summit.md`
-- `docs/game-design/sketchbook-ridge-milestone-plan.md`
+- `docs/game-design/ridge/summit.md`
+- `docs/game-design/ridge/milestone-plan.md`
 - `docs/runtime-architecture.md`
 - `.agents/rules/40-audio-runtime.md`
 - The specific artifact being reviewed or drafted.

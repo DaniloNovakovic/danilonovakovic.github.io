@@ -10,8 +10,8 @@ Advisory and drafting mode for keeping Sketchbook Ridge warm, personal, funny-sa
 ## Load First
 
 - `docs/agents/sketchbook-ridge-team.md`
-- `docs/game-design/sketchbook-ridge-summit.md`
-- `docs/game-design/sketchbook-ridge-milestone-plan.md`
+- `docs/game-design/ridge/summit.md`
+- `docs/game-design/ridge/milestone-plan.md`
 - `docs/design/style-guide.md`
 - The specific artifact being reviewed or drafted.
 
