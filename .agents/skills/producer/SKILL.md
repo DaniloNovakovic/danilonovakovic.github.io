@@ -54,6 +54,8 @@ When planning agent work:
 3. Assign each task to the smallest fitting owner:
    - Architect: architecture/shared seams.
    - Level Designer: route shape, pacing, and landmarks.
+   - Playability Tester: smoke paths, route reachability, mobile checks, and
+     regression evidence.
    - Story / Tone Designer: emotional tone and story feel.
    - Systems / Production Designer: systems, mobile feasibility, and build order.
    - Character Designer: NPCs and Cicka.
@@ -69,8 +71,8 @@ When planning agent work:
 "Hiring" means adding a new role to `docs/agents/sketchbook-ridge-team.md`.
 "Firing" means removing, merging, or marking a role inactive in that same doc.
 
-Hire only for a real repeated gap, such as testing, performance,
-accessibility, writing, release management, or asset pipeline work.
+Hire only for a real repeated gap, such as performance, accessibility, writing,
+release management, or asset pipeline work.
 
 Before hiring/firing, state why, proposed role name, ownership, protected
 constraints, and default output. If Danilo approves, update

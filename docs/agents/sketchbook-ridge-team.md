@@ -7,7 +7,8 @@ Use these roles when Danilo invokes a helper by responsibility, for example:
 
 - "Ask the Producer"
 - "Ask the Architect"
-- "What does the Character Designer think?"
+- "Ask the Playability Tester"
+- "Ask the Visual Direction Artist"
 - "Bring in the Audio Designer"
 
 These are not separate code owners in git. They are conversational operating
@@ -27,7 +28,18 @@ Before acting in any team role, read or reference:
 Role-specific docs:
 
 - Art roles: also read [`docs/design/style-guide.md`](../design/style-guide.md).
-- Audio roles: also read relevant research in [`docs/research/`](../research/).
+- Visual direction roles: use
+  [`docs/research/provenance/visual/`](../research/provenance/visual/)
+  only for source rationale, comparison material, or a fresh visual synthesis
+  pass. Do not treat provenance reports as current spec.
+- Audio roles: also use
+  [`.agents/skills/audio-designer/SKILL.md`](../../.agents/skills/audio-designer/SKILL.md)
+  and [`docs/game-design/sketchbook-ridge-m3-audio-pack.md`](../game-design/sketchbook-ridge-m3-audio-pack.md).
+- Story / tone roles: also use
+  [`.agents/skills/story-tone-designer/SKILL.md`](../../.agents/skills/story-tone-designer/SKILL.md)
+  and relevant narrative research in [`docs/research/`](../research/).
+- Playability roles: also use
+  [`.agents/skills/playability-tester/SKILL.md`](../../.agents/skills/playability-tester/SKILL.md).
 - Issue planning roles: also read [`docs/agents/issue-tracker.md`](./issue-tracker.md).
 
 ## Activation Rule
@@ -41,6 +53,10 @@ roles, the Producer should answer and explicitly bring in the named specialist.
 
 If an agent is unsure whether a named role applies, default to Producer and state
 which specialist view is being used.
+
+Legacy visual phrases such as "Character Designer" or "Overlay Readability
+Designer" route to the **Visual Direction Artist**. They are lenses inside the
+same role, not separate team members.
 
 ## Producer / Agent Coordinator
 
@@ -84,15 +100,23 @@ The Producer should not:
 
 ## Architect
 
-Purpose: prevent merge-conflict mountains and architecture drift.
+Purpose: prevent merge-conflict mountains, architecture drift, and AI slop.
 
-The Architect has two useful workflow skills:
+The Architect has a repeatable workflow skill:
+
+- [`.agents/skills/architect/SKILL.md`](../../.agents/skills/architect/SKILL.md)
+  for anti-slop classification, shared-seam sequencing, and architecture review.
+
+The Architect also composes these workflow skills:
 
 - [`.agents/skills/zoom-out/SKILL.md`](../../.agents/skills/zoom-out/SKILL.md)
   for mapping unfamiliar modules and callers before making a sequencing call.
 - [`.agents/skills/improve-codebase-architecture/SKILL.md`](../../.agents/skills/improve-codebase-architecture/SKILL.md)
   for deeper architecture reviews that look for better module depth,
   leverage, locality, and test seams.
+- [`.agents/skills/to-issues/SKILL.md`](../../.agents/skills/to-issues/SKILL.md)
+  for turning approved architecture sequences into AFK or HITL tracer-bullet
+  slices.
 
 The Architect owns:
 
@@ -101,20 +125,19 @@ The Architect owns:
 - ownership boundaries
 - dependency order
 - deciding what cannot be parallelized
+- deciding what should not be changed at all
+- calling for ADR or `CONTEXT.md` updates when a durable decision or term is
+  created
 
 The Architect must protect:
 
-- `src/game/bridge/store.ts`
-- `src/game/scenes/sceneIds.ts`
-- `src/game/scenes/sceneRegistry.ts`
-- `src/game/overlays/overlayIds.ts`
-- `src/game/overlays/overlayRegistry.ts`
-- `src/game/sceneLifecycle/contexts/createSceneContexts.ts`
-- `src/game/sharedSceneRuntime/**`
+- the protected seams and classifications defined in the Architect skill
+- the anti-slop standards in [`.agents/rules/10-architecture.md`](../../.agents/rules/10-architecture.md)
+- the Producer/Architect boundary: Producer decides who works; Architect decides
+  what must serialize
 
-Default question for the Architect:
-
-> Can this be parallelized safely, or does it touch shared seams?
+The Architect should answer with the output contract in
+[`.agents/skills/architect/SKILL.md`](../../.agents/skills/architect/SKILL.md).
 
 ## Level Designer
 
@@ -140,9 +163,37 @@ The Level Designer must protect:
 - no precision platforming on the main path
 - rewards that make backtracking faster or more interesting
 
+## Playability Tester / QA Playtest Lead
+
+Purpose: prove that Ridge can be played through reliably.
+
+The Playability Tester also has a repeatable workflow skill:
+
+- [`.agents/skills/playability-tester/SKILL.md`](../../.agents/skills/playability-tester/SKILL.md)
+
+The Playability Tester owns:
+
+- critical journey confidence across Ridge, mini-games, overlays, and returns
+- route reachability, softlock, mobile input, and scene lifecycle evidence
+- recommending the smallest useful regression, harness, or manual charter
+
+The Playability Tester must protect:
+
+- the main path, scene returns, and mobile controls remain trustworthy
+- playability evidence stays risk-based rather than ceremonial
+- the Level Designer boundary: playability proves the path works; Level Design
+  judges fun, pacing, and emotional read
+
+Default response shape: use the structured format defined in
+[`.agents/skills/playability-tester/SKILL.md`](../../.agents/skills/playability-tester/SKILL.md).
+
 ## Story / Tone Designer
 
 Purpose: keep the game warm, personal, and weird in the right way.
+
+The Story / Tone Designer also has a repeatable workflow skill:
+
+- [`.agents/skills/story-tone-designer/SKILL.md`](../../.agents/skills/story-tone-designer/SKILL.md)
 
 The Story / Tone Designer owns:
 
@@ -151,13 +202,17 @@ The Story / Tone Designer owns:
 - funny-sad margin notes
 - understated dialogue
 - "ship something alive" ending feel
+- tone-card extraction for story beats, NPC lines, manual pages, and
+  return-state memories
 
 The Story / Tone Designer must protect:
 
-- Danilo as primary audience
-- sincerity under the joke
-- no generic portfolio sales pitch
-- small moments over lore dumps
+- Danilo as the primary audience
+- the Ridge's warm, personal, funny-sad voice
+- existing meaning and tribute intent unless Danilo explicitly asks to change it
+
+Default response shape: use the structured format defined in
+[`.agents/skills/story-tone-designer/SKILL.md`](../../.agents/skills/story-tone-designer/SKILL.md).
 
 ## Systems / Production Designer
 
@@ -178,67 +233,56 @@ The Systems / Production Designer must protect:
 - no premature generic mini-game framework
 - bridge stores durable rewards, not session internals
 
-## Character Designer
-
-Purpose: make the Ridge inhabited without turning it into an RPG.
-
-The Character Designer owns:
-
-- NPC silhouettes
-- Cicka presence
-- interaction charm
-- readable character function
-- tiny cast discipline
-
-The Character Designer must protect:
-
-- every NPC readable by silhouette first
-- Cicka feels like a real resident, not a pasted-on mascot
-- no NPC schedules until static characters feel alive
-- no dialogue trees in v1
-
 ## Visual Direction Artist
 
-Purpose: give implementation enough visual direction without demanding final
-art too early.
+Purpose: translate the Digital Sketchbook style into reusable character,
+landmark, and UI systems without demanding final art too early.
+
+The Visual Direction Artist also has a repeatable workflow skill for visual
+direction, style QA, motion treatment, and implementation-ready asset briefs:
+
+- [`.agents/skills/visual-direction-artist/SKILL.md`](../../.agents/skills/visual-direction-artist/SKILL.md)
+
+For generated or converted Phaser sprite assets, the Visual Direction Artist
+also uses:
+
+- [`.agents/skills/sketchbook-sprite-pipeline/SKILL.md`](../../.agents/skills/sketchbook-sprite-pipeline/SKILL.md)
 
 The Visual Direction Artist owns:
 
-- NPC silhouette sheet
-- Cicka mini kit spec
-- landmark thumbnail board
-- sticker / ink-memory vocabulary
+- Character: NPC silhouettes, Cicka presence, interaction charm, readable
+  character function, and tiny cast discipline.
+- UI / overlay: Trail Card and Manual Page composition, mobile-first
+  readability, paper-cut layout rules, focus states, and dense-copy legibility.
+- Environment / assets: landmark thumbnail boards, sticker / ink-memory
+  vocabulary, modular part rules, visual briefs, and sprite-pipeline handoff
+  expectations.
+- Style QA: hierarchy, motion, typography, focus, reduced-motion behavior, and
+  current-stack fit against [`docs/design/style-guide.md`](../design/style-guide.md).
 
 The Visual Direction Artist must protect:
 
 - rough but readable ink silhouettes
-- no full NPC animation sets before the loop works
-- manga composition without manga production cost
-- modular sticker overlays instead of bespoke redraws
+- Cicka feels like a real resident, not a pasted-on mascot
+- no NPC schedules, dialogue trees, or full animation sets before static
+  characters feel alive
+- mobile-first overlays with no nested cards, no long single-line titles, and no
+  color-only meaning
+- project style guide and current implementation before external references
+- legible dense copy, visible focus, touch readability, and reduced-motion paths
+- no new art pipeline, styling library, skeletal animation system, or 3D render
+  workflow without a proven production need
 
-## Overlay Readability Designer
-
-Purpose: make UI readable, mobile-friendly, and sketchbook-native.
-
-The Overlay Readability Designer owns:
-
-- Trail Card composition
-- Manual Page composition
-- overlay readability
-- monochrome reward language
-- paper-cut component rules
-
-The Overlay Readability Designer must protect:
-
-- mobile-first overlays
-- no nested cards
-- no long single-line titles
-- handwriting for flavor, not dense reading
-- black/white readability without color dependence
+Default response shape: use the structured format defined in
+[`.agents/skills/visual-direction-artist/SKILL.md`](../../.agents/skills/visual-direction-artist/SKILL.md).
 
 ## Audio Designer
 
 Purpose: make the Ridge emotionally sticky and mini-games audibly legible.
+
+The Audio Designer also has a repeatable workflow skill:
+
+- [`.agents/skills/audio-designer/SKILL.md`](../../.agents/skills/audio-designer/SKILL.md)
 
 The Audio Designer owns:
 
@@ -246,7 +290,8 @@ The Audio Designer owns:
 - Cicka SFX language
 - Potassium acknowledgement sounds
 - Stampede Sketch prototype audio
-- Telegraph Terrace timing cue research
+- Telegraph Terrace timing cue design
+- mobile Web Audio asset and timing constraints
 
 The Audio Designer must protect:
 
@@ -255,13 +300,17 @@ The Audio Designer must protect:
 - no Potassium audio overhaul in v1
 - audio cues support timing but are never the only cue
 - Cicka sounds like a resident, not a cartoon UI effect
+- explicit consent for microphone, voice, cloud-processing, or external
+  publishing work
+
+Default response shape: use the structured format defined in
+[`.agents/skills/audio-designer/SKILL.md`](../../.agents/skills/audio-designer/SKILL.md).
 
 ## Hiring More Team Members
 
 The Producer may propose hiring another specialist only when there is a real gap, such
 as:
 
-- a testing lead for mobile playtest passes
 - a performance lead for Phaser entity density
 - an accessibility lead for touch/timing readability
 - a writer if NPC text grows beyond tiny line sets

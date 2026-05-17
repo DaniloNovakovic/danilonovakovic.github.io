@@ -28,9 +28,15 @@ Single-context repo: read root `CONTEXT.md` and `docs/adr/` when present. See [`
 
 ### Sketchbook Ridge team roles
 
-When Danilo invokes helper roles such as "Producer", "Level Designer", or "Audio Designer", use [`docs/agents/sketchbook-ridge-team.md`](docs/agents/sketchbook-ridge-team.md) for the role contract and activation rules.
+When Danilo invokes helper roles such as "Producer", "Playability Tester", "Level Designer", "Visual Direction Artist", "Character Designer", or "Audio Designer", use [`docs/agents/sketchbook-ridge-team.md`](docs/agents/sketchbook-ridge-team.md) for the role contract and activation rules.
 
 When Danilo invokes the Producer specifically, use [`.agents/skills/producer/SKILL.md`](.agents/skills/producer/SKILL.md) for the repeatable producer workflow.
+
+When Danilo invokes the Architect specifically, use [`.agents/skills/architect/SKILL.md`](.agents/skills/architect/SKILL.md) for the repeatable anti-slop and shared-seam review workflow.
+
+When Danilo invokes the Playability Tester specifically, use [`.agents/skills/playability-tester/SKILL.md`](.agents/skills/playability-tester/SKILL.md) for the repeatable gameplay QA, smoke path, and route reachability workflow.
+
+When Danilo invokes the Visual Direction Artist or Character Designer specifically, use [`.agents/skills/visual-direction-artist/SKILL.md`](.agents/skills/visual-direction-artist/SKILL.md) for the repeatable art-direction, character-package, style-QA, visual hierarchy, motion, and asset-brief workflow.
 
 ### Sprite asset pipeline
 

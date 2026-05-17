@@ -2,9 +2,9 @@
 
 Owner mode: Audio Designer.
 
-Purpose: implementation-facing audio research for the Ridge, Cicka, Potassium
+Purpose: active audio direction for the Ridge, Cicka, Potassium
 acknowledgements, Stampede Sketch, and Telegraph Terrace. This is a spec pack,
-not final asset direction.
+not final asset direction or runtime architecture.
 
 Active references:
 
@@ -194,27 +194,30 @@ Assist mode concerns:
 - Avoid cue language where higher pitch always means "press now"; players with
   limited hearing still need shape, motion, and contrast.
 
-## Web Audio Implementation Constraints For V1
+## Runtime Boundary
 
-Keep v1 boring technically so the project can ship the feel.
+Runtime hard rules live in `.agents/rules/40-audio-runtime.md`; adapter boundary
+direction lives in `docs/adr/0002-audio-adapter-boundary.md`. Use this pack for
+cue names, trigger intent, mix posture, and asset naming, not as Web Audio
+architecture.
 
-- Create or resume `AudioContext` only after a player gesture. Mobile browsers
-  may keep it suspended until touch/click.
-- Keep Web Audio adapters scene-owned at first, or under `src/game/adapters`
-  once at least two scenes share the same need. Do not put browser audio code in
-  `src/game/core`.
-- No full dynamic music graph in v1. Use named loops, one-shots, simple gain
-  ramps, and per-sound cooldowns.
-- Prefer short compressed assets for final SFX (`.ogg` with fallback only if the
-  target browser check proves it necessary). Generated oscillators are fine for
-  prototype beeps but should not define final Ridge tone.
-- Decode/load audio during scene preload or first intentional entry, not during
-  per-frame update.
-- Every repeating or dense cue needs an instance limit and a cooldown.
-- React overlays should request audio through bridge/adapter-facing actions only
-  if needed later; do not import Phaser into React overlays.
-- When overlays pause a scene, action SFX should stop or duck with the scene.
-  UI confirmation sounds may continue if they are overlay-owned.
+## Prototype Asset Strategy
+
+For the first developer playtest, prefer silence or tiny placeholder one-shots
+over polished production audio. The goal is to prove trigger timing, mute
+behavior, cooldowns, and cleanup before committing to final recordings.
+
+- Use silent stubs for ambience and non-critical cues until the interaction
+  feels correct.
+- Use short generated Web Audio placeholders only where timing or reward feel
+  needs audible feedback during playtesting.
+- Keep placeholders clearly named with a `placeholder_` subject, such as
+  `ridge_placeholder_stamp_01` or `telegraph_placeholder_ready_tick_01`.
+- Store temporary files under `public/assets/audio/placeholders/` if real files
+  are needed; replace or delete them before final Ridge audio asset intake.
+- Do not judge final tone from placeholders. The shipped Ridge palette should
+  still come from tactile, handmade Foley or intentionally recorded musical
+  material.
 
 Asset naming ideas:
 

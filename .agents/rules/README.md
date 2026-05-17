@@ -29,6 +29,7 @@ Rules should describe stable seams, decision process, and things that would be e
 - [`10-architecture.md`](10-architecture.md) — core, ECS, adapters, scene lifecycle, scene context, overlays, and bridge seams.
 - [`20-game-runtime.md`](20-game-runtime.md) — Phaser runtime, scene lifecycle, pause/input, resume, and shared scene runtime modules.
 - [`30-react-overlays.md`](30-react-overlays.md) — React overlay rules and bridge-only UI/engine communication.
+- [`40-audio-runtime.md`](40-audio-runtime.md) — Web Audio, Phaser sound, timing cues, mobile decoded-memory, and audio permission rules.
 
 ## Tooling Policy
 

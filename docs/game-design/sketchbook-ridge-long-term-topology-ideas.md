@@ -8,7 +8,7 @@
 Active sources: [`sketchbook-ridge-summit.md`](./sketchbook-ridge-summit.md),
 [`sketchbook-ridge-milestone-plan.md`](./sketchbook-ridge-milestone-plan.md),
 [`docs/design/style-guide.md`](../design/style-guide.md),
-[`A Short Hike` research note](../research/Analyzing%20A%20Short%20Hike's%20Fun.md),
+[`A Short Hike` research note](../research/summaries/game-inspirations/a-short-hike.md),
 and the current Ridge role contracts in
 [`docs/agents/sketchbook-ridge-team.md`](../agents/sketchbook-ridge-team.md).
 
