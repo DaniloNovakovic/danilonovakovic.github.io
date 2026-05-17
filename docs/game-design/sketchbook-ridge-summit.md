@@ -257,7 +257,7 @@ creatures around a picnic blanket. Nearby enemies chase Danilo; enemies that
 lose his attention may drift toward the blanket and crowd the calm patch.
 
 Purpose: protect one calm picnic-blanket patch from a stampede of runaway ideas.
-See [`stampede-sketch.md`](./stampede-sketch.md) for the active narrative and
+See [`stampede-sketch.md`](./mini-games/stampede-sketch.md) for the active narrative and
 asset brief.
 
 Core verb: **Kite**.

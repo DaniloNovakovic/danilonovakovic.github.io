@@ -1,6 +1,7 @@
 # Ridge Blockout Fun Review
 
-Status: design review of [`ridge.blockout.txt`](./ridge.blockout.txt).
+Status: design review of
+[`folded-desk-ridge.blockout.txt`](../../src/game/scenes/ridge/blockout/maps/folded-desk-ridge.blockout.txt).
 
 This review scores the first text skeleton against the current research notes on
 2D map design, Lucky Luna, and Nine Sols.
@@ -113,7 +114,7 @@ the parser renders the whole world and we can actually traverse it.
 
 Blockout Pass 2 is done. The next move is parser v0:
 
-- parse `ridge.blockout.txt`
+- parse the folded desk Ridge blockout source
 - validate grid dimensions and non-empty overlaps
 - render whole-world greybox
 - expose debug overlay for room bounds, anchors, shortcuts, and sightlines

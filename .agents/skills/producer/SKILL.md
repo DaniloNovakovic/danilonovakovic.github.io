@@ -13,6 +13,7 @@ Read or reference these before giving direction:
 
 - `docs/agents/sketchbook-ridge-team.md`
 - `docs/game-design/sketchbook-ridge-summit.md`
+- `docs/game-design/current-ridge-level.md`
 - `docs/game-design/sketchbook-ridge-milestone-plan.md`
 - `docs/runtime-architecture.md`
 - `docs/runtime-modes.md`
@@ -36,7 +37,12 @@ Keep the recommendation small. Favor the next useful slice over broad roadmaps.
 ## Operating Rules
 
 - Treat `sketchbook-ridge-summit.md` as the product vision.
-- Treat `sketchbook-ridge-milestone-plan.md` as the work map.
+- Treat `current-ridge-level.md` as the current human-readable Ridge level
+  snapshot.
+- Treat `sketchbook-ridge-milestone-plan.md` as the durable milestone and seam
+  map, not the live issue tracker.
+- Treat GitHub Issues as the live home for PRDs, issue state, current backlog,
+  and agent briefs.
 - Treat `docs/agents/sketchbook-ridge-team.md` as the role roster.
 - Treat `.agents/rules/` as hard coding rules.
 - Parallelize scene-owned internals; serialize shared seams.
@@ -84,8 +90,11 @@ has a repeatable workflow, not merely a point of view.
 Use this split: `.agents/rules/` for hard engineering constraints;
 `docs/agents/sketchbook-ridge-team.md` for roles; `.agents/skills/*` for
 repeatable workflows; `sketchbook-ridge-summit.md` for product vision;
-`sketchbook-ridge-milestone-plan.md` for milestones/issues/branches; and
-`player-manual.md` for shipped behavior only.
+`current-ridge-level.md` for current Ridge level reality;
+`sketchbook-ridge-milestone-plan.md` for milestone shape, ownership boundaries,
+and shared-seam/branch strategy; GitHub Issues for PRDs, implementation issues,
+triage state, current backlog, and agent briefs; and `player-manual.md` for
+shipped behavior only.
 
 Do not duplicate long guidance between these files. Add thin pointers instead.
 
@@ -93,8 +102,12 @@ Do not duplicate long guidance between these files. Add thin pointers instead.
 
 When Danilo asks to create issues:
 
-1. Use the milestone plan's draft issue breakdown.
-2. Confirm or infer the first batch.
-3. Publish in dependency order.
-4. Apply the normal triage label from `docs/agents/triage-labels.md`.
-5. Record blockers using real issue numbers once created.
+1. Use the milestone plan and current Ridge docs as context, not as a live
+   backlog to mirror.
+2. Draft tracer-bullet slices using `.agents/skills/to-issues/SKILL.md`.
+3. Confirm the proposed granularity, dependencies, and HITL/AFK split with
+   Danilo unless he explicitly authorizes a first batch.
+4. Publish approved issues in dependency order.
+5. Apply the normal triage label from `docs/agents/triage-labels.md`.
+6. Record blockers using real issue numbers once created.
+7. Do not duplicate the new issue bodies back into local docs.

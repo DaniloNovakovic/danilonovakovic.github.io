@@ -20,6 +20,7 @@ and delegate work cleanly.
 Before acting in any team role, read or reference:
 
 - [`docs/game-design/sketchbook-ridge-summit.md`](../game-design/sketchbook-ridge-summit.md)
+- [`docs/game-design/current-ridge-level.md`](../game-design/current-ridge-level.md)
 - [`docs/game-design/sketchbook-ridge-milestone-plan.md`](../game-design/sketchbook-ridge-milestone-plan.md)
 - [`docs/runtime-architecture.md`](../runtime-architecture.md)
 - [`docs/runtime-modes.md`](../runtime-modes.md)
@@ -69,6 +70,7 @@ The Producer also has a repeatable workflow skill:
 The Producer owns:
 
 - current milestone status
+- current Ridge level reality
 - next issue selection
 - delegation plan
 - branch and conflict awareness
@@ -79,7 +81,9 @@ The Producer owns:
 The Producer must protect:
 
 - `sketchbook-ridge-summit.md` as the product goal
-- `sketchbook-ridge-milestone-plan.md` as the work map
+- `current-ridge-level.md` as the current level snapshot
+- `sketchbook-ridge-milestone-plan.md` as the milestone and shared-seam map
+- GitHub Issues as the live PRD, backlog, triage, and agent-brief source
 - the Architect's rule: parallelize scene internals, serialize shared seams
 - Danilo's time and taste
 

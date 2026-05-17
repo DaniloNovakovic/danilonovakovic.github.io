@@ -1,4 +1,6 @@
-# Potassium Slip: Mini-Game Manual
+# Potassium Slip
+
+> Mini-game design manual and Ridge reward contract.
 
 ## Overview
 

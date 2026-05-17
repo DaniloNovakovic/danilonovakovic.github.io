@@ -4,6 +4,14 @@
 > The Summit doc is the product vision. This file is the implementation and
 > milestone map for agents working across branches.
 
+This is not the live issue tracker. PRDs, implementation issues, triage state,
+current backlog, and agent-ready briefs live in GitHub Issues through the
+workflow in [`../agents/issue-tracker.md`](../agents/issue-tracker.md).
+
+Use this file for durable milestone shape, ownership boundaries, branch/seam
+strategy, and reference stacks. Use [`current-ridge-level.md`](./current-ridge-level.md)
+for the current human-readable Ridge level snapshot.
+
 ## Active Goal
 
 The current product milestone is **Sketchbook Ridge Summit**.
@@ -20,6 +28,10 @@ The first complete milestone should prove:
 Anything beyond that is future scope unless a slice explicitly pulls it in.
 
 ## Current Implementation Status
+
+This section is a milestone snapshot for orientation. Do not mirror every
+GitHub issue update here; update it only when the milestone-level reality or
+current shipped/prototype capability changes.
 
 - **M1 Ridge Shell** is complete for the current placeholder slice: Ridge can
   boot directly with `?startScene=ridge`, uses shared side-view movement, shows
@@ -88,9 +100,10 @@ Role contracts and activation phrases live in
 
 ## Reference Stack
 
-Every implementation issue should link these:
+Every GitHub implementation issue should link the relevant subset of these:
 
 - [`sketchbook-ridge-summit.md`](./sketchbook-ridge-summit.md)
+- [`current-ridge-level.md`](./current-ridge-level.md)
 - [`runtime-architecture.md`](../runtime-architecture.md)
 - [`runtime-modes.md`](../runtime-modes.md)
 - [`architecture-direction.md`](../architecture-direction.md)
@@ -99,7 +112,10 @@ Every implementation issue should link these:
 - [`../../.agents/rules/20-game-runtime.md`](../../.agents/rules/20-game-runtime.md)
 - [`../../.agents/rules/30-react-overlays.md`](../../.agents/rules/30-react-overlays.md)
 
-Use [`potassium-slip.md`](./potassium-slip.md) for Potassium-specific behavior.
+Use [`potassium-slip.md`](./mini-games/potassium-slip.md) for Potassium-specific behavior,
+[`stampede-sketch.md`](./mini-games/stampede-sketch.md) for Stampede-specific behavior,
+and [`mini-games/README.md`](./mini-games/README.md) as the mini-game routing
+index.
 
 ## Conflict Strategy
 
@@ -238,7 +254,7 @@ Goal: ship the first new opt-in mini-game.
 Owner: Stampede scene.
 
 Purpose: protect one calm picnic-blanket patch from a stampede of runaway ideas.
-Use [`stampede-sketch.md`](./stampede-sketch.md) for player-guardian and enemy
+Use [`stampede-sketch.md`](./mini-games/stampede-sketch.md) for player-guardian and enemy
 intent before generating or wiring final Stampede art.
 
 Outputs:
@@ -297,7 +313,10 @@ Current checkpoint:
   remain the Phaser adapter/orchestrator while run decisions live behind
   `runtime/runFlow.ts` and swarm steering lives behind `runtime/swarmMotion.ts`.
 
-Next implementation slices:
+Potential next implementation slices:
+
+These are local planning notes. Publish approved work as GitHub Issues before
+assigning an AFK agent.
 
 1. **M5 Ridge Memory continuation**: add the first small Ridge shortcut or the
    first Cicka proximity/talk interaction as its own scene-owned slice.
@@ -351,7 +370,10 @@ Current checkpoint:
   first AI sprite audit records frame stability, runtime risks, and future
   review gates.
 
-Next implementation slices:
+Potential next implementation slices:
+
+These are local planning notes. Publish approved work as GitHub Issues before
+assigning an AFK agent.
 
 1. **Ridge / Outskirts Topology Spike**: design and lightly prototype how the
    current Overworld becomes Outskirts/Trailhead and Ridge becomes a connected
