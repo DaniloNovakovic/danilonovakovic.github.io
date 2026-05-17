@@ -13,7 +13,7 @@ facts, traversal connectors, and progress-gated presentation inputs.
 generation. It is not design prose.
 
 The first full skeleton lives in
-[`src/game/scenes/ridge/blockout/maps/folded-desk-ridge.blockout.txt`](../../src/game/scenes/ridge/blockout/maps/folded-desk-ridge.blockout.txt).
+[`src/game/scenes/ridge/blockout/maps/folded-desk-ridge.blockout.txt`](../../../src/game/scenes/ridge/blockout/maps/folded-desk-ridge.blockout.txt).
 Parser work should use that file, not a toy example, so the language evolves
 against the real Ridge topology.
 

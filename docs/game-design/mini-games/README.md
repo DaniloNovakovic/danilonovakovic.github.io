@@ -17,7 +17,7 @@ Issues, not in this folder.
 ## Future Docs
 
 Create a dedicated mini-game doc before a future scene needs durable design
-rules beyond the summary in [`../sketchbook-ridge-summit.md`](../sketchbook-ridge-summit.md).
+rules beyond the summary in [`../ridge/summit.md`](../ridge/summit.md).
 
 Likely future docs:
 

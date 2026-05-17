@@ -6,11 +6,11 @@
 
 ## Ownership
 
-- **Shipped behavior:** [`player-manual.md`](./player-manual.md).
-- **Runtime spatial data:** [`folded-desk-ridge.blockout.txt`](../../src/game/scenes/ridge/blockout/maps/folded-desk-ridge.blockout.txt).
-- **Blockout language contract:** [`ridge-map-language.md`](./ridge-map-language.md).
-- **Current map target:** [`sketchbook-ridge-proper-map-plan.md`](./sketchbook-ridge-proper-map-plan.md).
-- **Product vision:** [`sketchbook-ridge-summit.md`](./sketchbook-ridge-summit.md).
+- **Shipped behavior:** [`player-manual.md`](../player-manual.md).
+- **Runtime spatial data:** [`folded-desk-ridge.blockout.txt`](../../../src/game/scenes/ridge/blockout/maps/folded-desk-ridge.blockout.txt).
+- **Blockout language contract:** [`map-language.md`](./map-language.md).
+- **Current map target:** [`proper-map-plan.md`](./map-plans/proper-map-plan.md).
+- **Product vision:** [`summit.md`](./summit.md).
 - **Live implementation work:** GitHub Issues.
 
 If this file disagrees with the folded desk Ridge blockout about room layout,
@@ -107,7 +107,7 @@ Current accepted behavior:
 ## Current Target
 
 The current map target is the **Vertical Folded Ridge With Cicka Switchback**
-from [`sketchbook-ridge-proper-map-plan.md`](./sketchbook-ridge-proper-map-plan.md).
+from [`proper-map-plan.md`](./map-plans/proper-map-plan.md).
 
 The target asks for:
 

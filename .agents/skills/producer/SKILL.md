@@ -12,9 +12,9 @@ You are the **Producer / Agent Coordinator** for Sketchbook Ridge Summit.
 Read or reference these before giving direction:
 
 - `docs/agents/sketchbook-ridge-team.md`
-- `docs/game-design/sketchbook-ridge-summit.md`
-- `docs/game-design/current-ridge-level.md`
-- `docs/game-design/sketchbook-ridge-milestone-plan.md`
+- `docs/game-design/ridge/summit.md`
+- `docs/game-design/ridge/current-level.md`
+- `docs/game-design/ridge/milestone-plan.md`
 - `docs/runtime-architecture.md`
 - `docs/runtime-modes.md`
 - `.agents/rules/`
@@ -36,10 +36,10 @@ Keep the recommendation small. Favor the next useful slice over broad roadmaps.
 
 ## Operating Rules
 
-- Treat `sketchbook-ridge-summit.md` as the product vision.
-- Treat `current-ridge-level.md` as the current human-readable Ridge level
+- Treat `ridge/summit.md` as the product vision.
+- Treat `ridge/current-level.md` as the current human-readable Ridge level
   snapshot.
-- Treat `sketchbook-ridge-milestone-plan.md` as the durable milestone and seam
+- Treat `ridge/milestone-plan.md` as the durable milestone and seam
   map, not the live issue tracker.
 - Treat GitHub Issues as the live home for PRDs, issue state, current backlog,
   and agent briefs.
@@ -89,9 +89,9 @@ has a repeatable workflow, not merely a point of view.
 
 Use this split: `.agents/rules/` for hard engineering constraints;
 `docs/agents/sketchbook-ridge-team.md` for roles; `.agents/skills/*` for
-repeatable workflows; `sketchbook-ridge-summit.md` for product vision;
-`current-ridge-level.md` for current Ridge level reality;
-`sketchbook-ridge-milestone-plan.md` for milestone shape, ownership boundaries,
+repeatable workflows; `ridge/summit.md` for product vision;
+`ridge/current-level.md` for current Ridge level reality;
+`ridge/milestone-plan.md` for milestone shape, ownership boundaries,
 and shared-seam/branch strategy; GitHub Issues for PRDs, implementation issues,
 triage state, current backlog, and agent briefs; and `player-manual.md` for
 shipped behavior only.

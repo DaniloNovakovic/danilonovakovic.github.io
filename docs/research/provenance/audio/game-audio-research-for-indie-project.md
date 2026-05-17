@@ -1,7 +1,7 @@
 # **Audio Architecture and Technical Specifications for "The Ridge": An Elite Research Report and Reference Library**
 
 > Status: historical/background only. The active Sketchbook Ridge audio spec is
-> `docs/game-design/sketchbook-ridge-m3-audio-pack.md`; runtime hard rules live
+> `docs/game-design/ridge/reference/m3-audio-pack.md`; runtime hard rules live
 > in `.agents/rules/40-audio-runtime.md`. Use this report as provenance, not as
 > current implementation direction.
 

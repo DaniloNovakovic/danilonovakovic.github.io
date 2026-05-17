@@ -4,7 +4,7 @@ Visual Direction Artist guidance with Character Designer input. This pack is
 implementation guidance, not a final art bible. M4 should be able to ship rough
 placeholders from these specs without waiting for polished drawings.
 
-Active sources: `sketchbook-ridge-summit.md`, `sketchbook-ridge-milestone-plan.md`,
+Active sources: `../summit.md`, `../milestone-plan.md`,
 `docs/design/style-guide.md`, current runtime docs, scoped agent rules, and
 selected research summaries for A Short Hike, Tunic, Vampire Survivors, Clair
 Obscur, Divinity: Original Sin 2, and fighting game feel. Archived competition
@@ -194,8 +194,8 @@ These are taste calls, not implementation blockers.
 
 ## Verification
 
-- Changed file path: `docs/game-design/sketchbook-ridge-m3-visual-pack.md`
-- Verification run: `perl -ne 'print if /[^\x00-\x7F]/' docs/game-design/sketchbook-ridge-m3-visual-pack.md`
+- Changed file path: `docs/game-design/ridge/reference/m3-visual-pack.md`
+- Verification run: `perl -ne 'print if /[^\x00-\x7F]/' docs/game-design/ridge/reference/m3-visual-pack.md`
   returned no output, confirming ASCII-only content.
-- Verification run: `git diff --check -- docs/game-design/sketchbook-ridge-m3-visual-pack.md`
+- Verification run: `git diff --check -- docs/game-design/ridge/reference/m3-visual-pack.md`
   returned no output.

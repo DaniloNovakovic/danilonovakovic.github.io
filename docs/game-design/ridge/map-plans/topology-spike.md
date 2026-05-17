@@ -1,9 +1,9 @@
 # Sketchbook Ridge Topology Spike
 
 > Active M5 design brief for the next Ridge blockout. This document narrows
-> [`sketchbook-ridge-milestone-plan.md`](./sketchbook-ridge-milestone-plan.md)
+> [`milestone-plan.md`](../milestone-plan.md)
 > into one map-design spike. It is not shipped behavior; update
-> [`player-manual.md`](./player-manual.md) only after a playable route ships.
+> [`player-manual.md`](../../player-manual.md) only after a playable route ships.
 
 ## Purpose
 
@@ -114,15 +114,15 @@ Constraints:
 
 Use these docs as inspiration, not hard scope:
 
-- [`sketchbook-ridge-summit.md`](./sketchbook-ridge-summit.md): Ridge vision,
+- [`summit.md`](../summit.md): Ridge vision,
   Cicka arc, mini-game reward language, and mobile constraints.
-- [`sketchbook-ridge-long-term-topology-ideas.md`](./sketchbook-ridge-long-term-topology-ideas.md):
+- [`long-term-topology-ideas.md`](./long-term-topology-ideas.md):
   compact three-layer mountain, shortcut vocabulary, and secret families.
-- [`../research/summaries/design-theory/2d-map-design-principles.md`](../research/summaries/design-theory/2d-map-design-principles.md):
+- [`2d-map-design-principles.md`](../../../research/summaries/design-theory/2d-map-design-principles.md):
   loops, landmarks, mental mapping, and earned shortcut relief.
-- [`../research/summaries/game-inspirations/lucky-luna.md`](../research/summaries/game-inspirations/lucky-luna.md):
+- [`lucky-luna.md`](../../../research/summaries/game-inspirations/lucky-luna.md):
   mobile-native falling/descent ideas for optional later pockets.
-- [`../research/summaries/game-inspirations/nine-sols.md`](../research/summaries/game-inspirations/nine-sols.md):
+- [`nine-sols.md`](../../../research/summaries/game-inspirations/nine-sols.md):
   evolving home anchor, mementos, and restorative return space.
 
 ## Weighted Options

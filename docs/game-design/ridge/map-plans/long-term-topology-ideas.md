@@ -1,16 +1,16 @@
 # Sketchbook Ridge Long-Term Topology Ideas
 
-> Exploratory companion to [`sketchbook-ridge-summit.md`](./sketchbook-ridge-summit.md).
+> Exploratory companion to [`summit.md`](../summit.md).
 > This is not a locked roadmap or active milestone commitment. It captures a
 > likely long-term overworld direction so future planning can borrow from it
 > deliberately instead of reinventing it from memory.
 
-Active sources: [`sketchbook-ridge-summit.md`](./sketchbook-ridge-summit.md),
-[`sketchbook-ridge-milestone-plan.md`](./sketchbook-ridge-milestone-plan.md),
-[`docs/design/style-guide.md`](../design/style-guide.md),
-[`A Short Hike` research note](../research/summaries/game-inspirations/a-short-hike.md),
+Active sources: [`summit.md`](../summit.md),
+[`milestone-plan.md`](../milestone-plan.md),
+[`docs/design/style-guide.md`](../../../design/style-guide.md),
+[`A Short Hike` research note](../../../research/summaries/game-inspirations/a-short-hike.md),
 and the current Ridge role contracts in
-[`docs/agents/sketchbook-ridge-team.md`](../agents/sketchbook-ridge-team.md).
+[`docs/agents/sketchbook-ridge-team.md`](../../../agents/sketchbook-ridge-team.md).
 
 ## Intent
 
