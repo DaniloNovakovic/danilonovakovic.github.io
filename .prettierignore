@@ -1,0 +1,31 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+dist-ssr
+coverage
+storybook-static
+
+# Tool caches
+.pnpm-store
+.vite
+.turbo
+.cache
+.eslintcache
+
+# Package manager lockfiles
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Local environment
+.env
+.env.*
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*

@@ -166,7 +166,7 @@ Ridge uses focused runtime modules to keep the Exploration Map editable:
 ## Manual smoke verification
 
 After changes that touch Phaser boot, bridge, scene lifecycle, scenes, overlays,
-or scene UI, run `npm run dev` and use the canonical
+or scene UI, run `pnpm dev` and use the canonical
 [`runtime-modes.md` smoke path](runtime-modes.md#smoke-path). Record pass/fail
 in the PR or release notes when shipping runtime changes.
 

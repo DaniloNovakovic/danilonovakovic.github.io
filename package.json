@@ -3,20 +3,22 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "packageManager": "npm@11.9.0",
+  "packageManager": "pnpm@11.1.2",
   "engines": {
-    "node": ">=20"
+    "node": ">=22.13.0"
   },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "docs:check": "node scripts/check-docs.mjs",
-    "lint": "eslint .",
+    "lint": "eslint . --cache",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "check:types": "tsc --noEmit",
+    "typecheck": "tsc -b --noEmit",
+    "check": "pnpm lint && pnpm typecheck && pnpm test",
     "test": "vitest run",
+    "test:changed": "vitest run --changed",
     "test:watch": "vitest"
   },
   "dependencies": {
