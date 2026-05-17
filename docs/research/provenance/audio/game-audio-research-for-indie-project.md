@@ -29,7 +29,7 @@ For extremely quiet textures—such as finger-pad skin touching paper or soft fu
 
 #### **2\. Signal Processing Chain (EQ, Compression, and Saturation)**
 
-Raw home-recorded Foley requires careful spectral sculpting to sit comfortably in a mobile web mix. The processing chain must target and tame harsh resonant frequencies while introducing warm harmonic saturation :  
+Raw home-recorded Foley requires careful spectral sculpting to sit comfortably in a mobile web mix. The processing chain must target and tame harsh resonant frequencies while introducing warm harmonic saturation:
 `[Input Foley]`   
      `│`  
      `▼`  
@@ -39,13 +39,13 @@ Raw home-recorded Foley requires careful spectral sculpting to sit comfortably i
 `[Notch / Parametric EQ] (Taming 4 kHz & 8 kHz harshness)`  
      `│`  
      `▼`  
- `(Controlling dynamic peaks)`  
+`[Dynamic Compression] (Controlling dynamic peaks)`
      `│`  
      `▼`  
- `(Introducing warm odd/even harmonics)`  
+`[Tape Saturation] (Introducing warm odd/even harmonics)`
      `│`  
      `▼`  
- `(Small space blend, <5% wet mix)`
+`[Short Early Reflections] (Small space blend, <5% wet mix)`
 
 To prevent low-end rumble from overloading mobile speaker transducers, a steep high-pass filter is applied between 100\\text{ Hz} and 150\\text{ Hz}. A parametric equalizer must target the 4\\text{ kHz} and 8\\text{ kHz} spectral bands. These ranges contain the harshest scratching frequencies of pencils and paper edges.  
 Dynamic compression, utilizing a multiband compressor or de-esser, is configured to compress these target bands only when they exceed a specific threshold, preserving the natural performance dynamics. Tape saturation is introduced next, adding subtle, warm harmonic overtones that round out sharp transient spikes.  
@@ -58,7 +58,7 @@ Finally, a short, highly diffused early-reflections reverb (with a decay time un
 | **Graphite Pencil** | Menu hover, pencil sketches | 40 cm, 45-degree off-axis | Small diaphragm hypercardioid with pop shield | Notch cut at 6 kHz; subtle early reflections reverb |
 | **Domestic Glass/Wood** | Tabletop button press clicks | 30 cm, dry space | Small diaphragm condenser | Dynamic compression; spectral delta taming |
 
-\#\#\# Key Takeaways for AI Training (Pillar 1\)
+### Key Takeaways for AI Training (Pillar 1)
 
 * **Rule 1 (Acoustic Dominance):** Prohibit pure synthetic waveforms (sine, square, triangle oscillators) for UI actions. Every UI event must map to a physical domestic Foley asset.  
 * **Rule 2 (Anti-Harshness):** Restrict close-mic raw assets unless pre-processed with steep notch filters at 4\\text{ kHz} and 8\\text{ kHz} and high-passed at 120\\text{ Hz}.  
@@ -75,7 +75,7 @@ To establish Cicka's presence, the sound design must prioritize physical, non-vo
 * **Skeletal and Weight Shifts:** A cat moving across wood or paper surfaces generates soft claw clicks and skin-friction sounds. These are recorded by dusting surfaces with micro-textures (like fine sand) and capturing the step transients using highly sensitive shotgun microphones positioned close to the floor.  
 * **Kneading and Biscuit Making:** The gentle, rhythmic squeezing of soft fabric is designed using close-miked cotton or fleece rustling, layered with extremely brief, high-pass-filtered moisture squishes to simulate natural claw retraction.  
 * **Breathing and Sighs:** Soft feline exhalations are designed using close-up recordings of gentle human breathing, pitched up by 4 to 6 semitones, high-pass filtered to remove chest bass, and smoothed with low-pass filters to emulate a small nasal cavity.  
-* **Feline Purring:** Rather than a simple loop, purring must feel warm and organic. Real feline purring is generated during both inhalation and exhalation, creating a dual-phase rhythmic wave. This is designed by layering a continuous low-frequency hum (80\\text{ Hz} to 120\\text{ Hz}) with subtle odd-harmonic tape saturation. The volume and frequency are mapped to a slow, low-frequency oscillator (LFO) to simulate natural breathing cycles:
+* **Feline Purring:** Rather than a simple loop, purring must feel warm and organic. Real feline purring is generated during both inhalation and exhalation, creating a dual-phase rhythmic wave. This is designed by layering a continuous low-frequency hum (80\\text{ Hz} to 120\\text{ Hz}) with subtle odd-harmonic tape saturation. The volume and frequency are mapped to a slow, low-frequency oscillator (LFO) to simulate natural breathing cycles.
 
 ### **Micro-Trigger Matrix to Mitigate Audio Fatigue**
 
@@ -93,7 +93,7 @@ To prevent player audio fatigue, the animal's interactive cues must be throttled
 
 * **Rule 1 (Vocal Restraint):** Ban repetitive meow vocalizations. The cat must express presence primarily through physical movement, breathing, and purring.  
 * **Rule 2 (Natural Vocalizations):** Any vocalizations must be quiet, breathy, and short (under 0.8\\text{ seconds}). These sounds should use nasal, closed-mouth chirps or trills instead of open-mouthed, cartoonish meows.  
-* \*\*Rule 3 (Interactive Variety): Apply a random pitch variation of \\pm 10\\% and a playback rate variance of \\pm 8\\% to every triggered sound effect to ensure no two interactions sound identical.
+* **Rule 3 (Interactive Variety):** Apply a random pitch variation of \\pm 10\\% and a playback rate variance of \\pm 8\\% to every triggered sound effect to ensure no two interactions sound identical.
 
 ## **Dual-Cue Timing and Accessibility (Telegraph Terrace Research)**
 
@@ -101,7 +101,7 @@ In rhythm-focused or timing-based mini-games, players process sensory feedback t
 
 ### **Psychology of Auditory and Visual Processing**
 
-In human sensory psychology, auditory stimuli are processed faster than visual stimuli. Auditory signals reach the brain's processing centers in approximately 140 milliseconds, whereas visual stimuli require around 180 milliseconds. This discrepancy means that if an audio cue and a visual cue occur at the exact same physical instant, the player perceives the audio first. To create a satisfying, responsive experience, the visual transient (the peak of a button animation) should precede the audio transient (the peak of the sound effect) by a tiny fraction of a second, matching human sensory alignment:
+In human sensory psychology, auditory stimuli are processed faster than visual stimuli. Auditory signals reach the brain's processing centers in approximately 140 milliseconds, whereas visual stimuli require around 180 milliseconds. This discrepancy means that if an audio cue and a visual cue occur at the exact same physical instant, the player perceives the audio first. To create a satisfying, responsive experience, the visual transient (the peak of a button animation) should precede the audio transient (the peak of the sound effect) by a tiny fraction of a second, matching human sensory alignment.
 
 ### **Synchronization of Web Audio and Sprite Rendering**
 
@@ -126,7 +126,7 @@ To solve this, the application must use a synchronized tri-clock architecture th
 
 1. **The Web Audio API Clock (audioContext.currentTime):** This serves as the master reference clock. Run directly by the device's audio hardware thread, it is highly accurate and completely unaffected by main-thread JavaScript slowdowns or garbage collection.  
 2. **A Dedicated Web Worker:** Operating on a background thread, the Web Worker uses a highly accurate interval timer to continuously monitor the master clock and queue up upcoming audio events. By running outside the main thread, the worker's timing ticks remain precise even during heavy rendering tasks.  
-3. **The reque\[span\_88\](start\_span)\[span\_88\](end\_span)stAnimationFrame Loop:** This loop handles visual updates by timing them directly to the screen's refresh rate. When a frame is ready to render, the loop queries the Web Audio master clock (audioContext.currentTime) and calculates the exact visual frame that matches the current audio playback position :
+3. **The requestAnimationFrame Loop:** This loop handles visual updates by timing them directly to the screen's refresh rate. When a frame is ready to render, the loop queries the Web Audio master clock (audioContext.currentTime) and calculates the exact visual frame that matches the current audio playback position.
 
 By calculating this ratio before every repaint, the game engine can smoothly sync visual sprite animations with audio playback, completely bypassing main-thread timing drift.
 
@@ -159,45 +159,48 @@ Mobile web browsers—especially Safari on iOS and Chrome on Android—enforce s
 
 The most common cause of browser crashes in mobile web games is running out of memory due to uncompressed audio. While highly compressed audio formats like MP3 or AAC require very little space on disk, the Web Audio API must decode these files into 32-bit Linear Pulse Code Modulation (LPCM) in system RAM before they can be played back. This uncompressed format requires a massive memory footprint of approximately 10\\text{ MB} of system RAM per minute for a single channel (mono) of audio.  
 Under this formula, a standard 4-minute stereo track decoded at 44.1\\text{ kHz} balloons to nearly 85\\text{ MB} of native system RAM, even if the compressed MP3 file on disk was only 600\\text{ KB}. On mobile devices, loading just a few of these uncompressed tracks will cause the browser to crash due to out-of-memory errors.  
-To prevent these crashes, the sound designer must downsample all game assets :
+To prevent these crashes, the sound designer must downsample all game assets in two ways:
 
 * **Downmix to Mono:** Because mobile phones have closely spaced speakers, true stereo imaging is rarely noticeable. Downmixing all ambient sounds and Foley effects to mono instantly cuts their decoded memory footprint in half.  
-* *Reduce Sample Rates to 22.05 kHz:* Halving the sample rate from 44.1\\text{ kHz} to 22.05\\text{ kHz} reduces the decoded memory footprint by another 50\\%. This reduction is perfect for cozy, lo-fi games, as the slight loss of high frequencies actually enhances the warm, acoustic sketchbook aesthetic.
+* **Reduce Sample Rates to 22.05 kHz:** Halving the sample rate from 44.1\\text{ kHz} to 22.05\\text{ kHz} reduces the decoded memory footprint by another 50\\%. This reduction is perfect for cozy, lo-fi games, as the slight loss of high frequencies actually enhances the warm, acoustic sketchbook aesthetic.
 
 ### **The iOS Safari Memory Leak and the Scratch Buffer Fix**
 
-On iOS Safari, simply disconnecting an audio node or removing its JavaScript references is not enough to free its memory. Safari’s internal decoding thread often retains active references to the decoded audio buffer, causing memory to leak with every state change or scene reload. To fix this leak, the game engine must manually overwrite the massive audio buffer with a tiny, 1-sample "scratch buffer" before discarding the audio node. Because browsers like Chrome and Firefox will throw errors if an active buffer is reassigned during playback, this reassign script must be wrapped in a try-catch block to ensure cross-browser compatibility :  
-`// Initialize a global, 1-sample scratch buffer to overwrite leaking memory`  
-`const scratchBuffer = audioContext.createBuffer(1, 1, 22050); //` 
+On iOS Safari, simply disconnecting an audio node or removing its JavaScript references is not enough to free its memory. Safari’s internal decoding thread often retains active references to the decoded audio buffer, causing memory to leak with every state change or scene reload. To fix this leak, the game engine must manually overwrite the massive audio buffer with a tiny, 1-sample "scratch buffer" before discarding the audio node. Because browsers like Chrome and Firefox will throw errors if an active buffer is reassigned during playback, this reassign script must be wrapped in a try-catch block to ensure cross-browser compatibility:
 
-`function s[span_119](start_span)[span_119](end_span)afeDisposeSourceNode(sourceNode) {`  
-    `if (!sourceNode) return;`  
-      
-    `// 1. Prevent further callbacks by clearing event handlers`   
-    `sourceN[span_120](start_span)[span_120](end_span)ode.onended = null;`   
-      
-    `// 2. Stop playback and disconnect from the audio graph`   
-    `try {`  
- `[span_121](start_span)[span_121](end_span)       sourceNode.disconnect(0);`   
-    `} catch (e) {`  
-        `// Handle cases where the node was already disconnected`  
-    `}`  
-      
-    `// 3. Overwrite the massive decoded buffer with our 1-sample dummy buffer`   
-    `try {`  
- `[span_122](start_span)[span_122](end_span)       sourceNode.buffer = scratchBuffer;`   
-    `} catch (e) {`  
-        `// Catches and bypasses browser-specific reassignment errors on Chrome/Firefox`   
-    `}`  
-      
-`[span_123](start_span)[span_123](end_span)    // 4. Dereference the node to let the garbage collector reclaim memory`   
-    `sourceN[span_124](start_span)[span_124](end_span)ode = null;`   
-`}`
+```js
+// Initialize a global, 1-sample scratch buffer to overwrite leaking memory.
+const scratchBuffer = audioContext.createBuffer(1, 1, 22050);
+
+function safeDisposeSourceNode(sourceNode) {
+    if (!sourceNode) return;
+
+    // 1. Prevent further callbacks by clearing event handlers.
+    sourceNode.onended = null;
+
+    // 2. Stop playback and disconnect from the audio graph.
+    try {
+        sourceNode.disconnect(0);
+    } catch (e) {
+        // Handle cases where the node was already disconnected.
+    }
+
+    // 3. Overwrite the massive decoded buffer with our 1-sample dummy buffer.
+    try {
+        sourceNode.buffer = scratchBuffer;
+    } catch (e) {
+        // Catches and bypasses browser-specific reassignment errors.
+    }
+
+    // 4. Dereference the node to let the garbage collector reclaim memory.
+    sourceNode = null;
+}
+```
 
 ### **Addressing Latency Discrepancies on Chrome Android and iOS Safari**
 
 Mobile Safari and Chrome Android exhibit highly divergent latency behaviors that directly impact real-time gameplay. Under native execution, Android devices often report total round-trip audio latencies under 50 milliseconds. However, when running Web Audio inside Chrome on Android, total latency can balloon to 300 milliseconds. This is caused by Chrome bypassing the low-latency audio path of the hardware when a device reports that it does not support Android's strict low-latency parameters. In such cases, Chrome defaults to a large, safe buffer size (often 3,000 frames) instead of a performance-optimized size (256 or 512 frames).  
-By contrast, Web Audio latency inside iOS Safari is generally tighter, measuring around 130 milliseconds. To minimize the 300-millisecond latency on Android and keep latency consistent across both platforms, developers must apply several constructor-level parameters when instantiating the AudioContext :
+By contrast, Web Audio latency inside iOS Safari is generally tighter, measuring around 130 milliseconds. To minimize the 300-millisecond latency on Android and keep latency consistent across both platforms, developers must apply several constructor-level parameters when instantiating the AudioContext:
 
 * **The latencyHint Option:** Constructing the context with latencyHint: 0.003 (or 'interactive') forces Chrome to request the smallest possible buffer size from the audio driver. While this can occasionally cause minor audio glitches on older devices, it is essential for reducing input lag in timing-critical games.  
 * **Bypassing Resampling:** If the sample rate of loaded audio files does not match the native sample rate of the device's hardware (which is typically 48 kHz on modern Android phones), the browser must resample the audio in real-time. This resampling step introduces significant latency overhead. Constructing the AudioContext with a specified sampleRate option that matches the device's hardware sample rate eliminates this overhead completely.
@@ -208,27 +211,38 @@ Mobile browsers start the Web Audio API in a suspended state to prevent unwanted
 
 #### **Unlocking the Audio Context**
 
-To handle these browser security locks cleanly, the Phaser or PixiJS game engine must listen for the UNLOCKED event before attempting to play any audio. This avoids flooding the browser console with autoplay warnings and ensures that assets load and play only after user consent has been granted :  
-`// Listen for Phaser's sound manager to unlock before starting background music`  
-`this.sound.once(Phaser.Sound.Events.UNLOCKED, () => {`  
-    `this.backgroundMusic.play({ loop: true, volume: 0.3 }); //`   
-`});`
+To handle these browser security locks cleanly, the Phaser or PixiJS game engine must listen for the UNLOCKED event before attempting to play any audio. This avoids flooding the browser console with autoplay warnings and ensures that assets load and play only after user consent has been granted:
+
+```js
+// Listen for Phaser's sound manager to unlock before starting background music.
+this.sound.once(Phaser.Sound.Events.UNLOCKED, () => {
+    this.backgroundMusic.play({ loop: true, volume: 0.3 });
+});
+```
 
 #### **State Transitions and Focus Changes**
 
 When transitioning between different game states—such as moving from the quiet Overworld to a timing mini-game—the audio engine must gracefully fade active tracks out and clean-load new assets, rather than running a complex, resource-heavy dynamic audio mixer. Using Phaser's built-in WebAudioSoundManager and addAudioSprite allows developers to package all UI and gameplay Foley sounds into a single compressed audio file, which reduces network requests and memory overhead.  
-To handle visibility changes cleanly (such as when a player switches tabs or receives a phone call), the game must listen to the browser's visibilitychange event. Rather than relying on Phaser's automatic focus handling, which can fail on certain iOS devices, the sound manager should set pauseOnBlur to false and handle pause and resume states manually :  
-`doc[span_158](start_span)[span_158](end_span)ument.addEventListener('visibilitychange', () => {`  
-    `if (document.hidden) {`  
-        `// Manually suspend the audio context and pause game loops when focus is lost`  
-        `audioContext.suspend(); //`   
-    `} else {`  
-      `[span_159](start_span)[span_159](end_span)  // Manually resume the audio context on focus return, bypassing mobile Safari resume bugs`  
-        `audioContext.resume(); // [span_165](start_span)[span_165](end_span)[span_167](start_span)[span_167](end_span)`  
-    `}`  
-`});`
+To handle visibility changes cleanly (such as when a player switches tabs or receives a phone call), the game must listen to the browser's visibilitychange event. Rather than relying on Phaser's automatic focus handling, which can fail on certain iOS devices, the sound manager should set pauseOnBlur to false and handle pause and resume states manually:
 
-| Audio Codec | Mobile Safari Support | Chrome Android Support | Decoded Memory (LPCM) Size | Gapless Looping Support | Latency Under Web Audio | Recommended Deployment Use Case | | :--- | :--- | :--- | :--- | :--- | :--- | :--- | | **MP3** | Universal | Universal | High (\~10MB/min/ch) | No (Decoder padding gaps) | Moderate (\~130ms on iOS) | Legacy UI sprites and non-looping ambient events | | **AAC** | Universal | Universal | High (\~10MB/min/ch) | No (Standard container gaps) | Moderate | Short, one-shot Foley sequences with high transient profiles | | **Ogg Vorbis** | No | Universal | Moderate | Yes | Low | Long ambient background soundscapes specifically for Android devices | | **Ogg Opus** | No | Universal | Low (Optimized decoding) | Yes | Ultra-Low | High-efficiency loops and background music layers on Android |
+```js
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        // Manually suspend the audio context and pause game loops when focus is lost.
+        audioContext.suspend();
+    } else {
+        // Manually resume the audio context on focus return.
+        audioContext.resume();
+    }
+});
+```
+
+| Audio Codec | Mobile Safari Support | Chrome Android Support | Decoded Memory (LPCM) Size | Gapless Looping Support | Latency Under Web Audio | Recommended Deployment Use Case |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **MP3** | Universal | Universal | High (\~10MB/min/ch) | No (decoder padding gaps) | Moderate (\~130ms on iOS) | Legacy UI sprites and non-looping ambient events |
+| **AAC** | Universal | Universal | High (\~10MB/min/ch) | No (standard container gaps) | Moderate | Short, one-shot Foley sequences with high transient profiles |
+| **Ogg Vorbis** | No | Universal | Moderate | Yes | Low | Long ambient background soundscapes specifically for Android devices |
+| **Ogg Opus** | No | Universal | Low (optimized decoding) | Yes | Ultra-low | High-efficiency loops and background music layers on Android |
 
 ### **Key Takeaways for AI Training (Pillar 4\)**
 
