@@ -99,6 +99,15 @@ Agents should edit `.source.ts` files and then run `pnpm ridge:source`.
 `pnpm ridge:source:check` and the standard `pnpm check` command fail when a
 generated artifact is stale or when source validation rejects the contract.
 
+## Read-Only Viewer
+
+In development, `?mode=ridge-blockout` opens a read-only Ridge Blockout Viewer
+over the committed generated artifact. It renders the compiled map, tile
+interpretation, room labels, anchors, active and future routes, shortcuts,
+colliders, assist zones, rects, and validation status. The viewer is an
+inspection surface only; source edits still happen in `.source.ts` followed by
+`pnpm ridge:source`.
+
 ## Core Shape
 
 Each blockout source can declare global route logic before room beats:

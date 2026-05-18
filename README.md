@@ -30,6 +30,11 @@ Ridge blockout authoring lives in `.source.ts` files under
 `pnpm ridge:source:check` when you only want to verify freshness. `pnpm check`
 includes that freshness gate.
 
+In development, open the read-only Ridge Blockout Viewer with
+`?mode=ridge-blockout` after starting `pnpm dev`. The viewer is a dev-only QA
+surface for the generated map, room labels, anchors, routes, shortcuts,
+colliders, assist zones, rects, and validation status.
+
 ## Architecture
 
 Runtime layering follows explicit scene/overlay boundaries. Phaser world lookup lives in [`src/game/scenes/sceneRegistry.ts`](src/game/scenes/sceneRegistry.ts), React overlay lookup lives in [`src/game/overlays/overlayRegistry.ts`](src/game/overlays/overlayRegistry.ts), scene lifecycle lives in [`src/game/sceneLifecycle`](src/game/sceneLifecycle), and Phaser-facing shared modules live in [`src/game/sharedSceneRuntime`](src/game/sharedSceneRuntime).
