@@ -11,6 +11,7 @@ import { SceneLifecycleController } from '@/game/sceneLifecycle/SceneLifecycleCo
 import { SceneManager } from '@/game/sceneLifecycle/SceneManager';
 import { getGameConfig } from '@/game/sharedSceneRuntime/config';
 import { getSceneStartResume, prepareSceneStart } from '@/game/sharedSceneRuntime/sceneResumePolicy';
+import type { RidgeDevControls } from '@/game/scenes/ridge/runtime/ridgeDevControls';
 import { getDevRidgeProgressSeed } from './devRidgeProgressParams';
 
 interface UsePhaserGameBootOptions {
@@ -19,6 +20,7 @@ interface UsePhaserGameBootOptions {
     onEnterScene: (sceneId: SceneId) => void;
     onOpenOverlay: (overlayId: OverlayId, options?: OpenOverlayOptions) => void;
     onReturnToOverworld: () => void;
+    ridgeDevControls?: RidgeDevControls;
   }>;
   containerRef: RefObject<HTMLDivElement | null>;
   gameRef: RefObject<Phaser.Game | null>;
@@ -78,6 +80,7 @@ export function usePhaserGameBoot({
       getIsPaused: () => bridgeRef.current.isPaused,
       prepareSceneStart: (sceneKey) => prepareSceneStart(sceneKey),
       getSceneStartResume: (sceneKey) => getSceneStartResume(sceneKey),
+      getRidgeDevControls: () => bridgeRef.current.ridgeDevControls,
       loadPhaserScene: (id) => getLoadableScene(id)?.loadScene?.()
     });
     sceneContexts.forEach((context) => sceneManager.registerContext(context));

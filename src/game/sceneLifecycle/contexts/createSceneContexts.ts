@@ -15,6 +15,7 @@ import { createOverworldSceneContext } from '@/game/scenes/overworld/sceneContex
 import { createPotassiumSlipSceneContext } from '@/game/scenes/potassiumSlip/sceneContext';
 import { createRidgeSceneContext } from '@/game/scenes/ridge/sceneContext';
 import { createStampedeSketchSceneContext } from '@/game/scenes/stampedeSketch/sceneContext';
+import type { RidgeDevControls } from '@/game/scenes/ridge/runtime/ridgeDevControls';
 import type { ResumeSnapshot, SceneContextDefinition } from '../types';
 
 export interface SceneContextAssemblyDeps {
@@ -25,6 +26,7 @@ export interface SceneContextAssemblyDeps {
   prepareSceneStart: (sceneKey: string) => void;
   getSceneStartResume: (sceneKey: string) => ResumeSnapshot | undefined;
   loadPhaserScene: (id: SceneId) => Promise<unknown> | undefined;
+  getRidgeDevControls?: () => RidgeDevControls | undefined;
 }
 
 /**
@@ -79,7 +81,8 @@ export function createSceneContexts(
       onClose: deps.onReturnToOverworld,
       onOpenOverlay: deps.onOpenOverlay,
       getResumePosition: getPreparedResume(PHASER_SCENE_KEYS.ridge),
-      loadScene: loadScene(RIDGE_SCENE_ID)
+      loadScene: loadScene(RIDGE_SCENE_ID),
+      getDevControls: deps.getRidgeDevControls
     }),
     createStampedeSketchSceneContext({
       onClose: () => deps.onEnterScene(RIDGE_SCENE_ID),
