@@ -7,7 +7,10 @@ import {
 import type { RidgeBlockoutSource } from './sourceContract';
 import { CONTRACT_FIXTURE_RIDGE_COMPILED_BLOCKOUT } from './sources/contract-fixture.generated';
 import { CONTRACT_FIXTURE_RIDGE_SOURCE } from './sources/contract-fixture.source';
+import { FOLDED_DESK_RIDGE_COMPILED_BLOCKOUT } from './sources/folded-desk-ridge.generated';
+import { FOLDED_DESK_RIDGE_SOURCE } from './sources/folded-desk-ridge.source';
 import generatedFixtureSource from './sources/contract-fixture.generated.ts?raw';
+import generatedFoldedDeskSource from './sources/folded-desk-ridge.generated.ts?raw';
 
 describe('ridge blockout source compiler', () => {
   it('compiles a typed source into a RidgeBlockoutMap-compatible artifact', () => {
@@ -40,6 +43,43 @@ describe('ridge blockout source compiler', () => {
       compiled,
       typeImportPath: '../sourceContract'
     })).toBe(generatedFixtureSource);
+  });
+
+  it('compiles the folded desk Ridge source into the runtime blockout shape', () => {
+    const compiled = compileRidgeBlockoutSource(FOLDED_DESK_RIDGE_SOURCE);
+    const cickaHomeRuntimeTiles = compiled.runtimeTileRooms.find((room) =>
+      room.id === 'cicka_home'
+    );
+
+    expect(compiled.map.validationErrors).toEqual([]);
+    expect(compiled.map).toEqual(FOLDED_DESK_RIDGE_COMPILED_BLOCKOUT.map);
+    expect(compiled.map.rooms).toHaveLength(12);
+    expect(compiled.map.routes.find((route) => route.id === 'first_walk')?.roomIds).toEqual([
+      'outskirts',
+      'cicka_home',
+      'work_artifact',
+      'stampede_blanket',
+      'switchback_shelf',
+      'telegraph_terrace',
+      'guide_overlook',
+      'relay_gate',
+      'domino_desk'
+    ]);
+    expect(compiled.map.homeMutations).toContainEqual({
+      id: 'stampede_sketch',
+      attrs: { adds: 'stampede_note', opens: 'fold_drop_landing' }
+    });
+    expect(cickaHomeRuntimeTiles?.runtimeTileRows[2]?.[27]).toBe(3);
+  });
+
+  it('keeps the committed folded desk generated artifact in sync', () => {
+    const compiled = compileRidgeBlockoutSource(FOLDED_DESK_RIDGE_SOURCE);
+
+    expect(serializeRidgeCompiledBlockout({
+      exportName: 'FOLDED_DESK_RIDGE_COMPILED_BLOCKOUT',
+      compiled,
+      typeImportPath: '../sourceContract'
+    })).toBe(generatedFoldedDeskSource);
   });
 
   it('validates unknown symbols and bad grid dimensions', () => {

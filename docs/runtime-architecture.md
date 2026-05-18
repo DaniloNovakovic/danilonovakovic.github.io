@@ -44,11 +44,11 @@ game vocabulary is explicit:
 - **Pure gameplay decisions** - `src/game/core` contains deterministic ECS, input, and player logic that can be tested without Phaser, React, browser globals, or bridge state.
 - **Scene-owned modules** - scene folders own local layout, triggers, Phaser objects, scene contexts, scene-local overlays, and heavy scene runtime modules.
 - **Ridge exploration runtime** - Ridge treats
-  `src/game/scenes/ridge/blockout/maps/folded-desk-ridge.blockout.txt` as
-  runtime source data. The Ridge scene parses the blockout, derives geometry,
-  compiles typed facts, resolves durable progress, and hands those outputs to
-  scene-owned presentation, traversal, interaction, and Cicka Home mutation
-  modules.
+  `src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts` as
+  typed authoring source data and imports the committed generated artifact at
+  runtime. The Ridge scene derives geometry, compiles typed facts, resolves
+  durable progress, and hands those outputs to scene-owned presentation,
+  traversal, interaction, and Cicka Home mutation modules.
 
 ## Scene presentation and camera
 
@@ -100,7 +100,7 @@ re-apply camera bounds/profile math.
 - Use `sceneResumePolicy` for resume persistence and reset rules. The low-level resume store should not be imported directly by scenes or adapters.
 - Side-view player scenes should compose `SideViewPlayerRuntime` before creating colliders against `runtime.player`; pass its camera config when the scene should follow and clamp the player.
 - Interior rooms should describe prop targets and effect commands, then let `InteriorInteractionRuntime` choose the active target and prompt/effect result. Phaser text mutation, bridge writes, and scene-local helpers stay in the scene.
-- Ridge spatial changes should start in the Ridge Map Language source, then flow through the Ridge blockout parser, geometry derivation, and compiled fact layer. Keep raw string attributes at the parser boundary; callers should consume typed facts or geometry outputs.
+- Ridge spatial changes should start in the typed Ridge blockout source, then flow through the generated blockout artifact, geometry derivation, and compiled fact layer. Keep raw string attributes at the source-contract boundary; callers should consume typed facts or geometry outputs.
 - Ridge traversal assists are owned by the Ridge traversal runtime. The current runtime consumes compiled geometry and applies ramp, climb, drop, step-up, mantle, safe-position capture, and fall-recovery decisions around the shared side-view player.
 - Ridge landmark presentation owns ordinary landmark visuals such as Stampede blanket, Telegraph, Relay, Domino, guide, and high ledges. Cicka Home mutation visuals are resolved separately from compiled home-mutation facts and durable Ridge progress.
 - Cicka Home mutation declarations are data-driven but conservative: active mutations render only when a durable source exists, and future declarations stay typed promises until their progress source is implemented.
@@ -151,9 +151,9 @@ Potassium uses focused runtime modules to keep the large arcade scene navigable:
 
 Ridge uses focused runtime modules to keep the Exploration Map editable:
 
-- The blockout parser accepts the Ridge Map Language source and validates rooms,
-  symbols, anchors, route references, shortcuts, traversal movement values, and
-  runtime cell overlap.
+- The source compiler accepts the typed Ridge blockout source and validates
+  rooms, symbols, anchors, route references, shortcuts, traversal movement
+  values, and runtime cell overlap.
 - The geometry layer turns grid cells, exits, and progress-gated shortcuts into
   bounds, collider runs, connector platforms, and assist zones.
 - The compiled fact layer exposes room beats, route links, anchors, shortcuts,

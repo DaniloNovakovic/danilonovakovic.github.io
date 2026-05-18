@@ -2,11 +2,11 @@
 
 Status: accepted.
 
-Ridge blockout authoring will move from the current custom ASCII-first DSL toward
-an AI-readable typed TypeScript Ridge Blockout Source with a build-time Ridge
-Source Contract. The source remains optimized for Danilo and AI level-design
-agents to read and edit, while a generator validates the source and emits a
-committed typed TypeScript artifact for runtime and future editor imports.
+Ridge blockout authoring uses an AI-readable typed TypeScript Ridge Blockout
+Source with a build-time Ridge Source Contract. The source remains optimized for
+Danilo and AI level-design agents to read and edit, while a generator validates
+the source and emits a committed typed TypeScript artifact for runtime and
+future editor imports.
 
 ## Considered Options
 
@@ -33,9 +33,8 @@ not the primary authoring surface.
   code imports that typed artifact.
 - Build, typecheck, or check workflows should fail when the source is structurally
   or semantically invalid.
-- A migration may temporarily keep the old DSL and new JSONC source side by side
-  inside one PR for parity checks, but the project should not keep two permanent
-  Ridge source formats.
+- The project should not keep two permanent Ridge source formats; the old raw
+  `.blockout.txt` source path is retired after parity checks.
 - The first Ridge Blockout Editor should be a read-only visual QA surface over
   the validated/compiled data. Source-writing tools can come after the viewer
   proves the source, compiler, and renderer agree.

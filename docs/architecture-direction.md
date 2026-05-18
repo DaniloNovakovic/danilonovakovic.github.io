@@ -47,7 +47,7 @@ paths, prefer [`runtime-architecture.md`](runtime-architecture.md). When
 proposing future refactors:
 
 - Prefer extending existing lifecycle, bridge, overlay, scene UI, and shared runtime seams instead of re-introducing callback-only scene orchestration, ad-hoc overlay maps, or ad-hoc global state.
-- Keep Ridge spatial truth in Ridge Map Language and compiled facts instead of rebuilding parallel parent/route/spatial catalogs.
+- Keep Ridge spatial truth in typed Ridge blockout source and compiled facts instead of rebuilding parallel parent/route/spatial catalogs.
 - Introduce shared render helpers only when repeated render policy code appears.
 
 ---

@@ -4,11 +4,10 @@ This context defines the game-design language for the gamified portfolio and its
 
 ## Language
 
-**Ridge Map Language**:
-A human- and agent-editable source notation that describes Ridge topology, room
-blockouts, traversal primitives, shortcuts, anchors, and Cicka Home mutation
-declarations as source data. It may be typed TypeScript rather than a custom
-ASCII-only DSL, as long as it remains readable and strictly validated.
+**Typed Ridge Blockout Source**:
+A human- and agent-editable TypeScript source notation that describes Ridge
+topology, room blockouts, traversal primitives, shortcuts, anchors, tile
+registry entries, and Cicka Home mutation declarations as source data.
 _Avoid_: map editor, final art map
 
 **Ridge Blockout Source**:
@@ -18,7 +17,7 @@ facts and geometry.
 _Avoid_: final art source, exported screenshot
 
 **Ridge Blockout**:
-A playable primitive Ridge map generated from the Ridge Map Language before
+A playable primitive Ridge map generated from the typed Ridge Blockout Source before
 final assets are placed. The current blockout compiles into typed facts,
 geometry, connectors, and presentation inputs.
 _Avoid_: final map, finished level
@@ -32,7 +31,7 @@ not a final art map editor.
 _Avoid_: final art editor, generic map editor
 
 **Grid Cell**:
-A configurable unit in the Ridge Map Language that converts text-grid positions into world-space pixels.
+A configurable unit in the typed Ridge Blockout Source that converts text-grid positions into world-space pixels.
 _Avoid_: hard-coded tile size, permanent pixel size
 
 **Ridge Tile Registry**:
@@ -94,8 +93,8 @@ _Avoid_: stored sticker state, generic landmark memory
 ## Relationships
 
 - A **Topology Map** defines the route logic between **Room Beats**.
-- The **Ridge Map Language** describes **Room Beats** in a parseable source file.
-- The **Ridge Blockout Source** is written in the **Ridge Map Language**.
+- The **Typed Ridge Blockout Source** describes **Room Beats** in a validated source file.
+- The **Ridge Blockout Source** is written as **Typed Ridge Blockout Source**.
 - The **Ridge Blockout Source** produces a **Ridge Blockout** and a compiled
   fact layer for routes, anchors, shortcuts, and Cicka Home mutations.
 - A **Ridge Blockout Editor** reads and writes the **Ridge Blockout Source**
@@ -107,7 +106,7 @@ _Avoid_: stored sticker state, generic landmark memory
 - The **Ridge Source Contract** validates the **Ridge Blockout Source** before
   runtime/editor code imports compiled Ridge blockout data.
 - A Ridge Blockout Source format migration may use a temporary dual path inside
-  one implementation PR for parity checks, but the project should not carry two
+  one implementation PR for parity checks, but the project does not carry two
   permanent Ridge source formats after validation passes.
 - A **Grid Cell** gives **Room Beats** their scale in the **Ridge Blockout**.
 - A **Ridge Blockout** is replaced or enriched by final assets after traversal feels good.
@@ -125,7 +124,7 @@ _Avoid_: stored sticker state, generic landmark memory
 ## Example Dialogue
 
 > **Dev:** "Should we change the Stampede room art now?"
-> **Domain expert:** "No, first update the **Room Beat** in the **Ridge Map Language** so the **Ridge Blockout** proves the shortcut back to Cicka."
+> **Domain expert:** "No, first update the **Room Beat** in the **Typed Ridge Blockout Source** so the **Ridge Blockout** proves the shortcut back to Cicka."
 
 ## Flagged Ambiguities
 

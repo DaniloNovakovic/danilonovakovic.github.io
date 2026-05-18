@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 
 const require = createRequire(import.meta.url);
@@ -8,12 +9,34 @@ const repoRoot = process.cwd();
 const outDir = path.join(repoRoot, 'node_modules', '.tmp', 'ridge-source-generator');
 const checkOnly = process.argv.includes('--check');
 
-const ridgeSources = [{
-  sourcePath: 'src/game/scenes/ridge/blockout/sources/contract-fixture.source.ts',
-  generatedPath: 'src/game/scenes/ridge/blockout/sources/contract-fixture.generated.ts',
-  exportName: 'CONTRACT_FIXTURE_RIDGE_COMPILED_BLOCKOUT',
-  typeImportPath: '../sourceContract'
-}];
+const ridgeSources = [
+  {
+    sourcePath: 'src/game/scenes/ridge/blockout/sources/contract-fixture.source.ts',
+    generatedPath: 'src/game/scenes/ridge/blockout/sources/contract-fixture.generated.ts',
+    exportName: 'CONTRACT_FIXTURE_RIDGE_COMPILED_BLOCKOUT',
+    typeImportPath: '../sourceContract'
+  },
+  {
+    sourcePath: 'src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts',
+    generatedPath: 'src/game/scenes/ridge/blockout/sources/folded-desk-ridge.generated.ts',
+    exportName: 'FOLDED_DESK_RIDGE_COMPILED_BLOCKOUT',
+    typeImportPath: '../sourceContract'
+  }
+];
+
+export function formatStaleGeneratedFilesMessage(staleFiles) {
+  return [
+    'Ridge source generated files are stale:',
+    ...staleFiles.map((filePath) => `- ${filePath}`)
+  ].join('\n');
+}
+
+export function assertNoStaleGeneratedFiles(staleFiles) {
+  if (staleFiles.length === 0) return;
+  const error = new Error(formatStaleGeneratedFilesMessage(staleFiles));
+  error.exitCode = 1;
+  throw error;
+}
 
 function cleanGeneratedRuntime() {
   fs.rmSync(outDir, { recursive: true, force: true });
@@ -61,48 +84,60 @@ function readSourceModule(sourcePath) {
   return sourceModule.default;
 }
 
-cleanGeneratedRuntime();
-emitRuntimeModules([
-  path.join(repoRoot, 'src/game/scenes/ridge/blockout/sourceCompiler.ts'),
-  ...ridgeSources.map((source) => path.join(repoRoot, source.sourcePath))
-]);
+function runGenerator() {
+  cleanGeneratedRuntime();
+  emitRuntimeModules([
+    path.join(repoRoot, 'src/game/scenes/ridge/blockout/sourceCompiler.ts'),
+    ...ridgeSources.map((source) => path.join(repoRoot, source.sourcePath))
+  ]);
 
-const {
-  compileRidgeBlockoutSource,
-  serializeRidgeCompiledBlockout
-} = require(compiledModulePath('src/game/scenes/ridge/blockout/sourceCompiler.ts'));
+  const {
+    compileRidgeBlockoutSource,
+    serializeRidgeCompiledBlockout
+  } = require(compiledModulePath('src/game/scenes/ridge/blockout/sourceCompiler.ts'));
 
-const staleFiles = [];
+  const staleFiles = [];
 
-for (const source of ridgeSources) {
-  const blockoutSource = readSourceModule(source.sourcePath);
-  const compiled = compileRidgeBlockoutSource(blockoutSource);
-  const nextContent = serializeRidgeCompiledBlockout({
-    exportName: source.exportName,
-    compiled,
-    typeImportPath: source.typeImportPath
-  });
-  const generatedPath = path.join(repoRoot, source.generatedPath);
-  const currentContent = fs.existsSync(generatedPath)
-    ? fs.readFileSync(generatedPath, 'utf8')
-    : '';
+  for (const source of ridgeSources) {
+    const blockoutSource = readSourceModule(source.sourcePath);
+    const compiled = compileRidgeBlockoutSource(blockoutSource);
+    const nextContent = serializeRidgeCompiledBlockout({
+      exportName: source.exportName,
+      compiled,
+      typeImportPath: source.typeImportPath
+    });
+    const generatedPath = path.join(repoRoot, source.generatedPath);
+    const currentContent = fs.existsSync(generatedPath)
+      ? fs.readFileSync(generatedPath, 'utf8')
+      : '';
 
-  if (currentContent !== nextContent) {
-    if (checkOnly) {
-      staleFiles.push(source.generatedPath);
-    } else {
-      fs.writeFileSync(generatedPath, nextContent);
-      console.log(`generated ${source.generatedPath}`);
+    if (currentContent !== nextContent) {
+      if (checkOnly) {
+        staleFiles.push(source.generatedPath);
+      } else {
+        fs.writeFileSync(generatedPath, nextContent);
+        console.log(`generated ${source.generatedPath}`);
+      }
     }
+  }
+
+  assertNoStaleGeneratedFiles(staleFiles);
+
+  if (checkOnly) {
+    console.log(`Ridge source generated files are current (${ridgeSources.length}).`);
   }
 }
 
-if (staleFiles.length > 0) {
-  console.error('Ridge source generated files are stale:');
-  staleFiles.forEach((filePath) => console.error(`- ${filePath}`));
-  process.exit(1);
+function isDirectRun() {
+  return process.argv[1] !== undefined &&
+    path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 }
 
-if (checkOnly) {
-  console.log(`Ridge source generated files are current (${ridgeSources.length}).`);
+if (isDirectRun()) {
+  try {
+    runGenerator();
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : error);
+    process.exit(error.exitCode ?? 1);
+  }
 }

@@ -6,8 +6,8 @@ import {
   parseRidgeBlockout
 } from './parser';
 
-describe('ridge blockout parser', () => {
-  it('parses the real Ridge blockout source without validation errors', () => {
+describe('ridge blockout runtime source', () => {
+  it('loads the generated real Ridge blockout without validation errors', () => {
     expect(RIDGE_BLOCKOUT.validationErrors).toEqual([]);
     expect(RIDGE_BLOCKOUT.language).toBe('ridge-v0');
     expect(RIDGE_BLOCKOUT.cell).toBe(48);
@@ -35,9 +35,11 @@ describe('ridge blockout parser', () => {
   it('accepts the single-cell ladder marker in grids', () => {
     expect(RIDGE_BLOCKOUT_LADDER_SYMBOL).toBe('L');
     const cickaHome = findRidgeBlockoutRoom(RIDGE_BLOCKOUT, 'cicka_home');
+    const cickaHomeGrid: readonly string[] = cickaHome?.grid ?? [];
+    const validationErrors: readonly string[] = RIDGE_BLOCKOUT.validationErrors;
 
-    expect(cickaHome?.grid.some((row) => row.includes(RIDGE_BLOCKOUT_LADDER_SYMBOL))).toBe(true);
-    expect(RIDGE_BLOCKOUT.validationErrors.some((error) => error.includes('unknown symbol "L"'))).toBe(false);
+    expect(cickaHomeGrid.some((row) => row.includes(RIDGE_BLOCKOUT_LADDER_SYMBOL))).toBe(true);
+    expect(validationErrors.some((error) => error.includes('unknown symbol "L"'))).toBe(false);
   });
 
   it('keeps the Cicka Home climb out of the lower floor explicit', () => {

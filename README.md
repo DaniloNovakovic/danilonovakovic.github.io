@@ -18,10 +18,17 @@ pnpm dev
 ## Quality checks
 
 ```bash
+pnpm check
 pnpm lint
 pnpm test
 pnpm build
 ```
+
+Ridge blockout authoring lives in `.source.ts` files under
+`src/game/scenes/ridge/blockout/sources/`. Edit those files, run
+`pnpm ridge:source` to refresh committed `.generated.ts` artifacts, and use
+`pnpm ridge:source:check` when you only want to verify freshness. `pnpm check`
+includes that freshness gate.
 
 ## Architecture
 
