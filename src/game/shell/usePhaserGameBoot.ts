@@ -13,6 +13,7 @@ import { getGameConfig } from '@/game/sharedSceneRuntime/config';
 import { getSceneStartResume, prepareSceneStart } from '@/game/sharedSceneRuntime/sceneResumePolicy';
 import type { RidgeDevControls } from '@/game/scenes/ridge/runtime/ridgeDevControls';
 import { getDevRidgeProgressSeed } from './devRidgeProgressParams';
+import { setPauseOnPausableScenes } from './phaserGamePauseSync';
 
 interface UsePhaserGameBootOptions {
   bridgeRef: RefObject<{
@@ -71,6 +72,9 @@ export function usePhaserGameBoot({
     const sceneManager = new SceneManager(adapter, {
       onSceneLoadingChange: (contextId) => {
         bridgeActions.setSceneLoading(contextId && isSceneId(contextId) ? contextId : null);
+      },
+      onSceneStarted: () => {
+        setPauseOnPausableScenes(gameRef.current, bridgeRef.current.isPaused);
       }
     });
     const sceneContexts = createSceneContexts({

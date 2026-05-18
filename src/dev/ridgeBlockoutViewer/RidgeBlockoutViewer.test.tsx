@@ -9,19 +9,23 @@ import RidgeBlockoutViewer from './RidgeBlockoutViewer';
 
 let lastRidgeDevControls: RidgeDevControls | undefined;
 let lastReturnToOverworld: (() => void) | undefined;
+let lastGameIsPaused: boolean | undefined;
 
 vi.mock('@/game/shell/Game', () => ({
   default: ({
     activeSceneId,
+    isPaused,
     ridgeDevControls,
     onReturnToOverworld
   }: {
     activeSceneId: string;
+    isPaused: boolean;
     ridgeDevControls?: RidgeDevControls;
     onReturnToOverworld: () => void;
   }) => {
     lastRidgeDevControls = ridgeDevControls;
     lastReturnToOverworld = onReturnToOverworld;
+    lastGameIsPaused = isPaused;
     return <div data-testid="mock-ridge-game">Runtime scene: {activeSceneId}</div>;
   }
 }));
@@ -36,6 +40,7 @@ describe('RidgeBlockoutViewer', () => {
     bridgeActions.resetTouch();
     lastRidgeDevControls = undefined;
     lastReturnToOverworld = undefined;
+    lastGameIsPaused = undefined;
   });
 
   afterEach(() => {
@@ -47,6 +52,7 @@ describe('RidgeBlockoutViewer', () => {
     bridgeActions.resetTouch();
     lastRidgeDevControls = undefined;
     lastReturnToOverworld = undefined;
+    lastGameIsPaused = undefined;
   });
 
   it('defaults to the runtime preview tab and boots Ridge through the game shell', async () => {
@@ -56,7 +62,61 @@ describe('RidgeBlockoutViewer', () => {
     expect(screen.getByRole('button', { name: 'Model' }).getAttribute('aria-pressed')).toBe('false');
     expect(screen.getByTestId('ridge-runtime-preview')).not.toBeNull();
     expect(await screen.findByText('Runtime scene: ridge')).not.toBeNull();
+    expect(lastGameIsPaused).toBe(false);
     expect(screen.queryByTestId('ridge-blockout-svg')).toBeNull();
+  });
+
+  it('pauses game input while preview panel controls own focus', async () => {
+    render(<RidgeBlockoutViewer />);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Reset player' }));
+
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Reset player' }));
+    expect(lastGameIsPaused).toBe(true);
+    expect(screen.getByTestId('ridge-preview-input-status').textContent).toContain('Panel focus');
+    expect(screen.getByTestId('ridge-preview-paused-overlay').textContent).toContain('Paused');
+    expect(screen.getByTestId('ridge-preview-paused-overlay').textContent).toContain('Panel focus');
+  });
+
+  it('keeps native Space activation on focused panel buttons without resuming game input', async () => {
+    render(<RidgeBlockoutViewer />);
+    await userEvent.click(screen.getByRole('button', { name: 'Reset player' }));
+    lastRidgeDevControls?.consumeResetRequest?.();
+
+    await userEvent.keyboard('[Space]');
+
+    expect(lastGameIsPaused).toBe(true);
+    expect(lastRidgeDevControls?.consumeResetRequest?.()).toMatchObject({ label: 'start' });
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Reset player' }));
+  });
+
+  it('resumes game input when the runtime preview owns focus again', async () => {
+    render(<RidgeBlockoutViewer />);
+    const preview = screen.getByTestId('ridge-runtime-preview');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Reset player' }));
+    expect(lastGameIsPaused).toBe(true);
+
+    await userEvent.click(preview);
+
+    expect(lastGameIsPaused).toBe(false);
+    expect(document.activeElement).toBe(preview);
+    expect(screen.getByTestId('ridge-preview-input-status').textContent).toContain('Game input');
+    expect(screen.queryByTestId('ridge-preview-paused-overlay')).toBeNull();
+  });
+
+  it('resumes game input from the preview focus control', async () => {
+    render(<RidgeBlockoutViewer />);
+    const preview = screen.getByTestId('ridge-runtime-preview');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Reset player' }));
+    expect(lastGameIsPaused).toBe(true);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Focus game' }));
+
+    expect(lastGameIsPaused).toBe(false);
+    expect(document.activeElement).toBe(preview);
+    expect(screen.queryByTestId('ridge-preview-paused-overlay')).toBeNull();
   });
 
   it('keeps the runtime preview in Ridge when the scene close callback fires', async () => {
@@ -76,7 +136,15 @@ describe('RidgeBlockoutViewer', () => {
     expect(screen.getByRole('heading', { name: 'Ridge Blockout Viewer' })).not.toBeNull();
     expect(screen.getByRole('button', { name: 'Preview' })).not.toBeNull();
     expect(screen.getByRole('button', { name: 'Model' })).not.toBeNull();
-    expect(screen.getByTestId('ridge-viewer-header-validation-status').textContent).toContain('Clean');
+    expect(screen.getByTestId('ridge-viewer-header-validation-status').textContent).toContain('Map valid');
+  });
+
+  it('uses clear runtime preview labels for zoom and input state', () => {
+    render(<RidgeBlockoutViewer />);
+
+    expect(screen.getByText('Live Ridge')).not.toBeNull();
+    expect(screen.getByText('Camera zoom 100%')).not.toBeNull();
+    expect(screen.queryByText(/Actual Ridge runtime/)).toBeNull();
   });
 
   it('updates the runtime preview camera zoom control', async () => {
@@ -156,7 +224,7 @@ describe('RidgeBlockoutViewer', () => {
 
     expect(screen.getByRole('heading', { name: 'Ridge Blockout Viewer' })).not.toBeNull();
     expect(screen.getByText('Folded Desk Ridge')).not.toBeNull();
-    expect(screen.getByTestId('ridge-viewer-validation-status').textContent).toContain('Validation clean');
+    expect(screen.getByTestId('ridge-viewer-validation-status').textContent).toContain('Map valid');
     expect(screen.getByLabelText('Room Cicka Home')).not.toBeNull();
     expect(screen.getByLabelText(/Anchor C in Cicka Home: npc/)).not.toBeNull();
     expect(screen.getByText('Route: first_walk')).not.toBeNull();

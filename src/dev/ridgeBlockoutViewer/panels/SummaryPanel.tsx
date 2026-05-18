@@ -18,7 +18,7 @@ export function SummaryPanel({ model }: { model: RidgeBlockoutViewerModel }) {
         data-testid="ridge-viewer-validation-status"
       >
         {model.validationErrors.length === 0
-          ? 'Validation clean'
+          ? 'Map valid'
           : `${model.validationErrors.length} validation errors`}
       </p>
     </section>

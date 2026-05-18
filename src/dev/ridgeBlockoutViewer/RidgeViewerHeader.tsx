@@ -25,13 +25,23 @@ export function RidgeViewerHeader({
           {model.title}
         </span>
         <span
+          aria-label={
+            model.validationErrors.length === 0
+              ? 'Generated Ridge blockout validation status: map valid'
+              : 'Generated Ridge blockout validation status: map errors'
+          }
           className={[
             'border-2 border-[#1a1a1a] px-2 py-0.5 font-mono text-[10px] font-black uppercase tracking-widest',
             model.validationErrors.length === 0 ? 'bg-[#d7f2d1]' : 'bg-[#ffd6d1]'
           ].join(' ')}
           data-testid="ridge-viewer-header-validation-status"
+          title={
+            model.validationErrors.length === 0
+              ? 'Generated Ridge blockout validation passed'
+              : `${model.validationErrors.length} generated Ridge blockout validation errors`
+          }
         >
-          {model.validationErrors.length === 0 ? 'Clean' : 'Errors'}
+          {model.validationErrors.length === 0 ? 'Map valid' : 'Map errors'}
         </span>
       </div>
       <div className="flex border-2 border-[#1a1a1a] bg-[#e7dfcf] p-1" aria-label="Ridge viewer view">

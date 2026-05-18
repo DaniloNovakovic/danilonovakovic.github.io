@@ -66,8 +66,7 @@ export function PreviewPanel({
               <Plus className="h-4 w-4" aria-hidden />
             </IconButton>
           </div>
-          <dl className="grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
-            <Detail label="Camera" value={`${Math.round(previewZoom * 100)}%`} />
+          <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-2 text-xs">
             <Detail
               label="Player"
               value={playerSnapshot

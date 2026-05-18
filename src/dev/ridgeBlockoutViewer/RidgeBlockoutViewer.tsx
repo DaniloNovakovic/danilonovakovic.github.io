@@ -1,6 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { ModelCanvas } from './ModelCanvas';
-import { RidgeRuntimePreview } from './RidgeRuntimePreview';
+import {
+  RidgeRuntimePreview,
+  type RidgePreviewInputOwner
+} from './RidgeRuntimePreview';
 import { RidgeViewerHeader } from './RidgeViewerHeader';
 import { useModelViewport } from './hooks/useModelViewport';
 import { useRidgePreviewControls } from './hooks/useRidgePreviewControls';
@@ -22,48 +25,65 @@ export default function RidgeBlockoutViewer() {
   const { activeView, switchView } = useRidgeViewerView();
   const { layers, toggleLayer } = useRidgeViewerLayers();
   const [selection, setSelection] = useState<Selection | null>(null);
+  const [previewInputOwner, setPreviewInputOwner] = useState<RidgePreviewInputOwner>('game');
   const modelViewport = useModelViewport(model.rooms);
   const previewControls = useRidgePreviewControls();
   const selectedDetails = selection ? getSelectionDetails(model, selection) : null;
   const teleportGroups = useMemo(() => getTeleportGroups(model), [model]);
+  const claimPanelInput = useCallback(() => setPreviewInputOwner('panel'), []);
+  const claimGameInput = useCallback(() => setPreviewInputOwner('game'), []);
 
   return (
     <div className="h-[100dvh] max-h-[100dvh] overflow-hidden bg-[#f4f1ea] text-[#1a1a1a]">
       <div className="grid h-full min-h-0 min-w-0 grid-rows-[auto_minmax(0,1fr)] gap-2 p-2 lg:p-3">
-        <RidgeViewerHeader
-          activeView={activeView}
-          model={model}
-          onSwitchView={switchView}
-        />
+        <div onFocusCapture={claimPanelInput} onPointerDownCapture={claimPanelInput}>
+          <RidgeViewerHeader
+            activeView={activeView}
+            model={model}
+            onSwitchView={switchView}
+          />
+        </div>
 
         <main className="grid min-h-0 min-w-0 grid-rows-[minmax(0,1fr)_minmax(220px,35dvh)] gap-2 lg:grid-cols-[minmax(0,1fr)_320px] lg:grid-rows-none">
           {activeView === 'preview' ? (
             <RidgeRuntimePreview
+              inputOwner={previewInputOwner}
+              onClaimGameInput={claimGameInput}
               previewZoom={previewControls.previewZoom}
               ridgeDevControls={previewControls.ridgeDevControls}
             />
           ) : (
-            <ModelCanvas
-              layers={layers}
-              model={model}
-              onFocusRoom={modelViewport.focusRoom}
-              onPointerDown={modelViewport.handlePointerDown}
-              onPointerMove={modelViewport.handlePointerMove}
-              onResetView={modelViewport.resetView}
-              onSelect={setSelection}
-              onStopDragging={modelViewport.stopDragging}
-              onWheel={modelViewport.handleWheel}
-              onZoomIn={() => modelViewport.adjustZoom(0.02)}
-              onZoomOut={() => modelViewport.adjustZoom(-0.02)}
-              playerSnapshot={previewControls.playerSnapshot}
-              svgRef={modelViewport.svgRef}
-              transform={modelViewport.transform}
-              view={modelViewport.view}
-              worldRef={modelViewport.worldRef}
-            />
+            <div
+              className="h-full min-h-0 min-w-0"
+              onFocusCapture={claimPanelInput}
+              onPointerDownCapture={claimPanelInput}
+            >
+              <ModelCanvas
+                layers={layers}
+                model={model}
+                onFocusRoom={modelViewport.focusRoom}
+                onPointerDown={modelViewport.handlePointerDown}
+                onPointerMove={modelViewport.handlePointerMove}
+                onResetView={modelViewport.resetView}
+                onSelect={setSelection}
+                onStopDragging={modelViewport.stopDragging}
+                onWheel={modelViewport.handleWheel}
+                onZoomIn={() => modelViewport.adjustZoom(0.02)}
+                onZoomOut={() => modelViewport.adjustZoom(-0.02)}
+                playerSnapshot={previewControls.playerSnapshot}
+                svgRef={modelViewport.svgRef}
+                transform={modelViewport.transform}
+                view={modelViewport.view}
+                worldRef={modelViewport.worldRef}
+              />
+            </div>
           )}
 
-          <aside className="min-h-0 min-w-0 overflow-y-auto overflow-x-hidden border-4 border-[#1a1a1a] bg-[#fbfbf9] p-4 shadow-[7px_7px_0_rgba(26,26,26,1)]">
+          <aside
+            className="min-h-0 min-w-0 overflow-y-auto overflow-x-hidden border-4 border-[#1a1a1a] bg-[#fbfbf9] p-4 shadow-[7px_7px_0_rgba(26,26,26,1)]"
+            onFocusCapture={claimPanelInput}
+            onPointerDownCapture={claimPanelInput}
+          >
             <SummaryPanel model={model} />
             {activeView === 'preview' ? (
               <PreviewPanel

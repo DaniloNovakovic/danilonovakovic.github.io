@@ -4,6 +4,7 @@ import { Circle, Hand } from 'lucide-react';
 import { useGameBridgeCallbacks } from './useGameBridgeCallbacks';
 import { useGameTouchControls } from './useGameTouchControls';
 import { usePhaserGameBoot } from './usePhaserGameBoot';
+import { usePhaserGamePauseSync } from './usePhaserGamePauseSync';
 import { usePhaserScaleRefresh } from './usePhaserScaleRefresh';
 import type { PhaserScenePresentationMode } from '@/game/sharedSceneRuntime/phaserScenePresentation';
 import type { SceneId } from '@/game/scenes/sceneIds';
@@ -58,6 +59,7 @@ export default function Game({
     stableOnOpenOverlay,
     stableOnReturnToOverworld
   });
+  usePhaserGamePauseSync({ activeSceneId, gameRef, isPaused });
 
   const frameClassName = chrome === 'framed'
     ? 'relative h-full w-full min-h-0 overflow-hidden rounded-lg border-4 border-neutral-800 bg-[#fbfbf9] shadow-[8px_8px_0px_0px_rgba(26,26,26,1)]'

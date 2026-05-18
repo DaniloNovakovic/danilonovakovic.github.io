@@ -89,7 +89,8 @@ describe('SceneManager', () => {
 
   it('starts the target context from a cold boot with scene start data', async () => {
     const adapter = makeFakeAdapter();
-    const manager = new SceneManager(adapter);
+    const onSceneStarted = vi.fn();
+    const manager = new SceneManager(adapter, { onSceneStarted });
     manager.registerContext(context('main'));
 
     await manager.exitTo('main');
@@ -97,6 +98,7 @@ describe('SceneManager', () => {
     expect(adapter.stopScene).not.toHaveBeenCalled();
     expect(adapter.startScene).toHaveBeenCalledWith('main', { id: 'main' });
     expect(adapter.activeScenes()).toEqual(['main']);
+    expect(onSceneStarted).toHaveBeenCalledTimes(1);
   });
 
   it('does not restart a context that is already active', async () => {
@@ -109,6 +111,18 @@ describe('SceneManager', () => {
 
     expect(adapter.stopScene).not.toHaveBeenCalled();
     expect(adapter.startScene).not.toHaveBeenCalled();
+  });
+
+  it('notifies after entering a newly started context', async () => {
+    const adapter = makeFakeAdapter(['main']);
+    const onSceneStarted = vi.fn();
+    const manager = new SceneManager(adapter, { onSceneStarted });
+    manager.registerContext(context('main'));
+    manager.registerContext(context('hobbies'));
+
+    await manager.enter('hobbies');
+
+    expect(onSceneStarted).toHaveBeenCalledTimes(1);
   });
 
   it('loads and registers a lazy context before starting it', async () => {
