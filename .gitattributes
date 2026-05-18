@@ -1,0 +1,25 @@
+# Normalize text files in the repo to LF so clones behave consistently across
+# Windows, WSL, Linux, and macOS.
+* text=auto eol=lf
+
+# Binary assets should never be line-ending normalized.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.mp3 binary
+*.wav binary
+*.ogg binary
+*.glb binary
+*.gltf binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.mp4 binary
+*.webm binary
+*.wasm binary
+*.zip binary
+*.pdf binary
