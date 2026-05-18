@@ -11,16 +11,16 @@ The goal is to create a place where I can easily surface interesting personal op
 ## Development
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 ## Quality checks
 
 ```bash
-npm run lint
-npm run test
-npm run build
+pnpm lint
+pnpm test
+pnpm build
 ```
 
 ## Architecture
