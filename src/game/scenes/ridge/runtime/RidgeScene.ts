@@ -361,9 +361,9 @@ export class RidgeScene extends Phaser.Scene {
       this.playerRuntime?.cameraRuntime?.refresh();
     }
 
-    const resetRequest = this.ridgeDevControls.consumeResetRequest?.();
     if (!this.player) return;
 
+    const resetRequest = this.ridgeDevControls.consumeResetRequest?.();
     if (resetRequest && this.ridgeSpawnPosition) {
       this.movePlayerForDev({
         x: this.ridgeSpawnPosition.x,

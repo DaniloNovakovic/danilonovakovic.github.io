@@ -78,6 +78,39 @@ describe('Ridge traversal runtime', () => {
     expect(result.state.lastSafePosition).toEqual({ x: 50, y: 80 });
   });
 
+  it('allows small ramp step-ups without pulling from far below', () => {
+    const runtime = createRidgeTraversalRuntime({
+      geometry: makeGeometry({
+        assistZones: [
+          makeAssistZone({
+            id: 'paper-stair-ramp',
+            kind: 'ramp',
+            from: { x: 0, y: 100 },
+            to: { x: 100, y: 100 }
+          })
+        ]
+      })
+    });
+    const nearStep = makePlayer({ x: 50, y: 104, height: 40, velocityY: 20 });
+    const farBelow = makePlayer({ x: 50, y: 120, height: 40, velocityY: 20 });
+
+    const nearResult = runtime.update({
+      player: nearStep,
+      commands: command(),
+      deltaMs: 1000 / 60
+    });
+    const farResult = runtime.update({
+      player: farBelow,
+      commands: command(),
+      deltaMs: 1000 / 60
+    });
+
+    expect(nearResult.appliedAssists).toContain('ramp');
+    expect(nearStep.y).toBe(80);
+    expect(farResult.appliedAssists).not.toContain('ramp');
+    expect(farBelow.y).toBe(120);
+  });
+
   it('runs climb before other assists and releases attachment when climb intent ends', () => {
     const climb = makeAssistZone({
       id: 'cord-climb',

@@ -95,7 +95,7 @@ export interface RidgeTraversalRuntimeOptions {
 
 const RIDGE_RAMP_SNAP = {
   maxSnapDownY: 28,
-  maxSnapUpY: 150
+  maxSnapUpY: 32
 } as const;
 const RIDGE_CLIMB_ATTACH_DISTANCE = 22;
 const RIDGE_DROP_ATTACH_DISTANCE = 28;

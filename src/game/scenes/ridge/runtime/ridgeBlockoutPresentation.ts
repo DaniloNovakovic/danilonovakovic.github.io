@@ -218,7 +218,7 @@ function configureColliderBody(
   zone: Phaser.GameObjects.Zone,
   collider: RidgeBlockoutCollider
 ): void {
-  if (collider.kind !== 'route-connector' || collider.movement !== 'ramp') return;
+  if (collider.movement !== 'ramp') return;
   const body = zone.body as Phaser.Physics.Arcade.StaticBody | undefined;
   if (!body) return;
 
