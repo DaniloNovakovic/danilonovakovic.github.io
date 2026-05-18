@@ -209,8 +209,23 @@ function addBlockoutColliders(
     addColliderVisual(scene, collider);
     const zone = scene.add.zone(collider.x, collider.y, collider.width, collider.height);
     scene.physics.add.existing(zone, true);
+    configureColliderBody(zone, collider);
     return zone;
   });
+}
+
+function configureColliderBody(
+  zone: Phaser.GameObjects.Zone,
+  collider: RidgeBlockoutCollider
+): void {
+  if (collider.movement !== 'ramp') return;
+  const body = zone.body as Phaser.Physics.Arcade.StaticBody | undefined;
+  if (!body) return;
+
+  body.checkCollision.left = false;
+  body.checkCollision.right = false;
+  body.checkCollision.down = false;
+  body.checkCollision.up = true;
 }
 
 function addColliderVisual(scene: Phaser.Scene, collider: RidgeBlockoutCollider): void {

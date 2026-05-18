@@ -136,9 +136,10 @@ export function deriveRidgeBlockoutGeometry(
   options: RidgeBlockoutGeometryOptions = {}
 ): RidgeBlockoutGeometry {
   const gridColliders = deriveGridColliders(map);
-  const routeConnectors = deriveFirstWalkRouteConnectors(map);
+  const solidBlockers = gridColliders.filter((collider) => collider.kind === 'solid');
+  const routeConnectors = deriveFirstWalkRouteConnectors(map, solidBlockers);
   const routeColliders = routeConnectors.flatMap((connection) => connection.colliders);
-  const shortcutConnections = deriveShortcutConnections(map, options);
+  const shortcutConnections = deriveShortcutConnections(map, options, solidBlockers);
   const shortcutColliders = shortcutConnections.flatMap((connection) => connection.colliders);
   const assistZones = [
     ...routeConnectors.flatMap((connection) => connection.assistZones),
@@ -288,7 +289,8 @@ function deriveGridColliders(map: RidgeBlockoutMap): readonly RidgeBlockoutColli
 }
 
 function deriveFirstWalkRouteConnectors(
-  map: RidgeBlockoutMap
+  map: RidgeBlockoutMap,
+  solidBlockers: readonly RidgeBlockoutCollider[]
 ): readonly RidgeBlockoutTraversalConnector[] {
   const firstWalk = map.routes.find((route) => route.id === 'first_walk');
   if (!firstWalk) return [];
@@ -318,6 +320,7 @@ function deriveFirstWalkRouteConnectors(
       start: from.point,
       end: to.point,
       movement,
+      solidBlockers,
       assistStart: ladderSegment?.start,
       assistEnd: ladderSegment?.end
     })];
@@ -326,7 +329,8 @@ function deriveFirstWalkRouteConnectors(
 
 function deriveShortcutConnections(
   map: RidgeBlockoutMap,
-  options: RidgeBlockoutGeometryOptions
+  options: RidgeBlockoutGeometryOptions,
+  solidBlockers: readonly RidgeBlockoutCollider[]
 ): readonly RidgeBlockoutShortcutConnection[] {
   return map.shortcuts.flatMap((shortcut) => {
     const sourceRoom = findRidgeBlockoutRoom(map, shortcut.fromRoomId);
@@ -354,7 +358,8 @@ function deriveShortcutConnections(
         shortcutId: shortcut.id,
         start: from,
         end: target,
-        movement
+        movement,
+        solidBlockers
       })
       : createEmptyTraversalConnector({
         idPrefix: `shortcut:${shortcut.id}`,
@@ -434,6 +439,7 @@ function createTraversalConnector({
   start,
   end,
   movement,
+  solidBlockers,
   assistStart,
   assistEnd
 }: {
@@ -445,6 +451,7 @@ function createTraversalConnector({
   start: { x: number; y: number };
   end: { x: number; y: number };
   movement: RidgeTraversalMovement;
+  solidBlockers?: readonly RidgeBlockoutCollider[];
   assistStart?: { x: number; y: number };
   assistEnd?: { x: number; y: number };
 }): RidgeBlockoutTraversalConnector {
@@ -469,6 +476,8 @@ function createTraversalConnector({
     };
   }
 
+  const surfaceStart = assistStart ?? toSurfacePoint(start, cell, movement);
+  const surfaceEnd = assistEnd ?? toSurfacePoint(end, cell, movement);
   const zoneKind = movement === 'ramp'
     ? 'ramp'
     : movement === 'climb'
@@ -481,7 +490,18 @@ function createTraversalConnector({
     shortcutId,
     from: start as RidgeBlockoutAnchorPoint,
     to: end,
-    colliders: [],
+    colliders: movement === 'ramp'
+      ? createRampBridgePlatforms({
+        cell,
+        idPrefix,
+        kind: colliderKind,
+        routeId,
+        shortcutId,
+        start: surfaceStart,
+        end: surfaceEnd,
+        solidBlockers: solidBlockers ?? []
+      })
+      : [],
     assistZones: [createAssistZone({
       cell,
       id: idPrefix,
@@ -489,8 +509,8 @@ function createTraversalConnector({
       movement,
       routeId,
       shortcutId,
-      start: assistStart ?? toSurfacePoint(start, cell, movement),
-      end: assistEnd ?? toSurfacePoint(end, cell, movement)
+      start: surfaceStart,
+      end: surfaceEnd
     })]
   };
 }
@@ -603,6 +623,65 @@ function createJumpPlatforms({
   });
 }
 
+function createRampBridgePlatforms({
+  cell,
+  idPrefix,
+  kind,
+  routeId,
+  shortcutId,
+  start,
+  end,
+  solidBlockers
+}: {
+  cell: number;
+  idPrefix: string;
+  kind: Extract<RidgeBlockoutColliderKind, 'route-connector' | 'shortcut-connector'>;
+  routeId?: string;
+  shortcutId?: string;
+  start: { x: number; y: number };
+  end: { x: number; y: number };
+  solidBlockers: readonly RidgeBlockoutCollider[];
+}): readonly RidgeBlockoutCollider[] {
+  const distanceX = Math.abs(end.x - start.x);
+  const distanceY = Math.abs(end.y - start.y);
+  if (distanceX < 0.001 && distanceY < 0.001) return [];
+
+  const stripCount = Math.max(
+    2,
+    Math.ceil(Math.max(distanceX / (cell * 0.9), distanceY / (cell * 0.3)))
+  );
+  const width = Math.max(
+    Math.round(cell * 1.2),
+    Math.round(distanceX / stripCount + cell * 0.72)
+  );
+  const height = Math.max(12, Math.round(cell * 0.24));
+  const catchOffsetY = 0;
+
+  return Array.from({ length: stripCount }, (_, index) => {
+    const t = (index + 0.5) / stripCount;
+    const surfaceY = lerp(start.y, end.y, t);
+    return {
+      id: `${idPrefix}:ramp:${index + 1}`,
+      kind,
+      movement: 'ramp' as const,
+      routeId,
+      shortcutId,
+      x: lerp(start.x, end.x, t),
+      y: surfaceY + catchOffsetY + height / 2,
+      width,
+      height
+    };
+  })
+    .map((collider) => trimColliderAgainstSolidBlockers(collider, solidBlockers, cell))
+    .map((collider) => collider
+      ? {
+        ...collider,
+        y: getSegmentYAtX(start, end, collider.x) + catchOffsetY + height / 2
+      }
+      : undefined)
+    .filter((collider): collider is RidgeBlockoutCollider => collider !== undefined);
+}
+
 function createAssistZone({
   cell,
   id,
@@ -680,4 +759,53 @@ function toSurfacePoint(
 
 function lerp(start: number, end: number, t: number): number {
   return start + (end - start) * t;
+}
+
+function getSegmentYAtX(
+  from: { x: number; y: number },
+  to: { x: number; y: number },
+  x: number
+): number {
+  const dx = to.x - from.x;
+  if (Math.abs(dx) < 0.001) return Math.min(from.y, to.y);
+  return lerp(from.y, to.y, (x - from.x) / dx);
+}
+
+function trimColliderAgainstSolidBlockers(
+  collider: RidgeBlockoutCollider,
+  solidBlockers: readonly RidgeBlockoutCollider[],
+  cell: number
+): RidgeBlockoutCollider | undefined {
+  const clearance = 0.5;
+  let left = collider.x - collider.width / 2;
+  let right = collider.x + collider.width / 2;
+  const top = collider.y - collider.height / 2;
+  const bottom = collider.y + collider.height / 2;
+
+  solidBlockers.forEach((solid) => {
+    const solidLeft = solid.x - solid.width / 2;
+    const solidRight = solid.x + solid.width / 2;
+    const solidTop = solid.y - solid.height / 2;
+    const solidBottom = solid.y + solid.height / 2;
+    const overlapsVertically = top < solidBottom && bottom > solidTop;
+    const overlapsHorizontally = left < solidRight && right > solidLeft;
+    if (!overlapsVertically || !overlapsHorizontally) return;
+
+    if (collider.x < solid.x) {
+      right = Math.min(right, solidLeft - clearance);
+    } else if (collider.x > solid.x) {
+      left = Math.max(left, solidRight + clearance);
+    } else {
+      left = right;
+    }
+  });
+
+  const width = right - left;
+  if (width < cell * 0.45) return undefined;
+
+  return {
+    ...collider,
+    x: (left + right) / 2,
+    width
+  };
 }

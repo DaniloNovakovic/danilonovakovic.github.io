@@ -49,7 +49,7 @@ export function ModelCanvas({
   worldRef: RefObject<SVGGElement | null>;
 }) {
   return (
-    <section className="relative min-h-0 min-w-0 overflow-hidden border-4 border-[#1a1a1a] bg-[#fdfcf7] shadow-[7px_7px_0_rgba(26,26,26,1)]">
+    <section className="relative h-full min-h-0 min-w-0 overflow-hidden border-4 border-[#1a1a1a] bg-[#fdfcf7] shadow-[7px_7px_0_rgba(26,26,26,1)]">
       <ModelToolbar
         zoom={view.zoom}
         onZoomIn={onZoomIn}

@@ -78,6 +78,39 @@ describe('Ridge traversal runtime', () => {
     expect(result.state.lastSafePosition).toEqual({ x: 50, y: 80 });
   });
 
+  it('allows small ramp step-ups without pulling from far below', () => {
+    const runtime = createRidgeTraversalRuntime({
+      geometry: makeGeometry({
+        assistZones: [
+          makeAssistZone({
+            id: 'paper-stair-ramp',
+            kind: 'ramp',
+            from: { x: 0, y: 100 },
+            to: { x: 100, y: 100 }
+          })
+        ]
+      })
+    });
+    const nearStep = makePlayer({ x: 50, y: 104, height: 40, velocityY: 20 });
+    const farBelow = makePlayer({ x: 50, y: 120, height: 40, velocityY: 20 });
+
+    const nearResult = runtime.update({
+      player: nearStep,
+      commands: command(),
+      deltaMs: 1000 / 60
+    });
+    const farResult = runtime.update({
+      player: farBelow,
+      commands: command(),
+      deltaMs: 1000 / 60
+    });
+
+    expect(nearResult.appliedAssists).toContain('ramp');
+    expect(nearStep.y).toBe(80);
+    expect(farResult.appliedAssists).not.toContain('ramp');
+    expect(farBelow.y).toBe(120);
+  });
+
   it('runs climb before other assists and releases attachment when climb intent ends', () => {
     const climb = makeAssistZone({
       id: 'cord-climb',
@@ -282,6 +315,54 @@ describe('Ridge traversal runtime', () => {
     expect(player.y).toBe(20);
     expect(player.body.velocity.x).toBe(0);
     expect(player.body.velocity.y).toBe(0);
+  });
+
+  it('does not capture world-bottom contact as the last safe position', () => {
+    const runtime = createRidgeTraversalRuntime({
+      geometry: makeGeometry()
+    });
+    const player = makePlayer({
+      x: 20,
+      y: 20,
+      touchingDown: true
+    });
+
+    const safeCaptureResult = runtime.update({
+      player,
+      commands: command(),
+      deltaMs: 1000 / 60
+    });
+    expect(safeCaptureResult.state.lastSafePosition).toEqual({ x: 20, y: 20 });
+
+    player.x = 300;
+    player.y = 940;
+    player.body.touching.down = true;
+    player.body.blocked.down = true;
+    player.body.velocity.y = 0;
+
+    const bottomContactResult = runtime.update({
+      player,
+      commands: command(),
+      deltaMs: 1000 / 60
+    });
+    expect(bottomContactResult.appliedAssists).not.toContain('fall-recovery');
+    expect(bottomContactResult.appliedAssists).not.toContain('safe-capture');
+    expect(bottomContactResult.state.lastSafePosition).toEqual({ x: 20, y: 20 });
+
+    player.y = 980;
+    player.body.touching.down = false;
+    player.body.blocked.down = false;
+    player.body.velocity.y = 300;
+
+    const recoveryResult = runtime.update({
+      player,
+      commands: command(),
+      deltaMs: 1000 / 60
+    });
+
+    expect(recoveryResult.appliedAssists).toContain('fall-recovery');
+    expect(player.x).toBe(20);
+    expect(player.y).toBe(20);
   });
 
   it('keeps solid terrain out of mantle targets', () => {

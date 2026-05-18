@@ -95,7 +95,7 @@ export interface RidgeTraversalRuntimeOptions {
 
 const RIDGE_RAMP_SNAP = {
   maxSnapDownY: 28,
-  maxSnapUpY: 8
+  maxSnapUpY: 32
 } as const;
 const RIDGE_CLIMB_ATTACH_DISTANCE = 22;
 const RIDGE_DROP_ATTACH_DISTANCE = 28;
@@ -447,9 +447,9 @@ class RidgeTraversalRuntimeImpl implements RidgeTraversalRuntime {
     const bottomBandY = this.geometry.bounds.y +
       this.geometry.bounds.height -
       RIDGE_FALL_RECOVERY_THRESHOLD_Y;
-    if (player.y >= bottomBandY) return false;
-
     const bottomY = getPlayerBottomY(player);
+    if (bottomY >= bottomBandY) return false;
+
     const ramp = resolveWalkableRampSurfaceY(
       this.geometry.assistZones,
       { x: player.x, y: bottomY },

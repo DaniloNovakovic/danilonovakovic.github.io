@@ -8,6 +8,7 @@ afterEach(cleanup);
 
 const controllerProps: OverlayControllerProps = {
   close: vi.fn(),
+  enterScene: vi.fn(),
   openOverlay: vi.fn(),
   titleId: 'title',
   descriptionId: 'description'

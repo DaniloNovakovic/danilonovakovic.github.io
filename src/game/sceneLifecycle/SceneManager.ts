@@ -13,6 +13,7 @@ export interface SceneRuntimeAdapter {
 
 interface SceneManagerOptions {
   onSceneLoadingChange?: (contextId: ContextId | null) => void;
+  onSceneStarted?: () => void;
 }
 
 export interface SceneTransitionGuard {
@@ -55,6 +56,7 @@ export class SceneManager {
 
     this.adapter.startScene(target.sceneKey, target.getStartData());
     target.onEnter?.();
+    this.options.onSceneStarted?.();
   }
 
   async exitTo(contextId: ContextId, guard?: SceneTransitionGuard): Promise<void> {
@@ -82,6 +84,7 @@ export class SceneManager {
     if (!this.adapter.isSceneActive(target.sceneKey)) {
       this.adapter.startScene(target.sceneKey, target.getStartData());
       target.onEnter?.();
+      this.options.onSceneStarted?.();
     }
   }
 

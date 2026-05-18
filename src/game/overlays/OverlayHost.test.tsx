@@ -17,11 +17,13 @@ vi.mock('./overlayRegistry', async () => {
       component: ({
         params,
         close,
+        enterScene,
         titleId,
         descriptionId
       }: {
         params?: unknown;
         close: () => void;
+        enterScene: (sceneId: string) => void;
         titleId: string;
         descriptionId: string;
       }) => {
@@ -34,7 +36,12 @@ vi.mock('./overlayRegistry', async () => {
             onClose: close,
             titleId,
             descriptionId,
-            children: React.createElement('button', { onClick: close }, 'Child close')
+            children: React.createElement(
+              React.Fragment,
+              null,
+              React.createElement('button', { onClick: close }, 'Child close'),
+              React.createElement('button', { onClick: () => enterScene('ridge') }, 'Child enter')
+            )
           }
         );
       }
@@ -68,6 +75,18 @@ describe('OverlayHost', () => {
 
     await userEvent.click(screen.getByRole('button', { name: /child close/i }));
     await waitFor(() => expect(bridgeStore.getState().activeOverlay).toBeNull());
+  });
+
+  it('passes injected scene entry to active overlays', async () => {
+    const enterScene = vi.fn();
+    bridgeActions.openOverlay('profile');
+
+    render(<OverlayHost enterScene={enterScene} />);
+
+    expect(await screen.findByRole('dialog', { name: /mock profile/i })).toBeDefined();
+    await userEvent.click(screen.getByRole('button', { name: /child enter/i }));
+
+    expect(enterScene).toHaveBeenCalledWith('ridge');
   });
 
   it('closes on Escape by default', async () => {

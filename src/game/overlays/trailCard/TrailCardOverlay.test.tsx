@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import TrailCardOverlay from './TrailCardOverlay';
 import type { TrailCardOverlayParams } from './types';
@@ -26,6 +26,7 @@ describe('TrailCardOverlay', () => {
       <TrailCardOverlay
         params={params}
         close={vi.fn()}
+        enterScene={vi.fn()}
         openOverlay={vi.fn()}
         titleId="trail-title"
         descriptionId="trail-description"
@@ -48,10 +49,12 @@ describe('TrailCardOverlay', () => {
       rewardPreview: 'Stamp + glide pip',
       enterSceneId: 'stampedeSketch'
     };
+    const enterScene = vi.fn();
     render(
       <TrailCardOverlay
         params={enabledParams}
         close={vi.fn()}
+        enterScene={enterScene}
         openOverlay={vi.fn()}
         titleId="trail-title"
         descriptionId="trail-description"
@@ -63,9 +66,8 @@ describe('TrailCardOverlay', () => {
 
     await userEvent.click(enter);
 
-    await waitFor(() => {
-      expect(bridgeStore.getState().activeSceneId).toBe('stampedeSketch');
-    });
+    expect(enterScene).toHaveBeenCalledWith('stampedeSketch');
+    expect(bridgeStore.getState().activeSceneId).not.toBe('stampedeSketch');
   });
 
   it('closes through the back action', async () => {
@@ -74,6 +76,7 @@ describe('TrailCardOverlay', () => {
       <TrailCardOverlay
         params={params}
         close={close}
+        enterScene={vi.fn()}
         openOverlay={vi.fn()}
         titleId="trail-title"
         descriptionId="trail-description"
