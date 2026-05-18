@@ -14,5 +14,12 @@
 *.ogg binary
 *.glb binary
 *.gltf binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.mp4 binary
+*.webm binary
+*.wasm binary
 *.zip binary
 *.pdf binary
