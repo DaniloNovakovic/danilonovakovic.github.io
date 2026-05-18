@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
   applyRidgeDevTeleportToPlayer,
+  resolveRidgeDevDebugSettings,
   resolveRidgeDevCameraZoom,
   resolveRidgeDevTeleportPosition,
   RIDGE_PLAYER_SPAWN_OFFSET_Y
@@ -12,6 +13,27 @@ describe('ridgeDevControls', () => {
     expect(resolveRidgeDevCameraZoom(1.25)).toBe(1.25);
     expect(resolveRidgeDevCameraZoom(0.1)).toBe(0.65);
     expect(resolveRidgeDevCameraZoom(4)).toBe(1.6);
+  });
+
+  it('resolves debug settings with all overlays off by default', () => {
+    expect(resolveRidgeDevDebugSettings(undefined)).toEqual({
+      graybox: false,
+      showColliders: false,
+      showPlayerBody: false,
+      showInteractZones: false,
+      showTraversalAssists: false
+    });
+
+    expect(resolveRidgeDevDebugSettings({
+      showColliders: true,
+      showPlayerBody: true
+    })).toEqual({
+      graybox: false,
+      showColliders: true,
+      showPlayerBody: true,
+      showInteractZones: false,
+      showTraversalAssists: false
+    });
   });
 
   it('resolves teleport targets with the Ridge player spawn offset when requested', () => {

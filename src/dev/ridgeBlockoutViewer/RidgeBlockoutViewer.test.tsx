@@ -8,16 +8,20 @@ import type { RidgeDevControls } from '@/game/scenes/ridge/runtime/ridgeDevContr
 import RidgeBlockoutViewer from './RidgeBlockoutViewer';
 
 let lastRidgeDevControls: RidgeDevControls | undefined;
+let lastReturnToOverworld: (() => void) | undefined;
 
 vi.mock('@/game/shell/Game', () => ({
   default: ({
     activeSceneId,
-    ridgeDevControls
+    ridgeDevControls,
+    onReturnToOverworld
   }: {
     activeSceneId: string;
     ridgeDevControls?: RidgeDevControls;
+    onReturnToOverworld: () => void;
   }) => {
     lastRidgeDevControls = ridgeDevControls;
+    lastReturnToOverworld = onReturnToOverworld;
     return <div data-testid="mock-ridge-game">Runtime scene: {activeSceneId}</div>;
   }
 }));
@@ -31,6 +35,7 @@ describe('RidgeBlockoutViewer', () => {
     bridgeActions.setSceneLoading(null);
     bridgeActions.resetTouch();
     lastRidgeDevControls = undefined;
+    lastReturnToOverworld = undefined;
   });
 
   afterEach(() => {
@@ -41,6 +46,7 @@ describe('RidgeBlockoutViewer', () => {
     bridgeActions.setSceneLoading(null);
     bridgeActions.resetTouch();
     lastRidgeDevControls = undefined;
+    lastReturnToOverworld = undefined;
   });
 
   it('defaults to the runtime preview tab and boots Ridge through the game shell', async () => {
@@ -51,6 +57,17 @@ describe('RidgeBlockoutViewer', () => {
     expect(screen.getByTestId('ridge-runtime-preview')).not.toBeNull();
     expect(await screen.findByText('Runtime scene: ridge')).not.toBeNull();
     expect(screen.queryByTestId('ridge-blockout-svg')).toBeNull();
+  });
+
+  it('keeps the runtime preview in Ridge when the scene close callback fires', async () => {
+    render(<RidgeBlockoutViewer />);
+    expect(await screen.findByText('Runtime scene: ridge')).not.toBeNull();
+
+    act(() => {
+      lastReturnToOverworld?.();
+    });
+
+    expect(screen.getByText('Runtime scene: ridge')).not.toBeNull();
   });
 
   it('keeps the compact header controls and validation status visible', () => {
@@ -73,6 +90,29 @@ describe('RidgeBlockoutViewer', () => {
     expect(screen.getByLabelText('Preview zoom')).toHaveProperty('value', '1.25');
   });
 
+  it('updates the runtime preview debug overlay settings', async () => {
+    render(<RidgeBlockoutViewer />);
+
+    expect(lastRidgeDevControls?.resolveDebugSettings?.()).toMatchObject({
+      graybox: false,
+      showColliders: false,
+      showPlayerBody: false,
+      showInteractZones: false,
+      showTraversalAssists: false
+    });
+
+    await userEvent.click(screen.getByRole('checkbox', { name: 'Colliders' }));
+    await userEvent.click(screen.getByRole('checkbox', { name: 'Interact zones' }));
+
+    expect(lastRidgeDevControls?.resolveDebugSettings?.()).toMatchObject({
+      graybox: false,
+      showColliders: true,
+      showPlayerBody: false,
+      showInteractZones: true,
+      showTraversalAssists: false
+    });
+  });
+
   it('dispatches preview teleport requests from source-backed anchors', async () => {
     render(<RidgeBlockoutViewer />);
 
@@ -85,6 +125,19 @@ describe('RidgeBlockoutViewer', () => {
     });
     expect(request?.x).toBeGreaterThan(0);
     expect(request?.y).toBeGreaterThan(0);
+  });
+
+  it('dispatches a preview reset request back to the Ridge spawn', async () => {
+    render(<RidgeBlockoutViewer />);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Reset player' }));
+
+    const request = lastRidgeDevControls?.consumeResetRequest?.();
+    expect(request).toMatchObject({
+      label: 'start'
+    });
+    expect(screen.getByText('Sent: reset start')).not.toBeNull();
+    expect(lastRidgeDevControls?.consumeResetRequest?.()).toBeNull();
   });
 
   it('switches to the source-backed model inspector tab', async () => {

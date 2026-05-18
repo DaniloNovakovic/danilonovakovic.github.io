@@ -67,10 +67,13 @@ export default function RidgeBlockoutViewer() {
             <SummaryPanel model={model} />
             {activeView === 'preview' ? (
               <PreviewPanel
+                debugSettings={previewControls.debugSettings}
                 lastTeleportLabel={previewControls.lastTeleportLabel}
                 onPreviewZoomChange={previewControls.setPreviewZoomLevel}
                 onPreviewZoomIn={() => previewControls.adjustPreviewZoom(0.25)}
                 onPreviewZoomOut={() => previewControls.adjustPreviewZoom(-0.25)}
+                onResetPlayer={previewControls.requestPlayerReset}
+                onToggleDebugSetting={previewControls.toggleDebugSetting}
                 onTeleport={previewControls.requestTeleport}
                 playerSnapshot={previewControls.playerSnapshot}
                 previewZoom={previewControls.previewZoom}

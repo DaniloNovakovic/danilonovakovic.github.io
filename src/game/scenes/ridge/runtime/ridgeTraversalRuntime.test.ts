@@ -284,6 +284,54 @@ describe('Ridge traversal runtime', () => {
     expect(player.body.velocity.y).toBe(0);
   });
 
+  it('does not capture world-bottom contact as the last safe position', () => {
+    const runtime = createRidgeTraversalRuntime({
+      geometry: makeGeometry()
+    });
+    const player = makePlayer({
+      x: 20,
+      y: 20,
+      touchingDown: true
+    });
+
+    const safeCaptureResult = runtime.update({
+      player,
+      commands: command(),
+      deltaMs: 1000 / 60
+    });
+    expect(safeCaptureResult.state.lastSafePosition).toEqual({ x: 20, y: 20 });
+
+    player.x = 300;
+    player.y = 940;
+    player.body.touching.down = true;
+    player.body.blocked.down = true;
+    player.body.velocity.y = 0;
+
+    const bottomContactResult = runtime.update({
+      player,
+      commands: command(),
+      deltaMs: 1000 / 60
+    });
+    expect(bottomContactResult.appliedAssists).not.toContain('fall-recovery');
+    expect(bottomContactResult.appliedAssists).not.toContain('safe-capture');
+    expect(bottomContactResult.state.lastSafePosition).toEqual({ x: 20, y: 20 });
+
+    player.y = 980;
+    player.body.touching.down = false;
+    player.body.blocked.down = false;
+    player.body.velocity.y = 300;
+
+    const recoveryResult = runtime.update({
+      player,
+      commands: command(),
+      deltaMs: 1000 / 60
+    });
+
+    expect(recoveryResult.appliedAssists).toContain('fall-recovery');
+    expect(player.x).toBe(20);
+    expect(player.y).toBe(20);
+  });
+
   it('keeps solid terrain out of mantle targets', () => {
     const runtime = createRidgeTraversalRuntime({
       geometry: makeGeometry({

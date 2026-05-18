@@ -6,13 +6,28 @@ export interface RidgeDevTeleportRequest {
   applySpawnOffset: boolean;
 }
 
+export interface RidgeDevResetRequest {
+  sequence: number;
+  label: string;
+}
+
 export interface RidgeDevPlayerSnapshot {
   x: number;
   y: number;
 }
 
+export interface RidgeDevDebugSettings {
+  graybox: boolean;
+  showColliders: boolean;
+  showPlayerBody: boolean;
+  showInteractZones: boolean;
+  showTraversalAssists: boolean;
+}
+
 export interface RidgeDevControls {
   resolveCameraZoom?: () => number | undefined;
+  resolveDebugSettings?: () => Partial<RidgeDevDebugSettings> | undefined;
+  consumeResetRequest?: () => RidgeDevResetRequest | null;
   consumeTeleportRequest?: () => RidgeDevTeleportRequest | null;
   publishPlayerSnapshot?: (snapshot: RidgeDevPlayerSnapshot) => void;
 }
@@ -33,12 +48,29 @@ export const RIDGE_DEFAULT_CAMERA_ZOOM = 1;
 export const RIDGE_DEV_MIN_CAMERA_ZOOM = 0.65;
 export const RIDGE_DEV_MAX_CAMERA_ZOOM = 1.6;
 
+export const RIDGE_DEV_DEFAULT_DEBUG_SETTINGS: RidgeDevDebugSettings = {
+  graybox: false,
+  showColliders: false,
+  showPlayerBody: false,
+  showInteractZones: false,
+  showTraversalAssists: false
+};
+
 export function resolveRidgeDevCameraZoom(value: number | undefined): number {
   if (!Number.isFinite(value)) return RIDGE_DEFAULT_CAMERA_ZOOM;
   return Math.min(
     RIDGE_DEV_MAX_CAMERA_ZOOM,
     Math.max(RIDGE_DEV_MIN_CAMERA_ZOOM, Math.round((value ?? RIDGE_DEFAULT_CAMERA_ZOOM) * 100) / 100)
   );
+}
+
+export function resolveRidgeDevDebugSettings(
+  value: Partial<RidgeDevDebugSettings> | undefined
+): RidgeDevDebugSettings {
+  return {
+    ...RIDGE_DEV_DEFAULT_DEBUG_SETTINGS,
+    ...value
+  };
 }
 
 export function resolveRidgeDevTeleportPosition(

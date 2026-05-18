@@ -34,8 +34,7 @@ import {
 } from '../blockout';
 import { getRidgeWorldMemories } from '../worldMemory';
 import {
-  shouldShowCickaInteractionPrompt,
-  type CickaInteractionCopy
+  shouldShowCickaInteractionPrompt
 } from '../cicka/interaction';
 import {
   createCickaAnimations,
@@ -51,14 +50,20 @@ import {
   applyRidgeDevTeleportToPlayer,
   RIDGE_DEFAULT_CAMERA_ZOOM,
   RIDGE_PLAYER_SPAWN_OFFSET_Y,
+  resolveRidgeDevDebugSettings,
   resolveRidgeDevCameraZoom,
   type RidgeDevControls
 } from './ridgeDevControls';
 import { createRidgeBlockoutPresentation } from './ridgeBlockoutPresentation';
 import { createRidgeLandmarkPresentation } from './ridgeLandmarkPresentation';
 import {
+  createRidgeDebugOverlay,
+  type RidgeDebugOverlay
+} from './ridgeDebugOverlay';
+import {
   createRidgeInteractionTargets,
   type RidgeInteractionEffect,
+  type RidgeInteractionTarget,
   type RidgeInteractionTargetId
 } from './ridgeInteractionTargets';
 
@@ -88,6 +93,9 @@ export class RidgeScene extends Phaser.Scene {
   private resumePosition?: { x: number; y: number };
   private ridgeDevControls?: RidgeDevControls;
   private currentGeometry?: RidgeBlockoutGeometry;
+  private ridgeInteractionTargets: RidgeInteractionTarget[] = [];
+  private ridgeDebugOverlay?: RidgeDebugOverlay;
+  private ridgeSpawnPosition?: { x: number; y: number };
   private lastCameraZoom = RIDGE_DEFAULT_CAMERA_ZOOM;
 
   constructor() {
@@ -131,6 +139,9 @@ export class RidgeScene extends Phaser.Scene {
       stampIds: ridgeProgress.stampIds
     });
     this.currentGeometry = geometry;
+    this.ridgeInteractionTargets = [];
+    this.ridgeDebugOverlay?.destroy();
+    this.ridgeDebugOverlay = undefined;
     const facts = compileRidgeBlockoutFacts(blockout, {
       geometry
     });
@@ -167,13 +178,16 @@ export class RidgeScene extends Phaser.Scene {
     });
     this.cickaPerch = landmarkPresentation.cickaPerch;
     this.createPlayer(blockoutPresentation.platforms, facts, geometry);
-    this.createRidgeInteractions(
-      messages.navigation.interact,
-      messages.scenes.ridge.cicka.interaction,
-      facts
-    );
+    this.ridgeInteractionTargets = createRidgeInteractionTargets({
+      facts,
+      cickaPerch: this.cickaPerch,
+      cickaInteractionCopy: messages.scenes.ridge.cicka.interaction,
+      getWorldMemories: () => getRidgeWorldMemories(bridgeStore.getState().progress.ridge)
+    });
+    this.createRidgeInteractions(messages.navigation.interact, this.ridgeInteractionTargets);
     this.setPaused(this.isPaused);
     this.playerRuntime?.syncAppearance();
+    this.syncDevRuntimeState();
   }
 
   update(_time: number, delta: number): void {
@@ -184,12 +198,12 @@ export class RidgeScene extends Phaser.Scene {
     }
     const playerUpdate = this.playerRuntime?.update();
     if (!playerUpdate || playerUpdate.paused) {
-      this.publishDevPlayerSnapshot();
+      this.syncDevRuntimeState();
       return;
     }
 
     if (playerUpdate.commands.exitContext) {
-      this.publishDevPlayerSnapshot();
+      this.syncDevRuntimeState();
       this.onClose();
       return;
     }
@@ -217,7 +231,7 @@ export class RidgeScene extends Phaser.Scene {
 
     if (!interaction) {
       this.interactPrompt?.setVisible(false);
-      this.publishDevPlayerSnapshot();
+      this.syncDevRuntimeState();
       return;
     }
 
@@ -238,12 +252,12 @@ export class RidgeScene extends Phaser.Scene {
       })
     ) {
       this.interactPrompt?.setVisible(false);
-      this.publishDevPlayerSnapshot();
+      this.syncDevRuntimeState();
       return;
     }
 
     this.interactPrompt?.setPosition(interaction.prompt.x, interaction.prompt.y).setVisible(true);
-    this.publishDevPlayerSnapshot();
+    this.syncDevRuntimeState();
   }
 
   private createPlayer(
@@ -252,12 +266,13 @@ export class RidgeScene extends Phaser.Scene {
     geometry: RidgeBlockoutGeometry
   ): void {
     const spawn = facts.spawn;
+    this.ridgeSpawnPosition = {
+      x: spawn.x,
+      y: spawn.y + RIDGE_PLAYER_SPAWN_OFFSET_Y
+    };
     const playerRuntime = createSideViewPlayerRuntime({
       scene: this,
-      start: {
-        x: spawn.x,
-        y: spawn.y + RIDGE_PLAYER_SPAWN_OFFSET_Y
-      },
+      start: this.ridgeSpawnPosition,
       resumePosition: this.resumePosition,
       resumeClamp: {
         minX: geometry.bounds.x + RIDGE_PLAYER_EDGE_PADDING,
@@ -312,8 +327,7 @@ export class RidgeScene extends Phaser.Scene {
 
   private createRidgeInteractions(
     promptText: string,
-    cickaInteractionCopy: CickaInteractionCopy,
-    facts: RidgeBlockoutFacts
+    targets: RidgeInteractionTarget[]
   ): void {
     this.interactPrompt?.destroy();
 
@@ -330,12 +344,7 @@ export class RidgeScene extends Phaser.Scene {
     >({
       interactRadius: 72,
       exitEffect: { kind: 'close' },
-      targets: createRidgeInteractionTargets({
-        facts,
-        cickaPerch: this.cickaPerch,
-        cickaInteractionCopy,
-        getWorldMemories: () => getRidgeWorldMemories(bridgeStore.getState().progress.ridge)
-      })
+      targets
     });
   }
 
@@ -352,10 +361,36 @@ export class RidgeScene extends Phaser.Scene {
       this.playerRuntime?.cameraRuntime?.refresh();
     }
 
+    const resetRequest = this.ridgeDevControls.consumeResetRequest?.();
+    if (!this.player) return;
+
+    if (resetRequest && this.ridgeSpawnPosition) {
+      this.movePlayerForDev({
+        x: this.ridgeSpawnPosition.x,
+        y: this.ridgeSpawnPosition.y
+      });
+      return;
+    }
+
     const request = this.ridgeDevControls.consumeTeleportRequest?.();
-    if (!request || !this.player) return;
+    if (!request) return;
 
     const position = applyRidgeDevTeleportToPlayer(this.player, request);
+    this.refreshTraversalRuntimeSafePosition(position);
+    this.playerRuntime?.cameraRuntime?.refresh();
+  }
+
+  private movePlayerForDev(position: { x: number; y: number }): void {
+    if (!this.player) return;
+    this.player.setPosition(position.x, position.y);
+    this.player.setVelocityX(0);
+    this.player.setVelocityY(0);
+    this.player.body.setAllowGravity(true);
+    this.refreshTraversalRuntimeSafePosition(position);
+    this.playerRuntime?.cameraRuntime?.refresh();
+  }
+
+  private refreshTraversalRuntimeSafePosition(position: { x: number; y: number }): void {
     if (this.currentGeometry) {
       this.traversalRuntime = createRidgeTraversalRuntime({
         geometry: this.currentGeometry,
@@ -364,11 +399,28 @@ export class RidgeScene extends Phaser.Scene {
     }
   }
 
-  private publishDevPlayerSnapshot(): void {
-    if (!import.meta.env.DEV || !this.ridgeDevControls || !this.player) return;
-    this.ridgeDevControls.publishPlayerSnapshot?.({
-      x: this.player.x,
-      y: this.player.y
+  private syncDevRuntimeState(): void {
+    if (!import.meta.env.DEV || !this.ridgeDevControls) return;
+    if (this.player) {
+      this.ridgeDevControls.publishPlayerSnapshot?.({
+        x: this.player.x,
+        y: this.player.y
+      });
+    }
+    this.renderDevDebugOverlay();
+  }
+
+  private renderDevDebugOverlay(): void {
+    if (!import.meta.env.DEV || !this.ridgeDevControls || !this.currentGeometry) return;
+    this.ridgeDebugOverlay ??= createRidgeDebugOverlay(this);
+    this.ridgeDebugOverlay.render({
+      geometry: this.currentGeometry,
+      interactionTargets: this.ridgeInteractionTargets,
+      player: this.player,
+      settings: resolveRidgeDevDebugSettings(
+        this.ridgeDevControls.resolveDebugSettings?.()
+      ),
+      traversalState: this.traversalRuntime?.getState()
     });
   }
 }

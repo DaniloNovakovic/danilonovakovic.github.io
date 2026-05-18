@@ -447,9 +447,9 @@ class RidgeTraversalRuntimeImpl implements RidgeTraversalRuntime {
     const bottomBandY = this.geometry.bounds.y +
       this.geometry.bounds.height -
       RIDGE_FALL_RECOVERY_THRESHOLD_Y;
-    if (player.y >= bottomBandY) return false;
-
     const bottomY = getPlayerBottomY(player);
+    if (bottomY >= bottomBandY) return false;
+
     const ramp = resolveWalkableRampSurfaceY(
       this.geometry.assistZones,
       { x: player.x, y: bottomY },

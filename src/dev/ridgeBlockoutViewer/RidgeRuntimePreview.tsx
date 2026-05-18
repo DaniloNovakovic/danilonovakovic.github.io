@@ -4,6 +4,8 @@ import { bridgeActions, useBridgeState } from '@/game/bridge/store';
 import { RIDGE_SCENE_ID } from '@/game/scenes/sceneIds';
 import type { RidgeDevControls } from '@/game/scenes/ridge/runtime/ridgeDevControls';
 
+function ignorePreviewSceneClose(): void {}
+
 export function RidgeRuntimePreview({
   previewZoom,
   ridgeDevControls
@@ -47,7 +49,7 @@ export function RidgeRuntimePreview({
         isPaused={bridge.isPaused || bridge.loadingSceneId !== null}
         onEnterScene={bridgeActions.enterScene}
         onOpenOverlay={bridgeActions.openOverlay}
-        onReturnToOverworld={bridgeActions.returnToOverworld}
+        onReturnToOverworld={ignorePreviewSceneClose}
         presentationMode="portrait-cover"
         ridgeDevControls={ridgeDevControls}
       />
