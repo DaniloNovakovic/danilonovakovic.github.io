@@ -7,9 +7,8 @@ This context defines the game-design language for the gamified portfolio and its
 **Ridge Map Language**:
 A human- and agent-editable source notation that describes Ridge topology, room
 blockouts, traversal primitives, shortcuts, anchors, and Cicka Home mutation
-declarations as source data. It may be schema-backed text such as JSONC rather
-than a custom ASCII-only DSL, as long as it remains readable and strictly
-validated.
+declarations as source data. It may be typed TypeScript rather than a custom
+ASCII-only DSL, as long as it remains readable and strictly validated.
 _Avoid_: map editor, final art map
 
 **Ridge Blockout Source**:

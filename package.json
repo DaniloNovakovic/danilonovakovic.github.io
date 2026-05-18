@@ -11,6 +11,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "docs:check": "node scripts/check-docs.mjs",
+    "ridge:source": "node scripts/generate-ridge-blockout-sources.mjs",
+    "ridge:source:check": "node scripts/generate-ridge-blockout-sources.mjs --check",
     "lint": "eslint . --cache",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",

@@ -3,10 +3,10 @@
 Status: accepted.
 
 Ridge blockout authoring will move from the current custom ASCII-first DSL toward
-an AI-readable JSONC Ridge Blockout Source with a build-time Ridge Source
-Contract. The source remains optimized for Danilo and AI level-design agents to
-read and edit, while a generator validates the source and emits a committed
-typed TypeScript artifact for runtime and future editor imports.
+an AI-readable typed TypeScript Ridge Blockout Source with a build-time Ridge
+Source Contract. The source remains optimized for Danilo and AI level-design
+agents to read and edit, while a generator validates the source and emits a
+committed typed TypeScript artifact for runtime and future editor imports.
 
 ## Considered Options
 
@@ -14,14 +14,16 @@ typed TypeScript artifact for runtime and future editor imports.
 - Store dense grid cells as raw numeric tile IDs, matching common tilemap
   runtime formats.
 - Use external editor formats such as Tiled or LDtk as the primary source.
-- Use JSONC authoring source with readable grid symbols, an explicit tile
-  registry, build-time validation, and committed generated TypeScript output.
+- Use typed TypeScript authoring source with readable grid symbols, an explicit
+  tile registry, build-time validation, and committed generated TypeScript
+  output.
 
-We chose JSONC authoring plus generated TypeScript because Ridge needs source
-files that are easy for AI agents to modify directly, but runtime code should
-depend on typed compiled data rather than loose strings or runtime-only parser
-conventions. Numeric Runtime Tile IDs remain part of the compiled layer, not the
-primary authoring surface.
+We chose typed TypeScript authoring plus generated TypeScript because Ridge
+needs source files that are easy for AI agents to modify directly, while source
+imports should still fail type-safely when the contract changes. Runtime code
+should depend on typed compiled data rather than loose strings or runtime-only
+parser conventions. Numeric Runtime Tile IDs remain part of the compiled layer,
+not the primary authoring surface.
 
 ## Consequences
 
