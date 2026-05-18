@@ -13,26 +13,35 @@ export type RidgePreviewInputOwner = 'game' | 'panel';
 
 export function RidgeRuntimePreview({
   inputOwner,
+  isActive,
   onClaimGameInput,
   previewZoom,
   ridgeDevControls
 }: {
   inputOwner: RidgePreviewInputOwner;
+  isActive: boolean;
   onClaimGameInput: () => void;
   previewZoom: number;
   ridgeDevControls: RidgeDevControls;
 }) {
   const bridge = useBridgeState();
   const previewRef = useRef<HTMLElement | null>(null);
-  const isInputPaused = bridge.isPaused || bridge.loadingSceneId !== null || inputOwner === 'panel';
-  const inputStatusLabel = inputOwner === 'panel'
-    ? 'Panel focus'
-    : bridge.isPaused || bridge.loadingSceneId !== null
-      ? 'Runtime paused'
-      : 'Game input';
-  const pauseReason = inputOwner === 'panel' ? 'Panel focus' : 'Runtime paused';
+  const isInputPaused =
+    !isActive || bridge.isPaused || bridge.loadingSceneId !== null || inputOwner === 'panel';
+  const inputStatusLabel = !isActive
+    ? 'Model view'
+    : inputOwner === 'panel'
+      ? 'Panel focus'
+      : bridge.isPaused || bridge.loadingSceneId !== null
+        ? 'Runtime paused'
+        : 'Game input';
+  const pauseReason = !isActive
+    ? 'Model view'
+    : inputOwner === 'panel'
+      ? 'Panel focus'
+      : 'Runtime paused';
   const showPausedOverlay =
-    isInputPaused && bridge.loadingSceneId === null && bridge.activeOverlayId === null;
+    isActive && isInputPaused && bridge.loadingSceneId === null && bridge.activeOverlayId === null;
   const presentationMode = getPhaserScenePresentationMode(bridge.activeSceneId);
   const isRidgeSceneActive = bridge.activeSceneId === RIDGE_SCENE_ID;
 
@@ -52,6 +61,7 @@ export function RidgeRuntimePreview({
   }, []);
 
   function claimGameInput(): void {
+    if (!isActive) return;
     onClaimGameInput();
     previewRef.current?.focus({ preventScroll: true });
   }
@@ -71,19 +81,24 @@ export function RidgeRuntimePreview({
   return (
     <section
       aria-label="Ridge runtime preview game input area"
-      className="relative min-h-0 min-w-0 overflow-hidden border-4 border-[#1a1a1a] bg-[#fbfbf9] shadow-[7px_7px_0_rgba(26,26,26,1)]"
+      aria-hidden={!isActive}
+      className={[
+        'relative h-full min-h-0 min-w-0 overflow-hidden border-4 border-[#1a1a1a] bg-[#fbfbf9] shadow-[7px_7px_0_rgba(26,26,26,1)]',
+        isActive ? '' : 'invisible pointer-events-none'
+      ].join(' ')}
       data-testid="ridge-runtime-preview"
       onFocus={(event) => {
-        if (event.target === event.currentTarget) {
+        if (isActive && event.target === event.currentTarget) {
           onClaimGameInput();
         }
       }}
       onPointerDown={(event) => {
+        if (!isActive) return;
         if ((event.target as HTMLElement).closest('[data-ridge-preview-focus-button]')) return;
         claimGameInput();
       }}
       ref={previewRef}
-      tabIndex={0}
+      tabIndex={isActive ? 0 : -1}
     >
       <div className="absolute left-2 top-2 z-20 max-w-[min(16rem,calc(100%-1rem))] border-2 border-[#1a1a1a] bg-[#fbfbf9]/88 px-2 py-1.5 shadow-[3px_3px_0_rgba(26,26,26,1)]">
         <p className="font-mono text-[10px] font-black uppercase tracking-widest text-[#5a554f]">

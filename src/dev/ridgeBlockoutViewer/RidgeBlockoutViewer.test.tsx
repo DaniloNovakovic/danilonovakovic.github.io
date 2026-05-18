@@ -7,6 +7,8 @@ import { bridgeActions, bridgeStore } from '@/game/bridge/store';
 import { RIDGE_SCENE_ID, STAMPEDE_SKETCH_SCENE_ID } from '@/game/scenes/sceneIds';
 import type { RidgeDevControls } from '@/game/scenes/ridge/runtime/ridgeDevControls';
 import RidgeBlockoutViewer from './RidgeBlockoutViewer';
+import { createRidgeBlockoutViewerModel } from './model';
+import { fitRoomToViewport, getWorldTransform } from './modelViewport';
 
 let lastRidgeDevControls: RidgeDevControls | undefined;
 let lastReturnToOverworld: (() => void) | undefined;
@@ -308,6 +310,66 @@ describe('RidgeBlockoutViewer', () => {
     expect(window.location.search).toContain('view=model');
   });
 
+  it('focuses the model view on the room containing the latest preview player snapshot', async () => {
+    const model = createRidgeBlockoutViewerModel();
+    const cickaHome = getViewerRoom(model, 'cicka_home');
+    render(<RidgeBlockoutViewer />);
+
+    act(() => {
+      lastRidgeDevControls?.publishPlayerSnapshot?.({
+        x: cickaHome.x + cickaHome.width / 2,
+        y: cickaHome.y + cickaHome.height / 2
+      });
+    });
+    await userEvent.click(screen.getByRole('button', { name: 'Model' }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ridge-viewer-world').getAttribute('transform')).toBe(
+        getExpectedRoomTransform(cickaHome)
+      );
+    });
+  });
+
+  it('focuses the nearest room when the preview player snapshot is on a connector', async () => {
+    const model = createRidgeBlockoutViewerModel();
+    const cickaHome = getViewerRoom(model, 'cicka_home');
+    render(<RidgeBlockoutViewer />);
+
+    act(() => {
+      lastRidgeDevControls?.publishPlayerSnapshot?.({
+        x: cickaHome.x - 12,
+        y: cickaHome.y + cickaHome.height / 2
+      });
+    });
+    await userEvent.click(screen.getByRole('button', { name: 'Model' }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ridge-viewer-world').getAttribute('transform')).toBe(
+        getExpectedRoomTransform(cickaHome)
+      );
+    });
+  });
+
+  it('keeps the runtime preview mounted and paused while inspecting the model', async () => {
+    render(<RidgeBlockoutViewer />);
+
+    expect(await screen.findByText('Runtime scene: ridge')).not.toBeNull();
+    await userEvent.click(screen.getByRole('button', { name: 'Model' }));
+
+    const preview = screen.getByTestId('ridge-runtime-preview');
+    expect(bridgeStore.getState().activeSceneId).toBe(RIDGE_SCENE_ID);
+    expect(lastGameIsPaused).toBe(true);
+    expect(preview.hidden).toBe(false);
+    expect(preview.getAttribute('aria-hidden')).toBe('true');
+    expect(preview.className).toContain('invisible');
+    expect(preview.tabIndex).toBe(-1);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Preview' }));
+
+    expect(screen.getByTestId('mock-ridge-game').textContent).toContain('Runtime scene: ridge');
+    expect(bridgeStore.getState().activeSceneId).toBe(RIDGE_SCENE_ID);
+  });
+
   it('renders generated blockout summary and inspection layers', () => {
     render(<RidgeBlockoutViewer />);
     fireEvent.click(screen.getByRole('button', { name: 'Model' }));
@@ -385,3 +447,20 @@ describe('RidgeBlockoutViewer', () => {
     expect(selected.textContent).toContain('cicka');
   });
 });
+
+function getViewerRoom(
+  model: ReturnType<typeof createRidgeBlockoutViewerModel>,
+  roomId: string
+) {
+  const room = model.rooms.find((candidate) => candidate.id === roomId);
+  if (!room) throw new Error(`Missing Ridge viewer room "${roomId}"`);
+  return room;
+}
+
+function getExpectedRoomTransform(room: ReturnType<typeof getViewerRoom>): string {
+  return getWorldTransform(fitRoomToViewport({
+    room,
+    viewportHeight: 700,
+    viewportWidth: 1000
+  }));
+}
