@@ -1,6 +1,5 @@
 import { Button } from '@/shared/ui';
 import { getMessages } from '@/shared/i18n';
-import { bridgeActions } from '@/game/bridge/store';
 import { isSceneId } from '@/game/scenes/sceneIds';
 import { OverlayDialogFrame } from '@/game/overlays/OverlayDialogFrame';
 import type { OverlayControllerProps } from '@/game/overlays/types';
@@ -22,6 +21,7 @@ function isTrailCardOverlayParams(params: unknown): params is TrailCardOverlayPa
 export default function TrailCardOverlay({
   params,
   close,
+  enterScene,
   titleId,
   descriptionId
 }: OverlayControllerProps) {
@@ -39,7 +39,7 @@ export default function TrailCardOverlay({
   const canEnter = !trailCard.unavailableReason && enterSceneId !== undefined;
   const enterTrail = () => {
     if (!canEnter || !enterSceneId) return;
-    bridgeActions.enterScene(enterSceneId);
+    enterScene(enterSceneId);
   };
 
   return (

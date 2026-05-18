@@ -1,31 +1,36 @@
 // @vitest-environment jsdom
 
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { bridgeActions } from '@/game/bridge/store';
+import { bridgeActions, bridgeStore } from '@/game/bridge/store';
+import { RIDGE_SCENE_ID, STAMPEDE_SKETCH_SCENE_ID } from '@/game/scenes/sceneIds';
 import type { RidgeDevControls } from '@/game/scenes/ridge/runtime/ridgeDevControls';
 import RidgeBlockoutViewer from './RidgeBlockoutViewer';
 
 let lastRidgeDevControls: RidgeDevControls | undefined;
 let lastReturnToOverworld: (() => void) | undefined;
 let lastGameIsPaused: boolean | undefined;
+let lastGamePresentationMode: string | undefined;
 
 vi.mock('@/game/shell/Game', () => ({
   default: ({
     activeSceneId,
     isPaused,
+    presentationMode,
     ridgeDevControls,
     onReturnToOverworld
   }: {
     activeSceneId: string;
     isPaused: boolean;
+    presentationMode: string;
     ridgeDevControls?: RidgeDevControls;
     onReturnToOverworld: () => void;
   }) => {
     lastRidgeDevControls = ridgeDevControls;
     lastReturnToOverworld = onReturnToOverworld;
     lastGameIsPaused = isPaused;
+    lastGamePresentationMode = presentationMode;
     return <div data-testid="mock-ridge-game">Runtime scene: {activeSceneId}</div>;
   }
 }));
@@ -41,6 +46,7 @@ describe('RidgeBlockoutViewer', () => {
     lastRidgeDevControls = undefined;
     lastReturnToOverworld = undefined;
     lastGameIsPaused = undefined;
+    lastGamePresentationMode = undefined;
   });
 
   afterEach(() => {
@@ -53,6 +59,7 @@ describe('RidgeBlockoutViewer', () => {
     lastRidgeDevControls = undefined;
     lastReturnToOverworld = undefined;
     lastGameIsPaused = undefined;
+    lastGamePresentationMode = undefined;
   });
 
   it('defaults to the runtime preview tab and boots Ridge through the game shell', async () => {
@@ -117,6 +124,89 @@ describe('RidgeBlockoutViewer', () => {
     expect(lastGameIsPaused).toBe(false);
     expect(document.activeElement).toBe(preview);
     expect(screen.queryByTestId('ridge-preview-paused-overlay')).toBeNull();
+  });
+
+  it('renders Trail Card overlays inside the preview instead of leaving a ghost pause', async () => {
+    render(<RidgeBlockoutViewer />);
+
+    act(() => {
+      bridgeActions.openOverlay('trailCard', {
+        params: {
+          title: 'Stampede Sketch',
+          mood: 'Kite overexcited ink ideas',
+          timeEstimate: '60-90 seconds',
+          rewardPreview: 'Stamp + glide pip',
+          enterSceneId: STAMPEDE_SKETCH_SCENE_ID
+        },
+        returnToSceneId: RIDGE_SCENE_ID
+      });
+    });
+
+    expect(lastGameIsPaused).toBe(true);
+    expect(screen.getByTestId('ridge-preview-input-status').textContent).toContain('Runtime paused');
+    expect(screen.queryByTestId('ridge-preview-paused-overlay')).toBeNull();
+    expect(await screen.findByRole('dialog', { name: 'Stampede Sketch' })).toBeDefined();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Back to Ridge' }));
+
+    await waitFor(() => expect(bridgeStore.getState().activeOverlay).toBeNull());
+    expect(lastGameIsPaused).toBe(false);
+    expect(screen.getByTestId('ridge-preview-input-status').textContent).toContain('Game input');
+  });
+
+  it('routes Trail Card scene entry through the preview runtime owner', async () => {
+    render(<RidgeBlockoutViewer />);
+
+    act(() => {
+      bridgeActions.openOverlay('trailCard', {
+        params: {
+          title: 'Stampede Sketch',
+          mood: 'Kite overexcited ink ideas',
+          timeEstimate: '60-90 seconds',
+          rewardPreview: 'Stamp + glide pip',
+          enterSceneId: STAMPEDE_SKETCH_SCENE_ID
+        },
+        returnToSceneId: RIDGE_SCENE_ID
+      });
+    });
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Enter' }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Runtime scene: stampedeSketch')).toBeDefined();
+    });
+    expect(bridgeStore.getState().activeOverlay).toBeNull();
+    expect(lastGameIsPaused).toBe(false);
+    expect(lastGamePresentationMode).toBe('vertical-board');
+    expect(screen.getByRole('button', { name: 'Back to Ridge' })).toBeDefined();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Back to Ridge' }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Runtime scene: ridge')).toBeDefined();
+    });
+  });
+
+  it('hosts Stampede scene UI surfaces inside the preview runtime', () => {
+    render(<RidgeBlockoutViewer />);
+
+    act(() => {
+      bridgeActions.enterScene(STAMPEDE_SKETCH_SCENE_ID);
+      bridgeActions.setSceneUiPanel(STAMPEDE_SKETCH_SCENE_ID, 'stampedeStartPrompt');
+      bridgeActions.setSceneUiStatus(STAMPEDE_SKETCH_SCENE_ID, 'stampedeStatus', {
+        timeRemainingSeconds: 68,
+        phaseLabel: 'Breather',
+        pageNoise: 0.4,
+        healthRemaining: 4,
+        contactLimit: 5
+      });
+    });
+
+    expect(screen.getByRole('dialog', { name: 'Ready?' })).toBeDefined();
+    expect(screen.getByRole('button', { name: /^start$/i })).toBeDefined();
+    expect(screen.getByText('1:08')).toBeDefined();
+    expect(screen.getByLabelText('HP 4 of 5')).toBeDefined();
+    expect(screen.getByRole('progressbar', { name: /page noise/i }).getAttribute('aria-valuenow')).toBe('40');
   });
 
   it('keeps the runtime preview in Ridge when the scene close callback fires', async () => {

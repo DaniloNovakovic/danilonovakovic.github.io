@@ -1,8 +1,15 @@
 import { useBridgeState, bridgeActions } from '@/game/bridge/store';
 import { ModalShell } from '@/shared/ui';
 import { getOverlayDefinition } from './overlayRegistry';
+import type { SceneId } from '@/game/scenes/sceneIds';
 
-export function OverlayHost() {
+interface OverlayHostProps {
+  enterScene?: (sceneId: SceneId) => void;
+}
+
+export function OverlayHost({
+  enterScene = bridgeActions.enterScene
+}: OverlayHostProps = {}) {
   const { activeOverlay } = useBridgeState();
   const ActiveOverlayComponent = activeOverlay ? getOverlayDefinition(activeOverlay.id).component : null;
 
@@ -20,6 +27,7 @@ export function OverlayHost() {
         <ActiveOverlayComponent
           params={activeOverlay.params}
           close={closeOverlay}
+          enterScene={enterScene}
           openOverlay={bridgeActions.openOverlay}
           titleId={titleId}
           descriptionId={descriptionId}

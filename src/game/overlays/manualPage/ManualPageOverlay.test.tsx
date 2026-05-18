@@ -21,6 +21,7 @@ describe('ManualPageOverlay', () => {
       <ManualPageOverlay
         params={params}
         close={vi.fn()}
+        enterScene={vi.fn()}
         openOverlay={vi.fn()}
         titleId="manual-title"
         descriptionId="manual-description"
@@ -38,6 +39,7 @@ describe('ManualPageOverlay', () => {
       <ManualPageOverlay
         params={params}
         close={close}
+        enterScene={vi.fn()}
         openOverlay={vi.fn()}
         titleId="manual-title"
         descriptionId="manual-description"

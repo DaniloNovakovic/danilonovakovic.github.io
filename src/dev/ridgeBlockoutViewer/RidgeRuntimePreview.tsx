@@ -1,7 +1,10 @@
 import { useEffect, useRef } from 'react';
 import Game from '@/game/shell/Game';
 import { bridgeActions, useBridgeState } from '@/game/bridge/store';
-import { RIDGE_SCENE_ID } from '@/game/scenes/sceneIds';
+import { OverlayHost } from '@/game/overlays/OverlayHost';
+import { SceneUiHost } from '@/game/sceneUi/SceneUiHost';
+import { getPhaserScenePresentationMode } from '@/game/sharedSceneRuntime/phaserScenePresentation';
+import { RIDGE_SCENE_ID, type SceneId } from '@/game/scenes/sceneIds';
 import type { RidgeDevControls } from '@/game/scenes/ridge/runtime/ridgeDevControls';
 
 function ignorePreviewSceneClose(): void {}
@@ -22,8 +25,16 @@ export function RidgeRuntimePreview({
   const bridge = useBridgeState();
   const previewRef = useRef<HTMLElement | null>(null);
   const isInputPaused = bridge.isPaused || bridge.loadingSceneId !== null || inputOwner === 'panel';
+  const inputStatusLabel = inputOwner === 'panel'
+    ? 'Panel focus'
+    : bridge.isPaused || bridge.loadingSceneId !== null
+      ? 'Runtime paused'
+      : 'Game input';
   const pauseReason = inputOwner === 'panel' ? 'Panel focus' : 'Runtime paused';
-  const showPausedOverlay = isInputPaused && bridge.loadingSceneId === null;
+  const showPausedOverlay =
+    isInputPaused && bridge.loadingSceneId === null && bridge.activeOverlayId === null;
+  const presentationMode = getPhaserScenePresentationMode(bridge.activeSceneId);
+  const isRidgeSceneActive = bridge.activeSceneId === RIDGE_SCENE_ID;
 
   useEffect(function bootRidgePreviewScene() {
     bridgeActions.closeOverlay();
@@ -43,6 +54,18 @@ export function RidgeRuntimePreview({
   function claimGameInput(): void {
     onClaimGameInput();
     previewRef.current?.focus({ preventScroll: true });
+  }
+
+  function enterPreviewScene(sceneId: SceneId): void {
+    bridgeActions.enterScene(sceneId);
+    onClaimGameInput();
+    requestAnimationFrame(() => {
+      previewRef.current?.focus({ preventScroll: true });
+    });
+  }
+
+  function returnToRidgePreview(): void {
+    enterPreviewScene(RIDGE_SCENE_ID);
   }
 
   return (
@@ -77,20 +100,43 @@ export function RidgeRuntimePreview({
             ].join(' ')}
             data-testid="ridge-preview-input-status"
           >
-            {isInputPaused ? 'Panel focus' : 'Game input'}
+            {inputStatusLabel}
           </span>
+          {!isRidgeSceneActive ? (
+            <button
+              className="border-2 border-[#1a1a1a] bg-[#fbfbf9] px-2 py-0.5 font-mono text-[10px] font-black uppercase tracking-widest transition-colors hover:bg-[#1a1a1a] hover:text-[#fbfbf9] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1a1a1a]"
+              data-ridge-preview-focus-button=""
+              onClick={returnToRidgePreview}
+              type="button"
+            >
+              Back to Ridge
+            </button>
+          ) : null}
         </div>
       </div>
       <Game
         activeSceneId={bridge.activeSceneId}
         chrome="bare"
         isPaused={isInputPaused}
-        onEnterScene={bridgeActions.enterScene}
+        onEnterScene={enterPreviewScene}
         onOpenOverlay={bridgeActions.openOverlay}
         onReturnToOverworld={ignorePreviewSceneClose}
-        presentationMode="portrait-cover"
+        presentationMode={presentationMode}
         ridgeDevControls={ridgeDevControls}
       />
+      <div className="pointer-events-none absolute inset-0 z-[15]">
+        <div className="pointer-events-auto">
+          <SceneUiHost placement="panel" />
+        </div>
+      </div>
+      {bridge.sceneUi.status ? (
+        <div className="pointer-events-none absolute bottom-2 left-2 right-2 z-20 flex justify-center">
+          <div className="pointer-events-auto w-[min(28rem,100%)]">
+            <SceneUiHost placement="status" />
+          </div>
+        </div>
+      ) : null}
+      <OverlayHost enterScene={enterPreviewScene} />
       {showPausedOverlay ? (
         <div
           className="absolute inset-0 z-10 flex items-center justify-center bg-[#fbfbf9]/42 backdrop-blur-[2px]"

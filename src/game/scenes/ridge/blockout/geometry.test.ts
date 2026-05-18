@@ -53,9 +53,64 @@ describe('ridge blockout geometry', () => {
       expect(connector.colliders.length).toBeGreaterThan(0);
       expect(connector.colliders.length).toBeLessThanOrEqual(2);
     });
-    expect(geometry.routeConnectors.some((connector) =>
-      connector.movement === 'ramp' && connector.colliders.length > 2
-    )).toBe(false);
+  });
+
+  it('backs ramp traversal connectors with physical bridge strips and one assist zone', () => {
+    const geometry = deriveRidgeBlockoutGeometry(RIDGE_BLOCKOUT);
+    const rampConnectors = geometry.routeConnectors.filter(
+      (connector) => connector.movement === 'ramp'
+    );
+
+    expect(rampConnectors.length).toBeGreaterThan(0);
+    rampConnectors.forEach((connector) => {
+      expect(connector.assistZones).toHaveLength(1);
+      expect(connector.assistZones[0]?.kind).toBe('ramp');
+      expect(connector.colliders.length).toBeGreaterThan(0);
+      expect(connector.colliders.every((collider) =>
+        collider.kind === 'route-connector' &&
+        collider.movement === 'ramp' &&
+        collider.routeId === 'first_walk'
+      )).toBe(true);
+    });
+  });
+
+  it('keeps generated ramp bridge strips on the authored ramp line outside solid blockers', () => {
+    const geometry = deriveRidgeBlockoutGeometry(RIDGE_BLOCKOUT);
+    const solidBlockers = geometry.gridColliders.filter((collider) => collider.kind === 'solid');
+    const rampConnectors = geometry.routeConnectors.filter(
+      (connector) => connector.movement === 'ramp'
+    );
+
+    rampConnectors.forEach((connector) => {
+      const rampZone = connector.assistZones[0];
+      connector.colliders.forEach((strip) => {
+        const surfaceY = rampZone
+          ? getSegmentYAtX(rampZone.from, rampZone.to, strip.x)
+          : undefined;
+        expect(surfaceY).toBeDefined();
+        expect(getColliderTop(strip)).toBeGreaterThanOrEqual(surfaceY ?? 0);
+        expect(getColliderTop(strip) - (surfaceY ?? 0)).toBeLessThanOrEqual(1);
+        expect(solidBlockers.some((solid) => collidersOverlap(strip, solid))).toBe(false);
+      });
+    });
+  });
+
+  it('gives the Outskirts to Cicka Home ramp a collider-backed handoff', () => {
+    const geometry = deriveRidgeBlockoutGeometry(RIDGE_BLOCKOUT);
+    const connector = geometry.routeConnectors.find(
+      (candidate) => candidate.id === 'route:first_walk:outskirts:cicka_home'
+    );
+    const solidBlockers = geometry.gridColliders.filter((collider) => collider.kind === 'solid');
+
+    expect(connector?.movement).toBe('ramp');
+    expect(connector?.colliders.length).toBeGreaterThan(3);
+    connector?.colliders.forEach((strip) => {
+      expect(solidBlockers.some((solid) => collidersOverlap(strip, solid))).toBe(false);
+    });
+    const cickaHomeLeftEdgeX = 36 * RIDGE_BLOCKOUT.cell;
+    expect(
+      Math.max(...(connector?.colliders.map((collider) => collider.x + collider.width / 2) ?? []))
+    ).toBeGreaterThanOrEqual(cickaHomeLeftEdgeX - 1);
   });
 
   it('does not generate collider platforms for future routes', () => {
@@ -185,3 +240,30 @@ describe('ridge blockout geometry', () => {
     expect(cickaToWork?.colliders).toEqual([]);
   });
 });
+
+function getColliderTop(collider: { y: number; height: number }): number {
+  return collider.y - collider.height / 2;
+}
+
+function getSegmentYAtX(
+  from: { x: number; y: number },
+  to: { x: number; y: number },
+  x: number
+): number | undefined {
+  const minX = Math.min(from.x, to.x);
+  const maxX = Math.max(from.x, to.x);
+  if (x < minX || x > maxX) return undefined;
+  const dx = to.x - from.x;
+  if (Math.abs(dx) < 0.001) return Math.min(from.y, to.y);
+  return from.y + (to.y - from.y) * ((x - from.x) / dx);
+}
+
+function collidersOverlap(
+  left: { x: number; y: number; width: number; height: number },
+  right: { x: number; y: number; width: number; height: number }
+): boolean {
+  return (
+    Math.abs(left.x - right.x) * 2 < left.width + right.width &&
+    Math.abs(left.y - right.y) * 2 < left.height + right.height
+  );
+}
