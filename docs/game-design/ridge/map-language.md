@@ -1,46 +1,54 @@
-# Ridge Map Language
+# Ridge Blockout Source
 
 Status: active runtime source and design tool.
 
-The Ridge Map Language is a small text format for designing Ridge room beats
-before final assets exist. It should be readable by Danilo, easy for agents to
-edit, and strict enough that the parser can generate a Phaser greybox, typed
-facts, traversal connectors, and progress-gated presentation inputs.
+The Ridge Blockout Source is a typed TypeScript authoring contract for
+designing Ridge room beats before final assets exist. It should be readable by
+Danilo, easy for agents to edit, and strict enough that TypeScript plus the
+source generator can produce a Phaser greybox, typed facts, traversal
+connectors, numeric tile rows, and progress-gated presentation inputs.
 
 ## Decision
 
-`folded-desk-ridge.blockout.txt` is the runtime source for Ridge greybox
-generation. It is not design prose.
+`folded-desk-ridge.source.ts` is the authoring source for Ridge greybox
+generation. It is not design prose. Runtime imports the committed generated
+artifact next to it.
 
 The first full skeleton lives in
-[`src/game/scenes/ridge/blockout/maps/folded-desk-ridge.blockout.txt`](../../../src/game/scenes/ridge/blockout/maps/folded-desk-ridge.blockout.txt).
-Parser work should use that file, not a toy example, so the language evolves
-against the real Ridge topology.
+[`src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts`](../../../src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts).
+Source-contract work should use that file, not a toy example, so the language
+evolves against the real Ridge topology.
 
-Location note: the blockout used to live under `docs/game-design/` because the
-language started as a design artifact. It now lives beside the Ridge blockout
-parser because the build imports it as raw runtime data. If it moves again,
-update the Vite raw import, this document, and ADR-0001 in the same migration.
+Location note: the blockout used to live under `docs/game-design/` and then as
+a raw `.blockout.txt` runtime import because the language started as a design
+artifact. It now lives beside the generated Ridge source artifact because the
+build checks it as typed source data. If it moves again, update the generator,
+runtime import, this document, and ADR-0001 in the same migration.
 
-The default grid cell size is **48px**, declared at the file level instead of
+The default grid cell size is **48px**, declared at the source level instead of
 hard-coded into the runtime:
 
-```txt
-language ridge-v0
-cell 48
+```ts
+export const FOLDED_DESK_RIDGE_SOURCE = {
+  language: 'ridge-v0',
+  cell: 48
+};
 ```
 
-Parsers must read the declared `cell` value and convert grid coordinates into
-world pixels from that value. A future map can change the cell size without
-rewriting every room.
+The source compiler reads the declared `cell` value and downstream runtime code
+converts grid coordinates into world pixels from that value. A future map can
+change the cell size without rewriting every room.
 
 `place x y` uses grid cells, not raw pixels:
 
-```txt
-cell 48
-
-room cicka_home
-place x=18 y=42
+```ts
+{
+  cell: 48,
+  rooms: [{
+    id: 'cicka_home',
+    place: { x: 18, y: 42 }
+  }]
+}
 ```
 
 The runtime converts this to `worldX = 18 * 48` and `worldY = 42 * 48`.
@@ -70,41 +78,53 @@ First supported output is primitive:
 - prop markers
 - environment tags
 
-Parser v0 feeds the whole seamless world into a Phaser greybox. It groups `#`
-and `_` cells into horizontal collider runs, generates first-walk connectors
-from route exit anchors, and only adds shortcut colliders when the matching
-Ridge progress exists. Final art, sprite placement polish, particles, sound,
-one-way platform behavior, and bespoke encounter logic stay outside v0.
+The generated v0 runtime artifact feeds the whole seamless world into a Phaser
+greybox. The geometry layer groups `#` and `_` cells into horizontal collider
+runs, generates first-walk connectors from route exit anchors, and only adds
+shortcut colliders when the matching Ridge progress exists. Final art, sprite
+placement polish, particles, sound, one-way platform behavior, and bespoke
+encounter logic stay outside v0.
 
 ## Design Goals
 
 - **Readable first:** a human should understand one room beat in seconds.
-- **Parseable second:** agents should be able to generate tests and Phaser
+- **Validatable second:** agents should be able to generate tests and Phaser
   greybox geometry from the same file.
 - **Fast to change:** moving a platform or exit should be a text edit.
 - **Layered:** topology, blockout geometry, and environment intent should be
   separate enough that one can change without rewriting all three.
 - **Asset-light:** symbols reserve intent before final art exists.
 
-Line comments use `//` if needed. Avoid `#` comments because `#` is the solid
-collider symbol inside grids.
+Agents should edit `.source.ts` files and then run `pnpm ridge:source`.
+`pnpm ridge:source:check` and the standard `pnpm check` command fail when a
+generated artifact is stale or when source validation rejects the contract.
+
+## Read-Only Viewer
+
+In development, `?mode=ridge-blockout` opens a read-only Ridge Blockout Viewer
+over the committed generated artifact. It renders the compiled map, tile
+interpretation, room labels, anchors, active and future routes, shortcuts,
+colliders, assist zones, rects, and validation status. The viewer is an
+inspection surface only; source edits still happen in `.source.ts` followed by
+`pnpm ridge:source`.
 
 ## Core Shape
 
-Each blockout file can declare global route logic before room beats:
+Each blockout source can declare global route logic before room beats:
 
-```txt
-language ridge-v0
-cell 48
-world folded_desk_ridge
-title Folded Desk Ridge
-spawn room=outskirts anchor=1
-
-route first_walk outskirts -> cicka_home -> work_artifact
-optional_pocket early_skill_scrap room=work_artifact kind=side_shelf
-shortcut stampede_sketch from=switchback_shelf to=cicka_home kind=fall_steer_fold_drop
-home_mutation stampede_sketch adds=stampede_note opens=fold_drop_landing
-future_route cicka_underpath outskirts -> underpath -> cicka_home
+```ts
+{
+  language: 'ridge-v0',
+  cell: 48,
+  worldId: 'folded_desk_ridge',
+  title: 'Folded Desk Ridge',
+  spawn: { roomId: 'outskirts', anchorSymbol: '1' },
+  routes: [{ id: 'first_walk', roomIds: ['outskirts', 'cicka_home', 'work_artifact'] }],
+  optionalPockets: [{ id: 'early_skill_scrap', roomId: 'work_artifact', kind: 'side_shelf' }],
+  shortcuts: [{ id: 'stampede_sketch', fromRoomId: 'switchback_shelf', toRoomId: 'cicka_home', kind: 'fall_steer_fold_drop' }],
+  homeMutations: [{ id: 'stampede_sketch', attrs: { adds: 'stampede_note', opens: 'fold_drop_landing' } }],
+  futureRoutes: [{ id: 'cicka_underpath', roomIds: ['outskirts', 'underpath', 'cicka_home'] }]
+}
 ```
 
 Global declarations:
@@ -115,42 +135,44 @@ Global declarations:
 | `route` | named intended traversal route |
 | `shortcut` | route opened by progress |
 | `future_route` | teased or not-yet-runtime route |
-| `optional_pocket` | parsed small curiosity branch; currently design data |
+| `optionalPockets` | parsed small curiosity branch; currently design data |
 | `home_mutation` | Cicka Home change declaration resolved against progress |
 
 Each room beat should have metadata plus a grid:
 
-```txt
-language ridge-v0
-cell 48
-
-room cicka_home
-title Cicka Home
-place x=18 y=42
-size 32x14
-theme desk_nest
-mood safe
-links left:outskirts up:work_artifact secret:underpath
-props desk, pinboard, memento_slots, paw_marks
-after stampede_sketch unlocks fold_drop_from:switchback
-
-grid
-................................
-...............1................
-................................
-.......M........................
-............C...................
-.............____...............
-.....######################.....
-.....#....................#.....
-.....#....?...............#.....
-############################....
-
-anchor 1 exit to=work_artifact label=up
-anchor C npc id=cicka
-anchor ? secret to=underpath
-rect camera_hint x=0 y=0 w=32 h=14
-rect cicka_safe_zone x=8 y=3 w=14 h=7
+```ts
+{
+  id: 'cicka_home',
+  title: 'Cicka Home',
+  place: { x: 18, y: 42 },
+  size: { width: 32, height: 14 },
+  theme: 'desk_nest',
+  mood: 'safe',
+  links: ['left:outskirts', 'up:work_artifact', 'secret:underpath'],
+  props: ['desk', 'pinboard', 'memento_slots', 'paw_marks'],
+  declarations: ['after stampede_sketch unlocks fold_drop_from:switchback'],
+  grid: [
+    '................................',
+    '...............1................',
+    '................................',
+    '.......M........................',
+    '............C...................',
+    '.............____...............',
+    '.....######################.....',
+    '.....#....................#.....',
+    '.....#....?...............#.....',
+    '############################....'
+  ],
+  anchors: [
+    { symbol: '1', kind: 'exit', attrs: { to: 'work_artifact', label: 'up' } },
+    { symbol: 'C', kind: 'npc', attrs: { id: 'cicka' } },
+    { symbol: '?', kind: 'secret', attrs: { to: 'underpath' } }
+  ],
+  rects: [
+    { id: 'camera_hint', x: 0, y: 0, width: 32, height: 14 },
+    { id: 'cicka_safe_zone', x: 8, y: 3, width: 14, height: 7 }
+  ]
+}
 ```
 
 Discrete room transitions can still be used later for interiors, mini-games,
@@ -158,7 +180,7 @@ basement pockets, or scenes that intentionally leave the Ridge world.
 
 ## Compiled Facts
 
-The runtime compiles parser output into typed facts before callers use it.
+The runtime compiles generated map output into typed facts before callers use it.
 Current fact groups are:
 
 | Fact | Runtime role |
@@ -221,8 +243,8 @@ Design-only v0 symbols:
 | `N` | generic NPC |
 | `M` | memento board | Cicka Home memory anchor |
 
-Parser rule: unknown symbols should fail with a clear error unless the room opts
-into a newer language version.
+Source compiler rule: unknown symbols should fail with a clear error unless the
+room opts into a newer language version.
 
 Exit anchors may include `movement=` to choose the generated traversal
 connector. v0 supports `ramp`, `jump`, `climb`, and `drop`; unknown movement
@@ -238,9 +260,10 @@ error.
 
 ## Current Runtime Output
 
-`src/game/scenes/ridge/blockout/` parses this file directly through Vite raw
-imports. `RidgeScene` renders every room into one whole-world greybox by
-default, derives typed traversal connectors from `movement=` metadata, compiles
-typed facts for presentation/interaction modules, resolves shortcuts from
-durable Ridge progress, and keeps future routes, locked shortcuts, and future
-Cicka Home mutations as inactive promises until their progress source exists.
+`src/game/scenes/ridge/blockout/` generates a committed `.generated.ts`
+artifact from the typed `.source.ts` file. `RidgeScene` renders every room into
+one whole-world greybox by default, derives typed traversal connectors from
+`movement` metadata, compiles typed facts for presentation/interaction modules,
+resolves shortcuts from durable Ridge progress, and keeps future routes, locked
+shortcuts, and future Cicka Home mutations as inactive promises until their
+progress source exists.

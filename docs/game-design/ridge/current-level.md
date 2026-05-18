@@ -7,7 +7,7 @@
 ## Ownership
 
 - **Shipped behavior:** [`player-manual.md`](../player-manual.md).
-- **Runtime spatial data:** [`folded-desk-ridge.blockout.txt`](../../../src/game/scenes/ridge/blockout/maps/folded-desk-ridge.blockout.txt).
+- **Runtime spatial data:** [`folded-desk-ridge.source.ts`](../../../src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts).
 - **Blockout language contract:** [`map-language.md`](./map-language.md).
 - **Current map target:** [`proper-map-plan.md`](./map-plans/proper-map-plan.md).
 - **Product vision:** [`summit.md`](./summit.md).
@@ -28,9 +28,9 @@ Ridge is a separate Phaser scene that can boot directly in development with:
 Current runtime characteristics:
 
 - Ridge uses shared side-view movement and camera/runtime support.
-- The scene parses the Ridge Map Language source, derives geometry, compiles
-  typed facts, and hands those facts to scene-owned presentation, traversal,
-  interaction, and Cicka Home mutation modules.
+- The scene imports the generated Ridge blockout artifact, derives geometry,
+  compiles typed facts, and hands those facts to scene-owned presentation,
+  traversal, interaction, and Cicka Home mutation modules.
 - The runtime source is the folded Ridge blockout, not a separate hand-coded
   room catalog.
 - Stampede can be reached from the Ridge Trail Card path.

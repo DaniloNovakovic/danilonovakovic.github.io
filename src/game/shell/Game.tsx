@@ -9,6 +9,7 @@ import type { PhaserScenePresentationMode } from '@/game/sharedSceneRuntime/phas
 import type { SceneId } from '@/game/scenes/sceneIds';
 import type { OverlayId } from '@/game/overlays/overlayIds';
 import type { OpenOverlayOptions } from '@/game/bridge/store';
+import type { RidgeDevControls } from '@/game/scenes/ridge/runtime/ridgeDevControls';
 
 interface GameProps {
   onEnterScene: (sceneId: SceneId) => void;
@@ -18,6 +19,7 @@ interface GameProps {
   presentationMode: PhaserScenePresentationMode;
   onReturnToOverworld: () => void;
   chrome?: 'framed' | 'bare';
+  ridgeDevControls?: RidgeDevControls;
 }
 
 export default function Game({
@@ -27,7 +29,8 @@ export default function Game({
   activeSceneId,
   presentationMode,
   onReturnToOverworld,
-  chrome = 'framed'
+  chrome = 'framed',
+  ridgeDevControls
 }: GameProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
@@ -41,7 +44,8 @@ export default function Game({
     onEnterScene,
     onOpenOverlay,
     onReturnToOverworld,
-    isPaused
+    isPaused,
+    ridgeDevControls
   });
 
   const touchControls = useGameTouchControls({ isPaused });

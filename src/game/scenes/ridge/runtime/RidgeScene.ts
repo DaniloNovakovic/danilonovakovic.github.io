@@ -47,6 +47,13 @@ import {
   createRidgeTraversalRuntime,
   type RidgeTraversalRuntime
 } from './ridgeTraversalRuntime';
+import {
+  applyRidgeDevTeleportToPlayer,
+  RIDGE_DEFAULT_CAMERA_ZOOM,
+  RIDGE_PLAYER_SPAWN_OFFSET_Y,
+  resolveRidgeDevCameraZoom,
+  type RidgeDevControls
+} from './ridgeDevControls';
 import { createRidgeBlockoutPresentation } from './ridgeBlockoutPresentation';
 import { createRidgeLandmarkPresentation } from './ridgeLandmarkPresentation';
 import {
@@ -60,9 +67,9 @@ interface RidgeSceneStartData {
   onOpenOverlay?: (overlayId: OverlayId, options?: OpenOverlayOptions) => void;
   isPaused?: boolean;
   resumePosition?: { x: number; y: number };
+  ridgeDevControls?: RidgeDevControls;
 }
 
-const PLAYER_SPAWN_OFFSET_Y = -80;
 const RIDGE_PLAYER_EDGE_PADDING = 48;
 const RIDGE_COYOTE_TIME_MS = 120;
 const RIDGE_JUMP_BUFFER_MS = 120;
@@ -79,6 +86,9 @@ export class RidgeScene extends Phaser.Scene {
   private onOpenOverlay?: (overlayId: OverlayId, options?: OpenOverlayOptions) => void;
   private isPaused = false;
   private resumePosition?: { x: number; y: number };
+  private ridgeDevControls?: RidgeDevControls;
+  private currentGeometry?: RidgeBlockoutGeometry;
+  private lastCameraZoom = RIDGE_DEFAULT_CAMERA_ZOOM;
 
   constructor() {
     super(PHASER_SCENE_KEYS.ridge);
@@ -89,6 +99,7 @@ export class RidgeScene extends Phaser.Scene {
     this.onOpenOverlay = data.onOpenOverlay;
     this.isPaused = data.isPaused ?? false;
     this.resumePosition = data.resumePosition;
+    this.ridgeDevControls = import.meta.env.DEV ? data.ridgeDevControls : undefined;
   }
 
   preload(): void {
@@ -110,12 +121,16 @@ export class RidgeScene extends Phaser.Scene {
   create(data: RidgeSceneStartData = {}): void {
     this.onClose = data.onClose ?? this.onClose;
     this.onOpenOverlay = data.onOpenOverlay ?? this.onOpenOverlay;
+    this.ridgeDevControls = import.meta.env.DEV
+      ? data.ridgeDevControls ?? this.ridgeDevControls
+      : undefined;
     const messages = getMessages();
     const ridgeProgress = bridgeStore.getState().progress.ridge;
     const blockout = RIDGE_BLOCKOUT;
     const geometry = deriveRidgeBlockoutGeometry(blockout, {
       stampIds: ridgeProgress.stampIds
     });
+    this.currentGeometry = geometry;
     const facts = compileRidgeBlockoutFacts(blockout, {
       geometry
     });
@@ -162,13 +177,19 @@ export class RidgeScene extends Phaser.Scene {
   }
 
   update(_time: number, delta: number): void {
+    this.applyDevControls();
+
     if (this.player) {
       this.traversalRuntime?.primeGrounding(this.player);
     }
     const playerUpdate = this.playerRuntime?.update();
-    if (!playerUpdate || playerUpdate.paused) return;
+    if (!playerUpdate || playerUpdate.paused) {
+      this.publishDevPlayerSnapshot();
+      return;
+    }
 
     if (playerUpdate.commands.exitContext) {
+      this.publishDevPlayerSnapshot();
       this.onClose();
       return;
     }
@@ -196,6 +217,7 @@ export class RidgeScene extends Phaser.Scene {
 
     if (!interaction) {
       this.interactPrompt?.setVisible(false);
+      this.publishDevPlayerSnapshot();
       return;
     }
 
@@ -216,10 +238,12 @@ export class RidgeScene extends Phaser.Scene {
       })
     ) {
       this.interactPrompt?.setVisible(false);
+      this.publishDevPlayerSnapshot();
       return;
     }
 
     this.interactPrompt?.setPosition(interaction.prompt.x, interaction.prompt.y).setVisible(true);
+    this.publishDevPlayerSnapshot();
   }
 
   private createPlayer(
@@ -232,7 +256,7 @@ export class RidgeScene extends Phaser.Scene {
       scene: this,
       start: {
         x: spawn.x,
-        y: spawn.y + PLAYER_SPAWN_OFFSET_Y
+        y: spawn.y + RIDGE_PLAYER_SPAWN_OFFSET_Y
       },
       resumePosition: this.resumePosition,
       resumeClamp: {
@@ -268,10 +292,10 @@ export class RidgeScene extends Phaser.Scene {
           width: GAME_DESIGN_WIDTH,
           height: GAME_DESIGN_HEIGHT
         },
-        profile: {
-          zoom: 1,
+        resolveProfile: () => ({
+          zoom: this.resolveCameraZoom(),
           followOffsetY: 0
-        }
+        })
       }
     });
     this.playerRuntime = playerRuntime;
@@ -312,6 +336,39 @@ export class RidgeScene extends Phaser.Scene {
         cickaInteractionCopy,
         getWorldMemories: () => getRidgeWorldMemories(bridgeStore.getState().progress.ridge)
       })
+    });
+  }
+
+  private resolveCameraZoom(): number {
+    return resolveRidgeDevCameraZoom(this.ridgeDevControls?.resolveCameraZoom?.());
+  }
+
+  private applyDevControls(): void {
+    if (!import.meta.env.DEV || !this.ridgeDevControls) return;
+
+    const nextCameraZoom = this.resolveCameraZoom();
+    if (nextCameraZoom !== this.lastCameraZoom) {
+      this.lastCameraZoom = nextCameraZoom;
+      this.playerRuntime?.cameraRuntime?.refresh();
+    }
+
+    const request = this.ridgeDevControls.consumeTeleportRequest?.();
+    if (!request || !this.player) return;
+
+    const position = applyRidgeDevTeleportToPlayer(this.player, request);
+    if (this.currentGeometry) {
+      this.traversalRuntime = createRidgeTraversalRuntime({
+        geometry: this.currentGeometry,
+        initialSafePosition: position
+      });
+    }
+  }
+
+  private publishDevPlayerSnapshot(): void {
+    if (!import.meta.env.DEV || !this.ridgeDevControls || !this.player) return;
+    this.ridgeDevControls.publishPlayerSnapshot?.({
+      x: this.player.x,
+      y: this.player.y
     });
   }
 }

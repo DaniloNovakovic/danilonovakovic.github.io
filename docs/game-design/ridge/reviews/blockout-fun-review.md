@@ -1,7 +1,7 @@
 # Ridge Blockout Fun Review
 
 Status: design review of
-[`folded-desk-ridge.blockout.txt`](../../../../src/game/scenes/ridge/blockout/maps/folded-desk-ridge.blockout.txt).
+[`folded-desk-ridge.source.ts`](../../../../src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts).
 
 This review scores the first text skeleton against the current research notes on
 2D map design, Lucky Luna, and Nine Sols.
@@ -20,7 +20,7 @@ loops. It is not yet a strong playable map because the movement texture is
 still mostly generic platforms, and the Lucky Luna-style descent is isolated in
 a future optional pocket instead of being part of the first-route joy.
 
-Do one map-quality pass before parser implementation.
+Do one map-quality pass before source compiler/runtime implementation.
 
 Update: Blockout Pass 2 resolved the first hard blockers:
 
@@ -46,7 +46,7 @@ Update: Blockout Pass 2 resolved the first hard blockers:
 Initial total: **76 / 100**.
 
 Post-pass design estimate: **80 / 100**. Movement feel remains unverified until
-the parser renders the whole world and we can actually traverse it.
+the runtime renders the whole world and we can actually traverse it.
 
 ## What Works
 
@@ -86,7 +86,7 @@ the parser renders the whole world and we can actually traverse it.
 
 5. **Seamless placement has collider conflicts.**
    Current `place` coordinates cause non-empty grid cells from different rooms
-   to overlap. That may be fine for a drawing, but not for parser output.
+   to overlap. That may be fine for a drawing, but not for runtime output.
 
 ## Required Pre-Parser Fixes
 
@@ -107,14 +107,14 @@ the parser renders the whole world and we can actually traverse it.
 
 5. **Add sightline metadata.**
    Use rectangles such as `rect sightline_to_relay` and
-   `rect cicka_visible_below` so parser/debug overlay can confirm the map's
+   `rect cicka_visible_below` so a debug overlay can confirm the map's
    mental-model promises.
 
 ## Recommended Next Move
 
-Blockout Pass 2 is done. The next move is parser v0:
+Blockout Pass 2 is done. The next move is source compiler/runtime v0:
 
-- parse the folded desk Ridge blockout source
+- validate and compile the folded desk Ridge blockout source
 - validate grid dimensions and non-empty overlaps
 - render whole-world greybox
 - expose debug overlay for room bounds, anchors, shortcuts, and sightlines

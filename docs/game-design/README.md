@@ -7,7 +7,7 @@ file here as equally active.
 ## Source Of Truth
 
 - **Shipped player behavior:** [`player-manual.md`](./player-manual.md).
-- **Runtime spatial source:** [`folded-desk-ridge.blockout.txt`](../../src/game/scenes/ridge/blockout/maps/folded-desk-ridge.blockout.txt), described by
+- **Runtime spatial source:** [`folded-desk-ridge.source.ts`](../../src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts), described by
   [`ridge/map-language.md`](./ridge/map-language.md).
 - **Current Ridge level read:** [`ridge/current-level.md`](./ridge/current-level.md).
 - **Current map target:** [`ridge/map-plans/proper-map-plan.md`](./ridge/map-plans/proper-map-plan.md).
@@ -41,12 +41,12 @@ then reference/provenance.
   issue tracker.
 - **[Sketchbook Ridge Proper Map Plan](./ridge/map-plans/proper-map-plan.md)**:
   Current target map plan for the folded, multi-screen Ridge around Cicka Home.
-- **[Ridge Map Language](./ridge/map-language.md)**: Text-first blockout
-  language for Ridge room beats, environment tags, traversal primitives, and
+- **[Ridge Blockout Source](./ridge/map-language.md)**: Typed blockout source
+  contract for Ridge room beats, environment tags, traversal primitives, and
   greybox generation.
-- **[Ridge Blockout Source](../../src/game/scenes/ridge/blockout/maps/folded-desk-ridge.blockout.txt)**:
-  Current runtime spatial data for the seamless Ridge world. It lives under
-  the Ridge runtime because it is build input, not prose.
+- **[Ridge Blockout Source](../../src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts)**:
+  Current authoring data for the seamless Ridge world. It lives under the
+  Ridge runtime because it is build input, not prose.
 - **[Ridge Blockout Fun Review](./ridge/reviews/blockout-fun-review.md)**: Design review
   of the first blockout skeleton.
 - **[Sketchbook Ridge Topology Spike](./ridge/map-plans/topology-spike.md)**:
@@ -76,7 +76,7 @@ then reference/provenance.
   `ridge/map-plans/proper-map-plan.md`,
   `mini-games/potassium-slip.md`, and `mini-games/stampede-sketch.md`.
 - **Current runtime source:**
-  `../../src/game/scenes/ridge/blockout/maps/folded-desk-ridge.blockout.txt`.
+  `../../src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts`.
 - **Current runtime source documentation:** `ridge/map-language.md`.
 - **Planning history / design review:** `ridge/map-plans/topology-spike.md`
   and `ridge/reviews/blockout-fun-review.md`.

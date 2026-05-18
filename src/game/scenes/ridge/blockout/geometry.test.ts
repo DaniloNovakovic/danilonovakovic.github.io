@@ -60,7 +60,7 @@ describe('ridge blockout geometry', () => {
 
   it('does not generate collider platforms for future routes', () => {
     const geometry = deriveRidgeBlockoutGeometry(RIDGE_BLOCKOUT);
-    const futureRouteIds = new Set(RIDGE_BLOCKOUT.futureRoutes.map((route) => route.id));
+    const futureRouteIds = new Set<string>(RIDGE_BLOCKOUT.futureRoutes.map((route) => route.id));
 
     expect(geometry.colliders.some((collider) =>
       collider.routeId !== undefined && futureRouteIds.has(collider.routeId)
