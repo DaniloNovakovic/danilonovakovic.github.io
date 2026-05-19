@@ -157,6 +157,11 @@ Gate:
 - at least three major clears / proofs, with Potassium Circuit counting as one
   proof rather than a solo bypass
 - plus one Cicka / translator / manual insight that decodes the Relay sign
+- Relay Spire can be physically reachable before the gate is ready; the blocker
+  is that the sketchbook does not have enough living proof to send yet.
+- Treat these as proof categories, not an exact visible checklist. The path to
+  Relay should itself create enough resident help, world change, and Cicka
+  familiarity for the first ending.
 
 The gate should feel earned but not tedious. It should not require every
 mini-game or every optional mastery scene, but it should ask the player to spend
@@ -164,10 +169,16 @@ real time with the Ridge before the farewell.
 
 Ending beat:
 
-- Cicka is present at the Relay Spire as a guide to a threshold.
+- Cicka accompanies the player to the Relay Spire as a guide to a threshold.
 - The player understands she is going somewhere the player cannot follow.
+- Before the final send, the player can play guitar for Cicka as the last
+  ordinary shared comfort moment. This should echo earlier Cicka Home/Ridge
+  guitar interactions rather than appearing only at the ending.
 - The farewell is tender but not literal-heavy: no on-screen death scene, no long grief speech.
 - Cicka leaves a final paw mark or page mark, and the Ridge remains replayable after the ending.
+- Design this as the canonical first ending. Do not add multiple endings unless
+  a later story/level pass proves an alternate ending creates meaningful replay
+  value without diluting the Cicka farewell.
 - Micka, a small kitten/child presence, appears only after the player returns
   to the normal Ridge and completes or replays one mini-game post-ending, not
   during the ending sequence.

@@ -10,6 +10,7 @@
 - **Runtime spatial data:** [`folded-desk-ridge.source.ts`](../../../src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts).
 - **Blockout language contract:** [`map-language.md`](./map-language.md).
 - **Current map target:** [`proper-map-plan.md`](./map-plans/proper-map-plan.md).
+- **Story/level plan:** [`story-level-bible.md`](./story-level-bible.md).
 - **Product vision:** [`summit.md`](./summit.md).
 - **Live implementation work:** GitHub Issues.
 
@@ -37,6 +38,29 @@ Current runtime characteristics:
 - Telegraph, Domino, high ledge, underpath, and other future beats are present
   as route promises or disabled/teased anchors until their implementation
   slices exist.
+- Ridge remains a proof-of-concept surface. The current playable traversal code
+  can be replaced if the next design pass preserves the useful source contract,
+  compiler, generated facts, and viewer/debugger workflow.
+
+## Protected PoC Assets
+
+The valuable Ridge proof-of-concept investment is the authoring and QA spine,
+not the current moment-to-moment traversal model.
+
+Preserve or adapt:
+
+- Ridge Blockout Source / source contract.
+- compiler and generated spatial facts.
+- route, anchor, shortcut, collider, validation, and mutation facts.
+- read-only previewer/debugger workflow.
+- map-loading path that lets agents and Danilo inspect topology quickly.
+
+Disposable if a better Ridge emerges:
+
+- current required-jump traversal feel.
+- slope/ramp-first geometry assumptions.
+- current folded-desk room arrangement.
+- any runtime module whose main job was proving the old platformer-like route.
 
 ## Current Route Read
 
@@ -62,15 +86,16 @@ Future or optional promises in the blockout include:
 - Telegraph cord drop back to Cicka Home.
 - Domino lift back to Cicka Home.
 
-The level-design goal is that the player learns a compact vertical route, sees
-Relay early, returns to Cicka Home through earned folds or drops, and learns
-Danilo through artifacts rather than static portfolio buildings.
+The level-design goal is that the player walks a compact lived-in sketchbook
+neighborhood, sees Relay early, follows subtle Cicka field-presence hints at
+route blockers, helps tiny residents change the route, and learns Danilo
+through artifacts rather than static portfolio buildings.
 
 ## Current Landmarks
 
 - **Outskirts:** old city edge / future Overworld absorption point, Basement
   hatch promise, Potassium hint space, early Relay sightline.
-- **Cicka Home:** emotional return anchor, Cicka perch, memento/home mutation
+- **Cicka Home:** progress memory space, Cicka home base, memento/home mutation
   space, future underpath clue.
 - **Work Artifact Ledge:** first obvious work/project artifact area with a
   side-shelf skill scrap promise.
@@ -106,17 +131,108 @@ Current accepted behavior:
 
 ## Current Target
 
-The current map target is the **Vertical Folded Ridge With Cicka Switchback**
+The current map target is the **Sketchbook Neighborhood Spine With Folded Shortcuts**
 from [`proper-map-plan.md`](./map-plans/proper-map-plan.md).
+
+Before implementing the next Ridge runtime or blockout rewrite, write and accept
+a prose story/level/character plan for the core Exploration Map scenes and
+their route blockers. Start from the middle/end emotional and progression beats,
+then work backward to the opening so the first scene teaches the right promise.
+Mini-games, shortcuts, and optional platforming pockets may stay rougher in
+this prose pass, but the core overworld/Ridge route blockers should be legible
+in words first.
+
+The accepted ending anchor is the **Cicka Threshold Farewell**: Cicka recurs
+through the Ridge as field presence, accompanies the player to the Relay Spire
+threshold, and then departs somewhere the player cannot follow. The ending
+should stay replayable, tender, and non-literal rather than becoming a death
+scene or grief speech.
+Design the canonical first ending before designing optional endings. Multiple
+endings are not required for the Ridge; add alternate endings only if a later
+story/level pass proves they create meaningful replay value without weakening
+the Cicka farewell.
+The first prose artifact should be a short ending sequence outline before any
+required Resident Room Beats are designed: arrival state, Relay readiness,
+Cicka's final field presence, farewell action, final mark, and return-to-Ridge
+state.
+
+Accepted first ending outline:
+
+1. The player reaches Relay Spire and can stand there before it is ready.
+2. Once Living Proof is enough, the Relay sign becomes readable.
+3. Cicka appears in her final field-presence spot, calm and familiar.
+4. The player shares a quiet Guitar Farewell with Cicka, ideally under a warm
+   sunset or other cozy threshold light.
+5. The player activates or sends the sketchbook.
+6. Cicka walks with the player to the threshold, pauses, leaves one final
+   paw/page mark, then departs somewhere unreachable.
+7. The player returns to Ridge after the ending, with the final mark preserved
+   and the world still open.
+
+The guitar should be established earlier as a meaningful comfort item: something
+the player can pick up, carry, and play in the world, especially at Cicka Home.
+Petting can be a smaller recurring affection interaction. A hug is optional and
+should wait until character art can support it without making the farewell feel
+awkward or over-staged.
+The guitar should enter mid-route through a Resident Room Beat as an entrusted
+reward or responsibility, not as a random pickup. A resident can give or lend it
+after the player helps with a local music/concert problem, then Cicka Home and
+quiet Ridge spots can teach the player that playing for Cicka is a comfort
+ritual before the Relay Spire ending.
+Middle required Resident Room Beat: **Concert Crossing Beat**. A blocked concert/traffic crossing
+halts the route because the local guitarist cannot play, the paper-stage setup
+is tangled, or the guitar needs a small repair. Cicka subtly points attention to
+the guitar case, loose string, or blocked crossing. The player learns a small
+Guitar-Hero-like performance mini-game, helps the concert continue, the crossing
+opens, and the guitar is entrusted to the player afterward. Keep the comedy
+gentle; avoid making the guitarist a joke-only drunk if that undercuts the later
+tribute.
+Because dialogue UI, character assets, route blockers, trees/props, and audio
+are already enough production load, the Concert Crossing Beat needs a non-arcade
+fallback: conversation, collection, practice together, or a forgiving auto-play
+path can resolve the main route while the Guitar-Hero-like mini-game remains the
+ideal or optional version.
+
+The final blocker should be a **Living Proof Gate**. The Relay Spire can be
+physically reachable early, but it should not send the sketchbook until the path
+has created enough resident/world changes, mini-game proofs, and Cicka
+familiarity to make the destination emotionally and semantically ready. Avoid an
+exact visible checklist unless testing shows the player needs clearer feedback.
+Planning assumption: start with 2-3 required main-path Resident Help Beats
+before the first ending, plus optional extra residents for return play. Treat the
+exact count as a Level Designer and Story/Tone tuning variable, not a fixed
+rule.
 
 The target asks for:
 
-- no long hallway row
-- vertical shelves and switchbacks
-- Cicka Home near the lower-middle as an emotional return anchor
-- main route traversal that stays mobile-safe
+- a readable mostly forward neighborhood route toward Relay Spire
+- Relay Spire physically reachable before it can send
+- Living Proof Gate made from enough visible world changes, proofs, and Cicka
+  familiarity rather than an exact checklist
+- first ending path completable through conversations, collection, authored
+  traversal, Resident Room Beats, and world changes without requiring full
+  arcade mini-games
+- Mini-Game Entrances as optional alternate path unlockers, proof sources,
+  rewards, or pure side fun
+- non-arcade fallback for any required beat that contains arcade-like interaction
+- tiny resident problems that create visible route changes
+- first v0 Resident Help Beat as a required soft gate: a closed/taped bridge or
+  missing-plank crossing with an obvious local solution
+- 2-3 required main-path Resident Room Beats before the first ending, each
+  centered on a Resident Help Beat, with optional extra residents only if they
+  add texture instead of errand fatigue
+- Cicka field presence in every required Resident Help Beat, with her role
+  varying from subtle obstacle hint to changed-object observer to quiet trust marker
+- optional residents, NPCs, interactive props, and chill spaces that can offer
+  mini-games, atmosphere, jokes, or company without solving barricades
+- Cicka Home as a progress memory space, not the only emotional anchor
+- no main-path slope reliance in v0; use chunky stairs, cords, shelves, bridges,
+  lifts, and soft drops
+- no required jump button on the v0 main route; use authored climb, descend,
+  drop, lift, bridge, enter, and inspect interactions instead
+- main route traversal that stays mobile-safe and object-driven
 - first-walk route mastery before dexterity
-- Cicka-return shortcuts after mini-game clears
+- folded shortcuts after mini-game clears or resident help beats
 - artifacts as physical learning objects, not resume modal replacements
 
 ## Not Current Scope
@@ -126,6 +242,9 @@ The target asks for:
 - Adding a generic mini-game framework.
 - Adding stored sticker state.
 - Making Cicka Home a checklist hub, shop, or quest board.
+- Making Cicka a continuous follower, puzzle solver, or explicit objective giver.
+- Using slopes/ramps as required main-path traversal in the v0 Ridge blockout.
+- Requiring jump as a core Exploration Map button in the v0 main route.
 - Requiring wall jump, double jump, or precision platforming for the first
   farewell route.
 - Moving the runtime blockout source again without an explicit migration issue
