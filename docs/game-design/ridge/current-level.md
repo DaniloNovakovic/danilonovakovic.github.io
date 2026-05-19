@@ -228,19 +228,22 @@ The target asks for:
   and/or the last hill shuttle not running until the event closes properly. The
   locked route-agent is the nervous hill-shuttle driver, whose daily job and
   emotional problem both connect to the final approach. His romantic partner is
-  the shy last-stop lantern/ticket clerk, whose daily work connects the dance,
-  final shuttle, service-road barrier, and hill-road lanterns. Locked arrival
-  state: **Last Ticket + Lantern Check**. The driver waits by the shuttle with
-  the route clipboard; the clerk closes the booth ledger and lantern tokens;
-  each needs the other's sign-off before the final shuttle can leave.
+  the shy last-stop song-table volunteer, whose daily work connects the dance,
+  final shuttle, service-road barrier, and last-song timing. Locked arrival
+  state: **Last Song Table + Final Shuttle Hold**. The driver waits by the
+  shuttle with the route clipboard; the volunteer stays at the song table
+  because the final song stalls unless a trusted person covers it.
   Introduce the beat through a practical wayfinding loop: the player asks how
   to reach Relay, notices the blocked service road and shuttle sign, then
-  discovers the emotional layer through the delayed final check. Reveal the
-  relationship through a triangulated discovery flow: the driver and clerk give
-  truthful but incomplete practical answers, then nearby locals help the player
-  understand that they are avoiding each other. Conversation
-  choices can create different tones, orderings, and recoverable awkward paths,
-  but should not permanently block the first ending.
+  discovers the emotional layer through the delayed final song. Reveal the
+  relationship through a triangulated discovery flow: the driver and song-table
+  volunteer give truthful but incomplete practical answers, then nearby locals
+  help the player understand that they are avoiding each other. Do not let the
+  player solve the beat by directly confronting them with their feelings. Each
+  romantic character should need a small readiness favor before the final song,
+  shy dance, and lane-clearing handoff can happen. Conversation choices can
+  create different tones, orderings, and recoverable awkward paths, but should
+  not permanently block the first ending.
 - required route spine: Blueprint Bridge means changing the world through art,
   Concert Crossing means turning memory into comfort, Last Dance / Bachata
   Crossing means life can keep moving with someone new, then Relay Spire /

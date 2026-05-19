@@ -165,6 +165,13 @@ answers from the directly involved residents, then learns the fuller social
 context by asking nearby locals who have partial observations.
 _Avoid_: omniscient NPC reveal, instant confession, hidden-state guessing
 
+**Readiness Favor**:
+A small personal or practical favor that helps a resident become ready to take
+the next route-solving action without the player exposing private feelings or
+forcing a confession. It should reveal character and reduce a believable
+insecurity, not act as arbitrary busywork.
+_Avoid_: generic fetch quest, public romantic confrontation, puppet-master solve
+
 **Living Proof Gate**:
 A quiet ending gate where the player can physically reach the Relay Spire, but
 the sketchbook cannot send until the route has created enough visible world
@@ -233,6 +240,8 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
   emotional stakes when a beat needs to feel lived-in and grounded.
 - A **Triangulated Discovery Flow** can reveal a resident relationship without
   making the player or one NPC magically know private feelings.
+- A **Readiness Favor** can bridge the gap between knowing what a resident wants
+  and helping them act without making the player directly manage their feelings.
 - The **Cicka Threshold Farewell** resolves Cicka's recurring field guidance
   without closing the **Sketchbook Neighborhood**; the Ridge remains replayable
   with Cicka's final mark or absence-shaped changes.
