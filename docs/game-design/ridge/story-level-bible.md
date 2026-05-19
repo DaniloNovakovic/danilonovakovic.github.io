@@ -94,20 +94,20 @@ should wait until character art can support it cleanly.
 Start with 2-3 required main-path Resident Room Beats before the first ending.
 Treat the exact count as a Level Designer and Story/Tone tuning variable.
 
-Current required proof arc:
+Current required route spine:
 
 ```text
-Taped Bridge / Missing Plank -> I can change the world by making something through art.
+Blueprint Bridge -> I can change the world by making something through art.
 Concert Crossing -> I can turn memory into comfort.
 Last Dance / Bachata Crossing -> Life can keep moving with someone new.
-Relay Spire -> I am ready for Cicka's threshold farewell.
+Relay Spire / Guitar Farewell -> I am ready for Cicka's threshold farewell.
 ```
 
 | Beat | Status | Route role | Cicka role | World change |
 | --- | --- | --- | --- | --- |
 | Last Dance / Bachata Crossing | Accepted final beat candidate | Creates the last emotional readiness before Relay through a nervous dance/romance setup | Quiet observer at the edge of the dance space | Dance crossing clears; path to Relay feels emotionally ready |
 | Concert Crossing Beat | Accepted middle beat | Blocks a concert/traffic crossing and earns the guitar | Points attention to guitar case, string, stage, or crossing | Concert continues; crossing opens; guitar entrusted to player |
-| Taped Bridge / Missing Plank | Accepted first art/drawing beat | Required soft gate tutorial for resident help | Obvious subtle attention cue at unsafe edge | Bridge/crossing opens or is patched through drawing/art |
+| Blueprint Bridge | Accepted first art/drawing beat | Required soft gate tutorial for resident help | Obvious subtle attention cue at unsafe edge or blank plan | Finished bridge sketch becomes the crossing |
 
 ## Last Dance / Bachata Crossing
 
@@ -144,7 +144,7 @@ collection, practice together, or forgiving auto-play.
 Avoid making the guitarist a joke-only drunk if it undercuts the later tribute.
 Gentle comedy is welcome; the guitar's emotional role needs room to breathe.
 
-## Taped Bridge / Missing Plank
+## Blueprint Bridge
 
 The first Resident Room Beat should be a required art/drawing soft gate. It
 teaches:
@@ -153,10 +153,16 @@ teaches:
 Cicka noticed something -> a resident needs local help -> the route visibly changes
 ```
 
-Possible solutions include drawing missing planks, sketching a paper fold,
-helping a resident finish a sign/blueprint, or collecting art scraps that let
-the crossing become real. Keep it tiny, obvious, and local. It should not feel
-like a fetch quest or a test of platforming skill.
+Current recommended solution: help a resident finish a tiny bridge
+drawing/blueprint, then the finished sketch becomes the crossing. Cicka can sit
+on or near the blank/missing part of the plan.
+
+Future optional upgrade: let the player draw directly on the bridge, either as
+a visual customization or a small physics/bridge-building toy. Do not make that
+the required v0 solution.
+
+Keep it tiny, obvious, and local. It should not feel like a fetch quest or a
+test of platforming skill.
 
 ## Mini-Game Entrances
 

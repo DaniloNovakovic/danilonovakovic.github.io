@@ -216,18 +216,19 @@ The target asks for:
   rewards, or pure side fun
 - non-arcade fallback for any required beat that contains arcade-like interaction
 - tiny resident problems that create visible route changes
-- first v0 Resident Help Beat as a required soft gate: a closed/taped bridge or
-  missing-plank crossing with an obvious local art/drawing solution
+- first v0 Resident Help Beat as **Blueprint Bridge**: a required soft gate
+  where helping a resident finish a bridge drawing/blueprint makes the crossing
+  real
 - 2-3 required main-path Resident Room Beats before the first ending, each
   centered on a Resident Help Beat, with optional extra residents only if they
   add texture instead of errand fatigue
 - final required Resident Room Beat candidate as Last Dance / Bachata Crossing:
   a nervous dance/romance setup that prepares the farewell without repeating the
   Guitar Farewell
-- required proof arc: Bridge means changing the world by making something
-  through art/drawing,
-  Concert means turning memory into comfort, Dance means life can keep moving
-  with someone new, then Relay is ready for Cicka's threshold farewell
+- required route spine: Blueprint Bridge means changing the world through art,
+  Concert Crossing means turning memory into comfort, Last Dance / Bachata
+  Crossing means life can keep moving with someone new, then Relay Spire /
+  Guitar Farewell resolves Cicka's threshold farewell
 - Cicka field presence in every required Resident Help Beat, with her role
   varying from subtle obstacle hint to changed-object observer to quiet trust marker
 - optional residents, NPCs, interactive props, and chill spaces that can offer

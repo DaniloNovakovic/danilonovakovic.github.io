@@ -209,7 +209,7 @@ camera width of playable space.
 | 2. Cicka Home | Emotional anchor | desk-nest, pinboard, empty memento space, Cicka interaction |
 | 3. Work Artifact Ledge | Learn Danilo through object | short climb; easy major artifact slot: Saturn/Vega or Hummingbird placeholder |
 | 4. Stampede Blanket | First opt-in action | wide bridge/shelf approach; visible future drop/fold back to Cicka |
-| 5. Taped Bridge / Missing Plank | First required art/drawing soft gate / Resident Help Beat | closed or unsafe crossing; Cicka field presence draws attention; tiny resident problem opens or patches route through art |
+| 5. Blueprint Bridge | First required art/drawing soft gate / Resident Help Beat | closed or unsafe crossing; Cicka field presence draws attention to a blank plan; finished bridge sketch becomes the route |
 | 6. Switchback Shelf | First spatial memory test | trail bends upward/back over Cicka; Cicka Home visible below |
 | 7. Telegraph Terrace | Future mini-game teaser | vertical climb/elevator-looking cord; later cord drop to Cicka |
 | 8. Guide Overlook | Reorientation | Relay Spire visible again from above; Guide points without exposition dump |
@@ -241,7 +241,7 @@ the first shortcut opens. This creates the mental model:
 
 | Unlock | Route change | Why it matters |
 | --- | --- | --- |
-| Bridge resident helped | Taped bridge or missing-plank crossing opens on the main route through drawing/art | Teaches "help resident -> route changes" with a tiny local soft gate |
+| Blueprint Bridge helped | Bridge sketch becomes the main-route crossing | Teaches "help resident -> route changes" with a tiny local art beat |
 | Stampede clear | Safe drop/fold from Switchback back to Cicka Home | First "aha"; Cicka is reachable after first mini-game |
 | Telegraph clear | Cord/drop shaft from Telegraph Terrace to Cicka Home | Lucky Luna-style descent; makes terrace feel above home |
 | Domino future | Desk lift/elevator returns from Domino to Cicka Home | Vertical route compression and puzzle identity |
@@ -681,6 +681,11 @@ dance, prepares one nervous partner, and helps the pair find rhythm so the
 crossing clears. Keep the main solution conversational/collection-based; a dance
 rhythm mini-game can be optional later. The couple can be emotionally inspired
 by Danilo and Milena's story, but should not be literal stand-ins.
+
+Current first required Resident Room Beat: **Blueprint Bridge**. Help a resident
+finish a tiny bridge drawing/blueprint, then the finished sketch becomes the crossing.
+Direct bridge drawing or physics bridge-building can be a future optional toy,
+not the required v0 route.
 
 Next code issue after that prose plan should be:
 
