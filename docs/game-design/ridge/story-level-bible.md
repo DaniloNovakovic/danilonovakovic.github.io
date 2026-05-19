@@ -8,6 +8,9 @@
 This bible is in-progress. It records resolved story, level-design, character,
 and progression decisions for the core Exploration Map route.
 
+Current design focus: work backward from the ending by detailing **Last Dance /
+Bachata Crossing** before Concert Crossing and Blueprint Bridge.
+
 Design order:
 
 1. canonical first ending
@@ -22,6 +25,11 @@ Design order:
 The Ridge should read first as a **Sketchbook Neighborhood**: a lived-in paper
 place where the player moves toward the Relay Spire by talking with residents,
 collecting meaningful objects, noticing Cicka, and seeing routes change.
+
+Even when the world uses sketchbook visuals, route blockers should obey
+**Lived-In Causality**. Each required beat should make practical sense as a
+place, a physical blockage, and a resident relationship: where does this happen,
+what is actually blocking progress, and why can this person help?
 
 The first ending path should be completable through conversations, collection,
 authored traversal interactions, Resident Room Beats, and visible world changes.
@@ -105,7 +113,7 @@ Relay Spire / Guitar Farewell -> I am ready for Cicka's threshold farewell.
 
 | Beat | Status | Route role | Cicka role | World change |
 | --- | --- | --- | --- | --- |
-| Last Dance / Bachata Crossing | Accepted final beat candidate | Creates the last emotional readiness before Relay through a nervous dance/romance setup | Quiet observer at the edge of the dance space | Dance crossing clears; path to Relay feels emotionally ready |
+| Last Dance / Bachata Crossing | Accepted final beat candidate | Creates the last emotional readiness before Relay through the Last Ticket + Lantern Check at the foot of the Relay hill | Quiet observer near the unstamped ticket, shuttle step, or service gate | Lantern check completes; final shuttle ticket is stamped; festival barriers/service road clear |
 | Concert Crossing Beat | Accepted middle beat | Blocks a concert/traffic crossing and earns the guitar | Points attention to guitar case, string, stage, or crossing | Concert continues; crossing opens; guitar entrusted to player |
 | Blueprint Bridge | Accepted first art/drawing beat | Required soft gate tutorial for resident help | Obvious subtle attention cue at unsafe edge or blank plan | Finished bridge sketch becomes the crossing |
 
@@ -116,6 +124,136 @@ from the Guitar Farewell. Two fictional residents like each other but are too
 nervous to step onto the dance floor or talk directly. The player helps set up
 the dance event with the organizers, prepares one nervous partner for the dance,
 and helps the pair find enough rhythm to meet.
+
+Accepted geography and blocker: the dance happens in a small town square,
+community hall, or festival street at the foot of the Relay hill, where a local
+dance night naturally belongs. The route to the Relay Spire is blocked by a
+practical final-approach problem: festival barriers, a locked service-road gate,
+and/or the last hill shuttle not running until the event can close properly.
+The player helps a resident whose daily purpose connects to that route, such as
+the hill-shuttle driver, hill caretaker, or festival organizer. Helping the
+dance happen lets the organizers clear the street or reopen the service gate,
+and gives the helper a believable reason and means to take the player toward
+the Relay overlook.
+
+Locked arrival state: **Last Ticket + Lantern Check**.
+
+```text
+Last-Stop Plaza at the foot of the Relay hill.
+Festival barriers block the service road.
+Sign: "Hill road closed during dance hour. Final shuttle leaves after lantern check."
+```
+
+On arrival, the hill-shuttle driver stands beside the shuttle near the locked
+service-road gate, checking the same route clipboard too many times. He cannot
+drive yet because the road is still closed, the hill lantern check is not
+signed, and the last-stop clerk has not stamped the final ticket batch. He is
+working, but the work is also a safe place to hide from asking for one small
+dance.
+
+The lantern/ticket clerk stays at the ticket and lantern booth, closing the
+last-shuttle ledger and checking hill-lantern tokens. She needs the driver's
+route confirmation before she can stamp the final tickets. He needs her lantern
+clearance before he can drive. Their jobs literally require them to coordinate,
+which lets the romance grow out of the plaza's real closing procedure.
+
+Supporting static residents:
+
+- traveler near the plaza entry: points the player toward the shuttle and
+  explains that Relay requires the last hill shuttle
+- festival steward near the barrier: explains that the service road opens only
+  after the final dance/lantern check closes cleanly
+- dance teacher near the floor: offers gentle facilitation and possibly one
+  small step, but is not the romance target
+
+Accepted discovery pattern: use a **Practical Wayfinding Loop**, not a quest
+giver. The player arrives asking how to reach Relay, notices the closed
+service-road barrier and shuttle sign, then learns from practical local roles
+that the final shuttle is delayed because the last ticket and lantern check are
+unfinished.
+
+First-read sequence:
+
+```text
+Player arrives at Last-Stop Plaza.
+Closed service-road barrier and shuttle sign show the route is blocked.
+Traveler says Relay requires the last hill shuttle.
+Driver is visible by the shuttle, stuck on the route clipboard.
+Clerk is visible at the booth, stuck on the lantern/ticket ledger.
+Steward explains that the road opens after the final check.
+```
+
+The player's natural question should be "How do I get to Relay?", not "How do I
+fix the romance?" The romantic problem should emerge only after the player asks
+why the last shuttle is delayed and notices that the driver and clerk need each
+other's sign-off.
+
+Accepted conversation discovery pattern: **Triangulated Discovery Flow**. The
+player should be able to talk to the driver and clerk first and receive
+practical but incomplete answers:
+
+```text
+Driver: cannot leave until the lantern check is cleared.
+Clerk: cannot stamp the last tickets until the route is confirmed.
+```
+
+Both answers are true, but they do not explain why the two are avoiding the
+simple act of coordinating. The player can then return to the plaza and ask
+nearby locals what is going on.
+
+Possible local reads:
+
+- traveler: "The driver's been rereading that clipboard for ten minutes."
+- festival steward: "Those two need to sign the same last-run sheet.
+  Separately, apparently."
+- dance teacher: "They both know the steps. They are pretending the paperwork
+  is harder."
+
+This lets the player piece together the relationship from public behavior and
+local observations rather than receiving an instant confession or omniscient
+quest explanation.
+
+Required relocation should stay minimal. After the player helps, the driver and
+clerk can move once to the edge of the dance floor for a shy final dance, then
+return to the shuttle/booth roles so the clerk stamps the final ticket, the
+steward clears the barrier, and the driver offers the ride toward Relay.
+
+Locked route-agent: the nervous dance resident is the **hill-shuttle driver**.
+He runs the last practical route up toward the Relay overlook, but he is stuck
+at the festival because the street is still closed and because he cannot bring
+himself to step onto the floor. His daily job, his emotional problem, and the
+player's route blocker should all point at the same practical situation.
+
+Locked romantic partner: the shy **last-stop lantern/ticket clerk**. She stamps
+last-shuttle tickets, helps close the festival street, and sets or checks the
+lanterns for the hill road. She belongs in this place because her daily work
+sits exactly between the dance, the service-road barrier, and the final shuttle.
+She likes the driver because he is quietly reliable: he waits for her to finish
+packing, remembers nervous passengers, and takes the hill road gently. He likes
+her because she notices small things and keeps the last-stop plaza feeling
+kind.
+
+The dance teacher can still exist, but as a facilitator rather than the romance
+target. They can teach one small step, give the player social cover, or notice
+that two shy people are orbiting each other. Avoid turning the beat into a
+competition for the teacher's attention unless a later tone pass proves it can
+stay gentle.
+
+Conversation design should use **Recoverable Conversation Choices**. The player
+should feel agency through what they ask, who they approach first, how they
+encourage the driver, and how they recover from a clumsy read. A failed path can
+create awkwardness, delay, or require extra listening, but it should not
+permanently block the first ending.
+
+Do not use a purely magical or abstract "dance crossing" explanation. This beat
+must answer:
+
+- where a dance naturally belongs in the final approach environment
+- what physical barricade prevents the player from reaching the Relay Spire
+- why the resident being helped has a believable reason and practical way to
+  help with that barricade
+- what small backstory or daily purpose makes each involved resident feel like a
+  local person rather than a route-solving robot
 
 The couple should be emotionally inspired by Danilo and Milena's story without
 being literal stand-ins. Protect the intimacy: carry the emotional truth through

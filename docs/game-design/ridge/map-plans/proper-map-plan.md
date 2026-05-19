@@ -677,10 +677,29 @@ polished.
 Current final required Resident Room Beat candidate: **Last Dance / Bachata
 Crossing**. Two fictional residents like each other but are too nervous to step
 onto the dance floor or talk directly. The player helps organizers set up the
-dance, prepares one nervous partner, and helps the pair find rhythm so the
-crossing clears. Keep the main solution conversational/collection-based; a dance
-rhythm mini-game can be optional later. The couple can be emotionally inspired
-by Danilo and Milena's story, but should not be literal stand-ins.
+dance, prepares one nervous partner, and helps the pair find rhythm. The dance
+belongs in a town square, community hall, or festival street at the foot of the
+Relay hill. The physical blocker is practical: festival barriers, a locked
+service-road gate, and/or the last hill shuttle not running until the event can
+close properly. The resident being helped should have a daily purpose tied to
+that route. Current locked direction: the nervous dancer is the hill-shuttle
+driver, and the romantic partner is the shy last-stop lantern/ticket clerk. She
+belongs at the festival because she stamps last-shuttle tickets, helps close the
+street, and checks the lanterns for the hill road. Locked arrival state:
+**Last Ticket + Lantern Check**. The driver waits by the shuttle with the route
+clipboard; the clerk closes the booth ledger and lantern tokens; each needs the
+other's sign-off before the final shuttle can leave. Conversation choices can
+create different tones, orders, or recoverable awkward paths, but should not
+permanently block the first ending. Introduce the beat through a practical
+wayfinding loop: the player asks how to reach Relay, notices the blocked
+service road and shuttle sign, then learns the emotional layer through the
+delayed final check. Reveal the relationship through a triangulated discovery
+flow: the driver and clerk give truthful but incomplete practical answers, then
+nearby locals help the player understand that they are avoiding each other.
+Avoid magical or abstract "dance makes route open" causality. Keep the main
+solution conversational/collection-based; a dance rhythm mini-game can be
+optional later. The couple can be emotionally inspired by Danilo and Milena's
+story, but should not be literal stand-ins.
 
 Current first required Resident Room Beat: **Blueprint Bridge**. Help a resident
 finish a tiny bridge drawing/blueprint, then the finished sketch becomes the crossing.

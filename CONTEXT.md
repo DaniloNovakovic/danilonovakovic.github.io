@@ -80,6 +80,14 @@ where the player moves toward the Relay Spire by helping tiny residents and
 seeing routes change.
 _Avoid_: metroidvania platforming map, portfolio theme park, static building row
 
+**Lived-In Causality**:
+A design rule for the Sketchbook Neighborhood: route blockers and world changes
+should have practical in-world causes, local context, and residents with
+believable reasons and means to help. A beat should answer where it belongs,
+what physically blocks progress, and why the character involved can affect that
+blocker.
+_Avoid_: purely magical unlock, abstract emotional gate, quest-giver robot
+
 **Exploration Traversal**:
 The common forgiving movement model for the Exploration Map, centered on
 walking and authored traversal interactions such as climb, descend, drop, lift,
@@ -138,6 +146,25 @@ An authored Room Beat centered on one required resident problem, its local
 characters, possible solutions, Cicka field presence, and visible route change.
 _Avoid_: Phaser scene, isolated quest room, dialogue hub
 
+**Recoverable Conversation Choice**:
+A dialogue choice inside a Resident Room Beat that can change tone, trust,
+order, optional rewards, or temporary awkwardness without permanently blocking
+the first ending. A failed or clumsy choice should create an in-world recovery
+path rather than a dead end.
+_Avoid_: permanent fail state, gotcha dialogue, illusion-only choice
+
+**Practical Wayfinding Loop**:
+A Resident Room Beat discovery pattern where the player first learns a route
+problem through signs, blocked paths, local roles, and travel questions before
+uncovering the emotional or character layer underneath.
+_Avoid_: quest-giver monologue, immediate emotional exposition, objective popup
+
+**Triangulated Discovery Flow**:
+A conversation pattern where the player first receives incomplete but truthful
+answers from the directly involved residents, then learns the fuller social
+context by asking nearby locals who have partial observations.
+_Avoid_: omniscient NPC reveal, instant confession, hidden-state guessing
+
 **Living Proof Gate**:
 A quiet ending gate where the player can physically reach the Relay Spire, but
 the sketchbook cannot send until the route has created enough visible world
@@ -168,6 +195,10 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 - The **Exploration Map** should read first as a **Sketchbook Neighborhood**,
   with shortcut relief supporting that fantasy instead of required precision
   platforming defining it.
+- The **Sketchbook Neighborhood** should obey **Lived-In Causality** even when
+  its art direction is sketchbook-like: a route change can be whimsical in
+  presentation, but its blocker, helper, and resolution should feel practical
+  and locally motivated.
 - The **Exploration Map** uses **Exploration Traversal**.
 - A mini-game may use its own **Mini-Game Movement System** instead of
   **Exploration Traversal**.
@@ -195,6 +226,13 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 - A required **Resident Help Beat** usually belongs to one **Resident Room Beat**;
   that room beat can include multiple residents, optional interactions, and
   alternate solutions without becoming a separate Phaser scene.
+- **Resident Room Beats** can use **Recoverable Conversation Choices** to make
+  resident help feel authored and personal, but the main ending path should not
+  become permanently missable because of one dialogue choice.
+- A **Practical Wayfinding Loop** should introduce route blockers before
+  emotional stakes when a beat needs to feel lived-in and grounded.
+- A **Triangulated Discovery Flow** can reveal a resident relationship without
+  making the player or one NPC magically know private feelings.
 - The **Cicka Threshold Farewell** resolves Cicka's recurring field guidance
   without closing the **Sketchbook Neighborhood**; the Ridge remains replayable
   with Cicka's final mark or absence-shaped changes.
