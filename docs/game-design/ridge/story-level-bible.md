@@ -94,11 +94,41 @@ should wait until character art can support it cleanly.
 Start with 2-3 required main-path Resident Room Beats before the first ending.
 Treat the exact count as a Level Designer and Story/Tone tuning variable.
 
+Current required proof arc:
+
+```text
+Taped Bridge / Missing Plank -> I can change the world by making something through art.
+Concert Crossing -> I can turn memory into comfort.
+Last Dance / Bachata Crossing -> Life can keep moving with someone new.
+Relay Spire -> I am ready for Cicka's threshold farewell.
+```
+
 | Beat | Status | Route role | Cicka role | World change |
 | --- | --- | --- | --- | --- |
-| Final required Resident Room Beat | TBD | Creates the last readiness/insight before Relay | Quiet trust marker | TBD |
+| Last Dance / Bachata Crossing | Accepted final beat candidate | Creates the last emotional readiness before Relay through a nervous dance/romance setup | Quiet observer at the edge of the dance space | Dance crossing clears; path to Relay feels emotionally ready |
 | Concert Crossing Beat | Accepted middle beat | Blocks a concert/traffic crossing and earns the guitar | Points attention to guitar case, string, stage, or crossing | Concert continues; crossing opens; guitar entrusted to player |
-| Taped Bridge / Missing Plank | Accepted first beat | Required soft gate tutorial for resident help | Obvious subtle attention cue at unsafe edge | Bridge/crossing opens or is patched |
+| Taped Bridge / Missing Plank | Accepted first art/drawing beat | Required soft gate tutorial for resident help | Obvious subtle attention cue at unsafe edge | Bridge/crossing opens or is patched through drawing/art |
+
+## Last Dance / Bachata Crossing
+
+The final required Resident Room Beat should be romantic, warm, and different
+from the Guitar Farewell. Two fictional residents like each other but are too
+nervous to step onto the dance floor or talk directly. The player helps set up
+the dance event with the organizers, prepares one nervous partner for the dance,
+and helps the pair find enough rhythm to meet.
+
+The couple should be emotionally inspired by Danilo and Milena's story without
+being literal stand-ins. Protect the intimacy: carry the emotional truth through
+fictional residents, not a private memory exhibit.
+
+The main solution should be conversation, collection, and gentle setup. An
+optional dance/rhythm mini-game can deepen the beat later, but the first ending
+path should not depend on arcade performance.
+
+Cicka does not explain love or grief. She watches from the edge of the dance
+space, perhaps walking through the cleared crossing afterward as if the whole
+thing was obvious. The emotional lesson is that life can continue and new love
+can arrive after loss without replacing what was lost.
 
 ## Concert Crossing Beat
 
@@ -116,14 +146,17 @@ Gentle comedy is welcome; the guitar's emotional role needs room to breathe.
 
 ## Taped Bridge / Missing Plank
 
-The first Resident Room Beat should be a required soft gate. It teaches:
+The first Resident Room Beat should be a required art/drawing soft gate. It
+teaches:
 
 ```text
 Cicka noticed something -> a resident needs local help -> the route visibly changes
 ```
 
-Keep it tiny, obvious, and local. It should not feel like a fetch quest or a
-test of platforming skill.
+Possible solutions include drawing missing planks, sketching a paper fold,
+helping a resident finish a sign/blueprint, or collecting art scraps that let
+the crossing become real. Keep it tiny, obvious, and local. It should not feel
+like a fetch quest or a test of platforming skill.
 
 ## Mini-Game Entrances
 
