@@ -144,7 +144,9 @@ _Avoid_: rhythm UI, fail state, final skill check, objective popup
 
 **Living Proof Montage**:
 A brief Guitar Farewell montage that wordlessly shows the resident help and
-world changes that made the sketchbook ready to send.
+world changes that made the sketchbook ready to send; the Opening Dance image is
+an emotional echo scored by the player's guitar while the actual festival song
+request stays implied and offscreen.
 _Avoid_: full recap, credits roll, visible checklist, objective summary
 
 **Send the Sketchbook Prompt**:
@@ -187,8 +189,10 @@ step so he can offer shared rhythm without pretending to be a good dancer.
 _Avoid_: dance mastery, public embarrassment, required rhythm challenge
 
 **Folded Song Request**:
-The small paper invitation that lets the hill-shuttle driver ask the Last-Stop
-Operations Helper to dance without forcing a public confession.
+The small paper invitation where the hill-shuttle driver requests a simple,
+cute, guitar-friendly song and asks the Last-Stop Operations Helper for one
+dance without forcing a public confession; the exact requested song does not
+need to be shown or heard by the player.
 _Avoid_: love letter, public proposal, player-delivered confession
 
 **Setup Clearance Walkthrough**:
@@ -334,7 +338,8 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
   comfort interaction, especially at Cicka Home, so the final Relay Spire use
   feels remembered rather than introduced for drama.
 - The **Guitar Farewell** can include a **Living Proof Montage**, but the montage
-  should stay brief and keep Cicka as the emotional focus.
+  should stay brief and keep Cicka as the emotional focus; the player's guitar
+  is the only music the player needs to hear during the montage.
 - The **Sit and Play Prompt** starts the **Guitar Farewell** at Relay Spire
   without turning it into a rhythm challenge.
 - The **Send the Sketchbook Prompt** should happen after the **Guitar Farewell**,
@@ -360,7 +365,9 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
   public skill test.
 - The **Folded Song Request** connects the two Readiness Favors by letting the
   driver ask through a subtle operations-table object instead of direct public
-  matchmaking.
+  matchmaking; the song should be simple, cute, and guitar-friendly, not locked
+  to bachata or any other specific dance genre, and it can remain unshown and
+  unheard as a specific track.
 - The **Setup Clearance Walkthrough** restores the practical route blocker after
   the romantic connector by making the service lane visibly ready for the last
   daylight shuttle.
@@ -427,6 +434,12 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 > **Dev:** "How does he actually ask her to dance?"
 > **Domain expert:** "Use the **Folded Song Request**: a small paper invitation at the operations table, not a public confession."
 
+> **Dev:** "Does the dance need to be bachata?"
+> **Domain expert:** "No — keep bachata as loose inspiration at most. Canon should use a simple, cute, guitar-friendly requested song so the driver can plausibly dance and the Guitar Farewell montage can carry the same feeling."
+
+> **Dev:** "Is the night festival literally hearing the same guitar song as the Relay farewell?"
+> **Domain expert:** "No — treat it as an emotional echo. The requested festival song stays implied/offscreen; the only song the player needs to hear is the guitar during the **Guitar Farewell**."
+
 > **Dev:** "How does the road physically open after the cute paper moment?"
 > **Domain expert:** "Use the **Setup Clearance Walkthrough** so visible setup details clear the service lane for the last daylight shuttle."
 
@@ -472,6 +485,10 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
   not explicit objective text like "go fix the bridge."
 - "last dance" previously meant an after-festival closure gate; resolved: use
   **Opening Dance Shuttle Beat** for the final dance-festival route beat.
+- "bachata" is loose discarded inspiration, not canonical genre; use a simple,
+  cute, guitar-friendly implied request for the **Folded Song Request** while
+  the later **Living Proof Montage** dance image is emotionally scored by the
+  player's guitar.
 - "festival helper" is too generic for the driver's colleague; resolved: use
   **Last-Stop Operations Helper**.
 - "lighthouse" is current story shorthand for the **Relay Spire** as a beacon or

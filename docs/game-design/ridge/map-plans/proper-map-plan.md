@@ -705,8 +705,11 @@ planning; it is showing that she did enough and can enjoy the event. The
 driver's readiness favor is **One-Step Practice**: the player helps him
 privately learn one tiny dance step before the setup handoff, last daylight
 ride, and later night-dance promise can happen. After both favors, the connector
-is **Folded Song Request**: a tiny paper invitation that lets the driver ask her
-for one dance later without a public confession. The physical route solve is
+is **Folded Song Request**: a tiny paper invitation where the driver requests a
+simple, cute, guitar-friendly song and asks her for one dance later without a
+public confession. Do not lock the beat to bachata or any other specific dance
+genre; the exact requested song can remain unshown and unheard by the player.
+The physical route solve is
 **Setup Clearance Walkthrough**: final visible setup details clear the service
 lane enough for the steward to open the gate and the driver to offer the last
 daylight ride. Present it as a **Prompt-Driven Playable Montage**: a few
@@ -723,9 +726,9 @@ optional later. The couple can be emotionally inspired by Danilo and Milena's
 story, but should not be literal stand-ins.
 
 Guitar Farewell can include a brief **Living Proof Montage**: Blueprint Bridge
-being used, Concert Crossing continuing, Opening Dance beginning at night, and
-Cicka Home carrying accumulated marks. Keep it wordless or nearly wordless so
-the focus stays on Cicka.
+being used, Concert Crossing continuing, Opening Dance beginning at night as an
+emotional echo under the player's guitar, and Cicka Home carrying accumulated
+marks. Keep it wordless or nearly wordless so the focus stays on Cicka.
 
 Relay time should progress from sunset for **Sit and Play Prompt** to **Relay
 Blue Hour** for **Send the Sketchbook Prompt**. The montage can show the night

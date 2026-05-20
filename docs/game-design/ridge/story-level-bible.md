@@ -52,7 +52,8 @@ Accepted ending outline:
    light.
 5. A brief **Living Proof Montage** can appear during the guitar: Blueprint
    Bridge being used, Concert Crossing continuing, Opening Dance beginning at
-   night, and Cicka Home carrying accumulated marks.
+   night as an emotional echo under the player's guitar, and Cicka Home carrying
+   accumulated marks.
 6. Control returns in **Relay Blue Hour** at the Relay sign/spire for a **Send
    the Sketchbook Prompt**.
 7. Cicka walks with the player to the threshold, pauses, looks back once, leaves
@@ -264,7 +265,12 @@ preserving their dignity.
 
 After both romantic characters are ready, the connector is **Folded Song
 Request**. The driver writes a tiny folded paper request at the operations
-table, asking her for one dance later without making a public confession. It can
+table, requesting a simple, cute song and asking her for one dance later without
+making a public confession. The request should not lock the beat to bachata or
+any other specific dance genre; it should feel playable on guitar, simple enough
+for a non-dancer, and emotionally compatible with the later Guitar Farewell
+montage. The exact requested song does not need to be shown or heard by the
+player; the only presented music can be the guitar during the farewell. It can
 use her own event paper, handwriting marks, or song-request language so the ask
 feels rooted in her work rather than imposed by the player.
 
@@ -341,7 +347,9 @@ such as "All aboard the last ride," the vehicle starts over a brief blackout,
 and the player respawns at Relay Spire under sunset. Control resumes at Cicka's
 overlook spot for the **Sit and Play Prompt** and **Guitar Farewell**. The later
 night festival can appear as a **Living Proof Montage** image during the
-farewell instead of pulling the playable ending away from Cicka. After the
+farewell instead of pulling the playable ending away from Cicka; the dancing can
+read as an emotional echo of the player's guitar rather than revealing or
+playing the actual requested festival song. After the
 montage, Relay returns in **Relay Blue Hour** for the **Send the Sketchbook
 Prompt** rather than full night. The emotional lesson is that life can continue
 and new love can arrive after loss without replacing what was lost.
