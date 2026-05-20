@@ -699,10 +699,10 @@ then nearby locals help the player understand that they are avoiding each other.
 Do not let the player solve the beat by directly confronting them with their
 feelings. The Last-Stop Operations Helper's readiness favor is **Operations
 Handoff Check**: the player helps prove the plaza setup is safe enough for a
-trusted resident to keep watch once the night dance starts, with the dance
-teacher as the simplest current cover candidate. The point is not replacing her
-planning; it is showing that she did enough and can enjoy the event. The
-driver's readiness favor is **One-Step Practice**: the player helps him
+the **Dance Teacher** to keep watch once the night dance starts. The point is
+not replacing her planning; it is showing that she did enough and can enjoy the
+event. The driver's readiness favor is **One-Step Practice**: the player helps
+him
 privately learn one tiny dance step before the setup handoff, last daylight
 ride, and later night-dance promise can happen. After both favors, the connector
 is **Folded Song Request**: a tiny paper invitation where the driver requests a
@@ -713,8 +713,11 @@ The physical route solve is
 **Setup Clearance Walkthrough**: final visible setup details clear the service
 lane enough for the steward to open the gate and the driver to offer the last
 daylight ride. Present it as a **Prompt-Driven Playable Montage**: a few
-authored interaction snaps plus a visible sky/plaza time shift, not full manual
-chores or a pure cutscene. Cicka's role is quiet threshold observer near the
+symbolic one-action snaps plus a visible sky/plaza time shift, not full manual
+chores or a pure cutscene. The default snaps are: secure the lantern line, clear
+or tape the service-lane obstruction, and flip the shuttle sign to "Last
+daylight ride." These can collapse further if the beat needs to move faster.
+Cicka's role is quiet threshold observer near the
 operations table, shuttle step, or service gate; she can loaf with the
 **Unnamed Counterpart Cat** as implied continuity foreshadowing, but the scene
 should use only silhouette/color specificity such as a pale or light-ink

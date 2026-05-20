@@ -177,9 +177,15 @@ operations such as shuttle questions, setup checks, volunteer handoffs, and
 service-road clearance calls.
 _Avoid_: DJ, song-table volunteer, generic festival helper, niche technician
 
+**Dance Teacher**:
+The Opening Dance facilitator who teaches the hill-shuttle driver one private
+step and covers the operations watch so the Last-Stop Operations Helper can
+enjoy the night dance.
+_Avoid_: romance target, competition judge, extra route gate, new protagonist
+
 **Operations Handoff Check**:
 A Readiness Favor where the player helps the Last-Stop Operations Helper prove
-the plaza setup is safe enough for another resident to watch while she enjoys
+the plaza setup is safe enough for the Dance Teacher to watch while she enjoys
 the night dance.
 _Avoid_: confidence speech, therapy puzzle, arbitrary item fetch
 
@@ -197,12 +203,15 @@ _Avoid_: love letter, public proposal, player-delivered confession
 
 **Setup Clearance Walkthrough**:
 The physical route solve in the Opening Dance Shuttle Beat where final visible
-festival setup details clear the service lane for the last daylight shuttle.
+festival setup details clear the service lane for the last daylight shuttle;
+default symbolic snaps are securing a lantern line, clearing or taping the
+service-lane obstruction, and flipping the shuttle sign to "Last daylight ride."
 _Avoid_: long chore list, black-screen-only solve, abstract emotional unlock
 
 **Prompt-Driven Playable Montage**:
 A compact presentation pattern where the player triggers a few authored
-interactions that snap through visible work and a time-of-day shift.
+interactions that snap through visible work and a time-of-day shift; the work
+can be symbolic one-action prep rather than literal manual labor.
 _Avoid_: pure cutscene, full manual chores, repeated object hauling
 
 **Short Threshold Transition**:
@@ -358,8 +367,9 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
   **Last-Stop Operations Helper** as colleagues whose practical work and private
   nervousness both delay the last daylight ride.
 - The **Operations Handoff Check** is the Last-Stop Operations Helper's current
-  **Readiness Favor**; the dance teacher is the simple first candidate to cover
-  the operations watch, but the covering resident can remain flexible.
+  **Readiness Favor**; the **Dance Teacher** covers the operations watch after
+  setup is proven safe, keeping the cast small and letting the helper enjoy the
+  dance without implying someone else planned it better.
 - **One-Step Practice** is the hill-shuttle driver's current **Readiness Favor**;
   it gives him one private, imperfect step rather than turning dance into a
   public skill test.
@@ -372,8 +382,10 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
   the romantic connector by making the service lane visibly ready for the last
   daylight shuttle.
 - The **Setup Clearance Walkthrough** should present as a **Prompt-Driven
-  Playable Montage**, with a few interaction snaps and a visible sky/plaza time
-  shift instead of full manual chores.
+  Playable Montage**, with three default symbolic snaps: secure the lantern
+  line, clear or tape the service-lane obstruction, and flip the shuttle sign to
+  "Last daylight ride." These can collapse further if implementation needs a
+  shorter transition, but they should not become full manual chores.
 - In the **Opening Dance Shuttle Beat**, **Cicka Field Presence** should read as
   a quiet threshold observer near the operations table or service gate; the
   **Unnamed Counterpart Cat** can add texture and imply future continuity, but
@@ -426,7 +438,10 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 > **Domain expert:** "No — she is the **Last-Stop Operations Helper**, a visible plaza worker whose setup checklist and service-road handoff make her role immediately readable."
 
 > **Dev:** "How do we help the shy operations helper without therapizing her?"
-> **Domain expert:** "Use the **Operations Handoff Check**: prove the setup is ready and let a trusted resident keep watch so she can enjoy the night."
+> **Domain expert:** "Use the **Operations Handoff Check**: prove the setup is ready and let the **Dance Teacher** keep watch so she can enjoy the night."
+
+> **Dev:** "Who covers the operations watch?"
+> **Domain expert:** "Use the **Dance Teacher**. They already belong in the beat as the gentle facilitator, so they can cover the watch without adding another resident role."
 
 > **Dev:** "How do we help the driver if he cannot dance?"
 > **Domain expert:** "Use **One-Step Practice**: he learns one tiny private step, enough to ask without pretending he is suddenly good."
@@ -445,6 +460,9 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 
 > **Dev:** "Do we make the player manually move every chair?"
 > **Domain expert:** "No — present the **Setup Clearance Walkthrough** as a **Prompt-Driven Playable Montage** with a few authored interaction snaps."
+
+> **Dev:** "Which setup snaps should the montage use?"
+> **Domain expert:** "Use three symbolic one-action snaps by default: lantern line, service-lane obstruction, and shuttle sign. They are story-readable, practical, and easy to collapse if the beat needs to be shorter."
 
 > **Dev:** "Can Cicka hang out with another cat during the dance setup?"
 > **Domain expert:** "Yes — use the **Unnamed Counterpart Cat** for implied continuity, but do not spend Micka before the post-ending return."

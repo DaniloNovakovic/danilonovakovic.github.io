@@ -182,9 +182,9 @@ Supporting static residents:
   explains that Relay requires the last daylight hill shuttle
 - festival steward near the barrier: explains that the service road opens only
   after setup is safe and closes again when the night festival begins
-- dance teacher near the floor: can offer gentle facilitation, teach one small
-  step, or notice that two shy people are orbiting each other, but is not the
-  romance target
+- **Dance Teacher** near the floor: offers gentle facilitation, teaches one small
+  step, covers the operations watch once setup is proven safe, and notices that
+  two shy people are orbiting each other, but is not the romance target
 
 Accepted discovery pattern: use a **Practical Wayfinding Loop**, not a quest
 giver. The player arrives asking how to reach Relay, notices the closed
@@ -226,7 +226,7 @@ Possible local reads:
 - traveler: "The driver's been rereading that clipboard for ten minutes."
 - festival steward: "The shuttle waits on the lane. She waits on one perfect
   lantern. He waits on anything except asking."
-- dance teacher: "They both know where the floor is. They are practicing the
+- **Dance Teacher**: "They both know where the floor is. They are practicing the
   art of being unavailable."
 
 This lets the player piece together the relationship from public behavior and
@@ -253,13 +253,11 @@ preserving their dignity.
 
 - Last-Stop Operations Helper: **Operations Handoff Check**. The player helps
   her prove the plaza setup is safe enough by checking a few visible festival
-  details, then getting a trusted resident to keep watch once the night dance
-  starts. The dance teacher is the simplest current cover candidate, but the
-  covering resident can remain flexible if the supporting cast changes. The
-  emotional point is not that someone else can plan better; it is that she has
-  done enough and the event can keep going while she enjoys it.
+  details, then getting the **Dance Teacher** to keep watch once the night dance
+  starts. The emotional point is not that someone else can plan better; it is
+  that she has done enough and the event can keep going while she enjoys it.
 - Hill-shuttle driver: **One-Step Practice**. The player helps him learn exactly
-  one tiny dance step from the dance teacher, privately enough to protect his
+  one tiny dance step from the **Dance Teacher**, privately enough to protect his
   dignity. He does not become good at dancing; he gains one small shared rhythm
   he can offer later.
 
@@ -282,9 +280,11 @@ steward to open the barrier and the driver to offer the last daylight ride
 toward Relay. Present this as a **Prompt-Driven Playable Montage**, not a full
 manual chore sequence or pure cutscene. The player chooses a prompt such as
 "Help with remaining preparations," then triggers a few authored interaction
-snaps: secure the lantern line, move a chair stack off the lane or tape down a
-cable, flip the shuttle sign to "Last daylight ride." After the snaps, the sky
-warms, the plaza reads more ready, the covering resident keeps watch, and the
+snaps. Default symbolic set: secure the lantern line, clear or tape the
+service-lane obstruction, and flip the shuttle sign to "Last daylight ride."
+Treat these as one-action story beats rather than small chore gameplay; they
+can collapse further if the beat needs to move faster. After the snaps, the sky
+warms, the plaza reads more ready, the **Dance Teacher** keeps watch, and the
 steward opens the gate. The actual dance can remain a promised night-festival
 moment and/or appear in the Guitar Farewell montage.
 
@@ -303,11 +303,11 @@ finish packing, remembers nervous passengers, and takes the hill road gently. He
 likes her because she notices small things and keeps the last-stop plaza feeling
 kind.
 
-The dance teacher can still exist, but as a facilitator rather than the romance
-target. They can teach one small step, give the player social cover, or notice
-that two shy people are orbiting each other. Avoid turning the beat into a
-competition for the teacher's attention unless a later tone pass proves it can
-stay gentle.
+The **Dance Teacher** exists as a facilitator rather than the romance target.
+They teach one small step, give the player social cover, cover the operations
+watch after the handoff, and notice that two shy people are orbiting each other.
+Avoid turning the beat into a competition for the teacher's attention unless a
+later tone pass proves it can stay gentle.
 
 Conversation design should use **Recoverable Conversation Choices**. The player
 should feel agency through what they ask, who they approach first, how they
