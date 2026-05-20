@@ -674,35 +674,58 @@ Give Concert Crossing a non-arcade fallback so the main route can ship through
 dialogue, collection, practice, or auto-play before the rhythm mini-game is fully
 polished.
 
-Current final required Resident Room Beat candidate: **Last Dance / Bachata
-Crossing**. Two fictional residents like each other but are too nervous to step
-onto the dance floor or talk directly. The player helps organizers set up the
-dance, prepares one nervous partner, and helps the pair find rhythm. The dance
-belongs in a town square, community hall, or festival street at the foot of the
-Relay hill. The physical blocker is practical: festival barriers, a locked
-service-road gate, and/or the last hill shuttle not running until the event can
-close properly. The resident being helped should have a daily purpose tied to
-that route. Current locked direction: the nervous dancer is the hill-shuttle
-driver, and the romantic partner is the shy last-stop song-table volunteer. She
-belongs at the festival because she handles song slips, basic final-dance
-timing, and last-shuttle questions. Locked arrival state: **Last Song Table +
-Final Shuttle Hold**. The driver waits by the shuttle with the route clipboard;
-the volunteer stays at the song table because the final song stalls unless a
-trusted person covers it. Conversation choices can create different tones,
-orders, or recoverable awkward paths, but should not permanently block the first
-ending. Introduce the beat through a practical wayfinding loop: the player asks
-how to reach Relay, notices the blocked service road and shuttle sign, then
-learns the emotional layer through the delayed final song. Reveal the
-relationship through a triangulated discovery flow: the driver and song-table
-volunteer give truthful but incomplete practical answers, then nearby locals
-help the player understand that they are avoiding each other. Do not let the
-player solve the beat by directly confronting them with their feelings. Each
-romantic character should need a small readiness favor before the final song,
-shy dance, and lane-clearing handoff can happen.
+Current final required Resident Room Beat candidate: **Opening Dance Shuttle
+Beat**. Two fictional residents like each other but are too nervous to step onto
+the dance floor or talk directly. The night dance festival is real, but the
+player participates in afternoon setup and leaves before the festival fully
+begins. The dance belongs in a town square, community hall, or festival street
+at the foot of the Relay hill. The physical blocker is practical: festival
+barriers, lantern lines, chair stacks, stage/speaker cables, and a locked
+service-road gate block the hill route until setup passes inspection. The
+resident being helped should have a daily purpose tied to that route. Current
+locked direction: the nervous dancer is the hill-shuttle driver, and the
+romantic partner is the shy **Last-Stop Operations Helper**, whose visible
+plaza-table work connects shuttle questions, setup checks, volunteer handoffs,
+service-road clearance, and the night dance. Accepted arrival premise:
+**Opening Dance Setup + Last Daylight Shuttle**. Conversation choices can create
+different tones, orders, or recoverable awkward paths, but should not
+permanently block the first ending. Introduce the beat through a practical
+wayfinding loop: the player asks how to reach Relay, notices the blocked service
+road and shuttle sign, then learns the emotional layer through delayed setup and
+the last daylight shuttle window before the road closes for the night festival.
+Reveal the relationship through a triangulated discovery flow: the driver and
+Last-Stop Operations Helper give truthful but incomplete practical answers,
+then nearby locals help the player understand that they are avoiding each other.
+Do not let the player solve the beat by directly confronting them with their
+feelings. The Last-Stop Operations Helper's readiness favor is **Operations
+Handoff Check**: the player helps prove the plaza setup is safe enough for a
+trusted resident to keep watch once the night dance starts, with the dance
+teacher as the simplest current cover candidate. The point is not replacing her
+planning; it is showing that she did enough and can enjoy the event. The
+driver's readiness favor is **One-Step Practice**: the player helps him
+privately learn one tiny dance step before the setup handoff, last daylight
+ride, and later night-dance promise can happen. After both favors, the connector
+is **Folded Song Request**: a tiny paper invitation that lets the driver ask her
+for one dance later without a public confession. The physical route solve is
+**Setup Clearance Walkthrough**: final visible setup details clear the service
+lane enough for the steward to open the gate and the driver to offer the last
+daylight ride. Present it as a **Prompt-Driven Playable Montage**: a few
+authored interaction snaps plus a visible sky/plaza time shift, not full manual
+chores or a pure cutscene. Cicka's role is quiet threshold observer near the
+operations table, shuttle step, or service gate; she can loaf with the
+**Unnamed Counterpart Cat** as implied continuity foreshadowing, but the scene
+should use only silhouette/color specificity such as a pale or light-ink
+contrast to Cicka. Do not name him, give him dialogue, confirm parentage, or
+spend Micka before the post-ending return.
 Avoid magical or abstract "dance makes route open" causality. Keep the main
 solution conversational/collection-based; a dance rhythm mini-game can be
 optional later. The couple can be emotionally inspired by Danilo and Milena's
 story, but should not be literal stand-ins.
+
+Guitar Farewell can include a brief **Living Proof Montage**: Blueprint Bridge
+being used, Concert Crossing continuing, Opening Dance beginning at night, and
+Cicka Home carrying accumulated marks. Keep it wordless or nearly wordless so
+the focus stays on Cicka.
 
 Current first required Resident Room Beat: **Blueprint Bridge**. Help a resident
 finish a tiny bridge drawing/blueprint, then the finished sketch becomes the crossing.

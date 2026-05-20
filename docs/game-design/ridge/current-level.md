@@ -222,32 +222,55 @@ The target asks for:
 - 2-3 required main-path Resident Room Beats before the first ending, each
   centered on a Resident Help Beat, with optional extra residents only if they
   add texture instead of errand fatigue
-- final required Resident Room Beat candidate as Last Dance / Bachata Crossing:
-  a nervous dance/romance setup at the foot of the Relay hill. The route
-  blocker should be practical: festival barriers, a locked service-road gate,
-  and/or the last hill shuttle not running until the event closes properly. The
-  locked route-agent is the nervous hill-shuttle driver, whose daily job and
-  emotional problem both connect to the final approach. His romantic partner is
-  the shy last-stop song-table volunteer, whose daily work connects the dance,
-  final shuttle, service-road barrier, and last-song timing. Locked arrival
-  state: **Last Song Table + Final Shuttle Hold**. The driver waits by the
-  shuttle with the route clipboard; the volunteer stays at the song table
-  because the final song stalls unless a trusted person covers it.
-  Introduce the beat through a practical wayfinding loop: the player asks how
-  to reach Relay, notices the blocked service road and shuttle sign, then
-  discovers the emotional layer through the delayed final song. Reveal the
-  relationship through a triangulated discovery flow: the driver and song-table
-  volunteer give truthful but incomplete practical answers, then nearby locals
-  help the player understand that they are avoiding each other. Do not let the
-  player solve the beat by directly confronting them with their feelings. Each
-  romantic character should need a small readiness favor before the final song,
-  shy dance, and lane-clearing handoff can happen. Conversation choices can
+- final required Resident Room Beat candidate as **Opening Dance Shuttle Beat**:
+  a nervous dance/romance setup at the foot of the Relay hill. The night dance
+  festival is real, but the required route beat happens during afternoon setup.
+  The route blocker should be practical: festival barriers, lantern lines,
+  chair stacks, stage/speaker cables, and a locked service-road gate block the
+  hill route until setup passes inspection. The locked route-agent is the
+  nervous hill-shuttle driver, whose daily job and emotional problem both
+  connect to the final approach. His romantic partner is the shy **Last-Stop
+  Operations Helper**, whose visible plaza-table work connects shuttle
+  questions, setup checks, volunteer handoffs, service-road clearance, and the
+  night dance. Accepted arrival premise: **Opening Dance Setup + Last Daylight
+  Shuttle**. Introduce the beat through a practical wayfinding loop:
+  the player asks how to reach Relay, notices the blocked service road and
+  shuttle sign, then discovers the emotional layer through delayed setup and the
+  last daylight shuttle window before the road closes for the night festival.
+  Reveal the relationship through a triangulated discovery flow: the driver and
+  Last-Stop Operations Helper give truthful but incomplete practical answers,
+  then nearby locals help the player understand that they are avoiding each
+  other. Do not let the player solve the beat by directly confronting them with
+  their feelings. The Last-Stop Operations Helper's readiness favor is
+  **Operations Handoff Check**: the player helps prove the plaza setup is safe
+  enough for a trusted resident to keep watch once the night dance starts, with
+  the dance teacher as the simplest current cover candidate. The point is not
+  replacing her planning; it is showing that she did enough and can enjoy the
+  event. The driver's readiness favor is **One-Step Practice**: the player helps
+  him privately learn one tiny dance step before the setup handoff, last
+  daylight ride, and later night-dance promise can happen. After both favors,
+  the connector is **Folded Song Request**: a tiny paper invitation that lets the
+  driver ask her for one dance later without a public confession. The physical
+  route solve is **Setup Clearance Walkthrough**: final visible setup details
+  clear the service lane enough for the steward to open the gate and the driver
+  to offer the last daylight ride. Present it as a **Prompt-Driven Playable
+  Montage**: a few authored interaction snaps plus a visible sky/plaza time
+  shift, not full manual chores or a pure cutscene. Conversation choices can
   create different tones, orderings, and recoverable awkward paths, but should
-  not permanently block the first ending.
+  not permanently block the first ending. Cicka's role is quiet threshold
+  observer near the operations table, shuttle step, or service gate; she can
+  loaf with the **Unnamed Counterpart Cat** as implied continuity foreshadowing,
+  using only silhouette/color specificity such as a pale or light-ink contrast
+  to Cicka. The scene should not name him, give him dialogue, confirm parentage,
+  or spend Micka before the post-ending return.
 - required route spine: Blueprint Bridge means changing the world through art,
-  Concert Crossing means turning memory into comfort, Last Dance / Bachata
-  Crossing means life can keep moving with someone new, then Relay Spire /
+  Concert Crossing means turning memory into comfort, Opening Dance Shuttle
+  Beat means life can keep moving with someone new, then Relay Spire /
   Guitar Farewell resolves Cicka's threshold farewell
+- Guitar Farewell can include a brief **Living Proof Montage**: Blueprint Bridge
+  being used, Concert Crossing continuing, Opening Dance beginning at night, and
+  Cicka Home carrying accumulated marks. Keep it wordless or nearly wordless so
+  the focus stays on Cicka.
 - Cicka field presence in every required Resident Help Beat, with her role
   varying from subtle obstacle hint to changed-object observer to quiet trust marker
 - optional residents, NPCs, interactive props, and chill spaces that can offer

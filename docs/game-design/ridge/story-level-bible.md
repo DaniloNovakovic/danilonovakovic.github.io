@@ -8,8 +8,8 @@
 This bible is in-progress. It records resolved story, level-design, character,
 and progression decisions for the core Exploration Map route.
 
-Current design focus: work backward from the ending by detailing **Last Dance /
-Bachata Crossing** before Concert Crossing and Blueprint Bridge.
+Current design focus: work backward from the ending by detailing **Opening
+Dance Shuttle Beat** before Concert Crossing and Blueprint Bridge.
 
 Design order:
 
@@ -49,10 +49,13 @@ Accepted ending outline:
 3. Cicka appears in her final field-presence spot, calm and familiar.
 4. The player shares a quiet **Guitar Farewell** with Cicka, ideally under a
    warm sunset or other cozy threshold light.
-5. The player activates or sends the sketchbook.
-6. Cicka walks with the player to the threshold, pauses, leaves one final
+5. A brief **Living Proof Montage** can appear during the guitar: Blueprint
+   Bridge being used, Concert Crossing continuing, Opening Dance beginning at
+   night, and Cicka Home carrying accumulated marks.
+6. The player activates or sends the sketchbook.
+7. Cicka walks with the player to the threshold, pauses, leaves one final
    paw/page mark, then departs somewhere unreachable.
-7. The player returns to Ridge after the ending, with the final mark preserved
+8. The player returns to Ridge after the ending, with the final mark preserved
    and the world still open.
 
 Tone boundaries:
@@ -107,96 +110,102 @@ Current required route spine:
 ```text
 Blueprint Bridge -> I can change the world by making something through art.
 Concert Crossing -> I can turn memory into comfort.
-Last Dance / Bachata Crossing -> Life can keep moving with someone new.
+Opening Dance Shuttle Beat -> Life can keep moving with someone new.
 Relay Spire / Guitar Farewell -> I am ready for Cicka's threshold farewell.
 ```
 
 | Beat | Status | Route role | Cicka role | World change |
 | --- | --- | --- | --- | --- |
-| Last Dance / Bachata Crossing | Accepted final beat candidate | Creates the last emotional readiness before Relay through the Last Song Table and Final Shuttle Hold at the foot of the Relay hill | Quiet observer near the song table, shuttle step, or service gate | Final song happens; shuttle lane clears; festival barriers/service road open |
+| Opening Dance Shuttle Beat | Accepted final beat direction; Last-Stop Operations Helper locked as romantic partner role | Creates the last emotional readiness before Relay through afternoon setup for a night dance festival at the foot of the Relay hill | Quiet threshold observer near the lantern crates, operations table, shuttle step, or service gate; may loaf with the Unnamed Counterpart Cat | Festival setup clears enough for one last daylight shuttle to Relay before the night road closure |
 | Concert Crossing Beat | Accepted middle beat | Blocks a concert/traffic crossing and earns the guitar | Points attention to guitar case, string, stage, or crossing | Concert continues; crossing opens; guitar entrusted to player |
 | Blueprint Bridge | Accepted first art/drawing beat | Required soft gate tutorial for resident help | Obvious subtle attention cue at unsafe edge or blank plan | Finished bridge sketch becomes the crossing |
 
-## Last Dance / Bachata Crossing
+## Opening Dance Shuttle Beat
 
 The final required Resident Room Beat should be romantic, warm, and different
 from the Guitar Farewell. Two fictional residents like each other but are too
-nervous to step onto the dance floor or talk directly. The player helps set up
-the dance event with the organizers, prepares one nervous partner for the dance,
-and helps the pair find enough rhythm to meet.
+nervous to step onto the dance floor or talk directly. The night dance festival
+is real, but the player participates in afternoon setup and leaves before the
+festival fully begins. The player helps make the event ready, prepares one
+nervous partner for a future dance, and helps the pair find enough rhythm to
+meet without turning the beat into public matchmaking.
 
 Accepted geography and blocker: the dance happens in a small town square,
 community hall, or festival street at the foot of the Relay hill, where a local
 dance night naturally belongs. The route to the Relay Spire is blocked by a
-practical final-approach problem: festival barriers, a locked service-road gate,
-and/or the last hill shuttle not running until the event can close properly.
-The player helps a resident whose daily purpose connects to that route, such as
-the hill-shuttle driver, hill caretaker, or festival organizer. Helping the
-dance happen lets the organizers clear the street or reopen the service gate,
-and gives the helper a believable reason and means to take the player toward
-the Relay overlook.
+practical final-approach problem: festival setup temporarily occupies the
+service road with barriers, lantern lines, chair stacks, stage/speaker cables,
+and a locked gate. Once setup is safe enough, the steward can open one short
+daylight window for the final hill shuttle before the road closes again for the
+night festival. The player helps the hill-shuttle driver, the Last-Stop
+Operations Helper, and nearby festival helpers finish that setup window, giving
+the driver a believable reason and means to take the player toward the Relay
+overlook at sunset.
 
-Locked arrival state: **Last Song Table + Final Shuttle Hold**.
+Accepted arrival premise: **Opening Dance Setup + Last Daylight Shuttle**. This
+replaces the previous after-festival **Last Song Table + Final Shuttle Hold**
+candidate. The stable spine is now:
 
 ```text
 Last-Stop Plaza at the foot of the Relay hill.
-Festival barriers block the service road.
-Sign: "Shuttle lane closed during final dance. Final hill shuttle after last song."
+Festival setup blocks the service road.
+Sign: "Service road closes for night dance. Last daylight shuttle after setup check."
 ```
 
 On arrival, the hill-shuttle driver stands beside the shuttle near the locked
 service-road gate, checking the same route clipboard too many times. He cannot
-drive yet because the festival dance uses the service lane and the steward will
-not open the barrier until the last song finishes and the lane is cleared. He
-is working, but the work is also a safe place to hide from asking for one small
-dance.
+drive yet because setup is still blocking the service lane and the steward will
+not open the barrier until the lane is safe. He is genuinely working the
+afternoon/evening event shuttle shift, but the clipboard is also a safe place to
+hide from asking one small question before the dance begins.
 
-The romantic partner is the shy **last-stop song-table volunteer**. She handles
-the final song table near the dance floor: song slips, basic festival timing,
-and last-shuttle questions. She is not a flashy performer; she is the trusted
-local who keeps the final dance from becoming confused. She cannot easily step
-away because if nobody covers the table, the final song stalls and the shuttle
-lane cannot clear. Emotionally, the table lets her watch the dance while staying
-useful enough not to feel visible.
+The romantic partner is the shy **Last-Stop Operations Helper**. She works the
+visible plaza table that sits between the shuttle, dance setup, and service-road
+barrier: shuttle questions, setup checklist, lantern tags/signs, volunteer
+handoff, and radioing the steward when the lane is clear. She is not a flashy
+performer; she is the trusted local who keeps the last-stop plaza from becoming
+confused. Emotionally, the operations table lets her keep being useful instead
+of becoming visible enough to be asked to dance.
 
 Supporting static residents:
 
 - traveler near the plaza entry: points the player toward the shuttle and
-  explains that Relay requires the last hill shuttle
+  explains that Relay requires the last daylight hill shuttle
 - festival steward near the barrier: explains that the service road opens only
-  after the final dance ends and the lane is clear
-- dance teacher near the floor: can cover the song table for one song, offer
-  gentle facilitation, and possibly teach one small step, but is not the romance
-  target
+  after setup is safe and closes again when the night festival begins
+- dance teacher near the floor: can offer gentle facilitation, teach one small
+  step, or notice that two shy people are orbiting each other, but is not the
+  romance target
 
 Accepted discovery pattern: use a **Practical Wayfinding Loop**, not a quest
 giver. The player arrives asking how to reach Relay, notices the closed
 service-road barrier and shuttle sign, then learns from practical local roles
-that the final shuttle leaves after the last song and the lane-clearing handoff.
+that the final daylight shuttle leaves after setup passes inspection and before
+the road closes for the night dance.
 
 First-read sequence:
 
 ```text
 Player arrives at Last-Stop Plaza.
-Closed service-road barrier and shuttle sign show the route is blocked.
-Traveler says Relay requires the last hill shuttle.
+Festival barriers, lantern lines, and shuttle sign show the route is blocked.
+Traveler says Relay requires the last daylight hill shuttle.
 Driver is visible by the shuttle, stuck on the route clipboard.
-Song-table volunteer is visible near the dance floor, stuck sorting song slips.
-Steward explains that the road opens after the final song and lane clear.
+Operations helper is visible near the dance floor, stuck perfecting setup details.
+Steward explains that the road opens after setup check, then closes for night.
 ```
 
 The player's natural question should be "How do I get to Relay?", not "How do I
 fix the romance?" The romantic problem should emerge only after the player asks
-why the last shuttle is delayed and notices that the driver and song-table
-volunteer are both hiding inside practical work.
+why the last daylight shuttle is delayed and notices that the driver and
+operations helper are both hiding inside practical work.
 
 Accepted conversation discovery pattern: **Triangulated Discovery Flow**. The
-player should be able to talk to the driver and song-table volunteer first and
+player should be able to talk to the driver and Last-Stop Operations Helper first and
 receive practical but incomplete answers:
 
 ```text
-Driver: cannot leave until the final song ends and the lane clears.
-Song-table volunteer: cannot step away unless someone trusted covers the table.
+Driver: cannot leave until setup clears and the steward opens the service gate.
+Operations helper: cannot stop fixing setup details until someone trusted checks the handoff.
 ```
 
 Both answers are true, but they do not explain why the two are hiding inside
@@ -206,55 +215,78 @@ plaza and ask nearby locals what is going on.
 Possible local reads:
 
 - traveler: "The driver's been rereading that clipboard for ten minutes."
-- festival steward: "The shuttle waits on the last song. She waits on someone
-  else to press play. He waits on anything except asking."
-- dance teacher: "They both know where the floor is. They are pretending work
-  is the hard part."
+- festival steward: "The shuttle waits on the lane. She waits on one perfect
+  lantern. He waits on anything except asking."
+- dance teacher: "They both know where the floor is. They are practicing the
+  art of being unavailable."
 
 This lets the player piece together the relationship from public behavior and
 local observations rather than receiving an instant confession or omniscient
 quest explanation.
 
 The player should not be able to solve the beat immediately by confronting the
-driver and song-table volunteer with "you like each other." That would likely
-make shy people defensive and would flatten the scene into forced matchmaking.
-Instead, Last Dance should use two **Readiness Favors**, one for each romantic
-character, before the final song, shy dance, and lane-clearing handoff can
-happen.
+driver and Last-Stop Operations Helper with "you like each other." That would likely make
+shy people defensive and would flatten the scene into forced matchmaking.
+Instead, Opening Dance should use two **Readiness Favors**, one for each
+romantic character, before the setup handoff, last daylight shuttle, and later
+night-dance promise can happen.
 
 Current readiness direction:
 
 - driver insecurity: he does not know how to dance and does not want to
-  embarrass himself in front of the song-table volunteer
-- song-table volunteer insecurity: if she stays behind the table, she is useful;
-  if she steps onto the floor, she is just someone hoping to be asked
+  embarrass himself in front of the Last-Stop Operations Helper
+- Last-Stop Operations Helper insecurity: if she stays useful behind an
+  organizer role, she knows who she is; if she steps onto the floor, she is just
+  someone hoping to be asked
 
 The Readiness Favors should let the player help each person feel prepared while
-preserving their dignity. Her likely favor is **Cover the Last Song Table for
-One Song**: the player gets the dance teacher or steward to cover the table, so
-she can step away without abandoning the event. After both are ready, a small
-romantic connector such as a shy song request, folded note, or indirect
-invitation can make the final step feel romantic without becoming a public
-confession puzzle.
+preserving their dignity.
+
+- Last-Stop Operations Helper: **Operations Handoff Check**. The player helps
+  her prove the plaza setup is safe enough by checking a few visible festival
+  details, then getting a trusted resident to keep watch once the night dance
+  starts. The dance teacher is the simplest current cover candidate, but the
+  covering resident can remain flexible if the supporting cast changes. The
+  emotional point is not that someone else can plan better; it is that she has
+  done enough and the event can keep going while she enjoys it.
+- Hill-shuttle driver: **One-Step Practice**. The player helps him learn exactly
+  one tiny dance step from the dance teacher, privately enough to protect his
+  dignity. He does not become good at dancing; he gains one small shared rhythm
+  he can offer later.
+
+After both romantic characters are ready, the connector is **Folded Song
+Request**. The driver writes a tiny folded paper request at the operations
+table, asking her for one dance later without making a public confession. It can
+use her own event paper, handwriting marks, or song-request language so the ask
+feels rooted in her work rather than imposed by the player.
 
 Required relocation should stay minimal. After the player helps, the driver and
-song-table volunteer can move once to the edge of the dance floor for a shy
-final dance, then return to their practical roles so the final song ends, the
-steward clears the barrier, and the driver offers the ride toward Relay.
+Last-Stop Operations Helper can share or acknowledge the Folded Song Request,
+then return to their practical roles for the **Setup Clearance Walkthrough**:
+the remaining visible setup details clear the service lane enough for the
+steward to open the barrier and the driver to offer the last daylight ride
+toward Relay. Present this as a **Prompt-Driven Playable Montage**, not a full
+manual chore sequence or pure cutscene. The player chooses a prompt such as
+"Help with remaining preparations," then triggers a few authored interaction
+snaps: secure the lantern line, move a chair stack off the lane or tape down a
+cable, flip the shuttle sign to "Last daylight ride." After the snaps, the sky
+warms, the plaza reads more ready, the covering resident keeps watch, and the
+steward opens the gate. The actual dance can remain a promised night-festival
+moment and/or appear in the Guitar Farewell montage.
 
 Locked route-agent: the nervous dance resident is the **hill-shuttle driver**.
 He runs the last practical route up toward the Relay overlook, but he is stuck
-at the festival because the street is still closed and because he cannot bring
-himself to step onto the floor. His daily job, his emotional problem, and the
-player's route blocker should all point at the same practical situation.
+at the festival because the service road is not yet clear and because he cannot
+bring himself to ask about the night dance. His daily job, his emotional
+problem, and the player's route blocker should all point at the same practical
+situation.
 
-Locked romantic partner: the shy **last-stop song-table volunteer**. She helps
-run the event from the song table, answers last-shuttle questions, and keeps the
-final song handoff from stalling. She belongs in this place because her daily
-work sits between the dance, the service-road barrier, and the final shuttle.
-She likes the driver because he is quietly reliable: he waits for her to finish
-packing, remembers nervous passengers, and takes the hill road gently. He likes
-her because she notices small things and keeps the last-stop plaza feeling
+Locked romantic partner: the shy **Last-Stop Operations Helper**. She belongs in
+this place because her daily work sits between the dance, the service-road
+barrier, and the last daylight shuttle without requiring technical explanation.
+She likes the driver because he is quietly reliable: he waits for helpers to
+finish packing, remembers nervous passengers, and takes the hill road gently. He
+likes her because she notices small things and keeps the last-stop plaza feeling
 kind.
 
 The dance teacher can still exist, but as a facilitator rather than the romance
@@ -288,9 +320,18 @@ optional dance/rhythm mini-game can deepen the beat later, but the first ending
 path should not depend on arcade performance.
 
 Cicka does not explain love or grief. She watches from the edge of the dance
-space, perhaps walking through the cleared crossing afterward as if the whole
-thing was obvious. The emotional lesson is that life can continue and new love
-can arrive after loss without replacing what was lost.
+setup, perhaps walking through the cleared lane afterward as if the whole thing
+was obvious. She can also hang out with the **Unnamed Counterpart Cat** near the
+operations table or service gate: loafing together, staring at the same lantern,
+or briefly playing while the humans work. The counterpart cat can visually
+contrast with Cicka, such as a pale or white cat if Cicka reads dark, so that
+Micka's later half-and-half design feels quietly prepared. Do not name him,
+label him as Micka's father, or confirm parentage before the post-ending return.
+The player catches the sunset shuttle to Relay, and the later night festival can
+appear as a **Living Proof Montage** image during the **Guitar Farewell** instead
+of pulling the playable ending away from Cicka. The emotional lesson is that
+life can continue and new love can arrive after loss without replacing what was
+lost.
 
 ## Concert Crossing Beat
 

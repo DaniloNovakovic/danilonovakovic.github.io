@@ -131,10 +131,61 @@ The final shared Cicka moment where the player plays guitar for her at the Relay
 Spire, echoing an established comfort interaction from Cicka Home and the Ridge.
 _Avoid_: generic music mini-game, melodrama, one-off ending prop
 
+**Living Proof Montage**:
+A brief Guitar Farewell montage that wordlessly shows the resident help and
+world changes that made the sketchbook ready to send.
+_Avoid_: full recap, credits roll, visible checklist, objective summary
+
 **Concert Crossing Beat**:
 A mid-route Resident Room Beat where a blocked concert/traffic crossing becomes
 the way the player earns the guitar through a small music performance problem.
 _Avoid_: joke-only drunk musician, random item pickup, final-farewell skill gate
+
+**Opening Dance Shuttle Beat**:
+A final-route Resident Room Beat where afternoon festival setup blocks the Relay
+hill service road until the player helps prepare the night dance and catches the
+last daylight shuttle to the Relay Spire.
+_Avoid_: Last Dance, Final Shuttle Hold, after-festival closure gate
+
+**Last-Stop Operations Helper**:
+The shy colleague in the Opening Dance Shuttle Beat who handles visible plaza
+operations such as shuttle questions, setup checks, volunteer handoffs, and
+service-road clearance calls.
+_Avoid_: DJ, song-table volunteer, generic festival helper, niche technician
+
+**Operations Handoff Check**:
+A Readiness Favor where the player helps the Last-Stop Operations Helper prove
+the plaza setup is safe enough for another resident to watch while she enjoys
+the night dance.
+_Avoid_: confidence speech, therapy puzzle, arbitrary item fetch
+
+**One-Step Practice**:
+A Readiness Favor where the hill-shuttle driver privately learns one tiny dance
+step so he can offer shared rhythm without pretending to be a good dancer.
+_Avoid_: dance mastery, public embarrassment, required rhythm challenge
+
+**Folded Song Request**:
+The small paper invitation that lets the hill-shuttle driver ask the Last-Stop
+Operations Helper to dance without forcing a public confession.
+_Avoid_: love letter, public proposal, player-delivered confession
+
+**Setup Clearance Walkthrough**:
+The physical route solve in the Opening Dance Shuttle Beat where final visible
+festival setup details clear the service lane for the last daylight shuttle.
+_Avoid_: long chore list, black-screen-only solve, abstract emotional unlock
+
+**Prompt-Driven Playable Montage**:
+A compact presentation pattern where the player triggers a few authored
+interactions that snap through visible work and a time-of-day shift.
+_Avoid_: pure cutscene, full manual chores, repeated object hauling
+
+**Unnamed Counterpart Cat**:
+The non-Micka local cat who may quietly interact with Cicka during the Opening
+Dance Shuttle Beat as implied continuity foreshadowing.
+Use only silhouette/color specificity, such as a pale or light-ink contrast to
+Cicka.
+_Avoid_: Micka's dad, explicit parentage reveal, early Micka reveal, exposition,
+named dialogue
 
 **Resident Help Beat**:
 A small Sketchbook Neighborhood progression beat where the player helps a tiny
@@ -248,9 +299,36 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 - The **Guitar Farewell** should be established before the ending as a repeatable
   comfort interaction, especially at Cicka Home, so the final Relay Spire use
   feels remembered rather than introduced for drama.
+- The **Guitar Farewell** can include a **Living Proof Montage**, but the montage
+  should stay brief and keep Cicka as the emotional focus.
 - The **Concert Crossing Beat** can teach the guitar through a small
   Guitar-Hero-like mini-game, but the **Guitar Farewell** itself should remain a
   cozy remembrance interaction rather than an arcade pass/fail challenge.
+- The **Opening Dance Shuttle Beat** keeps the dance festival as a night event,
+  but the required route action happens during daytime setup so the player can
+  reach the Relay Spire for the sunset **Guitar Farewell**.
+- The **Opening Dance Shuttle Beat** centers the hill-shuttle driver and the
+  **Last-Stop Operations Helper** as colleagues whose practical work and private
+  nervousness both delay the last daylight ride.
+- The **Operations Handoff Check** is the Last-Stop Operations Helper's current
+  **Readiness Favor**; the dance teacher is the simple first candidate to cover
+  the operations watch, but the covering resident can remain flexible.
+- **One-Step Practice** is the hill-shuttle driver's current **Readiness Favor**;
+  it gives him one private, imperfect step rather than turning dance into a
+  public skill test.
+- The **Folded Song Request** connects the two Readiness Favors by letting the
+  driver ask through a subtle operations-table object instead of direct public
+  matchmaking.
+- The **Setup Clearance Walkthrough** restores the practical route blocker after
+  the romantic connector by making the service lane visibly ready for the last
+  daylight shuttle.
+- The **Setup Clearance Walkthrough** should present as a **Prompt-Driven
+  Playable Montage**, with a few interaction snaps and a visible sky/plaza time
+  shift instead of full manual chores.
+- In the **Opening Dance Shuttle Beat**, **Cicka Field Presence** should read as
+  a quiet threshold observer near the operations table or service gate; the
+  **Unnamed Counterpart Cat** can add texture and imply future continuity, but
+  it should stay visual-only and should not be named or treated as Micka.
 - Required **Resident Room Beats** that contain arcade-like interactions should
   also have a non-arcade fallback through conversation, collection, practice, or
   a forgiving auto-resolve path.
@@ -283,8 +361,38 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 > **Dev:** "Can the final Cicka beat be the player playing guitar for her?"
 > **Domain expert:** "Yes — make it the **Guitar Farewell**, but establish guitar as a quiet comfort interaction before Relay so it carries memory instead of exposition."
 
+> **Dev:** "Can the Guitar Farewell show what happened to the residents?"
+> **Domain expert:** "Yes — use a brief **Living Proof Montage** of resident/world changes, not a full recap."
+
 > **Dev:** "Can the guitar come from a concert problem?"
 > **Domain expert:** "Yes — use the **Concert Crossing Beat** to earn the guitar through a tiny performance/help moment, then let Cicka Home turn it into comfort."
+
+> **Dev:** "Does the dance festival happen at night?"
+> **Domain expert:** "Yes — but the required route beat is the **Opening Dance Shuttle Beat**, where daytime setup opens one last daylight ride to Relay before the night festival begins."
+
+> **Dev:** "Is the driver's crush the DJ?"
+> **Domain expert:** "No — she is the **Last-Stop Operations Helper**, a visible plaza worker whose setup checklist and service-road handoff make her role immediately readable."
+
+> **Dev:** "How do we help the shy operations helper without therapizing her?"
+> **Domain expert:** "Use the **Operations Handoff Check**: prove the setup is ready and let a trusted resident keep watch so she can enjoy the night."
+
+> **Dev:** "How do we help the driver if he cannot dance?"
+> **Domain expert:** "Use **One-Step Practice**: he learns one tiny private step, enough to ask without pretending he is suddenly good."
+
+> **Dev:** "How does he actually ask her to dance?"
+> **Domain expert:** "Use the **Folded Song Request**: a small paper invitation at the operations table, not a public confession."
+
+> **Dev:** "How does the road physically open after the cute paper moment?"
+> **Domain expert:** "Use the **Setup Clearance Walkthrough** so visible setup details clear the service lane for the last daylight shuttle."
+
+> **Dev:** "Do we make the player manually move every chair?"
+> **Domain expert:** "No — present the **Setup Clearance Walkthrough** as a **Prompt-Driven Playable Montage** with a few authored interaction snaps."
+
+> **Dev:** "Can Cicka hang out with another cat during the dance setup?"
+> **Domain expert:** "Yes — use the **Unnamed Counterpart Cat** for implied continuity, but do not spend Micka before the post-ending return."
+
+> **Dev:** "Should we design the other cat now?"
+> **Domain expert:** "Only at silhouette/color level: a pale or light-ink contrast to Cicka, with no name, dialogue, or parentage reveal."
 
 > **Dev:** "Does every obstacle need a mini-game?"
 > **Domain expert:** "No — the first ending path should work through residents, conversations, collection, and world changes; **Mini-Game Entrances** can add alternate paths or side fun."
@@ -314,3 +422,12 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
   player, not with the player.
 - "hint" from Cicka means subtle attention guidance through staging or reaction,
   not explicit objective text like "go fix the bridge."
+- "last dance" previously meant an after-festival closure gate; resolved: use
+  **Opening Dance Shuttle Beat** for the final dance-festival route beat.
+- "festival helper" is too generic for the driver's colleague; resolved: use
+  **Last-Stop Operations Helper**.
+- "lighthouse" is current story shorthand for the **Relay Spire** as a beacon or
+  overlook; keep docs on **Relay Spire** unless the final landmark is renamed.
+- "another cat" during **Opening Dance Shuttle Beat** means the **Unnamed
+  Counterpart Cat**, not **Micka**, whose first appearance remains after the
+  first-ending return unless that timing is deliberately reopened.
