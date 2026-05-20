@@ -123,18 +123,40 @@ _Avoid_: companion AI, quest marker, follower pet, objective dispenser
 
 **Cicka Threshold Farewell**:
 The first ending beat where Cicka accompanies the player to the Relay Spire
-threshold, then departs somewhere the player cannot follow.
+threshold, looks back, leaves one final paw/page mark, then slips into a page
+fold or light beyond the player's path.
 _Avoid_: literal death scene, grief monologue, Cicka leaving with the player
+
+**Open Ridge Return State**:
+The immediate post-ending Ridge state where the world remains playable with
+Cicka's final mark and absence-shaped changes before any later Micka trigger.
+_Avoid_: closed ending, sad objective, immediate replacement reveal
 
 **Guitar Farewell**:
 The final shared Cicka moment where the player plays guitar for her at the Relay
 Spire, echoing an established comfort interaction from Cicka Home and the Ridge.
 _Avoid_: generic music mini-game, melodrama, one-off ending prop
 
+**Sit and Play Prompt**:
+The final Relay Spire interaction that starts the Guitar Farewell when the
+player chooses to sit near Cicka and play guitar.
+_Avoid_: rhythm UI, fail state, final skill check, objective popup
+
 **Living Proof Montage**:
 A brief Guitar Farewell montage that wordlessly shows the resident help and
 world changes that made the sketchbook ready to send.
 _Avoid_: full recap, credits roll, visible checklist, objective summary
+
+**Send the Sketchbook Prompt**:
+The post-Guitar Farewell Relay Spire interaction that begins the Cicka Threshold
+Farewell after the player has shared the quiet song with Cicka.
+_Avoid_: automatic send, guitar-as-send-button, boss gate, extra skill check
+
+**Relay Blue Hour**:
+The final send lighting state after the Guitar Farewell, where Relay has moved
+from sunset warmth into blue-hour threshold light while the night festival begins
+elsewhere.
+_Avoid_: full night farewell, hard time cut, cold death-coded darkness
 
 **Concert Crossing Beat**:
 A mid-route Resident Room Beat where a blocked concert/traffic crossing becomes
@@ -178,6 +200,12 @@ _Avoid_: long chore list, black-screen-only solve, abstract emotional unlock
 A compact presentation pattern where the player triggers a few authored
 interactions that snap through visible work and a time-of-day shift.
 _Avoid_: pure cutscene, full manual chores, repeated object hauling
+
+**Short Threshold Transition**:
+A brief non-controllable passage that carries the player from a solved route
+beat into the next playable emotional threshold, often through a line, sound
+cue, blackout, and respawn.
+_Avoid_: driving mini-game, long travel scene, instant unexplained teleport
 
 **Unnamed Counterpart Cat**:
 The non-Micka local cat who may quietly interact with Cicka during the Opening
@@ -296,11 +324,25 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 - The **Cicka Threshold Farewell** resolves Cicka's recurring field guidance
   without closing the **Sketchbook Neighborhood**; the Ridge remains replayable
   with Cicka's final mark or absence-shaped changes.
+- The **Cicka Threshold Farewell** departure should be physical and mostly
+  silent: walk together, pause, look back, final mark, then page-fold/light
+  departure; any meow or translated fragment should stay tiny and optional.
+- The immediate return after the **Cicka Threshold Farewell** should be the
+  **Open Ridge Return State**: replayable, quiet, and absence-marked, with Micka
+  still delayed until the later post-ending trigger.
 - The **Guitar Farewell** should be established before the ending as a repeatable
   comfort interaction, especially at Cicka Home, so the final Relay Spire use
   feels remembered rather than introduced for drama.
 - The **Guitar Farewell** can include a **Living Proof Montage**, but the montage
   should stay brief and keep Cicka as the emotional focus.
+- The **Sit and Play Prompt** starts the **Guitar Farewell** at Relay Spire
+  without turning it into a rhythm challenge.
+- The **Send the Sketchbook Prompt** should happen after the **Guitar Farewell**,
+  keeping the final send as an active player choice while preserving the song as
+  comfort rather than a send button.
+- The Relay ending should use sunset for **Sit and Play Prompt**, then
+  **Relay Blue Hour** for **Send the Sketchbook Prompt**; the **Living Proof
+  Montage** can show the night festival beginning elsewhere.
 - The **Concert Crossing Beat** can teach the guitar through a small
   Guitar-Hero-like mini-game, but the **Guitar Farewell** itself should remain a
   cozy remembrance interaction rather than an arcade pass/fail challenge.
@@ -329,6 +371,9 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
   a quiet threshold observer near the operations table or service gate; the
   **Unnamed Counterpart Cat** can add texture and imply future continuity, but
   it should stay visual-only and should not be named or treated as Micka.
+- The ride from Last-Stop Plaza to Relay should be a **Short Threshold
+  Transition**, not a controllable driving scene; a driver line, vehicle-start
+  sound, brief blackout, and Relay spawn are enough.
 - Required **Resident Room Beats** that contain arcade-like interactions should
   also have a non-arcade fallback through conversation, collection, practice, or
   a forgiving auto-resolve path.
@@ -393,6 +438,9 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 
 > **Dev:** "Should we design the other cat now?"
 > **Domain expert:** "Only at silhouette/color level: a pale or light-ink contrast to Cicka, with no name, dialogue, or parentage reveal."
+
+> **Dev:** "Do we play the shuttle ride?"
+> **Domain expert:** "No — use a **Short Threshold Transition**: driver line, vehicle-start sound, brief blackout, then control resumes at Relay."
 
 > **Dev:** "Does every obstacle need a mini-game?"
 > **Domain expert:** "No — the first ending path should work through residents, conversations, collection, and world changes; **Mini-Game Entrances** can add alternate paths or side fun."

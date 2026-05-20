@@ -727,6 +727,32 @@ being used, Concert Crossing continuing, Opening Dance beginning at night, and
 Cicka Home carrying accumulated marks. Keep it wordless or nearly wordless so
 the focus stays on Cicka.
 
+Relay time should progress from sunset for **Sit and Play Prompt** to **Relay
+Blue Hour** for **Send the Sketchbook Prompt**. The montage can show the night
+festival beginning elsewhere, but Relay should not become full night before the
+farewell.
+
+The shuttle ride from Last-Stop Plaza to Relay should be a **Short Threshold
+Transition**, not a controllable driving segment: the driver can say "All aboard
+the last ride," the vehicle starts over a brief blackout, the player respawns at
+Relay Spire under sunset, and control resumes at Cicka's overlook spot.
+
+The final Relay Spire interaction should be a **Sit and Play Prompt** near
+Cicka. It starts the Guitar Farewell without rhythm UI, fail state, or final
+skill check.
+
+After the Guitar Farewell, control returns at the Relay sign/spire for a **Send
+the Sketchbook Prompt**. This starts the Cicka Threshold Farewell while keeping
+the guitar as comfort rather than the send button.
+
+Cicka's departure should be physical and mostly silent: walk together, pause,
+look back, final mark, then page-fold/light departure. Any meow or translated
+fragment should stay tiny and optional.
+
+Immediate post-ending play should use the **Open Ridge Return State**:
+replayable, quiet, and absence-marked. Micka remains delayed until the later
+post-ending trigger rather than appearing immediately.
+
 Current first required Resident Room Beat: **Blueprint Bridge**. Help a resident
 finish a tiny bridge drawing/blueprint, then the finished sketch becomes the crossing.
 Direct bridge drawing or physics bridge-building can be a future optional toy,

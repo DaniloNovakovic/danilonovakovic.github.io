@@ -47,16 +47,20 @@ Accepted ending outline:
 1. The player reaches Relay Spire and can stand there before it is ready.
 2. Once Living Proof is enough, the Relay sign becomes readable.
 3. Cicka appears in her final field-presence spot, calm and familiar.
-4. The player shares a quiet **Guitar Farewell** with Cicka, ideally under a
-   warm sunset or other cozy threshold light.
+4. The player uses a **Sit and Play Prompt** near Cicka to share a quiet
+   **Guitar Farewell**, ideally under a warm sunset or other cozy threshold
+   light.
 5. A brief **Living Proof Montage** can appear during the guitar: Blueprint
    Bridge being used, Concert Crossing continuing, Opening Dance beginning at
    night, and Cicka Home carrying accumulated marks.
-6. The player activates or sends the sketchbook.
-7. Cicka walks with the player to the threshold, pauses, leaves one final
-   paw/page mark, then departs somewhere unreachable.
-8. The player returns to Ridge after the ending, with the final mark preserved
-   and the world still open.
+6. Control returns in **Relay Blue Hour** at the Relay sign/spire for a **Send
+   the Sketchbook Prompt**.
+7. Cicka walks with the player to the threshold, pauses, looks back once, leaves
+   one final paw/page mark, then slips into a page fold or light beyond the
+   player's path.
+8. The player returns to the **Open Ridge Return State** after the ending, with
+   the final mark preserved, Cicka's absence felt through favorite spots or
+   marks, and the world still open.
 
 Tone boundaries:
 
@@ -64,6 +68,10 @@ Tone boundaries:
 - no grief monologue
 - no credits-only ending
 - no arcade pass/fail challenge during the Guitar Farewell
+- no explanatory departure speech; a tiny meow or translated fragment is
+  optional only if it stays smaller than the silence
+- no immediate replacement reveal; Micka remains delayed until the later
+  post-ending trigger
 
 ## Living Proof Gate
 
@@ -327,11 +335,16 @@ or briefly playing while the humans work. The counterpart cat can visually
 contrast with Cicka, such as a pale or white cat if Cicka reads dark, so that
 Micka's later half-and-half design feels quietly prepared. Do not name him,
 label him as Micka's father, or confirm parentage before the post-ending return.
-The player catches the sunset shuttle to Relay, and the later night festival can
-appear as a **Living Proof Montage** image during the **Guitar Farewell** instead
-of pulling the playable ending away from Cicka. The emotional lesson is that
-life can continue and new love can arrive after loss without replacing what was
-lost.
+The player catches the sunset shuttle to Relay through a **Short Threshold
+Transition**, not a controllable driving scene. The driver can say a small line
+such as "All aboard the last ride," the vehicle starts over a brief blackout,
+and the player respawns at Relay Spire under sunset. Control resumes at Cicka's
+overlook spot for the **Sit and Play Prompt** and **Guitar Farewell**. The later
+night festival can appear as a **Living Proof Montage** image during the
+farewell instead of pulling the playable ending away from Cicka. After the
+montage, Relay returns in **Relay Blue Hour** for the **Send the Sketchbook
+Prompt** rather than full night. The emotional lesson is that life can continue
+and new love can arrive after loss without replacing what was lost.
 
 ## Concert Crossing Beat
 
