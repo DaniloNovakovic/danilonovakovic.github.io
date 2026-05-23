@@ -329,8 +329,10 @@ The target asks for:
 - Bridge Resting Spot, Concert Resting Spot, and Dance Festival Resting Spot as
   local progress-memory spaces, not hubs or v0 prompt nodes
 - two tiny visual states for each Cicka Resting Spot: before resolution, Cicka
-  draws attention to the local problem; after resolution, the spot becomes
-  calmer through a settled pose, tiny mark, changed prop, or later absence echo
+  draws attention to the local problem; immediately after resolution, the spot
+  becomes calmer through a settled pose, tiny mark, changed prop, or later
+  absence echo; the Guitar Farewell montage can revisit these already-changed
+  states rather than introducing them
 - no main-path slope reliance in v0; use chunky stairs, cords, shelves, bridges,
   lifts, and soft drops
 - no required jump button on the v0 main route; use authored climb, descend,

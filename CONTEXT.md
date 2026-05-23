@@ -148,7 +148,9 @@ later affection passes can add tiny optional comfort interactions such as
 sitting together, petting, lap loafing, or playing guitar nearby.
 Each v0 spot should support two tiny visual states: before its area beat
 resolves, Cicka uses the spot to draw attention; after resolution, the spot
-settles into a calmer pose, tiny mark, or changed prop.
+settles immediately into a calmer pose, tiny mark, or changed prop. The Guitar
+Farewell montage can revisit these already-changed states, but should not be
+the first time the player sees them.
 _Avoid_: Cicka Home hub, quest board, required backtracking checkpoint, inventory stash, required affection system, v0 interaction node
 
 **Bridge Resting Spot**:

@@ -794,7 +794,8 @@ Build:
 - place Bridge Resting Spot, Concert Resting Spot, and Dance Festival Resting
   Spot as progress-memory spaces, not hubs or v0 prompt nodes
 - give each resting spot two tiny visual states: pre-resolution attention cue
-  and post-resolution calm/memory read
+  and immediate post-resolution calm/memory read; the Guitar Farewell montage
+  can revisit those changed states instead of introducing them
 - add at least one Cicka field-presence hint at a local route blocker
 - add at least one Resident Help Beat that visibly changes a route
 - make Stampede route at least one vertical beat away

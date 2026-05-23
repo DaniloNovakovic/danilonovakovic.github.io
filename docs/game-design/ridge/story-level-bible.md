@@ -120,8 +120,12 @@ Each resting spot should have two tiny visual states:
 
 - **Before area beat resolution**: Cicka uses the spot to draw attention to a
   local problem, route blocker, or emotional handoff.
-- **After area beat resolution**: the spot becomes calmer through a settled
-  pose, tiny mark, changed prop, or quiet absence echo.
+- **Immediately after area beat resolution**: the spot becomes calmer through a
+  settled pose, tiny mark, changed prop, or quiet absence echo.
+
+The Guitar Farewell montage may revisit these changed resting-spot states, but
+it should not be the first time the player sees them. The world should feel
+responsive during play, not only during the ending.
 
 Use practical design labels for these spots:
 
