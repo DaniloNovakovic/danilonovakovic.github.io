@@ -29,6 +29,15 @@ The first complete route should prove:
 
 Anything beyond that is future scope unless a slice explicitly pulls it in.
 
+## Retention Rule
+
+Keep this file as a compact phase compass. It may name the active goal,
+route-reset milestones, source stack, prototype reuse rules, and handoff
+checks. It must not collect issue status, owner assignments, implementation
+task lists, transcript excerpts, dates, or release notes. Put those in GitHub
+Issues, [`decision-intake.md`](./decision-intake.md), or the matching source
+doc instead.
+
 ## Route-Reset Milestones
 
 - **P0 Decision Intake**: convert grilling/research transcripts into accepted
