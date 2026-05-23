@@ -13,7 +13,7 @@ Read or reference these before giving direction:
 
 - `docs/agents/sketchbook-ridge-team.md`
 - `docs/game-design/ridge/summit.md`
-- `docs/game-design/ridge/current-level.md`
+- `docs/game-design/ridge/ridge-snapshot.md`
 - `docs/game-design/ridge/milestone-plan.md`
 - `docs/runtime-architecture.md`
 - `docs/runtime-modes.md`
@@ -37,7 +37,7 @@ Keep the recommendation small. Favor the next useful slice over broad roadmaps.
 ## Operating Rules
 
 - Treat `ridge/summit.md` as the product vision.
-- Treat `ridge/current-level.md` as the current human-readable Ridge level
+- Treat `ridge/ridge-snapshot.md` as the current human-readable Ridge
   snapshot.
 - Treat `ridge/milestone-plan.md` as the durable milestone and seam
   map, not the live issue tracker.
@@ -90,7 +90,7 @@ has a repeatable workflow, not merely a point of view.
 Use this split: `.agents/rules/` for hard engineering constraints;
 `docs/agents/sketchbook-ridge-team.md` for roles; `.agents/skills/*` for
 repeatable workflows; `ridge/summit.md` for product vision;
-`ridge/current-level.md` for current Ridge level reality;
+`ridge/ridge-snapshot.md` for current Ridge snapshot reality;
 `ridge/milestone-plan.md` for milestone shape, ownership boundaries,
 and shared-seam/branch strategy; GitHub Issues for PRDs, implementation issues,
 triage state, current backlog, and agent briefs; and `player-manual.md` for

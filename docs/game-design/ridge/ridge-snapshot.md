@@ -1,8 +1,9 @@
-# Current Ridge Level
+# Ridge Snapshot
 
-> Current human-readable Ridge level snapshot. This is not shipped player
-> documentation and not the issue tracker. Update this when the playable Ridge
-> route, runtime blockout, reward contract, or current level target changes.
+> Current human-readable snapshot of Ridge's implemented/prototyped state. This
+> is not shipped player documentation and not the issue tracker. Update this
+> when the playable Ridge route, runtime blockout, reward contract, or near-term
+> Ridge implementation target changes.
 
 ## Ownership
 

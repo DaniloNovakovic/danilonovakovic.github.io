@@ -18,7 +18,7 @@ is fun; this role owns whether the intended path survives the runtime.
 - `docs/runtime-architecture.md`
 - `.agents/rules/20-game-runtime.md`
 - The specific artifact, diff, issue, or route being tested.
-- For Ridge route work: `docs/game-design/ridge/current-level.md`,
+- For Ridge route work: `docs/game-design/ridge/ridge-snapshot.md`,
   `docs/game-design/ridge/map-language.md`,
   `src/game/scenes/ridge/blockout/maps/folded-desk-ridge.blockout.txt`, and
   relevant `src/game/scenes/ridge/` tests or runtime files.

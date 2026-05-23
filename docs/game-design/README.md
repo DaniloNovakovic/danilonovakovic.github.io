@@ -9,7 +9,7 @@ file here as equally active.
 - **Shipped player behavior:** [`player-manual.md`](./player-manual.md).
 - **Runtime spatial source:** [`folded-desk-ridge.source.ts`](../../src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts), described by
   [`ridge/map-language.md`](./ridge/map-language.md).
-- **Current Ridge level read:** [`ridge/current-level.md`](./ridge/current-level.md).
+- **Current Ridge snapshot:** [`ridge/ridge-snapshot.md`](./ridge/ridge-snapshot.md).
 - **Ridge story/level plan:** [`ridge/story-level-bible.md`](./ridge/story-level-bible.md).
 - **Current map target:** [`ridge/map-plans/proper-map-plan.md`](./ridge/map-plans/proper-map-plan.md).
 - **Product vision:** [`ridge/summit.md`](./ridge/summit.md).
@@ -19,18 +19,18 @@ file here as equally active.
   configured in [`../agents/issue-tracker.md`](../agents/issue-tracker.md).
 
 When files disagree, prefer this order: shipped behavior, runtime source,
-current Ridge level read, Ridge story/level plan, current map target, product
+current Ridge snapshot, Ridge story/level plan, current map target, product
 vision, milestone map, then reference/provenance.
 
 ## Documents
 
 - **[Player Manual](./player-manual.md)**: Shipped controls, rooms,
   interactions, return behavior, and playtest notes.
-- **[Current Ridge Level](./ridge/current-level.md)**: Human-readable snapshot
+- **[Ridge Snapshot](./ridge/ridge-snapshot.md)**: Human-readable snapshot
   of the currently implemented/prototyped Ridge level and what source owns each
   part.
 - **[Ridge Story/Level Bible](./ridge/story-level-bible.md)**: Prose-first
-  story, level, character, ending, and Resident Room Beat plan for the next
+  story, level, character, ending, and Ridge Area / Resident Beat plan for the next
   Ridge direction before implementation resumes.
 - **[Mini-Games](./mini-games/README.md)**: Routing index for mini-game-specific
   rules and Ridge reward contracts.
@@ -75,7 +75,7 @@ vision, milestone map, then reference/provenance.
 ## Document Status
 
 - **Shipped:** `player-manual.md`.
-- **Current design:** `ridge/current-level.md`,
+- **Current design:** `ridge/ridge-snapshot.md`,
   `ridge/story-level-bible.md`,
   `ridge/summit.md`, `ridge/milestone-plan.md`,
   `ridge/map-plans/proper-map-plan.md`,
@@ -104,6 +104,6 @@ vision, milestone map, then reference/provenance.
 3. **Fun & Surprise:** Secrets, mini-games, and "glitches" keep the experience engaging.
 
 When a concept becomes shipped behavior, update `player-manual.md` first. When
-current Ridge level reality changes, update `ridge/current-level.md`. When work
+current Ridge snapshot reality changes, update `ridge/ridge-snapshot.md`. When work
 needs planning, publish or update GitHub issues instead of growing local backlog
 sections.

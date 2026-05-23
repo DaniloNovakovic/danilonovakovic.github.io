@@ -9,8 +9,8 @@ current backlog, and agent-ready briefs live in GitHub Issues through the
 workflow in [`docs/agents/issue-tracker.md`](../../agents/issue-tracker.md).
 
 Use this file for durable milestone shape, ownership boundaries, branch/seam
-strategy, and reference stacks. Use [`current-level.md`](./current-level.md)
-for the current human-readable Ridge level snapshot.
+strategy, and reference stacks. Use [`ridge-snapshot.md`](./ridge-snapshot.md)
+for the current human-readable Ridge snapshot.
 
 ## Active Goal
 
@@ -103,7 +103,7 @@ Role contracts and activation phrases live in
 Every GitHub implementation issue should link the relevant subset of these:
 
 - [`summit.md`](./summit.md)
-- [`current-level.md`](./current-level.md)
+- [`ridge-snapshot.md`](./ridge-snapshot.md)
 - [`runtime-architecture.md`](../../runtime-architecture.md)
 - [`runtime-modes.md`](../../runtime-modes.md)
 - [`architecture-direction.md`](../../architecture-direction.md)
