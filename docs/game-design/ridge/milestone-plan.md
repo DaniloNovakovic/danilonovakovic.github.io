@@ -3,6 +3,10 @@
 > Planning companion for [`summit.md`](./summit.md).
 > The Summit doc is the product vision. This file is the implementation and
 > milestone map for agents working across branches.
+> Read [`README.md`](./README.md) first for Ridge source-of-truth routing and
+> [`story-level-bible.md`](./story-level-bible.md) for the active
+> Bridge/Concert/Dance/Relay route canon. Use [`areas/`](./areas/README.md) for
+> area-local design detail.
 
 This is not the live issue tracker. PRDs, implementation issues, triage state,
 current backlog, and agent-ready briefs live in GitHub Issues through the
@@ -375,14 +379,15 @@ Potential next implementation slices:
 These are local planning notes. Publish approved work as GitHub Issues before
 assigning an AFK agent.
 
-1. **Ridge / Outskirts Topology Spike**: design and lightly prototype how the
-   current Overworld becomes Outskirts/Trailhead and Ridge becomes a connected
-   Hollow Knight topology side-view world. Use
-   [`topology-spike.md`](./map-plans/topology-spike.md)
-   as the active M5 map brief. Do not fully replace the default Overworld in
-   the same PR.
+1. **Ridge Route Reset Planning**: align the next implementation plan with the
+   active Bridge Area -> Concert Area -> Dance Festival Area -> Relay/Cicka
+   ending route in [`story-level-bible.md`](./story-level-bible.md). Treat
+   [`topology-spike.md`](./map-plans/topology-spike.md) and
+   [`proper-map-plan.md`](./map-plans/proper-map-plan.md) as legacy/prototype
+   references unless a slice explicitly adapts their source-contract or topology
+   ideas.
 2. **Later First Ridge Shortcut / Ridge-Only Glide**: revisit these after the
-   topology spike gives shortcuts and movement rewards a real route shape.
+   route reset gives shortcuts and movement rewards a real route shape.
 3. **Translator / Cicka Daydream**: keep translated Cicka subtitles and the
    Cicka daydream mini-slice for later, after Ridge Memory proves return play.
 
@@ -397,8 +402,12 @@ Owner: integration + Ridge.
 
 Outputs:
 
-- final gate: at least three major clears / proofs, with Potassium Circuit
-  counting as one proof, plus one Cicka / translator / manual insight.
+- final gate: the three required Ridge Areas and their visible resident/world
+  changes provide enough Living Proof for the first ending. Mini-games can
+  remain optional fun, rewards, shortcuts, or future alternate solutions; they
+  are not required Living Proof for the current first-ending route.
+- Guitar Farewell, Send the Sketchbook Prompt, Cicka Threshold Farewell, and
+  Open Ridge Return State follow `story-level-bible.md`.
 - short ending/contact overlay.
 - return to Ridge after ending.
 - post-ending Ridge state where Micka first appears after the player completes

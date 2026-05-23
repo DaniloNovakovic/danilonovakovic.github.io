@@ -1,9 +1,9 @@
 # Sketchbook Ridge Topology Spike
 
-> Active M5 design brief for the next Ridge blockout. This document narrows
-> [`milestone-plan.md`](../milestone-plan.md)
-> into one map-design spike. It is not shipped behavior; update
-> [`player-manual.md`](../../player-manual.md) only after a playable route ships.
+> Status: superseded legacy/reference.
+> This was the M5 folded/Cicka Home map-design spike for the prior Ridge
+> direction. Keep it as planning history and topology reference only. For
+> current Ridge source-of-truth routing, read [`../README.md`](../README.md).
 
 ## Purpose
 

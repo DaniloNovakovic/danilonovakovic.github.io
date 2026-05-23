@@ -1,37 +1,52 @@
 # Game Design
 
-This directory separates shipped behavior, current Ridge design, long-term
-direction, runtime blockout source, and reference material. Do not treat every
-file here as equally active.
+This directory separates shipped behavior, active Ridge design, current runtime
+prototype truth, long-term direction, runtime blockout source, and reference
+material. Do not treat every file here as equally active.
 
 ## Source Of Truth
 
 - **Shipped player behavior:** [`player-manual.md`](./player-manual.md).
-- **Runtime spatial source:** [`folded-desk-ridge.source.ts`](../../src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts), described by
+- **Ridge design router:** [`ridge/README.md`](./ridge/README.md).
+- **Active Ridge story/route canon:** [`ridge/story-level-bible.md`](./ridge/story-level-bible.md).
+- **Active Ridge area design:** [`ridge/areas/`](./ridge/areas/README.md).
+- **Current Ridge runtime/prototype snapshot:** [`ridge/ridge-snapshot.md`](./ridge/ridge-snapshot.md).
+- **Runtime spatial source for the current prototype:** [`folded-desk-ridge.source.ts`](../../src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts), described by
   [`ridge/map-language.md`](./ridge/map-language.md).
-- **Current Ridge snapshot:** [`ridge/ridge-snapshot.md`](./ridge/ridge-snapshot.md).
-- **Ridge story/level plan:** [`ridge/story-level-bible.md`](./ridge/story-level-bible.md).
-- **Current map target:** [`ridge/map-plans/proper-map-plan.md`](./ridge/map-plans/proper-map-plan.md).
 - **Product vision:** [`ridge/summit.md`](./ridge/summit.md).
 - **Milestone map:** [`ridge/milestone-plan.md`](./ridge/milestone-plan.md).
 - **Mini-game routing:** [`mini-games/README.md`](./mini-games/README.md).
 - **Live PRDs, issues, triage state, and agent briefs:** GitHub Issues, as
   configured in [`../agents/issue-tracker.md`](../agents/issue-tracker.md).
 
-When files disagree, prefer this order: shipped behavior, runtime source,
-current Ridge snapshot, Ridge story/level plan, current map target, product
-vision, milestone map, then reference/provenance.
+For future Ridge design, prefer [`CONTEXT.md`](../../CONTEXT.md),
+[`ridge/README.md`](./ridge/README.md), and
+[`ridge/story-level-bible.md`](./ridge/story-level-bible.md), then the matching
+[`ridge/areas/`](./ridge/areas/README.md) file for area-local detail. For
+current runtime behavior, prefer runtime source and
+[`ridge/ridge-snapshot.md`](./ridge/ridge-snapshot.md). For live work state,
+prefer GitHub Issues.
 
 ## Documents
 
 - **[Player Manual](./player-manual.md)**: Shipped controls, rooms,
   interactions, return behavior, and playtest notes.
+- **[Ridge Design Router](./ridge/README.md)**: First-read status matrix for
+  Ridge docs, source ownership, legacy prototype rules, and update protocol.
 - **[Ridge Snapshot](./ridge/ridge-snapshot.md)**: Human-readable snapshot
-  of the currently implemented/prototyped Ridge level and what source owns each
-  part.
+  of the currently implemented/prototyped Ridge level, including which parts
+  are disposable legacy prototype.
 - **[Ridge Story/Level Bible](./ridge/story-level-bible.md)**: Prose-first
-  story, level, character, ending, and Ridge Area and Resident Beat plan for the
-  next Ridge direction before implementation resumes.
+  route spine, cross-area dependencies, Living Proof, Cicka/guitar logic, and
+  ending order for the active Bridge -> Concert -> Dance Festival -> Relay/Cicka
+  direction.
+- **[Ridge Areas](./ridge/areas/README.md)**: Local source-of-truth docs for
+  Bridge, Concert, Dance Festival, and Relay Ending design details.
+- **[Ridge Decision Intake](./ridge/decision-intake.md)**: Routing template for
+  future grilling or research transcripts so candidate ideas do not become
+  accidental canon.
+- **[Ridge Open Questions](./ridge/open-questions.md)**: Active unresolved
+  ending, Dance Festival, dependency, and scope questions for future grilling.
 - **[Mini-Games](./mini-games/README.md)**: Routing index for mini-game-specific
   rules and Ridge reward contracts.
 - **[Potassium Slip Manual](./mini-games/potassium-slip.md)**: Focused guide for the
@@ -44,7 +59,9 @@ vision, milestone map, then reference/provenance.
   Durable milestone, branch, shared-seam, and ownership map. It is not the live
   issue tracker.
 - **[Sketchbook Ridge Proper Map Plan](./ridge/map-plans/proper-map-plan.md)**:
-  Current target map plan for the folded, multi-screen Ridge around Cicka Home.
+  Folded/Cicka Home topology reference from the prior route direction. Use as
+  legacy/prototype material unless a new slice explicitly rewrites it around
+  the active Bridge/Concert/Dance/Relay route.
 - **[Ridge Blockout Source](./ridge/map-language.md)**: Typed blockout source
   contract for Ridge room beats, environment tags, traversal primitives, and
   greybox generation.
@@ -75,20 +92,26 @@ vision, milestone map, then reference/provenance.
 ## Document Status
 
 - **Shipped:** `player-manual.md`.
-- **Current design:** `ridge/ridge-snapshot.md`,
+- **Ridge routing and governance:** `ridge/README.md` and
+  `ridge/decision-intake.md`.
+- **Active Ridge open questions:** `ridge/open-questions.md`.
+- **Active Ridge design:** `ridge/README.md`,
+  `ridge/areas/`,
   `ridge/story-level-bible.md`,
   `ridge/summit.md`, `ridge/milestone-plan.md`,
-  `ridge/map-plans/proper-map-plan.md`,
   `mini-games/potassium-slip.md`, and `mini-games/stampede-sketch.md`.
+- **Current Ridge runtime/prototype reality:** `ridge/ridge-snapshot.md`.
 - **Current runtime source:**
   `../../src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts`.
 - **Current runtime source documentation:** `ridge/map-language.md`.
-- **Planning history / design review:** `ridge/map-plans/topology-spike.md`
-  and `ridge/reviews/blockout-fun-review.md`.
+- **Legacy/prototype topology and planning history:**
+  `ridge/map-plans/proper-map-plan.md`,
+  `ridge/map-plans/topology-spike.md`, and
+  `ridge/reviews/blockout-fun-review.md`.
 - **Reference/provenance:** M3 visual/audio/overlay packs, asset staging,
   Cicka runtime asset audit, and long-term topology. These can guide future
-  work, but should not override current design, shipped behavior, runtime docs,
-  or GitHub issues.
+  work, but should not override active Ridge design, shipped behavior, runtime
+  docs, or GitHub issues.
 - **Implementation source:** `../runtime-architecture.md`,
   `../runtime-modes.md`, and scoped rules under `../../.agents/rules/`.
 - **Issue tracker:** PRDs, implementation issues, triage state, current backlog,
@@ -104,6 +127,9 @@ vision, milestone map, then reference/provenance.
 3. **Fun & Surprise:** Secrets, mini-games, and "glitches" keep the experience engaging.
 
 When a concept becomes shipped behavior, update `player-manual.md` first. When
-current Ridge snapshot reality changes, update `ridge/ridge-snapshot.md`. When work
-needs planning, publish or update GitHub issues instead of growing local backlog
+current Ridge runtime/prototype reality changes, update `ridge/ridge-snapshot.md`.
+When future Ridge route canon changes, update `ridge/story-level-bible.md`
+through the routing rules in `ridge/README.md`. When area-local accepted detail
+changes, update the matching file under `ridge/areas/`. When work needs
+planning, publish or update GitHub issues instead of growing local backlog
 sections.

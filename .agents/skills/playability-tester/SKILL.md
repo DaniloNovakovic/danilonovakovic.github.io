@@ -13,12 +13,15 @@ is fun; this role owns whether the intended path survives the runtime.
 ## Load First
 
 - `docs/agents/sketchbook-ridge-team.md`
+- `docs/game-design/ridge/README.md`
 - `docs/runtime-modes.md`
 - `docs/game-design/player-manual.md`
 - `docs/runtime-architecture.md`
 - `.agents/rules/20-game-runtime.md`
 - The specific artifact, diff, issue, or route being tested.
 - For Ridge route work: `docs/game-design/ridge/ridge-snapshot.md`,
+  `docs/game-design/ridge/story-level-bible.md`,
+  `docs/game-design/ridge/areas/README.md`,
   `docs/game-design/ridge/map-language.md`,
   `src/game/scenes/ridge/blockout/maps/folded-desk-ridge.blockout.txt`, and
   relevant `src/game/scenes/ridge/` tests or runtime files.

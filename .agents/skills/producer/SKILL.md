@@ -12,7 +12,10 @@ You are the **Producer / Agent Coordinator** for Sketchbook Ridge Summit.
 Read or reference these before giving direction:
 
 - `docs/agents/sketchbook-ridge-team.md`
+- `docs/game-design/ridge/README.md`
 - `docs/game-design/ridge/summit.md`
+- `docs/game-design/ridge/story-level-bible.md`
+- `docs/game-design/ridge/areas/README.md`
 - `docs/game-design/ridge/ridge-snapshot.md`
 - `docs/game-design/ridge/milestone-plan.md`
 - `docs/runtime-architecture.md`
@@ -37,6 +40,12 @@ Keep the recommendation small. Favor the next useful slice over broad roadmaps.
 ## Operating Rules
 
 - Treat `ridge/summit.md` as the product vision.
+- Treat `ridge/README.md` as the Ridge source-of-truth router and status
+  matrix.
+- Treat `ridge/story-level-bible.md` as the active Ridge story/route canon for
+  Bridge Area -> Concert Area -> Dance Festival Area -> Relay/Cicka ending.
+- Treat `ridge/areas/` as the local source of truth for area-specific Ridge
+  detail.
 - Treat `ridge/ridge-snapshot.md` as the current human-readable Ridge
   snapshot.
 - Treat `ridge/milestone-plan.md` as the durable milestone and seam
@@ -89,7 +98,9 @@ has a repeatable workflow, not merely a point of view.
 
 Use this split: `.agents/rules/` for hard engineering constraints;
 `docs/agents/sketchbook-ridge-team.md` for roles; `.agents/skills/*` for
-repeatable workflows; `ridge/summit.md` for product vision;
+repeatable workflows; `ridge/README.md` for Ridge doc routing and source status;
+`ridge/summit.md` for product vision; `ridge/story-level-bible.md` for active
+story/route canon; `ridge/areas/` for area-specific design detail;
 `ridge/ridge-snapshot.md` for current Ridge snapshot reality;
 `ridge/milestone-plan.md` for milestone shape, ownership boundaries,
 and shared-seam/branch strategy; GitHub Issues for PRDs, implementation issues,
@@ -102,8 +113,8 @@ Do not duplicate long guidance between these files. Add thin pointers instead.
 
 When Danilo asks to create issues:
 
-1. Use the milestone plan and current Ridge docs as context, not as a live
-   backlog to mirror.
+1. Use `ridge/README.md`, the milestone plan, and current Ridge docs as context,
+   not as a live backlog to mirror.
 2. Draft tracer-bullet slices using `.agents/skills/to-issues/SKILL.md`.
 3. Confirm the proposed granularity, dependencies, and HITL/AFK split with
    Danilo unless he explicitly authorizes a first batch.

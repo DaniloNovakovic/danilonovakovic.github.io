@@ -54,4 +54,6 @@ When generating or converting sprite assets for Phaser scenes, use [`.agents/ski
 
 - [`README.md`](README.md) — project overview, development commands, deployment notes.
 - [`docs/game-design/`](docs/game-design/) — shipped player-facing behavior and future design notes.
+- [`docs/game-design/ridge/README.md`](docs/game-design/ridge/README.md) — first-read Ridge source-of-truth router, status matrix, and update protocol.
+- [`docs/game-design/ridge/areas/README.md`](docs/game-design/ridge/areas/README.md) — active Bridge, Concert, Dance Festival, and Relay Ending area docs.
 - [`src/README.md`](src/README.md) — source folder map.

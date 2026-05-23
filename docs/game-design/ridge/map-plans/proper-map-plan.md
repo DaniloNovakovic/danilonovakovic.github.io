@@ -1,9 +1,14 @@
 # Sketchbook Ridge Proper Map Plan
 
+> Status: legacy/prototype topology reference.
 > Follow-up to [`topology-spike.md`](./topology-spike.md).
 > Issue #54 proved the current Ridge can change visually, but the route is still
-> a short prop line. This document defines the first real Ridge map before the
-> next implementation pass.
+> a short prop line. This document records the prior folded/Cicka Home topology
+> target. It is not the active Ridge route canon unless a new slice explicitly
+> rewrites it around [`../story-level-bible.md`](../story-level-bible.md).
+
+For current Ridge source-of-truth routing, read [`../README.md`](../README.md)
+first.
 
 ## Decision
 
@@ -132,10 +137,9 @@ resident-caused route changes**, not abstract platforming.
 
 ## Topology Visual
 
-The old standalone inventory canvas was removed after this plan became the
-current map target.
-draws the same plan as an in-game map-screen style canvas with first-walk,
-shortcut, and future-route layers.
+The old standalone inventory canvas was removed during the prior folded-map
+planning pass. This section draws that plan as an in-game map-screen style
+canvas with first-walk, shortcut, and future-route layers.
 
 ```text
 Legend:

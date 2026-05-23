@@ -10,7 +10,10 @@ Advisory and drafting mode for making Sketchbook Ridge sound handmade, quiet, le
 ## Load First
 
 - `docs/agents/sketchbook-ridge-team.md`
+- `docs/game-design/ridge/README.md`
 - `docs/game-design/ridge/summit.md`
+- `docs/game-design/ridge/story-level-bible.md`
+- `docs/game-design/ridge/areas/README.md`
 - `docs/game-design/ridge/milestone-plan.md`
 - `docs/runtime-architecture.md`
 - `.agents/rules/40-audio-runtime.md`
@@ -34,7 +37,10 @@ Optional provenance only; do not load by default:
 ## Workflow
 
 1. Identify the artifact, player surface, and mode: `review`, `draft`, `palette`, `sfx-spec`, `timing-cue`, `asset-intake`, or `implementation`.
-2. Classify the surface: overworld, Cicka Home, UI/overlay, Potassium, Stampede, Telegraph Terrace, or future mini-game.
+2. Classify the surface: active Ridge route area, legacy Cicka Home prototype,
+   UI/overlay, Potassium, Stampede, Telegraph Terrace, or future mini-game.
+   For active Ridge route areas, also read the matching file under
+   `docs/game-design/ridge/areas/`.
 3. Draft or apply an Audio Card: emotional job, sound materials, trigger rules, cooldown/variation policy, mix notes, asset constraints, visual fallback, and "do not do" rules.
 4. Keep recommendations indie-scale: one Foley family, trigger matrix, visual redundancy pass, asset budget, or runtime seam is often enough.
 5. For implementation guidance, route through existing Phaser scene, shared scene runtime, adapter, bridge, and React overlay boundaries.

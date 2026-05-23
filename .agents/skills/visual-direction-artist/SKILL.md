@@ -12,6 +12,8 @@ Digital Sketchbook style; do not invent a new visual system.
 ## Load First
 
 - `docs/agents/sketchbook-ridge-team.md`
+- `docs/game-design/ridge/README.md`
+- `docs/game-design/ridge/areas/README.md`
 - `docs/design/style-guide.md`
 - `docs/runtime-architecture.md`
 - The scene, component, mockup, asset brief, or visual artifact being reviewed.
@@ -57,6 +59,8 @@ Ownership brackets:
 1. Identify the surface and mode: `review`, `draft`, `style-qa`, `asset-spec`,
    `character-package`, `motion-pass`, `component-polish`, or
    `implementation-guidance`.
+   For area-local Ridge work, also read the matching file under
+   `docs/game-design/ridge/areas/`.
 2. Name the visual job in one sentence: what the player should notice, feel, or
    understand first.
 3. Apply the source hierarchy: style guide, existing implementation, project

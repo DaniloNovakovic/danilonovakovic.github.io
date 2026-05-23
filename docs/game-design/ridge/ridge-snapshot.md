@@ -1,23 +1,28 @@
 # Ridge Snapshot
 
-> Current human-readable snapshot of Ridge's implemented/prototyped state. This
-> is not shipped player documentation and not the issue tracker. Update this
-> when the playable Ridge route, runtime blockout, reward contract, or near-term
-> Ridge implementation target changes.
+> Status: implemented/prototype snapshot.
+> This is the current human-readable snapshot of Ridge's implemented/prototyped
+> state, not the active future design target, shipped player documentation, or
+> issue tracker. Update this when current runtime behavior or prototype
+> capability changes.
 
 ## Ownership
 
 - **Shipped behavior:** [`player-manual.md`](../player-manual.md).
+- **Ridge source router:** [`README.md`](./README.md).
+- **Active story/route canon:** [`story-level-bible.md`](./story-level-bible.md).
+- **Active area design:** [`areas/`](./areas/README.md).
 - **Runtime spatial data:** [`folded-desk-ridge.source.ts`](../../../src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts).
 - **Blockout language contract:** [`map-language.md`](./map-language.md).
-- **Current map target:** [`proper-map-plan.md`](./map-plans/proper-map-plan.md).
-- **Story/level plan:** [`story-level-bible.md`](./story-level-bible.md).
+- **Legacy folded topology reference:** [`proper-map-plan.md`](./map-plans/proper-map-plan.md).
 - **Product vision:** [`summit.md`](./summit.md).
 - **Live implementation work:** GitHub Issues.
 
 If this file disagrees with the folded desk Ridge blockout about room layout,
 route order, anchors, shortcuts, or progress-gated geometry, the blockout wins.
 If this file disagrees with GitHub about active work state, GitHub wins.
+If this file disagrees with `story-level-bible.md` or the matching `areas/`
+doc about future route intent, the active design docs win.
 
 ## Current Runtime Shape
 
@@ -134,10 +139,21 @@ Current accepted behavior:
 - Cicka can provide early pre-translator presence and Stampede-gated memory
   flavor without becoming a quest board, vendor, or inventory checklist.
 
-## Current Target
+## Future Design Target
 
-The current map target is the **Sketchbook Neighborhood Spine With Folded Shortcuts**
-from [`proper-map-plan.md`](./map-plans/proper-map-plan.md).
+The active future design target is the linear Ridge route from
+[`story-level-bible.md`](./story-level-bible.md):
+
+```text
+Bridge Area / Blueprint Bridge
+  -> Concert Area / Concert Crossing Beat
+  -> Dance Festival Area / Opening Dance Shuttle Beat
+  -> Relay Spire / Guitar Farewell / Cicka Threshold Farewell
+```
+
+The folded/Cicka Home route in
+[`proper-map-plan.md`](./map-plans/proper-map-plan.md) remains legacy prototype
+and topology reference until it is rewritten around this route.
 
 Before implementing the next Ridge runtime or blockout rewrite, write and accept
 a prose story/level/character plan for the core Exploration Map scenes and
@@ -372,7 +388,8 @@ Update this file when:
 - the current blockout route changes meaningfully
 - a room or landmark becomes active/inactive in the runtime
 - a reward changes durable state shape
-- the current map target changes
+- the active future route target changes in a way that affects runtime/prototype
+  interpretation
 - a prior topology/design spike is superseded
 
 Do not update this file just to record every implementation issue. Use GitHub

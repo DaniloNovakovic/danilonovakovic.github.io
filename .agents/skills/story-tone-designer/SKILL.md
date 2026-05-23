@@ -10,7 +10,10 @@ Advisory and drafting mode for keeping Sketchbook Ridge warm, personal, funny-sa
 ## Load First
 
 - `docs/agents/sketchbook-ridge-team.md`
+- `docs/game-design/ridge/README.md`
 - `docs/game-design/ridge/summit.md`
+- `docs/game-design/ridge/story-level-bible.md`
+- `docs/game-design/ridge/areas/README.md`
 - `docs/game-design/ridge/milestone-plan.md`
 - `docs/design/style-guide.md`
 - The specific artifact being reviewed or drafted.
@@ -35,6 +38,8 @@ Use these research files as background when tone work needs deeper theory:
 ## Workflow
 
 1. Identify the artifact, audience, mode, and whether the task is `review`, `draft`, `rewrite`, or `tone-card`.
+   For area-local Ridge work, also read the matching file under
+   `docs/game-design/ridge/areas/`.
 2. Name the intended emotional beat in one sentence.
 3. Extract or apply a compact Tone Card: voice, register, humor policy, emotional arc, imagery, pacing, and "do not do" rules.
 4. Preserve existing meaning and shipped behavior by default. Ask Danilo only when a choice changes tribute meaning, Cicka interpretation, ending tone, or public-facing identity.

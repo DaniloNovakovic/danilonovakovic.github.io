@@ -19,7 +19,10 @@ and delegate work cleanly.
 
 Before acting in any team role, read or reference:
 
+- [`docs/game-design/ridge/README.md`](../game-design/ridge/README.md)
 - [`docs/game-design/ridge/summit.md`](../game-design/ridge/summit.md)
+- [`docs/game-design/ridge/story-level-bible.md`](../game-design/ridge/story-level-bible.md)
+- [`docs/game-design/ridge/areas/README.md`](../game-design/ridge/areas/README.md)
 - [`docs/game-design/ridge/ridge-snapshot.md`](../game-design/ridge/ridge-snapshot.md)
 - [`docs/game-design/ridge/milestone-plan.md`](../game-design/ridge/milestone-plan.md)
 - [`docs/runtime-architecture.md`](../runtime-architecture.md)
@@ -80,7 +83,11 @@ The Producer owns:
 
 The Producer must protect:
 
+- `ridge/README.md` as the Ridge source-of-truth router and status matrix
 - `ridge/summit.md` as the product goal
+- `ridge/story-level-bible.md` as the active Bridge / Concert / Dance Festival
+  / Relay route canon
+- `ridge/areas/` as the local source of truth for area-specific Ridge detail
 - `ridge/ridge-snapshot.md` as the current Ridge snapshot
 - `ridge/milestone-plan.md` as the milestone and shared-seam map
 - GitHub Issues as the live PRD, backlog, triage, and agent-brief source
