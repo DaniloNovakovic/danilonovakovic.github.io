@@ -48,12 +48,13 @@ Sign: "Service road closes for night dance. Last daylight shuttle after setup ch
 - service-road gate or barrier
 - last daylight shuttle sign
 - shuttle or shuttle stop
-- operations table with checklist, lantern tags, radio, or route papers
+- operations table with the setup checklist, lantern tags, radio, route clipboard,
+  and blank song-request slips
 - lantern lines
 - chair stacks
 - stage/speaker cables
 - dance-floor edge
-- folded song-request paper
+- folded song-request paper after the driver writes it
 
 ## Visual And Audio Direction
 

@@ -100,6 +100,23 @@ only presented music can be the guitar during the farewell. It can use her own
 event paper, handwriting marks, or song-request language so the ask feels rooted
 in her work rather than imposed by the player.
 
+## Object Handoffs
+
+The Dance Festival's "collection" should mean a few grounded prop handoffs, not
+a fetch quest or inventory hunt. Keep the required objects tied to visible setup
+work and character readiness:
+
+- setup checklist / lantern tag: confirms the Operations Handoff Check
+- route clipboard or radio acknowledgement: confirms the driver can make the
+  last daylight shuttle once the steward opens the lane
+- blank song-request slip: becomes the **Folded Song Request** after the driver
+  writes it
+- service-lane tape/sign interaction: clears the lane during Setup Clearance
+
+These can be represented as prompts, brief pickups, or immediate handoffs. The
+important read is that the player helped people finish concrete local tasks,
+not that they vacuumed collectibles out of the plaza.
+
 ## Setup Clearance
 
 Required relocation should stay minimal. After the player helps, the driver and
@@ -147,9 +164,9 @@ The couple should be emotionally inspired by Danilo and Milena's story without
 being literal stand-ins. Protect the intimacy: carry the emotional truth through
 fictional residents, not a private memory exhibit.
 
-The main solution should be conversation, collection, and gentle setup. An
-optional dance/rhythm mini-game can deepen the beat later, but the first ending
-path should not depend on arcade performance.
+The main solution should be conversation, the small object handoffs above, and
+gentle setup. An optional dance/rhythm mini-game can deepen the beat later, but
+the first ending path should not depend on arcade performance.
 
 ## Relay Transition
 
