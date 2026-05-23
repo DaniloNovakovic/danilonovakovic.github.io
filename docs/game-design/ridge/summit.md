@@ -48,7 +48,7 @@ and proofs are out of order. The player learns Danilo by restoring meaning
 through play, not by opening resume modals. Basement, Potassium Slip, and the
 Glasses re-read effect are strong anchors; generic information buildings should
 eventually be absorbed into artifacts, mini-games, Cicka notes, manual pages,
-and visible Cicka Home changes.
+and local Cicka Resting Spot changes.
 
 The ending should not say "you became perfect." It should say:
 
@@ -172,8 +172,8 @@ Ending beat:
 - Cicka accompanies the player to the Relay Spire as a guide to a threshold.
 - The player understands she is going somewhere the player cannot follow.
 - Before the final send, the player can play guitar for Cicka as the last
-  ordinary shared comfort moment. This should echo earlier Cicka Home/Ridge
-  guitar interactions rather than appearing only at the ending.
+  ordinary shared comfort moment. This should echo earlier Cicka Resting Spot
+  or quiet Ridge guitar interactions rather than appearing only at the ending.
 - The farewell is tender but not literal-heavy: no on-screen death scene, no long grief speech.
 - Cicka leaves a final paw mark or page mark, and the Ridge remains replayable after the ending.
 - Design this as the canonical first ending. Do not add multiple endings unless
@@ -192,8 +192,8 @@ Ending beat:
 5. Enter the mini-game, inspect the artifact, or keep hiking.
 6. Clear, fail, or quit back to ridge.
 7. Receive a stamp, manual page, sticker, memento, shortcut, or glide pip.
-8. Return to Cicka Home or revisit the landmark and see that the sketchbook
-   changed.
+8. Revisit the landmark or a local Cicka Resting Spot and see that the
+   sketchbook changed.
 
 The repeatable pleasure is not just "new content." It is returning to the same place and feeling that the sketchbook remembers.
 
@@ -206,13 +206,14 @@ The repeatable pleasure is not just "new content." It is returning to the same p
   Danilo through context instead of static profile text. Major work/project
   artifacts should be easy to notice; smaller skill scraps such as languages,
   libraries, and tools can be tucked into optional re-read details.
-- **Mementos**: small proof objects from mini-games that physically change
-  Cicka Home. They are memory and relationship, not currency.
+- **Mementos**: small proof objects from mini-games that physically change a
+  local Cicka Resting Spot or nearby landmark. They are memory and relationship,
+  not currency.
 - **Glide Pips**: movement upgrades inspired by *A Short Hike* feathers.
 - **Shortcuts**: route changes inspired by *Hollow Knight* relief moments.
 - **Circuit**: Potassium Slip's major reward and one major proof toward the Relay Spire gate. Derive this from the existing inventory item instead of duplicating `potassium.circuitOwned` in progress.
 - **Cicka Notes**: tiny cat-side observations that reinterpret nearby props without becoming a full language system.
-- **Developer Laptop**: a future portable or Cicka Home-adjacent terminal that
+- **Developer Laptop**: a future portable or resting-spot-adjacent terminal that
   extends the Basement computer fantasy. It may support debug/dev commands and
   artifact inspection after the player has the right key and Glasses, but it
   should not make typing mandatory for mobile progression.
@@ -542,8 +543,12 @@ Design:
 Ending and tribute rule:
 
 - Cicka's farewell is a tribute beat, not a literal death scene.
-- Use presence, absence, paw marks, and one or two translated lines instead of heavy exposition.
-- After the ending, the Ridge remains open for replay, and Cicka's final mark should persist.
+- Use presence, absence, paw marks, silence, and optionally a tiny raw sound
+  instead of translated farewell text or heavy exposition in the initial ending.
+- After the ending, the Ridge remains open for replay. Cicka's canonical final
+  mark should persist at the Relay threshold, with one quieter echo at the
+  Concert Resting Spot for the initial return state. The echo is the empty usual
+  spot plus one small paw/page mark, not the player's guitar left behind.
 - Micka appears after the player returns to the Ridge from completing or
   replaying one post-ending mini-game. She is continuity, not replacement.
 

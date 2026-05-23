@@ -64,6 +64,13 @@ _Avoid_: runtime-only validation, informal parser convention
 A named playable region with a traversal purpose, environment identity, and links to other room beats.
 _Avoid_: scene, screen, box
 
+**Ridge Area**:
+A logical section of the Ridge route, such as the Bridge Area, Concert Area, or
+Dance Festival Area. A Ridge Area can contain exterior space, interiors,
+residents, props, Cicka Resting Spots, mini-game entrances, and one or more
+runtime Phaser Scenes.
+_Avoid_: hub, Phaser scene, single room, isolated mini-game silo
+
 **Topology Map**:
 A high-level route graph showing room beats, locks, shortcuts, and return paths.
 _Avoid_: blockout map, minimap
@@ -110,10 +117,24 @@ alternate solution, or just fun without being required for the core ending path.
 _Avoid_: mandatory arcade gate, generic content silo
 
 **Cicka Home Mutation**:
-A Ridge-owned declaration that a durable progress source can change Cicka Home,
-such as adding a Stampede note or opening a return fold. Declarations without a
-real progress source stay typed as future promises instead of rendering.
+A current Ridge proof-of-concept declaration that a durable progress source can
+change Cicka Home, such as adding a Stampede note or opening a return fold.
+Declarations without a real progress source stay typed as future promises
+instead of rendering. In the newer linear story route, this should become a
+compatibility detail or be replaced by local Cicka Resting Spot state.
 _Avoid_: stored sticker state, generic landmark memory
+
+**Cicka Resting Spot**:
+A small local Cicka perch, loafing place, or quiet seat inside a required Ridge
+Area where Cicka can be present without creating a central hub;
+after the guitar is earned, it can also host a tiny comfort-play interaction.
+_Avoid_: Cicka Home hub, quest board, required backtracking checkpoint, inventory stash
+
+**Concert Resting Spot**:
+The Cicka Resting Spot in the Concert Crossing area, where the guitar first
+becomes a comfort object and where the Open Ridge Return State can show one
+quiet empty-spot echo after the farewell.
+_Avoid_: abandoned guitar, shrine, required sad objective
 
 **Cicka Field Presence**:
 An authored Cicka appearance inside the Exploration Map where she observes,
@@ -124,17 +145,21 @@ _Avoid_: companion AI, quest marker, follower pet, objective dispenser
 **Cicka Threshold Farewell**:
 The first ending beat where Cicka accompanies the player to the Relay Spire
 threshold, looks back, leaves one final paw/page mark, then slips into a page
-fold or light beyond the player's path.
-_Avoid_: literal death scene, grief monologue, Cicka leaving with the player
+fold or light beyond the player's path without translated farewell text in the
+initial version.
+_Avoid_: literal death scene, grief monologue, Cicka leaving with the player, written goodbye
 
 **Open Ridge Return State**:
-The immediate post-ending Ridge state where the world remains playable with
-Cicka's final mark and absence-shaped changes before any later Micka trigger.
-_Avoid_: closed ending, sad objective, immediate replacement reveal
+The immediate post-ending Ridge state where the world remains playable with the
+canonical final mark at the Relay threshold and one quiet echo at the Concert
+Resting Spot before any later Micka trigger; the echo should read as an empty
+usual spot with one small paw/page mark, not the player's guitar left behind.
+_Avoid_: closed ending, sad objective, immediate replacement reveal, scattered sadness marks, abandoned inventory
 
 **Guitar Farewell**:
 The final shared Cicka moment where the player plays guitar for her at the Relay
-Spire, echoing an established comfort interaction from Cicka Home and the Ridge.
+Spire, echoing established comfort interactions from Cicka Resting Spots across
+the Ridge.
 _Avoid_: generic music mini-game, melodrama, one-off ending prop
 
 **Sit and Play Prompt**:
@@ -161,12 +186,12 @@ elsewhere.
 _Avoid_: full night farewell, hard time cut, cold death-coded darkness
 
 **Concert Crossing Beat**:
-A mid-route Resident Room Beat where a blocked concert/traffic crossing becomes
+A mid-route Resident Beat where a blocked concert/traffic crossing becomes
 the way the player earns the guitar through a small music performance problem.
 _Avoid_: joke-only drunk musician, random item pickup, final-farewell skill gate
 
 **Opening Dance Shuttle Beat**:
-A final-route Resident Room Beat where afternoon festival setup blocks the Relay
+A final-route Resident Beat where afternoon festival setup blocks the Relay
 hill service road until the player helps prepare the night dance and catches the
 last daylight shuttle to the Relay Spire.
 _Avoid_: Last Dance, Final Shuttle Hold, after-festival closure gate
@@ -182,6 +207,12 @@ The Opening Dance facilitator who teaches the hill-shuttle driver one private
 step and covers the operations watch so the Last-Stop Operations Helper can
 enjoy the night dance.
 _Avoid_: romance target, competition judge, extra route gate, new protagonist
+
+**Role-First Character Labels**:
+Placeholder character labels that describe the resident's job in the beat before
+a later naming pass, such as hill-shuttle driver, Last-Stop Operations Helper,
+and Dance Teacher.
+_Avoid_: premature proper names, joke aliases, final character names before role clarity
 
 **Operations Handoff Check**:
 A Readiness Favor where the player helps the Last-Stop Operations Helper prove
@@ -233,21 +264,22 @@ A small Sketchbook Neighborhood progression beat where the player helps a tiny
 resident with a concrete local problem and the world visibly changes in return.
 _Avoid_: quest chain, dialogue tree, generic fetch quest, portfolio sales pitch
 
-**Resident Room Beat**:
-An authored Room Beat centered on one required resident problem, its local
-characters, possible solutions, Cicka field presence, and visible route change.
-_Avoid_: Phaser scene, isolated quest room, dialogue hub
+**Resident Beat**:
+An authored resident problem/story sequence inside a Ridge Area, including its
+local characters, possible solutions, Cicka field presence, and visible route
+change.
+_Avoid_: Phaser scene, isolated quest room, dialogue hub, whole area name
 
 **Recoverable Conversation Choice**:
-A dialogue choice inside a Resident Room Beat that can change tone, trust,
+A dialogue choice inside a Resident Beat that can change tone, trust,
 order, optional rewards, or temporary awkwardness without permanently blocking
 the first ending. A failed or clumsy choice should create an in-world recovery
 path rather than a dead end.
 _Avoid_: permanent fail state, gotcha dialogue, illusion-only choice
 
 **Practical Wayfinding Loop**:
-A Resident Room Beat discovery pattern where the player first learns a route
-problem through signs, blocked paths, local roles, and travel questions before
+A Resident Beat discovery pattern where the player first learns a route problem
+through signs, blocked paths, local roles, and travel questions before
 uncovering the emotional or character layer underneath.
 _Avoid_: quest-giver monologue, immediate emotional exposition, objective popup
 
@@ -302,30 +334,36 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 - A mini-game may use its own **Mini-Game Movement System** instead of
   **Exploration Traversal**.
 - The first ending path should be completable through conversation, collection,
-  authored traversal, Resident Room Beats, and world changes without requiring
-  full arcade mini-games.
+  authored traversal, Ridge Areas, Resident Beats, and world changes without
+  requiring full arcade mini-games.
 - **Mini-Game Entrances** can provide optional alternate path unlocks, proof
   sources, rewards, or pure side fun, but they should not be the default way the
   core route solves blockers.
 - **Exploration Traversal** treats jump as non-core for the v0 main path;
   vertical movement should come from **Authored Traversal Interactions** unless
   a future mobility item deliberately changes the route grammar.
-- **Cicka Home Mutations** resolve compiled Ridge facts against durable Ridge
-  progress; active mutations can render Cicka Home changes, while unresolved
-  future mutations remain data only.
-- **Cicka Field Presence** complements **Cicka Home** by making Cicka recur
-  across the **Sketchbook Neighborhood** without turning her into a follower,
-  solver, vendor, or quest board.
+- **Cicka Home Mutations** are current proof-of-concept data for the old
+  hub-like blockout. The newer linear story route should prefer local
+  **Cicka Resting Spots** unless a future map deliberately restores a central
+  home space.
+- **Cicka Field Presence** complements **Cicka Resting Spots** by making Cicka
+  recur across the **Sketchbook Neighborhood** without turning her into a
+  follower, solver, vendor, or quest board.
 - A **Resident Help Beat** may use **Cicka Field Presence** to draw attention to
   a route blocker, but the solution should come from a resident, artifact,
   mini-game clear, or visible environment change.
 - Required **Resident Help Beats** should include **Cicka Field Presence**, but
   Cicka's role can shift from obvious attention cue to changed-object observer
   to quiet trust marker.
-- A required **Resident Help Beat** usually belongs to one **Resident Room Beat**;
-  that room beat can include multiple residents, optional interactions, and
-  alternate solutions without becoming a separate Phaser scene.
-- **Resident Room Beats** can use **Recoverable Conversation Choices** to make
+- Each required **Ridge Area** should have one local **Cicka Resting Spot**: a
+  bridge perch near the crossing, a concert listening corner, and a
+  dance-festival loafing spot near operations or the service gate. These spots
+  are local emotional anchors, not hubs.
+- A required **Resident Help Beat** usually belongs to one **Resident Beat**
+  inside a **Ridge Area**; that area can include multiple residents, interiors,
+  optional interactions, and alternate solutions without becoming one Phaser
+  scene.
+- **Resident Beats** can use **Recoverable Conversation Choices** to make
   resident help feel authored and personal, but the main ending path should not
   become permanently missable because of one dialogue choice.
 - A **Practical Wayfinding Loop** should introduce route blockers before
@@ -336,16 +374,20 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
   and helping them act without making the player directly manage their feelings.
 - The **Cicka Threshold Farewell** resolves Cicka's recurring field guidance
   without closing the **Sketchbook Neighborhood**; the Ridge remains replayable
-  with Cicka's final mark or absence-shaped changes.
+  with Cicka's Relay threshold mark and one Concert Resting Spot echo.
 - The **Cicka Threshold Farewell** departure should be physical and mostly
   silent: walk together, pause, look back, final mark, then page-fold/light
-  departure; any meow or translated fragment should stay tiny and optional.
+  departure. The initial version should use no translated farewell line; a tiny
+  raw meow/chirp sound can remain optional if it supports the staging.
 - The immediate return after the **Cicka Threshold Farewell** should be the
-  **Open Ridge Return State**: replayable, quiet, and absence-marked, with Micka
-  still delayed until the later post-ending trigger.
+  **Open Ridge Return State**: replayable, quiet, and minimally absence-marked,
+  with the canonical final mark at the Relay threshold, one quieter echo at
+  the **Concert Resting Spot**, and Micka still delayed until the later
+  post-ending trigger. The echo should be an empty usual spot with one small
+  paw/page mark, not the guitar left behind.
 - The **Guitar Farewell** should be established before the ending as a repeatable
-  comfort interaction, especially at Cicka Home, so the final Relay Spire use
-  feels remembered rather than introduced for drama.
+  comfort interaction at local **Cicka Resting Spots**, so the final Relay Spire
+  use feels remembered rather than introduced for drama.
 - The **Guitar Farewell** can include a **Living Proof Montage**, but the montage
   should stay brief and keep Cicka as the emotional focus; the player's guitar
   is the only music the player needs to hear during the montage.
@@ -366,6 +408,9 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 - The **Opening Dance Shuttle Beat** centers the hill-shuttle driver and the
   **Last-Stop Operations Helper** as colleagues whose practical work and private
   nervousness both delay the last daylight ride.
+- The hill-shuttle driver, **Last-Stop Operations Helper**, and **Dance Teacher**
+  should use **Role-First Character Labels** until a later character naming pass;
+  their jobs and emotional functions matter more than proper names right now.
 - The **Operations Handoff Check** is the Last-Stop Operations Helper's current
   **Readiness Favor**; the **Dance Teacher** covers the operations watch after
   setup is proven safe, keeping the cast small and letting the helper enjoy the
@@ -393,7 +438,7 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 - The ride from Last-Stop Plaza to Relay should be a **Short Threshold
   Transition**, not a controllable driving scene; a driver line, vehicle-start
   sound, brief blackout, and Relay spawn are enough.
-- Required **Resident Room Beats** that contain arcade-like interactions should
+- Required **Resident Beats** that contain arcade-like interactions should
   also have a non-arcade fallback through conversation, collection, practice, or
   a forgiving auto-resolve path.
 - A **Living Proof Gate** blocks the **Cicka Threshold Farewell** emotionally and
@@ -408,7 +453,7 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 > **Domain expert:** "No, first update the **Room Beat** in the **Typed Ridge Blockout Source** so the **Ridge Blockout** proves the shortcut back to Cicka."
 
 > **Dev:** "Should the player always return to Cicka Home after a blocked bridge?"
-> **Domain expert:** "No — use **Cicka Field Presence** at the bridge to draw attention, while **Cicka Home Mutations** keep home as the place that remembers durable progress."
+> **Domain expert:** "No — in the linear story route, use a local **Cicka Resting Spot** and **Cicka Field Presence** at the bridge instead of requiring hub returns."
 
 > **Dev:** "Can Cicka tell the player to fix the bridge?"
 > **Domain expert:** "No — let **Cicka Field Presence** make the bridge feel suspicious, then resolve it as a **Resident Help Beat** with a visible route change."
@@ -417,10 +462,25 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 > **Domain expert:** "No — required **Resident Help Beats** change routes, while optional residents can offer mini-games, atmosphere, jokes, or quiet company."
 
 > **Dev:** "Should each resident scene be a Phaser scene?"
-> **Domain expert:** "No — call it a **Resident Room Beat** unless it truly needs a separate runtime scene."
+> **Domain expert:** "No — call the place a **Ridge Area** and the problem sequence a **Resident Beat**. Use **Phaser Scene** only for runtime implementation."
 
 > **Dev:** "Does Cicka leave with the player at the ending?"
 > **Domain expert:** "No — the **Cicka Threshold Farewell** means she walks with the player to the threshold, then departs somewhere the player cannot follow."
+
+> **Dev:** "Should Cicka's final departure include translated text?"
+> **Domain expert:** "No — the initial **Cicka Threshold Farewell** should be fully nonverbal. Use staging, the final mark, silence, and optionally a tiny raw sound instead of a written goodbye."
+
+> **Dev:** "Where does Cicka's final mark persist after the ending?"
+> **Domain expert:** "Use a minimal **Open Ridge Return State**: the canonical final mark persists at the Relay threshold, with one quieter echo at the **Concert Resting Spot** and no scattershot sad marks."
+
+> **Dev:** "Should the Cicka Resting Spot echo leave the guitar there?"
+> **Domain expert:** "No — the guitar stays with the player. The echo should be the empty usual spot plus one small paw/page mark."
+
+> **Dev:** "Should each bridge/concert/dance area have a small Cicka resting spot?"
+> **Domain expert:** "Yes — give each required **Ridge Area** one local **Cicka Resting Spot**. It keeps Cicka present across a linear route without turning any area into a hub."
+
+> **Dev:** "What should we call the bridge/concert/dance festival chunks?"
+> **Domain expert:** "Use **Ridge Area** for the logical place and **Resident Beat** for the authored problem inside it; reserve **Phaser Scene** for runtime units."
 
 > **Dev:** "Can the final Cicka beat be the player playing guitar for her?"
 > **Domain expert:** "Yes — make it the **Guitar Farewell**, but establish guitar as a quiet comfort interaction before Relay so it carries memory instead of exposition."
@@ -429,7 +489,7 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 > **Domain expert:** "Yes — use a brief **Living Proof Montage** of resident/world changes, not a full recap."
 
 > **Dev:** "Can the guitar come from a concert problem?"
-> **Domain expert:** "Yes — use the **Concert Crossing Beat** to earn the guitar through a tiny performance/help moment, then let Cicka Home turn it into comfort."
+> **Domain expert:** "Yes — use the **Concert Crossing Beat** to earn the guitar through a tiny performance/help moment, then let local **Cicka Resting Spots** turn it into comfort."
 
 > **Dev:** "Does the dance festival happen at night?"
 > **Domain expert:** "Yes — but the required route beat is the **Opening Dance Shuttle Beat**, where daytime setup opens one last daylight ride to Relay before the night festival begins."
@@ -442,6 +502,9 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 
 > **Dev:** "Who covers the operations watch?"
 > **Domain expert:** "Use the **Dance Teacher**. They already belong in the beat as the gentle facilitator, so they can cover the watch without adding another resident role."
+
+> **Dev:** "Do the driver and Last-Stop Operations Helper need proper names now?"
+> **Domain expert:** "No — use **Role-First Character Labels** for now. Names can wait until their jobs, movement, and emotional function survive a later character pass."
 
 > **Dev:** "How do we help the driver if he cannot dance?"
 > **Domain expert:** "Use **One-Step Practice**: he learns one tiny private step, enough to ask without pretending he is suddenly good."
@@ -482,9 +545,12 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 ## Flagged Ambiguities
 
 - "map" can mean **Topology Map**, **Ridge Blockout**, or final art; resolved by naming the layer explicitly.
-- "scene" can mean a design beat or a Phaser runtime scene; use **Resident Room
-  Beat** for required resident progression spaces unless a separate runtime
-  scene is deliberately needed.
+- "scene" can mean a design beat or a Phaser runtime scene; use **Ridge Area**
+  for the logical place, **Resident Beat** for the authored problem sequence,
+  and **Phaser Scene** for runtime implementation.
+- "Resident Room Beat" is retired terminology; use **Ridge Area** for
+  bridge/concert/dance chunks and **Resident Beat** for their authored resident
+  problems.
 - "metroidvania" is inspiration for shortcut relief, route memory, and changed
   landmarks, not a promise of required ability-gated precision platforming on
   the main **Exploration Map** route.
@@ -509,6 +575,11 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
   player's guitar.
 - "festival helper" is too generic for the driver's colleague; resolved: use
   **Last-Stop Operations Helper**.
+- "name" or "alias" for Opening Dance residents should mean a **Role-First
+  Character Label** for now, not a final proper name.
+- "Cicka Home" is a current proof-of-concept/runtime blockout term; the newer
+  linear story route should say **Cicka Resting Spot** unless a central home
+  space is deliberately restored.
 - "lighthouse" is current story shorthand for the **Relay Spire** as a beacon or
   overlook; keep docs on **Relay Spire** unless the final landmark is renamed.
 - "another cat" during **Opening Dance Shuttle Beat** means the **Unnamed

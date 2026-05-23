@@ -41,6 +41,10 @@ Current runtime characteristics:
 - Ridge remains a proof-of-concept surface. The current playable traversal code
   can be replaced if the next design pass preserves the useful source contract,
   compiler, generated facts, and viewer/debugger workflow.
+- Newer story-route planning demotes Cicka Home from canonical hub to local
+  **Cicka Resting Spots** inside each required Ridge Area. The current
+  Cicka Home runtime pieces are proof-of-concept infrastructure until a route
+  rewrite chooses whether to adapt or remove them.
 
 ## Protected PoC Assets
 
@@ -152,9 +156,9 @@ endings are not required for the Ridge; add alternate endings only if a later
 story/level pass proves they create meaningful replay value without weakening
 the Cicka farewell.
 The first prose artifact should be a short ending sequence outline before any
-required Resident Room Beats are designed: arrival state, Relay readiness,
-Cicka's final field presence, farewell action, final mark, and return-to-Ridge
-state.
+required Ridge Areas / Resident Beats are designed: arrival state, Relay
+readiness, Cicka's final field presence, farewell action, final mark, and
+return-to-Ridge state.
 
 Accepted first ending outline:
 
@@ -167,25 +171,29 @@ Accepted first ending outline:
    the Sketchbook Prompt**.
 6. Cicka walks with the player to the threshold, pauses, looks back once, leaves
    one final paw/page mark, then slips into a page fold or light beyond the
-   player's path.
+   player's path. The initial version uses no translated farewell line.
 7. The player returns to the **Open Ridge Return State** after the ending, with
-   the final mark preserved, Cicka's absence felt through favorite spots or
-   marks, and the world still open.
+   the canonical final mark preserved at the Relay threshold, one quieter echo
+   at the Concert Resting Spot, and the world still open. The echo is the
+   empty usual spot plus one small paw/page mark, not the player's guitar left
+   behind.
 
 The guitar should be established earlier as a meaningful comfort item: something
-the player can pick up, carry, and play in the world, especially at Cicka Home.
+the player can pick up, carry, and play in the world, especially at local Cicka
+Resting Spots.
 Petting can be a smaller recurring affection interaction. A hug is optional and
 should wait until character art can support it without making the farewell feel
 awkward or over-staged.
-The guitar should enter mid-route through a Resident Room Beat as an entrusted
+The guitar should enter mid-route through a Resident Beat as an entrusted
 reward or responsibility, not as a random pickup. A resident can give or lend it
-after the player helps with a local music/concert problem, then Cicka Home and
-quiet Ridge spots can teach the player that playing for Cicka is a comfort
-ritual before the Relay Spire ending.
-Middle required Resident Room Beat: **Concert Crossing Beat**. A blocked concert/traffic crossing
-halts the route because the local guitarist cannot play, the paper-stage setup
-is tangled, or the guitar needs a small repair. Cicka subtly points attention to
-the guitar case, loose string, or blocked crossing. The player learns a small
+after the player helps with a local music/concert problem, then local Cicka
+Resting Spots can teach the player that playing for Cicka is a comfort ritual
+before the Relay Spire ending.
+Middle required Ridge Area / Resident Beat: **Concert Crossing Beat**. A
+blocked concert/traffic crossing halts the route because the local guitarist
+cannot play, the paper-stage setup is tangled, or the guitar needs a small
+repair. Cicka subtly points attention to the guitar case, loose string, or
+blocked crossing. The player learns a small
 Guitar-Hero-like performance mini-game, helps the concert continue, the crossing
 opens, and the guitar is entrusted to the player afterward. Keep the comedy
 gentle; avoid making the guitarist a joke-only drunk if that undercuts the later
@@ -213,8 +221,8 @@ The target asks for:
 - Living Proof Gate made from enough visible world changes, proofs, and Cicka
   familiarity rather than an exact checklist
 - first ending path completable through conversations, collection, authored
-  traversal, Resident Room Beats, and world changes without requiring full
-  arcade mini-games
+  traversal, Ridge Areas, Resident Beats, and world changes without requiring
+  full arcade mini-games
 - Mini-Game Entrances as optional alternate path unlockers, proof sources,
   rewards, or pure side fun
 - non-arcade fallback for any required beat that contains arcade-like interaction
@@ -222,10 +230,11 @@ The target asks for:
 - first v0 Resident Help Beat as **Blueprint Bridge**: a required soft gate
   where helping a resident finish a bridge drawing/blueprint makes the crossing
   real
-- 2-3 required main-path Resident Room Beats before the first ending, each
-  centered on a Resident Help Beat, with optional extra residents only if they
+- 2-3 required main-path Ridge Areas before the first ending, each centered on a
+  Resident Beat / Resident Help Beat, with optional extra residents only if they
   add texture instead of errand fatigue
-- final required Resident Room Beat candidate as **Opening Dance Shuttle Beat**:
+- final required Ridge Area / Resident Beat candidate as **Opening Dance
+  Shuttle Beat**:
   a nervous dance/romance setup at the foot of the Relay hill. The night dance
   festival is real, but the required route beat happens during afternoon setup.
   The route blocker should be practical: festival barriers, lantern lines,
@@ -235,8 +244,10 @@ The target asks for:
   connect to the final approach. His romantic partner is the shy **Last-Stop
   Operations Helper**, whose visible plaza-table work connects shuttle
   questions, setup checks, volunteer handoffs, service-road clearance, and the
-  night dance. Accepted arrival premise: **Opening Dance Setup + Last Daylight
-  Shuttle**. Introduce the beat through a practical wayfinding loop:
+  night dance. Keep these as role-first character labels for now; proper names
+  can wait until a later character pass. Accepted arrival premise: **Opening
+  Dance Setup + Last Daylight Shuttle**. Introduce the beat through a practical
+  wayfinding loop:
   the player asks how to reach Relay, notices the blocked service road and
   shuttle sign, then discovers the emotional layer through delayed setup and the
   last daylight shuttle window before the road closes for the night festival.
@@ -278,9 +289,9 @@ The target asks for:
   Guitar Farewell resolves Cicka's threshold farewell
 - Guitar Farewell can include a brief **Living Proof Montage**: Blueprint Bridge
   being used, Concert Crossing continuing, Opening Dance beginning at night as
-  an emotional echo under the player's guitar, and Cicka Home carrying
-  accumulated marks. Keep it wordless or nearly wordless so the focus stays on
-  Cicka.
+  an emotional echo under the player's guitar, and earlier Cicka Resting Spots
+  carrying accumulated marks. Keep it wordless or nearly wordless so the focus
+  stays on Cicka.
 - Relay time should progress from sunset for **Sit and Play Prompt** to **Relay
   Blue Hour** for **Send the Sketchbook Prompt**. The montage can show the night
   festival beginning elsewhere, but Relay should not become full night before
@@ -297,16 +308,21 @@ The target asks for:
   **Send the Sketchbook Prompt**. This starts the Cicka Threshold Farewell while
   keeping the guitar as comfort rather than the send button.
 - Cicka's departure should be physical and mostly silent: walk together, pause,
-  look back, final mark, then page-fold/light departure. Any meow or translated
-  fragment should stay tiny and optional.
+  look back, final mark, then page-fold/light departure. The initial version
+  should use no translated farewell line; a tiny raw meow/chirp sound can remain
+  optional if it supports the staging.
 - Immediate post-ending play should use the **Open Ridge Return State**:
-  replayable, quiet, and absence-marked. Micka remains delayed until the later
-  post-ending trigger rather than appearing immediately.
-- Cicka field presence in every required Resident Help Beat, with her role
-  varying from subtle obstacle hint to changed-object observer to quiet trust marker
+  replayable, quiet, and minimally absence-marked. The canonical final mark
+  persists at the Relay threshold, one quieter echo appears at the Concert
+  Resting Spot, and Micka remains delayed until the later post-ending trigger
+  rather than appearing immediately. The echo should be an empty usual spot with
+  one small paw/page mark, not the guitar left behind.
+- Cicka field presence in every required Resident Help Beat, with one local
+  **Cicka Resting Spot** per required Ridge Area. Her role can vary from
+  subtle obstacle hint to changed-object observer to quiet trust marker.
 - optional residents, NPCs, interactive props, and chill spaces that can offer
   mini-games, atmosphere, jokes, or company without solving barricades
-- Cicka Home as a progress memory space, not the only emotional anchor
+- Cicka Resting Spots as local progress-memory spaces, not hubs
 - no main-path slope reliance in v0; use chunky stairs, cords, shelves, bridges,
   lifts, and soft drops
 - no required jump button on the v0 main route; use authored climb, descend,
@@ -322,7 +338,7 @@ The target asks for:
 - Adding a minimap.
 - Adding a generic mini-game framework.
 - Adding stored sticker state.
-- Making Cicka Home a checklist hub, shop, or quest board.
+- Making Cicka Resting Spots into checklist hubs, shops, or quest boards.
 - Making Cicka a continuous follower, puzzle solver, or explicit objective giver.
 - Using slopes/ramps as required main-path traversal in the v0 Ridge blockout.
 - Requiring jump as a core Exploration Map button in the v0 main route.
