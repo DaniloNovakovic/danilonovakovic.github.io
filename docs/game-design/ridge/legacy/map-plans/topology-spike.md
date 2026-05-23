@@ -3,7 +3,7 @@
 > Status: superseded legacy/reference.
 > This was the M5 folded/Cicka Home map-design spike for the prior Ridge
 > direction. Keep it as planning history and topology reference only. For
-> current Ridge source-of-truth routing, read [`../README.md`](../README.md).
+> current Ridge source-of-truth routing, read [`../../README.md`](../../README.md).
 
 ## Purpose
 
@@ -114,15 +114,15 @@ Constraints:
 
 Use these docs as inspiration, not hard scope:
 
-- [`summit.md`](../summit.md): Ridge vision,
+- [`summit.md`](../../summit.md): Ridge vision,
   Cicka arc, mini-game reward language, and mobile constraints.
 - [`long-term-topology-ideas.md`](./long-term-topology-ideas.md):
   compact three-layer mountain, shortcut vocabulary, and secret families.
-- [`2d-map-design-principles.md`](../../../research/summaries/design-theory/2d-map-design-principles.md):
+- [`2d-map-design-principles.md`](../../../../research/summaries/design-theory/2d-map-design-principles.md):
   loops, landmarks, mental mapping, and earned shortcut relief.
-- [`lucky-luna.md`](../../../research/summaries/game-inspirations/lucky-luna.md):
+- [`lucky-luna.md`](../../../../research/summaries/game-inspirations/lucky-luna.md):
   mobile-native falling/descent ideas for optional later pockets.
-- [`nine-sols.md`](../../../research/summaries/game-inspirations/nine-sols.md):
+- [`nine-sols.md`](../../../../research/summaries/game-inspirations/nine-sols.md):
   evolving home anchor, mementos, and restorative return space.
 
 ## Weighted Options

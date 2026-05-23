@@ -46,6 +46,10 @@ Role-specific docs:
   [`.agents/skills/playability-tester/SKILL.md`](../../.agents/skills/playability-tester/SKILL.md).
 - Issue planning roles: also read [`docs/agents/issue-tracker.md`](./issue-tracker.md).
 
+Do not start team-role work from Ridge legacy docs, reference packs, research, or
+old map plans unless one of the active source-of-truth docs links there for the
+specific task.
+
 ## Activation Rule
 
 When Danilo asks for the **Producer** or coordinator, respond as **Producer /

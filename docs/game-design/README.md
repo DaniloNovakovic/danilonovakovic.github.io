@@ -41,7 +41,9 @@ prefer GitHub Issues.
   ending order for the active Bridge -> Concert -> Dance Festival -> Relay/Cicka
   direction.
 - **[Ridge Areas](./ridge/areas/README.md)**: Local source-of-truth docs for
-  Bridge, Concert, Dance Festival, and Relay Ending design details.
+  Bridge, Concert, Dance Festival, and Relay Ending design details. Area
+  folders may contain narrow subdocs for layout, characters, or interaction
+  flow when one README would get bulky.
 - **[Ridge Decision Intake](./ridge/decision-intake.md)**: Routing template for
   future grilling or research transcripts so candidate ideas do not become
   accidental canon.
@@ -58,23 +60,18 @@ prefer GitHub Issues.
 - **[Sketchbook Ridge Milestone Plan](./ridge/milestone-plan.md)**:
   Durable milestone, branch, shared-seam, and ownership map. It is not the live
   issue tracker.
-- **[Sketchbook Ridge Proper Map Plan](./ridge/map-plans/proper-map-plan.md)**:
-  Folded/Cicka Home topology reference from the prior route direction. Use as
-  legacy/prototype material unless a new slice explicitly rewrites it around
-  the active Bridge/Concert/Dance/Relay route.
 - **[Ridge Blockout Source](./ridge/map-language.md)**: Typed blockout source
   contract for Ridge room beats, environment tags, traversal primitives, and
   greybox generation.
 - **[Ridge Blockout Source](../../src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts)**:
   Current authoring data for the seamless Ridge world. It lives under the
   Ridge runtime because it is build input, not prose.
-- **[Ridge Blockout Fun Review](./ridge/reviews/blockout-fun-review.md)**: Design review
-  of the first blockout skeleton.
-- **[Sketchbook Ridge Topology Spike](./ridge/map-plans/topology-spike.md)**:
-  Earlier M5 map-design spike. Keep as design history unless a current plan
-  explicitly points back to it.
-- **[Sketchbook Ridge Long-Term Topology Ideas](./ridge/map-plans/long-term-topology-ideas.md)**:
-  Exploratory long-term topology companion. Not an active roadmap.
+- **[Ridge Legacy Docs](./ridge/legacy/README.md)**: Superseded folded/Cicka
+  Home map plans and blockout reviews. Reference only unless a current active
+  doc explicitly links there.
+- **[Ridge Reference Packs](./ridge/reference/README.md)**: Art/audio/overlay
+  and asset support packs. Use when active docs or implementation issues need
+  support material.
 - **[Sketchbook Ridge Asset Staging Plan](./ridge/reference/asset-staging-plan.md)**:
   Organization guide for POC assets, prepared runtime candidates, and
   milestone-safe adoption.
@@ -104,14 +101,10 @@ prefer GitHub Issues.
 - **Current runtime source:**
   `../../src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts`.
 - **Current runtime source documentation:** `ridge/map-language.md`.
-- **Legacy/prototype topology and planning history:**
-  `ridge/map-plans/proper-map-plan.md`,
-  `ridge/map-plans/topology-spike.md`, and
-  `ridge/reviews/blockout-fun-review.md`.
-- **Reference/provenance:** M3 visual/audio/overlay packs, asset staging,
-  Cicka runtime asset audit, and long-term topology. These can guide future
-  work, but should not override active Ridge design, shipped behavior, runtime
-  docs, or GitHub issues.
+- **Legacy/prototype topology and planning history:** `ridge/legacy/`.
+- **Reference/provenance:** `ridge/reference/` plus `docs/research/`. These can
+  guide future work, but should not override active Ridge design, shipped
+  behavior, runtime docs, or GitHub issues.
 - **Implementation source:** `../runtime-architecture.md`,
   `../runtime-modes.md`, and scoped rules under `../../.agents/rules/`.
 - **Issue tracker:** PRDs, implementation issues, triage state, current backlog,

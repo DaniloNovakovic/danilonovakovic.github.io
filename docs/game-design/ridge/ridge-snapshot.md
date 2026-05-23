@@ -14,7 +14,7 @@
 - **Active area design:** [`areas/`](./areas/README.md).
 - **Runtime spatial data:** [`folded-desk-ridge.source.ts`](../../../src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts).
 - **Blockout language contract:** [`map-language.md`](./map-language.md).
-- **Legacy folded topology reference:** [`proper-map-plan.md`](./map-plans/proper-map-plan.md).
+- **Legacy folded topology reference:** [`legacy/`](./legacy/README.md).
 - **Product vision:** [`summit.md`](./summit.md).
 - **Live implementation work:** GitHub Issues.
 
@@ -151,9 +151,8 @@ Bridge Area / Blueprint Bridge
   -> Relay Spire / Guitar Farewell / Cicka Threshold Farewell
 ```
 
-The folded/Cicka Home route in
-[`proper-map-plan.md`](./map-plans/proper-map-plan.md) remains legacy prototype
-and topology reference until it is rewritten around this route.
+The folded/Cicka Home route in [`legacy/`](./legacy/README.md) remains legacy
+prototype and topology reference until it is rewritten around this route.
 
 Before implementing the next Ridge runtime or blockout rewrite, write and accept
 a prose story/level/character plan for the core Exploration Map scenes and

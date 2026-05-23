@@ -6,7 +6,8 @@
 > accepted decision to the correct canon file and remove or rewrite the question.
 
 Read [`README.md`](./README.md) first for source-of-truth routing. Resolved
-area-local detail belongs in the matching [`areas/`](./areas/README.md) file.
+area-local detail belongs in the matching [`areas/`](./areas/README.md) file or
+the narrowest subdoc inside that area folder.
 
 ## Ending
 
@@ -58,7 +59,7 @@ When a grilling/research pass resolves a question:
 
 1. Add accepted route/story decisions to [`story-level-bible.md`](./story-level-bible.md).
 2. Add accepted local area detail to the matching [`areas/`](./areas/README.md)
-   file.
+   file or area subdoc.
 3. Add new stable terms or ambiguities to [`../../../CONTEXT.md`](../../../CONTEXT.md).
 4. Add implementation work to GitHub Issues.
 5. Add runtime/prototype facts to [`ridge-snapshot.md`](./ridge-snapshot.md).

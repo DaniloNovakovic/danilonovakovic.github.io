@@ -21,7 +21,7 @@ questions.
 | --- | --- | --- |
 | 1 | [`01-bridge/README.md`](./01-bridge/README.md) | Blueprint Bridge, first resident-help soft gate, first Cicka attention cue |
 | 2 | [`02-concert/README.md`](./02-concert/README.md) | Concert Crossing, guitar acquisition, comfort-through-memory beat |
-| 3 | [`03-dance-festival/README.md`](./03-dance-festival/README.md) | Opening Dance Shuttle, last daylight shuttle, final pre-Relay readiness |
+| 3 | [`03-dance-festival/README.md`](./03-dance-festival/README.md) | Opening Dance Shuttle index; local detail split into [`layout.md`](./03-dance-festival/layout.md), [`characters.md`](./03-dance-festival/characters.md), and [`interaction-flow.md`](./03-dance-festival/interaction-flow.md) |
 | 4 | [`04-relay-ending/README.md`](./04-relay-ending/README.md) | Relay Spire, Guitar Farewell staging, Cicka Threshold Farewell, return state |
 
 ## Update Rules
@@ -36,3 +36,5 @@ questions.
   [`../story-level-bible.md`](../story-level-bible.md) too.
 - If a design becomes implementation work, publish or update a GitHub Issue
   instead of adding a local backlog.
+- If an area folder has subdocs, update the narrowest subdoc first and keep the
+  area `README.md` as the quick local index.

@@ -30,7 +30,8 @@ Use each file for exactly one concern:
 | Product vision | [`summit.md`](./summit.md) | Durable fantasy and pillars, not detailed route implementation. |
 | Implementation sequencing | [`milestone-plan.md`](./milestone-plan.md) | Milestones, seams, branch strategy. Not live backlog. |
 | Runtime blockout contract | [`map-language.md`](./map-language.md) | Source format and generated facts for the current/prototype blockout. |
-| Folded topology reference | [`map-plans/proper-map-plan.md`](./map-plans/proper-map-plan.md) | Legacy/prototype topology reference unless rewritten around the active route. |
+| Legacy topology/reviews | [`legacy/`](./legacy/README.md) | Superseded folded/Cicka Home plans and reviews. Reference only unless an active doc links there. |
+| Art/audio/asset support | [`reference/`](./reference/README.md) | Reference packs that support active docs but do not override route canon. |
 | Live work | GitHub Issues | PRDs, current backlog, triage state, and agent briefs. |
 
 When docs disagree about future Ridge design, prefer `CONTEXT.md`,
@@ -68,6 +69,9 @@ Treat these as prototype/reference unless a task explicitly says to adapt them:
 Useful legacy pieces may still be preserved or adapted: the Ridge Blockout
 Source contract, compiler, generated facts, validation, and preview/debugger
 workflow.
+
+Superseded planning docs live under [`legacy/`](./legacy/README.md). Do not
+search that folder first when updating active route design.
 
 ## Update Rules
 

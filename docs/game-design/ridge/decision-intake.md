@@ -12,7 +12,7 @@ each claim to one canonical home.
 | --- | --- |
 | New stable domain term or ambiguity | [`../../../CONTEXT.md`](../../../CONTEXT.md) |
 | Accepted route spine, ending order, Cicka, guitar, or Living Proof decision | [`story-level-bible.md`](./story-level-bible.md) |
-| Accepted area-local Bridge, Concert, Dance Festival, or Relay detail | matching file under [`areas/`](./areas/README.md) |
+| Accepted area-local Bridge, Concert, Dance Festival, or Relay detail | matching file or subdoc under [`areas/`](./areas/README.md) |
 | Current implemented/runtime truth | [`ridge-snapshot.md`](./ridge-snapshot.md) or runtime source |
 | Hard-to-reverse surprising trade-off | `docs/adr/NNNN-slug.md` |
 | Work to build | GitHub Issue |
@@ -43,7 +43,7 @@ Reviewer needed: yes/no
 
 - `CONTEXT.md`: terms only
 - `story-level-bible.md`: route spine, cross-area dependencies, ending logic only
-- `areas/`: area-local accepted detail only
+- `areas/`: area-local accepted detail only; use the narrowest subdoc when one exists
 - `ridge-snapshot.md`: runtime truth only
 - GitHub issue: implementation only
 

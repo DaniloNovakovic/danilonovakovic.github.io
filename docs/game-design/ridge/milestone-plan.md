@@ -382,10 +382,8 @@ assigning an AFK agent.
 1. **Ridge Route Reset Planning**: align the next implementation plan with the
    active Bridge Area -> Concert Area -> Dance Festival Area -> Relay/Cicka
    ending route in [`story-level-bible.md`](./story-level-bible.md). Treat
-   [`topology-spike.md`](./map-plans/topology-spike.md) and
-   [`proper-map-plan.md`](./map-plans/proper-map-plan.md) as legacy/prototype
-   references unless a slice explicitly adapts their source-contract or topology
-   ideas.
+   [`legacy/`](./legacy/README.md) as legacy/prototype reference unless a slice
+   explicitly adapts its source-contract or topology ideas.
 2. **Later First Ridge Shortcut / Ridge-Only Glide**: revisit these after the
    route reset gives shortcuts and movement rewards a real route shape.
 3. **Translator / Cicka Daydream**: keep translated Cicka subtitles and the

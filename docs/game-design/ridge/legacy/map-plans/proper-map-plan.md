@@ -5,9 +5,9 @@
 > Issue #54 proved the current Ridge can change visually, but the route is still
 > a short prop line. This document records the prior folded/Cicka Home topology
 > target. It is not the active Ridge route canon unless a new slice explicitly
-> rewrites it around [`../story-level-bible.md`](../story-level-bible.md).
+> rewrites it around [`../../story-level-bible.md`](../../story-level-bible.md).
 
-For current Ridge source-of-truth routing, read [`../README.md`](../README.md)
+For current Ridge source-of-truth routing, read [`../../README.md`](../../README.md)
 first.
 
 ## Decision
