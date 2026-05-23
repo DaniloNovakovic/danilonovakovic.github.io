@@ -179,17 +179,18 @@ Accepted first ending outline:
    empty usual spot plus one small paw/page mark, not the player's guitar left
    behind.
 
-The guitar should be established earlier as a meaningful comfort item: something
-the player can pick up, carry, and play in the world, especially at local Cicka
-Resting Spots.
-Petting can be a smaller recurring affection interaction. A hug is optional and
-should wait until character art can support it without making the farewell feel
-awkward or over-staged.
+The guitar should be established earlier as a meaningful comfort item:
+something the player can pick up and carry before the Relay **Guitar Farewell**.
+Initial local Cicka Resting Spots can stay mostly visual instead of becoming
+repeatable guitar prompts or dedicated interaction nodes.
+Petting, lap resting, and similar affection interactions can wait for a later
+polish pass. A hug is optional and should wait until character art can support
+it without making the farewell feel awkward or over-staged.
 The guitar should enter mid-route through a Resident Beat as an entrusted
 reward or responsibility, not as a random pickup. A resident can give or lend it
-after the player helps with a local music/concert problem, then local Cicka
-Resting Spots can teach the player that playing for Cicka is a comfort ritual
-before the Relay Spire ending.
+after the player helps with a local music/concert problem; the route can then
+stage Cicka around local Resting Spots so the final Relay comfort moment feels
+prepared without requiring resting-spot interactions in v0.
 Middle route area: **Concert Area**, containing **Concert Crossing Beat**. A
 blocked concert/traffic crossing halts the route because the local guitarist
 cannot play, the paper-stage setup is tangled, or the guitar needs a small
@@ -320,11 +321,16 @@ The target asks for:
   rather than appearing immediately. The echo should be an empty usual spot with
   one small paw/page mark, not the guitar left behind.
 - Cicka field presence in every required Resident Help Beat, with one local
-  **Cicka Resting Spot** per required Ridge Area. Her role can vary from
-  subtle obstacle hint to changed-object observer to quiet trust marker.
+  **Cicka Resting Spot** per required Ridge Area: Bridge Resting Spot, Concert
+  Resting Spot, and Dance Festival Resting Spot. Her role can vary from subtle
+  obstacle hint to changed-object observer to quiet trust marker.
 - optional residents, NPCs, interactive props, and chill spaces that can offer
   mini-games, atmosphere, jokes, or company without solving barricades
-- Cicka Resting Spots as local progress-memory spaces, not hubs
+- Bridge Resting Spot, Concert Resting Spot, and Dance Festival Resting Spot as
+  local progress-memory spaces, not hubs or v0 prompt nodes
+- two tiny visual states for each Cicka Resting Spot: before resolution, Cicka
+  draws attention to the local problem; after resolution, the spot becomes
+  calmer through a settled pose, tiny mark, changed prop, or later absence echo
 - no main-path slope reliance in v0; use chunky stairs, cords, shelves, bridges,
   lifts, and soft drops
 - no required jump button on the v0 main route; use authored climb, descend,

@@ -143,14 +143,31 @@ _Avoid_: stored sticker state, generic landmark memory
 **Cicka Resting Spot**:
 A small local Cicka perch, loafing place, or quiet seat inside a required Ridge
 Area where Cicka can be present without creating a central hub;
-after the guitar is earned, it can also host a tiny comfort-play interaction.
-_Avoid_: Cicka Home hub, quest board, required backtracking checkpoint, inventory stash
+in the initial route it is mostly visual and has no dedicated prompt, while
+later affection passes can add tiny optional comfort interactions such as
+sitting together, petting, lap loafing, or playing guitar nearby.
+Each v0 spot should support two tiny visual states: before its area beat
+resolves, Cicka uses the spot to draw attention; after resolution, the spot
+settles into a calmer pose, tiny mark, or changed prop.
+_Avoid_: Cicka Home hub, quest board, required backtracking checkpoint, inventory stash, required affection system, v0 interaction node
+
+**Bridge Resting Spot**:
+The Cicka Resting Spot in the Bridge Area, staged near the unsafe crossing,
+blank plan, or newly completed bridge so Cicka can quietly point attention to
+the first resident-help route change.
+_Avoid_: tutorial UI marker, required backtracking perch
 
 **Concert Resting Spot**:
-The Cicka Resting Spot in the Concert Crossing area, where the guitar first
-becomes a comfort object and where the Open Ridge Return State can show one
-quiet empty-spot echo after the farewell.
+The Cicka Resting Spot in the Concert Area, where the guitar first becomes a
+comfort object and where the Open Ridge Return State can show one quiet
+empty-spot echo after the farewell.
 _Avoid_: abandoned guitar, shrine, required sad objective
+
+**Dance Festival Resting Spot**:
+The Cicka Resting Spot in the Dance Festival Area, staged near the operations
+table, shuttle step, lantern crates, or service gate so Cicka can observe the
+last social handoff before the daylight ride to Relay.
+_Avoid_: route gate, dialogue station, confirmed parentage scene
 
 **Cicka Field Presence**:
 An authored Cicka appearance inside the Exploration Map where she observes,
@@ -174,8 +191,8 @@ _Avoid_: closed ending, sad objective, immediate replacement reveal, scattered s
 
 **Guitar Farewell**:
 The final shared Cicka moment where the player plays guitar for her at the Relay
-Spire, echoing established comfort interactions from Cicka Resting Spots across
-the Ridge.
+Spire, echoing the visual presence, tiny marks, and accumulated memory from
+Cicka Resting Spots across the Ridge.
 _Avoid_: generic music mini-game, melodrama, one-off ending prop
 
 **Sit and Play Prompt**:
@@ -372,9 +389,9 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
   Cicka's role can shift from obvious attention cue to changed-object observer
   to quiet trust marker.
 - Each required **Ridge Area** should have one local **Cicka Resting Spot**: a
-  bridge perch near the crossing, a concert listening corner, and a
-  dance-festival loafing spot near operations or the service gate. These spots
-  are local emotional anchors, not hubs.
+  **Bridge Resting Spot** near the crossing, **Concert Resting Spot** as a
+  listening corner, and **Dance Festival Resting Spot** near operations or the
+  service gate. These spots are local emotional anchors, not hubs.
 - A required **Resident Help Beat** usually belongs to one **Resident Beat**
   inside a **Ridge Area**; that area can include multiple residents, interiors,
   optional interactions, and alternate solutions without becoming one Phaser
@@ -401,9 +418,11 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
   the **Concert Resting Spot**, and Micka still delayed until the later
   post-ending trigger. The echo should be an empty usual spot with one small
   paw/page mark, not the guitar left behind.
-- The **Guitar Farewell** should be established before the ending as a repeatable
-  comfort interaction at local **Cicka Resting Spots**, so the final Relay Spire
-  use feels remembered rather than introduced for drama.
+- The **Guitar Farewell** should be established before the ending through the
+  guitar's story role and visual Cicka Resting Spot presence. The initial route
+  does not need repeatable resting-spot interactions; sitting together, petting,
+  lap loafing, or playing guitar at local spots can wait for a later affection
+  pass.
 - The **Guitar Farewell** can include a **Living Proof Montage**, but the montage
   should stay brief and keep Cicka as the emotional focus; the player's guitar
   is the only music the player needs to hear during the montage.

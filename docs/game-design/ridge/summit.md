@@ -172,8 +172,9 @@ Ending beat:
 - Cicka accompanies the player to the Relay Spire as a guide to a threshold.
 - The player understands she is going somewhere the player cannot follow.
 - Before the final send, the player can play guitar for Cicka as the last
-  ordinary shared comfort moment. This should echo earlier Cicka Resting Spot
-  or quiet Ridge guitar interactions rather than appearing only at the ending.
+  ordinary shared comfort moment. This should echo the guitar's earlier story
+  role and visual Cicka Resting Spot presence rather than requiring repeatable
+  resting-spot guitar interactions in the initial route.
 - The farewell is tender but not literal-heavy: no on-screen death scene, no long grief speech.
 - Cicka leaves a final paw mark or page mark, and the Ridge remains replayable after the ending.
 - Design this as the canonical first ending. Do not add multiple endings unless
@@ -388,6 +389,8 @@ Keep it small:
 - no cat inventory
 - no permanent second campaign
 - no complex animal-language grammar
+- no required resting-spot affection system in the initial route
+- no dedicated Cicka Resting Spot prompts before a later affection pass
 
 Why it belongs:
 

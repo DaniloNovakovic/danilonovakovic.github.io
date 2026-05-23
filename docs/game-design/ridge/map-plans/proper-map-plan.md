@@ -666,8 +666,10 @@ Concert Area / Concert Crossing Beat, and only then the first Bridge Area /
 Blueprint Bridge tutorial beat.
 The ending outline should include the Guitar Farewell as an established comfort
 interaction, not a one-off ending prop: the player finds or receives the guitar
-earlier, can play it at local Cicka Resting Spots or quiet Ridge spots, and
-plays for Cicka near Relay before the threshold farewell.
+earlier, carries it through later route beats, and plays for Cicka near Relay
+before the threshold farewell. Local Cicka Resting Spots can stay mostly visual
+in v0 with no dedicated prompt; repeatable sitting, petting, lap-resting, or
+guitar interactions can wait for a later affection pass.
 Current middle route area: **Concert Area**, containing **Concert Crossing
 Beat**, where a blocked concert/traffic crossing opens after the player helps
 with a small Guitar-Hero-like performance problem and earns the guitar. Keep
@@ -723,7 +725,7 @@ or tape the service-lane obstruction, and flip the shuttle sign to "Last
 daylight ride." These can collapse further if the beat needs to move faster.
 Cicka's role is quiet threshold observer near the
 operations table, shuttle step, or service gate. This is the Opening Dance
-**Cicka Resting Spot**; she can loaf with the
+**Dance Festival Resting Spot**; she can loaf with the
 **Unnamed Counterpart Cat** as implied continuity foreshadowing, but the scene
 should use only silhouette/color specificity such as a pale or light-ink
 contrast to Cicka. Do not name him, give him dialogue, confirm parentage, or
@@ -789,7 +791,10 @@ Build:
 - introduce a mostly forward neighborhood route with readable bends and folds
 - keep main route mobile-safe with wide shelves, chunky stairs, cords, bridges,
   lifts, and soft drops
-- place local Cicka Resting Spots as progress-memory spaces, not hubs
+- place Bridge Resting Spot, Concert Resting Spot, and Dance Festival Resting
+  Spot as progress-memory spaces, not hubs or v0 prompt nodes
+- give each resting spot two tiny visual states: pre-resolution attention cue
+  and post-resolution calm/memory read
 - add at least one Cicka field-presence hint at a local route blocker
 - add at least one Resident Help Beat that visibly changes a route
 - make Stampede route at least one vertical beat away

@@ -108,18 +108,42 @@ as the canonical story-route anchor for the current linear three-beat shape;
 the existing Cicka Home blockout can remain a proof-of-concept implementation
 detail until the route is rewritten.
 
+Initial scope: keep these spots mostly visual. They can hold Cicka posture,
+changed-object memory, tiny marks, and later absence echoes without needing an
+interaction prompt. Do not add a dedicated resting-spot prompt in v0; keep the
+only explicit comfort prompt as **Sit and Play** at Relay for the **Guitar
+Farewell**. A later affection pass can add optional sitting together, petting,
+Cicka jumping into the player's lap, or Cicka loafing on the player while
+resting.
+
+Each resting spot should have two tiny visual states:
+
+- **Before area beat resolution**: Cicka uses the spot to draw attention to a
+  local problem, route blocker, or emotional handoff.
+- **After area beat resolution**: the spot becomes calmer through a settled
+  pose, tiny mark, changed prop, or quiet absence echo.
+
+Use practical design labels for these spots:
+
+| Area | Practical resting spot label | Before resolution | After resolution |
+| --- | --- | --- | --- |
+| Bridge Area | Bridge Resting Spot | Cicka perches near the unsafe crossing or blank plan | Cicka settles near the completed bridge sketch or leaves a tiny mark by the crossing |
+| Concert Area | Concert Resting Spot | Cicka watches the guitar case, stage edge, or blocked crossing | Cicka rests in a quiet listening corner near the opened crossing; this can later become the post-ending echo spot |
+| Dance Festival Area | Dance Festival Resting Spot | Cicka loafs near the operations table, shuttle step, lantern crates, or service gate | Cicka settles near the cleared service gate or finished shuttle sign, optionally beside the Unnamed Counterpart Cat |
+
 ## Guitar
 
 The guitar is a meaningful comfort item. It should enter mid-route through a
 Resident Beat as an entrusted reward or responsibility, not as a random
 pickup.
 
-After the player receives it, the guitar should become playable in quiet Ridge
-spots, especially local Cicka Resting Spots, so playing for Cicka at Relay feels
-remembered rather than staged.
+After the player receives it, the guitar should feel present as a carried
+comfort item, but v0 does not need repeatable guitar prompts at every resting
+spot. The required playable comfort moment is the Relay **Guitar Farewell**.
 
-Petting can be a smaller recurring affection interaction. A hug is optional and
-should wait until character art can support it cleanly.
+Petting, lap resting, and similar affection interactions are later polish
+passes. A hug is optional and should wait until character art can support it
+cleanly.
 
 ## Required Ridge Areas
 
