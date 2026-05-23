@@ -156,8 +156,8 @@ Design the canonical first ending before designing optional endings. Multiple
 endings are not required for the Ridge; add alternate endings only if a later
 story/level pass proves they create meaningful replay value without weakening
 the Cicka farewell.
-The first prose artifact should be a short ending sequence outline before any
-required Ridge Areas / Resident Beats are designed: arrival state, Relay
+The first prose artifact should be a short ending sequence outline before the
+required Ridge Areas and their Resident Beats are designed: arrival state, Relay
 readiness, Cicka's final field presence, farewell action, final mark, and
 return-to-Ridge state.
 
@@ -190,7 +190,7 @@ reward or responsibility, not as a random pickup. A resident can give or lend it
 after the player helps with a local music/concert problem, then local Cicka
 Resting Spots can teach the player that playing for Cicka is a comfort ritual
 before the Relay Spire ending.
-Middle required Ridge Area / Resident Beat: **Concert Crossing Beat**. A
+Middle route area: **Concert Area**, containing **Concert Crossing Beat**. A
 blocked concert/traffic crossing halts the route because the local guitarist
 cannot play, the paper-stage setup is tangled, or the guitar needs a small
 repair. Cicka subtly points attention to the guitar case, loose string, or
@@ -228,14 +228,14 @@ The target asks for:
   rewards, or pure side fun
 - non-arcade fallback for any required beat that contains arcade-like interaction
 - tiny resident problems that create visible route changes
-- first v0 Resident Help Beat as **Blueprint Bridge**: a required soft gate
-  where helping a resident finish a bridge drawing/blueprint makes the crossing
-  real
+- first route area as **Bridge Area**, containing **Blueprint Bridge**: a
+  required soft gate where helping a resident finish a bridge drawing/blueprint
+  makes the crossing real
 - 2-3 required main-path Ridge Areas before the first ending, each centered on a
   Resident Beat / Resident Help Beat, with optional extra residents only if they
   add texture instead of errand fatigue
-- final required Ridge Area / Resident Beat candidate as **Opening Dance
-  Shuttle Beat**:
+- final required route area as **Dance Festival Area**, containing **Opening
+  Dance Shuttle Beat**:
   a nervous dance/romance setup at the foot of the Relay hill. The night dance
   festival is real, but the required route beat happens during afternoon setup.
   The route blocker should be practical: festival barriers, lantern lines,
@@ -284,10 +284,11 @@ The target asks for:
   using only silhouette/color specificity such as a pale or light-ink contrast
   to Cicka. The scene should not name him, give him dialogue, confirm parentage,
   or spend Micka before the post-ending return.
-- required route spine: Blueprint Bridge means changing the world through art,
-  Concert Crossing means turning memory into comfort, Opening Dance Shuttle
-  Beat means life can keep moving with someone new, then Relay Spire /
-  Guitar Farewell resolves Cicka's threshold farewell
+- required route spine: Bridge Area / Blueprint Bridge means changing the world
+  through art, Concert Area / Concert Crossing Beat means turning memory into
+  comfort, Dance Festival Area / Opening Dance Shuttle Beat means life can keep
+  moving with someone new, then Relay Spire / Guitar Farewell resolves Cicka's
+  threshold farewell
 - Guitar Farewell can include a brief **Living Proof Montage**: Blueprint Bridge
   being used, Concert Crossing continuing, Opening Dance beginning at night as
   an emotional echo under the player's guitar, and earlier Cicka Resting Spots

@@ -30,8 +30,8 @@ vision, milestone map, then reference/provenance.
   of the currently implemented/prototyped Ridge level and what source owns each
   part.
 - **[Ridge Story/Level Bible](./ridge/story-level-bible.md)**: Prose-first
-  story, level, character, ending, and Ridge Area / Resident Beat plan for the next
-  Ridge direction before implementation resumes.
+  story, level, character, ending, and Ridge Area and Resident Beat plan for the
+  next Ridge direction before implementation resumes.
 - **[Mini-Games](./mini-games/README.md)**: Routing index for mini-game-specific
   rules and Ridge reward contracts.
 - **[Potassium Slip Manual](./mini-games/potassium-slip.md)**: Focused guide for the

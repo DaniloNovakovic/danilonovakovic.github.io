@@ -661,32 +661,33 @@ story beats, level beats, tiny residents, Cicka field presences, route blockers,
 and visible before/after world changes. Design from the middle/end backward so
 the opening is not overfit to the current prototype.
 Write the canonical ending sequence outline first, then work backward into the
-final required Ridge Area / Resident Beat, the middle cause-and-effect beat,
-and only then the first taped-bridge tutorial beat.
+final required Dance Festival Area / Opening Dance Shuttle Beat, the middle
+Concert Area / Concert Crossing Beat, and only then the first Bridge Area /
+Blueprint Bridge tutorial beat.
 The ending outline should include the Guitar Farewell as an established comfort
 interaction, not a one-off ending prop: the player finds or receives the guitar
 earlier, can play it at local Cicka Resting Spots or quiet Ridge spots, and
 plays for Cicka near Relay before the threshold farewell.
-Current middle required Ridge Area / Resident Beat: a **Concert Crossing Beat**
-where a blocked concert/traffic crossing opens after the player helps with a
-small Guitar-Hero-like performance problem and earns the guitar. Keep the final
-Guitar Farewell separate from arcade difficulty; the concert teaches the item,
-while the ending uses it as comfort.
+Current middle route area: **Concert Area**, containing **Concert Crossing
+Beat**, where a blocked concert/traffic crossing opens after the player helps
+with a small Guitar-Hero-like performance problem and earns the guitar. Keep
+the final Guitar Farewell separate from arcade difficulty; the concert teaches
+the item, while the ending uses it as comfort.
 Give Concert Crossing a non-arcade fallback so the main route can ship through
 dialogue, collection, practice, or auto-play before the rhythm mini-game is fully
 polished.
 
-Current final required Ridge Area / Resident Beat candidate: **Opening Dance Shuttle
-Beat**. Two fictional residents like each other but are too nervous to step onto
-the dance floor or talk directly. The night dance festival is real, but the
-player participates in afternoon setup and leaves before the festival fully
-begins. The dance belongs in a town square, community hall, or festival street
-at the foot of the Relay hill. The physical blocker is practical: festival
-barriers, lantern lines, chair stacks, stage/speaker cables, and a locked
-service-road gate block the hill route until setup passes inspection. The
-resident being helped should have a daily purpose tied to that route. Current
-locked direction: the nervous dancer is the hill-shuttle driver, and the
-romantic partner is the shy **Last-Stop Operations Helper**, whose visible
+Current final route area: **Dance Festival Area**, containing **Opening Dance
+Shuttle Beat**. Two fictional residents like each other but are too nervous to
+step onto the dance floor or talk directly. The night dance festival is real,
+but the player participates in afternoon setup and leaves before the festival
+fully begins. The dance belongs in a town square, community hall, or festival
+street at the foot of the Relay hill. The physical blocker is practical:
+festival barriers, lantern lines, chair stacks, stage/speaker cables, and a
+locked service-road gate block the hill route until setup passes inspection.
+The resident being helped should have a daily purpose tied to that route.
+Current locked direction: the nervous dancer is the hill-shuttle driver, and
+the romantic partner is the shy **Last-Stop Operations Helper**, whose visible
 plaza-table work connects shuttle questions, setup checks, volunteer handoffs,
 service-road clearance, and the night dance. Keep these as role-first character
 labels for now; proper names can wait until a later character pass. Accepted
@@ -768,9 +769,9 @@ Resting Spot, and Micka remains delayed until the later post-ending trigger
 rather than appearing immediately. The echo should be an empty usual spot with
 one small paw/page mark, not the guitar left behind.
 
-Current first required Ridge Area / Resident Beat: **Blueprint Bridge**. Help a
-resident finish a tiny bridge drawing/blueprint, then the finished sketch
-becomes the crossing.
+Current first route area: **Bridge Area**, containing **Blueprint Bridge**.
+Help a resident finish a tiny bridge drawing/blueprint, then the finished
+sketch becomes the crossing.
 Direct bridge drawing or physics bridge-building can be a future optional toy,
 not the required v0 route.
 

@@ -71,6 +71,22 @@ residents, props, Cicka Resting Spots, mini-game entrances, and one or more
 runtime Phaser Scenes.
 _Avoid_: hub, Phaser scene, single room, isolated mini-game silo
 
+**Bridge Area**:
+The first required Ridge Area. It contains the Blueprint Bridge Resident Beat
+and teaches that helping a resident can visibly change the route.
+_Avoid_: calling the whole area Blueprint Bridge, bridge hub
+
+**Concert Area**:
+The middle required Ridge Area. It contains the Concert Crossing Beat, the
+Concert Resting Spot, and the guitar's first entrusted use.
+_Avoid_: calling the whole area Concert Crossing, music hub
+
+**Dance Festival Area**:
+The final required Ridge Area at the foot of the Relay hill. It contains the
+Opening Dance Shuttle Beat and clears the last daylight ride to Relay before
+the night festival begins.
+_Avoid_: calling the whole area Opening Dance Shuttle, final hub
+
 **Topology Map**:
 A high-level route graph showing room beats, locks, shortcuts, and return paths.
 _Avoid_: blockout map, minimap
@@ -551,6 +567,10 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 - "Resident Room Beat" is retired terminology; use **Ridge Area** for
   bridge/concert/dance chunks and **Resident Beat** for their authored resident
   problems.
+- "bridge/concert/dance festival" names the **Bridge Area**, **Concert Area**,
+  or **Dance Festival Area**; **Blueprint Bridge**, **Concert Crossing Beat**,
+  and **Opening Dance Shuttle Beat** name the Resident Beats inside those
+  areas.
 - "metroidvania" is inspiration for shortcut relief, route memory, and changed
   landmarks, not a promise of required ability-gated precision platforming on
   the main **Exploration Map** route.

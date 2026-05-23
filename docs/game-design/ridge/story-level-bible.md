@@ -8,16 +8,17 @@
 This bible is in-progress. It records resolved story, level-design, character,
 and progression decisions for the core Exploration Map route.
 
-Current design focus: work backward from the ending by detailing **Opening
-Dance Shuttle Beat** before Concert Crossing and Blueprint Bridge.
+Current design focus: work backward from the ending by detailing **Dance
+Festival Area / Opening Dance Shuttle Beat** before Concert Area / Concert
+Crossing Beat and Bridge Area / Blueprint Bridge.
 
 Design order:
 
 1. canonical first ending
 2. Living Proof Gate readiness
-3. final required Ridge Area / Resident Beat
-4. middle required Ridge Area / Resident Beat
-5. first required Ridge Area / Resident Beat
+3. Dance Festival Area / Opening Dance Shuttle Beat
+4. Concert Area / Concert Crossing Beat
+5. Bridge Area / Blueprint Bridge
 6. optional residents and Mini-Game Entrances
 
 ## Core Promise
@@ -130,21 +131,22 @@ Designer and Story/Tone tuning variable.
 Current required route spine:
 
 ```text
-Blueprint Bridge -> I can change the world by making something through art.
-Concert Crossing -> I can turn memory into comfort.
-Opening Dance Shuttle Beat -> Life can keep moving with someone new.
+Bridge Area / Blueprint Bridge -> I can change the world by making something through art.
+Concert Area / Concert Crossing Beat -> I can turn memory into comfort.
+Dance Festival Area / Opening Dance Shuttle Beat -> Life can keep moving with someone new.
 Relay Spire / Guitar Farewell -> I am ready for Cicka's threshold farewell.
 ```
 
-| Beat | Status | Route role | Cicka role | World change |
-| --- | --- | --- | --- | --- |
-| Opening Dance Shuttle Beat | Accepted final beat direction; Last-Stop Operations Helper locked as romantic partner role | Creates the last emotional readiness before Relay through afternoon setup for a night dance festival at the foot of the Relay hill | Quiet threshold observer near the lantern crates, operations table, shuttle step, or service gate; may loaf with the Unnamed Counterpart Cat | Festival setup clears enough for one last daylight shuttle to Relay before the night road closure |
-| Concert Crossing Beat | Accepted middle beat | Blocks a concert/traffic crossing and earns the guitar | Points attention to guitar case, string, stage, or crossing | Concert continues; crossing opens; guitar entrusted to player |
-| Blueprint Bridge | Accepted first art/drawing beat | Required soft gate tutorial for resident help | Obvious subtle attention cue at unsafe edge or blank plan | Finished bridge sketch becomes the crossing |
+| Area | Resident Beat | Status | Route role | Cicka role | World change |
+| --- | --- | --- | --- | --- | --- |
+| Dance Festival Area | Opening Dance Shuttle Beat | Accepted final beat direction; Last-Stop Operations Helper locked as romantic partner role | Creates the last emotional readiness before Relay through afternoon setup for a night dance festival at the foot of the Relay hill | Quiet threshold observer near the lantern crates, operations table, shuttle step, or service gate; may loaf with the Unnamed Counterpart Cat | Festival setup clears enough for one last daylight shuttle to Relay before the night road closure |
+| Concert Area | Concert Crossing Beat | Accepted middle beat | Blocks a concert/traffic crossing and earns the guitar | Points attention to guitar case, string, stage, or crossing | Concert continues; crossing opens; guitar entrusted to player |
+| Bridge Area | Blueprint Bridge | Accepted first art/drawing beat | Required soft gate tutorial for resident help | Obvious subtle attention cue at unsafe edge or blank plan | Finished bridge sketch becomes the crossing |
 
 ## Opening Dance Shuttle Beat
 
-The final required Ridge Area / Resident Beat should be romantic, warm, and
+The **Dance Festival Area** should contain the final required Resident Beat,
+**Opening Dance Shuttle Beat**. It should be romantic, warm, and
 different from the Guitar Farewell. Two fictional residents like each other but are too
 nervous to step onto the dance floor or talk directly. The night dance festival
 is real, but the player participates in afternoon setup and leaves before the
@@ -385,8 +387,8 @@ Gentle comedy is welcome; the guitar's emotional role needs room to breathe.
 
 ## Blueprint Bridge
 
-The first Ridge Area / Resident Beat should be a required art/drawing soft
-gate. It teaches:
+The **Bridge Area** should contain the first required Resident Beat,
+**Blueprint Bridge**: a required art/drawing soft gate. It teaches:
 
 ```text
 Cicka noticed something -> a resident needs local help -> the route visibly changes
@@ -421,7 +423,7 @@ blockers.
 
 ## Open Design Slots
 
-- Final required Ridge Area / Resident Beat near Relay.
+- Dance Festival Area layout near Relay.
 - Required resident cast names and silhouettes.
 - Optional resident cast and hangout spaces.
 - Guitar acquisition details inside Concert Crossing.
