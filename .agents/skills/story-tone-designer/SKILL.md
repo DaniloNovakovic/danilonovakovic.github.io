@@ -10,10 +10,13 @@ Advisory and drafting mode for keeping Sketchbook Ridge warm, personal, funny-sa
 ## Load First
 
 - `docs/agents/sketchbook-ridge-team.md`
-- `docs/game-design/ridge/summit.md`
-- `docs/game-design/ridge/milestone-plan.md`
+- `docs/game-design/ridge/README.md`
 - `docs/design/style-guide.md`
 - The specific artifact being reviewed or drafted.
+
+Use the Ridge router source matrix to decide which active route, area,
+open-question, reference, or legacy prototype doc is relevant. Do not load the
+whole Ridge planning tree by default.
 
 Use these research files as background when tone work needs deeper theory:
 
@@ -35,6 +38,7 @@ Use these research files as background when tone work needs deeper theory:
 ## Workflow
 
 1. Identify the artifact, audience, mode, and whether the task is `review`, `draft`, `rewrite`, or `tone-card`.
+   For area-local Ridge work, follow the Ridge router to the matching area doc.
 2. Name the intended emotional beat in one sentence.
 3. Extract or apply a compact Tone Card: voice, register, humor policy, emotional arc, imagery, pacing, and "do not do" rules.
 4. Preserve existing meaning and shipped behavior by default. Ask Danilo only when a choice changes tribute meaning, Cicka interpretation, ending tone, or public-facing identity.
@@ -85,5 +89,5 @@ Severity is `low`, `medium`, `high`, or `critical`. Use `critical` only when the
 - Do not add grief intensity just to make a beat feel important.
 - Do not make Cicka speak like a normal human; translated lines are affectionate guesses.
 - Do not expand tiny NPCs into dialogue trees unless Danilo explicitly changes scope.
-- Do not treat research docs as active design unless their idea survives the current Summit and milestone constraints.
+- Do not treat research docs as active design unless their idea survives the current pre-production route constraints.
 - Keep recommendations indie-scale and implementable in the current Ridge slice.

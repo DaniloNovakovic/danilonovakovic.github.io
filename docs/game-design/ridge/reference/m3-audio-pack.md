@@ -2,12 +2,15 @@
 
 Owner mode: Audio Designer.
 
-Purpose: active audio direction for the Ridge, Cicka, Potassium
-acknowledgements, Stampede Sketch, and Telegraph Terrace. This is a spec pack,
-not final asset direction or runtime architecture.
+Purpose: reference audio direction for the Ridge, Cicka, optional/current
+mini-games, Potassium acknowledgements, Stampede Sketch, and Telegraph Terrace.
+The `M3` name is historical. This is a spec pack, not final asset direction,
+route canon, or runtime architecture.
 
 Active references:
 
+- `../README.md`, `../story-level-bible.md`, and relevant area docs for active
+  Ridge route/ending context.
 - `../summit.md`: low-cortisol Ridge, high-spice mini-games,
   stickers/world memory, Cicka as resident.
 - `style-guide.md`: off-white paper, black ink, stepped handmade feel.

@@ -10,11 +10,14 @@ Advisory and drafting mode for making Sketchbook Ridge sound handmade, quiet, le
 ## Load First
 
 - `docs/agents/sketchbook-ridge-team.md`
-- `docs/game-design/ridge/summit.md`
-- `docs/game-design/ridge/milestone-plan.md`
+- `docs/game-design/ridge/README.md`
 - `docs/runtime-architecture.md`
 - `.agents/rules/40-audio-runtime.md`
 - The specific artifact being reviewed or drafted.
+
+Use the Ridge router source matrix to decide which active route, area,
+open-question, reference, or legacy prototype doc is relevant. Do not load the
+whole Ridge planning tree by default.
 
 Optional provenance only; do not load by default:
 
@@ -34,7 +37,9 @@ Optional provenance only; do not load by default:
 ## Workflow
 
 1. Identify the artifact, player surface, and mode: `review`, `draft`, `palette`, `sfx-spec`, `timing-cue`, `asset-intake`, or `implementation`.
-2. Classify the surface: overworld, Cicka Home, UI/overlay, Potassium, Stampede, Telegraph Terrace, or future mini-game.
+2. Classify the surface: active Ridge route area, current legacy prototype
+   surface, UI/overlay, optional mini-game, or future mini-game. For active
+   Ridge route areas, follow the Ridge router to the matching area doc.
 3. Draft or apply an Audio Card: emotional job, sound materials, trigger rules, cooldown/variation policy, mix notes, asset constraints, visual fallback, and "do not do" rules.
 4. Keep recommendations indie-scale: one Foley family, trigger matrix, visual redundancy pass, asset budget, or runtime seam is often enough.
 5. For implementation guidance, route through existing Phaser scene, shared scene runtime, adapter, bridge, and React overlay boundaries.
@@ -85,6 +90,6 @@ Severity is `low`, `medium`, `high`, or `critical`. Use `critical` only when pro
 - Do not make timing, navigation, or progression depend on audio alone.
 - Do not use repetitive meows, cartoon animal barks, or explicit Cicka speech.
 - Do not turn every UI action into sound; the Ridge should have air in it.
-- Do not treat research docs as active design unless their idea survives the current Summit and milestone constraints.
+- Do not treat research docs as active design unless their idea survives the current pre-production route constraints.
 - Do not load provenance reports unless Danilo asks for source research, a disputed rationale, or a new audio-domain expansion.
 - Do not suggest cloud upload, microphone capture, speaker identification, or voice-likeness work without explicit user approval and a local-first fallback.

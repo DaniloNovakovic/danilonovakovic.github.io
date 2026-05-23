@@ -7,7 +7,11 @@ description: Guides Sketchbook Ridge architecture planning, seam sequencing, bra
 
 ## Quick Start
 
-1. Read `CONTEXT.md`, relevant `docs/adr/`, `docs/runtime-architecture.md`, `docs/architecture-direction.md`, `.agents/rules/10-architecture.md`, and `docs/agents/sketchbook-ridge-team.md`.
+1. Read `CONTEXT.md`, relevant `docs/adr/`, `docs/runtime-architecture.md`,
+   `docs/architecture-direction.md`, `.agents/rules/10-architecture.md`, and
+   `docs/agents/sketchbook-ridge-team.md`. For Ridge work, also read
+   `docs/game-design/ridge/README.md` before choosing source-of-truth docs; for
+   area-local work, follow its pointer to `docs/game-design/ridge/areas/`.
 2. Start with the smallest safe change. Classify the request as `NO-CHANGE`, `SAFE-AFK`, `SAFE-WITH-SEQUENCE`, or `HITL`.
 3. Apply the anti-slop standards in `.agents/rules/10-architecture.md`.
 4. If unfamiliar, use `zoom-out` first. If refactoring or a new seam is proposed, use `improve-codebase-architecture` for theory before implementation planning.

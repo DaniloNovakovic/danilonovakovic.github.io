@@ -1,6 +1,6 @@
 ---
 name: playability-tester
-description: Validates Sketchbook Ridge playable routes, scene transitions, mobile inputs, smoke paths, and regression evidence. Use when Danilo invokes the Playability Tester or QA Playtest Lead, asks for playability QA, smoke testing, route reachability, softlock checks, mobile playtests, or changes touch Ridge blockouts, traversal, scene lifecycle, overlay pause, shell input, or scene returns.
+description: Validates Sketchbook Ridge playable routes, scene transitions, mobile inputs, smoke paths, and regression evidence. Use when Danilo invokes the Playability Tester or QA Playtest Lead, asks for playability QA, smoke testing, route reachability, softlock checks, mobile playtests, or changes touch Ridge route implementation, blockouts, traversal, scene lifecycle, overlay pause, shell input, or scene returns.
 ---
 
 # Playability Tester
@@ -13,15 +13,16 @@ is fun; this role owns whether the intended path survives the runtime.
 ## Load First
 
 - `docs/agents/sketchbook-ridge-team.md`
+- `docs/game-design/ridge/README.md`
 - `docs/runtime-modes.md`
 - `docs/game-design/player-manual.md`
 - `docs/runtime-architecture.md`
 - `.agents/rules/20-game-runtime.md`
 - The specific artifact, diff, issue, or route being tested.
-- For Ridge route work: `docs/game-design/ridge/current-level.md`,
-  `docs/game-design/ridge/map-language.md`,
-  `src/game/scenes/ridge/blockout/maps/folded-desk-ridge.blockout.txt`, and
-  relevant `src/game/scenes/ridge/` tests or runtime files.
+- For Ridge route work, follow the Ridge router source matrix to the relevant
+  active design docs, current prototype snapshot, runtime files, and tests.
+  Read prototype blockout files only when the task actually touches current
+  blockout implementation.
 - For deeper testing theory:
   `docs/research/summaries/design-theory/automated-2d-level-playability-testing.md`
   and
@@ -31,7 +32,7 @@ is fun; this role owns whether the intended path survives the runtime.
 
 Require a playability pass when work touches:
 
-- Ridge blockout topology, anchors, gates, shortcuts, generated colliders, or traversal metadata.
+- Ridge route implementation, blockout topology, anchors, gates, shortcuts, generated colliders, or traversal metadata.
 - Movement constants, traversal helpers, collision, spawn, resume, fall recovery, camera, or control mats.
 - Scene lifecycle, bridge state, overlay pause, scene-owned UI actions, or parent-scene returns.
 - Mobile/touch movement, jump, interact, drag, or viewport layout that affects playable input.
@@ -100,7 +101,7 @@ broken.
 
 ## Preferred Evidence Ladder
 
-1. **Static blockout checks:** parser validation, route references, anchors,
+1. **Static route/blockout checks:** parser validation, route references, anchors,
    gates, shortcut availability, generated connectors, overlap errors.
 2. **Deterministic runtime checks:** geometry, traversal comfort, fall recovery,
    scene return policy, bridge state, overlay pause, shell control event mapping.

@@ -10,6 +10,8 @@ This is the high-level, tool-agnostic entrypoint for agents working on this gami
 - **Runtime modes:** [`docs/runtime-modes.md`](docs/runtime-modes.md) explains app mode transitions and parent-scene returns.
 - **Visual identity:** [`docs/design/style-guide.md`](docs/design/style-guide.md) is the source of truth for the "Digital Sketchbook" aesthetic.
 
+For Ridge design or planning, treat the project as **pre-production for the game rework**: start with [`docs/game-design/ridge/README.md`](docs/game-design/ridge/README.md), then follow its source matrix to the active route, area, open-question, or implementation doc. The existing Phaser Ridge is a legacy prototype/reference unless the task explicitly targets current runtime behavior. Do not start from `legacy/`, `reference/`, research, or old map plans unless an active doc explicitly sends you there.
+
 If another AI tool needs its own entry file, keep it as a thin pointer back to this file and [`.agents/rules/`](.agents/rules/). Do not duplicate the scoped rules into tool-specific files.
 
 ## Agent skills
@@ -53,5 +55,7 @@ When generating or converting sprite assets for Phaser scenes, use [`.agents/ski
 ## Project docs
 
 - [`README.md`](README.md) — project overview, development commands, deployment notes.
-- [`docs/game-design/`](docs/game-design/) — shipped player-facing behavior and future design notes.
+- [`docs/game-design/`](docs/game-design/) — shipped player-facing behavior, active Ridge design, current prototype truth, reference packs, and legacy history.
+- [`docs/game-design/ridge/README.md`](docs/game-design/ridge/README.md) — first-read Ridge source-of-truth router, status matrix, and update protocol.
+- [`docs/game-design/ridge/areas/README.md`](docs/game-design/ridge/areas/README.md) — active Bridge, Concert, Dance Festival, and Relay Ending area docs.
 - [`src/README.md`](src/README.md) — source folder map.

@@ -6,6 +6,8 @@ The goal is to create a place where I can easily surface interesting personal op
 
 **This repository (v3)** is a gamified portfolio: **Phaser** scenes for worlds plus **React** overlays for portfolio, inventory, and scene-local surfaces. Stack: **Vite**, **React 19**, **TypeScript**, **Tailwind CSS v4**. Design direction lives in [`docs/design/style-guide.md`](docs/design/style-guide.md); agent-oriented notes in [`AGENTS.md`](AGENTS.md).
 
+**Current active design slice:** Ridge is in pre-production for the desired route rework. The phase compass is [`docs/game-design/ridge/milestone-plan.md`](docs/game-design/ridge/milestone-plan.md); live PRDs, backlog, and agent-ready briefs stay in GitHub Issues.
+
 **Personal log / opinions by version:** see [`CHANGELOG.md`](CHANGELOG.md) (v1 → v2 → current v3).
 
 ## Development

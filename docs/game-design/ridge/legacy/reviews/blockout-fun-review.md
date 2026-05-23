@@ -1,7 +1,7 @@
 # Ridge Blockout Fun Review
 
 Status: design review of
-[`folded-desk-ridge.source.ts`](../../../../src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts).
+[`folded-desk-ridge.source.ts`](../../../../../src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts).
 
 This review scores the first text skeleton against the current research notes on
 2D map design, Lucky Luna, and Nine Sols.

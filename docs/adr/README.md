@@ -1,3 +1,18 @@
 # Architecture Decision Records
 
-Durable architecture decisions live here when they exist. It is valid for this directory to contain only this placeholder until a decision is worth recording.
+Durable architecture decisions live here when they exist. Keep ADRs short,
+statused, and scoped to the system they actually decide.
+
+Use ADRs for technical choices that should survive across issues, not for
+active Ridge route design. For Ridge design and planning, start from
+[`../game-design/ridge/README.md`](../game-design/ridge/README.md). Some older
+Ridge ADRs still describe the current Phaser prototype/runtime but do not
+override the Ridge pre-production route.
+
+## Records
+
+| ADR | Current Scope |
+| --- | --- |
+| [`0001-ridge-blockout-as-exploration-map-source.md`](./0001-ridge-blockout-as-exploration-map-source.md) | Current/prototype Ridge blockout runtime only; superseded as future route canon. |
+| [`0002-audio-adapter-boundary.md`](./0002-audio-adapter-boundary.md) | Current audio ownership boundary. |
+| [`0003-ridge-blockout-source-contract.md`](./0003-ridge-blockout-source-contract.md) | Current/prototype Ridge blockout tooling contract only; superseded as future route canon. |

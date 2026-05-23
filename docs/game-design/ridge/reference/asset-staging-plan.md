@@ -1,11 +1,12 @@
 # Sketchbook Ridge Asset Staging Plan
 
-> Planning companion for active Ridge and mini-game asset work.
+> Planning companion for active Ridge pre-production and optional/current
+> mini-game asset work.
 > This is an organization and adoption guide, not a final art bible and not a
 > promise that every prepared asset will ship unchanged.
 
-Active sources: `../summit.md`,
-`../milestone-plan.md`, `m3-visual-pack.md`,
+Active sources: `../README.md`, `../story-level-bible.md`, relevant area docs,
+`../summit.md`, `../milestone-plan.md`, `m3-visual-pack.md`,
 `m3-overlay-pack.md`, `m3-audio-pack.md`,
 `docs/design/style-guide.md`, local generated/prepared asset readmes under
 ignored `asset-sources/**` when present,
@@ -27,8 +28,8 @@ it becomes easy to confuse:
 - prepared spritesheets with runtime-ready integration
 - scene-specific experiments with a repo-wide asset pipeline decision
 
-This document keeps the Summit milestone moving while giving the newer POC
-assets a clear home.
+This document keeps pre-production asset work and current prototype assets in
+separate lanes while giving newer POC assets a clear home.
 
 ## Producer Summary
 
@@ -43,14 +44,16 @@ Producer read:
 
 ## Current Milestone Guardrail
 
-The active milestone still proves:
+The active Ridge route-reset milestone proves:
 
-1. a compact Ridge route exists
+1. a compact Bridge -> Concert -> Dance Festival -> Relay route exists
 2. Relay Spire is visible early
-3. Potassium Slip remains the existing arcade anchor
-4. Stampede Sketch is the first new opt-in mini-game
-5. rewards visibly change the Ridge
-6. Cicka and one NPC make the world feel inhabited
+3. required resident help visibly changes the Ridge
+4. Cicka presence, resting spots, guitar comfort, and farewell staging feel
+   intentional
+5. optional mini-game assets remain side-fun, reward, shortcut, or
+   alternate-path candidates
+6. existing prototype assets are reused only when they support the desired route
 
 Anything that does not directly support those proofs is secondary unless a
 specific slice pulls it in.
@@ -188,7 +191,7 @@ Recommended slice:
 
 Reason:
 
-- Stampede is the current active mini-game milestone
+- Stampede is the current optional/prototype mini-game milestone
 - enemy silhouettes affect readability and tone directly
 - scene-local integration is safer than a cross-game art push
 - the current design now depends on a readable central calm patch plus a

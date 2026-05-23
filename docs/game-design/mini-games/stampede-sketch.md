@@ -2,7 +2,9 @@
 
 > Mini-game design brief and Ridge reward contract.
 
-Stampede Sketch is the first new opt-in mini-game for Sketchbook Ridge.
+Stampede Sketch is the first new opt-in mini-game prototype for Sketchbook
+Ridge. In the active Ridge pre-production route, it is optional side fun or an
+alternate-path candidate, not required Living Proof for the first ending.
 
 ## Core Purpose
 
@@ -61,7 +63,8 @@ them to the blanket, but the blanket itself should remain a separate landmark.
 - **Upgrades:** better ways to organize, soften, or survive pressure.
 - **Damage/contact:** smudges, page noise, crowding.
 - **Win:** the blanket stays calm until the timer ends.
-- **First-clear reward:** stamp plus one glide pip for Ridge traversal.
+- **First-clear reward:** candidate stamp plus one glide pip for Ridge
+  traversal if the active route later accepts that reward.
 
 ## First-Slice Art Direction
 

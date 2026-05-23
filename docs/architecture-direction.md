@@ -5,6 +5,10 @@ why behind the runtime shape, and the direction future refactors should preserve
 For what exists in code today, treat [`runtime-architecture.md`](runtime-architecture.md),
 `AGENTS.md`, and the scoped `.agents/rules/` files as the operational guidance.
 
+Ridge caveat: architecture notes about the typed Ridge blockout apply to the
+current Phaser prototype/runtime. They do not override the Ridge pre-production
+route in [`game-design/ridge/README.md`](./game-design/ridge/README.md).
+
 ## 1. Architectural Philosophy
 
 This project is built on three core pillars to ensure that adding future complex scenes and overlays does not create technical debt or "God Objects."
@@ -47,7 +51,9 @@ paths, prefer [`runtime-architecture.md`](runtime-architecture.md). When
 proposing future refactors:
 
 - Prefer extending existing lifecycle, bridge, overlay, scene UI, and shared runtime seams instead of re-introducing callback-only scene orchestration, ad-hoc overlay maps, or ad-hoc global state.
-- Keep Ridge spatial truth in typed Ridge blockout source and compiled facts instead of rebuilding parallel parent/route/spatial catalogs.
+- For current/prototype Ridge runtime work, keep spatial truth in the typed
+  Ridge blockout source and compiled facts instead of rebuilding parallel
+  parent/route/spatial catalogs.
 - Introduce shared render helpers only when repeated render policy code appears.
 
 ---

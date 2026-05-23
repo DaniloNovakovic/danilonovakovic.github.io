@@ -248,10 +248,13 @@ room opts into a newer language version.
 
 Exit anchors may include `movement=` to choose the generated traversal
 connector. v0 supports `ramp`, `jump`, `climb`, and `drop`; unknown movement
-values fail validation. These are blockout semantics, not final ability names:
-ramps/stairs are assisted walking strips, jumps create sparse forgiving
-platforms, climbs create cord/lift assist zones, and drops create safe return
-zones when unlocked.
+values fail validation. These are blockout semantics, not final ability names.
+`ramp` is a legacy/internal connector label for assisted walking strips; the v0
+Ridge design should describe main-path terrain as chunky stairs, shelves,
+bridges, cords, lifts, and soft drops rather than visual slope traversal. Jump
+connectors remain available for legacy or optional blockouts but are not the v0
+main-route target. Climb connectors create cord/lift assist zones, and drops
+create safe return zones when unlocked.
 
 Seamless-world QA rule: runtime-active, non-empty cells from different room
 beats should not overlap unless the map explicitly declares a merge rule. v0
