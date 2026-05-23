@@ -30,9 +30,9 @@ Use each file for exactly one concern:
 | Current runtime/prototype truth | [`ridge-snapshot.md`](./ridge-snapshot.md) | What exists now in the Phaser prototype, what can be reused, and what is disposable. |
 | Active open questions | [`open-questions.md`](./open-questions.md) | Unresolved ending, Dance Festival, dependency, and scope gaps. |
 | Product vision | [`summit.md`](./summit.md) | Durable fantasy and pillars, not detailed route implementation. |
-| Implementation sequencing | [`milestone-plan.md`](./milestone-plan.md) | Current route-reset target plus legacy/prototype milestone history, seams, branch strategy. Not live backlog. |
+| Implementation sequencing | [`milestone-plan.md`](./milestone-plan.md) | Current route-reset milestones, source stack, prototype reuse rules, and agent checklist. Not live backlog. |
 | Runtime blockout contract | [`map-language.md`](./map-language.md) | Source format and generated facts for the current/prototype blockout. |
-| Legacy topology/reviews | [`legacy/`](./legacy/README.md) | Superseded folded/Cicka Home plans and reviews. Reference only unless an active doc links there. |
+| Legacy prototype history | [`legacy/`](./legacy/README.md) | Superseded folded/Cicka Home plans, old summit/milestone history, map plans, and reviews. Reference only unless an active doc links there. |
 | Art/audio/asset support | [`reference/`](./reference/README.md) | Reference packs that support active docs but do not override route canon. |
 | Live work | GitHub Issues | PRDs, current backlog, triage state, and agent briefs. |
 

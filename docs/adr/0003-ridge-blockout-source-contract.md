@@ -1,12 +1,18 @@
 # Adopt A Validated Ridge Blockout Source Contract
 
-Status: accepted.
+Status: accepted for current/prototype Ridge blockout tooling; superseded as
+future Ridge route canon by the Ridge pre-production plan.
 
-Ridge blockout authoring uses an AI-readable typed TypeScript Ridge Blockout
-Source with a build-time Ridge Source Contract. The source remains optimized for
-Danilo and AI level-design agents to read and edit, while a generator validates
-the source and emits a committed typed TypeScript artifact for runtime and
-future editor imports.
+This ADR describes a useful authoring/validation contract for the existing
+Phaser Ridge prototype. It does not decide the final spatial layout, route
+shape, traversal requirements, or area order for the desired
+Bridge/Concert/Dance/Relay rework.
+
+Current/prototype Ridge blockout authoring uses an AI-readable typed TypeScript
+Ridge Blockout Source with a build-time Ridge Source Contract. The source
+remains optimized for Danilo and AI level-design agents to read and edit, while
+a generator validates the source and emits a committed typed TypeScript artifact
+for runtime and prototype/editor imports.
 
 ## Considered Options
 
@@ -27,8 +33,8 @@ not the primary authoring surface.
 
 ## Consequences
 
-- Danilo and AI level-design agents edit the Ridge Blockout Source, not generated
-  TypeScript.
+- For current/prototype blockout work, Danilo and AI level-design agents edit
+  the Ridge Blockout Source, not generated TypeScript.
 - The generator owns the committed `.generated.ts` artifact, and runtime/editor
   code imports that typed artifact.
 - Build, typecheck, or check workflows should fail when the source is structurally

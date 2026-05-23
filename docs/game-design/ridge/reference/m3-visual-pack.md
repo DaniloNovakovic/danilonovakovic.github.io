@@ -1,14 +1,16 @@
 # Sketchbook Ridge M3 Visual Pack
 
 Visual Direction Artist guidance with Character Designer input. This pack is
-implementation guidance, not a final art bible. M4 should be able to ship rough
-placeholders from these specs without waiting for polished drawings.
+reference guidance, not a final art bible or route-canon source. The `M3` name
+is historical; active Ridge area and ending decisions live in the Ridge router,
+story bible, and area docs.
 
-Active sources: `../summit.md`, `../milestone-plan.md`,
+Active sources: `../README.md`, `../story-level-bible.md`, relevant area docs,
+`../summit.md`, `../milestone-plan.md`,
 `docs/design/style-guide.md`, current runtime docs, scoped agent rules, and
 selected research summaries for A Short Hike, Tunic, Vampire Survivors, Clair
-Obscur, Divinity: Original Sin 2, and fighting game feel. Archived competition
-docs are not used as active source of truth.
+Obscur, Divinity: Original Sin 2, and fighting game feel. Legacy/prototype docs
+are not used as active source of truth unless an active doc links them.
 
 ## Visual Thesis
 
@@ -139,10 +141,10 @@ not unlocked by a menu.
 
 If a sticker makes interaction less clear, remove or fade the sticker.
 
-## M4 Placeholder Rules
+## Legacy M4 Placeholder Rules
 
-M4 Stampede and Ridge implementation can move with placeholders if they obey
-the read of this pack.
+Current/prototype Stampede and Ridge implementation can move with placeholders
+if they obey the read of this pack.
 
 - Use simple black silhouettes on paper: rectangles, ovals, triangles, torn
   scraps, and hand-drawn arcs are enough.
@@ -162,7 +164,8 @@ the read of this pack.
 - Telegraph and Domino can remain inert landmark silhouettes until their scenes
   exist. Their Trail Cards should not imply playable behavior before wiring.
 - Do not introduce a shared asset pipeline or generic mini-game art framework
-  for M4. Scene-owned placeholders are fine until repeated pain is proven.
+  from one prototype. Scene-owned placeholders are fine until repeated pain is
+  proven.
 - Keep placeholder art monochrome and readable at mobile crop. If it only reads
   on desktop, simplify the silhouette.
 

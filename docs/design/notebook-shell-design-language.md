@@ -4,6 +4,12 @@
 > prototypes, Storybook specimens, and runtime profile work; it is not a
 > shipped behavior manual.
 
+Status: current runtime shell/UI guidance. This document can guide notebook
+presentation for current scenes and optional mini-game prototypes, but it does
+not decide active Ridge route canon. For Bridge, Concert, Dance Festival, Relay,
+Living Proof, or ending design, start from
+[`../game-design/ridge/README.md`](../game-design/ridge/README.md).
+
 ## Core Idea
 
 Interactive mode should feel like a living sketchbook page, not a game trapped
@@ -79,7 +85,7 @@ as a card wrapped around another card.
 
 | Profile | Scenes | Layout Intent |
 | --- | --- | --- |
-| `sideViewPage` | Current Overworld, Ridge | Horizontal trail on paper with sparse prompts and overlays. |
+| `sideViewPage` | Current Overworld, legacy/prototype Ridge, possible future Ridge if the active route adopts it | Horizontal trail on paper with sparse prompts and overlays. |
 | `ruledBoardPage` | Potassium Slip | Tall ruled board, drag/recall control mat, board-like rhythm. |
 | `survivalPage` | Stampede Sketch | Clean open arena, edge status, minimal decoration. |
 | `timingPage` | Telegraph Terrace | One readable timing subject and one obvious parry surface. |
@@ -127,8 +133,10 @@ control-mat contract stays testable before broader extraction.
   Notebook Shell content.
 - Stampede should feel like a clean survival page, with pressure and status at
   the edge and almost no center decoration.
-- Ridge should sell the notebook fantasy through landmarks, stickers, Trail
-  Cards, and margin memory, not through dense side panels.
+- Ridge should sell the notebook fantasy through landmarks, resident changes,
+  Cicka presence, Trail Cards when needed, and margin memory, not through dense
+  side panels. Active route/ending decisions still belong in the Ridge router
+  docs, not this shell-language note.
 - Future scenes should choose a profile before designing custom UI.
 
 ## Storybook Readiness

@@ -2,6 +2,11 @@
 
 This document outlines the visual identity and interaction philosophy for Danilo Novakovic's gamified portfolio.
 
+Status: source of truth for visual identity. It does not decide Ridge route
+canon, level order, ending gates, or whether the future Ridge keeps the current
+Phaser prototype topology. For active Ridge pre-production design, start from
+[`../game-design/ridge/README.md`](../game-design/ridge/README.md).
+
 Related provenance:
 [`docs/research/provenance/visual/`](../research/provenance/visual/)
 stores source research and background rationale. This file remains the current
@@ -35,12 +40,17 @@ The aesthetic is a fusion of **Pablo Stanley’s Open Peeps** (modular, clean ch
 
 ### 3. Environment & World-Building
 
-- **Perspective:** 2D Side-scroller with horizontal parallax layering.
-- **Layout:** A continuous, seamless horizontal street of buildings.
+- **Perspective:** 2D side-view with horizontal parallax layering unless a
+  future design spike deliberately proves another presentation.
+- **Layout:** A continuous, readable sketchbook route. Buildings, props,
+  resting spots, and landmarks should serve the active route instead of
+  defaulting to a portfolio street.
 - **Stroke Style:**
   - *Foreground:* Sharp, dark ink with thicker outlines.
   - *Background:* Sketchy, lighter lines with cross-hatching for shadows.
-- **Interaction:** Buildings indicate interactivity with a subtle "wobble" animation or a scribbled `[E] ENTER` prompt.
+- **Interaction:** Buildings, landmarks, props, and resting spots indicate
+  interactivity with subtle wobble, paper lift, ink jitter, or a clear
+  on-style prompt.
 
 ### 4. UI & Interaction
 
@@ -63,7 +73,11 @@ The aesthetic is a fusion of **Pablo Stanley’s Open Peeps** (modular, clean ch
 
 ## 🛠 Technical Implementation Details
 
-- **Perspective:** Phaser 2D Side-scroller.
-- **Gravity:** Enabled for walking and jumping.
-- **Movement:** `A/D` or `Arrows` to Walk, `Shift` to Sprint, `E` to Interact.
-- **Overlay:** React-based modals for mini-games and deeper content.
+Current implementation snapshot, not a future Ridge gameplay mandate:
+
+- **Perspective:** Phaser 2D side-view.
+- **Movement:** existing side-view scenes support walking, jumping, sprinting,
+  and interaction; the active Ridge pre-production route should choose required
+  traversal from route and area docs.
+- **Overlay:** React-based overlays and scene-owned UI for Trail Cards,
+  mini-games, results, and deeper content.

@@ -1,6 +1,7 @@
 # Sketchbook Ridge M3 Overlay Pack
 
-> Overlay Readability Designer's overlay and manual-page visual readability pack for M3.
+> Overlay Readability Designer's overlay and manual-page visual readability
+> reference pack. The `M3` name is historical.
 > This is a practical spec for Trail Cards, Manual Pages, and monochrome
 > reward/locked language. It should guide implementation without creating final
 > art pressure.
@@ -9,6 +10,8 @@
 
 Use this pack with:
 
+- `docs/game-design/ridge/README.md`
+- the active route/area doc for the task
 - `docs/game-design/ridge/summit.md`
 - `docs/game-design/ridge/milestone-plan.md`
 - `docs/design/style-guide.md`
@@ -16,7 +19,8 @@ Use this pack with:
 - the current `OverlayDialogFrame`, `DialogCard`, `TrailCardOverlay`, and
   `ManualPageOverlay` implementation
 
-Do not use archived competition docs as active source of truth.
+Do not use legacy/prototype docs as active source of truth unless the Ridge
+router or active task sends you there.
 
 ## Overlay Thesis
 

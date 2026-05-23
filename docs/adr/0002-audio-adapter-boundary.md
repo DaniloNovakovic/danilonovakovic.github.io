@@ -1,6 +1,7 @@
 # Keep Audio Behind Scene-Owned Or Shared Adapter Boundaries
 
-Status: accepted for M3 audio planning.
+Status: accepted for current runtime audio ownership. Originated during M3
+audio planning, but the boundary is not M3-specific.
 
 Sketchbook Ridge audio should enter runtime code through explicit Phaser scene
 ownership first, and through a shared audio adapter only after at least two

@@ -8,6 +8,9 @@ the active route canon in [`../story-level-bible.md`](../story-level-bible.md),
 the area docs in [`../areas/`](../areas/README.md), shipped behavior, runtime
 source, or GitHub Issues.
 
+Some file names still use old milestone labels such as `m3-*`. Treat those as
+historical package names, not active milestone ownership.
+
 Use reference packs when a task asks for art/audio/overlay/assets or when an
 active design doc links here. Do not search this folder first for route
 decisions.

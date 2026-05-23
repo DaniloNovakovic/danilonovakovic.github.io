@@ -15,7 +15,7 @@ and reference material. Do not treat every file here as equally active.
   [`ridge/map-language.md`](./ridge/map-language.md).
 - **Pre-production product vision:** [`ridge/summit.md`](./ridge/summit.md).
 - **Milestone map:** [`ridge/milestone-plan.md`](./ridge/milestone-plan.md)
-  for current route-reset targets plus legacy/prototype milestone history.
+  for current route-reset milestones and prototype reuse rules.
 - **Optional/current mini-game routing:** [`mini-games/README.md`](./mini-games/README.md).
 - **Live PRDs, issues, triage state, and agent briefs:** GitHub Issues, as
   configured in [`../agents/issue-tracker.md`](../agents/issue-tracker.md).
@@ -59,11 +59,11 @@ prefer GitHub Issues.
 - **[Stampede Sketch](./mini-games/stampede-sketch.md)**: Purpose, player fantasy, enemy
   intent, and first-slice asset direction for the Stampede mini-game.
 - **[Sketchbook Ridge Summit](./ridge/summit.md)**: Pre-production vision for
-  the desired Ridge rework, including the overworld and optional mini-games.
+  the desired Ridge rework, including pillars, ending promise, scope cuts, and
+  optional-toy stance.
 - **[Sketchbook Ridge Milestone Plan](./ridge/milestone-plan.md)**:
-  Durable milestone, branch, shared-seam, and ownership map. It includes
-  legacy/prototype milestone history; use the top status note and Ridge router
-  before treating a section as active. It is not the live issue tracker.
+  Current route-reset milestones, source stack, prototype reuse rules, and
+  first-agent checklist. It is not the live issue tracker.
 - **[Ridge Blockout Source](./ridge/map-language.md)**: Typed blockout source
   contract for Ridge room beats, environment tags, traversal primitives, and
   greybox generation.
@@ -71,8 +71,8 @@ prefer GitHub Issues.
   Current authoring data for the seamless Ridge world. It lives under the
   Ridge runtime because it is build input, not prose.
 - **[Ridge Legacy Docs](./ridge/legacy/README.md)**: Superseded folded/Cicka
-  Home map plans and blockout reviews. Reference only unless a current active
-  doc explicitly links there.
+  Home map plans, old summit/milestone history, and blockout reviews. Reference
+  only unless a current active doc explicitly links there.
 - **[Ridge Reference Packs](./ridge/reference/README.md)**: Art/audio/overlay
   and asset support packs. Use when active docs or implementation issues need
   support material.
