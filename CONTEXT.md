@@ -4,6 +4,13 @@ This context defines the game-design language for the gamified portfolio and its
 
 ## Language
 
+**Ridge Pre-Production Plan**:
+The active design target for the game rework: a linear emotional Ridge route
+through Bridge Area, Concert Area, Dance Festival Area, and Relay Spire. It can
+override legacy prototype plans, but it does not describe shipped behavior until
+implemented and reflected in the player manual.
+_Avoid_: current runtime, shipped game, legacy prototype
+
 **Typed Ridge Blockout Source**:
 A human- and agent-editable TypeScript source notation that describes Ridge
 topology, room blockouts, traversal primitives, shortcuts, anchors, tile
@@ -369,6 +376,9 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 - The **Exploration Map** should read first as a **Sketchbook Neighborhood**,
   with shortcut relief supporting that fantasy instead of required precision
   platforming defining it.
+- The **Ridge Pre-Production Plan** is the current target for the desired game
+  rework; the existing Phaser Ridge is a legacy prototype/reference unless a
+  task explicitly targets current runtime behavior.
 - The **Sketchbook Neighborhood** should obey **Lived-In Causality** even when
   its art direction is sketchbook-like: a route change can be whimsical in
   presentation, but its blocker, helper, and resolution should feel practical

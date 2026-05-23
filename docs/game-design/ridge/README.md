@@ -1,9 +1,11 @@
 # Ridge Design Router
 
 This is the first doc to read before changing Ridge design, Ridge planning, or
-Ridge implementation issues.
+Ridge implementation issues. It is the pre-production router for the desired
+game rework, while the existing Phaser Ridge remains a legacy prototype and
+runtime reference.
 
-The active product direction is the linear emotional Ridge route:
+The active pre-production product direction is the linear emotional Ridge route:
 
 ```text
 Bridge Area / Blueprint Bridge
@@ -25,10 +27,10 @@ Use each file for exactly one concern:
 | Shipped behavior | [`../player-manual.md`](../player-manual.md) | Update only when behavior ships. |
 | Current Ridge route canon | [`story-level-bible.md`](./story-level-bible.md) | Route spine, cross-area Cicka/guitar logic, Living Proof, ending order. |
 | Area-specific design canon | [`areas/`](./areas/README.md) | Local geography, blockers, residents, prompts, staging, Cicka Resting Spots, visual/audio notes. |
-| Current runtime/prototype truth | [`ridge-snapshot.md`](./ridge-snapshot.md) | What exists now in the Phaser prototype and what parts are disposable. |
+| Current runtime/prototype truth | [`ridge-snapshot.md`](./ridge-snapshot.md) | What exists now in the Phaser prototype, what can be reused, and what is disposable. |
 | Active open questions | [`open-questions.md`](./open-questions.md) | Unresolved ending, Dance Festival, dependency, and scope gaps. |
 | Product vision | [`summit.md`](./summit.md) | Durable fantasy and pillars, not detailed route implementation. |
-| Implementation sequencing | [`milestone-plan.md`](./milestone-plan.md) | Milestones, seams, branch strategy. Not live backlog. |
+| Implementation sequencing | [`milestone-plan.md`](./milestone-plan.md) | Current route-reset target plus legacy/prototype milestone history, seams, branch strategy. Not live backlog. |
 | Runtime blockout contract | [`map-language.md`](./map-language.md) | Source format and generated facts for the current/prototype blockout. |
 | Legacy topology/reviews | [`legacy/`](./legacy/README.md) | Superseded folded/Cicka Home plans and reviews. Reference only unless an active doc links there. |
 | Art/audio/asset support | [`reference/`](./reference/README.md) | Reference packs that support active docs but do not override route canon. |

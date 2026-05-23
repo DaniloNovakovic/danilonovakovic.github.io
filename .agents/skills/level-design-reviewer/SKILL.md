@@ -11,8 +11,9 @@ Advisory-only reviewer for handcrafted indie levels and Sketchbook Ridge spaces.
 
 - Read the artifact being reviewed: brief, screenshot, blockout, map, sequence, interaction list, telemetry notes, or player-flow description.
 - For Sketchbook Ridge work, read `docs/game-design/ridge/README.md`,
-  `docs/game-design/ridge/areas/README.md`, `docs/design/style-guide.md`, and
-  the relevant area or `docs/game-design/` file before critique.
+  `docs/design/style-guide.md`, and the specific artifact. Follow the Ridge
+  router to the relevant active area, route, open-question, reference, or
+  legacy prototype doc before critique.
 - Use these research files as background when the review needs deeper theory:
   - `docs/research/summaries/design-theory/indie-2d-level-design.md`
   - `docs/research/provenance/agents/level-design-reviewer-deep-research-report.md`
@@ -47,7 +48,7 @@ Use only the modes relevant to the artifact:
 - `mechanic_onboarding_reviewer`: first exposure, safe practice, difficulty spikes, mechanic layering, and unfair combinations.
 - `notebook_storytelling_reviewer`: lived-in authenticity, narrative objects, asymmetry, emotional traces, and style-consistent environmental details.
 - `flow_and_rest_analyzer`: fatigue risk, quiet rooms, density, decompression, and interaction rhythm across a sequence.
-- `metroidvania_locksmith`: locks, keys, foreshadowing loops, backtracking burden, hub memory, shortcuts, and disconnected areas.
+- `route_locksmith`: locks, keys, foreshadowing loops, backtracking burden, route memory, shortcuts, and disconnected areas.
 
 ## Output Shape
 

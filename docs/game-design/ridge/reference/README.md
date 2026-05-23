@@ -21,5 +21,5 @@ decisions.
 - [`m3-visual-pack.md`](./m3-visual-pack.md): visual direction reference.
 - [`m3-overlay-pack.md`](./m3-overlay-pack.md): Trail Card and Manual Page
   overlay reference.
-- [`m3-audio-pack.md`](./m3-audio-pack.md): Ridge, Cicka, Potassium, Stampede,
-  and Telegraph audio reference.
+- [`m3-audio-pack.md`](./m3-audio-pack.md): Ridge, Cicka, optional mini-game,
+  and timing-cue audio reference.

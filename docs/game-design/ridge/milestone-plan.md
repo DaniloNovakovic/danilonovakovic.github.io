@@ -3,6 +3,8 @@
 > Planning companion for [`summit.md`](./summit.md).
 > The Summit doc is the product vision. This file is the implementation and
 > milestone map for agents working across branches.
+> Status: mixed current route-reset plan plus legacy/prototype milestone
+> history. Use [`README.md`](./README.md) to decide which sections are active.
 > Read [`README.md`](./README.md) first for Ridge source-of-truth routing and
 > [`story-level-bible.md`](./story-level-bible.md) for the active
 > Bridge/Concert/Dance/Relay route canon. Use [`areas/`](./areas/README.md) for
@@ -18,18 +20,24 @@ for the current human-readable Ridge snapshot.
 
 ## Active Goal
 
-The current product milestone is **Sketchbook Ridge Summit**.
+The current phase is **Ridge pre-production for the desired game rework**.
 
-The first complete milestone should prove:
+The first complete route target should prove:
 
-1. a compact Ridge route exists
+1. a compact Bridge -> Concert -> Dance Festival -> Relay route exists
 2. the Relay Spire is visible early
-3. Potassium Slip can act as the existing arcade anchor
-4. Stampede Sketch is the first new opt-in mini-game
-5. rewards visibly change the Ridge
-6. Cicka and one NPC make the world feel inhabited
+3. required Resident Help Beats visibly change the Ridge
+4. Cicka feels present through local field appearances and resting spots
+5. Guitar Farewell, Send the Sketchbook Prompt, Cicka Threshold Farewell, and
+   Open Ridge Return State land without arcade gating
+6. optional mini-games remain side fun, rewards, shortcuts, or future
+   alternate-path candidates rather than required first-ending proof
 
 Anything beyond that is future scope unless a slice explicitly pulls it in.
+
+The older M1-M5 sections below describe useful prototype history and reusable
+seams. Do not treat them as the active product target unless a current issue or
+the Ridge router explicitly sends you there.
 
 ## Current Implementation Status
 

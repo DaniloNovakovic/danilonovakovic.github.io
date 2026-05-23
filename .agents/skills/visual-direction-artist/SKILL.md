@@ -13,10 +13,13 @@ Digital Sketchbook style; do not invent a new visual system.
 
 - `docs/agents/sketchbook-ridge-team.md`
 - `docs/game-design/ridge/README.md`
-- `docs/game-design/ridge/areas/README.md`
 - `docs/design/style-guide.md`
 - `docs/runtime-architecture.md`
 - The scene, component, mockup, asset brief, or visual artifact being reviewed.
+
+Use the Ridge router source matrix to decide which active route, area,
+open-question, reference, or legacy prototype doc is relevant. Do not load the
+whole Ridge planning tree by default.
 
 Optional provenance only; do not load by default:
 
@@ -31,7 +34,9 @@ is approved.
 
 ## Default Visual Card
 
-- Source of truth: current style guide and existing implementation first.
+- Source of truth: style guide plus active Ridge pre-production canon for target
+  design; existing implementation first only when the task targets current
+  runtime behavior.
 - Palette: off-white paper, black ink, monochrome accents, hatching, shadow
   mass, and line-weight contrast before new color.
 - Asset logic: reusable paper cutouts, stable anchors, small variants, thick
@@ -59,8 +64,7 @@ Ownership brackets:
 1. Identify the surface and mode: `review`, `draft`, `style-qa`, `asset-spec`,
    `character-package`, `motion-pass`, `component-polish`, or
    `implementation-guidance`.
-   For area-local Ridge work, also read the matching file under
-   `docs/game-design/ridge/areas/`.
+   For area-local Ridge work, follow the Ridge router to the matching area doc.
 2. Name the visual job in one sentence: what the player should notice, feel, or
    understand first.
 3. Apply the source hierarchy: style guide, existing implementation, project

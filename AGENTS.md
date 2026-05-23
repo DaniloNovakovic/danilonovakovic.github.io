@@ -10,7 +10,7 @@ This is the high-level, tool-agnostic entrypoint for agents working on this gami
 - **Runtime modes:** [`docs/runtime-modes.md`](docs/runtime-modes.md) explains app mode transitions and parent-scene returns.
 - **Visual identity:** [`docs/design/style-guide.md`](docs/design/style-guide.md) is the source of truth for the "Digital Sketchbook" aesthetic.
 
-For Ridge design or planning, start with [`docs/game-design/ridge/README.md`](docs/game-design/ridge/README.md), then [`docs/game-design/ridge/story-level-bible.md`](docs/game-design/ridge/story-level-bible.md), then the matching file under [`docs/game-design/ridge/areas/`](docs/game-design/ridge/areas/README.md). Do not start from `legacy/`, `reference/`, research, or old map plans unless an active doc explicitly sends you there.
+For Ridge design or planning, treat the project as **pre-production for the game rework**: start with [`docs/game-design/ridge/README.md`](docs/game-design/ridge/README.md), then follow its source matrix to the active route, area, open-question, or implementation doc. The existing Phaser Ridge is a legacy prototype/reference unless the task explicitly targets current runtime behavior. Do not start from `legacy/`, `reference/`, research, or old map plans unless an active doc explicitly sends you there.
 
 If another AI tool needs its own entry file, keep it as a thin pointer back to this file and [`.agents/rules/`](.agents/rules/). Do not duplicate the scoped rules into tool-specific files.
 

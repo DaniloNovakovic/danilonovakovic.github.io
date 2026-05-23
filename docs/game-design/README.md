@@ -1,21 +1,22 @@
 # Game Design
 
-This directory separates shipped behavior, active Ridge design, current runtime
-prototype truth, long-term direction, runtime blockout source, and reference
-material. Do not treat every file here as equally active.
+This directory separates shipped behavior, active Ridge pre-production design,
+current runtime prototype truth, long-term direction, runtime blockout source,
+and reference material. Do not treat every file here as equally active.
 
 ## Source Of Truth
 
 - **Shipped player behavior:** [`player-manual.md`](./player-manual.md).
 - **Ridge design router:** [`ridge/README.md`](./ridge/README.md).
-- **Active Ridge story/route canon:** [`ridge/story-level-bible.md`](./ridge/story-level-bible.md).
-- **Active Ridge area design:** [`ridge/areas/`](./ridge/areas/README.md).
+- **Active Ridge pre-production story/route canon:** [`ridge/story-level-bible.md`](./ridge/story-level-bible.md).
+- **Active Ridge pre-production area design:** [`ridge/areas/`](./ridge/areas/README.md).
 - **Current Ridge runtime/prototype snapshot:** [`ridge/ridge-snapshot.md`](./ridge/ridge-snapshot.md).
 - **Runtime spatial source for the current prototype:** [`folded-desk-ridge.source.ts`](../../src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts), described by
   [`ridge/map-language.md`](./ridge/map-language.md).
-- **Product vision:** [`ridge/summit.md`](./ridge/summit.md).
-- **Milestone map:** [`ridge/milestone-plan.md`](./ridge/milestone-plan.md).
-- **Mini-game routing:** [`mini-games/README.md`](./mini-games/README.md).
+- **Pre-production product vision:** [`ridge/summit.md`](./ridge/summit.md).
+- **Milestone map:** [`ridge/milestone-plan.md`](./ridge/milestone-plan.md)
+  for current route-reset targets plus legacy/prototype milestone history.
+- **Optional/current mini-game routing:** [`mini-games/README.md`](./mini-games/README.md).
 - **Live PRDs, issues, triage state, and agent briefs:** GitHub Issues, as
   configured in [`../agents/issue-tracker.md`](../agents/issue-tracker.md).
 
@@ -49,17 +50,20 @@ prefer GitHub Issues.
   accidental canon.
 - **[Ridge Open Questions](./ridge/open-questions.md)**: Active unresolved
   ending, Dance Festival, dependency, and scope questions for future grilling.
-- **[Mini-Games](./mini-games/README.md)**: Routing index for mini-game-specific
-  rules and Ridge reward contracts.
+- **[Mini-Games](./mini-games/README.md)**: Routing index for optional and
+  current-prototype mini-game-specific rules. These docs do not make a
+  mini-game required Living Proof unless the Ridge router and active route canon
+  explicitly say so.
 - **[Potassium Slip Manual](./mini-games/potassium-slip.md)**: Focused guide for the
   Potassium Slip mini-game.
 - **[Stampede Sketch](./mini-games/stampede-sketch.md)**: Purpose, player fantasy, enemy
   intent, and first-slice asset direction for the Stampede mini-game.
-- **[Sketchbook Ridge Summit](./ridge/summit.md)**: Post-competition
-  production vision for the Ridge overworld and opt-in mini-games.
+- **[Sketchbook Ridge Summit](./ridge/summit.md)**: Pre-production vision for
+  the desired Ridge rework, including the overworld and optional mini-games.
 - **[Sketchbook Ridge Milestone Plan](./ridge/milestone-plan.md)**:
-  Durable milestone, branch, shared-seam, and ownership map. It is not the live
-  issue tracker.
+  Durable milestone, branch, shared-seam, and ownership map. It includes
+  legacy/prototype milestone history; use the top status note and Ridge router
+  before treating a section as active. It is not the live issue tracker.
 - **[Ridge Blockout Source](./ridge/map-language.md)**: Typed blockout source
   contract for Ridge room beats, environment tags, traversal primitives, and
   greybox generation.
@@ -83,8 +87,7 @@ prefer GitHub Issues.
 - **[Sketchbook Ridge M3 Overlay Pack](./ridge/reference/m3-overlay-pack.md)**:
   Reference Trail Card, Manual Page, mobile readability, and reward-state spec.
 - **[Sketchbook Ridge M3 Audio Pack](./ridge/reference/m3-audio-pack.md)**:
-  Reference Ridge, Cicka, Potassium acknowledgement, Stampede, and Telegraph
-  audio direction.
+  Reference Ridge, Cicka, optional mini-game, and timing-cue audio direction.
 
 ## Document Status
 
@@ -92,11 +95,13 @@ prefer GitHub Issues.
 - **Ridge routing and governance:** `ridge/README.md` and
   `ridge/decision-intake.md`.
 - **Active Ridge open questions:** `ridge/open-questions.md`.
-- **Active Ridge design:** `ridge/README.md`,
+- **Active Ridge pre-production design:** `ridge/README.md`,
   `ridge/areas/`,
   `ridge/story-level-bible.md`,
-  `ridge/summit.md`, `ridge/milestone-plan.md`,
-  `mini-games/potassium-slip.md`, and `mini-games/stampede-sketch.md`.
+  `ridge/summit.md`, and `ridge/milestone-plan.md`.
+- **Optional/current mini-game design:** `mini-games/potassium-slip.md` and
+  `mini-games/stampede-sketch.md`. These are local mini-game contracts, not
+  required first-ending Living Proof.
 - **Current Ridge runtime/prototype reality:** `ridge/ridge-snapshot.md`.
 - **Current runtime source:**
   `../../src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts`.

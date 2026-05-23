@@ -1,7 +1,11 @@
 # Sketchbook Ridge Agent Team
 
-This document defines lightweight role cards for the Sketchbook Ridge Summit
-planning and implementation team.
+This document defines lightweight role cards for the Sketchbook Ridge
+pre-production and implementation team.
+
+Current Ridge work is pre-production for the desired game rework. The existing
+Phaser Ridge is a legacy prototype/reference unless a task explicitly targets
+current runtime behavior.
 
 Use these roles when Danilo invokes a helper by responsibility, for example:
 
@@ -19,15 +23,21 @@ and delegate work cleanly.
 
 Before acting in any team role, read or reference:
 
+- [`AGENTS.md`](../../AGENTS.md)
 - [`docs/game-design/ridge/README.md`](../game-design/ridge/README.md)
-- [`docs/game-design/ridge/summit.md`](../game-design/ridge/summit.md)
-- [`docs/game-design/ridge/story-level-bible.md`](../game-design/ridge/story-level-bible.md)
-- [`docs/game-design/ridge/areas/README.md`](../game-design/ridge/areas/README.md)
-- [`docs/game-design/ridge/ridge-snapshot.md`](../game-design/ridge/ridge-snapshot.md)
-- [`docs/game-design/ridge/milestone-plan.md`](../game-design/ridge/milestone-plan.md)
-- [`docs/runtime-architecture.md`](../runtime-architecture.md)
-- [`docs/runtime-modes.md`](../runtime-modes.md)
+- the specific issue, artifact, route beat, area, scene, or diff being worked on
 - [`.agents/rules/`](../../.agents/rules/)
+
+Use the Ridge router source matrix to decide whether to read the story bible,
+area docs, open questions, snapshot, milestone plan, reference packs, or legacy
+prototype docs. Do not hard-code a larger document list inside role skills.
+
+For implementation or shipped-behavior work, also read the relevant runtime
+docs from [`AGENTS.md`](../../AGENTS.md), especially
+[`docs/runtime-architecture.md`](../runtime-architecture.md),
+[`docs/runtime-modes.md`](../runtime-modes.md), and
+[`docs/game-design/player-manual.md`](../game-design/player-manual.md) when the
+change touches player-facing behavior.
 
 Role-specific docs:
 
@@ -37,8 +47,9 @@ Role-specific docs:
   only for source rationale, comparison material, or a fresh visual synthesis
   pass. Do not treat provenance reports as current spec.
 - Audio roles: also use
-  [`.agents/skills/audio-designer/SKILL.md`](../../.agents/skills/audio-designer/SKILL.md)
-  and [`docs/game-design/ridge/reference/m3-audio-pack.md`](../game-design/ridge/reference/m3-audio-pack.md).
+  [`.agents/skills/audio-designer/SKILL.md`](../../.agents/skills/audio-designer/SKILL.md).
+  When source material is needed, follow the Ridge router to the relevant
+  reference pack.
 - Story / tone roles: also use
   [`.agents/skills/story-tone-designer/SKILL.md`](../../.agents/skills/story-tone-designer/SKILL.md)
   and relevant narrative research in [`docs/research/`](../research/).
@@ -46,9 +57,9 @@ Role-specific docs:
   [`.agents/skills/playability-tester/SKILL.md`](../../.agents/skills/playability-tester/SKILL.md).
 - Issue planning roles: also read [`docs/agents/issue-tracker.md`](./issue-tracker.md).
 
-Do not start team-role work from Ridge legacy docs, reference packs, research, or
-old map plans unless one of the active source-of-truth docs links there for the
-specific task.
+Do not start team-role work from Ridge legacy docs, reference packs, research,
+or old map plans unless the Ridge router or another active source-of-truth doc
+links there for the specific task.
 
 ## Activation Rule
 
@@ -88,12 +99,7 @@ The Producer owns:
 The Producer must protect:
 
 - `ridge/README.md` as the Ridge source-of-truth router and status matrix
-- `ridge/summit.md` as the product goal
-- `ridge/story-level-bible.md` as the active Bridge / Concert / Dance Festival
-  / Relay route canon
-- `ridge/areas/` as the local source of truth for area-specific Ridge detail
-- `ridge/ridge-snapshot.md` as the current Ridge snapshot
-- `ridge/milestone-plan.md` as the milestone and shared-seam map
+- the source-of-truth ownership described by the Ridge router
 - GitHub Issues as the live PRD, backlog, triage, and agent-brief source
 - the Architect's rule: parallelize scene internals, serialize shared seams
 - Danilo's time and taste
@@ -110,7 +116,7 @@ The Producer should not:
 
 - invent a large new roadmap without checking the milestone plan
 - spawn or suggest many agents before shared seams are stable
-- treat archived competition docs as active design source of truth
+- treat legacy prototype docs as active design source of truth
 - ask Danilo to decide implementation details that agents can safely infer
 
 ## Architect
@@ -167,7 +173,7 @@ The Level Designer owns:
 - route shape
 - pacing
 - landmark clarity
-- opt-in mini-game placement
+- optional mini-game entrance placement
 - first-minute experience
 - return-to-Ridge feel
 
@@ -188,7 +194,8 @@ The Playability Tester also has a repeatable workflow skill:
 
 The Playability Tester owns:
 
-- critical journey confidence across Ridge, mini-games, overlays, and returns
+- critical journey confidence across Ridge, optional mini-games, overlays, and
+  returns
 - route reachability, softlock, mobile input, and scene lifecycle evidence
 - recommending the smallest useful regression, harness, or manual charter
 
@@ -235,7 +242,7 @@ Purpose: keep the fun loops feasible.
 
 The Systems / Production Designer owns:
 
-- mini-game scope
+- optional mini-game scope
 - mobile feasibility
 - progression economy
 - reward shape
@@ -243,8 +250,9 @@ The Systems / Production Designer owns:
 
 The Systems / Production Designer must protect:
 
-- one verb per mini-game
-- Potassium owns ricochet
+- one verb per optional mini-game
+- current prototype mini-games keep their own primary toy unless a rework issue
+  says otherwise
 - no premature generic mini-game framework
 - bridge stores durable rewards, not session internals
 
@@ -293,7 +301,8 @@ Default response shape: use the structured format defined in
 
 ## Audio Designer
 
-Purpose: make the Ridge emotionally sticky and mini-games audibly legible.
+Purpose: make the Ridge emotionally sticky and optional mini-games audibly
+legible.
 
 The Audio Designer also has a repeatable workflow skill:
 
@@ -303,16 +312,16 @@ The Audio Designer owns:
 
 - Ridge audio palette
 - Cicka SFX language
-- Potassium acknowledgement sounds
-- Stampede Sketch prototype audio
-- Telegraph Terrace timing cue design
+- optional mini-game cue palettes
+- current prototype audio surfaces when a task explicitly touches them
+- timing cue design
 - mobile Web Audio asset and timing constraints
 
 The Audio Designer must protect:
 
 - quiet handmade overworld tone
 - no full dynamic score engine in v1
-- no Potassium audio overhaul in v1
+- no legacy prototype audio overhaul unless explicitly requested
 - audio cues support timing but are never the only cue
 - Cicka sounds like a resident, not a cartoon UI effect
 - explicit consent for microphone, voice, cloud-processing, or external
