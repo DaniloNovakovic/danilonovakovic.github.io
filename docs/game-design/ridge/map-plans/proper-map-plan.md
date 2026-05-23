@@ -47,8 +47,10 @@ Later: "Old scraps now mean something about Danilo."
   appears early, disappears behind local terrain, then reappears from a higher
   angle.
 - **Living Proof Gate:** Relay Spire can be physically reached before it can
-  send. It should require enough visible world changes, mini-game proofs, and
-  Cicka familiarity rather than a boss, precision climb, or arbitrary checklist.
+  send. For the current first ending, the three required Ridge Areas and their
+  visible world changes should be enough Living Proof. Changed Cicka Resting
+  Spots can echo proof emotionally, but proof should come from the resident
+  beat/world change, not from noticing the resting spot.
   The path to the Spire should naturally provide enough resident help and cat
   familiarity for the first ending; extra residents can deepen optional return
   play.
@@ -67,7 +69,7 @@ Later: "Old scraps now mean something about Danilo."
 - **Mini-games attach; they do not hold up the spine.** The first ending path
   should work through conversations, collection, authored traversal, Ridge
   Areas, Resident Beats, and visible world changes. Mini-Game Entrances can add
-  optional alternate path unlocks, proofs, shortcuts, rewards, or pure side fun.
+  optional fun, rewards, shortcuts, or future alternate ways to finish a level.
 - **Not every resident is progression.** Optional residents, NPCs, props, and
   tiny hangout spaces may offer mini-games, alternate flavor, jokes, or vibes
   without solving a barricade.

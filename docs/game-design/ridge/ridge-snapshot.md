@@ -208,9 +208,12 @@ ideal or optional version.
 
 The final blocker should be a **Living Proof Gate**. The Relay Spire can be
 physically reachable early, but it should not send the sketchbook until the path
-has created enough resident/world changes, mini-game proofs, and Cicka
-familiarity to make the destination emotionally and semantically ready. Avoid an
+has created enough resident/world changes and Cicka familiarity to make the
+destination emotionally and semantically ready. The three required Ridge Areas
+should be enough proof for the current first ending. Avoid an
 exact visible checklist unless testing shows the player needs clearer feedback.
+Changed Cicka Resting Spots should not count as proof by themselves; they are
+emotional echoes of resident/world changes already earned elsewhere.
 Planning assumption: start with 2-3 required main-path Resident Help Beats
 before the first ending, plus optional extra residents for return play. Treat the
 exact count as a Level Designer and Story/Tone tuning variable, not a fixed
@@ -220,13 +223,16 @@ The target asks for:
 
 - a readable mostly forward neighborhood route toward Relay Spire
 - Relay Spire physically reachable before it can send
-- Living Proof Gate made from enough visible world changes, proofs, and Cicka
-  familiarity rather than an exact checklist
+- Living Proof Gate made from enough visible world changes and Cicka familiarity
+  rather than an exact checklist; the three required Ridge Areas should be
+  enough for the current first ending
+- changed Cicka Resting Spots as emotional echoes of proof, not separate proof
+  sources
 - first ending path completable through conversations, collection, authored
   traversal, Ridge Areas, Resident Beats, and world changes without requiring
   full arcade mini-games
-- Mini-Game Entrances as optional alternate path unlockers, proof sources,
-  rewards, or pure side fun
+- Mini-Game Entrances as optional fun, rewards, shortcuts, or future alternate
+  ways to finish a level, not required first-ending proof
 - non-arcade fallback for any required beat that contains arcade-like interaction
 - tiny resident problems that create visible route changes
 - first route area as **Bridge Area**, containing **Blueprint Bridge**: a

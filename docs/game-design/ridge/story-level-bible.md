@@ -35,8 +35,10 @@ what is actually blocking progress, and why can this person help?
 The first ending path should be completable through conversations, collection,
 authored traversal interactions, Ridge Areas, Resident Beats, and visible world
 changes.
-Mini-games attach to the world as optional alternate paths, proof sources,
-rewards, shortcuts, or pure side fun.
+Mini-games attach to the world as optional fun, rewards, shortcuts, or future
+alternate ways to finish a level. They should not become required Living Proof
+or the default solution for main route blockers in the current first-ending
+route.
 
 ## Canonical Ending
 
@@ -90,6 +92,11 @@ world changes, proofs, and Cicka familiarity.
 The gate should feel like emotional and semantic readiness, not an exact visible
 checklist. The route to Relay should naturally provide enough resident help and
 cat familiarity for the first ending.
+
+Living Proof should come from the three required Ridge Areas and their
+Resident/world changes, not from optional mini-games or noticing changed Cicka
+Resting Spots. A resting spot is the emotional echo or memory of proof already
+earned elsewhere, not a separate proof token.
 
 ## Cicka
 
@@ -443,15 +450,15 @@ Mini-game ideas can attach to the Ridge without holding up the core path.
 
 Current candidates:
 
-- Potassium Slip: polished flagship secret/proof candidate.
-- Stampede Sketch: optional Vampire Survivors-style homage/proof candidate.
-- Telegraph / Clair-Obscur-style timing: optional timing/parry proof candidate.
+- Potassium Slip: polished flagship secret / future alternate-path candidate.
+- Stampede Sketch: optional Vampire Survivors-style homage / future alternate-path candidate.
+- Telegraph / Clair-Obscur-style timing: optional timing/parry future alternate-path candidate.
 - Concert guitar performance: small teaching toy for the guitar, with required
   non-arcade fallback.
 
-Mini-games may unlock alternate paths, extra proof, shortcuts, rewards, or just
-exist for fun. They should not become the default solution for main route
-blockers.
+Mini-games may unlock alternate paths, shortcuts, rewards, or just exist for
+fun. In the current first-ending route they are not required proof. Future
+passes can let them unlock alternate ways to finish a level.
 
 ## Open Design Slots
 

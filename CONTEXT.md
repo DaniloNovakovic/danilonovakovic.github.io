@@ -128,8 +128,11 @@ mini-game's primary toy and input needs.
 _Avoid_: shared overworld movement
 
 **Mini-Game Entrance**:
-An opt-in world attachment that can offer a hobby toy, proof, reward, shortcut,
+An opt-in world attachment that can offer a hobby toy, reward, shortcut,
 alternate solution, or just fun without being required for the core ending path.
+For the current first-ending route, mini-games are optional fun and do not need
+to count as Living Proof; future passes may let them unlock alternate ways to
+finish a level.
 _Avoid_: mandatory arcade gate, generic content silo
 
 **Cicka Home Mutation**:
@@ -336,6 +339,10 @@ _Avoid_: generic fetch quest, public romantic confrontation, puppet-master solve
 A quiet ending gate where the player can physically reach the Relay Spire, but
 the sketchbook cannot send until the route has created enough visible world
 changes, proofs, and Cicka familiarity to make the destination legible.
+For the current first ending, the three required Ridge Areas and their
+Resident/world changes should provide enough Living Proof by themselves.
+Changed Cicka Resting Spots can echo that proof emotionally, but they should
+not be counted as separate proof sources.
 _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 
 ## Relationships
@@ -372,9 +379,10 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 - The first ending path should be completable through conversation, collection,
   authored traversal, Ridge Areas, Resident Beats, and world changes without
   requiring full arcade mini-games.
-- **Mini-Game Entrances** can provide optional alternate path unlocks, proof
-  sources, rewards, or pure side fun, but they should not be the default way the
-  core route solves blockers.
+- **Mini-Game Entrances** can provide optional rewards, shortcuts, alternate
+  path unlocks, or pure side fun, but they should not be required Living Proof
+  for the current first ending. Future passes may let them unlock alternate
+  ways to finish a level.
 - **Exploration Traversal** treats jump as non-core for the v0 main path;
   vertical movement should come from **Authored Traversal Interactions** unless
   a future mobility item deliberately changes the route grammar.

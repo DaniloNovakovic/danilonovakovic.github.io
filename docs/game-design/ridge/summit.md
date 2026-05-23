@@ -154,14 +154,18 @@ Purpose: final shipping/contact/credits route, and the first Cicka farewell.
 
 Gate:
 
-- at least three major clears / proofs, with Potassium Circuit counting as one
-  proof rather than a solo bypass
+- for the current first-ending route, the three required Ridge Areas and their
+  resident/world changes should provide enough Living Proof
 - plus one Cicka / translator / manual insight that decodes the Relay sign
 - Relay Spire can be physically reachable before the gate is ready; the blocker
   is that the sketchbook does not have enough living proof to send yet.
 - Treat these as proof categories, not an exact visible checklist. The path to
   Relay should itself create enough resident help, world change, and Cicka
   familiarity for the first ending.
+- Optional mini-games are fun, rewards, shortcuts, or future alternate ways to
+  finish a level; they are not required proof for the current first ending.
+- Local Cicka Resting Spot changes are memory and emotional continuity, not
+  separate Living Proof Gate tokens.
 
 The gate should feel earned but not tedious. It should not require every
 mini-game or every optional mastery scene, but it should ask the player to spend
@@ -200,19 +204,19 @@ The repeatable pleasure is not just "new content." It is returning to the same p
 
 ## Reward Language
 
-- **Stamps**: durable proof that a hobby scene was cleared.
+- **Stamps**: durable record that a hobby scene was cleared.
 - **Stickers**: visible world changes. These are the emotional reward.
 - **Manual Pages**: one-screen clues that reinterpret a route, sign, or mechanic.
 - **Artifacts**: found personal objects, tools, scraps, or odd props that teach
   Danilo through context instead of static profile text. Major work/project
   artifacts should be easy to notice; smaller skill scraps such as languages,
   libraries, and tools can be tucked into optional re-read details.
-- **Mementos**: small proof objects from mini-games that physically change a
+- **Mementos**: small memory objects from mini-games that physically change a
   local Cicka Resting Spot or nearby landmark. They are memory and relationship,
   not currency.
 - **Glide Pips**: movement upgrades inspired by *A Short Hike* feathers.
 - **Shortcuts**: route changes inspired by *Hollow Knight* relief moments.
-- **Circuit**: Potassium Slip's major reward and one major proof toward the Relay Spire gate. Derive this from the existing inventory item instead of duplicating `potassium.circuitOwned` in progress.
+- **Circuit**: Potassium Slip's major reward and a possible future alternate-path proof. Derive this from the existing inventory item instead of duplicating `potassium.circuitOwned` in progress.
 - **Cicka Notes**: tiny cat-side observations that reinterpret nearby props without becoming a full language system.
 - **Developer Laptop**: a future portable or resting-spot-adjacent terminal that
   extends the Basement computer fantasy. It may support debug/dev commands and
@@ -244,12 +248,13 @@ Role:
 
 - anchor secret
 - Ball x Pit fun already captured
-- one major proof toward the first ending through Circuit
+- possible future alternate-path proof through Circuit, not required for the
+  current first ending
 - benchmark for mini-game depth and documentation
 
 Do:
 
-- integrate the Circuit into Ridge progression as one major proof
+- keep Circuit as a major reward and possible future alternate-path hook
 - let Ridge signs and NPCs acknowledge Potassium
 - preserve vertical-board controls
 
@@ -728,8 +733,8 @@ Goal: close the loop with Cicka as the emotional spine.
 Tasks:
 
 - add final gate logic
-- require at least three major clears / proofs, with Potassium Circuit counting
-  as one proof
+- require the three required Ridge Areas / resident-world changes as the current
+  first-ending proof spine
 - require one Cicka / translator / manual insight
 - add short ending overlay / paper-cut farewell beat
 - return player to Ridge after ending
