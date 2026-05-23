@@ -333,6 +333,8 @@ The target asks for:
   becomes calmer through a settled pose, tiny mark, changed prop, or later
   absence echo; the Guitar Farewell montage can revisit these already-changed
   states rather than introducing them
+- changed resting-spot states as optional emotional rewards, not required
+  noticing, revisiting, checklist, or route-gate steps
 - no main-path slope reliance in v0; use chunky stairs, cords, shelves, bridges,
   lifts, and soft drops
 - no required jump button on the v0 main route; use authored climb, descend,

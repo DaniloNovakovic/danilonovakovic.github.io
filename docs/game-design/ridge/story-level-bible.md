@@ -127,6 +127,10 @@ The Guitar Farewell montage may revisit these changed resting-spot states, but
 it should not be the first time the player sees them. The world should feel
 responsive during play, not only during the ending.
 
+The player is never required to notice, inspect, or revisit changed resting
+spots to progress. They are readable rewards and emotional continuity for
+players who look, not route gates or checklist items.
+
 Use practical design labels for these spots:
 
 | Area | Practical resting spot label | Before resolution | After resolution |

@@ -796,6 +796,8 @@ Build:
 - give each resting spot two tiny visual states: pre-resolution attention cue
   and immediate post-resolution calm/memory read; the Guitar Farewell montage
   can revisit those changed states instead of introducing them
+- keep changed resting-spot states optional to notice or revisit; they must not
+  become checklist gates or route requirements
 - add at least one Cicka field-presence hint at a local route blocker
 - add at least one Resident Help Beat that visibly changes a route
 - make Stampede route at least one vertical beat away
