@@ -84,8 +84,9 @@ and teaches that helping a resident can visibly change the route.
 _Avoid_: calling the whole area Blueprint Bridge, bridge hub
 
 **Concert Area**:
-The middle required Ridge Area. It contains the Concert Crossing Beat, the
-Concert Resting Spot, and the guitar's first entrusted use.
+The middle required Ridge Area: a compact city-like concert block with small
+buildings, bars, street details, the Concert Crossing Beat, the Concert Resting
+Spot, and the guitar's first entrusted use.
 _Avoid_: calling the whole area Concert Crossing, music hub
 
 **Dance Festival Area**:
@@ -171,9 +172,10 @@ the first resident-help route change.
 _Avoid_: tutorial UI marker, required backtracking perch
 
 **Concert Resting Spot**:
-The Cicka Resting Spot in the Concert Area, where the guitar first becomes a
-comfort object and where the Open Ridge Return State can show one quiet
-empty-spot echo after the farewell.
+The Cicka Resting Spot in the Concert Area: first a hidden musician-side place
+where crowd-shy Cicka watches the delay, then a relaxed band-side spot near the
+opened exit where the Open Ridge Return State can show one quiet empty-spot echo
+after the farewell.
 _Avoid_: abandoned guitar, shrine, required sad objective
 
 **Dance Festival Resting Spot**:
@@ -264,6 +266,11 @@ incapacitated local guitarist who hurt his hand or wrist while trying to prove
 he was still young after a kid teased him, clear the crowd, and receive the
 Concert Guitar during a goodbye beat at the opened exit.
 _Avoid_: joke-only drunk musician, random item pickup, final-farewell skill gate
+
+**Compact-Area Discovery**:
+A discovery pattern where a small Ridge Area relies on readable staging,
+optional chatter, and player wandering instead of a strict breadcrumb chain.
+_Avoid_: over-breadcrumbed objective path, hidden critical clue, giant search space
 
 **Forgiving Practice Riff**:
 The simple guitar phrase the injured Concert guitarist teaches the player so v0

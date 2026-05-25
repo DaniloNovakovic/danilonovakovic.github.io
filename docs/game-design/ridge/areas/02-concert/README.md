@@ -15,13 +15,20 @@ something" toward "carrying comfort forward."
 
 The emotional idea is: **I can turn memory into comfort.**
 
+The area identity is a compact city-like concert block: small buildings, bars,
+stage-adjacent storefronts, alleys, and lived-in street details around the
+blocked crossing. The first prototype can keep most buildings as facade
+atmosphere, while later passes may add enterable bars/building interiors,
+extra residents, and optional hangout spaces to make the block feel more alive.
+
 ## Accepted Local Contract
 
 - A blocked concert/traffic crossing halts the route.
 - The crossing is blocked by a crowd, traffic line, or gathering waiting for the
   concert to start.
-- The player discovers the delay by asking what everyone is waiting for, then
-  finds the local guitarist away from the crowd.
+- The player discovers the delay through compact-area exploration: annoyed
+  crowd members can mention that the concert is late, but the player can also
+  simply wander the small area and find the musician-side space naturally.
 - The local guitarist cannot play because of a clumsy show-off mishap: after a
   kid teased that he was old, he tried to prove he was still young by doing an
   absurd concert stunt, such as playing guitar while riding a skateboard on one
@@ -46,14 +53,36 @@ The emotional idea is: **I can turn memory into comfort.**
   performance and the Relay **Sit and Play** interaction.
 - The beat must make the later **Guitar Farewell** feel earned.
 
+## Prototype Floor
+
+The first blockout only needs:
+
+- blocked crowd/traffic crossing
+- 2-3 annoyed crowd NPCs
+- hidden musician-side nook
+- injured guitarist
+- one forgiving practice interaction
+- auto-success concert start
+- crowd clears
+- goodbye/reward beat at the opened exit
+- guitar received
+- Cicka hidden before resolution and chilling with the band after resolution
+
+Small-city facades, bars, and building silhouettes should frame the area even in
+the prototype, but enterable buildings and extra residents are later liveliness
+scope.
+
 ## Cicka Resting Spot
 
 Use **Concert Resting Spot** as the practical label.
 
-- Before resolution: Cicka watches the guitar case, string, stage edge, or
-  blocked crossing.
-- After resolution: Cicka rests in a quiet listening corner near the opened
-  crossing.
+- Before resolution: Cicka avoids the crowd and watches from a hidden or
+  musician-side place, such as behind stage props, near the guitar case, or
+  close to where the injured guitarist/band is waiting.
+- During the concert: Cicka stays off to the side rather than entering the
+  crowd, reading as curious but crowd-shy.
+- After resolution: Cicka chills with the musicians near the opened exit; the
+  injured guitarist or another band member may quietly pet her.
 
 This can later become the post-ending echo spot. The echo should be an empty
 usual spot plus one small paw/page mark, not the player's guitar left behind.
@@ -64,6 +93,8 @@ usual spot plus one small paw/page mark, not the player's guitar left behind.
   expression.
 - The required route must have a non-arcade fallback.
 - Do not block the first route MVP on building the full rhythm mini-game.
+- Do not over-breadcrumb the injured guitarist in v0; compact exploration and
+  believable crowd chatter should be enough unless playtests prove otherwise.
 - Avoid making the guitarist a joke-only drunk if it undercuts the tribute.
 - Gentle comedy is welcome if the guitar's emotional role still has room to
   breathe.
@@ -71,6 +102,8 @@ usual spot plus one small paw/page mark, not the player's guitar left behind.
 ## Open Local Slots
 
 - exact crossing geometry and why it blocks progress
+- small-city block layout, bars, building facades, and possible later interiors
+- how many annoyed crowd/band flavor lines are enough for discovery
 - exact post-concert goodbye staging near the opened exit
 - guitarist/resident role, silhouette, simplified staging for the skateboard
   stunt, and eventual name

@@ -159,7 +159,7 @@ Use practical design labels for these spots:
 | Area | Practical resting spot label | Before resolution | After resolution |
 | --- | --- | --- | --- |
 | [Bridge Area](./areas/01-bridge/README.md) | Bridge Resting Spot | Cicka perches near the unsafe crossing or blank plan | Cicka settles near the completed bridge sketch or leaves a tiny mark by the crossing |
-| [Concert Area](./areas/02-concert/README.md) | Concert Resting Spot | Cicka watches the guitar case, stage edge, or blocked crossing | Cicka rests in a quiet listening corner near the opened crossing; this can later become the post-ending echo spot |
+| [Concert Area](./areas/02-concert/README.md) | Concert Resting Spot | Cicka avoids the crowd and watches from a hidden musician-side place near the guitar case, stage props, or injured guitarist | Cicka chills with the musicians near the opened exit, optionally being quietly pet by the injured guitarist or another band member; this can later become the post-ending echo spot |
 | [Dance Festival Area](./areas/03-dance-festival/README.md) | Dance Festival Resting Spot | Cicka loafs near the operations table, shuttle step, lantern crates, or service gate | Cicka settles near the cleared service gate or finished shuttle sign, optionally beside the Unnamed Counterpart Cat |
 
 ## Guitar
@@ -201,7 +201,7 @@ Relay Spire / Guitar Farewell -> I am ready for Cicka's threshold farewell.
 | Area | Resident Beat | Status | Route role | Cicka role | World change |
 | --- | --- | --- | --- | --- | --- |
 | [Bridge Area](./areas/01-bridge/README.md) | Blueprint Bridge | Accepted first art/drawing beat | Required soft gate tutorial for resident help | Obvious subtle attention cue at unsafe edge or blank plan | Finished bridge sketch becomes the crossing |
-| [Concert Area](./areas/02-concert/README.md) | Concert Crossing Beat | Accepted middle beat | Blocks a concert/traffic crossing and earns the guitar | Points attention to guitar case, string, stage, or crossing | Concert continues; crossing opens; guitar entrusted to player |
+| [Concert Area](./areas/02-concert/README.md) | Concert Crossing Beat | Accepted middle beat | Blocks a concert/traffic crossing and earns the guitar | Crowd-shy observer near hidden musician-side space, then relaxed with the band after the crossing opens | Concert continues; crossing opens; guitar entrusted to player |
 | [Dance Festival Area](./areas/03-dance-festival/README.md) | Opening Dance Shuttle Beat | Accepted final beat direction; Last-Stop Operations Helper locked as romantic partner role | Creates the last emotional readiness before Relay through afternoon setup for a night dance festival at the foot of the Relay hill | Quiet threshold observer near the lantern crates, operations table, shuttle step, or service gate; may loaf with the Unnamed Counterpart Cat | Festival setup clears enough for one last daylight shuttle to Relay before the night road closure |
 | [Relay Ending Area](./areas/04-relay-ending/README.md) | Guitar Farewell / Cicka Threshold Farewell | Active ending direction | Final threshold after the Dance Festival barricade is cleared | Final field-presence spot and threshold departure | Open Ridge Return State preserves the final Relay mark and one quiet Concert echo |
 
@@ -232,27 +232,40 @@ then echo in the Guitar Farewell montage.
 Detailed local contract:
 [`Concert Area`](./areas/02-concert/README.md).
 
+Concert Area should read as a compact city-like concert block with small
+buildings, bars, stage-adjacent storefronts, alleys, and lived-in street details
+around the blocked crossing. The first prototype can use facades and silhouettes
+instead of enterable buildings; later passes may add interiors, extra residents,
+and hangout spaces to make the block feel more alive.
+
 A crowd, traffic line, or gathering blocks the route while everyone waits for
-the concert to start. The player asks what is taking so long, finds the local
-guitarist away from the crowd, and learns that the guitarist cannot play because
-of a clumsy show-off mishap: after a kid teased that he was old, he tried to
-prove he was still young by doing an absurd concert stunt, such as playing
-guitar while riding a skateboard on one leg, and hurt his hand or wrist. The
-player learns one **Forgiving Practice Riff** and takes over the concert. In
-v0, the concert performance can be auto-success or highly forgiving so the main
-route is not blocked by rhythm-game production. After the first playable route
-lands, a Guitar-Hero-like or Baka Mitai-style button-rhythm guitar mini-game can
-become the richer expression, potentially using Danilo's real guitar/song
-material and generated button prompts from authored song data. Once the
-performance begins, the crowd/traffic clears. After the concert, the musician
-or band waits near the opened exit for a short goodbye/reward beat where the
-guitarist entrusts the guitar to the player. This is the same physical guitar
-the player carries for the rest of the game and uses at Relay for the
-**Guitar Farewell**.
+the concert to start. The player can learn that the concert is late from
+annoyed crowd chatter, but the area should stay compact enough that simply
+wandering and talking with people can reveal the musician-side space. There the
+player finds the local guitarist and learns that he cannot play because of a
+clumsy show-off mishap: after a kid teased that he was old, he tried to prove
+he was still young by doing an absurd concert stunt, such as playing guitar
+while riding a skateboard on one leg, and hurt his hand or wrist. The player
+learns one **Forgiving Practice Riff** and takes over the concert. In v0, the
+concert performance can be auto-success or highly forgiving so the main route is
+not blocked by rhythm-game production. After the first playable route lands, a
+Guitar-Hero-like or Baka Mitai-style button-rhythm guitar mini-game can become
+the richer expression, potentially using Danilo's real guitar/song material and
+generated button prompts from authored song data. Once the performance begins,
+the crowd/traffic clears. After the concert, the musician or band waits near
+the opened exit for a short goodbye/reward beat where the guitarist entrusts
+the guitar to the player. This is the same physical guitar the player carries
+for the rest of the game and uses at Relay for the **Guitar Farewell**.
 
 The ideal later version can include a small Guitar-Hero-like performance
 mini-game. The required v0 route should use forgiving practice or auto-success
 performance first.
+
+The first blockout floor is: blocked crowd/traffic crossing, 2-3 annoyed crowd
+NPCs, hidden musician-side nook, injured guitarist, one forgiving practice
+interaction, auto-success concert start, crowd clears, goodbye/reward at the
+opened exit, guitar received, and Cicka hidden before/chilling with the band
+after.
 
 Avoid making the guitarist a joke-only drunk if it undercuts the later tribute.
 Gentle comedy, clumsiness, and foolishness are welcome; the guitar's emotional
