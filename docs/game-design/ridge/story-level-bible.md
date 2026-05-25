@@ -283,13 +283,21 @@ The **Bridge Area** should contain the first required Resident Beat,
 Cicka noticed something -> a resident needs local help -> the route visibly changes
 ```
 
-Current recommended solution: help a resident finish a tiny bridge
-drawing/blueprint, then the finished sketch becomes the crossing. Cicka can sit
-on or near the blank/missing part of the plan.
+Current recommended solution: help the **Bridge Draftsperson**, a tiny nervous
+or blocked planner responsible for the crossing blueprint, finish a bridge
+drawing/blueprint by drawing or visually completing the bridge. The
+Draftsperson's specific problem is a missing middle span: they keep erasing and
+redrawing it because they are overthinking whether the structure will hold.
+Failed doodles, eraser marks, or a tiny toy car/weight-test prop can make this
+readable and support a future bridge-physics toy. The finished sketch becomes
+the crossing. For v0, this can be a basic authored drawing/completion visual
+rather than a full freeform drawing system. Cicka can sit on or near the
+blank/missing part of the plan.
 
 Future optional upgrade: let the player draw directly on the bridge, either as
-a visual customization or a small physics/bridge-building toy. Do not make that
-the required v0 solution.
+a visual customization or a small physics/bridge-building toy, potentially
+testing whether the drawn bridge can carry a car or similar weight. Do not make
+that the required v0 solution.
 
 Keep it tiny, obvious, and local. It should not feel like a fetch quest or a
 test of platforming skill.
@@ -305,6 +313,8 @@ Current candidates:
 - Telegraph / Clair-Obscur-style timing: optional timing/parry future alternate-path candidate.
 - Concert guitar performance: small teaching toy for the guitar, with required
   non-arcade fallback.
+- Bridge drawing/physics: future bridge-building toy after the route MVP is
+  proven; v0 should use an authored drawing/completion visual.
 
 Mini-games may unlock alternate paths, shortcuts, rewards, or just exist for
 fun. In the current first-ending route they are not required proof. Future

@@ -83,6 +83,21 @@ The first required Ridge Area. It contains the Blueprint Bridge Resident Beat
 and teaches that helping a resident can visibly change the route.
 _Avoid_: calling the whole area Blueprint Bridge, bridge hub
 
+**Blueprint Bridge**:
+The first required Resident Beat where the player helps the Bridge Draftsperson
+complete a missing middle span on a bridge drawing or blueprint so the finished
+sketch becomes the physical crossing.
+_Avoid_: required physics puzzle, fetch quest, platforming test
+
+**Bridge Draftsperson**:
+The nervous or blocked resident responsible for the Blueprint Bridge plan.
+_Avoid_: wizard, quest board, generic artist-god, final proper name too early
+
+**Bridge Drawing Toy**:
+A future optional upgrade where the player draws or customizes the bridge more
+directly, potentially with simple bridge-building physics.
+_Avoid_: required v0 route blocker, full simulation before route MVP
+
 **Concert Area**:
 The middle required Ridge Area: a compact city-like concert block with small
 buildings, bars, street details, the Concert Crossing Beat, the Concert Resting
