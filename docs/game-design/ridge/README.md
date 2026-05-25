@@ -25,7 +25,7 @@ Use each file for exactly one concern:
 | --- | --- | --- |
 | Domain language | [`../../../CONTEXT.md`](../../../CONTEXT.md) | Use these terms exactly. Add only stable domain terms and ambiguities. |
 | Shipped behavior | [`../player-manual.md`](../player-manual.md) | Update only when behavior ships. |
-| Current Ridge route canon | [`story-level-bible.md`](./story-level-bible.md) | Route spine, cross-area Cicka/guitar logic, Living Proof, ending order. |
+| Current Ridge route canon | [`story-level-bible.md`](./story-level-bible.md) | Route spine, area barricade chain, cross-area Cicka/guitar logic, ending order. |
 | Area-specific design canon | [`areas/`](./areas/README.md) | Local geography, blockers, residents, prompts, staging, Cicka Resting Spots, visual/audio notes. |
 | Current runtime/prototype truth | [`ridge-snapshot.md`](./ridge-snapshot.md) | What exists now in the Phaser prototype, what can be reused, and what is disposable. |
 | Active open questions | [`open-questions.md`](./open-questions.md) | Unresolved ending, Dance Festival, dependency, and scope gaps. |
@@ -66,7 +66,7 @@ Treat these as prototype/reference unless a task explicitly says to adapt them:
 - Folded-desk route order.
 - Required jump/platformer traversal.
 - Main-path slopes, ramps, wall jumps, double jumps, or precision platforming.
-- Mini-game clears as required Living Proof for the first ending.
+- Mini-game clears as required first-ending proof.
 
 Useful legacy pieces may still be preserved or adapted: the Ridge Blockout
 Source contract, compiler, generated facts, validation, and preview/debugger

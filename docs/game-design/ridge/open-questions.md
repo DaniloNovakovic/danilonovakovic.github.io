@@ -11,10 +11,13 @@ the narrowest subdoc inside that area folder.
 
 ## Ending
 
-- **Living Proof feedback:** What does the player see, hear, or read when Relay
-  is physically reachable but not ready to send?
 - **Guitar Farewell staging:** What are the camera, input handoff, animation,
-  silence, and audio beats from Sit and Play through Relay Blue Hour?
+  silence, and audio beats from Sit and Play through the Relay Holding State?
+- **Relay Holding State:** What small movement, repeat guitar, sitting, or
+  comfort interactions are available before Send the Sketchbook, and how is the
+  wider Ridge route blocked without feeling gamey?
+- **Send the Sketchbook staging:** What exactly happens to the sketchbook, the
+  accumulated marks, and the threshold when the final trigger is selected?
 - **Cicka Threshold Farewell staging:** What exact physical sequence carries
   Cicka's final walk, look back, mark, and page-fold/light departure?
 - **Open Ridge Return State:** What interactions remain available immediately
@@ -50,7 +53,7 @@ the narrowest subdoc inside that area folder.
 - **Bridge dependency:** How much does Blueprint Bridge need to teach about
   resident help and visible world change before later beats depend on it?
 - **Cicka Resting Spots:** What tiny before/after visual state does each
-  required Ridge Area need before those states can echo in the Living Proof
+  required Ridge Area need before those states can echo in the Route Memory
   Montage?
 
 ## Resolution Rule

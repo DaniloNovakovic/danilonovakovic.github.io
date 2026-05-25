@@ -44,7 +44,7 @@ without turning the scene into public matchmaking.
 - Setup clears through a short **Prompt-Driven Playable Montage**, not a chore
   list or pure cutscene.
 - The player catches a **Short Threshold Transition** to Relay under sunset.
-- The night dance can appear later as a Living Proof Montage echo during the
+- The night dance can appear later as a Route Memory Montage echo during the
   Guitar Farewell.
 
 ## Boundaries

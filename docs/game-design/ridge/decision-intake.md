@@ -11,7 +11,7 @@ each claim to one canonical home.
 | Claim type | Destination |
 | --- | --- |
 | New stable domain term or ambiguity | [`../../../CONTEXT.md`](../../../CONTEXT.md) |
-| Accepted route spine, ending order, Cicka, guitar, or Living Proof decision | [`story-level-bible.md`](./story-level-bible.md) |
+| Accepted route spine, ending order, area barricade chain, Cicka, guitar, or route-readiness decision | [`story-level-bible.md`](./story-level-bible.md) |
 | Accepted area-local Bridge, Concert, Dance Festival, or Relay detail | matching file or subdoc under [`areas/`](./areas/README.md) |
 | Current implemented/runtime truth | [`ridge-snapshot.md`](./ridge-snapshot.md) or runtime source |
 | Hard-to-reverse surprising trade-off | numbered ADR under [`../../adr/`](../../adr/) |

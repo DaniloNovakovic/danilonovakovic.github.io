@@ -137,8 +137,8 @@ _Avoid_: shared overworld movement
 **Mini-Game Entrance**:
 An opt-in world attachment that can offer a hobby toy, reward, shortcut,
 alternate solution, or just fun without being required for the core ending path.
-For the current first-ending route, mini-games are optional fun and do not need
-to count as Living Proof; future passes may let them unlock alternate ways to
+For the current first-ending route, mini-games are optional fun and do not
+count as first-ending proof; future passes may let them unlock alternate ways to
 finish a level.
 _Avoid_: mandatory arcade gate, generic content silo
 
@@ -214,16 +214,31 @@ player chooses to sit near Cicka and play guitar.
 _Avoid_: rhythm UI, fail state, final skill check, objective popup
 
 **Living Proof Montage**:
-A brief Guitar Farewell montage that wordlessly shows the resident help and
-world changes that made the sketchbook ready to send; the Opening Dance image is
-an emotional echo scored by the player's guitar while the actual festival song
-request stays implied and offscreen.
+A previous name for the brief ending montage, now better treated as **Route
+Memory Montage** unless a later design restores a separate proof system.
 _Avoid_: full recap, credits roll, visible checklist, objective summary
+
+**Route Memory Montage**:
+A brief Guitar Farewell montage that wordlessly shows the fixed route's resident
+help, world changes, and Cicka Resting Spot echoes before the final send.
+_Avoid_: full recap, credits roll, visible checklist, objective summary
+
+**Area Barricade Chain**:
+The fixed first-ending route structure where Bridge, Concert, and Dance
+Festival each contain one concrete local barricade whose resolution opens the
+next area and finally brings the player to Relay.
+_Avoid_: optional proof checklist, hub progression, abstract emotional gate
 
 **Send the Sketchbook Prompt**:
 The post-Guitar Farewell Relay Spire interaction that begins the Cicka Threshold
 Farewell after the player has shared the quiet song with Cicka.
 _Avoid_: automatic send, guitar-as-send-button, boss gate, extra skill check
+
+**Relay Holding State**:
+The small post-Guitar Farewell state where Cicka remains present at Relay and
+the player may linger, but cannot return to the wider Ridge route until choosing
+Send the Sketchbook.
+_Avoid_: open backtracking, menu-only ending choice, automatic cutscene trigger
 
 **Relay Blue Hour**:
 The final send lighting state after the Guitar Farewell, where Relay has moved
@@ -343,13 +358,9 @@ insecurity, not act as arbitrary busywork.
 _Avoid_: generic fetch quest, public romantic confrontation, puppet-master solve
 
 **Living Proof Gate**:
-A quiet ending gate where the player can physically reach the Relay Spire, but
-the sketchbook cannot send until the route has created enough visible world
-changes, proofs, and Cicka familiarity to make the destination legible.
-For the current first ending, the three required Ridge Areas and their
-Resident/world changes should provide enough Living Proof by themselves.
-Changed Cicka Resting Spots can echo that proof emotionally, but they should
-not be counted as separate proof sources.
+A retired or provisional ending-gate term. The current first-ending route uses
+the fixed **Area Barricade Chain** instead of a separate proof resource,
+checklist, or optional readiness system.
 _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 
 ## Relationships
@@ -384,14 +395,17 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
   presentation, but its blocker, helper, and resolution should feel practical
   and locally motivated.
 - The **Exploration Map** uses **Exploration Traversal**.
+- The first-ending route currently uses an **Area Barricade Chain**: Bridge
+  Area clears into Concert Area, Concert Area clears into Dance Festival Area,
+  and Dance Festival clears into Relay Ending.
 - A mini-game may use its own **Mini-Game Movement System** instead of
   **Exploration Traversal**.
 - The first ending path should be completable through conversation, collection,
   authored traversal, Ridge Areas, Resident Beats, and world changes without
   requiring full arcade mini-games.
 - **Mini-Game Entrances** can provide optional rewards, shortcuts, alternate
-  path unlocks, or pure side fun, but they should not be required Living Proof
-  for the current first ending. Future passes may let them unlock alternate
+  path unlocks, or pure side fun, but they should not be required first-ending
+  proof for the current first ending. Future passes may let them unlock alternate
   ways to finish a level.
 - **Exploration Traversal** treats jump as non-core for the v0 main path;
   vertical movement should come from **Authored Traversal Interactions** unless
@@ -444,7 +458,7 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
   does not need repeatable resting-spot interactions; sitting together, petting,
   lap loafing, or playing guitar at local spots can wait for a later affection
   pass.
-- The **Guitar Farewell** can include a **Living Proof Montage**, but the montage
+- The **Guitar Farewell** can include a **Route Memory Montage**, but the montage
   should stay brief and keep Cicka as the emotional focus; the player's guitar
   is the only music the player needs to hear during the montage.
 - The **Sit and Play Prompt** starts the **Guitar Farewell** at Relay Spire
@@ -452,8 +466,8 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 - The **Send the Sketchbook Prompt** should happen after the **Guitar Farewell**,
   keeping the final send as an active player choice while preserving the song as
   comfort rather than a send button.
-- The Relay ending should use sunset for **Sit and Play Prompt**, then
-  **Relay Blue Hour** for **Send the Sketchbook Prompt**; the **Living Proof
+- The Relay ending should use sunset for **Sit and Play Prompt**, then a
+  **Relay Holding State** for **Send the Sketchbook Prompt**; the **Route Memory
   Montage** can show the night festival beginning elsewhere.
 - The **Concert Crossing Beat** can teach the guitar through a small
   Guitar-Hero-like mini-game, but the **Guitar Farewell** itself should remain a
@@ -497,8 +511,9 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 - Required **Resident Beats** that contain arcade-like interactions should
   also have a non-arcade fallback through conversation, collection, practice, or
   a forgiving auto-resolve path.
-- A **Living Proof Gate** blocks the **Cicka Threshold Farewell** emotionally and
-  semantically, not by making the Relay Spire physically unreachable.
+- **Living Proof Gate** language should not imply a required proof resource in
+  the current first-ending route; use **Area Barricade Chain** for progression
+  and **Route Memory Montage** for the ending echo.
 - The old Overworld and Hobbies scenes are transitional surfaces. Long-term,
   their best content should fold into the **Exploration Map** as artifacts,
   entrances, Cicka reactions, Basement/Potassium paths, and mini-game props.
@@ -542,7 +557,7 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 > **Domain expert:** "Yes — make it the **Guitar Farewell**, but establish guitar as a quiet comfort interaction before Relay so it carries memory instead of exposition."
 
 > **Dev:** "Can the Guitar Farewell show what happened to the residents?"
-> **Domain expert:** "Yes — use a brief **Living Proof Montage** of resident/world changes, not a full recap."
+> **Domain expert:** "Yes — use a brief **Route Memory Montage** of resident/world changes, not a full recap."
 
 > **Dev:** "Can the guitar come from a concert problem?"
 > **Domain expert:** "Yes — use the **Concert Crossing Beat** to earn the guitar through a tiny performance/help moment, then let local **Cicka Resting Spots** turn it into comfort."
@@ -596,7 +611,7 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 > **Domain expert:** "No — the first ending path should work through residents, conversations, collection, and world changes; **Mini-Game Entrances** can add alternate paths or side fun."
 
 > **Dev:** "Should the Relay Spire require a boss or hard climb?"
-> **Domain expert:** "No — use a **Living Proof Gate** so the player can reach it early but cannot send until the path has created enough visible change and emotional tie to Cicka."
+> **Domain expert:** "No — use the **Area Barricade Chain** so the player reaches Relay after clearing the Bridge, Concert, and Dance Festival barricades."
 
 ## Flagged Ambiguities
 
@@ -631,7 +646,7 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
   **Opening Dance Shuttle Beat** for the final dance-festival route beat.
 - "bachata" is loose discarded inspiration, not canonical genre; use a simple,
   cute, guitar-friendly implied request for the **Folded Song Request** while
-  the later **Living Proof Montage** dance image is emotionally scored by the
+  the later **Route Memory Montage** dance image is emotionally scored by the
   player's guitar.
 - "festival helper" is too generic for the driver's colleague; resolved: use
   **Last-Stop Operations Helper**.

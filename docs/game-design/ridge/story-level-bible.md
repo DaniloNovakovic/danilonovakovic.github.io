@@ -13,14 +13,14 @@
 This bible is in-progress. It records resolved story, level-design, character,
 and progression decisions for the core Exploration Map route.
 
-Current design focus: work backward from the ending by detailing **Dance
-Festival Area / Opening Dance Shuttle Beat** before Concert Area / Concert
-Crossing Beat and Bridge Area / Blueprint Bridge.
+Current design focus: work backward from the ending while preserving the
+fixed first-ending route order: Bridge Area, Concert Area, Dance Festival Area,
+then Relay Ending.
 
 Design order:
 
 1. canonical first ending
-2. Living Proof Gate readiness
+2. fixed Area Barricade Chain
 3. Dance Festival Area / Opening Dance Shuttle Beat
 4. Concert Area / Concert Crossing Beat
 5. Bridge Area / Blueprint Bridge
@@ -41,9 +41,8 @@ The first ending path should be completable through conversations, collection,
 authored traversal interactions, Ridge Areas, Resident Beats, and visible world
 changes.
 Mini-games attach to the world as optional fun, rewards, shortcuts, or future
-alternate ways to finish a level. They should not become required Living Proof
-or the default solution for main route blockers in the current first-ending
-route.
+alternate ways to finish a level. They should not become required first-ending
+proof or the default solution for main route blockers.
 
 ## Canonical Ending
 
@@ -53,22 +52,32 @@ they add meaningful replay value without weakening Cicka's farewell.
 
 Accepted ending outline:
 
-1. The player reaches Relay Spire and can stand there before it is ready.
-2. Once Living Proof is enough, the Relay sign becomes readable.
+1. The fixed main route carries the player through Bridge Area, Concert Area,
+   and Dance Festival Area before Relay.
+2. Clearing the Dance Festival barricade grants the last daylight ride to Relay.
 3. Cicka appears in her final field-presence spot, calm and familiar.
 4. The player uses a **Sit and Play Prompt** near Cicka to share a quiet
    **Guitar Farewell**, ideally under a warm sunset or other cozy threshold
    light.
-5. A brief **Living Proof Montage** can appear during the guitar: Blueprint
+5. A brief **Route Memory Montage** can appear during the guitar: Blueprint
    Bridge being used, Concert Crossing continuing, Opening Dance beginning at
    night as an emotional echo under the player's guitar, and earlier Cicka
    Resting Spots carrying accumulated marks.
-6. Control returns in **Relay Blue Hour** at the Relay sign/spire for a **Send
+6. Control returns in a small **Relay Holding State** for a **Send
    the Sketchbook Prompt**.
-7. Cicka walks with the player to the threshold, pauses, looks back once, leaves
+7. While in the Relay Holding State, the player can remain present with Cicka
+   near the threshold, such as by walking around the small Relay clearing,
+   sitting again, replaying a quiet guitar phrase, or using an optional comfort
+   interaction if supported. The player cannot return to the wider Ridge route
+   until the sketchbook is sent.
+8. **Send the Sketchbook Prompt** is the final completion trigger. It is
+   currently provisional in exact staging, but it should mean the player is
+   ready to let the sketchbook carry the completed farewell forward.
+9. Cicka walks with the player to the threshold, pauses, looks back once, leaves
    one final paw/page mark, then slips into a page fold or light beyond the
-   player's path. The initial version uses no translated farewell line.
-8. The player returns to the **Open Ridge Return State** after the ending, with
+   player's path. The player does not force Cicka away. The initial version uses
+   no translated farewell line.
+10. The player returns to the **Open Ridge Return State** after the ending, with
    the canonical final mark preserved at the Relay threshold, one quieter echo
    at the Concert Resting Spot, and the world still open. The echo is the
    empty usual spot plus one small paw/page mark, not the player's guitar left
@@ -88,20 +97,22 @@ Tone boundaries:
 - no scattering sad marks everywhere in the initial return state; use the Relay
   threshold mark plus one quiet Concert Resting Spot echo first
 
-## Living Proof Gate
+## Area Barricade Chain
 
-The Relay Spire can be physically reachable before it can send. The blocker is
-that the sketchbook is not ready yet: the path has not created enough visible
-world changes, proofs, and Cicka familiarity.
+The first-ending route is currently a fixed linear chain:
 
-The gate should feel like emotional and semantic readiness, not an exact visible
-checklist. The route to Relay should naturally provide enough resident help and
-cat familiarity for the first ending.
+```text
+Bridge Area -> Concert Area -> Dance Festival Area -> Relay Ending
+```
 
-Living Proof should come from the three required Ridge Areas and their
-Resident/world changes, not from optional mini-games or noticing changed Cicka
-Resting Spots. A resting spot is the emotional echo or memory of proof already
-earned elsewhere, not a separate proof token.
+Each required Ridge Area has a concrete local barricade. Clearing that
+barricade opens the next area. Relay does not currently need a separate
+"collect enough proof" or optional-area readiness system.
+
+Earlier "Living Proof" language should be treated as poetic shorthand for the
+meaning of completed area changes, not as a required mechanic, resource, or
+checklist. If a later version restores optional ordering or alternate endings,
+the gate can be reconsidered.
 
 ## Cicka
 
@@ -188,7 +199,7 @@ Relay Spire / Guitar Farewell -> I am ready for Cicka's threshold farewell.
 | [Bridge Area](./areas/01-bridge/README.md) | Blueprint Bridge | Accepted first art/drawing beat | Required soft gate tutorial for resident help | Obvious subtle attention cue at unsafe edge or blank plan | Finished bridge sketch becomes the crossing |
 | [Concert Area](./areas/02-concert/README.md) | Concert Crossing Beat | Accepted middle beat | Blocks a concert/traffic crossing and earns the guitar | Points attention to guitar case, string, stage, or crossing | Concert continues; crossing opens; guitar entrusted to player |
 | [Dance Festival Area](./areas/03-dance-festival/README.md) | Opening Dance Shuttle Beat | Accepted final beat direction; Last-Stop Operations Helper locked as romantic partner role | Creates the last emotional readiness before Relay through afternoon setup for a night dance festival at the foot of the Relay hill | Quiet threshold observer near the lantern crates, operations table, shuttle step, or service gate; may loaf with the Unnamed Counterpart Cat | Festival setup clears enough for one last daylight shuttle to Relay before the night road closure |
-| [Relay Ending Area](./areas/04-relay-ending/README.md) | Guitar Farewell / Cicka Threshold Farewell | Active ending direction | Final threshold after Living Proof is enough | Final field-presence spot and threshold departure | Open Ridge Return State preserves the final Relay mark and one quiet Concert echo |
+| [Relay Ending Area](./areas/04-relay-ending/README.md) | Guitar Farewell / Cicka Threshold Farewell | Active ending direction | Final threshold after the Dance Festival barricade is cleared | Final field-presence spot and threshold departure | Open Ridge Return State preserves the final Relay mark and one quiet Concert echo |
 
 ## Opening Dance Shuttle Beat
 
@@ -278,5 +289,5 @@ Current cross-area hot spots:
 - Required resident cast names and silhouettes.
 - Optional resident cast and hangout spaces.
 - Concert guitar acquisition as an ending dependency.
-- Living Proof feedback at Relay when it is reachable but not ready.
+- Exact Send the Sketchbook staging after the Guitar Farewell.
 - Return-to-Ridge state after the Cicka Threshold Farewell.

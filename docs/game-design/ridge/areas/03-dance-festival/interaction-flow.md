@@ -176,11 +176,11 @@ such as "All aboard the last ride," the vehicle starts over a brief blackout,
 and the player respawns at Relay Spire under sunset.
 
 Control resumes at Cicka's overlook spot for the **Sit and Play Prompt** and
-**Guitar Farewell**. The later night festival can appear as a **Living Proof
+**Guitar Farewell**. The later night festival can appear as a **Route Memory
 Montage** image during the farewell instead of pulling the playable ending away
 from Cicka; the dancing can read as an emotional echo of the player's guitar
 rather than revealing or playing the actual requested festival song. After the
-montage, Relay returns in **Relay Blue Hour** for the **Send the Sketchbook
+montage, Relay enters the **Relay Holding State** for the **Send the Sketchbook
 Prompt** rather than full night.
 
 The emotional lesson is that life can continue and new love can arrive after

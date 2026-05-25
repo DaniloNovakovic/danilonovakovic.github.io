@@ -178,17 +178,20 @@ return-to-Ridge state.
 
 Accepted first ending outline:
 
-1. The player reaches Relay Spire and can stand there before it is ready.
-2. Once Living Proof is enough, the Relay sign becomes readable.
+1. The fixed main route carries the player through Bridge Area, Concert Area,
+   and Dance Festival Area before Relay.
+2. Clearing the Dance Festival barricade grants the last daylight ride to Relay.
 3. Cicka appears in her final field-presence spot, calm and familiar.
 4. The player shares a quiet Guitar Farewell with Cicka, ideally under a warm
    sunset or other cozy threshold light.
-5. Control returns in **Relay Blue Hour** at the Relay sign/spire for a **Send
-   the Sketchbook Prompt**.
-6. Cicka walks with the player to the threshold, pauses, looks back once, leaves
+5. Control returns in a small **Relay Holding State** for a **Send the
+   Sketchbook Prompt**.
+6. Cicka remains physically present while the player can linger near Relay, but
+   the wider Ridge route does not reopen until the sketchbook is sent.
+7. Cicka walks with the player to the threshold, pauses, looks back once, leaves
    one final paw/page mark, then slips into a page fold or light beyond the
    player's path. The initial version uses no translated farewell line.
-7. The player returns to the **Open Ridge Return State** after the ending, with
+8. The player returns to the **Open Ridge Return State** after the ending, with
    the canonical final mark preserved at the Relay threshold, one quieter echo
    at the Concert Resting Spot, and the world still open. The echo is the
    empty usual spot plus one small paw/page mark, not the player's guitar left
@@ -221,14 +224,11 @@ fallback: conversation, collection, practice together, or a forgiving auto-play
 path can resolve the main route while the Guitar-Hero-like mini-game remains the
 ideal or optional version.
 
-The final blocker should be a **Living Proof Gate**. The Relay Spire can be
-physically reachable early, but it should not send the sketchbook until the path
-has created enough resident/world changes and Cicka familiarity to make the
-destination emotionally and semantically ready. The three required Ridge Areas
-should be enough proof for the current first ending. Avoid an
-exact visible checklist unless testing shows the player needs clearer feedback.
-Changed Cicka Resting Spots should not count as proof by themselves; they are
-emotional echoes of resident/world changes already earned elsewhere.
+The final route structure should be an **Area Barricade Chain**. Bridge,
+Concert, and Dance Festival each contain one concrete local barricade; clearing
+the Dance Festival barricade brings the player to Relay. Earlier "Living Proof"
+language should now be treated as poetic shorthand for completed area changes,
+not a separate proof resource, checklist, or optional readiness system.
 Planning assumption: start with 2-3 required main-path Resident Help Beats
 before the first ending, plus optional extra residents for return play. Treat the
 exact count as a Level Designer and Story/Tone tuning variable, not a fixed
@@ -237,12 +237,8 @@ rule.
 The target asks for:
 
 - a readable mostly forward neighborhood route toward Relay Spire
-- Relay Spire physically reachable before it can send
-- Living Proof Gate made from enough visible world changes and Cicka familiarity
-  rather than an exact checklist; the three required Ridge Areas should be
-  enough for the current first ending
-- changed Cicka Resting Spots as emotional echoes of proof, not separate proof
-  sources
+- fixed Bridge -> Concert -> Dance Festival -> Relay Area Barricade Chain
+- changed Cicka Resting Spots as emotional echoes, not separate proof sources
 - first ending path completable through conversations, collection, authored
   traversal, Ridge Areas, Resident Beats, and world changes without requiring
   full arcade mini-games
@@ -311,15 +307,15 @@ The target asks for:
   comfort, Dance Festival Area / Opening Dance Shuttle Beat means life can keep
   moving with someone new, then Relay Spire / Guitar Farewell resolves Cicka's
   threshold farewell
-- Guitar Farewell can include a brief **Living Proof Montage**: Blueprint Bridge
+- Guitar Farewell can include a brief **Route Memory Montage**: Blueprint Bridge
   being used, Concert Crossing continuing, Opening Dance beginning at night as
   an emotional echo under the player's guitar, and earlier Cicka Resting Spots
   carrying accumulated marks. Keep it wordless or nearly wordless so the focus
   stays on Cicka.
-- Relay time should progress from sunset for **Sit and Play Prompt** to **Relay
-  Blue Hour** for **Send the Sketchbook Prompt**. The montage can show the night
-  festival beginning elsewhere, but Relay should not become full night before
-  the farewell.
+- Relay time should progress from sunset for **Sit and Play Prompt** to the
+  **Relay Holding State** for **Send the Sketchbook Prompt**. The montage can
+  show the night festival beginning elsewhere, but Relay should not become full
+  night before the farewell.
 - The shuttle ride from Last-Stop Plaza to Relay should be a **Short Threshold
   Transition**, not a controllable driving segment: the driver can say "All
   aboard the last ride," the vehicle starts over a brief blackout, the player
@@ -328,9 +324,10 @@ The target asks for:
 - The final Relay Spire interaction should be a **Sit and Play Prompt** near
   Cicka. It starts the Guitar Farewell without rhythm UI, fail state, or final
   skill check.
-- After the Guitar Farewell, control returns at the Relay sign/spire for a
-  **Send the Sketchbook Prompt**. This starts the Cicka Threshold Farewell while
-  keeping the guitar as comfort rather than the send button.
+- After the Guitar Farewell, control returns at the Relay sign/spire in a
+  **Relay Holding State** for a **Send the Sketchbook Prompt**. This starts the
+  Cicka Threshold Farewell while keeping the guitar as comfort rather than the
+  send button.
 - Cicka's departure should be physical and mostly silent: walk together, pause,
   look back, final mark, then page-fold/light departure. The initial version
   should use no translated farewell line; a tiny raw meow/chirp sound can remain

@@ -65,10 +65,10 @@ does not dictate the desired route shape.
 
 The ending order is protected:
 
-1. Living Proof readiness
+1. Fixed area barricade chain reaches Relay
 2. Cicka appears at the Relay threshold
 3. Guitar Farewell at sunset
-4. Send the Sketchbook Prompt in blue hour
+4. Relay Holding State with Send the Sketchbook Prompt
 5. Cicka Threshold Farewell
 6. Open Ridge Return State
 
@@ -87,8 +87,8 @@ Desk, Neutral Notebook, and similar ideas are candidates, not required proof for
 the first ending unless route canon explicitly reopens that.
 
 Before adding or prioritizing another mini-game, ask whether Bridge, Concert,
-Dance Festival, Relay, Living Proof feedback, and the Cicka farewell are clearer
-than they were before.
+Dance Festival, Relay, route readiness feedback, and the Cicka farewell are
+clearer than they were before.
 
 ## Scope Cuts
 
