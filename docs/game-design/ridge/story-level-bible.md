@@ -124,6 +124,12 @@ but her role should evolve:
 - middle: observer of a changed object or resident moment
 - late: quiet trust marker near the threshold
 
+Bridge Area can serve as the first Cicka encounter. In the current accepted
+opening, Cicka steals the Bridge Draftsperson's tiny toy car / weight-test prop,
+pulling the player toward the unsafe crossing and unfinished blueprint. After
+this first meeting, she should not become a continuous follower; she becomes a
+recurring authored field presence across meaningful route beats.
+
 Each required Ridge Area should include one local **Cicka Resting
 Spot**: a small perch, loafing place, or quiet seat where Cicka can be present
 without making the player return to a central hub. This replaces **Cicka Home**
@@ -283,16 +289,17 @@ The **Bridge Area** should contain the first required Resident Beat,
 Cicka noticed something -> a resident needs local help -> the route visibly changes
 ```
 
-Current recommended solution: help the **Bridge Draftsperson**, a tiny nervous
-or blocked planner responsible for the crossing blueprint, finish a bridge
-drawing/blueprint by drawing or visually completing the bridge. The
+Current recommended solution: Cicka first appears by stealing the **Bridge
+Draftsperson**'s tiny toy car / weight-test prop, pulling the player toward the
+unsafe crossing and unfinished blueprint. The Draftsperson is a tiny nervous or
+blocked planner responsible for the crossing blueprint. The player helps finish
+the bridge drawing/blueprint by drawing or visually completing the bridge. The
 Draftsperson's specific problem is a missing middle span: they keep erasing and
 redrawing it because they are overthinking whether the structure will hold.
-Failed doodles, eraser marks, or a tiny toy car/weight-test prop can make this
+Failed doodles, eraser marks, and the toy car/weight-test prop make this
 readable and support a future bridge-physics toy. The finished sketch becomes
 the crossing. For v0, this can be a basic authored drawing/completion visual
-rather than a full freeform drawing system. Cicka can sit on or near the
-blank/missing part of the plan.
+rather than a full freeform drawing system.
 
 Future optional upgrade: let the player draw directly on the bridge, either as
 a visual customization or a small physics/bridge-building toy, potentially

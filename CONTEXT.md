@@ -89,6 +89,12 @@ complete a missing middle span on a bridge drawing or blueprint so the finished
 sketch becomes the physical crossing.
 _Avoid_: required physics puzzle, fetch quest, platforming test
 
+**Toy Car Theft**:
+The first Cicka encounter where she steals the Bridge Draftsperson's tiny
+weight-test car and pulls the player toward the unsafe crossing and unfinished
+bridge blueprint.
+_Avoid_: generic fetch quest, inventory tutorial, permanent follower setup
+
 **Bridge Draftsperson**:
 The nervous or blocked resident responsible for the Blueprint Bridge plan.
 _Avoid_: wizard, quest board, generic artist-god, final proper name too early
@@ -459,6 +465,8 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 - **Cicka Field Presence** complements **Cicka Resting Spots** by making Cicka
   recur across the **Sketchbook Neighborhood** without turning her into a
   follower, solver, vendor, or quest board.
+- **Toy Car Theft** can introduce Cicka in Bridge Area, but it should lead into
+  recurring **Cicka Field Presence**, not continuous follower behavior.
 - A **Resident Help Beat** may use **Cicka Field Presence** to draw attention to
   a route blocker, but the solution should come from a resident, artifact,
   mini-game clear, or visible environment change.

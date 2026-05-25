@@ -21,6 +21,12 @@ art.**
 ## Accepted Local Contract
 
 - The main blocker is a missing, unsafe, or unfinished crossing.
+- Bridge Area can be the first time the player meets Cicka.
+- Cicka introduces herself by stealing the tiny toy car / weight-test prop from
+  the Bridge Draftsperson's blueprint setup.
+- The player follows or investigates the stolen prop, finds Cicka near the
+  unsafe crossing or unfinished blueprint, and is pulled naturally into the
+  Bridge Draftsperson's problem.
 - The local resident role is the **Bridge Draftsperson**: a tiny nervous or
   blocked planner responsible for the crossing blueprint.
 - The Bridge Draftsperson's problem is a missing middle span on the blueprint:
@@ -35,6 +41,8 @@ art.**
   full freeform drawing system.
 - Cicka gives an obvious but nonverbal attention cue near the unsafe edge,
   blank plan, or missing part of the bridge.
+- After this first encounter, Cicka should become a recurring authored field
+  presence rather than a continuous follower.
 - The route change must be visible in the world, not only in dialogue.
 - The beat should be tiny, obvious, local, and kind.
 
@@ -42,7 +50,8 @@ art.**
 
 Use **Bridge Resting Spot** as the practical label.
 
-- Before resolution: Cicka perches near the unsafe crossing or blank plan.
+- Before resolution: Cicka steals or carries the toy car / weight-test prop,
+  then perches near the unsafe crossing or blank plan.
 - After resolution: Cicka settles near the completed bridge sketch or leaves a
   tiny mark by the crossing.
 
@@ -53,6 +62,7 @@ The resting spot is readable flavor, not a gate.
 - Do not make Bridge Area a platforming test.
 - Do not make the required v0 solution depend on physics drawing.
 - Do not turn the beat into a fetch quest.
+- Do not turn Cicka into a continuous follower after the first encounter.
 - Future optional upgrade: let the player draw directly on the bridge as a
   small customization or bridge-building toy, potentially with simple
   bridge-building physics that tests whether the drawn bridge can carry a car
@@ -64,5 +74,6 @@ The resting spot is readable flavor, not a gate.
 - exact bridge topology and camera framing
 - prop kit for the unfinished sketch/blueprint
 - failed doodles, eraser marks, or toy car/weight-test prop staging
+- tiny toy car theft trail and first Cicka encounter staging
 - one or two prompts that make the crossing change feel authored
 - future drawing/bridge-physics toy scope after the route MVP is proven
