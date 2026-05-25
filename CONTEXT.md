@@ -208,6 +208,17 @@ Spire, echoing the visual presence, tiny marks, and accumulated memory from
 Cicka Resting Spots across the Ridge.
 _Avoid_: generic music mini-game, melodrama, one-off ending prop
 
+**Concert Guitar**:
+The literal guitar entrusted to the player after Concert Crossing; it remains
+with the player for the rest of the first-ending route and becomes the
+instrument used for the Guitar Farewell.
+_Avoid_: abstract music ability, temporary quest prop, separate ending guitar
+
+**Optional Guitar Comfort Interaction**:
+A later-polish interaction where the player may sit near a Cicka Resting Spot
+and play a tiny guitar phrase without changing route progression.
+_Avoid_: hidden required prompt, affection checklist, extra proof token
+
 **Sit and Play Prompt**:
 The final Relay Spire interaction that starts the Guitar Farewell when the
 player chooses to sit near Cicka and play guitar.
@@ -247,9 +258,18 @@ elsewhere.
 _Avoid_: full night farewell, hard time cut, cold death-coded darkness
 
 **Concert Crossing Beat**:
-A mid-route Resident Beat where a blocked concert/traffic crossing becomes
-the way the player earns the guitar through a small music performance problem.
+A mid-route Resident Beat where a crowd or traffic line blocks the crossing
+while waiting for a delayed concert, leading the player to take over for an
+incapacitated local guitarist who hurt his hand or wrist while trying to prove
+he was still young after a kid teased him, clear the crowd, and receive the
+Concert Guitar during a goodbye beat at the opened exit.
 _Avoid_: joke-only drunk musician, random item pickup, final-farewell skill gate
+
+**Forgiving Practice Riff**:
+The simple guitar phrase the injured Concert guitarist teaches the player so v0
+can resolve the concert through auto-success or highly forgiving prompts before
+a later rhythm mini-game exists.
+_Avoid_: required hard rhythm check, mastery test, full song system in MVP
 
 **Opening Dance Shuttle Beat**:
 A final-route Resident Beat where afternoon festival setup blocks the Relay
@@ -458,6 +478,11 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
   does not need repeatable resting-spot interactions; sitting together, petting,
   lap loafing, or playing guitar at local spots can wait for a later affection
   pass.
+- The **Concert Guitar** is the same physical instrument used in the **Guitar
+  Farewell**, not an abstract music unlock or a different ending-only prop.
+- The only required guitar uses in the first-ending route are the Concert
+  performance and Relay **Sit and Play Prompt**; any guitar use at local
+  **Cicka Resting Spots** should be an **Optional Guitar Comfort Interaction**.
 - The **Guitar Farewell** can include a **Route Memory Montage**, but the montage
   should stay brief and keep Cicka as the emotional focus; the player's guitar
   is the only music the player needs to hear during the montage.

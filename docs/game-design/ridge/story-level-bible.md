@@ -171,6 +171,10 @@ pickup.
 After the player receives it, the guitar should feel present as a carried
 comfort item, but v0 does not need repeatable guitar prompts at every resting
 spot. The required playable comfort moment is the Relay **Guitar Farewell**.
+The only required guitar uses in the first-ending route are the Concert
+performance and the Relay **Sit and Play** interaction. Optional later polish can
+let the player sit at Cicka Resting Spots and play a tiny phrase there, but
+these should stay optional comfort interactions rather than route gates.
 
 Petting, lap resting, and similar affection interactions are later polish
 passes. A hug is optional and should wait until character art can support it
@@ -228,17 +232,31 @@ then echo in the Guitar Farewell montage.
 Detailed local contract:
 [`Concert Area`](./areas/02-concert/README.md).
 
-A blocked concert/traffic crossing halts the route because the local guitarist
-cannot play, the paper-stage setup is tangled, or the guitar needs a small
-repair. The player helps the resident, learns the guitar, and receives or is
-entrusted with the guitar afterward.
+A crowd, traffic line, or gathering blocks the route while everyone waits for
+the concert to start. The player asks what is taking so long, finds the local
+guitarist away from the crowd, and learns that the guitarist cannot play because
+of a clumsy show-off mishap: after a kid teased that he was old, he tried to
+prove he was still young by doing an absurd concert stunt, such as playing
+guitar while riding a skateboard on one leg, and hurt his hand or wrist. The
+player learns one **Forgiving Practice Riff** and takes over the concert. In
+v0, the concert performance can be auto-success or highly forgiving so the main
+route is not blocked by rhythm-game production. After the first playable route
+lands, a Guitar-Hero-like or Baka Mitai-style button-rhythm guitar mini-game can
+become the richer expression, potentially using Danilo's real guitar/song
+material and generated button prompts from authored song data. Once the
+performance begins, the crowd/traffic clears. After the concert, the musician
+or band waits near the opened exit for a short goodbye/reward beat where the
+guitarist entrusts the guitar to the player. This is the same physical guitar
+the player carries for the rest of the game and uses at Relay for the
+**Guitar Farewell**.
 
-The ideal version can include a small Guitar-Hero-like performance mini-game.
-The required route must also have a non-arcade fallback through conversation,
-collection, practice together, or forgiving auto-play.
+The ideal later version can include a small Guitar-Hero-like performance
+mini-game. The required v0 route should use forgiving practice or auto-success
+performance first.
 
 Avoid making the guitarist a joke-only drunk if it undercuts the later tribute.
-Gentle comedy is welcome; the guitar's emotional role needs room to breathe.
+Gentle comedy, clumsiness, and foolishness are welcome; the guitar's emotional
+role needs room to breathe.
 
 ## Blueprint Bridge
 

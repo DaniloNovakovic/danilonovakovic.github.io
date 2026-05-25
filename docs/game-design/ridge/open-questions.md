@@ -48,8 +48,9 @@ the narrowest subdoc inside that area folder.
 
 ## Dependencies
 
-- **Concert dependency:** How exactly does Concert Crossing entrust the guitar
-  so the Guitar Farewell feels earned?
+- **Concert guitarist stunt staging:** How much of the guitarist's absurd
+  skateboard stunt needs to be shown, implied, or reconstructed through props
+  so the joke lands without becoming expensive animation scope?
 - **Bridge dependency:** How much does Blueprint Bridge need to teach about
   resident help and visible world change before later beats depend on it?
 - **Cicka Resting Spots:** What tiny before/after visual state does each
