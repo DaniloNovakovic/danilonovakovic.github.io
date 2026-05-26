@@ -89,11 +89,28 @@ complete a missing middle span on a bridge drawing or blueprint so the finished
 sketch becomes the physical crossing.
 _Avoid_: required physics puzzle, fetch quest, platforming test
 
-**Toy Car Theft**:
-The first Cicka encounter where she steals the Bridge Draftsperson's tiny
-weight-test car and pulls the player toward the unsafe crossing and unfinished
-bridge blueprint.
-_Avoid_: generic fetch quest, inventory tutorial, permanent follower setup
+**Toy Car Play**:
+The first Cicka encounter where she peacefully plays with the Bridge
+Draftsperson's tiny weight-test car before the player later realizes it is
+needed for the bridge test.
+_Avoid_: generic fetch quest, thief tutorial, permanent follower setup
+
+**Cicka Parallel Play**:
+The gentle Bridge interaction where the player sits or relaxes near Cicka until
+she treats the toy car as shared play and lets it become usable for the bridge
+test.
+_Avoid_: taking the toy by force, obedient quest-item handoff, food-fetch gate
+
+**Toy Car Bridge Test**:
+The v0 auto-success presentation where the retrieved toy car rolls across the
+completed bridge drawing and proves the sketch can become the physical crossing.
+_Avoid_: required physics failure, hidden pass criteria, simulation-first MVP
+
+**Cicka Treat Shortcut**:
+A future optional Bridge interaction where nearby cabin food can persuade Cicka
+to release the toy car, acting as an alternate path around a richer toy-car play
+mini-game.
+_Avoid_: required food fetch, first-route errand, replacing parallel play in v0
 
 **Bridge Draftsperson**:
 The nervous or blocked resident responsible for the Blueprint Bridge plan.
@@ -465,8 +482,13 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 - **Cicka Field Presence** complements **Cicka Resting Spots** by making Cicka
   recur across the **Sketchbook Neighborhood** without turning her into a
   follower, solver, vendor, or quest board.
-- **Toy Car Theft** can introduce Cicka in Bridge Area, but it should lead into
+- **Toy Car Play** can introduce Cicka in Bridge Area, but it should lead into
   recurring **Cicka Field Presence**, not continuous follower behavior.
+- **Cicka Parallel Play** retrieves the toy car by joining Cicka's play rather
+  than commanding her, taking the toy, or adding a food-fetch gate.
+- The first Bridge prototype should use an auto-success **Toy Car Bridge Test**;
+  **Bridge Drawing Toy**, toy-car ping-pong, and **Cicka Treat Shortcut** are
+  later optional layers after the route MVP is proven.
 - A **Resident Help Beat** may use **Cicka Field Presence** to draw attention to
   a route blocker, but the solution should come from a resident, artifact,
   mini-game clear, or visible environment change.

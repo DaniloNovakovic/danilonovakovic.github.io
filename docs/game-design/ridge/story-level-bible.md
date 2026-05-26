@@ -125,9 +125,16 @@ but her role should evolve:
 - late: quiet trust marker near the threshold
 
 Bridge Area can serve as the first Cicka encounter. In the current accepted
-opening, Cicka steals the Bridge Draftsperson's tiny toy car / weight-test prop,
-pulling the player toward the unsafe crossing and unfinished blueprint. After
-this first meeting, she should not become a continuous follower; she becomes a
+opening, the game begins with a simple walk-right control introduction from a
+hill or nature edge before the bridge problem is visible. Cicka first appears
+peacefully playing with the Bridge Draftsperson's tiny toy car / weight-test
+prop, and the player can meet her through a tiny pet/play interaction before
+knowing the toy matters. After the player reaches the blocked bridge and learns
+the test car is missing, they can infer that Cicka has it and return to retrieve
+it through **Cicka Parallel Play**: the player sits or relaxes near Cicka long
+enough that she treats the toy as shared play, bats or rolls it toward the
+player, and eventually lets it become usable for the bridge test. After this
+first meeting, she should not become a continuous follower; she becomes a
 recurring authored field presence across meaningful route beats.
 
 Each required Ridge Area should include one local **Cicka Resting
@@ -289,17 +296,22 @@ The **Bridge Area** should contain the first required Resident Beat,
 Cicka noticed something -> a resident needs local help -> the route visibly changes
 ```
 
-Current recommended solution: Cicka first appears by stealing the **Bridge
-Draftsperson**'s tiny toy car / weight-test prop, pulling the player toward the
-unsafe crossing and unfinished blueprint. The Draftsperson is a tiny nervous or
-blocked planner responsible for the crossing blueprint. The player helps finish
-the bridge drawing/blueprint by drawing or visually completing the bridge. The
+Current recommended solution: the player first meets Cicka peacefully playing
+with the **Bridge Draftsperson**'s tiny toy car / weight-test prop, then later
+recontextualizes that toy as the missing bridge test car after reaching the
+blocked crossing. The Draftsperson is a tiny nervous or blocked planner
+responsible for the crossing blueprint. The player retrieves the toy car from
+Cicka through **Cicka Parallel Play**, then helps finish the bridge
+drawing/blueprint by drawing or visually completing the bridge. The
 Draftsperson's specific problem is a missing middle span: they keep erasing and
 redrawing it because they are overthinking whether the structure will hold.
 Failed doodles, eraser marks, and the toy car/weight-test prop make this
 readable and support a future bridge-physics toy. The finished sketch becomes
 the crossing. For v0, this can be a basic authored drawing/completion visual
-rather than a full freeform drawing system.
+rather than a full freeform drawing system, and the toy car test should be
+auto-success presentation: place or bring the toy car to the completed
+blueprint, roll it across the drawn bridge, then let the sketch become the real
+crossing.
 
 Future optional upgrade: let the player draw directly on the bridge, either as
 a visual customization or a small physics/bridge-building toy, potentially
@@ -308,6 +320,13 @@ that the required v0 solution.
 
 Keep it tiny, obvious, and local. It should not feel like a fetch quest or a
 test of platforming skill.
+
+The first blockout floor is: walk-right nature/hill intro, peaceful Cicka + toy
+car first encounter, basic sit/play interaction, blocked bridge, Bridge
+Draftsperson + missing middle span blueprint, return to Cicka for Cicka
+Parallel Play, toy car bridge test, simple bridge drawing completion visual,
+bridge becomes crossing, and Cicka settles near the completed crossing. Cabin,
+food, physics simulation, and toy-car ping-pong are later optional layers.
 
 ## Mini-Game Entrances
 
@@ -322,6 +341,12 @@ Current candidates:
   non-arcade fallback.
 - Bridge drawing/physics: future bridge-building toy after the route MVP is
   proven; v0 should use an authored drawing/completion visual.
+- Toy-car parallel play: future tiny back-and-forth Cicka game after the route
+  MVP is proven; v0 should be a short sit/play/share interaction.
+- Cabin/treat shortcut: future optional Bridge interaction where the player can
+  bring food to Cicka as an alternate way to retrieve the toy car, such as a
+  shortcut around the toy-car parallel-play mini-game rather than required v0
+  route logic.
 
 Mini-games may unlock alternate paths, shortcuts, rewards, or just exist for
 fun. In the current first-ending route they are not required proof. Future
