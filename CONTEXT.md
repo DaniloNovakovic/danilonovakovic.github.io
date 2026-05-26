@@ -122,10 +122,33 @@ directly, potentially with simple bridge-building physics.
 _Avoid_: required v0 route blocker, full simulation before route MVP
 
 **Concert Area**:
-The middle required Ridge Area: a compact city-like concert block with small
-buildings, bars, street details, the Concert Crossing Beat, the Concert Resting
-Spot, and the guitar's first entrusted use.
-_Avoid_: calling the whole area Concert Crossing, music hub
+The middle required Ridge Area: a compact small-town / varos-like concert block
+at evening or night with bars, street details, the Concert Crossing Beat, the
+Concert Resting Spot, and the guitar's first entrusted use.
+_Avoid_: calling the whole area Concert Crossing, night-club gig, music hub
+
+**Travel Interlude**:
+A short between-area passage that implies meaningful distance, time change, or
+rest between compact Ridge Areas without becoming a required vehicle mini-game.
+_Avoid_: unexplained teleport, mandatory driving game, full overworld commute
+
+**Concert-to-Dance Rest Interlude**:
+The post-Concert night-to-morning passage where the player rests after the
+concert, then travels toward Dance Festival through a short non-driving
+transition using the Band Roadie Van Ride.
+_Avoid_: walking all night, required driving mini-game, unexplained time skip
+
+**Band Roadie Van Ride**:
+The grounded Concert-to-Dance morning transition where a practical band roadie /
+van driver gives the player a lift because the player helped the concert and the
+band is already packing up gear.
+_Avoid_: making the roadie the festival-sleep joke, required driving mini-game, random bus substitute
+
+**Festival Superfan**:
+A desired recurring comic resident who talks up the Dance Festival in earlier
+areas, then sleeps through the festival when it finally happens; likely
+immediate post-v0 scope unless cheap to reserve in v0.
+_Avoid_: making him the required driver without vehicle setup, stealing focus from area residents
 
 **Dance Festival Area**:
 The final required Ridge Area at the foot of the Relay hill. It contains the
@@ -279,6 +302,11 @@ The fixed first-ending route structure where Bridge, Concert, and Dance
 Festival each contain one concrete local barricade whose resolution opens the
 next area and finally brings the player to Relay.
 _Avoid_: optional proof checklist, hub progression, abstract emotional gate
+
+**Compact Area Transition**:
+A short transition between separate compact Ridge Areas that preserves linear
+progress without requiring one continuous walkable overworld geography.
+_Avoid_: unexplained teleport, giant continuous map requirement, hard distance scale
 
 **Send the Sketchbook Prompt**:
 The post-Guitar Farewell Relay Spire interaction that begins the Cicka Threshold
@@ -463,6 +491,9 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 - The first-ending route currently uses an **Area Barricade Chain**: Bridge
   Area clears into Concert Area, Concert Area clears into Dance Festival Area,
   and Dance Festival clears into Relay Ending.
+- The first playable route should use **Compact Area Transitions** between
+  separate compact maps, allowing different time of day, environment, and
+  staging per area while distant Relay cues imply route progress.
 - A mini-game may use its own **Mini-Game Movement System** instead of
   **Exploration Traversal**.
 - The first ending path should be completable through conversation, collection,

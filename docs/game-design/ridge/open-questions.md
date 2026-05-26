@@ -26,6 +26,15 @@ the narrowest subdoc inside that area folder.
 - **Micka timing:** What post-ending action eventually introduces Micka, and
   what must stay hidden until then?
 
+## Route Transitions
+
+- **Concert-to-Dance travel staging:** What exact beats show the accepted
+  post-concert campfire/tent rest and morning Band Roadie Van Ride without
+  becoming a required driving mini-game?
+- **Recurring festival superfan:** Should Bridge and Concert include a recurring
+  comic resident who keeps talking about the Dance Festival, only to sleep
+  through it, and should he enter v0 or the immediate post-v0 liveliness pass?
+
 ## Dance Festival Area
 
 - **Spatial layout:** What is the room topology for Last-Stop Plaza, service

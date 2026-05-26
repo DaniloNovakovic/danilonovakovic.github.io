@@ -109,6 +109,36 @@ Each required Ridge Area has a concrete local barricade. Clearing that
 barricade opens the next area. Relay does not currently need a separate
 "collect enough proof" or optional-area readiness system.
 
+For the first playable route, treat the areas as separate compact maps connected
+by short transitions rather than one continuous walkable geography. This gives
+each area freedom to have its own time of day, environment, and staging while
+still reading as a linear route. Distance between areas can stay ambiguous, with
+background composition, distant Relay silhouettes, signage, or skyline changes
+implying progress toward the final ridge.
+
+Current time-of-day arc: Bridge begins during the day at a nature/hill edge;
+Concert moves into evening/night small-town festival energy; a short sleep/rest
+interlude carries the player from Concert night to Dance Festival morning/day
+arrival; Dance Festival plays from morning/day setup into later afternoon; Relay
+uses sunset for Sit and Play, then the Relay Holding State for Send the
+Sketchbook.
+
+Current Concert-to-Dance transition direction: after the night concert, the
+route should rest instead of sending the player walking through the night. The
+leading flavor is a small post-concert campfire/tent sleepover, followed by
+morning travel toward Dance Festival through a grounded **Band Roadie Van
+Ride**. The transport role is a band roadie / van driver from the Concert area,
+not the injured guitarist. The roadie is a practical helpful character who
+offers the ride because the player saved the concert and the band is already
+packing up gear; he should not own the sleep-through-festival joke.
+
+A separate recurring **Festival Superfan** is desired for the game, but can wait
+until the immediate post-v0 liveliness pass if the first route prototype is
+already cast-heavy. His running joke: he mentions at Bridge that he is excited
+for the Dance Festival, talks about it again at Concert, then sleeps through it.
+Keep this role separate from the driver unless a later staging pass finds a
+clean vehicle reason.
+
 Earlier "Living Proof" language should be treated as poetic shorthand for the
 meaning of completed area changes, not as a required mechanic, resource, or
 checklist. If a later version restores optional ordering or alternate endings,
@@ -245,11 +275,13 @@ then echo in the Guitar Farewell montage.
 Detailed local contract:
 [`Concert Area`](./areas/02-concert/README.md).
 
-Concert Area should read as a compact city-like concert block with small
-buildings, bars, stage-adjacent storefronts, alleys, and lived-in street details
-around the blocked crossing. The first prototype can use facades and silhouettes
-instead of enterable buildings; later passes may add interiors, extra residents,
-and hangout spaces to make the block feel more alive.
+Concert Area should read as a compact small-town / varos-like concert block with
+small buildings, bars, stage-adjacent storefronts, alleys, and lived-in street
+details around the blocked crossing. The concert can be a daytime or afternoon
+local festival-style event rather than a night-club gig. The first prototype can
+use facades and silhouettes instead of enterable buildings; later passes may add
+interiors, extra residents, and hangout spaces to make the block feel more
+alive.
 
 A crowd, traffic line, or gathering blocks the route while everyone waits for
 the concert to start. The player can learn that the concert is late from

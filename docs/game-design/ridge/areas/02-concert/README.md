@@ -15,11 +15,13 @@ something" toward "carrying comfort forward."
 
 The emotional idea is: **I can turn memory into comfort.**
 
-The area identity is a compact city-like concert block: small buildings, bars,
-stage-adjacent storefronts, alleys, and lived-in street details around the
-blocked crossing. The first prototype can keep most buildings as facade
-atmosphere, while later passes may add enterable bars/building interiors,
-extra residents, and optional hangout spaces to make the block feel more alive.
+The area identity is a compact small-town / varos-like concert block at evening
+or night: small buildings, bars, stage-adjacent storefronts, alleys, street
+lights, and lived-in festival details around the blocked crossing. The concert
+should feel like a memorable local night event rather than a nightclub gig. The
+first prototype can keep most buildings as facade atmosphere, while later passes
+may add enterable bars/building interiors, extra residents, and optional hangout
+spaces to make the block feel more alive.
 
 ## Accepted Local Contract
 
