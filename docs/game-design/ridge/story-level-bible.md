@@ -125,7 +125,7 @@ can become later liveliness scope for talking with characters, playing with
 Cicka, or adding a tiny optional toy. Morning travel toward Dance Festival uses
 a grounded **Band Roadie Van Ride**. The transport role is a band roadie / van
 driver from the Concert area, not the injured guitarist. The roadie is a
-practical helpful character who offers the ride because the player saved the
+practical, helpful character who offers the ride because the player saved the
 concert and the band is already packing up gear; he should not own the
 sleep-through-festival joke. The roadie/band do not need to attend the Dance
 Festival. They are headed somewhere else nearby, such as a local hospital or
@@ -291,7 +291,7 @@ the concert to start. The player can learn that the concert is late from
 annoyed crowd chatter, but the area should stay compact enough that simply
 wandering and talking with people can reveal the musician-side space. There the
 player finds the local guitarist and learns that he cannot play because of a
-clumsy show-off mishap: after a kid teased that he was old, he tried to prove
+clumsy show-off mishap: after a kid teased him about being old, he tried to prove
 he was still young by doing an absurd concert stunt, such as playing guitar
 while riding a skateboard on one leg, and hurt his hand or wrist. The player
 learns one **Forgiving Practice Riff** and takes over the concert. In v0, the

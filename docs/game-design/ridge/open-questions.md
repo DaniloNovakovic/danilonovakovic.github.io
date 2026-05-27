@@ -36,7 +36,7 @@ the narrowest subdoc inside that area folder.
   band storage, or leaving the destination unexplained while dropping the player
   near Dance Festival because it is on the way?
 - **Recurring festival superfan placement:** Where should the desired comic
-  resident be seeded at Bridge and Concert, where does he sleep through Dance,
+  resident be seeded at Bridge and Concert, where he sleeps through Dance,
   and is he cheap enough for v0 or better saved for the immediate post-v0
   liveliness pass?
 

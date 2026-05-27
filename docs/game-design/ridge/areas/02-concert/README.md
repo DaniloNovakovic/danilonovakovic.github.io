@@ -32,7 +32,7 @@ spaces to make the block feel more alive.
   crowd members can mention that the concert is late, but the player can also
   simply wander the small area and find the musician-side space naturally.
 - The local guitarist cannot play because of a clumsy show-off mishap: after a
-  kid teased that he was old, he tried to prove he was still young by doing an
+  kid teased him about being old, he tried to prove he was still young by doing an
   absurd concert stunt, such as playing guitar while riding a skateboard on one
   leg, and hurt his hand or wrist.
 - The player helps by learning one **Forgiving Practice Riff** from the injured
@@ -44,7 +44,7 @@ spaces to make the block feel more alive.
   use Danilo's real guitar/song material and dynamically generate button prompts
   from authored song data.
 - Once the performance begins, the crowd or traffic clears the crossing.
-- After the concert, the map clears up: the crowd leaves or moves aside, the
+- After the concert, the area clears up: the crowd leaves or moves aside, the
   crossing opens, and the musician or band waits near the exit for a short
   goodbye/reward beat.
 - During that exit beat, the guitarist entrusts the guitar to the player as a

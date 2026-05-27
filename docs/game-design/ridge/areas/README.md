@@ -31,7 +31,7 @@ questions.
   [`../decision-intake.md`](../decision-intake.md).
 - Put unresolved decisions in [`../open-questions.md`](../open-questions.md)
   unless they are purely local notes inside one area doc.
-- If an area decision changes the route order, area barricade logic, Cicka's
+- If an area decision changes the route order, Area Barricade Chain, Cicka's
   cross-area role, or guitar/ending dependency, update
   [`../story-level-bible.md`](../story-level-bible.md) too.
 - If a design becomes implementation work, publish or update a GitHub Issue

@@ -17,9 +17,9 @@ The emotional idea is: **I am ready for Cicka's threshold farewell.**
 
 ## Accepted Local Contract
 
-- Relay Spire can be physically reachable before it is ready for the farewell.
 - In the current first-ending route, the Dance Festival clear is the practical
-  route action that brings the player to Relay.
+  route action that brings the player to Relay; do not add a separate pre-ready
+  Relay access state for v0.
 - Cicka appears in her final field-presence spot, calm and familiar.
 - The player uses **Sit and Play** near Cicka to share the **Guitar Farewell**.
   The first playable version should be mostly quiet, player-triggered, and
