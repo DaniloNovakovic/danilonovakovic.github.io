@@ -11,6 +11,12 @@ override legacy prototype plans, but it does not describe shipped behavior until
 implemented and reflected in the player manual.
 _Avoid_: current runtime, shipped game, legacy prototype
 
+**First Playable Route**:
+The smallest complete Bridge Area -> Concert Area -> Dance Festival Area ->
+Relay Spire path that proves the emotional arc without required mini-games,
+optional interiors, campfire hangouts, or extra resident liveliness.
+_Avoid_: v0, route MVP, prototype floor, first route prototype
+
 **Typed Ridge Blockout Source**:
 A human- and agent-editable TypeScript source notation that describes Ridge
 topology, room blockouts, traversal primitives, shortcuts, anchors, tile

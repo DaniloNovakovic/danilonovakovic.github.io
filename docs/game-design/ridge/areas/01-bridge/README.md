@@ -106,6 +106,8 @@ layers.
 
 - Bridge Draftsperson silhouette, personality, and eventual name
 - exact bridge topology and camera framing
+- blockout validation for the accepted route grammar: Cicka noticed something,
+  a resident needs local help, and the route visibly changes
 - prop kit for the unfinished sketch/blueprint
 - failed doodles, eraser marks, or toy car/weight-test prop staging
 - Toy Car Play first Cicka encounter and gentle retrieval staging

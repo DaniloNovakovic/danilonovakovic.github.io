@@ -15,6 +15,11 @@ area files for local geography, blockers, residents, prompts, traversal,
 staging, Cicka Resting Spot details, visual/audio notes, and area-specific open
 questions.
 
+Ownership rule: root [`../open-questions.md`](../open-questions.md) is for
+route-level or taste-sensitive decisions. Area docs own local **Open Local
+Slots** such as topology, prompt wording, prop placement, resident silhouettes,
+camera framing, and local art/audio choices.
+
 ## Area Docs
 
 | Route order | Area doc | Owns |
