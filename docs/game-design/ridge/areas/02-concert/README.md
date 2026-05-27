@@ -86,8 +86,9 @@ Use **Concert Resting Spot** as the practical label.
 - After resolution: Cicka chills with the musicians near the opened exit; the
   injured guitarist or another band member may quietly pet her.
 
-This can later become the post-ending echo spot. The echo should be an empty
-usual spot plus one small paw/page mark, not the player's guitar left behind.
+This can later become the post-ending echo spot. If used, the echo should be a
+small visual absence cue at Cicka's usual spot, not the player's guitar left
+behind and not an unseeded paw/page mark mechanic.
 
 ## Boundaries
 

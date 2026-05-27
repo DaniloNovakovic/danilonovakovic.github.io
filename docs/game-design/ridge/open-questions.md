@@ -11,33 +11,34 @@ the narrowest subdoc inside that area folder.
 
 ## Ending
 
-- **Guitar Farewell staging:** What are the camera, input handoff, animation,
-  silence, and audio beats from Sit and Play through the Relay Holding State?
-- **Relay Holding State:** What small movement, repeat guitar, sitting, or
-  comfort interactions are available before Send the Sketchbook, and how is the
-  wider Ridge route blocked without feeling gamey?
-- **Send the Sketchbook staging:** What exactly happens to the sketchbook, the
-  accumulated marks, and the threshold when the final trigger is selected?
+- **Guitar Farewell micro-staging:** Given the accepted quiet, short Sit and
+  Play shape, what are the exact camera, input handoff, animation, silence, and
+  audio beats from guitar phrase through Cicka's threshold departure?
+- **Pre-ending Relay linger:** What small movement, sitting, or comfort
+  interactions are available before the player chooses Sit and Play, and how is
+  the wider Ridge route blocked without feeling gamey?
 - **Cicka Threshold Farewell staging:** What exact physical sequence carries
-  Cicka's final walk, look back, mark, and page-fold/light departure?
+  Cicka's final walk, look back, and page-fold/light departure without relying
+  on unseeded paw/page marks as a mechanic?
 - **Open Ridge Return State:** What interactions remain available immediately
-  after the ending, and what exact state is preserved at Relay and the Concert
-  Resting Spot?
+  after the ending, and what minimal visual absence echo, if any, is preserved
+  at Relay or the Concert Resting Spot?
 - **Micka timing:** What post-ending action eventually introduces Micka, and
   what must stay hidden until then?
 
 ## Route Transitions
 
 - **Concert-to-Dance travel staging:** What exact beats show the accepted
-  implied post-concert rest and morning Band Roadie Van Ride without becoming a
-  required driving mini-game?
+  implied post-concert rest and post-rest Band Roadie Van Ride without becoming
+  a required driving mini-game?
 - **Band roadie destination flavor:** Is the band roadie taking the injured
   guitarist to a local hospital/clinic, heading to another gig route, going to
   band storage, or leaving the destination unexplained while dropping the player
   near Dance Festival because it is on the way?
-- **Recurring festival superfan:** Should Bridge and Concert include a recurring
-  comic resident who keeps talking about the Dance Festival, only to sleep
-  through it, and should he enter v0 or the immediate post-v0 liveliness pass?
+- **Recurring festival superfan placement:** Where should the desired comic
+  resident be seeded at Bridge and Concert, where does he sleep through Dance,
+  and is he cheap enough for v0 or better saved for the immediate post-v0
+  liveliness pass?
 
 ## Dance Festival Area
 
@@ -64,11 +65,15 @@ the narrowest subdoc inside that area folder.
 - **Concert guitarist stunt staging:** How much of the guitarist's absurd
   skateboard stunt needs to be shown, implied, or reconstructed through props
   so the joke lands without becoming expensive animation scope?
-- **Bridge dependency:** How much does Blueprint Bridge need to teach about
-  resident help and visible world change before later beats depend on it?
-- **Cicka Resting Spots:** What tiny before/after visual state does each
-  required Ridge Area need before those states can echo in the Route Memory
-  Montage?
+- **Bridge blockout validation:** What must be visible in the Bridge blockout
+  to prove the accepted tutorial chain is readable: Cicka noticed something,
+  resident needs local help, route visibly changes?
+- **Cicka Resting Spots v0 states:** Which exact before/after prop, posture, or
+  visual trace is the smallest readable version for each required Ridge Area,
+  and which of those states should echo in the Route Memory Montage?
+- **Whole-route v0 scope floor:** What is the smallest playable route from
+  Bridge through Relay that preserves the emotional arc without waiting for
+  later mini-games, interiors, campfire, or extra resident liveliness?
 
 ## Resolution Rule
 

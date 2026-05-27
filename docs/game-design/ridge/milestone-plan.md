@@ -22,8 +22,8 @@ The first complete route should prove:
 2. Relay Spire is visible early
 3. required Resident Help Beats visibly change the Ridge
 4. Cicka feels present through field appearances and resting spots
-5. Guitar Farewell, Send the Sketchbook Prompt, Cicka Threshold Farewell, and
-   Open Ridge Return State land without arcade gating
+5. Guitar Farewell, Cicka Threshold Farewell, and Open Ridge Return State land
+   without arcade gating or an unseeded extra final prompt
 6. optional mini-games remain side fun, rewards, shortcuts, or future
    alternate-path candidates rather than required first-ending proof
 
@@ -49,8 +49,8 @@ doc instead.
   end with placeholder art and no required precision platforming.
 - **P3 Route Readiness Feedback**: make area barricades, resident help, world
   changes, and Relay arrival readable without a visible chore checklist.
-- **P4 Ending Pass**: land Guitar Farewell, Send the Sketchbook Prompt, Cicka
-  Threshold Farewell, Open Ridge Return State, and later Micka timing.
+- **P4 Ending Pass**: land Guitar Farewell as the final trigger, Cicka Threshold
+  Farewell, Open Ridge Return State, and later Micka timing.
 
 Optional mini-games, old Cicka Home mutation work, and folded-desk topology
 enter these milestones only when an active route doc or issue pulls a specific
