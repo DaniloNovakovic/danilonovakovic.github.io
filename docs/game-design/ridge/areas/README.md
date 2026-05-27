@@ -10,7 +10,7 @@ This folder holds the local source-of-truth docs for the active Ridge route:
 ```
 
 Use [`../story-level-bible.md`](../story-level-bible.md) for the route spine,
-ending order, Living Proof rules, and cross-area Cicka/guitar logic. Use these
+ending order, area barricade chain, and cross-area Cicka/guitar logic. Use these
 area files for local geography, blockers, residents, prompts, traversal,
 staging, Cicka Resting Spot details, visual/audio notes, and area-specific open
 questions.
@@ -31,7 +31,7 @@ questions.
   [`../decision-intake.md`](../decision-intake.md).
 - Put unresolved decisions in [`../open-questions.md`](../open-questions.md)
   unless they are purely local notes inside one area doc.
-- If an area decision changes the route order, Living Proof logic, Cicka's
+- If an area decision changes the route order, Area Barricade Chain, Cicka's
   cross-area role, or guitar/ending dependency, update
   [`../story-level-bible.md`](../story-level-bible.md) too.
 - If a design becomes implementation work, publish or update a GitHub Issue

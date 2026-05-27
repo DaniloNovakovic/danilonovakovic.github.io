@@ -22,8 +22,8 @@ The first complete route should prove:
 2. Relay Spire is visible early
 3. required Resident Help Beats visibly change the Ridge
 4. Cicka feels present through field appearances and resting spots
-5. Guitar Farewell, Send the Sketchbook Prompt, Cicka Threshold Farewell, and
-   Open Ridge Return State land without arcade gating
+5. Guitar Farewell, Cicka Threshold Farewell, and Open Ridge Return State land
+   without arcade gating or an unseeded extra final prompt
 6. optional mini-games remain side fun, rewards, shortcuts, or future
    alternate-path candidates rather than required first-ending proof
 
@@ -47,10 +47,10 @@ doc instead.
   and exit conditions.
 - **P2 First Playable Route Blockout**: prove the route can be walked end to
   end with placeholder art and no required precision platforming.
-- **P3 Living Proof Feedback**: make resident help, world changes, and Relay
-  readiness readable without a visible chore checklist.
-- **P4 Ending Pass**: land Guitar Farewell, Send the Sketchbook Prompt, Cicka
-  Threshold Farewell, Open Ridge Return State, and later Micka timing.
+- **P3 Route Readiness Feedback**: make area barricades, resident help, world
+  changes, and Relay arrival readable without a visible chore checklist.
+- **P4 Ending Pass**: land Guitar Farewell as the final trigger, Cicka Threshold
+  Farewell, Open Ridge Return State, and later Micka timing.
 
 Optional mini-games, old Cicka Home mutation work, and folded-desk topology
 enter these milestones only when an active route doc or issue pulls a specific
@@ -62,8 +62,8 @@ For Ridge rework issues, link the smallest relevant set:
 
 - [`README.md`](./README.md): source matrix and update protocol
 - [`summit.md`](./summit.md): product fantasy, pillars, and scope instincts
-- [`story-level-bible.md`](./story-level-bible.md): route spine, Living Proof,
-  Cicka/guitar logic, ending order
+- [`story-level-bible.md`](./story-level-bible.md): route spine, area barricade
+  chain, Cicka/guitar logic, ending order
 - [`areas/`](./areas/README.md): Bridge, Concert, Dance Festival, Relay detail
 - [`open-questions.md`](./open-questions.md): unresolved design gaps
 - [`ridge-snapshot.md`](./ridge-snapshot.md): current Phaser prototype/runtime
@@ -100,7 +100,7 @@ Do not inherit these as active route requirements:
 - Cicka Home as central hub
 - folded-desk route order
 - platformer-like traversal
-- required mini-game clears as Living Proof
+- required mini-game clears as first-ending proof
 - Stampede-gated Cicka memory as first-ending dependency
 - old M0-M7 sequence as live backlog
 

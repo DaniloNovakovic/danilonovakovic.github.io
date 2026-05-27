@@ -83,10 +83,80 @@ The first required Ridge Area. It contains the Blueprint Bridge Resident Beat
 and teaches that helping a resident can visibly change the route.
 _Avoid_: calling the whole area Blueprint Bridge, bridge hub
 
+**Blueprint Bridge**:
+The first required Resident Beat where the player helps the Bridge Draftsperson
+complete a missing middle span on a bridge drawing or blueprint so the finished
+sketch becomes the physical crossing.
+_Avoid_: required physics puzzle, fetch quest, platforming test
+
+**Toy Car Play**:
+The first Cicka encounter where she peacefully plays with the Bridge
+Draftsperson's tiny weight-test car before the player later realizes it is
+needed for the bridge test.
+_Avoid_: generic fetch quest, thief tutorial, permanent follower setup
+
+**Cicka Parallel Play**:
+The gentle Bridge interaction where the player sits or relaxes near Cicka until
+she treats the toy car as shared play and lets it become usable for the bridge
+test.
+_Avoid_: taking the toy by force, obedient quest-item handoff, food-fetch gate
+
+**Toy Car Bridge Test**:
+The v0 auto-success presentation where the retrieved toy car rolls across the
+completed bridge drawing and proves the sketch can become the physical crossing.
+_Avoid_: required physics failure, hidden pass criteria, simulation-first MVP
+
+**Cicka Treat Shortcut**:
+A future optional Bridge interaction where nearby cabin food can persuade Cicka
+to release the toy car, acting as an alternate path around a richer toy-car play
+mini-game.
+_Avoid_: required food fetch, first-route errand, replacing parallel play in v0
+
+**Bridge Draftsperson**:
+The nervous or blocked resident responsible for the Blueprint Bridge plan.
+_Avoid_: wizard, quest board, generic artist-god, final proper name too early
+
+**Bridge Drawing Toy**:
+A future optional upgrade where the player draws or customizes the bridge more
+directly, potentially with simple bridge-building physics.
+_Avoid_: required v0 route blocker, full simulation before route MVP
+
 **Concert Area**:
-The middle required Ridge Area. It contains the Concert Crossing Beat, the
+The middle required Ridge Area: a compact small-town / varos-like concert block
+at evening or night with bars, street details, the Concert Crossing Beat, the
 Concert Resting Spot, and the guitar's first entrusted use.
-_Avoid_: calling the whole area Concert Crossing, music hub
+_Avoid_: calling the whole area Concert Crossing, night-club gig, music hub
+
+**Travel Interlude**:
+A short between-area passage that implies meaningful distance, time change, or
+rest between compact Ridge Areas without becoming a required vehicle mini-game.
+_Avoid_: unexplained teleport, mandatory driving game, full overworld commute
+
+**Concert-to-Dance Rest Interlude**:
+The post-Concert night-to-daytime passage where the player rests after the
+concert, then travels toward Dance Festival through a short non-driving
+transition using the Band Roadie Van Ride; the rest can be implied or skipped in
+v0, while a campfire/tent hangout can be later liveliness scope.
+_Avoid_: walking all night, required driving mini-game, unexplained time skip
+
+**Band Roadie Van Ride**:
+The grounded Concert-to-Dance daytime transition where a practical band roadie /
+van driver gives the player a lift because the player helped the concert and the
+band is already packing up gear; the band is headed somewhere else nearby and
+drops the player near Dance Festival because it is on the way.
+_Avoid_: making the roadie the festival-sleep joke, required driving mini-game, making the band attend Dance Festival by default, random bus substitute
+
+**Sneaky Cicka Arrival**:
+An optional travel flavor where Cicka is present around the Concert rest/travel
+beat or sneaks into/around the roadie van, while v0 can simply place her near
+Dance Festival without explaining the trip.
+_Avoid_: managed pet passenger, required travel explanation, companion logistics
+
+**Festival Superfan**:
+A desired recurring comic resident who talks up the Dance Festival in earlier
+areas, then sleeps through the festival when it finally happens; likely
+immediate post-v0 scope unless cheap to reserve in v0.
+_Avoid_: making him the required driver without vehicle setup, stealing focus from area residents
 
 **Dance Festival Area**:
 The final required Ridge Area at the foot of the Relay hill. It contains the
@@ -137,8 +207,8 @@ _Avoid_: shared overworld movement
 **Mini-Game Entrance**:
 An opt-in world attachment that can offer a hobby toy, reward, shortcut,
 alternate solution, or just fun without being required for the core ending path.
-For the current first-ending route, mini-games are optional fun and do not need
-to count as Living Proof; future passes may let them unlock alternate ways to
+For the current first-ending route, mini-games are optional fun and do not
+count as first-ending proof; future passes may let them unlock alternate ways to
 finish a level.
 _Avoid_: mandatory arcade gate, generic content silo
 
@@ -171,9 +241,10 @@ the first resident-help route change.
 _Avoid_: tutorial UI marker, required backtracking perch
 
 **Concert Resting Spot**:
-The Cicka Resting Spot in the Concert Area, where the guitar first becomes a
-comfort object and where the Open Ridge Return State can show one quiet
-empty-spot echo after the farewell.
+The Cicka Resting Spot in the Concert Area: first a hidden musician-side place
+where crowd-shy Cicka watches the delay, then a relaxed band-side spot near the
+opened exit where the Open Ridge Return State can show one quiet empty-spot echo
+after the farewell.
 _Avoid_: abandoned guitar, shrine, required sad objective
 
 **Dance Festival Resting Spot**:
@@ -190,56 +261,102 @@ _Avoid_: companion AI, quest marker, follower pet, objective dispenser
 
 **Cicka Threshold Farewell**:
 The first ending beat where Cicka accompanies the player to the Relay Spire
-threshold, looks back, leaves one final paw/page mark, then slips into a page
-fold or light beyond the player's path without translated farewell text in the
-initial version.
+threshold, looks back, then slips into a page fold, light, or other threshold
+beyond the player's path without translated farewell text in the initial
+version. Any final trace should be treated as optional visual staging only if
+the route has already taught that language.
 _Avoid_: literal death scene, grief monologue, Cicka leaving with the player, written goodbye
 
 **Open Ridge Return State**:
 The immediate post-ending Ridge state where the world remains playable with the
-canonical final mark at the Relay threshold and one quiet echo at the Concert
-Resting Spot before any later Micka trigger; the echo should read as an empty
-usual spot with one small paw/page mark, not the player's guitar left behind.
+farewell complete, the guitar still with the player, and any minimal absence
+echo treated as visual staging rather than a required mark mechanic before any
+later Micka trigger.
 _Avoid_: closed ending, sad objective, immediate replacement reveal, scattered sadness marks, abandoned inventory
 
 **Guitar Farewell**:
-The final shared Cicka moment where the player plays guitar for her at the Relay
-Spire, echoing the visual presence, tiny marks, and accumulated memory from
-Cicka Resting Spots across the Ridge.
+The final shared Cicka moment where the player chooses Sit and Play at the Relay
+Spire, plays the familiar Concert guitar phrase for her, and commits to the
+ending through a quiet, short, non-arcade farewell sequence.
 _Avoid_: generic music mini-game, melodrama, one-off ending prop
 
+**Concert Guitar**:
+The literal guitar entrusted to the player after Concert Crossing; it remains
+with the player for the rest of the first-ending route and becomes the
+instrument used for the Guitar Farewell.
+_Avoid_: abstract music ability, temporary quest prop, separate ending guitar
+
+**Optional Guitar Comfort Interaction**:
+A later-polish interaction where the player may sit near a Cicka Resting Spot
+and play a tiny guitar phrase without changing route progression.
+_Avoid_: hidden required prompt, affection checklist, extra proof token
+
 **Sit and Play Prompt**:
-The final Relay Spire interaction that starts the Guitar Farewell when the
-player chooses to sit near Cicka and play guitar.
-_Avoid_: rhythm UI, fail state, final skill check, objective popup
+The final Relay Spire interaction that starts the Guitar Farewell and commits to
+the first ending when the player chooses to sit near Cicka and play guitar.
+_Avoid_: rhythm UI, fail state, final skill check, objective popup, unseeded second ending prompt
 
 **Living Proof Montage**:
-A brief Guitar Farewell montage that wordlessly shows the resident help and
-world changes that made the sketchbook ready to send; the Opening Dance image is
-an emotional echo scored by the player's guitar while the actual festival song
-request stays implied and offscreen.
+A previous name for the brief ending montage, now better treated as **Route
+Memory Montage** unless a later design restores a separate proof system.
 _Avoid_: full recap, credits roll, visible checklist, objective summary
 
+**Route Memory Montage**:
+A brief Guitar Farewell montage that wordlessly shows the fixed route's resident
+help, world changes, and Cicka Resting Spot echoes during the final song.
+_Avoid_: full recap, credits roll, visible checklist, objective summary
+
+**Area Barricade Chain**:
+The fixed first-ending route structure where Bridge, Concert, and Dance
+Festival each contain one concrete local barricade whose resolution opens the
+next area and finally brings the player to Relay.
+_Avoid_: optional proof checklist, hub progression, abstract emotional gate
+
+**Compact Area Transition**:
+A short transition between separate compact Ridge Areas that preserves linear
+progress without requiring one continuous walkable overworld geography.
+_Avoid_: unexplained teleport, giant continuous map requirement, hard distance scale
+
 **Send the Sketchbook Prompt**:
-The post-Guitar Farewell Relay Spire interaction that begins the Cicka Threshold
-Farewell after the player has shared the quiet song with Cicka.
-_Avoid_: automatic send, guitar-as-send-button, boss gate, extra skill check
+A retired/provisional ending prompt. Do not use it in v0 unless the sketchbook
+becomes a seeded object or interaction across the route first.
+_Avoid_: unintroduced final symbol, automatic send, guitar-as-send-button, boss gate, extra skill check
+
+**Pre-Ending Relay Linger**:
+The small Relay state before choosing Sit and Play where Cicka is present and
+the player may look around, sit nearby, or share a quiet optional comfort beat
+before committing to the ending.
+_Avoid_: open backtracking after the final song, menu-only ending choice, automatic cutscene trigger
 
 **Relay Blue Hour**:
-The final send lighting state after the Guitar Farewell, where Relay has moved
-from sunset warmth into blue-hour threshold light while the night festival begins
-elsewhere.
+A retired/provisional name for a post-song send lighting state. Current v0
+direction keeps the Guitar Farewell and Cicka Threshold Farewell at sunset unless
+blockout proves another lighting transition is needed.
 _Avoid_: full night farewell, hard time cut, cold death-coded darkness
 
 **Concert Crossing Beat**:
-A mid-route Resident Beat where a blocked concert/traffic crossing becomes
-the way the player earns the guitar through a small music performance problem.
+A mid-route Resident Beat where a crowd or traffic line blocks the crossing
+while waiting for a delayed concert, leading the player to take over for an
+incapacitated local guitarist who hurt his hand or wrist while trying to prove
+he was still young after a kid teased him, clear the crowd, and receive the
+Concert Guitar during a goodbye beat at the opened exit.
 _Avoid_: joke-only drunk musician, random item pickup, final-farewell skill gate
 
+**Compact-Area Discovery**:
+A discovery pattern where a small Ridge Area relies on readable staging,
+optional chatter, and player wandering instead of a strict breadcrumb chain.
+_Avoid_: over-breadcrumbed objective path, hidden critical clue, giant search space
+
+**Forgiving Practice Riff**:
+The simple guitar phrase the injured Concert guitarist teaches the player so v0
+can resolve the concert through auto-success or highly forgiving prompts before
+a later rhythm mini-game exists.
+_Avoid_: required hard rhythm check, mastery test, full song system in MVP
+
 **Opening Dance Shuttle Beat**:
-A final-route Resident Beat where afternoon festival setup blocks the Relay
-hill service road until the player helps prepare the night dance and catches the
-last daylight shuttle to the Relay Spire.
+A final-route Resident Beat where daytime festival setup progresses toward late
+afternoon, blocks the Relay hill service road until the player helps prepare the
+night dance, and ends with the last daylight shuttle to the Relay Spire.
 _Avoid_: Last Dance, Final Shuttle Hold, after-festival closure gate
 
 **Last-Stop Operations Helper**:
@@ -343,13 +460,9 @@ insecurity, not act as arbitrary busywork.
 _Avoid_: generic fetch quest, public romantic confrontation, puppet-master solve
 
 **Living Proof Gate**:
-A quiet ending gate where the player can physically reach the Relay Spire, but
-the sketchbook cannot send until the route has created enough visible world
-changes, proofs, and Cicka familiarity to make the destination legible.
-For the current first ending, the three required Ridge Areas and their
-Resident/world changes should provide enough Living Proof by themselves.
-Changed Cicka Resting Spots can echo that proof emotionally, but they should
-not be counted as separate proof sources.
+A retired or provisional ending-gate term. The current first-ending route uses
+the fixed **Area Barricade Chain** instead of a separate proof resource,
+checklist, or optional readiness system.
 _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 
 ## Relationships
@@ -384,14 +497,20 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
   presentation, but its blocker, helper, and resolution should feel practical
   and locally motivated.
 - The **Exploration Map** uses **Exploration Traversal**.
+- The first-ending route currently uses an **Area Barricade Chain**: Bridge
+  Area clears into Concert Area, Concert Area clears into Dance Festival Area,
+  and Dance Festival clears into Relay Ending.
+- The first playable route should use **Compact Area Transitions** between
+  separate compact maps, allowing different time of day, environment, and
+  staging per area while distant Relay cues imply route progress.
 - A mini-game may use its own **Mini-Game Movement System** instead of
   **Exploration Traversal**.
 - The first ending path should be completable through conversation, collection,
   authored traversal, Ridge Areas, Resident Beats, and world changes without
   requiring full arcade mini-games.
 - **Mini-Game Entrances** can provide optional rewards, shortcuts, alternate
-  path unlocks, or pure side fun, but they should not be required Living Proof
-  for the current first ending. Future passes may let them unlock alternate
+  path unlocks, or pure side fun, but they should not be required first-ending
+  proof for the current first ending. Future passes may let them unlock alternate
   ways to finish a level.
 - **Exploration Traversal** treats jump as non-core for the v0 main path;
   vertical movement should come from **Authored Traversal Interactions** unless
@@ -403,6 +522,13 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 - **Cicka Field Presence** complements **Cicka Resting Spots** by making Cicka
   recur across the **Sketchbook Neighborhood** without turning her into a
   follower, solver, vendor, or quest board.
+- **Toy Car Play** can introduce Cicka in Bridge Area, but it should lead into
+  recurring **Cicka Field Presence**, not continuous follower behavior.
+- **Cicka Parallel Play** retrieves the toy car by joining Cicka's play rather
+  than commanding her, taking the toy, or adding a food-fetch gate.
+- The first Bridge prototype should use an auto-success **Toy Car Bridge Test**;
+  **Bridge Drawing Toy**, toy-car ping-pong, and **Cicka Treat Shortcut** are
+  later optional layers after the route MVP is proven.
 - A **Resident Help Beat** may use **Cicka Field Presence** to draw attention to
   a route blocker, but the solution should come from a resident, artifact,
   mini-game clear, or visible environment change.
@@ -428,39 +554,44 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
   and helping them act without making the player directly manage their feelings.
 - The **Cicka Threshold Farewell** resolves Cicka's recurring field guidance
   without closing the **Sketchbook Neighborhood**; the Ridge remains replayable
-  with Cicka's Relay threshold mark and one Concert Resting Spot echo.
+  after the farewell.
 - The **Cicka Threshold Farewell** departure should be physical and mostly
-  silent: walk together, pause, look back, final mark, then page-fold/light
-  departure. The initial version should use no translated farewell line; a tiny
-  raw meow/chirp sound can remain optional if it supports the staging.
+  silent: walk together, pause, look back, then page-fold/light departure. The
+  initial version should use no translated farewell line; a tiny raw meow/chirp
+  sound can remain optional if it supports the staging. Do not rely on
+  paw/page marks as a required symbol unless the route has seeded that visual
+  language first.
 - The immediate return after the **Cicka Threshold Farewell** should be the
-  **Open Ridge Return State**: replayable, quiet, and minimally absence-marked,
-  with the canonical final mark at the Relay threshold, one quieter echo at
-  the **Concert Resting Spot**, and Micka still delayed until the later
-  post-ending trigger. The echo should be an empty usual spot with one small
-  paw/page mark, not the guitar left behind.
+  **Open Ridge Return State**: replayable, quiet, and minimally absence-marked
+  only if that visual language has been seeded, with Micka still delayed until
+  the later post-ending trigger. The guitar stays with the player.
 - The **Guitar Farewell** should be established before the ending through the
   guitar's story role and visual Cicka Resting Spot presence. The initial route
   does not need repeatable resting-spot interactions; sitting together, petting,
   lap loafing, or playing guitar at local spots can wait for a later affection
   pass.
-- The **Guitar Farewell** can include a **Living Proof Montage**, but the montage
+- The **Concert Guitar** is the same physical instrument used in the **Guitar
+  Farewell**, not an abstract music unlock or a different ending-only prop.
+- The only required guitar uses in the first-ending route are the Concert
+  performance and Relay **Sit and Play Prompt**; any guitar use at local
+  **Cicka Resting Spots** should be an **Optional Guitar Comfort Interaction**.
+- The **Guitar Farewell** can include a **Route Memory Montage**, but the montage
   should stay brief and keep Cicka as the emotional focus; the player's guitar
   is the only music the player needs to hear during the montage.
 - The **Sit and Play Prompt** starts the **Guitar Farewell** at Relay Spire
-  without turning it into a rhythm challenge.
-- The **Send the Sketchbook Prompt** should happen after the **Guitar Farewell**,
-  keeping the final send as an active player choice while preserving the song as
-  comfort rather than a send button.
-- The Relay ending should use sunset for **Sit and Play Prompt**, then
-  **Relay Blue Hour** for **Send the Sketchbook Prompt**; the **Living Proof
-  Montage** can show the night festival beginning elsewhere.
+  without turning it into a rhythm challenge, and it is the v0 final trigger.
+- Do not use **Send the Sketchbook Prompt** in v0 unless the sketchbook becomes
+  a seeded object or interaction across the route first.
+- The Relay ending should use sunset for **Sit and Play Prompt** and the
+  **Cicka Threshold Farewell**; the **Route Memory Montage** can show the night
+  festival beginning elsewhere.
 - The **Concert Crossing Beat** can teach the guitar through a small
   Guitar-Hero-like mini-game, but the **Guitar Farewell** itself should remain a
   cozy remembrance interaction rather than an arcade pass/fail challenge.
 - The **Opening Dance Shuttle Beat** keeps the dance festival as a night event,
-  but the required route action happens during daytime setup so the player can
-  reach the Relay Spire for the sunset **Guitar Farewell**.
+  but the required route action starts during daytime setup, progresses toward
+  late afternoon, and gets the player to Relay Spire for the sunset **Guitar
+  Farewell**.
 - The **Opening Dance Shuttle Beat** centers the hill-shuttle driver and the
   **Last-Stop Operations Helper** as colleagues whose practical work and private
   nervousness both delay the last daylight ride.
@@ -497,8 +628,9 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 - Required **Resident Beats** that contain arcade-like interactions should
   also have a non-arcade fallback through conversation, collection, practice, or
   a forgiving auto-resolve path.
-- A **Living Proof Gate** blocks the **Cicka Threshold Farewell** emotionally and
-  semantically, not by making the Relay Spire physically unreachable.
+- **Living Proof Gate** language should not imply a required proof resource in
+  the current first-ending route; use **Area Barricade Chain** for progression
+  and **Route Memory Montage** for the ending echo.
 - The old Overworld and Hobbies scenes are transitional surfaces. Long-term,
   their best content should fold into the **Exploration Map** as artifacts,
   entrances, Cicka reactions, Basement/Potassium paths, and mini-game props.
@@ -524,13 +656,13 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 > **Domain expert:** "No — the **Cicka Threshold Farewell** means she walks with the player to the threshold, then departs somewhere the player cannot follow."
 
 > **Dev:** "Should Cicka's final departure include translated text?"
-> **Domain expert:** "No — the initial **Cicka Threshold Farewell** should be fully nonverbal. Use staging, the final mark, silence, and optionally a tiny raw sound instead of a written goodbye."
+> **Domain expert:** "No — the initial **Cicka Threshold Farewell** should be fully nonverbal. Use staging, silence, and optionally a tiny raw sound instead of a written goodbye."
 
-> **Dev:** "Where does Cicka's final mark persist after the ending?"
-> **Domain expert:** "Use a minimal **Open Ridge Return State**: the canonical final mark persists at the Relay threshold, with one quieter echo at the **Concert Resting Spot** and no scattershot sad marks."
+> **Dev:** "Should the ending rely on paw/page marks?"
+> **Domain expert:** "No — only use a final trace or absence echo as visual staging if the route has already taught that language. Do not make paw/page marks a surprise mechanic or required symbol in v0."
 
 > **Dev:** "Should the Cicka Resting Spot echo leave the guitar there?"
-> **Domain expert:** "No — the guitar stays with the player. The echo should be the empty usual spot plus one small paw/page mark."
+> **Domain expert:** "No — the guitar stays with the player. Any echo should be a small absence cue at the usual spot, not an abandoned inventory object."
 
 > **Dev:** "Should each bridge/concert/dance area have a small Cicka resting spot?"
 > **Domain expert:** "Yes — give each required **Ridge Area** one local **Cicka Resting Spot**. It keeps Cicka present across a linear route without turning any area into a hub."
@@ -542,13 +674,13 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 > **Domain expert:** "Yes — make it the **Guitar Farewell**, but establish guitar as a quiet comfort interaction before Relay so it carries memory instead of exposition."
 
 > **Dev:** "Can the Guitar Farewell show what happened to the residents?"
-> **Domain expert:** "Yes — use a brief **Living Proof Montage** of resident/world changes, not a full recap."
+> **Domain expert:** "Yes — use a brief **Route Memory Montage** of resident/world changes, not a full recap."
 
 > **Dev:** "Can the guitar come from a concert problem?"
 > **Domain expert:** "Yes — use the **Concert Crossing Beat** to earn the guitar through a tiny performance/help moment, then let local **Cicka Resting Spots** turn it into comfort."
 
 > **Dev:** "Does the dance festival happen at night?"
-> **Domain expert:** "Yes — but the required route beat is the **Opening Dance Shuttle Beat**, where daytime setup opens one last daylight ride to Relay before the night festival begins."
+> **Domain expert:** "Yes — but the required route beat is the **Opening Dance Shuttle Beat**, where daytime setup progresses toward one last daylight ride to Relay before the night festival begins."
 
 > **Dev:** "Is the driver's crush the DJ?"
 > **Domain expert:** "No — she is the **Last-Stop Operations Helper**, a visible plaza worker whose setup checklist and service-road handoff make her role immediately readable."
@@ -596,7 +728,7 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 > **Domain expert:** "No — the first ending path should work through residents, conversations, collection, and world changes; **Mini-Game Entrances** can add alternate paths or side fun."
 
 > **Dev:** "Should the Relay Spire require a boss or hard climb?"
-> **Domain expert:** "No — use a **Living Proof Gate** so the player can reach it early but cannot send until the path has created enough visible change and emotional tie to Cicka."
+> **Domain expert:** "No — use the **Area Barricade Chain** so the player reaches Relay after clearing the Bridge, Concert, and Dance Festival barricades."
 
 ## Flagged Ambiguities
 
@@ -631,7 +763,7 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
   **Opening Dance Shuttle Beat** for the final dance-festival route beat.
 - "bachata" is loose discarded inspiration, not canonical genre; use a simple,
   cute, guitar-friendly implied request for the **Folded Song Request** while
-  the later **Living Proof Montage** dance image is emotionally scored by the
+  the later **Route Memory Montage** dance image is emotionally scored by the
   player's guitar.
 - "festival helper" is too generic for the driver's colleague; resolved: use
   **Last-Stop Operations Helper**.

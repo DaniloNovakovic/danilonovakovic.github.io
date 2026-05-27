@@ -65,15 +65,16 @@ does not dictate the desired route shape.
 
 The ending order is protected:
 
-1. Living Proof readiness
+1. Fixed area barricade chain reaches Relay
 2. Cicka appears at the Relay threshold
-3. Guitar Farewell at sunset
-4. Send the Sketchbook Prompt in blue hour
-5. Cicka Threshold Farewell
-6. Open Ridge Return State
+3. Sit and Play starts the Guitar Farewell at sunset as the final trigger
+4. Cicka Threshold Farewell follows the final guitar phrase
+5. Open Ridge Return State
 
 The farewell is a tribute beat, not a literal-heavy explanation. Use presence,
-absence, paw marks, silence, guitar, and the return-state Ridge to carry it.
+absence, silence, guitar, and the return-state Ridge to carry it. Paw/page marks
+should stay optional visual language only if seeded earlier, not an unintroduced
+ending mechanic.
 
 Micka appears after the player returns to normal Ridge and completes or replays
 one post-ending mini-game. She is continuity, not replacement, and should not
@@ -87,8 +88,8 @@ Desk, Neutral Notebook, and similar ideas are candidates, not required proof for
 the first ending unless route canon explicitly reopens that.
 
 Before adding or prioritizing another mini-game, ask whether Bridge, Concert,
-Dance Festival, Relay, Living Proof feedback, and the Cicka farewell are clearer
-than they were before.
+Dance Festival, Relay, route readiness feedback, and the Cicka farewell are
+clearer than they were before.
 
 ## Scope Cuts
 

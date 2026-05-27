@@ -15,33 +15,89 @@ something" toward "carrying comfort forward."
 
 The emotional idea is: **I can turn memory into comfort.**
 
+The area identity is a compact small-town / varos-like concert block at evening
+or night: small buildings, bars, stage-adjacent storefronts, alleys, street
+lights, and lived-in festival details around the blocked crossing. The concert
+should feel like a memorable local night event rather than a nightclub gig. The
+first prototype can keep most buildings as facade atmosphere, while later passes
+may add enterable bars/building interiors, extra residents, and optional hangout
+spaces to make the block feel more alive.
+
 ## Accepted Local Contract
 
 - A blocked concert/traffic crossing halts the route.
-- The crossing is blocked because the local guitarist cannot play, the
-  paper-stage setup is tangled, or the guitar needs a small repair.
-- The player helps the resident through conversation, collection, practice
-  together, forgiving auto-play, or another non-arcade fallback.
-- The guitar is entrusted to the player afterward as a meaningful comfort item.
+- The crossing is blocked by a crowd, traffic line, or gathering waiting for the
+  concert to start.
+- The player discovers the delay through compact-area exploration: annoyed
+  crowd members can mention that the concert is late, but the player can also
+  simply wander the small area and find the musician-side space naturally.
+- The local guitarist cannot play because of a clumsy show-off mishap: after a
+  kid teased him about being old, he tried to prove he was still young by doing an
+  absurd concert stunt, such as playing guitar while riding a skateboard on one
+  leg, and hurt his hand or wrist.
+- The player helps by learning one **Forgiving Practice Riff** from the injured
+  guitarist, then taking over the concert.
+- In v0, the concert performance can be auto-success or highly forgiving so the
+  main route is not blocked by rhythm-game production.
+- After the first playable route lands, a Guitar-Hero-like or Baka Mitai-style
+  button-rhythm guitar mini-game can become the richer expression. It may later
+  use Danilo's real guitar/song material and dynamically generate button prompts
+  from authored song data.
+- Once the performance begins, the crowd or traffic clears the crossing.
+- After the concert, the area clears up: the crowd leaves or moves aside, the
+  crossing opens, and the musician or band waits near the exit for a short
+  goodbye/reward beat.
+- During that exit beat, the guitarist entrusts the guitar to the player as a
+  meaningful comfort item and reward.
+- This is the same physical guitar the player carries for the rest of the game
+  and uses at Relay for the **Guitar Farewell**.
+- The only required guitar uses in the first-ending route are the Concert
+  performance and the Relay **Sit and Play** interaction.
 - The beat must make the later **Guitar Farewell** feel earned.
+
+## Prototype Floor
+
+The first blockout only needs:
+
+- blocked crowd/traffic crossing
+- 2-3 annoyed crowd NPCs
+- hidden musician-side nook
+- injured guitarist
+- one forgiving practice interaction
+- auto-success concert start
+- crowd clears
+- goodbye/reward beat at the opened exit
+- guitar received
+- Cicka hidden before resolution and chilling with the band after resolution
+
+Small-city facades, bars, and building silhouettes should frame the area even in
+the prototype, but enterable buildings and extra residents are later liveliness
+scope.
 
 ## Cicka Resting Spot
 
 Use **Concert Resting Spot** as the practical label.
 
-- Before resolution: Cicka watches the guitar case, string, stage edge, or
-  blocked crossing.
-- After resolution: Cicka rests in a quiet listening corner near the opened
-  crossing.
+- Before resolution: Cicka avoids the crowd and watches from a hidden or
+  musician-side place, such as behind stage props, near the guitar case, or
+  close to where the injured guitarist/band is waiting.
+- During the concert: Cicka stays off to the side rather than entering the
+  crowd, reading as curious but crowd-shy.
+- After resolution: Cicka chills with the musicians near the opened exit; the
+  injured guitarist or another band member may quietly pet her.
 
-This can later become the post-ending echo spot. The echo should be an empty
-usual spot plus one small paw/page mark, not the player's guitar left behind.
+This can later become the post-ending echo spot. If used, the echo should be a
+small visual absence cue at Cicka's usual spot, not the player's guitar left
+behind and not an unseeded paw/page mark mechanic.
 
 ## Boundaries
 
 - A Guitar-Hero-like performance mini-game is allowed as an ideal or optional
   expression.
 - The required route must have a non-arcade fallback.
+- Do not block the first route MVP on building the full rhythm mini-game.
+- Do not over-breadcrumb the injured guitarist in v0; compact exploration and
+  believable crowd chatter should be enough unless playtests prove otherwise.
 - Avoid making the guitarist a joke-only drunk if it undercuts the tribute.
 - Gentle comedy is welcome if the guitar's emotional role still has room to
   breathe.
@@ -49,7 +105,12 @@ usual spot plus one small paw/page mark, not the player's guitar left behind.
 ## Open Local Slots
 
 - exact crossing geometry and why it blocks progress
-- guitarist/resident role, silhouette, and eventual name
-- how the guitar is repaired, taught, or entrusted
+- small-city block layout, bars, building facades, and possible later interiors
+- how many annoyed crowd/band flavor lines are enough for discovery
+- exact post-concert goodbye staging near the opened exit
+- guitarist/resident role, silhouette, simplified staging for the skateboard
+  stunt, and eventual name
+- exact Forgiving Practice Riff prompts and auto-success performance beat
+- future rhythm mini-game song-data format and generated button prompt rules
 - first playable guitar interaction, if any, before Relay
 - visual/audio distinction from Dance Festival and Relay sunset
