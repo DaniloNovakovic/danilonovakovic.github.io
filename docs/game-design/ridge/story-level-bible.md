@@ -118,19 +118,27 @@ implying progress toward the final ridge.
 
 Current time-of-day arc: Bridge begins during the day at a nature/hill edge;
 Concert moves into evening/night small-town festival energy; a short sleep/rest
-interlude carries the player from Concert night to Dance Festival morning/day
-arrival; Dance Festival plays from morning/day setup into later afternoon; Relay
+interlude carries the player from Concert night to Dance Festival daytime
+arrival; Dance Festival plays from daytime setup into later afternoon; Relay
 uses sunset for Sit and Play, then the Relay Holding State for Send the
 Sketchbook.
 
 Current Concert-to-Dance transition direction: after the night concert, the
 route should rest instead of sending the player walking through the night. The
-leading flavor is a small post-concert campfire/tent sleepover, followed by
-morning travel toward Dance Festival through a grounded **Band Roadie Van
-Ride**. The transport role is a band roadie / van driver from the Concert area,
-not the injured guitarist. The roadie is a practical helpful character who
-offers the ride because the player saved the concert and the band is already
-packing up gear; he should not own the sleep-through-festival joke.
+rest can be implied or skipped in v0; a small post-concert campfire/tent hangout
+can become later liveliness scope for talking with characters, playing with
+Cicka, or adding a tiny optional toy. Morning travel toward Dance Festival uses
+a grounded **Band Roadie Van Ride**. The transport role is a band roadie / van
+driver from the Concert area, not the injured guitarist. The roadie is a
+practical helpful character who offers the ride because the player saved the
+concert and the band is already packing up gear; he should not own the
+sleep-through-festival joke. The roadie/band do not need to attend the Dance
+Festival. They are headed somewhere else nearby, such as a local hospital or
+clinic for the guitarist's wrist, another gig route, band storage, or an
+unexplained practical destination, and Dance Festival road is on the way.
+Cicka can be present if the later campfire/tent rest is shown, and she may
+arrive near Dance Festival by sneaking into or around the van. V0 does not need
+to explain her travel; she can simply appear nearby as authored field presence.
 
 A separate recurring **Festival Superfan** is desired for the game, but can wait
 until the immediate post-v0 liveliness pass if the first route prototype is
@@ -245,7 +253,7 @@ Relay Spire / Guitar Farewell -> I am ready for Cicka's threshold farewell.
 | --- | --- | --- | --- | --- | --- |
 | [Bridge Area](./areas/01-bridge/README.md) | Blueprint Bridge | Accepted first art/drawing beat | Required soft gate tutorial for resident help | Obvious subtle attention cue at unsafe edge or blank plan | Finished bridge sketch becomes the crossing |
 | [Concert Area](./areas/02-concert/README.md) | Concert Crossing Beat | Accepted middle beat | Blocks a concert/traffic crossing and earns the guitar | Crowd-shy observer near hidden musician-side space, then relaxed with the band after the crossing opens | Concert continues; crossing opens; guitar entrusted to player |
-| [Dance Festival Area](./areas/03-dance-festival/README.md) | Opening Dance Shuttle Beat | Accepted final beat direction; Last-Stop Operations Helper locked as romantic partner role | Creates the last emotional readiness before Relay through afternoon setup for a night dance festival at the foot of the Relay hill | Quiet threshold observer near the lantern crates, operations table, shuttle step, or service gate; may loaf with the Unnamed Counterpart Cat | Festival setup clears enough for one last daylight shuttle to Relay before the night road closure |
+| [Dance Festival Area](./areas/03-dance-festival/README.md) | Opening Dance Shuttle Beat | Accepted final beat direction; Last-Stop Operations Helper locked as romantic partner role | Creates the last emotional readiness before Relay through daytime setup that progresses toward late afternoon for a night dance festival at the foot of the Relay hill | Quiet threshold observer near the lantern crates, operations table, shuttle step, or service gate; may loaf with the Unnamed Counterpart Cat | Festival setup clears enough for one last daylight shuttle to Relay before the night road closure |
 | [Relay Ending Area](./areas/04-relay-ending/README.md) | Guitar Farewell / Cicka Threshold Farewell | Active ending direction | Final threshold after the Dance Festival barricade is cleared | Final field-presence spot and threshold departure | Open Ridge Return State preserves the final Relay mark and one quiet Concert echo |
 
 ## Opening Dance Shuttle Beat
@@ -254,8 +262,9 @@ Detailed local contract:
 [`Dance Festival Area`](./areas/03-dance-festival/README.md).
 
 Accepted route summary: the player reaches **Last-Stop Plaza** at the foot of
-the Relay hill during afternoon setup for a night dance festival. Festival
-setup blocks the service road with barriers, lantern lines, chair stacks,
+the Relay hill during daytime setup for a night dance festival, then the beat
+progresses toward the late-afternoon last daylight shuttle. Festival setup
+blocks the service road with barriers, lantern lines, chair stacks,
 stage/speaker cables, and a locked gate. The last daylight hill shuttle can
 leave only after the setup lane is safe.
 
@@ -275,13 +284,12 @@ then echo in the Guitar Farewell montage.
 Detailed local contract:
 [`Concert Area`](./areas/02-concert/README.md).
 
-Concert Area should read as a compact small-town / varos-like concert block with
-small buildings, bars, stage-adjacent storefronts, alleys, and lived-in street
-details around the blocked crossing. The concert can be a daytime or afternoon
-local festival-style event rather than a night-club gig. The first prototype can
-use facades and silhouettes instead of enterable buildings; later passes may add
-interiors, extra residents, and hangout spaces to make the block feel more
-alive.
+Concert Area should read as a compact small-town / varos-like concert block at
+evening or night, with small buildings, bars, stage-adjacent storefronts,
+alleys, street lights, and lived-in festival details around the blocked
+crossing. The first prototype can use facades and silhouettes instead of
+enterable buildings; later passes may add interiors, extra residents, and
+hangout spaces to make the block feel more alive.
 
 A crowd, traffic line, or gathering blocks the route while everyone waits for
 the concert to start. The player can learn that the concert is late from

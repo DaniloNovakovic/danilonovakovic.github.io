@@ -29,8 +29,12 @@ the narrowest subdoc inside that area folder.
 ## Route Transitions
 
 - **Concert-to-Dance travel staging:** What exact beats show the accepted
-  post-concert campfire/tent rest and morning Band Roadie Van Ride without
-  becoming a required driving mini-game?
+  implied post-concert rest and morning Band Roadie Van Ride without becoming a
+  required driving mini-game?
+- **Band roadie destination flavor:** Is the band roadie taking the injured
+  guitarist to a local hospital/clinic, heading to another gig route, going to
+  band storage, or leaving the destination unexplained while dropping the player
+  near Dance Festival because it is on the way?
 - **Recurring festival superfan:** Should Bridge and Concert include a recurring
   comic resident who keeps talking about the Dance Festival, only to sleep
   through it, and should he enter v0 or the immediate post-v0 liveliness pass?

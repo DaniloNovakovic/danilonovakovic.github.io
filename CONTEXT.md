@@ -133,16 +133,24 @@ rest between compact Ridge Areas without becoming a required vehicle mini-game.
 _Avoid_: unexplained teleport, mandatory driving game, full overworld commute
 
 **Concert-to-Dance Rest Interlude**:
-The post-Concert night-to-morning passage where the player rests after the
+The post-Concert night-to-daytime passage where the player rests after the
 concert, then travels toward Dance Festival through a short non-driving
-transition using the Band Roadie Van Ride.
+transition using the Band Roadie Van Ride; the rest can be implied or skipped in
+v0, while a campfire/tent hangout can be later liveliness scope.
 _Avoid_: walking all night, required driving mini-game, unexplained time skip
 
 **Band Roadie Van Ride**:
-The grounded Concert-to-Dance morning transition where a practical band roadie /
+The grounded Concert-to-Dance daytime transition where a practical band roadie /
 van driver gives the player a lift because the player helped the concert and the
-band is already packing up gear.
-_Avoid_: making the roadie the festival-sleep joke, required driving mini-game, random bus substitute
+band is already packing up gear; the band is headed somewhere else nearby and
+drops the player near Dance Festival because it is on the way.
+_Avoid_: making the roadie the festival-sleep joke, required driving mini-game, making the band attend Dance Festival by default, random bus substitute
+
+**Sneaky Cicka Arrival**:
+An optional travel flavor where Cicka is present around the Concert rest/travel
+beat or sneaks into/around the roadie van, while v0 can simply place her near
+Dance Festival without explaining the trip.
+_Avoid_: managed pet passenger, required travel explanation, companion logistics
 
 **Festival Superfan**:
 A desired recurring comic resident who talks up the Dance Festival in earlier
@@ -345,9 +353,9 @@ a later rhythm mini-game exists.
 _Avoid_: required hard rhythm check, mastery test, full song system in MVP
 
 **Opening Dance Shuttle Beat**:
-A final-route Resident Beat where afternoon festival setup blocks the Relay
-hill service road until the player helps prepare the night dance and catches the
-last daylight shuttle to the Relay Spire.
+A final-route Resident Beat where daytime festival setup progresses toward late
+afternoon, blocks the Relay hill service road until the player helps prepare the
+night dance, and ends with the last daylight shuttle to the Relay Spire.
 _Avoid_: Last Dance, Final Shuttle Hold, after-festival closure gate
 
 **Last-Stop Operations Helper**:
@@ -581,8 +589,9 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
   Guitar-Hero-like mini-game, but the **Guitar Farewell** itself should remain a
   cozy remembrance interaction rather than an arcade pass/fail challenge.
 - The **Opening Dance Shuttle Beat** keeps the dance festival as a night event,
-  but the required route action happens during daytime setup so the player can
-  reach the Relay Spire for the sunset **Guitar Farewell**.
+  but the required route action starts during daytime setup, progresses toward
+  late afternoon, and gets the player to Relay Spire for the sunset **Guitar
+  Farewell**.
 - The **Opening Dance Shuttle Beat** centers the hill-shuttle driver and the
   **Last-Stop Operations Helper** as colleagues whose practical work and private
   nervousness both delay the last daylight ride.
@@ -671,7 +680,7 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 > **Domain expert:** "Yes — use the **Concert Crossing Beat** to earn the guitar through a tiny performance/help moment, then let local **Cicka Resting Spots** turn it into comfort."
 
 > **Dev:** "Does the dance festival happen at night?"
-> **Domain expert:** "Yes — but the required route beat is the **Opening Dance Shuttle Beat**, where daytime setup opens one last daylight ride to Relay before the night festival begins."
+> **Domain expert:** "Yes — but the required route beat is the **Opening Dance Shuttle Beat**, where daytime setup progresses toward one last daylight ride to Relay before the night festival begins."
 
 > **Dev:** "Is the driver's crush the DJ?"
 > **Domain expert:** "No — she is the **Last-Stop Operations Helper**, a visible plaza worker whose setup checklist and service-road handoff make her role immediately readable."

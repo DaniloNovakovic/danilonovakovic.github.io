@@ -14,11 +14,12 @@ route to the Relay Spire is blocked by a practical final-approach problem:
 festival setup temporarily occupies the service road with barriers, lantern
 lines, chair stacks, stage/speaker cables, and a locked gate.
 
-Once setup is safe enough, the steward can open one short daylight window for
-the final hill shuttle before the road closes again for the night festival. The
-player helps the hill-shuttle driver, the Last-Stop Operations Helper, and
-nearby festival helpers finish that setup window, giving the driver a believable
-reason and means to take the player toward the Relay overlook at sunset.
+The player can arrive during daytime setup. Once setup is safe enough, the
+steward can open one short late-afternoon daylight window for the final hill
+shuttle before the road closes again for the night festival. The player helps
+the hill-shuttle driver, the Last-Stop Operations Helper, and nearby festival
+helpers finish that setup window, giving the driver a believable reason and
+means to take the player toward the Relay overlook at sunset.
 
 Accepted arrival premise: **Opening Dance Setup + Last Daylight Shuttle**. This
 replaces the previous after-festival **Last Song Table + Final Shuttle Hold**
@@ -65,7 +66,7 @@ actual full dance stays mostly offscreen or appears later in the ending montage.
 
 Open art/audio choices:
 
-- afternoon-to-sunset palette
+- daytime setup progressing toward a late-afternoon-to-sunset palette
 - signage language
 - crowd ambience level
 - music texture before the dance begins

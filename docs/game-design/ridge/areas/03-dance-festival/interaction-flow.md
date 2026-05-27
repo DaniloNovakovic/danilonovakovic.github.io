@@ -17,7 +17,7 @@ dance.
 First-read sequence:
 
 ```text
-Player arrives at Last-Stop Plaza.
+Player arrives at Last-Stop Plaza during daytime setup.
 Festival barriers, lantern lines, and shuttle sign show the route is blocked.
 Traveler says Relay requires the last daylight hill shuttle.
 Driver is visible by the shuttle, stuck on the route clipboard.

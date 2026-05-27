@@ -14,8 +14,9 @@ Dance Festival Area is the final required Ridge Area before Relay Spire.
 
 The emotional idea is: **Life can keep moving with someone new.**
 
-The player participates in afternoon setup for a real night dance festival and
-leaves before the festival fully begins. The beat is romantic, warm, and
+The player arrives during daytime setup for a real night dance festival, then
+the area progresses toward the late-afternoon last daylight shuttle. The
+player leaves before the festival fully begins. The beat is romantic, warm, and
 different from the Guitar Farewell: two fictional residents like each other but
 are too nervous to step onto the dance floor or talk directly. The player helps
 the place become ready and gives both residents enough dignity to meet later
@@ -33,6 +34,8 @@ without turning the scene into public matchmaking.
 
 - Accepted arrival premise: **Opening Dance Setup + Last Daylight Shuttle**.
 - Last-Stop Plaza sits at the foot of the Relay hill.
+- The player may arrive in daytime; the local beat can progress through
+  setup toward the late-afternoon shuttle window.
 - Festival setup blocks the service road with barriers, lantern lines, chair
   stacks, stage/speaker cables, and a locked gate.
 - The last daylight hill shuttle can leave only after the setup lane is safe.
