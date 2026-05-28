@@ -163,10 +163,9 @@ this prose pass, but the core overworld/Ridge route blockers should be legible
 in words first.
 
 The accepted ending anchor is the **Cicka Threshold Farewell**: Cicka recurs
-through the Ridge as field presence, accompanies the player to the Relay Spire
-threshold, and then departs somewhere the player cannot follow. The ending
-should stay replayable, tender, and non-literal rather than becoming a death
-scene or grief speech.
+through the Ridge as field presence, then leaves the seated player through a
+warm sketchbook threshold somewhere the player cannot follow. The ending should
+stay tender and non-literal rather than becoming a death scene or grief speech.
 Design the canonical first ending before designing optional endings. Multiple
 endings are not required for the Ridge; add alternate endings only if a later
 story/level pass proves they create meaningful replay value without weakening
@@ -185,14 +184,33 @@ Accepted first ending outline:
 4. The player uses **Sit and Play** to share a quiet Guitar Farewell with Cicka,
    ideally under a warm sunset or other cozy threshold light. This is the v0
    final trigger, not setup for a separate post-song send prompt.
-5. Cicka walks with the player to the threshold, pauses, looks back once, then
-   slips into a page fold, light, or other threshold beyond the player's path.
-   The initial version uses no translated farewell line.
-6. A final Relay trace or Concert Resting Spot echo can exist only as visual
+5. Cicka moves toward the threshold, pauses, turns back toward the seated
+   player, gives one small raw meow, then slips into a warm
+   sketchbook-threshold artifact beyond the player's path. It can read as warm
+   light, a scratch-like seam, a paper hole, or a gentle glitch-portal-like
+   artifact rather than a literal page-edge fold. The player cannot follow into
+   that threshold. The initial version uses no translated farewell line.
+6. After Cicka disappears, hold on the empty sunset spot for a short silent beat,
+   then fade to a restrained non-diegetic dedication card:
+   **For Cicka.** / **Thank you for playing.** Do not present this card as Cicka
+   writing, speaking, or explaining the farewell. The card should hold briefly,
+   then auto-fade into the clean Bridge Area reset without a button prompt. Do
+   not add a separate credits card or "The End" card in v0.
+   Exact hold, fade, montage, prompt-delay, and silence timings should be tuned
+   in prototype/playtest with tasteful recommended defaults rather than fixed in
+   pre-production.
+7. A final Relay trace or Concert Resting Spot echo can exist only as visual
    staging if earlier route art has taught that language. Do not present
    paw/page marks as a mechanic or required symbol in v0.
-7. The player returns to the **Open Ridge Return State** after the ending, with
-   the world still open and the guitar still with the player.
+8. For the first playable version, use **First Playable Reset Return** after the
+   **Dedication Card**: cleanly reset route progress and return the player
+   directly to the beginning of Bridge Area rather than opening a post-game
+   free-travel Ridge or title/menu return. Long-term, this can become an **Open
+   Ridge Return State** where completed areas remain freely revisitable after
+   the farewell, once optional mini-games, return content, and completed-area
+   revisits exist.
+   Do not surface any visible ending-seen memory in v0: no Micka, no changed
+   post-ending world, no special marker, and no new objective after reset.
 
 The guitar should be established earlier as a meaningful comfort item:
 something the player can pick up and carry before the Relay **Guitar Farewell**.
@@ -320,14 +338,22 @@ The target asks for:
 - The final Relay Spire interaction should be a **Sit and Play Prompt** near
   Cicka. It starts the Guitar Farewell and commits to the ending without rhythm
   UI, fail state, final skill check, or separate post-song send prompt.
-- Cicka's departure should be physical and mostly silent: walk together, pause,
-  look back, then page-fold/light departure. The initial version should use no
-  translated farewell line; a tiny raw meow/chirp sound can remain optional if
-  it supports the staging.
-- Immediate post-ending play should use the **Open Ridge Return State**:
-  replayable, quiet, and minimally absence-marked only if the route has seeded
-  that visual language. Micka remains delayed until the later post-ending
-  trigger rather than appearing immediately. The guitar stays with the player.
+- Cicka's departure should be physical and mostly silent: Cicka moves toward
+  the threshold alone, turns back toward the seated player, gives one small raw
+  meow, then slips into a warm sketchbook-threshold artifact beyond the player's
+  path. It can read as warm light, a scratch-like seam, a paper hole, or a
+  gentle glitch-portal-like artifact rather than a literal page-edge fold. The
+  player cannot follow into that threshold. The initial version should use no
+  translated farewell line.
+- Immediate v0 post-ending behavior should use **First Playable Reset Return**:
+  after the **Dedication Card**, cleanly reset route progress and return the
+  player directly to the beginning of Bridge Area instead of opening a
+  post-game free-travel Ridge. Long-term, an **Open Ridge Return State** can
+  make completed areas freely revisitable, quiet, and minimally absence-marked
+  once optional mini-games, return content, or completed-area revisits make that
+  return valuable. Do not surface visible ending-seen memory in v0; Micka
+  remains delayed until a later post-ending trigger rather than appearing
+  immediately.
 - Cicka field presence in every required Resident Help Beat, with one local
   **Cicka Resting Spot** per required Ridge Area: Bridge Resting Spot, Concert
   Resting Spot, and Dance Festival Resting Spot. Her role can vary from subtle

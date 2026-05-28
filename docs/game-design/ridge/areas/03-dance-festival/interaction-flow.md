@@ -192,5 +192,4 @@ loss without replacing what was lost.
   paths
 - whether the player can help the driver or Last-Stop Operations Helper first
 - final 2-3 authored snaps for Setup Clearance Walkthrough
-- smallest playable version that still lands final emotional readiness before
-  Relay
+- smallest prompt set that proves the accepted Opening Dance Shuttle beat

@@ -69,16 +69,20 @@ The ending order is protected:
 2. Cicka appears at the Relay threshold
 3. Sit and Play starts the Guitar Farewell at sunset as the final trigger
 4. Cicka Threshold Farewell follows the final guitar phrase
-5. Open Ridge Return State
+5. First Playable Reset Return for v0; long-term Open Ridge Return State
 
 The farewell is a tribute beat, not a literal-heavy explanation. Use presence,
-absence, silence, guitar, and the return-state Ridge to carry it. Paw/page marks
-should stay optional visual language only if seeded earlier, not an unintroduced
-ending mechanic.
+absence, silence, guitar, and a restrained non-diegetic dedication to carry it.
+For v0, the ending can cleanly reset the player to Bridge Area after the
+Dedication Card instead of opening post-game free travel. Long-term, the
+return-state Ridge can carry absence and free movement between completed areas
+once optional mini-games, return content, and completed-area revisits make that
+valuable. Paw/page marks should stay optional visual language only if seeded
+earlier, not an unintroduced ending mechanic.
 
-Micka appears after the player returns to normal Ridge and completes or replays
-one post-ending mini-game. She is continuity, not replacement, and should not
-enter the ending sequence itself.
+Micka appears only after a later post-ending trigger such as returning to a
+post-game Ridge and completing or replaying one mini-game. She is continuity,
+not replacement, and should not enter the ending sequence itself.
 
 ## Optional Toy Stance
 

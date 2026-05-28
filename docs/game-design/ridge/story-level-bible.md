@@ -61,33 +61,65 @@ Accepted ending outline:
    cozy threshold light. The first playable version should stay short and quiet:
    sit beside Cicka, play the familiar Concert guitar phrase, and let the moment
    breathe without a pass/fail challenge.
-5. A brief **Route Memory Montage** can appear during the guitar with 2-3
-   flashes, such as Blueprint Bridge being used, Concert Crossing continuing,
-   Opening Dance beginning at night as an emotional echo under the player's
-   guitar, or earlier Cicka Resting Spots carrying changed visual states.
-6. **Sit and Play Prompt** is the final completion trigger for the first
+5. The first playable ending includes a brief **Route Memory Montage** during
+   the guitar with exactly three soft flashes, no interaction, and no captions:
+   the completed Bridge crossing, the opened Concert crossing / guitar handoff
+   echo, and Dance Festival night beginning after the player leaves. Cicka
+   Resting Spot echoes are later polish unless one is visually cheap and already
+   established.
+6. After the montage, return to Relay at sunset while Danilo keeps playing as
+   the sun lowers. Do not show the stop-playing option immediately; after a
+   short delay, reveal a soft prompt such as **Let the song end**. If the player
+   does not press it, the guitar phrase resolves on its own. Only after that
+   small musical ending and silence should Cicka move toward the threshold.
+7. **Sit and Play Prompt** is the final completion trigger for the first
    ending. Do not add **Send the Sketchbook Prompt** in v0 unless the sketchbook
    becomes a seeded object or interaction across the route first.
-7. After the final guitar phrase, Cicka walks with the player to the threshold,
-   pauses, looks back once, then slips into a page fold, light, or other
-   threshold beyond the player's path. The player does not force Cicka away.
-   The initial version uses no translated farewell line.
-8. A final trace at Relay or a quiet Concert Resting Spot echo can exist only as
+8. After the final guitar phrase, Cicka moves toward the threshold, pauses,
+   turns back toward the seated player, gives one small raw meow, then slips
+   into a warm sketchbook-threshold artifact beyond the player's path. It
+   should read like a small place in the page that opens for Cicka, not
+   necessarily a literal fold at a paper edge: possible reads include warm
+   light, a scratch-like seam, a paper hole, or a gentle glitch-portal-like
+   artifact. The player cannot follow into that threshold and does not force
+   Cicka away. The initial version uses no translated farewell line. Art
+   direction should refine the exact threshold presentation while preserving
+   this v0 read.
+9. After Cicka disappears, hold on the empty sunset spot for a short silent
+   beat, then fade to a restrained non-diegetic dedication card:
+   **For Cicka.** / **Thank you for playing.** This card should not be presented
+   as Cicka writing, speaking, or explaining the farewell. The card should hold
+   briefly, then auto-fade into the clean Bridge Area reset without a button
+   prompt. Do not add a separate credits card or "The End" card in v0.
+   Exact hold, fade, montage, prompt-delay, and silence timings should be tuned
+   in prototype/playtest with tasteful recommended defaults rather than fixed in
+   pre-production.
+10. A final trace at Relay or a quiet Concert Resting Spot echo can exist only as
    visual staging if earlier route art has taught that language. Do not present
    paw/page marks as a mechanic or required symbol in v0.
-9. The player returns to the **Open Ridge Return State** after the ending, with
-   the world still open and the guitar still with the player. The exact
-   post-ending interactability and any minimal visual absence echo remain open.
+11. For the first playable version, use **First Playable Reset Return** after
+   the **Dedication Card**: cleanly reset route progress and return the player
+   directly to the beginning of Bridge Area rather than opening a post-game
+   free-travel Ridge or title/menu return. Long-term, this can become an
+   **Open Ridge Return State** where the player can freely move between
+   completed areas after the farewell, but that pays off only once optional
+   mini-games, return content, and completed-area revisits exist.
+   Do not surface any visible ending-seen memory in v0: no Micka, no changed
+   post-ending world, no special marker, and no new objective after reset.
 
 Tone boundaries:
 
 - no literal death scene
 - no grief monologue
 - no credits-only ending
+- no separate credits card or "The End" card in v0; the **Dedication Card** is
+  the full end card
 - no arcade pass/fail challenge during the Guitar Farewell
 - no explanatory departure speech and no written goodbye in the initial version;
-  a tiny raw meow/chirp sound is optional only if it stays smaller than the
-  silence
+  Cicka's only farewell sound is one tiny raw meow before she crosses the
+  threshold, and it should stay smaller than the silence
+- the dedication card is non-diegetic; do not present it as a message from
+  Cicka or as an explanation of where she went
 - no immediate replacement reveal; Micka remains delayed until the later
   post-ending trigger
 - no scattering sad marks everywhere in the initial return state; use at most a
@@ -249,7 +281,7 @@ Relay Spire / Guitar Farewell -> I am ready for Cicka's threshold farewell.
 | [Bridge Area](./areas/01-bridge/README.md) | Blueprint Bridge | Accepted first art/drawing beat | Required soft gate tutorial for resident help | Obvious subtle attention cue at unsafe edge or blank plan | Finished bridge sketch becomes the crossing |
 | [Concert Area](./areas/02-concert/README.md) | Concert Crossing Beat | Accepted middle beat | Blocks a concert/traffic crossing and earns the guitar | Crowd-shy observer near hidden musician-side space, then relaxed with the band after the crossing opens | Concert continues; crossing opens; guitar entrusted to player |
 | [Dance Festival Area](./areas/03-dance-festival/README.md) | Opening Dance Shuttle Beat | Accepted final beat direction; Last-Stop Operations Helper locked as romantic partner role | Creates the last emotional readiness before Relay through daytime setup that progresses toward late afternoon for a night dance festival at the foot of the Relay hill | Quiet threshold observer near the lantern crates, operations table, shuttle step, or service gate; may loaf with the Unnamed Counterpart Cat | Festival setup clears enough for one last daylight shuttle to Relay before the night road closure |
-| [Relay Ending Area](./areas/04-relay-ending/README.md) | Guitar Farewell / Cicka Threshold Farewell | Active ending direction | Final threshold after the Dance Festival barricade is cleared | Final field-presence spot and threshold departure | Open Ridge Return State keeps the world open after the farewell, with any absence echo treated as visual staging rather than a required mark mechanic |
+| [Relay Ending Area](./areas/04-relay-ending/README.md) | Guitar Farewell / Cicka Threshold Farewell | Active ending direction | Final threshold after the Dance Festival barricade is cleared | Final field-presence spot and threshold departure | First playable cleanly resets to Bridge Area after the Dedication Card; long-term Open Ridge Return State can keep the completed world open after the farewell |
 
 ## Opening Dance Shuttle Beat
 

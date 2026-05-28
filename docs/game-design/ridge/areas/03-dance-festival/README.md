@@ -80,4 +80,4 @@ a route gate.
   eventual names for local residents.
 - [`interaction-flow.md`](./interaction-flow.md): concrete prompts, object
   interactions, recovery paths, readiness order flexibility, and the smallest
-  playable version that still lands final readiness before Relay.
+  prompt set that proves the accepted Opening Dance Shuttle beat.
