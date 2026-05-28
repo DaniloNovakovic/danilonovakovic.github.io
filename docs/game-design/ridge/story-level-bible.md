@@ -88,19 +88,29 @@ Accepted ending outline:
 9. After Cicka disappears, hold on the empty sunset spot for a short silent
    beat, then fade to a restrained non-diegetic dedication card:
    **For Cicka.** / **Thank you for playing.** This card should not be presented
-   as Cicka writing, speaking, or explaining the farewell.
+   as Cicka writing, speaking, or explaining the farewell. The card should hold
+   briefly, then auto-fade into the clean Bridge Area reset without a button
+   prompt. Do not add a separate credits card or "The End" card in v0.
 10. A final trace at Relay or a quiet Concert Resting Spot echo can exist only as
    visual staging if earlier route art has taught that language. Do not present
    paw/page marks as a mechanic or required symbol in v0.
-11. The player returns to the **Open Ridge Return State** after the ending, with
-   the world still open and the guitar still with the player. The exact
-   post-ending interactability and any minimal visual absence echo remain open.
+11. For the first playable version, use **First Playable Reset Return** after
+   the **Dedication Card**: cleanly reset route progress and return the player
+   directly to the beginning of Bridge Area rather than opening a post-game
+   free-travel Ridge or title/menu return. Long-term, this can become an
+   **Open Ridge Return State** where the player can freely move between
+   completed areas after the farewell, but that pays off only once optional
+   mini-games, return content, and completed-area revisits exist.
+   Do not surface any visible ending-seen memory in v0: no Micka, no changed
+   post-ending world, no special marker, and no new objective after reset.
 
 Tone boundaries:
 
 - no literal death scene
 - no grief monologue
 - no credits-only ending
+- no separate credits card or "The End" card in v0; the **Dedication Card** is
+  the full end card
 - no arcade pass/fail challenge during the Guitar Farewell
 - no explanatory departure speech and no written goodbye in the initial version;
   Cicka's only farewell sound is one tiny raw meow before she crosses the
@@ -268,7 +278,7 @@ Relay Spire / Guitar Farewell -> I am ready for Cicka's threshold farewell.
 | [Bridge Area](./areas/01-bridge/README.md) | Blueprint Bridge | Accepted first art/drawing beat | Required soft gate tutorial for resident help | Obvious subtle attention cue at unsafe edge or blank plan | Finished bridge sketch becomes the crossing |
 | [Concert Area](./areas/02-concert/README.md) | Concert Crossing Beat | Accepted middle beat | Blocks a concert/traffic crossing and earns the guitar | Crowd-shy observer near hidden musician-side space, then relaxed with the band after the crossing opens | Concert continues; crossing opens; guitar entrusted to player |
 | [Dance Festival Area](./areas/03-dance-festival/README.md) | Opening Dance Shuttle Beat | Accepted final beat direction; Last-Stop Operations Helper locked as romantic partner role | Creates the last emotional readiness before Relay through daytime setup that progresses toward late afternoon for a night dance festival at the foot of the Relay hill | Quiet threshold observer near the lantern crates, operations table, shuttle step, or service gate; may loaf with the Unnamed Counterpart Cat | Festival setup clears enough for one last daylight shuttle to Relay before the night road closure |
-| [Relay Ending Area](./areas/04-relay-ending/README.md) | Guitar Farewell / Cicka Threshold Farewell | Active ending direction | Final threshold after the Dance Festival barricade is cleared | Final field-presence spot and threshold departure | Open Ridge Return State keeps the world open after the farewell, with any absence echo treated as visual staging rather than a required mark mechanic |
+| [Relay Ending Area](./areas/04-relay-ending/README.md) | Guitar Farewell / Cicka Threshold Farewell | Active ending direction | Final threshold after the Dance Festival barricade is cleared | Final field-presence spot and threshold departure | First playable cleanly resets to Bridge Area after the Dedication Card; long-term Open Ridge Return State can keep the completed world open after the farewell |
 
 ## Opening Dance Shuttle Beat
 

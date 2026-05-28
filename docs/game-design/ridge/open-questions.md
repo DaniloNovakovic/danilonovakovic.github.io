@@ -55,10 +55,10 @@ True design unknowns:
   Cicka's final threshold movement, turn-back, tiny raw meow, and warm
   sketchbook-threshold departure without relying on unseeded paw/page marks as a
   mechanic?
-- **Open Ridge Return State:** What interactions remain available immediately
-  after the empty-sunset hold and non-diegetic dedication card, and what minimal
-  visual absence echo, if any, is preserved at Relay or the Concert Resting
-  Spot?
+- **Long-term Open Ridge Return State:** After optional mini-games, return
+  content, or completed-area revisits exist, what interactions remain available
+  in a post-game free-travel Ridge, and what minimal visual absence echo, if
+  any, is preserved at Relay or the Concert Resting Spot?
 - **Micka timing:** What post-ending action eventually introduces Micka, and
   what must stay hidden until then?
 

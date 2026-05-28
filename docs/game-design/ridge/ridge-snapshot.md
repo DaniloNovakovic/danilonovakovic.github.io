@@ -194,12 +194,21 @@ Accepted first ending outline:
 6. After Cicka disappears, hold on the empty sunset spot for a short silent beat,
    then fade to a restrained non-diegetic dedication card:
    **For Cicka.** / **Thank you for playing.** Do not present this card as Cicka
-   writing, speaking, or explaining the farewell.
+   writing, speaking, or explaining the farewell. The card should hold briefly,
+   then auto-fade into the clean Bridge Area reset without a button prompt. Do
+   not add a separate credits card or "The End" card in v0.
 7. A final Relay trace or Concert Resting Spot echo can exist only as visual
    staging if earlier route art has taught that language. Do not present
    paw/page marks as a mechanic or required symbol in v0.
-8. The player returns to the **Open Ridge Return State** after the ending, with
-   the world still open and the guitar still with the player.
+8. For the first playable version, use **First Playable Reset Return** after the
+   **Dedication Card**: cleanly reset route progress and return the player
+   directly to the beginning of Bridge Area rather than opening a post-game
+   free-travel Ridge or title/menu return. Long-term, this can become an **Open
+   Ridge Return State** where completed areas remain freely revisitable after
+   the farewell, once optional mini-games, return content, and completed-area
+   revisits exist.
+   Do not surface any visible ending-seen memory in v0: no Micka, no changed
+   post-ending world, no special marker, and no new objective after reset.
 
 The guitar should be established earlier as a meaningful comfort item:
 something the player can pick up and carry before the Relay **Guitar Farewell**.
@@ -334,10 +343,15 @@ The target asks for:
   gentle glitch-portal-like artifact rather than a literal page-edge fold. The
   player cannot follow into that threshold. The initial version should use no
   translated farewell line.
-- Immediate post-ending play should use the **Open Ridge Return State**:
-  replayable, quiet, and minimally absence-marked only if the route has seeded
-  that visual language. Micka remains delayed until the later post-ending
-  trigger rather than appearing immediately. The guitar stays with the player.
+- Immediate v0 post-ending behavior should use **First Playable Reset Return**:
+  after the **Dedication Card**, cleanly reset route progress and return the
+  player directly to the beginning of Bridge Area instead of opening a
+  post-game free-travel Ridge. Long-term, an **Open Ridge Return State** can
+  make completed areas freely revisitable, quiet, and minimally absence-marked
+  once optional mini-games, return content, or completed-area revisits make that
+  return valuable. Do not surface visible ending-seen memory in v0; Micka
+  remains delayed until a later post-ending trigger rather than appearing
+  immediately.
 - Cicka field presence in every required Resident Help Beat, with one local
   **Cicka Resting Spot** per required Ridge Area: Bridge Resting Spot, Concert
   Resting Spot, and Dance Festival Resting Spot. Her role can vary from subtle
