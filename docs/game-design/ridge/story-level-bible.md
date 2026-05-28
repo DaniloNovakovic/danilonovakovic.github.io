@@ -61,21 +61,38 @@ Accepted ending outline:
    cozy threshold light. The first playable version should stay short and quiet:
    sit beside Cicka, play the familiar Concert guitar phrase, and let the moment
    breathe without a pass/fail challenge.
-5. A brief **Route Memory Montage** can appear during the guitar with 2-3
-   flashes, such as Blueprint Bridge being used, Concert Crossing continuing,
-   Opening Dance beginning at night as an emotional echo under the player's
-   guitar, or earlier Cicka Resting Spots carrying changed visual states.
-6. **Sit and Play Prompt** is the final completion trigger for the first
+5. The first playable ending includes a brief **Route Memory Montage** during
+   the guitar with exactly three soft flashes, no interaction, and no captions:
+   the completed Bridge crossing, the opened Concert crossing / guitar handoff
+   echo, and Dance Festival night beginning after the player leaves. Cicka
+   Resting Spot echoes are later polish unless one is visually cheap and already
+   established.
+6. After the montage, return to Relay at sunset while Danilo keeps playing as
+   the sun lowers. Do not show the stop-playing option immediately; after a
+   short delay, reveal a soft prompt such as **Let the song end**. If the player
+   does not press it, the guitar phrase resolves on its own. Only after that
+   small musical ending and silence should Cicka move toward the threshold.
+7. **Sit and Play Prompt** is the final completion trigger for the first
    ending. Do not add **Send the Sketchbook Prompt** in v0 unless the sketchbook
    becomes a seeded object or interaction across the route first.
-7. After the final guitar phrase, Cicka walks with the player to the threshold,
-   pauses, looks back once, then slips into a page fold, light, or other
-   threshold beyond the player's path. The player does not force Cicka away.
-   The initial version uses no translated farewell line.
-8. A final trace at Relay or a quiet Concert Resting Spot echo can exist only as
+8. After the final guitar phrase, Cicka moves toward the threshold, pauses,
+   turns back toward the seated player, gives one small raw meow, then slips
+   into a warm sketchbook-threshold artifact beyond the player's path. It
+   should read like a small place in the page that opens for Cicka, not
+   necessarily a literal fold at a paper edge: possible reads include warm
+   light, a scratch-like seam, a paper hole, or a gentle glitch-portal-like
+   artifact. The player cannot follow into that threshold and does not force
+   Cicka away. The initial version uses no translated farewell line. Art
+   direction should refine the exact threshold presentation while preserving
+   this v0 read.
+9. After Cicka disappears, hold on the empty sunset spot for a short silent
+   beat, then fade to a restrained non-diegetic dedication card:
+   **For Cicka.** / **Thank you for playing.** This card should not be presented
+   as Cicka writing, speaking, or explaining the farewell.
+10. A final trace at Relay or a quiet Concert Resting Spot echo can exist only as
    visual staging if earlier route art has taught that language. Do not present
    paw/page marks as a mechanic or required symbol in v0.
-9. The player returns to the **Open Ridge Return State** after the ending, with
+11. The player returns to the **Open Ridge Return State** after the ending, with
    the world still open and the guitar still with the player. The exact
    post-ending interactability and any minimal visual absence echo remain open.
 
@@ -86,8 +103,10 @@ Tone boundaries:
 - no credits-only ending
 - no arcade pass/fail challenge during the Guitar Farewell
 - no explanatory departure speech and no written goodbye in the initial version;
-  a tiny raw meow/chirp sound is optional only if it stays smaller than the
-  silence
+  Cicka's only farewell sound is one tiny raw meow before she crosses the
+  threshold, and it should stay smaller than the silence
+- the dedication card is non-diegetic; do not present it as a message from
+  Cicka or as an explanation of where she went
 - no immediate replacement reveal; Micka remains delayed until the later
   post-ending trigger
 - no scattering sad marks everywhere in the initial return state; use at most a

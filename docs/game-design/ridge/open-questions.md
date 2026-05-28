@@ -47,23 +47,27 @@ Area-local detail lives here:
 True design unknowns:
 
 - **Guitar Farewell micro-staging:** Given the accepted quiet, short Sit and
-  Play shape, what are the exact camera, input handoff, animation, silence, and
-  audio beats from guitar phrase through Cicka's threshold departure?
+  Play shape and authored post-prompt handoff, what are the exact camera,
+  animation, three-flash montage timing, post-montage sunset playing beat,
+  delayed soft prompt timing/wording, silence, and audio beats from guitar
+  phrase through Cicka's threshold departure?
 - **Cicka Threshold Farewell staging:** What exact physical sequence carries
-  Cicka's final walk, look back, and page-fold/light departure without relying
-  on unseeded paw/page marks as a mechanic?
+  Cicka's final threshold movement, turn-back, tiny raw meow, and warm
+  sketchbook-threshold departure without relying on unseeded paw/page marks as a
+  mechanic?
 - **Open Ridge Return State:** What interactions remain available immediately
-  after the ending, and what minimal visual absence echo, if any, is preserved
-  at Relay or the Concert Resting Spot?
+  after the empty-sunset hold and non-diegetic dedication card, and what minimal
+  visual absence echo, if any, is preserved at Relay or the Concert Resting
+  Spot?
 - **Micka timing:** What post-ending action eventually introduces Micka, and
   what must stay hidden until then?
 
 Route blockout TBD:
 
-- **Relay arrival linger:** What small movement, sitting, looking, or comfort
-  interactions are available after the Dance-to-Relay transition but before the
-  player chooses Sit and Play, without adding a separate pre-ready Relay access
-  state?
+- **Relay arrival linger micro-beats:** Given the accepted minimal one-sequence
+  ending shape, what exact overlook framing, optional single inspect detail, and
+  Sit and Play prompt placement are available after the Dance-to-Relay
+  transition?
 
 ## Route Transitions
 

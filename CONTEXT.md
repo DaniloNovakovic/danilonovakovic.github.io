@@ -266,12 +266,10 @@ subtle posture, placement, and tiny reactions instead of explicit instructions.
 _Avoid_: companion AI, quest marker, follower pet, objective dispenser
 
 **Cicka Threshold Farewell**:
-The first ending beat where Cicka accompanies the player to the Relay Spire
-threshold, looks back, then slips into a page fold, light, or other threshold
-beyond the player's path without translated farewell text in the initial
-version. Any final trace should be treated as optional visual staging only if
-the route has already taught that language.
-_Avoid_: literal death scene, grief monologue, Cicka leaving with the player, written goodbye
+The first ending beat where Cicka leaves the seated player through a warm
+sketchbook threshold beyond the player's path after one small raw meow, without
+translated farewell text in the initial version.
+_Avoid_: literal death scene, grief monologue, Cicka leaving with the player, written goodbye, player escort
 
 **Open Ridge Return State**:
 The immediate post-ending Ridge state where the world remains playable with the
@@ -308,9 +306,20 @@ Memory Montage** unless a later design restores a separate proof system.
 _Avoid_: full recap, credits roll, visible checklist, objective summary
 
 **Route Memory Montage**:
-A brief Guitar Farewell montage that wordlessly shows the fixed route's resident
-help, world changes, and Cicka Resting Spot echoes during the final song.
+A brief three-flash Guitar Farewell montage that wordlessly shows the fixed
+route's changed world states during the final song.
 _Avoid_: full recap, credits roll, visible checklist, objective summary
+
+**Warm Sketchbook Threshold**:
+The small Relay threshold artifact that opens for Cicka beyond the player's
+path, readable as warm light, a scratch-like seam, a paper hole, or a gentle
+glitch-portal-like artifact rather than a literal page-edge fold.
+_Avoid_: ordinary doorway, page-edge-only fold, portal the player can enter
+
+**Dedication Card**:
+A restrained non-diegetic card after Cicka's departure and the empty-sunset hold
+that says "For Cicka." and "Thank you for playing."
+_Avoid_: message from Cicka, written goodbye, explanation of where she went
 
 **Area Barricade Chain**:
 The fixed first-ending route structure where Bridge, Concert, and Dance
@@ -659,10 +668,10 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 > **Domain expert:** "No — call the place a **Ridge Area** and the problem sequence a **Resident Beat**. Use **Phaser Scene** only for runtime implementation."
 
 > **Dev:** "Does Cicka leave with the player at the ending?"
-> **Domain expert:** "No — the **Cicka Threshold Farewell** means she walks with the player to the threshold, then departs somewhere the player cannot follow."
+> **Domain expert:** "No — during the **Cicka Threshold Farewell**, the player remains seated while Cicka leaves through the **Warm Sketchbook Threshold** somewhere the player cannot follow."
 
 > **Dev:** "Should Cicka's final departure include translated text?"
-> **Domain expert:** "No — the initial **Cicka Threshold Farewell** should be fully nonverbal. Use staging, silence, and optionally a tiny raw sound instead of a written goodbye."
+> **Domain expert:** "No translated line or written goodbye — Cicka gives one tiny raw meow, and the later **Dedication Card** stays non-diegetic."
 
 > **Dev:** "Should the ending rely on paw/page marks?"
 > **Domain expert:** "No — only use a final trace or absence echo as visual staging if the route has already taught that language. Do not make paw/page marks a surprise mechanic or required symbol in v0."
