@@ -777,9 +777,9 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
   and soft drops. `ramp` may remain an internal connector label where needed.
 - "Cicka follows the player" means authored **Cicka Field Presence** at route
   beats, not continuous companion following or autonomous navigation.
-- "Cicka departs with us" means **Cicka Threshold Farewell**, where she
-  accompanies the player to the Relay Spire threshold and then leaves from the
-  player, not with the player.
+- "Cicka departs with us" is imprecise; use **Cicka Threshold Farewell**, where
+  the player remains seated while Cicka leaves through the **Warm Sketchbook
+  Threshold** somewhere the player cannot follow.
 - "hint" from Cicka means subtle attention guidance through staging or reaction,
   not explicit objective text like "go fix the bridge."
 - "last dance" previously meant an after-festival closure gate; resolved: use

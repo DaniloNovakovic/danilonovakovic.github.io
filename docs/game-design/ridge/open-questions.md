@@ -48,9 +48,10 @@ True design unknowns:
 
 - **Guitar Farewell micro-staging:** Given the accepted quiet, short Sit and
   Play shape and authored post-prompt handoff, what are the exact camera,
-  animation, three-flash montage timing, post-montage sunset playing beat,
-  delayed soft prompt timing/wording, silence, and audio beats from guitar
-  phrase through Cicka's threshold departure?
+  animation, post-montage sunset playing beat, delayed soft prompt wording, and
+  audio beats from guitar phrase through Cicka's threshold departure? Exact
+  timing values should be delegated to prototype/playtest with tasteful
+  recommended defaults rather than locked in pre-production.
 - **Cicka Threshold Farewell staging:** What exact physical sequence carries
   Cicka's final threshold movement, turn-back, tiny raw meow, and warm
   sketchbook-threshold departure without relying on unseeded paw/page marks as a

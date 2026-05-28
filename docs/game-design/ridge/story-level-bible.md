@@ -91,6 +91,9 @@ Accepted ending outline:
    as Cicka writing, speaking, or explaining the farewell. The card should hold
    briefly, then auto-fade into the clean Bridge Area reset without a button
    prompt. Do not add a separate credits card or "The End" card in v0.
+   Exact hold, fade, montage, prompt-delay, and silence timings should be tuned
+   in prototype/playtest with tasteful recommended defaults rather than fixed in
+   pre-production.
 10. A final trace at Relay or a quiet Concert Resting Spot echo can exist only as
    visual staging if earlier route art has taught that language. Do not present
    paw/page marks as a mechanic or required symbol in v0.

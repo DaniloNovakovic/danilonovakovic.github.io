@@ -119,18 +119,20 @@ reset.
 
 Unresolved. This area still needs exact decisions for camera behavior, input
 handoff, animation beats, silence, audio, visual trace placement if any,
-threshold geometry, and post-ending interactability.
+threshold geometry, and post-ending interactability. Exact timing values for
+holds, fades, prompt delay, montage flashes, and silence are prototype-tuned
+rather than pre-production canon; implementation agents should choose tasteful
+recommended defaults and validate them through playtesting.
 
 ## Open Local Slots
 
 - physical Relay topology and warm sketchbook-threshold geometry
 - final Cicka field-presence spot
 - exact camera framing for the authored Sit and Play handoff
-- exact guitar audio texture, delayed soft prompt timing/wording, and silence
-  timing
-- exact framing and timing for each Route Memory Montage flash
+- exact guitar audio texture and delayed soft prompt wording
+- prototype-tuned timing defaults for the delayed soft prompt, silence, Route
+  Memory Montage flashes, empty-sunset hold, dedication-card hold, and auto-fade
 - exact warm threshold artifact presentation after Sit and Play
-- exact empty-sunset hold duration and dedication-card auto-fade timing
 - First Playable Reset Return Bridge-start reset behavior
 - whether any invisible ending-seen flag is needed for future unlocks
 - long-term Open Ridge Return State interactions

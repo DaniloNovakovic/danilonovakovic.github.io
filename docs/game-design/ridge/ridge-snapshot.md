@@ -163,10 +163,9 @@ this prose pass, but the core overworld/Ridge route blockers should be legible
 in words first.
 
 The accepted ending anchor is the **Cicka Threshold Farewell**: Cicka recurs
-through the Ridge as field presence, accompanies the player to the Relay Spire
-threshold, and then departs somewhere the player cannot follow. The ending
-should stay replayable, tender, and non-literal rather than becoming a death
-scene or grief speech.
+through the Ridge as field presence, then leaves the seated player through a
+warm sketchbook threshold somewhere the player cannot follow. The ending should
+stay tender and non-literal rather than becoming a death scene or grief speech.
 Design the canonical first ending before designing optional endings. Multiple
 endings are not required for the Ridge; add alternate endings only if a later
 story/level pass proves they create meaningful replay value without weakening
@@ -197,6 +196,9 @@ Accepted first ending outline:
    writing, speaking, or explaining the farewell. The card should hold briefly,
    then auto-fade into the clean Bridge Area reset without a button prompt. Do
    not add a separate credits card or "The End" card in v0.
+   Exact hold, fade, montage, prompt-delay, and silence timings should be tuned
+   in prototype/playtest with tasteful recommended defaults rather than fixed in
+   pre-production.
 7. A final Relay trace or Concert Resting Spot echo can exist only as visual
    staging if earlier route art has taught that language. Do not present
    paw/page marks as a mechanic or required symbol in v0.
