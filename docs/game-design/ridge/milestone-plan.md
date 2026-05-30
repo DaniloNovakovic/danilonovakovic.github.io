@@ -66,18 +66,20 @@ Bridge, Concert, and Dance Festival area is blockout-complete when it has:
 
 1. an entry state where the player enters, can move, and the camera frames the
    local problem
-2. coherent sketchbook blockout art with a foreground frame, playable lane, and
+2. one Compact Ridge Stage topology, with any Area Interior Pocket kept inside
+   the same area progress rather than becoming a second mini-map
+3. coherent sketchbook blockout art with a foreground frame, playable lane, and
    background set dressing
-3. a visible blocker where the next route is physically blocked before dialogue
+4. a visible blocker where the next route is physically blocked before dialogue
    explains it
-4. a Cicka cue near the problem, prop, or emotional handoff
-5. a resident help beat where one local resident has a practical reason they
+5. a Cicka cue near the problem, prop, or emotional handoff
+6. a resident help beat where one local resident has a practical reason they
    can affect the blocker
-6. one simple interaction chain with two to four authored prompts or dialogue
+7. one simple interaction chain with two to four authored prompts or dialogue
    beats and no fail state
-7. a visible world change that changes the map, not only dialogue
-8. a Cicka after-state where the local resting spot changes or settles
-9. an exit trigger that carries the player to the next Ridge Area
+8. a visible world change that changes the map, not only dialogue
+9. a Cicka after-state where the local resting spot changes or settles
+10. an exit trigger that carries the player to the next Ridge Area
 
 Relay replaces the resident help beat with a brief playable linger, **Sit and
 Play**, authored farewell, **Dedication Card**, and clean Bridge reset.

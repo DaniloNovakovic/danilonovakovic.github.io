@@ -203,6 +203,15 @@ still reading as a linear route. Distance between areas can stay ambiguous, with
 background composition, distant Relay silhouettes, signage, or skyline changes
 implying progress toward the final ridge.
 
+Each required area should be a **Compact Ridge Stage** for the First Playable
+Route: one small readable stage/chapter, not a sprawling mini-map. Bridge,
+Concert, Dance Festival, and Relay may include **Area Interior Pockets** such as
+an enterable building, musician nook, operations-side alcove, or facade interior
+when that makes the level feel richer or creates staged depth. An Area Interior
+Pocket may use a Phaser scene change if useful, but it still belongs to the
+same Ridge Area, shares the same local progress, and should not become a
+separate navigation problem.
+
 Current time-of-day arc: Bridge begins during the day at a nature/hill edge;
 Concert moves into evening/night small-town festival energy; a short sleep/rest
 interlude carries the player from Concert night to Dance Festival daytime
@@ -322,6 +331,10 @@ cleanly.
 Start with three required main-path Ridge Areas before the Relay ending. Each
 Ridge Area can contain one main Resident Beat plus local interiors, optional
 interactions, and runtime Phaser Scenes.
+For the First Playable Route, keep each required Ridge Area structured as one
+Compact Ridge Stage. Use Area Interior Pockets only when they reinforce the
+local beat, depth, or richness without expanding the area into a sprawling
+mini-map.
 
 Area-specific accepted details live in [`areas/`](./areas/README.md). Keep this
 bible focused on the route spine, cross-area dependencies, and ending logic.

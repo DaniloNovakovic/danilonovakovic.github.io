@@ -84,6 +84,20 @@ residents, props, Cicka Resting Spots, mini-game entrances, and one or more
 runtime Phaser Scenes.
 _Avoid_: hub, Phaser scene, single room, isolated mini-game silo
 
+**Compact Ridge Stage**:
+The First Playable Route topology target for each required Ridge Area: one
+small, readable stage/chapter with a local entry, blocker, resident beat, Cicka
+spot, visible world change, and exit composition. It can contain small depth
+pockets, but it should not become a sprawling mini-map.
+_Avoid_: sprawling area map, free-roam zone, multi-room maze
+
+**Area Interior Pocket**:
+A small enterable building, nook, facade interior, or side space that belongs to
+the current Ridge Area. It may use a Phaser scene change if useful, but it
+shares the same area progress and exists to add staged depth, richness, or
+local context rather than becoming a separate Ridge Area.
+_Avoid_: separate chapter, required dungeon, second mini-map
+
 **Bridge Area**:
 The first required Ridge Area. It contains the Blueprint Bridge Resident Beat
 and teaches that helping a resident can visibly change the route.

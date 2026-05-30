@@ -16,6 +16,11 @@ staging, Cicka Resting Spot details, visual/audio notes, and area-specific open
 questions. Use [`../dialogue-conventions.md`](../dialogue-conventions.md) for
 dialogue file format, placeholder policy, and line ID rules.
 
+For the First Playable Route, each required area should be designed as a
+Compact Ridge Stage. Small Area Interior Pockets are allowed when they add
+depth or local richness, but they remain part of the same area/chapter and
+should not create sprawling mini-map navigation.
+
 Ownership rule: root [`../open-questions.md`](../open-questions.md) is for
 route-level or taste-sensitive decisions. Area docs own local **Open Local
 Slots** such as topology, prompt wording, prop placement, resident silhouettes,
