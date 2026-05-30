@@ -160,6 +160,8 @@ export class RidgeScene extends Phaser.Scene {
 
     if (interaction.effect) {
       this.handleBridgeInteractionEffect(interaction.effect);
+      this.syncDevRuntimeState();
+      return;
     }
 
     this.bridgeStage?.showPrompt(

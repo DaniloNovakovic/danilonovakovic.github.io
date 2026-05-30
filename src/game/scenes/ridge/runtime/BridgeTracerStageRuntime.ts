@@ -4,6 +4,7 @@ import {
   GAME_DESIGN_WIDTH
 } from '@/game/sharedSceneRuntime/config';
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
+import { getMessages } from '@/shared/i18n';
 import {
   CICKA_ANIMATION_KEYS,
   CICKA_FRAME_INDEX,
@@ -130,7 +131,7 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
     if (!this.dialogueContainer || !this.dialogueText) return;
     const text = lineIds.map((id) => {
       const line = getBridgeDialogueLine(id);
-      return line.speaker === 'Prompt'
+      return line.speakerId === 'prompt'
         ? line.text
         : `${line.speaker}: ${line.text}`;
     }).join('\n');
@@ -398,7 +399,7 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
       this.scene,
       BRIDGE_TRACER_WORLD.exit.x + 70,
       BRIDGE_TRACER_WORLD.exit.y - 130,
-      'evening music ahead',
+      getMessages().scenes.ridge.bridge.handoffNote,
       {
         fontSize: '14px',
         color: '#1a1a1a',
