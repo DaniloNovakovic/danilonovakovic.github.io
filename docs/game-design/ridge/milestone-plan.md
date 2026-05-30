@@ -47,7 +47,8 @@ doc instead.
   docs until each area has layout, resident beats, blockers, Cicka presence,
   and exit conditions.
 - **P2 First Playable Route Blockout**: prove the route can be walked end to
-  end with placeholder art and no required precision platforming.
+  end with a **Coherent Sketchbook Blockout** and no required precision
+  platforming.
 - **P3 Route Readiness Feedback**: make area barricades, resident help, world
   changes, and Relay arrival readable without a visible chore checklist.
 - **P4 Ending Pass**: land Guitar Farewell as the final trigger, Cicka Threshold
@@ -65,16 +66,18 @@ Bridge, Concert, and Dance Festival area is blockout-complete when it has:
 
 1. an entry state where the player enters, can move, and the camera frames the
    local problem
-2. a visible blocker where the next route is physically blocked before dialogue
+2. coherent sketchbook blockout art with a foreground frame, playable lane, and
+   background set dressing
+3. a visible blocker where the next route is physically blocked before dialogue
    explains it
-3. a Cicka cue near the problem, prop, or emotional handoff
-4. a resident help beat where one local resident has a practical reason they
+4. a Cicka cue near the problem, prop, or emotional handoff
+5. a resident help beat where one local resident has a practical reason they
    can affect the blocker
-5. one simple interaction chain with two to four authored prompts or dialogue
+6. one simple interaction chain with two to four authored prompts or dialogue
    beats and no fail state
-6. a visible world change that changes the map, not only dialogue
-7. a Cicka after-state where the local resting spot changes or settles
-8. an exit trigger that carries the player to the next Ridge Area
+7. a visible world change that changes the map, not only dialogue
+8. a Cicka after-state where the local resting spot changes or settles
+9. an exit trigger that carries the player to the next Ridge Area
 
 Relay replaces the resident help beat with a brief playable linger, **Sit and
 Play**, authored farewell, **Dedication Card**, and clean Bridge reset.

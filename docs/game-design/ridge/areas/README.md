@@ -13,7 +13,8 @@ Use [`../story-level-bible.md`](../story-level-bible.md) for the route spine,
 ending order, area barricade chain, and cross-area Cicka/guitar logic. Use these
 area files for local geography, blockers, residents, prompts, traversal,
 staging, Cicka Resting Spot details, visual/audio notes, and area-specific open
-questions.
+questions. Use [`../dialogue-conventions.md`](../dialogue-conventions.md) for
+dialogue file format, placeholder policy, and line ID rules.
 
 Ownership rule: root [`../open-questions.md`](../open-questions.md) is for
 route-level or taste-sensitive decisions. Area docs own local **Open Local
@@ -24,10 +25,10 @@ camera framing, and local art/audio choices.
 
 | Route order | Area doc | Owns |
 | --- | --- | --- |
-| 1 | [`01-bridge/README.md`](./01-bridge/README.md) | Blueprint Bridge, first resident-help soft gate, first Cicka attention cue |
-| 2 | [`02-concert/README.md`](./02-concert/README.md) | Concert Crossing, guitar acquisition, comfort-through-memory beat |
-| 3 | [`03-dance-festival/README.md`](./03-dance-festival/README.md) | Opening Dance Shuttle index; local detail split into [`layout.md`](./03-dance-festival/layout.md), [`characters.md`](./03-dance-festival/characters.md), and [`interaction-flow.md`](./03-dance-festival/interaction-flow.md) |
-| 4 | [`04-relay-ending/README.md`](./04-relay-ending/README.md) | Relay Spire, Guitar Farewell staging, Cicka Threshold Farewell, return state |
+| 1 | [`01-bridge/README.md`](./01-bridge/README.md) / [`dialogue.md`](./01-bridge/dialogue.md) | Blueprint Bridge, first resident-help soft gate, first Cicka attention cue |
+| 2 | [`02-concert/README.md`](./02-concert/README.md) / [`dialogue.md`](./02-concert/dialogue.md) | Concert Crossing, guitar acquisition, comfort-through-memory beat |
+| 3 | [`03-dance-festival/README.md`](./03-dance-festival/README.md) / [`dialogue.md`](./03-dance-festival/dialogue.md) | Opening Dance Shuttle index; local detail split into [`layout.md`](./03-dance-festival/layout.md), [`characters.md`](./03-dance-festival/characters.md), and [`interaction-flow.md`](./03-dance-festival/interaction-flow.md) |
+| 4 | [`04-relay-ending/README.md`](./04-relay-ending/README.md) / [`dialogue.md`](./04-relay-ending/dialogue.md) | Relay Spire, Guitar Farewell staging, Cicka Threshold Farewell, return state |
 
 ## Update Rules
 

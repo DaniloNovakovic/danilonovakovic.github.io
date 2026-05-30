@@ -192,6 +192,14 @@ The accepted Ridge presentation direction: a Harold Halibut-like or theater-set
 composing each area like a hand-built paper set with shallow staged depth.
 _Avoid_: isometric RPG map, true 3D navigation, flat precision-platformer camera
 
+**Coherent Sketchbook Blockout**:
+The First Playable Route art target: rough and cheap enough to change, but
+already art-directed enough to test Sketchbook Ridge mood, readability, Cicka
+staging, blockers, resident silhouettes, before/after world changes, and the
+Walkable Sketchbook Stage presentation. It is not gray-box art and not final
+polish.
+_Avoid_: gray-box placeholder, final art pass, polished asset set
+
 **Lived-In Causality**:
 A design rule for the Sketchbook Neighborhood: route blockers and world changes
 should have practical in-world causes, local context, and residents with

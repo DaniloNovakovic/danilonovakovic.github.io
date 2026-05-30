@@ -69,6 +69,40 @@ small up/down lane movement. If a later area proves the simple model cannot
 support its staging, that area can earn a focused camera/traversal spike, but
 the first implementation should try the consistent simple model first.
 
+Use a **Coherent Sketchbook Blockout** as the First Playable Route art target:
+rough enough to revise cheaply, but visually directed enough that playtests can
+judge mood, readability, emotional staging, Cicka placement, blockers, resident
+roles, and before/after world changes. It should not be gray boxes, and it
+should not require final character designs, polished animation sets, full
+building interiors, or rich prop catalogs.
+
+Each required area should have enough visual language to prove the Walkable
+Sketchbook Stage direction: a foreground frame, playable lane, background set
+dressing, one unmistakable blocker, one readable resident silhouette or role,
+one Cicka field/resting spot, one visible before/after world change, and one
+exit or transition composition.
+
+## Dialogue Documentation Direction
+
+Use [`dialogue-conventions.md`](./dialogue-conventions.md) as the global
+pre-production convention for dialogue structure, line IDs, placeholder policy,
+and future migration into typed runtime data.
+
+Keep actual route dialogue colocated with the area that owns it:
+
+- Bridge lines live in [`areas/01-bridge/dialogue.md`](./areas/01-bridge/dialogue.md).
+- Concert lines live in [`areas/02-concert/dialogue.md`](./areas/02-concert/dialogue.md).
+- Dance Festival lines live in
+  [`areas/03-dance-festival/dialogue.md`](./areas/03-dance-festival/dialogue.md).
+- Relay Ending lines live in
+  [`areas/04-relay-ending/dialogue.md`](./areas/04-relay-ending/dialogue.md).
+
+During pre-production, these Markdown files are the human design source. They
+should use stable line IDs from the start so the same identifiers can later
+survive migration into JSON, TypeScript data, a narrative scripting format, or
+another type-safe dialogue pipeline. Do not choose the final runtime format
+until the route dialogue shape stops moving.
+
 ## Canonical Ending
 
 The first ending is the **Cicka Threshold Farewell**. It is the canonical ending

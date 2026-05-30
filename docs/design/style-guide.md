@@ -40,8 +40,10 @@ The aesthetic is a fusion of **Pablo Stanley’s Open Peeps** (modular, clean ch
 
 ### 3. Environment & World-Building
 
-- **Perspective:** 2D side-view with horizontal parallax layering unless a
-  future design spike deliberately proves another presentation.
+- **Perspective:** The active Ridge route uses a Walkable Sketchbook Stage:
+  side-view interaction composed like a shallow hand-built paper set. Use
+  foreground frames, a readable playable lane, background set dressing, and
+  authored composition rather than true 3D navigation or isometric map logic.
 - **Layout:** A continuous, readable sketchbook route. Buildings, props,
   resting spots, and landmarks should serve the active route instead of
   defaulting to a portfolio street.
@@ -66,6 +68,11 @@ The aesthetic is a fusion of **Pablo Stanley’s Open Peeps** (modular, clean ch
 - **Line-weight integrity:** Preserve thick outer contours and lighter interior marks when scaling, tweening, or reusing assets. Avoid transformations that visibly stretch ink lines.
 - **Living paper motion:** Prefer stepped motion around 10-12 FPS, subtle wobble, low-frequency line jitter, or paper-grain displacement over smooth synthetic easing.
 - **Memory language:** Denser hatching, high-contrast 1-bit/dither treatments, or harsher ink shadows are available for memories or special emotional beats only if readability stays strong.
+- **First playable art target:** Use a Coherent Sketchbook Blockout: rough,
+  replaceable art with clear paper layers, blockers, resident silhouettes,
+  Cicka spots, and before/after world changes. Avoid gray-box placeholders, but
+  do not require final animation sets, full interiors, or polished prop
+  catalogs before the route is playable.
 - **Implementation anchors:** For Phaser assets, define pivots/origins, baselines, and runtime scale before polishing. For scalable paper UI inside Phaser, consider nine-slice-style panels only when the rendering constraints fit the scene.
 - **Scope boundary:** Do not adopt new styling systems, skeletal animation tools, or 3D-to-2D asset pipelines just because the research mentions them. Promote those only after a real production need.
 

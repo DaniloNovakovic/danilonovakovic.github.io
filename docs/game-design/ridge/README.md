@@ -27,6 +27,7 @@ Use each file for exactly one concern:
 | Shipped behavior | [`../player-manual.md`](../player-manual.md) | Update only when behavior ships. |
 | Current Ridge route canon | [`story-level-bible.md`](./story-level-bible.md) | Route spine, area barricade chain, cross-area Cicka/guitar logic, ending order. |
 | Area-specific design canon | [`areas/`](./areas/README.md) | Local geography, blockers, residents, prompts, staging, Cicka Resting Spots, visual/audio notes. |
+| Dialogue conventions | [`dialogue-conventions.md`](./dialogue-conventions.md) | Pre-production dialogue file structure, line IDs, placeholder policy, and migration rules. |
 | Current runtime/prototype truth | [`ridge-snapshot.md`](./ridge-snapshot.md) | What exists now in the Phaser prototype, what can be reused, and what is disposable. |
 | Active open questions | [`open-questions.md`](./open-questions.md) | True design unknowns and blockout-detail TBD. Area premises may already be accepted even when prompt/topology details remain open. |
 | Product vision | [`summit.md`](./summit.md) | Durable fantasy and pillars, not detailed route implementation. |
