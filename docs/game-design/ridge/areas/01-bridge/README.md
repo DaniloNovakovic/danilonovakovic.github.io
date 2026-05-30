@@ -126,6 +126,53 @@ First Playable Audio Floor needs for the tracer: gentle Bridge/nature ambience,
 Cicka chirp or purr cue, toy-car bridge-test cue, visible bridge-change cue, and
 a soft Bridge-to-Concert transition stinger.
 
+## Bridge Visual Coherence Pass
+
+Track this as a new follow-up issue after the Bridge Tracer Slice rather than
+expanding the tracer PR. Run it after the Bridge Tracer Slice works and before
+Concert Area implementation begins. The goal is not final art; it is to make
+Bridge Area a credible **Walkable Sketchbook Stage** that sets the visual bar
+for the rest of the First Playable Route.
+
+Sequence after the Bridge Tracer Slice:
+
+1. Run the Bridge Visual Coherence Pass.
+2. Build the route-wide **Character Conversation Overlay** as a React Scene UI
+   surface, first integrated into Bridge Area. Phaser should own conversation
+   start, player stand-still/freeze behavior, and active dialogue IDs; React
+   should own the lower-screen panel, character icon/portrait frame, typed text
+   reveal, and advance/close affordance. The first version should show one
+   speaker and one active line at a time, Persona-like, while allowing authored
+   line sequences to advance and switch speaker between lines. Conversation
+   state should freeze player control and interaction target switching, while
+   harmless ambient animation can continue. Do not include Ambient Bark Bubbles
+   in this first conversation overlay issue beyond preserving a clean data
+   boundary between deliberate conversations and later non-blocking barks.
+3. Investigate interactive shell screen usage / fullscreen direction if the
+   conversation overlay or Bridge staging still feels cramped in the current
+   game card.
+4. Begin Concert Area implementation.
+
+Minimum outcomes:
+
+- Cicka is grounded at the Bridge Resting Spot and visibly plays with the toy
+  car / weight-test prop instead of floating near a generic marker.
+- The Bridge Draftsperson has a distinct blueprint work zone, such as a tiny
+  drafting shelter, cabin facade, desk, or taped paper construction nook.
+- Cicka's space and the Draftsperson's work zone are separated by local terrain,
+  trees, paper folds, or foreground/background staging so the Draftsperson does
+  not appear able to see Cicka holding the toy car.
+- The bridge, missing span, completed span, floor, background, and prop
+  placeholders read as one handmade paper set rather than unrelated debug
+  shapes.
+- The pass produces tiny role portrait/icon placeholders for the first
+  **Character Conversation Overlay** integration: Cicka, Bridge Draftsperson,
+  and neutral Prompt/narration.
+- The pass may create a small reusable Bridge art kit, but it should stay rough,
+  scene-owned, and conservative until repeated asset-pipeline pain is proven.
+- Keep staging compatible with the route-wide **Character Conversation Overlay**
+  follow-up, but do not expand this visual pass into the final conversation UI.
+
 ## Boundaries
 
 - Do not make Bridge Area a platforming test.

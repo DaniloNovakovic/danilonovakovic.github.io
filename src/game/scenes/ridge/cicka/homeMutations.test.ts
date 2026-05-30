@@ -20,6 +20,10 @@ function createRidgeProgress(
       glidePips: 0
     },
     shortcutIds: [],
+    firstPlayableRoute: {
+      activeAreaId: 'bridge',
+      bridgeBeat: 'intro'
+    },
     ...overrides
   };
 }

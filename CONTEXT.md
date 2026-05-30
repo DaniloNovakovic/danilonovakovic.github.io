@@ -151,6 +151,40 @@ provisional lines or prompts, clear intent, and the route or world-state outcome
 it supports.
 _Avoid_: final polish pass, generic placeholder text, deep branching tree, final proper names too early
 
+**Character Conversation Overlay**:
+A reusable deliberate-conversation UI pattern for Ridge character interactions.
+When the player chooses to talk, sit, or respond to a resident, exploration
+pauses or the player stands still, a stylized lower-screen conversation panel
+appears with a character icon or portrait, and the line text can reveal with a
+typed effect before the player advances or closes it. The first version shows
+one speaker and one active line at a time, while still allowing authored line
+sequences to advance and switch speaker between lines. Its first character
+icons should come from the local visual coherence pass for the area using the
+overlay, not from generic unrelated UI symbols. While it is open, player control
+and interaction target switching should freeze, but harmless ambient animation
+such as paper sway, blinking, idle bobs, or line boil can continue.
+_Avoid_: sticky top-of-screen debug text, ambient bark bubble, quest log,
+dialogue tree by default, multiple simultaneous portraits, backlog/history,
+route objective panel
+
+**Interactive Shell Screen-Usage Investigation**:
+A focused layout investigation for making interactive mode use more available
+viewport space, potentially through a fullscreen or fuller-bleed game shell.
+It should evaluate Ridge readability, conversation overlay placement, touch
+controls, header/footer chrome, safe areas, and desktop/mobile framing before
+committing to a shell rewrite.
+_Avoid_: Bridge art pass, per-scene asset polish, hiding required controls,
+unreviewed fullscreen-only layout, changing gameplay scale without camera tests
+
+**Ambient Bark Bubble**:
+A lightweight in-world bubble above or near a character for background flavor,
+short reactions, or local noise. It does not freeze exploration, does not open
+the Character Conversation Overlay, and should stay short enough to read while
+moving. Implement it as a later separate issue from the first Character
+Conversation Overlay pass, while keeping the data model boundaries distinct.
+_Avoid_: deliberate conversation UI, required progress prompt, long dialogue
+line, objective hint spam
+
 **Prompt/Dialogue ID**:
 A stable area-scoped label for a prompt, line, bark, or interaction beat before
 the final text is locked. The ID lets docs, implementation issues, runtime data,
@@ -312,6 +346,15 @@ The first implementation slice after the Area Paper Pass. It proves the Bridge
 route seam before Concert, Dance Festival, and Relay implementation fan out; the
 done checklist is owned by the Ridge milestone plan.
 _Avoid_: parallelizing all areas first, full Bridge polish, isolated tech spike, final art pass
+
+**Bridge Visual Coherence Pass**:
+The follow-up Bridge Area staging pass after the Bridge Tracer Slice. It makes
+the existing Bridge route feel like an authored paper stage by grounding Cicka
+and the toy car, giving the Bridge Draftsperson a distinct work zone, separating
+their spaces with local terrain or trees, and unifying bridge, floor,
+background, and prop placeholders into one readable handmade set.
+_Avoid_: final art pass, production asset pack, generic beautification pass,
+new route mechanics, expanding the Bridge Area into a larger map
 
 **First Playable Audio Floor**:
 The smallest placeholder audio layer needed to test route mood, timing, and

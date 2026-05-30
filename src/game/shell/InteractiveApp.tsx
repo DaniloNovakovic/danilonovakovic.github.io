@@ -1,11 +1,11 @@
-import { ArrowLeft, BookOpen, Backpack, Bug } from 'lucide-react';
+import { ArrowLeft, BookOpen, Bug } from 'lucide-react';
 import Game from './Game';
 import { bridgeActions, useBridgeState, type OpenOverlayOptions } from '@/game/bridge/store';
 import {
   getPhaserScenePresentationMode,
   type PhaserScenePresentationMode
 } from '@/game/sharedSceneRuntime/phaserScenePresentation';
-import { DEV_SWITCHER_OVERLAY_ID, INVENTORY_OVERLAY_ID, type OverlayId } from '@/game/overlays/overlayIds';
+import { DEV_SWITCHER_OVERLAY_ID, type OverlayId } from '@/game/overlays/overlayIds';
 import { OverlayHost } from '@/game/overlays/OverlayHost';
 import { SceneUiHost } from '@/game/sceneUi/SceneUiHost';
 import {
@@ -130,18 +130,6 @@ export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps
               </Button>
             ) : (
               <>
-                <Button
-                  variant="floating"
-                  size="sm"
-                  onClick={() => bridgeActions.openOverlay(INVENTORY_OVERLAY_ID)}
-                  className="sm:px-3 sm:py-1.5 sm:text-xs"
-                  aria-haspopup="dialog"
-                  aria-expanded={bridge.activeOverlayId === INVENTORY_OVERLAY_ID}
-                  aria-label={messages.gameShell.openInventory}
-                >
-                  <Backpack className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
-                  <span>{messages.gameShell.inventory}</span>
-                </Button>
                 {import.meta.env.DEV && (
                   <Button
                     variant="floating"

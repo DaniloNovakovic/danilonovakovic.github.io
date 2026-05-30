@@ -49,6 +49,25 @@ export interface BridgeEquipmentState {
 export type RidgeStampId = string;
 export type RidgeManualPageId = string;
 export type RidgeShortcutId = string;
+export type RidgeFirstPlayableAreaId = 'bridge' | 'concert' | 'danceFestival' | 'relay';
+export type RidgeBridgeBeatState =
+  | 'intro'
+  | 'needs_toy_car'
+  | 'toy_car_shared'
+  | 'bridge_complete'
+  | 'concert_handoff';
+export type RidgeBridgeAreaBeatState = Exclude<RidgeBridgeBeatState, 'concert_handoff'>;
+export type RidgePostBridgeAreaId = Exclude<RidgeFirstPlayableAreaId, 'bridge'>;
+
+export type RidgeFirstPlayableRouteState =
+  | {
+      activeAreaId: 'bridge';
+      bridgeBeat: RidgeBridgeAreaBeatState;
+    }
+  | {
+      activeAreaId: RidgePostBridgeAreaId;
+      bridgeBeat: 'concert_handoff';
+    };
 
 export interface BridgeRidgeProgressState {
   stampIds: RidgeStampId[];
@@ -57,6 +76,7 @@ export interface BridgeRidgeProgressState {
     glidePips: number;
   };
   shortcutIds: RidgeShortcutId[];
+  firstPlayableRoute: RidgeFirstPlayableRouteState;
 }
 
 export interface BridgeProgressState {
@@ -120,7 +140,15 @@ function createInitialRidgeProgress(): BridgeRidgeProgressState {
     mobility: {
       glidePips: 0
     },
-    shortcutIds: []
+    shortcutIds: [],
+    firstPlayableRoute: createInitialRidgeFirstPlayableRoute()
+  };
+}
+
+function createInitialRidgeFirstPlayableRoute(): RidgeFirstPlayableRouteState {
+  return {
+    activeAreaId: 'bridge',
+    bridgeBeat: 'intro'
   };
 }
 
@@ -262,6 +290,10 @@ function setState(updater: (current: BridgeState) => BridgeState): void {
     arraysEqual(previous.progress.ridge.manualPageIds, candidate.progress.ridge.manualPageIds) &&
     previous.progress.ridge.mobility.glidePips === candidate.progress.ridge.mobility.glidePips &&
     arraysEqual(previous.progress.ridge.shortcutIds, candidate.progress.ridge.shortcutIds) &&
+    previous.progress.ridge.firstPlayableRoute.activeAreaId ===
+      candidate.progress.ridge.firstPlayableRoute.activeAreaId &&
+    previous.progress.ridge.firstPlayableRoute.bridgeBeat ===
+      candidate.progress.ridge.firstPlayableRoute.bridgeBeat &&
     previous.sceneHintText === candidate.sceneHintText &&
     previous.touch.left === candidate.touch.left &&
     previous.touch.right === candidate.touch.right &&
@@ -461,6 +493,37 @@ export const bridgeActions = {
         }
       };
     });
+  },
+  setRidgeBridgeBeat(bridgeBeat: RidgeBridgeAreaBeatState): void {
+    setState((current) => ({
+      ...current,
+      progress: {
+        ...current.progress,
+        ridge: {
+          ...current.progress.ridge,
+          firstPlayableRoute: {
+            ...current.progress.ridge.firstPlayableRoute,
+            activeAreaId: 'bridge',
+            bridgeBeat
+          }
+        }
+      }
+    }));
+  },
+  triggerRidgeConcertHandoff(): void {
+    setState((current) => ({
+      ...current,
+      progress: {
+        ...current.progress,
+        ridge: {
+          ...current.progress.ridge,
+          firstPlayableRoute: {
+            activeAreaId: 'concert',
+            bridgeBeat: 'concert_handoff'
+          }
+        }
+      }
+    }));
   },
   resetProgress(): void {
     setState((current) => ({
