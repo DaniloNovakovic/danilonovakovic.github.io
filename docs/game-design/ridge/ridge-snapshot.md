@@ -12,14 +12,16 @@
 - **Ridge source router:** [`README.md`](./README.md).
 - **Active story/route canon:** [`story-level-bible.md`](./story-level-bible.md).
 - **Active area design:** [`areas/`](./areas/README.md).
-- **Runtime spatial data:** [`folded-desk-ridge.source.ts`](../../../src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts).
+- **Legacy blockout spatial data:** [`folded-desk-ridge.source.ts`](../../../src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts).
 - **Blockout language contract:** [`map-language.md`](./map-language.md).
 - **Legacy folded topology reference:** [`legacy/`](./legacy/README.md).
 - **Product vision:** [`summit.md`](./summit.md).
 - **Live implementation work:** GitHub Issues.
 
-If this file disagrees with the folded desk Ridge blockout about room layout,
-route order, anchors, shortcuts, or progress-gated geometry, the blockout wins.
+If this file disagrees with the current Ridge runtime code about implemented
+behavior, the code wins. If this file describes the legacy folded desk blockout
+and disagrees with the folded desk Ridge blockout about room layout, route
+order, anchors, shortcuts, or progress-gated geometry, the blockout wins.
 If this file disagrees with GitHub about active work state, GitHub wins.
 If this file disagrees with `story-level-bible.md` or the matching `areas/`
 doc about future route intent, the active design docs win.
@@ -35,22 +37,20 @@ Ridge is a separate Phaser scene that can boot directly in development with:
 Current runtime characteristics:
 
 - Ridge uses shared side-view movement and camera/runtime support.
-- The scene imports the generated Ridge blockout artifact, derives geometry,
-  compiles typed facts, and hands those facts to scene-owned presentation,
-  traversal, interaction, and Cicka Home mutation modules.
-- The runtime source is the folded Ridge blockout, not a separate hand-coded
-  room catalog.
-- Stampede can be reached from the Ridge Trail Card path.
-- Telegraph, Domino, high ledge, underpath, and other future beats are present
-  as route promises or disabled/teased anchors until their implementation
-  slices exist.
-- Ridge remains a proof-of-concept surface. The current playable traversal code
-  can be replaced if the next design pass preserves the useful source contract,
-  compiler, generated facts, and viewer/debugger workflow.
-- Newer story-route planning demotes Cicka Home from canonical hub to local
-  **Cicka Resting Spots** inside each required Ridge Area. The current
-  Cicka Home runtime pieces are proof-of-concept infrastructure until a route
-  rewrite chooses whether to adapt or remove them.
+- The active `ridge` scene is now the **Bridge Tracer Slice**: a flat
+  Bridge-only route from nature/hill entry to Cicka's toy-car play spot,
+  blocked blueprint bridge, Bridge Draftsperson, auto-success toy-car test,
+  completed crossing, and Bridge-to-Concert handoff.
+- First Playable Route progress lives in the bridge store as
+  `firstPlayableRoute`, currently tracking `activeAreaId` and `bridgeBeat`.
+- Bridge prompts and dialogue are mirrored into a small typed runtime data layer
+  from the accepted Bridge dialogue IDs.
+- The folded desk blockout, generated facts, traversal helpers, Cicka Home
+  mutation code, Trail Cards, and Stampede reward path remain in the repo as
+  protected prototype/reference assets, but they are not the active Ridge route
+  presented by the `ridge` scene.
+- Stampede remains loadable as its own scene and through development tooling,
+  but the active Bridge slice does not route to Stampede/Telegraph/Domino.
 
 ## Protected PoC Assets
 
@@ -72,7 +72,25 @@ Disposable if a better Ridge emerges:
 - current folded-desk room arrangement.
 - any runtime module whose main job was proving the old platformer-like route.
 
-## Current Route Read
+## Active Runtime Route Read
+
+The current playable Ridge route is the Bridge tracer:
+
+```text
+Nature / hill entry
+  -> Cicka + toy car play spot
+  -> blocked bridge + unfinished blueprint
+  -> Bridge Draftsperson
+  -> Cicka Parallel Play
+  -> toy-car bridge test
+  -> completed crossing
+  -> Bridge-to-Concert handoff
+```
+
+The Bridge-to-Concert handoff is only a transition proof. Concert, Dance
+Festival, Relay, and the ending sequence remain future implementation slices.
+
+## Legacy Folded Blockout Read
 
 The current blockout route is the folded desk Ridge:
 
@@ -126,9 +144,13 @@ Durable Ridge progress is intentionally small:
 - manual pages
 - glide pips
 - shortcuts
+- first playable route state
 
 Current accepted behavior:
 
+- Bridge route state tracks the Bridge beat from `intro` through
+  `concert_handoff` without introducing inventory, quest logs, or objective
+  trackers.
 - First Stampede clear awards the `stampede-sketch` Ridge stamp.
 - First Stampede clear awards one glide pip.
 - Repeat Stampede clears do not duplicate those rewards.

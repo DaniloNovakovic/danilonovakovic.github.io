@@ -171,7 +171,11 @@ describe('bridgeStore', () => {
         mobility: {
           glidePips: 0
         },
-        shortcutIds: []
+        shortcutIds: [],
+        firstPlayableRoute: {
+          activeAreaId: 'bridge',
+          bridgeBeat: 'intro'
+        }
       });
       expect(bridgeStore.getState().inventory.ownedItemIds).toEqual([]);
       expect(bridgeStore.getState().equipment.equippedItemIds).toEqual([]);
@@ -197,7 +201,11 @@ describe('bridgeStore', () => {
         mobility: {
           glidePips: 0
         },
-        shortcutIds: []
+        shortcutIds: [],
+        firstPlayableRoute: {
+          activeAreaId: 'bridge',
+          bridgeBeat: 'intro'
+        }
       });
       expect(bridgeStore.getState().inventory.ownedItemIds).toEqual([]);
       expect(bridgeStore.getState().equipment.equippedItemIds).toEqual([]);
@@ -253,11 +261,37 @@ describe('bridgeStore', () => {
       bridgeActions.awardRidgeStamp('stampede-sketch');
       expect(bridgeStore.getState().progress.ridge).not.toHaveProperty('stickerIds');
       expect(Object.keys(bridgeStore.getState().progress.ridge).sort()).toEqual([
+        'firstPlayableRoute',
         'manualPageIds',
         'mobility',
         'shortcutIds',
         'stampIds'
       ]);
+    });
+
+    it('tracks the first playable Ridge route handoff separately from rewards', () => {
+      expect(bridgeStore.getState().progress.ridge.firstPlayableRoute).toEqual({
+        activeAreaId: 'bridge',
+        bridgeBeat: 'intro'
+      });
+
+      bridgeActions.setRidgeBridgeBeat('needs_toy_car');
+      expect(bridgeStore.getState().progress.ridge.firstPlayableRoute).toEqual({
+        activeAreaId: 'bridge',
+        bridgeBeat: 'needs_toy_car'
+      });
+
+      bridgeActions.triggerRidgeConcertHandoff();
+      expect(bridgeStore.getState().progress.ridge.firstPlayableRoute).toEqual({
+        activeAreaId: 'concert',
+        bridgeBeat: 'concert_handoff'
+      });
+
+      bridgeActions.resetProgress();
+      expect(bridgeStore.getState().progress.ridge.firstPlayableRoute).toEqual({
+        activeAreaId: 'bridge',
+        bridgeBeat: 'intro'
+      });
     });
 
     it('keeps Potassium Circuit ownership derived from inventory', () => {

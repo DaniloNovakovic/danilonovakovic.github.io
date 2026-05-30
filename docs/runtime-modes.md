@@ -58,12 +58,11 @@ Use this path when checking pattern refactors:
 4. Open and close a hobby overlay from inside the hobbies scene.
 5. Enter the Developer Basement, open the computer console, and close it back
    to the basement scene.
-6. Boot `?startScene=ridge`; verify the Ridge shell renders, movement works,
-   and walking near a Stampede/Telegraph/Domino prop shows `[E] INTERACT`.
-   Interact with the Stampede prop to open its Trail Card, confirm `Enter`
-   starts Stampede Sketch, confirm the Stampede Notebook shell renders, drag
-   from outside the visible page to move, and return to Ridge. Telegraph and
-   Domino cards should still keep primary entry disabled.
+6. Boot `?startScene=ridge`; verify the Ridge shell renders the Bridge tracer,
+   movement works from the nature/hill entry, Cicka appears with the toy car,
+   the Bridge Draftsperson advances the missing-span beat, Cicka Parallel Play
+   unlocks the toy car test, the auto-success bridge test visibly opens the
+   crossing, and the opened crossing triggers the Bridge-to-Concert handoff.
 7. Open inventory from the overworld and from a child scene.
 8. In Potassium, confirm the Notebook shell renders with Back and Static Mode,
    then drag/release from outside the visible board area and confirm launch or
