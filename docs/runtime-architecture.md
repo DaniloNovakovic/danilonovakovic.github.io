@@ -89,6 +89,12 @@ re-apply camera bounds/profile math.
   game card. Stampede uses this for status/start/result UI; Potassium uses it
   for draft choices and terminal actions while Phaser keeps the active HUD and
   gameplay field.
+- Route-wide character conversations should use the same scene UI seam: Phaser
+  owns when a conversation starts, when the player stands still, and which
+  dialogue IDs are active; React owns the Character Conversation Overlay,
+  portrait/icon frame, typed text reveal, and advance/close controls.
+  Conversation state should freeze player control and interaction target
+  switching without necessarily pausing harmless ambient scene animation.
 - Use shell header chrome policy for app navigation controls that belong
   outside the Phaser card, such as Back buttons for arcade scenes. Do not push
   those controls through scene-owned UI unless they need scene gameplay state.
