@@ -1,5 +1,6 @@
 import type { InteriorInteractionTarget } from '@/game/sharedSceneRuntime/interactions/InteriorInteractionRuntime';
 import type {
+  RidgeBridgeAreaBeatState,
   RidgeBridgeBeatState,
   RidgeFirstPlayableRouteState
 } from '@/game/bridge/store';
@@ -54,7 +55,7 @@ export type BridgeTracerEffect =
   | {
       kind: 'showDialogue';
       lineIds: BridgeDialogueLineId[];
-      nextBeat?: RidgeBridgeBeatState;
+      nextBeat?: RidgeBridgeAreaBeatState;
     }
   | {
       kind: 'runToyCarTest';
@@ -72,6 +73,8 @@ export type BridgeTracerInteractionTarget = InteriorInteractionTarget<
   promptLineId: BridgeDialogueLineId;
 };
 
+type BridgeTracerTargetFactory = () => BridgeTracerInteractionTarget;
+
 export function isBridgeCrossingOpen(bridgeBeat: RidgeBridgeBeatState): boolean {
   return bridgeBeat === 'bridge_complete' || bridgeBeat === 'concert_handoff';
 }
@@ -88,31 +91,22 @@ export function createBridgeTracerInteractionTargets(
   route: RidgeFirstPlayableRouteState
 ): BridgeTracerInteractionTarget[] {
   if (route.activeAreaId !== 'bridge') return [];
-
-  const targets: BridgeTracerInteractionTarget[] = [];
-
-  if (route.bridgeBeat === 'intro') {
-    targets.push(createCickaFirstMeetTarget());
-  }
-
-  if (route.bridgeBeat === 'needs_toy_car') {
-    targets.push(createCickaParallelPlayTarget());
-  }
-
-  if (route.bridgeBeat === 'intro' || route.bridgeBeat === 'needs_toy_car') {
-    targets.push(createMissingSpanTarget(route.bridgeBeat));
-  }
-
-  if (route.bridgeBeat === 'toy_car_shared') {
-    targets.push(createToyCarTestTarget());
-  }
-
-  if (route.bridgeBeat === 'bridge_complete') {
-    targets.push(createConcertExitTarget());
-  }
-
-  return targets;
+  return BRIDGE_TARGETS_BY_BEAT[route.bridgeBeat].map((createTarget) => createTarget());
 }
+
+const BRIDGE_TARGETS_BY_BEAT = {
+  intro: [
+    createCickaFirstMeetTarget,
+    createIntroMissingSpanTarget
+  ],
+  needs_toy_car: [
+    createCickaParallelPlayTarget,
+    createNeedsToyCarMissingSpanTarget
+  ],
+  toy_car_shared: [createToyCarTestTarget],
+  testing_bridge: [],
+  bridge_complete: [createConcertExitTarget]
+} satisfies Record<RidgeBridgeAreaBeatState, readonly BridgeTracerTargetFactory[]>;
 
 function createCickaFirstMeetTarget(): BridgeTracerInteractionTarget {
   return {
@@ -162,8 +156,16 @@ function createCickaParallelPlayTarget(): BridgeTracerInteractionTarget {
   };
 }
 
+function createIntroMissingSpanTarget(): BridgeTracerInteractionTarget {
+  return createMissingSpanTarget('intro');
+}
+
+function createNeedsToyCarMissingSpanTarget(): BridgeTracerInteractionTarget {
+  return createMissingSpanTarget('needs_toy_car');
+}
+
 function createMissingSpanTarget(
-  bridgeBeat: Extract<RidgeBridgeBeatState, 'intro' | 'needs_toy_car'>
+  bridgeBeat: Extract<RidgeBridgeAreaBeatState, 'intro' | 'needs_toy_car'>
 ): BridgeTracerInteractionTarget {
   return {
     id: 'draftsperson',

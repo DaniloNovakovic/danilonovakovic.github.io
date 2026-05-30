@@ -42,7 +42,9 @@ Current runtime characteristics:
   blocked blueprint bridge, Bridge Draftsperson, auto-success toy-car test,
   completed crossing, and Bridge-to-Concert handoff.
 - First Playable Route progress lives in the bridge store as
-  `firstPlayableRoute`, currently tracking `activeAreaId` and `bridgeBeat`.
+  `firstPlayableRoute`, a typed route state that only permits active Bridge
+  beats while `activeAreaId` is `bridge` and records the Concert handoff as the
+  post-Bridge area state.
 - Bridge prompts and dialogue are mirrored into a small typed runtime data layer
   from the accepted Bridge dialogue IDs.
 - The folded desk blockout, generated facts, traversal helpers, Cicka Home

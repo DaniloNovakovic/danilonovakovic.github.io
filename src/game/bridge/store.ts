@@ -57,11 +57,18 @@ export type RidgeBridgeBeatState =
   | 'testing_bridge'
   | 'bridge_complete'
   | 'concert_handoff';
+export type RidgeBridgeAreaBeatState = Exclude<RidgeBridgeBeatState, 'concert_handoff'>;
+export type RidgePostBridgeAreaId = Exclude<RidgeFirstPlayableAreaId, 'bridge'>;
 
-export interface RidgeFirstPlayableRouteState {
-  activeAreaId: RidgeFirstPlayableAreaId;
-  bridgeBeat: RidgeBridgeBeatState;
-}
+export type RidgeFirstPlayableRouteState =
+  | {
+      activeAreaId: 'bridge';
+      bridgeBeat: RidgeBridgeAreaBeatState;
+    }
+  | {
+      activeAreaId: RidgePostBridgeAreaId;
+      bridgeBeat: 'concert_handoff';
+    };
 
 export interface BridgeRidgeProgressState {
   stampIds: RidgeStampId[];
@@ -488,7 +495,7 @@ export const bridgeActions = {
       };
     });
   },
-  setRidgeBridgeBeat(bridgeBeat: RidgeBridgeBeatState): void {
+  setRidgeBridgeBeat(bridgeBeat: RidgeBridgeAreaBeatState): void {
     setState((current) => ({
       ...current,
       progress: {

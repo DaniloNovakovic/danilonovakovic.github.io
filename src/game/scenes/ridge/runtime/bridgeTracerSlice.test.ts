@@ -7,8 +7,15 @@ import {
 } from './bridgeTracerSlice';
 
 function route(bridgeBeat: RidgeBridgeBeatState): RidgeFirstPlayableRouteState {
+  if (bridgeBeat === 'concert_handoff') {
+    return {
+      activeAreaId: 'concert',
+      bridgeBeat
+    };
+  }
+
   return {
-    activeAreaId: bridgeBeat === 'concert_handoff' ? 'concert' : 'bridge',
+    activeAreaId: 'bridge',
     bridgeBeat
   };
 }
