@@ -12,6 +12,7 @@ import {
   CICKA_RUNTIME_SCALE,
   CICKA_TEXTURE_KEY
 } from '../cicka/assets';
+import { BRIDGE_TEXTURE_KEYS } from '../bridge/assets';
 import {
   getBridgeDialogueLine,
   getBridgePromptText,
@@ -67,7 +68,7 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
   private completedBridgeObjects: VisibleGameObject[] = [];
   private cickaSprite?: Phaser.GameObjects.Sprite;
   private cickaShadow?: Phaser.GameObjects.Ellipse;
-  private toyCar?: Phaser.GameObjects.Container;
+  private toyCar?: Phaser.GameObjects.Image;
   private handoffNote?: Phaser.GameObjects.Text;
   private interactPrompt?: Phaser.GameObjects.Text;
   private dialogueContainer?: Phaser.GameObjects.Container;
@@ -194,80 +195,26 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
   }
 
   private addBackdropInk(): void {
-    const graphics = this.scene.add.graphics().setDepth(-80);
-    graphics.lineStyle(2, 0x1f1f1d, 0.06);
-    for (let y = 116; y < BRIDGE_TRACER_WORLD.bounds.height; y += 96) {
-      graphics.strokeLineShape(new Phaser.Geom.Line(0, y, BRIDGE_TRACER_WORLD.bounds.width, y));
-    }
+    this.scene.add.image(0, 0, BRIDGE_TEXTURE_KEYS.stageBackdrop)
+      .setOrigin(0, 0)
+      .setDepth(-80);
 
-    graphics.lineStyle(4, 0x1f1f1d, 0.12);
-    graphics.beginPath();
-    graphics.moveTo(0, BRIDGE_TRACER_WORLD.floorY - 34);
-    graphics.lineTo(220, BRIDGE_TRACER_WORLD.floorY - 58);
-    graphics.lineTo(460, BRIDGE_TRACER_WORLD.floorY - 34);
-    graphics.lineTo(760, BRIDGE_TRACER_WORLD.floorY - 46);
-    graphics.strokePath();
-
-    for (let x = 180; x < 1000; x += 190) {
-      graphics.lineStyle(3, 0x1f1f1d, 0.12);
-      graphics.strokeTriangle(
-        x,
-        BRIDGE_TRACER_WORLD.floorY - 72,
-        x - 34,
-        BRIDGE_TRACER_WORLD.floorY - 14,
-        x + 40,
-        BRIDGE_TRACER_WORLD.floorY - 14
-      );
-      graphics.lineStyle(2, 0x1f1f1d, 0.1);
-      graphics.strokeLineShape(new Phaser.Geom.Line(
-        x,
-        BRIDGE_TRACER_WORLD.floorY - 54,
-        x,
-        BRIDGE_TRACER_WORLD.floorY - 12
-      ));
-    }
-
-    graphics.lineStyle(5, 0x1f1f1d, 0.14);
-    graphics.strokeLineShape(new Phaser.Geom.Line(1980, 332, 2060, 250));
-    graphics.strokeLineShape(new Phaser.Geom.Line(2060, 250, 2140, 332));
-    graphics.lineStyle(3, 0x1f1f1d, 0.1);
-    graphics.strokeLineShape(new Phaser.Geom.Line(2024, 292, 2094, 292));
+    this.scene.add.image(
+      1035,
+      BRIDGE_TRACER_WORLD.floorY + 16,
+      BRIDGE_TEXTURE_KEYS.foregroundScreen
+    )
+      .setOrigin(0.5, 1)
+      .setDepth(24);
   }
 
   private createBridgeGround(): void {
     const { floorY, bridge, bounds } = BRIDGE_TRACER_WORLD;
     const groundY = floorY + BRIDGE_GROUND_COLLIDER_HEIGHT / 2;
 
-    this.scene.add.rectangle(
-      bridge.leftBankEndX / 2,
-      floorY + 24,
-      bridge.leftBankEndX,
-      48,
-      0xf7f1df,
-      1
-    )
-      .setStrokeStyle(4, 0x1f1f1d, 0.8)
+    this.scene.add.image(0, 0, BRIDGE_TEXTURE_KEYS.groundStrips)
+      .setOrigin(0, 0)
       .setDepth(1);
-    this.scene.add.rectangle(
-      bridge.rightBankStartX + (bounds.width - bridge.rightBankStartX) / 2,
-      floorY + 24,
-      bounds.width - bridge.rightBankStartX,
-      48,
-      0xf7f1df,
-      1
-    )
-      .setStrokeStyle(4, 0x1f1f1d, 0.8)
-      .setDepth(1);
-
-    this.addHatching(40, floorY + 8, bridge.leftBankEndX - 80, 34, 14, 0.12);
-    this.addHatching(
-      bridge.rightBankStartX + 34,
-      floorY + 8,
-      bounds.width - bridge.rightBankStartX - 80,
-      34,
-      14,
-      0.12
-    );
 
     this.groundPlatforms.push(
       this.addStaticZone(
@@ -287,6 +234,26 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
 
   private createCickaPlaySpot(): void {
     const { cickaPlaySpot } = BRIDGE_TRACER_WORLD;
+    this.scene.add.rectangle(
+      cickaPlaySpot.x + 34,
+      cickaPlaySpot.y + 25,
+      172,
+      28,
+      0xf7f1df,
+      0.92
+    )
+      .setStrokeStyle(3, 0x1f1f1d, 0.26)
+      .setAngle(-2)
+      .setDepth(14);
+    for (const offset of [-24, -8, 10]) {
+      this.scene.add.circle(
+        cickaPlaySpot.x + 112 + offset,
+        cickaPlaySpot.y + 20 + Math.abs(offset % 7),
+        3,
+        0x1f1f1d,
+        0.26
+      ).setDepth(15);
+    }
     this.cickaShadow = this.scene.add.ellipse(
       cickaPlaySpot.x,
       cickaPlaySpot.y + 8,
@@ -309,88 +276,55 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
   }
 
   private createBridgeDraftsperson(): void {
-    const { draftsperson, blueprint } = BRIDGE_TRACER_WORLD;
-    this.scene.add.ellipse(draftsperson.x, draftsperson.y + 10, 80, 18, 0x1f1f1d, 0.1).setDepth(14);
-    this.scene.add.rectangle(draftsperson.x, draftsperson.y - 40, 38, 62, 0xf7f1df, 1)
-      .setStrokeStyle(4, 0x1f1f1d, 0.86)
-      .setDepth(21);
-    this.scene.add.circle(draftsperson.x, draftsperson.y - 82, 26, 0xf7f1df, 1)
-      .setStrokeStyle(4, 0x1f1f1d, 0.9)
-      .setDepth(22);
-    this.scene.add.line(draftsperson.x + 6, draftsperson.y - 87, -6, 0, 6, 0, 0x1f1f1d, 0.8)
-      .setLineWidth(3)
-      .setDepth(23);
-    this.scene.add.line(draftsperson.x - 16, draftsperson.y - 90, -5, -4, 5, 4, 0x1f1f1d, 0.65)
-      .setLineWidth(2)
-      .setDepth(23);
-    this.scene.add.line(draftsperson.x + 16, draftsperson.y - 90, -5, 4, 5, -4, 0x1f1f1d, 0.65)
-      .setLineWidth(2)
-      .setDepth(23);
+    const { draftsperson, blueprint, floorY } = BRIDGE_TRACER_WORLD;
 
-    this.scene.add.rectangle(blueprint.x, blueprint.y, 184, 116, 0xf7f1df, 1)
-      .setStrokeStyle(4, 0x1f1f1d, 0.82)
-      .setAngle(-2)
-      .setDepth(12);
-    this.scene.add.line(blueprint.x - 48, blueprint.y - 6, -54, 0, -12, -18, 0x1f1f1d, 0.7)
-      .setLineWidth(4)
-      .setDepth(13);
-    this.scene.add.line(blueprint.x + 42, blueprint.y - 2, 10, -18, 54, 2, 0x1f1f1d, 0.7)
-      .setLineWidth(4)
-      .setDepth(13);
-    this.completedBridgeObjects.push(this.asVisible(this.scene.add.line(
+    this.scene.add.image(
+      draftsperson.x - 150,
+      floorY + 6,
+      BRIDGE_TEXTURE_KEYS.draftspersonRestShelter
+    )
+      .setOrigin(0.5, 1)
+      .setDepth(9);
+
+    this.scene.add.image(
       blueprint.x,
-      blueprint.y - 13,
-      -26,
-      -6,
-      26,
-      6,
-      0x1f1f1d,
-      0.86
-    ).setLineWidth(4).setDepth(14)));
-    this.addHatching(blueprint.x - 74, blueprint.y + 28, 142, 24, 11, 0.1);
+      floorY + 4,
+      BRIDGE_TEXTURE_KEYS.draftspersonWorkZone
+    )
+      .setOrigin(0.5, 1)
+      .setDepth(12);
+
+    this.scene.add.image(
+      draftsperson.x,
+      draftsperson.y + 18,
+      BRIDGE_TEXTURE_KEYS.draftspersonCharacter
+    )
+      .setOrigin(0.5, 1)
+      .setScale(0.76)
+      .setDepth(23);
   }
 
   private createBridgeCrossingVisuals(): void {
     const { bridge, floorY } = BRIDGE_TRACER_WORLD;
-    this.scene.add.rectangle(bridge.leftBankEndX - 18, floorY - 22, 34, 88, 0xf7f1df, 1)
-      .setStrokeStyle(4, 0x1f1f1d, 0.84)
-      .setDepth(5);
-    this.scene.add.rectangle(bridge.rightBankStartX + 18, floorY - 22, 34, 88, 0xf7f1df, 1)
-      .setStrokeStyle(4, 0x1f1f1d, 0.84)
-      .setDepth(5);
 
     this.blockedBridgeObjects.push(
-      this.asVisible(this.scene.add.rectangle(bridge.centerX, floorY - 40, 220, 44, 0xf7f1df, 0.7)
-        .setStrokeStyle(3, 0x1f1f1d, 0.45)
-        .setDepth(6)),
-      this.asVisible(this.scene.add.line(bridge.centerX - 58, floorY - 42, -38, -22, 38, 22, 0x1f1f1d, 0.72)
-        .setLineWidth(5)
-        .setDepth(7)),
-      this.asVisible(this.scene.add.line(bridge.centerX + 58, floorY - 42, -38, 22, 38, -22, 0x1f1f1d, 0.72)
-        .setLineWidth(5)
-        .setDepth(7))
+      this.asVisible(this.scene.add.image(
+        bridge.centerX,
+        floorY - 46,
+        BRIDGE_TEXTURE_KEYS.crossingBefore
+      )
+        .setOrigin(0.5)
+        .setDepth(8))
     );
 
-    const deck = this.scene.add.rectangle(
-      bridge.centerX,
-      bridge.deckY - 12,
-      bridge.deckWidth,
-      24,
-      0xf7f1df,
-      1
-    )
-      .setStrokeStyle(5, 0x1f1f1d, 0.9)
-      .setDepth(8);
-    const topLine = this.scene.add.line(bridge.centerX, bridge.deckY - 30, -130, 0, 130, 0, 0x1f1f1d, 0.62)
-      .setLineWidth(3)
-      .setDepth(9);
-    const bottomLine = this.scene.add.line(bridge.centerX, bridge.deckY + 2, -128, 0, 128, 0, 0x1f1f1d, 0.36)
-      .setLineWidth(2)
-      .setDepth(9);
     this.completedBridgeObjects.push(
-      this.asVisible(deck),
-      this.asVisible(topLine),
-      this.asVisible(bottomLine)
+      this.asVisible(this.scene.add.image(
+        bridge.centerX,
+        floorY - 46,
+        BRIDGE_TEXTURE_KEYS.crossingAfter
+      )
+        .setOrigin(0.5)
+        .setDepth(8))
     );
   }
 
@@ -520,36 +454,11 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
     );
   }
 
-  private createToyCar(x: number, y: number): Phaser.GameObjects.Container {
-    const container = this.scene.add.container(x, y).setDepth(25);
-    const body = this.scene.add.rectangle(0, -7, 48, 20, 0xf7f1df, 1)
-      .setStrokeStyle(3, 0x1f1f1d, 0.88);
-    const roof = this.scene.add.rectangle(-4, -20, 24, 14, 0xf7f1df, 1)
-      .setStrokeStyle(2, 0x1f1f1d, 0.72);
-    const wheelLeft = this.scene.add.circle(-15, 6, 6, 0x1f1f1d, 0.9);
-    const wheelRight = this.scene.add.circle(16, 6, 6, 0x1f1f1d, 0.9);
-    container.add([body, roof, wheelLeft, wheelRight]);
-    return container;
-  }
-
-  private addHatching(
-    x: number,
-    y: number,
-    width: number,
-    height: number,
-    spacing: number,
-    alpha: number
-  ): void {
-    const graphics = this.scene.add.graphics().setDepth(4);
-    graphics.lineStyle(2, 0x1f1f1d, alpha);
-    for (let offset = 0; offset <= width + height; offset += spacing) {
-      graphics.strokeLineShape(new Phaser.Geom.Line(
-        x + offset,
-        y,
-        x + offset - height,
-        y + height
-      ));
-    }
+  private createToyCar(x: number, y: number): Phaser.GameObjects.Image {
+    return this.scene.add.image(x, y, BRIDGE_TEXTURE_KEYS.toyCar)
+      .setOrigin(0.5, 0.84)
+      .setScale(0.72)
+      .setDepth(25);
   }
 
   private addStaticZone(

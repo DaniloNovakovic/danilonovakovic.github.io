@@ -28,6 +28,7 @@ import {
   createCickaAnimations,
   preloadCickaAssets
 } from '../cicka/assets';
+import { preloadBridgeAssets } from '../bridge/assets';
 import {
   applyRidgeDevTeleportToPlayer,
   RIDGE_DEFAULT_CAMERA_ZOOM,
@@ -92,6 +93,7 @@ export class RidgeScene extends Phaser.Scene {
     if (!this.textures.exists('player_idle')) {
       TextureGenerator.generatePlayer(this);
     }
+    preloadBridgeAssets(this);
     preloadCickaAssets(this);
   }
 

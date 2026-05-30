@@ -199,8 +199,10 @@ Minimum outcomes:
      span doodles.
   6. `draftsperson-rest-shelter`: visual-only tent, cabin, or sleep shelter
      cue.
-  7. `toy-car-prop`: small physical weight-test car with a readable silhouette.
-  8. tiny role portrait/icon placeholders for Cicka, Bridge Draftsperson, and
+  7. `draftsperson-character`: a readable Bridge Draftsperson silhouette at
+     gameplay scale.
+  8. `toy-car-prop`: small physical weight-test car with a readable silhouette.
+  9. tiny role portrait/icon placeholders for Cicka, Bridge Draftsperson, and
      neutral Prompt/narration, reserved for the Character Conversation Overlay
      follow-up.
 - Keep Bridge assets layered rather than compositing the full stage into one

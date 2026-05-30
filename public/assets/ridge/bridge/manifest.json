@@ -1,0 +1,108 @@
+{
+  "slug": "bridge-visual-coherence",
+  "owner": "src/game/scenes/ridge/**",
+  "generatedBy": "scripts/generate-bridge-assets.py",
+  "style": "Digital Sketchbook: off-white paper, black ink, silhouette-first, hatching for value.",
+  "assets": [
+    {
+      "key": "bridge-stage-backdrop",
+      "file": "bridge-stage-backdrop.png",
+      "width": 2600,
+      "height": 600,
+      "origin": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "key": "bridge-stage-foreground-screen",
+      "file": "bridge-stage-foreground-screen.png",
+      "width": 380,
+      "height": 260,
+      "origin": {
+        "x": 0.5,
+        "y": 1
+      }
+    },
+    {
+      "key": "bridge-ground-strips",
+      "file": "bridge-ground-strips.png",
+      "width": 2600,
+      "height": 600,
+      "origin": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "key": "bridge-crossing-before",
+      "file": "bridge-crossing-before.png",
+      "width": 460,
+      "height": 210,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "key": "bridge-crossing-after",
+      "file": "bridge-crossing-after.png",
+      "width": 460,
+      "height": 210,
+      "origin": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "key": "draftsperson-work-zone",
+      "file": "draftsperson-work-zone.png",
+      "width": 470,
+      "height": 280,
+      "origin": {
+        "x": 0.5,
+        "y": 1
+      }
+    },
+    {
+      "key": "draftsperson-rest-shelter",
+      "file": "draftsperson-rest-shelter.png",
+      "width": 330,
+      "height": 230,
+      "origin": {
+        "x": 0.5,
+        "y": 1
+      }
+    },
+    {
+      "key": "draftsperson-character",
+      "file": "draftsperson-character.png",
+      "width": 128,
+      "height": 170,
+      "origin": {
+        "x": 0.5,
+        "y": 1
+      }
+    },
+    {
+      "key": "toy-car-prop",
+      "file": "toy-car-prop.png",
+      "width": 96,
+      "height": 64,
+      "origin": {
+        "x": 0.5,
+        "y": 0.84
+      }
+    },
+    {
+      "key": "bridge-role-icons",
+      "file": "bridge-role-icons.png",
+      "width": 288,
+      "height": 96,
+      "frameWidth": 96,
+      "frameHeight": 96,
+      "frameCount": 3
+    }
+  ],
+  "debugContact": "bridge-debug-contact.png"
+}
