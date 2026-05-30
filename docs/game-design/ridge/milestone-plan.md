@@ -58,6 +58,27 @@ Optional mini-games, old Cicka Home mutation work, and folded-desk topology
 enter these milestones only when an active route doc or issue pulls a specific
 piece forward.
 
+### P2 Blockout Completeness Contract
+
+For the first end-to-end **First Playable Route** blockout, each required
+Bridge, Concert, and Dance Festival area is blockout-complete when it has:
+
+1. an entry state where the player enters, can move, and the camera frames the
+   local problem
+2. a visible blocker where the next route is physically blocked before dialogue
+   explains it
+3. a Cicka cue near the problem, prop, or emotional handoff
+4. a resident help beat where one local resident has a practical reason they
+   can affect the blocker
+5. one simple interaction chain with two to four authored prompts or dialogue
+   beats and no fail state
+6. a visible world change that changes the map, not only dialogue
+7. a Cicka after-state where the local resting spot changes or settles
+8. an exit trigger that carries the player to the next Ridge Area
+
+Relay replaces the resident help beat with a brief playable linger, **Sit and
+Play**, authored farewell, **Dedication Card**, and clean Bridge reset.
+
 ## Source Stack
 
 For Ridge rework issues, link the smallest relevant set:

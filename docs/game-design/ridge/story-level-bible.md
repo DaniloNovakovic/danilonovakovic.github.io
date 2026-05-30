@@ -44,6 +44,31 @@ Mini-games attach to the world as optional fun, rewards, shortcuts, or future
 alternate ways to finish a level. They should not become required first-ending
 proof or the default solution for main route blockers.
 
+## Camera And Presentation Direction
+
+Use a **Walkable Sketchbook Stage** direction for the active Ridge route: a
+Harold Halibut-like or theater-set 2.5D presentation that keeps side-view
+interaction simple while composing each Ridge Area like a hand-built paper set.
+
+This means Bridge, Concert, Dance Festival, and Relay can use shallow staged
+depth, foreground/background paper layers, and authored composition, but the
+player's main route movement remains side-view and forgiving. The target is
+closer to a walkable sketchbook stage than an isometric RPG map.
+
+For the First Playable Route, this direction should be expressed lightly:
+per-area bounds, readable spawn framing, visible blockers, simple paper-layer
+depth, and camera framing that supports the local problem. Authored camera
+zones, look-ahead, dead zones, profile blending, and richer parallax are
+follow-up runtime/art polish unless a narrow spike proves they are needed for
+blockout readability.
+
+Keep First Playable Route traversal strictly side-view and mostly left/right.
+Create depth through area composition, foreground/background paper layers,
+entered buildings or local interiors, prop staging, and silhouettes rather than
+small up/down lane movement. If a later area proves the simple model cannot
+support its staging, that area can earn a focused camera/traversal spike, but
+the first implementation should try the consistent simple model first.
+
 ## Canonical Ending
 
 The first ending is the **Cicka Threshold Farewell**. It is the canonical ending

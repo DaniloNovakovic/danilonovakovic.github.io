@@ -186,6 +186,12 @@ where the player moves toward the Relay Spire by helping tiny residents and
 seeing routes change.
 _Avoid_: metroidvania platforming map, portfolio theme park, static building row
 
+**Walkable Sketchbook Stage**:
+The accepted Ridge presentation direction: a Harold Halibut-like or theater-set
+2.5D area presentation that preserves side-view interaction simplicity while
+composing each area like a hand-built paper set with shallow staged depth.
+_Avoid_: isometric RPG map, true 3D navigation, flat precision-platformer camera
+
 **Lived-In Causality**:
 A design rule for the Sketchbook Neighborhood: route blockers and world changes
 should have practical in-world causes, local context, and residents with
