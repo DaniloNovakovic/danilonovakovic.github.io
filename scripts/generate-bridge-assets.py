@@ -212,32 +212,20 @@ def create_backdrop() -> None:
 
     draw_line(
         draw,
-        [(0, 462), (180, 440), (360, 452), (560, 430), (760, 446), (990, 432), (1220, 450), (1480, 430), (1760, 454), (2060, 430), (2360, 448), (2600, 438)],
-        fill=rgba(INK, 90),
+        [(0, 450), (260, 432), (540, 444), (820, 425), (1120, 440), (1420, 426), (1740, 446), (2060, 428), (2360, 442), (2600, 432)],
+        fill=rgba(INK, 46),
         width=4,
         jitter=2,
-        passes=2,
+        passes=1,
     )
     draw_line(
         draw,
-        [(1780, 370), (1920, 310), (2050, 380), (2180, 322), (2300, 372)],
-        fill=rgba(INK, 72),
-        width=4,
+        [(1780, 368), (1920, 310), (2050, 376), (2180, 322), (2320, 370)],
+        fill=rgba(INK, 38),
+        width=3,
         jitter=1.2,
-        passes=2,
+        passes=1,
     )
-
-    for base_x in [180, 330, 520, 790, 2190, 2380]:
-        trunk_top = 345 + random.uniform(-20, 20)
-        draw_line(draw, [(base_x, FLOOR_Y - 18), (base_x + random.uniform(-6, 6), trunk_top)], fill=rgba(INK, 80), width=3, jitter=1, passes=2)
-        draw_poly(
-            draw,
-            [(base_x, trunk_top - 74), (base_x - 38, trunk_top + 8), (base_x + 42, trunk_top + 8)],
-            fill=rgba(PAPER_LIGHT, 150),
-            outline=rgba(INK, 72),
-            width=3,
-            jitter=1.6,
-        )
 
     for x in [420, 860, 1710, 2240]:
         draw_torn_rect(draw, x, 158 + random.uniform(-20, 20), 150, 44, fill=rgba(PAPER_LIGHT, 80), outline=rgba(INK, 42), line_width=2, roughness=4)
@@ -247,21 +235,69 @@ def create_backdrop() -> None:
     save_canvas(image, width, height, OUT / "bridge-stage-backdrop.png")
 
 
-def create_foreground_screen() -> None:
-    width, height = 380, 260
+def draw_pine(
+    draw: ImageDraw.ImageDraw,
+    x: float,
+    base_y: float,
+    height: float,
+    *,
+    fill: tuple[int, int, int, int],
+    outline: tuple[int, int, int, int],
+    width: int,
+) -> None:
+    trunk_top = base_y - height * 0.58
+    draw_line(draw, [(x, base_y), (x + random.uniform(-4, 4), trunk_top)], fill=outline, width=max(1, width - 1), jitter=0.8, passes=1)
+    levels = [
+        (base_y - height * 0.16, height * 0.28),
+        (base_y - height * 0.36, height * 0.24),
+        (base_y - height * 0.55, height * 0.2),
+    ]
+    for y, tier_height in levels:
+        tier_width = height * (0.24 + (base_y - y) / height * 0.16)
+        draw_poly(
+            draw,
+            [(x, y - tier_height), (x - tier_width, y + tier_height * 0.34), (x + tier_width, y + tier_height * 0.34)],
+            fill=fill,
+            outline=outline,
+            width=width,
+            jitter=1.5,
+        )
+
+
+def create_forest_layer(filename: str, *, alpha: int, y_offset: float, scale: float, spacing: int) -> None:
+    width, height = WORLD_WIDTH, WORLD_HEIGHT
     image, draw = new_canvas(width, height)
 
-    draw_poly(draw, [(26, 248), (74, 58), (112, 250)], fill=rgba(PAPER_WARM, 246), outline=INK_SOFT, width=5, jitter=2.2)
-    draw_hatching(draw, 52, 112, 54, 112, spacing=13, fill=rgba(INK, 48), line_width=1)
-    draw_poly(draw, [(128, 252), (178, 28), (224, 252)], fill=rgba(PAPER_LIGHT, 245), outline=INK_SOFT, width=5, jitter=2.4)
-    draw_hatching(draw, 156, 82, 58, 134, spacing=13, fill=rgba(INK, 50), line_width=1)
-    draw_poly(draw, [(236, 250), (282, 74), (344, 252)], fill=rgba(PAPER_WARM, 245), outline=INK_SOFT, width=5, jitter=2.0)
+    x = -80
+    while x < width + 160:
+        tree_height = random.uniform(120, 215) * scale
+        base_y = FLOOR_Y + y_offset + random.uniform(-16, 18)
+        draw_pine(
+            draw,
+            x + random.uniform(-28, 28),
+            base_y,
+            tree_height,
+            fill=rgba(PAPER_LIGHT, max(70, alpha - 18)),
+            outline=rgba(INK, alpha),
+            width=2 if alpha < 80 else 3,
+        )
+        x += random.randint(spacing - 26, spacing + 34)
 
-    for base_x, top_y in [(72, 58), (180, 28), (286, 74)]:
-        draw_line(draw, [(base_x, 248), (base_x, top_y + 44)], fill=rgba(INK, 80), width=2, jitter=1, passes=1)
-        draw_tape(draw, base_x - 18, top_y + 82, 52, 18, angle=random.choice([-12, 9, 16]))
+    image = add_paper_noise(image, opacity=8)
+    save_canvas(image, width, height, OUT / filename)
 
-    draw_torn_rect(draw, 20, 224, 330, 28, fill=rgba(PAPER_LIGHT, 220), outline=rgba(INK, 120), line_width=3, roughness=5)
+
+def create_foreground_screen() -> None:
+    width, height = 320, 240
+    image, draw = new_canvas(width, height)
+
+    draw_pine(draw, 70, 224, 190, fill=rgba(PAPER_WARM, 238), outline=rgba(INK, 184), width=4)
+    draw_pine(draw, 156, 226, 220, fill=rgba(PAPER_LIGHT, 240), outline=rgba(INK, 190), width=4)
+    draw_pine(draw, 242, 226, 178, fill=rgba(PAPER_WARM, 238), outline=rgba(INK, 165), width=4)
+    draw_hatching(draw, 36, 82, 226, 122, spacing=15, fill=rgba(INK, 34), line_width=1)
+    draw_torn_rect(draw, 28, 212, 250, 28, fill=rgba(PAPER_LIGHT, 225), outline=rgba(INK, 116), line_width=3, roughness=5)
+    draw_tape(draw, 92, 112, 58, 18, angle=-10)
+    draw_tape(draw, 180, 130, 62, 18, angle=8)
     image = add_paper_noise(image, opacity=14)
     save_canvas(image, width, height, OUT / "bridge-stage-foreground-screen.png")
 
@@ -312,39 +348,36 @@ def create_bridge_state(filename: str, completed: bool) -> None:
 
 
 def create_work_zone() -> None:
-    width, height = 470, 280
+    width, height = 430, 230
     image, draw = new_canvas(width, height)
 
-    draw_torn_rect(draw, 42, 42, 350, 160, fill=rgba(PAPER_LIGHT, 235), outline=rgba(INK, 126), line_width=4, roughness=8)
-    draw_tape(draw, 54, 32, 64, 22, angle=-8)
-    draw_tape(draw, 318, 38, 70, 22, angle=9)
-    draw_torn_rect(draw, 126, 110, 194, 112, fill=rgba(PAPER, 255), outline=INK_SOFT, line_width=4, roughness=5)
-    draw_line(draw, [(154, 162), (202, 136), (232, 164), (292, 144)], fill=rgba(INK, 140), width=4, jitter=1.2, passes=2)
-    draw_line(draw, [(156, 182), (296, 184)], fill=rgba(INK, 58), width=2, jitter=0.7, passes=1)
-    draw_hatching(draw, 158, 192, 116, 18, spacing=10, fill=rgba(INK, 42), line_width=1)
+    draw_torn_rect(draw, 68, 34, 292, 128, fill=rgba(PAPER_LIGHT, 238), outline=rgba(INK, 126), line_width=4, roughness=6)
+    draw_tape(draw, 84, 24, 62, 20, angle=-7)
+    draw_tape(draw, 284, 28, 66, 20, angle=8)
 
-    draw_torn_rect(draw, 92, 210, 268, 38, fill=PAPER_WARM, outline=INK_SOFT, line_width=4, roughness=5)
-    draw_line(draw, [(130, 248), (110, 272)], fill=INK_SOFT, width=5, jitter=0.6, passes=2)
-    draw_line(draw, [(324, 248), (346, 272)], fill=INK_SOFT, width=5, jitter=0.6, passes=2)
-    for x, y in [(64, 206), (386, 210), (368, 158)]:
-        draw_torn_rect(draw, x, y, 54, 30, fill=rgba(PAPER, 230), outline=rgba(INK, 82), line_width=2, roughness=4)
-        draw_line(draw, [(x + 8, y + 16), (x + 44, y + 13)], fill=rgba(INK, 58), width=1, passes=1)
+    draw_torn_rect(draw, 116, 74, 200, 74, fill=rgba(PAPER, 255), outline=rgba(INK, 205), line_width=4, roughness=4)
+    draw_line(draw, [(136, 118), (178, 96), (222, 122), (292, 100)], fill=rgba(INK, 170), width=4, jitter=1, passes=2)
+    draw_line(draw, [(138, 136), (292, 136)], fill=rgba(INK, 56), width=2, jitter=0.5, passes=1)
+
+    draw_torn_rect(draw, 94, 166, 250, 34, fill=PAPER_WARM, outline=rgba(INK, 170), line_width=4, roughness=4)
+    draw_line(draw, [(132, 199), (116, 226)], fill=rgba(INK, 150), width=5, jitter=0.5, passes=1)
+    draw_line(draw, [(310, 199), (330, 226)], fill=rgba(INK, 150), width=5, jitter=0.5, passes=1)
+    draw_torn_rect(draw, 32, 176, 48, 24, fill=rgba(PAPER, 228), outline=rgba(INK, 70), line_width=2, roughness=4)
 
     image = add_paper_noise(image, opacity=14)
     save_canvas(image, width, height, OUT / "draftsperson-work-zone.png")
 
 
 def create_rest_shelter() -> None:
-    width, height = 330, 230
+    width, height = 290, 210
     image, draw = new_canvas(width, height)
 
-    draw_poly(draw, [(34, 216), (116, 58), (288, 216)], fill=PAPER_WARM, outline=INK_SOFT, width=5, jitter=2.4)
-    draw_poly(draw, [(116, 58), (158, 216), (288, 216)], fill=rgba(PAPER_LIGHT, 235), outline=rgba(INK, 100), width=3, jitter=1.5)
-    draw_line(draw, [(116, 58), (160, 216)], fill=rgba(INK, 130), width=4, jitter=0.8, passes=2)
-    draw_torn_rect(draw, 86, 164, 72, 48, fill=(26, 26, 26, 130), outline=rgba(INK, 155), line_width=3, roughness=4)
-    draw_torn_rect(draw, 172, 178, 70, 28, fill=rgba(PAPER, 220), outline=rgba(INK, 90), line_width=2, roughness=4)
-    draw_tape(draw, 78, 88, 56, 18, angle=-16)
-    draw_tape(draw, 212, 126, 58, 18, angle=12)
+    draw_poly(draw, [(34, 198), (116, 48), (258, 198)], fill=PAPER_WARM, outline=rgba(INK, 190), width=5, jitter=2.0)
+    draw_poly(draw, [(116, 48), (152, 198), (258, 198)], fill=rgba(PAPER_LIGHT, 235), outline=rgba(INK, 116), width=3, jitter=1.3)
+    draw_line(draw, [(116, 48), (152, 198)], fill=rgba(INK, 145), width=4, jitter=0.8, passes=2)
+    draw_torn_rect(draw, 86, 150, 62, 48, fill=(26, 26, 26, 128), outline=rgba(INK, 155), line_width=3, roughness=4)
+    draw_torn_rect(draw, 164, 168, 66, 24, fill=rgba(PAPER, 220), outline=rgba(INK, 90), line_width=2, roughness=3)
+    draw_tape(draw, 78, 78, 54, 18, angle=-14)
     image = add_paper_noise(image, opacity=14)
     save_canvas(image, width, height, OUT / "draftsperson-rest-shelter.png")
 
@@ -428,6 +461,8 @@ def create_role_icons() -> None:
 def create_debug_contact() -> None:
     assets = [
         "bridge-stage-backdrop.png",
+        "bridge-far-forest.png",
+        "bridge-mid-forest.png",
         "bridge-stage-foreground-screen.png",
         "bridge-ground-strips.png",
         "bridge-crossing-before.png",
@@ -466,12 +501,14 @@ def write_manifest() -> None:
         "style": "Digital Sketchbook: off-white paper, black ink, silhouette-first, hatching for value.",
         "assets": [
             {"key": "bridge-stage-backdrop", "file": "bridge-stage-backdrop.png", "width": WORLD_WIDTH, "height": WORLD_HEIGHT, "origin": {"x": 0, "y": 0}},
-            {"key": "bridge-stage-foreground-screen", "file": "bridge-stage-foreground-screen.png", "width": 380, "height": 260, "origin": {"x": 0.5, "y": 1}},
+            {"key": "bridge-far-forest", "file": "bridge-far-forest.png", "width": WORLD_WIDTH, "height": WORLD_HEIGHT, "origin": {"x": 0, "y": 0}, "scrollFactor": 0.22},
+            {"key": "bridge-mid-forest", "file": "bridge-mid-forest.png", "width": WORLD_WIDTH, "height": WORLD_HEIGHT, "origin": {"x": 0, "y": 0}, "scrollFactor": 0.48},
+            {"key": "bridge-stage-foreground-screen", "file": "bridge-stage-foreground-screen.png", "width": 320, "height": 240, "origin": {"x": 0.5, "y": 1}},
             {"key": "bridge-ground-strips", "file": "bridge-ground-strips.png", "width": WORLD_WIDTH, "height": WORLD_HEIGHT, "origin": {"x": 0, "y": 0}},
             {"key": "bridge-crossing-before", "file": "bridge-crossing-before.png", "width": 460, "height": 210, "origin": {"x": 0.5, "y": 0.5}},
             {"key": "bridge-crossing-after", "file": "bridge-crossing-after.png", "width": 460, "height": 210, "origin": {"x": 0.5, "y": 0.5}},
-            {"key": "draftsperson-work-zone", "file": "draftsperson-work-zone.png", "width": 470, "height": 280, "origin": {"x": 0.5, "y": 1}},
-            {"key": "draftsperson-rest-shelter", "file": "draftsperson-rest-shelter.png", "width": 330, "height": 230, "origin": {"x": 0.5, "y": 1}},
+            {"key": "draftsperson-work-zone", "file": "draftsperson-work-zone.png", "width": 430, "height": 230, "origin": {"x": 0.5, "y": 1}},
+            {"key": "draftsperson-rest-shelter", "file": "draftsperson-rest-shelter.png", "width": 290, "height": 210, "origin": {"x": 0.5, "y": 1}},
             {"key": "draftsperson-character", "file": "draftsperson-character.png", "width": 128, "height": 170, "origin": {"x": 0.5, "y": 1}},
             {"key": "toy-car-prop", "file": "toy-car-prop.png", "width": 96, "height": 64, "origin": {"x": 0.5, "y": 0.84}},
             {"key": "bridge-role-icons", "file": "bridge-role-icons.png", "width": 288, "height": 96, "frameWidth": 96, "frameHeight": 96, "frameCount": 3},
@@ -502,6 +539,7 @@ placement, route state, collision, prompts, and toy-car movement.
 - silhouette-first reads at gameplay scale
 - hatching and line weight for depth instead of color
 - layered PNGs, not one composited stage
+- separate far/mid forest layers for lightweight parallax
 - Bridge-owned until repeated Ridge asset reuse proves a broader framework
 
 ## Runtime Contract
@@ -517,6 +555,8 @@ def main() -> None:
     random.seed(90)
     OUT.mkdir(parents=True, exist_ok=True)
     create_backdrop()
+    create_forest_layer("bridge-far-forest.png", alpha=42, y_offset=-56, scale=1.05, spacing=220)
+    create_forest_layer("bridge-mid-forest.png", alpha=76, y_offset=-34, scale=0.88, spacing=165)
     create_foreground_screen()
     create_ground()
     create_bridge_state("bridge-crossing-before.png", completed=False)

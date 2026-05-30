@@ -162,11 +162,19 @@ Minimum outcomes:
   paper folds, trees, terrain, or set dressing should screen Cicka's toy-car
   play spot from the Draftsperson's work zone without adding a new pocket,
   traversal branch, or route mechanic.
+- Stage the Bridge Area as a wooded paper-set scene with multi-parallax forest
+  layers: pale distant trees, midground pines/brush, and a few foreground
+  paper-fold or tree screens. The environment should read as "wood like" before
+  individual props are noticed.
 - The Bridge Draftsperson has a distinct blueprint work zone, such as a tiny
   taped paper construction nook with a small desk/blueprint table. Add a nearby
   worker rest cue, such as a rough tent, tiny cabin facade, or sleep shelter, so
   the Draftsperson feels like someone stationed at the bridge rather than a
   generic marker.
+- Keep the Bridge Draftsperson's construction zone visually simple: one clear
+  bridge, one clear blueprint/plan surface, one clear worker silhouette, and one
+  clear rest shelter cue. Avoid random paper scraps, oversized overlapping
+  shapes, or doodles that compete with the bridge read.
 - The worker rest cue is visual-only in this pass: no enterable pocket, food
   pickup, treat shortcut, new prompt, or route mechanic.
 - Cicka's space and the Draftsperson's work zone are separated by local terrain,
@@ -189,25 +197,27 @@ Minimum outcomes:
 - Issue #90 should try to create the rough Bridge runtime PNGs directly rather
   than only adding code that waits for future art. These assets may stay rough
   and replaceable, but they should be real images wired into the Ridge scene.
-- Minimum Bridge-owned bitmap placeholder set:
-  1. `bridge-stage-backdrop`: paper hills, trees, and folds that create the
-     Cicka-to-Draftsperson screen.
-  2. `bridge-ground-strips`: unified walkable paper floor and banks.
-  3. `bridge-crossing-before`: broken or missing-span bridge state.
-  4. `bridge-crossing-after`: completed-span bridge state.
-  5. `draftsperson-work-zone`: taped paper nook, blueprint desk, and failed
-     span doodles.
+- Minimum Bridge-owned bitmap placeholder set should be modular rather than one
+  baked whole-map image:
+  1. tree variants for far/mid/foreground parallax
+  2. bush, flower, grass, log, and rock variants for forest-floor staging
+  3. ground strip and cliff/bank pieces for readable walkable terrain
+  4. before/after bridge pieces or overlays for missing-span and completed-span
+     route state
+  5. `draftsperson-work-zone`: taped paper blueprint desk / drafting board
   6. `draftsperson-rest-shelter`: visual-only tent, cabin, or sleep shelter
-     cue.
+     cue
   7. `draftsperson-character`: a readable Bridge Draftsperson silhouette at
-     gameplay scale.
-  8. `toy-car-prop`: small physical weight-test car with a readable silhouette.
+     gameplay scale
+  8. `toy-car-prop`: small physical weight-test car with a readable silhouette
   9. tiny role portrait/icon placeholders for Cicka, Bridge Draftsperson, and
      neutral Prompt/narration, reserved for the Character Conversation Overlay
-     follow-up.
-- Keep Bridge assets layered rather than compositing the full stage into one
-  image. Phaser should still own placement, before/after bridge visibility,
-  toy-car movement, prompts, collision, and route-state presentation.
+     follow-up
+- Keep Bridge assets layered and individually placeable rather than compositing
+  the full stage into one image. A generated full-scene image may be used as
+  target/reference, but Phaser should still own placement, before/after bridge
+  visibility, toy-car movement, prompts, collision, and route-state
+  presentation.
 - The pass produces tiny role portrait/icon placeholders for the first
   **Character Conversation Overlay** integration: Cicka, Bridge Draftsperson,
   and neutral Prompt/narration.

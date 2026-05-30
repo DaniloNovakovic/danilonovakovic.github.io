@@ -20,18 +20,18 @@ export const BRIDGE_TRACER_WORLD = {
   },
   cickaPlaySpot: {
     x: 650,
-    y: 458
+    y: 500
   },
   cickaSettledSpot: {
     x: 1850,
-    y: 458
+    y: 500
   },
   draftsperson: {
     x: 1295,
-    y: 456
+    y: 500
   },
   blueprint: {
-    x: 1375,
+    x: 1235,
     y: 430
   },
   bridge: {
@@ -43,7 +43,7 @@ export const BRIDGE_TRACER_WORLD = {
   },
   exit: {
     x: 2315,
-    y: 456
+    y: 500
   }
 } as const;
 
