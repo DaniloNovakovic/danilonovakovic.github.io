@@ -5,7 +5,7 @@ description: Set up Claude Code hooks to block dangerous git commands (push, res
 
 # Setup Git Guardrails
 
-Sets up a PreToolUse hook that intercepts and blocks dangerous git commands before Claude executes them.
+Sets up a best-effort PreToolUse hook that intercepts and blocks common dangerous git commands before Claude executes them. This hook is a safety net, not a complete shell sandbox: it can miss aliases, wrappers, unusual quoting, or commands hidden behind another executable.
 
 ## What Gets Blocked
 
@@ -15,7 +15,7 @@ Sets up a PreToolUse hook that intercepts and blocks dangerous git commands befo
 - `git branch -D`
 - `git checkout .` / `git restore .`
 
-When blocked, Claude sees a message telling it that it does not have authority to access these commands.
+When blocked, Claude sees a message telling it that it does not have authority to access these commands. Keep normal review and permission habits in place even after installing the hook.
 
 ## Steps
 
@@ -93,3 +93,11 @@ echo '{"tool_input":{"command":"git push origin main"}}' | <path-to-script>
 ```
 
 Should exit with code 2 and print a BLOCKED message to stderr.
+
+Also test common variants:
+
+```bash
+echo '{"tool_input":{"command":"git -C repo push"}}' | <path-to-script>
+echo '{"tool_input":{"command":"git clean -xdf"}}' | <path-to-script>
+echo '{"tool_input":{"command":"git restore -- ."}}' | <path-to-script>
+```

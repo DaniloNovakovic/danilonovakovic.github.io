@@ -270,58 +270,11 @@ Pocket may use a Phaser scene change if useful, but it still belongs to the
 same Ridge Area, shares the same local progress, and should not become a
 separate navigation problem.
 
-During the P1 Area Paper Pass, capture only the **Rough Stage Composition** for
-each Compact Ridge Stage: beat order, entry and exit sides, blocker location,
-Cicka spot, resident or prop zone, optional Area Interior Pocket, and camera
-framing intent. Exact coordinates, collision shapes, parallax distances, and
-final prop placement belong to the Bridge Tracer Slice or later blockout passes.
-
-Use a tiny **First Playable Interaction Vocabulary** across the route: move
-left/right, interact or talk, inspect, enter/exit an Area Interior Pocket when
-present, sit/play for Cicka or Relay guitar moments, and confirm contextual
-prompts. Contextual prompts carry the route. Object handoffs such as the toy
-car, guitar, folded song request, clipboard, lantern/sign, or setup props can
-exist, but they should be immediate authored interactions rather than a general
-inventory system.
-
-Do not add an inventory screen, freeform item combining, required rhythm,
-drawing, or dance skill checks, or fail states to the First Playable Route.
-Richer drawing, rhythm, dance, or item systems can become optional toys or later
-expressions after the route works end to end.
-
-Use **Minimal Route Guidance**. The route should be readable through visible
-blockers, compact staging, NPC barks, Cicka placement, camera framing, changed
-world state, and contextual prompts. A tiny current-area prompt on first entry
-is allowed only if playtests show the route is unclear without it.
-
-Use a tiny linear **First Playable Route State**, not a quest log. Area docs can
-own local detail, but the shared route runtime should only need to know the
-current area, the current local beat state, whether the **Concert Guitar** has
-been received, and whether the Relay ending sequence is running. The exact
-runtime enum names are implementation detail, but the intended shape is:
-
-```text
-bridge: intro -> needs_toy_car -> bridge_complete
-concert: blocked -> practiced_riff -> concert_complete -> guitar_received
-dance: blocked -> readiness_favors_done -> shuttle_ready
-relay: arrived -> sit_and_play -> farewell_complete -> reset
-```
-
-Do not add a visible quest checklist, proof inventory, optional-area readiness
-score, minimap, objective tracker, "go talk to X" UI, or complex save model for
-the First Playable Route. The player should feel progress through changed world
-state, area transitions, Cicka after-states, and contextual prompts rather than
-UI state.
-
-Use the **First Playable Audio Floor**, not a full soundtrack. Each area can
-have simple handmade-feeling ambience, clear blocker/world-change cues, and soft
-transition stingers. Concert and Relay should share one short guitar phrase so
-the guitar feels remembered rather than introduced at the ending. Cicka can use
-a tiny meow/purr/chirp set, with the final threshold sound still being one small
-raw meow. Do not require full songs, voiced dialogue, adaptive scoring, a
-polished mix, or rhythm-game-quality audio before the route works end to end.
-Use [`reference/m3-audio-pack.md`](./reference/m3-audio-pack.md) for palette and
-naming guidance when an audio slice is ready.
+Implementation readiness, acceptance checks, shared route-state shape, and
+paper-pass boundaries are owned by
+[`milestone-plan.md`](./milestone-plan.md). Keep this bible focused on route
+spine, story causality, emotional logic, and cross-area dependencies; area-local
+implementation detail belongs in [`areas/`](./areas/README.md).
 
 Current time-of-day arc: Bridge begins during the day at a nature/hill edge;
 Concert moves into evening/night small-town festival energy; a short sleep/rest
