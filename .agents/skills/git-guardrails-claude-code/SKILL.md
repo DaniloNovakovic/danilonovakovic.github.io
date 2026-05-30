@@ -5,7 +5,7 @@ description: Set up Claude Code hooks to block dangerous git commands (push, res
 
 # Setup Git Guardrails
 
-Sets up a best-effort PreToolUse hook that intercepts and blocks common dangerous git commands before Claude executes them. This hook is a safety net, not a complete shell sandbox: it can miss aliases, wrappers, unusual quoting, or commands hidden behind another executable.
+Sets up a best-effort PreToolUse hook that intercepts and blocks common dangerous git commands before Claude executes them. This hook requires `jq` and fails closed if it cannot parse Claude's hook input. It is a safety net, not a complete shell sandbox: it can miss aliases, wrappers, unusual quoting, or commands hidden behind another executable.
 
 ## What Gets Blocked
 
@@ -33,6 +33,10 @@ Copy it to the target location based on scope:
 - **Global**: `~/.claude/hooks/block-dangerous-git.sh`
 
 Make it executable with `chmod +x`.
+
+Make sure `jq` is installed on the machine where the hook will run. The script
+exits with code 2 if `jq` is missing or if Claude's hook payload cannot be
+parsed.
 
 ### 3. Add hook to settings
 

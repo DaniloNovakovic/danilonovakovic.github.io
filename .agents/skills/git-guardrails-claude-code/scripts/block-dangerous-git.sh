@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
-INPUT=$(cat)
-
-if command -v jq >/dev/null 2>&1; then
-  COMMAND=$(printf '%s' "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null || true)
-else
-  COMMAND=$(printf '%s' "$INPUT" | sed -n 's/.*"command"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
+if ! command -v jq >/dev/null 2>&1; then
+  echo "ERROR: 'jq' is required but not installed. Cannot verify git guardrails." >&2
+  exit 2
 fi
 
-if [ -z "${COMMAND:-}" ]; then
-  exit 0
+INPUT=$(cat)
+
+if ! COMMAND=$(printf '%s' "$INPUT" | jq -er '.tool_input.command | strings' 2>/dev/null); then
+  echo "ERROR: Failed to parse tool input command. Cannot verify git guardrails." >&2
+  exit 2
 fi
 
 NORMALIZED_COMMAND=$(printf '%s' "$COMMAND" | tr '\n' ' ' | sed -E 's/[[:space:]]+/ /g; s/^ //; s/ $//')
@@ -28,7 +28,7 @@ DANGEROUS_PATTERNS=(
 
 for pattern in "${DANGEROUS_PATTERNS[@]}"; do
   if printf '%s\n' "$NORMALIZED_COMMAND" | grep -qE "$pattern"; then
-    echo "BLOCKED: '$COMMAND' matches dangerous git pattern. The user has prevented you from doing this." >&2
+    printf "BLOCKED: '%s' matches dangerous git pattern. The user has prevented you from doing this.\n" "$COMMAND" >&2
     exit 2
   fi
 done
