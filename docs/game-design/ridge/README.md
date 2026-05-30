@@ -31,7 +31,7 @@ Use each file for exactly one concern:
 | Current runtime/prototype truth | [`ridge-snapshot.md`](./ridge-snapshot.md) | What exists now in the Phaser prototype, what can be reused, and what is disposable. |
 | Active open questions | [`open-questions.md`](./open-questions.md) | True design unknowns and blockout-detail TBD. Area premises may already be accepted even when prompt/topology details remain open. |
 | Product vision | [`summit.md`](./summit.md) | Durable fantasy and pillars, not detailed route implementation. |
-| Implementation sequencing | [`milestone-plan.md`](./milestone-plan.md) | Current route-reset milestones, source stack, prototype reuse rules, and agent checklist. Not live backlog. |
+| Implementation sequencing | [`milestone-plan.md`](./milestone-plan.md) | Current route-reset milestones, source stack, Agent-Ready Slice Contract, prototype reuse rules, and agent checklist. Not live backlog. |
 | Runtime blockout contract | [`map-language.md`](./map-language.md) | Source format and generated facts for the current/prototype blockout. |
 | Legacy prototype history | [`legacy/`](./legacy/README.md) | Superseded folded/Cicka Home plans, old summit/milestone history, map plans, and reviews. Reference only unless an active doc links there. |
 | Art/audio/asset support | [`reference/`](./reference/README.md) | Reference packs that support active docs but do not override route canon. |

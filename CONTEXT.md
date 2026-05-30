@@ -256,6 +256,20 @@ received, and whether the Relay ending sequence is running. Progress should be
 felt through changed world state rather than visible quest UI.
 _Avoid_: quest log, proof inventory, optional-area readiness score, complex save model, visible checklist
 
+**Minimal Route Guidance**:
+The First Playable Route's guidance style: readable staging, visible blockers,
+NPC barks, Cicka placement, camera framing, changed world state, and contextual
+prompts, with only a tiny current-area prompt on first entry if playtests prove
+it is needed.
+_Avoid_: quest log, checklist, minimap, objective tracker, "go talk to X" UI, repeated hint popup
+
+**Agent-Ready Slice Contract**:
+The minimum specification needed before assigning a Ridge implementation slice
+to an AFK agent: area, local beat state, prompt/dialogue IDs, visible blocker,
+world-change result, Cicka before/after placement, exit condition, linked source
+docs, and acceptance checks.
+_Avoid_: vague area build request, taste-sensitive unresolved premise, broad "make this level" task, hidden dependency on undocumented canon
+
 **Authored Traversal Interaction**:
 A local route action that moves the player through a designed object or route
 change instead of requiring freeform jump execution.
@@ -580,6 +594,13 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
   and whether the Relay ending sequence is running. Do not add a visible quest
   log, proof inventory, optional-area readiness score, or complex save model for
   the First Playable Route.
+- Use **Minimal Route Guidance** for the First Playable Route. The route should
+  be readable through staging and prompts, not a quest log, checklist, minimap,
+  objective tracker, or "go talk to X" UI.
+- An implementation issue should satisfy the **Agent-Ready Slice Contract**
+  before it is assigned to an AFK agent. Slice boundaries should name the
+  relevant area, beat state, prompts, world change, Cicka placement, exit
+  condition, source docs, and acceptance checks.
 - The first playable route should use **Compact Area Transitions** between
   separate compact maps, allowing different time of day, environment, and
   staging per area while distant Relay cues imply route progress.
@@ -843,6 +864,11 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
   Threshold** somewhere the player cannot follow.
 - "hint" from Cicka means subtle attention guidance through staging or reaction,
   not explicit objective text like "go fix the bridge."
+- "objective UI" for the First Playable Route should mean **Minimal Route
+  Guidance**, not a visible quest tracker, minimap, checklist, or repeated hint
+  popup.
+- "ready for agent" for Ridge implementation means the issue satisfies the
+  **Agent-Ready Slice Contract**, not just that the area direction is accepted.
 - "last dance" previously meant an after-festival closure gate; resolved: use
   **Opening Dance Shuttle Beat** for the final dance-festival route beat.
 - "bachata" is loose discarded inspiration, not canonical genre; use a simple,

@@ -26,6 +26,10 @@ talk/interact, inspect, optional enter/exit, sit/play where appropriate, and
 contextual prompt confirms. Do not add local inventory, required rhythm/drawing
 checks, or fail states before the end-to-end route works.
 
+Use Minimal Route Guidance for area-local readability. Prefer blockers,
+composition, barks, Cicka placement, changed props, and contextual prompts over
+quest logs, checklists, minimaps, objective trackers, or "go talk to X" UI.
+
 Use Role Names for First Playable residents and animals until a focused
 naming/tone pass accepts final proper names. Role labels are stable enough for
 area docs, dialogue IDs, implementation references, and issue writing.
@@ -34,6 +38,11 @@ Keep each area's First Playable cast to the Minimum Route Cast. Add only the
 required route resident(s), Cicka, and the smallest useful barks or silhouettes
 needed for staging; reserve richer optional residents and hangouts for later
 liveliness passes.
+
+When an area-local detail becomes implementation work, package it through the
+Agent-Ready Slice Contract in [`../milestone-plan.md`](../milestone-plan.md):
+area, local beat state, prompt/dialogue IDs, blocker, world change, Cicka
+placement, exit condition, and acceptance checks.
 
 Ownership rule: root [`../open-questions.md`](../open-questions.md) is for
 route-level or taste-sensitive decisions. Area docs own local **Open Local

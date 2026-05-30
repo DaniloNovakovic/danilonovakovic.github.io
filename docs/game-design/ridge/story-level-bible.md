@@ -262,6 +262,11 @@ drawing, or dance skill checks, or fail states to the First Playable Route.
 Richer drawing, rhythm, dance, or item systems can become optional toys or later
 expressions after the route works end to end.
 
+Use **Minimal Route Guidance**. The route should be readable through visible
+blockers, compact staging, NPC barks, Cicka placement, camera framing, changed
+world state, and contextual prompts. A tiny current-area prompt on first entry
+is allowed only if playtests show the route is unclear without it.
+
 Use a tiny linear **First Playable Route State**, not a quest log. Area docs can
 own local detail, but the shared route runtime should only need to know the
 current area, the current local beat state, whether the **Concert Guitar** has
@@ -276,9 +281,10 @@ relay: arrived -> sit_and_play -> farewell_complete -> reset
 ```
 
 Do not add a visible quest checklist, proof inventory, optional-area readiness
-score, or complex save model for the First Playable Route. The player should
-feel progress through changed world state, area transitions, Cicka after-states,
-and contextual prompts rather than UI state.
+score, minimap, objective tracker, "go talk to X" UI, or complex save model for
+the First Playable Route. The player should feel progress through changed world
+state, area transitions, Cicka after-states, and contextual prompts rather than
+UI state.
 
 Current time-of-day arc: Bridge begins during the day at a nature/hill edge;
 Concert moves into evening/night small-town festival energy; a short sleep/rest

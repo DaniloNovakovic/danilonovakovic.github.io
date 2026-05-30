@@ -79,13 +79,41 @@ Bridge, Concert, and Dance Festival area is blockout-complete when it has:
    can affect the blocker
 8. one simple interaction chain with two to four authored prompts or dialogue
    beats using the First Playable Interaction Vocabulary and no fail state
-9. a visible world change that changes the map, not only dialogue
-10. a Cicka after-state where the local resting spot changes or settles
-11. a tiny local beat state that feeds the shared First Playable Route State
-12. an exit trigger that carries the player to the next Ridge Area
+9. Minimal Route Guidance: readable staging and contextual prompts, not a quest
+   log, checklist, minimap, objective tracker, or "go talk to X" UI
+10. a visible world change that changes the map, not only dialogue
+11. a Cicka after-state where the local resting spot changes or settles
+12. a tiny local beat state that feeds the shared First Playable Route State
+13. an exit trigger that carries the player to the next Ridge Area
 
 Relay replaces the resident help beat with a brief playable linger, **Sit and
 Play**, authored farewell, **Dedication Card**, and clean Bridge reset.
+
+### Agent-Ready Slice Contract
+
+Before assigning a Ridge implementation issue to an AFK agent, make the slice
+small and concrete enough to implement without resolving product taste:
+
+1. Name the Ridge Area and route segment.
+2. Name the local beat state before and after the slice.
+3. Link the smallest relevant source docs from the Source Stack.
+4. List required prompt/dialogue IDs or say that the slice creates placeholder
+   IDs in the area's `dialogue.md`.
+5. Describe the visible blocker before the slice and the visible world-change
+   result after it.
+6. Describe Cicka's before/after placement if the slice touches a route beat.
+7. Name the exit condition or transition unlocked by the slice.
+8. State the constraints it must preserve: Compact Ridge Stage, Minimum Route
+   Cast, Minimal Route Guidance, First Playable Interaction Vocabulary, and no
+   new fail state.
+9. Include acceptance checks: route reaches the slice start, the slice outcome
+   is visible, the next route state or transition unlocks, and required runtime
+   checks/playability evidence are recorded when code changes.
+
+Avoid vague assignments like "make Concert Area" or "add the Dance Festival."
+Prefer vertical route slices such as "Bridge blocker + Bridge Draftsperson +
+toy-car handoff + opened crossing" where an agent can prove a player-facing
+before/after state.
 
 ## Source Stack
 
