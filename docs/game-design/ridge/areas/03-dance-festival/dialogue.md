@@ -7,6 +7,11 @@
 This file owns Dance Festival conversations, prompts, barks, and placeholder
 lines. Flow details live in [`interaction-flow.md`](./interaction-flow.md).
 
+Pre-Tracer scope: these planned conversation IDs are enough until Dance Festival
+is packaged as its own implementation slice. Add line-level Tone-Locked
+Placeholder Dialogue after the Bridge Tracer Slice proves the dialogue data
+shape.
+
 ## Planned Conversation Sets
 
 - `dance.traveler.relay_wayfinding`: practical first read that Relay requires

@@ -7,6 +7,10 @@
 This file owns Concert Area conversations, prompts, barks, and placeholder
 lines.
 
+Pre-Tracer scope: these planned conversation IDs are enough until Concert is
+packaged as its own implementation slice. Add line-level Tone-Locked Placeholder
+Dialogue after the Bridge Tracer Slice proves the dialogue data shape.
+
 ## Planned Conversation Sets
 
 - `concert.crowd.delay_barks`: annoyed crowd or traffic chatter that makes the

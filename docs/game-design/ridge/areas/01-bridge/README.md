@@ -65,6 +65,26 @@ Use **Bridge Resting Spot** as the practical label.
 
 The resting spot is readable flavor, not a gate.
 
+## Rough Stage Composition
+
+Stage-order sketch:
+
+```text
+Nature / hill entry
+  -> Cicka + toy car play spot
+  -> blocked bridge + unfinished blueprint
+  -> Bridge Draftsperson / prop zone
+  -> Cicka Parallel Play return
+  -> toy car bridge test + completed crossing
+  -> Concert transition exit
+```
+
+Framing intent: start with a gentle walk-right introduction, then compose the
+blocked crossing and blueprint as the readable center of the stage. Foreground
+paper edges and failed sketch props can frame the playable lane; background
+layers should make the bridge feel like a small handmade crossing rather than a
+platforming gauntlet.
+
 ## Prototype Floor
 
 The first Bridge implementation should serve as the **Bridge Tracer Slice** for
@@ -84,9 +104,27 @@ The first blockout only needs:
 - simple bridge drawing completion visual
 - bridge becomes crossing
 - Cicka settles near the completed crossing
+- Bridge-to-Concert transition trigger
 
 Cabin, food, physics simulation, and toy-car ping-pong are later optional
 layers.
+
+Definition of done for the Bridge Tracer Slice:
+
+1. player can start at Bridge and move through the nature/hill entry
+2. player can encounter Cicka with the toy car
+3. player can talk to the Bridge Draftsperson at the unfinished blueprint
+4. player can use Cicka Parallel Play to receive or unlock the toy car test prop
+5. player can run the toy-car bridge test
+6. the bridge visibly changes from blocked to usable
+7. player can trigger the Bridge-to-Concert transition
+8. implementation proves shared route state, prompt/dialogue lookup by ID,
+   camera framing, Cicka placement, transition handoff, and basic playability
+   evidence
+
+First Playable Audio Floor needs for the tracer: gentle Bridge/nature ambience,
+Cicka chirp or purr cue, toy-car bridge-test cue, visible bridge-change cue, and
+a soft Bridge-to-Concert transition stinger.
 
 ## Boundaries
 
@@ -110,8 +148,6 @@ layers.
 ## Open Local Slots
 
 - Bridge Draftsperson silhouette, personality, and eventual name
-- rough bridge stage order, entry/exit sides, blocker location, Cicka spot,
-  Bridge Draftsperson/prop zone, and camera framing intent
 - exact bridge topology, collision geometry, and final camera tuning during
   blockout
 - blockout validation for the accepted route grammar: Cicka noticed something,

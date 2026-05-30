@@ -151,6 +151,19 @@ provisional lines or prompts, clear intent, and the route or world-state outcome
 it supports.
 _Avoid_: final polish pass, generic placeholder text, deep branching tree, final proper names too early
 
+**Prompt/Dialogue ID**:
+A stable area-scoped label for a prompt, line, bark, or interaction beat before
+the final text is locked. The ID lets docs, implementation issues, runtime data,
+and tests point at the same beat while wording can still change.
+_Avoid_: final line text, final character name, throwaway TODO label, implementation-only magic string
+
+**Paper-Level Acceptance Check**:
+A pre-implementation acceptance check phrased as a player-visible outcome or
+documented slice requirement. It confirms that an area doc is ready to become an
+implementation issue, but it does not claim runtime proof, screenshots, tests,
+or playability evidence yet.
+_Avoid_: runtime test result, playtest evidence, implementation done state, vague design wish
+
 **Minimum Route Cast**:
 The smallest set of visible characters needed for the First Playable Route to
 feel alive, readable, and emotionally staged without requiring optional
@@ -294,6 +307,13 @@ without fixing pixel positions, collision geometry, parallax distances, or final
 prop placement.
 _Avoid_: exact coordinates, collision map, final prop placement, production layout pass
 
+**Stage-Order Sketch**:
+A tiny non-coordinate ASCII sketch inside an area doc that summarizes Rough
+Stage Composition for first-read planning, such as entry -> Cicka/prop ->
+blocker/resident -> changed route -> exit. It is a schematic beat order, not a
+map.
+_Avoid_: minimap, tile layout, pixel layout, final camera plan
+
 **Bridge Tracer Slice**:
 The first implementation slice after the Area Paper Pass: Bridge blocker,
 Bridge Draftsperson, Cicka toy-car play, visible bridge change, and the
@@ -302,6 +322,15 @@ data shape, camera framing, Cicka placement, transition handling, and Coherent
 Sketchbook Blockout conventions before Concert, Dance Festival, and Relay work
 fan out.
 _Avoid_: parallelizing all areas first, full Bridge polish, isolated tech spike, final art pass
+
+**Bridge Tracer Slice Done**:
+The acceptance bar for the first implementation slice: the player can start
+Bridge, encounter Cicka with the toy car, talk to the Bridge Draftsperson, use
+Cicka Parallel Play, run the toy-car bridge test, see the crossing visibly
+change, and trigger the Bridge-to-Concert transition. The slice also proves
+shared route state, Prompt/Dialogue ID lookup, camera framing, Cicka placement,
+one Compact Area Transition, and basic playability evidence.
+_Avoid_: visual-only mock, isolated dialogue demo, Bridge polish pass, unverified handoff
 
 **First Playable Audio Floor**:
 The smallest audio palette needed to test route mood, timing, and emotional

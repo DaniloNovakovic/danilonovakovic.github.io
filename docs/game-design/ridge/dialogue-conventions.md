@@ -73,6 +73,17 @@ The exact runtime pipeline is deferred. These IDs should be able to survive a
 future migration into JSON, TypeScript dialogue data, a narrative scripting
 format, or another type-safe import system.
 
+## First Slice ID Depth
+
+For the **Bridge Tracer Slice**, Bridge dialogue should have concrete
+Prompt/Dialogue IDs and Tone-Locked Placeholder Dialogue before implementation
+starts, because Bridge proves the import/data shape for later areas.
+
+Concert, Dance Festival, and Relay only need planned conversation IDs and
+obvious TODO slots until their implementation slices are next. Do not fill later
+areas with detailed placeholder lines just to look complete; add line-level IDs
+when the slice is close enough that implementation can use them.
+
 ## Tone-Locked Placeholder Policy
 
 First Playable Route dialogue should use **Tone-Locked Placeholder Dialogue**:

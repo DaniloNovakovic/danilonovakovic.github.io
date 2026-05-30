@@ -84,11 +84,39 @@ For Rough Stage Composition, P1 should resolve the left-to-right beat order,
 entry and exit sides, blocker location, Cicka spot, resident or prop zone,
 optional Area Interior Pocket if any, and camera framing intent. Leave pixel
 positions, collision geometry, parallax layer distances, and final prop
-placement to the Bridge Tracer Slice and later blockout work.
+placement to the Bridge Tracer Slice and later blockout work. Each area README
+should include a tiny **Stage-Order Sketch** so implementation agents can read
+the local route shape without treating it as a pixel map.
 
 P1 should not produce pixel-perfect maps, final scripts, final names, final art
 briefs, finished audio specs, complete dialogue trees, optional mini-game
 designs, final collision geometry, or post-v0 liveliness scope.
+
+For Prompt/Dialogue IDs, the Bridge Area should be filled to line/prompt level
+before the Bridge Tracer Slice. Concert, Dance Festival, and Relay may stay at
+planned conversation IDs plus explicit TODO slots until their implementation
+slices are next.
+
+For non-Bridge areas, P1 acceptance checks are **Paper-Level Acceptance
+Checks**: five to eight player-visible outcomes or documented slice
+requirements in the area README. They should confirm that the blocker, Cicka
+placement, resident role, prompt/dialogue ID plan, world change or ending
+handoff, transition/reset condition, and audio-floor need are named. They do
+not require runtime proof, screenshots, automated tests, or playability evidence
+until each area becomes an implementation slice after the Bridge Tracer Slice.
+
+### P1 Readiness Matrix
+
+Use this matrix as the paper-pass exit check before writing implementation
+issues. "Ready" here means the docs are ready to package a slice; only Bridge
+requires immediate runtime/playability proof because it is the tracer.
+
+| Area | Stage sketch | Prompt/dialogue IDs | Cicka placement | Transition/reset | Audio floor | Acceptance checks | Readiness |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Bridge | In area README | Concrete line/prompt IDs in `dialogue.md` | Before/after resting spot named | Bridge-to-Concert transition named | Bridge ambience, Cicka cue, bridge-change cue, transition cue named | Bridge Tracer Slice definition of done | Ready for tracer slice |
+| Concert | In area README | Planned conversation IDs | Hidden before, band/resting after | Dance transition exit named | Night ambience, guitar phrase, crowd-clearing cue, Cicka/transition cues named | Paper-Level Acceptance Checks | Paper-ready; implement after Bridge |
+| Dance Festival | In area README and `layout.md` | Planned conversation IDs | Operations/shuttle/service-gate before/after options named | Relay sunset transition named | Setup ambience, setup-clearance cue, Cicka/transition cues named | Paper-Level Acceptance Checks | Paper-ready; implement after Bridge |
+| Relay | In area README | Planned prompt IDs plus dedication text | Final field-presence / threshold role named | First Playable Reset Return named | Relay ambience, guitar phrase, raw meow, silence/reset cues named | Paper-Level Acceptance Checks | Paper-ready; implement after Bridge |
 
 ### Implementation Sequencing
 
@@ -102,6 +130,23 @@ Route State, prompt/dialogue data shape, camera framing, Cicka placement,
 Compact Area Transition handling, and Coherent Sketchbook Blockout conventions.
 Once the Bridge Tracer Slice is playable and verified, Concert, Dance Festival,
 and Relay can be split into Agent-Ready Slice Contract issues.
+
+The Bridge Tracer Slice is done when a player can:
+
+1. start at the Bridge nature/hill entry
+2. encounter Cicka with the toy car
+3. talk to the Bridge Draftsperson at the unfinished blueprint
+4. use Cicka Parallel Play to receive or unlock the toy car test prop
+5. run the toy-car bridge test
+6. see the crossing visibly change from blocked to usable
+7. cross or confirm the opened bridge exit
+8. trigger the Bridge-to-Concert Compact Area Transition
+
+The implementation should also prove the shared route state, prompt/dialogue
+lookup by Prompt/Dialogue ID, camera framing, Cicka placement, transition
+handoff, and Coherent Sketchbook Blockout conventions. Record basic playability
+evidence with the issue or PR so later area slices inherit a tested seam rather
+than a guess.
 
 ### P2 Blockout Completeness Contract
 

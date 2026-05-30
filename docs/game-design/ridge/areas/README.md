@@ -61,8 +61,15 @@ Cicka before/after, required prompt/dialogue IDs, Rough Stage Composition,
 transition or reset behavior, audio floor needs, and acceptance checks. Rough
 Stage Composition should name beat order, entry/exit sides, blocker location,
 Cicka spot, resident/prop zone, optional Area Interior Pocket, and camera
-framing intent. Do not turn the area docs into pixel maps, collision geometry,
-final scripts, complete dialogue trees, or final art briefs.
+framing intent. Each area README should include a tiny Stage-Order Sketch, using
+ASCII arrows or equivalent simple text, for the first-read route shape. Do not
+turn the area docs into pixel maps, collision geometry, final scripts, complete
+dialogue trees, or final art briefs.
+
+For Concert, Dance Festival, and Relay, P1 acceptance checks are paper-level:
+list five to eight player-visible outcomes or documented requirements in the
+area README, but do not require runtime proof until those areas become
+implementation slices after the Bridge Tracer Slice.
 
 For first playable audio, use the First Playable Audio Floor: placeholder
 handmade ambience, blocker/world-change cues, Cicka cue if present, and only the

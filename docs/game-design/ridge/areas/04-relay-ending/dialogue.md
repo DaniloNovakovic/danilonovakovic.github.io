@@ -7,6 +7,11 @@
 This file owns Relay Ending prompts, minimal inspect text, dedication-card text,
 and any placeholder lines. The first playable ending should remain mostly quiet.
 
+Pre-Tracer scope: keep Relay mostly at planned prompt IDs plus the already
+accepted dedication-card text until Relay is packaged as its own implementation
+slice. Add any remaining line-level Tone-Locked Placeholder Dialogue after the
+Bridge Tracer Slice proves the dialogue data shape.
+
 ## Planned Conversation Sets
 
 - `relay.overlook.inspect`: optional single quiet overlook inspect detail, if

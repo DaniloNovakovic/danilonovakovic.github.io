@@ -72,6 +72,44 @@ Use **Dance Festival Resting Spot** as the practical label.
 Cicka is an observer, not an explainer. The resting spot is readable flavor, not
 a route gate.
 
+## Rough Stage Composition
+
+Stage-order sketch:
+
+```text
+Concert rest / van arrival entry
+  -> Last-Stop Plaza setup
+  -> shuttle sign + operations table
+  -> service-road blocker
+  -> readiness favors + folded song request
+  -> cleared shuttle lane / Cicka settles
+  -> Relay sunset transition exit
+```
+
+Framing intent: make the shuttle, operations table, and blocked service road
+read as one practical plaza problem. Keep the promised night dance visible in
+lanterns, chair stacks, and dance-floor edges without turning the first-playable
+route into a full festival simulation.
+
+## Paper-Level Acceptance Checks
+
+- The service-road blocker is visible before the player understands the
+  romantic folded-song-request layer.
+- The shuttle, last-daylight sign, operations table, and service gate are named
+  as one readable plaza problem.
+- Cicka has before/after placement near the operations table, shuttle step,
+  lantern crates, service gate, or cleared shuttle sign.
+- Minimum Route Cast roles are named: Hill-Shuttle Driver, Last-Stop Operations
+  Helper, Dance Teacher, Festival Steward, and Unnamed Counterpart Cat.
+- Planned prompt/dialogue IDs cover wayfinding, shuttle delay, operations
+  handoff, local triangulation, one-step practice, folded song request, setup
+  clearance, and final shuttle ride.
+- The visible world change is that setup clears enough for the last daylight
+  shuttle lane.
+- The Relay sunset transition exit condition is named.
+- First Playable Audio Floor needs are clear: daytime setup ambience,
+  setup-clearance cue, Cicka cue if used, and shuttle/transition stinger.
+
 ## Open Local Slots
 
 - [`layout.md`](./layout.md): Rough Stage Composition first, then exact room
