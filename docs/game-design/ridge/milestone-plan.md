@@ -83,8 +83,11 @@ Bridge, Concert, and Dance Festival area is blockout-complete when it has:
    log, checklist, minimap, objective tracker, or "go talk to X" UI
 10. a visible world change that changes the map, not only dialogue
 11. a Cicka after-state where the local resting spot changes or settles
-12. a tiny local beat state that feeds the shared First Playable Route State
-13. an exit trigger that carries the player to the next Ridge Area
+12. First Playable Audio Floor cues for the area: placeholder ambience,
+   blocker/world-change cue, Cicka cue if present, and transition/guitar cue
+   where relevant
+13. a tiny local beat state that feeds the shared First Playable Route State
+14. an exit trigger that carries the player to the next Ridge Area
 
 Relay replaces the resident help beat with a brief playable linger, **Sit and
 Play**, authored farewell, **Dedication Card**, and clean Bridge reset.
@@ -106,7 +109,9 @@ small and concrete enough to implement without resolving product taste:
 8. State the constraints it must preserve: Compact Ridge Stage, Minimum Route
    Cast, Minimal Route Guidance, First Playable Interaction Vocabulary, and no
    new fail state.
-9. Include acceptance checks: route reaches the slice start, the slice outcome
+9. For audio-touching slices, state whether the slice uses the First Playable
+   Audio Floor or deliberately defers audio with a silent placeholder.
+10. Include acceptance checks: route reaches the slice start, the slice outcome
    is visible, the next route state or transition unlocks, and required runtime
    checks/playability evidence are recorded when code changes.
 

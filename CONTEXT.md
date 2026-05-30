@@ -270,6 +270,13 @@ world-change result, Cicka before/after placement, exit condition, linked source
 docs, and acceptance checks.
 _Avoid_: vague area build request, taste-sensitive unresolved premise, broad "make this level" task, hidden dependency on undocumented canon
 
+**First Playable Audio Floor**:
+The smallest audio palette needed to test route mood, timing, and emotional
+handoffs: simple handmade-feeling ambience per area, one short guitar phrase for
+Concert and Relay, tiny Cicka meow/purr/chirp cues, soft transition stingers,
+and clear blocker/world-change cues.
+_Avoid_: full soundtrack, final polished mix, voiced dialogue, adaptive score engine, rhythm-game-quality track, full song system
+
 **Authored Traversal Interaction**:
 A local route action that moves the player through a designed object or route
 change instead of requiring freeform jump execution.
@@ -601,6 +608,11 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
   before it is assigned to an AFK agent. Slice boundaries should name the
   relevant area, beat state, prompts, world change, Cicka placement, exit
   condition, source docs, and acceptance checks.
+- Use the **First Playable Audio Floor** for the initial route: placeholder
+  handmade ambience, one short guitar phrase shared by Concert and Relay, tiny
+  Cicka vocals, transition stingers, and blocker/world-change cues. Defer full
+  songs, voiced dialogue, adaptive scoring, polished mix, and rhythm-game audio
+  production until the route proves itself.
 - The first playable route should use **Compact Area Transitions** between
   separate compact maps, allowing different time of day, environment, and
   staging per area while distant Relay cues imply route progress.

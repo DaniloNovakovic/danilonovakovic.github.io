@@ -35,6 +35,22 @@ Active references:
 - Timing audio can support mastery, but every Telegraph cue needs a primary
   visual read and an assist-mode fallback.
 
+## First Playable Audio Floor
+
+For the First Playable Route, use this pack as palette guidance, not a demand
+for final production audio. The first playable audio floor is intentionally
+small:
+
+- simple handmade-feeling ambience per required area
+- one short guitar phrase that appears at Concert and returns at Relay
+- tiny Cicka meow/purr/chirp cues, including the final raw threshold meow
+- soft transition stingers for area changes
+- clear blocker/world-change cues where sound helps the authored change read
+
+Do not block v0 on full songs, voiced dialogue, adaptive score logic, final mix,
+or rhythm-game-quality guitar/audio production. Silent stubs are acceptable for
+non-critical cues until interaction timing and route readability are proven.
+
 ## Ridge Overworld Loop
 
 Goal: a short seamless loop that can run for several minutes without demanding

@@ -44,6 +44,11 @@ Agent-Ready Slice Contract in [`../milestone-plan.md`](../milestone-plan.md):
 area, local beat state, prompt/dialogue IDs, blocker, world change, Cicka
 placement, exit condition, and acceptance checks.
 
+For first playable audio, use the First Playable Audio Floor: placeholder
+handmade ambience, blocker/world-change cues, Cicka cue if present, and only the
+small guitar or transition cues needed by that area. Use the audio reference
+pack for palette, not as a requirement to produce final songs or mixes.
+
 Ownership rule: root [`../open-questions.md`](../open-questions.md) is for
 route-level or taste-sensitive decisions. Area docs own local **Open Local
 Slots** such as topology, prompt wording, prop placement, resident silhouettes,

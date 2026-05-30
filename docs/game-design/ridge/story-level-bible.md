@@ -286,6 +286,16 @@ the First Playable Route. The player should feel progress through changed world
 state, area transitions, Cicka after-states, and contextual prompts rather than
 UI state.
 
+Use the **First Playable Audio Floor**, not a full soundtrack. Each area can
+have simple handmade-feeling ambience, clear blocker/world-change cues, and soft
+transition stingers. Concert and Relay should share one short guitar phrase so
+the guitar feels remembered rather than introduced at the ending. Cicka can use
+a tiny meow/purr/chirp set, with the final threshold sound still being one small
+raw meow. Do not require full songs, voiced dialogue, adaptive scoring, a
+polished mix, or rhythm-game-quality audio before the route works end to end.
+Use [`reference/m3-audio-pack.md`](./reference/m3-audio-pack.md) for palette and
+naming guidance when an audio slice is ready.
+
 Current time-of-day arc: Bridge begins during the day at a nature/hill edge;
 Concert moves into evening/night small-town festival energy; a short sleep/rest
 interlude carries the player from Concert night to Dance Festival daytime
