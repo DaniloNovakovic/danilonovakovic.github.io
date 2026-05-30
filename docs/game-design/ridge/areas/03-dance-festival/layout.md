@@ -31,6 +31,24 @@ Festival setup blocks the service road.
 Sign: "Service road closes for night dance. Last daylight shuttle after setup check."
 ```
 
+## Rough Stage Composition
+
+Stage-order sketch:
+
+```text
+Van drop-off / plaza entry
+  -> shuttle stop and last-daylight sign
+  -> operations table with helper / clipboard props
+  -> lantern crates, chairs, cables, dance-floor edge
+  -> service-road gate blocker
+  -> cleared setup snaps
+  -> shuttle departure toward Relay
+```
+
+Optional depth pocket: a community-hall doorway, equipment alcove, or
+operations-side nook can exist if it helps stage setup favors, but it should
+share the same Dance Festival progress and not become a second navigation map.
+
 ## Required Readability
 
 - The closed service-road barrier must be visible before the player understands
@@ -75,8 +93,7 @@ Open art/audio choices:
 
 ## Open Spatial Slots
 
-- exact room topology for Last-Stop Plaza
-- camera framing for plaza entry, shuttle, operations table, service gate, and
-  dance floor
+- exact room topology, collision geometry, and camera tuning for plaza entry,
+  shuttle, operations table, service gate, and dance floor
 - whether the road gate is one screen or a visible edge across several screens
 - final 2-3 setup snaps that visibly clear the service lane

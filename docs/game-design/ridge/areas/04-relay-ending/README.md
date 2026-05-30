@@ -87,8 +87,8 @@ The emotional idea is: **I am ready for Cicka's threshold farewell.**
   optional mini-games, return content, and completed-area revisits exist.
 - Keep the v0 reset clean: do not show Micka, a changed post-ending world, a
   special ending-seen marker, or a new objective after reset. If an internal
-  ending-seen flag is ever needed, keep it invisible until the long-term
-  post-game design exists.
+  ending-seen flag is ever needed for implementation or debugging, keep it
+  invisible until the long-term post-game design exists.
 
 ## Tone Boundaries
 
@@ -115,6 +115,44 @@ playable linger before **Sit and Play**, then the handoff from sunset **Guitar
 Farewell** into Cicka's threshold departure, **Dedication Card**, and route
 reset.
 
+## Rough Stage Composition
+
+Stage-order sketch:
+
+```text
+Dance shuttle / sunset arrival
+  -> tiny overlook linger
+  -> Cicka final field-presence spot
+  -> Sit and Play guitar spot
+  -> warm sketchbook-threshold artifact beyond the path
+  -> dedication card
+  -> Bridge reset
+```
+
+Framing intent: keep Relay almost still. The playable space should be a small
+sunset overlook that lets the player take a few steps before settling beside
+Cicka; the threshold belongs beyond the player's path, readable but unreachable.
+
+## Paper-Level Acceptance Checks
+
+- The Relay arrival, tiny overlook linger, Cicka final field-presence spot, and
+  Sit and Play location are named.
+- The player-facing final trigger is Sit and Play, with no separate send prompt,
+  readiness gate, final choice, NPC, collectible, or comfort menu.
+- The authored sequence order is documented from guitar phrase through Cicka
+  threshold departure, Dedication Card, and Bridge reset.
+- Planned prompt/dialogue IDs cover optional overlook inspect, Sit and Play,
+  delayed soft prompt, final raw meow, and dedication card text.
+- The Route Memory Montage uses exactly three soft flashes: completed Bridge,
+  opened Concert/guitar handoff echo, and Dance Festival night beginning.
+- The warm sketchbook-threshold artifact is beyond the player's path and cannot
+  be followed.
+- The First Playable Reset Return goes directly to fresh Bridge progress with no
+  player-facing ending-seen marker, changed post-ending world, Micka tease, or
+  new objective.
+- First Playable Audio Floor needs are clear: quiet Relay ambience, familiar
+  guitar phrase, final raw meow, silence beat, and reset/fade cue.
+
 ## Cicka Threshold Staging
 
 Unresolved. This area still needs exact decisions for camera behavior, input
@@ -126,7 +164,8 @@ recommended defaults and validate them through playtesting.
 
 ## Open Local Slots
 
-- physical Relay topology and warm sketchbook-threshold geometry
+- physical Relay topology, collision geometry, and warm sketchbook-threshold
+  geometry during blockout
 - final Cicka field-presence spot
 - exact camera framing for the authored Sit and Play handoff
 - exact guitar audio texture and delayed soft prompt wording
@@ -134,7 +173,8 @@ recommended defaults and validate them through playtesting.
   Memory Montage flashes, empty-sunset hold, dedication-card hold, and auto-fade
 - exact warm threshold artifact presentation after Sit and Play
 - First Playable Reset Return Bridge-start reset behavior
-- whether any invisible ending-seen flag is needed for future unlocks
+- implementation-only: whether an invisible ending-seen flag is useful for
+  debugging or future unlock plumbing
 - long-term Open Ridge Return State interactions
 - delayed Micka trigger
 - later optional Relay texture details after the minimal first-playable linger

@@ -44,6 +44,108 @@ Mini-games attach to the world as optional fun, rewards, shortcuts, or future
 alternate ways to finish a level. They should not become required first-ending
 proof or the default solution for main route blockers.
 
+## Camera And Presentation Direction
+
+Use a **Walkable Sketchbook Stage** direction for the active Ridge route: a
+Harold Halibut-like or theater-set 2.5D presentation that keeps side-view
+interaction simple while composing each Ridge Area like a hand-built paper set.
+
+This means Bridge, Concert, Dance Festival, and Relay can use shallow staged
+depth, foreground/background paper layers, and authored composition, but the
+player's main route movement remains side-view and forgiving. The target is
+closer to a walkable sketchbook stage than an isometric RPG map.
+
+For the First Playable Route, this direction should be expressed lightly:
+per-area bounds, readable spawn framing, visible blockers, simple paper-layer
+depth, and camera framing that supports the local problem. Authored camera
+zones, look-ahead, dead zones, profile blending, and richer parallax are
+follow-up runtime/art polish unless a narrow spike proves they are needed for
+blockout readability.
+
+Keep First Playable Route traversal strictly side-view and mostly left/right.
+Create depth through area composition, foreground/background paper layers,
+entered buildings or local interiors, prop staging, and silhouettes rather than
+small up/down lane movement. If a later area proves the simple model cannot
+support its staging, that area can earn a focused camera/traversal spike, but
+the first implementation should try the consistent simple model first.
+
+Use a **Coherent Sketchbook Blockout** as the First Playable Route art target:
+rough enough to revise cheaply, but visually directed enough that playtests can
+judge mood, readability, emotional staging, Cicka placement, blockers, resident
+roles, and before/after world changes. It should not be gray boxes, and it
+should not require final character designs, polished animation sets, full
+building interiors, or rich prop catalogs.
+
+Each required area should have enough visual language to prove the Walkable
+Sketchbook Stage direction: a foreground frame, playable lane, background set
+dressing, one unmistakable blocker, one readable resident silhouette or role,
+one Cicka field/resting spot, one visible before/after world change, and one
+exit or transition composition.
+
+## Dialogue Documentation Direction
+
+Use [`dialogue-conventions.md`](./dialogue-conventions.md) as the global
+pre-production convention for dialogue structure, line IDs, placeholder policy,
+and future migration into typed runtime data.
+
+Keep actual route dialogue colocated with the area that owns it:
+
+- Bridge lines live in [`areas/01-bridge/dialogue.md`](./areas/01-bridge/dialogue.md).
+- Concert lines live in [`areas/02-concert/dialogue.md`](./areas/02-concert/dialogue.md).
+- Dance Festival lines live in
+  [`areas/03-dance-festival/dialogue.md`](./areas/03-dance-festival/dialogue.md).
+- Relay Ending lines live in
+  [`areas/04-relay-ending/dialogue.md`](./areas/04-relay-ending/dialogue.md).
+
+During pre-production, these Markdown files are the human design source. They
+should use stable line IDs from the start so the same identifiers can later
+survive migration into JSON, TypeScript data, a narrative scripting format, or
+another type-safe dialogue pipeline. Do not choose the final runtime format
+until the route dialogue shape stops moving.
+
+Use **Role Names** for First Playable Route characters until a focused
+naming/tone pass accepts final proper names. Stable role labels are enough for
+docs, dialogue IDs, implementation references, and issue writing:
+
+- Bridge Draftsperson
+- Injured Guitarist
+- Band Roadie
+- Hill-Shuttle Driver
+- Last-Stop Operations Helper
+- Dance Teacher
+- Festival Steward
+- Unnamed Counterpart Cat
+
+Characters can still have strong silhouettes, props, placeholder voices, and
+local behavior before they have final names. Do not lock throwaway proper names
+into dialogue IDs or implementation data.
+
+Use **Tone-Locked Placeholder Dialogue** for First Playable writing. Each
+required route beat should have stable IDs and one to three provisional lines or
+prompts that capture intent, speaker role, emotional tone, and state outcome.
+This is enough for implementation and playtest without committing to final
+banter, deep branches, final proper names, or line-by-line literary polish.
+
+## Cast Scope
+
+First Playable should use a **Minimum Route Cast**: only the characters and
+ambient presence needed to make the route alive, readable, and emotionally
+staged.
+
+- Bridge requires the Bridge Draftsperson and Cicka.
+- Concert requires the Injured Guitarist, Cicka, and just enough crowd or band
+  presence to make the delayed concert and later cleared crossing readable.
+- Dance Festival requires the Hill-Shuttle Driver, Last-Stop Operations Helper,
+  Dance Teacher or Festival Steward coverage for the practical handoff, Cicka,
+  and optionally the Unnamed Counterpart Cat as visual flavor.
+- Relay requires no NPCs beyond Cicka.
+
+Reserve richer residents, full crowd writing, recurring optional hangouts,
+enterable bars full of people, the post-concert campfire/tent hangout, and the
+Festival Superfan for after the route works unless a single cheap bark or
+silhouette is needed for staging. Empty spots, facades, and silhouettes may
+reserve liveliness without becoming required dialogue or implementation scope.
+
 ## Canonical Ending
 
 The first ending is the **Cicka Threshold Farewell**. It is the canonical ending
@@ -105,7 +207,9 @@ Accepted ending outline:
    completed areas after the farewell, but that pays off only once optional
    mini-games, return content, and completed-area revisits exist.
    Do not surface any visible ending-seen memory in v0: no Micka, no changed
-   post-ending world, no special marker, and no new objective after reset.
+   post-ending world, no special marker, and no new objective after reset. An
+   internal ending-seen flag may exist only if useful for implementation or
+   debugging, and must remain invisible to the player in v0.
 
 Tone boundaries:
 
@@ -143,6 +247,34 @@ each area freedom to have its own time of day, environment, and staging while
 still reading as a linear route. Distance between areas can stay ambiguous, with
 background composition, distant Relay silhouettes, signage, or skyline changes
 implying progress toward the final ridge.
+
+Use **Compact Area Transitions** as the route handoff pattern. Each required
+area jump should be short and consistent: an exit prompt or resident line, a
+quick page/ink/blackout-style transition, one travel cue or soft stinger, then
+control resumes with the player framed at the next area's local problem. Do not
+add playable travel routes, vehicle mini-games, long cutscenes, or a map screen
+for the First Playable Route.
+
+The individual transitions can stay lightly authored. Bridge-to-Concert can be
+the simplest page-turn or ink handoff. Concert-to-Dance should imply rest after
+the night concert before the grounded Band Roadie Van Ride drops the player near
+the daytime Dance Festival area. Dance-to-Relay should use the accepted shuttle
+line/sound/brief blackout and respawn at Relay under sunset.
+
+Each required area should be a **Compact Ridge Stage** for the First Playable
+Route: one small readable stage/chapter, not a sprawling mini-map. Bridge,
+Concert, Dance Festival, and Relay may include **Area Interior Pockets** such as
+an enterable building, musician nook, operations-side alcove, or facade interior
+when that makes the level feel richer or creates staged depth. An Area Interior
+Pocket may use a Phaser scene change if useful, but it still belongs to the
+same Ridge Area, shares the same local progress, and should not become a
+separate navigation problem.
+
+Implementation readiness, acceptance checks, shared route-state shape, and
+paper-pass boundaries are owned by
+[`milestone-plan.md`](./milestone-plan.md). Keep this bible focused on route
+spine, story causality, emotional logic, and cross-area dependencies; area-local
+implementation detail belongs in [`areas/`](./areas/README.md).
 
 Current time-of-day arc: Bridge begins during the day at a nature/hill edge;
 Concert moves into evening/night small-town festival energy; a short sleep/rest
@@ -188,6 +320,14 @@ but her role should evolve:
 - early: subtle attention cue near an obstacle
 - middle: observer of a changed object or resident moment
 - late: quiet trust marker near the threshold
+
+She should not need to guide the player much because the First Playable Route
+uses Compact Ridge Stages rather than giant searchable maps. Cicka can sit near
+the thing that matters, play with or avoid important props, react to world
+changes, and settle into new after-states. She should not speak, display
+thought bubbles, point with UI arrows, repeatedly lead the player, or become a
+hint system. If the player is lost, compact layout, NPC barks, camera framing,
+prop placement, and prompt availability should do the heavy lifting.
 
 Bridge Area can serve as the first Cicka encounter. In the current accepted
 opening, the game begins with a simple walk-right control introduction from a
@@ -263,6 +403,10 @@ cleanly.
 Start with three required main-path Ridge Areas before the Relay ending. Each
 Ridge Area can contain one main Resident Beat plus local interiors, optional
 interactions, and runtime Phaser Scenes.
+For the First Playable Route, keep each required Ridge Area structured as one
+Compact Ridge Stage. Use Area Interior Pockets only when they reinforce the
+local beat, depth, or richness without expanding the area into a sprawling
+mini-map.
 
 Area-specific accepted details live in [`areas/`](./areas/README.md). Keep this
 bible focused on the route spine, cross-area dependencies, and ending logic.

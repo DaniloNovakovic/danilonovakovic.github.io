@@ -11,6 +11,8 @@ source rationale, comparison material, or a fresh synthesis pass.
 
 - `agents/`: deep research reports that informed specialist agent/skill design.
 - `audio/`: background audio research and Audio Designer provenance.
+- `design-theory/`: source research for general game design theory, including
+  camera, level, and playability patterns.
 - `narrative/`: background narrative and tribute writing research.
 - `visual/`: background visual-direction, character-design, asset-pipeline, and
   style-system research.

@@ -47,11 +47,12 @@ Area-local detail lives here:
 True design unknowns:
 
 - **Guitar Farewell micro-staging:** Given the accepted quiet, short Sit and
-  Play shape and authored post-prompt handoff, what are the exact camera,
-  animation, post-montage sunset playing beat, delayed soft prompt wording, and
-  audio beats from guitar phrase through Cicka's threshold departure? Exact
-  timing values should be delegated to prototype/playtest with tasteful
-  recommended defaults rather than locked in pre-production.
+  Play shape, authored post-prompt handoff, and Walkable Sketchbook Stage
+  presentation direction, what are the exact Relay framing, animation,
+  post-montage sunset playing beat, delayed soft prompt wording, and audio
+  beats from guitar phrase through Cicka's threshold departure? Exact timing
+  values should be delegated to prototype/playtest with tasteful recommended
+  defaults rather than locked in pre-production.
 - **Cicka Threshold Farewell staging:** What exact physical sequence carries
   Cicka's final threshold movement, turn-back, tiny raw meow, and warm
   sketchbook-threshold departure without relying on unseeded paw/page marks as a
@@ -96,9 +97,6 @@ Do not re-grill that scope unless Danilo changes the product target.
 
 Route blockout TBD:
 
-- **Route blockout checklist:** What exact rooms, prompts, blockers, route
-  changes, Cicka before/after states, and transition triggers must exist for a
-  complete Bridge -> Concert -> Dance -> Relay blockout pass?
 - **Cicka Resting Spots first-pass states:** Which exact before/after prop,
   posture, or visual trace is the smallest readable version for each required
   Ridge Area, and which of those states should echo in the Route Memory Montage?

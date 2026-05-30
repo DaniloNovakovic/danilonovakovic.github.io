@@ -60,13 +60,14 @@ spaces to make the block feel more alive.
 The first blockout only needs:
 
 - blocked crowd/traffic crossing
-- 2-3 annoyed crowd NPCs
+- 2-3 annoyed crowd barks or silhouettes
 - hidden musician-side nook
 - injured guitarist
 - one forgiving practice interaction
 - auto-success concert start
 - crowd clears
-- goodbye/reward beat at the opened exit
+- goodbye/reward beat at the opened exit, with a band member only if needed for
+  staging
 - guitar received
 - Cicka hidden before resolution and chilling with the band after resolution
 
@@ -90,6 +91,43 @@ This can later become the post-ending echo spot. If used, the echo should be a
 small visual absence cue at Cicka's usual spot, not the player's guitar left
 behind and not an unseeded paw/page mark mechanic.
 
+## Rough Stage Composition
+
+Stage-order sketch:
+
+```text
+Bridge transition entry
+  -> crowd / traffic crossing blocker
+  -> crowd barks + facade atmosphere
+  -> musician-side nook with hidden Cicka
+  -> Injured Guitarist practice riff
+  -> auto-success concert start
+  -> opened crossing + goodbye / guitar handoff
+  -> Dance transition exit
+```
+
+Framing intent: present the Concert Area as a compact night block with the
+blocked crossing readable early, then pull the player sideways into the quieter
+musician nook. Foreground crowd silhouettes and storefront facades can sell
+depth while the playable lane stays mostly left/right.
+
+## Paper-Level Acceptance Checks
+
+- The blocked crowd/traffic crossing is visible before dialogue explains the
+  concert delay.
+- Cicka has a before-resolution hiding spot near the musician-side nook and an
+  after-resolution resting spot with or near the band.
+- The Injured Guitarist role, practice-riff beat, and non-arcade fallback are
+  named.
+- Planned prompt/dialogue IDs cover crowd barks, injury setup, practice riff,
+  performance start, guitar handoff, and Cicka flavor.
+- The visible world change is that the crowd or traffic clears and the crossing
+  opens.
+- The guitar handoff is named as the reward that sets up Relay.
+- The Dance transition exit condition is named.
+- First Playable Audio Floor needs are clear: night ambience, guitar phrase,
+  crowd-clearing cue, Cicka cue if used, and transition stinger.
+
 ## Boundaries
 
 - A Guitar-Hero-like performance mini-game is allowed as an ideal or optional
@@ -104,8 +142,9 @@ behind and not an unseeded paw/page mark mechanic.
 
 ## Open Local Slots
 
-- exact crossing geometry and why it blocks progress
-- small-city block layout, bars, building facades, and possible later interiors
+- exact crossing geometry, collision behavior, and why it blocks progress
+- small-city block layout, bars, building facades, and possible later Area
+  Interior Pockets
 - how many annoyed crowd/band flavor lines are enough for discovery
 - exact post-concert goodbye staging near the opened exit
 - guitarist/resident role, silhouette, simplified staging for the skateboard
