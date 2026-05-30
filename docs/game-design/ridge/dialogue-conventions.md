@@ -73,10 +73,22 @@ The exact runtime pipeline is deferred. These IDs should be able to survive a
 future migration into JSON, TypeScript dialogue data, a narrative scripting
 format, or another type-safe import system.
 
-## Placeholder Policy
+## Tone-Locked Placeholder Policy
 
-First Playable Route dialogue should be functional placeholder prose with tone,
-not final writing. A placeholder line is good enough when it proves:
+First Playable Route dialogue should use **Tone-Locked Placeholder Dialogue**:
+provisional writing with enough voice to test mood and implementation, but not a
+final banter or literary polish pass.
+
+For each required route beat, aim for one to three provisional lines or prompts
+with:
+
+- stable area-scoped IDs
+- a Role Name speaker or prompt speaker
+- the character's intent, feeling, or practical need
+- the route state, prompt unlock, handoff, or visible world change the line
+  supports
+
+A placeholder line is good enough when it proves:
 
 - what the player learns
 - what the character wants or feels
@@ -86,6 +98,9 @@ not final writing. A placeholder line is good enough when it proves:
 Do not polish every line before the route is playable. Do not leave a line so
 generic that implementation cannot tell what state, prompt, or emotional beat it
 supports.
+
+Avoid polished banter passes, deep branching trees, final proper names, or
+line-by-line literary tuning until the route works end to end.
 
 ## Branching Scope
 

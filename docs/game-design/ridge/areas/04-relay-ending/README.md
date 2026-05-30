@@ -87,8 +87,8 @@ The emotional idea is: **I am ready for Cicka's threshold farewell.**
   optional mini-games, return content, and completed-area revisits exist.
 - Keep the v0 reset clean: do not show Micka, a changed post-ending world, a
   special ending-seen marker, or a new objective after reset. If an internal
-  ending-seen flag is ever needed, keep it invisible until the long-term
-  post-game design exists.
+  ending-seen flag is ever needed for implementation or debugging, keep it
+  invisible until the long-term post-game design exists.
 
 ## Tone Boundaries
 
@@ -134,7 +134,8 @@ recommended defaults and validate them through playtesting.
   Memory Montage flashes, empty-sunset hold, dedication-card hold, and auto-fade
 - exact warm threshold artifact presentation after Sit and Play
 - First Playable Reset Return Bridge-start reset behavior
-- whether any invisible ending-seen flag is needed for future unlocks
+- implementation-only: whether an invisible ending-seen flag is useful for
+  debugging or future unlock plumbing
 - long-term Open Ridge Return State interactions
 - delayed Micka trigger
 - later optional Relay texture details after the minimal first-playable linger

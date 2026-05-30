@@ -30,9 +30,20 @@ Use Minimal Route Guidance for area-local readability. Prefer blockers,
 composition, barks, Cicka placement, changed props, and contextual prompts over
 quest logs, checklists, minimaps, objective trackers, or "go talk to X" UI.
 
+Use Compact Area Transitions between required areas. An area exit should resolve
+through a short authored handoff, page/ink/blackout-style transition, soft
+travel cue or stinger, and framed respawn at the next local problem. Do not make
+area exits depend on playable travel routes, vehicle mini-games, long cutscenes,
+or a map screen in the First Playable Route.
+
 Use Role Names for First Playable residents and animals until a focused
 naming/tone pass accepts final proper names. Role labels are stable enough for
 area docs, dialogue IDs, implementation references, and issue writing.
+
+Use Tone-Locked Placeholder Dialogue for area-local writing: stable IDs, Role
+Name speakers, one to three provisional lines or prompts per required beat, and
+clear state outcomes. Save polished banter, deep branches, and final proper
+names for later writing passes.
 
 Keep each area's First Playable cast to the Minimum Route Cast. Add only the
 required route resident(s), Cicka, and the smallest useful barks or silhouettes
@@ -43,6 +54,13 @@ When an area-local detail becomes implementation work, package it through the
 Agent-Ready Slice Contract in [`../milestone-plan.md`](../milestone-plan.md):
 area, local beat state, prompt/dialogue IDs, blocker, world change, Cicka
 placement, exit condition, and acceptance checks.
+
+Before implementation starts, use the Area Paper Pass to make each local area
+doc agent-ready rather than final: define beat states, blocker or threshold,
+Cicka before/after, required prompt/dialogue IDs, rough stage composition,
+transition or reset behavior, audio floor needs, and acceptance checks. Do not
+turn the area docs into pixel maps, final scripts, complete dialogue trees, or
+final art briefs.
 
 For first playable audio, use the First Playable Audio Floor: placeholder
 handmade ambience, blocker/world-change cues, Cicka cue if present, and only the

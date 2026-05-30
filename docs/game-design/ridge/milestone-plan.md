@@ -44,20 +44,57 @@ doc instead.
 - **P0 Decision Intake**: convert grilling/research transcripts into accepted
   route claims, rejected ideas, and open questions.
 - **P1 Area Paper Pass**: tighten Bridge, Concert, Dance Festival, and Relay
-  docs until each area has layout, resident beats, blockers, Cicka presence,
-  and exit conditions.
+  docs until each area is clear enough to turn into agent-ready implementation
+  slices. "Paper" means docs only: no pixel maps, final scripts, final art
+  specs, or complete dialogue trees.
 - **P2 First Playable Route Blockout**: prove the route can be walked end to
   end with a **Coherent Sketchbook Blockout** and no required precision
   platforming.
 - **P3 Route Readiness Feedback**: make area barricades, resident help, world
   changes, and Relay arrival readable without a visible chore checklist.
 - **P4 Ending Pass**: land Guitar Farewell as the final trigger, Cicka Threshold
-  Farewell, Dedication Card, First Playable Reset Return, and later long-term
-  Open Ridge Return State / Micka timing.
+  Farewell, Dedication Card, and clean First Playable Reset Return. Keep
+  long-term Open Ridge Return State and Micka timing as future/post-v0
+  questions.
 
 Optional mini-games, old Cicka Home mutation work, and folded-desk topology
 enter these milestones only when an active route doc or issue pulls a specific
 piece forward.
+
+### P1 Area Paper Pass Contract
+
+Before implementation starts, each required area should have enough local docs
+to satisfy the **Agent-Ready Slice Contract** without asking an agent to resolve
+product taste. Bridge, Concert, Dance Festival, and Relay should each define:
+
+1. the local route role and emotional idea
+2. local beat states and the intended before/after state for the area
+3. the visible blocker or ending threshold
+4. Cicka's before/after placement or final field-presence role
+5. required Role Name characters from the Minimum Route Cast
+6. required prompt/dialogue IDs using Tone-Locked Placeholder Dialogue
+7. rough Compact Ridge Stage composition, including any Area Interior Pocket
+8. visible world change or ending handoff result
+9. Compact Area Transition, exit condition, or First Playable Reset Return
+10. first playable audio needs from the First Playable Audio Floor
+11. acceptance checks for the first implementation slice
+
+P1 should not produce pixel-perfect maps, final scripts, final names, final art
+briefs, finished audio specs, complete dialogue trees, optional mini-game
+designs, or post-v0 liveliness scope.
+
+### Implementation Sequencing
+
+After the Area Paper Pass, begin implementation with the **Bridge Tracer
+Slice** rather than building all required areas in parallel. The first slice
+should include the Bridge blocker, Bridge Draftsperson, Cicka toy-car play,
+visible bridge change, and Bridge-to-Concert transition.
+
+This slice proves the shared seams before other areas fan out: First Playable
+Route State, prompt/dialogue data shape, camera framing, Cicka placement,
+Compact Area Transition handling, and Coherent Sketchbook Blockout conventions.
+Once the Bridge Tracer Slice is playable and verified, Concert, Dance Festival,
+and Relay can be split into Agent-Ready Slice Contract issues.
 
 ### P2 Blockout Completeness Contract
 
@@ -87,10 +124,13 @@ Bridge, Concert, and Dance Festival area is blockout-complete when it has:
    blocker/world-change cue, Cicka cue if present, and transition/guitar cue
    where relevant
 13. a tiny local beat state that feeds the shared First Playable Route State
-14. an exit trigger that carries the player to the next Ridge Area
+14. a Compact Area Transition that carries the player to the next Ridge Area
+    through a short authored handoff, cue/stinger, and framed respawn rather
+    than playable travel, a vehicle mini-game, long cutscene, or map screen
 
 Relay replaces the resident help beat with a brief playable linger, **Sit and
-Play**, authored farewell, **Dedication Card**, and clean Bridge reset.
+Play**, authored farewell, **Dedication Card**, and clean Bridge reset with no
+player-facing ending-seen marker, changed world, Micka tease, or new objective.
 
 ### Agent-Ready Slice Contract
 
@@ -100,12 +140,12 @@ small and concrete enough to implement without resolving product taste:
 1. Name the Ridge Area and route segment.
 2. Name the local beat state before and after the slice.
 3. Link the smallest relevant source docs from the Source Stack.
-4. List required prompt/dialogue IDs or say that the slice creates placeholder
-   IDs in the area's `dialogue.md`.
+4. List required prompt/dialogue IDs or say that the slice creates
+   Tone-Locked Placeholder Dialogue in the area's `dialogue.md`.
 5. Describe the visible blocker before the slice and the visible world-change
    result after it.
 6. Describe Cicka's before/after placement if the slice touches a route beat.
-7. Name the exit condition or transition unlocked by the slice.
+7. Name the exit condition or Compact Area Transition unlocked by the slice.
 8. State the constraints it must preserve: Compact Ridge Stage, Minimum Route
    Cast, Minimal Route Guidance, First Playable Interaction Vocabulary, and no
    new fail state.
@@ -119,6 +159,11 @@ Avoid vague assignments like "make Concert Area" or "add the Dance Festival."
 Prefer vertical route slices such as "Bridge blocker + Bridge Draftsperson +
 toy-car handoff + opened crossing" where an agent can prove a player-facing
 before/after state.
+
+The first implementation issue should use the **Bridge Tracer Slice**. Do not
+parallelize Concert, Dance Festival, or Relay implementation until Bridge has
+proved the shared route state, prompts/dialogue shape, camera framing, Cicka
+placement, transition handling, and blockout-art conventions.
 
 ## Source Stack
 

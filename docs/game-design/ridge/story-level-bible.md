@@ -120,6 +120,12 @@ Characters can still have strong silhouettes, props, placeholder voices, and
 local behavior before they have final names. Do not lock throwaway proper names
 into dialogue IDs or implementation data.
 
+Use **Tone-Locked Placeholder Dialogue** for First Playable writing. Each
+required route beat should have stable IDs and one to three provisional lines or
+prompts that capture intent, speaker role, emotional tone, and state outcome.
+This is enough for implementation and playtest without committing to final
+banter, deep branches, final proper names, or line-by-line literary polish.
+
 ## Cast Scope
 
 First Playable should use a **Minimum Route Cast**: only the characters and
@@ -201,7 +207,9 @@ Accepted ending outline:
    completed areas after the farewell, but that pays off only once optional
    mini-games, return content, and completed-area revisits exist.
    Do not surface any visible ending-seen memory in v0: no Micka, no changed
-   post-ending world, no special marker, and no new objective after reset.
+   post-ending world, no special marker, and no new objective after reset. An
+   internal ending-seen flag may exist only if useful for implementation or
+   debugging, and must remain invisible to the player in v0.
 
 Tone boundaries:
 
@@ -239,6 +247,19 @@ each area freedom to have its own time of day, environment, and staging while
 still reading as a linear route. Distance between areas can stay ambiguous, with
 background composition, distant Relay silhouettes, signage, or skyline changes
 implying progress toward the final ridge.
+
+Use **Compact Area Transitions** as the route handoff pattern. Each required
+area jump should be short and consistent: an exit prompt or resident line, a
+quick page/ink/blackout-style transition, one travel cue or soft stinger, then
+control resumes with the player framed at the next area's local problem. Do not
+add playable travel routes, vehicle mini-games, long cutscenes, or a map screen
+for the First Playable Route.
+
+The individual transitions can stay lightly authored. Bridge-to-Concert can be
+the simplest page-turn or ink handoff. Concert-to-Dance should imply rest after
+the night concert before the grounded Band Roadie Van Ride drops the player near
+the daytime Dance Festival area. Dance-to-Relay should use the accepted shuttle
+line/sound/brief blackout and respawn at Relay under sunset.
 
 Each required area should be a **Compact Ridge Stage** for the First Playable
 Route: one small readable stage/chapter, not a sprawling mini-map. Bridge,

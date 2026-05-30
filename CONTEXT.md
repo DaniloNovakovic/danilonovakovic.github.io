@@ -143,6 +143,14 @@ implementation references, and issue writing until a focused naming/tone pass
 chooses final names.
 _Avoid_: throwaway final name, unstable nickname, hardcoded proper name too early
 
+**Tone-Locked Placeholder Dialogue**:
+Pre-production route dialogue that is specific enough to test implementation,
+state changes, and emotional feel, but not treated as final writing. Each
+required beat should have stable IDs, Role Name speakers, one to three
+provisional lines or prompts, clear intent, and the route or world-state outcome
+it supports.
+_Avoid_: final polish pass, generic placeholder text, deep branching tree, final proper names too early
+
 **Minimum Route Cast**:
 The smallest set of visible characters needed for the First Playable Route to
 feel alive, readable, and emotionally staged without requiring optional
@@ -270,6 +278,23 @@ world-change result, Cicka before/after placement, exit condition, linked source
 docs, and acceptance checks.
 _Avoid_: vague area build request, taste-sensitive unresolved premise, broad "make this level" task, hidden dependency on undocumented canon
 
+**Area Paper Pass**:
+The pre-implementation documentation pass that makes each required Ridge Area
+ready to slice into agent work. It defines local beat states, blocker, Cicka
+before/after placement, prompt/dialogue IDs, transition or exit condition, rough
+stage composition, and acceptance checks without producing pixel maps, final
+scripts, final art specs, or complete dialogue trees.
+_Avoid_: final level spec, pixel map, implementation ticket, polished script, final art brief
+
+**Bridge Tracer Slice**:
+The first implementation slice after the Area Paper Pass: Bridge blocker,
+Bridge Draftsperson, Cicka toy-car play, visible bridge change, and the
+Bridge-to-Concert transition. It proves shared route state, prompts/dialogue
+data shape, camera framing, Cicka placement, transition handling, and Coherent
+Sketchbook Blockout conventions before Concert, Dance Festival, and Relay work
+fan out.
+_Avoid_: parallelizing all areas first, full Bridge polish, isolated tech spike, final art pass
+
 **First Playable Audio Floor**:
 The smallest audio palette needed to test route mood, timing, and emotional
 handoffs: simple handmade-feeling ambience per area, one short guitar phrase for
@@ -361,7 +386,9 @@ _Avoid_: first-playable reset, closed ending, sad objective, immediate replaceme
 **First Playable Reset Return**:
 The v0 post-dedication behavior where the game returns the player to the
 beginning of Bridge Area with clean route progress instead of opening a
-post-game free-travel Ridge.
+post-game free-travel Ridge. An internal ending-seen flag may exist only as
+invisible implementation or debug state; it should not create player-facing
+memory, objectives, Micka setup, or altered world state in v0.
 _Avoid_: post-game world, immediate Micka reveal, new objective, credits lockout, partial completed-world return, visible ending-seen marker
 
 **Guitar Farewell**:
@@ -416,8 +443,11 @@ _Avoid_: optional proof checklist, hub progression, abstract emotional gate
 
 **Compact Area Transition**:
 A short transition between separate compact Ridge Areas that preserves linear
-progress without requiring one continuous walkable overworld geography.
-_Avoid_: unexplained teleport, giant continuous map requirement, hard distance scale
+progress without requiring one continuous walkable overworld geography. For the
+First Playable Route, it should use a small authored handoff beat such as an
+exit prompt or resident line, a quick page/ink/blackout-style transition, one
+travel cue or stinger, and a respawn framed at the next area's local problem.
+_Avoid_: unexplained teleport, giant continuous map requirement, hard distance scale, playable commute, vehicle mini-game, long cutscene, map screen
 
 **Send the Sketchbook Prompt**:
 A retired/provisional ending prompt. Do not use it in v0 unless the sketchbook
@@ -666,9 +696,10 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 - A **Readiness Favor** can bridge the gap between knowing what a resident wants
   and helping them act without making the player directly manage their feelings.
 - The **Cicka Threshold Farewell** resolves Cicka's recurring field guidance.
-  V0 uses the **First Playable Reset Return** after the **Dedication Card**;
-  long-term post-game scope may replace that with the **Open Ridge Return
-  State**.
+  V0 uses the **First Playable Reset Return** after the **Dedication Card**:
+  reset directly to Bridge with fresh route progress. If an internal
+  ending-seen flag is useful, keep it invisible. Long-term post-game scope may
+  replace the clean reset with the **Open Ridge Return State**.
 - The **Cicka Threshold Farewell** departure should be physical and mostly
   silent: Cicka moves toward the threshold alone, turns back toward the seated
   player, gives one small raw meow, then slips into the **Warm Sketchbook

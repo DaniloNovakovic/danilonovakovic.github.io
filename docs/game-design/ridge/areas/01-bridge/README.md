@@ -67,6 +67,11 @@ The resting spot is readable flavor, not a gate.
 
 ## Prototype Floor
 
+The first Bridge implementation should serve as the **Bridge Tracer Slice** for
+the wider route. It should prove shared route state, prompts/dialogue shape,
+camera framing, Cicka placement, transition handling, and Coherent Sketchbook
+Blockout conventions before the other required areas fan out.
+
 The first blockout only needs:
 
 - walk-right nature/hill intro

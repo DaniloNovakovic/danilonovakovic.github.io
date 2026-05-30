@@ -1,6 +1,6 @@
 # Bridge Dialogue
 
-> Status: accepted pre-production home / needs line pass.
+> Status: accepted pre-production home / needs tone-locked placeholder line pass.
 > Parent: [`README.md`](./README.md). Format:
 > [`../../dialogue-conventions.md`](../../dialogue-conventions.md).
 
