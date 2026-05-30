@@ -82,7 +82,6 @@ export function isBridgeCrossingOpen(bridgeBeat: RidgeBridgeBeatState): boolean 
 export function hasCickaSharedToyCar(bridgeBeat: RidgeBridgeBeatState): boolean {
   return (
     bridgeBeat === 'toy_car_shared' ||
-    bridgeBeat === 'testing_bridge' ||
     isBridgeCrossingOpen(bridgeBeat)
   );
 }
@@ -104,7 +103,6 @@ const BRIDGE_TARGETS_BY_BEAT = {
     createNeedsToyCarMissingSpanTarget
   ],
   toy_car_shared: [createToyCarTestTarget],
-  testing_bridge: [],
   bridge_complete: [createConcertExitTarget]
 } satisfies Record<RidgeBridgeAreaBeatState, readonly BridgeTracerTargetFactory[]>;
 

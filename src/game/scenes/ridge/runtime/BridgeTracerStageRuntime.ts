@@ -148,10 +148,9 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
     player?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody
   ): void {
     const crossingOpen = isBridgeCrossingOpen(bridgeBeat);
-    const drawingVisible = bridgeBeat === 'testing_bridge' || crossingOpen;
 
     this.setVisible(this.blockedBridgeObjects, !crossingOpen);
-    this.setVisible(this.completedBridgeObjects, drawingVisible);
+    this.setVisible(this.completedBridgeObjects, crossingOpen);
     this.syncBridgePhysics(crossingOpen, player);
     this.syncCickaAndToyCar(bridgeBeat);
     this.handoffNote?.setVisible(bridgeBeat === 'concert_handoff');
@@ -164,6 +163,7 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
     if (this.toyCarTestRunning) return false;
     this.toyCarTestRunning = true;
     this.showDialogue(lineIds, BRIDGE_DIALOGUE_DURATION_MS + BRIDGE_TEST_DURATION_MS);
+    this.setVisible(this.completedBridgeObjects, true);
 
     if (!this.toyCar) {
       this.toyCarTestRunning = false;

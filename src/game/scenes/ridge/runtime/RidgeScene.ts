@@ -259,10 +259,7 @@ export class RidgeScene extends Phaser.Scene {
   private runToyCarBridgeTest(
     effect: Extract<BridgeTracerEffect, { kind: 'runToyCarTest' }>
   ): void {
-    bridgeActions.setRidgeBridgeBeat('testing_bridge');
-    this.syncBridgeRouteState();
-    this.createBridgeInteractions();
-
+    this.bridgeStage?.hidePrompt();
     this.bridgeStage?.runToyCarTest(effect.lineIds, () => {
       bridgeActions.setRidgeBridgeBeat('bridge_complete');
       this.syncBridgeRouteState();

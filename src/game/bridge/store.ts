@@ -54,7 +54,6 @@ export type RidgeBridgeBeatState =
   | 'intro'
   | 'needs_toy_car'
   | 'toy_car_shared'
-  | 'testing_bridge'
   | 'bridge_complete'
   | 'concert_handoff';
 export type RidgeBridgeAreaBeatState = Exclude<RidgeBridgeBeatState, 'concert_handoff'>;
