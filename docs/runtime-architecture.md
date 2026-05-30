@@ -34,8 +34,8 @@ game vocabulary is explicit:
   pause Phaser automatically; the owning scene decides whether gameplay is
   gated and consumes one-shot UI actions through the bridge.
 - **Scene header chrome** - `src/game/shell/sceneHeaderChrome.ts` owns the
-  small shell-level policy for replacing default Inventory/Dev controls with a
-  scene navigation control in presentation-heavy arcade scenes.
+  small shell-level policy for replacing default shell controls with a scene
+  navigation control in presentation-heavy arcade scenes.
 - **Notebook shell profile policy** - `src/game/shell/notebookShellProfile.ts`
   maps runtime scenes onto shared Notebook Shell layout primitives. Potassium
   uses the `ruledBoardPage` focus profile; Stampede uses the `survivalPage`

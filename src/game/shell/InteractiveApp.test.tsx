@@ -100,7 +100,8 @@ describe('InteractiveApp', () => {
     expect(header.className).not.toContain('fixed');
     expect(toolbar).toBeDefined();
     expect(toolbar.className).not.toContain('fixed');
-    expect(screen.getByRole('button', { name: /open inventory/i }).className).not.toContain('fixed');
+    expect(screen.queryByRole('button', { name: /open inventory/i })).toBeNull();
+    expect(screen.getByRole('button', { name: /open dev scene switcher/i }).className).not.toContain('fixed');
     expect(screen.getByRole('button', { name: /switch to static portfolio/i }).className).not.toContain('fixed');
   });
 
@@ -135,7 +136,7 @@ describe('InteractiveApp', () => {
   it('opens and closes inventory as a dialog that pauses UI state', async () => {
     render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
 
-    await userEvent.click(screen.getByRole('button', { name: /open inventory/i }));
+    act(() => bridgeActions.openOverlay('inventory'));
 
     expect(await screen.findByRole('dialog', { name: /inventory/i })).toBeDefined();
     expect(bridgeStore.getState().activeOverlayId).toBe('inventory');

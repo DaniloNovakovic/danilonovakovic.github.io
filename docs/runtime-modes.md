@@ -63,11 +63,10 @@ Use this path when checking pattern refactors:
    the Bridge Draftsperson advances the missing-span beat, Cicka Parallel Play
    unlocks the toy car test, the auto-success bridge test visibly opens the
    crossing, and the opened crossing triggers the Bridge-to-Concert handoff.
-7. Open inventory from the overworld and from a child scene.
-8. In Potassium, confirm the Notebook shell renders with Back and Static Mode,
+7. In Potassium, confirm the Notebook shell renders with Back and Static Mode,
    then drag/release from outside the visible board area and confirm launch or
    recall still works. Clear or dev-skip a wave and confirm the upgrade-choice
    panel is a React scene UI panel above the notebook stage; choose an upgrade
    and confirm play continues. Confirm terminal Retry/Return actions work from
    the React panel.
-9. Verify mobile touch movement, jump, and interact one-shots.
+8. Verify mobile touch movement, jump, and interact one-shots.
