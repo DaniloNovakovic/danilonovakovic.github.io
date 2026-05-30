@@ -103,6 +103,43 @@ survive migration into JSON, TypeScript data, a narrative scripting format, or
 another type-safe dialogue pipeline. Do not choose the final runtime format
 until the route dialogue shape stops moving.
 
+Use **Role Names** for First Playable Route characters until a focused
+naming/tone pass accepts final proper names. Stable role labels are enough for
+docs, dialogue IDs, implementation references, and issue writing:
+
+- Bridge Draftsperson
+- Injured Guitarist
+- Band Roadie
+- Hill-Shuttle Driver
+- Last-Stop Operations Helper
+- Dance Teacher
+- Festival Steward
+- Unnamed Counterpart Cat
+
+Characters can still have strong silhouettes, props, placeholder voices, and
+local behavior before they have final names. Do not lock throwaway proper names
+into dialogue IDs or implementation data.
+
+## Cast Scope
+
+First Playable should use a **Minimum Route Cast**: only the characters and
+ambient presence needed to make the route alive, readable, and emotionally
+staged.
+
+- Bridge requires the Bridge Draftsperson and Cicka.
+- Concert requires the Injured Guitarist, Cicka, and just enough crowd or band
+  presence to make the delayed concert and later cleared crossing readable.
+- Dance Festival requires the Hill-Shuttle Driver, Last-Stop Operations Helper,
+  Dance Teacher or Festival Steward coverage for the practical handoff, Cicka,
+  and optionally the Unnamed Counterpart Cat as visual flavor.
+- Relay requires no NPCs beyond Cicka.
+
+Reserve richer residents, full crowd writing, recurring optional hangouts,
+enterable bars full of people, the post-concert campfire/tent hangout, and the
+Festival Superfan for after the route works unless a single cheap bark or
+silhouette is needed for staging. Empty spots, facades, and silhouettes may
+reserve liveliness without becoming required dialogue or implementation scope.
+
 ## Canonical Ending
 
 The first ending is the **Cicka Threshold Farewell**. It is the canonical ending
@@ -212,6 +249,37 @@ Pocket may use a Phaser scene change if useful, but it still belongs to the
 same Ridge Area, shares the same local progress, and should not become a
 separate navigation problem.
 
+Use a tiny **First Playable Interaction Vocabulary** across the route: move
+left/right, interact or talk, inspect, enter/exit an Area Interior Pocket when
+present, sit/play for Cicka or Relay guitar moments, and confirm contextual
+prompts. Contextual prompts carry the route. Object handoffs such as the toy
+car, guitar, folded song request, clipboard, lantern/sign, or setup props can
+exist, but they should be immediate authored interactions rather than a general
+inventory system.
+
+Do not add an inventory screen, freeform item combining, required rhythm,
+drawing, or dance skill checks, or fail states to the First Playable Route.
+Richer drawing, rhythm, dance, or item systems can become optional toys or later
+expressions after the route works end to end.
+
+Use a tiny linear **First Playable Route State**, not a quest log. Area docs can
+own local detail, but the shared route runtime should only need to know the
+current area, the current local beat state, whether the **Concert Guitar** has
+been received, and whether the Relay ending sequence is running. The exact
+runtime enum names are implementation detail, but the intended shape is:
+
+```text
+bridge: intro -> needs_toy_car -> bridge_complete
+concert: blocked -> practiced_riff -> concert_complete -> guitar_received
+dance: blocked -> readiness_favors_done -> shuttle_ready
+relay: arrived -> sit_and_play -> farewell_complete -> reset
+```
+
+Do not add a visible quest checklist, proof inventory, optional-area readiness
+score, or complex save model for the First Playable Route. The player should
+feel progress through changed world state, area transitions, Cicka after-states,
+and contextual prompts rather than UI state.
+
 Current time-of-day arc: Bridge begins during the day at a nature/hill edge;
 Concert moves into evening/night small-town festival energy; a short sleep/rest
 interlude carries the player from Concert night to Dance Festival daytime
@@ -256,6 +324,14 @@ but her role should evolve:
 - early: subtle attention cue near an obstacle
 - middle: observer of a changed object or resident moment
 - late: quiet trust marker near the threshold
+
+She should not need to guide the player much because the First Playable Route
+uses Compact Ridge Stages rather than giant searchable maps. Cicka can sit near
+the thing that matters, play with or avoid important props, react to world
+changes, and settle into new after-states. She should not speak, display
+thought bubbles, point with UI arrows, repeatedly lead the player, or become a
+hint system. If the player is lost, compact layout, NPC barks, camera framing,
+prop placement, and prompt availability should do the heavy lifting.
 
 Bridge Area can serve as the first Cicka encounter. In the current accepted
 opening, the game begins with a simple walk-right control introduction from a

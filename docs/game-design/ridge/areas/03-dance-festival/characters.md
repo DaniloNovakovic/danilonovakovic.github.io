@@ -23,15 +23,20 @@ performer; she is the trusted local who keeps the last-stop plaza from becoming
 confused. Emotionally, the operations table lets her keep being useful instead
 of becoming visible enough to be asked to dance.
 
-## Supporting Static Residents
+## Supporting Static Presence
 
-- traveler near the plaza entry: points the player toward the shuttle and
-  explains that Relay requires the last daylight hill shuttle
-- festival steward near the barrier: explains that the service road opens only
-  after setup is safe and closes again when the night festival begins
-- **Dance Teacher** near the floor: offers gentle facilitation, teaches one
-  small step, covers the operations watch once setup is proven safe, and notices
-  that two shy people are orbiting each other, but is not the romance target
+For First Playable, use only the smallest supporting presence needed for the
+route to read clearly:
+
+- optional traveler bark near the plaza entry: points the player toward the
+  shuttle if playtests need extra arrival readability
+- **Festival Steward** near the barrier or **Dance Teacher** near the floor:
+  covers the practical handoff once setup is proven safe
+
+The **Dance Teacher** can also offer gentle facilitation, teach one small step,
+and notice that two shy people are orbiting each other, but is not the romance
+target. Do not require both a fully written steward and teacher unless staging
+proves they serve different jobs.
 
 ## Locked Character Roles
 

@@ -136,6 +136,19 @@ _Avoid_: required food fetch, first-route errand, replacing parallel play in v0
 The nervous or blocked resident responsible for the Blueprint Bridge plan.
 _Avoid_: wizard, quest board, generic artist-god, final proper name too early
 
+**Role Name**:
+A stable pre-production label for a resident, character, or animal before a
+final proper name is accepted. Role Names are safe for docs, dialogue IDs,
+implementation references, and issue writing until a focused naming/tone pass
+chooses final names.
+_Avoid_: throwaway final name, unstable nickname, hardcoded proper name too early
+
+**Minimum Route Cast**:
+The smallest set of visible characters needed for the First Playable Route to
+feel alive, readable, and emotionally staged without requiring optional
+residents, hangouts, or rich crowd writing.
+_Avoid_: full town cast, optional resident backlog, empty gray-box route, writing every background silhouette as required content
+
 **Bridge Drawing Toy**:
 A future optional upgrade where the player draws or customizes the bridge more
 directly, potentially with simple bridge-building physics.
@@ -228,6 +241,21 @@ walking and authored traversal interactions such as climb, descend, drop, lift,
 bridge, enter, inspect, and recovery helpers.
 _Avoid_: mini-game controls, one-off arcade movement, required jump platforming
 
+**First Playable Interaction Vocabulary**:
+The small shared verb set for the First Playable Route: move left/right,
+interact or talk, inspect, enter/exit an Area Interior Pocket when present,
+sit/play for Cicka or Relay guitar moments, and confirm contextual prompts.
+Object handoffs can exist, but they should be immediate authored interactions
+rather than inventory systems.
+_Avoid_: inventory screen, freeform item combining, required rhythm/drawing/dance skill check, fail state
+
+**First Playable Route State**:
+The tiny linear progress model for the First Playable Route. It tracks current
+area, the current local beat state, whether the Concert Guitar has been
+received, and whether the Relay ending sequence is running. Progress should be
+felt through changed world state rather than visible quest UI.
+_Avoid_: quest log, proof inventory, optional-area readiness score, complex save model, visible checklist
+
 **Authored Traversal Interaction**:
 A local route action that moves the player through a designed object or route
 change instead of requiring freeform jump execution.
@@ -291,7 +319,10 @@ _Avoid_: route gate, dialogue station, confirmed parentage scene
 An authored Cicka appearance inside the Exploration Map where she observes,
 loafs, points attention, or quietly reacts at a meaningful route beat through
 subtle posture, placement, and tiny reactions instead of explicit instructions.
-_Avoid_: companion AI, quest marker, follower pet, objective dispenser
+The route should stay readable through compact layout, NPC barks, camera
+framing, prop placement, and prompt availability rather than depending on Cicka
+as a hint system.
+_Avoid_: companion AI, quest marker, follower pet, objective dispenser, hint system
 
 **Cicka Threshold Farewell**:
 The first ending beat where Cicka leaves the seated player through a warm
@@ -421,12 +452,6 @@ step and covers the operations watch so the Last-Stop Operations Helper can
 enjoy the night dance.
 _Avoid_: romance target, competition judge, extra route gate, new protagonist
 
-**Role-First Character Labels**:
-Placeholder character labels that describe the resident's job in the beat before
-a later naming pass, such as hill-shuttle driver, Last-Stop Operations Helper,
-and Dance Teacher.
-_Avoid_: premature proper names, joke aliases, final character names before role clarity
-
 **Operations Handoff Check**:
 A Readiness Favor where the player helps the Last-Stop Operations Helper prove
 the plaza setup is safe enough for the Dance Teacher to watch while she enjoys
@@ -550,6 +575,11 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 - The first-ending route currently uses an **Area Barricade Chain**: Bridge
   Area clears into Concert Area, Concert Area clears into Dance Festival Area,
   and Dance Festival clears into Relay Ending.
+- The **First Playable Route State** should stay tiny and linear: track current
+  area, local area beat state, whether the **Concert Guitar** has been received,
+  and whether the Relay ending sequence is running. Do not add a visible quest
+  log, proof inventory, optional-area readiness score, or complex save model for
+  the First Playable Route.
 - The first playable route should use **Compact Area Transitions** between
   separate compact maps, allowing different time of day, environment, and
   staging per area while distant Relay cues imply route progress.
@@ -647,8 +677,11 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
   **Last-Stop Operations Helper** as colleagues whose practical work and private
   nervousness both delay the last daylight ride.
 - The hill-shuttle driver, **Last-Stop Operations Helper**, and **Dance Teacher**
-  should use **Role-First Character Labels** until a later character naming pass;
+  should use **Role Names** until a later character naming pass;
   their jobs and emotional functions matter more than proper names right now.
+- The **Minimum Route Cast** should prioritize the required route residents,
+  Cicka, a few readable barks or silhouettes where needed for area liveliness,
+  and no optional resident systems until the First Playable Route works.
 - The **Operations Handoff Check** is the Last-Stop Operations Helper's current
   **Readiness Favor**; the **Dance Teacher** covers the operations watch after
   setup is proven safe, keeping the cast small and letting the helper enjoy the
@@ -743,7 +776,7 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 > **Domain expert:** "Use the **Dance Teacher**. They already belong in the beat as the gentle facilitator, so they can cover the watch without adding another resident role."
 
 > **Dev:** "Do the driver and Last-Stop Operations Helper need proper names now?"
-> **Domain expert:** "No — use **Role-First Character Labels** for now. Names can wait until their jobs, movement, and emotional function survive a later character pass."
+> **Domain expert:** "No — use **Role Names** for now. Names can wait until their jobs, movement, and emotional function survive a later character pass."
 
 > **Dev:** "How do we help the driver if he cannot dance?"
 > **Domain expert:** "Use **One-Step Practice**: he learns one tiny private step, enough to ask without pretending he is suddenly good."
@@ -818,8 +851,8 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
   player's guitar.
 - "festival helper" is too generic for the driver's colleague; resolved: use
   **Last-Stop Operations Helper**.
-- "name" or "alias" for Opening Dance residents should mean a **Role-First
-  Character Label** for now, not a final proper name.
+- "name" or "alias" for Opening Dance residents should mean a **Role Name** for
+  now, not a final proper name.
 - "Cicka Home" is a current proof-of-concept/runtime blockout term; the newer
   linear story route should say **Cicka Resting Spot** unless a central home
   space is deliberately restored.

@@ -60,13 +60,14 @@ spaces to make the block feel more alive.
 The first blockout only needs:
 
 - blocked crowd/traffic crossing
-- 2-3 annoyed crowd NPCs
+- 2-3 annoyed crowd barks or silhouettes
 - hidden musician-side nook
 - injured guitarist
 - one forgiving practice interaction
 - auto-success concert start
 - crowd clears
-- goodbye/reward beat at the opened exit
+- goodbye/reward beat at the opened exit, with a band member only if needed for
+  staging
 - guitar received
 - Cicka hidden before resolution and chilling with the band after resolution
 

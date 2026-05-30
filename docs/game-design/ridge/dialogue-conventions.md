@@ -65,6 +65,10 @@ Avoid final character names until names are accepted. Prefer role labels such as
 `bridge.draftsperson`, `concert.guitarist`, `dance.driver`, or
 `dance.operations_helper`.
 
+For First Playable Route dialogue, use stable Role Names instead of provisional
+proper names. Proper names can replace labels only after a naming/tone pass
+accepts them and the affected IDs or data migration are deliberate.
+
 The exact runtime pipeline is deferred. These IDs should be able to survive a
 future migration into JSON, TypeScript dialogue data, a narrative scripting
 format, or another type-safe import system.

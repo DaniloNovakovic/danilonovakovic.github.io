@@ -21,6 +21,20 @@ Compact Ridge Stage. Small Area Interior Pockets are allowed when they add
 depth or local richness, but they remain part of the same area/chapter and
 should not create sprawling mini-map navigation.
 
+Use the First Playable Interaction Vocabulary for area-local beats: movement,
+talk/interact, inspect, optional enter/exit, sit/play where appropriate, and
+contextual prompt confirms. Do not add local inventory, required rhythm/drawing
+checks, or fail states before the end-to-end route works.
+
+Use Role Names for First Playable residents and animals until a focused
+naming/tone pass accepts final proper names. Role labels are stable enough for
+area docs, dialogue IDs, implementation references, and issue writing.
+
+Keep each area's First Playable cast to the Minimum Route Cast. Add only the
+required route resident(s), Cicka, and the smallest useful barks or silhouettes
+needed for staging; reserve richer optional residents and hangouts for later
+liveliness passes.
+
 Ownership rule: root [`../open-questions.md`](../open-questions.md) is for
 route-level or taste-sensitive decisions. Area docs own local **Open Local
 Slots** such as topology, prompt wording, prop placement, resident silhouettes,
