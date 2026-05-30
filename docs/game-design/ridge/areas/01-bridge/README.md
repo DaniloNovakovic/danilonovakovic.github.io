@@ -157,14 +157,55 @@ Minimum outcomes:
 
 - Cicka is grounded at the Bridge Resting Spot and visibly plays with the toy
   car / weight-test prop instead of floating near a generic marker.
+- Keep the current left-to-right route geometry for this pass. Solve the
+  Cicka / Draftsperson sightline problem through visual staging: foreground
+  paper folds, trees, terrain, or set dressing should screen Cicka's toy-car
+  play spot from the Draftsperson's work zone without adding a new pocket,
+  traversal branch, or route mechanic.
 - The Bridge Draftsperson has a distinct blueprint work zone, such as a tiny
-  drafting shelter, cabin facade, desk, or taped paper construction nook.
+  taped paper construction nook with a small desk/blueprint table. Add a nearby
+  worker rest cue, such as a rough tent, tiny cabin facade, or sleep shelter, so
+  the Draftsperson feels like someone stationed at the bridge rather than a
+  generic marker.
+- The worker rest cue is visual-only in this pass: no enterable pocket, food
+  pickup, treat shortcut, new prompt, or route mechanic.
 - Cicka's space and the Draftsperson's work zone are separated by local terrain,
   trees, paper folds, or foreground/background staging so the Draftsperson does
   not appear able to see Cicka holding the toy car.
 - The bridge, missing span, completed span, floor, background, and prop
   placeholders read as one handmade paper set rather than unrelated debug
   shapes.
+- This pass may use actual bitmap/image placeholders for the Bridge map set and
+  Minimum Route Cast reads, not only Phaser-drawn primitive shapes. The target
+  is nice-enough first-playable presentation for Ridge mood, map readability,
+  Cicka, and the Bridge Draftsperson while still avoiding final art or a broad
+  production asset pack. These images should still follow the Digital
+  Sketchbook visual identity: off-white paper, black ink, silhouette-first
+  reads, hatching/value for depth, and no new color palette.
+- Bridge-specific runtime image placeholders should live under
+  `public/assets/ridge/bridge/` with local README/manifest notes, owned by
+  `src/game/scenes/ridge/**`. Follow the Cicka asset adoption pattern, but do
+  not introduce a shared Ridge asset framework from this single pass.
+- Issue #90 should try to create the rough Bridge runtime PNGs directly rather
+  than only adding code that waits for future art. These assets may stay rough
+  and replaceable, but they should be real images wired into the Ridge scene.
+- Minimum Bridge-owned bitmap placeholder set:
+  1. `bridge-stage-backdrop`: paper hills, trees, and folds that create the
+     Cicka-to-Draftsperson screen.
+  2. `bridge-ground-strips`: unified walkable paper floor and banks.
+  3. `bridge-crossing-before`: broken or missing-span bridge state.
+  4. `bridge-crossing-after`: completed-span bridge state.
+  5. `draftsperson-work-zone`: taped paper nook, blueprint desk, and failed
+     span doodles.
+  6. `draftsperson-rest-shelter`: visual-only tent, cabin, or sleep shelter
+     cue.
+  7. `toy-car-prop`: small physical weight-test car with a readable silhouette.
+  8. tiny role portrait/icon placeholders for Cicka, Bridge Draftsperson, and
+     neutral Prompt/narration, reserved for the Character Conversation Overlay
+     follow-up.
+- Keep Bridge assets layered rather than compositing the full stage into one
+  image. Phaser should still own placement, before/after bridge visibility,
+  toy-car movement, prompts, collision, and route-state presentation.
 - The pass produces tiny role portrait/icon placeholders for the first
   **Character Conversation Overlay** integration: Cicka, Bridge Draftsperson,
   and neutral Prompt/narration.
