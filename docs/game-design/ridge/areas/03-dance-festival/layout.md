@@ -75,8 +75,10 @@ Open art/audio choices:
 
 ## Open Spatial Slots
 
-- exact room topology for Last-Stop Plaza
-- camera framing for plaza entry, shuttle, operations table, service gate, and
-  dance floor
+- Rough Stage Composition for Last-Stop Plaza: entry/exit sides, blocker
+  location, Cicka spot, shuttle/operations/resident zones, and camera framing
+  intent
+- exact room topology, collision geometry, and camera tuning for plaza entry,
+  shuttle, operations table, service gate, and dance floor
 - whether the road gate is one screen or a visible edge across several screens
 - final 2-3 setup snaps that visibly clear the service lane

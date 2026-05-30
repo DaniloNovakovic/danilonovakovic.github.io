@@ -110,7 +110,10 @@ layers.
 ## Open Local Slots
 
 - Bridge Draftsperson silhouette, personality, and eventual name
-- exact bridge topology and camera framing
+- rough bridge stage order, entry/exit sides, blocker location, Cicka spot,
+  Bridge Draftsperson/prop zone, and camera framing intent
+- exact bridge topology, collision geometry, and final camera tuning during
+  blockout
 - blockout validation for the accepted route grammar: Cicka noticed something,
   a resident needs local help, and the route visibly changes
 - prop kit for the unfinished sketch/blueprint

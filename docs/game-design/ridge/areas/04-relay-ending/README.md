@@ -126,7 +126,10 @@ recommended defaults and validate them through playtesting.
 
 ## Open Local Slots
 
-- physical Relay topology and warm sketchbook-threshold geometry
+- Rough Stage Composition for Relay: arrival side, sit/play spot, Cicka
+  threshold spot, warm artifact zone, and camera framing intent
+- physical Relay topology, collision geometry, and warm sketchbook-threshold
+  geometry during blockout
 - final Cicka field-presence spot
 - exact camera framing for the authored Sit and Play handoff
 - exact guitar audio texture and delayed soft prompt wording

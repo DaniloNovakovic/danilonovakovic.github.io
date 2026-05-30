@@ -286,6 +286,14 @@ stage composition, and acceptance checks without producing pixel maps, final
 scripts, final art specs, or complete dialogue trees.
 _Avoid_: final level spec, pixel map, implementation ticket, polished script, final art brief
 
+**Rough Stage Composition**:
+The P1-level spatial description for a Compact Ridge Stage. It names the
+left-to-right beat order, entry and exit sides, blocker location, Cicka spot,
+resident or prop zone, optional Area Interior Pocket, and camera framing intent
+without fixing pixel positions, collision geometry, parallax distances, or final
+prop placement.
+_Avoid_: exact coordinates, collision map, final prop placement, production layout pass
+
 **Bridge Tracer Slice**:
 The first implementation slice after the Area Paper Pass: Bridge blocker,
 Bridge Draftsperson, Cicka toy-car play, visible bridge change, and the

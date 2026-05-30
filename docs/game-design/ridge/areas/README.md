@@ -57,10 +57,12 @@ placement, exit condition, and acceptance checks.
 
 Before implementation starts, use the Area Paper Pass to make each local area
 doc agent-ready rather than final: define beat states, blocker or threshold,
-Cicka before/after, required prompt/dialogue IDs, rough stage composition,
-transition or reset behavior, audio floor needs, and acceptance checks. Do not
-turn the area docs into pixel maps, final scripts, complete dialogue trees, or
-final art briefs.
+Cicka before/after, required prompt/dialogue IDs, Rough Stage Composition,
+transition or reset behavior, audio floor needs, and acceptance checks. Rough
+Stage Composition should name beat order, entry/exit sides, blocker location,
+Cicka spot, resident/prop zone, optional Area Interior Pocket, and camera
+framing intent. Do not turn the area docs into pixel maps, collision geometry,
+final scripts, complete dialogue trees, or final art briefs.
 
 For first playable audio, use the First Playable Audio Floor: placeholder
 handmade ambience, blocker/world-change cues, Cicka cue if present, and only the
@@ -69,8 +71,8 @@ pack for palette, not as a requirement to produce final songs or mixes.
 
 Ownership rule: root [`../open-questions.md`](../open-questions.md) is for
 route-level or taste-sensitive decisions. Area docs own local **Open Local
-Slots** such as topology, prompt wording, prop placement, resident silhouettes,
-camera framing, and local art/audio choices.
+Slots** such as Rough Stage Composition, prompt wording, resident silhouettes,
+camera framing intent, exact blockout geometry, and local art/audio choices.
 
 ## Area Docs
 

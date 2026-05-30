@@ -270,6 +270,12 @@ Pocket may use a Phaser scene change if useful, but it still belongs to the
 same Ridge Area, shares the same local progress, and should not become a
 separate navigation problem.
 
+During the P1 Area Paper Pass, capture only the **Rough Stage Composition** for
+each Compact Ridge Stage: beat order, entry and exit sides, blocker location,
+Cicka spot, resident or prop zone, optional Area Interior Pocket, and camera
+framing intent. Exact coordinates, collision shapes, parallax distances, and
+final prop placement belong to the Bridge Tracer Slice or later blockout passes.
+
 Use a tiny **First Playable Interaction Vocabulary** across the route: move
 left/right, interact or talk, inspect, enter/exit an Area Interior Pocket when
 present, sit/play for Cicka or Relay guitar moments, and confirm contextual

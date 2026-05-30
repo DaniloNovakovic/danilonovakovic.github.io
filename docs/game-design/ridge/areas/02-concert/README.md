@@ -105,8 +105,11 @@ behind and not an unseeded paw/page mark mechanic.
 
 ## Open Local Slots
 
-- exact crossing geometry and why it blocks progress
-- small-city block layout, bars, building facades, and possible later interiors
+- rough concert stage order, entry/exit sides, crossing blocker location,
+  Cicka spot, Injured Guitarist/Band Roadie zone, and camera framing intent
+- exact crossing geometry, collision behavior, and why it blocks progress
+- small-city block layout, bars, building facades, and possible later Area
+  Interior Pockets
 - how many annoyed crowd/band flavor lines are enough for discovery
 - exact post-concert goodbye staging near the opened exit
 - guitarist/resident role, silhouette, simplified staging for the skateboard

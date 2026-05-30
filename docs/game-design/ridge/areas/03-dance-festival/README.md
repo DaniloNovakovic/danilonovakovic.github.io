@@ -74,8 +74,8 @@ a route gate.
 
 ## Open Local Slots
 
-- [`layout.md`](./layout.md): exact room topology, prop placement, staging,
-  palette, signage, music texture, and crowd ambience.
+- [`layout.md`](./layout.md): Rough Stage Composition first, then exact room
+  topology, prop placement, palette, signage, music texture, and crowd ambience.
 - [`characters.md`](./characters.md): silhouettes, movement, dialogue style, and
   eventual names for local residents.
 - [`interaction-flow.md`](./interaction-flow.md): concrete prompts, object

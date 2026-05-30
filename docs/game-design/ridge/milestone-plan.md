@@ -73,15 +73,22 @@ product taste. Bridge, Concert, Dance Festival, and Relay should each define:
 4. Cicka's before/after placement or final field-presence role
 5. required Role Name characters from the Minimum Route Cast
 6. required prompt/dialogue IDs using Tone-Locked Placeholder Dialogue
-7. rough Compact Ridge Stage composition, including any Area Interior Pocket
+7. Rough Stage Composition for the Compact Ridge Stage, including any Area
+   Interior Pocket
 8. visible world change or ending handoff result
 9. Compact Area Transition, exit condition, or First Playable Reset Return
 10. first playable audio needs from the First Playable Audio Floor
 11. acceptance checks for the first implementation slice
 
+For Rough Stage Composition, P1 should resolve the left-to-right beat order,
+entry and exit sides, blocker location, Cicka spot, resident or prop zone,
+optional Area Interior Pocket if any, and camera framing intent. Leave pixel
+positions, collision geometry, parallax layer distances, and final prop
+placement to the Bridge Tracer Slice and later blockout work.
+
 P1 should not produce pixel-perfect maps, final scripts, final names, final art
 briefs, finished audio specs, complete dialogue trees, optional mini-game
-designs, or post-v0 liveliness scope.
+designs, final collision geometry, or post-v0 liveliness scope.
 
 ### Implementation Sequencing
 
