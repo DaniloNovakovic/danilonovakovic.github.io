@@ -202,35 +202,53 @@ Minimum outcomes:
 - Issue #90 should try to create the rough Bridge runtime PNGs directly rather
   than only adding code that waits for future art. These assets may stay rough
   and replaceable, but they should be real images wired into the Ridge scene.
-- Minimum Bridge-owned bitmap placeholder set should be modular rather than one
-  baked whole-map image:
-  1. tree variants for far/mid/foreground parallax
-  2. bush, flower, grass, log, and rock variants for forest-floor staging
-  3. ground strip and cliff/bank pieces for readable walkable terrain
-  4. before/after bridge pieces or overlays for missing-span and completed-span
-     route state
-  5. `draftsperson-work-zone`: taped paper blueprint desk / drafting board
-  6. `draftsperson-rest-shelter`: visual-only tent, cabin, or sleep shelter
-     cue
-  7. `draftsperson-character`: a readable Bridge Draftsperson silhouette at
-     gameplay scale
-  8. `toy-car-prop`: small physical weight-test car with a readable silhouette
-  9. tiny role portrait/icon placeholders for Cicka, Bridge Draftsperson, and
-     neutral Prompt/narration, reserved for the Character Conversation Overlay
-     follow-up
+- Replace the asset direction with a **hybrid layered stage** rather than many
+  unrelated environment cutouts. The Bridge Area should use a small number of
+  coherent horizontal sketch plates for scenery, then keep interactive objects
+  modular:
+  1. deep sky / mountain plate
+  2. far forest plate with varied pines and rounded bushy trees
+  3. mid forest / work-camp staging plate
+  4. playable terrain / gorge plate with visible top surface, cliff faces,
+     hatching, and bridge supports
+  5. modular before/after bridge state
+  6. modular Cicka, toy car, Bridge Draftsperson, prompts, and route-state
+     objects
+- Do not return to a single baked whole-map image. The layered plates should
+  keep parallax, camera framing, and runtime route-state flexibility while
+  preventing the scene from reading as a collage of isolated generated props.
+- Individual tree, bush, rock, and terrain cutouts are allowed only when they
+  support a coherent layer plate or a clear gameplay staging need. They should
+  not be the main way the forest read is created.
+- When the player reaches the bridge vista, the background can become the first
+  route-wide promise shot. The deep layers may eventually hint at later Ridge
+  areas beyond the gorge: a distant city / Concert Area silhouette, the Ridge
+  Threshold, and the area near the threshold that leads toward the Dance
+  Festival. Keep these as tiny environmental reads in the far distance, not
+  literal UI labels or busy landmarks. If the downstream areas are not visually
+  settled yet, leave the current forest/mountain vista intact and add these
+  silhouettes after their art direction exists.
+- The Bridge plate must include both staging moods, not only the bridge vista:
+  the left approach should stay on the same continuous sidescroller path while
+  close trees and brush hide most distant layers; the bridge approach should
+  then open into the ridge vista so the player feels the space clear as they
+  reach the crossing. Do not turn the Cicka approach into a separate lower
+  forest floor, blocked foreground-room composition, new traversal pocket, or
+  angled/isometric top-plane view. The scene may imply cliff height at the gorge
+  and ridge edges, but the playable lane should read primarily as a side-on
+  horizontal path.
 - Keep Bridge assets layered and individually placeable rather than compositing
   the full stage into one image. A generated full-scene image may be used as
   target/reference, but Phaser should still own placement, before/after bridge
   visibility, toy-car movement, prompts, collision, and route-state
   presentation.
-- For the current forest-level pass, use an overworld-like ink floor line with
-  a tiny suggested land plane and torn bank edges at the bridge gap. If a later
-  textured terrain kit returns, it must be composable enough to replace the
-  line cleanly rather than sitting as an unrelated slab below it.
-- Bridge staging should still read as a shallow **2.5D paper diorama**, not a
-  pure side-view platformer. Characters, trees, shelter props, and work-zone
-  objects need a visible contact surface, back edge / top-plane cue, and small
-  contact shadows so they feel planted on paper terrain.
+- For the current playable proof, use a side-scroller-first lane with generated
+  layered plates: far mountains, mid forest, and close terrain/camp/gorge.
+  Avoid mixing a separate floor-line system and unrelated terrain slabs under
+  the same scene.
+- Bridge staging should read as a side-scroller sketchbook route. Characters
+  and stateful props still need contact shadows and clear foot placement, but
+  the playable lane should not become a shallow isometric/top-plane diorama.
 - Treat distant forest readability as more than transparent pine silhouettes.
   Depth should come from simpler shapes, smaller scale, lighter ink/tint, and
   reduced hatching/detail, not from making full objects translucent. Background

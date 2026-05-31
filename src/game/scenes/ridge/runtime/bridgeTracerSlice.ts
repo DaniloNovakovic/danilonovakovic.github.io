@@ -19,30 +19,30 @@ export const BRIDGE_TRACER_WORLD = {
     y: 452
   },
   cickaPlaySpot: {
-    x: 650,
+    x: 520,
     y: 500
   },
   cickaSettledSpot: {
-    x: 1850,
+    x: 2050,
     y: 500
   },
   draftsperson: {
-    x: 1295,
+    x: 1275,
     y: 500
   },
   blueprint: {
-    x: 1235,
+    x: 1145,
     y: 430
   },
   bridge: {
-    leftBankEndX: 1450,
-    rightBankStartX: 1730,
-    centerX: 1590,
+    leftBankEndX: 1490,
+    rightBankStartX: 1945,
+    centerX: 1718,
     deckY: 500,
-    deckWidth: 286
+    deckWidth: 470
   },
   exit: {
-    x: 2315,
+    x: 2360,
     y: 500
   }
 } as const;
