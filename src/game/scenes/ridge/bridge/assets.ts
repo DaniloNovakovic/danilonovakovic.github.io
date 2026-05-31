@@ -245,7 +245,7 @@ const BRIDGE_IMAGE_ASSETS = [
   },
   {
     key: BRIDGE_TEXTURE_KEYS.layeredCloseStage,
-    file: 'close-stage.png',
+    file: 'close-stage-no-stumps.png',
     path: BRIDGE_LAYERED_RESET_ASSET_PATH
   }
 ] as const;

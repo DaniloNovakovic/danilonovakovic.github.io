@@ -250,7 +250,6 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
         scale: BRIDGE_CLOSE_STAGE_SCALE
       }
     );
-
     this.addAmbientInkLife();
   }
 
@@ -364,12 +363,6 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
     const groundY = this.getGroundedY(draftsperson.y);
 
     this.addReadabilityPocket(draftsperson.x, groundY - 80, 118, 180, 22);
-    this.addBridgeImage(BRIDGE_TEXTURE_KEYS.bridgeBuilder, draftsperson.x, groundY - 2, {
-      alpha: 0.42,
-      depth: 23,
-      scale: 0.82,
-      tint: 0x111111
-    });
     this.bridgeBuilder = this.addBridgeImage(BRIDGE_TEXTURE_KEYS.bridgeBuilder, draftsperson.x, groundY - 2, {
       depth: 24,
       scale: 0.76
@@ -510,13 +503,8 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
     }
 
     if (bridgeBeat === 'toy_car_shared') {
-      this.toyCar.setVisible(true);
-      this.toyCarShadow?.setVisible(true);
-      this.toyCar.setPosition(
-        BRIDGE_TRACER_WORLD.blueprint.x - 22,
-        BRIDGE_TRACER_WORLD.blueprint.y + 44
-      );
-      this.toyCarShadow?.setPosition(this.toyCar.x, this.toyCar.y + 4);
+      this.toyCar.setVisible(false);
+      this.toyCarShadow?.setVisible(false);
       return;
     }
 
