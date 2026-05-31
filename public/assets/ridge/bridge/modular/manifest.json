@@ -50,6 +50,24 @@
       "height": 70
     },
     {
+      "file": "tree-bush-far-a.png",
+      "kind": "tree",
+      "width": 220,
+      "height": 166
+    },
+    {
+      "file": "tree-bush-far-b.png",
+      "kind": "tree",
+      "width": 260,
+      "height": 184
+    },
+    {
+      "file": "tree-bush-mid-a.png",
+      "kind": "tree",
+      "width": 258,
+      "height": 214
+    },
+    {
       "file": "flowers.png",
       "kind": "nature",
       "width": 117,
@@ -72,6 +90,18 @@
       "kind": "nature",
       "width": 146,
       "height": 58
+    },
+    {
+      "file": "terrain-top-long.png",
+      "kind": "terrain",
+      "width": 1000,
+      "height": 112
+    },
+    {
+      "file": "terrain-top-short.png",
+      "kind": "terrain",
+      "width": 620,
+      "height": 112
     },
     {
       "file": "ground-long.png",

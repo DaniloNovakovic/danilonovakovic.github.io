@@ -13,14 +13,28 @@ Pass placeholders. They are real runtime images, but they are intentionally
 replaceable. Phaser still owns composition, route state, collision, prompts,
 before/after bridge state, and toy-car movement.
 
+The current forest-level floor intentionally falls back to an overworld-like
+ink baseline with tiny torn bank edges at the bridge gap. The earlier ground
+strip assets remain available as rough source material, but should not be mixed
+under the line unless they are redesigned as a coherent composable tile kit.
+
 ## Style Contract
 
 - off-white paper and black ink only
+- runtime presentation should stay monochrome-first; temporary yellow paper
+  fills should be subdued programmatically rather than treated as the Bridge
+  palette
 - silhouette-first reads at gameplay scale
 - hatching and line weight for depth instead of color
 - modular PNGs composed in Phaser, not one composited stage
 - reusable tree, bush, terrain, bridge, builder, toy-car, work-zone, and shelter
   pieces for lightweight parallax and scene staging
+- distant layers should use simpler, lower-detail full-opacity drawings rather
+  than translucent full-detail assets; depth comes from scale, line weight,
+  value, and detail density
+- Bridge terrain should read as a shallow paper top plane, not only as a
+  side-view floor line, so trees, Cicka, the shelter, and the Draftsperson feel
+  planted
 - Bridge-owned until repeated Ridge asset reuse proves a broader framework
 
 ## Runtime Contract

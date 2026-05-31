@@ -172,8 +172,8 @@ function createMissingSpanTarget(
     distanceAnchorY: BRIDGE_TRACER_WORLD.draftsperson.y,
     interactRadius: BRIDGE_TRACER_INTERACT_RADIUS,
     prompt: {
-      x: BRIDGE_TRACER_WORLD.draftsperson.x,
-      y: BRIDGE_TRACER_WORLD.draftsperson.y - 132
+      x: BRIDGE_TRACER_WORLD.draftsperson.x + 260,
+      y: BRIDGE_TRACER_WORLD.draftsperson.y - 96
     },
     promptLineId: 'bridge.draftsperson.missing_span.03',
     effect: {
@@ -196,8 +196,8 @@ function createToyCarTestTarget(): BridgeTracerInteractionTarget {
     distanceAnchorY: BRIDGE_TRACER_WORLD.draftsperson.y,
     interactRadius: BRIDGE_TRACER_INTERACT_RADIUS,
     prompt: {
-      x: BRIDGE_TRACER_WORLD.draftsperson.x,
-      y: BRIDGE_TRACER_WORLD.draftsperson.y - 132
+      x: BRIDGE_TRACER_WORLD.draftsperson.x + 260,
+      y: BRIDGE_TRACER_WORLD.draftsperson.y - 96
     },
     promptLineId: 'bridge.draftsperson.toy_car_test.01',
     effect: {

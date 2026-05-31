@@ -24,10 +24,15 @@ export const BRIDGE_TEXTURE_KEYS = {
   bushLarge: 'ridge-bridge-bush-large',
   bushMedium: 'ridge-bridge-bush-medium',
   bushSmall: 'ridge-bridge-bush-small',
+  treeBushFarA: 'ridge-bridge-tree-bush-far-a',
+  treeBushFarB: 'ridge-bridge-tree-bush-far-b',
+  treeBushMidA: 'ridge-bridge-tree-bush-mid-a',
   flowers: 'ridge-bridge-flowers',
   grassTuft: 'ridge-bridge-grass-tuft',
   logPile: 'ridge-bridge-log-pile',
   paperRock: 'ridge-bridge-paper-rock',
+  terrainTopLong: 'ridge-bridge-terrain-top-long',
+  terrainTopShort: 'ridge-bridge-terrain-top-short',
   groundLong: 'ridge-bridge-ground-long',
   groundShort: 'ridge-bridge-ground-short',
   cliffLeft: 'ridge-bridge-cliff-left',
@@ -130,6 +135,21 @@ const BRIDGE_IMAGE_ASSETS = [
     path: BRIDGE_MODULAR_ASSET_PATH
   },
   {
+    key: BRIDGE_TEXTURE_KEYS.treeBushFarA,
+    file: 'tree-bush-far-a.png',
+    path: BRIDGE_MODULAR_ASSET_PATH
+  },
+  {
+    key: BRIDGE_TEXTURE_KEYS.treeBushFarB,
+    file: 'tree-bush-far-b.png',
+    path: BRIDGE_MODULAR_ASSET_PATH
+  },
+  {
+    key: BRIDGE_TEXTURE_KEYS.treeBushMidA,
+    file: 'tree-bush-mid-a.png',
+    path: BRIDGE_MODULAR_ASSET_PATH
+  },
+  {
     key: BRIDGE_TEXTURE_KEYS.flowers,
     file: 'flowers.png',
     path: BRIDGE_MODULAR_ASSET_PATH
@@ -147,6 +167,16 @@ const BRIDGE_IMAGE_ASSETS = [
   {
     key: BRIDGE_TEXTURE_KEYS.paperRock,
     file: 'paper-rock.png',
+    path: BRIDGE_MODULAR_ASSET_PATH
+  },
+  {
+    key: BRIDGE_TEXTURE_KEYS.terrainTopLong,
+    file: 'terrain-top-long.png',
+    path: BRIDGE_MODULAR_ASSET_PATH
+  },
+  {
+    key: BRIDGE_TEXTURE_KEYS.terrainTopShort,
+    file: 'terrain-top-short.png',
     path: BRIDGE_MODULAR_ASSET_PATH
   },
   {

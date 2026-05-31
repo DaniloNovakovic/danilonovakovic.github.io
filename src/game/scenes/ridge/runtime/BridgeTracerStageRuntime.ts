@@ -42,6 +42,7 @@ type BridgeImageOptions = {
   origin?: readonly [number, number];
   scale?: number;
   scrollFactor?: readonly [number, number];
+  tint?: number;
 };
 
 export interface BridgeTracerStageRuntime {
@@ -78,11 +79,15 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
   private cickaSprite?: Phaser.GameObjects.Sprite;
   private cickaShadow?: Phaser.GameObjects.Ellipse;
   private toyCar?: Phaser.GameObjects.Image;
+  private toyCarShadow?: Phaser.GameObjects.Ellipse;
+  private bridgeBuilder?: Phaser.GameObjects.Image;
   private handoffNote?: Phaser.GameObjects.Text;
   private interactPrompt?: Phaser.GameObjects.Text;
   private dialogueContainer?: Phaser.GameObjects.Container;
   private dialogueText?: Phaser.GameObjects.Text;
   private dialogueHideEvent?: Phaser.Time.TimerEvent;
+  private builderIdleTween?: Phaser.Tweens.Tween;
+  private builderTalkTween?: Phaser.Tweens.Tween;
   private toyCarTween?: Phaser.Tweens.Tween;
   private toyCarTestRunning = false;
 
@@ -117,6 +122,10 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
   dispose(): void {
     this.dialogueHideEvent?.remove(false);
     this.dialogueHideEvent = undefined;
+    this.builderIdleTween?.stop();
+    this.builderIdleTween = undefined;
+    this.builderTalkTween?.stop();
+    this.builderTalkTween = undefined;
     this.toyCarTween?.stop();
     this.toyCarTween = undefined;
     this.toyCarTestRunning = false;
@@ -148,9 +157,11 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
 
     this.dialogueText.setText(text);
     this.dialogueContainer.setVisible(true);
+    this.setBuilderTalking(lineIds.some((id) => id.startsWith('bridge.draftsperson.')));
     this.dialogueHideEvent?.remove(false);
     this.dialogueHideEvent = this.scene.time.delayedCall(durationMs, () => {
       this.dialogueContainer?.setVisible(false);
+      this.setBuilderTalking(false);
     });
   }
 
@@ -183,13 +194,15 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
     }
 
     this.toyCar.setVisible(true);
+    this.toyCarShadow?.setVisible(true);
     this.toyCar.setPosition(
       BRIDGE_TRACER_WORLD.blueprint.x - 22,
       BRIDGE_TRACER_WORLD.blueprint.y + 44
     );
+    this.toyCarShadow?.setPosition(this.toyCar.x, this.toyCar.y + 4);
     this.toyCarTween?.stop();
     this.toyCarTween = this.scene.tweens.add({
-      targets: this.toyCar,
+      targets: [this.toyCar, this.toyCarShadow].filter(Boolean),
       x: BRIDGE_TRACER_WORLD.bridge.rightBankStartX + 120,
       y: BRIDGE_TRACER_WORLD.floorY - 4,
       duration: BRIDGE_TEST_DURATION_MS,
@@ -208,45 +221,35 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
     const paper = this.scene.add.graphics().setDepth(-90);
     paper.fillStyle(0xf7f1df, 1);
     paper.fillRect(0, 0, bounds.width, bounds.height);
-    paper.lineStyle(1, 0x1f1f1d, 0.08);
-    [126, 244, 374].forEach((y) => {
-      paper.lineBetween(0, y, bounds.width, y + 8);
-    });
-    paper.lineStyle(3, 0x1f1f1d, 0.12);
-    paper.beginPath();
-    paper.moveTo(0, floorY - 78);
-    paper.lineTo(380, floorY - 96);
-    paper.lineTo(760, floorY - 82);
-    paper.lineTo(1110, floorY - 104);
-    paper.lineTo(1430, floorY - 86);
-    paper.lineTo(1780, floorY - 106);
-    paper.lineTo(2200, floorY - 88);
-    paper.lineTo(bounds.width, floorY - 100);
-    paper.strokePath();
+
+    this.addDistantMountainRidge();
+    this.addCloudLayer();
+    this.addAmbientInkLife();
+    this.addForestUnderstoryLayer();
 
     this.addBridgeImage(BRIDGE_TEXTURE_KEYS.treePineFar, 220, floorY - 20, {
-      alpha: 0.42,
       depth: -75,
       scale: 1.15,
-      scrollFactor: [0.2, 1]
+      scrollFactor: [0.2, 1],
+      tint: 0xd8d8d8
     });
     this.addBridgeImage(BRIDGE_TEXTURE_KEYS.treePineFar, 820, floorY - 48, {
-      alpha: 0.34,
       depth: -75,
       scale: 1.35,
-      scrollFactor: [0.2, 1]
+      scrollFactor: [0.2, 1],
+      tint: 0xd8d8d8
     });
     this.addBridgeImage(BRIDGE_TEXTURE_KEYS.treePineFar, 1580, floorY - 46, {
-      alpha: 0.32,
       depth: -75,
       scale: 1.25,
-      scrollFactor: [0.2, 1]
+      scrollFactor: [0.2, 1],
+      tint: 0xd8d8d8
     });
     this.addBridgeImage(BRIDGE_TEXTURE_KEYS.treePineFar, 2180, floorY - 34, {
-      alpha: 0.38,
       depth: -75,
       scale: 1.2,
-      scrollFactor: [0.2, 1]
+      scrollFactor: [0.2, 1],
+      tint: 0xd8d8d8
     });
 
     [
@@ -258,10 +261,10 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
       [BRIDGE_TEXTURE_KEYS.treePineMediumA, 2240, 0.76]
     ].forEach(([key, x, scale]) => {
       this.addBridgeImage(key as string, x as number, floorY - 4, {
-        alpha: 0.52,
         depth: -38,
         scale: scale as number,
-        scrollFactor: [0.48, 1]
+        scrollFactor: [0.48, 1],
+        tint: 0xd0d0d0
       });
     });
 
@@ -270,6 +273,7 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
       [BRIDGE_TEXTURE_KEYS.treePineMediumA, 1040, 0.9],
       [BRIDGE_TEXTURE_KEYS.treePineMediumB, 1138, 0.82]
     ].forEach(([key, x, scale]) => {
+      this.addGroundContactShadow(x as number, floorY - 2, 120 * (scale as number), 22, 4);
       this.addBridgeImage(key as string, x as number, floorY - 2, {
         alpha: 0.96,
         depth: 5,
@@ -278,29 +282,151 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
     });
   }
 
+  private addDistantMountainRidge(): void {
+    const { bounds, floorY } = BRIDGE_TRACER_WORLD;
+    const mountains = this.scene.add.graphics()
+      .setDepth(-84)
+      .setScrollFactor(0.14, 1);
+
+    const peaks = [
+      [40, floorY - 74, 270, floorY - 238, 510, floorY - 72],
+      [410, floorY - 70, 710, floorY - 266, 1000, floorY - 68],
+      [940, floorY - 78, 1250, floorY - 226, 1530, floorY - 76],
+      [1430, floorY - 70, 1800, floorY - 252, 2180, floorY - 66],
+      [2040, floorY - 76, 2380, floorY - 230, bounds.width + 180, floorY - 74]
+    ];
+
+    mountains.fillStyle(0xf0f0ee, 1);
+    mountains.lineStyle(2, 0x8a8a86, 1);
+    peaks.forEach(([leftX, leftY, peakX, peakY, rightX, rightY]) => {
+      mountains.beginPath();
+      mountains.moveTo(leftX, leftY);
+      mountains.lineTo(peakX, peakY);
+      mountains.lineTo(rightX, rightY);
+      mountains.lineTo(rightX, floorY - 84);
+      mountains.lineTo(leftX, floorY - 84);
+      mountains.closePath();
+      mountains.strokePath();
+    });
+  }
+
+  private addCloudLayer(): void {
+    [
+      { x: 310, y: 116, scale: 0.85 },
+      { x: 980, y: 92, scale: 0.7 },
+      { x: 1630, y: 124, scale: 0.78 },
+      { x: 2240, y: 86, scale: 0.72 }
+    ].forEach(({ x, y, scale }, index) => {
+      const cloud = this.scene.add.graphics()
+        .setDepth(-82)
+        .setScrollFactor(0.18 + index * 0.01, 1);
+      cloud.fillStyle(0xfbfbf9, 0.78);
+      cloud.lineStyle(2, 0x1f1f1d, 0.2);
+      cloud.strokeEllipse(x - 34 * scale, y + 8 * scale, 72 * scale, 28 * scale);
+      cloud.strokeEllipse(x + 12 * scale, y, 82 * scale, 34 * scale);
+      cloud.strokeEllipse(x + 56 * scale, y + 10 * scale, 64 * scale, 24 * scale);
+      cloud.lineStyle(1, 0x1f1f1d, 0.12);
+      cloud.lineBetween(x - 72 * scale, y + 18 * scale, x + 92 * scale, y + 18 * scale);
+    });
+  }
+
+  private addAmbientInkLife(): void {
+    const { bounds, floorY } = BRIDGE_TRACER_WORLD;
+    const wind = this.scene.add.graphics().setDepth(-30);
+    wind.lineStyle(2, 0x1f1f1d, 0.14);
+    [
+      [290, floorY - 128, 82],
+      [1180, floorY - 154, 64],
+      [1960, floorY - 118, 74],
+      [2380, floorY - 166, 58]
+    ].forEach(([x, y, width]) => {
+      wind.beginPath();
+      wind.moveTo(x, y);
+      wind.lineTo(x + width / 2, y - 8);
+      wind.lineTo(x + width, y);
+      wind.strokePath();
+    });
+
+    [
+      [520, 178],
+      [1470, 154],
+      [2130, 192]
+    ].forEach(([x, y], index) => {
+      const bird = this.scene.add.graphics()
+        .setDepth(-28)
+        .setScrollFactor(0.36, 1);
+      bird.lineStyle(2, 0x1f1f1d, 0.38);
+      bird.lineBetween(-8, 0, 0, -5);
+      bird.lineBetween(0, -5, 9, 0);
+      bird.setPosition(x, y);
+      this.scene.tweens.add({
+        targets: bird,
+        x: x + 52,
+        y: y + (index % 2 === 0 ? -6 : 5),
+        alpha: 0.2,
+        duration: 2600 + index * 380,
+        ease: 'Stepped',
+        easeParams: [6],
+        repeat: -1,
+        yoyo: true
+      });
+    });
+
+    const edgeDust = this.scene.add.graphics()
+      .setDepth(4)
+      .setScrollFactor(1, 1);
+    edgeDust.lineStyle(1, 0x1f1f1d, 0.1);
+    for (let x = 140; x < bounds.width; x += 220) {
+      edgeDust.lineBetween(x, floorY + 18, x + 42, floorY + 14);
+    }
+  }
+
+  private addForestUnderstoryLayer(): void {
+    const { floorY } = BRIDGE_TRACER_WORLD;
+    [
+      [BRIDGE_TEXTURE_KEYS.treeBushFarA, 110, 0.92, -66, false, 0.28],
+      [BRIDGE_TEXTURE_KEYS.treeBushFarB, 420, 0.86, -66, true, 0.28],
+      [BRIDGE_TEXTURE_KEYS.treeBushFarA, 990, 0.88, -66, true, 0.28],
+      [BRIDGE_TEXTURE_KEYS.treeBushFarB, 1510, 0.9, -66, false, 0.28],
+      [BRIDGE_TEXTURE_KEYS.treeBushFarA, 2020, 0.84, -66, false, 0.28],
+      [BRIDGE_TEXTURE_KEYS.treeBushFarB, 2380, 0.86, -66, true, 0.28],
+      [BRIDGE_TEXTURE_KEYS.treeBushMidA, 245, 0.86, -50, false, 0.42],
+      [BRIDGE_TEXTURE_KEYS.treeBushMidA, 875, 0.82, -50, true, 0.42],
+      [BRIDGE_TEXTURE_KEYS.treeBushMidA, 1695, 0.84, -50, false, 0.42],
+      [BRIDGE_TEXTURE_KEYS.treeBushMidA, 2225, 0.8, -50, true, 0.42],
+      [BRIDGE_TEXTURE_KEYS.bushLarge, 120, 0.92, -62, false],
+      [BRIDGE_TEXTURE_KEYS.bushMedium, 310, 0.74, -61, true],
+      [BRIDGE_TEXTURE_KEYS.bushLarge, 560, 0.98, -62, true],
+      [BRIDGE_TEXTURE_KEYS.bushMedium, 740, 0.82, -60, false],
+      [BRIDGE_TEXTURE_KEYS.bushLarge, 980, 0.9, -62, false],
+      [BRIDGE_TEXTURE_KEYS.bushMedium, 1190, 0.8, -60, true],
+      [BRIDGE_TEXTURE_KEYS.bushLarge, 1450, 0.96, -62, true],
+      [BRIDGE_TEXTURE_KEYS.bushMedium, 1640, 0.78, -60, false],
+      [BRIDGE_TEXTURE_KEYS.bushLarge, 1900, 0.98, -62, false],
+      [BRIDGE_TEXTURE_KEYS.bushMedium, 2110, 0.8, -60, true],
+      [BRIDGE_TEXTURE_KEYS.bushLarge, 2360, 0.92, -62, true],
+      [BRIDGE_TEXTURE_KEYS.bushMedium, 2540, 0.76, -60, false]
+    ].forEach(([key, x, scale, depth, flipX, scrollX], index) => {
+      this.addBridgeImage(key as string, x as number, floorY - 42 + (index % 3) * 8, {
+        depth: depth as number,
+        scale: scale as number,
+        scrollFactor: [(scrollX as number | undefined) ?? 0.34, 1],
+        tint: 0xdcdcdc,
+        flipX: Boolean(flipX)
+      });
+    });
+  }
+
   private createBridgeGround(): void {
     const { floorY, bridge, bounds } = BRIDGE_TRACER_WORLD;
     const groundY = floorY + BRIDGE_GROUND_COLLIDER_HEIGHT / 2;
 
-    this.addBridgeImage(BRIDGE_TEXTURE_KEYS.groundLong, 610, floorY - 12, {
-      depth: 1,
-      origin: [0.5, 0],
-      scale: 1
+    this.addStageLandPlane();
+    this.addGroundRun(0, bridge.leftBankEndX, {
+      rightEdgeTexture: BRIDGE_TEXTURE_KEYS.cliffLeft
     });
-    this.addBridgeImage(BRIDGE_TEXTURE_KEYS.cliffLeft, bridge.leftBankEndX - 178, floorY - 10, {
-      depth: 2,
-      origin: [0.5, 0],
-      scale: 1
-    });
-    this.addBridgeImage(BRIDGE_TEXTURE_KEYS.cliffRight, bridge.rightBankStartX + 178, floorY - 10, {
-      depth: 2,
-      origin: [0.5, 0],
-      scale: 1
-    });
-    this.addBridgeImage(BRIDGE_TEXTURE_KEYS.groundLong, 2320, floorY - 12, {
-      depth: 1,
-      origin: [0.5, 0],
-      scale: 1
+    this.addGroundRun(bridge.rightBankStartX, bounds.width, {
+      leftEdgeTexture: BRIDGE_TEXTURE_KEYS.cliffRight
     });
 
     this.groundPlatforms.push(
@@ -317,6 +443,70 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
         BRIDGE_GROUND_COLLIDER_HEIGHT
       )
     );
+  }
+
+  private addStageLandPlane(): void {
+    const { bounds, floorY } = BRIDGE_TRACER_WORLD;
+    this.addBridgeImage(BRIDGE_TEXTURE_KEYS.terrainTopLong, 0, floorY - 62, {
+      depth: 0,
+      origin: [0, 0],
+      scale: 1
+    });
+    this.addBridgeImage(BRIDGE_TEXTURE_KEYS.terrainTopShort, 860, floorY - 62, {
+      depth: 0,
+      origin: [0, 0],
+      scale: 1
+    });
+    this.addBridgeImage(BRIDGE_TEXTURE_KEYS.terrainTopLong, BRIDGE_TRACER_WORLD.bridge.rightBankStartX, floorY - 62, {
+      depth: 0,
+      origin: [0, 0],
+      scale: 1
+    });
+
+    const backEdge = this.scene.add.graphics().setDepth(-1);
+    backEdge.lineStyle(2, 0x9a9a95, 1);
+    backEdge.lineBetween(0, floorY - 72, bounds.width, floorY - 68);
+  }
+
+  private addGroundRun(
+    leftX: number,
+    rightX: number,
+    options: {
+      leftEdgeTexture?: string;
+      rightEdgeTexture?: string;
+    } = {}
+  ): void {
+    const { floorY } = BRIDGE_TRACER_WORLD;
+    const ground = this.scene.add.graphics().setDepth(1);
+
+    ground.lineStyle(4, 0x1f1f1d, 0.76);
+    ground.lineBetween(leftX - 6, floorY - 28, rightX + 6, floorY - 28);
+
+    if (options.leftEdgeTexture) {
+      this.addTornBankEdge(leftX, 'left');
+    }
+    if (options.rightEdgeTexture) {
+      this.addTornBankEdge(rightX, 'right');
+    }
+  }
+
+  private addTornBankEdge(x: number, side: 'left' | 'right'): void {
+    const { floorY } = BRIDGE_TRACER_WORLD;
+    const visualTopY = floorY - 28;
+    const direction = side === 'left' ? 1 : -1;
+    const edge = this.scene.add.graphics().setDepth(2);
+
+    edge.lineStyle(4, 0x1f1f1d, 0.72);
+    edge.beginPath();
+    edge.moveTo(x, visualTopY);
+    edge.lineTo(x + direction * 20, visualTopY + 18);
+    edge.lineTo(x + direction * 10, visualTopY + 38);
+    edge.lineTo(x + direction * 26, visualTopY + 64);
+    edge.strokePath();
+
+    edge.lineStyle(1, 0x1f1f1d, 0.16);
+    edge.lineBetween(x + direction * 8, visualTopY + 20, x + direction * 56, visualTopY + 52);
+    edge.lineBetween(x + direction * 2, visualTopY + 52, x + direction * 48, visualTopY + 84);
   }
 
   private createCickaPlaySpot(): void {
@@ -368,6 +558,7 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
   private createBridgeDraftsperson(): void {
     const { draftsperson, blueprint, floorY } = BRIDGE_TRACER_WORLD;
 
+    this.addGroundContactShadow(draftsperson.x - 300, floorY - 4, 170, 24, 7);
     this.addBridgeImage(BRIDGE_TEXTURE_KEYS.restShelter, draftsperson.x - 300, floorY - 4, {
       alpha: 0.94,
       depth: 8,
@@ -378,63 +569,40 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
       depth: 9,
       scale: 0.58
     });
+    this.addGroundContactShadow(blueprint.x, floorY - 2, 260, 28, 11);
     this.addBridgeImage(BRIDGE_TEXTURE_KEYS.draftingBoard, blueprint.x, floorY - 2, {
       depth: 12,
       scale: 0.72
     });
-    this.addBridgeImage(BRIDGE_TEXTURE_KEYS.bridgeBuilder, draftsperson.x + 80, draftsperson.y - 2, {
+    this.bridgeBuilder = this.addBridgeImage(BRIDGE_TEXTURE_KEYS.bridgeBuilder, draftsperson.x + 80, draftsperson.y - 2, {
       depth: 24,
-      scale: 0.72
+      scale: 0.76
+    });
+    this.addGroundContactShadow(draftsperson.x + 80, draftsperson.y - 2, 72, 16, 23);
+    this.builderIdleTween = this.scene.tweens.add({
+      targets: this.bridgeBuilder,
+      y: draftsperson.y - 5,
+      angle: -0.8,
+      duration: 1320,
+      ease: 'Stepped',
+      easeParams: [5],
+      repeat: -1,
+      yoyo: true
     });
   }
 
   private createBridgeCrossingVisuals(): void {
     const { bridge, floorY } = BRIDGE_TRACER_WORLD;
 
-    this.blockedBridgeObjects.push(
-      this.asVisible(this.addBridgeImage(
-        BRIDGE_TEXTURE_KEYS.supportPier,
-        bridge.leftBankEndX - 54,
-        floorY - 8,
-        {
-          alpha: 0.78,
-          depth: 7,
-          scale: 0.46
-        }
-      )),
-      this.asVisible(this.addBridgeImage(
-        BRIDGE_TEXTURE_KEYS.supportPier,
-        bridge.rightBankStartX + 54,
-        floorY - 8,
-        {
-          alpha: 0.78,
-          depth: 7,
-          scale: 0.46
-        }
-      ))
-    );
-
-    this.blockedBridgeObjects.push(
-      this.asVisible(this.addBridgeImage(
-        BRIDGE_TEXTURE_KEYS.bridgeSpanComplete,
-        bridge.centerX,
-        floorY - 12,
-        {
-          alpha: 0.16,
-          depth: 6,
-          scale: 0.38
-        }
-      ))
-    );
-
     this.completedBridgeObjects.push(
       this.asVisible(this.addBridgeImage(
         BRIDGE_TEXTURE_KEYS.bridgeSpanComplete,
         bridge.centerX,
-        floorY - 12,
+        floorY - 88,
         {
           depth: 8,
-          scale: 0.38
+          origin: [0.5, 0],
+          scale: 0.5
         }
       ))
     );
@@ -532,10 +700,7 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
   }
 
   private syncCickaAndToyCar(bridgeBeat: RidgeBridgeBeatState): void {
-    const crossingOpen = isBridgeCrossingOpen(bridgeBeat);
-    const cickaSpot = crossingOpen
-      ? BRIDGE_TRACER_WORLD.cickaSettledSpot
-      : BRIDGE_TRACER_WORLD.cickaPlaySpot;
+    const cickaSpot = BRIDGE_TRACER_WORLD.cickaPlaySpot;
     this.cickaSprite?.setPosition(cickaSpot.x, cickaSpot.y);
     this.cickaShadow?.setPosition(cickaSpot.x, cickaSpot.y - 2);
 
@@ -543,33 +708,66 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
 
     if (!hasCickaSharedToyCar(bridgeBeat)) {
       this.toyCar.setVisible(true);
+      this.toyCarShadow?.setVisible(true);
       this.toyCar.setPosition(
         BRIDGE_TRACER_WORLD.cickaPlaySpot.x + 72,
         BRIDGE_TRACER_WORLD.cickaPlaySpot.y - 2
       );
+      this.toyCarShadow?.setPosition(this.toyCar.x, this.toyCar.y + 4);
       return;
     }
 
     if (bridgeBeat === 'toy_car_shared') {
       this.toyCar.setVisible(true);
+      this.toyCarShadow?.setVisible(true);
       this.toyCar.setPosition(
         BRIDGE_TRACER_WORLD.blueprint.x - 22,
         BRIDGE_TRACER_WORLD.blueprint.y + 44
       );
+      this.toyCarShadow?.setPosition(this.toyCar.x, this.toyCar.y + 4);
       return;
     }
 
     this.toyCar.setVisible(true);
+    this.toyCarShadow?.setVisible(true);
     this.toyCar.setPosition(
       BRIDGE_TRACER_WORLD.bridge.rightBankStartX + 120,
       BRIDGE_TRACER_WORLD.floorY - 4
     );
+    this.toyCarShadow?.setPosition(this.toyCar.x, this.toyCar.y + 4);
   }
 
   private createToyCar(x: number, y: number): Phaser.GameObjects.Image {
+    this.toyCarShadow = this.addGroundContactShadow(x, y + 2, 78, 14, 24);
     return this.addBridgeImage(BRIDGE_TEXTURE_KEYS.modularToyCar, x, y, {
       depth: 25,
       scale: 0.62
+    });
+  }
+
+  private setBuilderTalking(isTalking: boolean): void {
+    if (!this.bridgeBuilder) return;
+    this.builderTalkTween?.stop();
+    this.builderTalkTween = undefined;
+
+    if (!isTalking) {
+      this.builderIdleTween?.resume();
+      this.bridgeBuilder.setScale(0.76).setAngle(0);
+      return;
+    }
+
+    this.builderIdleTween?.pause();
+    this.builderTalkTween = this.scene.tweens.add({
+      targets: this.bridgeBuilder,
+      y: BRIDGE_TRACER_WORLD.draftsperson.y - 10,
+      scaleX: 0.79,
+      scaleY: 0.74,
+      angle: 1.4,
+      duration: 180,
+      ease: 'Stepped',
+      easeParams: [2],
+      repeat: -1,
+      yoyo: true
     });
   }
 
@@ -587,6 +785,9 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
     if (options.alpha !== undefined) {
       image.setAlpha(options.alpha);
     }
+    if (options.tint !== undefined) {
+      image.setTint(options.tint);
+    }
     if (options.flipX) {
       image.setFlipX(true);
     }
@@ -594,6 +795,17 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
       image.setScrollFactor(options.scrollFactor[0], options.scrollFactor[1]);
     }
     return image;
+  }
+
+  private addGroundContactShadow(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    depth: number
+  ): Phaser.GameObjects.Ellipse {
+    return this.scene.add.ellipse(x, y + 2, width, height, 0x1f1f1d, 0.1)
+      .setDepth(depth);
   }
 
   private addStaticZone(

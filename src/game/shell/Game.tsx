@@ -7,7 +7,7 @@ import { usePhaserGameBoot } from './usePhaserGameBoot';
 import { usePhaserGamePauseSync } from './usePhaserGamePauseSync';
 import { usePhaserScaleRefresh } from './usePhaserScaleRefresh';
 import type { PhaserScenePresentationMode } from '@/game/sharedSceneRuntime/phaserScenePresentation';
-import type { SceneId } from '@/game/scenes/sceneIds';
+import { RIDGE_SCENE_ID, type SceneId } from '@/game/scenes/sceneIds';
 import type { OverlayId } from '@/game/overlays/overlayIds';
 import type { OpenOverlayOptions } from '@/game/bridge/store';
 import type { RidgeDevControls } from '@/game/scenes/ridge/runtime/ridgeDevControls';
@@ -64,10 +64,13 @@ export default function Game({
   const frameClassName = chrome === 'framed'
     ? 'relative h-full w-full min-h-0 overflow-hidden rounded-lg border-4 border-neutral-800 bg-[#fbfbf9] shadow-[8px_8px_0px_0px_rgba(26,26,26,1)]'
     : 'relative h-full w-full min-h-0 overflow-hidden bg-[#fbfbf9]';
+  const gameCanvasStyle = activeSceneId === RIDGE_SCENE_ID
+    ? { filter: 'grayscale(1) contrast(1.08)' }
+    : undefined;
 
   return (
     <div className={frameClassName}>
-      <div ref={containerRef} className="absolute inset-0 outline-none" />
+      <div ref={containerRef} className="absolute inset-0 outline-none" style={gameCanvasStyle} />
       {shouldUseGestureOverlay && (
         <>
           <div
