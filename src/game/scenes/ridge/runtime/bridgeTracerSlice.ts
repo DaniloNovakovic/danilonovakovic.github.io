@@ -35,9 +35,9 @@ export const BRIDGE_TRACER_WORLD = {
     y: 430
   },
   bridge: {
-    leftBankEndX: 1490,
-    rightBankStartX: 1945,
-    centerX: 1718,
+    leftBankEndX: 1410,
+    rightBankStartX: 1865,
+    centerX: 1638,
     deckY: 500,
     deckWidth: 470
   },
@@ -45,6 +45,11 @@ export const BRIDGE_TRACER_WORLD = {
     x: 2360,
     y: 500
   }
+} as const;
+
+export const BRIDGE_TRACER_CAMERA_BOUNDS = {
+  ...BRIDGE_TRACER_WORLD.bounds,
+  width: 2320
 } as const;
 
 export const BRIDGE_TRACER_INTERACT_RADIUS = 86;

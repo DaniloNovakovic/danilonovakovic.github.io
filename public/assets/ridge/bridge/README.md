@@ -9,12 +9,14 @@ or saved as coherent wide source plates for layered stage composition.
 
 ## Current Use
 
-Ridge now uses the generated proof plates under `layered-reset/plates/` for the
+Ridge now uses generated proof plates under `layered-reset/plates/` for the
 Bridge playable proof:
 
 - `far-mountains.png`: slow far parallax paper/mountain layer
-- `mid-forest.png`: transparent mid-distance woodland band
 - `close-stage.png`: transparent close playable terrain, camp, and gorge layer
+- `mid-forest.png`: transparent mid-distance woodland band, retained as a
+  source experiment but not drawn in the current proof because it made the
+  bridge vista forest read as floating behind the gorge rocks
 
 Phaser still owns composition, route state, collision, prompts, before/after
 bridge state, character sprites, and toy-car movement. The older modular kit

@@ -36,6 +36,7 @@ import {
   type RidgeDevControls
 } from './ridgeDevControls';
 import {
+  BRIDGE_TRACER_CAMERA_BOUNDS,
   BRIDGE_TRACER_INTERACT_RADIUS,
   BRIDGE_TRACER_WORLD,
   createBridgeTracerInteractionTargets,
@@ -208,7 +209,7 @@ export class RidgeScene extends Phaser.Scene {
         glassesTextureKey: 'player_glasses'
       },
       camera: {
-        worldBounds: BRIDGE_TRACER_WORLD.bounds,
+        worldBounds: BRIDGE_TRACER_CAMERA_BOUNDS,
         designSize: {
           width: GAME_DESIGN_WIDTH,
           height: GAME_DESIGN_HEIGHT
@@ -221,6 +222,7 @@ export class RidgeScene extends Phaser.Scene {
     });
     this.playerRuntime = playerRuntime;
     this.player = playerRuntime.player;
+    this.player.setOrigin(0.5, 0.42);
     platforms.forEach((platform) => {
       this.physics.add.collider(playerRuntime.player, platform);
     });
