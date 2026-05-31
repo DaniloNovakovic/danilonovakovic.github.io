@@ -84,6 +84,7 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
   private cickaSprite?: Phaser.GameObjects.Sprite;
   private cickaShadow?: Phaser.GameObjects.Ellipse;
   private toyCar?: Phaser.GameObjects.Image;
+  private toyCarHalo?: Phaser.GameObjects.Graphics;
   private toyCarShadow?: Phaser.GameObjects.Ellipse;
   private bridgeBuilder?: Phaser.GameObjects.Image;
   private handoffNote?: Phaser.GameObjects.Text;
@@ -204,14 +205,18 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
       BRIDGE_TRACER_WORLD.blueprint.x - 22,
       BRIDGE_TRACER_WORLD.blueprint.y + 44
     );
-    this.toyCarShadow?.setPosition(this.toyCar.x, this.toyCar.y + 4);
+    this.syncToyCarSupport(this.toyCar.x, this.toyCar.y, true);
     this.toyCarTween?.stop();
     this.toyCarTween = this.scene.tweens.add({
-      targets: [this.toyCar, this.toyCarShadow].filter(Boolean),
+      targets: this.toyCar,
       x: BRIDGE_TRACER_WORLD.bridge.rightBankStartX + 120,
       y: this.getGroundedY(BRIDGE_TRACER_WORLD.floorY) - 4,
       duration: BRIDGE_TEST_DURATION_MS,
       ease: 'Sine.easeInOut',
+      onUpdate: () => {
+        if (!this.toyCar) return;
+        this.syncToyCarSupport(this.toyCar.x, this.toyCar.y, true);
+      },
       onComplete: () => {
         this.toyCarTestRunning = false;
         onComplete();
@@ -270,31 +275,6 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
       wind.strokePath();
     });
 
-    [
-      [520, 178],
-      [1470, 154],
-      [2130, 192]
-    ].forEach(([x, y], index) => {
-      const bird = this.scene.add.graphics()
-        .setDepth(-28)
-        .setScrollFactor(0.36, 1);
-      bird.lineStyle(2, 0x1f1f1d, 0.38);
-      bird.lineBetween(-8, 0, 0, -5);
-      bird.lineBetween(0, -5, 9, 0);
-      bird.setPosition(x, y);
-      this.scene.tweens.add({
-        targets: bird,
-        x: x + 52,
-        y: y + (index % 2 === 0 ? -6 : 5),
-        alpha: 0.2,
-        duration: 2600 + index * 380,
-        ease: 'Stepped',
-        easeParams: [6],
-        repeat: -1,
-        yoyo: true
-      });
-    });
-
     const edgeDust = this.scene.add.graphics()
       .setDepth(4)
       .setScrollFactor(1, 1);
@@ -327,7 +307,7 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
   private createCickaPlaySpot(): void {
     const { cickaPlaySpot } = BRIDGE_TRACER_WORLD;
     const groundY = this.getGroundedY(cickaPlaySpot.y);
-    this.addReadabilityPocket(cickaPlaySpot.x + 46, groundY - 34, 250, 96, 14);
+    this.addReadabilityPocket(cickaPlaySpot.x + 34, groundY - 34, 176, 86, 14);
     this.cickaShadow = this.scene.add.ellipse(
       cickaPlaySpot.x,
       groundY - 2,
@@ -354,6 +334,10 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
       duration: 1180,
       ease: 'Sine.easeInOut',
       repeat: -1,
+      onUpdate: () => {
+        if (!this.toyCar) return;
+        this.syncToyCarSupport(this.toyCar.x, this.toyCar.y, true);
+      },
       yoyo: true
     });
   }
@@ -362,7 +346,7 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
     const { draftsperson } = BRIDGE_TRACER_WORLD;
     const groundY = this.getGroundedY(draftsperson.y);
 
-    this.addReadabilityPocket(draftsperson.x, groundY - 80, 118, 180, 22);
+    this.addReadabilityPocket(draftsperson.x, groundY - 80, 104, 176, 22);
     this.bridgeBuilder = this.addBridgeImage(BRIDGE_TEXTURE_KEYS.bridgeBuilder, draftsperson.x, groundY - 2, {
       depth: 24,
       scale: 0.76
@@ -498,13 +482,13 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
         BRIDGE_TRACER_WORLD.cickaPlaySpot.x + 72,
         cickaGroundY - 2
       );
-      this.toyCarShadow?.setPosition(this.toyCar.x, this.toyCar.y + 4);
+      this.syncToyCarSupport(this.toyCar.x, this.toyCar.y, true);
       return;
     }
 
     if (bridgeBeat === 'toy_car_shared') {
       this.toyCar.setVisible(false);
-      this.toyCarShadow?.setVisible(false);
+      this.syncToyCarSupport(this.toyCar.x, this.toyCar.y, false);
       return;
     }
 
@@ -514,15 +498,21 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
       BRIDGE_TRACER_WORLD.bridge.rightBankStartX + 120,
       this.getGroundedY(BRIDGE_TRACER_WORLD.floorY) - 4
     );
-    this.toyCarShadow?.setPosition(this.toyCar.x, this.toyCar.y + 4);
+    this.syncToyCarSupport(this.toyCar.x, this.toyCar.y, true);
   }
 
   private createToyCar(x: number, y: number): Phaser.GameObjects.Image {
+    this.toyCarHalo = this.addReadabilityPocket(x, y - 18, 98, 56, 23);
     this.toyCarShadow = this.addGroundContactShadow(x, y + 2, 78, 14, 24);
     return this.addBridgeImage(BRIDGE_TEXTURE_KEYS.modularToyCar, x, y, {
       depth: 25,
       scale: 0.78
     });
+  }
+
+  private syncToyCarSupport(x: number, y: number, visible: boolean): void {
+    this.toyCarHalo?.setVisible(visible).setPosition(x, y - 18);
+    this.toyCarShadow?.setVisible(visible).setPosition(x, y + 4);
   }
 
   private setBuilderTalking(isTalking: boolean): void {
@@ -637,15 +627,18 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
     width: number,
     height: number,
     depth: number
-  ): void {
+  ): Phaser.GameObjects.Graphics {
     const pocket = this.scene.add.graphics().setDepth(depth);
-    pocket.fillStyle(0xf7f1df, 0.82);
-    pocket.lineStyle(2, 0x1f1f1d, 0.16);
-    pocket.fillEllipse(x, y, width, height);
-    pocket.strokeEllipse(x, y, width, height);
+    pocket.setPosition(x, y);
+    pocket.fillStyle(0xf7f1df, 0.9);
+    pocket.lineStyle(2, 0xffffff, 0.72);
+    pocket.fillEllipse(0, 0, width, height);
+    pocket.strokeEllipse(0, 0, width + 8, height + 8);
 
     pocket.lineStyle(1, 0x1f1f1d, 0.12);
-    pocket.lineBetween(x - width * 0.32, y + height * 0.24, x + width * 0.32, y + height * 0.18);
+    pocket.strokeEllipse(3, -2, width * 0.96, height * 0.9);
+    pocket.lineBetween(-width * 0.32, height * 0.24, width * 0.32, height * 0.18);
+    return pocket;
   }
 
   private addStaticZone(

@@ -235,7 +235,7 @@ const BRIDGE_IMAGE_ASSETS = [
   },
   {
     key: BRIDGE_TEXTURE_KEYS.layeredFarMountains,
-    file: 'far-mountains.png',
+    file: 'far-mountains-clouds.png',
     path: BRIDGE_LAYERED_RESET_ASSET_PATH
   },
   {

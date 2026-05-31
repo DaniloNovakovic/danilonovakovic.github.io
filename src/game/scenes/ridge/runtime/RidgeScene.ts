@@ -68,6 +68,7 @@ export class RidgeScene extends Phaser.Scene {
   private playerRuntime?: SideViewPlayerRuntime;
   private bridgeStage?: BridgeTracerStageRuntime;
   private interactionRuntime?: InteriorInteractionRuntime<BridgeTracerTargetId, BridgeTracerEffect>;
+  private playerReadabilityHalo?: Phaser.GameObjects.Graphics;
   private onClose: () => void = () => {};
   private isPaused = false;
   private resumePosition?: { x: number; y: number };
@@ -137,6 +138,7 @@ export class RidgeScene extends Phaser.Scene {
     this.applyDevControls();
 
     const playerUpdate = this.playerRuntime?.update();
+    this.syncPlayerReadabilityHalo();
     if (!playerUpdate || playerUpdate.paused) {
       this.syncDevRuntimeState();
       return;
@@ -223,9 +225,29 @@ export class RidgeScene extends Phaser.Scene {
     this.playerRuntime = playerRuntime;
     this.player = playerRuntime.player;
     this.player.setOrigin(0.5, 0.42);
+    this.createPlayerReadabilityHalo();
     platforms.forEach((platform) => {
       this.physics.add.collider(playerRuntime.player, platform);
     });
+  }
+
+  private createPlayerReadabilityHalo(): void {
+    this.playerReadabilityHalo?.destroy();
+    const halo = this.add.graphics().setDepth(29);
+    halo.fillStyle(0xf7f1df, 0.92);
+    halo.lineStyle(2, 0xffffff, 0.78);
+    halo.fillEllipse(0, 0, 58, 78);
+    halo.strokeEllipse(0, 0, 66, 86);
+    halo.lineStyle(1, 0x1f1f1d, 0.14);
+    halo.strokeEllipse(3, -2, 54, 72);
+    halo.lineBetween(-16, 24, 18, 20);
+    this.playerReadabilityHalo = halo;
+    this.syncPlayerReadabilityHalo();
+  }
+
+  private syncPlayerReadabilityHalo(): void {
+    if (!this.player || !this.playerReadabilityHalo) return;
+    this.playerReadabilityHalo.setPosition(this.player.x, this.player.y - 10);
   }
 
   private createBridgeInteractions(): void {
@@ -312,6 +334,7 @@ export class RidgeScene extends Phaser.Scene {
     this.player.setVelocityX(0);
     this.player.setVelocityY(0);
     this.player.body.setAllowGravity(true);
+    this.syncPlayerReadabilityHalo();
     this.playerRuntime?.cameraRuntime?.refresh();
   }
 
