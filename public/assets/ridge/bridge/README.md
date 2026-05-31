@@ -12,16 +12,14 @@ or saved as coherent wide source plates for layered stage composition.
 Ridge now uses generated proof plates under `layered-reset/plates/` for the
 Bridge playable proof:
 
-- `far-mountains.png`: slow far parallax paper/mountain layer
-- `close-stage.png`: transparent close playable terrain, camp, and gorge layer
-- `mid-forest.png`: transparent mid-distance woodland band, retained as a
-  source experiment but not drawn in the current proof because it made the
-  bridge vista forest read as floating behind the gorge rocks
+- `far-mountains-clouds.png`: slow far parallax paper/mountain/cloud layer
+- `close-stage-no-stumps.png`: transparent close playable terrain, camp, and
+  gorge layer
 
 Phaser still owns composition, route state, collision, prompts, before/after
-bridge state, character sprites, and toy-car movement. The older modular kit
-under `modular/` remains available for stateful objects and experiments, but it
-is no longer the primary way the forest/background read is created.
+bridge state, character sprites, and toy-car movement. The `modular/` folder is
+kept only for currently drawn modular runtime props: Bridge Draftsperson and the
+toy car.
 
 ## Style Contract
 
@@ -47,28 +45,7 @@ is no longer the primary way the forest/background read is created.
 
 ## Runtime Contract
 
-See `modular/manifest.json` for modular asset dimensions and
-`manifest.json` for older first-pass placeholders. The role icon sheet reserves
-Cicka, Bridge Draftsperson, and neutral Prompt/narration cells for the future
-Character Conversation Overlay.
-
-`layered-reset/source-concept-v5.png` is the current preferred generated visual
-target for the hybrid plate approach. It corrects the earlier angled/2.5D floor
-problem by returning the playable lane to a side-scroller read: a mostly
-horizontal path, close trees and brush obscuring the left approach background,
-and visible cliff depth focused around the gorge/ridge edges.
-
-`layered-reset/plates/` contains the first playable runtime split generated from
-that direction. These are proof assets for feel and feedback, not final art.
-
-`layered-reset/source-concept-v4.png` remains useful as a composition step, but
-its angled terrain/top-plane read should not be copied into the runtime
-direction.
-
-`layered-reset/source-concept-v3.png` remains useful as a too-heavy exploration
-of the closed Cicka forest pocket. Do not copy its separate lower forest-floor
-read or giant foreground occluder into the runtime direction.
-
-`layered-reset/source-concept-v2.png` remains useful as the cleaner bridge-vista
-reference: left/player-side work camp, no half-built bridge span, taller gorge,
-and clearer stone outcrop.
+`layered-reset/plates/` contains the playable proof split generated from the
+accepted layered direction. These are proof assets for feel and feedback, not
+final art. Removed exploratory source concepts and unused cutouts should be
+regenerated from design notes rather than kept in `public/` as runtime cargo.
