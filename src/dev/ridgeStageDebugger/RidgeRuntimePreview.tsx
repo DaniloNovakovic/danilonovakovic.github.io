@@ -29,14 +29,14 @@ export function RidgeRuntimePreview({
   const isInputPaused =
     !isActive || bridge.isPaused || bridge.loadingSceneId !== null || inputOwner === 'panel';
   const inputStatusLabel = !isActive
-    ? 'Model view'
+    ? 'Debugger inactive'
     : inputOwner === 'panel'
       ? 'Panel focus'
       : bridge.isPaused || bridge.loadingSceneId !== null
         ? 'Runtime paused'
         : 'Game input';
   const pauseReason = !isActive
-    ? 'Model view'
+    ? 'Debugger inactive'
     : inputOwner === 'panel'
       ? 'Panel focus'
       : 'Runtime paused';
@@ -102,7 +102,7 @@ export function RidgeRuntimePreview({
     >
       <div className="absolute left-2 top-2 z-20 max-w-[min(16rem,calc(100%-1rem))] border-2 border-[#1a1a1a] bg-[#fbfbf9]/88 px-2 py-1.5 shadow-[3px_3px_0_rgba(26,26,26,1)]">
         <p className="font-mono text-[10px] font-black uppercase tracking-widest text-[#5a554f]">
-          Live Ridge
+          Live Bridge
         </p>
         <p className="text-[11px] font-black uppercase tracking-wider text-[#1a1a1a]">
           Camera zoom {Math.round(previewZoom * 100)}%

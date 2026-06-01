@@ -1,18 +1,28 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  bridgeActions,
+  type RidgeBridgeAreaBeatState,
+  type RidgeBridgeBeatState
+} from '@/game/bridge/store';
 import type {
   RidgeDevControls,
   RidgeDevDebugSettings,
   RidgeDevPlayerSnapshot,
   RidgeDevResetRequest,
+  RidgeDevRouteBeatRequest,
   RidgeDevTeleportRequest
 } from '@/game/scenes/ridge/runtime/ridgeDevControls';
 import {
+  BRIDGE_STAGE_SOURCE,
+  resolveBridgeStageSpot,
+  type BridgeStageSpotId
+} from '@/game/scenes/ridge/bridge/stageComposition';
+import {
   INITIAL_PREVIEW_ZOOM,
+  PREVIEW_ZOOM_MAX,
+  PREVIEW_ZOOM_MIN,
   PLAYER_SNAPSHOT_RENDER_INTERVAL_MS
 } from '../constants';
-import type { RidgeViewerAnchor } from '../model';
-import { clampPreviewZoom } from '../modelViewport';
-import { getTeleportAnchorLabel } from '../teleportTargets';
 
 export function useRidgePreviewControls() {
   const [previewZoom, setPreviewZoom] = useState(INITIAL_PREVIEW_ZOOM);
@@ -21,14 +31,16 @@ export function useRidgePreviewControls() {
     showColliders: false,
     showPlayerBody: false,
     showInteractZones: false,
-    showTraversalAssists: false
+    showTraversalAssists: true
   });
-  const [lastTeleportLabel, setLastTeleportLabel] = useState<string | null>(null);
+  const [lastCommandLabel, setLastCommandLabel] = useState<string | null>(null);
   const [playerSnapshot, setPlayerSnapshot] = useState<RidgeDevPlayerSnapshot | null>(null);
   const previewZoomRef = useRef(INITIAL_PREVIEW_ZOOM);
   const debugSettingsRef = useRef(debugSettings);
   const resetRequestRef = useRef<RidgeDevResetRequest | null>(null);
   const resetSequenceRef = useRef(0);
+  const routeBeatRequestRef = useRef<RidgeDevRouteBeatRequest | null>(null);
+  const routeBeatSequenceRef = useRef(0);
   const teleportRequestRef = useRef<RidgeDevTeleportRequest | null>(null);
   const teleportSequenceRef = useRef(0);
   const lastPlayerSnapshotRenderAtRef = useRef(0);
@@ -44,6 +56,11 @@ export function useRidgePreviewControls() {
   const ridgeDevControls = useMemo<RidgeDevControls>(() => ({
     resolveCameraZoom: () => previewZoomRef.current,
     resolveDebugSettings: () => debugSettingsRef.current,
+    consumeRouteBeatRequest: () => {
+      const request = routeBeatRequestRef.current;
+      routeBeatRequestRef.current = null;
+      return request;
+    },
     consumeResetRequest: () => {
       const request = resetRequestRef.current;
       resetRequestRef.current = null;
@@ -80,34 +97,56 @@ export function useRidgePreviewControls() {
   const requestPlayerReset = useCallback(() => {
     const request = {
       sequence: ++resetSequenceRef.current,
-      label: 'start'
+      label: 'spawn'
     };
     resetRequestRef.current = request;
-    setLastTeleportLabel(`reset ${request.label}`);
+    setLastCommandLabel(`reset ${request.label}`);
   }, []);
 
-  const requestTeleport = useCallback((anchor: RidgeViewerAnchor) => {
+  const requestBridgeBeat = useCallback((bridgeBeat: RidgeBridgeBeatState) => {
+    const request = {
+      sequence: ++routeBeatSequenceRef.current,
+      label: bridgeBeat,
+      bridgeBeat
+    };
+    routeBeatRequestRef.current = request;
+    if (bridgeBeat === 'concert_handoff') {
+      bridgeActions.triggerRidgeConcertHandoff();
+    } else {
+      bridgeActions.setRidgeBridgeBeat(bridgeBeat as RidgeBridgeAreaBeatState);
+    }
+    setLastCommandLabel(`beat ${request.label}`);
+  }, []);
+
+  const requestStageSpotTeleport = useCallback((spotId: BridgeStageSpotId) => {
+    const spot = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, spotId);
     const request = {
       sequence: ++teleportSequenceRef.current,
-      label: getTeleportAnchorLabel(anchor),
-      x: anchor.x,
-      y: anchor.y,
-      applySpawnOffset: true
+      label: spot.id,
+      x: spot.x,
+      y: spot.y,
+      applySpawnOffset: false
     };
     teleportRequestRef.current = request;
-    setLastTeleportLabel(request.label);
+    setLastCommandLabel(`spot ${request.label}`);
   }, []);
 
   return {
     adjustPreviewZoom,
     debugSettings,
-    lastTeleportLabel,
+    lastCommandLabel,
     playerSnapshot,
     previewZoom,
+    requestBridgeBeat,
     requestPlayerReset,
-    requestTeleport,
+    requestStageSpotTeleport,
     ridgeDevControls,
     setPreviewZoomLevel,
     toggleDebugSetting
   };
+}
+
+function clampPreviewZoom(zoom: number): number {
+  if (!Number.isFinite(zoom)) return INITIAL_PREVIEW_ZOOM;
+  return Math.min(PREVIEW_ZOOM_MAX, Math.max(PREVIEW_ZOOM_MIN, Math.round(zoom * 100) / 100));
 }

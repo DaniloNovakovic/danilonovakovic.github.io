@@ -50,7 +50,7 @@ game vocabulary is explicit:
   predicates consumed by the Ridge scene. The legacy folded desk prototype
   still treats `src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts`
   as typed authoring source data and imports the committed generated artifact
-  for blockout facts, traversal helpers, and dev-model inspection.
+  for blockout facts, traversal helpers, and legacy prototype tests.
 
 ## Scene presentation and camera
 

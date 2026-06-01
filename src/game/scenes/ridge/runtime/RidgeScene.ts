@@ -3,6 +3,8 @@ import {
   bridgeActions,
   bridgeStore,
   type OpenOverlayOptions,
+  type RidgeBridgeAreaBeatState,
+  type RidgeBridgeBeatState,
   type RidgeFirstPlayableRouteState
 } from '@/game/bridge/store';
 import { type OverlayId } from '@/game/overlays/overlayIds';
@@ -285,6 +287,11 @@ export class RidgeScene extends Phaser.Scene {
 
     if (!this.player) return;
 
+    const routeBeatRequest = this.ridgeDevControls.consumeRouteBeatRequest?.();
+    if (routeBeatRequest) {
+      this.applyDevBridgeBeat(routeBeatRequest.bridgeBeat);
+    }
+
     const resetRequest = this.ridgeDevControls.consumeResetRequest?.();
     if (resetRequest) {
       this.movePlayerForDev(this.ridgeSpawnPosition);
@@ -295,6 +302,17 @@ export class RidgeScene extends Phaser.Scene {
     if (!request) return;
 
     this.movePlayerForDev(resolveRidgeDevTeleportPosition(request));
+  }
+
+  private applyDevBridgeBeat(bridgeBeat: RidgeBridgeBeatState): void {
+    if (bridgeBeat === 'concert_handoff') {
+      bridgeActions.triggerRidgeConcertHandoff();
+    } else {
+      bridgeActions.setRidgeBridgeBeat(bridgeBeat as RidgeBridgeAreaBeatState);
+    }
+    this.syncBridgeRouteState();
+    this.createBridgeInteractions();
+    this.syncPlayerReadabilityHalo();
   }
 
   private movePlayerForDev(position: { x: number; y: number }): void {
@@ -333,6 +351,9 @@ export class RidgeScene extends Phaser.Scene {
       railProgress: railSnapshot?.progress,
       railScale: railSnapshot?.scale,
       railDepth: railSnapshot?.depth,
+      bridgeBeat: this.routeState.bridgeBeat,
+      crossingOpen: this.bridgePresentation.crossingOpen,
+      playerProgressMax: this.bridgePresentation.playerProgressRange.max,
       nearestStageSpotId: railSnapshot?.nearestSpotId,
       sourceSnippet: railSnapshot?.sourceSnippet
     });

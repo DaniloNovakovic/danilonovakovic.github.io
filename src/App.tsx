@@ -5,7 +5,7 @@ import { LoadingFallback } from '@/shared/ui';
 import { StaticPortfolio } from '@/static';
 
 const InteractiveApp = lazy(() => import('@/game/shell'));
-const RidgeBlockoutViewer = lazy(() => import('@/dev/ridgeBlockoutViewer'));
+const RidgeStageDebugger = lazy(() => import('@/dev/ridgeStageDebugger'));
 
 function App() {
   const { route, setMode } = useReadMode();
@@ -18,10 +18,10 @@ function App() {
     return <StaticPortfolio onSwitchToInteractive={() => setMode('interactive')} />;
   }
 
-  if (import.meta.env.DEV && route === 'ridge-blockout') {
+  if (import.meta.env.DEV && route === 'ridge-stage-debugger') {
     return (
       <Suspense fallback={<LoadingFallback />}>
-        <RidgeBlockoutViewer />
+        <RidgeStageDebugger />
       </Suspense>
     );
   }

@@ -26,16 +26,17 @@ pnpm test
 pnpm build
 ```
 
-Ridge blockout authoring lives in `.source.ts` files under
-`src/game/scenes/ridge/blockout/sources/`. Edit those files, run
-`pnpm ridge:source` to refresh committed `.generated.ts` artifacts, and use
-`pnpm ridge:source:check` when you only want to verify freshness. `pnpm check`
-includes that freshness gate.
+Current Bridge staging lives in
+`src/game/scenes/ridge/bridge/stageComposition.ts`. In development, open the
+Ridge Stage Debugger with `?mode=ridge-stage-debugger` after starting
+`pnpm dev`; it hosts the live Bridge preview, route-beat controls, Walk Rail
+readouts, Stage Spot movement, and Bridge Stage debug overlays.
 
-In development, open the read-only Ridge Blockout Viewer with
-`?mode=ridge-blockout` after starting `pnpm dev`. The viewer is a dev-only QA
-surface for the generated map, room labels, anchors, routes, shortcuts,
-colliders, assist zones, rects, and validation status.
+Legacy Ridge blockout source files still live under
+`src/game/scenes/ridge/blockout/sources/`. If you edit those files, run
+`pnpm ridge:source` to refresh committed `.generated.ts` artifacts, or
+`pnpm ridge:source:check` to verify freshness. `pnpm check` includes that
+freshness gate.
 
 ## Architecture
 

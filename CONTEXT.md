@@ -35,13 +35,13 @@ final assets are placed. The current blockout compiles into typed facts,
 geometry, connectors, and presentation inputs.
 _Avoid_: final map, finished level
 
-**Ridge Blockout Editor**:
-A visual authoring and QA surface for the Ridge Blockout Source that renders the
-compiled blockout and supports scrolling around the Exploration Map. Its first
-useful version is a read-only visual QA surface; validated source editing can be
-added after the viewer proves the source, compiler, and renderer agree. It is
-not a final art map editor.
-_Avoid_: final art editor, generic map editor
+**Ridge Stage Debugger**:
+A development QA surface for Walkable Sketchbook Stages. It runs the live Ridge
+stage preview and exposes route beats, Walk Rail readouts, Stage Spot movement,
+Rail Perspective Cues, and debug overlays so Danilo and AI agents can tune a
+Ridge Stage Composition Source. It is not the legacy Ridge Blockout Viewer or a
+final art map editor.
+_Avoid_: Ridge Blockout Viewer, final art editor, generic map editor
 
 **Grid Cell**:
 A configurable unit in the typed Ridge Blockout Source that converts text-grid positions into world-space pixels.

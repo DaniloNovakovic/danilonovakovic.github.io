@@ -47,10 +47,9 @@ Current runtime characteristics:
 - Bridge stage plates, modular objects, Stage Spots, Stage Occluders, and
   route-beat presentation state are authored in the colocated Bridge source
   under `src/game/scenes/ridge/bridge/`.
-- The current Ridge blockout viewer is a mixed dev surface: its live preview can
-  show the Bridge rail readout, but its model and teleport panels still belong
-  to the older folded/platformer draft and are not the proper Bridge rail
-  debugger.
+- `?mode=ridge-stage-debugger` opens the current Ridge Stage Debugger: a
+  Bridge-first live preview with route-beat controls, Walk Rail readouts, Stage
+  Spot movement, copyable rail snippets, and Bridge Stage debug overlays.
 - First Playable Route progress lives in the bridge store as
   `firstPlayableRoute`, a typed route state that only permits active Bridge
   beats while `activeAreaId` is `bridge` and records the Concert handoff as the
