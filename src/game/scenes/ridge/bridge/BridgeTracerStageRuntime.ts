@@ -23,6 +23,7 @@ import {
 } from './bridgeTracerSlice';
 import {
   BRIDGE_STAGE_SOURCE,
+  resolveBridgeRailRelativeStageDepth,
   resolveBridgeStageObject,
   resolveBridgeStageObjectPlacement,
   resolveBridgeStagePresentation,
@@ -107,7 +108,6 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
     this.createCickaPlaySpot();
     this.createBridgeDraftsperson();
     this.createBridgeCrossingVisuals();
-    this.createRailRelativeForegroundObjects();
     this.createConcertHandoffNote();
     this.createInteractionPrompt();
     this.createDialoguePanel();
@@ -264,7 +264,7 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
   }
 
   private createCickaPlaySpot(): void {
-    const cickaPlaySpot = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, 'cicka-play');
+    const cickaPlaySpot = this.resolveCickaPlacement('cicka-play');
     this.addReadabilityPocket(cickaPlaySpot.x + 34, cickaPlaySpot.y - 34, 176, 86, 14);
     this.cickaShadow = this.scene.add.ellipse(
       cickaPlaySpot.x,
@@ -273,7 +273,7 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
       18,
       0x1f1f1d,
       0.12
-    ).setDepth(15);
+    ).setDepth(cickaPlaySpot.depth - 1);
     this.cickaSprite = this.scene.add.sprite(
       cickaPlaySpot.x,
       cickaPlaySpot.y,
@@ -282,7 +282,7 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
     )
       .setOrigin(CICKA_ORIGIN.x, CICKA_ORIGIN.y)
       .setScale(CICKA_RUNTIME_SCALE)
-      .setDepth(26);
+      .setDepth(cickaPlaySpot.depth);
     this.cickaSprite.play(CICKA_ANIMATION_KEYS.perchIdle);
     this.toyCar = this.createToyCar();
   }
@@ -326,23 +326,6 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
         bridgePlacement.y,
         bridgePlacement.depth
       ))
-    );
-  }
-
-  private createRailRelativeForegroundObjects(): void {
-    const foregroundLip = resolveBridgeStageObjectPlacement(
-      BRIDGE_STAGE_SOURCE,
-      'near-bank-foreground-lip'
-    );
-    const foregroundLipObject = foregroundLip.object;
-
-    this.createPaperFold(
-      foregroundLip.x,
-      foregroundLip.y,
-      foregroundLipObject.width,
-      foregroundLipObject.height,
-      foregroundLipObject.angle ?? 0,
-      foregroundLip.depth
     );
   }
 
@@ -403,9 +386,13 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
   }
 
   private syncCickaAndToyCar(presentation: BridgeStagePresentationState): void {
-    const cickaSpot = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, presentation.cickaSpotId);
-    this.cickaSprite?.setPosition(cickaSpot.x, cickaSpot.y);
-    this.cickaShadow?.setPosition(cickaSpot.x, cickaSpot.y - 2);
+    const cickaSpot = this.resolveCickaPlacement(presentation.cickaSpotId);
+    this.cickaSprite
+      ?.setPosition(cickaSpot.x, cickaSpot.y)
+      .setDepth(cickaSpot.depth);
+    this.cickaShadow
+      ?.setPosition(cickaSpot.x, cickaSpot.y - 2)
+      .setDepth(cickaSpot.depth - 1);
 
     if (!this.toyCar || this.toyCarTestRunning) return;
 
@@ -477,6 +464,14 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
       depth: toyCarPlacement.depth,
       scale: toyCarObject.scale
     });
+  }
+
+  private resolveCickaPlacement(spotId: BridgeStagePresentationState['cickaSpotId']) {
+    const spot = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, spotId);
+    return {
+      ...spot,
+      depth: resolveBridgeRailRelativeStageDepth(spot.railPoint, spot)
+    };
   }
 
   private syncToyCarSupport(x: number, y: number, visible: boolean): void {
@@ -563,45 +558,6 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
     bridge.lineBetween(rightX - 86, deckTopY + 34, rightX - 4, deckTopY + 22);
 
     return bridge;
-  }
-
-  private createPaperFold(
-    x: number,
-    y: number,
-    width: number,
-    height: number,
-    angle: number,
-    depth: number
-  ): Phaser.GameObjects.Graphics {
-    const fold = this.scene.add.graphics()
-      .setPosition(x, y)
-      .setAngle(angle)
-      .setDepth(depth);
-    const halfWidth = width / 2;
-    const topY = -height * 0.28;
-    const bottomY = height * 0.34;
-
-    fold.fillStyle(0xf7f1df, 0.94);
-    fold.lineStyle(4, 0x1f1f1d, 0.86);
-    fold.beginPath();
-    fold.moveTo(-halfWidth, topY + 8);
-    fold.lineTo(-halfWidth * 0.54, topY - 7);
-    fold.lineTo(halfWidth * 0.12, topY + 3);
-    fold.lineTo(halfWidth, topY - 4);
-    fold.lineTo(halfWidth * 0.92, bottomY);
-    fold.lineTo(-halfWidth * 0.88, bottomY + 3);
-    fold.closePath();
-    fold.fillPath();
-    fold.strokePath();
-
-    fold.lineStyle(2, 0x1f1f1d, 0.28);
-    for (let hatchX = -halfWidth + 24; hatchX < halfWidth - 12; hatchX += 34) {
-      fold.lineBetween(hatchX, topY + 10, hatchX - 16, bottomY - 2);
-    }
-
-    fold.lineStyle(1, 0xffffff, 0.7);
-    fold.lineBetween(-halfWidth * 0.78, topY + 8, halfWidth * 0.76, topY + 2);
-    return fold;
   }
 
   private addBridgeImage(

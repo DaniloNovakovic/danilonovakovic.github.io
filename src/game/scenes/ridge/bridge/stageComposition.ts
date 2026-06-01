@@ -124,7 +124,6 @@ export type BridgeStageObjectId =
   | 'bridge-draftsperson'
   | 'toy-car'
   | 'completed-bridge'
-  | 'near-bank-foreground-lip'
   | 'handoff-note';
 
 interface BridgeStageObjectBase {
@@ -183,14 +182,6 @@ export type BridgeStageProceduralBridgeObject = BridgeStageObjectBase & BridgeSt
   deckInset: number;
 };
 
-export type BridgeStagePaperFoldObject = BridgeStageObjectBase & BridgeStageSpecialDepthRule & {
-  id: Extract<BridgeStageObjectId, 'near-bank-foreground-lip'>;
-  kind: 'paper-fold';
-  width: number;
-  height: number;
-  angle?: number;
-};
-
 export type BridgeStageTextNoteObject = BridgeStageObjectBase & BridgeStageSpecialDepthRule & {
   id: Extract<BridgeStageObjectId, 'handoff-note'>;
   kind: 'text-note';
@@ -200,7 +191,6 @@ export type BridgeStageObject =
   | BridgeStageImageObject<'bridge-draftsperson'>
   | BridgeStageImageObject<'toy-car'>
   | BridgeStageProceduralBridgeObject
-  | BridgeStagePaperFoldObject
   | BridgeStageTextNoteObject;
 
 export interface BridgeStageOccluder {
@@ -295,7 +285,7 @@ const BRIDGE_CANVAS = {
 
 const HORIZONTAL_LINE_BASELINE = 520;
 const RAIL_RELATIVE_DEPTH_DEAD_ZONE_PX = 10;
-const RAIL_RELATIVE_DEPTH_PIXELS_PER_LAYER = 24;
+const RAIL_RELATIVE_DEPTH_PIXELS_PER_LAYER = 16;
 const RAIL_RELATIVE_ON_RAIL_TIE_BREAK = -0.5;
 
 /**
@@ -307,8 +297,9 @@ const RAIL_RELATIVE_ON_RAIL_TIE_BREAK = -0.5;
  * 3. Only one object's art is wrong: edit that object's `offset`.
  * 4. Prompt appears awkwardly: edit that spot's `promptOffset`.
  * 5. Background/foreground plate is misaligned: edit `plates`.
- * 6. Modular image objects default to rail-relative depth. Positive `offset.y`
- *    moves an object closer/front; negative `offset.y` moves it farther/back.
+ * 6. Modular image objects and Bridge Cicka spots use rail-relative depth.
+ *    Positive `offset.y` moves them closer/front; negative `offset.y` moves
+ *    them farther/back.
  * 7. Fixed-depth objects can still set `depthMode: 'fixed'` and `depth`.
  *
  * Keep rail `progress` values ascending from `0` to `1`. The player can only
@@ -398,7 +389,7 @@ export const BRIDGE_STAGE_SOURCE: BridgeStageCompositionSource = {
       promptOffset: { x: 0, y: -116 },
       interactRadius: 86
     },
-    { id: 'cicka-settled', railProgress: 0.88 },
+    { id: 'cicka-settled', railProgress: 0.88, offset: { x: 0, y: 20 } },
     { id: 'cicka-toy-car', railProgress: 0.18, offset: { x: 72, y: -2 } },
     {
       id: 'draftsperson',
@@ -478,16 +469,6 @@ export const BRIDGE_STAGE_SOURCE: BridgeStageCompositionSource = {
       leftSpotId: 'bridge-left-bank',
       rightSpotId: 'bridge-right-bank',
       deckInset: 8
-    },
-    {
-      id: 'near-bank-foreground-lip',
-      kind: 'paper-fold',
-      spotId: 'bridge-left-bank',
-      offset: { x: 84, y: 38 },
-      depthMode: 'rail-relative',
-      width: 280,
-      height: 52,
-      angle: -1.5
     },
     {
       id: 'handoff-note',

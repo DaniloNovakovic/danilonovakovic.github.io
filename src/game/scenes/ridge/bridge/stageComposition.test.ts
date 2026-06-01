@@ -5,6 +5,7 @@ import {
   getBridgeWalkRailLength,
   getNearestBridgeStageSpotId,
   projectPointToBridgeWalkRail,
+  resolveBridgeRailRelativeStageDepth,
   resolveBridgeStageObject,
   resolveBridgeStageObjectPlacement,
   resolveBridgeStagePresentation,
@@ -105,11 +106,6 @@ describe('Bridge Stage Composition Source', () => {
       rightSpotId: 'bridge-right-bank',
       deckInset: 8
     });
-    expect(resolveBridgeStageObject(BRIDGE_STAGE_SOURCE, 'near-bank-foreground-lip')).toMatchObject({
-      kind: 'paper-fold',
-      spotId: 'bridge-left-bank',
-      depthMode: 'rail-relative'
-    });
     expect(BRIDGE_STAGE_SOURCE.occluders[0]?.id).toBe('near-bank-lip');
   });
 
@@ -118,13 +114,29 @@ describe('Bridge Stage Composition Source', () => {
       BRIDGE_STAGE_SOURCE,
       'bridge-draftsperson'
     );
-    const foregroundLip = resolveBridgeStageObjectPlacement(
-      BRIDGE_STAGE_SOURCE,
-      'near-bank-foreground-lip'
-    );
     const completedBridge = resolveBridgeStageObjectPlacement(
       BRIDGE_STAGE_SOURCE,
       'completed-bridge'
+    );
+    const bridgeLeftBank = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, 'bridge-left-bank');
+    const belowRailDepth = resolveBridgeRailRelativeStageDepth(
+      bridgeLeftBank.railPoint,
+      {
+        x: bridgeLeftBank.railPoint.x,
+        y: bridgeLeftBank.railPoint.y + 42
+      }
+    );
+    const slightlyBelowRailDepth = resolveBridgeRailRelativeStageDepth(
+      bridgeLeftBank.railPoint,
+      {
+        x: bridgeLeftBank.railPoint.x,
+        y: bridgeLeftBank.railPoint.y + 20
+      }
+    );
+    const cickaSettled = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, 'cicka-settled');
+    const cickaSettledDepth = resolveBridgeRailRelativeStageDepth(
+      cickaSettled.railPoint,
+      cickaSettled
     );
 
     expect(draftsperson).toMatchObject({
@@ -134,8 +146,9 @@ describe('Bridge Stage Composition Source', () => {
     });
     expect(draftsperson.depth).toBeLessThan(draftsperson.railPoint.cue.depth);
 
-    expect(foregroundLip.y).toBeGreaterThan(foregroundLip.railPoint.y);
-    expect(foregroundLip.depth).toBeGreaterThan(foregroundLip.railPoint.cue.depth);
+    expect(belowRailDepth).toBeGreaterThan(bridgeLeftBank.railPoint.cue.depth);
+    expect(slightlyBelowRailDepth).toBeGreaterThan(bridgeLeftBank.railPoint.cue.depth);
+    expect(cickaSettledDepth).toBeGreaterThan(cickaSettled.railPoint.cue.depth);
 
     expect(completedBridge).toMatchObject({
       depthMode: 'fixed',
