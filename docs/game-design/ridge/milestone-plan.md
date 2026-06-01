@@ -128,6 +128,18 @@ visible bridge change, and Bridge-to-Concert transition.
 This slice proves the shared seams before other areas fan out: First Playable
 Route State, prompt/dialogue data shape, camera framing, Cicka placement,
 Compact Area Transition handling, and Coherent Sketchbook Blockout conventions.
+For the experimental 2.5D staging pass, Bridge should also prove the Ridge
+Stage Composition Source: a Primary Walk Rail as movement authority, rail-
+relative Stage Spots for the player/Cicka/resident/props/exit, Stage Plates for
+current bridge art layers, Stage Objects for modular assets, Stage Presentation
+State for blocked/completed route changes, and a debug overlay for rail/spots/
+interactions. Do not build a visual editor before the Bridge source/runtime
+consumption proves useful. Manual tweak tooling should start with read-only
+debug overlays and copyable dev readouts for rail progress, offsets, spots, and
+world coordinates before any drag-to-edit surface is considered. Colocate the
+Bridge source, area-specific stage runtime, interactions, and assets in a
+Bridge-owned Ridge area folder; leave broader Ridge reorganization until the
+Bridge slice proves the shape.
 Once the Bridge Tracer Slice is playable and verified, Concert, Dance Festival,
 and Relay can be split into Agent-Ready Slice Contract issues.
 

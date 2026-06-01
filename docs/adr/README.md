@@ -16,3 +16,4 @@ override the Ridge pre-production route.
 | [`0001-ridge-blockout-as-exploration-map-source.md`](./0001-ridge-blockout-as-exploration-map-source.md) | Current/prototype Ridge blockout runtime only; superseded as future route canon. |
 | [`0002-audio-adapter-boundary.md`](./0002-audio-adapter-boundary.md) | Current audio ownership boundary. |
 | [`0003-ridge-blockout-source-contract.md`](./0003-ridge-blockout-source-contract.md) | Current/prototype Ridge blockout tooling contract only; superseded as future route canon. |
+| [`0004-ridge-stage-composition-source.md`](./0004-ridge-stage-composition-source.md) | Experimental Ridge exploration and First Playable Route staging source. |
