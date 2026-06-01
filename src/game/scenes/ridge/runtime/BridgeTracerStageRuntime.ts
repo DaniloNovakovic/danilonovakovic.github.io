@@ -327,19 +327,6 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
       .setDepth(26);
     this.cickaSprite.play(CICKA_ANIMATION_KEYS.perchIdle);
     this.toyCar = this.createToyCar(cickaPlaySpot.x + 72, groundY - 2);
-    this.toyCarTween = this.scene.tweens.add({
-      targets: this.toyCar,
-      x: cickaPlaySpot.x + 98,
-      angle: 5,
-      duration: 1180,
-      ease: 'Sine.easeInOut',
-      repeat: -1,
-      onUpdate: () => {
-        if (!this.toyCar) return;
-        this.syncToyCarSupport(this.toyCar.x, this.toyCar.y, true);
-      },
-      yoyo: true
-    });
   }
 
   private createBridgeDraftsperson(): void {
@@ -483,8 +470,29 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
         cickaGroundY - 2
       );
       this.syncToyCarSupport(this.toyCar.x, this.toyCar.y, true);
+
+      if (!this.toyCarTween || !this.toyCarTween.isPlaying()) {
+        this.toyCarTween?.stop();
+        this.toyCarTween = this.scene.tweens.add({
+          targets: this.toyCar,
+          x: cickaSpot.x + 98,
+          angle: 5,
+          duration: 1180,
+          ease: 'Sine.easeInOut',
+          repeat: -1,
+          onUpdate: () => {
+            if (!this.toyCar) return;
+            this.syncToyCarSupport(this.toyCar.x, this.toyCar.y, true);
+          },
+          yoyo: true
+        });
+      }
       return;
     }
+
+    this.toyCarTween?.stop();
+    this.toyCarTween = undefined;
+    this.toyCar.setAngle(0);
 
     if (bridgeBeat === 'toy_car_shared') {
       this.toyCar.setVisible(false);
@@ -522,7 +530,8 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
 
     if (!isTalking) {
       this.builderIdleTween?.resume();
-      this.bridgeBuilder.setScale(0.76).setAngle(0);
+      const groundY = this.getGroundedY(BRIDGE_TRACER_WORLD.draftsperson.y);
+      this.bridgeBuilder.setY(groundY - 2).setScale(0.76).setAngle(0);
       return;
     }
 
