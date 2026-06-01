@@ -24,6 +24,7 @@ import {
 import {
   BRIDGE_STAGE_SOURCE,
   resolveBridgeStageObject,
+  resolveBridgeStageObjectPlacement,
   resolveBridgeStagePresentation,
   resolveBridgeStageSpot,
   type BridgeStagePresentationState
@@ -106,6 +107,7 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
     this.createCickaPlaySpot();
     this.createBridgeDraftsperson();
     this.createBridgeCrossingVisuals();
+    this.createRailRelativeForegroundObjects();
     this.createConcertHandoffNote();
     this.createInteractionPrompt();
     this.createDialoguePanel();
@@ -184,16 +186,25 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
 
     this.toyCar.setVisible(true);
     this.toyCarShadow?.setVisible(true);
-    const testStartSpot = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, 'toy-car-test-start');
-    const testEndSpot = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, 'toy-car-test-end');
+    const testStartPlacement = resolveBridgeStageObjectPlacement(
+      BRIDGE_STAGE_SOURCE,
+      'toy-car',
+      { spotId: 'toy-car-test-start' }
+    );
+    const testEndPlacement = resolveBridgeStageObjectPlacement(
+      BRIDGE_STAGE_SOURCE,
+      'toy-car',
+      { spotId: 'toy-car-test-end' }
+    );
 
-    this.toyCar.setPosition(testStartSpot.x, testStartSpot.y);
+    this.toyCar.setPosition(testStartPlacement.x, testStartPlacement.y)
+      .setDepth(testStartPlacement.depth);
     this.syncToyCarSupport(this.toyCar.x, this.toyCar.y, true);
     this.toyCarTween?.stop();
     this.toyCarTween = this.scene.tweens.add({
       targets: this.toyCar,
-      x: testEndSpot.x,
-      y: testEndSpot.y,
+      x: testEndPlacement.x,
+      y: testEndPlacement.y,
       duration: BRIDGE_TEST_DURATION_MS,
       ease: 'Sine.easeInOut',
       onUpdate: () => {
@@ -273,23 +284,26 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
       .setScale(CICKA_RUNTIME_SCALE)
       .setDepth(26);
     this.cickaSprite.play(CICKA_ANIMATION_KEYS.perchIdle);
-    const toyCarSpot = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, 'cicka-toy-car');
-    this.toyCar = this.createToyCar(toyCarSpot.x, toyCarSpot.y);
+    this.toyCar = this.createToyCar();
   }
 
   private createBridgeDraftsperson(): void {
     const draftsperson = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, 'draftsperson');
-    const builderObject = resolveBridgeStageObject(BRIDGE_STAGE_SOURCE, 'bridge-draftsperson');
+    const builderPlacement = resolveBridgeStageObjectPlacement(
+      BRIDGE_STAGE_SOURCE,
+      'bridge-draftsperson'
+    );
+    const builderObject = builderPlacement.object;
 
     this.addReadabilityPocket(draftsperson.x, draftsperson.y - 80, 104, 176, 22);
-    this.bridgeBuilder = this.addBridgeImage(builderObject.textureKey, draftsperson.x, draftsperson.y - 2, {
-      depth: builderObject.depth,
+    this.bridgeBuilder = this.addBridgeImage(builderObject.textureKey, builderPlacement.x, builderPlacement.y, {
+      depth: builderPlacement.depth,
       scale: builderObject.scale
     });
-    this.addGroundContactShadow(draftsperson.x, draftsperson.y - 2, 72, 16, 23);
+    this.addGroundContactShadow(builderPlacement.x, builderPlacement.y, 72, 16, builderPlacement.depth - 1);
     this.builderIdleTween = this.scene.tweens.add({
       targets: this.bridgeBuilder,
-      y: draftsperson.y - 5,
+      y: builderPlacement.y - 3,
       angle: -0.8,
       duration: 1320,
       ease: 'Stepped',
@@ -301,27 +315,43 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
 
   private createBridgeCrossingVisuals(): void {
     const bridgeObject = resolveBridgeStageObject(BRIDGE_STAGE_SOURCE, 'completed-bridge');
+    const bridgePlacement = resolveBridgeStageObjectPlacement(BRIDGE_STAGE_SOURCE, 'completed-bridge');
     const leftBank = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, bridgeObject.leftSpotId);
     const rightBank = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, bridgeObject.rightSpotId);
-    const deck = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, bridgeObject.spotId);
 
     this.completedBridgeObjects.push(
       this.asVisible(this.createSimpleWoodenBridge(
         leftBank.x + bridgeObject.deckInset,
         rightBank.x - bridgeObject.deckInset,
-        deck.y,
-        bridgeObject.depth
+        bridgePlacement.y,
+        bridgePlacement.depth
       ))
     );
   }
 
+  private createRailRelativeForegroundObjects(): void {
+    const foregroundLip = resolveBridgeStageObjectPlacement(
+      BRIDGE_STAGE_SOURCE,
+      'near-bank-foreground-lip'
+    );
+    const foregroundLipObject = foregroundLip.object;
+
+    this.createPaperFold(
+      foregroundLip.x,
+      foregroundLip.y,
+      foregroundLipObject.width,
+      foregroundLipObject.height,
+      foregroundLipObject.angle ?? 0,
+      foregroundLip.depth
+    );
+  }
+
   private createConcertHandoffNote(): void {
-    const handoffSpot = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, 'handoff-note');
-    const handoffObject = resolveBridgeStageObject(BRIDGE_STAGE_SOURCE, 'handoff-note');
+    const handoffPlacement = resolveBridgeStageObjectPlacement(BRIDGE_STAGE_SOURCE, 'handoff-note');
     this.handoffNote = createUiText(
       this.scene,
-      handoffSpot.x,
-      handoffSpot.y,
+      handoffPlacement.x,
+      handoffPlacement.y,
       getMessages().scenes.ridge.bridge.handoffNote,
       {
         fontSize: '14px',
@@ -332,7 +362,7 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
     )
       .setOrigin(0.5)
       .setAngle(-2)
-      .setDepth(handoffObject.depth)
+      .setDepth(handoffPlacement.depth)
       .setVisible(false);
   }
 
@@ -380,17 +410,22 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
     if (!this.toyCar || this.toyCarTestRunning) return;
 
     if (presentation.toyCar.visible && presentation.toyCar.spotId === 'cicka-toy-car') {
-      const toyCarSpot = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, presentation.toyCar.spotId);
+      const toyCarPlacement = resolveBridgeStageObjectPlacement(
+        BRIDGE_STAGE_SOURCE,
+        'toy-car',
+        { spotId: presentation.toyCar.spotId }
+      );
       this.toyCar.setVisible(true);
       this.toyCarShadow?.setVisible(true);
-      this.toyCar.setPosition(toyCarSpot.x, toyCarSpot.y);
+      this.toyCar.setPosition(toyCarPlacement.x, toyCarPlacement.y)
+        .setDepth(toyCarPlacement.depth);
       this.syncToyCarSupport(this.toyCar.x, this.toyCar.y, true);
 
       if (!this.toyCarTween || !this.toyCarTween.isPlaying()) {
         this.toyCarTween?.stop();
         this.toyCarTween = this.scene.tweens.add({
           targets: this.toyCar,
-          x: toyCarSpot.x + 26,
+          x: toyCarPlacement.x + 26,
           angle: 5,
           duration: 1180,
           ease: 'Sine.easeInOut',
@@ -415,19 +450,31 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
       return;
     }
 
-    const toyCarSpot = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, presentation.toyCar.spotId);
+    const toyCarPlacement = resolveBridgeStageObjectPlacement(
+      BRIDGE_STAGE_SOURCE,
+      'toy-car',
+      { spotId: presentation.toyCar.spotId }
+    );
     this.toyCar.setVisible(true);
     this.toyCarShadow?.setVisible(true);
-    this.toyCar.setPosition(toyCarSpot.x, toyCarSpot.y);
+    this.toyCar.setPosition(toyCarPlacement.x, toyCarPlacement.y)
+      .setDepth(toyCarPlacement.depth);
     this.syncToyCarSupport(this.toyCar.x, this.toyCar.y, true);
   }
 
-  private createToyCar(x: number, y: number): Phaser.GameObjects.Image {
-    const toyCarObject = resolveBridgeStageObject(BRIDGE_STAGE_SOURCE, 'toy-car');
-    this.toyCarHalo = this.addReadabilityPocket(x, y - 18, 98, 56, 23);
-    this.toyCarShadow = this.addGroundContactShadow(x, y + 2, 78, 14, 24);
-    return this.addBridgeImage(toyCarObject.textureKey, x, y, {
-      depth: toyCarObject.depth,
+  private createToyCar(): Phaser.GameObjects.Image {
+    const toyCarPlacement = resolveBridgeStageObjectPlacement(BRIDGE_STAGE_SOURCE, 'toy-car');
+    const toyCarObject = toyCarPlacement.object;
+    this.toyCarHalo = this.addReadabilityPocket(toyCarPlacement.x, toyCarPlacement.y - 18, 98, 56, 23);
+    this.toyCarShadow = this.addGroundContactShadow(
+      toyCarPlacement.x,
+      toyCarPlacement.y + 2,
+      78,
+      14,
+      toyCarPlacement.depth - 1
+    );
+    return this.addBridgeImage(toyCarObject.textureKey, toyCarPlacement.x, toyCarPlacement.y, {
+      depth: toyCarPlacement.depth,
       scale: toyCarObject.scale
     });
   }
@@ -444,19 +491,29 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
 
     if (!isTalking) {
       this.builderIdleTween?.resume();
-      const draftsperson = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, 'draftsperson');
-      const builderObject = resolveBridgeStageObject(BRIDGE_STAGE_SOURCE, 'bridge-draftsperson');
-      this.bridgeBuilder.setY(draftsperson.y - 2).setScale(builderObject.scale ?? 1).setAngle(0);
+      const builderPlacement = resolveBridgeStageObjectPlacement(
+        BRIDGE_STAGE_SOURCE,
+        'bridge-draftsperson'
+      );
+      const builderObject = builderPlacement.object;
+      this.bridgeBuilder
+        .setY(builderPlacement.y)
+        .setScale(builderObject.scale ?? 1)
+        .setDepth(builderPlacement.depth)
+        .setAngle(0);
       return;
     }
 
     this.builderIdleTween?.pause();
-    const draftsperson = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, 'draftsperson');
-    const builderObject = resolveBridgeStageObject(BRIDGE_STAGE_SOURCE, 'bridge-draftsperson');
+    const builderPlacement = resolveBridgeStageObjectPlacement(
+      BRIDGE_STAGE_SOURCE,
+      'bridge-draftsperson'
+    );
+    const builderObject = builderPlacement.object;
     const baseScale = builderObject.scale ?? 1;
     this.builderTalkTween = this.scene.tweens.add({
       targets: this.bridgeBuilder,
-      y: draftsperson.y - 10,
+      y: builderPlacement.y - 8,
       scaleX: baseScale + 0.03,
       scaleY: Math.max(0.1, baseScale - 0.02),
       angle: 1.4,
@@ -506,6 +563,45 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
     bridge.lineBetween(rightX - 86, deckTopY + 34, rightX - 4, deckTopY + 22);
 
     return bridge;
+  }
+
+  private createPaperFold(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    angle: number,
+    depth: number
+  ): Phaser.GameObjects.Graphics {
+    const fold = this.scene.add.graphics()
+      .setPosition(x, y)
+      .setAngle(angle)
+      .setDepth(depth);
+    const halfWidth = width / 2;
+    const topY = -height * 0.28;
+    const bottomY = height * 0.34;
+
+    fold.fillStyle(0xf7f1df, 0.94);
+    fold.lineStyle(4, 0x1f1f1d, 0.86);
+    fold.beginPath();
+    fold.moveTo(-halfWidth, topY + 8);
+    fold.lineTo(-halfWidth * 0.54, topY - 7);
+    fold.lineTo(halfWidth * 0.12, topY + 3);
+    fold.lineTo(halfWidth, topY - 4);
+    fold.lineTo(halfWidth * 0.92, bottomY);
+    fold.lineTo(-halfWidth * 0.88, bottomY + 3);
+    fold.closePath();
+    fold.fillPath();
+    fold.strokePath();
+
+    fold.lineStyle(2, 0x1f1f1d, 0.28);
+    for (let hatchX = -halfWidth + 24; hatchX < halfWidth - 12; hatchX += 34) {
+      fold.lineBetween(hatchX, topY + 10, hatchX - 16, bottomY - 2);
+    }
+
+    fold.lineStyle(1, 0xffffff, 0.7);
+    fold.lineBetween(-halfWidth * 0.78, topY + 8, halfWidth * 0.76, topY + 2);
+    return fold;
   }
 
   private addBridgeImage(

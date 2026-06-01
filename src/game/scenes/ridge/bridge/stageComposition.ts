@@ -13,6 +13,8 @@ export interface BridgeStagePoint {
   y: number;
 }
 
+export type BridgeStageDepthMode = 'fixed' | 'rail-relative';
+
 /**
  * Rectangular authoring bounds in Bridge Stage Source space.
  *
@@ -122,28 +124,56 @@ export type BridgeStageObjectId =
   | 'bridge-draftsperson'
   | 'toy-car'
   | 'completed-bridge'
+  | 'near-bank-foreground-lip'
   | 'handoff-note';
 
 interface BridgeStageObjectBase {
   /** Stage Spot that owns this object's placement. Tweak the spot before this. */
   spotId: BridgeStageSpotId;
-  /** Display depth relative to plates, player cue depth, and occluders. */
-  depth: number;
+  /** Optional art-only nudge from the owning Stage Spot. */
+  offset?: BridgeStagePoint;
+  /** Optional nudge for the point used by rail-relative depth sorting. */
+  depthAnchorOffset?: BridgeStagePoint;
   scale?: number;
   origin?: readonly [number, number];
 }
 
-export interface BridgeStageImageObject<
+type BridgeStageImageDepthRule =
+  | {
+      /** Image objects use rail-relative visual depth by default. */
+      depthMode?: 'rail-relative';
+      /** Fine-tune the computed rail-relative depth without switching to fixed depth. */
+      depthOffset?: number;
+    }
+  | {
+      /** Manual display depth for special image cases. */
+      depthMode: 'fixed';
+      depth: number;
+    };
+
+type BridgeStageSpecialDepthRule =
+  | {
+      /** Non-image objects keep fixed depth by default. */
+      depthMode?: 'fixed';
+      depth: number;
+    }
+  | {
+      /** Special objects can opt into rail-relative visual depth. */
+      depthMode: 'rail-relative';
+      depthOffset?: number;
+    };
+
+export type BridgeStageImageObject<
   ObjectId extends Extract<BridgeStageObjectId, 'bridge-draftsperson' | 'toy-car'> =
     Extract<BridgeStageObjectId, 'bridge-draftsperson' | 'toy-car'>
-> extends BridgeStageObjectBase {
+> = BridgeStageObjectBase & BridgeStageImageDepthRule & {
   /** Stable name for a runtime object or debugger row. */
   id: ObjectId;
   kind: 'image';
   textureKey: string;
-}
+};
 
-export interface BridgeStageProceduralBridgeObject extends BridgeStageObjectBase {
+export type BridgeStageProceduralBridgeObject = BridgeStageObjectBase & BridgeStageSpecialDepthRule & {
   id: Extract<BridgeStageObjectId, 'completed-bridge'>;
   kind: 'procedural-bridge';
   /** Rail-attached spots that define the procedural bridge span. */
@@ -151,17 +181,26 @@ export interface BridgeStageProceduralBridgeObject extends BridgeStageObjectBase
   rightSpotId: Extract<BridgeStageSpotId, 'bridge-right-bank'>;
   /** Pixel inset from each bank before drawing the bridge deck. */
   deckInset: number;
-}
+};
 
-export interface BridgeStageTextNoteObject extends BridgeStageObjectBase {
+export type BridgeStagePaperFoldObject = BridgeStageObjectBase & BridgeStageSpecialDepthRule & {
+  id: Extract<BridgeStageObjectId, 'near-bank-foreground-lip'>;
+  kind: 'paper-fold';
+  width: number;
+  height: number;
+  angle?: number;
+};
+
+export type BridgeStageTextNoteObject = BridgeStageObjectBase & BridgeStageSpecialDepthRule & {
   id: Extract<BridgeStageObjectId, 'handoff-note'>;
   kind: 'text-note';
-}
+};
 
 export type BridgeStageObject =
   | BridgeStageImageObject<'bridge-draftsperson'>
   | BridgeStageImageObject<'toy-car'>
   | BridgeStageProceduralBridgeObject
+  | BridgeStagePaperFoldObject
   | BridgeStageTextNoteObject;
 
 export interface BridgeStageOccluder {
@@ -202,6 +241,23 @@ export interface BridgeRailSample extends BridgeStagePoint {
   cue: BridgeRailPerspectiveCue;
 }
 
+export interface ResolveBridgeStageObjectPlacementOptions {
+  /** Optional route-state placement override, used by objects like the toy car. */
+  spotId?: BridgeStageSpotId;
+}
+
+export interface ResolvedBridgeStageObjectPlacement<
+  ObjectId extends BridgeStageObjectId = BridgeStageObjectId
+> extends BridgeStagePoint {
+  id: ObjectId;
+  object: Extract<BridgeStageObject, { id: ObjectId }>;
+  spot: ResolvedBridgeStageSpot;
+  railPoint: BridgeRailSample;
+  contactPoint: BridgeStagePoint;
+  depth: number;
+  depthMode: BridgeStageDepthMode;
+}
+
 /**
  * Runtime view of the Bridge for the current story beat.
  *
@@ -238,17 +294,22 @@ const BRIDGE_CANVAS = {
 } as const;
 
 const HORIZONTAL_LINE_BASELINE = 520;
+const RAIL_RELATIVE_DEPTH_DEAD_ZONE_PX = 10;
+const RAIL_RELATIVE_DEPTH_PIXELS_PER_LAYER = 24;
+const RAIL_RELATIVE_ON_RAIL_TIE_BREAK = -0.5;
 
 /**
  * Bridge Stage Composition Source.
  *
  * Quick tweak guide:
  * 1. Walking line feels off: edit `primaryWalkRail.points`.
- * 2. NPC/prop is in the wrong place: edit its `spot` railProgress/offset.
- * 3. Prompt appears awkwardly: edit that spot's `promptOffset`.
- * 4. Background/foreground plate is misaligned: edit `plates`.
- * 5. Something should render in front/behind: edit `cue.depth`, object `depth`,
- *    plate `depth`, or occluder `depth`.
+ * 2. NPC/prop anchor is wrong: edit its Stage Spot `railProgress`/`offset`.
+ * 3. Only one object's art is wrong: edit that object's `offset`.
+ * 4. Prompt appears awkwardly: edit that spot's `promptOffset`.
+ * 5. Background/foreground plate is misaligned: edit `plates`.
+ * 6. Modular image objects default to rail-relative depth. Positive `offset.y`
+ *    moves an object closer/front; negative `offset.y` moves it farther/back.
+ * 7. Fixed-depth objects can still set `depthMode: 'fixed'` and `depth`.
  *
  * Keep rail `progress` values ascending from `0` to `1`. The player can only
  * move along this rail; all Stage Spots attach to it by `railProgress`.
@@ -398,7 +459,7 @@ export const BRIDGE_STAGE_SOURCE: BridgeStageCompositionSource = {
       kind: 'image',
       textureKey: BRIDGE_TEXTURE_KEYS.bridgeBuilder,
       spotId: 'draftsperson',
-      depth: 24,
+      offset: { x: 0, y: -2 },
       scale: 0.76
     },
     {
@@ -406,22 +467,33 @@ export const BRIDGE_STAGE_SOURCE: BridgeStageCompositionSource = {
       kind: 'image',
       textureKey: BRIDGE_TEXTURE_KEYS.modularToyCar,
       spotId: 'cicka-toy-car',
-      depth: 25,
       scale: 0.78
     },
     {
       id: 'completed-bridge',
       kind: 'procedural-bridge',
       spotId: 'bridge-center',
+      depthMode: 'fixed',
       depth: 10,
       leftSpotId: 'bridge-left-bank',
       rightSpotId: 'bridge-right-bank',
       deckInset: 8
     },
     {
+      id: 'near-bank-foreground-lip',
+      kind: 'paper-fold',
+      spotId: 'bridge-left-bank',
+      offset: { x: 84, y: 38 },
+      depthMode: 'rail-relative',
+      width: 280,
+      height: 52,
+      angle: -1.5
+    },
+    {
       id: 'handoff-note',
       kind: 'text-note',
       spotId: 'handoff-note',
+      depthMode: 'fixed',
       depth: 24
     }
   ],
@@ -538,6 +610,67 @@ export function resolveBridgeStageObject(
     throw new Error(`Unknown Bridge Stage Object: ${objectId}`);
   }
   return object;
+}
+
+/**
+ * Resolve a Stage Object to world placement and visual depth.
+ *
+ * Image objects default to rail-relative depth: their Stage Contact Point is
+ * compared with the sampled Walk Rail. Objects below the rail render in front
+ * of the player; objects at or above the rail render behind the player.
+ */
+export function resolveBridgeStageObjectPlacement<ObjectId extends BridgeStageObjectId>(
+  source: BridgeStageCompositionSource,
+  objectId: ObjectId,
+  options: ResolveBridgeStageObjectPlacementOptions = {}
+): ResolvedBridgeStageObjectPlacement<ObjectId> {
+  const object = resolveBridgeStageObject(source, objectId);
+  const spot = resolveBridgeStageSpot(source, options.spotId ?? object.spotId);
+  const x = spot.x + (object.offset?.x ?? 0);
+  const y = spot.y + (object.offset?.y ?? 0);
+  const contactPoint = {
+    x: x + (object.depthAnchorOffset?.x ?? 0),
+    y: y + (object.depthAnchorOffset?.y ?? 0)
+  };
+  const depthMode = resolveBridgeStageObjectDepthMode(object);
+  const depth = depthMode === 'rail-relative'
+    ? resolveBridgeRailRelativeStageDepth(
+      spot.railPoint,
+      contactPoint,
+      getBridgeStageObjectDepthOffset(object)
+    )
+    : getBridgeStageObjectFixedDepth(object);
+
+  return {
+    id: object.id,
+    object,
+    spot,
+    railPoint: spot.railPoint,
+    x,
+    y,
+    contactPoint,
+    depth,
+    depthMode
+  } as ResolvedBridgeStageObjectPlacement<ObjectId>;
+}
+
+/** Resolve visual-only draw order for a rail-relative Stage Contact Point. */
+export function resolveBridgeRailRelativeStageDepth(
+  railPoint: BridgeRailSample,
+  contactPoint: BridgeStagePoint,
+  depthOffset: number = 0
+): number {
+  const deltaY = contactPoint.y - railPoint.y;
+  const depthDeltaY = Math.abs(deltaY) <= RAIL_RELATIVE_DEPTH_DEAD_ZONE_PX
+    ? 0
+    : deltaY - (Math.sign(deltaY) * RAIL_RELATIVE_DEPTH_DEAD_ZONE_PX);
+
+  return (
+    railPoint.cue.depth +
+    RAIL_RELATIVE_ON_RAIL_TIE_BREAK +
+    (depthDeltaY / RAIL_RELATIVE_DEPTH_PIXELS_PER_LAYER) +
+    depthOffset
+  );
 }
 
 /**
@@ -688,6 +821,23 @@ function toRailSample(
     progress,
     cue: { ...point.cue }
   };
+}
+
+function resolveBridgeStageObjectDepthMode(
+  object: BridgeStageObject
+): BridgeStageDepthMode {
+  return object.depthMode ?? (object.kind === 'image' ? 'rail-relative' : 'fixed');
+}
+
+function getBridgeStageObjectFixedDepth(object: BridgeStageObject): number {
+  if ('depth' in object && typeof object.depth === 'number') {
+    return object.depth;
+  }
+  throw new Error(`Bridge Stage Object "${object.id}" must define fixed depth.`);
+}
+
+function getBridgeStageObjectDepthOffset(object: BridgeStageObject): number {
+  return 'depthOffset' in object ? object.depthOffset ?? 0 : 0;
 }
 
 function clamp01(value: number): number {

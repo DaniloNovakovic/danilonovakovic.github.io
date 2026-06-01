@@ -6,6 +6,7 @@ import {
   getNearestBridgeStageSpotId,
   projectPointToBridgeWalkRail,
   resolveBridgeStageObject,
+  resolveBridgeStageObjectPlacement,
   resolveBridgeStagePresentation,
   resolveBridgeStageSpot,
   sampleBridgeWalkRail
@@ -99,11 +100,62 @@ describe('Bridge Stage Composition Source', () => {
     expect(resolveBridgeStageObject(BRIDGE_STAGE_SOURCE, 'completed-bridge')).toMatchObject({
       kind: 'procedural-bridge',
       spotId: 'bridge-center',
+      depthMode: 'fixed',
       leftSpotId: 'bridge-left-bank',
       rightSpotId: 'bridge-right-bank',
       deckInset: 8
     });
+    expect(resolveBridgeStageObject(BRIDGE_STAGE_SOURCE, 'near-bank-foreground-lip')).toMatchObject({
+      kind: 'paper-fold',
+      spotId: 'bridge-left-bank',
+      depthMode: 'rail-relative'
+    });
     expect(BRIDGE_STAGE_SOURCE.occluders[0]?.id).toBe('near-bank-lip');
+  });
+
+  it('resolves Stage Object placement with rail-relative visual depth', () => {
+    const draftsperson = resolveBridgeStageObjectPlacement(
+      BRIDGE_STAGE_SOURCE,
+      'bridge-draftsperson'
+    );
+    const foregroundLip = resolveBridgeStageObjectPlacement(
+      BRIDGE_STAGE_SOURCE,
+      'near-bank-foreground-lip'
+    );
+    const completedBridge = resolveBridgeStageObjectPlacement(
+      BRIDGE_STAGE_SOURCE,
+      'completed-bridge'
+    );
+
+    expect(draftsperson).toMatchObject({
+      x: 1275,
+      y: 518,
+      depthMode: 'rail-relative'
+    });
+    expect(draftsperson.depth).toBeLessThan(draftsperson.railPoint.cue.depth);
+
+    expect(foregroundLip.y).toBeGreaterThan(foregroundLip.railPoint.y);
+    expect(foregroundLip.depth).toBeGreaterThan(foregroundLip.railPoint.cue.depth);
+
+    expect(completedBridge).toMatchObject({
+      depthMode: 'fixed',
+      depth: 10
+    });
+  });
+
+  it('can resolve route-state object placement without changing the source anchor', () => {
+    const toyCarAtTestEnd = resolveBridgeStageObjectPlacement(
+      BRIDGE_STAGE_SOURCE,
+      'toy-car',
+      { spotId: 'toy-car-test-end' }
+    );
+
+    expect(toyCarAtTestEnd).toMatchObject({
+      x: 1985,
+      y: 514,
+      depthMode: 'rail-relative'
+    });
+    expect(resolveBridgeStageObject(BRIDGE_STAGE_SOURCE, 'toy-car').spotId).toBe('cicka-toy-car');
   });
 
   it('projects free world positions back onto the Walk Rail for resume and dev teleports', () => {
