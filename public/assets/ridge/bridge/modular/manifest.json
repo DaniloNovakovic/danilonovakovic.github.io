@@ -1,0 +1,17 @@
+{
+  "source": "built-in image_gen + local chroma-key slicing",
+  "assets": [
+    {
+      "file": "bridge-builder.png",
+      "kind": "character",
+      "width": 105,
+      "height": 220
+    },
+    {
+      "file": "toy-car.png",
+      "kind": "prop",
+      "width": 132,
+      "height": 72
+    }
+  ]
+}

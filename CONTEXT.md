@@ -281,6 +281,70 @@ Walkable Sketchbook Stage presentation. It is not gray-box art and not final
 polish.
 _Avoid_: gray-box placeholder, final art pass, polished asset set
 
+**Ridge Stage Composition Source**:
+The authorable spatial staging source for a Walkable Sketchbook Stage. It owns
+major placement decisions such as the player movement track, character spots,
+props, interaction anchors, foreground blockers, and camera framing before final
+art is locked.
+_Avoid_: scattered runtime constants, Procreate export, Tiled map, final art map
+
+**Walk Rail**:
+The authored one-dimensional movement track inside a Walkable Sketchbook Stage.
+Left and right input move the player along the rail while the player's foot
+anchor resolves to staged world position, scale, depth, camera, and interaction
+readability. For the First Playable Route, it is the movement authority for
+Ridge exploration rather than a visual helper layered over platform colliders.
+_Avoid_: path, collision strip, navmesh, route, spline, platform floor
+
+**Rail Perspective Cue**:
+Scale, depth, or framing data carried by Walk Rail points so rail-attached
+characters and props inherit a coherent staged perspective by default. Stage
+Objects can override these cues only when local art polish needs it.
+_Avoid_: per-sprite scale guessing, hidden perspective hack
+
+**Primary Walk Rail**:
+The main left-to-right Walk Rail through a Compact Ridge Stage. Required route
+progress stays on this rail, while any optional side pocket must stay short,
+named, and clearly connected so the stage does not become a maze or free-roam
+map.
+_Avoid_: rail network, top-down branch graph, maze, multi-lane navigation
+
+**Stage Spot**:
+A named rail-relative placement in a Ridge Stage Composition Source, used for
+characters, props, interactions, exits, camera beats, or Cicka field presence.
+It attaches to a Walk Rail by progress and can use small offsets for art polish.
+_Avoid_: raw coordinate, hard-coded position, invisible quest marker
+
+**Stage Plate**:
+A large hand-authored visual layer in a Ridge Stage Composition Source, such as
+far background, close stage, or foreground frame art exported from Procreate or
+another drawing tool. Stage Plates align to the declared canvas of their owning
+Compact Ridge Stage; canvas width can vary by stage while height should stay
+stable unless the area really needs different framing. Multiple Stage Plates
+can compose one layer for long scenes, but the default workflow is a full-stage
+aligned plate per layer until segmentation is needed.
+_Avoid_: tilemap, collision map, gameplay source, one global Ridge canvas
+
+**Stage Object**:
+A modular character, prop, route-change piece, or foreground blocker placed by
+the Ridge Stage Composition Source. Stage Objects can attach to Stage Spots and
+change visibility or presentation with local beat state.
+_Avoid_: baked-only prop, scattered scene sprite, final asset requirement
+
+**Stage Presentation State**:
+The visibility, placement, or presentation changes that a Ridge Stage
+Composition Source derives from local route beat state. It describes how a
+state looks on the stage, not the story or progression rule that changes the
+state.
+_Avoid_: route logic, quest state, story progression, scene if-statement web
+
+**Stage Occluder**:
+An explicit foreground Stage Object or authored depth shape that can pass in
+front of the player or other rail-attached objects. Use it for player-affecting
+foreground depth instead of baking gameplay-relevant occlusion into one large
+front image.
+_Avoid_: magic foreground layer, hidden depth mask, visual blocker as collision
+
 **Lived-In Causality**:
 A design rule for the Sketchbook Neighborhood: route blockers and world changes
 should have practical in-world causes, local context, and residents with

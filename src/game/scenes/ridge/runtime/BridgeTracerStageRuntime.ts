@@ -12,6 +12,7 @@ import {
   CICKA_RUNTIME_SCALE,
   CICKA_TEXTURE_KEY
 } from '../cicka/assets';
+import { BRIDGE_TEXTURE_KEYS } from '../bridge/assets';
 import {
   getBridgeDialogueLine,
   getBridgePromptText,
@@ -33,6 +34,21 @@ const BRIDGE_DIALOGUE_DURATION_MS = 5600;
 const BRIDGE_TEST_DURATION_MS = 1900;
 const BRIDGE_DIALOGUE_PANEL_WIDTH = 460;
 const BRIDGE_DIALOGUE_TEXT_WIDTH = 418;
+const BRIDGE_CHARACTER_GROUND_OFFSET_Y = 8;
+const BRIDGE_FAR_LAYER_SCALE = 0.82;
+const BRIDGE_CLOSE_STAGE_SCALE = 1.25;
+const BRIDGE_CLOSE_STAGE_FLOOR_SOURCE_Y = 556;
+const BRIDGE_CLOSE_STAGE_OFFSET_Y = -12;
+
+type BridgeImageOptions = {
+  alpha?: number;
+  depth?: number;
+  flipX?: boolean;
+  origin?: readonly [number, number];
+  scale?: number;
+  scrollFactor?: readonly [number, number];
+  tint?: number;
+};
 
 export interface BridgeTracerStageRuntime {
   readonly platforms: readonly Phaser.GameObjects.Zone[];
@@ -67,12 +83,17 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
   private completedBridgeObjects: VisibleGameObject[] = [];
   private cickaSprite?: Phaser.GameObjects.Sprite;
   private cickaShadow?: Phaser.GameObjects.Ellipse;
-  private toyCar?: Phaser.GameObjects.Container;
+  private toyCar?: Phaser.GameObjects.Image;
+  private toyCarHalo?: Phaser.GameObjects.Graphics;
+  private toyCarShadow?: Phaser.GameObjects.Ellipse;
+  private bridgeBuilder?: Phaser.GameObjects.Image;
   private handoffNote?: Phaser.GameObjects.Text;
   private interactPrompt?: Phaser.GameObjects.Text;
   private dialogueContainer?: Phaser.GameObjects.Container;
   private dialogueText?: Phaser.GameObjects.Text;
   private dialogueHideEvent?: Phaser.Time.TimerEvent;
+  private builderIdleTween?: Phaser.Tweens.Tween;
+  private builderTalkTween?: Phaser.Tweens.Tween;
   private toyCarTween?: Phaser.Tweens.Tween;
   private toyCarTestRunning = false;
 
@@ -107,6 +128,10 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
   dispose(): void {
     this.dialogueHideEvent?.remove(false);
     this.dialogueHideEvent = undefined;
+    this.builderIdleTween?.stop();
+    this.builderIdleTween = undefined;
+    this.builderTalkTween?.stop();
+    this.builderTalkTween = undefined;
     this.toyCarTween?.stop();
     this.toyCarTween = undefined;
     this.toyCarTestRunning = false;
@@ -138,9 +163,11 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
 
     this.dialogueText.setText(text);
     this.dialogueContainer.setVisible(true);
+    this.setBuilderTalking(lineIds.some((id) => id.startsWith('bridge.draftsperson.')));
     this.dialogueHideEvent?.remove(false);
     this.dialogueHideEvent = this.scene.time.delayedCall(durationMs, () => {
       this.dialogueContainer?.setVisible(false);
+      this.setBuilderTalking(false);
     });
   }
 
@@ -173,17 +200,23 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
     }
 
     this.toyCar.setVisible(true);
+    this.toyCarShadow?.setVisible(true);
     this.toyCar.setPosition(
       BRIDGE_TRACER_WORLD.blueprint.x - 22,
       BRIDGE_TRACER_WORLD.blueprint.y + 44
     );
+    this.syncToyCarSupport(this.toyCar.x, this.toyCar.y, true);
     this.toyCarTween?.stop();
     this.toyCarTween = this.scene.tweens.add({
       targets: this.toyCar,
       x: BRIDGE_TRACER_WORLD.bridge.rightBankStartX + 120,
-      y: BRIDGE_TRACER_WORLD.floorY - 4,
+      y: this.getGroundedY(BRIDGE_TRACER_WORLD.floorY) - 4,
       duration: BRIDGE_TEST_DURATION_MS,
       ease: 'Sine.easeInOut',
+      onUpdate: () => {
+        if (!this.toyCar) return;
+        this.syncToyCarSupport(this.toyCar.x, this.toyCar.y, true);
+      },
       onComplete: () => {
         this.toyCarTestRunning = false;
         onComplete();
@@ -194,80 +227,66 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
   }
 
   private addBackdropInk(): void {
-    const graphics = this.scene.add.graphics().setDepth(-80);
-    graphics.lineStyle(2, 0x1f1f1d, 0.06);
-    for (let y = 116; y < BRIDGE_TRACER_WORLD.bounds.height; y += 96) {
-      graphics.strokeLineShape(new Phaser.Geom.Line(0, y, BRIDGE_TRACER_WORLD.bounds.width, y));
+    const { bounds, floorY } = BRIDGE_TRACER_WORLD;
+    const paper = this.scene.add.graphics().setDepth(-90);
+    paper.fillStyle(0xf7f1df, 1);
+    paper.fillRect(0, 0, bounds.width, bounds.height);
+
+    this.addBridgeImage(BRIDGE_TEXTURE_KEYS.layeredFarMountains, -80, -12, {
+      depth: -82,
+      origin: [0, 0],
+      scale: BRIDGE_FAR_LAYER_SCALE,
+      scrollFactor: [0.16, 1]
+    });
+    this.addBridgeImage(BRIDGE_TEXTURE_KEYS.layeredFarMountains, 1260, -12, {
+      depth: -82,
+      origin: [0, 0],
+      scale: BRIDGE_FAR_LAYER_SCALE,
+      scrollFactor: [0.16, 1]
+    });
+
+    this.addBridgeImage(
+      BRIDGE_TEXTURE_KEYS.layeredCloseStage,
+      0,
+      floorY - BRIDGE_CLOSE_STAGE_FLOOR_SOURCE_Y * BRIDGE_CLOSE_STAGE_SCALE + BRIDGE_CLOSE_STAGE_OFFSET_Y,
+      {
+        depth: 3,
+        origin: [0, 0],
+        scale: BRIDGE_CLOSE_STAGE_SCALE
+      }
+    );
+    this.addAmbientInkLife();
+  }
+
+  private addAmbientInkLife(): void {
+    const { bounds, floorY } = BRIDGE_TRACER_WORLD;
+    const wind = this.scene.add.graphics().setDepth(-30);
+    wind.lineStyle(2, 0x1f1f1d, 0.14);
+    [
+      [290, floorY - 128, 82],
+      [1180, floorY - 154, 64],
+      [1960, floorY - 118, 74],
+      [2380, floorY - 166, 58]
+    ].forEach(([x, y, width]) => {
+      wind.beginPath();
+      wind.moveTo(x, y);
+      wind.lineTo(x + width / 2, y - 8);
+      wind.lineTo(x + width, y);
+      wind.strokePath();
+    });
+
+    const edgeDust = this.scene.add.graphics()
+      .setDepth(4)
+      .setScrollFactor(1, 1);
+    edgeDust.lineStyle(1, 0x1f1f1d, 0.1);
+    for (let x = 140; x < bounds.width; x += 220) {
+      edgeDust.lineBetween(x, floorY + 18, x + 42, floorY + 14);
     }
-
-    graphics.lineStyle(4, 0x1f1f1d, 0.12);
-    graphics.beginPath();
-    graphics.moveTo(0, BRIDGE_TRACER_WORLD.floorY - 34);
-    graphics.lineTo(220, BRIDGE_TRACER_WORLD.floorY - 58);
-    graphics.lineTo(460, BRIDGE_TRACER_WORLD.floorY - 34);
-    graphics.lineTo(760, BRIDGE_TRACER_WORLD.floorY - 46);
-    graphics.strokePath();
-
-    for (let x = 180; x < 1000; x += 190) {
-      graphics.lineStyle(3, 0x1f1f1d, 0.12);
-      graphics.strokeTriangle(
-        x,
-        BRIDGE_TRACER_WORLD.floorY - 72,
-        x - 34,
-        BRIDGE_TRACER_WORLD.floorY - 14,
-        x + 40,
-        BRIDGE_TRACER_WORLD.floorY - 14
-      );
-      graphics.lineStyle(2, 0x1f1f1d, 0.1);
-      graphics.strokeLineShape(new Phaser.Geom.Line(
-        x,
-        BRIDGE_TRACER_WORLD.floorY - 54,
-        x,
-        BRIDGE_TRACER_WORLD.floorY - 12
-      ));
-    }
-
-    graphics.lineStyle(5, 0x1f1f1d, 0.14);
-    graphics.strokeLineShape(new Phaser.Geom.Line(1980, 332, 2060, 250));
-    graphics.strokeLineShape(new Phaser.Geom.Line(2060, 250, 2140, 332));
-    graphics.lineStyle(3, 0x1f1f1d, 0.1);
-    graphics.strokeLineShape(new Phaser.Geom.Line(2024, 292, 2094, 292));
   }
 
   private createBridgeGround(): void {
     const { floorY, bridge, bounds } = BRIDGE_TRACER_WORLD;
     const groundY = floorY + BRIDGE_GROUND_COLLIDER_HEIGHT / 2;
-
-    this.scene.add.rectangle(
-      bridge.leftBankEndX / 2,
-      floorY + 24,
-      bridge.leftBankEndX,
-      48,
-      0xf7f1df,
-      1
-    )
-      .setStrokeStyle(4, 0x1f1f1d, 0.8)
-      .setDepth(1);
-    this.scene.add.rectangle(
-      bridge.rightBankStartX + (bounds.width - bridge.rightBankStartX) / 2,
-      floorY + 24,
-      bounds.width - bridge.rightBankStartX,
-      48,
-      0xf7f1df,
-      1
-    )
-      .setStrokeStyle(4, 0x1f1f1d, 0.8)
-      .setDepth(1);
-
-    this.addHatching(40, floorY + 8, bridge.leftBankEndX - 80, 34, 14, 0.12);
-    this.addHatching(
-      bridge.rightBankStartX + 34,
-      floorY + 8,
-      bounds.width - bridge.rightBankStartX - 80,
-      34,
-      14,
-      0.12
-    );
 
     this.groundPlatforms.push(
       this.addStaticZone(
@@ -287,9 +306,11 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
 
   private createCickaPlaySpot(): void {
     const { cickaPlaySpot } = BRIDGE_TRACER_WORLD;
+    const groundY = this.getGroundedY(cickaPlaySpot.y);
+    this.addReadabilityPocket(cickaPlaySpot.x + 34, groundY - 34, 176, 86, 14);
     this.cickaShadow = this.scene.add.ellipse(
       cickaPlaySpot.x,
-      cickaPlaySpot.y + 8,
+      groundY - 2,
       92,
       18,
       0x1f1f1d,
@@ -297,7 +318,7 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
     ).setDepth(15);
     this.cickaSprite = this.scene.add.sprite(
       cickaPlaySpot.x,
-      cickaPlaySpot.y,
+      groundY,
       CICKA_TEXTURE_KEY,
       CICKA_FRAME_INDEX.perchSit
     )
@@ -305,92 +326,53 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
       .setScale(CICKA_RUNTIME_SCALE)
       .setDepth(26);
     this.cickaSprite.play(CICKA_ANIMATION_KEYS.perchIdle);
-    this.toyCar = this.createToyCar(cickaPlaySpot.x + 66, cickaPlaySpot.y + 8);
+    this.toyCar = this.createToyCar(cickaPlaySpot.x + 72, groundY - 2);
+    this.toyCarTween = this.scene.tweens.add({
+      targets: this.toyCar,
+      x: cickaPlaySpot.x + 98,
+      angle: 5,
+      duration: 1180,
+      ease: 'Sine.easeInOut',
+      repeat: -1,
+      onUpdate: () => {
+        if (!this.toyCar) return;
+        this.syncToyCarSupport(this.toyCar.x, this.toyCar.y, true);
+      },
+      yoyo: true
+    });
   }
 
   private createBridgeDraftsperson(): void {
-    const { draftsperson, blueprint } = BRIDGE_TRACER_WORLD;
-    this.scene.add.ellipse(draftsperson.x, draftsperson.y + 10, 80, 18, 0x1f1f1d, 0.1).setDepth(14);
-    this.scene.add.rectangle(draftsperson.x, draftsperson.y - 40, 38, 62, 0xf7f1df, 1)
-      .setStrokeStyle(4, 0x1f1f1d, 0.86)
-      .setDepth(21);
-    this.scene.add.circle(draftsperson.x, draftsperson.y - 82, 26, 0xf7f1df, 1)
-      .setStrokeStyle(4, 0x1f1f1d, 0.9)
-      .setDepth(22);
-    this.scene.add.line(draftsperson.x + 6, draftsperson.y - 87, -6, 0, 6, 0, 0x1f1f1d, 0.8)
-      .setLineWidth(3)
-      .setDepth(23);
-    this.scene.add.line(draftsperson.x - 16, draftsperson.y - 90, -5, -4, 5, 4, 0x1f1f1d, 0.65)
-      .setLineWidth(2)
-      .setDepth(23);
-    this.scene.add.line(draftsperson.x + 16, draftsperson.y - 90, -5, 4, 5, -4, 0x1f1f1d, 0.65)
-      .setLineWidth(2)
-      .setDepth(23);
+    const { draftsperson } = BRIDGE_TRACER_WORLD;
+    const groundY = this.getGroundedY(draftsperson.y);
 
-    this.scene.add.rectangle(blueprint.x, blueprint.y, 184, 116, 0xf7f1df, 1)
-      .setStrokeStyle(4, 0x1f1f1d, 0.82)
-      .setAngle(-2)
-      .setDepth(12);
-    this.scene.add.line(blueprint.x - 48, blueprint.y - 6, -54, 0, -12, -18, 0x1f1f1d, 0.7)
-      .setLineWidth(4)
-      .setDepth(13);
-    this.scene.add.line(blueprint.x + 42, blueprint.y - 2, 10, -18, 54, 2, 0x1f1f1d, 0.7)
-      .setLineWidth(4)
-      .setDepth(13);
-    this.completedBridgeObjects.push(this.asVisible(this.scene.add.line(
-      blueprint.x,
-      blueprint.y - 13,
-      -26,
-      -6,
-      26,
-      6,
-      0x1f1f1d,
-      0.86
-    ).setLineWidth(4).setDepth(14)));
-    this.addHatching(blueprint.x - 74, blueprint.y + 28, 142, 24, 11, 0.1);
+    this.addReadabilityPocket(draftsperson.x, groundY - 80, 104, 176, 22);
+    this.bridgeBuilder = this.addBridgeImage(BRIDGE_TEXTURE_KEYS.bridgeBuilder, draftsperson.x, groundY - 2, {
+      depth: 24,
+      scale: 0.76
+    });
+    this.addGroundContactShadow(draftsperson.x, groundY - 2, 72, 16, 23);
+    this.builderIdleTween = this.scene.tweens.add({
+      targets: this.bridgeBuilder,
+      y: groundY - 5,
+      angle: -0.8,
+      duration: 1320,
+      ease: 'Stepped',
+      easeParams: [5],
+      repeat: -1,
+      yoyo: true
+    });
   }
 
   private createBridgeCrossingVisuals(): void {
     const { bridge, floorY } = BRIDGE_TRACER_WORLD;
-    this.scene.add.rectangle(bridge.leftBankEndX - 18, floorY - 22, 34, 88, 0xf7f1df, 1)
-      .setStrokeStyle(4, 0x1f1f1d, 0.84)
-      .setDepth(5);
-    this.scene.add.rectangle(bridge.rightBankStartX + 18, floorY - 22, 34, 88, 0xf7f1df, 1)
-      .setStrokeStyle(4, 0x1f1f1d, 0.84)
-      .setDepth(5);
 
-    this.blockedBridgeObjects.push(
-      this.asVisible(this.scene.add.rectangle(bridge.centerX, floorY - 40, 220, 44, 0xf7f1df, 0.7)
-        .setStrokeStyle(3, 0x1f1f1d, 0.45)
-        .setDepth(6)),
-      this.asVisible(this.scene.add.line(bridge.centerX - 58, floorY - 42, -38, -22, 38, 22, 0x1f1f1d, 0.72)
-        .setLineWidth(5)
-        .setDepth(7)),
-      this.asVisible(this.scene.add.line(bridge.centerX + 58, floorY - 42, -38, 22, 38, -22, 0x1f1f1d, 0.72)
-        .setLineWidth(5)
-        .setDepth(7))
-    );
-
-    const deck = this.scene.add.rectangle(
-      bridge.centerX,
-      bridge.deckY - 12,
-      bridge.deckWidth,
-      24,
-      0xf7f1df,
-      1
-    )
-      .setStrokeStyle(5, 0x1f1f1d, 0.9)
-      .setDepth(8);
-    const topLine = this.scene.add.line(bridge.centerX, bridge.deckY - 30, -130, 0, 130, 0, 0x1f1f1d, 0.62)
-      .setLineWidth(3)
-      .setDepth(9);
-    const bottomLine = this.scene.add.line(bridge.centerX, bridge.deckY + 2, -128, 0, 128, 0, 0x1f1f1d, 0.36)
-      .setLineWidth(2)
-      .setDepth(9);
     this.completedBridgeObjects.push(
-      this.asVisible(deck),
-      this.asVisible(topLine),
-      this.asVisible(bottomLine)
+      this.asVisible(this.createSimpleWoodenBridge(
+        bridge.leftBankEndX + 8,
+        bridge.rightBankStartX - 8,
+        floorY
+      ))
     );
   }
 
@@ -486,70 +468,177 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
   }
 
   private syncCickaAndToyCar(bridgeBeat: RidgeBridgeBeatState): void {
-    const crossingOpen = isBridgeCrossingOpen(bridgeBeat);
-    const cickaSpot = crossingOpen
-      ? BRIDGE_TRACER_WORLD.cickaSettledSpot
-      : BRIDGE_TRACER_WORLD.cickaPlaySpot;
-    this.cickaSprite?.setPosition(cickaSpot.x, cickaSpot.y);
-    this.cickaShadow?.setPosition(cickaSpot.x, cickaSpot.y + 8);
+    const cickaSpot = BRIDGE_TRACER_WORLD.cickaPlaySpot;
+    const cickaGroundY = this.getGroundedY(cickaSpot.y);
+    this.cickaSprite?.setPosition(cickaSpot.x, cickaGroundY);
+    this.cickaShadow?.setPosition(cickaSpot.x, cickaGroundY - 2);
 
     if (!this.toyCar || this.toyCarTestRunning) return;
 
     if (!hasCickaSharedToyCar(bridgeBeat)) {
       this.toyCar.setVisible(true);
+      this.toyCarShadow?.setVisible(true);
       this.toyCar.setPosition(
-        BRIDGE_TRACER_WORLD.cickaPlaySpot.x + 66,
-        BRIDGE_TRACER_WORLD.cickaPlaySpot.y + 8
+        BRIDGE_TRACER_WORLD.cickaPlaySpot.x + 72,
+        cickaGroundY - 2
       );
+      this.syncToyCarSupport(this.toyCar.x, this.toyCar.y, true);
       return;
     }
 
     if (bridgeBeat === 'toy_car_shared') {
-      this.toyCar.setVisible(true);
-      this.toyCar.setPosition(
-        BRIDGE_TRACER_WORLD.blueprint.x - 22,
-        BRIDGE_TRACER_WORLD.blueprint.y + 44
-      );
+      this.toyCar.setVisible(false);
+      this.syncToyCarSupport(this.toyCar.x, this.toyCar.y, false);
       return;
     }
 
     this.toyCar.setVisible(true);
+    this.toyCarShadow?.setVisible(true);
     this.toyCar.setPosition(
       BRIDGE_TRACER_WORLD.bridge.rightBankStartX + 120,
-      BRIDGE_TRACER_WORLD.floorY - 4
+      this.getGroundedY(BRIDGE_TRACER_WORLD.floorY) - 4
     );
+    this.syncToyCarSupport(this.toyCar.x, this.toyCar.y, true);
   }
 
-  private createToyCar(x: number, y: number): Phaser.GameObjects.Container {
-    const container = this.scene.add.container(x, y).setDepth(25);
-    const body = this.scene.add.rectangle(0, -7, 48, 20, 0xf7f1df, 1)
-      .setStrokeStyle(3, 0x1f1f1d, 0.88);
-    const roof = this.scene.add.rectangle(-4, -20, 24, 14, 0xf7f1df, 1)
-      .setStrokeStyle(2, 0x1f1f1d, 0.72);
-    const wheelLeft = this.scene.add.circle(-15, 6, 6, 0x1f1f1d, 0.9);
-    const wheelRight = this.scene.add.circle(16, 6, 6, 0x1f1f1d, 0.9);
-    container.add([body, roof, wheelLeft, wheelRight]);
-    return container;
+  private createToyCar(x: number, y: number): Phaser.GameObjects.Image {
+    this.toyCarHalo = this.addReadabilityPocket(x, y - 18, 98, 56, 23);
+    this.toyCarShadow = this.addGroundContactShadow(x, y + 2, 78, 14, 24);
+    return this.addBridgeImage(BRIDGE_TEXTURE_KEYS.modularToyCar, x, y, {
+      depth: 25,
+      scale: 0.78
+    });
   }
 
-  private addHatching(
+  private syncToyCarSupport(x: number, y: number, visible: boolean): void {
+    this.toyCarHalo?.setVisible(visible).setPosition(x, y - 18);
+    this.toyCarShadow?.setVisible(visible).setPosition(x, y + 4);
+  }
+
+  private setBuilderTalking(isTalking: boolean): void {
+    if (!this.bridgeBuilder) return;
+    this.builderTalkTween?.stop();
+    this.builderTalkTween = undefined;
+
+    if (!isTalking) {
+      this.builderIdleTween?.resume();
+      this.bridgeBuilder.setScale(0.76).setAngle(0);
+      return;
+    }
+
+    this.builderIdleTween?.pause();
+    this.builderTalkTween = this.scene.tweens.add({
+      targets: this.bridgeBuilder,
+      y: this.getGroundedY(BRIDGE_TRACER_WORLD.draftsperson.y) - 10,
+      scaleX: 0.79,
+      scaleY: 0.74,
+      angle: 1.4,
+      duration: 180,
+      ease: 'Stepped',
+      easeParams: [2],
+      repeat: -1,
+      yoyo: true
+    });
+  }
+
+  private createSimpleWoodenBridge(
+    leftX: number,
+    rightX: number,
+    deckTopY: number
+  ): Phaser.GameObjects.Graphics {
+    const width = rightX - leftX;
+    const bridge = this.scene.add.graphics().setDepth(10);
+
+    bridge.fillStyle(0xf7f1df, 0.9);
+    bridge.lineStyle(4, 0x1f1f1d, 0.92);
+    bridge.fillRect(leftX, deckTopY, width, 18);
+    bridge.strokeRect(leftX, deckTopY, width, 18);
+
+    bridge.lineStyle(2, 0x1f1f1d, 0.54);
+    for (let x = leftX + 24; x < rightX - 12; x += 34) {
+      bridge.lineBetween(x, deckTopY + 2, x - 5, deckTopY + 17);
+    }
+
+    bridge.lineStyle(3, 0x1f1f1d, 0.78);
+    bridge.lineBetween(leftX + 26, deckTopY + 20, rightX - 26, deckTopY + 20);
+
+    const supportInset = 58;
+    const supportTopY = deckTopY + 18;
+    const supportBottomY = deckTopY + 76;
+    [leftX + supportInset, rightX - supportInset].forEach((x) => {
+      bridge.fillStyle(0xf7f1df, 0.78);
+      bridge.fillRect(x - 12, supportTopY, 24, supportBottomY - supportTopY);
+      bridge.strokeRect(x - 12, supportTopY, 24, supportBottomY - supportTopY);
+      bridge.lineBetween(x - 12, supportBottomY, x + 12, supportTopY);
+      bridge.lineBetween(x + 12, supportBottomY, x - 12, supportTopY);
+    });
+
+    bridge.lineStyle(2, 0x1f1f1d, 0.32);
+    bridge.lineBetween(leftX + 4, deckTopY + 22, leftX + 86, deckTopY + 34);
+    bridge.lineBetween(rightX - 86, deckTopY + 34, rightX - 4, deckTopY + 22);
+
+    return bridge;
+  }
+
+  private addBridgeImage(
+    textureKey: string,
+    x: number,
+    y: number,
+    options: BridgeImageOptions = {}
+  ): Phaser.GameObjects.Image {
+    const image = this.scene.add.image(x, y, textureKey)
+      .setOrigin(options.origin?.[0] ?? 0.5, options.origin?.[1] ?? 1)
+      .setScale(options.scale ?? 1)
+      .setDepth(options.depth ?? 0);
+
+    if (options.alpha !== undefined) {
+      image.setAlpha(options.alpha);
+    }
+    if (options.tint !== undefined) {
+      image.setTint(options.tint);
+    }
+    if (options.flipX) {
+      image.setFlipX(true);
+    }
+    if (options.scrollFactor) {
+      image.setScrollFactor(options.scrollFactor[0], options.scrollFactor[1]);
+    }
+    return image;
+  }
+
+  private addGroundContactShadow(
     x: number,
     y: number,
     width: number,
     height: number,
-    spacing: number,
-    alpha: number
-  ): void {
-    const graphics = this.scene.add.graphics().setDepth(4);
-    graphics.lineStyle(2, 0x1f1f1d, alpha);
-    for (let offset = 0; offset <= width + height; offset += spacing) {
-      graphics.strokeLineShape(new Phaser.Geom.Line(
-        x + offset,
-        y,
-        x + offset - height,
-        y + height
-      ));
-    }
+    depth: number
+  ): Phaser.GameObjects.Ellipse {
+    return this.scene.add.ellipse(x, y + 2, width, height, 0x1f1f1d, 0.1)
+      .setDepth(depth);
+  }
+
+  private getGroundedY(y: number): number {
+    return y + BRIDGE_CHARACTER_GROUND_OFFSET_Y;
+  }
+
+  private addReadabilityPocket(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    depth: number
+  ): Phaser.GameObjects.Graphics {
+    const pocket = this.scene.add.graphics().setDepth(depth);
+    pocket.setPosition(x, y);
+    pocket.fillStyle(0xf7f1df, 0.9);
+    pocket.lineStyle(2, 0xffffff, 0.72);
+    pocket.fillEllipse(0, 0, width, height);
+    pocket.strokeEllipse(0, 0, width + 8, height + 8);
+
+    pocket.lineStyle(1, 0x1f1f1d, 0.12);
+    pocket.strokeEllipse(3, -2, width * 0.96, height * 0.9);
+    pocket.lineBetween(-width * 0.32, height * 0.24, width * 0.32, height * 0.18);
+    return pocket;
   }
 
   private addStaticZone(

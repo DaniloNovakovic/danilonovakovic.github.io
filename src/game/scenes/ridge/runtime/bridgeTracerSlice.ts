@@ -19,32 +19,37 @@ export const BRIDGE_TRACER_WORLD = {
     y: 452
   },
   cickaPlaySpot: {
-    x: 650,
-    y: 458
+    x: 520,
+    y: 500
   },
   cickaSettledSpot: {
-    x: 1850,
-    y: 458
+    x: 2050,
+    y: 500
   },
   draftsperson: {
-    x: 1295,
-    y: 456
+    x: 1275,
+    y: 500
   },
   blueprint: {
-    x: 1375,
+    x: 1145,
     y: 430
   },
   bridge: {
-    leftBankEndX: 1450,
-    rightBankStartX: 1730,
-    centerX: 1590,
+    leftBankEndX: 1410,
+    rightBankStartX: 1865,
+    centerX: 1638,
     deckY: 500,
-    deckWidth: 286
+    deckWidth: 470
   },
   exit: {
-    x: 2315,
-    y: 456
+    x: 2360,
+    y: 500
   }
+} as const;
+
+export const BRIDGE_TRACER_CAMERA_BOUNDS = {
+  ...BRIDGE_TRACER_WORLD.bounds,
+  width: 2320
 } as const;
 
 export const BRIDGE_TRACER_INTERACT_RADIUS = 86;
@@ -172,8 +177,8 @@ function createMissingSpanTarget(
     distanceAnchorY: BRIDGE_TRACER_WORLD.draftsperson.y,
     interactRadius: BRIDGE_TRACER_INTERACT_RADIUS,
     prompt: {
-      x: BRIDGE_TRACER_WORLD.draftsperson.x,
-      y: BRIDGE_TRACER_WORLD.draftsperson.y - 132
+      x: BRIDGE_TRACER_WORLD.draftsperson.x + 260,
+      y: BRIDGE_TRACER_WORLD.draftsperson.y - 96
     },
     promptLineId: 'bridge.draftsperson.missing_span.03',
     effect: {
@@ -196,8 +201,8 @@ function createToyCarTestTarget(): BridgeTracerInteractionTarget {
     distanceAnchorY: BRIDGE_TRACER_WORLD.draftsperson.y,
     interactRadius: BRIDGE_TRACER_INTERACT_RADIUS,
     prompt: {
-      x: BRIDGE_TRACER_WORLD.draftsperson.x,
-      y: BRIDGE_TRACER_WORLD.draftsperson.y - 132
+      x: BRIDGE_TRACER_WORLD.draftsperson.x + 260,
+      y: BRIDGE_TRACER_WORLD.draftsperson.y - 96
     },
     promptLineId: 'bridge.draftsperson.toy_car_test.01',
     effect: {

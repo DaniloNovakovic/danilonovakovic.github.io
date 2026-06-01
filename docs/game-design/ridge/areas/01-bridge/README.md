@@ -157,14 +157,125 @@ Minimum outcomes:
 
 - Cicka is grounded at the Bridge Resting Spot and visibly plays with the toy
   car / weight-test prop instead of floating near a generic marker.
+- Keep the current left-to-right route geometry for this pass. Solve the
+  Cicka / Draftsperson sightline problem through visual staging: foreground
+  paper folds, trees, terrain, or set dressing should screen Cicka's toy-car
+  play spot from the Draftsperson's work zone without adding a new pocket,
+  traversal branch, or route mechanic.
+- Stage the Bridge Area as a wooded paper-set scene with multi-parallax forest
+  layers: pale distant trees, midground pines/brush, and a few foreground
+  paper-fold or tree screens. The environment should read as "wood like" before
+  individual props are noticed.
 - The Bridge Draftsperson has a distinct blueprint work zone, such as a tiny
-  drafting shelter, cabin facade, desk, or taped paper construction nook.
+  taped paper construction nook with a small desk/blueprint table. Add a nearby
+  worker rest cue, such as a rough tent, tiny cabin facade, or sleep shelter, so
+  the Draftsperson feels like someone stationed at the bridge rather than a
+  generic marker.
+- Keep the Bridge Draftsperson's construction zone visually simple: one clear
+  bridge, one clear blueprint/plan surface, one clear worker silhouette, and one
+  clear rest shelter cue. Avoid random paper scraps, oversized overlapping
+  shapes, or doodles that compete with the bridge read.
+- The worker rest cue is visual-only in this pass: no enterable pocket, food
+  pickup, treat shortcut, new prompt, or route mechanic.
 - Cicka's space and the Draftsperson's work zone are separated by local terrain,
   trees, paper folds, or foreground/background staging so the Draftsperson does
   not appear able to see Cicka holding the toy car.
 - The bridge, missing span, completed span, floor, background, and prop
   placeholders read as one handmade paper set rather than unrelated debug
   shapes.
+- For the first playable forest read, prefer **monochrome-first staging**:
+  black ink on off-white paper, with value/line weight/hatching doing the work.
+  Yellowed paper fills should be subdued by runtime presentation rather than
+  becoming a new Bridge palette. Later color can be applied deliberately as a
+  programmatic treatment, not baked into these rough assets.
+- This pass may use actual bitmap/image placeholders for the Bridge map set and
+  Minimum Route Cast reads, not only Phaser-drawn primitive shapes. The target
+  is nice-enough first-playable presentation for Ridge mood, map readability,
+  Cicka, and the Bridge Draftsperson while still avoiding final art or a broad
+  production asset pack. These images should still follow the Digital
+  Sketchbook visual identity: off-white paper, black ink, silhouette-first
+  reads, hatching/value for depth, and no new color palette.
+- Bridge-specific runtime image placeholders should live under
+  `public/assets/ridge/bridge/` with local README/manifest notes, owned by
+  `src/game/scenes/ridge/**`. Follow the Cicka asset adoption pattern, but do
+  not introduce a shared Ridge asset framework from this single pass.
+- Issue #90 should try to create the rough Bridge runtime PNGs directly rather
+  than only adding code that waits for future art. These assets may stay rough
+  and replaceable, but they should be real images wired into the Ridge scene.
+- Replace the asset direction with a **hybrid layered stage** rather than many
+  unrelated environment cutouts. The Bridge Area should use a small number of
+  coherent horizontal sketch plates for scenery, then keep interactive objects
+  modular:
+  1. deep sky / mountain plate
+  2. far forest plate with varied pines and rounded bushy trees
+  3. mid forest / work-camp staging plate
+  4. playable terrain / gorge plate with visible top surface, cliff faces,
+     hatching, and bridge supports
+  5. modular before/after bridge state
+  6. modular Cicka, toy car, Bridge Draftsperson, prompts, and route-state
+     objects
+- Do not return to a single baked whole-map image. The layered plates should
+  keep parallax, camera framing, and runtime route-state flexibility while
+  preventing the scene from reading as a collage of isolated generated props.
+- Individual tree, bush, rock, and terrain cutouts are allowed only when they
+  support a coherent layer plate or a clear gameplay staging need. They should
+  not be the main way the forest read is created.
+- When the player reaches the bridge vista, the background can become the first
+  route-wide promise shot. The deep layers may eventually hint at later Ridge
+  areas beyond the gorge: a distant city / Concert Area silhouette, the Ridge
+  Threshold, and the area near the threshold that leads toward the Dance
+  Festival. Keep these as tiny environmental reads in the far distance, not
+  literal UI labels or busy landmarks. If the downstream areas are not visually
+  settled yet, leave the current forest/mountain vista intact and add these
+  silhouettes after their art direction exists.
+- The Bridge plate must include both staging moods, not only the bridge vista:
+  the left approach should stay on the same continuous sidescroller path while
+  close trees and brush hide most distant layers; the bridge approach should
+  then open into the ridge vista so the player feels the space clear as they
+  reach the crossing. Do not turn the Cicka approach into a separate lower
+  forest floor, blocked foreground-room composition, new traversal pocket, or
+  angled/isometric top-plane view. The scene may imply cliff height at the gorge
+  and ridge edges, but the playable lane should read primarily as a side-on
+  horizontal path.
+- Keep Bridge assets layered and individually placeable rather than compositing
+  the full stage into one image. A generated full-scene image may be used as
+  target/reference, but Phaser should still own placement, before/after bridge
+  visibility, toy-car movement, prompts, collision, and route-state
+  presentation.
+- For the current playable proof, use a side-scroller-first lane with generated
+  layered plates: far mountains, mid forest, and close terrain/camp/gorge.
+  Avoid mixing a separate floor-line system and unrelated terrain slabs under
+  the same scene.
+- Bridge staging should read as a side-scroller sketchbook route. Characters
+  and stateful props still need contact shadows and clear foot placement, but
+  the playable lane should not become a shallow isometric/top-plane diorama.
+- Treat distant forest readability as more than transparent pine silhouettes.
+  Depth should come from simpler shapes, smaller scale, lighter ink/tint, and
+  reduced hatching/detail, not from making full objects translucent. Background
+  layers may be visually quieter, but they should still read as solid drawings.
+- The Bridge forest should not be pine-only. Match the reference read with a
+  varied woodland stack: distant mountains, low-detail bush/tree masses made
+  from actual forest assets, scattered lower-detail tree marks, then sharper
+  pines and foreground brush near the playable lane. Avoid drawn circle blobs
+  that read as construction marks rather than forest.
+- Remove notebook/ruling lines from the Bridge stage unless they have a clear
+  authored meaning. A few clouds, small wind marks, or tiny bird silhouettes can
+  add life as non-interactive atmosphere when they do not compete with prompts
+  or traversal.
+- The before-bridge state should read primarily as a real gap. Avoid showing a
+  ghost completed bridge in the background if it reads like a small floating
+  bridge. The completed bridge visual must align its deck with the playable
+  floor line and banks.
+- The Bridge Draftsperson should have minimal living-paper motion: idle wobble
+  by default and a distinct talking/working wiggle during Draftsperson dialogue
+  or toy-car test beats. Do not add a full animation sheet until the still
+  character package needs it.
+- The Bridge Draftsperson should stand out from the forest/background through
+  silhouette contrast, a small paper backing or shadow mass, and staging that
+  keeps prompts away from the blueprint.
+- During the toy-car bridge test, Cicka does not need to follow or teleport to
+  the car. For this first pass she can remain at the Bridge Resting Spot while
+  the car proves the crossing.
 - The pass produces tiny role portrait/icon placeholders for the first
   **Character Conversation Overlay** integration: Cicka, Bridge Draftsperson,
   and neutral Prompt/narration.
