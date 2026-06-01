@@ -11,7 +11,9 @@ and reference material. Do not treat every file here as equally active.
 - **Active Ridge pre-production story/route canon:** [`ridge/story-level-bible.md`](./ridge/story-level-bible.md).
 - **Active Ridge pre-production area design:** [`ridge/areas/`](./ridge/areas/README.md).
 - **Current Ridge runtime/prototype snapshot:** [`ridge/ridge-snapshot.md`](./ridge/ridge-snapshot.md).
-- **Runtime spatial source for the current prototype:** [`folded-desk-ridge.source.ts`](../../src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts), described by
+- **Current Bridge runtime spatial source:** [`stageComposition.ts`](../../src/game/scenes/ridge/bridge/stageComposition.ts), described by
+  [`ridge/ridge-snapshot.md`](./ridge/ridge-snapshot.md).
+- **Legacy folded blockout source:** [`folded-desk-ridge.source.ts`](../../src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts), described by
   [`ridge/map-language.md`](./ridge/map-language.md).
 - **Pre-production product vision:** [`ridge/summit.md`](./ridge/summit.md).
 - **Milestone map:** [`ridge/milestone-plan.md`](./ridge/milestone-plan.md)
@@ -67,9 +69,9 @@ prefer GitHub Issues.
 - **[Ridge Blockout Source](./ridge/map-language.md)**: Typed blockout source
   contract for Ridge room beats, environment tags, traversal primitives, and
   greybox generation.
-- **[Ridge Blockout Source](../../src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts)**:
-  Current authoring data for the seamless Ridge world. It lives under the
-  Ridge runtime because it is build input, not prose.
+- **[Legacy Ridge Blockout Source](../../src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts)**:
+  Folded prototype authoring data retained as build input and reference, not
+  the active Bridge rail/stage authoring surface.
 - **[Ridge Legacy Docs](./ridge/legacy/README.md)**: Superseded folded/Cicka
   Home map plans, old summit/milestone history, and blockout reviews. Reference
   only unless a current active doc explicitly links there.

@@ -5,6 +5,7 @@ import {
   hasCickaSharedToyCar,
   isBridgeCrossingOpen
 } from './bridgeTracerSlice';
+import { BRIDGE_STAGE_SOURCE, resolveBridgeStageSpot } from './stageComposition';
 
 function route(bridgeBeat: RidgeBridgeBeatState): RidgeFirstPlayableRouteState {
   if (bridgeBeat === 'concert_handoff') {
@@ -79,5 +80,22 @@ describe('Bridge Tracer Slice route targets', () => {
     expect(isBridgeCrossingOpen('bridge_complete')).toBe(true);
     expect(hasCickaSharedToyCar('needs_toy_car')).toBe(false);
     expect(hasCickaSharedToyCar('toy_car_shared')).toBe(true);
+  });
+
+  it('resolves interaction anchors from Bridge Stage Spots', () => {
+    const targets = createBridgeTracerInteractionTargets(route('intro'));
+    const cickaSpot = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, 'cicka-play');
+    const draftspersonSpot = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, 'draftsperson');
+
+    expect(targets[0]).toMatchObject({
+      x: cickaSpot.x,
+      distanceAnchorY: cickaSpot.y,
+      prompt: cickaSpot.prompt
+    });
+    expect(targets[1]).toMatchObject({
+      x: draftspersonSpot.x,
+      distanceAnchorY: draftspersonSpot.y,
+      prompt: draftspersonSpot.prompt
+    });
   });
 });

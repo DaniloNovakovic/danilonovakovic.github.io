@@ -99,14 +99,16 @@ Agents should edit `.source.ts` files and then run `pnpm ridge:source`.
 `pnpm ridge:source:check` and the standard `pnpm check` command fail when a
 generated artifact is stale or when source validation rejects the contract.
 
-## Read-Only Viewer
+## Tooling Status
 
-In development, `?mode=ridge-blockout` opens a read-only Ridge Blockout Viewer
-over the committed generated artifact. It renders the compiled map, tile
-interpretation, room labels, anchors, active and future routes, shortcuts,
-colliders, assist zones, rects, and validation status. The viewer is an
-inspection surface only; source edits still happen in `.source.ts` followed by
-`pnpm ridge:source`.
+This contract is retained for the legacy folded Ridge prototype source,
+compiler, generated facts, and validation tests. It is no longer the main Ridge
+development surface. Current Bridge rail/stage work uses the Ridge Stage
+Debugger at `?mode=ridge-stage-debugger` and the Bridge Stage Composition Source
+under `src/game/scenes/ridge/bridge/`.
+
+If this legacy source is edited, source edits still happen in `.source.ts`
+followed by `pnpm ridge:source`.
 
 ## Core Shape
 

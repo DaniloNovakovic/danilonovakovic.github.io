@@ -1,9 +1,17 @@
+import type { RidgeBridgeBeatState } from '@/game/bridge/store';
+
 export interface RidgeDevTeleportRequest {
   sequence: number;
   label: string;
   x: number;
   y: number;
   applySpawnOffset: boolean;
+}
+
+export interface RidgeDevRouteBeatRequest {
+  sequence: number;
+  label: string;
+  bridgeBeat: RidgeBridgeBeatState;
 }
 
 export interface RidgeDevResetRequest {
@@ -14,6 +22,14 @@ export interface RidgeDevResetRequest {
 export interface RidgeDevPlayerSnapshot {
   x: number;
   y: number;
+  railDepth?: number;
+  railProgress?: number;
+  railScale?: number;
+  bridgeBeat?: RidgeBridgeBeatState;
+  crossingOpen?: boolean;
+  playerProgressMax?: number;
+  nearestStageSpotId?: string;
+  sourceSnippet?: string;
 }
 
 export interface RidgeDevDebugSettings {
@@ -27,6 +43,7 @@ export interface RidgeDevDebugSettings {
 export interface RidgeDevControls {
   resolveCameraZoom?: () => number | undefined;
   resolveDebugSettings?: () => Partial<RidgeDevDebugSettings> | undefined;
+  consumeRouteBeatRequest?: () => RidgeDevRouteBeatRequest | null;
   consumeResetRequest?: () => RidgeDevResetRequest | null;
   consumeTeleportRequest?: () => RidgeDevTeleportRequest | null;
   publishPlayerSnapshot?: (snapshot: RidgeDevPlayerSnapshot) => void;
