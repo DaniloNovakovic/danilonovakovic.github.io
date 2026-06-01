@@ -40,7 +40,8 @@ export function PreviewPanel({
       <section className="border-b-2 border-[#1a1a1a] py-4">
         <h2 className="text-lg font-black">Preview</h2>
         <p className="mt-2 text-sm font-bold text-[#5a554f]">
-          Real Phaser Ridge scene. Use Model for source-backed overlays.
+          Live Bridge stage. Rail readout is current; Model and Teleport below
+          are legacy folded-blockout helpers.
         </p>
         <div className="mt-3 grid gap-2">
           <div className="flex items-center gap-2">
@@ -136,7 +137,11 @@ export function PreviewPanel({
         </div>
       </section>
       <section className="py-4">
-        <h2 className="text-lg font-black">Teleport</h2>
+        <h2 className="text-lg font-black">Legacy Teleport</h2>
+        <p className="mt-2 text-sm font-bold text-[#5a554f]">
+          These anchors belong to the older folded blockout draft, not the
+          Bridge Walk Rail.
+        </p>
         {lastTeleportLabel ? (
           <p className="mt-2 border-2 border-[#1a1a1a] bg-[#f3df8b] px-2 py-1 text-xs font-black uppercase tracking-widest">
             Sent: {lastTeleportLabel}

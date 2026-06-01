@@ -4,7 +4,11 @@ import { Detail } from '../components/Detail';
 export function SummaryPanel({ model }: { model: RidgeBlockoutViewerModel }) {
   return (
     <section className="border-b-2 border-[#1a1a1a] pb-4">
-      <h2 className="text-lg font-black">World</h2>
+      <h2 className="text-lg font-black">Legacy Folded Blockout</h2>
+      <p className="mt-2 text-sm font-bold text-[#5a554f]">
+        This model is the older platformer/blockout draft. It is retained for
+        reference and is not the Bridge rail source.
+      </p>
       <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
         <Detail label="World" value={model.worldId} />
         <Detail label="Cell" value={`${model.cell}px`} />
