@@ -122,14 +122,14 @@ describe('RidgeStageDebugger', () => {
     expect(screen.getByText('Sent: spot draftsperson')).not.toBeNull();
   });
 
-  it('dispatches route beat requests and updates the Bridge route state', async () => {
+  it('dispatches route beat requests without mutating Bridge route state from React', async () => {
     render(<RidgeStageDebugger />);
 
     await userEvent.click(screen.getByRole('button', { name: /Bridge Complete/ }));
 
     expect(bridgeStore.getState().progress.ridge.firstPlayableRoute).toEqual({
       activeAreaId: 'bridge',
-      bridgeBeat: 'bridge_complete'
+      bridgeBeat: 'intro'
     });
     expect(lastRidgeDevControls?.consumeRouteBeatRequest?.()).toMatchObject({
       bridgeBeat: 'bridge_complete',
@@ -139,8 +139,8 @@ describe('RidgeStageDebugger', () => {
     await userEvent.click(screen.getByRole('button', { name: /Concert Handoff/ }));
 
     expect(bridgeStore.getState().progress.ridge.firstPlayableRoute).toEqual({
-      activeAreaId: 'concert',
-      bridgeBeat: 'concert_handoff'
+      activeAreaId: 'bridge',
+      bridgeBeat: 'intro'
     });
     expect(lastRidgeDevControls?.consumeRouteBeatRequest?.()).toMatchObject({
       bridgeBeat: 'concert_handoff',

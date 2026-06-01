@@ -1,9 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  bridgeActions,
-  type RidgeBridgeAreaBeatState,
-  type RidgeBridgeBeatState
-} from '@/game/bridge/store';
+import type { RidgeBridgeBeatState } from '@/game/bridge/store';
 import type {
   RidgeDevControls,
   RidgeDevDebugSettings,
@@ -110,11 +106,6 @@ export function useRidgePreviewControls() {
       bridgeBeat
     };
     routeBeatRequestRef.current = request;
-    if (bridgeBeat === 'concert_handoff') {
-      bridgeActions.triggerRidgeConcertHandoff();
-    } else {
-      bridgeActions.setRidgeBridgeBeat(bridgeBeat as RidgeBridgeAreaBeatState);
-    }
     setLastCommandLabel(`beat ${request.label}`);
   }, []);
 

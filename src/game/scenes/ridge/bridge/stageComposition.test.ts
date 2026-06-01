@@ -17,7 +17,7 @@ describe('Bridge Stage Composition Source', () => {
 
     expect(sample.x).toBeGreaterThan(1410);
     expect(sample.x).toBeLessThan(1638);
-    expect(sample.y).toBeLessThan(500);
+    expect(sample.y).toBeLessThan(520);
     expect(sample.cue.scale).toBeGreaterThan(0.95);
     expect(sample.cue.depth).toBeGreaterThanOrEqual(30);
   });
@@ -29,18 +29,18 @@ describe('Bridge Stage Composition Source', () => {
 
     expect(draftsperson).toMatchObject({
       x: 1275,
-      y: 500,
+      y: 520,
       prompt: {
         x: 1535,
-        y: 404
+        y: 424
       },
       interactRadius: 86
     });
     expect(blueprint).toMatchObject({
       x: 1145,
-      y: 430
+      y: 450
     });
-    expect(exit.prompt.y).toBe(374);
+    expect(exit.prompt.y).toBe(394);
   });
 
   it('derives Bridge presentation from route beat state', () => {
@@ -96,6 +96,13 @@ describe('Bridge Stage Composition Source', () => {
       textureKey: BRIDGE_TEXTURE_KEYS.modularToyCar,
       spotId: 'cicka-toy-car'
     });
+    expect(resolveBridgeStageObject(BRIDGE_STAGE_SOURCE, 'completed-bridge')).toMatchObject({
+      kind: 'procedural-bridge',
+      spotId: 'bridge-center',
+      leftSpotId: 'bridge-left-bank',
+      rightSpotId: 'bridge-right-bank',
+      deckInset: 8
+    });
     expect(BRIDGE_STAGE_SOURCE.occluders[0]?.id).toBe('near-bank-lip');
   });
 
@@ -107,6 +114,6 @@ describe('Bridge Stage Composition Source', () => {
 
     expect(projected.progress).toBeCloseTo(0.48, 1);
     expect(getNearestBridgeStageSpotId(BRIDGE_STAGE_SOURCE, projected.progress)).toBe('draftsperson');
-    expect(getBridgeWalkRailLength(BRIDGE_STAGE_SOURCE.primaryWalkRail)).toBeGreaterThan(2200);
+    expect(getBridgeWalkRailLength(BRIDGE_STAGE_SOURCE.primaryWalkRail)).toBeGreaterThan(2000);
   });
 });

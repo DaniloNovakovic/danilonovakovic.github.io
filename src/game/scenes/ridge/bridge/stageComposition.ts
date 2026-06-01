@@ -124,11 +124,7 @@ export type BridgeStageObjectId =
   | 'completed-bridge'
   | 'handoff-note';
 
-export interface BridgeStageObject {
-  /** Stable name for a runtime object or debugger row. */
-  id: BridgeStageObjectId;
-  kind: 'image' | 'procedural-bridge' | 'text-note';
-  textureKey?: string;
+interface BridgeStageObjectBase {
   /** Stage Spot that owns this object's placement. Tweak the spot before this. */
   spotId: BridgeStageSpotId;
   /** Display depth relative to plates, player cue depth, and occluders. */
@@ -136,6 +132,37 @@ export interface BridgeStageObject {
   scale?: number;
   origin?: readonly [number, number];
 }
+
+export interface BridgeStageImageObject<
+  ObjectId extends Extract<BridgeStageObjectId, 'bridge-draftsperson' | 'toy-car'> =
+    Extract<BridgeStageObjectId, 'bridge-draftsperson' | 'toy-car'>
+> extends BridgeStageObjectBase {
+  /** Stable name for a runtime object or debugger row. */
+  id: ObjectId;
+  kind: 'image';
+  textureKey: string;
+}
+
+export interface BridgeStageProceduralBridgeObject extends BridgeStageObjectBase {
+  id: Extract<BridgeStageObjectId, 'completed-bridge'>;
+  kind: 'procedural-bridge';
+  /** Rail-attached spots that define the procedural bridge span. */
+  leftSpotId: Extract<BridgeStageSpotId, 'bridge-left-bank'>;
+  rightSpotId: Extract<BridgeStageSpotId, 'bridge-right-bank'>;
+  /** Pixel inset from each bank before drawing the bridge deck. */
+  deckInset: number;
+}
+
+export interface BridgeStageTextNoteObject extends BridgeStageObjectBase {
+  id: Extract<BridgeStageObjectId, 'handoff-note'>;
+  kind: 'text-note';
+}
+
+export type BridgeStageObject =
+  | BridgeStageImageObject<'bridge-draftsperson'>
+  | BridgeStageImageObject<'toy-car'>
+  | BridgeStageProceduralBridgeObject
+  | BridgeStageTextNoteObject;
 
 export interface BridgeStageOccluder {
   /** Debug name for a foreground mask/hint region. */
@@ -209,7 +236,6 @@ const BRIDGE_CANVAS = {
   width: 2600,
   height: 600
 } as const;
-
 
 const HORIZONTAL_LINE_BASELINE = 520;
 
@@ -291,7 +317,7 @@ export const BRIDGE_STAGE_SOURCE: BridgeStageCompositionSource = {
       {
         progress: 0.88,
         x: 2050,
-        y: HORIZONTAL_LINE_BASELINE ,
+        y: HORIZONTAL_LINE_BASELINE,
         cue: { scale: 1, depth: 31, cameraFollowOffsetY: 0 }
       },
       {
@@ -387,7 +413,10 @@ export const BRIDGE_STAGE_SOURCE: BridgeStageCompositionSource = {
       id: 'completed-bridge',
       kind: 'procedural-bridge',
       spotId: 'bridge-center',
-      depth: 10
+      depth: 10,
+      leftSpotId: 'bridge-left-bank',
+      rightSpotId: 'bridge-right-bank',
+      deckInset: 8
     },
     {
       id: 'handoff-note',
@@ -496,6 +525,10 @@ export function resolveBridgeStageSpot(
 }
 
 /** Look up a Stage Object definition by id. Placement comes from its `spotId`. */
+export function resolveBridgeStageObject<ObjectId extends BridgeStageObjectId>(
+  source: BridgeStageCompositionSource,
+  objectId: ObjectId
+): Extract<BridgeStageObject, { id: ObjectId }>;
 export function resolveBridgeStageObject(
   source: BridgeStageCompositionSource,
   objectId: BridgeStageObjectId

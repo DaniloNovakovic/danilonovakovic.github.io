@@ -282,7 +282,7 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
     const builderObject = resolveBridgeStageObject(BRIDGE_STAGE_SOURCE, 'bridge-draftsperson');
 
     this.addReadabilityPocket(draftsperson.x, draftsperson.y - 80, 104, 176, 22);
-    this.bridgeBuilder = this.addBridgeImage(builderObject.textureKey ?? '', draftsperson.x, draftsperson.y - 2, {
+    this.bridgeBuilder = this.addBridgeImage(builderObject.textureKey, draftsperson.x, draftsperson.y - 2, {
       depth: builderObject.depth,
       scale: builderObject.scale
     });
@@ -300,13 +300,17 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
   }
 
   private createBridgeCrossingVisuals(): void {
-    const { bridge, floorY } = BRIDGE_TRACER_WORLD;
+    const bridgeObject = resolveBridgeStageObject(BRIDGE_STAGE_SOURCE, 'completed-bridge');
+    const leftBank = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, bridgeObject.leftSpotId);
+    const rightBank = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, bridgeObject.rightSpotId);
+    const deck = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, bridgeObject.spotId);
 
     this.completedBridgeObjects.push(
       this.asVisible(this.createSimpleWoodenBridge(
-        bridge.leftBankEndX + 8,
-        bridge.rightBankStartX - 8,
-        floorY
+        leftBank.x + bridgeObject.deckInset,
+        rightBank.x - bridgeObject.deckInset,
+        deck.y,
+        bridgeObject.depth
       ))
     );
   }
@@ -422,7 +426,7 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
     const toyCarObject = resolveBridgeStageObject(BRIDGE_STAGE_SOURCE, 'toy-car');
     this.toyCarHalo = this.addReadabilityPocket(x, y - 18, 98, 56, 23);
     this.toyCarShadow = this.addGroundContactShadow(x, y + 2, 78, 14, 24);
-    return this.addBridgeImage(toyCarObject.textureKey ?? '', x, y, {
+    return this.addBridgeImage(toyCarObject.textureKey, x, y, {
       depth: toyCarObject.depth,
       scale: toyCarObject.scale
     });
@@ -467,10 +471,11 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
   private createSimpleWoodenBridge(
     leftX: number,
     rightX: number,
-    deckTopY: number
+    deckTopY: number,
+    depth: number
   ): Phaser.GameObjects.Graphics {
     const width = rightX - leftX;
-    const bridge = this.scene.add.graphics().setDepth(10);
+    const bridge = this.scene.add.graphics().setDepth(depth);
 
     bridge.fillStyle(0xf7f1df, 0.9);
     bridge.lineStyle(4, 0x1f1f1d, 0.92);

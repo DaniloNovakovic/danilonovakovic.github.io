@@ -19,8 +19,6 @@ const cickaSettledSpot = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, 'cicka-sett
 const draftspersonSpot = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, 'draftsperson');
 const blueprintSpot = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, 'blueprint');
 const bridgeLeftBankSpot = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, 'bridge-left-bank');
-const bridgeCenterSpot = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, 'bridge-center');
-const bridgeRightBankSpot = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, 'bridge-right-bank');
 const exitSpot = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, 'concert-exit');
 
 export const BRIDGE_TRACER_WORLD = {
@@ -45,13 +43,6 @@ export const BRIDGE_TRACER_WORLD = {
   blueprint: {
     x: blueprintSpot.x,
     y: blueprintSpot.y
-  },
-  bridge: {
-    leftBankEndX: bridgeLeftBankSpot.x,
-    rightBankStartX: bridgeRightBankSpot.x,
-    centerX: bridgeCenterSpot.x,
-    deckY: bridgeCenterSpot.y,
-    deckWidth: bridgeRightBankSpot.x - bridgeLeftBankSpot.x + 15
   },
   exit: {
     x: exitSpot.x,

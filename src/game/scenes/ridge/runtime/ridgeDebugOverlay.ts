@@ -1,4 +1,8 @@
 import type * as Phaser from 'phaser';
+import {
+  renderRidgeDebugDrawCommands,
+  type RidgeDebugDrawCommand
+} from '../debugDrawCommands';
 import type {
   RidgeBlockoutGeometry,
   RidgeBlockoutAssistZone,
@@ -19,41 +23,7 @@ export interface RidgeDebugOverlayPlayer {
   };
 }
 
-export type RidgeDebugDrawCommand =
-  | {
-    kind: 'rect';
-    id: string;
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    fillColor: number;
-    fillAlpha: number;
-    strokeColor: number;
-    strokeAlpha: number;
-    lineWidth: number;
-  }
-  | {
-    kind: 'circle';
-    id: string;
-    x: number;
-    y: number;
-    radius: number;
-    fillColor: number;
-    fillAlpha: number;
-    strokeColor: number;
-    strokeAlpha: number;
-    lineWidth: number;
-  }
-  | {
-    kind: 'line';
-    id: string;
-    from: { x: number; y: number };
-    to: { x: number; y: number };
-    strokeColor: number;
-    strokeAlpha: number;
-    lineWidth: number;
-  };
+export type { RidgeDebugDrawCommand } from '../debugDrawCommands';
 
 export interface RidgeDebugDrawCommandOptions {
   geometry: RidgeBlockoutGeometry;
@@ -196,10 +166,8 @@ export function createRidgeDebugOverlay(scene: Phaser.Scene): RidgeDebugOverlay 
 
   return {
     render(frame) {
-      graphics.clear();
       const commands = createRidgeDebugDrawCommands(frame);
-      graphics.setVisible(commands.length > 0);
-      commands.forEach((command) => drawCommand(graphics, command));
+      renderRidgeDebugDrawCommands(graphics, commands);
     },
     destroy() {
       graphics.destroy();
@@ -341,44 +309,5 @@ function getAssistZoneColor(zone: RidgeBlockoutAssistZone): number {
       return 0x596f8f;
     case 'drop':
       return 0xb85f5a;
-  }
-}
-
-function drawCommand(
-  graphics: Phaser.GameObjects.Graphics,
-  command: RidgeDebugDrawCommand
-): void {
-  switch (command.kind) {
-    case 'rect':
-      graphics.fillStyle(command.fillColor, command.fillAlpha);
-      graphics.fillRect(
-        command.x - command.width / 2,
-        command.y - command.height / 2,
-        command.width,
-        command.height
-      );
-      graphics.lineStyle(command.lineWidth, command.strokeColor, command.strokeAlpha);
-      graphics.strokeRect(
-        command.x - command.width / 2,
-        command.y - command.height / 2,
-        command.width,
-        command.height
-      );
-      return;
-    case 'circle':
-      graphics.fillStyle(command.fillColor, command.fillAlpha);
-      graphics.fillCircle(command.x, command.y, command.radius);
-      graphics.lineStyle(command.lineWidth, command.strokeColor, command.strokeAlpha);
-      graphics.strokeCircle(command.x, command.y, command.radius);
-      return;
-    case 'line':
-      graphics.lineStyle(command.lineWidth, command.strokeColor, command.strokeAlpha);
-      graphics.strokeLineShape({
-        x1: command.from.x,
-        y1: command.from.y,
-        x2: command.to.x,
-        y2: command.to.y
-      } as Phaser.Geom.Line);
-      return;
   }
 }
