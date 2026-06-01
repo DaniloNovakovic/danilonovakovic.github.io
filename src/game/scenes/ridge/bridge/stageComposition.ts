@@ -1,27 +1,66 @@
 import type { RidgeBridgeBeatState } from '@/game/bridge/store';
 import { BRIDGE_TEXTURE_KEYS } from './assets';
 
+/**
+ * Bridge Stage Source coordinates are plain Phaser world pixels.
+ *
+ * `x` grows left-to-right and `y` grows top-to-bottom. Lower `y` values are
+ * visually farther back/up the screen; higher `y` values are closer to the
+ * foreground.
+ */
 export interface BridgeStagePoint {
   x: number;
   y: number;
 }
 
+/**
+ * Rectangular authoring bounds in Bridge Stage Source space.
+ *
+ * For a longer or shorter Bridge scene, change these bounds together with the
+ * rail end point and any far-right Stage Spots. `cameraBounds.width` can be
+ * smaller than `canvas.width` when the camera should stop before the full
+ * authoring canvas ends.
+ */
 export interface BridgeStageBounds extends BridgeStagePoint {
   width: number;
   height: number;
 }
 
+/**
+ * Pseudo-3D rendering hint sampled from the Walk Rail.
+ *
+ * These values do not move the player along the path. They only adjust how the
+ * player is presented at that rail position.
+ */
 export interface BridgeRailPerspectiveCue {
+  /** Player sprite scale at this part of the rail. Smaller reads farther away. */
   scale: number;
+  /** Phaser display depth. Larger values draw in front of smaller values. */
   depth: number;
+  /** Vertical camera follow nudge for this rail point. Usually keep subtle. */
   cameraFollowOffsetY: number;
 }
 
+/**
+ * One editable control point on the Primary Walk Rail.
+ *
+ * This is the main thing to tweak when the visible walking line feels wrong.
+ * Keep `progress` values sorted from `0` to `1`; insert new points between
+ * neighboring progress values when the rail needs a bend or dip.
+ */
 export interface BridgeWalkRailPoint extends BridgeStagePoint {
+  /** Normalized left-to-right distance along the rail. Start is `0`, end is `1`. */
   progress: number;
+  /** Presentation cue blended between this point and the next point. */
   cue: BridgeRailPerspectiveCue;
 }
 
+/**
+ * The one-dimensional player route for the Bridge.
+ *
+ * Player input changes rail progress. Runtime position is then sampled from
+ * these points, so the player stays locked to this authored line.
+ */
 export interface BridgeWalkRail {
   id: 'primary';
   points: readonly BridgeWalkRailPoint[];
@@ -43,10 +82,15 @@ export type BridgeStageSpotId =
   | 'handoff-note';
 
 export interface BridgeStageSpot {
+  /** Stable name used by runtime code, debugger buttons, and Stage Objects. */
   id: BridgeStageSpotId;
+  /** Where this spot attaches to the Primary Walk Rail. */
   railProgress: number;
+  /** Optional visual offset from the sampled rail point. Useful for props/NPCs. */
   offset?: BridgeStagePoint;
+  /** Optional offset for interaction prompt placement, relative to the spot. */
   promptOffset?: BridgeStagePoint;
+  /** Optional interaction radius override. Defaults to BRIDGE_STAGE_DEFAULT_INTERACT_RADIUS. */
   interactRadius?: number;
 }
 
@@ -59,13 +103,18 @@ export interface ResolvedBridgeStageSpot extends BridgeStagePoint {
 }
 
 export interface BridgeStagePlate {
+  /** Stable name for a large background, midground, or foreground plate. */
   id: string;
   textureKey: string;
+  /** Top-level Phaser world placement for the plate. */
   x: number;
   y: number;
+  /** Display depth. Negative/background values draw behind the player rail. */
   depth: number;
+  /** Phaser origin tuple. `[0, 0]` means x/y is the top-left corner. */
   origin: readonly [number, number];
   scale: number;
+  /** Optional parallax factor. Lower x values move slower than the camera. */
   scrollFactor?: readonly [number, number];
 }
 
@@ -76,21 +125,40 @@ export type BridgeStageObjectId =
   | 'handoff-note';
 
 export interface BridgeStageObject {
+  /** Stable name for a runtime object or debugger row. */
   id: BridgeStageObjectId;
   kind: 'image' | 'procedural-bridge' | 'text-note';
   textureKey?: string;
+  /** Stage Spot that owns this object's placement. Tweak the spot before this. */
   spotId: BridgeStageSpotId;
+  /** Display depth relative to plates, player cue depth, and occluders. */
   depth: number;
   scale?: number;
   origin?: readonly [number, number];
 }
 
 export interface BridgeStageOccluder {
+  /** Debug name for a foreground mask/hint region. */
   id: string;
+  /** Polygon points in source space. Used by the debugger and future cover logic. */
   points: readonly BridgeStagePoint[];
+  /** Depth this occluder represents. Player depths below this read as behind it. */
   depth: number;
 }
 
+/**
+ * Single source of truth for Bridge spatial authoring.
+ *
+ * Edit this shape for normal Bridge staging work:
+ * - `primaryWalkRail.points`: the path the player walks on.
+ * - `spots`: named anchors for NPCs, props, prompts, teleports, and gates.
+ * - `plates`: large authored art layers and parallax pieces.
+ * - `objects`: runtime objects attached to named Stage Spots.
+ * - `occluders`: foreground regions used to debug/express visual overlap.
+ *
+ * Helper functions below should usually stay boring; they sample and resolve
+ * this data for Phaser, tests, and the Ridge Stage Debugger.
+ */
 export interface BridgeStageCompositionSource {
   id: 'bridge';
   canvas: BridgeStageBounds;
@@ -107,6 +175,12 @@ export interface BridgeRailSample extends BridgeStagePoint {
   cue: BridgeRailPerspectiveCue;
 }
 
+/**
+ * Runtime view of the Bridge for the current story beat.
+ *
+ * This controls gates and visibility, not the authored geometry itself. If the
+ * rail line or object placement looks wrong, edit `BRIDGE_STAGE_SOURCE` instead.
+ */
 export interface BridgeStagePresentationState {
   bridgeBeat: RidgeBridgeBeatState;
   crossingOpen: boolean;
@@ -136,78 +210,99 @@ const BRIDGE_CANVAS = {
   height: 600
 } as const;
 
+
+const HORIZONTAL_LINE_BASELINE = 520;
+
+/**
+ * Bridge Stage Composition Source.
+ *
+ * Quick tweak guide:
+ * 1. Walking line feels off: edit `primaryWalkRail.points`.
+ * 2. NPC/prop is in the wrong place: edit its `spot` railProgress/offset.
+ * 3. Prompt appears awkwardly: edit that spot's `promptOffset`.
+ * 4. Background/foreground plate is misaligned: edit `plates`.
+ * 5. Something should render in front/behind: edit `cue.depth`, object `depth`,
+ *    plate `depth`, or occluder `depth`.
+ *
+ * Keep rail `progress` values ascending from `0` to `1`. The player can only
+ * move along this rail; all Stage Spots attach to it by `railProgress`.
+ */
 export const BRIDGE_STAGE_SOURCE: BridgeStageCompositionSource = {
   id: 'bridge',
+  /** Full authored stage size. Extend this when the Bridge area needs more room. */
   canvas: BRIDGE_CANVAS,
+  /** Camera travel area. Usually same origin/height as canvas, with a tuned width. */
   cameraBounds: {
     ...BRIDGE_CANVAS,
     width: 2320
   },
+  /** The visible/debuggable walking line. This is the first place to tweak. */
   primaryWalkRail: {
     id: 'primary',
     points: [
       {
         progress: 0,
-        x: 140,
-        y: 500,
+        x: 120,
+        y: HORIZONTAL_LINE_BASELINE,
         cue: { scale: 0.94, depth: 30, cameraFollowOffsetY: 0 }
       },
       {
         progress: 0.09,
         x: 320,
-        y: 494,
+        y: HORIZONTAL_LINE_BASELINE,
         cue: { scale: 0.95, depth: 30, cameraFollowOffsetY: 0 }
       },
       {
         progress: 0.18,
         x: 520,
-        y: 500,
+        y: HORIZONTAL_LINE_BASELINE - 2,
         cue: { scale: 0.98, depth: 31, cameraFollowOffsetY: 2 }
       },
       {
         progress: 0.38,
         x: 1040,
-        y: 492,
+        y: HORIZONTAL_LINE_BASELINE,
         cue: { scale: 0.96, depth: 30, cameraFollowOffsetY: -6 }
       },
       {
         progress: 0.48,
         x: 1275,
-        y: 500,
+        y: HORIZONTAL_LINE_BASELINE,
         cue: { scale: 1, depth: 31, cameraFollowOffsetY: 0 }
       },
       {
         progress: 0.56,
         x: 1410,
-        y: 500,
+        y: HORIZONTAL_LINE_BASELINE - 10,
         cue: { scale: 1, depth: 31, cameraFollowOffsetY: 0 }
       },
       {
         progress: 0.67,
         x: 1638,
-        y: 488,
+        y: HORIZONTAL_LINE_BASELINE - 10,
         cue: { scale: 0.96, depth: 30, cameraFollowOffsetY: -12 }
       },
       {
         progress: 0.78,
         x: 1865,
-        y: 500,
+        y: HORIZONTAL_LINE_BASELINE - 10,
         cue: { scale: 1, depth: 31, cameraFollowOffsetY: 0 }
       },
       {
         progress: 0.88,
         x: 2050,
-        y: 500,
+        y: HORIZONTAL_LINE_BASELINE ,
         cue: { scale: 1, depth: 31, cameraFollowOffsetY: 0 }
       },
       {
         progress: 1,
-        x: 2360,
-        y: 500,
+        x: 2200,
+        y: HORIZONTAL_LINE_BASELINE,
         cue: { scale: 0.98, depth: 30, cameraFollowOffsetY: 0 }
       }
     ]
   },
+  /** Named anchors attached to the rail. Runtime objects and dev teleports use these. */
   spots: [
     { id: 'spawn', railProgress: 0 },
     {
@@ -229,7 +324,7 @@ export const BRIDGE_STAGE_SOURCE: BridgeStageCompositionSource = {
     { id: 'bridge-center', railProgress: 0.67 },
     { id: 'bridge-right-bank', railProgress: 0.78 },
     { id: 'toy-car-test-start', railProgress: 0.48, offset: { x: -152, y: -26 } },
-    { id: 'toy-car-test-end', railProgress: 0.78, offset: { x: 120, y: -4 } },
+    { id: 'toy-car-test-end', railProgress: 0.78, offset: { x: 120, y: 4 } },
     {
       id: 'concert-exit',
       railProgress: 1,
@@ -238,6 +333,7 @@ export const BRIDGE_STAGE_SOURCE: BridgeStageCompositionSource = {
     },
     { id: 'handoff-note', railProgress: 1, offset: { x: 70, y: -130 } }
   ],
+  /** Large visual layers. Move these when the image plates do not line up. */
   plates: [
     {
       id: 'far-mountains-left',
@@ -269,6 +365,7 @@ export const BRIDGE_STAGE_SOURCE: BridgeStageCompositionSource = {
       scale: 1.25
     }
   ],
+  /** Rendered Bridge props/NPCs. Their placement comes from `spotId`. */
   objects: [
     {
       id: 'bridge-draftsperson',
@@ -299,6 +396,7 @@ export const BRIDGE_STAGE_SOURCE: BridgeStageCompositionSource = {
       depth: 24
     }
   ],
+  /** Foreground overlap hints. These are currently most useful in the debugger. */
   occluders: [
     {
       id: 'near-bank-lip',
@@ -313,8 +411,16 @@ export const BRIDGE_STAGE_SOURCE: BridgeStageCompositionSource = {
   ]
 } as const;
 
+/** Default trigger size for Stage Spots that do not specify their own radius. */
 export const BRIDGE_STAGE_DEFAULT_INTERACT_RADIUS = 86;
 
+/**
+ * Sample the Primary Walk Rail at a normalized progress value.
+ *
+ * This interpolates both position and perspective cue between neighboring rail
+ * points. It is the core conversion from "player is 43% across the rail" to
+ * "player is at x/y with this scale/depth."
+ */
 export function sampleBridgeWalkRail(
   rail: BridgeWalkRail,
   progress: number
@@ -356,6 +462,13 @@ export function sampleBridgeWalkRail(
   return toRailSample(last, clampedProgress);
 }
 
+/**
+ * Resolve a named Stage Spot to absolute world coordinates.
+ *
+ * Spots stay attached to the rail, so moving the rail naturally carries nearby
+ * NPCs/props with it. Use `offset` only when an anchor should sit beside the
+ * rail instead of directly on it.
+ */
 export function resolveBridgeStageSpot(
   source: BridgeStageCompositionSource,
   spotId: BridgeStageSpotId
@@ -382,6 +495,7 @@ export function resolveBridgeStageSpot(
   };
 }
 
+/** Look up a Stage Object definition by id. Placement comes from its `spotId`. */
 export function resolveBridgeStageObject(
   source: BridgeStageCompositionSource,
   objectId: BridgeStageObjectId
@@ -393,6 +507,12 @@ export function resolveBridgeStageObject(
   return object;
 }
 
+/**
+ * Convert story beat state into Bridge presentation rules.
+ *
+ * This decides which rail range is playable, where Cicka/toy car should appear,
+ * and whether the completed bridge/handoff note are visible.
+ */
 export function resolveBridgeStagePresentation(
   bridgeBeat: RidgeBridgeBeatState,
   source: BridgeStageCompositionSource = BRIDGE_STAGE_SOURCE
@@ -415,10 +535,12 @@ export function resolveBridgeStagePresentation(
   };
 }
 
+/** True once the player is allowed to cross past the left bank gate. */
 export function isBridgeCrossingOpen(bridgeBeat: RidgeBridgeBeatState): boolean {
   return bridgeBeat === 'bridge_complete' || bridgeBeat === 'concert_handoff';
 }
 
+/** True once the toy car has been shared with Cicka or the bridge is complete. */
 export function hasCickaSharedToyCar(bridgeBeat: RidgeBridgeBeatState): boolean {
   return (
     bridgeBeat === 'toy_car_shared' ||
@@ -426,6 +548,12 @@ export function hasCickaSharedToyCar(bridgeBeat: RidgeBridgeBeatState): boolean 
   );
 }
 
+/**
+ * Find the nearest rail sample for an arbitrary world point.
+ *
+ * Used for resume/dev placement so older saved coordinates or debugger teleports
+ * can snap back onto the authored Walk Rail.
+ */
 export function projectPointToBridgeWalkRail(
   rail: BridgeWalkRail,
   point: BridgeStagePoint
@@ -462,6 +590,7 @@ export function projectPointToBridgeWalkRail(
   return sampleBridgeWalkRail(rail, bestProgress);
 }
 
+/** Total pixel length of the authored Walk Rail polyline. Useful for debug readouts. */
 export function getBridgeWalkRailLength(rail: BridgeWalkRail): number {
   let length = 0;
   for (let index = 0; index < rail.points.length - 1; index += 1) {
@@ -473,6 +602,7 @@ export function getBridgeWalkRailLength(rail: BridgeWalkRail): number {
   return length;
 }
 
+/** Return the Stage Spot whose `railProgress` is closest to the given progress. */
 export function getNearestBridgeStageSpotId(
   source: BridgeStageCompositionSource,
   progress: number
