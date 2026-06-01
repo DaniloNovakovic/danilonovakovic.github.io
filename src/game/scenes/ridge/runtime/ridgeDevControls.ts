@@ -14,6 +14,11 @@ export interface RidgeDevResetRequest {
 export interface RidgeDevPlayerSnapshot {
   x: number;
   y: number;
+  railDepth?: number;
+  railProgress?: number;
+  railScale?: number;
+  nearestStageSpotId?: string;
+  sourceSnippet?: string;
 }
 
 export interface RidgeDevDebugSettings {

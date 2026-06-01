@@ -36,11 +36,17 @@ Ridge is a separate Phaser scene that can boot directly in development with:
 
 Current runtime characteristics:
 
-- Ridge uses shared side-view movement and camera/runtime support.
+- Ridge Bridge exploration uses a Bridge-owned Stage Composition Source and a
+  Primary Walk Rail as movement authority. Left/right input advances rail
+  progress, then the player foot position, scale, depth, and interaction
+  checks resolve from the rail and Stage Spots.
 - The active `ridge` scene is now the **Bridge Tracer Slice**: a flat
   Bridge-only route from nature/hill entry to Cicka's toy-car play spot,
   blocked blueprint bridge, Bridge Draftsperson, auto-success toy-car test,
   completed crossing, and Bridge-to-Concert handoff.
+- Bridge stage plates, modular objects, Stage Spots, Stage Occluders, and
+  route-beat presentation state are authored in the colocated Bridge source
+  under `src/game/scenes/ridge/bridge/`.
 - First Playable Route progress lives in the bridge store as
   `firstPlayableRoute`, a typed route state that only permits active Bridge
   beats while `activeAreaId` is `bridge` and records the Concert handoff as the

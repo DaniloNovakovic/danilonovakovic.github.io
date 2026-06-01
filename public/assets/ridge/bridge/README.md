@@ -16,10 +16,12 @@ Bridge playable proof:
 - `close-stage-no-stumps.png`: transparent close playable terrain, camp, and
   gorge layer
 
-Phaser still owns composition, route state, collision, prompts, before/after
-bridge state, character sprites, and toy-car movement. The `modular/` folder is
-kept only for currently drawn modular runtime props: Bridge Draftsperson and the
-toy car.
+The Bridge runtime consumes the typed Bridge Stage Composition Source in
+`src/game/scenes/ridge/bridge/stageComposition.ts` for stage plates, Walk Rail
+placement, Stage Spots, modular object placement, and before/after presentation.
+Route state still lives outside the asset folder. The `modular/` folder is kept
+only for currently drawn modular runtime props: Bridge Draftsperson and the toy
+car.
 
 ## Style Contract
 

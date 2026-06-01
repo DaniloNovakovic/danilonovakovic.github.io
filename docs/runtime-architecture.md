@@ -43,12 +43,14 @@ game vocabulary is explicit:
 - **Shared scene runtime** - reusable Phaser-facing machinery lives in `src/game/sharedSceneRuntime`: side-view player lifecycle, camera policy, scene presentation, resume policy, keyboard pause, interior interactions, text, textures, and vision helpers.
 - **Pure gameplay decisions** - `src/game/core` contains deterministic ECS, input, and player logic that can be tested without Phaser, React, browser globals, or bridge state.
 - **Scene-owned modules** - scene folders own local layout, triggers, Phaser objects, scene contexts, scene-local overlays, and heavy scene runtime modules.
-- **Ridge exploration runtime** - Ridge treats
-  `src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts` as
-  typed authoring source data and imports the committed generated artifact at
-  runtime. The Ridge scene derives geometry, compiles typed facts, resolves
-  durable progress, and hands those outputs to scene-owned presentation,
-  traversal, interaction, and Cicka Home mutation modules.
+- **Ridge exploration runtime** - Current Bridge exploration treats
+  `src/game/scenes/ridge/bridge/stageComposition.ts` as the Bridge Stage
+  Composition Source: it owns the Primary Walk Rail, Stage Spots, Stage Plates,
+  Stage Objects, Stage Occluders, camera bounds, and route-beat presentation
+  predicates consumed by the Ridge scene. The legacy folded desk prototype
+  still treats `src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts`
+  as typed authoring source data and imports the committed generated artifact
+  for blockout facts, traversal helpers, and dev-model inspection.
 
 ## Scene presentation and camera
 

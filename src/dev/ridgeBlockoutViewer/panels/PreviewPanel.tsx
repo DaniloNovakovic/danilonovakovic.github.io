@@ -73,7 +73,28 @@ export function PreviewPanel({
                 ? `${Math.round(playerSnapshot.x)}, ${Math.round(playerSnapshot.y)}`
                 : 'waiting'}
             />
+            <Detail
+              label="Rail"
+              value={playerSnapshot?.railProgress !== undefined
+                ? `${playerSnapshot.railProgress.toFixed(3)} @ ${playerSnapshot.nearestStageSpotId ?? 'spot?'}`
+                : 'waiting'}
+            />
+            <Detail
+              label="Cue"
+              value={playerSnapshot?.railScale !== undefined && playerSnapshot.railDepth !== undefined
+                ? `scale ${playerSnapshot.railScale.toFixed(2)} / depth ${playerSnapshot.railDepth}`
+                : 'waiting'}
+            />
           </dl>
+          {playerSnapshot?.sourceSnippet ? (
+            <input
+              aria-label="Copyable Ridge Stage Source snippet"
+              className="h-8 w-full border-2 border-[#1a1a1a] bg-[#fbfbf9] px-2 font-mono text-[10px] font-black"
+              onFocus={(event) => event.currentTarget.select()}
+              readOnly
+              value={playerSnapshot.sourceSnippet}
+            />
+          ) : null}
           <button
             className="flex min-h-9 items-center justify-center gap-2 border-2 border-[#1a1a1a] bg-[#fbfbf9] px-2 py-1 text-xs font-black uppercase tracking-wider transition-colors hover:bg-[#1a1a1a] hover:text-[#fbfbf9] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1a1a1a]"
             onClick={onResetPlayer}

@@ -2,52 +2,52 @@ import * as Phaser from 'phaser';
 import {
   bridgeActions,
   bridgeStore,
-  isItemEquipped,
   type OpenOverlayOptions,
   type RidgeFirstPlayableRouteState
 } from '@/game/bridge/store';
 import { type OverlayId } from '@/game/overlays/overlayIds';
 import { PHASER_SCENE_KEYS } from '@/game/scenes/sceneIds';
 import {
-  GAME_DESIGN_HEIGHT,
-  GAME_DESIGN_WIDTH,
-  SIDE_VIEW_JUMP_VELOCITY_Y,
-  SIDE_VIEW_PLAYER_GRAVITY_Y,
-  SIDE_VIEW_SPRINT_SPEED,
-  SIDE_VIEW_WALK_SPEED
-} from '@/game/sharedSceneRuntime/config';
-import {
   createInteriorInteractionRuntime,
   type InteriorInteractionRuntime
 } from '@/game/sharedSceneRuntime/interactions/InteriorInteractionRuntime';
-import {
-  createSideViewPlayerRuntime,
-  type SideViewPlayerRuntime
-} from '@/game/sharedSceneRuntime/player/SideViewPlayerRuntime';
 import {
   createCickaAnimations,
   preloadCickaAssets
 } from '../cicka/assets';
 import { preloadBridgeAssets } from '../bridge/assets';
 import {
-  applyRidgeDevTeleportToPlayer,
   RIDGE_DEFAULT_CAMERA_ZOOM,
+  resolveRidgeDevDebugSettings,
   resolveRidgeDevCameraZoom,
+  resolveRidgeDevTeleportPosition,
   type RidgeDevControls
 } from './ridgeDevControls';
 import {
-  BRIDGE_TRACER_CAMERA_BOUNDS,
   BRIDGE_TRACER_INTERACT_RADIUS,
   BRIDGE_TRACER_WORLD,
   createBridgeTracerInteractionTargets,
   type BridgeTracerEffect,
   type BridgeTracerInteractionTarget,
   type BridgeTracerTargetId
-} from './bridgeTracerSlice';
+} from '../bridge/bridgeTracerSlice';
 import {
   createBridgeTracerStageRuntime,
   type BridgeTracerStageRuntime
-} from './BridgeTracerStageRuntime';
+} from '../bridge/BridgeTracerStageRuntime';
+import {
+  createBridgeWalkRailPlayerRuntime,
+  type BridgeWalkRailPlayerRuntime
+} from '../bridge/BridgeWalkRailPlayerRuntime';
+import {
+  createBridgeStageDebugOverlay,
+  type BridgeStageDebugOverlay
+} from '../bridge/bridgeStageDebugOverlay';
+import {
+  BRIDGE_STAGE_SOURCE,
+  resolveBridgeStagePresentation,
+  type BridgeStagePresentationState
+} from '../bridge/stageComposition';
 import { TextureGenerator } from '@/game/sharedSceneRuntime/textures/TextureGenerator';
 
 interface RidgeSceneStartData {
@@ -58,16 +58,14 @@ interface RidgeSceneStartData {
   ridgeDevControls?: RidgeDevControls;
 }
 
-const RIDGE_PLAYER_EDGE_PADDING = 48;
-const RIDGE_COYOTE_TIME_MS = 120;
-const RIDGE_JUMP_BUFFER_MS = 120;
-
 export class RidgeScene extends Phaser.Scene {
   player?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
 
-  private playerRuntime?: SideViewPlayerRuntime;
+  private playerRuntime?: BridgeWalkRailPlayerRuntime;
   private bridgeStage?: BridgeTracerStageRuntime;
+  private bridgeDebugOverlay?: BridgeStageDebugOverlay;
   private interactionRuntime?: InteriorInteractionRuntime<BridgeTracerTargetId, BridgeTracerEffect>;
+  private bridgeInteractionTargets: BridgeTracerInteractionTarget[] = [];
   private playerReadabilityHalo?: Phaser.GameObjects.Graphics;
   private onClose: () => void = () => {};
   private isPaused = false;
@@ -75,6 +73,7 @@ export class RidgeScene extends Phaser.Scene {
   private ridgeDevControls?: RidgeDevControls;
   private ridgeSpawnPosition = { ...BRIDGE_TRACER_WORLD.spawn };
   private lastCameraZoom = RIDGE_DEFAULT_CAMERA_ZOOM;
+  private bridgePresentation: BridgeStagePresentationState = resolveBridgeStagePresentation('intro');
   private routeState: RidgeFirstPlayableRouteState = {
     activeAreaId: 'bridge',
     bridgeBeat: 'intro'
@@ -116,6 +115,7 @@ export class RidgeScene extends Phaser.Scene {
     this.routeState = bridgeStore.getState().progress.ridge.firstPlayableRoute;
 
     this.bridgeStage?.dispose();
+    this.bridgeDebugOverlay?.destroy();
     this.cameras.main.setBackgroundColor('#f7f1df');
     this.physics.world.setBounds(
       BRIDGE_TRACER_WORLD.bounds.x,
@@ -126,7 +126,10 @@ export class RidgeScene extends Phaser.Scene {
     createCickaAnimations(this);
 
     this.bridgeStage = createBridgeTracerStageRuntime(this);
-    this.createPlayer(this.bridgeStage.platforms);
+    this.createPlayer();
+    this.bridgeDebugOverlay = import.meta.env.DEV
+      ? createBridgeStageDebugOverlay(this)
+      : undefined;
     this.syncBridgeRouteState();
     this.createBridgeInteractions();
     this.setPaused(this.isPaused);
@@ -134,10 +137,10 @@ export class RidgeScene extends Phaser.Scene {
     this.syncDevRuntimeState();
   }
 
-  update(): void {
+  update(_time: number, delta: number): void {
     this.applyDevControls();
 
-    const playerUpdate = this.playerRuntime?.update();
+    const playerUpdate = this.playerRuntime?.update(delta);
     this.syncPlayerReadabilityHalo();
     if (!playerUpdate || playerUpdate.paused) {
       this.syncDevRuntimeState();
@@ -177,58 +180,18 @@ export class RidgeScene extends Phaser.Scene {
     this.syncDevRuntimeState();
   }
 
-  private createPlayer(platforms: readonly Phaser.GameObjects.Zone[]): void {
+  private createPlayer(): void {
     this.ridgeSpawnPosition = { ...BRIDGE_TRACER_WORLD.spawn };
-    const playerRuntime = createSideViewPlayerRuntime({
+    const playerRuntime = createBridgeWalkRailPlayerRuntime({
       scene: this,
-      start: this.ridgeSpawnPosition,
       resumePosition: this.resumePosition,
-      resumeClamp: {
-        minX: BRIDGE_TRACER_WORLD.bounds.x + RIDGE_PLAYER_EDGE_PADDING,
-        maxX: BRIDGE_TRACER_WORLD.bounds.x + BRIDGE_TRACER_WORLD.bounds.width - RIDGE_PLAYER_EDGE_PADDING,
-        minY: BRIDGE_TRACER_WORLD.bounds.y + RIDGE_PLAYER_EDGE_PADDING,
-        maxY: BRIDGE_TRACER_WORLD.bounds.y + BRIDGE_TRACER_WORLD.bounds.height - RIDGE_PLAYER_EDGE_PADDING
-      },
-      sprite: {
-        depth: 30,
-        gravityY: SIDE_VIEW_PLAYER_GRAVITY_Y
-      },
-      movement: {
-        walkSpeed: SIDE_VIEW_WALK_SPEED,
-        sprintSpeed: SIDE_VIEW_SPRINT_SPEED,
-        jumpVelocityY: SIDE_VIEW_JUMP_VELOCITY_Y,
-        coyoteTimeMs: RIDGE_COYOTE_TIME_MS,
-        jumpBufferMs: RIDGE_JUMP_BUFFER_MS
-      },
-      input: {
-        allowJump: false,
-        allowSprint: true,
-        includeEscapeKey: true
-      },
-      appearance: {
-        isGlassesEquipped: () => isItemEquipped('glasses'),
-        idleTextureKey: 'player_idle',
-        glassesTextureKey: 'player_glasses'
-      },
-      camera: {
-        worldBounds: BRIDGE_TRACER_CAMERA_BOUNDS,
-        designSize: {
-          width: GAME_DESIGN_WIDTH,
-          height: GAME_DESIGN_HEIGHT
-        },
-        resolveProfile: () => ({
-          zoom: this.resolveCameraZoom(),
-          followOffsetY: 10
-        })
-      }
+      resolveCameraZoom: () => this.resolveCameraZoom()
     });
     this.playerRuntime = playerRuntime;
     this.player = playerRuntime.player;
-    this.player.setOrigin(0.5, 0.42);
+    this.bridgePresentation = resolveBridgeStagePresentation(this.routeState.bridgeBeat);
+    playerRuntime.setProgressRange(this.bridgePresentation.playerProgressRange);
     this.createPlayerReadabilityHalo();
-    platforms.forEach((platform) => {
-      this.physics.add.collider(playerRuntime.player, platform);
-    });
   }
 
   private createPlayerReadabilityHalo(): void {
@@ -247,16 +210,20 @@ export class RidgeScene extends Phaser.Scene {
 
   private syncPlayerReadabilityHalo(): void {
     if (!this.player || !this.playerReadabilityHalo) return;
-    this.playerReadabilityHalo.setPosition(this.player.x, this.player.y - 10);
+    this.playerReadabilityHalo
+      .setPosition(this.player.x, this.player.y - 34)
+      .setScale(Math.abs(this.player.scaleX))
+      .setDepth(this.player.depth - 1);
   }
 
   private createBridgeInteractions(): void {
+    this.bridgeInteractionTargets = createBridgeTracerInteractionTargets(this.routeState);
     this.interactionRuntime = createInteriorInteractionRuntime<
       BridgeTracerTargetId,
       BridgeTracerEffect
     >({
       interactRadius: BRIDGE_TRACER_INTERACT_RADIUS,
-      targets: createBridgeTracerInteractionTargets(this.routeState)
+      targets: this.bridgeInteractionTargets
     });
   }
 
@@ -297,7 +264,10 @@ export class RidgeScene extends Phaser.Scene {
 
   private syncBridgeRouteState(): void {
     this.routeState = bridgeStore.getState().progress.ridge.firstPlayableRoute;
-    this.bridgeStage?.syncBeat(this.routeState.bridgeBeat, this.player);
+    this.bridgePresentation =
+      this.bridgeStage?.syncBeat(this.routeState.bridgeBeat) ??
+      resolveBridgeStagePresentation(this.routeState.bridgeBeat);
+    this.playerRuntime?.setProgressRange(this.bridgePresentation.playerProgressRange);
   }
 
   private resolveCameraZoom(): number {
@@ -324,25 +294,47 @@ export class RidgeScene extends Phaser.Scene {
     const request = this.ridgeDevControls.consumeTeleportRequest?.();
     if (!request) return;
 
-    applyRidgeDevTeleportToPlayer(this.player, request);
-    this.playerRuntime?.cameraRuntime?.refresh();
+    this.movePlayerForDev(resolveRidgeDevTeleportPosition(request));
   }
 
   private movePlayerForDev(position: { x: number; y: number }): void {
-    if (!this.player) return;
-    this.player.setPosition(position.x, position.y);
-    this.player.setVelocityX(0);
-    this.player.setVelocityY(0);
-    this.player.body.setAllowGravity(true);
+    this.playerRuntime?.moveToWorldPosition(position);
     this.syncPlayerReadabilityHalo();
-    this.playerRuntime?.cameraRuntime?.refresh();
   }
 
   private syncDevRuntimeState(): void {
     if (!import.meta.env.DEV || !this.ridgeDevControls || !this.player) return;
+    const railSnapshot = this.playerRuntime?.getRailSnapshot();
+    const body = this.player.body
+      ? {
+          x: this.player.body.x,
+          y: this.player.body.y,
+          width: this.player.body.width,
+          height: this.player.body.height
+        }
+      : undefined;
+    const debugSettings = resolveRidgeDevDebugSettings(
+      this.ridgeDevControls.resolveDebugSettings?.()
+    );
+    this.bridgeDebugOverlay?.render({
+      source: BRIDGE_STAGE_SOURCE,
+      interactionTargets: this.bridgeInteractionTargets,
+      player: {
+        x: this.player.x,
+        y: this.player.y,
+        body
+      },
+      railProgress: railSnapshot?.progress,
+      settings: debugSettings
+    });
     this.ridgeDevControls.publishPlayerSnapshot?.({
       x: this.player.x,
-      y: this.player.y
+      y: this.player.y,
+      railProgress: railSnapshot?.progress,
+      railScale: railSnapshot?.scale,
+      railDepth: railSnapshot?.depth,
+      nearestStageSpotId: railSnapshot?.nearestSpotId,
+      sourceSnippet: railSnapshot?.sourceSnippet
     });
   }
 }

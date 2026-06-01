@@ -1,58 +1,67 @@
 import type { InteriorInteractionTarget } from '@/game/sharedSceneRuntime/interactions/InteriorInteractionRuntime';
 import type {
   RidgeBridgeAreaBeatState,
-  RidgeBridgeBeatState,
   RidgeFirstPlayableRouteState
 } from '@/game/bridge/store';
 import type { BridgeDialogueLineId } from '../dialogue/bridgeDialogue';
+import {
+  BRIDGE_STAGE_DEFAULT_INTERACT_RADIUS,
+  BRIDGE_STAGE_SOURCE,
+  resolveBridgeStageSpot,
+  type BridgeStageSpotId
+} from './stageComposition';
+
+export { hasCickaSharedToyCar, isBridgeCrossingOpen } from './stageComposition';
+
+const spawnSpot = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, 'spawn');
+const cickaPlaySpot = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, 'cicka-play');
+const cickaSettledSpot = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, 'cicka-settled');
+const draftspersonSpot = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, 'draftsperson');
+const blueprintSpot = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, 'blueprint');
+const bridgeLeftBankSpot = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, 'bridge-left-bank');
+const bridgeCenterSpot = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, 'bridge-center');
+const bridgeRightBankSpot = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, 'bridge-right-bank');
+const exitSpot = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, 'concert-exit');
 
 export const BRIDGE_TRACER_WORLD = {
-  bounds: {
-    x: 0,
-    y: 0,
-    width: 2600,
-    height: 600
-  },
-  floorY: 500,
+  bounds: BRIDGE_STAGE_SOURCE.canvas,
+  floorY: bridgeLeftBankSpot.y,
   spawn: {
-    x: 140,
-    y: 452
+    x: spawnSpot.x,
+    y: spawnSpot.y
   },
   cickaPlaySpot: {
-    x: 520,
-    y: 500
+    x: cickaPlaySpot.x,
+    y: cickaPlaySpot.y
   },
   cickaSettledSpot: {
-    x: 2050,
-    y: 500
+    x: cickaSettledSpot.x,
+    y: cickaSettledSpot.y
   },
   draftsperson: {
-    x: 1275,
-    y: 500
+    x: draftspersonSpot.x,
+    y: draftspersonSpot.y
   },
   blueprint: {
-    x: 1145,
-    y: 430
+    x: blueprintSpot.x,
+    y: blueprintSpot.y
   },
   bridge: {
-    leftBankEndX: 1410,
-    rightBankStartX: 1865,
-    centerX: 1638,
-    deckY: 500,
-    deckWidth: 470
+    leftBankEndX: bridgeLeftBankSpot.x,
+    rightBankStartX: bridgeRightBankSpot.x,
+    centerX: bridgeCenterSpot.x,
+    deckY: bridgeCenterSpot.y,
+    deckWidth: bridgeRightBankSpot.x - bridgeLeftBankSpot.x + 15
   },
   exit: {
-    x: 2360,
-    y: 500
+    x: exitSpot.x,
+    y: exitSpot.y
   }
 } as const;
 
-export const BRIDGE_TRACER_CAMERA_BOUNDS = {
-  ...BRIDGE_TRACER_WORLD.bounds,
-  width: 2320
-} as const;
+export const BRIDGE_TRACER_CAMERA_BOUNDS = BRIDGE_STAGE_SOURCE.cameraBounds;
 
-export const BRIDGE_TRACER_INTERACT_RADIUS = 86;
+export const BRIDGE_TRACER_INTERACT_RADIUS = BRIDGE_STAGE_DEFAULT_INTERACT_RADIUS;
 
 export type BridgeTracerTargetId = 'cicka' | 'draftsperson' | 'concert-exit';
 
@@ -80,17 +89,6 @@ export type BridgeTracerInteractionTarget = InteriorInteractionTarget<
 
 type BridgeTracerTargetFactory = () => BridgeTracerInteractionTarget;
 
-export function isBridgeCrossingOpen(bridgeBeat: RidgeBridgeBeatState): boolean {
-  return bridgeBeat === 'bridge_complete' || bridgeBeat === 'concert_handoff';
-}
-
-export function hasCickaSharedToyCar(bridgeBeat: RidgeBridgeBeatState): boolean {
-  return (
-    bridgeBeat === 'toy_car_shared' ||
-    isBridgeCrossingOpen(bridgeBeat)
-  );
-}
-
 export function createBridgeTracerInteractionTargets(
   route: RidgeFirstPlayableRouteState
 ): BridgeTracerInteractionTarget[] {
@@ -112,16 +110,10 @@ const BRIDGE_TARGETS_BY_BEAT = {
 } satisfies Record<RidgeBridgeAreaBeatState, readonly BridgeTracerTargetFactory[]>;
 
 function createCickaFirstMeetTarget(): BridgeTracerInteractionTarget {
-  return {
+  return createSpotTarget({
     id: 'cicka',
     kind: 'ridge-bridge-cicka',
-    x: BRIDGE_TRACER_WORLD.cickaPlaySpot.x,
-    distanceAnchorY: BRIDGE_TRACER_WORLD.cickaPlaySpot.y,
-    interactRadius: BRIDGE_TRACER_INTERACT_RADIUS,
-    prompt: {
-      x: BRIDGE_TRACER_WORLD.cickaPlaySpot.x,
-      y: BRIDGE_TRACER_WORLD.cickaPlaySpot.y - 116
-    },
+    spotId: 'cicka-play',
     promptLineId: 'bridge.cicka.first_meet.01',
     effect: {
       kind: 'showDialogue',
@@ -131,20 +123,14 @@ function createCickaFirstMeetTarget(): BridgeTracerInteractionTarget {
         'bridge.cicka.first_meet.03'
       ]
     }
-  };
+  });
 }
 
 function createCickaParallelPlayTarget(): BridgeTracerInteractionTarget {
-  return {
+  return createSpotTarget({
     id: 'cicka',
     kind: 'ridge-bridge-cicka',
-    x: BRIDGE_TRACER_WORLD.cickaPlaySpot.x,
-    distanceAnchorY: BRIDGE_TRACER_WORLD.cickaPlaySpot.y,
-    interactRadius: BRIDGE_TRACER_INTERACT_RADIUS,
-    prompt: {
-      x: BRIDGE_TRACER_WORLD.cickaPlaySpot.x,
-      y: BRIDGE_TRACER_WORLD.cickaPlaySpot.y - 116
-    },
+    spotId: 'cicka-play',
     promptLineId: 'bridge.cicka.parallel_play.01',
     effect: {
       kind: 'showDialogue',
@@ -156,7 +142,7 @@ function createCickaParallelPlayTarget(): BridgeTracerInteractionTarget {
       ],
       nextBeat: 'toy_car_shared'
     }
-  };
+  });
 }
 
 function createIntroMissingSpanTarget(): BridgeTracerInteractionTarget {
@@ -170,16 +156,10 @@ function createNeedsToyCarMissingSpanTarget(): BridgeTracerInteractionTarget {
 function createMissingSpanTarget(
   bridgeBeat: Extract<RidgeBridgeAreaBeatState, 'intro' | 'needs_toy_car'>
 ): BridgeTracerInteractionTarget {
-  return {
+  return createSpotTarget({
     id: 'draftsperson',
     kind: 'ridge-bridge-draftsperson',
-    x: BRIDGE_TRACER_WORLD.draftsperson.x,
-    distanceAnchorY: BRIDGE_TRACER_WORLD.draftsperson.y,
-    interactRadius: BRIDGE_TRACER_INTERACT_RADIUS,
-    prompt: {
-      x: BRIDGE_TRACER_WORLD.draftsperson.x + 260,
-      y: BRIDGE_TRACER_WORLD.draftsperson.y - 96
-    },
+    spotId: 'draftsperson',
     promptLineId: 'bridge.draftsperson.missing_span.03',
     effect: {
       kind: 'showDialogue',
@@ -190,20 +170,14 @@ function createMissingSpanTarget(
       ],
       nextBeat: bridgeBeat === 'intro' ? 'needs_toy_car' : undefined
     }
-  };
+  });
 }
 
 function createToyCarTestTarget(): BridgeTracerInteractionTarget {
-  return {
+  return createSpotTarget({
     id: 'draftsperson',
     kind: 'ridge-bridge-draftsperson',
-    x: BRIDGE_TRACER_WORLD.draftsperson.x,
-    distanceAnchorY: BRIDGE_TRACER_WORLD.draftsperson.y,
-    interactRadius: BRIDGE_TRACER_INTERACT_RADIUS,
-    prompt: {
-      x: BRIDGE_TRACER_WORLD.draftsperson.x + 260,
-      y: BRIDGE_TRACER_WORLD.draftsperson.y - 96
-    },
+    spotId: 'draftsperson',
     promptLineId: 'bridge.draftsperson.toy_car_test.01',
     effect: {
       kind: 'runToyCarTest',
@@ -214,20 +188,14 @@ function createToyCarTestTarget(): BridgeTracerInteractionTarget {
         'bridge.draftsperson.toy_car_test.04'
       ]
     }
-  };
+  });
 }
 
 function createConcertExitTarget(): BridgeTracerInteractionTarget {
-  return {
+  return createSpotTarget({
     id: 'concert-exit',
     kind: 'ridge-bridge-exit',
-    x: BRIDGE_TRACER_WORLD.exit.x,
-    distanceAnchorY: BRIDGE_TRACER_WORLD.exit.y,
-    interactRadius: 104,
-    prompt: {
-      x: BRIDGE_TRACER_WORLD.exit.x,
-      y: BRIDGE_TRACER_WORLD.exit.y - 126
-    },
+    spotId: 'concert-exit',
     promptLineId: 'bridge.exit.opened_crossing.01',
     effect: {
       kind: 'triggerConcertHandoff',
@@ -237,5 +205,25 @@ function createConcertExitTarget(): BridgeTracerInteractionTarget {
         'bridge.exit.opened_crossing.03'
       ]
     }
+  });
+}
+
+function createSpotTarget(options: {
+  id: BridgeTracerTargetId;
+  kind: string;
+  spotId: BridgeStageSpotId;
+  promptLineId: BridgeDialogueLineId;
+  effect: BridgeTracerEffect;
+}): BridgeTracerInteractionTarget {
+  const spot = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, options.spotId);
+  return {
+    id: options.id,
+    kind: options.kind,
+    x: spot.x,
+    distanceAnchorY: spot.y,
+    interactRadius: spot.interactRadius ?? BRIDGE_TRACER_INTERACT_RADIUS,
+    prompt: spot.prompt,
+    promptLineId: options.promptLineId,
+    effect: options.effect
   };
 }
