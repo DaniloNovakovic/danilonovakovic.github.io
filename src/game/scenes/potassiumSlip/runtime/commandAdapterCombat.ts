@@ -62,40 +62,106 @@ function applyCombatCommand(
     ? context.projectiles.get(command.projectileId)
     : undefined;
 
+  if (applyCombatEnemyCommand(internals, command, enemy)) return;
+  if (applyCombatProjectileCommand(internals, command, projectile, enemy)) return;
+  applyCombatWorldCommand(internals, command, context, enemy);
+}
+
+function applyCombatEnemyCommand(
+  internals: PotassiumCommandAdapterInternals,
+  command: PotassiumCombatCommand,
+  enemy: PotassiumCommandObject | undefined
+): boolean {
+  if (applyCombatEnemyDamageCommand(internals, command, enemy)) return true;
+  if (applyCombatEnemyStatusCommand(internals, command, enemy)) return true;
+  return applyCombatEnemyLifecycleCommand(internals, command, enemy);
+}
+
+function applyCombatEnemyDamageCommand(
+  internals: PotassiumCommandAdapterInternals,
+  command: PotassiumCombatCommand,
+  enemy: PotassiumCommandObject | undefined
+): boolean {
   switch (command.type) {
     case 'damageEnemy':
       if (enemy) damageEnemy(internals, enemy, command.amount, command.source);
-      return;
+      return true;
     case 'setEnemyHp':
       if (enemy) setPotassiumEnemyHealth(enemy, command.hp, command.damageState);
-      return;
+      return true;
     case 'showDamageCue':
       if (enemy) internals.ports.showDamageCue(enemy, command.source);
-      return;
+      return true;
+    default:
+      return false;
+  }
+}
+
+function applyCombatEnemyStatusCommand(
+  internals: PotassiumCommandAdapterInternals,
+  command: PotassiumCombatCommand,
+  enemy: PotassiumCommandObject | undefined
+): boolean {
+  switch (command.type) {
     case 'setFireTickUntil':
       if (enemy) setPotassiumData(enemy, POTASSIUM_DATA_KEYS.fireTickUntil, command.fireTickUntil);
-      return;
+      return true;
     case 'setPoisonNextTickAt':
       if (enemy) setPotassiumData(enemy, POTASSIUM_DATA_KEYS.poisonNextTickAt, command.poisonNextTickAt);
-      return;
+      return true;
     case 'applyPoison':
       if (enemy) applyPoisonCommand(internals, enemy, command);
-      return;
+      return true;
     case 'clearPoison':
       if (enemy) clearPoison(enemy);
-      return;
+      return true;
+    default:
+      return false;
+  }
+}
+
+function applyCombatEnemyLifecycleCommand(
+  internals: PotassiumCommandAdapterInternals,
+  command: PotassiumCombatCommand,
+  enemy: PotassiumCommandObject | undefined
+): boolean {
+  switch (command.type) {
     case 'spawnSplitterChildren':
       if (enemy) internals.ports.spawnSplitterChildren(enemy);
-      return;
+      return true;
     case 'killEnemy':
       if (enemy) killEnemy(internals, enemy);
-      return;
+      return true;
+    default:
+      return false;
+  }
+}
+
+function applyCombatProjectileCommand(
+  internals: PotassiumCommandAdapterInternals,
+  command: PotassiumCombatCommand,
+  projectile: PotassiumCommandObject | undefined,
+  enemy: PotassiumCommandObject | undefined
+): boolean {
+  switch (command.type) {
     case 'ricochetProjectile':
       if (projectile && enemy) ricochetProjectileFromEnemy(internals, projectile, enemy);
-      return;
+      return true;
     case 'boostRecallVelocity':
       projectile?.setVelocity(projectile.body.velocity.x * 1.01, projectile.body.velocity.y * 1.01);
-      return;
+      return true;
+    default:
+      return false;
+  }
+}
+
+function applyCombatWorldCommand(
+  internals: PotassiumCommandAdapterInternals,
+  command: PotassiumCombatCommand,
+  context: PotassiumCombatContext,
+  sourceEnemy: PotassiumCommandObject | undefined
+): void {
+  switch (command.type) {
     case 'spawnFirePatch':
       internals.ports.spawnFirePatch(
         command.x,
@@ -104,28 +170,28 @@ function applyCombatCommand(
         command.lifetimeMs,
         command.scale
       );
-      return;
+      break;
     case 'explodeAt':
       explodeAt(internals, command.x, command.y, command.effectMultiplier, command.radiusMultiplier);
-      return;
+      break;
     case 'spawnBananaClones':
       internals.ports.spawnBananaClones(command.count, command.lifetimeMs);
-      return;
+      break;
     case 'spawnGhostBeam':
       spawnGhostBeam(internals, command.x, command.y, command.direction, command.effectMultiplier);
-      return;
+      break;
     case 'spawnGhostStatusField':
       spawnGhostStatusField(internals, command.x, command.y, command.direction, command.effectMultiplier);
-      return;
+      break;
     case 'spreadPoisonFrom':
       spreadPoisonFrom(
         internals,
         command.x,
         command.y,
         command.effectMultiplier,
-        enemy ?? context.enemies.get(command.sourceEnemyId)
+        sourceEnemy ?? context.enemies.get(command.sourceEnemyId)
       );
-      return;
+      break;
     default:
       break;
   }
@@ -140,40 +206,16 @@ function ricochetProjectileFromEnemy(
 
   const { options, ports } = internals;
   const velocity = { x: projectile.body.velocity.x, y: projectile.body.velocity.y };
-  const currentSpeed = vectorLength(velocity);
-  let normal = { x: projectile.x - enemy.x, y: projectile.y - enemy.y };
-  if (vectorLengthSquared(normal) <= 0.001) {
-    normal = vectorLengthSquared(velocity) > 0.001 ? velocity : { x: 0, y: 1 };
-  }
-  normal = normalize(normal);
-
-  let ricochet = { ...velocity };
-  const dot = dotProduct(ricochet, normal);
-  if (dot < 0) {
-    ricochet = {
-      x: ricochet.x - normal.x * (2 * dot),
-      y: ricochet.y - normal.y * (2 * dot)
-    };
-  } else {
-    ricochet = { ...normal };
-  }
-  if (vectorLengthSquared(ricochet) <= 0.001) {
-    ricochet = { ...normal };
-  }
-
+  const normal = collisionNormal(projectile, enemy, velocity);
   const maxSpeed = ports.isMainProjectile(projectile)
     ? ports.getMaxMainProjectileSpeed()
     : options.cloneRicochetMaxSpeed;
-  const speed = clamp(
-    Math.max(currentSpeed * options.bananaRicochetBoost, options.bananaRicochetMinSpeed),
-    options.bananaRicochetMinSpeed,
-    maxSpeed
+  const ricochet = scaledRicochetVelocity(
+    reflectVelocity(velocity, normal),
+    vectorLength(velocity),
+    maxSpeed,
+    options
   );
-  const ricochetNormal = normalize(ricochet);
-  ricochet = {
-    x: ricochetNormal.x * speed,
-    y: ricochetNormal.y * speed
-  };
 
   projectile.setPosition(
     clamp(projectile.x + normal.x * 8, options.arena.left + 28, options.arena.right - 28),
@@ -346,6 +388,56 @@ function spawnGhostStatusField(
       durationMs: options.ghostStatusFieldLifetimeMs
     });
   }
+}
+
+function collisionNormal(
+  projectile: PotassiumCommandObject,
+  enemy: PotassiumCommandObject,
+  velocity: { x: number; y: number }
+): { x: number; y: number } {
+  let normal = { x: projectile.x - enemy.x, y: projectile.y - enemy.y };
+  if (vectorLengthSquared(normal) <= 0.001) {
+    normal = vectorLengthSquared(velocity) > 0.001 ? velocity : { x: 0, y: 1 };
+  }
+  return normalize(normal);
+}
+
+function reflectVelocity(
+  velocity: { x: number; y: number },
+  normal: { x: number; y: number }
+): { x: number; y: number } {
+  let ricochet = { ...velocity };
+  const dot = dotProduct(ricochet, normal);
+  if (dot < 0) {
+    ricochet = {
+      x: ricochet.x - normal.x * (2 * dot),
+      y: ricochet.y - normal.y * (2 * dot)
+    };
+  } else {
+    ricochet = { ...normal };
+  }
+  if (vectorLengthSquared(ricochet) <= 0.001) {
+    return { ...normal };
+  }
+  return ricochet;
+}
+
+function scaledRicochetVelocity(
+  ricochet: { x: number; y: number },
+  currentSpeed: number,
+  maxSpeed: number,
+  options: PotassiumCommandAdapterInternals['options']
+): { x: number; y: number } {
+  const speed = clamp(
+    Math.max(currentSpeed * options.bananaRicochetBoost, options.bananaRicochetMinSpeed),
+    options.bananaRicochetMinSpeed,
+    maxSpeed
+  );
+  const ricochetNormal = normalize(ricochet);
+  return {
+    x: ricochetNormal.x * speed,
+    y: ricochetNormal.y * speed
+  };
 }
 
 function vectorLength(point: { x: number; y: number }): number {
