@@ -154,135 +154,235 @@ const ROOM_DECLARATION_PREFIXES = [
   'future '
 ];
 
-export function parseRidgeBlockout(source: string): RidgeBlockoutMap {
-  let language = DEFAULT_MAP.language;
-  let cell = DEFAULT_MAP.cell;
-  let worldId = DEFAULT_MAP.worldId;
-  let title = DEFAULT_MAP.title;
-  let spawn = DEFAULT_MAP.spawn;
-  const routes: RidgeBlockoutRoute[] = [];
-  const futureRoutes: RidgeBlockoutRoute[] = [];
-  const shortcuts: RidgeBlockoutShortcut[] = [];
-  const optionalPockets: RidgeBlockoutOptionalPocket[] = [];
-  const homeMutations: RidgeBlockoutHomeMutation[] = [];
-  const rooms: RidgeBlockoutRoom[] = [];
-  let currentRoom: MutableRoom | undefined;
-  let readingGrid = false;
+interface RidgeBlockoutParseContext {
+  language: string;
+  cell: number;
+  worldId: string;
+  title: string;
+  spawn: RidgeBlockoutMap['spawn'];
+  routes: RidgeBlockoutRoute[];
+  futureRoutes: RidgeBlockoutRoute[];
+  shortcuts: RidgeBlockoutShortcut[];
+  optionalPockets: RidgeBlockoutOptionalPocket[];
+  homeMutations: RidgeBlockoutHomeMutation[];
+  rooms: RidgeBlockoutRoom[];
+  currentRoom?: MutableRoom;
+  readingGrid: boolean;
+}
 
-  const finishCurrentRoom = () => {
-    if (!currentRoom) return;
-    rooms.push({
-      id: currentRoom.id,
-      title: currentRoom.title || currentRoom.id,
-      place: currentRoom.place ?? { x: 0, y: 0 },
-      size: currentRoom.size ?? { width: 0, height: 0 },
-      theme: currentRoom.theme,
-      mood: currentRoom.mood,
-      links: currentRoom.links,
-      props: currentRoom.props,
-      grid: currentRoom.grid,
-      anchors: currentRoom.anchors,
-      rects: currentRoom.rects,
-      declarations: currentRoom.declarations
-    });
-    currentRoom = undefined;
+function createRidgeBlockoutParseContext(): RidgeBlockoutParseContext {
+  return {
+    language: DEFAULT_MAP.language,
+    cell: DEFAULT_MAP.cell,
+    worldId: DEFAULT_MAP.worldId,
+    title: DEFAULT_MAP.title,
+    spawn: DEFAULT_MAP.spawn,
+    routes: [],
+    futureRoutes: [],
+    shortcuts: [],
+    optionalPockets: [],
+    homeMutations: [],
+    rooms: [],
+    readingGrid: false
   };
+}
+
+function finishRidgeBlockoutRoom(ctx: RidgeBlockoutParseContext): void {
+  if (!ctx.currentRoom) return;
+  ctx.rooms.push({
+    id: ctx.currentRoom.id,
+    title: ctx.currentRoom.title || ctx.currentRoom.id,
+    place: ctx.currentRoom.place ?? { x: 0, y: 0 },
+    size: ctx.currentRoom.size ?? { width: 0, height: 0 },
+    theme: ctx.currentRoom.theme,
+    mood: ctx.currentRoom.mood,
+    links: ctx.currentRoom.links,
+    props: ctx.currentRoom.props,
+    grid: ctx.currentRoom.grid,
+    anchors: ctx.currentRoom.anchors,
+    rects: ctx.currentRoom.rects,
+    declarations: ctx.currentRoom.declarations
+  });
+  ctx.currentRoom = undefined;
+}
+
+function startRidgeBlockoutRoom(ctx: RidgeBlockoutParseContext, line: string): void {
+  finishRidgeBlockoutRoom(ctx);
+  ctx.currentRoom = {
+    id: line.slice('room '.length).trim(),
+    title: '',
+    links: [],
+    props: [],
+    grid: [],
+    anchors: [],
+    rects: [],
+    declarations: []
+  };
+  ctx.readingGrid = false;
+}
+
+function applyRidgeBlockoutMapHeaderLine(ctx: RidgeBlockoutParseContext, line: string): boolean {
+  if (line.startsWith('language ')) {
+    ctx.language = line.slice('language '.length).trim();
+    return true;
+  }
+  if (line.startsWith('cell ')) {
+    ctx.cell = Number(line.slice('cell '.length).trim());
+    return true;
+  }
+  if (line.startsWith('world ')) {
+    ctx.worldId = line.slice('world '.length).trim();
+    return true;
+  }
+  if (line.startsWith('title ')) {
+    ctx.title = line.slice('title '.length).trim();
+    return true;
+  }
+  if (line.startsWith('spawn ')) {
+    const attrs = parseAttrs(line.slice('spawn '.length).split(/\s+/));
+    ctx.spawn = {
+      roomId: attrs.room ?? '',
+      anchorSymbol: attrs.anchor ?? ''
+    };
+    return true;
+  }
+  return false;
+}
+
+function applyRidgeBlockoutMapCollectionLine(ctx: RidgeBlockoutParseContext, line: string): boolean {
+  if (line.startsWith('route ')) {
+    ctx.routes.push(parseRoute(line, 'route'));
+    return true;
+  }
+  if (line.startsWith('future_route ')) {
+    ctx.futureRoutes.push(parseRoute(line, 'future_route'));
+    return true;
+  }
+  if (line.startsWith('shortcut ')) {
+    ctx.shortcuts.push(parseShortcut(line));
+    return true;
+  }
+  if (line.startsWith('optional_pocket ')) {
+    ctx.optionalPockets.push(parseOptionalPocket(line));
+    return true;
+  }
+  if (line.startsWith('home_mutation ')) {
+    ctx.homeMutations.push(parseHomeMutation(line));
+    return true;
+  }
+  return false;
+}
+
+function parseRidgeBlockoutMapLine(ctx: RidgeBlockoutParseContext, line: string): void {
+  if (applyRidgeBlockoutMapHeaderLine(ctx, line)) return;
+  applyRidgeBlockoutMapCollectionLine(ctx, line);
+}
+
+function applyRidgeBlockoutRoomLayoutLine(room: MutableRoom, line: string): boolean {
+  if (line.startsWith('title ')) {
+    room.title = line.slice('title '.length).trim();
+    return true;
+  }
+  if (line.startsWith('place ')) {
+    room.place = parsePoint(line.slice('place '.length));
+    return true;
+  }
+  if (line.startsWith('size ')) {
+    room.size = parseSize(line.slice('size '.length).trim());
+    return true;
+  }
+  if (line.startsWith('theme ')) {
+    room.theme = line.slice('theme '.length).trim();
+    return true;
+  }
+  if (line.startsWith('mood ')) {
+    room.mood = line.slice('mood '.length).trim();
+    return true;
+  }
+  return false;
+}
+
+function applyRidgeBlockoutRoomContentLine(room: MutableRoom, line: string): boolean {
+  if (line.startsWith('links ')) {
+    room.links = line.slice('links '.length).split(/\s+/).filter(Boolean);
+    return true;
+  }
+  if (line.startsWith('props ')) {
+    room.props = line.slice('props '.length).split(',').map((prop) => prop.trim()).filter(Boolean);
+    return true;
+  }
+  if (line.startsWith('anchor ')) {
+    room.anchors.push(parseAnchor(line));
+    return true;
+  }
+  if (line.startsWith('rect ')) {
+    room.rects.push(parseRect(line));
+    return true;
+  }
+  return false;
+}
+
+function applyRidgeBlockoutRoomScalarLine(room: MutableRoom, line: string): boolean {
+  return applyRidgeBlockoutRoomLayoutLine(room, line) || applyRidgeBlockoutRoomContentLine(room, line);
+}
+
+function parseRidgeBlockoutRoomLine(ctx: RidgeBlockoutParseContext, line: string): void {
+  const room = ctx.currentRoom;
+  if (!room) return;
+
+  if (ctx.readingGrid) {
+    room.grid.push(line);
+    return;
+  }
+
+  if (line === 'grid') {
+    ctx.readingGrid = true;
+    return;
+  }
+
+  if (applyRidgeBlockoutRoomScalarLine(room, line)) return;
+
+  if (ROOM_DECLARATION_PREFIXES.some((prefix) => line.startsWith(prefix))) {
+    room.declarations.push(line);
+  }
+}
+
+export function parseRidgeBlockout(source: string): RidgeBlockoutMap {
+  const ctx = createRidgeBlockoutParseContext();
 
   normalizeLines(source).forEach((line) => {
     if (!line) {
-      readingGrid = false;
+      ctx.readingGrid = false;
       return;
     }
 
     if (line.startsWith('room ')) {
-      finishCurrentRoom();
-      currentRoom = {
-        id: line.slice('room '.length).trim(),
-        title: '',
-        links: [],
-        props: [],
-        grid: [],
-        anchors: [],
-        rects: [],
-        declarations: []
-      };
-      readingGrid = false;
+      startRidgeBlockoutRoom(ctx, line);
       return;
     }
 
-    if (!currentRoom) {
-      if (line.startsWith('language ')) {
-        language = line.slice('language '.length).trim();
-      } else if (line.startsWith('cell ')) {
-        cell = Number(line.slice('cell '.length).trim());
-      } else if (line.startsWith('world ')) {
-        worldId = line.slice('world '.length).trim();
-      } else if (line.startsWith('title ')) {
-        title = line.slice('title '.length).trim();
-      } else if (line.startsWith('spawn ')) {
-        const attrs = parseAttrs(line.slice('spawn '.length).split(/\s+/));
-        spawn = {
-          roomId: attrs.room ?? '',
-          anchorSymbol: attrs.anchor ?? ''
-        };
-      } else if (line.startsWith('route ')) {
-        routes.push(parseRoute(line, 'route'));
-      } else if (line.startsWith('future_route ')) {
-        futureRoutes.push(parseRoute(line, 'future_route'));
-      } else if (line.startsWith('shortcut ')) {
-        shortcuts.push(parseShortcut(line));
-      } else if (line.startsWith('optional_pocket ')) {
-        optionalPockets.push(parseOptionalPocket(line));
-      } else if (line.startsWith('home_mutation ')) {
-        homeMutations.push(parseHomeMutation(line));
-      }
+    if (!ctx.currentRoom) {
+      parseRidgeBlockoutMapLine(ctx, line);
       return;
     }
 
-    if (readingGrid) {
-      currentRoom.grid.push(line);
-      return;
-    }
-
-    if (line === 'grid') {
-      readingGrid = true;
-    } else if (line.startsWith('title ')) {
-      currentRoom.title = line.slice('title '.length).trim();
-    } else if (line.startsWith('place ')) {
-      currentRoom.place = parsePoint(line.slice('place '.length));
-    } else if (line.startsWith('size ')) {
-      currentRoom.size = parseSize(line.slice('size '.length).trim());
-    } else if (line.startsWith('theme ')) {
-      currentRoom.theme = line.slice('theme '.length).trim();
-    } else if (line.startsWith('mood ')) {
-      currentRoom.mood = line.slice('mood '.length).trim();
-    } else if (line.startsWith('links ')) {
-      currentRoom.links = line.slice('links '.length).split(/\s+/).filter(Boolean);
-    } else if (line.startsWith('props ')) {
-      currentRoom.props = line.slice('props '.length).split(',').map((prop) => prop.trim()).filter(Boolean);
-    } else if (line.startsWith('anchor ')) {
-      currentRoom.anchors.push(parseAnchor(line));
-    } else if (line.startsWith('rect ')) {
-      currentRoom.rects.push(parseRect(line));
-    } else if (ROOM_DECLARATION_PREFIXES.some((prefix) => line.startsWith(prefix))) {
-      currentRoom.declarations.push(line);
-    }
+    parseRidgeBlockoutRoomLine(ctx, line);
   });
 
-  finishCurrentRoom();
+  finishRidgeBlockoutRoom(ctx);
 
   const mapWithoutErrors: RidgeBlockoutMap = {
-    language,
-    cell,
-    worldId,
-    title,
-    spawn,
-    routes,
-    futureRoutes,
-    shortcuts,
-    optionalPockets,
-    homeMutations,
-    rooms,
+    language: ctx.language,
+    cell: ctx.cell,
+    worldId: ctx.worldId,
+    title: ctx.title,
+    spawn: ctx.spawn,
+    routes: ctx.routes,
+    futureRoutes: ctx.futureRoutes,
+    shortcuts: ctx.shortcuts,
+    optionalPockets: ctx.optionalPockets,
+    homeMutations: ctx.homeMutations,
+    rooms: ctx.rooms,
     validationErrors: []
   };
 

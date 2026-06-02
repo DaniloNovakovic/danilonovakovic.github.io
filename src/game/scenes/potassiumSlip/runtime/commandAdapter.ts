@@ -31,6 +31,7 @@ import type {
   PotassiumDraftChoiceView,
   PotassiumHudFacts
 } from './session';
+import { clamp, linear } from '@/shared/math';
 import {
   getPotassiumExplosionRadius,
   type PotassiumGenericUpgradeKind,
@@ -224,49 +225,102 @@ export class PotassiumCommandAdapter {
   }
 
   applySessionCommands(commands: readonly PotassiumSessionCommand[]): void {
-    commands.forEach((command) => {
-      if (command.type === 'resetBoard') {
+    commands.forEach((command) => this.applySessionCommand(command));
+  }
+
+  private applySessionCommand(command: PotassiumSessionCommand): void {
+    if (this.tryApplySessionBoardCommand(command)) return;
+    if (this.tryApplySessionWaveCommand(command)) return;
+    if (this.tryApplySessionHudCommand(command)) return;
+    this.applySessionFlowCommand(command);
+  }
+
+  private tryApplySessionBoardCommand(command: PotassiumSessionCommand): boolean {
+    switch (command.type) {
+      case 'resetBoard':
         this.ports.resetBoardObjects();
-      } else if (command.type === 'hideMainOverlay') {
+        return true;
+      case 'hideMainOverlay':
         this.ports.hideMainOverlay();
-      } else if (command.type === 'clearTerminal') {
+        return true;
+      case 'clearTerminal':
         this.ports.clearTerminalOverlay();
-      } else if (command.type === 'clearUpgradeChoices') {
+        return true;
+      case 'clearUpgradeChoices':
         this.ports.clearUpgradeChoiceOverlay();
-      } else if (command.type === 'setHint') {
-        this.ports.setHint(command.text);
-      } else if (command.type === 'spawnWave') {
-        this.ports.spawnWave(command.wave);
-      } else if (command.type === 'spawnBoss') {
-        this.ports.spawnBossDelayed();
-      } else if (command.type === 'scheduleWaveRows') {
-        this.ports.scheduleWaveRows(command.schedule);
-      } else if (command.type === 'scheduleUpgradeChoices') {
-        this.ports.scheduleUpgradeChoices();
-      } else if (command.type === 'showUpgradeChoices') {
-        this.ports.showUpgradeChoices(command.choices);
-      } else if (command.type === 'advanceWaveAfterDelay') {
-        this.ports.advanceWaveAfterDelay(command.wave);
-      } else if (command.type === 'refreshProjectileVisuals') {
-        this.ports.refreshAllProjectileVisuals();
-      } else if (command.type === 'updateHud') {
-        this.ports.updateHud(command.hud);
-      } else if (command.type === 'collectCircuit') {
-        this.ports.collectCircuit();
-      } else if (command.type === 'saveRunRecord') {
-        this.ports.saveRunRecord(command.record);
-      } else if (command.type === 'showOutcome') {
-        this.ports.showOutcomeOverlay(command);
-      } else if (command.type === 'showTerminal') {
-        this.ports.showTerminal(command.outcome);
-      } else if (command.type === 'closeScene') {
-        this.ports.closeScene();
-      } else if (command.type === 'stopBanana') {
+        return true;
+      case 'stopBanana':
         this.ports.stopMainProjectile();
-      } else if (command.type === 'clearBoardForOutcome') {
+        return true;
+      case 'clearBoardForOutcome':
         this.ports.clearBoardForOutcome();
-      }
-    });
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  private tryApplySessionWaveCommand(command: PotassiumSessionCommand): boolean {
+    switch (command.type) {
+      case 'spawnWave':
+        this.ports.spawnWave(command.wave);
+        return true;
+      case 'spawnBoss':
+        this.ports.spawnBossDelayed();
+        return true;
+      case 'scheduleWaveRows':
+        this.ports.scheduleWaveRows(command.schedule);
+        return true;
+      case 'scheduleUpgradeChoices':
+        this.ports.scheduleUpgradeChoices();
+        return true;
+      case 'advanceWaveAfterDelay':
+        this.ports.advanceWaveAfterDelay(command.wave);
+        return true;
+      case 'refreshProjectileVisuals':
+        this.ports.refreshAllProjectileVisuals();
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  private tryApplySessionHudCommand(command: PotassiumSessionCommand): boolean {
+    switch (command.type) {
+      case 'setHint':
+        this.ports.setHint(command.text);
+        return true;
+      case 'updateHud':
+        this.ports.updateHud(command.hud);
+        return true;
+      case 'collectCircuit':
+        this.ports.collectCircuit();
+        return true;
+      case 'saveRunRecord':
+        this.ports.saveRunRecord(command.record);
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  private applySessionFlowCommand(command: PotassiumSessionCommand): void {
+    switch (command.type) {
+      case 'showUpgradeChoices':
+        this.ports.showUpgradeChoices(command.choices);
+        break;
+      case 'showOutcome':
+        this.ports.showOutcomeOverlay(command);
+        break;
+      case 'showTerminal':
+        this.ports.showTerminal(command.outcome);
+        break;
+      case 'closeScene':
+        this.ports.closeScene();
+        break;
+      default:
+        break;
+    }
   }
 
   getEnemyCombatFacts(enemy: PotassiumCommandObject): PotassiumEnemyCombatFacts {
@@ -334,45 +388,141 @@ export class PotassiumCommandAdapter {
     commands: readonly PotassiumCombatCommand[],
     context = this.createCombatContext()
   ): void {
-    commands.forEach((command) => {
-      const enemy = 'enemyId' in command ? context.enemies.get(command.enemyId) : undefined;
-      const projectile = 'projectileId' in command ? context.projectiles.get(command.projectileId) : undefined;
-      if (command.type === 'damageEnemy') {
+    commands.forEach((command) => this.applyCombatCommand(command, context));
+  }
+
+  private applyCombatCommand(command: PotassiumCombatCommand, context: PotassiumCombatContext): void {
+    const enemy = 'enemyId' in command ? context.enemies.get(command.enemyId) : undefined;
+    const projectile = 'projectileId' in command
+      ? context.projectiles.get(command.projectileId)
+      : undefined;
+
+    if (this.tryApplyCombatEnemyCommand(command, enemy)) return;
+    if (this.tryApplyCombatProjectileCommand(command, projectile, enemy)) return;
+    this.applyCombatWorldCommand(command, context, enemy);
+  }
+
+  private tryApplyCombatEnemyCommand(
+    command: PotassiumCombatCommand,
+    enemy: PotassiumCommandObject | undefined
+  ): boolean {
+    if (this.tryApplyCombatEnemyDamageCommand(command, enemy)) return true;
+    if (this.tryApplyCombatEnemyStatusCommand(command, enemy)) return true;
+    return this.tryApplyCombatEnemyLifecycleCommand(command, enemy);
+  }
+
+  private tryApplyCombatEnemyDamageCommand(
+    command: PotassiumCombatCommand,
+    enemy: PotassiumCommandObject | undefined
+  ): boolean {
+    switch (command.type) {
+      case 'damageEnemy':
         if (enemy) this.damageEnemy(enemy, command.amount, command.source);
-      } else if (command.type === 'setEnemyHp') {
+        return true;
+      case 'setEnemyHp':
         if (enemy) setPotassiumEnemyHealth(enemy, command.hp, command.damageState);
-      } else if (command.type === 'setFireTickUntil') {
-        if (enemy) setPotassiumData(enemy, POTASSIUM_DATA_KEYS.fireTickUntil, command.fireTickUntil);
-      } else if (command.type === 'setPoisonNextTickAt') {
-        if (enemy) setPotassiumData(enemy, POTASSIUM_DATA_KEYS.poisonNextTickAt, command.poisonNextTickAt);
-      } else if (command.type === 'showDamageCue') {
+        return true;
+      case 'showDamageCue':
         if (enemy) this.ports.showDamageCue(enemy, command.source);
-      } else if (command.type === 'ricochetProjectile') {
-        if (projectile && enemy) this.ricochetProjectileFromEnemy(projectile, enemy);
-      } else if (command.type === 'boostRecallVelocity') {
-        projectile?.setVelocity(projectile.body.velocity.x * 1.01, projectile.body.velocity.y * 1.01);
-      } else if (command.type === 'applyPoison') {
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  private tryApplyCombatEnemyStatusCommand(
+    command: PotassiumCombatCommand,
+    enemy: PotassiumCommandObject | undefined
+  ): boolean {
+    switch (command.type) {
+      case 'setFireTickUntil':
+        if (enemy) setPotassiumData(enemy, POTASSIUM_DATA_KEYS.fireTickUntil, command.fireTickUntil);
+        return true;
+      case 'setPoisonNextTickAt':
+        if (enemy) setPotassiumData(enemy, POTASSIUM_DATA_KEYS.poisonNextTickAt, command.poisonNextTickAt);
+        return true;
+      case 'applyPoison':
         if (enemy) this.applyPoisonCommand(enemy, command);
-      } else if (command.type === 'clearPoison') {
+        return true;
+      case 'clearPoison':
         if (enemy) this.clearPoison(enemy);
-      } else if (command.type === 'spawnFirePatch') {
-        this.ports.spawnFirePatch(command.x, command.y, command.effectMultiplier, command.lifetimeMs, command.scale);
-      } else if (command.type === 'explodeAt') {
-        this.explodeAt(command.x, command.y, command.effectMultiplier, command.radiusMultiplier);
-      } else if (command.type === 'spawnBananaClones') {
-        this.ports.spawnBananaClones(command.count, command.lifetimeMs);
-      } else if (command.type === 'spawnGhostBeam') {
-        this.spawnGhostBeam(command.x, command.y, command.direction, command.effectMultiplier);
-      } else if (command.type === 'spawnGhostStatusField') {
-        this.spawnGhostStatusField(command.x, command.y, command.direction, command.effectMultiplier);
-      } else if (command.type === 'spreadPoisonFrom') {
-        this.spreadPoisonFrom(command.x, command.y, command.effectMultiplier, context.enemies.get(command.sourceEnemyId));
-      } else if (command.type === 'spawnSplitterChildren') {
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  private tryApplyCombatEnemyLifecycleCommand(
+    command: PotassiumCombatCommand,
+    enemy: PotassiumCommandObject | undefined
+  ): boolean {
+    switch (command.type) {
+      case 'spawnSplitterChildren':
         if (enemy) this.ports.spawnSplitterChildren(enemy);
-      } else if (command.type === 'killEnemy') {
+        return true;
+      case 'killEnemy':
         if (enemy) this.killEnemy(enemy);
-      }
-    });
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  private tryApplyCombatProjectileCommand(
+    command: PotassiumCombatCommand,
+    projectile: PotassiumCommandObject | undefined,
+    enemy: PotassiumCommandObject | undefined
+  ): boolean {
+    switch (command.type) {
+      case 'ricochetProjectile':
+        if (projectile && enemy) this.ricochetProjectileFromEnemy(projectile, enemy);
+        return true;
+      case 'boostRecallVelocity':
+        projectile?.setVelocity(projectile.body.velocity.x * 1.01, projectile.body.velocity.y * 1.01);
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  private applyCombatWorldCommand(
+    command: PotassiumCombatCommand,
+    context: PotassiumCombatContext,
+    sourceEnemy: PotassiumCommandObject | undefined
+  ): void {
+    switch (command.type) {
+      case 'spawnFirePatch':
+        this.ports.spawnFirePatch(
+          command.x,
+          command.y,
+          command.effectMultiplier,
+          command.lifetimeMs,
+          command.scale
+        );
+        break;
+      case 'explodeAt':
+        this.explodeAt(command.x, command.y, command.effectMultiplier, command.radiusMultiplier);
+        break;
+      case 'spawnBananaClones':
+        this.ports.spawnBananaClones(command.count, command.lifetimeMs);
+        break;
+      case 'spawnGhostBeam':
+        this.spawnGhostBeam(command.x, command.y, command.direction, command.effectMultiplier);
+        break;
+      case 'spawnGhostStatusField':
+        this.spawnGhostStatusField(command.x, command.y, command.direction, command.effectMultiplier);
+        break;
+      case 'spreadPoisonFrom':
+        this.spreadPoisonFrom(
+          command.x,
+          command.y,
+          command.effectMultiplier,
+          sourceEnemy ?? context.enemies.get(command.sourceEnemyId)
+        );
+        break;
+      default:
+        break;
+    }
   }
 
   damageEnemy(enemy: PotassiumCommandObject, amount: number, source: PotassiumDamageSource): void {
@@ -387,34 +537,77 @@ export class PotassiumCommandAdapter {
   }
 
   applyBossCommands(commands: readonly PotassiumBossCommand[], boss?: PotassiumCommandObject): void {
-    commands.forEach((command) => {
-      if (command.type === 'setBossPhase') {
+    commands.forEach((command) => this.applyBossCommand(command, boss));
+  }
+
+  private applyBossCommand(command: PotassiumBossCommand, boss?: PotassiumCommandObject): void {
+    if (this.tryApplyBossMotionCommand(command, boss)) return;
+    if (this.tryApplyBossPresentationCommand(command, boss)) return;
+    this.applyBossSpawnCommand(command, boss);
+  }
+
+  private tryApplyBossMotionCommand(
+    command: PotassiumBossCommand,
+    boss?: PotassiumCommandObject
+  ): boolean {
+    switch (command.type) {
+      case 'setBossPhase':
         if (boss) setPotassiumData(boss, POTASSIUM_DATA_KEYS.bossPhase, command.phase);
-      } else if (command.type === 'setBossVelocity') {
-        if (!boss) return;
-        if (command.x !== undefined) boss.setX(command.x);
-        if (command.velocityX !== undefined) boss.setVelocityX(command.velocityX);
-        boss.setVelocityY(command.velocityY);
-      } else if (command.type === 'setBossHint') {
-        this.ports.setHint(command.text);
-      } else if (command.type === 'shakeCamera') {
-        this.ports.shakeCamera(command.durationMs, command.intensity);
-      } else if (command.type === 'spawnOrbitBlockers') {
-        if (boss) this.ports.spawnBossOrbitBlockers(boss);
-      } else if (command.type === 'updateOrbitBlockers') {
-        if (boss) this.ports.updateBossOrbitBlockers(boss, command.now);
-      } else if (command.type === 'startStone') {
+        return true;
+      case 'setBossVelocity':
+        if (boss) {
+          if (command.x !== undefined) boss.setX(command.x);
+          if (command.velocityX !== undefined) boss.setVelocityX(command.velocityX);
+          boss.setVelocityY(command.velocityY);
+        }
+        return true;
+      case 'startStone':
         if (boss) setPotassiumData(boss, POTASSIUM_DATA_KEYS.stoneUntil, command.stoneUntil);
-      } else if (command.type === 'endStone') {
+        return true;
+      case 'endStone':
         if (boss) setPotassiumData(boss, POTASSIUM_DATA_KEYS.stoneUntil, undefined);
-      } else if (command.type === 'setStoneVisual') {
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  private tryApplyBossPresentationCommand(
+    command: PotassiumBossCommand,
+    boss?: PotassiumCommandObject
+  ): boolean {
+    switch (command.type) {
+      case 'setBossHint':
+        this.ports.setHint(command.text);
+        return true;
+      case 'shakeCamera':
+        this.ports.shakeCamera(command.durationMs, command.intensity);
+        return true;
+      case 'setStoneVisual':
         if (boss) this.ports.setBossStoneVisual(boss, command.active);
-      } else if (command.type === 'spawnSummons') {
-        this.ports.spawnBossSummons(command.summons);
-      } else if (command.type === 'clearOrbitBlockers') {
+        return true;
+      case 'clearOrbitBlockers':
         this.ports.clearOrbitBlockers();
-      }
-    });
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  private applyBossSpawnCommand(command: PotassiumBossCommand, boss?: PotassiumCommandObject): void {
+    switch (command.type) {
+      case 'spawnOrbitBlockers':
+        if (boss) this.ports.spawnBossOrbitBlockers(boss);
+        break;
+      case 'updateOrbitBlockers':
+        if (boss) this.ports.updateBossOrbitBlockers(boss, command.now);
+        break;
+      case 'spawnSummons':
+        this.ports.spawnBossSummons(command.summons);
+        break;
+      default:
+        break;
+    }
   }
 
   private getCombatId(object: PotassiumCommandObject, prefix: string): string {
@@ -645,10 +838,3 @@ function distance(a: { x: number; y: number }, b: { x: number; y: number }): num
   return vectorLength({ x: a.x - b.x, y: a.y - b.y });
 }
 
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(max, Math.max(min, value));
-}
-
-function linear(from: number, to: number, t: number): number {
-  return from + (to - from) * t;
-}
