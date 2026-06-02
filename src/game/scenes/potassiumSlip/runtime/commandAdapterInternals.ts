@@ -107,7 +107,7 @@ export class PotassiumCommandAdapterInternals {
       maxHp: getPotassiumEnemyMaxHp(boss),
       x: boss.x,
       y: boss.y,
-      velocityX: boss.body.velocity.x
+      velocityX: boss.body?.velocity?.x ?? 0
     };
   }
 

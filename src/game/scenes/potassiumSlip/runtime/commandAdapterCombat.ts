@@ -148,7 +148,9 @@ function applyCombatProjectileCommand(
       if (projectile && enemy) ricochetProjectileFromEnemy(internals, projectile, enemy);
       return true;
     case 'boostRecallVelocity':
-      projectile?.setVelocity(projectile.body.velocity.x * 1.01, projectile.body.velocity.y * 1.01);
+      if (projectile?.body) {
+        projectile.setVelocity(projectile.body.velocity.x * 1.01, projectile.body.velocity.y * 1.01);
+      }
       return true;
     default:
       return false;
@@ -290,7 +292,7 @@ function killEnemy(internals: PotassiumCommandAdapterInternals, enemy: Potassium
   setPotassiumEnemyDying(enemy, true);
   const damageCueTween = getPotassiumData<{ stop?: () => void }>(enemy, POTASSIUM_DATA_KEYS.damageCueTween);
   damageCueTween?.stop?.();
-  enemy.body.enable = false;
+  if (enemy.body) enemy.body.enable = false;
   const killResult = resolvePotassiumEnemyKilled(internals.ports.getSession(), config.score, kind);
   if (kind !== 'boss') {
     internals.delegates.applySessionResult(killResult);
