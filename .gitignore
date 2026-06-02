@@ -17,6 +17,7 @@ storybook-static
 .turbo
 .cache
 .eslintcache
+.fallow/
 *.local
 *.local.json
 
@@ -40,6 +41,13 @@ storybook-static
 
 # Local AI/tooling state
 .codex/
-.cursor/
 .claude/
 .playwright-cli/
+.antigravitycli/
+
+# Cursor: ignore machine-local state; keep shared project config committable
+.cursor/*
+!.cursor/rules/
+!.cursor/rules/**
+!.cursor/mcp.json
+!.cursor/hooks.json

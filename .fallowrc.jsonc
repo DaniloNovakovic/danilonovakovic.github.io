@@ -1,0 +1,71 @@
+{
+  "$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
+
+  // Ridge generated artifacts and build output should not skew duplication/health.
+  "ignorePatterns": [
+    "**/*.generated.ts",
+    "dist/**",
+    "storybook-static/**",
+    "coverage/**"
+  ],
+
+  // PostCSS/Tailwind pipeline; referenced from config, not imported in TS.
+  "ignoreDependencies": ["autoprefixer"],
+
+  // Scene barrels and tuning exports are often same-file or test-facing API.
+  "ignoreExportsUsedInFile": {
+    "type": true,
+    "interface": true
+  },
+
+  // Phaser scenes and lazy React overlays load through dynamic import() strings.
+  "dynamicallyLoaded": [
+    "src/game/scenes/**/runtime/*Scene.ts",
+    "src/game/overlays/**/*.tsx",
+    "src/dev/**/*.tsx"
+  ],
+
+  "entry": [
+    "scripts/generate-ridge-blockout-sources.test.mjs"
+  ],
+
+  "health": {
+    "ignore": ["**/*.generated.ts", "dist/**", "storybook-static/**"]
+  },
+
+  "duplicates": {
+    "ignore": ["**/*.generated.ts"]
+  },
+
+  // Incremental adoption: enforce architecture, warn on cleanup debt.
+  "rules": {
+    "unused-files": "warn",
+    "unused-exports": "warn",
+    "unused-types": "off",
+    "unused-class-members": "warn",
+    "unused-dev-dependencies": "warn",
+    "boundary-violation": "error",
+    "circular-dependencies": "warn",
+    "re-export-cycle": "warn"
+  },
+
+  // Match `.agents/rules/10-architecture.md`: core stays pure gameplay logic.
+  "boundaries": {
+    "zones": [
+      { "name": "core", "patterns": ["src/game/core/**"] },
+      { "name": "shared", "patterns": ["src/shared/**"] },
+      { "name": "adapters", "patterns": ["src/game/adapters/**"] },
+      { "name": "bridge", "patterns": ["src/game/bridge/**"] },
+      { "name": "scene-lifecycle", "patterns": ["src/game/sceneLifecycle/**"] },
+      { "name": "shared-runtime", "patterns": ["src/game/sharedSceneRuntime/**"] },
+      { "name": "scenes", "patterns": ["src/game/scenes/**"] },
+      { "name": "overlays", "patterns": ["src/game/overlays/**"] },
+      { "name": "scene-ui", "patterns": ["src/game/sceneUi/**"] },
+      { "name": "shell", "patterns": ["src/game/shell/**"] },
+      { "name": "dev", "patterns": ["src/dev/**"] }
+    ],
+    "rules": [
+      { "from": "core", "allow": ["core", "shared"], "allowTypeOnly": ["shared"] }
+    ]
+  }
+}

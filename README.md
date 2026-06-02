@@ -24,6 +24,8 @@ pnpm check
 pnpm lint
 pnpm test
 pnpm build
+pnpm fallow:health    # complexity + duplication overview
+pnpm fallow:audit     # changed-files review since main
 ```
 
 Current Bridge staging lives in

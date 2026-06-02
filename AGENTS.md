@@ -44,6 +44,8 @@ When Danilo invokes the Visual Direction Artist or Character Designer specifical
 
 When generating or converting sprite assets for Phaser scenes, use [`.agents/skills/sketchbook-sprite-pipeline/SKILL.md`](.agents/skills/sketchbook-sprite-pipeline/SKILL.md) to preserve the Digital Sketchbook style while producing normalized runtime frames, manifests, and QA sheets.
 
+When running codebase health, dead-code, duplication, complexity, or architecture-boundary analysis, use [`.agents/skills/fallow/SKILL.md`](.agents/skills/fallow/SKILL.md). Project config lives in [`.fallowrc.jsonc`](.fallowrc.jsonc); baselines in [`fallow-baselines/`](fallow-baselines/).
+
 ## Tech stack
 
 - **Frontend Framework:** React (Vite)
