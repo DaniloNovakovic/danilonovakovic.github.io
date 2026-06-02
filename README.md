@@ -105,7 +105,7 @@ Ask the Architect whether these two scene changes can be worked in parallel.
 
 ## Deploy (GitHub Pages)
 
-Production build outputs to `dist/`. [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs lint, tests, and build on `push` / `pull_request` against `main`/`master`. [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) runs the same quality gates and deploys GitHub Pages from `master`.
+Production build outputs to `dist/`. [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs lint, tests, and build on `push` / `pull_request` against `main`. [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) runs the same quality gates and deploys GitHub Pages from `main`.
 
 ## Credits & License
 
