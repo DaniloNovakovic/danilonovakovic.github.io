@@ -43,14 +43,13 @@ game vocabulary is explicit:
 - **Shared scene runtime** - reusable Phaser-facing machinery lives in `src/game/sharedSceneRuntime`: side-view player lifecycle, camera policy, scene presentation, resume policy, keyboard pause, interior interactions, text, textures, and vision helpers.
 - **Pure gameplay decisions** - `src/game/core` contains deterministic ECS, input, and player logic that can be tested without Phaser, React, browser globals, or bridge state.
 - **Scene-owned modules** - scene folders own local layout, triggers, Phaser objects, scene contexts, scene-local overlays, and heavy scene runtime modules.
-- **Ridge exploration runtime** - Current Bridge exploration treats
+- **Ridge exploration runtime** - Bridge exploration treats
   `src/game/scenes/ridge/bridge/stageComposition.ts` as the Bridge Stage
   Composition Source: it owns the Primary Walk Rail, Stage Spots, Stage Plates,
   Stage Objects, Stage Occluders, camera bounds, and route-beat presentation
-  predicates consumed by the Ridge scene. The legacy folded desk prototype
-  still treats `src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts`
-  as typed authoring source data and imports the committed generated artifact
-  for blockout facts, traversal helpers, and legacy prototype tests.
+  predicates consumed by the Ridge scene. The legacy folded-desk blockout stack
+  was removed from the repo; see [`game-design/ridge/map-language.md`](game-design/ridge/map-language.md)
+  for the historical contract.
 
 ## Scene presentation and camera
 
@@ -77,10 +76,10 @@ re-apply camera bounds/profile math.
 
 - Add new Phaser worlds under `src/game/scenes/<scene>/` with a scene context and, when loadable, a scene registry entry.
 - Keep scene triggers in the owning scene. A trigger should call `enterScene(sceneId)` or `openOverlay(overlayId, options)` through the bridge callback it receives at scene start.
-- Use overlay options for scene-owned overlay params and return intent. Ridge
-  Trail Cards use this path to show reusable entry cards. Stampede can enter
-  its movement prototype from the Trail Card, while later Ridge props stay
-  disabled until their target scenes exist.
+- Use overlay options for scene-owned overlay params and return intent. The
+  shared `trailCard` overlay remains available for future Ridge/area entry
+  cards. Stampede Sketch is a standalone scene (dev switcher / basement console
+  today), not wired through the active Bridge tracer route.
 - Put scene-local overlays under `src/game/scenes/<scene>/overlays` and export overlay definitions from that scene. Put shared/global overlays under `src/game/overlays`.
 - Use `src/game/overlays/OverlayHost.tsx` for overlay rendering. Do not add local React overlay maps to shell or scene code.
 - Use `src/game/sceneUi/SceneUiHost.tsx` for scene-owned React status/panels
@@ -108,10 +107,10 @@ re-apply camera bounds/profile math.
 - Use `sceneResumePolicy` for resume persistence and reset rules. The low-level resume store should not be imported directly by scenes or adapters.
 - Side-view player scenes should compose `SideViewPlayerRuntime` before creating colliders against `runtime.player`; pass its camera config when the scene should follow and clamp the player.
 - Interior rooms should describe prop targets and effect commands, then let `InteriorInteractionRuntime` choose the active target and prompt/effect result. Phaser text mutation, bridge writes, and scene-local helpers stay in the scene.
-- Ridge spatial changes should start in the typed Ridge blockout source, then flow through the generated blockout artifact, geometry derivation, and compiled fact layer. Keep raw string attributes at the source-contract boundary; callers should consume typed facts or geometry outputs.
-- Ridge traversal assists are owned by the Ridge traversal runtime. The current runtime consumes compiled geometry and applies ramp, climb, drop, step-up, mantle, safe-position capture, and fall-recovery decisions around the shared side-view player.
-- Ridge landmark presentation owns ordinary landmark visuals such as Stampede blanket, Telegraph, Relay, Domino, guide, and high ledges. Cicka Home mutation visuals are resolved separately from compiled home-mutation facts and durable Ridge progress.
-- Cicka Home mutation declarations are data-driven but conservative: active mutations render only when a durable source exists, and future declarations stay typed promises until their progress source is implemented.
+- Ridge spatial changes for the active route should start in
+  `src/game/scenes/ridge/bridge/stageComposition.ts` (Bridge Stage Composition
+  Source) and the colocated Bridge tracer modules, not the removed blockout
+  pipeline.
 
 ## Folder ownership
 
@@ -157,19 +156,16 @@ Potassium uses focused runtime modules to keep the large arcade scene navigable:
 - `potassiumSlipEnemyFactory` is the enemy setup seam for kind facts, spawn placement, and body/attachment setup.
 - `potassiumSlipPhaserData` is the typed data seam for Potassium-specific Phaser object metadata.
 
-Ridge uses focused runtime modules to keep the Exploration Map editable:
+Ridge runtime modules for the active Bridge tracer:
 
-- The source compiler accepts the typed Ridge blockout source and validates
-  rooms, symbols, anchors, route references, shortcuts, traversal movement
-  values, and runtime cell overlap.
-- The geometry layer turns grid cells, exits, and progress-gated shortcuts into
-  bounds, collider runs, connector platforms, and assist zones.
-- The compiled fact layer exposes room beats, route links, anchors, shortcuts,
-  and home mutations for presentation and interaction callers.
-- Ridge traversal runtime owns forgiving movement assists for the Exploration
-  Map; opt-in mini-games such as Stampede keep their own movement systems.
-- Cicka Home mutation resolution maps compiled home-mutation facts to durable
-  Ridge progress and keeps unresolved future mutations inactive.
+- `bridge/stageComposition.ts` — Bridge Stage Composition Source (rails, spots,
+  plates, objects, route-beat presentation).
+- `bridge/bridgeTracerSlice.ts` — interaction targets and world constants for
+  the flat Bridge route.
+- `bridge/BridgeTracerStageRuntime.ts` — stage visuals, prompts, dialogue, toy-car test.
+- `bridge/BridgeWalkRailPlayerRuntime.ts` — rail-based player movement.
+- Opt-in mini-games such as Stampede Sketch keep their own scenes and movement
+  systems under `src/game/scenes/stampedeSketch/`.
 
 ## Manual smoke verification
 

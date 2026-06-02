@@ -8,11 +8,6 @@
         "count": 2
       }
     },
-    "scripts/generate-ridge-blockout-sources.mjs": {
-      "crap_moderate": {
-        "count": 1
-      }
-    },
     "src/App.tsx": {
       "crap_moderate": {
         "count": 1

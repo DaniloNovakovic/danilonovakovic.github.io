@@ -36,11 +36,9 @@ Ridge Stage Debugger with `?mode=ridge-stage-debugger` after starting
 `pnpm dev`; it hosts the live Bridge preview, route-beat controls, Walk Rail
 readouts, Stage Spot movement, and Bridge Stage debug overlays.
 
-Legacy Ridge blockout source files still live under
-`src/game/scenes/ridge/blockout/sources/`. If you edit those files, run
-`pnpm ridge:source` to refresh committed `.generated.ts` artifacts, or
-`pnpm ridge:source:check` to verify freshness. `pnpm check` includes that
-freshness gate.
+Stampede Sketch remains a standalone mini-game scene (`stampedeSketch`) for
+optional future content; reach it via the dev scene switcher or basement console
+(`stampede`) until the Ridge rework wires a player-facing entry.
 
 ## Architecture
 

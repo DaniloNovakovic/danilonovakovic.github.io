@@ -1,8 +1,8 @@
 # Game Design
 
 This directory separates shipped behavior, active Ridge pre-production design,
-current runtime prototype truth, long-term direction, runtime blockout source,
-and reference material. Do not treat every file here as equally active.
+current runtime prototype truth, long-term direction, and reference material.
+Do not treat every file here as equally active.
 
 ## Source Of Truth
 
@@ -13,8 +13,7 @@ and reference material. Do not treat every file here as equally active.
 - **Current Ridge runtime/prototype snapshot:** [`ridge/ridge-snapshot.md`](./ridge/ridge-snapshot.md).
 - **Current Bridge runtime spatial source:** [`stageComposition.ts`](../../src/game/scenes/ridge/bridge/stageComposition.ts), described by
   [`ridge/ridge-snapshot.md`](./ridge/ridge-snapshot.md).
-- **Legacy folded blockout source:** [`folded-desk-ridge.source.ts`](../../src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts), described by
-  [`ridge/map-language.md`](./ridge/map-language.md).
+- **Legacy blockout contract (historical):** [`ridge/map-language.md`](./ridge/map-language.md) — source removed from repo.
 - **Pre-production product vision:** [`ridge/summit.md`](./ridge/summit.md).
 - **Milestone map:** [`ridge/milestone-plan.md`](./ridge/milestone-plan.md)
   for current route-reset milestones and prototype reuse rules.
@@ -66,12 +65,9 @@ prefer GitHub Issues.
 - **[Sketchbook Ridge Milestone Plan](./ridge/milestone-plan.md)**:
   Current route-reset milestones, source stack, prototype reuse rules, and
   first-agent checklist. It is not the live issue tracker.
-- **[Ridge Blockout Source](./ridge/map-language.md)**: Typed blockout source
-  contract for Ridge room beats, environment tags, traversal primitives, and
-  greybox generation.
-- **[Legacy Ridge Blockout Source](../../src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts)**:
-  Folded prototype authoring data retained as build input and reference, not
-  the active Bridge rail/stage authoring surface.
+- **[Ridge Blockout Source](./ridge/map-language.md)**: Historical typed
+  blockout contract (removed from repo; Bridge stage composition is the active
+  spatial source).
 - **[Ridge Legacy Docs](./ridge/legacy/README.md)**: Superseded folded/Cicka
   Home map plans, old summit/milestone history, and blockout reviews. Reference
   only unless a current active doc explicitly links there.
@@ -105,9 +101,8 @@ prefer GitHub Issues.
   `mini-games/stampede-sketch.md`. These are local mini-game contracts, not
   required first-ending Living Proof.
 - **Current Ridge runtime/prototype reality:** `ridge/ridge-snapshot.md`.
-- **Current runtime source:**
-  `../../src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts`.
-- **Current runtime source documentation:** `ridge/map-language.md`.
+- **Current runtime source:** `../../src/game/scenes/ridge/bridge/stageComposition.ts`.
+- **Historical blockout documentation:** `ridge/map-language.md`.
 - **Legacy/prototype topology and planning history:** `ridge/legacy/`.
 - **Reference/provenance:** `ridge/reference/` plus `docs/research/`. These can
   guide future work, but should not override active Ridge design, shipped

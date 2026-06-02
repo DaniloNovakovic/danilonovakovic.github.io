@@ -1,6 +1,11 @@
 # Ridge Blockout Source
 
-Status: active runtime source and design tool.
+> Status: **superseded / removed from repo.** The folded-desk blockout source,
+> compiler, and generated artifacts were deleted when the active Ridge runtime
+> became the Bridge Tracer Slice only. This doc remains as historical contract
+> reference; do not run `pnpm ridge:source` (scripts removed).
+
+Status: historical design tool (no longer in `src/`).
 
 The Ridge Blockout Source is a typed TypeScript authoring contract for
 designing Ridge room beats before final assets exist. It should be readable by
@@ -8,22 +13,15 @@ Danilo, easy for agents to edit, and strict enough that TypeScript plus the
 source generator can produce a Phaser greybox, typed facts, traversal
 connectors, numeric tile rows, and progress-gated presentation inputs.
 
-## Decision
+## Decision (historical)
 
-`folded-desk-ridge.source.ts` is the authoring source for Ridge greybox
-generation. It is not design prose. Runtime imports the committed generated
-artifact next to it.
+`folded-desk-ridge.source.ts` was the authoring source for Ridge greybox
+generation. It was not design prose. Runtime imported a committed generated
+artifact compiled from typed `.source.ts` files.
 
-The first full skeleton lives in
-[`src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts`](../../../src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts).
-Source-contract work should use that file, not a toy example, so the language
-evolves against the real Ridge topology.
-
-Location note: the blockout used to live under `docs/game-design/` and then as
-a raw `.blockout.txt` runtime import because the language started as a design
-artifact. It now lives beside the generated Ridge source artifact because the
-build checks it as typed source data. If it moves again, update the generator,
-runtime import, this document, and ADR-0001 in the same migration.
+That implementation was removed from the repository when the active Ridge
+scene became the Bridge Tracer Slice only. Restore from git history if the
+contract is needed again for a future area blockout.
 
 The default grid cell size is **48px**, declared at the source level instead of
 hard-coded into the runtime:
@@ -95,20 +93,12 @@ encounter logic stay outside v0.
   separate enough that one can change without rewriting all three.
 - **Asset-light:** symbols reserve intent before final art exists.
 
-Agents should edit `.source.ts` files and then run `pnpm ridge:source`.
-`pnpm ridge:source:check` and the standard `pnpm check` command fail when a
-generated artifact is stale or when source validation rejects the contract.
-
 ## Tooling Status
 
-This contract is retained for the legacy folded Ridge prototype source,
-compiler, generated facts, and validation tests. It is no longer the main Ridge
-development surface. Current Bridge rail/stage work uses the Ridge Stage
-Debugger at `?mode=ridge-stage-debugger` and the Bridge Stage Composition Source
-under `src/game/scenes/ridge/bridge/`.
-
-If this legacy source is edited, source edits still happen in `.source.ts`
-followed by `pnpm ridge:source`.
+The blockout generator scripts and the former Ridge blockout source tree were
+removed. Current Bridge rail/stage work uses the Ridge Stage Debugger at
+`?mode=ridge-stage-debugger` and the Bridge Stage Composition Source under
+`src/game/scenes/ridge/bridge/stageComposition.ts`.
 
 ## Core Shape
 
@@ -263,12 +253,10 @@ beats should not overlap unless the map explicitly declares a merge rule. v0
 should avoid merge rules and treat conflicting non-empty overlap as a validation
 error.
 
-## Current Runtime Output
+## Historical Runtime Output
 
-`src/game/scenes/ridge/blockout/` generates a committed `.generated.ts`
-artifact from the typed `.source.ts` file. `RidgeScene` renders every room into
-one whole-world greybox by default, derives typed traversal connectors from
-`movement` metadata, compiles typed facts for presentation/interaction modules,
-resolves shortcuts from durable Ridge progress, and keeps future routes, locked
-shortcuts, and future Cicka Home mutations as inactive promises until their
-progress source exists.
+The removed pipeline generated a committed `.generated.ts` artifact from typed
+`.source.ts` files, derived traversal connectors from `movement` metadata,
+compiled facts for presentation/interaction modules, and resolved shortcuts from
+durable Ridge progress. None of that runs in the current Bridge-only
+`RidgeScene`.

@@ -25,10 +25,6 @@
     "src/dev/**/*.tsx"
   ],
 
-  "entry": [
-    "scripts/generate-ridge-blockout-sources.test.mjs"
-  ],
-
   "health": {
     "ignore": ["**/*.generated.ts", "dist/**", "storybook-static/**"]
   },

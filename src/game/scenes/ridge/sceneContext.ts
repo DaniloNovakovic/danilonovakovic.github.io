@@ -13,10 +13,7 @@ interface RidgeSceneContextOptions {
 }
 
 /**
- * Scene lifecycle contract for the placeholder Sketchbook Ridge scene.
- *
- * Ridge starts as a separate loadable scene so it can be tested directly before
- * replacing or absorbing the current overworld route.
+ * Scene lifecycle contract for the Bridge Tracer Ridge scene.
  */
 export function createRidgeSceneContext(
   options: RidgeSceneContextOptions
