@@ -37,7 +37,7 @@ export class SceneManager {
 
   async enter(contextId: ContextId, guard?: SceneTransitionGuard): Promise<void> {
     const target = await this.prepareContext(contextId, guard);
-    if (!target) return;
+    if (!target || this.isGuardStale(guard)) return;
 
     if (this.adapter.isSceneActive(target.sceneKey)) {
       this.clearLoadingIfCurrent(guard);
@@ -45,12 +45,13 @@ export class SceneManager {
     }
 
     this.stopActiveContextsExcept(target.sceneKey);
+    if (this.isGuardStale(guard)) return;
     this.startContext(target);
   }
 
   async exitTo(contextId: ContextId, guard?: SceneTransitionGuard): Promise<void> {
     const target = await this.prepareContext(contextId, guard);
-    if (!target) return;
+    if (!target || this.isGuardStale(guard)) return;
 
     const allKeys = this.adapter.listKnownSceneKeys();
     for (const sceneKey of allKeys) {
@@ -62,7 +63,7 @@ export class SceneManager {
       context?.onExit?.(resumeSnapshot);
     }
 
-    if (!this.adapter.isSceneActive(target.sceneKey)) {
+    if (!this.adapter.isSceneActive(target.sceneKey) && !this.isGuardStale(guard)) {
       this.startContext(target);
     }
   }
@@ -146,6 +147,10 @@ export class SceneManager {
   private clearLoadingIfCurrent(guard?: SceneTransitionGuard): void {
     if (guard && !guard.isCurrent()) return;
     this.options.onSceneLoadingChange?.(null);
+  }
+
+  private isGuardStale(guard?: SceneTransitionGuard): boolean {
+    return guard !== undefined && !guard.isCurrent();
   }
 
   private stopActiveContextsExcept(targetSceneKey: string): void {

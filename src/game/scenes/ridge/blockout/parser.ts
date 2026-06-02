@@ -19,20 +19,23 @@ const RIDGE_BLOCKOUT_RUNTIME_SYMBOLS = new Set([
 ]);
 
 const RIDGE_BLOCKOUT_DESIGN_SYMBOLS = new Set(['=', '~', 'N', 'M']);
-export const RIDGE_BLOCKOUT_LADDER_SYMBOL = 'L';
 
-export const RIDGE_BLOCKOUT_TRAVERSAL_MOVEMENTS = new Set([
-  'ramp',
-  'jump',
-  'climb',
-  'drop'
-]);
-
-export type RidgeBlockoutTraversalMovement =
-  | 'ramp'
-  | 'jump'
-  | 'climb'
-  | 'drop';
+export {
+  RIDGE_BLOCKOUT_LADDER_SYMBOL,
+  RIDGE_BLOCKOUT_TRAVERSAL_MOVEMENTS,
+  type RidgeBlockoutTraversalMovement
+} from './ridgeBlockoutConstants';
+import { RIDGE_BLOCKOUT_LADDER_SYMBOL } from './ridgeBlockoutConstants';
+import {
+  appendDuplicateRidgeBlockoutRoomId,
+  appendRidgeBlockoutHeaderErrors,
+  appendRidgeBlockoutRoomAnchorErrors,
+  appendRidgeBlockoutRoomGridErrors,
+  appendRidgeBlockoutRouteErrors,
+  appendRidgeBlockoutRuntimeCellOverlapErrors,
+  appendRidgeBlockoutShortcutErrors,
+  appendRidgeBlockoutSpawnErrors
+} from './ridgeBlockoutValidation';
 
 export interface RidgeBlockoutPoint {
   x: number;
@@ -59,13 +62,16 @@ export interface RidgeBlockoutRect {
   attrs: Readonly<Record<string, string>>;
 }
 
-export interface RidgeBlockoutRoom {
+interface RidgeBlockoutRoomCore {
   id: string;
   title: string;
-  place: RidgeBlockoutPoint;
-  size: RidgeBlockoutSize;
   theme?: string;
   mood?: string;
+}
+
+export interface RidgeBlockoutRoom extends RidgeBlockoutRoomCore {
+  place: RidgeBlockoutPoint;
+  size: RidgeBlockoutSize;
   links: readonly string[];
   props: readonly string[];
   grid: readonly string[];
@@ -115,13 +121,9 @@ export interface RidgeBlockoutMap {
   validationErrors: readonly string[];
 }
 
-interface MutableRoom {
-  id: string;
-  title: string;
+interface MutableRoom extends RidgeBlockoutRoomCore {
   place?: RidgeBlockoutPoint;
   size?: RidgeBlockoutSize;
-  theme?: string;
-  mood?: string;
   links: string[];
   props: string[];
   grid: string[];
@@ -396,85 +398,24 @@ function validateRidgeBlockout(map: RidgeBlockoutMap): readonly string[] {
   const errors: string[] = [];
   const roomIds = new Set<string>();
 
-  if (map.language !== 'ridge-v0') {
-    errors.push(`unsupported language "${map.language}"`);
-  }
-  if (!Number.isFinite(map.cell) || map.cell <= 0) {
-    errors.push(`invalid cell size "${map.cell}"`);
-  }
-  if (!map.worldId) {
-    errors.push('missing world id');
-  }
-  if (!map.spawn.roomId || !map.spawn.anchorSymbol) {
-    errors.push('missing spawn room or anchor');
-  }
+  appendRidgeBlockoutHeaderErrors(errors, map);
 
   map.rooms.forEach((room) => {
-    if (roomIds.has(room.id)) {
-      errors.push(`duplicate room "${room.id}"`);
-    }
-    roomIds.add(room.id);
+    appendDuplicateRidgeBlockoutRoomId(room.id, roomIds, errors);
 
-    if (room.size.width <= 0 || room.size.height <= 0) {
-      errors.push(`room "${room.id}" has invalid size`);
-    }
-    if (room.grid.length !== room.size.height) {
-      errors.push(`room "${room.id}" grid height ${room.grid.length} does not match size ${room.size.height}`);
-    }
-    room.grid.forEach((row, rowIndex) => {
-      if (row.length !== room.size.width) {
-        errors.push(`room "${room.id}" row ${rowIndex + 1} width ${row.length} does not match size ${room.size.width}`);
-      }
-      [...row].forEach((symbol, columnIndex) => {
-        if (!isKnownRidgeBlockoutSymbol(symbol)) {
-          errors.push(`room "${room.id}" has unknown symbol "${symbol}" at ${columnIndex},${rowIndex}`);
-        }
-      });
-    });
-
-    room.anchors.forEach((anchor) => {
-      if (!room.grid.some((row) => row.includes(anchor.symbol))) {
-        errors.push(`room "${room.id}" anchor "${anchor.symbol}" has no matching grid cell`);
-      }
-      if (
-        anchor.attrs.movement !== undefined &&
-        !RIDGE_BLOCKOUT_TRAVERSAL_MOVEMENTS.has(anchor.attrs.movement)
-      ) {
-        errors.push(
-          `room "${room.id}" anchor "${anchor.symbol}" has unknown movement "${anchor.attrs.movement}"`
-        );
-      }
+    appendRidgeBlockoutRoomGridErrors(room, errors, isKnownRidgeBlockoutSymbol);
+    appendRidgeBlockoutRoomAnchorErrors(room, errors, {
+      gridContainsSymbol: (symbol) => room.grid.some((row) => row.includes(symbol))
     });
   });
 
-  if (!roomIds.has(map.spawn.roomId)) {
-    errors.push(`spawn room "${map.spawn.roomId}" does not exist`);
-  } else {
-    const spawnRoom = findRidgeBlockoutRoom(map, map.spawn.roomId);
-    const spawnAnchor = spawnRoom?.anchors.find((anchor) => anchor.symbol === map.spawn.anchorSymbol);
-    if (!spawnAnchor) {
-      errors.push(`spawn anchor "${map.spawn.anchorSymbol}" does not exist in room "${map.spawn.roomId}"`);
-    }
-  }
+  appendRidgeBlockoutSpawnErrors(errors, map.spawn, roomIds, (roomId) =>
+    findRidgeBlockoutRoom(map, roomId)
+  );
+  appendRidgeBlockoutRouteErrors(errors, [...map.routes, ...map.futureRoutes], roomIds);
+  appendRidgeBlockoutShortcutErrors(errors, map.shortcuts, roomIds);
+  appendRidgeBlockoutRuntimeCellOverlapErrors(errors, map.rooms, isRuntimeActiveRidgeBlockoutSymbol);
 
-  [...map.routes, ...map.futureRoutes].forEach((route) => {
-    route.roomIds.forEach((roomId) => {
-      if (!roomIds.has(roomId)) {
-        errors.push(`route "${route.id}" references missing room "${roomId}"`);
-      }
-    });
-  });
-
-  map.shortcuts.forEach((shortcut) => {
-    if (!roomIds.has(shortcut.fromRoomId)) {
-      errors.push(`shortcut "${shortcut.id}" references missing from room "${shortcut.fromRoomId}"`);
-    }
-    if (!roomIds.has(shortcut.toRoomId)) {
-      errors.push(`shortcut "${shortcut.id}" references missing to room "${shortcut.toRoomId}"`);
-    }
-  });
-
-  errors.push(...validateRuntimeCellOverlaps(map));
   return errors;
 }
 
@@ -608,28 +549,4 @@ function isKnownRidgeBlockoutSymbol(symbol: string): boolean {
     RIDGE_BLOCKOUT_DESIGN_SYMBOLS.has(symbol) ||
     symbol === RIDGE_BLOCKOUT_LADDER_SYMBOL
   );
-}
-
-function validateRuntimeCellOverlaps(map: RidgeBlockoutMap): readonly string[] {
-  const errors: string[] = [];
-  const seen = new Map<string, { roomId: string; symbol: string }>();
-
-  map.rooms.forEach((room) => {
-    room.grid.forEach((row, rowIndex) => {
-      [...row].forEach((symbol, columnIndex) => {
-        if (!isRuntimeActiveRidgeBlockoutSymbol(symbol)) return;
-        const key = `${room.place.x + columnIndex},${room.place.y + rowIndex}`;
-        const previous = seen.get(key);
-        if (previous && previous.roomId !== room.id) {
-          errors.push(
-            `runtime cell overlap at ${key}: ${previous.roomId}/${previous.symbol} and ${room.id}/${symbol}`
-          );
-          return;
-        }
-        seen.set(key, { roomId: room.id, symbol });
-      });
-    });
-  });
-
-  return errors;
 }

@@ -1,7 +1,14 @@
+import type { RidgeBlockoutMap } from './parser';
 import {
-  RIDGE_BLOCKOUT_TRAVERSAL_MOVEMENTS,
-  type RidgeBlockoutMap
-} from './parser';
+  appendDuplicateRidgeBlockoutRoomId,
+  appendRidgeBlockoutHeaderErrors,
+  appendRidgeBlockoutRoomAnchorErrors,
+  appendRidgeBlockoutRoomGridErrors,
+  appendRidgeBlockoutRouteErrors,
+  appendRidgeBlockoutRuntimeCellOverlapErrors,
+  appendRidgeBlockoutShortcutErrors,
+  appendRidgeBlockoutSpawnErrors
+} from './ridgeBlockoutValidation';
 import type {
   RidgeBlockoutSource,
   RidgeBlockoutSourceAnchor,
@@ -50,33 +57,49 @@ export function validateRidgeBlockoutSource(source: RidgeBlockoutSource): readon
   const tileLookup = validateTileRegistry(source.tileRegistry, errors);
   const roomIds = new Set<string>();
 
-  if (source.language !== 'ridge-v0') {
-    errors.push(`unsupported language "${source.language}"`);
-  }
-  if (!Number.isFinite(source.cell) || source.cell <= 0) {
-    errors.push(`invalid cell size "${source.cell}"`);
-  }
-  if (!source.worldId) {
-    errors.push('missing world id');
-  }
-  if (!source.spawn.roomId || !source.spawn.anchorSymbol) {
-    errors.push('missing spawn room or anchor');
-  }
+  appendRidgeBlockoutHeaderErrors(errors, source);
 
   source.rooms.forEach((room) => {
-    if (roomIds.has(room.id)) {
-      errors.push(`duplicate room "${room.id}"`);
-    }
-    roomIds.add(room.id);
+    appendDuplicateRidgeBlockoutRoomId(room.id, roomIds, errors);
 
-    validateRoomGrid(room, tileLookup, errors);
-    validateRoomAnchors(room, tileLookup, errors);
+    appendRidgeBlockoutRoomGridErrors(room, errors, (symbol) => tileLookup.bySymbol.has(symbol));
+    appendRidgeBlockoutRoomAnchorErrors(
+      {
+        ...room,
+        anchors: (room.anchors ?? []).map((anchor) => ({
+          symbol: anchor.symbol,
+          attrs: anchor.attrs ?? {}
+        }))
+      },
+      errors,
+      {
+        gridContainsSymbol: (symbol) => room.grid.some((row) => [...row].includes(symbol)),
+        anchorSymbolErrors: (anchor) =>
+          tileLookup.bySymbol.has(anchor.symbol)
+            ? []
+            : [`room "${room.id}" anchor "${anchor.symbol}" uses an unknown tile symbol`]
+      }
+    );
   });
 
-  validateSpawn(source, roomIds, errors);
-  validateRoutes(source, roomIds, errors);
-  validateShortcuts(source, roomIds, errors);
-  validateRuntimeCellOverlaps(source, tileLookup, errors);
+  appendRidgeBlockoutSpawnErrors(errors, source.spawn, roomIds, (roomId) => {
+    const room = source.rooms.find((candidate) => candidate.id === roomId);
+    return room
+      ? {
+          anchors: (room.anchors ?? []).map((anchor) => ({ symbol: anchor.symbol }))
+        }
+      : undefined;
+  });
+  appendRidgeBlockoutRouteErrors(
+    errors,
+    [...source.routes, ...(source.futureRoutes ?? [])],
+    roomIds
+  );
+  appendRidgeBlockoutShortcutErrors(errors, source.shortcuts ?? [], roomIds);
+  appendRidgeBlockoutRuntimeCellOverlapErrors(errors, source.rooms, (symbol) => {
+    const tile = tileLookup.bySymbol.get(symbol);
+    return tile !== undefined && isRuntimeActiveTile(tile);
+  });
 
   return errors;
 }
@@ -182,127 +205,6 @@ function validateTileRegistry(
   });
 
   return { bySymbol };
-}
-
-function validateRoomGrid(
-  room: RidgeBlockoutSourceRoom,
-  tileLookup: TileLookup,
-  errors: string[]
-): void {
-  if (room.size.width <= 0 || room.size.height <= 0) {
-    errors.push(`room "${room.id}" has invalid size`);
-  }
-  if (room.grid.length !== room.size.height) {
-    errors.push(`room "${room.id}" grid height ${room.grid.length} does not match size ${room.size.height}`);
-  }
-  room.grid.forEach((row, rowIndex) => {
-    if ([...row].length !== room.size.width) {
-      errors.push(`room "${room.id}" row ${rowIndex + 1} width ${[...row].length} does not match size ${room.size.width}`);
-    }
-    [...row].forEach((symbol, columnIndex) => {
-      if (!tileLookup.bySymbol.has(symbol)) {
-        errors.push(`room "${room.id}" has unknown symbol "${symbol}" at ${columnIndex},${rowIndex}`);
-      }
-    });
-  });
-}
-
-function validateRoomAnchors(
-  room: RidgeBlockoutSourceRoom,
-  tileLookup: TileLookup,
-  errors: string[]
-): void {
-  (room.anchors ?? []).forEach((anchor) => {
-    if (!tileLookup.bySymbol.has(anchor.symbol)) {
-      errors.push(`room "${room.id}" anchor "${anchor.symbol}" uses an unknown tile symbol`);
-    }
-    if (!room.grid.some((row) => [...row].includes(anchor.symbol))) {
-      errors.push(`room "${room.id}" anchor "${anchor.symbol}" has no matching grid cell`);
-    }
-    if (
-      anchor.attrs?.movement !== undefined &&
-      !RIDGE_BLOCKOUT_TRAVERSAL_MOVEMENTS.has(anchor.attrs.movement)
-    ) {
-      errors.push(
-        `room "${room.id}" anchor "${anchor.symbol}" has unknown movement "${anchor.attrs.movement}"`
-      );
-    }
-  });
-}
-
-function validateSpawn(
-  source: RidgeBlockoutSource,
-  roomIds: ReadonlySet<string>,
-  errors: string[]
-): void {
-  if (!roomIds.has(source.spawn.roomId)) {
-    errors.push(`spawn room "${source.spawn.roomId}" does not exist`);
-    return;
-  }
-
-  const spawnRoom = source.rooms.find((room) => room.id === source.spawn.roomId);
-  const spawnAnchor = spawnRoom?.anchors?.find((anchor) =>
-    anchor.symbol === source.spawn.anchorSymbol
-  );
-  if (!spawnAnchor) {
-    errors.push(`spawn anchor "${source.spawn.anchorSymbol}" does not exist in room "${source.spawn.roomId}"`);
-  }
-}
-
-function validateRoutes(
-  source: RidgeBlockoutSource,
-  roomIds: ReadonlySet<string>,
-  errors: string[]
-): void {
-  [...source.routes, ...(source.futureRoutes ?? [])].forEach((route) => {
-    route.roomIds.forEach((roomId) => {
-      if (!roomIds.has(roomId)) {
-        errors.push(`route "${route.id}" references missing room "${roomId}"`);
-      }
-    });
-  });
-}
-
-function validateShortcuts(
-  source: RidgeBlockoutSource,
-  roomIds: ReadonlySet<string>,
-  errors: string[]
-): void {
-  (source.shortcuts ?? []).forEach((shortcut) => {
-    if (!roomIds.has(shortcut.fromRoomId)) {
-      errors.push(`shortcut "${shortcut.id}" references missing from room "${shortcut.fromRoomId}"`);
-    }
-    if (!roomIds.has(shortcut.toRoomId)) {
-      errors.push(`shortcut "${shortcut.id}" references missing to room "${shortcut.toRoomId}"`);
-    }
-  });
-}
-
-function validateRuntimeCellOverlaps(
-  source: RidgeBlockoutSource,
-  tileLookup: TileLookup,
-  errors: string[]
-): void {
-  const seen = new Map<string, { roomId: string; symbol: string }>();
-
-  source.rooms.forEach((room) => {
-    room.grid.forEach((row, rowIndex) => {
-      [...row].forEach((symbol, columnIndex) => {
-        const tile = tileLookup.bySymbol.get(symbol);
-        if (!tile || !isRuntimeActiveTile(tile)) return;
-
-        const key = `${room.place.x + columnIndex},${room.place.y + rowIndex}`;
-        const previous = seen.get(key);
-        if (previous && previous.roomId !== room.id) {
-          errors.push(
-            `runtime cell overlap at ${key}: ${previous.roomId}/${previous.symbol} and ${room.id}/${symbol}`
-          );
-          return;
-        }
-        seen.set(key, { roomId: room.id, symbol });
-      });
-    });
-  });
 }
 
 function createTileLookup(registry: RidgeTileRegistry): TileLookup {

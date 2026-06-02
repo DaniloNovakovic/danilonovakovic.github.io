@@ -65,6 +65,7 @@ function context(
 async function settleAsyncTransition(): Promise<void> {
   await Promise.resolve();
   await Promise.resolve();
+  await Promise.resolve();
 }
 
 describe('SceneTransitionCoordinator', () => {
