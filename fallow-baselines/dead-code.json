@@ -1,9 +1,6 @@
 {
   "unused_files": [],
   "unused_exports": [
-    "src/game/scenes/ridge/blockout/sources/contract-fixture.source.ts:default",
-    "src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts:default",
-    "src/game/scenes/ridge/cicka/CickaPerch.ts:createCickaPerch",
     "src/game/shell/index.ts:InteractiveApp",
     "src/shared/i18n/index.ts:DEFAULT_LOCALE",
     "src/shared/i18n/index.ts:readLocaleFromBrowser",

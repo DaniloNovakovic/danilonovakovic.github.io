@@ -24,12 +24,6 @@
       }
     },
     "src/game/bridge/store.ts": {
-      "complexity_critical": {
-        "count": 1
-      },
-      "crap_critical": {
-        "count": 1
-      },
       "crap_moderate": {
         "count": 2
       }
@@ -44,18 +38,8 @@
         "count": 1
       }
     },
-    "src/game/sceneLifecycle/SceneManager.ts": {
-      "crap_moderate": {
-        "count": 1
-      }
-    },
     "src/game/scenes/hobbies/runtime/HobbiesScene.ts": {
       "crap_moderate": {
-        "count": 1
-      }
-    },
-    "src/game/scenes/overworld/runtime/overworld/overworldInteractionState.ts": {
-      "complexity_high": {
         "count": 1
       }
     },
@@ -69,17 +53,6 @@
     },
     "src/game/scenes/potassiumSlip/runtime/combat.ts": {
       "crap_high": {
-        "count": 1
-      }
-    },
-    "src/game/scenes/potassiumSlip/runtime/commandAdapter.ts": {
-      "complexity_critical": {
-        "count": 3
-      },
-      "crap_critical": {
-        "count": 3
-      },
-      "crap_moderate": {
         "count": 1
       }
     },
@@ -112,24 +85,6 @@
         "count": 1
       }
     },
-    "src/game/scenes/ridge/blockout/facts.ts": {
-      "crap_moderate": {
-        "count": 1
-      }
-    },
-    "src/game/scenes/ridge/blockout/geometry.test.ts": {
-      "crap_moderate": {
-        "count": 1
-      }
-    },
-    "src/game/scenes/ridge/blockout/parser.ts": {
-      "complexity_critical": {
-        "count": 1
-      },
-      "crap_critical": {
-        "count": 1
-      }
-    },
     "src/game/scenes/ridge/bridge/BridgeTracerStageRuntime.ts": {
       "crap_moderate": {
         "count": 1
@@ -143,16 +98,6 @@
     "src/game/scenes/ridge/runtime/RidgeScene.ts": {
       "crap_moderate": {
         "count": 3
-      }
-    },
-    "src/game/scenes/ridge/runtime/ridgeTraversalRuntime.ts": {
-      "crap_moderate": {
-        "count": 1
-      }
-    },
-    "src/game/scenes/ridge/runtime/traversalComfort.ts": {
-      "crap_moderate": {
-        "count": 1
       }
     },
     "src/game/scenes/stampedeSketch/runtime/StampedeSketchScene.ts": {
@@ -178,14 +123,6 @@
         "count": 1
       }
     },
-    "src/game/shell/InteractiveApp.tsx": {
-      "complexity_critical": {
-        "count": 1
-      },
-      "crap_critical": {
-        "count": 1
-      }
-    },
     "src/game/shell/usePhaserGameBoot.ts": {
       "crap_moderate": {
         "count": 1
@@ -199,8 +136,6 @@
   },
   "runtime_coverage_findings": [],
   "target_keys": [
-    "src/game/sceneLifecycle/SceneManager.ts:high impact",
-    "src/game/scenes/potassiumSlip/runtime/commandAdapter.ts:complexity",
-    "src/game/scenes/overworld/runtime/overworld/overworldInteractionState.ts:complexity"
+    "src/game/sceneLifecycle/SceneManager.ts:high impact"
   ]
 }
