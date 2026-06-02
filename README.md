@@ -20,11 +20,15 @@ pnpm dev
 ## Quality checks
 
 ```bash
-pnpm check
+pnpm check              # includes fallow:audit on changed files since main
 pnpm lint
 pnpm test
 pnpm build
+pnpm fallow:health    # complexity + duplication overview
+pnpm fallow:baseline  # regenerate committed CI baselines after cleanup
 ```
+
+Fallow CI policy and agent workflow: [`docs/agents/fallow.md`](docs/agents/fallow.md).
 
 Current Bridge staging lives in
 `src/game/scenes/ridge/bridge/stageComposition.ts`. In development, open the
