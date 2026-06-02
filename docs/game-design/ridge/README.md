@@ -32,7 +32,7 @@ Use each file for exactly one concern:
 | Active open questions | [`open-questions.md`](./open-questions.md) | True design unknowns and blockout-detail TBD. Area premises may already be accepted even when prompt/topology details remain open. |
 | Product vision | [`summit.md`](./summit.md) | Durable fantasy and pillars, not detailed route implementation. |
 | Implementation sequencing | [`milestone-plan.md`](./milestone-plan.md) | Current route-reset milestones, Bridge Tracer Slice, source stack, Agent-Ready Slice Contract, prototype reuse rules, and agent checklist. Not live backlog. |
-| Runtime blockout contract | [`map-language.md`](./map-language.md) | Source format and generated facts for the current/prototype blockout. |
+| Historical blockout contract | [`map-language.md`](./map-language.md) | Superseded source format (removed from repo); Bridge stage composition is active. |
 | Legacy prototype history | [`legacy/`](./legacy/README.md) | Superseded folded/Cicka Home plans, old summit/milestone history, map plans, and reviews. Reference only unless an active doc links there. |
 | Art/audio/asset support | [`reference/`](./reference/README.md) | Reference packs that support active docs but do not override route canon. |
 | Live work | GitHub Issues | PRDs, current backlog, triage state, and agent briefs. |
@@ -69,9 +69,9 @@ Treat these as prototype/reference unless a task explicitly says to adapt them:
 - Main-path slopes, ramps, wall jumps, double jumps, or precision platforming.
 - Mini-game clears as required first-ending proof.
 
-Useful legacy pieces may still be preserved or adapted: the Ridge Blockout
-Source contract, compiler, generated facts, validation, and preview/debugger
-workflow.
+The Ridge Blockout Source implementation was removed from the repo; keep
+[`map-language.md`](./map-language.md) and git history as contract reference.
+The Ridge Stage Debugger (`?mode=ridge-stage-debugger`) remains Bridge-first.
 
 Superseded planning docs live under [`legacy/`](./legacy/README.md). Do not
 search that folder first when updating active route design.

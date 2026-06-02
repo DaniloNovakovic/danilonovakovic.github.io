@@ -7,6 +7,7 @@ import {
   type PotassiumShieldSide
 } from './waves';
 import { POTASSIUM_DATA_KEYS } from './phaserData';
+import { clamp, linear } from '@/shared/math';
 import { getMessages } from '@/shared/i18n';
 
 const messages = getMessages();
@@ -60,7 +61,7 @@ export interface PotassiumEnemySetupFacts {
 }
 
 export const POTASSIUM_NON_BOSS_ENEMY_SPEED = 54;
-export const POTASSIUM_SPLITTER_CHILD_SPEED = POTASSIUM_NON_BOSS_ENEMY_SPEED + 18;
+const POTASSIUM_SPLITTER_CHILD_SPEED = POTASSIUM_NON_BOSS_ENEMY_SPEED + 18;
 
 const ENEMY_CONFIGS: Record<PotassiumEnemyKind, PotassiumEnemyConfig> = {
   intern: {
@@ -232,12 +233,4 @@ function getPotassiumEnemyBodyProfile(kind: PotassiumEnemyKind): PotassiumEnemyB
   if (kind === 'splitter') return { width: 118, height: 52 };
   if (kind === 'shield') return { width: 54, height: 54 };
   return undefined;
-}
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(max, Math.max(min, value));
-}
-
-function linear(from: number, to: number, t: number): number {
-  return from + (to - from) * t;
 }

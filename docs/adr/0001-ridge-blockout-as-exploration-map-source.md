@@ -1,7 +1,7 @@
 # Adopt Ridge Blockout As Exploration Map Source Of Truth
 
-Status: accepted for the current/prototype Ridge runtime; superseded as future
-Ridge route canon by the Ridge pre-production plan.
+Status: **superseded** — blockout implementation removed from the repo (Bridge
+Tracer is the active Ridge runtime). Kept as historical ADR.
 
 This ADR explains why the existing Phaser Ridge prototype compiles a typed
 blockout source into spatial facts. It does not require the desired
@@ -23,6 +23,6 @@ route, anchor, shortcut, and home-mutation facts before runtime presentation and
 interaction modules consume it. This deepens the original runtime decision
 rather than superseding it.
 
-The current/prototype blockout source lives beside the generated runtime artifact at
-`src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts`. The
-language documentation remains in `docs/game-design/ridge/map-language.md`.
+The folded-desk blockout source and compiler were removed from the repository.
+The language documentation remains in `docs/game-design/ridge/map-language.md`
+as a historical contract reference.

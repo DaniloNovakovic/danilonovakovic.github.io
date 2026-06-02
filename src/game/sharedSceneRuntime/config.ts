@@ -21,7 +21,6 @@ export const HOBBIES_RESUME_CLAMP = {
   minY: 120,
   maxY: HOBBIES_FLOOR_Y - 20
 } as const;
-export const HOBBIES_WALK_SPEED = 300;
 /** Proximity radius for hobby stations / exit (Phaser distance check). */
 export const HOBBIES_INTERACT_RADIUS = 60;
 /** Ground collider zone relative to floor. */

@@ -1,1 +1,0 @@
-export { StampedeSketchScene } from './StampedeSketchScene';

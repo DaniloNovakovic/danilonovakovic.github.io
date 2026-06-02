@@ -62,10 +62,10 @@ export interface RidgeDevTeleportPlayer {
 
 export const RIDGE_PLAYER_SPAWN_OFFSET_Y = -80;
 export const RIDGE_DEFAULT_CAMERA_ZOOM = 1;
-export const RIDGE_DEV_MIN_CAMERA_ZOOM = 0.65;
-export const RIDGE_DEV_MAX_CAMERA_ZOOM = 1.6;
+const RIDGE_DEV_MIN_CAMERA_ZOOM = 0.65;
+const RIDGE_DEV_MAX_CAMERA_ZOOM = 1.6;
 
-export const RIDGE_DEV_DEFAULT_DEBUG_SETTINGS: RidgeDevDebugSettings = {
+const RIDGE_DEV_DEFAULT_DEBUG_SETTINGS: RidgeDevDebugSettings = {
   graybox: false,
   showColliders: false,
   showPlayerBody: false,

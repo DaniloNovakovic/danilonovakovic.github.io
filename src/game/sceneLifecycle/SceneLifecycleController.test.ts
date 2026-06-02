@@ -38,6 +38,11 @@ function resetBridge() {
   bridgeActions.resetTouch();
 }
 
+async function settleAsyncTransitions(): Promise<void> {
+  await Promise.resolve();
+  await Promise.resolve();
+}
+
 describe('SceneLifecycleController', () => {
   let controller: SceneLifecycleController;
   let eventBus: SceneLifecycleEventBus;
@@ -50,7 +55,7 @@ describe('SceneLifecycleController', () => {
     resetBridge();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     resetBridge();
     eventBus = new SceneLifecycleEventBus();
     events = [];
@@ -70,6 +75,7 @@ describe('SceneLifecycleController', () => {
     });
     controller = new SceneLifecycleController(sceneManager, eventBus);
     controller.start();
+    await settleAsyncTransitions();
   });
 
   it('emits PauseChanged on start', () => {
@@ -137,7 +143,7 @@ describe('SceneLifecycleController', () => {
     const enterSpy = vi.spyOn(sceneManager, 'enter');
 
     bridgeActions.enterScene('hobbies');
-    await Promise.resolve();
+    await settleAsyncTransitions();
 
     const trans = events.find((e) => e.type === 'SceneTransitionRequested');
     expect(trans).toBeDefined();

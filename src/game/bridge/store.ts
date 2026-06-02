@@ -32,11 +32,9 @@ export interface SceneControlPointerEvent {
   timestamp: number;
 }
 
-export const INVENTORY_ITEM_IDS = ['glasses', 'circuit'] as const;
-export type InventoryItemId = (typeof INVENTORY_ITEM_IDS)[number];
+export type InventoryItemId = 'glasses' | 'circuit';
 
-export const SECRET_DISCOVERY_IDS = ['banana-peel-clue'] as const;
-export type SecretDiscoveryId = (typeof SECRET_DISCOVERY_IDS)[number];
+export type SecretDiscoveryId = 'banana-peel-clue';
 
 export interface BridgeInventoryState {
   ownedItemIds: InventoryItemId[];
@@ -261,10 +259,8 @@ function emit(): void {
   listeners.forEach((listener) => listener());
 }
 
-function setState(updater: (current: BridgeState) => BridgeState): void {
-  const previous = state;
-  const next = updater(state);
-  const candidate: BridgeState = {
+function projectBridgeState(next: BridgeState): BridgeState {
+  return {
     ...next,
     activeOverlayId: next.activeOverlay?.id ?? null,
     progress: {
@@ -273,7 +269,10 @@ function setState(updater: (current: BridgeState) => BridgeState): void {
     },
     isPaused: next.activeOverlay !== null || next.loadingSceneId !== null
   };
-  const unchanged =
+}
+
+function isBridgeSceneShellUnchanged(previous: BridgeState, candidate: BridgeState): boolean {
+  return (
     previous.activeSceneId === candidate.activeSceneId &&
     overlayRequestsEqual(previous.activeOverlay, candidate.activeOverlay) &&
     previous.activeOverlayId === candidate.activeOverlayId &&
@@ -282,8 +281,19 @@ function setState(updater: (current: BridgeState) => BridgeState): void {
     sceneUiSurfacesEqual(previous.sceneUi.status, candidate.sceneUi.status) &&
     sceneUiSurfacesEqual(previous.sceneUi.panel, candidate.sceneUi.panel) &&
     sceneUiActionsEqual(previous.sceneUi.lastAction, candidate.sceneUi.lastAction) &&
+    previous.sceneHintText === candidate.sceneHintText
+  );
+}
+
+function isBridgeInventoryUnchanged(previous: BridgeState, candidate: BridgeState): boolean {
+  return (
     arraysEqual(previous.inventory.ownedItemIds, candidate.inventory.ownedItemIds) &&
-    arraysEqual(previous.equipment.equippedItemIds, candidate.equipment.equippedItemIds) &&
+    arraysEqual(previous.equipment.equippedItemIds, candidate.equipment.equippedItemIds)
+  );
+}
+
+function isBridgeProgressUnchanged(previous: BridgeState, candidate: BridgeState): boolean {
+  return (
     previous.progress.hasGlasses === candidate.progress.hasGlasses &&
     arraysEqual(previous.progress.discoveredSecretIds, candidate.progress.discoveredSecretIds) &&
     arraysEqual(previous.progress.ridge.stampIds, candidate.progress.ridge.stampIds) &&
@@ -293,8 +303,12 @@ function setState(updater: (current: BridgeState) => BridgeState): void {
     previous.progress.ridge.firstPlayableRoute.activeAreaId ===
       candidate.progress.ridge.firstPlayableRoute.activeAreaId &&
     previous.progress.ridge.firstPlayableRoute.bridgeBeat ===
-      candidate.progress.ridge.firstPlayableRoute.bridgeBeat &&
-    previous.sceneHintText === candidate.sceneHintText &&
+      candidate.progress.ridge.firstPlayableRoute.bridgeBeat
+  );
+}
+
+function isBridgeTouchInputUnchanged(previous: BridgeState, candidate: BridgeState): boolean {
+  return (
     previous.touch.left === candidate.touch.left &&
     previous.touch.right === candidate.touch.right &&
     previous.touch.up === candidate.touch.up &&
@@ -304,8 +318,23 @@ function setState(updater: (current: BridgeState) => BridgeState): void {
     sceneControlPointerEventsEqual(
       previous.sceneControlPointerEvents,
       candidate.sceneControlPointerEvents
-    );
-  if (unchanged) return;
+    )
+  );
+}
+
+function isBridgeStateUnchanged(previous: BridgeState, candidate: BridgeState): boolean {
+  return (
+    isBridgeSceneShellUnchanged(previous, candidate) &&
+    isBridgeInventoryUnchanged(previous, candidate) &&
+    isBridgeProgressUnchanged(previous, candidate) &&
+    isBridgeTouchInputUnchanged(previous, candidate)
+  );
+}
+
+function setState(updater: (current: BridgeState) => BridgeState): void {
+  const previous = state;
+  const candidate = projectBridgeState(updater(state));
+  if (isBridgeStateUnchanged(previous, candidate)) return;
   state = candidate;
   emit();
 }

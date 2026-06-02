@@ -1,10 +1,3 @@
-export const sketchColors = {
-  ink: '#1a1a1a',
-  paper: '#fbfbf9',
-  paperMuted: '#f4f1ea',
-  paperHover: '#e8e5df'
-} as const;
-
 export const sketchShadows = {
   xs: 'shadow-[2px_2px_0px_0px_rgba(26,26,26,1)]',
   sm: 'shadow-[3px_3px_0px_0px_rgba(26,26,26,1)]',

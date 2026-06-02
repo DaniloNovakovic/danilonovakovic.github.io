@@ -1,8 +1,8 @@
-export const SUPPORTED_LOCALES = ['en'] as const;
+const SUPPORTED_LOCALES = ['en'] as const;
 export type Locale = (typeof SUPPORTED_LOCALES)[number];
 
 export const DEFAULT_LOCALE: Locale = 'en';
-export const LOCALE_QUERY_PARAM = 'lang';
+const LOCALE_QUERY_PARAM = 'lang';
 export const LOCALE_STORAGE_KEY = 'portfolio:locale';
 
 export interface LocaleStorageLike {
@@ -10,7 +10,7 @@ export interface LocaleStorageLike {
   setItem(key: string, value: string): void;
 }
 
-export function isLocale(value: string | null | undefined): value is Locale {
+function isLocale(value: string | null | undefined): value is Locale {
   return SUPPORTED_LOCALES.includes(value as Locale);
 }
 
@@ -25,7 +25,7 @@ export function resolveLocale(input: {
   return DEFAULT_LOCALE;
 }
 
-export function readStoredLocale(storage: LocaleStorageLike | null = getBrowserStorage()): Locale | null {
+function readStoredLocale(storage: LocaleStorageLike | null = getBrowserStorage()): Locale | null {
   if (!storage) return null;
   try {
     const stored = storage.getItem(LOCALE_STORAGE_KEY);

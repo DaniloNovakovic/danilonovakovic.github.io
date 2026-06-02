@@ -25,10 +25,6 @@
     "src/dev/**/*.tsx"
   ],
 
-  "entry": [
-    "scripts/generate-ridge-blockout-sources.test.mjs"
-  ],
-
   "health": {
     "ignore": ["**/*.generated.ts", "dist/**", "storybook-static/**"]
   },
@@ -77,5 +73,31 @@
       { "from": "core", "allow": ["core", "shared"], "allowTypeOnly": ["shared"] },
       { "from": "shared", "allow": ["shared"] }
     ]
-  }
+  },
+  "ignoreExports": [
+    {
+      "file": "src/game/core/ecs/systems/playerSystems.ts",
+      "exports": ["*"]
+    },
+    {
+      "file": "src/game/core/player/PlayerController.ts",
+      "exports": ["*"]
+    },
+    {
+      "file": "src/game/scenes/potassiumSlip/runtime/renderer.ts",
+      "exports": ["*"]
+    },
+    {
+      "file": "src/game/scenes/potassiumSlip/runtime/session.ts",
+      "exports": ["*"]
+    },
+    {
+      "file": "src/game/scenes/potassiumSlip/runtime/phaserData.ts",
+      "exports": ["*"]
+    },
+    {
+      "file": "src/game/scenes/potassiumSlip/runtime/waves.ts",
+      "exports": ["*"]
+    }
+  ]
 }

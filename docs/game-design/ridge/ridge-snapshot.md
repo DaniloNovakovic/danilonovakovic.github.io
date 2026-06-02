@@ -12,17 +12,14 @@
 - **Ridge source router:** [`README.md`](./README.md).
 - **Active story/route canon:** [`story-level-bible.md`](./story-level-bible.md).
 - **Active area design:** [`areas/`](./areas/README.md).
-- **Legacy blockout spatial data:** [`folded-desk-ridge.source.ts`](../../../src/game/scenes/ridge/blockout/sources/folded-desk-ridge.source.ts).
-- **Blockout language contract:** [`map-language.md`](./map-language.md).
+- **Legacy blockout language (historical):** [`map-language.md`](./map-language.md) — superseded; folded-desk source removed from the repo.
 - **Legacy folded topology reference:** [`legacy/`](./legacy/README.md).
 - **Product vision:** [`summit.md`](./summit.md).
 - **Live implementation work:** GitHub Issues.
 
 If this file disagrees with the current Ridge runtime code about implemented
-behavior, the code wins. If this file describes the legacy folded desk blockout
-and disagrees with the folded desk Ridge blockout about room layout, route
-order, anchors, shortcuts, or progress-gated geometry, the blockout wins.
-If this file disagrees with GitHub about active work state, GitHub wins.
+behavior, the code wins. If this file disagrees with GitHub about active work
+state, GitHub wins.
 If this file disagrees with `story-level-bible.md` or the matching `areas/`
 doc about future route intent, the active design docs win.
 
@@ -56,32 +53,13 @@ Current runtime characteristics:
   post-Bridge area state.
 - Bridge prompts and dialogue are mirrored into a small typed runtime data layer
   from the accepted Bridge dialogue IDs.
-- The folded desk blockout, generated facts, traversal helpers, Cicka Home
-  mutation code, Trail Cards, and Stampede reward path remain in the repo as
-  protected prototype/reference assets, but they are not the active Ridge route
-  presented by the `ridge` scene.
-- Stampede remains loadable as its own scene and through development tooling,
-  but the active Bridge slice does not route to Stampede/Telegraph/Domino.
-
-## Protected PoC Assets
-
-The valuable Ridge proof-of-concept investment is the authoring and QA spine,
-not the current moment-to-moment traversal model.
-
-Preserve or adapt:
-
-- Ridge Blockout Source / source contract.
-- compiler and generated spatial facts.
-- route, anchor, shortcut, collider, validation, and mutation facts.
-- read-only previewer/debugger workflow.
-- map-loading path that lets agents and Danilo inspect topology quickly.
-
-Disposable if a better Ridge emerges:
-
-- current required-jump traversal feel.
-- slope/ramp-first geometry assumptions.
-- current folded-desk room arrangement.
-- any runtime module whose main job was proving the old platformer-like route.
+- The legacy folded-desk blockout stack (source compiler, generated map,
+  traversal helpers, Cicka Home mutations, trail-card anchors) was removed from
+  the repo; see git history and [`map-language.md`](./map-language.md) for the
+  old contract description.
+- **Stampede Sketch** remains as a standalone scene and development entry point
+  (dev switcher, basement `stampede` command). It is not on the active Bridge
+  route; keep it for optional mini-game content in a future rework.
 
 ## Active Runtime Route Read
 

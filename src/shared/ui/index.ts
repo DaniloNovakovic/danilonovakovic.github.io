@@ -30,7 +30,4 @@ export type {
   NotebookSceneProfile,
   NotebookShellLayout
 } from './NotebookShell';
-export { SectionHeader } from './SectionHeader';
 export { SketchSection } from './SketchSection';
-export { notebookShadowRoles, sketchBorders, sketchColors, sketchShadows } from './tokens';
-export { cn } from './utils';

@@ -1,8 +1,8 @@
 export const STAMPEDE_AUTO_ATTACK_COOLDOWN_MS = 2_600;
-export const STAMPEDE_AUTO_ATTACK_RANGE = 170;
+const STAMPEDE_AUTO_ATTACK_RANGE = 170;
 export const STAMPEDE_AUTO_ATTACK_LENGTH = 120;
 export const STAMPEDE_AUTO_ATTACK_HALF_WIDTH = 22;
-export const STAMPEDE_AUTO_ATTACK_MAX_HITS = 2;
+const STAMPEDE_AUTO_ATTACK_MAX_HITS = 2;
 
 export interface StampedeAutoAttackProfile {
   cooldownMs: number;

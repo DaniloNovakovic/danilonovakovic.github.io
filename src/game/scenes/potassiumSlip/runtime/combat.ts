@@ -139,11 +139,11 @@ export type PotassiumCombatCommand =
   | { type: 'spawnSplitterChildren'; enemyId: string }
   | { type: 'killEnemy'; enemyId: string };
 
-export const POTASSIUM_RECALL_DAMAGE = 0.65;
-export const POTASSIUM_FIRE_TICK_COOLDOWN_MS = 420;
+const POTASSIUM_RECALL_DAMAGE = 0.65;
+const POTASSIUM_FIRE_TICK_COOLDOWN_MS = 420;
 export const POTASSIUM_POISON_TICK_INTERVAL_MS = 500;
 export const POTASSIUM_POISON_DURATION_MS = 2500;
-export const POTASSIUM_DUPLICATE_CLONE_LIFETIME_MS = 3000;
+const POTASSIUM_DUPLICATE_CLONE_LIFETIME_MS = 3000;
 export const POTASSIUM_FIRE_HIT_PATCH_LIFETIME_MS = 900;
 export const POTASSIUM_GHOST_STATUS_FIELD_LIFETIME_MS = 680;
 

@@ -5,9 +5,12 @@ why behind the runtime shape, and the direction future refactors should preserve
 For what exists in code today, treat [`runtime-architecture.md`](runtime-architecture.md),
 `AGENTS.md`, and the scoped `.agents/rules/` files as the operational guidance.
 
-Ridge caveat: architecture notes about the typed Ridge blockout apply to the
-current Phaser prototype/runtime. They do not override the Ridge pre-production
-route in [`game-design/ridge/README.md`](./game-design/ridge/README.md).
+Ridge caveat: the folded-desk blockout stack was removed from the repo. Active
+Ridge runtime spatial truth lives in Bridge stage composition
+(`src/game/scenes/ridge/bridge/`). Historical blockout notes in ADRs and
+[`game-design/ridge/map-language.md`](./game-design/ridge/map-language.md) do
+not override the pre-production route in
+[`game-design/ridge/README.md`](./game-design/ridge/README.md).
 
 ## 1. Architectural Philosophy
 
@@ -51,9 +54,9 @@ paths, prefer [`runtime-architecture.md`](runtime-architecture.md). When
 proposing future refactors:
 
 - Prefer extending existing lifecycle, bridge, overlay, scene UI, and shared runtime seams instead of re-introducing callback-only scene orchestration, ad-hoc overlay maps, or ad-hoc global state.
-- For current/prototype Ridge runtime work, keep spatial truth in the typed
-  Ridge blockout source and compiled facts instead of rebuilding parallel
-  parent/route/spatial catalogs.
+- For current Ridge runtime work, keep spatial truth in Bridge stage
+  composition (`stageComposition.ts`) instead of rebuilding parallel catalogs or
+  resurrecting the removed blockout pipeline.
 - Introduce shared render helpers only when repeated render policy code appears.
 
 ---

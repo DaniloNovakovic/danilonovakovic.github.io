@@ -36,41 +36,23 @@ export class SceneManager {
   }
 
   async enter(contextId: ContextId, guard?: SceneTransitionGuard): Promise<void> {
-    const target = this.contexts.get(contextId);
-    if (!target) {
-      this.clearLoadingIfCurrent(guard);
-      return;
-    }
+    const target = await this.prepareContext(contextId, guard);
+    if (!target || this.isGuardStale(guard)) return;
 
     if (this.adapter.isSceneActive(target.sceneKey)) {
       this.clearLoadingIfCurrent(guard);
       return;
     }
 
-    const loadedScene = await this.ensureSceneRegistered(target, guard);
-    if (guard && !guard.isCurrent()) return;
-    if (!loadedScene) {
-      this.clearLoadingIfCurrent(guard);
-    }
     this.stopActiveContextsExcept(target.sceneKey);
-
-    this.adapter.startScene(target.sceneKey, target.getStartData());
-    target.onEnter?.();
-    this.options.onSceneStarted?.();
+    if (this.isGuardStale(guard)) return;
+    this.startContext(target);
   }
 
   async exitTo(contextId: ContextId, guard?: SceneTransitionGuard): Promise<void> {
-    const target = this.contexts.get(contextId);
-    if (!target) {
-      this.clearLoadingIfCurrent(guard);
-      return;
-    }
+    const target = await this.prepareContext(contextId, guard);
+    if (!target || this.isGuardStale(guard)) return;
 
-    const loadedScene = await this.ensureSceneRegistered(target, guard);
-    if (guard && !guard.isCurrent()) return;
-    if (!loadedScene) {
-      this.clearLoadingIfCurrent(guard);
-    }
     const allKeys = this.adapter.listKnownSceneKeys();
     for (const sceneKey of allKeys) {
       if (sceneKey === target.sceneKey) continue;
@@ -81,10 +63,8 @@ export class SceneManager {
       context?.onExit?.(resumeSnapshot);
     }
 
-    if (!this.adapter.isSceneActive(target.sceneKey)) {
-      this.adapter.startScene(target.sceneKey, target.getStartData());
-      target.onEnter?.();
-      this.options.onSceneStarted?.();
+    if (!this.adapter.isSceneActive(target.sceneKey) && !this.isGuardStale(guard)) {
+      this.startContext(target);
     }
   }
 
@@ -110,6 +90,30 @@ export class SceneManager {
   dispose(): void {
     this.options.onSceneLoadingChange?.(null);
     this.contexts.forEach((context) => context.onDispose?.());
+  }
+
+  private async prepareContext(
+    contextId: ContextId,
+    guard?: SceneTransitionGuard
+  ): Promise<SceneContextDefinition | null> {
+    const target = this.contexts.get(contextId);
+    if (!target) {
+      this.clearLoadingIfCurrent(guard);
+      return null;
+    }
+
+    const loadedScene = await this.ensureSceneRegistered(target, guard);
+    if (guard && !guard.isCurrent()) return null;
+    if (!loadedScene) {
+      this.clearLoadingIfCurrent(guard);
+    }
+    return target;
+  }
+
+  private startContext(target: SceneContextDefinition): void {
+    this.adapter.startScene(target.sceneKey, target.getStartData());
+    target.onEnter?.();
+    this.options.onSceneStarted?.();
   }
 
   private findContextBySceneKey(sceneKey: string): SceneContextDefinition | undefined {
@@ -143,6 +147,10 @@ export class SceneManager {
   private clearLoadingIfCurrent(guard?: SceneTransitionGuard): void {
     if (guard && !guard.isCurrent()) return;
     this.options.onSceneLoadingChange?.(null);
+  }
+
+  private isGuardStale(guard?: SceneTransitionGuard): boolean {
+    return guard !== undefined && !guard.isCurrent();
   }
 
   private stopActiveContextsExcept(targetSceneKey: string): void {

@@ -18,7 +18,7 @@ export interface SceneUiSurfaceDefinition {
   panelChrome?: 'default' | 'overlay';
 }
 
-export const SCENE_UI_DEFINITIONS: readonly SceneUiSurfaceDefinition[] = [
+const SCENE_UI_DEFINITIONS: readonly SceneUiSurfaceDefinition[] = [
   ...STAMPEDE_SCENE_UI_DEFINITIONS,
   ...POTASSIUM_SCENE_UI_DEFINITIONS
 ];
