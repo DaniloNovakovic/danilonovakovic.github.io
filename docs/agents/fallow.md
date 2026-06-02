@@ -7,7 +7,7 @@ Fallow is the repo's codebase-intelligence gate: dead code, duplication, complex
 | Command | When |
 | --- | --- |
 | `pnpm fallow:audit` | Before pushing a branch; scopes to files changed since `main` |
-| `pnpm fallow:health` | Periodic review of complexity hotspots and duplication rate |
+| `pnpm fallow:health` | Periodic review of complexity hotspots and duplication rate (advisory; always exits 0) |
 | `pnpm fallow` | Full-repo snapshot when planning cleanup or refactors |
 | `pnpm check` | Local parity with CI (includes `fallow:audit`) |
 
@@ -27,6 +27,16 @@ Fallow enforces the hardest rules from [`.agents/rules/10-architecture.md`](../.
 - `src/shared/**` may import only from `shared`
 
 Add more zones/rules one at a time after fixing any violations they surface.
+
+## Exit codes
+
+| Command | Exit 1 means |
+| --- | --- |
+| `fallow:health` | Never (uses `--report-only`; findings are informational) |
+| `fallow:audit` / `fallow:ci` | New error-severity findings in changed files |
+| `fallow` (bare) | Issues found anywhere in the repo |
+
+Plain `fallow health` without `--report-only` exits 1 when any function exceeds complexity thresholds — that is normal Fallow behavior, not a runtime crash.
 
 ## Baseline maintenance
 
