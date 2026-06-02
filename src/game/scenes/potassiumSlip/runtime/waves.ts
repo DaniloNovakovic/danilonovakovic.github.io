@@ -64,8 +64,8 @@ export const POTASSIUM_COLUMN_COUNT = 5;
 export const POTASSIUM_NON_BOSS_WAVE_COUNT = 10;
 export const POTASSIUM_BOSS_WAVE = POTASSIUM_NON_BOSS_WAVE_COUNT + 1;
 export const POTASSIUM_ENDLESS_START_WAVE = POTASSIUM_BOSS_WAVE + 1;
-export const POTASSIUM_ROW_SPAWN_DELAY_MS = 900;
-export const POTASSIUM_MID_GAME_ROW_SPAWN_DELAY_MS = 1050;
+const POTASSIUM_ROW_SPAWN_DELAY_MS = 900;
+const POTASSIUM_MID_GAME_ROW_SPAWN_DELAY_MS = 1050;
 
 export const POTASSIUM_UPGRADES: readonly PotassiumUpgradeKind[] = [
   'fire',
@@ -76,7 +76,7 @@ export const POTASSIUM_UPGRADES: readonly PotassiumUpgradeKind[] = [
   'ghostVertical'
 ] as const;
 
-export const POTASSIUM_GENERIC_UPGRADES: readonly PotassiumGenericUpgradeKind[] = [
+const POTASSIUM_GENERIC_UPGRADES: readonly PotassiumGenericUpgradeKind[] = [
   'damage',
   'poison',
   'explosion',
@@ -172,7 +172,7 @@ export function getPotassiumSkillRank(
   return skillRanks[upgrade] ?? 0;
 }
 
-export function getPotassiumDraftPool(skillRanks: PotassiumSkillRanks): PotassiumSkillDraftOption[] {
+function getPotassiumDraftPool(skillRanks: PotassiumSkillRanks): PotassiumSkillDraftOption[] {
   return POTASSIUM_UPGRADES.flatMap<PotassiumSkillDraftOption>((upgrade) => {
     const rank = getPotassiumSkillRank(skillRanks, upgrade);
     if (rank === 0) return [{ kind: upgrade, action: 'unlock' as const }];

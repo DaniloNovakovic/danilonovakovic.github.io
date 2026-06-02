@@ -32,11 +32,9 @@ export interface SceneControlPointerEvent {
   timestamp: number;
 }
 
-export const INVENTORY_ITEM_IDS = ['glasses', 'circuit'] as const;
-export type InventoryItemId = (typeof INVENTORY_ITEM_IDS)[number];
+export type InventoryItemId = 'glasses' | 'circuit';
 
-export const SECRET_DISCOVERY_IDS = ['banana-peel-clue'] as const;
-export type SecretDiscoveryId = (typeof SECRET_DISCOVERY_IDS)[number];
+export type SecretDiscoveryId = 'banana-peel-clue';
 
 export interface BridgeInventoryState {
   ownedItemIds: InventoryItemId[];

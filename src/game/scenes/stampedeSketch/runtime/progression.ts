@@ -1,8 +1,8 @@
 import type { StampedeUpgradeId } from './upgrades';
 
-export const STAMPEDE_SCRAP_PICKUP_RADIUS = 10;
+const STAMPEDE_SCRAP_PICKUP_RADIUS = 10;
 export const STAMPEDE_SCRAP_COLLECTION_RADIUS = 34;
-export const STAMPEDE_UPGRADE_SCRAP_GOAL = 3;
+const STAMPEDE_UPGRADE_SCRAP_GOAL = 3;
 
 export interface StampedeClearedMarkPoint {
   id: string;

@@ -56,7 +56,7 @@ export function getRampSurfaceYAtX(
   return lerp(zone.from.y, zone.to.y, t);
 }
 
-export function isPointInsideTraversalZone(
+function isPointInsideTraversalZone(
   zone: Pick<RidgeTraversalLineZone, 'x' | 'y' | 'width' | 'height'>,
   point: RidgeTraversalPoint
 ): boolean {

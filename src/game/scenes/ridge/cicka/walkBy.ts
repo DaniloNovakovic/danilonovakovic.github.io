@@ -1,4 +1,4 @@
-export const CICKA_WALK_BY_RADIUS = 88;
+const CICKA_WALK_BY_RADIUS = 88;
 export const CICKA_WALK_BY_BARK_DURATION_MS = 2600;
 
 export interface CickaWalkByState {

@@ -1,4 +1,4 @@
-export const PORTFOLIO_OVERLAY_IDS = [
+const PORTFOLIO_OVERLAY_IDS = [
   'profile',
   'experiences',
   'projects',
@@ -7,8 +7,8 @@ export const PORTFOLIO_OVERLAY_IDS = [
 ] as const;
 
 export const HOBBIES_OVERLAY_IDS = ['art', 'music', 'fitness', 'dancing'] as const;
-export const BASEMENT_OVERLAY_IDS = ['games'] as const;
-export const GLOBAL_OVERLAY_IDS = ['inventory', 'devSwitcher', 'trailCard', 'manualPage'] as const;
+const BASEMENT_OVERLAY_IDS = ['games'] as const;
+const GLOBAL_OVERLAY_IDS = ['inventory', 'devSwitcher', 'trailCard', 'manualPage'] as const;
 
 export const OVERLAY_IDS = [
   ...PORTFOLIO_OVERLAY_IDS,
@@ -23,12 +23,5 @@ export type BasementOverlayId = (typeof BASEMENT_OVERLAY_IDS)[number];
 export type GlobalOverlayId = (typeof GLOBAL_OVERLAY_IDS)[number];
 export type OverlayId = (typeof OVERLAY_IDS)[number];
 
-export const INVENTORY_OVERLAY_ID = 'inventory' satisfies OverlayId;
 export const DEV_SWITCHER_OVERLAY_ID = 'devSwitcher' satisfies OverlayId;
-export const TRAIL_CARD_OVERLAY_ID = 'trailCard' satisfies GlobalOverlayId;
-export const MANUAL_PAGE_OVERLAY_ID = 'manualPage' satisfies GlobalOverlayId;
 export const BASEMENT_CONSOLE_OVERLAY_ID = 'games' satisfies BasementOverlayId;
-
-export function isOverlayId(id: string | null | undefined): id is OverlayId {
-  return id !== null && id !== undefined && (OVERLAY_IDS as readonly string[]).includes(id);
-}

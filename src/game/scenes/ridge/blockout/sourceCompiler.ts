@@ -1,7 +1,6 @@
 import {
   RIDGE_BLOCKOUT_TRAVERSAL_MOVEMENTS,
-  type RidgeBlockoutMap,
-  type RidgeBlockoutTraversalMovement
+  type RidgeBlockoutMap
 } from './parser';
 import type {
   RidgeBlockoutSource,
@@ -14,7 +13,7 @@ import type {
   RidgeTileRegistry
 } from './sourceContract';
 
-export class RidgeBlockoutSourceValidationError extends Error {
+class RidgeBlockoutSourceValidationError extends Error {
   readonly errors: readonly string[];
 
   constructor(errors: readonly string[]) {
@@ -82,7 +81,7 @@ export function validateRidgeBlockoutSource(source: RidgeBlockoutSource): readon
   return errors;
 }
 
-export function toRidgeBlockoutMap(
+function toRidgeBlockoutMap(
   source: RidgeBlockoutSource,
   validationErrors: readonly string[] = validateRidgeBlockoutSource(source)
 ): RidgeBlockoutMap {
@@ -346,10 +345,4 @@ function toMapRect(rect: RidgeBlockoutSourceRect) {
 function isRuntimeActiveTile(tile: RidgeTileDefinition): boolean {
   if (tile.runtimeActive !== undefined) return tile.runtimeActive;
   return tile.kind !== 'empty' && tile.kind !== 'design' && tile.kind !== 'ladder';
-}
-
-export function isRidgeBlockoutSourceTraversalMovement(
-  value: string
-): value is RidgeBlockoutTraversalMovement {
-  return RIDGE_BLOCKOUT_TRAVERSAL_MOVEMENTS.has(value);
 }

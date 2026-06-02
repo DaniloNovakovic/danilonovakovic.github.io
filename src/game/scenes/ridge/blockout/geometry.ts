@@ -157,7 +157,7 @@ export function deriveRidgeBlockoutGeometry(
   };
 }
 
-export function deriveRidgeBlockoutBounds(map: RidgeBlockoutMap): RidgeBlockoutBounds {
+function deriveRidgeBlockoutBounds(map: RidgeBlockoutMap): RidgeBlockoutBounds {
   const maxX = Math.max(
     ...map.rooms.map((room) => (room.place.x + room.size.width) * map.cell),
     map.cell
@@ -202,36 +202,6 @@ export function getRidgeBlockoutAnchorPoint(
     x: (room.place.x + (minColumn + maxColumn + 1) / 2) * map.cell,
     y: (room.place.y + (minRow + maxRow + 1) / 2) * map.cell
   };
-}
-
-export function findRidgeBlockoutAnchorPoint(
-  geometry: Pick<RidgeBlockoutGeometry, 'anchorPoints'>,
-  selector: RidgeBlockoutAnchorSelector
-): RidgeBlockoutAnchorPoint | undefined {
-  return geometry.anchorPoints.find((point) =>
-    point.roomId === selector.roomId &&
-    (!selector.symbol || point.symbol === selector.symbol) &&
-    (!selector.kind || point.kind === selector.kind) &&
-    (!selector.attrId || point.attrs.id === selector.attrId)
-  );
-}
-
-export function getRidgeBlockoutSpawnPoint(map: RidgeBlockoutMap): RidgeBlockoutAnchorPoint {
-  const spawnRoom = findRidgeBlockoutRoom(map, map.spawn.roomId);
-  const spawnAnchor = spawnRoom?.anchors.find(
-    (anchor) => anchor.symbol === map.spawn.anchorSymbol
-  );
-  const point = spawnRoom && spawnAnchor
-    ? getRidgeBlockoutAnchorPoint(map, spawnRoom, spawnAnchor)
-    : undefined;
-
-  if (!point) {
-    throw new Error(
-      `Ridge blockout spawn anchor "${map.spawn.anchorSymbol}" in room "${map.spawn.roomId}" could not be resolved`
-    );
-  }
-
-  return point;
 }
 
 function deriveRoomBounds(map: RidgeBlockoutMap): readonly RidgeBlockoutRoomBounds[] {

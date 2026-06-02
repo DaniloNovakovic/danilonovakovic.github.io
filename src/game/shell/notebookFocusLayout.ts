@@ -1,6 +1,6 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 
-export const NOTEBOOK_STAGE_MAX_WIDTH = 1180;
+const NOTEBOOK_STAGE_MAX_WIDTH = 1180;
 export const NOTEBOOK_CONTROL_MAT_TOP_OFFSET_PX = 64;
 
 export interface NotebookFocusFrameLayout {

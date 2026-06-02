@@ -4,7 +4,7 @@ import {
 } from './autoAttack';
 import { STAMPEDE_PLAYER_SPEED } from './movement';
 
-export const STAMPEDE_UPGRADE_IDS = [
+const STAMPEDE_UPGRADE_IDS = [
   'quickPencil',
   'wideSwipe',
   'swiftGuardian'

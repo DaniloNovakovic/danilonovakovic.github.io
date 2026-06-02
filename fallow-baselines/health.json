@@ -150,11 +150,6 @@
         "count": 3
       }
     },
-    "src/game/scenes/ridge/runtime/ridgeBlockoutPresentation.ts": {
-      "crap_moderate": {
-        "count": 3
-      }
-    },
     "src/game/scenes/ridge/runtime/ridgeTraversalRuntime.ts": {
       "crap_moderate": {
         "count": 1
@@ -209,10 +204,7 @@
   },
   "runtime_coverage_findings": [],
   "target_keys": [
-    "src/game/scenes/ridge/blockout/sourceCompiler.ts:dead code",
-    "src/game/overlays/overlayIds.ts:dead code",
     "src/game/sceneLifecycle/SceneManager.ts:high impact",
-    "src/game/scenes/ridge/blockout/geometry.ts:dead code",
     "src/game/scenes/potassiumSlip/runtime/commandAdapter.ts:complexity",
     "src/game/scenes/overworld/runtime/overworld/overworldInteractionState.ts:complexity"
   ]

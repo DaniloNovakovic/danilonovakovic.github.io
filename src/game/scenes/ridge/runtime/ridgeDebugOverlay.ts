@@ -1,6 +1,4 @@
-import type * as Phaser from 'phaser';
 import {
-  renderRidgeDebugDrawCommands,
   type RidgeDebugDrawCommand
 } from '../debugDrawCommands';
 import type {
@@ -34,14 +32,6 @@ export interface RidgeDebugDrawCommandOptions {
   defaultInteractRadius?: number;
 }
 
-export type RidgeDebugOverlayFrame = RidgeDebugDrawCommandOptions;
-
-export interface RidgeDebugOverlay {
-  render(frame: RidgeDebugOverlayFrame): void;
-  destroy(): void;
-}
-
-const RIDGE_DEBUG_OVERLAY_DEPTH = 500;
 const DEFAULT_INTERACT_RADIUS = 72;
 
 export function createRidgeDebugDrawCommands(
@@ -159,20 +149,6 @@ export function createRidgeDebugDrawCommands(
   }
 
   return commands;
-}
-
-export function createRidgeDebugOverlay(scene: Phaser.Scene): RidgeDebugOverlay {
-  const graphics = scene.add.graphics().setDepth(RIDGE_DEBUG_OVERLAY_DEPTH);
-
-  return {
-    render(frame) {
-      const commands = createRidgeDebugDrawCommands(frame);
-      renderRidgeDebugDrawCommands(graphics, commands);
-    },
-    destroy() {
-      graphics.destroy();
-    }
-  };
 }
 
 function getEffectiveDebugSettings(settings: RidgeDevDebugSettings): RidgeDevDebugSettings {

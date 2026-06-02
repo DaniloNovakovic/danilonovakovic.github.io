@@ -15,8 +15,8 @@ export const STAMPEDE_ARENA = {
 } as const;
 
 export const STAMPEDE_PLAYER_SPEED = 210;
-export const STAMPEDE_STICK_DEAD_ZONE = 10;
-export const STAMPEDE_STICK_FULL_DISTANCE = 60;
+const STAMPEDE_STICK_DEAD_ZONE = 10;
+const STAMPEDE_STICK_FULL_DISTANCE = 60;
 
 export interface StampedeAxisInput {
   x: number;

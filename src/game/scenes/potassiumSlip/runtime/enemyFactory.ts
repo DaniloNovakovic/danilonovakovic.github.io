@@ -60,7 +60,7 @@ export interface PotassiumEnemySetupFacts {
 }
 
 export const POTASSIUM_NON_BOSS_ENEMY_SPEED = 54;
-export const POTASSIUM_SPLITTER_CHILD_SPEED = POTASSIUM_NON_BOSS_ENEMY_SPEED + 18;
+const POTASSIUM_SPLITTER_CHILD_SPEED = POTASSIUM_NON_BOSS_ENEMY_SPEED + 18;
 
 const ENEMY_CONFIGS: Record<PotassiumEnemyKind, PotassiumEnemyConfig> = {
   intern: {

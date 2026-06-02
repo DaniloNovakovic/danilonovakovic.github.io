@@ -1,4 +1,4 @@
-export const RIDGE_BLOCKOUT_RUNTIME_SYMBOLS = new Set([
+const RIDGE_BLOCKOUT_RUNTIME_SYMBOLS = new Set([
   '.',
   '#',
   '_',
@@ -18,7 +18,7 @@ export const RIDGE_BLOCKOUT_RUNTIME_SYMBOLS = new Set([
   '?'
 ]);
 
-export const RIDGE_BLOCKOUT_DESIGN_SYMBOLS = new Set(['=', '~', 'N', 'M']);
+const RIDGE_BLOCKOUT_DESIGN_SYMBOLS = new Set(['=', '~', 'N', 'M']);
 export const RIDGE_BLOCKOUT_LADDER_SYMBOL = 'L';
 
 export const RIDGE_BLOCKOUT_TRAVERSAL_MOVEMENTS = new Set([
@@ -292,7 +292,7 @@ export function parseRidgeBlockout(source: string): RidgeBlockoutMap {
   };
 }
 
-export function validateRidgeBlockout(map: RidgeBlockoutMap): readonly string[] {
+function validateRidgeBlockout(map: RidgeBlockoutMap): readonly string[] {
   const errors: string[] = [];
   const roomIds = new Set<string>();
 
@@ -392,7 +392,7 @@ export function findRidgeBlockoutAnchor(
   return room.anchors.find(predicate);
 }
 
-export function isRuntimeActiveRidgeBlockoutSymbol(symbol: string): boolean {
+function isRuntimeActiveRidgeBlockoutSymbol(symbol: string): boolean {
   return symbol !== '.' && RIDGE_BLOCKOUT_RUNTIME_SYMBOLS.has(symbol);
 }
 

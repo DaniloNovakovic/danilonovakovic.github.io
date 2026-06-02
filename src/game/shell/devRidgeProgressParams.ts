@@ -2,7 +2,7 @@ import { STAMPEDE_SKETCH_RIDGE_STAMP_ID } from '@/game/bridge/ridgeProgressIds';
 
 export const DEV_RIDGE_STAMP_QUERY_PARAM = 'devRidgeStamp';
 
-export const DEV_RIDGE_STAMP_IDS = [
+const DEV_RIDGE_STAMP_IDS = [
   STAMPEDE_SKETCH_RIDGE_STAMP_ID
 ] as const;
 

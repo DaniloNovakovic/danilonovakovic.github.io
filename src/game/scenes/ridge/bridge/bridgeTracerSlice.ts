@@ -50,8 +50,6 @@ export const BRIDGE_TRACER_WORLD = {
   }
 } as const;
 
-export const BRIDGE_TRACER_CAMERA_BOUNDS = BRIDGE_STAGE_SOURCE.cameraBounds;
-
 export const BRIDGE_TRACER_INTERACT_RADIUS = BRIDGE_STAGE_DEFAULT_INTERACT_RADIUS;
 
 export type BridgeTracerTargetId = 'cicka' | 'draftsperson' | 'concert-exit';

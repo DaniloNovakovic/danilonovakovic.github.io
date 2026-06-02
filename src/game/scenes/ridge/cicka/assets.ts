@@ -1,9 +1,9 @@
 import type * as Phaser from 'phaser';
 
 export const CICKA_TEXTURE_KEY = 'ridge-cicka';
-export const CICKA_ASSET_PATH = '/assets/ridge/cicka/cicka-spritesheet.png';
-export const CICKA_FRAME_WIDTH = 128;
-export const CICKA_FRAME_HEIGHT = 96;
+const CICKA_ASSET_PATH = '/assets/ridge/cicka/cicka-spritesheet.png';
+const CICKA_FRAME_WIDTH = 128;
+const CICKA_FRAME_HEIGHT = 96;
 export const CICKA_RUNTIME_SCALE = 0.58;
 export const CICKA_ORIGIN = { x: 0.5, y: 1 } as const;
 

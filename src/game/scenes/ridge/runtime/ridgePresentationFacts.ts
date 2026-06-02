@@ -18,16 +18,3 @@ export function requireRidgeBlockoutFactAnchor(
   }
   return point;
 }
-
-export function getRidgeBlockoutRoomCenter(
-  facts: Pick<RidgeBlockoutFacts, 'rooms'>,
-  roomId: string
-): { x: number; y: number } | undefined {
-  const room = facts.rooms.find((candidate) => candidate.id === roomId);
-  return room
-    ? {
-      x: room.bounds.x + room.bounds.width / 2,
-      y: room.bounds.y + room.bounds.height / 2
-    }
-    : undefined;
-}

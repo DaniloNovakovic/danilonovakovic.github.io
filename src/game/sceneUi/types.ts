@@ -1,15 +1,12 @@
 import type { SceneId } from '@/game/scenes/sceneIds';
 
-export const SCENE_UI_SURFACE_IDS = [
-  'stampedeStatus',
-  'stampedeStartPrompt',
-  'stampedeUpgradeDraft',
-  'stampedeResult',
-  'potassiumUpgradeChoices',
-  'potassiumTerminal'
-] as const;
-
-export type SceneUiSurfaceId = (typeof SCENE_UI_SURFACE_IDS)[number];
+export type SceneUiSurfaceId =
+  | 'stampedeStatus'
+  | 'stampedeStartPrompt'
+  | 'stampedeUpgradeDraft'
+  | 'stampedeResult'
+  | 'potassiumUpgradeChoices'
+  | 'potassiumTerminal';
 
 export type SceneUiActionId =
   | 'start'

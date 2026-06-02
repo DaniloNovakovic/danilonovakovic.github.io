@@ -30,13 +30,13 @@ export type HobbiesRoomInteractableTypeObject =
     };
 
 /** Proximity anchor Y for hobby stations and exit (player feet region). */
-export const HOBBIES_PROXIMITY_ANCHOR_Y = 450;
+const HOBBIES_PROXIMITY_ANCHOR_Y = 450;
 
 /** Exit door center X (left side of room — keeps center clear for five hobby stations). */
 export const HOBBIES_EXIT_X = 100;
 
 /** Shared prompt Y for all room interactables. */
-export const HOBBIES_INTERACT_PROMPT_Y = 350;
+const HOBBIES_INTERACT_PROMPT_Y = 350;
 
 /**
  * Hobby stations: sprite X aligns with interaction X.

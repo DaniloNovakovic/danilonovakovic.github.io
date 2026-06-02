@@ -1,6 +1,6 @@
 import type { RidgeBlockoutSource, RidgeTileRegistry } from '../sourceContract';
 
-export const FOLDED_DESK_RIDGE_TILE_REGISTRY = [
+const FOLDED_DESK_RIDGE_TILE_REGISTRY = [
   { symbol: '.', id: 0, kind: 'empty', label: 'empty air' },
   { symbol: '#', id: 1, kind: 'solid', label: 'solid ground or wall' },
   { symbol: '_', id: 2, kind: 'platform', label: 'paper platform' },
