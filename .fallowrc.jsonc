@@ -37,6 +37,14 @@
     "ignore": ["**/*.generated.ts"]
   },
 
+  // PR gate: only new findings in changed files fail CI (see docs/agents/fallow.md).
+  "audit": {
+    "gate": "new-only",
+    "deadCodeBaseline": "fallow-baselines/dead-code.json",
+    "healthBaseline": "fallow-baselines/health.json",
+    "dupesBaseline": "fallow-baselines/dupes.json"
+  },
+
   // Incremental adoption: enforce architecture, warn on cleanup debt.
   "rules": {
     "unused-files": "warn",
@@ -46,10 +54,11 @@
     "unused-dev-dependencies": "warn",
     "boundary-violation": "error",
     "circular-dependencies": "warn",
-    "re-export-cycle": "warn"
+    "re-export-cycle": "warn",
+    "stale-suppressions": "warn"
   },
 
-  // Match `.agents/rules/10-architecture.md`: core stays pure gameplay logic.
+  // Match `.agents/rules/10-architecture.md`: core stays pure; shared stays portable.
   "boundaries": {
     "zones": [
       { "name": "core", "patterns": ["src/game/core/**"] },
@@ -65,7 +74,8 @@
       { "name": "dev", "patterns": ["src/dev/**"] }
     ],
     "rules": [
-      { "from": "core", "allow": ["core", "shared"], "allowTypeOnly": ["shared"] }
+      { "from": "core", "allow": ["core", "shared"], "allowTypeOnly": ["shared"] },
+      { "from": "shared", "allow": ["shared"] }
     ]
   }
 }
