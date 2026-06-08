@@ -9,16 +9,28 @@ import { bridgeActions } from '@/game/bridge/store';
 import { reduceControlMatDragIndicator } from '@/shared/ui';
 import {
   resolvePortraitCoverHorizontalAxis,
-  shouldPortraitCoverDragActivate
+  shouldPortraitCoverPointerTravelActivate
 } from './portraitCoverTouchInput';
 
 interface UseGameTouchControlsOptions {
   isPaused: boolean;
 }
 
+interface DragStartSnapshot {
+  clientX: number;
+  clientY: number;
+  containerX: number;
+  containerY: number;
+}
+
 export function useGameTouchControls({ isPaused }: UseGameTouchControlsOptions) {
   const activePointerIdRef = useRef<number | null>(null);
-  const anchorRef = useRef({ x: 0, y: 0 });
+  const dragStartRef = useRef<DragStartSnapshot>({
+    clientX: 0,
+    clientY: 0,
+    containerX: 0,
+    containerY: 0
+  });
   const hasDraggedRef = useRef(false);
   const [dragIndicator, dispatchDragIndicator] = useReducer(reduceControlMatDragIndicator, null);
 
@@ -40,14 +52,6 @@ export function useGameTouchControls({ isPaused }: UseGameTouchControlsOptions) 
     }
   }, [isPaused, releasePointer]);
 
-  const readPoint = useCallback((event: PointerEvent<HTMLDivElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    return {
-      x: event.clientX - rect.left,
-      y: event.clientY - rect.top
-    };
-  }, []);
-
   const stopPointer = useCallback((event: PointerEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.stopPropagation();
@@ -63,30 +67,49 @@ export function useGameTouchControls({ isPaused }: UseGameTouchControlsOptions) 
 
   const onPointerDown = useCallback((event: PointerEvent<HTMLDivElement>) => {
     stopPointer(event);
-    if (isPaused) return;
+    if (isPaused || activePointerIdRef.current !== null) return;
 
-    const point = readPoint(event);
+    const rect = event.currentTarget.getBoundingClientRect();
+    const containerX = event.clientX - rect.left;
+    const containerY = event.clientY - rect.top;
+
+    dragStartRef.current = {
+      clientX: event.clientX,
+      clientY: event.clientY,
+      containerX,
+      containerY
+    };
     activePointerIdRef.current = event.pointerId;
-    anchorRef.current = point;
     hasDraggedRef.current = false;
     event.currentTarget.setPointerCapture(event.pointerId);
-    dispatchDragIndicator({ type: 'begin', point });
+    dispatchDragIndicator({
+      type: 'begin',
+      point: { x: containerX, y: containerY }
+    });
     clearMovement();
-  }, [clearMovement, isPaused, readPoint, stopPointer]);
+  }, [clearMovement, isPaused, stopPointer]);
 
   const onPointerMove = useCallback((event: PointerEvent<HTMLDivElement>) => {
     if (activePointerIdRef.current !== event.pointerId) return;
     stopPointer(event);
 
-    const point = readPoint(event);
-    const deltaX = point.x - anchorRef.current.x;
-    if (shouldPortraitCoverDragActivate(deltaX)) {
+    const start = dragStartRef.current;
+    const deltaX = event.clientX - start.clientX;
+    const deltaY = event.clientY - start.clientY;
+
+    if (shouldPortraitCoverPointerTravelActivate(deltaX, deltaY)) {
       hasDraggedRef.current = true;
     }
 
-    dispatchDragIndicator({ type: 'move', point });
+    dispatchDragIndicator({
+      type: 'move',
+      point: {
+        x: start.containerX + deltaX,
+        y: start.containerY + deltaY
+      }
+    });
     applyDrag(deltaX);
-  }, [applyDrag, readPoint, stopPointer]);
+  }, [applyDrag, stopPointer]);
 
   const onPointerUp = useCallback((event: PointerEvent<HTMLDivElement>) => {
     if (activePointerIdRef.current !== event.pointerId) return;

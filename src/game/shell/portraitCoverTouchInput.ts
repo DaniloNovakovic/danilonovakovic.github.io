@@ -17,3 +17,12 @@ export function shouldPortraitCoverDragActivate(
 ): boolean {
   return Math.abs(deltaX) > threshold;
 }
+
+export function shouldPortraitCoverPointerTravelActivate(
+  deltaX: number,
+  deltaY: number,
+  threshold = PORTRAIT_COVER_TAP_THRESHOLD_PX
+): boolean {
+  return shouldPortraitCoverDragActivate(deltaX, threshold)
+    || shouldPortraitCoverDragActivate(deltaY, threshold);
+}

@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   resolvePortraitCoverHorizontalAxis,
-  shouldPortraitCoverDragActivate
+  shouldPortraitCoverDragActivate,
+  shouldPortraitCoverPointerTravelActivate
 } from './portraitCoverTouchInput';
 
 describe('portraitCoverTouchInput', () => {
@@ -20,5 +21,11 @@ describe('portraitCoverTouchInput', () => {
     expect(shouldPortraitCoverDragActivate(10)).toBe(false);
     expect(shouldPortraitCoverDragActivate(16)).toBe(true);
     expect(shouldPortraitCoverDragActivate(-20)).toBe(true);
+  });
+
+  it('activates pointer travel when either axis crosses threshold', () => {
+    expect(shouldPortraitCoverPointerTravelActivate(10, 10)).toBe(false);
+    expect(shouldPortraitCoverPointerTravelActivate(16, 0)).toBe(true);
+    expect(shouldPortraitCoverPointerTravelActivate(0, 16)).toBe(true);
   });
 });
