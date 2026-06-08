@@ -1,4 +1,6 @@
 import type { RidgeBridgeBeatState } from '@/game/bridge/store';
+import type { BridgeStageCompositionSource } from '../bridge/stageComposition';
+import type { StageAuthoringSelection } from '../bridge/stageAuthoring';
 
 export interface RidgeDevTeleportRequest {
   sequence: number;
@@ -40,12 +42,28 @@ export interface RidgeDevDebugSettings {
   showTraversalAssists: boolean;
 }
 
+export interface RidgeDevAuthoringState {
+  active: boolean;
+  selection: StageAuthoringSelection | null;
+}
+
+export interface RidgeDevAuthoringDragRequest {
+  selection: StageAuthoringSelection;
+  worldX: number;
+  worldY: number;
+  offsetOnly: boolean;
+}
+
 export interface RidgeDevControls {
   resolveCameraZoom?: () => number | undefined;
+  resolveCompositionSource?: () => BridgeStageCompositionSource | undefined;
   resolveDebugSettings?: () => Partial<RidgeDevDebugSettings> | undefined;
+  resolveAuthoringState?: () => RidgeDevAuthoringState | undefined;
   consumeRouteBeatRequest?: () => RidgeDevRouteBeatRequest | null;
   consumeResetRequest?: () => RidgeDevResetRequest | null;
   consumeTeleportRequest?: () => RidgeDevTeleportRequest | null;
+  publishAuthoringPick?: (selection: StageAuthoringSelection) => void;
+  publishAuthoringDrag?: (request: RidgeDevAuthoringDragRequest) => void;
   publishPlayerSnapshot?: (snapshot: RidgeDevPlayerSnapshot) => void;
 }
 

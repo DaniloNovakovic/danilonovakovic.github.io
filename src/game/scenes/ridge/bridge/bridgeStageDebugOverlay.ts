@@ -5,8 +5,10 @@ import {
 } from '../debugDrawCommands';
 import type { RidgeDevDebugSettings } from '../runtime/ridgeDevControls';
 import type { BridgeTracerInteractionTarget } from './bridgeTracerSlice';
+import { areStageAuthoringSelectionsEqual, type StageAuthoringSelection } from './stageAuthoring';
 import {
   BRIDGE_STAGE_SOURCE,
+  resolveBridgeStageObjectPlacement,
   resolveBridgeStageSpot,
   sampleBridgeWalkRail,
   type BridgeStageCompositionSource
@@ -27,6 +29,10 @@ export type BridgeStageDebugDrawCommand = RidgeDebugDrawCommand;
 
 export interface BridgeStageDebugDrawCommandOptions {
   source?: BridgeStageCompositionSource;
+  authoring?: {
+    active: boolean;
+    selection: StageAuthoringSelection | null;
+  };
   interactionTargets: readonly BridgeTracerInteractionTarget[];
   player?: BridgeStageDebugOverlayPlayer;
   railProgress?: number;
@@ -49,7 +55,8 @@ export function createBridgeStageDebugDrawCommands(
   const source = options.source ?? BRIDGE_STAGE_SOURCE;
   const commands: BridgeStageDebugDrawCommand[] = [];
   const enabled = getEffectiveDebugSettings(options.settings);
-  if (!isAnyDebugSettingEnabled(enabled)) return commands;
+  const showAuthoringMarkers = options.authoring?.active === true;
+  if (!isAnyDebugSettingEnabled(enabled) && !showAuthoringMarkers) return commands;
 
   if (enabled.graybox) {
     commands.push({
@@ -83,7 +90,9 @@ export function createBridgeStageDebugDrawCommands(
     });
   }
 
-  if (enabled.showTraversalAssists) {
+  const showTraversal = enabled.showTraversalAssists || showAuthoringMarkers;
+
+  if (showTraversal) {
     const points = source.primaryWalkRail.points;
     for (let index = 0; index < points.length - 1; index += 1) {
       const from = points[index];
@@ -100,21 +109,69 @@ export function createBridgeStageDebugDrawCommands(
       });
     }
 
+    if (showAuthoringMarkers) {
+      points.forEach((point, index) => {
+        const selected = areStageAuthoringSelectionsEqual(options.authoring?.selection, {
+          kind: 'rail-point',
+          index
+        });
+        commands.push({
+          kind: 'circle',
+          id: `authoring-rail-point:${index}`,
+          x: point.x,
+          y: point.y,
+          radius: selected ? 12 : 8,
+          fillColor: 0x7aa0d8,
+          fillAlpha: selected ? 0.42 : 0.24,
+          strokeColor: 0x1a1a1a,
+          strokeAlpha: selected ? 1 : 0.78,
+          lineWidth: selected ? 3 : 2
+        });
+      });
+    }
+
     source.spots.forEach((spot) => {
       const resolved = resolveBridgeStageSpot(source, spot.id);
+      const selected = areStageAuthoringSelectionsEqual(options.authoring?.selection, {
+        kind: 'spot',
+        id: spot.id
+      });
       commands.push({
         kind: 'circle',
         id: `stage-spot:${spot.id}`,
         x: resolved.x,
         y: resolved.y,
-        radius: 10,
+        radius: selected ? 12 : 10,
         fillColor: 0xf0d35f,
-        fillAlpha: 0.22,
+        fillAlpha: selected ? 0.36 : 0.22,
         strokeColor: 0x1a1a1a,
-        strokeAlpha: 0.78,
-        lineWidth: 2
+        strokeAlpha: selected ? 1 : 0.78,
+        lineWidth: selected ? 3 : 2
       });
     });
+
+    if (showAuthoringMarkers) {
+      source.objects.forEach((object) => {
+        const placement = resolveBridgeStageObjectPlacement(source, object.id);
+        const selected = areStageAuthoringSelectionsEqual(options.authoring?.selection, {
+          kind: 'object',
+          id: object.id
+        });
+        commands.push({
+          kind: 'rect',
+          id: `authoring-object:${object.id}`,
+          x: placement.contactPoint.x,
+          y: placement.contactPoint.y,
+          width: selected ? 20 : 16,
+          height: selected ? 20 : 16,
+          fillColor: 0x8ec7a7,
+          fillAlpha: selected ? 0.42 : 0.24,
+          strokeColor: 0x1a1a1a,
+          strokeAlpha: selected ? 1 : 0.78,
+          lineWidth: selected ? 3 : 2
+        });
+      });
+    }
 
     if (options.railProgress !== undefined) {
       const sample = sampleBridgeWalkRail(source.primaryWalkRail, options.railProgress);
@@ -226,3 +283,4 @@ function isAnyDebugSettingEnabled(settings: RidgeDevDebugSettings): boolean {
     settings.showInteractZones ||
     settings.showTraversalAssists;
 }
+

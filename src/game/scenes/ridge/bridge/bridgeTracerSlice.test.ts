@@ -98,4 +98,20 @@ describe('Bridge Tracer Slice route targets', () => {
       prompt: draftspersonSpot.prompt
     });
   });
+
+  it('resolves interaction anchors from an authored composition source', () => {
+    const draft = structuredClone(BRIDGE_STAGE_SOURCE) as typeof BRIDGE_STAGE_SOURCE;
+    const draftsperson = draft.spots.find((spot) => spot.id === 'draftsperson');
+    if (draftsperson) {
+      draftsperson.offset = { x: 42, y: -18 };
+    }
+
+    const targets = createBridgeTracerInteractionTargets(route('intro'), draft);
+    const draftspersonSpot = resolveBridgeStageSpot(draft, 'draftsperson');
+
+    expect(targets[1]).toMatchObject({
+      x: draftspersonSpot.x,
+      distanceAnchorY: draftspersonSpot.y
+    });
+  });
 });

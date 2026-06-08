@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
+import { resolveRidgePreviewStatus } from './resolveRidgePreviewStatus';
 import Game from '@/game/shell/Game';
 import { bridgeActions, useBridgeState } from '@/game/bridge/store';
 import { OverlayHost } from '@/game/overlays/OverlayHost';
@@ -12,12 +13,14 @@ function ignorePreviewSceneClose(): void {}
 export type RidgePreviewInputOwner = 'game' | 'panel';
 
 export function RidgeRuntimePreview({
+  authoringActive = false,
   inputOwner,
   isActive,
   onClaimGameInput,
   previewZoom,
   ridgeDevControls
 }: {
+  authoringActive?: boolean;
   inputOwner: RidgePreviewInputOwner;
   isActive: boolean;
   onClaimGameInput: () => void;
@@ -26,22 +29,25 @@ export function RidgeRuntimePreview({
 }) {
   const bridge = useBridgeState();
   const previewRef = useRef<HTMLElement | null>(null);
-  const isInputPaused =
-    !isActive || bridge.isPaused || bridge.loadingSceneId !== null || inputOwner === 'panel';
-  const inputStatusLabel = !isActive
-    ? 'Debugger inactive'
-    : inputOwner === 'panel'
-      ? 'Panel focus'
-      : bridge.isPaused || bridge.loadingSceneId !== null
-        ? 'Runtime paused'
-        : 'Game input';
-  const pauseReason = !isActive
-    ? 'Debugger inactive'
-    : inputOwner === 'panel'
-      ? 'Panel focus'
-      : 'Runtime paused';
-  const showPausedOverlay =
-    isActive && isInputPaused && bridge.loadingSceneId === null && bridge.activeOverlayId === null;
+  const previewStatus = useMemo(
+    () => resolveRidgePreviewStatus({
+      activeOverlayId: bridge.activeOverlayId,
+      authoringActive,
+      inputOwner,
+      isActive,
+      isPaused: bridge.isPaused,
+      loadingSceneId: bridge.loadingSceneId
+    }),
+    [
+      authoringActive,
+      bridge.activeOverlayId,
+      bridge.isPaused,
+      bridge.loadingSceneId,
+      inputOwner,
+      isActive
+    ]
+  );
+  const { inputStatusLabel, isInputPaused, pauseReason, showPausedOverlay } = previewStatus;
   const presentationMode = getPhaserScenePresentationMode(bridge.activeSceneId);
   const isRidgeSceneActive = bridge.activeSceneId === RIDGE_SCENE_ID;
 
@@ -84,6 +90,7 @@ export function RidgeRuntimePreview({
       aria-hidden={!isActive}
       className={[
         'relative h-full min-h-0 min-w-0 overflow-hidden border-4 border-[#1a1a1a] bg-[#fbfbf9] shadow-[7px_7px_0_rgba(26,26,26,1)]',
+        authoringActive ? 'cursor-grab active:cursor-grabbing' : '',
         isActive ? '' : 'invisible pointer-events-none'
       ].join(' ')}
       data-testid="ridge-runtime-preview"

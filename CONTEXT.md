@@ -43,6 +43,30 @@ Ridge Stage Composition Source. It is not the legacy Ridge Blockout Viewer or a
 final art map editor.
 _Avoid_: Ridge Blockout Viewer, final art editor, generic map editor
 
+**Stage Authoring Draft**:
+Ephemeral in-debugger adjustments to Ridge Stage Composition Source spatial
+data. A draft updates the live preview immediately, shows copyable typed-source
+snippets for review, and is applied to git only when Danilo or an agent pastes
+the change into the Ridge Stage Composition Source. It is not a second persisted
+editor format or runtime data store.
+_Avoid_: map editor save file, localStorage canonical source, auto-patched source file
+
+**Stage Authoring Mode**:
+An explicit Ridge Stage Debugger state for spatial tweaking. While active, player
+movement is frozen, all source-backed Walk Rail points, Stage Spots, and Stage
+Object contact markers are shown regardless of route-beat visibility, preview
+clicks select draft targets, and the sidebar exposes nudge controls plus
+copyable typed-source replacement snippets. Outside this mode, the debugger
+keeps its normal live-preview QA behavior.
+_Avoid_: always-on pick mode, modifier-only pick mode, beat-filtered edit targets, separate map editor app
+
+**Stage Authoring Camera**:
+The preview camera behavior used during Stage Authoring Mode. It stops following
+the frozen player, scrolls to center the selected spatial target when selection
+changes, and allows free panning across the authored stage canvas so distant
+rail points, spots, and objects remain easy to inspect.
+_Avoid_: player-follow camera, locked-on-target camera with no pan, separate editor viewport
+
 **Grid Cell**:
 A configurable unit in the typed Ridge Blockout Source that converts text-grid positions into world-space pixels.
 _Avoid_: hard-coded tile size, permanent pixel size

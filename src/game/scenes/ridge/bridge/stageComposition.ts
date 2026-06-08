@@ -635,6 +635,34 @@ export function resolveBridgeStageObjectPlacement<ObjectId extends BridgeStageOb
   } as ResolvedBridgeStageObjectPlacement<ObjectId>;
 }
 
+/** Stable placement fingerprint for live authoring sync without object-identity compares. */
+export function getStageCompositionPlacementSignature(
+  source: BridgeStageCompositionSource
+): string {
+  const rail = source.primaryWalkRail.points
+    .map((point) => `${point.x},${point.y}`)
+    .join(';');
+  const spots = source.spots
+    .map((spot) => `${spot.id}:${spot.railProgress},${spot.offset?.x ?? 0},${spot.offset?.y ?? 0}`)
+    .join(';');
+  const objects = source.objects
+    .map((object) => `${object.id}:${object.offset?.x ?? 0},${object.offset?.y ?? 0}`)
+    .join(';');
+  return `${rail}|${spots}|${objects}`;
+}
+
+/** Fingerprint for procedural bridge deck geometry only. */
+export function getBridgeCrossingPlacementSignature(
+  source: BridgeStageCompositionSource
+): string {
+  const bridgeObject = resolveBridgeStageObject(source, 'completed-bridge');
+  if (bridgeObject.kind !== 'procedural-bridge') return '';
+  const left = resolveBridgeStageSpot(source, bridgeObject.leftSpotId);
+  const right = resolveBridgeStageSpot(source, bridgeObject.rightSpotId);
+  const center = resolveBridgeStageSpot(source, bridgeObject.spotId);
+  return `${left.x},${left.y}|${right.x},${right.y}|${center.y}|${bridgeObject.deckInset}`;
+}
+
 /** Resolve visual-only draw order for a rail-relative Stage Contact Point. */
 export function resolveBridgeRailRelativeStageDepth(
   railPoint: BridgeRailSample,

@@ -7,6 +7,8 @@ import {
   type PlayerStepResult
 } from '../../core/player/PlayerController';
 import type { ResumeSnapshot } from '../../sceneLifecycle/types';
+import { bindSideViewKeyboard } from '../input/sceneKeyboard';
+import type { SceneInputKeys } from '../input/readSceneInputCommands';
 import { readPlayerSceneStep } from '../input/scenePlayerInput';
 import { setSceneKeyboardPaused } from '../sceneKeyboardPause';
 import {
@@ -79,21 +81,6 @@ const DEFAULT_TEXTURE_KEY = 'player_idle';
 const WALK_BOB_PERIOD_MS = 100;
 const WALK_BOB_ANGLE_DEGREES = 5;
 
-function noOpKey(): Phaser.Input.Keyboard.Key {
-  return { isDown: false } as Phaser.Input.Keyboard.Key;
-}
-
-function noOpCursors(): Phaser.Types.Input.Keyboard.CursorKeys {
-  return {
-    left: noOpKey(),
-    right: noOpKey(),
-    up: noOpKey(),
-    shift: noOpKey(),
-    down: noOpKey(),
-    space: noOpKey()
-  } as Phaser.Types.Input.Keyboard.CursorKeys;
-}
-
 function resolveStartPosition(options: SideViewPlayerRuntimeOptions): ResumeSnapshot {
   const raw = options.resumePosition ?? options.start;
   if (!options.resumeClamp) return raw;
@@ -110,16 +97,7 @@ class PhaserSideViewPlayerRuntime implements SideViewPlayerRuntime {
 
   private readonly options: SideViewPlayerRuntimeOptions;
   private readonly inputFrame = createInputCommandFrame();
-  private readonly cursors: Phaser.Types.Input.Keyboard.CursorKeys;
-  private readonly wasd: {
-    a: Phaser.Input.Keyboard.Key;
-    d: Phaser.Input.Keyboard.Key;
-    w: Phaser.Input.Keyboard.Key;
-    s: Phaser.Input.Keyboard.Key;
-  };
-  private readonly interactKey: Phaser.Input.Keyboard.Key;
-  private readonly hKey: Phaser.Input.Keyboard.Key;
-  private readonly escapeKey?: Phaser.Input.Keyboard.Key;
+  private readonly inputKeys: SceneInputKeys;
   private isPaused = false;
   private hasGlassesSprite: boolean | null = null;
 
@@ -140,19 +118,9 @@ class PhaserSideViewPlayerRuntime implements SideViewPlayerRuntime {
     this.controller.mount(this.player);
     this.cameraRuntime = createPlayerCameraRuntime(options, this.player);
 
-    const keyboard = scene.input.keyboard;
-    this.cursors = keyboard?.createCursorKeys() ?? noOpCursors();
-    this.wasd = {
-      a: keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.A) ?? noOpKey(),
-      d: keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.D) ?? noOpKey(),
-      w: keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.W) ?? noOpKey(),
-      s: keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.S) ?? noOpKey()
-    };
-    this.interactKey = keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.E) ?? noOpKey();
-    this.hKey = keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.H) ?? noOpKey();
-    this.escapeKey = options.input.includeEscapeKey
-      ? keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.ESC) ?? noOpKey()
-      : undefined;
+    this.inputKeys = bindSideViewKeyboard(scene.input.keyboard, {
+      includeEscapeKey: options.input.includeEscapeKey
+    });
   }
 
   setPaused(paused: boolean): void {
@@ -180,11 +148,7 @@ class PhaserSideViewPlayerRuntime implements SideViewPlayerRuntime {
     const { commands, step } = readPlayerSceneStep({
       frame: this.inputFrame,
       controller: this.controller,
-      cursors: this.cursors,
-      wasd: this.wasd,
-      interactKey: this.interactKey,
-      hKey: this.hKey,
-      escapeKey: this.escapeKey,
+      ...this.inputKeys,
       allowJump: this.options.input.allowJump,
       allowSprint: this.options.input.allowSprint
     });

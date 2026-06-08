@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { BRIDGE_TEXTURE_KEYS } from './assets';
 import {
   BRIDGE_STAGE_SOURCE,
+  getBridgeCrossingPlacementSignature,
   getBridgeWalkRailLength,
   getNearestBridgeStageSpotId,
+  getStageCompositionPlacementSignature,
   projectPointToBridgeWalkRail,
   resolveBridgeRailRelativeStageDepth,
   resolveBridgeStageObject,
@@ -12,6 +14,7 @@ import {
   resolveBridgeStageSpot,
   sampleBridgeWalkRail
 } from './stageComposition';
+import { updateStageAuthoringDraft } from './stageAuthoring';
 
 describe('Bridge Stage Composition Source', () => {
   it('samples the Primary Walk Rail and interpolates Rail Perspective Cues', () => {
@@ -180,5 +183,20 @@ describe('Bridge Stage Composition Source', () => {
     expect(projected.progress).toBeCloseTo(0.48, 1);
     expect(getNearestBridgeStageSpotId(BRIDGE_STAGE_SOURCE, projected.progress)).toBe('draftsperson');
     expect(getBridgeWalkRailLength(BRIDGE_STAGE_SOURCE.primaryWalkRail)).toBeGreaterThan(2000);
+  });
+
+  it('tracks spot offset edits in placement signatures without touching bridge crossing', () => {
+    const baseline = getStageCompositionPlacementSignature(BRIDGE_STAGE_SOURCE);
+    const draft = updateStageAuthoringDraft(
+      BRIDGE_STAGE_SOURCE,
+      { kind: 'spot', id: 'draftsperson' },
+      'offset.y',
+      -12
+    );
+
+    expect(getStageCompositionPlacementSignature(draft)).not.toBe(baseline);
+    expect(getBridgeCrossingPlacementSignature(draft)).toBe(
+      getBridgeCrossingPlacementSignature(BRIDGE_STAGE_SOURCE)
+    );
   });
 });

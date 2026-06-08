@@ -27,7 +27,7 @@ export function createRidgeSceneContext(
       onOpenOverlay: options.onOpenOverlay,
       isPaused: false,
       resumePosition: options.getResumePosition(),
-      ridgeDevControls: import.meta.env.DEV ? options.getDevControls?.() : undefined
+      getRidgeDevControls: import.meta.env.DEV ? options.getDevControls : undefined
     })
   };
 }

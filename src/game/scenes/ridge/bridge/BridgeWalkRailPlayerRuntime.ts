@@ -16,7 +16,9 @@ import {
   createSideViewCameraRuntime,
   type SideViewCameraRuntime
 } from '@/game/sharedSceneRuntime/camera/sideViewCameraRuntime';
+import { bindSideViewKeyboard } from '@/game/sharedSceneRuntime/input/sceneKeyboard';
 import { readSceneInputCommands } from '@/game/sharedSceneRuntime/input/readSceneInputCommands';
+import type { SceneInputKeys } from '@/game/sharedSceneRuntime/input/readSceneInputCommands';
 import { setSceneKeyboardPaused } from '@/game/sharedSceneRuntime/sceneKeyboardPause';
 import type { ResumeSnapshot } from '@/game/sceneLifecycle/types';
 import {
@@ -62,6 +64,8 @@ export interface BridgeWalkRailPlayerRuntime {
   readonly player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   readonly cameraRuntime?: SideViewCameraRuntime;
   setPaused(paused: boolean): void;
+  setAuthoringFrozen(frozen: boolean): void;
+  setCompositionSource(source: BridgeStageCompositionSource): void;
   setProgressRange(range: BridgeWalkRailProgressRange): void;
   captureResume(): ResumeSnapshot | null;
   getRailSnapshot(): BridgeWalkRailPlayerSnapshot;
@@ -82,21 +86,6 @@ const GLASSES_TEXTURE_KEY = 'player_glasses';
 const WALK_BOB_PERIOD_MS = 100;
 const WALK_BOB_ANGLE_DEGREES = 5;
 
-function noOpKey(): Phaser.Input.Keyboard.Key {
-  return { isDown: false } as Phaser.Input.Keyboard.Key;
-}
-
-function noOpCursors(): Phaser.Types.Input.Keyboard.CursorKeys {
-  return {
-    left: noOpKey(),
-    right: noOpKey(),
-    up: noOpKey(),
-    shift: noOpKey(),
-    down: noOpKey(),
-    space: noOpKey()
-  } as Phaser.Types.Input.Keyboard.CursorKeys;
-}
-
 export function createBridgeWalkRailPlayerRuntime(
   options: BridgeWalkRailPlayerRuntimeOptions
 ): BridgeWalkRailPlayerRuntime {
@@ -108,23 +97,15 @@ class PhaserBridgeWalkRailPlayerRuntime implements BridgeWalkRailPlayerRuntime {
   readonly cameraRuntime?: SideViewCameraRuntime;
 
   private readonly scene: Phaser.Scene;
-  private readonly source: BridgeStageCompositionSource;
+  private source: BridgeStageCompositionSource;
+  private railLength: number;
   private readonly commands = createInputCommandFrame();
-  private readonly cursors: Phaser.Types.Input.Keyboard.CursorKeys;
-  private readonly wasd: {
-    a: Phaser.Input.Keyboard.Key;
-    d: Phaser.Input.Keyboard.Key;
-    w: Phaser.Input.Keyboard.Key;
-    s: Phaser.Input.Keyboard.Key;
-  };
-  private readonly interactKey: Phaser.Input.Keyboard.Key;
-  private readonly hKey: Phaser.Input.Keyboard.Key;
-  private readonly escapeKey: Phaser.Input.Keyboard.Key;
-  private readonly railLength: number;
+  private readonly inputKeys: SceneInputKeys;
   private progressRange: BridgeWalkRailProgressRange = { min: 0, max: 1 };
   private progress: number;
   private facingLeft = false;
   private isPaused = false;
+  private authoringFrozen = false;
   private hasGlassesSprite: boolean | null = null;
   private lastSample: BridgeRailSample;
 
@@ -149,17 +130,7 @@ class PhaserBridgeWalkRailPlayerRuntime implements BridgeWalkRailPlayerRuntime {
     this.player.body.setImmovable(true);
     this.applySample(this.lastSample);
 
-    const keyboard = this.scene.input.keyboard;
-    this.cursors = keyboard?.createCursorKeys() ?? noOpCursors();
-    this.wasd = {
-      a: keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.A) ?? noOpKey(),
-      d: keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.D) ?? noOpKey(),
-      w: keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.W) ?? noOpKey(),
-      s: keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.S) ?? noOpKey()
-    };
-    this.interactKey = keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.E) ?? noOpKey();
-    this.hKey = keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.H) ?? noOpKey();
-    this.escapeKey = keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.ESC) ?? noOpKey();
+    this.inputKeys = bindSideViewKeyboard(this.scene.input.keyboard, { includeEscapeKey: true });
 
     this.cameraRuntime = createSideViewCameraRuntime({
       scene: this.scene,
@@ -185,6 +156,20 @@ class PhaserBridgeWalkRailPlayerRuntime implements BridgeWalkRailPlayerRuntime {
         this.player.setVelocityY(0);
       }
     });
+  }
+
+  setAuthoringFrozen(frozen: boolean): void {
+    this.authoringFrozen = frozen;
+    if (frozen) {
+      this.player.setVelocity(0, 0);
+    }
+  }
+
+  setCompositionSource(source: BridgeStageCompositionSource): void {
+    this.source = source;
+    this.railLength = getBridgeWalkRailLength(this.source.primaryWalkRail);
+    this.applySample(sampleBridgeWalkRail(this.source.primaryWalkRail, this.progress));
+    this.cameraRuntime?.refresh();
   }
 
   setProgressRange(range: BridgeWalkRailProgressRange): void {
@@ -223,18 +208,14 @@ class PhaserBridgeWalkRailPlayerRuntime implements BridgeWalkRailPlayerRuntime {
 
   update(deltaMs: number = 16.67): BridgeWalkRailPlayerRuntimeUpdate {
     this.syncAppearance();
-    if (this.isPaused) {
+    if (this.isPaused || this.authoringFrozen) {
       this.player.setVelocity(0, 0);
       return { paused: true };
     }
 
     const commands = readSceneInputCommands({
       frame: this.commands,
-      cursors: this.cursors,
-      wasd: this.wasd,
-      interactKey: this.interactKey,
-      hKey: this.hKey,
-      escapeKey: this.escapeKey,
+      ...this.inputKeys,
       touch: getTouchState(),
       oneShots: bridgeActions.consumeTouchOneShots(),
       allowJump: false,

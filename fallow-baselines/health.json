@@ -14,11 +14,16 @@
       }
     },
     "src/dev/ridgeStageDebugger/RidgeRuntimePreview.tsx": {
-      "complexity_moderate": {
+      "complexity_high": {
         "count": 1
       }
     },
     "src/dev/ridgeStageDebugger/RidgeStageDebugger.tsx": {
+      "crap_high": {
+        "count": 1
+      }
+    },
+    "src/dev/ridgeStageDebugger/hooks/useStageAuthoring.ts": {
       "crap_high": {
         "count": 1
       }
@@ -90,12 +95,23 @@
         "count": 1
       }
     },
-    "src/game/scenes/ridge/bridge/BridgeWalkRailPlayerRuntime.ts": {
-      "crap_moderate": {
+    "src/game/scenes/ridge/bridge/bridgeStageDebugOverlay.ts": {
+      "complexity_moderate": {
+        "count": 1
+      }
+    },
+    "src/game/scenes/ridge/bridge/stageAuthoring.ts": {
+      "complexity_high": {
+        "count": 1
+      },
+      "crap_high": {
         "count": 1
       }
     },
     "src/game/scenes/ridge/runtime/RidgeScene.ts": {
+      "crap_high": {
+        "count": 2
+      },
       "crap_moderate": {
         "count": 3
       }
@@ -115,11 +131,6 @@
     },
     "src/game/sharedSceneRuntime/input/readSceneInputCommands.ts": {
       "complexity_moderate": {
-        "count": 1
-      }
-    },
-    "src/game/sharedSceneRuntime/player/SideViewPlayerRuntime.ts": {
-      "crap_high": {
         "count": 1
       }
     },

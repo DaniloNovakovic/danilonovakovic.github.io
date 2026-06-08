@@ -1,5 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
-import type { ReactNode } from 'react';
+import { useCallback, useMemo, useState, type ReactNode } from 'react';
 import {
   Bug,
   Crosshair,
@@ -32,7 +31,9 @@ import {
 import { IconButton } from './components/IconButton';
 import { Detail } from './components/Detail';
 import { PREVIEW_ZOOM_OPTIONS } from './constants';
+import { AuthoringPanel } from './components/AuthoringPanel';
 import { useRidgePreviewControls } from './hooks/useRidgePreviewControls';
+import { useStageAuthoring } from './hooks/useStageAuthoring';
 
 const BRIDGE_BEAT_OPTIONS = [
   { id: 'intro', label: 'Intro' },
@@ -61,6 +62,7 @@ export default function RidgeStageDebugger() {
   const bridge = useBridgeState();
   const [previewInputOwner, setPreviewInputOwner] = useState<RidgePreviewInputOwner>('game');
   const previewControls = useRidgePreviewControls();
+  const authoring = useStageAuthoring();
   const claimPanelInput = useCallback(() => setPreviewInputOwner('panel'), []);
   const claimGameInput = useCallback(() => setPreviewInputOwner('game'), []);
   const routeState = bridge.progress.ridge.firstPlayableRoute;
@@ -73,6 +75,29 @@ export default function RidgeStageDebugger() {
     resolvedSpots.forEach((spot) => next.set(spot.id, spot));
     return next;
   }, [resolvedSpots]);
+
+  const ridgeDevControls = useMemo(() => ({
+    ...previewControls.ridgeDevControls,
+    resolveCompositionSource: authoring.resolveCompositionSource,
+    resolveAuthoringState: () => ({
+      active: authoring.active,
+      selection: authoring.selection
+    }),
+    publishAuthoringPick: authoring.handlePick,
+    publishAuthoringDrag: authoring.handleDrag,
+    resolveDebugSettings: () => ({
+      ...previewControls.debugSettings,
+      showTraversalAssists: previewControls.debugSettings.showTraversalAssists || authoring.active
+    })
+  }), [
+    authoring.active,
+    authoring.handleDrag,
+    authoring.handlePick,
+    authoring.resolveCompositionSource,
+    authoring.selection,
+    previewControls.debugSettings,
+    previewControls.ridgeDevControls
+  ]);
 
   return (
     <div className="h-[100dvh] max-h-[100dvh] overflow-hidden bg-[#f4f1ea] text-[#1a1a1a]">
@@ -101,11 +126,12 @@ export default function RidgeStageDebugger() {
         <main className="grid min-h-0 min-w-0 grid-rows-[minmax(0,1fr)_minmax(260px,38dvh)] gap-2 lg:grid-cols-[minmax(0,1fr)_340px] lg:grid-rows-none">
           <div className="relative h-full min-h-0 min-w-0">
             <RidgeRuntimePreview
+              authoringActive={authoring.active}
               inputOwner={previewInputOwner}
               isActive
               onClaimGameInput={claimGameInput}
               previewZoom={previewControls.previewZoom}
-              ridgeDevControls={previewControls.ridgeDevControls}
+              ridgeDevControls={ridgeDevControls}
             />
           </div>
 
@@ -114,6 +140,23 @@ export default function RidgeStageDebugger() {
             onFocusCapture={claimPanelInput}
             onPointerDownCapture={claimPanelInput}
           >
+            <AuthoringPanel
+              active={authoring.active}
+              fields={authoring.fields}
+              isDirty={authoring.isDirty}
+              onDiscardDraft={authoring.discardDraft}
+              onResetSelection={authoring.resetSelectionDraft}
+              onSelectTarget={authoring.handlePick}
+              onToggleActive={(nextActive) => {
+                authoring.setAuthoringActive(nextActive);
+                if (nextActive) claimGameInput();
+              }}
+              onUpdateField={authoring.updateField}
+              selection={authoring.selection}
+              selectionLabel={authoring.selectionLabel}
+              snippet={authoring.snippet}
+              targetOptions={authoring.targetOptions}
+            />
             <StageSourcePanel spotCount={resolvedSpots.length} />
             <PreviewPanel
               lastCommandLabel={previewControls.lastCommandLabel}

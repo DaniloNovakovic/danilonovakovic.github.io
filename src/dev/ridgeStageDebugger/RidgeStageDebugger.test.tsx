@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { bridgeActions, bridgeStore } from '@/game/bridge/store';
@@ -146,6 +146,51 @@ describe('RidgeStageDebugger', () => {
       bridgeBeat: 'concert_handoff',
       label: 'concert_handoff'
     });
+  });
+
+  it('exposes Stage Authoring controls and draft source wiring', async () => {
+    render(<RidgeStageDebugger />);
+
+    expect(screen.getByLabelText('Stage Authoring Mode')).toHaveProperty('checked', false);
+    expect(lastRidgeDevControls?.resolveAuthoringState?.()).toEqual({
+      active: false,
+      selection: null
+    });
+    expect(lastRidgeDevControls?.resolveCompositionSource?.()).toBeUndefined();
+
+    await userEvent.click(screen.getByLabelText('Stage Authoring Mode'));
+
+    expect(screen.getByLabelText('Stage Authoring Mode')).toHaveProperty('checked', true);
+    expect(lastRidgeDevControls?.resolveAuthoringState?.()).toEqual({
+      active: true,
+      selection: null
+    });
+    expect(lastRidgeDevControls?.resolveCompositionSource?.()?.id).toBe('bridge');
+    expect(lastRidgeDevControls?.resolveDebugSettings?.()).toMatchObject({
+      showTraversalAssists: true
+    });
+  });
+
+  it('updates the authoring draft and snippet from sidebar field edits', async () => {
+    render(<RidgeStageDebugger />);
+
+    await userEvent.click(screen.getByLabelText('Stage Authoring Mode'));
+    await userEvent.selectOptions(
+      screen.getByLabelText('Authoring target'),
+      'Spot draftsperson'
+    );
+
+    expect(screen.getByText('Stage Spot draftsperson')).not.toBeNull();
+
+    const offsetYInput = screen.getByLabelText('offset.y');
+    fireEvent.change(offsetYInput, { target: { value: '-6' } });
+
+    expect(lastRidgeDevControls?.resolveCompositionSource?.()?.spots.find((spot) => spot.id === 'draftsperson')?.offset)
+      .toEqual({ x: 0, y: -6 });
+    expect(screen.getByLabelText('Copyable Ridge Stage Source replacement snippet').textContent)
+      .toContain("id: 'draftsperson'");
+    expect(screen.getByLabelText('Copyable Ridge Stage Source replacement snippet').textContent)
+      .toContain('offset: { x: 0, y: -6 }');
   });
 
   it('renders the latest rail snapshot and copyable source snippet', () => {
