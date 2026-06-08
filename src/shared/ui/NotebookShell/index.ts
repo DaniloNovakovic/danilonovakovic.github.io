@@ -4,9 +4,13 @@ export {
 export {
   ControlMatDragIndicator
 } from './chrome/ControlMatDragIndicator';
+export {
+  reduceControlMatDragIndicator
+} from './chrome/controlMatDragIndicatorState';
 export type {
+  ControlMatDragIndicatorAction,
   ControlMatDragIndicatorState
-} from './chrome/ControlMatDragIndicator';
+} from './chrome/controlMatDragIndicatorState';
 export {
   NotebookHeaderChrome
 } from './chrome/NotebookHeaderChrome';

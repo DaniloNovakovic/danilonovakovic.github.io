@@ -8,6 +8,7 @@ export { ModalShell } from './ModalShell';
 export {
   ControlMat,
   ControlMatDragIndicator,
+  reduceControlMatDragIndicator,
   NotebookMenuSheet,
   NotebookHeaderChrome,
   NotebookPageFrame,
@@ -21,6 +22,7 @@ export {
   SceneStatusSlip
 } from './NotebookShell';
 export type {
+  ControlMatDragIndicatorAction,
   ControlMatDragIndicatorState,
   NotebookChoiceTone,
   NotebookFooterMode,

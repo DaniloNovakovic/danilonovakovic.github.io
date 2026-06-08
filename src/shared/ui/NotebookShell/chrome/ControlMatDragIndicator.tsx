@@ -1,12 +1,8 @@
 import type { HTMLAttributes } from 'react';
 import { cn } from '../../utils';
+import type { ControlMatDragIndicatorState } from './controlMatDragIndicatorState';
 
-export interface ControlMatDragIndicatorState {
-  anchorX: number;
-  anchorY: number;
-  currentX: number;
-  currentY: number;
-}
+export type { ControlMatDragIndicatorState } from './controlMatDragIndicatorState';
 
 interface ControlMatDragIndicatorProps extends HTMLAttributes<HTMLDivElement> {
   maxDistance?: number;

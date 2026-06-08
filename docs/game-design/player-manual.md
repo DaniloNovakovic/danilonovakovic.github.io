@@ -21,9 +21,9 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
 
 ### Mobile / Touch
 
-- **Move:** swipe left or right on the game area.
-- **Jump:** swipe up.
+- **Move:** drag left or right anywhere on the game area. A small drag indicator appears under your finger while moving.
 - **Interact:** tap the game area.
+- **Jump:** desktop only (up arrow). Not mapped on mobile touch.
 
 ## Overworld
 
