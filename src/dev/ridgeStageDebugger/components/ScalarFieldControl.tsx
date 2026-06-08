@@ -1,6 +1,8 @@
 import { useId } from 'react';
 
 export function ScalarFieldControl({
+  inputMax,
+  inputMin,
   label,
   max,
   min,
@@ -8,6 +10,8 @@ export function ScalarFieldControl({
   step = 1,
   value
 }: {
+  inputMax?: number;
+  inputMin?: number;
   label: string;
   max: number;
   min: number;
@@ -15,6 +19,8 @@ export function ScalarFieldControl({
   step?: number;
   value: number;
 }) {
+  const numberMin = inputMin ?? min;
+  const numberMax = inputMax ?? max;
   const inputId = useId();
 
   return (
@@ -26,16 +32,18 @@ export function ScalarFieldControl({
         <div className="flex items-center gap-1">
           <StepButton
             ariaLabel={`Decrease ${label}`}
-            onClick={() => onChange(value - step)}
+            onClick={() => onChange(clamp(value - step, numberMin, numberMax))}
           >
             -
           </StepButton>
           <input
             className="h-8 w-20 border-2 border-[#1a1a1a] bg-[#fbfbf9] px-2 text-right font-mono text-xs font-black"
             id={inputId}
+            max={numberMax}
+            min={numberMin}
             onChange={(event) => {
               const next = Number(event.target.value);
-              if (Number.isFinite(next)) onChange(next);
+              if (Number.isFinite(next)) onChange(clamp(next, numberMin, numberMax));
             }}
             step={step}
             type="number"
@@ -43,7 +51,7 @@ export function ScalarFieldControl({
           />
           <StepButton
             ariaLabel={`Increase ${label}`}
-            onClick={() => onChange(value + step)}
+            onClick={() => onChange(clamp(value + step, numberMin, numberMax))}
           >
             +
           </StepButton>

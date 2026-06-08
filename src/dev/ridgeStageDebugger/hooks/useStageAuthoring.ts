@@ -4,10 +4,14 @@ import {
   resolveBridgeStageObject,
   type BridgeStageCompositionSource
 } from '@/game/scenes/ridge/bridge/stageComposition';
+import type { RidgeDevAuthoringDragRequest } from '@/game/scenes/ridge/runtime/ridgeDevControls';
 import {
+  applyStageAuthoringDrag,
+  clampStageAuthoringOffset,
   cloneBridgeStageCompositionSource,
   formatStageAuthoringSnippet,
   resetStageAuthoringSelection,
+  STAGE_AUTHORING_OFFSET_LIMIT_PX,
   STAGE_AUTHORING_OFFSET_SLIDER_WINDOW_PX,
   updateStageAuthoringDraft,
   type StageAuthoringSelection
@@ -20,6 +24,8 @@ export interface StageAuthoringTargetOption {
 
 export interface StageAuthoringField {
   field: string;
+  inputMax: number;
+  inputMin: number;
   label: string;
   max: number;
   min: number;
@@ -35,6 +41,18 @@ export function useStageAuthoring() {
 
   const handlePick = useCallback((nextSelection: StageAuthoringSelection) => {
     setSelection(nextSelection);
+  }, []);
+
+  const handleDrag = useCallback((request: RidgeDevAuthoringDragRequest) => {
+    setDraftSource((current) => applyStageAuthoringDrag(
+      current,
+      request.selection,
+      request.worldX,
+      request.worldY,
+      { offsetOnly: request.offsetOnly }
+    ));
+    setSelection(request.selection);
+    setIsDirty(true);
   }, []);
 
   const setAuthoringActive = useCallback((nextActive: boolean) => {
@@ -93,6 +111,7 @@ export function useStageAuthoring() {
     discardDraft,
     draftSource,
     fields,
+    handleDrag,
     handlePick,
     isDirty,
     resetSelectionDraft,
@@ -135,82 +154,71 @@ function getAuthoringFields(
       const point = source.primaryWalkRail.points[selection.index];
       if (!point) return [];
       return [
-        {
-          field: 'x',
-          label: 'x',
-          min: source.canvas.x,
-          max: source.canvas.x + source.canvas.width,
-          step: 1,
-          value: Math.round(point.x)
-        },
-        {
-          field: 'y',
-          label: 'y',
-          min: source.canvas.y,
-          max: source.canvas.y + source.canvas.height,
-          step: 1,
-          value: Math.round(point.y)
-        }
+        createWorldAxisField('x', Math.round(point.x), source.canvas.x, source.canvas.width),
+        createWorldAxisField('y', Math.round(point.y), source.canvas.y, source.canvas.height)
       ];
     }
     case 'spot': {
       const spot = source.spots.find((candidate) => candidate.id === selection.id);
       if (!spot) return [];
-      const offsetX = spot.offset?.x ?? 0;
-      const offsetY = spot.offset?.y ?? 0;
       return [
         {
           field: 'railProgress',
           label: 'railProgress',
+          inputMin: 0,
+          inputMax: 1,
           min: 0,
           max: 1,
           step: 0.001,
           value: spot.railProgress
         },
-        {
-          field: 'offset.x',
-          label: 'offset.x',
-          min: offsetX - STAGE_AUTHORING_OFFSET_SLIDER_WINDOW_PX,
-          max: offsetX + STAGE_AUTHORING_OFFSET_SLIDER_WINDOW_PX,
-          step: 1,
-          value: Math.round(offsetX)
-        },
-        {
-          field: 'offset.y',
-          label: 'offset.y',
-          min: offsetY - STAGE_AUTHORING_OFFSET_SLIDER_WINDOW_PX,
-          max: offsetY + STAGE_AUTHORING_OFFSET_SLIDER_WINDOW_PX,
-          step: 1,
-          value: Math.round(offsetY)
-        }
+        createOffsetField('offset.x', spot.offset?.x ?? 0),
+        createOffsetField('offset.y', spot.offset?.y ?? 0)
       ];
     }
     case 'object': {
       const object = resolveBridgeStageObject(source, selection.id);
-      const offsetX = object.offset?.x ?? 0;
-      const offsetY = object.offset?.y ?? 0;
       return [
-        {
-          field: 'offset.x',
-          label: 'offset.x',
-          min: offsetX - STAGE_AUTHORING_OFFSET_SLIDER_WINDOW_PX,
-          max: offsetX + STAGE_AUTHORING_OFFSET_SLIDER_WINDOW_PX,
-          step: 1,
-          value: Math.round(offsetX)
-        },
-        {
-          field: 'offset.y',
-          label: 'offset.y',
-          min: offsetY - STAGE_AUTHORING_OFFSET_SLIDER_WINDOW_PX,
-          max: offsetY + STAGE_AUTHORING_OFFSET_SLIDER_WINDOW_PX,
-          step: 1,
-          value: Math.round(offsetY)
-        }
+        createOffsetField('offset.x', object.offset?.x ?? 0),
+        createOffsetField('offset.y', object.offset?.y ?? 0)
       ];
     }
     default:
       return [];
   }
+}
+
+function createWorldAxisField(
+  label: 'x' | 'y',
+  value: number,
+  origin: number,
+  span: number
+): StageAuthoringField {
+  return {
+    field: label,
+    label,
+    inputMin: origin,
+    inputMax: origin + span,
+    min: origin,
+    max: origin + span,
+    step: 1,
+    value
+  };
+}
+
+function createOffsetField(field: 'offset.x' | 'offset.y', rawValue: number): StageAuthoringField {
+  const value = clampStageAuthoringOffset(rawValue);
+  const halfWindow = STAGE_AUTHORING_OFFSET_SLIDER_WINDOW_PX;
+  return {
+    field,
+    label: field,
+    inputMin: -STAGE_AUTHORING_OFFSET_LIMIT_PX,
+    inputMax: STAGE_AUTHORING_OFFSET_LIMIT_PX,
+    min: -halfWindow,
+    max: halfWindow,
+    step: 1,
+    value
+  };
 }
 
 function formatSelectionLabel(selection: StageAuthoringSelection): string {

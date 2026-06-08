@@ -47,6 +47,13 @@ export interface RidgeDevAuthoringState {
   selection: StageAuthoringSelection | null;
 }
 
+export interface RidgeDevAuthoringDragRequest {
+  selection: StageAuthoringSelection;
+  worldX: number;
+  worldY: number;
+  offsetOnly: boolean;
+}
+
 export interface RidgeDevControls {
   resolveCameraZoom?: () => number | undefined;
   resolveCompositionSource?: () => BridgeStageCompositionSource | undefined;
@@ -56,6 +63,7 @@ export interface RidgeDevControls {
   consumeResetRequest?: () => RidgeDevResetRequest | null;
   consumeTeleportRequest?: () => RidgeDevTeleportRequest | null;
   publishAuthoringPick?: (selection: StageAuthoringSelection) => void;
+  publishAuthoringDrag?: (request: RidgeDevAuthoringDragRequest) => void;
   publishPlayerSnapshot?: (snapshot: RidgeDevPlayerSnapshot) => void;
 }
 

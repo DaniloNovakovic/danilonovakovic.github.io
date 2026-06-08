@@ -81,7 +81,6 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
   private cickaSprite?: Phaser.GameObjects.Sprite;
   private cickaShadow?: Phaser.GameObjects.Ellipse;
   private toyCar?: Phaser.GameObjects.Image;
-  private toyCarHalo?: Phaser.GameObjects.Graphics;
   private toyCarShadow?: Phaser.GameObjects.Ellipse;
   private bridgeBuilder?: Phaser.GameObjects.Image;
   private handoffNote?: Phaser.GameObjects.Text;
@@ -277,7 +276,6 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
 
   private createCickaPlaySpot(): void {
     const cickaPlaySpot = this.resolveCickaPlacement('cicka-play');
-    this.addReadabilityPocket(cickaPlaySpot.x + 34, cickaPlaySpot.y - 34, 176, 86, 14);
     this.cickaShadow = this.scene.add.ellipse(
       cickaPlaySpot.x,
       cickaPlaySpot.y - 2,
@@ -300,14 +298,12 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
   }
 
   private createBridgeDraftsperson(): void {
-    const draftsperson = resolveBridgeStageSpot(this.source, 'draftsperson');
     const builderPlacement = resolveBridgeStageObjectPlacement(
       this.source,
       'bridge-draftsperson'
     );
     const builderObject = builderPlacement.object;
 
-    this.addReadabilityPocket(draftsperson.x, draftsperson.y - 80, 104, 176, 22);
     this.bridgeBuilder = this.addBridgeImage(builderObject.textureKey, builderPlacement.x, builderPlacement.y, {
       depth: builderPlacement.depth,
       scale: builderObject.scale
@@ -482,7 +478,6 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
   private createToyCar(): Phaser.GameObjects.Image {
     const toyCarPlacement = resolveBridgeStageObjectPlacement(this.source, 'toy-car');
     const toyCarObject = toyCarPlacement.object;
-    this.toyCarHalo = this.addReadabilityPocket(toyCarPlacement.x, toyCarPlacement.y - 18, 98, 56, 23);
     this.toyCarShadow = this.addGroundContactShadow(
       toyCarPlacement.x,
       toyCarPlacement.y + 2,
@@ -505,7 +500,6 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
   }
 
   private syncToyCarSupport(x: number, y: number, visible: boolean): void {
-    this.toyCarHalo?.setVisible(visible).setPosition(x, y - 18);
     this.toyCarShadow?.setVisible(visible).setPosition(x, y + 4);
   }
 
@@ -625,26 +619,6 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
   ): Phaser.GameObjects.Ellipse {
     return this.scene.add.ellipse(x, y + 2, width, height, 0x1f1f1d, 0.1)
       .setDepth(depth);
-  }
-
-  private addReadabilityPocket(
-    x: number,
-    y: number,
-    width: number,
-    height: number,
-    depth: number
-  ): Phaser.GameObjects.Graphics {
-    const pocket = this.scene.add.graphics().setDepth(depth);
-    pocket.setPosition(x, y);
-    pocket.fillStyle(0xf7f1df, 0.9);
-    pocket.lineStyle(2, 0xffffff, 0.72);
-    pocket.fillEllipse(0, 0, width, height);
-    pocket.strokeEllipse(0, 0, width + 8, height + 8);
-
-    pocket.lineStyle(1, 0x1f1f1d, 0.12);
-    pocket.strokeEllipse(3, -2, width * 0.96, height * 0.9);
-    pocket.lineBetween(-width * 0.32, height * 0.24, width * 0.32, height * 0.18);
-    return pocket;
   }
 
   private asVisible<GameObject extends VisibleGameObject>(gameObject: GameObject): GameObject {

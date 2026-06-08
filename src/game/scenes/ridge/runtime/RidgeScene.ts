@@ -23,6 +23,7 @@ import {
   resolveRidgeDevDebugSettings,
   resolveRidgeDevCameraZoom,
   resolveRidgeDevTeleportPosition,
+  type RidgeDevAuthoringState,
   type RidgeDevControls
 } from './ridgeDevControls';
 import {
@@ -45,7 +46,14 @@ import {
   createBridgeStageDebugOverlay,
   type BridgeStageDebugOverlay
 } from '../bridge/bridgeStageDebugOverlay';
-import { hitTestStageAuthoringTargets } from '../bridge/stageAuthoring';
+import {
+  hitTestStageAuthoringTargets,
+  isWorldPointInsideCameraView,
+  resolveStageAuthoringTargetPoint,
+  serializeStageAuthoringSelection,
+  STAGE_AUTHORING_DRAG_THRESHOLD_PX,
+  type StageAuthoringSelection
+} from '../bridge/stageAuthoring';
 import {
   BRIDGE_STAGE_SOURCE,
   resolveBridgeStagePresentation,
@@ -71,13 +79,33 @@ export class RidgeScene extends Phaser.Scene {
   private bridgeDebugOverlay?: BridgeStageDebugOverlay;
   private interactionRuntime?: InteriorInteractionRuntime<BridgeTracerTargetId, BridgeTracerEffect>;
   private bridgeInteractionTargets: BridgeTracerInteractionTarget[] = [];
-  private playerReadabilityHalo?: Phaser.GameObjects.Graphics;
   private onClose: () => void = () => {};
   private isPaused = false;
   private resumePosition?: { x: number; y: number };
   private ridgeDevControls?: RidgeDevControls;
   private getRidgeDevControls?: () => RidgeDevControls | undefined;
   private authoringPointerBound = false;
+  private lastAuthoringActive = false;
+  private lastAuthoringSelectionKey: string | null = null;
+  private authoringPointer: {
+    mode: 'idle' | 'pan' | 'drag-marker' | 'pending';
+    moved: boolean;
+    offsetOnly: boolean;
+    selection: StageAuthoringSelection | null;
+    startScrollX: number;
+    startScrollY: number;
+    startX: number;
+    startY: number;
+  } = {
+    mode: 'idle',
+    moved: false,
+    offsetOnly: false,
+    selection: null,
+    startScrollX: 0,
+    startScrollY: 0,
+    startX: 0,
+    startY: 0
+  };
   private ridgeSpawnPosition = { ...BRIDGE_TRACER_WORLD.spawn };
   private lastCameraZoom = RIDGE_DEFAULT_CAMERA_ZOOM;
   private lastCompositionSource: BridgeStageCompositionSource = BRIDGE_STAGE_SOURCE;
@@ -154,7 +182,6 @@ export class RidgeScene extends Phaser.Scene {
     this.applyDevControls();
 
     const playerUpdate = this.playerRuntime?.update(delta);
-    this.syncPlayerReadabilityHalo();
     if (!playerUpdate || playerUpdate.paused) {
       this.syncDevRuntimeState();
       return;
@@ -204,29 +231,6 @@ export class RidgeScene extends Phaser.Scene {
     this.player = playerRuntime.player;
     this.bridgePresentation = resolveBridgeStagePresentation(this.routeState.bridgeBeat);
     playerRuntime.setProgressRange(this.bridgePresentation.playerProgressRange);
-    this.createPlayerReadabilityHalo();
-  }
-
-  private createPlayerReadabilityHalo(): void {
-    this.playerReadabilityHalo?.destroy();
-    const halo = this.add.graphics().setDepth(29);
-    halo.fillStyle(0xf7f1df, 0.92);
-    halo.lineStyle(2, 0xffffff, 0.78);
-    halo.fillEllipse(0, 0, 58, 78);
-    halo.strokeEllipse(0, 0, 66, 86);
-    halo.lineStyle(1, 0x1f1f1d, 0.14);
-    halo.strokeEllipse(3, -2, 54, 72);
-    halo.lineBetween(-16, 24, 18, 20);
-    this.playerReadabilityHalo = halo;
-    this.syncPlayerReadabilityHalo();
-  }
-
-  private syncPlayerReadabilityHalo(): void {
-    if (!this.player || !this.playerReadabilityHalo) return;
-    this.playerReadabilityHalo
-      .setPosition(this.player.x, this.player.y - 34)
-      .setScale(Math.abs(this.player.scaleX))
-      .setDepth(this.player.depth - 1);
   }
 
   private createBridgeInteractions(): void {
@@ -329,29 +333,142 @@ export class RidgeScene extends Phaser.Scene {
     }
     this.syncBridgeRouteState();
     this.createBridgeInteractions();
-    this.syncPlayerReadabilityHalo();
   }
 
   private movePlayerForDev(position: { x: number; y: number }): void {
     this.playerRuntime?.moveToWorldPosition(position);
-    this.syncPlayerReadabilityHalo();
   }
 
   private bindDevAuthoringPointer(): void {
     if (!import.meta.env.DEV || this.authoringPointerBound) return;
 
     this.authoringPointerBound = true;
+
+    const resetAuthoringPointer = (): void => {
+      this.authoringPointer = {
+        mode: 'idle',
+        moved: false,
+        offsetOnly: false,
+        selection: null,
+        startScrollX: 0,
+        startScrollY: 0,
+        startX: 0,
+        startY: 0
+      };
+    };
+
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       const ridgeDevControls = this.resolveRidgeDevControls();
       const authoring = ridgeDevControls?.resolveAuthoringState?.();
       if (!authoring?.active) return;
 
       const source = this.resolveCompositionSource();
-      const selection = hitTestStageAuthoringTargets(source, pointer.worldX, pointer.worldY);
-      if (selection) {
-        ridgeDevControls?.publishAuthoringPick?.(selection);
+      const hit = hitTestStageAuthoringTargets(source, pointer.worldX, pointer.worldY);
+      const camera = this.cameras.main;
+
+      this.authoringPointer = {
+        mode: hit ? 'pending' : 'pan',
+        moved: false,
+        offsetOnly: pointer.event.shiftKey,
+        selection: hit,
+        startScrollX: camera.scrollX,
+        startScrollY: camera.scrollY,
+        startX: pointer.x,
+        startY: pointer.y
+      };
+    });
+
+    this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+      if (this.authoringPointer.mode === 'idle') return;
+
+      const ridgeDevControls = this.resolveRidgeDevControls();
+      const authoring = ridgeDevControls?.resolveAuthoringState?.();
+      if (!authoring?.active) {
+        resetAuthoringPointer();
+        return;
+      }
+
+      const distance = Math.hypot(
+        pointer.x - this.authoringPointer.startX,
+        pointer.y - this.authoringPointer.startY
+      );
+
+      if (
+        this.authoringPointer.mode === 'pending' &&
+        distance >= STAGE_AUTHORING_DRAG_THRESHOLD_PX
+      ) {
+        this.authoringPointer.mode = 'drag-marker';
+        if (this.authoringPointer.selection) {
+          ridgeDevControls?.publishAuthoringPick?.(this.authoringPointer.selection);
+        }
+      }
+
+      const camera = this.cameras.main;
+
+      if (this.authoringPointer.mode === 'pan') {
+        this.authoringPointer.moved = true;
+        camera.scrollX = this.authoringPointer.startScrollX -
+          ((pointer.x - this.authoringPointer.startX) / camera.zoom);
+        camera.scrollY = this.authoringPointer.startScrollY -
+          ((pointer.y - this.authoringPointer.startY) / camera.zoom);
+        return;
+      }
+
+      if (this.authoringPointer.mode === 'drag-marker' && this.authoringPointer.selection) {
+        this.authoringPointer.moved = true;
+        ridgeDevControls?.publishAuthoringDrag?.({
+          selection: this.authoringPointer.selection,
+          worldX: pointer.worldX,
+          worldY: pointer.worldY,
+          offsetOnly: this.authoringPointer.offsetOnly
+        });
       }
     });
+
+    this.input.on('pointerup', () => {
+      const ridgeDevControls = this.resolveRidgeDevControls();
+      const { mode, moved, selection } = this.authoringPointer;
+
+      if (mode === 'pending' && selection && !moved) {
+        ridgeDevControls?.publishAuthoringPick?.(selection);
+      }
+
+      resetAuthoringPointer();
+    });
+  }
+
+  private syncAuthoringCamera(
+    authoring: RidgeDevAuthoringState | undefined,
+    source: BridgeStageCompositionSource
+  ): void {
+    const camera = this.cameras.main;
+    const active = authoring?.active ?? false;
+
+    if (active && !this.lastAuthoringActive) {
+      camera.stopFollow();
+    }
+
+    if (!active && this.lastAuthoringActive && this.player) {
+      camera.startFollow(this.player, true, 0.08, 0.08);
+      this.playerRuntime?.cameraRuntime?.refresh();
+      this.lastAuthoringSelectionKey = null;
+    }
+
+    this.lastAuthoringActive = active;
+    if (!active) return;
+    if (!authoring?.selection) {
+      this.lastAuthoringSelectionKey = null;
+      return;
+    }
+
+    const selectionKey = serializeStageAuthoringSelection(authoring.selection);
+    if (!selectionKey || selectionKey === this.lastAuthoringSelectionKey) return;
+
+    const target = resolveStageAuthoringTargetPoint(source, authoring.selection);
+    if (!isWorldPointInsideCameraView(camera.worldView, target)) {
+      camera.centerOn(target.x, target.y);
+    }
+    this.lastAuthoringSelectionKey = selectionKey;
   }
 
   private resolveCompositionSource(): BridgeStageCompositionSource {
@@ -374,6 +491,9 @@ export class RidgeScene extends Phaser.Scene {
 
     const authoring = ridgeDevControls.resolveAuthoringState?.();
     this.playerRuntime?.setAuthoringFrozen(authoring?.active ?? false);
+
+    const compositionSource = this.resolveCompositionSource();
+    this.syncAuthoringCamera(authoring, compositionSource);
 
     const railSnapshot = this.playerRuntime?.getRailSnapshot();
     const body = this.player.body

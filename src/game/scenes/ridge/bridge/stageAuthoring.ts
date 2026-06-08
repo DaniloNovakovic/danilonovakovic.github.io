@@ -1,10 +1,13 @@
 import {
   BRIDGE_STAGE_SOURCE,
+  projectPointToBridgeWalkRail,
   resolveBridgeStageObjectPlacement,
   resolveBridgeStageSpot,
+  sampleBridgeWalkRail,
   type BridgeStageCompositionSource,
   type BridgeStageObject,
   type BridgeStageObjectId,
+  type BridgeStagePoint,
   type BridgeStageSpot,
   type BridgeStageSpotId,
   type BridgeWalkRailPoint
@@ -16,6 +19,16 @@ export type StageAuthoringSelection =
   | { kind: 'object'; id: BridgeStageObjectId };
 
 export const STAGE_AUTHORING_OFFSET_SLIDER_WINDOW_PX = 200;
+export const STAGE_AUTHORING_OFFSET_LIMIT_PX = 500;
+
+export function clampStageAuthoringOffset(value: number): number {
+  return Math.min(
+    STAGE_AUTHORING_OFFSET_LIMIT_PX,
+    Math.max(-STAGE_AUTHORING_OFFSET_LIMIT_PX, Math.round(value))
+  );
+}
+export const STAGE_AUTHORING_DRAG_THRESHOLD_PX = 5;
+export const STAGE_AUTHORING_CAMERA_FOCUS_MARGIN_PX = 48;
 const RAIL_POINT_PICK_RADIUS_PX = 14;
 const SPOT_PICK_RADIUS_PX = 12;
 const OBJECT_PICK_HALF_SIZE_PX = 8;
@@ -70,6 +83,114 @@ export function hitTestStageAuthoringTargets(
   });
 
   return bestSelection;
+}
+
+export function serializeStageAuthoringSelection(
+  selection: StageAuthoringSelection | null
+): string | null {
+  if (!selection) return null;
+  switch (selection.kind) {
+    case 'rail-point':
+      return `rail-point:${selection.index}`;
+    case 'spot':
+      return `spot:${selection.id}`;
+    case 'object':
+      return `object:${selection.id}`;
+    default:
+      return assertNever(selection);
+  }
+}
+
+export function resolveStageAuthoringTargetPoint(
+  source: BridgeStageCompositionSource,
+  selection: StageAuthoringSelection
+): BridgeStagePoint {
+  switch (selection.kind) {
+    case 'rail-point': {
+      const point = source.primaryWalkRail.points[selection.index];
+      if (!point) return { x: 0, y: 0 };
+      return { x: point.x, y: point.y };
+    }
+    case 'spot':
+      return resolveBridgeStageSpot(source, selection.id);
+    case 'object':
+      return resolveBridgeStageObjectPlacement(source, selection.id).contactPoint;
+    default:
+      return assertNever(selection);
+  }
+}
+
+export function isWorldPointInsideCameraView(
+  view: { x: number; y: number; right: number; bottom: number },
+  point: BridgeStagePoint,
+  margin: number = STAGE_AUTHORING_CAMERA_FOCUS_MARGIN_PX
+): boolean {
+  return point.x >= view.x + margin &&
+    point.x <= view.right - margin &&
+    point.y >= view.y + margin &&
+    point.y <= view.bottom - margin;
+}
+
+export interface ApplyStageAuthoringDragOptions {
+  offsetOnly?: boolean;
+}
+
+export function applyStageAuthoringDrag(
+  draft: BridgeStageCompositionSource,
+  selection: StageAuthoringSelection,
+  worldX: number,
+  worldY: number,
+  options: ApplyStageAuthoringDragOptions = {}
+): BridgeStageCompositionSource {
+  const next = cloneBridgeStageCompositionSource(draft);
+  const roundedX = Math.round(worldX);
+  const roundedY = Math.round(worldY);
+
+  switch (selection.kind) {
+    case 'rail-point': {
+      const point = next.primaryWalkRail.points[selection.index];
+      if (!point) return next;
+      point.x = roundedX;
+      point.y = roundedY;
+      return next;
+    }
+    case 'spot': {
+      const spot = next.spots.find((candidate) => candidate.id === selection.id);
+      if (!spot) return next;
+      if (options.offsetOnly) {
+        const railPoint = sampleBridgeWalkRail(next.primaryWalkRail, spot.railProgress);
+        spot.offset = {
+          x: clampStageAuthoringOffset(roundedX - railPoint.x),
+          y: clampStageAuthoringOffset(roundedY - railPoint.y)
+        };
+        return next;
+      }
+      const projected = projectPointToBridgeWalkRail(next.primaryWalkRail, {
+        x: roundedX,
+        y: roundedY
+      });
+      spot.railProgress = projected.progress;
+      spot.offset = {
+        x: clampStageAuthoringOffset(roundedX - projected.x),
+        y: clampStageAuthoringOffset(roundedY - projected.y)
+      };
+      return next;
+    }
+    case 'object': {
+      const object = next.objects.find((candidate) => candidate.id === selection.id);
+      if (!object) return next;
+      const spot = resolveBridgeStageSpot(next, object.spotId);
+      const anchorX = object.depthAnchorOffset?.x ?? 0;
+      const anchorY = object.depthAnchorOffset?.y ?? 0;
+      object.offset = {
+        x: clampStageAuthoringOffset(roundedX - spot.x - anchorX),
+        y: clampStageAuthoringOffset(roundedY - spot.y - anchorY)
+      };
+      return next;
+    }
+    default:
+      return assertNever(selection);
+  }
 }
 
 export function formatStageAuthoringSnippet(
@@ -163,7 +284,7 @@ export function updateStageAuthoringDraft(
         spot.offset = {
           x: spot.offset?.x ?? 0,
           y: spot.offset?.y ?? 0,
-          [axis]: value
+          [axis]: clampStageAuthoringOffset(value)
         };
         return next;
       }
@@ -177,7 +298,7 @@ export function updateStageAuthoringDraft(
         object.offset = {
           x: object.offset?.x ?? 0,
           y: object.offset?.y ?? 0,
-          [axis]: value
+          [axis]: clampStageAuthoringOffset(value)
         };
       }
       return next;

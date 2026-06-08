@@ -84,12 +84,14 @@ export default function RidgeStageDebugger() {
       selection: authoring.selection
     }),
     publishAuthoringPick: authoring.handlePick,
+    publishAuthoringDrag: authoring.handleDrag,
     resolveDebugSettings: () => ({
       ...previewControls.debugSettings,
       showTraversalAssists: previewControls.debugSettings.showTraversalAssists || authoring.active
     })
   }), [
     authoring.active,
+    authoring.handleDrag,
     authoring.handlePick,
     authoring.resolveCompositionSource,
     authoring.selection,

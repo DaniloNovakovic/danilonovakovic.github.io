@@ -97,6 +97,7 @@ export function RidgeRuntimePreview({
       aria-hidden={!isActive}
       className={[
         'relative h-full min-h-0 min-w-0 overflow-hidden border-4 border-[#1a1a1a] bg-[#fbfbf9] shadow-[7px_7px_0_rgba(26,26,26,1)]',
+        authoringActive ? 'cursor-grab active:cursor-grabbing' : '',
         isActive ? '' : 'invisible pointer-events-none'
       ].join(' ')}
       data-testid="ridge-runtime-preview"

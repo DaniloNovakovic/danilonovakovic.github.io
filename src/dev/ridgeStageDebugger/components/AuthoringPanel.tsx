@@ -54,7 +54,7 @@ export function AuthoringPanel({
 
       <p className="mt-3 text-xs font-black uppercase tracking-wider text-[#5a554f]">
         {active
-          ? 'Pick a target below or click markers in the preview.'
+          ? 'Drag empty space to pan. Drag markers to move. Shift+drag a spot for offset-only nudges.'
           : 'Turn on Authoring Mode to select and nudge source-backed markers.'}
       </p>
 
@@ -93,6 +93,8 @@ export function AuthoringPanel({
               {fields.map((field) => (
                 <ScalarFieldControl
                   key={field.field}
+                  inputMax={field.inputMax}
+                  inputMin={field.inputMin}
                   label={field.label}
                   max={field.max}
                   min={field.min}

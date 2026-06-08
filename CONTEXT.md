@@ -60,6 +60,13 @@ copyable typed-source replacement snippets. Outside this mode, the debugger
 keeps its normal live-preview QA behavior.
 _Avoid_: always-on pick mode, modifier-only pick mode, beat-filtered edit targets, separate map editor app
 
+**Stage Authoring Camera**:
+The preview camera behavior used during Stage Authoring Mode. It stops following
+the frozen player, scrolls to center the selected spatial target when selection
+changes, and allows free panning across the authored stage canvas so distant
+rail points, spots, and objects remain easy to inspect.
+_Avoid_: player-follow camera, locked-on-target camera with no pan, separate editor viewport
+
 **Grid Cell**:
 A configurable unit in the typed Ridge Blockout Source that converts text-grid positions into world-space pixels.
 _Avoid_: hard-coded tile size, permanent pixel size
