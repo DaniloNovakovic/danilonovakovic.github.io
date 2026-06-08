@@ -7,7 +7,7 @@ import {
   type PlayerStepResult
 } from '../../core/player/PlayerController';
 import type { ResumeSnapshot } from '../../sceneLifecycle/types';
-import { bindSideViewKeyboard } from '../input/noOpKeyboard';
+import { bindSideViewKeyboard } from '../input/sceneKeyboard';
 import type { SceneInputKeys } from '../input/readSceneInputCommands';
 import { readPlayerSceneStep } from '../input/scenePlayerInput';
 import { setSceneKeyboardPaused } from '../sceneKeyboardPause';

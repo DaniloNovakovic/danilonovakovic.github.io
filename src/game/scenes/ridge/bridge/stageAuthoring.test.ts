@@ -5,14 +5,19 @@ import {
   sampleBridgeWalkRail
 } from './stageComposition';
 import {
+  advanceStageAuthoringPointer,
   applyStageAuthoringDrag,
+  areStageAuthoringSelectionsEqual,
+  beginStageAuthoringPointer,
   clampStageAuthoringOffset,
   cloneBridgeStageCompositionSource,
+  finishStageAuthoringPointer,
   formatStageAuthoringSnippet,
   hitTestStageAuthoringTargets,
   isWorldPointInsideCameraView,
   resetStageAuthoringSelection,
   STAGE_AUTHORING_OFFSET_LIMIT_PX,
+  STAGE_AUTHORING_DRAG_THRESHOLD_PX,
   updateStageAuthoringDraft
 } from './stageAuthoring';
 
@@ -123,5 +128,63 @@ describe('stageAuthoring', () => {
     const spot = reset.spots.find((candidate) => candidate.id === 'draftsperson');
 
     expect(spot?.offset).toBeUndefined();
+  });
+
+  it('compares selections with serialized keys', () => {
+    expect(areStageAuthoringSelectionsEqual(
+      { kind: 'spot', id: 'draftsperson' },
+      { kind: 'spot', id: 'draftsperson' }
+    )).toBe(true);
+    expect(areStageAuthoringSelectionsEqual(
+      { kind: 'spot', id: 'draftsperson' },
+      { kind: 'object', id: 'bridge-draftsperson' }
+    )).toBe(false);
+  });
+
+  it('steps the authoring pointer FSM from pending click to pick', () => {
+    const pending = beginStageAuthoringPointer({
+      hit: { kind: 'spot', id: 'draftsperson' },
+      offsetOnly: false,
+      scrollX: 0,
+      scrollY: 0,
+      pointerX: 10,
+      pointerY: 10
+    });
+    const finished = finishStageAuthoringPointer(pending);
+
+    expect(finished.intents).toEqual([
+      { kind: 'pick', selection: { kind: 'spot', id: 'draftsperson' } }
+    ]);
+    expect(finished.state.mode).toBe('idle');
+  });
+
+  it('promotes pending drags past the threshold into drag intents', () => {
+    const pending = beginStageAuthoringPointer({
+      hit: { kind: 'rail-point', index: 2 },
+      offsetOnly: true,
+      scrollX: 0,
+      scrollY: 0,
+      pointerX: 0,
+      pointerY: 0
+    });
+    const moved = advanceStageAuthoringPointer(pending, {
+      pointerX: STAGE_AUTHORING_DRAG_THRESHOLD_PX + 2,
+      pointerY: 0,
+      worldX: 520,
+      worldY: 500,
+      zoom: 1
+    });
+
+    expect(moved.state.mode).toBe('drag-marker');
+    expect(moved.intents).toEqual([
+      { kind: 'pick', selection: { kind: 'rail-point', index: 2 } },
+      {
+        kind: 'drag',
+        selection: { kind: 'rail-point', index: 2 },
+        worldX: 520,
+        worldY: 500,
+        offsetOnly: true
+      }
+    ]);
   });
 });

@@ -5,7 +5,7 @@ import {
 } from '../debugDrawCommands';
 import type { RidgeDevDebugSettings } from '../runtime/ridgeDevControls';
 import type { BridgeTracerInteractionTarget } from './bridgeTracerSlice';
-import type { StageAuthoringSelection } from './stageAuthoring';
+import { areStageAuthoringSelectionsEqual, type StageAuthoringSelection } from './stageAuthoring';
 import {
   BRIDGE_STAGE_SOURCE,
   resolveBridgeStageObjectPlacement,
@@ -111,7 +111,7 @@ export function createBridgeStageDebugDrawCommands(
 
     if (showAuthoringMarkers) {
       points.forEach((point, index) => {
-        const selected = isAuthoringTargetSelected(options.authoring?.selection, {
+        const selected = areStageAuthoringSelectionsEqual(options.authoring?.selection, {
           kind: 'rail-point',
           index
         });
@@ -132,7 +132,7 @@ export function createBridgeStageDebugDrawCommands(
 
     source.spots.forEach((spot) => {
       const resolved = resolveBridgeStageSpot(source, spot.id);
-      const selected = isAuthoringTargetSelected(options.authoring?.selection, {
+      const selected = areStageAuthoringSelectionsEqual(options.authoring?.selection, {
         kind: 'spot',
         id: spot.id
       });
@@ -153,7 +153,7 @@ export function createBridgeStageDebugDrawCommands(
     if (showAuthoringMarkers) {
       source.objects.forEach((object) => {
         const placement = resolveBridgeStageObjectPlacement(source, object.id);
-        const selected = isAuthoringTargetSelected(options.authoring?.selection, {
+        const selected = areStageAuthoringSelectionsEqual(options.authoring?.selection, {
           kind: 'object',
           id: object.id
         });
@@ -284,19 +284,3 @@ function isAnyDebugSettingEnabled(settings: RidgeDevDebugSettings): boolean {
     settings.showTraversalAssists;
 }
 
-function isAuthoringTargetSelected(
-  selection: StageAuthoringSelection | null | undefined,
-  target: StageAuthoringSelection
-): boolean {
-  if (!selection || selection.kind !== target.kind) return false;
-  if (selection.kind === 'rail-point' && target.kind === 'rail-point') {
-    return selection.index === target.index;
-  }
-  if (selection.kind === 'spot' && target.kind === 'spot') {
-    return selection.id === target.id;
-  }
-  if (selection.kind === 'object' && target.kind === 'object') {
-    return selection.id === target.id;
-  }
-  return false;
-}

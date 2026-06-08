@@ -3,7 +3,10 @@ import type {
   StageAuthoringField,
   StageAuthoringTargetOption
 } from '../hooks/useStageAuthoring';
-import type { StageAuthoringSelection } from '@/game/scenes/ridge/bridge/stageAuthoring';
+import {
+  areStageAuthoringSelectionsEqual,
+  type StageAuthoringSelection
+} from '@/game/scenes/ridge/bridge/stageAuthoring';
 import { ScalarFieldControl } from './ScalarFieldControl';
 
 export function AuthoringPanel({
@@ -71,7 +74,9 @@ export function AuthoringPanel({
                 const option = targetOptions.find((candidate) => candidate.key === event.target.value);
                 if (option) onSelectTarget(option.selection);
               }}
-              value={targetOptions.find((option) => isSameSelection(option.selection, selection))?.key ?? ''}
+              value={targetOptions.find((option) =>
+                areStageAuthoringSelectionsEqual(option.selection, selection)
+              )?.key ?? ''}
             >
               <option disabled value="">
                 Choose target...
@@ -142,13 +147,3 @@ export function AuthoringPanel({
   );
 }
 
-function isSameSelection(
-  left: StageAuthoringSelection,
-  right: StageAuthoringSelection | null
-): boolean {
-  if (!right || left.kind !== right.kind) return false;
-  if (left.kind === 'rail-point' && right.kind === 'rail-point') return left.index === right.index;
-  if (left.kind === 'spot' && right.kind === 'spot') return left.id === right.id;
-  if (left.kind === 'object' && right.kind === 'object') return left.id === right.id;
-  return false;
-}

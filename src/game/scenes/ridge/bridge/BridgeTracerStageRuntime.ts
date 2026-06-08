@@ -23,6 +23,7 @@ import {
 } from './bridgeTracerSlice';
 import {
   BRIDGE_STAGE_SOURCE,
+  getBridgeCrossingPlacementSignature,
   resolveBridgeRailRelativeStageDepth,
   resolveBridgeStageObject,
   resolveBridgeStageObjectPlacement,
@@ -92,6 +93,7 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
   private builderTalkTween?: Phaser.Tweens.Tween;
   private toyCarTween?: Phaser.Tweens.Tween;
   private toyCarTestRunning = false;
+  private bridgeCrossingPlacementSignature = '';
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
@@ -111,6 +113,7 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
     this.createCickaPlaySpot();
     this.createBridgeDraftsperson();
     this.createBridgeCrossingVisuals();
+    this.bridgeCrossingPlacementSignature = getBridgeCrossingPlacementSignature(this.source);
     this.createConcertHandoffNote();
     this.createInteractionPrompt();
     this.createDialoguePanel();
@@ -120,9 +123,14 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
     this.source = source;
     this.syncCickaAndToyCar(this.currentPresentation);
     this.syncBridgeObjectPlacements();
-    this.recreateBridgeCrossingVisuals();
-    this.setVisible(this.blockedBridgeObjects, this.currentPresentation.blockedBridgeVisible);
-    this.setVisible(this.completedBridgeObjects, this.currentPresentation.completedBridgeVisible);
+
+    const crossingSignature = getBridgeCrossingPlacementSignature(source);
+    if (crossingSignature !== this.bridgeCrossingPlacementSignature) {
+      this.recreateBridgeCrossingVisuals();
+      this.bridgeCrossingPlacementSignature = crossingSignature;
+      this.setVisible(this.blockedBridgeObjects, this.currentPresentation.blockedBridgeVisible);
+      this.setVisible(this.completedBridgeObjects, this.currentPresentation.completedBridgeVisible);
+    }
   }
 
   dispose(): void {

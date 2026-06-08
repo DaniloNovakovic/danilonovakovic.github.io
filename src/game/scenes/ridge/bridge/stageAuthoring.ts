@@ -101,6 +101,128 @@ export function serializeStageAuthoringSelection(
   }
 }
 
+export function areStageAuthoringSelectionsEqual(
+  left: StageAuthoringSelection | null | undefined,
+  right: StageAuthoringSelection | null | undefined
+): boolean {
+  return serializeStageAuthoringSelection(left ?? null) ===
+    serializeStageAuthoringSelection(right ?? null);
+}
+
+export type StageAuthoringPointerMode = 'idle' | 'pan' | 'drag-marker' | 'pending';
+
+export interface StageAuthoringPointerState {
+  mode: StageAuthoringPointerMode;
+  moved: boolean;
+  offsetOnly: boolean;
+  selection: StageAuthoringSelection | null;
+  startScrollX: number;
+  startScrollY: number;
+  startX: number;
+  startY: number;
+}
+
+export type StageAuthoringPointerIntent =
+  | { kind: 'pick'; selection: StageAuthoringSelection }
+  | { kind: 'drag'; selection: StageAuthoringSelection; worldX: number; worldY: number; offsetOnly: boolean };
+
+export function createIdleStageAuthoringPointerState(): StageAuthoringPointerState {
+  return {
+    mode: 'idle',
+    moved: false,
+    offsetOnly: false,
+    selection: null,
+    startScrollX: 0,
+    startScrollY: 0,
+    startX: 0,
+    startY: 0
+  };
+}
+
+export function beginStageAuthoringPointer(input: {
+  hit: StageAuthoringSelection | null;
+  offsetOnly: boolean;
+  scrollX: number;
+  scrollY: number;
+  pointerX: number;
+  pointerY: number;
+}): StageAuthoringPointerState {
+  return {
+    mode: input.hit ? 'pending' : 'pan',
+    moved: false,
+    offsetOnly: input.offsetOnly,
+    selection: input.hit,
+    startScrollX: input.scrollX,
+    startScrollY: input.scrollY,
+    startX: input.pointerX,
+    startY: input.pointerY
+  };
+}
+
+export function advanceStageAuthoringPointer(
+  state: StageAuthoringPointerState,
+  input: {
+    pointerX: number;
+    pointerY: number;
+    worldX: number;
+    worldY: number;
+    zoom: number;
+  }
+): {
+  state: StageAuthoringPointerState;
+  intents: StageAuthoringPointerIntent[];
+  panScroll?: { scrollX: number; scrollY: number };
+} {
+  if (state.mode === 'idle') {
+    return { state, intents: [] };
+  }
+
+  const distance = Math.hypot(input.pointerX - state.startX, input.pointerY - state.startY);
+  let nextState = state;
+  const intents: StageAuthoringPointerIntent[] = [];
+
+  if (state.mode === 'pending' && distance >= STAGE_AUTHORING_DRAG_THRESHOLD_PX) {
+    nextState = { ...state, mode: 'drag-marker' };
+    if (nextState.selection) {
+      intents.push({ kind: 'pick', selection: nextState.selection });
+    }
+  }
+
+  if (nextState.mode === 'pan') {
+    return {
+      state: { ...nextState, moved: true },
+      intents,
+      panScroll: {
+        scrollX: nextState.startScrollX - ((input.pointerX - nextState.startX) / input.zoom),
+        scrollY: nextState.startScrollY - ((input.pointerY - nextState.startY) / input.zoom)
+      }
+    };
+  }
+
+  if (nextState.mode === 'drag-marker' && nextState.selection) {
+    intents.push({
+      kind: 'drag',
+      selection: nextState.selection,
+      worldX: input.worldX,
+      worldY: input.worldY,
+      offsetOnly: nextState.offsetOnly
+    });
+    return { state: { ...nextState, moved: true }, intents };
+  }
+
+  return { state: nextState, intents };
+}
+
+export function finishStageAuthoringPointer(
+  state: StageAuthoringPointerState
+): { state: StageAuthoringPointerState; intents: StageAuthoringPointerIntent[] } {
+  const intents: StageAuthoringPointerIntent[] = [];
+  if (state.mode === 'pending' && state.selection && !state.moved) {
+    intents.push({ kind: 'pick', selection: state.selection });
+  }
+  return { state: createIdleStageAuthoringPointerState(), intents };
+}
+
 export function resolveStageAuthoringTargetPoint(
   source: BridgeStageCompositionSource,
   selection: StageAuthoringSelection

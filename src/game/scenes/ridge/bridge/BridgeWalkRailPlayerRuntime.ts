@@ -16,7 +16,7 @@ import {
   createSideViewCameraRuntime,
   type SideViewCameraRuntime
 } from '@/game/sharedSceneRuntime/camera/sideViewCameraRuntime';
-import { bindSideViewKeyboard } from '@/game/sharedSceneRuntime/input/noOpKeyboard';
+import { bindSideViewKeyboard } from '@/game/sharedSceneRuntime/input/sceneKeyboard';
 import { readSceneInputCommands } from '@/game/sharedSceneRuntime/input/readSceneInputCommands';
 import type { SceneInputKeys } from '@/game/sharedSceneRuntime/input/readSceneInputCommands';
 import { setSceneKeyboardPaused } from '@/game/sharedSceneRuntime/sceneKeyboardPause';
