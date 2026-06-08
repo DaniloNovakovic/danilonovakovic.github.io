@@ -396,6 +396,15 @@ walking and authored traversal interactions such as climb, descend, drop, lift,
 bridge, enter, inspect, and recovery helpers.
 _Avoid_: mini-game controls, one-off arcade movement, required jump platforming
 
+**Portrait-Cover Touch Control**:
+Mobile input for side-view portrait-cover Phaser scenes such as the
+Exploration Map, Hobbies, Basement, and Ridge. The player drags anywhere on
+the game area for horizontal analog movement; a small ephemeral drag indicator
+appears at the touch anchor only while dragging. Tap releases interact when the
+touch did not become a move. Jump stays desktop-only for these scenes.
+_Avoid_: fixed on-screen joystick, permanent jump/interact buttons, swipe-up
+jump on mobile, vertical analog stick
+
 **First Playable Interaction Vocabulary**:
 The small shared verb set for the First Playable Route: move left/right,
 interact or talk, inspect, enter/exit an Area Interior Pocket when present,

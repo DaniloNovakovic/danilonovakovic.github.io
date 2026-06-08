@@ -1,163 +1,148 @@
-import { useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useReducer,
+  useRef,
+  type PointerEvent
+} from 'react';
 import { bridgeActions } from '@/game/bridge/store';
-import { useTouchGestures } from '@/shared/hooks/useTouchGestures';
-import type { PointerEvent } from 'react';
+import type { ControlMatDragIndicatorState } from '@/shared/ui';
+import {
+  PORTRAIT_COVER_DRAG_MAX_DISTANCE_PX,
+  resolvePortraitCoverHorizontalAxis,
+  shouldPortraitCoverDragActivate
+} from './portraitCoverTouchInput';
 
 interface UseGameTouchControlsOptions {
   isPaused: boolean;
 }
 
-type TouchDirection = 'left' | 'right' | 'up' | 'down';
+type DragIndicatorAction =
+  | { type: 'begin'; point: { x: number; y: number } }
+  | { type: 'move'; point: { x: number; y: number } }
+  | { type: 'clear' };
 
-const JOYSTICK_RADIUS_PX = 48;
-const JOYSTICK_KNOB_RADIUS_PX = 34;
-const JOYSTICK_DEADZONE = 0.18;
+function dragIndicatorReducer(
+  state: ControlMatDragIndicatorState | null,
+  action: DragIndicatorAction
+): ControlMatDragIndicatorState | null {
+  switch (action.type) {
+    case 'begin':
+      return {
+        anchorX: action.point.x,
+        anchorY: action.point.y,
+        currentX: action.point.x,
+        currentY: action.point.y
+      };
+    case 'move':
+      return state
+        ? { ...state, currentX: action.point.x, currentY: action.point.y }
+        : null;
+    case 'clear':
+      return null;
+  }
+}
 
 export function useGameTouchControls({ isPaused }: UseGameTouchControlsOptions) {
-  const joystickPointerId = useRef<number | null>(null);
-  const [joystickOffset, setJoystickOffset] = useState({ x: 0, y: 0 });
+  const activePointerIdRef = useRef<number | null>(null);
+  const anchorRef = useRef({ x: 0, y: 0 });
+  const hasDraggedRef = useRef(false);
+  const [dragIndicator, dispatchDragIndicator] = useReducer(dragIndicatorReducer, null);
 
-  function setDirection(direction: TouchDirection, intensity: number): void {
-    if (isPaused && intensity > 0) return;
-    bridgeActions.setTouchDirectional(direction, intensity);
-  }
+  const clearMovement = useCallback(() => {
+    bridgeActions.setTouchDirectional('left', 0);
+    bridgeActions.setTouchDirectional('right', 0);
+  }, []);
 
-  function setDirectionalAxes(horizontalAxis: number, verticalAxis: number): void {
-    setDirection('left', Math.max(0, -horizontalAxis));
-    setDirection('right', Math.max(0, horizontalAxis));
-    setDirection('up', Math.max(0, -verticalAxis));
-    setDirection('down', Math.max(0, verticalAxis));
-  }
+  const releasePointer = useCallback(() => {
+    activePointerIdRef.current = null;
+    hasDraggedRef.current = false;
+    clearMovement();
+    dispatchDragIndicator({ type: 'clear' });
+  }, [clearMovement]);
 
-  function stopPointer(e: PointerEvent): void {
-    e.preventDefault();
-    e.stopPropagation();
-  }
-
-  const gestureHandlers = useTouchGestures({
-    onSwipeLeft: (intensity) => {
-      setDirection('left', intensity);
-      setDirection('right', 0);
-    },
-    onSwipeRight: (intensity) => {
-      setDirection('right', intensity);
-      setDirection('left', 0);
-    },
-    onSwipeUp: () => {
-      if (isPaused) return;
-      bridgeActions.queueJump();
-    },
-    onSwipeEnd: () => {
-      setDirection('left', 0);
-      setDirection('right', 0);
-      setDirection('up', 0);
-      setDirection('down', 0);
-    },
-    onTap: () => {
-      if (isPaused) return;
-      bridgeActions.tapInteract();
+  useEffect(() => {
+    if (isPaused) {
+      releasePointer();
     }
-  });
+  }, [isPaused, releasePointer]);
 
-  function getDirectionalButtonHandlers(direction: TouchDirection) {
+  const readPoint = useCallback((event: PointerEvent<HTMLDivElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
     return {
-      onPointerDown: (e: PointerEvent<HTMLButtonElement>) => {
-        stopPointer(e);
-        e.currentTarget.setPointerCapture(e.pointerId);
-        setDirection(direction, 1);
-      },
-      onPointerUp: (e: PointerEvent<HTMLButtonElement>) => {
-        stopPointer(e);
-        setDirection(direction, 0);
-      },
-      onPointerCancel: (e: PointerEvent<HTMLButtonElement>) => {
-        stopPointer(e);
-        setDirection(direction, 0);
-      },
-      onPointerLeave: (e: PointerEvent<HTMLButtonElement>) => {
-        stopPointer(e);
-        setDirection(direction, 0);
-      }
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top
     };
-  }
+  }, []);
 
-  function updateJoystick(e: PointerEvent<HTMLDivElement>): void {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    const rawX = (e.clientX - centerX) / JOYSTICK_RADIUS_PX;
-    const rawY = (e.clientY - centerY) / JOYSTICK_RADIUS_PX;
-    const length = Math.hypot(rawX, rawY);
-    const scale = length > 1 ? 1 / length : 1;
-    const clampedX = rawX * scale;
-    const clampedY = rawY * scale;
-    const active = length >= JOYSTICK_DEADZONE;
-    const axisX = active ? clampedX : 0;
-    const axisY = active ? clampedY : 0;
+  const stopPointer = useCallback((event: PointerEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+  }, []);
 
-    setDirectionalAxes(axisX, axisY);
-    setJoystickOffset({
-      x: axisX * JOYSTICK_KNOB_RADIUS_PX,
-      y: axisY * JOYSTICK_KNOB_RADIUS_PX
-    });
-  }
+  const applyDrag = useCallback((deltaX: number) => {
+    if (isPaused) return;
 
-  function releaseJoystick(): void {
-    joystickPointerId.current = null;
-    setDirectionalAxes(0, 0);
-    setJoystickOffset({ x: 0, y: 0 });
-  }
+    const axisX = resolvePortraitCoverHorizontalAxis(deltaX);
+    bridgeActions.setTouchDirectional('left', Math.max(0, -axisX));
+    bridgeActions.setTouchDirectional('right', Math.max(0, axisX));
+  }, [isPaused]);
 
-  const joystickHandlers = {
-    onPointerDown: (e: PointerEvent<HTMLDivElement>) => {
-      stopPointer(e);
+  const pointerHandlers = {
+    onPointerDown: useCallback((event: PointerEvent<HTMLDivElement>) => {
+      stopPointer(event);
       if (isPaused) return;
-      joystickPointerId.current = e.pointerId;
-      e.currentTarget.setPointerCapture(e.pointerId);
-      updateJoystick(e);
-    },
-    onPointerMove: (e: PointerEvent<HTMLDivElement>) => {
-      if (joystickPointerId.current !== e.pointerId) return;
-      stopPointer(e);
-      updateJoystick(e);
-    },
-    onPointerUp: (e: PointerEvent<HTMLDivElement>) => {
-      if (joystickPointerId.current !== e.pointerId) return;
-      stopPointer(e);
-      releaseJoystick();
-    },
-    onPointerCancel: (e: PointerEvent<HTMLDivElement>) => {
-      if (joystickPointerId.current !== e.pointerId) return;
-      stopPointer(e);
-      releaseJoystick();
-    },
-    onPointerLeave: (e: PointerEvent<HTMLDivElement>) => {
-      if (joystickPointerId.current !== e.pointerId) return;
-      stopPointer(e);
-      releaseJoystick();
-    }
-  };
 
-  const jumpButtonHandlers = {
-    onPointerDown: (e: PointerEvent<HTMLButtonElement>) => {
-      stopPointer(e);
-      if (!isPaused) bridgeActions.queueJump();
-    }
-  };
+      const point = readPoint(event);
+      activePointerIdRef.current = event.pointerId;
+      anchorRef.current = point;
+      hasDraggedRef.current = false;
+      event.currentTarget.setPointerCapture(event.pointerId);
+      dispatchDragIndicator({ type: 'begin', point });
+      clearMovement();
+    }, [clearMovement, isPaused, readPoint, stopPointer]),
 
-  const interactButtonHandlers = {
-    onPointerDown: (e: PointerEvent<HTMLButtonElement>) => {
-      stopPointer(e);
-      if (!isPaused) bridgeActions.tapInteract();
-    }
+    onPointerMove: useCallback((event: PointerEvent<HTMLDivElement>) => {
+      if (activePointerIdRef.current !== event.pointerId) return;
+      stopPointer(event);
+
+      const point = readPoint(event);
+      const deltaX = point.x - anchorRef.current.x;
+      if (shouldPortraitCoverDragActivate(deltaX)) {
+        hasDraggedRef.current = true;
+      }
+
+      dispatchDragIndicator({ type: 'move', point });
+      applyDrag(deltaX);
+    }, [applyDrag, readPoint, stopPointer]),
+
+    onPointerUp: useCallback((event: PointerEvent<HTMLDivElement>) => {
+      if (activePointerIdRef.current !== event.pointerId) return;
+      stopPointer(event);
+
+      if (!isPaused && !hasDraggedRef.current) {
+        bridgeActions.tapInteract();
+      }
+
+      releasePointer();
+    }, [isPaused, releasePointer, stopPointer]),
+
+    onPointerCancel: useCallback((event: PointerEvent<HTMLDivElement>) => {
+      if (activePointerIdRef.current !== event.pointerId) return;
+      stopPointer(event);
+      releasePointer();
+    }, [releasePointer, stopPointer]),
+
+    onPointerLeave: useCallback((event: PointerEvent<HTMLDivElement>) => {
+      if (activePointerIdRef.current !== event.pointerId) return;
+      stopPointer(event);
+      releasePointer();
+    }, [releasePointer, stopPointer])
   };
 
   return {
-    gestureHandlers,
-    getDirectionalButtonHandlers,
-    joystickHandlers,
-    joystickOffset,
-    jumpButtonHandlers,
-    interactButtonHandlers
+    dragIndicator,
+    dragMaxDistance: PORTRAIT_COVER_DRAG_MAX_DISTANCE_PX,
+    pointerHandlers
   };
 }
