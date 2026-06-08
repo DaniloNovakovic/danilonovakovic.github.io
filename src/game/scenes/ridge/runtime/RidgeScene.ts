@@ -45,9 +45,11 @@ import {
   createBridgeStageDebugOverlay,
   type BridgeStageDebugOverlay
 } from '../bridge/bridgeStageDebugOverlay';
+import { hitTestStageAuthoringTargets } from '../bridge/stageAuthoring';
 import {
   BRIDGE_STAGE_SOURCE,
   resolveBridgeStagePresentation,
+  type BridgeStageCompositionSource,
   type BridgeStagePresentationState
 } from '../bridge/stageComposition';
 import { TextureGenerator } from '@/game/sharedSceneRuntime/textures/TextureGenerator';
@@ -58,6 +60,7 @@ interface RidgeSceneStartData {
   isPaused?: boolean;
   resumePosition?: { x: number; y: number };
   ridgeDevControls?: RidgeDevControls;
+  getRidgeDevControls?: () => RidgeDevControls | undefined;
 }
 
 export class RidgeScene extends Phaser.Scene {
@@ -73,8 +76,11 @@ export class RidgeScene extends Phaser.Scene {
   private isPaused = false;
   private resumePosition?: { x: number; y: number };
   private ridgeDevControls?: RidgeDevControls;
+  private getRidgeDevControls?: () => RidgeDevControls | undefined;
+  private authoringPointerBound = false;
   private ridgeSpawnPosition = { ...BRIDGE_TRACER_WORLD.spawn };
   private lastCameraZoom = RIDGE_DEFAULT_CAMERA_ZOOM;
+  private lastCompositionSource: BridgeStageCompositionSource = BRIDGE_STAGE_SOURCE;
   private bridgePresentation: BridgeStagePresentationState = resolveBridgeStagePresentation('intro');
   private routeState: RidgeFirstPlayableRouteState = {
     activeAreaId: 'bridge',
@@ -90,6 +96,7 @@ export class RidgeScene extends Phaser.Scene {
     this.isPaused = data.isPaused ?? false;
     this.resumePosition = data.resumePosition;
     this.ridgeDevControls = import.meta.env.DEV ? data.ridgeDevControls : undefined;
+    this.getRidgeDevControls = import.meta.env.DEV ? data.getRidgeDevControls : undefined;
   }
 
   preload(): void {
@@ -114,6 +121,9 @@ export class RidgeScene extends Phaser.Scene {
     this.ridgeDevControls = import.meta.env.DEV
       ? data.ridgeDevControls ?? this.ridgeDevControls
       : undefined;
+    this.getRidgeDevControls = import.meta.env.DEV
+      ? data.getRidgeDevControls ?? this.getRidgeDevControls
+      : undefined;
     this.routeState = bridgeStore.getState().progress.ridge.firstPlayableRoute;
 
     this.bridgeStage?.dispose();
@@ -136,6 +146,7 @@ export class RidgeScene extends Phaser.Scene {
     this.createBridgeInteractions();
     this.setPaused(this.isPaused);
     this.playerRuntime?.syncAppearance();
+    this.bindDevAuthoringPointer();
     this.syncDevRuntimeState();
   }
 
@@ -272,12 +283,18 @@ export class RidgeScene extends Phaser.Scene {
     this.playerRuntime?.setProgressRange(this.bridgePresentation.playerProgressRange);
   }
 
+  private resolveRidgeDevControls(): RidgeDevControls | undefined {
+    if (!import.meta.env.DEV) return undefined;
+    return this.getRidgeDevControls?.() ?? this.ridgeDevControls;
+  }
+
   private resolveCameraZoom(): number {
-    return resolveRidgeDevCameraZoom(this.ridgeDevControls?.resolveCameraZoom?.());
+    return resolveRidgeDevCameraZoom(this.resolveRidgeDevControls()?.resolveCameraZoom?.());
   }
 
   private applyDevControls(): void {
-    if (!import.meta.env.DEV || !this.ridgeDevControls) return;
+    const ridgeDevControls = this.resolveRidgeDevControls();
+    if (!import.meta.env.DEV || !ridgeDevControls) return;
 
     const nextCameraZoom = this.resolveCameraZoom();
     if (nextCameraZoom !== this.lastCameraZoom) {
@@ -287,18 +304,18 @@ export class RidgeScene extends Phaser.Scene {
 
     if (!this.player) return;
 
-    const routeBeatRequest = this.ridgeDevControls.consumeRouteBeatRequest?.();
+    const routeBeatRequest = ridgeDevControls.consumeRouteBeatRequest?.();
     if (routeBeatRequest) {
       this.applyDevBridgeBeat(routeBeatRequest.bridgeBeat);
     }
 
-    const resetRequest = this.ridgeDevControls.consumeResetRequest?.();
+    const resetRequest = ridgeDevControls.consumeResetRequest?.();
     if (resetRequest) {
       this.movePlayerForDev(this.ridgeSpawnPosition);
       return;
     }
 
-    const request = this.ridgeDevControls.consumeTeleportRequest?.();
+    const request = ridgeDevControls.consumeTeleportRequest?.();
     if (!request) return;
 
     this.movePlayerForDev(resolveRidgeDevTeleportPosition(request));
@@ -320,8 +337,44 @@ export class RidgeScene extends Phaser.Scene {
     this.syncPlayerReadabilityHalo();
   }
 
+  private bindDevAuthoringPointer(): void {
+    if (!import.meta.env.DEV || this.authoringPointerBound) return;
+
+    this.authoringPointerBound = true;
+    this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      const ridgeDevControls = this.resolveRidgeDevControls();
+      const authoring = ridgeDevControls?.resolveAuthoringState?.();
+      if (!authoring?.active) return;
+
+      const source = this.resolveCompositionSource();
+      const selection = hitTestStageAuthoringTargets(source, pointer.worldX, pointer.worldY);
+      if (selection) {
+        ridgeDevControls?.publishAuthoringPick?.(selection);
+      }
+    });
+  }
+
+  private resolveCompositionSource(): BridgeStageCompositionSource {
+    return this.resolveRidgeDevControls()?.resolveCompositionSource?.() ?? BRIDGE_STAGE_SOURCE;
+  }
+
+  private syncCompositionSource(): void {
+    const source = this.resolveCompositionSource();
+    if (source === this.lastCompositionSource) return;
+
+    this.lastCompositionSource = source;
+    this.playerRuntime?.setCompositionSource(source);
+    this.bridgeStage?.applyCompositionSource(source);
+  }
+
   private syncDevRuntimeState(): void {
-    if (!import.meta.env.DEV || !this.ridgeDevControls || !this.player) return;
+    const ridgeDevControls = this.resolveRidgeDevControls();
+    if (!import.meta.env.DEV || !ridgeDevControls || !this.player) return;
+    this.syncCompositionSource();
+
+    const authoring = ridgeDevControls.resolveAuthoringState?.();
+    this.playerRuntime?.setAuthoringFrozen(authoring?.active ?? false);
+
     const railSnapshot = this.playerRuntime?.getRailSnapshot();
     const body = this.player.body
       ? {
@@ -332,10 +385,16 @@ export class RidgeScene extends Phaser.Scene {
         }
       : undefined;
     const debugSettings = resolveRidgeDevDebugSettings(
-      this.ridgeDevControls.resolveDebugSettings?.()
+      ridgeDevControls.resolveDebugSettings?.()
     );
     this.bridgeDebugOverlay?.render({
-      source: BRIDGE_STAGE_SOURCE,
+      source: this.resolveCompositionSource(),
+      authoring: authoring
+        ? {
+            active: authoring.active,
+            selection: authoring.selection
+          }
+        : undefined,
       interactionTargets: this.bridgeInteractionTargets,
       player: {
         x: this.player.x,
@@ -345,7 +404,7 @@ export class RidgeScene extends Phaser.Scene {
       railProgress: railSnapshot?.progress,
       settings: debugSettings
     });
-    this.ridgeDevControls.publishPlayerSnapshot?.({
+    ridgeDevControls.publishPlayerSnapshot?.({
       x: this.player.x,
       y: this.player.y,
       railProgress: railSnapshot?.progress,

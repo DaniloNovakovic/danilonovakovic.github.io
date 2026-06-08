@@ -62,6 +62,8 @@ export interface BridgeWalkRailPlayerRuntime {
   readonly player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   readonly cameraRuntime?: SideViewCameraRuntime;
   setPaused(paused: boolean): void;
+  setAuthoringFrozen(frozen: boolean): void;
+  setCompositionSource(source: BridgeStageCompositionSource): void;
   setProgressRange(range: BridgeWalkRailProgressRange): void;
   captureResume(): ResumeSnapshot | null;
   getRailSnapshot(): BridgeWalkRailPlayerSnapshot;
@@ -108,7 +110,8 @@ class PhaserBridgeWalkRailPlayerRuntime implements BridgeWalkRailPlayerRuntime {
   readonly cameraRuntime?: SideViewCameraRuntime;
 
   private readonly scene: Phaser.Scene;
-  private readonly source: BridgeStageCompositionSource;
+  private source: BridgeStageCompositionSource;
+  private railLength: number;
   private readonly commands = createInputCommandFrame();
   private readonly cursors: Phaser.Types.Input.Keyboard.CursorKeys;
   private readonly wasd: {
@@ -120,11 +123,11 @@ class PhaserBridgeWalkRailPlayerRuntime implements BridgeWalkRailPlayerRuntime {
   private readonly interactKey: Phaser.Input.Keyboard.Key;
   private readonly hKey: Phaser.Input.Keyboard.Key;
   private readonly escapeKey: Phaser.Input.Keyboard.Key;
-  private readonly railLength: number;
   private progressRange: BridgeWalkRailProgressRange = { min: 0, max: 1 };
   private progress: number;
   private facingLeft = false;
   private isPaused = false;
+  private authoringFrozen = false;
   private hasGlassesSprite: boolean | null = null;
   private lastSample: BridgeRailSample;
 
@@ -187,6 +190,20 @@ class PhaserBridgeWalkRailPlayerRuntime implements BridgeWalkRailPlayerRuntime {
     });
   }
 
+  setAuthoringFrozen(frozen: boolean): void {
+    this.authoringFrozen = frozen;
+    if (frozen) {
+      this.player.setVelocity(0, 0);
+    }
+  }
+
+  setCompositionSource(source: BridgeStageCompositionSource): void {
+    this.source = source;
+    this.railLength = getBridgeWalkRailLength(this.source.primaryWalkRail);
+    this.applySample(sampleBridgeWalkRail(this.source.primaryWalkRail, this.progress));
+    this.cameraRuntime?.refresh();
+  }
+
   setProgressRange(range: BridgeWalkRailProgressRange): void {
     this.progressRange = {
       min: clamp01(Math.min(range.min, range.max)),
@@ -223,7 +240,7 @@ class PhaserBridgeWalkRailPlayerRuntime implements BridgeWalkRailPlayerRuntime {
 
   update(deltaMs: number = 16.67): BridgeWalkRailPlayerRuntimeUpdate {
     this.syncAppearance();
-    if (this.isPaused) {
+    if (this.isPaused || this.authoringFrozen) {
       this.player.setVelocity(0, 0);
       return { paused: true };
     }

@@ -12,12 +12,14 @@ function ignorePreviewSceneClose(): void {}
 export type RidgePreviewInputOwner = 'game' | 'panel';
 
 export function RidgeRuntimePreview({
+  authoringActive = false,
   inputOwner,
   isActive,
   onClaimGameInput,
   previewZoom,
   ridgeDevControls
 }: {
+  authoringActive?: boolean;
   inputOwner: RidgePreviewInputOwner;
   isActive: boolean;
   onClaimGameInput: () => void;
@@ -27,21 +29,32 @@ export function RidgeRuntimePreview({
   const bridge = useBridgeState();
   const previewRef = useRef<HTMLElement | null>(null);
   const isInputPaused =
-    !isActive || bridge.isPaused || bridge.loadingSceneId !== null || inputOwner === 'panel';
+    !isActive ||
+    bridge.isPaused ||
+    bridge.loadingSceneId !== null ||
+    (inputOwner === 'panel' && !authoringActive);
   const inputStatusLabel = !isActive
     ? 'Debugger inactive'
-    : inputOwner === 'panel'
-      ? 'Panel focus'
-      : bridge.isPaused || bridge.loadingSceneId !== null
-        ? 'Runtime paused'
-        : 'Game input';
+    : authoringActive
+      ? 'Authoring mode'
+      : inputOwner === 'panel'
+        ? 'Panel focus'
+        : bridge.isPaused || bridge.loadingSceneId !== null
+          ? 'Runtime paused'
+          : 'Game input';
   const pauseReason = !isActive
     ? 'Debugger inactive'
-    : inputOwner === 'panel'
-      ? 'Panel focus'
-      : 'Runtime paused';
+    : authoringActive
+      ? 'Authoring mode'
+      : inputOwner === 'panel'
+        ? 'Panel focus'
+        : 'Runtime paused';
   const showPausedOverlay =
-    isActive && isInputPaused && bridge.loadingSceneId === null && bridge.activeOverlayId === null;
+    isActive &&
+    !authoringActive &&
+    isInputPaused &&
+    bridge.loadingSceneId === null &&
+    bridge.activeOverlayId === null;
   const presentationMode = getPhaserScenePresentationMode(bridge.activeSceneId);
   const isRidgeSceneActive = bridge.activeSceneId === RIDGE_SCENE_ID;
 

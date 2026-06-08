@@ -51,6 +51,21 @@ describe('Bridge Stage debug overlay draw commands', () => {
     expect(commands.some((command) => command.id === 'walk-rail:player-progress')).toBe(true);
   });
 
+  it('draws authoring markers for rail points and Stage Objects when authoring mode is active', () => {
+    const commands = createBridgeStageDebugDrawCommands({
+      interactionTargets: [],
+      authoring: {
+        active: true,
+        selection: { kind: 'object', id: 'bridge-draftsperson' }
+      },
+      settings: debugOff
+    });
+
+    expect(commands.some((command) => command.id === 'authoring-rail-point:0')).toBe(true);
+    expect(commands.some((command) => command.id === 'authoring-object:bridge-draftsperson')).toBe(true);
+    expect(commands.some((command) => command.id === 'stage-spot:draftsperson')).toBe(true);
+  });
+
   it('treats graybox mode as a composite Bridge Stage overlay', () => {
     const commands = createBridgeStageDebugDrawCommands({
       interactionTargets: [],
