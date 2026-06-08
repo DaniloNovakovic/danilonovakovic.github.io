@@ -68,16 +68,16 @@ export function AuthoringPanel({
               aria-label="Authoring target"
               className="h-9 w-full border-2 border-[#1a1a1a] bg-[#fbfbf9] px-2 font-mono text-xs font-black"
               onChange={(event) => {
-                const option = targetOptions.find((candidate) => candidate.label === event.target.value);
+                const option = targetOptions.find((candidate) => candidate.key === event.target.value);
                 if (option) onSelectTarget(option.selection);
               }}
-              value={targetOptions.find((option) => isSameSelection(option.selection, selection))?.label ?? ''}
+              value={targetOptions.find((option) => isSameSelection(option.selection, selection))?.key ?? ''}
             >
               <option disabled value="">
                 Choose target...
               </option>
               {targetOptions.map((option) => (
-                <option key={option.label} value={option.label}>
+                <option key={option.key} value={option.key}>
                   {option.label}
                 </option>
               ))}

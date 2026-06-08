@@ -233,8 +233,9 @@ export class RidgeScene extends Phaser.Scene {
     playerRuntime.setProgressRange(this.bridgePresentation.playerProgressRange);
   }
 
-  private createBridgeInteractions(): void {
-    this.bridgeInteractionTargets = createBridgeTracerInteractionTargets(this.routeState);
+  private createBridgeInteractions(source?: BridgeStageCompositionSource): void {
+    const resolvedSource = source ?? this.resolveCompositionSource();
+    this.bridgeInteractionTargets = createBridgeTracerInteractionTargets(this.routeState, resolvedSource);
     this.interactionRuntime = createInteriorInteractionRuntime<
       BridgeTracerTargetId,
       BridgeTracerEffect
@@ -369,7 +370,7 @@ export class RidgeScene extends Phaser.Scene {
       this.authoringPointer = {
         mode: hit ? 'pending' : 'pan',
         moved: false,
-        offsetOnly: pointer.event.shiftKey,
+        offsetOnly: pointer.event?.shiftKey ?? false,
         selection: hit,
         startScrollX: camera.scrollX,
         startScrollY: camera.scrollY,
@@ -482,6 +483,7 @@ export class RidgeScene extends Phaser.Scene {
     this.lastCompositionSource = source;
     this.playerRuntime?.setCompositionSource(source);
     this.bridgeStage?.applyCompositionSource(source);
+    this.createBridgeInteractions(source);
   }
 
   private syncDevRuntimeState(): void {

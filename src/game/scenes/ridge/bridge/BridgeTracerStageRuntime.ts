@@ -121,6 +121,8 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
     this.syncCickaAndToyCar(this.currentPresentation);
     this.syncBridgeObjectPlacements();
     this.recreateBridgeCrossingVisuals();
+    this.setVisible(this.blockedBridgeObjects, this.currentPresentation.blockedBridgeVisible);
+    this.setVisible(this.completedBridgeObjects, this.currentPresentation.completedBridgeVisible);
   }
 
   dispose(): void {

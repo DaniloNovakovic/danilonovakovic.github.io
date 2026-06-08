@@ -8,6 +8,7 @@ import {
   BRIDGE_STAGE_DEFAULT_INTERACT_RADIUS,
   BRIDGE_STAGE_SOURCE,
   resolveBridgeStageSpot,
+  type BridgeStageCompositionSource,
   type BridgeStageSpotId
 } from './stageComposition';
 
@@ -76,13 +77,16 @@ export type BridgeTracerInteractionTarget = InteriorInteractionTarget<
   promptLineId: BridgeDialogueLineId;
 };
 
-type BridgeTracerTargetFactory = () => BridgeTracerInteractionTarget;
+type BridgeTracerTargetFactory = (
+  source: BridgeStageCompositionSource
+) => BridgeTracerInteractionTarget;
 
 export function createBridgeTracerInteractionTargets(
-  route: RidgeFirstPlayableRouteState
+  route: RidgeFirstPlayableRouteState,
+  source: BridgeStageCompositionSource = BRIDGE_STAGE_SOURCE
 ): BridgeTracerInteractionTarget[] {
   if (route.activeAreaId !== 'bridge') return [];
-  return BRIDGE_TARGETS_BY_BEAT[route.bridgeBeat].map((createTarget) => createTarget());
+  return BRIDGE_TARGETS_BY_BEAT[route.bridgeBeat].map((createTarget) => createTarget(source));
 }
 
 const BRIDGE_TARGETS_BY_BEAT = {
@@ -98,8 +102,8 @@ const BRIDGE_TARGETS_BY_BEAT = {
   bridge_complete: [createConcertExitTarget]
 } satisfies Record<RidgeBridgeAreaBeatState, readonly BridgeTracerTargetFactory[]>;
 
-function createCickaFirstMeetTarget(): BridgeTracerInteractionTarget {
-  return createSpotTarget({
+function createCickaFirstMeetTarget(source: BridgeStageCompositionSource): BridgeTracerInteractionTarget {
+  return createSpotTarget(source, {
     id: 'cicka',
     kind: 'ridge-bridge-cicka',
     spotId: 'cicka-play',
@@ -115,8 +119,8 @@ function createCickaFirstMeetTarget(): BridgeTracerInteractionTarget {
   });
 }
 
-function createCickaParallelPlayTarget(): BridgeTracerInteractionTarget {
-  return createSpotTarget({
+function createCickaParallelPlayTarget(source: BridgeStageCompositionSource): BridgeTracerInteractionTarget {
+  return createSpotTarget(source, {
     id: 'cicka',
     kind: 'ridge-bridge-cicka',
     spotId: 'cicka-play',
@@ -134,18 +138,19 @@ function createCickaParallelPlayTarget(): BridgeTracerInteractionTarget {
   });
 }
 
-function createIntroMissingSpanTarget(): BridgeTracerInteractionTarget {
-  return createMissingSpanTarget('intro');
+function createIntroMissingSpanTarget(source: BridgeStageCompositionSource): BridgeTracerInteractionTarget {
+  return createMissingSpanTarget(source, 'intro');
 }
 
-function createNeedsToyCarMissingSpanTarget(): BridgeTracerInteractionTarget {
-  return createMissingSpanTarget('needs_toy_car');
+function createNeedsToyCarMissingSpanTarget(source: BridgeStageCompositionSource): BridgeTracerInteractionTarget {
+  return createMissingSpanTarget(source, 'needs_toy_car');
 }
 
 function createMissingSpanTarget(
+  source: BridgeStageCompositionSource,
   bridgeBeat: Extract<RidgeBridgeAreaBeatState, 'intro' | 'needs_toy_car'>
 ): BridgeTracerInteractionTarget {
-  return createSpotTarget({
+  return createSpotTarget(source, {
     id: 'draftsperson',
     kind: 'ridge-bridge-draftsperson',
     spotId: 'draftsperson',
@@ -162,8 +167,8 @@ function createMissingSpanTarget(
   });
 }
 
-function createToyCarTestTarget(): BridgeTracerInteractionTarget {
-  return createSpotTarget({
+function createToyCarTestTarget(source: BridgeStageCompositionSource): BridgeTracerInteractionTarget {
+  return createSpotTarget(source, {
     id: 'draftsperson',
     kind: 'ridge-bridge-draftsperson',
     spotId: 'draftsperson',
@@ -180,8 +185,8 @@ function createToyCarTestTarget(): BridgeTracerInteractionTarget {
   });
 }
 
-function createConcertExitTarget(): BridgeTracerInteractionTarget {
-  return createSpotTarget({
+function createConcertExitTarget(source: BridgeStageCompositionSource): BridgeTracerInteractionTarget {
+  return createSpotTarget(source, {
     id: 'concert-exit',
     kind: 'ridge-bridge-exit',
     spotId: 'concert-exit',
@@ -197,14 +202,17 @@ function createConcertExitTarget(): BridgeTracerInteractionTarget {
   });
 }
 
-function createSpotTarget(options: {
-  id: BridgeTracerTargetId;
-  kind: string;
-  spotId: BridgeStageSpotId;
-  promptLineId: BridgeDialogueLineId;
-  effect: BridgeTracerEffect;
-}): BridgeTracerInteractionTarget {
-  const spot = resolveBridgeStageSpot(BRIDGE_STAGE_SOURCE, options.spotId);
+function createSpotTarget(
+  source: BridgeStageCompositionSource,
+  options: {
+    id: BridgeTracerTargetId;
+    kind: string;
+    spotId: BridgeStageSpotId;
+    promptLineId: BridgeDialogueLineId;
+    effect: BridgeTracerEffect;
+  }
+): BridgeTracerInteractionTarget {
+  const spot = resolveBridgeStageSpot(source, options.spotId);
   return {
     id: options.id,
     kind: options.kind,

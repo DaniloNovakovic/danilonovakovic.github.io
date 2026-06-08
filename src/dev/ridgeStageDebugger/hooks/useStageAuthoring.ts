@@ -11,6 +11,7 @@ import {
   cloneBridgeStageCompositionSource,
   formatStageAuthoringSnippet,
   resetStageAuthoringSelection,
+  serializeStageAuthoringSelection,
   STAGE_AUTHORING_OFFSET_LIMIT_PX,
   STAGE_AUTHORING_OFFSET_SLIDER_WINDOW_PX,
   updateStageAuthoringDraft,
@@ -18,6 +19,7 @@ import {
 } from '@/game/scenes/ridge/bridge/stageAuthoring';
 
 export interface StageAuthoringTargetOption {
+  key: string;
   label: string;
   selection: StageAuthoringSelection;
 }
@@ -129,18 +131,30 @@ export function useStageAuthoring() {
 function getAuthoringTargetOptions(
   source: BridgeStageCompositionSource
 ): StageAuthoringTargetOption[] {
-  const railPoints = source.primaryWalkRail.points.map((point, index) => ({
-    label: `Rail point ${index} @ ${Math.round(point.x)}, ${Math.round(point.y)}`,
-    selection: { kind: 'rail-point', index } as const
-  }));
-  const spots = source.spots.map((spot) => ({
-    label: `Spot ${spot.id}`,
-    selection: { kind: 'spot', id: spot.id } as const
-  }));
-  const objects = source.objects.map((object) => ({
-    label: `Object ${object.id}`,
-    selection: { kind: 'object', id: object.id } as const
-  }));
+  const railPoints = source.primaryWalkRail.points.map((point, index) => {
+    const selection = { kind: 'rail-point', index } as const;
+    return {
+      key: serializeStageAuthoringSelection(selection) ?? `rail-point:${index}`,
+      label: `Rail point ${index} @ ${Math.round(point.x)}, ${Math.round(point.y)}`,
+      selection
+    };
+  });
+  const spots = source.spots.map((spot) => {
+    const selection = { kind: 'spot', id: spot.id } as const;
+    return {
+      key: serializeStageAuthoringSelection(selection) ?? `spot:${spot.id}`,
+      label: `Spot ${spot.id}`,
+      selection
+    };
+  });
+  const objects = source.objects.map((object) => {
+    const selection = { kind: 'object', id: object.id } as const;
+    return {
+      key: serializeStageAuthoringSelection(selection) ?? `object:${object.id}`,
+      label: `Object ${object.id}`,
+      selection
+    };
+  });
 
   return [...railPoints, ...spots, ...objects];
 }
