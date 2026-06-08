@@ -2,9 +2,11 @@ export {
   ControlMat
 } from './chrome/ControlMat';
 export {
-  ControlMatDragIndicator
+  ControlMatDragIndicator,
+  reduceControlMatDragIndicator
 } from './chrome/ControlMatDragIndicator';
 export type {
+  ControlMatDragIndicatorAction,
   ControlMatDragIndicatorState
 } from './chrome/ControlMatDragIndicator';
 export {

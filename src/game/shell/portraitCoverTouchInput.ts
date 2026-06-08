@@ -1,6 +1,6 @@
-export const PORTRAIT_COVER_DRAG_MAX_DISTANCE_PX = 44;
-export const PORTRAIT_COVER_TAP_THRESHOLD_PX = 15;
-export const PORTRAIT_COVER_MOVEMENT_DEADZONE = 0.18;
+const PORTRAIT_COVER_DRAG_MAX_DISTANCE_PX = 44;
+const PORTRAIT_COVER_TAP_THRESHOLD_PX = 15;
+const PORTRAIT_COVER_MOVEMENT_DEADZONE = 0.18;
 
 export function resolvePortraitCoverHorizontalAxis(
   deltaX: number,

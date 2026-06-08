@@ -8,6 +8,32 @@ export interface ControlMatDragIndicatorState {
   currentY: number;
 }
 
+export type ControlMatDragIndicatorAction =
+  | { type: 'begin'; point: { x: number; y: number } }
+  | { type: 'move'; point: { x: number; y: number } }
+  | { type: 'clear' };
+
+export function reduceControlMatDragIndicator(
+  state: ControlMatDragIndicatorState | null,
+  action: ControlMatDragIndicatorAction
+): ControlMatDragIndicatorState | null {
+  switch (action.type) {
+    case 'begin':
+      return {
+        anchorX: action.point.x,
+        anchorY: action.point.y,
+        currentX: action.point.x,
+        currentY: action.point.y
+      };
+    case 'move':
+      return state
+        ? { ...state, currentX: action.point.x, currentY: action.point.y }
+        : null;
+    case 'clear':
+      return null;
+  }
+}
+
 interface ControlMatDragIndicatorProps extends HTMLAttributes<HTMLDivElement> {
   maxDistance?: number;
   state: ControlMatDragIndicatorState | null;

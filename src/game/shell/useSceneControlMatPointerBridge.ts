@@ -5,7 +5,7 @@ import {
 } from '@/game/bridge/store';
 import { GAME_DESIGN_HEIGHT, GAME_DESIGN_WIDTH } from '@/game/sharedSceneRuntime/designSize';
 import type { SceneId } from '@/game/scenes/sceneIds';
-import type { ControlMatDragIndicatorState } from '@/shared/ui';
+import { reduceControlMatDragIndicator } from '@/shared/ui';
 
 interface UseSceneControlMatPointerBridgeOptions {
   disabled: boolean;
@@ -25,7 +25,7 @@ export function useSceneControlMatPointerBridge({
   const lastPointerEventRef = useRef<SceneControlPointerEventSnapshot | null>(null);
   const pendingMoveRef = useRef<SceneControlPointerEventSnapshot | null>(null);
   const pendingMoveFrameRef = useRef<number | null>(null);
-  const [pointerVisual, dispatchPointerVisual] = useReducer(pointerVisualReducer, null);
+  const [pointerVisual, dispatchPointerVisual] = useReducer(reduceControlMatDragIndicator, null);
 
   const dispatchPointer = useCallback((
     kind: SceneControlPointerEventKind,
@@ -227,32 +227,6 @@ function releasePointerCapture(target: HTMLElement | null, pointerId: number): v
     target?.releasePointerCapture?.(pointerId);
   } catch {
     // Pointer capture may already be gone if the browser canceled the gesture first.
-  }
-}
-
-type PointerVisualAction =
-  | { type: 'begin'; point: { x: number; y: number } }
-  | { type: 'move'; point: { x: number; y: number } }
-  | { type: 'clear' };
-
-function pointerVisualReducer(
-  state: ControlMatDragIndicatorState | null,
-  action: PointerVisualAction
-): ControlMatDragIndicatorState | null {
-  switch (action.type) {
-    case 'begin':
-      return {
-        anchorX: action.point.x,
-        anchorY: action.point.y,
-        currentX: action.point.x,
-        currentY: action.point.y
-      };
-    case 'move':
-      return state
-        ? { ...state, currentX: action.point.x, currentY: action.point.y }
-        : null;
-    case 'clear':
-      return null;
   }
 }
 

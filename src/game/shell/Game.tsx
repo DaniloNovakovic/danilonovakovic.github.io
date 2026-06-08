@@ -74,11 +74,14 @@ export default function Game({
             aria-label="Move and interact"
             className="absolute inset-0 z-10 touch-none md:hidden"
             role="application"
-            {...touchControls.pointerHandlers}
+            onPointerCancel={touchControls.onPointerCancel}
+            onPointerDown={touchControls.onPointerDown}
+            onPointerLeave={touchControls.onPointerLeave}
+            onPointerMove={touchControls.onPointerMove}
+            onPointerUp={touchControls.onPointerUp}
           />
           <ControlMatDragIndicator
             className="z-20 md:hidden"
-            maxDistance={touchControls.dragMaxDistance}
             state={touchControls.dragIndicator}
           />
         </>
