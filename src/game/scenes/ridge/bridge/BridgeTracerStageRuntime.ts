@@ -428,11 +428,7 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
         'toy-car',
         { spotId: presentation.toyCar.spotId }
       );
-      this.toyCar.setVisible(true);
-      this.toyCarShadow?.setVisible(true);
-      this.toyCar.setPosition(toyCarPlacement.x, toyCarPlacement.y)
-        .setDepth(toyCarPlacement.depth);
-      this.syncToyCarSupport(this.toyCar.x, this.toyCar.y, true);
+      this.placeToyCarAt(toyCarPlacement);
 
       if (!this.toyCarTween || !this.toyCarTween.isPlaying()) {
         this.toyCarTween?.stop();
@@ -468,10 +464,15 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
       'toy-car',
       { spotId: presentation.toyCar.spotId }
     );
+    this.placeToyCarAt(toyCarPlacement);
+  }
+
+  private placeToyCarAt(placement: { depth: number; x: number; y: number }): void {
+    if (!this.toyCar) return;
     this.toyCar.setVisible(true);
     this.toyCarShadow?.setVisible(true);
-    this.toyCar.setPosition(toyCarPlacement.x, toyCarPlacement.y)
-      .setDepth(toyCarPlacement.depth);
+    this.toyCar.setPosition(placement.x, placement.y)
+      .setDepth(placement.depth);
     this.syncToyCarSupport(this.toyCar.x, this.toyCar.y, true);
   }
 

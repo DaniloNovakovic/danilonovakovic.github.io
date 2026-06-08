@@ -28,7 +28,7 @@ export function clampStageAuthoringOffset(value: number): number {
   );
 }
 export const STAGE_AUTHORING_DRAG_THRESHOLD_PX = 5;
-export const STAGE_AUTHORING_CAMERA_FOCUS_MARGIN_PX = 48;
+const STAGE_AUTHORING_CAMERA_FOCUS_MARGIN_PX = 48;
 const RAIL_POINT_PICK_RADIUS_PX = 14;
 const SPOT_PICK_RADIUS_PX = 12;
 const OBJECT_PICK_HALF_SIZE_PX = 8;
