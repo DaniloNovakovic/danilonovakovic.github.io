@@ -12,9 +12,25 @@ or saved as coherent wide source plates for layered stage composition.
 Ridge now uses generated proof plates under `layered-reset/plates/` for the
 Bridge playable proof:
 
-- `far-mountains-clouds.png`: slow far parallax paper/mountain/cloud layer
-- `close-stage-no-stumps.png`: transparent close playable terrain, camp, and
-  gorge layer
+- `cornfield-bridge-stage.png` (1536x1024): source doodle plate in the
+  Childlike Sunny Register matching the approved concept boards
+  (`docs/game-design/ridge/reference/concept-art/ridge-concept-06/07`):
+  sparse Cornfield Section, one bold foreground corn exit screen, an empty
+  builder work pad (logs + sawhorse only; Draftsperson and blueprint stay
+  modular), a plain river gap with no posts/stubs, and a simple far-bank path.
+  Ground line is drawn at image y=700 and the river gap spans image x 991-1204;
+  `stageComposition.ts` plate placement (scale 1.56, y -572) maps these onto the
+  Walk Rail baseline and the bridge bank Stage Spots. Not loaded at runtime;
+  kept as the source the parallax layers are split from.
+- Parallax layers split from the source plate as ink-on-transparent PNGs
+  (constant `#1f1f1d` ink, alpha from source luminance; paper tone comes from
+  the scene backdrop fill so layers blend seamlessly):
+  - `cornfield-sky.png` (420x160, source crop at 20,330): sun + clouds,
+    scrollFactor 0.2
+  - `cornfield-far-hill.png` (206x65, source crop at 1330,620): far hill
+    outline, scrollFactor 0.55, slides into view near the bridge
+  - `cornfield-ground.png` (1536x1024): cornfield, banks, river, props,
+    scrollFactor 1
 
 The Bridge runtime consumes the typed Bridge Stage Composition Source in
 `src/game/scenes/ridge/bridge/stageComposition.ts` for stage plates, Walk Rail
@@ -31,11 +47,14 @@ car.
   palette
 - silhouette-first reads at gameplay scale
 - hatching and line weight for depth instead of color
-- use a hybrid layered stage: coherent wide scenery plates for sky/mountains,
-  far forest, mid forest/work-camp staging, and playable terrain/gorge
+- use coherent wide scenery plates for the Cornfield Section, foreground corn
+  exit screen, open builder work pad, simple river gap, and playable banks
+- keep the plate in the loose childlike doodle register: wobbly thick-contour
+  ink, generous blank paper, sparse hatching only in shadows; no dense
+  engraving/etching texture, no buildings, no busy future-level backdrop
 - keep bridge state, Cicka, toy car, Bridge Draftsperson, prompts, and other
   interactive or stateful pieces modular
-- avoid building the forest read from many unrelated tree/bush cutouts; use
+- avoid building the cornfield read from many unrelated stalk cutouts; use
   individual cutouts only to reinforce a coherent layer or clear gameplay beat
 - distant layers should use simpler, lower-detail full-opacity drawings rather
   than translucent full-detail assets; depth comes from scale, line weight,

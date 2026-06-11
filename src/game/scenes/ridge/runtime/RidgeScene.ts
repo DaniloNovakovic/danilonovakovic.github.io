@@ -115,6 +115,9 @@ export class RidgeScene extends Phaser.Scene {
     if (!this.textures.exists('player_idle')) {
       TextureGenerator.generatePlayer(this);
     }
+    if (!this.textures.exists('player_idle_2x')) {
+      TextureGenerator.generatePlayer(this, 2, '_2x');
+    }
     preloadBridgeAssets(this);
     preloadCickaAssets(this);
   }

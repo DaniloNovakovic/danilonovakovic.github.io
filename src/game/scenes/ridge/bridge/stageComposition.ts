@@ -351,6 +351,12 @@ export const BRIDGE_STAGE_SOURCE: BridgeStageCompositionSource = {
       {
         progress: 0.56,
         x: 1410,
+        y: HORIZONTAL_LINE_BASELINE,
+        cue: { scale: 1, depth: 31, cameraFollowOffsetY: 0 }
+      },
+      {
+        progress: 0.61,
+        x: 1514,
         y: HORIZONTAL_LINE_BASELINE - 10,
         cue: { scale: 1, depth: 31, cameraFollowOffsetY: 0 }
       },
@@ -363,6 +369,12 @@ export const BRIDGE_STAGE_SOURCE: BridgeStageCompositionSource = {
       {
         progress: 0.78,
         x: 1865,
+        y: HORIZONTAL_LINE_BASELINE - 10,
+        cue: { scale: 1, depth: 31, cameraFollowOffsetY: 0 }
+      },
+      {
+        progress: 0.8,
+        x: 1902,
         y: HORIZONTAL_LINE_BASELINE - 10,
         cue: { scale: 1, depth: 31, cameraFollowOffsetY: 0 }
       },
@@ -385,12 +397,12 @@ export const BRIDGE_STAGE_SOURCE: BridgeStageCompositionSource = {
     { id: 'spawn', railProgress: 0 },
     {
       id: 'cicka-play',
-      railProgress: 0.18,
+      railProgress: 0.12,
       promptOffset: { x: 0, y: -116 },
       interactRadius: 86
     },
     { id: 'cicka-settled', railProgress: 0.88, offset: { x: 0, y: 20 } },
-    { id: 'cicka-toy-car', railProgress: 0.18, offset: { x: 72, y: -2 } },
+    { id: 'cicka-toy-car', railProgress: 0.12, offset: { x: 72, y: -2 } },
     {
       id: 'draftsperson',
       railProgress: 0.48,
@@ -398,9 +410,9 @@ export const BRIDGE_STAGE_SOURCE: BridgeStageCompositionSource = {
       interactRadius: 86
     },
     { id: 'blueprint', railProgress: 0.48, offset: { x: -130, y: -70 } },
-    { id: 'bridge-left-bank', railProgress: 0.56 },
-    { id: 'bridge-center', railProgress: 0.67 },
-    { id: 'bridge-right-bank', railProgress: 0.78 },
+    { id: 'bridge-left-bank', railProgress: 0.61 },
+    { id: 'bridge-center', railProgress: 0.71 },
+    { id: 'bridge-right-bank', railProgress: 0.8 },
     { id: 'toy-car-test-start', railProgress: 0.48, offset: { x: -152, y: -26 } },
     { id: 'toy-car-test-end', railProgress: 0.78, offset: { x: 120, y: 4 } },
     {
@@ -413,52 +425,69 @@ export const BRIDGE_STAGE_SOURCE: BridgeStageCompositionSource = {
   ],
   /** Large visual layers. Move these when the image plates do not line up. */
   plates: [
+    /**
+     * The cornfield stage is split into ink-on-transparent parallax layers
+     * extracted from the source doodle plate (1536x1024). The paper tone comes
+     * from the scene's backdrop fill, so all three layers blend seamlessly.
+     *
+     * Ground geometry in source-plate pixels: walkable ground line at image
+     * y=700, river gap at image x 991-1204. At scale 1.56 the ground line lands
+     * on the rail baseline (520) and the gap spans world x 1546-1878, matching
+     * the bridge bank Stage Spots.
+     */
     {
-      id: 'far-mountains-left',
-      textureKey: BRIDGE_TEXTURE_KEYS.layeredFarMountains,
-      x: -80,
-      y: -12,
-      depth: -82,
+      /** Sun + clouds strip (source crop at 20,330). Drifts slowly for parallax. */
+      id: 'cornfield-sky',
+      textureKey: BRIDGE_TEXTURE_KEYS.layeredCornfieldSky,
+      x: 31,
+      y: -57,
+      depth: 1,
       origin: [0, 0],
-      scale: 0.82,
-      scrollFactor: [0.16, 1]
+      scale: 1.56,
+      scrollFactor: [0.2, 1]
     },
     {
-      id: 'far-mountains-right',
-      textureKey: BRIDGE_TEXTURE_KEYS.layeredFarMountains,
-      x: 1260,
-      y: -12,
-      depth: -82,
+      /**
+       * Far hill outline (source crop at 1330,620). Positioned so it slides
+       * into view over the right bank as the camera approaches the bridge.
+       */
+      id: 'cornfield-far-hill',
+      textureKey: BRIDGE_TEXTURE_KEYS.layeredCornfieldFarHill,
+      x: 1481,
+      y: 395,
+      depth: 2,
       origin: [0, 0],
-      scale: 0.82,
-      scrollFactor: [0.16, 1]
+      scale: 1.56,
+      scrollFactor: [0.55, 1]
     },
     {
-      id: 'close-stage',
-      textureKey: BRIDGE_TEXTURE_KEYS.layeredCloseStage,
+      id: 'cornfield-ground',
+      textureKey: BRIDGE_TEXTURE_KEYS.layeredCornfieldGround,
       x: 0,
-      y: -207,
+      y: -572,
       depth: 3,
       origin: [0, 0],
-      scale: 1.25
+      scale: 1.56
     }
   ],
   /** Rendered Bridge props/NPCs. Their placement comes from `spotId`. */
   objects: [
     {
+      /** Asset is 140x210; 0.5 presents the builder at ~105px, near player height. */
       id: 'bridge-draftsperson',
       kind: 'image',
       textureKey: BRIDGE_TEXTURE_KEYS.bridgeBuilder,
       spotId: 'draftsperson',
       offset: { x: 0, y: -2 },
-      scale: 0.76
+      scale: 0.5
     },
     {
+      /** Asset is 80x49; 0.45 keeps the toy car toy-sized, smaller than Cicka. */
       id: 'toy-car',
       kind: 'image',
       textureKey: BRIDGE_TEXTURE_KEYS.modularToyCar,
       spotId: 'cicka-toy-car',
-      scale: 0.78
+      scale: 0.45
     },
     {
       id: 'completed-bridge',
@@ -484,10 +513,10 @@ export const BRIDGE_STAGE_SOURCE: BridgeStageCompositionSource = {
       id: 'near-bank-lip',
       depth: 32,
       points: [
-        { x: 1320, y: 520 },
-        { x: 1435, y: 506 },
-        { x: 1888, y: 506 },
-        { x: 2028, y: 522 }
+        { x: 1430, y: 520 },
+        { x: 1540, y: 506 },
+        { x: 1890, y: 506 },
+        { x: 2040, y: 522 }
       ]
     }
   ]

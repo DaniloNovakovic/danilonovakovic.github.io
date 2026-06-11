@@ -81,10 +81,18 @@ export interface BridgeWalkRailPlayerRuntimeOptions {
   resolveCameraZoom: () => number;
 }
 
-const DEFAULT_TEXTURE_KEY = 'player_idle';
-const GLASSES_TEXTURE_KEY = 'player_glasses';
+const DEFAULT_TEXTURE_KEY = 'player_idle_2x';
+const GLASSES_TEXTURE_KEY = 'player_glasses_2x';
 const WALK_BOB_PERIOD_MS = 100;
 const WALK_BOB_ANGLE_DEGREES = 5;
+/**
+ * Base presentation scale applied on top of rail perspective cues.
+ *
+ * The Bridge player uses the crisp 2x procedural texture (96x130), so 0.78
+ * presents the player at roughly 100px tall - in proportion with the
+ * cornfield plate (corn rows ~3x player) and the Bridge cast.
+ */
+const PLAYER_RAIL_BASE_SCALE = 0.78;
 
 export function createBridgeWalkRailPlayerRuntime(
   options: BridgeWalkRailPlayerRuntimeOptions
@@ -266,7 +274,7 @@ class PhaserBridgeWalkRailPlayerRuntime implements BridgeWalkRailPlayerRuntime {
     this.lastSample = sample;
     this.player
       .setPosition(sample.x, sample.y)
-      .setScale(sample.cue.scale)
+      .setScale(PLAYER_RAIL_BASE_SCALE * sample.cue.scale)
       .setDepth(sample.cue.depth);
     this.scene.cameras.main.setFollowOffset(0, sample.cue.cameraFollowOffsetY);
   }

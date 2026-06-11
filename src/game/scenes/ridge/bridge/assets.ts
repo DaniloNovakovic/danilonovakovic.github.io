@@ -7,8 +7,9 @@ const BRIDGE_LAYERED_RESET_ASSET_PATH = `${BRIDGE_ASSET_PATH}layered-reset/plate
 export const BRIDGE_TEXTURE_KEYS = {
   bridgeBuilder: 'ridge-bridge-builder',
   modularToyCar: 'ridge-bridge-toy-car',
-  layeredFarMountains: 'ridge-bridge-layered-far-mountains',
-  layeredCloseStage: 'ridge-bridge-layered-close-stage'
+  layeredCornfieldSky: 'ridge-bridge-layered-cornfield-sky',
+  layeredCornfieldFarHill: 'ridge-bridge-layered-cornfield-far-hill',
+  layeredCornfieldGround: 'ridge-bridge-layered-cornfield-ground'
 } as const;
 
 const BRIDGE_IMAGE_ASSETS = [
@@ -23,13 +24,18 @@ const BRIDGE_IMAGE_ASSETS = [
     path: BRIDGE_MODULAR_ASSET_PATH
   },
   {
-    key: BRIDGE_TEXTURE_KEYS.layeredFarMountains,
-    file: 'far-mountains-clouds.png',
+    key: BRIDGE_TEXTURE_KEYS.layeredCornfieldSky,
+    file: 'cornfield-sky.png',
     path: BRIDGE_LAYERED_RESET_ASSET_PATH
   },
   {
-    key: BRIDGE_TEXTURE_KEYS.layeredCloseStage,
-    file: 'close-stage-no-stumps.png',
+    key: BRIDGE_TEXTURE_KEYS.layeredCornfieldFarHill,
+    file: 'cornfield-far-hill.png',
+    path: BRIDGE_LAYERED_RESET_ASSET_PATH
+  },
+  {
+    key: BRIDGE_TEXTURE_KEYS.layeredCornfieldGround,
+    file: 'cornfield-ground.png',
     path: BRIDGE_LAYERED_RESET_ASSET_PATH
   }
 ] as const;

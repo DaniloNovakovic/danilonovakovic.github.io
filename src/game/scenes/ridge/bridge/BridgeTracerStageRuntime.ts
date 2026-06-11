@@ -289,8 +289,8 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
     this.cickaShadow = this.scene.add.ellipse(
       cickaPlaySpot.x,
       cickaPlaySpot.y - 2,
-      92,
-      18,
+      58,
+      12,
       0x1f1f1d,
       0.12
     ).setDepth(cickaPlaySpot.depth - 1);
@@ -492,8 +492,8 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
     this.toyCarShadow = this.addGroundContactShadow(
       toyCarPlacement.x,
       toyCarPlacement.y + 2,
-      78,
-      14,
+      40,
+      8,
       toyCarPlacement.depth - 1
     );
     return this.addBridgeImage(toyCarObject.textureKey, toyCarPlacement.x, toyCarPlacement.y, {
@@ -566,31 +566,16 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
 
     bridge.fillStyle(0xf7f1df, 0.9);
     bridge.lineStyle(4, 0x1f1f1d, 0.92);
-    bridge.fillRect(leftX, deckTopY, width, 18);
-    bridge.strokeRect(leftX, deckTopY, width, 18);
+    bridge.fillRect(leftX, deckTopY, width, 16);
+    bridge.strokeRect(leftX, deckTopY, width, 16);
 
     bridge.lineStyle(2, 0x1f1f1d, 0.54);
     for (let x = leftX + 24; x < rightX - 12; x += 34) {
-      bridge.lineBetween(x, deckTopY + 2, x - 5, deckTopY + 17);
+      bridge.lineBetween(x, deckTopY + 2, x - 5, deckTopY + 15);
     }
 
-    bridge.lineStyle(3, 0x1f1f1d, 0.78);
-    bridge.lineBetween(leftX + 26, deckTopY + 20, rightX - 26, deckTopY + 20);
-
-    const supportInset = 58;
-    const supportTopY = deckTopY + 18;
-    const supportBottomY = deckTopY + 76;
-    [leftX + supportInset, rightX - supportInset].forEach((x) => {
-      bridge.fillStyle(0xf7f1df, 0.78);
-      bridge.fillRect(x - 12, supportTopY, 24, supportBottomY - supportTopY);
-      bridge.strokeRect(x - 12, supportTopY, 24, supportBottomY - supportTopY);
-      bridge.lineBetween(x - 12, supportBottomY, x + 12, supportTopY);
-      bridge.lineBetween(x + 12, supportBottomY, x - 12, supportTopY);
-    });
-
-    bridge.lineStyle(2, 0x1f1f1d, 0.32);
-    bridge.lineBetween(leftX + 4, deckTopY + 22, leftX + 86, deckTopY + 34);
-    bridge.lineBetween(rightX - 86, deckTopY + 34, rightX - 4, deckTopY + 22);
+    bridge.lineStyle(3, 0x1f1f1d, 0.64);
+    bridge.lineBetween(leftX + 6, deckTopY + 17, rightX - 6, deckTopY + 17);
 
     return bridge;
   }

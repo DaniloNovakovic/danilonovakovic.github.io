@@ -1,17 +1,21 @@
 {
-  "source": "built-in image_gen + local chroma-key slicing",
+  "source": "GenerateImage doodle pass (2026-06-11) + chroma-key removal; style-locked to layered-reset cornfield plate and ridge-concept-06",
   "assets": [
     {
       "file": "bridge-builder.png",
       "kind": "character",
-      "width": 105,
-      "height": 220
+      "width": 140,
+      "height": 210,
+      "runtimeScale": 0.5,
+      "note": "~105px display height, near player height (player_idle_2x at 0.78 rail base scale)"
     },
     {
       "file": "toy-car.png",
       "kind": "prop",
-      "width": 132,
-      "height": 72
+      "width": 80,
+      "height": 49,
+      "runtimeScale": 0.45,
+      "note": "~36px display length, toy-sized relative to Cicka"
     }
   ]
 }

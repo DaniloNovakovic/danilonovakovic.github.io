@@ -53,7 +53,7 @@ describe('Bridge Stage Composition Source', () => {
       crossingOpen: false,
       playerProgressRange: {
         min: 0,
-        max: 0.56
+        max: 0.61
       },
       cickaSpotId: 'cicka-play',
       toyCar: {
@@ -88,9 +88,9 @@ describe('Bridge Stage Composition Source', () => {
 
   it('keeps runtime assets referenced through Stage Plates and Stage Objects', () => {
     expect(BRIDGE_STAGE_SOURCE.plates.map((plate) => plate.textureKey)).toEqual([
-      BRIDGE_TEXTURE_KEYS.layeredFarMountains,
-      BRIDGE_TEXTURE_KEYS.layeredFarMountains,
-      BRIDGE_TEXTURE_KEYS.layeredCloseStage
+      BRIDGE_TEXTURE_KEYS.layeredCornfieldSky,
+      BRIDGE_TEXTURE_KEYS.layeredCornfieldFarHill,
+      BRIDGE_TEXTURE_KEYS.layeredCornfieldGround
     ]);
 
     expect(resolveBridgeStageObject(BRIDGE_STAGE_SOURCE, 'bridge-draftsperson')).toMatchObject({
