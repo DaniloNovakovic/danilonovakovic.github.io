@@ -63,7 +63,25 @@ describe('Bridge Stage debug overlay draw commands', () => {
 
     expect(commands.some((command) => command.id === 'authoring-rail-point:0')).toBe(true);
     expect(commands.some((command) => command.id === 'authoring-object:bridge-draftsperson')).toBe(true);
+    expect(commands.some((command) => command.id === 'authoring-plate:cornfield-sky')).toBe(true);
     expect(commands.some((command) => command.id === 'stage-spot:draftsperson')).toBe(true);
+  });
+
+  it('highlights the selected Stage Plate bounds in authoring mode', () => {
+    const commands = createBridgeStageDebugDrawCommands({
+      interactionTargets: [],
+      authoring: {
+        active: true,
+        selection: { kind: 'plate', id: 'cornfield-ground' }
+      },
+      settings: debugOff
+    });
+
+    const plateBounds = commands.find((command) => command.id === 'authoring-plate:cornfield-ground');
+    expect(plateBounds?.kind).toBe('rect');
+    if (plateBounds?.kind === 'rect') {
+      expect(plateBounds.lineWidth).toBe(3);
+    }
   });
 
   it('treats graybox mode as a composite Bridge Stage overlay', () => {

@@ -14,4 +14,7 @@ export const modePickerMessages = {
     cta: "Read the page",
   },
   switchHint: "You can switch between the two at any time.",
+  ridgeDebugger: {
+    cta: "Open Ridge Debugger",
+  },
 } as const;

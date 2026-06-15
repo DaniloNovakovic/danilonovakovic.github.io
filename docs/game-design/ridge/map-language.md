@@ -97,7 +97,7 @@ encounter logic stay outside v0.
 
 The blockout generator scripts and the former Ridge blockout source tree were
 removed. Current Bridge rail/stage work uses the Ridge Stage Debugger at
-`?mode=ridge-stage-debugger` and the Bridge Stage Composition Source under
+`?mode=ridge-debugger` and the Bridge Stage Composition Source under
 `src/game/scenes/ridge/bridge/stageComposition.ts`.
 
 ## Core Shape

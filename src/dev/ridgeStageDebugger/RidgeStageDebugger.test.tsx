@@ -41,7 +41,7 @@ vi.mock('@/game/shell/Game', () => ({
 
 describe('RidgeStageDebugger', () => {
   beforeEach(() => {
-    window.history.replaceState(window.history.state, '', '/?mode=ridge-stage-debugger');
+    window.history.replaceState(window.history.state, '', '/?mode=ridge-debugger');
     resetBridgeForDebuggerTest();
   });
 

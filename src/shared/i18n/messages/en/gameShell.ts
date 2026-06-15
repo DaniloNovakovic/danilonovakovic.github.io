@@ -11,6 +11,8 @@ export const gameShellMessages = {
   backToCity: "Back to City",
   back: "Back",
   devSwitcher: "Dev scene switcher",
+  ridgeDebugger: "Ridge Debugger",
+  devToolsSection: "Dev tools",
   city: "City",
   loadingScene: "Loading scene",
 } as const;

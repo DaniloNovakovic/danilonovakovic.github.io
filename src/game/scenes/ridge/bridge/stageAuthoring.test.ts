@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   BRIDGE_STAGE_SOURCE,
   resolveBridgeStageObjectPlacement,
+  resolveBridgeStagePlateBounds,
   sampleBridgeWalkRail
 } from './stageComposition';
 import {
@@ -139,6 +140,56 @@ describe('stageAuthoring', () => {
       { kind: 'spot', id: 'draftsperson' },
       { kind: 'object', id: 'bridge-draftsperson' }
     )).toBe(false);
+  });
+
+  it('updates plate placement and formats a replacement snippet', () => {
+    const draft = updateStageAuthoringDraft(
+      cloneBridgeStageCompositionSource(),
+      { kind: 'plate', id: 'cornfield-sky' },
+      'y',
+      -40
+    );
+    const plate = draft.plates.find((candidate) => candidate.id === 'cornfield-sky');
+
+    expect(plate?.y).toBe(-40);
+    expect(formatStageAuthoringSnippet(draft, { kind: 'plate', id: 'cornfield-sky' })).toContain(
+      "id: 'cornfield-sky'"
+    );
+    expect(formatStageAuthoringSnippet(draft, { kind: 'plate', id: 'cornfield-sky' })).toContain(
+      'y: -40'
+    );
+  });
+
+  it('keeps plate drag motion relative to the grab point', () => {
+    const draft = applyStageAuthoringDrag(
+      cloneBridgeStageCompositionSource(),
+      { kind: 'plate', id: 'cornfield-sky' },
+      131,
+      -47,
+      {
+        dragAnchor: {
+          worldX: 100,
+          worldY: -50,
+          targetX: 31,
+          targetY: -57
+        }
+      }
+    );
+    const plate = draft.plates.find((candidate) => candidate.id === 'cornfield-sky');
+
+    expect(plate).toEqual(expect.objectContaining({ x: 62, y: -54 }));
+  });
+
+  it('selects the topmost Stage Plate under a canvas click', () => {
+    const ground = BRIDGE_STAGE_SOURCE.plates.find((plate) => plate.id === 'cornfield-ground');
+    const bounds = resolveBridgeStagePlateBounds(ground!);
+    const pick = hitTestStageAuthoringTargets(
+      BRIDGE_STAGE_SOURCE,
+      bounds.centerX,
+      bounds.centerY
+    );
+
+    expect(pick).toEqual({ kind: 'plate', id: 'cornfield-ground' });
   });
 
   it('steps the authoring pointer FSM from pending click to pick', () => {

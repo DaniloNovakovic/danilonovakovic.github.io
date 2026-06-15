@@ -40,6 +40,18 @@ const BRIDGE_IMAGE_ASSETS = [
   }
 ] as const;
 
+/** Native pixel sizes for Bridge parallax plate textures (used by stage authoring bounds). */
+export const BRIDGE_PLATE_TEXTURE_DIMENSIONS = {
+  [BRIDGE_TEXTURE_KEYS.layeredCornfieldSky]: { width: 420, height: 160 },
+  [BRIDGE_TEXTURE_KEYS.layeredCornfieldFarHill]: { width: 206, height: 65 },
+  [BRIDGE_TEXTURE_KEYS.layeredCornfieldGround]: { width: 1536, height: 1024 }
+} as const satisfies Record<
+  | typeof BRIDGE_TEXTURE_KEYS.layeredCornfieldSky
+  | typeof BRIDGE_TEXTURE_KEYS.layeredCornfieldFarHill
+  | typeof BRIDGE_TEXTURE_KEYS.layeredCornfieldGround,
+  { width: number; height: number }
+>;
+
 export function preloadBridgeAssets(scene: Phaser.Scene): void {
   BRIDGE_IMAGE_ASSETS.forEach((asset) => {
     const path = 'path' in asset ? asset.path : BRIDGE_ASSET_PATH;

@@ -9,6 +9,7 @@ import { areStageAuthoringSelectionsEqual, type StageAuthoringSelection } from '
 import {
   BRIDGE_STAGE_SOURCE,
   resolveBridgeStageObjectPlacement,
+  resolveBridgeStagePlateBounds,
   resolveBridgeStageSpot,
   sampleBridgeWalkRail,
   type BridgeStageCompositionSource
@@ -151,6 +152,39 @@ export function createBridgeStageDebugDrawCommands(
     });
 
     if (showAuthoringMarkers) {
+      source.plates.forEach((plate) => {
+        const bounds = resolveBridgeStagePlateBounds(plate);
+        const selected = areStageAuthoringSelectionsEqual(options.authoring?.selection, {
+          kind: 'plate',
+          id: plate.id
+        });
+        commands.push({
+          kind: 'rect',
+          id: `authoring-plate:${plate.id}`,
+          x: bounds.centerX,
+          y: bounds.centerY,
+          width: bounds.width,
+          height: bounds.height,
+          fillColor: 0xd4a5f5,
+          fillAlpha: selected ? 0.14 : 0.06,
+          strokeColor: 0x1a1a1a,
+          strokeAlpha: selected ? 1 : 0.55,
+          lineWidth: selected ? 3 : 2
+        });
+        commands.push({
+          kind: 'circle',
+          id: `authoring-plate-anchor:${plate.id}`,
+          x: plate.x,
+          y: plate.y,
+          radius: selected ? 7 : 5,
+          fillColor: 0xd4a5f5,
+          fillAlpha: selected ? 0.5 : 0.28,
+          strokeColor: 0x1a1a1a,
+          strokeAlpha: selected ? 1 : 0.78,
+          lineWidth: selected ? 3 : 2
+        });
+      });
+
       source.objects.forEach((object) => {
         const placement = resolveBridgeStageObjectPlacement(source, object.id);
         const selected = areStageAuthoringSelectionsEqual(options.authoring?.selection, {

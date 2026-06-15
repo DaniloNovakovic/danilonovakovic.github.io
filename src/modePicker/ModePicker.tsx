@@ -1,13 +1,15 @@
 import type { ReactNode } from 'react';
-import { Gamepad2, BookOpen } from 'lucide-react';
+import { Bug, Gamepad2, BookOpen } from 'lucide-react';
+import type { DevToolMode } from '@/shared/hooks/useReadMode';
 import { useMessages } from '@/shared/i18n';
 import { Badge, Button } from '@/shared/ui';
 import { useIsTouchLike } from './useIsTouchLike';
 
 export type AppMode = 'interactive' | 'static';
+export type ModePickerChoice = AppMode | DevToolMode;
 
 interface ModePickerProps {
-  onChoose: (mode: AppMode) => void;
+  onChoose: (mode: ModePickerChoice) => void;
 }
 
 interface ChoiceCardProps {
@@ -87,6 +89,17 @@ export default function ModePicker({ onChoose }: ModePickerProps) {
         <p className="max-w-md text-center text-xs text-[#1a1a1a]/60">
           {messages.modePicker.switchHint}
         </p>
+
+        {import.meta.env.DEV ? (
+          <Button
+            variant="secondary"
+            onClick={() => onChoose('ridge-debugger')}
+            className="mt-2 flex min-h-11 w-full max-w-sm items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[#1a1a1a]/50 bg-[#fbfbf9]/80 px-4 py-2 text-sm font-bold uppercase tracking-wider text-[#1a1a1a] shadow-none hover:bg-[#f3df8b]"
+          >
+            <Bug className="h-4 w-4" aria-hidden />
+            <span>{messages.modePicker.ridgeDebugger.cta}</span>
+          </Button>
+        ) : null}
       </div>
     </div>
   );

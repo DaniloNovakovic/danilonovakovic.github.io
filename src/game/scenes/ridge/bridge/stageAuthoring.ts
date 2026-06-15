@@ -2,11 +2,13 @@ import {
   BRIDGE_STAGE_SOURCE,
   projectPointToBridgeWalkRail,
   resolveBridgeStageObjectPlacement,
+  resolveBridgeStagePlateBounds,
   resolveBridgeStageSpot,
   sampleBridgeWalkRail,
   type BridgeStageCompositionSource,
   type BridgeStageObject,
   type BridgeStageObjectId,
+  type BridgeStagePlate,
   type BridgeStagePoint,
   type BridgeStageSpot,
   type BridgeStageSpotId,
@@ -16,7 +18,8 @@ import {
 export type StageAuthoringSelection =
   | { kind: 'rail-point'; index: number }
   | { kind: 'spot'; id: BridgeStageSpotId }
-  | { kind: 'object'; id: BridgeStageObjectId };
+  | { kind: 'object'; id: BridgeStageObjectId }
+  | { kind: 'plate'; id: string };
 
 export const STAGE_AUTHORING_OFFSET_SLIDER_WINDOW_PX = 200;
 export const STAGE_AUTHORING_OFFSET_LIMIT_PX = 500;
@@ -82,7 +85,28 @@ export function hitTestStageAuthoringTargets(
     consider({ kind: 'rail-point', index }, point.x, point.y, RAIL_POINT_PICK_RADIUS_PX);
   });
 
-  return bestSelection;
+  if (bestSelection) return bestSelection;
+
+  let plateSelection: StageAuthoringSelection | null = null;
+  let bestPlateDepth = Number.NEGATIVE_INFINITY;
+
+  source.plates.forEach((plate) => {
+    const bounds = resolveBridgeStagePlateBounds(plate);
+    if (
+      worldX < bounds.left ||
+      worldX > bounds.left + bounds.width ||
+      worldY < bounds.top ||
+      worldY > bounds.top + bounds.height
+    ) {
+      return;
+    }
+    if (plate.depth >= bestPlateDepth) {
+      bestPlateDepth = plate.depth;
+      plateSelection = { kind: 'plate', id: plate.id };
+    }
+  });
+
+  return plateSelection;
 }
 
 export function serializeStageAuthoringSelection(
@@ -96,6 +120,8 @@ export function serializeStageAuthoringSelection(
       return `spot:${selection.id}`;
     case 'object':
       return `object:${selection.id}`;
+    case 'plate':
+      return `plate:${selection.id}`;
     default:
       return assertNever(selection);
   }
@@ -120,6 +146,7 @@ export interface StageAuthoringPointerState {
   startScrollY: number;
   startX: number;
   startY: number;
+  dragAnchor?: ApplyStageAuthoringDragOptions['dragAnchor'];
 }
 
 export type StageAuthoringPointerIntent =
@@ -167,6 +194,7 @@ export function advanceStageAuthoringPointer(
     worldX: number;
     worldY: number;
     zoom: number;
+    dragTargetOrigin?: BridgeStagePoint | null;
   }
 ): {
   state: StageAuthoringPointerState;
@@ -182,7 +210,18 @@ export function advanceStageAuthoringPointer(
   const intents: StageAuthoringPointerIntent[] = [];
 
   if (state.mode === 'pending' && distance >= STAGE_AUTHORING_DRAG_THRESHOLD_PX) {
-    nextState = { ...state, mode: 'drag-marker' };
+    nextState = {
+      ...state,
+      mode: 'drag-marker',
+      dragAnchor: input.dragTargetOrigin
+        ? {
+            worldX: input.worldX,
+            worldY: input.worldY,
+            targetX: input.dragTargetOrigin.x,
+            targetY: input.dragTargetOrigin.y
+          }
+        : undefined
+    };
     if (nextState.selection) {
       intents.push({ kind: 'pick', selection: nextState.selection });
     }
@@ -237,9 +276,27 @@ export function resolveStageAuthoringTargetPoint(
       return resolveBridgeStageSpot(source, selection.id);
     case 'object':
       return resolveBridgeStageObjectPlacement(source, selection.id).contactPoint;
+    case 'plate': {
+      const plate = source.plates.find((candidate) => candidate.id === selection.id);
+      if (!plate) return { x: 0, y: 0 };
+      const bounds = resolveBridgeStagePlateBounds(plate);
+      return { x: bounds.centerX, y: bounds.centerY };
+    }
     default:
       return assertNever(selection);
   }
+}
+
+export function resolveStageAuthoringDragOrigin(
+  source: BridgeStageCompositionSource,
+  selection: StageAuthoringSelection
+): BridgeStagePoint {
+  if (selection.kind === 'plate') {
+    const plate = source.plates.find((candidate) => candidate.id === selection.id);
+    if (!plate) return { x: 0, y: 0 };
+    return { x: plate.x, y: plate.y };
+  }
+  return resolveStageAuthoringTargetPoint(source, selection);
 }
 
 export function isWorldPointInsideCameraView(
@@ -255,6 +312,12 @@ export function isWorldPointInsideCameraView(
 
 export interface ApplyStageAuthoringDragOptions {
   offsetOnly?: boolean;
+  dragAnchor?: {
+    worldX: number;
+    worldY: number;
+    targetX: number;
+    targetY: number;
+  };
 }
 
 export function applyStageAuthoringDrag(
@@ -310,6 +373,22 @@ export function applyStageAuthoringDrag(
       };
       return next;
     }
+    case 'plate': {
+      const plate = next.plates.find((candidate) => candidate.id === selection.id);
+      if (!plate) return next;
+      if (options.dragAnchor) {
+        plate.x = Math.round(
+          options.dragAnchor.targetX + (worldX - options.dragAnchor.worldX)
+        );
+        plate.y = Math.round(
+          options.dragAnchor.targetY + (worldY - options.dragAnchor.worldY)
+        );
+        return next;
+      }
+      plate.x = roundedX;
+      plate.y = roundedY;
+      return next;
+    }
     default:
       return assertNever(selection);
   }
@@ -334,6 +413,11 @@ export function formatStageAuthoringSnippet(
       const object = source.objects.find((candidate) => candidate.id === selection.id);
       if (!object) return '';
       return formatObjectSnippet(object);
+    }
+    case 'plate': {
+      const plate = source.plates.find((candidate) => candidate.id === selection.id);
+      if (!plate) return '';
+      return formatPlateSnippet(plate);
     }
     default:
       return assertNever(selection);
@@ -369,6 +453,14 @@ export function resetStageAuthoringSelection(
       if (!object) return next;
       next.objects = next.objects.map((candidate) => (
         candidate.id === selection.id ? cloneObject(object) : candidate
+      ));
+      return next;
+    }
+    case 'plate': {
+      const plate = committed.plates.find((candidate) => candidate.id === selection.id);
+      if (!plate) return next;
+      next.plates = next.plates.map((candidate) => (
+        candidate.id === selection.id ? clonePlate(plate) : candidate
       ));
       return next;
     }
@@ -422,6 +514,26 @@ export function updateStageAuthoringDraft(
           y: object.offset?.y ?? 0,
           [axis]: clampStageAuthoringOffset(value)
         };
+      }
+      return next;
+    }
+    case 'plate': {
+      const plate = next.plates.find((candidate) => candidate.id === selection.id);
+      if (!plate) return next;
+      if (field === 'x' || field === 'y') {
+        plate[field] = Math.round(value);
+        return next;
+      }
+      if (field === 'scale') {
+        plate.scale = clampPlateScale(value);
+        return next;
+      }
+      if (field === 'scrollFactor.x' || field === 'scrollFactor.y') {
+        const axis = field === 'scrollFactor.x' ? 0 : 1;
+        const current = plate.scrollFactor ?? [1, 1];
+        plate.scrollFactor = axis === 0
+          ? [clampScrollFactor(value), current[1] ?? 1]
+          : [current[0] ?? 1, clampScrollFactor(value)];
       }
       return next;
     }
@@ -512,6 +624,26 @@ function formatObjectSnippet(object: BridgeStageObject): string {
   return lines.join('\n');
 }
 
+function formatPlateSnippet(plate: BridgeStagePlate): string {
+  const lines = [
+    '{',
+    `  id: '${plate.id}',`,
+    `  textureKey: '${plate.textureKey}',`,
+    `  x: ${Math.round(plate.x)},`,
+    `  y: ${Math.round(plate.y)},`,
+    `  depth: ${Math.round(plate.depth)},`,
+    `  origin: [${plate.origin[0]}, ${plate.origin[1]}],`,
+    `  scale: ${formatNumber(plate.scale)},`
+  ];
+
+  if (plate.scrollFactor) {
+    lines.push(`  scrollFactor: [${formatNumber(plate.scrollFactor[0])}, ${formatNumber(plate.scrollFactor[1])}],`);
+  }
+
+  lines.push('}');
+  return lines.join('\n');
+}
+
 function cloneRailPoint(point: BridgeWalkRailPoint): BridgeWalkRailPoint {
   return {
     progress: point.progress,
@@ -538,12 +670,28 @@ function cloneObject(object: BridgeStageObject): BridgeStageObject {
   } as BridgeStageObject;
 }
 
+function clonePlate(plate: BridgeStagePlate): BridgeStagePlate {
+  return {
+    ...plate,
+    origin: [...plate.origin] as [number, number],
+    scrollFactor: plate.scrollFactor ? [...plate.scrollFactor] as [number, number] : undefined
+  };
+}
+
 function formatNumber(value: number): string {
   return Number.isInteger(value) ? String(value) : value.toFixed(3);
 }
 
 function clamp01(value: number): number {
   return Math.min(1, Math.max(0, value));
+}
+
+function clampPlateScale(value: number): number {
+  return Math.min(3, Math.max(0.25, Math.round(value * 100) / 100));
+}
+
+function clampScrollFactor(value: number): number {
+  return Math.min(1, Math.max(0, Math.round(value * 1000) / 1000));
 }
 
 function assertNever(value: never): never {

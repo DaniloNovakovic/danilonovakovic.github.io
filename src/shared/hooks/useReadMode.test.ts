@@ -10,8 +10,8 @@ describe('readRouteStateFromSearch', () => {
   });
 
   it('only exposes the Ridge Stage Debugger in dev mode', () => {
-    expect(readRouteStateFromSearch('?mode=ridge-stage-debugger', true)).toBe('ridge-stage-debugger');
-    expect(readRouteStateFromSearch('?mode=ridge-stage-debugger', false)).toBe('picker');
+    expect(readRouteStateFromSearch('?mode=ridge-debugger', true)).toBe('ridge-debugger');
+    expect(readRouteStateFromSearch('?mode=ridge-debugger', false)).toBe('picker');
     expect(readRouteStateFromSearch('?mode=ridge-blockout', true)).toBe('picker');
   });
 });

@@ -44,7 +44,7 @@ Current runtime characteristics:
 - Bridge stage plates, modular objects, Stage Spots, Stage Occluders, and
   route-beat presentation state are authored in the colocated Bridge source
   under `src/game/scenes/ridge/bridge/`.
-- `?mode=ridge-stage-debugger` opens the current Ridge Stage Debugger: a
+- `?mode=ridge-debugger` opens the current Ridge Stage Debugger: a
   Bridge-first live preview with route-beat controls, Walk Rail readouts, Stage
   Spot movement, copyable rail snippets, and Bridge Stage debug overlays.
 - First Playable Route progress lives in the bridge store as

@@ -45,20 +45,34 @@ _Avoid_: Ridge Blockout Viewer, final art editor, generic map editor
 
 **Stage Authoring Draft**:
 Ephemeral in-debugger adjustments to Ridge Stage Composition Source spatial
-data. A draft updates the live preview immediately, shows copyable typed-source
-snippets for review, and is applied to git only when Danilo or an agent pastes
-the change into the Ridge Stage Composition Source. It is not a second persisted
-editor format or runtime data store.
-_Avoid_: map editor save file, localStorage canonical source, auto-patched source file
+data. A draft updates the live preview immediately while Danilo or an agent
+tunes placement. It is not a second persisted editor format or runtime data
+store until committed.
+_Avoid_: map editor save file, localStorage canonical source, parallel JSON stage source
+
+**Stage Authoring Commit**:
+The dev-only save action that writes the current Stage Authoring Draft back
+into the owning Ridge Stage Composition Source file. Danilo should not need to
+hunt for changed fields or paste per-target snippets by hand.
+_Avoid_: manual snippet archaeology, delta-only export as the primary workflow
 
 **Stage Authoring Mode**:
 An explicit Ridge Stage Debugger state for spatial tweaking. While active, player
-movement is frozen, all source-backed Walk Rail points, Stage Spots, and Stage
-Object contact markers are shown regardless of route-beat visibility, preview
-clicks select draft targets, and the sidebar exposes nudge controls plus
-copyable typed-source replacement snippets. Outside this mode, the debugger
-keeps its normal live-preview QA behavior.
-_Avoid_: always-on pick mode, modifier-only pick mode, beat-filtered edit targets, separate map editor app
+movement is frozen, all source-backed Walk Rail points, Stage Spots, Stage
+Plates, and Stage Object contact markers are shown regardless of route-beat
+visibility, preview clicks select draft targets, and the sidebar exposes nudge
+controls plus a dev-only Stage Authoring Commit action. Stage Plates are chosen
+from the authoring target list first; the preview highlights the active plate
+with a bounding box. Canvas click may select a plate when visible pixels are
+hit, but obscured plates are not expected to be reachable by click alone.
+Outside this mode, the debugger keeps its normal live-preview QA behavior.
+_Avoid_: always-on pick mode, modifier-only pick mode, beat-filtered edit targets, separate map editor app, canvas-only plate picking
+
+**Ridge Debugger Route**:
+The dev-only app route that opens the Ridge Stage Debugger without entering
+Interactive mode first. It is reached from Pick Your Path, the dev scene
+switcher, or a short `?mode=` URL alias.
+_Avoid_: treating the debugger as a Phaser scene
 
 **Stage Authoring Camera**:
 The preview camera behavior used during Stage Authoring Mode. It stops following
@@ -124,8 +138,85 @@ _Avoid_: separate chapter, required dungeon, second mini-map
 
 **Bridge Area**:
 The first required Ridge Area. It contains the Blueprint Bridge Resident Beat
-and teaches that helping a resident can visibly change the route.
-_Avoid_: calling the whole area Blueprint Bridge, bridge hub
+and teaches that helping a resident can visibly change the route. It should read
+as a sunny **Farm River** lowland with a **Cornfield Section** leading into a
+very **Simple Bridge Crossing** over the river, plus childlike cheerful staging
+rather than a mountain-top or moody forest start.
+_Avoid_: calling the whole area Blueprint Bridge, bridge hub, summit entry,
+generic mountain vista without destination reads, moody-only forest gorge as
+the accepted Bridge identity, complicated truss bridge as the v0 read
+
+**Cornfield Section**:
+The left Bridge approach where Cicka plays with the toy car inside tall corn.
+It uses a simple background without the full **Route Landmark Backdrop**, and
+ends with foreground corn stalks that mark the player leaving the field before
+the bridge work site opens.
+_Avoid_: full-route promise shot in the cornfield, making corn a traversal maze,
+required hide-and-seek mechanic
+
+**Cornfield Exit**:
+The foreground corn stalks or screen at the end of the **Cornfield Section**
+that makes leaving the field feel readable and explains why the Bridge
+Draftsperson could not see Cicka with the toy car.
+_Avoid_: invisible sightline cheat, separate scene load, mandatory stealth beat
+
+**Simple Bridge Crossing**:
+The accepted v0 Bridge crossing read: a very simple unfinished gap and an equally
+simple completed bridge state, drawn and animated easily by hand rather than as
+a detailed engineering structure.
+_Avoid_: truss blueprint porn, multi-span engineering set, physics-simulation bridge
+
+**Childlike Sunny Register**:
+The accepted Bridge Area visual tone: rounder, simpler ink shapes, brighter
+off-white paper mood, sunflowers and playful pastoral props, and a gentler
+hand-drawn line quality than the denser adult cross-hatch used elsewhere on the
+route.
+_Avoid_: dark forest-only Bridge, hyper-detailed realism, gray-box placeholder
+tone, making the whole Ridge route childlike
+
+**Route Landmark Backdrop**:
+The far-background silhouette layer on a Ridge stage that hints where the route
+is heading: Concert as a distant city read, Dance Festival as a foothill plaza
+or setup glow, Relay as a coastal hill crest with sea horizon and bench read.
+These are environmental promise shots, not labels, minimap icons, or playable
+geography.
+_Avoid_: busy landmark collage, literal UI arrows, one repeated mountain layer,
+unreadable same-y peaks, lighthouse as required destination read
+
+**Ridge Geography Arc**:
+The accepted felt progression across required Ridge Areas: childlike sunny
+**Farm River** lowland at Bridge, valley-town night at Concert, foothill
+festival setup at Dance Festival, and a bare **Relay Summit Overlook** at Relay.
+Literal altitude can stay loose because areas are Compact Ridge Stages, but each
+area needs a distinct register. The full **Route Landmark Backdrop** opens at
+the Bridge crossing vista, not in the **Cornfield Section**.
+_Avoid_: four mountain stages, unexplained biome jumps, overworld street geography,
+landmark backdrop in every Bridge sub-section
+
+**Relay Summit Overlook**:
+The accepted Relay Ending visual register: a hilltop or ridge crest with a
+bench, open sea/ocean view, sunset farewell framing, Cicka present, and at most
+one optional quiet inspect prop such as a star-watcher instrument. It is a
+threshold overlook, not a tower climb, lighthouse fantasy, or busy final hub.
+_Avoid_: lighthouse as focal landmark, required beacon climb, interior lighthouse,
+crowded summit town, generic twin-peak mountain finale
+
+**Hand-Drawable Sketchbook**:
+The accepted Ridge art-production target: rough, goofy, human-drawable assets
+that a skilled artist can make and animate quickly in Procreate or similar tools.
+Prefer simple shapes, readable silhouettes, and light shading over dense
+cross-hatch polish; stick-figure-adjacent simplicity is allowed when it stays
+on-style and readable on mobile.
+_Avoid_: hyper-real shading passes, production asset packs that are hard to revise
+by hand, over-modeled detail that fights fast iteration
+
+**Unified Hand-Drawn Lane**:
+The accepted Ridge visual rule: one Hand-Drawable Sketchbook line system across
+Bridge, Concert, Dance Festival, and Relay. Areas mature emotionally through
+place, props, crowd density, and time-of-day rather than switching to a more
+polished or more childlike ink system mid-route.
+_Avoid_: per-area line-quality cliffs, Bridge-only stick-figure style while later
+areas become hyper-shaded, separate Ridge art bibles per area
 
 **Blueprint Bridge**:
 The first required Resident Beat where the player helps the Bridge Draftsperson
@@ -279,17 +370,68 @@ _Avoid_: calling the whole area Opening Dance Shuttle, final hub
 A high-level route graph showing room beats, locks, shortcuts, and return paths.
 _Avoid_: blockout map, minimap
 
+**Overworld**:
+The default portfolio-first visitor layer: a walkable street where building
+stops surface CV sections, hobbies, contact, and other low-friction about-me
+content for visitors who may never play the full Ridge route.
+_Avoid_: Exploration Map, Ridge route, Sketchbook Neighborhood, modal menu site
+
+**Portfolio Street**:
+An acceptable alias for **Overworld** when describing the same default
+portfolio-skimmer layer in design conversation.
+_Avoid_: treating it as a separate place from Overworld, Ridge topology
+
+**Flat Portfolio Street**:
+The accepted Overworld topology: one horizontal legible street of portfolio
+stops, without its own geographic journey arc. Ridge owns meaningful place
+progression; the street may later gain light inhabited zones or post-ship flavor
+without becoming a second Exploration Map.
+_Avoid_: overworld mountain-to-city arc, Ridge geography mirrored on the street,
+sprawling neighborhood map during pre-production
+
+**Desk Versus Opened Page**:
+The accepted Overworld-versus-Ridge visual split: the **Overworld** reads as a
+slightly cleaner notebook-cover or portfolio-street layer, while **Ridge Pass**
+through the basement computer reads as a rougher opened-sketchbook interior
+using the same ink-and-paper family but looser Hand-Drawable production.
+_Avoid_: totally separate art products, hyper-polished Ridge, overworld doodle
+chaos that breaks recruiter legibility
+
+**Portfolio Pass**:
+The default first-visit contract for the site: skim the Overworld, open word-forward
+portfolio sections, and leave without needing Ridge progress or game literacy.
+_Avoid_: requiring Ridge entry, quest completion, full route play
+
+**Ridge Pass**:
+The optional discovered play path through Bridge Area, Concert Area, Dance
+Festival Area, and Relay Spire for visitors who want the full sketchbook journey.
+_Avoid_: default recruiter path, mandatory first visit, overworld replacement
+
+**Ridge Airlock**:
+The basement computer entry that is the only player-facing way into Ridge Pass
+until the First Playable Route is finished. Additional Overworld entry points may
+be added only after Ridge ships.
+_Avoid_: required overworld signage before Ridge ships, Ridge as default spawn,
+parallel Ridge entrances during pre-production
+
+**Phased Ridge Discovery**:
+The accepted rollout where Ridge stays basement-computer-only during Ridge
+pre-production, then may gain extra discoverable Overworld paths once the route
+is complete enough to stand as a finished secret game.
+_Avoid_: multi-entry Ridge before route completion, hiding Ridge forever after ship
+
 **Exploration Map**:
-The shared side-view route outside opt-in mini-games where the player explores,
-encounters Cicka, helps residents, finds artifacts, and reads the world through
-shortcuts and changed landmarks.
-_Avoid_: mini-game arena, old modal overworld
+The Ridge-only shared side-view route outside opt-in mini-games where the player
+explores, encounters Cicka, helps residents, finds artifacts, and reads the world
+through shortcuts and changed landmarks. It lives inside the Ridge Pass, not on
+the default Overworld street.
+_Avoid_: mini-game arena, Overworld, Portfolio Street, portfolio building row
 
 **Sketchbook Neighborhood**:
-The intended first-read fantasy of the Exploration Map: an inhabited paper place
-where the player moves toward the Relay Spire by helping tiny residents and
-seeing routes change.
-_Avoid_: metroidvania platforming map, portfolio theme park, static building row
+The intended first-read fantasy of the Ridge **Exploration Map**: an inhabited
+paper place where the player moves toward the Relay Spire by helping tiny
+residents and seeing routes change.
+_Avoid_: metroidvania platforming map, portfolio theme park, Overworld street
 
 **Walkable Sketchbook Stage**:
 The accepted Ridge presentation direction: a Harold Halibut-like or theater-set
@@ -512,10 +654,11 @@ should be an optional emotional reward, never a progression requirement.
 _Avoid_: Cicka Home hub, quest board, required backtracking checkpoint, inventory stash, required affection system, v0 interaction node, checklist gate
 
 **Bridge Resting Spot**:
-The Cicka Resting Spot in the Bridge Area, staged near the unsafe crossing,
-blank plan, or newly completed bridge so Cicka can quietly point attention to
-the first resident-help route change.
-_Avoid_: tutorial UI marker, required backtracking perch
+The Cicka Resting Spot in the Bridge Area, staged inside the **Cornfield
+Section** before resolution and near the **Simple Bridge Crossing** after
+resolution so Cicka can quietly point attention to the first resident-help route
+change.
+_Avoid_: tutorial UI marker, required backtracking perch, draftsperson-visible perch
 
 **Concert Resting Spot**:
 The Cicka Resting Spot in the Concert Area: first a hidden musician-side place
@@ -762,6 +905,11 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 
 ## Flagged Ambiguities
 
+- "overworld" and "portfolio street" both mean the default **Overworld**
+  portfolio-skimmer layer; **Exploration Map** means the Ridge route only.
+- "enter Ridge" during pre-production means the **Ridge Airlock** basement
+  computer path; extra Overworld discovery belongs to **Phased Ridge Discovery**
+  after the route ships.
 - "map" can mean **Topology Map**, **Ridge Blockout**, or final art; resolved by naming the layer explicitly.
 - "scene" can mean a design beat or a Phaser runtime scene; use **Ridge Area**
   for the logical place, **Resident Beat** for the authored problem sequence,
@@ -807,8 +955,11 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
 - "Cicka Home" is a current proof-of-concept/runtime blockout term; the newer
   linear story route should say **Cicka Resting Spot** unless a central home
   space is deliberately restored.
-- "lighthouse" is current story shorthand for the **Relay Spire** as a beacon or
-  overlook; keep docs on **Relay Spire** unless the final landmark is renamed.
+- "lighthouse" is retired from active Ridge visuals unless deliberately revived;
+  **Relay Summit Overlook** is bench + sea + sunset + Cicka. Keep **Relay Spire**
+  as the area name unless a rename pass lands.
+- "high quality shading" is not the Ridge art goal; prefer **Hand-Drawable
+  Sketchbook** roughness that stays fast to draw, revise, and animate by hand.
 - "another cat" during **Opening Dance Shuttle Beat** means the **Unnamed
   Counterpart Cat**, not **Micka**, whose first appearance remains after the
   first-ending return unless that timing is deliberately reopened.

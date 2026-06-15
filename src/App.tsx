@@ -18,7 +18,7 @@ function App() {
     return <StaticPortfolio onSwitchToInteractive={() => setMode('interactive')} />;
   }
 
-  if (import.meta.env.DEV && route === 'ridge-stage-debugger') {
+  if (import.meta.env.DEV && route === 'ridge-debugger') {
     return (
       <Suspense fallback={<LoadingFallback />}>
         <RidgeStageDebugger />

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { AppMode } from '../../modePicker';
 
-export type DevToolMode = 'ridge-stage-debugger';
+export type DevToolMode = 'ridge-debugger';
 export type RouteState = 'picker' | AppMode | DevToolMode;
 
 export function readRouteStateFromSearch(
@@ -11,7 +11,7 @@ export function readRouteStateFromSearch(
   const params = new URLSearchParams(search);
   const mode = params.get('mode');
   if (mode === 'interactive' || mode === 'static') return mode;
-  if (isDev && mode === 'ridge-stage-debugger') return mode;
+  if (isDev && mode === 'ridge-debugger') return mode;
   return 'picker';
 }
 
@@ -25,7 +25,7 @@ function isPublicMode(mode: RouteState): mode is AppMode {
 }
 
 function isDevToolMode(mode: RouteState): mode is DevToolMode {
-  return mode === 'ridge-stage-debugger';
+  return mode === 'ridge-debugger';
 }
 
 function canWriteModeToUrl(mode: RouteState): mode is AppMode | DevToolMode {

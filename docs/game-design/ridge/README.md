@@ -71,7 +71,7 @@ Treat these as prototype/reference unless a task explicitly says to adapt them:
 
 The Ridge Blockout Source implementation was removed from the repo; keep
 [`map-language.md`](./map-language.md) and git history as contract reference.
-The Ridge Stage Debugger (`?mode=ridge-stage-debugger`) remains Bridge-first.
+The Ridge Stage Debugger (`?mode=ridge-debugger`) remains Bridge-first.
 
 Superseded planning docs live under [`legacy/`](./legacy/README.md). Do not
 search that folder first when updating active route design.

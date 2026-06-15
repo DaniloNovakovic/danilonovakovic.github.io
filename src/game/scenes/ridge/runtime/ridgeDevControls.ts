@@ -52,6 +52,12 @@ export interface RidgeDevAuthoringDragRequest {
   worldX: number;
   worldY: number;
   offsetOnly: boolean;
+  dragAnchor?: {
+    worldX: number;
+    worldY: number;
+    targetX: number;
+    targetY: number;
+  };
 }
 
 export interface RidgeDevControls {

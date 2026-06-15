@@ -51,7 +51,10 @@ export function useStageAuthoring() {
       request.selection,
       request.worldX,
       request.worldY,
-      { offsetOnly: request.offsetOnly }
+      {
+        offsetOnly: request.offsetOnly,
+        dragAnchor: request.dragAnchor
+      }
     ));
     setSelection(request.selection);
     setIsDirty(true);
@@ -131,6 +134,14 @@ export function useStageAuthoring() {
 function getAuthoringTargetOptions(
   source: BridgeStageCompositionSource
 ): StageAuthoringTargetOption[] {
+  const plates = source.plates.map((plate) => {
+    const selection = { kind: 'plate', id: plate.id } as const;
+    return {
+      key: serializeStageAuthoringSelection(selection) ?? `plate:${plate.id}`,
+      label: `Plate ${plate.id}`,
+      selection
+    };
+  });
   const railPoints = source.primaryWalkRail.points.map((point, index) => {
     const selection = { kind: 'rail-point', index } as const;
     return {
@@ -156,7 +167,7 @@ function getAuthoringTargetOptions(
     };
   });
 
-  return [...railPoints, ...spots, ...objects];
+  return [...plates, ...railPoints, ...spots, ...objects];
 }
 
 function getAuthoringFields(
@@ -195,6 +206,44 @@ function getAuthoringFields(
       return [
         createOffsetField('offset.x', object.offset?.x ?? 0),
         createOffsetField('offset.y', object.offset?.y ?? 0)
+      ];
+    }
+    case 'plate': {
+      const plate = source.plates.find((candidate) => candidate.id === selection.id);
+      if (!plate) return [];
+      return [
+        createWorldAxisField('x', Math.round(plate.x), source.canvas.x, source.canvas.width),
+        createWorldAxisField('y', Math.round(plate.y), source.canvas.y, source.canvas.height),
+        {
+          field: 'scale',
+          label: 'scale',
+          inputMin: 0.25,
+          inputMax: 3,
+          min: 0.25,
+          max: 3,
+          step: 0.01,
+          value: plate.scale
+        },
+        {
+          field: 'scrollFactor.x',
+          label: 'scrollFactor.x',
+          inputMin: 0,
+          inputMax: 1,
+          min: 0,
+          max: 1,
+          step: 0.001,
+          value: plate.scrollFactor?.[0] ?? 1
+        },
+        {
+          field: 'scrollFactor.y',
+          label: 'scrollFactor.y',
+          inputMin: 0,
+          inputMax: 1,
+          min: 0,
+          max: 1,
+          step: 0.001,
+          value: plate.scrollFactor?.[1] ?? 1
+        }
       ];
     }
     default:
@@ -243,6 +292,8 @@ function formatSelectionLabel(selection: StageAuthoringSelection): string {
       return `Stage Spot ${selection.id}`;
     case 'object':
       return `Stage Object ${selection.id}`;
+    case 'plate':
+      return `Stage Plate ${selection.id}`;
     default:
       return 'Selection';
   }

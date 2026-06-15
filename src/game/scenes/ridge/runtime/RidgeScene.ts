@@ -54,6 +54,7 @@ import {
   hitTestStageAuthoringTargets,
   isWorldPointInsideCameraView,
   resolveStageAuthoringTargetPoint,
+  resolveStageAuthoringDragOrigin,
   serializeStageAuthoringSelection,
   type StageAuthoringPointerIntent,
   type StageAuthoringPointerState
@@ -370,15 +371,20 @@ export class RidgeScene extends Phaser.Scene {
       }
 
       const camera = this.cameras.main;
+      const source = this.resolveCompositionSource();
+      const dragTargetOrigin = this.authoringPointer.selection?.kind === 'plate'
+        ? resolveStageAuthoringDragOrigin(source, this.authoringPointer.selection)
+        : null;
       const step = advanceStageAuthoringPointer(this.authoringPointer, {
         pointerX: pointer.x,
         pointerY: pointer.y,
         worldX: pointer.worldX,
         worldY: pointer.worldY,
-        zoom: camera.zoom
+        zoom: camera.zoom,
+        dragTargetOrigin
       });
       this.authoringPointer = step.state;
-      this.publishAuthoringPointerIntents(ridgeDevControls, step.intents);
+      this.publishAuthoringPointerIntents(ridgeDevControls, step.intents, step.state.dragAnchor);
       if (step.panScroll) {
         camera.scrollX = step.panScroll.scrollX;
         camera.scrollY = step.panScroll.scrollY;
@@ -395,7 +401,13 @@ export class RidgeScene extends Phaser.Scene {
 
   private publishAuthoringPointerIntents(
     ridgeDevControls: RidgeDevControls | undefined,
-    intents: readonly StageAuthoringPointerIntent[]
+    intents: readonly StageAuthoringPointerIntent[],
+    dragAnchor?: {
+      worldX: number;
+      worldY: number;
+      targetX: number;
+      targetY: number;
+    }
   ): void {
     intents.forEach((intent) => {
       if (intent.kind === 'pick') {
@@ -406,7 +418,8 @@ export class RidgeScene extends Phaser.Scene {
         selection: intent.selection,
         worldX: intent.worldX,
         worldY: intent.worldY,
-        offsetOnly: intent.offsetOnly
+        offsetOnly: intent.offsetOnly,
+        dragAnchor
       });
     });
   }

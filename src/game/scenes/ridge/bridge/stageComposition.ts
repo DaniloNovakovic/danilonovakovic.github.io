@@ -1,5 +1,5 @@
 import type { RidgeBridgeBeatState } from '@/game/bridge/store';
-import { BRIDGE_TEXTURE_KEYS } from './assets';
+import { BRIDGE_PLATE_TEXTURE_DIMENSIONS, BRIDGE_TEXTURE_KEYS } from './assets';
 
 /**
  * Bridge Stage Source coordinates are plain Phaser world pixels.
@@ -118,6 +118,15 @@ export interface BridgeStagePlate {
   scale: number;
   /** Optional parallax factor. Lower x values move slower than the camera. */
   scrollFactor?: readonly [number, number];
+}
+
+export interface BridgeStagePlateBounds {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  centerX: number;
+  centerY: number;
 }
 
 export type BridgeStageObjectId =
@@ -283,7 +292,7 @@ const BRIDGE_CANVAS = {
   height: 600
 } as const;
 
-const HORIZONTAL_LINE_BASELINE = 520;
+const HORIZONTAL_LINE_BASELINE = 540;
 const RAIL_RELATIVE_DEPTH_DEAD_ZONE_PX = 10;
 const RAIL_RELATIVE_DEPTH_PIXELS_PER_LAYER = 16;
 const RAIL_RELATIVE_ON_RAIL_TIE_BREAK = -0.5;
@@ -357,25 +366,25 @@ export const BRIDGE_STAGE_SOURCE: BridgeStageCompositionSource = {
       {
         progress: 0.61,
         x: 1514,
-        y: HORIZONTAL_LINE_BASELINE - 10,
+        y: HORIZONTAL_LINE_BASELINE,
         cue: { scale: 1, depth: 31, cameraFollowOffsetY: 0 }
       },
       {
         progress: 0.67,
         x: 1638,
-        y: HORIZONTAL_LINE_BASELINE - 10,
+        y: HORIZONTAL_LINE_BASELINE,
         cue: { scale: 0.96, depth: 30, cameraFollowOffsetY: -12 }
       },
       {
         progress: 0.78,
         x: 1865,
-        y: HORIZONTAL_LINE_BASELINE - 10,
+        y: HORIZONTAL_LINE_BASELINE,
         cue: { scale: 1, depth: 31, cameraFollowOffsetY: 0 }
       },
       {
         progress: 0.8,
         x: 1902,
-        y: HORIZONTAL_LINE_BASELINE - 10,
+        y: HORIZONTAL_LINE_BASELINE,
         cue: { scale: 1, depth: 31, cameraFollowOffsetY: 0 }
       },
       {
@@ -571,6 +580,30 @@ export function sampleBridgeWalkRail(
   }
 
   return toRailSample(last, clampedProgress);
+}
+
+/** Resolve a Stage Plate's world-space bounds from its texture size, origin, and scale. */
+export function resolveBridgeStagePlateBounds(plate: BridgeStagePlate): BridgeStagePlateBounds {
+  const dimensions = BRIDGE_PLATE_TEXTURE_DIMENSIONS[
+    plate.textureKey as keyof typeof BRIDGE_PLATE_TEXTURE_DIMENSIONS
+  ];
+  if (!dimensions) {
+    throw new Error(`Unknown Bridge Stage Plate texture: ${plate.textureKey}`);
+  }
+
+  const width = dimensions.width * plate.scale;
+  const height = dimensions.height * plate.scale;
+  const left = plate.x - (width * plate.origin[0]);
+  const top = plate.y - (height * plate.origin[1]);
+
+  return {
+    left,
+    top,
+    width,
+    height,
+    centerX: left + width / 2,
+    centerY: top + height / 2
+  };
 }
 
 /**

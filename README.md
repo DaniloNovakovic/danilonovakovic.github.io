@@ -32,7 +32,7 @@ Fallow CI policy and agent workflow: [`docs/agents/fallow.md`](docs/agents/fallo
 
 Current Bridge staging lives in
 `src/game/scenes/ridge/bridge/stageComposition.ts`. In development, open the
-Ridge Stage Debugger with `?mode=ridge-stage-debugger` after starting
+Ridge Stage Debugger with `?mode=ridge-debugger` after starting
 `pnpm dev`; it hosts the live Bridge preview, route-beat controls, Walk Rail
 readouts, Stage Spot movement, and Bridge Stage debug overlays.
 

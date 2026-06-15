@@ -6,6 +6,12 @@ import type { OverlayControllerProps } from '@/game/overlays/types';
 import { getDevSwitcherOverlayTargets } from './devSwitcherTargets';
 import { getMessages } from '@/shared/i18n';
 
+function openRidgeDebuggerRoute(): void {
+  const url = new URL(window.location.href);
+  url.searchParams.set('mode', 'ridge-debugger');
+  window.location.assign(url.toString());
+}
+
 export default function DevSwitcherOverlay({ close, titleId, descriptionId }: OverlayControllerProps) {
   const messages = getMessages();
 
@@ -47,6 +53,18 @@ export default function DevSwitcherOverlay({ close, titleId, descriptionId }: Ov
             {target.label}
           </button>
         ))}
+      </div>
+      <div className="mt-3 border-t border-[#1a1a1a]/20 pt-3">
+        <p className="mb-1.5 text-[10px] font-black uppercase tracking-widest text-[#5a554f]">
+          {messages.gameShell.devToolsSection}
+        </p>
+        <button
+          type="button"
+          onClick={openRidgeDebuggerRoute}
+          className="w-full rounded border border-[#1a1a1a]/40 bg-[#f3df8b]/70 px-2 py-1.5 text-left text-[11px] font-bold uppercase tracking-wide text-[#1a1a1a] hover:bg-[#f3df8b]"
+        >
+          {messages.gameShell.ridgeDebugger}
+        </button>
       </div>
     </OverlayDialogFrame>
   );
