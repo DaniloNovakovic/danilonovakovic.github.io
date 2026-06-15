@@ -1,6 +1,6 @@
 import type { RidgeBridgeBeatState } from '@/game/bridge/store';
 import type { BridgeStageCompositionSource } from '../bridge/stageComposition';
-import type { StageAuthoringSelection } from '../bridge/stageAuthoring';
+import type { StageAuthoringDragAnchor, StageAuthoringSelection } from '../bridge/stageAuthoring';
 
 export interface RidgeDevTeleportRequest {
   sequence: number;
@@ -52,12 +52,7 @@ export interface RidgeDevAuthoringDragRequest {
   worldX: number;
   worldY: number;
   offsetOnly: boolean;
-  dragAnchor?: {
-    worldX: number;
-    worldY: number;
-    targetX: number;
-    targetY: number;
-  };
+  dragAnchor?: StageAuthoringDragAnchor;
 }
 
 export interface RidgeDevControls {

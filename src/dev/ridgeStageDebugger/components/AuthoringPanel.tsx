@@ -1,4 +1,4 @@
-import { PencilLine, RotateCcw, Trash2 } from 'lucide-react';
+import { PencilLine, RotateCcw, Save, Trash2 } from 'lucide-react';
 import type {
   StageAuthoringField,
   StageAuthoringTargetOption
@@ -11,8 +11,11 @@ import { ScalarFieldControl } from './ScalarFieldControl';
 
 export function AuthoringPanel({
   active,
+  commitError,
   fields,
+  isCommitting,
   isDirty,
+  onCommitDraft,
   onDiscardDraft,
   onResetSelection,
   onSelectTarget,
@@ -24,8 +27,11 @@ export function AuthoringPanel({
   targetOptions
 }: {
   active: boolean;
+  commitError: string | null;
   fields: readonly StageAuthoringField[];
+  isCommitting: boolean;
   isDirty: boolean;
+  onCommitDraft: () => void;
   onDiscardDraft: () => void;
   onResetSelection: () => void;
   onSelectTarget: (selection: StageAuthoringSelection) => void;
@@ -122,6 +128,20 @@ export function AuthoringPanel({
           ) : null}
 
           <div className="grid gap-1.5">
+            <button
+              className="flex min-h-9 items-center justify-center gap-2 border-2 border-[#1a1a1a] bg-[#f3df8b] px-2 py-1 text-xs font-black uppercase tracking-wider transition-colors hover:bg-[#1a1a1a] hover:text-[#fbfbf9] disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={!isDirty || isCommitting}
+              onClick={onCommitDraft}
+              type="button"
+            >
+              <Save className="h-4 w-4" aria-hidden />
+              {isCommitting ? 'Saving…' : 'Save to Source'}
+            </button>
+            {commitError ? (
+              <p className="border-2 border-[#b85f5a] bg-[#fff4f2] px-2 py-1 text-[10px] font-black uppercase tracking-wider text-[#7a2f2a]">
+                {commitError}
+              </p>
+            ) : null}
             <button
               className="flex min-h-9 items-center justify-center gap-2 border-2 border-[#1a1a1a] bg-[#fbfbf9] px-2 py-1 text-xs font-black uppercase tracking-wider transition-colors hover:bg-[#1a1a1a] hover:text-[#fbfbf9] disabled:cursor-not-allowed disabled:opacity-50"
               disabled={!snippet}

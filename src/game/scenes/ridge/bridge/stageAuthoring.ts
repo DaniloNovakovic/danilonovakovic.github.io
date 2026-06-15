@@ -1,6 +1,7 @@
 import {
   BRIDGE_STAGE_SOURCE,
   projectPointToBridgeWalkRail,
+  resolveBridgeStageObject,
   resolveBridgeStageObjectPlacement,
   resolveBridgeStagePlateBounds,
   resolveBridgeStageSpot,
@@ -137,6 +138,18 @@ export function areStageAuthoringSelectionsEqual(
 
 export type StageAuthoringPointerMode = 'idle' | 'pan' | 'drag-marker' | 'pending';
 
+export interface StageAuthoringDragAnchor {
+  worldX: number;
+  worldY: number;
+  targetX: number;
+  targetY: number;
+}
+
+export interface ApplyStageAuthoringDragOptions {
+  offsetOnly?: boolean;
+  dragAnchor?: StageAuthoringDragAnchor;
+}
+
 export interface StageAuthoringPointerState {
   mode: StageAuthoringPointerMode;
   moved: boolean;
@@ -194,7 +207,7 @@ export function advanceStageAuthoringPointer(
     worldX: number;
     worldY: number;
     zoom: number;
-    dragTargetOrigin?: BridgeStagePoint | null;
+    source?: BridgeStageCompositionSource;
   }
 ): {
   state: StageAuthoringPointerState;
@@ -210,17 +223,24 @@ export function advanceStageAuthoringPointer(
   const intents: StageAuthoringPointerIntent[] = [];
 
   if (state.mode === 'pending' && distance >= STAGE_AUTHORING_DRAG_THRESHOLD_PX) {
+    const plateDragAnchor = state.selection?.kind === 'plate' && input.source
+      ? (() => {
+          const selection = state.selection;
+          if (!selection || selection.kind !== 'plate') return undefined;
+          const plate = input.source.plates.find((candidate) => candidate.id === selection.id);
+          if (!plate) return undefined;
+          return {
+            worldX: input.worldX,
+            worldY: input.worldY,
+            targetX: plate.x,
+            targetY: plate.y
+          } satisfies StageAuthoringDragAnchor;
+        })()
+      : undefined;
     nextState = {
       ...state,
       mode: 'drag-marker',
-      dragAnchor: input.dragTargetOrigin
-        ? {
-            worldX: input.worldX,
-            worldY: input.worldY,
-            targetX: input.dragTargetOrigin.x,
-            targetY: input.dragTargetOrigin.y
-          }
-        : undefined
+      dragAnchor: plateDragAnchor
     };
     if (nextState.selection) {
       intents.push({ kind: 'pick', selection: nextState.selection });
@@ -310,15 +330,31 @@ export function isWorldPointInsideCameraView(
     point.y <= view.bottom - margin;
 }
 
-export interface ApplyStageAuthoringDragOptions {
-  offsetOnly?: boolean;
-  dragAnchor?: {
-    worldX: number;
-    worldY: number;
-    targetX: number;
-    targetY: number;
-  };
+export interface StageAuthoringField {
+  field: string;
+  inputMax: number;
+  inputMin: number;
+  label: string;
+  max: number;
+  min: number;
+  step: number;
+  value: number;
 }
+
+export interface StageAuthoringTargetOption {
+  key: string;
+  label: string;
+  selection: StageAuthoringSelection;
+}
+
+export const STAGE_AUTHORING_SYNC_SECTIONS = [
+  'primary-walk-rail-points',
+  'spots',
+  'plates',
+  'objects'
+] as const;
+
+export type StageAuthoringSyncSection = typeof STAGE_AUTHORING_SYNC_SECTIONS[number];
 
 export function applyStageAuthoringDrag(
   draft: BridgeStageCompositionSource,
@@ -540,6 +576,221 @@ export function updateStageAuthoringDraft(
     default:
       return assertNever(selection);
   }
+}
+
+export function listStageAuthoringTargetOptions(
+  source: BridgeStageCompositionSource
+): StageAuthoringTargetOption[] {
+  const plates = source.plates.map((plate) => {
+    const selection = { kind: 'plate', id: plate.id } as const;
+    return {
+      key: serializeStageAuthoringSelection(selection) ?? `plate:${plate.id}`,
+      label: `Plate ${plate.id}`,
+      selection
+    };
+  });
+  const railPoints = source.primaryWalkRail.points.map((point, index) => {
+    const selection = { kind: 'rail-point', index } as const;
+    return {
+      key: serializeStageAuthoringSelection(selection) ?? `rail-point:${index}`,
+      label: `Rail point ${index} @ ${Math.round(point.x)}, ${Math.round(point.y)}`,
+      selection
+    };
+  });
+  const spots = source.spots.map((spot) => {
+    const selection = { kind: 'spot', id: spot.id } as const;
+    return {
+      key: serializeStageAuthoringSelection(selection) ?? `spot:${spot.id}`,
+      label: `Spot ${spot.id}`,
+      selection
+    };
+  });
+  const objects = source.objects.map((object) => {
+    const selection = { kind: 'object', id: object.id } as const;
+    return {
+      key: serializeStageAuthoringSelection(selection) ?? `object:${object.id}`,
+      label: `Object ${object.id}`,
+      selection
+    };
+  });
+
+  return [...plates, ...railPoints, ...spots, ...objects];
+}
+
+export function listStageAuthoringFields(
+  source: BridgeStageCompositionSource,
+  selection: StageAuthoringSelection
+): StageAuthoringField[] {
+  switch (selection.kind) {
+    case 'rail-point': {
+      const point = source.primaryWalkRail.points[selection.index];
+      if (!point) return [];
+      return [
+        createWorldAxisField('x', Math.round(point.x), source.canvas.x, source.canvas.width),
+        createWorldAxisField('y', Math.round(point.y), source.canvas.y, source.canvas.height)
+      ];
+    }
+    case 'spot': {
+      const spot = source.spots.find((candidate) => candidate.id === selection.id);
+      if (!spot) return [];
+      return [
+        {
+          field: 'railProgress',
+          label: 'railProgress',
+          inputMin: 0,
+          inputMax: 1,
+          min: 0,
+          max: 1,
+          step: 0.001,
+          value: spot.railProgress
+        },
+        createOffsetField('offset.x', spot.offset?.x ?? 0),
+        createOffsetField('offset.y', spot.offset?.y ?? 0)
+      ];
+    }
+    case 'object': {
+      const object = resolveBridgeStageObject(source, selection.id);
+      return [
+        createOffsetField('offset.x', object.offset?.x ?? 0),
+        createOffsetField('offset.y', object.offset?.y ?? 0)
+      ];
+    }
+    case 'plate': {
+      const plate = source.plates.find((candidate) => candidate.id === selection.id);
+      if (!plate) return [];
+      return [
+        createWorldAxisField('x', Math.round(plate.x), source.canvas.x, source.canvas.width),
+        createWorldAxisField('y', Math.round(plate.y), source.canvas.y, source.canvas.height),
+        {
+          field: 'scale',
+          label: 'scale',
+          inputMin: 0.25,
+          inputMax: 3,
+          min: 0.25,
+          max: 3,
+          step: 0.01,
+          value: plate.scale
+        },
+        {
+          field: 'scrollFactor.x',
+          label: 'scrollFactor.x',
+          inputMin: 0,
+          inputMax: 1,
+          min: 0,
+          max: 1,
+          step: 0.001,
+          value: plate.scrollFactor?.[0] ?? 1
+        },
+        {
+          field: 'scrollFactor.y',
+          label: 'scrollFactor.y',
+          inputMin: 0,
+          inputMax: 1,
+          min: 0,
+          max: 1,
+          step: 0.001,
+          value: plate.scrollFactor?.[1] ?? 1
+        }
+      ];
+    }
+    default:
+      return assertNever(selection);
+  }
+}
+
+export function formatStageAuthoringSelectionLabel(selection: StageAuthoringSelection): string {
+  switch (selection.kind) {
+    case 'rail-point':
+      return `Walk Rail point ${selection.index}`;
+    case 'spot':
+      return `Stage Spot ${selection.id}`;
+    case 'object':
+      return `Stage Object ${selection.id}`;
+    case 'plate':
+      return `Stage Plate ${selection.id}`;
+    default:
+      return assertNever(selection);
+  }
+}
+
+export function serializeBridgeStageAuthoringSections(
+  source: BridgeStageCompositionSource
+): Record<StageAuthoringSyncSection, string> {
+  const formatArrayEntries = (
+    items: readonly string[],
+    indentSpaces: number,
+    trailingComma: boolean
+  ): string => items.map((item, index) => {
+    const suffix = trailingComma && index < items.length - 1 ? ',' : '';
+    return `${indentMultiline(item, indentSpaces)}${suffix}`;
+  }).join('\n');
+
+  return {
+    'primary-walk-rail-points': [
+      '    points: [',
+      formatArrayEntries(
+        source.primaryWalkRail.points.map((point) => formatRailPointSnippet(point)),
+        6,
+        true
+      ),
+      '    ]'
+    ].join('\n'),
+    spots: [
+      '  spots: [',
+      formatArrayEntries(source.spots.map((spot) => formatSpotSnippet(spot)), 4, true),
+      '  ],'
+    ].join('\n'),
+    plates: formatArrayEntries(source.plates.map((plate) => formatPlateSnippet(plate)), 4, true),
+    objects: [
+      '  objects: [',
+      formatArrayEntries(source.objects.map((object) => formatObjectSnippet(object)), 4, true),
+      '  ],'
+    ].join('\n')
+  };
+}
+
+export function stageAuthoringSyncMarker(id: StageAuthoringSyncSection, closing = false): string {
+  return closing
+    ? `/* </stage-authoring-sync:${id}> */`
+    : `/* <stage-authoring-sync:${id}> */`;
+}
+
+function createWorldAxisField(
+  label: 'x' | 'y',
+  value: number,
+  origin: number,
+  span: number
+): StageAuthoringField {
+  return {
+    field: label,
+    label,
+    inputMin: origin,
+    inputMax: origin + span,
+    min: origin,
+    max: origin + span,
+    step: 1,
+    value
+  };
+}
+
+function createOffsetField(field: 'offset.x' | 'offset.y', rawValue: number): StageAuthoringField {
+  const value = clampStageAuthoringOffset(rawValue);
+  const halfWindow = STAGE_AUTHORING_OFFSET_SLIDER_WINDOW_PX;
+  return {
+    field,
+    label: field,
+    inputMin: -STAGE_AUTHORING_OFFSET_LIMIT_PX,
+    inputMax: STAGE_AUTHORING_OFFSET_LIMIT_PX,
+    min: -halfWindow,
+    max: halfWindow,
+    step: 1,
+    value
+  };
+}
+
+function indentMultiline(value: string, spaces: number): string {
+  const pad = ' '.repeat(spaces);
+  return value.split('\n').map((line) => `${pad}${line}`).join('\n');
 }
 
 function formatRailPointSnippet(point: BridgeWalkRailPoint): string {

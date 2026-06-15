@@ -142,8 +142,11 @@ export default function RidgeStageDebugger() {
           >
             <AuthoringPanel
               active={authoring.active}
+              commitError={authoring.commitError}
               fields={authoring.fields}
+              isCommitting={authoring.isCommitting}
               isDirty={authoring.isDirty}
+              onCommitDraft={authoring.commitDraft}
               onDiscardDraft={authoring.discardDraft}
               onResetSelection={authoring.resetSelectionDraft}
               onSelectTarget={authoring.handlePick}

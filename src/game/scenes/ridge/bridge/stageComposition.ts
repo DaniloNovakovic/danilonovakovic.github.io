@@ -292,7 +292,7 @@ const BRIDGE_CANVAS = {
   height: 600
 } as const;
 
-const HORIZONTAL_LINE_BASELINE = 540;
+const HORIZONTAL_LINE_BASELINE = 520;
 const RAIL_RELATIVE_DEPTH_DEAD_ZONE_PX = 10;
 const RAIL_RELATIVE_DEPTH_PIXELS_PER_LAYER = 16;
 const RAIL_RELATIVE_ON_RAIL_TIE_BREAK = -0.5;
@@ -326,6 +326,7 @@ export const BRIDGE_STAGE_SOURCE: BridgeStageCompositionSource = {
   /** The visible/debuggable walking line. This is the first place to tweak. */
   primaryWalkRail: {
     id: 'primary',
+    /* <stage-authoring-sync:primary-walk-rail-points> */
     points: [
       {
         progress: 0,
@@ -400,8 +401,10 @@ export const BRIDGE_STAGE_SOURCE: BridgeStageCompositionSource = {
         cue: { scale: 0.98, depth: 30, cameraFollowOffsetY: 0 }
       }
     ]
+    /* </stage-authoring-sync:primary-walk-rail-points> */
   },
   /** Named anchors attached to the rail. Runtime objects and dev teleports use these. */
+  /* <stage-authoring-sync:spots> */
   spots: [
     { id: 'spawn', railProgress: 0 },
     {
@@ -432,6 +435,7 @@ export const BRIDGE_STAGE_SOURCE: BridgeStageCompositionSource = {
     },
     { id: 'handoff-note', railProgress: 1, offset: { x: 70, y: -130 } }
   ],
+  /* </stage-authoring-sync:spots> */
   /** Large visual layers. Move these when the image plates do not line up. */
   plates: [
     /**
@@ -444,6 +448,7 @@ export const BRIDGE_STAGE_SOURCE: BridgeStageCompositionSource = {
      * on the rail baseline (520) and the gap spans world x 1546-1878, matching
      * the bridge bank Stage Spots.
      */
+    /* <stage-authoring-sync:plates> */
     {
       /** Sun + clouds strip (source crop at 20,330). Drifts slowly for parallax. */
       id: 'cornfield-sky',
@@ -478,8 +483,10 @@ export const BRIDGE_STAGE_SOURCE: BridgeStageCompositionSource = {
       origin: [0, 0],
       scale: 1.56
     }
+    /* </stage-authoring-sync:plates> */
   ],
   /** Rendered Bridge props/NPCs. Their placement comes from `spotId`. */
+  /* <stage-authoring-sync:objects> */
   objects: [
     {
       /** Asset is 140x210; 0.5 presents the builder at ~105px, near player height. */
@@ -516,6 +523,7 @@ export const BRIDGE_STAGE_SOURCE: BridgeStageCompositionSource = {
       depth: 24
     }
   ],
+  /* </stage-authoring-sync:objects> */
   /** Foreground overlap hints. These are currently most useful in the debugger. */
   occluders: [
     {
@@ -710,7 +718,12 @@ export function getStageCompositionPlacementSignature(
   const objects = source.objects
     .map((object) => `${object.id}:${object.offset?.x ?? 0},${object.offset?.y ?? 0}`)
     .join(';');
-  return `${rail}|${spots}|${objects}`;
+  const plates = source.plates
+    .map((plate) => (
+      `${plate.id}:${plate.x},${plate.y},${plate.scale},${plate.scrollFactor?.[0] ?? 1},${plate.scrollFactor?.[1] ?? 1}`
+    ))
+    .join(';');
+  return `${rail}|${spots}|${objects}|${plates}`;
 }
 
 /** Fingerprint for procedural bridge deck geometry only. */

@@ -22,7 +22,7 @@ describe('Bridge Stage Composition Source', () => {
 
     expect(sample.x).toBeGreaterThan(1410);
     expect(sample.x).toBeLessThan(1638);
-    expect(sample.y).toBeLessThan(520);
+    expect(sample.y).toBeLessThanOrEqual(520);
     expect(sample.cue.scale).toBeGreaterThan(0.95);
     expect(sample.cue.depth).toBeGreaterThanOrEqual(30);
   });
@@ -168,7 +168,7 @@ describe('Bridge Stage Composition Source', () => {
 
     expect(toyCarAtTestEnd).toMatchObject({
       x: 1985,
-      y: 514,
+      y: 524,
       depthMode: 'rail-relative'
     });
     expect(resolveBridgeStageObject(BRIDGE_STAGE_SOURCE, 'toy-car').spotId).toBe('cicka-toy-car');
@@ -183,6 +183,18 @@ describe('Bridge Stage Composition Source', () => {
     expect(projected.progress).toBeCloseTo(0.48, 1);
     expect(getNearestBridgeStageSpotId(BRIDGE_STAGE_SOURCE, projected.progress)).toBe('draftsperson');
     expect(getBridgeWalkRailLength(BRIDGE_STAGE_SOURCE.primaryWalkRail)).toBeGreaterThan(2000);
+  });
+
+  it('tracks plate edits in placement signatures', () => {
+    const baseline = getStageCompositionPlacementSignature(BRIDGE_STAGE_SOURCE);
+    const draft = updateStageAuthoringDraft(
+      BRIDGE_STAGE_SOURCE,
+      { kind: 'plate', id: 'cornfield-ground' },
+      'y',
+      -580
+    );
+
+    expect(getStageCompositionPlacementSignature(draft)).not.toBe(baseline);
   });
 
   it('tracks spot offset edits in placement signatures without touching bridge crossing', () => {

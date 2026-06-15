@@ -94,6 +94,7 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
   private toyCarTween?: Phaser.Tweens.Tween;
   private toyCarTestRunning = false;
   private bridgeCrossingPlacementSignature = '';
+  private readonly plateImages = new Map<string, Phaser.GameObjects.Image>();
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
@@ -123,6 +124,7 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
     this.source = source;
     this.syncCickaAndToyCar(this.currentPresentation);
     this.syncBridgeObjectPlacements();
+    this.syncPlatePlacements();
 
     const crossingSignature = getBridgeCrossingPlacementSignature(source);
     if (crossingSignature !== this.bridgeCrossingPlacementSignature) {
@@ -248,12 +250,13 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
     paper.fillRect(0, 0, bounds.width, bounds.height);
 
     this.source.plates.forEach((plate) => {
-      this.addBridgeImage(plate.textureKey, plate.x, plate.y, {
+      const image = this.addBridgeImage(plate.textureKey, plate.x, plate.y, {
         depth: plate.depth,
         origin: plate.origin,
         scale: plate.scale,
         scrollFactor: plate.scrollFactor
       });
+      this.plateImages.set(plate.id, image);
     });
     this.addAmbientInkLife();
   }
@@ -413,6 +416,24 @@ class BridgeTracerStageRuntimeImpl implements BridgeTracerStageRuntime {
 
     const handoffPlacement = resolveBridgeStageObjectPlacement(this.source, 'handoff-note');
     this.handoffNote?.setPosition(handoffPlacement.x, handoffPlacement.y);
+  }
+
+  private syncPlatePlacements(): void {
+    this.source.plates.forEach((plate) => {
+      const image = this.plateImages.get(plate.id);
+      if (!image) return;
+
+      image
+        .setPosition(plate.x, plate.y)
+        .setScale(plate.scale)
+        .setDepth(plate.depth);
+
+      if (plate.scrollFactor) {
+        image.setScrollFactor(plate.scrollFactor[0], plate.scrollFactor[1]);
+      } else {
+        image.setScrollFactor(1, 1);
+      }
+    });
   }
 
   private recreateBridgeCrossingVisuals(): void {
