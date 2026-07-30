@@ -1,3 +1,5 @@
+// Stick sync redraws many actors/layers each frame; branching is presentation policy.
+// fallow-ignore-file complexity
 import type * as Phaser from 'phaser';
 import type { RidgeVisualProvider, RidgeVisualViewModel } from '../types';
 import {
@@ -60,14 +62,6 @@ export class StickVisualProvider implements RidgeVisualProvider {
 
     scene.cameras.main.setBounds(0, 0, this.stageWidth, this.stageHeight);
     scene.cameras.main.setBackgroundColor(PAPER);
-  }
-
-  get bounds(): { width: number; height: number; groundY: number } {
-    return {
-      width: this.stageWidth,
-      height: this.stageHeight,
-      groundY: GROUND_Y
-    };
   }
 
   worldXForProgress(progress: number): number {

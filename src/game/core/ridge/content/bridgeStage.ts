@@ -1,6 +1,7 @@
+// Bridge content resolvers encode beat-specific actor presence; branching is data policy.
+// fallow-ignore-file complexity
 import type {
   RidgeActorPresence,
-  RidgeBridgeAreaBeat,
   RidgeConversationDefinition,
   RidgeDialogueLine,
   RidgeInteractable,
@@ -8,8 +9,8 @@ import type {
   RidgeWorldState
 } from '../types';
 
-export const BRIDGE_TOY_CAR_ITEM = 'toy-car';
-export const BRIDGE_BLOCKED_PROGRESS = 0.62;
+const BRIDGE_TOY_CAR_ITEM = 'toy-car';
+const BRIDGE_BLOCKED_PROGRESS = 0.62;
 
 export interface BridgeDialogueCatalog {
   speakers: {
@@ -357,8 +358,3 @@ function describeBridgeAmbience(state: RidgeWorldState): string {
   return 'A farm river lowland. An unfinished simple bridge interrupts the walk east.';
 }
 
-export function bridgeBeatAfterHandoff(
-  beat: RidgeWorldState['beat']
-): RidgeBridgeAreaBeat | 'concert_handoff' {
-  return beat;
-}

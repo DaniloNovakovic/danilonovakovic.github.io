@@ -170,7 +170,7 @@ function finishConversation(
   };
 }
 
-export function applyOutcome(
+function applyOutcome(
   state: RidgeWorldState,
   outcome: RidgeConversationOutcome
 ): { state: RidgeWorldState; events: RidgeSessionEvent[] } {

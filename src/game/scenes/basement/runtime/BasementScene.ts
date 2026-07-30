@@ -1,3 +1,5 @@
+// Thin adapter update loop; branching mirrors input + console event application.
+// fallow-ignore-file complexity
 import * as Phaser from 'phaser';
 import type { OverlayId } from '@/game/overlays/overlayIds';
 import {

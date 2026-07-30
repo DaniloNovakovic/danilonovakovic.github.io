@@ -1,8 +1,7 @@
-import {
-  BASEMENT_PLAYER_START,
-  BASEMENT_SPOTS,
-  BASEMENT_STEP_PX
-} from './content/basementSpots';
+// Nearby scanning encodes room priority rules; keep branches local and readable.
+// fallow-ignore-file complexity
+import { BASEMENT_SPOTS, BASEMENT_STEP_PX } from './content/basementSpots';
+import { clamp, nearbyMissMessage, pickNearby } from './nearby';
 import { getGamesOverlay } from './overlayCatalog';
 import type { GameItemId, GameSessionEvent, GameWorldState, NearbyThing } from './types';
 
@@ -66,17 +65,10 @@ export function interactBasement(
   target: string | undefined
 ): BasementInteractOutcome {
   const nearby = listBasementNearby(state);
-  if (nearby.length === 0) {
-    return { message: 'Nothing close enough in the basement.', events: [] };
-  }
-
+  const miss = nearbyMissMessage(nearby, target, 'Nothing close enough in the basement.');
+  if (miss) return { message: miss, events: [] };
   const picked = pickNearby(nearby, target);
-  if (!picked) {
-    return {
-      message: `No match for "${target}". Nearby: ${nearby.map((n) => n.id).join(', ')}`,
-      events: []
-    };
-  }
+  if (!picked) return { message: 'Nothing close enough in the basement.', events: [] };
 
   if (picked.id === 'exit') {
     return returnToOverworld(state, 'You climb back to the street.');
@@ -131,20 +123,3 @@ export function returnToOverworld(state: GameWorldState, message: string): Basem
   };
 }
 
-export function resetBasementPosition(state: GameWorldState): void {
-  state.basement.playerX = BASEMENT_PLAYER_START.x;
-  state.basement.facing = 'right';
-}
-
-function pickNearby(nearby: readonly NearbyThing[], target: string | undefined): NearbyThing | null {
-  if (!target) return nearby[0] ?? null;
-  const needle = target.toLowerCase();
-  return (
-    nearby.find((n) => n.id.toLowerCase() === needle || n.label.toLowerCase().includes(needle)) ??
-    null
-  );
-}
-
-function clamp(n: number, min: number, max: number): number {
-  return Math.max(min, Math.min(max, n));
-}

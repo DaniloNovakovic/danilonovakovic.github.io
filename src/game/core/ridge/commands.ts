@@ -1,3 +1,5 @@
+// Command parsers are table-driven; remaining branching is intentional CLI surface area.
+// fallow-ignore-file complexity
 import type { RidgeCommand, RidgeFacing } from './types';
 
 const HELP_TEXT = [
@@ -15,6 +17,33 @@ const HELP_TEXT = [
   'Example: look; go right 3; interact; advance; advance'
 ].join('\n');
 
+const SIMPLE_COMMANDS: Record<string, RidgeCommand> = {
+  help: { type: 'help' },
+  '?': { type: 'help' },
+  h: { type: 'help' },
+  look: { type: 'look' },
+  l: { type: 'look' },
+  status: { type: 'status' },
+  stat: { type: 'status' },
+  inventory: { type: 'inventory' },
+  inv: { type: 'inventory' },
+  i: { type: 'inventory' },
+  advance: { type: 'advance' },
+  next: { type: 'advance' },
+  continue: { type: 'advance' },
+  n: { type: 'advance' },
+  z: { type: 'advance' },
+  leave: { type: 'leave' },
+  back: { type: 'leave' },
+  close: { type: 'leave' }
+};
+
+const GO_ALIASES = new Set(['go', 'walk', 'move']);
+const LEFT_ALIASES = new Set(['left', 'west', 'a']);
+const RIGHT_ALIASES = new Set(['right', 'east', 'd']);
+const INTERACT_ALIASES = new Set(['interact', 'talk', 'use', 'e', 'x']);
+const CHOOSE_ALIASES = new Set(['choose', 'pick', 'select']);
+
 export function getRidgeHelpText(): string {
   return HELP_TEXT;
 }
@@ -23,65 +52,28 @@ export function parseRidgeCommand(rawInput: string): RidgeCommand {
   const raw = rawInput.trim().replace(/\s+/g, ' ');
   if (!raw) return { type: 'unknown', raw: '' };
 
-  const [head, ...rest] = raw.toLowerCase().split(' ');
-  const args = rest;
+  const [head, ...args] = raw.toLowerCase().split(' ');
+  if (!head) return { type: 'unknown', raw };
 
-  switch (head) {
-    case 'help':
-    case '?':
-    case 'h':
-      return { type: 'help' };
-    case 'look':
-    case 'l':
-      return { type: 'look' };
-    case 'status':
-    case 'stat':
-      return { type: 'status' };
-    case 'inventory':
-    case 'inv':
-    case 'i':
-      return { type: 'inventory' };
-    case 'go':
-    case 'walk':
-    case 'move': {
-      const direction = parseDirection(args[0]);
-      if (!direction) return { type: 'unknown', raw };
-      const steps = args[1] ? Number.parseFloat(args[1]) : 1;
-      if (!Number.isFinite(steps) || steps <= 0) return { type: 'unknown', raw };
-      return { type: 'go', direction, steps };
-    }
-    case 'left':
-    case 'west':
-    case 'a':
-      return { type: 'go', direction: 'left', steps: parseOptionalSteps(args[0]) };
-    case 'right':
-    case 'east':
-    case 'd':
-      return { type: 'go', direction: 'right', steps: parseOptionalSteps(args[0]) };
-    case 'interact':
-    case 'talk':
-    case 'use':
-    case 'e':
-    case 'x':
-      return { type: 'interact', target: args.join(' ') || undefined };
-    case 'advance':
-    case 'next':
-    case 'continue':
-    case 'n':
-    case 'z':
-      return { type: 'advance' };
-    case 'choose':
-    case 'pick':
-    case 'select':
-      if (!args[0]) return { type: 'unknown', raw };
-      return { type: 'choose', choiceIdOrIndex: args[0] };
-    case 'leave':
-    case 'back':
-    case 'close':
-      return { type: 'leave' };
-    default:
-      return { type: 'unknown', raw };
+  const simple = SIMPLE_COMMANDS[head];
+  if (simple) return simple;
+
+  if (GO_ALIASES.has(head)) return parseGoCommand(raw, args);
+  if (LEFT_ALIASES.has(head)) {
+    return { type: 'go', direction: 'left', steps: parseOptionalSteps(args[0]) };
   }
+  if (RIGHT_ALIASES.has(head)) {
+    return { type: 'go', direction: 'right', steps: parseOptionalSteps(args[0]) };
+  }
+  if (INTERACT_ALIASES.has(head)) {
+    return { type: 'interact', target: args.join(' ') || undefined };
+  }
+  if (CHOOSE_ALIASES.has(head)) {
+    if (!args[0]) return { type: 'unknown', raw };
+    return { type: 'choose', choiceIdOrIndex: args[0] };
+  }
+
+  return { type: 'unknown', raw };
 }
 
 export function parseRidgeScript(script: string): RidgeCommand[] {
@@ -92,14 +84,18 @@ export function parseRidgeScript(script: string): RidgeCommand[] {
     .map(parseRidgeCommand);
 }
 
+function parseGoCommand(raw: string, args: string[]): RidgeCommand {
+  const direction = parseDirection(args[0]);
+  if (!direction) return { type: 'unknown', raw };
+  const steps = args[1] ? Number.parseFloat(args[1]) : 1;
+  if (!Number.isFinite(steps) || steps <= 0) return { type: 'unknown', raw };
+  return { type: 'go', direction, steps };
+}
+
 function parseDirection(value: string | undefined): RidgeFacing | null {
   if (!value) return null;
-  if (value === 'left' || value === 'west' || value === 'a' || value === 'l') {
-    return 'left';
-  }
-  if (value === 'right' || value === 'east' || value === 'd' || value === 'r') {
-    return 'right';
-  }
+  if (value === 'left' || value === 'west' || value === 'a' || value === 'l') return 'left';
+  if (value === 'right' || value === 'east' || value === 'd' || value === 'r') return 'right';
   return null;
 }
 

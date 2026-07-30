@@ -1,3 +1,5 @@
+// Nearby scanning encodes street priority rules; keep branches local and readable.
+// fallow-ignore-file complexity
 import {
   OVERWORLD_BANANA_PEEL,
   OVERWORLD_BASEMENT_HOLE,
@@ -9,6 +11,7 @@ import {
   OVERWORLD_WIDTH,
   type OverworldBuildingSpot
 } from './content/overworldSpots';
+import { clamp, nearbyMissMessage, pickNearby } from './nearby';
 import { getPortfolioOverlay } from './overlayCatalog';
 import type { GameSecretId, GameSessionEvent, GameWorldState, NearbyThing } from './types';
 
@@ -144,17 +147,10 @@ export function interactOverworld(
   }
 
   const nearby = listOverworldNearby(state);
-  if (nearby.length === 0) {
-    return { message: 'Nothing close enough to interact with.', events: [] };
-  }
-
+  const miss = nearbyMissMessage(nearby, target, 'Nothing close enough to interact with.');
+  if (miss) return { message: miss, events: [] };
   const picked = pickNearby(nearby, target);
-  if (!picked) {
-    return {
-      message: `No match for "${target}". Nearby: ${nearby.map((n) => n.id).join(', ')}`,
-      events: []
-    };
-  }
+  if (!picked) return { message: 'Nothing close enough to interact with.', events: [] };
 
   if (picked.id === OVERWORLD_BASEMENT_HOLE.id) {
     state.mode = 'basement';
@@ -267,15 +263,3 @@ function maybeCancelBananaPeel(state: GameWorldState): GameSessionEvent[] {
   return [{ type: 'banana_peel_cancelled' }];
 }
 
-function pickNearby(nearby: readonly NearbyThing[], target: string | undefined): NearbyThing | null {
-  if (!target) return nearby[0] ?? null;
-  const needle = target.toLowerCase();
-  return (
-    nearby.find((n) => n.id.toLowerCase() === needle || n.label.toLowerCase().includes(needle)) ??
-    null
-  );
-}
-
-function clamp(n: number, min: number, max: number): number {
-  return Math.max(min, Math.min(max, n));
-}

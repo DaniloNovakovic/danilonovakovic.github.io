@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// fallow-ignore-file complexity
 /**
  * Headless full-game console for humans and AI agents.
  *

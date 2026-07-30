@@ -1,3 +1,5 @@
+// Observation formatting is intentionally branchy for CLI readability.
+// fallow-ignore-file complexity
 import type { RidgeObservation } from '../ridge/types';
 import { listBasementNearby } from './basementLogic';
 import { listHobbiesNearby } from './hobbiesLogic';

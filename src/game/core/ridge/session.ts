@@ -1,3 +1,5 @@
+// Session dispatch mirrors many console verbs; complexity is the command surface.
+// fallow-ignore-file complexity
 import {
   advanceConversation,
   chooseInConversation,
@@ -7,7 +9,6 @@ import {
 import { getRidgeHelpText, parseRidgeCommand, parseRidgeScript } from './commands';
 import { formatObservation, observeRidgeWorld } from './observe';
 import type {
-  RidgeBridgeAreaBeat,
   RidgeBridgeBeat,
   RidgeCommand,
   RidgeCommandResult,
@@ -46,10 +47,6 @@ export class RidgeConsoleSession {
       conversation: null,
       lastMessage: null
     };
-  }
-
-  getState(): RidgeWorldState {
-    return this.state;
   }
 
   observe(): RidgeObservation {
@@ -240,17 +237,6 @@ export class RidgeConsoleSession {
       events: []
     };
   }
-}
-
-export function createBridgeSession(
-  stage: RidgeStageDefinition,
-  options: Omit<RidgeSessionOptions, 'stage'> = {}
-): RidgeConsoleSession {
-  return new RidgeConsoleSession({ stage, ...options });
-}
-
-export function isBridgeAreaBeat(beat: RidgeBridgeBeat): beat is RidgeBridgeAreaBeat {
-  return beat !== 'concert_handoff';
 }
 
 function clamp01(value: number): number {

@@ -1,37 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import type { BridgeDialogueCatalog } from '../ridge/content/bridgeStage';
+import { TEST_BRIDGE_DIALOGUE_CATALOG } from '../ridge/content/testBridgeCatalog';
 import { parseGameCommand, parseGameScript } from './commands';
 import { GameConsoleSession } from './session';
 
-const catalog: BridgeDialogueCatalog = {
-  speakers: {
-    prompt: 'Prompt',
-    cicka: 'Cicka',
-    bridgeDraftsperson: 'Bridge Draftsperson'
-  },
-  lines: {
-    'bridge.cicka.first_meet.01': 'Sit near Cicka',
-    'bridge.cicka.first_meet.02': 'Small chirp.',
-    'bridge.cicka.first_meet.03': 'Cicka bats the tiny car back into place.',
-    'bridge.draftsperson.missing_span.01': 'Missing span worry.',
-    'bridge.draftsperson.missing_span.02': 'Toy car missing.',
-    'bridge.draftsperson.missing_span.03': 'Look for the tiny test car',
-    'bridge.cicka.parallel_play.01': 'Sit with Cicka',
-    'bridge.cicka.parallel_play.02': 'Roll the car back gently',
-    'bridge.cicka.parallel_play.03': 'Quiet purr.',
-    'bridge.cicka.parallel_play.04': 'Cicka leaves the tiny car beside you.',
-    'bridge.draftsperson.toy_car_test.01': 'Set the tiny car on the drawing',
-    'bridge.draftsperson.toy_car_test.02': 'Courage line.',
-    'bridge.draftsperson.toy_car_test.03': 'The toy car rolls across the new span.',
-    'bridge.draftsperson.toy_car_test.04': 'That line holds.',
-    'bridge.exit.opened_crossing.01': 'Cross the finished bridge',
-    'bridge.exit.opened_crossing.02': 'Thank you.',
-    'bridge.exit.opened_crossing.03': 'The page turns toward evening music.'
-  }
-};
-
 function createSession() {
-  return new GameConsoleSession({ dialogue: catalog });
+  return new GameConsoleSession({ dialogue: TEST_BRIDGE_DIALOGUE_CATALOG });
 }
 
 describe('parseGameCommand', () => {
@@ -108,7 +81,7 @@ describe('GameConsoleSession full secret route', () => {
 
   it('syncs Phaser position and cancels a pending banana peel when walking away', () => {
     const session = new GameConsoleSession({
-      dialogue: catalog,
+      dialogue: TEST_BRIDGE_DIALOGUE_CATALOG,
       ownedItemIds: ['glasses'],
       equippedItemIds: ['glasses']
     });
@@ -123,7 +96,7 @@ describe('GameConsoleSession full secret route', () => {
 
   it('inserts Circuit at the CRT after hydrate', () => {
     const session = new GameConsoleSession({
-      dialogue: catalog,
+      dialogue: TEST_BRIDGE_DIALOGUE_CATALOG,
       ownedItemIds: ['circuit'],
       equippedItemIds: []
     });
@@ -135,7 +108,7 @@ describe('GameConsoleSession full secret route', () => {
 
   it('commits banana peel warp for the live Overworld typewriter path', () => {
     const session = new GameConsoleSession({
-      dialogue: catalog,
+      dialogue: TEST_BRIDGE_DIALOGUE_CATALOG,
       ownedItemIds: ['glasses'],
       equippedItemIds: ['glasses'],
       discoveredSecretIds: ['banana-peel-clue']

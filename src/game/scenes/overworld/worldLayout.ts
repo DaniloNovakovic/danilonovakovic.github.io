@@ -7,8 +7,6 @@ import {
   OVERWORLD_BASEMENT_HOLE as CORE_BASEMENT_HOLE,
   OVERWORLD_BUILDING_SPOTS,
   OVERWORLD_CIRCUIT_CRT,
-  OVERWORLD_INTERACT_DISTANCE_X as CORE_INTERACT_DISTANCE_X,
-  OVERWORLD_INTERACT_MIN_PLAYER_Y as CORE_INTERACT_MIN_PLAYER_Y,
   OVERWORLD_PLAYER_START as CORE_PLAYER_START,
   OVERWORLD_WIDTH as CORE_WIDTH
 } from '@/game/core/console/content/overworldSpots';
@@ -28,9 +26,6 @@ export const OVERWORLD_GROUND_ZONE = {
   height: 50
 } as const;
 
-/** Building interaction: max horizontal distance to sprite center, min player Y. */
-export const OVERWORLD_INTERACT_DISTANCE_X = CORE_INTERACT_DISTANCE_X;
-export const OVERWORLD_INTERACT_MIN_PLAYER_Y = CORE_INTERACT_MIN_PLAYER_Y;
 export const OVERWORLD_INTERACT_PROMPT_OFFSET_Y = 40;
 
 /**
@@ -71,6 +66,7 @@ export function getOverworldBuildingTrigger(id: string): OverworldBuildingTrigge
   return OVERWORLD_BUILDING_TRIGGERS.find((trigger) => trigger.id === id);
 }
 
+/** Basement hatch trigger (scene-facing subset of the core spot). */
 export const OVERWORLD_BASEMENT_HOLE = {
   x: CORE_BASEMENT_HOLE.x,
   y: CORE_BASEMENT_HOLE.y,

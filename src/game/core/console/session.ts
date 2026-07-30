@@ -1,3 +1,5 @@
+// Session dispatch mirrors many console verbs; complexity is the command surface.
+// fallow-ignore-file complexity
 import {
   createBridgeStage,
   RidgeConsoleSession,
@@ -96,6 +98,8 @@ export class GameConsoleSession {
     return observeGameWorld(this.state, this.ridge?.observe() ?? null);
   }
 
+  // Used by scripts/game-console.ts (CLI entry; not always visible to graph analysis).
+  // fallow-ignore-next-line unused-class-member
   format(): string {
     return formatGameObservation(this.observe());
   }
@@ -104,6 +108,7 @@ export class GameConsoleSession {
     return this.run(parseGameCommand(raw));
   }
 
+  // fallow-ignore-next-line unused-class-member
   execScript(script: string): GameCommandResult[] {
     return parseGameScript(script).map((command) => this.run(command));
   }

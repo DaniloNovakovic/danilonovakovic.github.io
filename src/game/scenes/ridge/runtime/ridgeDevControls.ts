@@ -11,5 +11,3 @@ export interface RidgeDevPlayerSnapshot {
 export interface RidgeDevControls {
   publishPlayerSnapshot?: (snapshot: RidgeDevPlayerSnapshot) => void;
 }
-
-export const RIDGE_DEFAULT_CAMERA_ZOOM = 1;
