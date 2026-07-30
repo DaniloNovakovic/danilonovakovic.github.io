@@ -1,4 +1,9 @@
 import { BASEMENT_CONSOLE_OVERLAY_ID } from '@/game/overlays/overlayIds';
+import {
+  BASEMENT_FLOOR_Y as CORE_FLOOR_Y,
+  BASEMENT_PLAYER_START as CORE_PLAYER_START,
+  getBasementSpot
+} from '@/game/core/console/content/basementSpots';
 import { getMessages } from '@/shared/i18n';
 
 export type BasementRoomInteractableId = 'exit' | 'computer' | 'glasses';
@@ -31,39 +36,29 @@ export interface BasementInteractionTargetDeps {
   isGlassesOwned: () => boolean;
 }
 
-export const BASEMENT_FLOOR_Y = 500;
-export const BASEMENT_PLAYER_START = { x: 135, y: BASEMENT_FLOOR_Y - 50 } as const;
+export const BASEMENT_FLOOR_Y = CORE_FLOOR_Y;
+export const BASEMENT_PLAYER_START = CORE_PLAYER_START;
 export const BASEMENT_GAMES_OVERLAY_ID = BASEMENT_CONSOLE_OVERLAY_ID;
 
-export const BASEMENT_EXIT = {
-  kind: 'exit',
-  id: 'exit',
-  x: 95,
-  y: BASEMENT_FLOOR_Y - 75,
-  distanceAnchorY: BASEMENT_FLOOR_Y - 75,
-  radius: 70,
-  prompt: { x: 95, y: BASEMENT_FLOOR_Y - 135 }
-} as const satisfies BasementRoomInteractableTypeObject;
+function spotToInteractable(
+  id: BasementRoomInteractableId,
+  kind: BasementRoomInteractableTypeObject['kind']
+): BasementRoomInteractableTypeObject {
+  const spot = getBasementSpot(id);
+  return {
+    kind,
+    id,
+    x: spot.x,
+    y: spot.y,
+    distanceAnchorY: spot.distanceAnchorY,
+    radius: spot.radius,
+    prompt: { x: spot.promptX, y: spot.promptY }
+  };
+}
 
-export const BASEMENT_COMPUTER = {
-  kind: 'computer',
-  id: 'computer',
-  x: 400,
-  y: BASEMENT_FLOOR_Y - 105,
-  distanceAnchorY: BASEMENT_FLOOR_Y - 105,
-  radius: 82,
-  prompt: { x: 400, y: BASEMENT_FLOOR_Y - 197 }
-} as const satisfies BasementRoomInteractableTypeObject;
-
-export const GLASSES_PICKUP = {
-  kind: 'pickup',
-  id: 'glasses',
-  x: 610,
-  y: BASEMENT_FLOOR_Y - 95,
-  distanceAnchorY: BASEMENT_FLOOR_Y - 95,
-  radius: 70,
-  prompt: { x: 610, y: BASEMENT_FLOOR_Y - 165 }
-} as const satisfies BasementRoomInteractableTypeObject;
+export const BASEMENT_EXIT = spotToInteractable('exit', 'exit');
+export const BASEMENT_COMPUTER = spotToInteractable('computer', 'computer');
+export const GLASSES_PICKUP = spotToInteractable('glasses', 'pickup');
 
 export const BASEMENT_ROOM_INTERACTABLES = [
   BASEMENT_COMPUTER,

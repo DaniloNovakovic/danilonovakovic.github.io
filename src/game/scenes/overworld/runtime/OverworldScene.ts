@@ -5,28 +5,19 @@
  */
 import * as Phaser from 'phaser';
 import { TextureGenerator } from '@/game/sharedSceneRuntime/textures/TextureGenerator';
-import {
-  BASEMENT_SCENE_ID,
-  HOBBIES_SCENE_ID,
-  POTASSIUM_SCENE_ID,
-  type SceneId
-} from '@/game/scenes/sceneIds';
+import { HOBBIES_SCENE_ID, POTASSIUM_SCENE_ID, type SceneId } from '@/game/scenes/sceneIds';
 import type { OverlayId } from '@/game/overlays/overlayIds';
 import {
   BANANA_PEEL_CLUE_ID,
-  getOverworldBuildingTrigger,
   OVERWORLD_BASEMENT_HOLE,
   OVERWORLD_BUILDING_TRIGGERS,
   OVERWORLD_CIRCUIT_SLOT,
   OVERWORLD_GLASSES_SECRET_SLOTS,
-  OVERWORLD_INTERACT_DISTANCE_X,
-  OVERWORLD_INTERACT_MIN_PLAYER_Y,
   OVERWORLD_INTERACT_PROMPT_OFFSET_Y,
   OVERWORLD_PLAYER_RESUME_Y_CLAMP,
   OVERWORLD_PLAYER_SPAWN_MARGIN_X,
   OVERWORLD_PLAYER_START,
-  OVERWORLD_WIDTH,
-  type OverworldTriggerAction
+  OVERWORLD_WIDTH
 } from '../worldLayout';
 import { getMessages } from '@/shared/i18n';
 import {
@@ -37,12 +28,19 @@ import {
   SIDE_VIEW_WALK_SPEED
 } from '@/game/sharedSceneRuntime/config';
 import {
-  bridgeActions,
+  bridgeStore,
   isItemEquipped,
   isItemOwned,
   isSecretDiscovered,
   type OpenOverlayOptions
 } from '@/game/bridge/store';
+import {
+  GameConsoleSession,
+  type GameCommandResult,
+  type NearbyThing
+} from '@/game/core/console';
+import { loadBridgeDialogueCatalog } from '@/game/scenes/ridge/content/bridgeCatalog';
+import { applyGameConsoleEvents } from '@/game/scenes/shared/applyGameConsoleEvents';
 import {
   buildStreetEnvironment,
   buildStreetForeground,
@@ -55,12 +53,6 @@ import { startTypewriterEffect, type TypewriterEffectHandle } from '@/game/share
 import type { OverworldBuildingSlot } from '@/game/core/ecs/systems/overworldInteractSystems';
 import { DistanceHazeVision } from '@/game/sharedSceneRuntime/vision/DistanceHazeVision';
 import {
-  createOverworldInteractionState,
-  decideOverworldInteraction,
-  type OverworldInteractionPrompt,
-  type OverworldInteractionState
-} from './overworld/overworldInteractionState';
-import {
   createSideViewPlayerRuntime,
   type SideViewPlayerRuntime
 } from '@/game/sharedSceneRuntime/player/SideViewPlayerRuntime';
@@ -71,9 +63,6 @@ const BANANA_PEEL_TYPEWRITER_CHAR_MS = 28;
 const BANANA_PEEL_POST_TYPEWRITE_WARP_MS = 2000;
 /** How long the clue toast stays visible after typing finishes (ms). */
 const BANANA_PEEL_CLUE_VISIBLE_MS = 4500;
-/** Cancel pending peel warp only after moving this far past slot radius (avoids 1-frame jitter killing the timer). */
-const BANANA_PEEL_WARP_CANCEL_EXTRA_DIST = 36;
-
 export class OverworldScene extends Phaser.Scene {
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   streetBuildings!: StreetBuildingLayers;
@@ -95,7 +84,7 @@ export class OverworldScene extends Phaser.Scene {
   private glassesSecretMessageHideTimer?: Phaser.Time.TimerEvent;
   private bananaClueTypewriter?: TypewriterEffectHandle;
   private bananaPeelWarpTimeoutId?: ReturnType<typeof setTimeout>;
-  private overworldInteractionState: OverworldInteractionState = createOverworldInteractionState();
+  private session?: GameConsoleSession;
 
   constructor() {
     super({ key: 'MainScene' });
@@ -139,6 +128,15 @@ export class OverworldScene extends Phaser.Scene {
 
   create() {
     const messages = getMessages();
+    const bridge = bridgeStore.getState();
+    this.session = new GameConsoleSession({
+      dialogue: loadBridgeDialogueCatalog(),
+      sceneId: 'overworld',
+      ownedItemIds: bridge.inventory.ownedItemIds,
+      equippedItemIds: bridge.equipment.equippedItemIds,
+      discoveredSecretIds: bridge.progress.discoveredSecretIds
+    });
+
     this.physics.world.setBounds(0, 0, OVERWORLD_WIDTH, GAME_DESIGN_HEIGHT);
 
     const { groundZone } = buildStreetEnvironment(this);
@@ -237,65 +235,76 @@ export class OverworldScene extends Phaser.Scene {
 
     updateStreetParticles(this);
 
-    this.updateOverworldInteraction(step.interactRequested, hasGlassesEquipped, hasCircuit);
+    this.updateOverworldInteraction(step.interactRequested);
   }
 
-  private updateOverworldInteraction(
-    interactRequested: boolean,
-    hasGlassesEquipped: boolean,
-    hasCircuit: boolean
-  ): void {
-    const overworldCopy = getMessages().scenes.overworld;
-    const result = decideOverworldInteraction(this.overworldInteractionState, {
-      playerX: this.player.x,
-      playerY: this.player.y,
-      interactRequested,
-      hasGlassesEquipped,
-      hasCircuit,
-      bananaDiscovered: isSecretDiscovered(BANANA_PEEL_CLUE_ID),
-      bananaWarpScheduled: this.bananaPeelWarpTimeoutId !== undefined,
-      bananaCancelExtraDist: BANANA_PEEL_WARP_CANCEL_EXTRA_DIST,
-      basementSceneId: BASEMENT_SCENE_ID,
-      potassiumSceneId: POTASSIUM_SCENE_ID,
-      basementHole: OVERWORLD_BASEMENT_HOLE,
-      circuitSlot: OVERWORLD_CIRCUIT_SLOT,
-      secretSlots: OVERWORLD_GLASSES_SECRET_SLOTS,
-      buildingSlots: this.buildingSlots,
-      buildingPickOptions: {
-        maxDistX: OVERWORLD_INTERACT_DISTANCE_X,
-        minPlayerY: OVERWORLD_INTERACT_MIN_PLAYER_Y,
-        promptOffsetY: OVERWORLD_INTERACT_PROMPT_OFFSET_Y
-      },
-      texts: {
-        basement: getMessages().navigation.interact,
-        enter: getMessages().navigation.enter,
-        bananaDiscovered: overworldCopy.bananaDiscoveredPrompt,
-        bananaUndiscovered: overworldCopy.bananaUndiscoveredPrompt,
-        circuitCrtLocked: overworldCopy.circuitCrtLockedPrompt,
-        circuitCrtReady: overworldCopy.circuitCrtReadyPrompt
-      }
-    });
+  private updateOverworldInteraction(interactRequested: boolean): void {
+    if (!this.session) return;
 
-    this.overworldInteractionState = result.state;
-    this.applyOverworldPrompt(result.prompt);
-    for (const effect of result.effects) {
-      if (effect.type === 'cancelBananaPeel') {
-        this.cancelBananaPeelWarpIfAny();
-      } else if (effect.type === 'discoverBananaPeel') {
-        this.startBananaPeelDiscovery();
-      } else {
-        const trigger = getOverworldBuildingTrigger(effect.targetId);
-        this.applyOverworldTriggerAction(trigger?.action ?? { kind: 'enterScene', sceneId: effect.targetId as SceneId });
-      }
-    }
-  }
+    const sync = this.session.syncPlayerPosition(this.player.x, this.player.y);
+    this.applySessionResult(sync);
 
-  private applyOverworldPrompt(prompt: OverworldInteractionPrompt): void {
-    if (!prompt.visible) {
+    if (this.bananaPeelWarpTimeoutId !== undefined) {
       this.interactPrompt.setVisible(false);
       return;
     }
-    this.interactPrompt.setText(prompt.text).setPosition(prompt.x, prompt.y).setVisible(true);
+
+    if (interactRequested) {
+      this.applySessionResult(this.session.exec('interact'));
+    }
+
+    const nearby = this.session.observe().nearby[0];
+    this.applyOverworldNearbyPrompt(nearby);
+  }
+
+  private applySessionResult(result: GameCommandResult): void {
+    if (!this.session) return;
+    applyGameConsoleEvents(result.events, {
+      onEnterScene: (sceneId) => this.onEnterScene?.(sceneId),
+      onOpenOverlay: (overlayId) => {
+        this.onOpenOverlay?.(overlayId);
+        this.session?.restoreExploreAfterOverlay();
+      },
+      onBananaPeelDiscovered: () => this.startBananaPeelDiscovery(),
+      onBananaPeelCancelled: () => this.cancelBananaPeelWarpIfAny()
+    });
+  }
+
+  private applyOverworldNearbyPrompt(nearby: NearbyThing | undefined): void {
+    if (!nearby || this.session?.getState().overworld.bananaFirstPeelPending) {
+      this.interactPrompt.setVisible(false);
+      return;
+    }
+
+    const text = this.localizedPromptForNearby(nearby);
+    const building = this.buildingSlots.find((slot) => slot.buildingId === nearby.id);
+    const promptX =
+      nearby.promptX ??
+      (building?.x ?? (nearby.id === 'banana-peel' ? OVERWORLD_GLASSES_SECRET_SLOTS[0].x : this.player.x));
+    const promptY = building
+      ? building.y + OVERWORLD_INTERACT_PROMPT_OFFSET_Y
+      : (nearby.promptY ?? this.player.y - 40);
+
+    this.interactPrompt.setText(text).setPosition(promptX, promptY).setVisible(true);
+  }
+
+  private localizedPromptForNearby(nearby: NearbyThing): string {
+    const nav = getMessages().navigation;
+    const overworld = getMessages().scenes.overworld;
+    switch (nearby.kind) {
+      case 'hatch':
+        return nav.interact;
+      case 'secret':
+        return isSecretDiscovered(BANANA_PEEL_CLUE_ID)
+          ? overworld.bananaDiscoveredPrompt
+          : overworld.bananaUndiscoveredPrompt;
+      case 'crt':
+        return isItemOwned('circuit')
+          ? overworld.circuitCrtReadyPrompt
+          : overworld.circuitCrtLockedPrompt;
+      default:
+        return nav.enter;
+    }
   }
 
   private drawBananaFloorIcon(): void {
@@ -482,23 +491,22 @@ export class OverworldScene extends Phaser.Scene {
       globalThis.clearTimeout(this.bananaPeelWarpTimeoutId);
       this.bananaPeelWarpTimeoutId = undefined;
     }
-    this.overworldInteractionState = createOverworldInteractionState();
+    if (this.session) {
+      this.session.getState().overworld.bananaFirstPeelPending = false;
+    }
     this.clearBananaClueMessageTimers();
     this.glassesSecretMessage?.setVisible(false);
   }
 
   /** Abort first peel if the player walks away or uses another exit while typewriter / warp is pending. */
   private cancelBananaPeelWarpIfAny(): void {
-    if (
-      this.bananaPeelWarpTimeoutId === undefined &&
-      !this.overworldInteractionState.bananaFirstPeelPending
-    ) return;
+    const pending = this.session?.getState().overworld.bananaFirstPeelPending ?? false;
+    if (this.bananaPeelWarpTimeoutId === undefined && !pending) return;
     this.resetBananaPeelFlow();
   }
 
   private startBananaPeelDiscovery(): void {
     const messages = getMessages();
-    bridgeActions.discoverSecret(BANANA_PEEL_CLUE_ID);
     this.showBananaClueMessage(
       messages.scenes.overworld.bananaDiscovery,
       BANANA_PEEL_CLUE_VISIBLE_MS,
@@ -507,8 +515,11 @@ export class OverworldScene extends Phaser.Scene {
         onTypewriterComplete: () => {
           this.bananaPeelWarpTimeoutId = globalThis.setTimeout(() => {
             this.bananaPeelWarpTimeoutId = undefined;
-            this.overworldInteractionState = createOverworldInteractionState();
-            this.onEnterScene?.(POTASSIUM_SCENE_ID);
+            if (this.session) {
+              this.applySessionResult(this.session.commitBananaPeelWarp());
+            } else {
+              this.onEnterScene?.(POTASSIUM_SCENE_ID);
+            }
           }, BANANA_PEEL_POST_TYPEWRITE_WARP_MS);
         }
       }
@@ -577,11 +588,4 @@ export class OverworldScene extends Phaser.Scene {
     ).setOrigin(0.5);
   }
 
-  private applyOverworldTriggerAction(action: OverworldTriggerAction): void {
-    if (action.kind === 'openOverlay') {
-      this.onOpenOverlay?.(action.overlayId);
-    } else {
-      this.onEnterScene?.(action.sceneId);
-    }
-  }
 }

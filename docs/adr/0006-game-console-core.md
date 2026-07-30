@@ -37,8 +37,8 @@ surface via `pnpm game:console`.
 ## Consequences
 
 - Full AI smoke paths no longer require a browser.
-- Overworld/Basement Phaser scenes may later thin toward console sessions;
-  until then, keep interaction reducers (`decideOverworldInteraction`) and
-  console logic aligned on shared spot constants under `src/game/core/`.
+- Overworld and Basement Phaser scenes are thin adapters over
+  `GameConsoleSession` (physics/art stay in Phaser; interact/gating decisions
+  and shared street/room spots live in `src/game/core/console/`).
 - Real-time Potassium physics stays Phaser-only; do not pretend the discrete
   console is a frame-accurate physics sim.

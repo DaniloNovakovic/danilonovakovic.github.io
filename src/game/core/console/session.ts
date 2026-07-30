@@ -4,7 +4,12 @@ import {
   type BridgeDialogueCatalog,
   type RidgeSessionEvent
 } from '../ridge/index';
-import { interactBasement, moveBasement, returnToOverworld } from './basementLogic';
+import {
+  interactBasement,
+  moveBasement,
+  returnToOverworld,
+  syncBasementPosition
+} from './basementLogic';
 import { getGameHelpText, parseGameCommand, parseGameScript } from './commands';
 import {
   OVERWORLD_GROUND_Y,
@@ -14,12 +19,18 @@ import {
 import { interactHobbies, moveHobbies } from './hobbiesLogic';
 import { formatGameObservation, observeGameWorld } from './observe';
 import { draftPotassium, fightPotassium, startPotassium } from './potassiumLogic';
-import { interactOverworld, moveOverworld } from './overworldLogic';
+import {
+  enterPotassiumFromBananaPeel,
+  interactOverworld,
+  moveOverworld,
+  syncOverworldPosition
+} from './overworldLogic';
 import type {
   GameCommand,
   GameCommandResult,
   GameItemId,
   GameObservation,
+  GameSecretId,
   GameSessionEvent,
   GameWorldState
 } from './types';
@@ -30,6 +41,7 @@ export interface GameConsoleSessionOptions {
   sceneId?: GameSceneId;
   ownedItemIds?: readonly GameItemId[];
   equippedItemIds?: readonly GameItemId[];
+  discoveredSecretIds?: readonly GameSecretId[];
 }
 
 export class GameConsoleSession {
@@ -41,6 +53,7 @@ export class GameConsoleSession {
     this.dialogue = options.dialogue;
     const owned = [...(options.ownedItemIds ?? [])];
     const equipped = [...(options.equippedItemIds ?? [])];
+    const secrets = [...(options.discoveredSecretIds ?? [])];
     const sceneId = options.sceneId ?? 'overworld';
 
     this.state = {
@@ -49,7 +62,7 @@ export class GameConsoleSession {
       overlay: null,
       ownedItemIds: owned,
       equippedItemIds: equipped,
-      discoveredSecretIds: [],
+      discoveredSecretIds: secrets,
       overworld: {
         playerX: OVERWORLD_PLAYER_START.x,
         playerY: OVERWORLD_GROUND_Y,
@@ -93,6 +106,52 @@ export class GameConsoleSession {
 
   execScript(script: string): GameCommandResult[] {
     return parseGameScript(script).map((command) => this.run(command));
+  }
+
+  /**
+   * Phaser-authoritative position sync. Physics/jump stay in the scene;
+   * the session only needs coords for nearby/gating decisions.
+   */
+  syncPlayerPosition(x: number, y?: number): GameCommandResult {
+    if (this.state.mode === 'overworld') {
+      const events = syncOverworldPosition(this.state, x, y ?? this.state.overworld.playerY);
+      return this.finish('Synced overworld position.', events);
+    }
+    if (this.state.mode === 'basement') {
+      syncBasementPosition(this.state, x);
+      return this.ok('Synced basement position.');
+    }
+    if (this.state.mode === 'hobbies') {
+      this.state.hobbies.playerX = x;
+      return this.ok('Synced hobbies position.');
+    }
+    return this.ok('Position sync ignored outside walk modes.');
+  }
+
+  /** Live Overworld typewriter warp entry into Potassium. */
+  commitBananaPeelWarp(): GameCommandResult {
+    if (this.state.mode !== 'overworld') {
+      return this.fail('Banana peel warp only applies on the street.');
+    }
+    const result = enterPotassiumFromBananaPeel(this.state);
+    return this.finish(result.message, result.events);
+  }
+
+  /**
+   * Phaser overlays pause the street without leaving the Overworld scene.
+   * After applying `overlay_opened`, restore explore mode so nearby stays valid.
+   */
+  restoreExploreAfterOverlay(): void {
+    if (this.state.mode !== 'overlay') return;
+    this.state.overlay = null;
+    if (this.state.sceneId === 'basement') {
+      this.state.mode = 'basement';
+    } else if (this.state.sceneId === 'hobbies') {
+      this.state.mode = 'hobbies';
+    } else {
+      this.state.mode = 'overworld';
+      this.state.sceneId = 'overworld';
+    }
   }
 
   run(command: GameCommand): GameCommandResult {
@@ -152,15 +211,14 @@ export class GameConsoleSession {
       return this.forwardRidge(`go ${direction} ${steps}`);
     }
 
-    let message: string;
     if (this.state.mode === 'basement') {
-      message = moveBasement(this.state, direction, steps);
-    } else if (this.state.mode === 'hobbies') {
-      message = moveHobbies(this.state, direction, steps);
-    } else {
-      message = moveOverworld(this.state, direction, steps);
+      return this.ok(moveBasement(this.state, direction, steps));
     }
-    return this.ok(message);
+    if (this.state.mode === 'hobbies') {
+      return this.ok(moveHobbies(this.state, direction, steps));
+    }
+    const walked = moveOverworld(this.state, direction, steps);
+    return this.finish(walked.message, walked.events);
   }
 
   private handleInteract(target: string | undefined): GameCommandResult {

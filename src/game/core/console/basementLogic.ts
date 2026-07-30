@@ -1,4 +1,8 @@
-import { BASEMENT_PLAYER_START, BASEMENT_SPOTS, BASEMENT_STEP_PX } from './content/basementSpots';
+import {
+  BASEMENT_PLAYER_START,
+  BASEMENT_SPOTS,
+  BASEMENT_STEP_PX
+} from './content/basementSpots';
 import { getGamesOverlay } from './overlayCatalog';
 import type { GameItemId, GameSessionEvent, GameWorldState, NearbyThing } from './types';
 
@@ -30,7 +34,9 @@ export function listBasementNearby(state: GameWorldState): NearbyThing[] {
       label: spot.label,
       distance,
       prompt,
-      kind: spot.id === 'exit' ? 'exit' : spot.id === 'glasses' ? 'pickup' : 'computer'
+      kind: spot.id === 'exit' ? 'exit' : spot.id === 'glasses' ? 'pickup' : 'computer',
+      promptX: spot.promptX,
+      promptY: spot.promptY
     });
   }
 
@@ -49,6 +55,10 @@ export function moveBasement(
   return direction === 'right'
     ? `You shuffle right to x=${Math.round(next)}.`
     : `You shuffle left to x=${Math.round(next)}.`;
+}
+
+export function syncBasementPosition(state: GameWorldState, x: number): void {
+  state.basement.playerX = x;
 }
 
 export function interactBasement(
@@ -76,9 +86,11 @@ export function interactBasement(
     return collectGlasses(state);
   }
 
-  // computer
   if (!state.ownedItemIds.includes('glasses')) {
-    return { message: 'ughh... I can\'t see', events: [] };
+    return {
+      message: "ughh... I can't see",
+      events: [{ type: 'thought', id: 'basement_cannot_see' }]
+    };
   }
 
   state.mode = 'overlay';

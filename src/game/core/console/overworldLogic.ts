@@ -17,6 +17,8 @@ export interface OverworldInteractOutcome {
   events: GameSessionEvent[];
 }
 
+const BANANA_CANCEL_EXTRA = 40;
+
 export function listOverworldNearby(state: GameWorldState): NearbyThing[] {
   const x = state.overworld.playerX;
   const y = state.overworld.playerY;
@@ -29,20 +31,28 @@ export function listOverworldNearby(state: GameWorldState): NearbyThing[] {
       label: OVERWORLD_BASEMENT_HOLE.label,
       distance: hatchDx,
       prompt: 'Enter basement',
-      kind: 'hatch'
+      kind: 'hatch',
+      promptX: OVERWORLD_BASEMENT_HOLE.x,
+      promptY: OVERWORLD_BASEMENT_HOLE.promptY
     });
   }
 
   const peelDist = Math.hypot(x - OVERWORLD_BANANA_PEEL.x, y - OVERWORLD_BANANA_PEEL.y);
   const glassesOn = state.equippedItemIds.includes('glasses');
-  if (glassesOn && peelDist <= OVERWORLD_BANANA_PEEL.radius) {
+  if (
+    glassesOn &&
+    peelDist <= OVERWORLD_BANANA_PEEL.radius &&
+    !state.overworld.bananaFirstPeelPending
+  ) {
     const discovered = state.discoveredSecretIds.includes(OVERWORLD_BANANA_PEEL.secretId);
     things.push({
       id: OVERWORLD_BANANA_PEEL.id,
       label: OVERWORLD_BANANA_PEEL.label,
       distance: peelDist,
       prompt: discovered ? 'Slip into Potassium' : 'Inspect peel',
-      kind: 'secret'
+      kind: 'secret',
+      promptX: OVERWORLD_BANANA_PEEL.x,
+      promptY: OVERWORLD_BANANA_PEEL.y - 56
     });
   }
 
@@ -54,7 +64,9 @@ export function listOverworldNearby(state: GameWorldState): NearbyThing[] {
       label: OVERWORLD_CIRCUIT_CRT.label,
       distance: crtDx,
       prompt: hasCircuit ? 'Insert Circuit — enter Ridge' : 'CRT waits for a Circuit',
-      kind: 'crt'
+      kind: 'crt',
+      promptX: OVERWORLD_CIRCUIT_CRT.x,
+      promptY: OVERWORLD_CIRCUIT_CRT.promptY
     });
   }
 
@@ -66,8 +78,13 @@ export function listOverworldNearby(state: GameWorldState): NearbyThing[] {
         label: building.label,
         distance: dx,
         prompt: `Enter ${building.label}`,
-        kind: 'building'
+        kind: 'building',
+        promptX: building.x,
+        promptY: building.x // placeholder overwritten below — buildings use sprite Y in Phaser
       });
+      // Prompt Y for buildings is owned by Phaser street sprites; headless uses a street band.
+      const last = things[things.length - 1];
+      if (last) last.promptY = 400;
     }
   }
 
@@ -78,29 +95,54 @@ export function moveOverworld(
   state: GameWorldState,
   direction: 'left' | 'right',
   steps: number
-): string {
+): { message: string; events: GameSessionEvent[] } {
   const delta = steps * OVERWORLD_STEP_PX * (direction === 'right' ? 1 : -1);
   const next = clamp(state.overworld.playerX + delta, 24, OVERWORLD_WIDTH - 24);
   state.overworld.playerX = next;
   state.overworld.facing = direction;
+  const events = maybeCancelBananaPeel(state);
+  return {
+    message:
+      direction === 'right'
+        ? `You walk right to x=${Math.round(next)}.`
+        : `You walk left to x=${Math.round(next)}.`,
+    events
+  };
+}
 
-  const peelDist = Math.hypot(
-    next - OVERWORLD_BANANA_PEEL.x,
-    state.overworld.playerY - OVERWORLD_BANANA_PEEL.y
-  );
-  if (state.overworld.bananaFirstPeelPending && peelDist > OVERWORLD_BANANA_PEEL.radius + 40) {
-    state.overworld.bananaFirstPeelPending = false;
-  }
-
-  return direction === 'right'
-    ? `You walk right to x=${Math.round(next)}.`
-    : `You walk left to x=${Math.round(next)}.`;
+/** Phaser-authoritative position sync (no movement simulation). */
+export function syncOverworldPosition(
+  state: GameWorldState,
+  x: number,
+  y: number
+): GameSessionEvent[] {
+  state.overworld.playerX = x;
+  state.overworld.playerY = y;
+  return maybeCancelBananaPeel(state);
 }
 
 export function interactOverworld(
   state: GameWorldState,
   target: string | undefined
 ): OverworldInteractOutcome {
+  // Headless second interact (and explicit peel target) while the discovery beat is pending.
+  if (
+    state.overworld.bananaFirstPeelPending &&
+    state.discoveredSecretIds.includes(OVERWORLD_BANANA_PEEL.secretId) &&
+    (!target ||
+      target.toLowerCase().includes('banana') ||
+      target.toLowerCase().includes('peel') ||
+      target.toLowerCase().includes('potassium'))
+  ) {
+    const peelDist = Math.hypot(
+      state.overworld.playerX - OVERWORLD_BANANA_PEEL.x,
+      state.overworld.playerY - OVERWORLD_BANANA_PEEL.y
+    );
+    if (peelDist <= OVERWORLD_BANANA_PEEL.radius + BANANA_CANCEL_EXTRA) {
+      return enterPotassiumFromBananaPeel(state);
+    }
+  }
+
   const nearby = listOverworldNearby(state);
   if (nearby.length === 0) {
     return { message: 'Nothing close enough to interact with.', events: [] };
@@ -152,19 +194,12 @@ export function interactOverworld(
   return enterBuilding(state, building);
 }
 
-function interactBananaPeel(state: GameWorldState): OverworldInteractOutcome {
-  const secretId: GameSecretId = OVERWORLD_BANANA_PEEL.secretId;
-  const discovered = state.discoveredSecretIds.includes(secretId);
-
-  if (!discovered) {
-    state.discoveredSecretIds = [...state.discoveredSecretIds, secretId];
-    return {
-      message:
-        'A banana peel snaps into focus. Secret discovered — interact again to slip into Potassium.',
-      events: [{ type: 'secret_discovered', secretId }]
-    };
+/** Live Overworld typewriter warp (and console second interact) enter Potassium. */
+export function enterPotassiumFromBananaPeel(state: GameWorldState): OverworldInteractOutcome {
+  if (!state.discoveredSecretIds.includes(OVERWORLD_BANANA_PEEL.secretId)) {
+    return { message: 'No banana peel discovery to commit.', events: [] };
   }
-
+  state.overworld.bananaFirstPeelPending = false;
   state.mode = 'potassium';
   state.sceneId = 'potassium';
   state.potassium = {
@@ -179,6 +214,23 @@ function interactBananaPeel(state: GameWorldState): OverworldInteractOutcome {
     message: 'You slip on the peel and tumble into Potassium Slip.',
     events: [{ type: 'scene_entered', sceneId: 'potassium' }]
   };
+}
+
+function interactBananaPeel(state: GameWorldState): OverworldInteractOutcome {
+  const secretId: GameSecretId = OVERWORLD_BANANA_PEEL.secretId;
+  const discovered = state.discoveredSecretIds.includes(secretId);
+
+  if (!discovered) {
+    state.discoveredSecretIds = [...state.discoveredSecretIds, secretId];
+    state.overworld.bananaFirstPeelPending = true;
+    return {
+      message:
+        'A banana peel snaps into focus. Secret discovered — interact again (or wait for the warp) to enter Potassium.',
+      events: [{ type: 'secret_discovered', secretId }]
+    };
+  }
+
+  return enterPotassiumFromBananaPeel(state);
 }
 
 function enterBuilding(
@@ -202,6 +254,17 @@ function enterBuilding(
     message: `You open ${state.overlay.title}.`,
     events: [{ type: 'overlay_opened', overlayId: building.action.overlayId }]
   };
+}
+
+function maybeCancelBananaPeel(state: GameWorldState): GameSessionEvent[] {
+  if (!state.overworld.bananaFirstPeelPending) return [];
+  const peelDist = Math.hypot(
+    state.overworld.playerX - OVERWORLD_BANANA_PEEL.x,
+    state.overworld.playerY - OVERWORLD_BANANA_PEEL.y
+  );
+  if (peelDist <= OVERWORLD_BANANA_PEEL.radius + BANANA_CANCEL_EXTRA) return [];
+  state.overworld.bananaFirstPeelPending = false;
+  return [{ type: 'banana_peel_cancelled' }];
 }
 
 function pickNearby(nearby: readonly NearbyThing[], target: string | undefined): NearbyThing | null {

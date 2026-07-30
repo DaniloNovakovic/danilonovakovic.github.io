@@ -105,6 +105,46 @@ describe('GameConsoleSession full secret route', () => {
     expect(session.exec('close').ok).toBe(true);
     expect(session.observe().mode).toBe('overworld');
   });
+
+  it('syncs Phaser position and cancels a pending banana peel when walking away', () => {
+    const session = new GameConsoleSession({
+      dialogue: catalog,
+      ownedItemIds: ['glasses'],
+      equippedItemIds: ['glasses']
+    });
+    session.syncPlayerPosition(650, 535);
+    expect(session.exec('interact').events.some((e) => e.type === 'secret_discovered')).toBe(true);
+    expect(session.getState().overworld.bananaFirstPeelPending).toBe(true);
+
+    const cancelled = session.syncPlayerPosition(900, 535);
+    expect(cancelled.events).toContainEqual({ type: 'banana_peel_cancelled' });
+    expect(session.getState().overworld.bananaFirstPeelPending).toBe(false);
+  });
+
+  it('inserts Circuit at the CRT after hydrate', () => {
+    const session = new GameConsoleSession({
+      dialogue: catalog,
+      ownedItemIds: ['circuit'],
+      equippedItemIds: []
+    });
+    session.syncPlayerPosition(1650, 520);
+    const result = session.exec('interact');
+    expect(result.events).toContainEqual({ type: 'scene_entered', sceneId: 'ridge' });
+    expect(session.observe().mode).toBe('ridge');
+  });
+
+  it('commits banana peel warp for the live Overworld typewriter path', () => {
+    const session = new GameConsoleSession({
+      dialogue: catalog,
+      ownedItemIds: ['glasses'],
+      equippedItemIds: ['glasses'],
+      discoveredSecretIds: ['banana-peel-clue']
+    });
+    session.syncPlayerPosition(650, 535);
+    const result = session.commitBananaPeelWarp();
+    expect(result.ok).toBe(true);
+    expect(session.observe().mode).toBe('potassium');
+  });
 });
 
 function walkOverworldTo(session: GameConsoleSession, targetX: number): void {

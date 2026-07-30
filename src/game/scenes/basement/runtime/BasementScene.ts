@@ -5,10 +5,7 @@ import {
   BASEMENT_EXIT,
   BASEMENT_FLOOR_Y,
   BASEMENT_PLAYER_START,
-  createBasementInteractionTargets,
-  GLASSES_PICKUP,
-  type BasementInteractionEffect,
-  type BasementRoomInteractableId
+  GLASSES_PICKUP
 } from '../roomLayout';
 import { getMessages } from '@/shared/i18n';
 import {
@@ -19,17 +16,21 @@ import {
   SIDE_VIEW_SPRINT_SPEED,
   SIDE_VIEW_WALK_SPEED
 } from '@/game/sharedSceneRuntime/config';
-import { bridgeActions, isItemEquipped, isItemOwned, type OpenOverlayOptions } from '@/game/bridge/store';
+import {
+  bridgeStore,
+  isItemEquipped,
+  isItemOwned,
+  type OpenOverlayOptions
+} from '@/game/bridge/store';
+import { GameConsoleSession, type GameCommandResult } from '@/game/core/console';
+import { loadBridgeDialogueCatalog } from '@/game/scenes/ridge/content/bridgeCatalog';
+import { applyGameConsoleEvents } from '@/game/scenes/shared/applyGameConsoleEvents';
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
 import { PlayerThoughtText } from '@/game/sharedSceneRuntime/text/PlayerThoughtText';
 import {
   createSideViewPlayerRuntime,
   type SideViewPlayerRuntime
 } from '@/game/sharedSceneRuntime/player/SideViewPlayerRuntime';
-import {
-  createInteriorInteractionRuntime,
-  type InteriorInteractionRuntime
-} from '@/game/sharedSceneRuntime/interactions/InteriorInteractionRuntime';
 
 export class BasementScene extends Phaser.Scene {
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -40,10 +41,7 @@ export class BasementScene extends Phaser.Scene {
   playerThought!: PlayerThoughtText;
 
   private playerRuntime?: SideViewPlayerRuntime;
-  private interactionRuntime?: InteriorInteractionRuntime<
-    BasementRoomInteractableId,
-    BasementInteractionEffect
-  >;
+  private session?: GameConsoleSession;
   private onClose?: () => void;
   private onOpenOverlay?: (overlayId: OverlayId, options?: OpenOverlayOptions) => void;
   private isPaused: boolean = false;
@@ -76,6 +74,15 @@ export class BasementScene extends Phaser.Scene {
 
   create() {
     const messages = getMessages();
+    const bridge = bridgeStore.getState();
+    this.session = new GameConsoleSession({
+      dialogue: loadBridgeDialogueCatalog(),
+      sceneId: 'basement',
+      ownedItemIds: bridge.inventory.ownedItemIds,
+      equippedItemIds: bridge.equipment.equippedItemIds,
+      discoveredSecretIds: bridge.progress.discoveredSecretIds
+    });
+
     this.physics.world.setBounds(0, 0, GAME_DESIGN_WIDTH, GAME_DESIGN_HEIGHT);
     this.buildRoom();
 
@@ -153,15 +160,6 @@ export class BasementScene extends Phaser.Scene {
       }
     ).setOrigin(0.5).setDepth(100);
 
-    this.interactionRuntime = createInteriorInteractionRuntime({
-      interactRadius: 0,
-      exitEffect: { kind: 'close' },
-      targets: createBasementInteractionTargets({ isGlassesOwned: () => isItemOwned('glasses') }).map((target) => ({
-        ...target,
-        interactRadius: target.radius
-      }))
-    });
-
     this.refreshGlassesVisibility();
     this.setPaused(this.isPaused);
     this.playerRuntime.syncAppearance();
@@ -171,34 +169,55 @@ export class BasementScene extends Phaser.Scene {
     this.refreshGlassesVisibility();
 
     const playerUpdate = this.playerRuntime?.update();
-    if (!playerUpdate || playerUpdate.paused) {
+    if (!playerUpdate || playerUpdate.paused || !this.session) {
       this.interactPrompt.setVisible(false);
       return;
     }
 
     const { commands, step } = playerUpdate;
-    const interaction = this.interactionRuntime?.update({
-      playerX: this.player.x,
-      playerY: this.player.y,
-      interactRequested: step.interactRequested,
-      exitRequested: commands.exitContext
-    });
+    this.session.syncPlayerPosition(this.player.x);
 
-    if (interaction?.effect?.kind === 'close') {
-      this.applyBasementInteractionEffect(interaction.effect);
+    if (commands.exitContext) {
+      this.onClose?.();
       return;
     }
 
     this.playerThought.update();
 
-    if (!interaction || !interaction.prompt.visible) {
+    if (step.interactRequested) {
+      this.applySessionResult(this.session.exec('interact'));
+    }
+
+    const nearby = this.session.observe().nearby[0];
+    if (!nearby || nearby.promptX == null || nearby.promptY == null) {
       this.interactPrompt.setVisible(false);
       return;
     }
 
-    this.interactPrompt.setPosition(interaction.prompt.x, interaction.prompt.y).setVisible(true);
-    if (interaction.effect) {
-      this.applyBasementInteractionEffect(interaction.effect);
+    this.interactPrompt
+      .setText(getMessages().navigation.interact)
+      .setPosition(nearby.promptX, nearby.promptY)
+      .setVisible(true);
+  }
+
+  private applySessionResult(result: GameCommandResult): void {
+    const messages = getMessages();
+    applyGameConsoleEvents(result.events, {
+      onReturnToOverworld: () => this.onClose?.(),
+      onOpenOverlay: (overlayId) => {
+        this.onOpenOverlay?.(overlayId);
+        this.session?.restoreExploreAfterOverlay();
+      },
+      onThought: (id) => {
+        if (id === 'basement_cannot_see') {
+          this.playerThought.show(messages.scenes.basement.cannotSeeThought);
+        }
+      }
+    });
+
+    if (result.events.some((event) => event.type === 'item_collected' && event.itemId === 'glasses')) {
+      this.statusText.setText(messages.scenes.basement.glassesAcquired);
+      this.refreshGlassesVisibility();
     }
   }
 
@@ -320,25 +339,5 @@ export class BasementScene extends Phaser.Scene {
     const visible = !isItemOwned('glasses');
     this.glasses?.setVisible(visible);
     this.glassesLabel?.setVisible(visible);
-  }
-
-  private applyBasementInteractionEffect(effect: BasementInteractionEffect): void {
-    const messages = getMessages();
-    switch (effect.kind) {
-      case 'close':
-        this.onClose?.();
-        break;
-      case 'openOverlay':
-        this.onOpenOverlay?.(effect.id);
-        break;
-      case 'collectGlasses':
-        bridgeActions.collectGlasses();
-        this.statusText.setText(messages.scenes.basement.glassesAcquired);
-        this.refreshGlassesVisibility();
-        break;
-      case 'showThought':
-        this.playerThought.show(effect.text);
-        break;
-    }
   }
 }

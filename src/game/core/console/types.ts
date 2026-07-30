@@ -25,6 +25,9 @@ export interface NearbyThing {
   distance: number;
   prompt: string;
   kind: 'building' | 'secret' | 'hatch' | 'crt' | 'pickup' | 'exit' | 'computer' | 'npc' | 'prop';
+  /** World anchor for Phaser interact prompts (optional for headless). */
+  promptX?: number;
+  promptY?: number;
 }
 
 export interface OverlaySummary {
@@ -122,6 +125,8 @@ export type GameSessionEvent =
   | { type: 'item_equipped'; itemId: GameItemId }
   | { type: 'item_unequipped'; itemId: GameItemId }
   | { type: 'secret_discovered'; secretId: GameSecretId }
+  | { type: 'banana_peel_cancelled' }
+  | { type: 'thought'; id: 'basement_cannot_see' }
   | { type: 'potassium_won' }
   | { type: 'ridge_beat_changed'; beat: RidgeBridgeBeat }
   | { type: 'ridge_concert_handoff' };
