@@ -48,6 +48,9 @@ export default function DevSwitcherOverlay({ close, titleId, descriptionId }: Ov
           </button>
         ))}
       </div>
+      <p className="mt-3 border-t border-[#1a1a1a]/20 pt-3 text-[10px] font-bold leading-relaxed text-[#5a554f]">
+        {messages.gameShell.ridgeConsoleHint}
+      </p>
     </OverlayDialogFrame>
   );
 }

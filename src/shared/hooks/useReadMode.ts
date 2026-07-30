@@ -1,17 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { AppMode } from '../../modePicker';
 
-export type DevToolMode = 'ridge-stage-debugger';
-export type RouteState = 'picker' | AppMode | DevToolMode;
+export type RouteState = 'picker' | AppMode;
 
-export function readRouteStateFromSearch(
-  search: string,
-  isDev = import.meta.env.DEV
-): RouteState {
+export function readRouteStateFromSearch(search: string): RouteState {
   const params = new URLSearchParams(search);
   const mode = params.get('mode');
   if (mode === 'interactive' || mode === 'static') return mode;
-  if (isDev && mode === 'ridge-stage-debugger') return mode;
   return 'picker';
 }
 
@@ -20,22 +15,10 @@ function readModeFromUrl(): RouteState {
   return readRouteStateFromSearch(window.location.search);
 }
 
-function isPublicMode(mode: RouteState): mode is AppMode {
-  return mode === 'interactive' || mode === 'static';
-}
-
-function isDevToolMode(mode: RouteState): mode is DevToolMode {
-  return mode === 'ridge-stage-debugger';
-}
-
-function canWriteModeToUrl(mode: RouteState): mode is AppMode | DevToolMode {
-  return isPublicMode(mode) || (import.meta.env.DEV && isDevToolMode(mode));
-}
-
 function writeModeToUrl(mode: RouteState) {
   if (typeof window === 'undefined') return;
   const url = new URL(window.location.href);
-  if (canWriteModeToUrl(mode)) {
+  if (mode === 'interactive' || mode === 'static') {
     url.searchParams.set('mode', mode);
   } else {
     url.searchParams.delete('mode');

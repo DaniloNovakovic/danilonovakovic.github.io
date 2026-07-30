@@ -11,6 +11,8 @@ export const gameShellMessages = {
   backToCity: "Back to City",
   back: "Back",
   devSwitcher: "Dev scene switcher",
+  ridgeConsoleHint: "Ridge AI playtest: pnpm ridge:console",
+  devToolsSection: "Dev tools",
   city: "City",
   loadingScene: "Loading scene",
 } as const;

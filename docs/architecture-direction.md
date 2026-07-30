@@ -5,9 +5,10 @@ why behind the runtime shape, and the direction future refactors should preserve
 For what exists in code today, treat [`runtime-architecture.md`](runtime-architecture.md),
 `AGENTS.md`, and the scoped `.agents/rules/` files as the operational guidance.
 
-Ridge caveat: the folded-desk blockout stack was removed from the repo. Active
-Ridge runtime spatial truth lives in Bridge stage composition
-(`src/game/scenes/ridge/bridge/`). Historical blockout notes in ADRs and
+Ridge caveat: the folded-desk blockout stack and Stage Debugger were removed.
+Active Ridge gameplay truth lives in the Ridge Console Core
+(`src/game/core/ridge/`) with stick VisualProvider presentation under
+`src/game/scenes/ridge/art/`. Historical blockout notes in ADRs and
 [`game-design/ridge/map-language.md`](./game-design/ridge/map-language.md) do
 not override the pre-production route in
 [`game-design/ridge/README.md`](./game-design/ridge/README.md).
@@ -54,9 +55,12 @@ paths, prefer [`runtime-architecture.md`](runtime-architecture.md). When
 proposing future refactors:
 
 - Prefer extending existing lifecycle, bridge, overlay, scene UI, and shared runtime seams instead of re-introducing callback-only scene orchestration, ad-hoc overlay maps, or ad-hoc global state.
-- For current Ridge runtime work, keep spatial truth in Bridge stage
-  composition (`stageComposition.ts`) instead of rebuilding parallel catalogs or
-  resurrecting the removed blockout pipeline.
+- For current Ridge runtime work, keep gameplay truth in the Ridge Console Core
+  (`src/game/core/ridge/`) and art behind VisualProvider, instead of rebuilding
+  parallel catalogs or resurrecting removed debugger/blockout pipelines.
+- For full-game AI/headless playtests, prefer `GameConsoleSession`
+  (`src/game/core/console/`, ADR-0006) and `pnpm game:console` over browser-only
+  smoke paths.
 - Introduce shared render helpers only when repeated render policy code appears.
 
 ---

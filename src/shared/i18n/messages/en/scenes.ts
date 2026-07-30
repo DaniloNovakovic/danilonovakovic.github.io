@@ -6,6 +6,8 @@ export const sceneMessages = {
     bananaUndiscoveredPrompt: "[E] Peel?",
     bananaDiscovery:
       "A tiny banana sticker points east. This city has stranger shortcuts than doors.",
+    circuitCrtLockedPrompt: "A blank CRT. Needs a Circuit.",
+    circuitCrtReadyPrompt: "[E] Insert Circuit",
   },
   basement: {
     title: "DEVELOPER BASEMENT",

@@ -22,7 +22,13 @@ Use these checks before adding modules, wrappers, interfaces, or cross-folder se
 4. **Count adapters honestly.** One adapter is a hypothetical seam; two adapters are evidence that the seam may be real.
 5. **Prefer locality.** Keep change, bugs, knowledge, and verification concentrated unless separation gives clear leverage.
 6. **Reject knowledge-leaking interfaces.** Do not add interfaces that require callers to understand more lifecycle, ordering, or implementation detail than before.
-7. **Keep Ridge spatial truth in Ridge Map Language and compiled facts.** Follow ADR-0001 instead of recreating parent/route/spatial catalogs in runtime code.
+7. **Keep Ridge gameplay truth in Ridge Console Core.** Follow ADR-0005
+   (`src/game/core/ridge/`) instead of recreating route/spatial catalogs in
+   Phaser scene code. Art stays behind VisualProvider.
+8. **Keep full-game headless play in Game Console Core.** Follow ADR-0006
+   (`src/game/core/console/`, `pnpm game:console`) for Overworld / Basement /
+   discrete Potassium / Ridge orchestration. Do not invent a second headless
+   store or browser-only smoke path when the console session can answer.
 
 ## Folder Ownership
 

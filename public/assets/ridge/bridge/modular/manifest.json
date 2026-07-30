@@ -1,17 +1,20 @@
 {
-  "source": "built-in image_gen + local chroma-key slicing",
+  "status": "historical-reference",
+  "note": "Bridge runtime uses stick VisualProvider under src/game/scenes/ridge/art/stick/. PNG modular assets here are not loaded.",
   "assets": [
     {
       "file": "bridge-builder.png",
       "kind": "character",
-      "width": 105,
-      "height": 220
+      "width": 140,
+      "height": 210,
+      "note": "Legacy reference only"
     },
     {
       "file": "toy-car.png",
       "kind": "prop",
-      "width": 132,
-      "height": 72
+      "width": 80,
+      "height": 49,
+      "note": "Legacy reference only"
     }
   ]
 }

@@ -36,7 +36,9 @@ This folder is organized by surface ownership.
 - `game/shell/use*.ts` - Focused React hooks for Phaser boot, bridge callbacks, touch controls, and scale refresh.
 - `game/sceneLifecycle` - Scene lifecycle orchestration, scene manager, lifecycle events, and context assembly.
 - `game/sharedSceneRuntime` - Reusable Phaser-facing machinery shared by multiple scenes.
-- `game/core` - Pure ECS, input, and player decision logic with no Phaser/React/browser imports.
+- `game/core` - Pure ECS, input, player, and Ridge console decision logic with no Phaser/React/browser imports.
+- `game/scenes/ridge/art` - Replaceable Ridge VisualProvider (stick figures by default).
+- `game/scenes/ridge/sceneUi` - Persona-style Character Conversation Panel.
 - `game/adapters` - Concrete adapters to external engines/APIs, such as the Phaser scene adapter.
 - `shared/i18n/messages/en/` - English user-facing copy for React and Phaser. `index.ts` composes the locale from domain files. Add new display strings here first; do not add scene `text.ts` compatibility shims.
 

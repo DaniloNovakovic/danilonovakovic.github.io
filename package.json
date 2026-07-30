@@ -24,7 +24,9 @@
     "fallow:baseline": "fallow dead-code --save-baseline fallow-baselines/dead-code.json --quiet; fallow health --save-baseline fallow-baselines/health.json --quiet; fallow dupes --save-baseline fallow-baselines/dupes.json --quiet",
     "test": "vitest run",
     "test:changed": "vitest run --changed",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "game:console": "vite-node scripts/game-console.ts",
+    "ridge:console": "vite-node scripts/game-console.ts --scene ridge"
   },
   "dependencies": {
     "clsx": "^2.1.1",

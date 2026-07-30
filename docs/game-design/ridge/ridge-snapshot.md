@@ -12,8 +12,7 @@
 - **Ridge source router:** [`README.md`](./README.md).
 - **Active story/route canon:** [`story-level-bible.md`](./story-level-bible.md).
 - **Active area design:** [`areas/`](./areas/README.md).
-- **Legacy blockout language (historical):** [`map-language.md`](./map-language.md) — superseded; folded-desk source removed from the repo.
-- **Legacy folded topology reference:** [`legacy/`](./legacy/README.md).
+- **Runtime architecture ADR:** [`../../adr/0005-ridge-console-core-and-stick-visuals.md`](../../adr/0005-ridge-console-core-and-stick-visuals.md).
 - **Product vision:** [`summit.md`](./summit.md).
 - **Live implementation work:** GitHub Issues.
 
@@ -25,395 +24,91 @@ doc about future route intent, the active design docs win.
 
 ## Current Runtime Shape
 
-Ridge is a separate Phaser scene that can boot directly in development with:
+Player-facing Ridge entry (secret side game):
+
+```text
+Overworld banana peel
+  -> win Potassium Slip (earn Circuit)
+  -> insert Circuit into the street CRT (between Projects and Abilities)
+  -> Ridge
+```
+
+Dev direct boot:
 
 ```text
 ?mode=interactive&startScene=ridge
 ```
 
+Headless / AI playtest:
+
+```text
+pnpm ridge:console
+pnpm ridge:console --script "look; go right 3; interact; advance"
+pnpm ridge:console --script "look" --json
+```
+
+Full-game headless (street → Circuit → Ridge) uses `pnpm game:console`; see
+ADR-0006 and the player manual. `ridge:console` is `game:console --scene ridge`.
+
 Current runtime characteristics:
 
-- Ridge Bridge exploration uses a Bridge-owned Stage Composition Source and a
-  Primary Walk Rail as movement authority. Left/right input advances rail
-  progress, then the player foot position, scale, depth, and interaction
-  checks resolve from the rail and Stage Spots.
-- The active `ridge` scene is now the **Bridge Tracer Slice**: a flat
-  Bridge-only route from nature/hill entry to Cicka's toy-car play spot,
-  blocked blueprint bridge, Bridge Draftsperson, auto-success toy-car test,
-  completed crossing, and Bridge-to-Concert handoff.
-- Bridge stage plates, modular objects, Stage Spots, Stage Occluders, and
-  route-beat presentation state are authored in the colocated Bridge source
-  under `src/game/scenes/ridge/bridge/`.
-- `?mode=ridge-stage-debugger` opens the current Ridge Stage Debugger: a
-  Bridge-first live preview with route-beat controls, Walk Rail readouts, Stage
-  Spot movement, copyable rail snippets, and Bridge Stage debug overlays.
-- First Playable Route progress lives in the bridge store as
-  `firstPlayableRoute`, a typed route state that only permits active Bridge
-  beats while `activeAreaId` is `bridge` and records the Concert handoff as the
-  post-Bridge area state.
-- Bridge prompts and dialogue are mirrored into a small typed runtime data layer
-  from the accepted Bridge dialogue IDs.
-- The legacy folded-desk blockout stack (source compiler, generated map,
-  traversal helpers, Cicka Home mutations, trail-card anchors) was removed from
-  the repo; see git history and [`map-language.md`](./map-language.md) for the
-  old contract description.
-- **Stampede Sketch** remains as a standalone scene and development entry point
-  (dev switcher, basement `stampede` command). It is not on the active Bridge
-  route; keep it for optional mini-game content in a future rework.
+- Gameplay authority lives in pure `src/game/core/ridge/` (`RidgeConsoleSession`).
+- Phaser `RidgeScene` is a thin adapter: left/right (+ touch) walks progress,
+  interact starts conversation, Scene UI owns the Persona-style talk panel.
+- Default art is mathematical stick figures via `StickVisualProvider`
+  (`src/game/scenes/ridge/art/`). Replace that provider later for iPad art
+  without rewriting route logic.
+- Bridge route beats still use bridge-store `firstPlayableRoute`
+  (`intro` -> `needs_toy_car` -> `toy_car_shared` -> `bridge_complete` ->
+  concert handoff).
+- The Ridge Stage Debugger, Walk-Rail authoring commit plugin, and large PNG
+  stage-plate pipeline were removed as disposable prototype tooling.
+- **Stampede Sketch** remains a standalone optional scene; it is not on the
+  active Bridge route.
 
 ## Active Runtime Route Read
 
-The current playable Ridge route is the Bridge tracer:
-
 ```text
 Nature / hill entry
-  -> Cicka + toy car play spot
+  -> Cicka + toy car play spot (optional Persona-style choice)
   -> blocked bridge + unfinished blueprint
   -> Bridge Draftsperson
-  -> Cicka Parallel Play
+  -> Cicka Parallel Play (receive toy car)
   -> toy-car bridge test
   -> completed crossing
   -> Bridge-to-Concert handoff
 ```
 
-The Bridge-to-Concert handoff is only a transition proof. Concert, Dance
-Festival, Relay, and the ending sequence remain future implementation slices.
+Concert, Dance Festival, Relay, and the ending sequence remain future
+implementation slices. Copy the Bridge console-content + stick-visual pattern.
 
-## Legacy Folded Blockout Read
+## Console Contract (for AI agents)
 
-The current blockout route is the folded desk Ridge:
+Useful commands:
 
-```text
-Outskirts
-  -> Cicka Home
-  -> Work Artifact Ledge
-  -> Stampede Blanket
-  -> Switchback Shelf
-  -> Telegraph Terrace
-  -> Guide Overlook
-  -> Relay Gate
-  -> Domino Desk
-```
+| Command | Meaning |
+| --- | --- |
+| `look` / `status` | Surroundings, nearby distances, beat, progress |
+| `go left\|right [n]` | Walk the progress line |
+| `interact [name]` | Start nearest/named conversation |
+| `advance` | Continue halted conversation |
+| `choose <n\|id>` | Persona-style reply |
+| `leave` | Exit conversation early |
+| `help` | Command list |
 
-Future or optional promises in the blockout include:
+Observation JSON (`--json`) includes `nearby[].distance`, actors, inventory,
+conversation state, and hints.
 
-- Paw Underpath from Outskirts/Cicka Home.
-- Lucky Luna Drop Pocket from Guide Overlook toward Stampede Blanket.
-- High Ledge above Domino Desk.
-- Telegraph cord drop back to Cicka Home.
-- Domino lift back to Cicka Home.
+## What Remains Disposable
 
-The level-design goal is that the player walks a compact lived-in sketchbook
-neighborhood, sees Relay early, follows subtle Cicka field-presence hints at
-route blockers, helps tiny residents change the route, and learns Danilo
-through artifacts rather than static portfolio buildings.
+- Stick art itself (replace via VisualProvider)
+- Exact progress numbers / interact radii
+- Temporary conversation choice copy on first Cicka meet
 
-## Current Landmarks
+## What Should Survive Area Blueprints
 
-- **Outskirts:** old city edge / future Overworld absorption point, Basement
-  hatch promise, Potassium hint space, early Relay sightline.
-- **Cicka Home:** progress memory space, Cicka home base, memento/home mutation
-  space, future underpath clue.
-- **Work Artifact Ledge:** first obvious work/project artifact area with a
-  side-shelf skill scrap promise.
-- **Stampede Blanket:** first new opt-in mini-game anchor and first earned
-  Ridge memory source.
-- **Switchback Shelf:** first spatial fold above Cicka Home and Stampede
-  shortcut promise.
-- **Telegraph Terrace:** future one-button parry/timing lane landmark.
-- **Guide Overlook:** reorientation point and Relay sightline.
-- **Relay Gate:** first-ending promise and proof-slot destination.
-- **Domino Desk:** future deterministic puzzle/lift promise.
-
-## Current Rewards And Memory
-
-Durable Ridge progress is intentionally small:
-
-- stamps
-- manual pages
-- glide pips
-- shortcuts
-- first playable route state
-
-Current accepted behavior:
-
-- Bridge route state tracks the Bridge beat from `intro` through
-  `concert_handoff` without introducing inventory, quest logs, or objective
-  trackers.
-- First Stampede clear awards the `stampede-sketch` Ridge stamp.
-- First Stampede clear awards one glide pip.
-- Repeat Stampede clears do not duplicate those rewards.
-- Ridge derives visible Stampede blanket memory from the stamp instead of
-  storing sticker ids.
-- Cicka Home mutation facts are compiled from the blockout and become active
-  only when a real durable progress source exists.
-- Cicka can provide early pre-translator presence and Stampede-gated memory
-  flavor without becoming a quest board, vendor, or inventory checklist.
-
-## Future Design Target
-
-The active future design target is the linear Ridge route from
-[`story-level-bible.md`](./story-level-bible.md):
-
-```text
-Bridge Area / Blueprint Bridge
-  -> Concert Area / Concert Crossing Beat
-  -> Dance Festival Area / Opening Dance Shuttle Beat
-  -> Relay Spire / Guitar Farewell / Cicka Threshold Farewell
-```
-
-The folded/Cicka Home route in [`legacy/`](./legacy/README.md) remains legacy
-prototype and topology reference until it is rewritten around this route.
-
-Before implementing the next Ridge runtime or blockout rewrite, write and accept
-a prose story/level/character plan for the core Exploration Map scenes and
-their route blockers. Start from the middle/end emotional and progression beats,
-then work backward to the opening so the first scene teaches the right promise.
-Mini-games, shortcuts, and optional platforming pockets may stay rougher in
-this prose pass, but the core overworld/Ridge route blockers should be legible
-in words first.
-
-The accepted ending anchor is the **Cicka Threshold Farewell**: Cicka recurs
-through the Ridge as field presence, then leaves the seated player through a
-warm sketchbook threshold somewhere the player cannot follow. The ending should
-stay tender and non-literal rather than becoming a death scene or grief speech.
-Design the canonical first ending before designing optional endings. Multiple
-endings are not required for the Ridge; add alternate endings only if a later
-story/level pass proves they create meaningful replay value without weakening
-the Cicka farewell.
-The first prose artifact should be a short ending sequence outline before the
-required Ridge Areas and their Resident Beats are designed: arrival state, Relay
-readiness, Cicka's final field presence, farewell action, threshold departure,
-and return-to-Ridge state.
-
-Accepted first ending outline:
-
-1. The fixed main route carries the player through Bridge Area, Concert Area,
-   and Dance Festival Area before Relay.
-2. Clearing the Dance Festival barricade grants the last daylight ride to Relay.
-3. Cicka appears in her final field-presence spot, calm and familiar.
-4. The player uses **Sit and Play** to share a quiet Guitar Farewell with Cicka,
-   ideally under a warm sunset or other cozy threshold light. This is the v0
-   final trigger, not setup for a separate post-song send prompt.
-5. Cicka moves toward the threshold, pauses, turns back toward the seated
-   player, gives one small raw meow, then slips into a warm
-   sketchbook-threshold artifact beyond the player's path. It can read as warm
-   light, a scratch-like seam, a paper hole, or a gentle glitch-portal-like
-   artifact rather than a literal page-edge fold. The player cannot follow into
-   that threshold. The initial version uses no translated farewell line.
-6. After Cicka disappears, hold on the empty sunset spot for a short silent beat,
-   then fade to a restrained non-diegetic dedication card:
-   **For Cicka.** / **Thank you for playing.** Do not present this card as Cicka
-   writing, speaking, or explaining the farewell. The card should hold briefly,
-   then auto-fade into the clean Bridge Area reset without a button prompt. Do
-   not add a separate credits card or "The End" card in v0.
-   Exact hold, fade, montage, prompt-delay, and silence timings should be tuned
-   in prototype/playtest with tasteful recommended defaults rather than fixed in
-   pre-production.
-7. A final Relay trace or Concert Resting Spot echo can exist only as visual
-   staging if earlier route art has taught that language. Do not present
-   paw/page marks as a mechanic or required symbol in v0.
-8. For the first playable version, use **First Playable Reset Return** after the
-   **Dedication Card**: cleanly reset route progress and return the player
-   directly to the beginning of Bridge Area rather than opening a post-game
-   free-travel Ridge or title/menu return. Long-term, this can become an **Open
-   Ridge Return State** where completed areas remain freely revisitable after
-   the farewell, once optional mini-games, return content, and completed-area
-   revisits exist.
-   Do not surface any visible ending-seen memory in v0: no Micka, no changed
-   post-ending world, no special marker, and no new objective after reset.
-
-The guitar should be established earlier as a meaningful comfort item:
-something the player can pick up and carry before the Relay **Guitar Farewell**.
-Initial local Cicka Resting Spots can stay mostly visual instead of becoming
-repeatable guitar prompts or dedicated interaction nodes.
-Petting, lap resting, and similar affection interactions can wait for a later
-polish pass. A hug is optional and should wait until character art can support
-it without making the farewell feel awkward or over-staged.
-The guitar should enter mid-route through a Resident Beat as an entrusted
-reward or responsibility, not as a random pickup. A resident can give or lend it
-after the player helps with a local music/concert problem; the route can then
-stage Cicka around local Resting Spots so the final Relay comfort moment feels
-prepared without requiring resting-spot interactions in v0.
-Middle route area: **Concert Area**, containing **Concert Crossing Beat**. A
-blocked concert/traffic crossing halts the route because the local guitarist
-cannot play, the paper-stage setup is tangled, or the guitar needs a small
-repair. Cicka subtly points attention to the guitar case, loose string, or
-blocked crossing. The player learns a small
-Guitar-Hero-like performance mini-game, helps the concert continue, the crossing
-opens, and the guitar is entrusted to the player afterward. Keep the comedy
-gentle; avoid making the guitarist a joke-only drunk if that undercuts the later
-tribute.
-Because dialogue UI, character assets, route blockers, trees/props, and audio
-are already enough production load, the Concert Crossing Beat needs a non-arcade
-fallback: conversation, collection, practice together, or a forgiving auto-play
-path can resolve the main route while the Guitar-Hero-like mini-game remains the
-ideal or optional version.
-
-The final route structure should be an **Area Barricade Chain**. Bridge,
-Concert, and Dance Festival each contain one concrete local barricade; clearing
-the Dance Festival barricade brings the player to Relay. Earlier "Living Proof"
-language should now be treated as poetic shorthand for completed area changes,
-not a separate proof resource, checklist, or optional readiness system.
-Planning assumption: start with 2-3 required main-path Resident Help Beats
-before the first ending, plus optional extra residents for return play. Treat the
-exact count as a Level Designer and Story/Tone tuning variable, not a fixed
-rule.
-
-The target asks for:
-
-- a readable mostly forward neighborhood route toward Relay Spire
-- fixed Bridge -> Concert -> Dance Festival -> Relay Area Barricade Chain
-- changed Cicka Resting Spots as emotional echoes, not separate proof sources
-- first ending path completable through conversations, collection, authored
-  traversal, Ridge Areas, Resident Beats, and world changes without requiring
-  full arcade mini-games
-- Mini-Game Entrances as optional fun, rewards, shortcuts, or future alternate
-  ways to finish a level, not required first-ending proof
-- non-arcade fallback for any required beat that contains arcade-like interaction
-- tiny resident problems that create visible route changes
-- first route area as **Bridge Area**, containing **Blueprint Bridge**: a
-  required soft gate where helping a resident finish a bridge drawing/blueprint
-  makes the crossing real
-- 2-3 required main-path Ridge Areas before the first ending, each centered on a
-  Resident Beat / Resident Help Beat, with optional extra residents only if they
-  add texture instead of errand fatigue
-- final required route area as **Dance Festival Area**, containing **Opening
-  Dance Shuttle Beat**:
-  a nervous dance/romance setup at the foot of the Relay hill. The night dance
-  festival is real, but the required route beat happens during afternoon setup.
-  The route blocker should be practical: festival barriers, lantern lines,
-  chair stacks, stage/speaker cables, and a locked service-road gate block the
-  hill route until setup passes inspection. The locked route-agent is the
-  nervous hill-shuttle driver, whose daily job and emotional problem both
-  connect to the final approach. His romantic partner is the shy **Last-Stop
-  Operations Helper**, whose visible plaza-table work connects shuttle
-  questions, setup checks, volunteer handoffs, service-road clearance, and the
-  night dance. Keep these as role-first character labels for now; proper names
-  can wait until a later character pass. Accepted arrival premise: **Opening
-  Dance Setup + Last Daylight Shuttle**. Introduce the beat through a practical
-  wayfinding loop:
-  the player asks how to reach Relay, notices the blocked service road and
-  shuttle sign, then discovers the emotional layer through delayed setup and the
-  last daylight shuttle window before the road closes for the night festival.
-  Reveal the relationship through a triangulated discovery flow: the driver and
-  Last-Stop Operations Helper give truthful but incomplete practical answers,
-  then nearby locals help the player understand that they are avoiding each
-  other. Do not let the player solve the beat by directly confronting them with
-  their feelings. The Last-Stop Operations Helper's readiness favor is
-  **Operations Handoff Check**: the player helps prove the plaza setup is safe
-  enough for the **Dance Teacher** to keep watch once the night dance starts.
-  The point is not replacing her planning; it is showing that she did enough
-  and can enjoy the event. The driver's readiness favor is **One-Step
-  Practice**: the player helps
-  him privately learn one tiny dance step before the setup handoff, last
-  daylight ride, and later night-dance promise can happen. After both favors,
-  the connector is **Folded Song Request**: a tiny paper invitation where the
-  driver requests a simple, cute, guitar-friendly song and asks her for one
-  dance later without a public confession. Do not lock the beat to bachata or
-  any other specific dance genre; the exact requested song can remain unshown
-  and unheard by the player. The physical
-  route solve is **Setup Clearance Walkthrough**: final visible setup details
-  clear the service lane enough for the steward to open the gate and the driver
-  to offer the last daylight ride. Present it as a **Prompt-Driven Playable
-  Montage**: three default symbolic one-action snaps, plus a visible sky/plaza
-  time shift, not full manual chores or a pure cutscene. The default snaps are:
-  secure the lantern line, clear or tape the service-lane obstruction, and flip
-  the shuttle sign to "Last daylight ride." These can collapse further if the
-  beat needs to move faster. Conversation choices can
-  create different tones, orderings, and recoverable awkward paths, but should
-  not permanently block the first ending. Cicka's role is quiet threshold
-  observer near the operations table, shuttle step, or service gate; she can
-  loaf with the **Unnamed Counterpart Cat** as implied continuity foreshadowing,
-  using only silhouette/color specificity such as a pale or light-ink contrast
-  to Cicka. The scene should not name him, give him dialogue, confirm parentage,
-  or spend Micka before the post-ending return.
-- required route spine: Bridge Area / Blueprint Bridge means changing the world
-  through art, Concert Area / Concert Crossing Beat means turning memory into
-  comfort, Dance Festival Area / Opening Dance Shuttle Beat means life can keep
-  moving with someone new, then Relay Spire / Guitar Farewell resolves Cicka's
-  threshold farewell
-- Guitar Farewell can include a brief **Route Memory Montage**: Blueprint Bridge
-  being used, Concert Crossing continuing, Opening Dance beginning at night as
-  an emotional echo under the player's guitar, and earlier Cicka Resting Spots
-  carrying changed visual states. Keep it wordless or nearly wordless so the
-  focus stays on Cicka.
-- Relay should use sunset for **Sit and Play Prompt** and the Cicka Threshold
-  Farewell. The montage can show the night festival beginning elsewhere, but
-  Relay should not become full night before the farewell.
-- The shuttle ride from Last-Stop Plaza to Relay should be a **Short Threshold
-  Transition**, not a controllable driving segment: the driver can say "All
-  aboard the last ride," the vehicle starts over a brief blackout, the player
-  respawns at Relay Spire under sunset, and control resumes at Cicka's overlook
-  spot.
-- The final Relay Spire interaction should be a **Sit and Play Prompt** near
-  Cicka. It starts the Guitar Farewell and commits to the ending without rhythm
-  UI, fail state, final skill check, or separate post-song send prompt.
-- Cicka's departure should be physical and mostly silent: Cicka moves toward
-  the threshold alone, turns back toward the seated player, gives one small raw
-  meow, then slips into a warm sketchbook-threshold artifact beyond the player's
-  path. It can read as warm light, a scratch-like seam, a paper hole, or a
-  gentle glitch-portal-like artifact rather than a literal page-edge fold. The
-  player cannot follow into that threshold. The initial version should use no
-  translated farewell line.
-- Immediate v0 post-ending behavior should use **First Playable Reset Return**:
-  after the **Dedication Card**, cleanly reset route progress and return the
-  player directly to the beginning of Bridge Area instead of opening a
-  post-game free-travel Ridge. Long-term, an **Open Ridge Return State** can
-  make completed areas freely revisitable, quiet, and minimally absence-marked
-  once optional mini-games, return content, or completed-area revisits make that
-  return valuable. Do not surface visible ending-seen memory in v0; Micka
-  remains delayed until a later post-ending trigger rather than appearing
-  immediately.
-- Cicka field presence in every required Resident Help Beat, with one local
-  **Cicka Resting Spot** per required Ridge Area: Bridge Resting Spot, Concert
-  Resting Spot, and Dance Festival Resting Spot. Her role can vary from subtle
-  obstacle hint to changed-object observer to quiet trust marker.
-- optional residents, NPCs, interactive props, and chill spaces that can offer
-  mini-games, atmosphere, jokes, or company without solving barricades
-- Bridge Resting Spot, Concert Resting Spot, and Dance Festival Resting Spot as
-  local progress-memory spaces, not hubs or v0 prompt nodes
-- two tiny visual states for each Cicka Resting Spot: before resolution, Cicka
-  draws attention to the local problem; immediately after resolution, the spot
-  becomes calmer through a settled pose, tiny mark, changed prop, or later
-  absence echo; the Guitar Farewell montage can revisit these already-changed
-  states rather than introducing them
-- changed resting-spot states as optional emotional rewards, not required
-  noticing, revisiting, checklist, or route-gate steps
-- no main-path slope reliance in v0; use chunky stairs, cords, shelves, bridges,
-  lifts, and soft drops
-- no required jump button on the v0 main route; use authored climb, descend,
-  drop, lift, bridge, enter, and inspect interactions instead
-- main route traversal that stays mobile-safe and object-driven
-- first-walk route mastery before dexterity
-- folded shortcuts after mini-game clears or resident help beats
-- artifacts as physical learning objects, not resume modal replacements
-
-## Not Current Scope
-
-- Replacing the old Overworld as the default scene.
-- Adding a minimap.
-- Adding a generic mini-game framework.
-- Adding stored sticker state.
-- Making Cicka Resting Spots into checklist hubs, shops, or quest boards.
-- Making Cicka a continuous follower, puzzle solver, or explicit objective giver.
-- Using slopes/ramps as required main-path traversal in the v0 Ridge blockout.
-- Requiring jump as a core Exploration Map button in the v0 main route.
-- Requiring wall jump, double jump, or precision platforming for the first
-  farewell route.
-- Moving the runtime blockout source again without an explicit migration issue
-  that updates imports and documentation together.
-
-## Update Rule
-
-Update this file when:
-
-- the current blockout route changes meaningfully
-- a room or landmark becomes active/inactive in the runtime
-- a reward changes durable state shape
-- the active future route target changes in a way that affects runtime/prototype
-  interpretation
-- a prior topology/design spike is superseded
-
-Do not update this file just to record every implementation issue. Use GitHub
-Issues for live planning and agent-ready briefs.
+1. Pure console session + scripted playthrough tests
+2. Progress-based Compact Ridge Stage spots
+3. Conversation halt + React Scene UI panel
+4. VisualProvider seam between gameplay and art
+5. Bridge-store `firstPlayableRoute` for durable route beats

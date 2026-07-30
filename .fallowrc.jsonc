@@ -19,10 +19,13 @@
   },
 
   // Phaser scenes and lazy React overlays load through dynamic import() strings.
+  // Headless CLI scripts are real entrypoints for GameConsoleSession public methods.
   "dynamicallyLoaded": [
     "src/game/scenes/**/runtime/*Scene.ts",
     "src/game/overlays/**/*.tsx",
-    "src/dev/**/*.tsx"
+    "src/dev/**/*.tsx",
+    "scripts/game-console.ts",
+    "scripts/**/*.ts"
   ],
 
   "health": {
@@ -98,6 +101,21 @@
     {
       "file": "src/game/scenes/potassiumSlip/runtime/waves.ts",
       "exports": ["*"]
+    },
+    {
+      // Shared street/room spot constants intentionally re-exported by scene layout modules.
+      "file": "src/game/core/console/content/overworldSpots.ts",
+      "exports": [
+        "OVERWORLD_WIDTH",
+        "OVERWORLD_PLAYER_START",
+        "OVERWORLD_BASEMENT_HOLE",
+        "OVERWORLD_INTERACT_DISTANCE_X",
+        "OVERWORLD_INTERACT_MIN_PLAYER_Y"
+      ]
+    },
+    {
+      "file": "src/game/core/console/content/basementSpots.ts",
+      "exports": ["BASEMENT_FLOOR_Y", "BASEMENT_PLAYER_START"]
     }
   ]
 }

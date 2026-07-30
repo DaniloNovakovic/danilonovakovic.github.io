@@ -5,9 +5,10 @@ import { Badge, Button } from '@/shared/ui';
 import { useIsTouchLike } from './useIsTouchLike';
 
 export type AppMode = 'interactive' | 'static';
+export type ModePickerChoice = AppMode;
 
 interface ModePickerProps {
-  onChoose: (mode: AppMode) => void;
+  onChoose: (mode: ModePickerChoice) => void;
 }
 
 interface ChoiceCardProps {

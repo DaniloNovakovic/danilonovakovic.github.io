@@ -4,6 +4,7 @@ import { GAME_DESIGN_HEIGHT } from '@/game/sharedSceneRuntime/designSize';
 import {
   OVERWORLD_BASEMENT_HOLE,
   OVERWORLD_BUILDING_TRIGGERS,
+  OVERWORLD_CIRCUIT_SLOT,
   OVERWORLD_GLASSES_SECRET_SLOTS,
   OVERWORLD_PLAYER_RESUME_Y_CLAMP,
   OVERWORLD_PLAYER_SPAWN_MARGIN_X,
@@ -58,5 +59,11 @@ describe('overworld world layout', () => {
       kind: 'enterScene',
       sceneId: HOBBIES_SCENE_ID
     });
+  });
+
+  it('keeps the Circuit CRT slot on the street as a Ridge entrance', () => {
+    expect(OVERWORLD_CIRCUIT_SLOT.x).toBeGreaterThan(0);
+    expect(OVERWORLD_CIRCUIT_SLOT.x).toBeLessThan(OVERWORLD_WIDTH);
+    expect(OVERWORLD_CIRCUIT_SLOT.ridgeSceneId).toBe('ridge');
   });
 });

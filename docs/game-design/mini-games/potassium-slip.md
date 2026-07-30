@@ -42,10 +42,11 @@ ricochet lane and should remain the benchmark for a deep opt-in mini-game, not
 the template every future mini-game must match.
 
 The Circuit is Potassium's durable world reward in the current/prototype
-runtime. For the active Ridge pre-production plan, Potassium is optional side
-fun and should not be required Living Proof for the first ending unless the
-active route canon deliberately reopens that decision. Current runtime code
-that reads the Circuit should use existing inventory ownership with
+runtime. Inserting it into the overworld street CRT boots Ridge as an optional
+secret side story (game-inside-the-game). Potassium remains optional side fun
+and should not be required Living Proof for the first ending unless the active
+route canon deliberately reopens that decision. Current runtime code that reads
+the Circuit should use existing inventory ownership with
 `isItemOwned('circuit')`, or the equivalent bridge inventory read, instead of
 adding a separate Ridge progress flag such as `circuitOwned`.
 

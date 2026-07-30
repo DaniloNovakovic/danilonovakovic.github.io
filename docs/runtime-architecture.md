@@ -43,13 +43,17 @@ game vocabulary is explicit:
 - **Shared scene runtime** - reusable Phaser-facing machinery lives in `src/game/sharedSceneRuntime`: side-view player lifecycle, camera policy, scene presentation, resume policy, keyboard pause, interior interactions, text, textures, and vision helpers.
 - **Pure gameplay decisions** - `src/game/core` contains deterministic ECS, input, and player logic that can be tested without Phaser, React, browser globals, or bridge state.
 - **Scene-owned modules** - scene folders own local layout, triggers, Phaser objects, scene contexts, scene-local overlays, and heavy scene runtime modules.
-- **Ridge exploration runtime** - Bridge exploration treats
-  `src/game/scenes/ridge/bridge/stageComposition.ts` as the Bridge Stage
-  Composition Source: it owns the Primary Walk Rail, Stage Spots, Stage Plates,
-  Stage Objects, Stage Occluders, camera bounds, and route-beat presentation
-  predicates consumed by the Ridge scene. The legacy folded-desk blockout stack
-  was removed from the repo; see [`game-design/ridge/map-language.md`](game-design/ridge/map-language.md)
-  for the historical contract.
+- **Ridge exploration runtime** - Bridge exploration is console-first
+  (`src/game/core/ridge/`): progress-based spots, conversation halt, and
+  command/observation APIs shared by `pnpm ridge:console` and Phaser
+  `RidgeScene`. Stick art renders through `RidgeVisualProvider`. See
+  [`adr/0005-ridge-console-core-and-stick-visuals.md`](adr/0005-ridge-console-core-and-stick-visuals.md).
+- **Full-game console** - `GameConsoleSession` (`src/game/core/console/`)
+  orchestrates Overworld, Basement, discrete Potassium Slip, overlays, and Ridge
+  for headless AI/human play via `pnpm game:console`. See
+  [`adr/0006-game-console-core.md`](adr/0006-game-console-core.md). Overworld
+  street spot coordinates are shared with Phaser through
+  `core/console/content/overworldSpots.ts`.
 
 ## Scene presentation and camera
 
@@ -107,10 +111,10 @@ re-apply camera bounds/profile math.
 - Use `sceneResumePolicy` for resume persistence and reset rules. The low-level resume store should not be imported directly by scenes or adapters.
 - Side-view player scenes should compose `SideViewPlayerRuntime` before creating colliders against `runtime.player`; pass its camera config when the scene should follow and clamp the player.
 - Interior rooms should describe prop targets and effect commands, then let `InteriorInteractionRuntime` choose the active target and prompt/effect result. Phaser text mutation, bridge writes, and scene-local helpers stay in the scene.
-- Ridge spatial changes for the active route should start in
-  `src/game/scenes/ridge/bridge/stageComposition.ts` (Bridge Stage Composition
-  Source) and the colocated Bridge tracer modules, not the removed blockout
-  pipeline.
+- Ridge route/gameplay changes should start in `src/game/core/ridge/` (console
+  session + Bridge stage content). Art swaps go through
+  `src/game/scenes/ridge/art/` VisualProvider. Conversation UI stays in Ridge
+  Scene UI.
 
 ## Folder ownership
 
@@ -158,12 +162,10 @@ Potassium uses focused runtime modules to keep the large arcade scene navigable:
 
 Ridge runtime modules for the active Bridge tracer:
 
-- `bridge/stageComposition.ts` — Bridge Stage Composition Source (rails, spots,
-  plates, objects, route-beat presentation).
-- `bridge/bridgeTracerSlice.ts` — interaction targets and world constants for
-  the flat Bridge route.
-- `bridge/BridgeTracerStageRuntime.ts` — stage visuals, prompts, dialogue, toy-car test.
-- `bridge/BridgeWalkRailPlayerRuntime.ts` — rail-based player movement.
+- `src/game/core/ridge/` — pure console session, commands, conversation, Bridge stage.
+- `scenes/ridge/runtime/RidgeScene.ts` — thin Phaser input/presentation adapter.
+- `scenes/ridge/art/stick/` — default stick-figure VisualProvider.
+- `scenes/ridge/sceneUi/` — Persona-style Character Conversation Panel.
 - Opt-in mini-games such as Stampede Sketch keep their own scenes and movement
   systems under `src/game/scenes/stampedeSketch/`.
 

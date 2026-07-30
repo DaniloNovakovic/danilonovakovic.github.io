@@ -30,11 +30,21 @@ pnpm fallow:baseline  # regenerate committed CI baselines after cleanup
 
 Fallow CI policy and agent workflow: [`docs/agents/fallow.md`](docs/agents/fallow.md).
 
-Current Bridge staging lives in
-`src/game/scenes/ridge/bridge/stageComposition.ts`. In development, open the
-Ridge Stage Debugger with `?mode=ridge-stage-debugger` after starting
-`pnpm dev`; it hosts the live Bridge preview, route-beat controls, Walk Rail
-readouts, Stage Spot movement, and Bridge Stage debug overlays.
+Headless / AI playtest (full game graph):
+
+```bash
+pnpm game:console
+pnpm game:console --script "look; go right 4; interact" --json
+```
+
+Ridge Bridge is also a console-driven stick prototype:
+
+- Visual play: `pnpm dev` then `?mode=interactive&startScene=ridge`
+- Ridge-only headless: `pnpm ridge:console` (alias of `game:console --scene ridge`)
+
+Full-game console: `src/game/core/console/` (ADR-0006). Ridge gameplay:
+`src/game/core/ridge/`; stick art is a replaceable VisualProvider under
+`src/game/scenes/ridge/art/`.
 
 Stampede Sketch remains a standalone mini-game scene (`stampedeSketch`) for
 optional future content; reach it via the dev scene switcher or basement console

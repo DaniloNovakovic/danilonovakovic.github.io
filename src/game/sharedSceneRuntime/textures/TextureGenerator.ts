@@ -3,58 +3,66 @@ import type { HobbiesOverlayId } from '@/game/overlays/overlayIds';
 import { drawOverworldBuildingArt, drawPixelOverworldBuildingArt } from './buildingTextures';
 
 export class TextureGenerator {
-  static generatePlayer(scene: Phaser.Scene) {
+  /**
+   * Generates `player_idle` / `player_glasses` textures.
+   *
+   * `scaleFactor` rasterizes the same drawing larger so scenes that present
+   * the player bigger (e.g. the Bridge Walk Rail) can stay crisp; pass a
+   * matching `keySuffix` (e.g. `'_2x'`) so the default textures stay untouched.
+   */
+  static generatePlayer(scene: Phaser.Scene, scaleFactor = 1, keySuffix = '') {
+    const k = scaleFactor;
     const pg = scene.make.graphics({ x: 0, y: 0 });
     const pFill = 0xfbfbf9;
     const pLine = 0x1a1a1a;
 
     // Shadow
     pg.fillStyle(0x000000, 0.1);
-    pg.fillEllipse(24, 60, 20, 6);
+    pg.fillEllipse(24 * k, 60 * k, 20 * k, 6 * k);
 
     pg.fillStyle(pFill, 1);
-    pg.lineStyle(3, pLine, 1);
+    pg.lineStyle(3 * k, pLine, 1);
 
     // Legs
     pg.beginPath();
-    pg.moveTo(18, 45);
-    pg.lineTo(18, 60);
-    pg.moveTo(30, 45);
-    pg.lineTo(30, 60);
+    pg.moveTo(18 * k, 45 * k);
+    pg.lineTo(18 * k, 60 * k);
+    pg.moveTo(30 * k, 45 * k);
+    pg.lineTo(30 * k, 60 * k);
     pg.strokePath();
 
     // Backpack
-    pg.fillRect(8, 28, 8, 16);
-    pg.strokeRect(8, 28, 8, 16);
+    pg.fillRect(8 * k, 28 * k, 8 * k, 16 * k);
+    pg.strokeRect(8 * k, 28 * k, 8 * k, 16 * k);
 
     // Body (Hoodie)
-    pg.fillRect(14, 24, 20, 22);
-    pg.strokeRect(14, 24, 20, 22);
+    pg.fillRect(14 * k, 24 * k, 20 * k, 22 * k);
+    pg.strokeRect(14 * k, 24 * k, 20 * k, 22 * k);
 
     // Head
-    pg.fillCircle(24, 16, 12);
-    pg.strokeCircle(24, 16, 12);
+    pg.fillCircle(24 * k, 16 * k, 12 * k);
+    pg.strokeCircle(24 * k, 16 * k, 12 * k);
 
     // Eyes (facing right)
     pg.fillStyle(pLine, 1);
-    pg.fillCircle(26, 14, 2);
-    pg.fillCircle(32, 14, 2);
+    pg.fillCircle(26 * k, 14 * k, 2 * k);
+    pg.fillCircle(32 * k, 14 * k, 2 * k);
 
-    pg.generateTexture('player_idle', 48, 65);
+    pg.generateTexture(`player_idle${keySuffix}`, 48 * k, 65 * k);
 
     // Glasses variant
-    pg.lineStyle(2, pLine, 1);
-    pg.strokeCircle(26, 14, 4);
-    pg.strokeCircle(32, 14, 4);
+    pg.lineStyle(2 * k, pLine, 1);
+    pg.strokeCircle(26 * k, 14 * k, 4 * k);
+    pg.strokeCircle(32 * k, 14 * k, 4 * k);
     pg.beginPath();
-    pg.moveTo(29, 14);
-    pg.lineTo(29, 14);
+    pg.moveTo(29 * k, 14 * k);
+    pg.lineTo(29 * k, 14 * k);
     pg.strokePath();
     pg.beginPath();
-    pg.moveTo(22, 13);
-    pg.lineTo(18, 12);
+    pg.moveTo(22 * k, 13 * k);
+    pg.lineTo(18 * k, 12 * k);
     pg.strokePath();
-    pg.generateTexture('player_glasses', 48, 65);
+    pg.generateTexture(`player_glasses${keySuffix}`, 48 * k, 65 * k);
     pg.destroy();
   }
 
