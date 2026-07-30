@@ -73,6 +73,9 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
   live drag-banana physics. Winning still grants the Circuit.
 - Ridge conversation uses `advance` / `choose`. `pnpm ridge:console` is an alias
   that starts already inside Ridge.
+- Ridge first-playable secret route: Bridge → Concert → Dance Festival → Relay
+  farewell (Sit and Play, dedication card), then return to the Overworld street.
+  Progress resets so the next CRT entry starts Bridge again.
 - One-shot scripts: `pnpm game:console --script "look; go right 3; interact" --json`.
 
 ## Runtime Notes For Playtesting

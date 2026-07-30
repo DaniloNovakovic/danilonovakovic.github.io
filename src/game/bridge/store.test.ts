@@ -174,7 +174,7 @@ describe('bridgeStore', () => {
         shortcutIds: [],
         firstPlayableRoute: {
           activeAreaId: 'bridge',
-          bridgeBeat: 'intro'
+          beat: 'intro'
         }
       });
       expect(bridgeStore.getState().inventory.ownedItemIds).toEqual([]);
@@ -204,7 +204,7 @@ describe('bridgeStore', () => {
         shortcutIds: [],
         firstPlayableRoute: {
           activeAreaId: 'bridge',
-          bridgeBeat: 'intro'
+          beat: 'intro'
         }
       });
       expect(bridgeStore.getState().inventory.ownedItemIds).toEqual([]);
@@ -272,25 +272,25 @@ describe('bridgeStore', () => {
     it('tracks the first playable Ridge route handoff separately from rewards', () => {
       expect(bridgeStore.getState().progress.ridge.firstPlayableRoute).toEqual({
         activeAreaId: 'bridge',
-        bridgeBeat: 'intro'
+        beat: 'intro'
       });
 
-      bridgeActions.setRidgeBridgeBeat('needs_toy_car');
+      bridgeActions.setRidgeRouteBeat('needs_toy_car');
       expect(bridgeStore.getState().progress.ridge.firstPlayableRoute).toEqual({
         activeAreaId: 'bridge',
-        bridgeBeat: 'needs_toy_car'
+        beat: 'needs_toy_car'
       });
 
-      bridgeActions.triggerRidgeConcertHandoff();
+      bridgeActions.setRidgeAreaHandoff('concert', 'concert_arrival');
       expect(bridgeStore.getState().progress.ridge.firstPlayableRoute).toEqual({
         activeAreaId: 'concert',
-        bridgeBeat: 'concert_handoff'
+        beat: 'concert_arrival'
       });
 
-      bridgeActions.resetProgress();
+      bridgeActions.resetRidgeFirstPlayableRoute();
       expect(bridgeStore.getState().progress.ridge.firstPlayableRoute).toEqual({
         activeAreaId: 'bridge',
-        bridgeBeat: 'intro'
+        beat: 'intro'
       });
     });
 

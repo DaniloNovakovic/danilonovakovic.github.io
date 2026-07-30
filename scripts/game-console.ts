@@ -23,19 +23,14 @@ import {
   type GameSceneId,
   formatGameObservation
 } from '../src/game/core/console/index';
-import type { BridgeDialogueCatalog } from '../src/game/core/ridge/index';
+import {
+  loadRouteCatalogFromMessages,
+  type RidgeRouteDialogueCatalog
+} from '../src/game/core/ridge/index';
 import { enMessages } from '../src/shared/i18n/messages/en';
 
-function loadCatalog(): BridgeDialogueCatalog {
-  const bridge = enMessages.scenes.ridge.bridge;
-  return {
-    speakers: {
-      prompt: bridge.speakers.prompt,
-      cicka: bridge.speakers.cicka,
-      bridgeDraftsperson: bridge.speakers.bridgeDraftsperson
-    },
-    lines: { ...bridge.dialogue }
-  };
+function loadCatalog(): RidgeRouteDialogueCatalog {
+  return loadRouteCatalogFromMessages(enMessages.scenes.ridge);
 }
 
 function parseScene(args: string[]): GameSceneId {

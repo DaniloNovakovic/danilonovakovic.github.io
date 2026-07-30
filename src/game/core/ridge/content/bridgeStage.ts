@@ -8,8 +8,8 @@ import type {
   RidgeStageDefinition,
   RidgeWorldState
 } from '../types';
+import { RIDGE_TOY_CAR_ITEM } from '../types';
 
-const BRIDGE_TOY_CAR_ITEM = 'toy-car';
 const BRIDGE_BLOCKED_PROGRESS = 0.62;
 
 export interface BridgeDialogueCatalog {
@@ -89,6 +89,9 @@ export function createBridgeStage(catalog: BridgeDialogueCatalog): RidgeStageDef
     lengthLabel: 'farm river sketch',
     spots: SPOTS,
     blockedProgress: BRIDGE_BLOCKED_PROGRESS,
+    blockedMessage:
+      'The unfinished bridge blocks the way. Talk to the draftsperson or finish the crossing.',
+    isCrossingOpen: (state) => state.beat === 'bridge_complete',
     resolveInteractables: (state) => resolveBridgeInteractables(state, catalog),
     resolveActors: (state) => resolveBridgeActors(state),
     resolveConversation: (conversationId, state) =>
@@ -101,8 +104,6 @@ function resolveBridgeInteractables(
   state: RidgeWorldState,
   catalog: BridgeDialogueCatalog
 ): RidgeInteractable[] {
-  if (state.beat === 'concert_handoff') return [];
-
   const plans = interactPlansForBeat(state.beat);
   const result: RidgeInteractable[] = [];
 
@@ -175,18 +176,10 @@ function interactPlansForBeat(beat: RidgeWorldState['beat']): BridgeInteractPlan
 }
 
 function resolveBridgeActors(state: RidgeWorldState): RidgeActorPresence[] {
-  const crossingOpen =
-    state.beat === 'bridge_complete' || state.beat === 'concert_handoff';
-  const cickaProgress =
-    state.beat === 'bridge_complete' || state.beat === 'concert_handoff'
-      ? 0.68
-      : 0.22;
+  const crossingOpen = state.beat === 'bridge_complete';
+  const cickaProgress = crossingOpen ? 0.68 : 0.22;
   const toyCarProgress =
-    state.beat === 'toy_car_shared'
-      ? state.progress
-      : state.beat === 'bridge_complete' || state.beat === 'concert_handoff'
-        ? 0.7
-        : 0.24;
+    state.beat === 'toy_car_shared' ? state.progress : crossingOpen ? 0.7 : 0.24;
 
   return [
     {
@@ -200,7 +193,7 @@ function resolveBridgeActors(state: RidgeWorldState): RidgeActorPresence[] {
       id: 'cicka',
       label: 'Cicka',
       progress: cickaProgress,
-      visible: state.beat !== 'concert_handoff',
+      visible: true,
       facing: 'right'
     },
     {
@@ -217,7 +210,7 @@ function resolveBridgeActors(state: RidgeWorldState): RidgeActorPresence[] {
       visible:
         state.beat === 'intro' ||
         state.beat === 'needs_toy_car' ||
-        state.inventory.includes(BRIDGE_TOY_CAR_ITEM) ||
+        state.inventory.includes(RIDGE_TOY_CAR_ITEM) ||
         crossingOpen,
       facing: 'right'
     }
@@ -291,7 +284,7 @@ function resolveBridgeConversation(
         ],
         outcome: {
           setBeat: 'toy_car_shared',
-          addItem: BRIDGE_TOY_CAR_ITEM,
+          addItem: RIDGE_TOY_CAR_ITEM,
           setFlag: 'toy_car_shared'
         }
       };
@@ -318,7 +311,7 @@ function resolveBridgeConversation(
           line('bridge.exit.opened_crossing.03', 'prompt')
         ],
         outcome: {
-          concertHandoff: true
+          handoffToArea: 'concert'
         }
       };
     default:
@@ -340,9 +333,6 @@ function makeLine(
 }
 
 function describeBridgeAmbience(state: RidgeWorldState): string {
-  if (state.beat === 'concert_handoff') {
-    return 'The finished bridge holds. Evening music leans in from the next page.';
-  }
   if (state.beat === 'bridge_complete') {
     return 'Ink settles into a real crossing. The concert exit is open to the east.';
   }

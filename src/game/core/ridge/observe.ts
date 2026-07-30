@@ -14,11 +14,11 @@ export function observeRidgeWorld(
     (a, b) => a.distance - b.distance
   );
   const actors = stage.resolveActors(state);
+  const crossingOpen = stage.isCrossingOpen?.(state) ?? true;
   const blockedAhead =
     state.facing === 'right' &&
     stage.blockedProgress !== undefined &&
-    state.beat !== 'bridge_complete' &&
-    state.beat !== 'concert_handoff' &&
+    !crossingOpen &&
     state.progress >= stage.blockedProgress - 0.001;
 
   const conversation = state.conversation
@@ -41,7 +41,7 @@ export function observeRidgeWorld(
       })()
     : null;
 
-  const hints = buildHints(state, nearby, blockedAhead);
+  const hints = buildHints(state, stage, nearby, blockedAhead);
 
   return {
     mode: state.mode,
@@ -65,6 +65,7 @@ export function observeRidgeWorld(
 
 function buildHints(
   state: RidgeWorldState,
+  stage: RidgeStageDefinition,
   nearby: RidgeObservation['nearby'],
   blockedAhead: boolean
 ): string[] {
@@ -85,10 +86,16 @@ function buildHints(
     hints.unshift(`interact — ${nearby[0].prompt} (${nearby[0].label})`);
   }
   if (blockedAhead) {
-    hints.unshift('The unfinished bridge blocks the path east until it is completed.');
+    const blockedMessage = stage.blockedMessage;
+    hints.unshift(
+      (typeof blockedMessage === 'function'
+        ? blockedMessage(state)
+        : blockedMessage) ??
+        'The path east is blocked until the local problem clears.'
+    );
   }
-  if (state.beat === 'concert_handoff') {
-    hints.unshift('Bridge handoff complete. Concert area is next (not implemented yet).');
+  if (state.beat === 'relay_complete') {
+    hints.unshift('The dedication fades. The page will return to the Bridge.');
   }
 
   return hints;
@@ -98,7 +105,7 @@ export function formatObservation(observation: RidgeObservation): string {
   const lines: string[] = [];
   lines.push(`# ${observation.title}`);
   lines.push(
-    `mode=${observation.mode} beat=${observation.beat} progress=${observation.progressPercent}% facing=${observation.facing}`
+    `mode=${observation.mode} area=${observation.areaId} beat=${observation.beat} progress=${observation.progressPercent}% facing=${observation.facing}`
   );
   lines.push(observation.ambience);
 

@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { TEST_BRIDGE_DIALOGUE_CATALOG } from '../ridge/content/testBridgeCatalog';
+import { TEST_ROUTE_DIALOGUE_CATALOG } from '../ridge/content/testRouteCatalog';
 import { parseGameCommand, parseGameScript } from './commands';
 import { GameConsoleSession } from './session';
 
-function createSession() {
-  return new GameConsoleSession({ dialogue: TEST_BRIDGE_DIALOGUE_CATALOG });
+function createSession(
+  options: Omit<ConstructorParameters<typeof GameConsoleSession>[0], 'dialogue'> = {}
+) {
+  return new GameConsoleSession({ dialogue: TEST_ROUTE_DIALOGUE_CATALOG, ...options });
 }
 
 describe('parseGameCommand', () => {
@@ -81,7 +83,7 @@ describe('GameConsoleSession full secret route', () => {
 
   it('syncs Phaser position and cancels a pending banana peel when walking away', () => {
     const session = new GameConsoleSession({
-      dialogue: TEST_BRIDGE_DIALOGUE_CATALOG,
+      dialogue: TEST_ROUTE_DIALOGUE_CATALOG,
       ownedItemIds: ['glasses'],
       equippedItemIds: ['glasses']
     });
@@ -96,7 +98,7 @@ describe('GameConsoleSession full secret route', () => {
 
   it('inserts Circuit at the CRT after hydrate', () => {
     const session = new GameConsoleSession({
-      dialogue: TEST_BRIDGE_DIALOGUE_CATALOG,
+      dialogue: TEST_ROUTE_DIALOGUE_CATALOG,
       ownedItemIds: ['circuit'],
       equippedItemIds: []
     });
@@ -106,9 +108,32 @@ describe('GameConsoleSession full secret route', () => {
     expect(session.observe().mode).toBe('ridge');
   });
 
+  it('returns to Overworld after Ridge dedication / route reset', () => {
+    const session = new GameConsoleSession({
+      dialogue: TEST_ROUTE_DIALOGUE_CATALOG,
+      ownedItemIds: ['circuit'],
+      sceneId: 'ridge'
+    });
+    expect(session.exec('warp relay').ok).toBe(true);
+    session.exec('go right 10');
+    expect(session.exec('interact').ok).toBe(true);
+    for (let i = 0; i < 20; i += 1) {
+      if (session.observe().ridge?.conversation?.awaitingChoice) break;
+      if (session.observe().mode !== 'ridge') break;
+      session.exec('advance');
+    }
+    expect(session.exec('choose let-song-end').ok).toBe(true);
+    for (let i = 0; i < 20; i += 1) {
+      if (session.observe().mode !== 'ridge') break;
+      session.exec('advance');
+    }
+    expect(session.observe().mode).toBe('overworld');
+    expect(session.observe().ownedItemIds).toContain('circuit');
+  });
+
   it('commits banana peel warp for the live Overworld typewriter path', () => {
     const session = new GameConsoleSession({
-      dialogue: TEST_BRIDGE_DIALOGUE_CATALOG,
+      dialogue: TEST_ROUTE_DIALOGUE_CATALOG,
       ownedItemIds: ['glasses'],
       equippedItemIds: ['glasses'],
       discoveredSecretIds: ['banana-peel-clue']

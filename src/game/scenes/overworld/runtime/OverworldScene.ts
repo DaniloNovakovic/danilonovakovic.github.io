@@ -39,7 +39,7 @@ import {
   type GameCommandResult,
   type NearbyThing
 } from '@/game/core/console';
-import { loadBridgeDialogueCatalog } from '@/game/scenes/ridge/content/bridgeCatalog';
+import { loadRidgeRouteDialogueCatalog } from '@/game/scenes/ridge/content/routeCatalog';
 import { applyGameConsoleEvents } from '@/game/scenes/shared/applyGameConsoleEvents';
 import {
   buildStreetEnvironment,
@@ -130,7 +130,7 @@ export class OverworldScene extends Phaser.Scene {
     const messages = getMessages();
     const bridge = bridgeStore.getState();
     this.session = new GameConsoleSession({
-      dialogue: loadBridgeDialogueCatalog(),
+      dialogue: loadRidgeRouteDialogueCatalog(),
       sceneId: 'overworld',
       ownedItemIds: bridge.inventory.ownedItemIds,
       equippedItemIds: bridge.equipment.equippedItemIds,

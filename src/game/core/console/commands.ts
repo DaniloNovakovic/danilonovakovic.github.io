@@ -19,7 +19,9 @@ const SIMPLE_COMMANDS: Record<string, GameCommand> = {
   continue: { type: 'advance' },
   start: { type: 'start' },
   fight: { type: 'fight' },
-  clear: { type: 'fight' }
+  clear: { type: 'fight' },
+  skip: { type: 'skip' },
+  next: { type: 'skip' }
 };
 
 const GO_ALIASES = new Set(['go', 'walk', 'move']);
@@ -40,6 +42,10 @@ export function getGameHelpText(): string {
     '',
     'Ridge conversation:',
     '  advance | choose <id|index>',
+    '',
+    'Ridge playtest skips:',
+    '  skip                         next area',
+    '  warp bridge|concert|dance|relay',
     '',
     'Potassium (discrete campaign):',
     '  start | fight | draft <id|index>',
@@ -76,6 +82,11 @@ export function parseGameCommand(raw: string): GameCommand {
   if (head === 'draft') return parseChoiceCommand('draft', parts, trimmed);
   if (head === 'equip' || head === 'unequip') return parseEquipCommand(head, parts, trimmed);
   if (head === 'cheat') return parseCheatCommand(parts, trimmed);
+  if (head === 'warp' || head === 'tp' || head === 'goto' || head === 'jump') {
+    const areaId = parts[1];
+    if (!areaId) return { type: 'unknown', raw: trimmed };
+    return { type: 'warp', areaId };
+  }
   if (INTERACT_ALIASES.has(head)) {
     return { type: 'interact', target: parts.slice(1).join(' ') || undefined };
   }

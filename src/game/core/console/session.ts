@@ -1,9 +1,9 @@
 // Session dispatch mirrors many console verbs; complexity is the command surface.
 // fallow-ignore-file complexity
 import {
-  createBridgeStage,
+  createRidgeRouteStages,
   RidgeConsoleSession,
-  type BridgeDialogueCatalog,
+  type RidgeRouteDialogueCatalog,
   type RidgeSessionEvent
 } from '../ridge/index';
 import {
@@ -38,7 +38,7 @@ import type {
 } from './types';
 
 export interface GameConsoleSessionOptions {
-  dialogue: BridgeDialogueCatalog;
+  dialogue: RidgeRouteDialogueCatalog;
   /** Start scene (default overworld). */
   sceneId?: GameSceneId;
   ownedItemIds?: readonly GameItemId[];
@@ -49,7 +49,7 @@ export interface GameConsoleSessionOptions {
 export class GameConsoleSession {
   private state: GameWorldState;
   private ridge: RidgeConsoleSession | null = null;
-  private readonly dialogue: BridgeDialogueCatalog;
+  private readonly dialogue: RidgeRouteDialogueCatalog;
 
   constructor(options: GameConsoleSessionOptions) {
     this.dialogue = options.dialogue;
@@ -190,6 +190,10 @@ export class GameConsoleSession {
       case 'advance':
       case 'choose':
         return this.handleRidgeTalk(command);
+      case 'skip':
+        return this.handleRidgeSkipWarp('skip');
+      case 'warp':
+        return this.handleRidgeSkipWarp(`warp ${command.areaId}`);
       case 'start':
         return this.wrapPotassium(startPotassium(this.state));
       case 'fight':
@@ -203,6 +207,13 @@ export class GameConsoleSession {
             : 'Empty command. Type help.'
         );
     }
+  }
+
+  private handleRidgeSkipWarp(raw: string): GameCommandResult {
+    if (this.state.mode !== 'ridge') {
+      return this.fail('skip / warp only work inside Ridge.');
+    }
+    return this.forwardRidge(raw);
   }
 
   private handleGo(direction: 'left' | 'right', steps: number): GameCommandResult {
@@ -347,6 +358,24 @@ export class GameConsoleSession {
     const ridge = this.ensureRidge();
     const result = ridge.exec(raw);
     const events = mapRidgeEvents(result.events);
+
+    if (events.some((event) => event.type === 'ridge_route_reset')) {
+      // Dedication card finished — eject to Overworld until post-game exists.
+      this.ridge = null;
+      this.state.mode = 'overworld';
+      this.state.sceneId = 'overworld';
+      this.state.ridgeBeat = null;
+      const message =
+        'For Cicka. The CRT softens — you are back on the street. Circuit stays with you.';
+      this.state.lastMessage = message;
+      return {
+        ok: result.ok,
+        message,
+        observation: this.observe(),
+        events: [...events, { type: 'scene_returned', sceneId: 'overworld' }]
+      };
+    }
+
     this.state.ridgeBeat = ridge.observe().beat;
     this.state.lastMessage = result.message;
     return {
@@ -360,7 +389,7 @@ export class GameConsoleSession {
   private ensureRidge(): RidgeConsoleSession {
     if (!this.ridge) {
       this.ridge = new RidgeConsoleSession({
-        stage: createBridgeStage(this.dialogue)
+        stages: createRidgeRouteStages(this.dialogue)
       });
     }
     return this.ridge;
@@ -404,8 +433,10 @@ function mapRidgeEvents(events: readonly RidgeSessionEvent[]): GameSessionEvent[
   for (const event of events) {
     if (event.type === 'beat_changed') {
       out.push({ type: 'ridge_beat_changed', beat: event.beat });
-    } else if (event.type === 'concert_handoff') {
-      out.push({ type: 'ridge_concert_handoff' });
+    } else if (event.type === 'area_handoff') {
+      out.push({ type: 'ridge_area_handoff', areaId: event.areaId });
+    } else if (event.type === 'route_reset') {
+      out.push({ type: 'ridge_route_reset' });
     }
   }
   return out;

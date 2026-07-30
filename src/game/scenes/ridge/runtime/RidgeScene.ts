@@ -2,11 +2,15 @@ import * as Phaser from 'phaser';
 import {
   bridgeActions,
   bridgeStore,
-  type OpenOverlayOptions
+  type OpenOverlayOptions,
+  type RidgeRouteBeatState
 } from '@/game/bridge/store';
 import {
-  createBridgeStage,
+  createRidgeRouteStages,
   RidgeConsoleSession,
+  RIDGE_GUITAR_ITEM,
+  RIDGE_INITIAL_BEAT,
+  type RidgeAreaId,
   type RidgeCommandResult,
   type RidgeSessionEvent
 } from '@/game/core/ridge';
@@ -23,7 +27,7 @@ import {
 import { bindSideViewKeyboard } from '@/game/sharedSceneRuntime/input/sceneKeyboard';
 import { StickVisualProvider } from '../art/stick/StickVisualProvider';
 import { toRidgeVisualViewModel } from '../art/types';
-import { loadBridgeDialogueCatalog } from '../content/bridgeCatalog';
+import { loadRidgeRouteDialogueCatalog } from '../content/routeCatalog';
 import type { RidgeConversationPanelView } from '../sceneUi/RidgeConversationPanel';
 import type { RidgeDevControls } from './ridgeDevControls';
 
@@ -50,6 +54,13 @@ export class RidgeScene extends Phaser.Scene {
   private getRidgeDevControls?: () => RidgeDevControls | undefined;
   private lastConversationKey: string | null = null;
   private escJustHandled = false;
+  private skipKey?: Phaser.Input.Keyboard.Key;
+  private warpKeys?: {
+    bridge: Phaser.Input.Keyboard.Key;
+    concert: Phaser.Input.Keyboard.Key;
+    dance: Phaser.Input.Keyboard.Key;
+    relay: Phaser.Input.Keyboard.Key;
+  };
 
   constructor() {
     super(PHASER_SCENE_KEYS.ridge);
@@ -63,17 +74,31 @@ export class RidgeScene extends Phaser.Scene {
 
   create(): void {
     const route = bridgeStore.getState().progress.ridge.firstPlayableRoute;
-    const beat =
-      route.activeAreaId === 'bridge' ? route.bridgeBeat : 'concert_handoff';
+    const areaId = route.activeAreaId;
+    const hasGuitar =
+      route.beat === 'concert_cleared' ||
+      areaId === 'danceFestival' ||
+      areaId === 'relay';
 
     this.session = new RidgeConsoleSession({
-      stage: createBridgeStage(loadBridgeDialogueCatalog()),
-      beat,
-      progress: 0.05
+      stages: createRidgeRouteStages(loadRidgeRouteDialogueCatalog()),
+      areaId,
+      beat: route.beat,
+      progress: 0.05,
+      inventory: hasGuitar ? [RIDGE_GUITAR_ITEM] : []
     });
 
     this.visuals = new StickVisualProvider(this);
     this.keys = bindSideViewKeyboard(this.input.keyboard, { includeEscapeKey: true });
+    if (import.meta.env.DEV && this.input.keyboard) {
+      this.skipKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CLOSED_BRACKET);
+      this.warpKeys = {
+        bridge: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE),
+        concert: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO),
+        dance: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE),
+        relay: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FOUR)
+      };
+    }
     this.cameras.main.setZoom(1);
 
     this.syncPresentation();
@@ -85,6 +110,7 @@ export class RidgeScene extends Phaser.Scene {
     if (!this.session || !this.visuals || !this.keys || this.isPaused) return;
 
     this.handleSceneUiActions();
+    this.handleDevSkipKeys();
 
     const observation = this.session.observe();
     if (observation.mode === 'conversation') {
@@ -131,6 +157,37 @@ export class RidgeScene extends Phaser.Scene {
     this.isPaused = paused;
   }
 
+  private handleDevSkipKeys(): void {
+    if (!import.meta.env.DEV || !this.session) return;
+
+    if (this.skipKey && Phaser.Input.Keyboard.JustDown(this.skipKey)) {
+      this.applyResult(this.session.exec('skip'));
+      this.syncPresentation();
+      return;
+    }
+
+    if (!this.warpKeys) return;
+    if (Phaser.Input.Keyboard.JustDown(this.warpKeys.bridge)) {
+      this.applyResult(this.session.exec('warp bridge'));
+      this.syncPresentation();
+      return;
+    }
+    if (Phaser.Input.Keyboard.JustDown(this.warpKeys.concert)) {
+      this.applyResult(this.session.exec('warp concert'));
+      this.syncPresentation();
+      return;
+    }
+    if (Phaser.Input.Keyboard.JustDown(this.warpKeys.dance)) {
+      this.applyResult(this.session.exec('warp dance'));
+      this.syncPresentation();
+      return;
+    }
+    if (Phaser.Input.Keyboard.JustDown(this.warpKeys.relay)) {
+      this.applyResult(this.session.exec('warp relay'));
+      this.syncPresentation();
+    }
+  }
+
   private handleSceneUiActions(): void {
     if (!this.session) return;
     const action = bridgeActions.consumeSceneUiAction(RIDGE_SCENE_ID);
@@ -166,11 +223,19 @@ export class RidgeScene extends Phaser.Scene {
 
   private handleSessionEvent(event: RidgeSessionEvent): void {
     if (event.type === 'beat_changed') {
-      bridgeActions.setRidgeBridgeBeat(event.beat);
+      bridgeActions.setRidgeRouteBeat(event.beat as RidgeRouteBeatState);
       return;
     }
-    if (event.type === 'concert_handoff') {
-      bridgeActions.triggerRidgeConcertHandoff();
+    if (event.type === 'area_handoff') {
+      const areaId = event.areaId as RidgeAreaId;
+      bridgeActions.setRidgeAreaHandoff(areaId, RIDGE_INITIAL_BEAT[areaId] as RidgeRouteBeatState);
+      return;
+    }
+    if (event.type === 'route_reset') {
+      // v0: dedication ends the CRT story and returns to Overworld.
+      // Post-game Open Ridge Return can replace this later.
+      bridgeActions.resetRidgeFirstPlayableRoute();
+      this.onClose();
     }
   }
 
@@ -231,6 +296,8 @@ export class RidgeScene extends Phaser.Scene {
     this.visuals = undefined;
     this.session = undefined;
     this.keys = undefined;
+    this.skipKey = undefined;
+    this.warpKeys = undefined;
     this.lastConversationKey = null;
   }
 }
@@ -239,7 +306,9 @@ function portraitForSpeaker(
   speakerId: string
 ): RidgeConversationPanelView['portrait'] {
   if (speakerId === 'cicka') return 'cicka';
-  if (speakerId === 'bridgeDraftsperson') return 'draftsperson';
-  if (speakerId === 'prompt') return 'prompt';
+  if (speakerId === 'bridgeDraftsperson' || speakerId === 'injuredGuitarist') {
+    return 'draftsperson';
+  }
+  if (speakerId === 'prompt' || speakerId === 'dedication') return 'prompt';
   return 'player';
 }

@@ -9,20 +9,35 @@ import {
 import { getRidgeHelpText, parseRidgeCommand, parseRidgeScript } from './commands';
 import { formatObservation, observeRidgeWorld } from './observe';
 import type {
-  RidgeBridgeBeat,
+  RidgeAreaId,
   RidgeCommand,
   RidgeCommandResult,
   RidgeFacing,
   RidgeObservation,
+  RidgeRouteBeat,
+  RidgeSessionEvent,
   RidgeStageDefinition,
+  RidgeStageRegistry,
   RidgeWorldState
 } from './types';
+import { RIDGE_GUITAR_ITEM, RIDGE_INITIAL_BEAT } from './types';
 
 const DEFAULT_STEP = 0.05;
 
+const NEXT_AREA: Record<RidgeAreaId, RidgeAreaId | null> = {
+  bridge: 'concert',
+  concert: 'danceFestival',
+  danceFestival: 'relay',
+  relay: null
+};
+
 export interface RidgeSessionOptions {
-  stage: RidgeStageDefinition;
-  beat?: RidgeBridgeBeat;
+  /** Preferred: full multi-area registry for Compact Area Transitions. */
+  stages?: RidgeStageRegistry;
+  /** Legacy single-stage constructor (Bridge-only tests). */
+  stage?: RidgeStageDefinition;
+  areaId?: RidgeAreaId;
+  beat?: RidgeRouteBeat;
   progress?: number;
   facing?: RidgeFacing;
   inventory?: readonly string[];
@@ -31,16 +46,27 @@ export interface RidgeSessionOptions {
 
 export class RidgeConsoleSession {
   private state: RidgeWorldState;
-  private readonly stage: RidgeStageDefinition;
+  private stage: RidgeStageDefinition;
+  private readonly stages: RidgeStageRegistry | null;
 
   constructor(options: RidgeSessionOptions) {
-    this.stage = options.stage;
+    if (options.stages) {
+      this.stages = options.stages;
+      const areaId = options.areaId ?? 'bridge';
+      this.stage = options.stages[areaId];
+    } else if (options.stage) {
+      this.stages = null;
+      this.stage = options.stage;
+    } else {
+      throw new Error('RidgeConsoleSession requires stages or stage.');
+    }
+
     this.state = {
-      areaId: options.stage.areaId,
-      title: options.stage.title,
+      areaId: this.stage.areaId,
+      title: this.stage.title,
       progress: clamp01(options.progress ?? 0.05),
       facing: options.facing ?? 'right',
-      beat: options.beat ?? 'intro',
+      beat: options.beat ?? RIDGE_INITIAL_BEAT[this.stage.areaId],
       mode: 'explore',
       flags: new Set(options.flags ?? []),
       inventory: [...(options.inventory ?? [])],
@@ -93,6 +119,10 @@ export class RidgeConsoleSession {
         return this.handleChoose(command.choiceIdOrIndex);
       case 'leave':
         return this.handleLeave();
+      case 'skip':
+        return this.handleSkip();
+      case 'warp':
+        return this.handleWarp(command.areaId);
       case 'unknown':
         return this.fail(
           command.raw
@@ -113,16 +143,21 @@ export class RidgeConsoleSession {
     let blocked = false;
 
     const blockedAt = this.stage.blockedProgress;
+    const crossingOpen = this.stage.isCrossingOpen?.(this.state) ?? true;
     if (
       blockedAt !== undefined &&
-      this.state.beat !== 'bridge_complete' &&
-      this.state.beat !== 'concert_handoff' &&
+      !crossingOpen &&
       direction === 'right' &&
       nextProgress > blockedAt
     ) {
       nextProgress = blockedAt;
       blocked = true;
-      message = 'The unfinished bridge blocks the way. Talk to the draftsperson or finish the crossing.';
+      const blockedMessage = this.stage.blockedMessage;
+      message =
+        (typeof blockedMessage === 'function'
+          ? blockedMessage(this.state)
+          : blockedMessage) ??
+        'Something blocks the way east. Talk to someone nearby.';
     }
 
     this.state = {
@@ -145,7 +180,9 @@ export class RidgeConsoleSession {
       return this.fail('Already in conversation. Use advance / choose / leave.');
     }
 
-    const nearby = this.stage.resolveInteractables(this.state);
+    const nearby = [...this.stage.resolveInteractables(this.state)].sort(
+      (a, b) => a.distance - b.distance
+    );
     if (nearby.length === 0) {
       return this.fail('Nothing in reach.');
     }
@@ -184,13 +221,7 @@ export class RidgeConsoleSession {
       return this.fail('No active conversation.');
     }
     const result = advanceConversation(this.state);
-    this.state = result.state;
-    return {
-      ok: true,
-      message: result.message,
-      observation: this.observe(),
-      events: result.events
-    };
+    return this.commitConversationResult(result);
   }
 
   private handleChoose(choiceIdOrIndex: string): RidgeCommandResult {
@@ -198,13 +229,10 @@ export class RidgeConsoleSession {
       return this.fail('No active conversation.');
     }
     const result = chooseInConversation(this.state, choiceIdOrIndex);
-    this.state = result.state;
-    return {
-      ok: result.message.startsWith('Unknown') ? false : true,
-      message: result.message,
-      observation: this.observe(),
-      events: result.events
-    };
+    return this.commitConversationResult({
+      ...result,
+      ok: !result.message.startsWith('Unknown')
+    });
   }
 
   private handleLeave(): RidgeCommandResult {
@@ -215,6 +243,110 @@ export class RidgeConsoleSession {
       message: result.message,
       observation: this.observe(),
       events: result.events
+    };
+  }
+
+  private handleSkip(): RidgeCommandResult {
+    const next = NEXT_AREA[this.state.areaId];
+    if (!next) {
+      return this.fail('Already at Relay. Use: warp bridge|concert|dance|relay');
+    }
+    return this.handleWarp(next);
+  }
+
+  private handleWarp(areaId: RidgeAreaId): RidgeCommandResult {
+    if (!this.stages && areaId !== this.stage.areaId) {
+      return this.fail('Warp needs the full route registry (use pnpm ridge:console).');
+    }
+
+    this.applyAreaHandoff(areaId);
+    this.state = {
+      ...this.state,
+      inventory: inventoryForArea(areaId),
+      flags: new Set(),
+      lastMessage: `DEV warp → ${this.stage.title}`
+    };
+
+    return {
+      ok: true,
+      message: this.state.lastMessage ?? `Warped to ${areaId}.`,
+      observation: this.observe(),
+      events: [
+        { type: 'area_handoff', areaId },
+        { type: 'beat_changed', beat: this.state.beat }
+      ]
+    };
+  }
+
+  private commitConversationResult(result: {
+    state: RidgeWorldState;
+    events: RidgeSessionEvent[];
+    message: string;
+    ok?: boolean;
+  }): RidgeCommandResult {
+    this.state = result.state;
+    const events = [...result.events];
+
+    for (const event of result.events) {
+      if (event.type === 'area_handoff') {
+        this.applyAreaHandoff(event.areaId);
+        events.push({ type: 'beat_changed', beat: this.state.beat });
+      } else if (event.type === 'route_reset') {
+        this.applyRouteReset();
+        events.push({ type: 'beat_changed', beat: this.state.beat });
+        events.push({ type: 'area_handoff', areaId: 'bridge' });
+      }
+    }
+
+    return {
+      ok: result.ok ?? true,
+      message: result.message,
+      observation: this.observe(),
+      events
+    };
+  }
+
+  private applyAreaHandoff(areaId: RidgeAreaId): void {
+    if (!this.stages) {
+      this.state = {
+        ...this.state,
+        areaId,
+        beat: RIDGE_INITIAL_BEAT[areaId],
+        progress: 0.05,
+        facing: 'right',
+        lastMessage: `The page turns toward ${areaId}.`
+      };
+      return;
+    }
+
+    this.stage = this.stages[areaId];
+    this.state = {
+      ...this.state,
+      areaId,
+      title: this.stage.title,
+      beat: RIDGE_INITIAL_BEAT[areaId],
+      progress: 0.05,
+      facing: 'right',
+      mode: 'explore',
+      conversation: null,
+      lastMessage: `Arrived: ${this.stage.title}`
+    };
+  }
+
+  private applyRouteReset(): void {
+    const bridge = this.stages?.bridge ?? this.stage;
+    this.stage = bridge;
+    this.state = {
+      areaId: 'bridge',
+      title: bridge.title,
+      progress: 0.05,
+      facing: 'right',
+      beat: 'intro',
+      mode: 'explore',
+      flags: new Set(),
+      inventory: [],
+      conversation: null,
+      lastMessage: 'For Cicka. The page begins again at the Bridge.'
     };
   }
 
@@ -237,6 +369,13 @@ export class RidgeConsoleSession {
       events: []
     };
   }
+}
+
+function inventoryForArea(areaId: RidgeAreaId): string[] {
+  if (areaId === 'danceFestival' || areaId === 'relay') {
+    return [RIDGE_GUITAR_ITEM];
+  }
+  return [];
 }
 
 function clamp01(value: number): number {

@@ -25,7 +25,7 @@ import {
   type OpenOverlayOptions
 } from '@/game/bridge/store';
 import { GameConsoleSession, type GameCommandResult } from '@/game/core/console';
-import { loadBridgeDialogueCatalog } from '@/game/scenes/ridge/content/bridgeCatalog';
+import { loadRidgeRouteDialogueCatalog } from '@/game/scenes/ridge/content/routeCatalog';
 import { applyGameConsoleEvents } from '@/game/scenes/shared/applyGameConsoleEvents';
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
 import { PlayerThoughtText } from '@/game/sharedSceneRuntime/text/PlayerThoughtText';
@@ -78,7 +78,7 @@ export class BasementScene extends Phaser.Scene {
     const messages = getMessages();
     const bridge = bridgeStore.getState();
     this.session = new GameConsoleSession({
-      dialogue: loadBridgeDialogueCatalog(),
+      dialogue: loadRidgeRouteDialogueCatalog(),
       sceneId: 'basement',
       ownedItemIds: bridge.inventory.ownedItemIds,
       equippedItemIds: bridge.equipment.equippedItemIds,

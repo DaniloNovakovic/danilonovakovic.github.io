@@ -1,11 +1,22 @@
 import { describe, expect, it } from 'vitest';
 import { createBridgeStage } from './content/bridgeStage';
+import { createRidgeRouteStages } from './content/routeStages';
 import { TEST_BRIDGE_DIALOGUE_CATALOG } from './content/testBridgeCatalog';
+import { TEST_ROUTE_DIALOGUE_CATALOG } from './content/testRouteCatalog';
 import { parseRidgeCommand, parseRidgeScript } from './commands';
 import { RidgeConsoleSession } from './session';
+import type { RidgeSessionEvent } from './types';
 
-function createSession() {
-  return new RidgeConsoleSession({ stage: createBridgeStage(TEST_BRIDGE_DIALOGUE_CATALOG) });
+function createBridgeOnlySession() {
+  return new RidgeConsoleSession({
+    stage: createBridgeStage(TEST_BRIDGE_DIALOGUE_CATALOG)
+  });
+}
+
+function createRouteSession() {
+  return new RidgeConsoleSession({
+    stages: createRidgeRouteStages(TEST_ROUTE_DIALOGUE_CATALOG)
+  });
 }
 
 describe('parseRidgeCommand', () => {
@@ -30,58 +41,21 @@ describe('parseRidgeCommand', () => {
 
 describe('RidgeConsoleSession Bridge playthrough', () => {
   it('runs semicolon scripts', () => {
-    const session = createSession();
+    const session = createBridgeOnlySession();
     const results = session.execScript('look; go right 1');
     expect(results.map((r) => r.ok)).toEqual([true, true]);
   });
 
   it('walks the Bridge tracer end-to-end through console commands', () => {
-    const session = createSession();
-
-    // Reach Cicka and meet her (with Persona-style choice).
-    walkTo(session, 0.22);
-    expect(session.exec('interact cicka').ok).toBe(true);
-    drainConversation(session);
-    expect(session.observe().conversation?.awaitingChoice).toBe(true);
-    expect(session.exec('choose pet').ok).toBe(true);
-    drainConversation(session);
-    expect(session.observe().mode).toBe('explore');
-
-    // Learn about the missing span.
-    walkTo(session, 0.55);
-    expect(session.exec('interact draftsperson').ok).toBe(true);
-    drainConversation(session);
-    expect(session.observe().beat).toBe('needs_toy_car');
-
-    // Soft wall before the bridge opens.
-    const blocked = session.exec('go right 5');
-    expect(blocked.ok).toBe(false);
-    expect(session.observe().progress).toBeLessThanOrEqual(0.62);
-
-    // Retrieve toy car via parallel play.
-    walkTo(session, 0.22);
-    expect(session.exec('interact').ok).toBe(true);
-    drainConversation(session);
-    expect(session.observe().beat).toBe('toy_car_shared');
-    expect(session.observe().inventory).toContain('toy-car');
-
-    // Auto-success toy car test opens the crossing.
-    walkTo(session, 0.55);
-    expect(session.exec('interact').ok).toBe(true);
-    drainConversation(session);
-    expect(session.observe().beat).toBe('bridge_complete');
-
-    // Exit handoff.
-    walkTo(session, 0.9);
-    expect(session.exec('interact').ok).toBe(true);
-    const events = drainConversation(session);
-    expect(events.some((event) => event.type === 'concert_handoff')).toBe(true);
-    expect(session.observe().beat).toBe('concert_handoff');
-    expect(session.observe().areaId).toBe('concert');
+    const session = createBridgeOnlySession();
+    playBridge(session);
+    const observation = session.observe();
+    expect(observation.areaId).toBe('concert');
+    expect(observation.beat).toBe('concert_arrival');
   });
 
   it('exposes nearby distances useful for AI agents', () => {
-    const session = createSession();
+    const session = createBridgeOnlySession();
     walkTo(session, 0.22);
     const observation = session.observe();
     expect(observation.nearby.some((item) => item.spotId === 'cicka')).toBe(true);
@@ -89,6 +63,141 @@ describe('RidgeConsoleSession Bridge playthrough', () => {
     expect(session.format()).toContain('Nearby:');
   });
 });
+
+describe('RidgeConsoleSession playtest skips', () => {
+  it('warps and skips across Compact Ridge Areas with guitar when needed', () => {
+    const session = createRouteSession();
+    expect(session.exec('warp dance').ok).toBe(true);
+    expect(session.observe().areaId).toBe('danceFestival');
+    expect(session.observe().inventory).toContain('guitar');
+
+    expect(session.exec('skip').ok).toBe(true);
+    expect(session.observe().areaId).toBe('relay');
+
+    expect(session.exec('skip').ok).toBe(false);
+    expect(session.exec('warp bridge').ok).toBe(true);
+    expect(session.observe().areaId).toBe('bridge');
+    expect(session.observe().inventory).toEqual([]);
+  });
+});
+
+describe('RidgeConsoleSession first-playable full route', () => {
+  it('plays Bridge → Concert → Dance → Relay farewell → Bridge reset', () => {
+    const session = createRouteSession();
+
+    playBridge(session);
+    expect(session.observe().areaId).toBe('concert');
+    expect(session.observe().title).toContain('Concert');
+
+    playConcert(session);
+    expect(session.observe().areaId).toBe('danceFestival');
+    expect(session.observe().inventory).toContain('guitar');
+
+    playDance(session);
+    expect(session.observe().areaId).toBe('relay');
+
+    const endingEvents = playRelay(session);
+    expect(endingEvents.some((event) => event.type === 'route_reset')).toBe(true);
+    expect(session.observe().areaId).toBe('bridge');
+    expect(session.observe().beat).toBe('intro');
+    expect(session.observe().inventory).toEqual([]);
+    expect(session.format()).toContain('Bridge Area');
+  });
+});
+
+function playBridge(session: RidgeConsoleSession): RidgeSessionEvent[] {
+  const events: RidgeSessionEvent[] = [];
+
+  walkTo(session, 0.22);
+  expect(session.exec('interact cicka').ok).toBe(true);
+  events.push(...drainConversation(session));
+  expect(session.exec('choose pet').ok).toBe(true);
+  events.push(...drainConversation(session));
+
+  walkTo(session, 0.55);
+  expect(session.exec('interact draftsperson').ok).toBe(true);
+  events.push(...drainConversation(session));
+  expect(session.observe().beat).toBe('needs_toy_car');
+
+  const blocked = session.exec('go right 5');
+  expect(blocked.ok).toBe(false);
+
+  walkTo(session, 0.22);
+  expect(session.exec('interact').ok).toBe(true);
+  events.push(...drainConversation(session));
+  expect(session.observe().inventory).toContain('toy-car');
+
+  walkTo(session, 0.55);
+  expect(session.exec('interact').ok).toBe(true);
+  events.push(...drainConversation(session));
+  expect(session.observe().beat).toBe('bridge_complete');
+
+  walkTo(session, 0.9);
+  expect(session.exec('interact').ok).toBe(true);
+  events.push(...drainConversation(session));
+  expect(events.some((event) => event.type === 'area_handoff')).toBe(true);
+  return events;
+}
+
+function playConcert(session: RidgeConsoleSession): void {
+  walkTo(session, 0.55);
+  expect(session.exec('interact crowd').ok).toBe(true);
+  drainConversation(session);
+
+  walkTo(session, 0.28);
+  expect(session.exec('interact guitarist').ok).toBe(true);
+  drainConversation(session);
+
+  expect(session.exec('interact guitarist').ok).toBe(true);
+  drainConversation(session);
+  expect(session.observe().beat).toBe('concert_practiced');
+
+  walkTo(session, 0.42);
+  expect(session.exec('interact stage').ok).toBe(true);
+  drainConversation(session);
+  expect(session.observe().beat).toBe('concert_cleared');
+  expect(session.observe().inventory).toContain('guitar');
+
+  walkTo(session, 0.9);
+  expect(session.exec('interact').ok).toBe(true);
+  drainConversation(session);
+}
+
+function playDance(session: RidgeConsoleSession): void {
+  walkTo(session, 0.14);
+  expect(session.exec('interact traveler').ok).toBe(true);
+  drainConversation(session);
+
+  walkTo(session, 0.56);
+  expect(session.exec('interact operations').ok).toBe(true);
+  drainConversation(session);
+
+  walkTo(session, 0.4);
+  expect(session.exec('interact teacher').ok).toBe(true);
+  drainConversation(session);
+  expect(session.observe().beat).toBe('dance_ready');
+
+  // Nearest interact at the soft wall should prefer the gate over the steward.
+  walkTo(session, 0.68);
+  expect(session.exec('interact').ok).toBe(true);
+  expect(session.observe().conversation?.id).toBe('dance.setup_clearance');
+  drainConversation(session);
+  expect(session.observe().beat).toBe('dance_cleared');
+
+  walkTo(session, 0.9);
+  expect(session.exec('interact shuttle').ok).toBe(true);
+  drainConversation(session);
+}
+
+function playRelay(session: RidgeConsoleSession): RidgeSessionEvent[] {
+  walkTo(session, 0.55);
+  expect(session.exec('interact').ok).toBe(true);
+  const events = drainConversation(session);
+  expect(session.observe().conversation?.awaitingChoice).toBe(true);
+  expect(session.exec('choose let-song-end').ok).toBe(true);
+  events.push(...drainConversation(session));
+  return events;
+}
 
 function walkTo(session: RidgeConsoleSession, target: number): void {
   for (let i = 0; i < 40; i += 1) {
@@ -100,8 +209,8 @@ function walkTo(session: RidgeConsoleSession, target: number): void {
 }
 
 function drainConversation(session: RidgeConsoleSession) {
-  const events = [];
-  for (let i = 0; i < 12; i += 1) {
+  const events: RidgeSessionEvent[] = [];
+  for (let i = 0; i < 20; i += 1) {
     const observation = session.observe();
     if (observation.mode !== 'conversation') break;
     if (observation.conversation?.awaitingChoice) break;
