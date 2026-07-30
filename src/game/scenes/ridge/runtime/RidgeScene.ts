@@ -232,7 +232,10 @@ export class RidgeScene extends Phaser.Scene {
       return;
     }
     if (event.type === 'route_reset') {
+      // v0: dedication ends the CRT story and returns to Overworld.
+      // Post-game Open Ridge Return can replace this later.
       bridgeActions.resetRidgeFirstPlayableRoute();
+      this.onClose();
     }
   }
 

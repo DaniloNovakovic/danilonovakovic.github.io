@@ -99,8 +99,12 @@ Relay Ending
   -> Sit and Play beside Cicka
   -> Route Memory Montage (3 flashes) + Let the song end
   -> Cicka Threshold Farewell + Dedication Card
-  -> First Playable Reset Return to Bridge
+  -> return to Overworld (CRT story ends; Circuit kept)
 ```
+
+After the dedication, v0 returns to the Overworld street rather than an in-Ridge
+Bridge replay. Route progress resets so the next CRT entry starts Bridge fresh.
+Long-term Open Ridge Return / post-game can replace this eject later.
 
 Full route is playable in `pnpm ridge:console` and covered by
 `src/game/core/ridge/session.test.ts`. Stick visuals swap backgrounds/cast per

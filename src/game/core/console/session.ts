@@ -358,6 +358,24 @@ export class GameConsoleSession {
     const ridge = this.ensureRidge();
     const result = ridge.exec(raw);
     const events = mapRidgeEvents(result.events);
+
+    if (events.some((event) => event.type === 'ridge_route_reset')) {
+      // Dedication card finished — eject to Overworld until post-game exists.
+      this.ridge = null;
+      this.state.mode = 'overworld';
+      this.state.sceneId = 'overworld';
+      this.state.ridgeBeat = null;
+      const message =
+        'For Cicka. The CRT softens — you are back on the street. Circuit stays with you.';
+      this.state.lastMessage = message;
+      return {
+        ok: result.ok,
+        message,
+        observation: this.observe(),
+        events: [...events, { type: 'scene_returned', sceneId: 'overworld' }]
+      };
+    }
+
     this.state.ridgeBeat = ridge.observe().beat;
     this.state.lastMessage = result.message;
     return {
