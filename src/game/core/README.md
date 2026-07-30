@@ -15,6 +15,8 @@ engine adapters belong to `adapters/`.
 - Input command frames and pure input-to-player translation (`input/`)
 - Engine-agnostic player decision logic (`player/`)
 - Ridge console gameplay (`ridge/`): stage progress, conversation halt, AI/CLI commands
+- Full-game console (`console/`): Overworld / Basement / discrete Potassium / Ridge
+  orchestration for `pnpm game:console` (ADR-0006)
 
 ## Depends on
 
@@ -39,4 +41,5 @@ engine adapters belong to `adapters/`.
 - `ecs/systems/playerSystems.ts`
 - `input/commands.ts`
 - `player/PlayerController.ts`
-- `ridge/session.ts` / `pnpm ridge:console`
+- `ridge/session.ts` / `pnpm ridge:console` (alias of game console `--scene ridge`)
+- `console/session.ts` / `pnpm game:console`

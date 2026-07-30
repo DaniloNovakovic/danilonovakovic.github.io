@@ -1,0 +1,363 @@
+import {
+  createBridgeStage,
+  RidgeConsoleSession,
+  type BridgeDialogueCatalog,
+  type RidgeSessionEvent
+} from '../ridge/index';
+import { interactBasement, moveBasement, returnToOverworld } from './basementLogic';
+import { getGameHelpText, parseGameCommand, parseGameScript } from './commands';
+import {
+  OVERWORLD_GROUND_Y,
+  OVERWORLD_PLAYER_START,
+  type GameSceneId
+} from './content/overworldSpots';
+import { interactHobbies, moveHobbies } from './hobbiesLogic';
+import { formatGameObservation, observeGameWorld } from './observe';
+import { draftPotassium, fightPotassium, startPotassium } from './potassiumLogic';
+import { interactOverworld, moveOverworld } from './overworldLogic';
+import type {
+  GameCommand,
+  GameCommandResult,
+  GameItemId,
+  GameObservation,
+  GameSessionEvent,
+  GameWorldState
+} from './types';
+
+export interface GameConsoleSessionOptions {
+  dialogue: BridgeDialogueCatalog;
+  /** Start scene (default overworld). */
+  sceneId?: GameSceneId;
+  ownedItemIds?: readonly GameItemId[];
+  equippedItemIds?: readonly GameItemId[];
+}
+
+export class GameConsoleSession {
+  private state: GameWorldState;
+  private ridge: RidgeConsoleSession | null = null;
+  private readonly dialogue: BridgeDialogueCatalog;
+
+  constructor(options: GameConsoleSessionOptions) {
+    this.dialogue = options.dialogue;
+    const owned = [...(options.ownedItemIds ?? [])];
+    const equipped = [...(options.equippedItemIds ?? [])];
+    const sceneId = options.sceneId ?? 'overworld';
+
+    this.state = {
+      mode: modeForScene(sceneId),
+      sceneId,
+      overlay: null,
+      ownedItemIds: owned,
+      equippedItemIds: equipped,
+      discoveredSecretIds: [],
+      overworld: {
+        playerX: OVERWORLD_PLAYER_START.x,
+        playerY: OVERWORLD_GROUND_Y,
+        facing: 'right',
+        bananaFirstPeelPending: false
+      },
+      basement: { playerX: 135, facing: 'right' },
+      hobbies: { playerX: 200, facing: 'right' },
+      potassium: {
+        phase: 'lobby',
+        wave: 0,
+        maxWaves: 5,
+        lives: 3,
+        score: 0,
+        draftChoices: []
+      },
+      lastMessage: null,
+      ridgeBeat: null
+    };
+
+    if (sceneId === 'ridge') {
+      this.ensureRidge();
+    }
+  }
+
+  getState(): GameWorldState {
+    return this.state;
+  }
+
+  observe(): GameObservation {
+    return observeGameWorld(this.state, this.ridge?.observe() ?? null);
+  }
+
+  format(): string {
+    return formatGameObservation(this.observe());
+  }
+
+  exec(raw: string): GameCommandResult {
+    return this.run(parseGameCommand(raw));
+  }
+
+  execScript(script: string): GameCommandResult[] {
+    return parseGameScript(script).map((command) => this.run(command));
+  }
+
+  run(command: GameCommand): GameCommandResult {
+    switch (command.type) {
+      case 'help':
+        return this.ok(getGameHelpText());
+      case 'look':
+      case 'status':
+        return this.ok(command.type === 'look' ? 'You take in the scene.' : 'Status.');
+      case 'inventory':
+        return this.ok(
+          this.state.ownedItemIds.length > 0
+            ? `Inventory: ${this.state.ownedItemIds.join(', ')} (equipped: ${
+                this.state.equippedItemIds.join(', ') || 'none'
+              })`
+            : 'Inventory is empty.'
+        );
+      case 'equip':
+        return this.handleEquip(command.itemId);
+      case 'unequip':
+        return this.handleUnequip(command.itemId);
+      case 'cheat':
+        return this.handleCheatGive(command.itemId);
+      case 'go':
+        return this.handleGo(command.direction, command.steps ?? 1);
+      case 'interact':
+        return this.handleInteract(command.target);
+      case 'close':
+      case 'leave':
+        return this.handleCloseOrLeave(command.type);
+      case 'advance':
+      case 'choose':
+        return this.handleRidgeTalk(command);
+      case 'start':
+        return this.wrapPotassium(startPotassium(this.state));
+      case 'fight':
+        return this.wrapPotassium(fightPotassium(this.state));
+      case 'draft':
+        return this.wrapPotassium(draftPotassium(this.state, command.choiceIdOrIndex));
+      case 'unknown':
+        return this.fail(
+          command.raw
+            ? `Unknown command "${command.raw}". Type help.`
+            : 'Empty command. Type help.'
+        );
+    }
+  }
+
+  private handleGo(direction: 'left' | 'right', steps: number): GameCommandResult {
+    if (this.state.mode === 'overlay') {
+      return this.fail('Close the overlay first (close).');
+    }
+    if (this.state.mode === 'potassium') {
+      return this.fail('Potassium is turn-based here. Use start / fight / draft.');
+    }
+    if (this.state.mode === 'ridge') {
+      return this.forwardRidge(`go ${direction} ${steps}`);
+    }
+
+    let message: string;
+    if (this.state.mode === 'basement') {
+      message = moveBasement(this.state, direction, steps);
+    } else if (this.state.mode === 'hobbies') {
+      message = moveHobbies(this.state, direction, steps);
+    } else {
+      message = moveOverworld(this.state, direction, steps);
+    }
+    return this.ok(message);
+  }
+
+  private handleInteract(target: string | undefined): GameCommandResult {
+    if (this.state.mode === 'overlay') {
+      return this.fail('Overlay open — type close, or read with look.');
+    }
+    if (this.state.mode === 'potassium') {
+      return this.fail('In Potassium use start / fight / draft (or close to bail).');
+    }
+    if (this.state.mode === 'ridge') {
+      return this.forwardRidge(target ? `interact ${target}` : 'interact');
+    }
+
+    if (this.state.mode === 'basement') {
+      const result = interactBasement(this.state, target);
+      return this.finish(result.message, result.events);
+    }
+    if (this.state.mode === 'hobbies') {
+      const result = interactHobbies(this.state, target);
+      return this.finish(result.message, result.events);
+    }
+
+    const result = interactOverworld(this.state, target);
+    if (result.events.some((e) => e.type === 'scene_entered' && e.sceneId === 'ridge')) {
+      this.ensureRidge();
+    }
+    return this.finish(result.message, result.events);
+  }
+
+  private handleCloseOrLeave(kind: 'close' | 'leave'): GameCommandResult {
+    if (this.state.mode === 'ridge') {
+      if (kind === 'leave') {
+        return this.forwardRidge('leave');
+      }
+      // close from Ridge returns to overworld (eject the Circuit fantasy)
+      this.ridge = null;
+      this.state.mode = 'overworld';
+      this.state.sceneId = 'overworld';
+      this.state.ridgeBeat = null;
+      return this.finish('You pull the Circuit. The CRT goes dark — back on the street.', [
+        { type: 'scene_returned', sceneId: 'overworld' }
+      ]);
+    }
+
+    if (this.state.mode === 'overlay') {
+      const overlayId = this.state.overlay?.id ?? 'unknown';
+      const returnScene = this.state.sceneId;
+      this.state.overlay = null;
+      this.state.mode =
+        returnScene === 'basement'
+          ? 'basement'
+          : returnScene === 'hobbies'
+            ? 'hobbies'
+            : 'overworld';
+      return this.finish(`Closed ${overlayId}.`, [{ type: 'overlay_closed', overlayId }]);
+    }
+
+    if (this.state.mode === 'basement' || this.state.mode === 'hobbies' || this.state.mode === 'potassium') {
+      const leavingPotassium = this.state.mode === 'potassium';
+      const result = returnToOverworld(
+        this.state,
+        leavingPotassium
+          ? 'You bail out of Potassium Slip back to the street.'
+          : 'You return to the street.'
+      );
+      if (leavingPotassium) {
+        this.state.potassium.phase = 'lobby';
+      }
+      return this.finish(result.message, result.events);
+    }
+
+    return this.fail('Nothing to close.');
+  }
+
+  private handleRidgeTalk(
+    command: Extract<GameCommand, { type: 'advance' } | { type: 'choose' }>
+  ): GameCommandResult {
+    if (this.state.mode !== 'ridge') {
+      return this.fail('Conversation commands only work inside Ridge.');
+    }
+    if (command.type === 'advance') return this.forwardRidge('advance');
+    return this.forwardRidge(`choose ${command.choiceIdOrIndex}`);
+  }
+
+  private handleEquip(itemId: GameItemId): GameCommandResult {
+    if (!this.state.ownedItemIds.includes(itemId)) {
+      return this.fail(`You do not own ${itemId}.`);
+    }
+    if (this.state.equippedItemIds.includes(itemId)) {
+      return this.ok(`${itemId} already equipped.`);
+    }
+    this.state.equippedItemIds = [...this.state.equippedItemIds, itemId];
+    return this.finish(`Equipped ${itemId}.`, [{ type: 'item_equipped', itemId }]);
+  }
+
+  private handleUnequip(itemId: GameItemId): GameCommandResult {
+    if (!this.state.equippedItemIds.includes(itemId)) {
+      return this.fail(`${itemId} is not equipped.`);
+    }
+    this.state.equippedItemIds = this.state.equippedItemIds.filter((id) => id !== itemId);
+    return this.finish(`Unequipped ${itemId}.`, [{ type: 'item_unequipped', itemId }]);
+  }
+
+  private handleCheatGive(itemId: GameItemId): GameCommandResult {
+    const events: GameSessionEvent[] = [];
+    if (!this.state.ownedItemIds.includes(itemId)) {
+      this.state.ownedItemIds = [...this.state.ownedItemIds, itemId];
+      events.push({ type: 'item_collected', itemId });
+    }
+    if (itemId === 'glasses' && !this.state.equippedItemIds.includes('glasses')) {
+      this.state.equippedItemIds = [...this.state.equippedItemIds, 'glasses'];
+      events.push({ type: 'item_equipped', itemId: 'glasses' });
+    }
+    if (itemId === 'glasses' && !this.state.discoveredSecretIds.includes('banana-peel-clue')) {
+      // cheat does not auto-discover peel
+    }
+    return this.finish(`Cheat: now own ${itemId}.`, events);
+  }
+
+  private forwardRidge(raw: string): GameCommandResult {
+    const ridge = this.ensureRidge();
+    const result = ridge.exec(raw);
+    const events = mapRidgeEvents(result.events);
+    this.state.ridgeBeat = ridge.observe().beat;
+    this.state.lastMessage = result.message;
+    return {
+      ok: result.ok,
+      message: result.message,
+      observation: this.observe(),
+      events
+    };
+  }
+
+  private ensureRidge(): RidgeConsoleSession {
+    if (!this.ridge) {
+      this.ridge = new RidgeConsoleSession({
+        stage: createBridgeStage(this.dialogue)
+      });
+    }
+    return this.ridge;
+  }
+
+  private wrapPotassium(result: {
+    ok: boolean;
+    message: string;
+    events: GameSessionEvent[];
+  }): GameCommandResult {
+    return result.ok ? this.finish(result.message, result.events) : this.fail(result.message);
+  }
+
+  private ok(message: string, events: readonly GameSessionEvent[] = []): GameCommandResult {
+    return this.finish(message, events);
+  }
+
+  private fail(message: string): GameCommandResult {
+    this.state.lastMessage = message;
+    return {
+      ok: false,
+      message,
+      observation: this.observe(),
+      events: []
+    };
+  }
+
+  private finish(message: string, events: readonly GameSessionEvent[]): GameCommandResult {
+    this.state.lastMessage = message;
+    return {
+      ok: true,
+      message,
+      observation: this.observe(),
+      events
+    };
+  }
+}
+
+function mapRidgeEvents(events: readonly RidgeSessionEvent[]): GameSessionEvent[] {
+  const out: GameSessionEvent[] = [];
+  for (const event of events) {
+    if (event.type === 'beat_changed') {
+      out.push({ type: 'ridge_beat_changed', beat: event.beat });
+    } else if (event.type === 'concert_handoff') {
+      out.push({ type: 'ridge_concert_handoff' });
+    }
+  }
+  return out;
+}
+
+function modeForScene(sceneId: GameSceneId): GameWorldState['mode'] {
+  switch (sceneId) {
+    case 'basement':
+    case 'hobbies':
+    case 'potassium':
+    case 'ridge':
+    case 'overworld':
+      return sceneId;
+    case 'stampedeSketch':
+      // Not console-backed yet; land on overworld with a clear observation.
+      return 'overworld';
+  }
+}

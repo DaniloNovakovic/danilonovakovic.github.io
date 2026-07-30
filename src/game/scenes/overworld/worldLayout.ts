@@ -2,13 +2,23 @@ import type { OverlayId } from '@/game/overlays/overlayIds';
 import { HOBBIES_SCENE_ID, RIDGE_SCENE_ID, type SceneId } from '@/game/scenes/sceneIds';
 import type { SecretDiscoveryId } from '@/game/bridge/store';
 import type { OverworldSecretSlot } from '@/game/core/ecs/systems/overworldInteractSystems';
+import {
+  OVERWORLD_BANANA_PEEL,
+  OVERWORLD_BASEMENT_HOLE as CORE_BASEMENT_HOLE,
+  OVERWORLD_BUILDING_SPOTS,
+  OVERWORLD_CIRCUIT_CRT,
+  OVERWORLD_INTERACT_DISTANCE_X as CORE_INTERACT_DISTANCE_X,
+  OVERWORLD_INTERACT_MIN_PLAYER_Y as CORE_INTERACT_MIN_PLAYER_Y,
+  OVERWORLD_PLAYER_START as CORE_PLAYER_START,
+  OVERWORLD_WIDTH as CORE_WIDTH
+} from '@/game/core/console/content/overworldSpots';
 import { GAME_DESIGN_HEIGHT } from '@/game/sharedSceneRuntime/designSize';
 
-/** Overworld street width (logical px). */
-export const OVERWORLD_WIDTH = 3000;
+/** Overworld street width (logical px). Shared with headless Game Console. */
+export const OVERWORLD_WIDTH = CORE_WIDTH;
 
 /** Player spawn and route-local resume constraints. */
-export const OVERWORLD_PLAYER_START = { x: 100, y: 400 } as const;
+export const OVERWORLD_PLAYER_START = CORE_PLAYER_START;
 export const OVERWORLD_PLAYER_SPAWN_MARGIN_X = 48;
 export const OVERWORLD_PLAYER_RESUME_Y_CLAMP = { min: 300, max: 550 } as const;
 
@@ -19,13 +29,14 @@ export const OVERWORLD_GROUND_ZONE = {
 } as const;
 
 /** Building interaction: max horizontal distance to sprite center, min player Y. */
-export const OVERWORLD_INTERACT_DISTANCE_X = 80;
-export const OVERWORLD_INTERACT_MIN_PLAYER_Y = 400;
+export const OVERWORLD_INTERACT_DISTANCE_X = CORE_INTERACT_DISTANCE_X;
+export const OVERWORLD_INTERACT_MIN_PLAYER_Y = CORE_INTERACT_MIN_PLAYER_Y;
 export const OVERWORLD_INTERACT_PROMPT_OFFSET_Y = 40;
 
 /**
  * Overworld building triggers.
  * The scene owns where the trigger sits and whether it opens a scene or overlay.
+ * Coordinates come from Game Console spots (ADR-0006).
  */
 export type OverworldTriggerAction =
   | { kind: 'openOverlay'; overlayId: OverlayId }
@@ -38,65 +49,44 @@ export interface OverworldBuildingTrigger {
   action: OverworldTriggerAction;
 }
 
-export const OVERWORLD_BUILDING_TRIGGERS: readonly OverworldBuildingTrigger[] = [
-  {
-    kind: 'overworldBuilding',
-    id: 'profile',
-    x: 400,
-    action: { kind: 'openOverlay', overlayId: 'profile' }
-  },
-  {
-    kind: 'overworldBuilding',
-    id: 'experiences',
-    x: 900,
-    action: { kind: 'openOverlay', overlayId: 'experiences' }
-  },
-  {
-    kind: 'overworldBuilding',
-    id: 'projects',
-    x: 1400,
-    action: { kind: 'openOverlay', overlayId: 'projects' }
-  },
-  {
-    kind: 'overworldBuilding',
-    id: 'abilities',
-    x: 1900,
-    action: { kind: 'openOverlay', overlayId: 'abilities' }
-  },
-  {
-    kind: 'overworldBuilding',
-    id: HOBBIES_SCENE_ID,
-    x: 2400,
-    action: { kind: 'enterScene', sceneId: HOBBIES_SCENE_ID }
-  },
-  {
-    kind: 'overworldBuilding',
-    id: 'contact',
-    x: 2900,
-    action: { kind: 'openOverlay', overlayId: 'contact' }
-  }
-];
+export const OVERWORLD_BUILDING_TRIGGERS: readonly OverworldBuildingTrigger[] =
+  OVERWORLD_BUILDING_SPOTS.map((spot) => {
+    if (spot.action.kind === 'enterScene') {
+      return {
+        kind: 'overworldBuilding' as const,
+        id: spot.id === 'hobbies' ? HOBBIES_SCENE_ID : spot.id,
+        x: spot.x,
+        action: { kind: 'enterScene' as const, sceneId: HOBBIES_SCENE_ID }
+      };
+    }
+    return {
+      kind: 'overworldBuilding' as const,
+      id: spot.id,
+      x: spot.x,
+      action: { kind: 'openOverlay' as const, overlayId: spot.action.overlayId }
+    };
+  });
 
 export function getOverworldBuildingTrigger(id: string): OverworldBuildingTrigger | undefined {
   return OVERWORLD_BUILDING_TRIGGERS.find((trigger) => trigger.id === id);
 }
 
 export const OVERWORLD_BASEMENT_HOLE = {
-  x: 230,
-  y: 535,
-  promptY: 485,
-  interactDistanceX: 70,
-  minPlayerY: 400
+  x: CORE_BASEMENT_HOLE.x,
+  y: CORE_BASEMENT_HOLE.y,
+  promptY: CORE_BASEMENT_HOLE.promptY,
+  interactDistanceX: CORE_BASEMENT_HOLE.interactDistanceX,
+  minPlayerY: CORE_BASEMENT_HOLE.minPlayerY
 } as const;
 
-export const BANANA_PEEL_CLUE_ID = 'banana-peel-clue' satisfies SecretDiscoveryId;
+export const BANANA_PEEL_CLUE_ID = OVERWORLD_BANANA_PEEL.secretId satisfies SecretDiscoveryId;
 
 export const OVERWORLD_GLASSES_SECRET_SLOTS: readonly OverworldSecretSlot[] = [
   {
     secretId: BANANA_PEEL_CLUE_ID,
-    x: 650,
-    y: 535,
-    radius: 95,
+    x: OVERWORLD_BANANA_PEEL.x,
+    y: OVERWORLD_BANANA_PEEL.y,
+    radius: OVERWORLD_BANANA_PEEL.radius,
     promptOffsetY: -56
   }
 ];
@@ -106,12 +96,12 @@ export const OVERWORLD_GLASSES_SECRET_SLOTS: readonly OverworldSecretSlot[] = [
  * as a nested "game inside the game."
  */
 export const OVERWORLD_CIRCUIT_SLOT = {
-  id: 'circuit-crt',
-  x: 1650,
-  y: 520,
-  promptY: 455,
-  interactDistanceX: 78,
-  minPlayerY: 400,
+  id: OVERWORLD_CIRCUIT_CRT.id,
+  x: OVERWORLD_CIRCUIT_CRT.x,
+  y: OVERWORLD_CIRCUIT_CRT.y,
+  promptY: OVERWORLD_CIRCUIT_CRT.promptY,
+  interactDistanceX: OVERWORLD_CIRCUIT_CRT.interactDistanceX,
+  minPlayerY: OVERWORLD_CIRCUIT_CRT.minPlayerY,
   ridgeSceneId: RIDGE_SCENE_ID
 } as const;
 

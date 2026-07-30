@@ -1,0 +1,138 @@
+import { BASEMENT_PLAYER_START, BASEMENT_SPOTS, BASEMENT_STEP_PX } from './content/basementSpots';
+import { getGamesOverlay } from './overlayCatalog';
+import type { GameItemId, GameSessionEvent, GameWorldState, NearbyThing } from './types';
+
+export interface BasementInteractOutcome {
+  message: string;
+  events: GameSessionEvent[];
+}
+
+export function listBasementNearby(state: GameWorldState): NearbyThing[] {
+  const x = state.basement.playerX;
+  const things: NearbyThing[] = [];
+
+  for (const spot of BASEMENT_SPOTS) {
+    if (spot.id === 'glasses' && state.ownedItemIds.includes('glasses')) continue;
+    const distance = Math.abs(x - spot.x);
+    if (distance > spot.radius) continue;
+
+    const prompt =
+      spot.id === 'exit'
+        ? 'Climb out'
+        : spot.id === 'glasses'
+          ? 'Pick up glasses'
+          : state.ownedItemIds.includes('glasses')
+            ? 'Open developer console'
+            : 'Peer at the screen';
+
+    things.push({
+      id: spot.id,
+      label: spot.label,
+      distance,
+      prompt,
+      kind: spot.id === 'exit' ? 'exit' : spot.id === 'glasses' ? 'pickup' : 'computer'
+    });
+  }
+
+  return things.sort((a, b) => a.distance - b.distance);
+}
+
+export function moveBasement(
+  state: GameWorldState,
+  direction: 'left' | 'right',
+  steps: number
+): string {
+  const delta = steps * BASEMENT_STEP_PX * (direction === 'right' ? 1 : -1);
+  const next = clamp(state.basement.playerX + delta, 60, 720);
+  state.basement.playerX = next;
+  state.basement.facing = direction;
+  return direction === 'right'
+    ? `You shuffle right to x=${Math.round(next)}.`
+    : `You shuffle left to x=${Math.round(next)}.`;
+}
+
+export function interactBasement(
+  state: GameWorldState,
+  target: string | undefined
+): BasementInteractOutcome {
+  const nearby = listBasementNearby(state);
+  if (nearby.length === 0) {
+    return { message: 'Nothing close enough in the basement.', events: [] };
+  }
+
+  const picked = pickNearby(nearby, target);
+  if (!picked) {
+    return {
+      message: `No match for "${target}". Nearby: ${nearby.map((n) => n.id).join(', ')}`,
+      events: []
+    };
+  }
+
+  if (picked.id === 'exit') {
+    return returnToOverworld(state, 'You climb back to the street.');
+  }
+
+  if (picked.id === 'glasses') {
+    return collectGlasses(state);
+  }
+
+  // computer
+  if (!state.ownedItemIds.includes('glasses')) {
+    return { message: 'ughh... I can\'t see', events: [] };
+  }
+
+  state.mode = 'overlay';
+  state.overlay = getGamesOverlay();
+  return {
+    message: 'The developer console boots on the basement CRT.',
+    events: [{ type: 'overlay_opened', overlayId: 'games' }]
+  };
+}
+
+function collectGlasses(state: GameWorldState): BasementInteractOutcome {
+  if (state.ownedItemIds.includes('glasses')) {
+    return { message: 'Glasses already collected.', events: [] };
+  }
+
+  const itemId: GameItemId = 'glasses';
+  state.ownedItemIds = [...state.ownedItemIds, itemId];
+  if (!state.equippedItemIds.includes(itemId)) {
+    state.equippedItemIds = [...state.equippedItemIds, itemId];
+  }
+
+  return {
+    message: 'Glasses acquired. The sketch city flickers into focus.',
+    events: [
+      { type: 'item_collected', itemId },
+      { type: 'item_equipped', itemId }
+    ]
+  };
+}
+
+export function returnToOverworld(state: GameWorldState, message: string): BasementInteractOutcome {
+  state.mode = 'overworld';
+  state.sceneId = 'overworld';
+  state.overlay = null;
+  return {
+    message,
+    events: [{ type: 'scene_returned', sceneId: 'overworld' }]
+  };
+}
+
+export function resetBasementPosition(state: GameWorldState): void {
+  state.basement.playerX = BASEMENT_PLAYER_START.x;
+  state.basement.facing = 'right';
+}
+
+function pickNearby(nearby: readonly NearbyThing[], target: string | undefined): NearbyThing | null {
+  if (!target) return nearby[0] ?? null;
+  const needle = target.toLowerCase();
+  return (
+    nearby.find((n) => n.id.toLowerCase() === needle || n.label.toLowerCase().includes(needle)) ??
+    null
+  );
+}
+
+function clamp(n: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, n));
+}

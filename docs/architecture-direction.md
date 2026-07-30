@@ -58,6 +58,9 @@ proposing future refactors:
 - For current Ridge runtime work, keep gameplay truth in the Ridge Console Core
   (`src/game/core/ridge/`) and art behind VisualProvider, instead of rebuilding
   parallel catalogs or resurrecting removed debugger/blockout pipelines.
+- For full-game AI/headless playtests, prefer `GameConsoleSession`
+  (`src/game/core/console/`, ADR-0006) and `pnpm game:console` over browser-only
+  smoke paths.
 - Introduce shared render helpers only when repeated render policy code appears.
 
 ---

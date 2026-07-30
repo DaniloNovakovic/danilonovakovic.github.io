@@ -64,6 +64,17 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
 - Potassium keeps a local top-5 records list for finished runs.
 - Press `R` to retry after a terminal screen, `E` to return, `Space` to continue into endless after winning, or `Esc` to return to the city.
 
+## Headless / AI Console
+
+- Full interactive route is playable without a browser via `pnpm game:console`.
+- Shared commands: `look`, `go left|right [n]`, `interact [name]`, `inventory`,
+  `equip` / `unequip`, `close`.
+- Potassium in console mode is discrete (`start`, `fight`, `draft`) — not the
+  live drag-banana physics. Winning still grants the Circuit.
+- Ridge conversation uses `advance` / `choose`. `pnpm ridge:console` is an alias
+  that starts already inside Ridge.
+- One-shot scripts: `pnpm game:console --script "look; go right 3; interact" --json`.
+
 ## Runtime Notes For Playtesting
 
 - React overlays should always pause Phaser input.

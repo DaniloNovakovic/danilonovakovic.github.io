@@ -25,6 +25,10 @@ Use these checks before adding modules, wrappers, interfaces, or cross-folder se
 7. **Keep Ridge gameplay truth in Ridge Console Core.** Follow ADR-0005
    (`src/game/core/ridge/`) instead of recreating route/spatial catalogs in
    Phaser scene code. Art stays behind VisualProvider.
+8. **Keep full-game headless play in Game Console Core.** Follow ADR-0006
+   (`src/game/core/console/`, `pnpm game:console`) for Overworld / Basement /
+   discrete Potassium / Ridge orchestration. Do not invent a second headless
+   store or browser-only smoke path when the console session can answer.
 
 ## Folder Ownership
 

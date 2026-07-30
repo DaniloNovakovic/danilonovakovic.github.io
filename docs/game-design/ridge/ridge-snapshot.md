@@ -47,6 +47,9 @@ pnpm ridge:console --script "look; go right 3; interact; advance"
 pnpm ridge:console --script "look" --json
 ```
 
+Full-game headless (street → Circuit → Ridge) uses `pnpm game:console`; see
+ADR-0006 and the player manual. `ridge:console` is `game:console --scene ridge`.
+
 Current runtime characteristics:
 
 - Gameplay authority lives in pure `src/game/core/ridge/` (`RidgeConsoleSession`).

@@ -1,25 +1,28 @@
 #!/usr/bin/env node
 /**
- * Headless Ridge console for humans and AI agents.
+ * Headless full-game console for humans and AI agents.
  *
  * Interactive:
- *   pnpm ridge:console
+ *   pnpm game:console
  *
  * One-shot script (semicolon-separated):
- *   pnpm ridge:console --script "look; go right 3; interact; advance"
+ *   pnpm game:console --script "look; go right 3; interact"
  *
- * JSON observation stream (machine-friendly):
- *   pnpm ridge:console --script "look" --json
+ * JSON observation stream:
+ *   pnpm game:console --script "look" --json
+ *
+ * Start inside Ridge (skip street):
+ *   pnpm game:console --scene ridge
  */
 import * as readline from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
 import {
-  createBridgeStage,
-  RidgeConsoleSession,
-  formatObservation,
-  type BridgeDialogueCatalog,
-  type RidgeCommandResult
-} from '../src/game/core/ridge/index';
+  GameConsoleSession,
+  type GameCommandResult,
+  type GameSceneId,
+  formatGameObservation
+} from '../src/game/core/console/index';
+import type { BridgeDialogueCatalog } from '../src/game/core/ridge/index';
 import { enMessages } from '../src/shared/i18n/messages/en';
 
 function loadCatalog(): BridgeDialogueCatalog {
@@ -34,13 +37,29 @@ function loadCatalog(): BridgeDialogueCatalog {
   };
 }
 
-function createSession(): RidgeConsoleSession {
-  return new RidgeConsoleSession({
-    stage: createBridgeStage(loadCatalog())
+function parseScene(args: string[]): GameSceneId {
+  const index = args.indexOf('--scene');
+  const raw = index >= 0 ? args[index + 1] : 'overworld';
+  const allowed: GameSceneId[] = [
+    'overworld',
+    'basement',
+    'hobbies',
+    'potassium',
+    'ridge',
+    'stampedeSketch'
+  ];
+  if (raw && (allowed as string[]).includes(raw)) return raw as GameSceneId;
+  return 'overworld';
+}
+
+function createSession(sceneId: GameSceneId): GameConsoleSession {
+  return new GameConsoleSession({
+    dialogue: loadCatalog(),
+    sceneId
   });
 }
 
-function printResult(result: RidgeCommandResult, asJson: boolean): void {
+function printResult(result: GameCommandResult, asJson: boolean): void {
   if (asJson) {
     output.write(
       `${JSON.stringify(
@@ -58,17 +77,18 @@ function printResult(result: RidgeCommandResult, asJson: boolean): void {
   }
 
   output.write(`\n${result.message}\n\n`);
-  output.write(`${formatObservation(result.observation)}\n`);
+  output.write(`${formatGameObservation(result.observation)}\n`);
 }
 
-async function runScript(script: string, asJson: boolean): Promise<number> {
-  const session = createSession();
+async function runScript(
+  script: string,
+  asJson: boolean,
+  sceneId: GameSceneId
+): Promise<number> {
+  const session = createSession(sceneId);
   const results = session.execScript(script);
   for (const result of results) {
     printResult(result, asJson);
-    if (!result.ok && result.observation.mode === 'explore') {
-      // Keep going for soft failures like blocked movement inside a script.
-    }
   }
   if (results.length === 0) {
     printResult(session.exec('look'), asJson);
@@ -76,16 +96,16 @@ async function runScript(script: string, asJson: boolean): Promise<number> {
   return 0;
 }
 
-async function runRepl(asJson: boolean): Promise<number> {
-  const session = createSession();
+async function runRepl(asJson: boolean, sceneId: GameSceneId): Promise<number> {
+  const session = createSession(sceneId);
   const rl = readline.createInterface({ input, output });
 
-  output.write('Ridge Console — Bridge Area stick prototype\n');
+  output.write('Game Console — Overworld / Basement / Potassium / Ridge\n');
   output.write('Type help. Ctrl+C or quit to exit.\n\n');
   output.write(`${session.format()}\n`);
 
   while (true) {
-    const answer = await rl.question('\nridge> ');
+    const answer = await rl.question('\ngame> ');
     const trimmed = answer.trim();
     if (!trimmed) continue;
     if (trimmed === 'quit' || trimmed === 'exit') break;
@@ -107,28 +127,28 @@ async function runRepl(asJson: boolean): Promise<number> {
 async function main(): Promise<number> {
   const args = process.argv.slice(2);
   const asJson = args.includes('--json');
+  const sceneId = parseScene(args);
   const scriptIndex = args.indexOf('--script');
   const script = scriptIndex >= 0 ? args[scriptIndex + 1] : undefined;
 
   if (script) {
-    return runScript(script, asJson);
+    return runScript(script, asJson, sceneId);
   }
 
   if (!input.isTTY) {
-    // Non-interactive stdin: treat whole stdin as a script.
     const chunks: Buffer[] = [];
     for await (const chunk of input) {
       chunks.push(Buffer.from(chunk));
     }
     const scriptFromStdin = Buffer.concat(chunks).toString('utf8').trim();
     if (!scriptFromStdin) {
-      output.write('No commands on stdin. Example: echo "look; help" | pnpm ridge:console\n');
+      output.write('No commands on stdin. Example: echo "look; help" | pnpm game:console\n');
       return 1;
     }
-    return runScript(scriptFromStdin, asJson);
+    return runScript(scriptFromStdin, asJson, sceneId);
   }
 
-  return runRepl(asJson);
+  return runRepl(asJson, sceneId);
 }
 
 main()
