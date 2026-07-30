@@ -1,5 +1,6 @@
 import type {
   RidgeActorPresence,
+  RidgeAreaId,
   RidgeMode,
   RidgeObservation
 } from '@/game/core/ridge';
@@ -10,13 +11,14 @@ import type {
  */
 export interface RidgeVisualViewModel {
   mode: RidgeMode;
+  areaId: RidgeAreaId;
   progress: number;
   facing: RidgeObservation['facing'];
   beat: RidgeObservation['beat'];
   ambience: string;
   nearbyPrompt: string | null;
   actors: readonly RidgeActorPresence[];
-  bridgeOpen: boolean;
+  crossingOpen: boolean;
 }
 
 export interface RidgeVisualProvider {
@@ -28,16 +30,20 @@ export interface RidgeVisualProvider {
 export function toRidgeVisualViewModel(
   observation: RidgeObservation
 ): RidgeVisualViewModel {
+  const crossingOpen =
+    observation.beat === 'bridge_complete' ||
+    observation.beat === 'concert_cleared' ||
+    observation.beat === 'dance_cleared';
+
   return {
     mode: observation.mode,
+    areaId: observation.areaId,
     progress: observation.progress,
     facing: observation.facing,
     beat: observation.beat,
     ambience: observation.ambience,
     nearbyPrompt: observation.nearby[0]?.prompt ?? null,
     actors: observation.actors,
-    bridgeOpen:
-      observation.beat === 'bridge_complete' ||
-      observation.beat === 'concert_handoff'
+    crossingOpen
   };
 }

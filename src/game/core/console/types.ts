@@ -2,7 +2,7 @@
  * Pure full-game console types. No Phaser, React, DOM, or bridge store.
  */
 
-import type { RidgeBridgeBeat, RidgeObservation } from '../ridge/types';
+import type { RidgeObservation, RidgeRouteBeat } from '../ridge/types';
 import type { GameSceneId, PortfolioOverlayId } from './content/overworldSpots';
 
 export type GameItemId = 'glasses' | 'circuit';
@@ -76,7 +76,7 @@ export interface GameWorldState {
   potassium: PotassiumSlice;
   lastMessage: string | null;
   /** Ridge is hosted separately; beat mirrored for observation. */
-  ridgeBeat: RidgeBridgeBeat | null;
+  ridgeBeat: RidgeRouteBeat | null;
 }
 
 export interface GameObservation {
@@ -128,8 +128,9 @@ export type GameSessionEvent =
   | { type: 'banana_peel_cancelled' }
   | { type: 'thought'; id: 'basement_cannot_see' }
   | { type: 'potassium_won' }
-  | { type: 'ridge_beat_changed'; beat: RidgeBridgeBeat }
-  | { type: 'ridge_concert_handoff' };
+  | { type: 'ridge_beat_changed'; beat: RidgeRouteBeat }
+  | { type: 'ridge_area_handoff'; areaId: string }
+  | { type: 'ridge_route_reset' };
 
 export interface GameCommandResult {
   ok: boolean;

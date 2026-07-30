@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { TEST_BRIDGE_DIALOGUE_CATALOG } from '../ridge/content/testBridgeCatalog';
+import { TEST_ROUTE_DIALOGUE_CATALOG } from '../ridge/content/testRouteCatalog';
 import { parseGameCommand, parseGameScript } from './commands';
 import { GameConsoleSession } from './session';
 
-function createSession() {
-  return new GameConsoleSession({ dialogue: TEST_BRIDGE_DIALOGUE_CATALOG });
+function createSession(
+  options: Omit<ConstructorParameters<typeof GameConsoleSession>[0], 'dialogue'> = {}
+) {
+  return new GameConsoleSession({ dialogue: TEST_ROUTE_DIALOGUE_CATALOG, ...options });
 }
 
 describe('parseGameCommand', () => {
@@ -81,7 +83,7 @@ describe('GameConsoleSession full secret route', () => {
 
   it('syncs Phaser position and cancels a pending banana peel when walking away', () => {
     const session = new GameConsoleSession({
-      dialogue: TEST_BRIDGE_DIALOGUE_CATALOG,
+      dialogue: TEST_ROUTE_DIALOGUE_CATALOG,
       ownedItemIds: ['glasses'],
       equippedItemIds: ['glasses']
     });
@@ -96,7 +98,7 @@ describe('GameConsoleSession full secret route', () => {
 
   it('inserts Circuit at the CRT after hydrate', () => {
     const session = new GameConsoleSession({
-      dialogue: TEST_BRIDGE_DIALOGUE_CATALOG,
+      dialogue: TEST_ROUTE_DIALOGUE_CATALOG,
       ownedItemIds: ['circuit'],
       equippedItemIds: []
     });
@@ -108,7 +110,7 @@ describe('GameConsoleSession full secret route', () => {
 
   it('commits banana peel warp for the live Overworld typewriter path', () => {
     const session = new GameConsoleSession({
-      dialogue: TEST_BRIDGE_DIALOGUE_CATALOG,
+      dialogue: TEST_ROUTE_DIALOGUE_CATALOG,
       ownedItemIds: ['glasses'],
       equippedItemIds: ['glasses'],
       discoveredSecretIds: ['banana-peel-clue']

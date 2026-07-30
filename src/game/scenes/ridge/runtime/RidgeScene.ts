@@ -2,11 +2,15 @@ import * as Phaser from 'phaser';
 import {
   bridgeActions,
   bridgeStore,
-  type OpenOverlayOptions
+  type OpenOverlayOptions,
+  type RidgeRouteBeatState
 } from '@/game/bridge/store';
 import {
-  createBridgeStage,
+  createRidgeRouteStages,
   RidgeConsoleSession,
+  RIDGE_GUITAR_ITEM,
+  RIDGE_INITIAL_BEAT,
+  type RidgeAreaId,
   type RidgeCommandResult,
   type RidgeSessionEvent
 } from '@/game/core/ridge';
@@ -23,7 +27,7 @@ import {
 import { bindSideViewKeyboard } from '@/game/sharedSceneRuntime/input/sceneKeyboard';
 import { StickVisualProvider } from '../art/stick/StickVisualProvider';
 import { toRidgeVisualViewModel } from '../art/types';
-import { loadBridgeDialogueCatalog } from '../content/bridgeCatalog';
+import { loadRidgeRouteDialogueCatalog } from '../content/routeCatalog';
 import type { RidgeConversationPanelView } from '../sceneUi/RidgeConversationPanel';
 import type { RidgeDevControls } from './ridgeDevControls';
 
@@ -63,13 +67,18 @@ export class RidgeScene extends Phaser.Scene {
 
   create(): void {
     const route = bridgeStore.getState().progress.ridge.firstPlayableRoute;
-    const beat =
-      route.activeAreaId === 'bridge' ? route.bridgeBeat : 'concert_handoff';
+    const areaId = route.activeAreaId;
+    const hasGuitar =
+      route.beat === 'concert_cleared' ||
+      areaId === 'danceFestival' ||
+      areaId === 'relay';
 
     this.session = new RidgeConsoleSession({
-      stage: createBridgeStage(loadBridgeDialogueCatalog()),
-      beat,
-      progress: 0.05
+      stages: createRidgeRouteStages(loadRidgeRouteDialogueCatalog()),
+      areaId,
+      beat: route.beat,
+      progress: 0.05,
+      inventory: hasGuitar ? [RIDGE_GUITAR_ITEM] : []
     });
 
     this.visuals = new StickVisualProvider(this);
@@ -166,11 +175,16 @@ export class RidgeScene extends Phaser.Scene {
 
   private handleSessionEvent(event: RidgeSessionEvent): void {
     if (event.type === 'beat_changed') {
-      bridgeActions.setRidgeBridgeBeat(event.beat);
+      bridgeActions.setRidgeRouteBeat(event.beat as RidgeRouteBeatState);
       return;
     }
-    if (event.type === 'concert_handoff') {
-      bridgeActions.triggerRidgeConcertHandoff();
+    if (event.type === 'area_handoff') {
+      const areaId = event.areaId as RidgeAreaId;
+      bridgeActions.setRidgeAreaHandoff(areaId, RIDGE_INITIAL_BEAT[areaId] as RidgeRouteBeatState);
+      return;
+    }
+    if (event.type === 'route_reset') {
+      bridgeActions.resetRidgeFirstPlayableRoute();
     }
   }
 
@@ -239,7 +253,9 @@ function portraitForSpeaker(
   speakerId: string
 ): RidgeConversationPanelView['portrait'] {
   if (speakerId === 'cicka') return 'cicka';
-  if (speakerId === 'bridgeDraftsperson') return 'draftsperson';
-  if (speakerId === 'prompt') return 'prompt';
+  if (speakerId === 'bridgeDraftsperson' || speakerId === 'injuredGuitarist') {
+    return 'draftsperson';
+  }
+  if (speakerId === 'prompt' || speakerId === 'dedication') return 'prompt';
   return 'player';
 }

@@ -1,3 +1,5 @@
+// Outcome application branches across inventory/flags/handoffs by design.
+// fallow-ignore-file complexity
 import type {
   RidgeConversationDefinition,
   RidgeConversationOutcome,
@@ -174,7 +176,6 @@ function applyOutcome(
   state: RidgeWorldState,
   outcome: RidgeConversationOutcome
 ): { state: RidgeWorldState; events: RidgeSessionEvent[] } {
-  let next = state;
   const events: RidgeSessionEvent[] = [];
   const flags = new Set(state.flags);
 
@@ -192,6 +193,10 @@ function applyOutcome(
     inventory = [...inventory, outcome.addItem];
     events.push({ type: 'item_added', itemId: outcome.addItem });
   }
+  if (outcome.removeItem && inventory.includes(outcome.removeItem)) {
+    inventory = inventory.filter((item) => item !== outcome.removeItem);
+    events.push({ type: 'item_removed', itemId: outcome.removeItem });
+  }
 
   let beat = state.beat;
   if (outcome.setBeat) {
@@ -199,28 +204,33 @@ function applyOutcome(
     events.push({ type: 'beat_changed', beat: outcome.setBeat });
   }
 
-  if (outcome.concertHandoff) {
-    beat = 'concert_handoff';
-    events.push({ type: 'concert_handoff' });
+  if (outcome.handoffToArea) {
+    events.push({ type: 'area_handoff', areaId: outcome.handoffToArea });
   }
 
-  next = {
-    ...state,
-    flags,
-    inventory,
-    beat,
-    areaId: outcome.concertHandoff ? 'concert' : state.areaId,
-    lastMessage: describeOutcome(outcome)
-  };
+  if (outcome.routeReset) {
+    events.push({ type: 'route_reset' });
+  }
 
-  return { state: next, events };
+  return {
+    state: {
+      ...state,
+      flags,
+      inventory,
+      beat,
+      lastMessage: describeOutcome(outcome)
+    },
+    events
+  };
 }
 
 function describeOutcome(outcome: RidgeConversationOutcome): string {
   const parts: string[] = [];
   if (outcome.addItem) parts.push(`Got: ${outcome.addItem}`);
+  if (outcome.removeItem) parts.push(`Left: ${outcome.removeItem}`);
   if (outcome.setBeat) parts.push(`Beat -> ${outcome.setBeat}`);
-  if (outcome.concertHandoff) parts.push('Handoff -> concert');
+  if (outcome.handoffToArea) parts.push(`Handoff -> ${outcome.handoffToArea}`);
+  if (outcome.routeReset) parts.push('Route resets to Bridge');
   return parts.length > 0 ? parts.join(' | ') : 'Conversation ended.';
 }
 

@@ -72,6 +72,138 @@ export const sceneMessages = {
       },
       handoffNote: "evening music ahead",
     },
+    concert: {
+      speakers: {
+        prompt: "Prompt",
+        cicka: "Cicka",
+        injuredGuitarist: "Injured Guitarist",
+        crowd: "Crowd",
+      },
+      dialogue: {
+        "concert.crowd.delay_barks.01": "Show's late. Crossing's full of patience wearing thin.",
+        "concert.crowd.delay_barks.02": "Heard the guitarist wiped out trying to look brave.",
+        "concert.crowd.delay_barks.03": "Someone's behind the stage props. Maybe start there.",
+        "concert.guitarist.injury.01": "I tried a one-leg skateboard solo. The street voted no.",
+        "concert.guitarist.injury.02": "Wrist won't play loud. Pride won't either.",
+        "concert.guitarist.injury.03": "Learn the phrase with me",
+        "concert.guitarist.practice_riff.01": "Practice the forgiving riff",
+        "concert.guitarist.practice_riff.02": "You find the phrase without failing.",
+        "concert.guitarist.practice_riff.03": "That much courage can clear a street.",
+        "concert.performance.auto_success.01": "Start the concert",
+        "concert.performance.auto_success.02": "The phrase lands. Soft. True.",
+        "concert.performance.auto_success.03": "Alright—show happened. People can move.",
+        "concert.performance.auto_success.04": "Take the guitar. Carry the comfort.",
+        "concert.guitarist.guitar_handoff.01": "Keep it for the road ahead.",
+        "concert.guitarist.guitar_handoff.02": "Play it when quiet needs company.",
+        "concert.guitarist.guitar_handoff.03": "The guitar rests warm against your side.",
+        "concert.cicka.band_resting_spot.01": "Sit near hidden Cicka",
+        "concert.cicka.band_resting_spot.02": "mrrp.",
+        "concert.cicka.band_resting_spot.03": "Cicka loafs with the band",
+        "concert.cicka.band_resting_spot.04": "purr.",
+        "concert.exit.dance_transition.01": "Follow the opened crossing",
+        "concert.exit.dance_transition.02": "Festival setup waits downhill.",
+        "concert.exit.dance_transition.03": "The page warms toward afternoon.",
+      },
+    },
+    dance: {
+      speakers: {
+        prompt: "Prompt",
+        cicka: "Cicka",
+        traveler: "Traveler",
+        hillShuttleDriver: "Hill-Shuttle Driver",
+        operationsHelper: "Last-Stop Operations Helper",
+        danceTeacher: "Dance Teacher",
+        festivalSteward: "Festival Steward",
+      },
+      dialogue: {
+        "dance.traveler.relay_wayfinding.01": "Relay is up the hill shuttle.",
+        "dance.traveler.relay_wayfinding.02":
+          "Last daylight ride—only after setup clears.",
+        "dance.traveler.relay_wayfinding.03":
+          "Ask at the shuttle, then the operations table.",
+        "dance.driver.shuttle_delay.01":
+          "Can't leave until the steward opens the gate.",
+        "dance.driver.shuttle_delay.02":
+          "Clipboard says ready. My feet disagree.",
+        "dance.driver.shuttle_delay.03": "He keeps rereading the same safe line.",
+        "dance.driver.shuttle_delay.choice.help": "One step. Privately. Maybe.",
+        "dance.driver.shuttle_delay.choice.wait":
+          "You give him space and ask around.",
+        "dance.operations_helper.handoff_check.01":
+          "If the lantern line fails, I fail with it.",
+        "dance.operations_helper.handoff_check.02":
+          "Check the details with me once.",
+        "dance.operations_helper.handoff_check.03":
+          "Help with the operations handoff",
+        "dance.operations_helper.handoff_check.done.01":
+          "The teacher can keep watch now.",
+        "dance.operations_helper.handoff_check.done.02":
+          "She almost believes the plaza can breathe.",
+        "dance.locals.triangulated_read.01": "Road opens after the setup check.",
+        "dance.locals.triangulated_read.02":
+          "She waits on one perfect lantern. He waits on anything but asking.",
+        "dance.locals.triangulated_read.03":
+          "They practice the art of being unavailable.",
+        "dance.driver.one_step_practice.01": "One private step. No audience.",
+        "dance.driver.one_step_practice.02":
+          "He learns exactly one shared rhythm.",
+        "dance.driver.one_step_practice.03":
+          "Okay. I can offer that much later.",
+        "dance.driver.one_step_practice.done.01": "He has his one step.",
+        "dance.driver.one_step_practice.done.02": "Dignity intact.",
+        "dance.driver.folded_song_request.01":
+          "Help me fold a tiny song request.",
+        "dance.driver.folded_song_request.02":
+          "No confession. Just one dance later.",
+        "dance.driver.folded_song_request.03":
+          "She reads it. Soft nod. No spotlight.",
+        "dance.driver.folded_song_request.04": "The practical courage lands.",
+        "dance.setup_clearance.01": "Help with remaining preparations",
+        "dance.setup_clearance.02": "Secure the lantern line.",
+        "dance.setup_clearance.03": "Tape the service lane clear.",
+        "dance.setup_clearance.04": "Gate open. Last daylight window.",
+        "dance.setup_clearance.05": "Flip the shuttle sign.",
+        "dance.shuttle.last_daylight_ride.01": "All aboard the last ride.",
+        "dance.shuttle.last_daylight_ride.02":
+          "The hill lifts into sunset paper.",
+        "dance.shuttle.last_daylight_ride.03": "Relay waits quiet above.",
+        "dance.cicka.resting_spot.01": "Cicka loafs on the operations table",
+        "dance.cicka.resting_spot.02": "Cicka settles by the cleared gate",
+        "dance.cicka.resting_spot.03": "mrrp.",
+      },
+    },
+    relay: {
+      speakers: {
+        prompt: "Prompt",
+        cicka: "Cicka",
+        dedication: "Dedication",
+      },
+      dialogue: {
+        "relay.overlook.inspect.01": "Look out over the finished route",
+        "relay.overlook.inspect.02":
+          "The pages below still hold their changes.",
+        "relay.sit_and_play.prompt.01": "Sit and play beside Cicka",
+        "relay.sit_and_play.prompt.02":
+          "You settle. The guitar finds the concert phrase.",
+        "relay.sit_and_play.prompt.03": "The overlook softens.",
+        "relay.montage.bridge.01": "(memory) The finished bridge holds.",
+        "relay.montage.concert.01":
+          "(memory) The crossing clears; the guitar changes hands.",
+        "relay.montage.dance.01":
+          "(memory) Night lanterns wake after you leave.",
+        "relay.guitar.sunset.01":
+          "Sunset lowers while the phrase keeps breathing.",
+        "relay.guitar.let_song_end.01": "Let the song end",
+        "relay.guitar.let_song_end.02": "The phrase resolves into quiet.",
+        "relay.cicka.threshold_meow.01": "mrrp.",
+        "relay.cicka.threshold_meow.02":
+          "Cicka turns back once, then slips into warm paper light.",
+        "relay.cicka.threshold_meow.03":
+          "The overlook holds empty for a breath.",
+        "relay.dedication.card.01": "For Cicka.",
+        "relay.dedication.card.02": "Thank you for playing.",
+      },
+    },
   },
   stampedeSketch: {
     result: {

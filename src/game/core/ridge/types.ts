@@ -4,14 +4,32 @@
 
 export type RidgeAreaId = 'bridge' | 'concert' | 'danceFestival' | 'relay';
 
-export type RidgeBridgeBeat =
+/** Full first-playable route beat vocabulary across all areas. */
+export type RidgeRouteBeat =
+  // Bridge
   | 'intro'
   | 'needs_toy_car'
   | 'toy_car_shared'
   | 'bridge_complete'
-  | 'concert_handoff';
+  // Concert
+  | 'concert_arrival'
+  | 'concert_practiced'
+  | 'concert_cleared'
+  // Dance Festival
+  | 'dance_arrival'
+  | 'dance_ready'
+  | 'dance_cleared'
+  // Relay Ending
+  | 'relay_linger'
+  | 'relay_farewell'
+  | 'relay_complete';
 
-export type RidgeBridgeAreaBeat = Exclude<RidgeBridgeBeat, 'concert_handoff'>;
+/** @deprecated Prefer RidgeRouteBeat — kept for Bridge-local call sites. */
+export type RidgeBridgeBeat = RidgeRouteBeat;
+export type RidgeBridgeAreaBeat = Extract<
+  RidgeRouteBeat,
+  'intro' | 'needs_toy_car' | 'toy_car_shared' | 'bridge_complete'
+>;
 
 export type RidgeFacing = 'left' | 'right';
 
@@ -19,7 +37,21 @@ export type RidgeMode = 'explore' | 'conversation';
 
 export type RidgeSpotKind = 'landmark' | 'npc' | 'prop' | 'exit';
 
-export type RidgeActorId = 'player' | 'cicka' | 'draftsperson' | 'toy-car';
+export type RidgeActorId =
+  | 'player'
+  | 'cicka'
+  | 'draftsperson'
+  | 'toy-car'
+  | 'guitarist'
+  | 'crowd'
+  | 'guitar'
+  | 'traveler'
+  | 'driver'
+  | 'operations-helper'
+  | 'dance-teacher'
+  | 'steward'
+  | 'counterpart-cat'
+  | 'shuttle';
 
 export interface RidgeDialogueLine {
   id: string;
@@ -37,9 +69,13 @@ export interface RidgeDialogueChoice {
 }
 
 export interface RidgeConversationOutcome {
-  setBeat?: RidgeBridgeAreaBeat;
-  concertHandoff?: boolean;
+  setBeat?: RidgeRouteBeat;
+  /** Swap into the next Compact Ridge Stage and reset progress. */
+  handoffToArea?: RidgeAreaId;
+  /** First Playable Reset Return — clean Bridge restart. */
+  routeReset?: boolean;
   addItem?: string;
+  removeItem?: string;
   setFlag?: string;
   clearFlag?: string;
 }
@@ -96,6 +132,10 @@ export interface RidgeStageDefinition {
   spots: readonly RidgeSpotDefinition[];
   /** Soft wall until the crossing opens. */
   blockedProgress?: number;
+  /** Message when the soft wall stops the player. */
+  blockedMessage?: string;
+  /** When true, blockedProgress no longer applies. */
+  isCrossingOpen?: (state: RidgeWorldState) => boolean;
   resolveInteractables: (state: RidgeWorldState) => readonly RidgeInteractable[];
   resolveActors: (state: RidgeWorldState) => readonly RidgeActorPresence[];
   resolveConversation: (
@@ -105,12 +145,14 @@ export interface RidgeStageDefinition {
   describeAmbience: (state: RidgeWorldState) => string;
 }
 
+export type RidgeStageRegistry = Record<RidgeAreaId, RidgeStageDefinition>;
+
 export interface RidgeWorldState {
   areaId: RidgeAreaId;
   title: string;
   progress: number;
   facing: RidgeFacing;
-  beat: RidgeBridgeBeat;
+  beat: RidgeRouteBeat;
   mode: RidgeMode;
   flags: ReadonlySet<string>;
   inventory: readonly string[];
@@ -122,7 +164,7 @@ export interface RidgeObservation {
   mode: RidgeMode;
   areaId: RidgeAreaId;
   title: string;
-  beat: RidgeBridgeBeat;
+  beat: RidgeRouteBeat;
   progress: number;
   progressPercent: number;
   facing: RidgeFacing;
@@ -160,11 +202,13 @@ export type RidgeCommand =
   | { type: 'unknown'; raw: string };
 
 export type RidgeSessionEvent =
-  | { type: 'beat_changed'; beat: RidgeBridgeAreaBeat }
-  | { type: 'concert_handoff' }
+  | { type: 'beat_changed'; beat: RidgeRouteBeat }
+  | { type: 'area_handoff'; areaId: RidgeAreaId }
+  | { type: 'route_reset' }
   | { type: 'conversation_started'; conversationId: string }
   | { type: 'conversation_ended'; conversationId: string }
   | { type: 'item_added'; itemId: string }
+  | { type: 'item_removed'; itemId: string }
   | { type: 'flag_changed'; flag: string; present: boolean };
 
 export interface RidgeCommandResult {
@@ -173,3 +217,13 @@ export interface RidgeCommandResult {
   observation: RidgeObservation;
   events: readonly RidgeSessionEvent[];
 }
+
+export const RIDGE_INITIAL_BEAT: Record<RidgeAreaId, RidgeRouteBeat> = {
+  bridge: 'intro',
+  concert: 'concert_arrival',
+  danceFestival: 'dance_arrival',
+  relay: 'relay_linger'
+};
+
+export const RIDGE_GUITAR_ITEM = 'guitar';
+export const RIDGE_TOY_CAR_ITEM = 'toy-car';

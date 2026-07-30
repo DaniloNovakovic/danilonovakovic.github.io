@@ -1,9 +1,9 @@
 // Session dispatch mirrors many console verbs; complexity is the command surface.
 // fallow-ignore-file complexity
 import {
-  createBridgeStage,
+  createRidgeRouteStages,
   RidgeConsoleSession,
-  type BridgeDialogueCatalog,
+  type RidgeRouteDialogueCatalog,
   type RidgeSessionEvent
 } from '../ridge/index';
 import {
@@ -38,7 +38,7 @@ import type {
 } from './types';
 
 export interface GameConsoleSessionOptions {
-  dialogue: BridgeDialogueCatalog;
+  dialogue: RidgeRouteDialogueCatalog;
   /** Start scene (default overworld). */
   sceneId?: GameSceneId;
   ownedItemIds?: readonly GameItemId[];
@@ -49,7 +49,7 @@ export interface GameConsoleSessionOptions {
 export class GameConsoleSession {
   private state: GameWorldState;
   private ridge: RidgeConsoleSession | null = null;
-  private readonly dialogue: BridgeDialogueCatalog;
+  private readonly dialogue: RidgeRouteDialogueCatalog;
 
   constructor(options: GameConsoleSessionOptions) {
     this.dialogue = options.dialogue;
@@ -360,7 +360,7 @@ export class GameConsoleSession {
   private ensureRidge(): RidgeConsoleSession {
     if (!this.ridge) {
       this.ridge = new RidgeConsoleSession({
-        stage: createBridgeStage(this.dialogue)
+        stages: createRidgeRouteStages(this.dialogue)
       });
     }
     return this.ridge;
@@ -404,8 +404,10 @@ function mapRidgeEvents(events: readonly RidgeSessionEvent[]): GameSessionEvent[
   for (const event of events) {
     if (event.type === 'beat_changed') {
       out.push({ type: 'ridge_beat_changed', beat: event.beat });
-    } else if (event.type === 'concert_handoff') {
-      out.push({ type: 'ridge_concert_handoff' });
+    } else if (event.type === 'area_handoff') {
+      out.push({ type: 'ridge_area_handoff', areaId: event.areaId });
+    } else if (event.type === 'route_reset') {
+      out.push({ type: 'ridge_route_reset' });
     }
   }
   return out;

@@ -48,24 +48,33 @@ export type RidgeStampId = string;
 export type RidgeManualPageId = string;
 export type RidgeShortcutId = string;
 export type RidgeFirstPlayableAreaId = 'bridge' | 'concert' | 'danceFestival' | 'relay';
-export type RidgeBridgeBeatState =
+export type RidgeRouteBeatState =
   | 'intro'
   | 'needs_toy_car'
   | 'toy_car_shared'
   | 'bridge_complete'
-  | 'concert_handoff';
-export type RidgeBridgeAreaBeatState = Exclude<RidgeBridgeBeatState, 'concert_handoff'>;
+  | 'concert_arrival'
+  | 'concert_practiced'
+  | 'concert_cleared'
+  | 'dance_arrival'
+  | 'dance_ready'
+  | 'dance_cleared'
+  | 'relay_linger'
+  | 'relay_farewell'
+  | 'relay_complete';
+/** @deprecated Prefer RidgeRouteBeatState */
+export type RidgeBridgeBeatState = RidgeRouteBeatState;
+/** @deprecated Prefer RidgeRouteBeatState */
+export type RidgeBridgeAreaBeatState = Extract<
+  RidgeRouteBeatState,
+  'intro' | 'needs_toy_car' | 'toy_car_shared' | 'bridge_complete'
+>;
 export type RidgePostBridgeAreaId = Exclude<RidgeFirstPlayableAreaId, 'bridge'>;
 
-export type RidgeFirstPlayableRouteState =
-  | {
-      activeAreaId: 'bridge';
-      bridgeBeat: RidgeBridgeAreaBeatState;
-    }
-  | {
-      activeAreaId: RidgePostBridgeAreaId;
-      bridgeBeat: 'concert_handoff';
-    };
+export type RidgeFirstPlayableRouteState = {
+  activeAreaId: RidgeFirstPlayableAreaId;
+  beat: RidgeRouteBeatState;
+};
 
 export interface BridgeRidgeProgressState {
   stampIds: RidgeStampId[];
@@ -146,7 +155,7 @@ function createInitialRidgeProgress(): BridgeRidgeProgressState {
 function createInitialRidgeFirstPlayableRoute(): RidgeFirstPlayableRouteState {
   return {
     activeAreaId: 'bridge',
-    bridgeBeat: 'intro'
+    beat: 'intro'
   };
 }
 
@@ -302,8 +311,8 @@ function isBridgeProgressUnchanged(previous: BridgeState, candidate: BridgeState
     arraysEqual(previous.progress.ridge.shortcutIds, candidate.progress.ridge.shortcutIds) &&
     previous.progress.ridge.firstPlayableRoute.activeAreaId ===
       candidate.progress.ridge.firstPlayableRoute.activeAreaId &&
-    previous.progress.ridge.firstPlayableRoute.bridgeBeat ===
-      candidate.progress.ridge.firstPlayableRoute.bridgeBeat
+    previous.progress.ridge.firstPlayableRoute.beat ===
+      candidate.progress.ridge.firstPlayableRoute.beat
   );
 }
 
@@ -523,7 +532,7 @@ export const bridgeActions = {
       };
     });
   },
-  setRidgeBridgeBeat(bridgeBeat: RidgeBridgeAreaBeatState): void {
+  setRidgeRouteBeat(beat: RidgeRouteBeatState): void {
     setState((current) => ({
       ...current,
       progress: {
@@ -532,14 +541,17 @@ export const bridgeActions = {
           ...current.progress.ridge,
           firstPlayableRoute: {
             ...current.progress.ridge.firstPlayableRoute,
-            activeAreaId: 'bridge',
-            bridgeBeat
+            beat
           }
         }
       }
     }));
   },
-  triggerRidgeConcertHandoff(): void {
+  /** @deprecated Prefer setRidgeRouteBeat */
+  setRidgeBridgeBeat(bridgeBeat: RidgeBridgeAreaBeatState): void {
+    bridgeActions.setRidgeRouteBeat(bridgeBeat);
+  },
+  setRidgeAreaHandoff(areaId: RidgeFirstPlayableAreaId, beat: RidgeRouteBeatState): void {
     setState((current) => ({
       ...current,
       progress: {
@@ -547,12 +559,28 @@ export const bridgeActions = {
         ridge: {
           ...current.progress.ridge,
           firstPlayableRoute: {
-            activeAreaId: 'concert',
-            bridgeBeat: 'concert_handoff'
+            activeAreaId: areaId,
+            beat
           }
         }
       }
     }));
+  },
+  resetRidgeFirstPlayableRoute(): void {
+    setState((current) => ({
+      ...current,
+      progress: {
+        ...current.progress,
+        ridge: {
+          ...current.progress.ridge,
+          firstPlayableRoute: createInitialRidgeFirstPlayableRoute()
+        }
+      }
+    }));
+  },
+  /** @deprecated Prefer setRidgeAreaHandoff('concert', 'concert_arrival') */
+  triggerRidgeConcertHandoff(): void {
+    bridgeActions.setRidgeAreaHandoff('concert', 'concert_arrival');
   },
   resetProgress(): void {
     setState((current) => ({

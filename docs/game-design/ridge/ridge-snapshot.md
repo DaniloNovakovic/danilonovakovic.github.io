@@ -69,7 +69,8 @@ Current runtime characteristics:
 ## Active Runtime Route Read
 
 ```text
-Nature / hill entry
+Bridge
+  Nature / hill entry
   -> Cicka + toy car play spot (optional Persona-style choice)
   -> blocked bridge + unfinished blueprint
   -> Bridge Draftsperson
@@ -77,10 +78,33 @@ Nature / hill entry
   -> toy-car bridge test
   -> completed crossing
   -> Bridge-to-Concert handoff
+
+Concert
+  -> crowd / traffic crossing blocker + night facades
+  -> musician-side nook (hidden Cicka + Injured Guitarist)
+  -> forgiving practice riff
+  -> auto-success concert (crowd clears, guitar received)
+  -> Dance transition exit
+
+Dance Festival
+  -> Last-Stop Plaza setup + service-road blocker
+  -> traveler wayfinding + triangulated resident reads
+  -> Operations Handoff Check + One-Step Practice
+  -> Folded Song Request
+  -> Setup Clearance montage
+  -> last daylight shuttle -> Relay
+
+Relay Ending
+  -> tiny sunset overlook linger
+  -> Sit and Play beside Cicka
+  -> Route Memory Montage (3 flashes) + Let the song end
+  -> Cicka Threshold Farewell + Dedication Card
+  -> First Playable Reset Return to Bridge
 ```
 
-Concert, Dance Festival, Relay, and the ending sequence remain future
-implementation slices. Copy the Bridge console-content + stick-visual pattern.
+Full route is playable in `pnpm ridge:console` and covered by
+`src/game/core/ridge/session.test.ts`. Stick visuals swap backgrounds/cast per
+area via `StickVisualProvider`.
 
 ## Console Contract (for AI agents)
 
