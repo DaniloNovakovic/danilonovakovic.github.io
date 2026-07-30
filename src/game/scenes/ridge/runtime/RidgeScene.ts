@@ -54,6 +54,13 @@ export class RidgeScene extends Phaser.Scene {
   private getRidgeDevControls?: () => RidgeDevControls | undefined;
   private lastConversationKey: string | null = null;
   private escJustHandled = false;
+  private skipKey?: Phaser.Input.Keyboard.Key;
+  private warpKeys?: {
+    bridge: Phaser.Input.Keyboard.Key;
+    concert: Phaser.Input.Keyboard.Key;
+    dance: Phaser.Input.Keyboard.Key;
+    relay: Phaser.Input.Keyboard.Key;
+  };
 
   constructor() {
     super(PHASER_SCENE_KEYS.ridge);
@@ -83,6 +90,15 @@ export class RidgeScene extends Phaser.Scene {
 
     this.visuals = new StickVisualProvider(this);
     this.keys = bindSideViewKeyboard(this.input.keyboard, { includeEscapeKey: true });
+    if (import.meta.env.DEV && this.input.keyboard) {
+      this.skipKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CLOSED_BRACKET);
+      this.warpKeys = {
+        bridge: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE),
+        concert: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO),
+        dance: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE),
+        relay: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FOUR)
+      };
+    }
     this.cameras.main.setZoom(1);
 
     this.syncPresentation();
@@ -94,6 +110,7 @@ export class RidgeScene extends Phaser.Scene {
     if (!this.session || !this.visuals || !this.keys || this.isPaused) return;
 
     this.handleSceneUiActions();
+    this.handleDevSkipKeys();
 
     const observation = this.session.observe();
     if (observation.mode === 'conversation') {
@@ -138,6 +155,37 @@ export class RidgeScene extends Phaser.Scene {
 
   setPaused(paused: boolean): void {
     this.isPaused = paused;
+  }
+
+  private handleDevSkipKeys(): void {
+    if (!import.meta.env.DEV || !this.session) return;
+
+    if (this.skipKey && Phaser.Input.Keyboard.JustDown(this.skipKey)) {
+      this.applyResult(this.session.exec('skip'));
+      this.syncPresentation();
+      return;
+    }
+
+    if (!this.warpKeys) return;
+    if (Phaser.Input.Keyboard.JustDown(this.warpKeys.bridge)) {
+      this.applyResult(this.session.exec('warp bridge'));
+      this.syncPresentation();
+      return;
+    }
+    if (Phaser.Input.Keyboard.JustDown(this.warpKeys.concert)) {
+      this.applyResult(this.session.exec('warp concert'));
+      this.syncPresentation();
+      return;
+    }
+    if (Phaser.Input.Keyboard.JustDown(this.warpKeys.dance)) {
+      this.applyResult(this.session.exec('warp dance'));
+      this.syncPresentation();
+      return;
+    }
+    if (Phaser.Input.Keyboard.JustDown(this.warpKeys.relay)) {
+      this.applyResult(this.session.exec('warp relay'));
+      this.syncPresentation();
+    }
   }
 
   private handleSceneUiActions(): void {
@@ -245,6 +293,8 @@ export class RidgeScene extends Phaser.Scene {
     this.visuals = undefined;
     this.session = undefined;
     this.keys = undefined;
+    this.skipKey = undefined;
+    this.warpKeys = undefined;
     this.lastConversationKey = null;
   }
 }

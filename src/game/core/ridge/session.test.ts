@@ -64,6 +64,23 @@ describe('RidgeConsoleSession Bridge playthrough', () => {
   });
 });
 
+describe('RidgeConsoleSession playtest skips', () => {
+  it('warps and skips across Compact Ridge Areas with guitar when needed', () => {
+    const session = createRouteSession();
+    expect(session.exec('warp dance').ok).toBe(true);
+    expect(session.observe().areaId).toBe('danceFestival');
+    expect(session.observe().inventory).toContain('guitar');
+
+    expect(session.exec('skip').ok).toBe(true);
+    expect(session.observe().areaId).toBe('relay');
+
+    expect(session.exec('skip').ok).toBe(false);
+    expect(session.exec('warp bridge').ok).toBe(true);
+    expect(session.observe().areaId).toBe('bridge');
+    expect(session.observe().inventory).toEqual([]);
+  });
+});
+
 describe('RidgeConsoleSession first-playable full route', () => {
   it('plays Bridge → Concert → Dance → Relay farewell → Bridge reset', () => {
     const session = createRouteSession();

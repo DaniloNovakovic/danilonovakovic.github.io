@@ -114,6 +114,8 @@ export type GameCommand =
   | { type: 'fight' }
   | { type: 'draft'; choiceIdOrIndex: string }
   | { type: 'cheat'; action: 'give'; itemId: GameItemId }
+  | { type: 'skip' }
+  | { type: 'warp'; areaId: string }
   | { type: 'unknown'; raw: string };
 
 export type GameSessionEvent =

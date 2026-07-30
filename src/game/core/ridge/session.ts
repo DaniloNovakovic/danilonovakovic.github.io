@@ -20,9 +20,16 @@ import type {
   RidgeStageRegistry,
   RidgeWorldState
 } from './types';
-import { RIDGE_INITIAL_BEAT } from './types';
+import { RIDGE_GUITAR_ITEM, RIDGE_INITIAL_BEAT } from './types';
 
 const DEFAULT_STEP = 0.05;
+
+const NEXT_AREA: Record<RidgeAreaId, RidgeAreaId | null> = {
+  bridge: 'concert',
+  concert: 'danceFestival',
+  danceFestival: 'relay',
+  relay: null
+};
 
 export interface RidgeSessionOptions {
   /** Preferred: full multi-area registry for Compact Area Transitions. */
@@ -112,6 +119,10 @@ export class RidgeConsoleSession {
         return this.handleChoose(command.choiceIdOrIndex);
       case 'leave':
         return this.handleLeave();
+      case 'skip':
+        return this.handleSkip();
+      case 'warp':
+        return this.handleWarp(command.areaId);
       case 'unknown':
         return this.fail(
           command.raw
@@ -235,6 +246,38 @@ export class RidgeConsoleSession {
     };
   }
 
+  private handleSkip(): RidgeCommandResult {
+    const next = NEXT_AREA[this.state.areaId];
+    if (!next) {
+      return this.fail('Already at Relay. Use: warp bridge|concert|dance|relay');
+    }
+    return this.handleWarp(next);
+  }
+
+  private handleWarp(areaId: RidgeAreaId): RidgeCommandResult {
+    if (!this.stages && areaId !== this.stage.areaId) {
+      return this.fail('Warp needs the full route registry (use pnpm ridge:console).');
+    }
+
+    this.applyAreaHandoff(areaId);
+    this.state = {
+      ...this.state,
+      inventory: inventoryForArea(areaId),
+      flags: new Set(),
+      lastMessage: `DEV warp → ${this.stage.title}`
+    };
+
+    return {
+      ok: true,
+      message: this.state.lastMessage ?? `Warped to ${areaId}.`,
+      observation: this.observe(),
+      events: [
+        { type: 'area_handoff', areaId },
+        { type: 'beat_changed', beat: this.state.beat }
+      ]
+    };
+  }
+
   private commitConversationResult(result: {
     state: RidgeWorldState;
     events: RidgeSessionEvent[];
@@ -326,6 +369,13 @@ export class RidgeConsoleSession {
       events: []
     };
   }
+}
+
+function inventoryForArea(areaId: RidgeAreaId): string[] {
+  if (areaId === 'danceFestival' || areaId === 'relay') {
+    return [RIDGE_GUITAR_ITEM];
+  }
+  return [];
 }
 
 function clamp01(value: number): number {

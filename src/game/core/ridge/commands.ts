@@ -13,6 +13,10 @@ const HELP_TEXT = [
   '  choose <n|id>        pick a conversation reply',
   '  leave                exit conversation without finishing',
   '',
+  'Playtest skips:',
+  '  skip                 jump to the next area start',
+  '  warp bridge|concert|dance|relay',
+  '',
   'Script mode: separate commands with `;`',
   'Example: look; go right 3; interact; advance; advance'
 ].join('\n');
@@ -29,13 +33,14 @@ const SIMPLE_COMMANDS: Record<string, RidgeCommand> = {
   inv: { type: 'inventory' },
   i: { type: 'inventory' },
   advance: { type: 'advance' },
-  next: { type: 'advance' },
   continue: { type: 'advance' },
   n: { type: 'advance' },
   z: { type: 'advance' },
   leave: { type: 'leave' },
   back: { type: 'leave' },
-  close: { type: 'leave' }
+  close: { type: 'leave' },
+  skip: { type: 'skip' },
+  next: { type: 'skip' }
 };
 
 const GO_ALIASES = new Set(['go', 'walk', 'move']);
@@ -43,6 +48,16 @@ const LEFT_ALIASES = new Set(['left', 'west', 'a']);
 const RIGHT_ALIASES = new Set(['right', 'east', 'd']);
 const INTERACT_ALIASES = new Set(['interact', 'talk', 'use', 'e', 'x']);
 const CHOOSE_ALIASES = new Set(['choose', 'pick', 'select']);
+const WARP_ALIASES = new Set(['warp', 'tp', 'goto', 'jump']);
+const AREA_ALIASES: Record<string, import('./types').RidgeAreaId> = {
+  bridge: 'bridge',
+  concert: 'concert',
+  dance: 'danceFestival',
+  dancefestival: 'danceFestival',
+  festival: 'danceFestival',
+  relay: 'relay',
+  ending: 'relay'
+};
 
 export function getRidgeHelpText(): string {
   return HELP_TEXT;
@@ -71,6 +86,11 @@ export function parseRidgeCommand(rawInput: string): RidgeCommand {
   if (CHOOSE_ALIASES.has(head)) {
     if (!args[0]) return { type: 'unknown', raw };
     return { type: 'choose', choiceIdOrIndex: args[0] };
+  }
+  if (WARP_ALIASES.has(head)) {
+    const areaId = args[0] ? AREA_ALIASES[args[0].replace(/[_-]/g, '')] : undefined;
+    if (!areaId) return { type: 'unknown', raw };
+    return { type: 'warp', areaId };
   }
 
   return { type: 'unknown', raw };

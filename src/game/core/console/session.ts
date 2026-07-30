@@ -190,6 +190,10 @@ export class GameConsoleSession {
       case 'advance':
       case 'choose':
         return this.handleRidgeTalk(command);
+      case 'skip':
+        return this.handleRidgeSkipWarp('skip');
+      case 'warp':
+        return this.handleRidgeSkipWarp(`warp ${command.areaId}`);
       case 'start':
         return this.wrapPotassium(startPotassium(this.state));
       case 'fight':
@@ -203,6 +207,13 @@ export class GameConsoleSession {
             : 'Empty command. Type help.'
         );
     }
+  }
+
+  private handleRidgeSkipWarp(raw: string): GameCommandResult {
+    if (this.state.mode !== 'ridge') {
+      return this.fail('skip / warp only work inside Ridge.');
+    }
+    return this.forwardRidge(raw);
   }
 
   private handleGo(direction: 'left' | 'right', steps: number): GameCommandResult {

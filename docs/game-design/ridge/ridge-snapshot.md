@@ -118,7 +118,11 @@ Useful commands:
 | `advance` | Continue halted conversation |
 | `choose <n\|id>` | Persona-style reply |
 | `leave` | Exit conversation early |
+| `skip` / `next` | Playtest: jump to next area start |
+| `warp bridge\|concert\|dance\|relay` | Playtest: warp to an area |
 | `help` | Command list |
+
+Browser DEV only: `]` skips to the next area; `1`–`4` warp Bridge / Concert / Dance / Relay.
 
 Observation JSON (`--json`) includes `nearby[].distance`, actors, inventory,
 conversation state, and hints.

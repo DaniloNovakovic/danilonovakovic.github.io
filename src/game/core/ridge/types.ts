@@ -199,6 +199,10 @@ export type RidgeCommand =
   | { type: 'advance' }
   | { type: 'choose'; choiceIdOrIndex: string }
   | { type: 'leave' }
+  /** DEV / AI: jump to the next Compact Ridge Area. */
+  | { type: 'skip' }
+  /** DEV / AI: warp to a named area start. */
+  | { type: 'warp'; areaId: RidgeAreaId }
   | { type: 'unknown'; raw: string };
 
 export type RidgeSessionEvent =
