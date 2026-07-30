@@ -1,5 +1,5 @@
 import type { OverlayId } from '@/game/overlays/overlayIds';
-import { HOBBIES_SCENE_ID, type SceneId } from '@/game/scenes/sceneIds';
+import { HOBBIES_SCENE_ID, RIDGE_SCENE_ID, type SceneId } from '@/game/scenes/sceneIds';
 import type { SecretDiscoveryId } from '@/game/bridge/store';
 import type { OverworldSecretSlot } from '@/game/core/ecs/systems/overworldInteractSystems';
 import { GAME_DESIGN_HEIGHT } from '@/game/sharedSceneRuntime/designSize';
@@ -100,6 +100,20 @@ export const OVERWORLD_GLASSES_SECRET_SLOTS: readonly OverworldSecretSlot[] = [
     promptOffsetY: -56
   }
 ];
+
+/**
+ * Street CRT / sketch-console that accepts the Potassium Circuit and boots Ridge
+ * as a nested "game inside the game."
+ */
+export const OVERWORLD_CIRCUIT_SLOT = {
+  id: 'circuit-crt',
+  x: 1650,
+  y: 520,
+  promptY: 455,
+  interactDistanceX: 78,
+  minPlayerY: 400,
+  ridgeSceneId: RIDGE_SCENE_ID
+} as const;
 
 /** Ink particle spawn band (overworld ambience). */
 export const OVERWORLD_PARTICLE_MAX_Y = GAME_DESIGN_HEIGHT;

@@ -32,6 +32,7 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
 - Closing an overlay returns to the street, unless the overlay was opened from an interior parent scene.
 - The basement entrance is the hole under the `TODO?` sign.
 - A banana peel secret can be discovered in the street. After discovery, interacting with it enters Potassium Slip.
+- A blank street CRT sits between the Projects and Abilities buildings. Without a Circuit it only shows a locked prompt. After winning Potassium Slip and owning the Circuit, interact with the CRT to insert it and enter Ridge (secret side story).
 
 ## Hobbies Room
 
@@ -57,6 +58,7 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
 - Launch the banana by dragging toward a target and releasing.
 - Hold while the banana is moving to yo-yo it back to the launch pad, then relaunch.
 - Clear falling 5-column enemy waves, draft stackable upgrades, and defeat the boss for the Circuit.
+- The Circuit can be inserted into the overworld street CRT to enter Ridge.
 - You start with 5 lives; losing all lives ends the run.
 - After game over, choose `Retry` or `Return to City`. After winning, choose `Endless Mode` or `Return to City`.
 - Potassium keeps a local top-5 records list for finished runs.

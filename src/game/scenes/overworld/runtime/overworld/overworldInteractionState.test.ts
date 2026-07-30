@@ -10,6 +10,7 @@ const baseInput: OverworldInteractionInput = {
   playerY: 0,
   interactRequested: false,
   hasGlassesEquipped: false,
+  hasCircuit: false,
   bananaDiscovered: false,
   bananaWarpScheduled: false,
   bananaCancelExtraDist: 36,
@@ -22,6 +23,14 @@ const baseInput: OverworldInteractionInput = {
     interactDistanceX: 70,
     minPlayerY: 400
   },
+  circuitSlot: {
+    x: 1650,
+    y: 520,
+    promptY: 455,
+    interactDistanceX: 78,
+    minPlayerY: 400,
+    ridgeSceneId: 'ridge'
+  },
   secretSlots: [{ secretId: 'banana-peel-clue', x: 650, y: 535, radius: 95, promptOffsetY: -56 }],
   buildingSlots: [{ buildingId: 'profile', x: 900, y: 500 }],
   buildingPickOptions: {
@@ -33,7 +42,9 @@ const baseInput: OverworldInteractionInput = {
     basement: '[E] Interact',
     enter: '[E] Enter',
     bananaUndiscovered: '[E] Peel?',
-    bananaDiscovered: '[E] Peel banana'
+    bananaDiscovered: '[E] Peel banana',
+    circuitCrtLocked: 'A blank CRT. Needs a Circuit.',
+    circuitCrtReady: '[E] Insert Circuit'
   }
 };
 
@@ -88,6 +99,41 @@ describe('decideOverworldInteraction', () => {
 
     expect(result.state.bananaFirstPeelPending).toBe(false);
     expect(result.effects).toContainEqual({ type: 'cancelBananaPeel' });
+  });
+
+  it('shows locked CRT prompt without Circuit and does not enter Ridge', () => {
+    const result = decideOverworldInteraction(createOverworldInteractionState(), {
+      ...baseInput,
+      playerX: 1650,
+      playerY: 520,
+      interactRequested: true
+    });
+
+    expect(result.prompt).toEqual({
+      visible: true,
+      text: 'A blank CRT. Needs a Circuit.',
+      x: 1650,
+      y: 455
+    });
+    expect(result.effects).toEqual([]);
+  });
+
+  it('inserts Circuit into the CRT and enters Ridge', () => {
+    const result = decideOverworldInteraction(createOverworldInteractionState(), {
+      ...baseInput,
+      playerX: 1650,
+      playerY: 520,
+      hasCircuit: true,
+      interactRequested: true
+    });
+
+    expect(result.prompt).toEqual({
+      visible: true,
+      text: '[E] Insert Circuit',
+      x: 1650,
+      y: 455
+    });
+    expect(result.effects).toEqual([{ type: 'enter', targetId: 'ridge' }]);
   });
 
   it('falls back to normal building prompt and enter effect', () => {

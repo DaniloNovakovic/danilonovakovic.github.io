@@ -17,6 +17,7 @@ import {
   getOverworldBuildingTrigger,
   OVERWORLD_BASEMENT_HOLE,
   OVERWORLD_BUILDING_TRIGGERS,
+  OVERWORLD_CIRCUIT_SLOT,
   OVERWORLD_GLASSES_SECRET_SLOTS,
   OVERWORLD_INTERACT_DISTANCE_X,
   OVERWORLD_INTERACT_MIN_PLAYER_Y,
@@ -38,6 +39,7 @@ import {
 import {
   bridgeActions,
   isItemEquipped,
+  isItemOwned,
   isSecretDiscovered,
   type OpenOverlayOptions
 } from '@/game/bridge/store';
@@ -86,6 +88,8 @@ export class OverworldScene extends Phaser.Scene {
   private lensRevealScratch: boolean[] = [];
   private preGlassesVision?: DistanceHazeVision;
   private bananaFloorIcon?: Phaser.GameObjects.Graphics;
+  private circuitCrt?: Phaser.GameObjects.Graphics;
+  private circuitCrtPowered: boolean | null = null;
   private glassesSecretHint?: Phaser.GameObjects.Text;
   private glassesSecretMessage?: Phaser.GameObjects.Text;
   private glassesSecretMessageHideTimer?: Phaser.Time.TimerEvent;
@@ -194,6 +198,8 @@ export class OverworldScene extends Phaser.Scene {
     }).setOrigin(0.5).setVisible(false).setDepth(20);
     this.bananaFloorIcon = this.add.graphics().setDepth(21).setVisible(false);
     this.drawBananaFloorIcon();
+    this.circuitCrt = this.add.graphics().setDepth(18);
+    this.drawCircuitCrt(false);
 
     this.preGlassesVision = new DistanceHazeVision(this, {
       depth: 15,
@@ -225,25 +231,34 @@ export class OverworldScene extends Phaser.Scene {
     }
 
     const hasGlassesEquipped = isItemEquipped('glasses');
+    const hasCircuit = isItemOwned('circuit');
     this.setBananaFloorVisible(hasGlassesEquipped);
+    this.drawCircuitCrt(hasCircuit);
 
     updateStreetParticles(this);
 
-    this.updateOverworldInteraction(step.interactRequested, hasGlassesEquipped);
+    this.updateOverworldInteraction(step.interactRequested, hasGlassesEquipped, hasCircuit);
   }
 
-  private updateOverworldInteraction(interactRequested: boolean, hasGlassesEquipped: boolean): void {
+  private updateOverworldInteraction(
+    interactRequested: boolean,
+    hasGlassesEquipped: boolean,
+    hasCircuit: boolean
+  ): void {
+    const overworldCopy = getMessages().scenes.overworld;
     const result = decideOverworldInteraction(this.overworldInteractionState, {
       playerX: this.player.x,
       playerY: this.player.y,
       interactRequested,
       hasGlassesEquipped,
+      hasCircuit,
       bananaDiscovered: isSecretDiscovered(BANANA_PEEL_CLUE_ID),
       bananaWarpScheduled: this.bananaPeelWarpTimeoutId !== undefined,
       bananaCancelExtraDist: BANANA_PEEL_WARP_CANCEL_EXTRA_DIST,
       basementSceneId: BASEMENT_SCENE_ID,
       potassiumSceneId: POTASSIUM_SCENE_ID,
       basementHole: OVERWORLD_BASEMENT_HOLE,
+      circuitSlot: OVERWORLD_CIRCUIT_SLOT,
       secretSlots: OVERWORLD_GLASSES_SECRET_SLOTS,
       buildingSlots: this.buildingSlots,
       buildingPickOptions: {
@@ -254,8 +269,10 @@ export class OverworldScene extends Phaser.Scene {
       texts: {
         basement: getMessages().navigation.interact,
         enter: getMessages().navigation.enter,
-        bananaDiscovered: getMessages().scenes.overworld.bananaDiscoveredPrompt,
-        bananaUndiscovered: getMessages().scenes.overworld.bananaUndiscoveredPrompt
+        bananaDiscovered: overworldCopy.bananaDiscoveredPrompt,
+        bananaUndiscovered: overworldCopy.bananaUndiscoveredPrompt,
+        circuitCrtLocked: overworldCopy.circuitCrtLockedPrompt,
+        circuitCrtReady: overworldCopy.circuitCrtReadyPrompt
       }
     });
 
@@ -328,6 +345,50 @@ export class OverworldScene extends Phaser.Scene {
     g.moveTo(tipOutL.x, tipOutL.y);
     g.lineTo(tipOutL.x - 5, tipOutL.y - 6);
     g.strokePath();
+  }
+
+  private drawCircuitCrt(powered: boolean): void {
+    if (!this.circuitCrt) return;
+    if (this.circuitCrtPowered === powered) return;
+    this.circuitCrtPowered = powered;
+    const g = this.circuitCrt;
+    const x = OVERWORLD_CIRCUIT_SLOT.x;
+    const y = OVERWORLD_CIRCUIT_SLOT.y;
+    g.clear();
+    g.setPosition(0, 0);
+
+    // pedestal
+    g.lineStyle(3, 0x1a1a1a, 1);
+    g.fillStyle(0xfbfbf9, 1);
+    g.fillRect(x - 34, y - 8, 68, 18);
+    g.strokeRect(x - 34, y - 8, 68, 18);
+
+    // CRT body
+    g.fillRect(x - 40, y - 78, 80, 70);
+    g.strokeRect(x - 40, y - 78, 80, 70);
+
+    // screen
+    if (powered) {
+      g.fillStyle(0xf4f1ea, 1);
+      g.fillRect(x - 30, y - 68, 60, 44);
+      g.lineStyle(2, 0x1a1a1a, 0.85);
+      // tiny stick "channel" silhouette
+      g.lineBetween(x - 12, y - 40, x - 12, y - 28);
+      g.strokeCircle(x - 12, y - 46, 5);
+      g.lineBetween(x + 8, y - 36, x + 22, y - 50);
+      g.lineBetween(x + 8, y - 36, x + 22, y - 30);
+    } else {
+      g.fillStyle(0x1a1a1a, 0.12);
+      g.fillRect(x - 30, y - 68, 60, 44);
+      g.lineStyle(2, 0x1a1a1a, 0.45);
+      g.lineBetween(x - 18, y - 46, x + 18, y - 46);
+    }
+    g.lineStyle(3, 0x1a1a1a, 1);
+    g.strokeRect(x - 30, y - 68, 60, 44);
+
+    // antenna
+    g.lineBetween(x - 10, y - 78, x - 18, y - 96);
+    g.lineBetween(x + 10, y - 78, x + 18, y - 96);
   }
 
   private setBananaFloorVisible(visible: boolean): void {

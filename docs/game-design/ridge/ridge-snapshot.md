@@ -24,7 +24,16 @@ doc about future route intent, the active design docs win.
 
 ## Current Runtime Shape
 
-Ridge boots in development with:
+Player-facing Ridge entry (secret side game):
+
+```text
+Overworld banana peel
+  -> win Potassium Slip (earn Circuit)
+  -> insert Circuit into the street CRT (between Projects and Abilities)
+  -> Ridge
+```
+
+Dev direct boot:
 
 ```text
 ?mode=interactive&startScene=ridge

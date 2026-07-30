@@ -23,6 +23,17 @@ export interface OverworldInteractionTexts {
   enter: string;
   bananaUndiscovered: string;
   bananaDiscovered: string;
+  circuitCrtLocked: string;
+  circuitCrtReady: string;
+}
+
+export interface CircuitSlotInteraction {
+  x: number;
+  y: number;
+  promptY: number;
+  interactDistanceX: number;
+  minPlayerY: number;
+  ridgeSceneId: string;
 }
 
 export interface OverworldInteractionInput {
@@ -30,12 +41,14 @@ export interface OverworldInteractionInput {
   playerY: number;
   interactRequested: boolean;
   hasGlassesEquipped: boolean;
+  hasCircuit: boolean;
   bananaDiscovered: boolean;
   bananaWarpScheduled: boolean;
   bananaCancelExtraDist: number;
   basementSceneId: string;
   potassiumSceneId: string;
   basementHole: BasementHoleInteraction;
+  circuitSlot: CircuitSlotInteraction;
   secretSlots: readonly OverworldSecretSlot[];
   buildingSlots: readonly OverworldBuildingSlot[];
   buildingPickOptions: OverworldInteractPickOptions;
@@ -75,6 +88,9 @@ export function decideOverworldInteraction(
 
   const peel = resolveBananaPeelInteraction(nextState, effects, input);
   if (peel) return peel;
+
+  const circuitCrt = resolveCircuitCrtInteraction(nextState, effects, input);
+  if (circuitCrt) return circuitCrt;
 
   const building = resolveBuildingInteraction(nextState, effects, input);
   if (building) return building;
@@ -174,6 +190,29 @@ function buildBananaPeelPrompt(
   };
 }
 
+function resolveCircuitCrtInteraction(
+  state: OverworldInteractionState,
+  effects: OverworldInteractionEffect[],
+  input: OverworldInteractionInput
+): OverworldInteractionResult | null {
+  if (!isNearCircuitSlot(input.playerX, input.playerY, input.circuitSlot)) return null;
+
+  if (input.interactRequested && input.hasCircuit) {
+    effects.push({ type: 'enter', targetId: input.circuitSlot.ridgeSceneId });
+  }
+
+  return {
+    state,
+    effects,
+    prompt: {
+      visible: true,
+      text: input.hasCircuit ? input.texts.circuitCrtReady : input.texts.circuitCrtLocked,
+      x: input.circuitSlot.x,
+      y: input.circuitSlot.promptY
+    }
+  };
+}
+
 function resolveBuildingInteraction(
   state: OverworldInteractionState,
   effects: OverworldInteractionEffect[],
@@ -213,5 +252,16 @@ function isNearBasementHole(
   return (
     Math.abs(playerX - basementHole.x) < basementHole.interactDistanceX &&
     playerY > basementHole.minPlayerY
+  );
+}
+
+function isNearCircuitSlot(
+  playerX: number,
+  playerY: number,
+  circuitSlot: CircuitSlotInteraction
+): boolean {
+  return (
+    Math.abs(playerX - circuitSlot.x) < circuitSlot.interactDistanceX &&
+    playerY > circuitSlot.minPlayerY
   );
 }
