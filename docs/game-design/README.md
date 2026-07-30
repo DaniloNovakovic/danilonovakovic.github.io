@@ -11,8 +11,9 @@ Do not treat every file here as equally active.
 - **Active Ridge pre-production story/route canon:** [`ridge/story-level-bible.md`](./ridge/story-level-bible.md).
 - **Active Ridge pre-production area design:** [`ridge/areas/`](./ridge/areas/README.md).
 - **Current Ridge runtime/prototype snapshot:** [`ridge/ridge-snapshot.md`](./ridge/ridge-snapshot.md).
-- **Current Bridge runtime spatial source:** [`stageComposition.ts`](../../src/game/scenes/ridge/bridge/stageComposition.ts), described by
-  [`ridge/ridge-snapshot.md`](./ridge/ridge-snapshot.md).
+- **Current Bridge runtime:** console core + stick VisualProvider, described by
+  [`ridge/ridge-snapshot.md`](./ridge/ridge-snapshot.md) and
+  [`../adr/0005-ridge-console-core-and-stick-visuals.md`](../adr/0005-ridge-console-core-and-stick-visuals.md).
 - **Legacy blockout contract (historical):** [`ridge/map-language.md`](./ridge/map-language.md) — source removed from repo.
 - **Pre-production product vision:** [`ridge/summit.md`](./ridge/summit.md).
 - **Milestone map:** [`ridge/milestone-plan.md`](./ridge/milestone-plan.md)
@@ -101,7 +102,8 @@ prefer GitHub Issues.
   `mini-games/stampede-sketch.md`. These are local mini-game contracts, not
   required first-ending Living Proof.
 - **Current Ridge runtime/prototype reality:** `ridge/ridge-snapshot.md`.
-- **Current runtime source:** `../../src/game/scenes/ridge/bridge/stageComposition.ts`.
+- **Current runtime source:** `../../src/game/core/ridge/` plus
+  `../../src/game/scenes/ridge/`.
 - **Historical blockout documentation:** `ridge/map-language.md`.
 - **Legacy/prototype topology and planning history:** `ridge/legacy/`.
 - **Reference/provenance:** `ridge/reference/` plus `docs/research/`. These can

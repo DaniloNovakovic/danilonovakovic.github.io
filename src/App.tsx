@@ -5,7 +5,6 @@ import { LoadingFallback } from '@/shared/ui';
 import { StaticPortfolio } from '@/static';
 
 const InteractiveApp = lazy(() => import('@/game/shell'));
-const RidgeStageDebugger = lazy(() => import('@/dev/ridgeStageDebugger'));
 
 function App() {
   const { route, setMode } = useReadMode();
@@ -16,14 +15,6 @@ function App() {
 
   if (route === 'static') {
     return <StaticPortfolio onSwitchToInteractive={() => setMode('interactive')} />;
-  }
-
-  if (import.meta.env.DEV && route === 'ridge-debugger') {
-    return (
-      <Suspense fallback={<LoadingFallback />}>
-        <RidgeStageDebugger />
-      </Suspense>
-    );
   }
 
   return (

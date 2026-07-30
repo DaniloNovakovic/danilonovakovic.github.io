@@ -6,7 +6,8 @@ export type SceneUiSurfaceId =
   | 'stampedeUpgradeDraft'
   | 'stampedeResult'
   | 'potassiumUpgradeChoices'
-  | 'potassiumTerminal';
+  | 'potassiumTerminal'
+  | 'ridgeConversation';
 
 export type SceneUiActionId =
   | 'start'
@@ -14,7 +15,10 @@ export type SceneUiActionId =
   | 'backToRidge'
   | 'stampedeUpgradeChoice'
   | 'potassiumDraftChoice'
-  | 'potassiumTerminalAction';
+  | 'potassiumTerminalAction'
+  | 'ridgeConversationAdvance'
+  | 'ridgeConversationChoose'
+  | 'ridgeConversationLeave';
 
 export interface SceneUiSurfaceRequest {
   ownerSceneId: SceneId;

@@ -1,21 +1,20 @@
 {
-  "source": "GenerateImage doodle pass (2026-06-11) + chroma-key removal; style-locked to layered-reset cornfield plate and ridge-concept-06",
+  "status": "historical-reference",
+  "note": "Bridge runtime uses stick VisualProvider under src/game/scenes/ridge/art/stick/. PNG modular assets here are not loaded.",
   "assets": [
     {
       "file": "bridge-builder.png",
       "kind": "character",
       "width": 140,
       "height": 210,
-      "runtimeScale": 0.5,
-      "note": "~105px display height, near player height (player_idle_2x at 0.78 rail base scale)"
+      "note": "Legacy reference only"
     },
     {
       "file": "toy-car.png",
       "kind": "prop",
       "width": 80,
       "height": 49,
-      "runtimeScale": 0.45,
-      "note": "~36px display length, toy-sized relative to Cicka"
+      "note": "Legacy reference only"
     }
   ]
 }

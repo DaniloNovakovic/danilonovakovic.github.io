@@ -1,30 +1,17 @@
-# Cicka Ridge Runtime Assets
+# Cicka Ridge Assets
 
 Owner: `src/game/scenes/ridge/**`
 
-Runtime loader: `src/game/scenes/ridge/cicka/assets.ts`
+Current Bridge runtime draws Cicka as a stick figure via
+`src/game/scenes/ridge/art/stick/`. PNG sheets in this folder are historical
+reference only and are not loaded by the stick provider.
 
-Promoted from: `asset-sources/prepared/characters/cicka/`
+When hand-drawn Cicka art returns, implement a sprite-backed
+`RidgeVisualProvider` and keep `src/game/core/ridge/` unchanged.
 
-External source archive: `prepared-assets` ->
-`characters/cicka/` in `asset-sources/settings.local.json`
-
-## Current Use
-
-Ridge loads `cicka-spritesheet.png` as a display-only NPC/perch sprite. Cicka
-does not use a Phaser physics body in this slice; the existing Ridge
-interaction target remains the gameplay affordance.
-
-## Frame Contract
+## Legacy Frame Contract (reference)
 
 - frame size: `128x96`
 - frame count: `12`
 - origin: `{ "x": 0.5, "y": 1 }`
-- runtime scale: `0.58`
-- initial animations: perch idle and notice
-
-`manifest.json` is the runtime-facing contract and points back to the retained
-local source sheet plus the external prepared archive key. The local
-`asset-sources/prepared/**` copy is ignored and should be treated as a Drive
-mirror, not repo-owned source. `cicka-debug-contact.png` is retained here as the
-promoted runtime QA sheet because this is the first AI sprite adoption slice.
+- former runtime scale: `0.58`

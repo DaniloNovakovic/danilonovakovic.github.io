@@ -13,7 +13,7 @@ interface RidgeSceneContextOptions {
 }
 
 /**
- * Scene lifecycle contract for the Bridge Tracer Ridge scene.
+ * Scene lifecycle contract for the console-driven Bridge Ridge scene.
  */
 export function createRidgeSceneContext(
   options: RidgeSceneContextOptions

@@ -1,6 +1,6 @@
 # Adopt Ridge Stage Composition Source For Experimental Ridge Exploration
 
-Status: accepted for experimental Ridge exploration and the First Playable Route.
+Status: superseded by ADR-0005 for First Playable Route runtime. Kept as historical staging-source reference.
 
 Ridge exploration will use a typed Ridge Stage Composition Source as the primary authoring surface for Walkable Sketchbook Stages. The source owns Walk Rails, Stage Spots, Stage Plates, Stage Objects, Stage Occluders, camera framing, and beat-state-driven presentation, while route/story logic remains in the route state and interaction systems.
 

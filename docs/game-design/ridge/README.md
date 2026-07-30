@@ -28,7 +28,8 @@ Use each file for exactly one concern:
 | Current Ridge route canon | [`story-level-bible.md`](./story-level-bible.md) | Route spine, area barricade chain, cross-area Cicka/guitar logic, ending order. |
 | Area-specific design canon | [`areas/`](./areas/README.md) | Local geography, blockers, residents, prompts, staging, Cicka Resting Spots, visual/audio notes. |
 | Dialogue conventions | [`dialogue-conventions.md`](./dialogue-conventions.md) | Pre-production dialogue file structure, line IDs, placeholder policy, and migration rules. |
-| Current runtime/prototype truth | [`ridge-snapshot.md`](./ridge-snapshot.md) | What exists now in the Phaser prototype, what can be reused, and what is disposable. |
+| Current runtime/prototype truth | [`ridge-snapshot.md`](./ridge-snapshot.md) | What exists now: console core, stick visuals, conversation panel. |
+| Runtime architecture ADR | [`../../adr/0005-ridge-console-core-and-stick-visuals.md`](../../adr/0005-ridge-console-core-and-stick-visuals.md) | Console-first gameplay authority and replaceable VisualProvider. |
 | Active open questions | [`open-questions.md`](./open-questions.md) | True design unknowns and blockout-detail TBD. Area premises may already be accepted even when prompt/topology details remain open. |
 | Product vision | [`summit.md`](./summit.md) | Durable fantasy and pillars, not detailed route implementation. |
 | Implementation sequencing | [`milestone-plan.md`](./milestone-plan.md) | Current route-reset milestones, Bridge Tracer Slice, source stack, Agent-Ready Slice Contract, prototype reuse rules, and agent checklist. Not live backlog. |
@@ -71,7 +72,8 @@ Treat these as prototype/reference unless a task explicitly says to adapt them:
 
 The Ridge Blockout Source implementation was removed from the repo; keep
 [`map-language.md`](./map-language.md) and git history as contract reference.
-The Ridge Stage Debugger (`?mode=ridge-debugger`) remains Bridge-first.
+The Ridge Stage Debugger was removed; use `pnpm ridge:console` and the stick
+Bridge scene (`?mode=interactive&startScene=ridge`) for playtest. See ADR-0005.
 
 Superseded planning docs live under [`legacy/`](./legacy/README.md). Do not
 search that folder first when updating active route design.

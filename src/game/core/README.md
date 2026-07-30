@@ -14,6 +14,7 @@ engine adapters belong to `adapters/`.
 - ECS data model and pure systems (`ecs/`)
 - Input command frames and pure input-to-player translation (`input/`)
 - Engine-agnostic player decision logic (`player/`)
+- Ridge console gameplay (`ridge/`): stage progress, conversation halt, AI/CLI commands
 
 ## Depends on
 
@@ -38,3 +39,4 @@ engine adapters belong to `adapters/`.
 - `ecs/systems/playerSystems.ts`
 - `input/commands.ts`
 - `player/PlayerController.ts`
+- `ridge/session.ts` / `pnpm ridge:console`

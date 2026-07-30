@@ -35,13 +35,28 @@ final assets are placed. The current blockout compiles into typed facts,
 geometry, connectors, and presentation inputs.
 _Avoid_: final map, finished level
 
+**Ridge Console Core**:
+Pure TypeScript Ridge gameplay under `src/game/core/ridge/`. It owns progress,
+beats, nearby interactables, conversation halt, and command results for both
+`pnpm ridge:console` and the Phaser Ridge scene. Phaser/React are presentation
+adapters only.
+_Avoid_: debugger-as-gameplay-authority, duplicating route logic in Phaser
+
+**Ridge Visual Provider**:
+Replaceable presentation seam that renders a Ridge view model. The default is
+mathematical stick-figure art; future iPad/Procreate art should plug in here
+without rewriting console/route logic.
+_Avoid_: baking final art assumptions into core gameplay modules
+
+**Character Conversation Panel**:
+Persona-style Scene UI that halts explore mode while talking: speaker name,
+portrait slot, line text, advance, and optional choices.
+_Avoid_: timed Phaser toast dialogue, non-halting talk overlays
+
 **Ridge Stage Debugger**:
-A development QA surface for Walkable Sketchbook Stages. It runs the live Ridge
-stage preview and exposes route beats, Walk Rail readouts, Stage Spot movement,
-Rail Perspective Cues, and debug overlays so Danilo and AI agents can tune a
-Ridge Stage Composition Source. It is not the legacy Ridge Blockout Viewer or a
-final art map editor.
-_Avoid_: Ridge Blockout Viewer, final art editor, generic map editor
+Removed development QA surface for the old Stage Composition / Walk Rail
+workflow. Superseded by Ridge Console Core playtest and the stick Bridge scene.
+_Avoid_: reviving `?mode=ridge-debugger` without a new ADR
 
 **Stage Authoring Draft**:
 Ephemeral in-debugger adjustments to Ridge Stage Composition Source spatial

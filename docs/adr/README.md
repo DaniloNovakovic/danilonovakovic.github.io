@@ -16,4 +16,5 @@ override the Ridge pre-production route.
 | [`0001-ridge-blockout-as-exploration-map-source.md`](./0001-ridge-blockout-as-exploration-map-source.md) | Historical folded-desk blockout runtime (removed from repo); superseded as future route canon. |
 | [`0002-audio-adapter-boundary.md`](./0002-audio-adapter-boundary.md) | Current audio ownership boundary. |
 | [`0003-ridge-blockout-source-contract.md`](./0003-ridge-blockout-source-contract.md) | Historical blockout tooling contract (removed from repo); superseded as future route canon. |
-| [`0004-ridge-stage-composition-source.md`](./0004-ridge-stage-composition-source.md) | Experimental Ridge exploration and First Playable Route staging source. |
+| [`0004-ridge-stage-composition-source.md`](./0004-ridge-stage-composition-source.md) | Historical Stage Composition / Walk Rail staging source; superseded by ADR-0005 for First Playable Route runtime. |
+| [`0005-ridge-console-core-and-stick-visuals.md`](./0005-ridge-console-core-and-stick-visuals.md) | Active Ridge runtime: console core, stick VisualProvider, Scene UI conversation. |
