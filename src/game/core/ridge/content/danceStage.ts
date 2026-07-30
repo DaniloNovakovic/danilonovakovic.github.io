@@ -9,7 +9,7 @@ import type {
 } from '../types';
 import { collectNearbyFromPlans, makeCatalogLine } from './dialogueHelpers';
 
-const DANCE_BLOCKED_PROGRESS = 0.62;
+const DANCE_BLOCKED_PROGRESS = 0.68;
 const FLAG_OPS = 'ops_ready';
 const FLAG_DRIVER = 'driver_ready';
 
@@ -26,6 +26,10 @@ export interface DanceDialogueCatalog {
   lines: Record<string, string>;
 }
 
+/**
+ * Spread plaza cast left→right so silhouettes and prompts stay readable.
+ * Soft wall / service gate sits at ~0.68; shuttle beyond after clearance.
+ */
 const SPOTS = [
   {
     id: 'entry',
@@ -39,8 +43,8 @@ const SPOTS = [
     id: 'traveler',
     label: 'Traveler',
     kind: 'npc' as const,
-    progress: 0.18,
-    interactRadius: 0.07,
+    progress: 0.14,
+    interactRadius: 0.08,
     actorId: 'traveler' as const,
     description: 'Someone asking the same question you are: how to reach Relay.'
   },
@@ -48,61 +52,61 @@ const SPOTS = [
     id: 'driver',
     label: 'Hill-Shuttle Driver',
     kind: 'npc' as const,
-    progress: 0.35,
-    interactRadius: 0.08,
+    progress: 0.28,
+    interactRadius: 0.09,
     actorId: 'driver' as const,
-    description: 'Stuck on a route clipboard beside the last-daylight shuttle.'
-  },
-  {
-    id: 'operations',
-    label: 'Last-Stop Operations Helper',
-    kind: 'npc' as const,
-    progress: 0.48,
-    interactRadius: 0.08,
-    actorId: 'operations-helper' as const,
-    description: 'Perfecting lanterns and chair stacks near the dance floor edge.'
+    description: 'Stuck on a route clipboard beside the shuttle sign.'
   },
   {
     id: 'teacher',
     label: 'Dance Teacher',
     kind: 'npc' as const,
-    progress: 0.42,
-    interactRadius: 0.07,
+    progress: 0.4,
+    interactRadius: 0.09,
     actorId: 'dance-teacher' as const,
     description: 'Keeps watch without forcing anyone onto the floor.'
-  },
-  {
-    id: 'steward',
-    label: 'Festival Steward',
-    kind: 'npc' as const,
-    progress: 0.58,
-    interactRadius: 0.07,
-    actorId: 'steward' as const,
-    description: 'Holds the service-gate key until setup is safe.'
   },
   {
     id: 'cicka',
     label: 'Cicka',
     kind: 'npc' as const,
-    progress: 0.52,
-    interactRadius: 0.06,
+    progress: 0.48,
+    interactRadius: 0.07,
     actorId: 'cicka' as const,
     description: 'Loafs near the operations table like a soft paperweight.'
+  },
+  {
+    id: 'operations',
+    label: 'Last-Stop Operations Helper',
+    kind: 'npc' as const,
+    progress: 0.56,
+    interactRadius: 0.09,
+    actorId: 'operations-helper' as const,
+    description: 'Perfecting lanterns and chair stacks near the dance floor edge.'
+  },
+  {
+    id: 'steward',
+    label: 'Festival Steward',
+    kind: 'npc' as const,
+    progress: 0.64,
+    interactRadius: 0.08,
+    actorId: 'steward' as const,
+    description: 'Holds the service-gate key until setup is safe.'
   },
   {
     id: 'gate',
     label: 'Service gate',
     kind: 'prop' as const,
-    progress: 0.62,
-    interactRadius: 0.07,
+    progress: 0.68,
+    interactRadius: 0.1,
     description: 'Festival barriers and cable tape block the hill road.'
   },
   {
     id: 'shuttle',
     label: 'Last daylight shuttle',
     kind: 'exit' as const,
-    progress: 0.88,
-    interactRadius: 0.08,
+    progress: 0.9,
+    interactRadius: 0.1,
     actorId: 'shuttle' as const,
     description: 'The threshold ride to Relay under warming sky.'
   }
@@ -115,8 +119,7 @@ export function createDanceStage(catalog: DanceDialogueCatalog): RidgeStageDefin
     lengthLabel: 'Last-Stop Plaza',
     spots: SPOTS,
     blockedProgress: DANCE_BLOCKED_PROGRESS,
-    blockedMessage:
-      'The service road is closed for festival setup. Help the plaza become ready.',
+    blockedMessage: (state) => describeDanceBlock(state),
     isCrossingOpen: (state) => state.beat === 'dance_cleared',
     resolveInteractables: (state) => resolveDanceInteractables(state, catalog),
     resolveActors: (state) => resolveDanceActors(state),
@@ -130,11 +133,25 @@ function bothReady(state: RidgeWorldState): boolean {
   return state.flags.has(FLAG_OPS) && state.flags.has(FLAG_DRIVER);
 }
 
+function describeDanceBlock(state: RidgeWorldState): string {
+  if (state.beat === 'dance_ready' || bothReady(state)) {
+    return 'Service gate is ready. Press interact on the gate to clear the last setup.';
+  }
+  if (state.flags.has(FLAG_OPS) && !state.flags.has(FLAG_DRIVER)) {
+    return 'Operations is ready. Ask the Dance Teacher for one private practice step.';
+  }
+  if (state.flags.has(FLAG_DRIVER) && !state.flags.has(FLAG_OPS)) {
+    return 'The driver has one step. Help the Operations Helper finish her handoff check.';
+  }
+  return 'Service road closed for festival setup. Help Operations and the Dance Teacher first.';
+}
+
 function resolveDanceInteractables(
   state: RidgeWorldState,
   catalog: DanceDialogueCatalog
 ): RidgeInteractable[] {
   const plans: { spotId: string; conversationId: string; prompt: string }[] = [];
+  const line = (key: string) => catalog.lines[key] ?? key;
 
   if (state.beat === 'dance_arrival' || state.beat === 'dance_ready') {
     plans.push({
@@ -149,17 +166,17 @@ function resolveDanceInteractables(
     });
     plans.push({
       spotId: 'teacher',
-      conversationId: state.flags.has(FLAG_DRIVER)
-        ? 'dance.locals.triangulated_read'
-        : 'dance.driver.one_step_practice',
+      conversationId: 'dance.driver.one_step_practice',
       prompt: state.flags.has(FLAG_DRIVER)
-        ? 'dance.locals.triangulated_read.03'
+        ? 'dance.driver.one_step_practice.done.01'
         : 'dance.driver.one_step_practice.01'
     });
     plans.push({
       spotId: 'operations',
       conversationId: 'dance.operations_helper.handoff_check',
-      prompt: 'dance.operations_helper.handoff_check.01'
+      prompt: state.flags.has(FLAG_OPS)
+        ? 'dance.operations_helper.handoff_check.done.01'
+        : 'dance.operations_helper.handoff_check.01'
     });
     plans.push({
       spotId: 'driver',
@@ -177,7 +194,7 @@ function resolveDanceInteractables(
     });
   }
 
-  if (state.beat === 'dance_ready') {
+  if (state.beat === 'dance_ready' || bothReady(state)) {
     plans.push({
       spotId: 'gate',
       conversationId: 'dance.setup_clearance',
@@ -198,12 +215,7 @@ function resolveDanceInteractables(
     });
   }
 
-  return collectNearbyFromPlans(
-    state.progress,
-    SPOTS,
-    plans,
-    (key) => catalog.lines[key] ?? key
-  );
+  return collectNearbyFromPlans(state.progress, SPOTS, plans, line);
 }
 
 function resolveDanceActors(state: RidgeWorldState): RidgeActorPresence[] {
@@ -219,56 +231,56 @@ function resolveDanceActors(state: RidgeWorldState): RidgeActorPresence[] {
     {
       id: 'traveler',
       label: 'Traveler',
-      progress: 0.18,
+      progress: 0.14,
       visible: !cleared,
       facing: 'right'
     },
     {
       id: 'driver',
-      label: 'Hill-Shuttle Driver',
-      progress: cleared ? 0.86 : 0.35,
+      label: 'Driver',
+      progress: cleared ? 0.88 : 0.28,
       visible: true,
       facing: cleared ? 'right' : 'left'
     },
     {
-      id: 'operations-helper',
-      label: 'Last-Stop Operations Helper',
-      progress: cleared ? 0.7 : 0.48,
-      visible: true,
-      facing: 'left'
-    },
-    {
       id: 'dance-teacher',
-      label: 'Dance Teacher',
-      progress: 0.42,
+      label: 'Teacher',
+      progress: 0.4,
       visible: true,
       facing: 'right'
-    },
-    {
-      id: 'steward',
-      label: 'Festival Steward',
-      progress: cleared ? 0.64 : 0.58,
-      visible: true,
-      facing: 'left'
     },
     {
       id: 'cicka',
       label: 'Cicka',
-      progress: cleared ? 0.66 : 0.52,
+      progress: cleared ? 0.72 : 0.48,
       visible: true,
       facing: 'right'
     },
     {
+      id: 'operations-helper',
+      label: 'Operations',
+      progress: cleared ? 0.74 : 0.56,
+      visible: true,
+      facing: 'left'
+    },
+    {
+      id: 'steward',
+      label: 'Steward',
+      progress: cleared ? 0.7 : 0.64,
+      visible: true,
+      facing: 'left'
+    },
+    {
       id: 'counterpart-cat',
-      label: 'Quiet counterpart cat',
-      progress: 0.68,
+      label: 'Quiet cat',
+      progress: 0.76,
       visible: cleared,
       facing: 'left'
     },
     {
       id: 'shuttle',
-      label: 'Last daylight shuttle',
-      progress: 0.88,
+      label: 'Shuttle',
+      progress: 0.9,
       visible: true,
       facing: 'right'
     }
@@ -306,15 +318,15 @@ function resolveDanceConversation(
           : [
               {
                 id: 'offer-help',
-                label: 'Maybe one small step would help',
+                label: 'Find the Dance Teacher for him',
                 lines: [
-                  line('dance.driver.shuttle_delay.choice.help', 'hillShuttleDriver')
-                ],
-                outcome: undefined
+                  line('dance.driver.shuttle_delay.choice.help', 'hillShuttleDriver'),
+                  line('dance.driver.shuttle_delay.choice.help_hint', 'prompt')
+                ]
               },
               {
                 id: 'wait',
-                label: 'I will ask around the plaza',
+                label: 'Ask around the plaza first',
                 lines: [line('dance.driver.shuttle_delay.choice.wait', 'prompt')]
               }
             ]
@@ -410,7 +422,10 @@ function resolveDanceConversation(
                 line('dance.cicka.resting_spot.02', 'prompt'),
                 line('dance.cicka.resting_spot.03', 'cicka')
               ]
-            : [line('dance.cicka.resting_spot.01', 'prompt'), line('dance.cicka.resting_spot.03', 'cicka')]
+            : [
+                line('dance.cicka.resting_spot.01', 'prompt'),
+                line('dance.cicka.resting_spot.03', 'cicka')
+              ]
       };
     default:
       return null;
@@ -419,13 +434,16 @@ function resolveDanceConversation(
 
 function describeDanceAmbience(state: RidgeWorldState): string {
   if (state.beat === 'dance_cleared') {
-    return 'Lanterns settle. The last daylight shuttle waits with a warm sky behind the hill.';
+    return 'Lane clear. Board the last daylight shuttle on the right.';
   }
-  if (state.beat === 'dance_ready') {
-    return 'Both shy helpers are ready. One more setup clearance and the road can open.';
+  if (state.beat === 'dance_ready' || bothReady(state)) {
+    return 'Both helpers are ready. Clear the service gate, then take the shuttle.';
   }
-  if (bothReady(state)) {
-    return 'The plaza almost breathes. A folded song request could finish the practical courage.';
+  if (state.flags.has(FLAG_OPS) && !state.flags.has(FLAG_DRIVER)) {
+    return 'Operations handoff done. The Dance Teacher can teach one private step.';
   }
-  return 'Daytime festival setup. Barriers, lantern crates, and a shuttle that cannot leave yet.';
+  if (state.flags.has(FLAG_DRIVER) && !state.flags.has(FLAG_OPS)) {
+    return 'Driver practiced one step. The Operations Helper still needs a handoff check.';
+  }
+  return 'Last-Stop Plaza setup. Talk to Operations (lantern) and the Dance Teacher (skirt pose).';
 }

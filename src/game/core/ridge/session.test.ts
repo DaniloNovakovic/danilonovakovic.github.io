@@ -147,29 +147,27 @@ function playConcert(session: RidgeConsoleSession): void {
 }
 
 function playDance(session: RidgeConsoleSession): void {
-  walkTo(session, 0.18);
+  walkTo(session, 0.14);
   expect(session.exec('interact traveler').ok).toBe(true);
   drainConversation(session);
 
-  walkTo(session, 0.48);
+  walkTo(session, 0.56);
   expect(session.exec('interact operations').ok).toBe(true);
   drainConversation(session);
 
-  walkTo(session, 0.42);
+  walkTo(session, 0.4);
   expect(session.exec('interact teacher').ok).toBe(true);
   drainConversation(session);
   expect(session.observe().beat).toBe('dance_ready');
 
-  walkTo(session, 0.35);
-  expect(session.exec('interact driver').ok).toBe(true);
-  drainConversation(session);
-
-  walkTo(session, 0.62);
-  expect(session.exec('interact gate').ok).toBe(true);
+  // Nearest interact at the soft wall should prefer the gate over the steward.
+  walkTo(session, 0.68);
+  expect(session.exec('interact').ok).toBe(true);
+  expect(session.observe().conversation?.id).toBe('dance.setup_clearance');
   drainConversation(session);
   expect(session.observe().beat).toBe('dance_cleared');
 
-  walkTo(session, 0.88);
+  walkTo(session, 0.9);
   expect(session.exec('interact shuttle').ok).toBe(true);
   drainConversation(session);
 }

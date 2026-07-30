@@ -141,8 +141,11 @@ export class RidgeConsoleSession {
     ) {
       nextProgress = blockedAt;
       blocked = true;
+      const blockedMessage = this.stage.blockedMessage;
       message =
-        this.stage.blockedMessage ??
+        (typeof blockedMessage === 'function'
+          ? blockedMessage(this.state)
+          : blockedMessage) ??
         'Something blocks the way east. Talk to someone nearby.';
     }
 
@@ -166,7 +169,9 @@ export class RidgeConsoleSession {
       return this.fail('Already in conversation. Use advance / choose / leave.');
     }
 
-    const nearby = this.stage.resolveInteractables(this.state);
+    const nearby = [...this.stage.resolveInteractables(this.state)].sort(
+      (a, b) => a.distance - b.distance
+    );
     if (nearby.length === 0) {
       return this.fail('Nothing in reach.');
     }

@@ -11,12 +11,12 @@ import {
   drawStickDriver,
   drawStickGuitar,
   drawStickGuitarist,
-  drawStickNpc,
   drawStickOperationsHelper,
   drawStickPlayer,
   drawStickShuttle,
   drawStickSteward,
-  drawStickToyCar
+  drawStickToyCar,
+  drawStickTraveler
 } from './stickFigures';
 
 const PAPER = 0xfbfbf9;
@@ -45,6 +45,7 @@ export class StickVisualProvider implements RidgeVisualProvider {
   private readonly actors: Phaser.GameObjects.Graphics;
   private readonly overlay: Phaser.GameObjects.Graphics;
   private promptText?: Phaser.GameObjects.Text;
+  private readonly nameLabels = new Map<string, Phaser.GameObjects.Text>();
   private destroyed = false;
 
   constructor(scene: Phaser.Scene, options: StickVisualProviderOptions = {}) {
@@ -84,8 +85,10 @@ export class StickVisualProvider implements RidgeVisualProvider {
     this.drawBackground(view.areaId, view.crossingOpen, view.beat);
     this.actors.clear();
 
+    const visibleIds = new Set<string>();
     for (const actor of view.actors) {
       if (!actor.visible) continue;
+      visibleIds.add(actor.id);
       const x = this.worldXForProgress(actor.progress);
       const y = GROUND_Y;
       switch (actor.id) {
@@ -112,7 +115,7 @@ export class StickVisualProvider implements RidgeVisualProvider {
           drawStickGuitar(this.actors, x + 16, y + 2, 1.1);
           break;
         case 'traveler':
-          drawStickNpc(this.actors, x, y, actor.facing, 1);
+          drawStickTraveler(this.actors, x, y, actor.facing, 1);
           break;
         case 'driver':
           drawStickDriver(this.actors, x, y, actor.facing, 1.05);
@@ -130,6 +133,14 @@ export class StickVisualProvider implements RidgeVisualProvider {
           drawStickShuttle(this.actors, x, y, 1.1);
           break;
       }
+
+      if (actor.id !== 'player' && actor.id !== 'toy-car' && actor.id !== 'guitar') {
+        this.syncNameLabel(actor.id, actor.label, x, y);
+      }
+    }
+
+    for (const [id, label] of this.nameLabels) {
+      if (!visibleIds.has(id)) label.setVisible(false);
     }
 
     const player = view.actors.find((actor) => actor.id === 'player');
@@ -138,7 +149,7 @@ export class StickVisualProvider implements RidgeVisualProvider {
         const x = this.worldXForProgress(player.progress);
         this.promptText
           .setText(`[E] ${view.nearbyPrompt}`)
-          .setPosition(x, GROUND_Y - 110)
+          .setPosition(x, GROUND_Y - 130)
           .setVisible(true);
       } else {
         this.promptText.setVisible(false);
@@ -155,6 +166,26 @@ export class StickVisualProvider implements RidgeVisualProvider {
     this.root.destroy(true);
     this.promptText?.destroy();
     this.promptText = undefined;
+    for (const label of this.nameLabels.values()) label.destroy();
+    this.nameLabels.clear();
+  }
+
+  private syncNameLabel(id: string, text: string, x: number, y: number): void {
+    let label = this.nameLabels.get(id);
+    if (!label) {
+      label = this.scene.add
+        .text(0, 0, text, {
+          fontFamily: 'Caveat, Comic Neue, cursive',
+          fontSize: '16px',
+          color: '#1a1a1a',
+          backgroundColor: '#fbfbf9aa',
+          padding: { x: 4, y: 1 }
+        })
+        .setOrigin(0.5, 1)
+        .setDepth(35);
+      this.nameLabels.set(id, label);
+    }
+    label.setText(text).setPosition(x, y - 78).setVisible(true);
   }
 
   private drawBackground(
@@ -277,17 +308,20 @@ export class StickVisualProvider implements RidgeVisualProvider {
       g.lineBetween(x, GROUND_Y, x, GROUND_Y - 90);
       g.strokeRect(x - 8, GROUND_Y - 110, 16, 20);
     }
-    // service gate
-    const gate = this.worldXForProgress(0.62);
+    // service gate (matches soft-wall progress)
+    const gate = this.worldXForProgress(0.68);
     g.lineStyle(3, INK, crossingOpen ? 0.25 : 1);
-    g.strokeRect(gate - 30, GROUND_Y - 80, 60, 80);
+    g.strokeRect(gate - 36, GROUND_Y - 90, 72, 90);
+    g.lineStyle(2, INK, crossingOpen ? 0.2 : 0.7);
+    g.lineBetween(gate - 20, GROUND_Y - 70, gate + 20, GROUND_Y - 70);
+    g.lineBetween(gate - 20, GROUND_Y - 50, gate + 20, GROUND_Y - 50);
     if (crossingOpen) {
       g.lineStyle(2, INK, 0.4);
-      g.lineBetween(gate + 30, GROUND_Y - 80, gate + 70, GROUND_Y - 40);
+      g.lineBetween(gate + 36, GROUND_Y - 90, gate + 80, GROUND_Y - 40);
     }
-    // dance floor edge
+    // dance floor edge near teacher
     g.lineStyle(2, INK, 0.35);
-    g.strokeEllipse(this.worldXForProgress(0.45), GROUND_Y - 20, 120, 30);
+    g.strokeEllipse(this.worldXForProgress(0.4), GROUND_Y - 20, 100, 28);
   }
 
   private drawRelaySet(

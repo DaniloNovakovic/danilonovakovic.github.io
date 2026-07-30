@@ -133,7 +133,7 @@ export interface RidgeStageDefinition {
   /** Soft wall until the crossing opens. */
   blockedProgress?: number;
   /** Message when the soft wall stops the player. */
-  blockedMessage?: string;
+  blockedMessage?: string | ((state: RidgeWorldState) => string);
   /** When true, blockedProgress no longer applies. */
   isCrossingOpen?: (state: RidgeWorldState) => boolean;
   resolveInteractables: (state: RidgeWorldState) => readonly RidgeInteractable[];

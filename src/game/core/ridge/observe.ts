@@ -86,8 +86,12 @@ function buildHints(
     hints.unshift(`interact — ${nearby[0].prompt} (${nearby[0].label})`);
   }
   if (blockedAhead) {
+    const blockedMessage = stage.blockedMessage;
     hints.unshift(
-      stage.blockedMessage ?? 'The path east is blocked until the local problem clears.'
+      (typeof blockedMessage === 'function'
+        ? blockedMessage(state)
+        : blockedMessage) ??
+        'The path east is blocked until the local problem clears.'
     );
   }
   if (state.beat === 'relay_complete') {

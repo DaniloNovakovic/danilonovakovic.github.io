@@ -120,49 +120,57 @@ export const sceneMessages = {
         "dance.traveler.relay_wayfinding.02":
           "Last daylight ride—only after setup clears.",
         "dance.traveler.relay_wayfinding.03":
-          "Ask at the shuttle, then the operations table.",
+          "Help Operations with lanterns, then the Dance Teacher with one step.",
         "dance.driver.shuttle_delay.01":
           "Can't leave until the steward opens the gate.",
         "dance.driver.shuttle_delay.02":
           "Clipboard says ready. My feet disagree.",
         "dance.driver.shuttle_delay.03": "He keeps rereading the same safe line.",
-        "dance.driver.shuttle_delay.choice.help": "One step. Privately. Maybe.",
+        "dance.driver.shuttle_delay.choice.help":
+          "One step. Privately. Maybe the Dance Teacher…",
+        "dance.driver.shuttle_delay.choice.help_hint":
+          "Walk left-of-center to the Dance Teacher (skirt pose, raised arm).",
         "dance.driver.shuttle_delay.choice.wait":
           "You give him space and ask around.",
         "dance.operations_helper.handoff_check.01":
-          "If the lantern line fails, I fail with it.",
+          "Help check the operations handoff",
         "dance.operations_helper.handoff_check.02":
-          "Check the details with me once.",
+          "If the lantern line fails, I fail with it.",
         "dance.operations_helper.handoff_check.03":
-          "Help with the operations handoff",
+          "You check the crates with her. One clean pass is enough.",
         "dance.operations_helper.handoff_check.done.01":
-          "The teacher can keep watch now.",
+          "Handoff done — find the Dance Teacher next",
         "dance.operations_helper.handoff_check.done.02":
-          "She almost believes the plaza can breathe.",
-        "dance.locals.triangulated_read.01": "Road opens after the setup check.",
+          "She can almost leave the plaza alone now.",
+        "dance.locals.triangulated_read.01":
+          "Road opens after setup clears at the gate.",
         "dance.locals.triangulated_read.02":
           "She waits on one perfect lantern. He waits on anything but asking.",
         "dance.locals.triangulated_read.03":
-          "They practice the art of being unavailable.",
-        "dance.driver.one_step_practice.01": "One private step. No audience.",
+          "Help Operations, then ask me for one private step for him.",
+        "dance.driver.one_step_practice.01": "Practice one private dance step",
         "dance.driver.one_step_practice.02":
-          "He learns exactly one shared rhythm.",
+          "No audience. He learns exactly one shared rhythm.",
         "dance.driver.one_step_practice.03":
           "Okay. I can offer that much later.",
-        "dance.driver.one_step_practice.done.01": "He has his one step.",
-        "dance.driver.one_step_practice.done.02": "Dignity intact.",
+        "dance.driver.one_step_practice.done.01":
+          "Step learned — clear the service gate next",
+        "dance.driver.one_step_practice.done.02":
+          "Dignity intact. The gate can open when setup finishes.",
         "dance.driver.folded_song_request.01":
-          "Help me fold a tiny song request.",
+          "Help fold a tiny song request",
         "dance.driver.folded_song_request.02":
           "No confession. Just one dance later.",
         "dance.driver.folded_song_request.03":
           "She reads it. Soft nod. No spotlight.",
-        "dance.driver.folded_song_request.04": "The practical courage lands.",
-        "dance.setup_clearance.01": "Help with remaining preparations",
+        "dance.driver.folded_song_request.04":
+          "Now clear the service gate on the right.",
+        "dance.setup_clearance.01": "Clear the service gate for the shuttle",
         "dance.setup_clearance.02": "Secure the lantern line.",
         "dance.setup_clearance.03": "Tape the service lane clear.",
         "dance.setup_clearance.04": "Gate open. Last daylight window.",
-        "dance.setup_clearance.05": "Flip the shuttle sign.",
+        "dance.setup_clearance.05":
+          "Shuttle sign flips. Board the van to the right.",
         "dance.shuttle.last_daylight_ride.01": "All aboard the last ride.",
         "dance.shuttle.last_daylight_ride.02":
           "The hill lifts into sunset paper.",
