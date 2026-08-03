@@ -130,12 +130,10 @@ The Architect has a repeatable workflow skill:
 
 The Architect also composes these workflow skills:
 
-- [`.agents/skills/zoom-out/SKILL.md`](../../.agents/skills/zoom-out/SKILL.md)
-  for mapping unfamiliar modules and callers before making a sequencing call.
 - [`.agents/skills/improve-codebase-architecture/SKILL.md`](../../.agents/skills/improve-codebase-architecture/SKILL.md)
   for deeper architecture reviews that look for better module depth,
   leverage, locality, and test seams.
-- [`.agents/skills/to-issues/SKILL.md`](../../.agents/skills/to-issues/SKILL.md)
+- [`.agents/skills/to-tickets/SKILL.md`](../../.agents/skills/to-tickets/SKILL.md)
   for turning approved architecture sequences into AFK or HITL tracer-bullet
   slices.
 

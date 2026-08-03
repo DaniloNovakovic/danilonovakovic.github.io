@@ -14,8 +14,8 @@ description: Guides Sketchbook Ridge architecture planning, seam sequencing, bra
    area-local work, follow its pointer to `docs/game-design/ridge/areas/`.
 2. Start with the smallest safe change. Classify the request as `NO-CHANGE`, `SAFE-AFK`, `SAFE-WITH-SEQUENCE`, or `HITL`.
 3. Apply the anti-slop standards in `.agents/rules/10-architecture.md`.
-4. If unfamiliar, use `zoom-out` first. If refactoring or a new seam is proposed, use `improve-codebase-architecture` for theory before implementation planning.
-5. If the result should become work items, use `to-issues` as the publisher after the sequence is clear.
+4. If unfamiliar with an area, map the relevant modules and callers first (domain vocabulary from `CONTEXT.md` / ADRs). If refactoring or a new seam is proposed, use `improve-codebase-architecture` for theory before implementation planning.
+5. If the result should become work items, use `to-tickets` as the publisher after the sequence is clear.
 
 ## Classifications
 

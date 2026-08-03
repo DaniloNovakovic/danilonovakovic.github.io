@@ -73,21 +73,22 @@ For larger or fuzzier work, use the workflow skills as planning tools before cod
 | Situation | Ask for | What it produces |
 | --- | --- | --- |
 | You have a broad feature idea and need the shape clarified | `grill-with-docs` | A structured conversation that sharpens terms, checks existing domain docs, and records durable decisions in `CONTEXT.md` or ADRs when needed. |
-| You want a product-level spec from an already-discussed idea | `to-prd` | A PRD, meaning a Product Requirements Document. In this repo it is published as a GitHub issue that captures the problem, solution, user stories, decisions, tests, and out-of-scope items. |
-| You have a PRD, plan, or big issue and need buildable work items | `to-issues` | Small GitHub issues in dependency order. Each issue should be a vertical slice with acceptance criteria, not a layer-by-layer task list. |
+| You want a product-level spec from an already-discussed idea | `to-spec` | A buildable spec (you may know this as a PRD). In this repo it is published as a GitHub issue that captures the problem, solution, user stories, decisions, tests, and out-of-scope items. |
+| You have a spec, plan, or big issue and need buildable work items | `to-tickets` | Tracer-bullet tickets with blocking edges. Each ticket should be a vertical slice with acceptance criteria, not a layer-by-layer task list. |
 | You need to manage or prepare existing issues | `triage` | Issue state changes such as `needs-info`, `ready-for-human`, or `ready-for-agent`. For agent-ready work it can add an agent brief comment that becomes the implementation contract. |
 | You want the implementation to be test-first | `tdd` | A red-green-refactor loop: one behavior test, one small implementation step, then refactor. Best for risky behavior changes and shared logic. |
-| Something is broken or flaky | `diagnose` | A reproduction loop, hypotheses, instrumentation, fix, and regression test. |
+| Something is broken or flaky | `diagnosing-bugs` | A tight reproduction loop, hypotheses, instrumentation, fix, and regression test. |
+| You want a standards + spec review of a branch/PR | `dual-lens-code-review` | Parallel Standards and Spec reviews of the diff since a fixed point. |
 | You are worried about architecture drift or parallel work conflicts | `Architect` | A seam review: what should change, what should stay serialized, what can safely be parallelized, and whether the work should become issues. |
 | You need coordination across roles or a next-work recommendation | `Producer` | A short production plan, suggested issue order, role assignment, and handoff notes. |
 
 A useful default flow for a new feature is:
 
 ```text
-grill-with-docs -> to-prd -> to-issues -> triage ready-for-agent -> implement with tdd or normal coding
+grill-with-docs -> to-spec -> to-tickets -> implement (tdd + dual-lens-code-review)
 ```
 
-Skip steps when the work is already clear. A one-line copy fix does not need a PRD. A half-formed game-system idea probably benefits from `grill-with-docs` before anybody writes code. A feature that spans multiple scenes, overlays, assets, or runtime seams probably deserves a PRD and sliced issues.
+Skip steps when the work is already clear. A one-line copy fix does not need a spec. A half-formed game-system idea probably benefits from `grill-with-docs` before anybody writes code. A feature that spans multiple scenes, overlays, assets, or runtime seams probably deserves a spec and sliced tickets.
 
 Useful prompts:
 
@@ -96,11 +97,11 @@ Use grill-with-docs to stress-test this idea against the current Ridge domain do
 ```
 
 ```text
-Turn our discussion into a PRD and publish it to GitHub Issues.
+Turn our discussion into a spec and publish it to GitHub Issues with to-spec.
 ```
 
 ```text
-Break issue #42 into vertical implementation issues with to-issues.
+Break issue #42 into tracer-bullet tickets with to-tickets.
 ```
 
 ```text

@@ -19,7 +19,7 @@ Read or reference these before giving direction:
 - The specific issue, artifact, route beat, area, scene, or diff being planned.
 
 For issue planning, also read `docs/agents/issue-tracker.md` and
-`.agents/skills/to-issues/SKILL.md`.
+`.agents/skills/to-tickets/SKILL.md`.
 
 Use the Ridge router source matrix to decide which active design, prototype,
 runtime, reference, or legacy doc is actually needed. Do not load the whole
@@ -106,7 +106,7 @@ When Danilo asks to create issues:
 
 1. Use `ridge/README.md` to choose the relevant current Ridge docs as context,
    not as a live backlog to mirror.
-2. Draft tracer-bullet slices using `.agents/skills/to-issues/SKILL.md`.
+2. Draft tracer-bullet slices using `.agents/skills/to-tickets/SKILL.md`.
 3. Confirm the proposed granularity, dependencies, and HITL/AFK split with
    Danilo unless he explicitly authorizes a first batch.
 4. Publish approved issues in dependency order.
