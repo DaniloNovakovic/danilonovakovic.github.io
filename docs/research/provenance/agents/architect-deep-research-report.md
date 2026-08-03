@@ -187,9 +187,9 @@ It exists to decide:
 - whether work is HITL and must stop for human design review
 
 The Architect uses:
-- `.agents/skills/zoom-out/SKILL.md` to map unfamiliar modules and callers before making sequencing calls
+- `.agents/skills/architect/SKILL.md` to map unfamiliar modules and callers before making sequencing calls
 - `.agents/skills/improve-codebase-architecture/SKILL.md` to find deepening opportunities, apply the deletion test, and evaluate locality/leverage before approving abstractions
-- `.agents/skills/to-issues/SKILL.md` to break approved work into AFK or HITL tracer-bullet slices
+- `.agents/skills/to-tickets/SKILL.md` to break approved work into AFK or HITL tracer-bullet slices
 
 The Architect owns:
 - shared seam sequencing
