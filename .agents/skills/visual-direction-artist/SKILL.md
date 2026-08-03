@@ -1,124 +1,89 @@
 ---
 name: visual-direction-artist
-description: Preserves and extends Sketchbook Ridge's Digital Sketchbook visual direction. Use when Danilo invokes the Visual Direction Artist or Character Designer, or asks for art direction, character design, UI polish, visual hierarchy, motion treatment, environmental styling, asset decomposition, component style QA, or on-style visual implementation guidance.
+description: Preserves Sketchbook Ridge Digital Sketchbook visual direction — art direction, character packages, style QA, motion, and on-style implementation guidance. Use when Danilo invokes the Visual Direction Artist or Character Designer.
 ---
 
 # Visual Direction Artist
 
-Advisory and drafting mode for keeping Sketchbook Ridge visually handmade,
-readable, implementation-ready, and small enough to ship. Preserve the existing
-Digital Sketchbook style; do not invent a new visual system.
+Keep Sketchbook Ridge visually handmade, readable, and small enough to ship.
+Style guide is the house style; extend it, don't invent a parallel system.
 
 ## Load First
 
-- `docs/agents/sketchbook-ridge-team.md`
-- `docs/game-design/ridge/README.md`
-- `docs/design/style-guide.md`
-- `docs/runtime-architecture.md`
-- The scene, component, mockup, asset brief, or visual artifact being reviewed.
+1. The scene, component, mockup, asset brief, or visual artifact.
+2. `docs/design/style-guide.md`
+3. `docs/game-design/ridge/README.md` → router-selected area/route doc when
+   Ridge-local
+4. `docs/runtime-architecture.md` when the ask is implementation guidance
 
-Use the Ridge router source matrix to decide which active route, area,
-open-question, reference, or legacy prototype doc is relevant. Do not load the
-whole Ridge planning tree by default.
+Provenance under `docs/research/provenance/visual/` only when Danilo asks for
+source rationale, comparison, or a fresh synthesis pass.
 
-Optional provenance only; do not load by default:
+After visual direction is approved for generated/converted Phaser sprites, use
+`.agents/skills/sketchbook-sprite-pipeline/SKILL.md`.
 
-- `docs/research/provenance/visual/analog-digital-fusion-modular-sticker-workflows.md`
-- `docs/research/provenance/visual/ridge-character-design-micro-presence-brief.md`
-- `docs/research/provenance/visual/character-designer-ai-agent-research.md`
-- `docs/research/provenance/visual/visual-direction-specialist-skill-research.md`
-
-For generated or converted Phaser sprite assets, use
-`.agents/skills/sketchbook-sprite-pipeline/SKILL.md` after the visual direction
-is approved.
+Completion: surface, mode, and one-sentence visual job are named.
 
 ## Default Visual Card
 
-- Source of truth: style guide plus active Ridge pre-production canon for target
-  design; existing implementation first only when the task targets current
-  runtime behavior.
+- Source of truth: style guide + active Ridge pre-production canon; current
+  implementation first only when the task targets runtime behavior.
 - Palette: off-white paper, black ink, monochrome accents, hatching, shadow
-  mass, and line-weight contrast before new color.
+  mass, line-weight contrast before new color.
 - Asset logic: reusable paper cutouts, stable anchors, small variants, thick
-  outer contours, and lighter interior marks.
-- Atmosphere: living sketchbook pages, painted notes, margin artifacts, and
-  world surfaces that feel touched by hand.
-- Motion: stepped, subtle wobble, low-frequency jitter, and ink/page cues only
-  when they support comprehension.
-- Accessibility: readable dense text, visible focus, contrast, keyboard flow,
-  and reduced-motion alternatives are part of the design output.
-- Stack fit: Phaser, React, Tailwind/CSS utilities, sprite atlases, texture
-  frames, pivots, and shared classes before new tools.
+  outer contours, lighter interior marks.
+- Atmosphere: living sketchbook pages, margin artifacts, hand-touched surfaces.
+- Motion: stepped, subtle wobble, low-frequency jitter — only when it aids
+  comprehension; decorative motion stays optional / reduced-motion safe.
+- Accessibility: dense-text readability, visible focus, contrast, keyboard flow,
+  touch targets.
+- Stack fit: Phaser, React, Tailwind/CSS utilities, atlases, pivots, shared
+  classes before new tools.
 
-Ownership brackets:
-
-- Character: NPC silhouettes, Cicka presence, interaction charm, readable
-  function, and tiny cast discipline.
-- UI / overlay: Trail Cards, Manual Pages, mobile-first readability, paper-cut
-  layout, focus states, touch targets, and dense-copy legibility.
-- Environment / assets: landmark thumbnails, sticker / ink-memory vocabulary,
-  modular part rules, visual briefs, and sprite-pipeline handoffs.
+Ownership brackets (one role, three lenses): Character · UI/overlay ·
+Environment/assets. Character Designer and Overlay Readability Designer route
+here.
 
 ## Workflow
 
-1. Identify the surface and mode: `review`, `draft`, `style-qa`, `asset-spec`,
-   `character-package`, `motion-pass`, `component-polish`, or
+1. Name surface and mode: `review` | `draft` | `style-qa` | `asset-spec` |
+   `character-package` | `motion-pass` | `component-polish` |
    `implementation-guidance`.
-   For area-local Ridge work, follow the Ridge router to the matching area doc.
-2. Name the visual job in one sentence: what the player should notice, feel, or
-   understand first.
-3. Apply the source hierarchy: style guide, existing implementation, project
-   role docs, then provenance and external references.
+2. Name the visual job in one sentence (what the player notices first).
+3. Source hierarchy: style guide → existing implementation (if runtime) → role
+   docs → provenance only if requested.
 4. Convert taste into production specs: silhouettes, anchors, variants, line
-   weights, shadows, motion states, responsive constraints, and asset checklist.
-5. Keep the recommendation indie-scale: one reusable part system, one component
-   rule, one landmark thumbnail, or one motion/readability pass is often enough.
-6. Validate against the lenses below and flag conflicts instead of blending them
-   into vague "make it more stylish" advice.
+   weights, shadows, motion states, responsive constraints, asset checklist.
+5. Prefer one reusable part system, component rule, landmark thumbnail, or
+   motion/readability pass.
+6. Validate against the lenses; flag conflicts instead of blending them.
 
-## Character Package Lens
+For `character-package` mode, also apply
+[`references/character-package.md`](references/character-package.md).
 
-Use this when Danilo asks for the Character Designer, NPC design, Cicka design,
-or a character-facing asset brief. Keep it inside Visual Direction Artist unless
-Danilo explicitly asks for a larger character-system buildout.
-
-- Function first: every NPC needs one portfolio job, one fast recruiter action,
-  and one deeper hiring-manager path.
-- Silhouette first: define a primary shape, a secondary form or prop, negative
-  space channels, and the smallest mobile size where the character still reads.
-- Presence before lore: specify `passive`, `aware`, and `reaction` states before
-  proposing schedules, dialogue trees, or large animation sheets.
-- Cicka rule: Cicka is an autonomous resident with sleepy, curious, grooming, or
-  inconveniently-placed behaviors; she should not become a mascot button.
-- Handoff: list sprite parts, pivots/origins, baseline, runtime scale, state
-  poses, tiny bark family, and open risks before using the sprite pipeline.
+Completion: Visual Card filled; every finding/spec tied to a lens; one
+validation check present.
 
 ## Review Lenses
 
-- `Style Fidelity`: Does it preserve off-white paper, black ink, monochrome
-  hatching, and sketchbook tactility?
-- `Modular Production`: Can the idea become reusable stickers, landmarks,
-  props, UI surfaces, or sprite parts with stable anchors and small variants?
-- `Readability Hierarchy`: Are silhouette, line weight, spacing, shadow mass,
-  and hatching doing the work before new color or effects?
-- `Character Presence`: Do Cicka and NPCs read as residents with clear function,
-  readable silhouette, micro-presence, and tiny-cast discipline rather than
-  mascots, lore dumps, or animation-scope traps?
-- `Overlay Readability`: Can React overlays be read and tapped on mobile without
-  nested cards, color-only meaning, long single-line titles, or decorative dense
-  handwriting?
-- `Stack Fit`: Does it speak in Phaser, React, Tailwind/CSS utilities, sprite
-  atlases, pivots, shared classes, and existing runtime boundaries?
-- `Motion Discipline`: Is motion stepped, optional when decorative, and safe for
-  reduced-motion users?
-- `Accessibility`: Are dense copy, focus states, keyboard flow, touch targets,
-  and contrast protected?
-- `Scope Control`: Are Panda CSS, vanilla-extract, Spine, DragonBones, and
-  3D-to-2D pipelines treated as escalation paths rather than defaults?
+- `Style Fidelity`: Off-white paper, black ink, monochrome hatching, sketchbook
+  tactility.
+- `Modular Production`: Reusable stickers, landmarks, props, UI, or sprite parts
+  with stable anchors and small variants.
+- `Readability Hierarchy`: Silhouette, line weight, spacing, shadow mass, and
+  hatching before new color or effects.
+- `Character Presence`: Residents with clear function and micro-presence; tiny
+  cast; static presence before schedules or large animation sheets.
+- `Overlay Readability`: Mobile-readable React overlays — paper-cut layout,
+  short titles, no nested cards, no color-only meaning, no decorative
+  handwriting for dense copy.
+- `Stack Fit`: Speaks in current Phaser/React/Tailwind boundaries.
+- `Motion Discipline`: Stepped; decorative motion optional; reduced-motion safe.
+- `Accessibility`: Dense copy, focus, keyboard, touch, contrast protected.
+- `Scope Control`: New styling libs, skeletal animation, or 3D pipelines are
+  escalation paths only when Danilo asks for tooling exploration.
 
 ## Output Shape
-
-Default to this compact structure:
 
 ```md
 **Visual Read**
@@ -132,7 +97,7 @@ Default to this compact structure:
 - Motion:
 - Implementation notes:
 - Accessibility:
-- Do not do:
+- Prefer / avoid:
 
 **Specs Or Findings**
 - `[severity] [lens] issue or proposed direction`
@@ -143,22 +108,6 @@ Default to this compact structure:
 - [style-guide check, mobile/readability check, reduced-motion check, or Danilo taste check]
 ```
 
-Severity is `low`, `medium`, `high`, or `critical`. Use `critical` only when
-progression, accessibility, tribute handling, or the project's visual identity
-would likely break.
-
-## Guardrails
-
-- Do not treat external references as a new house style.
-- Do not add default colorization beyond the monochrome language.
-- Do not use decorative handwriting for dense body copy or long modal text.
-- Do not expand NPCs into schedules, dialogue trees, or full animation sets
-  before static characters feel alive.
-- Do not create a separate Character Designer process unless character packages,
-  schemas, bark packs, or behavior specs become recurring production artifacts.
-- Do not make page flips, parallax, wobble, or ink bleed essential to
-  comprehension.
-- Do not suggest style-system migrations, skeletal animation, or 3D pipelines
-  unless Danilo explicitly asks for a tooling exploration.
-- Do not load provenance reports unless Danilo asks for source rationale,
-  comparison material, or a fresh visual synthesis pass.
+Severity: `low` | `medium` | `high` | `critical`. Use `critical` only when
+progression, accessibility, tribute handling, or visual identity would likely
+break.

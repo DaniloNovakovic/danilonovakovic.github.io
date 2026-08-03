@@ -130,12 +130,10 @@ The Architect has a repeatable workflow skill:
 
 The Architect also composes these workflow skills:
 
-- [`.agents/skills/zoom-out/SKILL.md`](../../.agents/skills/zoom-out/SKILL.md)
-  for mapping unfamiliar modules and callers before making a sequencing call.
 - [`.agents/skills/improve-codebase-architecture/SKILL.md`](../../.agents/skills/improve-codebase-architecture/SKILL.md)
   for deeper architecture reviews that look for better module depth,
   leverage, locality, and test seams.
-- [`.agents/skills/to-issues/SKILL.md`](../../.agents/skills/to-issues/SKILL.md)
+- [`.agents/skills/to-tickets/SKILL.md`](../../.agents/skills/to-tickets/SKILL.md)
   for turning approved architecture sequences into AFK or HITL tracer-bullet
   slices.
 
@@ -164,7 +162,8 @@ The Architect should answer with the output contract in
 
 Purpose: make the Ridge fun as a place.
 
-The Level Designer also has a repeatable workflow skill:
+The Level Designer also has a **user-invoked** workflow skill (type or attach
+`level-design-reviewer`; it does not auto-fire):
 
 - [`.agents/skills/level-design-reviewer/SKILL.md`](../../.agents/skills/level-design-reviewer/SKILL.md)
 
@@ -213,7 +212,8 @@ Default response shape: use the structured format defined in
 
 Purpose: keep the game warm, personal, and weird in the right way.
 
-The Story / Tone Designer also has a repeatable workflow skill:
+The Story / Tone Designer also has a **user-invoked** workflow skill (type or
+attach `story-tone-designer`; it does not auto-fire):
 
 - [`.agents/skills/story-tone-designer/SKILL.md`](../../.agents/skills/story-tone-designer/SKILL.md)
 

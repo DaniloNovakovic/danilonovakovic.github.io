@@ -7,22 +7,30 @@ description: Guides Sketchbook Ridge architecture planning, seam sequencing, bra
 
 ## Quick Start
 
-1. Read `CONTEXT.md`, relevant `docs/adr/`, `docs/runtime-architecture.md`,
-   `docs/architecture-direction.md`, `.agents/rules/10-architecture.md`, and
-   `docs/agents/sketchbook-ridge-team.md`. For Ridge work, also read
-   `docs/game-design/ridge/README.md` before choosing source-of-truth docs; for
-   area-local work, follow its pointer to `docs/game-design/ridge/areas/`.
-2. Start with the smallest safe change. Classify the request as `NO-CHANGE`, `SAFE-AFK`, `SAFE-WITH-SEQUENCE`, or `HITL`.
-3. Apply the anti-slop standards in `.agents/rules/10-architecture.md`.
-4. If unfamiliar, use `zoom-out` first. If refactoring or a new seam is proposed, use `improve-codebase-architecture` for theory before implementation planning.
-5. If the result should become work items, use `to-issues` as the publisher after the sequence is clear.
+1. Load anti-slop + seams from `.agents/rules/10-architecture.md`, plus
+   `docs/runtime-architecture.md` / `docs/architecture-direction.md` as needed.
+   For Ridge work, start at `docs/game-design/ridge/README.md` before choosing
+   SoT docs. Use `CONTEXT.md` / `docs/adr/` when domain language or durable
+   decisions are in play.
+2. Classify as `NO-CHANGE`, `SAFE-AFK`, `SAFE-WITH-SEQUENCE`, or `HITL`.
+3. If unfamiliar with an area, map modules and callers first (domain vocabulary
+   from `CONTEXT.md` / ADRs). For refactor or new-seam theory, use
+   `improve-codebase-architecture` before implementation planning.
+4. If the result should become work items, publish with `to-tickets` after the
+   sequence is clear.
+
+Completion: classification chosen; protected/shared seams named; output contract
+filled.
 
 ## Classifications
 
-- `NO-CHANGE`: no code or doc change should be made; the issue is solved, too speculative, or the proposed abstraction is shallow.
-- `SAFE-AFK`: one thin vertical slice can be implemented independently.
-- `SAFE-WITH-SEQUENCE`: work can proceed only in the specified blocker order; parallelize scene internals, serialize shared seams.
-- `HITL`: stop for Danilo when the choice changes product direction, accepted ADRs, durable domain language, or protected shared seams.
+- `NO-CHANGE`: no code or doc change; solved, too speculative, or shallow
+  abstraction.
+- `SAFE-AFK`: one thin vertical slice can proceed independently.
+- `SAFE-WITH-SEQUENCE`: blocker order required; parallelize scene internals,
+  serialize shared seams.
+- `HITL`: stop for Danilo when the choice changes product direction, accepted
+  ADRs, durable domain language, or protected shared seams.
 
 ## Protected Seams
 
@@ -38,7 +46,7 @@ Treat edits here as high-risk semantic conflicts:
 
 ## Output Contract
 
-For architecture planning or review, answer with:
+Answer with:
 
 - `Classification`
 - `Protected seams touched`
@@ -51,4 +59,6 @@ For architecture planning or review, answer with:
 
 ## Review Boundary
 
-When acting as Architect reviewer, inspect plans, diffs, docs, and tests before approving direction. Do not implement production code in the same pass unless Danilo explicitly asks the Architect to make the change after the review. If using delegated agents has been explicitly requested, keep reviewer work read-only and focused.
+Inspect plans, diffs, docs, and tests before approving direction. Implement
+production code in the same pass only when Danilo explicitly asks after the
+review. If delegated agents were requested, keep reviewer work read-only.
