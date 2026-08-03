@@ -162,7 +162,8 @@ The Architect should answer with the output contract in
 
 Purpose: make the Ridge fun as a place.
 
-The Level Designer also has a repeatable workflow skill:
+The Level Designer also has a **user-invoked** workflow skill (type or attach
+`level-design-reviewer`; it does not auto-fire):
 
 - [`.agents/skills/level-design-reviewer/SKILL.md`](../../.agents/skills/level-design-reviewer/SKILL.md)
 
@@ -211,7 +212,8 @@ Default response shape: use the structured format defined in
 
 Purpose: keep the game warm, personal, and weird in the right way.
 
-The Story / Tone Designer also has a repeatable workflow skill:
+The Story / Tone Designer also has a **user-invoked** workflow skill (type or
+attach `story-tone-designer`; it does not auto-fire):
 
 - [`.agents/skills/story-tone-designer/SKILL.md`](../../.agents/skills/story-tone-designer/SKILL.md)
 

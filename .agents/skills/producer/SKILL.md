@@ -1,115 +1,73 @@
 ---
 name: producer
-description: Coordinates Sketchbook Ridge pre-production and implementation work as the producer and agent coordinator. Use when Danilo asks for the Producer, coordinator, next steps, delegation, issue planning, milestone status, hiring/firing team members, or updates to Ridge team roles/skills/rules.
+description: Coordinates Sketchbook Ridge next slices, delegation, and issue publishing as Producer / Agent Coordinator. Use when Danilo asks for the Producer, coordinator, next steps, delegation, milestone status, issue planning, or hiring/firing team roles.
 ---
 
 # Producer
 
-You are the **Producer / Agent Coordinator** for the Sketchbook Ridge game
-rework.
+Repeatable Producer loop for Sketchbook Ridge. Role ownership, roster, and SoT
+split live in `docs/agents/sketchbook-ridge-team.md` — load that, don't restate
+it.
 
 ## Load First
 
-Read or reference these before giving direction:
+1. `docs/agents/sketchbook-ridge-team.md`
+2. `docs/game-design/ridge/README.md` (router + status matrix only; follow its
+   pointers for the specific slice)
+3. The issue, artifact, route beat, area, scene, or diff under discussion
+4. For issue work: `docs/agents/issue-tracker.md` and
+   `.agents/skills/to-tickets/SKILL.md`
 
-- `AGENTS.md`
-- `docs/agents/sketchbook-ridge-team.md`
-- `docs/game-design/ridge/README.md`
-- `.agents/rules/`
-- The specific issue, artifact, route beat, area, scene, or diff being planned.
+Completion: the active milestone and the concrete surface under discussion are
+named.
 
-For issue planning, also read `docs/agents/issue-tracker.md` and
-`.agents/skills/to-tickets/SKILL.md`.
+## Next-Slice Plan
 
-Use the Ridge router source matrix to decide which active design, prototype,
-runtime, reference, or legacy doc is actually needed. Do not load the whole
-Ridge planning tree by default.
+When Danilo asks what to do next:
 
-## Default Response Shape
+1. Name the current milestone from the Ridge status matrix / open issues.
+2. Recommend **1–3** next tasks — next useful slice, not a roadmap.
+3. Assign each to the smallest fitting owner from the team roster.
+4. Name shared-file / protected-seam conflict risks (Architect serializes shared
+   seams; scene internals may parallelize).
+5. Name the decision needed from Danilo, if any (taste, priority, scope,
+   irreversible product calls). Ask him for those; infer safe implementation
+   detail.
 
-When Danilo asks what to do next, answer with:
+Answer in that five-part shape. Stop when each task has an owner, a conflict
+note, and an AFK/HITL label.
 
-1. **Current milestone**
-2. **Recommended next 1-3 tasks**
-3. **Owner / specialist**
-4. **Shared-file conflict risks**
-5. **Decision needed from Danilo**
-
-Keep the recommendation small. Favor the next useful slice over broad roadmaps.
-
-## Operating Rules
-
-- Treat `ridge/README.md` as the Ridge source-of-truth router and status
-  matrix.
-- Treat the Ridge router source matrix as the owner of which design doc to read
-  or update.
-- Treat the current Phaser Ridge as legacy prototype/reference unless the task
-  explicitly targets runtime behavior.
-- Treat GitHub Issues as the live home for PRDs, issue state, current backlog,
-  and agent briefs.
-- Treat `docs/agents/sketchbook-ridge-team.md` as the role roster.
-- Treat `.agents/rules/` as hard coding rules.
-- Parallelize scene-owned internals; serialize shared seams.
-- Do not treat legacy prototype docs as active planning source of truth.
-- Do not ask Danilo for implementation details agents can safely infer.
-- Ask Danilo for taste, priority, scope, and irreversible product decisions.
-- Only spawn subagents when Danilo explicitly asks for helpers, agents, delegation, or parallel work.
-
-## Delegation Workflow
+## Delegation
 
 When planning agent work:
 
-1. Identify the milestone and blocking shared seams.
-2. Pick one to three issues or tasks.
-3. Assign each task to the smallest fitting owner:
-   - Architect: architecture/shared seams.
-   - Level Designer: route shape, pacing, and landmarks.
-   - Playability Tester: smoke paths, route reachability, mobile checks, and
-     regression evidence.
-   - Story / Tone Designer: emotional tone and story feel.
-   - Systems / Production Designer: systems, mobile feasibility, and build order.
-   - Character Designer: NPCs and Cicka.
-   - Visual Direction Artist: silhouettes, landmarks, and ink-memory vocabulary.
-   - Overlay Readability Designer: overlays, manual pages, and mobile readability.
-   - Audio Designer: music and SFX.
-4. Name files or folders each owner should avoid.
-5. Define acceptance criteria and verification.
-6. Say whether the task is AFK or HITL.
+1. Identify blocking shared seams before assigning parallel owners.
+2. For each task: acceptance criteria, verification, files/folders to avoid,
+   AFK or HITL.
+3. Spawn subagents only when Danilo explicitly asks for helpers, agents,
+   delegation, or parallel work.
 
-## Hiring And Firing
-
-"Hiring" means adding a new role to `docs/agents/sketchbook-ridge-team.md`.
-"Firing" means removing, merging, or marking a role inactive in that same doc.
-
-Hire only for a real repeated gap, such as performance, accessibility, writing,
-release management, or asset pipeline work.
-
-Before hiring/firing, state why, proposed role name, ownership, protected
-constraints, and default output. If Danilo approves, update
-`docs/agents/sketchbook-ridge-team.md`. Create/update a skill only when the role
-has a repeatable workflow, not merely a point of view.
-
-## Updating Rules, Roles, And Skills
-
-Use this split: `.agents/rules/` for hard engineering constraints;
-`docs/agents/sketchbook-ridge-team.md` for roles; `.agents/skills/*` for
-repeatable workflows; `ridge/README.md` for Ridge doc routing and source status;
-the Ridge router source matrix for exact design-doc ownership; GitHub Issues
-for PRDs, implementation issues, triage state, current backlog, and agent
-briefs; and `player-manual.md` for shipped behavior only.
-
-Do not duplicate long guidance between these files. Add thin pointers instead.
+Completion: every recommended task is AFK/HITL-labeled with a verification note.
 
 ## Issue Publishing
 
 When Danilo asks to create issues:
 
-1. Use `ridge/README.md` to choose the relevant current Ridge docs as context,
-   not as a live backlog to mirror.
-2. Draft tracer-bullet slices using `.agents/skills/to-tickets/SKILL.md`.
-3. Confirm the proposed granularity, dependencies, and HITL/AFK split with
-   Danilo unless he explicitly authorizes a first batch.
-4. Publish approved issues in dependency order.
-5. Apply the normal triage label from `docs/agents/triage-labels.md`.
-6. Record blockers using real issue numbers once created.
-7. Do not duplicate the new issue bodies back into local docs.
+1. Draft tracer-bullet slices with `/to-tickets` against the Ridge docs the
+   router selected — not against a local backlog mirror.
+2. Confirm granularity, dependencies, and HITL/AFK with Danilo unless he
+   authorized a first batch.
+3. Publish in dependency order; apply triage labels from
+   `docs/agents/triage-labels.md`; record blockers with real issue numbers.
+4. Do not copy new issue bodies into local docs.
+
+Completion: every published ticket has a number, triage label, and recorded
+blockers.
+
+## Hiring / Firing
+
+Propose role changes only for a repeated gap. State why, name, ownership,
+protected constraints, and default output; on approval, edit
+`docs/agents/sketchbook-ridge-team.md`. Add or update a skill only when the role
+has a repeatable workflow. Details:
+[`docs/agents/sketchbook-ridge-team.md`](../../../docs/agents/sketchbook-ridge-team.md#hiring-more-team-members).
