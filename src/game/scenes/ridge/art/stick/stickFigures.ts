@@ -40,8 +40,8 @@ export function drawStickCicka(
   const s = 12 * scale;
   g.lineStyle(2.5, INK, 1);
   g.fillStyle(PAPER, 1);
-  g.fillEllipse(x, y - s * 0.35, s * 1.5, s * 0.9);
-  g.strokeEllipse(x, y - s * 0.35, s * 1.5, s * 0.9);
+  g.fillEllipse(x, y - s * 0.35, s * 1.5, s * 0.9, 8);
+  g.strokeEllipse(x, y - s * 0.35, s * 1.5, s * 0.9, 8);
   g.fillCircle(x + s * 0.7, y - s * 0.75, s * 0.45);
   g.strokeCircle(x + s * 0.7, y - s * 0.75, s * 0.45);
   g.lineBetween(x + s * 0.45, y - s * 1.05, x + s * 0.35, y - s * 1.45);
@@ -169,7 +169,7 @@ export function drawStickGuitarist(
   const dir = facing === 'left' ? -1 : 1;
   drawBasePerson(g, x, y, facing, scale, { hair: 'messy' });
   g.lineStyle(2.5, INK, 1);
-  g.strokeEllipse(x + dir * s * 0.55, y - s * 0.5, s * 0.6, s * 0.95);
+  g.strokeEllipse(x + dir * s * 0.55, y - s * 0.5, s * 0.6, s * 0.95, 8);
   g.lineBetween(x + dir * s * 0.55, y - s * 1.0, x + dir * s * 0.55, y - s * 1.4);
   // wrist wrap
   g.lineStyle(3, INK, 0.7);
@@ -195,7 +195,7 @@ export function drawStickGuitar(
 ): void {
   const s = 10 * scale;
   g.lineStyle(2.5, INK, 1);
-  g.strokeEllipse(x, y - s * 0.2, s * 0.7, s);
+  g.strokeEllipse(x, y - s * 0.2, s * 0.7, s, 8);
   g.lineBetween(x, y - s * 0.8, x, y - s * 1.5);
   g.strokeRect(x - s * 0.15, y - s * 1.65, s * 0.3, s * 0.25);
 }

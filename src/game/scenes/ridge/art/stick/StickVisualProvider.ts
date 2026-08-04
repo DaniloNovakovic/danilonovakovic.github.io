@@ -1,8 +1,8 @@
-// Stick sync redraws many actors/layers each frame; branching is presentation policy.
-// fallow-ignore-file complexity
 import type * as Phaser from 'phaser';
-import type { RidgeAreaId } from '@/game/core/ridge';
 import type { RidgeVisualProvider, RidgeVisualViewModel } from '../types';
+import { drawRidgeAreaSet } from './areaSets';
+import { drawCrtAtmosphere } from './atmosphere';
+import { GROUND_Y, PAPER, STAGE_HEIGHT, STAGE_WIDTH } from './palette';
 import {
   drawStickCicka,
   drawStickCrowd,
@@ -19,13 +19,8 @@ import {
   drawStickTraveler
 } from './stickFigures';
 
-const PAPER = 0xfbfbf9;
-const INK = 0x1a1a1a;
-const FAINT = 0x4b4337;
-
-const STAGE_WIDTH = 1600;
-const STAGE_HEIGHT = 720;
-const GROUND_Y = 520;
+const BG_TEXTURE_KEY = 'ridge-stick-bg';
+const CRT_TEXTURE_KEY = 'ridge-stick-crt';
 
 export interface StickVisualProviderOptions {
   stageWidth?: number;
@@ -33,19 +28,28 @@ export interface StickVisualProviderOptions {
 }
 
 /**
- * Mathematical stick-figure presentation for Ridge.
- * Swap this class for a sprite-backed provider later without touching core.
+ * Stick-figure Ridge presentation.
+ *
+ * Performance rules:
+ * - Scenery bakes once to a WebGL DynamicTexture (1 quad/frame). Never use
+ *   Graphics#generateTexture (Canvas + willReadFrequently) for full stages.
+ * - Stick Graphics redraw only when actors move.
+ * - Text labels update only when text/position actually changes.
  */
 export class StickVisualProvider implements RidgeVisualProvider {
   private readonly scene: Phaser.Scene;
   private readonly stageWidth: number;
   private readonly stageHeight: number;
-  private readonly root: Phaser.GameObjects.Container;
-  private readonly background: Phaser.GameObjects.Graphics;
   private readonly actors: Phaser.GameObjects.Graphics;
-  private readonly overlay: Phaser.GameObjects.Graphics;
+  private bgImage?: Phaser.GameObjects.Image;
+  private crtImage?: Phaser.GameObjects.Image;
   private promptText?: Phaser.GameObjects.Text;
   private readonly nameLabels = new Map<string, Phaser.GameObjects.Text>();
+  private readonly labelState = new Map<string, { text: string; x: number; y: number }>();
+  private lastBackdropKey = '';
+  private lastOverlayKey = '';
+  private lastActorKey = '';
+  private lastPrompt = '';
   private destroyed = false;
 
   constructor(scene: Phaser.Scene, options: StickVisualProviderOptions = {}) {
@@ -53,19 +57,15 @@ export class StickVisualProvider implements RidgeVisualProvider {
     this.stageWidth = options.stageWidth ?? STAGE_WIDTH;
     this.stageHeight = options.stageHeight ?? STAGE_HEIGHT;
 
-    this.background = scene.add.graphics();
-    this.actors = scene.add.graphics();
-    this.overlay = scene.add.graphics();
-    this.root = scene.add.container(0, 0, [this.background, this.actors, this.overlay]);
-    this.root.setDepth(10);
+    this.actors = scene.add.graphics().setDepth(20);
 
     this.promptText = scene.add
       .text(0, 0, '', {
         fontFamily: 'Caveat, Comic Neue, cursive',
-        fontSize: '22px',
+        fontSize: '24px',
         color: '#1a1a1a',
-        backgroundColor: '#fbfbf9cc',
-        padding: { x: 10, y: 6 }
+        backgroundColor: '#fbfbf9ee',
+        padding: { x: 12, y: 7 }
       })
       .setOrigin(0.5, 1)
       .setDepth(40)
@@ -73,6 +73,7 @@ export class StickVisualProvider implements RidgeVisualProvider {
 
     scene.cameras.main.setBounds(0, 0, this.stageWidth, this.stageHeight);
     scene.cameras.main.setBackgroundColor(PAPER);
+    scene.cameras.main.setZoom(1.15);
   }
 
   worldXForProgress(progress: number): number {
@@ -82,15 +83,134 @@ export class StickVisualProvider implements RidgeVisualProvider {
   sync(view: RidgeVisualViewModel): void {
     if (this.destroyed) return;
 
-    this.drawBackground(view.areaId, view.crossingOpen, view.beat);
-    this.actors.clear();
+    // Beat only affects Relay threshold art; elsewhere crossingOpen covers before/after.
+    const backdropKey =
+      view.areaId === 'relay'
+        ? `${view.areaId}|${view.beat}`
+        : `${view.areaId}|${view.crossingOpen}`;
 
+    if (backdropKey !== this.lastBackdropKey) {
+      this.lastBackdropKey = backdropKey;
+      this.bakeBackground(view);
+    }
+
+    const cam = this.scene.cameras.main;
+    const overlayKey = `${Math.round(cam.width)}x${Math.round(cam.height)}`;
+    if (overlayKey !== this.lastOverlayKey) {
+      this.lastOverlayKey = overlayKey;
+      this.bakeCrtOverlay(Math.round(cam.width), Math.round(cam.height));
+    }
+
+    const actorKey = buildActorKey(view);
+    if (actorKey !== this.lastActorKey) {
+      this.lastActorKey = actorKey;
+      this.redrawActors(view);
+    }
+
+    const player = view.actors.find((actor) => actor.id === 'player');
+    if (player) {
+      const playerX = this.worldXForProgress(player.progress);
+      if (this.promptText) {
+        if (view.nearbyPrompt && view.mode === 'explore') {
+          const prompt = `[E] ${view.nearbyPrompt}`;
+          if (prompt !== this.lastPrompt) {
+            this.lastPrompt = prompt;
+            this.promptText.setText(prompt);
+          }
+          this.promptText.setPosition(playerX, GROUND_Y - 138).setVisible(true);
+        } else {
+          if (this.lastPrompt !== '') this.lastPrompt = '';
+          this.promptText.setVisible(false);
+        }
+      }
+      cam.centerOn(playerX, GROUND_Y - 80);
+    }
+  }
+
+  destroy(): void {
+    this.destroyed = true;
+    this.actors.destroy();
+    this.bgImage?.destroy();
+    this.crtImage?.destroy();
+    this.promptText?.destroy();
+    this.promptText = undefined;
+    this.bgImage = undefined;
+    this.crtImage = undefined;
+    for (const label of this.nameLabels.values()) label.destroy();
+    this.nameLabels.clear();
+    this.labelState.clear();
+    if (this.scene.textures.exists(BG_TEXTURE_KEY)) this.scene.textures.remove(BG_TEXTURE_KEY);
+    if (this.scene.textures.exists(CRT_TEXTURE_KEY)) this.scene.textures.remove(CRT_TEXTURE_KEY);
+  }
+
+  private bakeBackground(view: RidgeVisualViewModel): void {
+    const g = this.scene.make.graphics({ x: 0, y: 0 });
+    drawRidgeAreaSet(g, view.areaId, view.crossingOpen, view.beat, {
+      worldXForProgress: (p) => this.worldXForProgress(p),
+      tick: 0,
+      motion: false
+    });
+
+    try {
+      const texture = replaceDynamicTexture(
+        this.scene,
+        BG_TEXTURE_KEY,
+        this.stageWidth,
+        this.stageHeight
+      );
+      texture.draw(g);
+      texture.render();
+      g.destroy();
+
+      if (this.bgImage) {
+        this.bgImage.setTexture(BG_TEXTURE_KEY).setVisible(true);
+      } else {
+        this.bgImage = this.scene.add
+          .image(0, 0, BG_TEXTURE_KEY)
+          .setOrigin(0, 0)
+          .setDepth(10);
+      }
+    } catch {
+      // Fallback: keep the Graphics object as a static (never-cleared) layer.
+      g.setDepth(10);
+      this.bgImage?.setVisible(false);
+    }
+  }
+
+  private bakeCrtOverlay(width: number, height: number): void {
+    const w = Math.max(1, width);
+    const h = Math.max(1, height);
+    const g = this.scene.make.graphics({ x: 0, y: 0 });
+    drawCrtAtmosphere(g, w, h, 0, false);
+
+    const texture = replaceDynamicTexture(this.scene, CRT_TEXTURE_KEY, w, h);
+    texture.draw(g);
+    texture.render();
+    g.destroy();
+
+    if (this.crtImage) {
+      this.crtImage.setTexture(CRT_TEXTURE_KEY);
+      this.crtImage.setDisplaySize(w, h);
+    } else {
+      this.crtImage = this.scene.add
+        .image(0, 0, CRT_TEXTURE_KEY)
+        .setOrigin(0, 0)
+        .setScrollFactor(0)
+        .setDepth(50)
+        .setDisplaySize(w, h);
+    }
+  }
+
+  private redrawActors(view: RidgeVisualViewModel): void {
+    this.actors.clear();
     const visibleIds = new Set<string>();
+
     for (const actor of view.actors) {
       if (!actor.visible) continue;
       visibleIds.add(actor.id);
       const x = this.worldXForProgress(actor.progress);
       const y = GROUND_Y;
+
       switch (actor.id) {
         case 'player':
           drawStickPlayer(this.actors, x, y, actor.facing, 1.15);
@@ -135,217 +255,67 @@ export class StickVisualProvider implements RidgeVisualProvider {
       }
 
       if (actor.id !== 'player' && actor.id !== 'toy-car' && actor.id !== 'guitar') {
-        this.syncNameLabel(actor.id, actor.label, x, y);
+        this.syncNameLabel(actor.id, actor.label, x, GROUND_Y - 82);
       }
     }
 
     for (const [id, label] of this.nameLabels) {
       if (!visibleIds.has(id)) label.setVisible(false);
     }
-
-    const player = view.actors.find((actor) => actor.id === 'player');
-    if (player && this.promptText) {
-      if (view.nearbyPrompt && view.mode === 'explore') {
-        const x = this.worldXForProgress(player.progress);
-        this.promptText
-          .setText(`[E] ${view.nearbyPrompt}`)
-          .setPosition(x, GROUND_Y - 130)
-          .setVisible(true);
-      } else {
-        this.promptText.setVisible(false);
-      }
-      this.scene.cameras.main.centerOn(
-        this.worldXForProgress(player.progress),
-        GROUND_Y - 80
-      );
-    }
-  }
-
-  destroy(): void {
-    this.destroyed = true;
-    this.root.destroy(true);
-    this.promptText?.destroy();
-    this.promptText = undefined;
-    for (const label of this.nameLabels.values()) label.destroy();
-    this.nameLabels.clear();
   }
 
   private syncNameLabel(id: string, text: string, x: number, y: number): void {
+    const roundedX = Math.round(x);
+    const roundedY = Math.round(y);
+    const prev = this.labelState.get(id);
     let label = this.nameLabels.get(id);
+
     if (!label) {
       label = this.scene.add
-        .text(0, 0, text, {
+        .text(roundedX, roundedY, text, {
           fontFamily: 'Caveat, Comic Neue, cursive',
-          fontSize: '16px',
+          fontSize: '17px',
           color: '#1a1a1a',
-          backgroundColor: '#fbfbf9aa',
-          padding: { x: 4, y: 1 }
+          backgroundColor: '#f4f1eadd',
+          padding: { x: 6, y: 2 }
         })
         .setOrigin(0.5, 1)
         .setDepth(35);
       this.nameLabels.set(id, label);
+      this.labelState.set(id, { text, x: roundedX, y: roundedY });
+      return;
     }
-    label.setText(text).setPosition(x, y - 78).setVisible(true);
+
+    label.setVisible(true);
+    if (!prev || prev.text !== text) label.setText(text);
+    if (!prev || prev.x !== roundedX || prev.y !== roundedY) {
+      label.setPosition(roundedX, roundedY);
+    }
+    this.labelState.set(id, { text, x: roundedX, y: roundedY });
   }
+}
 
-  private drawBackground(
-    areaId: RidgeAreaId,
-    crossingOpen: boolean,
-    beat: RidgeVisualViewModel['beat']
-  ): void {
-    const g = this.background;
-    g.clear();
-    g.fillStyle(PAPER, 1);
-    g.fillRect(0, 0, this.stageWidth, this.stageHeight);
-
-    g.lineStyle(1, FAINT, 0.08);
-    for (let y = 40; y < this.stageHeight; y += 36) {
-      g.lineBetween(0, y, this.stageWidth, y);
-    }
-
-    g.lineStyle(3, INK, 1);
-    g.lineBetween(0, GROUND_Y, this.stageWidth, GROUND_Y);
-
-    if (areaId === 'bridge') {
-      this.drawBridgeSet(g, crossingOpen);
-    } else if (areaId === 'concert') {
-      this.drawConcertSet(g, crossingOpen);
-    } else if (areaId === 'danceFestival') {
-      this.drawDanceSet(g, crossingOpen);
-    } else {
-      this.drawRelaySet(g, beat);
-    }
+function buildActorKey(view: RidgeVisualViewModel): string {
+  let key = `${view.areaId}|`;
+  for (const actor of view.actors) {
+    if (!actor.visible) continue;
+    key += `${actor.id}:${Math.round(actor.progress * 2880)}:${actor.facing}|`;
   }
+  return key;
+}
 
-  private drawBridgeSet(g: Phaser.GameObjects.Graphics, bridgeOpen: boolean): void {
-    g.lineStyle(1, INK, 0.12);
-    for (let x = 0; x < this.stageWidth; x += 28) {
-      g.lineBetween(x, 40, x + 18, 90);
-    }
-    g.lineStyle(2, INK, 0.35);
-    g.beginPath();
-    g.moveTo(0, 280);
-    g.lineTo(220, 210);
-    g.lineTo(480, 260);
-    g.lineTo(760, 190);
-    g.lineTo(1100, 250);
-    g.lineTo(1400, 200);
-    g.lineTo(this.stageWidth, 240);
-    g.strokePath();
-
-    g.lineStyle(2, INK, 0.7);
-    for (let i = 0; i < 26; i += 1) {
-      const x = 90 + i * 18;
-      const h = 55 + ((i * 17) % 35);
-      g.lineBetween(x, GROUND_Y, x, GROUND_Y - h);
-      g.lineBetween(x, GROUND_Y - h, x + 8, GROUND_Y - h - 10);
-    }
-
-    const riverLeft = this.worldXForProgress(0.58);
-    const riverRight = this.worldXForProgress(0.78);
-    g.lineStyle(2, INK, 0.45);
-    for (let y = GROUND_Y + 8; y < GROUND_Y + 70; y += 10) {
-      g.beginPath();
-      g.moveTo(riverLeft, y);
-      for (let x = riverLeft; x <= riverRight; x += 24) {
-        g.lineTo(x + 12, y + ((x / 24) % 2 === 0 ? 3 : -3));
-      }
-      g.strokePath();
-    }
-
-    g.lineStyle(4, INK, 1);
-    if (bridgeOpen) {
-      g.lineBetween(riverLeft, GROUND_Y - 4, riverRight, GROUND_Y - 4);
-    } else {
-      const mid = (riverLeft + riverRight) / 2;
-      g.lineBetween(riverLeft, GROUND_Y - 4, mid - 36, GROUND_Y - 4);
-      g.lineBetween(mid + 36, GROUND_Y - 4, riverRight, GROUND_Y - 4);
-      g.lineStyle(2, INK, 0.4);
-      g.lineBetween(mid - 30, GROUND_Y - 18, mid + 30, GROUND_Y - 18);
-      g.strokeRect(mid - 42, GROUND_Y - 90, 84, 50);
-    }
-
-    g.lineStyle(2, INK, 0.5);
-    g.strokeCircle(140, 110, 28);
+function replaceDynamicTexture(
+  scene: Phaser.Scene,
+  key: string,
+  width: number,
+  height: number
+): Phaser.Textures.DynamicTexture {
+  if (scene.textures.exists(key)) {
+    scene.textures.remove(key);
   }
-
-  private drawConcertSet(g: Phaser.GameObjects.Graphics, crossingOpen: boolean): void {
-    // night wash hatch
-    g.lineStyle(1, INK, 0.18);
-    for (let x = 0; x < this.stageWidth; x += 22) {
-      g.lineBetween(x, 20, x + 10, 120);
-    }
-    // storefronts
-    g.lineStyle(2.5, INK, 0.85);
-    for (let i = 0; i < 6; i += 1) {
-      const x = 120 + i * 220;
-      g.strokeRect(x, GROUND_Y - 160, 140, 160);
-      g.strokeRect(x + 20, GROUND_Y - 100, 40, 50);
-      g.strokeRect(x + 80, GROUND_Y - 100, 40, 50);
-    }
-    // crossing / crowd lane mark
-    const gate = this.worldXForProgress(0.55);
-    g.lineStyle(3, INK, crossingOpen ? 0.25 : 0.9);
-    g.lineBetween(gate, GROUND_Y - 8, gate, GROUND_Y - 70);
-    if (!crossingOpen) {
-      g.lineBetween(gate - 40, GROUND_Y - 40, gate + 40, GROUND_Y - 40);
-    }
-    // moon
-    g.lineStyle(2, INK, 0.55);
-    g.strokeCircle(this.stageWidth - 160, 100, 26);
+  const created = scene.textures.addDynamicTexture(key, width, height);
+  if (!created) {
+    throw new Error(`Failed to create DynamicTexture "${key}"`);
   }
-
-  private drawDanceSet(g: Phaser.GameObjects.Graphics, crossingOpen: boolean): void {
-    // daytime warm hatch
-    g.lineStyle(1, INK, 0.1);
-    for (let x = 0; x < this.stageWidth; x += 30) {
-      g.lineBetween(x, 30, x + 16, 100);
-    }
-    // lantern posts
-    g.lineStyle(2, INK, 0.8);
-    for (let i = 0; i < 8; i += 1) {
-      const x = 160 + i * 170;
-      g.lineBetween(x, GROUND_Y, x, GROUND_Y - 90);
-      g.strokeRect(x - 8, GROUND_Y - 110, 16, 20);
-    }
-    // service gate (matches soft-wall progress)
-    const gate = this.worldXForProgress(0.68);
-    g.lineStyle(3, INK, crossingOpen ? 0.25 : 1);
-    g.strokeRect(gate - 36, GROUND_Y - 90, 72, 90);
-    g.lineStyle(2, INK, crossingOpen ? 0.2 : 0.7);
-    g.lineBetween(gate - 20, GROUND_Y - 70, gate + 20, GROUND_Y - 70);
-    g.lineBetween(gate - 20, GROUND_Y - 50, gate + 20, GROUND_Y - 50);
-    if (crossingOpen) {
-      g.lineStyle(2, INK, 0.4);
-      g.lineBetween(gate + 36, GROUND_Y - 90, gate + 80, GROUND_Y - 40);
-    }
-    // dance floor edge near teacher
-    g.lineStyle(2, INK, 0.35);
-    g.strokeEllipse(this.worldXForProgress(0.4), GROUND_Y - 20, 100, 28);
-  }
-
-  private drawRelaySet(
-    g: Phaser.GameObjects.Graphics,
-    beat: RidgeVisualViewModel['beat']
-  ): void {
-    // sunset arcs
-    g.lineStyle(2, INK, 0.35);
-    for (let i = 0; i < 5; i += 1) {
-      g.strokeCircle(this.stageWidth * 0.7, 180, 40 + i * 28);
-    }
-    // overlook ledge
-    g.lineStyle(3, INK, 1);
-    g.lineBetween(this.worldXForProgress(0.15), GROUND_Y, this.worldXForProgress(0.9), GROUND_Y);
-    g.lineBetween(
-      this.worldXForProgress(0.85),
-      GROUND_Y,
-      this.worldXForProgress(0.95),
-      GROUND_Y + 40
-    );
-    // warm threshold seam
-    const tx = this.worldXForProgress(0.85);
-    g.lineStyle(2, INK, beat === 'relay_complete' ? 0.2 : 0.7);
-    g.strokeCircle(tx, GROUND_Y - 70, 34);
-    g.lineBetween(tx - 20, GROUND_Y - 70, tx + 20, GROUND_Y - 70);
-  }
+  return created;
 }

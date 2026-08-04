@@ -132,10 +132,11 @@ function PortraitFrame({
   return (
     <div
       aria-hidden
-      className="relative flex aspect-square items-end justify-center overflow-hidden rounded border-2 border-[#1a1a1a] bg-[#f4f1ea]"
+      className="relative flex aspect-square items-end justify-center overflow-hidden rounded border-2 border-[#1a1a1a] bg-[#f4f1ea] shadow-[4px_4px_0px_0px_rgba(26,26,26,0.35)]"
       title={speaker}
     >
-      <svg viewBox="0 0 80 80" className="h-full w-full p-2">
+      <div className="pointer-events-none absolute inset-0 opacity-[0.12] [background-image:repeating-linear-gradient(-18deg,transparent,transparent_3px,#1a1a1a_3px,#1a1a1a_4px)]" />
+      <svg viewBox="0 0 80 80" className="relative h-full w-full p-2">
         {portrait === 'cicka' ? <CickaPortrait /> : null}
         {portrait === 'draftsperson' ? <DraftspersonPortrait /> : null}
         {portrait === 'player' ? <PlayerPortrait /> : null}

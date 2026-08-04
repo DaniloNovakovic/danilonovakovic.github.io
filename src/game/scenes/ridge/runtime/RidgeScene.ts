@@ -53,6 +53,7 @@ export class RidgeScene extends Phaser.Scene {
   private isPaused = false;
   private getRidgeDevControls?: () => RidgeDevControls | undefined;
   private lastConversationKey: string | null = null;
+  private lastDevSnapshotKey = '';
   private escJustHandled = false;
   private skipKey?: Phaser.Input.Keyboard.Key;
   private warpKeys?: {
@@ -99,7 +100,7 @@ export class RidgeScene extends Phaser.Scene {
         relay: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FOUR)
       };
     }
-    this.cameras.main.setZoom(1);
+    this.cameras.main.setZoom(1.15);
 
     this.syncPresentation();
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.cleanup());
@@ -246,13 +247,17 @@ export class RidgeScene extends Phaser.Scene {
     this.syncConversationUi(observation);
 
     if (import.meta.env.DEV) {
-      const controls = this.getRidgeDevControls?.();
-      controls?.publishPlayerSnapshot?.({
-        progress: observation.progress,
-        beat: observation.beat,
-        mode: observation.mode,
-        nearby: observation.nearby.map((item) => item.label)
-      });
+      const nearbyLabels = observation.nearby.map((item) => item.label);
+      const snapshotKey = `${observation.progress.toFixed(3)}|${observation.beat}|${observation.mode}|${nearbyLabels.join(',')}`;
+      if (snapshotKey !== this.lastDevSnapshotKey) {
+        this.lastDevSnapshotKey = snapshotKey;
+        this.getRidgeDevControls?.()?.publishPlayerSnapshot?.({
+          progress: observation.progress,
+          beat: observation.beat,
+          mode: observation.mode,
+          nearby: nearbyLabels
+        });
+      }
     }
   }
 
