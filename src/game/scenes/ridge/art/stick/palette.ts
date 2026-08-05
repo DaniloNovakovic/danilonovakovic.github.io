@@ -1,7 +1,6 @@
 export const PAPER = 0xfbfbf9;
 export const PAPER_WARM = 0xf4f1ea;
 export const INK = 0x1a1a1a;
-export const FAINT = 0x4b4337;
 export const WASH = 0x2a241c;
 
 /** CSS twins of {@link PAPER} / {@link INK} for Phaser Text styles. */
@@ -28,7 +27,6 @@ export const VIEW_ABOVE_GROUND = 250;
 export const VIEW_BELOW_GROUND = 90;
 export const VIEW_HEIGHT = VIEW_ABOVE_GROUND + VIEW_BELOW_GROUND;
 export const SKY_TOP = GROUND_Y - VIEW_ABOVE_GROUND;
-export const VIEW_BOTTOM = GROUND_Y + VIEW_BELOW_GROUND;
 
 export const LAYERS = {
   // Runs all the way to the ground line so the distant fill passes behind the

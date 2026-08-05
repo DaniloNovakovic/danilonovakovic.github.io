@@ -185,6 +185,27 @@ interface PersonStyle {
   eyes?: 'determined' | 'thoughtful' | 'happy' | 'focused';
 }
 
+/**
+ * Shared NPC place-and-pose: shadow, base person, and facing metrics.
+ * Keeps the per-role drawers from cloning the same 12-line preamble.
+ */
+function placeStickPerson(
+  g: Phaser.GameObjects.Graphics,
+  x: number,
+  y: number,
+  facing: RidgeFacing,
+  scale: number,
+  pose: StickPose,
+  style: PersonStyle = {},
+  personScale = scale
+): { s: number; dir: number } {
+  const s = 16 * scale;
+  const dir = facing === 'left' ? -1 : 1;
+  drawContactShadow(g, x, y, 32 * scale);
+  drawBasePerson(g, x, y, facing, personScale, pose, style);
+  return { s, dir };
+}
+
 function drawBasePerson(
   g: Phaser.GameObjects.Graphics,
   x: number,
@@ -406,10 +427,7 @@ export function drawStickGuitarist(
   scale = 1,
   pose: StickPose = STILL
 ): void {
-  const s = 16 * scale;
-  const dir = facing === 'left' ? -1 : 1;
-  drawContactShadow(g, x, y, 32 * scale);
-  drawBasePerson(g, x, y, facing, scale, pose, {
+  const { s, dir } = placeStickPerson(g, x, y, facing, scale, pose, {
     hair: 'beanie',
     eyes: 'thoughtful'
   });
@@ -481,10 +499,7 @@ export function drawStickTraveler(
   scale = 1,
   pose: StickPose = STILL
 ): void {
-  const s = 16 * scale;
-  const dir = facing === 'left' ? -1 : 1;
-  drawContactShadow(g, x, y, 32 * scale);
-  drawBasePerson(g, x, y, facing, scale, pose, {
+  const { s, dir } = placeStickPerson(g, x, y, facing, scale, pose, {
     hair: 'ponytail',
     walkingStick: true,
     eyes: 'happy'
@@ -505,10 +520,7 @@ export function drawStickDriver(
   scale = 1,
   pose: StickPose = STILL
 ): void {
-  const s = 16 * scale;
-  const dir = facing === 'left' ? -1 : 1;
-  drawContactShadow(g, x, y, 32 * scale);
-  drawBasePerson(g, x, y, facing, scale, pose, {
+  const { s, dir } = placeStickPerson(g, x, y, facing, scale, pose, {
     hair: 'cap',
     eyes: 'focused'
   });
@@ -532,10 +544,7 @@ export function drawStickOperationsHelper(
   scale = 1,
   pose: StickPose = STILL
 ): void {
-  const s = 16 * scale;
-  const dir = facing === 'left' ? -1 : 1;
-  drawContactShadow(g, x, y, 32 * scale);
-  drawBasePerson(g, x, y, facing, scale, pose, {
+  const { s, dir } = placeStickPerson(g, x, y, facing, scale, pose, {
     hair: 'ponytail',
     apron: true,
     eyes: 'happy'
@@ -586,10 +595,7 @@ export function drawStickSteward(
   scale = 1,
   pose: StickPose = STILL
 ): void {
-  const s = 16 * scale;
-  const dir = facing === 'left' ? -1 : 1;
-  drawContactShadow(g, x, y, 32 * scale);
-  drawBasePerson(g, x, y, facing, scale * 1.05, pose, { hair: 'hat' });
+  const { s, dir } = placeStickPerson(g, x, y, facing, scale, pose, { hair: 'hat' }, scale * 1.05);
   g.lineStyle(2, INK, 1);
   g.strokeCircle(x + dir * s * 0.36, y - s * 0.2, s * 0.12);
   g.lineBetween(x + dir * s * 0.36, y - s * 0.08, x + dir * s * 0.36, y + s * 0.15);

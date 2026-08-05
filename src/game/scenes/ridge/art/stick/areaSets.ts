@@ -13,19 +13,19 @@ import {
   drawPaperBacking,
   drawSunOrMoon,
   drawTree,
-  GROUND_Y,
   jitter,
-  STAGE_WIDTH,
   strokeLeaf
 } from './atmosphere';
 import {
   BRIDGE_CAMP_X,
+  GROUND_Y,
   HORIZON_Y,
   INK,
   LAYERS,
   PAPER,
   PAPER_WARM,
-  SKY_TOP
+  SKY_TOP,
+  STAGE_WIDTH
 } from './palette';
 
 /**

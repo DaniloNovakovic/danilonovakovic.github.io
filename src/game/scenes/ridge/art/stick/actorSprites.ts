@@ -149,6 +149,32 @@ function depthOffsetFor(id: RidgeActorId): number {
   return 0;
 }
 
+type ActorDrawer = (
+  g: Phaser.GameObjects.Graphics,
+  facing: RidgeFacing,
+  pose: StickPose,
+  s: number
+) => void;
+
+/** Per-cast drawer table — avoids a high-cyclomatic switch on every redraw. */
+const ACTOR_DRAWERS: Record<RidgeActorId, ActorDrawer> = {
+  player: (g, facing, pose, s) => drawStickPlayer(g, 0, 0, facing, 1.15 * s, pose),
+  cicka: (g, _facing, pose, s) => drawStickCicka(g, 0, 0, 1.1 * s, pose),
+  'counterpart-cat': (g, _facing, pose, s) => drawStickCicka(g, 0, 0, 0.95 * s, pose),
+  draftsperson: (g, facing, pose, s) => drawStickDraftsperson(g, 0, 0, facing, 1.05 * s, pose),
+  'toy-car': (g, _facing, _pose, s) => drawStickToyCar(g, 22, 4, 1.1 * s),
+  guitarist: (g, facing, pose, s) => drawStickGuitarist(g, 0, 0, facing, 1.05 * s, pose),
+  crowd: (g, _facing, pose, s) => drawStickCrowd(g, 0, 0, s, pose),
+  guitar: (g, _facing, _pose, s) => drawStickGuitar(g, 20, 2, 1.1 * s),
+  traveler: (g, facing, pose, s) => drawStickTraveler(g, 0, 0, facing, s, pose),
+  driver: (g, facing, pose, s) => drawStickDriver(g, 0, 0, facing, 1.05 * s, pose),
+  'operations-helper': (g, facing, pose, s) =>
+    drawStickOperationsHelper(g, 0, 0, facing, 1.05 * s, pose),
+  'dance-teacher': (g, facing, pose, s) => drawStickDanceTeacher(g, 0, 0, facing, 1.05 * s, pose),
+  steward: (g, facing, pose, s) => drawStickSteward(g, 0, 0, facing, s, pose),
+  shuttle: (g, _facing, _pose, s) => drawStickShuttle(g, 0, 0, 1.1 * s)
+};
+
 /** Figures draw around a local origin so the pool can move them freely. */
 function drawActor(
   g: Phaser.GameObjects.Graphics,
@@ -156,49 +182,5 @@ function drawActor(
   facing: RidgeFacing,
   pose: StickPose
 ): void {
-  const s = FIGURE_SCALE;
-  switch (id) {
-    case 'player':
-      drawStickPlayer(g, 0, 0, facing, 1.15 * s, pose);
-      return;
-    case 'cicka':
-      drawStickCicka(g, 0, 0, 1.1 * s, pose);
-      return;
-    case 'counterpart-cat':
-      drawStickCicka(g, 0, 0, 0.95 * s, pose);
-      return;
-    case 'draftsperson':
-      drawStickDraftsperson(g, 0, 0, facing, 1.05 * s, pose);
-      return;
-    case 'toy-car':
-      drawStickToyCar(g, 22, 4, 1.1 * s);
-      return;
-    case 'guitarist':
-      drawStickGuitarist(g, 0, 0, facing, 1.05 * s, pose);
-      return;
-    case 'crowd':
-      drawStickCrowd(g, 0, 0, s, pose);
-      return;
-    case 'guitar':
-      drawStickGuitar(g, 20, 2, 1.1 * s);
-      return;
-    case 'traveler':
-      drawStickTraveler(g, 0, 0, facing, s, pose);
-      return;
-    case 'driver':
-      drawStickDriver(g, 0, 0, facing, 1.05 * s, pose);
-      return;
-    case 'operations-helper':
-      drawStickOperationsHelper(g, 0, 0, facing, 1.05 * s, pose);
-      return;
-    case 'dance-teacher':
-      drawStickDanceTeacher(g, 0, 0, facing, 1.05 * s, pose);
-      return;
-    case 'steward':
-      drawStickSteward(g, 0, 0, facing, s, pose);
-      return;
-    case 'shuttle':
-      drawStickShuttle(g, 0, 0, 1.1 * s);
-      return;
-  }
+  ACTOR_DRAWERS[id](g, facing, pose, FIGURE_SCALE);
 }

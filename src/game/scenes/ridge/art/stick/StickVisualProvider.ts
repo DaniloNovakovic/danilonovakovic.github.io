@@ -309,6 +309,25 @@ export class StickVisualProvider implements RidgeVisualProvider {
     motion: boolean
   ): void {
     const inConversation = view.mode === 'conversation';
+    this.syncNameplates(view, playerProgress, inConversation);
+
+    if (inConversation) {
+      this.barkDirector.interrupt(now);
+      this.presence.syncBarks([]);
+      this.presence.syncFocus(null, 0);
+      return;
+    }
+
+    this.syncAmbientBarks(view, now);
+    this.syncInteractPip(view, tick, motion);
+  }
+
+  /** Nearby residents get a nameplate; the focused one is reserved for the pip. */
+  private syncNameplates(
+    view: RidgeVisualViewModel,
+    playerProgress: number,
+    inConversation: boolean
+  ): void {
     const plates = this.presencePlates;
     const barkCandidates = this.barkCandidates;
     plates.length = 0;
@@ -316,11 +335,9 @@ export class StickVisualProvider implements RidgeVisualProvider {
     const focusActorId = view.focus?.actorId;
 
     for (const actor of view.actors) {
-      if (!actor.visible || actor.id === 'player') continue;
-      if (actor.id === 'toy-car' || actor.id === 'guitar') continue;
+      if (!actor.visible || !showsPresenceChrome(actor.id)) continue;
 
-      const distance = Math.abs(actor.progress - playerProgress);
-      const alpha = inConversation ? 0 : presenceAlpha(distance);
+      const alpha = nameplateAlpha(actor.progress, playerProgress, inConversation);
       if (alpha <= 0.02) continue;
 
       plates.push({
@@ -332,20 +349,14 @@ export class StickVisualProvider implements RidgeVisualProvider {
         alpha
       });
 
-      // The focused resident gets the interact pip instead of small talk.
       if (actor.id !== focusActorId) barkCandidates.push(actor.id);
     }
 
     this.presence.syncNameplates(plates);
+  }
 
-    if (inConversation) {
-      this.barkDirector.interrupt(now);
-      this.presence.syncBarks([]);
-      this.presence.syncFocus(null, 0);
-      return;
-    }
-
-    const bark = this.barkDirector.update(now, barkCandidates);
+  private syncAmbientBarks(view: RidgeVisualViewModel, now: number): void {
+    const bark = this.barkDirector.update(now, this.barkCandidates);
     const barks = this.activeBarks;
     barks.length = 0;
     if (bark) {
@@ -361,7 +372,9 @@ export class StickVisualProvider implements RidgeVisualProvider {
       }
     }
     this.presence.syncBarks(barks);
+  }
 
+  private syncInteractPip(view: RidgeVisualViewModel, tick: number, motion: boolean): void {
     const focus = view.focus;
     if (!focus) {
       this.presence.syncFocus(null, 0);
@@ -397,6 +410,20 @@ export class StickVisualProvider implements RidgeVisualProvider {
       GROUND_Y - (VIEW_ABOVE_GROUND - VIEW_BELOW_GROUND) / 2
     );
   }
+}
+
+/** Props and the player never wear nameplates or mutter ambient lines. */
+function showsPresenceChrome(id: RidgeActorId): boolean {
+  return id !== 'player' && id !== 'toy-car' && id !== 'guitar';
+}
+
+function nameplateAlpha(
+  progress: number,
+  playerProgress: number,
+  inConversation: boolean
+): number {
+  if (inConversation) return 0;
+  return presenceAlpha(Math.abs(progress - playerProgress));
 }
 
 function presenceAlpha(distance: number): number {

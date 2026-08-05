@@ -61,32 +61,12 @@ export function RidgeConversationPanel({ params, dispatchAction }: SceneUiSurfac
     if (!view) return;
 
     const onKey = (event: KeyboardEvent) => {
-      if (view.awaitingChoice && view.choices.length > 0) {
-        if (event.key >= '1' && event.key <= '9') {
-          const index = parseInt(event.key, 10) - 1;
-          if (index < view.choices.length) {
-            event.preventDefault();
-            dispatchAction('ridgeConversationChoose', { choiceId: view.choices[index].id });
-            return;
-          }
-        }
-      }
-
-      if (!view.awaitingChoice) {
-        if (event.key === 'Enter' || event.key === ' ' || event.key === 'z' || event.key === 'Z') {
-          event.preventDefault();
-          if (isTyping) {
-            setTypedLength(view.text.length);
-          } else {
-            dispatchAction('ridgeConversationAdvance');
-          }
-        }
-      }
-
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        dispatchAction('ridgeConversationLeave');
-      }
+      handleConversationKey(event, view, isTyping, {
+        choose: (choiceId) => dispatchAction('ridgeConversationChoose', { choiceId }),
+        advance: () => dispatchAction('ridgeConversationAdvance'),
+        skipTypewriter: () => setTypedLength(view.text.length),
+        leave: () => dispatchAction('ridgeConversationLeave')
+      });
     };
 
     window.addEventListener('keydown', onKey);
@@ -198,6 +178,58 @@ export function RidgeConversationPanel({ params, dispatchAction }: SceneUiSurfac
       </div>
     </div>
   );
+}
+
+interface ConversationKeyActions {
+  choose: (choiceId: string) => void;
+  advance: () => void;
+  skipTypewriter: () => void;
+  leave: () => void;
+}
+
+/** Keyboard contract for the JRPG panel: 1–9 choose, Z/Space/Enter advance, Esc leave. */
+function handleConversationKey(
+  event: KeyboardEvent,
+  view: RidgeConversationPanelView,
+  isTyping: boolean,
+  actions: ConversationKeyActions
+): void {
+  if (tryChoiceKey(event, view, actions.choose)) return;
+  if (tryAdvanceKey(event, view, isTyping, actions)) return;
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    actions.leave();
+  }
+}
+
+function tryChoiceKey(
+  event: KeyboardEvent,
+  view: RidgeConversationPanelView,
+  choose: (choiceId: string) => void
+): boolean {
+  if (!view.awaitingChoice || view.choices.length === 0) return false;
+  if (event.key < '1' || event.key > '9') return false;
+  const index = parseInt(event.key, 10) - 1;
+  if (index >= view.choices.length) return false;
+  event.preventDefault();
+  choose(view.choices[index].id);
+  return true;
+}
+
+function tryAdvanceKey(
+  event: KeyboardEvent,
+  view: RidgeConversationPanelView,
+  isTyping: boolean,
+  actions: Pick<ConversationKeyActions, 'advance' | 'skipTypewriter'>
+): boolean {
+  if (view.awaitingChoice) return false;
+  if (event.key !== 'Enter' && event.key !== ' ' && event.key !== 'z' && event.key !== 'Z') {
+    return false;
+  }
+  event.preventDefault();
+  if (isTyping) actions.skipTypewriter();
+  else actions.advance();
+  return true;
 }
 
 function PortraitFrame({

@@ -245,7 +245,7 @@ export const RIDGE_INITIAL_BEAT: Record<RidgeAreaId, RidgeRouteBeat> = {
 };
 
 /** Left-to-right Compact Ridge Area order for the First Playable Route. */
-export const RIDGE_AREA_ORDER = ['bridge', 'concert', 'danceFestival', 'relay'] as const;
+const RIDGE_AREA_ORDER = ['bridge', 'concert', 'danceFestival', 'relay'] as const;
 
 /** Next area on the route, or null at Relay. */
 export function ridgeNextArea(areaId: RidgeAreaId): RidgeAreaId | null {

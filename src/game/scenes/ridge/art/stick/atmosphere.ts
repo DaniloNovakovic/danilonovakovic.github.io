@@ -1,5 +1,5 @@
 import type * as Phaser from 'phaser';
-import { GROUND_Y, INK, PAPER, PAPER_WARM, STAGE_HEIGHT, STAGE_WIDTH, WASH } from './palette';
+import { GROUND_Y, INK, PAPER, PAPER_WARM, STAGE_HEIGHT, WASH } from './palette';
 
 /** Stepped sketchbook clock (~11 FPS) so motion reads as hand-drawn. */
 export function sketchTick(timeMs: number): number {
@@ -420,19 +420,6 @@ export function drawSunOrMoon(
   }
 }
 
-/** Tiny margin caption — storytelling scrap, not UI. */
-export function drawMarginNote(
-  g: Phaser.GameObjects.Graphics,
-  x: number,
-  y: number,
-  width: number
-): void {
-  g.lineStyle(1.5, INK, 0.28);
-  g.strokeRect(x, y, width, 22);
-  g.lineBetween(x + 6, y + 8, x + width - 8, y + 8);
-  g.lineBetween(x + 6, y + 14, x + width * 0.55, y + 14);
-}
-
 export function drawPaperBacking(
   g: Phaser.GameObjects.Graphics,
   x: number,
@@ -448,5 +435,3 @@ export function drawPaperBacking(
   g.lineBetween(x - w * 0.5 + 4, y, x + w * 0.5 + 4, y);
   g.lineBetween(x + w * 0.5, y - h + 4, x + w * 0.5 + 4, y);
 }
-
-export { STAGE_WIDTH, STAGE_HEIGHT, GROUND_Y };
