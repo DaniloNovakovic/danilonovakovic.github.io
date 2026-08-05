@@ -19,7 +19,11 @@ export function jitter(seed: number): number {
   return n - Math.floor(n);
 }
 
-/** Soft cream wash with a warm band top and bottom. */
+/**
+ * Soft cream wash. The warm tint is stacked into shallow steps at the top of
+ * the sky and left to fade out before the horizon, so the sky gets depth
+ * without a hard tonal edge anywhere the scenery has to sit against.
+ */
 export function drawPaperBase(
   g: Phaser.GameObjects.Graphics,
   width: number,
@@ -27,9 +31,10 @@ export function drawPaperBase(
 ): void {
   g.fillStyle(PAPER, 1);
   g.fillRect(0, 0, width, height);
-  g.fillStyle(PAPER_WARM, 0.5);
-  g.fillRect(0, 0, width, 40);
-  g.fillRect(0, height - 48, width, 48);
+  for (let i = 0; i < 4; i += 1) {
+    g.fillStyle(PAPER_WARM, 0.22);
+    g.fillRect(0, 0, width, 44 + i * 34);
+  }
 }
 
 /**
@@ -139,41 +144,46 @@ export function drawContactShadow(
   g.fillRect(x - width * 0.34, y + 6, width * 0.68, 3);
 }
 
-/** Hatched earth band, ink horizon, and a light grass scribble. */
+/**
+ * The lane the cast walks on.
+ *
+ * Deliberately the quietest surface in the frame: one heavy horizon stroke,
+ * a pale trodden band, and a scatter of stones. Texture here competes with
+ * feet, so it stays under the ground line where nothing else is drawn.
+ */
 export function drawGroundBand(
   g: Phaser.GameObjects.Graphics,
   width: number,
   groundY = GROUND_Y
 ): void {
-  // Trodden lane, then heavier earth below it.
-  g.fillStyle(INK, 0.045);
-  g.fillRect(0, groundY, width, 34);
-  g.fillStyle(INK, 0.09);
-  g.fillRect(0, groundY + 34, width, STAGE_HEIGHT - groundY - 34);
-  drawHatch(g, 0, groundY + 34, width, 60, 38, 0.06, 0.9);
+  g.fillStyle(INK, 0.04);
+  g.fillRect(0, groundY, width, 30);
+  g.fillStyle(INK, 0.075);
+  g.fillRect(0, groundY + 30, width, STAGE_HEIGHT - groundY - 30);
 
   g.lineStyle(5, INK, 1);
   g.lineBetween(0, groundY, width, groundY);
-  g.lineStyle(1.8, INK, 0.3);
-  g.lineBetween(0, groundY + 34, width, groundY + 33);
 
-  // Pebbles and scuffs along the lane.
-  g.fillStyle(INK, 0.3);
-  for (let x = 24; x < width; x += 47) {
-    g.fillRect(x, groundY + 10 + jitter(x * 1.7) * 18, 3 + jitter(x) * 4, 2);
+  // Broken kerb line: a continuous second rule reads as a printing error.
+  g.lineStyle(1.8, INK, 0.22);
+  for (let x = 0; x < width; x += 190) {
+    const run = 110 + jitter(x * 0.9) * 60;
+    g.lineBetween(x, groundY + 30, x + run, groundY + 31);
   }
 
-  g.lineStyle(1.8, INK, 0.38);
-  for (let x = 16; x < width; x += 44) {
-    const h = 8 + jitter(x) * 11;
-    g.lineBetween(x, groundY, x - 3, groundY - h);
-    g.lineBetween(x, groundY, x + 4, groundY - h * 0.7);
+  g.fillStyle(INK, 0.22);
+  for (let x = 24; x < width; x += 68) {
+    g.fillRect(x, groundY + 9 + jitter(x * 1.7) * 16, 3 + jitter(x) * 4, 2);
   }
 }
 
 /**
- * Single bumpy outline rather than stacked circles — overlapping strokes on
- * pale fill read as a Venn diagram, not a cloud.
+ * Flat-bottomed cloud built as one simple polygon.
+ *
+ * Chained `arc()` bumps self-intersect, and the fill rule then knocks holes in
+ * the overlaps and the stroke draws every hidden interior edge, so the mark
+ * reads as a Venn diagram or a row of chevrons. Sampling the union of the bumps
+ * as a height field keeps it a single closed outline.
  */
 export function drawCloud(
   g: Phaser.GameObjects.Graphics,
@@ -183,13 +193,30 @@ export function drawCloud(
   alpha = 0.35
 ): void {
   const s = 16 * scale;
+  const bumps: ReadonlyArray<readonly [number, number]> = [
+    [-0.72, 0.5],
+    [0.02, 0.82],
+    [0.78, 0.56]
+  ];
+  const left = x - s * 1.24;
+  const right = x + s * 1.36;
+
   g.fillStyle(PAPER, 1);
   g.lineStyle(1.8, INK, alpha);
   g.beginPath();
-  g.arc(x - s * 0.72, y + 3, s * 0.5, Math.PI, 0);
-  g.arc(x, y - 4, s * 0.8, Math.PI, 0);
-  g.arc(x + s * 0.78, y + 2, s * 0.55, Math.PI, 0);
-  g.lineTo(x - s * 1.22, y + 3);
+  g.moveTo(left, y + s * 0.2);
+  for (let px = left; px <= right; px += 4) {
+    let top = y + s * 0.2;
+    for (const [offset, radius] of bumps) {
+      const cx = x + s * offset;
+      const r = s * radius;
+      const dx = px - cx;
+      if (Math.abs(dx) >= r) continue;
+      top = Math.min(top, y - Math.sqrt(r * r - dx * dx));
+    }
+    g.lineTo(px, top);
+  }
+  g.lineTo(right, y + s * 0.2);
   g.closePath();
   g.fillPath();
   g.strokePath();
@@ -225,12 +252,13 @@ export function drawMountainRange(
 ): void {
   if (points.length < 2) return;
 
-  // Paler crest behind, offset upward. Two flat tones read as depth; loose
-  // hatching this far away just looks like dirt on the page.
-  fillRidge(g, points, baseY, INK, alpha * 0.6, -30);
+  // One flat tone per range. Depth comes from stacking two calls at different
+  // alphas, not from shading a single mass, which only muddies it.
   fillRidge(g, points, baseY, INK, alpha, 0);
 
-  g.lineStyle(2, INK, Math.min(0.7, alpha + 0.4));
+  // The crest is barely darker than its own fill. A crisp contour over a pale
+  // mass reads as a line drawn on the sky rather than as a distant hillside.
+  g.lineStyle(1.8, INK, Math.min(0.3, alpha + 0.08));
   g.beginPath();
   g.moveTo(points[0]![0], points[0]![1]);
   for (let i = 1; i < points.length; i += 1) {
@@ -255,6 +283,50 @@ function fillRidge(
   }
   g.lineTo(points[points.length - 1]![0], baseY);
   g.lineTo(points[0]![0], baseY);
+  g.closePath();
+  g.fillPath();
+}
+
+/** Corn stalk for the Bridge field: stalk, tassel, and drooping leaves. */
+export function drawCornStalk(
+  g: Phaser.GameObjects.Graphics,
+  x: number,
+  groundY: number,
+  height: number,
+  sway = 0,
+  alpha = 0.75
+): void {
+  const top = groundY - height;
+  g.lineStyle(2.4, INK, alpha);
+  g.lineBetween(x, groundY, x + sway, top);
+  g.lineStyle(1.6, INK, alpha * 0.8);
+  g.lineBetween(x + sway, top, x + sway + 5, top - 11);
+  g.lineBetween(x + sway, top, x + sway - 3, top - 9);
+
+  g.fillStyle(INK, alpha * 0.85);
+  for (let i = 0; i < 4; i += 1) {
+    const at = groundY - height * (0.3 + i * 0.19);
+    strokeLeaf(g, x + sway * 0.5, at, (i % 2 === 0 ? 1 : -1) * (26 + i * 7), 16 + i * 4);
+  }
+}
+
+/**
+ * Leaf that leaves the stem flat then droops, built from a short polygon so it
+ * reads as foliage instead of an arrowhead.
+ */
+export function strokeLeaf(
+  g: Phaser.GameObjects.Graphics,
+  x: number,
+  y: number,
+  reach: number,
+  droop: number
+): void {
+  g.beginPath();
+  g.moveTo(x, y - 2);
+  g.lineTo(x + reach * 0.55, y - 1 + droop * 0.18);
+  g.lineTo(x + reach, y + droop);
+  g.lineTo(x + reach * 0.5, y + droop * 0.28);
+  g.lineTo(x, y + 3);
   g.closePath();
   g.fillPath();
 }
@@ -301,50 +373,6 @@ export function drawTree(
     g.lineStyle(1.2, INK, alpha * 0.55);
     g.lineBetween(x - s * 0.5, groundY - s * 1.1, x - s * 0.1, groundY - s * 1.5);
   }
-}
-
-/** Corn stalk for the Bridge field: stalk, tassel, and drooping leaves. */
-export function drawCornStalk(
-  g: Phaser.GameObjects.Graphics,
-  x: number,
-  groundY: number,
-  height: number,
-  sway = 0,
-  alpha = 0.75
-): void {
-  const top = groundY - height;
-  g.lineStyle(2.4, INK, alpha);
-  g.lineBetween(x, groundY, x + sway, top);
-  g.lineStyle(1.6, INK, alpha * 0.8);
-  g.lineBetween(x + sway, top, x + sway + 5, top - 11);
-  g.lineBetween(x + sway, top, x + sway - 3, top - 9);
-
-  g.fillStyle(INK, alpha * 0.85);
-  for (let i = 0; i < 4; i += 1) {
-    const at = groundY - height * (0.3 + i * 0.19);
-    strokeLeaf(g, x + sway * 0.5, at, (i % 2 === 0 ? 1 : -1) * (26 + i * 7), 16 + i * 4);
-  }
-}
-
-/**
- * Leaf that leaves the stem flat then droops, built from a short polygon so it
- * reads as foliage instead of an arrowhead.
- */
-export function strokeLeaf(
-  g: Phaser.GameObjects.Graphics,
-  x: number,
-  y: number,
-  reach: number,
-  droop: number
-): void {
-  g.beginPath();
-  g.moveTo(x, y - 2);
-  g.lineTo(x + reach * 0.55, y - 1 + droop * 0.18);
-  g.lineTo(x + reach, y + droop);
-  g.lineTo(x + reach * 0.5, y + droop * 0.28);
-  g.lineTo(x, y + 3);
-  g.closePath();
-  g.fillPath();
 }
 
 export function drawSunOrMoon(

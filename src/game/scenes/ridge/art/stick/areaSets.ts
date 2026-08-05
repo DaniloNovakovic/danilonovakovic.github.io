@@ -18,7 +18,15 @@ import {
   STAGE_WIDTH,
   strokeLeaf
 } from './atmosphere';
-import { HORIZON_Y, INK, LAYERS, PAPER, PAPER_WARM, SKY_TOP } from './palette';
+import {
+  BRIDGE_CAMP_X,
+  HORIZON_Y,
+  INK,
+  LAYERS,
+  PAPER,
+  PAPER_WARM,
+  SKY_TOP
+} from './palette';
 
 /**
  * Parallax band being baked.
@@ -61,87 +69,94 @@ export function drawRidgeAreaLayer(
 
 // --- far band -------------------------------------------------------------
 
+/**
+ * Distant ridges stop above the woodland mass. Filling them to the ground line
+ * turns the lower half of the frame into one grey slab behind the corn.
+ */
+const RIDGE_BASE_Y = GROUND_Y - 118;
+
 function drawFarBand(g: Phaser.GameObjects.Graphics, areaId: RidgeAreaId): void {
   if (areaId === 'concert') {
-    g.fillStyle(INK, 0.1);
-    g.fillRect(0, 0, STAGE_WIDTH, HORIZON_Y);
-    drawHatch(g, 0, SKY_TOP, STAGE_WIDTH, 90, 44, 0.08, 0.7);
-    drawSunOrMoon(g, STAGE_WIDTH - 240, SKY_TOP + 46, 28, 'moon');
-    g.fillStyle(INK, 0.4);
+    // Night: the sky is the darkest thing behind the lane, not the trees.
+    g.fillStyle(INK, 0.13);
+    g.fillRect(0, 0, STAGE_WIDTH, RIDGE_BASE_Y);
+    drawSunOrMoon(g, STAGE_WIDTH - 240, SKY_TOP + 40, 26, 'moon');
+    g.fillStyle(INK, 0.35);
     for (let i = 0; i < 26; i += 1) {
       const sx = jitter(i * 3.1) * STAGE_WIDTH;
-      const sy = SKY_TOP + 10 + jitter(i * 7.7) * 150;
+      const sy = SKY_TOP + 8 + jitter(i * 7.7) * 120;
       g.fillRect(sx, sy, 2, 2);
     }
-    drawMountainRange(g, ridgeLine(areaId), 0.14, HORIZON_Y);
+    drawRidges(g, areaId, 0.05, 0.09);
     return;
   }
 
   if (areaId === 'relay') {
-    drawSunOrMoon(g, STAGE_WIDTH * 0.66, SKY_TOP + 100, 42, 'sunset');
-    drawMountainRange(g, ridgeLine(areaId), 0.12, HORIZON_Y);
+    drawSunOrMoon(g, STAGE_WIDTH * 0.66, SKY_TOP + 88, 40, 'sunset');
+    drawRidges(g, areaId, 0.04, 0.075);
     return;
   }
 
-  drawSunOrMoon(g, areaId === 'bridge' ? 210 : 250, SKY_TOP + 56, 27, 'sun');
-  drawMountainRange(g, ridgeLine(areaId), areaId === 'bridge' ? 0.09 : 0.075, HORIZON_Y);
+  drawSunOrMoon(g, areaId === 'bridge' ? 220 : 250, SKY_TOP + 48, 26, 'sun');
+  drawRidges(g, areaId, 0.035, 0.065);
 
   if (areaId === 'bridge') {
-    // Distant town on the far ridge — a promise of somewhere to walk toward.
-    g.lineStyle(1.6, INK, 0.3);
-    const townY = HORIZON_Y - 58;
+    // Distant town on the near ridge — a promise of somewhere to walk toward.
+    g.lineStyle(1.6, INK, 0.26);
+    const townY = RIDGE_BASE_Y - 26;
     for (let i = 0; i < 7; i += 1) {
-      const h = 22 + (i % 3) * 12;
-      g.strokeRect(1180 + i * 16, townY - h, 11, h);
+      const h = 16 + (i % 3) * 10;
+      g.strokeRect(1180 + i * 15, townY - h, 10, h);
     }
-    g.lineBetween(1170, townY, 1310, townY);
+    g.lineBetween(1168, townY, 1306, townY);
   }
 }
 
-/** Peaks live in the upper half of the visible sky, never above it. */
-function ridgeLine(areaId: RidgeAreaId): ReadonlyArray<readonly [number, number]> {
-  const crest = SKY_TOP + 74;
-  switch (areaId) {
-    case 'bridge':
-      return [
-        [0, crest + 46],
-        [280, crest],
-        [560, crest + 34],
-        [860, crest - 22],
-        [1180, crest + 28],
-        [STAGE_WIDTH, crest + 6]
-      ];
-    case 'concert':
-      return [
-        [0, crest + 58],
-        [340, crest + 12],
-        [700, crest + 48],
-        [1080, crest + 4],
-        [STAGE_WIDTH, crest + 40]
-      ];
-    case 'relay':
-      return [
-        [0, crest + 44],
-        [360, crest - 18],
-        [760, crest + 26],
-        [1140, crest - 32],
-        [STAGE_WIDTH, crest + 10]
-      ];
-    default:
-      return [
-        [0, crest + 62],
-        [400, crest + 18],
-        [800, crest + 52],
-        [1200, crest + 2],
-        [STAGE_WIDTH, crest + 36]
-      ];
-  }
+/** Two crests at different heights and tones: the cheapest read of distance. */
+function drawRidges(
+  g: Phaser.GameObjects.Graphics,
+  areaId: RidgeAreaId,
+  farAlpha: number,
+  nearAlpha: number
+): void {
+  drawMountainRange(g, ridgeLine(areaId, 0), farAlpha, RIDGE_BASE_Y);
+  drawMountainRange(g, ridgeLine(areaId, 1), nearAlpha, RIDGE_BASE_Y);
 }
 
 /**
- * Two bands of massed canopy stitching the horizon to the playable lane.
- * Individual little trees at this distance read as specks; a silhouette reads
- * as woodland.
+ * Peaks live in the upper half of the visible sky, never above it. `rank` 0 is
+ * the far crest; rank 1 sits lower and is seeded differently so the two never
+ * trace each other.
+ *
+ * Sampled densely rather than authored as a handful of corners: six points
+ * across 1600px produce enormous straight diagonals that read as ruled lines,
+ * not hills.
+ */
+function ridgeLine(areaId: RidgeAreaId, rank: number): ReadonlyArray<readonly [number, number]> {
+  const crest = SKY_TOP + (rank === 0 ? 40 : 84);
+  const relief = rank === 0 ? 46 : 34;
+  const seed = (areaId === 'concert' ? 4.1 : areaId === 'relay' ? 8.7 : 1.3) + rank * 17;
+
+  const points: Array<readonly [number, number]> = [];
+  const step = 58;
+  for (let x = -step; x <= STAGE_WIDTH + step; x += step) {
+    const t = x / step;
+    // Two out-of-phase waves plus a little noise: broad hills carrying smaller
+    // shoulders, which is what a ridge actually looks like from a distance.
+    const shape =
+      Math.sin(t * 0.34 + seed) * 0.6 +
+      Math.sin(t * 0.79 + seed * 2.4) * 0.28 +
+      (jitter(t + seed) - 0.5) * 0.24;
+    points.push([x, crest - shape * relief]);
+  }
+  return points;
+}
+
+/**
+ * Massed woodland stitching the horizon to the playable lane.
+ *
+ * Dense and grounded like the backup pass, but sampled as a union silhouette
+ * so overlapping crowns fill solid instead of punching Venn-diagram holes.
  */
 function drawTreeline(g: Phaser.GameObjects.Graphics, areaId: RidgeAreaId): void {
   // Haze gap: a pale strip separating the distant ridge from the woodland, so
@@ -167,14 +182,56 @@ function drawCanopyBand(
   g.fillStyle(INK, alpha);
   g.beginPath();
   g.moveTo(-spacing, baseY);
-  for (let x = -spacing; x <= STAGE_WIDTH + spacing; x += spacing) {
-    const lift = crown * (0.45 + jitter(x * 0.11 + seed) * 0.75);
-    const radius = spacing * (0.52 + jitter(x * 0.07 + seed) * 0.3);
-    g.arc(x, baseY - lift, radius, Math.PI, 0);
+  for (let x = -spacing; x <= STAGE_WIDTH + spacing; x += 8) {
+    g.lineTo(x, baseY - canopyHeightAt(x, crown, spacing, seed));
   }
   g.lineTo(STAGE_WIDTH + spacing, baseY);
   g.closePath();
   g.fillPath();
+
+  fadeBelow(g, baseY, alpha);
+}
+
+/**
+ * Silhouette height of the treeline at `x`: the union of nearby crowns, sampled
+ * as a height field.
+ *
+ * Chaining overlapping `arc()` calls into a single path looks like the obvious
+ * way to mass foliage, but the path self-intersects and the fill rule then
+ * cancels every overlap, leaving a patchwork of lens-shaped seams. Sampling the
+ * outline instead yields one simple polygon that fills solid.
+ */
+function canopyHeightAt(x: number, crown: number, spacing: number, seed: number): number {
+  // Continuous floor, so the band never opens a gap down to the ground.
+  let height = crown * 0.2;
+  const first = Math.floor(x / spacing) - 1;
+
+  for (let i = first; i <= first + 2; i += 1) {
+    const cx = i * spacing;
+    const radius = spacing * (0.6 + jitter(cx * 0.07 + seed) * 0.45);
+    const dx = x - cx;
+    if (Math.abs(dx) >= radius) continue;
+    const lift = crown * (0.34 + jitter(cx * 0.11 + seed) * 0.66);
+    height = Math.max(height, lift + Math.sqrt(radius * radius - dx * dx) * 0.55);
+  }
+  return height;
+}
+
+/**
+ * Ramps a baked mass into the tone below it over a few flat steps.
+ *
+ * A silhouette that simply stops leaves a ruled horizontal across the stage,
+ * and scattering marks along the join to hide it only trades one artefact for a
+ * field of blobs. Stepping the alpha down costs five rects and reads as haze.
+ */
+function fadeBelow(g: Phaser.GameObjects.Graphics, y: number, alpha: number): void {
+  const depth = 30;
+  const steps = 5;
+  for (let i = 0; i < steps; i += 1) {
+    const band = depth / steps;
+    g.fillStyle(INK, alpha * (1 - i / steps) * 0.8);
+    g.fillRect(0, y + band * i, STAGE_WIDTH, band + 1);
+  }
 }
 
 // --- near band ------------------------------------------------------------
@@ -184,6 +241,7 @@ function drawBridgeNear(
   bridgeOpen: boolean,
   ctx: AreaSetContext
 ): void {
+  // Grounded timber — trunks meet the lane so crowns never float on haze.
   for (let i = 0; i < 7; i += 1) {
     drawTree(g, 600 + i * 96, GROUND_Y - 2, i % 2 === 0 ? 'pine' : 'round', 1.15, 0.45);
   }
@@ -223,19 +281,27 @@ function drawBridgeNear(
     g.lineBetween(mid - 36, GROUND_Y - 44, mid + 20, GROUND_Y - 44);
   }
 
-  const campX = ctx.worldXForProgress(0.46);
-  g.fillStyle(PAPER_WARM, 0.9);
-  g.lineStyle(2.6, INK, 0.8);
+  const campX = BRIDGE_CAMP_X;
+  g.fillStyle(PAPER_WARM, 1);
+  g.lineStyle(2.8, INK, 0.85);
   g.beginPath();
-  g.moveTo(campX - 36, GROUND_Y);
-  g.lineTo(campX, GROUND_Y - 46);
-  g.lineTo(campX + 36, GROUND_Y);
+  g.moveTo(campX - 40, GROUND_Y);
+  g.lineTo(campX, GROUND_Y - 52);
+  g.lineTo(campX + 40, GROUND_Y);
   g.closePath();
   g.fillPath();
   g.strokePath();
-  drawHatch(g, campX + 6, GROUND_Y - 30, 28, 30, 8, 0.28, 0.9);
-  g.lineStyle(2.2, INK, 0.7);
-  g.strokeRect(campX + 48, GROUND_Y - 30, 38, 20);
+  drawHatch(g, campX + 6, GROUND_Y - 34, 32, 34, 8, 0.26, 0.9);
+
+  // Fire ring in front of the tent — the anchor the drifting smoke rises from.
+  g.lineStyle(2.4, INK, 0.75);
+  g.fillStyle(INK, 0.8);
+  for (let i = 0; i < 3; i += 1) {
+    const a = -0.7 + i * 0.7;
+    g.lineBetween(campX + 62, GROUND_Y, campX + 62 + Math.sin(a) * 16, GROUND_Y - 18);
+  }
+  g.lineStyle(2.2, INK, 0.55);
+  g.lineBetween(campX + 46, GROUND_Y - 1, campX + 78, GROUND_Y - 1);
 }
 
 /**
@@ -474,7 +540,6 @@ function drawForeBand(g: Phaser.GameObjects.Graphics, areaId: RidgeAreaId): void
       g.fillCircle(x, shoulder - r, r);
       g.fillTriangle(x - r * 1.5, base, x + r * 1.5, base, x, shoulder - r * 1.4);
       if (i % 5 === 1) {
-        // An arm up in the air, holding the moment.
         g.fillRect(x + r * 0.8, shoulder - r * 3.4, 7, r * 2.6);
       }
     }

@@ -28,26 +28,29 @@ const FIGURE_SCALE = 1.6;
 /**
  * Distance above the ground line where a figure's silhouette ends, used to
  * hang nameplates and bubbles clear of the art.
+ *
+ * Stored unscaled and multiplied by {@link FIGURE_SCALE} on read, so retuning
+ * figure size cannot silently drop chrome onto somebody's head.
  */
 const HEAD_TOP: Record<RidgeActorId, number> = {
-  player: -78,
-  cicka: -44,
-  'counterpart-cat': -40,
-  draftsperson: -76,
-  'toy-car': -22,
-  guitarist: -74,
-  crowd: -66,
-  guitar: -38,
-  traveler: -70,
-  driver: -74,
-  'operations-helper': -74,
-  'dance-teacher': -80,
-  steward: -76,
-  shuttle: -46
+  player: -49,
+  cicka: -28,
+  'counterpart-cat': -25,
+  draftsperson: -48,
+  'toy-car': -14,
+  guitarist: -46,
+  crowd: -41,
+  guitar: -24,
+  traveler: -44,
+  driver: -46,
+  'operations-helper': -46,
+  'dance-teacher': -50,
+  steward: -48,
+  shuttle: -29
 };
 
 export function headTopFor(id: RidgeActorId): number {
-  return HEAD_TOP[id] ?? -70;
+  return (HEAD_TOP[id] ?? -44) * FIGURE_SCALE;
 }
 
 export interface ActorRenderRequest {

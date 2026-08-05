@@ -16,6 +16,9 @@ export const GROUND_Y = 520;
  * Vertical composition, in world units around {@link GROUND_Y}. Camera zoom is
  * derived from this so the same slice of world is framed on every screen, and
  * scenery can be authored against a window that is actually visible.
+ *
+ * Sized for a phone-friendly walk: enough sky and fore verge that the route
+ * reads as a place, not a close-up talking head.
  */
 export const VIEW_ABOVE_GROUND = 250;
 export const VIEW_BELOW_GROUND = 90;
@@ -28,12 +31,16 @@ export const LAYERS = {
   // canopy instead of ending in a visible tonal seam above it.
   far: { top: 0, width: STAGE_WIDTH, height: GROUND_Y, scrollFactor: 0.35, depth: 5 },
   near: { top: 0, width: STAGE_WIDTH, height: STAGE_HEIGHT, scrollFactor: 1, depth: 14 },
-  // Wider than the stage: a scroll factor above 1 outruns the right edge otherwise.
+  // Tall enough for fore corn to frame the lane. Wider than the stage: a
+  // scroll factor above 1 outruns the right edge otherwise.
   fore: { top: 458, width: 2000, height: 170, scrollFactor: 1.22, depth: 30 }
 } as const;
 
 /** Bottom of the far band — distant silhouettes rest on this line. */
 export const HORIZON_Y = LAYERS.far.height;
+
+/** Bridge campfire, in world X. Shared so drifting smoke lands on the tent. */
+export const BRIDGE_CAMP_X = 742;
 
 export type RidgeLayerId = keyof typeof LAYERS;
 
@@ -46,8 +53,9 @@ export const DEPTH = {
 } as const;
 
 /**
- * Nameplate fade window. The ramp is deliberately short: a plate lingering at
- * half opacity looks like a rendering fault rather than a deliberate fade.
+ * Nameplate fade window, in stage progress. Wide enough that anyone clearly on
+ * screen is labelled, with a short ramp at the edge: a plate lingering at half
+ * opacity looks like a rendering fault rather than a deliberate fade.
  */
-export const PRESENCE_NEAR = 0.155;
-export const PRESENCE_FAR = 0.19;
+export const PRESENCE_NEAR = 0.27;
+export const PRESENCE_FAR = 0.33;

@@ -1,7 +1,7 @@
 import type * as Phaser from 'phaser';
 import type { RidgeAreaId } from '@/game/core/ridge';
 import { drawBird, drawCloud, jitter } from './atmosphere';
-import { GROUND_Y, INK, PAPER, SKY_TOP, STAGE_WIDTH } from './palette';
+import { BRIDGE_CAMP_X, GROUND_Y, INK, PAPER, SKY_TOP, STAGE_WIDTH } from './palette';
 
 /**
  * Drifting set dressing, redrawn on the stepped sketch clock (~11 FPS) rather
@@ -47,6 +47,7 @@ export function drawAmbientNear(
   g.clear();
 
   if (areaId === 'bridge') {
+    drawCampSmoke(g, tick);
     drawDriftingSeeds(g, tick);
     return;
   }
@@ -59,6 +60,24 @@ export function drawAmbientNear(
     return;
   }
   drawSlowMotes(g, tick);
+}
+
+/**
+ * Bridge: smoke off the campfire. A column of loops that widen, lean, and fade
+ * as they climb — the one signal that says somebody lives here.
+ */
+function drawCampSmoke(g: Phaser.GameObjects.Graphics, tick: number): void {
+  const rise = 150;
+  const x = BRIDGE_CAMP_X + 62;
+
+  for (let i = 0; i < 6; i += 1) {
+    const t = (((i * (rise / 6) + tick * 1.2) % rise) + rise) % rise;
+    const climb = t / rise;
+    const y = GROUND_Y - 22 - t;
+    const lean = Math.sin(climb * 3.1 + tick * 0.08) * 22 * climb;
+    g.lineStyle(2, INK, 0.3 * (1 - climb));
+    g.strokeCircle(x + lean, y, 4 + climb * 13);
+  }
 }
 
 /** Bridge: dandelion seeds tumbling on the river breeze. */
