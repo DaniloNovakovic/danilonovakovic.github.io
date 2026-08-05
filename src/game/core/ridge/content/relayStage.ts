@@ -79,17 +79,17 @@ function resolveRelayInteractables(
     {
       spotId: 'arrival',
       conversationId: 'relay.overlook.inspect',
-      prompt: 'relay.overlook.inspect.01'
+      prompt: 'relay.overlook.inspect.prompt'
     },
     {
       spotId: 'cicka',
       conversationId: 'relay.sit_and_play.prompt',
-      prompt: 'relay.sit_and_play.prompt.01'
+      prompt: 'relay.sit_and_play.prompt.prompt'
     },
     {
       spotId: 'sit',
       conversationId: 'relay.sit_and_play.prompt',
-      prompt: 'relay.sit_and_play.prompt.01'
+      prompt: 'relay.sit_and_play.prompt.prompt'
     }
   ];
 

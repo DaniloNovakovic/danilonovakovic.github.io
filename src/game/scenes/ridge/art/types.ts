@@ -1,9 +1,12 @@
 import type {
+  RidgeActorId,
   RidgeActorPresence,
   RidgeAreaId,
+  RidgeInteractable,
   RidgeMode,
   RidgeObservation
 } from '@/game/core/ridge';
+import { actorIdForSpeaker } from '../content/castRegistry';
 
 /**
  * Replaceable art seam.
@@ -16,7 +19,10 @@ export interface RidgeVisualViewModel {
   facing: RidgeObservation['facing'];
   beat: RidgeObservation['beat'];
   ambience: string;
-  nearbyPrompt: string | null;
+  /** Nearest interactable from core; presentation anchors the pip to it. */
+  focus: RidgeInteractable | null;
+  /** Who is speaking right now, so the world can animate their mouth. */
+  speakingActorId: RidgeActorId | null;
   actors: readonly RidgeActorPresence[];
   crossingOpen: boolean;
 }
@@ -42,7 +48,10 @@ export function toRidgeVisualViewModel(
     facing: observation.facing,
     beat: observation.beat,
     ambience: observation.ambience,
-    nearbyPrompt: observation.nearby[0]?.prompt ?? null,
+    focus: observation.nearby[0] ?? null,
+    speakingActorId: observation.conversation
+      ? actorIdForSpeaker(observation.conversation.speakerId)
+      : null,
     actors: observation.actors,
     crossingOpen
   };

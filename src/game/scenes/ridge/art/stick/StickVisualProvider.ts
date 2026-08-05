@@ -1,75 +1,108 @@
-// Stick sync redraws many actors/layers each frame; branching is presentation policy.
-// fallow-ignore-file complexity
 import type * as Phaser from 'phaser';
-import type { RidgeAreaId } from '@/game/core/ridge';
+import type { RidgeActorId, RidgeFacing } from '@/game/core/ridge';
 import type { RidgeVisualProvider, RidgeVisualViewModel } from '../types';
+import { ActorSpritePool, headTopFor, type ActorRenderRequest } from './actorSprites';
+import { drawAmbientFar, drawAmbientNear } from './ambientLayer';
+import { drawRidgeAreaLayer, type SceneryLayer } from './areaSets';
+import { drawCrtAtmosphere, prefersReducedMotion, sketchTick } from './atmosphere';
+import { BarkDirector, type BarkLines } from './barkDirector';
+import { PresenceLayer, type ActiveBark, type PlacedPresence } from './presenceLayer';
 import {
-  drawStickCicka,
-  drawStickCrowd,
-  drawStickDanceTeacher,
-  drawStickDraftsperson,
-  drawStickDriver,
-  drawStickGuitar,
-  drawStickGuitarist,
-  drawStickOperationsHelper,
-  drawStickPlayer,
-  drawStickShuttle,
-  drawStickSteward,
-  drawStickToyCar,
-  drawStickTraveler
-} from './stickFigures';
+  DEPTH,
+  GROUND_Y,
+  LAYERS,
+  PAPER,
+  PRESENCE_FAR,
+  PRESENCE_NEAR,
+  STAGE_HEIGHT,
+  STAGE_WIDTH,
+  VIEW_ABOVE_GROUND,
+  VIEW_BELOW_GROUND,
+  VIEW_HEIGHT
+} from './palette';
 
-const PAPER = 0xfbfbf9;
-const INK = 0x1a1a1a;
-const FAINT = 0x4b4337;
+const CRT_TEXTURE_KEY = 'ridge-stick-crt';
+const SCENERY_TEXTURE_KEY: Record<SceneryLayer, string> = {
+  far: 'ridge-stick-far',
+  near: 'ridge-stick-near',
+  fore: 'ridge-stick-fore'
+};
+const SCENERY_LAYERS: readonly SceneryLayer[] = ['far', 'near', 'fore'];
 
-const STAGE_WIDTH = 1600;
-const STAGE_HEIGHT = 720;
-const GROUND_Y = 520;
+/**
+ * Zoom is driven by height, not width: it keeps the ground line, the figures,
+ * and the sky in the same proportion on any screen, and lets wide displays see
+ * more of the stage instead of larger characters.
+ */
+const MIN_ZOOM = 0.9;
+const MAX_ZOOM = 2.4;
+/** Milliseconds of grace after the last movement before the walk cycle stops. */
+const WALK_RELEASE_MS = 150;
+/** How far an NPC will turn to acknowledge the player, in stage progress. */
+const AWARENESS_RANGE = 0.13;
+
+/** Clearance above a head for a nameplate, so bubbles stack above it. */
+const PLATE_HEIGHT = 60;
 
 export interface StickVisualProviderOptions {
   stageWidth?: number;
   stageHeight?: number;
+  /** Role tags shown under each resident's name. */
+  roles?: Partial<Record<RidgeActorId, string>>;
+  /** Ambient lines residents mutter as the player walks past. */
+  barks?: BarkLines;
 }
 
 /**
- * Mathematical stick-figure presentation for Ridge.
- * Swap this class for a sprite-backed provider later without touching core.
+ * Stick-figure Ridge presentation.
+ *
+ * Performance rules:
+ * - Scenery bakes into one DynamicTexture per parallax band (1 quad each).
+ *   Never use Graphics#generateTexture (Canvas + willReadFrequently) for stages.
+ * - Figures redraw only when their stepped pose changes; following them is a
+ *   transform update.
+ * - Ambient drift redraws on the ~11 FPS sketch clock, not per frame.
+ * - Text objects update only when their content actually changes.
  */
 export class StickVisualProvider implements RidgeVisualProvider {
   private readonly scene: Phaser.Scene;
   private readonly stageWidth: number;
   private readonly stageHeight: number;
-  private readonly root: Phaser.GameObjects.Container;
-  private readonly background: Phaser.GameObjects.Graphics;
-  private readonly actors: Phaser.GameObjects.Graphics;
-  private readonly overlay: Phaser.GameObjects.Graphics;
-  private promptText?: Phaser.GameObjects.Text;
-  private readonly nameLabels = new Map<string, Phaser.GameObjects.Text>();
+  private readonly roles: Partial<Record<RidgeActorId, string>>;
+  private readonly actorPool: ActorSpritePool;
+  private readonly presence: PresenceLayer;
+  private readonly barkDirector: BarkDirector;
+  private readonly sceneryImages = new Map<SceneryLayer, Phaser.GameObjects.Image>();
+  private readonly ambientFar: Phaser.GameObjects.Graphics;
+  private readonly ambientNear: Phaser.GameObjects.Graphics;
+  private crtImage?: Phaser.GameObjects.Image;
+  private lastSceneryKey = '';
+  private lastViewportKey = '';
+  private lastAmbientKey = '';
+  private lastPlayerProgress = Number.NaN;
+  private lastMovedAt = -Infinity;
   private destroyed = false;
+  /** Reused each sync to avoid per-frame array churn on the hot path. */
+  private readonly actorRequests: ActorRenderRequest[] = [];
+  private readonly presencePlates: PlacedPresence[] = [];
+  private readonly barkCandidates: RidgeActorId[] = [];
+  private readonly activeBarks: ActiveBark[] = [];
 
   constructor(scene: Phaser.Scene, options: StickVisualProviderOptions = {}) {
     this.scene = scene;
     this.stageWidth = options.stageWidth ?? STAGE_WIDTH;
     this.stageHeight = options.stageHeight ?? STAGE_HEIGHT;
+    this.roles = options.roles ?? {};
 
-    this.background = scene.add.graphics();
-    this.actors = scene.add.graphics();
-    this.overlay = scene.add.graphics();
-    this.root = scene.add.container(0, 0, [this.background, this.actors, this.overlay]);
-    this.root.setDepth(10);
+    this.ambientFar = scene.add
+      .graphics()
+      .setDepth(DEPTH.ambientFar)
+      .setScrollFactor(LAYERS.far.scrollFactor, 1);
+    this.ambientNear = scene.add.graphics().setDepth(DEPTH.ambientNear);
 
-    this.promptText = scene.add
-      .text(0, 0, '', {
-        fontFamily: 'Caveat, Comic Neue, cursive',
-        fontSize: '22px',
-        color: '#1a1a1a',
-        backgroundColor: '#fbfbf9cc',
-        padding: { x: 10, y: 6 }
-      })
-      .setOrigin(0.5, 1)
-      .setDepth(40)
-      .setVisible(false);
+    this.actorPool = new ActorSpritePool(scene);
+    this.presence = new PresenceLayer(scene);
+    this.barkDirector = new BarkDirector(options.barks ?? {});
 
     scene.cameras.main.setBounds(0, 0, this.stageWidth, this.stageHeight);
     scene.cameras.main.setBackgroundColor(PAPER);
@@ -82,270 +115,339 @@ export class StickVisualProvider implements RidgeVisualProvider {
   sync(view: RidgeVisualViewModel): void {
     if (this.destroyed) return;
 
-    this.drawBackground(view.areaId, view.crossingOpen, view.beat);
-    this.actors.clear();
+    const now = this.scene.time.now;
+    const motion = !prefersReducedMotion();
+    const stepTick = sketchTick(now);
+    // Decorative motion freezes under reduced-motion; the walk cycle does not,
+    // because it is feedback for something the player is actively doing.
+    const tick = motion ? stepTick : 0;
 
-    const visibleIds = new Set<string>();
-    for (const actor of view.actors) {
-      if (!actor.visible) continue;
-      visibleIds.add(actor.id);
-      const x = this.worldXForProgress(actor.progress);
-      const y = GROUND_Y;
-      switch (actor.id) {
-        case 'player':
-          drawStickPlayer(this.actors, x, y, actor.facing, 1.15);
-          break;
-        case 'cicka':
-        case 'counterpart-cat':
-          drawStickCicka(this.actors, x, y, actor.id === 'counterpart-cat' ? 0.95 : 1.1);
-          break;
-        case 'draftsperson':
-          drawStickDraftsperson(this.actors, x, y, actor.facing, 1.05);
-          break;
-        case 'toy-car':
-          drawStickToyCar(this.actors, x + 18, y + 4, 1.1);
-          break;
-        case 'guitarist':
-          drawStickGuitarist(this.actors, x, y, actor.facing, 1.05);
-          break;
-        case 'crowd':
-          drawStickCrowd(this.actors, x, y, 1);
-          break;
-        case 'guitar':
-          drawStickGuitar(this.actors, x + 16, y + 2, 1.1);
-          break;
-        case 'traveler':
-          drawStickTraveler(this.actors, x, y, actor.facing, 1);
-          break;
-        case 'driver':
-          drawStickDriver(this.actors, x, y, actor.facing, 1.05);
-          break;
-        case 'operations-helper':
-          drawStickOperationsHelper(this.actors, x, y, actor.facing, 1.05);
-          break;
-        case 'dance-teacher':
-          drawStickDanceTeacher(this.actors, x, y, actor.facing, 1.05);
-          break;
-        case 'steward':
-          drawStickSteward(this.actors, x, y, actor.facing, 1);
-          break;
-        case 'shuttle':
-          drawStickShuttle(this.actors, x, y, 1.1);
-          break;
-      }
-
-      if (actor.id !== 'player' && actor.id !== 'toy-car' && actor.id !== 'guitar') {
-        this.syncNameLabel(actor.id, actor.label, x, y);
-      }
-    }
-
-    for (const [id, label] of this.nameLabels) {
-      if (!visibleIds.has(id)) label.setVisible(false);
-    }
+    this.syncViewport();
+    this.syncScenery(view);
+    this.syncAmbient(view, tick);
 
     const player = view.actors.find((actor) => actor.id === 'player');
-    if (player && this.promptText) {
-      if (view.nearbyPrompt && view.mode === 'explore') {
-        const x = this.worldXForProgress(player.progress);
-        this.promptText
-          .setText(`[E] ${view.nearbyPrompt}`)
-          .setPosition(x, GROUND_Y - 130)
-          .setVisible(true);
-      } else {
-        this.promptText.setVisible(false);
-      }
-      this.scene.cameras.main.centerOn(
-        this.worldXForProgress(player.progress),
-        GROUND_Y - 80
-      );
-    }
+    const playerProgress = player?.progress ?? view.progress;
+    const walking = this.trackWalking(playerProgress, now) && view.mode === 'explore';
+
+    this.syncActors(view, playerProgress, tick, stepTick, motion, walking);
+    this.syncPresence(view, playerProgress, now, tick, motion);
+    this.followCamera(view, playerProgress);
   }
 
   destroy(): void {
     this.destroyed = true;
-    this.root.destroy(true);
-    this.promptText?.destroy();
-    this.promptText = undefined;
-    for (const label of this.nameLabels.values()) label.destroy();
-    this.nameLabels.clear();
-  }
+    this.actorPool.destroy();
+    this.presence.destroy();
+    this.ambientFar.destroy();
+    this.ambientNear.destroy();
+    this.crtImage?.destroy();
+    this.crtImage = undefined;
 
-  private syncNameLabel(id: string, text: string, x: number, y: number): void {
-    let label = this.nameLabels.get(id);
-    if (!label) {
-      label = this.scene.add
-        .text(0, 0, text, {
-          fontFamily: 'Caveat, Comic Neue, cursive',
-          fontSize: '16px',
-          color: '#1a1a1a',
-          backgroundColor: '#fbfbf9aa',
-          padding: { x: 4, y: 1 }
-        })
-        .setOrigin(0.5, 1)
-        .setDepth(35);
-      this.nameLabels.set(id, label);
+    for (const image of this.sceneryImages.values()) image.destroy();
+    this.sceneryImages.clear();
+
+    for (const key of Object.values(SCENERY_TEXTURE_KEY)) {
+      if (this.scene.textures.exists(key)) this.scene.textures.remove(key);
     }
-    label.setText(text).setPosition(x, y - 78).setVisible(true);
-  }
-
-  private drawBackground(
-    areaId: RidgeAreaId,
-    crossingOpen: boolean,
-    beat: RidgeVisualViewModel['beat']
-  ): void {
-    const g = this.background;
-    g.clear();
-    g.fillStyle(PAPER, 1);
-    g.fillRect(0, 0, this.stageWidth, this.stageHeight);
-
-    g.lineStyle(1, FAINT, 0.08);
-    for (let y = 40; y < this.stageHeight; y += 36) {
-      g.lineBetween(0, y, this.stageWidth, y);
-    }
-
-    g.lineStyle(3, INK, 1);
-    g.lineBetween(0, GROUND_Y, this.stageWidth, GROUND_Y);
-
-    if (areaId === 'bridge') {
-      this.drawBridgeSet(g, crossingOpen);
-    } else if (areaId === 'concert') {
-      this.drawConcertSet(g, crossingOpen);
-    } else if (areaId === 'danceFestival') {
-      this.drawDanceSet(g, crossingOpen);
-    } else {
-      this.drawRelaySet(g, beat);
+    if (this.scene.textures.exists(CRT_TEXTURE_KEY)) {
+      this.scene.textures.remove(CRT_TEXTURE_KEY);
     }
   }
 
-  private drawBridgeSet(g: Phaser.GameObjects.Graphics, bridgeOpen: boolean): void {
-    g.lineStyle(1, INK, 0.12);
-    for (let x = 0; x < this.stageWidth; x += 28) {
-      g.lineBetween(x, 40, x + 18, 90);
-    }
-    g.lineStyle(2, INK, 0.35);
-    g.beginPath();
-    g.moveTo(0, 280);
-    g.lineTo(220, 210);
-    g.lineTo(480, 260);
-    g.lineTo(760, 190);
-    g.lineTo(1100, 250);
-    g.lineTo(1400, 200);
-    g.lineTo(this.stageWidth, 240);
-    g.strokePath();
+  /** Zoom so figures stay a readable size on any canvas, and rebake the CRT. */
+  private syncViewport(): void {
+    const cam = this.scene.cameras.main;
+    const key = `${Math.round(cam.width)}x${Math.round(cam.height)}`;
+    if (key === this.lastViewportKey) return;
+    this.lastViewportKey = key;
 
-    g.lineStyle(2, INK, 0.7);
-    for (let i = 0; i < 26; i += 1) {
-      const x = 90 + i * 18;
-      const h = 55 + ((i * 17) % 35);
-      g.lineBetween(x, GROUND_Y, x, GROUND_Y - h);
-      g.lineBetween(x, GROUND_Y - h, x + 8, GROUND_Y - h - 10);
-    }
+    cam.setZoom(clamp(cam.height / VIEW_HEIGHT, MIN_ZOOM, MAX_ZOOM));
+    this.bakeCrtOverlay(Math.round(cam.width), Math.round(cam.height));
+  }
 
-    const riverLeft = this.worldXForProgress(0.58);
-    const riverRight = this.worldXForProgress(0.78);
-    g.lineStyle(2, INK, 0.45);
-    for (let y = GROUND_Y + 8; y < GROUND_Y + 70; y += 10) {
-      g.beginPath();
-      g.moveTo(riverLeft, y);
-      for (let x = riverLeft; x <= riverRight; x += 24) {
-        g.lineTo(x + 12, y + ((x / 24) % 2 === 0 ? 3 : -3));
+  private syncScenery(view: RidgeVisualViewModel): void {
+    // Only Relay redresses per beat; elsewhere the crossing state covers it.
+    const key =
+      view.areaId === 'relay'
+        ? `${view.areaId}|${view.beat}`
+        : `${view.areaId}|${view.crossingOpen}`;
+    if (key === this.lastSceneryKey) return;
+    this.lastSceneryKey = key;
+
+    for (const layer of SCENERY_LAYERS) {
+      this.bakeSceneryLayer(layer, view);
+    }
+  }
+
+  private bakeSceneryLayer(layer: SceneryLayer, view: RidgeVisualViewModel): void {
+    const spec = LAYERS[layer];
+    const g = this.scene.make.graphics({ x: 0, y: 0 });
+    drawRidgeAreaLayer(g, layer, view.areaId, view.crossingOpen, view.beat, {
+      worldXForProgress: (progress) => this.worldXForProgress(progress)
+    });
+
+    const key = SCENERY_TEXTURE_KEY[layer];
+    try {
+      const texture = replaceDynamicTexture(this.scene, key, spec.width, spec.height);
+      texture.draw(g);
+      texture.render();
+
+      let image = this.sceneryImages.get(layer);
+      if (image) {
+        image.setTexture(key);
+      } else {
+        image = this.scene.add
+          .image(0, spec.top, key)
+          .setOrigin(0, 0)
+          .setDepth(spec.depth)
+          // Parallax on X only: the camera barely pans vertically, and a
+          // vertical factor would slide the horizon out of its own band.
+          .setScrollFactor(spec.scrollFactor, 1);
+        this.sceneryImages.set(layer, image);
       }
-      g.strokePath();
+      image.setVisible(true);
+    } finally {
+      g.destroy();
     }
-
-    g.lineStyle(4, INK, 1);
-    if (bridgeOpen) {
-      g.lineBetween(riverLeft, GROUND_Y - 4, riverRight, GROUND_Y - 4);
-    } else {
-      const mid = (riverLeft + riverRight) / 2;
-      g.lineBetween(riverLeft, GROUND_Y - 4, mid - 36, GROUND_Y - 4);
-      g.lineBetween(mid + 36, GROUND_Y - 4, riverRight, GROUND_Y - 4);
-      g.lineStyle(2, INK, 0.4);
-      g.lineBetween(mid - 30, GROUND_Y - 18, mid + 30, GROUND_Y - 18);
-      g.strokeRect(mid - 42, GROUND_Y - 90, 84, 50);
-    }
-
-    g.lineStyle(2, INK, 0.5);
-    g.strokeCircle(140, 110, 28);
   }
 
-  private drawConcertSet(g: Phaser.GameObjects.Graphics, crossingOpen: boolean): void {
-    // night wash hatch
-    g.lineStyle(1, INK, 0.18);
-    for (let x = 0; x < this.stageWidth; x += 22) {
-      g.lineBetween(x, 20, x + 10, 120);
+  private bakeCrtOverlay(width: number, height: number): void {
+    const w = Math.max(1, width);
+    const h = Math.max(1, height);
+    const g = this.scene.make.graphics({ x: 0, y: 0 });
+    drawCrtAtmosphere(g, w, h);
+
+    const texture = replaceDynamicTexture(this.scene, CRT_TEXTURE_KEY, w, h);
+    texture.draw(g);
+    texture.render();
+    g.destroy();
+
+    if (this.crtImage) {
+      this.crtImage.setTexture(CRT_TEXTURE_KEY).setDisplaySize(w, h);
+      return;
     }
-    // storefronts
-    g.lineStyle(2.5, INK, 0.85);
-    for (let i = 0; i < 6; i += 1) {
-      const x = 120 + i * 220;
-      g.strokeRect(x, GROUND_Y - 160, 140, 160);
-      g.strokeRect(x + 20, GROUND_Y - 100, 40, 50);
-      g.strokeRect(x + 80, GROUND_Y - 100, 40, 50);
-    }
-    // crossing / crowd lane mark
-    const gate = this.worldXForProgress(0.55);
-    g.lineStyle(3, INK, crossingOpen ? 0.25 : 0.9);
-    g.lineBetween(gate, GROUND_Y - 8, gate, GROUND_Y - 70);
-    if (!crossingOpen) {
-      g.lineBetween(gate - 40, GROUND_Y - 40, gate + 40, GROUND_Y - 40);
-    }
-    // moon
-    g.lineStyle(2, INK, 0.55);
-    g.strokeCircle(this.stageWidth - 160, 100, 26);
+    this.crtImage = this.scene.add
+      .image(0, 0, CRT_TEXTURE_KEY)
+      .setOrigin(0, 0)
+      .setScrollFactor(0)
+      .setDepth(DEPTH.crt)
+      .setDisplaySize(w, h);
   }
 
-  private drawDanceSet(g: Phaser.GameObjects.Graphics, crossingOpen: boolean): void {
-    // daytime warm hatch
-    g.lineStyle(1, INK, 0.1);
-    for (let x = 0; x < this.stageWidth; x += 30) {
-      g.lineBetween(x, 30, x + 16, 100);
-    }
-    // lantern posts
-    g.lineStyle(2, INK, 0.8);
-    for (let i = 0; i < 8; i += 1) {
-      const x = 160 + i * 170;
-      g.lineBetween(x, GROUND_Y, x, GROUND_Y - 90);
-      g.strokeRect(x - 8, GROUND_Y - 110, 16, 20);
-    }
-    // service gate (matches soft-wall progress)
-    const gate = this.worldXForProgress(0.68);
-    g.lineStyle(3, INK, crossingOpen ? 0.25 : 1);
-    g.strokeRect(gate - 36, GROUND_Y - 90, 72, 90);
-    g.lineStyle(2, INK, crossingOpen ? 0.2 : 0.7);
-    g.lineBetween(gate - 20, GROUND_Y - 70, gate + 20, GROUND_Y - 70);
-    g.lineBetween(gate - 20, GROUND_Y - 50, gate + 20, GROUND_Y - 50);
-    if (crossingOpen) {
-      g.lineStyle(2, INK, 0.4);
-      g.lineBetween(gate + 36, GROUND_Y - 90, gate + 80, GROUND_Y - 40);
-    }
-    // dance floor edge near teacher
-    g.lineStyle(2, INK, 0.35);
-    g.strokeEllipse(this.worldXForProgress(0.4), GROUND_Y - 20, 100, 28);
+  private syncAmbient(view: RidgeVisualViewModel, tick: number): void {
+    const key = `${view.areaId}|${tick}`;
+    if (key === this.lastAmbientKey) return;
+    this.lastAmbientKey = key;
+    drawAmbientFar(this.ambientFar, view.areaId, tick);
+    drawAmbientNear(this.ambientNear, view.areaId, tick);
   }
 
-  private drawRelaySet(
-    g: Phaser.GameObjects.Graphics,
-    beat: RidgeVisualViewModel['beat']
+  /** True while the player is actively walking, with a short release. */
+  private trackWalking(progress: number, now: number): boolean {
+    if (Number.isNaN(this.lastPlayerProgress)) {
+      this.lastPlayerProgress = progress;
+      return false;
+    }
+    if (Math.abs(progress - this.lastPlayerProgress) > 0.0001) {
+      this.lastPlayerProgress = progress;
+      this.lastMovedAt = now;
+    }
+    return now - this.lastMovedAt < WALK_RELEASE_MS;
+  }
+
+  private syncActors(
+    view: RidgeVisualViewModel,
+    playerProgress: number,
+    tick: number,
+    stepTick: number,
+    motion: boolean,
+    walking: boolean
   ): void {
-    // sunset arcs
-    g.lineStyle(2, INK, 0.35);
-    for (let i = 0; i < 5; i += 1) {
-      g.strokeCircle(this.stageWidth * 0.7, 180, 40 + i * 28);
-    }
-    // overlook ledge
-    g.lineStyle(3, INK, 1);
-    g.lineBetween(this.worldXForProgress(0.15), GROUND_Y, this.worldXForProgress(0.9), GROUND_Y);
-    g.lineBetween(
-      this.worldXForProgress(0.85),
-      GROUND_Y,
-      this.worldXForProgress(0.95),
-      GROUND_Y + 40
-    );
-    // warm threshold seam
-    const tx = this.worldXForProgress(0.85);
-    g.lineStyle(2, INK, beat === 'relay_complete' ? 0.2 : 0.7);
-    g.strokeCircle(tx, GROUND_Y - 70, 34);
-    g.lineBetween(tx - 20, GROUND_Y - 70, tx + 20, GROUND_Y - 70);
+    const requests = this.actorRequests;
+    requests.length = 0;
+    const playerX = this.worldXForProgress(playerProgress);
+
+    view.actors.forEach((actor, index) => {
+      if (!actor.visible) return;
+
+      const x = this.worldXForProgress(actor.progress);
+      const isPlayer = actor.id === 'player';
+      const isWalking = isPlayer && walking;
+      const isTalking = view.speakingActorId === actor.id;
+
+      // Residents turn to acknowledge you, the way a street does.
+      const aware = !isPlayer && Math.abs(actor.progress - playerProgress) < AWARENESS_RANGE;
+      const towardPlayer: RidgeFacing = playerX >= x ? 'right' : 'left';
+
+      // Idle breath is a transform, so it never touches the command buffer.
+      const breath =
+        motion && !isWalking ? Math.round(Math.sin((tick + index * 3) * 0.42) * 1.4) : 0;
+
+      requests.push({
+        id: actor.id,
+        x,
+        y: GROUND_Y,
+        facing: aware ? towardPlayer : actor.facing,
+        bob: breath,
+        pose: {
+          frame: (isWalking ? stepTick : tick) + index,
+          walking: isWalking,
+          talking: isTalking
+        }
+      });
+    });
+
+    this.actorPool.sync(requests);
   }
+
+  private syncPresence(
+    view: RidgeVisualViewModel,
+    playerProgress: number,
+    now: number,
+    tick: number,
+    motion: boolean
+  ): void {
+    const inConversation = view.mode === 'conversation';
+    this.syncNameplates(view, playerProgress, inConversation);
+
+    if (inConversation) {
+      this.barkDirector.interrupt(now);
+      this.presence.syncBarks([]);
+      this.presence.syncFocus(null, 0);
+      return;
+    }
+
+    this.syncAmbientBarks(view, now);
+    this.syncInteractPip(view, tick, motion);
+  }
+
+  /** Nearby residents get a nameplate; the focused one is reserved for the pip. */
+  private syncNameplates(
+    view: RidgeVisualViewModel,
+    playerProgress: number,
+    inConversation: boolean
+  ): void {
+    const plates = this.presencePlates;
+    const barkCandidates = this.barkCandidates;
+    plates.length = 0;
+    barkCandidates.length = 0;
+    const focusActorId = view.focus?.actorId;
+
+    for (const actor of view.actors) {
+      if (!actor.visible || !showsPresenceChrome(actor.id)) continue;
+
+      const alpha = nameplateAlpha(actor.progress, playerProgress, inConversation);
+      if (alpha <= 0.02) continue;
+
+      plates.push({
+        id: actor.id,
+        name: actor.label,
+        role: this.roles[actor.id] ?? '',
+        x: this.worldXForProgress(actor.progress),
+        y: GROUND_Y + headTopFor(actor.id),
+        alpha
+      });
+
+      if (actor.id !== focusActorId) barkCandidates.push(actor.id);
+    }
+
+    this.presence.syncNameplates(plates);
+  }
+
+  private syncAmbientBarks(view: RidgeVisualViewModel, now: number): void {
+    const bark = this.barkDirector.update(now, this.barkCandidates);
+    const barks = this.activeBarks;
+    barks.length = 0;
+    if (bark) {
+      const speaker = view.actors.find((actor) => actor.id === bark.actorId);
+      if (speaker) {
+        barks.push({
+          id: bark.actorId,
+          text: bark.text,
+          x: this.worldXForProgress(speaker.progress),
+          y: GROUND_Y + headTopFor(speaker.id) - PLATE_HEIGHT,
+          alpha: bark.alpha
+        });
+      }
+    }
+    this.presence.syncBarks(barks);
+  }
+
+  private syncInteractPip(view: RidgeVisualViewModel, tick: number, motion: boolean): void {
+    const focus = view.focus;
+    if (!focus) {
+      this.presence.syncFocus(null, 0);
+      return;
+    }
+
+    const anchor = focus.actorId
+      ? view.actors.find((actor) => actor.id === focus.actorId && actor.visible)
+      : undefined;
+    const x = this.worldXForProgress(anchor ? anchor.progress : focus.progress);
+    const y = anchor
+      ? GROUND_Y + headTopFor(anchor.id) - PLATE_HEIGHT
+      : GROUND_Y - 96;
+    const bob = motion ? (tick % 6 < 3 ? 0 : -3) : 0;
+
+    this.presence.syncFocus({ key: focus.spotId + focus.prompt, label: focus.prompt, x, y }, bob);
+  }
+
+  /** Frame the player, and widen to hold both speakers during a conversation. */
+  private followCamera(view: RidgeVisualViewModel, playerProgress: number): void {
+    const playerX = this.worldXForProgress(playerProgress);
+    let centerX = playerX;
+
+    if (view.mode === 'conversation' && view.speakingActorId) {
+      const speaker = view.actors.find((actor) => actor.id === view.speakingActorId);
+      if (speaker?.visible) {
+        centerX = (playerX + this.worldXForProgress(speaker.progress)) / 2;
+      }
+    }
+
+    this.scene.cameras.main.centerOn(
+      centerX,
+      GROUND_Y - (VIEW_ABOVE_GROUND - VIEW_BELOW_GROUND) / 2
+    );
+  }
+}
+
+/** Props and the player never wear nameplates or mutter ambient lines. */
+function showsPresenceChrome(id: RidgeActorId): boolean {
+  return id !== 'player' && id !== 'toy-car' && id !== 'guitar';
+}
+
+function nameplateAlpha(
+  progress: number,
+  playerProgress: number,
+  inConversation: boolean
+): number {
+  if (inConversation) return 0;
+  return presenceAlpha(Math.abs(progress - playerProgress));
+}
+
+function presenceAlpha(distance: number): number {
+  if (distance <= PRESENCE_NEAR) return 1;
+  if (distance >= PRESENCE_FAR) return 0;
+  return 1 - (distance - PRESENCE_NEAR) / (PRESENCE_FAR - PRESENCE_NEAR);
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
+function replaceDynamicTexture(
+  scene: Phaser.Scene,
+  key: string,
+  width: number,
+  height: number
+): Phaser.Textures.DynamicTexture {
+  if (scene.textures.exists(key)) {
+    scene.textures.remove(key);
+  }
+  const created = scene.textures.addDynamicTexture(key, width, height);
+  if (!created) {
+    throw new Error(`Failed to create DynamicTexture "${key}"`);
+  }
+  return created;
 }

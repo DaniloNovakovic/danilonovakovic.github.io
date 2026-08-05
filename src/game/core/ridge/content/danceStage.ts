@@ -157,26 +157,22 @@ function resolveDanceInteractables(
     plans.push({
       spotId: 'traveler',
       conversationId: 'dance.traveler.relay_wayfinding',
-      prompt: 'dance.traveler.relay_wayfinding.01'
+      prompt: 'dance.traveler.relay_wayfinding.prompt'
     });
     plans.push({
       spotId: 'steward',
       conversationId: 'dance.locals.triangulated_read',
-      prompt: 'dance.locals.triangulated_read.01'
+      prompt: 'dance.locals.triangulated_read.prompt'
     });
     plans.push({
       spotId: 'teacher',
       conversationId: 'dance.driver.one_step_practice',
-      prompt: state.flags.has(FLAG_DRIVER)
-        ? 'dance.driver.one_step_practice.done.01'
-        : 'dance.driver.one_step_practice.01'
+      prompt: 'dance.driver.one_step_practice.prompt'
     });
     plans.push({
       spotId: 'operations',
       conversationId: 'dance.operations_helper.handoff_check',
-      prompt: state.flags.has(FLAG_OPS)
-        ? 'dance.operations_helper.handoff_check.done.01'
-        : 'dance.operations_helper.handoff_check.01'
+      prompt: 'dance.operations_helper.handoff_check.prompt'
     });
     plans.push({
       spotId: 'driver',
@@ -184,13 +180,13 @@ function resolveDanceInteractables(
         ? 'dance.driver.folded_song_request'
         : 'dance.driver.shuttle_delay',
       prompt: bothReady(state)
-        ? 'dance.driver.folded_song_request.01'
-        : 'dance.driver.shuttle_delay.01'
+        ? 'dance.driver.folded_song_request.prompt'
+        : 'dance.driver.shuttle_delay.prompt'
     });
     plans.push({
       spotId: 'cicka',
       conversationId: 'dance.cicka.resting_spot',
-      prompt: 'dance.cicka.resting_spot.01'
+      prompt: 'dance.cicka.resting_spot.prompt'
     });
   }
 
@@ -198,7 +194,7 @@ function resolveDanceInteractables(
     plans.push({
       spotId: 'gate',
       conversationId: 'dance.setup_clearance',
-      prompt: 'dance.setup_clearance.01'
+      prompt: 'dance.setup_clearance.prompt'
     });
   }
 
@@ -206,7 +202,7 @@ function resolveDanceInteractables(
     plans.push({
       spotId: 'shuttle',
       conversationId: 'dance.shuttle.last_daylight_ride',
-      prompt: 'dance.shuttle.last_daylight_ride.01'
+      prompt: 'dance.shuttle.last_daylight_ride.prompt'
     });
     plans.push({
       spotId: 'cicka',

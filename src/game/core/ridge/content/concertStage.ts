@@ -104,7 +104,7 @@ function resolveConcertInteractables(
     plans.push({
       spotId: 'crowd',
       conversationId: 'concert.crowd.delay_barks',
-      prompt: 'concert.crowd.delay_barks.01'
+      prompt: 'concert.crowd.delay_barks.prompt'
     });
     plans.push({
       spotId: 'guitarist',
@@ -116,21 +116,21 @@ function resolveConcertInteractables(
             : 'concert.guitarist.injury',
       prompt:
         state.beat === 'concert_practiced'
-          ? 'concert.performance.auto_success.01'
+          ? 'concert.performance.auto_success.prompt'
           : state.flags.has('met_guitarist')
-            ? 'concert.guitarist.practice_riff.01'
-            : 'concert.guitarist.injury.01'
+            ? 'concert.guitarist.practice_riff.prompt'
+            : 'concert.guitarist.injury.prompt'
     });
     plans.push({
       spotId: 'cicka-nook',
       conversationId: 'concert.cicka.band_resting_spot',
-      prompt: 'concert.cicka.band_resting_spot.01'
+      prompt: 'concert.cicka.band_resting_spot.prompt'
     });
     if (state.beat === 'concert_practiced') {
       plans.push({
         spotId: 'stage',
         conversationId: 'concert.performance.auto_success',
-        prompt: 'concert.performance.auto_success.01'
+        prompt: 'concert.performance.auto_success.prompt'
       });
     }
   }
@@ -139,17 +139,17 @@ function resolveConcertInteractables(
     plans.push({
       spotId: 'guitarist',
       conversationId: 'concert.guitarist.guitar_handoff',
-      prompt: 'concert.guitarist.guitar_handoff.01'
+      prompt: 'concert.guitarist.guitar_handoff.prompt'
     });
     plans.push({
       spotId: 'cicka-nook',
       conversationId: 'concert.cicka.band_resting_spot',
-      prompt: 'concert.cicka.band_resting_spot.03'
+      prompt: 'concert.cicka.band_resting_spot.prompt'
     });
     plans.push({
       spotId: 'dance-exit',
       conversationId: 'concert.exit.dance_transition',
-      prompt: 'concert.exit.dance_transition.01'
+      prompt: 'concert.exit.dance_transition.prompt'
     });
   }
 

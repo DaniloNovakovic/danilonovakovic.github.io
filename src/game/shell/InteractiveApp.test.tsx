@@ -703,6 +703,40 @@ describe('InteractiveApp', () => {
     });
   });
 
+  it('keeps Ridge conversation panel in-flow inside the scene UI overlay host', async () => {
+    bridgeActions.enterScene(RIDGE_SCENE_ID);
+    bridgeActions.setSceneUiPanel(RIDGE_SCENE_ID, 'ridgeConversation', {
+      conversationId: 'cicka-intro',
+      speaker: 'Cicka',
+      speakerId: 'cicka',
+      text: 'Soft footfalls on the page.',
+      lineIndex: 0,
+      lineCount: 2,
+      awaitingChoice: false,
+      choices: [],
+      portrait: 'cicka'
+    });
+    render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
+
+    const dialog = screen.getByRole('dialog', { name: /cicka/i });
+    const overlayHost = screen.getByTestId('scene-ui-panel-overlay');
+
+    // Fixed + host transform/overflow clips the dialog into a black strip mid-CRT.
+    expect(dialog.className).not.toMatch(/\bfixed\b/);
+    expect(overlayHost.contains(dialog)).toBe(true);
+    expect(within(dialog).getByRole('button', { name: /continue/i })).toBeDefined();
+    expect(within(dialog).getByRole('button', { name: /step back/i })).toBeDefined();
+
+    // First click finishes the typewriter; second advances the line.
+    await userEvent.click(within(dialog).getByRole('button', { name: /continue/i }));
+    await userEvent.click(within(dialog).getByRole('button', { name: /continue/i }));
+
+    expect(bridgeStore.getState().sceneUi.lastAction).toMatchObject({
+      ownerSceneId: RIDGE_SCENE_ID,
+      action: 'ridgeConversationAdvance'
+    });
+  });
+
   it('switches to static mode directly from the toolbar', async () => {
     const onSwitchToStatic = vi.fn();
     render(<InteractiveApp onSwitchToStatic={onSwitchToStatic} />);

@@ -20,16 +20,9 @@ import type {
   RidgeStageRegistry,
   RidgeWorldState
 } from './types';
-import { RIDGE_GUITAR_ITEM, RIDGE_INITIAL_BEAT } from './types';
+import { RIDGE_GUITAR_ITEM, RIDGE_INITIAL_BEAT, ridgeNextArea } from './types';
 
 const DEFAULT_STEP = 0.05;
-
-const NEXT_AREA: Record<RidgeAreaId, RidgeAreaId | null> = {
-  bridge: 'concert',
-  concert: 'danceFestival',
-  danceFestival: 'relay',
-  relay: null
-};
 
 export interface RidgeSessionOptions {
   /** Preferred: full multi-area registry for Compact Area Transitions. */
@@ -247,7 +240,7 @@ export class RidgeConsoleSession {
   }
 
   private handleSkip(): RidgeCommandResult {
-    const next = NEXT_AREA[this.state.areaId];
+    const next = ridgeNextArea(this.state.areaId);
     if (!next) {
       return this.fail('Already at Relay. Use: warp bridge|concert|dance|relay');
     }

@@ -31,7 +31,9 @@ export function collectNearbyFromPlans(
       kind: spot.kind,
       distance,
       prompt: resolvePrompt(plan.prompt),
-      conversationId: plan.conversationId
+      conversationId: plan.conversationId,
+      progress: spot.progress,
+      actorId: spot.actorId
     });
   }
   return result;
