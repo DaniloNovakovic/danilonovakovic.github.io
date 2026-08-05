@@ -26,24 +26,34 @@ export function RidgeConversationPanel({ params, dispatchAction }: SceneUiSurfac
   const titleId = useId();
   const textId = useId();
 
+  const lineKey = view ? `${view.conversationId}:${view.lineIndex}:${view.text}` : '';
   const [typedLength, setTypedLength] = useState(0);
+  const [activeLineKey, setActiveLineKey] = useState(lineKey);
+
+  // Reset the typewriter when the authored line changes — during render, not in
+  // an effect (react-hooks/set-state-in-effect).
+  if (lineKey !== activeLineKey) {
+    setActiveLineKey(lineKey);
+    setTypedLength(0);
+  }
 
   useEffect(() => {
     if (!view) return;
-    setTypedLength(0);
     const targetLen = view.text.length;
     if (targetLen === 0) return;
 
     const interval = setInterval(() => {
       setTypedLength((prev) => {
-        if (prev < targetLen) return prev + 1;
-        clearInterval(interval);
-        return prev;
+        if (prev >= targetLen) {
+          clearInterval(interval);
+          return prev;
+        }
+        return prev + 1;
       });
     }, 16);
 
     return () => clearInterval(interval);
-  }, [view?.text, view?.lineIndex]);
+  }, [lineKey, view]);
 
   const isTyping = view ? typedLength < view.text.length : false;
 
