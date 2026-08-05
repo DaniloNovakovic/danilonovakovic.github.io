@@ -244,5 +244,24 @@ export const RIDGE_INITIAL_BEAT: Record<RidgeAreaId, RidgeRouteBeat> = {
   relay: 'relay_linger'
 };
 
+/** Left-to-right Compact Ridge Area order for the First Playable Route. */
+export const RIDGE_AREA_ORDER = ['bridge', 'concert', 'danceFestival', 'relay'] as const;
+
+/** Next area on the route, or null at Relay. */
+export function ridgeNextArea(areaId: RidgeAreaId): RidgeAreaId | null {
+  const index = RIDGE_AREA_ORDER.indexOf(areaId);
+  if (index < 0 || index >= RIDGE_AREA_ORDER.length - 1) return null;
+  return RIDGE_AREA_ORDER[index + 1]!;
+}
+
+/**
+ * Previous area for DEV reverse-warp. Wraps Bridge → Relay so `[` / `]` cycle.
+ */
+export function ridgePrevArea(areaId: RidgeAreaId): RidgeAreaId {
+  const index = RIDGE_AREA_ORDER.indexOf(areaId);
+  if (index <= 0) return RIDGE_AREA_ORDER[RIDGE_AREA_ORDER.length - 1]!;
+  return RIDGE_AREA_ORDER[index - 1]!;
+}
+
 export const RIDGE_GUITAR_ITEM = 'guitar';
 export const RIDGE_TOY_CAR_ITEM = 'toy-car';

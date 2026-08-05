@@ -82,6 +82,11 @@ export class StickVisualProvider implements RidgeVisualProvider {
   private lastPlayerProgress = Number.NaN;
   private lastMovedAt = -Infinity;
   private destroyed = false;
+  /** Reused each sync to avoid per-frame array churn on the hot path. */
+  private readonly actorRequests: ActorRenderRequest[] = [];
+  private readonly presencePlates: PlacedPresence[] = [];
+  private readonly barkCandidates: RidgeActorId[] = [];
+  private readonly activeBarks: ActiveBark[] = [];
 
   constructor(scene: Phaser.Scene, options: StickVisualProviderOptions = {}) {
     this.scene = scene;
@@ -259,7 +264,8 @@ export class StickVisualProvider implements RidgeVisualProvider {
     motion: boolean,
     walking: boolean
   ): void {
-    const requests: ActorRenderRequest[] = [];
+    const requests = this.actorRequests;
+    requests.length = 0;
     const playerX = this.worldXForProgress(playerProgress);
 
     view.actors.forEach((actor, index) => {
@@ -303,8 +309,10 @@ export class StickVisualProvider implements RidgeVisualProvider {
     motion: boolean
   ): void {
     const inConversation = view.mode === 'conversation';
-    const plates: PlacedPresence[] = [];
-    const barkCandidates: string[] = [];
+    const plates = this.presencePlates;
+    const barkCandidates = this.barkCandidates;
+    plates.length = 0;
+    barkCandidates.length = 0;
     const focusActorId = view.focus?.actorId;
 
     for (const actor of view.actors) {
@@ -338,7 +346,8 @@ export class StickVisualProvider implements RidgeVisualProvider {
     }
 
     const bark = this.barkDirector.update(now, barkCandidates);
-    const barks: ActiveBark[] = [];
+    const barks = this.activeBarks;
+    barks.length = 0;
     if (bark) {
       const speaker = view.actors.find((actor) => actor.id === bark.actorId);
       if (speaker) {

@@ -1,6 +1,7 @@
 import { useEffect, useId, useState } from 'react';
 import type { SceneUiSurfaceProps } from '@/game/sceneUi/registry';
 import type { RidgeEmotion } from '@/game/core/ridge';
+import type { RidgePortraitId } from '../content/castRegistry';
 
 export interface RidgeConversationChoiceView {
   id: string;
@@ -16,7 +17,7 @@ export interface RidgeConversationPanelView {
   lineCount: number;
   awaitingChoice: boolean;
   choices: readonly RidgeConversationChoiceView[];
-  portrait: 'player' | 'cicka' | 'draftsperson' | 'guitarist' | 'driver' | 'traveler' | 'teacher' | 'prompt';
+  portrait: RidgePortraitId;
   emotion?: RidgeEmotion;
 }
 
@@ -86,10 +87,14 @@ export function RidgeConversationPanel({ params, dispatchAction }: SceneUiSurfac
 
   const visibleText = view.text.slice(0, typedLength);
 
+  /** Same as Z/Space: skip the typewriter, or advance once the line is shown. */
   const handleBoxClick = () => {
+    if (view.awaitingChoice) return;
     if (isTyping) {
       setTypedLength(view.text.length);
+      return;
     }
+    dispatchAction('ridgeConversationAdvance');
   };
 
   // Stay in-flow: SceneUiHost already centers overlay panels with a transform +
@@ -157,9 +162,6 @@ export function RidgeConversationPanel({ params, dispatchAction }: SceneUiSurfac
                 onClick={(e) => {
                   e.stopPropagation();
                   handleBoxClick();
-                  if (!isTyping) {
-                    dispatchAction('ridgeConversationAdvance');
-                  }
                 }}
               >
                 Continue<span className="hidden sm:inline-block font-normal opacity-70 ml-1.5">[Z / Space]</span>

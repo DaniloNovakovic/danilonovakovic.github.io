@@ -4,6 +4,10 @@ export const INK = 0x1a1a1a;
 export const FAINT = 0x4b4337;
 export const WASH = 0x2a241c;
 
+/** CSS twins of {@link PAPER} / {@link INK} for Phaser Text styles. */
+export const PAPER_CSS = '#fbfbf9';
+export const INK_CSS = '#1a1a1a';
+
 export const STAGE_WIDTH = 1600;
 export const STAGE_HEIGHT = 720;
 export const GROUND_Y = 520;

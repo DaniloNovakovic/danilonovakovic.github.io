@@ -10,10 +10,12 @@ import {
   RidgeConsoleSession,
   RIDGE_GUITAR_ITEM,
   RIDGE_INITIAL_BEAT,
+  ridgePrevArea,
   type RidgeAreaId,
   type RidgeCommandResult,
   type RidgeSessionEvent
 } from '@/game/core/ridge';
+import { portraitForSpeaker } from '../content/castRegistry';
 import { type OverlayId } from '@/game/overlays/overlayIds';
 import { PHASER_SCENE_KEYS, RIDGE_SCENE_ID } from '@/game/scenes/sceneIds';
 import {
@@ -163,13 +165,7 @@ export class RidgeScene extends Phaser.Scene {
 
     if (this.prevKey && Phaser.Input.Keyboard.JustDown(this.prevKey)) {
       const currentArea = this.session.observe().areaId;
-      const prevAreaMap: Record<RidgeAreaId, RidgeAreaId> = {
-        bridge: 'relay',
-        concert: 'bridge',
-        danceFestival: 'concert',
-        relay: 'danceFestival'
-      };
-      this.applyResult(this.session.exec(`warp ${prevAreaMap[currentArea]}`));
+      this.applyResult(this.session.exec(`warp ${ridgePrevArea(currentArea)}`));
       this.syncPresentation();
     }
   }
@@ -291,17 +287,4 @@ export class RidgeScene extends Phaser.Scene {
     this.prevKey = undefined;
     this.lastConversationKey = null;
   }
-}
-
-function portraitForSpeaker(
-  speakerId: string
-): RidgeConversationPanelView['portrait'] {
-  if (speakerId === 'cicka' || speakerId === 'counterpart-cat') return 'cicka';
-  if (speakerId === 'bridgeDraftsperson' || speakerId === 'draftsperson') return 'draftsperson';
-  if (speakerId === 'injuredGuitarist' || speakerId === 'guitarist') return 'guitarist';
-  if (speakerId === 'danceDriver' || speakerId === 'driver' || speakerId === 'operationsHelper') return 'driver';
-  if (speakerId === 'traveler' || speakerId === 'steward') return 'traveler';
-  if (speakerId === 'danceTeacher') return 'teacher';
-  if (speakerId === 'prompt' || speakerId === 'dedication') return 'prompt';
-  return 'player';
 }

@@ -1,9 +1,6 @@
 import type * as Phaser from 'phaser';
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
-import { DEPTH, INK, PAPER, PAPER_WARM } from './palette';
-
-const INK_CSS = '#1a1a1a';
-const PAPER_CSS = '#fbfbf9';
+import { DEPTH, INK, INK_CSS, PAPER, PAPER_CSS, PAPER_WARM } from './palette';
 
 export interface NameplateContent {
   name: string;
@@ -43,6 +40,7 @@ export class PresenceLayer {
   private readonly scene: Phaser.Scene;
   private readonly nameplates = new Map<string, Nameplate>();
   private readonly barks = new Map<string, SpeechBubble>();
+  private readonly seenIds = new Set<string>();
   private focus?: FocusPip;
 
   constructor(scene: Phaser.Scene) {
@@ -50,10 +48,10 @@ export class PresenceLayer {
   }
 
   syncNameplates(entries: readonly PlacedPresence[]): void {
-    const seen = new Set<string>();
+    this.seenIds.clear();
 
     for (const entry of entries) {
-      seen.add(entry.id);
+      this.seenIds.add(entry.id);
       let plate = this.nameplates.get(entry.id);
       if (!plate) {
         plate = new Nameplate(this.scene);
@@ -64,7 +62,7 @@ export class PresenceLayer {
     }
 
     for (const [id, plate] of this.nameplates) {
-      if (!seen.has(id)) plate.hide();
+      if (!this.seenIds.has(id)) plate.hide();
     }
   }
 
@@ -79,10 +77,10 @@ export class PresenceLayer {
   }
 
   syncBarks(active: readonly ActiveBark[]): void {
-    const seen = new Set<string>();
+    this.seenIds.clear();
 
     for (const bark of active) {
-      seen.add(bark.id);
+      this.seenIds.add(bark.id);
       let bubble = this.barks.get(bark.id);
       if (!bubble) {
         bubble = new SpeechBubble(this.scene);
@@ -93,7 +91,7 @@ export class PresenceLayer {
     }
 
     for (const [id, bubble] of this.barks) {
-      if (!seen.has(id)) bubble.hide();
+      if (!this.seenIds.has(id)) bubble.hide();
     }
   }
 

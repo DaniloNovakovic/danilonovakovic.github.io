@@ -1,9 +1,11 @@
 /** Ambient chatter scheduling. No Phaser or DOM, so it stays testable. */
 
-export type BarkLines = Readonly<Record<string, readonly string[]>>;
+import type { RidgeActorId } from '@/game/core/ridge';
+
+export type BarkLines = Partial<Record<RidgeActorId, readonly string[]>>;
 
 export interface BarkPerformance {
-  actorId: string;
+  actorId: RidgeActorId;
   text: string;
   /** 0..1 fade envelope for the bubble. */
   alpha: number;
@@ -23,9 +25,9 @@ const MAX_GAP_MS = 6400;
 export class BarkDirector {
   private readonly lines: BarkLines;
   private readonly random: () => number;
-  private current: { actorId: string; text: string; startedAt: number } | null = null;
+  private current: { actorId: RidgeActorId; text: string; startedAt: number } | null = null;
   private nextAt = 0;
-  private readonly lastLineByActor = new Map<string, string>();
+  private readonly lastLineByActor = new Map<RidgeActorId, string>();
 
   constructor(lines: BarkLines, random: () => number = Math.random) {
     this.lines = lines;
@@ -36,7 +38,7 @@ export class BarkDirector {
    * @param candidates actors currently worth hearing from, nearest first.
    * @returns the line to show right now, if any.
    */
-  update(now: number, candidates: readonly string[]): BarkPerformance | null {
+  update(now: number, candidates: readonly RidgeActorId[]): BarkPerformance | null {
     if (this.current) {
       const elapsed = now - this.current.startedAt;
       const stillOnStage = candidates.includes(this.current.actorId);
@@ -77,7 +79,7 @@ export class BarkDirector {
     this.nextAt = now + MIN_GAP_MS;
   }
 
-  private pick(candidates: readonly string[]): { actorId: string; text: string } | null {
+  private pick(candidates: readonly RidgeActorId[]): { actorId: RidgeActorId; text: string } | null {
     const speakable = candidates.filter((id) => (this.lines[id]?.length ?? 0) > 0);
     if (speakable.length === 0) return null;
 
