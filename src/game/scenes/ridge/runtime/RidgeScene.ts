@@ -27,6 +27,7 @@ import {
 import { bindSideViewKeyboard } from '@/game/sharedSceneRuntime/input/sceneKeyboard';
 import { StickVisualProvider } from '../art/stick/StickVisualProvider';
 import { toRidgeVisualViewModel } from '../art/types';
+import { loadRidgePresenceCatalog } from '../content/presenceCatalog';
 import { loadRidgeRouteDialogueCatalog } from '../content/routeCatalog';
 import type { RidgeConversationPanelView } from '../sceneUi/RidgeConversationPanel';
 import type { RidgeDevControls } from './ridgeDevControls';
@@ -84,13 +85,16 @@ export class RidgeScene extends Phaser.Scene {
       inventory: hasGuitar ? [RIDGE_GUITAR_ITEM] : []
     });
 
-    this.visuals = new StickVisualProvider(this);
+    const presence = loadRidgePresenceCatalog();
+    this.visuals = new StickVisualProvider(this, {
+      roles: presence.roles,
+      barks: presence.barks
+    });
     this.keys = bindSideViewKeyboard(this.input.keyboard, { includeEscapeKey: true });
     if (import.meta.env.DEV && this.input.keyboard) {
       this.nextKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CLOSED_BRACKET);
       this.prevKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.OPEN_BRACKET);
     }
-    this.cameras.main.setZoom(1.15);
 
     this.syncPresentation();
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.cleanup());

@@ -37,6 +37,64 @@ export const sceneMessages = {
         stampedeMemory: "mrrp!",
       },
     },
+    presence: {
+      roles: {
+        cicka: "road cat",
+        "counterpart-cat": "local cat",
+        draftsperson: "bridge draftsperson",
+        guitarist: "touring guitarist",
+        crowd: "waiting crowd",
+        traveler: "long-way walker",
+        driver: "shuttle driver",
+        "operations-helper": "festival crew",
+        "dance-teacher": "dance teacher",
+        steward: "festival steward",
+        shuttle: "last shuttle",
+      },
+      barks: {
+        cicka: ["mrrp.", "prrt?", "...mrow.", "*tail flick*"],
+        "counterpart-cat": ["mrow.", "*slow blink*", "prrp."],
+        draftsperson: [
+          "...load-bearing, load-bearing...",
+          "It's the middle span. It's always the middle span.",
+          "Measure twice. Then measure again.",
+          "Paper holds. Paper always holds.",
+        ],
+        guitarist: [
+          "Two chords. I only need two.",
+          "...still can't close my hand around it.",
+          "Hums something unfinished.",
+          "The crowd's been patient. Too patient.",
+        ],
+        crowd: [
+          "Is it starting?",
+          "I walked an hour for this.",
+          "Shh — listen.",
+          "Someone play something.",
+        ],
+        traveler: [
+          "Long way yet.",
+          "Feet know the road better than I do.",
+          "Which ridge was it again?",
+        ],
+        driver: [
+          "Schedule says one thing, the road says another.",
+          "Last ride leaves at sundown.",
+          "Everyone accounted for?",
+        ],
+        "operations-helper": [
+          "Lanterns up!",
+          "Mind the cables, mind the cables.",
+          "Almost set. Almost.",
+        ],
+        "dance-teacher": [
+          "One step. Then the next one.",
+          "Loosen the shoulders.",
+          "You already know this part.",
+        ],
+        steward: ["The gate opens when it opens.", "Ticket? Ah — go on.", "Busy night."],
+      },
+    },
     bridge: {
       speakers: {
         prompt: "Prompt",

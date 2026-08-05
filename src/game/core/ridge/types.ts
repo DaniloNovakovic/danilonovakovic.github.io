@@ -125,6 +125,10 @@ export interface RidgeInteractable {
   distance: number;
   prompt: string;
   conversationId: string;
+  /** Stage position of the spot, so presentation can anchor a prompt to it. */
+  progress: number;
+  /** Set when the spot is embodied by an actor rather than scenery. */
+  actorId?: RidgeActorId;
 }
 
 export interface RidgeActorPresence {

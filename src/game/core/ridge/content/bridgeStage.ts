@@ -119,7 +119,9 @@ function resolveBridgeInteractables(
       kind: spot.kind,
       distance,
       prompt: catalog.lines[plan.prompt] ?? plan.prompt,
-      conversationId: plan.conversationId
+      conversationId: plan.conversationId,
+      progress: spot.progress,
+      actorId: 'actorId' in spot ? spot.actorId : undefined
     });
   }
 
