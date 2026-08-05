@@ -55,13 +55,8 @@ export class RidgeScene extends Phaser.Scene {
   private lastConversationKey: string | null = null;
   private lastDevSnapshotKey = '';
   private escJustHandled = false;
-  private skipKey?: Phaser.Input.Keyboard.Key;
-  private warpKeys?: {
-    bridge: Phaser.Input.Keyboard.Key;
-    concert: Phaser.Input.Keyboard.Key;
-    dance: Phaser.Input.Keyboard.Key;
-    relay: Phaser.Input.Keyboard.Key;
-  };
+  private nextKey?: Phaser.Input.Keyboard.Key;
+  private prevKey?: Phaser.Input.Keyboard.Key;
 
   constructor() {
     super(PHASER_SCENE_KEYS.ridge);
@@ -92,13 +87,8 @@ export class RidgeScene extends Phaser.Scene {
     this.visuals = new StickVisualProvider(this);
     this.keys = bindSideViewKeyboard(this.input.keyboard, { includeEscapeKey: true });
     if (import.meta.env.DEV && this.input.keyboard) {
-      this.skipKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CLOSED_BRACKET);
-      this.warpKeys = {
-        bridge: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE),
-        concert: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO),
-        dance: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE),
-        relay: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FOUR)
-      };
+      this.nextKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CLOSED_BRACKET);
+      this.prevKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.OPEN_BRACKET);
     }
     this.cameras.main.setZoom(1.15);
 
@@ -161,30 +151,21 @@ export class RidgeScene extends Phaser.Scene {
   private handleDevSkipKeys(): void {
     if (!import.meta.env.DEV || !this.session) return;
 
-    if (this.skipKey && Phaser.Input.Keyboard.JustDown(this.skipKey)) {
+    if (this.nextKey && Phaser.Input.Keyboard.JustDown(this.nextKey)) {
       this.applyResult(this.session.exec('skip'));
       this.syncPresentation();
       return;
     }
 
-    if (!this.warpKeys) return;
-    if (Phaser.Input.Keyboard.JustDown(this.warpKeys.bridge)) {
-      this.applyResult(this.session.exec('warp bridge'));
-      this.syncPresentation();
-      return;
-    }
-    if (Phaser.Input.Keyboard.JustDown(this.warpKeys.concert)) {
-      this.applyResult(this.session.exec('warp concert'));
-      this.syncPresentation();
-      return;
-    }
-    if (Phaser.Input.Keyboard.JustDown(this.warpKeys.dance)) {
-      this.applyResult(this.session.exec('warp dance'));
-      this.syncPresentation();
-      return;
-    }
-    if (Phaser.Input.Keyboard.JustDown(this.warpKeys.relay)) {
-      this.applyResult(this.session.exec('warp relay'));
+    if (this.prevKey && Phaser.Input.Keyboard.JustDown(this.prevKey)) {
+      const currentArea = this.session.observe().areaId;
+      const prevAreaMap: Record<RidgeAreaId, RidgeAreaId> = {
+        bridge: 'relay',
+        concert: 'bridge',
+        danceFestival: 'concert',
+        relay: 'danceFestival'
+      };
+      this.applyResult(this.session.exec(`warp ${prevAreaMap[currentArea]}`));
       this.syncPresentation();
     }
   }
@@ -282,6 +263,7 @@ export class RidgeScene extends Phaser.Scene {
       speaker: c.speaker,
       speakerId: c.speakerId,
       text: c.text,
+      emotion: c.emotion,
       lineIndex: c.lineIndex,
       lineCount: c.lineCount,
       awaitingChoice: c.awaitingChoice,
@@ -301,8 +283,8 @@ export class RidgeScene extends Phaser.Scene {
     this.visuals = undefined;
     this.session = undefined;
     this.keys = undefined;
-    this.skipKey = undefined;
-    this.warpKeys = undefined;
+    this.nextKey = undefined;
+    this.prevKey = undefined;
     this.lastConversationKey = null;
   }
 }
@@ -310,10 +292,12 @@ export class RidgeScene extends Phaser.Scene {
 function portraitForSpeaker(
   speakerId: string
 ): RidgeConversationPanelView['portrait'] {
-  if (speakerId === 'cicka') return 'cicka';
-  if (speakerId === 'bridgeDraftsperson' || speakerId === 'injuredGuitarist') {
-    return 'draftsperson';
-  }
+  if (speakerId === 'cicka' || speakerId === 'counterpart-cat') return 'cicka';
+  if (speakerId === 'bridgeDraftsperson' || speakerId === 'draftsperson') return 'draftsperson';
+  if (speakerId === 'injuredGuitarist' || speakerId === 'guitarist') return 'guitarist';
+  if (speakerId === 'danceDriver' || speakerId === 'driver' || speakerId === 'operationsHelper') return 'driver';
+  if (speakerId === 'traveler' || speakerId === 'steward') return 'traveler';
+  if (speakerId === 'danceTeacher') return 'teacher';
   if (speakerId === 'prompt' || speakerId === 'dedication') return 'prompt';
   return 'player';
 }

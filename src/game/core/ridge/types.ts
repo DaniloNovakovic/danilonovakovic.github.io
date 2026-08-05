@@ -53,11 +53,21 @@ export type RidgeActorId =
   | 'counterpart-cat'
   | 'shuttle';
 
+export type RidgeEmotion =
+  | 'neutral'
+  | 'curious'
+  | 'playful'
+  | 'determined'
+  | 'thoughtful'
+  | 'surprised'
+  | 'sleepy';
+
 export interface RidgeDialogueLine {
   id: string;
   speakerId: string;
   speaker: string;
   text: string;
+  emotion?: RidgeEmotion;
 }
 
 export interface RidgeDialogueChoice {
@@ -177,6 +187,7 @@ export interface RidgeObservation {
     speaker: string;
     speakerId: string;
     text: string;
+    emotion?: RidgeEmotion;
     lineId: string;
     lineIndex: number;
     lineCount: number;

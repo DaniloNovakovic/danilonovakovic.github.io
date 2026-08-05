@@ -61,11 +61,11 @@ export class StickVisualProvider implements RidgeVisualProvider {
 
     this.promptText = scene.add
       .text(0, 0, '', {
-        fontFamily: 'Caveat, Comic Neue, cursive',
-        fontSize: '24px',
-        color: '#1a1a1a',
-        backgroundColor: '#fbfbf9ee',
-        padding: { x: 12, y: 7 }
+        fontFamily: 'Comic Neue, sans-serif',
+        fontSize: '15px',
+        color: '#fbfbf9',
+        backgroundColor: '#1a1a1a',
+        padding: { x: 10, y: 5 }
       })
       .setOrigin(0.5, 1)
       .setDepth(40)
@@ -112,12 +112,12 @@ export class StickVisualProvider implements RidgeVisualProvider {
       const playerX = this.worldXForProgress(player.progress);
       if (this.promptText) {
         if (view.nearbyPrompt && view.mode === 'explore') {
-          const prompt = `[E] ${view.nearbyPrompt}`;
+          const prompt = `💬 ${view.nearbyPrompt}`;
           if (prompt !== this.lastPrompt) {
             this.lastPrompt = prompt;
             this.promptText.setText(prompt);
           }
-          this.promptText.setPosition(playerX, GROUND_Y - 138).setVisible(true);
+          this.promptText.setPosition(playerX, GROUND_Y - 108).setVisible(true);
         } else {
           if (this.lastPrompt !== '') this.lastPrompt = '';
           this.promptText.setVisible(false);

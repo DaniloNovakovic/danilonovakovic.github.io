@@ -30,6 +30,7 @@ export function observeRidgeWorld(
           speaker: line.speaker,
           speakerId: line.speakerId,
           text: line.text,
+          emotion: line.emotion,
           lineId: line.id,
           lineIndex: state.conversation.lineIndex,
           lineCount: state.conversation.lines.length,

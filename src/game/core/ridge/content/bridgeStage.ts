@@ -133,12 +133,12 @@ function interactPlansForBeat(beat: RidgeWorldState['beat']): BridgeInteractPlan
         {
           spotId: 'cicka',
           conversationId: 'bridge.cicka.first_meet',
-          prompt: 'bridge.cicka.first_meet.01'
+          prompt: 'bridge.cicka.first_meet.prompt'
         },
         {
           spotId: 'draftsperson',
           conversationId: 'bridge.draftsperson.missing_span',
-          prompt: 'bridge.draftsperson.missing_span.03'
+          prompt: 'bridge.draftsperson.missing_span.prompt'
         }
       ];
     case 'needs_toy_car':
@@ -146,12 +146,12 @@ function interactPlansForBeat(beat: RidgeWorldState['beat']): BridgeInteractPlan
         {
           spotId: 'cicka',
           conversationId: 'bridge.cicka.parallel_play',
-          prompt: 'bridge.cicka.parallel_play.01'
+          prompt: 'bridge.cicka.parallel_play.prompt'
         },
         {
           spotId: 'draftsperson',
           conversationId: 'bridge.draftsperson.missing_span',
-          prompt: 'bridge.draftsperson.missing_span.03'
+          prompt: 'bridge.draftsperson.missing_span.prompt'
         }
       ];
     case 'toy_car_shared':
@@ -159,7 +159,7 @@ function interactPlansForBeat(beat: RidgeWorldState['beat']): BridgeInteractPlan
         {
           spotId: 'draftsperson',
           conversationId: 'bridge.draftsperson.toy_car_test',
-          prompt: 'bridge.draftsperson.toy_car_test.01'
+          prompt: 'bridge.draftsperson.toy_car_test.prompt'
         }
       ];
     case 'bridge_complete':
@@ -167,7 +167,7 @@ function interactPlansForBeat(beat: RidgeWorldState['beat']): BridgeInteractPlan
         {
           spotId: 'concert-exit',
           conversationId: 'bridge.exit.opened_crossing',
-          prompt: 'bridge.exit.opened_crossing.01'
+          prompt: 'bridge.exit.opened_crossing.prompt'
         }
       ];
     default:
