@@ -8,6 +8,16 @@ export const sceneMessages = {
       "A tiny banana sticker points east. This city has stranger shortcuts than doors.",
     circuitCrtLockedPrompt: "A blank CRT. Needs a Circuit.",
     circuitCrtReadyPrompt: "[E] Insert Circuit",
+    signpostLabel: "START",
+    signpostPrompt: "[E] Read sign",
+    signpostHints: {
+      "find-glasses": "The sign is too blurry to read. Someone left a TODO? hatch open just ahead...",
+      "wear-glasses": "Glasses off? The street hides things from blurry eyes.",
+      "find-peel": "Watch your step between Profile and Experiences. Something slippery is down there.",
+      "win-circuit": "That peel still leads somewhere. Win what's down there and bring it back.",
+      "use-crt": "The blank CRT by Projects is humming. It wants your Circuit.",
+    },
+    signpostTally: (found: number, total: number) => `Secrets found: ${found}/${total}`,
   },
   basement: {
     title: "DEVELOPER BASEMENT",

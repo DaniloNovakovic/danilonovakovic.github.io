@@ -28,11 +28,15 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
 ## Overworld
 
 - Walk along the hand-drawn street and interact with buildings to open React portfolio overlays.
+- The building you can enter lifts and wobbles slightly, and its label grows.
+- A `START` signpost sits beside the spawn. Reading it gives a hint for the next step of the secret chain (glasses → banana peel → Circuit → CRT) plus a `Secrets found: n/3` tally. A bobbing `!` marks the sign when it has a hint you haven't read yet.
+- Doodle birds on the telephone wire scatter when you get close (sooner while sprinting) and return once you've walked away. Landing and sprinting kick up small ink puffs.
+- Decorative motion (bird flight, puffs, wobble, CRT animation) is reduced or frozen under `prefers-reduced-motion`.
 - Opening a React overlay pauses Phaser movement and input.
 - Closing an overlay returns to the street, unless the overlay was opened from an interior parent scene.
 - The basement entrance is the hole under the `TODO?` sign.
 - A banana peel secret can be discovered in the street. After discovery, interacting with it enters Potassium Slip.
-- A blank street CRT sits between the Projects and Abilities buildings. Without a Circuit it only shows a locked prompt. After winning Potassium Slip and owning the Circuit, interact with the CRT to insert it and enter Ridge (secret side story).
+- A blank street CRT sits between the Projects and Abilities buildings. Without a Circuit it only shows a locked prompt and the occasional flicker of static; once you own the Circuit, a little stick figure waves from the screen. After winning Potassium Slip and owning the Circuit, interact with the CRT to insert it and enter Ridge (secret side story).
 
 ## Hobbies Room
 

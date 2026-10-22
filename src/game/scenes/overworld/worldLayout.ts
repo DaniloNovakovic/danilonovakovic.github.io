@@ -8,6 +8,7 @@ import {
   OVERWORLD_BUILDING_SPOTS,
   OVERWORLD_CIRCUIT_CRT,
   OVERWORLD_PLAYER_START as CORE_PLAYER_START,
+  OVERWORLD_SIGNPOST as CORE_SIGNPOST,
   OVERWORLD_WIDTH as CORE_WIDTH
 } from '@/game/core/console/content/overworldSpots';
 import { GAME_DESIGN_HEIGHT } from '@/game/sharedSceneRuntime/designSize';
@@ -74,6 +75,9 @@ export const OVERWORLD_BASEMENT_HOLE = {
   interactDistanceX: CORE_BASEMENT_HOLE.interactDistanceX,
   minPlayerY: CORE_BASEMENT_HOLE.minPlayerY
 } as const;
+
+/** Progress-aware hint sign beside the player spawn. */
+export const OVERWORLD_SIGNPOST_X = CORE_SIGNPOST.x;
 
 export const BANANA_PEEL_CLUE_ID = OVERWORLD_BANANA_PEEL.secretId satisfies SecretDiscoveryId;
 

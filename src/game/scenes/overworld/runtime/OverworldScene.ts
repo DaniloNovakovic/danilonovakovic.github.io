@@ -17,6 +17,7 @@ import {
   OVERWORLD_PLAYER_RESUME_Y_CLAMP,
   OVERWORLD_PLAYER_SPAWN_MARGIN_X,
   OVERWORLD_PLAYER_START,
+  OVERWORLD_SIGNPOST_X,
   OVERWORLD_WIDTH
 } from '../worldLayout';
 import { getMessages } from '@/shared/i18n';
@@ -36,6 +37,7 @@ import {
 } from '@/game/bridge/store';
 import {
   GameConsoleSession,
+  getOverworldProgress,
   type GameCommandResult,
   type NearbyThing
 } from '@/game/core/console';
@@ -48,6 +50,10 @@ import {
 } from './street/StreetEnvironment';
 import { buildStreetBuildings, type StreetBuildingLayers } from './street/StreetBuildings';
 import { updateStreetParticles } from './street/StreetParticles';
+import { StreetBirds, StreetFootsteps } from './street/StreetLife';
+import { StreetCrt } from './street/StreetCrt';
+import { StreetSignpost } from './street/StreetSignpost';
+import { prefersReducedMotion, sketchTick } from '@/game/sharedSceneRuntime/motion/sketchMotion';
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
 import { startTypewriterEffect, type TypewriterEffectHandle } from '@/game/sharedSceneRuntime/text/typewriterEffect';
 import type { OverworldBuildingSlot } from '@/game/core/ecs/systems/overworldInteractSystems';
@@ -77,8 +83,11 @@ export class OverworldScene extends Phaser.Scene {
   private lensRevealScratch: boolean[] = [];
   private preGlassesVision?: DistanceHazeVision;
   private bananaFloorIcon?: Phaser.GameObjects.Graphics;
-  private circuitCrt?: Phaser.GameObjects.Graphics;
-  private circuitCrtPowered: boolean | null = null;
+  private circuitCrt?: StreetCrt;
+  private signpost?: StreetSignpost;
+  private birds?: StreetBirds;
+  private footsteps?: StreetFootsteps;
+  private motion = true;
   private glassesSecretHint?: Phaser.GameObjects.Text;
   private glassesSecretMessage?: Phaser.GameObjects.Text;
   private glassesSecretMessageHideTimer?: Phaser.Time.TimerEvent;
@@ -139,8 +148,9 @@ export class OverworldScene extends Phaser.Scene {
 
     this.physics.world.setBounds(0, 0, OVERWORLD_WIDTH, GAME_DESIGN_HEIGHT);
 
-    const { groundZone } = buildStreetEnvironment(this);
+    this.motion = !prefersReducedMotion();    const { groundZone } = buildStreetEnvironment(this);
     this.streetBuildings = buildStreetBuildings(this);
+    this.signpost = new StreetSignpost(this, OVERWORLD_SIGNPOST_X);
     this.createBasementHoleTrigger();
     this.buildingSlots.length = 0;
     for (const bldg of this.streetBuildings.interactables.getChildren() as Phaser.GameObjects.Sprite[]) {
@@ -196,8 +206,10 @@ export class OverworldScene extends Phaser.Scene {
     }).setOrigin(0.5).setVisible(false).setDepth(20);
     this.bananaFloorIcon = this.add.graphics().setDepth(21).setVisible(false);
     this.drawBananaFloorIcon();
-    this.circuitCrt = this.add.graphics().setDepth(18);
-    this.drawCircuitCrt(false);
+    this.circuitCrt = new StreetCrt(this, OVERWORLD_CIRCUIT_SLOT.x, OVERWORLD_CIRCUIT_SLOT.y, 18);
+    this.circuitCrt.update(isItemOwned('circuit'), 0, this.motion);
+    this.birds = new StreetBirds(this);
+    this.footsteps = new StreetFootsteps(this);
 
     this.preGlassesVision = new DistanceHazeVision(this, {
       depth: 15,
@@ -214,7 +226,7 @@ export class OverworldScene extends Phaser.Scene {
     this.updateLensReveal();
   }
 
-  update() {
+  update(time: number, delta: number) {
     const playerUpdate = this.playerRuntime?.update();
     this.updateLensReveal();
 
@@ -230,23 +242,36 @@ export class OverworldScene extends Phaser.Scene {
 
     const hasGlassesEquipped = isItemEquipped('glasses');
     const hasCircuit = isItemOwned('circuit');
+    const tick = sketchTick(time);
+    const sprinting = Math.abs(this.player.body.velocity.x) > SIDE_VIEW_WALK_SPEED + 1;
     this.setBananaFloorVisible(hasGlassesEquipped);
-    this.drawCircuitCrt(hasCircuit);
+    this.circuitCrt?.update(hasCircuit, tick, this.motion);
+    this.birds?.update(time, delta, this.player.x, sprinting, this.motion);
+    this.footsteps?.update(this.player, time, sprinting, this.motion);
 
     updateStreetParticles(this);
 
-    this.updateOverworldInteraction(step.interactRequested);
+    const nearby = this.updateOverworldInteraction(step.interactRequested);
+    this.streetBuildings.applyFocus(
+      nearby?.kind === 'building' ? nearby.id : null,
+      tick,
+      this.motion
+    );
+    if (this.session) {
+      const { stage } = getOverworldProgress(this.session.getState());
+      this.signpost?.update(stage, tick, this.player.x, nearby?.kind === 'prop', this.motion);
+    }
   }
 
-  private updateOverworldInteraction(interactRequested: boolean): void {
-    if (!this.session) return;
+  private updateOverworldInteraction(interactRequested: boolean): NearbyThing | undefined {
+    if (!this.session) return undefined;
 
     const sync = this.session.syncPlayerPosition(this.player.x, this.player.y);
     this.applySessionResult(sync);
 
     if (this.bananaPeelWarpTimeoutId !== undefined) {
       this.interactPrompt.setVisible(false);
-      return;
+      return undefined;
     }
 
     if (interactRequested) {
@@ -255,6 +280,7 @@ export class OverworldScene extends Phaser.Scene {
 
     const nearby = this.session.observe().nearby[0];
     this.applyOverworldNearbyPrompt(nearby);
+    return nearby;
   }
 
   private applySessionResult(result: GameCommandResult): void {
@@ -266,7 +292,8 @@ export class OverworldScene extends Phaser.Scene {
         this.session?.restoreExploreAfterOverlay();
       },
       onBananaPeelDiscovered: () => this.startBananaPeelDiscovery(),
-      onBananaPeelCancelled: () => this.cancelBananaPeelWarpIfAny()
+      onBananaPeelCancelled: () => this.cancelBananaPeelWarpIfAny(),
+      onSignpostRead: ({ stage, found, total }) => this.signpost?.read(stage, found, total)
     });
   }
 
@@ -294,6 +321,8 @@ export class OverworldScene extends Phaser.Scene {
     switch (nearby.kind) {
       case 'hatch':
         return nav.interact;
+      case 'prop':
+        return overworld.signpostPrompt;
       case 'secret':
         return isSecretDiscovered(BANANA_PEEL_CLUE_ID)
           ? overworld.bananaDiscoveredPrompt
@@ -354,50 +383,6 @@ export class OverworldScene extends Phaser.Scene {
     g.moveTo(tipOutL.x, tipOutL.y);
     g.lineTo(tipOutL.x - 5, tipOutL.y - 6);
     g.strokePath();
-  }
-
-  private drawCircuitCrt(powered: boolean): void {
-    if (!this.circuitCrt) return;
-    if (this.circuitCrtPowered === powered) return;
-    this.circuitCrtPowered = powered;
-    const g = this.circuitCrt;
-    const x = OVERWORLD_CIRCUIT_SLOT.x;
-    const y = OVERWORLD_CIRCUIT_SLOT.y;
-    g.clear();
-    g.setPosition(0, 0);
-
-    // pedestal
-    g.lineStyle(3, 0x1a1a1a, 1);
-    g.fillStyle(0xfbfbf9, 1);
-    g.fillRect(x - 34, y - 8, 68, 18);
-    g.strokeRect(x - 34, y - 8, 68, 18);
-
-    // CRT body
-    g.fillRect(x - 40, y - 78, 80, 70);
-    g.strokeRect(x - 40, y - 78, 80, 70);
-
-    // screen
-    if (powered) {
-      g.fillStyle(0xf4f1ea, 1);
-      g.fillRect(x - 30, y - 68, 60, 44);
-      g.lineStyle(2, 0x1a1a1a, 0.85);
-      // tiny stick "channel" silhouette
-      g.lineBetween(x - 12, y - 40, x - 12, y - 28);
-      g.strokeCircle(x - 12, y - 46, 5);
-      g.lineBetween(x + 8, y - 36, x + 22, y - 50);
-      g.lineBetween(x + 8, y - 36, x + 22, y - 30);
-    } else {
-      g.fillStyle(0x1a1a1a, 0.12);
-      g.fillRect(x - 30, y - 68, 60, 44);
-      g.lineStyle(2, 0x1a1a1a, 0.45);
-      g.lineBetween(x - 18, y - 46, x + 18, y - 46);
-    }
-    g.lineStyle(3, 0x1a1a1a, 1);
-    g.strokeRect(x - 30, y - 68, 60, 44);
-
-    // antenna
-    g.lineBetween(x - 10, y - 78, x - 18, y - 96);
-    g.lineBetween(x + 10, y - 78, x + 18, y - 96);
   }
 
   private setBananaFloorVisible(visible: boolean): void {

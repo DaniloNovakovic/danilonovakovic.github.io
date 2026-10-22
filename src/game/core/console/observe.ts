@@ -3,8 +3,22 @@
 import type { RidgeObservation } from '../ridge/types';
 import { listBasementNearby } from './basementLogic';
 import { listHobbiesNearby } from './hobbiesLogic';
-import { listOverworldNearby } from './overworldLogic';
-import type { GameObservation, GameWorldState, NearbyThing } from './types';
+import { getOverworldProgress, listOverworldNearby } from './overworldLogic';
+import type {
+  GameObservation,
+  GameWorldState,
+  NearbyThing,
+  OverworldProgressStage
+} from './types';
+
+const OVERWORLD_CONSOLE_HINTS: Record<OverworldProgressStage, string> = {
+  'find-glasses':
+    'Find the basement hatch near the start of the street and pick up the glasses.',
+  'wear-glasses': 'equip glasses to reveal the banana peel secret.',
+  'find-peel': 'With glasses on, walk near x=650 and interact with the peel.',
+  'win-circuit': 'Interact with the peel again to enter Potassium Slip and win the Circuit.',
+  'use-crt': 'Walk to the street CRT near x=1650 and insert the Circuit to enter Ridge.'
+};
 
 export function observeGameWorld(
   state: GameWorldState,
@@ -144,17 +158,7 @@ function buildHints(
   const hints: string[] = [];
 
   if (state.mode === 'overworld') {
-    if (!state.ownedItemIds.includes('glasses')) {
-      hints.push('Find the basement hatch near the start of the street and pick up the glasses.');
-    } else if (!state.equippedItemIds.includes('glasses')) {
-      hints.push('equip glasses to reveal the banana peel secret.');
-    } else if (!state.discoveredSecretIds.includes('banana-peel-clue')) {
-      hints.push('With glasses on, walk near x=650 and interact with the peel.');
-    } else if (!state.ownedItemIds.includes('circuit')) {
-      hints.push('Interact with the peel again to enter Potassium Slip and win the Circuit.');
-    } else {
-      hints.push('Walk to the street CRT near x=1650 and insert the Circuit to enter Ridge.');
-    }
+    hints.push(OVERWORLD_CONSOLE_HINTS[getOverworldProgress(state).stage]);
   }
 
   if (state.mode === 'basement' && !state.ownedItemIds.includes('glasses')) {

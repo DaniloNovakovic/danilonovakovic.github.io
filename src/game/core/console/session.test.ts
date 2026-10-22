@@ -131,6 +131,40 @@ describe('GameConsoleSession full secret route', () => {
     expect(session.observe().ownedItemIds).toContain('circuit');
   });
 
+  it('reads the spawn signpost with a hint that follows the secret chain', () => {
+    const fresh = createSession();
+    expect(fresh.observe().nearby[0]?.id).toBe('signpost');
+    expect(fresh.exec('interact signpost').events).toContainEqual({
+      type: 'signpost_read',
+      stage: 'find-glasses',
+      found: 0,
+      total: 3
+    });
+
+    const unequipped = createSession({ ownedItemIds: ['glasses'], equippedItemIds: [] });
+    expect(unequipped.exec('interact signpost').events).toContainEqual(
+      expect.objectContaining({ stage: 'wear-glasses', found: 1 })
+    );
+
+    const peeled = createSession({
+      ownedItemIds: ['glasses'],
+      equippedItemIds: ['glasses'],
+      discoveredSecretIds: ['banana-peel-clue']
+    });
+    expect(peeled.exec('interact signpost').events).toContainEqual(
+      expect.objectContaining({ stage: 'win-circuit', found: 2 })
+    );
+
+    const done = createSession({
+      ownedItemIds: ['glasses', 'circuit'],
+      discoveredSecretIds: ['banana-peel-clue']
+    });
+    const doneRead = done.exec('interact signpost');
+    expect(doneRead.events).toContainEqual(expect.objectContaining({ stage: 'use-crt', found: 3 }));
+    expect(doneRead.message).toContain('3/3');
+    expect(done.observe().mode).toBe('overworld');
+  });
+
   it('commits banana peel warp for the live Overworld typewriter path', () => {
     const session = new GameConsoleSession({
       dialogue: TEST_ROUTE_DIALOGUE_CATALOG,

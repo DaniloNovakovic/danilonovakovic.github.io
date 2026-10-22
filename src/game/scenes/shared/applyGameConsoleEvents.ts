@@ -18,8 +18,11 @@ export interface GameConsoleEventPorts {
   onThought?: (id: 'basement_cannot_see') => void;
   onBananaPeelDiscovered?: () => void;
   onBananaPeelCancelled?: () => void;
+  onSignpostRead?: (event: Extract<GameSessionEvent, { type: 'signpost_read' }>) => void;
 }
 
+// Flat one-case-per-event dispatcher; splitting it would only scatter the event map.
+// fallow-ignore-next-line complexity
 export function applyGameConsoleEvents(
   events: readonly GameSessionEvent[],
   ports: GameConsoleEventPorts
@@ -59,6 +62,9 @@ export function applyGameConsoleEvents(
         break;
       case 'banana_peel_cancelled':
         ports.onBananaPeelCancelled?.();
+        break;
+      case 'signpost_read':
+        ports.onSignpostRead?.(event);
         break;
       case 'thought':
         ports.onThought?.(event.id);

@@ -9,6 +9,14 @@ export type GameItemId = 'glasses' | 'circuit';
 export type GameSecretId = 'banana-peel-clue';
 export type GameFacing = 'left' | 'right';
 
+/** Next step of the street secret chain; drives the signpost and console hints. */
+export type OverworldProgressStage =
+  | 'find-glasses'
+  | 'wear-glasses'
+  | 'find-peel'
+  | 'win-circuit'
+  | 'use-crt';
+
 export type GameMode =
   | 'overworld'
   | 'basement'
@@ -128,6 +136,7 @@ export type GameSessionEvent =
   | { type: 'item_unequipped'; itemId: GameItemId }
   | { type: 'secret_discovered'; secretId: GameSecretId }
   | { type: 'banana_peel_cancelled' }
+  | { type: 'signpost_read'; stage: OverworldProgressStage; found: number; total: number }
   | { type: 'thought'; id: 'basement_cannot_see' }
   | { type: 'potassium_won' }
   | { type: 'ridge_beat_changed'; beat: RidgeRouteBeat }

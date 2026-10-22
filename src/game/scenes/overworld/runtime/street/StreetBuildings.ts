@@ -11,12 +11,16 @@ import { OVERWORLD_BUILDING_TRIGGERS, type OverworldBuildingTrigger } from '../.
 
 const BUILDING_Y = 395;
 const LABEL_Y = 150;
+const FOCUS_LIFT_PX = 6;
+const FOCUS_WOBBLE_RAD = 0.008;
+const FOCUS_LABEL_WOBBLE_RAD = 0.035;
 
 export interface StreetBuildingFace {
   buildingId: string;
   x: number;
   sketch: Phaser.GameObjects.Sprite;
   pixel: Phaser.GameObjects.Sprite;
+  label: Phaser.GameObjects.Text;
 }
 
 export interface StreetBuildingLayers {
@@ -27,6 +31,8 @@ export interface StreetBuildingLayers {
   pixelLayer: Phaser.GameObjects.Layer;
   /** Per-building sketch vs pixel visibility from precomputed flags (same order as `faces`). */
   applyLensProximityReveal(flags: readonly boolean[]): void;
+  /** Paper-lift + stepped ink wobble on the building the player can enter. */
+  applyFocus(buildingId: string | null, tick: number, motion: boolean): void;
 }
 
 export function buildStreetBuildings(scene: Phaser.Scene): StreetBuildingLayers {
@@ -47,7 +53,7 @@ export function buildStreetBuildings(scene: Phaser.Scene): StreetBuildingLayers 
     pixelBldg.setAlpha(1);
     bldg.setAlpha(1);
 
-    createUiText(scene, trigger.x, LABEL_Y, getBuildingLabel(trigger).toUpperCase(), {
+    const label = createUiText(scene, trigger.x, LABEL_Y, getBuildingLabel(trigger).toUpperCase(), {
       fontSize: '22px',
       color: '#1a1a1a',
       fontStyle: 'bold'
@@ -57,7 +63,7 @@ export function buildStreetBuildings(scene: Phaser.Scene): StreetBuildingLayers 
 
     bldg.setData('name', trigger.id);
     group.add(bldg);
-    faces.push({ buildingId: trigger.id, x: trigger.x, sketch: bldg, pixel: pixelBldg });
+    faces.push({ buildingId: trigger.id, x: trigger.x, sketch: bldg, pixel: pixelBldg, label });
   }
 
   return {
@@ -80,6 +86,22 @@ export function buildStreetBuildings(scene: Phaser.Scene): StreetBuildingLayers 
           pixel.setVisible(false);
           pixel.setAlpha(1);
         }
+      }
+    },
+    applyFocus(buildingId: string | null, tick: number, motion: boolean) {
+      // Stepped 4-frame wobble: -1, 0, 1, 0.
+      const phase = tick % 4;
+      const wobble = !motion ? 0 : phase === 0 ? -1 : phase === 2 ? 1 : 0;
+      for (const face of faces) {
+        const focused = face.buildingId === buildingId;
+        const lift = focused ? FOCUS_LIFT_PX : 0;
+        const rotation = focused ? wobble * FOCUS_WOBBLE_RAD : 0;
+        face.sketch.setY(BUILDING_Y - lift).setRotation(rotation);
+        face.pixel.setY(BUILDING_Y - lift).setRotation(rotation);
+        face.label
+          .setY(LABEL_Y - lift * 2)
+          .setRotation(focused ? wobble * FOCUS_LABEL_WOBBLE_RAD : 0)
+          .setScale(focused ? 1.12 : 1);
       }
     }
   };

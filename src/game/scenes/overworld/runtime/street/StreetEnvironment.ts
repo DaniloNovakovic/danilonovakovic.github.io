@@ -11,6 +11,7 @@ import {
 import { OVERWORLD_GROUND_ZONE, OVERWORLD_WIDTH } from '../../worldLayout';
 import { getStreetCameraProfile } from './streetCameraProfile';
 import { createSideViewCameraRuntime } from '@/game/sharedSceneRuntime/camera/sideViewCameraRuntime';
+import { buildStreetWires } from './StreetLife';
 
 export interface StreetEnvironmentHandles {
   groundZone: Phaser.GameObjects.Zone;
@@ -22,6 +23,7 @@ export function buildStreetEnvironment(scene: Phaser.Scene): StreetEnvironmentHa
   EnvironmentBuilder.buildMountains(scene);
   EnvironmentBuilder.buildTrees(scene);
   EnvironmentBuilder.buildGround(scene, worldWidth);
+  buildStreetWires(scene);
 
   const groundZone = scene.add.zone(
     worldWidth / 2,
