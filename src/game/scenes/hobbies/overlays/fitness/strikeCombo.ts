@@ -19,6 +19,13 @@ const PERFECT_HALF_WIDTH = 0.025;
 const SWEEP_START_MS = 1500;
 const SWEEP_SPEEDUP_PER_STEP_MS = 120;
 const SWEEP_MIN_MS = 800;
+/** Finisher stays the smallest window, eased off the raw ramp so it is hittable. */
+const ROUNDHOUSE_HALF_WIDTH = 0.075;
+const ROUNDHOUSE_PERIOD_MS = 1000;
+
+function isRoundhouseStep(step: number): boolean {
+  return step === COMBO_LENGTH - 1;
+}
 
 export interface StrikeZone {
   center: number;
@@ -43,15 +50,17 @@ export interface StrikeResult {
 export const INITIAL_COMBO: ComboState = { step: 0, best: 0 };
 
 export function strikeZone(step: number): StrikeZone {
+  const rampedHalfWidth = Math.max(ZONE_MIN_HALF_WIDTH, ZONE_START_HALF_WIDTH - step * ZONE_SHRINK_PER_STEP);
   return {
     center: ZONE_CENTERS[step % ZONE_CENTERS.length] ?? 0.5,
-    halfWidth: Math.max(ZONE_MIN_HALF_WIDTH, ZONE_START_HALF_WIDTH - step * ZONE_SHRINK_PER_STEP),
+    halfWidth: isRoundhouseStep(step) ? ROUNDHOUSE_HALF_WIDTH : rampedHalfWidth,
     perfectHalfWidth: PERFECT_HALF_WIDTH
   };
 }
 
 /** One full left-right-left sweep duration for the given combo step. */
 export function sweepPeriodMs(step: number): number {
+  if (isRoundhouseStep(step)) return ROUNDHOUSE_PERIOD_MS;
   return Math.max(SWEEP_MIN_MS, SWEEP_START_MS - step * SWEEP_SPEEDUP_PER_STEP_MS);
 }
 

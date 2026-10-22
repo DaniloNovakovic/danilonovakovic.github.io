@@ -275,16 +275,16 @@ export class HobbiesRoom {
       const sprite = this.scene.add
         .sprite(station.x, floorY + station.yOffsetFromFloor, `hobby_${station.id}`)
         .setOrigin(0.5, station.spriteMode === 'floor' ? 1 : 0.5)
-        .setDepth(3);
+        .setDepth(3); // Player walks at depth 8, in front of the props.
       const label = createUiText(this.scene, station.x, floorY - 140, messages.scenes.hobbies.labels[station.id], {
         fontSize: '20px',
         color: '#1a1a1a',
         fontStyle: 'bold'
       })
         .setOrigin(0.5)
-        .setDepth(3);
+        .setDepth(9);
       const tagX = station.x + label.width / 2 + 18;
-      const tag = this.scene.add.graphics({ x: tagX, y: floorY - 140 }).setDepth(3);
+      const tag = this.scene.add.graphics({ x: tagX, y: floorY - 140 }).setDepth(9);
       this.stations.push({ id: station.id, sprite, label, tag, tagX, claimed: null });
     }
   }

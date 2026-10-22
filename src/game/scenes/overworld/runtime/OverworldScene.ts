@@ -98,6 +98,8 @@ export class OverworldScene extends Phaser.Scene {
   private hatch?: StreetHatch;
   private streetDetail?: StreetDetail;
   private droppingIntoHatch = false;
+  /** Where the player stood before the hatch tween, so the return isn't inside the ground. */
+  private preDropPosition?: { x: number; y: number };
   private birds?: StreetBirds;
   private footsteps?: StreetFootsteps;
   private motion = true;
@@ -126,6 +128,7 @@ export class OverworldScene extends Phaser.Scene {
   }
 
   getResumeCapturePosition(): { x: number; y: number } | null {
+    if (this.droppingIntoHatch && this.preDropPosition) return this.preDropPosition;
     return this.playerRuntime?.captureResume() ?? null;
   }
 
@@ -573,6 +576,7 @@ export class OverworldScene extends Phaser.Scene {
       this.onEnterScene?.(sceneId);
       return;
     }
+    this.preDropPosition = { x: this.player.x, y: this.player.y };
     this.droppingIntoHatch = true;
     this.interactPrompt.setVisible(false);
     this.hatch.dropIn(this.player, this.motion, () => this.onEnterScene?.(sceneId));

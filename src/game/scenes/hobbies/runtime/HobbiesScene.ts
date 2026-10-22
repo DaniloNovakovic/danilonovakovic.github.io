@@ -96,6 +96,7 @@ export class HobbiesScene extends Phaser.Scene {
       resumePosition: this.resumePosition,
       resumeClamp: HOBBIES_RESUME_CLAMP,
       sprite: {
+        depth: 8,
         gravityY: 1000
       },
       movement: {

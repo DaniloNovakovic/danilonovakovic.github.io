@@ -37,6 +37,15 @@ describe('strike zones', () => {
     expect(sweepPeriodMs(5)).toBeLessThan(sweepPeriodMs(0));
     expect(sweepPeriodMs(100)).toBeGreaterThan(0);
   });
+
+  it('eases the roundhouse without making it easier than the strike before it', () => {
+    const roundhouse = COMBO_LENGTH - 1;
+    const before = roundhouse - 1;
+    expect(strikeZone(roundhouse).halfWidth).toBeGreaterThan(0.06);
+    expect(strikeZone(roundhouse).halfWidth).toBeLessThan(strikeZone(before).halfWidth);
+    expect(sweepPeriodMs(roundhouse)).toBeGreaterThan(900);
+    expect(sweepPeriodMs(roundhouse)).toBeLessThan(sweepPeriodMs(before));
+  });
 });
 
 describe('resolveStrike', () => {
