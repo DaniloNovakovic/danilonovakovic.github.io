@@ -7,25 +7,78 @@ import {
   OVERWORLD_CIRCUIT_CRT,
   OVERWORLD_INTERACT_DISTANCE_X,
   OVERWORLD_INTERACT_MIN_PLAYER_Y,
+  OVERWORLD_SIGNPOST,
   OVERWORLD_STEP_PX,
   OVERWORLD_WIDTH,
   type OverworldBuildingSpot
 } from './content/overworldSpots';
 import { clamp, nearbyMissMessage, pickNearby } from './nearby';
 import { getPortfolioOverlay } from './overlayCatalog';
-import type { GameSecretId, GameSessionEvent, GameWorldState, NearbyThing } from './types';
+import type {
+  GameSecretId,
+  GameSessionEvent,
+  GameWorldState,
+  NearbyThing,
+  OverworldProgressStage
+} from './types';
 
 export interface OverworldInteractOutcome {
   message: string;
   events: GameSessionEvent[];
 }
 
+export interface OverworldProgress {
+  stage: OverworldProgressStage;
+  /** Street secrets found so far: glasses, banana peel, Circuit. */
+  found: number;
+  total: number;
+}
+
 const BANANA_CANCEL_EXTRA = 40;
+
+const SIGNPOST_MESSAGES: Record<OverworldProgressStage, string> = {
+  'find-glasses': 'The sign is a blur. Someone left a TODO? hatch open near the start of the street.',
+  'wear-glasses': 'Put your glasses back on. The street hides things from blurry eyes.',
+  'find-peel': 'Something slippery lies between the Profile house and Experiences.',
+  'win-circuit': 'That peel still leads somewhere. Win what is down there and bring it back.',
+  'use-crt': 'The blank CRT by Projects is humming. It wants your Circuit.'
+};
+
+export function getOverworldProgress(
+  state: Pick<GameWorldState, 'ownedItemIds' | 'equippedItemIds' | 'discoveredSecretIds'>
+): OverworldProgress {
+  const hasGlasses = state.ownedItemIds.includes('glasses');
+  const peelFound = state.discoveredSecretIds.includes(OVERWORLD_BANANA_PEEL.secretId);
+  const hasCircuit = state.ownedItemIds.includes('circuit');
+  const found = Number(hasGlasses) + Number(peelFound) + Number(hasCircuit);
+
+  let stage: OverworldProgressStage;
+  if (hasCircuit) stage = 'use-crt';
+  else if (!hasGlasses) stage = 'find-glasses';
+  else if (!state.equippedItemIds.includes('glasses')) stage = 'wear-glasses';
+  else if (!peelFound) stage = 'find-peel';
+  else stage = 'win-circuit';
+
+  return { stage, found, total: 3 };
+}
 
 export function listOverworldNearby(state: GameWorldState): NearbyThing[] {
   const x = state.overworld.playerX;
   const y = state.overworld.playerY;
   const things: NearbyThing[] = [];
+
+  const signDx = Math.abs(x - OVERWORLD_SIGNPOST.x);
+  if (signDx < OVERWORLD_SIGNPOST.interactDistanceX && y > OVERWORLD_SIGNPOST.minPlayerY) {
+    things.push({
+      id: OVERWORLD_SIGNPOST.id,
+      label: OVERWORLD_SIGNPOST.label,
+      distance: signDx,
+      prompt: 'Read the signpost',
+      kind: 'prop',
+      promptX: OVERWORLD_SIGNPOST.x,
+      promptY: OVERWORLD_SIGNPOST.promptY
+    });
+  }
 
   const hatchDx = Math.abs(x - OVERWORLD_BASEMENT_HOLE.x);
   if (hatchDx < OVERWORLD_BASEMENT_HOLE.interactDistanceX && y > OVERWORLD_BASEMENT_HOLE.minPlayerY) {
@@ -161,6 +214,14 @@ export function interactOverworld(
     return {
       message: 'You drop through the hatch into the basement.',
       events: [{ type: 'scene_entered', sceneId: 'basement' }]
+    };
+  }
+
+  if (picked.id === OVERWORLD_SIGNPOST.id) {
+    const progress = getOverworldProgress(state);
+    return {
+      message: `${SIGNPOST_MESSAGES[progress.stage]} (Secrets found: ${progress.found}/${progress.total})`,
+      events: [{ type: 'signpost_read', ...progress }]
     };
   }
 

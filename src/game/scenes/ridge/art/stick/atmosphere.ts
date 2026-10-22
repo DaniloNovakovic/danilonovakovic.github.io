@@ -1,18 +1,6 @@
 import type * as Phaser from 'phaser';
 import { GROUND_Y, INK, PAPER, PAPER_WARM, STAGE_HEIGHT, WASH } from './palette';
 
-/** Stepped sketchbook clock (~11 FPS) so motion reads as hand-drawn. */
-export function sketchTick(timeMs: number): number {
-  return Math.floor(timeMs / 90);
-}
-
-export function prefersReducedMotion(): boolean {
-  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
-    return false;
-  }
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-}
-
 /** Stable scatter so baked scenery looks hand-placed but never re-rolls. */
 export function jitter(seed: number): number {
   const n = Math.sin(seed * 127.1) * 43758.5453;

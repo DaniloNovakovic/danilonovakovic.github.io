@@ -4,7 +4,8 @@ import type { RidgeVisualProvider, RidgeVisualViewModel } from '../types';
 import { ActorSpritePool, headTopFor, type ActorRenderRequest } from './actorSprites';
 import { drawAmbientFar, drawAmbientNear } from './ambientLayer';
 import { drawRidgeAreaLayer, type SceneryLayer } from './areaSets';
-import { drawCrtAtmosphere, prefersReducedMotion, sketchTick } from './atmosphere';
+import { drawCrtAtmosphere } from './atmosphere';
+import { prefersReducedMotion, sketchTick } from '@/game/sharedSceneRuntime/motion/sketchMotion';
 import { BarkDirector, type BarkLines } from './barkDirector';
 import { PresenceLayer, type ActiveBark, type PlacedPresence } from './presenceLayer';
 import {

@@ -96,5 +96,15 @@ export const OVERWORLD_CIRCUIT_CRT = {
   sceneId: 'ridge' as const
 };
 
+/** Progress-aware hint sign at the start of the street (in reach from spawn). */
+export const OVERWORLD_SIGNPOST = {
+  id: 'signpost',
+  label: 'Street signpost',
+  x: 60,
+  promptY: 410,
+  interactDistanceX: 70,
+  minPlayerY: 400
+};
+
 export const OVERWORLD_INTERACT_DISTANCE_X = 80;
 export const OVERWORLD_INTERACT_MIN_PLAYER_Y = 400;
