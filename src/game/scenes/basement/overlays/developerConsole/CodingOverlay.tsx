@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { OverlayDialogFrame } from '@/game/overlays/OverlayDialogFrame';
 import type { OverlayControllerProps } from '@/game/overlays/types';
 import { useMessages } from '@/shared/i18n';
-import { bridgeActions } from '@/game/bridge/store';
+import { bridgeActions, bridgeStore, isItemOwned } from '@/game/bridge/store';
+import { CIRCUIT_PART_IDS, countCircuitParts } from '@/game/core/console/content/circuitParts';
 import { executeDeveloperConsoleCommand } from './commands';
 
 export default function CodingOverlay({ close, titleId, descriptionId }: OverlayControllerProps) {
@@ -29,7 +30,12 @@ export default function CodingOverlay({ close, titleId, descriptionId }: Overlay
 
   const handleCommand = (cmd: string) => {
     const result = executeDeveloperConsoleCommand(cmd, copy, {
-      enterScene: (sceneId) => bridgeActions.enterScene(sceneId)
+      enterScene: (sceneId) => bridgeActions.enterScene(sceneId),
+      getCircuitStatus: () => ({
+        ownedParts: countCircuitParts(bridgeStore.getState().inventory.ownedItemIds),
+        totalParts: CIRCUIT_PART_IDS.length,
+        hasCircuit: isItemOwned('circuit')
+      })
     });
 
     if (result.clearHistory) {

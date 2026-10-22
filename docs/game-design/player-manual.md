@@ -29,20 +29,24 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
 
 - Walk along the hand-drawn street and interact with buildings to open React portfolio overlays.
 - The building you can enter lifts and wobbles slightly, and its label grows.
-- A `START` signpost sits beside the spawn. Reading it gives a hint for the next step of the secret chain (glasses → banana peel → Circuit → CRT) plus a `Secrets found: n/3` tally. A bobbing `!` marks the sign when it has a hint you haven't read yet.
+- A `START` signpost sits beside the spawn. Reading it gives a hint for the next step of the secret chain (glasses → hobby spare parts or banana peel → Circuit → CRT) plus a `Secrets found: n/6` tally (glasses, banana peel, Circuit, and three spare parts). A bobbing `!` marks the sign when it has a hint you haven't read yet.
+- The street "grows up" as secrets are found. With glasses it is the plain kid-drawing street; after three secrets an ink pass adds cast-shadow hatching, daisies, and picket fences; with the Circuit, street lamps with light pools and twinkling stars appear. A short toast announces each upgrade.
+- A billboard near the end of the street reads "This space for rent" until you sign and pin a drawing in the Hobbies art station; the pinned doodle then hangs on the billboard.
 - Doodle birds on the telephone wire scatter when you get close (sooner while sprinting) and return once you've walked away. Landing and sprinting kick up small ink puffs.
 - Decorative motion (bird flight, puffs, wobble, CRT animation) is reduced or frozen under `prefers-reduced-motion`.
 - Opening a React overlay pauses Phaser movement and input.
 - Closing an overlay returns to the street, unless the overlay was opened from an interior parent scene.
-- The basement entrance is the hole under the `TODO?` sign.
+- The basement entrance is a hatch with a ladder under a `TODO?` tag. The lid rattles and `?` glyphs float up when you walk near it; after collecting the glasses the tag is crossed out as `DONE` and code glyphs rise instead. Entering plays a short drop-in animation.
 - A banana peel secret can be discovered in the street. After discovery, interacting with it enters Potassium Slip.
-- A blank street CRT sits between the Projects and Abilities buildings. Without a Circuit it only shows a locked prompt and the occasional flicker of static; once you own the Circuit, a little stick figure waves from the screen. After winning Potassium Slip and owning the Circuit, interact with the CRT to insert it and enter Ridge (secret side story).
+- A blank street CRT sits between the Projects and Abilities buildings. It is always drawn, with or without glasses. Without a Circuit it only shows a locked prompt and the occasional flicker of static; once you own the Circuit, a little stick figure waves from the screen. While owning the Circuit, interact with the CRT to insert it and enter Ridge (secret side story).
 
 ## Hobbies Room
 
 - Enter the Hobbies Phaser scene from the Hobbies building.
 - Walk to a hobby station and press `E` to open its React overlay.
-- Current hobby stations: Art, Music, Fitness, and Dancing.
+- Current hobby stations: Art, Music, Fitness, and Dancing. A prize tag beside each station label stays dashed until its reward is claimed, then shows a tick.
+- Music (guitar riff), Fitness (Muay Thai timing combo), and Dancing (rhythm rounds) each award one Circuit spare part when cleared: copper string, battery cell, and clock crystal. Replays stay playable for fun.
+- Art lets you sign and pin a drawing; it appears on the street billboard.
 - Close a hobby overlay to return to the Hobbies room.
 - Press `H` or `Esc`, or interact with the exit, to return to the street.
 
@@ -50,8 +54,12 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
 
 - Enter through the overworld basement hole.
 - The glasses pickup is in the basement. Collecting it adds and equips the glasses.
+- Without glasses the den is dim; collecting them switches the swinging bulb on.
 - Before glasses are owned, interacting with the computer shows the character thought: `ughh... I can't see`.
-- After glasses are owned, interacting with the computer opens the Developer Console React overlay.
+- After glasses are owned, interacting with the computer opens the Developer Console React overlay. Besides `whoami`, `skills`, and `enter <scene>`, it answers `ls`, `cat <file>`, `parts`, and a couple of hidden commands.
+- The corkboard cycles through notes about Danilo's work; read cards are marked on the board.
+- The shelf holds relics of old projects (a uc32 board, a chess piece glued to a Tetris block).
+- The workbench shows a Circuit blueprint with three part slots. With all three hobby spare parts, interacting solders them into a Circuit — a second route to the Circuit besides winning Potassium Slip.
 - Close the console to return to the basement.
 - Press `H` or `Esc`, or interact with the ladder, to return to the street.
 

@@ -12,6 +12,7 @@ import {
   OVERWORLD_WIDTH,
   type OverworldBuildingSpot
 } from './content/overworldSpots';
+import { CIRCUIT_PART_IDS, countCircuitParts } from './content/circuitParts';
 import { clamp, nearbyMissMessage, pickNearby } from './nearby';
 import { getPortfolioOverlay } from './overlayCatalog';
 import type {
@@ -40,9 +41,15 @@ const SIGNPOST_MESSAGES: Record<OverworldProgressStage, string> = {
   'find-glasses': 'The sign is a blur. Someone left a TODO? hatch open near the start of the street.',
   'wear-glasses': 'Put your glasses back on. The street hides things from blurry eyes.',
   'find-peel': 'Something slippery lies between the Profile house and Experiences.',
-  'win-circuit': 'That peel still leads somewhere. Win what is down there and bring it back.',
+  'win-circuit':
+    'That peel still leads somewhere. Win what is down there — or build a Circuit from hobby parts.',
+  'solder-circuit': 'Your pockets rattle with parts. The basement workbench could make something of them.',
   'use-crt': 'The blank CRT by Projects is humming. It wants your Circuit.'
 };
+
+/** Glasses, banana peel, three hobby parts, Circuit. */
+const STREET_SECRET_TOTAL = 3 + CIRCUIT_PART_IDS.length;
+
 
 export function getOverworldProgress(
   state: Pick<GameWorldState, 'ownedItemIds' | 'equippedItemIds' | 'discoveredSecretIds'>
@@ -50,16 +57,32 @@ export function getOverworldProgress(
   const hasGlasses = state.ownedItemIds.includes('glasses');
   const peelFound = state.discoveredSecretIds.includes(OVERWORLD_BANANA_PEEL.secretId);
   const hasCircuit = state.ownedItemIds.includes('circuit');
-  const found = Number(hasGlasses) + Number(peelFound) + Number(hasCircuit);
+  const parts = countCircuitParts(state.ownedItemIds);
+  const found = Number(hasGlasses) + Number(peelFound) + Number(hasCircuit) + parts;
 
   let stage: OverworldProgressStage;
   if (hasCircuit) stage = 'use-crt';
   else if (!hasGlasses) stage = 'find-glasses';
   else if (!state.equippedItemIds.includes('glasses')) stage = 'wear-glasses';
+  else if (parts === CIRCUIT_PART_IDS.length) stage = 'solder-circuit';
   else if (!peelFound) stage = 'find-peel';
   else stage = 'win-circuit';
 
-  return { stage, found, total: 3 };
+  return { stage, found, total: STREET_SECRET_TOTAL };
+}
+
+/**
+ * How "finished" the street drawing looks: 0 rough doodle, 1 glasses (haze lifts),
+ * 2 ink pass after three secrets, 3 finished pass once the Circuit is in hand.
+ */
+export type SketchDetailLevel = 0 | 1 | 2 | 3;
+
+export function getSketchDetailLevel(
+  state: Pick<GameWorldState, 'ownedItemIds' | 'equippedItemIds' | 'discoveredSecretIds'>
+): SketchDetailLevel {
+  if (state.ownedItemIds.includes('circuit')) return 3;
+  if (getOverworldProgress(state).found >= 3) return 2;
+  return state.ownedItemIds.includes('glasses') ? 1 : 0;
 }
 
 export function listOverworldNearby(state: GameWorldState): NearbyThing[] {
@@ -232,7 +255,8 @@ export function interactOverworld(
   if (picked.id === OVERWORLD_CIRCUIT_CRT.id) {
     if (!state.ownedItemIds.includes('circuit')) {
       return {
-        message: 'The CRT is blank. Win Potassium Slip for a Circuit, then come back.',
+        message:
+          'The CRT is blank. Win Potassium Slip for a Circuit, or solder one from hobby parts in the basement.',
         events: []
       };
     }

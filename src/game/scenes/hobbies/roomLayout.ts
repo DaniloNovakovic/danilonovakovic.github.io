@@ -1,4 +1,5 @@
 import type { HobbiesOverlayId, OverlayId } from '@/game/overlays/overlayIds';
+import { HOBBIES_EXIT_SPOT_X, HOBBY_STATION_SPOTS } from '@/game/core/console/content/hobbiesSpots';
 
 export type HobbiesRoomInteractableId = OverlayId | 'exit';
 
@@ -33,21 +34,18 @@ export type HobbiesRoomInteractableTypeObject =
 const HOBBIES_PROXIMITY_ANCHOR_Y = 450;
 
 /** Exit door center X (left side of room — keeps center clear for five hobby stations). */
-export const HOBBIES_EXIT_X = 100;
+export const HOBBIES_EXIT_X = HOBBIES_EXIT_SPOT_X;
 
 /** Shared prompt Y for all room interactables. */
-const HOBBIES_INTERACT_PROMPT_Y = 350;
+const HOBBIES_INTERACT_PROMPT_Y = 318;
 
 /**
  * Hobby stations: sprite X aligns with interaction X.
  * `spriteMode`: `floor` = sprite origin bottom at floorY + yOffset; `mid` = origin center.
  */
-export const HOBBY_STATION_LAYOUT: readonly HobbyStationTypeObject[] = [
-  { kind: 'hobbyStation', id: 'art', x: 280, spriteMode: 'floor', yOffsetFromFloor: 0 },
-  { kind: 'hobbyStation', id: 'music', x: 440, spriteMode: 'floor', yOffsetFromFloor: 0 },
-  { kind: 'hobbyStation', id: 'fitness', x: 600, spriteMode: 'floor', yOffsetFromFloor: 0 },
-  { kind: 'hobbyStation', id: 'dancing', x: 760, spriteMode: 'floor', yOffsetFromFloor: 0 }
-];
+export const HOBBY_STATION_LAYOUT: readonly HobbyStationTypeObject[] = HOBBY_STATION_SPOTS.map(
+  (spot) => ({ kind: 'hobbyStation', id: spot.id, x: spot.x, spriteMode: 'floor', yOffsetFromFloor: 0 })
+);
 
 /**
  * Interaction hotspots inside the Hobbies Phaser room. The scene owns these

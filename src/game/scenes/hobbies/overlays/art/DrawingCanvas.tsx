@@ -1,178 +1,58 @@
-import React, { useRef, useState, useEffect, useLayoutEffect } from 'react';
-import { Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { Pin, PinOff, Trash2 } from 'lucide-react';
+import { bridgeActions, useBridgeState } from '@/game/bridge/store';
 import { OverlayDialogFrame } from '@/game/overlays/OverlayDialogFrame';
 import type { OverlayControllerProps } from '@/game/overlays/types';
 import { useMessages } from '@/shared/i18n';
 import { useOverlayKeys } from '@/shared/hooks/useOverlayKeys';
 import { Button, Panel } from '@/shared/ui';
+import { RewardSticker } from '../shared/RewardSticker';
+import { hobbyBoardClass } from '../shared/hobbyStyles';
+import { canvasHasInk, exportSignedDoodle } from './doodleExport';
+import { ToolPicker } from './ToolPicker';
+import { useDoodleCanvas } from './useDoodleCanvas';
 
 export default function DrawingCanvas({ close, titleId, descriptionId }: OverlayControllerProps) {
   const messages = useMessages();
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [context, setContext] = useState<CanvasRenderingContext2D | null>(null);
+  const copy = messages.miniGames.drawing;
+  const pinnedDoodle = useBridgeState().progress.streetDoodle;
+  const {
+    canvasRef,
+    tool,
+    setTool,
+    keyboardCursor,
+    clear,
+    moveKeyboardCursor,
+    toggleKeyboardPen,
+    pointerHandlers
+  } = useDoodleCanvas();
+  const [pinStickerKey, setPinStickerKey] = useState(0);
+  const [showEmptyNotice, setShowEmptyNotice] = useState(false);
 
-  const cursorRef = useRef({ x: 0, y: 0 });
-  const isKeyboardDrawingRef = useRef(false);
-
-  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
-  const [isKeyboardDrawing, setIsKeyboardDrawing] = useState(false);
-  const [isUsingKeyboard, setIsUsingKeyboard] = useState(false);
-
-  useLayoutEffect(() => {
-    cursorRef.current = cursorPos;
-  }, [cursorPos]);
-  useLayoutEffect(() => {
-    isKeyboardDrawingRef.current = isKeyboardDrawing;
-  }, [isKeyboardDrawing]);
-
-  useEffect(function initializeCanvasDrawingContext() {
-    const canvas = canvasRef.current;
-    if (canvas) {
-      const dpr = window.devicePixelRatio || 1;
-      const rect = canvas.getBoundingClientRect();
-
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
-
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.scale(dpr, dpr);
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.strokeStyle = '#1a1a1a';
-        ctx.lineWidth = 4;
-        setContext(ctx);
-
-        const cx = rect.width / 2;
-        const cy = rect.height / 2;
-        cursorRef.current = { x: cx, y: cy };
-        setCursorPos({ x: cx, y: cy });
-      }
-    }
-  }, []);
-
-  // Arrow keys and Space are handled via useOverlayKeys (preventDefault prevents
-  // overlay scroll conflicts). The hook re-reads the latest ref values each call
-  // so it is safe to pass an inline object.
+  const moveCursor = (event: KeyboardEvent) => moveKeyboardCursor(event.key, event.shiftKey);
   useOverlayKeys({
-    ArrowUp: (e) => {
-      if (!context || !canvasRef.current) return;
-      const step = e.shiftKey ? 10 : 5;
-      const pos = cursorRef.current;
-      const newY = Math.max(0, pos.y - step);
-      setIsUsingKeyboard(true);
-      if (isKeyboardDrawingRef.current) { context.lineTo(pos.x, newY); context.stroke(); }
-      cursorRef.current = { x: pos.x, y: newY };
-      setCursorPos({ x: pos.x, y: newY });
-    },
-    ArrowDown: (e) => {
-      if (!context || !canvasRef.current) return;
-      const step = e.shiftKey ? 10 : 5;
-      const pos = cursorRef.current;
-      const dpr = window.devicePixelRatio || 1;
-      const maxY = canvasRef.current.height / dpr;
-      const newY = Math.min(maxY, pos.y + step);
-      setIsUsingKeyboard(true);
-      if (isKeyboardDrawingRef.current) { context.lineTo(pos.x, newY); context.stroke(); }
-      cursorRef.current = { x: pos.x, y: newY };
-      setCursorPos({ x: pos.x, y: newY });
-    },
-    ArrowLeft: (e) => {
-      if (!context || !canvasRef.current) return;
-      const step = e.shiftKey ? 10 : 5;
-      const pos = cursorRef.current;
-      const newX = Math.max(0, pos.x - step);
-      setIsUsingKeyboard(true);
-      if (isKeyboardDrawingRef.current) { context.lineTo(newX, pos.y); context.stroke(); }
-      cursorRef.current = { x: newX, y: pos.y };
-      setCursorPos({ x: newX, y: pos.y });
-    },
-    ArrowRight: (e) => {
-      if (!context || !canvasRef.current) return;
-      const step = e.shiftKey ? 10 : 5;
-      const pos = cursorRef.current;
-      const dpr = window.devicePixelRatio || 1;
-      const maxX = canvasRef.current.width / dpr;
-      const newX = Math.min(maxX, pos.x + step);
-      setIsUsingKeyboard(true);
-      if (isKeyboardDrawingRef.current) { context.lineTo(newX, pos.y); context.stroke(); }
-      cursorRef.current = { x: newX, y: pos.y };
-      setCursorPos({ x: newX, y: pos.y });
-    },
-    ' ': () => {
-      if (!context) return;
-      const drawing = isKeyboardDrawingRef.current;
-      isKeyboardDrawingRef.current = !drawing;
-      setIsKeyboardDrawing(!drawing);
-      if (!drawing) {
-        context.beginPath();
-        context.moveTo(cursorRef.current.x, cursorRef.current.y);
-      } else {
-        context.closePath();
-      }
-    }
+    ArrowUp: moveCursor,
+    ArrowDown: moveCursor,
+    ArrowLeft: moveCursor,
+    ArrowRight: moveCursor,
+    ' ': toggleKeyboardPen,
+    '1': () => setTool('thin'),
+    '2': () => setTool('thick'),
+    '3': () => setTool('eraser')
   });
 
-  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
-    if (!context) return;
-    setIsUsingKeyboard(false);
-    
-    // Prevent scrolling on touch
-    if (e.type === 'touchstart') {
-        e.preventDefault();
-    }
-
-    const { offsetX, offsetY } = getCoordinates(e);
-    context.beginPath();
-    context.moveTo(offsetX, offsetY);
-    setIsDrawing(true);
-    cursorRef.current = { x: offsetX, y: offsetY };
-    setCursorPos({ x: offsetX, y: offsetY });
-  };
-
-  const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
-    if (!isDrawing || !context) return;
-    
-    if (e.type === 'touchmove') {
-        e.preventDefault();
-    }
-
-    const { offsetX, offsetY } = getCoordinates(e);
-    context.lineTo(offsetX, offsetY);
-    context.stroke();
-    cursorRef.current = { x: offsetX, y: offsetY };
-    setCursorPos({ x: offsetX, y: offsetY });
-  };
-
-  const stopDrawing = () => {
-    if (!context) return;
-    context.closePath();
-    setIsDrawing(false);
-  };
-
-  const getCoordinates = (event: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+  const pin = () => {
     const canvas = canvasRef.current;
-    if (!canvas) return { offsetX: 0, offsetY: 0 };
-
-    if ('touches' in event) {
-      const rect = canvas.getBoundingClientRect();
-      return {
-        offsetX: event.touches[0].clientX - rect.left,
-        offsetY: event.touches[0].clientY - rect.top
-      };
-    } else {
-      return {
-        offsetX: event.nativeEvent.offsetX,
-        offsetY: event.nativeEvent.offsetY
-      };
-    }
+    const dataUrl = canvas && canvasHasInk(canvas) ? exportSignedDoodle(canvas, copy.signature) : null;
+    setShowEmptyNotice(!dataUrl);
+    if (!dataUrl) return;
+    bridgeActions.pinStreetDoodle(dataUrl);
+    setPinStickerKey((key) => key + 1);
   };
 
-  const clearCanvas = () => {
-    if (!context || !canvasRef.current) return;
-    const canvas = canvasRef.current;
-    context.clearRect(0, 0, canvas.width, canvas.height);
+  const unpin = () => {
+    bridgeActions.pinStreetDoodle(null);
+    setPinStickerKey(0);
   };
 
   return (
@@ -183,54 +63,80 @@ export default function DrawingCanvas({ close, titleId, descriptionId }: Overlay
       titleId={titleId}
       descriptionId={descriptionId}
     >
-      <div className="flex flex-col items-center w-full">
-        <Panel border="thick" className="group relative h-[250px] w-full overflow-hidden p-0 shadow-[6px_6px_0px_0px_rgba(26,26,26,1)]">
+      <div className="flex w-full flex-col items-center gap-3">
+        <ToolPicker tool={tool} onSelect={setTool} />
+
+        <Panel border="thick" className={`${hobbyBoardClass} group h-[250px] p-0`}>
           <canvas
             ref={canvasRef}
-            className="w-full h-full cursor-crosshair touch-none"
-            onMouseDown={startDrawing}
-            onMouseMove={draw}
-            onMouseUp={stopDrawing}
-            onMouseOut={stopDrawing}
-            onTouchStart={startDrawing}
-            onTouchMove={draw}
-            onTouchEnd={stopDrawing}
+            aria-label={copy.canvasLabel}
+            className="h-full w-full cursor-crosshair touch-none"
+            {...pointerHandlers}
           />
-
-          {isUsingKeyboard && (
-            <div 
-              className={`absolute pointer-events-none w-4 h-4 border-2 rounded-full -translate-x-1/2 -translate-y-1/2 transition-colors duration-100 ${isKeyboardDrawing ? 'bg-red-500 border-black' : 'bg-transparent border-blue-500'}`}
-              style={{ left: cursorPos.x, top: cursorPos.y }}
+          {keyboardCursor ? (
+            <div
+              className={`pointer-events-none absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[#1a1a1a] ${keyboardCursor.penDown ? 'bg-[#1a1a1a]/30' : 'border-dashed'}`}
+              style={{ left: keyboardCursor.point.x, top: keyboardCursor.point.y }}
             >
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-1 bg-black rounded-full" />
+              <div className="absolute left-1/2 top-1/2 h-1 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#1a1a1a]" />
             </div>
-          )}
-          
-          <div className="absolute top-0 left-0 w-4 h-4 border-b-2 border-r-2 border-[#1a1a1a] opacity-30"></div>
-          <div className="absolute top-0 right-0 w-4 h-4 border-b-2 border-l-2 border-[#1a1a1a] opacity-30"></div>
-          <div className="absolute bottom-0 left-0 w-4 h-4 border-t-2 border-r-2 border-[#1a1a1a] opacity-30"></div>
-          <div className="absolute bottom-0 right-0 w-4 h-4 border-t-2 border-l-2 border-[#1a1a1a] opacity-30"></div>
+          ) : null}
+          <CornerMarks />
+          {pinStickerKey > 0 && pinnedDoodle ? (
+            <RewardSticker
+              key={pinStickerKey}
+              icon="pin"
+              title={copy.pinnedTitle}
+              body={copy.pinnedBody}
+              dismissLabel={messages.miniGames.sparePart.dismiss}
+              onDismiss={() => setPinStickerKey(0)}
+            />
+          ) : null}
         </Panel>
-        
-        <div className="mt-4 flex justify-between w-full items-center">
+
+        <div className="flex w-full flex-wrap items-center justify-between gap-2">
           <div className="flex flex-col">
-            <span className="text-sm font-bold text-[#1a1a1a] opacity-60">
-              {messages.miniGames.drawing.instruction}
-            </span>
-            <span className="text-[10px] font-mono opacity-40">
-              {messages.miniGames.drawing.keyboardHint}
-            </span>
+            <span className="text-sm font-bold text-[#1a1a1a] opacity-60">{copy.instruction}</span>
+            <span className="font-mono text-[10px] opacity-40">{copy.keyboardHint}</span>
+            {showEmptyNotice ? (
+              <span role="alert" className="text-xs font-black">
+                {copy.emptyCanvas}
+              </span>
+            ) : null}
           </div>
-          <Button
-            onClick={clearCanvas}
-            variant="secondary"
-            className="shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] hover:translate-y-[2px] hover:shadow-none active:scale-95"
-          >
-            <Trash2 size={16} />
-            {messages.miniGames.drawing.erase}
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="secondary" size="sm" onClick={clear} icon={<Trash2 size={14} />}>
+              {copy.clear}
+            </Button>
+            <Button variant="primary" size="sm" onClick={pin} icon={<Pin size={14} />}>
+              {copy.pin}
+            </Button>
+          </div>
         </div>
+
+        {pinnedDoodle ? (
+          <div className="flex w-full items-center gap-3 border-t-2 border-dashed border-[#1a1a1a]/40 pt-2">
+            <span className="text-[11px] font-bold opacity-60">{copy.pinnedPreview}</span>
+            <img src={pinnedDoodle} alt="" className="h-10 w-auto -rotate-2 border-2 border-[#1a1a1a] shadow-[2px_2px_0px_0px_rgba(26,26,26,1)]" />
+            <Button variant="ghost" size="sm" onClick={unpin} icon={<PinOff size={14} />}>
+              {copy.unpin}
+            </Button>
+          </div>
+        ) : null}
+
+        <p className="text-[11px] italic opacity-45">{copy.marginNote}</p>
       </div>
     </OverlayDialogFrame>
+  );
+}
+
+function CornerMarks() {
+  return (
+    <>
+      <div className="pointer-events-none absolute left-0 top-0 h-4 w-4 border-b-2 border-r-2 border-[#1a1a1a] opacity-30" />
+      <div className="pointer-events-none absolute right-0 top-0 h-4 w-4 border-b-2 border-l-2 border-[#1a1a1a] opacity-30" />
+      <div className="pointer-events-none absolute bottom-0 left-0 h-4 w-4 border-r-2 border-t-2 border-[#1a1a1a] opacity-30" />
+      <div className="pointer-events-none absolute bottom-0 right-0 h-4 w-4 border-l-2 border-t-2 border-[#1a1a1a] opacity-30" />
+    </>
   );
 }

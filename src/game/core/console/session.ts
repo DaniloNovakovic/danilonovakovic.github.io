@@ -18,7 +18,7 @@ import {
   OVERWORLD_PLAYER_START,
   type GameSceneId
 } from './content/overworldSpots';
-import { interactHobbies, moveHobbies } from './hobbiesLogic';
+import { interactHobbies, moveHobbies, performHobby } from './hobbiesLogic';
 import { formatGameObservation, observeGameWorld } from './observe';
 import { draftPotassium, fightPotassium, startPotassium } from './potassiumLogic';
 import {
@@ -71,7 +71,7 @@ export class GameConsoleSession {
         facing: 'right',
         bananaFirstPeelPending: false
       },
-      basement: { playerX: 135, facing: 'right' },
+      basement: { playerX: 135, facing: 'right', corkboardNote: 0 },
       hobbies: { playerX: 200, facing: 'right' },
       potassium: {
         phase: 'lobby',
@@ -194,6 +194,12 @@ export class GameConsoleSession {
         return this.handleRidgeSkipWarp('skip');
       case 'warp':
         return this.handleRidgeSkipWarp(`warp ${command.areaId}`);
+      case 'perform': {
+        const performed = performHobby(this.state);
+        return performed
+          ? this.finish(performed.message, performed.events)
+          : this.fail('perform only works with a hobby mini-game open.');
+      }
       case 'start':
         return this.wrapPotassium(startPotassium(this.state));
       case 'fight':

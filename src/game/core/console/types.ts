@@ -4,8 +4,10 @@
 
 import type { RidgeObservation, RidgeRouteBeat } from '../ridge/types';
 import type { GameSceneId, PortfolioOverlayId } from './content/overworldSpots';
+import type { CircuitPartId } from './content/circuitParts';
+import type { HobbyStationId } from './content/hobbiesSpots';
 
-export type GameItemId = 'glasses' | 'circuit';
+export type GameItemId = 'glasses' | 'circuit' | CircuitPartId;
 export type GameSecretId = 'banana-peel-clue';
 export type GameFacing = 'left' | 'right';
 
@@ -15,7 +17,16 @@ export type OverworldProgressStage =
   | 'wear-glasses'
   | 'find-peel'
   | 'win-circuit'
+  | 'solder-circuit'
   | 'use-crt';
+
+export type GameThoughtId =
+  | 'basement_cannot_see'
+  | 'basement_corkboard'
+  | 'basement_shelf'
+  | 'workbench_missing_parts'
+  | 'workbench_soldered';
+
 
 export type GameMode =
   | 'overworld'
@@ -39,7 +50,7 @@ export interface NearbyThing {
 }
 
 export interface OverlaySummary {
-  id: PortfolioOverlayId | 'games' | 'inventory';
+  id: PortfolioOverlayId | HobbyStationId | 'games' | 'inventory';
   title: string;
   blurb: string;
 }
@@ -54,6 +65,8 @@ export interface OverworldSlice {
 export interface BasementSlice {
   playerX: number;
   facing: GameFacing;
+  /** Next corkboard note to read; cycles so repeat visits reveal more. */
+  corkboardNote: number;
 }
 
 export interface HobbiesSlice {
@@ -119,6 +132,7 @@ export type GameCommand =
   | { type: 'choose'; choiceIdOrIndex: string }
   | { type: 'leave' }
   | { type: 'start' }
+  | { type: 'perform' }
   | { type: 'fight' }
   | { type: 'draft'; choiceIdOrIndex: string }
   | { type: 'cheat'; action: 'give'; itemId: GameItemId }
@@ -137,7 +151,7 @@ export type GameSessionEvent =
   | { type: 'secret_discovered'; secretId: GameSecretId }
   | { type: 'banana_peel_cancelled' }
   | { type: 'signpost_read'; stage: OverworldProgressStage; found: number; total: number }
-  | { type: 'thought'; id: 'basement_cannot_see' }
+  | { type: 'thought'; id: GameThoughtId; variant?: number }
   | { type: 'potassium_won' }
   | { type: 'ridge_beat_changed'; beat: RidgeRouteBeat }
   | { type: 'ridge_area_handoff'; areaId: string }

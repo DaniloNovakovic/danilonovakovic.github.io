@@ -1,3 +1,4 @@
+import type { HobbyStationId } from './content/hobbiesSpots';
 import type { PortfolioOverlayId } from './content/overworldSpots';
 import type { OverlaySummary } from './types';
 
@@ -31,6 +32,33 @@ const PORTFOLIO: Record<PortfolioOverlayId, OverlaySummary> = {
 
 export function getPortfolioOverlay(id: PortfolioOverlayId): OverlaySummary {
   return PORTFOLIO[id];
+}
+
+const HOBBIES: Record<HobbyStationId, OverlaySummary> = {
+  art: {
+    id: 'art',
+    title: 'Drawing',
+    blurb: 'An easel and a fresh sheet. Sign a doodle to pin it up on the street.'
+  },
+  music: {
+    id: 'music',
+    title: 'Guitar',
+    blurb: 'Six strings. Play the riff on the sticky note to win a copper string.'
+  },
+  fitness: {
+    id: 'fitness',
+    title: 'Muay Thai',
+    blurb: 'Strike the bag on the beat. Land the full combo for a battery cell.'
+  },
+  dancing: {
+    id: 'dancing',
+    title: 'Dancing',
+    blurb: 'Repeat the moves on the beat. Reach round five for a clock crystal.'
+  }
+};
+
+export function getHobbyOverlay(id: HobbyStationId): OverlaySummary {
+  return HOBBIES[id];
 }
 
 export function getGamesOverlay(): OverlaySummary {

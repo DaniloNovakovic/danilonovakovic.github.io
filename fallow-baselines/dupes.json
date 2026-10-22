@@ -17,7 +17,7 @@
     "src/game/sceneLifecycle/SceneTransitionCoordinator.test.ts:112-118|src/game/sceneLifecycle/SceneTransitionCoordinator.test.ts:87-93",
     "src/game/sceneLifecycle/SceneTransitionCoordinator.test.ts:100-108|src/game/sceneLifecycle/SceneTransitionCoordinator.test.ts:130-138",
     "src/game/sceneLifecycle/contexts/createSceneContexts.test.ts:114-121|src/game/sceneLifecycle/contexts/createSceneContexts.test.ts:92-99",
-    "src/game/scenes/basement/runtime/BasementScene.ts:53-78|src/game/scenes/hobbies/runtime/HobbiesScene.ts:53-78",
+    "src/game/scenes/basement/runtime/BasementScene.ts:58-84|src/game/scenes/hobbies/runtime/HobbiesScene.ts:58-84",
     "src/game/scenes/basement/runtime/BasementScene.ts:175-188|src/game/scenes/hobbies/runtime/HobbiesScene.ts:169-182",
     "src/game/scenes/potassiumSlip/runtime/PotassiumSlipScene.ts:507-513|src/game/scenes/potassiumSlip/runtime/PotassiumSlipScene.ts:536-542",
     "src/game/scenes/potassiumSlip/runtime/waves.test.ts:175-182|src/game/scenes/potassiumSlip/runtime/waves.test.ts:55-62",

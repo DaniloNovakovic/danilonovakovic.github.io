@@ -20,8 +20,10 @@ import {
   SIDE_VIEW_SPRINT_SPEED,
   SIDE_VIEW_WALK_SPEED
 } from '@/game/sharedSceneRuntime/config';
-import { isItemEquipped, type OpenOverlayOptions } from '@/game/bridge/store';
-import { buildHobbiesRoom } from './HobbiesRoom';
+import { bridgeStore, isItemEquipped, type OpenOverlayOptions } from '@/game/bridge/store';
+import { CIRCUIT_PART_HOBBY, CIRCUIT_PART_IDS } from '@/game/core/console/content/circuitParts';
+import { prefersReducedMotion, sketchTick } from '@/game/sharedSceneRuntime/motion/sketchMotion';
+import { HobbiesRoom } from './HobbiesRoom';
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
 import {
   createSideViewPlayerRuntime,
@@ -47,6 +49,9 @@ export class HobbiesScene extends Phaser.Scene {
   private onClose?: () => void;
   private onOpenOverlay?: (overlayId: OverlayId, options?: OpenOverlayOptions) => void;
   private isPaused: boolean = false;
+  private room?: HobbiesRoom;
+  private motion = true;
+  private readonly claimedScratch = new Set<HobbiesOverlayId>();
   private resumePosition?: { x: number; y: number };
 
   constructor() {
@@ -82,7 +87,8 @@ export class HobbiesScene extends Phaser.Scene {
 
     this.physics.world.setBounds(0, 0, width, height);
 
-    buildHobbiesRoom(this);
+    this.motion = !prefersReducedMotion();
+    this.room = new HobbiesRoom(this);
 
     this.playerRuntime = createSideViewPlayerRuntime({
       scene: this,
@@ -90,6 +96,7 @@ export class HobbiesScene extends Phaser.Scene {
       resumePosition: this.resumePosition,
       resumeClamp: HOBBIES_RESUME_CLAMP,
       sprite: {
+        depth: 8,
         gravityY: 1000
       },
       movement: {
@@ -163,7 +170,7 @@ export class HobbiesScene extends Phaser.Scene {
     this.playerRuntime.syncAppearance();
   }
 
-  update() {
+  update(time: number) {
     const playerUpdate = this.playerRuntime?.update();
     if (!playerUpdate || playerUpdate.paused) {
       this.exitPrompt.setVisible(false);
@@ -177,6 +184,7 @@ export class HobbiesScene extends Phaser.Scene {
       interactRequested: step.interactRequested,
       exitRequested: commands.exitContext
     });
+    this.updateRoom(interaction?.activeTarget?.id ?? null, sketchTick(time));
 
     if (interaction?.effect?.kind === 'close') {
       this.onClose?.();
@@ -196,5 +204,19 @@ export class HobbiesScene extends Phaser.Scene {
           break;
       }
     }
+  }
+
+  private updateRoom(activeId: HobbiesInteractionId | null, tick: number): void {
+    const state = bridgeStore.getState();
+    this.claimedScratch.clear();
+    for (const partId of CIRCUIT_PART_IDS) {
+      if (state.inventory.ownedItemIds.includes(partId)) this.claimedScratch.add(CIRCUIT_PART_HOBBY[partId]);
+    }
+    if (state.progress.streetDoodle) this.claimedScratch.add('art');
+    this.room?.update(
+      { claimed: this.claimedScratch, focusId: activeId === 'exit' ? null : activeId },
+      tick,
+      this.motion
+    );
   }
 }

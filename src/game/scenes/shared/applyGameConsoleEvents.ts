@@ -7,7 +7,7 @@ import {
   type InventoryItemId,
   type SecretDiscoveryId
 } from '@/game/bridge/store';
-import type { GameSessionEvent } from '@/game/core/console';
+import type { GameSessionEvent, GameThoughtId } from '@/game/core/console';
 import type { OverlayId } from '@/game/overlays/overlayIds';
 import type { SceneId } from '@/game/scenes/sceneIds';
 
@@ -15,7 +15,7 @@ export interface GameConsoleEventPorts {
   onEnterScene?: (sceneId: SceneId) => void;
   onOpenOverlay?: (overlayId: OverlayId) => void;
   onReturnToOverworld?: () => void;
-  onThought?: (id: 'basement_cannot_see') => void;
+  onThought?: (id: GameThoughtId, variant: number) => void;
   onBananaPeelDiscovered?: () => void;
   onBananaPeelCancelled?: () => void;
   onSignpostRead?: (event: Extract<GameSessionEvent, { type: 'signpost_read' }>) => void;
@@ -67,7 +67,7 @@ export function applyGameConsoleEvents(
         ports.onSignpostRead?.(event);
         break;
       case 'thought':
-        ports.onThought?.(event.id);
+        ports.onThought?.(event.id, event.variant ?? 0);
         break;
       default:
         break;

@@ -2,6 +2,7 @@
 // fallow-ignore-file complexity
 import type { RidgeObservation } from '../ridge/types';
 import { listBasementNearby } from './basementLogic';
+import { OVERWORLD_BANANA_PEEL } from './content/overworldSpots';
 import { listHobbiesNearby } from './hobbiesLogic';
 import { getOverworldProgress, listOverworldNearby } from './overworldLogic';
 import type {
@@ -15,8 +16,10 @@ const OVERWORLD_CONSOLE_HINTS: Record<OverworldProgressStage, string> = {
   'find-glasses':
     'Find the basement hatch near the start of the street and pick up the glasses.',
   'wear-glasses': 'equip glasses to reveal the banana peel secret.',
-  'find-peel': 'With glasses on, walk near x=650 and interact with the peel.',
-  'win-circuit': 'Interact with the peel again to enter Potassium Slip and win the Circuit.',
+  'find-peel': `With glasses on, walk near x=${OVERWORLD_BANANA_PEEL.x} and interact with the peel.`,
+  'win-circuit':
+    'Interact with the peel again to enter Potassium Slip and win the Circuit — or win music, fitness and dancing parts in Hobbies (perform) and solder them at the basement workbench.',
+  'solder-circuit': 'Drop into the basement and use the workbench near x=790 to solder the Circuit.',
   'use-crt': 'Walk to the street CRT near x=1650 and insert the Circuit to enter Ridge.'
 };
 
@@ -175,7 +178,12 @@ function buildHints(
     hints.push(...ridge.hints);
   }
 
+  if (state.mode === 'hobbies') {
+    hints.push('Stations: art x=280, music x=440, fitness x=600, dancing x=760. Interact, then perform.');
+  }
+
   if (state.mode === 'overlay') {
+    if (state.sceneId === 'hobbies') hints.push('Type perform to clear the mini-game goal.');
     hints.push('Type close to return.');
   }
 

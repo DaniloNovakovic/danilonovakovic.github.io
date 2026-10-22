@@ -229,6 +229,16 @@ describe('bridgeStore', () => {
       expect(isSecretDiscovered('banana-peel-clue')).toBe(false);
     });
 
+    it('pins and clears the street doodle, and resets it with progress', () => {
+      bridgeActions.pinStreetDoodle('data:image/png;base64,AAAA');
+      expect(bridgeStore.getState().progress.streetDoodle).toBe('data:image/png;base64,AAAA');
+      bridgeActions.pinStreetDoodle(null);
+      expect(bridgeStore.getState().progress.streetDoodle).toBeNull();
+      bridgeActions.pinStreetDoodle('data:image/png;base64,BBBB');
+      bridgeActions.resetProgress();
+      expect(bridgeStore.getState().progress.streetDoodle).toBeNull();
+    });
+
     it('awards Ridge stamps once by id', () => {
       bridgeActions.awardRidgeStamp('stampede-sketch');
       bridgeActions.awardRidgeStamp('stampede-sketch');

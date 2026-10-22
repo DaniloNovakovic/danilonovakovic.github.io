@@ -1,42 +1,75 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { OverlayDialogFrame } from '@/game/overlays/OverlayDialogFrame';
 import type { OverlayControllerProps } from '@/game/overlays/types';
 import { useMessages } from '@/shared/i18n';
+import { useOverlayKeys } from '@/shared/hooks/useOverlayKeys';
 import { Panel } from '@/shared/ui';
+import { SparePartSticker } from '../shared/SparePartSticker';
+import { useHobbyAudio } from '../shared/useHobbyAudio';
+import { useSparePartReward } from '../shared/useSparePartReward';
+import { hobbyBoardClass } from '../shared/hobbyStyles';
+import { HeavyBag } from './HeavyBag';
+import { ComboTracker, TimingBar } from './StrikeHud';
+import {
+  COMBO_LENGTH,
+  INITIAL_COMBO,
+  resolveStrike,
+  strikeZone,
+  sweepPeriodMs,
+  type StrikeResult
+} from './strikeCombo';
+import { playRoundBell, playStrikeSound } from './strikeSound';
+import { useSweepMarker } from './useSweepMarker';
+import '../shared/hobbyMotion.css';
+
+const STRIKE_COOLDOWN_MS = 140;
+
+interface StrikeFx extends StrikeResult {
+  id: number;
+}
 
 export default function MuayThaiOverlay({ close, titleId, descriptionId }: OverlayControllerProps) {
   const messages = useMessages();
-  const [hits, setHits] = useState(0);
-  const [isHit, setIsHit] = useState(false);
-  const hitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const copy = messages.miniGames.muayThai;
+  const getAudio = useHobbyAudio();
+  const reward = useSparePartReward('battery-cell');
+  const claimReward = reward.claim;
+  const { markerRef, readPosition, restart } = useSweepMarker(sweepPeriodMs(0));
 
-  const clearHitTimer = useCallback(() => {
-    if (hitTimerRef.current != null) {
-      clearTimeout(hitTimerRef.current);
-      hitTimerRef.current = null;
+  const [combo, setCombo] = useState(INITIAL_COMBO);
+  const [fx, setFx] = useState<StrikeFx | null>(null);
+  const comboRef = useRef(INITIAL_COMBO);
+  const lastStrikeAtRef = useRef(-Infinity);
+  const fxIdRef = useRef(0);
+
+  const strike = useCallback(() => {
+    const now = performance.now();
+    if (now - lastStrikeAtRef.current < STRIKE_COOLDOWN_MS) return;
+    lastStrikeAtRef.current = now;
+
+    const result = resolveStrike(comboRef.current, readPosition());
+    comboRef.current = result.state;
+    setCombo(result.state);
+    restart(sweepPeriodMs(result.state.step));
+    fxIdRef.current += 1;
+    setFx({ ...result, id: fxIdRef.current });
+
+    const audio = getAudio();
+    if (audio) playStrikeSound(audio, result.grade);
+    if (result.completed) {
+      if (audio) playRoundBell(audio);
+      claimReward();
     }
-  }, []);
+  }, [claimReward, getAudio, readPosition, restart]);
 
-  useEffect(function clearHitTimerOnUnmount() {
-    return () => clearHitTimer();
-  }, [clearHitTimer]);
-
-  const punch = () => {
-    clearHitTimer();
-    setHits((h) => h + 1);
-    setIsHit(true);
-    hitTimerRef.current = setTimeout(() => {
-      hitTimerRef.current = null;
-      setIsHit(false);
-    }, 150);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      punch();
+  useOverlayKeys({
+    ' ': (event) => {
+      if (!event.repeat) strike();
+    },
+    Enter: (event) => {
+      if (!event.repeat) strike();
     }
-  };
+  });
 
   return (
     <OverlayDialogFrame
@@ -46,37 +79,46 @@ export default function MuayThaiOverlay({ close, titleId, descriptionId }: Overl
       titleId={titleId}
       descriptionId={descriptionId}
     >
-      <div className="w-full flex flex-col items-center">
-        <Panel border="thick" className="relative flex h-[250px] w-full items-end justify-center pb-8 shadow-[6px_6px_0px_0px_rgba(26,26,26,1)]">
-          <div className="absolute top-4 left-4 font-bold text-2xl">
-            {messages.common.combo} {hits}
-          </div>
-
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1 h-16 border-l-4 border-dashed border-[#1a1a1a]"></div>
-
-          <div
-            onClick={punch}
-            onKeyDown={handleKeyDown}
-            tabIndex={0}
-            className={`w-24 h-40 border-4 border-[#1a1a1a] bg-[#e8e5df] rounded-b-2xl rounded-t-lg cursor-pointer flex flex-col items-center pt-2 transition-transform duration-100 ${isHit ? '-rotate-12 translate-x-4 -translate-y-2' : 'rotate-0 origin-top'} outline-none focus:ring-4 focus:ring-blue-400 focus:ring-opacity-50`}
-            style={{ transformOrigin: 'top center' }}
-            role="button"
-            aria-label={messages.miniGames.muayThai.punchingBag}
-          >
-            <div className="w-16 h-4 border-2 border-[#1a1a1a] mb-2 opacity-50"></div>
-            <div className="w-16 h-4 border-2 border-[#1a1a1a] opacity-50"></div>
-
-            {isHit && (
-              <div className="absolute top-1/2 left-0 -translate-x-12 -translate-y-1/2 font-bold text-xl rotate-12">
-                {messages.miniGames.muayThai.bam}
-              </div>
-            )}
-          </div>
-        </Panel>
-        <div className="mt-4 text-sm font-bold text-[#1a1a1a] opacity-60">
-          {messages.miniGames.muayThai.instruction}
+      <div className="flex w-full flex-col items-center gap-3">
+        <div className="flex w-full items-center justify-between gap-2 text-xs font-black uppercase tracking-wider">
+          <span aria-live="polite">{copy.comboLabel(combo.step, COMBO_LENGTH)}</span>
+          <span className="opacity-60">{copy.best(combo.best)}</span>
         </div>
+        <ComboTracker step={combo.step} names={copy.strikes} />
+
+        <Panel border="thick" className={`${hobbyBoardClass} flex h-[230px] items-start justify-center p-2`}>
+          <div className="hobby-hatch-light absolute inset-x-0 bottom-0 h-8 border-t-2 border-[#1a1a1a]" />
+          <HeavyBag label={copy.heavyBag} print={copy.bagPrint} hitId={fx?.id ?? 0} grade={fx?.grade ?? null} onStrike={strike} />
+          {fx ? <StrikeStamp key={fx.id} fx={fx} /> : null}
+          <SparePartSticker key={reward.stickerKey} partId="battery-cell" outcome={reward.outcome} onDismiss={reward.dismiss} />
+        </Panel>
+
+        <div className="w-full">
+          <TimingBar label={copy.timingBar} zone={strikeZone(combo.step)} markerRef={markerRef} />
+        </div>
+
+        <p className="text-sm font-bold text-[#1a1a1a] opacity-60">{copy.instruction}</p>
+        <p className="text-[11px] italic opacity-45">{copy.marginNote}</p>
       </div>
     </OverlayDialogFrame>
+  );
+}
+
+function StrikeStamp({ fx }: { fx: StrikeFx }) {
+  const copy = useMessages().miniGames.muayThai;
+  const headline = fx.completed ? copy.fullCombo : copy.grades[fx.grade];
+  const isMiss = fx.grade === 'miss';
+  return (
+    <div
+      aria-live="polite"
+      className="hobby-stamp-pop pointer-events-none absolute left-3 top-6 -rotate-6 text-left sm:left-6"
+    >
+      <p
+        className={`inline-block border-[3px] border-[#1a1a1a] px-2 py-0.5 text-lg font-black tracking-widest ${isMiss ? 'hobby-shake border-dashed bg-[#fbfbf9]' : 'bg-[#1a1a1a] text-[#fbfbf9]'}`}
+      >
+        {headline}
+      </p>
+      {isMiss ? null : <p className="mt-1 text-2xl font-black tracking-wider">{copy.strikes[fx.strike]}</p>}
+    </div>
   );
 }
