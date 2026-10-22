@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { TEST_ROUTE_DIALOGUE_CATALOG } from '../ridge/content/testRouteCatalog';
 import { parseGameCommand, parseGameScript } from './commands';
+import { getSketchDetailLevel } from './overworldLogic';
 import { GameConsoleSession } from './session';
 
 function createSession(
@@ -138,7 +139,7 @@ describe('GameConsoleSession full secret route', () => {
       type: 'signpost_read',
       stage: 'find-glasses',
       found: 0,
-      total: 3
+      total: 6
     });
 
     const unequipped = createSession({ ownedItemIds: ['glasses'], equippedItemIds: [] });
@@ -161,8 +162,72 @@ describe('GameConsoleSession full secret route', () => {
     });
     const doneRead = done.exec('interact signpost');
     expect(doneRead.events).toContainEqual(expect.objectContaining({ stage: 'use-crt', found: 3 }));
-    expect(doneRead.message).toContain('3/3');
+    expect(doneRead.message).toContain('3/6');
     expect(done.observe().mode).toBe('overworld');
+  });
+
+  it('builds the Circuit from hobby parts and solders it at the basement workbench', () => {
+    const session = createSession({ ownedItemIds: ['glasses'], equippedItemIds: ['glasses'] });
+    walkOverworldTo(session, 2400);
+    session.exec('interact hobbies');
+    expect(session.observe().mode).toBe('hobbies');
+
+    const stations = [
+      { x: 440, part: 'copper-string' },
+      { x: 600, part: 'battery-cell' },
+      { x: 760, part: 'clock-crystal' }
+    ] as const;
+    for (const station of stations) {
+      walkHobbiesTo(session, station.x);
+      session.exec('interact');
+      expect(session.observe().mode).toBe('overlay');
+      expect(session.exec('perform').events).toContainEqual({
+        type: 'item_collected',
+        itemId: station.part
+      });
+      session.exec('close');
+    }
+    expect(session.exec('perform').ok).toBe(false);
+
+    walkHobbiesTo(session, 100);
+    session.exec('interact exit');
+    walkOverworldTo(session, 60);
+    expect(session.exec('interact signpost').events).toContainEqual(
+      expect.objectContaining({ stage: 'solder-circuit', found: 4 })
+    );
+    walkOverworldTo(session, 230);
+    session.exec('interact hatch');
+    expect(session.observe().mode).toBe('basement');
+
+    session.exec('go right 19');
+    expect(session.observe().nearby[0]?.id).toBe('workbench');
+    const soldered = session.exec('interact workbench');
+    expect(soldered.events).toContainEqual({ type: 'item_collected', itemId: 'circuit' });
+    expect(session.observe().ownedItemIds).toContain('circuit');
+  });
+
+  it('raises the street sketch detail level as secrets pile up', () => {
+    const base = { equippedItemIds: [], discoveredSecretIds: [] } as const;
+    expect(getSketchDetailLevel({ ...base, ownedItemIds: [] })).toBe(0);
+    expect(getSketchDetailLevel({ ...base, ownedItemIds: ['glasses'] })).toBe(1);
+    expect(
+      getSketchDetailLevel({ ...base, ownedItemIds: ['glasses', 'copper-string', 'battery-cell'] })
+    ).toBe(2);
+    expect(getSketchDetailLevel({ ...base, ownedItemIds: ['glasses', 'circuit'] })).toBe(3);
+  });
+
+  it('cycles corkboard notes and reports missing workbench parts', () => {
+    const session = createSession({ sceneId: 'basement', ownedItemIds: ['glasses'] });
+    session.exec('go right 3');
+    const first = session.exec('interact corkboard');
+    const second = session.exec('interact corkboard');
+    expect(first.events).toContainEqual({ type: 'thought', id: 'basement_corkboard', variant: 0 });
+    expect(second.events).toContainEqual({ type: 'thought', id: 'basement_corkboard', variant: 1 });
+
+    session.exec('go right 16');
+    const bench = session.exec('interact workbench');
+    expect(bench.events).toContainEqual({ type: 'thought', id: 'workbench_missing_parts', variant: 0 });
+    expect(bench.message).toContain('copper-string');
   });
 
   it('commits banana peel warp for the live Overworld typewriter path', () => {
@@ -178,6 +243,14 @@ describe('GameConsoleSession full secret route', () => {
     expect(session.observe().mode).toBe('potassium');
   });
 });
+
+function walkHobbiesTo(session: GameConsoleSession, targetX: number): void {
+  for (let i = 0; i < 40; i += 1) {
+    const x = session.observe().hobbies?.playerX ?? 0;
+    if (Math.abs(x - targetX) <= 20) return;
+    session.exec(`go ${x < targetX ? 'right' : 'left'} 1`);
+  }
+}
 
 function walkOverworldTo(session: GameConsoleSession, targetX: number): void {
   for (let i = 0; i < 80; i += 1) {

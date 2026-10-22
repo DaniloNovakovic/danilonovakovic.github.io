@@ -5,11 +5,17 @@
  */
 import * as Phaser from 'phaser';
 import { TextureGenerator } from '@/game/sharedSceneRuntime/textures/TextureGenerator';
-import { HOBBIES_SCENE_ID, POTASSIUM_SCENE_ID, type SceneId } from '@/game/scenes/sceneIds';
+import {
+  BASEMENT_SCENE_ID,
+  HOBBIES_SCENE_ID,
+  POTASSIUM_SCENE_ID,
+  type SceneId
+} from '@/game/scenes/sceneIds';
 import type { OverlayId } from '@/game/overlays/overlayIds';
 import {
   BANANA_PEEL_CLUE_ID,
   OVERWORLD_BASEMENT_HOLE,
+  OVERWORLD_BILLBOARD_X,
   OVERWORLD_BUILDING_TRIGGERS,
   OVERWORLD_CIRCUIT_SLOT,
   OVERWORLD_GLASSES_SECRET_SLOTS,
@@ -38,6 +44,7 @@ import {
 import {
   GameConsoleSession,
   getOverworldProgress,
+  getSketchDetailLevel,
   type GameCommandResult,
   type NearbyThing
 } from '@/game/core/console';
@@ -53,6 +60,9 @@ import { updateStreetParticles } from './street/StreetParticles';
 import { StreetBirds, StreetFootsteps } from './street/StreetLife';
 import { StreetCrt } from './street/StreetCrt';
 import { StreetSignpost } from './street/StreetSignpost';
+import { StreetHatch } from './street/StreetHatch';
+import { StreetDetail } from './street/StreetDetail';
+import { StreetBillboard } from './street/StreetBillboard';
 import { prefersReducedMotion, sketchTick } from '@/game/sharedSceneRuntime/motion/sketchMotion';
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
 import { startTypewriterEffect, type TypewriterEffectHandle } from '@/game/sharedSceneRuntime/text/typewriterEffect';
@@ -85,6 +95,9 @@ export class OverworldScene extends Phaser.Scene {
   private bananaFloorIcon?: Phaser.GameObjects.Graphics;
   private circuitCrt?: StreetCrt;
   private signpost?: StreetSignpost;
+  private hatch?: StreetHatch;
+  private streetDetail?: StreetDetail;
+  private droppingIntoHatch = false;
   private birds?: StreetBirds;
   private footsteps?: StreetFootsteps;
   private motion = true;
@@ -148,10 +161,14 @@ export class OverworldScene extends Phaser.Scene {
 
     this.physics.world.setBounds(0, 0, OVERWORLD_WIDTH, GAME_DESIGN_HEIGHT);
 
-    this.motion = !prefersReducedMotion();    const { groundZone } = buildStreetEnvironment(this);
+    this.motion = !prefersReducedMotion();
+    const { groundZone } = buildStreetEnvironment(this);
+    this.streetDetail = new StreetDetail(this);
+    new StreetBillboard(this, OVERWORLD_BILLBOARD_X, bridge.progress.streetDoodle);
     this.streetBuildings = buildStreetBuildings(this);
     this.signpost = new StreetSignpost(this, OVERWORLD_SIGNPOST_X);
-    this.createBasementHoleTrigger();
+    this.droppingIntoHatch = false;
+    this.hatch = new StreetHatch(this, OVERWORLD_BASEMENT_HOLE.x, OVERWORLD_BASEMENT_HOLE.y);
     this.buildingSlots.length = 0;
     for (const bldg of this.streetBuildings.interactables.getChildren() as Phaser.GameObjects.Sprite[]) {
       this.buildingSlots.push({
@@ -227,6 +244,7 @@ export class OverworldScene extends Phaser.Scene {
   }
 
   update(time: number, delta: number) {
+    if (this.droppingIntoHatch) return;
     const playerUpdate = this.playerRuntime?.update();
     this.updateLensReveal();
 
@@ -240,15 +258,8 @@ export class OverworldScene extends Phaser.Scene {
       return;
     }
 
-    const hasGlassesEquipped = isItemEquipped('glasses');
-    const hasCircuit = isItemOwned('circuit');
     const tick = sketchTick(time);
-    const sprinting = Math.abs(this.player.body.velocity.x) > SIDE_VIEW_WALK_SPEED + 1;
-    this.setBananaFloorVisible(hasGlassesEquipped);
-    this.circuitCrt?.update(hasCircuit, tick, this.motion);
-    this.birds?.update(time, delta, this.player.x, sprinting, this.motion);
-    this.footsteps?.update(this.player, time, sprinting, this.motion);
-
+    this.updateStreetProps(time, delta, tick);
     updateStreetParticles(this);
 
     const nearby = this.updateOverworldInteraction(step.interactRequested);
@@ -257,10 +268,25 @@ export class OverworldScene extends Phaser.Scene {
       tick,
       this.motion
     );
-    if (this.session) {
-      const { stage } = getOverworldProgress(this.session.getState());
-      this.signpost?.update(stage, tick, this.player.x, nearby?.kind === 'prop', this.motion);
-    }
+    this.updateProgressProps(tick, nearby?.kind === 'prop');
+  }
+
+  private updateStreetProps(time: number, delta: number, tick: number): void {
+    const hasCircuit = isItemOwned('circuit');
+    const sprinting = Math.abs(this.player.body.velocity.x) > SIDE_VIEW_WALK_SPEED + 1;
+    this.setBananaFloorVisible(isItemEquipped('glasses'));
+    this.circuitCrt?.update(hasCircuit, tick, this.motion);
+    this.hatch?.update({ hasGlasses: isItemOwned('glasses'), hasCircuit }, this.player.x, tick, this.motion);
+    this.birds?.update(time, delta, this.player.x, sprinting, this.motion);
+    this.footsteps?.update(this.player, time, sprinting, this.motion);
+  }
+
+  private updateProgressProps(tick: number, nearProp: boolean): void {
+    if (!this.session) return;
+    const state = this.session.getState();
+    const { stage } = getOverworldProgress(state);
+    this.signpost?.update(stage, tick, this.player.x, nearProp, this.motion);
+    this.streetDetail?.update(getSketchDetailLevel(state), tick, this.motion);
   }
 
   private updateOverworldInteraction(interactRequested: boolean): NearbyThing | undefined {
@@ -286,7 +312,7 @@ export class OverworldScene extends Phaser.Scene {
   private applySessionResult(result: GameCommandResult): void {
     if (!this.session) return;
     applyGameConsoleEvents(result.events, {
-      onEnterScene: (sceneId) => this.onEnterScene?.(sceneId),
+      onEnterScene: (sceneId) => this.enterSceneFromStreet(sceneId),
       onOpenOverlay: (overlayId) => {
         this.onOpenOverlay?.(overlayId);
         this.session?.restoreExploreAfterOverlay();
@@ -542,35 +568,13 @@ export class OverworldScene extends Phaser.Scene {
     }
   }
 
-  private createBasementHoleTrigger(): void {
-    const messages = getMessages();
-    const line = 0x1a1a1a;
-    const hole = this.add.graphics();
-    hole.fillStyle(line, 0.92);
-    hole.fillEllipse(OVERWORLD_BASEMENT_HOLE.x, OVERWORLD_BASEMENT_HOLE.y, 120, 28);
-    hole.lineStyle(3, line, 1);
-    hole.strokeEllipse(OVERWORLD_BASEMENT_HOLE.x, OVERWORLD_BASEMENT_HOLE.y - 2, 122, 30);
-    hole.lineStyle(2, 0xfbfbf9, 0.35);
-    for (let offset = -45; offset <= 45; offset += 18) {
-      hole.beginPath();
-      hole.moveTo(OVERWORLD_BASEMENT_HOLE.x + offset, OVERWORLD_BASEMENT_HOLE.y - 10);
-      hole.lineTo(OVERWORLD_BASEMENT_HOLE.x + offset + 12, OVERWORLD_BASEMENT_HOLE.y + 8);
-      hole.strokePath();
+  private enterSceneFromStreet(sceneId: SceneId): void {
+    if (sceneId !== BASEMENT_SCENE_ID || !this.hatch || this.droppingIntoHatch) {
+      this.onEnterScene?.(sceneId);
+      return;
     }
-
-    createUiText(
-      this,
-      OVERWORLD_BASEMENT_HOLE.x,
-      OVERWORLD_BASEMENT_HOLE.y - 48,
-      messages.scenes.overworld.basementHole,
-      {
-        fontSize: '18px',
-        color: '#1a1a1a',
-        fontStyle: 'bold',
-        backgroundColor: '#fbfbf9',
-        padding: { x: 6, y: 2 }
-      }
-    ).setOrigin(0.5);
+    this.droppingIntoHatch = true;
+    this.interactPrompt.setVisible(false);
+    this.hatch.dropIn(this.player, this.motion, () => this.onEnterScene?.(sceneId));
   }
-
 }

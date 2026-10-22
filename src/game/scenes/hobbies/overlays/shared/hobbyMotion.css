@@ -1,0 +1,150 @@
+/*
+ * Stepped (~10-12 FPS) paper motion for the hobby mini-games.
+ * Decorative motion only runs with `prefers-reduced-motion: no-preference`;
+ * the reduce branch swaps to static, non-flashing fallbacks.
+ */
+
+.hobby-hatch {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(26, 26, 26, 0.55) 0 1.5px,
+    transparent 1.5px 6px
+  );
+}
+
+.hobby-hatch-light {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(26, 26, 26, 0.22) 0 1px,
+    transparent 1px 5px
+  );
+}
+
+.hobby-string-flash {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hobby-sticker-drop {
+    animation: hobby-sticker-drop 480ms steps(1, end) both;
+  }
+
+  .hobby-stamp-pop {
+    animation: hobby-stamp-pop 270ms steps(1, end) both;
+  }
+
+  .hobby-wobble {
+    animation: hobby-wobble 1.8s steps(1, end) infinite;
+  }
+
+  .hobby-bob {
+    animation: hobby-bob 1.2s steps(1, end) infinite;
+  }
+
+  .hobby-shake {
+    animation: hobby-shake 270ms steps(1, end) both;
+  }
+
+  .hobby-bag-swing,
+  .hobby-bag-swing-big {
+    transform-box: view-box;
+    transform-origin: 80px 6px;
+    animation: hobby-bag-swing 640ms steps(1, end) both;
+  }
+
+  .hobby-bag-swing-big {
+    animation-name: hobby-bag-swing-big;
+    animation-duration: 820ms;
+  }
+
+  .hobby-string-vibrate {
+    transform-box: view-box;
+    animation: hobby-string-vibrate 1000ms steps(1, end) forwards;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hobby-string-vibrate {
+    display: none;
+  }
+
+  .hobby-string-flash {
+    display: inline;
+    animation: hobby-string-flash 320ms steps(1, end) forwards;
+  }
+}
+
+@keyframes hobby-sticker-drop {
+  0% { opacity: 0; transform: translateY(-36px) rotate(-12deg) scale(1.15); }
+  20% { opacity: 1; transform: translateY(-12px) rotate(-7deg) scale(1.08); }
+  40% { transform: translateY(4px) rotate(-2deg) scale(0.97); }
+  60% { transform: translateY(-2px) rotate(-4deg) scale(1.01); }
+  80%, 100% { transform: translateY(0) rotate(-3deg) scale(1); }
+}
+
+@keyframes hobby-stamp-pop {
+  0% { opacity: 0; transform: scale(1.6) rotate(-8deg); }
+  33% { opacity: 1; transform: scale(0.92) rotate(-3deg); }
+  66%, 100% { transform: scale(1) rotate(-4deg); }
+}
+
+@keyframes hobby-wobble {
+  0%, 100% { transform: rotate(-1deg); }
+  33% { transform: rotate(0.6deg) translateY(-1px); }
+  66% { transform: rotate(-0.4deg); }
+}
+
+@keyframes hobby-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes hobby-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(4px); }
+  75% { transform: translateX(-2px); }
+}
+
+@keyframes hobby-bag-swing {
+  0% { transform: rotate(0deg); }
+  14% { transform: rotate(-9deg); }
+  28% { transform: rotate(5deg); }
+  42% { transform: rotate(-3deg); }
+  57% { transform: rotate(2deg); }
+  71% { transform: rotate(-1deg); }
+  85%, 100% { transform: rotate(0deg); }
+}
+
+@keyframes hobby-bag-swing-big {
+  0% { transform: rotate(0deg); }
+  11% { transform: rotate(-17deg); }
+  22% { transform: rotate(10deg); }
+  33% { transform: rotate(-7deg); }
+  44% { transform: rotate(5deg); }
+  55% { transform: rotate(-3deg); }
+  66% { transform: rotate(2deg); }
+  77% { transform: rotate(-1deg); }
+  88%, 100% { transform: rotate(0deg); }
+}
+
+@keyframes hobby-string-vibrate {
+  0% { opacity: 1; transform: scaleY(1); }
+  8% { transform: scaleY(-0.85); }
+  16% { transform: scaleY(0.72); }
+  24% { transform: scaleY(-0.6); }
+  32% { transform: scaleY(0.5); }
+  40% { transform: scaleY(-0.41); }
+  48% { transform: scaleY(0.33); }
+  56% { transform: scaleY(-0.26); }
+  64% { transform: scaleY(0.2); }
+  72% { transform: scaleY(-0.14); }
+  80% { transform: scaleY(0.09); opacity: 1; }
+  90% { transform: scaleY(-0.05); opacity: 0.6; }
+  100% { transform: scaleY(0.02); opacity: 0; }
+}
+
+@keyframes hobby-string-flash {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}

@@ -9,7 +9,14 @@ const copy: DeveloperConsoleCopy = {
   enterAvailableScenesLabel: 'Available scene names:',
   enterUnknownScene: (sceneName) => `Unknown scene: ${sceneName}`,
   enteringScene: (sceneName) => `Entering ${sceneName}...`,
-  commandNotFound: (command) => `Command not found: ${command}`
+  commandNotFound: (command) => `Command not found: ${command}`,
+  lsResponse: 'notes.txt',
+  files: { 'notes.txt': 'line one\nline two' },
+  catUsage: 'Usage: cat <file>',
+  catMissing: (fileName) => `missing ${fileName}`,
+  partsStatus: (owned, total, hasCircuit) => (hasCircuit ? 'online' : `${owned}/${total}`),
+  duckResponse: 'quack',
+  sudoResponse: 'nope'
 };
 
 describe('executeDeveloperConsoleCommand', () => {
@@ -55,5 +62,35 @@ describe('executeDeveloperConsoleCommand', () => {
     });
 
     expect(result).toEqual({ clearHistory: true });
+  });
+
+  it('cats known files line by line and rejects unknown or prototype keys', () => {
+    const deps = { enterScene: () => undefined };
+    expect(executeDeveloperConsoleCommand('cat NOTES.txt', copy, deps).responseLines).toEqual([
+      'line one',
+      'line two'
+    ]);
+    expect(executeDeveloperConsoleCommand('cat constructor', copy, deps).responseLines).toEqual([
+      'missing constructor'
+    ]);
+    expect(executeDeveloperConsoleCommand('cat', copy, deps).responseLines).toEqual([
+      'Usage: cat <file>'
+    ]);
+  });
+
+  it('reports circuit part progress from the injected status', () => {
+    const result = executeDeveloperConsoleCommand('parts', copy, {
+      enterScene: () => undefined,
+      getCircuitStatus: () => ({ ownedParts: 2, totalParts: 3, hasCircuit: false })
+    });
+    expect(result.responseLines).toEqual(['2/3']);
+  });
+
+  it('answers easter-egg commands and still rejects unknown ones', () => {
+    const deps = { enterScene: () => undefined };
+    expect(executeDeveloperConsoleCommand('duck', copy, deps).responseLines).toEqual(['quack']);
+    expect(executeDeveloperConsoleCommand('toString', copy, deps).responseLines).toEqual([
+      'Command not found: tostring'
+    ]);
   });
 });

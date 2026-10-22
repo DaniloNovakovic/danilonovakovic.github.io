@@ -1,154 +1,59 @@
-import { useState, useRef, useEffect, useCallback, useLayoutEffect } from 'react';
 import { OverlayDialogFrame } from '@/game/overlays/OverlayDialogFrame';
 import type { OverlayControllerProps } from '@/game/overlays/types';
-import { useMessages } from '@/shared/i18n';
+import { useMessages, type Messages } from '@/shared/i18n';
 import { useOverlayKeys } from '@/shared/hooks/useOverlayKeys';
 import { Button, Panel } from '@/shared/ui';
+import { SparePartSticker } from '../shared/SparePartSticker';
+import { useSparePartReward } from '../shared/useSparePartReward';
+import { hobbyBoardClass } from '../shared/hobbyStyles';
+import { COUNT_IN_BEATS, DANCE_REWARD_ROUND, demoLengthBeats, type DanceMove } from './danceRound';
+import { StickDancer } from './StickDancer';
+import { useDanceGame, type DancePhase, type DanceState } from './useDanceGame';
 
-const ARROWS = ['UP', 'RIGHT', 'DOWN', 'LEFT'] as const;
+type DanceCopy = Messages['miniGames']['dancing'];
 
-function pickRandomArrow(): (typeof ARROWS)[number] {
-  return ARROWS[Math.floor(Math.random() * ARROWS.length)]!;
-}
+const PHASE_MESSAGE: Record<DancePhase, (copy: DanceCopy, state: DanceState) => string> = {
+  idle: (copy) => copy.startMessage,
+  demo: (copy, state) => (state.beat !== null && state.beat >= COUNT_IN_BEATS ? copy.watchMessage : copy.countIn),
+  input: (copy) => copy.turnMessage,
+  cleared: (copy) => copy.successMessage,
+  over: (copy, state) => copy.gameOver(Math.max(0, state.sequence.length - 1))
+};
 
-function ArrowButton({
-  dir,
-  label,
-  activeArrow,
-  onPress
-}: {
-  dir: string;
-  label: string;
-  activeArrow: string | null;
-  onPress: (dir: string) => void;
-}) {
-  const isActive = activeArrow === dir;
-  return (
-    <Button
-      variant="control"
-      onClick={() => onPress(dir)}
-      className={`h-16 w-16 p-0 text-2xl ${isActive ? 'bg-[#1a1a1a] text-[#fbfbf9]' : 'bg-[#f4f1ea] hover:bg-[#e8e5df]'}`}
-    >
-      {label}
-    </Button>
-  );
-}
+const PAD_LAYOUT: readonly (readonly [DanceMove, string] | null)[] = [
+  null,
+  ['up', '↑'],
+  null,
+  ['left', '←'],
+  ['down', '↓'],
+  ['right', '→']
+];
+
+const KEY_MOVES: Record<string, DanceMove> = {
+  ArrowUp: 'up',
+  w: 'up',
+  W: 'up',
+  ArrowRight: 'right',
+  d: 'right',
+  D: 'right',
+  ArrowDown: 'down',
+  s: 'down',
+  S: 'down',
+  ArrowLeft: 'left',
+  a: 'left',
+  A: 'left'
+};
 
 export default function DancingOverlay({ close, titleId, descriptionId }: OverlayControllerProps) {
   const messages = useMessages();
   const copy = messages.miniGames.dancing;
-  const [sequence, setSequence] = useState<string[]>([]);
-  const [playerSeq, setPlayerSeq] = useState<string[]>([]);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isWatching, setIsWatching] = useState(false);
-  const [activeArrow, setActiveArrow] = useState<string | null>(null);
-  const [message, setMessage] = useState<string>(copy.startMessage);
-
-  const sequenceRef = useRef<string[]>([]);
-  const playerSeqRef = useRef<string[]>([]);
-  const isPlayingRef = useRef(false);
-  const isWatchingRef = useRef(false);
-
-  useLayoutEffect(() => { sequenceRef.current = sequence; }, [sequence]);
-  useLayoutEffect(() => { playerSeqRef.current = playerSeq; }, [playerSeq]);
-  useLayoutEffect(() => { isPlayingRef.current = isPlaying; }, [isPlaying]);
-  useLayoutEffect(() => { isWatchingRef.current = isWatching; }, [isWatching]);
-
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
-
-  const clearTimers = useCallback(() => {
-    if (intervalRef.current != null) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-    timeoutsRef.current.forEach(clearTimeout);
-    timeoutsRef.current = [];
-  }, []);
-
-  useEffect(function clearDanceTimersOnUnmount() {
-    return () => clearTimers();
-  }, [clearTimers]);
-
-  const playSequence = useCallback(
-    (seq: string[]) => {
-      clearTimers();
-      let i = 0;
-      setIsWatching(true);
-      setMessage(copy.watchMessage);
-      intervalRef.current = setInterval(() => {
-        const idx = i;
-        setActiveArrow(seq[idx] ?? null);
-        const t1 = setTimeout(() => setActiveArrow(null), 400);
-        timeoutsRef.current.push(t1);
-        i++;
-        if (i >= seq.length) {
-          if (intervalRef.current != null) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
-          }
-          const t2 = setTimeout(() => {
-            setIsWatching(false);
-            setMessage(copy.turnMessage);
-          }, 500);
-          timeoutsRef.current.push(t2);
-        }
-      }, 800);
-    },
-    [clearTimers, copy]
-  );
-
-  const nextRound = useCallback(
-    (currentSeq: string[]) => {
-      const nextArrow = pickRandomArrow();
-      const newSeq = [...currentSeq, nextArrow];
-      setSequence(newSeq);
-      setPlayerSeq([]);
-      playSequence(newSeq);
-    },
-    [playSequence]
-  );
-
-  const startGame = () => {
-    clearTimers();
-    setSequence([]);
-    setPlayerSeq([]);
-    setIsPlaying(true);
-    setIsWatching(true);
-    setMessage(copy.watchMessage);
-    nextRound([]);
-  };
-
-  const handleArrowClick = useCallback((arrow: string) => {
-    if (!isPlayingRef.current || isWatchingRef.current) return;
-
-    setActiveArrow(arrow);
-    const tFlash = setTimeout(() => setActiveArrow(null), 200);
-    timeoutsRef.current.push(tFlash);
-
-    const seq = sequenceRef.current;
-    const newPlayerSeq = [...playerSeqRef.current, arrow];
-    setPlayerSeq(newPlayerSeq);
-
-    const isCorrect = newPlayerSeq.every((val, index) => val === seq[index]);
-
-    if (!isCorrect) {
-      clearTimers();
-      setMessage(copy.gameOverWithScore(seq.length - 1));
-      setIsPlaying(false);
-      setIsWatching(false);
-    } else if (newPlayerSeq.length === seq.length) {
-      setMessage(copy.successMessage);
-      const tNext = setTimeout(() => nextRound(seq), 1000);
-      timeoutsRef.current.push(tNext);
-    }
-  }, [clearTimers, copy, nextRound]);
+  const reward = useSparePartReward('clock-crystal');
+  const { state, press, start } = useDanceGame(reward.claim);
+  const canStart = state.phase === 'idle' || state.phase === 'over';
 
   useOverlayKeys({
-    ArrowUp: () => handleArrowClick('UP'),
-    ArrowDown: () => handleArrowClick('DOWN'),
-    ArrowLeft: () => handleArrowClick('LEFT'),
-    ArrowRight: () => handleArrowClick('RIGHT')
+    ...Object.fromEntries(Object.entries(KEY_MOVES).map(([key, move]) => [key, () => press(move)])),
+    Enter: start
   });
 
   return (
@@ -159,34 +64,67 @@ export default function DancingOverlay({ close, titleId, descriptionId }: Overla
       titleId={titleId}
       descriptionId={descriptionId}
     >
-      <div className="w-full flex flex-col items-center">
-        <Panel border="thick" className="relative flex h-[250px] w-full flex-col items-center justify-center shadow-[6px_6px_0px_0px_rgba(26,26,26,1)]">
-          <div className="absolute top-4 font-bold text-lg">{message}</div>
-
-          <div className="grid grid-cols-3 gap-2 mt-8">
-            <div></div>
-            <ArrowButton dir="UP" label="↑" activeArrow={activeArrow} onPress={handleArrowClick} />
-            <div></div>
-            <ArrowButton dir="LEFT" label="←" activeArrow={activeArrow} onPress={handleArrowClick} />
-            <ArrowButton dir="DOWN" label="↓" activeArrow={activeArrow} onPress={handleArrowClick} />
-            <ArrowButton dir="RIGHT" label="→" activeArrow={activeArrow} onPress={handleArrowClick} />
-          </div>
-
-          {!isPlaying && (
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={startGame}
-              className="absolute bottom-4"
-            >
-              {sequence.length > 0 ? messages.common.restart : messages.common.start}
-            </Button>
-          )}
-        </Panel>
-        <div className="mt-4 text-sm font-bold text-[#1a1a1a] opacity-60">
-          {copy.instruction}
+      <div className="flex w-full flex-col items-center gap-3">
+        <div className="flex w-full items-center justify-between gap-2 text-xs font-black uppercase tracking-wider">
+          <span>{copy.round(Math.max(1, state.sequence.length))}</span>
+          {reward.owned ? null : <span className="normal-case italic opacity-50">{copy.goal(DANCE_REWARD_ROUND)}</span>}
+          <span className="opacity-60">{copy.best(state.best)}</span>
         </div>
+
+        <Panel border="thick" className={`${hobbyBoardClass} flex h-[260px] flex-col items-center p-3`}>
+          <p className="text-base font-black" aria-live="polite">
+            {PHASE_MESSAGE[state.phase](copy, state)}
+          </p>
+          <BeatDots state={state} />
+          <div className="flex w-full flex-1 items-center justify-around gap-2">
+            <div className="h-[150px]">
+              <StickDancer pose={state.pose} label={copy.dancerLabel} />
+            </div>
+            <div className="grid grid-cols-3 gap-1.5">
+              {PAD_LAYOUT.map((cell, index) =>
+                cell ? (
+                  <Button
+                    key={cell[0]}
+                    variant="control"
+                    aria-label={copy.moveButton(copy.moves[cell[0]])}
+                    onClick={() => press(cell[0])}
+                    className={`h-12 w-12 p-0 text-xl sm:h-14 sm:w-14 ${state.activeMove === cell[0] ? 'bg-[#1a1a1a] text-[#fbfbf9] hover:bg-[#1a1a1a]' : ''}`}
+                  >
+                    {cell[1]}
+                  </Button>
+                ) : (
+                  <div key={index} />
+                )
+              )}
+            </div>
+          </div>
+          {canStart ? (
+            <Button variant="secondary" size="sm" onClick={start}>
+              {state.phase === 'over' ? messages.common.restart : messages.common.start}
+            </Button>
+          ) : null}
+          <SparePartSticker key={reward.stickerKey} partId="clock-crystal" outcome={reward.outcome} onDismiss={reward.dismiss} />
+        </Panel>
+
+        <p className="text-sm font-bold text-[#1a1a1a] opacity-60">{copy.instruction}</p>
+        <p className="text-[11px] italic opacity-45">{copy.marginNote}</p>
       </div>
     </OverlayDialogFrame>
+  );
+}
+
+/** Visual metronome: count-in beats are rings, move beats are squares; the current beat is inked. */
+function BeatDots({ state }: { state: DanceState }) {
+  if (state.phase !== 'demo') return <div className="h-3" aria-hidden="true" />;
+  const beats = demoLengthBeats(state.sequence.length);
+  return (
+    <div className="mt-1 flex h-3 items-center gap-1.5" aria-hidden="true">
+      {Array.from({ length: beats }, (_, beat) => (
+        <span
+          key={beat}
+          className={`h-2.5 w-2.5 border-2 border-[#1a1a1a] ${beat < COUNT_IN_BEATS ? 'rounded-full' : 'rounded-[1px]'} ${state.beat !== null && beat <= state.beat ? 'bg-[#1a1a1a]' : ''}`}
+        />
+      ))}
+    </div>
   );
 }

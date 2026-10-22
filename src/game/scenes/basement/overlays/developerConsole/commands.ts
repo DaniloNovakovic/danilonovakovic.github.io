@@ -10,10 +10,24 @@ export interface DeveloperConsoleCopy {
   enterUnknownScene: (sceneName: string) => string;
   enteringScene: (sceneName: string) => string;
   commandNotFound: (command: string) => string;
+  lsResponse: string;
+  files: Readonly<Record<string, string>>;
+  catUsage: string;
+  catMissing: (fileName: string) => string;
+  partsStatus: (owned: number, total: number, hasCircuit: boolean) => string;
+  duckResponse: string;
+  sudoResponse: string;
+}
+
+export interface CircuitStatus {
+  ownedParts: number;
+  totalParts: number;
+  hasCircuit: boolean;
 }
 
 export interface DeveloperConsoleCommandDeps {
   enterScene: (sceneId: SceneId) => void;
+  getCircuitStatus?: () => CircuitStatus;
 }
 
 export interface DeveloperConsoleCommandResult {
@@ -26,7 +40,17 @@ interface SceneCommandTarget {
   title: string;
 }
 
+type ArgCommandHandler = (
+  commandArgs: string,
+  copy: DeveloperConsoleCopy,
+  deps: DeveloperConsoleCommandDeps
+) => DeveloperConsoleCommandResult;
+
 const ENTER_HELP_ALIASES = new Set(['-h', '--help', 'help']);
+
+function lines(text: string): DeveloperConsoleCommandResult {
+  return { responseLines: text.split('\n') };
+}
 
 function normalizeSceneToken(value: string): string {
   return value.trim().toLowerCase().replace(/[\s_-]+/g, '');
@@ -65,15 +89,16 @@ function handleEnterCommand(
   copy: DeveloperConsoleCopy,
   deps: DeveloperConsoleCommandDeps
 ): DeveloperConsoleCommandResult {
-  if (!commandArgs || ENTER_HELP_ALIASES.has(commandArgs)) {
+  const sceneArgs = commandArgs.toLowerCase();
+  if (!sceneArgs || ENTER_HELP_ALIASES.has(sceneArgs)) {
     return { responseLines: getEnterHelpLines(copy) };
   }
 
-  const sceneId = getSceneAliasMap().get(normalizeSceneToken(commandArgs));
+  const sceneId = getSceneAliasMap().get(normalizeSceneToken(sceneArgs));
   if (!sceneId) {
     return {
       responseLines: [
-        copy.enterUnknownScene(commandArgs),
+        copy.enterUnknownScene(sceneArgs),
         copy.enterUsage
       ]
     };
@@ -85,38 +110,60 @@ function handleEnterCommand(
   };
 }
 
+function handleCatCommand(
+  commandArgs: string,
+  copy: DeveloperConsoleCopy
+): DeveloperConsoleCommandResult {
+  const fileName = commandArgs.toLowerCase();
+  if (!fileName) return { responseLines: [copy.catUsage] };
+  return Object.hasOwn(copy.files, fileName)
+    ? lines(copy.files[fileName])
+    : { responseLines: [copy.catMissing(fileName)] };
+}
+
+function handlePartsCommand(
+  _commandArgs: string,
+  copy: DeveloperConsoleCopy,
+  deps: DeveloperConsoleCommandDeps
+): DeveloperConsoleCommandResult {
+  const status = deps.getCircuitStatus?.() ?? { ownedParts: 0, totalParts: 3, hasCircuit: false };
+  return lines(copy.partsStatus(status.ownedParts, status.totalParts, status.hasCircuit));
+}
+
+const TEXT_COMMANDS = new Map<string, (copy: DeveloperConsoleCopy) => string>([
+  ['help', (copy) => copy.helpResponse],
+  ['whoami', (copy) => copy.whoamiResponse],
+  ['skills', (copy) => copy.skillsResponse],
+  ['ls', (copy) => copy.lsResponse],
+  ['duck', (copy) => copy.duckResponse],
+  ['sudo', (copy) => copy.sudoResponse]
+]);
+
+const ARG_COMMANDS = new Map<string, ArgCommandHandler>([
+  ['enter', handleEnterCommand],
+  ['cat', (args, copy) => handleCatCommand(args, copy)],
+  ['parts', handlePartsCommand]
+]);
+
 export function executeDeveloperConsoleCommand(
   command: string,
   copy: DeveloperConsoleCopy,
   deps: DeveloperConsoleCommandDeps
 ): DeveloperConsoleCommandResult {
   const trimmed = command.trim();
-  const normalized = trimmed.toLowerCase();
+  if (!trimmed) return {};
 
-  if (!normalized) {
-    return {};
-  }
+  const [rawName = '', ...rest] = trimmed.split(/\s+/);
+  const name = rawName.toLowerCase();
+  const commandArgs = rest.join(' ');
 
-  if (normalized === 'clear') {
-    return { clearHistory: true };
-  }
+  if (name === 'clear') return { clearHistory: true };
 
-  if (normalized === 'help') {
-    return { responseLines: copy.helpResponse.split('\n') };
-  }
+  const text = TEXT_COMMANDS.get(name);
+  if (text) return lines(text(copy));
 
-  if (normalized === 'whoami') {
-    return { responseLines: copy.whoamiResponse.split('\n') };
-  }
+  const handler = ARG_COMMANDS.get(name);
+  if (handler) return handler(commandArgs, copy, deps);
 
-  if (normalized === 'skills') {
-    return { responseLines: copy.skillsResponse.split('\n') };
-  }
-
-  if (normalized.startsWith('enter')) {
-    const commandArgs = trimmed.slice('enter'.length).trim().toLowerCase();
-    return handleEnterCommand(commandArgs, copy, deps);
-  }
-
-  return { responseLines: [copy.commandNotFound(normalized)] };
+  return { responseLines: [copy.commandNotFound(trimmed.toLowerCase())] };
 }

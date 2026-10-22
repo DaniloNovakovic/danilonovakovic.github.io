@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { OVERWORLD_SCENE_ID, type SceneId } from '@/game/scenes/sceneIds';
 import type { OverlayId } from '@/game/overlays/overlayIds';
+import type { GameItemId } from '@/game/core/console/types';
 import type {
   SceneUiActionId,
   SceneUiActionRequest,
@@ -32,7 +33,7 @@ export interface SceneControlPointerEvent {
   timestamp: number;
 }
 
-export type InventoryItemId = 'glasses' | 'circuit';
+export type InventoryItemId = GameItemId;
 
 export type SecretDiscoveryId = 'banana-peel-clue';
 
@@ -89,6 +90,8 @@ export interface BridgeRidgeProgressState {
 export interface BridgeProgressState {
   hasGlasses: boolean;
   discoveredSecretIds: SecretDiscoveryId[];
+  /** PNG data URL of the doodle signed at the Hobbies easel; shown on the street billboard. */
+  streetDoodle: string | null;
   ridge: BridgeRidgeProgressState;
 }
 
@@ -248,6 +251,7 @@ let state: BridgeState = {
   progress: {
     hasGlasses: false,
     discoveredSecretIds: [],
+    streetDoodle: null,
     ridge: createInitialRidgeProgress()
   },
   sceneHintText: null,
@@ -304,6 +308,7 @@ function isBridgeInventoryUnchanged(previous: BridgeState, candidate: BridgeStat
 function isBridgeProgressUnchanged(previous: BridgeState, candidate: BridgeState): boolean {
   return (
     previous.progress.hasGlasses === candidate.progress.hasGlasses &&
+    previous.progress.streetDoodle === candidate.progress.streetDoodle &&
     arraysEqual(previous.progress.discoveredSecretIds, candidate.progress.discoveredSecretIds) &&
     arraysEqual(previous.progress.ridge.stampIds, candidate.progress.ridge.stampIds) &&
     arraysEqual(previous.progress.ridge.manualPageIds, candidate.progress.ridge.manualPageIds) &&
@@ -459,6 +464,12 @@ export const bridgeActions = {
   collectGlasses(): void {
     bridgeActions.collectItem('glasses', true);
   },
+  pinStreetDoodle(dataUrl: string | null): void {
+    setState((current) => ({
+      ...current,
+      progress: { ...current.progress, streetDoodle: dataUrl }
+    }));
+  },
   discoverSecret(secretId: SecretDiscoveryId): void {
     setState((current) => {
       if (current.progress.discoveredSecretIds.includes(secretId)) return current;
@@ -594,6 +605,7 @@ export const bridgeActions = {
       progress: {
         hasGlasses: false,
         discoveredSecretIds: [],
+        streetDoodle: null,
         ridge: createInitialRidgeProgress()
       }
     }));

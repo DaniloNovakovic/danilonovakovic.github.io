@@ -14,10 +14,14 @@ export const sceneMessages = {
       "find-glasses": "The sign is too blurry to read. Someone left a TODO? hatch open just ahead...",
       "wear-glasses": "Glasses off? The street hides things from blurry eyes.",
       "find-peel": "Watch your step between Profile and Experiences. Something slippery is down there.",
-      "win-circuit": "That peel still leads somewhere. Win what's down there and bring it back.",
+      "win-circuit": "That peel leads somewhere. Win what's down there... or build your own. The hobby house hides spare parts.",
+      "solder-circuit": "Your pockets rattle with parts. The basement workbench could make something of them.",
       "use-crt": "The blank CRT by Projects is humming. It wants your Circuit.",
     },
     signpostTally: (found: number, total: number) => `Secrets found: ${found}/${total}`,
+    hatchDone: "DONE",
+    billboardEmpty: "This space for rent.\n(Ask the artist in the hobby house.)",
+    sketchUpgrade: "The sketch picks up a little more detail...",
   },
   basement: {
     title: "DEVELOPER BASEMENT",
@@ -25,6 +29,22 @@ export const sceneMessages = {
     glasses: "GLASSES",
     glassesAcquired: "Glasses acquired. The sketch city flickers into focus.",
     cannotSeeThought: "ughh... I can't see",
+    darkStatus: "A forgotten dev room hums under the sketch city.",
+    litStatus: "Lights on. Someone has been building things down here.",
+    corkboard: "NOTES",
+    workbench: "WORKBENCH",
+    corkboardNotes: [
+      "Sticky note: \"Coding since 2016. Still not done.\"",
+      "Index card: \"Import job: 92% faster. Levenshtein fixed the team names.\"",
+      "Napkin sketch: chess + tetris + plants vs zombies = ???",
+      "Printout: \"eslint rule idea — no more magic numbers. (except 42)\"",
+      "Postcard from Serbia: \"Design tokens in Figma = tokens in code. Make it so.\"",
+    ],
+    shelfThought: "An old uc32 board, jumper wires... and a chess piece glued to a Tetris block?",
+    workbenchMissing: (owned: number, total: number) =>
+      `A Circuit blueprint. Parts ${owned}/${total}. The hobby house might have spares...`,
+    workbenchSoldered: "Copper, crystal, cell... *sizzle* — I built a Circuit!",
+    workbenchDone: "The iron is cold. My Circuit is already humming.",
   },
   hobbies: {
     labels: {
@@ -35,6 +55,7 @@ export const sceneMessages = {
       fitness: "FITNESS",
       dancing: "DANCE",
     },
+    posterLimbs: "ART OF 8 LIMBS",
   },
   ridge: {
     memory: {

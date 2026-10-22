@@ -1,8 +1,9 @@
 // Command parsers are table-driven; remaining branching is intentional CLI surface area.
 // fallow-ignore-file complexity
+import { CIRCUIT_PART_IDS } from './content/circuitParts';
 import type { GameCommand, GameFacing, GameItemId } from './types';
 
-const ITEM_IDS = new Set<GameItemId>(['glasses', 'circuit']);
+const ITEM_IDS = new Set<GameItemId>(['glasses', 'circuit', ...CIRCUIT_PART_IDS]);
 
 const SIMPLE_COMMANDS: Record<string, GameCommand> = {
   help: { type: 'help' },
@@ -18,6 +19,8 @@ const SIMPLE_COMMANDS: Record<string, GameCommand> = {
   z: { type: 'advance' },
   continue: { type: 'advance' },
   start: { type: 'start' },
+  perform: { type: 'perform' },
+  play: { type: 'perform' },
   fight: { type: 'fight' },
   clear: { type: 'fight' },
   skip: { type: 'skip' },
@@ -40,6 +43,9 @@ export function getGameHelpText(): string {
     '  equip <item> | unequip <item>   items: glasses, circuit',
     '  close | leave | back            close overlay / leave room / leave talk',
     '',
+    'Hobbies room:',
+    '  perform | play      clear the open mini-game goal (music/fitness/dancing award Circuit parts)',
+    '',
     'Ridge conversation:',
     '  advance | choose <id|index>',
     '',
@@ -51,7 +57,7 @@ export function getGameHelpText(): string {
     '  start | fight | draft <id|index>',
     '',
     'AI cheats:',
-    '  cheat give glasses|circuit',
+    '  cheat give glasses|circuit|copper-string|clock-crystal|battery-cell',
     '',
     'Scripts: separate commands with ;',
     'Example smoke:',

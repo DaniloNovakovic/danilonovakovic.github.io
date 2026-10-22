@@ -1,75 +1,65 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { OverlayDialogFrame } from '@/game/overlays/OverlayDialogFrame';
 import type { OverlayControllerProps } from '@/game/overlays/types';
 import { useMessages } from '@/shared/i18n';
 import { useOverlayKeys } from '@/shared/hooks/useOverlayKeys';
 import { Panel } from '@/shared/ui';
+import { SparePartSticker } from '../shared/SparePartSticker';
+import { useSparePartReward } from '../shared/useSparePartReward';
+import { hobbyBoardClass, hobbyFocusRing } from '../shared/hobbyStyles';
+import { appendPick, MARGIN_RIFF, riffProgress, type StringNumber } from './riff';
+import { RiffNote } from './RiffNote';
+import { StringBoard } from './StringBoard';
+import { GUITAR_STRINGS, useGuitarSynth, type GuitarStringSpec } from './useGuitarSynth';
 
-const NOTES = [
-  { note: 'E4', freq: 329.63, key: '1' },
-  { note: 'B3', freq: 246.94, key: '2' },
-  { note: 'G3', freq: 196.0, key: '3' },
-  { note: 'D3', freq: 146.83, key: '4' },
-  { note: 'A2', freq: 110.0, key: '5' },
-  { note: 'E2', freq: 82.41, key: '6' }
-];
+const NO_PLUCKS: readonly number[] = GUITAR_STRINGS.map(() => 0);
 
 export default function GuitarStrings({ close, titleId, descriptionId }: OverlayControllerProps) {
   const messages = useMessages();
-  const [activeString, setActiveString] = useState<number | null>(null);
-  const audioCtxRef = useRef<AudioContext | null>(null);
-  const activeStringTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const copy = messages.miniGames.guitar;
+  const { pluck, strumAll } = useGuitarSynth();
+  const reward = useSparePartReward('copper-string');
+  const claimReward = reward.claim;
 
-  const clearActiveStringTimer = useCallback(() => {
-    if (activeStringTimeoutRef.current != null) {
-      clearTimeout(activeStringTimeoutRef.current);
-      activeStringTimeoutRef.current = null;
-    }
+  const [plucks, setPlucks] = useState(NO_PLUCKS);
+  const [progress, setProgress] = useState(0);
+  const [riffDone, setRiffDone] = useState(false);
+  const historyRef = useRef<StringNumber[]>([]);
+
+  const vibrate = useCallback((number: StringNumber | 'all') => {
+    setPlucks((current) =>
+      current.map((count, index) => (number === 'all' || GUITAR_STRINGS[index]?.number === number ? count + 1 : count))
+    );
   }, []);
 
-  useEffect(function clearActiveStringTimerOnUnmount() {
-    return () => clearActiveStringTimer();
-  }, [clearActiveStringTimer]);
+  const strum = useCallback(
+    (spec: GuitarStringSpec) => {
+      pluck(spec, 0.7);
+      vibrate(spec.number);
+    },
+    [pluck, vibrate]
+  );
 
-  const playNote = useCallback((index: number, freq: number) => {
-    clearActiveStringTimer();
-    setActiveString(index);
-    activeStringTimeoutRef.current = setTimeout(() => {
-      activeStringTimeoutRef.current = null;
-      setActiveString(null);
-    }, 150);
-
-    if (!audioCtxRef.current) {
-      type WindowWithWebKitAudio = Window & { webkitAudioContext?: typeof AudioContext };
-      const w = window as WindowWithWebKitAudio;
-      const AudioCtx = window.AudioContext ?? w.webkitAudioContext;
-      if (!AudioCtx) return;
-      audioCtxRef.current = new AudioCtx();
-    }
-
-    const ctx = audioCtxRef.current;
-    if (ctx.state === 'suspended') void ctx.resume();
-
-    const osc = ctx.createOscillator();
-    const gainNode = ctx.createGain();
-
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(freq, ctx.currentTime);
-
-    gainNode.gain.setValueAtTime(0.5, ctx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1.5);
-
-    osc.connect(gainNode);
-    gainNode.connect(ctx.destination);
-
-    osc.start();
-    osc.stop(ctx.currentTime + 1.5);
-  }, [clearActiveStringTimer]);
+  const pick = useCallback(
+    (spec: GuitarStringSpec) => {
+      pluck(spec);
+      vibrate(spec.number);
+      const history = appendPick(historyRef.current, spec.number);
+      const matched = riffProgress(history);
+      const completed = matched === MARGIN_RIFF.length;
+      historyRef.current = completed ? [] : history;
+      setProgress(completed ? 0 : matched);
+      setRiffDone(completed);
+      if (!completed) return;
+      strumAll();
+      vibrate('all');
+      claimReward();
+    },
+    [claimReward, pluck, strumAll, vibrate]
+  );
 
   useOverlayKeys(
-    Object.fromEntries(
-      NOTES.map((n, i) => [n.key, () => playNote(i, n.freq)])
-    )
+    Object.fromEntries(GUITAR_STRINGS.map((spec) => [String(spec.number), () => pick(spec)]))
   );
 
   return (
@@ -80,38 +70,38 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
       titleId={titleId}
       descriptionId={descriptionId}
     >
-      <div className="w-full flex flex-col items-center">
-        <Panel border="thick" className="relative flex h-[200px] w-full flex-col justify-center gap-4 p-4 shadow-[6px_6px_0px_0px_rgba(26,26,26,1)]">
-          {NOTES.map((n, i) => (
-            <div
-              key={n.note}
-              className="w-full h-4 relative cursor-pointer group outline-none"
-              onMouseEnter={() => playNote(i, n.freq)}
-              onClick={() => playNote(i, n.freq)}
-              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && playNote(i, n.freq)}
-              tabIndex={0}
-              role="button"
-              aria-label={messages.miniGames.guitar.stringLabel(n.note, n.key)}
-            >
-              <div
-                className={`absolute top-1/2 left-0 w-full h-[2px] bg-[#1a1a1a] transition-transform duration-100 ${activeString === i ? 'scale-y-300 translate-y-1' : ''} group-focus:bg-blue-500`}
-              ></div>
-              <div
-                className={`absolute -left-2 top-0 text-xs font-bold ${activeString === i ? 'text-black' : 'text-transparent group-hover:text-black group-focus:text-black'} transition-colors`}
-              >
-                {n.note}
-              </div>
-              <div className="absolute -right-2 top-0 text-[10px] font-mono opacity-30 group-hover:opacity-100 group-focus:opacity-100">
-                [{n.key}]
-              </div>
-            </div>
-          ))}
+      <div className="flex w-full flex-col items-center gap-3">
+        <RiffNote
+          title={copy.riffTitle}
+          hint={copy.riffHint}
+          progressLabel={copy.riffProgress(progress, MARGIN_RIFF.length)}
+          doneLabel={copy.riffDone}
+          progress={progress}
+          done={riffDone}
+        />
 
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border-4 border-[#1a1a1a] opacity-20 pointer-events-none"></div>
+        <Panel border="thick" className={`${hobbyBoardClass} p-2`}>
+          <StringBoard label={copy.stringsLabel} plucks={plucks} onPick={pick} onStrum={strum} />
+          <SparePartSticker key={reward.stickerKey} partId="copper-string" outcome={reward.outcome} onDismiss={reward.dismiss} />
         </Panel>
-        <div className="mt-4 text-sm font-bold text-[#1a1a1a] opacity-60">
-          {messages.miniGames.guitar.instruction}
+
+        <div className="flex w-full justify-center gap-1.5">
+          {GUITAR_STRINGS.map((spec) => (
+            <button
+              key={spec.number}
+              type="button"
+              onClick={() => pick(spec)}
+              aria-label={copy.stringLabel(spec.note, String(spec.number))}
+              className={`flex h-11 w-11 cursor-pointer flex-col items-center justify-center rounded border-2 border-[#1a1a1a] bg-[#fbfbf9] leading-none shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none ${hobbyFocusRing}`}
+            >
+              <span className="font-mono text-sm font-black">{spec.number}</span>
+              <span className="text-[9px] font-bold opacity-60">{spec.note}</span>
+            </button>
+          ))}
         </div>
+
+        <p className="text-sm font-bold text-[#1a1a1a] opacity-60">{copy.instruction}</p>
+        <p className="text-[11px] italic opacity-45">{copy.marginNote}</p>
       </div>
     </OverlayDialogFrame>
   );
