@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { TEST_ROUTE_DIALOGUE_CATALOG } from '../ridge/content/testRouteCatalog';
 import { parseGameCommand, parseGameScript } from './commands';
+import { OVERWORLD_BANANA_PEEL, OVERWORLD_BASEMENT_HOLE, OVERWORLD_BUILDING_SPOTS } from './content/overworldSpots';
 import { getSketchDetailLevel } from './overworldLogic';
 import { GameConsoleSession } from './session';
+
+const PROFILE_X = OVERWORLD_BUILDING_SPOTS.find((spot) => spot.id === 'profile')?.x ?? 0;
 
 function createSession(
   options: Omit<ConstructorParameters<typeof GameConsoleSession>[0], 'dialogue'> = {}
@@ -31,7 +34,7 @@ describe('GameConsoleSession full secret route', () => {
   it('walks Overworld → Basement glasses → Potassium Circuit → CRT → Ridge', () => {
     const session = createSession();
 
-    // Basement hatch is near x=230; spawn at 100 → a few steps right.
+    // Basement hatch is a few steps right of spawn.
     expect(session.exec('go right 4').ok).toBe(true);
     expect(session.exec('interact').ok).toBe(true);
     expect(session.observe().mode).toBe('basement');
@@ -45,8 +48,7 @@ describe('GameConsoleSession full secret route', () => {
     expect(session.exec('close').ok).toBe(true);
     expect(session.observe().mode).toBe('overworld');
 
-    // Peel at x=650.
-    walkOverworldTo(session, 650);
+    walkOverworldTo(session, OVERWORLD_BANANA_PEEL.x);
     expect(session.exec('interact').ok).toBe(true);
     expect(session.observe().discoveredSecretIds).toContain('banana-peel-clue');
     expect(session.exec('interact').ok).toBe(true);
@@ -74,7 +76,7 @@ describe('GameConsoleSession full secret route', () => {
 
   it('opens a portfolio overlay from a street building and closes it', () => {
     const session = createSession();
-    walkOverworldTo(session, 400);
+    walkOverworldTo(session, PROFILE_X);
     expect(session.exec('interact profile').ok).toBe(true);
     expect(session.observe().mode).toBe('overlay');
     expect(session.observe().overlay?.id).toBe('profile');
@@ -88,7 +90,7 @@ describe('GameConsoleSession full secret route', () => {
       ownedItemIds: ['glasses'],
       equippedItemIds: ['glasses']
     });
-    session.syncPlayerPosition(650, 535);
+    session.syncPlayerPosition(OVERWORLD_BANANA_PEEL.x, OVERWORLD_BANANA_PEEL.y);
     expect(session.exec('interact').events.some((e) => e.type === 'secret_discovered')).toBe(true);
     expect(session.getState().overworld.bananaFirstPeelPending).toBe(true);
 
@@ -195,7 +197,7 @@ describe('GameConsoleSession full secret route', () => {
     expect(session.exec('interact signpost').events).toContainEqual(
       expect.objectContaining({ stage: 'solder-circuit', found: 4 })
     );
-    walkOverworldTo(session, 230);
+    walkOverworldTo(session, OVERWORLD_BASEMENT_HOLE.x);
     session.exec('interact hatch');
     expect(session.observe().mode).toBe('basement');
 
@@ -237,7 +239,7 @@ describe('GameConsoleSession full secret route', () => {
       equippedItemIds: ['glasses'],
       discoveredSecretIds: ['banana-peel-clue']
     });
-    session.syncPlayerPosition(650, 535);
+    session.syncPlayerPosition(OVERWORLD_BANANA_PEEL.x, OVERWORLD_BANANA_PEEL.y);
     const result = session.commitBananaPeelWarp();
     expect(result.ok).toBe(true);
     expect(session.observe().mode).toBe('potassium');

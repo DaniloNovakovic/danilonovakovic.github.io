@@ -2,6 +2,7 @@
 // fallow-ignore-file complexity
 import type { RidgeObservation } from '../ridge/types';
 import { listBasementNearby } from './basementLogic';
+import { OVERWORLD_BANANA_PEEL } from './content/overworldSpots';
 import { listHobbiesNearby } from './hobbiesLogic';
 import { getOverworldProgress, listOverworldNearby } from './overworldLogic';
 import type {
@@ -15,7 +16,7 @@ const OVERWORLD_CONSOLE_HINTS: Record<OverworldProgressStage, string> = {
   'find-glasses':
     'Find the basement hatch near the start of the street and pick up the glasses.',
   'wear-glasses': 'equip glasses to reveal the banana peel secret.',
-  'find-peel': 'With glasses on, walk near x=650 and interact with the peel.',
+  'find-peel': `With glasses on, walk near x=${OVERWORLD_BANANA_PEEL.x} and interact with the peel.`,
   'win-circuit':
     'Interact with the peel again to enter Potassium Slip and win the Circuit — or win music, fitness and dancing parts in Hobbies (perform) and solder them at the basement workbench.',
   'solder-circuit': 'Drop into the basement and use the workbench near x=790 to solder the Circuit.',

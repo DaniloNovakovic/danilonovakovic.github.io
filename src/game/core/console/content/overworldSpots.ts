@@ -37,7 +37,7 @@ export interface OverworldBuildingSpot {
 }
 
 export const OVERWORLD_BUILDING_SPOTS: readonly OverworldBuildingSpot[] = [
-  { id: 'profile', label: 'Profile desk', x: 400, action: { kind: 'openOverlay', overlayId: 'profile' } },
+  { id: 'profile', label: 'Profile desk', x: 510, action: { kind: 'openOverlay', overlayId: 'profile' } },
   {
     id: 'experiences',
     label: 'Experiences gallery',
@@ -68,7 +68,7 @@ export const OVERWORLD_BUILDING_SPOTS: readonly OverworldBuildingSpot[] = [
 export const OVERWORLD_BASEMENT_HOLE = {
   id: 'basement-hole',
   label: 'Basement hatch',
-  x: 230,
+  x: 280,
   y: 535,
   promptY: 485,
   interactDistanceX: 70,
@@ -80,7 +80,7 @@ export const OVERWORLD_BANANA_PEEL = {
   id: 'banana-peel',
   secretId: 'banana-peel-clue' as const,
   label: 'Banana peel (glasses secret)',
-  x: 650,
+  x: 730,
   y: 535,
   radius: 95
 };
