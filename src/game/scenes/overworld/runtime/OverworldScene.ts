@@ -292,6 +292,7 @@ export class OverworldScene extends Phaser.Scene {
     this.streetDetail?.update(getSketchDetailLevel(state), tick, this.motion);
   }
 
+
   private updateOverworldInteraction(interactRequested: boolean): NearbyThing | undefined {
     if (!this.session) return undefined;
 

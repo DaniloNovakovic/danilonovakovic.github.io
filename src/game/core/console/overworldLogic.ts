@@ -50,6 +50,7 @@ const SIGNPOST_MESSAGES: Record<OverworldProgressStage, string> = {
 /** Glasses, banana peel, three hobby parts, Circuit. */
 const STREET_SECRET_TOTAL = 3 + CIRCUIT_PART_IDS.length;
 
+
 export function getOverworldProgress(
   state: Pick<GameWorldState, 'ownedItemIds' | 'equippedItemIds' | 'discoveredSecretIds'>
 ): OverworldProgress {

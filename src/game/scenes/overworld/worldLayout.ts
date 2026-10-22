@@ -82,6 +82,7 @@ export const OVERWORLD_SIGNPOST_X = CORE_SIGNPOST.x;
 /** Roadside board between Hobbies and Contact that shows the pinned easel doodle. */
 export const OVERWORLD_BILLBOARD_X = 2650;
 
+
 export const BANANA_PEEL_CLUE_ID = OVERWORLD_BANANA_PEEL.secretId satisfies SecretDiscoveryId;
 
 export const OVERWORLD_GLASSES_SECRET_SLOTS: readonly OverworldSecretSlot[] = [
