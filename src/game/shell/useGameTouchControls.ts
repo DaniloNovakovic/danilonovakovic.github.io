@@ -81,7 +81,11 @@ export function useGameTouchControls({ isPaused }: UseGameTouchControlsOptions) 
     };
     activePointerIdRef.current = event.pointerId;
     hasDraggedRef.current = false;
-    event.currentTarget.setPointerCapture(event.pointerId);
+    try {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    } catch {
+      // Synthetic and some mobile pointers are not active yet at pointerdown.
+    }
     dispatchDragIndicator({
       type: 'begin',
       point: { x: containerX, y: containerY }
@@ -130,6 +134,9 @@ export function useGameTouchControls({ isPaused }: UseGameTouchControlsOptions) 
 
   const onPointerLeave = useCallback((event: PointerEvent<HTMLDivElement>) => {
     if (activePointerIdRef.current !== event.pointerId) return;
+    // Capture keeps the gesture alive after the contact point leaves the surface.
+    // Ending it here drops the tap, so the next touch is the one that interacts.
+    if (event.currentTarget.hasPointerCapture?.(event.pointerId)) return;
     stopPointer(event);
     releasePointer();
   }, [releasePointer, stopPointer]);

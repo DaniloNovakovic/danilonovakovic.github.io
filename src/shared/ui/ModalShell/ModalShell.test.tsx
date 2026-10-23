@@ -146,6 +146,56 @@ describe('ModalShell', () => {
     expect(backdropClasses).not.toContain('items-end');
   });
 
+  it('does not dismiss when the opening tap compatibility click hits the focused close control', () => {
+    const onClose = vi.fn();
+
+    render(
+      <ModalShell onClose={onClose}>
+        {({ titleId }) => (
+          <div>
+            <h2 id={titleId}>Hobby</h2>
+            <button onClick={onClose}>Close</button>
+          </div>
+        )}
+      </ModalShell>
+    );
+
+    const close = screen.getByRole('button', { name: 'Close' });
+    expect(document.activeElement).toBe(close);
+    close.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 }));
+
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('still closes from a real pointer press on the focused close control', async () => {
+    const onClose = vi.fn();
+
+    render(
+      <ModalShell onClose={onClose}>
+        {({ titleId }) => (
+          <div>
+            <h2 id={titleId}>Hobby</h2>
+            <button onClick={onClose}>Close</button>
+          </div>
+        )}
+      </ModalShell>
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Close' }));
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not dismiss when a compatibility mousedown hits the backdrop', () => {
+    const onClose = vi.fn();
+    render(<TestModal onClose={onClose} />);
+
+    const backdrop = screen.getByRole('dialog').parentElement!;
+    backdrop.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
   it('closes on backdrop click but not inside click', async () => {
     const onClose = vi.fn();
     render(<TestModal onClose={onClose} />);
