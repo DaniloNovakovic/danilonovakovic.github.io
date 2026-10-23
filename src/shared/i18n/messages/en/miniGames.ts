@@ -51,8 +51,8 @@ export const miniGameMessages = {
   },
   muayThai: {
     title: "Muay Thai & Fitness",
-    instruction: "Strike when the marker crosses the hatched zone. Space, click or tap the bag.",
-    heavyBag: "Heavy bag. Strike when the marker is in the zone.",
+    instruction: "Strike when the marker crosses the hatched zone. Space, or tap the page or the bar.",
+    heavyBag: "Heavy bag. Tap the page around it, or the timing bar, when the marker is in the zone.",
     bagPrint: "มวยไทย",
     timingBar: "Timing bar",
     strikes: {

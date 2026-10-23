@@ -38,13 +38,17 @@ describe('strike zones', () => {
     expect(sweepPeriodMs(100)).toBeGreaterThan(0);
   });
 
-  it('eases the roundhouse without making it easier than the strike before it', () => {
+  it('eases the knee and roundhouse without letting the finisher get easier', () => {
     const roundhouse = COMBO_LENGTH - 1;
-    const before = roundhouse - 1;
-    expect(strikeZone(roundhouse).halfWidth).toBeGreaterThan(0.06);
-    expect(strikeZone(roundhouse).halfWidth).toBeLessThan(strikeZone(before).halfWidth);
-    expect(sweepPeriodMs(roundhouse)).toBeGreaterThan(900);
-    expect(sweepPeriodMs(roundhouse)).toBeLessThan(sweepPeriodMs(before));
+    const knee = roundhouse - 1;
+    expect(strikeZone(knee).halfWidth).toBe(0.1);
+    expect(sweepPeriodMs(knee)).toBe(1120);
+    expect(strikeZone(roundhouse).halfWidth).toBe(0.096);
+    expect(sweepPeriodMs(roundhouse)).toBe(1080);
+    expect(strikeZone(roundhouse).halfWidth).toBeLessThan(strikeZone(knee).halfWidth);
+    expect(sweepPeriodMs(roundhouse)).toBeLessThan(sweepPeriodMs(knee));
+    expect(strikeZone(knee).halfWidth * sweepPeriodMs(knee)).toBeGreaterThan(100);
+    expect(strikeZone(roundhouse).halfWidth * sweepPeriodMs(roundhouse)).toBeGreaterThan(100);
   });
 });
 

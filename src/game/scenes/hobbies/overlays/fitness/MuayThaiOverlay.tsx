@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, type PointerEvent } from 'react';
 import { OverlayDialogFrame } from '@/game/overlays/OverlayDialogFrame';
 import type { OverlayControllerProps } from '@/game/overlays/types';
 import { useMessages } from '@/shared/i18n';
@@ -7,7 +7,7 @@ import { Panel } from '@/shared/ui';
 import { SparePartSticker } from '../shared/SparePartSticker';
 import { useHobbyAudio } from '../shared/useHobbyAudio';
 import { useSparePartReward } from '../shared/useSparePartReward';
-import { hobbyBoardClass } from '../shared/hobbyStyles';
+import { hobbyBoardClass, hobbyFocusRing } from '../shared/hobbyStyles';
 import { HeavyBag } from './HeavyBag';
 import { ComboTracker, TimingBar } from './StrikeHud';
 import {
@@ -62,6 +62,12 @@ export default function MuayThaiOverlay({ close, titleId, descriptionId }: Overl
     }
   }, [claimReward, getAudio, readPosition, restart]);
 
+  const strikeFromPointer = (event: PointerEvent<HTMLButtonElement>) => {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    strike();
+  };
+
   useOverlayKeys({
     ' ': (event) => {
       if (!event.repeat) strike();
@@ -86,15 +92,27 @@ export default function MuayThaiOverlay({ close, titleId, descriptionId }: Overl
         </div>
         <ComboTracker step={combo.step} names={copy.strikes} />
 
-        <Panel border="thick" className={`${hobbyBoardClass} flex h-[230px] items-start justify-center p-2`}>
-          <div className="hobby-hatch-light absolute inset-x-0 bottom-0 h-8 border-t-2 border-[#1a1a1a]" />
-          <HeavyBag label={copy.heavyBag} print={copy.bagPrint} hitId={fx?.id ?? 0} grade={fx?.grade ?? null} onStrike={strike} />
-          {fx ? <StrikeStamp key={fx.id} fx={fx} /> : null}
-          <SparePartSticker key={reward.stickerKey} partId="battery-cell" outcome={reward.outcome} onDismiss={reward.dismiss} />
-        </Panel>
-
-        <div className="w-full">
-          <TimingBar label={copy.timingBar} zone={strikeZone(combo.step)} markerRef={markerRef} />
+        <div className="relative w-full">
+          <div className="flex w-full flex-col items-center gap-3">
+            <Panel border="thick" className={`${hobbyBoardClass} flex h-[230px] items-start justify-center p-2`}>
+              <div className="hobby-hatch-light absolute inset-x-0 bottom-0 h-8 border-t-2 border-[#1a1a1a]" />
+              <HeavyBag print={copy.bagPrint} hitId={fx?.id ?? 0} grade={fx?.grade ?? null} />
+              {fx ? <StrikeStamp key={fx.id} fx={fx} /> : null}
+            </Panel>
+            <div className="w-full">
+              <TimingBar label={copy.timingBar} zone={strikeZone(combo.step)} markerRef={markerRef} />
+            </div>
+          </div>
+          {/* Transparent pad over the page around the bag and the timing bar. */}
+          <button
+            type="button"
+            aria-label={copy.heavyBag}
+            onPointerDown={strikeFromPointer}
+            className={`absolute inset-0 z-10 cursor-pointer touch-manipulation select-none rounded-lg ${hobbyFocusRing}`}
+          />
+          <div className="pointer-events-none absolute inset-0 z-20">
+            <SparePartSticker key={reward.stickerKey} partId="battery-cell" outcome={reward.outcome} onDismiss={reward.dismiss} />
+          </div>
         </div>
 
         <p className="text-sm font-bold text-[#1a1a1a] opacity-60">{copy.instruction}</p>
