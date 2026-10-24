@@ -133,6 +133,15 @@ export class GameConsoleSession {
     return this.ok('Position sync ignored outside walk modes.');
   }
 
+  /** Live inventory from the bridge, so street gates follow equip toggles. */
+  syncInventory(
+    ownedItemIds: readonly GameItemId[],
+    equippedItemIds: readonly GameItemId[]
+  ): void {
+    this.state.ownedItemIds = ownedItemIds;
+    this.state.equippedItemIds = equippedItemIds;
+  }
+
   /** Live Overworld typewriter warp entry into Potassium. */
   commitBananaPeelWarp(): GameCommandResult {
     if (this.state.mode !== 'overworld') {

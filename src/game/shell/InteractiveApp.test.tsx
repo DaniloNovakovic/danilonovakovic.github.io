@@ -170,13 +170,13 @@ describe('InteractiveApp', () => {
     bridgeActions.enterScene(STAMPEDE_SKETCH_SCENE_ID);
     render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
 
-    expect(screen.getByRole('button', { name: /back to ridge/i })).toBeDefined();
+    expect(screen.getByRole('button', { name: /back to the street/i })).toBeDefined();
     expect(screen.queryByRole('button', { name: /open inventory/i })).toBeNull();
     expect(screen.queryByRole('button', { name: /open dev scene switcher/i })).toBeNull();
 
-    await userEvent.click(screen.getByRole('button', { name: /back to ridge/i }));
+    await userEvent.click(screen.getByRole('button', { name: /back to the street/i }));
 
-    expect(bridgeStore.getState().activeSceneId).toBe(RIDGE_SCENE_ID);
+    expect(bridgeStore.getState().activeSceneId).toBe(OVERWORLD_SCENE_ID);
   });
 
   it('replaces inventory and dev controls with Back during Potassium Slip', async () => {
@@ -227,7 +227,7 @@ describe('InteractiveApp', () => {
     expect(pageFrame.getAttribute('data-arena-aspect')).toBe(String(arenaAspect));
     expect(pageFrame.className).toContain('stampede-notebook-page-frame');
     expect(screen.getByTestId('stampede-control-mat').style.bottom).toBe('0.75rem');
-    expect(screen.getByRole('button', { name: /back to ridge/i })).toBeDefined();
+    expect(screen.getByRole('button', { name: /back to the street/i })).toBeDefined();
     expect(screen.getByRole('button', { name: /switch to static portfolio/i })).toBeDefined();
     expect(screen.queryByRole('button', { name: /menu/i })).toBeNull();
 
@@ -579,11 +579,12 @@ describe('InteractiveApp', () => {
     bridgeActions.setSceneUiPanel(STAMPEDE_SKETCH_SCENE_ID, 'stampedeStartPrompt');
     render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
 
-    await userEvent.click(screen.getByRole('button', { name: /^start$/i }));
+    await userEvent.click(screen.getByRole('button', { name: /bad selfie/i }));
 
     expect(bridgeStore.getState().sceneUi.lastAction).toMatchObject({
       ownerSceneId: STAMPEDE_SKETCH_SCENE_ID,
-      action: 'start'
+      action: 'stampedeUpgradeChoice',
+      params: { upgradeId: 'badSelfie' }
     });
   });
 
@@ -597,14 +598,14 @@ describe('InteractiveApp', () => {
     render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
 
     expect(screen.getByTestId('scene-ui-panel-overlay')).toBeDefined();
-    expect(screen.getByRole('dialog', { name: /pick a page trick/i })).toBeDefined();
+    expect(screen.getByRole('dialog', { name: /pick a weapon/i })).toBeDefined();
 
-    await userEvent.click(screen.getByRole('button', { name: /wider scribble/i }));
+    await userEvent.click(screen.getByRole('button', { name: /bad smell/i }));
 
     expect(bridgeStore.getState().sceneUi.lastAction).toMatchObject({
       ownerSceneId: STAMPEDE_SKETCH_SCENE_ID,
       action: 'stampedeUpgradeChoice',
-      params: { upgradeId: 'wideSwipe' }
+      params: { upgradeId: 'badSmell' }
     });
   });
 
@@ -621,10 +622,10 @@ describe('InteractiveApp', () => {
       })
     );
     render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
-    const resultDialog = screen.getByRole('dialog', { name: /page got crowded/i });
+    const resultDialog = screen.getByRole('dialog', { name: /pecked/i });
 
     expect(within(resultDialog).getByRole('button', { name: /^retry$/i })).toBeDefined();
-    expect(within(resultDialog).getByRole('button', { name: /back to ridge/i })).toBeDefined();
+    expect(within(resultDialog).getByRole('button', { name: /back to the street/i })).toBeDefined();
 
     await userEvent.click(within(resultDialog).getByRole('button', { name: /^retry$/i }));
     expect(bridgeStore.getState().sceneUi.lastAction).toMatchObject({
@@ -632,7 +633,7 @@ describe('InteractiveApp', () => {
       action: 'retry'
     });
 
-    await userEvent.click(within(resultDialog).getByRole('button', { name: /back to ridge/i }));
+    await userEvent.click(within(resultDialog).getByRole('button', { name: /back to the street/i }));
     expect(bridgeStore.getState().sceneUi.lastAction).toMatchObject({
       ownerSceneId: STAMPEDE_SKETCH_SCENE_ID,
       action: 'backToRidge'

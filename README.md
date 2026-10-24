@@ -46,9 +46,10 @@ Full-game console: `src/game/core/console/` (ADR-0006). Ridge gameplay:
 `src/game/core/ridge/`; stick art is a replaceable VisualProvider under
 `src/game/scenes/ridge/art/`.
 
-Stampede Sketch remains a standalone mini-game scene (`stampedeSketch`) for
-optional future content; reach it via the dev scene switcher or basement console
-(`stampede`) until the Ridge rework wires a player-facing entry.
+Chick Magnet is the stampede sketch scene (`stampedeSketch`). A chick just past
+Experiences starts it while glasses are off. Clearing it grants the glasses.
+With glasses on, the chick runs away. Closing returns to the street. The dev
+scene switcher and basement console (`stampede`) still open it directly.
 
 ## Architecture
 

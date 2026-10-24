@@ -3,8 +3,16 @@
 > Mini-game design brief and Ridge reward contract.
 
 Stampede Sketch is the first new opt-in mini-game prototype for Sketchbook
-Ridge. In the active Ridge pre-production route, it is optional side fun or an
-alternate-path candidate, not required Living Proof for the first ending.
+Ridge. On the current street it ships as **Chick Magnet**: a chick just past
+Experiences starts it while glasses are off, the first clear grants and equips
+the glasses, and wearing glasses makes that chick run away. The arena is a
+flock that gets meaner over a 2:30 run: chicks, then broody hens, then a
+rooster that charges. You pick one starting weapon. Scraps come slowly and
+are at least 18 seconds apart; each draft is another weapon or a meaner
+version of one you have. Bad selfie hits random nearby chicks, bad breath
+damages the cone in front of you, bad smell is a circle around you, and fake
+glasses drops the nearest chicks. You keep each one. Closing returns to the street. In the active Ridge pre-production route, it is optional
+side fun, not required Living Proof for the first ending.
 
 ## Core Purpose
 
@@ -59,12 +67,20 @@ them to the blanket, but the blanket itself should remain a separate landmark.
 
 - **Core verb:** kite.
 - **Auto-attacks:** sketch tools that sort or redirect pressure.
+- **Spells:** weapons you keep. The run starts with one chosen weapon. Bad selfie
+  damages random nearby chicks. Bad breath damages the cone in front of where
+  you are looking. Bad smell damages a circle around you. Fake glasses damages
+  the nearest chicks, and the character wears them while that weapon is in the kit. Scrap drafts are spaced at least 18 seconds apart and
+  offer either a new weapon or a stronger rank of one you already have. Hens
+  arrive after the opening and take two hits. A rooster arrives later, takes
+  three hits, and charges.
 - **XP pickups:** captured ink drops, sticky notes, or useful scraps.
 - **Upgrades:** better ways to organize, soften, or survive pressure.
 - **Damage/contact:** smudges, page noise, crowding.
 - **Win:** the blanket stays calm until the timer ends.
-- **First-clear reward:** candidate stamp plus one glide pip for Ridge
-  traversal if the active route later accepts that reward.
+- **First-clear reward:** the street glasses, owned and equipped. A repeat
+  clear does not grant another pair. The earlier Ridge stamp and glide pip
+  candidate is not awarded by this clear.
 
 ## First-Slice Art Direction
 

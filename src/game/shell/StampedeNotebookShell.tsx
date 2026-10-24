@@ -2,7 +2,7 @@ import { SceneUiHost } from '@/game/sceneUi/SceneUiHost';
 import type { OpenOverlayOptions } from '@/game/bridge/store';
 import type { OverlayId } from '@/game/overlays/overlayIds';
 import type { PhaserScenePresentationMode } from '@/game/sharedSceneRuntime/phaserScenePresentation';
-import { RIDGE_SCENE_ID, type SceneId } from '@/game/scenes/sceneIds';
+import type { SceneId } from '@/game/scenes/sceneIds';
 import { STAMPEDE_ARENA } from '@/game/scenes/stampedeSketch/runtime/movement';
 import { useMessages } from '@/shared/i18n';
 import type { NotebookRuntimeShellProfile } from './notebookShellProfile';
@@ -47,7 +47,7 @@ export function StampedeNotebookShell({
   return (
     <NotebookRuntimeShell
       activeSceneId={activeSceneId}
-      backAriaLabel={messages.gameShell.backToRidge}
+      backAriaLabel={messages.gameShell.backToStreet}
       controlMat={{
         ariaLabel: 'Stampede input mat',
         className: 'touch-none',
@@ -59,7 +59,7 @@ export function StampedeNotebookShell({
       isGameInputBlocked={isGameInputBlocked}
       isScenePanelOpen={isScenePanelOpen}
       loadingSceneId={loadingSceneId}
-      onBack={() => onEnterScene(RIDGE_SCENE_ID)}
+      onBack={onReturnToOverworld}
       onEnterScene={onEnterScene}
       onOpenOverlay={onOpenOverlay}
       onReturnToOverworld={onReturnToOverworld}

@@ -5,15 +5,16 @@ export const sceneMessages = {
     bananaDiscoveredPrompt: "[E] Peel banana",
     bananaUndiscoveredPrompt: "[E] Peel?",
     bananaDiscovery:
-      "A tiny banana sticker points east. This city has stranger shortcuts than doors.",
+      "A tiny banana sticker points along the street. This city has stranger shortcuts than doors.",
+    chickPrompt: "[E] The chick is staring",
     circuitCrtLockedPrompt: "A blank CRT. Needs a Circuit.",
     circuitCrtReadyPrompt: "[E] Insert Circuit",
     signpostLabel: "START",
     signpostPrompt: "[E] Read sign",
     signpostHints: {
-      "find-glasses": "The sign is too blurry to read. Someone left a TODO? hatch open just ahead...",
-      "wear-glasses": "Glasses off? The street hides things from blurry eyes.",
-      "find-peel": "Watch your step between Profile and Experiences. Something slippery is down there.",
+      "find-glasses": "The sign is too blurry to read. A chick is pacing just past Experiences. A TODO? hatch is open just ahead...",
+      "wear-glasses": "Glasses off? The street hides things from blurry eyes. That chick will bolt if you put them on.",
+      "find-peel": "Watch your step just past the Abilities shelf. Something slippery is down there.",
       "win-circuit": "That peel leads somewhere. Win what's down there... or build your own. The hobby house hides spare parts.",
       "solder-circuit": "Your pockets rattle with parts. The basement workbench could make something of them.",
       "use-crt": "The blank CRT by Projects is humming. It wants your Circuit.",
@@ -327,31 +328,36 @@ export const sceneMessages = {
     },
   },
   stampedeSketch: {
+    start: {
+      title: "Ooh. Irresistible.",
+      body: "Don't make eye contact. It only encourages them.",
+      hint: "Pick one weapon. It fires on its own. Scraps bring another, or a meaner version.",
+    },
     result: {
       eyebrow: {
         cleared: "Run complete",
         failed: "Run ended",
       },
       title: {
-        cleared: "Blanket held",
-        failed: "Page got crowded",
+        cleared: "They lost the scent",
+        failed: "Pecked",
       },
       body: {
-        cleared: "The sketch stayed calm through the whole stampede.",
-        failed: "Too many marks landed before the timer ran out.",
+        cleared: "The flock peels off, offended. A pair of glasses is sitting in the mess.",
+        failed: "The flock got the hug. You got the beak.",
       },
       rewardNote: {
-        earned: "Stamp earned. One glide pip tucked into the Ridge.",
-        alreadyOwned: "Stamp already owned. Glide pip already tucked into the Ridge.",
-        unavailable: "No stamp yet. Rewards are still taped over.",
-        failed: "Hold the blanket to earn the Stampede stamp and glide pip.",
+        earned: "Glasses acquired. The street snaps into focus. The chick will not forgive this.",
+        alreadyOwned: "Still no second pair. The chicks remain obsessed.",
+        unavailable: "No glasses yet.",
+        failed: "Stay out of beak range. The glasses are the prize.",
       },
       stats: {
         time: "Time",
         contacts: "Contacts",
       },
       actions: {
-        backToRidge: "Back to Ridge",
+        backToRidge: "Back to the street",
         retry: "Retry",
       },
     },

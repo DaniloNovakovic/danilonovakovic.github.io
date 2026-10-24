@@ -37,7 +37,8 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
 - Opening a React overlay pauses Phaser movement and input.
 - Closing an overlay returns to the street, unless the overlay was opened from an interior parent scene.
 - The basement entrance is a hatch with a ladder under a `TODO?` tag. The lid rattles and `?` glyphs float up when you walk near it; after collecting the glasses the tag is crossed out as `DONE` and code glyphs rise instead. Entering plays a short drop-in animation.
-- A banana peel secret can be discovered in the street. After discovery, interacting with it enters Potassium Slip.
+- A chick paces on the sidewalk just past Experiences. With glasses off, interact to start Chick Magnet. Clearing the 2:30 run grants and equips the glasses. The run starts by picking one weapon. Scraps come slowly, at least 18 seconds apart, and offer a new weapon or a meaner version of one you have: bad selfie on random nearby chicks, bad breath in front of you, a bad smell in a circle, and fake glasses on the nearest chicks. You keep each one. The flock starts as chicks, then hens that take two hits, then a rooster that charges and takes three. With glasses on, the chick runs away and will not talk. Take the glasses off and it comes back; a repeat clear does not grant a second pair.
+- A banana peel secret sits on the sidewalk just past Abilities, and only while glasses are on. After discovery, interacting with it enters Potassium Slip.
 - A blank street CRT sits between the Projects and Abilities buildings. It is always drawn, with or without glasses. Without a Circuit it only shows a locked prompt and the occasional flicker of static; once you own the Circuit, a little stick figure waves from the screen. While owning the Circuit, interact with the CRT to insert it and enter Ridge (secret side story).
 
 ## Hobbies Room
@@ -65,7 +66,7 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
 
 ## Potassium Slip
 
-- Potassium Slip is a Phaser mini-game reached from the banana peel secret.
+- Potassium Slip is a Phaser mini-game reached from the banana peel beside Abilities.
 - Start a run with `E` on desktop or a tap on mobile.
 - Launch the banana by dragging toward a target and releasing.
 - Hold while the banana is moving to yo-yo it back to the launch pad, then relaunch.

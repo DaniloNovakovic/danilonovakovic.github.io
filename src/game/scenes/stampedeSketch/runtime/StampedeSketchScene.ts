@@ -43,6 +43,8 @@ import {
   applyStampedeUpgradeChoice,
   collectStampedePickups,
   createStampedeProgressionState,
+  grantStampedeStartingWeapon,
+  openStampedeDraftIfReady,
   spawnStampedePickupsFromClearedMarks,
   type StampedeProgressionState
 } from './progression';
@@ -56,6 +58,11 @@ import {
   type StampedeResultViewModel
 } from './resultPresentation';
 import {
+  createStampedeSpellVfx,
+  type StampedeSpellVfx
+} from './spellPresentation';
+import { resolveStampedeSpellCast, type StampedeSpellId } from './spells';
+import {
   createStampedeSession,
   readStampedeSessionSnapshot,
   type StampedeSession,
@@ -66,8 +73,13 @@ import {
   type StampedeSwarmRuntime
 } from './swarmPresentation';
 import {
+  formatStampedeKitLabel,
   getStampedeUpgradeChoices,
+  getStampedeWeaponRank,
   isStampedeUpgradeId,
+  isStampedeWeaponId,
+  resolveEquippedSpell,
+  resolveOwnedSpells,
   resolveStampedeAutoAttackProfile,
   resolveStampedeGuardianSpeed
 } from './upgrades';
@@ -85,6 +97,7 @@ export class StampedeSketchScene extends Phaser.Scene {
   private feedbackRuntime?: StampedeFeedbackRuntime;
   private autoAttackRuntime?: StampedeAutoAttackPresentationRuntime;
   private pickupRuntime?: StampedePickupRuntime;
+  private spellVfx?: StampedeSpellVfx;
   private session: StampedeSession = createStampedeSession();
   private autoAttackState: StampedeAutoAttackState = createStampedeAutoAttackState();
   private progression: StampedeProgressionState = createStampedeProgressionState();
@@ -93,6 +106,8 @@ export class StampedeSketchScene extends Phaser.Scene {
   private hasRunStarted = false;
   private isUpgradeDraftOpen = false;
   private isPaused = false;
+  private spellCooldownReadyAt: Partial<Record<StampedeSpellId, number>> = {};
+  private lastFacing = { x: 1, y: 0 };
   private onClose: () => void = () => {};
 
   constructor() {
@@ -105,7 +120,7 @@ export class StampedeSketchScene extends Phaser.Scene {
   }
 
   preload(): void {
-    if (!this.textures.exists('player_idle')) {
+    if (!this.textures.exists('player_idle') || !this.textures.exists('player_glasses')) {
       TextureGenerator.generatePlayer(this);
     }
   }
@@ -125,6 +140,7 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.feedbackRuntime = createStampedeFeedbackRuntime({ scene: this });
     this.autoAttackRuntime = createStampedeAutoAttackPresentationRuntime({ scene: this });
     this.pickupRuntime = createStampedePickupRuntime({ scene: this });
+    this.spellVfx = createStampedeSpellVfx({ scene: this });
     this.session = createStampedeSession();
     this.autoAttackState = createStampedeAutoAttackState();
     this.progression = createStampedeProgressionState();
@@ -132,12 +148,16 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.lastPublishedStatusKey = '';
     this.hasRunStarted = false;
     this.isUpgradeDraftOpen = false;
+    this.spellCooldownReadyAt = {};
+    this.lastFacing = { x: 1, y: 0 };
     this.updateHud();
+    this.inputRuntime.setPointerControlEnabled(false);
     this.showStartPrompt();
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       bridgeActions.clearSceneUi(STAMPEDE_SKETCH_SCENE_ID);
       bridgeActions.clearSceneControlPointerEvents(STAMPEDE_SKETCH_SCENE_ID);
       this.pickupRuntime?.reset();
+      this.spellVfx?.reset();
     });
     this.setPaused(this.isPaused);
   }
@@ -163,7 +183,7 @@ export class StampedeSketchScene extends Phaser.Scene {
     }
 
     const sceneUiAction = bridgeActions.consumeSceneUiAction(STAMPEDE_SKETCH_SCENE_ID);
-    if (sceneUiAction) {
+    if (sceneUiAction && sceneUiAction.action !== 'castSpell') {
       this.handleSceneUiAction(sceneUiAction.action, sceneUiAction.params);
       return;
     }
@@ -186,15 +206,29 @@ export class StampedeSketchScene extends Phaser.Scene {
       return;
     }
 
+    const selfieRank = getStampedeWeaponRank(
+      this.progression.appliedUpgradeIds,
+      this.progression.upgradedWeaponIds,
+      'badSelfie'
+    );
+    const velocity = this.inputRuntime.readVelocity({
+      speed: resolveStampedeGuardianSpeed(this.progression.appliedUpgradeIds)
+    });
+    if (this.session.phase === 'playing') {
+      this.trackFacing(velocity);
+      this.fireOwnedSpells(time);
+    }
+
     const frame = resolveStampedeRunFrame({
       session: this.session,
-      autoAttackState: this.autoAttackState,
-      autoAttackProfile: resolveStampedeAutoAttackProfile(this.progression.appliedUpgradeIds),
+      autoAttackState: selfieRank > 0 ? this.autoAttackState : undefined,
+      autoAttackProfile: resolveStampedeAutoAttackProfile(
+        this.progression.appliedUpgradeIds,
+        this.progression.upgradedWeaponIds
+      ),
       deltaMs: delta,
       closeRequested,
-      velocity: this.inputRuntime.readVelocity({
-        speed: resolveStampedeGuardianSpeed(this.progression.appliedUpgradeIds)
-      }),
+      velocity,
       player: {
         x: this.player.x,
         y: this.player.y,
@@ -207,14 +241,27 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.autoAttackState = frame.autoAttackState ?? this.autoAttackState;
     switch (frame.kind) {
       case 'close':
-        this.closeToRidge();
+        this.closeToStreet();
         return;
       case 'terminal':
+        this.spellVfx?.aim({
+          spellId: resolveEquippedSpell(this.progression.appliedUpgradeIds) ?? 'badBreath',
+          origin: { x: this.player.x, y: this.player.y },
+          direction: this.lastFacing,
+          ready: false
+        });
         this.showTerminalFrame(frame, delta);
         return;
       case 'playing':
         this.player.setVelocity(frame.velocity.x, frame.velocity.y);
         this.player.setPosition(frame.player.x, frame.player.y);
+        const aimedSpell = resolveEquippedSpell(this.progression.appliedUpgradeIds);
+        this.spellVfx?.aim({
+          spellId: aimedSpell ?? 'badBreath',
+          origin: { x: frame.player.x, y: frame.player.y },
+          direction: this.lastFacing,
+          ready: aimedSpell !== null
+        });
         this.updatePlayerContactRing(frame.pressure);
         this.updatePlayerInkTilt(time, frame.velocity);
         this.applyAutoAttack(frame.attack);
@@ -222,11 +269,18 @@ export class StampedeSketchScene extends Phaser.Scene {
           this.inputRuntime.updateStickVisuals();
           return;
         }
+        if (this.revealPendingDraft()) {
+          this.inputRuntime.updateStickVisuals();
+          return;
+        }
         if (frame.contactCandidate) {
           this.feedbackRuntime?.showContact(this.player, frame.contactCandidate);
           this.updatePlayerContactRing(frame.pressure);
         }
-        this.swarmRuntime.update(this.player, delta, frame.swarm);
+        this.swarmRuntime.update(this.player, delta, {
+          ...frame.swarm,
+          elapsedMs: this.session.elapsedMs
+        });
         this.updateHud(frame.pressure);
         this.announceTerminalPhase();
         this.inputRuntime.updateStickVisuals();
@@ -252,9 +306,10 @@ export class StampedeSketchScene extends Phaser.Scene {
     ).setStrokeStyle(2, 0x1a1a1a, 0.32).setDepth(29);
   }
 
-  private closeToRidge(): void {
+  private closeToStreet(): void {
     this.player?.setVelocity(0, 0);
     this.autoAttackRuntime?.reset();
+    this.spellVfx?.reset();
     bridgeActions.clearSceneUi(STAMPEDE_SKETCH_SCENE_ID);
     this.onClose();
   }
@@ -265,14 +320,17 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.progression = createStampedeProgressionState();
     this.shownResultPhase = undefined;
     this.lastPublishedStatusKey = '';
-    this.hasRunStarted = true;
+    this.hasRunStarted = false;
     this.isUpgradeDraftOpen = false;
-    bridgeActions.clearSceneUiPanel(STAMPEDE_SKETCH_SCENE_ID);
+    this.showStartPrompt();
     this.autoAttackRuntime?.reset();
     this.feedbackRuntime?.reset();
     this.swarmRuntime?.reset();
     this.pickupRuntime?.reset();
-    this.inputRuntime?.setPointerControlEnabled(true);
+    this.spellVfx?.reset();
+    this.spellCooldownReadyAt = {};
+    this.lastFacing = { x: 1, y: 0 };
+    this.inputRuntime?.setPointerControlEnabled(false);
     this.inputRuntime?.clearPointerControl();
 
     const start = this.readPlayerStartPosition();
@@ -282,6 +340,7 @@ export class StampedeSketchScene extends Phaser.Scene {
       .setAlpha(1)
       .setScale(0.82)
       .setAngle(0);
+    this.syncFakeGlassesLook();
     this.updatePlayerContactRing();
 
     this.updateHud();
@@ -291,14 +350,9 @@ export class StampedeSketchScene extends Phaser.Scene {
   private updateReadyFrame(closeRequested: boolean): void {
     if (!this.player || !this.inputRuntime) return;
     if (closeRequested) {
-      this.closeToRidge();
+      this.closeToStreet();
       return;
     }
-    if (this.inputRuntime.startRequested()) {
-      this.startRun();
-      return;
-    }
-
     this.player.setVelocity(0, 0);
     this.updatePlayerContactRing();
     this.inputRuntime.updateStickVisuals();
@@ -322,7 +376,10 @@ export class StampedeSketchScene extends Phaser.Scene {
 
     this.player.setVelocity(0, 0);
     this.inputRuntime.setPointerControlEnabled(false);
-    this.swarmRuntime.update(this.player, delta, frame.swarm);
+    this.swarmRuntime.update(this.player, delta, {
+      ...frame.swarm,
+      elapsedMs: this.session.elapsedMs
+    });
     this.inputRuntime.updateStickVisuals();
     this.updateHud(frame.pressure);
     this.announceTerminalPhase();
@@ -351,6 +408,25 @@ export class StampedeSketchScene extends Phaser.Scene {
       pressure,
       this.progression
     );
+    if (this.hasRunStarted && this.session.phase === 'playing') {
+      const owned = resolveOwnedSpells(this.progression.appliedUpgradeIds);
+      const selfieRank = getStampedeWeaponRank(
+        this.progression.appliedUpgradeIds,
+        this.progression.upgradedWeaponIds,
+        'badSelfie'
+      );
+      const spellCoolingMs = soonestSpellCooldown(owned, this.spellCooldownReadyAt, this.time.now);
+      const selfieCoolingMs = selfieRank > 0
+        ? Math.max(0, this.autoAttackState.nextFireAtMs - this.session.elapsedMs)
+        : Number.POSITIVE_INFINITY;
+      const coolingMs = Math.min(spellCoolingMs, selfieCoolingMs);
+      snapshot.spellLabel = formatStampedeKitLabel(
+        this.progression.appliedUpgradeIds,
+        this.progression.upgradedWeaponIds
+      );
+      snapshot.spellReady = !Number.isFinite(coolingMs) || coolingMs <= 0;
+      snapshot.spellCooldownSeconds = Number.isFinite(coolingMs) ? coolingMs / 1000 : 0;
+    }
     this.publishStatus(snapshot);
   }
 
@@ -376,7 +452,9 @@ export class StampedeSketchScene extends Phaser.Scene {
     player: { x: number; y: number; radius?: number },
     pressure?: StampedePressureSnapshot
   ): boolean {
-    const frame = collectStampedePickups(this.progression, player);
+    const frame = collectStampedePickups(this.progression, player, {
+      elapsedMs: this.session.elapsedMs
+    });
     if (frame.collected.length === 0) return false;
 
     this.progression = frame.state;
@@ -384,6 +462,14 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.updateHud(pressure);
 
     if (this.progression.upgradeDraftStatus !== 'pending') return false;
+    this.showUpgradeDraft();
+    return true;
+  }
+
+  private revealPendingDraft(): boolean {
+    const next = openStampedeDraftIfReady(this.progression, this.session.elapsedMs);
+    if (next === this.progression) return false;
+    this.progression = next;
     this.showUpgradeDraft();
     return true;
   }
@@ -427,11 +513,12 @@ export class StampedeSketchScene extends Phaser.Scene {
   private handleSceneUiAction(action: SceneUiActionId, params?: unknown): void {
     switch (action) {
       case 'start':
-        if (!this.hasRunStarted) {
-          this.startRun();
-        }
         return;
       case 'stampedeUpgradeChoice':
+        if (!this.hasRunStarted) {
+          this.startWithWeapon(params);
+          return;
+        }
         this.handleUpgradeChoice(params);
         return;
       case 'retry':
@@ -440,9 +527,17 @@ export class StampedeSketchScene extends Phaser.Scene {
         }
         return;
       case 'backToRidge':
-        this.closeToRidge();
+        this.closeToStreet();
         return;
     }
+  }
+
+  private startWithWeapon(params: unknown): void {
+    if (this.hasRunStarted) return;
+    const weaponId = readUpgradeId(params);
+    if (!isStampedeWeaponId(weaponId)) return;
+    this.progression = grantStampedeStartingWeapon(this.progression, weaponId);
+    this.startRun();
   }
 
   private startRun(): void {
@@ -451,6 +546,8 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.inputRuntime?.setPointerControlEnabled(true);
     this.inputRuntime?.clearPointerControl();
     this.inputRuntime?.updateStickVisuals();
+    this.syncFakeGlassesLook();
+    this.updateHud();
   }
 
   private handleUpgradeChoice(params: unknown): void {
@@ -458,8 +555,15 @@ export class StampedeSketchScene extends Phaser.Scene {
     const upgradeId = readUpgradeId(params);
     if (!isStampedeUpgradeId(upgradeId)) return;
 
-    this.progression = applyStampedeUpgradeChoice(this.progression, upgradeId);
-    const profile = resolveStampedeAutoAttackProfile(this.progression.appliedUpgradeIds);
+    this.progression = applyStampedeUpgradeChoice(
+      this.progression,
+      upgradeId,
+      this.session.elapsedMs
+    );
+    const profile = resolveStampedeAutoAttackProfile(
+      this.progression.appliedUpgradeIds,
+      this.progression.upgradedWeaponIds
+    );
     this.autoAttackState = {
       ...this.autoAttackState,
       nextFireAtMs: Math.min(
@@ -472,20 +576,49 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.inputRuntime?.setPointerControlEnabled(true);
     this.inputRuntime?.clearPointerControl();
     this.inputRuntime?.updateStickVisuals();
+    this.syncFakeGlassesLook();
     this.updateHud();
+  }
+
+  private syncFakeGlassesLook(): void {
+    if (!this.player) return;
+    const wearing = this.progression.appliedUpgradeIds.includes('fakeGlasses');
+    const textureKey = wearing ? 'player_glasses' : 'player_idle';
+    if (this.player.texture.key !== textureKey && this.textures.exists(textureKey)) {
+      this.player.setTexture(textureKey);
+    }
   }
 
   private showUpgradeDraft(): void {
     if (this.isUpgradeDraftOpen) return;
 
+    const choices = getStampedeUpgradeChoices(
+      this.progression.appliedUpgradeIds,
+      this.progression.upgradedWeaponIds
+    );
+    if (choices.length === 0) {
+      this.progression = {
+        ...this.progression,
+        upgradeDraftStatus: 'none',
+        scrapGoal: 0
+      };
+      return;
+    }
+
     this.isUpgradeDraftOpen = true;
+    this.spellVfx?.aim({
+      spellId: resolveEquippedSpell(this.progression.appliedUpgradeIds) ?? 'badBreath',
+      origin: { x: this.player?.x ?? 0, y: this.player?.y ?? 0 },
+      direction: this.lastFacing,
+      ready: false
+    });
     this.player?.setVelocity(0, 0);
     this.inputRuntime?.setPointerControlEnabled(false);
     bridgeActions.setSceneUiPanel(
       STAMPEDE_SKETCH_SCENE_ID,
       'stampedeUpgradeDraft',
       {
-        choices: getStampedeUpgradeChoices(),
+        choices,
         scrapsCollected: this.progression.scrapsCollected,
         scrapGoal: this.progression.scrapGoal
       }
@@ -507,6 +640,39 @@ export class StampedeSketchScene extends Phaser.Scene {
     );
   }
 
+  private trackFacing(velocity: StampedeVelocity): void {
+    const speed = Math.hypot(velocity.x, velocity.y);
+    if (speed > 24) {
+      this.lastFacing = { x: velocity.x / speed, y: velocity.y / speed };
+    }
+  }
+
+  private fireOwnedSpells(now: number): void {
+    if (!this.player || !this.swarmRuntime) return;
+
+    resolveOwnedSpells(this.progression.appliedUpgradeIds).forEach((spellId) => {
+      const readyAt = this.spellCooldownReadyAt[spellId] ?? 0;
+      if (now < readyAt) return;
+
+      const cast = resolveStampedeSpellCast({
+        spellId,
+        player: { x: this.player!.x, y: this.player!.y },
+        facing: this.lastFacing,
+        candidates: this.swarmRuntime!.getSpellCandidates(),
+        rank: getStampedeWeaponRank(
+          this.progression.appliedUpgradeIds,
+          this.progression.upgradedWeaponIds,
+          spellId
+        ) === 2 ? 2 : 1
+      });
+      this.spellCooldownReadyAt[spellId] = now + cast.cooldownMs;
+      const clearedMarks = this.swarmRuntime?.clearMarks(cast.hitIds) ?? [];
+      this.progression = spawnStampedePickupsFromClearedMarks(this.progression, clearedMarks);
+      this.pickupRuntime?.sync(this.progression.pickups);
+      this.spellVfx?.show(cast);
+    });
+  }
+
   private publishStatus(snapshot: StampedeHudSnapshot): void {
     const statusKey = [
       Math.ceil(snapshot.timeRemainingSeconds ?? snapshot.timerSeconds ?? 0),
@@ -517,7 +683,10 @@ export class StampedeSketchScene extends Phaser.Scene {
       snapshot.contactLimit ?? '',
       snapshot.healthRemaining ?? '',
       snapshot.scrapsCollected ?? '',
-      snapshot.scrapGoal ?? ''
+      snapshot.scrapGoal ?? '',
+      snapshot.spellLabel ?? '',
+      snapshot.spellReady ? 1 : 0,
+      Math.ceil(snapshot.spellCooldownSeconds ?? 0)
     ].join('|');
 
     if (statusKey === this.lastPublishedStatusKey) return;
@@ -547,4 +716,13 @@ export class StampedeSketchScene extends Phaser.Scene {
 function readUpgradeId(params: unknown): unknown {
   if (!params || typeof params !== 'object') return undefined;
   return (params as { upgradeId?: unknown }).upgradeId;
+}
+
+function soonestSpellCooldown(
+  spellIds: readonly StampedeSpellId[],
+  readyAt: Partial<Record<StampedeSpellId, number>>,
+  now: number
+): number {
+  if (spellIds.length === 0) return Number.POSITIVE_INFINITY;
+  return Math.min(...spellIds.map((spellId) => Math.max(0, (readyAt[spellId] ?? 0) - now)));
 }

@@ -76,13 +76,22 @@ export const OVERWORLD_BASEMENT_HOLE = {
   sceneId: 'basement' as const
 };
 
+/** Sidewalk chick just past Experiences. Talks only while glasses are off. */
+export const OVERWORLD_CHICK = {
+  id: 'chick',
+  label: 'Street chick',
+  x: 1100,
+  y: 535,
+  radius: 70
+};
+
 export const OVERWORLD_BANANA_PEEL = {
   id: 'banana-peel',
   secretId: 'banana-peel-clue' as const,
   label: 'Banana peel (glasses secret)',
-  x: 730,
+  x: 2080,
   y: 535,
-  radius: 95
+  radius: 80
 };
 
 export const OVERWORLD_CIRCUIT_CRT = {

@@ -17,7 +17,7 @@ Issues, not in this folder.
 | Mini-game | Status | Doc | Ridge contract |
 | --- | --- | --- | --- |
 | Potassium Slip | Shipped / existing flagship; optional for new route | [`potassium-slip.md`](./potassium-slip.md) | Potassium owns ricochet and the current Circuit reward. Do not make it required first-ending Living Proof by default. |
-| Stampede Sketch | Prototype / optional candidate | [`stampede-sketch.md`](./stampede-sketch.md) | Candidate stamp/glide reward only; not required for the current first-ending route. |
+| Stampede Sketch (Chick Magnet) | Shipped street entry; optional for the Ridge route | [`stampede-sketch.md`](./stampede-sketch.md) | Street chick just past Experiences. First clear grants glasses. Not required Living Proof. |
 
 ## Future Docs
 

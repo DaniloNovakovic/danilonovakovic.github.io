@@ -85,7 +85,7 @@ export function createSceneContexts(
       getDevControls: deps.getRidgeDevControls
     }),
     createStampedeSketchSceneContext({
-      onClose: () => deps.onEnterScene(RIDGE_SCENE_ID),
+      onClose: deps.onReturnToOverworld,
       loadScene: loadScene(STAMPEDE_SKETCH_SCENE_ID)
     })
   ];

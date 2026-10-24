@@ -4,6 +4,7 @@ import {
   OVERWORLD_BANANA_PEEL,
   OVERWORLD_BASEMENT_HOLE,
   OVERWORLD_BUILDING_SPOTS,
+  OVERWORLD_CHICK,
   OVERWORLD_CIRCUIT_CRT,
   OVERWORLD_INTERACT_DISTANCE_X,
   OVERWORLD_INTERACT_MIN_PLAYER_Y,
@@ -38,9 +39,10 @@ export interface OverworldProgress {
 const BANANA_CANCEL_EXTRA = 40;
 
 const SIGNPOST_MESSAGES: Record<OverworldProgressStage, string> = {
-  'find-glasses': 'The sign is a blur. Someone left a TODO? hatch open near the start of the street.',
-  'wear-glasses': 'Put your glasses back on. The street hides things from blurry eyes.',
-  'find-peel': 'Something slippery lies between the Profile house and Experiences.',
+  'find-glasses':
+    'The sign is a blur. A chick is pacing just past Experiences. A TODO? hatch is also open near the start of the street.',
+  'wear-glasses': 'Put your glasses back on. The street hides things from blurry eyes. The chick will bolt.',
+  'find-peel': 'Something slippery lies on the sidewalk just past the Abilities shelf.',
   'win-circuit':
     'That peel still leads somewhere. Win what is down there — or build a Circuit from hobby parts.',
   'solder-circuit': 'Your pockets rattle with parts. The basement workbench could make something of them.',
@@ -116,8 +118,21 @@ export function listOverworldNearby(state: GameWorldState): NearbyThing[] {
     });
   }
 
-  const peelDist = Math.hypot(x - OVERWORLD_BANANA_PEEL.x, y - OVERWORLD_BANANA_PEEL.y);
   const glassesOn = state.equippedItemIds.includes('glasses');
+  const chickDist = Math.hypot(x - OVERWORLD_CHICK.x, y - OVERWORLD_CHICK.y);
+  if (!glassesOn && chickDist <= OVERWORLD_CHICK.radius) {
+    things.push({
+      id: OVERWORLD_CHICK.id,
+      label: OVERWORLD_CHICK.label,
+      distance: chickDist,
+      prompt: 'The chick is staring',
+      kind: 'npc',
+      promptX: OVERWORLD_CHICK.x,
+      promptY: OVERWORLD_CHICK.y - 56
+    });
+  }
+
+  const peelDist = Math.hypot(x - OVERWORLD_BANANA_PEEL.x, y - OVERWORLD_BANANA_PEEL.y);
   if (
     glassesOn &&
     peelDist <= OVERWORLD_BANANA_PEEL.radius &&
@@ -245,6 +260,13 @@ export function interactOverworld(
     return {
       message: `${SIGNPOST_MESSAGES[progress.stage]} (Secrets found: ${progress.found}/${progress.total})`,
       events: [{ type: 'signpost_read', ...progress }]
+    };
+  }
+
+  if (picked.id === OVERWORLD_CHICK.id) {
+    return {
+      message: 'The chick locks on. Chick Magnet starts — the flock is coming.',
+      events: [{ type: 'scene_entered', sceneId: 'stampedeSketch' }]
     };
   }
 

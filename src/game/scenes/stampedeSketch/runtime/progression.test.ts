@@ -4,6 +4,8 @@ import {
   applyStampedeUpgradeChoice,
   collectStampedePickups,
   createStampedeProgressionState,
+  grantStampedeStartingWeapon,
+  openStampedeDraftIfReady,
   spawnStampedePickupsFromClearedMarks
 } from './progression';
 
@@ -42,7 +44,7 @@ describe('stampede progression', () => {
     expect(frame.state.scrapsCollected).toBe(1);
   });
 
-  it('opens the upgrade draft once at the first scrap threshold', () => {
+  it('opens another attack draft at the next scrap threshold', () => {
     const spawned = spawnStampedePickupsFromClearedMarks(
       createStampedeProgressionState({ scrapGoal: 2 }),
       [
@@ -55,15 +57,47 @@ describe('stampede progression', () => {
     expect(collected.state.scrapsCollected).toBe(2);
     expect(collected.state.upgradeDraftStatus).toBe('pending');
 
-    const chosen = applyStampedeUpgradeChoice(collected.state, 'quickPencil');
-    const withMoreScraps = spawnStampedePickupsFromClearedMarks(chosen, [
-      { id: 'mark-c', x: 100, y: 100 },
-      { id: 'mark-d', x: 104, y: 100 }
-    ]);
+    const chosen = applyStampedeUpgradeChoice(collected.state, 'badBreath');
+    expect(chosen.upgradeDraftStatus).toBe('none');
+    expect(chosen.appliedUpgradeIds).toEqual(['badBreath']);
+    expect(chosen.scrapGoal).toBeGreaterThan(collected.state.scrapsCollected);
+
+    const withMoreScraps = spawnStampedePickupsFromClearedMarks(
+      { ...chosen, scrapsCollected: chosen.scrapGoal - 1 },
+      [{ id: 'mark-c', x: 100, y: 100 }]
+    );
     const collectedAgain = collectStampedePickups(withMoreScraps, { x: 100, y: 100 });
 
-    expect(collectedAgain.state.scrapsCollected).toBe(4);
-    expect(collectedAgain.state.upgradeDraftStatus).toBe('chosen');
-    expect(collectedAgain.state.appliedUpgradeIds).toEqual(['quickPencil']);
+    expect(collectedAgain.state.upgradeDraftStatus).toBe('pending');
+    expect(collectedAgain.state.appliedUpgradeIds).toEqual(['badBreath']);
+  });
+
+  it('keeps the first scrap goal after the starting weapon', () => {
+    const started = grantStampedeStartingWeapon(
+      createStampedeProgressionState(),
+      'badSelfie'
+    );
+
+    expect(started.appliedUpgradeIds).toEqual(['badSelfie']);
+    expect(started.draftsTaken).toBe(0);
+    expect(started.scrapGoal).toBe(16);
+
+    const meaner = applyStampedeUpgradeChoice(started, 'badSelfie');
+    expect(meaner.upgradedWeaponIds).toEqual(['badSelfie']);
+    expect(meaner.draftsTaken).toBe(1);
+    expect(meaner.scrapGoal).toBe(40);
+    expect(meaner.nextDraftAtMs).toBeGreaterThan(0);
+  });
+
+  it('holds a banked draft until the gap has passed', () => {
+    const spawned = spawnStampedePickupsFromClearedMarks(
+      createStampedeProgressionState({ scrapGoal: 1, nextDraftAtMs: 18_000 }),
+      [{ id: 'mark-a', x: 100, y: 100 }]
+    );
+    const early = collectStampedePickups(spawned, { x: 100, y: 100 }, { elapsedMs: 4_000 });
+
+    expect(early.state.scrapsCollected).toBe(1);
+    expect(early.state.upgradeDraftStatus).toBe('none');
+    expect(openStampedeDraftIfReady(early.state, 18_000).upgradeDraftStatus).toBe('pending');
   });
 });

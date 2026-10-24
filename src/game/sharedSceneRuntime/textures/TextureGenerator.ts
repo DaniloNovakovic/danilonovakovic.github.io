@@ -55,8 +55,8 @@ export class TextureGenerator {
     pg.strokeCircle(26 * k, 14 * k, 4 * k);
     pg.strokeCircle(32 * k, 14 * k, 4 * k);
     pg.beginPath();
-    pg.moveTo(29 * k, 14 * k);
-    pg.lineTo(29 * k, 14 * k);
+    pg.moveTo(28 * k, 14 * k);
+    pg.lineTo(30 * k, 14 * k);
     pg.strokePath();
     pg.beginPath();
     pg.moveTo(22 * k, 13 * k);

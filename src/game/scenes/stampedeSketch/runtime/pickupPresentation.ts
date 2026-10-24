@@ -18,7 +18,7 @@ export function createStampedePickupRuntime(
 
 class PhaserStampedePickupRuntime implements StampedePickupRuntime {
   private readonly scene: Phaser.Scene;
-  private readonly shapes = new Map<string, Phaser.GameObjects.Arc>();
+  private readonly shapes = new Map<string, Phaser.GameObjects.Graphics>();
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
@@ -41,15 +41,13 @@ class PhaserStampedePickupRuntime implements StampedePickupRuntime {
         return;
       }
 
-      const shape = this.scene.add.circle(
-        pickup.x,
-        pickup.y,
-        pickup.radius,
-        0xfacc15,
-        0.9
-      )
-        .setStrokeStyle(2, 0x1a1a1a, 0.9)
-        .setDepth(24);
+      const shape = this.scene.add.graphics().setPosition(pickup.x, pickup.y).setDepth(24);
+      const width = Math.max(8, pickup.radius * 2.4);
+      const height = Math.max(6, pickup.radius * 1.5);
+      shape.fillStyle(0xfacc15, 0.95);
+      shape.fillEllipse(0, 0, width, height);
+      shape.lineStyle(2, 0x1a1a1a, 0.9);
+      shape.strokeEllipse(0, 0, width, height);
 
       this.scene.tweens.add({
         targets: shape,
