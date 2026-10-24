@@ -40,7 +40,7 @@ function freshKey(handler: (event: KeyboardEvent) => void) {
 export default function GuitarStrings({ close, titleId, descriptionId }: OverlayControllerProps) {
   const messages = useMessages();
   const copy = messages.miniGames.guitar;
-  const { pluck, strumShape, retune } = useGuitarSynth();
+  const { pluck, strumShape, holdChord, glide, pluckLowest } = useGuitarSynth();
   const reward = useSparePartReward('copper-string');
   const claimReward = reward.claim;
 
@@ -63,16 +63,22 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
   }, []);
 
   const selectGrip = useCallback(
-    (id: GripId, nextVoicing: Voicing, nextColor: ChordColor) => {
+    (id: GripId, nextVoicing: Voicing, nextColor: ChordColor, fromButton = false) => {
       const shape = id === 'open' ? 'low' : nextVoicing;
       const next = id === 'open' ? 'scale' : nextColor;
+      const shapeFrets = fretsFor(id, shape, next);
       setGripId(id);
       setVoicing(shape);
       setColor(next);
       setCapo(0);
-      retune(fretsFor(id, shape, next));
+      if (fromButton) {
+        const number = pluckLowest(shapeFrets, palm);
+        if (number !== null) vibrate(number);
+        return;
+      }
+      holdChord(shapeFrets);
     },
-    [retune]
+    [holdChord, palm, pluckLowest, vibrate]
   );
 
   const slide = useCallback(
@@ -81,9 +87,9 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
       const moved = slideFrets(fretsFor(gripId, voicing, color), next);
       if (!moved) return;
       setCapo(next);
-      retune(moved);
+      glide(moved);
     },
-    [capo, color, gripId, retune, voicing]
+    [capo, color, glide, gripId, voicing]
   );
 
   const commitStrum = useCallback(
@@ -101,7 +107,7 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
   const playString = useCallback(
     (spec: GuitarStringSpec, velocity = 1) => {
       const fret = frets[spec.number - 1] ?? null;
-      pluck(spec, fret === null ? 0.5 : velocity, { fret, palm });
+      pluck(spec, fret === null ? 0.8 : velocity, { fret, palm });
       vibrate(spec.number);
     },
     [frets, palm, pluck, vibrate]
@@ -193,7 +199,12 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
             onStrum={(spec) => playString(spec, 0.62)}
             onRake={() => commitStrum(gripId)}
           />
-          <SparePartSticker key={reward.stickerKey} partId="copper-string" outcome={reward.outcome} onDismiss={reward.dismiss} />
+          <SparePartSticker
+            key={reward.stickerKey}
+            partId="copper-string"
+            outcome={reward.outcome === 'replay' ? null : reward.outcome}
+            onDismiss={reward.dismiss}
+          />
         </Panel>
 
         <div className="flex flex-col items-center gap-1.5">

@@ -1,5 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { chordName, frettedFrequency, fretsFor, noteLabel, slideFrets, type ChordColor, type GripId, type Voicing } from './grips';
+import {
+  chordName,
+  frettedFrequency,
+  fretsFor,
+  lowestSoundingIndex,
+  noteLabel,
+  slideFrets,
+  type ChordColor,
+  type GripId,
+  type Voicing
+} from './grips';
 import { GUITAR_STRINGS } from './useGuitarSynth';
 
 function voiced(id: GripId, voicing: Voicing = 'low', color: ChordColor = 'scale'): (string | 'x')[] {
@@ -38,6 +48,13 @@ describe('chord grips', () => {
     expect(slideFrets([0, 0, 0, 2, 2, 0], 1)).toEqual([1, 1, 1, 3, 3, 1]);
     expect(slideFrets([0, 0, 0, 2, 2, 0], -1)).toBeNull();
     expect(slideFrets([12, 12, 12, null, null, null], 1)).toBeNull();
+  });
+
+  it('finds the lowest speaking string and skips a muted bass', () => {
+    expect(lowestSoundingIndex(fretsFor('g', 'low'))).toBe(5);
+    expect(lowestSoundingIndex(fretsFor('a', 'low'))).toBe(4);
+    expect(lowestSoundingIndex(fretsFor('d', 'low'))).toBe(3);
+    expect(lowestSoundingIndex([null, null, null, null, null, null])).toBeNull();
   });
 
   it('raises pitch by one semitone per fret', () => {

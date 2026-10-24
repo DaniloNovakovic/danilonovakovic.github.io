@@ -78,7 +78,8 @@ describe('GuitarStrings', () => {
     expect(screen.getByText('Nailed it!')).toBeDefined();
 
     playCampfire();
-    expect(screen.getByText('Already have it')).toBeDefined();
+    expect(screen.queryByText('Already have it')).toBeNull();
+    expect(screen.queryByText('Spare part found!')).toBeNull();
     expect(bridgeStore.getState().inventory.ownedItemIds.filter((id) => id === 'copper-string')).toHaveLength(1);
   });
 

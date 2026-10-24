@@ -1,5 +1,6 @@
 import { useCallback, useRef } from 'react';
 import { useHobbyAudio } from '../shared/useHobbyAudio';
+import { lowestSoundingIndex } from './grips';
 import { renderPluckedString } from './karplusStrong';
 
 /** Guitar string number, 1 = high E (top) ... 6 = low E (bottom). */
@@ -51,7 +52,6 @@ interface ContextCache {
   /** Shared bus so strummed chords do not clip. */
   output: DynamicsCompressorNode;
   buffers: Map<StringNumber, StringBuffer>;
-  chuck: AudioBuffer | null;
 }
 
 interface Voice {
@@ -74,37 +74,12 @@ function renderStringBuffer(context: AudioContext, spec: GuitarStringSpec): Stri
   return { buffer, openRate: spec.frequency / pluck.renderedFrequency };
 }
 
-function renderChuckBuffer(context: AudioContext): AudioBuffer {
-  const length = Math.floor(SAMPLE_RATE * 0.07);
-  const buffer = context.createBuffer(1, length, SAMPLE_RATE);
-  const data = buffer.getChannelData(0);
-  let previous = 0;
-  let peak = 0;
-  for (let i = 0; i < length; i++) {
-    const noise = Math.random() * 2 - 1;
-    previous = previous * 0.55 + noise * 0.45;
-    const sample = previous * Math.exp(-i / (SAMPLE_RATE * 0.012));
-    data[i] = sample;
-    peak = Math.max(peak, Math.abs(sample));
-  }
-  const scale = peak > 0 ? 0.8 / peak : 0;
-  for (let i = 0; i < length; i++) data[i] = data[i]! * scale;
-  return buffer;
-}
-
-function releaseOnEnded(source: AudioBufferSourceNode, ...nodes: AudioNode[]): void {
-  source.onended = () => {
-    source.onended = null;
-    source.disconnect();
-    for (const node of nodes) node.disconnect();
-  };
-}
-
 /**
  * Plucked-string guitar voice. Each open string is rendered once per
  * AudioContext; frets are the same buffer played faster, which shortens the
  * speaking length the way a real fret does. Re-plucking damps the previous
- * voice. A grip change hammers ringing strings onto the new fret.
+ * voice. A grip change lets strings on the same fret keep ringing and stops
+ * the ones that moved, instead of sliding them to the new pitch.
  */
 export function useGuitarSynth() {
   const getAudio = useHobbyAudio();
@@ -115,7 +90,7 @@ export function useGuitarSynth() {
     if (cacheRef.current?.context !== context) {
       const output = context.createDynamicsCompressor();
       output.connect(context.destination);
-      cacheRef.current = { context, output, buffers: new Map(), chuck: null };
+      cacheRef.current = { context, output, buffers: new Map() };
       voicesRef.current.clear();
     }
     return cacheRef.current;
@@ -140,43 +115,28 @@ export function useGuitarSynth() {
     voice.source.stop(stopAt);
   }, []);
 
-  const chuckAt = useCallback((cache: ContextCache, at: number, velocity: number) => {
-    if (!cache.chuck) cache.chuck = renderChuckBuffer(cache.context);
-    const source = cache.context.createBufferSource();
-    const tone = cache.context.createBiquadFilter();
-    const gain = cache.context.createGain();
-    source.buffer = cache.chuck;
-    tone.type = 'bandpass';
-    tone.frequency.value = 260 + Math.random() * 90;
-    tone.Q.value = 0.7;
-    gain.gain.setValueAtTime(Math.min(0.45, velocity), at);
-    source.connect(tone).connect(gain).connect(cache.output);
-    releaseOnEnded(source, tone, gain);
-    source.start(at);
-  }, []);
-
   const pluckAt = useCallback(
     (context: AudioContext, spec: GuitarStringSpec, at: number, velocity: number, fret: number | null, palm: boolean) => {
       const cache = cacheFor(context);
       dampVoice(spec.number, at);
-      if (fret === null) {
-        chuckAt(cache, at, velocity);
-        return;
-      }
+      // An X is a dead string: the open pitch, choked like a palm mute, and not left ringing.
+      const choked = fret === null;
+      const soundingFret = choked ? 0 : fret;
+      const muted = palm || choked;
       const { buffer, openRate } = bufferFor(cache, spec);
       const source = context.createBufferSource();
       const tone = context.createBiquadFilter();
       const gain = context.createGain();
       source.buffer = buffer;
-      const rate = openRate * 2 ** (fret / 12) * (1 + (Math.random() - 0.5) * 0.004);
+      const rate = openRate * 2 ** (soundingFret / 12) * (1 + (Math.random() - 0.5) * 0.004);
       source.playbackRate.setValueAtTime(rate, at);
       tone.type = 'lowpass';
-      tone.frequency.value = (palm ? 900 : 2500 + fret * 160) + Math.random() * (palm ? 180 : 700);
+      tone.frequency.value = (muted ? 900 : 2500 + soundingFret * 160) + Math.random() * (muted ? 180 : 700);
       const level = velocity * (0.36 + Math.random() * 0.08);
       gain.gain.setValueAtTime(level, at);
-      if (palm) gain.gain.exponentialRampToValueAtTime(0.001, at + 0.11);
+      if (muted) gain.gain.exponentialRampToValueAtTime(0.001, at + 0.11);
       source.connect(tone).connect(gain).connect(cache.output);
-      const voice: Voice = { source, gain, openRate, fret, startedAt: at };
+      const voice: Voice = { source, gain, openRate, fret: soundingFret, startedAt: at };
       source.onended = () => {
         source.onended = null;
         source.disconnect();
@@ -184,10 +144,10 @@ export function useGuitarSynth() {
         gain.disconnect();
         if (voicesRef.current.get(spec.number) === voice) voicesRef.current.delete(spec.number);
       };
-      voicesRef.current.set(spec.number, voice);
+      if (!choked) voicesRef.current.set(spec.number, voice);
       source.start(at);
     },
-    [bufferFor, cacheFor, chuckAt, dampVoice]
+    [bufferFor, cacheFor, dampVoice]
   );
 
   const pluck = useCallback(
@@ -211,15 +171,31 @@ export function useGuitarSynth() {
         if (!spec) return;
         const fret = frets[index] ?? null;
         const when = Math.max(context.currentTime, start + step * STRUM_STAGGER_SECONDS + (Math.random() - 0.5) * 0.004);
-        const velocity = fret === null ? 0.22 : Math.max(0.45, 0.84 - step * 0.06);
+        const velocity = fret === null ? 0.55 : Math.max(0.45, 0.84 - step * 0.06);
         pluckAt(context, spec, when, velocity, fret, palm);
       });
     },
     [getAudio, pluckAt]
   );
 
-  /** Slide ringing strings onto a new grip. Silent strings stay silent. */
-  const retune = useCallback(
+  /** Keep strings whose fret did not move. Stop the ones that did. */
+  const holdChord = useCallback(
+    (frets: readonly (number | null)[]) => {
+      const context = getAudio();
+      if (!context) return;
+      const now = context.currentTime;
+      GUITAR_STRINGS.forEach((spec, index) => {
+        const voice = voicesRef.current.get(spec.number);
+        if (!voice) return;
+        const fret = frets[index] ?? null;
+        if (fret === null || fret !== voice.fret) dampVoice(spec.number, now);
+      });
+    },
+    [dampVoice, getAudio]
+  );
+
+  /** Pitch-glide ringing strings. Used when the whole shape slides a fret. */
+  const glide = useCallback(
     (frets: readonly (number | null)[]) => {
       const context = getAudio();
       if (!context) return;
@@ -241,5 +217,23 @@ export function useGuitarSynth() {
     [dampVoice, getAudio]
   );
 
-  return { pluck, strumShape, retune };
+  /** Silence the chord and strike its lowest speaking string. Returns that string number. */
+  const pluckLowest = useCallback(
+    (frets: readonly (number | null)[], palm = false): number | null => {
+      const context = getAudio();
+      if (!context) return null;
+      const now = context.currentTime;
+      for (const number of [...voicesRef.current.keys()]) dampVoice(number, now);
+      const index = lowestSoundingIndex(frets);
+      if (index === null) return null;
+      const spec = GUITAR_STRINGS[index];
+      const fret = frets[index];
+      if (!spec || fret === null || fret === undefined) return null;
+      pluckAt(context, spec, now, 0.92, fret, palm);
+      return spec.number;
+    },
+    [dampVoice, getAudio, pluckAt]
+  );
+
+  return { pluck, strumShape, holdChord, glide, pluckLowest };
 }

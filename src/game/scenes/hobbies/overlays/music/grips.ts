@@ -157,6 +157,14 @@ export function slideFrets(frets: Frets, capo: number): Frets | null {
   return moved;
 }
 
+/** Lowest string that speaks in the shape. Index 5 is the low E. Muted strings are skipped. */
+export function lowestSoundingIndex(frets: readonly (number | null)[]): number | null {
+  for (let index = frets.length - 1; index >= 0; index -= 1) {
+    if (frets[index] !== null) return index;
+  }
+  return null;
+}
+
 export function pickForKey(key: string): (typeof STRING_PICKS)[number] | undefined {
   const letter = key.toLowerCase();
   return STRING_PICKS.find((pick) => pick.key === letter);
