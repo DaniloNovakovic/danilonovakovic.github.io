@@ -5,6 +5,7 @@
  * whichever belongs there. In G that is G Am Bm C D Em, and F is F#°.
  * Shift is the other fingering. Option flips major and minor (F#° flips to F#m).
  * `-` and `=` slide the latched shape one fret, which is how the notes between appear.
+ * P walks the chord through its CAGED forms. The other scale chords follow to the nearest one.
  *
  * Right hand: I 9 0 are G, B, and high E. N M J are low E, A, and D.
  *

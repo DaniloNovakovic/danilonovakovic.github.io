@@ -103,6 +103,8 @@ export const miniGameMessages = {
     palmLabel: (on: boolean) => (on ? "Palm mute on" : "Palm mute off"),
     shortStrum: "Short",
     shortLabel: (on: boolean) => (on ? "Short strum on" : "Short strum off"),
+    position: "Pos",
+    positionLabel: (form: string) => (form ? `Position ${form}` : "Position"),
     riffTitle: "Campfire in the margin",
     riffHint: (chords: string) => `Strum ${chords}. Strumming the same chord twice is fine.`,
     settingsLabel: "Guitar settings",
@@ -112,7 +114,7 @@ export const miniGameMessages = {
     homeKeyLabel: (key: string) => `Key ${key}`,
     riffProgress: (count: number, total: number) => `${count}/${total}`,
     riffDone: "Nailed it!",
-    marginNote: "Shift is the other fingering. Option flips major and minor. = and - slide the shape a fret. Space strums. X palm-mutes. S shortens the strum. Picked notes ring until you strum.",
+    marginNote: "Shift is the other fingering. Option flips major and minor. = and - slide the shape a fret. P moves the whole scale up the neck. Space strums. X palm-mutes. S shortens the strum. Picked notes ring until you strum.",
   },
   drawing: {
     title: "Drawing",

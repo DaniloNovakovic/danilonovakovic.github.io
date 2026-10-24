@@ -83,6 +83,18 @@ describe('GuitarStrings', () => {
     expect(bridgeStore.getState().inventory.ownedItemIds.filter((id) => id === 'copper-string')).toHaveLength(1);
   });
 
+  it('moves the scale to the next CAGED position on P', () => {
+    renderGuitar();
+    expect(screen.getByRole('button', { name: 'Position G' })).toBeDefined();
+    press('p');
+    expect(screen.getByRole('button', { name: 'String 9 (D4)' })).toBeDefined();
+    expect(screen.getByRole('button', { name: 'Position E' })).toBeDefined();
+    press('a');
+    expect(screen.getByRole('button', { name: 'String 0 (A4)' })).toBeDefined();
+    expect(screen.queryByRole('button', { name: 'String N, muted' })).toBeNull();
+    expect(screen.getByText('0/5')).toBeDefined();
+  });
+
   it('strums up on V', () => {
     renderGuitar();
     expect(screen.getByRole('button', { name: 'Upstroke' }).textContent).toContain('V');

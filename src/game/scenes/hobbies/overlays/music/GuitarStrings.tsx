@@ -26,6 +26,7 @@ import {
   type HomeKeyId,
   type Voicing
 } from './grips';
+import { fretsForPosition, nextVoicing, cagedVoicings, nearestVoicing, positionForm } from './caged';
 import { GripBar, inkKeyClass } from './GripBar';
 import { GuitarSettings } from './GuitarSettings';
 import { advanceProgression } from './progression';
@@ -61,12 +62,15 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
   const [shortStrum, setShortStrum] = useState(false);
   const [plucks, setPlucks] = useState(NO_PLUCKS);
   const [chops, setChops] = useState(NO_CHOPS);
+  /** Neck region shared by the scale. Null keeps the open fingering. */
+  const [anchor, setAnchor] = useState<number | null>(null);
   const [progress, setProgress] = useState(0);
   const [songDone, setSongDone] = useState(false);
 
   const keyCapo = homeCapo(homeKey);
-  const frets = fretsInKey(gripId, voicing, color, keyCapo + capo);
+  const frets = fretsForPosition(gripId, voicing, color, keyCapo, capo, anchor);
   const sounding = chordName(gripId, color, keyCapo + capo);
+  const form = positionForm(gripId, color, keyCapo, capo, frets);
 
   const vibrate = useCallback((number: number | 'all', chop: boolean) => {
     const touched = (index: number) => number === 'all' || GUITAR_STRINGS[index]?.number === number;
@@ -87,21 +91,24 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
   );
 
   const selectGrip = useCallback(
-    (id: GripId, nextVoicing: Voicing, nextColor: ChordColor) => {
-      const shape = id === 'open' ? 'low' : nextVoicing;
-      const next = id === 'open' ? 'scale' : nextColor;
+    (id: GripId, requestedVoicing: Voicing, requestedColor: ChordColor) => {
+      const shape = id === 'open' ? 'low' : requestedVoicing;
+      const nextColor = id === 'open' ? 'scale' : requestedColor;
+      const nextAnchor = shape === 'high' ? null : anchor;
+      setAnchor(nextAnchor);
       setGripId(id);
       setVoicing(shape);
-      setColor(next);
+      setColor(nextColor);
       setCapo(0);
-      voiceChord(fretsInKey(id, shape, next, keyCapo));
+      voiceChord(fretsForPosition(id, shape, nextColor, homeCapo(homeKey), 0, nextAnchor));
     },
-    [keyCapo, voiceChord]
+    [anchor, homeKey, voiceChord]
   );
 
   const chooseKey = useCallback(
     (id: HomeKeyId) => {
       setHomeKey(id);
+      setAnchor(null);
       setCapo(0);
       voiceChord(fretsInKey(gripId, voicing, color, homeCapo(id)));
     },
@@ -110,14 +117,29 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
 
   const slide = useCallback(
     (delta: number) => {
-      const next = capo + delta;
-      const moved = slideFrets(fretsFor(gripId, voicing, color), keyCapo + next);
+      const nextCapo = capo + delta;
+      const transposed = homeCapo(homeKey);
+      const base =
+        anchor === null
+          ? fretsFor(gripId, voicing, color)
+          : nearestVoicing(cagedVoicings(gripId, color, transposed), anchor)?.frets;
+      const moved = base ? slideFrets(base, anchor === null ? transposed + nextCapo : nextCapo) : null;
       if (!moved) return;
-      setCapo(next);
+      setCapo(nextCapo);
       glide(moved);
     },
-    [capo, color, glide, gripId, keyCapo, voicing]
+    [anchor, capo, color, glide, gripId, homeKey, voicing]
   );
+
+  const movePosition = useCallback(() => {
+    const transposed = homeCapo(homeKey);
+    const current = fretsForPosition(gripId, voicing, color, transposed, 0, anchor);
+    const following = nextVoicing(cagedVoicings(gripId, color, transposed), current);
+    if (!following) return;
+    setAnchor(following.center);
+    setCapo(0);
+    voiceChord(following.frets);
+  }, [anchor, color, gripId, homeKey, voiceChord, voicing]);
 
   const commitStrum = useCallback(
     (id: GripId) => {
@@ -133,20 +155,22 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
 
   const playString = useCallback(
     (spec: GuitarStringSpec, velocity = 1, short = false) => {
-      const fret = frets[spec.number - 1] ?? null;
+      const shape = fretsForPosition(gripId, voicing, color, homeCapo(homeKey), capo, anchor);
+      const fret = shape[spec.number - 1] ?? null;
       pluck(spec, fret === null ? 0.8 : velocity, { fret, palm, short });
       vibrate(spec.number, short);
     },
-    [frets, palm, pluck, vibrate]
+    [anchor, capo, color, gripId, homeKey, palm, pluck, vibrate, voicing]
   );
 
   const strum = useCallback(
     (direction: StrumDirection) => {
-      strumShape(frets, direction, palm, shortStrum);
+      const shape = fretsForPosition(gripId, voicing, color, homeCapo(homeKey), capo, anchor);
+      strumShape(shape, direction, palm, shortStrum);
       vibrate('all', shortStrum);
       commitStrum(gripId);
     },
-    [commitStrum, frets, gripId, palm, shortStrum, strumShape, vibrate]
+    [anchor, capo, color, commitStrum, gripId, homeKey, palm, shortStrum, strumShape, vibrate, voicing]
   );
 
   const togglePalm = useCallback(() => setPalm((muted) => !muted), []);
@@ -188,7 +212,9 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
     x: freshKey(togglePalm),
     X: freshKey(togglePalm),
     s: freshKey(toggleShort),
-    S: freshKey(toggleShort)
+    S: freshKey(toggleShort),
+    p: freshKey(movePosition),
+    P: freshKey(movePosition)
   });
 
   const stepNames = CAMPFIRE.map((id) => chordName(id, 'scale', keyCapo));
@@ -313,6 +339,15 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
           >
             <span className="font-black">{copy.shortStrum}</span>
             <span className={`font-mono text-[9px] ${shortStrum ? 'opacity-70' : 'opacity-60'}`}>S</span>
+          </button>
+          <button
+            type="button"
+            onClick={movePosition}
+            aria-label={copy.positionLabel(form ?? '')}
+            className={`${inkKeyClass} bg-[#fbfbf9] px-3 text-[#1a1a1a]`}
+          >
+            <span className="font-black">{form ?? copy.position}</span>
+            <span className="font-mono text-[9px] opacity-60">P</span>
           </button>
         </div>
 
