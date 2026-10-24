@@ -4,7 +4,7 @@
  * The letter is the chord's name in the chosen key: D is D, Dm, or D#°,
  * whichever belongs there. In G that is G Am Bm C D Em, and F is F#°.
  * Shift is the other fingering. Option flips major and minor (F#° flips to F#m).
- * `-` and `=` slide the latched shape one fret, which is how the notes between appear.
+ * `-` and `=` move the whole key by one semitone, and the new key stays.
  * P walks the chord through its CAGED forms. The other scale chords follow to the nearest one.
  *
  * Right hand: I 9 0 are G, B, and high E. N M J are low E, A, and D.
@@ -126,17 +126,16 @@ export const STRING_PICKS = [
   { key: 'n', string: 6 }
 ] as const;
 
-/** On-screen rows match the keys under the right hand, treble above bass. */
-export const PICK_ROWS = [
-  ['i', '9', '0'],
-  ['n', 'm', 'j']
-] as const;
+/** One row, low E on the left through high E on the right. */
+export const PICK_ROWS = [['n', 'm', 'j', 'i', '9', '0']] as const;
 
 /** Sticky-note song: I–V–vi–IV–I in G. */
 export const CAMPFIRE: readonly GripId[] = ['g', 'd', 'e', 'c', 'g'];
 
 const GRIP_BY_ID = new Map(CHORD_GRIPS.map((grip) => [grip.id, grip]));
 const PITCHES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
+/** Letter each chromatic major key uses so A–G still appear once. */
+const TONIC_SPELLING = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
 const LETTERS = ['C', 'D', 'E', 'F', 'G', 'A', 'B'] as const;
 const NATURAL_PITCH: Record<(typeof LETTERS)[number], number> = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
 const QUALITY_SUFFIX: Record<ChordQuality, string> = { major: '', minor: 'm', dim: '°' };
@@ -154,21 +153,33 @@ export function fretsFor(id: GripId, voicing: Voicing, color: ChordColor = 'scal
   return voicing === 'high' ? pair.high : pair.low;
 }
 
-/** Major keys the letter buttons can play, measured up from G. */
+/** Major keys the letter buttons can play, one semitone apart, measured up from G. */
 export const HOME_KEYS = [
   { id: 'A', capo: 2 },
+  { id: 'A#', capo: 3 },
   { id: 'B', capo: 4 },
   { id: 'C', capo: 5 },
+  { id: 'C#', capo: 6 },
   { id: 'D', capo: 7 },
+  { id: 'D#', capo: 8 },
   { id: 'E', capo: 9 },
   { id: 'F', capo: 10 },
-  { id: 'G', capo: 0 }
+  { id: 'F#', capo: 11 },
+  { id: 'G', capo: 0 },
+  { id: 'G#', capo: 1 }
 ] as const;
 
 export type HomeKeyId = (typeof HOME_KEYS)[number]['id'];
 
 export function homeCapo(id: HomeKeyId): number {
   return HOME_KEYS.find((key) => key.id === id)?.capo ?? 0;
+}
+
+/** The next major key, one semitone at a time. The new key stays latched. */
+export function stepHomeKey(id: HomeKeyId, delta: number): HomeKeyId {
+  const index = HOME_KEYS.findIndex((key) => key.id === id);
+  const next = (index + delta + HOME_KEYS.length) % HOME_KEYS.length;
+  return HOME_KEYS[next]?.id ?? id;
 }
 
 /** Moves a shape up or down the neck. Returns null when a fret would leave 0–12. */
@@ -243,14 +254,23 @@ export function pickForKey(key: string): (typeof STRING_PICKS)[number] | undefin
 
 function tonicLetter(capo: number): (typeof LETTERS)[number] | undefined {
   const pitch = (((7 + capo) % 12) + 12) % 12;
-  return LETTERS.find((letter) => NATURAL_PITCH[letter] === pitch);
+  return TONIC_SPELLING[pitch]?.[0] as (typeof LETTERS)[number] | undefined;
+}
+
+function accidental(diff: number): string | null {
+  if (diff === 0) return '';
+  if (diff === 1) return '#';
+  if (diff === 2) return '##';
+  if (diff === 10) return 'bb';
+  if (diff === 11) return 'b';
+  return null;
 }
 
 function spell(letter: (typeof LETTERS)[number], pitch: number, quality: ChordQuality): string {
   const diff = (((pitch - NATURAL_PITCH[letter]) % 12) + 12) % 12;
-  const accidental = diff === 0 ? '' : diff === 1 ? '#' : diff === 11 ? 'b' : null;
-  if (accidental === null) return `${PITCHES[((pitch % 12) + 12) % 12]}${QUALITY_SUFFIX[quality]}`;
-  return `${letter}${accidental}${QUALITY_SUFFIX[quality]}`;
+  const mark = accidental(diff);
+  if (mark === null) return `${PITCHES[((pitch % 12) + 12) % 12]}${QUALITY_SUFFIX[quality]}`;
+  return `${letter}${mark}${QUALITY_SUFFIX[quality]}`;
 }
 
 /** Sounding name. Home keys use scale spelling, so F major's fourth is Bb. */

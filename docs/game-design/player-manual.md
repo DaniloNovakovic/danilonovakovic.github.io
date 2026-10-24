@@ -45,7 +45,7 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
 - Enter the Hobbies Phaser scene from the Hobbies building.
 - Walk to a hobby station and press `E` to open its React overlay.
 - Current hobby stations: Art, Music, Fitness, and Dancing. A prize tag beside each station label stays dashed until its reward is claimed, then shows a tick.
-- Music (guitar chord shapes, then G D Em C G), Fitness (Muay Thai timing combo), and Dancing (rhythm rounds) each award one Circuit spare part when cleared: copper string, battery cell, and clock crystal. Replays stay playable for fun.
+- Music (guitar chords in any major key, including the sharp keys). The campfire sketch, G D Em C G, awards a copper string. The other sketches are for playing. Fitness (Muay Thai timing combo) and Dancing (rhythm rounds) award a battery cell and a clock crystal. Replays stay playable for fun.
 - Art lets you sign and pin a drawing; it appears on the street billboard.
 - Close a hobby overlay to return to the Hobbies room.
 - Press `H` or `Esc`, or interact with the exit, to return to the street.

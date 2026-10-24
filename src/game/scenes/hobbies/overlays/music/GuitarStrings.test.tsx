@@ -52,18 +52,15 @@ describe('GuitarStrings', () => {
     expect(screen.getByRole('radio', { name: 'E chord, key E' }).getAttribute('aria-checked')).toBe('true');
   });
 
-  it('slides the shape with = and will not count that chord in the song', () => {
+  it('moves the whole key up with = and keeps it there', () => {
     renderGuitar();
     press('=');
+    expect(screen.getByRole('radio', { name: 'G# chord, key G' }).getAttribute('aria-checked')).toBe('true');
     expect(screen.getByRole('button', { name: 'String 0 (G#4)' })).toBeDefined();
-    press(' ');
-    press('d');
-    press(' ');
-    press('c');
-    press(' ');
-    press('g');
-    press(' ');
-    expect(bridgeStore.getState().inventory.ownedItemIds).not.toContain('copper-string');
+    press('=');
+    expect(screen.getByRole('radio', { name: 'A chord, key A' }).getAttribute('aria-checked')).toBe('true');
+    press('-');
+    expect(screen.getByRole('radio', { name: 'G# chord, key G' }).getAttribute('aria-checked')).toBe('true');
   });
 
   it('awards the copper string once when G D Em C G is strummed', () => {
@@ -93,6 +90,41 @@ describe('GuitarStrings', () => {
     expect(screen.getByRole('button', { name: 'String 0 (A4)' })).toBeDefined();
     expect(screen.queryByRole('button', { name: 'String N, muted' })).toBeNull();
     expect(screen.getByText('0/5')).toBeDefined();
+  });
+
+  it('puts the six string keys on one row', () => {
+    renderGuitar();
+    const low = screen.getByRole('button', { name: 'String N (G2)' });
+    const high = screen.getByRole('button', { name: 'String 0 (G4)' });
+    expect(low.parentElement).toBe(high.parentElement);
+    expect(low.parentElement?.querySelectorAll('button')).toHaveLength(6);
+  });
+
+  it('colors the chord with 7 and clears it on the second press', () => {
+    renderGuitar();
+    press('7');
+    expect(screen.getByRole('radio', { name: 'G7 chord, key G' }).getAttribute('aria-checked')).toBe('true');
+    expect(screen.getByRole('button', { name: 'String 0 (F4)' })).toBeDefined();
+    press('7');
+    expect(screen.getByRole('radio', { name: 'G chord, key G' }).getAttribute('aria-checked')).toBe('true');
+  });
+
+  it('offers pencil sketches that do not award a spare string', () => {
+    renderGuitar();
+    press(']');
+    expect(screen.getByText('Porch swing')).toBeDefined();
+    expect(screen.getByText('I–IV–I–V–IV–I')).toBeDefined();
+    for (const key of ['g', 'c', 'g', 'd', 'c', 'g']) {
+      press(key);
+      press(' ');
+    }
+    expect(screen.getByText('Sketched!')).toBeDefined();
+    expect(bridgeStore.getState().inventory.ownedItemIds).not.toContain('copper-string');
+
+    press('[');
+    expect(screen.getByText('Campfire')).toBeDefined();
+    playCampfire();
+    expect(bridgeStore.getState().inventory.ownedItemIds).toContain('copper-string');
   });
 
   it('strums up on V', () => {
@@ -140,24 +172,38 @@ describe('GuitarStrings', () => {
     expect((screen.getByRole('checkbox', { name: 'Bass note' }) as HTMLInputElement).checked).toBe(true);
 
     expect(screen.getByRole('radio', { name: 'Key E' })).toBeDefined();
-    expect(screen.getByRole('radio', { name: 'Key B' })).toBeDefined();
-    expect(screen.getByRole('radio', { name: 'Key F' })).toBeDefined();
+    expect(screen.getByRole('radio', { name: 'Key F#' })).toBeDefined();
+    expect(screen.getByRole('radio', { name: 'Key G#' })).toBeDefined();
+    expect(screen.getByRole('radio', { name: 'Key A#' })).toBeDefined();
+    expect(screen.getByRole('radio', { name: 'Key C#' })).toBeDefined();
+    expect(screen.getByRole('radio', { name: 'Key D#' })).toBeDefined();
 
     fireEvent.click(screen.getByRole('radio', { name: 'Key A' }));
+    expect(screen.queryByRole('radio', { name: 'Key A' })).toBeNull();
     expect(screen.getByRole('radio', { name: 'A chord, key A' }).getAttribute('aria-checked')).toBe('true');
     expect(screen.getByText('Strum A, E, F#m, D, A. Strumming the same chord twice is fine.')).toBeDefined();
     press('d');
     expect(screen.getByRole('radio', { name: 'D chord, key D' }).getAttribute('aria-checked')).toBe('true');
 
+    fireEvent.click(screen.getByRole('button', { name: 'Guitar settings' }));
     fireEvent.click(screen.getByRole('radio', { name: 'Key C' }));
     press('d');
     expect(screen.getByRole('radio', { name: 'Dm chord, key D' }).getAttribute('aria-checked')).toBe('true');
 
+    fireEvent.click(screen.getByRole('button', { name: 'Guitar settings' }));
     fireEvent.click(screen.getByRole('radio', { name: 'Key F' }));
     press('b');
     expect(screen.getByRole('radio', { name: 'Bb chord, key B' }).getAttribute('aria-checked')).toBe('true');
 
-    fireEvent.click(screen.getByRole('radio', { name: 'Key G' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Guitar settings' }));
+    fireEvent.click(screen.getByRole('radio', { name: 'Key F#' }));
+    expect(screen.getByText('Strum F#, C#, D#m, B, F#. Strumming the same chord twice is fine.')).toBeDefined();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Guitar settings' }));
+    fireEvent.pointerDown(document.body);
+    expect(screen.queryByRole('radio', { name: 'Key G' })).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Guitar settings' }));
     fireEvent.click(screen.getByRole('checkbox', { name: 'Bass note' }));
     expect((screen.getByRole('checkbox', { name: 'Bass note' }) as HTMLInputElement).checked).toBe(false);
   });

@@ -8,28 +8,28 @@ import { SparePartSticker } from '../shared/SparePartSticker';
 import { useSparePartReward } from '../shared/useSparePartReward';
 import { hobbyBoardClass } from '../shared/hobbyStyles';
 import {
-  CAMPFIRE,
   CHORD_GRIPS,
   PICK_ROWS,
   STRING_PICKS,
   chordName,
-  fretsFor,
+  gripById,
   gripForLetter,
   rootLetter,
-  fretsInKey,
   homeCapo,
   noteLabel,
   pickForKey,
-  slideFrets,
+  stepHomeKey,
   type ChordColor,
   type GripId,
   type HomeKeyId,
   type Voicing
 } from './grips';
-import { fretsForPosition, nextVoicing, cagedVoicings, nearestVoicing, positionForm } from './caged';
+import { fretsForPosition, nextVoicing, cagedVoicings, positionForm } from './caged';
+import { chordLabel, playedFrets, type Extension } from './extensions';
 import { GripBar, inkKeyClass } from './GripBar';
 import { GuitarSettings } from './GuitarSettings';
 import { advanceProgression } from './progression';
+import { sketchById, stepSketch, type SketchId } from './sketches';
 import { RiffNote } from './RiffNote';
 import { StringBoard } from './StringBoard';
 import { GUITAR_STRINGS, useGuitarSynth, type GuitarStringSpec, type StrumDirection } from './useGuitarSynth';
@@ -37,6 +37,16 @@ import { GUITAR_STRINGS, useGuitarSynth, type GuitarStringSpec, type StrumDirect
 const NO_PLUCKS: readonly number[] = GUITAR_STRINGS.map(() => 0);
 const NO_CHOPS: readonly boolean[] = GUITAR_STRINGS.map(() => false);
 const START_GRIP: GripId = 'g';
+
+function chordQuality(id: GripId, shown: ChordColor) {
+  if (id === 'open') return 'major' as const;
+  const grip = gripById(id);
+  return shown === 'alt' ? grip.altQuality : grip.scaleQuality;
+}
+
+function pickCopy<T>(rewarded: boolean, prize: T, sketch: T): T {
+  return rewarded ? prize : sketch;
+}
 
 function freshKey(handler: (event: KeyboardEvent) => void) {
   return (event: KeyboardEvent) => {
@@ -48,15 +58,16 @@ function freshKey(handler: (event: KeyboardEvent) => void) {
 export default function GuitarStrings({ close, titleId, descriptionId }: OverlayControllerProps) {
   const messages = useMessages();
   const copy = messages.miniGames.guitar;
-  const { pluck, strumShape, holdChord, glide, pluckLowest } = useGuitarSynth();
+  const { pluck, strumShape, holdChord, pluckLowest } = useGuitarSynth();
   const reward = useSparePartReward('copper-string');
   const claimReward = reward.claim;
 
   const [gripId, setGripId] = useState<GripId>(START_GRIP);
   const [voicing, setVoicing] = useState<Voicing>('low');
   const [color, setColor] = useState<ChordColor>('scale');
-  const [capo, setCapo] = useState(0);
   const [homeKey, setHomeKey] = useState<HomeKeyId>('G');
+  const [extensions, setExtensions] = useState<readonly Extension[]>([]);
+  const [sketchId, setSketchId] = useState<SketchId>('campfire');
   const [bassOnChord, setBassOnChord] = useState(true);
   const [palm, setPalm] = useState(false);
   const [shortStrum, setShortStrum] = useState(false);
@@ -68,9 +79,12 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
   const [songDone, setSongDone] = useState(false);
 
   const keyCapo = homeCapo(homeKey);
-  const frets = fretsForPosition(gripId, voicing, color, keyCapo, capo, anchor);
-  const sounding = chordName(gripId, color, keyCapo + capo);
-  const form = positionForm(gripId, color, keyCapo, capo, frets);
+  const sketch = sketchById(sketchId);
+  const plain = fretsForPosition(gripId, voicing, color, keyCapo, 0, anchor);
+  const frets = playedFrets(gripId, voicing, color, keyCapo, anchor, extensions);
+  const quality = chordQuality(gripId, color);
+  const sounding = chordLabel(chordName(gripId, color, keyCapo), quality, extensions);
+  const form = positionForm(gripId, color, keyCapo, 0, plain);
 
   const vibrate = useCallback((number: number | 'all', chop: boolean) => {
     const touched = (index: number) => number === 'all' || GUITAR_STRINGS[index]?.number === number;
@@ -99,36 +113,18 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
       setGripId(id);
       setVoicing(shape);
       setColor(nextColor);
-      setCapo(0);
-      voiceChord(fretsForPosition(id, shape, nextColor, homeCapo(homeKey), 0, nextAnchor));
+      voiceChord(playedFrets(id, shape, nextColor, homeCapo(homeKey), nextAnchor, extensions));
     },
-    [anchor, homeKey, voiceChord]
+    [anchor, extensions, homeKey, voiceChord]
   );
 
   const chooseKey = useCallback(
     (id: HomeKeyId) => {
       setHomeKey(id);
       setAnchor(null);
-      setCapo(0);
-      voiceChord(fretsInKey(gripId, voicing, color, homeCapo(id)));
+      voiceChord(playedFrets(gripId, voicing, color, homeCapo(id), null, extensions));
     },
-    [color, gripId, voiceChord, voicing]
-  );
-
-  const slide = useCallback(
-    (delta: number) => {
-      const nextCapo = capo + delta;
-      const transposed = homeCapo(homeKey);
-      const base =
-        anchor === null
-          ? fretsFor(gripId, voicing, color)
-          : nearestVoicing(cagedVoicings(gripId, color, transposed), anchor)?.frets;
-      const moved = base ? slideFrets(base, anchor === null ? transposed + nextCapo : nextCapo) : null;
-      if (!moved) return;
-      setCapo(nextCapo);
-      glide(moved);
-    },
-    [anchor, capo, color, glide, gripId, homeKey, voicing]
+    [color, extensions, gripId, voiceChord, voicing]
   );
 
   const movePosition = useCallback(() => {
@@ -137,44 +133,59 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
     const following = nextVoicing(cagedVoicings(gripId, color, transposed), current);
     if (!following) return;
     setAnchor(following.center);
-    setCapo(0);
-    voiceChord(following.frets);
-  }, [anchor, color, gripId, homeKey, voiceChord, voicing]);
+    voiceChord(playedFrets(gripId, voicing, color, transposed, following.center, extensions));
+  }, [anchor, color, extensions, gripId, homeKey, voiceChord, voicing]);
 
   const commitStrum = useCallback(
     (id: GripId) => {
-      const inKey = color === 'scale' && capo === 0;
-      const next = advanceProgression(progress, inKey ? id : 'open', CAMPFIRE);
-      const completed = next === CAMPFIRE.length;
+      const next = advanceProgression(progress, color === 'scale' ? id : 'open', sketch.steps);
+      const completed = next === sketch.steps.length;
       setProgress(completed ? 0 : next);
       setSongDone(completed);
-      if (completed) claimReward();
+      if (completed && sketch.reward) claimReward();
     },
-    [capo, claimReward, color, progress]
+    [claimReward, color, progress, sketch]
   );
 
   const playString = useCallback(
     (spec: GuitarStringSpec, velocity = 1, short = false) => {
-      const shape = fretsForPosition(gripId, voicing, color, homeCapo(homeKey), capo, anchor);
+      const shape = playedFrets(gripId, voicing, color, homeCapo(homeKey), anchor, extensions);
       const fret = shape[spec.number - 1] ?? null;
       pluck(spec, fret === null ? 0.8 : velocity, { fret, palm, short });
       vibrate(spec.number, short);
     },
-    [anchor, capo, color, gripId, homeKey, palm, pluck, vibrate, voicing]
+    [anchor, color, extensions, gripId, homeKey, palm, pluck, vibrate, voicing]
   );
 
   const strum = useCallback(
     (direction: StrumDirection) => {
-      const shape = fretsForPosition(gripId, voicing, color, homeCapo(homeKey), capo, anchor);
+      const shape = playedFrets(gripId, voicing, color, homeCapo(homeKey), anchor, extensions);
       strumShape(shape, direction, palm, shortStrum);
       vibrate('all', shortStrum);
       commitStrum(gripId);
     },
-    [anchor, capo, color, commitStrum, gripId, homeKey, palm, shortStrum, strumShape, vibrate, voicing]
+    [anchor, color, commitStrum, extensions, gripId, homeKey, palm, shortStrum, strumShape, vibrate, voicing]
   );
 
   const togglePalm = useCallback(() => setPalm((muted) => !muted), []);
   const toggleShort = useCallback(() => setShortStrum((short) => !short), []);
+  const toggleExtension = useCallback(
+    (tone: Extension) => {
+      const next = extensions.includes(tone) ? extensions.filter((item) => item !== tone) : [...extensions, tone];
+      setExtensions(next);
+      voiceChord(playedFrets(gripId, voicing, color, homeCapo(homeKey), anchor, next));
+    },
+    [anchor, color, extensions, gripId, homeKey, voiceChord, voicing]
+  );
+  const cycleSketch = useCallback((delta: number) => {
+    setSketchId((current) => stepSketch(current, delta).id);
+    setProgress(0);
+    setSongDone(false);
+  }, []);
+  const nameGrip = (id: GripId) => {
+    const shown = id === gripId ? color : 'scale';
+    return chordLabel(chordName(id, shown, keyCapo), chordQuality(id, shown), extensions);
+  };
 
   useOverlayKeys({
     ...Object.fromEntries(
@@ -206,18 +217,24 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
     V: freshKey(() => strum('up')),
     ArrowUp: freshKey(() => strum('up')),
     ArrowDown: freshKey(() => strum('down')),
-    '-': freshKey(() => slide(-1)),
-    '=': freshKey(() => slide(1)),
-    '+': freshKey(() => slide(1)),
+    '-': freshKey(() => chooseKey(stepHomeKey(homeKey, -1))),
+    '=': freshKey(() => chooseKey(stepHomeKey(homeKey, 1))),
+    '+': freshKey(() => chooseKey(stepHomeKey(homeKey, 1))),
     x: freshKey(togglePalm),
     X: freshKey(togglePalm),
     s: freshKey(toggleShort),
     S: freshKey(toggleShort),
     p: freshKey(movePosition),
-    P: freshKey(movePosition)
+    P: freshKey(movePosition),
+    '2': freshKey(() => toggleExtension(2)),
+    '4': freshKey(() => toggleExtension(4)),
+    '6': freshKey(() => toggleExtension(6)),
+    '7': freshKey(() => toggleExtension(7)),
+    '[': freshKey(() => cycleSketch(-1)),
+    ']': freshKey(() => cycleSketch(1))
   });
 
-  const stepNames = CAMPFIRE.map((id) => chordName(id, 'scale', keyCapo));
+  const stepNames = sketch.steps.map((id) => chordName(id, 'scale', keyCapo));
 
   return (
     <OverlayDialogFrame
@@ -229,13 +246,17 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
     >
       <div className="flex w-full flex-col items-center gap-3">
         <RiffNote
-          title={copy.riffTitle}
-          hint={copy.riffHint(stepNames.join(', '))}
-          progressLabel={copy.riffProgress(progress, CAMPFIRE.length)}
-          doneLabel={copy.riffDone}
+          title={copy.sketches[sketch.id]}
+          figures={sketch.figures}
+          hint={pickCopy(sketch.reward, copy.riffHint(stepNames.join(', ')), copy.sketchHint(stepNames.join(', ')))}
+          progressLabel={copy.riffProgress(progress, sketch.steps.length)}
+          doneLabel={pickCopy(sketch.reward, copy.riffDone, copy.sketchDone)}
+          nextLabel={copy.nextSketch}
+          rewarded={sketch.reward}
           steps={stepNames}
           progress={progress}
           done={songDone}
+          onNext={() => cycleSketch(1)}
         />
 
         <div className="flex w-full items-start gap-1.5">
@@ -243,7 +264,7 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
             <GripBar
               label={copy.gripsLabel}
               activeId={gripId}
-              gripName={(id) => (id === gripId ? sounding : chordName(id, 'scale', keyCapo))}
+              gripName={nameGrip}
               gripKey={(id) => (id === 'open' ? 'Z' : rootLetter(id, keyCapo).toUpperCase())}
               gripLabel={copy.gripLabel}
               onSelect={selectGrip}
@@ -259,6 +280,11 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
             onBass={setBassOnChord}
             homeKey={homeKey}
             onHomeKey={chooseKey}
+            extensionGroupLabel={copy.extensionGroup}
+            extensionHint={copy.extensionHint}
+            extensionLabel={copy.extensionLabel}
+            extensions={extensions}
+            onExtension={toggleExtension}
           />
         </div>
 
@@ -300,7 +326,7 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
                     type="button"
                     onClick={() => playString(spec, 0.9)}
                     aria-label={fret === null ? copy.mutedStringLabel(keyLabel) : copy.stringLabel(note, keyLabel)}
-                    className={`${inkKeyClass} w-11 bg-[#fbfbf9] text-[#1a1a1a]`}
+                    className={`${inkKeyClass} w-10 bg-[#fbfbf9] text-[#1a1a1a]`}
                   >
                     <span className="font-mono text-sm font-black">{keyLabel}</span>
                     <span className="text-[9px] font-bold opacity-60">{note}</span>

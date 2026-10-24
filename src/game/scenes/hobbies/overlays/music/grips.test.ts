@@ -11,6 +11,7 @@ import {
   noteLabel,
   rootLetter,
   slideFrets,
+  stepHomeKey,
   type ChordColor,
   type GripId,
   type Voicing
@@ -70,6 +71,14 @@ describe('chord grips', () => {
     expect(gripForLetter('b', homeCapo('F'))).toBe('c');
     expect(chordName('f', 'scale', homeCapo('E'))).toBe('D#°');
     expect(gripForLetter('d', homeCapo('E'))).toBe('f');
+    expect(chordName('g', 'scale', homeCapo('F#'))).toBe('F#');
+    expect(chordName('f', 'scale', homeCapo('F#'))).toBe('E#°');
+    expect(chordName('f', 'scale', homeCapo('G#'))).toBe('F##°');
+    expect(stepHomeKey('E', 1)).toBe('F');
+    expect(stepHomeKey('F', 1)).toBe('F#');
+    expect(stepHomeKey('G', 1)).toBe('G#');
+    expect(stepHomeKey('G#', 1)).toBe('A');
+    expect(stepHomeKey('A', -1)).toBe('G#');
 
     const letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
     for (const key of HOME_KEYS) {
