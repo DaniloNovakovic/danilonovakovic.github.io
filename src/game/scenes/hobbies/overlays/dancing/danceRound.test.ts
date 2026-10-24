@@ -5,8 +5,8 @@ import {
   demoLengthBeats,
   demoMoveBeat,
   isRewardClear,
+  composePhrase,
   judgeMove,
-  pickMove,
   type DanceMove
 } from './danceRound';
 
@@ -37,8 +37,45 @@ describe('reward and demo timing', () => {
     expect(demoLengthBeats(4)).toBe(COUNT_IN_BEATS + 4);
   });
 
-  it('maps the random source onto every move', () => {
-    expect(pickMove(() => 0)).toBe('up');
-    expect(pickMove(() => 0.99)).toBe('left');
+  it('builds a new phrase each round, with doubles allowed and ruts blocked', () => {
+    let previous: DanceMove[] | null = null;
+    for (let length = 1; length <= 8; length++) {
+      const phrase = composePhrase(length, previous, () => 0);
+      expectFreshPhrase(phrase, length, previous);
+      previous = phrase;
+    }
+    expect(composePhrase(4, null, () => 0).some((move, index, phrase) => move === phrase[index - 1])).toBe(true);
+  });
+
+  it('keeps later rounds from replaying the previous dance across seeds', () => {
+    for (let seed = 1; seed <= 12; seed++) {
+      const random = lcg(seed);
+      let previous: DanceMove[] | null = null;
+      for (let length = 1; length <= 8; length++) {
+        const phrase = composePhrase(length, previous, random);
+        expectFreshPhrase(phrase, length, previous);
+        previous = phrase;
+      }
+    }
   });
 });
+
+function expectFreshPhrase(phrase: DanceMove[], length: number, previous: DanceMove[] | null) {
+  expect(phrase).toHaveLength(length);
+  expect(hasTriple(phrase)).toBe(false);
+  const minimumDirections = length >= 5 ? 3 : 2;
+  if (length >= 3) expect(new Set(phrase).size).toBeGreaterThanOrEqual(minimumDirections);
+  if (previous) expect(phrase.slice(0, previous.length)).not.toEqual(previous);
+}
+
+function lcg(seed: number): () => number {
+  let state = seed;
+  return () => {
+    state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+    return state / 4294967296;
+  };
+}
+
+function hasTriple(phrase: readonly DanceMove[]): boolean {
+  return phrase.some((move, index) => index >= 2 && move === phrase[index - 1] && move === phrase[index - 2]);
+}

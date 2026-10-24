@@ -3,10 +3,10 @@ import { useHobbyAudio } from '../shared/useHobbyAudio';
 import {
   BEAT_SECONDS,
   COUNT_IN_BEATS,
+  composePhrase,
   demoLengthBeats,
   isRewardClear,
   judgeMove,
-  pickMove,
   type DanceInputResult,
   type DanceMove
 } from './danceRound';
@@ -107,7 +107,9 @@ export function useDanceGame(onRewardClear: () => void) {
       if (audio) playRoundCleared(audio);
       if (isRewardClear(round)) onRewardClear();
       later(CHEER_DELAY_MS, () => commit({ pose: 'cheer' }));
-      later(NEXT_ROUND_DELAY_MS, () => playRound([...current.sequence, pickMove()]));
+      later(NEXT_ROUND_DELAY_MS, () => {
+        playRound(composePhrase(current.sequence.length + 1, current.sequence));
+      });
     }
   };
 
@@ -126,7 +128,7 @@ export function useDanceGame(onRewardClear: () => void) {
 
   const start = () => {
     const phase = stateRef.current.phase;
-    if (phase === 'idle' || phase === 'over') playRound([pickMove()]);
+    if (phase === 'idle' || phase === 'over') playRound(composePhrase(1, null));
   };
 
   return { state, press, start };
