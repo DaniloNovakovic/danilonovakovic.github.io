@@ -10,6 +10,7 @@ import { setSceneKeyboardPaused } from '@/game/sharedSceneRuntime/sceneKeyboardP
 import { TextureGenerator } from '@/game/sharedSceneRuntime/textures/TextureGenerator';
 import {
   createStampedeAutoAttackState,
+  resolveGroupDazeIds,
   type StampedeAutoAttackEvent,
   type StampedeAutoAttackState
 } from './autoAttack';
@@ -22,8 +23,11 @@ import {
   createOrbitHitState,
   getBreathBeam,
   getStinkAura,
+  pushBreathLinger,
+  sampleBreathBubbles,
   stepBreathBeam,
   stepOrbitHits,
+  type StampedeBreathPatch,
   type StampedeOrbitHitState,
   type StampedeOrbitPoint
 } from './auras';
@@ -89,6 +93,7 @@ import {
 } from './swarmPresentation';
 import {
   formatStampedeKitLabel,
+  getStampedeStartingWeaponChoices,
   getStampedeUpgradeChoices,
   getStampedeWeaponRank,
   isStampedeUpgradeId,
@@ -124,6 +129,8 @@ export class StampedeSketchScene extends Phaser.Scene {
   private isPaused = false;
   private spellCooldownReadyAt: Partial<Record<StampedeSpellId, number>> = {};
   private breathHits: Record<string, number> = createBreathHitState();
+  private breathBubbles: StampedeOrbitPoint[] = [];
+  private breathLinger: StampedeBreathPatch[] = [];
   private stinkState: StampedeOrbitHitState = createOrbitHitState();
   private stinkPoints: StampedeOrbitPoint[] = [];
   private disarmedUntilMs = 0;
@@ -171,6 +178,8 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.isUpgradeDraftOpen = false;
     this.spellCooldownReadyAt = {};
     this.breathHits = createBreathHitState();
+    this.breathBubbles = [];
+    this.breathLinger = [];
     this.stinkState = createOrbitHitState();
     this.stinkPoints = [];
     this.disarmedUntilMs = 0;
@@ -283,6 +292,8 @@ export class StampedeSketchScene extends Phaser.Scene {
         this.player.setPosition(frame.player.x, frame.player.y);
         if (this.time.now < this.disarmedUntilMs) {
           this.breathHits = createBreathHitState();
+          this.breathBubbles = [];
+          this.breathLinger = [];
           this.stinkState = createOrbitHitState();
           this.stinkPoints = [];
         } else {
@@ -321,6 +332,8 @@ export class StampedeSketchScene extends Phaser.Scene {
         if (this.swarmRuntime.consumeBeerHit()) {
           this.disarmedUntilMs = this.time.now + STAMPEDE_BEER_DISARM_MS;
           this.breathHits = createBreathHitState();
+          this.breathBubbles = [];
+          this.breathLinger = [];
           this.stinkState = createOrbitHitState();
           this.stinkPoints = [];
         }
@@ -375,6 +388,8 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.kitLook?.reset();
     this.spellCooldownReadyAt = {};
     this.breathHits = createBreathHitState();
+    this.breathBubbles = [];
+    this.breathLinger = [];
     this.stinkState = createOrbitHitState();
     this.stinkPoints = [];
     this.disarmedUntilMs = 0;
@@ -497,7 +512,14 @@ export class StampedeSketchScene extends Phaser.Scene {
   ): void {
     if (!attack) return;
 
-    const clearedMarks = this.swarmRuntime?.clearMarks(attack.hitIds, 'daze') ?? [];
+    const dazeMs = this.progression.appliedUpgradeIds.includes('selfiePose') ? 1_700 : 880;
+    const clearedMarks = this.swarmRuntime?.clearMarks(attack.hitIds, 'daze', dazeMs) ?? [];
+    if (this.progression.appliedUpgradeIds.includes('selfieGroup')) {
+      this.swarmRuntime?.dazeMarks(
+        resolveGroupDazeIds(attack.hitIds, this.swarmRuntime.getSpellCandidates()),
+        dazeMs
+      );
+    }
     this.progression = spawnStampedePickupsFromClearedMarks(
       this.progression,
       clearedMarks
@@ -686,7 +708,8 @@ export class StampedeSketchScene extends Phaser.Scene {
   private showStartPrompt(): void {
     bridgeActions.setSceneUiPanel(
       STAMPEDE_SKETCH_SCENE_ID,
-      'stampedeStartPrompt'
+      'stampedeStartPrompt',
+      { choices: getStampedeStartingWeaponChoices() }
     );
   }
 
@@ -700,22 +723,36 @@ export class StampedeSketchScene extends Phaser.Scene {
 
   private tickBreath(): void {
     if (!this.player || !this.swarmRuntime) return;
-    const rank = getStampedeWeaponRank(
-      this.progression.appliedUpgradeIds,
-      this.progression.upgradedWeaponIds,
-      'badBreath'
-    );
-    if (rank === 0) {
+    const owned = this.progression.appliedUpgradeIds.includes('badBreath')
+      || this.progression.upgradedWeaponIds.includes('badBreath');
+    if (!owned) {
       this.breathHits = createBreathHitState();
+      this.breathBubbles = [];
+      this.breathLinger = [];
       return;
     }
+    const legacy = this.progression.upgradedWeaponIds.includes('badBreath');
+    const beam = getBreathBeam({
+      wide: legacy || this.progression.appliedUpgradeIds.includes('breathWide'),
+      crosswind: this.progression.appliedUpgradeIds.includes('breathCross')
+    });
+    const bubbles = sampleBreathBubbles(
+      { x: this.player.x, y: this.player.y },
+      this.lastFacing,
+      beam
+    );
+    this.breathBubbles = bubbles;
+    this.breathLinger = legacy || this.progression.appliedUpgradeIds.includes('breathLinger')
+      ? pushBreathLinger(this.breathLinger, bubbles, this.session.elapsedMs)
+      : [];
     const stepped = stepBreathBeam({
       state: this.breathHits,
-      beam: getBreathBeam(rank === 2 ? 2 : 1),
+      beam,
       elapsedMs: this.session.elapsedMs,
       player: { x: this.player.x, y: this.player.y },
       facing: this.lastFacing,
-      candidates: this.swarmRuntime.getSpellCandidates()
+      candidates: this.swarmRuntime.getSpellCandidates(),
+      linger: this.breathLinger
     });
     this.breathHits = stepped.state;
     this.applyWeaponHits(stepped.hitIds);
@@ -723,19 +760,22 @@ export class StampedeSketchScene extends Phaser.Scene {
 
   private tickStink(deltaMs: number): void {
     if (!this.player || !this.swarmRuntime) return;
-    const rank = getStampedeWeaponRank(
-      this.progression.appliedUpgradeIds,
-      this.progression.upgradedWeaponIds,
-      'badSmell'
-    );
-    if (rank === 0) {
+    const owned = this.progression.appliedUpgradeIds.includes('badSmell')
+      || this.progression.upgradedWeaponIds.includes('badSmell');
+    if (!owned) {
       this.stinkState = createOrbitHitState();
       this.stinkPoints = [];
       return;
     }
+    const legacy = this.progression.upgradedWeaponIds.includes('badSmell');
     const stepped = stepOrbitHits({
       state: this.stinkState,
-      aura: getStinkAura(rank === 2 ? 2 : 1),
+      aura: getStinkAura({
+        far: this.progression.appliedUpgradeIds.includes('smellFar'),
+        fast: legacy || this.progression.appliedUpgradeIds.includes('smellFast'),
+        twin: legacy || this.progression.appliedUpgradeIds.includes('smellTwin'),
+        fat: this.progression.appliedUpgradeIds.includes('smellFat')
+      }),
       elapsedMs: this.session.elapsedMs,
       deltaMs,
       player: { x: this.player.x, y: this.player.y },
@@ -762,12 +802,13 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.kitLook.sync({
       x: this.player.x,
       y: this.player.y,
-      facingX: this.lastFacing.x,
-      facingY: this.lastFacing.y,
       disarmed: this.time.now < this.disarmedUntilMs,
-      breathRank: rank('badBreath'),
+      breathBubbles: this.breathBubbles,
+      lingerBubbles: this.breathLinger,
       stinkPoints: this.stinkPoints,
+      stinkFat: this.progression.appliedUpgradeIds.includes('smellFat'),
       selfieRank: rank('badSelfie'),
+      selfieRear: this.progression.appliedUpgradeIds.includes('selfieRear'),
       glassesRank: rank('fakeGlasses')
     });
   }
@@ -793,6 +834,7 @@ export class StampedeSketchScene extends Phaser.Scene {
         player: { x: this.player!.x, y: this.player!.y },
         facing: this.lastFacing,
         candidates: this.swarmRuntime!.getSpellCandidates(),
+        mods: this.progression.appliedUpgradeIds,
         rank: getStampedeWeaponRank(
           this.progression.appliedUpgradeIds,
           this.progression.upgradedWeaponIds,
@@ -801,7 +843,13 @@ export class StampedeSketchScene extends Phaser.Scene {
       });
       this.spellCooldownReadyAt[spellId] = now + cast.cooldownMs;
       this.swarmRuntime?.showResisted(cast.resistedIds);
-      const clearedMarks = this.swarmRuntime?.clearMarks(cast.hitIds) ?? [];
+      const glassesFreeze = spellId === 'fakeGlasses'
+        && this.progression.appliedUpgradeIds.includes('glassesStare');
+      const clearedMarks = this.swarmRuntime?.clearMarks(
+        cast.hitIds,
+        glassesFreeze ? 'daze' : undefined,
+        1_100
+      ) ?? [];
       this.progression = spawnStampedePickupsFromClearedMarks(this.progression, clearedMarks);
       this.pickupRuntime?.sync(this.progression.pickups);
       this.spellVfx?.show(cast);

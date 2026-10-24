@@ -28,6 +28,24 @@ export interface StampedeBreathBeam {
   range: number;
   halfWidth: number;
   hitGapMs: number;
+  wide: boolean;
+  crosswind: boolean;
+}
+
+export interface StampedeBreathMods {
+  wide?: boolean;
+  crosswind?: boolean;
+}
+
+export interface StampedeStinkMods {
+  far?: boolean;
+  fast?: boolean;
+  twin?: boolean;
+  fat?: boolean;
+}
+
+export interface StampedeBreathPatch extends StampedeOrbitPoint {
+  untilMs: number;
 }
 
 export function createOrbitHitState(): StampedeOrbitHitState {
@@ -38,30 +56,61 @@ export function createBreathHitState(): Record<string, number> {
   return {};
 }
 
-export function getStinkAura(rank: 1 | 2): StampedeOrbitAura {
-  if (rank >= 2) {
-    return {
-      count: 3,
-      radius: 64,
-      hitRadius: 22,
-      radiansPerSecond: 2.5,
-      hitGapMs: 560
-    };
-  }
+export function getStinkAura(mods: StampedeStinkMods = {}): StampedeOrbitAura {
   return {
-    count: 1,
-    radius: 56,
-    hitRadius: 20,
-    radiansPerSecond: 1.35,
-    hitGapMs: 780
+    count: mods.twin ? 2 : 1,
+    radius: mods.far ? 102 : 56,
+    hitRadius: mods.fat ? 36 : 20,
+    radiansPerSecond: mods.fast ? 2.8 : 1.25,
+    hitGapMs: mods.fast ? 480 : 780
   };
 }
 
-export function getBreathBeam(rank: 1 | 2): StampedeBreathBeam {
-  if (rank >= 2) {
-    return { range: 248, halfWidth: 22, hitGapMs: 420 };
-  }
-  return { range: 168, halfWidth: 16, hitGapMs: 640 };
+export function getBreathBeam(mods: StampedeBreathMods = {}): StampedeBreathBeam {
+  return {
+    range: 188,
+    halfWidth: mods.wide ? 48 : 28,
+    hitGapMs: 640,
+    wide: Boolean(mods.wide),
+    crosswind: Boolean(mods.crosswind)
+  };
+}
+
+export function sampleBreathBubbles(
+  player: StampedeOrbitPoint,
+  facing: StampedeOrbitPoint,
+  beam: StampedeBreathBeam
+): StampedeOrbitPoint[] {
+  const facingLength = Math.hypot(facing.x, facing.y) || 1;
+  const facingX = facing.x / facingLength;
+  const facingY = facing.y / facingLength;
+  const sideX = -facingY;
+  const sideY = facingX;
+  const count = beam.wide ? 8 : 6;
+  return Array.from({ length: count }, (_, index) => {
+    const along = 26 + ((index + 0.5) / count) * (beam.range - 26);
+    const wave = beam.crosswind ? Math.sin(along / 32) * 18 : 0;
+    const spread = beam.wide ? (index % 2 === 0 ? 1 : -1) * beam.halfWidth * 0.42 : 0;
+    const lateral = spread + wave;
+    return {
+      x: player.x + facingX * along + sideX * lateral,
+      y: player.y + facingY * along + sideY * lateral
+    };
+  });
+}
+
+export function pushBreathLinger(
+  patches: readonly StampedeBreathPatch[],
+  fresh: readonly StampedeOrbitPoint[],
+  elapsedMs: number,
+  lifeMs = 1_100
+): StampedeBreathPatch[] {
+  const kept = patches.filter((patch) => patch.untilMs > elapsedMs);
+  const next = [
+    ...kept,
+    ...fresh.map((point) => ({ ...point, untilMs: elapsedMs + lifeMs }))
+  ];
+  return next.slice(-18);
 }
 
 export function stepOrbitHits(input: {
@@ -111,6 +160,7 @@ export function stepBreathBeam(input: {
   player: StampedeOrbitPoint;
   facing: StampedeOrbitPoint;
   candidates: readonly StampedeOrbitCandidate[];
+  linger?: readonly StampedeOrbitPoint[];
 }): { state: Record<string, number>; hitIds: string[] } {
   if (!input.beam) return { state: {}, hitIds: [] };
   const facingLength = Math.hypot(input.facing.x, input.facing.y) || 1;
@@ -125,8 +175,15 @@ export function stepBreathBeam(input: {
     const dx = candidate.x - input.player.x;
     const dy = candidate.y - input.player.y;
     const along = dx * facingX + dy * facingY;
-    const lateral = Math.abs(dx * facingY - dy * facingX);
-    if (along < 14 || along > input.beam!.range || lateral > input.beam!.halfWidth) return;
+    const lateral = dx * facingY - dy * facingX;
+    const wave = input.beam!.crosswind ? Math.sin(along / 32) * 18 : 0;
+    const lingering = (input.linger ?? []).some((patch) => (
+      Math.hypot(candidate.x - patch.x, candidate.y - patch.y) <= 18
+    ));
+    const inBeam = along >= 14
+      && along <= input.beam!.range
+      && Math.abs(lateral - wave) <= input.beam!.halfWidth;
+    if (!inBeam && !lingering) return;
     hitIds.push(candidate.id);
     nextHitAtById[candidate.id] = input.elapsedMs + input.beam!.hitGapMs;
   });

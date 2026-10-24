@@ -85,8 +85,10 @@ export interface StampedeSwarmRuntime {
   ): void;
   clearMarks(
     ids: readonly string[],
-    ailment?: 'poison' | 'daze'
+    ailment?: 'poison' | 'daze',
+    dazeMs?: number
   ): readonly StampedeClearedMarkPoint[];
+  dazeMarks(ids: readonly string[], dazeMs?: number): void;
   showResisted(ids: readonly string[]): void;
   consumeBeerHit(): boolean;
   reset(): void;
@@ -363,9 +365,21 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
     return hit;
   }
 
+  dazeMarks(ids: readonly string[], dazeMs = 880): void {
+    if (ids.length === 0) return;
+    const now = this.scene.time.now;
+    const wanted = new Set(ids);
+    this.dots.forEach((dot) => {
+      if (!wanted.has(dot.id) || dot.clearedUntilMs !== null) return;
+      dot.stunnedUntilMs = Math.max(dot.stunnedUntilMs, now + dazeMs);
+      dot.ailmentStep = -1;
+    });
+  }
+
   clearMarks(
     ids: readonly string[],
-    ailment?: 'poison' | 'daze'
+    ailment?: 'poison' | 'daze',
+    dazeMs = 880
   ): readonly StampedeClearedMarkPoint[] {
     if (ids.length === 0) return [];
 
@@ -381,7 +395,7 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
       dot.flapStep = -1;
       dot.ailmentStep = -1;
       if (ailment === 'poison') dot.poisonUntilMs = now + 900;
-      if (ailment === 'daze' && dot.hp > 0) dot.stunnedUntilMs = now + 880;
+      if (ailment === 'daze' && dot.hp > 0) dot.stunnedUntilMs = now + dazeMs;
       this.burstFeathers(dot.shape.x, dot.shape.y, dot.coat, dot.hp > 0 ? 1 : 3);
       drawSwarmChick(dot.chick, {
         mood: 'gag',

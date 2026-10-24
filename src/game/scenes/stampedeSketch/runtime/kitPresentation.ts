@@ -1,15 +1,15 @@
 import * as Phaser from 'phaser';
-import { getBreathBeam } from './auras';
 
 export interface StampedeKitLookFrame {
   x: number;
   y: number;
-  facingX: number;
-  facingY: number;
   disarmed: boolean;
-  breathRank: 0 | 1 | 2;
+  breathBubbles: readonly { x: number; y: number }[];
+  lingerBubbles: readonly { x: number; y: number }[];
   stinkPoints: readonly { x: number; y: number }[];
+  stinkFat: boolean;
   selfieRank: 0 | 1 | 2;
+  selfieRear: boolean;
   glassesRank: 0 | 1 | 2;
 }
 
@@ -29,10 +29,13 @@ export function createStampedeKitLook(scene: Phaser.Scene): StampedeKitLook {
     sync(frame) {
       graphics.clear().setVisible(true).setAlpha(frame.disarmed ? 0.28 : 1);
       if (!frame.disarmed) {
-        if (frame.breathRank > 0) drawPoisonLine(graphics, frame);
-        frame.stinkPoints.forEach((point) => drawStink(graphics, point.x, point.y));
+        frame.lingerBubbles.forEach((point) => drawBubble(graphics, point.x, point.y, 7, 0.28));
+        frame.breathBubbles.forEach((point, index) => (
+          drawBubble(graphics, point.x, point.y, 7 + (index % 3) * 2, 0.72)
+        ));
+        frame.stinkPoints.forEach((point) => drawStink(graphics, point.x, point.y, frame.stinkFat));
         if (frame.selfieRank > 0) drawPhone(graphics, frame.x - 18, frame.y + 2);
-        if (frame.selfieRank >= 2) drawPhone(graphics, frame.x + 16, frame.y - 8);
+        if (frame.selfieRank >= 2 || frame.selfieRear) drawPhone(graphics, frame.x + 16, frame.y - 8);
         if (frame.glassesRank > 0) drawLensGlint(graphics, frame);
       }
       if (frame.disarmed) drawBeerSplash(graphics, frame.x, frame.y - 16);
@@ -43,11 +46,17 @@ export function createStampedeKitLook(scene: Phaser.Scene): StampedeKitLook {
   };
 }
 
-function drawStink(graphics: Phaser.GameObjects.Graphics, x: number, y: number): void {
+function drawStink(
+  graphics: Phaser.GameObjects.Graphics,
+  x: number,
+  y: number,
+  fat: boolean
+): void {
+  const radius = fat ? 26 : 16;
   graphics.fillStyle(STINK, 0.28);
-  graphics.fillCircle(x, y, 16);
+  graphics.fillCircle(x, y, radius);
   graphics.lineStyle(2.5, INK, 0.9);
-  graphics.strokeCircle(x, y, 16);
+  graphics.strokeCircle(x, y, radius);
   graphics.lineStyle(1.6, STINK, 1);
   graphics.beginPath();
   graphics.moveTo(x - 4, y + 2);
@@ -57,36 +66,19 @@ function drawStink(graphics: Phaser.GameObjects.Graphics, x: number, y: number):
   graphics.strokePath();
 }
 
-function drawPoisonLine(
+function drawBubble(
   graphics: Phaser.GameObjects.Graphics,
-  frame: StampedeKitLookFrame
+  x: number,
+  y: number,
+  radius: number,
+  alpha: number
 ): void {
-  const beam = getBreathBeam(frame.breathRank === 2 ? 2 : 1);
-  const length = Math.hypot(frame.facingX, frame.facingY) || 1;
-  const facingX = frame.facingX / length;
-  const facingY = frame.facingY / length;
-  const startX = frame.x + facingX * 16;
-  const startY = frame.y + facingY * 16;
-  const endX = frame.x + facingX * beam.range;
-  const endY = frame.y + facingY * beam.range;
-  graphics.lineStyle(frame.breathRank >= 2 ? 14 : 10, POISON, 0.28);
-  graphics.lineBetween(startX, startY, endX, endY);
-  graphics.lineStyle(2.4, INK, 0.75);
-  graphics.lineBetween(startX, startY, endX, endY);
-  const sideX = -facingY;
-  const sideY = facingX;
-  graphics.lineStyle(1.5, POISON, 0.95);
-  for (let step = 0; step < 4; step += 1) {
-    const along = 28 + step * (beam.range / 5);
-    const wobble = (step % 2 === 0 ? 1 : -1) * 7;
-    const x = frame.x + facingX * along + sideX * wobble;
-    const y = frame.y + facingY * along + sideY * wobble;
-    graphics.beginPath();
-    graphics.moveTo(x - 3, y);
-    graphics.lineTo(x, y - 4);
-    graphics.lineTo(x + 3, y);
-    graphics.strokePath();
-  }
+  graphics.fillStyle(POISON, alpha * 0.45);
+  graphics.fillCircle(x, y, radius);
+  graphics.lineStyle(1.8, INK, alpha);
+  graphics.strokeCircle(x, y, radius);
+  graphics.fillStyle(0xd9f99d, alpha);
+  graphics.fillCircle(x - radius * 0.25, y - radius * 0.28, Math.max(1.2, radius * 0.22));
 }
 
 function drawPhone(graphics: Phaser.GameObjects.Graphics, x: number, y: number): void {

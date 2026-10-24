@@ -69,9 +69,20 @@ describe('chick magnet attacks', () => {
       facing: { x: 1, y: 0 },
       candidates
     });
+    const twist = resolveStampedeSpellCast({
+      spellId: 'fakeGlasses',
+      mods: ['glassesRx', 'glassesSide'],
+      player: { x: 400, y: 300 },
+      facing: { x: 1, y: 0 },
+      candidates: [
+        ...candidates,
+        { id: 'beside', x: 470, y: 340 }
+      ]
+    });
 
     expect(shrugged.hitIds).toEqual(['chick']);
     expect(shrugged.resistedIds).toEqual(['nerd']);
     expect(prescription.hitIds).toEqual(['nerd', 'chick']);
+    expect(twist.hitIds).toEqual(['nerd', 'chick', 'beside']);
   });
 });

@@ -1,9 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { getBreathBeam, getStinkAura, stepBreathBeam, stepOrbitHits, createOrbitHitState } from './auras';
+import {
+  getBreathBeam,
+  getStinkAura,
+  sampleBreathBubbles,
+  stepBreathBeam,
+  stepOrbitHits,
+  createOrbitHitState
+} from './auras';
 
 describe('chick magnet breath and stink', () => {
-  it('pours bad breath only along the direction you face', () => {
-    const beam = getBreathBeam(1);
+  it('pours green bubbles only along the direction you face', () => {
+    const beam = getBreathBeam();
     const cast = stepBreathBeam({
       state: {},
       beam,
@@ -16,25 +23,38 @@ describe('chick magnet breath and stink', () => {
         { id: 'aside', x: 70, y: 40 }
       ]
     });
-    const farther = stepBreathBeam({
+    const wide = stepBreathBeam({
       state: {},
-      beam: getBreathBeam(2),
+      beam: getBreathBeam({ wide: true }),
       elapsedMs: 1_000,
       player: { x: 0, y: 0 },
       facing: { x: 1, y: 0 },
-      candidates: [{ id: 'far', x: 220, y: 0 }]
+      candidates: [{ id: 'aside', x: 70, y: 40 }]
+    });
+    const lingering = stepBreathBeam({
+      state: {},
+      beam,
+      elapsedMs: 1_000,
+      player: { x: 0, y: 0 },
+      facing: { x: 1, y: 0 },
+      candidates: [{ id: 'leftover', x: -30, y: 20 }],
+      linger: [{ x: -30, y: 20 }]
     });
 
     expect(cast.hitIds).toEqual(['ahead']);
-    expect(getBreathBeam(2).range).toBeGreaterThan(beam.range);
-    expect(farther.hitIds).toEqual(['far']);
+    expect(wide.hitIds).toEqual(['aside']);
+    expect(lingering.hitIds).toEqual(['leftover']);
+    expect(sampleBreathBubbles({ x: 0, y: 0 }, { x: 1, y: 0 }, beam).length).toBeGreaterThan(3);
+    expect(getBreathBeam({ wide: true }).halfWidth).toBeGreaterThan(beam.halfWidth);
   });
 
-  it('swings more stink clouds after the upgrade and skips perfume', () => {
-    const first = getStinkAura(1);
-    const meaner = getStinkAura(2);
-    expect(meaner.count).toBeGreaterThan(first.count);
-    expect(meaner.radiansPerSecond).toBeGreaterThan(first.radiansPerSecond);
+  it('twists the stink cloud without giving perfume a pass', () => {
+    const first = getStinkAura();
+    const twin = getStinkAura({ twin: true, far: true, fast: true, fat: true });
+    expect(twin.count).toBe(2);
+    expect(twin.radius).toBeGreaterThan(first.radius);
+    expect(twin.radiansPerSecond).toBeGreaterThan(first.radiansPerSecond);
+    expect(twin.hitRadius).toBeGreaterThan(first.hitRadius);
 
     const hit = stepOrbitHits({
       state: createOrbitHitState(),

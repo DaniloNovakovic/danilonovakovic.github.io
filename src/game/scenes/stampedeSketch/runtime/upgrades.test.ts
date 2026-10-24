@@ -14,22 +14,25 @@ import {
 import { STAMPEDE_PLAYER_SPEED } from './movement';
 
 describe('stampede upgrades', () => {
-  it('starts as a weapon pick and later mixes a meaner weapon with a new one', () => {
-    expect(getStampedeStartingWeaponChoices().map((choice) => choice.id)).toEqual([
-      'badSelfie',
-      'badBreath',
-      'badSmell',
-      'fakeGlasses'
-    ]);
+  it('offers two or three starting weapons and later prefers twists', () => {
+    const steady = () => 0.99;
+    const opening = getStampedeStartingWeaponChoices(steady).map((choice) => choice.id);
+    expect(opening).toEqual(['badSelfie', 'badBreath', 'badSmell']);
+    expect(getStampedeStartingWeaponChoices(() => 0)).toHaveLength(2);
+    expect(opening.length).toBeLessThanOrEqual(3);
 
-    expect(getStampedeUpgradeChoices(['badSelfie']).map((choice) => ({
+    expect(getStampedeUpgradeChoices(['badSelfie'], [], steady).map((choice) => ({
       id: choice.id,
       action: choice.action
     }))).toEqual([
-      { id: 'badSelfie', action: 'upgrade' },
-      { id: 'badBreath', action: 'unlock' },
-      { id: 'badSmell', action: 'unlock' }
+      { id: 'selfieGroup', action: 'upgrade' },
+      { id: 'selfiePose', action: 'upgrade' },
+      { id: 'selfieRear', action: 'upgrade' }
     ]);
+
+    const withUnlock = getStampedeUpgradeChoices(['badSelfie'], [], () => 0);
+    expect(withUnlock).toHaveLength(3);
+    expect(withUnlock.filter((choice) => choice.action === 'unlock')).toHaveLength(1);
   });
 
   it('makes quick pencil shorten the next auto-attack cooldown', () => {

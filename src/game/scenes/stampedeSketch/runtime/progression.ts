@@ -1,4 +1,5 @@
 import {
+  isStampedeModId,
   isStampedeWeaponId,
   type StampedeUpgradeId,
   type StampedeWeaponId
@@ -6,7 +7,7 @@ import {
 
 const STAMPEDE_SCRAP_PICKUP_RADIUS = 10;
 export const STAMPEDE_SCRAP_COLLECTION_RADIUS = 34;
-export const STAMPEDE_DRAFT_GAP_MS = 18_000;
+export const STAMPEDE_DRAFT_GAP_MS = 14_000;
 const STAMPEDE_UPGRADE_THRESHOLDS = [16, 40, 72, 112, 160, 216, 280] as const;
 
 export function nextStampedeScrapGoal(appliedCount: number): number {
@@ -178,7 +179,11 @@ export function applyStampedeUpgradeChoice(
   let appliedUpgradeIds = state.appliedUpgradeIds;
   let upgradedWeaponIds = state.upgradedWeaponIds;
 
-  if (isStampedeWeaponId(upgradeId)) {
+  if (isStampedeModId(upgradeId)) {
+    if (!appliedUpgradeIds.includes(upgradeId)) {
+      appliedUpgradeIds = [...appliedUpgradeIds, upgradeId];
+    }
+  } else if (isStampedeWeaponId(upgradeId)) {
     const rank = state.upgradedWeaponIds.includes(upgradeId)
       ? 2
       : state.appliedUpgradeIds.includes(upgradeId)

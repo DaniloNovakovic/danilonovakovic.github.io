@@ -12,6 +12,9 @@ export interface StampedeAutoAttackProfile {
   length: number;
   halfWidth: number;
   maxHits: number;
+  rear?: boolean;
+  groupDaze?: boolean;
+  longPose?: boolean;
 }
 
 export const DEFAULT_STAMPEDE_AUTO_ATTACK_PROFILE: StampedeAutoAttackProfile = {
@@ -91,7 +94,7 @@ export function resolveStampedeAutoAttackFrame({
     };
   }
 
-  const hits = resolveSelfieHits(player, candidates, profile, elapsedMs);
+  const hits = resolveSelfieHits(player, candidates, profile, elapsedMs, lastDirection);
   const direction = hits[0]
     ? normalizeDirection({
       x: hits[0].x - player.x,
@@ -130,20 +133,51 @@ function resolveSelfieHits(
   player: StampedeAutoAttackPoint,
   candidates: readonly StampedeAutoAttackCandidate[],
   profile: StampedeAutoAttackProfile,
-  elapsedMs: number
+  elapsedMs: number,
+  direction: StampedeAutoAttackPoint
 ): StampedeAutoAttackCandidate[] {
-  return candidates
+  const inRange = candidates
     .filter((candidate) => !isStampedeWeaponImmune(candidate.kind ?? 'chick', 'badSelfie', 1))
     .filter((candidate) => {
       const distance = Math.hypot(candidate.x - player.x, candidate.y - player.y);
       return distance <= profile.range + candidate.radius;
-    })
+    });
+  const hits = inRange
     .sort((left, right) => selfieScore(left.id, elapsedMs) - selfieScore(right.id, elapsedMs))
-    .slice(0, profile.maxHits)
-    .sort((left, right) => (
+    .slice(0, profile.maxHits);
+  if (!profile.rear) {
+    return hits.sort((left, right) => (
       Math.hypot(left.x - player.x, left.y - player.y) -
       Math.hypot(right.x - player.x, right.y - player.y)
     ));
+  }
+  const behind = inRange
+    .filter((candidate) => !hits.includes(candidate))
+    .filter((candidate) => {
+      const dx = candidate.x - player.x;
+      const dy = candidate.y - player.y;
+      const distance = Math.hypot(dx, dy) || 1;
+      return (dx / distance) * direction.x + (dy / distance) * direction.y < -0.35;
+    })
+    .sort((left, right) => (
+      Math.hypot(left.x - player.x, left.y - player.y) -
+      Math.hypot(right.x - player.x, right.y - player.y)
+    ))[0];
+  return [...hits, ...(behind ? [behind] : [])];
+}
+
+export function resolveGroupDazeIds(
+  hitIds: readonly string[],
+  candidates: readonly StampedeAutoAttackCandidate[],
+  radius = 48
+): string[] {
+  const hits = candidates.filter((candidate) => hitIds.includes(candidate.id));
+  return candidates
+    .filter((candidate) => !hitIds.includes(candidate.id))
+    .filter((candidate) => hits.some((hit) => (
+      Math.hypot(candidate.x - hit.x, candidate.y - hit.y) <= radius
+    )))
+    .map((candidate) => candidate.id);
 }
 
 function selfieScore(id: string, elapsedMs: number): number {

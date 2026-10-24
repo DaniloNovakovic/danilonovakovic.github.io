@@ -591,7 +591,7 @@ describe('InteractiveApp', () => {
   it('dispatches Stampede upgrade draft choices through scene UI', async () => {
     bridgeActions.enterScene(STAMPEDE_SKETCH_SCENE_ID);
     bridgeActions.setSceneUiPanel(STAMPEDE_SKETCH_SCENE_ID, 'stampedeUpgradeDraft', {
-      choices: getStampedeUpgradeChoices(),
+      choices: getStampedeUpgradeChoices([], [], () => 0.99),
       scrapsCollected: 3,
       scrapGoal: 3
     });

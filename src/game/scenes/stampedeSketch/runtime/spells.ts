@@ -39,6 +39,7 @@ export interface StampedeSpellCastInput {
   facing: StampedeSpellPoint;
   candidates: readonly StampedeSpellCandidate[];
   rank?: 1 | 2;
+  mods?: readonly string[];
 }
 
 const BAD_BREATH_RANGE = 188;
@@ -59,7 +60,7 @@ const SPELLS: Record<StampedeSpellId, StampedeSpellChoice & {
   badBreath: {
     id: 'badBreath',
     title: 'Bad Breath',
-    description: 'A poison line in front of you, where you are looking.',
+    description: 'Green bubbles pour out in front of you, where you are looking.',
     color: '#1a1a1a',
     cooldownMs: BAD_BREATH_COOLDOWN_MS,
     bark: 'haah',
@@ -111,13 +112,14 @@ export function resolveStampedeSpellCast({
   player,
   facing,
   candidates,
-  rank
+  rank,
+  mods = []
 }: StampedeSpellCastInput): StampedeSpellCast {
   const direction = normalizePoint(facing) ?? { x: 1, y: 0 };
   const spell = SPELLS[spellId];
   const spellRank = rank ?? 1;
   const tuning = spellTuning(spellId, spellRank);
-  const resolved = resolveSpellHits(spellId, player, candidates, tuning, spellRank);
+  const resolved = resolveSpellHits(spellId, player, candidates, tuning, spellRank, mods);
   return {
     spellId,
     origin: { x: player.x, y: player.y },
@@ -165,7 +167,8 @@ function resolveSpellHits(
   player: StampedeSpellPoint,
   candidates: readonly StampedeSpellCandidate[],
   tuning: { range: number; maxHits: number },
-  rank: 1 | 2
+  rank: 1 | 2,
+  mods: readonly string[]
 ): { hits: StampedeSpellCandidate[]; resisted: StampedeSpellCandidate[] } {
   if (spellId === 'badBreath' || spellId === 'badSmell') {
     return { hits: [], resisted: [] };
@@ -177,13 +180,27 @@ function resolveSpellHits(
     [...candidates]
       .sort((left, right) => distanceBetween(player, left) - distanceBetween(player, right))
       .forEach((candidate) => {
-        const immune = isStampedeWeaponImmune(candidate.kind ?? 'chick', 'fakeGlasses', rank);
+        const pierce = rank >= 2 || mods.includes('glassesRx');
+        const immune = !pierce && isStampedeWeaponImmune(candidate.kind ?? 'chick', 'fakeGlasses', 1);
         if (immune) {
           if (distanceBetween(player, candidate) <= 220) resisted.push(candidate);
           return;
         }
         if (hits.length < tuning.maxHits) hits.push(candidate);
       });
+    if (mods.includes('glassesSide')) {
+      const neighbor = [...candidates]
+        .filter((candidate) => !hits.includes(candidate) && !resisted.includes(candidate))
+        .filter((candidate) => hits.some((hit) => distanceBetween(hit, candidate) <= 70))
+        .sort((left, right) => {
+          const leftDistance = Math.min(...hits.map((hit) => distanceBetween(hit, left)));
+          const rightDistance = Math.min(...hits.map((hit) => distanceBetween(hit, right)));
+          return leftDistance - rightDistance;
+        })[0];
+      if (neighbor && !isStampedeWeaponImmune(neighbor.kind ?? 'chick', 'fakeGlasses', pierceRank(rank, mods))) {
+        hits.push(neighbor);
+      }
+    }
     return { hits, resisted };
   }
 
@@ -199,6 +216,10 @@ function resolveSpellHits(
     hits.push(candidate);
   });
   return { hits, resisted };
+}
+
+function pierceRank(rank: 1 | 2, mods: readonly string[]): 1 | 2 {
+  return rank >= 2 || mods.includes('glassesRx') ? 2 : 1;
 }
 
 function distanceBetween(left: StampedeSpellPoint, right: StampedeSpellPoint): number {
