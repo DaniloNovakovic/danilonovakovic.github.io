@@ -58,18 +58,18 @@ function pickDifferent(from: DanceMove, random: () => number): DanceMove {
   return others[Math.floor(random() * others.length)] ?? 'up';
 }
 
-/** A repeat of the previous step weighs less than a change, and a third copy is blocked. */
+/** One-in-four chance to repeat the previous step. A third copy is left out of the pool. */
 function pickStep(phrase: readonly DanceMove[], random: () => number): DanceMove {
-  const previous = phrase[phrase.length - 1] ?? null;
-  const beforeThat = phrase[phrase.length - 2] ?? null;
-  const blocked = previous !== null && previous === beforeThat ? previous : null;
-  const weighted: DanceMove[] = [];
-  for (const move of DANCE_MOVES) {
-    if (move === blocked) continue;
-    const weight = move === previous ? 1 : 2;
-    for (let i = 0; i < weight; i++) weighted.push(move);
-  }
-  return weighted[Math.floor(random() * weighted.length)] ?? 'up';
+  const pool = stepChoices(phrase);
+  return pool[Math.floor(random() * pool.length)] ?? 'up';
+}
+
+function stepChoices(phrase: readonly DanceMove[]): readonly DanceMove[] {
+  const previous = phrase[phrase.length - 1];
+  if (previous === undefined) return DANCE_MOVES;
+  const others = DANCE_MOVES.filter((move) => move !== previous);
+  if (previous === phrase[phrase.length - 2]) return others;
+  return [previous, ...others];
 }
 
 function minimumDirections(length: number): number {

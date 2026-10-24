@@ -41,11 +41,7 @@ describe('reward and demo timing', () => {
     let previous: DanceMove[] | null = null;
     for (let length = 1; length <= 8; length++) {
       const phrase = composePhrase(length, previous, () => 0);
-      expect(phrase).toHaveLength(length);
-      expect(hasTriple(phrase)).toBe(false);
-      if (length >= 3) expect(new Set(phrase).size).toBeGreaterThanOrEqual(2);
-      if (length >= 5) expect(new Set(phrase).size).toBeGreaterThanOrEqual(3);
-      if (previous) expect(phrase.slice(0, previous.length)).not.toEqual(previous);
+      expectFreshPhrase(phrase, length, previous);
       previous = phrase;
     }
     expect(composePhrase(4, null, () => 0).some((move, index, phrase) => move === phrase[index - 1])).toBe(true);
@@ -57,16 +53,20 @@ describe('reward and demo timing', () => {
       let previous: DanceMove[] | null = null;
       for (let length = 1; length <= 8; length++) {
         const phrase = composePhrase(length, previous, random);
-        expect(phrase).toHaveLength(length);
-        expect(hasTriple(phrase)).toBe(false);
-        if (length >= 3) expect(new Set(phrase).size).toBeGreaterThanOrEqual(2);
-        if (length >= 5) expect(new Set(phrase).size).toBeGreaterThanOrEqual(3);
-        if (previous) expect(phrase.slice(0, previous.length)).not.toEqual(previous);
+        expectFreshPhrase(phrase, length, previous);
         previous = phrase;
       }
     }
   });
 });
+
+function expectFreshPhrase(phrase: DanceMove[], length: number, previous: DanceMove[] | null) {
+  expect(phrase).toHaveLength(length);
+  expect(hasTriple(phrase)).toBe(false);
+  const minimumDirections = length >= 5 ? 3 : 2;
+  if (length >= 3) expect(new Set(phrase).size).toBeGreaterThanOrEqual(minimumDirections);
+  if (previous) expect(phrase.slice(0, previous.length)).not.toEqual(previous);
+}
 
 function lcg(seed: number): () => number {
   let state = seed;
