@@ -75,7 +75,7 @@ export const miniGameMessages = {
   },
   guitar: {
     title: "Guitar",
-    instruction: "G major on the letters: G Am Bm C D Em, and F is F#°. J K L pick G, B, high E. I O P pick the bass.",
+    instruction: "G major on the letters: G Am Bm C D Em, and F is F#°. I O P pick G, B, high E. N J K pick low E, A, D.",
     stringsLabel: "Guitar strings",
     stringLabel: (note: string, key: string) => `String ${key} (${note})`,
     mutedStringLabel: (key: string) => `String ${key}, muted`,
