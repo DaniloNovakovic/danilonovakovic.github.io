@@ -15,6 +15,11 @@ function stringY(index: number): number {
   return FIRST_STRING_Y + index * STRING_SPACING;
 }
 
+function speakingStart(fret: number | null): number {
+  if (fret === null || fret <= 0) return NUT_X;
+  return FRET_XS[fret - 1] ?? NUT_X;
+}
+
 function rowAt(event: PointerEvent<HTMLDivElement>): number {
   const rect = event.currentTarget.getBoundingClientRect();
   if (rect.height <= 0) return 0;
@@ -25,45 +30,69 @@ function rowAt(event: PointerEvent<HTMLDivElement>): number {
 
 interface StringBoardProps {
   label: string;
+  gripName: string;
+  /** Fret per string, index 0 = high E. `null` is muted. */
+  frets: readonly (number | null)[];
+  palm: boolean;
   /** Pluck counter per string (top to bottom); a change replays that string's vibration. */
   plucks: readonly number[];
   onPick: (spec: GuitarStringSpec) => void;
   onStrum: (spec: GuitarStringSpec) => void;
+  /** A stroke that crossed at least two strings — a strum, not a single pick. */
+  onRake: () => void;
 }
 
 /**
- * Six strings over a hatched sound hole. Pointer down picks the string under
- * the pointer; hovering (mouse) or dragging (touch/pen) across strings strums.
+ * Six strings over a hatched sound hole, with the latched chord drawn on the
+ * frets. Pointer down picks the string under the pointer; hovering (mouse) or
+ * dragging across strings strums. Crossing a second string counts as a rake.
  */
-export function StringBoard({ label, plucks, onPick, onStrum }: StringBoardProps) {
+export function StringBoard({ label, gripName, frets, palm, plucks, onPick, onStrum, onRake }: StringBoardProps) {
   const hatchId = useId();
   const lastRowRef = useRef<number | null>(null);
+  const rowsRef = useRef(new Set<number>());
+  const rakedRef = useRef(false);
+
+  const endStroke = () => {
+    lastRowRef.current = null;
+    rowsRef.current.clear();
+    rakedRef.current = false;
+  };
+
+  const hit = (row: number, kind: 'pick' | 'strum') => {
+    if (row === lastRowRef.current) return;
+    lastRowRef.current = row;
+    rowsRef.current.add(row);
+    const spec = GUITAR_STRINGS[row];
+    if (!spec) return;
+    if (kind === 'pick') onPick(spec);
+    else onStrum(spec);
+    if (!rakedRef.current && rowsRef.current.size >= 2) {
+      rakedRef.current = true;
+      onRake();
+    }
+  };
 
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
     if (event.pointerType === 'mouse' && event.button !== 0) return;
-    const row = rowAt(event);
-    lastRowRef.current = row;
-    onPick(GUITAR_STRINGS[row]!);
+    hit(rowAt(event), 'pick');
   };
 
   const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
     if (event.pointerType !== 'mouse' && event.buttons === 0) return;
-    const row = rowAt(event);
-    if (row === lastRowRef.current) return;
-    lastRowRef.current = row;
-    onStrum(GUITAR_STRINGS[row]!);
+    hit(rowAt(event), 'strum');
   };
 
   return (
     <div
       role="img"
       aria-label={label}
-      className="aspect-[320/132] w-full cursor-pointer touch-none select-none"
+      className="relative aspect-[320/132] w-full cursor-pointer touch-none select-none"
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
-      onPointerLeave={() => {
-        lastRowRef.current = null;
-      }}
+      onPointerUp={endStroke}
+      onPointerLeave={endStroke}
+      onPointerCancel={endStroke}
     >
       <svg viewBox={`0 0 320 ${VIEW_HEIGHT}`} className="h-full w-full" aria-hidden="true">
         <defs>
@@ -76,30 +105,100 @@ export function StringBoard({ label, plucks, onPick, onStrum }: StringBoardProps
         {FRET_XS.map((x) => (
           <line key={x} x1={x} y1="4" x2={x} y2={VIEW_HEIGHT - 4} stroke={INK} strokeWidth="1.5" opacity="0.35" />
         ))}
+        {palm ? <rect x="262" y="8" width="18" height={VIEW_HEIGHT - 16} fill={INK} opacity="0.16" /> : null}
         <line x1={NUT_X} y1="2" x2={NUT_X} y2={VIEW_HEIGHT - 2} stroke={INK} strokeWidth="5" />
         <rect x={BRIDGE_X - 3} y="6" width="8" height={VIEW_HEIGHT - 12} fill={PAPER} stroke={INK} strokeWidth="2.5" />
         {GUITAR_STRINGS.map((spec, index) => (
-          <GuitarString key={spec.number} spec={spec} y={stringY(index)} pluckId={plucks[index] ?? 0} />
+          <GuitarString
+            key={spec.number}
+            spec={spec}
+            y={stringY(index)}
+            fret={frets[index] ?? null}
+            palm={palm}
+            pluckId={plucks[index] ?? 0}
+          />
+        ))}
+        {frets.map((fret, index) => (
+          <FretMarker key={index} fret={fret ?? null} y={stringY(index)} />
         ))}
       </svg>
+      <span className="pointer-events-none absolute left-[66%] top-1/2 -translate-x-1/2 -translate-y-1/2 border-2 border-[#1a1a1a] bg-[#fbfbf9] px-1.5 font-mono text-sm font-black leading-none">
+        {gripName}
+      </span>
     </div>
   );
 }
 
-function GuitarString({ spec, y, pluckId }: { spec: GuitarStringSpec; y: number; pluckId: number }) {
+function FretMarker({ fret, y }: { fret: number | null; y: number }) {
+  if (fret === null) {
+    const x = NUT_X + 16;
+    return (
+      <g stroke={INK} strokeWidth="1.7" strokeLinecap="round">
+        <line x1={x - 3.2} y1={y - 3.2} x2={x + 3.2} y2={y + 3.2} />
+        <line x1={x - 3.2} y1={y + 3.2} x2={x + 3.2} y2={y - 3.2} />
+      </g>
+    );
+  }
+  if (fret <= 0) {
+    return <circle cx={NUT_X + 16} cy={y} r="3.2" fill={PAPER} stroke={INK} strokeWidth="1.5" />;
+  }
+  const x = FRET_XS[fret - 1];
+  if (x === undefined) return null;
+  return <circle cx={x} cy={y} r="4.4" fill={INK} />;
+}
+
+function GuitarString({
+  spec,
+  y,
+  fret,
+  palm,
+  pluckId
+}: {
+  spec: GuitarStringSpec;
+  y: number;
+  fret: number | null;
+  palm: boolean;
+  pluckId: number;
+}) {
+  const startX = speakingStart(fret);
+  const stopped = fret !== null && fret > 0;
+  const muted = fret === null;
   const amplitude = 3 + spec.gauge * 1.2;
+  const originX = (startX + BRIDGE_X) / 2;
+  const motion = palm || muted ? 'hobby-string-chuck' : 'hobby-string-vibrate';
   return (
     <g>
-      <line x1={NUT_X} y1={y} x2={BRIDGE_X} y2={y} stroke={INK} strokeWidth={spec.gauge} strokeLinecap="round" />
-      {spec.wound ? (
-        <line x1={NUT_X} y1={y} x2={BRIDGE_X} y2={y} stroke={PAPER} strokeWidth={spec.gauge * 0.5} strokeDasharray="0.8 1.8" />
+      <line
+        x1={NUT_X}
+        y1={y}
+        x2={BRIDGE_X}
+        y2={y}
+        stroke={INK}
+        strokeWidth={spec.gauge}
+        strokeLinecap="round"
+        strokeDasharray={muted ? '2 3' : undefined}
+        opacity={stopped || muted ? 0.28 : 1}
+      />
+      {stopped ? (
+        <line x1={startX} y1={y} x2={BRIDGE_X} y2={y} stroke={INK} strokeWidth={spec.gauge} strokeLinecap="round" />
+      ) : null}
+      {spec.wound && !muted ? (
+        <line
+          x1={startX}
+          y1={y}
+          x2={BRIDGE_X}
+          y2={y}
+          stroke={PAPER}
+          strokeWidth={spec.gauge * 0.5}
+          strokeDasharray="0.8 1.8"
+        />
       ) : null}
       {pluckId > 0 ? (
         <g key={pluckId}>
           <path
-            className="hobby-string-vibrate"
-            style={{ transformOrigin: `160px ${y}px` }}
-            d={`M${NUT_X} ${y} Q 156 ${y - amplitude * 2} ${BRIDGE_X} ${y}`}
+            className={motion}
+            style={{ transformOrigin: `${originX}px ${y}px` }}
+            d={`M${startX} ${y} Q ${originX} ${y - amplitude * 2} ${BRIDGE_X} ${y}`}
             fill="none"
             stroke={INK}
             strokeWidth={spec.gauge}
@@ -107,7 +206,7 @@ function GuitarString({ spec, y, pluckId }: { spec: GuitarStringSpec; y: number;
           />
           <line
             className="hobby-string-flash"
-            x1={NUT_X}
+            x1={startX}
             y1={y}
             x2={BRIDGE_X}
             y2={y}
