@@ -24,11 +24,21 @@ export interface StampedeOrbitHitState {
   nextHitAtById: Record<string, number>;
 }
 
+export interface StampedeBreathBeam {
+  range: number;
+  halfWidth: number;
+  hitGapMs: number;
+}
+
 export function createOrbitHitState(): StampedeOrbitHitState {
   return { count: 0, angles: [], nextHitAtById: {} };
 }
 
-export function getBreathAura(rank: 1 | 2): StampedeOrbitAura {
+export function createBreathHitState(): Record<string, number> {
+  return {};
+}
+
+export function getStinkAura(rank: 1 | 2): StampedeOrbitAura {
   if (rank >= 2) {
     return {
       count: 3,
@@ -47,11 +57,11 @@ export function getBreathAura(rank: 1 | 2): StampedeOrbitAura {
   };
 }
 
-export function getSmellMoteAura(rank: 1 | 2): StampedeOrbitAura {
+export function getBreathBeam(rank: 1 | 2): StampedeBreathBeam {
   if (rank >= 2) {
-    return { count: 6, radius: 36, hitRadius: 0, radiansPerSecond: 1.7, hitGapMs: 0 };
+    return { range: 248, halfWidth: 22, hitGapMs: 420 };
   }
-  return { count: 3, radius: 28, hitRadius: 0, radiansPerSecond: 0.75, hitGapMs: 0 };
+  return { range: 168, halfWidth: 16, hitGapMs: 640 };
 }
 
 export function stepOrbitHits(input: {
@@ -77,7 +87,7 @@ export function stepOrbitHits(input: {
   const hitIds: string[] = [];
 
   input.candidates.forEach((candidate) => {
-    if (isStampedeWeaponImmune(candidate.kind ?? 'chick', 'badBreath', 1)) return;
+    if (isStampedeWeaponImmune(candidate.kind ?? 'chick', 'badSmell', 1)) return;
     if (input.elapsedMs < (nextHitAtById[candidate.id] ?? 0)) return;
     const touched = points.some((point) => (
       Math.hypot(point.x - candidate.x, point.y - candidate.y) <= aura.hitRadius
@@ -94,18 +104,34 @@ export function stepOrbitHits(input: {
   };
 }
 
-export function sampleOrbitPoints(
-  player: StampedeOrbitPoint,
-  aura: StampedeOrbitAura,
-  elapsedMs: number
-): StampedeOrbitPoint[] {
-  return evenAngles(aura.count).map((offset) => {
-    const angle = offset + aura.radiansPerSecond * (elapsedMs / 1000);
-    return {
-      x: player.x + Math.cos(angle) * aura.radius,
-      y: player.y + Math.sin(angle) * aura.radius
-    };
+export function stepBreathBeam(input: {
+  state: Record<string, number>;
+  beam: StampedeBreathBeam | null;
+  elapsedMs: number;
+  player: StampedeOrbitPoint;
+  facing: StampedeOrbitPoint;
+  candidates: readonly StampedeOrbitCandidate[];
+}): { state: Record<string, number>; hitIds: string[] } {
+  if (!input.beam) return { state: {}, hitIds: [] };
+  const facingLength = Math.hypot(input.facing.x, input.facing.y) || 1;
+  const facingX = input.facing.x / facingLength;
+  const facingY = input.facing.y / facingLength;
+  const nextHitAtById = { ...input.state };
+  const hitIds: string[] = [];
+
+  input.candidates.forEach((candidate) => {
+    if (isStampedeWeaponImmune(candidate.kind ?? 'chick', 'badBreath', 1)) return;
+    if (input.elapsedMs < (nextHitAtById[candidate.id] ?? 0)) return;
+    const dx = candidate.x - input.player.x;
+    const dy = candidate.y - input.player.y;
+    const along = dx * facingX + dy * facingY;
+    const lateral = Math.abs(dx * facingY - dy * facingX);
+    if (along < 14 || along > input.beam!.range || lateral > input.beam!.halfWidth) return;
+    hitIds.push(candidate.id);
+    nextHitAtById[candidate.id] = input.elapsedMs + input.beam!.hitGapMs;
   });
+
+  return { state: nextHitAtById, hitIds };
 }
 
 function evenAngles(count: number): number[] {

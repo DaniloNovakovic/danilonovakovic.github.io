@@ -1,4 +1,5 @@
 import * as Phaser from 'phaser';
+import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
 import {
   STAMPEDE_ARENA,
   clampStampedePosition
@@ -9,6 +10,7 @@ import {
   resolveStampedeSwarmTarget
 } from './swarmMotion';
 import type { StampedeClearedMarkPoint } from './progression';
+import { pickStampedeBark, stampedeBarkReadyAt } from './barks';
 import { createBeerShot, stepBeerShots, STAMPEDE_BARTENDER_THROW_MS, type StampedeBeerShot } from './beer';
 import {
   getStampedeFlockProfile,
@@ -46,6 +48,10 @@ interface StampedeSwarmDot {
   fleeVy: number;
   hitFlapUntilMs: number;
   nextTrickAtMs: number;
+  poisonUntilMs: number;
+  stunnedUntilMs: number;
+  nextBarkAtMs: number;
+  ailmentStep: number;
 }
 
 export type StampedeSwarmMode = 'calm' | 'build' | 'surge' | 'recover';
@@ -77,7 +83,10 @@ export interface StampedeSwarmRuntime {
     nowMs: number,
     impulses: readonly { id: string; vx: number; vy: number; fleeMs: number }[]
   ): void;
-  clearMarks(ids: readonly string[]): readonly StampedeClearedMarkPoint[];
+  clearMarks(
+    ids: readonly string[],
+    ailment?: 'poison' | 'daze'
+  ): readonly StampedeClearedMarkPoint[];
   showResisted(ids: readonly string[]): void;
   consumeBeerHit(): boolean;
   reset(): void;
@@ -141,7 +150,11 @@ export function createStampedeSwarmRuntime(
       fleeVx: 0,
       fleeVy: 0,
       hitFlapUntilMs: 0,
-      nextTrickAtMs: 0
+      nextTrickAtMs: 0,
+      poisonUntilMs: 0,
+      stunnedUntilMs: 0,
+      nextBarkAtMs: Number.POSITIVE_INFINITY,
+      ailmentStep: -1
     };
   });
 
@@ -161,6 +174,10 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
   private readonly resistMarks: Phaser.GameObjects.Graphics[];
   private resistCursor = 0;
   private beerHit = false;
+  private readonly bark: Phaser.GameObjects.Text;
+  private barkSpeakerId: string | null = null;
+  private barkUntilMs = 0;
+  private nextBarkGlobalAtMs = 0;
 
   constructor(
     scene: Phaser.Scene,
@@ -186,6 +203,13 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
       drawResistMark(mark);
       return mark;
     });
+    this.bark = createUiText(scene, 0, 0, '', {
+      fontSize: '13px',
+      color: '#1a1a1a',
+      fontStyle: 'bold',
+      backgroundColor: '#fbfbf9',
+      padding: { x: 5, y: 2 }
+    }).setOrigin(0.5, 1).setDepth(33).setVisible(false);
   }
 
   update(target: { x: number; y: number }, delta: number, options: StampedeSwarmUpdateOptions = {}): void {
@@ -207,6 +231,18 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
       }
 
       this.maybePromote(dot);
+
+      if (nowMs < dot.stunnedUntilMs) {
+        const spin = Math.sin(nowMs / 90 + dot.phase) * 10;
+        const held = clampStampedePosition(
+          { x: dot.shape.x + spin * deltaSeconds, y: dot.shape.y },
+          STAMPEDE_SWARM_BOUNDS
+        );
+        dot.shape.setPosition(held.x, held.y);
+        this.syncChick(dot, dot.facing === 1 ? 1 : -1, nowMs, false);
+        this.syncHalo(dot, false, motion.alphaMultiplier);
+        return;
+      }
 
       if (nowMs < dot.fleeUntilMs) {
         const damp = Math.max(0.35, Math.min(1, (dot.fleeUntilMs - nowMs) / 400));
@@ -268,6 +304,7 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
       this.syncHalo(dot, isNear, motion.alphaMultiplier);
     });
     this.stepBeers(delta, nowMs, target);
+    this.maybeBark(nowMs, target);
   }
 
   getContactCandidates(): readonly StampedeSwarmContactCandidate[] {
@@ -326,7 +363,10 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
     return hit;
   }
 
-  clearMarks(ids: readonly string[]): readonly StampedeClearedMarkPoint[] {
+  clearMarks(
+    ids: readonly string[],
+    ailment?: 'poison' | 'daze'
+  ): readonly StampedeClearedMarkPoint[] {
     if (ids.length === 0) return [];
 
     const hitIds = new Set(ids);
@@ -339,6 +379,9 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
       dot.hp -= 1;
       dot.hitFlapUntilMs = now + (dot.hp > 0 ? 180 : 280);
       dot.flapStep = -1;
+      dot.ailmentStep = -1;
+      if (ailment === 'poison') dot.poisonUntilMs = now + 900;
+      if (ailment === 'daze' && dot.hp > 0) dot.stunnedUntilMs = now + 880;
       this.burstFeathers(dot.shape.x, dot.shape.y, dot.coat, dot.hp > 0 ? 1 : 3);
       drawSwarmChick(dot.chick, {
         mood: 'gag',
@@ -421,6 +464,10 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
       this.scene.tweens.killTweensOf(mark);
       mark.setVisible(false);
     });
+    this.bark.setVisible(false);
+    this.barkSpeakerId = null;
+    this.barkUntilMs = 0;
+    this.nextBarkGlobalAtMs = 0;
   }
 
   private restoreDot(dot: StampedeSwarmDot): void {
@@ -433,6 +480,9 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
     dot.fleeVx = 0;
     dot.fleeVy = 0;
     dot.hitFlapUntilMs = 0;
+    dot.poisonUntilMs = 0;
+    dot.stunnedUntilMs = 0;
+    dot.ailmentStep = -1;
     this.applyKind(dot, resolveStampedeFlockKind(dot.slot, this.elapsedMs));
     drawSwarmChick(dot.chick, {
       mood: 'chase',
@@ -472,19 +522,32 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
     const facing: 1 | -1 = faceX >= 0 ? 1 : -1;
     const mood = forced ?? (smitten ? 'smitten' : 'chase');
     const hit = nowMs < dot.hitFlapUntilMs;
-    const flap = wingFlap(nowMs, dot.phase, smitten || forced === 'gag' || hit, hit);
+    const poisoned = nowMs < dot.poisonUntilMs;
+    const dazed = nowMs < dot.stunnedUntilMs;
+    const poisonFlash = poisoned && Math.floor(nowMs / 120) % 2 === 0;
+    const ailmentStep = (dazed ? 2 : 0) + (poisonFlash ? 1 : 0);
+    const flap = wingFlap(nowMs, dot.phase, smitten || forced === 'gag' || hit || dazed, hit);
     const flapStep = Math.round(flap * 4);
-    if (dot.facing !== facing || dot.mood !== mood || dot.flapStep !== flapStep) {
+    if (
+      dot.facing !== facing
+      || dot.mood !== mood
+      || dot.flapStep !== flapStep
+      || dot.ailmentStep !== ailmentStep
+    ) {
       dot.facing = facing;
       dot.mood = mood;
       dot.flapStep = flapStep;
+      dot.ailmentStep = ailmentStep;
       drawSwarmChick(dot.chick, {
         mood,
         flap,
         coat: dot.coat,
         kind: dot.kind,
         hp: dot.hp,
-        maxHp: dot.maxHp
+        maxHp: dot.maxHp,
+        poisoned,
+        poisonFlash,
+        dazed
       });
     }
     const kindScale = kindScaleFor(dot.kind);
@@ -493,7 +556,9 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
       ? Math.sin(nowMs / 45 + dot.phase) * 4
       : Math.sin(nowMs / 90 + dot.phase) * 3) * (dot.kind === 'hen' ? 1.7 : 1);
     const hop = flap > 0.45 ? -4 * flap : 0;
-    const angle = hit
+    const angle = dazed
+      ? Math.sin(nowMs / 70 + dot.phase) * 18
+      : hit
       ? Math.sin(nowMs / 40 + dot.phase) * 22
       : mood === 'gag'
         ? Math.sin(nowMs / 60 + dot.phase) * 16
@@ -530,6 +595,7 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
     dot.nextTrickAtMs = kind === 'bartender' || kind === 'fixer'
       ? this.scene.time.now + 900
       : 0;
+    dot.nextBarkAtMs = stampedeBarkReadyAt(kind, this.scene.time.now);
     dot.shape.setRadius(dot.homeRadius);
   }
 
@@ -649,6 +715,48 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
     }
   }
 
+  private maybeBark(nowMs: number, focus: { x: number; y: number }): void {
+    if (this.barkSpeakerId && nowMs < this.barkUntilMs) {
+      const speaker = this.dots.find((dot) => (
+        dot.id === this.barkSpeakerId && dot.clearedUntilMs === null
+      ));
+      if (!speaker) {
+        this.bark.setVisible(false);
+        this.barkSpeakerId = null;
+        return;
+      }
+      this.bark.setPosition(speaker.shape.x, speaker.shape.y - 28);
+      return;
+    }
+
+    this.bark.setVisible(false);
+    const pick = pickStampedeBark(
+      this.dots
+        .filter((dot) => (
+          dot.clearedUntilMs === null
+          && nowMs >= dot.nextBarkAtMs
+          && nowMs >= dot.stunnedUntilMs
+        ))
+        .map((dot) => ({
+          id: dot.id,
+          kind: dot.kind,
+          x: dot.shape.x,
+          y: dot.shape.y
+        })),
+      nowMs,
+      this.nextBarkGlobalAtMs,
+      focus
+    );
+    if (!pick) return;
+    const speaker = this.dots.find((dot) => dot.id === pick.id);
+    if (!speaker) return;
+    speaker.nextBarkAtMs = nowMs + 8_000;
+    this.nextBarkGlobalAtMs = pick.nextBarkAtMs;
+    this.barkSpeakerId = pick.id;
+    this.barkUntilMs = nowMs + 1_400;
+    this.bark.setText(pick.line).setPosition(speaker.shape.x, speaker.shape.y - 28).setVisible(true);
+  }
+
   private popHeart(x: number, y: number): void {
     const heart = this.hearts[this.heartCursor];
     if (!heart) return;
@@ -764,6 +872,9 @@ function drawSwarmChick(
     kind?: StampedeFlockKind;
     hp?: number;
     maxHp?: number;
+    poisoned?: boolean;
+    poisonFlash?: boolean;
+    dazed?: boolean;
   }
 ): void {
   const { mood, flap, coat } = pose;
@@ -851,6 +962,19 @@ function drawSwarmChick(
     }
   }
   drawKindTell(g, kind, mood);
+
+  if (pose.poisoned) {
+    g.fillStyle(0x6f9f3a, pose.poisonFlash ? 0.62 : 0.24);
+    g.fillEllipse(1, 1, 16, 14);
+  }
+  if (pose.dazed) {
+    g.lineStyle(1.2, CHICK_INK, 1);
+    g.strokeCircle(6.4, -6.4, 1.7);
+    g.strokeCircle(8.6, -5.2, 1.3);
+    g.fillStyle(0xf0a202, 1);
+    g.fillCircle(2.2, -15, 1.1);
+    g.fillCircle(10.2, -15.4, 0.9);
+  }
 
   if (maxHp > 1) {
     for (let index = 0; index < maxHp; index += 1) {

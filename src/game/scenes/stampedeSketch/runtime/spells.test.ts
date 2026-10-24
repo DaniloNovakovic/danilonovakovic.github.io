@@ -16,48 +16,22 @@ describe('chick magnet attacks', () => {
     expect(resolveEquippedStampedeSpell(['badBreath', 'fakeGlasses'])).toBe('fakeGlasses');
   });
 
-  it('leaves bad breath damage to the orbiting stink circles', () => {
-    const cast = resolveStampedeSpellCast({
+  it('leaves breath and stink damage to the steady line and the cloud', () => {
+    const breath = resolveStampedeSpellCast({
       spellId: 'badBreath',
       player: { x: 200, y: 200 },
       facing: { x: 1, y: 0 },
-      candidates: [
-        { id: 'ahead', x: 320, y: 210 },
-        { id: 'behind', x: 80, y: 200 }
-      ]
+      candidates: [{ id: 'ahead', x: 320, y: 210 }]
     });
-
-    expect(cast.hitIds).toEqual([]);
-  });
-
-  it('lets a bad smell damage every chick in the circle', () => {
-    const cast = resolveStampedeSpellCast({
+    const smell = resolveStampedeSpellCast({
       spellId: 'badSmell',
       player: { x: 200, y: 200 },
       facing: { x: 1, y: 0 },
-      candidates: [
-        { id: 'left', x: 120, y: 200 },
-        { id: 'right', x: 280, y: 200 },
-        { id: 'far', x: 200, y: 420 }
-      ]
+      candidates: [{ id: 'near', x: 250, y: 200, kind: 'perfume' }]
     });
 
-    expect(cast.hitIds).toEqual(['left', 'right']);
-  });
-
-  it('lets a perfume chick ignore the smell', () => {
-    const cast = resolveStampedeSpellCast({
-      spellId: 'badSmell',
-      player: { x: 200, y: 200 },
-      facing: { x: 1, y: 0 },
-      candidates: [
-        { id: 'plain', x: 250, y: 200 },
-        { id: 'cloud', x: 160, y: 200, kind: 'perfume' }
-      ]
-    });
-
-    expect(cast.hitIds).toEqual(['plain']);
-    expect(cast.resistedIds).toEqual(['cloud']);
+    expect(breath.hitIds).toEqual([]);
+    expect(smell.hitIds).toEqual([]);
   });
 
   it('damages the nearest chicks when the glasses flash', () => {

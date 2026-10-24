@@ -39,15 +39,15 @@ const STAMPEDE_LEVEL_UP_CHOICE_COUNT = 3;
 
 const SELFIE_COPY = {
   title: 'Bad Selfie',
-  description: 'Damages a couple of random chicks nearby. A situationship will not pose.',
-  upgradeDescription: 'More chicks, from farther away, and it fires faster.',
+  description: 'Damages a couple of random chicks nearby. Survivors are left dazed. A situationship will not pose.',
+  upgradeDescription: 'More chicks, from farther away, and it fires faster. Survivors stay dazed.',
   color: '#c2410c'
 } as const;
 
 const UPGRADE_COPY: Record<StampedeWeaponId, string> = {
   badSelfie: SELFIE_COPY.upgradeDescription,
-  badBreath: 'More stink circles, and they swing around faster.',
-  badSmell: 'The circle gets bigger and comes back faster.',
+  badBreath: 'The poison line reaches farther and keeps pouring.',
+  badSmell: 'More stink clouds, and they swing around faster.',
   fakeGlasses: 'A real prescription. Nerds flinch too, and a couple more fold.'
 };
 

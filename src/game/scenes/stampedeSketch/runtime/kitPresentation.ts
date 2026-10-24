@@ -1,13 +1,14 @@
 import * as Phaser from 'phaser';
-import { getSmellMoteAura, sampleOrbitPoints } from './auras';
+import { getBreathBeam } from './auras';
 
 export interface StampedeKitLookFrame {
   x: number;
   y: number;
-  elapsedMs: number;
+  facingX: number;
+  facingY: number;
   disarmed: boolean;
-  breathPoints: readonly { x: number; y: number }[];
-  smellRank: 0 | 1 | 2;
+  breathRank: 0 | 1 | 2;
+  stinkPoints: readonly { x: number; y: number }[];
   selfieRank: 0 | 1 | 2;
   glassesRank: 0 | 1 | 2;
 }
@@ -18,8 +19,8 @@ export interface StampedeKitLook {
 }
 
 const INK = 0x1a1a1a;
+const POISON = 0x6f9f3a;
 const STINK = 0x7d8f3a;
-const SMELL = 0xc45c8a;
 const AMBER = 0xf0a202;
 
 export function createStampedeKitLook(scene: Phaser.Scene): StampedeKitLook {
@@ -27,11 +28,9 @@ export function createStampedeKitLook(scene: Phaser.Scene): StampedeKitLook {
   return {
     sync(frame) {
       graphics.clear().setVisible(true).setAlpha(frame.disarmed ? 0.28 : 1);
-      if (!frame.disarmed && frame.smellRank > 0) {
-        drawSmell(graphics, frame);
-      }
       if (!frame.disarmed) {
-        frame.breathPoints.forEach((point) => drawStink(graphics, point.x, point.y));
+        if (frame.breathRank > 0) drawPoisonLine(graphics, frame);
+        frame.stinkPoints.forEach((point) => drawStink(graphics, point.x, point.y));
         if (frame.selfieRank > 0) drawPhone(graphics, frame.x - 18, frame.y + 2);
         if (frame.selfieRank >= 2) drawPhone(graphics, frame.x + 16, frame.y - 8);
         if (frame.glassesRank > 0) drawLensGlint(graphics, frame);
@@ -58,19 +57,36 @@ function drawStink(graphics: Phaser.GameObjects.Graphics, x: number, y: number):
   graphics.strokePath();
 }
 
-function drawSmell(
+function drawPoisonLine(
   graphics: Phaser.GameObjects.Graphics,
   frame: StampedeKitLookFrame
 ): void {
-  const aura = getSmellMoteAura(frame.smellRank === 2 ? 2 : 1);
-  graphics.lineStyle(2, SMELL, 0.55);
-  graphics.strokeCircle(frame.x, frame.y, aura.radius);
-  sampleOrbitPoints({ x: frame.x, y: frame.y }, aura, frame.elapsedMs).forEach((point) => {
-    graphics.fillStyle(SMELL, 0.85);
-    graphics.fillCircle(point.x, point.y, frame.smellRank >= 2 ? 3.4 : 2.6);
-    graphics.lineStyle(1.2, INK, 0.8);
-    graphics.strokeCircle(point.x, point.y, frame.smellRank >= 2 ? 3.4 : 2.6);
-  });
+  const beam = getBreathBeam(frame.breathRank === 2 ? 2 : 1);
+  const length = Math.hypot(frame.facingX, frame.facingY) || 1;
+  const facingX = frame.facingX / length;
+  const facingY = frame.facingY / length;
+  const startX = frame.x + facingX * 16;
+  const startY = frame.y + facingY * 16;
+  const endX = frame.x + facingX * beam.range;
+  const endY = frame.y + facingY * beam.range;
+  graphics.lineStyle(frame.breathRank >= 2 ? 14 : 10, POISON, 0.28);
+  graphics.lineBetween(startX, startY, endX, endY);
+  graphics.lineStyle(2.4, INK, 0.75);
+  graphics.lineBetween(startX, startY, endX, endY);
+  const sideX = -facingY;
+  const sideY = facingX;
+  graphics.lineStyle(1.5, POISON, 0.95);
+  for (let step = 0; step < 4; step += 1) {
+    const along = 28 + step * (beam.range / 5);
+    const wobble = (step % 2 === 0 ? 1 : -1) * 7;
+    const x = frame.x + facingX * along + sideX * wobble;
+    const y = frame.y + facingY * along + sideY * wobble;
+    graphics.beginPath();
+    graphics.moveTo(x - 3, y);
+    graphics.lineTo(x, y - 4);
+    graphics.lineTo(x + 3, y);
+    graphics.strokePath();
+  }
 }
 
 function drawPhone(graphics: Phaser.GameObjects.Graphics, x: number, y: number): void {

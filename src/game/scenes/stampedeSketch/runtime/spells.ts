@@ -59,7 +59,7 @@ const SPELLS: Record<StampedeSpellId, StampedeSpellChoice & {
   badBreath: {
     id: 'badBreath',
     title: 'Bad Breath',
-    description: 'A stink circle orbits you and spoils whoever it touches.',
+    description: 'A poison line in front of you, where you are looking.',
     color: '#1a1a1a',
     cooldownMs: BAD_BREATH_COOLDOWN_MS,
     bark: 'haah',
@@ -68,7 +68,7 @@ const SPELLS: Record<StampedeSpellId, StampedeSpellChoice & {
   badSmell: {
     id: 'badSmell',
     title: 'Bad Smell',
-    description: 'A circle around you. Chicks inside take the hint. Perfume does not.',
+    description: 'A stink cloud orbits you and spoils whoever it touches. Perfume does not.',
     color: '#b4533d',
     cooldownMs: SMELL_COOLDOWN_MS,
     bark: 'phew',
@@ -167,7 +167,7 @@ function resolveSpellHits(
   tuning: { range: number; maxHits: number },
   rank: 1 | 2
 ): { hits: StampedeSpellCandidate[]; resisted: StampedeSpellCandidate[] } {
-  if (spellId === 'badBreath') {
+  if (spellId === 'badBreath' || spellId === 'badSmell') {
     return { hits: [], resisted: [] };
   }
 
