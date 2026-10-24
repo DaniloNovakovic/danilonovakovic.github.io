@@ -112,7 +112,7 @@ export const miniGameMessages = {
     homeKeyLabel: (key: string) => `Key ${key}`,
     riffProgress: (count: number, total: number) => `${count}/${total}`,
     riffDone: "Nailed it!",
-    marginNote: "Shift is the other fingering. Option flips major and minor. = and - slide the shape a fret. Space strums. X palm-mutes. S plays it short.",
+    marginNote: "Shift is the other fingering. Option flips major and minor. = and - slide the shape a fret. Space strums. X palm-mutes. S shortens the strum. Picked notes ring until you strum.",
   },
   drawing: {
     title: "Drawing",

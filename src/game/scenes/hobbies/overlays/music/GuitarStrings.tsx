@@ -14,6 +14,8 @@ import {
   STRING_PICKS,
   chordName,
   fretsFor,
+  gripForLetter,
+  rootLetter,
   fretsInKey,
   homeCapo,
   noteLabel,
@@ -32,6 +34,7 @@ import { StringBoard } from './StringBoard';
 import { GUITAR_STRINGS, useGuitarSynth, type GuitarStringSpec, type StrumDirection } from './useGuitarSynth';
 
 const NO_PLUCKS: readonly number[] = GUITAR_STRINGS.map(() => 0);
+const NO_CHOPS: readonly boolean[] = GUITAR_STRINGS.map(() => false);
 const START_GRIP: GripId = 'g';
 
 function freshKey(handler: (event: KeyboardEvent) => void) {
@@ -57,6 +60,7 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
   const [palm, setPalm] = useState(false);
   const [shortStrum, setShortStrum] = useState(false);
   const [plucks, setPlucks] = useState(NO_PLUCKS);
+  const [chops, setChops] = useState(NO_CHOPS);
   const [progress, setProgress] = useState(0);
   const [songDone, setSongDone] = useState(false);
 
@@ -64,22 +68,22 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
   const frets = fretsInKey(gripId, voicing, color, keyCapo + capo);
   const sounding = chordName(gripId, color, keyCapo + capo);
 
-  const vibrate = useCallback((number: number | 'all') => {
-    setPlucks((current) =>
-      current.map((count, index) => (number === 'all' || GUITAR_STRINGS[index]?.number === number ? count + 1 : count))
-    );
+  const vibrate = useCallback((number: number | 'all', chop: boolean) => {
+    const touched = (index: number) => number === 'all' || GUITAR_STRINGS[index]?.number === number;
+    setPlucks((current) => current.map((count, index) => (touched(index) ? count + 1 : count)));
+    setChops((current) => current.map((value, index) => (touched(index) ? chop : value)));
   }, []);
 
   const voiceChord = useCallback(
     (shapeFrets: readonly (number | null)[]) => {
       if (bassOnChord) {
-        const number = pluckLowest(shapeFrets, palm, shortStrum);
-        if (number !== null) vibrate(number);
+        const number = pluckLowest(shapeFrets, palm);
+        if (number !== null) vibrate(number, false);
         return;
       }
       holdChord(shapeFrets);
     },
-    [bassOnChord, holdChord, palm, pluckLowest, shortStrum, vibrate]
+    [bassOnChord, holdChord, palm, pluckLowest, vibrate]
   );
 
   const selectGrip = useCallback(
@@ -128,18 +132,18 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
   );
 
   const playString = useCallback(
-    (spec: GuitarStringSpec, velocity = 1) => {
+    (spec: GuitarStringSpec, velocity = 1, short = false) => {
       const fret = frets[spec.number - 1] ?? null;
-      pluck(spec, fret === null ? 0.8 : velocity, { fret, palm, short: shortStrum });
-      vibrate(spec.number);
+      pluck(spec, fret === null ? 0.8 : velocity, { fret, palm, short });
+      vibrate(spec.number, short);
     },
-    [frets, palm, pluck, shortStrum, vibrate]
+    [frets, palm, pluck, vibrate]
   );
 
   const strum = useCallback(
     (direction: StrumDirection) => {
       strumShape(frets, direction, palm, shortStrum);
-      vibrate('all');
+      vibrate('all', shortStrum);
       commitStrum(gripId);
     },
     [commitStrum, frets, gripId, palm, shortStrum, strumShape, vibrate]
@@ -162,9 +166,11 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
     ),
     ...Object.fromEntries(
       CHORD_GRIPS.flatMap((shape) => {
-        const handler = freshKey((event) =>
-          selectGrip(shape.id, event.shiftKey ? 'high' : 'low', event.altKey ? 'alt' : 'scale')
-        );
+        const handler = freshKey((event) => {
+          const id = shape.id === 'open' ? 'open' : gripForLetter(shape.key, keyCapo);
+          if (!id) return;
+          selectGrip(id, event.shiftKey ? 'high' : 'low', event.altKey ? 'alt' : 'scale');
+        });
         return [
           [shape.key, handler],
           [shape.key.toUpperCase(), handler]
@@ -172,7 +178,8 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
       })
     ),
     ' ': freshKey(() => strum('down')),
-    ';': freshKey(() => strum('up')),
+    v: freshKey(() => strum('up')),
+    V: freshKey(() => strum('up')),
     ArrowUp: freshKey(() => strum('up')),
     ArrowDown: freshKey(() => strum('down')),
     '-': freshKey(() => slide(-1)),
@@ -211,6 +218,7 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
               label={copy.gripsLabel}
               activeId={gripId}
               gripName={(id) => (id === gripId ? sounding : chordName(id, 'scale', keyCapo))}
+              gripKey={(id) => (id === 'open' ? 'Z' : rootLetter(id, keyCapo).toUpperCase())}
               gripLabel={copy.gripLabel}
               onSelect={selectGrip}
             />
@@ -237,8 +245,9 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
             shortStrum={shortStrum}
             stringKeys={STRING_PICKS.map((pick) => pick.key.toUpperCase())}
             plucks={plucks}
+            chops={chops}
             onPick={(spec) => playString(spec, 0.9)}
-            onStrum={(spec) => playString(spec, 0.62)}
+            onStrum={(spec) => playString(spec, 0.62, shortStrum)}
             onRake={() => commitStrum(gripId)}
           />
           <SparePartSticker
@@ -283,7 +292,7 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
           </button>
           <button type="button" onClick={() => strum('up')} aria-label={copy.strumUpLabel} className={`${inkKeyClass} bg-[#fbfbf9] px-3 text-[#1a1a1a]`}>
             <span className="font-black">{copy.strumUp}</span>
-            <span className="font-mono text-[9px] opacity-60">;</span>
+            <span className="font-mono text-[9px] opacity-60">V</span>
           </button>
           <button
             type="button"

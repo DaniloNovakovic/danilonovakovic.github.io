@@ -55,6 +55,8 @@ interface StringBoardProps {
   stringKeys: readonly string[];
   /** Pluck counter per string (top to bottom); a change replays that string's vibration. */
   plucks: readonly number[];
+  /** True when that string's latest note was a short strum, so it chucks instead of ringing. */
+  chops: readonly boolean[];
   onPick: (spec: GuitarStringSpec) => void;
   onStrum: (spec: GuitarStringSpec) => void;
   /** A stroke that crossed at least two strings — a strum, not a single pick. */
@@ -74,6 +76,7 @@ export function StringBoard({
   shortStrum,
   stringKeys,
   plucks,
+  chops,
   onPick,
   onStrum,
   onRake
@@ -163,7 +166,7 @@ export function StringBoard({
             fret={frets[index] ?? null}
             base={base}
             palm={palm}
-            shortStrum={shortStrum}
+            chop={chops[index] ?? false}
             pluckId={plucks[index] ?? 0}
           />
         ))}
@@ -216,7 +219,7 @@ function GuitarString({
   fret,
   base,
   palm,
-  shortStrum,
+  chop,
   pluckId
 }: {
   spec: GuitarStringSpec;
@@ -224,7 +227,7 @@ function GuitarString({
   fret: number | null;
   base: number;
   palm: boolean;
-  shortStrum: boolean;
+  chop: boolean;
   pluckId: number;
 }) {
   const startX = speakingStart(fret, base);
@@ -232,7 +235,7 @@ function GuitarString({
   const muted = fret === null;
   const amplitude = 3 + spec.gauge * 1.2;
   const originX = (startX + BRIDGE_X) / 2;
-  const motion = palm || shortStrum || muted ? 'hobby-string-chuck' : 'hobby-string-vibrate';
+  const motion = palm || chop || muted ? 'hobby-string-chuck' : 'hobby-string-vibrate';
   return (
     <g>
       <line

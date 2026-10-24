@@ -1,11 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import {
+  HOME_KEYS,
   chordName,
   frettedFrequency,
   fretsFor,
   fretsInKey,
+  gripForLetter,
+  homeCapo,
   lowestSoundingIndex,
   noteLabel,
+  rootLetter,
   slideFrets,
   type ChordColor,
   type GripId,
@@ -56,6 +60,40 @@ describe('chord grips', () => {
     expect(chordName('g', 'scale', 2)).toBe('A');
     expect(chordName('d', 'scale', 2)).toBe('E');
     expect(chordName('c', 'scale', 2)).toBe('D');
+  });
+
+  it('spells every letter once, and keeps D on the D key', () => {
+    expect(gripForLetter('d', 0)).toBe('d');
+    expect(gripForLetter('d', homeCapo('C'))).toBe('a');
+    expect(chordName('a', 'scale', homeCapo('C'))).toBe('Dm');
+    expect(chordName('c', 'scale', homeCapo('F'))).toBe('Bb');
+    expect(gripForLetter('b', homeCapo('F'))).toBe('c');
+    expect(chordName('f', 'scale', homeCapo('E'))).toBe('D#°');
+    expect(gripForLetter('d', homeCapo('E'))).toBe('f');
+
+    const letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
+    for (const key of HOME_KEYS) {
+      const spelled = letters.map((letter) => rootLetter(gripForLetter(letter, key.capo)!, key.capo));
+      expect(spelled.sort()).toEqual([...letters].sort());
+    }
+  });
+
+  it('keeps every key on the neck, including the barre keys', () => {
+    const openPitch = [4, 11, 7, 2, 9, 4];
+    const roots = { g: 7, a: 9, b: 11, c: 0, d: 2, e: 4, f: 6 } as const;
+    const ids = Object.keys(roots) as (keyof typeof roots)[];
+    for (const key of HOME_KEYS) {
+      for (const id of ids) {
+        for (const color of ['scale', 'alt'] as const) {
+          for (const voicing of ['low', 'high'] as const) {
+            const frets = fretsInKey(id, voicing, color, key.capo);
+            expect(frets.every((fret) => fret === null || (fret >= 0 && fret <= 12))).toBe(true);
+            const sounding = frets.flatMap((fret, index) => (fret === null ? [] : [(openPitch[index]! + fret) % 12]));
+            expect(sounding).toContain((roots[id] + key.capo) % 12);
+          }
+        }
+      }
+    }
   });
 
   it('finds the lowest speaking string and skips a muted bass', () => {

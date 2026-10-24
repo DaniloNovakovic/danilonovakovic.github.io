@@ -1,9 +1,10 @@
 /**
- * Latched chord grips for the hobby guitar, in G major.
+ * Latched chord grips for the hobby guitar.
  *
- * The letter plays that scale degree: G Am Bm C D Em, and F is F#°.
+ * The letter is the chord's name in the chosen key: D is D, Dm, or D#°,
+ * whichever belongs there. In G that is G Am Bm C D Em, and F is F#°.
  * Shift is the other fingering. Option flips major and minor (F#° flips to F#m).
- * `-` and `=` slide the latched shape one fret, which is how D# and the rest appear.
+ * `-` and `=` slide the latched shape one fret, which is how the notes between appear.
  *
  * Right hand: I 9 0 are G, B, and high E. N M J are low E, A, and D.
  *
@@ -135,7 +136,10 @@ export const CAMPFIRE: readonly GripId[] = ['g', 'd', 'e', 'c', 'g'];
 
 const GRIP_BY_ID = new Map(CHORD_GRIPS.map((grip) => [grip.id, grip]));
 const PITCHES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
+const LETTERS = ['C', 'D', 'E', 'F', 'G', 'A', 'B'] as const;
+const NATURAL_PITCH: Record<(typeof LETTERS)[number], number> = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
 const QUALITY_SUFFIX: Record<ChordQuality, string> = { major: '', minor: 'm', dim: '°' };
+const DEGREE_INDEX: Record<Exclude<GripId, 'open'>, number> = { g: 0, a: 1, b: 2, c: 3, d: 4, e: 5, f: 6 };
 
 export function gripById(id: GripId): ChordGrip {
   const grip = GRIP_BY_ID.get(id);
@@ -149,12 +153,15 @@ export function fretsFor(id: GripId, voicing: Voicing, color: ChordColor = 'scal
   return voicing === 'high' ? pair.high : pair.low;
 }
 
-/** Open-position keys whose low shapes still fit on the neck. */
+/** Major keys the letter buttons can play, measured up from G. */
 export const HOME_KEYS = [
-  { id: 'G', capo: 0 },
   { id: 'A', capo: 2 },
+  { id: 'B', capo: 4 },
   { id: 'C', capo: 5 },
-  { id: 'D', capo: 7 }
+  { id: 'D', capo: 7 },
+  { id: 'E', capo: 9 },
+  { id: 'F', capo: 10 },
+  { id: 'G', capo: 0 }
 ] as const;
 
 export type HomeKeyId = (typeof HOME_KEYS)[number]['id'];
@@ -171,11 +178,53 @@ export function slideFrets(frets: Frets, capo: number): Frets | null {
   return moved;
 }
 
-/** Shape in a home key. A high voicing that leaves the neck falls back to the low one. */
+/** Shape in a home key. A fingering that leaves the neck falls back to a barre. */
 export function fretsInKey(id: GripId, voicing: Voicing, color: ChordColor, capo: number): Frets {
+  if (id === 'open') return slideFrets(fretsFor(id, 'low', 'scale'), capo) ?? fretsFor(id, 'low', 'scale');
   const preferred = slideFrets(fretsFor(id, voicing, color), capo);
   if (preferred) return preferred;
-  return slideFrets(fretsFor(id, 'low', color), capo) ?? fretsFor(id, 'low', color);
+  if (voicing === 'high') {
+    const low = slideFrets(fretsFor(id, 'low', color), capo);
+    if (low) return low;
+  }
+  return movableFrets(id, color, capo, voicing) ?? fretsFor(id, 'low', color);
+}
+
+function maxFret(frets: Frets): number {
+  const stopped = frets.filter((fret): fret is number => fret !== null);
+  return stopped.length === 0 ? 0 : Math.max(...stopped);
+}
+
+function onNeck(frets: Frets): boolean {
+  return frets.every((fret) => fret === null || (fret >= 0 && fret <= 12));
+}
+
+/** Barre forms for a root that no longer fits as an open G-shape. Lowest position first. */
+function movableFrets(id: GripId, color: ChordColor, capo: number, voicing: Voicing): Frets | null {
+  const grip = gripById(id);
+  const quality = color === 'alt' ? grip.altQuality : grip.scaleQuality;
+  const root = (((grip.root + capo) % 12) + 12) % 12;
+  const lowE = (root - 4 + 12) % 12;
+  const aString = (root - 9 + 12) % 12;
+  const dString = (root - 2 + 12) % 12;
+  const candidates: Frets[] =
+    quality === 'dim'
+      ? [
+          [dString + 1, dString, dString + 1, dString, null, null],
+          ...(lowE >= 1 ? [[lowE, lowE - 1, lowE, lowE + 2, null, lowE] as Frets] : [])
+        ]
+      : quality === 'minor'
+        ? [
+            [lowE, lowE, lowE, lowE + 2, lowE + 2, lowE],
+            [aString, aString + 1, aString + 2, aString + 2, aString, null]
+          ]
+        : [
+            [lowE, lowE, lowE + 1, lowE + 2, lowE + 2, lowE],
+            [aString, aString + 2, aString + 2, aString + 2, aString, null]
+          ];
+  const fitting = candidates.filter(onNeck).sort((left, right) => maxFret(left) - maxFret(right));
+  if (fitting.length === 0) return null;
+  return voicing === 'high' && fitting.length > 1 ? fitting[fitting.length - 1] : fitting[0];
 }
 
 /** Lowest string that speaks in the shape. Index 5 is the low E. Muted strings are skipped. */
@@ -191,13 +240,41 @@ export function pickForKey(key: string): (typeof STRING_PICKS)[number] | undefin
   return STRING_PICKS.find((pick) => pick.key === letter);
 }
 
-/** Sounding name, including a flipped quality or a slid root. */
+function tonicLetter(capo: number): (typeof LETTERS)[number] | undefined {
+  const pitch = (((7 + capo) % 12) + 12) % 12;
+  return LETTERS.find((letter) => NATURAL_PITCH[letter] === pitch);
+}
+
+function spell(letter: (typeof LETTERS)[number], pitch: number, quality: ChordQuality): string {
+  const diff = (((pitch - NATURAL_PITCH[letter]) % 12) + 12) % 12;
+  const accidental = diff === 0 ? '' : diff === 1 ? '#' : diff === 11 ? 'b' : null;
+  if (accidental === null) return `${PITCHES[((pitch % 12) + 12) % 12]}${QUALITY_SUFFIX[quality]}`;
+  return `${letter}${accidental}${QUALITY_SUFFIX[quality]}`;
+}
+
+/** Sounding name. Home keys use scale spelling, so F major's fourth is Bb. */
 export function chordName(id: GripId, color: ChordColor, capo = 0): string {
   if (id === 'open') return 'Open';
   const grip = gripById(id);
   const quality = color === 'alt' ? grip.altQuality : grip.scaleQuality;
-  const pitch = PITCHES[(((grip.root + capo) % 12) + 12) % 12];
-  return `${pitch}${QUALITY_SUFFIX[quality]}`;
+  const pitch = (((grip.root + capo) % 12) + 12) % 12;
+  const tonic = tonicLetter(capo);
+  const degree = DEGREE_INDEX[id];
+  if (!tonic || degree === undefined) return `${PITCHES[pitch]}${QUALITY_SUFFIX[quality]}`;
+  const letter = LETTERS[(LETTERS.indexOf(tonic) + degree) % LETTERS.length];
+  return spell(letter, pitch, quality);
+}
+
+/** Letter under the chord button. D, Dm, D#, and Db all live on D. */
+export function rootLetter(id: GripId, capo = 0): string {
+  if (id === 'open') return 'z';
+  return chordName(id, 'scale', capo)[0]?.toLowerCase() ?? 'z';
+}
+
+/** Scale degree whose name starts with this letter in the chosen key. */
+export function gripForLetter(letter: string, capo = 0): GripId | undefined {
+  const want = letter.toLowerCase();
+  return CHORD_GRIPS.find((grip) => grip.id !== 'open' && rootLetter(grip.id, capo) === want)?.id;
 }
 
 export function frettedFrequency(openFrequency: number, fret: number): number {

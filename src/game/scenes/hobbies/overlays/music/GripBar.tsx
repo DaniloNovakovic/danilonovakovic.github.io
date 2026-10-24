@@ -11,17 +11,18 @@ interface GripBarProps {
   label: string;
   activeId: GripId;
   gripName: (id: GripId) => string;
+  gripKey: (id: GripId) => string;
   gripLabel: (name: string, key: string) => string;
   onSelect: (id: GripId, voicing: Voicing, color: ChordColor) => void;
 }
 
 /** One tap latches a shape. It stays fretted until the next tap. */
-export function GripBar({ label, activeId, gripName, gripLabel, onSelect }: GripBarProps) {
+export function GripBar({ label, activeId, gripName, gripKey, gripLabel, onSelect }: GripBarProps) {
   return (
     <div role="radiogroup" aria-label={label} className="flex flex-wrap justify-center gap-1.5">
       {CHORD_GRIPS.map((grip) => {
         const name = gripName(grip.id);
-        const keyLabel = grip.key.toUpperCase();
+        const keyLabel = gripKey(grip.id);
         const selected = grip.id === activeId;
         return (
           <button
