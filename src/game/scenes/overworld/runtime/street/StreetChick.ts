@@ -49,40 +49,52 @@ export class StreetChick {
     motion: boolean
   ): void {
     const dt = Math.min(deltaMs, 50) / 1000;
+    if (this.fleeFromGlasses(playerX, glassesOn, motion, dt)) return;
+    if (this.walkHome(glassesOn, motion, dt)) return;
+    this.idleBeside(playerX, timeMs, glassesOn, motion);
+  }
+
+  private fleeFromGlasses(playerX: number, glassesOn: boolean, motion: boolean, dt: number): boolean {
+    if (!glassesOn || Math.abs(playerX - this.x) >= SCARE_PX) return false;
     const away = playerX >= this.x ? -1 : 1;
+    const step = motion ? FLEE_SPEED * dt : FLEE_CLEARANCE_PX;
+    this.facing = away;
+    this.x = clamp(this.x + away * step, STREET_MIN_X, STREET_MAX_X);
+    this.place('run');
+    this.say('nope!');
+    return true;
+  }
 
-    if (glassesOn && Math.abs(playerX - this.x) < SCARE_PX) {
-      this.facing = away;
-      if (!motion) {
-        this.x = clamp(this.x + away * FLEE_CLEARANCE_PX, STREET_MIN_X, STREET_MAX_X);
-      } else {
-        this.x = clamp(this.x + away * FLEE_SPEED * dt, STREET_MIN_X, STREET_MAX_X);
-      }
-      this.place('run');
-      this.say('nope!');
-      return;
-    }
+  private walkHome(glassesOn: boolean, motion: boolean, dt: number): boolean {
+    if (glassesOn || Math.abs(this.x - this.homeX) <= 4) return false;
+    const dir = this.homeX > this.x ? 1 : -1;
+    const step = motion ? RETURN_SPEED * dt : Math.abs(this.homeX - this.x);
+    const next = this.x + dir * step;
+    this.facing = dir;
+    this.x = dir > 0 ? Math.min(next, this.homeX) : Math.max(next, this.homeX);
+    this.place('run');
+    this.hush();
+    return true;
+  }
 
-    if (!glassesOn && Math.abs(this.x - this.homeX) > 4) {
-      const dir = this.homeX > this.x ? 1 : -1;
-      this.facing = dir;
-      const step = motion ? RETURN_SPEED * dt : Math.abs(this.homeX - this.x);
-      const next = this.x + dir * step;
-      this.x = dir > 0 ? Math.min(next, this.homeX) : Math.max(next, this.homeX);
-      this.place('run');
-      this.hush();
-      return;
-    }
-
+  private idleBeside(playerX: number, timeMs: number, glassesOn: boolean, motion: boolean): void {
     if (!glassesOn && motion && timeMs >= this.nextPeckAtMs) {
       this.peckUntilMs = timeMs + 320;
       this.nextPeckAtMs = timeMs + 2800;
     }
     this.facing = playerX >= this.x ? -1 : 1;
     this.place(!glassesOn && timeMs < this.peckUntilMs ? 'peck' : 'idle');
+    this.sayForDistance(playerX, glassesOn);
+  }
+
+  private sayForDistance(playerX: number, glassesOn: boolean): void {
+    if (glassesOn) {
+      this.hush();
+      return;
+    }
     const distance = Math.abs(playerX - this.x);
-    if (!glassesOn && distance < 90) this.say('hey. hey.');
-    else if (!glassesOn && distance < 170) this.say('ooh...');
+    if (distance < 90) this.say('hey. hey.');
+    else if (distance < 170) this.say('ooh...');
     else this.hush();
   }
 

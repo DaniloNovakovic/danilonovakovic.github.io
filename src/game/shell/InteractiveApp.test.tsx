@@ -74,6 +74,19 @@ function mockElementRect(element: Element, rect: DOMRect) {
   vi.spyOn(element, 'getBoundingClientRect').mockReturnValue(rect);
 }
 
+async function expectBackReplacesInventory(sceneId: string, backName: RegExp) {
+  bridgeActions.enterScene(sceneId as typeof OVERWORLD_SCENE_ID);
+  render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
+
+  expect(screen.getByRole('button', { name: backName })).toBeDefined();
+  expect(screen.queryByRole('button', { name: /open inventory/i })).toBeNull();
+  expect(screen.queryByRole('button', { name: /open dev scene switcher/i })).toBeNull();
+
+  await userEvent.click(screen.getByRole('button', { name: backName }));
+
+  expect(bridgeStore.getState().activeSceneId).toBe(OVERWORLD_SCENE_ID);
+}
+
 describe('InteractiveApp', () => {
   beforeEach(() => {
     resizeObserverCallback = undefined;
@@ -167,29 +180,11 @@ describe('InteractiveApp', () => {
   });
 
   it('replaces inventory and dev controls with Back during Stampede Sketch', async () => {
-    bridgeActions.enterScene(STAMPEDE_SKETCH_SCENE_ID);
-    render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
-
-    expect(screen.getByRole('button', { name: /back to the street/i })).toBeDefined();
-    expect(screen.queryByRole('button', { name: /open inventory/i })).toBeNull();
-    expect(screen.queryByRole('button', { name: /open dev scene switcher/i })).toBeNull();
-
-    await userEvent.click(screen.getByRole('button', { name: /back to the street/i }));
-
-    expect(bridgeStore.getState().activeSceneId).toBe(OVERWORLD_SCENE_ID);
+    await expectBackReplacesInventory(STAMPEDE_SKETCH_SCENE_ID, /back to the street/i);
   });
 
   it('replaces inventory and dev controls with Back during Potassium Slip', async () => {
-    bridgeActions.enterScene(POTASSIUM_SCENE_ID);
-    render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
-
-    expect(screen.getByRole('button', { name: /back to city/i })).toBeDefined();
-    expect(screen.queryByRole('button', { name: /open inventory/i })).toBeNull();
-    expect(screen.queryByRole('button', { name: /open dev scene switcher/i })).toBeNull();
-
-    await userEvent.click(screen.getByRole('button', { name: /back to city/i }));
-
-    expect(bridgeStore.getState().activeSceneId).toBe(OVERWORLD_SCENE_ID);
+    await expectBackReplacesInventory(POTASSIUM_SCENE_ID, /back to city/i);
   });
 
   it('renders Potassium inside the Notebook shell with Back and Static Mode chrome', async () => {

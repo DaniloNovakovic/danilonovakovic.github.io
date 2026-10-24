@@ -2,8 +2,8 @@ import { isStampedeWeaponImmune, type StampedeFlockKind } from './flock';
 
 export const STAMPEDE_AUTO_ATTACK_COOLDOWN_MS = 2_600;
 export const STAMPEDE_AUTO_ATTACK_RANGE = 170;
-export const STAMPEDE_AUTO_ATTACK_LENGTH = 120;
-export const STAMPEDE_AUTO_ATTACK_HALF_WIDTH = 22;
+const STAMPEDE_AUTO_ATTACK_LENGTH = 120;
+const STAMPEDE_AUTO_ATTACK_HALF_WIDTH = 22;
 const STAMPEDE_AUTO_ATTACK_MAX_HITS = 2;
 
 export interface StampedeAutoAttackProfile {
@@ -129,6 +129,13 @@ export function resolveStampedeAutoAttackFrame({
   };
 }
 
+function byDistance(player: StampedeAutoAttackPoint) {
+  return (left: StampedeAutoAttackPoint, right: StampedeAutoAttackPoint) => (
+    Math.hypot(left.x - player.x, left.y - player.y)
+    - Math.hypot(right.x - player.x, right.y - player.y)
+  );
+}
+
 function resolveSelfieHits(
   player: StampedeAutoAttackPoint,
   candidates: readonly StampedeAutoAttackCandidate[],
@@ -145,12 +152,7 @@ function resolveSelfieHits(
   const hits = inRange
     .sort((left, right) => selfieScore(left.id, elapsedMs) - selfieScore(right.id, elapsedMs))
     .slice(0, profile.maxHits);
-  if (!profile.rear) {
-    return hits.sort((left, right) => (
-      Math.hypot(left.x - player.x, left.y - player.y) -
-      Math.hypot(right.x - player.x, right.y - player.y)
-    ));
-  }
+  if (!profile.rear) return hits.sort(byDistance(player));
   const behind = inRange
     .filter((candidate) => !hits.includes(candidate))
     .filter((candidate) => {
@@ -159,10 +161,7 @@ function resolveSelfieHits(
       const distance = Math.hypot(dx, dy) || 1;
       return (dx / distance) * direction.x + (dy / distance) * direction.y < -0.35;
     })
-    .sort((left, right) => (
-      Math.hypot(left.x - player.x, left.y - player.y) -
-      Math.hypot(right.x - player.x, right.y - player.y)
-    ))[0];
+    .sort(byDistance(player))[0];
   return [...hits, ...(behind ? [behind] : [])];
 }
 

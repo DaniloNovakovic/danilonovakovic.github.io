@@ -1,7 +1,7 @@
 export const STAMPEDE_BEER_DISARM_MS = 3_400;
-export const STAMPEDE_BEER_SPEED = 220;
-export const STAMPEDE_BEER_HIT_RADIUS = 18;
-export const STAMPEDE_BEER_LIFE_MS = 1_400;
+const STAMPEDE_BEER_SPEED = 220;
+const STAMPEDE_BEER_HIT_RADIUS = 18;
+const STAMPEDE_BEER_LIFE_MS = 1_400;
 export const STAMPEDE_BARTENDER_THROW_MS = 2_800;
 
 export interface StampedeBeerPoint {

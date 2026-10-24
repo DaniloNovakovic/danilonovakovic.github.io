@@ -169,26 +169,43 @@ export function stepBreathBeam(input: {
   const nextHitAtById = { ...input.state };
   const hitIds: string[] = [];
 
+  const beam = input.beam;
   input.candidates.forEach((candidate) => {
-    if (isStampedeWeaponImmune(candidate.kind ?? 'chick', 'badBreath', 1)) return;
-    if (input.elapsedMs < (nextHitAtById[candidate.id] ?? 0)) return;
-    const dx = candidate.x - input.player.x;
-    const dy = candidate.y - input.player.y;
-    const along = dx * facingX + dy * facingY;
-    const lateral = dx * facingY - dy * facingX;
-    const wave = input.beam!.crosswind ? Math.sin(along / 32) * 18 : 0;
-    const lingering = (input.linger ?? []).some((patch) => (
-      Math.hypot(candidate.x - patch.x, candidate.y - patch.y) <= 18
-    ));
-    const inBeam = along >= 14
-      && along <= input.beam!.range
-      && Math.abs(lateral - wave) <= input.beam!.halfWidth;
-    if (!inBeam && !lingering) return;
+    if (!breathHitsCandidate(input, candidate, beam, facingX, facingY, nextHitAtById)) return;
     hitIds.push(candidate.id);
-    nextHitAtById[candidate.id] = input.elapsedMs + input.beam!.hitGapMs;
+    nextHitAtById[candidate.id] = input.elapsedMs + beam.hitGapMs;
   });
 
   return { state: nextHitAtById, hitIds };
+}
+
+function breathHitsCandidate(
+  input: {
+    elapsedMs: number;
+    player: StampedeOrbitPoint;
+    linger?: readonly StampedeOrbitPoint[];
+  },
+  candidate: StampedeOrbitCandidate,
+  beam: StampedeBreathBeam,
+  facingX: number,
+  facingY: number,
+  nextHitAtById: Record<string, number>
+): boolean {
+  if (isStampedeWeaponImmune(candidate.kind ?? 'chick', 'badBreath', 1)) return false;
+  if (input.elapsedMs < (nextHitAtById[candidate.id] ?? 0)) return false;
+  const dx = candidate.x - input.player.x;
+  const dy = candidate.y - input.player.y;
+  const along = dx * facingX + dy * facingY;
+  const lateral = dx * facingY - dy * facingX;
+  const wave = beam.crosswind ? Math.sin(along / 32) * 18 : 0;
+  if (insideBreath(along, lateral, wave, beam)) return true;
+  return (input.linger ?? []).some((patch) => (
+    Math.hypot(candidate.x - patch.x, candidate.y - patch.y) <= 18
+  ));
+}
+
+function insideBreath(along: number, lateral: number, wave: number, beam: StampedeBreathBeam): boolean {
+  return along >= 14 && along <= beam.range && Math.abs(lateral - wave) <= beam.halfWidth;
 }
 
 function evenAngles(count: number): number[] {

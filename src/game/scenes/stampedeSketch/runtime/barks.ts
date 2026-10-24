@@ -1,6 +1,6 @@
 import type { StampedeFlockKind } from './flock';
 
-export const STAMPEDE_BARK_GAP_MS = 2_400;
+const STAMPEDE_BARK_GAP_MS = 2_400;
 
 const BARK_LINES: Partial<Record<StampedeFlockKind, string>> = {
   nerd: 'Well, actually.',

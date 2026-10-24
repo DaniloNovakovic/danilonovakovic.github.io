@@ -7,7 +7,8 @@ import {
 import { STAMPEDE_CONTACT_RADIUS_PADDING } from './pressure';
 import {
   getStampedeSwarmMotion,
-  resolveStampedeSwarmTarget
+  resolveStampedeSwarmTarget,
+  type StampedeSwarmMotion
 } from './swarmMotion';
 import type { StampedeClearedMarkPoint } from './progression';
 import { pickStampedeBark, stampedeBarkReadyAt } from './barks';
@@ -60,6 +61,16 @@ export interface StampedeSwarmUpdateOptions {
   mode?: StampedeSwarmMode;
   pressure?: number;
   elapsedMs?: number;
+  playerHurting?: boolean;
+}
+
+interface StampedeStep {
+  target: { x: number; y: number };
+  deltaSeconds: number;
+  nowMs: number;
+  mode: StampedeSwarmMode;
+  pressure: number;
+  motion: StampedeSwarmMotion;
   playerHurting?: boolean;
 }
 
@@ -222,88 +233,17 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
     const mode = options.mode ?? 'calm';
     const motion = getStampedeSwarmMotion(mode, pressure);
 
+    const step = {
+      target,
+      deltaSeconds,
+      nowMs,
+      mode,
+      pressure,
+      motion,
+      playerHurting: options.playerHurting
+    };
     this.dots.forEach((dot) => {
-      if (dot.clearedUntilMs !== null) {
-        if (nowMs < dot.clearedUntilMs) {
-          this.syncChick(dot, dot.facing, nowMs, false);
-          this.updateRespawnTelegraph(dot, dot.clearedUntilMs - nowMs);
-          return;
-        }
-        this.restoreDot(dot);
-      }
-
-      this.maybePromote(dot);
-
-      if (nowMs < dot.stunnedUntilMs) {
-        const spin = Math.sin(nowMs / 90 + dot.phase) * 10;
-        const held = clampStampedePosition(
-          { x: dot.shape.x + spin * deltaSeconds, y: dot.shape.y },
-          STAMPEDE_SWARM_BOUNDS
-        );
-        dot.shape.setPosition(held.x, held.y);
-        this.syncChick(dot, dot.facing === 1 ? 1 : -1, nowMs, false);
-        this.syncHalo(dot, false, motion.alphaMultiplier);
-        return;
-      }
-
-      if (nowMs < dot.fleeUntilMs) {
-        const damp = Math.max(0.35, Math.min(1, (dot.fleeUntilMs - nowMs) / 400));
-        dot.shape.x += dot.fleeVx * damp * deltaSeconds;
-        dot.shape.y += dot.fleeVy * damp * deltaSeconds;
-        const fleeing = clampStampedePosition(
-          { x: dot.shape.x, y: dot.shape.y },
-          STAMPEDE_SWARM_BOUNDS
-        );
-        dot.shape.setPosition(fleeing.x, fleeing.y);
-        dot.shape.setScale(1.15 * motion.scaleMultiplier);
-        dot.shape.setAlpha(0.9);
-        this.syncChick(dot, dot.fleeVx, nowMs, false, 'gag');
-        this.syncHalo(dot, false, motion.alphaMultiplier);
-        return;
-      }
-
-      if (dot.kind === 'bartender') {
-        this.stepBartender(dot, target, nowMs, motion);
-        return;
-      }
-
-      const chaseTarget = dot.kind === 'rooster' || dot.kind === 'fixer'
-        ? target
-        : resolveStampedeSwarmTarget({
-          target,
-          phase: dot.phase,
-          mode,
-          pressure,
-          nowMs
-        });
-      const dx = chaseTarget.x - dot.shape.x;
-      const dy = chaseTarget.y - dot.shape.y;
-      const distance = Math.max(1, Math.hypot(dx, dy));
-      const wobbleX = Math.sin(nowMs / 380 + dot.phase) * 8 * motion.wobbleMultiplier;
-      const wobbleY = Math.cos(nowMs / 420 + dot.phase) * 6 * motion.wobbleMultiplier;
-      const isNear = distance < nearDistance(dot.kind);
-      const wobbleScale = wobbleFor(dot.kind);
-      const lunge = dot.kind === 'rooster' && distance < 160;
-      let stepSpeed = lunge ? dot.speed * 1.75 : dot.speed;
-      if (dot.kind === 'fixer' && options.playerHurting) stepSpeed *= 1.45;
-      const move = moveVector(dot.kind, dx, dy, distance, nowMs, dot.phase);
-      dot.shape.x += move.x * stepSpeed * motion.speedMultiplier * deltaSeconds + wobbleX * wobbleScale * deltaSeconds;
-      dot.shape.y += move.y * stepSpeed * motion.speedMultiplier * deltaSeconds + wobbleY * wobbleScale * deltaSeconds;
-
-      const clamped = clampStampedePosition(
-        { x: dot.shape.x, y: dot.shape.y },
-        STAMPEDE_SWARM_BOUNDS
-      );
-      dot.shape.setPosition(clamped.x, clamped.y);
-      dot.shape.setScale((isNear ? 1.35 : 1) * motion.scaleMultiplier);
-      dot.shape.setAlpha(Math.min(isNear ? 0.96 : 0.82, (isNear ? 0.9 : 0.62) * motion.alphaMultiplier));
-      this.syncChick(dot, dx, nowMs, heartingKind(dot.kind) ? isNear : false);
-      if (heartingKind(dot.kind) && isNear && nowMs >= dot.nextHeartAtMs) {
-        dot.nextHeartAtMs = nowMs + heartGap(dot.kind) + dot.phase * 80;
-        this.popHeart(dot.shape.x, dot.shape.y - 16);
-      }
-      if (dot.kind === 'fixer') this.tryMend(dot, nowMs);
-      this.syncHalo(dot, isNear, motion.alphaMultiplier);
+      this.stepDot(dot, step);
     });
     this.stepBeers(delta, nowMs, target);
     this.maybeBark(nowMs, target);
@@ -386,72 +326,79 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
     const hitIds = new Set(ids);
     const clearedMarks: StampedeClearedMarkPoint[] = [];
     this.dots.forEach((dot) => {
-      if (!hitIds.has(dot.id)) return;
-      if (dot.clearedUntilMs !== null) return;
-
-      const now = this.scene.time.now;
-      dot.hp -= 1;
-      dot.hitFlapUntilMs = now + (dot.hp > 0 ? 180 : 280);
-      dot.flapStep = -1;
-      dot.ailmentStep = -1;
-      if (ailment === 'poison') dot.poisonUntilMs = now + 900;
-      if (ailment === 'daze' && dot.hp > 0) dot.stunnedUntilMs = now + dazeMs;
-      this.burstFeathers(dot.shape.x, dot.shape.y, dot.coat, dot.hp > 0 ? 1 : 3);
-      drawSwarmChick(dot.chick, {
-        mood: 'gag',
-        flap: 1,
-        coat: dot.coat,
-        kind: dot.kind,
-        hp: Math.max(0, dot.hp),
-        maxHp: dot.maxHp
-      });
-      if (dot.hp > 0) return;
-
-      clearedMarks.push({
-        id: dot.id,
-        x: dot.shape.x,
-        y: dot.shape.y,
-        value: dot.scrapValue
-      });
-
-      dot.clearedUntilMs = now + dot.respawnMs;
-      if (dot.kind !== 'rooster') {
-        this.popHeart(dot.shape.x, dot.shape.y - 10);
-      }
-      this.scene.tweens.killTweensOf(dot.shape);
-      this.scene.tweens.killTweensOf(dot.chick);
-      this.scene.tweens.killTweensOf(dot.halo);
-      this.scene.tweens.killTweensOf(dot.telegraph);
-      dot.shape.setVisible(true);
-      dot.halo.setVisible(true);
-      dot.telegraph.setVisible(false).setAlpha(0);
-      this.scene.tweens.add({
-        targets: dot.shape,
-        alpha: 0.08,
-        scale: 1.8,
-        duration: 180,
-        ease: 'Sine.easeOut',
-        onComplete: () => {
-          if (dot.clearedUntilMs !== null) {
-            dot.shape.setVisible(false);
-          }
-        }
-      });
-      this.scene.tweens.add({
-        targets: dot.halo,
-        alpha: 0.05,
-        scale: 1.8,
-        duration: 180,
-        ease: 'Sine.easeOut',
-        onComplete: () => {
-          if (dot.clearedUntilMs !== null) {
-            dot.halo.setVisible(false);
-          }
-        }
-      });
+      const cleared = this.woundDot(dot, hitIds, ailment, dazeMs);
+      if (cleared) clearedMarks.push(cleared);
     });
-
     return clearedMarks;
+  }
+
+  private woundDot(
+    dot: StampedeSwarmDot,
+    hitIds: ReadonlySet<string>,
+    ailment: 'poison' | 'daze' | undefined,
+    dazeMs: number
+  ): StampedeClearedMarkPoint | null {
+    if (!hitIds.has(dot.id) || dot.clearedUntilMs !== null) return null;
+
+    const now = this.scene.time.now;
+    dot.hp -= 1;
+    dot.hitFlapUntilMs = now + (dot.hp > 0 ? 180 : 280);
+    dot.flapStep = -1;
+    dot.ailmentStep = -1;
+    if (ailment === 'poison') dot.poisonUntilMs = now + 900;
+    if (ailment === 'daze' && dot.hp > 0) dot.stunnedUntilMs = now + dazeMs;
+    this.burstFeathers(dot.shape.x, dot.shape.y, dot.coat, dot.hp > 0 ? 1 : 3);
+    drawSwarmChick(dot.chick, {
+      mood: 'gag',
+      flap: 1,
+      coat: dot.coat,
+      kind: dot.kind,
+      hp: Math.max(0, dot.hp),
+      maxHp: dot.maxHp
+    });
+    if (dot.hp > 0) return null;
+    return this.retireDot(dot, now);
+  }
+
+  private retireDot(dot: StampedeSwarmDot, now: number): StampedeClearedMarkPoint {
+    dot.clearedUntilMs = now + dot.respawnMs;
+    if (dot.kind !== 'rooster') this.popHeart(dot.shape.x, dot.shape.y - 10);
+    this.fadeClearedDot(dot);
+    return {
+      id: dot.id,
+      x: dot.shape.x,
+      y: dot.shape.y,
+      value: dot.scrapValue
+    };
+  }
+
+  private fadeClearedDot(dot: StampedeSwarmDot): void {
+    this.scene.tweens.killTweensOf(dot.shape);
+    this.scene.tweens.killTweensOf(dot.chick);
+    this.scene.tweens.killTweensOf(dot.halo);
+    this.scene.tweens.killTweensOf(dot.telegraph);
+    dot.shape.setVisible(true);
+    dot.halo.setVisible(true);
+    dot.telegraph.setVisible(false).setAlpha(0);
+    this.fadeOut(dot, dot.shape, 0.08);
+    this.fadeOut(dot, dot.halo, 0.05);
+  }
+
+  private fadeOut(
+    dot: StampedeSwarmDot,
+    target: Phaser.GameObjects.Shape,
+    alpha: number
+  ): void {
+    this.scene.tweens.add({
+      targets: target,
+      alpha,
+      scale: 1.8,
+      duration: 180,
+      ease: 'Sine.easeOut',
+      onComplete: () => {
+        if (dot.clearedUntilMs !== null) target.setVisible(false);
+      }
+    });
   }
 
   reset(): void {
@@ -526,6 +473,121 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
       .setAlpha(0);
   }
 
+  private stepDot(dot: StampedeSwarmDot, step: StampedeStep): void {
+    if (this.holdClearedDot(dot, step.nowMs)) return;
+    this.maybePromote(dot);
+    if (this.stepStunnedDot(dot, step.deltaSeconds, step.nowMs, step.motion.alphaMultiplier)) return;
+    if (this.stepFleeingDot(dot, step.deltaSeconds, step.nowMs, step.motion)) return;
+    if (dot.kind === 'bartender') {
+      this.stepBartender(dot, step.target, step.nowMs, step.motion);
+      return;
+    }
+    this.stepChasingDot(dot, step);
+  }
+
+  private holdClearedDot(dot: StampedeSwarmDot, nowMs: number): boolean {
+    if (dot.clearedUntilMs === null) return false;
+    if (nowMs < dot.clearedUntilMs) {
+      this.syncChick(dot, dot.facing, nowMs, false);
+      this.updateRespawnTelegraph(dot, dot.clearedUntilMs - nowMs);
+      return true;
+    }
+    this.restoreDot(dot);
+    return false;
+  }
+
+  private stepStunnedDot(
+    dot: StampedeSwarmDot,
+    deltaSeconds: number,
+    nowMs: number,
+    alphaMultiplier: number
+  ): boolean {
+    if (nowMs >= dot.stunnedUntilMs) return false;
+    const spin = Math.sin(nowMs / 90 + dot.phase) * 10;
+    const held = clampStampedePosition(
+      { x: dot.shape.x + spin * deltaSeconds, y: dot.shape.y },
+      STAMPEDE_SWARM_BOUNDS
+    );
+    dot.shape.setPosition(held.x, held.y);
+    this.syncChick(dot, dot.facing === 1 ? 1 : -1, nowMs, false);
+    this.syncHalo(dot, false, alphaMultiplier);
+    return true;
+  }
+
+  private stepFleeingDot(
+    dot: StampedeSwarmDot,
+    deltaSeconds: number,
+    nowMs: number,
+    motion: StampedeSwarmMotion
+  ): boolean {
+    if (nowMs >= dot.fleeUntilMs) return false;
+    const damp = Math.max(0.35, Math.min(1, (dot.fleeUntilMs - nowMs) / 400));
+    dot.shape.x += dot.fleeVx * damp * deltaSeconds;
+    dot.shape.y += dot.fleeVy * damp * deltaSeconds;
+    const fleeing = clampStampedePosition(
+      { x: dot.shape.x, y: dot.shape.y },
+      STAMPEDE_SWARM_BOUNDS
+    );
+    dot.shape.setPosition(fleeing.x, fleeing.y);
+    dot.shape.setScale(1.15 * motion.scaleMultiplier);
+    dot.shape.setAlpha(0.9);
+    this.syncChick(dot, dot.fleeVx, nowMs, false, 'gag');
+    this.syncHalo(dot, false, motion.alphaMultiplier);
+    return true;
+  }
+
+  private stepChasingDot(dot: StampedeSwarmDot, step: StampedeStep): void {
+    const chaseTarget = chasesPlayer(dot.kind)
+      ? step.target
+      : resolveStampedeSwarmTarget({
+        target: step.target,
+        phase: dot.phase,
+        mode: step.mode,
+        pressure: step.pressure,
+        nowMs: step.nowMs
+      });
+    const dx = chaseTarget.x - dot.shape.x;
+    const dy = chaseTarget.y - dot.shape.y;
+    const distance = Math.max(1, Math.hypot(dx, dy));
+    const isNear = distance < nearDistance(dot.kind);
+    this.slideChaser(dot, step, dx, dy, distance);
+    this.syncChick(dot, dx, step.nowMs, heartingKind(dot.kind) && isNear);
+    this.maybeHeart(dot, step.nowMs, isNear);
+    if (dot.kind === 'fixer') this.tryMend(dot, step.nowMs);
+    this.syncHalo(dot, isNear, step.motion.alphaMultiplier);
+  }
+
+  private slideChaser(
+    dot: StampedeSwarmDot,
+    step: StampedeStep,
+    dx: number,
+    dy: number,
+    distance: number
+  ): void {
+    const wobbleX = Math.sin(step.nowMs / 380 + dot.phase) * 8 * step.motion.wobbleMultiplier;
+    const wobbleY = Math.cos(step.nowMs / 420 + dot.phase) * 6 * step.motion.wobbleMultiplier;
+    const stepSpeed = chaseSpeed(dot, distance, step.playerHurting);
+    const move = moveVector(dot.kind, dx, dy, distance, step.nowMs, dot.phase);
+    const wobbleScale = wobbleFor(dot.kind);
+    const pace = stepSpeed * step.motion.speedMultiplier * step.deltaSeconds;
+    dot.shape.x += move.x * pace + wobbleX * wobbleScale * step.deltaSeconds;
+    dot.shape.y += move.y * pace + wobbleY * wobbleScale * step.deltaSeconds;
+    const clamped = clampStampedePosition(
+      { x: dot.shape.x, y: dot.shape.y },
+      STAMPEDE_SWARM_BOUNDS
+    );
+    const isNear = distance < nearDistance(dot.kind);
+    dot.shape.setPosition(clamped.x, clamped.y);
+    dot.shape.setScale((isNear ? 1.35 : 1) * step.motion.scaleMultiplier);
+    dot.shape.setAlpha(nearAlpha(isNear, step.motion.alphaMultiplier));
+  }
+
+  private maybeHeart(dot: StampedeSwarmDot, nowMs: number, isNear: boolean): void {
+    if (!heartingKind(dot.kind) || !isNear || nowMs < dot.nextHeartAtMs) return;
+    dot.nextHeartAtMs = nowMs + heartGap(dot.kind) + dot.phase * 80;
+    this.popHeart(dot.shape.x, dot.shape.y - 16);
+  }
+
   private syncChick(
     dot: StampedeSwarmDot,
     faceX: number,
@@ -533,55 +595,19 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
     smitten: boolean,
     forced?: 'gag'
   ): void {
-    const facing: 1 | -1 = faceX >= 0 ? 1 : -1;
-    const mood = forced ?? (smitten ? 'smitten' : 'chase');
-    const hit = nowMs < dot.hitFlapUntilMs;
-    const poisoned = nowMs < dot.poisonUntilMs;
-    const dazed = nowMs < dot.stunnedUntilMs;
-    const poisonFlash = poisoned && Math.floor(nowMs / 120) % 2 === 0;
-    const ailmentStep = (dazed ? 2 : 0) + (poisonFlash ? 1 : 0);
-    const flap = wingFlap(nowMs, dot.phase, smitten || forced === 'gag' || hit || dazed, hit);
-    const flapStep = Math.round(flap * 4);
-    if (
-      dot.facing !== facing
-      || dot.mood !== mood
-      || dot.flapStep !== flapStep
-      || dot.ailmentStep !== ailmentStep
-    ) {
-      dot.facing = facing;
-      dot.mood = mood;
-      dot.flapStep = flapStep;
-      dot.ailmentStep = ailmentStep;
-      drawSwarmChick(dot.chick, {
-        mood,
-        flap,
-        coat: dot.coat,
-        kind: dot.kind,
-        hp: dot.hp,
-        maxHp: dot.maxHp,
-        poisoned,
-        poisonFlash,
-        dazed
-      });
+    const pose = chickPose(dot, faceX, nowMs, smitten, forced);
+    if (poseChanged(dot, pose)) {
+      dot.facing = pose.facing;
+      dot.mood = pose.mood;
+      dot.flapStep = pose.flapStep;
+      dot.ailmentStep = pose.ailmentStep;
+      drawSwarmChick(dot.chick, pose.draw);
     }
-    const kindScale = kindScaleFor(dot.kind);
-    const size = (dot.homeRadius / 5) * Math.abs(dot.shape.scaleX || 1) * 1.65 * kindScale;
-    const waddle = (mood === 'gag'
-      ? Math.sin(nowMs / 45 + dot.phase) * 4
-      : Math.sin(nowMs / 90 + dot.phase) * 3) * (dot.kind === 'hen' ? 1.7 : 1);
-    const hop = flap > 0.45 ? -4 * flap : 0;
-    const angle = dazed
-      ? Math.sin(nowMs / 70 + dot.phase) * 18
-      : hit
-      ? Math.sin(nowMs / 40 + dot.phase) * 22
-      : mood === 'gag'
-        ? Math.sin(nowMs / 60 + dot.phase) * 16
-        : Math.sin(nowMs / 140 + dot.phase) * 8;
-    const punch = hit ? 1.2 : 1;
+    const bob = chickBob(dot, nowMs, pose.mood, pose.flap, pose.hit, pose.dazed, pose.facing);
     dot.chick
-      .setPosition(dot.shape.x, dot.shape.y + waddle + hop)
-      .setScale(facing * size * punch, size * (hit ? 0.92 : 1))
-      .setAngle(angle)
+      .setPosition(dot.shape.x, dot.shape.y + bob.offsetY)
+      .setScale(bob.scaleX, bob.scaleY)
+      .setAngle(bob.angle)
       .setAlpha(dot.shape.alpha)
       .setVisible(dot.shape.visible);
   }
@@ -908,20 +934,7 @@ function drawSwarmChick(
   g.fillStyle(coat.body, 1);
   g.fillEllipse(0, 3, 15, 13);
 
-  g.fillStyle(coat.wing, 1);
-  g.lineStyle(1.25, CHICK_INK, 1);
-  if (flap < 0.2) {
-    g.fillEllipse(-5, 2, 6.2, 3.2);
-    g.strokeEllipse(-5, 2, 6.2, 3.2);
-  } else {
-    const lift = flap * 12;
-    g.fillStyle(coat.beak, 1);
-    g.fillEllipse(-6.5, 5 - lift, 3.3, 11 + flap * 4);
-    g.strokeEllipse(-6.5, 5 - lift, 3.3, 11 + flap * 4);
-    g.fillStyle(coat.wing, 1);
-    g.fillEllipse(-3.2, 6 - lift * 0.78, 2.6, 8 + flap * 3);
-    g.strokeEllipse(-3.2, 6 - lift * 0.78, 2.6, 8 + flap * 3);
-  }
+  drawWing(g, coat, flap);
 
   g.lineStyle(2, CHICK_INK, 1);
   g.strokeEllipse(0, 3, 15, 13);
@@ -929,33 +942,11 @@ function drawSwarmChick(
   g.fillStyle(coat.body, 1);
   g.fillCircle(6, -5, 5.6);
   g.strokeCircle(6, -5, 5.6);
-  g.fillStyle(coat.comb, 1);
-  const comb = kind === 'rooster' ? 1.45 : kind === 'hen' ? 0.75 : 1;
-  g.fillCircle(4.2, -10.2 - (kind === 'rooster' ? 1.4 : 0), 1.7 * comb);
-  g.fillCircle(6.4, -11.4 - (kind === 'rooster' ? 2 : 0), 1.9 * comb);
-  g.fillCircle(8.4, -10 - (kind === 'rooster' ? 1 : 0), 1.5 * comb);
+  drawComb(g, coat, kind);
   g.fillStyle(coat.beak, 1);
   g.fillEllipse(7.2, -1.2, 2.2, 2.6);
 
-  g.fillStyle(CHICK_INK, 1);
-  if (mood === 'gag') {
-    g.fillTriangle(10, -4, 15, -1, 10, 1);
-    g.lineStyle(2, CHICK_INK, 1);
-    g.lineBetween(4.4, -6, 7.4, -6);
-  } else {
-    g.fillStyle(coat.beak, 1);
-    g.fillTriangle(10.2, -6.2, 16, -5, 10.2, -3.4);
-    g.lineStyle(1.5, CHICK_INK, 1);
-    g.strokeTriangle(10.2, -6.2, 16, -5, 10.2, -3.4);
-    g.fillStyle(CHICK_INK, 1);
-    g.fillCircle(7.4, -5.6, mood === 'smitten' ? 1.15 : 0.95);
-  }
-
-  if (mood === 'smitten') {
-    g.fillStyle(0xf0a0b0, 0.9);
-    g.fillEllipse(3.2, -3, 2.6, 1.6);
-    g.fillEllipse(9.2, -2.4, 2.4, 1.5);
-  }
+  drawBeak(g, coat, mood);
 
   g.lineStyle(1.5, CHICK_INK, 1);
   g.lineBetween(-2, 9, -3, 14);
@@ -965,36 +956,102 @@ function drawSwarmChick(
   g.lineBetween(4, 14, 2, 15);
   g.lineBetween(4, 14, 7, 15);
 
-  if (kind === 'rooster') {
-    g.lineStyle(1.4, coat.comb, 1);
-    g.lineBetween(-9, 1, -16, -6);
-    g.lineBetween(-9, 3, -17, 2);
-    g.lineStyle(1.4, CHICK_INK, 1);
-    g.lineBetween(5, 14, 8, 16);
-    if (mood !== 'gag') {
-      g.lineBetween(6.1, -7.2, 8.4, -6.3);
-    }
-  }
+  drawRoosterMarks(g, coat, kind, mood);
   drawKindTell(g, kind, mood);
+  drawAilment(g, pose.poisoned, pose.poisonFlash, pose.dazed);
+  drawPips(g, hp, maxHp);
+}
 
-  if (pose.poisoned) {
-    g.fillStyle(0x6f9f3a, pose.poisonFlash ? 0.62 : 0.24);
+function drawWing(g: Phaser.GameObjects.Graphics, coat: ChickCoat, flap: number): void {
+  g.fillStyle(coat.wing, 1);
+  g.lineStyle(1.25, CHICK_INK, 1);
+  if (flap < 0.2) {
+    g.fillEllipse(-5, 2, 6.2, 3.2);
+    g.strokeEllipse(-5, 2, 6.2, 3.2);
+    return;
+  }
+  const lift = flap * 12;
+  g.fillStyle(coat.beak, 1);
+  g.fillEllipse(-6.5, 5 - lift, 3.3, 11 + flap * 4);
+  g.strokeEllipse(-6.5, 5 - lift, 3.3, 11 + flap * 4);
+  g.fillStyle(coat.wing, 1);
+  g.fillEllipse(-3.2, 6 - lift * 0.78, 2.6, 8 + flap * 3);
+  g.strokeEllipse(-3.2, 6 - lift * 0.78, 2.6, 8 + flap * 3);
+}
+
+function drawComb(g: Phaser.GameObjects.Graphics, coat: ChickCoat, kind: StampedeFlockKind): void {
+  g.fillStyle(coat.comb, 1);
+  const comb = kind === 'rooster' ? 1.45 : kind === 'hen' ? 0.75 : 1;
+  const lift = kind === 'rooster' ? 1 : 0;
+  g.fillCircle(4.2, -10.2 - lift * 1.4, 1.7 * comb);
+  g.fillCircle(6.4, -11.4 - lift * 2, 1.9 * comb);
+  g.fillCircle(8.4, -10 - lift, 1.5 * comb);
+}
+
+function drawBeak(
+  g: Phaser.GameObjects.Graphics,
+  coat: ChickCoat,
+  mood: 'chase' | 'smitten' | 'gag'
+): void {
+  g.fillStyle(CHICK_INK, 1);
+  if (mood === 'gag') {
+    g.fillTriangle(10, -4, 15, -1, 10, 1);
+    g.lineStyle(2, CHICK_INK, 1);
+    g.lineBetween(4.4, -6, 7.4, -6);
+    return;
+  }
+  g.fillStyle(coat.beak, 1);
+  g.fillTriangle(10.2, -6.2, 16, -5, 10.2, -3.4);
+  g.lineStyle(1.5, CHICK_INK, 1);
+  g.strokeTriangle(10.2, -6.2, 16, -5, 10.2, -3.4);
+  g.fillStyle(CHICK_INK, 1);
+  g.fillCircle(7.4, -5.6, mood === 'smitten' ? 1.15 : 0.95);
+  if (mood !== 'smitten') return;
+  g.fillStyle(0xf0a0b0, 0.9);
+  g.fillEllipse(3.2, -3, 2.6, 1.6);
+  g.fillEllipse(9.2, -2.4, 2.4, 1.5);
+}
+
+function drawRoosterMarks(
+  g: Phaser.GameObjects.Graphics,
+  coat: ChickCoat,
+  kind: StampedeFlockKind,
+  mood: 'chase' | 'smitten' | 'gag'
+): void {
+  if (kind !== 'rooster') return;
+  g.lineStyle(1.4, coat.comb, 1);
+  g.lineBetween(-9, 1, -16, -6);
+  g.lineBetween(-9, 3, -17, 2);
+  g.lineStyle(1.4, CHICK_INK, 1);
+  g.lineBetween(5, 14, 8, 16);
+  if (mood === 'gag') return;
+  g.lineBetween(6.1, -7.2, 8.4, -6.3);
+}
+
+function drawAilment(
+  g: Phaser.GameObjects.Graphics,
+  poisoned: boolean | undefined,
+  poisonFlash: boolean | undefined,
+  dazed: boolean | undefined
+): void {
+  if (poisoned) {
+    g.fillStyle(0x6f9f3a, poisonFlash ? 0.62 : 0.24);
     g.fillEllipse(1, 1, 16, 14);
   }
-  if (pose.dazed) {
-    g.lineStyle(1.2, CHICK_INK, 1);
-    g.strokeCircle(6.4, -6.4, 1.7);
-    g.strokeCircle(8.6, -5.2, 1.3);
-    g.fillStyle(0xf0a202, 1);
-    g.fillCircle(2.2, -15, 1.1);
-    g.fillCircle(10.2, -15.4, 0.9);
-  }
+  if (!dazed) return;
+  g.lineStyle(1.2, CHICK_INK, 1);
+  g.strokeCircle(6.4, -6.4, 1.7);
+  g.strokeCircle(8.6, -5.2, 1.3);
+  g.fillStyle(0xf0a202, 1);
+  g.fillCircle(2.2, -15, 1.1);
+  g.fillCircle(10.2, -15.4, 0.9);
+}
 
-  if (maxHp > 1) {
-    for (let index = 0; index < maxHp; index += 1) {
-      g.fillStyle(index < hp ? 0xb91c1c : 0xd9d3c7, 1);
-      g.fillCircle(-((maxHp - 1) * 1.15) + index * 2.3, -15.5, 0.55);
-    }
+function drawPips(g: Phaser.GameObjects.Graphics, hp: number, maxHp: number): void {
+  if (maxHp <= 1) return;
+  for (let index = 0; index < maxHp; index += 1) {
+    g.fillStyle(index < hp ? 0xb91c1c : 0xd9d3c7, 1);
+    g.fillCircle(-((maxHp - 1) * 1.15) + index * 2.3, -15.5, 0.55);
   }
 }
 
@@ -1037,6 +1094,115 @@ function drawKindTell(
     g.fillEllipse(-9, 1, 4.2, 3.2);
     g.strokeEllipse(-9, 1, 4.2, 3.2);
   }
+}
+
+function chickMood(smitten: boolean, forced?: 'gag'): 'chase' | 'smitten' | 'gag' {
+  if (forced === 'gag') return 'gag';
+  return smitten ? 'smitten' : 'chase';
+}
+
+function hurriedChick(smitten: boolean, forced: 'gag' | undefined, hit: boolean, dazed: boolean): boolean {
+  return smitten || forced === 'gag' || hit || dazed;
+}
+
+function chickPose(
+  dot: StampedeSwarmDot,
+  faceX: number,
+  nowMs: number,
+  smitten: boolean,
+  forced?: 'gag'
+) {
+  const facing: 1 | -1 = faceX >= 0 ? 1 : -1;
+  const mood = chickMood(smitten, forced);
+  const hit = nowMs < dot.hitFlapUntilMs;
+  const poisoned = nowMs < dot.poisonUntilMs;
+  const dazed = nowMs < dot.stunnedUntilMs;
+  const poisonFlash = poisoned && Math.floor(nowMs / 120) % 2 === 0;
+  const flap = wingFlap(nowMs, dot.phase, hurriedChick(smitten, forced, hit, dazed), hit);
+  return {
+    facing,
+    mood,
+    flap,
+    flapStep: Math.round(flap * 4),
+    ailmentStep: (dazed ? 2 : 0) + (poisonFlash ? 1 : 0),
+    hit,
+    dazed,
+    draw: {
+      mood,
+      flap,
+      coat: dot.coat,
+      kind: dot.kind,
+      hp: dot.hp,
+      maxHp: dot.maxHp,
+      poisoned,
+      poisonFlash,
+      dazed
+    }
+  };
+}
+
+function poseChanged(
+  dot: StampedeSwarmDot,
+  pose: { facing: 1 | -1; mood: StampedeSwarmDot['mood']; flapStep: number; ailmentStep: number }
+): boolean {
+  return dot.facing !== pose.facing
+    || dot.mood !== pose.mood
+    || dot.flapStep !== pose.flapStep
+    || dot.ailmentStep !== pose.ailmentStep;
+}
+
+function chasesPlayer(kind: StampedeFlockKind): boolean {
+  return kind === 'rooster' || kind === 'fixer';
+}
+
+function nearAlpha(isNear: boolean, alphaMultiplier: number): number {
+  return Math.min(isNear ? 0.96 : 0.82, (isNear ? 0.9 : 0.62) * alphaMultiplier);
+}
+
+function chickAngle(
+  nowMs: number,
+  phase: number,
+  mood: 'chase' | 'smitten' | 'gag',
+  hit: boolean,
+  dazed: boolean
+): number {
+  if (dazed) return Math.sin(nowMs / 70 + phase) * 18;
+  if (hit) return Math.sin(nowMs / 40 + phase) * 22;
+  if (mood === 'gag') return Math.sin(nowMs / 60 + phase) * 16;
+  return Math.sin(nowMs / 140 + phase) * 8;
+}
+
+function chickBob(
+  dot: StampedeSwarmDot,
+  nowMs: number,
+  mood: 'chase' | 'smitten' | 'gag',
+  flap: number,
+  hit: boolean,
+  dazed: boolean,
+  facing: 1 | -1
+): { offsetY: number; scaleX: number; scaleY: number; angle: number } {
+  const size = (dot.homeRadius / 5) * Math.abs(dot.shape.scaleX || 1) * 1.65 * kindScaleFor(dot.kind);
+  const waddle = (mood === 'gag'
+    ? Math.sin(nowMs / 45 + dot.phase) * 4
+    : Math.sin(nowMs / 90 + dot.phase) * 3) * (dot.kind === 'hen' ? 1.7 : 1);
+  const hop = flap > 0.45 ? -4 * flap : 0;
+  const punch = hit ? 1.2 : 1;
+  return {
+    offsetY: waddle + hop,
+    scaleX: facing * size * punch,
+    scaleY: size * (hit ? 0.92 : 1),
+    angle: chickAngle(nowMs, dot.phase, mood, hit, dazed)
+  };
+}
+
+function chaseSpeed(
+  dot: { kind: StampedeFlockKind; speed: number },
+  distance: number,
+  playerHurting?: boolean
+): number {
+  const lunging = dot.kind === 'rooster' && distance < 160;
+  const speed = lunging ? dot.speed * 1.75 : dot.speed;
+  return dot.kind === 'fixer' && playerHurting ? speed * 1.45 : speed;
 }
 
 function nearDistance(kind: StampedeFlockKind): number {

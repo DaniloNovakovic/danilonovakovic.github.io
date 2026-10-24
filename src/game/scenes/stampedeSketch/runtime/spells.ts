@@ -1,6 +1,6 @@
 import { isStampedeWeaponImmune, type StampedeFlockKind } from './flock';
 
-export const STAMPEDE_SPELL_IDS = ['badBreath', 'badSmell', 'fakeGlasses'] as const;
+const STAMPEDE_SPELL_IDS = ['badBreath', 'badSmell', 'fakeGlasses'] as const;
 
 export type StampedeSpellId = (typeof STAMPEDE_SPELL_IDS)[number];
 
@@ -90,10 +90,6 @@ export function getStampedeSpellChoices(): readonly StampedeSpellChoice[] {
   return STAMPEDE_SPELL_IDS.map((id) => SPELLS[id]);
 }
 
-export function isStampedeSpellId(value: unknown): value is StampedeSpellId {
-  return typeof value === 'string' && STAMPEDE_SPELL_IDS.includes(value as StampedeSpellId);
-}
-
 export function resolveOwnedStampedeSpells(
   upgrades: readonly string[]
 ): StampedeSpellId[] {
@@ -137,23 +133,30 @@ function spellTuning(spellId: StampedeSpellId, rank: 1 | 2): {
   cooldownMs: number;
   maxHits: number;
 } {
-  const upgraded = rank >= 2;
-  if (spellId === 'badSmell') {
-    return {
-      range: upgraded ? 176 : SMELL_RANGE,
-      dot: 1,
-      cooldownMs: upgraded ? 2_800 : SMELL_COOLDOWN_MS,
-      maxHits: Number.POSITIVE_INFINITY
-    };
-  }
-  if (spellId === 'fakeGlasses') {
-    return {
-      range: Number.POSITIVE_INFINITY,
-      dot: -1,
-      cooldownMs: upgraded ? 4_600 : GLASSES_COOLDOWN_MS,
-      maxHits: upgraded ? 4 : GLASSES_MAX_HITS
-    };
-  }
+  if (spellId === 'badSmell') return smellTuning(rank >= 2);
+  if (spellId === 'fakeGlasses') return glassesTuning(rank >= 2);
+  return breathTuning(rank >= 2);
+}
+
+function smellTuning(upgraded: boolean) {
+  return {
+    range: upgraded ? 176 : SMELL_RANGE,
+    dot: 1,
+    cooldownMs: upgraded ? 2_800 : SMELL_COOLDOWN_MS,
+    maxHits: Number.POSITIVE_INFINITY
+  };
+}
+
+function glassesTuning(upgraded: boolean) {
+  return {
+    range: Number.POSITIVE_INFINITY,
+    dot: -1,
+    cooldownMs: upgraded ? 4_600 : GLASSES_COOLDOWN_MS,
+    maxHits: upgraded ? 4 : GLASSES_MAX_HITS
+  };
+}
+
+function breathTuning(upgraded: boolean) {
   return {
     range: upgraded ? 260 : BAD_BREATH_RANGE,
     dot: upgraded ? 0.22 : BAD_BREATH_DOT,

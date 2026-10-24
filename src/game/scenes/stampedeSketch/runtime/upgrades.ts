@@ -10,10 +10,10 @@ import {
   type StampedeSpellId
 } from './spells';
 
-export const STAMPEDE_WEAPON_IDS = ['badSelfie', 'badBreath', 'badSmell', 'fakeGlasses'] as const;
-export const STAMPEDE_CHOICE_CAP = 3;
+const STAMPEDE_WEAPON_IDS = ['badSelfie', 'badBreath', 'badSmell', 'fakeGlasses'] as const;
+const STAMPEDE_CHOICE_CAP = 3;
 
-export const STAMPEDE_MOD_IDS = [
+const STAMPEDE_MOD_IDS = [
   'breathWide',
   'breathLinger',
   'breathCross',
@@ -154,10 +154,11 @@ export function getStampedeStartingWeaponChoices(
 
 export function getStampedeUpgradeChoices(
   ownedUpgradeIds: readonly string[] = [],
-  _upgradedWeaponIds: readonly string[] = [],
+  upgradedWeaponIds: readonly string[] = [],
   random: () => number = Math.random,
   draftsTaken = 0
 ): readonly StampedeUpgradeChoiceView[] {
+  void upgradedWeaponIds;
   const mods = STAMPEDE_WEAPON_IDS.flatMap((weaponId) => (
     ownedUpgradeIds.includes(weaponId)
       ? MODS_BY_WEAPON[weaponId].filter((modId) => !ownedUpgradeIds.includes(modId))
@@ -289,22 +290,31 @@ function shuffle<T>(items: readonly T[], random: () => number): T[] {
   return copy;
 }
 
-function weaponChoice(id: StampedeWeaponId, action: StampedeWeaponAction): StampedeUpgradeChoiceView {
-  if (id === 'badSelfie') {
-    return {
-      id,
-      title: action === 'upgrade' ? `${SELFIE_COPY.title} +` : SELFIE_COPY.title,
-      description: action === 'upgrade' ? SELFIE_COPY.upgradeDescription : SELFIE_COPY.description,
-      color: SELFIE_COPY.color,
-      action
-    };
-  }
+function titled(name: string, action: StampedeWeaponAction): string {
+  return action === 'upgrade' ? `${name} +` : name;
+}
 
+function weaponChoice(id: StampedeWeaponId, action: StampedeWeaponAction): StampedeUpgradeChoiceView {
+  if (id === 'badSelfie') return selfieChoice(action);
+  return spellWeaponChoice(id, action);
+}
+
+function selfieChoice(action: StampedeWeaponAction): StampedeUpgradeChoiceView {
+  return {
+    id: 'badSelfie',
+    title: titled(SELFIE_COPY.title, action),
+    description: action === 'upgrade' ? SELFIE_COPY.upgradeDescription : SELFIE_COPY.description,
+    color: SELFIE_COPY.color,
+    action
+  };
+}
+
+function spellWeaponChoice(id: StampedeWeaponId, action: StampedeWeaponAction): StampedeUpgradeChoiceView {
   const spell = getStampedeSpellChoices().find((choice) => choice.id === id);
   const title = spell?.title ?? 'Bad Breath';
   return {
     id,
-    title: action === 'upgrade' ? `${title} +` : title,
+    title: titled(title, action),
     description: action === 'upgrade' ? UPGRADE_COPY[id] : spell?.description ?? '',
     color: spell?.color ?? '#1a1a1a',
     action

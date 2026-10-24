@@ -34,6 +34,7 @@ export interface StampedeRunFrameInput {
   velocity: StampedeVelocity;
   player: StampedePressurePoint;
   contactCandidates: readonly StampedeRunContactCandidate[];
+  ignoredContactIds?: readonly string[];
 }
 
 export interface StampedeRunSwarmFrame {
@@ -82,7 +83,8 @@ export function resolveStampedeRunFrame({
   closeRequested,
   velocity,
   player,
-  contactCandidates
+  contactCandidates,
+  ignoredContactIds = []
 }: StampedeRunFrameInput): StampedeRunFrame {
   if (closeRequested) {
     return {
@@ -121,10 +123,10 @@ export function resolveStampedeRunFrame({
       profile: autoAttackProfile
     })
     : null;
-  const pressureCandidates = removeHitCandidates(
-    contactCandidates,
-    autoAttackFrame?.attack?.hitIds ?? []
-  );
+  const pressureCandidates = removeHitCandidates(contactCandidates, [
+    ...(autoAttackFrame?.attack?.hitIds ?? []),
+    ...ignoredContactIds
+  ]);
   const pressure = resolveStampedePressure({
     elapsedMs: advancedSession.elapsedMs,
     durationMs: advancedSession.durationMs,

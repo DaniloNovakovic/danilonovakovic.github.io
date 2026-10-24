@@ -169,21 +169,7 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.pickupRuntime = createStampedePickupRuntime({ scene: this });
     this.spellVfx = createStampedeSpellVfx({ scene: this });
     this.kitLook = createStampedeKitLook(this);
-    this.session = createStampedeSession();
-    this.autoAttackState = createStampedeAutoAttackState();
-    this.progression = createStampedeProgressionState();
-    this.shownResultPhase = undefined;
-    this.lastPublishedStatusKey = '';
-    this.hasRunStarted = false;
-    this.isUpgradeDraftOpen = false;
-    this.spellCooldownReadyAt = {};
-    this.breathHits = createBreathHitState();
-    this.breathBubbles = [];
-    this.breathLinger = [];
-    this.stinkState = createOrbitHitState();
-    this.stinkPoints = [];
-    this.disarmedUntilMs = 0;
-    this.lastFacing = { x: 1, y: 0 };
+    this.resetRunBookkeeping();
     this.updateHud();
     this.inputRuntime.setPointerControlEnabled(false);
     this.showStartPrompt();
@@ -211,49 +197,50 @@ export class StampedeSketchScene extends Phaser.Scene {
   }
 
   update(time: number, delta: number): void {
-    if (!this.player || !this.inputRuntime || !this.swarmRuntime) return;
-    if (this.isPaused) {
-      this.player.setVelocity(0, 0);
-      return;
-    }
-
-    const sceneUiAction = bridgeActions.consumeSceneUiAction(STAMPEDE_SKETCH_SCENE_ID);
-    if (sceneUiAction && sceneUiAction.action !== 'castSpell') {
-      this.handleSceneUiAction(sceneUiAction.action, sceneUiAction.params);
-      return;
-    }
-
-    if (this.isUpgradeDraftOpen) {
-      this.player.setVelocity(0, 0);
-      this.inputRuntime.updateStickVisuals();
-      return;
-    }
+    if (this.haltUpdate()) return;
+    const inputRuntime = this.inputRuntime;
+    const swarmRuntime = this.swarmRuntime;
+    const player = this.player;
+    if (!inputRuntime || !swarmRuntime || !player) return;
 
     this.consumeSceneControlPointerEvents();
 
-    const closeRequested = this.inputRuntime.closeRequested();
+    const closeRequested = inputRuntime.closeRequested();
     if (!this.hasRunStarted) {
       this.updateReadyFrame(closeRequested);
       return;
     }
-    if (this.session.phase !== 'playing' && this.inputRuntime.retryRequested()) {
+    if (this.session.phase !== 'playing' && inputRuntime.retryRequested()) {
       this.restartRun();
       return;
     }
 
+    this.commitLiveFrame(inputRuntime, swarmRuntime, player, closeRequested, delta, time);
+  }
+
+  private commitLiveFrame(
+    inputRuntime: NonNullable<StampedeSketchScene['inputRuntime']>,
+    swarmRuntime: NonNullable<StampedeSketchScene['swarmRuntime']>,
+    player: NonNullable<StampedeSketchScene['player']>,
+    closeRequested: boolean,
+    delta: number,
+    time: number
+  ): void {
     const disarmed = this.time.now < this.disarmedUntilMs;
     const selfieRank = disarmed ? 0 : getStampedeWeaponRank(
       this.progression.appliedUpgradeIds,
       this.progression.upgradedWeaponIds,
       'badSelfie'
     );
-    const velocity = this.inputRuntime.readVelocity({
+    const velocity = inputRuntime.readVelocity({
       speed: resolveStampedeGuardianSpeed(this.progression.appliedUpgradeIds)
     });
-    if (this.session.phase === 'playing') {
-      this.trackFacing(velocity);
-    }
+    if (this.session.phase === 'playing') this.trackFacing(velocity);
 
+    const weaponElapsedMs = Math.min(
+      this.session.elapsedMs + Math.max(0, delta),
+      this.session.durationMs
+    );
     const frame = resolveStampedeRunFrame({
       session: this.session,
       autoAttackState: selfieRank > 0 ? this.autoAttackState : undefined,
@@ -265,11 +252,14 @@ export class StampedeSketchScene extends Phaser.Scene {
       closeRequested,
       velocity,
       player: {
-        x: this.player.x,
-        y: this.player.y,
+        x: player.x,
+        y: player.y,
         radius: STAMPEDE_PLAYER_CONTACT_RADIUS
       },
-      contactCandidates: this.swarmRuntime.getContactCandidates()
+      contactCandidates: swarmRuntime.getContactCandidates(),
+      ignoredContactIds: disarmed
+        ? []
+        : this.peekWeaponHitIds(weaponElapsedMs, delta, time)
     });
 
     this.session = frame.session;
@@ -281,68 +271,124 @@ export class StampedeSketchScene extends Phaser.Scene {
       case 'terminal':
         this.spellVfx?.aim({
           spellId: resolveEquippedSpell(this.progression.appliedUpgradeIds) ?? 'badBreath',
-          origin: { x: this.player.x, y: this.player.y },
+          origin: { x: player.x, y: player.y },
           direction: this.lastFacing,
           ready: false
         });
         this.showTerminalFrame(frame, delta);
         return;
       case 'playing':
-        this.player.setVelocity(frame.velocity.x, frame.velocity.y);
-        this.player.setPosition(frame.player.x, frame.player.y);
-        if (this.time.now < this.disarmedUntilMs) {
-          this.breathHits = createBreathHitState();
-          this.breathBubbles = [];
-          this.breathLinger = [];
-          this.stinkState = createOrbitHitState();
-          this.stinkPoints = [];
-        } else {
-          this.tickBreath();
-          this.tickStink(delta);
-          this.fireOwnedSpells(time);
-        }
-        const aimedSpell = resolveEquippedSpell(this.progression.appliedUpgradeIds);
-        this.spellVfx?.aim({
-          spellId: aimedSpell ?? 'badBreath',
-          origin: { x: frame.player.x, y: frame.player.y },
-          direction: this.lastFacing,
-          ready: aimedSpell === 'fakeGlasses' && this.time.now >= this.disarmedUntilMs
-        });
-        this.updatePlayerContactRing(frame.pressure);
-        this.updatePlayerInkTilt(time, frame.velocity);
-        this.applyAutoAttack(frame.attack);
-        this.syncKitLook();
-        if (this.collectPickups(frame.player, frame.pressure)) {
-          this.inputRuntime.updateStickVisuals();
-          return;
-        }
-        if (this.revealPendingDraft()) {
-          this.inputRuntime.updateStickVisuals();
-          return;
-        }
-        if (frame.contactCandidate) {
-          this.feedbackRuntime?.showContact(this.player, frame.contactCandidate);
-          this.updatePlayerContactRing(frame.pressure);
-        }
-        this.swarmRuntime.update(this.player, delta, {
-          ...frame.swarm,
-          elapsedMs: this.session.elapsedMs,
-          playerHurting: this.session.contacts >= 2
-        });
-        if (this.swarmRuntime.consumeBeerHit()) {
-          this.disarmedUntilMs = this.time.now + STAMPEDE_BEER_DISARM_MS;
-          this.breathHits = createBreathHitState();
-          this.breathBubbles = [];
-          this.breathLinger = [];
-          this.stinkState = createOrbitHitState();
-          this.stinkPoints = [];
-        }
-        this.syncKitLook();
-        this.updateHud(frame.pressure);
-        this.announceTerminalPhase();
-        this.inputRuntime.updateStickVisuals();
+        this.applyPlayingFrame(frame, delta, time);
         return;
     }
+  }
+
+  private haltUpdate(): boolean {
+    if (!this.player || !this.inputRuntime || !this.swarmRuntime) return true;
+    if (this.isPaused) {
+      this.player.setVelocity(0, 0);
+      return true;
+    }
+
+    const sceneUiAction = bridgeActions.consumeSceneUiAction(STAMPEDE_SKETCH_SCENE_ID);
+    if (sceneUiAction && sceneUiAction.action !== 'castSpell') {
+      this.handleSceneUiAction(sceneUiAction.action, sceneUiAction.params);
+      return true;
+    }
+
+    if (this.isUpgradeDraftOpen) {
+      this.player.setVelocity(0, 0);
+      this.inputRuntime.updateStickVisuals();
+      return true;
+    }
+
+    return false;
+  }
+
+  private applyPlayingFrame(
+    frame: Extract<ReturnType<typeof resolveStampedeRunFrame>, { kind: 'playing' }>,
+    delta: number,
+    time: number
+  ): void {
+    if (!this.player || !this.inputRuntime || !this.swarmRuntime) return;
+
+    this.player.setVelocity(frame.velocity.x, frame.velocity.y);
+    this.player.setPosition(frame.player.x, frame.player.y);
+    this.tickOwnedWeapons(delta, time);
+    this.aimEquippedSpell();
+    this.updatePlayerContactRing(frame.pressure);
+    this.updatePlayerInkTilt(time, frame.velocity);
+    this.applyAutoAttack(frame.attack);
+    this.syncKitLook();
+    if (this.collectPickups(frame.player, frame.pressure) || this.revealPendingDraft()) {
+      this.inputRuntime.updateStickVisuals();
+      return;
+    }
+    this.showPlayingContact(frame);
+    this.swarmRuntime.update(this.player, delta, {
+      ...frame.swarm,
+      elapsedMs: this.session.elapsedMs,
+      playerHurting: this.session.contacts >= 2
+    });
+    if (this.swarmRuntime.consumeBeerHit()) {
+      this.disarmedUntilMs = this.time.now + STAMPEDE_BEER_DISARM_MS;
+      this.clearContinuousWeapons();
+    }
+    this.syncKitLook();
+    this.updateHud(frame.pressure);
+    this.announceTerminalPhase();
+    this.inputRuntime.updateStickVisuals();
+  }
+
+  private tickOwnedWeapons(delta: number, time: number): void {
+    if (this.time.now < this.disarmedUntilMs) {
+      this.clearContinuousWeapons();
+      return;
+    }
+    this.tickBreath();
+    this.tickStink(delta);
+    this.fireOwnedSpells(time);
+  }
+
+  private aimEquippedSpell(): void {
+    if (!this.player) return;
+    const aimedSpell = resolveEquippedSpell(this.progression.appliedUpgradeIds);
+    this.spellVfx?.aim({
+      spellId: aimedSpell ?? 'badBreath',
+      origin: { x: this.player.x, y: this.player.y },
+      direction: this.lastFacing,
+      ready: aimedSpell === 'fakeGlasses' && this.time.now >= this.disarmedUntilMs
+    });
+  }
+
+  private showPlayingContact(
+    frame: Extract<ReturnType<typeof resolveStampedeRunFrame>, { kind: 'playing' }>
+  ): void {
+    if (!frame.contactCandidate || !this.player) return;
+    this.feedbackRuntime?.showContact(this.player, frame.contactCandidate);
+    this.updatePlayerContactRing(frame.pressure);
+  }
+
+  private clearContinuousWeapons(): void {
+    this.breathHits = createBreathHitState();
+    this.breathBubbles = [];
+    this.breathLinger = [];
+    this.stinkState = createOrbitHitState();
+    this.stinkPoints = [];
+  }
+
+  private resetRunBookkeeping(): void {
+    this.session = createStampedeSession();
+    this.autoAttackState = createStampedeAutoAttackState();
+    this.progression = createStampedeProgressionState();
+    this.shownResultPhase = undefined;
+    this.lastPublishedStatusKey = '';
+    this.hasRunStarted = false;
+    this.isUpgradeDraftOpen = false;
+    this.spellCooldownReadyAt = {};
+    this.clearContinuousWeapons();
+    this.disarmedUntilMs = 0;
+    this.lastFacing = { x: 1, y: 0 };
   }
 
   private createPlayer(): void {
@@ -372,13 +418,7 @@ export class StampedeSketchScene extends Phaser.Scene {
   }
 
   private restartRun(): void {
-    this.session = createStampedeSession();
-    this.autoAttackState = createStampedeAutoAttackState();
-    this.progression = createStampedeProgressionState();
-    this.shownResultPhase = undefined;
-    this.lastPublishedStatusKey = '';
-    this.hasRunStarted = false;
-    this.isUpgradeDraftOpen = false;
+    this.resetRunBookkeeping();
     this.showStartPrompt();
     this.autoAttackRuntime?.reset();
     this.feedbackRuntime?.reset();
@@ -386,14 +426,6 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.pickupRuntime?.reset();
     this.spellVfx?.reset();
     this.kitLook?.reset();
-    this.spellCooldownReadyAt = {};
-    this.breathHits = createBreathHitState();
-    this.breathBubbles = [];
-    this.breathLinger = [];
-    this.stinkState = createOrbitHitState();
-    this.stinkPoints = [];
-    this.disarmedUntilMs = 0;
-    this.lastFacing = { x: 1, y: 0 };
     this.inputRuntime?.setPointerControlEnabled(false);
     this.inputRuntime?.clearPointerControl();
 
@@ -723,16 +755,19 @@ export class StampedeSketchScene extends Phaser.Scene {
     );
   }
 
-  private tickBreath(): void {
-    if (!this.player || !this.swarmRuntime) return;
+  private peekWeaponHitIds(elapsedMs: number, deltaMs: number, now: number): readonly string[] {
+    return [
+      ...this.resolveBreath(elapsedMs)?.hitIds ?? [],
+      ...this.resolveStink(elapsedMs, deltaMs)?.hitIds ?? [],
+      ...this.resolveGlassesCast(now)?.hitIds ?? []
+    ];
+  }
+
+  private resolveBreath(elapsedMs: number) {
+    if (!this.player || !this.swarmRuntime) return null;
     const owned = this.progression.appliedUpgradeIds.includes('badBreath')
       || this.progression.upgradedWeaponIds.includes('badBreath');
-    if (!owned) {
-      this.breathHits = createBreathHitState();
-      this.breathBubbles = [];
-      this.breathLinger = [];
-      return;
-    }
+    if (!owned) return null;
     const legacy = this.progression.upgradedWeaponIds.includes('badBreath');
     const beam = getBreathBeam({
       wide: legacy || this.progression.appliedUpgradeIds.includes('breathWide'),
@@ -743,34 +778,31 @@ export class StampedeSketchScene extends Phaser.Scene {
       this.lastFacing,
       beam
     );
-    this.breathBubbles = bubbles;
-    this.breathLinger = legacy || this.progression.appliedUpgradeIds.includes('breathLinger')
-      ? pushBreathLinger(this.breathLinger, bubbles, this.session.elapsedMs)
+    const linger = legacy || this.progression.appliedUpgradeIds.includes('breathLinger')
+      ? pushBreathLinger(this.breathLinger, bubbles, elapsedMs)
       : [];
-    const stepped = stepBreathBeam({
-      state: this.breathHits,
-      beam,
-      elapsedMs: this.session.elapsedMs,
-      player: { x: this.player.x, y: this.player.y },
-      facing: this.lastFacing,
-      candidates: this.swarmRuntime.getSpellCandidates(),
-      linger: this.breathLinger
-    });
-    this.breathHits = stepped.state;
-    this.applyWeaponHits(stepped.hitIds);
+    return {
+      bubbles,
+      linger,
+      ...stepBreathBeam({
+        state: this.breathHits,
+        beam,
+        elapsedMs,
+        player: { x: this.player.x, y: this.player.y },
+        facing: this.lastFacing,
+        candidates: this.swarmRuntime.getSpellCandidates(),
+        linger
+      })
+    };
   }
 
-  private tickStink(deltaMs: number): void {
-    if (!this.player || !this.swarmRuntime) return;
+  private resolveStink(elapsedMs: number, deltaMs: number) {
+    if (!this.player || !this.swarmRuntime) return null;
     const owned = this.progression.appliedUpgradeIds.includes('badSmell')
       || this.progression.upgradedWeaponIds.includes('badSmell');
-    if (!owned) {
-      this.stinkState = createOrbitHitState();
-      this.stinkPoints = [];
-      return;
-    }
+    if (!owned) return null;
     const legacy = this.progression.upgradedWeaponIds.includes('badSmell');
-    const stepped = stepOrbitHits({
+    return stepOrbitHits({
       state: this.stinkState,
       aura: getStinkAura({
         far: this.progression.appliedUpgradeIds.includes('smellFar'),
@@ -778,14 +810,57 @@ export class StampedeSketchScene extends Phaser.Scene {
         twin: legacy || this.progression.appliedUpgradeIds.includes('smellTwin'),
         fat: this.progression.appliedUpgradeIds.includes('smellFat')
       }),
-      elapsedMs: this.session.elapsedMs,
+      elapsedMs,
       deltaMs,
       player: { x: this.player.x, y: this.player.y },
       candidates: this.swarmRuntime.getSpellCandidates()
     });
-    this.stinkState = stepped.state;
-    this.stinkPoints = stepped.points;
-    this.applyWeaponHits(stepped.hitIds);
+  }
+
+  private resolveGlassesCast(now: number) {
+    if (!this.player || !this.swarmRuntime) return null;
+    const spellId = 'fakeGlasses' as const;
+    const owned = this.progression.appliedUpgradeIds.includes(spellId)
+      || this.progression.upgradedWeaponIds.includes(spellId);
+    if (!owned || now < (this.spellCooldownReadyAt[spellId] ?? 0)) return null;
+    return resolveStampedeSpellCast({
+      spellId,
+      player: { x: this.player.x, y: this.player.y },
+      facing: this.lastFacing,
+      candidates: this.swarmRuntime.getSpellCandidates(),
+      mods: this.progression.appliedUpgradeIds,
+      rank: getStampedeWeaponRank(
+        this.progression.appliedUpgradeIds,
+        this.progression.upgradedWeaponIds,
+        spellId
+      ) === 2 ? 2 : 1
+    });
+  }
+
+  private tickBreath(): void {
+    const resolved = this.resolveBreath(this.session.elapsedMs);
+    if (!resolved) {
+      this.breathHits = createBreathHitState();
+      this.breathBubbles = [];
+      this.breathLinger = [];
+      return;
+    }
+    this.breathBubbles = resolved.bubbles;
+    this.breathLinger = resolved.linger;
+    this.breathHits = resolved.state;
+    this.applyWeaponHits(resolved.hitIds);
+  }
+
+  private tickStink(deltaMs: number): void {
+    const resolved = this.resolveStink(this.session.elapsedMs, deltaMs);
+    if (!resolved) {
+      this.stinkState = createOrbitHitState();
+      this.stinkPoints = [];
+      return;
+    }
+    this.stinkState = resolved.state;
+    this.stinkPoints = resolved.points;
+    this.applyWeaponHits(resolved.hitIds);
   }
 
   private applyWeaponHits(hitIds: readonly string[]): void {
@@ -825,54 +900,24 @@ export class StampedeSketchScene extends Phaser.Scene {
   private fireOwnedSpells(now: number): void {
     if (!this.player || !this.swarmRuntime) return;
 
-    resolveOwnedSpells(this.progression.appliedUpgradeIds)
-      .filter((spellId) => spellId === 'fakeGlasses')
-      .forEach((spellId) => {
-      const readyAt = this.spellCooldownReadyAt[spellId] ?? 0;
-      if (now < readyAt) return;
+    const cast = this.resolveGlassesCast(now);
+    if (!cast) return;
 
-      const cast = resolveStampedeSpellCast({
-        spellId,
-        player: { x: this.player!.x, y: this.player!.y },
-        facing: this.lastFacing,
-        candidates: this.swarmRuntime!.getSpellCandidates(),
-        mods: this.progression.appliedUpgradeIds,
-        rank: getStampedeWeaponRank(
-          this.progression.appliedUpgradeIds,
-          this.progression.upgradedWeaponIds,
-          spellId
-        ) === 2 ? 2 : 1
-      });
-      this.spellCooldownReadyAt[spellId] = now + cast.cooldownMs;
-      this.swarmRuntime?.showResisted(cast.resistedIds);
-      const glassesFreeze = spellId === 'fakeGlasses'
-        && this.progression.appliedUpgradeIds.includes('glassesStare');
-      const clearedMarks = this.swarmRuntime?.clearMarks(
-        cast.hitIds,
-        glassesFreeze ? 'daze' : undefined,
-        1_100
-      ) ?? [];
-      this.progression = spawnStampedePickupsFromClearedMarks(this.progression, clearedMarks);
-      this.pickupRuntime?.sync(this.progression.pickups);
-      this.spellVfx?.show(cast);
-    });
+    this.spellCooldownReadyAt.fakeGlasses = now + cast.cooldownMs;
+    this.swarmRuntime.showResisted(cast.resistedIds);
+    const glassesFreeze = this.progression.appliedUpgradeIds.includes('glassesStare');
+    const clearedMarks = this.swarmRuntime.clearMarks(
+      cast.hitIds,
+      glassesFreeze ? 'daze' : undefined,
+      1_100
+    );
+    this.progression = spawnStampedePickupsFromClearedMarks(this.progression, clearedMarks);
+    this.pickupRuntime?.sync(this.progression.pickups);
+    this.spellVfx?.show(cast);
   }
 
   private publishStatus(snapshot: StampedeHudSnapshot): void {
-    const statusKey = [
-      Math.ceil(snapshot.timeRemainingSeconds ?? snapshot.timerSeconds ?? 0),
-      Math.round((snapshot.pageNoise ?? 0) * 100),
-      snapshot.phaseLabel ?? '',
-      snapshot.feedback ?? '',
-      snapshot.contacts ?? '',
-      snapshot.contactLimit ?? '',
-      snapshot.healthRemaining ?? '',
-      snapshot.scrapsCollected ?? '',
-      snapshot.scrapGoal ?? '',
-      snapshot.spellLabel ?? '',
-      snapshot.spellReady ? 1 : 0,
-      Math.ceil(snapshot.spellCooldownSeconds ?? 0)
-    ].join('|');
+    const statusKey = stampedeStatusKey(snapshot);
 
     if (statusKey === this.lastPublishedStatusKey) return;
     this.lastPublishedStatusKey = statusKey;
@@ -901,6 +946,35 @@ export class StampedeSketchScene extends Phaser.Scene {
 function readUpgradeId(params: unknown): unknown {
   if (!params || typeof params !== 'object') return undefined;
   return (params as { upgradeId?: unknown }).upgradeId;
+}
+
+function stampedeStatusKey(snapshot: StampedeHudSnapshot): string {
+  return [timerKey(snapshot), copyKey(snapshot), kitKey(snapshot)].join('|');
+}
+
+function timerKey(snapshot: StampedeHudSnapshot): string {
+  const seconds = snapshot.timeRemainingSeconds ?? snapshot.timerSeconds ?? 0;
+  return [Math.ceil(seconds), Math.round((snapshot.pageNoise ?? 0) * 100)].join('|');
+}
+
+function copyKey(snapshot: StampedeHudSnapshot): string {
+  return [
+    snapshot.phaseLabel ?? '',
+    snapshot.feedback ?? '',
+    snapshot.contacts ?? '',
+    snapshot.contactLimit ?? '',
+    snapshot.healthRemaining ?? ''
+  ].join('|');
+}
+
+function kitKey(snapshot: StampedeHudSnapshot): string {
+  return [
+    snapshot.scrapsCollected ?? '',
+    snapshot.scrapGoal ?? '',
+    snapshot.spellLabel ?? '',
+    snapshot.spellReady ? 1 : 0,
+    Math.ceil(snapshot.spellCooldownSeconds ?? 0)
+  ].join('|');
 }
 
 function soonestSpellCooldown(
