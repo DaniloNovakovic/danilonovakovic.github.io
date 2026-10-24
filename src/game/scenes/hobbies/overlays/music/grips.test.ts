@@ -1,21 +1,43 @@
 import { describe, expect, it } from 'vitest';
-import { frettedFrequency, gripById, noteLabel, type GripId } from './grips';
+import { chordName, frettedFrequency, fretsFor, noteLabel, slideFrets, type ChordColor, type GripId, type Voicing } from './grips';
 import { GUITAR_STRINGS } from './useGuitarSynth';
 
-function voiced(id: GripId): (string | 'x')[] {
-  return gripById(id).frets.map((fret, index) =>
+function voiced(id: GripId, voicing: Voicing = 'low', color: ChordColor = 'scale'): (string | 'x')[] {
+  return fretsFor(id, voicing, color).map((fret, index) =>
     fret === null ? 'x' : noteLabel(GUITAR_STRINGS[index]!.frequency, fret)
   );
 }
 
 describe('chord grips', () => {
-  it('stops the strings at real campfire chord tones', () => {
-    expect(voiced('em')).toEqual(['E4', 'B3', 'G3', 'E3', 'B2', 'E2']);
+  it('stops the open shapes on the G major scale', () => {
     expect(voiced('g')).toEqual(['G4', 'B3', 'G3', 'D3', 'B2', 'G2']);
-    expect(voiced('d')).toEqual(['F#4', 'D4', 'A3', 'D3', 'x', 'x']);
+    expect(voiced('a')).toEqual(['E4', 'C4', 'A3', 'E3', 'A2', 'x']);
+    expect(voiced('b')).toEqual(['F#4', 'D4', 'B3', 'F#3', 'B2', 'x']);
     expect(voiced('c')).toEqual(['E4', 'C4', 'G3', 'E3', 'C3', 'x']);
-    expect(voiced('am')).toEqual(['E4', 'C4', 'A3', 'E3', 'A2', 'x']);
+    expect(voiced('d')).toEqual(['F#4', 'D4', 'A3', 'D3', 'x', 'x']);
+    expect(voiced('e')).toEqual(['E4', 'B3', 'G3', 'E3', 'B2', 'E2']);
+    expect(voiced('f')).toEqual(['F#4', 'C4', 'A3', 'F#3', 'x', 'F#2']);
     expect(voiced('open')).toEqual(['E4', 'B3', 'G3', 'D3', 'A2', 'E2']);
+  });
+
+  it('flips major and minor without leaving the root', () => {
+    expect(voiced('a', 'low', 'alt')).toEqual(['E4', 'C#4', 'A3', 'E3', 'A2', 'x']);
+    expect(voiced('e', 'low', 'alt')).toEqual(['E4', 'B3', 'G#3', 'E3', 'B2', 'E2']);
+    expect(voiced('g', 'low', 'alt')).toEqual(['G4', 'D4', 'A#3', 'G3', 'x', 'x']);
+    expect(chordName('f', 'scale')).toBe('F#°');
+    expect(chordName('f', 'alt')).toBe('F#m');
+    expect(chordName('g', 'scale', 1)).toBe('G#');
+  });
+
+  it('keeps the shifted shape on the same chord', () => {
+    expect(voiced('g', 'high')).toEqual(['G4', 'D4', 'B3', 'G3', 'x', 'x']);
+    expect(voiced('e', 'high')).toEqual(['G4', 'E4', 'B3', 'E3', 'x', 'x']);
+  });
+
+  it('slides a shape one fret and refuses to leave the neck', () => {
+    expect(slideFrets([0, 0, 0, 2, 2, 0], 1)).toEqual([1, 1, 1, 3, 3, 1]);
+    expect(slideFrets([0, 0, 0, 2, 2, 0], -1)).toBeNull();
+    expect(slideFrets([12, 12, 12, null, null, null], 1)).toBeNull();
   });
 
   it('raises pitch by one semitone per fret', () => {

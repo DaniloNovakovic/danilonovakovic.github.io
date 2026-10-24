@@ -1,37 +1,142 @@
 /**
- * Latched chord grips for the hobby guitar.
+ * Latched chord grips for the hobby guitar, in G major.
  *
- * A guitar needs a fretting hand and a picking hand. On a laptop the fretting
- * hand is one key: the shape stays held until the next chord, and every string
- * then sounds at that fret (or chucks if the shape mutes it). The shapes are
- * the open G / Em campfire set, so any order still sits in one key.
+ * The letter plays that scale degree: G Am Bm C D Em, and F is F#°.
+ * Shift is the other fingering. Option flips major and minor (F#° flips to F#m).
+ * `-` and `=` slide the latched shape one fret, which is how D# and the rest appear.
  *
- * `frets` is string 1 (high E) → string 6 (low E). `null` is a muted string.
- * Fret numbers are semitones above the open string.
+ * Right hand, fingerstyle: J K L are index, middle, and ring on G, B, and high E.
+ * I O P are the bass strings a thumb would alternate: low E, A, D.
+ *
+ * Frets are string 1 (high E) → string 6 (low E). `null` is muted.
  */
 
-export type GripId = 'em' | 'g' | 'd' | 'c' | 'am' | 'open';
+export type GripId = 'g' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'open';
+export type Voicing = 'low' | 'high';
+export type ChordColor = 'scale' | 'alt';
+export type ChordQuality = 'major' | 'minor' | 'dim';
+export type Frets = readonly (number | null)[];
+
+interface Voicings {
+  low: Frets;
+  high: Frets;
+}
 
 export interface ChordGrip {
   id: GripId;
   /** Keyboard key, lowercase. */
   key: string;
-  frets: readonly (number | null)[];
+  /** Pitch class of the scale root. C = 0. */
+  root: number;
+  scaleQuality: ChordQuality;
+  altQuality: ChordQuality;
+  scale: Voicings;
+  alt: Voicings;
 }
 
+const OPEN_STRINGS: Frets = [0, 0, 0, 0, 0, 0];
+
+/** Scale order, so the buttons themselves stay inside G major. */
 export const CHORD_GRIPS: readonly ChordGrip[] = [
-  { id: 'em', key: 'q', frets: [0, 0, 0, 2, 2, 0] },
-  { id: 'g', key: 'w', frets: [3, 0, 0, 0, 2, 3] },
-  { id: 'd', key: 'e', frets: [2, 3, 2, 0, null, null] },
-  { id: 'c', key: 'r', frets: [0, 1, 0, 2, 3, null] },
-  { id: 'am', key: 't', frets: [0, 1, 2, 2, 0, null] },
-  { id: 'open', key: 'y', frets: [0, 0, 0, 0, 0, 0] }
+  {
+    id: 'g',
+    key: 'g',
+    root: 7,
+    scaleQuality: 'major',
+    altQuality: 'minor',
+    scale: { low: [3, 0, 0, 0, 2, 3], high: [3, 3, 4, 5, null, null] },
+    alt: { low: [3, 3, 3, 5, null, null], high: [3, 3, 3, 5, 5, 3] }
+  },
+  {
+    id: 'a',
+    key: 'a',
+    root: 9,
+    scaleQuality: 'minor',
+    altQuality: 'major',
+    scale: { low: [0, 1, 2, 2, 0, null], high: [5, 5, 5, 7, 7, 5] },
+    alt: { low: [0, 2, 2, 2, 0, null], high: [5, 5, 6, 7, 7, 5] }
+  },
+  {
+    id: 'b',
+    key: 'b',
+    root: 11,
+    scaleQuality: 'minor',
+    altQuality: 'major',
+    scale: { low: [2, 3, 4, 4, 2, null], high: [7, 7, 7, 9, 9, 7] },
+    alt: { low: [2, 4, 4, 4, 2, null], high: [7, 7, 8, 9, 9, 7] }
+  },
+  {
+    id: 'c',
+    key: 'c',
+    root: 0,
+    scaleQuality: 'major',
+    altQuality: 'minor',
+    scale: { low: [0, 1, 0, 2, 3, null], high: [3, 5, 5, 5, null, null] },
+    alt: { low: [3, 4, 5, 5, 3, null], high: [8, 8, 8, 10, null, null] }
+  },
+  {
+    id: 'd',
+    key: 'd',
+    root: 2,
+    scaleQuality: 'major',
+    altQuality: 'minor',
+    scale: { low: [2, 3, 2, 0, null, null], high: [null, null, 2, 4, 5, null] },
+    alt: { low: [1, 3, 2, 0, null, null], high: [5, 6, 7, 7, 5, null] }
+  },
+  {
+    id: 'e',
+    key: 'e',
+    root: 4,
+    scaleQuality: 'minor',
+    altQuality: 'major',
+    scale: { low: [0, 0, 0, 2, 2, 0], high: [3, 5, 4, 2, null, null] },
+    alt: { low: [0, 0, 1, 2, 2, 0], high: [4, 5, 4, 2, null, null] }
+  },
+  {
+    id: 'f',
+    key: 'f',
+    root: 6,
+    scaleQuality: 'dim',
+    altQuality: 'minor',
+    scale: { low: [2, 1, 2, 4, null, 2], high: [5, 4, 5, 4, null, null] },
+    alt: { low: [2, 2, 2, 4, 4, 2], high: [2, 2, 2, 4, null, null] }
+  },
+  {
+    id: 'open',
+    key: 'z',
+    root: 4,
+    scaleQuality: 'major',
+    altQuality: 'major',
+    scale: { low: OPEN_STRINGS, high: OPEN_STRINGS },
+    alt: { low: OPEN_STRINGS, high: OPEN_STRINGS }
+  }
 ];
 
-/** Sticky-note song: vi–I–V–IV in G, the four keys Q W E R. */
-export const CAMPFIRE: readonly GripId[] = ['em', 'g', 'd', 'c'];
+/**
+ * Right-hand picks, high E first.
+ * Home row J K L = G, B, high E. Upper row I O P = low E, A, D.
+ */
+export const STRING_PICKS = [
+  { key: 'l', string: 1 },
+  { key: 'k', string: 2 },
+  { key: 'j', string: 3 },
+  { key: 'p', string: 4 },
+  { key: 'o', string: 5 },
+  { key: 'i', string: 6 }
+] as const;
+
+/** On-screen rows match the keys under the right hand. */
+export const PICK_ROWS = [
+  ['i', 'o', 'p'],
+  ['j', 'k', 'l']
+] as const;
+
+/** Sticky-note song: I–V–IV–I in G. */
+export const CAMPFIRE: readonly GripId[] = ['g', 'd', 'c', 'g'];
 
 const GRIP_BY_ID = new Map(CHORD_GRIPS.map((grip) => [grip.id, grip]));
+const PITCHES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
+const QUALITY_SUFFIX: Record<ChordQuality, string> = { major: '', minor: 'm', dim: '°' };
 
 export function gripById(id: GripId): ChordGrip {
   const grip = GRIP_BY_ID.get(id);
@@ -39,7 +144,33 @@ export function gripById(id: GripId): ChordGrip {
   return grip;
 }
 
-const PITCHES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
+export function fretsFor(id: GripId, voicing: Voicing, color: ChordColor = 'scale'): Frets {
+  const grip = gripById(id);
+  const pair = id === 'open' || color === 'scale' ? grip.scale : grip.alt;
+  return voicing === 'high' ? pair.high : pair.low;
+}
+
+/** Moves a shape up or down the neck. Returns null when a fret would leave 0–12. */
+export function slideFrets(frets: Frets, capo: number): Frets | null {
+  if (capo === 0) return frets;
+  const moved = frets.map((fret) => (fret === null ? null : fret + capo));
+  if (moved.some((fret) => fret !== null && (fret < 0 || fret > 12))) return null;
+  return moved;
+}
+
+export function pickForKey(key: string): (typeof STRING_PICKS)[number] | undefined {
+  const letter = key.toLowerCase();
+  return STRING_PICKS.find((pick) => pick.key === letter);
+}
+
+/** Sounding name, including a flipped quality or a slid root. */
+export function chordName(id: GripId, color: ChordColor, capo = 0): string {
+  if (id === 'open') return 'Open';
+  const grip = gripById(id);
+  const quality = color === 'alt' ? grip.altQuality : grip.scaleQuality;
+  const pitch = PITCHES[(((grip.root + capo) % 12) + 12) % 12];
+  return `${pitch}${QUALITY_SUFFIX[quality]}`;
+}
 
 export function frettedFrequency(openFrequency: number, fret: number): number {
   return openFrequency * 2 ** (fret / 12);

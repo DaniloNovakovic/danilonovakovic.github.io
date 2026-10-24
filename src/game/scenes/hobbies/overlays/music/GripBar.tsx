@@ -1,5 +1,6 @@
+import type { MouseEvent } from 'react';
 import { hobbyFocusRing } from '../shared/hobbyStyles';
-import { CHORD_GRIPS, type GripId } from './grips';
+import { CHORD_GRIPS, type ChordColor, type GripId, type Voicing } from './grips';
 
 export const inkKeyClass = `flex h-11 min-w-11 cursor-pointer flex-col items-center justify-center rounded border-2 border-[#1a1a1a] px-1.5 leading-none shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none ${hobbyFocusRing}`;
 
@@ -11,7 +12,7 @@ interface GripBarProps {
   activeId: GripId;
   gripName: (id: GripId) => string;
   gripLabel: (name: string, key: string) => string;
-  onSelect: (id: GripId) => void;
+  onSelect: (id: GripId, voicing: Voicing, color: ChordColor) => void;
 }
 
 /** One tap latches a shape. It stays fretted until the next tap. */
@@ -29,7 +30,9 @@ export function GripBar({ label, activeId, gripName, gripLabel, onSelect }: Grip
             role="radio"
             aria-checked={selected}
             aria-label={gripLabel(name, keyLabel)}
-            onClick={() => onSelect(grip.id)}
+            onClick={(event: MouseEvent<HTMLButtonElement>) =>
+              onSelect(grip.id, event.shiftKey ? 'high' : 'low', event.altKey ? 'alt' : 'scale')
+            }
             className={`${inkKeyClass} ${selected ? inkKeyOn : inkKeyIdle}`}
           >
             <span className="font-black">{name}</span>

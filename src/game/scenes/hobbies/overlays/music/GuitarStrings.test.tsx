@@ -10,21 +10,17 @@ function renderGuitar() {
   );
 }
 
-function press(key: string) {
+function press(key: string, shiftKey = false, altKey = false, code?: string) {
   act(() => {
-    fireEvent.keyDown(window, { key });
+    fireEvent.keyDown(window, { key, shiftKey, altKey, code });
   });
 }
 
 function playCampfire() {
-  press('q');
-  press(' ');
-  press('w');
-  press(' ');
-  press('e');
-  press(' ');
-  press('r');
-  press(' ');
+  for (const key of ['g', 'd', 'c', 'g']) {
+    press(key);
+    press(' ');
+  }
 }
 
 afterEach(() => {
@@ -33,27 +29,47 @@ afterEach(() => {
 });
 
 describe('GuitarStrings', () => {
-  it('starts fretted to Em instead of open strings', () => {
+  it('starts on G, with the fingers on J K L and the bass on I O P', () => {
     renderGuitar();
-    expect(screen.getByRole('button', { name: 'String 5 (B2)' })).toBeDefined();
-    expect(screen.getByRole('button', { name: 'String 6 (E2)' })).toBeDefined();
-    expect(screen.getByRole('radio', { name: 'Em chord, key Q' }).getAttribute('aria-checked')).toBe('true');
+    expect(screen.getByRole('radio', { name: 'G chord, key G' }).getAttribute('aria-checked')).toBe('true');
+    expect(screen.getByRole('radio', { name: 'Am chord, key A' })).toBeDefined();
+    expect(screen.getByRole('radio', { name: 'F#° chord, key F' })).toBeDefined();
+    expect(screen.getByRole('button', { name: 'String L (G4)' })).toBeDefined();
+    expect(screen.getByRole('button', { name: 'String J (G3)' })).toBeDefined();
+    expect(screen.getByRole('button', { name: 'String I (G2)' })).toBeDefined();
   });
 
-  it('shows the fretted notes of the latched shape', () => {
+  it('uses shift for the other voicing and option for the other quality', () => {
     renderGuitar();
-    fireEvent.click(screen.getByRole('radio', { name: 'G chord, key W' }));
-    expect(screen.getByRole('button', { name: 'String 6 (G2)' })).toBeDefined();
-    expect(screen.getByRole('button', { name: 'String 1 (G4)' })).toBeDefined();
+    press('G', true);
+    expect(screen.getByRole('button', { name: 'String L (G4)' })).toBeDefined();
+    expect(screen.getByRole('button', { name: 'String I, muted' })).toBeDefined();
 
-    fireEvent.click(screen.getByRole('radio', { name: 'D chord, key E' }));
-    expect(screen.getByRole('button', { name: 'String 1 (F#4)' })).toBeDefined();
-    expect(screen.getByRole('button', { name: 'String 6, muted' })).toBeDefined();
+    press('a', false, true);
+    expect(screen.getByRole('button', { name: 'String K (C#4)' })).toBeDefined();
+
+    press('å', false, true, 'KeyE');
+    expect(screen.getByRole('radio', { name: 'E chord, key E' }).getAttribute('aria-checked')).toBe('true');
   });
 
-  it('awards the copper string once when Em G D C is strummed', () => {
+  it('slides the shape with = and will not count that chord in the song', () => {
     renderGuitar();
-    press('5');
+    press('=');
+    expect(screen.getByRole('button', { name: 'String L (G#4)' })).toBeDefined();
+    press(' ');
+    press('d');
+    press(' ');
+    press('c');
+    press(' ');
+    press('g');
+    press(' ');
+    expect(bridgeStore.getState().inventory.ownedItemIds).not.toContain('copper-string');
+  });
+
+  it('awards the copper string once when G D C G is strummed', () => {
+    renderGuitar();
+    press('j');
+    press('1');
     expect(bridgeStore.getState().inventory.ownedItemIds).not.toContain('copper-string');
 
     playCampfire();
@@ -68,23 +84,22 @@ describe('GuitarStrings', () => {
 
   it('keeps the song when a chord is strummed twice and drops it on a wrong chord', () => {
     renderGuitar();
+    press('g');
     press(' ');
     press(' ');
-    press('w');
+    press('d');
     press(' ');
-    press('t');
-    press(' ');
-    press('r');
+    press('e');
     press(' ');
     expect(bridgeStore.getState().inventory.ownedItemIds).not.toContain('copper-string');
 
-    fireEvent.click(screen.getByRole('radio', { name: 'Em chord, key Q' }));
+    fireEvent.click(screen.getByRole('radio', { name: 'G chord, key G' }));
     fireEvent.click(screen.getByRole('button', { name: 'Strum down' }));
-    fireEvent.click(screen.getByRole('radio', { name: 'G chord, key W' }));
+    fireEvent.click(screen.getByRole('radio', { name: 'D chord, key D' }));
     fireEvent.click(screen.getByRole('button', { name: 'Strum down' }));
-    fireEvent.click(screen.getByRole('radio', { name: 'D chord, key E' }));
+    fireEvent.click(screen.getByRole('radio', { name: 'C chord, key C' }));
     fireEvent.click(screen.getByRole('button', { name: 'Strum down' }));
-    fireEvent.click(screen.getByRole('radio', { name: 'C chord, key R' }));
+    fireEvent.click(screen.getByRole('radio', { name: 'G chord, key G' }));
     fireEvent.click(screen.getByRole('button', { name: 'Strum down' }));
     expect(bridgeStore.getState().inventory.ownedItemIds).toContain('copper-string');
   });

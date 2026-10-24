@@ -29,7 +29,7 @@ export function RiffNote({ title, hint, progressLabel, doneLabel, steps, progres
       </div>
       <ol className="mt-1 flex gap-1 font-mono text-base font-black">
         {steps.map((step, index) => (
-          <li key={step} className={`min-w-6 rounded-sm px-1 text-center ${noteClass(index, progress, done)}`}>
+          <li key={`${step}-${index}`} className={`min-w-6 rounded-sm px-1 text-center ${noteClass(index, progress, done)}`}>
             {step}
           </li>
         ))}
