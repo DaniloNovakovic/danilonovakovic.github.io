@@ -80,12 +80,12 @@ describe('stampede progression', () => {
 
     expect(started.appliedUpgradeIds).toEqual(['badSelfie']);
     expect(started.draftsTaken).toBe(0);
-    expect(started.scrapGoal).toBe(16);
+    expect(started.scrapGoal).toBe(8);
 
     const meaner = applyStampedeUpgradeChoice(started, 'badSelfie');
     expect(meaner.upgradedWeaponIds).toEqual(['badSelfie']);
     expect(meaner.draftsTaken).toBe(1);
-    expect(meaner.scrapGoal).toBe(40);
+    expect(meaner.scrapGoal).toBe(20);
     expect(meaner.nextDraftAtMs).toBeGreaterThan(0);
   });
 

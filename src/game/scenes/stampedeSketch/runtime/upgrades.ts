@@ -155,7 +155,8 @@ export function getStampedeStartingWeaponChoices(
 export function getStampedeUpgradeChoices(
   ownedUpgradeIds: readonly string[] = [],
   _upgradedWeaponIds: readonly string[] = [],
-  random: () => number = Math.random
+  random: () => number = Math.random,
+  draftsTaken = 0
 ): readonly StampedeUpgradeChoiceView[] {
   const mods = STAMPEDE_WEAPON_IDS.flatMap((weaponId) => (
     ownedUpgradeIds.includes(weaponId)
@@ -166,15 +167,20 @@ export function getStampedeUpgradeChoices(
   const shuffledMods = shuffle(mods, random);
   const shuffledUnlocks = shuffle(unlocks, random);
   const picked: Array<StampedeModId | StampedeWeaponId> = [];
-  const offerUnlock = shuffledUnlocks.length > 0 && (shuffledMods.length === 0 || random() < 0.28);
+  const allowNewWeapon = draftsTaken >= 2 || shuffledMods.length === 0;
+  const offerUnlock = allowNewWeapon
+    && shuffledUnlocks.length > 0
+    && (shuffledMods.length === 0 || random() < 0.28);
   if (offerUnlock && shuffledUnlocks[0]) picked.push(shuffledUnlocks[0]);
   shuffledMods.forEach((modId) => {
     if (picked.length < STAMPEDE_CHOICE_CAP) picked.push(modId);
   });
-  shuffledUnlocks.forEach((weaponId) => {
-    if (picked.length >= STAMPEDE_CHOICE_CAP || picked.includes(weaponId)) return;
-    picked.push(weaponId);
-  });
+  if (allowNewWeapon) {
+    shuffledUnlocks.forEach((weaponId) => {
+      if (picked.length >= STAMPEDE_CHOICE_CAP || picked.includes(weaponId)) return;
+      picked.push(weaponId);
+    });
+  }
   return picked.slice(0, STAMPEDE_CHOICE_CAP).map((id) => (
     isStampedeModId(id) ? modChoice(id) : weaponChoice(id, 'unlock')
   ));

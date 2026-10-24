@@ -674,7 +674,9 @@ export class StampedeSketchScene extends Phaser.Scene {
 
     const choices = getStampedeUpgradeChoices(
       this.progression.appliedUpgradeIds,
-      this.progression.upgradedWeaponIds
+      this.progression.upgradedWeaponIds,
+      Math.random,
+      this.progression.draftsTaken
     );
     if (choices.length === 0) {
       this.progression = {

@@ -30,7 +30,10 @@ describe('stampede upgrades', () => {
       { id: 'selfieRear', action: 'upgrade' }
     ]);
 
-    const withUnlock = getStampedeUpgradeChoices(['badSelfie'], [], () => 0);
+    const early = getStampedeUpgradeChoices(['badSelfie'], [], () => 0, 0);
+    expect(early.every((choice) => choice.action === 'upgrade')).toBe(true);
+
+    const withUnlock = getStampedeUpgradeChoices(['badSelfie'], [], () => 0, 2);
     expect(withUnlock).toHaveLength(3);
     expect(withUnlock.filter((choice) => choice.action === 'unlock')).toHaveLength(1);
   });

@@ -8,7 +8,7 @@ import {
 const STAMPEDE_SCRAP_PICKUP_RADIUS = 10;
 export const STAMPEDE_SCRAP_COLLECTION_RADIUS = 34;
 export const STAMPEDE_DRAFT_GAP_MS = 14_000;
-const STAMPEDE_UPGRADE_THRESHOLDS = [16, 40, 72, 112, 160, 216, 280] as const;
+const STAMPEDE_UPGRADE_THRESHOLDS = [8, 20, 36, 56, 80, 108, 140] as const;
 
 export function nextStampedeScrapGoal(appliedCount: number): number {
   return STAMPEDE_UPGRADE_THRESHOLDS[appliedCount] ?? 0;
