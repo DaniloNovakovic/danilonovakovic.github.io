@@ -19,7 +19,9 @@ export function useOverlayKeys(handlers: KeyHandlers): void {
 
   useEffect(function bindOverlayKeyboardHandlers() {
     const onKeyDown = (e: KeyboardEvent) => {
-      const handler = handlersRef.current[e.key];
+      // Option on macOS rewrites event.key (A becomes å). The physical key still matches.
+      const letter = e.altKey && /^Key[A-Z]$/.test(e.code) ? e.code.slice(3).toLowerCase() : undefined;
+      const handler = handlersRef.current[e.key] ?? (letter ? handlersRef.current[letter] : undefined);
       if (handler) {
         e.preventDefault();
         handler(e);
