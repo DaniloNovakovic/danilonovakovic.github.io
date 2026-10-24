@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
 import { ModalShell } from './ModalShell';
@@ -144,6 +144,104 @@ describe('ModalShell', () => {
     expect(dialogClasses).toContain('max-w-full');
     expect(backdropClasses).toContain('items-center');
     expect(backdropClasses).not.toContain('items-end');
+  });
+
+  it('does not dismiss when the opening tap compatibility click hits the focused close control', () => {
+    const onClose = vi.fn();
+
+    render(
+      <ModalShell onClose={onClose}>
+        {({ titleId }) => (
+          <div>
+            <h2 id={titleId}>Hobby</h2>
+            <button onClick={onClose}>Close</button>
+          </div>
+        )}
+      </ModalShell>
+    );
+
+    const close = screen.getByRole('button', { name: 'Close' });
+    expect(document.activeElement).toBe(close);
+    close.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 }));
+
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('still closes from a real pointer press on the focused close control', async () => {
+    const onClose = vi.fn();
+
+    render(
+      <ModalShell onClose={onClose}>
+        {({ titleId }) => (
+          <div>
+            <h2 id={titleId}>Hobby</h2>
+            <button onClick={onClose}>Close</button>
+          </div>
+        )}
+      </ModalShell>
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Close' }));
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not dismiss when a compatibility mousedown hits the backdrop', () => {
+    const onClose = vi.fn();
+    render(<TestModal onClose={onClose} />);
+
+    const backdrop = screen.getByRole('dialog').parentElement!;
+    backdrop.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('does not close when a backdrop press is released over the dialog', () => {
+    const onClose = vi.fn();
+    render(<TestModal onClose={onClose} />);
+
+    const dialog = screen.getByRole('dialog', { name: 'Test Modal' });
+    const backdrop = dialog.parentElement!;
+    vi.spyOn(dialog, 'getBoundingClientRect').mockReturnValue({
+      x: 100,
+      y: 80,
+      left: 100,
+      top: 80,
+      right: 300,
+      bottom: 280,
+      width: 200,
+      height: 200,
+      toJSON: () => ({})
+    });
+
+    fireEvent.pointerDown(backdrop, { clientX: 8, clientY: 8, pointerId: 1 });
+    fireEvent.pointerUp(backdrop, { clientX: 160, clientY: 140, pointerId: 1 });
+
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('closes when a backdrop press is released outside the dialog', () => {
+    const onClose = vi.fn();
+    render(<TestModal onClose={onClose} />);
+
+    const dialog = screen.getByRole('dialog', { name: 'Test Modal' });
+    const backdrop = dialog.parentElement!;
+    vi.spyOn(dialog, 'getBoundingClientRect').mockReturnValue({
+      x: 100,
+      y: 80,
+      left: 100,
+      top: 80,
+      right: 300,
+      bottom: 280,
+      width: 200,
+      height: 200,
+      toJSON: () => ({})
+    });
+
+    fireEvent.pointerDown(backdrop, { clientX: 8, clientY: 8, pointerId: 1 });
+    fireEvent.pointerUp(backdrop, { clientX: 8, clientY: 8, pointerId: 1 });
+
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   it('closes on backdrop click but not inside click', async () => {
