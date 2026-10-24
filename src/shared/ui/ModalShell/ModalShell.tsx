@@ -10,6 +10,27 @@ let previousBodyOverflow = '';
 /** Long enough to cover a mobile compatibility click after the opening tap. */
 const OPENING_CLICK_GRACE_MS = 500;
 
+/**
+ * Implicit touch capture keeps `pointerup` targeted at the backdrop after the
+ * finger slides onto the dialog. Compare the release point with the dialog box.
+ * An empty box has no layout, so the backdrop target check decides instead.
+ */
+function releasePointIsInsideDialog(
+  dialog: HTMLElement | null,
+  clientX: number,
+  clientY: number
+): boolean {
+  if (!dialog) return false;
+  const bounds = dialog.getBoundingClientRect();
+  if (bounds.width <= 0 || bounds.height <= 0) return false;
+  return (
+    clientX >= bounds.left &&
+    clientX <= bounds.right &&
+    clientY >= bounds.top &&
+    clientY <= bounds.bottom
+  );
+}
+
 interface ModalShellRenderProps {
   titleId: string;
   descriptionId: string;
@@ -161,7 +182,12 @@ export function ModalShell({
       onPointerUp={(event) => {
         const pressedBackdrop = backdropPointerDownRef.current;
         backdropPointerDownRef.current = false;
-        if (closeOnBackdrop && pressedBackdrop && event.target === event.currentTarget) {
+        if (
+          closeOnBackdrop &&
+          pressedBackdrop &&
+          event.target === event.currentTarget &&
+          !releasePointIsInsideDialog(dialogRef.current, event.clientX, event.clientY)
+        ) {
           onClose();
         }
       }}
