@@ -14,8 +14,8 @@ import type {
 
 const OVERWORLD_CONSOLE_HINTS: Record<OverworldProgressStage, string> = {
   'find-glasses':
-    'Find the basement hatch near the start of the street and pick up the glasses.',
-  'wear-glasses': 'equip glasses to reveal the banana peel secret.',
+    'Walk to the chick just past Experiences (or the basement hatch) to get glasses.',
+  'wear-glasses': 'equip glasses to reveal the banana peel. The street chick will run.',
   'find-peel': `With glasses on, walk near x=${OVERWORLD_BANANA_PEEL.x} and interact with the peel.`,
   'win-circuit':
     'Interact with the peel again to enter Potassium Slip and win the Circuit — or win music, fitness and dancing parts in Hobbies (perform) and solder them at the basement workbench.',

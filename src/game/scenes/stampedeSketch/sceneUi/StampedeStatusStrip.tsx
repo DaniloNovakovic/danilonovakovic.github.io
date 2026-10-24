@@ -41,7 +41,7 @@ export function StampedeStatusStrip({ params }: SceneUiSurfaceProps) {
       ) : null}
       <div className="min-w-[8rem] flex-1 text-left [@media(max-height:420px)]:min-w-[5.5rem]">
         <p className="font-mono text-xs font-bold uppercase leading-tight tracking-widest text-[#4b4337] [@media(max-height:420px)]:text-[10px] md:text-sm">
-          {snapshot.phaseLabel ?? 'Kite ideas'}
+          {snapshot.phaseLabel ?? 'Chick magnet'}
         </p>
         {feedback && (
           <p className="font-mono text-[10px] font-bold uppercase leading-tight tracking-wider text-[#1a1a1a]/75 [@media(max-height:420px)]:hidden md:text-xs">
@@ -67,6 +67,11 @@ export function StampedeStatusStrip({ params }: SceneUiSurfaceProps) {
           />
         </div>
       </div>
+      {snapshot.spellLabel ? (
+        <p className="border-2 border-[#1a1a1a] bg-[#fbfbf9] px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-[#1a1a1a] md:text-xs">
+          {formatSpell(snapshot)}
+        </p>
+      ) : null}
       {typeof snapshot.scrapsCollected === 'number' && typeof snapshot.scrapGoal === 'number' ? (
         <p className="font-mono text-xs font-bold uppercase leading-tight tracking-widest text-[#4b4337] [@media(max-height:420px)]:hidden md:text-sm">
           Scraps {snapshot.scrapsCollected}/{snapshot.scrapGoal}
@@ -79,6 +84,15 @@ export function StampedeStatusStrip({ params }: SceneUiSurfaceProps) {
 function readStatusParams(params: unknown): StampedeHudSnapshot {
   if (!params || typeof params !== 'object') return {};
   return params as StampedeHudSnapshot;
+}
+
+function formatSpell(snapshot: StampedeHudSnapshot): string {
+  const label = snapshot.spellLabel ?? '';
+  const cooling = snapshot.spellCooldownSeconds ?? 0;
+  if (snapshot.spellReady === false && cooling > 0.2) {
+    return `${label} ${Math.ceil(cooling)}`;
+  }
+  return label;
 }
 
 function formatTimer(seconds: number): string {
@@ -96,9 +110,9 @@ function formatFeedback(feedback: StampedeHudSnapshot['feedback']): string {
     case 'smudged':
       return 'Smudged';
     case 'blanketHeld':
-      return 'Blanket held';
+      return 'You got away';
     case 'crowded':
-      return 'Page got crowded';
+      return 'Chicks caught up';
     default:
       return String(feedback);
   }

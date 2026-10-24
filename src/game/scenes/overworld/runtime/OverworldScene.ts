@@ -17,6 +17,7 @@ import {
   OVERWORLD_BASEMENT_HOLE,
   OVERWORLD_BILLBOARD_X,
   OVERWORLD_BUILDING_TRIGGERS,
+  OVERWORLD_CHICK,
   OVERWORLD_CIRCUIT_SLOT,
   OVERWORLD_GLASSES_SECRET_SLOTS,
   OVERWORLD_INTERACT_PROMPT_OFFSET_Y,
@@ -63,6 +64,7 @@ import { StreetSignpost } from './street/StreetSignpost';
 import { StreetHatch } from './street/StreetHatch';
 import { StreetDetail } from './street/StreetDetail';
 import { StreetBillboard } from './street/StreetBillboard';
+import { StreetChick } from './street/StreetChick';
 import { prefersReducedMotion, sketchTick } from '@/game/sharedSceneRuntime/motion/sketchMotion';
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
 import { startTypewriterEffect, type TypewriterEffectHandle } from '@/game/sharedSceneRuntime/text/typewriterEffect';
@@ -101,6 +103,7 @@ export class OverworldScene extends Phaser.Scene {
   /** Where the player stood before the hatch tween, so the return isn't inside the ground. */
   private preDropPosition?: { x: number; y: number };
   private birds?: StreetBirds;
+  private chick?: StreetChick;
   private footsteps?: StreetFootsteps;
   private motion = true;
   private glassesSecretHint?: Phaser.GameObjects.Text;
@@ -229,6 +232,7 @@ export class OverworldScene extends Phaser.Scene {
     this.circuitCrt = new StreetCrt(this, OVERWORLD_CIRCUIT_SLOT.x, OVERWORLD_CIRCUIT_SLOT.y, 18);
     this.circuitCrt.update(isItemOwned('circuit'), 0, this.motion);
     this.birds = new StreetBirds(this);
+    this.chick = new StreetChick(this, OVERWORLD_CHICK.x);
     this.footsteps = new StreetFootsteps(this);
 
     this.preGlassesVision = new DistanceHazeVision(this, {
@@ -277,7 +281,9 @@ export class OverworldScene extends Phaser.Scene {
   private updateStreetProps(time: number, delta: number, tick: number): void {
     const hasCircuit = isItemOwned('circuit');
     const sprinting = Math.abs(this.player.body.velocity.x) > SIDE_VIEW_WALK_SPEED + 1;
-    this.setBananaFloorVisible(isItemEquipped('glasses'));
+    const glassesOn = isItemEquipped('glasses');
+    this.setBananaFloorVisible(glassesOn);
+    this.chick?.update(time, delta, this.player.x, glassesOn, this.motion);
     this.circuitCrt?.update(hasCircuit, tick, this.motion);
     this.hatch?.update({ hasGlasses: isItemOwned('glasses'), hasCircuit }, this.player.x, tick, this.motion);
     this.birds?.update(time, delta, this.player.x, sprinting, this.motion);
@@ -296,6 +302,8 @@ export class OverworldScene extends Phaser.Scene {
   private updateOverworldInteraction(interactRequested: boolean): NearbyThing | undefined {
     if (!this.session) return undefined;
 
+    const bridge = bridgeStore.getState();
+    this.session.syncInventory(bridge.inventory.ownedItemIds, bridge.equipment.equippedItemIds);
     const sync = this.session.syncPlayerPosition(this.player.x, this.player.y);
     this.applySessionResult(sync);
 
@@ -357,6 +365,8 @@ export class OverworldScene extends Phaser.Scene {
         return isSecretDiscovered(BANANA_PEEL_CLUE_ID)
           ? overworld.bananaDiscoveredPrompt
           : overworld.bananaUndiscoveredPrompt;
+      case 'npc':
+        return overworld.chickPrompt;
       case 'crt':
         return isItemOwned('circuit')
           ? overworld.circuitCrtReadyPrompt

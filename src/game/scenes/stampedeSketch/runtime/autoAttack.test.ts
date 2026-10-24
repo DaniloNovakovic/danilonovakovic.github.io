@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   STAMPEDE_AUTO_ATTACK_COOLDOWN_MS,
-  STAMPEDE_AUTO_ATTACK_HALF_WIDTH,
-  STAMPEDE_AUTO_ATTACK_LENGTH,
+  STAMPEDE_AUTO_ATTACK_RANGE,
   createStampedeAutoAttackState,
   resolveStampedeAutoAttackFrame,
   type StampedeAutoAttackCandidate
@@ -76,58 +75,47 @@ describe('stampede auto attack', () => {
     expect(frame.attack?.hitIds[0]).toBe('mark-near');
   });
 
-  it('ignores marks outside targeting range and swipes in the last movement direction', () => {
+  it('snaps a random nearby chick and ignores marks outside range', () => {
     const frame = resolveStampedeAutoAttackFrame({
       state: createStampedeAutoAttackState({ lastDirection: { x: 0, y: -1 } }),
       elapsedMs: STAMPEDE_AUTO_ATTACK_COOLDOWN_MS,
       player,
       velocity: { x: 0, y: 0 },
-      candidates: [{
-        id: 'mark-far',
-        x: 400,
-        y: 100,
-        radius: 5
-      }]
+      candidates: [
+        { id: 'mark-near', x: 140, y: 100, radius: 5 },
+        { id: 'mark-far', x: 400, y: 100, radius: 5 }
+      ]
     });
 
-    expect(frame.attack?.hitIds).toEqual([]);
-    expect(frame.attack?.direction).toEqual({ x: 0, y: -1 });
+    expect(frame.attack?.hitIds).toEqual(['mark-near']);
+    expect(frame.attack?.target).toEqual({ x: 140, y: 100 });
   });
 
-  it('uses swipe geometry at the boundary', () => {
-    const target: StampedeAutoAttackCandidate = {
-      id: 'mark-target',
-      x: player.x + 40,
+  it('stays inside selfie range', () => {
+    const inside: StampedeAutoAttackCandidate = {
+      id: 'mark-inside',
+      x: player.x + STAMPEDE_AUTO_ATTACK_RANGE - 10,
       y: player.y,
-      radius: 5
-    };
-    const boundary: StampedeAutoAttackCandidate = {
-      id: 'mark-boundary',
-      x: player.x + STAMPEDE_AUTO_ATTACK_LENGTH,
-      y: player.y + STAMPEDE_AUTO_ATTACK_HALF_WIDTH + 5,
       radius: 5
     };
     const outside: StampedeAutoAttackCandidate = {
       id: 'mark-outside',
-      x: player.x + STAMPEDE_AUTO_ATTACK_LENGTH,
-      y: player.y + STAMPEDE_AUTO_ATTACK_HALF_WIDTH + 6,
+      x: player.x + STAMPEDE_AUTO_ATTACK_RANGE + 20,
+      y: player.y,
       radius: 5
     };
-
     const frame = resolveStampedeAutoAttackFrame({
       state: createStampedeAutoAttackState(),
       elapsedMs: STAMPEDE_AUTO_ATTACK_COOLDOWN_MS,
       player,
       velocity: { x: 1, y: 0 },
-      candidates: [target, boundary, outside]
+      candidates: [inside, outside]
     });
 
-    expect(frame.attack?.hitIds).toContain('mark-target');
-    expect(frame.attack?.hitIds).toContain('mark-boundary');
-    expect(frame.attack?.hitIds).not.toContain('mark-outside');
+    expect(frame.attack?.hitIds).toEqual(['mark-inside']);
   });
 
-  it('caps cleared marks at two and returns remaining candidates', () => {
+  it('caps cleared marks at two and returns the one it did not photograph', () => {
     const candidates: StampedeAutoAttackCandidate[] = [
       { id: 'mark-a', x: 130, y: 100, radius: 5 },
       { id: 'mark-b', x: 150, y: 100, radius: 5 },
@@ -141,10 +129,12 @@ describe('stampede auto attack', () => {
       candidates
     });
 
-    expect(frame.attack?.hitIds).toEqual(['mark-a', 'mark-b']);
-    expect(frame.remainingCandidates.map((candidate) => candidate.id)).toEqual([
-      'mark-c'
-    ]);
+    expect(frame.attack?.hitIds).toHaveLength(2);
+    expect(frame.remainingCandidates).toHaveLength(1);
+    expect([
+      ...(frame.attack?.hitIds ?? []),
+      frame.remainingCandidates[0]?.id
+    ].sort()).toEqual(['mark-a', 'mark-b', 'mark-c']);
   });
 
   it('is deterministic for the same plain inputs', () => {
@@ -159,5 +149,20 @@ describe('stampede auto attack', () => {
     expect(resolveStampedeAutoAttackFrame(input)).toEqual(
       resolveStampedeAutoAttackFrame(input)
     );
+  });
+
+  it('will not photograph a situationship', () => {
+    const frame = resolveStampedeAutoAttackFrame({
+      state: createStampedeAutoAttackState(),
+      elapsedMs: STAMPEDE_AUTO_ATTACK_COOLDOWN_MS,
+      player,
+      velocity: { x: 1, y: 0 },
+      candidates: [
+        { id: 'complicated', x: 140, y: 100, radius: 5, kind: 'situationship' },
+        { id: 'plain', x: 180, y: 100, radius: 5, kind: 'chick' }
+      ]
+    });
+
+    expect(frame.attack?.hitIds).toEqual(['plain']);
   });
 });

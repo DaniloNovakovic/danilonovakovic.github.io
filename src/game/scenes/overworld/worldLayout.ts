@@ -4,6 +4,7 @@ import type { SecretDiscoveryId } from '@/game/bridge/store';
 import type { OverworldSecretSlot } from '@/game/core/ecs/systems/overworldInteractSystems';
 import {
   OVERWORLD_BANANA_PEEL,
+  OVERWORLD_CHICK as CORE_CHICK,
   OVERWORLD_BASEMENT_HOLE as CORE_BASEMENT_HOLE,
   OVERWORLD_BUILDING_SPOTS,
   OVERWORLD_CIRCUIT_CRT,
@@ -82,6 +83,12 @@ export const OVERWORLD_SIGNPOST_X = CORE_SIGNPOST.x;
 /** Roadside board between Hobbies and Contact that shows the pinned easel doodle. */
 export const OVERWORLD_BILLBOARD_X = 2650;
 
+
+/** Sidewalk chick just past Experiences. Interact rules live in the console. */
+export const OVERWORLD_CHICK = {
+  x: CORE_CHICK.x,
+  y: CORE_CHICK.y
+} as const;
 
 export const BANANA_PEEL_CLUE_ID = OVERWORLD_BANANA_PEEL.secretId satisfies SecretDiscoveryId;
 

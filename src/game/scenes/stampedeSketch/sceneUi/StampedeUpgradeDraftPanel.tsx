@@ -32,10 +32,10 @@ export function StampedeUpgradeDraftPanel({ params, dispatchAction }: SceneUiSur
         Scraps {view.scrapsCollected}/{view.scrapGoal}
       </p>
       <h2 id={titleId} className="mt-1 font-mono text-xl font-bold uppercase leading-tight tracking-wider text-[#1a1a1a] sm:text-3xl">
-        Pick a page trick
+        Pick a weapon
       </h2>
       <p id={descriptionId} className="mx-auto mt-2 max-w-sm font-mono text-xs font-bold leading-snug text-[#4b4337] sm:text-sm">
-        The page coughs up one useful idea. Tape it down and keep moving.
+        Mostly a twist on a weapon you already have. A new weapon shows up less often.
       </p>
       <div className="mt-4 grid gap-3 sm:mt-5 sm:grid-cols-3 sm:gap-4">
         {view.choices.map((choice) => (
@@ -46,6 +46,9 @@ export function StampedeUpgradeDraftPanel({ params, dispatchAction }: SceneUiSur
             className="min-h-28 w-full flex-col gap-3 px-3 py-4 font-mono text-left normal-case tracking-normal sm:min-h-36 sm:px-4"
             onClick={() => dispatchAction('stampedeUpgradeChoice', { upgradeId: choice.id })}
           >
+            <span className="block text-center font-mono text-[10px] font-bold uppercase tracking-widest text-[#4b4337]">
+              {choice.action === 'upgrade' ? 'Twist' : 'New'}
+            </span>
             <span
               className="block text-center text-lg font-bold leading-tight sm:text-xl"
               style={{ color: choice.color }}

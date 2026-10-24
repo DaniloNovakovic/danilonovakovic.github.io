@@ -18,6 +18,9 @@ export interface StampedeHudSnapshot {
   healthRemaining?: number;
   scrapsCollected?: number;
   scrapGoal?: number;
+  spellLabel?: string;
+  spellReady?: boolean;
+  spellCooldownSeconds?: number;
 }
 
 export function createStampedeHudSnapshot(
@@ -53,19 +56,19 @@ function resolvePhaseLabel(
   session: StampedeSessionSnapshot,
   pressure?: StampedePressureSnapshot
 ): string {
-  if (session.phase === 'failed') return 'Page crowded';
-  if (session.phase === 'cleared') return 'Blanket held';
+  if (session.phase === 'failed') return 'Chicks caught up';
+  if (session.phase === 'cleared') return 'You got away';
 
   switch (pressure?.band) {
     case 'build':
-      return 'Noise rising';
+      return 'They noticed you';
     case 'surge':
-      return 'Surge';
+      return 'Stampede';
     case 'recover':
-      return 'Breather';
+      return 'They lose you';
     case 'calm':
     default:
-      return 'Kite ideas';
+      return 'Chick magnet';
   }
 }
 

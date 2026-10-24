@@ -3,8 +3,13 @@
 > Mini-game design brief and Ridge reward contract.
 
 Stampede Sketch is the first new opt-in mini-game prototype for Sketchbook
-Ridge. In the active Ridge pre-production route, it is optional side fun or an
-alternate-path candidate, not required Living Proof for the first ending.
+Ridge. On the current street it ships as **Chick Magnet**: a chick just past
+Experiences starts it while glasses are off, the first clear grants and equips
+the glasses, and wearing glasses makes that chick run away. The arena is a
+flock that gets meaner over a 2:30 run: chicks, then dating stereotypes, broody hens, a
+rooster that charges, and a bartender who throws beer. A mug that lands soaks you and
+your weapons go quiet for a few seconds. You pick one starting weapon from two or three random offers, never more than three. The first twist costs 8 scraps, later twists stay cheap, and drafts are still at least 14 seconds apart. The first two drafts only twist a weapon you already have. A new weapon can show up after that, and a card never offers a plain damage boost. Bad selfie hits random nearby chicks and dazes survivors; a situationship will not pose. Twists can daze the chick beside the photo, hold the pose longer, or snap whoever is behind you. Bad breath is a lane of green bubbles in the direction you face. Twists widen that lane, leave the stench hanging, or snake the stream. Bad smell is a green stink cloud orbiting you. Twists swing it farther, spin it faster, add a twin on the other side, or fatten the cloud. Perfume chicks ignore the stink. Hits from either flash the chick green. Fake glasses drops the nearest couple of chicks and shows on your face; nerds shrug them off until the prescription twist. Other glasses twists freeze whoever sees them, or catch a chick standing beside the target. Special chicks say one short line at a time, with the rarer type going first when they overlap. You keep each one, and the character wears the kit so you can see what is active. Closing returns to the street. In the active Ridge pre-production route, it is optional
+side fun, not required Living Proof for the first ending.
 
 ## Core Purpose
 
@@ -59,12 +64,18 @@ them to the blanket, but the blanket itself should remain a separate landmark.
 
 - **Core verb:** kite.
 - **Auto-attacks:** sketch tools that sort or redirect pressure.
+- **Spells:** weapons you keep, and each one shows on the character. The opening offers two or three weapons, never four. Bad selfie
+  damages random nearby chicks and dazes whoever survives; a situationship will not pose. Twists daze neighbors, hold the pose, or snap behind you. Bad breath is a lane of green bubbles in front of where you are looking; twists widen it, leave stench behind, or snake it. Bad smell is an orbiting green stink cloud; twists move it farther, spin it faster, add a twin, or fatten it. Perfume chicks ignore it. Fake glasses damages the nearest couple of chicks and puts lenses on you. Nerds are immune until the prescription twist. A stare freezes survivors, and a side eye catches a chick beside the target. A beer hit from the bartender silences every weapon for a few seconds and splashes the character. The first twist opens at 8 scraps, later twists stay cheaper, and drafts are still at least 14 seconds apart.
+  The first two drafts only twist a weapon you have. A new weapon can show up after that. After the opening, a nerd, a perfume chick, a fixer who mends wounded birds, and a situationship join the flock. Hens
+  arrive after the opening and take two hits. A rooster arrives later, takes
+  three hits, and charges. The bartender holds the edge and throws mugs.
 - **XP pickups:** captured ink drops, sticky notes, or useful scraps.
 - **Upgrades:** better ways to organize, soften, or survive pressure.
 - **Damage/contact:** smudges, page noise, crowding.
 - **Win:** the blanket stays calm until the timer ends.
-- **First-clear reward:** candidate stamp plus one glide pip for Ridge
-  traversal if the active route later accepts that reward.
+- **First-clear reward:** the street glasses, owned and equipped. A repeat
+  clear does not grant another pair. The earlier Ridge stamp and glide pip
+  candidate is not awarded by this clear.
 
 ## First-Slice Art Direction
 

@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { TEST_ROUTE_DIALOGUE_CATALOG } from '../ridge/content/testRouteCatalog';
 import { parseGameCommand, parseGameScript } from './commands';
-import { OVERWORLD_BANANA_PEEL, OVERWORLD_BASEMENT_HOLE, OVERWORLD_BUILDING_SPOTS } from './content/overworldSpots';
+import {
+  OVERWORLD_BANANA_PEEL,
+  OVERWORLD_BASEMENT_HOLE,
+  OVERWORLD_BUILDING_SPOTS,
+  OVERWORLD_CHICK
+} from './content/overworldSpots';
 import { getSketchDetailLevel } from './overworldLogic';
 import { GameConsoleSession } from './session';
 
@@ -230,6 +235,25 @@ describe('GameConsoleSession full secret route', () => {
     const bench = session.exec('interact workbench');
     expect(bench.events).toContainEqual({ type: 'thought', id: 'workbench_missing_parts', variant: 0 });
     expect(bench.message).toContain('copper-string');
+  });
+
+  it('starts Chick Magnet from the street chick only while glasses are off', () => {
+    const bare = createSession();
+    walkOverworldTo(bare, OVERWORLD_CHICK.x);
+    const started = bare.exec('interact chick');
+    expect(started.events).toContainEqual({ type: 'scene_entered', sceneId: 'stampedeSketch' });
+    expect(bare.observe().mode).toBe('overworld');
+
+    const wearing = createSession({ ownedItemIds: ['glasses'], equippedItemIds: ['glasses'] });
+    wearing.syncPlayerPosition(OVERWORLD_CHICK.x, OVERWORLD_CHICK.y);
+    expect(wearing.observe().nearby.some((thing) => thing.id === 'chick')).toBe(false);
+
+    const pocketed = createSession({ ownedItemIds: ['glasses'], equippedItemIds: [] });
+    pocketed.syncPlayerPosition(OVERWORLD_CHICK.x, OVERWORLD_CHICK.y);
+    expect(pocketed.observe().nearby[0]?.id).toBe('chick');
+
+    wearing.syncInventory(['glasses'], []);
+    expect(wearing.observe().nearby.some((thing) => thing.id === 'chick')).toBe(true);
   });
 
   it('commits banana peel warp for the live Overworld typewriter path', () => {

@@ -7,10 +7,9 @@ interface StampedeSketchSceneContextOptions {
 }
 
 /**
- * Scene lifecycle contract for the movement-only Stampede Sketch prototype.
+ * Scene lifecycle contract for Chick Magnet (the stampede sketch scene).
  *
- * Stampede is entered from Ridge Trail Cards, so closing returns to Ridge
- * instead of the legacy overworld route used by older interior scenes.
+ * The street chick starts it. Closing returns to the overworld.
  */
 export function createStampedeSketchSceneContext(
   options: StampedeSketchSceneContextOptions

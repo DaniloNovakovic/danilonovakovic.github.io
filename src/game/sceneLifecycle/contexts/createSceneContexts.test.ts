@@ -154,14 +154,14 @@ describe('createSceneContexts', () => {
     expect(loadPhaserScene).toHaveBeenNthCalledWith(5, 'stampedeSketch');
   });
 
-  it('returns from Stampede Sketch to Ridge', () => {
-    const onEnterScene = vi.fn();
-    const contexts = createSceneContexts(makeDeps({ onEnterScene }));
+  it('returns from Chick Magnet to the overworld street', () => {
+    const onReturnToOverworld = vi.fn();
+    const contexts = createSceneContexts(makeDeps({ onReturnToOverworld }));
     const stampedeStartData = contexts[5].getStartData() as { onClose: () => void };
 
     stampedeStartData.onClose();
 
-    expect(onEnterScene).toHaveBeenCalledWith('ridge');
+    expect(onReturnToOverworld).toHaveBeenCalledOnce();
   });
 
   it('rejects lazy loading with a descriptive error when a scene binding is missing', async () => {

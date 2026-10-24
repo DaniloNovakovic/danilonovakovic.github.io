@@ -67,8 +67,8 @@ export const catalogMessages = {
   },
   stampedeSketch: {
     stampedeSketch: {
-      name: "Stampede Sketch",
-      description: "A movement-only ink swarm prototype around a picnic blanket.",
+      name: "Chick Magnet",
+      description: "A flock of chicks tries to reach you. Outlast them and the street comes into focus.",
     },
   },
 } as const;

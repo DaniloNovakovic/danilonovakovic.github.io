@@ -1,8 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { STAMPEDE_SKETCH_RIDGE_STAMP_ID } from '@/game/bridge/ridgeProgressIds';
-import { bridgeActions, bridgeStore } from '@/game/bridge/store';
+import { bridgeActions, bridgeStore, isItemEquipped, isItemOwned } from '@/game/bridge/store';
 import {
-  STAMPEDE_FIRST_CLEAR_GLIDE_PIPS,
   claimStampedeFirstClearReward,
   getStampedeFirstClearRewardStatus
 } from './rewards';
@@ -12,28 +10,18 @@ describe('stampede durable rewards', () => {
     bridgeActions.resetProgress();
   });
 
-  it('awards the first-clear stamp and one glide pip once', () => {
+  it('awards glasses once on the first clear', () => {
     expect(claimStampedeFirstClearReward()).toBe('earned');
-    expect(bridgeStore.getState().progress.ridge.stampIds).toEqual([
-      STAMPEDE_SKETCH_RIDGE_STAMP_ID
-    ]);
-    expect(bridgeStore.getState().progress.ridge.mobility.glidePips).toBe(
-      STAMPEDE_FIRST_CLEAR_GLIDE_PIPS
-    );
+    expect(isItemOwned('glasses')).toBe(true);
+    expect(isItemEquipped('glasses')).toBe(true);
 
     expect(claimStampedeFirstClearReward()).toBe('alreadyOwned');
-    expect(bridgeStore.getState().progress.ridge.stampIds).toEqual([
-      STAMPEDE_SKETCH_RIDGE_STAMP_ID
-    ]);
-    expect(bridgeStore.getState().progress.ridge.mobility.glidePips).toBe(
-      STAMPEDE_FIRST_CLEAR_GLIDE_PIPS
-    );
+    expect(bridgeStore.getState().inventory.ownedItemIds.filter((id) => id === 'glasses')).toHaveLength(1);
   });
 
-  it('derives reward status from the Stampede stamp id', () => {
-    expect(getStampedeFirstClearRewardStatus({ stampIds: [] })).toBe('earned');
-    expect(getStampedeFirstClearRewardStatus({
-      stampIds: [STAMPEDE_SKETCH_RIDGE_STAMP_ID]
-    })).toBe('alreadyOwned');
+  it('derives reward status from glasses ownership', () => {
+    expect(getStampedeFirstClearRewardStatus()).toBe('earned');
+    bridgeActions.collectGlasses();
+    expect(getStampedeFirstClearRewardStatus()).toBe('alreadyOwned');
   });
 });

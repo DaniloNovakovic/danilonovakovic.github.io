@@ -18,6 +18,28 @@ describe('stampede run flow', () => {
   const baseVelocity = { x: 10, y: -20 };
   const basePlayer = { x: 500, y: 300 };
 
+  function sessionWithContacts(count: number, stepMs = 1_000) {
+    let session = createStampedeSession();
+    for (let index = 0; index < count; index += 1) {
+      session = resolveStampedeContact(session, index * stepMs);
+    }
+    return session;
+  }
+
+  function runFrame(
+    overrides: Partial<Parameters<typeof resolveStampedeRunFrame>[0]> = {}
+  ) {
+    return resolveStampedeRunFrame({
+      session: createStampedeSession(),
+      deltaMs: 500,
+      closeRequested: false,
+      velocity: baseVelocity,
+      player: basePlayer,
+      contactCandidates: [],
+      ...overrides
+    });
+  }
+
   it('returns close without advancing the run session', () => {
     const session = createStampedeSession({ durationMs: 1_000 });
     const frame = resolveStampedeRunFrame({
@@ -83,17 +105,9 @@ describe('stampede run flow', () => {
   });
 
   it('returns a terminal failure frame when a contact reaches the limit', () => {
-    let session = createStampedeSession();
-    for (let index = 0; index < STAMPEDE_CONTACT_LIMIT - 1; index += 1) {
-      session = resolveStampedeContact(session, index * 1_000);
-    }
-
-    const frame = resolveStampedeRunFrame({
-      session,
+    const frame = runFrame({
+      session: sessionWithContacts(STAMPEDE_CONTACT_LIMIT - 1),
       deltaMs: 2_500,
-      closeRequested: false,
-      velocity: baseVelocity,
-      player: basePlayer,
       contactCandidates: [{ ...basePlayer, radius: 10 }]
     });
 
@@ -107,6 +121,20 @@ describe('stampede run flow', () => {
       mode: 'recover',
       pressure: 1
     });
+  });
+
+  it('skips contact when a weapon clears that chick on the same frame', () => {
+    const frame = runFrame({
+      session: sessionWithContacts(STAMPEDE_CONTACT_LIMIT - 1),
+      deltaMs: 2_500,
+      contactCandidates: [{ ...basePlayer, radius: 10, id: 'mark-a' }],
+      ignoredContactIds: ['mark-a']
+    });
+
+    expect(frame.kind).toBe('playing');
+    if (frame.kind !== 'playing') return;
+    expect(frame.session.contacts).toBe(STAMPEDE_CONTACT_LIMIT - 1);
+    expect(frame.contactCandidate).toBeNull();
   });
 
   it('keeps terminal sessions terminal on the next frame', () => {

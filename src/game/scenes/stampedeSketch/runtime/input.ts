@@ -34,6 +34,7 @@ export interface StampedeInputRuntime {
   startRequested(): boolean;
   closeRequested(): boolean;
   retryRequested(): boolean;
+  castRequested(): boolean;
   handleControlPointerEvent(event: StampedeControlPointerEvent): void;
   setPointerControlEnabled(enabled: boolean): void;
   clearPointerControl(): void;
@@ -134,6 +135,10 @@ class PhaserStampedeInputRuntime implements StampedeInputRuntime {
         (this.keyEnter && justDown(this.keyEnter)) ||
         (this.keySpace && justDown(this.keySpace))
     );
+  }
+
+  castRequested(): boolean {
+    return Boolean(this.keySpace && Phaser.Input.Keyboard.JustDown(this.keySpace));
   }
 
   handleControlPointerEvent(event: StampedeControlPointerEvent): void {

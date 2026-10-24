@@ -1,13 +1,24 @@
-import type { StampedeUpgradeId } from './upgrades';
+import {
+  isStampedeModId,
+  isStampedeWeaponId,
+  type StampedeUpgradeId,
+  type StampedeWeaponId
+} from './upgrades';
 
 const STAMPEDE_SCRAP_PICKUP_RADIUS = 10;
 export const STAMPEDE_SCRAP_COLLECTION_RADIUS = 34;
-const STAMPEDE_UPGRADE_SCRAP_GOAL = 3;
+const STAMPEDE_DRAFT_GAP_MS = 14_000;
+const STAMPEDE_UPGRADE_THRESHOLDS = [8, 20, 36, 56, 80, 108, 140] as const;
+
+function nextStampedeScrapGoal(appliedCount: number): number {
+  return STAMPEDE_UPGRADE_THRESHOLDS[appliedCount] ?? 0;
+}
 
 export interface StampedeClearedMarkPoint {
   id: string;
   x: number;
   y: number;
+  value?: number;
 }
 
 export interface StampedePickup {
@@ -28,6 +39,9 @@ export interface StampedeProgressionState {
   nextPickupIndex: number;
   upgradeDraftStatus: StampedeUpgradeDraftStatus;
   appliedUpgradeIds: readonly StampedeUpgradeId[];
+  upgradedWeaponIds: readonly StampedeWeaponId[];
+  draftsTaken: number;
+  nextDraftAtMs: number;
 }
 
 export interface StampedePickupCollectionFrame {
@@ -41,10 +55,13 @@ export function createStampedeProgressionState(
   return {
     pickups: options.pickups ?? [],
     scrapsCollected: options.scrapsCollected ?? 0,
-    scrapGoal: options.scrapGoal ?? STAMPEDE_UPGRADE_SCRAP_GOAL,
+    scrapGoal: options.scrapGoal ?? nextStampedeScrapGoal(options.draftsTaken ?? 0),
     nextPickupIndex: options.nextPickupIndex ?? 1,
     upgradeDraftStatus: options.upgradeDraftStatus ?? 'none',
-    appliedUpgradeIds: options.appliedUpgradeIds ?? []
+    appliedUpgradeIds: options.appliedUpgradeIds ?? [],
+    upgradedWeaponIds: options.upgradedWeaponIds ?? [],
+    draftsTaken: options.draftsTaken ?? 0,
+    nextDraftAtMs: options.nextDraftAtMs ?? STAMPEDE_DRAFT_GAP_MS
   };
 }
 
@@ -62,7 +79,7 @@ export function spawnStampedePickupsFromClearedMarks(
       x: mark.x,
       y: mark.y,
       radius: STAMPEDE_SCRAP_PICKUP_RADIUS,
-      value: 1
+      value: mark.value ?? 1
     };
     nextPickupIndex += 1;
     return pickup;
@@ -77,7 +94,8 @@ export function spawnStampedePickupsFromClearedMarks(
 
 export function collectStampedePickups(
   state: StampedeProgressionState,
-  player: { x: number; y: number; radius?: number }
+  player: { x: number; y: number; radius?: number },
+  options: { elapsedMs?: number } = {}
 ): StampedePickupCollectionFrame {
   const collected: StampedePickup[] = [];
   const kept: StampedePickup[] = [];
@@ -102,8 +120,12 @@ export function collectStampedePickups(
 
   const scrapsCollected = state.scrapsCollected +
     collected.reduce((total, pickup) => total + pickup.value, 0);
+  const clockReady = options.elapsedMs === undefined || options.elapsedMs >= state.nextDraftAtMs;
   const upgradeDraftStatus =
-    state.upgradeDraftStatus === 'none' && scrapsCollected >= state.scrapGoal
+    state.upgradeDraftStatus === 'none' &&
+    state.scrapGoal > 0 &&
+    scrapsCollected >= state.scrapGoal &&
+    clockReady
       ? 'pending'
       : state.upgradeDraftStatus;
 
@@ -118,17 +140,75 @@ export function collectStampedePickups(
   };
 }
 
-export function applyStampedeUpgradeChoice(
+export function openStampedeDraftIfReady(
   state: StampedeProgressionState,
-  upgradeId: StampedeUpgradeId
+  elapsedMs: number
 ): StampedeProgressionState {
-  const appliedUpgradeIds = state.appliedUpgradeIds.includes(upgradeId)
-    ? state.appliedUpgradeIds
-    : [...state.appliedUpgradeIds, upgradeId];
+  if (state.upgradeDraftStatus !== 'none' || state.scrapGoal <= 0) return state;
+  if (state.scrapsCollected < state.scrapGoal || elapsedMs < state.nextDraftAtMs) return state;
+  return {
+    ...state,
+    upgradeDraftStatus: 'pending'
+  };
+}
+
+export function grantStampedeStartingWeapon(
+  state: StampedeProgressionState,
+  weaponId: StampedeWeaponId
+): StampedeProgressionState {
+  if (
+    state.appliedUpgradeIds.includes(weaponId) ||
+    state.upgradedWeaponIds.includes(weaponId)
+  ) {
+    return state;
+  }
 
   return {
     ...state,
-    upgradeDraftStatus: 'chosen',
-    appliedUpgradeIds
+    appliedUpgradeIds: [...state.appliedUpgradeIds, weaponId],
+    upgradeDraftStatus: 'none',
+    scrapGoal: nextStampedeScrapGoal(state.draftsTaken)
+  };
+}
+
+export function applyStampedeUpgradeChoice(
+  state: StampedeProgressionState,
+  upgradeId: StampedeUpgradeId,
+  nowMs = 0
+): StampedeProgressionState {
+  let appliedUpgradeIds = state.appliedUpgradeIds;
+  let upgradedWeaponIds = state.upgradedWeaponIds;
+
+  if (isStampedeModId(upgradeId)) {
+    if (!appliedUpgradeIds.includes(upgradeId)) {
+      appliedUpgradeIds = [...appliedUpgradeIds, upgradeId];
+    }
+  } else if (isStampedeWeaponId(upgradeId)) {
+    const rank = state.upgradedWeaponIds.includes(upgradeId)
+      ? 2
+      : state.appliedUpgradeIds.includes(upgradeId)
+        ? 1
+        : 0;
+    if (rank >= 2) {
+      return { ...state, upgradeDraftStatus: 'none' };
+    }
+    if (rank === 0) {
+      appliedUpgradeIds = [...appliedUpgradeIds, upgradeId];
+    } else {
+      upgradedWeaponIds = [...upgradedWeaponIds, upgradeId];
+    }
+  } else if (!appliedUpgradeIds.includes(upgradeId)) {
+    appliedUpgradeIds = [...appliedUpgradeIds, upgradeId];
+  }
+
+  const draftsTaken = state.draftsTaken + 1;
+  return {
+    ...state,
+    upgradeDraftStatus: 'none',
+    scrapGoal: nextStampedeScrapGoal(draftsTaken),
+    appliedUpgradeIds,
+    upgradedWeaponIds,
+    draftsTaken,
+    nextDraftAtMs: nowMs + STAMPEDE_DRAFT_GAP_MS
   };
 }
