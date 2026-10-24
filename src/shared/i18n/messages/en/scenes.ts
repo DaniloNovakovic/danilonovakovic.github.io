@@ -1,7 +1,6 @@
 export const sceneMessages = {
   overworld: {
     glassesSecretHint: "Something appears in plain sight.",
-    basementHole: "TODO?",
     bananaDiscoveredPrompt: "[E] Peel banana",
     bananaUndiscoveredPrompt: "[E] Peel?",
     bananaDiscovery:
@@ -11,7 +10,7 @@ export const sceneMessages = {
     signpostLabel: "START",
     signpostPrompt: "[E] Read sign",
     signpostHints: {
-      "find-glasses": "The sign is too blurry to read. Someone left a TODO? hatch open just ahead...",
+      "find-glasses": "Sign is too blurry to read... if only I had my glasses...",
       "wear-glasses": "Glasses off? The street hides things from blurry eyes.",
       "find-peel": "Watch your step between Profile and Experiences. Something slippery is down there.",
       "win-circuit": "That peel leads somewhere. Win what's down there... or build your own. The hobby house hides spare parts.",
@@ -19,7 +18,6 @@ export const sceneMessages = {
       "use-crt": "The blank CRT by Projects is humming. It wants your Circuit.",
     },
     signpostTally: (found: number, total: number) => `Secrets found: ${found}/${total}`,
-    hatchDone: "DONE",
     billboardEmpty: "This space for rent.\n(Ask the artist in the hobby house.)",
     sketchUpgrade: "The sketch picks up a little more detail...",
   },
