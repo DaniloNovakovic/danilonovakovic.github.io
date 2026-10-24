@@ -1,3 +1,5 @@
+import { isStampedeWeaponImmune, type StampedeFlockKind } from './flock';
+
 export const STAMPEDE_AUTO_ATTACK_COOLDOWN_MS = 2_600;
 export const STAMPEDE_AUTO_ATTACK_RANGE = 170;
 export const STAMPEDE_AUTO_ATTACK_LENGTH = 120;
@@ -28,6 +30,7 @@ export interface StampedeAutoAttackPoint {
 export interface StampedeAutoAttackCandidate extends StampedeAutoAttackPoint {
   id: string;
   radius: number;
+  kind?: StampedeFlockKind;
 }
 
 export interface StampedeAutoAttackState {
@@ -130,6 +133,7 @@ function resolveSelfieHits(
   elapsedMs: number
 ): StampedeAutoAttackCandidate[] {
   return candidates
+    .filter((candidate) => !isStampedeWeaponImmune(candidate.kind ?? 'chick', 'badSelfie', 1))
     .filter((candidate) => {
       const distance = Math.hypot(candidate.x - player.x, candidate.y - player.y);
       return distance <= profile.range + candidate.radius;

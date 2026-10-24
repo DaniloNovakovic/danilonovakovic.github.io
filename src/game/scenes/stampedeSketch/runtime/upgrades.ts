@@ -39,16 +39,16 @@ const STAMPEDE_LEVEL_UP_CHOICE_COUNT = 3;
 
 const SELFIE_COPY = {
   title: 'Bad Selfie',
-  description: 'Damages a couple of random chicks nearby.',
+  description: 'Damages a couple of random chicks nearby. A situationship will not pose.',
   upgradeDescription: 'More chicks, from farther away, and it fires faster.',
   color: '#c2410c'
 } as const;
 
 const UPGRADE_COPY: Record<StampedeWeaponId, string> = {
   badSelfie: SELFIE_COPY.upgradeDescription,
-  badBreath: 'A wider blast in front of you, and it comes out sooner.',
+  badBreath: 'More stink circles, and they swing around faster.',
   badSmell: 'The circle gets bigger and comes back faster.',
-  fakeGlasses: 'More chicks flinch, and the flash comes back sooner.'
+  fakeGlasses: 'A real prescription. Nerds flinch too, and a couple more fold.'
 };
 
 export function getStampedeStartingWeaponChoices(): readonly StampedeUpgradeChoiceView[] {

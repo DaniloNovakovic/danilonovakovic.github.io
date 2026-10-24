@@ -6,12 +6,11 @@ Stampede Sketch is the first new opt-in mini-game prototype for Sketchbook
 Ridge. On the current street it ships as **Chick Magnet**: a chick just past
 Experiences starts it while glasses are off, the first clear grants and equips
 the glasses, and wearing glasses makes that chick run away. The arena is a
-flock that gets meaner over a 2:30 run: chicks, then broody hens, then a
-rooster that charges. You pick one starting weapon. Scraps come slowly and
+flock that gets meaner over a 2:30 run: chicks, then dating stereotypes, broody hens, a
+rooster that charges, and a bartender who throws beer. A mug that lands soaks you and
+your weapons go quiet for a few seconds. You pick one starting weapon. Scraps come slowly and
 are at least 18 seconds apart; each draft is another weapon or a meaner
-version of one you have. Bad selfie hits random nearby chicks, bad breath
-damages the cone in front of you, bad smell is a circle around you, and fake
-glasses drops the nearest chicks. You keep each one. Closing returns to the street. In the active Ridge pre-production route, it is optional
+version of one you have. Bad selfie hits random nearby chicks, except a situationship will not pose. Bad breath is a stink circle orbiting you, and the upgrade adds more circles that spin faster. Bad smell is a circle around you that perfume chicks ignore. Fake glasses drops the nearest couple of chicks and shows on your face; nerds shrug them off until the prescription upgrade. You keep each one, and the character wears the kit so you can see what is active. Closing returns to the street. In the active Ridge pre-production route, it is optional
 side fun, not required Living Proof for the first ending.
 
 ## Core Purpose
@@ -67,13 +66,11 @@ them to the blanket, but the blanket itself should remain a separate landmark.
 
 - **Core verb:** kite.
 - **Auto-attacks:** sketch tools that sort or redirect pressure.
-- **Spells:** weapons you keep. The run starts with one chosen weapon. Bad selfie
-  damages random nearby chicks. Bad breath damages the cone in front of where
-  you are looking. Bad smell damages a circle around you. Fake glasses damages
-  the nearest chicks, and the character wears them while that weapon is in the kit. Scrap drafts are spaced at least 18 seconds apart and
-  offer either a new weapon or a stronger rank of one you already have. Hens
+- **Spells:** weapons you keep, and each one shows on the character. The run starts with one chosen weapon. Bad selfie
+  damages random nearby chicks; a situationship will not pose, and the upgrade adds a second phone. Bad breath is an orbiting stink circle; the upgrade adds circles and spins them faster. Bad smell damages a circle around you, with motes on the character; perfume chicks ignore it. Fake glasses damages the nearest couple of chicks and puts lenses on you. Nerds are immune until the prescription upgrade, which also folds a couple more. A beer hit from the bartender silences every weapon for a few seconds and splashes the character. Scrap drafts are spaced at least 18 seconds apart and
+  offer either a new weapon or a stronger rank of one you already have. After the opening, a nerd, a perfume chick, a fixer who mends wounded birds, and a situationship join the flock. Hens
   arrive after the opening and take two hits. A rooster arrives later, takes
-  three hits, and charges.
+  three hits, and charges. The bartender holds the edge and throws mugs.
 - **XP pickups:** captured ink drops, sticky notes, or useful scraps.
 - **Upgrades:** better ways to organize, soften, or survive pressure.
 - **Damage/contact:** smudges, page noise, crowding.

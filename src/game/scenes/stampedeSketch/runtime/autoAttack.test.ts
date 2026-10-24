@@ -150,4 +150,19 @@ describe('stampede auto attack', () => {
       resolveStampedeAutoAttackFrame(input)
     );
   });
+
+  it('will not photograph a situationship', () => {
+    const frame = resolveStampedeAutoAttackFrame({
+      state: createStampedeAutoAttackState(),
+      elapsedMs: STAMPEDE_AUTO_ATTACK_COOLDOWN_MS,
+      player,
+      velocity: { x: 1, y: 0 },
+      candidates: [
+        { id: 'complicated', x: 140, y: 100, radius: 5, kind: 'situationship' },
+        { id: 'plain', x: 180, y: 100, radius: 5, kind: 'chick' }
+      ]
+    });
+
+    expect(frame.attack?.hitIds).toEqual(['plain']);
+  });
 });

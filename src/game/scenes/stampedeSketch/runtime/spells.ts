@@ -1,3 +1,5 @@
+import { isStampedeWeaponImmune, type StampedeFlockKind } from './flock';
+
 export const STAMPEDE_SPELL_IDS = ['badBreath', 'badSmell', 'fakeGlasses'] as const;
 
 export type StampedeSpellId = (typeof STAMPEDE_SPELL_IDS)[number];
@@ -18,6 +20,7 @@ export interface StampedeSpellCandidate {
   id: string;
   x: number;
   y: number;
+  kind?: StampedeFlockKind;
 }
 
 export interface StampedeSpellCast {
@@ -25,6 +28,7 @@ export interface StampedeSpellCast {
   origin: StampedeSpellPoint;
   direction: StampedeSpellPoint;
   hitIds: readonly string[];
+  resistedIds: readonly string[];
   cooldownMs: number;
   bark: string;
 }
@@ -44,7 +48,7 @@ const BAD_BREATH_COOLDOWN_MS = 3_400;
 const SMELL_RANGE = 118;
 const SMELL_COOLDOWN_MS = 4_200;
 
-const GLASSES_MAX_HITS = 4;
+const GLASSES_MAX_HITS = 2;
 const GLASSES_COOLDOWN_MS = 6_800;
 
 const SPELLS: Record<StampedeSpellId, StampedeSpellChoice & {
@@ -55,7 +59,7 @@ const SPELLS: Record<StampedeSpellId, StampedeSpellChoice & {
   badBreath: {
     id: 'badBreath',
     title: 'Bad Breath',
-    description: 'Damages every chick in front of you, where you are looking.',
+    description: 'A stink circle orbits you and spoils whoever it touches.',
     color: '#1a1a1a',
     cooldownMs: BAD_BREATH_COOLDOWN_MS,
     bark: 'haah',
@@ -64,7 +68,7 @@ const SPELLS: Record<StampedeSpellId, StampedeSpellChoice & {
   badSmell: {
     id: 'badSmell',
     title: 'Bad Smell',
-    description: 'A circle around you. Every chick inside takes the hint.',
+    description: 'A circle around you. Chicks inside take the hint. Perfume does not.',
     color: '#b4533d',
     cooldownMs: SMELL_COOLDOWN_MS,
     bark: 'phew',
@@ -73,7 +77,7 @@ const SPELLS: Record<StampedeSpellId, StampedeSpellChoice & {
   fakeGlasses: {
     id: 'fakeGlasses',
     title: 'Fake Glasses',
-    description: 'The nearest chicks see the lenses and fold.',
+    description: 'The nearest couple of chicks fold. Nerds see right through them.',
     color: '#4b4337',
     cooldownMs: GLASSES_COOLDOWN_MS,
     bark: 'nope',
@@ -111,15 +115,17 @@ export function resolveStampedeSpellCast({
 }: StampedeSpellCastInput): StampedeSpellCast {
   const direction = normalizePoint(facing) ?? { x: 1, y: 0 };
   const spell = SPELLS[spellId];
-  const tuning = spellTuning(spellId, rank ?? 1);
-  const hits = resolveSpellHits(spellId, player, direction, candidates, tuning);
+  const spellRank = rank ?? 1;
+  const tuning = spellTuning(spellId, spellRank);
+  const resolved = resolveSpellHits(spellId, player, candidates, tuning, spellRank);
   return {
     spellId,
     origin: { x: player.x, y: player.y },
     direction,
-    hitIds: hits.map((candidate) => candidate.id),
+    hitIds: resolved.hits.map((candidate) => candidate.id),
+    resistedIds: resolved.resisted.map((candidate) => candidate.id),
     cooldownMs: tuning.cooldownMs,
-    bark: hits.length >= 4 ? spell.bigBark : spell.bark
+    bark: resolved.hits.length >= 4 ? spell.bigBark : spell.bark
   };
 }
 
@@ -143,7 +149,7 @@ function spellTuning(spellId: StampedeSpellId, rank: 1 | 2): {
       range: Number.POSITIVE_INFINITY,
       dot: -1,
       cooldownMs: upgraded ? 4_600 : GLASSES_COOLDOWN_MS,
-      maxHits: upgraded ? 7 : GLASSES_MAX_HITS
+      maxHits: upgraded ? 4 : GLASSES_MAX_HITS
     };
   }
   return {
@@ -157,26 +163,42 @@ function spellTuning(spellId: StampedeSpellId, rank: 1 | 2): {
 function resolveSpellHits(
   spellId: StampedeSpellId,
   player: StampedeSpellPoint,
-  facing: StampedeSpellPoint,
   candidates: readonly StampedeSpellCandidate[],
-  tuning: { range: number; dot: number; maxHits: number }
-): StampedeSpellCandidate[] {
-  if (spellId === 'fakeGlasses') {
-    return [...candidates]
-      .sort((left, right) => distanceBetween(player, left) - distanceBetween(player, right))
-      .slice(0, tuning.maxHits);
+  tuning: { range: number; maxHits: number },
+  rank: 1 | 2
+): { hits: StampedeSpellCandidate[]; resisted: StampedeSpellCandidate[] } {
+  if (spellId === 'badBreath') {
+    return { hits: [], resisted: [] };
   }
 
-  return candidates.filter((candidate) => {
+  if (spellId === 'fakeGlasses') {
+    const hits: StampedeSpellCandidate[] = [];
+    const resisted: StampedeSpellCandidate[] = [];
+    [...candidates]
+      .sort((left, right) => distanceBetween(player, left) - distanceBetween(player, right))
+      .forEach((candidate) => {
+        const immune = isStampedeWeaponImmune(candidate.kind ?? 'chick', 'fakeGlasses', rank);
+        if (immune) {
+          if (distanceBetween(player, candidate) <= 220) resisted.push(candidate);
+          return;
+        }
+        if (hits.length < tuning.maxHits) hits.push(candidate);
+      });
+    return { hits, resisted };
+  }
+
+  const hits: StampedeSpellCandidate[] = [];
+  const resisted: StampedeSpellCandidate[] = [];
+  candidates.forEach((candidate) => {
     const distance = distanceBetween(player, candidate);
-    if (distance < 1) return spellId === 'badSmell';
-    if (distance > tuning.range) return false;
-    if (spellId === 'badSmell') return true;
-    const dx = candidate.x - player.x;
-    const dy = candidate.y - player.y;
-    const dot = (dx / distance) * facing.x + (dy / distance) * facing.y;
-    return dot >= tuning.dot;
+    if (distance < 1 || distance > tuning.range) return;
+    if (isStampedeWeaponImmune(candidate.kind ?? 'chick', spellId, rank)) {
+      resisted.push(candidate);
+      return;
+    }
+    hits.push(candidate);
   });
+  return { hits, resisted };
 }
 
 function distanceBetween(left: StampedeSpellPoint, right: StampedeSpellPoint): number {

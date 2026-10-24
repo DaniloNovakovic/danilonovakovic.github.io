@@ -9,9 +9,11 @@ import {
   resolveStampedeSwarmTarget
 } from './swarmMotion';
 import type { StampedeClearedMarkPoint } from './progression';
+import { createBeerShot, stepBeerShots, STAMPEDE_BARTENDER_THROW_MS, type StampedeBeerShot } from './beer';
 import {
   getStampedeFlockProfile,
   resolveStampedeFlockKind,
+  resolveStampedeMendTarget,
   type StampedeFlockKind
 } from './flock';
 
@@ -43,6 +45,7 @@ interface StampedeSwarmDot {
   fleeVx: number;
   fleeVy: number;
   hitFlapUntilMs: number;
+  nextTrickAtMs: number;
 }
 
 export type StampedeSwarmMode = 'calm' | 'build' | 'surge' | 'recover';
@@ -51,6 +54,7 @@ export interface StampedeSwarmUpdateOptions {
   mode?: StampedeSwarmMode;
   pressure?: number;
   elapsedMs?: number;
+  playerHurting?: boolean;
 }
 
 export interface StampedeSwarmContactCandidate {
@@ -58,6 +62,7 @@ export interface StampedeSwarmContactCandidate {
   x: number;
   y: number;
   radius: number;
+  kind?: StampedeFlockKind;
 }
 
 interface StampedeSwarmRuntimeOptions {
@@ -73,6 +78,8 @@ export interface StampedeSwarmRuntime {
     impulses: readonly { id: string; vx: number; vy: number; fleeMs: number }[]
   ): void;
   clearMarks(ids: readonly string[]): readonly StampedeClearedMarkPoint[];
+  showResisted(ids: readonly string[]): void;
+  consumeBeerHit(): boolean;
   reset(): void;
 }
 
@@ -133,7 +140,8 @@ export function createStampedeSwarmRuntime(
       fleeUntilMs: 0,
       fleeVx: 0,
       fleeVy: 0,
-      hitFlapUntilMs: 0
+      hitFlapUntilMs: 0,
+      nextTrickAtMs: 0
     };
   });
 
@@ -148,6 +156,11 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
   private heartCursor = 0;
   private featherCursor = 0;
   private elapsedMs = 0;
+  private beers: StampedeBeerShot[] = [];
+  private readonly beerMugs: Phaser.GameObjects.Graphics[];
+  private readonly resistMarks: Phaser.GameObjects.Graphics[];
+  private resistCursor = 0;
+  private beerHit = false;
 
   constructor(
     scene: Phaser.Scene,
@@ -163,6 +176,16 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
     this.feathers = Array.from({ length: 18 }, () =>
       scene.add.graphics().setDepth(27).setVisible(false)
     );
+    this.beerMugs = Array.from({ length: 4 }, () => {
+      const mug = scene.add.graphics().setDepth(26).setVisible(false);
+      drawBeerMug(mug);
+      return mug;
+    });
+    this.resistMarks = Array.from({ length: 6 }, () => {
+      const mark = scene.add.graphics().setDepth(29).setVisible(false);
+      drawResistMark(mark);
+      return mark;
+    });
   }
 
   update(target: { x: number; y: number }, delta: number, options: StampedeSwarmUpdateOptions = {}): void {
@@ -201,7 +224,12 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
         return;
       }
 
-      const chaseTarget = dot.kind === 'rooster'
+      if (dot.kind === 'bartender') {
+        this.stepBartender(dot, target, nowMs, motion);
+        return;
+      }
+
+      const chaseTarget = dot.kind === 'rooster' || dot.kind === 'fixer'
         ? target
         : resolveStampedeSwarmTarget({
           target,
@@ -215,12 +243,14 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
       const distance = Math.max(1, Math.hypot(dx, dy));
       const wobbleX = Math.sin(nowMs / 380 + dot.phase) * 8 * motion.wobbleMultiplier;
       const wobbleY = Math.cos(nowMs / 420 + dot.phase) * 6 * motion.wobbleMultiplier;
-      const isNear = distance < (dot.kind === 'rooster' ? 78 : 38);
-      const wobbleScale = dot.kind === 'rooster' ? 0.15 : dot.kind === 'hen' ? 1.45 : 1;
+      const isNear = distance < nearDistance(dot.kind);
+      const wobbleScale = wobbleFor(dot.kind);
       const lunge = dot.kind === 'rooster' && distance < 160;
-      const stepSpeed = lunge ? dot.speed * 1.75 : dot.speed;
-      dot.shape.x += (dx / distance) * stepSpeed * motion.speedMultiplier * deltaSeconds + wobbleX * wobbleScale * deltaSeconds;
-      dot.shape.y += (dy / distance) * stepSpeed * motion.speedMultiplier * deltaSeconds + wobbleY * wobbleScale * deltaSeconds;
+      let stepSpeed = lunge ? dot.speed * 1.75 : dot.speed;
+      if (dot.kind === 'fixer' && options.playerHurting) stepSpeed *= 1.45;
+      const move = moveVector(dot.kind, dx, dy, distance, nowMs, dot.phase);
+      dot.shape.x += move.x * stepSpeed * motion.speedMultiplier * deltaSeconds + wobbleX * wobbleScale * deltaSeconds;
+      dot.shape.y += move.y * stepSpeed * motion.speedMultiplier * deltaSeconds + wobbleY * wobbleScale * deltaSeconds;
 
       const clamped = clampStampedePosition(
         { x: dot.shape.x, y: dot.shape.y },
@@ -229,13 +259,15 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
       dot.shape.setPosition(clamped.x, clamped.y);
       dot.shape.setScale((isNear ? 1.35 : 1) * motion.scaleMultiplier);
       dot.shape.setAlpha(Math.min(isNear ? 0.96 : 0.82, (isNear ? 0.9 : 0.62) * motion.alphaMultiplier));
-      this.syncChick(dot, dx, nowMs, dot.kind === 'rooster' ? false : isNear);
-      if (dot.kind !== 'rooster' && isNear && nowMs >= dot.nextHeartAtMs) {
-        dot.nextHeartAtMs = nowMs + (dot.kind === 'hen' ? 1_600 : 700) + dot.phase * 80;
+      this.syncChick(dot, dx, nowMs, heartingKind(dot.kind) ? isNear : false);
+      if (heartingKind(dot.kind) && isNear && nowMs >= dot.nextHeartAtMs) {
+        dot.nextHeartAtMs = nowMs + heartGap(dot.kind) + dot.phase * 80;
         this.popHeart(dot.shape.x, dot.shape.y - 16);
       }
+      if (dot.kind === 'fixer') this.tryMend(dot, nowMs);
       this.syncHalo(dot, isNear, motion.alphaMultiplier);
     });
+    this.stepBeers(delta, nowMs, target);
   }
 
   getContactCandidates(): readonly StampedeSwarmContactCandidate[] {
@@ -271,8 +303,27 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
       id: dot.id,
       x: dot.shape.x,
       y: dot.shape.y,
-      radius: dot.shape.radius * dot.shape.scaleX
+      radius: dot.shape.radius * dot.shape.scaleX,
+      kind: dot.kind
     };
+  }
+
+  showResisted(ids: readonly string[]): void {
+    if (ids.length === 0) return;
+    const now = this.scene.time.now;
+    ids.forEach((id) => {
+      const dot = this.dots.find((entry) => entry.id === id);
+      if (!dot || dot.clearedUntilMs !== null) return;
+      dot.hitFlapUntilMs = now + 160;
+      dot.flapStep = -1;
+      this.popResist(dot.shape.x, dot.shape.y - 18);
+    });
+  }
+
+  consumeBeerHit(): boolean {
+    const hit = this.beerHit;
+    this.beerHit = false;
+    return hit;
   }
 
   clearMarks(ids: readonly string[]): readonly StampedeClearedMarkPoint[] {
@@ -363,6 +414,13 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
       this.scene.tweens.killTweensOf(feather);
       feather.setVisible(false);
     });
+    this.beers = [];
+    this.beerHit = false;
+    this.beerMugs.forEach((mug) => mug.setVisible(false));
+    this.resistMarks.forEach((mark) => {
+      this.scene.tweens.killTweensOf(mark);
+      mark.setVisible(false);
+    });
   }
 
   private restoreDot(dot: StampedeSwarmDot): void {
@@ -429,7 +487,7 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
         maxHp: dot.maxHp
       });
     }
-    const kindScale = dot.kind === 'rooster' ? 1.12 : dot.kind === 'hen' ? 1.05 : 1;
+    const kindScale = kindScaleFor(dot.kind);
     const size = (dot.homeRadius / 5) * Math.abs(dot.shape.scaleX || 1) * 1.65 * kindScale;
     const waddle = (mood === 'gag'
       ? Math.sin(nowMs / 45 + dot.phase) * 4
@@ -469,7 +527,104 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
       ? CHICK_COATS[dot.slot % CHICK_COATS.length]!
       : KIND_COATS[kind];
     dot.flapStep = -1;
+    dot.nextTrickAtMs = kind === 'bartender' || kind === 'fixer'
+      ? this.scene.time.now + 900
+      : 0;
     dot.shape.setRadius(dot.homeRadius);
+  }
+
+  private stepBartender(
+    dot: StampedeSwarmDot,
+    target: { x: number; y: number },
+    nowMs: number,
+    motion: { scaleMultiplier: number; alphaMultiplier: number }
+  ): void {
+    const sway = Math.sin(nowMs / 700 + dot.phase) * 70;
+    const x = Phaser.Math.Clamp(
+      dot.homeX + sway,
+      STAMPEDE_SWARM_BOUNDS.safeLeft,
+      STAMPEDE_SWARM_BOUNDS.safeRight
+    );
+    dot.shape.setPosition(x, dot.homeY);
+    dot.shape.setScale(motion.scaleMultiplier);
+    dot.shape.setAlpha(0.9 * motion.alphaMultiplier);
+    this.syncChick(dot, target.x - x, nowMs, false);
+    this.syncHalo(dot, false, motion.alphaMultiplier);
+    if (nowMs < dot.nextTrickAtMs || this.beers.length >= this.beerMugs.length) return;
+    this.beers.push(createBeerShot(
+      { x: dot.shape.x, y: dot.shape.y },
+      target,
+      nowMs
+    ));
+    dot.nextTrickAtMs = nowMs + STAMPEDE_BARTENDER_THROW_MS;
+  }
+
+  private stepBeers(
+    deltaMs: number,
+    nowMs: number,
+    player: { x: number; y: number }
+  ): void {
+    const stepped = stepBeerShots(this.beers, deltaMs, nowMs, {
+      x: player.x,
+      y: player.y,
+      radius: 22
+    });
+    this.beers = stepped.shots;
+    if (stepped.hit) this.beerHit = true;
+    this.beerMugs.forEach((mug, index) => {
+      const shot = this.beers[index];
+      if (!shot) {
+        mug.setVisible(false);
+        return;
+      }
+      mug.setPosition(shot.x, shot.y).setVisible(true);
+    });
+  }
+
+  private tryMend(dot: StampedeSwarmDot, nowMs: number): void {
+    if (nowMs < dot.nextTrickAtMs) return;
+    const targetId = resolveStampedeMendTarget(
+      { id: dot.id, x: dot.shape.x, y: dot.shape.y },
+      this.dots.map((other) => ({
+        id: other.id,
+        x: other.shape.x,
+        y: other.shape.y,
+        hp: other.hp,
+        maxHp: other.maxHp,
+        alive: other.clearedUntilMs === null
+      }))
+    );
+    dot.nextTrickAtMs = nowMs + (targetId ? 2_400 : 700);
+    if (!targetId) return;
+    const other = this.dots.find((entry) => entry.id === targetId);
+    if (!other) return;
+    other.hp = Math.min(other.maxHp, other.hp + 1);
+    other.flapStep = -1;
+    drawSwarmChick(other.chick, {
+      mood: other.mood,
+      flap: 0,
+      coat: other.coat,
+      kind: other.kind,
+      hp: other.hp,
+      maxHp: other.maxHp
+    });
+    this.popHeart(other.shape.x, other.shape.y - 14);
+  }
+
+  private popResist(x: number, y: number): void {
+    const mark = this.resistMarks[this.resistCursor];
+    if (!mark) return;
+    this.resistCursor = (this.resistCursor + 1) % this.resistMarks.length;
+    this.scene.tweens.killTweensOf(mark);
+    mark.setPosition(x, y).setScale(1).setAlpha(1).setVisible(true);
+    this.scene.tweens.add({
+      targets: mark,
+      y: y - 16,
+      alpha: 0,
+      duration: 420,
+      ease: 'Sine.easeOut',
+      onComplete: () => mark.setVisible(false)
+    });
   }
 
   private burstFeathers(x: number, y: number, coat: ChickCoat, count = 3): void {
@@ -583,9 +738,14 @@ const CHICK_COATS: readonly ChickCoat[] = [
   { body: 0xf8c94a, wing: 0xe8a317, beak: 0xd86a22, comb: 0xb91c1c }
 ];
 
-const KIND_COATS: Record<'hen' | 'rooster', ChickCoat> = {
+const KIND_COATS: Record<Exclude<StampedeFlockKind, 'chick'>, ChickCoat> = {
   hen: { body: 0xf4e2b8, wing: 0xe2c07a, beak: 0xd9893b, comb: 0xc45c4a },
-  rooster: { body: 0xf0a202, wing: 0xd35400, beak: 0xe85d04, comb: 0xc1121f }
+  rooster: { body: 0xf0a202, wing: 0xd35400, beak: 0xe85d04, comb: 0xc1121f },
+  nerd: { body: 0xd9e2ef, wing: 0xb7c4d6, beak: 0xe07a2f, comb: 0xc45c4a },
+  perfume: { body: 0xf7c5d8, wing: 0xf4a7c5, beak: 0xe07a2f, comb: 0xd64545 },
+  fixer: { body: 0xf2b8a0, wing: 0xe08b74, beak: 0xd9893b, comb: 0xc24141 },
+  situationship: { body: 0xe4d4f5, wing: 0xc4b0e0, beak: 0xe07a2f, comb: 0xb4533d },
+  bartender: { body: 0xf6d36b, wing: 0x4b4337, beak: 0xe07a2f, comb: 0xb91c1c }
 };
 
 function wingFlap(nowMs: number, phase: number, hurried: boolean, hit: boolean): number {
@@ -690,6 +850,7 @@ function drawSwarmChick(
       g.lineBetween(6.1, -7.2, 8.4, -6.3);
     }
   }
+  drawKindTell(g, kind, mood);
 
   if (maxHp > 1) {
     for (let index = 0; index < maxHp; index += 1) {
@@ -697,6 +858,115 @@ function drawSwarmChick(
       g.fillCircle(-((maxHp - 1) * 1.15) + index * 2.3, -15.5, 0.55);
     }
   }
+}
+
+function drawKindTell(
+  g: Phaser.GameObjects.Graphics,
+  kind: StampedeFlockKind,
+  mood: 'chase' | 'smitten' | 'gag'
+): void {
+  if (kind === 'nerd' && mood !== 'gag') {
+    g.lineStyle(1.2, CHICK_INK, 1);
+    g.strokeCircle(6.1, -5.5, 2.2);
+    g.strokeCircle(8.8, -5.3, 2.2);
+    g.lineBetween(8.2, -5.4, 6.7, -5.4);
+    g.fillStyle(0x4b4337, 1);
+    g.fillRect(-1.5, 5, 4.2, 2.6);
+  }
+  if (kind === 'perfume') {
+    g.fillStyle(0xf4a7c5, 0.9);
+    g.fillCircle(13, -8, 1.4);
+    g.fillCircle(15, -4, 1.1);
+    g.lineStyle(1.2, 0xc45c8a, 1);
+    g.strokeRect(11.2, 1, 2.4, 4.2);
+  }
+  if (kind === 'fixer') {
+    g.lineStyle(1.4, 0xfbfbf9, 1);
+    g.lineBetween(-1, 2, 2.2, 2);
+    g.lineBetween(0.6, 0.4, 0.6, 3.6);
+  }
+  if (kind === 'situationship') {
+    g.lineStyle(1.1, CHICK_INK, 0.75);
+    g.strokeCircle(0, 2, 11);
+    g.fillStyle(CHICK_INK, 1);
+    g.fillCircle(5.5, -15.4, 0.7);
+    g.lineBetween(5.5, -14.2, 5.5, -13.2);
+  }
+  if (kind === 'bartender') {
+    g.lineStyle(1.5, CHICK_INK, 1);
+    g.strokeRect(-3, 3, 6, 5);
+    g.fillStyle(0xf0a202, 1);
+    g.fillEllipse(-9, 1, 4.2, 3.2);
+    g.strokeEllipse(-9, 1, 4.2, 3.2);
+  }
+}
+
+function nearDistance(kind: StampedeFlockKind): number {
+  if (kind === 'rooster') return 78;
+  if (kind === 'perfume') return 56;
+  if (kind === 'bartender') return 34;
+  return 38;
+}
+
+function wobbleFor(kind: StampedeFlockKind): number {
+  if (kind === 'rooster' || kind === 'bartender') return 0.15;
+  if (kind === 'hen') return 1.45;
+  if (kind === 'situationship') return 0.45;
+  if (kind === 'nerd') return 0.6;
+  return 1;
+}
+
+function kindScaleFor(kind: StampedeFlockKind): number {
+  if (kind === 'rooster') return 1.12;
+  if (kind === 'bartender') return 1.16;
+  if (kind === 'hen') return 1.05;
+  if (kind === 'fixer') return 1.04;
+  return 1;
+}
+
+function heartingKind(kind: StampedeFlockKind): boolean {
+  return kind !== 'rooster' && kind !== 'bartender' && kind !== 'situationship';
+}
+
+function heartGap(kind: StampedeFlockKind): number {
+  if (kind === 'hen') return 1_600;
+  if (kind === 'nerd') return 2_200;
+  return 700;
+}
+
+function moveVector(
+  kind: StampedeFlockKind,
+  dx: number,
+  dy: number,
+  distance: number,
+  nowMs: number,
+  phase: number
+): { x: number; y: number } {
+  if (kind === 'situationship' && distance < 108) {
+    return { x: -dx / distance, y: -dy / distance };
+  }
+  if (kind === 'situationship' && distance < 190) {
+    const side = Math.sin(nowMs / 500 + phase) >= 0 ? 1 : -1;
+    return { x: (-dy / distance) * side, y: (dx / distance) * side };
+  }
+  return { x: dx / distance, y: dy / distance };
+}
+
+function drawBeerMug(g: Phaser.GameObjects.Graphics): void {
+  g.clear();
+  g.fillStyle(0xf0a202, 1);
+  g.fillEllipse(0, 0, 12, 9);
+  g.lineStyle(1.8, CHICK_INK, 1);
+  g.strokeEllipse(0, 0, 12, 9);
+  g.fillStyle(0xfbfbf9, 0.95);
+  g.fillEllipse(0, -2, 7, 3);
+}
+
+function drawResistMark(g: Phaser.GameObjects.Graphics): void {
+  g.clear();
+  g.lineStyle(2.2, CHICK_INK, 1);
+  g.lineBetween(-5, -5, 5, 5);
+  g.lineBetween(-5, 5, 5, -5);
 }
 
 function drawFeather(g: Phaser.GameObjects.Graphics, color: number): void {

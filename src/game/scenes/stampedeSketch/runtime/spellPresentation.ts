@@ -97,14 +97,11 @@ class PhaserStampedeSpellVfx implements StampedeSpellVfx {
     });
   }
 
-  aim({ spellId, origin, direction, ready }: StampedeSpellAim): void {
+  aim({ spellId, origin, ready }: StampedeSpellAim): void {
     this.aimGraphics.clear();
     if (!ready) return;
     this.aimGraphics.lineStyle(2, 0x1a1a1a, 0.28);
-    if (spellId === 'badBreath') {
-      drawBreath(this.aimGraphics, origin, direction, 0.35);
-      return;
-    }
+    if (spellId === 'badBreath') return;
     if (spellId === 'badSmell') {
       this.aimGraphics.strokeCircle(origin.x, origin.y, 132);
       return;

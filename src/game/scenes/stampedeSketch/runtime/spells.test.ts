@@ -16,31 +16,18 @@ describe('chick magnet attacks', () => {
     expect(resolveEquippedStampedeSpell(['badBreath', 'fakeGlasses'])).toBe('fakeGlasses');
   });
 
-  it('breathes damage only onto the chicks in front', () => {
+  it('leaves bad breath damage to the orbiting stink circles', () => {
     const cast = resolveStampedeSpellCast({
       spellId: 'badBreath',
       player: { x: 200, y: 200 },
       facing: { x: 1, y: 0 },
       candidates: [
         { id: 'ahead', x: 320, y: 210 },
-        { id: 'behind', x: 80, y: 200 },
-        { id: 'aside', x: 230, y: 360 }
+        { id: 'behind', x: 80, y: 200 }
       ]
     });
 
-    expect(cast.hitIds).toEqual(['ahead']);
-    expect(cast.bark).toBe('haah');
-    expect(cast.cooldownMs).toBeGreaterThan(0);
-
-    const meaner = resolveStampedeSpellCast({
-      spellId: 'badBreath',
-      rank: 2,
-      player: { x: 200, y: 200 },
-      facing: { x: 1, y: 0 },
-      candidates: [{ id: 'farther', x: 430, y: 200 }]
-    });
-    expect(meaner.hitIds).toEqual(['farther']);
-    expect(meaner.cooldownMs).toBeLessThan(cast.cooldownMs);
+    expect(cast.hitIds).toEqual([]);
   });
 
   it('lets a bad smell damage every chick in the circle', () => {
@@ -58,6 +45,21 @@ describe('chick magnet attacks', () => {
     expect(cast.hitIds).toEqual(['left', 'right']);
   });
 
+  it('lets a perfume chick ignore the smell', () => {
+    const cast = resolveStampedeSpellCast({
+      spellId: 'badSmell',
+      player: { x: 200, y: 200 },
+      facing: { x: 1, y: 0 },
+      candidates: [
+        { id: 'plain', x: 250, y: 200 },
+        { id: 'cloud', x: 160, y: 200, kind: 'perfume' }
+      ]
+    });
+
+    expect(cast.hitIds).toEqual(['plain']);
+    expect(cast.resistedIds).toEqual(['cloud']);
+  });
+
   it('damages the nearest chicks when the glasses flash', () => {
     const cast = resolveStampedeSpellCast({
       spellId: 'fakeGlasses',
@@ -71,7 +73,31 @@ describe('chick magnet attacks', () => {
     });
 
     expect(cast.hitIds[0]).toBe('close');
-    expect(cast.hitIds).toContain('west');
-    expect(cast.hitIds).toContain('east');
+    expect(cast.hitIds).toHaveLength(2);
+    expect(cast.hitIds).not.toContain('east');
+  });
+
+  it('lets nerds ignore fake glasses until the prescription', () => {
+    const candidates = [
+      { id: 'nerd', x: 430, y: 300, kind: 'nerd' as const },
+      { id: 'chick', x: 470, y: 300 }
+    ];
+    const shrugged = resolveStampedeSpellCast({
+      spellId: 'fakeGlasses',
+      player: { x: 400, y: 300 },
+      facing: { x: 1, y: 0 },
+      candidates
+    });
+    const prescription = resolveStampedeSpellCast({
+      spellId: 'fakeGlasses',
+      rank: 2,
+      player: { x: 400, y: 300 },
+      facing: { x: 1, y: 0 },
+      candidates
+    });
+
+    expect(shrugged.hitIds).toEqual(['chick']);
+    expect(shrugged.resistedIds).toEqual(['nerd']);
+    expect(prescription.hitIds).toEqual(['nerd', 'chick']);
   });
 });
