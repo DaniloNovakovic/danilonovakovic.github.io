@@ -72,6 +72,19 @@ interface Voice {
   startedAt: number;
 }
 
+/** Visit each string that is still ringing, with the fret the new shape asks for. */
+function forEachVoice(
+  voices: ReadonlyMap<StringNumber, Voice>,
+  frets: readonly (number | null)[],
+  visit: (spec: GuitarStringSpec, voice: Voice, fret: number | null) => void
+) {
+  GUITAR_STRINGS.forEach((spec, index) => {
+    const voice = voices.get(spec.number);
+    if (!voice) return;
+    visit(spec, voice, frets[index] ?? null);
+  });
+}
+
 function renderStringBuffer(context: AudioContext, spec: GuitarStringSpec): StringBuffer {
   const pluck = renderPluckedString(spec.frequency, {
     sampleRate: SAMPLE_RATE,
@@ -222,10 +235,7 @@ export function useGuitarSynth() {
       const context = getAudio();
       if (!context) return;
       const now = context.currentTime;
-      GUITAR_STRINGS.forEach((spec, index) => {
-        const voice = voicesRef.current.get(spec.number);
-        if (!voice) return;
-        const fret = frets[index] ?? null;
+      forEachVoice(voicesRef.current, frets, (spec, voice, fret) => {
         if (fret === null || fret !== voice.fret) dampVoice(spec.number, now);
       });
     },
@@ -238,10 +248,7 @@ export function useGuitarSynth() {
       const context = getAudio();
       if (!context) return;
       const now = context.currentTime;
-      GUITAR_STRINGS.forEach((spec, index) => {
-        const voice = voicesRef.current.get(spec.number);
-        if (!voice) return;
-        const fret = frets[index] ?? null;
+      forEachVoice(voicesRef.current, frets, (spec, voice, fret) => {
         if (fret === null) {
           dampVoice(spec.number, now);
           return;

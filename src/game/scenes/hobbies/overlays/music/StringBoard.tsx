@@ -213,6 +213,20 @@ function FretMarker({ fret, base, y }: { fret: number | null; base: number; y: n
   return <circle cx={x} cy={y} r="4.4" fill={INK} />;
 }
 
+function stringPaint(fret: number | null, palm: boolean, chop: boolean, wound: boolean) {
+  const muted = fret === null;
+  const stopped = fret !== null && fret > 0;
+  const choked = palm || chop || muted;
+  return {
+    muted,
+    stopped,
+    motion: choked ? 'hobby-string-chuck' : 'hobby-string-vibrate',
+    dash: muted ? '2 3' : undefined,
+    restOpacity: stopped || muted ? 0.28 : 1,
+    wind: wound && !muted
+  };
+}
+
 function GuitarString({
   spec,
   y,
@@ -231,11 +245,9 @@ function GuitarString({
   pluckId: number;
 }) {
   const startX = speakingStart(fret, base);
-  const stopped = fret !== null && fret > 0;
-  const muted = fret === null;
+  const paint = stringPaint(fret, palm, chop, spec.wound);
   const amplitude = 3 + spec.gauge * 1.2;
   const originX = (startX + BRIDGE_X) / 2;
-  const motion = palm || chop || muted ? 'hobby-string-chuck' : 'hobby-string-vibrate';
   return (
     <g>
       <line
@@ -246,13 +258,13 @@ function GuitarString({
         stroke={INK}
         strokeWidth={spec.gauge}
         strokeLinecap="round"
-        strokeDasharray={muted ? '2 3' : undefined}
-        opacity={stopped || muted ? 0.28 : 1}
+        strokeDasharray={paint.dash}
+        opacity={paint.restOpacity}
       />
-      {stopped ? (
+      {paint.stopped ? (
         <line x1={startX} y1={y} x2={BRIDGE_X} y2={y} stroke={INK} strokeWidth={spec.gauge} strokeLinecap="round" />
       ) : null}
-      {spec.wound && !muted ? (
+      {paint.wind ? (
         <line
           x1={startX}
           y1={y}
@@ -266,7 +278,7 @@ function GuitarString({
       {pluckId > 0 ? (
         <g key={pluckId}>
           <path
-            className={motion}
+            className={paint.motion}
             style={{ transformOrigin: `${originX}px ${y}px` }}
             d={`M${startX} ${y} Q ${originX} ${y - amplitude * 2} ${BRIDGE_X} ${y}`}
             fill="none"

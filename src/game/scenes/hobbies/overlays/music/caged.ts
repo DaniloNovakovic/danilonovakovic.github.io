@@ -28,44 +28,56 @@ function accept(form: CagedForm, frets: Frets): CagedShape | null {
   return { form, frets, center: centerOf(frets) };
 }
 
+function majorForms(neck: number, fifth: number, fourth: number): (CagedShape | null)[] {
+  return [
+    accept('C', [fifth - 3, fifth - 2, fifth - 3, fifth - 1, fifth, null]),
+    accept('A', [fifth, fifth + 2, fifth + 2, fifth + 2, fifth, null]),
+    accept('G', [neck, neck - 3, neck - 3, neck - 3, neck - 1, neck]),
+    accept('E', [neck, neck, neck + 1, neck + 2, neck + 2, neck]),
+    accept('D', [fourth + 2, fourth + 3, fourth + 2, fourth, null, null])
+  ];
+}
+
+function minorForms(neck: number, fifth: number, fourth: number): (CagedShape | null)[] {
+  return [
+    accept('C', [fifth - 4, fifth - 2, fifth - 3, fifth - 2, fifth, null]),
+    accept('A', [fifth, fifth + 1, fifth + 2, fifth + 2, fifth, null]),
+    accept('G', [neck, neck - 4, neck - 3, neck - 3, neck - 2, neck]),
+    accept('E', [neck, neck, neck, neck + 2, neck + 2, neck]),
+    accept('D', [fourth + 1, fourth + 3, fourth + 2, fourth, null, null])
+  ];
+}
+
+function dimForms(neck: number, fifth: number, fourth: number): (CagedShape | null)[] {
+  return [
+    accept('C', [fifth - 4, fifth - 2, fifth - 4, fifth - 2, fifth, null]),
+    accept('A', [null, fifth + 1, fifth + 2, fifth + 1, fifth, null]),
+    accept('G', [neck, neck - 4, neck - 3, neck - 4, neck - 2, neck]),
+    accept('E', [neck, neck - 1, neck, neck + 2, null, neck]),
+    accept('D', [fourth + 1, fourth, fourth + 1, fourth, null, null])
+  ];
+}
+
+const SHAPE_FOR = { major: majorForms, minor: minorForms, dim: dimForms };
+
+function dedupe(candidates: readonly (CagedShape | null)[]): CagedShape[] {
+  const seen = new Set<string>();
+  const shapes: CagedShape[] = [];
+  for (const shape of candidates) {
+    if (!shape) continue;
+    const key = shape.frets.join(',');
+    if (seen.has(key)) continue;
+    seen.add(key);
+    shapes.push(shape);
+  }
+  return shapes.sort((left, right) => left.center - right.center || FORM_ORDER[left.form] - FORM_ORDER[right.form]);
+}
+
 function formsFor(quality: ChordQuality, root: number): CagedShape[] {
   const neck = (root - 4 + 12) % 12;
   const fifth = (root - 9 + 12) % 12;
   const fourth = (root - 2 + 12) % 12;
-  const candidates =
-    quality === 'minor'
-      ? [
-          fifth >= 4 ? accept('C', [fifth - 4, fifth - 2, fifth - 3, fifth - 2, fifth, null]) : null,
-          accept('A', [fifth, fifth + 1, fifth + 2, fifth + 2, fifth, null]),
-          neck >= 4 ? accept('G', [neck, neck - 4, neck - 3, neck - 3, neck - 2, neck]) : null,
-          accept('E', [neck, neck, neck, neck + 2, neck + 2, neck]),
-          accept('D', [fourth + 1, fourth + 3, fourth + 2, fourth, null, null])
-        ]
-      : quality === 'dim'
-        ? [
-            fifth >= 4 ? accept('C', [fifth - 4, fifth - 2, fifth - 4, fifth - 2, fifth, null]) : null,
-            accept('A', [null, fifth + 1, fifth + 2, fifth + 1, fifth, null]),
-            neck >= 4 ? accept('G', [neck, neck - 4, neck - 3, neck - 4, neck - 2, neck]) : null,
-            neck >= 1 ? accept('E', [neck, neck - 1, neck, neck + 2, null, neck]) : null,
-            accept('D', [fourth + 1, fourth, fourth + 1, fourth, null, null])
-          ]
-        : [
-            fifth >= 3 ? accept('C', [fifth - 3, fifth - 2, fifth - 3, fifth - 1, fifth, null]) : null,
-            accept('A', [fifth, fifth + 2, fifth + 2, fifth + 2, fifth, null]),
-            neck >= 3 ? accept('G', [neck, neck - 3, neck - 3, neck - 3, neck - 1, neck]) : null,
-            accept('E', [neck, neck, neck + 1, neck + 2, neck + 2, neck]),
-            accept('D', [fourth + 2, fourth + 3, fourth + 2, fourth, null, null])
-          ];
-  const seen = new Set<string>();
-  return candidates
-    .filter((shape): shape is CagedShape => shape !== null)
-    .filter((shape) => {
-      const key = shape.frets.join(',');
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    })
-    .sort((left, right) => left.center - right.center || FORM_ORDER[left.form] - FORM_ORDER[right.form]);
+  return dedupe(SHAPE_FOR[quality](neck, fifth, fourth));
 }
 
 /** Playable CAGED forms of one scale chord, lowest on the neck first. */
