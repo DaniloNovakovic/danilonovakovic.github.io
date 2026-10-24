@@ -5,7 +5,7 @@
  * Shift is the other fingering. Option flips major and minor (F#° flips to F#m).
  * `-` and `=` slide the latched shape one fret, which is how D# and the rest appear.
  *
- * Right hand: I O P are G, B, and high E. N J K are low E, A, and D.
+ * Right hand: I 9 0 are G, B, and high E. N M J are low E, A, and D.
  *
  * Frets are string 1 (high E) → string 6 (low E). `null` is muted.
  */
@@ -113,21 +113,21 @@ export const CHORD_GRIPS: readonly ChordGrip[] = [
 
 /**
  * Right-hand picks, high E first.
- * Upper row I O P = G, B, high E. N J K = low E, A, D.
+ * I 9 0 = G, B, high E. N M J = low E, A, D.
  */
 export const STRING_PICKS = [
-  { key: 'p', string: 1 },
-  { key: 'o', string: 2 },
+  { key: '0', string: 1 },
+  { key: '9', string: 2 },
   { key: 'i', string: 3 },
-  { key: 'k', string: 4 },
-  { key: 'j', string: 5 },
+  { key: 'j', string: 4 },
+  { key: 'm', string: 5 },
   { key: 'n', string: 6 }
 ] as const;
 
-/** On-screen rows match the keys under the right hand. */
+/** On-screen rows match the keys under the right hand, treble above bass. */
 export const PICK_ROWS = [
-  ['i', 'o', 'p'],
-  ['n', 'j', 'k']
+  ['i', '9', '0'],
+  ['n', 'm', 'j']
 ] as const;
 
 /** Sticky-note song: I–V–IV–I in G. */

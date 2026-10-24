@@ -75,7 +75,7 @@ export const miniGameMessages = {
   },
   guitar: {
     title: "Guitar",
-    instruction: "G major on the letters: G Am Bm C D Em, and F is F#°. I O P pick G, B, high E. N J K pick low E, A, D.",
+    instruction: "G major on the letters: G Am Bm C D Em, and F is F#°. I 9 0 pick G, B, high E. N M J pick low E, A, D.",
     stringsLabel: "Guitar strings",
     stringLabel: (note: string, key: string) => `String ${key} (${note})`,
     mutedStringLabel: (key: string) => `String ${key}, muted`,
@@ -102,7 +102,7 @@ export const miniGameMessages = {
     riffHint: "Strum G, D, C, G. Strumming the same chord twice is fine.",
     riffProgress: (count: number, total: number) => `${count}/${total}`,
     riffDone: "Nailed it!",
-    marginNote: "Shift is the other fingering. Option flips major and minor. = and - slide the shape a fret. Space strums. M palm-mutes.",
+    marginNote: "Shift is the other fingering. Option flips major and minor. = and - slide the shape a fret. Space strums. K palm-mutes.",
   },
   drawing: {
     title: "Drawing",

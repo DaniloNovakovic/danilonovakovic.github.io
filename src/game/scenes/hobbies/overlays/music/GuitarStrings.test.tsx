@@ -29,12 +29,12 @@ afterEach(() => {
 });
 
 describe('GuitarStrings', () => {
-  it('starts on G, with I O P on the treble and N J K on the bass', () => {
+  it('starts on G, with I 9 0 on the treble and N M J on the bass', () => {
     renderGuitar();
     expect(screen.getByRole('radio', { name: 'G chord, key G' }).getAttribute('aria-checked')).toBe('true');
     expect(screen.getByRole('radio', { name: 'Am chord, key A' })).toBeDefined();
     expect(screen.getByRole('radio', { name: 'F#° chord, key F' })).toBeDefined();
-    expect(screen.getByRole('button', { name: 'String P (G4)' })).toBeDefined();
+    expect(screen.getByRole('button', { name: 'String 0 (G4)' })).toBeDefined();
     expect(screen.getByRole('button', { name: 'String I (G3)' })).toBeDefined();
     expect(screen.getByRole('button', { name: 'String N (G2)' })).toBeDefined();
   });
@@ -42,11 +42,11 @@ describe('GuitarStrings', () => {
   it('uses shift for the other voicing and option for the other quality', () => {
     renderGuitar();
     press('G', true);
-    expect(screen.getByRole('button', { name: 'String P (G4)' })).toBeDefined();
+    expect(screen.getByRole('button', { name: 'String 0 (G4)' })).toBeDefined();
     expect(screen.getByRole('button', { name: 'String N, muted' })).toBeDefined();
 
     press('a', false, true);
-    expect(screen.getByRole('button', { name: 'String O (C#4)' })).toBeDefined();
+    expect(screen.getByRole('button', { name: 'String 9 (C#4)' })).toBeDefined();
 
     press('å', false, true, 'KeyE');
     expect(screen.getByRole('radio', { name: 'E chord, key E' }).getAttribute('aria-checked')).toBe('true');
@@ -55,7 +55,7 @@ describe('GuitarStrings', () => {
   it('slides the shape with = and will not count that chord in the song', () => {
     renderGuitar();
     press('=');
-    expect(screen.getByRole('button', { name: 'String P (G#4)' })).toBeDefined();
+    expect(screen.getByRole('button', { name: 'String 0 (G#4)' })).toBeDefined();
     press(' ');
     press('d');
     press(' ');

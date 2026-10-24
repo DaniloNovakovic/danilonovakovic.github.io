@@ -154,8 +154,8 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
     '-': freshKey(() => slide(-1)),
     '=': freshKey(() => slide(1)),
     '+': freshKey(() => slide(1)),
-    m: freshKey(togglePalm),
-    M: freshKey(togglePalm)
+    k: freshKey(togglePalm),
+    K: freshKey(togglePalm)
   });
 
   const stepNames = CAMPFIRE.map((id) => copy.grips[id]);
@@ -251,7 +251,7 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
             className={`${inkKeyClass} px-3 ${palm ? 'bg-[#1a1a1a] text-[#fbfbf9]' : 'bg-[#fbfbf9] text-[#1a1a1a]'}`}
           >
             <span className="font-black">{copy.palm}</span>
-            <span className={`font-mono text-[9px] ${palm ? 'opacity-70' : 'opacity-60'}`}>M</span>
+            <span className={`font-mono text-[9px] ${palm ? 'opacity-70' : 'opacity-60'}`}>K</span>
           </button>
         </div>
 

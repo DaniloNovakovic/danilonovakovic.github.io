@@ -41,6 +41,11 @@ export interface StringExpression {
 
 export type StrumDirection = 'down' | 'up';
 
+/** `null` is a dead string. A missing fret is the open string, not a mute. */
+export function resolvePluckFret(fret: number | null | undefined): number | null {
+  return fret === undefined ? 0 : fret;
+}
+
 interface StringBuffer {
   buffer: AudioBuffer;
   /** playbackRate that corrects the open-string render onto its true pitch. */
@@ -119,10 +124,9 @@ export function useGuitarSynth() {
     (context: AudioContext, spec: GuitarStringSpec, at: number, velocity: number, fret: number | null, palm: boolean) => {
       const cache = cacheFor(context);
       dampVoice(spec.number, at);
-      // An X is a dead string: the open pitch, choked like a palm mute, and not left ringing.
+      // An X is a dead string: a short thud, not the open note, and not left ringing.
       const choked = fret === null;
       const soundingFret = choked ? 0 : fret;
-      const muted = palm || choked;
       const { buffer, openRate } = bufferFor(cache, spec);
       const source = context.createBufferSource();
       const tone = context.createBiquadFilter();
@@ -131,10 +135,19 @@ export function useGuitarSynth() {
       const rate = openRate * 2 ** (soundingFret / 12) * (1 + (Math.random() - 0.5) * 0.004);
       source.playbackRate.setValueAtTime(rate, at);
       tone.type = 'lowpass';
-      tone.frequency.value = (muted ? 900 : 2500 + soundingFret * 160) + Math.random() * (muted ? 180 : 700);
       const level = velocity * (0.36 + Math.random() * 0.08);
-      gain.gain.setValueAtTime(level, at);
-      if (muted) gain.gain.exponentialRampToValueAtTime(0.001, at + 0.11);
+      if (choked) {
+        tone.frequency.value = 280;
+        gain.gain.setValueAtTime(Math.min(0.16, level), at);
+        gain.gain.exponentialRampToValueAtTime(0.001, at + 0.04);
+      } else if (palm) {
+        tone.frequency.value = 700 + Math.random() * 120;
+        gain.gain.setValueAtTime(level * 0.7, at);
+        gain.gain.exponentialRampToValueAtTime(0.001, at + 0.07);
+      } else {
+        tone.frequency.value = 2500 + soundingFret * 160 + Math.random() * 700;
+        gain.gain.setValueAtTime(level, at);
+      }
       source.connect(tone).connect(gain).connect(cache.output);
       const voice: Voice = { source, gain, openRate, fret: soundingFret, startedAt: at };
       source.onended = () => {
@@ -154,7 +167,7 @@ export function useGuitarSynth() {
     (spec: GuitarStringSpec, velocity = 1, expression?: StringExpression) => {
       const context = getAudio();
       if (!context) return;
-      pluckAt(context, spec, context.currentTime, velocity, expression?.fret ?? 0, expression?.palm ?? false);
+      pluckAt(context, spec, context.currentTime, velocity, resolvePluckFret(expression?.fret), expression?.palm ?? false);
     },
     [getAudio, pluckAt]
   );
@@ -171,7 +184,7 @@ export function useGuitarSynth() {
         if (!spec) return;
         const fret = frets[index] ?? null;
         const when = Math.max(context.currentTime, start + step * STRUM_STAGGER_SECONDS + (Math.random() - 0.5) * 0.004);
-        const velocity = fret === null ? 0.55 : Math.max(0.45, 0.84 - step * 0.06);
+        const velocity = fret === null ? 0.35 : Math.max(0.45, 0.84 - step * 0.06);
         pluckAt(context, spec, when, velocity, fret, palm);
       });
     },
