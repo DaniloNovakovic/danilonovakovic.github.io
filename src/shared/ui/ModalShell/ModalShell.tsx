@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, type ReactNode } from 'react';
+import { useEffect, useId, useRef, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react';
 import { cn } from '../utils';
 
 const FOCUSABLE =
@@ -7,6 +7,29 @@ const FOCUSABLE =
 const modalStack: symbol[] = [];
 let lockedModalCount = 0;
 let previousBodyOverflow = '';
+/** Long enough to cover a mobile compatibility click after the opening tap. */
+const OPENING_CLICK_GRACE_MS = 500;
+
+/**
+ * Implicit touch capture keeps `pointerup` targeted at the backdrop after the
+ * finger slides onto the dialog. Compare the release point with the dialog box.
+ * An empty box has no layout, so the backdrop target check decides instead.
+ */
+function releasePointIsInsideDialog(
+  dialog: HTMLElement | null,
+  clientX: number,
+  clientY: number
+): boolean {
+  if (!dialog) return false;
+  const bounds = dialog.getBoundingClientRect();
+  if (bounds.width <= 0 || bounds.height <= 0) return false;
+  return (
+    clientX >= bounds.left &&
+    clientX <= bounds.right &&
+    clientY >= bounds.top &&
+    clientY <= bounds.bottom
+  );
+}
 
 interface ModalShellRenderProps {
   titleId: string;
@@ -35,6 +58,8 @@ export function ModalShell({
   const modalId = useRef(Symbol('modal'));
   const dialogRef = useRef<HTMLDivElement>(null);
   const openerRef = useRef<HTMLElement | null>(null);
+  const backdropPointerDownRef = useRef(false);
+  const dialogPointerDownRef = useRef(false);
   const titleId = useId();
   const descriptionId = useId();
 
@@ -77,6 +102,32 @@ export function ModalShell({
   useEffect(function focusInitialModalElement() {
     const first = dialogRef.current?.querySelector<HTMLElement>(FOCUSABLE);
     (first ?? dialogRef.current)?.focus();
+  }, []);
+
+  useEffect(function ignoreOpeningCompatibilityClick() {
+    const openedAt = performance.now();
+    // Mobile browsers send a click after the tap that opened the modal. By then
+    // focus is on the close control, so that click dismisses the dialog immediately.
+    const swallowOpeningClick = (event: MouseEvent) => {
+      if (performance.now() - openedAt > OPENING_CLICK_GRACE_MS) {
+        window.removeEventListener('click', swallowOpeningClick, true);
+        return;
+      }
+      if (event.detail === 0 || dialogPointerDownRef.current) return;
+      event.preventDefault();
+      event.stopPropagation();
+      window.removeEventListener('click', swallowOpeningClick, true);
+    };
+
+    window.addEventListener('click', swallowOpeningClick, true);
+    const timeoutId = window.setTimeout(() => {
+      window.removeEventListener('click', swallowOpeningClick, true);
+    }, OPENING_CLICK_GRACE_MS);
+
+    return () => {
+      window.removeEventListener('click', swallowOpeningClick, true);
+      window.clearTimeout(timeoutId);
+    };
   }, []);
 
   useEffect(function bindModalKeyboardControls() {
@@ -122,8 +173,21 @@ export function ModalShell({
         'fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2 backdrop-blur-sm animate-in fade-in duration-300 sm:p-4',
         className
       )}
-      onMouseDown={(event) => {
-        if (closeOnBackdrop && event.target === event.currentTarget) {
+      onPointerCancel={() => {
+        backdropPointerDownRef.current = false;
+      }}
+      onPointerDown={(event) => {
+        backdropPointerDownRef.current = event.target === event.currentTarget;
+      }}
+      onPointerUp={(event) => {
+        const pressedBackdrop = backdropPointerDownRef.current;
+        backdropPointerDownRef.current = false;
+        if (
+          closeOnBackdrop &&
+          pressedBackdrop &&
+          event.target === event.currentTarget &&
+          !releasePointIsInsideDialog(dialogRef.current, event.clientX, event.clientY)
+        ) {
           onClose();
         }
       }}
@@ -136,7 +200,10 @@ export function ModalShell({
         aria-describedby={descriptionId}
         tabIndex={-1}
         className="max-w-full outline-none"
-        onMouseDown={(event) => event.stopPropagation()}
+        onPointerDown={(event: ReactPointerEvent<HTMLDivElement>) => {
+          dialogPointerDownRef.current = true;
+          event.stopPropagation();
+        }}
       >
         {children({ titleId, descriptionId })}
       </div>
