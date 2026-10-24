@@ -83,6 +83,26 @@ describe('GuitarStrings', () => {
     expect(bridgeStore.getState().inventory.ownedItemIds.filter((id) => id === 'copper-string')).toHaveLength(1);
   });
 
+  it('toggles palm on X and a short strum on S', () => {
+    renderGuitar();
+    const palmButton = () => screen.getByRole('button', { name: /Palm mute/ });
+    const shortButton = () => screen.getByRole('button', { name: /Short strum/ });
+    expect(palmButton().textContent).toContain('X');
+    expect(palmButton().getAttribute('aria-pressed')).toBe('false');
+    expect(shortButton().textContent).toContain('S');
+
+    press('x');
+    expect(palmButton().getAttribute('aria-pressed')).toBe('true');
+    press('k');
+    expect(palmButton().getAttribute('aria-pressed')).toBe('true');
+
+    press('s');
+    expect(shortButton().getAttribute('aria-pressed')).toBe('true');
+    expect(screen.getByRole('img', { name: 'G shape, palm muted, short strum' })).toBeDefined();
+    press('s');
+    expect(shortButton().getAttribute('aria-pressed')).toBe('false');
+  });
+
   it('lets the home key rename the chords and starts with the bass note on', () => {
     renderGuitar();
     fireEvent.click(screen.getByRole('button', { name: 'Guitar settings' }));

@@ -49,6 +49,8 @@ interface StringBoardProps {
   /** Fret per string, index 0 = high E. `null` is muted. */
   frets: readonly (number | null)[];
   palm: boolean;
+  /** Latched staccato: strings speak, then stop. */
+  shortStrum: boolean;
   /** Right-hand key for each string, high E first. */
   stringKeys: readonly string[];
   /** Pluck counter per string (top to bottom); a change replays that string's vibration. */
@@ -64,7 +66,18 @@ interface StringBoardProps {
  * frets. Pointer down picks the string under the pointer; hovering (mouse) or
  * dragging across strings strums. Crossing a second string counts as a rake.
  */
-export function StringBoard({ label, gripName, frets, palm, stringKeys, plucks, onPick, onStrum, onRake }: StringBoardProps) {
+export function StringBoard({
+  label,
+  gripName,
+  frets,
+  palm,
+  shortStrum,
+  stringKeys,
+  plucks,
+  onPick,
+  onStrum,
+  onRake
+}: StringBoardProps) {
   const hatchId = useId();
   const lastRowRef = useRef<number | null>(null);
   const rowsRef = useRef(new Set<number>());
@@ -124,6 +137,17 @@ export function StringBoard({ label, gripName, frets, palm, stringKeys, plucks, 
           <line key={x} x1={x} y1="4" x2={x} y2={VIEW_HEIGHT - 4} stroke={INK} strokeWidth="1.5" opacity="0.35" />
         ))}
         {palm ? <rect x="248" y="8" width="16" height={VIEW_HEIGHT - 16} fill={INK} opacity="0.16" /> : null}
+        {shortStrum ? (
+          <line
+            x1={BRIDGE_X - 16}
+            y1="8"
+            x2={BRIDGE_X - 16}
+            y2={VIEW_HEIGHT - 8}
+            stroke={INK}
+            strokeWidth="2"
+            strokeDasharray="3 3"
+          />
+        ) : null}
         {base > 0 ? (
           <text x="2" y="70" fill={INK} fontSize="9" fontFamily="ui-monospace, monospace" fontWeight="700">
             {base}
@@ -139,6 +163,7 @@ export function StringBoard({ label, gripName, frets, palm, stringKeys, plucks, 
             fret={frets[index] ?? null}
             base={base}
             palm={palm}
+            shortStrum={shortStrum}
             pluckId={plucks[index] ?? 0}
           />
         ))}
@@ -191,6 +216,7 @@ function GuitarString({
   fret,
   base,
   palm,
+  shortStrum,
   pluckId
 }: {
   spec: GuitarStringSpec;
@@ -198,6 +224,7 @@ function GuitarString({
   fret: number | null;
   base: number;
   palm: boolean;
+  shortStrum: boolean;
   pluckId: number;
 }) {
   const startX = speakingStart(fret, base);
@@ -205,7 +232,7 @@ function GuitarString({
   const muted = fret === null;
   const amplitude = 3 + spec.gauge * 1.2;
   const originX = (startX + BRIDGE_X) / 2;
-  const motion = palm || muted ? 'hobby-string-chuck' : 'hobby-string-vibrate';
+  const motion = palm || shortStrum || muted ? 'hobby-string-chuck' : 'hobby-string-vibrate';
   return (
     <g>
       <line

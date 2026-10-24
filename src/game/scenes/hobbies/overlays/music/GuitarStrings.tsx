@@ -55,6 +55,7 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
   const [homeKey, setHomeKey] = useState<HomeKeyId>('G');
   const [bassOnChord, setBassOnChord] = useState(true);
   const [palm, setPalm] = useState(false);
+  const [shortStrum, setShortStrum] = useState(false);
   const [plucks, setPlucks] = useState(NO_PLUCKS);
   const [progress, setProgress] = useState(0);
   const [songDone, setSongDone] = useState(false);
@@ -72,13 +73,13 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
   const voiceChord = useCallback(
     (shapeFrets: readonly (number | null)[]) => {
       if (bassOnChord) {
-        const number = pluckLowest(shapeFrets, palm);
+        const number = pluckLowest(shapeFrets, palm, shortStrum);
         if (number !== null) vibrate(number);
         return;
       }
       holdChord(shapeFrets);
     },
-    [bassOnChord, holdChord, palm, pluckLowest, vibrate]
+    [bassOnChord, holdChord, palm, pluckLowest, shortStrum, vibrate]
   );
 
   const selectGrip = useCallback(
@@ -129,22 +130,23 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
   const playString = useCallback(
     (spec: GuitarStringSpec, velocity = 1) => {
       const fret = frets[spec.number - 1] ?? null;
-      pluck(spec, fret === null ? 0.8 : velocity, { fret, palm });
+      pluck(spec, fret === null ? 0.8 : velocity, { fret, palm, short: shortStrum });
       vibrate(spec.number);
     },
-    [frets, palm, pluck, vibrate]
+    [frets, palm, pluck, shortStrum, vibrate]
   );
 
   const strum = useCallback(
     (direction: StrumDirection) => {
-      strumShape(frets, direction, palm);
+      strumShape(frets, direction, palm, shortStrum);
       vibrate('all');
       commitStrum(gripId);
     },
-    [commitStrum, frets, gripId, palm, strumShape, vibrate]
+    [commitStrum, frets, gripId, palm, shortStrum, strumShape, vibrate]
   );
 
   const togglePalm = useCallback(() => setPalm((muted) => !muted), []);
+  const toggleShort = useCallback(() => setShortStrum((short) => !short), []);
 
   useOverlayKeys({
     ...Object.fromEntries(
@@ -176,8 +178,10 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
     '-': freshKey(() => slide(-1)),
     '=': freshKey(() => slide(1)),
     '+': freshKey(() => slide(1)),
-    k: freshKey(togglePalm),
-    K: freshKey(togglePalm)
+    x: freshKey(togglePalm),
+    X: freshKey(togglePalm),
+    s: freshKey(toggleShort),
+    S: freshKey(toggleShort)
   });
 
   const stepNames = CAMPFIRE.map((id) => chordName(id, 'scale', keyCapo));
@@ -226,10 +230,11 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
 
         <Panel border="thick" className={`${hobbyBoardClass} p-2`}>
           <StringBoard
-            label={copy.boardLabel(sounding, palm)}
+            label={copy.boardLabel(sounding, palm, shortStrum)}
             gripName={sounding}
             frets={frets}
             palm={palm}
+            shortStrum={shortStrum}
             stringKeys={STRING_PICKS.map((pick) => pick.key.toUpperCase())}
             plucks={plucks}
             onPick={(spec) => playString(spec, 0.9)}
@@ -288,7 +293,17 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
             className={`${inkKeyClass} px-3 ${palm ? 'bg-[#1a1a1a] text-[#fbfbf9]' : 'bg-[#fbfbf9] text-[#1a1a1a]'}`}
           >
             <span className="font-black">{copy.palm}</span>
-            <span className={`font-mono text-[9px] ${palm ? 'opacity-70' : 'opacity-60'}`}>K</span>
+            <span className={`font-mono text-[9px] ${palm ? 'opacity-70' : 'opacity-60'}`}>X</span>
+          </button>
+          <button
+            type="button"
+            onClick={toggleShort}
+            aria-pressed={shortStrum}
+            aria-label={copy.shortLabel(shortStrum)}
+            className={`${inkKeyClass} px-3 ${shortStrum ? 'bg-[#1a1a1a] text-[#fbfbf9]' : 'bg-[#fbfbf9] text-[#1a1a1a]'}`}
+          >
+            <span className="font-black">{copy.shortStrum}</span>
+            <span className={`font-mono text-[9px] ${shortStrum ? 'opacity-70' : 'opacity-60'}`}>S</span>
           </button>
         </div>
 

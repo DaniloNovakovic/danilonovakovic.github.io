@@ -32,11 +32,15 @@ const RING_SECONDS = 2.6;
 const STRUM_STAGGER_SECONDS = 0.03;
 const DAMP_SECONDS = 0.03;
 const HAMMER_SECONDS = 0.02;
+/** Full tone, then gone. Long enough to hear the chord, short enough for an upbeat. */
+const SHORT_SECONDS = 0.16;
 
 export interface StringExpression {
   /** Semitones above the open string. `null` chucks the string (muted in the shape). */
   fret?: number | null;
   palm?: boolean;
+  /** Staccato: the note speaks, then stops, instead of ringing. */
+  short?: boolean;
 }
 
 export type StrumDirection = 'down' | 'up';
@@ -121,7 +125,15 @@ export function useGuitarSynth() {
   }, []);
 
   const pluckAt = useCallback(
-    (context: AudioContext, spec: GuitarStringSpec, at: number, velocity: number, fret: number | null, palm: boolean) => {
+    (
+      context: AudioContext,
+      spec: GuitarStringSpec,
+      at: number,
+      velocity: number,
+      fret: number | null,
+      palm: boolean,
+      short: boolean
+    ) => {
       const cache = cacheFor(context);
       dampVoice(spec.number, at);
       // An X is a dead string: a short thud, not the open note, and not left ringing.
@@ -144,6 +156,11 @@ export function useGuitarSynth() {
         tone.frequency.value = 700 + Math.random() * 120;
         gain.gain.setValueAtTime(level * 0.7, at);
         gain.gain.exponentialRampToValueAtTime(0.001, at + 0.07);
+      } else if (short) {
+        tone.frequency.value = 2500 + soundingFret * 160 + Math.random() * 700;
+        gain.gain.setValueAtTime(level, at);
+        gain.gain.setValueAtTime(level, at + 0.045);
+        gain.gain.exponentialRampToValueAtTime(0.001, at + SHORT_SECONDS);
       } else {
         tone.frequency.value = 2500 + soundingFret * 160 + Math.random() * 700;
         gain.gain.setValueAtTime(level, at);
@@ -167,14 +184,22 @@ export function useGuitarSynth() {
     (spec: GuitarStringSpec, velocity = 1, expression?: StringExpression) => {
       const context = getAudio();
       if (!context) return;
-      pluckAt(context, spec, context.currentTime, velocity, resolvePluckFret(expression?.fret), expression?.palm ?? false);
+      pluckAt(
+        context,
+        spec,
+        context.currentTime,
+        velocity,
+        resolvePluckFret(expression?.fret),
+        expression?.palm ?? false,
+        expression?.short ?? false
+      );
     },
     [getAudio, pluckAt]
   );
 
   /** Rake the current shape on the audio clock. Down starts on the low E. */
   const strumShape = useCallback(
-    (frets: readonly (number | null)[], direction: StrumDirection, palm: boolean) => {
+    (frets: readonly (number | null)[], direction: StrumDirection, palm: boolean, short = false) => {
       const context = getAudio();
       if (!context) return;
       const start = context.currentTime + 0.012;
@@ -185,7 +210,7 @@ export function useGuitarSynth() {
         const fret = frets[index] ?? null;
         const when = Math.max(context.currentTime, start + step * STRUM_STAGGER_SECONDS + (Math.random() - 0.5) * 0.004);
         const velocity = fret === null ? 0.35 : Math.max(0.45, 0.84 - step * 0.06);
-        pluckAt(context, spec, when, velocity, fret, palm);
+        pluckAt(context, spec, when, velocity, fret, palm, short);
       });
     },
     [getAudio, pluckAt]
@@ -232,7 +257,7 @@ export function useGuitarSynth() {
 
   /** Silence the chord and strike its lowest speaking string. Returns that string number. */
   const pluckLowest = useCallback(
-    (frets: readonly (number | null)[], palm = false): number | null => {
+    (frets: readonly (number | null)[], palm = false, short = false): number | null => {
       const context = getAudio();
       if (!context) return null;
       const now = context.currentTime;
@@ -242,7 +267,7 @@ export function useGuitarSynth() {
       const spec = GUITAR_STRINGS[index];
       const fret = frets[index];
       if (!spec || fret === null || fret === undefined) return null;
-      pluckAt(context, spec, now, 0.92, fret, palm);
+      pluckAt(context, spec, now, 0.92, fret, palm, short);
       return spec.number;
     },
     [dampVoice, getAudio, pluckAt]
