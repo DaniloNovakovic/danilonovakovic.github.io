@@ -1,8 +1,11 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { Settings } from 'lucide-react';
 import { hobbyFocusRing } from '../shared/hobbyStyles';
+import type { Extension } from './extensions';
 import { HOME_KEYS, type HomeKeyId } from './grips';
 import { inkKeyClass } from './GripBar';
+
+const COLOR_TONES: readonly Extension[] = [2, 4, 6, 7];
 
 interface GuitarSettingsProps {
   openLabel: string;
@@ -14,6 +17,11 @@ interface GuitarSettingsProps {
   onBass: (on: boolean) => void;
   homeKey: HomeKeyId;
   onHomeKey: (id: HomeKeyId) => void;
+  extensionGroupLabel: string;
+  extensionHint: string;
+  extensionLabel: (tone: string, on: boolean) => string;
+  extensions: readonly Extension[];
+  onExtension: (tone: Extension) => void;
 }
 
 /** Small settings popover: bass-note toggle and the home key. */
@@ -26,7 +34,12 @@ export function GuitarSettings({
   bass,
   onBass,
   homeKey,
-  onHomeKey
+  onHomeKey,
+  extensionGroupLabel,
+  extensionHint,
+  extensionLabel,
+  extensions,
+  onExtension
 }: GuitarSettingsProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -38,8 +51,8 @@ export function GuitarSettings({
     const onPointer = (event: PointerEvent) => {
       if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
     };
-    window.addEventListener('pointerdown', onPointer);
-    return () => window.removeEventListener('pointerdown', onPointer);
+    window.addEventListener('pointerdown', onPointer, true);
+    return () => window.removeEventListener('pointerdown', onPointer, true);
   }, [open]);
 
   return (
@@ -84,7 +97,10 @@ export function GuitarSettings({
                   role="radio"
                   aria-checked={selected}
                   aria-label={keyLabel(key.id)}
-                  onClick={() => onHomeKey(key.id)}
+                  onClick={() => {
+                    onHomeKey(key.id);
+                    setOpen(false);
+                  }}
                   className={`${inkKeyClass} min-w-0 ${selected ? 'bg-[#1a1a1a] text-[#fbfbf9]' : 'bg-[#fbfbf9] text-[#1a1a1a]'}`}
                 >
                   <span className="font-black">{key.id}</span>
@@ -92,6 +108,24 @@ export function GuitarSettings({
               );
             })}
           </div>
+          <div role="group" aria-label={extensionGroupLabel} className="mt-3 flex gap-1.5">
+            {COLOR_TONES.map((tone) => {
+              const selected = extensions.includes(tone);
+              return (
+                <button
+                  key={tone}
+                  type="button"
+                  aria-pressed={selected}
+                  aria-label={extensionLabel(String(tone), selected)}
+                  onClick={() => onExtension(tone)}
+                  className={`${inkKeyClass} min-w-0 flex-1 ${selected ? 'bg-[#1a1a1a] text-[#fbfbf9]' : 'bg-[#fbfbf9] text-[#1a1a1a]'}`}
+                >
+                  <span className="font-black">{tone}</span>
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-1 text-[11px] italic leading-snug opacity-60">{extensionHint}</p>
         </div>
       ) : null}
     </div>
