@@ -17,7 +17,7 @@ function press(key: string, shiftKey = false, altKey = false, code?: string) {
 }
 
 function playCampfire() {
-  for (const key of ['g', 'd', 'c', 'g']) {
+  for (const key of ['g', 'd', 'e', 'c', 'g']) {
     press(key);
     press(' ');
   }
@@ -66,7 +66,7 @@ describe('GuitarStrings', () => {
     expect(bridgeStore.getState().inventory.ownedItemIds).not.toContain('copper-string');
   });
 
-  it('awards the copper string once when G D C G is strummed', () => {
+  it('awards the copper string once when G D Em C G is strummed', () => {
     renderGuitar();
     press('j');
     press('1');
@@ -83,6 +83,19 @@ describe('GuitarStrings', () => {
     expect(bridgeStore.getState().inventory.ownedItemIds.filter((id) => id === 'copper-string')).toHaveLength(1);
   });
 
+  it('lets the home key rename the chords and starts with the bass note on', () => {
+    renderGuitar();
+    fireEvent.click(screen.getByRole('button', { name: 'Guitar settings' }));
+    expect((screen.getByRole('checkbox', { name: 'Bass note' }) as HTMLInputElement).checked).toBe(true);
+
+    fireEvent.click(screen.getByRole('radio', { name: 'Key A' }));
+    expect(screen.getByRole('radio', { name: 'A chord, key G' }).getAttribute('aria-checked')).toBe('true');
+    expect(screen.getByText('Strum A, E, F#m, D, A. Strumming the same chord twice is fine.')).toBeDefined();
+
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Bass note' }));
+    expect((screen.getByRole('checkbox', { name: 'Bass note' }) as HTMLInputElement).checked).toBe(false);
+  });
+
   it('keeps the song when a chord is strummed twice and drops it on a wrong chord', () => {
     renderGuitar();
     press('g');
@@ -90,13 +103,15 @@ describe('GuitarStrings', () => {
     press(' ');
     press('d');
     press(' ');
-    press('e');
+    press('a');
     press(' ');
     expect(bridgeStore.getState().inventory.ownedItemIds).not.toContain('copper-string');
 
     fireEvent.click(screen.getByRole('radio', { name: 'G chord, key G' }));
     fireEvent.click(screen.getByRole('button', { name: 'Strum down' }));
     fireEvent.click(screen.getByRole('radio', { name: 'D chord, key D' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Strum down' }));
+    fireEvent.click(screen.getByRole('radio', { name: 'Em chord, key E' }));
     fireEvent.click(screen.getByRole('button', { name: 'Strum down' }));
     fireEvent.click(screen.getByRole('radio', { name: 'C chord, key C' }));
     fireEvent.click(screen.getByRole('button', { name: 'Strum down' }));

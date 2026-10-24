@@ -3,6 +3,7 @@ import {
   chordName,
   frettedFrequency,
   fretsFor,
+  fretsInKey,
   lowestSoundingIndex,
   noteLabel,
   slideFrets,
@@ -48,6 +49,13 @@ describe('chord grips', () => {
     expect(slideFrets([0, 0, 0, 2, 2, 0], 1)).toEqual([1, 1, 1, 3, 3, 1]);
     expect(slideFrets([0, 0, 0, 2, 2, 0], -1)).toBeNull();
     expect(slideFrets([12, 12, 12, null, null, null], 1)).toBeNull();
+  });
+
+  it('moves the open G shape up when the home key is A', () => {
+    expect(fretsInKey('g', 'low', 'scale', 2)).toEqual([5, 2, 2, 2, 4, 5]);
+    expect(chordName('g', 'scale', 2)).toBe('A');
+    expect(chordName('d', 'scale', 2)).toBe('E');
+    expect(chordName('c', 'scale', 2)).toBe('D');
   });
 
   it('finds the lowest speaking string and skips a muted bass', () => {

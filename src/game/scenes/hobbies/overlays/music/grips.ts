@@ -130,8 +130,8 @@ export const PICK_ROWS = [
   ['n', 'm', 'j']
 ] as const;
 
-/** Sticky-note song: I–V–IV–I in G. */
-export const CAMPFIRE: readonly GripId[] = ['g', 'd', 'c', 'g'];
+/** Sticky-note song: I–V–vi–IV–I in G. */
+export const CAMPFIRE: readonly GripId[] = ['g', 'd', 'e', 'c', 'g'];
 
 const GRIP_BY_ID = new Map(CHORD_GRIPS.map((grip) => [grip.id, grip]));
 const PITCHES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
@@ -149,12 +149,33 @@ export function fretsFor(id: GripId, voicing: Voicing, color: ChordColor = 'scal
   return voicing === 'high' ? pair.high : pair.low;
 }
 
+/** Open-position keys whose low shapes still fit on the neck. */
+export const HOME_KEYS = [
+  { id: 'G', capo: 0 },
+  { id: 'A', capo: 2 },
+  { id: 'C', capo: 5 },
+  { id: 'D', capo: 7 }
+] as const;
+
+export type HomeKeyId = (typeof HOME_KEYS)[number]['id'];
+
+export function homeCapo(id: HomeKeyId): number {
+  return HOME_KEYS.find((key) => key.id === id)?.capo ?? 0;
+}
+
 /** Moves a shape up or down the neck. Returns null when a fret would leave 0–12. */
 export function slideFrets(frets: Frets, capo: number): Frets | null {
   if (capo === 0) return frets;
   const moved = frets.map((fret) => (fret === null ? null : fret + capo));
   if (moved.some((fret) => fret !== null && (fret < 0 || fret > 12))) return null;
   return moved;
+}
+
+/** Shape in a home key. A high voicing that leaves the neck falls back to the low one. */
+export function fretsInKey(id: GripId, voicing: Voicing, color: ChordColor, capo: number): Frets {
+  const preferred = slideFrets(fretsFor(id, voicing, color), capo);
+  if (preferred) return preferred;
+  return slideFrets(fretsFor(id, 'low', color), capo) ?? fretsFor(id, 'low', color);
 }
 
 /** Lowest string that speaks in the shape. Index 5 is the low E. Muted strings are skipped. */

@@ -14,14 +14,18 @@ import {
   STRING_PICKS,
   chordName,
   fretsFor,
+  fretsInKey,
+  homeCapo,
   noteLabel,
   pickForKey,
   slideFrets,
   type ChordColor,
   type GripId,
+  type HomeKeyId,
   type Voicing
 } from './grips';
 import { GripBar, inkKeyClass } from './GripBar';
+import { GuitarSettings } from './GuitarSettings';
 import { advanceProgression } from './progression';
 import { RiffNote } from './RiffNote';
 import { StringBoard } from './StringBoard';
@@ -48,13 +52,16 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
   const [voicing, setVoicing] = useState<Voicing>('low');
   const [color, setColor] = useState<ChordColor>('scale');
   const [capo, setCapo] = useState(0);
+  const [homeKey, setHomeKey] = useState<HomeKeyId>('G');
+  const [bassOnChord, setBassOnChord] = useState(true);
   const [palm, setPalm] = useState(false);
   const [plucks, setPlucks] = useState(NO_PLUCKS);
   const [progress, setProgress] = useState(0);
   const [songDone, setSongDone] = useState(false);
 
-  const frets = slideFrets(fretsFor(gripId, voicing, color), capo) ?? fretsFor(gripId, voicing, color);
-  const sounding = chordName(gripId, color, capo);
+  const keyCapo = homeCapo(homeKey);
+  const frets = fretsInKey(gripId, voicing, color, keyCapo + capo);
+  const sounding = chordName(gripId, color, keyCapo + capo);
 
   const vibrate = useCallback((number: number | 'all') => {
     setPlucks((current) =>
@@ -62,34 +69,49 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
     );
   }, []);
 
-  const selectGrip = useCallback(
-    (id: GripId, nextVoicing: Voicing, nextColor: ChordColor, fromButton = false) => {
-      const shape = id === 'open' ? 'low' : nextVoicing;
-      const next = id === 'open' ? 'scale' : nextColor;
-      const shapeFrets = fretsFor(id, shape, next);
-      setGripId(id);
-      setVoicing(shape);
-      setColor(next);
-      setCapo(0);
-      if (fromButton) {
+  const voiceChord = useCallback(
+    (shapeFrets: readonly (number | null)[]) => {
+      if (bassOnChord) {
         const number = pluckLowest(shapeFrets, palm);
         if (number !== null) vibrate(number);
         return;
       }
       holdChord(shapeFrets);
     },
-    [holdChord, palm, pluckLowest, vibrate]
+    [bassOnChord, holdChord, palm, pluckLowest, vibrate]
+  );
+
+  const selectGrip = useCallback(
+    (id: GripId, nextVoicing: Voicing, nextColor: ChordColor) => {
+      const shape = id === 'open' ? 'low' : nextVoicing;
+      const next = id === 'open' ? 'scale' : nextColor;
+      setGripId(id);
+      setVoicing(shape);
+      setColor(next);
+      setCapo(0);
+      voiceChord(fretsInKey(id, shape, next, keyCapo));
+    },
+    [keyCapo, voiceChord]
+  );
+
+  const chooseKey = useCallback(
+    (id: HomeKeyId) => {
+      setHomeKey(id);
+      setCapo(0);
+      voiceChord(fretsInKey(gripId, voicing, color, homeCapo(id)));
+    },
+    [color, gripId, voiceChord, voicing]
   );
 
   const slide = useCallback(
     (delta: number) => {
       const next = capo + delta;
-      const moved = slideFrets(fretsFor(gripId, voicing, color), next);
+      const moved = slideFrets(fretsFor(gripId, voicing, color), keyCapo + next);
       if (!moved) return;
       setCapo(next);
       glide(moved);
     },
-    [capo, color, glide, gripId, voicing]
+    [capo, color, glide, gripId, keyCapo, voicing]
   );
 
   const commitStrum = useCallback(
@@ -158,7 +180,7 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
     K: freshKey(togglePalm)
   });
 
-  const stepNames = CAMPFIRE.map((id) => copy.grips[id]);
+  const stepNames = CAMPFIRE.map((id) => chordName(id, 'scale', keyCapo));
 
   return (
     <OverlayDialogFrame
@@ -171,7 +193,7 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
       <div className="flex w-full flex-col items-center gap-3">
         <RiffNote
           title={copy.riffTitle}
-          hint={copy.riffHint}
+          hint={copy.riffHint(stepNames.join(', '))}
           progressLabel={copy.riffProgress(progress, CAMPFIRE.length)}
           doneLabel={copy.riffDone}
           steps={stepNames}
@@ -179,13 +201,28 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
           done={songDone}
         />
 
-        <GripBar
-          label={copy.gripsLabel}
-          activeId={gripId}
-          gripName={(id) => (id === gripId ? sounding : copy.grips[id])}
-          gripLabel={copy.gripLabel}
-          onSelect={selectGrip}
-        />
+        <div className="flex w-full items-start gap-1.5">
+          <div className="min-w-0 flex-1">
+            <GripBar
+              label={copy.gripsLabel}
+              activeId={gripId}
+              gripName={(id) => (id === gripId ? sounding : chordName(id, 'scale', keyCapo))}
+              gripLabel={copy.gripLabel}
+              onSelect={selectGrip}
+            />
+          </div>
+          <GuitarSettings
+            openLabel={copy.settingsLabel}
+            bassLabel={copy.bassNote}
+            bassHint={copy.bassNoteHint}
+            keyGroupLabel={copy.homeKey}
+            keyLabel={copy.homeKeyLabel}
+            bass={bassOnChord}
+            onBass={setBassOnChord}
+            homeKey={homeKey}
+            onHomeKey={chooseKey}
+          />
+        </div>
 
         <Panel border="thick" className={`${hobbyBoardClass} p-2`}>
           <StringBoard

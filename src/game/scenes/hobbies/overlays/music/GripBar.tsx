@@ -12,7 +12,7 @@ interface GripBarProps {
   activeId: GripId;
   gripName: (id: GripId) => string;
   gripLabel: (name: string, key: string) => string;
-  onSelect: (id: GripId, voicing: Voicing, color: ChordColor, fromButton: boolean) => void;
+  onSelect: (id: GripId, voicing: Voicing, color: ChordColor) => void;
 }
 
 /** One tap latches a shape. It stays fretted until the next tap. */
@@ -31,7 +31,7 @@ export function GripBar({ label, activeId, gripName, gripLabel, onSelect }: Grip
             aria-checked={selected}
             aria-label={gripLabel(name, keyLabel)}
             onClick={(event: MouseEvent<HTMLButtonElement>) =>
-              onSelect(grip.id, event.shiftKey ? 'high' : 'low', event.altKey ? 'alt' : 'scale', true)
+              onSelect(grip.id, event.shiftKey ? 'high' : 'low', event.altKey ? 'alt' : 'scale')
             }
             className={`${inkKeyClass} ${selected ? inkKeyOn : inkKeyIdle}`}
           >

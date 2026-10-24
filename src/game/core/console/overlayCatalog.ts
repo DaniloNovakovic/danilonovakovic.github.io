@@ -43,7 +43,7 @@ const HOBBIES: Record<HobbyStationId, OverlaySummary> = {
   music: {
     id: 'music',
     title: 'Guitar',
-    blurb: 'The letters fret G major. I, 9, and 0 pick the top strings. Strum G, D, C, G to win a copper string.'
+    blurb: 'The letters fret G major. I, 9, and 0 pick the top strings. Strum G, D, Em, C, G to win a copper string.'
   },
   fitness: {
     id: 'fitness',

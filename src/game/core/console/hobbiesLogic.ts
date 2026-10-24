@@ -18,7 +18,7 @@ const STATION_PROMPTS: Record<HobbyStationId, string> = {
 /** What clearing each mini-game goal means in the browser build. */
 const PERFORM_MESSAGES: Record<HobbyStationId, string> = {
   art: 'You sign the doodle and pin it up. Somewhere on the street, a billboard changes.',
-  music: 'You strum the four chords. A spare copper string pings loose — you pocket it.',
+  music: 'You strum the song. A spare copper string pings loose — you pocket it.',
   fitness: 'Perfect combo. A battery cell rolls out from behind the bag.',
   dancing: 'Round five, on the beat. A clock crystal glints on the floor.'
 };
