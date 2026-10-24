@@ -38,7 +38,7 @@ export interface OverworldProgress {
 const BANANA_CANCEL_EXTRA = 40;
 
 const SIGNPOST_MESSAGES: Record<OverworldProgressStage, string> = {
-  'find-glasses': 'The sign is a blur. Someone left a TODO? hatch open near the start of the street.',
+  'find-glasses': 'Sign is too blurry to read... if only I had my glasses...',
   'wear-glasses': 'Put your glasses back on. The street hides things from blurry eyes.',
   'find-peel': 'Something slippery lies between the Profile house and Experiences.',
   'win-circuit':

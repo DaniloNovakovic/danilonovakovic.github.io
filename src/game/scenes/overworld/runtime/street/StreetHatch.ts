@@ -1,10 +1,9 @@
 /**
- * StreetHatch — the TODO? trapdoor into the Developer Basement.
+ * StreetHatch — the open trapdoor into the Developer Basement.
  * Before the glasses it leaks scribbled "?" marks; afterwards it leaks code.
  * Gameplay (when to enter) stays in the Game Console; this only draws.
  */
 import * as Phaser from 'phaser';
-import { getMessages } from '@/shared/i18n';
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
 
 const INK = 0x1a1a1a;
@@ -17,10 +16,6 @@ const NEAR_PX = 150;
 const BLURRY_GLYPHS = ['?', '?', '~', '?', '¿', '?'];
 const CODE_GLYPHS = ['{', '}', ';', '</>', '01', '=>', '()', '//'];
 const DROP_MS = 420;
-const TAG_W = 86;
-const TAG_H = 32;
-/** Tag top edge, measured up from the hole center (keeps it clear of the interact prompt). */
-const TAG_TOP = 122;
 
 export interface StreetHatchState {
   hasGlasses: boolean;
@@ -34,8 +29,6 @@ export class StreetHatch {
   private readonly lid: Phaser.GameObjects.Graphics;
   private readonly glyphs: Phaser.GameObjects.Text[] = [];
   private readonly glyphCycle: number[] = [];
-  private readonly tagStrike: Phaser.GameObjects.Graphics;
-  private readonly tagDone: Phaser.GameObjects.Text;
   private readonly beam: Phaser.GameObjects.Graphics;
   private codeMode: boolean | null = null;
 
@@ -57,37 +50,12 @@ export class StreetHatch {
       );
       this.glyphCycle.push(-1);
     }
-
-    const tagX = x - 68;
-    const tagMidY = y - TAG_TOP + TAG_H / 2;
-    this.drawTag(tagX);
-    createUiText(scene, tagX, tagMidY, getMessages().scenes.overworld.basementHole, {
-      fontSize: '18px',
-      color: '#1a1a1a',
-      fontStyle: 'bold'
-    })
-      .setOrigin(0.5)
-      .setRotation(-0.05)
-      .setDepth(7);
-    this.tagStrike = scene.add.graphics().setDepth(8);
-    this.tagStrike.lineStyle(3, INK, 0.9);
-    this.tagStrike.lineBetween(tagX - 32, tagMidY + 3, tagX + 32, tagMidY - 4);
-    this.tagDone = createUiText(scene, tagX + 30, y - TAG_TOP - 4, getMessages().scenes.overworld.hatchDone, {
-      fontSize: '14px',
-      color: '#1a1a1a',
-      fontStyle: 'bold italic'
-    })
-      .setOrigin(0.5)
-      .setRotation(0.12)
-      .setDepth(8);
   }
 
   update(state: StreetHatchState, playerX: number, tick: number, motion: boolean): void {
     if (this.codeMode !== state.hasGlasses) {
       this.codeMode = state.hasGlasses;
       this.glyphCycle.fill(-1);
-      this.tagStrike.setVisible(state.hasGlasses);
-      this.tagDone.setVisible(state.hasGlasses);
       this.drawBeam(state.hasGlasses);
     }
 
@@ -194,18 +162,6 @@ export class StreetHatch {
     g.lineBetween(20, -4, 23, -56);
     g.lineStyle(2, INK, 0.9);
     g.strokeCircle(18, -30, 5);
-  }
-
-  private drawTag(tagX: number): void {
-    const g = this.scene.add.graphics().setDepth(6);
-    g.lineStyle(3, INK, 1);
-    g.lineBetween(tagX, this.y - TAG_TOP + TAG_H, tagX + 2, this.y + 8);
-    g.fillStyle(INK, 1);
-    g.fillRect(tagX - TAG_W / 2 + 4, this.y - TAG_TOP + 4, TAG_W, TAG_H);
-    g.fillStyle(PAPER, 1);
-    g.fillRect(tagX - TAG_W / 2, this.y - TAG_TOP, TAG_W, TAG_H);
-    g.lineStyle(2, INK, 1);
-    g.strokeRect(tagX - TAG_W / 2, this.y - TAG_TOP, TAG_W, TAG_H);
   }
 
   private drawBeam(lit: boolean): void {

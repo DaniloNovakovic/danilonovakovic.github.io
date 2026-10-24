@@ -727,6 +727,12 @@ describe('InteractiveApp', () => {
     expect(within(dialog).getByRole('button', { name: /continue/i })).toBeDefined();
     expect(within(dialog).getByRole('button', { name: /step back/i })).toBeDefined();
 
+    const description = document.getElementById(dialog.getAttribute('aria-describedby') ?? '');
+    expect(description?.textContent?.replaceAll('|', '')).toBe('Soft footfalls on the page.');
+    expect(description?.querySelector('.text-transparent')?.textContent?.replaceAll('|', '')).toBe(
+      'Soft footfalls on the page.'
+    );
+
     // First click finishes the typewriter; second advances the line.
     await userEvent.click(within(dialog).getByRole('button', { name: /continue/i }));
     await userEvent.click(within(dialog).getByRole('button', { name: /continue/i }));

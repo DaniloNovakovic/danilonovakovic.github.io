@@ -76,6 +76,7 @@ export function RidgeConversationPanel({ params, dispatchAction }: SceneUiSurfac
   if (!view) return null;
 
   const visibleText = view.text.slice(0, typedLength);
+  const hiddenText = view.text.slice(typedLength);
 
   /** Same as Z/Space: skip the typewriter, or advance once the line is shown. */
   const handleBoxClick = () => {
@@ -114,10 +115,23 @@ export function RidgeConversationPanel({ params, dispatchAction }: SceneUiSurfac
 
         <p
           id={textId}
-          className="mt-1.5 min-h-[3rem] font-mono text-xs font-bold leading-relaxed text-[#1a1a1a] sm:mt-2 sm:text-sm"
+          className="relative mt-1.5 min-h-[3rem] whitespace-pre-wrap font-mono text-xs font-bold leading-relaxed text-[#1a1a1a] sm:mt-2 sm:text-sm"
         >
           {visibleText}
-          {isTyping ? <span className="inline-block animate-pulse font-black">|</span> : null}
+          {/* Unrevealed characters stay in the line so wrap and box height do not jump. */}
+          {hiddenText ? (
+            <span className="text-transparent">
+              {isTyping ? (
+                <span
+                  aria-hidden="true"
+                  className="absolute -translate-x-full animate-pulse font-black text-[#1a1a1a]"
+                >
+                  |
+                </span>
+              ) : null}
+              {hiddenText}
+            </span>
+          ) : null}
         </p>
 
         {/* Persona 5 Choice Cards */}
