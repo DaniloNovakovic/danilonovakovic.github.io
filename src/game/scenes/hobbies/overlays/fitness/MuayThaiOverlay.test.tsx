@@ -35,6 +35,26 @@ describe('MuayThaiOverlay', () => {
     expect(bridgeStore.getState().inventory.ownedItemIds).toContain('battery-cell');
     expect(screen.getByText('FULL COMBO!')).toBeDefined();
     expect(screen.getByText('Spare part found!')).toBeDefined();
+    const strikePad = screen.getByRole('button', { name: /timing bar/i });
+    const dismiss = screen.getByRole('button', { name: 'Dismiss sticker' });
+    expect(strikePad.contains(dismiss)).toBe(false);
+    act(() => {
+      fireEvent.pointerDown(dismiss, { button: 0 });
+    });
+    expect(screen.queryByText('WHIFF!')).toBeNull();
+  });
+
+  it('strikes from the page around the bag, which also covers the timing bar', () => {
+    render(<MuayThaiOverlay close={vi.fn()} enterScene={vi.fn()} openOverlay={vi.fn()} titleId="t" descriptionId="d" />);
+    const strikePad = screen.getByRole('button', { name: /timing bar/i });
+    const bar = screen.getByRole('img', { name: 'Timing bar' });
+    expect(strikePad.className).toContain('inset-0');
+    expect(strikePad.parentElement?.contains(bar)).toBe(true);
+    clock += strikeZone(0).center * (sweepPeriodMs(0) / 2);
+    act(() => {
+      fireEvent.pointerDown(strikePad, { button: 0 });
+    });
+    expect(screen.getByText(`Combo 1/${COMBO_LENGTH}`)).toBeDefined();
   });
 
   it('resets the combo on a mistimed strike', () => {

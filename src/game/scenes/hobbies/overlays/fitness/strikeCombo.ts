@@ -1,7 +1,9 @@
 /**
  * Pure rules for the Muay Thai timing game: a marker sweeps a 0..1 bar, each
  * called strike has its own sweet-spot zone, and the zone shrinks while the
- * sweep speeds up as the combo grows.
+ * sweep speeds up as the combo grows. The knee and roundhouse leave that ramp
+ * so the last two strikes stay the tightest while remaining above the ~100ms
+ * a thumb can still land.
  */
 
 export const STRIKES = ['jab', 'cross', 'teep', 'elbow', 'knee', 'roundhouse'] as const;
@@ -19,12 +21,19 @@ const PERFECT_HALF_WIDTH = 0.025;
 const SWEEP_START_MS = 1500;
 const SWEEP_SPEEDUP_PER_STEP_MS = 120;
 const SWEEP_MIN_MS = 800;
-/** Finisher stays the smallest window, eased off the raw ramp so it is hittable. */
-const ROUNDHOUSE_HALF_WIDTH = 0.075;
-const ROUNDHOUSE_PERIOD_MS = 1000;
+/**
+ * Last two strikes, eased off the raw ramp (~80ms and ~75ms in the zone).
+ * Knee is ~112ms; roundhouse stays a notch tighter at ~104ms.
+ */
+const KNEE_HALF_WIDTH = 0.1;
+const KNEE_PERIOD_MS = 1120;
+const ROUNDHOUSE_HALF_WIDTH = 0.096;
+const ROUNDHOUSE_PERIOD_MS = 1080;
 
-function isRoundhouseStep(step: number): boolean {
-  return step === COMBO_LENGTH - 1;
+function lateComboWindow(step: number): { halfWidth: number; periodMs: number } | null {
+  if (step === COMBO_LENGTH - 2) return { halfWidth: KNEE_HALF_WIDTH, periodMs: KNEE_PERIOD_MS };
+  if (step === COMBO_LENGTH - 1) return { halfWidth: ROUNDHOUSE_HALF_WIDTH, periodMs: ROUNDHOUSE_PERIOD_MS };
+  return null;
 }
 
 export interface StrikeZone {
@@ -50,17 +59,19 @@ export interface StrikeResult {
 export const INITIAL_COMBO: ComboState = { step: 0, best: 0 };
 
 export function strikeZone(step: number): StrikeZone {
+  const late = lateComboWindow(step);
   const rampedHalfWidth = Math.max(ZONE_MIN_HALF_WIDTH, ZONE_START_HALF_WIDTH - step * ZONE_SHRINK_PER_STEP);
   return {
     center: ZONE_CENTERS[step % ZONE_CENTERS.length] ?? 0.5,
-    halfWidth: isRoundhouseStep(step) ? ROUNDHOUSE_HALF_WIDTH : rampedHalfWidth,
+    halfWidth: late?.halfWidth ?? rampedHalfWidth,
     perfectHalfWidth: PERFECT_HALF_WIDTH
   };
 }
 
 /** One full left-right-left sweep duration for the given combo step. */
 export function sweepPeriodMs(step: number): number {
-  if (isRoundhouseStep(step)) return ROUNDHOUSE_PERIOD_MS;
+  const late = lateComboWindow(step);
+  if (late) return late.periodMs;
   return Math.max(SWEEP_MIN_MS, SWEEP_START_MS - step * SWEEP_SPEEDUP_PER_STEP_MS);
 }
 

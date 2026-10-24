@@ -1,6 +1,5 @@
-import { useId, type PointerEvent } from 'react';
+import { useId } from 'react';
 import type { StrikeGrade } from './strikeCombo';
-import { hobbyFocusRing } from '../shared/hobbyStyles';
 import '../shared/hobbyMotion.css';
 
 const INK = '#1a1a1a';
@@ -12,31 +11,19 @@ const SWING_CLASS: Record<StrikeGrade, string> = {
 };
 
 interface HeavyBagProps {
-  label: string;
   /** Decorative lettering printed on the bag. */
   print: string;
   /** Changes on every strike so the swing animation replays. */
   hitId: number;
   grade: StrikeGrade | null;
-  onStrike: () => void;
 }
 
-/** Hanging heavy bag; swings harder for perfect hits. Struck on pointer down for tight timing. */
-export function HeavyBag({ label, print, hitId, grade, onStrike }: HeavyBagProps) {
+/** Hanging heavy bag; swings harder for perfect hits. The overlay owns the tap target. */
+export function HeavyBag({ print, hitId, grade }: HeavyBagProps) {
   const hatchId = useId();
-  const handlePointerDown = (event: PointerEvent<HTMLButtonElement>) => {
-    if (event.button !== 0) return;
-    event.preventDefault();
-    onStrike();
-  };
 
   return (
-    <button
-      type="button"
-      aria-label={label}
-      onPointerDown={handlePointerDown}
-      className={`relative h-[190px] w-[150px] cursor-pointer touch-manipulation select-none rounded-lg ${hobbyFocusRing}`}
-    >
+    <div className="relative h-[190px] w-[150px] select-none" aria-hidden="true">
       <svg viewBox="0 0 160 200" className="h-full w-full overflow-visible" aria-hidden="true">
         <defs>
           <pattern id={hatchId} width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)">
@@ -56,6 +43,6 @@ export function HeavyBag({ label, print, hitId, grade, onStrike }: HeavyBagProps
           </text>
         </g>
       </svg>
-    </button>
+    </div>
   );
 }

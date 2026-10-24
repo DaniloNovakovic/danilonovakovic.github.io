@@ -36,7 +36,7 @@ export function TimingBar({ label, zone, markerRef }: TimingBarProps) {
   const zoneLeft = (zone.center - zone.halfWidth) * 100;
   const perfectLeft = (zone.center - zone.perfectHalfWidth) * 100;
   return (
-    <div role="img" aria-label={label} className="relative mx-2 h-9 rounded-sm border-[3px] border-[#1a1a1a] bg-[#fbfbf9]">
+    <div role="img" aria-label={label} className="relative mx-2 h-12 rounded-sm border-[3px] border-[#1a1a1a] bg-[#fbfbf9]">
       <div
         className="hobby-hatch absolute inset-y-0 border-x-2 border-[#1a1a1a]"
         style={{ left: `${zoneLeft}%`, width: `${zone.halfWidth * 200}%` }}

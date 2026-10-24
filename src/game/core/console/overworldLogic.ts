@@ -40,7 +40,7 @@ const BANANA_CANCEL_EXTRA = 40;
 
 const SIGNPOST_MESSAGES: Record<OverworldProgressStage, string> = {
   'find-glasses':
-    'The sign is a blur. A chick is pacing just past Experiences. A TODO? hatch is also open near the start of the street.',
+    'The sign is a blur. A chick is pacing just past Experiences.',
   'wear-glasses': 'Put your glasses back on. The street hides things from blurry eyes. The chick will bolt.',
   'find-peel': 'Something slippery lies on the sidewalk just past the Abilities shelf.',
   'win-circuit':
