@@ -29,7 +29,7 @@ const STAMPEDE_MOD_IDS = [
   'glassesSide'
 ] as const;
 
-export const STAMPEDE_SURVIVAL_IDS = ['catchBreath', 'spareFeather', 'shell'] as const;
+const STAMPEDE_SURVIVAL_IDS = ['catchBreath', 'spareFeather', 'shell'] as const;
 
 export type StampedeWeaponId = (typeof STAMPEDE_WEAPON_IDS)[number];
 export type StampedeModId = (typeof STAMPEDE_MOD_IDS)[number];

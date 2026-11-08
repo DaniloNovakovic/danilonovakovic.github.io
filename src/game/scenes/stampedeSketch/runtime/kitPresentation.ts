@@ -67,6 +67,11 @@ function drawStink(
   graphics.strokePath();
 }
 
+const BREATH_PULSE = {
+  linger: { waveMs: 220, driftMs: 340, bobMs: 420, drift: 6, bob: 5 },
+  burst: { waveMs: 160, driftMs: 280, bobMs: 240, drift: 2.5, bob: 3.5 }
+} as const;
+
 function drawBreathBubble(
   graphics: Phaser.GameObjects.Graphics,
   point: { x: number; y: number; untilMs?: number },
@@ -74,9 +79,10 @@ function drawBreathBubble(
   nowMs: number,
   linger: boolean
 ): void {
-  const wave = Math.sin(nowMs / (linger ? 220 : 160) + index * 1.4);
-  const drift = Math.sin(nowMs / (linger ? 340 : 280) + index) * (linger ? 6 : 2.5);
-  const bob = Math.cos(nowMs / (linger ? 420 : 240) + index * 0.8) * (linger ? 5 : 3.5);
+  const pulse = linger ? BREATH_PULSE.linger : BREATH_PULSE.burst;
+  const wave = Math.sin(nowMs / pulse.waveMs + index * 1.4);
+  const drift = Math.sin(nowMs / pulse.driftMs + index) * pulse.drift;
+  const bob = Math.cos(nowMs / pulse.bobMs + index * 0.8) * pulse.bob;
   const radiusBase = linger ? 6 : 7 + (index % 3) * 2;
   const life = linger
     ? Math.max(0, Math.min(1, ((point.untilMs ?? nowMs) - nowMs) / 1_100))

@@ -219,48 +219,67 @@ export function applyStampedeUpgradeChoice(
   upgradeId: StampedeUpgradeId,
   nowMs = 0
 ): StampedeProgressionState {
-  let appliedUpgradeIds = state.appliedUpgradeIds;
-  let upgradedWeaponIds = state.upgradedWeaponIds;
-  let bonusHearts = state.bonusHearts;
-
   if (upgradeId === 'spareFeather') {
-    bonusHearts = Math.min(STAMPEDE_BONUS_HEART_CAP, bonusHearts + 1);
-  } else if (upgradeId === 'shell') {
-    if (!appliedUpgradeIds.includes('shell')) {
-      appliedUpgradeIds = [...appliedUpgradeIds, 'shell'];
-    }
-  } else if (upgradeId === 'catchBreath') {
-    // Healing happens on the session. This card can come back.
-  } else if (isStampedeModId(upgradeId)) {
-    if (!appliedUpgradeIds.includes(upgradeId)) {
-      appliedUpgradeIds = [...appliedUpgradeIds, upgradeId];
-    }
-  } else if (isStampedeWeaponId(upgradeId)) {
-    const rank = state.upgradedWeaponIds.includes(upgradeId)
-      ? 2
-      : state.appliedUpgradeIds.includes(upgradeId)
-        ? 1
-        : 0;
-    if (rank >= 2) {
-      return { ...state, upgradeDraftStatus: 'none' };
-    }
-    if (rank === 0) {
-      appliedUpgradeIds = [...appliedUpgradeIds, upgradeId];
-    } else {
-      upgradedWeaponIds = [...upgradedWeaponIds, upgradeId];
-    }
-  } else if (!appliedUpgradeIds.includes(upgradeId)) {
-    appliedUpgradeIds = [...appliedUpgradeIds, upgradeId];
+    return finishStampedeDraft(state, nowMs, {
+      bonusHearts: Math.min(STAMPEDE_BONUS_HEART_CAP, state.bonusHearts + 1)
+    });
   }
 
+  if (upgradeId === 'shell' || isStampedeModId(upgradeId)) {
+    return finishStampedeDraft(state, nowMs, {
+      appliedUpgradeIds: appendUpgradeId(state.appliedUpgradeIds, upgradeId)
+    });
+  }
+
+  // Healing happens on the session. This card can come back.
+  if (upgradeId === 'catchBreath') return finishStampedeDraft(state, nowMs);
+  if (isStampedeWeaponId(upgradeId)) return applyStampedeWeaponChoice(state, upgradeId, nowMs);
+
+  return finishStampedeDraft(state, nowMs, {
+    appliedUpgradeIds: appendUpgradeId(state.appliedUpgradeIds, upgradeId)
+  });
+}
+
+function applyStampedeWeaponChoice(
+  state: StampedeProgressionState,
+  upgradeId: StampedeWeaponId,
+  nowMs: number
+): StampedeProgressionState {
+  if (state.upgradedWeaponIds.includes(upgradeId)) {
+    return { ...state, upgradeDraftStatus: 'none' };
+  }
+
+  if (state.appliedUpgradeIds.includes(upgradeId)) {
+    return finishStampedeDraft(state, nowMs, {
+      upgradedWeaponIds: [...state.upgradedWeaponIds, upgradeId]
+    });
+  }
+
+  return finishStampedeDraft(state, nowMs, {
+    appliedUpgradeIds: [...state.appliedUpgradeIds, upgradeId]
+  });
+}
+
+function appendUpgradeId(
+  appliedUpgradeIds: readonly StampedeUpgradeId[],
+  upgradeId: StampedeUpgradeId
+): readonly StampedeUpgradeId[] {
+  return appliedUpgradeIds.includes(upgradeId)
+    ? appliedUpgradeIds
+    : [...appliedUpgradeIds, upgradeId];
+}
+
+function finishStampedeDraft(
+  state: StampedeProgressionState,
+  nowMs: number,
+  patch: Partial<Pick<StampedeProgressionState, 'appliedUpgradeIds' | 'upgradedWeaponIds' | 'bonusHearts'>> = {}
+): StampedeProgressionState {
   const draftsTaken = state.draftsTaken + 1;
   return {
     ...state,
+    ...patch,
     upgradeDraftStatus: 'none',
     scrapGoal: nextStampedeScrapGoal(draftsTaken),
-    appliedUpgradeIds,
-    upgradedWeaponIds,
-    bonusHearts,
     draftsTaken,
     nextDraftAtMs: nowMs + STAMPEDE_DRAFT_GAP_MS
   };

@@ -141,11 +141,13 @@ export function resolveStampedeRunFrame({
     candidates: pressureCandidates,
     lastContactAtMs: advancedSession.lastContactAtMs
   });
-  const shellReady = shellOwned && advancedSession.elapsedMs >= shellReadyAtMs;
-  const shellBlocked = pressure.canContact && shellReady;
-  const nextSession = pressure.canContact && !shellBlocked
-    ? resolveStampedeContact(advancedSession, advancedSession.elapsedMs, { contactLimit })
-    : advancedSession;
+  const { session: nextSession, shellBlocked } = resolveShellContact({
+    session: advancedSession,
+    pressure,
+    shellOwned,
+    shellReadyAtMs,
+    contactLimit
+  });
 
   if (nextSession.phase !== 'playing') {
     return {
@@ -178,6 +180,29 @@ export function resolveStampedeRunFrame({
       mode: pressure.band,
       pressure: pressure.pressure
     }
+  };
+}
+
+function resolveShellContact({
+  session,
+  pressure,
+  shellOwned,
+  shellReadyAtMs,
+  contactLimit
+}: {
+  session: StampedeSession;
+  pressure: StampedePressureSnapshot;
+  shellOwned: boolean;
+  shellReadyAtMs: number;
+  contactLimit?: number;
+}): { session: StampedeSession; shellBlocked: boolean } {
+  const shellReady = shellOwned && session.elapsedMs >= shellReadyAtMs;
+  const shellBlocked = pressure.canContact && shellReady;
+  return {
+    shellBlocked,
+    session: pressure.canContact && !shellBlocked
+      ? resolveStampedeContact(session, session.elapsedMs, { contactLimit })
+      : session
   };
 }
 
