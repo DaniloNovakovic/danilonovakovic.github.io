@@ -1,5 +1,8 @@
 export const STAMPEDE_SESSION_DURATION_MS = 150_000;
 export const STAMPEDE_CONTACT_LIMIT = 5;
+export const STAMPEDE_BONUS_HEART_CAP = 2;
+export const STAMPEDE_SHELL_RECHARGE_MS = 8_000;
+export const STAMPEDE_CLUTCH_HEART_CHANCE = 0.5;
 
 const STAMPEDE_RECENT_CONTACT_MS = 600;
 
@@ -53,6 +56,20 @@ export function advanceStampedeSession(
     phase,
     elapsedMs,
     recentContact: isRecentContact(session.lastContactAtMs, elapsedMs)
+  };
+}
+
+export function stampedeContactLimit(bonusHearts = 0): number {
+  const extra = Math.max(0, Math.min(STAMPEDE_BONUS_HEART_CAP, Math.floor(bonusHearts)));
+  return STAMPEDE_CONTACT_LIMIT + extra;
+}
+
+export function recoverStampedeContact(session: StampedeSession): StampedeSession {
+  if (session.phase !== 'playing' || session.contacts <= 0) return session;
+  return {
+    ...session,
+    contacts: session.contacts - 1,
+    recentContact: false
   };
 }
 

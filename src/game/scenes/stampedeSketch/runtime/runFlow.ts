@@ -35,6 +35,9 @@ export interface StampedeRunFrameInput {
   player: StampedePressurePoint;
   contactCandidates: readonly StampedeRunContactCandidate[];
   ignoredContactIds?: readonly string[];
+  contactLimit?: number;
+  shellOwned?: boolean;
+  shellReadyAtMs?: number;
 }
 
 export interface StampedeRunSwarmFrame {
@@ -72,6 +75,7 @@ export type StampedeRunFrame =
     pressure: StampedePressureSnapshot;
     contactCandidate: StampedeContactCandidate | null;
     attack?: StampedeAutoAttackEvent | null;
+    shellBlocked?: boolean;
     swarm: StampedeRunSwarmFrame;
   };
 
@@ -84,7 +88,10 @@ export function resolveStampedeRunFrame({
   velocity,
   player,
   contactCandidates,
-  ignoredContactIds = []
+  ignoredContactIds = [],
+  contactLimit,
+  shellOwned = false,
+  shellReadyAtMs = 0
 }: StampedeRunFrameInput): StampedeRunFrame {
   if (closeRequested) {
     return {
@@ -134,8 +141,10 @@ export function resolveStampedeRunFrame({
     candidates: pressureCandidates,
     lastContactAtMs: advancedSession.lastContactAtMs
   });
-  const nextSession = pressure.canContact
-    ? resolveStampedeContact(advancedSession, advancedSession.elapsedMs)
+  const shellReady = shellOwned && advancedSession.elapsedMs >= shellReadyAtMs;
+  const shellBlocked = pressure.canContact && shellReady;
+  const nextSession = pressure.canContact && !shellBlocked
+    ? resolveStampedeContact(advancedSession, advancedSession.elapsedMs, { contactLimit })
     : advancedSession;
 
   if (nextSession.phase !== 'playing') {
@@ -164,6 +173,7 @@ export function resolveStampedeRunFrame({
     pressure,
     contactCandidate: pressure.canContact ? pressure.nearestContactCandidate : null,
     attack: autoAttackFrame?.attack ?? null,
+    shellBlocked,
     swarm: {
       mode: pressure.band,
       pressure: pressure.pressure

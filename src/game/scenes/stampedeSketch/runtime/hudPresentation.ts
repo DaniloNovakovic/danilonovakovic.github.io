@@ -1,7 +1,7 @@
 import type { StampedePressureSnapshot } from './pressure';
 import type { StampedeProgressionState } from './progression';
 import {
-  STAMPEDE_CONTACT_LIMIT,
+  stampedeContactLimit,
   type StampedeSessionSnapshot
 } from './session';
 
@@ -29,6 +29,7 @@ export function createStampedeHudSnapshot(
   progression?: StampedeProgressionState
 ): StampedeHudSnapshot {
   const remainingMs = Math.max(0, session.durationMs - session.elapsedMs);
+  const contactLimit = stampedeContactLimit(progression?.bonusHearts ?? 0);
 
   return {
     timeRemainingSeconds: remainingMs / 1000,
@@ -36,8 +37,8 @@ export function createStampedeHudSnapshot(
     phaseLabel: resolvePhaseLabel(session, pressure),
     feedback: resolveHudFeedback(session),
     contacts: session.contacts,
-    contactLimit: STAMPEDE_CONTACT_LIMIT,
-    healthRemaining: Math.max(0, STAMPEDE_CONTACT_LIMIT - session.contacts),
+    contactLimit,
+    healthRemaining: Math.max(0, contactLimit - session.contacts),
     scrapsCollected: progression?.scrapsCollected,
     scrapGoal: progression?.scrapGoal
   };

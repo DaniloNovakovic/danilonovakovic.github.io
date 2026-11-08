@@ -29,16 +29,20 @@ const STAMPEDE_MOD_IDS = [
   'glassesSide'
 ] as const;
 
+export const STAMPEDE_SURVIVAL_IDS = ['catchBreath', 'spareFeather', 'shell'] as const;
+
 export type StampedeWeaponId = (typeof STAMPEDE_WEAPON_IDS)[number];
 export type StampedeModId = (typeof STAMPEDE_MOD_IDS)[number];
-export type StampedeWeaponAction = 'unlock' | 'upgrade';
+export type StampedeSurvivalId = (typeof STAMPEDE_SURVIVAL_IDS)[number];
+export type StampedeWeaponAction = 'unlock' | 'upgrade' | 'survive';
 
 const STAMPEDE_UPGRADE_IDS = [
   'quickPencil',
   'wideSwipe',
   'swiftGuardian',
   ...STAMPEDE_WEAPON_IDS,
-  ...STAMPEDE_MOD_IDS
+  ...STAMPEDE_MOD_IDS,
+  ...STAMPEDE_SURVIVAL_IDS
 ] as const;
 
 export type StampedeUpgradeId = (typeof STAMPEDE_UPGRADE_IDS)[number];
@@ -152,11 +156,24 @@ export function getStampedeStartingWeaponChoices(
     .map((id) => weaponChoice(id, 'unlock'));
 }
 
+export interface StampedeSurvivalOffer {
+  healthRemaining: number;
+  contactLimit: number;
+  bonusHearts: number;
+  shellOwned: boolean;
+}
+
 export function getStampedeUpgradeChoices(
   ownedUpgradeIds: readonly string[] = [],
   upgradedWeaponIds: readonly string[] = [],
   random: () => number = Math.random,
-  draftsTaken = 0
+  draftsTaken = 0,
+  survival: StampedeSurvivalOffer = {
+    healthRemaining: 5,
+    contactLimit: 5,
+    bonusHearts: 0,
+    shellOwned: false
+  }
 ): readonly StampedeUpgradeChoiceView[] {
   void upgradedWeaponIds;
   const mods = STAMPEDE_WEAPON_IDS.flatMap((weaponId) => (
@@ -182,9 +199,15 @@ export function getStampedeUpgradeChoices(
       picked.push(weaponId);
     });
   }
-  return picked.slice(0, STAMPEDE_CHOICE_CAP).map((id) => (
+  const views = picked.slice(0, STAMPEDE_CHOICE_CAP).map((id) => (
     isStampedeModId(id) ? modChoice(id) : weaponChoice(id, 'unlock')
   ));
+  const stay = STAMPEDE_WEAPON_IDS.some((id) => ownedUpgradeIds.includes(id))
+    ? survivalChoice(survival)
+    : null;
+  if (!stay) return views;
+  if (views.length >= STAMPEDE_CHOICE_CAP) return [...views.slice(0, STAMPEDE_CHOICE_CAP - 1), stay];
+  return [...views, stay];
 }
 
 export function getStampedeWeaponRank(
@@ -203,7 +226,7 @@ export function formatStampedeKitLabel(
 ): string {
   const owned = STAMPEDE_WEAPON_IDS.filter((id) => ownedUpgradeIds.includes(id));
   if (owned.length === 0) return 'Unarmed';
-  return owned
+  const label = owned
     .map((id) => {
       const title = weaponChoice(id, 'unlock').title;
       const twisted = upgradedWeaponIds.includes(id)
@@ -211,6 +234,7 @@ export function formatStampedeKitLabel(
       return twisted ? `${title} +` : title;
     })
     .join(' · ');
+  return ownedUpgradeIds.includes('shell') ? `${label} · Shell` : label;
 }
 
 export function resolveOwnedSpells(upgrades: readonly string[]): StampedeSpellId[] {
@@ -266,6 +290,38 @@ export function resolveStampedeGuardianSpeed(
   return upgrades.includes('swiftGuardian')
     ? STAMPEDE_PLAYER_SPEED + STAMPEDE_SWIFT_GUARDIAN_SPEED_BONUS
     : STAMPEDE_PLAYER_SPEED;
+}
+
+function survivalChoice(offer: StampedeSurvivalOffer): StampedeUpgradeChoiceView | null {
+  const hurt = offer.healthRemaining <= 2 && offer.healthRemaining < offer.contactLimit;
+  const id: StampedeSurvivalId | null = hurt
+    ? 'catchBreath'
+    : !offer.shellOwned
+      ? 'shell'
+      : offer.bonusHearts < 2
+        ? 'spareFeather'
+        : offer.healthRemaining < offer.contactLimit
+          ? 'catchBreath'
+          : null;
+  if (!id) return null;
+  const copy = {
+    catchBreath: {
+      title: 'Catch Breath',
+      description: 'Heal one peck.',
+      color: '#b4533d'
+    },
+    spareFeather: {
+      title: 'Spare Feather',
+      description: 'Room for one more peck.',
+      color: '#9f1239'
+    },
+    shell: {
+      title: 'Little Shell',
+      description: 'A hollow ring circles you and catches the next peck, then needs a moment.',
+      color: '#1a1a1a'
+    }
+  }[id];
+  return { id, ...copy, action: 'survive' };
 }
 
 function modChoice(id: StampedeModId): StampedeUpgradeChoiceView {

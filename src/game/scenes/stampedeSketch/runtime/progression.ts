@@ -1,3 +1,8 @@
+import { clampStampedePosition } from './movement';
+import {
+  STAMPEDE_BONUS_HEART_CAP,
+  STAMPEDE_CLUTCH_HEART_CHANCE
+} from './session';
 import {
   isStampedeModId,
   isStampedeWeaponId,
@@ -28,6 +33,7 @@ export interface StampedePickup {
   y: number;
   radius: number;
   value: number;
+  kind?: 'scrap' | 'heart';
 }
 
 export type StampedeUpgradeDraftStatus = 'none' | 'pending' | 'chosen';
@@ -40,6 +46,7 @@ export interface StampedeProgressionState {
   upgradeDraftStatus: StampedeUpgradeDraftStatus;
   appliedUpgradeIds: readonly StampedeUpgradeId[];
   upgradedWeaponIds: readonly StampedeWeaponId[];
+  bonusHearts: number;
   draftsTaken: number;
   nextDraftAtMs: number;
 }
@@ -47,6 +54,7 @@ export interface StampedeProgressionState {
 export interface StampedePickupCollectionFrame {
   state: StampedeProgressionState;
   collected: readonly StampedePickup[];
+  heartsCollected: number;
 }
 
 export function createStampedeProgressionState(
@@ -60,6 +68,7 @@ export function createStampedeProgressionState(
     upgradeDraftStatus: options.upgradeDraftStatus ?? 'none',
     appliedUpgradeIds: options.appliedUpgradeIds ?? [],
     upgradedWeaponIds: options.upgradedWeaponIds ?? [],
+    bonusHearts: options.bonusHearts ?? 0,
     draftsTaken: options.draftsTaken ?? 0,
     nextDraftAtMs: options.nextDraftAtMs ?? STAMPEDE_DRAFT_GAP_MS
   };
@@ -115,11 +124,14 @@ export function collectStampedePickups(
   });
 
   if (collected.length === 0) {
-    return { state, collected };
+    return { state, collected, heartsCollected: 0 };
   }
 
+  const heartsCollected = collected.filter((pickup) => pickup.kind === 'heart').length;
   const scrapsCollected = state.scrapsCollected +
-    collected.reduce((total, pickup) => total + pickup.value, 0);
+    collected.reduce((total, pickup) => (
+      total + (pickup.kind === 'heart' ? 0 : pickup.value)
+    ), 0);
   const clockReady = options.elapsedMs === undefined || options.elapsedMs >= state.nextDraftAtMs;
   const upgradeDraftStatus =
     state.upgradeDraftStatus === 'none' &&
@@ -136,7 +148,38 @@ export function collectStampedePickups(
       scrapsCollected,
       upgradeDraftStatus
     },
-    collected
+    collected,
+    heartsCollected
+  };
+}
+
+export function offerClutchHeart(random: () => number = Math.random): boolean {
+  return random() < STAMPEDE_CLUTCH_HEART_CHANCE;
+}
+
+export function spawnStampedeHeartPickup(
+  state: StampedeProgressionState,
+  player: { x: number; y: number },
+  random: () => number = Math.random
+): StampedeProgressionState {
+  const angle = random() * Math.PI * 2;
+  const point = clampStampedePosition({
+    x: player.x + Math.cos(angle) * 170,
+    y: player.y + Math.sin(angle) * 120
+  });
+  const pickup: StampedePickup = {
+    id: `heart-${state.nextPickupIndex}`,
+    sourceId: 'clutch',
+    x: point.x,
+    y: point.y,
+    radius: 12,
+    value: 0,
+    kind: 'heart'
+  };
+  return {
+    ...state,
+    pickups: [...state.pickups, pickup],
+    nextPickupIndex: state.nextPickupIndex + 1
   };
 }
 
@@ -178,8 +221,17 @@ export function applyStampedeUpgradeChoice(
 ): StampedeProgressionState {
   let appliedUpgradeIds = state.appliedUpgradeIds;
   let upgradedWeaponIds = state.upgradedWeaponIds;
+  let bonusHearts = state.bonusHearts;
 
-  if (isStampedeModId(upgradeId)) {
+  if (upgradeId === 'spareFeather') {
+    bonusHearts = Math.min(STAMPEDE_BONUS_HEART_CAP, bonusHearts + 1);
+  } else if (upgradeId === 'shell') {
+    if (!appliedUpgradeIds.includes('shell')) {
+      appliedUpgradeIds = [...appliedUpgradeIds, 'shell'];
+    }
+  } else if (upgradeId === 'catchBreath') {
+    // Healing happens on the session. This card can come back.
+  } else if (isStampedeModId(upgradeId)) {
     if (!appliedUpgradeIds.includes(upgradeId)) {
       appliedUpgradeIds = [...appliedUpgradeIds, upgradeId];
     }
@@ -208,6 +260,7 @@ export function applyStampedeUpgradeChoice(
     scrapGoal: nextStampedeScrapGoal(draftsTaken),
     appliedUpgradeIds,
     upgradedWeaponIds,
+    bonusHearts,
     draftsTaken,
     nextDraftAtMs: nowMs + STAMPEDE_DRAFT_GAP_MS
   };

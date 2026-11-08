@@ -42,12 +42,16 @@ class PhaserStampedePickupRuntime implements StampedePickupRuntime {
       }
 
       const shape = this.scene.add.graphics().setPosition(pickup.x, pickup.y).setDepth(24);
-      const width = Math.max(8, pickup.radius * 2.4);
-      const height = Math.max(6, pickup.radius * 1.5);
-      shape.fillStyle(0xfacc15, 0.95);
-      shape.fillEllipse(0, 0, width, height);
-      shape.lineStyle(2, 0x1a1a1a, 0.9);
-      shape.strokeEllipse(0, 0, width, height);
+      if (pickup.kind === 'heart') {
+        drawHeart(shape);
+      } else {
+        const width = Math.max(8, pickup.radius * 2.4);
+        const height = Math.max(6, pickup.radius * 1.5);
+        shape.fillStyle(0xfacc15, 0.95);
+        shape.fillEllipse(0, 0, width, height);
+        shape.lineStyle(2, 0x1a1a1a, 0.9);
+        shape.strokeEllipse(0, 0, width, height);
+      }
 
       this.scene.tweens.add({
         targets: shape,
@@ -69,4 +73,15 @@ class PhaserStampedePickupRuntime implements StampedePickupRuntime {
     });
     this.shapes.clear();
   }
+}
+
+function drawHeart(shape: Phaser.GameObjects.Graphics): void {
+  shape.fillStyle(0xb4533d, 1);
+  shape.fillCircle(-4, -2, 5);
+  shape.fillCircle(4, -2, 5);
+  shape.fillTriangle(-9, -1, 9, -1, 0, 10);
+  shape.lineStyle(2, 0x1a1a1a, 1);
+  shape.strokeCircle(-4, -2, 5);
+  shape.strokeCircle(4, -2, 5);
+  shape.strokeTriangle(-9, -1, 9, -1, 0, 10);
 }

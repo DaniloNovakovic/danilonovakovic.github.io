@@ -329,7 +329,7 @@ export const sceneMessages = {
     start: {
       title: "Ooh. Irresistible.",
       body: "Don't make eye contact. It only encourages them.",
-      hint: "Pick one weapon. It fires on its own. Scraps mostly twist how it feels. A new weapon is rarer.",
+      hint: "Pick one weapon. It fires on its own. Scraps mostly twist how it feels. Sometimes they let you stay standing.",
     },
     result: {
       eyebrow: {

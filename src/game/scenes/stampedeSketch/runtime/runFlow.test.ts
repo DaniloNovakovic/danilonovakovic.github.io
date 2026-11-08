@@ -298,4 +298,27 @@ describe('stampede run flow', () => {
     expect(frame.phase).toBe('failed');
     expect(frame.attack).toBeNull();
   });
+
+  it('lets a ready shell catch a peck, including the last one', () => {
+    let session = createStampedeSession();
+    for (let index = 0; index < STAMPEDE_CONTACT_LIMIT - 1; index += 1) {
+      session = resolveStampedeContact(session, index * 1_000);
+    }
+
+    const blocked = resolveStampedeRunFrame({
+      session,
+      deltaMs: 2_500,
+      closeRequested: false,
+      velocity: baseVelocity,
+      player: basePlayer,
+      contactCandidates: [{ ...basePlayer, radius: 10 }],
+      shellOwned: true
+    });
+
+    expect(blocked.kind).toBe('playing');
+    if (blocked.kind !== 'playing') return;
+    expect(blocked.shellBlocked).toBe(true);
+    expect(blocked.session.contacts).toBe(STAMPEDE_CONTACT_LIMIT - 1);
+    expect(blocked.session.phase).toBe('playing');
+  });
 });

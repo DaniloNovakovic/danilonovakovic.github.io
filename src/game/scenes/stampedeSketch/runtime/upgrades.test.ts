@@ -27,11 +27,19 @@ describe('stampede upgrades', () => {
     }))).toEqual([
       { id: 'selfieGroup', action: 'upgrade' },
       { id: 'selfiePose', action: 'upgrade' },
-      { id: 'selfieRear', action: 'upgrade' }
+      { id: 'shell', action: 'survive' }
     ]);
 
+    const hurt = getStampedeUpgradeChoices(['badSelfie'], [], steady, 0, {
+      healthRemaining: 1,
+      contactLimit: 5,
+      bonusHearts: 0,
+      shellOwned: false
+    });
+    expect(hurt.at(-1)?.id).toBe('catchBreath');
+
     const early = getStampedeUpgradeChoices(['badSelfie'], [], () => 0, 0);
-    expect(early.every((choice) => choice.action === 'upgrade')).toBe(true);
+    expect(early.every((choice) => choice.action !== 'unlock')).toBe(true);
 
     const withUnlock = getStampedeUpgradeChoices(['badSelfie'], [], () => 0, 2);
     expect(withUnlock).toHaveLength(3);
