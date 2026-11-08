@@ -35,6 +35,9 @@ export interface StampedeRunFrameInput {
   player: StampedePressurePoint;
   contactCandidates: readonly StampedeRunContactCandidate[];
   ignoredContactIds?: readonly string[];
+  contactLimit?: number;
+  shellOwned?: boolean;
+  shellReadyAtMs?: number;
 }
 
 export interface StampedeRunSwarmFrame {
@@ -72,6 +75,7 @@ export type StampedeRunFrame =
     pressure: StampedePressureSnapshot;
     contactCandidate: StampedeContactCandidate | null;
     attack?: StampedeAutoAttackEvent | null;
+    shellBlocked?: boolean;
     swarm: StampedeRunSwarmFrame;
   };
 
@@ -84,7 +88,10 @@ export function resolveStampedeRunFrame({
   velocity,
   player,
   contactCandidates,
-  ignoredContactIds = []
+  ignoredContactIds = [],
+  contactLimit,
+  shellOwned = false,
+  shellReadyAtMs = 0
 }: StampedeRunFrameInput): StampedeRunFrame {
   if (closeRequested) {
     return {
@@ -134,9 +141,13 @@ export function resolveStampedeRunFrame({
     candidates: pressureCandidates,
     lastContactAtMs: advancedSession.lastContactAtMs
   });
-  const nextSession = pressure.canContact
-    ? resolveStampedeContact(advancedSession, advancedSession.elapsedMs)
-    : advancedSession;
+  const { session: nextSession, shellBlocked } = resolveShellContact({
+    session: advancedSession,
+    pressure,
+    shellOwned,
+    shellReadyAtMs,
+    contactLimit
+  });
 
   if (nextSession.phase !== 'playing') {
     return {
@@ -164,10 +175,45 @@ export function resolveStampedeRunFrame({
     pressure,
     contactCandidate: pressure.canContact ? pressure.nearestContactCandidate : null,
     attack: autoAttackFrame?.attack ?? null,
+    shellBlocked,
     swarm: {
       mode: pressure.band,
       pressure: pressure.pressure
     }
+  };
+}
+
+function resolveShellContact({
+  session,
+  pressure,
+  shellOwned,
+  shellReadyAtMs,
+  contactLimit
+}: {
+  session: StampedeSession;
+  pressure: StampedePressureSnapshot;
+  shellOwned: boolean;
+  shellReadyAtMs: number;
+  contactLimit?: number;
+}): { session: StampedeSession; shellBlocked: boolean } {
+  const shellReady = shellOwned && session.elapsedMs >= shellReadyAtMs;
+  const shellBlocked = pressure.canContact && shellReady;
+  if (shellBlocked) {
+    return {
+      shellBlocked: true,
+      session: {
+        ...session,
+        lastContactAtMs: session.elapsedMs,
+        recentContact: true
+      }
+    };
+  }
+
+  return {
+    shellBlocked: false,
+    session: pressure.canContact
+      ? resolveStampedeContact(session, session.elapsedMs, { contactLimit })
+      : session
   };
 }
 

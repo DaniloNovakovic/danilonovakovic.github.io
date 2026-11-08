@@ -5,7 +5,9 @@ import {
   advanceStampedeSession,
   createStampedeSession,
   readStampedeSessionSnapshot,
-  resolveStampedeContact
+  recoverStampedeContact,
+  resolveStampedeContact,
+  stampedeContactLimit
 } from './session';
 
 describe('stampede session', () => {
@@ -67,5 +69,12 @@ describe('stampede session', () => {
 
     expect(readStampedeSessionSnapshot(session)).toEqual(session);
     expect(readStampedeSessionSnapshot(session)).not.toBe(session);
+  });
+
+  it('heals one peck and caps spare hearts at two', () => {
+    const pecked = resolveStampedeContact(createStampedeSession(), 100);
+    expect(recoverStampedeContact(pecked).contacts).toBe(0);
+    expect(stampedeContactLimit(2)).toBe(STAMPEDE_CONTACT_LIMIT + 2);
+    expect(stampedeContactLimit(9)).toBe(STAMPEDE_CONTACT_LIMIT + 2);
   });
 });

@@ -63,7 +63,9 @@ import {
   collectStampedePickups,
   createStampedeProgressionState,
   grantStampedeStartingWeapon,
+  offerClutchHeart,
   openStampedeDraftIfReady,
+  spawnStampedeHeartPickup,
   spawnStampedePickupsFromClearedMarks,
   type StampedeProgressionState
 } from './progression';
@@ -84,6 +86,9 @@ import { resolveStampedeSpellCast, type StampedeSpellId } from './spells';
 import {
   createStampedeSession,
   readStampedeSessionSnapshot,
+  recoverStampedeContact,
+  stampedeContactLimit,
+  STAMPEDE_SHELL_RECHARGE_MS,
   type StampedeSession,
   type StampedeSessionPhase
 } from './session';
@@ -134,6 +139,8 @@ export class StampedeSketchScene extends Phaser.Scene {
   private stinkState: StampedeOrbitHitState = createOrbitHitState();
   private stinkPoints: StampedeOrbitPoint[] = [];
   private disarmedUntilMs = 0;
+  private shellReadyAtMs = 0;
+  private clutchHeartOffered = false;
   private lastFacing = { x: 1, y: 0 };
   private onClose: () => void = () => {};
 
@@ -259,7 +266,10 @@ export class StampedeSketchScene extends Phaser.Scene {
       contactCandidates: swarmRuntime.getContactCandidates(),
       ignoredContactIds: disarmed
         ? []
-        : this.peekWeaponHitIds(weaponElapsedMs, delta, time)
+        : this.peekWeaponHitIds(weaponElapsedMs, delta, time),
+      contactLimit: stampedeContactLimit(this.progression.bonusHearts),
+      shellOwned: this.progression.appliedUpgradeIds.includes('shell'),
+      shellReadyAtMs: this.shellReadyAtMs
     });
 
     this.session = frame.session;
@@ -325,6 +335,7 @@ export class StampedeSketchScene extends Phaser.Scene {
       return;
     }
     this.showPlayingContact(frame);
+    this.maybeOfferClutchHeart();
     this.swarmRuntime.update(this.player, delta, {
       ...frame.swarm,
       elapsedMs: this.session.elapsedMs,
@@ -364,6 +375,10 @@ export class StampedeSketchScene extends Phaser.Scene {
   private showPlayingContact(
     frame: Extract<ReturnType<typeof resolveStampedeRunFrame>, { kind: 'playing' }>
   ): void {
+    if (frame.shellBlocked) {
+      this.shellReadyAtMs = this.session.elapsedMs + STAMPEDE_SHELL_RECHARGE_MS;
+      return;
+    }
     if (!frame.contactCandidate || !this.player) return;
     this.feedbackRuntime?.showContact(this.player, frame.contactCandidate);
     this.updatePlayerContactRing(frame.pressure);
@@ -388,6 +403,8 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.spellCooldownReadyAt = {};
     this.clearContinuousWeapons();
     this.disarmedUntilMs = 0;
+    this.shellReadyAtMs = 0;
+    this.clutchHeartOffered = false;
     this.lastFacing = { x: 1, y: 0 };
   }
 
@@ -570,6 +587,9 @@ export class StampedeSketchScene extends Phaser.Scene {
     if (frame.collected.length === 0) return false;
 
     this.progression = frame.state;
+    for (let index = 0; index < frame.heartsCollected; index += 1) {
+      this.session = recoverStampedeContact(this.session);
+    }
     this.pickupRuntime?.sync(this.progression.pickups);
     this.updateHud(pressure);
 
@@ -672,6 +692,9 @@ export class StampedeSketchScene extends Phaser.Scene {
       upgradeId,
       this.session.elapsedMs
     );
+    if (upgradeId === 'catchBreath') {
+      this.session = recoverStampedeContact(this.session);
+    }
     const profile = resolveStampedeAutoAttackProfile(
       this.progression.appliedUpgradeIds,
       this.progression.upgradedWeaponIds
@@ -708,7 +731,13 @@ export class StampedeSketchScene extends Phaser.Scene {
       this.progression.appliedUpgradeIds,
       this.progression.upgradedWeaponIds,
       Math.random,
-      this.progression.draftsTaken
+      this.progression.draftsTaken,
+      {
+        healthRemaining: stampedeContactLimit(this.progression.bonusHearts) - this.session.contacts,
+        contactLimit: stampedeContactLimit(this.progression.bonusHearts),
+        bonusHearts: this.progression.bonusHearts,
+        shellOwned: this.progression.appliedUpgradeIds.includes('shell')
+      }
     );
     if (choices.length === 0) {
       this.progression = {
@@ -876,9 +905,12 @@ export class StampedeSketchScene extends Phaser.Scene {
       this.progression.upgradedWeaponIds,
       weapon
     );
+    const shellOwned = this.progression.appliedUpgradeIds.includes('shell');
+    const shellAngle = this.session.elapsedMs / 280;
     this.kitLook.sync({
       x: this.player.x,
       y: this.player.y,
+      nowMs: this.session.elapsedMs,
       disarmed: this.time.now < this.disarmedUntilMs,
       breathBubbles: this.breathBubbles,
       lingerBubbles: this.breathLinger,
@@ -886,8 +918,30 @@ export class StampedeSketchScene extends Phaser.Scene {
       stinkFat: this.progression.appliedUpgradeIds.includes('smellFat'),
       selfieRank: rank('badSelfie'),
       selfieRear: this.progression.appliedUpgradeIds.includes('selfieRear'),
-      glassesRank: rank('fakeGlasses')
+      glassesRank: rank('fakeGlasses'),
+      shell: shellOwned
+        ? {
+          x: this.player.x + Math.cos(shellAngle) * 50,
+          y: this.player.y + Math.sin(shellAngle) * 50,
+          ready: this.session.elapsedMs >= this.shellReadyAtMs
+        }
+        : null
     });
+  }
+
+  private maybeOfferClutchHeart(): void {
+    if (!this.player || this.session.phase !== 'playing') return;
+    const remaining = stampedeContactLimit(this.progression.bonusHearts) - this.session.contacts;
+    if (remaining > 1) {
+      this.clutchHeartOffered = false;
+      return;
+    }
+    if (remaining !== 1 || this.clutchHeartOffered) return;
+    this.clutchHeartOffered = true;
+    if (this.progression.pickups.some((pickup) => pickup.kind === 'heart')) return;
+    if (!offerClutchHeart()) return;
+    this.progression = spawnStampedeHeartPickup(this.progression, this.player);
+    this.pickupRuntime?.sync(this.progression.pickups);
   }
 
   private trackFacing(velocity: StampedeVelocity): void {

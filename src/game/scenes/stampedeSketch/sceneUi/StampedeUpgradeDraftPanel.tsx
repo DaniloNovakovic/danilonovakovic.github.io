@@ -35,7 +35,7 @@ export function StampedeUpgradeDraftPanel({ params, dispatchAction }: SceneUiSur
         Pick a weapon
       </h2>
       <p id={descriptionId} className="mx-auto mt-2 max-w-sm font-mono text-xs font-bold leading-snug text-[#4b4337] sm:text-sm">
-        Mostly a twist on a weapon you already have. A new weapon shows up less often.
+        Mostly a twist on a weapon you already have. Sometimes you can stay standing instead. A new weapon shows up less often.
       </p>
       <div className="mt-4 grid gap-3 sm:mt-5 sm:grid-cols-3 sm:gap-4">
         {view.choices.map((choice) => (
@@ -47,7 +47,7 @@ export function StampedeUpgradeDraftPanel({ params, dispatchAction }: SceneUiSur
             onClick={() => dispatchAction('stampedeUpgradeChoice', { upgradeId: choice.id })}
           >
             <span className="block text-center font-mono text-[10px] font-bold uppercase tracking-widest text-[#4b4337]">
-              {choice.action === 'upgrade' ? 'Twist' : 'New'}
+              {choice.action === 'upgrade' ? 'Twist' : choice.action === 'survive' ? 'Stay' : 'New'}
             </span>
             <span
               className="block text-center text-lg font-bold leading-tight sm:text-xl"

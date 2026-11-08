@@ -8,8 +8,10 @@ import {
   STAMPEDE_PLAYER_CONTACT_RADIUS,
   resolveStampedeRunFrame
 } from './runFlow';
+import { STAMPEDE_CONTACT_COOLDOWN_MS } from './pressure';
 import {
   STAMPEDE_CONTACT_LIMIT,
+  STAMPEDE_SHELL_RECHARGE_MS,
   createStampedeSession,
   resolveStampedeContact
 } from './session';
@@ -297,5 +299,69 @@ describe('stampede run flow', () => {
     if (frame.kind !== 'terminal') return;
     expect(frame.phase).toBe('failed');
     expect(frame.attack).toBeNull();
+  });
+
+  it('lets a ready shell catch a peck, including the last one', () => {
+    let session = createStampedeSession();
+    for (let index = 0; index < STAMPEDE_CONTACT_LIMIT - 1; index += 1) {
+      session = resolveStampedeContact(session, index * 1_000);
+    }
+
+    const blocked = resolveStampedeRunFrame({
+      session,
+      deltaMs: 2_500,
+      closeRequested: false,
+      velocity: baseVelocity,
+      player: basePlayer,
+      contactCandidates: [{ ...basePlayer, radius: 10 }],
+      shellOwned: true
+    });
+
+    expect(blocked.kind).toBe('playing');
+    if (blocked.kind !== 'playing') return;
+    expect(blocked.shellBlocked).toBe(true);
+    expect(blocked.session.contacts).toBe(STAMPEDE_CONTACT_LIMIT - 1);
+    expect(blocked.session.phase).toBe('playing');
+    expect(blocked.session.lastContactAtMs).toBe(blocked.session.elapsedMs);
+  });
+
+  it('keeps a chick inside the ring from pecking until contact cooldown ends', () => {
+    const blocked = runFrame({
+      session: sessionWithContacts(1),
+      deltaMs: 2_500,
+      contactCandidates: [{ ...basePlayer, radius: 10 }],
+      shellOwned: true
+    });
+
+    expect(blocked.kind).toBe('playing');
+    if (blocked.kind !== 'playing') return;
+    expect(blocked.shellBlocked).toBe(true);
+
+    const shellReadyAtMs = blocked.session.elapsedMs + STAMPEDE_SHELL_RECHARGE_MS;
+    const stillInside = runFrame({
+      session: blocked.session,
+      deltaMs: 200,
+      contactCandidates: [{ ...basePlayer, radius: 10 }],
+      shellOwned: true,
+      shellReadyAtMs
+    });
+
+    expect(stillInside.kind).toBe('playing');
+    if (stillInside.kind !== 'playing') return;
+    expect(stillInside.shellBlocked).toBe(false);
+    expect(stillInside.session.contacts).toBe(1);
+
+    const afterCooldown = runFrame({
+      session: stillInside.session,
+      deltaMs: STAMPEDE_CONTACT_COOLDOWN_MS,
+      contactCandidates: [{ ...basePlayer, radius: 10 }],
+      shellOwned: true,
+      shellReadyAtMs
+    });
+
+    expect(afterCooldown.kind).toBe('playing');
+    if (afterCooldown.kind !== 'playing') return;
+    expect(afterCooldown.shellBlocked).toBe(false);
+    expect(afterCooldown.session.contacts).toBe(2);
   });
 });

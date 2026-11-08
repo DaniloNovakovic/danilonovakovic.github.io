@@ -6,6 +6,7 @@ import {
   createStampedeProgressionState,
   grantStampedeStartingWeapon,
   openStampedeDraftIfReady,
+  spawnStampedeHeartPickup,
   spawnStampedePickupsFromClearedMarks
 } from './progression';
 
@@ -99,5 +100,30 @@ describe('stampede progression', () => {
     expect(early.state.scrapsCollected).toBe(1);
     expect(early.state.upgradeDraftStatus).toBe('none');
     expect(openStampedeDraftIfReady(early.state, 18_000).upgradeDraftStatus).toBe('pending');
+  });
+
+  it('lets a heart heal without counting as scraps', () => {
+    const started = spawnStampedeHeartPickup(
+      createStampedeProgressionState({ scrapsCollected: 3 }),
+      { x: 200, y: 200 },
+      () => 0
+    );
+    const frame = collectStampedePickups(started, { x: started.pickups[0]!.x, y: started.pickups[0]!.y });
+
+    expect(frame.heartsCollected).toBe(1);
+    expect(frame.state.scrapsCollected).toBe(3);
+    expect(frame.state.pickups).toHaveLength(0);
+  });
+
+  it('grows one spare heart and keeps catch breath from sticking', () => {
+    const feather = applyStampedeUpgradeChoice(
+      createStampedeProgressionState({ appliedUpgradeIds: ['badBreath'] }),
+      'spareFeather'
+    );
+    const again = applyStampedeUpgradeChoice(feather, 'catchBreath');
+
+    expect(feather.bonusHearts).toBe(1);
+    expect(again.bonusHearts).toBe(1);
+    expect(again.appliedUpgradeIds).toEqual(['badBreath']);
   });
 });

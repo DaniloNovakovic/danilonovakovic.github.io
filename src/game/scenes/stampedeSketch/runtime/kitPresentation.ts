@@ -3,14 +3,16 @@ import * as Phaser from 'phaser';
 export interface StampedeKitLookFrame {
   x: number;
   y: number;
+  nowMs: number;
   disarmed: boolean;
   breathBubbles: readonly { x: number; y: number }[];
-  lingerBubbles: readonly { x: number; y: number }[];
+  lingerBubbles: readonly { x: number; y: number; untilMs: number }[];
   stinkPoints: readonly { x: number; y: number }[];
   stinkFat: boolean;
   selfieRank: 0 | 1 | 2;
   selfieRear: boolean;
   glassesRank: 0 | 1 | 2;
+  shell: { x: number; y: number; ready: boolean } | null;
 }
 
 export interface StampedeKitLook {
@@ -29,15 +31,14 @@ export function createStampedeKitLook(scene: Phaser.Scene): StampedeKitLook {
     sync(frame) {
       graphics.clear().setVisible(true).setAlpha(frame.disarmed ? 0.28 : 1);
       if (!frame.disarmed) {
-        frame.lingerBubbles.forEach((point) => drawBubble(graphics, point.x, point.y, 7, 0.28));
-        frame.breathBubbles.forEach((point, index) => (
-          drawBubble(graphics, point.x, point.y, 7 + (index % 3) * 2, 0.72)
-        ));
+        frame.lingerBubbles.forEach((point, index) => drawBreathBubble(graphics, point, index, frame.nowMs, true));
+        frame.breathBubbles.forEach((point, index) => drawBreathBubble(graphics, point, index, frame.nowMs, false));
         frame.stinkPoints.forEach((point) => drawStink(graphics, point.x, point.y, frame.stinkFat));
         if (frame.selfieRank > 0) drawPhone(graphics, frame.x - 18, frame.y + 2);
         if (frame.selfieRank >= 2 || frame.selfieRear) drawPhone(graphics, frame.x + 16, frame.y - 8);
         if (frame.glassesRank > 0) drawLensGlint(graphics, frame);
       }
+      if (frame.shell) drawShell(graphics, frame.shell);
       if (frame.disarmed) drawBeerSplash(graphics, frame.x, frame.y - 16);
     },
     reset() {
@@ -64,6 +65,49 @@ function drawStink(
   graphics.lineTo(x + 2, y + 1);
   graphics.lineTo(x + 5, y - 3);
   graphics.strokePath();
+}
+
+const BREATH_PULSE = {
+  linger: { waveMs: 220, driftMs: 340, bobMs: 420, drift: 6, bob: 5 },
+  burst: { waveMs: 160, driftMs: 280, bobMs: 240, drift: 2.5, bob: 3.5 }
+} as const;
+
+function drawBreathBubble(
+  graphics: Phaser.GameObjects.Graphics,
+  point: { x: number; y: number; untilMs?: number },
+  index: number,
+  nowMs: number,
+  linger: boolean
+): void {
+  const pulse = linger ? BREATH_PULSE.linger : BREATH_PULSE.burst;
+  const wave = Math.sin(nowMs / pulse.waveMs + index * 1.4);
+  const drift = Math.sin(nowMs / pulse.driftMs + index) * pulse.drift;
+  const bob = Math.cos(nowMs / pulse.bobMs + index * 0.8) * pulse.bob;
+  const radiusBase = linger ? 6 : 7 + (index % 3) * 2;
+  const life = linger
+    ? Math.max(0, Math.min(1, ((point.untilMs ?? nowMs) - nowMs) / 1_100))
+    : 1;
+  const alpha = linger ? 0.32 + life * 0.5 : 0.62 + wave * 0.14;
+  drawBubble(
+    graphics,
+    point.x + drift,
+    point.y + bob,
+    radiusBase * (0.8 + wave * 0.22),
+    alpha
+  );
+}
+
+function drawShell(
+  graphics: Phaser.GameObjects.Graphics,
+  shell: { x: number; y: number; ready: boolean }
+): void {
+  const radius = shell.ready ? 13 : 8;
+  graphics.lineStyle(shell.ready ? 2.6 : 1.5, INK, shell.ready ? 0.95 : 0.35);
+  graphics.strokeCircle(shell.x, shell.y, radius);
+  if (shell.ready) {
+    graphics.lineStyle(1.2, 0xfbfbf9, 0.95);
+    graphics.strokeCircle(shell.x, shell.y, radius - 4);
+  }
 }
 
 function drawBubble(
