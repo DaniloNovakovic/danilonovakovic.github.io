@@ -198,9 +198,20 @@ function resolveShellContact({
 }): { session: StampedeSession; shellBlocked: boolean } {
   const shellReady = shellOwned && session.elapsedMs >= shellReadyAtMs;
   const shellBlocked = pressure.canContact && shellReady;
+  if (shellBlocked) {
+    return {
+      shellBlocked: true,
+      session: {
+        ...session,
+        lastContactAtMs: session.elapsedMs,
+        recentContact: true
+      }
+    };
+  }
+
   return {
-    shellBlocked,
-    session: pressure.canContact && !shellBlocked
+    shellBlocked: false,
+    session: pressure.canContact
       ? resolveStampedeContact(session, session.elapsedMs, { contactLimit })
       : session
   };
