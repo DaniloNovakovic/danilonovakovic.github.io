@@ -26,7 +26,7 @@ Uses the default mattpocock/skills triage labels: `needs-triage`, `needs-info`, 
 
 ### Domain docs
 
-Single-context repo: read root `CONTEXT.md` and `docs/adr/` when present. See [`docs/agents/domain.md`](docs/agents/domain.md). Missing context and ADR files are allowed; create them lazily only when real terminology or durable decisions need recording.
+Single-context repo: read root `GLOSSARY.md` and `docs/adr/` when present. See [`docs/agents/domain.md`](docs/agents/domain.md). Missing glossary and ADR files are allowed; create them lazily only when real terminology or durable decisions need recording.
 
 ### Sketchbook Ridge team roles
 

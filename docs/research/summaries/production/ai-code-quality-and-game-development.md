@@ -61,7 +61,7 @@ To effectively de-slop a codebase, engineering teams must adopt a governance-fir
 
 The most effective way to reduce AI-generated slop is to minimize the "context gap".6 This is achieved through Context Engineering: the deliberate creation of artifacts that anchor the AI’s understanding of the specific repository.2
 
-* **CONTEXT.md**: A file that defines the project’s "Shared Language" (Ubiquitous Language).6 This ensures that variables, functions, and files are named consistently, reducing token usage and preventing the AI from hallucinating generic solutions that conflict with project standards.6  
+* **GLOSSARY.md** (formerly `CONTEXT.md`): A file that defines the project’s "Shared Language" (Ubiquitous Language).6 This ensures that variables, functions, and files are named consistently, reducing token usage and preventing the AI from hallucinating generic solutions that conflict with project standards.6  
 * **Architecture Decision Records (ADRs)**: Documents that record why specific design choices were made.2 By referencing ADRs, an AI agent can understand the constraints and historical context of the system, preventing "convention-blind" suggestions.6
 
 ### **The Four Principles of AI Governance**
@@ -125,7 +125,7 @@ When remediating a codebase that has already suffered from AI-induced degradatio
 
 ### **Step 1: Establish the Architectural Baseline**
 
-Before refactoring, run an "Architectural Review" skill to map the existing system.6 Create a CLAUDE.md or CONTEXT.md that explicitly lists anti-patterns to avoid, such as "No logic in Entity classes" or "All UI communication must go through the EventBus".12
+Before refactoring, run an "Architectural Review" skill to map the existing system.6 Create a CLAUDE.md or GLOSSARY.md that explicitly lists anti-patterns to avoid, such as "No logic in Entity classes" or "All UI communication must go through the EventBus".12
 
 ### **Step 2: The Red-Green-Refactor Loop**
 
