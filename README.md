@@ -79,14 +79,14 @@ For larger or fuzzier work, use the workflow skills as planning tools before cod
 | You need to manage or prepare existing issues | `triage` | Issue state changes such as `needs-info`, `ready-for-human`, or `ready-for-agent`. For agent-ready work it can add an agent brief comment that becomes the implementation contract. |
 | You want the implementation to be test-first | `tdd` | A red-green-refactor loop: one behavior test, one small implementation step, then refactor. Best for risky behavior changes and shared logic. |
 | Something is broken or flaky | `diagnosing-bugs` | A tight reproduction loop, hypotheses, instrumentation, fix, and regression test. |
-| You want a standards + spec review of a branch/PR | `code-review` | Parallel Standards and Spec reviews of the diff since a fixed point. |
+| You want a standards + spec review of a branch/PR | `dual-lens-code-review` | Parallel Standards and Spec reviews of the diff since a fixed point. |
 | You are worried about architecture drift or parallel work conflicts | `Architect` | A seam review: what should change, what should stay serialized, what can safely be parallelized, and whether the work should become issues. |
 | You need coordination across roles or a next-work recommendation | `Producer` | A short production plan, suggested issue order, role assignment, and handoff notes. |
 
 A useful default flow for a new feature is:
 
 ```text
-grill-with-docs -> to-spec -> to-tickets -> implement (tdd + code-review) -> retro
+grill-with-docs -> to-spec -> to-tickets -> implement (tdd + dual-lens-code-review) -> retro
 ```
 
 Skip steps when the work is already clear. A one-line copy fix does not need a spec. A half-formed game-system idea probably benefits from `grill-with-docs` before anybody writes code. A feature that spans multiple scenes, overlays, assets, or runtime seams probably deserves a spec and sliced tickets. Use `implement-spec` when one run should work that ticket graph, and `implement` when you want to drive one ticket at a time.
