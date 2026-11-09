@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
-  STAMPEDE_ARENA,
   STAMPEDE_PLAYER_SPEED,
+  STAMPEDE_WORLD,
   clampStampedePosition,
   resolveStampedeVelocity
 } from './movement';
@@ -31,10 +31,10 @@ describe('stampede movement', () => {
     expect(moving.y).toBe(0);
   });
 
-  it('clamps the player inside the safe arena', () => {
-    expect(clampStampedePosition({ x: -100, y: 900 })).toEqual({
-      x: STAMPEDE_ARENA.safeLeft,
-      y: STAMPEDE_ARENA.safeBottom
+  it('clamps the player inside the safe field', () => {
+    expect(clampStampedePosition({ x: -100, y: 5_000 })).toEqual({
+      x: STAMPEDE_WORLD.safeLeft,
+      y: STAMPEDE_WORLD.safeBottom
     });
   });
 });

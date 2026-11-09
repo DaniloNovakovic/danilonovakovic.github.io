@@ -72,8 +72,36 @@ class PhaserStampedeAutoAttackPresentationRuntime implements StampedeAutoAttackP
     const phoneY = attack.origin.y - 22;
     this.graphics.strokeRect(phoneX, phoneY, 14, 18);
     this.graphics.strokeCircle(phoneX + 7, phoneY + 8, 3);
-    this.graphics.strokeCircle(attack.target.x, attack.target.y, flashRadius);
-    this.graphics.strokeCircle(attack.target.x, attack.target.y, flashRadius * 0.45);
-    this.graphics.lineBetween(phoneX + 7, phoneY + 18, attack.target.x, attack.target.y);
+    const targets = attack.targets.length > 0 ? attack.targets : [attack.target];
+    const active = flashRadius > 12;
+    targets.forEach((target) => {
+      this.graphics.lineBetween(phoneX + 7, phoneY + 18, target.x, target.y);
+      if (active) {
+        this.graphics.fillStyle(0xfff6c8, 0.85);
+        this.graphics.fillCircle(target.x, target.y, flashRadius * 1.3);
+        drawFlashStar(this.graphics, target.x, target.y, flashRadius * 1.9);
+      }
+      this.graphics.strokeRect(
+        target.x - flashRadius * 1.25,
+        target.y - flashRadius * 1.25,
+        flashRadius * 2.5,
+        flashRadius * 2.5
+      );
+      this.graphics.strokeCircle(target.x, target.y, flashRadius * 0.45);
+    });
+  }
+}
+
+function drawFlashStar(graphics: Phaser.GameObjects.Graphics, x: number, y: number, size: number): void {
+  for (let index = 0; index < 8; index += 1) {
+    const angle = (index / 8) * Math.PI * 2;
+    const inner = size * 0.55;
+    const outer = index % 2 === 0 ? size : size * 0.75;
+    graphics.lineBetween(
+      x + Math.cos(angle) * inner,
+      y + Math.sin(angle) * inner,
+      x + Math.cos(angle) * outer,
+      y + Math.sin(angle) * outer
+    );
   }
 }

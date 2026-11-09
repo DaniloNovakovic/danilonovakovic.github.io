@@ -6,7 +6,8 @@ export type StampedeFlockKind =
   | 'perfume'
   | 'fixer'
   | 'situationship'
-  | 'bartender';
+  | 'bartender'
+  | 'ex';
 
 export type StampedeWeaponThreat = 'badSelfie' | 'badBreath' | 'badSmell' | 'fakeGlasses';
 
@@ -15,8 +16,8 @@ export interface StampedeFlockProfile {
   maxHp: number;
   scrapValue: number;
   speed: number;
+  /** Body circle in world pixels. The drawn body and the hitbox are the same circle. */
   radius: number;
-  respawnMs: number;
 }
 
 export interface StampedeMendBird {
@@ -36,44 +37,76 @@ export const STAMPEDE_SITUATIONSHIP_AT_MS = 34_000;
 export const STAMPEDE_ROOSTER_AT_MS = 46_000;
 export const STAMPEDE_BARTENDER_AT_MS = 54_000;
 
-const NERD_SLOTS = new Set([1]);
-const PERFUME_SLOTS = new Set([6]);
-const HEN_SLOTS = new Set([4, 7, 11]);
-const FIXER_SLOTS = new Set([8]);
-const SITUATIONSHIP_SLOTS = new Set([3]);
-const ROOSTER_SLOTS = new Set([2, 9]);
-const BARTENDER_SLOTS = new Set([5]);
+type StampedeSpawnKind = Exclude<StampedeFlockKind, 'ex'>;
 
-export function resolveStampedeFlockKind(slot: number, elapsedMs: number): StampedeFlockKind {
-  if (elapsedMs >= STAMPEDE_BARTENDER_AT_MS && BARTENDER_SLOTS.has(slot)) return 'bartender';
-  if (elapsedMs >= STAMPEDE_ROOSTER_AT_MS && ROOSTER_SLOTS.has(slot)) return 'rooster';
-  if (elapsedMs >= STAMPEDE_SITUATIONSHIP_AT_MS && SITUATIONSHIP_SLOTS.has(slot)) return 'situationship';
-  if (elapsedMs >= STAMPEDE_FIXER_AT_MS && FIXER_SLOTS.has(slot)) return 'fixer';
-  if (elapsedMs >= STAMPEDE_HEN_AT_MS && HEN_SLOTS.has(slot)) return 'hen';
-  if (elapsedMs >= STAMPEDE_PERFUME_AT_MS && PERFUME_SLOTS.has(slot)) return 'perfume';
-  if (elapsedMs >= STAMPEDE_NERD_AT_MS && NERD_SLOTS.has(slot)) return 'nerd';
+interface StampedeSpawnRule {
+  atMs: number;
+  cap: number;
+  weight: number;
+}
+
+const SPAWN_RULES: Record<StampedeSpawnKind, StampedeSpawnRule> = {
+  chick: { atMs: 0, cap: Number.POSITIVE_INFINITY, weight: 10 },
+  nerd: { atMs: STAMPEDE_NERD_AT_MS, cap: 2, weight: 2 },
+  perfume: { atMs: STAMPEDE_PERFUME_AT_MS, cap: 2, weight: 2 },
+  hen: { atMs: STAMPEDE_HEN_AT_MS, cap: 4, weight: 3 },
+  fixer: { atMs: STAMPEDE_FIXER_AT_MS, cap: 1, weight: 1.2 },
+  situationship: { atMs: STAMPEDE_SITUATIONSHIP_AT_MS, cap: 2, weight: 1.5 },
+  rooster: { atMs: STAMPEDE_ROOSTER_AT_MS, cap: 2, weight: 1.5 },
+  bartender: { atMs: STAMPEDE_BARTENDER_AT_MS, cap: 1, weight: 1 }
+};
+
+const SPAWN_KINDS = Object.keys(SPAWN_RULES) as StampedeSpawnKind[];
+
+/**
+ * Picks the next arrival. A kind that just unlocked and has never shown up goes
+ * first, so every stereotype gets its entrance; after that it is a weighted draw
+ * among kinds that are unlocked and under their cap.
+ */
+export function pickStampedeSpawnKind(
+  elapsedMs: number,
+  activeCounts: Partial<Record<StampedeFlockKind, number>>,
+  introduced: ReadonlySet<StampedeFlockKind>,
+  random: () => number = Math.random
+): StampedeSpawnKind {
+  const open = SPAWN_KINDS.filter((kind) => (
+    elapsedMs >= SPAWN_RULES[kind].atMs && (activeCounts[kind] ?? 0) < SPAWN_RULES[kind].cap
+  ));
+  const debut = open
+    .filter((kind) => kind !== 'chick' && !introduced.has(kind))
+    .sort((left, right) => SPAWN_RULES[left].atMs - SPAWN_RULES[right].atMs)[0];
+  if (debut) return debut;
+
+  const total = open.reduce((sum, kind) => sum + SPAWN_RULES[kind].weight, 0);
+  let roll = random() * total;
+  for (const kind of open) {
+    roll -= SPAWN_RULES[kind].weight;
+    if (roll < 0) return kind;
+  }
   return 'chick';
 }
 
 export function getStampedeFlockProfile(kind: StampedeFlockKind): StampedeFlockProfile {
   switch (kind) {
+    case 'ex':
+      return { kind, maxHp: 14, scrapValue: 10, speed: 46, radius: 24 };
     case 'bartender':
-      return { kind, maxHp: 3, scrapValue: 3, speed: 0, radius: 6, respawnMs: 6_400 };
+      return { kind, maxHp: 3, scrapValue: 3, speed: 34, radius: 15 };
     case 'rooster':
-      return { kind, maxHp: 3, scrapValue: 3, speed: 42, radius: 9, respawnMs: 5_600 };
+      return { kind, maxHp: 3, scrapValue: 3, speed: 50, radius: 16 };
     case 'situationship':
-      return { kind, maxHp: 2, scrapValue: 2, speed: 28, radius: 6, respawnMs: 4_200 };
+      return { kind, maxHp: 2, scrapValue: 2, speed: 58, radius: 12 };
     case 'fixer':
-      return { kind, maxHp: 2, scrapValue: 2, speed: 24, radius: 6, respawnMs: 4_600 };
+      return { kind, maxHp: 2, scrapValue: 2, speed: 50, radius: 12 };
     case 'hen':
-      return { kind, maxHp: 2, scrapValue: 2, speed: 15, radius: 8, respawnMs: 4_400 };
+      return { kind, maxHp: 2, scrapValue: 2, speed: 34, radius: 15 };
     case 'perfume':
-      return { kind, maxHp: 2, scrapValue: 2, speed: 20, radius: 9, respawnMs: 4_000 };
+      return { kind, maxHp: 2, scrapValue: 2, speed: 52, radius: 12 };
     case 'nerd':
-      return { kind, maxHp: 2, scrapValue: 2, speed: 13, radius: 6, respawnMs: 4_200 };
+      return { kind, maxHp: 2, scrapValue: 2, speed: 38, radius: 12 };
     case 'chick':
     default:
-      return { kind: 'chick', maxHp: 1, scrapValue: 1, speed: 20, radius: 5, respawnMs: 3_200 };
+      return { kind: 'chick', maxHp: 1, scrapValue: 1, speed: 52, radius: 11 };
   }
 }
 

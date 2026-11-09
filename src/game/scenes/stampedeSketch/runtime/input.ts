@@ -86,13 +86,16 @@ class PhaserStampedeInputRuntime implements StampedeInputRuntime {
 
     this.stickBase = scene.add.circle(0, 0, 34, 0xfbfbf9, 0.72)
       .setStrokeStyle(3, 0x1a1a1a, 0.75)
+      .setScrollFactor(0)
       .setDepth(90)
       .setVisible(false);
     this.stickLine = scene.add.line(0, 0, 0, 0, 0, 0, 0x1a1a1a, 0.5)
       .setLineWidth(4)
+      .setScrollFactor(0)
       .setDepth(91)
       .setVisible(false);
     this.stickKnob = scene.add.circle(0, 0, 12, 0x1a1a1a, 0.72)
+      .setScrollFactor(0)
       .setDepth(92)
       .setVisible(false);
 
@@ -201,14 +204,15 @@ class PhaserStampedeInputRuntime implements StampedeInputRuntime {
   }
 
   private registerPointerControls(): void {
+    // Screen coordinates: the camera scrolls, so world coordinates would drift under a held finger.
     this.scene.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       if (!this.pointerControlsEnabled) return;
       this.startTapQueued = true;
-      this.beginPointerControl(pointer.id, pointer.worldX, pointer.worldY);
+      this.beginPointerControl(pointer.id, pointer.x, pointer.y);
     });
 
     this.scene.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
-      this.movePointerControl(pointer.id, pointer.worldX, pointer.worldY);
+      this.movePointerControl(pointer.id, pointer.x, pointer.y);
     });
 
     this.scene.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {

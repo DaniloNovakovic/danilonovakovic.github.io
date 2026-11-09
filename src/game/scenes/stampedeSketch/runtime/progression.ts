@@ -1,3 +1,4 @@
+import type { StampedeFlockKind } from './flock';
 import { clampStampedePosition } from './movement';
 import {
   STAMPEDE_BONUS_HEART_CAP,
@@ -11,7 +12,9 @@ import {
 } from './upgrades';
 
 const STAMPEDE_SCRAP_PICKUP_RADIUS = 10;
-export const STAMPEDE_SCRAP_COLLECTION_RADIUS = 34;
+export const STAMPEDE_SCRAP_COLLECTION_RADIUS = 10;
+const STAMPEDE_SCRAP_MAGNET_RADIUS = 104;
+const STAMPEDE_SCRAP_FLY_SPEED = 520;
 const STAMPEDE_DRAFT_GAP_MS = 14_000;
 const STAMPEDE_UPGRADE_THRESHOLDS = [8, 20, 36, 56, 80, 108, 140] as const;
 
@@ -24,6 +27,7 @@ export interface StampedeClearedMarkPoint {
   x: number;
   y: number;
   value?: number;
+  kind?: StampedeFlockKind;
 }
 
 export interface StampedePickup {
@@ -33,7 +37,9 @@ export interface StampedePickup {
   y: number;
   radius: number;
   value: number;
-  kind?: 'scrap' | 'heart';
+  kind?: 'scrap' | 'heart' | 'gift';
+  /** Set once the pickup is flying to the player; it keeps flying from then on. */
+  homing?: boolean;
 }
 
 export type StampedeUpgradeDraftStatus = 'none' | 'pending' | 'chosen';
@@ -55,6 +61,7 @@ export interface StampedePickupCollectionFrame {
   state: StampedeProgressionState;
   collected: readonly StampedePickup[];
   heartsCollected: number;
+  giftsCollected: number;
 }
 
 export function createStampedeProgressionState(
@@ -124,13 +131,14 @@ export function collectStampedePickups(
   });
 
   if (collected.length === 0) {
-    return { state, collected, heartsCollected: 0 };
+    return { state, collected, heartsCollected: 0, giftsCollected: 0 };
   }
 
   const heartsCollected = collected.filter((pickup) => pickup.kind === 'heart').length;
+  const giftsCollected = collected.filter((pickup) => pickup.kind === 'gift').length;
   const scrapsCollected = state.scrapsCollected +
     collected.reduce((total, pickup) => (
-      total + (pickup.kind === 'heart' ? 0 : pickup.value)
+      total + (pickup.kind === 'heart' || pickup.kind === 'gift' ? 0 : pickup.value)
     ), 0);
   const clockReady = options.elapsedMs === undefined || options.elapsedMs >= state.nextDraftAtMs;
   const upgradeDraftStatus =
@@ -149,7 +157,62 @@ export function collectStampedePickups(
       upgradeDraftStatus
     },
     collected,
-    heartsCollected
+    heartsCollected,
+    giftsCollected
+  };
+}
+
+/**
+ * Scraps near the player (or every scrap, for a magnet gift) start flying in and
+ * keep flying until collected. Hearts and gifts stay put so grabbing them is a choice.
+ */
+export function attractStampedePickups(
+  state: StampedeProgressionState,
+  player: { x: number; y: number; radius?: number },
+  deltaMs: number,
+  options: { pullAll?: boolean } = {}
+): StampedeProgressionState {
+  if (state.pickups.length === 0) return state;
+  const step = STAMPEDE_SCRAP_FLY_SPEED * (deltaMs / 1000);
+  const reach = STAMPEDE_SCRAP_MAGNET_RADIUS + (player.radius ?? 0);
+  let moved = false;
+  const pickups = state.pickups.map((pickup) => {
+    if (pickup.kind === 'heart' || pickup.kind === 'gift') return pickup;
+    const dx = player.x - pickup.x;
+    const dy = player.y - pickup.y;
+    const distance = Math.hypot(dx, dy);
+    const homing = pickup.homing || options.pullAll || distance <= reach;
+    if (!homing || distance < 0.5) return pickup;
+    moved = true;
+    const travel = Math.min(distance, step);
+    return {
+      ...pickup,
+      homing: true,
+      x: pickup.x + (dx / distance) * travel,
+      y: pickup.y + (dy / distance) * travel
+    };
+  });
+  return moved ? { ...state, pickups } : state;
+}
+
+export function spawnStampedeGiftPickup(
+  state: StampedeProgressionState,
+  at: { x: number; y: number }
+): StampedeProgressionState {
+  const point = clampStampedePosition(at);
+  const pickup: StampedePickup = {
+    id: `gift-${state.nextPickupIndex}`,
+    sourceId: 'gift',
+    x: point.x,
+    y: point.y,
+    radius: 14,
+    value: 0,
+    kind: 'gift'
+  };
+  return {
+    ...state,
+    pickups: [...state.pickups, pickup],
+    nextPickupIndex: state.nextPickupIndex + 1
   };
 }
 
@@ -217,8 +280,21 @@ export function grantStampedeStartingWeapon(
 export function applyStampedeUpgradeChoice(
   state: StampedeProgressionState,
   upgradeId: StampedeUpgradeId,
-  nowMs = 0
+  nowMs = 0,
+  options: { free?: boolean } = {}
 ): StampedeProgressionState {
+  if (options.free) {
+    // A gifted twist leaves the scrap goal, draft count, and draft clock alone.
+    const paid = applyStampedeUpgradeChoice(state, upgradeId, nowMs);
+    return {
+      ...paid,
+      upgradeDraftStatus: state.upgradeDraftStatus,
+      scrapGoal: state.scrapGoal,
+      draftsTaken: state.draftsTaken,
+      nextDraftAtMs: state.nextDraftAtMs
+    };
+  }
+
   if (upgradeId === 'spareFeather') {
     return finishStampedeDraft(state, nowMs, {
       bonusHearts: Math.min(STAMPEDE_BONUS_HEART_CAP, state.bonusHearts + 1)

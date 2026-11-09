@@ -41,9 +41,11 @@ class PhaserStampedePickupRuntime implements StampedePickupRuntime {
         return;
       }
 
-      const shape = this.scene.add.graphics().setPosition(pickup.x, pickup.y).setDepth(24);
+      const shape = this.scene.add.graphics().setPosition(pickup.x, pickup.y).setDepth(16);
       if (pickup.kind === 'heart') {
         drawHeart(shape);
+      } else if (pickup.kind === 'gift') {
+        drawGift(shape);
       } else {
         const width = Math.max(8, pickup.radius * 2.4);
         const height = Math.max(6, pickup.radius * 1.5);
@@ -73,6 +75,23 @@ class PhaserStampedePickupRuntime implements StampedePickupRuntime {
     });
     this.shapes.clear();
   }
+}
+
+function drawGift(shape: Phaser.GameObjects.Graphics): void {
+  shape.fillStyle(0x1a1a1a, 0.14);
+  shape.fillEllipse(0, 15, 28, 8);
+  shape.fillStyle(0xf3c1d0, 1);
+  shape.lineStyle(2.4, 0x1a1a1a, 1);
+  shape.fillRect(-12, -8, 24, 20);
+  shape.strokeRect(-12, -8, 24, 20);
+  shape.fillStyle(0xc0263b, 1);
+  shape.fillRect(-3, -8, 6, 20);
+  shape.fillRect(-12, -1, 24, 5);
+  shape.strokeRect(-3, -8, 6, 20);
+  shape.fillTriangle(0, -8, -10, -15, -9, -5);
+  shape.strokeTriangle(0, -8, -10, -15, -9, -5);
+  shape.fillTriangle(0, -8, 10, -15, 9, -5);
+  shape.strokeTriangle(0, -8, 10, -15, 9, -5);
 }
 
 function drawHeart(shape: Phaser.GameObjects.Graphics): void {

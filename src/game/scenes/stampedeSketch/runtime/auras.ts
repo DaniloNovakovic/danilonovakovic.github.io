@@ -16,6 +16,8 @@ export interface StampedeOrbitPoint {
 export interface StampedeOrbitCandidate extends StampedeOrbitPoint {
   id: string;
   kind?: StampedeFlockKind;
+  /** Body radius; a hit lands when the cloud or bubble touches the body, not its center. */
+  radius?: number;
 }
 
 export interface StampedeOrbitHitState {
@@ -59,10 +61,10 @@ export function createBreathHitState(): Record<string, number> {
 export function getStinkAura(mods: StampedeStinkMods = {}): StampedeOrbitAura {
   return {
     count: mods.twin ? 2 : 1,
-    radius: mods.far ? 102 : 56,
-    hitRadius: mods.fat ? 36 : 20,
-    radiansPerSecond: mods.fast ? 2.8 : 1.25,
-    hitGapMs: mods.fast ? 480 : 780
+    radius: mods.far ? 110 : 68,
+    hitRadius: mods.fat ? 34 : 22,
+    radiansPerSecond: mods.fast ? 3.9 : 2.4,
+    hitGapMs: mods.fast ? 420 : 600
   };
 }
 
@@ -138,8 +140,9 @@ export function stepOrbitHits(input: {
   input.candidates.forEach((candidate) => {
     if (isStampedeWeaponImmune(candidate.kind ?? 'chick', 'badSmell', 1)) return;
     if (input.elapsedMs < (nextHitAtById[candidate.id] ?? 0)) return;
+    const reach = aura.hitRadius + (candidate.radius ?? 0);
     const touched = points.some((point) => (
-      Math.hypot(point.x - candidate.x, point.y - candidate.y) <= aura.hitRadius
+      Math.hypot(point.x - candidate.x, point.y - candidate.y) <= reach
     ));
     if (!touched) return;
     hitIds.push(candidate.id);
@@ -198,14 +201,23 @@ function breathHitsCandidate(
   const along = dx * facingX + dy * facingY;
   const lateral = dx * facingY - dy * facingX;
   const wave = beam.crosswind ? Math.sin(along / 32) * 18 : 0;
-  if (insideBreath(along, lateral, wave, beam)) return true;
+  const body = candidate.radius ?? 0;
+  if (insideBreath(along, lateral, wave, beam, body)) return true;
   return (input.linger ?? []).some((patch) => (
-    Math.hypot(candidate.x - patch.x, candidate.y - patch.y) <= 18
+    Math.hypot(candidate.x - patch.x, candidate.y - patch.y) <= 18 + body
   ));
 }
 
-function insideBreath(along: number, lateral: number, wave: number, beam: StampedeBreathBeam): boolean {
-  return along >= 14 && along <= beam.range && Math.abs(lateral - wave) <= beam.halfWidth;
+function insideBreath(
+  along: number,
+  lateral: number,
+  wave: number,
+  beam: StampedeBreathBeam,
+  body: number
+): boolean {
+  return along >= 14 - body
+    && along <= beam.range + body
+    && Math.abs(lateral - wave) <= beam.halfWidth + body;
 }
 
 function evenAngles(count: number): number[] {

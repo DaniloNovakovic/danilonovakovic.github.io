@@ -7,6 +7,8 @@ export interface StampedeUpgradeDraftPanelParams {
   choices: readonly StampedeUpgradeChoiceView[];
   scrapsCollected: number;
   scrapGoal: number;
+  /** A free twist from the mirror; it does not spend scraps. */
+  gift?: boolean;
 }
 
 export function StampedeUpgradeDraftPanel({ params, dispatchAction }: SceneUiSurfaceProps) {
@@ -29,13 +31,15 @@ export function StampedeUpgradeDraftPanel({ params, dispatchAction }: SceneUiSur
       className="max-h-[min(78dvh,calc(100dvh-8rem))] w-full overflow-y-auto p-3 text-center sm:p-5"
     >
       <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-[#4b4337] sm:text-xs">
-        Scraps {view.scrapsCollected}/{view.scrapGoal}
+        {view.gift ? 'Free twist' : `Scraps ${view.scrapsCollected}/${view.scrapGoal}`}
       </p>
       <h2 id={titleId} className="mt-1 font-mono text-xl font-bold uppercase leading-tight tracking-wider text-[#1a1a1a] sm:text-3xl">
-        Pick a weapon
+        {view.gift ? 'You look great' : 'Pick a weapon'}
       </h2>
       <p id={descriptionId} className="mx-auto mt-2 max-w-sm font-mono text-xs font-bold leading-snug text-[#4b4337] sm:text-sm">
-        Mostly a twist on a weapon you already have. Sometimes you can stay standing instead. A new weapon shows up less often.
+        {view.gift
+          ? 'The mirror believes in you. This one is on the house.'
+          : 'Mostly a twist on a weapon you already have. Sometimes you can stay standing instead. A new weapon shows up less often.'}
       </p>
       <div className="mt-4 grid gap-3 sm:mt-5 sm:grid-cols-3 sm:gap-4">
         {view.choices.map((choice) => (
@@ -73,6 +77,7 @@ function readParams(params: unknown): StampedeUpgradeDraftPanelParams | null {
   return {
     choices: partial.choices,
     scrapsCollected: partial.scrapsCollected ?? 0,
-    scrapGoal: partial.scrapGoal ?? 0
+    scrapGoal: partial.scrapGoal ?? 0,
+    gift: partial.gift === true
   };
 }

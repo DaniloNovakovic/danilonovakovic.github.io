@@ -40,7 +40,7 @@ describe('chick magnet attacks', () => {
       player: { x: 400, y: 300 },
       facing: { x: 0, y: 1 },
       candidates: [
-        { id: 'west', x: 40, y: 300 },
+        { id: 'west', x: 180, y: 300 },
         { id: 'east', x: 760, y: 300 },
         { id: 'close', x: 430, y: 300 }
       ]
@@ -49,6 +49,17 @@ describe('chick magnet attacks', () => {
     expect(cast.hitIds[0]).toBe('close');
     expect(cast.hitIds).toHaveLength(2);
     expect(cast.hitIds).not.toContain('east');
+  });
+
+  it('only flashes birds within range of the glasses', () => {
+    const cast = resolveStampedeSpellCast({
+      spellId: 'fakeGlasses',
+      player: { x: 400, y: 300 },
+      facing: { x: 1, y: 0 },
+      candidates: [{ id: 'offscreen', x: 1_000, y: 300 }]
+    });
+
+    expect(cast.hitIds).toEqual([]);
   });
 
   it('lets nerds ignore fake glasses until the prescription', () => {

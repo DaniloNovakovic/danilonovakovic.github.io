@@ -93,12 +93,12 @@ describe('stampede pressure', () => {
     expect(pressure.nearestContactDistance).toBe(12);
   });
 
-  it('treats exact contact radius as contact', () => {
+  it('treats touching drawn circles as contact, with no hidden padding', () => {
     const pressure = resolveStampedePressure({
       elapsedMs: 1_000,
       durationMs: 75_000,
       player: { x: 0, y: 0, radius: 10 },
-      candidates: [{ x: 26, y: 0, radius: 10 }]
+      candidates: [{ x: 20, y: 0, radius: 10 }]
     });
 
     expect(pressure.nearestContactDistance).toBe(0);

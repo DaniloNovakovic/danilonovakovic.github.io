@@ -2,10 +2,12 @@ import { describe, expect, it } from 'vitest';
 import {
   STAMPEDE_SCRAP_COLLECTION_RADIUS,
   applyStampedeUpgradeChoice,
+  attractStampedePickups,
   collectStampedePickups,
   createStampedeProgressionState,
   grantStampedeStartingWeapon,
   openStampedeDraftIfReady,
+  spawnStampedeGiftPickup,
   spawnStampedeHeartPickup,
   spawnStampedePickupsFromClearedMarks
 } from './progression';
@@ -125,5 +127,52 @@ describe('stampede progression', () => {
     expect(feather.bonusHearts).toBe(1);
     expect(again.bonusHearts).toBe(1);
     expect(again.appliedUpgradeIds).toEqual(['badBreath']);
+  });
+
+  it('pulls nearby scraps toward the player and keeps them homing', () => {
+    const state = spawnStampedePickupsFromClearedMarks(
+      createStampedeProgressionState(),
+      [{ id: 'near', x: 160, y: 100 }, { id: 'far', x: 900, y: 100 }]
+    );
+    const pulled = attractStampedePickups(state, { x: 100, y: 100 }, 50);
+
+    expect(pulled.pickups[0]!.x).toBeLessThan(160);
+    expect(pulled.pickups[0]!.homing).toBe(true);
+    expect(pulled.pickups[1]!.x).toBe(900);
+    expect(attractStampedePickups(createStampedeProgressionState(), { x: 0, y: 0 }, 16))
+      .toEqual(createStampedeProgressionState());
+  });
+
+  it('pulls every scrap during a magnet gift but never moves gifts', () => {
+    const scraps = spawnStampedePickupsFromClearedMarks(
+      createStampedeProgressionState(),
+      [{ id: 'far', x: 900, y: 100 }]
+    );
+    const state = spawnStampedeGiftPickup(scraps, { x: 600, y: 100 });
+    const pulled = attractStampedePickups(state, { x: 100, y: 100 }, 50, { pullAll: true });
+
+    expect(pulled.pickups[0]!.x).toBeLessThan(900);
+    expect(pulled.pickups[1]).toEqual(state.pickups[1]);
+
+    const frame = collectStampedePickups(state, { x: 600, y: 100 });
+    expect(frame.giftsCollected).toBe(1);
+    expect(frame.state.scrapsCollected).toBe(0);
+  });
+
+  it('gives a free twist without spending the scrap goal or draft clock', () => {
+    const state = createStampedeProgressionState({
+      appliedUpgradeIds: ['badBreath'],
+      scrapsCollected: 2,
+      scrapGoal: 5,
+      draftsTaken: 1,
+      nextDraftAtMs: 30_000
+    });
+    const free = applyStampedeUpgradeChoice(state, 'breathWide', 20_000, { free: true });
+
+    expect(free.appliedUpgradeIds).toContain('breathWide');
+    expect(free.scrapGoal).toBe(5);
+    expect(free.draftsTaken).toBe(1);
+    expect(free.nextDraftAtMs).toBe(30_000);
+    expect(free.upgradeDraftStatus).toBe(state.upgradeDraftStatus);
   });
 });
