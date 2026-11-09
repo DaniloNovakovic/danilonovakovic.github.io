@@ -60,10 +60,13 @@ class PhaserStampedeSpellVfx implements StampedeSpellVfx {
     if (cast.spellId === 'badBreath') {
       drawBreath(this.burstGraphics, cast.origin, cast.direction, 1);
     }
+    if (cast.spellId === 'fakeGlasses') {
+      drawGlare(this.burstGraphics, cast.origin, cast.hitPoints);
+    }
     this.scene.tweens.add({
       targets: this.burstGraphics,
       alpha: 0,
-      duration: cast.spellId === 'badBreath' ? 680 : 280,
+      duration: cast.spellId === 'badBreath' ? 680 : 420,
       ease: 'Sine.easeOut',
       onComplete: () => this.burstGraphics.clear()
     });
@@ -158,6 +161,26 @@ class PhaserStampedeSpellVfx implements StampedeSpellVfx {
       });
     });
   }
+}
+
+function drawGlare(
+  graphics: Phaser.GameObjects.Graphics,
+  origin: StampedeSpellPoint,
+  targets: readonly StampedeSpellPoint[]
+): void {
+  const eyeY = origin.y - 18;
+  targets.forEach((target) => {
+    graphics.lineStyle(7, 0xfff6c8, 0.9);
+    graphics.lineBetween(origin.x, eyeY, target.x, target.y);
+    graphics.lineStyle(2, 0x1a1a1a, 0.85);
+    graphics.lineBetween(origin.x - 3, eyeY, target.x - 3, target.y);
+    graphics.lineBetween(origin.x + 3, eyeY, target.x + 3, target.y);
+    graphics.strokeCircle(target.x, target.y, 14);
+    graphics.lineBetween(target.x - 20, target.y, target.x - 15, target.y);
+    graphics.lineBetween(target.x + 15, target.y, target.x + 20, target.y);
+    graphics.lineBetween(target.x, target.y - 20, target.x, target.y - 15);
+    graphics.lineBetween(target.x, target.y + 15, target.x, target.y + 20);
+  });
 }
 
 function drawBreath(

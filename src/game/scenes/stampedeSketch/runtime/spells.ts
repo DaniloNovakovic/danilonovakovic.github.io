@@ -28,6 +28,7 @@ export interface StampedeSpellCast {
   origin: StampedeSpellPoint;
   direction: StampedeSpellPoint;
   hitIds: readonly string[];
+  hitPoints: readonly StampedeSpellPoint[];
   resistedIds: readonly string[];
   cooldownMs: number;
   bark: string;
@@ -50,7 +51,8 @@ const SMELL_RANGE = 118;
 const SMELL_COOLDOWN_MS = 4_200;
 
 const GLASSES_MAX_HITS = 2;
-const GLASSES_COOLDOWN_MS = 6_800;
+const GLASSES_COOLDOWN_MS = 5_000;
+const GLASSES_RANGE = 300;
 
 const SPELLS: Record<StampedeSpellId, StampedeSpellChoice & {
   cooldownMs: number;
@@ -121,6 +123,7 @@ export function resolveStampedeSpellCast({
     origin: { x: player.x, y: player.y },
     direction,
     hitIds: resolved.hits.map((candidate) => candidate.id),
+    hitPoints: resolved.hits.map((candidate) => ({ x: candidate.x, y: candidate.y })),
     resistedIds: resolved.resisted.map((candidate) => candidate.id),
     cooldownMs: tuning.cooldownMs,
     bark: resolved.hits.length >= 4 ? spell.bigBark : spell.bark
@@ -149,9 +152,9 @@ function smellTuning(upgraded: boolean) {
 
 function glassesTuning(upgraded: boolean) {
   return {
-    range: Number.POSITIVE_INFINITY,
+    range: upgraded ? GLASSES_RANGE + 100 : GLASSES_RANGE,
     dot: -1,
-    cooldownMs: upgraded ? 4_600 : GLASSES_COOLDOWN_MS,
+    cooldownMs: upgraded ? 3_400 : GLASSES_COOLDOWN_MS,
     maxHits: upgraded ? 4 : GLASSES_MAX_HITS
   };
 }
@@ -181,6 +184,7 @@ function resolveSpellHits(
     const hits: StampedeSpellCandidate[] = [];
     const resisted: StampedeSpellCandidate[] = [];
     [...candidates]
+      .filter((candidate) => distanceBetween(player, candidate) <= tuning.range)
       .sort((left, right) => distanceBetween(player, left) - distanceBetween(player, right))
       .forEach((candidate) => {
         const pierce = rank >= 2 || mods.includes('glassesRx');

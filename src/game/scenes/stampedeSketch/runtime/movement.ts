@@ -14,6 +14,16 @@ export const STAMPEDE_ARENA = {
   safeBottom: GAME_DESIGN_HEIGHT - 52
 } as const;
 
+/** The scrolling field. `STAMPEDE_ARENA` stays the visible notebook frame. */
+export const STAMPEDE_WORLD = {
+  width: 1600,
+  height: 1000,
+  safeLeft: 40,
+  safeRight: 1560,
+  safeTop: 44,
+  safeBottom: 956
+} as const;
+
 export const STAMPEDE_PLAYER_SPEED = 210;
 const STAMPEDE_STICK_DEAD_ZONE = 10;
 const STAMPEDE_STICK_FULL_DISTANCE = 60;
@@ -64,7 +74,7 @@ export function resolveStampedeVelocity({
 
 export function clampStampedePosition(
   position: { x: number; y: number },
-  bounds: StampedeBounds = STAMPEDE_ARENA
+  bounds: StampedeBounds = STAMPEDE_WORLD
 ): { x: number; y: number } {
   return {
     x: clamp(position.x, bounds.safeLeft, bounds.safeRight),

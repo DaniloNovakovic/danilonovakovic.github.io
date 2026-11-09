@@ -55,6 +55,7 @@ export interface StampedeAutoAttackEvent {
   origin: StampedeAutoAttackPoint;
   direction: StampedeAutoAttackPoint;
   target: StampedeAutoAttackPoint;
+  targets: readonly StampedeAutoAttackPoint[];
   hitIds: readonly string[];
 }
 
@@ -123,6 +124,7 @@ export function resolveStampedeAutoAttackFrame({
       origin: player,
       direction,
       target,
+      targets: hits.map((candidate) => ({ x: candidate.x, y: candidate.y })),
       hitIds
     },
     remainingCandidates: candidates.filter((candidate) => !hitIdSet.has(candidate.id))

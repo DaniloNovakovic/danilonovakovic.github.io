@@ -3,7 +3,7 @@ import {
   STAMPEDE_AUTO_ATTACK_COOLDOWN_MS,
   createStampedeAutoAttackState
 } from './autoAttack';
-import { STAMPEDE_ARENA } from './movement';
+import { STAMPEDE_WORLD } from './movement';
 import {
   STAMPEDE_PLAYER_CONTACT_RADIUS,
   resolveStampedeRunFrame
@@ -81,8 +81,8 @@ describe('stampede run flow', () => {
 
   it('clamps player facts and applies one contact when a candidate reaches the player', () => {
     const candidate = {
-      x: STAMPEDE_ARENA.safeLeft,
-      y: STAMPEDE_ARENA.safeBottom,
+      x: STAMPEDE_WORLD.safeLeft,
+      y: STAMPEDE_WORLD.safeBottom,
       radius: 10
     };
     const frame = resolveStampedeRunFrame({
@@ -90,15 +90,15 @@ describe('stampede run flow', () => {
       deltaMs: 500,
       closeRequested: false,
       velocity: baseVelocity,
-      player: { x: -100, y: 900 },
+      player: { x: -100, y: 5_000 },
       contactCandidates: [candidate]
     });
 
     expect(frame.kind).toBe('playing');
     if (frame.kind !== 'playing') return;
     expect(frame.player).toEqual({
-      x: STAMPEDE_ARENA.safeLeft,
-      y: STAMPEDE_ARENA.safeBottom,
+      x: STAMPEDE_WORLD.safeLeft,
+      y: STAMPEDE_WORLD.safeBottom,
       radius: STAMPEDE_PLAYER_CONTACT_RADIUS
     });
     expect(frame.contactCandidate).toBe(candidate);

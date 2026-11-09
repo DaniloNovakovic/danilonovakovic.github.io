@@ -23,7 +23,8 @@ import {
 } from './session';
 import type { StampedeSwarmMode } from './swarmPresentation';
 
-export const STAMPEDE_PLAYER_CONTACT_RADIUS = 24;
+/** Matches the ring drawn around the player; birds peck when their body touches it. */
+export const STAMPEDE_PLAYER_CONTACT_RADIUS = 16;
 
 export interface StampedeRunFrameInput {
   session: StampedeSession;

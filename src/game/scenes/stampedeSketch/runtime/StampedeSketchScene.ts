@@ -2,10 +2,6 @@ import * as Phaser from 'phaser';
 import { bridgeActions, type SceneControlPointerEvent } from '@/game/bridge/store';
 import { PHASER_SCENE_KEYS, STAMPEDE_SKETCH_SCENE_ID } from '@/game/scenes/sceneIds';
 import type { SceneUiActionId } from '@/game/sceneUi/types';
-import {
-  GAME_DESIGN_HEIGHT,
-  GAME_DESIGN_WIDTH
-} from '@/game/sharedSceneRuntime/config';
 import { setSceneKeyboardPaused } from '@/game/sharedSceneRuntime/sceneKeyboardPause';
 import { TextureGenerator } from '@/game/sharedSceneRuntime/textures/TextureGenerator';
 import {
@@ -46,11 +42,26 @@ import {
   type StampedeInputRuntime
 } from './input';
 import {
+  createStampedeEventLook,
+  type StampedeEventBeacon,
+  type StampedeEventLook
+} from './eventPresentation';
+import {
   createStampedeKitLook,
   type StampedeKitLook
 } from './kitPresentation';
 import {
+  dueStampedeMapEvents,
+  isStampedeLastCall,
+  placeStampedeMirror,
+  rollStampedeGift,
+  stepStampedeMirror,
+  type StampedeMapEventKind,
+  type StampedeMirror
+} from './mapEvents';
+import {
   clampStampedePosition,
+  STAMPEDE_WORLD,
   type StampedeVelocity
 } from './movement';
 import {
@@ -60,13 +71,16 @@ import {
 import type { StampedePressureSnapshot } from './pressure';
 import {
   applyStampedeUpgradeChoice,
+  attractStampedePickups,
   collectStampedePickups,
   createStampedeProgressionState,
   grantStampedeStartingWeapon,
   offerClutchHeart,
   openStampedeDraftIfReady,
+  spawnStampedeGiftPickup,
   spawnStampedeHeartPickup,
   spawnStampedePickupsFromClearedMarks,
+  type StampedeClearedMarkPoint,
   type StampedeProgressionState
 } from './progression';
 import {
@@ -114,9 +128,20 @@ interface StampedeSketchSceneStartData {
   isPaused?: boolean;
 }
 
+type StampedeOpenDraft = 'none' | 'scraps' | 'free';
+
+const STAMPEDE_GHOSTING_MS = 3_600;
+const STAMPEDE_MAGNET_MS = 1_400;
+const STAMPEDE_ROOSTER_GIFT_CHANCE = 0.25;
+
 export class StampedeSketchScene extends Phaser.Scene {
   private player?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+  private playerShadow?: Phaser.GameObjects.Ellipse;
   private playerContactRing?: Phaser.GameObjects.Arc;
+  private eventLook?: StampedeEventLook;
+  private mirror: StampedeMirror | null = null;
+  private mirrorCharging = false;
+  private magnetUntilMs = 0;
   private inputRuntime?: StampedeInputRuntime;
   private swarmRuntime?: StampedeSwarmRuntime;
   private feedbackRuntime?: StampedeFeedbackRuntime;
@@ -130,7 +155,7 @@ export class StampedeSketchScene extends Phaser.Scene {
   private shownResultPhase?: Exclude<StampedeSessionPhase, 'playing'>;
   private lastPublishedStatusKey = '';
   private hasRunStarted = false;
-  private isUpgradeDraftOpen = false;
+  private openDraft: StampedeOpenDraft = 'none';
   private isPaused = false;
   private spellCooldownReadyAt: Partial<Record<StampedeSpellId, number>> = {};
   private breathHits: Record<string, number> = createBreathHitState();
@@ -163,12 +188,16 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.onClose = data.onClose ?? this.onClose;
     this.isPaused = data.isPaused ?? this.isPaused;
 
-    this.cameras.main.setBackgroundColor('#ffffff');
-    this.physics.world.setBounds(0, 0, GAME_DESIGN_WIDTH, GAME_DESIGN_HEIGHT);
+    this.cameras.main.setBackgroundColor('#fbfbf9');
+    this.physics.world.setBounds(0, 0, STAMPEDE_WORLD.width, STAMPEDE_WORLD.height);
     this.physics.world.gravity.set(0, 0);
 
     drawStampedeArena(this);
     this.createPlayer();
+    this.cameras.main
+      .setBounds(0, 0, STAMPEDE_WORLD.width, STAMPEDE_WORLD.height)
+      .startFollow(this.player!, true, 0.14, 0.14);
+    this.eventLook = createStampedeEventLook(this);
     this.inputRuntime = createStampedeInputRuntime({ scene: this });
     this.swarmRuntime = createStampedeSwarmRuntime({ scene: this });
     this.feedbackRuntime = createStampedeFeedbackRuntime({ scene: this });
@@ -186,6 +215,7 @@ export class StampedeSketchScene extends Phaser.Scene {
       this.pickupRuntime?.reset();
       this.spellVfx?.reset();
       this.kitLook?.reset();
+      this.eventLook?.reset();
     });
     this.setPaused(this.isPaused);
   }
@@ -244,6 +274,7 @@ export class StampedeSketchScene extends Phaser.Scene {
     });
     if (this.session.phase === 'playing') this.trackFacing(velocity);
 
+    const previousElapsedMs = this.session.elapsedMs;
     const weaponElapsedMs = Math.min(
       this.session.elapsedMs + Math.max(0, delta),
       this.session.durationMs
@@ -288,7 +319,7 @@ export class StampedeSketchScene extends Phaser.Scene {
         this.showTerminalFrame(frame, delta);
         return;
       case 'playing':
-        this.applyPlayingFrame(frame, delta, time);
+        this.applyPlayingFrame(frame, delta, time, previousElapsedMs);
         return;
     }
   }
@@ -306,7 +337,7 @@ export class StampedeSketchScene extends Phaser.Scene {
       return true;
     }
 
-    if (this.isUpgradeDraftOpen) {
+    if (this.openDraft !== 'none') {
       this.player.setVelocity(0, 0);
       this.inputRuntime.updateStickVisuals();
       return true;
@@ -318,7 +349,8 @@ export class StampedeSketchScene extends Phaser.Scene {
   private applyPlayingFrame(
     frame: Extract<ReturnType<typeof resolveStampedeRunFrame>, { kind: 'playing' }>,
     delta: number,
-    time: number
+    time: number,
+    previousElapsedMs: number
   ): void {
     if (!this.player || !this.inputRuntime || !this.swarmRuntime) return;
 
@@ -330,7 +362,12 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.updatePlayerInkTilt(time, frame.velocity);
     this.applyAutoAttack(frame.attack);
     this.syncKitLook();
-    if (this.collectPickups(frame.player, frame.pressure) || this.revealPendingDraft()) {
+    this.runMapEvents(previousElapsedMs, delta);
+    if (
+      this.collectPickups(frame.player, frame.pressure, delta)
+      || this.revealPendingDraft()
+      || this.openDraft !== 'none'
+    ) {
       this.inputRuntime.updateStickVisuals();
       return;
     }
@@ -339,16 +376,65 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.swarmRuntime.update(this.player, delta, {
       ...frame.swarm,
       elapsedMs: this.session.elapsedMs,
-      playerHurting: this.session.contacts >= 2
+      durationMs: this.session.durationMs,
+      playerHurting: this.session.contacts >= 2,
+      lastCall: isStampedeLastCall(this.session.elapsedMs, this.session.durationMs),
+      view: this.cameras.main.worldView
     });
     if (this.swarmRuntime.consumeBeerHit()) {
       this.disarmedUntilMs = this.time.now + STAMPEDE_BEER_DISARM_MS;
       this.clearContinuousWeapons();
     }
     this.syncKitLook();
+    this.syncBeacons();
     this.updateHud(frame.pressure);
     this.announceTerminalPhase();
     this.inputRuntime.updateStickVisuals();
+  }
+
+  private runMapEvents(previousElapsedMs: number, delta: number): void {
+    if (!this.player || !this.swarmRuntime) return;
+    dueStampedeMapEvents(previousElapsedMs, this.session.elapsedMs, this.session.durationMs)
+      .forEach((kind) => this.startMapEvent(kind));
+
+    if (!this.mirror) {
+      this.mirrorCharging = false;
+      this.eventLook?.syncMirror(null, this.time.now, false);
+      return;
+    }
+    const step = stepStampedeMirror(this.mirror, this.player, delta, this.session.elapsedMs);
+    this.mirror = step.mirror;
+    this.mirrorCharging = step.status === 'charging';
+    this.eventLook?.syncMirror(this.mirror, this.time.now, this.mirrorCharging);
+    if (step.status === 'complete') this.showFreeDraft();
+  }
+
+  private startMapEvent(kind: StampedeMapEventKind): void {
+    if (!this.player || !this.swarmRuntime) return;
+    switch (kind) {
+      case 'mirror':
+        this.mirror = placeStampedeMirror(this.player, STAMPEDE_WORLD, this.session.elapsedMs);
+        this.eventLook?.showBanner('A mirror appeared', 'Stand by it for a pep talk and a free twist');
+        return;
+      case 'ex':
+        this.swarmRuntime.spawnEx(this.cameras.main.worldView, this.player);
+        this.eventLook?.showBanner('Your ex showed up', 'Watch for the charge. Big gift if you win');
+        return;
+      case 'lastCall':
+        this.eventLook?.showBanner('Last call!', 'Everyone wants a dance. Hold on 20 seconds');
+    }
+  }
+
+  private syncBeacons(): void {
+    if (!this.eventLook || !this.swarmRuntime) return;
+    const beacons: StampedeEventBeacon[] = [...this.swarmRuntime.getBeacons()];
+    if (this.mirror) beacons.push({ x: this.mirror.x, y: this.mirror.y, kind: 'mirror' });
+    this.progression.pickups.forEach((pickup) => {
+      if (pickup.kind === 'heart' || pickup.kind === 'gift') {
+        beacons.push({ x: pickup.x, y: pickup.y, kind: pickup.kind });
+      }
+    });
+    this.eventLook.syncBeacons(beacons, this.cameras.main.worldView);
   }
 
   private tickOwnedWeapons(delta: number, time: number): void {
@@ -381,6 +467,9 @@ export class StampedeSketchScene extends Phaser.Scene {
     }
     if (!frame.contactCandidate || !this.player) return;
     this.feedbackRuntime?.showContact(this.player, frame.contactCandidate);
+    if ('id' in frame.contactCandidate && typeof frame.contactCandidate.id === 'string') {
+      this.swarmRuntime?.bouncePecker(frame.contactCandidate.id, this.player);
+    }
     this.updatePlayerContactRing(frame.pressure);
   }
 
@@ -399,7 +488,10 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.shownResultPhase = undefined;
     this.lastPublishedStatusKey = '';
     this.hasRunStarted = false;
-    this.isUpgradeDraftOpen = false;
+    this.openDraft = 'none';
+    this.mirror = null;
+    this.mirrorCharging = false;
+    this.magnetUntilMs = 0;
     this.spellCooldownReadyAt = {};
     this.clearContinuousWeapons();
     this.disarmedUntilMs = 0;
@@ -410,8 +502,8 @@ export class StampedeSketchScene extends Phaser.Scene {
 
   private createPlayer(): void {
     const start = this.readPlayerStartPosition();
+    this.playerShadow = this.add.ellipse(start.x, start.y + 22, 40, 12, 0x1a1a1a, 0.16).setDepth(15);
     this.player = this.physics.add.sprite(start.x, start.y, 'player_idle');
-    this.player.setDepth(30);
     this.player.setScale(0.82);
     this.player.setDrag(1400, 1400);
     this.player.body.setAllowGravity(false);
@@ -423,7 +515,15 @@ export class StampedeSketchScene extends Phaser.Scene {
       STAMPEDE_PLAYER_CONTACT_RADIUS,
       0xffffff,
       0
-    ).setStrokeStyle(2, 0x1a1a1a, 0.32).setDepth(29);
+    ).setStrokeStyle(2, 0x1a1a1a, 0.32).setDepth(19);
+    this.syncPlayerDepth();
+  }
+
+  /** Same y-sort as the flock so the player tucks behind birds lower on the page. */
+  private syncPlayerDepth(): void {
+    if (!this.player) return;
+    this.player.setDepth(20 + this.player.y / 10_000);
+    this.playerShadow?.setPosition(this.player.x, this.player.y + 22);
   }
 
   private closeToStreet(): void {
@@ -443,6 +543,7 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.pickupRuntime?.reset();
     this.spellVfx?.reset();
     this.kitLook?.reset();
+    this.eventLook?.reset();
     this.inputRuntime?.setPointerControlEnabled(false);
     this.inputRuntime?.clearPointerControl();
 
@@ -453,6 +554,7 @@ export class StampedeSketchScene extends Phaser.Scene {
       .setAlpha(1)
       .setScale(0.82)
       .setAngle(0);
+    this.cameras.main.centerOn(start.x, start.y);
     this.syncFakeGlassesLook();
     this.updatePlayerContactRing();
 
@@ -569,18 +671,22 @@ export class StampedeSketchScene extends Phaser.Scene {
         dazeMs
       );
     }
-    this.progression = spawnStampedePickupsFromClearedMarks(
-      this.progression,
-      clearedMarks
-    );
-    this.pickupRuntime?.sync(this.progression.pickups);
+    this.dropPickups(clearedMarks);
     this.autoAttackRuntime?.show(attack);
   }
 
   private collectPickups(
     player: { x: number; y: number; radius?: number },
-    pressure?: StampedePressureSnapshot
+    pressure: StampedePressureSnapshot | undefined,
+    deltaMs: number
   ): boolean {
+    const attracted = attractStampedePickups(this.progression, player, deltaMs, {
+      pullAll: this.time.now < this.magnetUntilMs
+    });
+    if (attracted !== this.progression) {
+      this.progression = attracted;
+      this.pickupRuntime?.sync(this.progression.pickups);
+    }
     const frame = collectStampedePickups(this.progression, player, {
       elapsedMs: this.session.elapsedMs
     });
@@ -590,12 +696,31 @@ export class StampedeSketchScene extends Phaser.Scene {
     for (let index = 0; index < frame.heartsCollected; index += 1) {
       this.session = recoverStampedeContact(this.session);
     }
+    for (let index = 0; index < frame.giftsCollected; index += 1) {
+      this.openGift(player);
+    }
     this.pickupRuntime?.sync(this.progression.pickups);
     this.updateHud(pressure);
 
     if (this.progression.upgradeDraftStatus !== 'pending') return false;
     this.showUpgradeDraft();
     return true;
+  }
+
+  private openGift(player: { x: number; y: number }): void {
+    switch (rollStampedeGift(this.session.contacts > 0)) {
+      case 'magnet':
+        this.magnetUntilMs = this.time.now + STAMPEDE_MAGNET_MS;
+        this.eventLook?.showBanner('Magnetic personality', 'Every scrap on the page flies to you');
+        return;
+      case 'ghosting':
+        this.swarmRuntime?.scatter(player, STAMPEDE_GHOSTING_MS);
+        this.eventLook?.showBanner('Ghosting', 'Everyone backs off for a moment');
+        return;
+      case 'heal':
+        this.session = recoverStampedeContact(this.session);
+        this.eventLook?.showBanner('Self care', 'One heart back');
+    }
   }
 
   private revealPendingDraft(): boolean {
@@ -624,6 +749,7 @@ export class StampedeSketchScene extends Phaser.Scene {
       this.session.recentContact ||
       nearestDistance < 24;
 
+    this.syncPlayerDepth();
     this.playerContactRing
       .setPosition(this.player.x, this.player.y)
       .setRadius(STAMPEDE_PLAYER_CONTACT_RADIUS)
@@ -637,8 +763,8 @@ export class StampedeSketchScene extends Phaser.Scene {
 
   private readPlayerStartPosition(): { x: number; y: number } {
     return clampStampedePosition({
-      x: GAME_DESIGN_WIDTH / 2,
-      y: GAME_DESIGN_HEIGHT / 2 + 36
+      x: STAMPEDE_WORLD.width / 2,
+      y: STAMPEDE_WORLD.height / 2 + 70
     });
   }
 
@@ -683,14 +809,15 @@ export class StampedeSketchScene extends Phaser.Scene {
   }
 
   private handleUpgradeChoice(params: unknown): void {
-    if (!this.isUpgradeDraftOpen) return;
+    if (this.openDraft === 'none') return;
     const upgradeId = readUpgradeId(params);
     if (!isStampedeUpgradeId(upgradeId)) return;
 
     this.progression = applyStampedeUpgradeChoice(
       this.progression,
       upgradeId,
-      this.session.elapsedMs
+      this.session.elapsedMs,
+      { free: this.openDraft === 'free' }
     );
     if (upgradeId === 'catchBreath') {
       this.session = recoverStampedeContact(this.session);
@@ -706,7 +833,7 @@ export class StampedeSketchScene extends Phaser.Scene {
         this.session.elapsedMs + profile.cooldownMs
       )
     };
-    this.isUpgradeDraftOpen = false;
+    this.openDraft = 'none';
     bridgeActions.clearSceneUiPanel(STAMPEDE_SKETCH_SCENE_ID);
     this.inputRuntime?.setPointerControlEnabled(true);
     this.inputRuntime?.clearPointerControl();
@@ -724,8 +851,17 @@ export class StampedeSketchScene extends Phaser.Scene {
     }
   }
 
-  private showUpgradeDraft(): void {
-    if (this.isUpgradeDraftOpen) return;
+  private showFreeDraft(): void {
+    this.mirror = null;
+    this.mirrorCharging = false;
+    this.eventLook?.syncMirror(null, this.time.now, false);
+    if (this.showUpgradeDraft('free')) return;
+    this.session = recoverStampedeContact(this.session);
+    this.eventLook?.showBanner('Looking good', 'The mirror patched you up');
+  }
+
+  private showUpgradeDraft(source: Exclude<StampedeOpenDraft, 'none'> = 'scraps'): boolean {
+    if (this.openDraft !== 'none') return false;
 
     const choices = getStampedeUpgradeChoices(
       this.progression.appliedUpgradeIds,
@@ -740,15 +876,17 @@ export class StampedeSketchScene extends Phaser.Scene {
       }
     );
     if (choices.length === 0) {
-      this.progression = {
-        ...this.progression,
-        upgradeDraftStatus: 'none',
-        scrapGoal: 0
-      };
-      return;
+      if (source === 'scraps') {
+        this.progression = {
+          ...this.progression,
+          upgradeDraftStatus: 'none',
+          scrapGoal: 0
+        };
+      }
+      return false;
     }
 
-    this.isUpgradeDraftOpen = true;
+    this.openDraft = source;
     this.spellVfx?.aim({
       spellId: resolveEquippedSpell(this.progression.appliedUpgradeIds) ?? 'badBreath',
       origin: { x: this.player?.x ?? 0, y: this.player?.y ?? 0 },
@@ -763,9 +901,11 @@ export class StampedeSketchScene extends Phaser.Scene {
       {
         choices,
         scrapsCollected: this.progression.scrapsCollected,
-        scrapGoal: this.progression.scrapGoal
+        scrapGoal: this.progression.scrapGoal,
+        gift: source === 'free'
       }
     );
+    return true;
   }
 
   private showStartPrompt(): void {
@@ -830,19 +970,24 @@ export class StampedeSketchScene extends Phaser.Scene {
     const owned = this.progression.appliedUpgradeIds.includes('badSmell')
       || this.progression.upgradedWeaponIds.includes('badSmell');
     if (!owned) return null;
-    const legacy = this.progression.upgradedWeaponIds.includes('badSmell');
     return stepOrbitHits({
       state: this.stinkState,
-      aura: getStinkAura({
-        far: this.progression.appliedUpgradeIds.includes('smellFar'),
-        fast: legacy || this.progression.appliedUpgradeIds.includes('smellFast'),
-        twin: legacy || this.progression.appliedUpgradeIds.includes('smellTwin'),
-        fat: this.progression.appliedUpgradeIds.includes('smellFat')
-      }),
+      aura: this.currentStinkAura(),
       elapsedMs,
       deltaMs,
       player: { x: this.player.x, y: this.player.y },
       candidates: this.swarmRuntime.getSpellCandidates()
+    });
+  }
+
+  private currentStinkAura() {
+    const applied = this.progression.appliedUpgradeIds;
+    const legacy = this.progression.upgradedWeaponIds.includes('badSmell');
+    return getStinkAura({
+      far: applied.includes('smellFar'),
+      fast: legacy || applied.includes('smellFast'),
+      twin: legacy || applied.includes('smellTwin'),
+      fat: applied.includes('smellFat')
     });
   }
 
@@ -893,8 +1038,17 @@ export class StampedeSketchScene extends Phaser.Scene {
   }
 
   private applyWeaponHits(hitIds: readonly string[]): void {
-    const clearedMarks = this.swarmRuntime?.clearMarks(hitIds, 'poison') ?? [];
+    this.dropPickups(this.swarmRuntime?.clearMarks(hitIds, 'poison') ?? []);
+  }
+
+  private dropPickups(clearedMarks: readonly StampedeClearedMarkPoint[]): void {
+    if (clearedMarks.length === 0) return;
     this.progression = spawnStampedePickupsFromClearedMarks(this.progression, clearedMarks);
+    clearedMarks.forEach((mark) => {
+      const dropsGift = mark.kind === 'ex'
+        || (mark.kind === 'rooster' && Math.random() < STAMPEDE_ROOSTER_GIFT_CHANCE);
+      if (dropsGift) this.progression = spawnStampedeGiftPickup(this.progression, mark);
+    });
     this.pickupRuntime?.sync(this.progression.pickups);
   }
 
@@ -915,7 +1069,7 @@ export class StampedeSketchScene extends Phaser.Scene {
       breathBubbles: this.breathBubbles,
       lingerBubbles: this.breathLinger,
       stinkPoints: this.stinkPoints,
-      stinkFat: this.progression.appliedUpgradeIds.includes('smellFat'),
+      stinkRadius: this.currentStinkAura().hitRadius,
       selfieRank: rank('badSelfie'),
       selfieRear: this.progression.appliedUpgradeIds.includes('selfieRear'),
       glassesRank: rank('fakeGlasses'),
@@ -965,8 +1119,7 @@ export class StampedeSketchScene extends Phaser.Scene {
       glassesFreeze ? 'daze' : undefined,
       1_100
     );
-    this.progression = spawnStampedePickupsFromClearedMarks(this.progression, clearedMarks);
-    this.pickupRuntime?.sync(this.progression.pickups);
+    this.dropPickups(clearedMarks);
     this.spellVfx?.show(cast);
   }
 

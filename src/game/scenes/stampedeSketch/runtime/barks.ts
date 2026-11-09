@@ -8,7 +8,8 @@ const BARK_LINES: Partial<Record<StampedeFlockKind, string>> = {
   fixer: 'I can fix him.',
   situationship: "It's complicated.",
   rooster: 'Square up.',
-  bartender: 'Last call.'
+  bartender: 'Last call.',
+  ex: 'We need to talk.'
 };
 
 const BARK_RARITY: Partial<Record<StampedeFlockKind, number>> = {
@@ -17,7 +18,8 @@ const BARK_RARITY: Partial<Record<StampedeFlockKind, number>> = {
   fixer: 3,
   situationship: 4,
   rooster: 5,
-  bartender: 6
+  bartender: 6,
+  ex: 7
 };
 
 const BARK_DELAY_MS: Partial<Record<StampedeFlockKind, number>> = {
@@ -26,7 +28,8 @@ const BARK_DELAY_MS: Partial<Record<StampedeFlockKind, number>> = {
   fixer: 7_200,
   situationship: 4_600,
   rooster: 8_000,
-  bartender: 4_000
+  bartender: 4_000,
+  ex: 1_200
 };
 
 export interface StampedeBarkSpeaker {
