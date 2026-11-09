@@ -131,6 +131,7 @@ export type GameCommand =
   | { type: 'advance' }
   | { type: 'choose'; choiceIdOrIndex: string }
   | { type: 'leave' }
+  | { type: 'testBridge' }
   | { type: 'start' }
   | { type: 'perform' }
   | { type: 'fight' }

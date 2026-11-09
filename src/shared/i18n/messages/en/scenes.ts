@@ -147,15 +147,15 @@ export const sceneMessages = {
         "bridge.cicka.parallel_play.02": "Gently roll the toy car back and forth",
         "bridge.cicka.parallel_play.03": "Purrrr... *Cicka nudges the toy car into your hand with approval*",
         "bridge.cicka.parallel_play.04": "Cicka entrusts you with the official Bridge Test Vehicle!",
-        "bridge.draftsperson.toy_car_test.prompt": "Test Blueprint",
+        "bridge.draftsperson.toy_car_test.prompt": "Open Blueprint Workbench",
         "bridge.draftsperson.toy_car_test.01":
-          "You place the tiny test car onto the blueprint span.",
+          "You place the tiny test car beside the blank middle span. This time, the lines are yours to draw.",
         "bridge.draftsperson.toy_car_test.02":
-          "If this little car can brave the gap on paper, we can build the real thing!",
+          "Give the deck some triangles. Triangles spread the weight instead of letting one brave line take all the credit.",
         "bridge.draftsperson.toy_car_test.03":
-          "Vroom! The toy car zips safely across the inked span without falling.",
+          "The toy car gets first dibs. Then a delivery truck full of groceries gets the final say.",
         "bridge.draftsperson.toy_car_test.04":
-          "Aha! The math holds! The blueprint bridge comes alive under our feet!",
+          "Open the workbench when you're ready. Nothing becomes a real bridge until both vehicles make it across.",
         "bridge.exit.opened_crossing.prompt": "Cross Bridge",
         "bridge.exit.opened_crossing.01": "You stride across the freshly completed bridge.",
         "bridge.exit.opened_crossing.02":

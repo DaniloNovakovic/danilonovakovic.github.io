@@ -300,8 +300,7 @@ function resolveBridgeConversation(
           line('bridge.draftsperson.toy_car_test.04', 'bridgeDraftsperson')
         ],
         outcome: {
-          setBeat: 'bridge_complete',
-          clearFlag: 'toy_car_shared'
+          openBridgeBuilder: true
         }
       };
     case 'bridge.exit.opened_crossing':

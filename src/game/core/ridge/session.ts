@@ -1,6 +1,15 @@
 // Session dispatch mirrors many console verbs; complexity is the command surface.
 // fallow-ignore-file complexity
 import {
+  addBridgeEdge,
+  canAddBridgeEdge,
+  createCanonicalBridgeDesign,
+  createEmptyBridgeDesign,
+  evaluateBridge,
+  isBridgeDesign,
+  type BridgeDesign
+} from './bridgeBuilder';
+import {
   advanceConversation,
   chooseInConversation,
   leaveConversation,
@@ -20,7 +29,12 @@ import type {
   RidgeStageRegistry,
   RidgeWorldState
 } from './types';
-import { RIDGE_GUITAR_ITEM, RIDGE_INITIAL_BEAT, ridgeNextArea } from './types';
+import {
+  RIDGE_GUITAR_ITEM,
+  RIDGE_INITIAL_BEAT,
+  RIDGE_TOY_CAR_ITEM,
+  ridgeNextArea
+} from './types';
 
 const DEFAULT_STEP = 0.05;
 
@@ -112,6 +126,8 @@ export class RidgeConsoleSession {
         return this.handleChoose(command.choiceIdOrIndex);
       case 'leave':
         return this.handleLeave();
+      case 'testBridge':
+        return this.handleTestBridge(command.design);
       case 'skip':
         return this.handleSkip();
       case 'warp':
@@ -236,6 +252,60 @@ export class RidgeConsoleSession {
       message: result.message,
       observation: this.observe(),
       events: result.events
+    };
+  }
+
+  private handleTestBridge(design?: BridgeDesign): RidgeCommandResult {
+    if (this.state.areaId !== 'bridge') {
+      return this.fail('The blueprint workbench belongs at Bridge Area.');
+    }
+    if (this.state.mode !== 'explore') {
+      return this.fail('Finish the conversation before testing the bridge.');
+    }
+    if (this.state.beat !== 'toy_car_shared') {
+      return this.fail('Cicka needs to share the test car before the bridge test.');
+    }
+
+    const candidate = design ?? createCanonicalBridgeDesign();
+    if (!isBridgeDesign(candidate)) {
+      return this.fail('That blueprint is not a valid set of bridge struts.');
+    }
+
+    let normalized = createEmptyBridgeDesign();
+    for (const edge of candidate.edges) {
+      if (!canAddBridgeEdge(normalized, edge.a, edge.b)) {
+        return this.fail('The blueprint has a duplicate, overlong, or over-budget strut.');
+      }
+      normalized = addBridgeEdge(normalized, edge.a, edge.b);
+    }
+
+    if (!evaluateBridge(normalized).truckReady) {
+      return this.fail('The truck needs a full deck, four triangles, and two belly braces.');
+    }
+
+    const hadToyCar = this.state.inventory.includes(RIDGE_TOY_CAR_ITEM);
+    const hadSharedFlag = this.state.flags.has('toy_car_shared');
+    const flags = new Set(this.state.flags);
+    flags.delete('toy_car_shared');
+    this.state = {
+      ...this.state,
+      beat: 'bridge_complete',
+      flags,
+      inventory: this.state.inventory.filter((item) => item !== RIDGE_TOY_CAR_ITEM),
+      lastMessage: 'The toy car and delivery truck both cross. Your drawing becomes the bridge.'
+    };
+
+    return {
+      ok: true,
+      message: this.state.lastMessage ?? 'Bridge test complete.',
+      observation: this.observe(),
+      events: [
+        { type: 'beat_changed', beat: 'bridge_complete' },
+        ...(hadToyCar ? [{ type: 'item_removed' as const, itemId: RIDGE_TOY_CAR_ITEM }] : []),
+        ...(hadSharedFlag
+          ? [{ type: 'flag_changed' as const, flag: 'toy_car_shared', present: false }]
+          : [])
+      ]
     };
   }
 

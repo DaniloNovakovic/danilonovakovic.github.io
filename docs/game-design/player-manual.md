@@ -77,6 +77,14 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
 - Potassium keeps a local top-5 records list for finished runs.
 - Press `R` to retry after a terminal screen, `E` to return, `Space` to continue into endless after winning, or `Esc` to return to the city.
 
+## Ridge / Blueprint Bridge
+
+- Enter Ridge by inserting the Circuit into the street CRT. At the Bridge, talk to the Draftsperson, then join Cicka's quiet toy-car play so she shares the test car.
+- Return to the Draftsperson and finish the short conversation to open **Blueprint Bridge**. Drag between numbered joints, or tap two joints in order, to draw ink struts. The pale pencil marks are optional guides; **Cicka's hint** points out one useful missing line.
+- A bridge needs an unbroken deck and triangular trusses. Send the toy car first, then reinforce the design with belly braces for the delivery truck. You have 16 ink drops; the traced guide design uses 14.
+- A failed test makes the bridge wobble but never consumes the car. Erase, undo, clear, or revise the drawing and try again. Closing the workbench early leaves the crossing unfinished.
+- When both vehicles pass, choose **Roll into Ridge** to make the crossing real and continue toward Concert Crossing. Keyboard: `R` reset, `H` hint, `T` test, `1` draw, `2` erase. Reduced-motion settings shorten the test animation.
+
 ## Headless / AI Console
 
 - Full interactive route is playable without a browser via `pnpm game:console`.
@@ -84,8 +92,9 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
   `equip` / `unequip`, `close`.
 - Potassium in console mode is discrete (`start`, `fight`, `draft`) — not the
   live drag-banana physics. Winning still grants the Circuit.
-- Ridge conversation uses `advance` / `choose`. `pnpm ridge:console` is an alias
-  that starts already inside Ridge.
+- Ridge conversation uses `advance` / `choose`. After the Draftsperson opens the
+  workbench beat, `test bridge` runs the authored car-and-truck check in headless
+  mode. `pnpm ridge:console` is an alias that starts already inside Ridge.
 - Ridge first-playable secret route: Bridge → Concert → Dance Festival → Relay
   farewell (Sit and Play, dedication card), then return to the Overworld street.
   Progress resets so the next CRT entry starts Bridge again.

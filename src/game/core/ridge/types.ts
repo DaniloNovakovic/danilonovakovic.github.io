@@ -1,3 +1,5 @@
+import type { BridgeDesign } from './bridgeBuilder';
+
 /**
  * Pure Ridge console types. No Phaser, React, or DOM.
  */
@@ -88,6 +90,8 @@ export interface RidgeConversationOutcome {
   removeItem?: string;
   setFlag?: string;
   clearFlag?: string;
+  /** Open the interactive construction workbench in the Phaser adapter. */
+  openBridgeBuilder?: boolean;
 }
 
 export interface RidgeConversationDefinition {
@@ -214,6 +218,8 @@ export type RidgeCommand =
   | { type: 'advance' }
   | { type: 'choose'; choiceIdOrIndex: string }
   | { type: 'leave' }
+  /** Run the car + truck check; omitted designs use the canonical console solution. */
+  | { type: 'testBridge'; design?: BridgeDesign }
   /** DEV / AI: jump to the next Compact Ridge Area. */
   | { type: 'skip' }
   /** DEV / AI: warp to a named area start. */
@@ -226,6 +232,7 @@ export type RidgeSessionEvent =
   | { type: 'route_reset' }
   | { type: 'conversation_started'; conversationId: string }
   | { type: 'conversation_ended'; conversationId: string }
+  | { type: 'bridge_builder_requested' }
   | { type: 'item_added'; itemId: string }
   | { type: 'item_removed'; itemId: string }
   | { type: 'flag_changed'; flag: string; present: boolean };

@@ -19,7 +19,8 @@ export type SceneUiActionId =
   | 'potassiumTerminalAction'
   | 'ridgeConversationAdvance'
   | 'ridgeConversationChoose'
-  | 'ridgeConversationLeave';
+  | 'ridgeConversationLeave'
+  | 'ridgeBridgeBuilderComplete';
 
 export interface SceneUiSurfaceRequest {
   ownerSceneId: SceneId;

@@ -7,8 +7,10 @@ import {
 } from '@/game/bridge/store';
 import {
   createRidgeRouteStages,
+  isBridgeDesign,
   RidgeConsoleSession,
   RIDGE_GUITAR_ITEM,
+  RIDGE_TOY_CAR_ITEM,
   RIDGE_INITIAL_BEAT,
   ridgePrevArea,
   type RidgeAreaId,
@@ -53,6 +55,7 @@ export class RidgeScene extends Phaser.Scene {
   private keys?: SceneInputKeys;
   private readonly inputFrame: InputCommandFrame = createInputCommandFrame();
   private onClose: () => void = () => {};
+  private onOpenOverlay: (overlayId: OverlayId, options?: OpenOverlayOptions) => void = () => {};
   private isPaused = false;
   private getRidgeDevControls?: () => RidgeDevControls | undefined;
   private lastConversationKey: string | null = null;
@@ -67,6 +70,7 @@ export class RidgeScene extends Phaser.Scene {
 
   init(data: RidgeSceneStartData = {}): void {
     this.onClose = data.onClose ?? (() => {});
+    this.onOpenOverlay = data.onOpenOverlay ?? (() => {});
     this.isPaused = data.isPaused ?? false;
     this.getRidgeDevControls = import.meta.env.DEV ? data.getRidgeDevControls : undefined;
   }
@@ -84,7 +88,10 @@ export class RidgeScene extends Phaser.Scene {
       areaId,
       beat: route.beat,
       progress: 0.05,
-      inventory: hasGuitar ? [RIDGE_GUITAR_ITEM] : []
+      inventory: [
+        ...(hasGuitar ? [RIDGE_GUITAR_ITEM] : []),
+        ...(route.beat === 'toy_car_shared' ? [RIDGE_TOY_CAR_ITEM] : [])
+      ]
     });
 
     const presence = loadRidgePresenceCatalog();
@@ -175,6 +182,12 @@ export class RidgeScene extends Phaser.Scene {
     const action = bridgeActions.consumeSceneUiAction(RIDGE_SCENE_ID);
     if (!action) return;
 
+    if (action.action === 'ridgeBridgeBuilderComplete') {
+      if (isBridgeDesign(action.params)) {
+        this.applyResult(this.session.run({ type: 'testBridge', design: action.params }));
+      }
+      return;
+    }
     if (action.action === 'ridgeConversationAdvance') {
       this.applyResult(this.session.exec('advance'));
       return;
@@ -211,6 +224,13 @@ export class RidgeScene extends Phaser.Scene {
     if (event.type === 'area_handoff') {
       const areaId = event.areaId as RidgeAreaId;
       bridgeActions.setRidgeAreaHandoff(areaId, RIDGE_INITIAL_BEAT[areaId] as RidgeRouteBeatState);
+      return;
+    }
+    if (event.type === 'bridge_builder_requested') {
+      this.onOpenOverlay('bridgeBuilder', {
+        returnToSceneId: RIDGE_SCENE_ID,
+        closeOnBackdrop: false
+      });
       return;
     }
     if (event.type === 'route_reset') {

@@ -262,14 +262,25 @@ function drawBridgeNear(
   }
 
   if (bridgeOpen) {
+    const deckY = GROUND_Y - 4;
+    const trussY = GROUND_Y - 58;
     g.lineStyle(5.5, INK, 1);
-    g.lineBetween(riverLeft, GROUND_Y - 4, riverRight, GROUND_Y - 4);
-    g.lineStyle(2, INK, 0.5);
-    g.lineBetween(riverLeft, GROUND_Y - 20, riverRight, GROUND_Y - 20);
+    g.lineBetween(riverLeft, deckY, riverRight, deckY);
+    g.lineStyle(2.8, INK, 0.82);
+    g.lineBetween(riverLeft + 12, trussY, riverRight - 12, trussY);
     for (let i = 0; i <= 6; i += 1) {
       const px = riverLeft + ((riverRight - riverLeft) / 6) * i;
-      g.lineBetween(px, GROUND_Y - 20, px, GROUND_Y - 4);
+      g.lineBetween(px, deckY, px, trussY);
+      if (i < 6) {
+        const nextX = riverLeft + ((riverRight - riverLeft) / 6) * (i + 1);
+        g.lineBetween(px, i % 2 === 0 ? deckY : trussY, nextX, i % 2 === 0 ? trussY : deckY);
+      }
     }
+    g.lineStyle(2, INK, 0.65);
+    g.lineBetween(riverRight - 4, deckY, riverRight - 4, deckY - 76);
+    g.fillStyle(PAPER_WARM, 1);
+    g.fillTriangle(riverRight - 4, deckY - 76, riverRight + 28, deckY - 66, riverRight - 4, deckY - 56);
+    g.strokeTriangle(riverRight - 4, deckY - 76, riverRight + 28, deckY - 66, riverRight - 4, deckY - 56);
   } else {
     const mid = (riverLeft + riverRight) / 2;
     g.lineStyle(5.5, INK, 1);
