@@ -5,7 +5,7 @@ description: Set up Claude Code hooks to block dangerous git commands (push, res
 
 # Setup Git Guardrails
 
-Sets up a best-effort PreToolUse hook that intercepts and blocks common dangerous git commands before Claude executes them. This hook requires `jq` and fails closed if it cannot parse Claude's hook input. It is a safety net, not a complete shell sandbox: it can miss aliases, wrappers, unusual quoting, or commands hidden behind another executable.
+Sets up a PreToolUse hook that intercepts and blocks dangerous git commands before Claude executes them.
 
 ## What Gets Blocked
 
@@ -15,7 +15,7 @@ Sets up a best-effort PreToolUse hook that intercepts and blocks common dangerou
 - `git branch -D`
 - `git checkout .` / `git restore .`
 
-When blocked, Claude sees a message telling it that it does not have authority to access these commands. Keep normal review and permission habits in place even after installing the hook.
+When blocked, Claude sees a message telling it that it does not have authority to access these commands.
 
 ## Steps
 
@@ -33,10 +33,6 @@ Copy it to the target location based on scope:
 - **Global**: `~/.claude/hooks/block-dangerous-git.sh`
 
 Make it executable with `chmod +x`.
-
-Make sure `jq` is installed on the machine where the hook will run. The script
-exits with code 2 if `jq` is missing or if Claude's hook payload cannot be
-parsed.
 
 ### 3. Add hook to settings
 
@@ -82,7 +78,7 @@ Add to the appropriate settings file:
 }
 ```
 
-If the settings file already exists, merge the hook into existing `hooks.PreToolUse` array — don't overwrite other settings.
+If the settings file already exists, merge the hook into the existing `hooks.PreToolUse` array. Don't overwrite other settings.
 
 ### 4. Ask about customization
 
@@ -97,11 +93,3 @@ echo '{"tool_input":{"command":"git push origin main"}}' | <path-to-script>
 ```
 
 Should exit with code 2 and print a BLOCKED message to stderr.
-
-Also test common variants:
-
-```bash
-echo '{"tool_input":{"command":"git -C repo push"}}' | <path-to-script>
-echo '{"tool_input":{"command":"git clean -xdf"}}' | <path-to-script>
-echo '{"tool_input":{"command":"git restore -- ."}}' | <path-to-script>
-```

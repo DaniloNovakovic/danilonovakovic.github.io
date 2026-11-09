@@ -22,7 +22,7 @@ Do not treat every file here as equally active.
 - **Live PRDs, issues, triage state, and agent briefs:** GitHub Issues, as
   configured in [`../agents/issue-tracker.md`](../agents/issue-tracker.md).
 
-For future Ridge design, prefer [`CONTEXT.md`](../../CONTEXT.md),
+For future Ridge design, prefer [`GLOSSARY.md`](../../GLOSSARY.md),
 [`ridge/README.md`](./ridge/README.md), and
 [`ridge/story-level-bible.md`](./ridge/story-level-bible.md), then the matching
 [`ridge/areas/`](./ridge/areas/README.md) file for area-local detail. For

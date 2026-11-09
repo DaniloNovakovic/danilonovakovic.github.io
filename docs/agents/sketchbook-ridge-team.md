@@ -145,7 +145,7 @@ The Architect owns:
 - dependency order
 - deciding what cannot be parallelized
 - deciding what should not be changed at all
-- calling for ADR or `CONTEXT.md` updates when a durable decision or term is
+- calling for ADR or `GLOSSARY.md` updates when a durable decision or term is
   created
 
 The Architect must protect:

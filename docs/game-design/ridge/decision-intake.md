@@ -10,7 +10,7 @@ each claim to one canonical home.
 
 | Claim type | Destination |
 | --- | --- |
-| New stable domain term or ambiguity | [`../../../CONTEXT.md`](../../../CONTEXT.md) |
+| New stable domain term or ambiguity | [`../../../GLOSSARY.md`](../../../GLOSSARY.md) |
 | Accepted route spine, ending order, area barricade chain, Cicka, guitar, or route-readiness decision | [`story-level-bible.md`](./story-level-bible.md) |
 | Accepted area-local Bridge, Concert, Dance Festival, or Relay detail | matching file or subdoc under [`areas/`](./areas/README.md) |
 | Current implemented/runtime truth | [`ridge-snapshot.md`](./ridge-snapshot.md) or runtime source |
@@ -41,7 +41,7 @@ Reviewer needed: yes/no
 
 ## Canon Updates Requested
 
-- `CONTEXT.md`: terms only
+- `GLOSSARY.md`: terms only
 - `story-level-bible.md`: route spine, cross-area dependencies, ending logic only
 - `areas/`: area-local accepted detail only; use the narrowest subdoc when one exists
 - `ridge-snapshot.md`: runtime truth only
@@ -102,7 +102,7 @@ Links only. No transcript paste.
 
 - Pasting transcripts into `story-level-bible.md`.
 - Treating provenance or research summaries as active spec.
-- Using `CONTEXT.md` as a story bible instead of a glossary.
+- Using `GLOSSARY.md` as a story bible instead of a glossary.
 - Repeating one decision in `summit.md`, `story-level-bible.md`,
   `ridge-snapshot.md`, and GitHub Issues.
 - Letting `candidate` ideas drive implementation.

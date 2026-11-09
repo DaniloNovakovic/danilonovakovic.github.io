@@ -90,7 +90,7 @@ Route blockout TBD:
 ## First Playable Route Blockout
 
 The **First Playable Route** scope floor is already accepted in
-[`../../../CONTEXT.md`](../../../CONTEXT.md): the smallest complete Bridge Area
+[`../../../GLOSSARY.md`](../../../GLOSSARY.md): the smallest complete Bridge Area
 through Relay Spire path that proves the emotional arc without required
 mini-games, optional interiors, campfire hangouts, or extra resident liveliness.
 Do not re-grill that scope unless Danilo changes the product target.
@@ -108,7 +108,7 @@ When a grilling/research pass resolves a question:
 1. Add accepted route/story decisions to [`story-level-bible.md`](./story-level-bible.md).
 2. Add accepted local area detail to the matching [`areas/`](./areas/README.md)
    file or area subdoc.
-3. Add new stable terms or ambiguities to [`../../../CONTEXT.md`](../../../CONTEXT.md).
+3. Add new stable terms or ambiguities to [`../../../GLOSSARY.md`](../../../GLOSSARY.md).
 4. Add implementation work to GitHub Issues.
 5. Add runtime/prototype facts to [`ridge-snapshot.md`](./ridge-snapshot.md).
 6. Remove or rewrite the resolved question here.

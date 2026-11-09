@@ -23,7 +23,7 @@ Use each file for exactly one concern:
 
 | Concern | Source | Notes |
 | --- | --- | --- |
-| Domain language | [`../../../CONTEXT.md`](../../../CONTEXT.md) | Use these terms exactly. Add only stable domain terms and ambiguities. |
+| Domain language | [`../../../GLOSSARY.md`](../../../GLOSSARY.md) | Use these terms exactly. Add only stable domain terms and ambiguities. |
 | Shipped behavior | [`../player-manual.md`](../player-manual.md) | Update only when behavior ships. |
 | Current Ridge route canon | [`story-level-bible.md`](./story-level-bible.md) | Route spine, area barricade chain, cross-area Cicka/guitar logic, ending order. |
 | Area-specific design canon | [`areas/`](./areas/README.md) | Local geography, blockers, residents, prompts, staging, Cicka Resting Spots, visual/audio notes. |
@@ -38,7 +38,7 @@ Use each file for exactly one concern:
 | Art/audio/asset support | [`reference/`](./reference/README.md) | Reference packs that support active docs but do not override route canon. |
 | Live work | GitHub Issues | PRDs, current backlog, triage state, and agent briefs. |
 
-When docs disagree about future Ridge design, prefer `CONTEXT.md`,
+When docs disagree about future Ridge design, prefer `GLOSSARY.md`,
 `story-level-bible.md`, and the matching `areas/` doc. When docs disagree about
 current runtime behavior, prefer runtime source plus `ridge-snapshot.md`.
 
@@ -83,7 +83,7 @@ search that folder first when updating active route design.
 For Ridge planning changes:
 
 1. Read this file first.
-2. Use `CONTEXT.md` vocabulary exactly.
+2. Use `GLOSSARY.md` vocabulary exactly.
 3. Update one canonical target file per claim.
 4. Do not paste transcripts into source-of-truth docs.
 5. Put area-local accepted detail in [`areas/`](./areas/README.md); update the
@@ -100,7 +100,7 @@ stale material before appending more.
 | File type | Soft cap |
 | --- | ---: |
 | Router docs | 120 lines |
-| `CONTEXT.md` | 700 lines |
+| `GLOSSARY.md` | 700 lines |
 | `story-level-bible.md` | 600 lines |
 | Area docs | 300 lines |
 | `ridge-snapshot.md` | 450 lines |

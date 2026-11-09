@@ -73,7 +73,7 @@ For larger or fuzzier work, use the workflow skills as planning tools before cod
 
 | Situation | Ask for | What it produces |
 | --- | --- | --- |
-| You have a broad feature idea and need the shape clarified | `grill-with-docs` | A structured conversation that sharpens terms, checks existing domain docs, and records durable decisions in `CONTEXT.md` or ADRs when needed. |
+| You have a broad feature idea and need the shape clarified | `grill-with-docs` | A structured conversation that sharpens terms, checks existing domain docs, and records durable decisions in `GLOSSARY.md` or ADRs when needed. |
 | You want a product-level spec from an already-discussed idea | `to-spec` | A buildable spec (you may know this as a PRD). In this repo it is published as a GitHub issue that captures the problem, solution, user stories, decisions, tests, and out-of-scope items. |
 | You have a spec, plan, or big issue and need buildable work items | `to-tickets` | Tracer-bullet tickets with blocking edges. Each ticket should be a vertical slice with acceptance criteria, not a layer-by-layer task list. |
 | You need to manage or prepare existing issues | `triage` | Issue state changes such as `needs-info`, `ready-for-human`, or `ready-for-agent`. For agent-ready work it can add an agent brief comment that becomes the implementation contract. |
@@ -86,10 +86,10 @@ For larger or fuzzier work, use the workflow skills as planning tools before cod
 A useful default flow for a new feature is:
 
 ```text
-grill-with-docs -> to-spec -> to-tickets -> implement (tdd + dual-lens-code-review)
+grill-with-docs -> to-spec -> to-tickets -> implement (tdd + dual-lens-code-review) -> retro
 ```
 
-Skip steps when the work is already clear. A one-line copy fix does not need a spec. A half-formed game-system idea probably benefits from `grill-with-docs` before anybody writes code. A feature that spans multiple scenes, overlays, assets, or runtime seams probably deserves a spec and sliced tickets.
+Skip steps when the work is already clear. A one-line copy fix does not need a spec. A half-formed game-system idea probably benefits from `grill-with-docs` before anybody writes code. A feature that spans multiple scenes, overlays, assets, or runtime seams probably deserves a spec and sliced tickets. Use `implement-spec` when one run should work that ticket graph, and `implement` when you want to drive one ticket at a time.
 
 Useful prompts:
 

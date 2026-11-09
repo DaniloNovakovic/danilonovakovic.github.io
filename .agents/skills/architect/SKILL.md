@@ -10,11 +10,11 @@ description: Guides Sketchbook Ridge architecture planning, seam sequencing, bra
 1. Load anti-slop + seams from `.agents/rules/10-architecture.md`, plus
    `docs/runtime-architecture.md` / `docs/architecture-direction.md` as needed.
    For Ridge work, start at `docs/game-design/ridge/README.md` before choosing
-   SoT docs. Use `CONTEXT.md` / `docs/adr/` when domain language or durable
+   SoT docs. Use `GLOSSARY.md` / `docs/adr/` when domain language or durable
    decisions are in play.
 2. Classify as `NO-CHANGE`, `SAFE-AFK`, `SAFE-WITH-SEQUENCE`, or `HITL`.
 3. If unfamiliar with an area, map modules and callers first (domain vocabulary
-   from `CONTEXT.md` / ADRs). For refactor or new-seam theory, use
+   from `GLOSSARY.md` / ADRs). For refactor or new-seam theory, use
    `improve-codebase-architecture` before implementation planning.
 4. If the result should become work items, publish with `to-tickets` after the
    sequence is clear.
