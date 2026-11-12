@@ -2,6 +2,7 @@ import { BASEMENT_OVERLAY_DEFINITIONS } from '@/game/scenes/basement/overlayDefi
 import { HOBBIES_OVERLAY_DEFINITIONS } from '@/game/scenes/hobbies/overlayDefinitions';
 import { GLOBAL_OVERLAY_DEFINITIONS } from './globalOverlayDefinitions';
 import { PORTFOLIO_OVERLAY_DEFINITIONS } from './portfolio/overlayDefinitions';
+import { RIDGE_OVERLAY_DEFINITIONS } from '@/game/scenes/ridge/overlayDefinitions';
 import type { OverlayDefinition } from './types';
 import type { OverlayId } from './overlayIds';
 
@@ -9,6 +10,7 @@ export const OVERLAY_DEFINITIONS: readonly OverlayDefinition[] = [
   ...PORTFOLIO_OVERLAY_DEFINITIONS,
   ...HOBBIES_OVERLAY_DEFINITIONS,
   ...BASEMENT_OVERLAY_DEFINITIONS,
+  ...RIDGE_OVERLAY_DEFINITIONS,
   ...GLOBAL_OVERLAY_DEFINITIONS
 ];
 

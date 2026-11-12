@@ -1,4 +1,5 @@
 export * from './types';
+export * from './bridgeBuilder';
 export * from './commands';
 export * from './observe';
 export * from './conversation';

@@ -513,21 +513,16 @@ recontextualizes that toy as the missing bridge test car after reaching the
 blocked crossing. The Draftsperson is a tiny nervous or blocked planner
 responsible for the crossing blueprint. The player retrieves the toy car from
 Cicka through **Cicka Parallel Play**, then helps finish the bridge
-drawing/blueprint by drawing or visually completing the bridge. The
-Draftsperson's specific problem is a missing middle span: they keep erasing and
-redrawing it because they are overthinking whether the structure will hold.
-Failed doodles, eraser marks, and the toy car/weight-test prop make this
-readable and support a future bridge-physics toy. The finished sketch becomes
-the crossing. For v0, this can be a basic authored drawing/completion visual
-rather than a full freeform drawing system, and the toy car test should be
-auto-success presentation: place or bring the toy car to the completed
-blueprint, roll it across the drawn bridge, then let the sketch become the real
-crossing.
-
-Future optional upgrade: let the player draw directly on the bridge, either as
-a visual customization or a small physics/bridge-building toy, potentially
-testing whether the drawn bridge can carry a car or similar weight. Do not make
-that the required v0 solution.
+drawing/blueprint in the **Blueprint Bridge workbench**. The Draftsperson's
+specific problem is a missing middle span: they keep erasing and redrawing it
+because they are overthinking whether the structure will hold. Failed doodles,
+eraser marks, and the toy car/weight-test prop make this readable. The current
+runtime uses a small numbered-joint construction puzzle: draw an unbroken deck,
+support it with triangles, and add belly braces. The toy car tests the first
+structure, then a delivery truck tests the reinforced design. Failed attempts
+can be revised without losing the car; two passing tests turn the sketch into
+the crossing. The rules are deterministic and readable rather than an
+unbounded freeform physics simulation.
 
 Keep it tiny, obvious, and local. It should not feel like a fetch quest or a
 test of platforming skill.
@@ -535,8 +530,8 @@ test of platforming skill.
 The first blockout floor is: walk-right nature/hill intro, peaceful Cicka + toy
 car first encounter, basic sit/play interaction, blocked bridge, Bridge
 Draftsperson + missing middle span blueprint, return to Cicka for Cicka
-Parallel Play, toy car bridge test, simple bridge drawing completion visual,
-bridge becomes crossing, and Cicka settles near the completed crossing. Cabin,
+Parallel Play, Blueprint Bridge workbench with toy-car and delivery-truck tests,
+simple bridge drawing completion visual, bridge becomes crossing, and Cicka settles near the completed crossing. Cabin,
 food, physics simulation, and toy-car ping-pong are later optional layers.
 
 ## Mini-Game Entrances

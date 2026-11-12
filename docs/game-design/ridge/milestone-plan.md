@@ -26,7 +26,8 @@ The first complete route should prove:
    Playable Reset Return land without arcade gating or an unseeded extra final
    prompt
 6. optional mini-games remain side fun, rewards, shortcuts, or future
-   alternate-path candidates rather than required first-ending proof
+   alternate-path candidates; the Blueprint Bridge workbench is the Bridge
+   resident-help interaction rather than an arcade clear or first-ending proof
 
 Anything beyond that is future scope unless a slice explicitly pulls it in.
 
@@ -149,7 +150,7 @@ The Bridge Tracer Slice is done when a player can:
 2. encounter Cicka with the toy car
 3. talk to the Bridge Draftsperson at the unfinished blueprint
 4. use Cicka Parallel Play to receive or unlock the toy car test prop
-5. run the toy-car bridge test
+5. build a joint-and-strut bridge and pass both the toy-car and delivery-truck tests
 6. see the crossing visibly change from blocked to usable
 7. cross or confirm the opened bridge exit
 8. trigger the Bridge-to-Concert Compact Area Transition

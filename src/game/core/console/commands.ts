@@ -48,6 +48,7 @@ export function getGameHelpText(): string {
     '',
     'Ridge conversation:',
     '  advance | choose <id|index>',
+    '  test bridge                 run the authored car + truck bridge check',
     '',
     'Ridge playtest skips:',
     '  skip                         next area',
@@ -95,6 +96,9 @@ export function parseGameCommand(raw: string): GameCommand {
   }
   if (INTERACT_ALIASES.has(head)) {
     return { type: 'interact', target: parts.slice(1).join(' ') || undefined };
+  }
+  if ((head === 'test' || head === 'build') && parts[1] === 'bridge') {
+    return { type: 'testBridge' };
   }
 
   const go = parseGo(parts, lower);

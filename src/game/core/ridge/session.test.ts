@@ -130,6 +130,11 @@ function playBridge(session: RidgeConsoleSession): RidgeSessionEvent[] {
   walkTo(session, 0.55);
   expect(session.exec('interact').ok).toBe(true);
   events.push(...drainConversation(session));
+  expect(session.observe().beat).toBe('toy_car_shared');
+  expect(events.some((event) => event.type === 'bridge_builder_requested')).toBe(true);
+  const tested = session.exec('test bridge');
+  expect(tested.ok).toBe(true);
+  events.push(...tested.events);
   expect(session.observe().beat).toBe('bridge_complete');
 
   walkTo(session, 0.9);

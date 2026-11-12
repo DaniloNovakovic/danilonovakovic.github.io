@@ -199,6 +199,10 @@ export class GameConsoleSession {
       case 'advance':
       case 'choose':
         return this.handleRidgeTalk(command);
+      case 'testBridge':
+        return this.state.mode === 'ridge'
+          ? this.forwardRidge('test bridge')
+          : this.fail('The bridge test only works inside Ridge.');
       case 'skip':
         return this.handleRidgeSkipWarp('skip');
       case 'warp':

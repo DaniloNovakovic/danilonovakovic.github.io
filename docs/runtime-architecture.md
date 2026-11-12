@@ -166,6 +166,9 @@ Ridge runtime modules for the active Bridge tracer:
 - `scenes/ridge/runtime/RidgeScene.ts` — thin Phaser input/presentation adapter.
 - `scenes/ridge/art/stick/` — default stick-figure VisualProvider.
 - `scenes/ridge/sceneUi/` — Persona-style Character Conversation Panel.
+- `scenes/ridge/overlays/bridgeBuilder/` — React Blueprint Bridge workbench;
+  pure joint/graph checks live in `core/ridge/bridgeBuilder.ts`, and approval
+  returns through the Ridge scene-UI action channel.
 - Opt-in mini-games such as Stampede Sketch keep their own scenes and movement
   systems under `src/game/scenes/stampedeSketch/`.
 

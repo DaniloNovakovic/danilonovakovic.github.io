@@ -8,12 +8,14 @@ const PORTFOLIO_OVERLAY_IDS = [
 
 export const HOBBIES_OVERLAY_IDS = ['art', 'music', 'fitness', 'dancing'] as const;
 const BASEMENT_OVERLAY_IDS = ['games'] as const;
+const RIDGE_OVERLAY_IDS = ['bridgeBuilder'] as const;
 const GLOBAL_OVERLAY_IDS = ['inventory', 'devSwitcher', 'trailCard', 'manualPage'] as const;
 
 export const OVERLAY_IDS = [
   ...PORTFOLIO_OVERLAY_IDS,
   ...HOBBIES_OVERLAY_IDS,
   ...BASEMENT_OVERLAY_IDS,
+  ...RIDGE_OVERLAY_IDS,
   ...GLOBAL_OVERLAY_IDS
 ] as const;
 

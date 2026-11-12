@@ -12,6 +12,7 @@ const HELP_TEXT = [
   '  advance              continue conversation',
   '  choose <n|id>        pick a conversation reply',
   '  leave                exit conversation without finishing',
+  '  test bridge          run the authored car + truck bridge check',
   '',
   'Playtest skips:',
   '  skip                 jump to the next area start',
@@ -82,6 +83,9 @@ export function parseRidgeCommand(rawInput: string): RidgeCommand {
   }
   if (INTERACT_ALIASES.has(head)) {
     return { type: 'interact', target: args.join(' ') || undefined };
+  }
+  if ((head === 'test' || head === 'build') && args[0] === 'bridge') {
+    return { type: 'testBridge' };
   }
   if (CHOOSE_ALIASES.has(head)) {
     if (!args[0]) return { type: 'unknown', raw };

@@ -40,12 +40,13 @@ art.**
 - The solution is a tiny art/drawing soft gate: help a resident finish a bridge
   drawing or blueprint by drawing or visually completing the bridge, then the
   finished sketch becomes the crossing.
-- For v0, this can be a basic authored drawing/completion visual rather than a
-  full freeform drawing system.
-- For v0, the bridge test should be auto-success presentation: after Cicka
-  Parallel Play returns the toy car, the player places or brings it to the
-  completed blueprint, the toy car rolls across the drawn bridge, and the sketch
-  becomes the real crossing.
+- The current runtime prototype uses a small **Blueprint Bridge workbench**:
+  connect numbered joints with ink struts, using the pale pencil marks as an
+  optional guide. The structural rules are deterministic and readable rather
+  than an unbounded freeform physics simulation.
+- The workbench tests the design with a toy car first and a delivery truck
+  second. A weak design visibly wobbles and can be revised without losing the
+  toy car; only two passing tests turn the sketch into the real crossing.
 - Cicka gives an obvious but nonverbal attention cue near the unsafe edge,
   blank plan, or missing part of the bridge.
 - After this first encounter, Cicka should become a recurring authored field
@@ -76,7 +77,7 @@ Cornfield Section (simple bg)
   -> blocked Simple Bridge Crossing + blueprint
   -> Bridge Draftsperson / prop zone
   -> Cicka Parallel Play return
-  -> toy car bridge test + completed crossing (Route Landmark Backdrop may open here)
+  -> Blueprint Bridge workbench + toy-car/truck tests + completed crossing (Route Landmark Backdrop may open here)
   -> Concert transition exit
 ```
 
@@ -103,7 +104,7 @@ The first blockout only needs:
 - blocked **Simple Bridge Crossing**
 - Bridge Draftsperson + missing middle span blueprint
 - return to Cicka for Cicka Parallel Play
-- toy car bridge test
+- Blueprint Bridge workbench with toy-car and delivery-truck tests
 - simple bridge drawing completion visual
 - bridge becomes crossing
 - Cicka settles near the completed crossing
@@ -118,7 +119,7 @@ Definition of done for the Bridge Tracer Slice:
 2. player can encounter Cicka with the toy car inside the corn
 3. player can talk to the Bridge Draftsperson at the unfinished blueprint
 4. player can use Cicka Parallel Play to receive or unlock the toy car test prop
-5. player can run the toy-car bridge test
+5. player can build a joint-and-strut bridge and pass both vehicle tests
 6. the bridge visibly changes from blocked to usable
 7. player can trigger the Bridge-to-Concert transition
 8. implementation proves shared route state, prompt/dialogue lookup by ID,
@@ -284,15 +285,14 @@ Minimum outcomes:
 ## Boundaries
 
 - Do not make Bridge Area a platforming test.
-- Do not make the required v0 solution depend on physics drawing.
+- Do not make the required solution depend on unbounded freeform physics drawing;
+  the workbench uses a small, readable joint-and-strut ruleset.
 - Do not turn the beat into a fetch quest.
 - Do not turn Cicka into a continuous follower after the first encounter.
 - Do not make Cicka obediently hand over the toy car as a quest item; the player
   should join her play until she chooses to share it.
-- Future optional upgrade: let the player draw directly on the bridge as a
-  small customization or bridge-building toy, potentially with simple
-  bridge-building physics that tests whether the drawn bridge can carry a car
-  or similar weight.
+- Future optional upgrade: add more bridge materials, challenge spans, or a
+  freeform drawing mode after the small workbench has proven its pacing.
 - Future optional upgrade: turn Cicka Parallel Play into a tiny toy-car
   back-and-forth game, like a low-stakes ping-pong riff using the car instead of
   a ball.
@@ -311,7 +311,7 @@ Minimum outcomes:
 - failed doodles, eraser marks, or toy car/weight-test prop staging
 - Toy Car Play first Cicka encounter and gentle retrieval staging
 - Cicka Parallel Play timing and prompt wording
-- auto-success toy car test staging
+- workbench pacing, hint staging, and vehicle-test feedback
 - one or two prompts that make the crossing change feel authored
 - future cabin/treat shortcut scope and placement
-- future drawing/bridge-physics toy scope after the route MVP is proven
+- additional bridge materials or challenge-span scope after the route MVP is proven
