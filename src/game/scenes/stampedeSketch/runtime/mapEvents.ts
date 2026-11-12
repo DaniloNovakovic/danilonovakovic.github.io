@@ -10,7 +10,8 @@ export const STAMPEDE_MIRROR_CHARGE_MS = 2_400;
 export const STAMPEDE_MIRROR_LIFE_MS = 26_000;
 const MIRROR_DRAIN_RATE = 0.35;
 
-export type StampedeGiftEffect = 'magnet' | 'ghosting' | 'heal';
+export type StampedeGiftEffect = 'magnet' | 'ghosting' | 'heal' | 'punchline';
+const PUNCHLINE_CHANCE = 0.2;
 
 export interface StampedeMirror {
   x: number;
@@ -119,10 +120,12 @@ export function stepStampedeMirror(
 
 export function rollStampedeGift(
   hurt: boolean,
-  random: () => number = Math.random
+  random: () => number = Math.random,
+  punchlineUseful = false
 ): StampedeGiftEffect {
   const roll = random();
   if (hurt && roll < 0.5) return 'heal';
+  if (punchlineUseful && random() < PUNCHLINE_CHANCE) return 'punchline';
   return roll < 0.75 ? 'magnet' : 'ghosting';
 }
 

@@ -361,6 +361,7 @@ export const sceneMessages = {
         time: "Time",
         contacts: "Contacts",
         best: "Best",
+        wingmen: "Wingmen",
       },
       actions: {
         backToRidge: "Back to the street",

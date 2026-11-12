@@ -220,21 +220,12 @@ export function getStampedeWeaponRank(
   return 0;
 }
 
-export function formatStampedeKitLabel(
-  ownedUpgradeIds: readonly string[],
-  upgradedWeaponIds: readonly string[]
-): string {
-  const owned = STAMPEDE_WEAPON_IDS.filter((id) => ownedUpgradeIds.includes(id));
-  if (owned.length === 0) return 'Unarmed';
-  const label = owned
-    .map((id) => {
-      const title = weaponChoice(id, 'unlock').title;
-      const twisted = upgradedWeaponIds.includes(id)
-        || MODS_BY_WEAPON[id].some((modId) => ownedUpgradeIds.includes(modId));
-      return twisted ? `${title} +` : title;
-    })
-    .join(' · ');
-  return ownedUpgradeIds.includes('shell') ? `${label} · Shell` : label;
+/** One name for the status strip. Twists and the rest of the kit stay on the character. */
+export function formatStampedeHudWeaponLabel(ownedUpgradeIds: readonly string[]): string {
+  const spellId = resolveEquippedSpell(ownedUpgradeIds);
+  if (spellId) return weaponChoice(spellId, 'unlock').title;
+  if (ownedUpgradeIds.includes('badSelfie')) return weaponChoice('badSelfie', 'unlock').title;
+  return 'Unarmed';
 }
 
 export function resolveOwnedSpells(upgrades: readonly string[]): StampedeSpellId[] {

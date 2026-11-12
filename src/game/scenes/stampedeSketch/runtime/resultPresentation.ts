@@ -14,10 +14,12 @@ export interface StampedeResultViewModelInput {
   rewardStatus?: StampedeRewardStatus;
   /** Present when an endless run ended. */
   endless?: { bestMs: number; newBest: boolean };
+  /** Times Brad laughed at a dad joke and switched sides this run. */
+  wingmen?: number;
 }
 
 export interface StampedeResultStatViewModel {
-  id: 'time' | 'contacts' | 'best';
+  id: 'time' | 'contacts' | 'best' | 'wingmen';
   label: string;
   value: string;
 }
@@ -49,10 +51,22 @@ export interface StampedeResultButtonBounds {
 export function createStampedeResultViewModel(
   input: StampedeResultViewModelInput
 ): StampedeResultViewModel {
-  const clear = input.phase === 'cleared';
   const copy = getMessages().scenes.stampedeSketch.result;
-  if (input.endless) return createEndlessResultViewModel(input, input.endless, copy);
+  const view = input.endless
+    ? createEndlessResultViewModel(input, input.endless, copy)
+    : createRunResultViewModel(input, copy);
+  if (!input.wingmen) return view;
+  return {
+    ...view,
+    stats: [...view.stats, { id: 'wingmen', label: copy.stats.wingmen, value: `${input.wingmen}` }]
+  };
+}
 
+function createRunResultViewModel(
+  input: StampedeResultViewModelInput,
+  copy: StampedeResultCopy
+): StampedeResultViewModel {
+  const clear = input.phase === 'cleared';
   return {
     phase: input.phase,
     eyebrow: clear ? copy.eyebrow.cleared : copy.eyebrow.failed,

@@ -9,6 +9,33 @@ import {
 import type { StampedeClearedMarkPoint } from './progression';
 import { pickStampedeBark, stampedeBarkReadyAt } from './barks';
 import {
+  resolveBoyfriendJokeOutcome,
+  STAMPEDE_JOKE_DAMAGE,
+  STAMPEDE_JOKE_BUBBLE_MS,
+  STAMPEDE_JOKE_DAZE_MS,
+  STAMPEDE_JOKE_EX_DAZE_MS
+} from './dadJoke';
+import {
+  befriendBrad,
+  bradComboTuning,
+  confuseBrad,
+  createBradBrain,
+  isBradFriendly,
+  stepBradBrain,
+  type BradAction,
+  type BradBrain,
+  type BradLane
+} from './boyfriend';
+import {
+  createShakerShot,
+  puddleSlowFactor,
+  shakerPosition,
+  STAMPEDE_PUDDLE_RADIUS,
+  stepShakers,
+  type StampedePuddle,
+  type StampedeShakerShot
+} from './shaker';
+import {
   createBeerShot,
   stepBeerShots,
   STAMPEDE_BARTENDER_THROW_MS,
@@ -41,6 +68,7 @@ import {
   drawBeerMug,
   drawFeather,
   drawInkHeart,
+  drawProteinShaker,
   drawResistMark,
   drawStampedeBird,
   stampedeBirdPoseKey,
@@ -75,7 +103,18 @@ export interface StampedeSwarmContactCandidate {
 export interface StampedeSwarmBeacon {
   x: number;
   y: number;
-  kind: 'bartender' | 'ex';
+  kind: 'bartender' | 'ex' | 'boyfriend';
+}
+
+/** Things the scene reacts to, collected during a swarm update. */
+export interface StampedeSwarmEvents {
+  /** Hearts popped by birds swooning over the player; they make Brad jealous. */
+  swoonHearts: number;
+  /** Birds cleared by the swarm itself (Brad as a wingman). */
+  cleared: StampedeClearedMarkPoint[];
+  /** A one-off push on the player (Brad's flex). */
+  shove: { x: number; y: number } | null;
+  befriended: { x: number; y: number }[];
 }
 
 interface StampedeSwarmRuntimeOptions {
@@ -97,9 +136,18 @@ export interface StampedeSwarmRuntime {
   bouncePecker(id: string, from: { x: number; y: number }): void;
   /** Every bird on the field runs away for a moment and cannot peck. */
   scatter(from: { x: number; y: number }, durationMs: number): void;
+  /** Dad joke: heavy hit on each bird, survivors left dazed. */
+  jokeHit(ids: readonly string[]): readonly StampedeClearedMarkPoint[];
+  /** Dad joke on Brad: confused while fresh, a wingman once worn down. */
+  jokeBoyfriend(ids: readonly string[]): void;
   spawnEx(view: StampedeViewRect, player: { x: number; y: number }, bonusHp?: number): void;
+  spawnBoyfriend(view: StampedeViewRect, player: { x: number; y: number }, bonusHp?: number): boolean;
+  isOnField(kind: 'ex' | 'boyfriend'): boolean;
+  /** 1 normally, lower while the player stands in a shaker puddle. */
+  playerSlowFactor(player: { x: number; y: number }): number;
   getBeacons(): readonly StampedeSwarmBeacon[];
   consumeBeerHit(): boolean;
+  consumeEvents(): StampedeSwarmEvents;
   reset(): void;
 }
 
@@ -139,6 +187,15 @@ interface FlockBird {
   nextBarkAtMs: number;
   charge: StampedeChargeState;
   throwAtMs: number | null;
+  /** Only Brad has one. */
+  brad: BradBrain | null;
+  /** Id of the Brad this bird shields, with its spot on the ring. */
+  escortOf: string | null;
+  escortSlot: number;
+  /** Out of the fight: following a friendly Brad, or walking off the page. */
+  calm: 'none' | 'tagalong' | 'leaving';
+  leaveUntilMs: number;
+  nextAllyHitAtMs: number;
 }
 
 interface FlockStep {
@@ -160,6 +217,16 @@ const OPENING_INSET = 120;
 const BARTENDER_RANGE = 440;
 const BARTENDER_WINDUP_MS = 560;
 const KNOCK_DECAY = 10;
+const BRAD_ESCORTS = 3;
+const BRAD_FLEX_REACH = 260;
+const BRAD_FLEX_SHOVE = 560;
+const BRAD_WINGMAN_REACH = 240;
+const BRAD_WINGMAN_SPEED = 260;
+const BRAD_WINGMAN_EVERY_MS = 1_200;
+const BRAD_LEAVE_MS = 5_000;
+/** Past the regular flock cap: one slot for the ex, one for Brad. */
+const BOSS_POOL_SLOTS = 2;
+const LEAVE_FADE_MS = 1_000;
 const INK = 0x1a1a1a;
 const WARN = 0xc0263b;
 
@@ -190,8 +257,13 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
   private introduced = new Set<StampedeFlockKind>();
   private beers: StampedeBeerShot[] = [];
   private beerHit = false;
+  private readonly shakerSprites: Phaser.GameObjects.Graphics[];
+  private shakers: StampedeShakerShot[] = [];
+  private puddles: StampedePuddle[] = [];
+  private events: StampedeSwarmEvents = EMPTY_EVENTS;
   private barkSpeakerId: string | null = null;
   private barkUntilMs = 0;
+  private pendingLine: { birdId: string; line: string; durationMs: number; atMs: number } | null = null;
   private nextBarkGlobalAtMs = 0;
   private candidatesDirty = true;
   private contactCandidates: StampedeSwarmContactCandidate[] = [];
@@ -200,7 +272,7 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
     this.telegraphs = scene.add.graphics().setDepth(17);
-    this.birds = Array.from({ length: STAMPEDE_FLOCK_POOL_SIZE + 1 }, (_, index) => ({
+    this.birds = Array.from({ length: STAMPEDE_FLOCK_POOL_SIZE + BOSS_POOL_SLOTS }, (_, index) => ({
       id: `mark-${index + 1}`,
       body: scene.add.graphics().setVisible(false),
       shadow: scene.add.ellipse(0, 0, 20, 8, INK, 0.13).setDepth(15).setVisible(false),
@@ -233,8 +305,19 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
       nextTrickAtMs: 0,
       nextBarkAtMs: Number.POSITIVE_INFINITY,
       charge: STAMPEDE_CHARGE_STALK,
-      throwAtMs: null
+      throwAtMs: null,
+      brad: null,
+      escortOf: null,
+      escortSlot: 0,
+      calm: 'none' as const,
+      leaveUntilMs: 0,
+      nextAllyHitAtMs: 0
     }));
+    this.shakerSprites = Array.from({ length: 3 }, () => {
+      const shaker = scene.add.graphics().setDepth(26).setVisible(false);
+      drawProteinShaker(shaker);
+      return shaker;
+    });
     this.hearts = Array.from({ length: 10 }, () => {
       const heart = scene.add.graphics().setDepth(28).setVisible(false);
       drawInkHeart(heart);
@@ -294,6 +377,7 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
     this.birds.forEach((bird) => this.stepBird(bird, step));
     this.separate();
     this.telegraphs.clear();
+    this.syncShakers(nowMs);
     this.birds.forEach((bird) => this.syncBird(bird, nowMs));
     this.stepBeers(delta, nowMs, target);
     this.maybeBark(nowMs, target);
@@ -313,12 +397,56 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
   getBeacons(): readonly StampedeSwarmBeacon[] {
     const beacons: StampedeSwarmBeacon[] = [];
     this.birds.forEach((bird) => {
-      if (bird.state !== 'active') return;
-      if (bird.kind === 'bartender' || bird.kind === 'ex') {
+      if (bird.state !== 'active' || isOutOfFight(bird)) return;
+      if (bird.kind === 'bartender' || bird.kind === 'ex' || bird.kind === 'boyfriend') {
         beacons.push({ x: bird.x, y: bird.y, kind: bird.kind });
       }
     });
     return beacons;
+  }
+
+  isOnField(kind: 'ex' | 'boyfriend'): boolean {
+    return this.birds.some((bird) => bird.state === 'active' && bird.kind === kind);
+  }
+
+  playerSlowFactor(player: { x: number; y: number }): number {
+    return puddleSlowFactor(this.puddles, player);
+  }
+
+  consumeEvents(): StampedeSwarmEvents {
+    const events = this.events;
+    if (events !== EMPTY_EVENTS) this.events = EMPTY_EVENTS;
+    return events;
+  }
+
+  spawnBoyfriend(view: StampedeViewRect, player: { x: number; y: number }, bonusHp = 0): boolean {
+    const bird = this.spawnBoss('boyfriend', view, player, bonusHp);
+    if (!bird) return false;
+    this.say(bird, "Who's this guy?", 2_000);
+    return true;
+  }
+
+  jokeBoyfriend(ids: readonly string[]): void {
+    const now = this.scene.time.now;
+    this.forEachActive(ids, (bird) => {
+      if (!bird.brad || isBradFriendly(bird.brad)) return;
+      if (resolveBoyfriendJokeOutcome(bird.hp, bird.maxHp) === 'confused') {
+        bird.brad = confuseBrad(bird.brad, now);
+        this.sayAfterJoke(bird, "...I don't get it.", 2_000);
+        return;
+      }
+      bird.brad = befriendBrad(bird.brad, now);
+      bird.stunnedUntilMs = 0;
+      bird.fleeUntilMs = 0;
+      bird.nextAllyHitAtMs = now + 900;
+      this.birds.forEach((other) => {
+        if (other.state === 'active' && other.escortOf === bird.id) other.calm = 'tagalong';
+      });
+      this.sayAfterJoke(bird, "HAH! Okay, okay. You're alright.", 2_400);
+      this.popHeart(bird.x, bird.y - bird.radius - 10);
+      this.pushEvent((events) => events.befriended.push({ x: bird.x, y: bird.y }));
+      this.candidatesDirty = true;
+    });
   }
 
   showResisted(ids: readonly string[]): void {
@@ -375,10 +503,20 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
   }
 
   spawnEx(view: StampedeViewRect, player: { x: number; y: number }, bonusHp = 0): void {
+    this.spawnBoss('ex', view, player, bonusHp);
+  }
+
+  private spawnBoss(
+    kind: 'ex' | 'boyfriend',
+    view: StampedeViewRect,
+    player: { x: number; y: number },
+    bonusHp: number
+  ): FlockBird | undefined {
     const bird = this.birds.find((entry) => entry.state === 'idle');
-    if (!bird) return;
+    if (!bird) return undefined;
     const point = pickStampedeSpawnPoint(view, STAMPEDE_WORLD, player);
-    this.activate(bird, 'ex', point, false, { speedScale: 1, bonusHp });
+    this.activate(bird, kind, point, false, { speedScale: 1, bonusHp });
+    return bird;
   }
 
   clearMarks(
@@ -392,6 +530,16 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
       const bird = this.findActive(id);
       if (!bird) return;
       const mark = this.woundBird(bird, ailment, dazeMs);
+      if (mark) cleared.push(mark);
+    });
+    return cleared;
+  }
+
+  jokeHit(ids: readonly string[]): readonly StampedeClearedMarkPoint[] {
+    const cleared: StampedeClearedMarkPoint[] = [];
+    this.forEachActive(ids, (bird) => {
+      const dazeMs = bird.kind === 'ex' ? STAMPEDE_JOKE_EX_DAZE_MS : STAMPEDE_JOKE_DAZE_MS;
+      const mark = this.woundBird(bird, 'daze', dazeMs, STAMPEDE_JOKE_DAMAGE);
       if (mark) cleared.push(mark);
     });
     return cleared;
@@ -415,9 +563,14 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
     this.beers = [];
     this.beerHit = false;
     this.beerMugs.forEach((mug) => mug.setVisible(false));
+    this.shakers = [];
+    this.puddles = [];
+    this.shakerSprites.forEach((shaker) => shaker.setVisible(false));
+    this.events = EMPTY_EVENTS;
     this.bark.setVisible(false);
     this.barkSpeakerId = null;
     this.barkUntilMs = 0;
+    this.pendingLine = null;
     this.nextBarkGlobalAtMs = 0;
     this.candidatesDirty = true;
   }
@@ -434,7 +587,7 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
     const counts: Partial<Record<StampedeFlockKind, number>> = {};
     let active = 0;
     this.birds.forEach((bird) => {
-      if (bird.state !== 'active' || bird.kind === 'ex') return;
+      if (bird.state !== 'active' || isBoss(bird) || isOutOfFight(bird)) return;
       counts[bird.kind] = (counts[bird.kind] ?? 0) + 1;
       active += 1;
     });
@@ -493,6 +646,11 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
     bird.nextBarkAtMs = stampedeBarkReadyAt(kind, now);
     bird.charge = STAMPEDE_CHARGE_STALK;
     bird.throwAtMs = null;
+    bird.brad = kind === 'boyfriend' ? createBradBrain(now) : null;
+    bird.escortOf = null;
+    bird.calm = 'none';
+    bird.leaveUntilMs = 0;
+    bird.nextAllyHitAtMs = 0;
     bird.body.setVisible(true).setAlpha(1).setAngle(0);
     bird.shadow.setSize(profile.radius * 2.1, profile.radius * 0.7).setVisible(true).setAlpha(1);
     if (popIn) this.poof(point.x, point.y, profile.radius);
@@ -512,24 +670,45 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
   private woundBird(
     bird: FlockBird,
     ailment: 'poison' | 'daze' | undefined,
-    dazeMs: number
+    dazeMs: number,
+    damage = 1
   ): StampedeClearedMarkPoint | null {
     const now = this.scene.time.now;
-    bird.hp -= 1;
+    if (this.isShielded(bird)) {
+      bird.flashUntilMs = now + 90;
+      this.popResist(bird.x, bird.y - bird.radius - 14);
+      return null;
+    }
+    this.chipBird(bird, ailment, dazeMs, damage, now);
+    return bird.hp > 0 ? null : this.downBird(bird, now);
+  }
+
+  private chipBird(
+    bird: FlockBird,
+    ailment: 'poison' | 'daze' | undefined,
+    dazeMs: number,
+    damage: number,
+    now: number
+  ): void {
+    bird.hp -= damage;
     bird.flashUntilMs = now + 110;
     if (ailment === 'poison') bird.poisonUntilMs = now + 900;
     if (ailment === 'daze' && bird.hp > 0) {
       bird.stunnedUntilMs = now + dazeMs;
       cancelCharge(bird);
     }
-    if (bird.hp > 0 && bird.kind !== 'ex' && bird.charge.phase !== 'dash') {
-      const push = awayFrom(bird, this.lastPlayer);
-      bird.knockVx = push.x * 170;
-      bird.knockVy = push.y * 170;
-    }
+    this.shoveWounded(bird);
     this.burstFeathers(bird.x, bird.y, stampedeFeatherColor(bird.kind), bird.hp > 0 ? 1 : 4);
-    if (bird.hp > 0) return null;
+  }
 
+  private shoveWounded(bird: FlockBird): void {
+    if (bird.hp <= 0 || isBoss(bird) || bird.charge.phase === 'dash') return;
+    const push = awayFrom(bird, this.lastPlayer);
+    bird.knockVx = push.x * 170;
+    bird.knockVy = push.y * 170;
+  }
+
+  private downBird(bird: FlockBird, now: number): StampedeClearedMarkPoint {
     bird.state = 'dying';
     bird.dyingUntilMs = now + STAMPEDE_DYING_MS;
     this.poof(bird.x, bird.y, bird.radius);
@@ -556,17 +735,38 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
   }
 
   private steerBird(bird: FlockBird, step: FlockStep): void {
+    if (this.steerAside(bird, step)) return;
+    if (bird.escortOf && this.stepEscort(bird, step)) return;
+    if (bird.brad) {
+      this.stepBoyfriend(bird, bird.brad, step);
+      return;
+    }
+    this.steerKind(bird, step);
+  }
+
+  /** Calm, friendly, stunned, or fleeing birds skip the chase. */
+  private steerAside(bird: FlockBird, step: FlockStep): boolean {
+    if (bird.calm !== 'none') {
+      this.stepCalm(bird, step);
+      return true;
+    }
+    if (bird.brad && isBradFriendly(bird.brad)) {
+      this.stepBoyfriend(bird, bird.brad, step);
+      return true;
+    }
     if (step.nowMs < bird.stunnedUntilMs) {
       bird.mood = 'gag';
-      return;
+      return true;
     }
-    if (step.nowMs < bird.fleeUntilMs) {
-      bird.x += bird.fleeVx * step.deltaSeconds;
-      bird.y += bird.fleeVy * step.deltaSeconds;
-      bird.mood = 'gag';
-      bird.facing = bird.fleeVx >= 0 ? 1 : -1;
-      return;
-    }
+    if (step.nowMs >= bird.fleeUntilMs) return false;
+    bird.x += bird.fleeVx * step.deltaSeconds;
+    bird.y += bird.fleeVy * step.deltaSeconds;
+    bird.mood = 'gag';
+    bird.facing = bird.fleeVx >= 0 ? 1 : -1;
+    return true;
+  }
+
+  private steerKind(bird: FlockBird, step: FlockStep): void {
     switch (bird.kind) {
       case 'bartender':
         this.stepBartender(bird, step);
@@ -605,6 +805,7 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
     if (!smitten || nowMs < bird.nextHeartAtMs) return;
     bird.nextHeartAtMs = nowMs + (bird.kind === 'hen' ? 1_600 : 900) + bird.phase * 60;
     this.popHeart(bird.x, bird.y - bird.radius - 8);
+    this.pushEvent((events) => { events.swoonHearts += 1; });
   }
 
   private stepCharger(bird: FlockBird, step: FlockStep, tuning: StampedeChargeTuning): void {
@@ -637,6 +838,294 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
         bird.mood = 'gag';
       }
     }
+  }
+
+  private stepBoyfriend(bird: FlockBird, brain: BradBrain, step: FlockStep): void {
+    const result = stepBradBrain(brain, {
+      nowMs: step.nowMs,
+      self: bird,
+      player: step.target,
+      hp: bird.hp,
+      maxHp: bird.maxHp,
+      escorts: this.countEscorts(bird.id)
+    });
+    bird.brad = result.brain;
+    this.applyBradAction(bird, result.action, step);
+    if (bird.calm !== 'none') return;
+    this.moveBrad(bird, result.brain, step);
+  }
+
+  private moveBrad(bird: FlockBird, brain: BradBrain, step: FlockStep): void {
+    const dx = step.target.x - bird.x;
+    const dy = step.target.y - bird.y;
+    bird.mood = brain.mode.kind === 'confused' ? 'confused' : 'chase';
+    if (brain.mode.kind === 'stalk') {
+      this.stepBradStalk(bird, dx, dy, step);
+      return;
+    }
+    if (brain.mode.kind === 'comboDash') {
+      this.stepBradDash(bird, brain, step);
+      return;
+    }
+    if (brain.mode.kind === 'ally') {
+      this.stepWingman(bird, step);
+      return;
+    }
+    bird.facing = dx >= 0 ? 1 : -1;
+  }
+
+  private stepBradStalk(bird: FlockBird, dx: number, dy: number, step: FlockStep): void {
+    const distance = Math.max(1, Math.hypot(dx, dy));
+    const pace = bird.speed * step.motion.speedMultiplier * step.deltaSeconds;
+    const travel = Math.min(pace, distance);
+    bird.x += (dx / distance) * travel;
+    bird.y += (dy / distance) * travel;
+    bird.facing = dx >= 0 ? 1 : -1;
+  }
+
+  private stepBradDash(bird: FlockBird, brain: BradBrain, step: FlockStep): void {
+    if (brain.mode.kind !== 'comboDash') return;
+    const lane = brain.mode.lanes[brain.mode.lane];
+    if (!lane) return;
+    const speed = bradComboTuning(brain.enraged).dashSpeed * step.deltaSeconds;
+    bird.x += lane.dirX * speed;
+    bird.y += lane.dirY * speed;
+    bird.facing = lane.dirX >= 0 ? 1 : -1;
+  }
+
+  private applyBradAction(bird: FlockBird, action: BradAction, step: FlockStep): void {
+    if (!action) return;
+    switch (action.kind) {
+      case 'whistle':
+        this.say(bird, 'Babe, come here.', 1_600);
+        this.callEscorts(bird);
+        return;
+      case 'throwShaker':
+        if (this.shakers.length < this.shakerSprites.length) {
+          this.shakers.push(createShakerShot({ x: bird.x, y: bird.y - bird.radius }, action.target, step.nowMs));
+        }
+        return;
+      case 'flex': {
+        this.say(bird, 'Do you even lift?', 1_800);
+        this.poof(bird.x, bird.y, bird.radius * 1.6);
+        const toPlayer = Math.hypot(step.target.x - bird.x, step.target.y - bird.y);
+        if (toPlayer < BRAD_FLEX_REACH) {
+          const push = awayFrom(step.target, bird);
+          this.pushEvent((events) => {
+            events.shove = { x: push.x * BRAD_FLEX_SHOVE, y: push.y * BRAD_FLEX_SHOVE };
+          });
+        }
+        return;
+      }
+      case 'allyDone':
+        this.say(bird, 'Later, bro.', 1_600);
+        this.sendOff(bird, step.nowMs);
+        this.birds.forEach((other) => {
+          if (other.state === 'active' && other.escortOf === bird.id) this.sendOff(other, step.nowMs);
+        });
+    }
+  }
+
+  /** The three nearest chicks or hens run to Brad and circle him as a shield. */
+  private callEscorts(brad: FlockBird): void {
+    const picks = this.birds
+      .filter((bird) => (
+        bird.state === 'active'
+        && (bird.kind === 'chick' || bird.kind === 'hen')
+        && bird.escortOf === null
+        && !isOutOfFight(bird)
+      ))
+      .sort((left, right) => (
+        Math.hypot(left.x - brad.x, left.y - brad.y) - Math.hypot(right.x - brad.x, right.y - brad.y)
+      ))
+      .slice(0, BRAD_ESCORTS);
+    picks.forEach((bird, slot) => {
+      bird.escortOf = brad.id;
+      bird.escortSlot = slot;
+      this.popHeart(bird.x, bird.y - bird.radius - 8);
+    });
+  }
+
+  private stepEscort(bird: FlockBird, step: FlockStep): boolean {
+    const brad = bird.escortOf ? this.findActive(bird.escortOf) : undefined;
+    if (!brad || isOutOfFight(brad)) {
+      bird.escortOf = null;
+      return false;
+    }
+    this.orbitBrad(bird, brad, step);
+    return true;
+  }
+
+  private orbitBrad(bird: FlockBird, brad: FlockBird, step: FlockStep): void {
+    const angle = step.nowMs / 650 + (bird.escortSlot * Math.PI * 2) / BRAD_ESCORTS;
+    const ring = brad.radius + bird.radius + 14;
+    const goalX = brad.x + Math.cos(angle) * ring;
+    const goalY = brad.y + Math.sin(angle) * ring;
+    const dx = goalX - bird.x;
+    const dy = goalY - bird.y;
+    const distance = Math.max(1, Math.hypot(dx, dy));
+    const pace = Math.max(bird.speed * 1.8, 140) * step.deltaSeconds;
+    bird.x += (dx / distance) * Math.min(pace, distance);
+    bird.y += (dy / distance) * Math.min(pace, distance);
+    bird.facing = brad.x - bird.x >= 0 ? 1 : -1;
+    bird.mood = 'smitten';
+  }
+
+  /** Brad on your side: stays near you and shoulder-checks the nearest bird. */
+  private stepWingman(bird: FlockBird, step: FlockStep): void {
+    bird.mood = 'smitten';
+    const foe = this.nearestFoe(step.target, BRAD_WINGMAN_REACH, bird.id);
+    const goal = foe ?? { x: step.target.x - 60, y: step.target.y + 12 };
+    this.approach(bird, goal, foe ? bird.radius + foe.radius : 0, BRAD_WINGMAN_SPEED, step);
+    if (foe) this.shoulderCheck(bird, foe, step);
+  }
+
+  private approach(
+    bird: FlockBird,
+    goal: { x: number; y: number },
+    stopAt: number,
+    speed: number,
+    step: FlockStep
+  ): void {
+    const dx = goal.x - bird.x;
+    const dy = goal.y - bird.y;
+    const distance = Math.max(1, Math.hypot(dx, dy));
+    const travel = Math.min(speed * step.deltaSeconds, Math.max(0, distance - stopAt));
+    bird.x += (dx / distance) * travel;
+    bird.y += (dy / distance) * travel;
+    bird.facing = dx >= 0 ? 1 : -1;
+  }
+
+  private shoulderCheck(bird: FlockBird, foe: FlockBird, step: FlockStep): void {
+    const distance = Math.hypot(foe.x - bird.x, foe.y - bird.y);
+    if (distance > bird.radius + foe.radius + 8 || step.nowMs < bird.nextAllyHitAtMs) return;
+    bird.nextAllyHitAtMs = step.nowMs + BRAD_WINGMAN_EVERY_MS;
+    const mark = this.woundBird(foe, 'daze', 600);
+    if (foe.state === 'active') {
+      const push = awayFrom(foe, bird);
+      foe.knockVx = push.x * 420;
+      foe.knockVy = push.y * 420;
+    }
+    if (mark) this.pushEvent((events) => events.cleared.push(mark));
+    if (step.nowMs >= bird.nextBarkAtMs) this.say(bird, 'I got you, bro.', 1_400);
+  }
+
+  private nearestFoe(around: { x: number; y: number }, reach: number, exceptId: string): FlockBird | undefined {
+    let best: FlockBird | undefined;
+    let bestDistance = reach;
+    this.birds.forEach((bird) => {
+      if (bird.state !== 'active' || bird.id === exceptId || isOutOfFight(bird)) return;
+      const distance = Math.hypot(bird.x - around.x, bird.y - around.y);
+      if (distance < bestDistance) {
+        best = bird;
+        bestDistance = distance;
+      }
+    });
+    return best;
+  }
+
+  private stepCalm(bird: FlockBird, step: FlockStep): void {
+    bird.mood = 'smitten';
+    if (bird.calm === 'tagalong') {
+      const brad = bird.escortOf ? this.findActive(bird.escortOf) : undefined;
+      if (brad) {
+        this.orbitBrad(bird, brad, step);
+        return;
+      }
+      this.sendOff(bird, step.nowMs);
+    }
+    if (step.nowMs >= bird.leaveUntilMs) {
+      this.retire(bird);
+      this.candidatesDirty = true;
+      return;
+    }
+    const away = awayFrom(bird, step.target);
+    const pace = Math.max(bird.speed, 60) * 1.4 * step.deltaSeconds;
+    bird.x += away.x * pace;
+    bird.y += away.y * pace;
+    bird.facing = away.x >= 0 ? 1 : -1;
+  }
+
+  private sendOff(bird: FlockBird, nowMs: number): void {
+    bird.calm = 'leaving';
+    bird.leaveUntilMs = nowMs + BRAD_LEAVE_MS;
+    cancelCharge(bird);
+    this.candidatesDirty = true;
+  }
+
+  private countEscorts(bradId: string): number {
+    let count = 0;
+    this.birds.forEach((bird) => {
+      if (bird.state === 'active' && bird.escortOf === bradId && bird.calm === 'none') count += 1;
+    });
+    return count;
+  }
+
+  private isShielded(bird: FlockBird): boolean {
+    return bird.kind === 'boyfriend' && this.countEscorts(bird.id) > 0;
+  }
+
+  private syncShakers(nowMs: number): void {
+    const stepped = stepShakers(this.shakers, this.puddles, nowMs);
+    this.shakers = stepped.shots;
+    this.puddles = stepped.puddles;
+    this.puddles.forEach((puddle) => {
+      const fade = Math.min(1, (puddle.untilMs - nowMs) / 600);
+      this.telegraphs.fillStyle(0xf29ac0, 0.42 * fade);
+      this.telegraphs.fillEllipse(puddle.x, puddle.y, STAMPEDE_PUDDLE_RADIUS * 2.1, STAMPEDE_PUDDLE_RADIUS * 1.5);
+      this.telegraphs.lineStyle(2, INK, 0.45 * fade);
+      this.telegraphs.strokeEllipse(puddle.x, puddle.y, STAMPEDE_PUDDLE_RADIUS * 2.1, STAMPEDE_PUDDLE_RADIUS * 1.5);
+    });
+    this.shakerSprites.forEach((sprite, index) => {
+      const shot = this.shakers[index];
+      if (!shot) {
+        sprite.setVisible(false);
+        return;
+      }
+      this.telegraphs.lineStyle(2, WARN, 0.6);
+      this.telegraphs.strokeEllipse(shot.toX, shot.toY, STAMPEDE_PUDDLE_RADIUS * 2.1, STAMPEDE_PUDDLE_RADIUS * 1.5);
+      const at = shakerPosition(shot, nowMs);
+      sprite.setPosition(at.x, at.y).setAngle((nowMs / 2) % 360).setVisible(true);
+    });
+  }
+
+  private drawBradTelegraph(bird: FlockBird, brain: BradBrain, nowMs: number): void {
+    const mode = brain.mode;
+    if (mode.kind === 'comboWindup') {
+      const windupMs = bradComboTuning(brain.enraged).windupMs;
+      const progress = 1 - Math.max(0, (mode.untilMs - nowMs) / windupMs);
+      mode.lanes.forEach((lane) => this.drawLane(lane, bird.radius, progress));
+      return;
+    }
+    if (mode.kind === 'comboDash') {
+      mode.lanes.slice(mode.lane + 1).forEach((lane) => this.drawLane(lane, bird.radius, 0.6));
+      return;
+    }
+    if (mode.kind === 'shakerWindup') {
+      this.telegraphs.lineStyle(2.4, WARN, 0.8);
+      this.telegraphs.strokeEllipse(
+        mode.target.x,
+        mode.target.y,
+        STAMPEDE_PUDDLE_RADIUS * 2.1,
+        STAMPEDE_PUDDLE_RADIUS * 1.5
+      );
+    }
+  }
+
+  private drawLane(lane: BradLane, halfWidth: number, progress: number): void {
+    const sideX = -lane.dirY * halfWidth;
+    const sideY = lane.dirX * halfWidth;
+    const endX = lane.x + lane.dirX * lane.length;
+    const endY = lane.y + lane.dirY * lane.length;
+    this.telegraphs.fillStyle(WARN, 0.08 + progress * 0.14);
+    this.telegraphs.fillPoints([
+      new Phaser.Math.Vector2(lane.x + sideX, lane.y + sideY),
+      new Phaser.Math.Vector2(endX + sideX, endY + sideY),
+      new Phaser.Math.Vector2(endX - sideX, endY - sideY),
+      new Phaser.Math.Vector2(lane.x - sideX, lane.y - sideY)
+    ], true);
+    this.telegraphs.lineStyle(2, WARN, 0.55 + progress * 0.4);
+    this.telegraphs.lineBetween(lane.x, lane.y, endX, endY);
   }
 
   private stepBartender(bird: FlockBird, step: FlockStep): void {
@@ -696,6 +1185,9 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
 
     if (bird.charge.phase === 'windup') this.drawChargeLane(bird, nowMs);
     if (bird.throwAtMs !== null) this.drawThrowWarning(bird, nowMs);
+    if (bird.brad && !isOutOfFight(bird) && nowMs >= bird.stunnedUntilMs) {
+      this.drawBradTelegraph(bird, bird.brad, nowMs);
+    }
   }
 
   private drawChargeLane(bird: FlockBird, nowMs: number): void {
@@ -780,7 +1272,7 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
     this.contactCandidates = [];
     this.spellCandidates = [];
     this.birds.forEach((bird) => {
-      if (bird.state !== 'active') return;
+      if (bird.state !== 'active' || isOutOfFight(bird)) return;
       const candidate = { id: bird.id, x: bird.x, y: bird.y, radius: bird.radius, kind: bird.kind };
       this.spellCandidates.push(candidate);
       if (now >= bird.fleeUntilMs && now >= bird.harmlessUntilMs) {
@@ -864,7 +1356,40 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
     });
   }
 
+  private pushEvent(record: (events: StampedeSwarmEvents) => void): void {
+    if (this.events === EMPTY_EVENTS) this.events = emptySwarmEvents();
+    record(this.events);
+  }
+
+  /** A scripted line that takes over the bark bubble right away. */
+  private say(bird: FlockBird, line: string, durationMs: number): void {
+    const now = this.scene.time.now;
+    this.barkSpeakerId = bird.id;
+    this.barkUntilMs = now + durationMs;
+    this.nextBarkGlobalAtMs = Math.max(this.nextBarkGlobalAtMs, now + durationMs + 600);
+    bird.nextBarkAtMs = now + 8_000;
+    this.bark
+      .setText(line)
+      .setPosition(bird.x, bird.y - bird.radius * 2 - 14)
+      .setVisible(true);
+  }
+
+  private sayAfterJoke(bird: FlockBird, line: string, durationMs: number): void {
+    const atMs = this.scene.time.now + STAMPEDE_JOKE_BUBBLE_MS;
+    this.pendingLine = { birdId: bird.id, line, durationMs, atMs };
+    this.nextBarkGlobalAtMs = Math.max(this.nextBarkGlobalAtMs, atMs);
+  }
+
   private maybeBark(nowMs: number, focus: { x: number; y: number }): void {
+    if (this.pendingLine && nowMs >= this.pendingLine.atMs) {
+      const { birdId, line, durationMs } = this.pendingLine;
+      this.pendingLine = null;
+      const speaker = this.findActive(birdId);
+      if (speaker) {
+        this.say(speaker, line, durationMs);
+        return;
+      }
+    }
     if (this.barkSpeakerId && nowMs < this.barkUntilMs) {
       const speaker = this.findActive(this.barkSpeakerId);
       if (!speaker) {
@@ -881,6 +1406,7 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
       this.birds
         .filter((bird) => (
           bird.state === 'active'
+          && !isOutOfFight(bird)
           && nowMs >= bird.nextBarkAtMs
           && nowMs >= bird.stunnedUntilMs
           && Math.hypot(bird.x - focus.x, bird.y - focus.y) < 460
@@ -909,6 +1435,14 @@ function cancelCharge(bird: FlockBird): void {
     bird.charge = STAMPEDE_CHARGE_STALK;
   }
   bird.throwAtMs = null;
+  if (bird.brad && isBradMidTrick(bird.brad)) {
+    bird.brad = { ...bird.brad, mode: { kind: 'stalk' } };
+  }
+}
+
+function isBradMidTrick(brain: BradBrain): boolean {
+  const kind = brain.mode.kind;
+  return kind === 'comboWindup' || kind === 'comboDash' || kind === 'shakerWindup' || kind === 'whistle';
 }
 
 function awayFrom(bird: { x: number; y: number }, from: { x: number; y: number }): { x: number; y: number } {
@@ -955,8 +1489,23 @@ function chaserAim(bird: FlockBird, step: FlockStep): { x: number; y: number } {
 
 /** Charging birds and the ex shove through the crowd instead of being shoved. */
 function isHeavy(bird: FlockBird): boolean {
-  return bird.kind === 'ex' || bird.charge.phase === 'dash';
+  return isBoss(bird) || bird.charge.phase === 'dash';
 }
+
+function isBoss(bird: FlockBird): boolean {
+  return bird.kind === 'ex' || bird.kind === 'boyfriend';
+}
+
+/** Friendly Brad and anyone tagging along or walking off: not hittable, not pecking, not counted. */
+function isOutOfFight(bird: FlockBird): boolean {
+  return bird.calm !== 'none' || (bird.brad !== null && isBradFriendly(bird.brad));
+}
+
+function emptySwarmEvents(): StampedeSwarmEvents {
+  return { swoonHearts: 0, cleared: [], shove: null, befriended: [] };
+}
+
+const EMPTY_EVENTS: StampedeSwarmEvents = emptySwarmEvents();
 
 function pushApart(a: FlockBird, b: FlockBird): void {
   const dx = b.x - a.x;
@@ -984,7 +1533,8 @@ function syncDyingBird(bird: FlockBird, nowMs: number): void {
 
 function birdPose(bird: FlockBird, nowMs: number): StampedeBirdPose {
   const stunned = nowMs < bird.stunnedUntilMs;
-  const windup = bird.charge.phase === 'windup' || bird.throwAtMs !== null;
+  const bradMode = bird.brad?.mode.kind;
+  const windup = bird.charge.phase === 'windup' || bird.throwAtMs !== null || bradMode === 'comboWindup';
   const poisoned = nowMs < bird.poisonUntilMs;
   const flapStep = isBirdMoving(bird, nowMs)
     ? (Math.floor(nowMs / 90 + bird.phase * 3) % 3) as 0 | 1 | 2
@@ -1000,15 +1550,27 @@ function birdPose(bird: FlockBird, nowMs: number): StampedeBirdPose {
     poisonFlash: poisoned && Math.floor(nowMs / 120) % 2 === 0,
     dazed: stunned,
     flash: nowMs < bird.flashUntilMs,
-    windup
+    windup,
+    raised: bradMode === 'shakerWindup',
+    enraged: bird.brad?.enraged ?? false,
+    ally: bradMode === 'ally' || (bird.kind === 'boyfriend' && bird.calm !== 'none')
   };
 }
 
 function isBirdMoving(bird: FlockBird, nowMs: number): boolean {
+  if (bird.brad && !isOutOfFight(bird)) {
+    const kind = bird.brad.mode.kind;
+    if (kind !== 'stalk' && kind !== 'comboDash') return false;
+  }
   return nowMs >= bird.stunnedUntilMs
     && bird.throwAtMs === null
     && bird.charge.phase !== 'windup'
     && bird.charge.phase !== 'rest';
+}
+
+function birdAlpha(bird: FlockBird, nowMs: number): number {
+  if (bird.calm === 'leaving') return Math.max(0, Math.min(1, (bird.leaveUntilMs - nowMs) / LEAVE_FADE_MS));
+  return nowMs < bird.fleeUntilMs ? 0.55 : 1;
 }
 
 function placeBird(bird: FlockBird, nowMs: number, pose: StampedeBirdPose): void {
@@ -1021,11 +1583,12 @@ function placeBird(bird: FlockBird, nowMs: number, pose: StampedeBirdPose): void
     .setPosition(bird.x + shake, bird.y + hop)
     .setScale(bird.facing * popScale, popScale)
     .setAngle(birdTilt(bird, nowMs, pose.dazed, moving))
-    .setAlpha(nowMs < bird.fleeUntilMs ? 0.55 : 1)
+    .setAlpha(birdAlpha(bird, nowMs))
     .setDepth(20 + bird.y / 10_000);
   bird.shadow
     .setPosition(bird.x, bird.y + bird.radius * 1.2)
-    .setScale(popScale);
+    .setScale(popScale)
+    .setAlpha(Math.min(1, birdAlpha(bird, nowMs)));
 }
 
 function birdTilt(bird: FlockBird, nowMs: number, dazed: boolean, moving: boolean): number {

@@ -1,7 +1,8 @@
 import type { SceneUiSurfaceProps } from '@/game/sceneUi/registry';
+import { Button } from '@/shared/ui';
 import type { StampedeHudSnapshot } from '../runtime/hudPresentation';
 
-export function StampedeStatusStrip({ params }: SceneUiSurfaceProps) {
+export function StampedeStatusStrip({ params, dispatchAction }: SceneUiSurfaceProps) {
   const snapshot = readStatusParams(params);
   const noise = clamp(snapshot.pageNoise ?? 0, 0, 1);
   const feedback = formatFeedback(snapshot.feedback);
@@ -12,13 +13,13 @@ export function StampedeStatusStrip({ params }: SceneUiSurfaceProps) {
   );
 
   return (
-    <div className="mx-auto flex w-full max-w-xl flex-wrap items-center justify-between gap-x-4 gap-y-2 text-[#1a1a1a] [@media(max-height:420px)]:max-w-sm [@media(max-height:420px)]:gap-x-2 [@media(max-height:420px)]:gap-y-0">
-      <p className="font-mono text-xl font-bold leading-none [@media(max-height:420px)]:text-base md:text-2xl">
+    <div className="mx-auto flex h-10 w-full flex-nowrap items-center justify-between gap-x-3 overflow-hidden text-[#1a1a1a] [@media(max-height:420px)]:gap-x-2">
+      <p className="shrink-0 font-mono text-xl font-bold leading-none [@media(max-height:420px)]:text-base md:text-2xl">
         {formatTimer(snapshot.timeRemainingSeconds ?? snapshot.timerSeconds ?? 0)}
       </p>
       {contactLimit > 0 ? (
         <div
-          className="flex items-center gap-1.5 [@media(max-height:420px)]:gap-1"
+          className="flex shrink-0 items-center gap-1.5 [@media(max-height:420px)]:gap-1"
           aria-label={`HP ${healthRemaining} of ${contactLimit}`}
         >
           <span className="font-mono text-xs font-bold uppercase tracking-widest text-[#4b4337] [@media(max-height:420px)]:text-[10px] md:text-sm">
@@ -39,17 +40,13 @@ export function StampedeStatusStrip({ params }: SceneUiSurfaceProps) {
           </span>
         </div>
       ) : null}
-      <div className="min-w-[8rem] flex-1 text-left [@media(max-height:420px)]:min-w-[5.5rem]">
-        <p className="font-mono text-xs font-bold uppercase leading-tight tracking-widest text-[#4b4337] [@media(max-height:420px)]:text-[10px] md:text-sm">
+      <div className="min-w-0 flex-1 text-left">
+        <p className="truncate font-mono text-xs font-bold uppercase leading-none tracking-widest text-[#4b4337] [@media(max-height:420px)]:text-[10px] md:text-sm">
           {snapshot.phaseLabel ?? 'Chick magnet'}
         </p>
-        {feedback && (
-          <p className="font-mono text-[10px] font-bold uppercase leading-tight tracking-wider text-[#1a1a1a]/75 [@media(max-height:420px)]:hidden md:text-xs">
-            {feedback}
-          </p>
-        )}
+        {feedback ? <span className="sr-only">{feedback}</span> : null}
       </div>
-      <div className="flex min-w-[8rem] items-center gap-2 [@media(max-height:420px)]:min-w-[5.5rem] [@media(max-height:420px)]:gap-1">
+      <div className="flex min-w-[5.5rem] shrink items-center gap-2 [@media(max-height:420px)]:min-w-[4.5rem] [@media(max-height:420px)]:gap-1">
         <span className="font-mono text-xs font-bold uppercase tracking-widest text-[#4b4337] [@media(max-height:420px)]:text-[10px] md:text-sm">
           Noise
         </span>
@@ -68,15 +65,64 @@ export function StampedeStatusStrip({ params }: SceneUiSurfaceProps) {
         </div>
       </div>
       {snapshot.spellLabel ? (
-        <p className="border-2 border-[#1a1a1a] bg-[#fbfbf9] px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-[#1a1a1a] md:text-xs">
+        <p className="max-w-[7.5rem] shrink truncate border-2 border-[#1a1a1a] bg-[#fbfbf9] px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-[#1a1a1a] md:max-w-[9rem] md:text-xs">
           {formatSpell(snapshot)}
         </p>
       ) : null}
+      {typeof snapshot.jokeCharge === 'number' ? (
+        <JokeMeter
+          charge={snapshot.jokeCharge}
+          ready={snapshot.jokeReady === true}
+          onTell={() => dispatchAction('castSpell')}
+        />
+      ) : null}
       {typeof snapshot.scrapsCollected === 'number' && typeof snapshot.scrapGoal === 'number' ? (
-        <p className="font-mono text-xs font-bold uppercase leading-tight tracking-widest text-[#4b4337] [@media(max-height:420px)]:hidden md:text-sm">
+        <p className="hidden shrink-0 font-mono text-xs font-bold uppercase leading-tight tracking-widest text-[#4b4337] md:block md:text-sm">
           Scraps {snapshot.scrapsCollected}/{snapshot.scrapGoal}
         </p>
       ) : null}
+    </div>
+  );
+}
+
+function JokeMeter({
+  charge,
+  ready,
+  onTell
+}: {
+  charge: number;
+  ready: boolean;
+  onTell: () => void;
+}) {
+  if (ready) {
+    return (
+      <Button
+        variant="primary"
+        size="sm"
+        className="shrink-0 animate-pulse font-mono uppercase tracking-widest [@media(max-height:420px)]:px-2 [@media(max-height:420px)]:py-0.5 [@media(max-height:420px)]:text-[10px]"
+        onClick={onTell}
+        aria-label="Tell a dad joke (Space)"
+      >
+        Dad joke!
+      </Button>
+    );
+  }
+  const percent = Math.round(clamp(charge, 0, 1) * 100);
+  return (
+    <div className="flex shrink-0 items-center gap-1.5">
+      <span className="font-mono text-xs font-bold uppercase tracking-widest text-[#4b4337] [@media(max-height:420px)]:text-[10px] md:text-sm">
+        Joke
+      </span>
+      <div
+        className="h-3 w-12 rounded-sm border-2 border-[#1a1a1a] bg-white [@media(max-height:420px)]:w-9"
+        role="progressbar"
+        aria-label="Dad joke charge"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={percent}
+      >
+        <div className="h-full bg-[#c0263b]" style={{ width: `${percent}%` }} />
+      </div>
     </div>
   );
 }

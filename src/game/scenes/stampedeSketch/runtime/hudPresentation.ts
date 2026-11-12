@@ -21,6 +21,9 @@ export interface StampedeHudSnapshot {
   spellLabel?: string;
   spellReady?: boolean;
   spellCooldownSeconds?: number;
+  /** Groan meter, 0 to 1. */
+  jokeCharge?: number;
+  jokeReady?: boolean;
 }
 
 export function createStampedeHudSnapshot(
