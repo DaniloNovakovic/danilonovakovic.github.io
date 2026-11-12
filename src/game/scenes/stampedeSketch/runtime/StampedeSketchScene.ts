@@ -43,6 +43,11 @@ import {
   type StampedeJokeMeter
 } from './dadJoke';
 import { createStampedeJokeLook, type StampedeJokeLook } from './jokePresentation';
+import {
+  createStampedeJealousy,
+  stepStampedeJealousy,
+  type StampedeJealousy
+} from './jealousy';
 import { recordStampedeEndlessRun } from './endlessRecord';
 import { STAMPEDE_BEER_DISARM_MS } from './beer';
 import {
@@ -125,6 +130,7 @@ import {
 } from './session';
 import {
   createStampedeSwarmRuntime,
+  type StampedeSwarmEvents,
   type StampedeSwarmRuntime
 } from './swarmPresentation';
 import {
@@ -151,6 +157,8 @@ const STAMPEDE_GHOSTING_MS = 3_600;
 const STAMPEDE_MAGNET_MS = 1_400;
 const STAMPEDE_ROOSTER_GIFT_CHANCE = 0.25;
 const STAMPEDE_EX_RETURN_HP = 6;
+const STAMPEDE_BRAD_RETURN_HP = 8;
+const STAMPEDE_SHOVE_DECAY = 6;
 
 export class StampedeSketchScene extends Phaser.Scene {
   private player?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -190,6 +198,9 @@ export class StampedeSketchScene extends Phaser.Scene {
   private jokeBag: StampedeJokeBag = createStampedeJokeBag();
   private jokeQueued = false;
   private jokeAnnounced = false;
+  private jealousy: StampedeJealousy = createStampedeJealousy();
+  private wingmen = 0;
+  private shove = { x: 0, y: 0 };
   private lastFacing = { x: 1, y: 0 };
   private onClose: () => void = () => {};
 
@@ -295,9 +306,10 @@ export class StampedeSketchScene extends Phaser.Scene {
       this.progression.upgradedWeaponIds,
       'badSelfie'
     );
-    const velocity = inputRuntime.readVelocity({
+    const velocity = this.addShove(inputRuntime.readVelocity({
       speed: resolveStampedeGuardianSpeed(this.progression.appliedUpgradeIds)
-    });
+        * swarmRuntime.playerSlowFactor(player)
+    }), delta);
     if (this.session.phase === 'playing') this.trackFacing(velocity);
 
     const previousElapsedMs = this.session.elapsedMs;
@@ -414,6 +426,7 @@ export class StampedeSketchScene extends Phaser.Scene {
       this.disarmedUntilMs = this.time.now + STAMPEDE_BEER_DISARM_MS;
       this.clearContinuousWeapons();
     }
+    this.applySwarmEvents(this.swarmRuntime.consumeEvents());
     this.syncKitLook();
     this.syncBeacons();
     this.updateHud(frame.pressure);
@@ -539,7 +552,57 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.jokeBag = createStampedeJokeBag();
     this.jokeQueued = false;
     this.jokeAnnounced = false;
+    this.jealousy = createStampedeJealousy();
+    this.wingmen = 0;
+    this.shove = { x: 0, y: 0 };
     this.lastFacing = { x: 1, y: 0 };
+  }
+
+  private addShove(velocity: StampedeVelocity, delta: number): StampedeVelocity {
+    if (this.shove.x === 0 && this.shove.y === 0) return velocity;
+    const shoved = { x: velocity.x + this.shove.x, y: velocity.y + this.shove.y };
+    const decay = Math.exp(-STAMPEDE_SHOVE_DECAY * (delta / 1000));
+    this.shove = Math.hypot(this.shove.x, this.shove.y) * decay < 8
+      ? { x: 0, y: 0 }
+      : { x: this.shove.x * decay, y: this.shove.y * decay };
+    return shoved;
+  }
+
+  private applySwarmEvents(events: StampedeSwarmEvents): void {
+    if (!this.player || !this.swarmRuntime) return;
+    this.dropPickups(events.cleared);
+    if (events.shove) this.shove = events.shove;
+    events.befriended.forEach((at) => {
+      this.wingmen += 1;
+      this.progression = spawnStampedeGiftPickup(this.progression, at);
+      this.progression = spawnStampedeHeartPickup(this.progression, { x: at.x + 30, y: at.y });
+      this.pickupRuntime?.sync(this.progression.pickups);
+      this.eventLook?.showBanner('Wingman!', "Brad's got your back for a bit");
+    });
+
+    const step = stepStampedeJealousy(this.jealousy, {
+      elapsedMs: this.session.elapsedMs,
+      durationMs: this.session.durationMs,
+      heartsAdded: events.swoonHearts,
+      exOnField: this.swarmRuntime.isOnField('ex'),
+      boyfriendOnField: this.swarmRuntime.isOnField('boyfriend')
+    });
+    this.jealousy = step.state;
+    if (step.event === 'foreshadow') {
+      this.eventLook?.showBanner("Someone's boyfriend", 'is asking about you');
+    }
+    if (step.event === 'arrive') {
+      const returning = this.jealousy.visits > 1;
+      this.swarmRuntime.spawnBoyfriend(
+        this.cameras.main.worldView,
+        this.player,
+        (this.jealousy.visits - 1) * STAMPEDE_BRAD_RETURN_HP
+      );
+      this.eventLook?.showBanner(
+        returning ? "Brad's back" : 'Her boyfriend just walked in',
+        "Wear him down, then tell him a dad joke"
+      );
+    }
   }
 
   private runDadJoke(delta: number): void {
@@ -563,6 +626,7 @@ export class StampedeSketchScene extends Phaser.Scene {
       candidates: this.swarmRuntime.getSpellCandidates()
     });
     const cleared = this.swarmRuntime.jokeHit(targets.hitIds);
+    this.swarmRuntime.jokeBoyfriend(targets.bossIds);
     this.dropPickups(cleared);
     this.jokeMeter = spendStampedeJokeMeter(this.jokeMeter);
     const next = nextStampedeJokeLine(this.jokeBag);
@@ -685,7 +749,8 @@ export class StampedeSketchScene extends Phaser.Scene {
       rewardStatus: phase === 'cleared'
         ? claimStampedeFirstClearReward()
         : 'unavailable',
-      endless: this.session.endless ? recordStampedeEndlessRun(this.session.elapsedMs) : undefined
+      endless: this.session.endless ? recordStampedeEndlessRun(this.session.elapsedMs) : undefined,
+      wingmen: this.wingmen
     });
     this.showResultPanel(view);
   }
@@ -1142,8 +1207,10 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.progression = spawnStampedePickupsFromClearedMarks(this.progression, clearedMarks);
     clearedMarks.forEach((mark) => {
       const dropsGift = mark.kind === 'ex'
+        || mark.kind === 'boyfriend'
         || (mark.kind === 'rooster' && Math.random() < STAMPEDE_ROOSTER_GIFT_CHANCE);
       if (dropsGift) this.progression = spawnStampedeGiftPickup(this.progression, mark);
+      if (mark.kind === 'boyfriend') this.eventLook?.showBanner("Brad's down", 'Big gift on the floor');
     });
     this.pickupRuntime?.sync(this.progression.pickups);
   }

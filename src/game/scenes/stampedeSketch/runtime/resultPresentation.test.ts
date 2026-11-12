@@ -2,6 +2,18 @@ import { describe, expect, it } from 'vitest';
 import { getMessages } from '@/shared/i18n';
 import { createStampedeResultViewModel } from './resultPresentation';
 
+describe('wingmen stat', () => {
+  it('shows only when Brad switched sides', () => {
+    const base = { phase: 'failed' as const, elapsedMs: 60_000, durationMs: 150_000, contacts: 5 };
+    expect(createStampedeResultViewModel(base).stats.map((stat) => stat.id)).not.toContain('wingmen');
+    expect(createStampedeResultViewModel({ ...base, wingmen: 1 }).stats.at(-1)).toEqual({
+      id: 'wingmen',
+      label: 'Wingmen',
+      value: '1'
+    });
+  });
+});
+
 describe('stampede result presentation view model', () => {
   const copy = getMessages().scenes.stampedeSketch.result;
 

@@ -9,7 +9,7 @@ import type { StampedeFlockKind } from './flock';
 
 type Graphics = Phaser.GameObjects.Graphics;
 
-export type StampedeBirdMood = 'chase' | 'smitten' | 'gag';
+export type StampedeBirdMood = 'chase' | 'smitten' | 'gag' | 'confused';
 
 export interface StampedeBirdPose {
   kind: StampedeFlockKind;
@@ -23,6 +23,10 @@ export interface StampedeBirdPose {
   dazed: boolean;
   flash: boolean;
   windup: boolean;
+  /** Something held overhead before a throw (Brad's shaker). */
+  raised: boolean;
+  enraged: boolean;
+  ally: boolean;
 }
 
 const INK = 0x1a1a1a;
@@ -43,7 +47,10 @@ export function stampedeBirdPoseKey(pose: StampedeBirdPose): string {
     pose.poisoned ? (pose.poisonFlash ? 2 : 1) : 0,
     pose.dazed ? 1 : 0,
     pose.flash ? 1 : 0,
-    pose.windup ? 1 : 0
+    pose.windup ? 1 : 0,
+    pose.raised ? 1 : 0,
+    pose.enraged ? 1 : 0,
+    pose.ally ? 1 : 0
   ].join('|');
 }
 
@@ -73,6 +80,9 @@ export function drawStampedeBird(g: Graphics, pose: StampedeBirdPose): void {
       break;
     case 'ex':
       drawEx(g, pose);
+      break;
+    case 'boyfriend':
+      drawBoyfriend(g, pose);
       break;
     case 'chick':
     default:
@@ -324,6 +334,192 @@ function drawEx(g: Graphics, pose: StampedeBirdPose): void {
   if (pose.windup) steam(g, head.x - head.r * 1.4, head.y - head.r * 0.5);
 }
 
+const BRAD_TAN = 0xd9b48a;
+const BRAD_CAP = 0xd13b3b;
+const GOLD = 0xf6c445;
+const SHAKER = 0xf29ac0;
+
+/**
+ * Brad: small head on a huge chest, ribbed tank top, flexed bicep, gold chain,
+ * backward red cap. Enraged rips the top and flips the cap forward.
+ */
+function drawBoyfriend(g: Graphics, pose: StampedeBirdPose): void {
+  const r = pose.radius;
+  drawLegs(g, r, 3);
+  if (!pose.raised) shakerProp(g, -r * 0.92, r * 0.35, 1);
+  g.fillStyle(BRAD_TAN, 1);
+  g.fillCircle(0, 0, r);
+  bradTankTop(g, r, pose.enraged);
+  g.lineStyle(3.2, INK, 1);
+  g.strokeCircle(0, 0, r);
+  bradChain(g, r);
+  bradBicep(g, r, pose);
+  const head = head_(g, r, 0.62, -0.86, 0.46, BRAD_TAN);
+  bradCap(g, head, pose.enraged);
+  bradFace(g, head, pose);
+  if (pose.raised) {
+    shakerProp(g, r * 0.05, -r * 1.75, 1.3);
+    exclaim(g, -r * 0.75, -r * 1.7);
+  }
+  if (pose.windup) steam(g, head.x - head.r * 1.5, head.y - head.r * 0.4);
+  bradMoodMarks(g, head, pose);
+}
+
+function bradTankTop(g: Graphics, r: number, enraged: boolean): void {
+  g.fillStyle(PAPER, 1);
+  g.slice(0, 0, r - 1.5, Math.PI * -0.08, Math.PI * 1.08, false);
+  g.fillPath();
+  g.lineStyle(1.2, INK, 0.35);
+  [-0.5, -0.22, 0.06, 0.34].forEach((fx) => {
+    g.lineBetween(r * fx, r * 0.2, r * fx, r * 0.78);
+  });
+  g.lineStyle(4, PAPER, 1);
+  g.lineBetween(r * 0.2, 0, r * 0.38, -r * 0.62);
+  if (!enraged) g.lineBetween(r * 0.62, 0, r * 0.74, -r * 0.5);
+  g.lineStyle(1.6, INK, 1);
+  g.lineBetween(-r * 0.98, -r * 0.06, r * 0.98, -r * 0.06);
+  if (!enraged) return;
+  g.lineStyle(1.8, INK, 1);
+  g.beginPath();
+  g.moveTo(-r * 0.6, r * 0.62);
+  [-0.45, -0.3, -0.15, 0, 0.15, 0.3, 0.45].forEach((fx, index) => {
+    g.lineTo(r * fx, r * (index % 2 === 0 ? 0.46 : 0.66));
+  });
+  g.strokePath();
+  g.lineStyle(2.6, PAPER, 1);
+  g.lineBetween(r * 0.72, -r * 0.1, r * 0.92, r * 0.25);
+}
+
+function bradChain(g: Graphics, r: number): void {
+  g.fillStyle(GOLD, 1);
+  g.lineStyle(1, INK, 0.9);
+  for (let step = 0; step <= 8; step += 1) {
+    const t = step / 8;
+    const x = r * (0.12 + t * 0.66);
+    const y = -r * 0.4 + Math.sin(t * Math.PI) * r * 0.32;
+    g.fillCircle(x, y, 1.6);
+    g.strokeCircle(x, y, 1.6);
+  }
+  const px = r * 0.45;
+  const py = -r * 0.02;
+  g.fillRect(px - 4, py + 2, 8, 2);
+  g.strokeRect(px - 4, py + 2, 8, 2);
+  [-5, 5].forEach((dx) => {
+    g.fillRect(px + dx - 1.6, py, 3.2, 6);
+    g.strokeRect(px + dx - 1.6, py, 3.2, 6);
+  });
+}
+
+function bradBicep(g: Graphics, r: number, pose: StampedeBirdPose): void {
+  const lift = pose.windup ? r * 0.3 : pose.ally ? pose.flapStep * r * 0.16 : pose.flapStep * r * 0.06;
+  const x = -r * 0.22;
+  const y = r * 0.12 - lift;
+  g.fillStyle(0xc99a6c, 1);
+  g.lineStyle(2.4, INK, 1);
+  g.fillEllipse(x, y, r * 1.0, r * 0.55);
+  g.strokeEllipse(x, y, r * 1.0, r * 0.55);
+  g.fillCircle(x + r * 0.08, y - r * 0.22, r * 0.27);
+  g.strokeCircle(x + r * 0.08, y - r * 0.22, r * 0.27);
+  if (pose.ally) {
+    g.fillStyle(BRAD_CAP, 1);
+    g.lineStyle(1.4, INK, 1);
+    g.fillRect(x - r * 0.38, y - r * 0.2, r * 0.16, r * 0.42);
+    g.strokeRect(x - r * 0.38, y - r * 0.2, r * 0.16, r * 0.42);
+    return;
+  }
+  g.lineStyle(1.4, BRAD_CAP, 0.85);
+  g.beginPath();
+  g.moveTo(x + r * 0.02, y - r * 0.32);
+  g.lineTo(x + r * 0.1, y - r * 0.24);
+  g.lineTo(x + r * 0.04, y - r * 0.16);
+  g.lineTo(x + r * 0.12, y - r * 0.08);
+  g.strokePath();
+}
+
+function bradCap(g: Graphics, head: { x: number; y: number; r: number }, enraged: boolean): void {
+  g.fillStyle(BRAD_CAP, 1);
+  g.lineStyle(2, INK, 1);
+  g.slice(head.x, head.y, head.r + 1, Math.PI, Math.PI * 2, false);
+  g.fillPath();
+  g.beginPath();
+  g.arc(head.x, head.y, head.r + 1, Math.PI, Math.PI * 2, false);
+  g.closePath();
+  g.strokePath();
+  const brimX = enraged ? head.x + head.r * 1.15 : head.x - head.r * 1.15;
+  g.fillEllipse(brimX, head.y - head.r * 0.08, head.r * 1.0, head.r * 0.34);
+  g.strokeEllipse(brimX, head.y - head.r * 0.08, head.r * 1.0, head.r * 0.34);
+  g.fillStyle(PAPER, 1);
+  g.fillCircle(head.x, head.y - head.r - 1, 1.8);
+}
+
+function bradFace(g: Graphics, head: { x: number; y: number; r: number }, pose: StampedeBirdPose): void {
+  const friendly = pose.ally || pose.mood === 'smitten';
+  eye(g, head.x + head.r * 0.38, head.y + head.r * 0.08, 2, pose.mood);
+  g.lineStyle(3.2, INK, 1);
+  if (friendly) {
+    g.lineBetween(head.x + head.r * 0.02, head.y - head.r * 0.36, head.x + head.r * 0.78, head.y - head.r * 0.36);
+  } else {
+    g.lineBetween(head.x - head.r * 0.05, head.y - head.r * 0.38, head.x + head.r * 0.8, head.y - head.r * 0.08);
+  }
+  beak(g, head.x + head.r * 0.95, head.y + head.r * 0.28, 6, pose.mood);
+  g.lineStyle(2, INK, 1);
+  g.lineBetween(head.x + head.r * 0.1, head.y + head.r * 0.8, head.x + head.r * 0.82, head.y + head.r * 0.66);
+}
+
+function bradMoodMarks(g: Graphics, head: { x: number; y: number; r: number }, pose: StampedeBirdPose): void {
+  if (pose.ally) {
+    heartShape(g, head.x - head.r * 0.2, head.y - head.r - 14, 0.8, 0xc0263b);
+    return;
+  }
+  if (pose.mood === 'confused') {
+    questionMark(g, head.x - head.r * 0.1, head.y - head.r - 20);
+    return;
+  }
+  if (pose.dazed) return;
+  angerMark(g, head.x - head.r * 1.5, head.y - head.r * 1.2);
+  if (pose.enraged) angerMark(g, head.x + head.r * 1.4, head.y - head.r * 1.5);
+}
+
+function angerMark(g: Graphics, x: number, y: number): void {
+  g.lineStyle(2.2, BRAD_CAP, 1);
+  [0, 1, 2, 3].forEach((quarter) => {
+    const angle = quarter * (Math.PI / 2) + Math.PI / 4;
+    const cx = x + Math.cos(angle) * 4.2;
+    const cy = y + Math.sin(angle) * 4.2;
+    g.beginPath();
+    g.arc(cx, cy, 3, angle + Math.PI * 0.6, angle + Math.PI * 1.4, false);
+    g.strokePath();
+  });
+}
+
+function questionMark(g: Graphics, x: number, y: number): void {
+  g.lineStyle(2.6, INK, 1);
+  g.beginPath();
+  g.arc(x, y - 4, 4.5, Math.PI * 1.05, Math.PI * 2.35, false);
+  g.strokePath();
+  g.lineBetween(x + 1.2, y + 0.8, x, y + 4);
+  g.fillStyle(INK, 1);
+  g.fillCircle(x, y + 8, 1.6);
+}
+
+function shakerProp(g: Graphics, x: number, y: number, scale: number): void {
+  const w = 8 * scale;
+  const h = 13 * scale;
+  g.fillStyle(SHAKER, 1);
+  g.lineStyle(1.8, INK, 1);
+  g.fillRoundedRect(x - w / 2, y - h / 2, w, h, 2.5 * scale);
+  g.strokeRoundedRect(x - w / 2, y - h / 2, w, h, 2.5 * scale);
+  g.fillStyle(INK, 1);
+  g.fillRect(x - w / 2 - 0.5, y - h / 2 - 3 * scale, w + 1, 3 * scale);
+  g.lineStyle(1.2, PAPER, 0.9);
+  g.lineBetween(x - w * 0.15, y - h * 0.25, x - w * 0.15, y + h * 0.25);
+}
+
+export function drawProteinShaker(g: Graphics): void {
+  g.clear();
+  shakerProp(g, 0, 0, 1.3);
+}
+
 function drawStatus(g: Graphics, pose: StampedeBirdPose): void {
   const r = pose.radius;
   if (pose.poisoned) {
@@ -354,6 +550,10 @@ function drawHpPips(g: Graphics, pose: StampedeBirdPose): void {
     g.fillStyle(0xc0263b, 1);
     g.fillRect(-width / 2, y + 4, width * Math.max(0, pose.hp / pose.maxHp), 6);
     g.strokeRect(-width / 2, y + 4, width, 6);
+    if (pose.kind === 'boyfriend') {
+      g.lineStyle(2, INK, 1);
+      g.lineBetween(0, y + 1, 0, y + 13);
+    }
     return;
   }
   const gap = 7;
@@ -633,6 +833,8 @@ export function stampedeFeatherColor(kind: StampedeFlockKind): number {
       return 0x3a3a3a;
     case 'ex':
       return 0x4a3550;
+    case 'boyfriend':
+      return BRAD_TAN;
     case 'chick':
     default:
       return 0xffd84d;

@@ -2,7 +2,7 @@ import * as Phaser from 'phaser';
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
 import { STAMPEDE_MIRROR_RADIUS, type StampedeMirror } from './mapEvents';
 
-export type StampedeBeaconKind = 'mirror' | 'gift' | 'heart' | 'bartender' | 'ex';
+export type StampedeBeaconKind = 'mirror' | 'gift' | 'heart' | 'bartender' | 'ex' | 'boyfriend';
 
 export interface StampedeEventBeacon {
   x: number;
@@ -27,7 +27,8 @@ const BEACON_COLORS: Record<StampedeBeaconKind, number> = {
   gift: 0xf3c1d0,
   heart: 0xc0263b,
   bartender: 0xf0a202,
-  ex: 0x6e3a62
+  ex: 0x6e3a62,
+  boyfriend: 0xd13b3b
 };
 
 export function createStampedeEventLook(scene: Phaser.Scene): StampedeEventLook {
