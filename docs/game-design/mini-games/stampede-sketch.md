@@ -18,8 +18,20 @@ dashes straight along it, so a sidestep dodges it. Scheduled events keep the run
 moving: a standing mirror appears at 0:22, 1:02, and 1:44, and standing next to it
 for a pep talk grants a free twist; your ex arrives at 1:26 as a tough charging
 boss that always drops a gift; the last 20 seconds are "Last call", with an extra
-rush of birds. Gifts (also sometimes dropped by roosters) pull in every scrap,
-make the flock scatter for a moment, or heal you when hurt. Arrows on the screen
+rush of birds. A dad joke meter starts a third full, fills over about 45 seconds,
+and fills faster as you clear birds. When it is full, Space or tapping the meter
+tells a dad joke: an expanding ring damages and dazes the eight nearest birds
+within reach, and a big clear earns a "ba-dum-tss". Chicks that crowd you pop
+hearts, and enough hearts make someone's boyfriend jealous: a warning banner,
+then Brad arrives at 1:50, or at 2:10 no matter what. Brad is a beefy boss in a
+tank top and backward cap. He whistles chicks over as escorts that shield him,
+chains three dashes along bent red lanes, and lobs protein shakers that leave a
+slowing pink puddle. Below half health he flexes, shoves you back, and fights
+faster. A dad joke only confuses a healthy Brad. Below half health it makes him
+laugh: he becomes a wingman who pecks the flock for 20 seconds, his escorts calm
+down, and then they all leave. Beaten or befriended, he leaves a gift. Gifts (also
+sometimes dropped by roosters) pull in every scrap, make the flock scatter for a
+moment, heal you when hurt, or are a punchline that refills the joke meter. Arrows on the screen
 edge point at an off-screen mirror, gift, heart, bartender, or ex. Scraps near you
 fly in on their own. A mug that lands soaks you and
 your weapons go quiet for a few seconds. You pick one starting weapon from two or three random offers, never more than three. The first twist costs 8 scraps, later twists stay cheap, and drafts are still at least 14 seconds apart. The first two drafts only twist a weapon you already have, though one card can be a way to stay standing: heal a peck, grow a spare heart, or spin a hollow shell that catches the next peck. At 1 HP a heart sometimes drops on the floor. A new weapon can show up after the early twists, and a card never offers a plain damage boost. Bad selfie hits random nearby chicks and dazes survivors; a situationship will not pose. Twists can daze the chick beside the photo, hold the pose longer, or snap whoever is behind you. Bad breath is a lane of green bubbles in the direction you face. Twists widen that lane, leave the stench hanging, or snake the stream. Bad smell is a grumpy green stink cloud that pops out of you and orbits close, trailing a little haze; the drawn cloud is exactly what hits. Twists swing it farther, spin it faster, add a twin on the other side, or fatten the cloud. Perfume chicks ignore the stink. Hits from either flash the chick green. Fake glasses drops the nearest couple of chicks within about a third of the screen and shows on your face; nerds shrug them off until the prescription twist. Other glasses twists freeze whoever sees them, or catch a chick standing beside the target. Special chicks say one short line at a time, with the rarer type going first when they overlap. You keep each one, and the character wears the kit so you can see what is active. Closing returns to the street. In the active Ridge pre-production route, it is optional
@@ -88,7 +100,14 @@ them to the blanket, but the blanket itself should remain a separate landmark.
   own entrance the first time it unlocks.
 - **Events:** mirror pep talks (free twist, or a heal if nothing is left to
   offer), the ex boss at 1:26 (big HP bar, slower charge, always drops a gift),
-  gifts (scrap magnet, scatter, or heal), and a last-call rush.
+  Brad the jealous boyfriend (arrives early when chicks swoon over you, always
+  by last call), gifts (scrap magnet, scatter, heal, or punchline), and a
+  last-call rush.
+- **Dad joke (ultimate):** one charge that refills over time and from clears.
+  It hits up to eight birds within reach for two hits each and dazes the
+  survivors; the ex is only dazed briefly. Brad does not take a target slot:
+  above half health the joke confuses him, below half it turns him into a
+  temporary wingman. The result screen counts wingmen made.
 - **XP pickups:** captured ink drops, sticky notes, or useful scraps.
 - **Upgrades:** better ways to organize, soften, or survive pressure.
 - **Damage/contact:** smudges, page noise, crowding.
@@ -102,7 +121,8 @@ them to the blanket, but the blanket itself should remain a separate landmark.
   grows by one every 15 seconds up to the pool, spawns come faster, and
   newcomers get up to 60% faster and up to four extra hits. A mirror returns
   every 40 seconds, the ex returns every 75 seconds with six more hits per
-  visit, and a 15-second rush comes once a minute. The longest endless run is
+  visit, Brad returns a minute in and then every 90 seconds with eight more
+  hits per visit, and a 15-second rush comes once a minute. The longest endless run is
   saved on the device and shown on the result as the best.
 
 ## First-Slice Art Direction

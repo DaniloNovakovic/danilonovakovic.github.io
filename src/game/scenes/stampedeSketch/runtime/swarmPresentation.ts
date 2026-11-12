@@ -11,6 +11,7 @@ import { pickStampedeBark, stampedeBarkReadyAt } from './barks';
 import {
   resolveBoyfriendJokeOutcome,
   STAMPEDE_JOKE_DAMAGE,
+  STAMPEDE_JOKE_BUBBLE_MS,
   STAMPEDE_JOKE_DAZE_MS,
   STAMPEDE_JOKE_EX_DAZE_MS
 } from './dadJoke';
@@ -260,6 +261,7 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
   private events: StampedeSwarmEvents = EMPTY_EVENTS;
   private barkSpeakerId: string | null = null;
   private barkUntilMs = 0;
+  private pendingLine: { birdId: string; line: string; durationMs: number; atMs: number } | null = null;
   private nextBarkGlobalAtMs = 0;
   private candidatesDirty = true;
   private contactCandidates: StampedeSwarmContactCandidate[] = [];
@@ -429,7 +431,7 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
       if (!bird.brad || isBradFriendly(bird.brad)) return;
       if (resolveBoyfriendJokeOutcome(bird.hp, bird.maxHp) === 'confused') {
         bird.brad = confuseBrad(bird.brad, now);
-        this.say(bird, "...I don't get it.", 2_000);
+        this.sayAfterJoke(bird, "...I don't get it.", 2_000);
         return;
       }
       bird.brad = befriendBrad(bird.brad, now);
@@ -439,7 +441,7 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
       this.birds.forEach((other) => {
         if (other.state === 'active' && other.escortOf === bird.id) other.calm = 'tagalong';
       });
-      this.say(bird, "HAH! Okay, okay. You're alright.", 2_400);
+      this.sayAfterJoke(bird, "HAH! Okay, okay. You're alright.", 2_400);
       this.popHeart(bird.x, bird.y - bird.radius - 10);
       this.pushEvent((events) => events.befriended.push({ x: bird.x, y: bird.y }));
       this.candidatesDirty = true;
@@ -557,6 +559,7 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
     this.bark.setVisible(false);
     this.barkSpeakerId = null;
     this.barkUntilMs = 0;
+    this.pendingLine = null;
     this.nextBarkGlobalAtMs = 0;
     this.candidatesDirty = true;
   }
@@ -1315,7 +1318,22 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
       .setVisible(true);
   }
 
+  private sayAfterJoke(bird: FlockBird, line: string, durationMs: number): void {
+    const atMs = this.scene.time.now + STAMPEDE_JOKE_BUBBLE_MS;
+    this.pendingLine = { birdId: bird.id, line, durationMs, atMs };
+    this.nextBarkGlobalAtMs = Math.max(this.nextBarkGlobalAtMs, atMs);
+  }
+
   private maybeBark(nowMs: number, focus: { x: number; y: number }): void {
+    if (this.pendingLine && nowMs >= this.pendingLine.atMs) {
+      const { birdId, line, durationMs } = this.pendingLine;
+      this.pendingLine = null;
+      const speaker = this.findActive(birdId);
+      if (speaker) {
+        this.say(speaker, line, durationMs);
+        return;
+      }
+    }
     if (this.barkSpeakerId && nowMs < this.barkUntilMs) {
       const speaker = this.findActive(this.barkSpeakerId);
       if (!speaker) {

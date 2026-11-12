@@ -14,6 +14,8 @@ export const STAMPEDE_JOKE_DAMAGE = 2;
 export const STAMPEDE_JOKE_DAZE_MS = 2_000;
 export const STAMPEDE_JOKE_EX_DAZE_MS = 1_000;
 export const STAMPEDE_JOKE_BIG_CLEAR = 5;
+/** How long the joke bubble stays up; Brad answers once it is gone so the two never overlap. */
+export const STAMPEDE_JOKE_BUBBLE_MS = 2_000;
 
 export const STAMPEDE_JOKE_LINES = [
   "Hi, chick magnet. I'm Dad.",

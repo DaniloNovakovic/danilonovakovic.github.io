@@ -1,5 +1,6 @@
 import * as Phaser from 'phaser';
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
+import { STAMPEDE_JOKE_BUBBLE_MS } from './dadJoke';
 
 export interface StampedeJokeLook {
   tell(line: string, origin: { x: number; y: number }, radius: number): void;
@@ -10,7 +11,6 @@ export interface StampedeJokeLook {
 
 const INK = 0x1a1a1a;
 const RING_MS = 420;
-const BUBBLE_MS = 2_400;
 const RING_SEGMENTS = 22;
 
 export function createStampedeJokeLook(scene: Phaser.Scene): StampedeJokeLook {
@@ -47,7 +47,7 @@ class PhaserStampedeJokeLook implements StampedeJokeLook {
 
   tell(line: string, origin: { x: number; y: number }, radius: number): void {
     this.bubble.setText(line).setVisible(true).setAlpha(1);
-    this.bubbleUntilMs = this.scene.time.now + BUBBLE_MS;
+    this.bubbleUntilMs = this.scene.time.now + STAMPEDE_JOKE_BUBBLE_MS;
     this.follow(origin);
 
     this.scene.tweens.killTweensOf(this.ring);
