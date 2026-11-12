@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   createStampedeJealousy,
+  deferStampedeBoyfriendVisit,
   STAMPEDE_JEALOUSY_HEARTS,
   stepStampedeJealousy,
   type StampedeJealousyInput
@@ -57,5 +58,20 @@ describe('jealousy', () => {
     const twice = { ...visited, visits: 2 };
     expect(stepStampedeJealousy(twice, input({ elapsedMs: DURATION + 100_000 })).event).toBeNull();
     expect(stepStampedeJealousy(twice, input({ elapsedMs: DURATION + 150_000 })).event).toBe('arrive');
+  });
+
+  it('puts a missed arrival back so the same beat can try again', () => {
+    const due = stepStampedeJealousy(
+      { hearts: 0, foreshadowed: true, visits: 1 },
+      input({ elapsedMs: DURATION + 60_000 })
+    );
+    expect(due.event).toBe('arrive');
+
+    const held = deferStampedeBoyfriendVisit(due.state);
+    expect(held.visits).toBe(1);
+    expect(stepStampedeJealousy(held, input({ elapsedMs: DURATION + 60_000 })).event).toBe('arrive');
+
+    const kept = stepStampedeJealousy(due.state, input({ elapsedMs: DURATION + 60_000 }));
+    expect(kept.event).toBeNull();
   });
 });

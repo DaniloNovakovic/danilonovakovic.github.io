@@ -45,6 +45,7 @@ import {
 import { createStampedeJokeLook, type StampedeJokeLook } from './jokePresentation';
 import {
   createStampedeJealousy,
+  deferStampedeBoyfriendVisit,
   stepStampedeJealousy,
   type StampedeJealousy
 } from './jealousy';
@@ -592,12 +593,16 @@ export class StampedeSketchScene extends Phaser.Scene {
       this.eventLook?.showBanner("Someone's boyfriend", 'is asking about you');
     }
     if (step.event === 'arrive') {
-      const returning = this.jealousy.visits > 1;
-      this.swarmRuntime.spawnBoyfriend(
+      const spawned = this.swarmRuntime.spawnBoyfriend(
         this.cameras.main.worldView,
         this.player,
         (this.jealousy.visits - 1) * STAMPEDE_BRAD_RETURN_HP
       );
+      if (!spawned) {
+        this.jealousy = deferStampedeBoyfriendVisit(this.jealousy);
+        return;
+      }
+      const returning = this.jealousy.visits > 1;
       this.eventLook?.showBanner(
         returning ? "Brad's back" : 'Her boyfriend just walked in',
         "Wear him down, then tell him a dad joke"

@@ -141,7 +141,7 @@ export interface StampedeSwarmRuntime {
   /** Dad joke on Brad: confused while fresh, a wingman once worn down. */
   jokeBoyfriend(ids: readonly string[]): void;
   spawnEx(view: StampedeViewRect, player: { x: number; y: number }, bonusHp?: number): void;
-  spawnBoyfriend(view: StampedeViewRect, player: { x: number; y: number }, bonusHp?: number): void;
+  spawnBoyfriend(view: StampedeViewRect, player: { x: number; y: number }, bonusHp?: number): boolean;
   isOnField(kind: 'ex' | 'boyfriend'): boolean;
   /** 1 normally, lower while the player stands in a shaker puddle. */
   playerSlowFactor(player: { x: number; y: number }): number;
@@ -224,6 +224,8 @@ const BRAD_WINGMAN_REACH = 240;
 const BRAD_WINGMAN_SPEED = 260;
 const BRAD_WINGMAN_EVERY_MS = 1_200;
 const BRAD_LEAVE_MS = 5_000;
+/** Past the regular flock cap: one slot for the ex, one for Brad. */
+const BOSS_POOL_SLOTS = 2;
 const LEAVE_FADE_MS = 1_000;
 const INK = 0x1a1a1a;
 const WARN = 0xc0263b;
@@ -270,7 +272,7 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
     this.telegraphs = scene.add.graphics().setDepth(17);
-    this.birds = Array.from({ length: STAMPEDE_FLOCK_POOL_SIZE + 1 }, (_, index) => ({
+    this.birds = Array.from({ length: STAMPEDE_FLOCK_POOL_SIZE + BOSS_POOL_SLOTS }, (_, index) => ({
       id: `mark-${index + 1}`,
       body: scene.add.graphics().setVisible(false),
       shadow: scene.add.ellipse(0, 0, 20, 8, INK, 0.13).setDepth(15).setVisible(false),
@@ -417,9 +419,11 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
     return events;
   }
 
-  spawnBoyfriend(view: StampedeViewRect, player: { x: number; y: number }, bonusHp = 0): void {
+  spawnBoyfriend(view: StampedeViewRect, player: { x: number; y: number }, bonusHp = 0): boolean {
     const bird = this.spawnBoss('boyfriend', view, player, bonusHp);
-    if (bird) this.say(bird, "Who's this guy?", 2_000);
+    if (!bird) return false;
+    this.say(bird, "Who's this guy?", 2_000);
+    return true;
   }
 
   jokeBoyfriend(ids: readonly string[]): void {

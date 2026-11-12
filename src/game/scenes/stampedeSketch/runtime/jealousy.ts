@@ -34,6 +34,14 @@ export function createStampedeJealousy(): StampedeJealousy {
   return { hearts: 0, foreshadowed: false, visits: 0 };
 }
 
+/**
+ * Brad was due, but the flock had no free slot. Put the visit back so the
+ * next step tries again instead of waiting out a full overtime beat.
+ */
+export function deferStampedeBoyfriendVisit(state: StampedeJealousy): StampedeJealousy {
+  return { ...state, visits: Math.max(0, state.visits - 1) };
+}
+
 export function stepStampedeJealousy(
   state: StampedeJealousy,
   input: StampedeJealousyInput
