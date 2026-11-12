@@ -9,6 +9,11 @@ import {
 import type { StampedeClearedMarkPoint } from './progression';
 import { pickStampedeBark, stampedeBarkReadyAt } from './barks';
 import {
+  STAMPEDE_JOKE_DAMAGE,
+  STAMPEDE_JOKE_DAZE_MS,
+  STAMPEDE_JOKE_EX_DAZE_MS
+} from './dadJoke';
+import {
   createBeerShot,
   stepBeerShots,
   STAMPEDE_BARTENDER_THROW_MS,
@@ -97,6 +102,8 @@ export interface StampedeSwarmRuntime {
   bouncePecker(id: string, from: { x: number; y: number }): void;
   /** Every bird on the field runs away for a moment and cannot peck. */
   scatter(from: { x: number; y: number }, durationMs: number): void;
+  /** Dad joke: heavy hit on each bird, survivors left dazed. */
+  jokeHit(ids: readonly string[]): readonly StampedeClearedMarkPoint[];
   spawnEx(view: StampedeViewRect, player: { x: number; y: number }, bonusHp?: number): void;
   getBeacons(): readonly StampedeSwarmBeacon[];
   consumeBeerHit(): boolean;
@@ -397,6 +404,16 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
     return cleared;
   }
 
+  jokeHit(ids: readonly string[]): readonly StampedeClearedMarkPoint[] {
+    const cleared: StampedeClearedMarkPoint[] = [];
+    this.forEachActive(ids, (bird) => {
+      const dazeMs = bird.kind === 'ex' ? STAMPEDE_JOKE_EX_DAZE_MS : STAMPEDE_JOKE_DAZE_MS;
+      const mark = this.woundBird(bird, 'daze', dazeMs, STAMPEDE_JOKE_DAMAGE);
+      if (mark) cleared.push(mark);
+    });
+    return cleared;
+  }
+
   reset(): void {
     this.elapsedMs = 0;
     this.nextSpawnAtMs = 0;
@@ -512,10 +529,11 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
   private woundBird(
     bird: FlockBird,
     ailment: 'poison' | 'daze' | undefined,
-    dazeMs: number
+    dazeMs: number,
+    damage = 1
   ): StampedeClearedMarkPoint | null {
     const now = this.scene.time.now;
-    bird.hp -= 1;
+    bird.hp -= damage;
     bird.flashUntilMs = now + 110;
     if (ailment === 'poison') bird.poisonUntilMs = now + 900;
     if (ailment === 'daze' && bird.hp > 0) {

@@ -88,4 +88,10 @@ describe('map events', () => {
     expect(rollStampedeGift(false, () => 0.1)).toBe('magnet');
     expect(rollStampedeGift(false, () => 0.9)).toBe('ghosting');
   });
+
+  it('sometimes deals a punchline card while the joke meter still needs it', () => {
+    expect(rollStampedeGift(false, () => 0.1, true)).toBe('punchline');
+    expect(rollStampedeGift(false, () => 0.9, true)).toBe('ghosting');
+    expect(rollStampedeGift(true, () => 0.1, true)).toBe('heal');
+  });
 });

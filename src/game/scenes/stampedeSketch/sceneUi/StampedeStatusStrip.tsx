@@ -1,7 +1,8 @@
 import type { SceneUiSurfaceProps } from '@/game/sceneUi/registry';
+import { Button } from '@/shared/ui';
 import type { StampedeHudSnapshot } from '../runtime/hudPresentation';
 
-export function StampedeStatusStrip({ params }: SceneUiSurfaceProps) {
+export function StampedeStatusStrip({ params, dispatchAction }: SceneUiSurfaceProps) {
   const snapshot = readStatusParams(params);
   const noise = clamp(snapshot.pageNoise ?? 0, 0, 1);
   const feedback = formatFeedback(snapshot.feedback);
@@ -72,11 +73,60 @@ export function StampedeStatusStrip({ params }: SceneUiSurfaceProps) {
           {formatSpell(snapshot)}
         </p>
       ) : null}
+      {typeof snapshot.jokeCharge === 'number' ? (
+        <JokeMeter
+          charge={snapshot.jokeCharge}
+          ready={snapshot.jokeReady === true}
+          onTell={() => dispatchAction('castSpell')}
+        />
+      ) : null}
       {typeof snapshot.scrapsCollected === 'number' && typeof snapshot.scrapGoal === 'number' ? (
         <p className="font-mono text-xs font-bold uppercase leading-tight tracking-widest text-[#4b4337] [@media(max-height:420px)]:hidden md:text-sm">
           Scraps {snapshot.scrapsCollected}/{snapshot.scrapGoal}
         </p>
       ) : null}
+    </div>
+  );
+}
+
+function JokeMeter({
+  charge,
+  ready,
+  onTell
+}: {
+  charge: number;
+  ready: boolean;
+  onTell: () => void;
+}) {
+  if (ready) {
+    return (
+      <Button
+        variant="primary"
+        size="sm"
+        className="animate-pulse font-mono uppercase tracking-widest [@media(max-height:420px)]:px-2 [@media(max-height:420px)]:py-0.5 [@media(max-height:420px)]:text-[10px]"
+        onClick={onTell}
+        aria-label="Tell a dad joke (Space)"
+      >
+        Dad joke!
+      </Button>
+    );
+  }
+  const percent = Math.round(clamp(charge, 0, 1) * 100);
+  return (
+    <div className="flex items-center gap-1.5">
+      <span className="font-mono text-xs font-bold uppercase tracking-widest text-[#4b4337] [@media(max-height:420px)]:text-[10px] md:text-sm">
+        Joke
+      </span>
+      <div
+        className="h-3 w-12 rounded-sm border-2 border-[#1a1a1a] bg-white [@media(max-height:420px)]:w-9"
+        role="progressbar"
+        aria-label="Dad joke charge"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={percent}
+      >
+        <div className="h-full bg-[#c0263b]" style={{ width: `${percent}%` }} />
+      </div>
     </div>
   );
 }

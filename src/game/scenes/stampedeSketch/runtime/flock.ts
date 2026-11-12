@@ -7,7 +7,8 @@ export type StampedeFlockKind =
   | 'fixer'
   | 'situationship'
   | 'bartender'
-  | 'ex';
+  | 'ex'
+  | 'boyfriend';
 
 export type StampedeWeaponThreat = 'badSelfie' | 'badBreath' | 'badSmell' | 'fakeGlasses';
 
@@ -37,7 +38,7 @@ export const STAMPEDE_SITUATIONSHIP_AT_MS = 34_000;
 export const STAMPEDE_ROOSTER_AT_MS = 46_000;
 export const STAMPEDE_BARTENDER_AT_MS = 54_000;
 
-type StampedeSpawnKind = Exclude<StampedeFlockKind, 'ex'>;
+type StampedeSpawnKind = Exclude<StampedeFlockKind, 'ex' | 'boyfriend'>;
 
 interface StampedeSpawnRule {
   atMs: number;
@@ -88,6 +89,8 @@ export function pickStampedeSpawnKind(
 
 export function getStampedeFlockProfile(kind: StampedeFlockKind): StampedeFlockProfile {
   switch (kind) {
+    case 'boyfriend':
+      return { kind, maxHp: 24, scrapValue: 15, speed: 40, radius: 27 };
     case 'ex':
       return { kind, maxHp: 14, scrapValue: 10, speed: 46, radius: 24 };
     case 'bartender':
