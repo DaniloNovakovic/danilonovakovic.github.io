@@ -135,7 +135,7 @@ import {
   type StampedeSwarmRuntime
 } from './swarmPresentation';
 import {
-  formatStampedeKitLabel,
+  formatStampedeHudWeaponLabel,
   getStampedeStartingWeaponChoices,
   getStampedeUpgradeChoices,
   getStampedeWeaponRank,
@@ -787,10 +787,7 @@ export class StampedeSketchScene extends Phaser.Scene {
       const coolingMs = Math.min(spellCoolingMs, selfieCoolingMs);
       snapshot.spellLabel = soakedMs > 0
         ? 'Soaked'
-        : formatStampedeKitLabel(
-          this.progression.appliedUpgradeIds,
-          this.progression.upgradedWeaponIds
-        );
+        : formatStampedeHudWeaponLabel(this.progression.appliedUpgradeIds);
       snapshot.spellReady = !Number.isFinite(coolingMs) || coolingMs <= 0;
       snapshot.spellCooldownSeconds = Number.isFinite(coolingMs) ? coolingMs / 1000 : 0;
       snapshot.jokeCharge = this.jokeMeter.charge;

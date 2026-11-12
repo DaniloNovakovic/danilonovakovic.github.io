@@ -6,6 +6,7 @@ import {
   resolveStampedeAutoAttackFrame
 } from './autoAttack';
 import {
+  formatStampedeHudWeaponLabel,
   getStampedeStartingWeaponChoices,
   getStampedeUpgradeChoices,
   resolveStampedeAutoAttackProfile,
@@ -109,6 +110,20 @@ describe('stampede upgrades', () => {
 
     expect(frame.attack?.hitIds).toHaveLength(3);
     expect(frame.state.nextFireAtMs).toBeLessThan(STAMPEDE_AUTO_ATTACK_COOLDOWN_MS * 2);
+  });
+
+  it('names only the latest weapon on the status strip', () => {
+    expect(formatStampedeHudWeaponLabel([])).toBe('Unarmed');
+    expect(formatStampedeHudWeaponLabel(['badSelfie'])).toBe('Bad Selfie');
+    const kit = formatStampedeHudWeaponLabel([
+      'badSelfie',
+      'badBreath',
+      'fakeGlasses',
+      'shell',
+      'breathWide'
+    ]);
+    expect(kit).toBe('Fake Glasses');
+    expect(kit).not.toContain('·');
   });
 
   it('makes lighter shoes increase guardian movement speed', () => {
