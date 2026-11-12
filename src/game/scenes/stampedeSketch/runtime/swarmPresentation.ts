@@ -23,8 +23,10 @@ import {
 import {
   pickStampedeSpawnPoint,
   stampedeFlockTarget,
+  stampedeOvertimeToughness,
   stampedeSpawnGapMs,
   STAMPEDE_FLOCK_POOL_SIZE,
+  type StampedeOvertimeToughness,
   type StampedeViewRect
 } from './flockDirector';
 import {
@@ -95,7 +97,7 @@ export interface StampedeSwarmRuntime {
   bouncePecker(id: string, from: { x: number; y: number }): void;
   /** Every bird on the field runs away for a moment and cannot peck. */
   scatter(from: { x: number; y: number }, durationMs: number): void;
-  spawnEx(view: StampedeViewRect, player: { x: number; y: number }): void;
+  spawnEx(view: StampedeViewRect, player: { x: number; y: number }, bonusHp?: number): void;
   getBeacons(): readonly StampedeSwarmBeacon[];
   consumeBeerHit(): boolean;
   reset(): void;
@@ -372,11 +374,11 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
     this.candidatesDirty = true;
   }
 
-  spawnEx(view: StampedeViewRect, player: { x: number; y: number }): void {
+  spawnEx(view: StampedeViewRect, player: { x: number; y: number }, bonusHp = 0): void {
     const bird = this.birds.find((entry) => entry.state === 'idle');
     if (!bird) return;
     const point = pickStampedeSpawnPoint(view, STAMPEDE_WORLD, player);
-    this.activate(bird, 'ex', point, false);
+    this.activate(bird, 'ex', point, false, { speedScale: 1, bonusHp });
   }
 
   clearMarks(
@@ -450,7 +452,7 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
     const onPage = this.elapsedMs < OPENING_ON_PAGE_MS;
     const spawnView = onPage ? insetView(view, OPENING_INSET) : view;
     const point = pickStampedeSpawnPoint(spawnView, STAMPEDE_WORLD, player);
-    this.activate(bird, kind, point, onPage);
+    this.activate(bird, kind, point, onPage, stampedeOvertimeToughness(this.elapsedMs, durationMs));
     this.introduced.add(kind);
     this.spawnCount += 1;
     this.nextSpawnAtMs = nowMs + stampedeSpawnGapMs(this.elapsedMs, durationMs, surge);
@@ -460,16 +462,17 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
     bird: FlockBird,
     kind: StampedeFlockKind,
     point: { x: number; y: number },
-    popIn: boolean
+    popIn: boolean,
+    toughness: StampedeOvertimeToughness
   ): void {
     const profile = getStampedeFlockProfile(kind);
     const now = this.scene.time.now;
     bird.state = 'active';
     bird.kind = kind;
-    bird.hp = profile.maxHp;
-    bird.maxHp = profile.maxHp;
+    bird.hp = profile.maxHp + toughness.bonusHp;
+    bird.maxHp = bird.hp;
     bird.radius = profile.radius;
-    bird.speed = profile.speed * (0.85 + Math.random() * 0.3);
+    bird.speed = profile.speed * toughness.speedScale * (0.85 + Math.random() * 0.3);
     bird.scrapValue = profile.scrapValue;
     bird.x = point.x;
     bird.y = point.y;

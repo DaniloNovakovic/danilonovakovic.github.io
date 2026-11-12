@@ -32,7 +32,9 @@ export function createStampedeHudSnapshot(
   const contactLimit = stampedeContactLimit(progression?.bonusHearts ?? 0);
 
   return {
-    timeRemainingSeconds: remainingMs / 1000,
+    ...(session.endless
+      ? { timerSeconds: session.elapsedMs / 1000 }
+      : { timeRemainingSeconds: remainingMs / 1000 }),
     pageNoise: resolveHudNoise(session, pressure),
     phaseLabel: resolvePhaseLabel(session, pressure),
     feedback: resolveHudFeedback(session),
@@ -69,7 +71,7 @@ function resolvePhaseLabel(
       return 'They lose you';
     case 'calm':
     default:
-      return 'Chick magnet';
+      return session.endless ? 'Endless' : 'Chick magnet';
   }
 }
 

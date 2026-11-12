@@ -12,6 +12,8 @@ export interface StampedeSession {
   phase: StampedeSessionPhase;
   elapsedMs: number;
   durationMs: number;
+  /** Past a clear the run keeps going until the last peck; durationMs stays the pacing reference. */
+  endless: boolean;
   contacts: number;
   lastContactAtMs: number | null;
   recentContact: boolean;
@@ -31,10 +33,17 @@ export function createStampedeSession(
     phase: 'playing',
     elapsedMs: 0,
     durationMs: Math.max(0, options.durationMs ?? STAMPEDE_SESSION_DURATION_MS),
+    endless: false,
     contacts: 0,
     lastContactAtMs: null,
     recentContact: false
   };
+}
+
+/** A cleared run picks back up where it stopped and only ends on the last peck. */
+export function continueStampedeSessionEndless(session: StampedeSession): StampedeSession {
+  if (session.phase !== 'cleared' || session.endless) return session;
+  return { ...session, phase: 'playing', endless: true, recentContact: false };
 }
 
 export function advanceStampedeSession(
@@ -43,13 +52,9 @@ export function advanceStampedeSession(
 ): StampedeSession {
   if (session.phase !== 'playing') return session;
 
-  const elapsedMs = clamp(
-    session.elapsedMs + Math.max(0, deltaMs),
-    0,
-    session.durationMs
-  );
+  const elapsedMs = clampElapsed(session, session.elapsedMs + Math.max(0, deltaMs));
   const phase: StampedeSessionPhase =
-    elapsedMs >= session.durationMs ? 'cleared' : 'playing';
+    !session.endless && elapsedMs >= session.durationMs ? 'cleared' : 'playing';
 
   return {
     ...session,
@@ -81,7 +86,7 @@ export function resolveStampedeContact(
   if (session.phase !== 'playing') return session;
 
   const contactLimit = options.contactLimit ?? STAMPEDE_CONTACT_LIMIT;
-  const elapsedMs = clamp(atMs, 0, session.durationMs);
+  const elapsedMs = clampElapsed(session, atMs);
   const contacts = session.contacts + 1;
 
   return {
@@ -105,6 +110,10 @@ function isRecentContact(lastContactAtMs: number | null, elapsedMs: number): boo
     lastContactAtMs !== null &&
     elapsedMs - lastContactAtMs <= STAMPEDE_RECENT_CONTACT_MS
   );
+}
+
+function clampElapsed(session: StampedeSession, elapsedMs: number): number {
+  return clamp(elapsedMs, 0, session.endless ? Number.POSITIVE_INFINITY : session.durationMs);
 }
 
 function clamp(value: number, min: number, max: number): number {

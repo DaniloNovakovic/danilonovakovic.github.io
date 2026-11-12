@@ -23,6 +23,21 @@ export type StampedeMirrorStep =
   | { status: 'waiting' | 'charging'; mirror: StampedeMirror }
   | { status: 'complete' | 'expired'; mirror: null };
 
+interface StampedeOvertimeBeat {
+  kind: StampedeMapEventKind;
+  firstMs: number;
+  everyMs: number;
+}
+
+const OVERTIME_RUSH: StampedeOvertimeBeat = { kind: 'lastCall', firstMs: 45_000, everyMs: 60_000 };
+const OVERTIME_RUSH_MS = 15_000;
+/** Endless overtime repeats each event on its own beat, counted from the end of the regular clock. */
+const OVERTIME_BEATS: readonly StampedeOvertimeBeat[] = [
+  { kind: 'mirror', firstMs: 30_000, everyMs: 40_000 },
+  { kind: 'ex', firstMs: 45_000, everyMs: 75_000 },
+  OVERTIME_RUSH
+];
+
 /** Events whose start time falls inside (previousMs, elapsedMs]. */
 export function dueStampedeMapEvents(
   previousMs: number,
@@ -36,11 +51,26 @@ export function dueStampedeMapEvents(
   });
   if (crossed(STAMPEDE_EX_AT_MS)) due.push('ex');
   if (crossed(durationMs - STAMPEDE_LAST_CALL_REMAINING_MS)) due.push('lastCall');
+  OVERTIME_BEATS.forEach((beat) => {
+    if (crossedBeat(previousMs - durationMs, elapsedMs - durationMs, beat.firstMs, beat.everyMs)) {
+      due.push(beat.kind);
+    }
+  });
   return due;
 }
 
+/** The final 20 seconds of the regular run, then a 15-second rush once a minute in endless overtime. */
 export function isStampedeLastCall(elapsedMs: number, durationMs: number): boolean {
-  return elapsedMs >= durationMs - STAMPEDE_LAST_CALL_REMAINING_MS;
+  if (elapsedMs < durationMs) return elapsedMs >= durationMs - STAMPEDE_LAST_CALL_REMAINING_MS;
+  const sinceFirstRush = elapsedMs - durationMs - OVERTIME_RUSH.firstMs;
+  if (sinceFirstRush < 0) return false;
+  return sinceFirstRush % OVERTIME_RUSH.everyMs < OVERTIME_RUSH_MS;
+}
+
+function crossedBeat(previousMs: number, elapsedMs: number, firstMs: number, everyMs: number): boolean {
+  if (elapsedMs < firstMs) return false;
+  const beatAt = firstMs + Math.floor((elapsedMs - firstMs) / everyMs) * everyMs;
+  return previousMs < beatAt;
 }
 
 /** A spot a short walk away: far enough to be a detour, close enough to be worth it. */

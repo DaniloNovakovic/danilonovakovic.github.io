@@ -3,6 +3,7 @@ import {
   pickStampedeSpawnPoint,
   STAMPEDE_FLOCK_POOL_SIZE,
   stampedeFlockTarget,
+  stampedeOvertimeToughness,
   stampedeSpawnGapMs
 } from './flockDirector';
 import { STAMPEDE_WORLD } from './movement';
@@ -34,6 +35,24 @@ describe('flock director', () => {
   it('spawns faster later and during surges', () => {
     expect(stampedeSpawnGapMs(DURATION, DURATION)).toBeLessThan(stampedeSpawnGapMs(0, DURATION));
     expect(stampedeSpawnGapMs(0, DURATION, true)).toBeLessThan(stampedeSpawnGapMs(0, DURATION));
+  });
+
+  it('keeps escalating in endless overtime up to the pool size', () => {
+    const atClock = stampedeFlockTarget({ elapsedMs: DURATION, durationMs: DURATION });
+    const overtime = stampedeFlockTarget({ elapsedMs: DURATION + 60_000, durationMs: DURATION });
+    expect(overtime).toBeGreaterThan(atClock);
+    expect(stampedeFlockTarget({ elapsedMs: DURATION * 20, durationMs: DURATION }))
+      .toBe(STAMPEDE_FLOCK_POOL_SIZE);
+    expect(stampedeSpawnGapMs(DURATION + 120_000, DURATION)).toBeLessThan(stampedeSpawnGapMs(DURATION, DURATION));
+    expect(stampedeSpawnGapMs(DURATION * 20, DURATION)).toBeGreaterThan(100);
+  });
+
+  it('toughens newcomers only past the regular clock, with a ceiling', () => {
+    expect(stampedeOvertimeToughness(DURATION, DURATION)).toEqual({ speedScale: 1, bonusHp: 0 });
+    const threeMinutes = stampedeOvertimeToughness(DURATION + 180_000, DURATION);
+    expect(threeMinutes.speedScale).toBeGreaterThan(1);
+    expect(threeMinutes.bonusHp).toBe(2);
+    expect(stampedeOvertimeToughness(DURATION * 30, DURATION)).toEqual({ speedScale: 1.6, bonusHp: 4 });
   });
 
   it('spawns just off camera but inside the field', () => {

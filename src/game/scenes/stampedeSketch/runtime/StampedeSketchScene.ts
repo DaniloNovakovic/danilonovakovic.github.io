@@ -28,6 +28,7 @@ import {
   type StampedeOrbitPoint
 } from './auras';
 import { drawStampedeArena } from './arenaPresentation';
+import { recordStampedeEndlessRun } from './endlessRecord';
 import { STAMPEDE_BEER_DISARM_MS } from './beer';
 import {
   createStampedeFeedbackRuntime,
@@ -98,6 +99,7 @@ import {
 } from './spellPresentation';
 import { resolveStampedeSpellCast, type StampedeSpellId } from './spells';
 import {
+  continueStampedeSessionEndless,
   createStampedeSession,
   readStampedeSessionSnapshot,
   recoverStampedeContact,
@@ -133,6 +135,7 @@ type StampedeOpenDraft = 'none' | 'scraps' | 'free';
 const STAMPEDE_GHOSTING_MS = 3_600;
 const STAMPEDE_MAGNET_MS = 1_400;
 const STAMPEDE_ROOSTER_GIFT_CHANCE = 0.25;
+const STAMPEDE_EX_RETURN_HP = 6;
 
 export class StampedeSketchScene extends Phaser.Scene {
   private player?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -166,6 +169,7 @@ export class StampedeSketchScene extends Phaser.Scene {
   private disarmedUntilMs = 0;
   private shellReadyAtMs = 0;
   private clutchHeartOffered = false;
+  private exVisits = 0;
   private lastFacing = { x: 1, y: 0 };
   private onClose: () => void = () => {};
 
@@ -277,7 +281,7 @@ export class StampedeSketchScene extends Phaser.Scene {
     const previousElapsedMs = this.session.elapsedMs;
     const weaponElapsedMs = Math.min(
       this.session.elapsedMs + Math.max(0, delta),
-      this.session.durationMs
+      this.session.endless ? Number.POSITIVE_INFINITY : this.session.durationMs
     );
     const frame = resolveStampedeRunFrame({
       session: this.session,
@@ -417,10 +421,18 @@ export class StampedeSketchScene extends Phaser.Scene {
         this.eventLook?.showBanner('A mirror appeared', 'Stand by it for a pep talk and a free twist');
         return;
       case 'ex':
-        this.swarmRuntime.spawnEx(this.cameras.main.worldView, this.player);
-        this.eventLook?.showBanner('Your ex showed up', 'Watch for the charge. Big gift if you win');
+        this.swarmRuntime.spawnEx(this.cameras.main.worldView, this.player, this.exVisits * STAMPEDE_EX_RETURN_HP);
+        this.eventLook?.showBanner(
+          this.exVisits === 0 ? 'Your ex showed up' : 'Your ex is back',
+          this.exVisits === 0 ? 'Watch for the charge. Big gift if you win' : 'Tougher this time. Same big gift'
+        );
+        this.exVisits += 1;
         return;
       case 'lastCall':
+        if (this.session.endless) {
+          this.eventLook?.showBanner('Rush hour!', 'Everyone wants a dance. Hold on 15 seconds');
+          return;
+        }
         this.eventLook?.showBanner('Last call!', 'Everyone wants a dance. Hold on 20 seconds');
     }
   }
@@ -497,6 +509,7 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.disarmedUntilMs = 0;
     this.shellReadyAtMs = 0;
     this.clutchHeartOffered = false;
+    this.exVisits = 0;
     this.lastFacing = { x: 1, y: 0 };
   }
 
@@ -612,7 +625,8 @@ export class StampedeSketchScene extends Phaser.Scene {
       contacts: this.session.contacts,
       rewardStatus: phase === 'cleared'
         ? claimStampedeFirstClearReward()
-        : 'unavailable'
+        : 'unavailable',
+      endless: this.session.endless ? recordStampedeEndlessRun(this.session.elapsedMs) : undefined
     });
     this.showResultPanel(view);
   }
@@ -787,7 +801,23 @@ export class StampedeSketchScene extends Phaser.Scene {
       case 'backToRidge':
         this.closeToStreet();
         return;
+      case 'stampedeKeepGoing':
+        this.continueEndless();
+        return;
     }
+  }
+
+  private continueEndless(): void {
+    const next = continueStampedeSessionEndless(this.session);
+    if (next === this.session) return;
+    this.session = next;
+    this.shownResultPhase = undefined;
+    bridgeActions.clearSceneUiPanel(STAMPEDE_SKETCH_SCENE_ID);
+    this.inputRuntime?.setPointerControlEnabled(true);
+    this.inputRuntime?.clearPointerControl();
+    this.inputRuntime?.updateStickVisuals();
+    this.eventLook?.showBanner('Endless mode', 'They never stop coming. How long can you last?');
+    this.updateHud();
   }
 
   private startWithWeapon(params: unknown): void {

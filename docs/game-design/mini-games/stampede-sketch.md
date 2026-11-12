@@ -95,7 +95,15 @@ them to the blanket, but the blanket itself should remain a separate landmark.
 - **Win:** the blanket stays calm until the timer ends.
 - **First-clear reward:** the street glasses, owned and equipped. A repeat
   clear does not grant another pair. The earlier Ridge stamp and glide pip
-  candidate is not awarded by this clear.
+  candidate is not awarded by this clear. To replay from the street, take the
+  glasses off in the inventory; the chick keeps running from glasses wearers.
+- **Endless:** every clear offers Keep going (endless), which resumes the same
+  run with a count-up clock until the last peck. Past 2:30 the flock target
+  grows by one every 15 seconds up to the pool, spawns come faster, and
+  newcomers get up to 60% faster and up to four extra hits. A mirror returns
+  every 40 seconds, the ex returns every 75 seconds with six more hits per
+  visit, and a 15-second rush comes once a minute. The longest endless run is
+  saved on the device and shown on the result as the best.
 
 ## First-Slice Art Direction
 
