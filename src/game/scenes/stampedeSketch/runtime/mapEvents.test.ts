@@ -32,6 +32,23 @@ describe('map events', () => {
     expect(isStampedeLastCall(DURATION - STAMPEDE_LAST_CALL_REMAINING_MS, DURATION)).toBe(true);
   });
 
+  it('repeats mirrors, ex visits and rushes on a beat in endless overtime', () => {
+    const fired: string[] = [];
+    for (let at = DURATION; at < DURATION + 300_000; at += 16) {
+      fired.push(...dueStampedeMapEvents(at, at + 16, DURATION));
+    }
+    expect(fired.filter((kind) => kind === 'mirror')).toHaveLength(7);
+    expect(fired.filter((kind) => kind === 'ex')).toHaveLength(4);
+    expect(fired.filter((kind) => kind === 'lastCall')).toHaveLength(5);
+  });
+
+  it('turns overtime rushes on and off instead of staying in last call', () => {
+    expect(isStampedeLastCall(DURATION + 1_000, DURATION)).toBe(false);
+    expect(isStampedeLastCall(DURATION + 50_000, DURATION)).toBe(true);
+    expect(isStampedeLastCall(DURATION + 70_000, DURATION)).toBe(false);
+    expect(isStampedeLastCall(DURATION + 110_000, DURATION)).toBe(true);
+  });
+
   it('places the mirror a short walk away, inside the field', () => {
     const player = { x: 800, y: 500 };
     const mirror = placeStampedeMirror(player, STAMPEDE_WORLD, 10_000, () => 0.3);

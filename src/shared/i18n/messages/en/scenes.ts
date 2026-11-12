@@ -335,14 +335,21 @@ export const sceneMessages = {
       eyebrow: {
         cleared: "Run complete",
         failed: "Run ended",
+        endless: "Endless run over",
       },
       title: {
         cleared: "They lost the scent",
         failed: "Pecked",
+        endless: "Finally caught",
       },
       body: {
         cleared: "The flock peels off, offended. A pair of glasses is sitting in the mess.",
         failed: "The flock got the hug. You got the beak.",
+        endless: "They never stopped coming. You never stopped being irresistible.",
+      },
+      endless: {
+        newBest: "New best. The flock will talk about this one.",
+        best: (time: string) => `Best ${time}. Keep them chasing longer.`,
       },
       rewardNote: {
         earned: "Glasses acquired. The street snaps into focus. The chick will not forgive this.",
@@ -353,10 +360,12 @@ export const sceneMessages = {
       stats: {
         time: "Time",
         contacts: "Contacts",
+        best: "Best",
       },
       actions: {
         backToRidge: "Back to the street",
         retry: "Retry",
+        keepGoing: "Keep going (endless)",
       },
     },
   },

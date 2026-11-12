@@ -1,6 +1,8 @@
 import { useId } from 'react';
 import type { SceneUiSurfaceProps } from '@/game/sceneUi/registry';
+import type { SceneUiActionId } from '@/game/sceneUi/types';
 import type {
+  StampedeResultActionId,
   StampedeResultActionViewModel,
   StampedeResultViewModel
 } from '../runtime/resultPresentation';
@@ -53,11 +55,12 @@ export function StampedeResultPanel({ params, dispatchAction }: SceneUiSurfacePr
         {view.rewardNote}
       </p>
       <div className="mt-3 grid grid-cols-2 gap-2 sm:mt-5 sm:gap-3">
-        {view.actions.map((action) => (
+        {view.actions.map((action, index) => (
           <ResultActionButton
             key={action.id}
             action={action}
-            onClick={() => dispatchAction(action.id === 'retry' ? 'retry' : 'backToRidge')}
+            wide={index === 0 && view.actions.length % 2 === 1}
+            onClick={() => dispatchAction(RESULT_ACTIONS[action.id])}
           />
         ))}
       </div>
@@ -65,11 +68,19 @@ export function StampedeResultPanel({ params, dispatchAction }: SceneUiSurfacePr
   );
 }
 
+const RESULT_ACTIONS: Record<StampedeResultActionId, SceneUiActionId> = {
+  retry: 'retry',
+  backToRidge: 'backToRidge',
+  keepGoing: 'stampedeKeepGoing'
+};
+
 function ResultActionButton({
   action,
+  wide,
   onClick
 }: {
   action: StampedeResultActionViewModel;
+  wide: boolean;
   onClick: () => void;
 }) {
   const primary = action.priority === 'primary';
@@ -78,7 +89,7 @@ function ResultActionButton({
     <Button
       variant={primary ? 'primary' : 'secondary'}
       size="lg"
-      className="min-h-10 w-full px-2 font-mono text-[11px] uppercase tracking-wider sm:min-h-14 sm:px-5 sm:text-base sm:tracking-widest"
+      className={`${wide ? 'col-span-2 ' : ''}min-h-10 w-full px-2 font-mono text-[11px] uppercase tracking-wider sm:min-h-14 sm:px-5 sm:text-base sm:tracking-widest`}
       onClick={onClick}
       autoFocus={primary}
     >

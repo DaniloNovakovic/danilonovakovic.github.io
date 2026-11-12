@@ -3,6 +3,7 @@ import {
   STAMPEDE_CONTACT_LIMIT,
   STAMPEDE_SESSION_DURATION_MS,
   advanceStampedeSession,
+  continueStampedeSessionEndless,
   createStampedeSession,
   readStampedeSessionSnapshot,
   recoverStampedeContact,
@@ -31,6 +32,34 @@ describe('stampede session', () => {
       phase: 'cleared',
       elapsedMs: 1_000
     });
+  });
+
+  it('keeps a cleared run going without a time cap once continued endlessly', () => {
+    const cleared = advanceStampedeSession(createStampedeSession({ durationMs: 1_000 }), 1_000);
+    const endless = continueStampedeSessionEndless(cleared);
+
+    expect(endless).toMatchObject({ phase: 'playing', endless: true });
+    expect(advanceStampedeSession(endless, 5_000)).toMatchObject({
+      phase: 'playing',
+      elapsedMs: 6_000
+    });
+  });
+
+  it('only continues endlessly from a fresh clear', () => {
+    const playing = createStampedeSession();
+    expect(continueStampedeSessionEndless(playing)).toBe(playing);
+  });
+
+  it('ends an endless run on the last peck', () => {
+    let session = continueStampedeSessionEndless(
+      advanceStampedeSession(createStampedeSession({ durationMs: 1_000 }), 1_000)
+    );
+    for (let index = 0; index < STAMPEDE_CONTACT_LIMIT; index += 1) {
+      session = resolveStampedeContact(session, 10_000 + index * 2_000);
+    }
+
+    expect(session).toMatchObject({ phase: 'failed', endless: true });
+    expect(session.elapsedMs).toBeGreaterThan(1_000);
   });
 
   it('fails at the contact limit', () => {

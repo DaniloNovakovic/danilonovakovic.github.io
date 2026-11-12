@@ -14,6 +14,7 @@ export type SceneUiActionId =
   | 'retry'
   | 'backToRidge'
   | 'stampedeUpgradeChoice'
+  | 'stampedeKeepGoing'
   | 'castSpell'
   | 'potassiumDraftChoice'
   | 'potassiumTerminalAction'

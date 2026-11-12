@@ -6,6 +6,10 @@ const LATE_FLOCK_GROWTH = 16;
 const SURGE_BONUS = 3;
 const LAST_CALL_BONUS = 6;
 const SPAWN_MARGIN = 46;
+const OVERTIME_GROWTH_MS = 15_000;
+const MIN_SPAWN_GAP_MS = 180;
+const MAX_OVERTIME_SPEED_BONUS = 0.6;
+const MAX_OVERTIME_BONUS_HP = 4;
 
 export interface StampedeFlockTargetInput {
   elapsedMs: number;
@@ -33,14 +37,37 @@ export function stampedeFlockTarget({
 }: StampedeFlockTargetInput): number {
   const progress = durationMs <= 0 ? 1 : clamp(elapsedMs / durationMs, 0, 1);
   const grown = OPENING_FLOCK + Math.floor(LATE_FLOCK_GROWTH * progress ** 0.75);
+  const overtime = Math.floor(overtimeMs(elapsedMs, durationMs) / OVERTIME_GROWTH_MS);
   const bonus = (surge ? SURGE_BONUS : 0) + (lastCall ? LAST_CALL_BONUS : 0);
-  return Math.min(STAMPEDE_FLOCK_POOL_SIZE, grown + bonus);
+  return Math.min(STAMPEDE_FLOCK_POOL_SIZE, grown + overtime + bonus);
 }
 
 export function stampedeSpawnGapMs(elapsedMs: number, durationMs: number, surge = false): number {
   const progress = durationMs <= 0 ? 1 : clamp(elapsedMs / durationMs, 0, 1);
-  const gap = 1_100 - 700 * progress;
+  const overtimeMinutes = overtimeMs(elapsedMs, durationMs) / 60_000;
+  const gap = Math.max(MIN_SPAWN_GAP_MS, (1_100 - 700 * progress) * 0.75 ** overtimeMinutes);
   return surge ? gap * 0.5 : gap;
+}
+
+export interface StampedeOvertimeToughness {
+  speedScale: number;
+  bonusHp: number;
+}
+
+/**
+ * Endless runs keep escalating once the regular clock is past: newcomers walk
+ * faster and take more hits the longer you last.
+ */
+export function stampedeOvertimeToughness(elapsedMs: number, durationMs: number): StampedeOvertimeToughness {
+  const minutes = overtimeMs(elapsedMs, durationMs) / 60_000;
+  return {
+    speedScale: 1 + Math.min(MAX_OVERTIME_SPEED_BONUS, minutes * 0.12),
+    bonusHp: Math.min(MAX_OVERTIME_BONUS_HP, Math.floor(minutes / 1.5))
+  };
+}
+
+function overtimeMs(elapsedMs: number, durationMs: number): number {
+  return Math.max(0, elapsedMs - durationMs);
 }
 
 /**

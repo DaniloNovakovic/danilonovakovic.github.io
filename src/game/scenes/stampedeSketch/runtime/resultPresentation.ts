@@ -1,7 +1,7 @@
 import { getMessages } from '@/shared/i18n';
 
 export type StampedeResultPhase = 'cleared' | 'failed';
-export type StampedeResultActionId = 'backToRidge' | 'retry';
+export type StampedeResultActionId = 'backToRidge' | 'retry' | 'keepGoing';
 export type StampedeResultActionPriority = 'primary' | 'secondary';
 export type StampedeRewardStatus = 'earned' | 'alreadyOwned' | 'unavailable';
 export type StampedeResultCopy = ReturnType<typeof getMessages>['scenes']['stampedeSketch']['result'];
@@ -12,10 +12,12 @@ export interface StampedeResultViewModelInput {
   durationMs: number;
   contacts: number;
   rewardStatus?: StampedeRewardStatus;
+  /** Present when an endless run ended. */
+  endless?: { bestMs: number; newBest: boolean };
 }
 
 export interface StampedeResultStatViewModel {
-  id: 'time' | 'contacts';
+  id: 'time' | 'contacts' | 'best';
   label: string;
   value: string;
 }
@@ -49,6 +51,7 @@ export function createStampedeResultViewModel(
 ): StampedeResultViewModel {
   const clear = input.phase === 'cleared';
   const copy = getMessages().scenes.stampedeSketch.result;
+  if (input.endless) return createEndlessResultViewModel(input, input.endless, copy);
 
   return {
     phase: input.phase,
@@ -73,9 +76,14 @@ export function createStampedeResultViewModel(
     actions: clear
       ? [
           {
+            id: 'keepGoing',
+            label: copy.actions.keepGoing,
+            priority: 'primary'
+          },
+          {
             id: 'backToRidge',
             label: copy.actions.backToRidge,
-            priority: 'primary'
+            priority: 'secondary'
           },
           {
             id: 'retry',
@@ -95,6 +103,33 @@ export function createStampedeResultViewModel(
             priority: 'secondary'
           }
         ]
+  };
+}
+
+function createEndlessResultViewModel(
+  input: StampedeResultViewModelInput,
+  endless: { bestMs: number; newBest: boolean },
+  copy: StampedeResultCopy
+): StampedeResultViewModel {
+  const bestTime = formatResultTime(endless.bestMs, Number.POSITIVE_INFINITY);
+  return {
+    phase: input.phase,
+    eyebrow: copy.eyebrow.endless,
+    title: copy.title.endless,
+    body: copy.body.endless,
+    rewardNote: endless.newBest ? copy.endless.newBest : copy.endless.best(bestTime),
+    stats: [
+      {
+        id: 'time',
+        label: copy.stats.time,
+        value: formatResultTime(input.elapsedMs, Number.POSITIVE_INFINITY)
+      },
+      { id: 'best', label: copy.stats.best, value: bestTime }
+    ],
+    actions: [
+      { id: 'retry', label: copy.actions.retry, priority: 'primary' },
+      { id: 'backToRidge', label: copy.actions.backToRidge, priority: 'secondary' }
+    ]
   };
 }
 
