@@ -174,46 +174,67 @@ function stepDash(
 }
 
 function decide(brain: BradBrain, input: BradStepInput): { brain: BradBrain; action: BradAction } {
-  const now = input.nowMs;
-  if (!brain.enraged && input.hp <= input.maxHp / 2) {
-    return {
-      brain: { ...brain, enraged: true, mode: { kind: 'flex', untilMs: now + FLEX_MS } },
-      action: { kind: 'flex' }
-    };
-  }
-  if (input.escorts === 0 && now >= brain.nextWhistleAtMs) {
-    const every = brain.enraged ? WHISTLE_EVERY_ENRAGED_MS : WHISTLE_EVERY_MS;
-    return {
-      brain: { ...brain, mode: { kind: 'whistle', untilMs: now + WHISTLE_MS }, nextWhistleAtMs: now + every },
-      action: null
-    };
-  }
+  return flexAtHalf(brain, input)
+    ?? whistleForEscorts(brain, input)
+    ?? rangedTrick(brain, input)
+    ?? { brain, action: null };
+}
+
+function flexAtHalf(
+  brain: BradBrain,
+  input: BradStepInput
+): { brain: BradBrain; action: BradAction } | null {
+  if (brain.enraged || input.hp > input.maxHp / 2) return null;
+  return {
+    brain: { ...brain, enraged: true, mode: { kind: 'flex', untilMs: input.nowMs + FLEX_MS } },
+    action: { kind: 'flex' }
+  };
+}
+
+function whistleForEscorts(
+  brain: BradBrain,
+  input: BradStepInput
+): { brain: BradBrain; action: BradAction } | null {
+  if (input.escorts > 0 || input.nowMs < brain.nextWhistleAtMs) return null;
+  const every = brain.enraged ? WHISTLE_EVERY_ENRAGED_MS : WHISTLE_EVERY_MS;
+  return {
+    brain: {
+      ...brain,
+      mode: { kind: 'whistle', untilMs: input.nowMs + WHISTLE_MS },
+      nextWhistleAtMs: input.nowMs + every
+    },
+    action: null
+  };
+}
+
+function rangedTrick(
+  brain: BradBrain,
+  input: BradStepInput
+): { brain: BradBrain; action: BradAction } | null {
   const distance = Math.hypot(input.player.x - input.self.x, input.player.y - input.self.y);
-  if (distance <= COMBO_TRIGGER && now >= brain.nextComboAtMs) {
+  if (distance <= COMBO_TRIGGER && input.nowMs >= brain.nextComboAtMs) {
     const tuning = bradComboTuning(brain.enraged);
     return {
       brain: {
         ...brain,
         mode: {
           kind: 'comboWindup',
-          untilMs: now + tuning.windupMs,
+          untilMs: input.nowMs + tuning.windupMs,
           lanes: planBradCombo(input.self, input.player, brain.enraged)
         }
       },
       action: null
     };
   }
-  if (distance >= SHAKER_MIN && distance <= SHAKER_MAX && now >= brain.nextShakerAtMs) {
-    return {
-      brain: {
-        ...brain,
-        mode: { kind: 'shakerWindup', untilMs: now + SHAKER_WINDUP_MS, target: { ...input.player } },
-        nextShakerAtMs: now + SHAKER_EVERY_MS
-      },
-      action: null
-    };
-  }
-  return { brain, action: null };
+  if (distance < SHAKER_MIN || distance > SHAKER_MAX || input.nowMs < brain.nextShakerAtMs) return null;
+  return {
+    brain: {
+      ...brain,
+      mode: { kind: 'shakerWindup', untilMs: input.nowMs + SHAKER_WINDUP_MS, target: { ...input.player } },
+      nextShakerAtMs: input.nowMs + SHAKER_EVERY_MS
+    },
+    action: null
+  };
 }
 
 function stalk(brain: BradBrain): BradBrain {

@@ -418,11 +418,8 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
   }
 
   spawnBoyfriend(view: StampedeViewRect, player: { x: number; y: number }, bonusHp = 0): void {
-    const bird = this.birds.find((entry) => entry.state === 'idle');
-    if (!bird) return;
-    const point = pickStampedeSpawnPoint(view, STAMPEDE_WORLD, player);
-    this.activate(bird, 'boyfriend', point, false, { speedScale: 1, bonusHp });
-    this.say(bird, "Who's this guy?", 2_000);
+    const bird = this.spawnBoss('boyfriend', view, player, bonusHp);
+    if (bird) this.say(bird, "Who's this guy?", 2_000);
   }
 
   jokeBoyfriend(ids: readonly string[]): void {
@@ -502,10 +499,20 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
   }
 
   spawnEx(view: StampedeViewRect, player: { x: number; y: number }, bonusHp = 0): void {
+    this.spawnBoss('ex', view, player, bonusHp);
+  }
+
+  private spawnBoss(
+    kind: 'ex' | 'boyfriend',
+    view: StampedeViewRect,
+    player: { x: number; y: number },
+    bonusHp: number
+  ): FlockBird | undefined {
     const bird = this.birds.find((entry) => entry.state === 'idle');
-    if (!bird) return;
+    if (!bird) return undefined;
     const point = pickStampedeSpawnPoint(view, STAMPEDE_WORLD, player);
-    this.activate(bird, 'ex', point, false, { speedScale: 1, bonusHp });
+    this.activate(bird, kind, point, false, { speedScale: 1, bonusHp });
+    return bird;
   }
 
   clearMarks(
@@ -668,6 +675,17 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
       this.popResist(bird.x, bird.y - bird.radius - 14);
       return null;
     }
+    this.chipBird(bird, ailment, dazeMs, damage, now);
+    return bird.hp > 0 ? null : this.downBird(bird, now);
+  }
+
+  private chipBird(
+    bird: FlockBird,
+    ailment: 'poison' | 'daze' | undefined,
+    dazeMs: number,
+    damage: number,
+    now: number
+  ): void {
     bird.hp -= damage;
     bird.flashUntilMs = now + 110;
     if (ailment === 'poison') bird.poisonUntilMs = now + 900;
@@ -675,14 +693,18 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
       bird.stunnedUntilMs = now + dazeMs;
       cancelCharge(bird);
     }
-    if (bird.hp > 0 && !isBoss(bird) && bird.charge.phase !== 'dash') {
-      const push = awayFrom(bird, this.lastPlayer);
-      bird.knockVx = push.x * 170;
-      bird.knockVy = push.y * 170;
-    }
+    this.shoveWounded(bird);
     this.burstFeathers(bird.x, bird.y, stampedeFeatherColor(bird.kind), bird.hp > 0 ? 1 : 4);
-    if (bird.hp > 0) return null;
+  }
 
+  private shoveWounded(bird: FlockBird): void {
+    if (bird.hp <= 0 || isBoss(bird) || bird.charge.phase === 'dash') return;
+    const push = awayFrom(bird, this.lastPlayer);
+    bird.knockVx = push.x * 170;
+    bird.knockVy = push.y * 170;
+  }
+
+  private downBird(bird: FlockBird, now: number): StampedeClearedMarkPoint {
     bird.state = 'dying';
     bird.dyingUntilMs = now + STAMPEDE_DYING_MS;
     this.poof(bird.x, bird.y, bird.radius);
@@ -709,30 +731,38 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
   }
 
   private steerBird(bird: FlockBird, step: FlockStep): void {
-    if (bird.calm !== 'none') {
-      this.stepCalm(bird, step);
-      return;
-    }
-    if (bird.brad && isBradFriendly(bird.brad)) {
-      this.stepBoyfriend(bird, bird.brad, step);
-      return;
-    }
-    if (step.nowMs < bird.stunnedUntilMs) {
-      bird.mood = 'gag';
-      return;
-    }
-    if (step.nowMs < bird.fleeUntilMs) {
-      bird.x += bird.fleeVx * step.deltaSeconds;
-      bird.y += bird.fleeVy * step.deltaSeconds;
-      bird.mood = 'gag';
-      bird.facing = bird.fleeVx >= 0 ? 1 : -1;
-      return;
-    }
+    if (this.steerAside(bird, step)) return;
     if (bird.escortOf && this.stepEscort(bird, step)) return;
     if (bird.brad) {
       this.stepBoyfriend(bird, bird.brad, step);
       return;
     }
+    this.steerKind(bird, step);
+  }
+
+  /** Calm, friendly, stunned, or fleeing birds skip the chase. */
+  private steerAside(bird: FlockBird, step: FlockStep): boolean {
+    if (bird.calm !== 'none') {
+      this.stepCalm(bird, step);
+      return true;
+    }
+    if (bird.brad && isBradFriendly(bird.brad)) {
+      this.stepBoyfriend(bird, bird.brad, step);
+      return true;
+    }
+    if (step.nowMs < bird.stunnedUntilMs) {
+      bird.mood = 'gag';
+      return true;
+    }
+    if (step.nowMs >= bird.fleeUntilMs) return false;
+    bird.x += bird.fleeVx * step.deltaSeconds;
+    bird.y += bird.fleeVy * step.deltaSeconds;
+    bird.mood = 'gag';
+    bird.facing = bird.fleeVx >= 0 ? 1 : -1;
+    return true;
+  }
+
+  private steerKind(bird: FlockBird, step: FlockStep): void {
     switch (bird.kind) {
       case 'bartender':
         this.stepBartender(bird, step);
@@ -818,35 +848,45 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
     bird.brad = result.brain;
     this.applyBradAction(bird, result.action, step);
     if (bird.calm !== 'none') return;
+    this.moveBrad(bird, result.brain, step);
+  }
 
-    const mode = result.brain.mode;
+  private moveBrad(bird: FlockBird, brain: BradBrain, step: FlockStep): void {
     const dx = step.target.x - bird.x;
     const dy = step.target.y - bird.y;
-    const distance = Math.max(1, Math.hypot(dx, dy));
-    bird.mood = mode.kind === 'confused' ? 'confused' : 'chase';
-    switch (mode.kind) {
-      case 'stalk': {
-        const pace = bird.speed * step.motion.speedMultiplier * step.deltaSeconds;
-        bird.x += (dx / distance) * Math.min(pace, distance);
-        bird.y += (dy / distance) * Math.min(pace, distance);
-        bird.facing = dx >= 0 ? 1 : -1;
-        return;
-      }
-      case 'comboDash': {
-        const lane = mode.lanes[mode.lane];
-        if (!lane) return;
-        const speed = bradComboTuning(result.brain.enraged).dashSpeed;
-        bird.x += lane.dirX * speed * step.deltaSeconds;
-        bird.y += lane.dirY * speed * step.deltaSeconds;
-        bird.facing = lane.dirX >= 0 ? 1 : -1;
-        return;
-      }
-      case 'ally':
-        this.stepWingman(bird, step);
-        return;
-      default:
-        bird.facing = dx >= 0 ? 1 : -1;
+    bird.mood = brain.mode.kind === 'confused' ? 'confused' : 'chase';
+    if (brain.mode.kind === 'stalk') {
+      this.stepBradStalk(bird, dx, dy, step);
+      return;
     }
+    if (brain.mode.kind === 'comboDash') {
+      this.stepBradDash(bird, brain, step);
+      return;
+    }
+    if (brain.mode.kind === 'ally') {
+      this.stepWingman(bird, step);
+      return;
+    }
+    bird.facing = dx >= 0 ? 1 : -1;
+  }
+
+  private stepBradStalk(bird: FlockBird, dx: number, dy: number, step: FlockStep): void {
+    const distance = Math.max(1, Math.hypot(dx, dy));
+    const pace = bird.speed * step.motion.speedMultiplier * step.deltaSeconds;
+    const travel = Math.min(pace, distance);
+    bird.x += (dx / distance) * travel;
+    bird.y += (dy / distance) * travel;
+    bird.facing = dx >= 0 ? 1 : -1;
+  }
+
+  private stepBradDash(bird: FlockBird, brain: BradBrain, step: FlockStep): void {
+    if (brain.mode.kind !== 'comboDash') return;
+    const lane = brain.mode.lanes[brain.mode.lane];
+    if (!lane) return;
+    const speed = bradComboTuning(brain.enraged).dashSpeed * step.deltaSeconds;
+    bird.x += lane.dirX * speed;
+    bird.y += lane.dirY * speed;
+    bird.facing = lane.dirX >= 0 ? 1 : -1;
   }
 
   private applyBradAction(bird: FlockBird, action: BradAction, step: FlockStep): void {
@@ -931,18 +971,30 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
   private stepWingman(bird: FlockBird, step: FlockStep): void {
     bird.mood = 'smitten';
     const foe = this.nearestFoe(step.target, BRAD_WINGMAN_REACH, bird.id);
-    const goal = foe ?? { x: step.target.x - 60, y: step.target.y + 12, radius: 0 };
+    const goal = foe ?? { x: step.target.x - 60, y: step.target.y + 12 };
+    this.approach(bird, goal, foe ? bird.radius + foe.radius : 0, BRAD_WINGMAN_SPEED, step);
+    if (foe) this.shoulderCheck(bird, foe, step);
+  }
+
+  private approach(
+    bird: FlockBird,
+    goal: { x: number; y: number },
+    stopAt: number,
+    speed: number,
+    step: FlockStep
+  ): void {
     const dx = goal.x - bird.x;
     const dy = goal.y - bird.y;
     const distance = Math.max(1, Math.hypot(dx, dy));
-    const pace = BRAD_WINGMAN_SPEED * step.deltaSeconds;
-    const stopAt = foe ? bird.radius + foe.radius : 0;
-    const travel = Math.min(pace, Math.max(0, distance - stopAt));
+    const travel = Math.min(speed * step.deltaSeconds, Math.max(0, distance - stopAt));
     bird.x += (dx / distance) * travel;
     bird.y += (dy / distance) * travel;
     bird.facing = dx >= 0 ? 1 : -1;
-    if (!foe || distance > bird.radius + foe.radius + 8 || step.nowMs < bird.nextAllyHitAtMs) return;
+  }
 
+  private shoulderCheck(bird: FlockBird, foe: FlockBird, step: FlockStep): void {
+    const distance = Math.hypot(foe.x - bird.x, foe.y - bird.y);
+    if (distance > bird.radius + foe.radius + 8 || step.nowMs < bird.nextAllyHitAtMs) return;
     bird.nextAllyHitAtMs = step.nowMs + BRAD_WINGMAN_EVERY_MS;
     const mark = this.woundBird(foe, 'daze', 600);
     if (foe.state === 'active') {
