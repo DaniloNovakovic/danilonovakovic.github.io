@@ -27,7 +27,7 @@ const FIGURE_SCALE = 1.6;
 
 /**
  * Distance above the ground line where a figure's silhouette ends, used to
- * hang nameplates and bubbles clear of the art.
+ * hang the focus card and bubbles clear of the art.
  *
  * Stored unscaled and multiplied by {@link FIGURE_SCALE} on read, so retuning
  * figure size cannot silently drop chrome onto somebody's head.
