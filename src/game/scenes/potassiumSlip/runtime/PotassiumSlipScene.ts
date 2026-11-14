@@ -466,10 +466,6 @@ export class PotassiumSlipScene extends Phaser.Scene {
         this.skipCurrentWaveForDev();
       });
     }
-
-    this.input.keyboard?.on('keydown-ESC', () => {
-      this.onClose?.();
-    });
   }
 
   private startGame(): void {

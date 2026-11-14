@@ -7,6 +7,7 @@ import { drawRidgeAreaLayer, type SceneryLayer } from './areaSets';
 import { drawCrtAtmosphere } from './atmosphere';
 import { prefersReducedMotion, sketchTick } from '@/game/sharedSceneRuntime/motion/sketchMotion';
 import { BarkDirector, type BarkLines } from './barkDirector';
+import { EmoteMark, emoteGlyphFor } from './emoteMark';
 import { PresenceLayer, type ActiveBark, type PlacedPresence } from './presenceLayer';
 import {
   DEPTH,
@@ -44,6 +45,23 @@ const AWARENESS_RANGE = 0.13;
 
 /** Clearance above a head for a nameplate, so bubbles stack above it. */
 const PLATE_HEIGHT = 60;
+
+/**
+ * Conversation framing. The camera eases in toward the people talking, lifts
+ * the ground line so the docked dialogue box sits under their feet, and
+ * fades bystanders back.
+ */
+const CONVERSATION_ZOOM = 1.3;
+const CONVERSATION_EASE_MS = 320;
+/** World units kept clear either side of the outermost speaker. */
+const CONVERSATION_SIDE_MARGIN = 70;
+/** How far the frame drifts from the pair's midpoint toward whoever is talking. */
+const SPEAKER_PULL = 0.18;
+/** CSS pixels the docked conversation box occupies along the frame bottom. */
+const CONVERSATION_BOX_RESERVE = 165;
+const BYSTANDER_ALPHA = 0.4;
+const SURPRISE_HOP_MS = 260;
+const SURPRISE_HOP_HEIGHT = 9;
 
 export interface StickVisualProviderOptions {
   stageWidth?: number;
@@ -88,6 +106,16 @@ export class StickVisualProvider implements RidgeVisualProvider {
   private readonly presencePlates: PlacedPresence[] = [];
   private readonly barkCandidates: RidgeActorId[] = [];
   private readonly activeBarks: ActiveBark[] = [];
+  private readonly emote: EmoteMark;
+  /** Height-driven zoom for exploring; conversation zoom multiplies it. */
+  private baseZoom = 1;
+  /** 0 = exploring, 1 = fully framed for conversation. */
+  private conversationBlend = 0;
+  private lastSyncAt = Number.NaN;
+  private lastLineKey: string | null = null;
+  private lineStartedAt = 0;
+  /** Where the ground line sits in the frame while talking, 0 top → 1 bottom. */
+  private conversationGroundAt = 0.62;
 
   constructor(scene: Phaser.Scene, options: StickVisualProviderOptions = {}) {
     this.scene = scene;
@@ -104,6 +132,7 @@ export class StickVisualProvider implements RidgeVisualProvider {
     this.actorPool = new ActorSpritePool(scene);
     this.presence = new PresenceLayer(scene);
     this.barkDirector = new BarkDirector(options.barks ?? {});
+    this.emote = new EmoteMark(scene);
 
     scene.cameras.main.setBounds(0, 0, this.stageWidth, this.stageHeight);
     scene.cameras.main.setBackgroundColor(PAPER);
@@ -131,8 +160,11 @@ export class StickVisualProvider implements RidgeVisualProvider {
     const playerProgress = player?.progress ?? view.progress;
     const walking = this.trackWalking(playerProgress, now) && view.mode === 'explore';
 
-    this.syncActors(view, playerProgress, tick, stepTick, motion, walking);
+    this.trackLine(view, now);
+    this.advanceConversationBlend(view, now, motion);
+    this.syncActors(view, playerProgress, now, tick, stepTick, motion, walking);
     this.syncPresence(view, playerProgress, now, tick, motion);
+    this.syncEmote(view, now, motion);
     this.followCamera(view, playerProgress);
   }
 
@@ -140,6 +172,7 @@ export class StickVisualProvider implements RidgeVisualProvider {
     this.destroyed = true;
     this.actorPool.destroy();
     this.presence.destroy();
+    this.emote.destroy();
     this.ambientFar.destroy();
     this.ambientNear.destroy();
     this.crtImage?.destroy();
@@ -163,7 +196,8 @@ export class StickVisualProvider implements RidgeVisualProvider {
     if (key === this.lastViewportKey) return;
     this.lastViewportKey = key;
 
-    cam.setZoom(clamp(cam.height / VIEW_HEIGHT, MIN_ZOOM, MAX_ZOOM));
+    this.baseZoom = clamp(cam.height / VIEW_HEIGHT, MIN_ZOOM, MAX_ZOOM);
+    cam.setZoom(this.baseZoom);
     this.bakeCrtOverlay(Math.round(cam.width), Math.round(cam.height));
   }
 
@@ -260,6 +294,7 @@ export class StickVisualProvider implements RidgeVisualProvider {
   private syncActors(
     view: RidgeVisualViewModel,
     playerProgress: number,
+    now: number,
     tick: number,
     stepTick: number,
     motion: boolean,
@@ -267,39 +302,54 @@ export class StickVisualProvider implements RidgeVisualProvider {
   ): void {
     const requests = this.actorRequests;
     requests.length = 0;
-    const playerX = this.worldXForProgress(playerProgress);
+    const frame: ActorFrame = {
+      view,
+      playerProgress,
+      playerX: this.worldXForProgress(playerProgress),
+      tick,
+      stepTick,
+      motion,
+      walking,
+      fade: easeInOut(this.conversationBlend),
+      hop:
+        motion && view.speakingEmotion === 'surprised'
+          ? surpriseHop(now - this.lineStartedAt)
+          : 0
+    };
 
     view.actors.forEach((actor, index) => {
-      if (!actor.visible) return;
-
-      const x = this.worldXForProgress(actor.progress);
-      const isPlayer = actor.id === 'player';
-      const isWalking = isPlayer && walking;
-      const isTalking = view.speakingActorId === actor.id;
-
-      // Residents turn to acknowledge you, the way a street does.
-      const aware = !isPlayer && Math.abs(actor.progress - playerProgress) < AWARENESS_RANGE;
-      const towardPlayer: RidgeFacing = playerX >= x ? 'right' : 'left';
-
-      // Idle breath is a transform, so it never touches the command buffer.
-      const breath =
-        motion && !isWalking ? Math.round(Math.sin((tick + index * 3) * 0.42) * 1.4) : 0;
-
-      requests.push({
-        id: actor.id,
-        x,
-        y: GROUND_Y,
-        facing: aware ? towardPlayer : actor.facing,
-        bob: breath,
-        pose: {
-          frame: (isWalking ? stepTick : tick) + index,
-          walking: isWalking,
-          talking: isTalking
-        }
-      });
+      if (actor.visible) requests.push(this.actorRequestFor(actor, index, frame));
     });
 
     this.actorPool.sync(requests);
+  }
+
+  private actorRequestFor(
+    actor: RidgeVisualViewModel['actors'][number],
+    index: number,
+    frame: ActorFrame
+  ): ActorRenderRequest {
+    const { view } = frame;
+    const x = this.worldXForProgress(actor.progress);
+    const isPlayer = actor.id === 'player';
+    const isWalking = isPlayer && frame.walking;
+    const isTalking = view.speakingActorId === actor.id;
+    const inScene = isPlayer || isTalking || actor.id === view.partnerActorId;
+
+    return {
+      id: actor.id,
+      x,
+      y: GROUND_Y,
+      facing: facingFor(actor, frame, x),
+      bob: idleBreath(frame, index, isWalking) - (isTalking ? frame.hop : 0),
+      alpha: inScene ? 1 : 1 - (1 - BYSTANDER_ALPHA) * frame.fade,
+      pose: {
+        frame: (isWalking ? frame.stepTick : frame.tick) + index,
+        walking: isWalking,
+        talking: isTalking,
+        emotion: isTalking ? view.speakingEmotion : null
+      }
+    };
   }
 
   private syncPresence(
@@ -394,23 +444,144 @@ export class StickVisualProvider implements RidgeVisualProvider {
     this.presence.syncFocus({ key: focus.spotId + focus.prompt, label: focus.prompt, x, y }, bob);
   }
 
-  /** Frame the player, and widen to hold both speakers during a conversation. */
-  private followCamera(view: RidgeVisualViewModel, playerProgress: number): void {
-    const playerX = this.worldXForProgress(playerProgress);
-    let centerX = playerX;
+  /** Restart one-shot line reactions (emote pop, hop) when a new line begins. */
+  private trackLine(view: RidgeVisualViewModel, now: number): void {
+    if (view.lineKey === this.lastLineKey) return;
+    const opening = this.lastLineKey === null && view.lineKey !== null;
+    this.lastLineKey = view.lineKey;
+    this.lineStartedAt = now;
+    if (opening) this.measureConversationGround();
+  }
 
-    if (view.mode === 'conversation' && view.speakingActorId) {
-      const speaker = view.actors.find((actor) => actor.id === view.speakingActorId);
-      if (speaker?.visible) {
-        centerX = (playerX + this.worldXForProgress(speaker.progress)) / 2;
-      }
+  /**
+   * The dialogue box has a CSS height, but the camera works in canvas pixels.
+   * Measure once per conversation so the ground lands just above the box.
+   */
+  private measureConversationGround(): void {
+    const cssHeight = this.scene.game.canvas?.clientHeight || this.scene.cameras.main.height;
+    this.conversationGroundAt = clamp(1 - CONVERSATION_BOX_RESERVE / cssHeight, 0.5, 0.72);
+  }
+
+  private advanceConversationBlend(view: RidgeVisualViewModel, now: number, motion: boolean): void {
+    const target = view.mode === 'conversation' ? 1 : 0;
+    const dt = Number.isNaN(this.lastSyncAt) ? 0 : Math.min(100, now - this.lastSyncAt);
+    this.lastSyncAt = now;
+
+    if (!motion) {
+      this.conversationBlend = target;
+      return;
     }
+    const step = dt / CONVERSATION_EASE_MS;
+    this.conversationBlend =
+      target > this.conversationBlend
+        ? Math.min(target, this.conversationBlend + step)
+        : Math.max(target, this.conversationBlend - step);
+  }
 
-    this.scene.cameras.main.centerOn(
-      centerX,
-      GROUND_Y - (VIEW_ABOVE_GROUND - VIEW_BELOW_GROUND) / 2
+  private syncEmote(view: RidgeVisualViewModel, now: number, motion: boolean): void {
+    const glyph = view.mode === 'conversation' ? emoteGlyphFor(view.speakingEmotion) : null;
+    const speaker = view.speakingActorId
+      ? view.actors.find((actor) => actor.id === view.speakingActorId && actor.visible)
+      : undefined;
+    if (!glyph || !speaker) {
+      this.emote.hide();
+      return;
+    }
+    const elapsed = now - this.lineStartedAt;
+    const hop = motion && view.speakingEmotion === 'surprised' ? surpriseHop(elapsed) : 0;
+    this.emote.show(
+      glyph,
+      this.worldXForProgress(speaker.progress) + 14,
+      GROUND_Y + headTopFor(speaker.id) - 8 - hop,
+      elapsed,
+      motion
     );
   }
+
+  /**
+   * Explore: follow the player at the height-driven zoom.
+   * Conversation: ease in on the pair, drifting toward the speaker, with the
+   * ground raised so the docked box does not cover anyone.
+   */
+  private followCamera(view: RidgeVisualViewModel, playerProgress: number): void {
+    const cam = this.scene.cameras.main;
+    const playerX = this.worldXForProgress(playerProgress);
+    const exploreY = GROUND_Y - (VIEW_ABOVE_GROUND - VIEW_BELOW_GROUND) / 2;
+    const blend = easeInOut(this.conversationBlend);
+
+    if (blend <= 0) {
+      if (cam.zoom !== this.baseZoom) cam.setZoom(this.baseZoom);
+      cam.centerOn(playerX, exploreY);
+      return;
+    }
+
+    const framing = this.conversationFraming(view, playerX);
+    const zoom = lerp(this.baseZoom, framing.zoom, blend);
+    cam.setZoom(zoom);
+
+    // Put GROUND_Y at `conversationGroundAt` of the visible height.
+    const viewHeight = cam.height / framing.zoom;
+    const talkY = GROUND_Y - viewHeight * (this.conversationGroundAt - 0.5);
+    cam.centerOn(lerp(playerX, framing.centerX, blend), lerp(exploreY, talkY, blend));
+  }
+
+  private conversationFraming(
+    view: RidgeVisualViewModel,
+    playerX: number
+  ): { zoom: number; centerX: number } {
+    const cam = this.scene.cameras.main;
+    let minX = playerX;
+    let maxX = playerX;
+    let speakerX = playerX;
+
+    for (const actor of view.actors) {
+      if (!actor.visible) continue;
+      const isSpeaker = actor.id === view.speakingActorId;
+      if (!isSpeaker && actor.id !== view.partnerActorId) continue;
+      const x = this.worldXForProgress(actor.progress);
+      minX = Math.min(minX, x);
+      maxX = Math.max(maxX, x);
+      if (isSpeaker) speakerX = x;
+    }
+
+    const midX = (minX + maxX) / 2;
+    const span = maxX - minX + CONVERSATION_SIDE_MARGIN * 2;
+    // Zoom in, but never so far that one of the pair leaves the frame.
+    const zoom = clamp(cam.width / span, this.baseZoom, this.baseZoom * CONVERSATION_ZOOM);
+    return { zoom, centerX: midX + (speakerX - midX) * SPEAKER_PULL };
+  }
+}
+
+/** Per-sync inputs shared by every actor request. */
+interface ActorFrame {
+  view: RidgeVisualViewModel;
+  playerProgress: number;
+  playerX: number;
+  tick: number;
+  stepTick: number;
+  motion: boolean;
+  walking: boolean;
+  /** Eased conversation blend, for fading bystanders. */
+  fade: number;
+  /** Current surprise-hop height for the speaker. */
+  hop: number;
+}
+
+/** Residents turn to acknowledge you, the way a street does. */
+function facingFor(
+  actor: RidgeVisualViewModel['actors'][number],
+  frame: ActorFrame,
+  x: number
+): RidgeFacing {
+  if (actor.id === 'player') return actor.facing;
+  if (Math.abs(actor.progress - frame.playerProgress) >= AWARENESS_RANGE) return actor.facing;
+  return frame.playerX >= x ? 'right' : 'left';
+}
+
+/** Idle breath is a transform, so it never touches the command buffer. */
+function idleBreath(frame: ActorFrame, index: number, isWalking: boolean): number {
+  if (!frame.motion || isWalking) return 0;
+  return Math.round(Math.sin((frame.tick + index * 3) * 0.42) * 1.4);
 }
 
 /** Props and the player never wear nameplates or mutter ambient lines. */
@@ -431,6 +602,20 @@ function presenceAlpha(distance: number): number {
   if (distance <= PRESENCE_NEAR) return 1;
   if (distance >= PRESENCE_FAR) return 0;
   return 1 - (distance - PRESENCE_NEAR) / (PRESENCE_FAR - PRESENCE_NEAR);
+}
+
+function lerp(from: number, to: number, t: number): number {
+  return from + (to - from) * t;
+}
+
+function easeInOut(t: number): number {
+  return t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
+}
+
+/** A single quick hop at the start of a surprised line. */
+function surpriseHop(elapsed: number): number {
+  if (elapsed < 0 || elapsed >= SURPRISE_HOP_MS) return 0;
+  return Math.round(Math.sin((elapsed / SURPRISE_HOP_MS) * Math.PI) * SURPRISE_HOP_HEIGHT);
 }
 
 function clamp(value: number, min: number, max: number): number {

@@ -1,7 +1,7 @@
 // Distinct NPC silhouettes intentionally branch on role props.
 // fallow-ignore-file complexity
 import type * as Phaser from 'phaser';
-import type { RidgeFacing } from '@/game/core/ridge';
+import type { RidgeEmotion, RidgeFacing } from '@/game/core/ridge';
 import { drawContactShadow, drawInkBlob } from './atmosphere';
 import { INK, PAPER, PAPER_WARM } from './palette';
 
@@ -17,6 +17,8 @@ export interface StickPose {
   frame: number;
   walking: boolean;
   talking: boolean;
+  /** Mood of the line being spoken; overrides the resting face while set. */
+  emotion?: RidgeEmotion | null;
 }
 
 const STILL: StickPose = { frame: 0, walking: false, talking: false };
@@ -182,8 +184,20 @@ interface PersonStyle {
   walkingStick?: boolean;
   glasses?: boolean;
   scarf?: boolean;
-  eyes?: 'determined' | 'thoughtful' | 'happy' | 'focused';
+  eyes?: FaceEyes;
 }
+
+type FaceEyes = 'determined' | 'thoughtful' | 'happy' | 'focused' | 'wide' | 'closed';
+
+/** Line moods borrow an existing eye shape where one already reads right. */
+const EMOTION_EYES: Partial<Record<RidgeEmotion, FaceEyes>> = {
+  playful: 'happy',
+  thoughtful: 'thoughtful',
+  determined: 'focused',
+  surprised: 'wide',
+  curious: 'wide',
+  sleepy: 'closed'
+};
 
 /**
  * Shared NPC place-and-pose: shadow, base person, and facing metrics.
@@ -286,40 +300,89 @@ function drawFace(
   style: PersonStyle,
   pose: StickPose
 ): void {
-  g.fillStyle(INK, 1);
-  if (style.eyes === 'happy') {
-    g.lineStyle(2, INK, 1);
-    g.beginPath();
-    g.moveTo(x + dir * s * 0.08, headY - s * 0.04);
-    g.lineTo(x + dir * s * 0.17, headY - s * 0.12);
-    g.lineTo(x + dir * s * 0.26, headY - s * 0.04);
-    g.strokePath();
-  } else if (style.eyes === 'thoughtful') {
-    g.lineStyle(2, INK, 1);
-    g.lineBetween(x + dir * s * 0.06, headY - s * 0.16, x + dir * s * 0.27, headY - s * 0.11);
-    g.fillCircle(x + dir * s * 0.19, headY - s * 0.01, s * 0.06);
-  } else if (style.eyes === 'focused') {
-    g.lineStyle(2.2, INK, 1);
-    g.lineBetween(x + dir * s * 0.08, headY - s * 0.14, x + dir * s * 0.28, headY - s * 0.14);
-    g.fillCircle(x + dir * s * 0.2, headY - s * 0.02, s * 0.07);
-  } else {
-    g.fillCircle(x + dir * s * 0.19, headY - s * 0.03, s * 0.075);
-  }
-
-  // Mouth: open on alternating frames while talking.
-  g.lineStyle(DETAIL, INK, 0.85);
-  if (pose.talking && pose.frame % 2 === 0) {
-    g.fillStyle(INK, 0.85);
-    g.fillCircle(x + dir * s * 0.24, headY + s * 0.19, s * 0.07);
-  } else {
-    g.lineBetween(x + dir * s * 0.14, headY + s * 0.2, x + dir * s * 0.3, headY + s * 0.19);
-  }
+  const emotion = pose.emotion ?? null;
+  const eyes = (emotion && EMOTION_EYES[emotion]) || style.eyes;
+  drawEyes(g, x, headY, dir, s, eyes);
+  drawMouth(g, x, headY, dir, s, pose, emotion);
 
   if (style.glasses) {
     g.lineStyle(2, INK, 1);
     g.strokeCircle(x + dir * s * 0.19, headY - s * 0.03, s * 0.15);
     g.lineBetween(x, headY - s * 0.03, x + dir * s * 0.05, headY - s * 0.03);
   }
+}
+
+function drawEyes(
+  g: Phaser.GameObjects.Graphics,
+  x: number,
+  headY: number,
+  dir: number,
+  s: number,
+  eyes: FaceEyes | undefined
+): void {
+  g.fillStyle(INK, 1);
+  if (eyes === 'happy') {
+    g.lineStyle(2, INK, 1);
+    g.beginPath();
+    g.moveTo(x + dir * s * 0.08, headY - s * 0.04);
+    g.lineTo(x + dir * s * 0.17, headY - s * 0.12);
+    g.lineTo(x + dir * s * 0.26, headY - s * 0.04);
+    g.strokePath();
+  } else if (eyes === 'thoughtful') {
+    g.lineStyle(2, INK, 1);
+    g.lineBetween(x + dir * s * 0.06, headY - s * 0.16, x + dir * s * 0.27, headY - s * 0.11);
+    g.fillCircle(x + dir * s * 0.19, headY - s * 0.01, s * 0.06);
+  } else if (eyes === 'focused') {
+    g.lineStyle(2.2, INK, 1);
+    g.lineBetween(x + dir * s * 0.08, headY - s * 0.14, x + dir * s * 0.28, headY - s * 0.14);
+    g.fillCircle(x + dir * s * 0.2, headY - s * 0.02, s * 0.07);
+  } else if (eyes === 'wide') {
+    // Raised brow over an open eye: surprise, or leaning in to listen.
+    g.lineStyle(2, INK, 1);
+    g.lineBetween(x + dir * s * 0.1, headY - s * 0.24, x + dir * s * 0.28, headY - s * 0.27);
+    g.fillStyle(PAPER, 1);
+    g.fillCircle(x + dir * s * 0.19, headY - s * 0.05, s * 0.12);
+    g.strokeCircle(x + dir * s * 0.19, headY - s * 0.05, s * 0.12);
+    g.fillStyle(INK, 1);
+    g.fillCircle(x + dir * s * 0.21, headY - s * 0.05, s * 0.055);
+  } else if (eyes === 'closed') {
+    g.lineStyle(2, INK, 1);
+    g.lineBetween(x + dir * s * 0.1, headY - s * 0.02, x + dir * s * 0.28, headY - s * 0.01);
+  } else {
+    g.fillCircle(x + dir * s * 0.19, headY - s * 0.03, s * 0.075);
+  }
+}
+
+function drawMouth(
+  g: Phaser.GameObjects.Graphics,
+  x: number,
+  headY: number,
+  dir: number,
+  s: number,
+  pose: StickPose,
+  emotion: RidgeEmotion | null
+): void {
+  g.lineStyle(DETAIL, INK, 0.85);
+  // A surprised mouth stays open between syllables.
+  if (emotion === 'surprised') {
+    g.strokeCircle(x + dir * s * 0.24, headY + s * 0.2, s * (pose.frame % 2 === 0 ? 0.09 : 0.07));
+    return;
+  }
+  // Open on alternating frames while talking.
+  if (pose.talking && pose.frame % 2 === 0) {
+    g.fillStyle(INK, 0.85);
+    g.fillCircle(x + dir * s * 0.24, headY + s * 0.19, s * 0.07);
+    return;
+  }
+  if (emotion === 'playful') {
+    g.beginPath();
+    g.moveTo(x + dir * s * 0.12, headY + s * 0.15);
+    g.lineTo(x + dir * s * 0.22, headY + s * 0.23);
+    g.lineTo(x + dir * s * 0.32, headY + s * 0.15);
+    g.strokePath();
+    return;
+  }
+  g.lineBetween(x + dir * s * 0.14, headY + s * 0.2, x + dir * s * 0.3, headY + s * 0.19);
 }
 
 function drawHair(
@@ -463,7 +526,8 @@ export function drawStickCrowd(
   const at = (offset: number): StickPose => ({
     frame: pose.frame + offset,
     walking: false,
-    talking: pose.talking
+    talking: pose.talking,
+    emotion: pose.emotion
   });
   drawBasePerson(g, x - 20 * scale, y, 'left', scale * 0.8, at(1), { hair: 'cap' });
   drawBasePerson(g, x, y, 'right', scale * 0.92, at(0), {

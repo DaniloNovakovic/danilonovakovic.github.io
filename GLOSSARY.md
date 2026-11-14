@@ -50,7 +50,9 @@ _Avoid_: baking final art assumptions into core gameplay modules
 
 **Character Conversation Panel**:
 Persona-style Scene UI that halts explore mode while talking: speaker name,
-portrait slot, line text, advance, and optional choices.
+portrait bust, line text, advance, and optional choices. Docked along the
+bottom of the game frame under the speaker's side (narration is a centered
+caption), while the camera eases in on the pair with letterbox bars.
 _Avoid_: timed Phaser toast dialogue, non-halting talk overlays
 
 **Ridge Stage Debugger**:

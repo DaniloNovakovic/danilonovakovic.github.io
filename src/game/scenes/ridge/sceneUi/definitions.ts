@@ -5,6 +5,6 @@ export const RIDGE_SCENE_UI_DEFINITIONS: readonly SceneUiSurfaceDefinition[] = [
   {
     id: 'ridgeConversation',
     component: RidgeConversationPanel,
-    panelChrome: 'overlay'
+    panelChrome: 'docked'
   }
 ];

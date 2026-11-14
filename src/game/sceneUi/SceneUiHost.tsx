@@ -28,6 +28,23 @@ export function SceneUiHost({ placement }: SceneUiHostProps) {
     );
   }
 
+  if (surface.panelChrome === 'docked') {
+    // Sits exactly over the frame (inside the 4px shell border) and clips to its
+    // rounded corners; the surface decides where inside the frame it draws.
+    return (
+      <div
+        data-testid="scene-ui-panel-docked"
+        className="pointer-events-none absolute inset-[4px] z-30 overflow-hidden rounded-[4px]"
+      >
+        <Surface
+          ownerSceneId={request.ownerSceneId}
+          params={request.params}
+          dispatchAction={dispatchAction}
+        />
+      </div>
+    );
+  }
+
   const isOverlayPanel = surface.panelChrome === 'overlay';
 
   return (

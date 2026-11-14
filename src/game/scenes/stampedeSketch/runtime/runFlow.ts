@@ -94,7 +94,8 @@ export function resolveStampedeRunFrame({
   shellOwned = false,
   shellReadyAtMs = 0
 }: StampedeRunFrameInput): StampedeRunFrame {
-  if (closeRequested) {
+  // A stray E/H mid-run must not end it; the header Back button still leaves.
+  if (closeRequested && session.phase !== 'playing') {
     return {
       kind: 'close',
       session,
