@@ -99,7 +99,6 @@ export class GameConsoleSession {
   }
 
   // Used by scripts/game-console.ts (CLI entry; not always visible to graph analysis).
-  // fallow-ignore-next-line unused-class-member
   format(): string {
     return formatGameObservation(this.observe());
   }
@@ -108,7 +107,6 @@ export class GameConsoleSession {
     return this.run(parseGameCommand(raw));
   }
 
-  // fallow-ignore-next-line unused-class-member
   execScript(script: string): GameCommandResult[] {
     return parseGameScript(script).map((command) => this.run(command));
   }
