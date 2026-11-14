@@ -11,6 +11,8 @@ import {
   type BridgeBeamSpec,
   type BridgeDesign
 } from './index';
+import { createBridgeStage } from '../content/bridgeStage';
+import { TEST_BRIDGE_DIALOGUE_CATALOG } from '../content/testBridgeCatalog';
 
 const road = (ax: number, ay: number, bx: number, by: number): BridgeBeamSpec => ({
   a: { x: ax, y: ay },
@@ -149,7 +151,7 @@ describe('Blueprint Bridge workbench', () => {
     const failed = bench.apply({ kind: 'test', instant: true });
     expect(failed.ok).toBe(false);
     expect(bench.phase).toBe('failed');
-    expect(bench.tip).toBe('self_weight');
+    expect(bench.tip).toBe('bare_deck');
     expect(bench.lastBreak).not.toBeNull();
 
     // Editing is locked until the player goes back to the table.
@@ -174,7 +176,24 @@ describe('Blueprint Bridge workbench', () => {
     }
     bench.apply({ kind: 'test', instant: true });
     expect(bench.sketchOffered).toBe(true);
-    expect(bench.tip).toBe('sketch_offer');
+    // The remark still names what went wrong; the sketch offer rides along.
+    expect(bench.tip).toBe('bare_deck');
+    expect(bench.sketchNudge).toBe(true);
+    bench.apply({ kind: 'hint' });
+    expect(bench.sketchNudge).toBe(false);
+  });
+
+  it.each([
+    ['road with no supports', FLAT_DECK, 'bare_deck'],
+    ['triangles with loose tops', LOOSE_TRIANGLES, 'loose_frame'],
+    // The sketch missing one middle diagonal survives settling, then cracks under the car.
+    ['a truss missing a middle brace', DRAFTSPERSON_SKETCH.filter((_, i) => i !== 7), 'snapped_middle']
+  ] as const)('reacts to %s', (_name, design, tip) => {
+    const bench = new BridgeWorkbench(PUZZLE);
+    for (const beam of design) bench.apply({ kind: 'add', ...beam });
+    bench.apply({ kind: 'test', instant: true });
+    expect(bench.phase).toBe('failed');
+    expect(bench.tip).toBe(tip);
   });
 
   it('animates a test one frame at a time', () => {
@@ -200,5 +219,28 @@ describe('Blueprint Bridge workbench', () => {
     bench.apply({ kind: 'add', material: 'road', a: { x: 2, y: 0 }, b: { x: 4, y: 0 } });
     bench.apply({ kind: 'undo' });
     expect(bench.design).toEqual([road(0, 0, 2, 0)]);
+  });
+});
+
+describe('Draftsperson remarks', () => {
+  const catalog = {
+    ...TEST_BRIDGE_DIALOGUE_CATALOG,
+    lines: {
+      ...TEST_BRIDGE_DIALOGUE_CATALOG.lines,
+      'bridge.builder.tip.bare_deck': 'Ouch.',
+      'bridge.builder.tip.bare_deck.2': 'Oof.',
+      'bridge.builder.tip.sketch_nudge': '(Psst.)'
+    }
+  };
+  const remark = createBridgeStage(catalog).describeBridgeTip!;
+
+  it('rotates phrasings between retries', () => {
+    expect(remark('bare_deck', { variant: 0, sketchNudge: false })).toBe('Ouch.');
+    expect(remark('bare_deck', { variant: 1, sketchNudge: false })).toBe('Oof.');
+    expect(remark('bare_deck', { variant: 2, sketchNudge: false })).toBe('Ouch.');
+  });
+
+  it('tacks the sketch offer onto the remark', () => {
+    expect(remark('bare_deck', { variant: 0, sketchNudge: true })).toBe('Ouch. (Psst.)');
   });
 });

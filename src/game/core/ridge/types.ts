@@ -166,8 +166,14 @@ export interface RidgeStageDefinition {
     state: RidgeWorldState
   ) => RidgeConversationDefinition | null;
   describeAmbience: (state: RidgeWorldState) => string;
-  /** Draftsperson tip copy for the Blueprint Bridge workbench (Bridge only). */
-  describeBridgeTip?: (tip: BridgeBuildTip) => string;
+  /**
+   * Draftsperson remark for the Blueprint Bridge workbench (Bridge only).
+   * `variant` rotates between phrasings; `sketchNudge` appends the sketch offer.
+   */
+  describeBridgeTip?: (
+    tip: BridgeBuildTip,
+    context: { variant: number; sketchNudge: boolean }
+  ) => string;
 }
 
 export type RidgeStageRegistry = Record<RidgeAreaId, RidgeStageDefinition>;

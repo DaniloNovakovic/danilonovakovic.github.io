@@ -28,10 +28,11 @@ const BRIDGE_TIP_IDS: readonly BridgeBuildTip[] = [
   'drawing',
   'testing',
   'no_road',
-  'self_weight',
-  'car_weight',
+  'bare_deck',
+  'loose_frame',
+  'snapped_middle',
+  'snapped_end',
   'stuck',
-  'sketch_offer',
   'sketch_shown',
   'out_of_ink',
   'passed'
@@ -122,9 +123,27 @@ export function createBridgeStage(catalog: BridgeDialogueCatalog): RidgeStageDef
     resolveConversation: (conversationId, state) =>
       resolveBridgeConversation(conversationId, state, catalog),
     describeAmbience: (state) => describeBridgeAmbience(state),
-    describeBridgeTip: (tip) =>
-      catalog.lines[`bridge.builder.tip.${BRIDGE_TIP_IDS.includes(tip) ? tip : 'drawing'}`] ?? tip
+    describeBridgeTip: (tip, context) => describeBridgeTip(catalog, tip, context)
   };
+}
+
+/**
+ * A remark may have alternates at `<key>.2`, `<key>.3`, …; retries rotate
+ * through them so the Draftsperson reacts instead of repeating a manual.
+ */
+function describeBridgeTip(
+  catalog: BridgeDialogueCatalog,
+  tip: BridgeBuildTip,
+  context: { variant: number; sketchNudge: boolean }
+): string {
+  const base = `bridge.builder.tip.${BRIDGE_TIP_IDS.includes(tip) ? tip : 'drawing'}`;
+  const phrasings = [base];
+  while (catalog.lines[`${base}.${phrasings.length + 1}`]) {
+    phrasings.push(`${base}.${phrasings.length + 1}`);
+  }
+  const line = catalog.lines[phrasings[context.variant % phrasings.length]!] ?? tip;
+  const nudge = context.sketchNudge ? catalog.lines['bridge.builder.tip.sketch_nudge'] : undefined;
+  return nudge ? `${line} ${nudge}` : line;
 }
 
 function resolveBridgeInteractables(

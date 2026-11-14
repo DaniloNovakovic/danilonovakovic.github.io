@@ -106,9 +106,14 @@ State: `bridge:bridge_complete`.
 ### bridge.builder.tip.*
 
 Workbench coaching keyed by `BridgeBuildTip`: `intro`, `drawing`, `testing`,
-`no_road`, `self_weight`, `car_weight`, `stuck`, `sketch_offer`,
-`sketch_shown`, `out_of_ink`, `passed`. Keep each to one short sentence that
-says what to try next.
+`no_road`, `bare_deck`, `loose_frame`, `snapped_middle`, `snapped_end`,
+`stuck`, `sketch_shown`, `out_of_ink`, `passed`.
+
+Failure remarks react to *how* the bridge failed, in the Draftsperson's voice
+(a small wince, then one concrete thing to try), never as a manual. A remark
+may have alternates at `<id>.2`, `<id>.3`; retries rotate through them.
+After two failed tests `bridge.builder.tip.sketch_nudge` is tacked onto the
+remark instead of replacing it, so the player still hears what went wrong.
 
 ### bridge.exit.opened_crossing
 

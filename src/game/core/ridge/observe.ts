@@ -54,7 +54,11 @@ export function observeRidgeWorld(
           ink: workbench.ink,
           inkBudget: workbench.puzzle.inkBudget,
           tip: workbench.tip,
-          tipText: stage.describeBridgeTip?.(workbench.tip) ?? workbench.tip,
+          tipText:
+            stage.describeBridgeTip?.(workbench.tip, {
+              variant: workbench.tipVariant,
+              sketchNudge: workbench.sketchNudge
+            }) ?? workbench.tip,
           hintVisible: workbench.hintVisible,
           sketchOffered: workbench.sketchOffered
         }

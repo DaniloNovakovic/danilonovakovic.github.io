@@ -27,10 +27,13 @@ export type BridgeBuildTip =
   | 'drawing'
   | 'testing'
   | 'no_road'
-  | 'self_weight'
-  | 'car_weight'
+  /** Road only, no supports: it folds under its own weight. */
+  | 'bare_deck'
+  /** Has supports, but the frame still folds before the car rolls. */
+  | 'loose_frame'
+  | 'snapped_middle'
+  | 'snapped_end'
   | 'stuck'
-  | 'sketch_offer'
   | 'sketch_shown'
   | 'out_of_ink'
   | 'passed';
@@ -83,6 +86,16 @@ export class BridgeWorkbench {
 
   get sketchOffered(): boolean {
     return this.attempts >= SKETCH_OFFER_AFTER;
+  }
+
+  /** After a few misses, the failure remark ends with a nudge toward the sketch. */
+  get sketchNudge(): boolean {
+    return this.phase === 'failed' && this.sketchOffered && !this.hintVisible;
+  }
+
+  /** Rotates which phrasing of a remark is shown, so retries don't repeat verbatim. */
+  get tipVariant(): number {
+    return Math.max(0, this.attempts - 1);
   }
 
   apply(action: BridgeBuildAction): BridgeActionResult {
@@ -227,13 +240,15 @@ export class BridgeWorkbench {
     return this.phase;
   }
 
+  /** Name what actually went wrong, so the Draftsperson can react to it. */
   private failureTip(sim: BridgeSim): BridgeBuildTip {
     if (!hasRoadAcross(this.puzzle, this.design)) return 'no_road';
-    if (this.sketchOffered && !this.hintVisible) return 'sketch_offer';
-    if (sim.firstSnap) {
-      return sim.firstSnap.time < this.puzzle.car.settleSeconds ? 'self_weight' : 'car_weight';
-    }
-    return 'stuck';
+    const snap = sim.firstSnap;
+    if (!snap) return 'stuck';
+    if (!this.design.some((beam) => beam.material === 'wood')) return 'bare_deck';
+    if (snap.time < this.puzzle.car.settleSeconds) return 'loose_frame';
+    const along = snap.x / (this.puzzle.columns * this.puzzle.cell);
+    return along < 0.25 || along > 0.75 ? 'snapped_end' : 'snapped_middle';
   }
 
   private pushHistory(): void {

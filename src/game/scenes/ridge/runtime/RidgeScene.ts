@@ -394,6 +394,7 @@ export class RidgeScene extends Phaser.Scene {
       ink: build.ink,
       inkBudget: build.inkBudget,
       attempts: build.attempts,
+      tip: build.tip,
       tipText: build.tipText,
       hintVisible: build.hintVisible,
       sketchOffered: build.sketchOffered,

@@ -1,5 +1,5 @@
 import { useEffect, type ReactNode } from 'react';
-import type { BridgeBuildPhase, RidgeEmotion } from '@/game/core/ridge';
+import type { BridgeBuildPhase, BridgeBuildTip, RidgeEmotion } from '@/game/core/ridge';
 import type { SceneUiSurfaceProps } from '@/game/sceneUi/registry';
 import { useMessages } from '@/shared/i18n';
 import { cn } from '@/shared/ui/utils';
@@ -23,6 +23,7 @@ export interface RidgeBridgeBuilderPanelView {
   ink: number;
   inkBudget: number;
   attempts: number;
+  tip: BridgeBuildTip;
   tipText: string;
   hintVisible: boolean;
   sketchOffered: boolean;
@@ -75,6 +76,18 @@ const TIP_EMOTION: Record<BridgeBuildPhase, RidgeEmotion> = {
   passed: 'playful'
 };
 
+/** How the Draftsperson takes each kind of collapse. */
+const FAILURE_EMOTION: Partial<Record<BridgeBuildTip, RidgeEmotion>> = {
+  no_road: 'surprised',
+  bare_deck: 'surprised',
+  loose_frame: 'thoughtful',
+  stuck: 'curious'
+};
+
+function tipEmotion(view: RidgeBridgeBuilderPanelView): RidgeEmotion {
+  return (view.phase === 'failed' ? FAILURE_EMOTION[view.tip] : undefined) ?? TIP_EMOTION[view.phase];
+}
+
 /** The Draftsperson coaching from the corner, like a margin note. */
 function TipCard({ view }: { view: RidgeBridgeBuilderPanelView }) {
   return (
@@ -85,7 +98,7 @@ function TipCard({ view }: { view: RidgeBridgeBuilderPanelView }) {
     >
       <PortraitChip
         portrait="draftsperson"
-        emotion={TIP_EMOTION[view.phase]}
+        emotion={tipEmotion(view)}
         className="h-10 w-10 sm:h-12 sm:w-12 short:h-7 short:w-7 short:border-2"
       />
       <p

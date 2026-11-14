@@ -32,7 +32,7 @@ export const TEST_BRIDGE_DIALOGUE_CATALOG: BridgeDialogueCatalog = {
     'bridge.draftsperson.bridge_built.03': 'Thank you, the crossing is open.',
     'bridge.draftsperson.bridge_built.04': 'The sketch firms into timber.',
     'bridge.builder.tip.intro': 'Drag from a bolt to draw.',
-    'bridge.builder.tip.self_weight': 'It sagged before the car started.',
+    'bridge.builder.tip.bare_deck': 'A plank alone just droops.',
     'bridge.exit.opened_crossing.prompt': 'Cross Bridge',
     'bridge.exit.opened_crossing.01': 'Cross the finished bridge',
     'bridge.exit.opened_crossing.02': 'Thank you.',
