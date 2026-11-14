@@ -1,5 +1,6 @@
 export * from './types';
 export * from './bridgeBuilder';
+export * from './bridgePhysics';
 export * from './commands';
 export * from './observe';
 export * from './conversation';

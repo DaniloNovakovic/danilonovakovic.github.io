@@ -80,10 +80,10 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
 ## Ridge / Blueprint Bridge
 
 - Enter Ridge by inserting the Circuit into the street CRT. At the Bridge, talk to the Draftsperson, then join Cicka's quiet toy-car play so she shares the test car.
-- Return to the Draftsperson and finish the short conversation to open **Blueprint Bridge**. Drag between numbered joints, or tap two joints in order, to draw ink struts. The pale pencil marks are optional guides; **Cicka's hint** points out one useful missing line.
-- A bridge needs an unbroken deck and triangular trusses. Send the toy car first, then reinforce the design with belly braces for the delivery truck. You have 16 ink drops; the traced guide design uses 14.
-- A failed test makes the bridge wobble but never consumes the car. Erase, undo, clear, or revise the drawing and try again. Closing the workbench early leaves the crossing unfinished.
-- When both vehicles pass, choose **Roll into Ridge** to make the crossing real and continue toward Concert Crossing. Keyboard: `R` reset, `H` hint, `T` test, `1` draw, `2` erase. Reduced-motion settings shorten the test animation.
+- Return to the Draftsperson and finish the short conversation to open **Blueprint Bridge Lab**. Drag anywhere to place joints and draw rigid beams or cheaper tension-only cables. **Move** reshapes open joints; square joints are cliff anchors.
+- Build any structure you like. Gentle beams carry tires, steep members provide support, and triangles are useful but never required. Ink cost depends on material length, not a fixed piece count.
+- **Test the car** whenever you want. The simulation applies gravity and the car's weight to your joints, shows sag and stress, and can snap overloaded members. Failed tests preserve the design so you can edit and retry immediately.
+- When the car crosses, choose **Use this bridge** to make the crossing real and continue toward Concert Crossing. Closing early leaves it unfinished. Keyboard: `T` test, `R` reset, `H` tip, `1` beam, `2` cable, `3` move, `4` erase; arrows and Space also draw. Reduced-motion settings accelerate the test.
 
 ## Headless / AI Console
 
@@ -93,8 +93,8 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
 - Potassium in console mode is discrete (`start`, `fight`, `draft`) — not the
   live drag-banana physics. Winning still grants the Circuit.
 - Ridge conversation uses `advance` / `choose`. After the Draftsperson opens the
-  workbench beat, `test bridge` runs the authored car-and-truck check in headless
-  mode. `pnpm ridge:console` is an alias that starts already inside Ridge.
+  workbench beat, `test bridge` runs the authored design through the same car
+  physics simulation in headless mode. `pnpm ridge:console` is an alias that starts already inside Ridge.
 - Ridge first-playable secret route: Bridge → Concert → Dance Festival → Relay
   farewell (Sit and Play, dedication card), then return to the Overworld street.
   Progress resets so the next CRT entry starts Bridge again.

@@ -55,10 +55,10 @@ Current runtime characteristics:
 - Gameplay authority lives in pure `src/game/core/ridge/` (`RidgeConsoleSession`).
 - Phaser `RidgeScene` is a thin adapter: left/right (+ touch) walks progress,
   interact starts conversation, Scene UI owns the Persona-style talk panel.
-- The Draftsperson's test beat opens a React **Blueprint Bridge** overlay. Pure
-  joint/graph rules check the deck, triangles, and belly braces; the toy car and
-  delivery truck provide two animated tests. Only approval returns
-  `bridge_complete` to the Ridge session.
+- The Draftsperson's test beat opens a React **Blueprint Bridge Lab** overlay.
+  Freeform joints, rigid beams, and tension cables run through a deterministic
+  physics simulation with gravity, tire load, sag, and snapping. Only a car
+  crossing returns `bridge_complete` to the Ridge session.
 - Default art is mathematical stick figures via `StickVisualProvider`
   (`src/game/scenes/ridge/art/`). Replace that provider later for iPad art
   without rewriting route logic.
@@ -79,8 +79,8 @@ Bridge
   -> blocked bridge + unfinished blueprint
   -> Bridge Draftsperson
   -> Cicka Parallel Play (receive toy car)
-  -> Blueprint Bridge workbench: draw joint-and-strut design
-  -> toy-car test -> delivery-truck test
+  -> Blueprint Bridge Lab: draw any beam/cable structure
+  -> physics-driven toy-car test
   -> completed crossing
   -> Bridge-to-Concert handoff
 
@@ -124,7 +124,7 @@ Useful commands:
 | `look` / `status` | Surroundings, nearby distances, beat, progress |
 | `go left\|right [n]` | Walk the progress line |
 | `interact [name]` | Start nearest/named conversation |
-| `test bridge` | Run the authored car + truck check in headless mode |
+| `test bridge` | Run the authored design through car physics in headless mode |
 | `advance` | Continue halted conversation |
 | `choose <n\|id>` | Persona-style reply |
 | `leave` | Exit conversation early |

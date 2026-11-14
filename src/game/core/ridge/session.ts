@@ -1,14 +1,11 @@
 // Session dispatch mirrors many console verbs; complexity is the command surface.
 // fallow-ignore-file complexity
 import {
-  addBridgeEdge,
-  canAddBridgeEdge,
   createCanonicalBridgeDesign,
-  createEmptyBridgeDesign,
-  evaluateBridge,
   isBridgeDesign,
   type BridgeDesign
 } from './bridgeBuilder';
+import { runBridgeCarTest } from './bridgePhysics';
 import {
   advanceConversation,
   chooseInConversation,
@@ -271,16 +268,9 @@ export class RidgeConsoleSession {
       return this.fail('That blueprint is not a valid set of bridge struts.');
     }
 
-    let normalized = createEmptyBridgeDesign();
-    for (const edge of candidate.edges) {
-      if (!canAddBridgeEdge(normalized, edge.a, edge.b)) {
-        return this.fail('The blueprint has a duplicate, overlong, or over-budget strut.');
-      }
-      normalized = addBridgeEdge(normalized, edge.a, edge.b);
-    }
-
-    if (!evaluateBridge(normalized).truckReady) {
-      return this.fail('The truck needs a full deck, four triangles, and two belly braces.');
+    const test = runBridgeCarTest(candidate);
+    if (test.status !== 'crossed') {
+      return this.fail('The car could not cross this version. Adjust the bridge and try again.');
     }
 
     const hadToyCar = this.state.inventory.includes(RIDGE_TOY_CAR_ITEM);
@@ -292,7 +282,7 @@ export class RidgeConsoleSession {
       beat: 'bridge_complete',
       flags,
       inventory: this.state.inventory.filter((item) => item !== RIDGE_TOY_CAR_ITEM),
-      lastMessage: 'The toy car and delivery truck both cross. Your drawing becomes the bridge.'
+      lastMessage: 'The toy car crosses your living, wobbling design. Your drawing becomes the bridge.'
     };
 
     return {

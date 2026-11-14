@@ -1,65 +1,67 @@
 import {
-  BRIDGE_GUIDE_EDGES,
-  BRIDGE_NODES,
-  bridgeEdgeKey,
-  bridgeNodeById,
-  bridgeNodePairLabel,
+  snapBridgePoint,
   type BridgeDesign,
-  type BridgeEdge,
-  type BridgeNodeId,
-  type BridgeTestVehicle
+  type BridgeMaterial,
+  type BridgeNode,
+  type BridgePoint,
+  type BridgeSimulation,
+  type CarWheel
 } from '@/game/core/ridge';
 import type { Messages } from '@/shared/i18n';
 import { useBridgeBoardInput } from './useBridgeBoardInput';
-
-export type BridgeTool = 'draw' | 'erase';
-export type BridgeBoardPhase = 'draft' | 'car-testing' | 'car-passed' | 'truck-testing' | 'complete' | 'failed';
-type BridgeBuilderCopy = Messages['miniGames']['bridgeBuilder'];
+import type { BridgeWorkbenchPhase } from './useBridgeCarTest';
+import type { BridgeTool } from './types';
 
 interface BridgeBoardProps {
-  copy: BridgeBuilderCopy;
+  copy: Messages['miniGames']['bridgeBuilder'];
   design: BridgeDesign;
+  simulation: BridgeSimulation | null;
+  phase: BridgeWorkbenchPhase;
   tool: BridgeTool;
-  selectedNode: BridgeNodeId | null;
-  hint: BridgeEdge | null;
-  showGuide: boolean;
-  phase: BridgeBoardPhase;
-  testVehicle: BridgeTestVehicle;
   canEdit: boolean;
-  onChooseNode: (nodeId: BridgeNodeId | null) => void;
-  onConnectNodes: (from: BridgeNodeId, to: BridgeNodeId) => void;
-  onEraseEdge: (edge: BridgeEdge) => void;
+  onConnect: (start: BridgePoint, end: BridgePoint, kind: BridgeMaterial) => void;
+  onMove: (nodeId: string, point: BridgePoint) => void;
+  onEraseBeam: (beamId: string) => void;
+  onEraseNode: (nodeId: string) => void;
 }
 
 export function BridgeBoard(props: BridgeBoardProps) {
-  const { copy, design, selectedNode, hint, showGuide, phase, testVehicle } = props;
+  const { copy, design, simulation, phase, tool, canEdit } = props;
   const {
     boardRef,
-    hoveredNode,
+    preview,
+    tapStart,
+    keyboardPoint,
     handlePointerDown,
     handlePointerMove,
     handlePointerUp,
     handlePointerCancel,
+    handleBoardKeyDown,
     handleNodeKeyDown
   } = useBridgeBoardInput({
-    design: props.design,
-    tool: props.tool,
-    canEdit: props.canEdit,
-    onChooseNode: props.onChooseNode,
-    onConnectNodes: props.onConnectNodes,
-    onEraseEdge: props.onEraseEdge
+    design,
+    tool,
+    canEdit,
+    onConnect: props.onConnect,
+    onMove: props.onMove,
+    onEraseBeam: props.onEraseBeam,
+    onEraseNode: props.onEraseNode
   });
-  const isTesting = phase === 'car-testing' || phase === 'truck-testing';
-  const hintKey = hint ? bridgeEdgeKey(hint.a, hint.b) : null;
+  const nodes = simulation?.nodes ?? design.nodes;
+  const beams = simulation?.beams ?? design.beams;
+  const rear = simulation?.car.rear ?? { x: 28, y: 200 };
+  const front = simulation?.car.front ?? { x: 70, y: 200 };
 
   return (
-    <div className={`bridge-builder-board relative overflow-hidden rounded-lg border-4 border-[#1a1a1a] bg-[#fbfbf9] shadow-[6px_6px_0px_0px_rgba(26,26,26,1)] ${phase === 'failed' ? 'is-failed' : ''}`}>
+    <div className="bridge-builder-board relative overflow-hidden rounded-lg border-4 border-[#1a1a1a] bg-[#fbfbf9] shadow-[6px_6px_0px_0px_rgba(26,26,26,1)]">
       <svg
         ref={boardRef}
         viewBox="0 0 640 380"
         className="block h-auto w-full"
         role="group"
         aria-label={copy.boardLabel}
+        tabIndex={0}
+        onKeyDown={handleBoardKeyDown}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
@@ -67,7 +69,7 @@ export function BridgeBoard(props: BridgeBoardProps) {
       >
         <defs>
           <pattern id="bridge-grid" width="32" height="32" patternUnits="userSpaceOnUse">
-            <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#1a1a1a" strokeWidth="1" opacity="0.08" />
+            <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#1a1a1a" strokeWidth="1" opacity="0.07" />
           </pattern>
           <pattern id="bridge-river-hatch" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(-18)">
             <path d="M 0 0 V 14" stroke="#1a1a1a" strokeWidth="2" opacity="0.12" />
@@ -77,79 +79,83 @@ export function BridgeBoard(props: BridgeBoardProps) {
         <rect width="640" height="380" fill="url(#bridge-grid)" />
         <path d="M0 245 Q100 230 190 250 T380 247 T640 246 V380 H0Z" fill="#f4f1ea" />
         <path d="M0 245 Q100 230 190 250 T380 247 T640 246 V380 H0Z" fill="url(#bridge-river-hatch)" />
-        <path d="M0 220 Q40 205 78 220 L106 245 H0Z" fill="#1a1a1a" opacity="0.12" />
-        <path d="M640 220 Q600 205 562 220 L534 245 H640Z" fill="#1a1a1a" opacity="0.12" />
-        <path d="M0 220 H62 M578 220 H640" stroke="#1a1a1a" strokeWidth="8" strokeLinecap="round" />
-        <text x="24" y="202" fill="#1a1a1a" fontSize="10" fontFamily="monospace" fontWeight="900" letterSpacing="1">{copy.westBank}</text>
-        <text x="616" y="202" textAnchor="end" fill="#1a1a1a" fontSize="10" fontFamily="monospace" fontWeight="900" letterSpacing="1">{copy.eastBank}</text>
-        <text x="320" y="365" textAnchor="middle" fill="#1a1a1a" opacity="0.45" fontSize="11" fontFamily="monospace" fontStyle="italic" letterSpacing="2">{copy.river}</text>
-        <text x="320" y="28" textAnchor="middle" fill="#1a1a1a" opacity="0.45" fontSize="10" fontFamily="monospace" letterSpacing="1">{copy.pencilMarks}</text>
+        <path d="M0 210 H70 L54 250 L38 270 L24 310 H0Z" fill="#1a1a1a" opacity="0.14" />
+        <path d="M640 210 H570 L586 250 L602 270 L616 310 H640Z" fill="#1a1a1a" opacity="0.14" />
+        <path d="M0 210 H70 M570 210 H640" stroke="#1a1a1a" strokeWidth="8" strokeLinecap="round" />
+        <path d="M45 230 L30 250 M58 245 L43 265 M595 230 L610 250 M582 245 L597 265" stroke="#1a1a1a" strokeWidth="2" opacity="0.3" />
+        <text x="20" y="194" fill="#1a1a1a" fontSize="9" fontFamily="monospace" fontWeight="900" letterSpacing="1">{copy.startLabel}</text>
+        <text x="620" y="194" textAnchor="end" fill="#1a1a1a" fontSize="9" fontFamily="monospace" fontWeight="900" letterSpacing="1">{copy.inspectorLabel}</text>
+        <text x="320" y="366" textAnchor="middle" fill="#1a1a1a" opacity="0.45" fontSize="10" fontFamily="monospace" fontStyle="italic" letterSpacing="2">{copy.river}</text>
+        <text x="18" y="26" fill="#1a1a1a" opacity="0.42" fontSize="9" fontFamily="monospace" letterSpacing="1">{copy.freeBuildLabel}</text>
 
-        <g className={`bridge-board-drawing ${isTesting ? 'is-testing' : ''} ${phase === 'failed' ? 'is-failed' : ''}`}>
-          {showGuide && props.canEdit ? BRIDGE_GUIDE_EDGES.map((edge) => {
-            const from = bridgeNodeById(edge.a);
-            const to = bridgeNodeById(edge.b);
-            const key = bridgeEdgeKey(edge.a, edge.b);
-            return (
-              <line
-                key={`guide-${key}`}
-                x1={from.x}
-                y1={from.y}
-                x2={to.x}
-                y2={to.y}
-                className={`bridge-guide-strut ${hintKey === key ? 'is-hinted' : ''}`}
-              />
-            );
-          }) : null}
-          {design.edges.map((edge) => {
-            const from = bridgeNodeById(edge.a);
-            const to = bridgeNodeById(edge.b);
-            const key = bridgeEdgeKey(edge.a, edge.b);
+        <g>
+          {beams.map((beam) => {
+            const a = findNode(nodes, beam.a);
+            const b = findNode(nodes, beam.b);
+            const physics = simulation?.beams.find((candidate) => candidate.id === beam.id);
+            const broken = physics?.broken ?? false;
+            const stressRatio = physics ? Math.min(1, physics.stress / (beam.kind === 'cable' ? 0.12 : 0.035)) : 0;
             return (
               <g
-                key={key}
-                data-edge-key={key}
-                role="button"
-                tabIndex={0}
-                aria-label={copy.removeStrutLabel(bridgeNodePairLabel(edge))}
+                key={beam.id}
+                data-beam-id={beam.id}
+                role={canEdit ? 'button' : undefined}
+                tabIndex={canEdit ? 0 : undefined}
+                aria-label={copy.removeStrutLabel(beam.id)}
                 onKeyDown={(event) => {
-                  if (event.key === 'Enter' || event.key === ' ' || event.key === 'Delete') {
+                  if (tool === 'erase' && (event.key === 'Enter' || event.key === ' ' || event.key === 'Delete')) {
                     event.preventDefault();
-                    props.onEraseEdge(edge);
+                    props.onEraseBeam(beam.id);
                   }
                 }}
               >
-                <line className="bridge-strut-hit" x1={from.x} y1={from.y} x2={to.x} y2={to.y} />
-                <line className="bridge-strut" x1={from.x} y1={from.y} x2={to.x} y2={to.y} pointerEvents="none" />
+                <line className="bridge-strut-hit" x1={a.x} y1={a.y} x2={b.x} y2={b.y} />
+                <line
+                  className={`bridge-strut ${beam.kind === 'cable' ? 'is-cable' : ''} ${broken ? 'is-broken' : ''} ${stressRatio > 0.65 ? 'is-stressed' : ''}`}
+                  x1={a.x}
+                  y1={a.y}
+                  x2={b.x}
+                  y2={b.y}
+                  strokeWidth={beam.kind === 'cable' ? 2.5 : 5 + stressRatio * 3}
+                  strokeDasharray={broken ? '4 8' : stressRatio > 0.9 ? '8 4' : beam.kind === 'cable' ? '8 5' : undefined}
+                  opacity={broken ? 0.18 : 1}
+                  pointerEvents="none"
+                />
               </g>
             );
           })}
         </g>
 
-        {BRIDGE_NODES.map((node) => (
+        {preview ? (
+          <PreviewLine preview={preview} nodes={design.nodes} />
+        ) : null}
+
+        {nodes.map((node) => (
           <g
             key={node.id}
             data-node-id={node.id}
-            className={`bridge-joint ${selectedNode === node.id ? 'is-selected' : ''} ${hoveredNode === node.id ? 'is-hovered' : ''}`}
-            role="button"
-            tabIndex={0}
-            aria-label={copy.jointLabel(node.label)}
-            onKeyDown={(event) => handleNodeKeyDown(event, node.id)}
+            className={`bridge-joint ${node.pinned ? 'is-anchored' : ''}`}
+            role={canEdit ? 'button' : undefined}
+            tabIndex={canEdit ? 0 : undefined}
+            aria-label={copy.jointLabel(node.id)}
+            onKeyDown={(event) => handleNodeKeyDown(event, node)}
           >
-            <circle cx={node.x} cy={node.y} r="40" fill="transparent" />
-            <circle className="bridge-joint-ring" cx={node.x} cy={node.y} r="13" />
-            <text className="bridge-joint-number" x={node.x} y={node.y + 5}>{node.label}</text>
+            <circle cx={node.x} cy={node.y} r="28" fill="transparent" />
+            {node.pinned ? (
+              <rect className="bridge-anchor" x={node.x - 8} y={node.y - 8} width="16" height="16" />
+            ) : (
+              <circle className="bridge-joint-ring" cx={node.x} cy={node.y} r="6" />
+            )}
           </g>
         ))}
+
+        {tapStart ? (
+          <circle className="bridge-start-ring" cx={tapStart.x} cy={tapStart.y} r="14" />
+        ) : null}
+        <KeyboardCursor point={keyboardPoint} />
+        <Car rear={rear} front={front} />
+        <CickaInspector />
       </svg>
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-        <div
-          className={`bridge-vehicle ${phase === 'car-testing' ? 'is-car-testing' : ''} ${phase === 'truck-testing' ? 'is-truck-testing' : ''} ${phase === 'failed' ? 'is-failed' : ''}`}
-          style={{ left: vehicleLeft(phase), top: '60%' }}
-        >
-          <BridgeVehicle vehicle={testVehicle} />
-        </div>
-      </div>
       {phase === 'complete' ? (
         <div className="bridge-stamp pointer-events-none absolute right-3 top-3 border-4 border-[#1a1a1a] bg-[#fbfbf9] px-3 py-1 font-mono text-sm font-black tracking-widest">
           {copy.approved}
@@ -164,30 +170,60 @@ export function BridgeBoard(props: BridgeBoardProps) {
   );
 }
 
-function vehicleLeft(phase: BridgeBoardPhase): string {
-  if (phase === 'car-passed' || phase === 'complete') return '86%';
-  if (phase === 'failed') return '52%';
-  return '10%';
+function PreviewLine({ preview, nodes }: { preview: { start: BridgePoint; end: BridgePoint; kind: BridgeMaterial }; nodes: readonly BridgeNode[] }) {
+  const start = snapBridgePoint(nodes, preview.start) ?? preview.start;
+  const end = snapBridgePoint(nodes, preview.end) ?? preview.end;
+  return (
+    <line
+      className={preview.kind === 'cable' ? 'bridge-preview is-cable' : 'bridge-preview'}
+      x1={start.x}
+      y1={start.y}
+      x2={end.x}
+      y2={end.y}
+      strokeDasharray={preview.kind === 'cable' ? '8 5' : undefined}
+    />
+  );
 }
 
-function BridgeVehicle({ vehicle }: { vehicle: BridgeTestVehicle }) {
-  if (vehicle === 'truck') {
-    return (
-      <svg viewBox="0 0 100 58" className="block w-full drop-shadow-[2px_2px_0px_rgba(26,26,26,0.25)]">
-        <path d="M5 12 H61 V43 H5Z M61 25 H82 L95 37 V43 H61Z" fill="#fbfbf9" stroke="#1a1a1a" strokeWidth="4" strokeLinejoin="round" />
-        <path d="M67 28 H80 L88 36 H67Z" fill="#1a1a1a" opacity="0.2" stroke="#1a1a1a" strokeWidth="2" />
-        <path d="M13 20 H52 M13 27 H52 M13 34 H52" stroke="#1a1a1a" strokeWidth="2" opacity="0.35" />
-        <circle cx="23" cy="45" r="8" fill="#1a1a1a" /><circle cx="23" cy="45" r="3" fill="#fbfbf9" />
-        <circle cx="77" cy="45" r="8" fill="#1a1a1a" /><circle cx="77" cy="45" r="3" fill="#fbfbf9" />
-      </svg>
-    );
-  }
+function KeyboardCursor({ point }: { point: BridgePoint }) {
+  return <path className="bridge-keyboard-cursor" d={`M${point.x - 9} ${point.y} H${point.x + 9} M${point.x} ${point.y - 9} V${point.y + 9}`} />;
+}
+
+function Car({ rear, front }: { rear: Pick<CarWheel, 'x' | 'y'>; front: Pick<CarWheel, 'x' | 'y'> }) {
+  const centerX = (rear.x + front.x) / 2;
+  const centerY = (rear.y + front.y) / 2 - 15;
+  const angle = Math.atan2(front.y - rear.y, front.x - rear.x) * (180 / Math.PI);
   return (
-    <svg viewBox="0 0 80 48" className="block w-full drop-shadow-[2px_2px_0px_rgba(26,26,26,0.25)]">
-      <path d="M8 29 L16 16 H49 L62 29 H72 V38 H8Z" fill="#fbfbf9" stroke="#1a1a1a" strokeWidth="3.5" strokeLinejoin="round" />
-      <path d="M20 18 H47 L56 28 H15Z" fill="#1a1a1a" opacity="0.16" stroke="#1a1a1a" strokeWidth="2" />
-      <circle cx="23" cy="38" r="7" fill="#1a1a1a" /><circle cx="23" cy="38" r="2.5" fill="#fbfbf9" />
-      <circle cx="59" cy="38" r="7" fill="#1a1a1a" /><circle cx="59" cy="38" r="2.5" fill="#fbfbf9" />
-    </svg>
+    <g className="bridge-car" aria-hidden="true">
+      <g transform={`translate(${centerX} ${centerY}) rotate(${angle})`}>
+        <path d="M-34 3 L-25 -12 H11 L26 3 H34 V13 H-34Z" fill="#fbfbf9" stroke="#1a1a1a" strokeWidth="3.5" strokeLinejoin="round" />
+        <path d="M-20 -10 H9 L19 1 H-26Z" fill="#1a1a1a" opacity="0.16" stroke="#1a1a1a" strokeWidth="1.5" />
+      </g>
+      {[rear, front].map((wheel, index) => (
+        <g key={index} transform={`translate(${wheel.x} ${wheel.y})`}>
+          <circle r="9" fill="#1a1a1a" />
+          <circle r="3" fill="#fbfbf9" />
+          <path d="M-7 0 H7 M0 -7 V7" stroke="#fbfbf9" strokeWidth="1" opacity="0.7" />
+        </g>
+      ))}
+    </g>
+  );
+}
+
+function findNode(nodes: readonly BridgeNode[], id: string): BridgeNode {
+  const node = nodes.find((candidate) => candidate.id === id);
+  if (!node) throw new Error(`Missing rendered bridge joint "${id}"`);
+  return node;
+}
+
+function CickaInspector() {
+  return (
+    <g transform="translate(586 178)" fill="none" stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round">
+      <ellipse cx="-4" cy="8" rx="16" ry="9" fill="#fbfbf9" />
+      <circle cx="9" cy="0" r="9" fill="#fbfbf9" />
+      <path d="M3 -6 L0 -15 L8 -8 M12 -7 L17 -15 L17 -4 M-18 7 Q-28 -4 -22 -12" />
+      <circle cx="7" cy="-1" r="1" fill="#1a1a1a" />
+      <circle cx="12" cy="-1" r="1" fill="#1a1a1a" />
+    </g>
   );
 }

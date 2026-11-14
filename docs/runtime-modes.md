@@ -61,10 +61,10 @@ Use this path when checking pattern refactors:
 6. Boot `?startScene=ridge`; verify the Ridge shell renders the Bridge tracer,
    movement works from the nature/hill entry, Cicka appears with the toy car,
    the Bridge Draftsperson advances the missing-span beat, Cicka Parallel Play
-   unlocks the Blueprint Bridge workbench, a player-drawn design passes the toy
-   car and delivery-truck tests, the crossing visibly opens, and the opened
-   crossing triggers the Bridge-to-Concert handoff. Closing the workbench early
-   leaves the bridge unfinished.
+   unlocks the Blueprint Bridge Lab, a freeform player-built structure carries
+   the toy car through the physics simulation, the crossing visibly opens, and
+   the opened crossing triggers the Bridge-to-Concert handoff. Closing the lab
+   early or failing a test leaves the bridge unfinished and editable.
 7. In Potassium, confirm the Notebook shell renders with Back and Static Mode,
    then drag/release from outside the visible board area and confirm launch or
    recall still works. Clear or dev-skip a wave and confirm the upgrade-choice

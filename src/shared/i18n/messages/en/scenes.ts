@@ -151,11 +151,11 @@ export const sceneMessages = {
         "bridge.draftsperson.toy_car_test.01":
           "You place the tiny test car beside the blank middle span. This time, the lines are yours to draw.",
         "bridge.draftsperson.toy_car_test.02":
-          "Give the deck some triangles. Triangles spread the weight instead of letting one brave line take all the credit.",
+          "Beams push and pull. Cables only pull. Put the joints wherever you like—weird shapes are welcome here.",
         "bridge.draftsperson.toy_car_test.03":
-          "The toy car gets first dibs. Then a delivery truck full of groceries gets the final say.",
+          "The toy car gets final say. It has no script and no respect for my calculations. If it crosses, the bridge is real.",
         "bridge.draftsperson.toy_car_test.04":
-          "Open the workbench when you're ready. Nothing becomes a real bridge until both vehicles make it across.",
+          "Open the lab whenever you're ready. Test early, test often, and please don't let the river have my lunch.",
         "bridge.exit.opened_crossing.prompt": "Cross Bridge",
         "bridge.exit.opened_crossing.01": "You stride across the freshly completed bridge.",
         "bridge.exit.opened_crossing.02":

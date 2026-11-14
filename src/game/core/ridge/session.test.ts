@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { createEmptyBridgeDesign } from './bridgeBuilder';
 import { createBridgeStage } from './content/bridgeStage';
 import { createRidgeRouteStages } from './content/routeStages';
 import { TEST_BRIDGE_DIALOGUE_CATALOG } from './content/testBridgeCatalog';
@@ -52,6 +53,21 @@ describe('RidgeConsoleSession Bridge playthrough', () => {
     const observation = session.observe();
     expect(observation.areaId).toBe('concert');
     expect(observation.beat).toBe('concert_arrival');
+  });
+
+  it('does not unlock the crossing for a design that fails the physics test', () => {
+    const session = new RidgeConsoleSession({
+      stage: createBridgeStage(TEST_BRIDGE_DIALOGUE_CATALOG),
+      beat: 'toy_car_shared',
+      inventory: ['toy-car'],
+      flags: ['toy_car_shared'],
+      progress: 0.55
+    });
+    const result = session.run({ type: 'testBridge', design: createEmptyBridgeDesign() });
+
+    expect(result.ok).toBe(false);
+    expect(session.observe().beat).toBe('toy_car_shared');
+    expect(session.observe().inventory).toContain('toy-car');
   });
 
   it('exposes nearby distances useful for AI agents', () => {

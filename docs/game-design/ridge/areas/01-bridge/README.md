@@ -40,13 +40,14 @@ art.**
 - The solution is a tiny art/drawing soft gate: help a resident finish a bridge
   drawing or blueprint by drawing or visually completing the bridge, then the
   finished sketch becomes the crossing.
-- The current runtime prototype uses a small **Blueprint Bridge workbench**:
-  connect numbered joints with ink struts, using the pale pencil marks as an
-  optional guide. The structural rules are deterministic and readable rather
-  than an unbounded freeform physics simulation.
-- The workbench tests the design with a toy car first and a delivery truck
-  second. A weak design visibly wobbles and can be revised without losing the
-  toy car; only two passing tests turn the sketch into the real crossing.
+- The current runtime prototype uses a freeform **Blueprint Bridge Lab**: place
+  joints anywhere, draw rigid beams or tension-only cables, and move joints to
+  revise the structure. Material length spends the ink budget; there is no
+  required template or fixed triangle checklist.
+- A deterministic physics simulation applies gravity and tire load, transfers
+  force into the joints, and snaps members after sustained overstress. The toy
+  car is the only required test. Failure preserves the design for immediate
+  editing; one crossing turns the sketch into the real bridge.
 - Cicka gives an obvious but nonverbal attention cue near the unsafe edge,
   blank plan, or missing part of the bridge.
 - After this first encounter, Cicka should become a recurring authored field
@@ -77,7 +78,7 @@ Cornfield Section (simple bg)
   -> blocked Simple Bridge Crossing + blueprint
   -> Bridge Draftsperson / prop zone
   -> Cicka Parallel Play return
-  -> Blueprint Bridge workbench + toy-car/truck tests + completed crossing (Route Landmark Backdrop may open here)
+  -> freeform Blueprint Bridge Lab + physics car test + completed crossing (Route Landmark Backdrop may open here)
   -> Concert transition exit
 ```
 
@@ -104,14 +105,14 @@ The first blockout only needs:
 - blocked **Simple Bridge Crossing**
 - Bridge Draftsperson + missing middle span blueprint
 - return to Cicka for Cicka Parallel Play
-- Blueprint Bridge workbench with toy-car and delivery-truck tests
+- freeform Blueprint Bridge Lab with a physics-driven toy-car test
 - simple bridge drawing completion visual
 - bridge becomes crossing
 - Cicka settles near the completed crossing
 - Bridge-to-Concert transition trigger
 
-Cabin, food, physics simulation, and toy-car ping-pong are later optional
-layers.
+Cabin, food, and toy-car ping-pong are later optional layers. The physics
+simulation is part of the current prototype.
 
 Definition of done for the Bridge Tracer Slice:
 
@@ -119,7 +120,7 @@ Definition of done for the Bridge Tracer Slice:
 2. player can encounter Cicka with the toy car inside the corn
 3. player can talk to the Bridge Draftsperson at the unfinished blueprint
 4. player can use Cicka Parallel Play to receive or unlock the toy car test prop
-5. player can build a joint-and-strut bridge and pass both vehicle tests
+5. player can build any freeform structure and get the toy car across its physics simulation
 6. the bridge visibly changes from blocked to usable
 7. player can trigger the Bridge-to-Concert transition
 8. implementation proves shared route state, prompt/dialogue lookup by ID,
@@ -285,14 +286,14 @@ Minimum outcomes:
 ## Boundaries
 
 - Do not make Bridge Area a platforming test.
-- Do not make the required solution depend on unbounded freeform physics drawing;
-  the workbench uses a small, readable joint-and-strut ruleset.
+- Keep the freeform physics deterministic, readable, and forgiving to revise;
+  do not require a hidden template or a particular truss.
 - Do not turn the beat into a fetch quest.
 - Do not turn Cicka into a continuous follower after the first encounter.
 - Do not make Cicka obediently hand over the toy car as a quest item; the player
   should join her play until she chooses to share it.
-- Future optional upgrade: add more bridge materials, challenge spans, or a
-  freeform drawing mode after the small workbench has proven its pacing.
+- Future optional upgrade: add more bridge materials or challenge spans after
+  the freeform lab has proven its pacing.
 - Future optional upgrade: turn Cicka Parallel Play into a tiny toy-car
   back-and-forth game, like a low-stakes ping-pong riff using the car instead of
   a ball.

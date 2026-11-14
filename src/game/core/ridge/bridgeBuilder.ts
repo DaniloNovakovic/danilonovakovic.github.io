@@ -1,254 +1,268 @@
-export const BRIDGE_BUILDER_INK_BUDGET = 16;
+export const BRIDGE_BUILDER_INK_BUDGET = 240;
+export const BRIDGE_BOARD_BOUNDS = { left: 30, right: 610, top: 48, bottom: 342 } as const;
 
-const BRIDGE_NODE_IDS = [
-  'west-bank',
-  'west-deck',
-  'center-deck',
-  'east-deck',
-  'east-bank',
-  'west-top',
-  'center-top',
-  'east-top',
-  'keel'
-] as const;
+export type BridgeNodeId = string;
+export type BridgeMaterial = 'beam' | 'cable';
+export type BridgeTestVehicle = 'car';
 
-export type BridgeNodeId = (typeof BRIDGE_NODE_IDS)[number];
-export type BridgeTestVehicle = 'car' | 'truck';
-export type BridgeEdgeRole = 'deck' | 'truss' | 'keel';
-
-export interface BridgeNode {
-  id: BridgeNodeId;
+export interface BridgePoint {
   x: number;
   y: number;
-  label: string;
 }
 
-export interface BridgeEdge {
+export interface BridgeNode extends BridgePoint {
+  id: BridgeNodeId;
+  pinned: boolean;
+}
+
+export interface BridgeBeam {
+  id: string;
   a: BridgeNodeId;
   b: BridgeNodeId;
+  kind: BridgeMaterial;
 }
 
 export interface BridgeDesign {
-  edges: readonly BridgeEdge[];
+  nodes: readonly BridgeNode[];
+  beams: readonly BridgeBeam[];
 }
 
-export interface BridgeGuideEdge extends BridgeEdge {
-  role: BridgeEdgeRole;
-}
-
-export type BridgeCheckId = 'deck' | 'carTriangles' | 'truckTriangles' | 'keel';
-
-export interface BridgeCheck {
-  id: BridgeCheckId;
-  current: number;
-  required: number;
-  passed: boolean;
-}
-
-export interface BridgeEvaluation {
-  inkUsed: number;
-  inkRemaining: number;
-  deckSegments: number;
-  triangleCount: number;
-  keelCount: number;
-  carReady: boolean;
-  truckReady: boolean;
-  checks: readonly BridgeCheck[];
-}
-
-export const BRIDGE_NODES: readonly BridgeNode[] = [
-  { id: 'west-bank', x: 60, y: 220, label: '1' },
-  { id: 'west-deck', x: 180, y: 220, label: '2' },
-  { id: 'center-deck', x: 300, y: 220, label: '3' },
-  { id: 'east-deck', x: 420, y: 220, label: '4' },
-  { id: 'east-bank', x: 540, y: 220, label: '5' },
-  { id: 'west-top', x: 180, y: 96, label: '6' },
-  { id: 'center-top', x: 300, y: 72, label: '7' },
-  { id: 'east-top', x: 420, y: 96, label: '8' },
-  { id: 'keel', x: 300, y: 326, label: '9' }
+const BRIDGE_ANCHORS: readonly BridgeNode[] = [
+  { id: 'west-road', x: 70, y: 210, pinned: true },
+  { id: 'east-road', x: 570, y: 210, pinned: true },
+  { id: 'west-cliff', x: 52, y: 318, pinned: true },
+  { id: 'east-cliff', x: 588, y: 318, pinned: true }
 ];
 
-const DECK_PAIRS: readonly (readonly [BridgeNodeId, BridgeNodeId])[] = [
-  ['west-bank', 'west-deck'],
-  ['west-deck', 'center-deck'],
-  ['center-deck', 'east-deck'],
-  ['east-deck', 'east-bank']
-];
+const MIN_BEAM_LENGTH = 20;
+const MAX_BEAM_LENGTH = 240;
+const MAX_NODES = 40;
+const MAX_BEAMS = 60;
+const SNAP_RADIUS = 18;
 
-const TRUSS_TRIANGLES: readonly (readonly [
-  BridgeNodeId,
-  BridgeNodeId,
-  BridgeNodeId
-])[] = [
-  ['west-bank', 'west-deck', 'west-top'],
-  ['west-deck', 'center-deck', 'center-top'],
-  ['center-deck', 'east-deck', 'center-top'],
-  ['east-deck', 'east-bank', 'east-top']
-];
-
-const KEEL_PAIRS: readonly (readonly [BridgeNodeId, BridgeNodeId])[] = [
-  ['keel', 'west-deck'],
-  ['keel', 'center-deck'],
-  ['keel', 'east-deck']
-];
-
-export const BRIDGE_GUIDE_EDGES: readonly BridgeGuideEdge[] = [
-  ...DECK_PAIRS.map(([a, b]) => ({ a, b, role: 'deck' as const })),
-  { a: 'west-bank', b: 'west-top', role: 'truss' },
-  { a: 'west-deck', b: 'west-top', role: 'truss' },
-  { a: 'west-deck', b: 'center-top', role: 'truss' },
-  { a: 'center-deck', b: 'center-top', role: 'truss' },
-  { a: 'east-deck', b: 'center-top', role: 'truss' },
-  { a: 'east-deck', b: 'east-top', role: 'truss' },
-  { a: 'east-bank', b: 'east-top', role: 'truss' },
-  ...KEEL_PAIRS.map(([a, b]) => ({ a, b, role: 'keel' as const }))
-];
-
-const NODE_BY_ID = new Map<BridgeNodeId, BridgeNode>(BRIDGE_NODES.map((node) => [node.id, node]));
-const NODE_ID_SET = new Set<string>(BRIDGE_NODE_IDS);
-const MAX_EDGE_LENGTH = 220;
-
-export function createCanonicalBridgeDesign(): BridgeDesign {
+export function createEmptyBridgeDesign(): BridgeDesign {
   return {
-    edges: BRIDGE_GUIDE_EDGES.map(({ a, b }) => ({ a, b }))
+    nodes: BRIDGE_ANCHORS.map((node) => ({ ...node })),
+    beams: []
   };
 }
 
-export function createEmptyBridgeDesign(): BridgeDesign {
-  return { edges: [] };
+export function createCanonicalBridgeDesign(): BridgeDesign {
+  let design = createEmptyBridgeDesign();
+  const beams: Array<readonly [BridgePoint, BridgePoint, BridgeMaterial?]> = [
+    [{ x: 70, y: 210 }, { x: 180, y: 210 }],
+    [{ x: 180, y: 210 }, { x: 320, y: 210 }],
+    [{ x: 320, y: 210 }, { x: 460, y: 210 }],
+    [{ x: 460, y: 210 }, { x: 570, y: 210 }],
+    [{ x: 70, y: 210 }, { x: 180, y: 92 }],
+    [{ x: 180, y: 210 }, { x: 180, y: 92 }],
+    [{ x: 180, y: 210 }, { x: 320, y: 72 }],
+    [{ x: 320, y: 210 }, { x: 320, y: 72 }],
+    [{ x: 320, y: 210 }, { x: 460, y: 92 }],
+    [{ x: 460, y: 210 }, { x: 460, y: 92 }],
+    [{ x: 460, y: 92 }, { x: 570, y: 210 }],
+    [{ x: 180, y: 210 }, { x: 320, y: 318 }],
+    [{ x: 320, y: 210 }, { x: 320, y: 318 }],
+    [{ x: 320, y: 210 }, { x: 460, y: 318 }],
+    [{ x: 460, y: 210 }, { x: 460, y: 318 }]
+  ];
+  for (const [a, b, kind] of beams) design = addBridgeBeam(design, a, b, kind ?? 'beam');
+  return design;
 }
 
-export function bridgeEdgeKey(a: BridgeNodeId, b: BridgeNodeId): string {
-  return [a, b].sort().join('|');
-}
-
-export function bridgeNodeById(id: BridgeNodeId): BridgeNode {
-  const node = NODE_BY_ID.get(id);
+export function bridgeNodeById(design: BridgeDesign, id: BridgeNodeId): BridgeNode {
+  const node = design.nodes.find((candidate) => candidate.id === id);
   if (!node) throw new Error(`Unknown bridge joint "${id}"`);
   return node;
 }
 
-export function isBridgeNodeId(value: unknown): value is BridgeNodeId {
-  return typeof value === 'string' && NODE_ID_SET.has(value);
+export function snapBridgePoint(
+  nodes: readonly BridgeNode[],
+  point: BridgePoint,
+  radius = SNAP_RADIUS
+): BridgeNode | null {
+  let nearest: BridgeNode | null = null;
+  let nearestDistance = radius;
+  for (const node of nodes) {
+    const distance = Math.hypot(node.x - point.x, node.y - point.y);
+    if (distance <= nearestDistance) {
+      nearest = node;
+      nearestDistance = distance;
+    }
+  }
+  return nearest;
+}
+
+export function canAddBridgeBeam(
+  design: BridgeDesign,
+  start: BridgePoint,
+  end: BridgePoint,
+  kind: BridgeMaterial = 'beam'
+): boolean {
+  const length = Math.hypot(end.x - start.x, end.y - start.y);
+  if (length < MIN_BEAM_LENGTH || length > MAX_BEAM_LENGTH || design.beams.length >= MAX_BEAMS) {
+    return false;
+  }
+  const startNode = snapBridgePoint(design.nodes, start);
+  const endNode = snapBridgePoint(design.nodes, end);
+  if (!startNode && !endNode && design.nodes.length + 2 > MAX_NODES) return false;
+  if ((!startNode || !endNode) && design.nodes.length + 1 > MAX_NODES) return false;
+  if (startNode && endNode) {
+    if (startNode.id === endNode.id) return false;
+    if (design.beams.some((beam) => connectsSameNodes(beam, startNode.id, endNode.id))) return false;
+  }
+  return bridgeInkUsed(design) + materialCost(length, kind) <= BRIDGE_BUILDER_INK_BUDGET;
+}
+
+export function addBridgeBeam(
+  design: BridgeDesign,
+  start: BridgePoint,
+  end: BridgePoint,
+  kind: BridgeMaterial = 'beam'
+): BridgeDesign {
+  if (!canAddBridgeBeam(design, start, end, kind)) return design;
+  const withStart = upsertNode(design, start);
+  const withEnd = upsertNode(withStart.design, end);
+  const a = withStart.node.id;
+  const b = withEnd.node.id;
+  if (a === b) return design;
+  return {
+    nodes: withEnd.design.nodes,
+    beams: [...withEnd.design.beams, { id: nextEntityId(withEnd.design.beams, 'beam'), a, b, kind }]
+  };
+}
+
+export function moveBridgeNode(
+  design: BridgeDesign,
+  nodeId: BridgeNodeId,
+  point: BridgePoint
+): BridgeDesign {
+  return {
+    ...design,
+    nodes: design.nodes.map((node) =>
+      node.id === nodeId && !node.pinned
+        ? { ...node, x: clampPoint(point.x, 'x'), y: clampPoint(point.y, 'y') }
+        : node
+    )
+  };
+}
+
+export function removeBridgeBeam(design: BridgeDesign, beamId: string): BridgeDesign {
+  return { ...design, beams: design.beams.filter((beam) => beam.id !== beamId) };
+}
+
+export function removeBridgeNode(design: BridgeDesign, nodeId: BridgeNodeId): BridgeDesign {
+  const target = design.nodes.find((node) => node.id === nodeId);
+  if (!target || target.pinned) return design;
+  return {
+    nodes: design.nodes.filter((node) => node.id !== nodeId),
+    beams: design.beams.filter((beam) => beam.a !== nodeId && beam.b !== nodeId)
+  };
+}
+
+export function bridgeInkUsed(design: BridgeDesign): number {
+  return design.beams.reduce((total, beam) => {
+    const a = bridgeNodeById(design, beam.a);
+    const b = bridgeNodeById(design, beam.b);
+    return total + materialCost(Math.hypot(a.x - b.x, a.y - b.y), beam.kind);
+  }, 0);
 }
 
 export function isBridgeDesign(value: unknown): value is BridgeDesign {
-  if (!value || typeof value !== 'object' || !('edges' in value)) return false;
-  const edges = (value as { edges: unknown }).edges;
-  if (!Array.isArray(edges)) return false;
-  const seen = new Set<string>();
-  for (const edge of edges) {
-    if (!edge || typeof edge !== 'object') return false;
-    const candidate = edge as { a?: unknown; b?: unknown };
-    if (!isBridgeNodeId(candidate.a) || !isBridgeNodeId(candidate.b)) return false;
-    if (candidate.a === candidate.b) return false;
-    const key = bridgeEdgeKey(candidate.a, candidate.b);
-    if (seen.has(key)) return false;
-    seen.add(key);
+  if (!value || typeof value !== 'object') return false;
+  const candidate = value as { nodes?: unknown; beams?: unknown };
+  if (!Array.isArray(candidate.nodes) || !Array.isArray(candidate.beams)) return false;
+  if (candidate.nodes.length > MAX_NODES || candidate.beams.length > MAX_BEAMS) return false;
+  const nodes = readValidNodes(candidate.nodes);
+  if (!nodes) return false;
+  const design = { nodes, beams: candidate.beams as BridgeBeam[] };
+  return areValidBeams(design) && bridgeInkUsed(design) <= BRIDGE_BUILDER_INK_BUDGET + 0.001;
+}
+
+function readValidNodes(nodes: unknown[]): BridgeNode[] | null {
+  const ids = new Set<string>();
+  for (const node of nodes) {
+    if (!isValidNode(node) || ids.has(node.id)) return null;
+    ids.add(node.id);
+  }
+  return ids.has('west-road') && ids.has('east-road') ? nodes as BridgeNode[] : null;
+}
+
+function areValidBeams(design: BridgeDesign): boolean {
+  const ids = new Set<string>();
+  const pairs = new Set<string>();
+  for (const beam of design.beams) {
+    if (!isValidBeamRecord(beam, design.nodes) || ids.has(beam.id)) return false;
+    const pair = [beam.a, beam.b].sort().join('|');
+    if (pairs.has(pair) || !hasValidBeamLength(design, beam)) return false;
+    ids.add(beam.id);
+    pairs.add(pair);
   }
   return true;
 }
 
-export function canAddBridgeEdge(
+function isValidBeamRecord(beam: unknown, nodes: readonly BridgeNode[]): beam is BridgeBeam {
+  if (!beam || typeof beam !== 'object') return false;
+  const item = beam as Partial<BridgeBeam>;
+  if (!hasBeamIdentity(item) || (item.kind !== 'beam' && item.kind !== 'cable')) return false;
+  if (item.a === item.b) return false;
+  return nodes.some((node) => node.id === item.a) && nodes.some((node) => node.id === item.b);
+}
+
+function hasBeamIdentity(beam: Partial<BridgeBeam>): beam is BridgeBeam {
+  return typeof beam.id === 'string' && typeof beam.a === 'string' && typeof beam.b === 'string';
+}
+
+function hasValidBeamLength(design: BridgeDesign, beam: BridgeBeam): boolean {
+  const a = bridgeNodeById(design, beam.a);
+  const b = bridgeNodeById(design, beam.b);
+  const length = Math.hypot(a.x - b.x, a.y - b.y);
+  return length >= MIN_BEAM_LENGTH && length <= MAX_BEAM_LENGTH;
+}
+
+function isValidNode(node: unknown): node is BridgeNode {
+  if (!node || typeof node !== 'object') return false;
+  const candidate = node as Partial<BridgeNode>;
+  return (
+    typeof candidate.id === 'string' &&
+    typeof candidate.x === 'number' &&
+    Number.isFinite(candidate.x) &&
+    typeof candidate.y === 'number' &&
+    Number.isFinite(candidate.y) &&
+    typeof candidate.pinned === 'boolean'
+  );
+}
+
+function upsertNode(
   design: BridgeDesign,
-  a: BridgeNodeId,
-  b: BridgeNodeId
-): boolean {
-  if (a === b || design.edges.length >= BRIDGE_BUILDER_INK_BUDGET) return false;
-  if (hasBridgeEdge(design, a, b)) return false;
-  const first = bridgeNodeById(a);
-  const second = bridgeNodeById(b);
-  return Math.hypot(first.x - second.x, first.y - second.y) <= MAX_EDGE_LENGTH;
-}
-
-export function addBridgeEdge(
-  design: BridgeDesign,
-  a: BridgeNodeId,
-  b: BridgeNodeId
-): BridgeDesign {
-  if (!canAddBridgeEdge(design, a, b)) return design;
-  return { edges: [...design.edges, { a, b }] };
-}
-
-export function removeBridgeEdge(design: BridgeDesign, target: BridgeEdge): BridgeDesign {
-  const targetKey = bridgeEdgeKey(target.a, target.b);
-  return {
-    edges: design.edges.filter((edge) => bridgeEdgeKey(edge.a, edge.b) !== targetKey)
+  point: BridgePoint
+): { design: BridgeDesign; node: BridgeNode } {
+  const snapped = snapBridgePoint(design.nodes, point);
+  if (snapped) return { design, node: snapped };
+  const node: BridgeNode = {
+    id: nextEntityId(design.nodes, 'joint'),
+    x: clampPoint(point.x, 'x'),
+    y: clampPoint(point.y, 'y'),
+    pinned: false
   };
+  return { design: { ...design, nodes: [...design.nodes, node] }, node };
 }
 
-export function hasBridgeEdge(design: BridgeDesign, a: BridgeNodeId, b: BridgeNodeId): boolean {
-  const key = bridgeEdgeKey(a, b);
-  return design.edges.some((edge) => bridgeEdgeKey(edge.a, edge.b) === key);
+function nextEntityId(items: readonly { id: string }[], prefix: string): string {
+  let index = items.length + 1;
+  while (items.some((item) => item.id === `${prefix}-${index}`)) index += 1;
+  return `${prefix}-${index}`;
 }
 
-export function evaluateBridge(design: BridgeDesign): BridgeEvaluation {
-  const deckSegments = DECK_PAIRS.filter(([a, b]) => hasBridgeEdge(design, a, b)).length;
-  const triangleCount = TRUSS_TRIANGLES.filter(([a, b, c]) =>
-    hasBridgeEdge(design, a, b) &&
-    hasBridgeEdge(design, b, c) &&
-    hasBridgeEdge(design, a, c)
-  ).length;
-  const keelCount = KEEL_PAIRS.filter(([a, b]) => hasBridgeEdge(design, a, b)).length;
-  const checks: BridgeCheck[] = [
-    {
-      id: 'deck',
-      current: deckSegments,
-      required: DECK_PAIRS.length,
-      passed: deckSegments === DECK_PAIRS.length
-    },
-    {
-      id: 'carTriangles',
-      current: Math.min(triangleCount, 2),
-      required: 2,
-      passed: triangleCount >= 2
-    },
-    {
-      id: 'truckTriangles',
-      current: triangleCount,
-      required: TRUSS_TRIANGLES.length,
-      passed: triangleCount === TRUSS_TRIANGLES.length
-    },
-    {
-      id: 'keel',
-      current: Math.min(keelCount, 2),
-      required: 2,
-      passed: keelCount >= 2
-    }
-  ];
-  const deckReady = checks[0]!.passed;
-  const carReady = deckReady && checks[1]!.passed;
-  const truckReady = carReady && checks[2]!.passed && checks[3]!.passed;
-
-  return {
-    inkUsed: design.edges.length,
-    inkRemaining: Math.max(0, BRIDGE_BUILDER_INK_BUDGET - design.edges.length),
-    deckSegments,
-    triangleCount,
-    keelCount,
-    carReady,
-    truckReady,
-    checks
-  };
+function connectsSameNodes(beam: BridgeBeam, a: string, b: string): boolean {
+  return (beam.a === a && beam.b === b) || (beam.a === b && beam.b === a);
 }
 
-export function nextBridgeHint(design: BridgeDesign): BridgeGuideEdge | null {
-  const evaluation = evaluateBridge(design);
-  const priority: BridgeEdgeRole[] = evaluation.deckSegments < DECK_PAIRS.length
-    ? ['deck', 'truss', 'keel']
-    : evaluation.triangleCount < TRUSS_TRIANGLES.length
-      ? ['truss', 'keel', 'deck']
-      : ['keel', 'truss', 'deck'];
-
-  for (const role of priority) {
-    const missing = BRIDGE_GUIDE_EDGES.find(
-      (edge) => edge.role === role && !hasBridgeEdge(design, edge.a, edge.b)
-    );
-    if (missing) return missing;
-  }
-  return null;
+function materialCost(length: number, kind: BridgeMaterial): number {
+  return (length / 10) * (kind === 'cable' ? 0.55 : 1);
 }
 
-export function bridgeNodePairLabel(edge: BridgeEdge): string {
-  return `${bridgeNodeById(edge.a).label} → ${bridgeNodeById(edge.b).label}`;
+function clampPoint(value: number, axis: 'x' | 'y'): number {
+  if (axis === 'x') return Math.min(BRIDGE_BOARD_BOUNDS.right, Math.max(BRIDGE_BOARD_BOUNDS.left, value));
+  return Math.min(BRIDGE_BOARD_BOUNDS.bottom, Math.max(BRIDGE_BOARD_BOUNDS.top, value));
 }

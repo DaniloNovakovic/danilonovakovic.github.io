@@ -517,12 +517,12 @@ drawing/blueprint in the **Blueprint Bridge workbench**. The Draftsperson's
 specific problem is a missing middle span: they keep erasing and redrawing it
 because they are overthinking whether the structure will hold. Failed doodles,
 eraser marks, and the toy car/weight-test prop make this readable. The current
-runtime uses a small numbered-joint construction puzzle: draw an unbroken deck,
-support it with triangles, and add belly braces. The toy car tests the first
-structure, then a delivery truck tests the reinforced design. Failed attempts
-can be revised without losing the car; two passing tests turn the sketch into
-the crossing. The rules are deterministic and readable rather than an
-unbounded freeform physics simulation.
+runtime uses a freeform construction sandbox: place joints anywhere, connect
+rigid beams or tension cables, and reshape the result. Gravity and tire weight
+flex the structure, stress is visible, and overloaded members can snap. The toy
+car is the only required test. Failed attempts preserve the design for immediate
+editing; one crossing turns the sketch into the bridge. Any structure that works
+is valid—there is no required deck pattern or triangle checklist.
 
 Keep it tiny, obvious, and local. It should not feel like a fetch quest or a
 test of platforming skill.
@@ -530,7 +530,7 @@ test of platforming skill.
 The first blockout floor is: walk-right nature/hill intro, peaceful Cicka + toy
 car first encounter, basic sit/play interaction, blocked bridge, Bridge
 Draftsperson + missing middle span blueprint, return to Cicka for Cicka
-Parallel Play, Blueprint Bridge workbench with toy-car and delivery-truck tests,
+Parallel Play, freeform Blueprint Bridge Lab with a physics-driven toy-car test,
 simple bridge drawing completion visual, bridge becomes crossing, and Cicka settles near the completed crossing. Cabin,
 food, physics simulation, and toy-car ping-pong are later optional layers.
 

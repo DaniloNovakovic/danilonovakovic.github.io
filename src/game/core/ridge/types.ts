@@ -218,7 +218,7 @@ export type RidgeCommand =
   | { type: 'advance' }
   | { type: 'choose'; choiceIdOrIndex: string }
   | { type: 'leave' }
-  /** Run the car + truck check; omitted designs use the canonical console solution. */
+  /** Run the car physics check; omitted designs use the canonical console solution. */
   | { type: 'testBridge'; design?: BridgeDesign }
   /** DEV / AI: jump to the next Compact Ridge Area. */
   | { type: 'skip' }

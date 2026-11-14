@@ -15,8 +15,8 @@ This file owns Bridge Area conversations, prompts, barks, and placeholder lines.
   unfinished blueprint and missing middle span.
 - `bridge.cicka.parallel_play`: player joins Cicka's toy-car play until she
   chooses to share the test car.
-- `bridge.draftsperson.toy_car_test`: opens the Blueprint Bridge workbench and
-  its two-vehicle bridge-complete response.
+- `bridge.draftsperson.toy_car_test`: opens the Blueprint Bridge Lab and its
+  physics-driven car-test response.
 - `bridge.exit.opened_crossing`: smallest prompt or line set after the crossing
   opens.
 
@@ -80,12 +80,12 @@ State: `bridge:toy_car_shared`.
 | ID | Speaker | Line / Prompt | Notes |
 | --- | --- | --- | --- |
 | bridge.draftsperson.toy_car_test.01 | Prompt | You place the tiny test car beside the blank middle span. This time, the lines are yours to draw. | Opens the construction beat. |
-| bridge.draftsperson.toy_car_test.02 | Bridge Draftsperson | Give the deck some triangles. Triangles spread the weight instead of letting one brave line take all the credit. | Teaches the main structural idea. |
-| bridge.draftsperson.toy_car_test.03 | Prompt | The toy car gets first dibs. Then a delivery truck full of groceries gets the final say. | Names the two test vehicles. |
-| bridge.draftsperson.toy_car_test.04 | Prompt | Open the workbench when you're ready. Nothing becomes a real bridge until both vehicles make it across. | Opens the React workbench after the line. |
+| bridge.draftsperson.toy_car_test.02 | Bridge Draftsperson | Beams push and pull. Cables only pull. Put the joints wherever you like—weird shapes are welcome here. | Teaches materials without prescribing a shape. |
+| bridge.draftsperson.toy_car_test.03 | Prompt | The toy car gets final say. It has no script and no respect for my calculations. If it crosses, the bridge is real. | Names the only test vehicle and physics-based outcome. |
+| bridge.draftsperson.toy_car_test.04 | Prompt | Open the lab whenever you're ready. Test early, test often, and please don't let the river have my lunch. | Opens the React sandbox after the line. |
 
-Outcome: The workbench requests `bridge:bridge_complete` only after a valid
-car-and-truck design; the bridge crossing then becomes visible and traversable.
+Outcome: The lab requests `bridge:bridge_complete` only after the car crosses
+the player's physics design; the bridge crossing then becomes visible and traversable.
 
 ### bridge.exit.opened_crossing
 

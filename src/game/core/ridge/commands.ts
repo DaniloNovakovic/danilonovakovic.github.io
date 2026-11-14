@@ -12,7 +12,7 @@ const HELP_TEXT = [
   '  advance              continue conversation',
   '  choose <n|id>        pick a conversation reply',
   '  leave                exit conversation without finishing',
-  '  test bridge          run the authored car + truck bridge check',
+  '  test bridge          run the authored car physics check',
   '',
   'Playtest skips:',
   '  skip                 jump to the next area start',

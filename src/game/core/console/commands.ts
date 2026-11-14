@@ -48,7 +48,7 @@ export function getGameHelpText(): string {
     '',
     'Ridge conversation:',
     '  advance | choose <id|index>',
-    '  test bridge                 run the authored car + truck bridge check',
+    '  test bridge                 run the authored car physics check',
     '',
     'Ridge playtest skips:',
     '  skip                         next area',
