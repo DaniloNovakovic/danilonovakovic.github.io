@@ -147,15 +147,41 @@ export const sceneMessages = {
         "bridge.cicka.parallel_play.02": "Gently roll the toy car back and forth",
         "bridge.cicka.parallel_play.03": "Purrrr... *Cicka nudges the toy car into your hand with approval*",
         "bridge.cicka.parallel_play.04": "Cicka entrusts you with the official Bridge Test Vehicle!",
-        "bridge.draftsperson.toy_car_test.prompt": "Test Blueprint",
+        "bridge.draftsperson.toy_car_test.prompt": "Draw the Bridge",
         "bridge.draftsperson.toy_car_test.01":
-          "You place the tiny test car onto the blueprint span.",
+          "You set the tiny test car on the blueprint table. The Draftsperson stares at the empty middle.",
         "bridge.draftsperson.toy_car_test.02":
-          "If this little car can brave the gap on paper, we can build the real thing!",
+          "Every time I draw the middle span, I erase it. What if it sags? What if it snaps?",
         "bridge.draftsperson.toy_car_test.03":
-          "Vroom! The toy car zips safely across the inked span without falling.",
+          "Would you draw it with me? Bolt beams to the banks, and the little car will tell us if it holds.",
         "bridge.draftsperson.toy_car_test.04":
-          "Aha! The math holds! The blueprint bridge comes alive under our feet!",
+          "Road beams carry the car. Wood beams hold the road up. Triangles are your friend.",
+        "bridge.draftsperson.toy_car_test.resume":
+          "Back to the drawing board! The little car is still fueled up.",
+        "bridge.draftsperson.bridge_built.01":
+          "Vroom! The toy car rattles all the way across your span, and the ink holds.",
+        "bridge.draftsperson.bridge_built.02":
+          "It held?! It HELD! I've drawn forty bridges and erased forty-one!",
+        "bridge.draftsperson.bridge_built.03":
+          "You didn't overthink it, you just drew it. Thank you, partner. The crossing is open!",
+        "bridge.draftsperson.bridge_built.04":
+          "The pencil lines darken into real timber. Cicka trots over to inspect the far bank.",
+        "bridge.builder.tip.intro":
+          "Drag from a bolt to draw a beam. Road for the car, wood to hold it up. Then press Test!",
+        "bridge.builder.tip.drawing": "Looking good! Triangles keep their shape. Flat beams just sag.",
+        "bridge.builder.tip.testing": "Go, little car, go...!",
+        "bridge.builder.tip.no_road":
+          "Splash! The car needs road beams all the way from one bank to the other.",
+        "bridge.builder.tip.self_weight":
+          "It sagged before the car even started! Prop the road up with wood triangles.",
+        "bridge.builder.tip.car_weight":
+          "So close! It snapped under the car. Add a triangle near the break mark.",
+        "bridge.builder.tip.stuck": "The car couldn't make it up there. Keep the road nice and gentle.",
+        "bridge.builder.tip.sketch_offer":
+          "Want to peek at my sketch? Tap Hint and trace the faint lines.",
+        "bridge.builder.tip.sketch_shown": "That's my doodle. Trace it, or improve it!",
+        "bridge.builder.tip.out_of_ink": "We're out of ink! Erase a few beams to free some up.",
+        "bridge.builder.tip.passed": "IT HOLDS! Look at it go!",
         "bridge.exit.opened_crossing.prompt": "Cross Bridge",
         "bridge.exit.opened_crossing.01": "You stride across the freshly completed bridge.",
         "bridge.exit.opened_crossing.02":

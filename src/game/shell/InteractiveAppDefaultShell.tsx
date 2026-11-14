@@ -1,3 +1,4 @@
+import { sceneUiSurfaceCapturesPointer } from '@/game/sceneUi/registry';
 import { ArrowLeft, BookOpen, Bug } from 'lucide-react';
 import Game from './Game';
 import { bridgeActions } from '@/game/bridge/store';
@@ -113,6 +114,7 @@ export function InteractiveAppDefaultShell({
                 activeSceneId={bridge.activeSceneId}
                 presentationMode={presentationMode}
                 onReturnToOverworld={returnToOverworld}
+                isScenePointerCaptured={sceneUiSurfaceCapturesPointer(bridge.sceneUi.panel?.id)}
               />
             </div>
           </div>

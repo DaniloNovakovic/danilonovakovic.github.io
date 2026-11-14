@@ -15,8 +15,10 @@ This file owns Bridge Area conversations, prompts, barks, and placeholder lines.
   unfinished blueprint and missing middle span.
 - `bridge.cicka.parallel_play`: player joins Cicka's toy-car play until she
   chooses to share the test car.
-- `bridge.draftsperson.toy_car_test`: toy car test and authored bridge-complete
-  response.
+- `bridge.draftsperson.toy_car_test`: Draftsperson asks the player to draw the
+  span; opens the Blueprint Bridge Workbench.
+- `bridge.draftsperson.bridge_built`: thanks after the toy car crosses.
+- `bridge.builder.tip.*`: Draftsperson coaching shown on the workbench.
 - `bridge.exit.opened_crossing`: smallest prompt or line set after the crossing
   opens.
 
@@ -73,19 +75,40 @@ and local.
 
 ### bridge.draftsperson.toy_car_test
 
-Purpose: Complete the authored bridge test and make the crossing change visible.
+Purpose: Hand the missing span to the player and open the Blueprint Bridge
+Workbench.
 Trigger: Player returns to the blueprint with the toy car.
-State: `bridge:needs_toy_car`.
+State: `bridge:toy_car_shared`.
 
 | ID | Speaker | Line / Prompt | Notes |
 | --- | --- | --- | --- |
-| bridge.draftsperson.toy_car_test.01 | Prompt | Set the tiny car on the drawing | Starts auto-success bridge test. |
-| bridge.draftsperson.toy_car_test.02 | Bridge Draftsperson | If it can carry this much courage, maybe it can carry us. | Provisional line; keep soft, not too clever. |
-| bridge.draftsperson.toy_car_test.03 | Prompt | The toy car rolls across the new span. | Presentation beat for visible route change. |
-| bridge.draftsperson.toy_car_test.04 | Bridge Draftsperson | That line holds. The bridge knows it now. | Signals sketch becoming crossing. |
+| bridge.draftsperson.toy_car_test.01 | Prompt | You set the tiny test car on the blueprint table. | Narration. |
+| bridge.draftsperson.toy_car_test.02 | Bridge Draftsperson | Every time I draw the middle span, I erase it. | Thoughtful; the overthinking problem. |
+| bridge.draftsperson.toy_car_test.03 | Bridge Draftsperson | Would you draw it with me? The little car will tell us if it holds. | Curious; invitation. |
+| bridge.draftsperson.toy_car_test.04 | Prompt | Road carries the car, wood holds it up. Triangles are your friend. | The only tutorial text. |
+| bridge.draftsperson.toy_car_test.resume | Bridge Draftsperson | Back to the drawing board! | Returning to an unfinished drawing. |
 
-Outcome: Route state can move to `bridge:bridge_complete`; bridge crossing
-becomes visible and traversable.
+Outcome: Workbench opens. Copy in `src/shared/i18n/messages/en/scenes.ts`.
+
+### bridge.draftsperson.bridge_built
+
+Purpose: Thank the player and land the visible route change.
+Trigger: The toy car crosses the player's span.
+State: `bridge:bridge_complete`.
+
+| ID | Speaker | Line / Prompt | Notes |
+| --- | --- | --- | --- |
+| bridge.draftsperson.bridge_built.01 | Prompt | Vroom! The toy car rattles across your span. | Narration. |
+| bridge.draftsperson.bridge_built.02 | Bridge Draftsperson | It held?! It HELD! | Surprised. |
+| bridge.draftsperson.bridge_built.03 | Bridge Draftsperson | You didn't overthink it, you just drew it. Thank you, partner. | Playful; emotional payoff of the area. |
+| bridge.draftsperson.bridge_built.04 | Prompt | The pencil lines darken into real timber. | Visible world change. |
+
+### bridge.builder.tip.*
+
+Workbench coaching keyed by `BridgeBuildTip`: `intro`, `drawing`, `testing`,
+`no_road`, `self_weight`, `car_weight`, `stuck`, `sketch_offer`,
+`sketch_shown`, `out_of_ink`, `passed`. Keep each to one short sentence that
+says what to try next.
 
 ### bridge.exit.opened_crossing
 

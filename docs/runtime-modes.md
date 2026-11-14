@@ -61,7 +61,9 @@ Use this path when checking pattern refactors:
 6. Boot `?startScene=ridge`; verify the Ridge shell renders the Bridge tracer,
    movement works from the nature/hill entry, Cicka appears with the toy car,
    the Bridge Draftsperson advances the missing-span beat, Cicka Parallel Play
-   unlocks the toy car test, the auto-success bridge test visibly opens the
+   shares the toy car, returning it to the Draftsperson opens the Blueprint
+   Bridge drawing table (draw beams by drag/touch, a bare
+   deck fails, the traced sketch passes), the passed test visibly opens the
    crossing, and the opened crossing triggers the Bridge-to-Concert handoff.
 7. In Potassium, confirm the Notebook shell renders with Back and Static Mode,
    then drag/release from outside the visible board area and confirm launch or

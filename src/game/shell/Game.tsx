@@ -21,6 +21,8 @@ interface GameProps {
   onReturnToOverworld: () => void;
   chrome?: 'framed' | 'bare';
   ridgeDevControls?: RidgeDevControls;
+  /** A scene UI surface needs raw canvas pointer input (e.g. drawing), so the swipe mat stands aside. */
+  isScenePointerCaptured?: boolean;
 }
 
 export default function Game({
@@ -31,11 +33,13 @@ export default function Game({
   presentationMode,
   onReturnToOverworld,
   chrome = 'framed',
-  ridgeDevControls
+  ridgeDevControls,
+  isScenePointerCaptured = false
 }: GameProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
-  const shouldUsePortraitCoverTouch = presentationMode === 'portrait-cover';
+  const shouldUsePortraitCoverTouch =
+    presentationMode === 'portrait-cover' && !isScenePointerCaptured;
   const {
     bridgeRef,
     stableOnEnterScene,

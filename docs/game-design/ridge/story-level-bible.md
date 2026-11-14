@@ -518,16 +518,13 @@ Draftsperson's specific problem is a missing middle span: they keep erasing and
 redrawing it because they are overthinking whether the structure will hold.
 Failed doodles, eraser marks, and the toy car/weight-test prop make this
 readable and support a future bridge-physics toy. The finished sketch becomes
-the crossing. For v0, this can be a basic authored drawing/completion visual
-rather than a full freeform drawing system, and the toy car test should be
-auto-success presentation: place or bring the toy car to the completed
-blueprint, roll it across the drawn bridge, then let the sketch become the real
-crossing.
-
-Future optional upgrade: let the player draw directly on the bridge, either as
-a visual customization or a small physics/bridge-building toy, potentially
-testing whether the drawn bridge can carry a car or similar weight. Do not make
-that the required v0 solution.
+the crossing. Accepted (Danilo, 2026-11-14): the drawing is the **Blueprint
+Bridge Workbench**, a small physics bridge-building toy over the real gap. The
+player draws road and wood beams from bank bolts, then the toy car tests the
+span; when it holds, the Draftsperson thanks the player and the drawn bridge
+becomes the crossing. Failure is gentle and explained, and the Draftsperson's
+traceable sketch keeps the route from ever blocking. Area detail lives in
+[`areas/01-bridge/README.md`](./areas/01-bridge/README.md).
 
 Keep it tiny, obvious, and local. It should not feel like a fetch quest or a
 test of platforming skill.
@@ -535,9 +532,9 @@ test of platforming skill.
 The first blockout floor is: walk-right nature/hill intro, peaceful Cicka + toy
 car first encounter, basic sit/play interaction, blocked bridge, Bridge
 Draftsperson + missing middle span blueprint, return to Cicka for Cicka
-Parallel Play, toy car bridge test, simple bridge drawing completion visual,
-bridge becomes crossing, and Cicka settles near the completed crossing. Cabin,
-food, physics simulation, and toy-car ping-pong are later optional layers.
+Parallel Play, Blueprint Bridge Workbench + toy car bridge test, bridge
+becomes crossing, and Cicka settles near the completed crossing. Cabin, food,
+and toy-car ping-pong are later optional layers.
 
 ## Mini-Game Entrances
 
@@ -550,8 +547,8 @@ Current candidates:
 - Telegraph / Clair-Obscur-style timing: optional timing/parry future alternate-path candidate.
 - Concert guitar performance: small teaching toy for the guitar, with required
   non-arcade fallback.
-- Bridge drawing/physics: future bridge-building toy after the route MVP is
-  proven; v0 should use an authored drawing/completion visual.
+- Bridge drawing/physics: implemented as the required-but-forgiving Blueprint
+  Bridge Workbench (sketch hint guarantees completion).
 - Toy-car parallel play: future tiny back-and-forth Cicka game after the route
   MVP is proven; v0 should be a short sit/play/share interaction.
 - Cabin/treat shortcut: future optional Bridge interaction where the player can

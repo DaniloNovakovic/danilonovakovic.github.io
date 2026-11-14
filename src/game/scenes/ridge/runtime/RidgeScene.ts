@@ -6,13 +6,16 @@ import {
   type RidgeRouteBeatState
 } from '@/game/bridge/store';
 import {
+  BRIDGE_SIM_DT,
   createRidgeRouteStages,
   RidgeConsoleSession,
   RIDGE_GUITAR_ITEM,
   RIDGE_INITIAL_BEAT,
   ridgePrevArea,
+  type BridgeBuildAction,
   type RidgeAreaId,
   type RidgeCommandResult,
+  type RidgeObservation,
   type RidgeSessionEvent
 } from '@/game/core/ridge';
 import { portraitForSpeaker } from '../content/castRegistry';
@@ -33,6 +36,12 @@ import { speakerSideFor } from '../art/conversationStaging';
 import { loadRidgePresenceCatalog } from '../content/presenceCatalog';
 import { loadRidgeRouteDialogueCatalog } from '../content/routeCatalog';
 import type { RidgeConversationPanelView } from '../sceneUi/RidgeConversationPanel';
+import type {
+  RidgeBridgeBuilderPanelView,
+  RidgeBridgeCommand,
+  RidgeBridgeTool
+} from '../sceneUi/RidgeBridgeBuilderPanel';
+import { BridgeBuilderView } from './BridgeBuilderView';
 import type { RidgeDevControls } from './ridgeDevControls';
 
 interface RidgeSceneStartData {
@@ -43,6 +52,21 @@ interface RidgeSceneStartData {
 }
 
 const WALK_SPEED = 0.18; // progress units per second
+/** How long the toy car's victory lap plays before the Draftsperson speaks. */
+const BRIDGE_CELEBRATE_MS = 2200;
+/** Catch-up cap so a hitch never fast-forwards the bridge test. */
+const MAX_SIM_STEPS_PER_FRAME = 4;
+
+const BRIDGE_COMMAND_ACTIONS: Record<RidgeBridgeCommand, BridgeBuildAction> = {
+  undo: { kind: 'undo' },
+  clear: { kind: 'clear' },
+  hint: { kind: 'hint' },
+  sketch: { kind: 'sketch' },
+  test: { kind: 'test', instant: false },
+  stop: { kind: 'edit' },
+  edit: { kind: 'edit' },
+  leave: { kind: 'leave' }
+};
 
 /**
  * Thin Phaser adapter over RidgeConsoleSession + StickVisualProvider.
@@ -56,7 +80,11 @@ export class RidgeScene extends Phaser.Scene {
   private onClose: () => void = () => {};
   private isPaused = false;
   private getRidgeDevControls?: () => RidgeDevControls | undefined;
-  private lastConversationKey: string | null = null;
+  private lastPanelKey: string | null = null;
+  private builder?: BridgeBuilderView;
+  private bridgeTool: RidgeBridgeTool = 'road';
+  private simAccumulator = 0;
+  private celebrateMs = 0;
   private lastDevSnapshotKey = '';
   private nextKey?: Phaser.Input.Keyboard.Key;
   private prevKey?: Phaser.Input.Keyboard.Key;
@@ -84,7 +112,9 @@ export class RidgeScene extends Phaser.Scene {
       areaId,
       beat: route.beat,
       progress: 0.05,
-      inventory: hasGuitar ? [RIDGE_GUITAR_ITEM] : []
+      inventory: hasGuitar ? [RIDGE_GUITAR_ITEM] : [],
+      builtBridge:
+        areaId === 'bridge' && route.beat === 'bridge_complete' ? (route.bridgeDesign ?? null) : null
     });
 
     const presence = loadRidgePresenceCatalog();
@@ -112,6 +142,13 @@ export class RidgeScene extends Phaser.Scene {
     this.handleDevSkipKeys();
 
     const observation = this.session.observe();
+    if (observation.mode === 'bridgeBuild') {
+      this.updateBridgeBuild(delta);
+      Phaser.Input.Keyboard.JustDown(this.keys.interactKey);
+      bridgeActions.consumeTouchOneShots();
+      this.syncPresentation();
+      return;
+    }
     if (observation.mode === 'conversation') {
       // Drain edge-triggered input so a press made while talking does not
       // fire the moment the conversation closes (e.g. E re-opening it).
@@ -166,10 +203,75 @@ export class RidgeScene extends Phaser.Scene {
     }
   }
 
+  /** Fixed-step the toy-car test so the animated run matches the console verdict. */
+  private updateBridgeBuild(delta: number): void {
+    const session = this.session;
+    const bench = session?.bridgeWorkbench;
+    if (!session || !bench || !this.visuals) return;
+    const builder = this.ensureBuilder();
+
+    if (bench.phase === 'editing') {
+      this.simAccumulator = 0;
+    } else {
+      this.simAccumulator += Math.min(delta, 100) / 1000;
+      for (let i = 0; i < MAX_SIM_STEPS_PER_FRAME && this.simAccumulator >= BRIDGE_SIM_DT; i += 1) {
+        this.simAccumulator -= BRIDGE_SIM_DT;
+        session.stepBridgeTest();
+        if (bench.sim) builder.afterSimStep(bench.sim);
+      }
+    }
+
+    builder.sync(bench);
+
+    if (bench.phase !== 'passed') {
+      this.celebrateMs = 0;
+      return;
+    }
+    this.celebrateMs += delta;
+    if (this.celebrateMs >= BRIDGE_CELEBRATE_MS) {
+      this.celebrateMs = 0;
+      this.applyResult(session.run({ type: 'build', action: { kind: 'done' } }));
+    }
+  }
+
+  private ensureBuilder(): BridgeBuilderView {
+    if (!this.builder) {
+      const origin = this.visuals!.bridgeGapOrigin();
+      this.builder = new BridgeBuilderView(this, {
+        originX: origin.x,
+        originY: origin.y,
+        onAction: (action) => this.applyResult(this.session!.run({ type: 'build', action }))
+      });
+      this.builder.setTool(this.bridgeTool);
+    }
+    return this.builder;
+  }
+
+  private handleBridgeUiAction(action: string, params: unknown): boolean {
+    if (!this.session) return false;
+    if (action === 'ridgeBridgeTool') {
+      const tool = readStringParam(params, 'tool') as RidgeBridgeTool | undefined;
+      if (tool === 'road' || tool === 'wood' || tool === 'eraser') {
+        this.bridgeTool = tool;
+        this.builder?.setTool(tool);
+        this.lastPanelKey = null;
+      }
+      return true;
+    }
+    if (action === 'ridgeBridgeCommand') {
+      const command = readStringParam(params, 'command') as RidgeBridgeCommand | undefined;
+      const buildAction = command ? BRIDGE_COMMAND_ACTIONS[command] : undefined;
+      if (buildAction) this.applyResult(this.session.run({ type: 'build', action: buildAction }));
+      return true;
+    }
+    return false;
+  }
+
   private handleSceneUiActions(): void {
     if (!this.session) return;
     const action = bridgeActions.consumeSceneUiAction(RIDGE_SCENE_ID);
     if (!action) return;
+    if (this.handleBridgeUiAction(action.action, action.params)) return;
 
     if (action.action === 'ridgeConversationAdvance') {
       this.applyResult(this.session.exec('advance'));
@@ -209,6 +311,10 @@ export class RidgeScene extends Phaser.Scene {
       bridgeActions.setRidgeAreaHandoff(areaId, RIDGE_INITIAL_BEAT[areaId] as RidgeRouteBeatState);
       return;
     }
+    if (event.type === 'bridge_built') {
+      bridgeActions.setRidgeBridgeDesign(event.design);
+      return;
+    }
     if (event.type === 'route_reset') {
       // v0: dedication ends the CRT story and returns to Overworld.
       // Post-game Open Ridge Return can replace this later.
@@ -220,8 +326,12 @@ export class RidgeScene extends Phaser.Scene {
   private syncPresentation(): void {
     if (!this.session || !this.visuals) return;
     const observation = this.session.observe();
+    if (observation.mode !== 'bridgeBuild' && this.builder) {
+      this.builder.destroy();
+      this.builder = undefined;
+    }
     this.visuals.sync(toRidgeVisualViewModel(observation));
-    this.syncConversationUi(observation);
+    this.syncSceneUiPanel(observation);
 
     if (import.meta.env.DEV) {
       const nearbyLabels = observation.nearby.map((item) => item.label);
@@ -238,21 +348,24 @@ export class RidgeScene extends Phaser.Scene {
     }
   }
 
-  private syncConversationUi(
-    observation: ReturnType<RidgeConsoleSession['observe']>
-  ): void {
+  /** One docked panel at a time: the conversation box or the drawing-table chrome. */
+  private syncSceneUiPanel(observation: RidgeObservation): void {
+    if (observation.mode === 'bridgeBuild' && observation.bridgeBuild) {
+      this.syncBridgeBuilderPanel(observation.bridgeBuild);
+      return;
+    }
     if (observation.mode !== 'conversation' || !observation.conversation) {
-      if (this.lastConversationKey !== null) {
+      if (this.lastPanelKey !== null) {
         bridgeActions.clearSceneUiPanel(RIDGE_SCENE_ID);
-        this.lastConversationKey = null;
+        this.lastPanelKey = null;
       }
       return;
     }
 
     const c = observation.conversation;
-    const key = `${c.id}:${c.lineIndex}:${c.awaitingChoice}:${c.choices?.map((choice) => choice.id).join(',') ?? ''}`;
-    if (key === this.lastConversationKey) return;
-    this.lastConversationKey = key;
+    const key = `talk:${c.id}:${c.lineIndex}:${c.awaitingChoice}:${c.choices?.map((choice) => choice.id).join(',') ?? ''}`;
+    if (key === this.lastPanelKey) return;
+    this.lastPanelKey = key;
 
     const view: RidgeConversationPanelView = {
       conversationId: c.id,
@@ -274,14 +387,40 @@ export class RidgeScene extends Phaser.Scene {
     bridgeActions.setSceneUiPanel(RIDGE_SCENE_ID, 'ridgeConversation', view);
   }
 
+  private syncBridgeBuilderPanel(build: NonNullable<RidgeObservation['bridgeBuild']>): void {
+    const view: RidgeBridgeBuilderPanelView = {
+      phase: build.phase,
+      tool: this.bridgeTool,
+      ink: build.ink,
+      inkBudget: build.inkBudget,
+      attempts: build.attempts,
+      tipText: build.tipText,
+      hintVisible: build.hintVisible,
+      sketchOffered: build.sketchOffered,
+      canUndo: build.beamCount > 0
+    };
+    const key = `build:${JSON.stringify(view)}`;
+    if (key === this.lastPanelKey) return;
+    this.lastPanelKey = key;
+    bridgeActions.setSceneUiPanel(RIDGE_SCENE_ID, 'ridgeBridgeBuilder', view);
+  }
+
   private cleanup(): void {
     bridgeActions.clearSceneUi(RIDGE_SCENE_ID);
+    this.builder?.destroy();
+    this.builder = undefined;
     this.visuals?.destroy();
     this.visuals = undefined;
     this.session = undefined;
     this.keys = undefined;
     this.nextKey = undefined;
     this.prevKey = undefined;
-    this.lastConversationKey = null;
+    this.lastPanelKey = null;
   }
+}
+
+function readStringParam(params: unknown, key: string): string | undefined {
+  if (!params || typeof params !== 'object' || !(key in params)) return undefined;
+  const value = (params as Record<string, unknown>)[key];
+  return typeof value === 'string' ? value : undefined;
 }

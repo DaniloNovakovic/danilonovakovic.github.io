@@ -1,7 +1,7 @@
 // Each area authors three parallax bands; the branching is set-dressing data.
 // fallow-ignore-file complexity
 import type * as Phaser from 'phaser';
-import type { RidgeAreaId } from '@/game/core/ridge';
+import { BLUEPRINT_BRIDGE_PUZZLE, type RidgeAreaId } from '@/game/core/ridge';
 import type { RidgeVisualViewModel } from '../types';
 import {
   drawCornStalk,
@@ -10,12 +10,12 @@ import {
   drawInkBlob,
   drawMountainRange,
   drawPaperBase,
-  drawPaperBacking,
   drawSunOrMoon,
   drawTree,
   jitter,
   strokeLeaf
 } from './atmosphere';
+import { drawBuiltBridge, drawInkBolt, type BuiltBridgeShape } from './bridgeInk';
 import {
   BRIDGE_CAMP_X,
   GROUND_Y,
@@ -38,6 +38,10 @@ export type SceneryLayer = 'far' | 'near' | 'fore';
 
 export interface AreaSetContext {
   worldXForProgress: (progress: number) => number;
+  /** Bridge river banks, in world X. */
+  bridgeGap?: { left: number; right: number };
+  /** The span the player drew, settled; replaces the authored crossing. */
+  builtBridge?: BuiltBridgeShape | null;
 }
 
 export function drawRidgeAreaLayer(
@@ -251,17 +255,13 @@ function drawBridgeNear(
 
   drawCornField(g, 30, 470);
 
-  const riverLeft = ctx.worldXForProgress(0.58);
-  const riverRight = ctx.worldXForProgress(0.78);
-  g.fillStyle(INK, 0.06);
-  g.fillRect(riverLeft - 8, GROUND_Y, riverRight - riverLeft + 16, 78);
-  g.lineStyle(2, INK, 0.32);
-  for (let y = GROUND_Y + 14; y < GROUND_Y + 70; y += 15) {
-    g.lineBetween(riverLeft, y, riverRight - 30, y + 2);
-    g.lineBetween(riverRight - 18, y + 6, riverRight, y + 5);
-  }
+  const riverLeft = ctx.bridgeGap?.left ?? ctx.worldXForProgress(0.58);
+  const riverRight = ctx.bridgeGap?.right ?? ctx.worldXForProgress(0.78);
+  drawGorge(g, riverLeft, riverRight);
 
-  if (bridgeOpen) {
+  if (bridgeOpen && ctx.builtBridge) {
+    drawBuiltBridge(g, ctx.builtBridge);
+  } else if (bridgeOpen) {
     g.lineStyle(5.5, INK, 1);
     g.lineBetween(riverLeft, GROUND_Y - 4, riverRight, GROUND_Y - 4);
     g.lineStyle(2, INK, 0.5);
@@ -271,14 +271,12 @@ function drawBridgeNear(
       g.lineBetween(px, GROUND_Y - 20, px, GROUND_Y - 4);
     }
   } else {
-    const mid = (riverLeft + riverRight) / 2;
-    g.lineStyle(5.5, INK, 1);
-    g.lineBetween(riverLeft, GROUND_Y - 4, mid - 40, GROUND_Y - 4);
-    g.lineBetween(mid + 40, GROUND_Y - 4, riverRight, GROUND_Y - 4);
-    drawPaperBacking(g, mid, GROUND_Y - 28, 88, 52);
-    g.lineStyle(1.4, INK, 0.4);
-    g.lineBetween(mid - 36, GROUND_Y - 56, mid + 36, GROUND_Y - 56);
-    g.lineBetween(mid - 36, GROUND_Y - 44, mid + 20, GROUND_Y - 44);
+    // Before: a real gap. Only the bank bolts hint that something belongs here.
+    const { cell, anchors, columns } = BLUEPRINT_BRIDGE_PUZZLE;
+    for (const anchor of anchors) {
+      const x = anchor.x === 0 ? riverLeft : riverLeft + columns * cell;
+      drawInkBolt(g, x, GROUND_Y + anchor.y * cell, anchor.x === 0 ? -1 : 1);
+    }
   }
 
   const campX = BRIDGE_CAMP_X;
@@ -302,6 +300,40 @@ function drawBridgeNear(
   }
   g.lineStyle(2.2, INK, 0.55);
   g.lineBetween(campX + 46, GROUND_Y - 1, campX + 78, GROUND_Y - 1);
+}
+
+/**
+ * River gorge cut through the ground band: cliff faces either side, open air
+ * down to the water line, and a few current marks. The water line matches the
+ * Blueprint Bridge splash depth so a falling toy car lands on it.
+ */
+function drawGorge(g: Phaser.GameObjects.Graphics, left: number, right: number): void {
+  const waterY = GROUND_Y + BLUEPRINT_BRIDGE_PUZZLE.waterDepth;
+  const bottom = GROUND_Y + 200;
+
+  // Erase the ground band and lane line inside the gap.
+  g.fillStyle(PAPER, 1);
+  g.fillRect(left, GROUND_Y - 3, right - left, bottom - GROUND_Y + 3);
+  g.fillStyle(INK, 0.03);
+  g.fillRect(left, GROUND_Y, right - left, waterY - GROUND_Y);
+
+  g.fillStyle(INK, 0.1);
+  g.fillRect(left, waterY, right - left, bottom - waterY);
+  g.lineStyle(2.4, INK, 0.7);
+  g.lineBetween(left, waterY, right, waterY);
+  g.lineStyle(1.6, INK, 0.32);
+  for (let y = waterY + 10; y < bottom; y += 13) {
+    for (let x = left + 10 + ((y / 13) % 2) * 18; x < right - 24; x += 52) {
+      g.lineBetween(x, y, x + 22, y + 1);
+    }
+  }
+
+  // Cliff faces, hatched on the bank side.
+  g.lineStyle(4, INK, 1);
+  g.lineBetween(left, GROUND_Y, left - 4, waterY);
+  g.lineBetween(right, GROUND_Y, right + 4, waterY);
+  drawHatch(g, left - 26, GROUND_Y + 6, 22, waterY - GROUND_Y - 6, 7, 0.3, 0.9);
+  drawHatch(g, right + 4, GROUND_Y + 6, 22, waterY - GROUND_Y - 6, 7, 0.3, 0.9);
 }
 
 /**

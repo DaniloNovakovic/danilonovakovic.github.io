@@ -179,9 +179,10 @@ _Avoid_: invisible sightline cheat, separate scene load, mandatory stealth beat
 
 **Simple Bridge Crossing**:
 The accepted v0 Bridge crossing read: a very simple unfinished gap and an equally
-simple completed bridge state, drawn and animated easily by hand rather than as
-a detailed engineering structure.
-_Avoid_: truss blueprint porn, multi-span engineering set, physics-simulation bridge
+simple completed bridge state. The completed state is the span the player drew
+on the **Blueprint Bridge Workbench**, settled under its own weight; an authored
+plank bridge is only the fallback when no drawn design exists.
+_Avoid_: truss blueprint porn, multi-span engineering set, decorative bridge unrelated to the player's drawing
 
 **Childlike Sunny Register**:
 The accepted Bridge Area visual tone: rounder, simpler ink shapes, brighter
@@ -238,8 +239,9 @@ areas become hyper-shaded, separate Ridge art bibles per area
 **Blueprint Bridge**:
 The first required Resident Beat where the player helps the Bridge Draftsperson
 complete a missing middle span on a bridge drawing or blueprint so the finished
-sketch becomes the physical crossing.
-_Avoid_: required physics puzzle, fetch quest, platforming test
+sketch becomes the physical crossing. Implemented as the **Blueprint Bridge
+Workbench**.
+_Avoid_: unforgiving physics exam, fetch quest, platforming test
 
 **Toy Car Play**:
 The first Cicka encounter where she peacefully plays with the Bridge
@@ -254,9 +256,19 @@ test.
 _Avoid_: taking the toy by force, obedient quest-item handoff, food-fetch gate
 
 **Toy Car Bridge Test**:
-The v0 auto-success presentation where the retrieved toy car rolls across the
-completed bridge drawing and proves the sketch can become the physical crossing.
-_Avoid_: required physics failure, hidden pass criteria, simulation-first MVP
+The physics run on the **Blueprint Bridge Workbench** where the retrieved toy
+car drives across the player's drawn span. If it reaches the far bank the
+sketch becomes the physical crossing; if a member snaps or the car splashes, the
+Draftsperson names why and the player fixes the drawing.
+_Avoid_: hidden pass criteria, punishing failure, dead-end retries
+
+**Blueprint Bridge Workbench**:
+The Bridge Draftsperson's drawing table over the river gap: the player drags
+road and wood beams between grid points from bank bolts, spends a forgiving ink
+budget, and runs the **Toy Car Bridge Test**. Kindness rails: a traceable
+Draftsperson sketch (Hint) is always available and is offered outright after two
+failed tests, so nobody is stuck.
+_Avoid_: free-form pixel drawing, engineering jargon, timer or score pressure
 
 **Cicka Treat Shortcut**:
 A future optional Bridge interaction where nearby cabin food can persuade Cicka
@@ -336,9 +348,8 @@ residents, hangouts, or rich crowd writing.
 _Avoid_: full town cast, optional resident backlog, empty gray-box route, writing every background silhouette as required content
 
 **Bridge Drawing Toy**:
-A future optional upgrade where the player draws or customizes the bridge more
-directly, potentially with simple bridge-building physics.
-_Avoid_: required v0 route blocker, full simulation before route MVP
+Superseded by the **Blueprint Bridge Workbench** (implemented 2026-11).
+_Avoid_: reviving as a separate optional layer
 
 **Concert Area**:
 The middle required Ridge Area: a compact small-town / varos-like concert block

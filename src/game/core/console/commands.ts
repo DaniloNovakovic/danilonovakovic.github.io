@@ -49,6 +49,10 @@ export function getGameHelpText(): string {
     'Ridge conversation:',
     '  advance | choose <id|index>',
     '',
+    'Ridge Blueprint Bridge (after the toy car test starts):',
+    '  build road|wood X,Y X,Y | build test | build edit | build done',
+    '  build sketch | hint | undo | erase <n> | show | leave',
+    '',
     'Ridge playtest skips:',
     '  skip                         next area',
     '  warp bridge|concert|dance|relay',
@@ -80,6 +84,9 @@ export function parseGameCommand(raw: string): GameCommand {
   if (head === 'look' || (head === 'l' && parts.length === 1)) {
     return { type: 'look' };
   }
+
+  // Before SIMPLE_COMMANDS: `build clear` must not read as the Potassium `clear`.
+  if (head === 'build') return { type: 'build', raw: trimmed };
 
   const simple = SIMPLE_COMMANDS[head];
   if (simple) return simple;

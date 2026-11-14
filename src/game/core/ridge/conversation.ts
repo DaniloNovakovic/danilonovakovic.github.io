@@ -212,6 +212,10 @@ function applyOutcome(
     events.push({ type: 'route_reset' });
   }
 
+  if (outcome.openBridgeBuild) {
+    events.push({ type: 'bridge_build_opened' });
+  }
+
   return {
     state: {
       ...state,

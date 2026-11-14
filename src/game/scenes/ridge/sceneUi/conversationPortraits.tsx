@@ -200,3 +200,28 @@ function PlayerPortrait({ emotion }: { emotion: RidgeEmotion }) {
     </g>
   );
 }
+
+/** Small framed face for compact Scene UI (e.g. the Blueprint Bridge tip card). */
+export function PortraitChip({
+  portrait,
+  emotion = 'neutral',
+  className
+}: {
+  portrait: BodiedPortraitId;
+  emotion?: RidgeEmotion;
+  className?: string;
+}) {
+  return (
+    <div
+      aria-hidden
+      className={cn(
+        'relative shrink-0 overflow-hidden rounded border-[3px] border-[#1a1a1a] bg-[#f4f1ea] shadow-[3px_3px_0px_0px_rgba(26,26,26,1)]',
+        className
+      )}
+    >
+      <svg viewBox="4 4 72 72" preserveAspectRatio="xMidYMax slice" className="h-full w-full">
+        {PORTRAITS[portrait](emotion)}
+      </svg>
+    </div>
+  );
+}
