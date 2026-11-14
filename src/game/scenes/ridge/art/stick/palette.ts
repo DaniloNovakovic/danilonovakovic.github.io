@@ -54,10 +54,5 @@ export const DEPTH = {
   crt: 50
 } as const;
 
-/**
- * Nameplate fade window, in stage progress. Wide enough that anyone clearly on
- * screen is labelled, with a short ramp at the edge: a plate lingering at half
- * opacity looks like a rendering fault rather than a deliberate fade.
- */
-export const PRESENCE_NEAR = 0.27;
-export const PRESENCE_FAR = 0.33;
+/** Residents within this stage progress of the player count as on screen for barks. */
+export const PRESENCE_RANGE = 0.3;

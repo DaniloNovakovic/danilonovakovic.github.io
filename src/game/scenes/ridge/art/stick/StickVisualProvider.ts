@@ -8,14 +8,13 @@ import { drawCrtAtmosphere } from './atmosphere';
 import { prefersReducedMotion, sketchTick } from '@/game/sharedSceneRuntime/motion/sketchMotion';
 import { BarkDirector, type BarkLines } from './barkDirector';
 import { EmoteMark, emoteGlyphFor } from './emoteMark';
-import { PresenceLayer, type ActiveBark, type PlacedPresence } from './presenceLayer';
+import { PresenceLayer, type ActiveBark } from './presenceLayer';
 import {
   DEPTH,
   GROUND_Y,
   LAYERS,
   PAPER,
-  PRESENCE_FAR,
-  PRESENCE_NEAR,
+  PRESENCE_RANGE,
   STAGE_HEIGHT,
   STAGE_WIDTH,
   VIEW_ABOVE_GROUND,
@@ -43,8 +42,13 @@ const WALK_RELEASE_MS = 150;
 /** How far an NPC will turn to acknowledge the player, in stage progress. */
 const AWARENESS_RANGE = 0.13;
 
-/** Clearance above a head for a nameplate, so bubbles stack above it. */
-const PLATE_HEIGHT = 60;
+/**
+ * Gap between the taller of (anchor, player) heads and floating chrome. Using
+ * the taller head means a cat's prompt never lands on the player's face.
+ */
+const CHROME_CLEARANCE = 12;
+/** Residents this close to the focus card stay quiet so bubbles never stack on it. */
+const BARK_FOCUS_CLEARANCE = 150;
 
 /**
  * Conversation framing. The camera eases in toward the people talking, lifts
@@ -103,7 +107,6 @@ export class StickVisualProvider implements RidgeVisualProvider {
   private destroyed = false;
   /** Reused each sync to avoid per-frame array churn on the hot path. */
   private readonly actorRequests: ActorRenderRequest[] = [];
-  private readonly presencePlates: PlacedPresence[] = [];
   private readonly barkCandidates: RidgeActorId[] = [];
   private readonly activeBarks: ActiveBark[] = [];
   private readonly emote: EmoteMark;
@@ -360,8 +363,6 @@ export class StickVisualProvider implements RidgeVisualProvider {
     motion: boolean
   ): void {
     const inConversation = view.mode === 'conversation';
-    this.syncNameplates(view, playerProgress, inConversation);
-
     if (inConversation) {
       this.barkDirector.interrupt(now);
       this.presence.syncBarks([]);
@@ -369,41 +370,27 @@ export class StickVisualProvider implements RidgeVisualProvider {
       return;
     }
 
+    this.collectBarkCandidates(view, playerProgress);
     this.syncAmbientBarks(view, now);
     this.syncInteractPip(view, tick, motion);
   }
 
-  /** Nearby residents get a nameplate; the focused one is reserved for the pip. */
-  private syncNameplates(
-    view: RidgeVisualViewModel,
-    playerProgress: number,
-    inConversation: boolean
-  ): void {
-    const plates = this.presencePlates;
-    const barkCandidates = this.barkCandidates;
-    plates.length = 0;
-    barkCandidates.length = 0;
-    const focusActorId = view.focus?.actorId;
+  /** On-screen residents may mutter, except whoever the focus card sits over. */
+  private collectBarkCandidates(view: RidgeVisualViewModel, playerProgress: number): void {
+    const candidates = this.barkCandidates;
+    candidates.length = 0;
+    const focus = view.focus;
+    const focusX = focus ? this.worldXForProgress(focus.progress) : Number.NaN;
 
     for (const actor of view.actors) {
       if (!actor.visible || !showsPresenceChrome(actor.id)) continue;
-
-      const alpha = nameplateAlpha(actor.progress, playerProgress, inConversation);
-      if (alpha <= 0.02) continue;
-
-      plates.push({
-        id: actor.id,
-        name: actor.label,
-        role: this.roles[actor.id] ?? '',
-        x: this.worldXForProgress(actor.progress),
-        y: GROUND_Y + headTopFor(actor.id),
-        alpha
-      });
-
-      if (actor.id !== focusActorId) barkCandidates.push(actor.id);
+      if (Math.abs(actor.progress - playerProgress) > PRESENCE_RANGE) continue;
+      if (actor.id === focus?.actorId) continue;
+      if (Math.abs(this.worldXForProgress(actor.progress) - focusX) < BARK_FOCUS_CLEARANCE) {
+        continue;
+      }
+      candidates.push(actor.id);
     }
-
-    this.presence.syncNameplates(plates);
   }
 
   private syncAmbientBarks(view: RidgeVisualViewModel, now: number): void {
@@ -417,7 +404,7 @@ export class StickVisualProvider implements RidgeVisualProvider {
           id: bark.actorId,
           text: bark.text,
           x: this.worldXForProgress(speaker.progress),
-          y: GROUND_Y + headTopFor(speaker.id) - PLATE_HEIGHT,
+          y: chromeAnchorY(speaker.id),
           alpha: bark.alpha
         });
       }
@@ -436,12 +423,20 @@ export class StickVisualProvider implements RidgeVisualProvider {
       ? view.actors.find((actor) => actor.id === focus.actorId && actor.visible)
       : undefined;
     const x = this.worldXForProgress(anchor ? anchor.progress : focus.progress);
-    const y = anchor
-      ? GROUND_Y + headTopFor(anchor.id) - PLATE_HEIGHT
-      : GROUND_Y - 96;
+    const y = anchor ? chromeAnchorY(anchor.id) : GROUND_Y - 96;
     const bob = motion ? (tick % 6 < 3 ? 0 : -3) : 0;
 
-    this.presence.syncFocus({ key: focus.spotId + focus.prompt, label: focus.prompt, x, y }, bob);
+    this.presence.syncFocus(
+      {
+        key: focus.spotId,
+        action: focus.prompt,
+        name: anchor?.label,
+        role: anchor ? this.roles[anchor.id] : undefined,
+        x,
+        y
+      },
+      bob
+    );
   }
 
   /** Restart one-shot line reactions (emote pop, hop) when a new line begins. */
@@ -584,24 +579,14 @@ function idleBreath(frame: ActorFrame, index: number, isWalking: boolean): numbe
   return Math.round(Math.sin((frame.tick + index * 3) * 0.42) * 1.4);
 }
 
-/** Props and the player never wear nameplates or mutter ambient lines. */
+/** Props and the player never get a focus identity tab or mutter ambient lines. */
 function showsPresenceChrome(id: RidgeActorId): boolean {
   return id !== 'player' && id !== 'toy-car' && id !== 'guitar';
 }
 
-function nameplateAlpha(
-  progress: number,
-  playerProgress: number,
-  inConversation: boolean
-): number {
-  if (inConversation) return 0;
-  return presenceAlpha(Math.abs(progress - playerProgress));
-}
-
-function presenceAlpha(distance: number): number {
-  if (distance <= PRESENCE_NEAR) return 1;
-  if (distance >= PRESENCE_FAR) return 0;
-  return 1 - (distance - PRESENCE_NEAR) / (PRESENCE_FAR - PRESENCE_NEAR);
+/** Where floating chrome bottoms out: above the taller of this actor and the player. */
+function chromeAnchorY(id: RidgeActorId): number {
+  return GROUND_Y + Math.min(headTopFor(id), headTopFor('player')) - CHROME_CLEARANCE;
 }
 
 function lerp(from: number, to: number, t: number): number {

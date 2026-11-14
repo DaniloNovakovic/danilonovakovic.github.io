@@ -2,21 +2,13 @@ import type * as Phaser from 'phaser';
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
 import { DEPTH, INK, INK_CSS, PAPER, PAPER_CSS, PAPER_WARM } from './palette';
 
-export interface NameplateContent {
-  name: string;
-  role: string;
-}
-
-export interface PlacedPresence extends NameplateContent {
-  id: string;
-  x: number;
-  y: number;
-  alpha: number;
-}
-
 export interface FocusPrompt {
   key: string;
-  label: string;
+  /** What pressing interact does, e.g. "Pet Cicka". */
+  action: string;
+  /** Who the action is aimed at; omitted for scenery spots. */
+  name?: string;
+  role?: string;
   x: number;
   y: number;
 }
@@ -30,40 +22,24 @@ export interface ActiveBark {
 }
 
 /**
- * Floating world chrome: who someone is, what you can do with them, and the
- * throwaway things they say as you pass.
+ * Floating world chrome: who the focused resident is, what you can do with
+ * them, and the throwaway things others say as you pass.
+ *
+ * Identity lives on the focus card only. Ambient per-actor nameplates were
+ * dropped: on a crowded stage they read as a wall of signs, collided with each
+ * other, and short actors (cats) pinned their plate over the player's head.
  *
  * Every piece draws its paper chrome once into container-local space, so
  * following an actor around only costs a transform update.
  */
 export class PresenceLayer {
   private readonly scene: Phaser.Scene;
-  private readonly nameplates = new Map<string, Nameplate>();
   private readonly barks = new Map<string, SpeechBubble>();
   private readonly seenIds = new Set<string>();
-  private focus?: FocusPip;
+  private focus?: FocusCard;
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
-  }
-
-  syncNameplates(entries: readonly PlacedPresence[]): void {
-    this.seenIds.clear();
-
-    for (const entry of entries) {
-      this.seenIds.add(entry.id);
-      let plate = this.nameplates.get(entry.id);
-      if (!plate) {
-        plate = new Nameplate(this.scene);
-        this.nameplates.set(entry.id, plate);
-      }
-      plate.setContent(entry);
-      plate.place(entry.x, entry.y, entry.alpha);
-    }
-
-    for (const [id, plate] of this.nameplates) {
-      if (!this.seenIds.has(id)) plate.hide();
-    }
   }
 
   syncFocus(prompt: FocusPrompt | null, bob: number): void {
@@ -71,8 +47,8 @@ export class PresenceLayer {
       this.focus?.hide();
       return;
     }
-    if (!this.focus) this.focus = new FocusPip(this.scene);
-    this.focus.setLabel(prompt.key, prompt.label);
+    if (!this.focus) this.focus = new FocusCard(this.scene);
+    this.focus.setContent(prompt);
     this.focus.place(prompt.x, prompt.y + bob);
   }
 
@@ -96,140 +72,99 @@ export class PresenceLayer {
   }
 
   destroy(): void {
-    for (const plate of this.nameplates.values()) plate.destroy();
     for (const bubble of this.barks.values()) bubble.destroy();
-    this.nameplates.clear();
     this.barks.clear();
     this.focus?.destroy();
     this.focus = undefined;
   }
 }
 
-/** Name over a role tag, on a torn paper chip. */
-class Nameplate {
+/**
+ * The focused target: a small paper tab naming who it is, over an ink strip
+ * saying what interact will do. Origin is the caret tip.
+ */
+class FocusCard {
   private readonly container: Phaser.GameObjects.Container;
-  private readonly chip: Phaser.GameObjects.Graphics;
+  private readonly chrome: Phaser.GameObjects.Graphics;
+  private readonly actionText: Phaser.GameObjects.Text;
   private readonly nameText: Phaser.GameObjects.Text;
   private readonly roleText: Phaser.GameObjects.Text;
   private contentKey = '';
-  private placedX = Number.NaN;
-  private placedY = Number.NaN;
-  private placedAlpha = -1;
-
-  constructor(scene: Phaser.Scene) {
-    this.chip = scene.add.graphics();
-    this.nameText = createUiText(scene, 0, 0, '', {
-      fontSize: '17px',
-      color: INK_CSS
-    }).setOrigin(0.5, 1);
-    this.roleText = createUiText(scene, 0, 0, '', {
-      fontSize: '11px',
-      color: INK_CSS
-    }).setOrigin(0.5, 1);
-    this.roleText.setAlpha(0.75);
-
-    this.container = scene.add
-      .container(0, 0, [this.chip, this.nameText, this.roleText])
-      .setDepth(DEPTH.presence)
-      .setVisible(false);
-  }
-
-  setContent({ name, role }: NameplateContent): void {
-    const key = `${name}|${role}`;
-    if (key === this.contentKey) return;
-    this.contentKey = key;
-
-    this.nameText.setText(name);
-    this.roleText.setText(role.toUpperCase());
-
-    const hasRole = role.length > 0;
-    const nameH = Math.ceil(this.nameText.height);
-    const roleH = hasRole ? Math.ceil(this.roleText.height) : 0;
-
-    this.roleText.setY(0);
-    this.nameText.setY(hasRole ? -roleH - 1 : 0);
-
-    const width = Math.max(this.nameText.width, this.roleText.width) + 18;
-    const height = nameH + roleH + 9;
-    const top = -height + 4;
-
-    this.chip.clear();
-    // Hard offset shadow first, matching the paper-cutout UI convention.
-    this.chip.fillStyle(INK, 0.3);
-    this.chip.fillRect(-width / 2 + 4, top + 4, width, height);
-    this.chip.fillStyle(PAPER_WARM, 1);
-    this.chip.fillRect(-width / 2, top, width, height);
-    this.chip.lineStyle(2.4, INK, 1);
-    this.chip.strokeRect(-width / 2, top, width, height);
-    // Stem down toward the head.
-    this.chip.lineStyle(2, INK, 0.55);
-    this.chip.lineBetween(0, top + height, 0, top + height + 8);
-  }
-
-  place(x: number, y: number, alpha: number): void {
-    const rx = Math.round(x);
-    const ry = Math.round(y);
-    if (rx !== this.placedX || ry !== this.placedY) {
-      this.placedX = rx;
-      this.placedY = ry;
-      this.container.setPosition(rx, ry);
-    }
-    if (alpha !== this.placedAlpha) {
-      this.placedAlpha = alpha;
-      this.container.setAlpha(alpha);
-    }
-    this.container.setVisible(alpha > 0.02);
-  }
-
-  hide(): void {
-    this.container.setVisible(false);
-    this.placedAlpha = -1;
-  }
-
-  destroy(): void {
-    this.container.destroy();
-  }
-}
-
-/** The "you can talk to this" pip that hovers over the focused target. */
-class FocusPip {
-  private readonly container: Phaser.GameObjects.Container;
-  private readonly chrome: Phaser.GameObjects.Graphics;
-  private readonly label: Phaser.GameObjects.Text;
-  private labelKey = '';
 
   constructor(scene: Phaser.Scene) {
     this.chrome = scene.add.graphics();
-    this.label = createUiText(scene, 0, 0, '', {
+    this.actionText = createUiText(scene, 0, 0, '', {
       fontSize: '14px',
       color: PAPER_CSS
     }).setOrigin(0.5, 1);
+    this.nameText = createUiText(scene, 0, 0, '', {
+      fontSize: '13px',
+      color: INK_CSS
+    }).setOrigin(0, 1);
+    this.roleText = createUiText(scene, 0, 0, '', {
+      fontSize: '10px',
+      color: INK_CSS
+    })
+      .setOrigin(0, 1)
+      .setAlpha(0.7);
 
     this.container = scene.add
-      .container(0, 0, [this.chrome, this.label])
+      .container(0, 0, [this.chrome, this.actionText, this.nameText, this.roleText])
       .setDepth(DEPTH.presence + 2)
       .setVisible(false);
   }
 
-  setLabel(key: string, text: string): void {
-    if (key === this.labelKey) return;
-    this.labelKey = key;
-    this.label.setText(text);
+  setContent({ key, action, name: rawName, role }: FocusPrompt): void {
+    // "Talk to Draftsperson" already says who; the tab only earns its place
+    // when the action doesn't ("Practice Riff", "Clear Gate").
+    const name = rawName && !mentions(action, rawName) ? rawName : undefined;
+    const shownRole = name && role && !sameWords(name, role) ? role : '';
+    const contentKey = `${key}|${action}|${name ?? ''}|${shownRole}`;
+    if (contentKey === this.contentKey) return;
+    this.contentKey = contentKey;
 
-    const width = this.label.width + 22;
-    const height = Math.ceil(this.label.height) + 10;
-    const top = -height;
+    this.actionText.setText(action);
+    this.nameText.setText(name ?? '').setVisible(Boolean(name));
+    this.roleText.setText(shownRole.toUpperCase()).setVisible(shownRole.length > 0);
+
+    const caret = 8;
+    const barW = Math.ceil(this.actionText.width) + 22;
+    const barH = Math.ceil(this.actionText.height) + 8;
+    const barTop = -caret - barH;
 
     this.chrome.clear();
+    if (name) {
+      const gap = shownRole ? 6 : 0;
+      const nameW = Math.ceil(this.nameText.width);
+      const roleW = shownRole ? Math.ceil(this.roleText.width) : 0;
+      const tabW = nameW + gap + roleW + 16;
+      const tabH = Math.ceil(this.nameText.height) + 5;
+      // Tab tucks 2px under the strip so the two read as one card.
+      const tabTop = barTop - tabH + 2;
+      const left = -tabW / 2 + 8;
+
+      this.chrome.fillStyle(INK, 0.25);
+      this.chrome.fillRect(-tabW / 2 + 3, tabTop + 3, tabW, tabH);
+      this.chrome.fillStyle(PAPER_WARM, 1);
+      this.chrome.fillRect(-tabW / 2, tabTop, tabW, tabH);
+      this.chrome.lineStyle(2, INK, 1);
+      this.chrome.strokeRect(-tabW / 2, tabTop, tabW, tabH);
+
+      const baseline = barTop - 1;
+      this.nameText.setPosition(left, baseline);
+      // Role sits on the name's baseline, nudged up to optically match.
+      this.roleText.setPosition(left + nameW + gap, baseline - 2);
+    }
+
     this.chrome.fillStyle(INK, 0.94);
-    this.chrome.fillRect(-width / 2, top, width, height);
+    this.chrome.fillRect(-barW / 2, barTop, barW, barH);
     this.chrome.lineStyle(2, PAPER, 0.85);
-    this.chrome.strokeRect(-width / 2, top, width, height);
+    this.chrome.strokeRect(-barW / 2, barTop, barW, barH);
     // Caret pointing down at the target.
     this.chrome.fillStyle(INK, 0.94);
-    this.chrome.fillTriangle(-7, top + height - 1, 7, top + height - 1, 0, top + height + 9);
+    this.chrome.fillTriangle(-7, -caret - 1, 7, -caret - 1, 0, 0);
 
-    this.label.setY(-7);
+    this.actionText.setY(-caret - 4);
   }
 
   place(x: number, y: number): void {
@@ -243,6 +178,21 @@ class FocusPip {
   destroy(): void {
     this.container.destroy();
   }
+}
+
+/** "Bridge Draftsperson" over "bridge draftsperson" says the same thing twice. */
+function sameWords(a: string, b: string): boolean {
+  return a.trim().toLowerCase() === b.trim().toLowerCase();
+}
+
+/** True when the action text already names the target by any word of its name. */
+function mentions(action: string, name: string): boolean {
+  const actionWords = new Set(words(action));
+  return words(name).some((word) => word.length > 2 && actionWords.has(word));
+}
+
+function words(text: string): string[] {
+  return text.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean);
 }
 
 /** Small overheard line — the passing chatter of the street. */
