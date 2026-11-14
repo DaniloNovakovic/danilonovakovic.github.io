@@ -42,8 +42,14 @@ describe('stampede run flow', () => {
     });
   }
 
-  it('returns close without advancing the run session', () => {
-    const session = createStampedeSession({ durationMs: 1_000 });
+  it('ignores close keys while the run is still playing', () => {
+    const frame = runFrame({ closeRequested: true });
+
+    expect(frame.kind).not.toBe('close');
+  });
+
+  it('returns close without advancing a finished run session', () => {
+    const session = { ...createStampedeSession({ durationMs: 1_000 }), phase: 'failed' as const };
     const frame = resolveStampedeRunFrame({
       session,
       deltaMs: 900,

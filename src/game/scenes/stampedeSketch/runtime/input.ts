@@ -120,7 +120,7 @@ class PhaserStampedeInputRuntime implements StampedeInputRuntime {
     return keyboardStart || pointerStart;
   }
 
-  /** Esc is deliberately not a close key: it is too easy to hit mid-run. */
+  /** Esc is deliberately not a close key; E/H only count once a run ends (see runFlow). */
   closeRequested(): boolean {
     const justDown = Phaser.Input.Keyboard.JustDown;
     return Boolean(
