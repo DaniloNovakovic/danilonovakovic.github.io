@@ -32,6 +32,8 @@ export interface StampedeBirdPose {
 const INK = 0x1a1a1a;
 const PAPER = 0xfbfbf9;
 const LEG = 0xe0892a;
+const METAL_HAIR = 0x1f1b24;
+const METAL_SHIRT = 0x2b2633;
 const BEAK = 0xef8b2c;
 const COMB = 0xd13b3b;
 const BLUSH = 0xf3a0b4;
@@ -77,6 +79,9 @@ export function drawStampedeBird(g: Graphics, pose: StampedeBirdPose): void {
       break;
     case 'bartender':
       drawBartender(g, pose);
+      break;
+    case 'metalhead':
+      drawMetalhead(g, pose);
       break;
     case 'ex':
       drawEx(g, pose);
@@ -190,6 +195,73 @@ function drawNerd(g: Graphics, pose: StampedeBirdPose): void {
     g.fillCircle(head.x + head.r * 0.15, head.y - head.r * 0.05, 1.3);
     g.fillCircle(head.x + head.r * 0.95, head.y - head.r * 0.05, 1.3);
   }
+}
+
+/**
+ * Metalhead: a black-band-tee chick with a long black mane that swings with the
+ * headbang, a fringe over one eye, and a little \m/ hand raised.
+ */
+function drawMetalhead(g: Graphics, pose: StampedeBirdPose): void {
+  const r = pose.radius;
+  const swing = (pose.flapStep - 1) * r * 0.22;
+  drawLegs(g, r, 1.7);
+
+  // Mane behind the body, swinging with the headbang.
+  g.fillStyle(METAL_HAIR, 1);
+  g.lineStyle(1.6, INK, 1);
+  g.beginPath();
+  g.moveTo(-r * 0.2, -r * 0.95);
+  g.lineTo(-r * 1.25 + swing, -r * 0.1);
+  g.lineTo(-r * 1.15 + swing, r * 0.55);
+  g.lineTo(-r * 0.8 + swing, r * 0.35);
+  g.lineTo(-r * 0.7 + swing, r * 0.85);
+  g.lineTo(-r * 0.2, r * 0.2);
+  g.closePath();
+  g.fillPath();
+  g.strokePath();
+
+  body(g, r, 0xffd84d);
+  // Band tee over the lower body.
+  g.fillStyle(METAL_SHIRT, 1);
+  g.beginPath();
+  g.arc(0, 0, r - 1.3, (35 * Math.PI) / 180, (145 * Math.PI) / 180, false);
+  g.closePath();
+  g.fillPath();
+  g.lineStyle(1.1, PAPER, 0.95);
+  g.lineBetween(-r * 0.32, r * 0.42, -r * 0.12, r * 0.62);
+  g.lineBetween(-r * 0.12, r * 0.62, r * 0.08, r * 0.42);
+  g.lineBetween(r * 0.08, r * 0.42, r * 0.28, r * 0.62);
+
+  wing(g, r, 0xf2b726, pose.flapStep);
+
+  // Fringe that hides the eye side, then the visible eye peeking out.
+  g.fillStyle(METAL_HAIR, 1);
+  g.lineStyle(1.4, INK, 1);
+  g.beginPath();
+  g.moveTo(-r * 0.3, -r * 0.95);
+  g.lineTo(r * 0.7, -r * 0.7);
+  g.lineTo(r * 0.45, -r * 0.3);
+  g.lineTo(r * 0.25, -r * 0.5);
+  g.lineTo(r * 0.05, -r * 0.35);
+  g.lineTo(-r * 0.05, -r * 0.6);
+  g.closePath();
+  g.fillPath();
+  g.strokePath();
+  eye(g, r * 0.5, -r * 0.08, 1.8, pose.mood);
+  beak(g, r * 0.9, r * 0.1, 4.2, pose.mood);
+
+  if (pose.mood !== 'gag') drawHorns(g, r * 1.05, -r * 1.05 - (pose.flapStep === 2 ? 2 : 0));
+}
+
+/** The \m/ hand: a fist with index and pinky up. */
+function drawHorns(g: Graphics, x: number, y: number): void {
+  g.fillStyle(0xffd84d, 1);
+  g.lineStyle(1.3, INK, 1);
+  g.fillCircle(x, y + 3, 2.8);
+  g.strokeCircle(x, y + 3, 2.8);
+  g.lineStyle(1.6, INK, 1);
+  g.lineBetween(x - 1.8, y + 1, x - 2.8, y - 4);
+  g.lineBetween(x + 1.8, y + 1, x + 2.8, y - 4);
 }
 
 function drawPerfume(g: Graphics, pose: StampedeBirdPose): void {
@@ -831,6 +903,8 @@ export function stampedeFeatherColor(kind: StampedeFlockKind): number {
       return 0xd8c8f2;
     case 'bartender':
       return 0x3a3a3a;
+    case 'metalhead':
+      return 0x2b2633;
     case 'ex':
       return 0x4a3550;
     case 'boyfriend':

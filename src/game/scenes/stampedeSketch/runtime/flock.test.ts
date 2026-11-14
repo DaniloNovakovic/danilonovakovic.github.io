@@ -4,6 +4,7 @@ import {
   STAMPEDE_BARTENDER_AT_MS,
   STAMPEDE_FIXER_AT_MS,
   STAMPEDE_HEN_AT_MS,
+  STAMPEDE_METALHEAD_AT_MS,
   STAMPEDE_NERD_AT_MS,
   STAMPEDE_PERFUME_AT_MS,
   STAMPEDE_ROOSTER_AT_MS,
@@ -62,6 +63,29 @@ describe('chick magnet flock', () => {
     }
     expect(seen.has('chick')).toBe(true);
     expect(seen.size).toBeGreaterThan(4);
+  });
+
+  it('only lets metalheads in once the player rides the guitar', () => {
+    const late = STAMPEDE_BARTENDER_AT_MS + 1;
+    for (let roll = 0; roll < 1; roll += 0.02) {
+      expect(pickStampedeSpawnKind(late, {}, ALL_SPECIALS, () => roll)).not.toBe('metalhead');
+    }
+    expect(pickStampedeSpawnKind(STAMPEDE_METALHEAD_AT_MS - 1, {}, ALL_SPECIALS, () => 0.99, { guitar: true }))
+      .not.toBe('metalhead');
+    // Picking up the guitar mid-run brings her straight in.
+    expect(pickStampedeSpawnKind(late, {}, ALL_SPECIALS, () => 0.99, { guitar: true })).toBe('metalhead');
+    expect(pickStampedeSpawnKind(late, { metalhead: 2 }, new Set([...ALL_SPECIALS, 'metalhead']), () => 0.99, {
+      guitar: true
+    })).not.toBe('metalhead');
+  });
+
+  it('makes the metalhead immune to metal and nothing else', () => {
+    expect(isStampedeWeaponImmune('metalhead', 'metalRiff', 1)).toBe(true);
+    expect(isStampedeWeaponImmune('metalhead', 'metalRiff', 2)).toBe(true);
+    expect(isStampedeWeaponImmune('metalhead', 'badSelfie', 1)).toBe(false);
+    expect(isStampedeWeaponImmune('chick', 'metalRiff', 1)).toBe(false);
+    expect(getStampedeFlockProfile('metalhead').speed)
+      .toBeGreaterThan(getStampedeFlockProfile('situationship').speed);
   });
 
   it('uses the drawn body as the hitbox, with the ex as the biggest target', () => {

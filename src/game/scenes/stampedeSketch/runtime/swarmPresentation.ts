@@ -90,6 +90,8 @@ export interface StampedeSwarmUpdateOptions {
   view?: StampedeViewRect;
   /** Spawning stops after the run ends; birds still move. */
   spawning?: boolean;
+  /** The player rides the guitar, which lets metalheads join. */
+  guitar?: boolean;
 }
 
 export interface StampedeSwarmContactCandidate {
@@ -601,7 +603,9 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
     const bird = this.birds.find((entry) => entry.state === 'idle');
     if (!bird) return;
 
-    const kind = pickStampedeSpawnKind(this.elapsedMs, counts, this.introduced);
+    const kind = pickStampedeSpawnKind(this.elapsedMs, counts, this.introduced, Math.random, {
+      guitar: options.guitar
+    });
     const onPage = this.elapsedMs < OPENING_ON_PAGE_MS;
     const spawnView = onPage ? insetView(view, OPENING_INSET) : view;
     const point = pickStampedeSpawnPoint(spawnView, STAMPEDE_WORLD, player);
@@ -1606,7 +1610,12 @@ function insetView(view: StampedeViewRect, inset: number): StampedeViewRect {
 }
 
 function heartingKind(kind: StampedeFlockKind): boolean {
-  return kind === 'chick' || kind === 'hen' || kind === 'nerd' || kind === 'perfume' || kind === 'fixer';
+  return kind === 'chick'
+    || kind === 'hen'
+    || kind === 'nerd'
+    || kind === 'perfume'
+    || kind === 'fixer'
+    || kind === 'metalhead';
 }
 
 function moveVector(

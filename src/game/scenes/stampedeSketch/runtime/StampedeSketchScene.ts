@@ -69,6 +69,12 @@ import {
   type StampedeEventLook
 } from './eventPresentation';
 import {
+  createStampedeGuitarState,
+  stepStampedeGuitar,
+  type StampedeGuitarState,
+  type StampedeGuitarStep
+} from './guitar';
+import {
   createStampedeKitLook,
   type StampedeKitLook
 } from './kitPresentation';
@@ -190,6 +196,8 @@ export class StampedeSketchScene extends Phaser.Scene {
   private breathLinger: StampedeBreathPatch[] = [];
   private stinkState: StampedeOrbitHitState = createOrbitHitState();
   private stinkPoints: StampedeOrbitPoint[] = [];
+  private guitarState: StampedeGuitarState = createStampedeGuitarState();
+  private pendingGuitarStep: StampedeGuitarStep | null = null;
   private disarmedUntilMs = 0;
   private shellReadyAtMs = 0;
   private clutchHeartOffered = false;
@@ -307,17 +315,17 @@ export class StampedeSketchScene extends Phaser.Scene {
       this.progression.upgradedWeaponIds,
       'badSelfie'
     );
-    const velocity = this.addShove(inputRuntime.readVelocity({
-      speed: resolveStampedeGuardianSpeed(this.progression.appliedUpgradeIds)
-        * swarmRuntime.playerSlowFactor(player)
-    }), delta);
-    if (this.session.phase === 'playing') this.trackFacing(velocity);
-
     const previousElapsedMs = this.session.elapsedMs;
     const weaponElapsedMs = Math.min(
       this.session.elapsedMs + Math.max(0, delta),
       this.session.endless ? Number.POSITIVE_INFINITY : this.session.durationMs
     );
+    const velocity = this.addShove(
+      this.readRiderVelocity(inputRuntime, swarmRuntime, player, disarmed, weaponElapsedMs, delta),
+      delta
+    );
+    if (this.session.phase === 'playing') this.trackFacing(velocity);
+
     const frame = resolveStampedeRunFrame({
       session: this.session,
       autoAttackState: selfieRank > 0 ? this.autoAttackState : undefined,
@@ -421,7 +429,8 @@ export class StampedeSketchScene extends Phaser.Scene {
       durationMs: this.session.durationMs,
       playerHurting: this.session.contacts >= 2,
       lastCall: isStampedeLastCall(this.session.elapsedMs, this.session.durationMs),
-      view: this.cameras.main.worldView
+      view: this.cameras.main.worldView,
+      guitar: this.ownsGuitar()
     });
     if (this.swarmRuntime.consumeBeerHit()) {
       this.disarmedUntilMs = this.time.now + STAMPEDE_BEER_DISARM_MS;
@@ -495,6 +504,7 @@ export class StampedeSketchScene extends Phaser.Scene {
     }
     this.tickBreath();
     this.tickStink(delta);
+    this.tickGuitar();
     this.fireOwnedSpells(time);
   }
 
@@ -530,6 +540,9 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.breathLinger = [];
     this.stinkState = createOrbitHitState();
     this.stinkPoints = [];
+    // Beer knocks you off the board; you climb back on from a standstill.
+    this.guitarState = createStampedeGuitarState();
+    this.pendingGuitarStep = null;
   }
 
   private resetRunBookkeeping(): void {
@@ -880,7 +893,13 @@ export class StampedeSketchScene extends Phaser.Scene {
   private updatePlayerInkTilt(time: number, velocity: StampedeVelocity): void {
     if (!this.player) return;
     const speed = Math.hypot(velocity.x, velocity.y);
-    this.player.setAngle(speed > 0 ? Math.sin(time / 95) * 6 : 0);
+    if (this.ownsGuitar() && this.time.now >= this.disarmedUntilMs) {
+      // Surfing: lean into the carve instead of the walking waddle.
+      const lean = Phaser.Math.Clamp(velocity.x / 30, -9, 9);
+      this.player.setAngle(lean + Math.sin(time / 180) * 1.5);
+    } else {
+      this.player.setAngle(speed > 0 ? Math.sin(time / 95) * 6 : 0);
+    }
     if (velocity.x !== 0) {
       this.player.setFlipX(velocity.x < 0);
     }
@@ -1090,6 +1109,7 @@ export class StampedeSketchScene extends Phaser.Scene {
     return [
       ...this.resolveBreath(elapsedMs)?.hitIds ?? [],
       ...this.resolveStink(elapsedMs, deltaMs)?.hitIds ?? [],
+      ...this.pendingGuitarStep?.hitIds ?? [],
       ...this.resolveGlassesCast(now)?.hitIds ?? []
     ];
   }
@@ -1199,6 +1219,68 @@ export class StampedeSketchScene extends Phaser.Scene {
     this.applyWeaponHits(resolved.hitIds);
   }
 
+  /** Plain walking, or the guitar's momentum when you are surfing. */
+  private readRiderVelocity(
+    inputRuntime: NonNullable<StampedeSketchScene['inputRuntime']>,
+    swarmRuntime: NonNullable<StampedeSketchScene['swarmRuntime']>,
+    player: NonNullable<StampedeSketchScene['player']>,
+    disarmed: boolean,
+    elapsedMs: number,
+    deltaMs: number
+  ): StampedeVelocity {
+    const walkSpeed = resolveStampedeGuardianSpeed(this.progression.appliedUpgradeIds)
+      * swarmRuntime.playerSlowFactor(player);
+    const walk = inputRuntime.readVelocity({ speed: walkSpeed });
+    this.pendingGuitarStep = disarmed ? null : this.resolveGuitar(walk, walkSpeed, elapsedMs, deltaMs);
+    return this.pendingGuitarStep?.velocity ?? walk;
+  }
+
+  private ownsGuitar(): boolean {
+    return this.progression.appliedUpgradeIds.includes('metalRiff')
+      || this.progression.upgradedWeaponIds.includes('metalRiff');
+  }
+
+  private resolveGuitar(
+    desired: StampedeVelocity,
+    walkSpeed: number,
+    elapsedMs: number,
+    deltaMs: number
+  ): StampedeGuitarStep | null {
+    if (!this.player || !this.swarmRuntime || !this.ownsGuitar()) return null;
+    const applied = this.progression.appliedUpgradeIds;
+    const legacy = this.progression.upgradedWeaponIds.includes('metalRiff');
+    return stepStampedeGuitar({
+      state: this.guitarState,
+      mods: {
+        long: legacy || applied.includes('riffLong'),
+        shred: legacy || applied.includes('riffShred'),
+        drop: applied.includes('riffDrop')
+      },
+      desired,
+      walkSpeed,
+      player: { x: this.player.x, y: this.player.y },
+      elapsedMs,
+      deltaMs,
+      candidates: this.swarmRuntime.getSpellCandidates()
+    });
+  }
+
+  private tickGuitar(): void {
+    const step = this.pendingGuitarStep;
+    this.pendingGuitarStep = null;
+    if (!step) {
+      if (!this.ownsGuitar()) this.guitarState = createStampedeGuitarState();
+      return;
+    }
+    this.guitarState = step.state;
+    const chordIds = new Set(step.chordHitIds);
+    this.applyWeaponHits(step.hitIds.filter((id) => !chordIds.has(id)));
+    if (step.chord) {
+      this.dropPickups(this.swarmRuntime?.clearMarks(step.chordHitIds, 'daze', 900) ?? []);
+      this.cameras.main.shake(140, 0.004);
+    }
+  }
+
   private applyWeaponHits(hitIds: readonly string[]): void {
     this.dropPickups(this.swarmRuntime?.clearMarks(hitIds, 'poison') ?? []);
   }
@@ -1238,6 +1320,13 @@ export class StampedeSketchScene extends Phaser.Scene {
       selfieRank: rank('badSelfie'),
       selfieRear: this.progression.appliedUpgradeIds.includes('selfieRear'),
       glassesRank: rank('fakeGlasses'),
+      guitar: this.ownsGuitar()
+        ? {
+          velocity: this.guitarState.velocity,
+          notes: this.guitarState.notes,
+          chord: this.guitarState.lastChord
+        }
+        : null,
       shell: shellOwned
         ? {
           x: this.player.x + Math.cos(shellAngle) * 50,

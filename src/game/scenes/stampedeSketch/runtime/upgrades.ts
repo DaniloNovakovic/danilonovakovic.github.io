@@ -10,7 +10,7 @@ import {
   type StampedeSpellId
 } from './spells';
 
-const STAMPEDE_WEAPON_IDS = ['badSelfie', 'badBreath', 'badSmell', 'fakeGlasses'] as const;
+const STAMPEDE_WEAPON_IDS = ['badSelfie', 'badBreath', 'badSmell', 'fakeGlasses', 'metalRiff'] as const;
 const STAMPEDE_CHOICE_CAP = 3;
 
 const STAMPEDE_MOD_IDS = [
@@ -26,7 +26,10 @@ const STAMPEDE_MOD_IDS = [
   'selfieRear',
   'glassesRx',
   'glassesStare',
-  'glassesSide'
+  'glassesSide',
+  'riffLong',
+  'riffShred',
+  'riffDrop'
 ] as const;
 
 const STAMPEDE_SURVIVAL_IDS = ['catchBreath', 'spareFeather', 'shell'] as const;
@@ -65,18 +68,27 @@ const SELFIE_COPY = {
   color: '#c2410c'
 } as const;
 
+const GUITAR_COPY = {
+  title: 'Guitar Surf',
+  description: 'Ride your guitar. Faster, but you drift and turn wide. Burning notes trail behind you. Chicks hate metal.',
+  upgradeDescription: 'The riff keeps going.',
+  color: '#7f1d1d'
+} as const;
+
 const UPGRADE_COPY: Record<StampedeWeaponId, string> = {
   badSelfie: SELFIE_COPY.upgradeDescription,
   badBreath: 'The bubbles change how the breath moves.',
   badSmell: 'The cloud changes how it travels.',
-  fakeGlasses: 'The lenses start doing something else.'
+  fakeGlasses: 'The lenses start doing something else.',
+  metalRiff: GUITAR_COPY.upgradeDescription
 };
 
 const MODS_BY_WEAPON: Record<StampedeWeaponId, readonly StampedeModId[]> = {
   badBreath: ['breathWide', 'breathLinger', 'breathCross'],
   badSmell: ['smellFar', 'smellFast', 'smellTwin', 'smellFat'],
   badSelfie: ['selfieGroup', 'selfiePose', 'selfieRear'],
-  fakeGlasses: ['glassesRx', 'glassesStare', 'glassesSide']
+  fakeGlasses: ['glassesRx', 'glassesStare', 'glassesSide'],
+  metalRiff: ['riffLong', 'riffShred', 'riffDrop']
 };
 
 const MOD_COPY: Record<StampedeModId, { title: string; description: string; color: string }> = {
@@ -144,6 +156,21 @@ const MOD_COPY: Record<StampedeModId, { title: string; description: string; colo
     title: 'Side Eye',
     description: 'The glare also catches a chick beside the target.',
     color: '#4b4337'
+  },
+  riffLong: {
+    title: 'Endless Solo',
+    description: 'The notes burn on the floor for longer.',
+    color: GUITAR_COPY.color
+  },
+  riffShred: {
+    title: 'Shred',
+    description: 'Higher top speed, and the notes come thicker.',
+    color: GUITAR_COPY.color
+  },
+  riffDrop: {
+    title: 'Power Chord',
+    description: 'Brake hard from top speed to slam a chord that blasts everyone around you.',
+    color: GUITAR_COPY.color
   }
 };
 
@@ -225,6 +252,7 @@ export function formatStampedeHudWeaponLabel(ownedUpgradeIds: readonly string[])
   const spellId = resolveEquippedSpell(ownedUpgradeIds);
   if (spellId) return weaponChoice(spellId, 'unlock').title;
   if (ownedUpgradeIds.includes('badSelfie')) return weaponChoice('badSelfie', 'unlock').title;
+  if (ownedUpgradeIds.includes('metalRiff')) return GUITAR_COPY.title;
   return 'Unarmed';
 }
 
@@ -343,6 +371,7 @@ function titled(name: string, action: StampedeWeaponAction): string {
 
 function weaponChoice(id: StampedeWeaponId, action: StampedeWeaponAction): StampedeUpgradeChoiceView {
   if (id === 'badSelfie') return selfieChoice(action);
+  if (id === 'metalRiff') return guitarChoice(action);
   return spellWeaponChoice(id, action);
 }
 
@@ -352,6 +381,16 @@ function selfieChoice(action: StampedeWeaponAction): StampedeUpgradeChoiceView {
     title: titled(SELFIE_COPY.title, action),
     description: action === 'upgrade' ? SELFIE_COPY.upgradeDescription : SELFIE_COPY.description,
     color: SELFIE_COPY.color,
+    action
+  };
+}
+
+function guitarChoice(action: StampedeWeaponAction): StampedeUpgradeChoiceView {
+  return {
+    id: 'metalRiff',
+    title: titled(GUITAR_COPY.title, action),
+    description: action === 'upgrade' ? GUITAR_COPY.upgradeDescription : GUITAR_COPY.description,
+    color: GUITAR_COPY.color,
     action
   };
 }
