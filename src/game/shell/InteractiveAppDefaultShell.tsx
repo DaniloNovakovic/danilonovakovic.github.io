@@ -36,10 +36,10 @@ export function InteractiveAppDefaultShell({
 
   return (
     <div
-      className="relative grid min-h-[100dvh] min-h-dvh w-full overflow-x-hidden bg-[#f4f1ea]"
+      className="relative grid h-[100dvh] h-dvh w-full overflow-x-hidden bg-[#f4f1ea]"
       style={{
         gridTemplateRows: shouldShowFooterHint ? 'auto minmax(0, 1fr) auto' : 'auto minmax(0, 1fr)',
-        gridTemplateColumns: 'minmax(20px, 1fr) minmax(0, 1000px) minmax(20px, 1fr)',
+        gridTemplateColumns: `minmax(20px, 1fr) minmax(0, ${gameShellLayout.maxContentWidth}) minmax(20px, 1fr)`,
         rowGap: '0.75rem',
         columnGap: '0.75rem',
         paddingBlockStart: 'max(0.5rem, env(safe-area-inset-top, 0px))',

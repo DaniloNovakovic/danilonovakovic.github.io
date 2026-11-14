@@ -3,6 +3,7 @@ import type * as Phaser from 'phaser';
 import { bridgeActions } from '@/game/bridge/store';
 import type { PhaserScenePresentationMode } from '@/game/sharedSceneRuntime/phaserScenePresentation';
 import type { SceneId } from '@/game/scenes/sceneIds';
+import { refreshPhaserScale } from './refreshPhaserScale';
 
 interface UsePhaserScaleRefreshOptions {
   activeSceneId: SceneId;
@@ -26,9 +27,9 @@ export function usePhaserScaleRefresh({
 
     let secondFrameId: number | undefined;
     const firstFrameId = requestAnimationFrame(() => {
-      game.scale.refresh();
+      refreshPhaserScale(game);
       secondFrameId = requestAnimationFrame(() => {
-        game.scale.refresh();
+        refreshPhaserScale(game);
       });
     });
 
