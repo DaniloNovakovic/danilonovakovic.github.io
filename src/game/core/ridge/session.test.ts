@@ -130,7 +130,26 @@ function playBridge(session: RidgeConsoleSession): RidgeSessionEvent[] {
   walkTo(session, 0.55);
   expect(session.exec('interact').ok).toBe(true);
   events.push(...drainConversation(session));
+  expect(session.observe().mode).toBe('bridgeBuild');
+  expect(session.exec('build test').ok).toBe(false);
+
+  // A bare deck sags into the river; the Draftsperson's sketch holds.
+  for (const x of [0, 2, 4, 6]) {
+    expect(session.exec(`build road ${x},0 ${x + 2},0`).ok).toBe(true);
+  }
+  expect(session.exec('build test').ok).toBe(false);
+  expect(session.observe().bridgeBuild?.phase).toBe('failed');
+  expect(session.exec('build edit').ok).toBe(true);
+  expect(session.exec('build sketch').ok).toBe(true);
+  expect(session.exec('build test').ok).toBe(true);
+  const done = session.exec('build done');
+  events.push(...done.events);
+  expect(done.events.some((event) => event.type === 'bridge_built')).toBe(true);
   expect(session.observe().beat).toBe('bridge_complete');
+  expect(session.observe().builtBridge?.length).toBeGreaterThan(0);
+  // The Draftsperson thanks you before the crossing opens up.
+  expect(session.observe().conversation?.id).toBe('bridge.draftsperson.bridge_built');
+  events.push(...drainConversation(session));
 
   walkTo(session, 0.9);
   expect(session.exec('interact').ok).toBe(true);

@@ -95,6 +95,13 @@ export function formatGameObservation(observation: GameObservation): string {
       `ridge beat=${r.beat} progress=${r.progressPercent}% mode=${r.mode} facing=${r.facing}`
     );
     lines.push(`ambience: ${r.ambience}`);
+    if (r.bridgeBuild) {
+      const b = r.bridgeBuild;
+      lines.push(
+        `blueprint bridge: ${b.phase} attempt=${b.attempts} ink=${b.ink}/${b.inkBudget} beams=${b.beamCount}`
+      );
+      lines.push(`draftsperson: ${b.tipText}`);
+    }
     if (r.conversation) {
       lines.push(
         `talking: ${r.conversation.speaker}: ${r.conversation.text} [${r.conversation.lineIndex + 1}/${r.conversation.lineCount}]`

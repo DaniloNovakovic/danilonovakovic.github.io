@@ -1,12 +1,19 @@
 import type * as Phaser from 'phaser';
-import type { RidgeActorId, RidgeFacing } from '@/game/core/ridge';
+import {
+  BLUEPRINT_BRIDGE_PUZZLE,
+  BRIDGE_RIVER_PROGRESS,
+  type BridgeDesign,
+  type RidgeActorId,
+  type RidgeFacing
+} from '@/game/core/ridge';
 import type { RidgeVisualProvider, RidgeVisualViewModel } from '../types';
-import { ActorSpritePool, headTopFor, type ActorRenderRequest } from './actorSprites';
+import { ActorSpritePool, footDropFor, headTopFor, type ActorRenderRequest } from './actorSprites';
 import { drawAmbientFar, drawAmbientNear } from './ambientLayer';
 import { drawRidgeAreaLayer, type SceneryLayer } from './areaSets';
 import { drawCrtAtmosphere } from './atmosphere';
 import { prefersReducedMotion, sketchTick } from '@/game/sharedSceneRuntime/motion/sketchMotion';
 import { BarkDirector, type BarkLines } from './barkDirector';
+import { builtBridgeShape, deckTopAt, type BuiltBridgeShape } from './bridgeInk';
 import { EmoteMark, emoteGlyphFor } from './emoteMark';
 import { PresenceLayer, type ActiveBark } from './presenceLayer';
 import {
@@ -64,6 +71,25 @@ const SPEAKER_PULL = 0.18;
 /** CSS pixels the docked conversation box occupies along the frame bottom. */
 const CONVERSATION_BOX_RESERVE = 165;
 const BYSTANDER_ALPHA = 0.4;
+/** World units over which a walker steps from the lane up onto the bridge deck. */
+const DECK_STEP_ON = 30;
+
+/**
+ * Drawing-table framing: the whole gap, the car's start on the near bank, the
+ * build rows overhead, and the water below, clear of the docked tool chrome.
+ */
+const BUILD_EASE_MS = 420;
+const BUILD_MARGIN_LEFT = 104;
+const BUILD_MARGIN_RIGHT = 72;
+const BUILD_MARGIN_TOP = 26;
+const BUILD_MARGIN_BOTTOM = 16;
+/** CSS pixels reserved for the tip card (top) and toolbar (bottom). */
+const BUILD_RESERVE_TOP = 76;
+const BUILD_RESERVE_BOTTOM = 104;
+/** Matches the `short:` Tailwind variant (max-height 32rem) the chrome compacts at. */
+const SHORT_VIEWPORT_CSS = 512;
+const BUILD_RESERVE_TOP_SHORT = 46;
+const BUILD_RESERVE_BOTTOM_SHORT = 50;
 const SURPRISE_HOP_MS = 260;
 const SURPRISE_HOP_HEIGHT = 9;
 
@@ -119,6 +145,12 @@ export class StickVisualProvider implements RidgeVisualProvider {
   private lineStartedAt = 0;
   /** Where the ground line sits in the frame while talking, 0 top → 1 bottom. */
   private conversationGroundAt = 0.62;
+  /** 0 = exploring, 1 = framed on the Blueprint Bridge drawing table. */
+  private buildBlend = 0;
+  private builtShape: BuiltBridgeShape | null = null;
+  private builtShapeDesign: BridgeDesign | null = null;
+  private readonly designIds = new WeakMap<BridgeDesign, number>();
+  private nextDesignId = 1;
 
   constructor(scene: Phaser.Scene, options: StickVisualProviderOptions = {}) {
     this.scene = scene;
@@ -145,6 +177,11 @@ export class StickVisualProvider implements RidgeVisualProvider {
     return 80 + progress * (this.stageWidth - 160);
   }
 
+  /** Top of the near river bank: origin of the Blueprint Bridge grid. */
+  bridgeGapOrigin(): { x: number; y: number } {
+    return { x: this.worldXForProgress(BRIDGE_RIVER_PROGRESS.left), y: GROUND_Y };
+  }
+
   sync(view: RidgeVisualViewModel): void {
     if (this.destroyed) return;
 
@@ -156,6 +193,8 @@ export class StickVisualProvider implements RidgeVisualProvider {
     const tick = motion ? stepTick : 0;
 
     this.syncViewport();
+    // Before scenery: the baked crossing draws the shape this resolves.
+    this.syncBuiltShape(view);
     this.syncScenery(view);
     this.syncAmbient(view, tick);
 
@@ -167,6 +206,8 @@ export class StickVisualProvider implements RidgeVisualProvider {
     this.advanceConversationBlend(view, now, motion);
     this.syncActors(view, playerProgress, now, tick, stepTick, motion, walking);
     this.syncPresence(view, playerProgress, now, tick, motion);
+    // Foreground corn would scribble over the drawing table; let it step aside.
+    this.sceneryImages.get('fore')?.setAlpha(1 - easeInOut(this.buildBlend) * 0.92);
     this.syncEmote(view, now, motion);
     this.followCamera(view, playerProgress);
   }
@@ -209,7 +250,7 @@ export class StickVisualProvider implements RidgeVisualProvider {
     const key =
       view.areaId === 'relay'
         ? `${view.areaId}|${view.beat}`
-        : `${view.areaId}|${view.crossingOpen}`;
+        : `${view.areaId}|${view.crossingOpen}|${this.designKey(view.builtBridge)}`;
     if (key === this.lastSceneryKey) return;
     this.lastSceneryKey = key;
 
@@ -222,7 +263,12 @@ export class StickVisualProvider implements RidgeVisualProvider {
     const spec = LAYERS[layer];
     const g = this.scene.make.graphics({ x: 0, y: 0 });
     drawRidgeAreaLayer(g, layer, view.areaId, view.crossingOpen, view.beat, {
-      worldXForProgress: (progress) => this.worldXForProgress(progress)
+      worldXForProgress: (progress) => this.worldXForProgress(progress),
+      bridgeGap: {
+        left: this.worldXForProgress(BRIDGE_RIVER_PROGRESS.left),
+        right: this.worldXForProgress(BRIDGE_RIVER_PROGRESS.right)
+      },
+      builtBridge: view.areaId === 'bridge' ? this.builtShape : null
     });
 
     const key = SCENERY_TEXTURE_KEY[layer];
@@ -342,7 +388,7 @@ export class StickVisualProvider implements RidgeVisualProvider {
     return {
       id: actor.id,
       x,
-      y: GROUND_Y,
+      y: this.groundYAt(view, x, actor.id),
       facing: facingFor(actor, frame, x),
       bob: idleBreath(frame, index, isWalking) - (isTalking ? frame.hop : 0),
       alpha: inScene ? 1 : 1 - (1 - BYSTANDER_ALPHA) * frame.fade,
@@ -362,7 +408,7 @@ export class StickVisualProvider implements RidgeVisualProvider {
     tick: number,
     motion: boolean
   ): void {
-    const inConversation = view.mode === 'conversation';
+    const inConversation = view.mode === 'conversation' || view.mode === 'bridgeBuild';
     if (inConversation) {
       this.barkDirector.interrupt(now);
       this.presence.syncBarks([]);
@@ -458,19 +504,51 @@ export class StickVisualProvider implements RidgeVisualProvider {
   }
 
   private advanceConversationBlend(view: RidgeVisualViewModel, now: number, motion: boolean): void {
-    const target = view.mode === 'conversation' ? 1 : 0;
     const dt = Number.isNaN(this.lastSyncAt) ? 0 : Math.min(100, now - this.lastSyncAt);
     this.lastSyncAt = now;
+    this.conversationBlend = approach(
+      this.conversationBlend,
+      view.mode === 'conversation' ? 1 : 0,
+      motion ? dt / CONVERSATION_EASE_MS : 1
+    );
+    this.buildBlend = approach(
+      this.buildBlend,
+      view.mode === 'bridgeBuild' ? 1 : 0,
+      motion ? dt / BUILD_EASE_MS : 1
+    );
+  }
 
-    if (!motion) {
-      this.conversationBlend = target;
-      return;
+  private designKey(design: BridgeDesign | null): number {
+    if (!design) return 0;
+    let id = this.designIds.get(design);
+    if (id === undefined) {
+      id = this.nextDesignId++;
+      this.designIds.set(design, id);
     }
-    const step = dt / CONVERSATION_EASE_MS;
-    this.conversationBlend =
-      target > this.conversationBlend
-        ? Math.min(target, this.conversationBlend + step)
-        : Math.max(target, this.conversationBlend - step);
+    return id;
+  }
+
+  private syncBuiltShape(view: RidgeVisualViewModel): void {
+    const design = view.areaId === 'bridge' && view.crossingOpen ? view.builtBridge : null;
+    if (design === this.builtShapeDesign) return;
+    this.builtShapeDesign = design;
+    const origin = this.bridgeGapOrigin();
+    this.builtShape = design ? builtBridgeShape(design, origin.x, origin.y) : null;
+  }
+
+  /**
+   * Walkers follow the deck of the bridge the player drew, feet on the road.
+   * Over the first stretch from each bank they ease from the lane's footing up
+   * onto the deck, so stepping on reads as a step rather than a jump.
+   */
+  private groundYAt(view: RidgeVisualViewModel, x: number, id: RidgeActorId): number {
+    if (!this.builtShape || view.areaId !== 'bridge') return GROUND_Y;
+    const deck = deckTopAt(this.builtShape, x);
+    if (deck === null) return GROUND_Y;
+    const left = this.worldXForProgress(BRIDGE_RIVER_PROGRESS.left);
+    const right = this.worldXForProgress(BRIDGE_RIVER_PROGRESS.right);
+    const onto = Math.min(1, Math.max(0, Math.min(x - left, right - x) / DECK_STEP_ON));
+    return GROUND_Y + (deck - footDropFor(id) - GROUND_Y) * onto;
   }
 
   private syncEmote(view: RidgeVisualViewModel, now: number, motion: boolean): void {
@@ -503,21 +581,58 @@ export class StickVisualProvider implements RidgeVisualProvider {
     const playerX = this.worldXForProgress(playerProgress);
     const exploreY = GROUND_Y - (VIEW_ABOVE_GROUND - VIEW_BELOW_GROUND) / 2;
     const blend = easeInOut(this.conversationBlend);
+    const build = easeInOut(this.buildBlend);
 
-    if (blend <= 0) {
-      if (cam.zoom !== this.baseZoom) cam.setZoom(this.baseZoom);
-      cam.centerOn(playerX, exploreY);
-      return;
+    let zoom = this.baseZoom;
+    let centerX = playerX;
+    let centerY = exploreY;
+
+    if (blend > 0) {
+      const framing = this.conversationFraming(view, playerX);
+      // Put GROUND_Y at `conversationGroundAt` of the visible height.
+      const viewHeight = cam.height / framing.zoom;
+      const talkY = GROUND_Y - viewHeight * (this.conversationGroundAt - 0.5);
+      zoom = lerp(zoom, framing.zoom, blend);
+      centerX = lerp(centerX, framing.centerX, blend);
+      centerY = lerp(centerY, talkY, blend);
     }
 
-    const framing = this.conversationFraming(view, playerX);
-    const zoom = lerp(this.baseZoom, framing.zoom, blend);
-    cam.setZoom(zoom);
+    if (build > 0) {
+      const framing = this.buildFraming();
+      zoom = lerp(zoom, framing.zoom, build);
+      centerX = lerp(centerX, framing.centerX, build);
+      centerY = lerp(centerY, framing.centerY, build);
+    }
 
-    // Put GROUND_Y at `conversationGroundAt` of the visible height.
-    const viewHeight = cam.height / framing.zoom;
-    const talkY = GROUND_Y - viewHeight * (this.conversationGroundAt - 0.5);
-    cam.centerOn(lerp(playerX, framing.centerX, blend), lerp(exploreY, talkY, blend));
+    if (cam.zoom !== zoom) cam.setZoom(zoom);
+    cam.centerOn(centerX, centerY);
+  }
+
+  /** Fit the drawing table between the tip card and the toolbar. */
+  private buildFraming(): { zoom: number; centerX: number; centerY: number } {
+    const cam = this.scene.cameras.main;
+    const { cell, columns, minRow, waterDepth } = BLUEPRINT_BRIDGE_PUZZLE;
+    const origin = this.bridgeGapOrigin();
+    const left = origin.x - BUILD_MARGIN_LEFT;
+    const right = origin.x + columns * cell + BUILD_MARGIN_RIGHT;
+    const top = origin.y + minRow * cell - BUILD_MARGIN_TOP;
+    const bottom = origin.y + waterDepth + BUILD_MARGIN_BOTTOM;
+
+    const cssHeight = this.scene.game.canvas?.clientHeight || cam.height;
+    const toCanvas = cam.height / cssHeight;
+    const short = window.innerHeight <= SHORT_VIEWPORT_CSS;
+    const reserveTop = (short ? BUILD_RESERVE_TOP_SHORT : BUILD_RESERVE_TOP) * toCanvas;
+    const reserveBottom = (short ? BUILD_RESERVE_BOTTOM_SHORT : BUILD_RESERVE_BOTTOM) * toCanvas;
+    const usableHeight = Math.max(cam.height * 0.4, cam.height - reserveTop - reserveBottom);
+
+    const zoom = clamp(
+      Math.min(cam.width / (right - left), usableHeight / (bottom - top)),
+      this.baseZoom * 0.75,
+      this.baseZoom * 2.4
+    );
+    // Centre the table in the band between the chrome, not the whole frame.
+    const shift = (reserveTop - reserveBottom) / 2 / zoom;
+    return { zoom, centerX: (left + right) / 2, centerY: (top + bottom) / 2 - shift };
   }
 
   private conversationFraming(
@@ -587,6 +702,10 @@ function showsPresenceChrome(id: RidgeActorId): boolean {
 /** Where floating chrome bottoms out: above the taller of this actor and the player. */
 function chromeAnchorY(id: RidgeActorId): number {
   return GROUND_Y + Math.min(headTopFor(id), headTopFor('player')) - CHROME_CLEARANCE;
+}
+
+function approach(value: number, target: number, step: number): number {
+  return target > value ? Math.min(target, value + step) : Math.max(target, value - step);
 }
 
 function lerp(from: number, to: number, t: number): number {

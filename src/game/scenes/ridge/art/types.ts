@@ -1,4 +1,5 @@
 import type {
+  BridgeDesign,
   RidgeActorId,
   RidgeActorPresence,
   RidgeAreaId,
@@ -32,6 +33,8 @@ export interface RidgeVisualViewModel {
   lineKey: string | null;
   actors: readonly RidgeActorPresence[];
   crossingOpen: boolean;
+  /** The Bridge span the player drew, once proven. */
+  builtBridge: BridgeDesign | null;
 }
 
 export interface RidgeVisualProvider {
@@ -63,6 +66,7 @@ export function toRidgeVisualViewModel(
       ? `${observation.conversation.id}:${observation.conversation.lineIndex}`
       : null,
     actors: observation.actors,
-    crossingOpen
+    crossingOpen,
+    builtBridge: observation.builtBridge
   };
 }

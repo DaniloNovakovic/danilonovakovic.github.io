@@ -147,15 +147,57 @@ export const sceneMessages = {
         "bridge.cicka.parallel_play.02": "Gently roll the toy car back and forth",
         "bridge.cicka.parallel_play.03": "Purrrr... *Cicka nudges the toy car into your hand with approval*",
         "bridge.cicka.parallel_play.04": "Cicka entrusts you with the official Bridge Test Vehicle!",
-        "bridge.draftsperson.toy_car_test.prompt": "Test Blueprint",
+        "bridge.draftsperson.toy_car_test.prompt": "Draw the Bridge",
         "bridge.draftsperson.toy_car_test.01":
-          "You place the tiny test car onto the blueprint span.",
+          "You set the tiny test car on the blueprint table. The Draftsperson stares at the empty middle.",
         "bridge.draftsperson.toy_car_test.02":
-          "If this little car can brave the gap on paper, we can build the real thing!",
+          "Every time I draw the middle span, I erase it. What if it sags? What if it snaps?",
         "bridge.draftsperson.toy_car_test.03":
-          "Vroom! The toy car zips safely across the inked span without falling.",
+          "Would you draw it with me? Bolt beams to the banks, and the little car will tell us if it holds.",
         "bridge.draftsperson.toy_car_test.04":
-          "Aha! The math holds! The blueprint bridge comes alive under our feet!",
+          "Road beams carry the car. Wood beams hold the road up. Triangles are your friend.",
+        "bridge.draftsperson.toy_car_test.resume":
+          "Back to the drawing board! The little car is still fueled up.",
+        "bridge.draftsperson.bridge_built.01":
+          "Vroom! The toy car rattles all the way across your span, and the ink holds.",
+        "bridge.draftsperson.bridge_built.02":
+          "It held?! It HELD! I've drawn forty bridges and erased forty-one!",
+        "bridge.draftsperson.bridge_built.03":
+          "You didn't overthink it, you just drew it. Thank you, partner. The crossing is open!",
+        "bridge.draftsperson.bridge_built.04":
+          "The pencil lines darken into real timber. Cicka trots over to inspect the far bank.",
+        "bridge.builder.tip.intro":
+          "Drag from a bolt to draw. The four bolts are our only solid ground; everything else hangs off them.",
+        "bridge.builder.tip.drawing": "Road for the car, wood to hold it up. Triangles keep their shape.",
+        "bridge.builder.tip.wobbly": "Hmm, see the faint pencil? That's where it droops before the car even rolls.",
+        "bridge.builder.tip.wobbly.2": "The ghost lines are sagging... something in there can still fold.",
+        "bridge.builder.tip.steady": "Ooh, it's holding its own weight. Ready when you are!",
+        "bridge.builder.tip.testing": "Go, little car, go...!",
+        "bridge.builder.tip.no_road": "Glub. Our car went swimming... the road stops short somewhere.",
+        "bridge.builder.tip.no_road.2": "Splash! The road needs to reach bank to bank, no gaps.",
+        "bridge.builder.tip.no_road.3": "I do that too. Drawing a road that stops halfway. Close the gap?",
+        "bridge.builder.tip.bare_deck": "Ouch... a plank on its own just droops. It needs some wood to lean on.",
+        "bridge.builder.tip.bare_deck.2": "It folded like wet paper. Try wood triangles above or under the road.",
+        "bridge.builder.tip.bare_deck.3": "Even I'd sag holding all that alone. Give the road some support?",
+        "bridge.builder.tip.loose_frame": "So close! Those triangle tips wobble loose. Try tying them together.",
+        "bridge.builder.tip.loose_frame.2": "Hmm. It folded before the car even moved. Join the peaks along the top?",
+        "bridge.builder.tip.loose_frame.3": "The points flap like loose pages. Connect them and they'll hold.",
+        "bridge.builder.tip.hanging_joint":
+          "Those low points are just dangling in the air. Nothing's under them but river.",
+        "bridge.builder.tip.hanging_joint.2": "No ground down there! Tie the low points back with triangles.",
+        "bridge.builder.tip.hanging_joint.3": "A pillar needs something to stand on. Down there it's only water.",
+        "bridge.builder.tip.snapped_middle": "Snap! The middle gave way. It's always the loneliest part of a bridge.",
+        "bridge.builder.tip.snapped_middle.2": "Ah, right in the belly. One more triangle near my X?",
+        "bridge.builder.tip.snapped_middle.3": "It almost made it! The middle just needs a friend near the X.",
+        "bridge.builder.tip.snapped_end": "Crack, right by the bank! That end could use a diagonal brace.",
+        "bridge.builder.tip.snapped_end.2": "The middle held, but the edge buckled. Brace it near the bolt.",
+        "bridge.builder.tip.snapped_end.3": "The ends do the heaviest pulling. Shore up near my X.",
+        "bridge.builder.tip.stuck": "The little car couldn't climb that. Keep the road nice and gentle.",
+        "bridge.builder.tip.stuck.2": "Wheels spinning... that slope's too steep for a toy.",
+        "bridge.builder.tip.sketch_nudge": "(Psst, my sketch is under Hint.)",
+        "bridge.builder.tip.sketch_shown": "That's my doodle. Trace it, or improve it!",
+        "bridge.builder.tip.out_of_ink": "We're out of ink! Erase a few beams to free some up.",
+        "bridge.builder.tip.passed": "IT HOLDS! Look at it go!",
         "bridge.exit.opened_crossing.prompt": "Cross Bridge",
         "bridge.exit.opened_crossing.01": "You stride across the freshly completed bridge.",
         "bridge.exit.opened_crossing.02":

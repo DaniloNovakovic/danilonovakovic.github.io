@@ -1,5 +1,6 @@
 // Observation formatting is intentionally branchy for CLI readability.
 // fallow-ignore-file complexity
+import type { BridgeWorkbench } from './bridgeBuilder';
 import type {
   RidgeObservation,
   RidgeStageDefinition,
@@ -8,7 +9,8 @@ import type {
 
 export function observeRidgeWorld(
   state: RidgeWorldState,
-  stage: RidgeStageDefinition
+  stage: RidgeStageDefinition,
+  workbench: BridgeWorkbench | null = null
 ): RidgeObservation {
   const nearby = [...stage.resolveInteractables(state)].sort(
     (a, b) => a.distance - b.distance
@@ -42,7 +44,25 @@ export function observeRidgeWorld(
       })()
     : null;
 
-  const hints = buildHints(state, stage, nearby, blockedAhead);
+  const hints = buildHints(state, stage, nearby, blockedAhead, workbench);
+  const bridgeBuild =
+    state.mode === 'bridgeBuild' && workbench
+      ? {
+          phase: workbench.phase,
+          attempts: workbench.attempts,
+          beamCount: workbench.design.length,
+          ink: workbench.ink,
+          inkBudget: workbench.puzzle.inkBudget,
+          tip: workbench.tip,
+          tipText:
+            stage.describeBridgeTip?.(workbench.tip, {
+              variant: workbench.tipVariant,
+              sketchNudge: workbench.sketchNudge
+            }) ?? workbench.tip,
+          hintVisible: workbench.hintVisible,
+          sketchOffered: workbench.sketchOffered
+        }
+      : null;
 
   return {
     mode: state.mode,
@@ -57,6 +77,8 @@ export function observeRidgeWorld(
     actors,
     inventory: state.inventory,
     conversation,
+    bridgeBuild,
+    builtBridge: state.builtBridge,
     canMove: state.mode === 'explore',
     blockedAhead,
     lastMessage: state.lastMessage,
@@ -68,8 +90,12 @@ function buildHints(
   state: RidgeWorldState,
   stage: RidgeStageDefinition,
   nearby: RidgeObservation['nearby'],
-  blockedAhead: boolean
+  blockedAhead: boolean,
+  workbench: BridgeWorkbench | null
 ): string[] {
+  if (state.mode === 'bridgeBuild') {
+    return bridgeBuildHints(workbench);
+  }
   if (state.mode === 'conversation') {
     if (state.conversation?.awaitingChoice) {
       return ['choose <number|id> — pick a reply', 'leave — end conversation'];
@@ -102,6 +128,26 @@ function buildHints(
   return hints;
 }
 
+function bridgeBuildHints(workbench: BridgeWorkbench | null): string[] {
+  switch (workbench?.phase) {
+    case 'testing':
+      return ['build edit — stop the run and keep drawing'];
+    case 'failed':
+      return [
+        'build edit — back to drawing',
+        workbench.sketchOffered ? 'build sketch — trace the Draftsperson sketch' : 'build hint — peek at the sketch'
+      ];
+    case 'passed':
+      return ['build done — open the crossing'];
+    default:
+      return [
+        'build road|wood X,Y X,Y — draw from a bolt or joint (max ~2 squares)',
+        'build test — send the toy car across',
+        'build show | undo | erase <n> | hint | leave'
+      ];
+  }
+}
+
 export function formatObservation(observation: RidgeObservation): string {
   const lines: string[] = [];
   lines.push(`# ${observation.title}`);
@@ -110,7 +156,14 @@ export function formatObservation(observation: RidgeObservation): string {
   );
   lines.push(observation.ambience);
 
-  if (observation.conversation) {
+  if (observation.bridgeBuild) {
+    const b = observation.bridgeBuild;
+    lines.push('');
+    lines.push(
+      `--- blueprint bridge: ${b.phase} (attempt ${b.attempts}) ink ${b.ink}/${b.inkBudget} beams=${b.beamCount} ---`
+    );
+    lines.push(`Bridge Draftsperson: ${b.tipText}`);
+  } else if (observation.conversation) {
     const c = observation.conversation;
     lines.push('');
     lines.push(`--- conversation:${c.id} (${c.lineIndex + 1}/${c.lineCount}) ---`);

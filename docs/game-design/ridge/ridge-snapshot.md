@@ -75,8 +75,9 @@ Bridge
   -> blocked bridge + unfinished blueprint
   -> Bridge Draftsperson
   -> Cicka Parallel Play (receive toy car)
-  -> toy-car bridge test
-  -> completed crossing
+  -> Blueprint Bridge Workbench (draw road/wood beams, physics toy-car test,
+     forgiving retries + traceable sketch)
+  -> Draftsperson thanks you; your drawn bridge becomes the crossing
   -> Bridge-to-Concert handoff
 
 Concert
@@ -121,7 +122,10 @@ Useful commands:
 | `interact [name]` | Start nearest/named conversation |
 | `advance` | Continue halted conversation |
 | `choose <n\|id>` | Persona-style reply |
-| `leave` | Exit conversation early |
+| `leave` | Exit conversation early (or step away from the drawing table) |
+| `build road\|wood X,Y X,Y` | Blueprint Bridge: draw a beam (bolts 0,0 8,0 0,2 8,2) |
+| `build test` / `edit` / `done` | Run the toy car, return to drawing, accept a held bridge |
+| `build sketch` / `hint` / `undo` / `erase n` / `show` | Workbench helpers |
 | `skip` / `next` | Playtest: jump to next area start |
 | `warp bridge\|concert\|dance\|relay` | Playtest: warp to an area |
 | `help` | Command list |

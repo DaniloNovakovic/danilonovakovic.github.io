@@ -40,18 +40,25 @@ art.**
 - The solution is a tiny art/drawing soft gate: help a resident finish a bridge
   drawing or blueprint by drawing or visually completing the bridge, then the
   finished sketch becomes the crossing.
-- For v0, this can be a basic authored drawing/completion visual rather than a
-  full freeform drawing system.
-- For v0, the bridge test should be auto-success presentation: after Cicka
-  Parallel Play returns the toy car, the player places or brings it to the
-  completed blueprint, the toy car rolls across the drawn bridge, and the sketch
-  becomes the real crossing.
+- Accepted 2026-11-14 (Danilo): the drawing is the **Blueprint Bridge
+  Workbench**, a physics bridge-building mini-game in the style of classic 2D
+  bridge builders, played in place over the real river gap. See
+  [`blueprint-workbench.md`](./blueprint-workbench.md).
 - Cicka gives an obvious but nonverbal attention cue near the unsafe edge,
   blank plan, or missing part of the bridge.
 - After this first encounter, Cicka should become a recurring authored field
   presence rather than a continuous follower.
 - The route change must be visible in the world, not only in dialogue.
 - The beat should be tiny, obvious, local, and kind.
+
+## Blueprint Bridge Workbench
+
+> Status: implemented. Detail: [`blueprint-workbench.md`](./blueprint-workbench.md).
+
+A forgiving physics bridge-building mini-game over the real gap: draw road and
+wood beams from bank bolts, the toy car tests the span, the Draftsperson coaches
+failures and offers a traceable sketch, and on success thanks the player while
+the drawn bridge becomes the crossing.
 
 ## Cicka Resting Spot
 
@@ -103,8 +110,7 @@ The first blockout only needs:
 - blocked **Simple Bridge Crossing**
 - Bridge Draftsperson + missing middle span blueprint
 - return to Cicka for Cicka Parallel Play
-- toy car bridge test
-- simple bridge drawing completion visual
+- Blueprint Bridge Workbench + toy car bridge test
 - bridge becomes crossing
 - Cicka settles near the completed crossing
 - Bridge-to-Concert transition trigger
@@ -285,15 +291,12 @@ Minimum outcomes:
 ## Boundaries
 
 - Do not make Bridge Area a platforming test.
-- Do not make the required v0 solution depend on physics drawing.
+- The physics drawing is required, so it must stay forgiving: never remove the
+  traceable sketch or add timers, scores, or punishing resets.
 - Do not turn the beat into a fetch quest.
 - Do not turn Cicka into a continuous follower after the first encounter.
 - Do not make Cicka obediently hand over the toy car as a quest item; the player
   should join her play until she chooses to share it.
-- Future optional upgrade: let the player draw directly on the bridge as a
-  small customization or bridge-building toy, potentially with simple
-  bridge-building physics that tests whether the drawn bridge can carry a car
-  or similar weight.
 - Future optional upgrade: turn Cicka Parallel Play into a tiny toy-car
   back-and-forth game, like a low-stakes ping-pong riff using the car instead of
   a ball.
@@ -315,4 +318,5 @@ Minimum outcomes:
 - auto-success toy car test staging
 - one or two prompts that make the crossing change feel authored
 - future cabin/treat shortcut scope and placement
-- future drawing/bridge-physics toy scope after the route MVP is proven
+- Blueprint Bridge audio cues (pencil scratch, member snap, splash, cheer)
+- optional later puzzle variety (rope/cable material, par-ink star)

@@ -23,6 +23,11 @@ export interface SceneUiSurfaceDefinition {
    *   stage the surface itself (e.g. a conversation box along the bottom edge).
    */
   panelChrome?: 'default' | 'overlay' | 'docked';
+  /**
+   * The owning scene reads pointer input on the canvas while this surface is
+   * up (e.g. drawing), so shell touch mats must stand aside.
+   */
+  capturesScenePointer?: boolean;
 }
 
 const SCENE_UI_DEFINITIONS: readonly SceneUiSurfaceDefinition[] = [
@@ -34,6 +39,10 @@ const SCENE_UI_DEFINITIONS: readonly SceneUiSurfaceDefinition[] = [
 const SCENE_UI_BY_ID: ReadonlyMap<SceneUiSurfaceId, SceneUiSurfaceDefinition> = new Map(
   SCENE_UI_DEFINITIONS.map((surface) => [surface.id, surface])
 );
+
+export function sceneUiSurfaceCapturesPointer(id: SceneUiSurfaceId | undefined): boolean {
+  return id ? SCENE_UI_BY_ID.get(id)?.capturesScenePointer === true : false;
+}
 
 export function getSceneUiSurfaceDefinition(
   id: SceneUiSurfaceId

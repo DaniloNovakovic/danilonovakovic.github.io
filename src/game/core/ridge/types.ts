@@ -1,6 +1,12 @@
 /**
  * Pure Ridge console types. No Phaser, React, or DOM.
  */
+import type {
+  BridgeBuildAction,
+  BridgeBuildPhase,
+  BridgeBuildTip,
+  BridgeDesign
+} from './bridgeBuilder';
 
 export type RidgeAreaId = 'bridge' | 'concert' | 'danceFestival' | 'relay';
 
@@ -33,7 +39,8 @@ export type RidgeBridgeAreaBeat = Extract<
 
 export type RidgeFacing = 'left' | 'right';
 
-export type RidgeMode = 'explore' | 'conversation';
+/** `bridgeBuild` is the Blueprint Bridge workbench: drawing and testing a span. */
+export type RidgeMode = 'explore' | 'conversation' | 'bridgeBuild';
 
 export type RidgeSpotKind = 'landmark' | 'npc' | 'prop' | 'exit';
 
@@ -88,6 +95,8 @@ export interface RidgeConversationOutcome {
   removeItem?: string;
   setFlag?: string;
   clearFlag?: string;
+  /** Open the Blueprint Bridge workbench once the conversation closes. */
+  openBridgeBuild?: boolean;
 }
 
 export interface RidgeConversationDefinition {
@@ -157,6 +166,14 @@ export interface RidgeStageDefinition {
     state: RidgeWorldState
   ) => RidgeConversationDefinition | null;
   describeAmbience: (state: RidgeWorldState) => string;
+  /**
+   * Draftsperson remark for the Blueprint Bridge workbench (Bridge only).
+   * `variant` rotates between phrasings; `sketchNudge` appends the sketch offer.
+   */
+  describeBridgeTip?: (
+    tip: BridgeBuildTip,
+    context: { variant: number; sketchNudge: boolean }
+  ) => string;
 }
 
 export type RidgeStageRegistry = Record<RidgeAreaId, RidgeStageDefinition>;
@@ -172,6 +189,8 @@ export interface RidgeWorldState {
   inventory: readonly string[];
   conversation: RidgeConversationState | null;
   lastMessage: string | null;
+  /** The span the player drew and proved, once the toy car crossed it. */
+  builtBridge: BridgeDesign | null;
 }
 
 export interface RidgeObservation {
@@ -198,6 +217,19 @@ export interface RidgeObservation {
     choices: readonly RidgeDialogueChoice[] | null;
     awaitingChoice: boolean;
   };
+  /** Workbench summary while drawing or testing the bridge. */
+  bridgeBuild: null | {
+    phase: BridgeBuildPhase;
+    attempts: number;
+    beamCount: number;
+    ink: number;
+    inkBudget: number;
+    tip: BridgeBuildTip;
+    tipText: string;
+    hintVisible: boolean;
+    sketchOffered: boolean;
+  };
+  builtBridge: BridgeDesign | null;
   canMove: boolean;
   blockedAhead: boolean;
   lastMessage: string | null;
@@ -218,6 +250,8 @@ export type RidgeCommand =
   | { type: 'skip' }
   /** DEV / AI: warp to a named area start. */
   | { type: 'warp'; areaId: RidgeAreaId }
+  /** Blueprint Bridge workbench verbs (`build road 0,0 2,0`, `build test`, …). */
+  | { type: 'build'; action: BridgeBuildAction }
   | { type: 'unknown'; raw: string };
 
 export type RidgeSessionEvent =
@@ -228,7 +262,10 @@ export type RidgeSessionEvent =
   | { type: 'conversation_ended'; conversationId: string }
   | { type: 'item_added'; itemId: string }
   | { type: 'item_removed'; itemId: string }
-  | { type: 'flag_changed'; flag: string; present: boolean };
+  | { type: 'flag_changed'; flag: string; present: boolean }
+  | { type: 'bridge_build_opened' }
+  | { type: 'bridge_build_closed' }
+  | { type: 'bridge_built'; design: BridgeDesign };
 
 export interface RidgeCommandResult {
   ok: boolean;

@@ -1,16 +1,45 @@
 // Bridge content resolvers encode beat-specific actor presence; branching is data policy.
 // fallow-ignore-file complexity
+import type { BridgeBuildTip } from '../bridgeBuilder';
 import type {
   RidgeActorPresence,
   RidgeConversationDefinition,
   RidgeDialogueLine,
+  RidgeEmotion,
   RidgeInteractable,
   RidgeStageDefinition,
   RidgeWorldState
 } from '../types';
 import { RIDGE_TOY_CAR_ITEM } from '../types';
 
-const BRIDGE_BLOCKED_PROGRESS = 0.62;
+/**
+ * River banks on the progress line. The Blueprint Bridge puzzle gap (8 cells of
+ * 36 world units) spans exactly this stretch of the 1440-unit walk line.
+ */
+export const BRIDGE_RIVER_PROGRESS = { left: 0.58, right: 0.78 } as const;
+
+/** Just short of the near bank edge. */
+const BRIDGE_BLOCKED_PROGRESS = 0.575;
+/** Mirrors the session flag set once the drawing table has been opened. */
+const BRIDGE_BUILD_STARTED_FLAG = 'bridge_build_started';
+
+const BRIDGE_TIP_IDS: readonly BridgeBuildTip[] = [
+  'intro',
+  'drawing',
+  'wobbly',
+  'steady',
+  'testing',
+  'no_road',
+  'bare_deck',
+  'loose_frame',
+  'hanging_joint',
+  'snapped_middle',
+  'snapped_end',
+  'stuck',
+  'sketch_shown',
+  'out_of_ink',
+  'passed'
+];
 
 export interface BridgeDialogueCatalog {
   speakers: {
@@ -60,7 +89,7 @@ const SPOTS = [
     id: 'bridge',
     label: 'Simple Bridge Crossing',
     kind: 'prop' as const,
-    progress: 0.62,
+    progress: 0.68,
     interactRadius: 0.06,
     description: 'The unfinished crossing. Blueprint ink waits for courage.'
   },
@@ -96,8 +125,28 @@ export function createBridgeStage(catalog: BridgeDialogueCatalog): RidgeStageDef
     resolveActors: (state) => resolveBridgeActors(state),
     resolveConversation: (conversationId, state) =>
       resolveBridgeConversation(conversationId, state, catalog),
-    describeAmbience: (state) => describeBridgeAmbience(state)
+    describeAmbience: (state) => describeBridgeAmbience(state),
+    describeBridgeTip: (tip, context) => describeBridgeTip(catalog, tip, context)
   };
+}
+
+/**
+ * A remark may have alternates at `<key>.2`, `<key>.3`, …; retries rotate
+ * through them so the Draftsperson reacts instead of repeating a manual.
+ */
+function describeBridgeTip(
+  catalog: BridgeDialogueCatalog,
+  tip: BridgeBuildTip,
+  context: { variant: number; sketchNudge: boolean }
+): string {
+  const base = `bridge.builder.tip.${BRIDGE_TIP_IDS.includes(tip) ? tip : 'drawing'}`;
+  const phrasings = [base];
+  while (catalog.lines[`${base}.${phrasings.length + 1}`]) {
+    phrasings.push(`${base}.${phrasings.length + 1}`);
+  }
+  const line = catalog.lines[phrasings[context.variant % phrasings.length]!] ?? tip;
+  const nudge = context.sketchNudge ? catalog.lines['bridge.builder.tip.sketch_nudge'] : undefined;
+  return nudge ? `${line} ${nudge}` : line;
 }
 
 function resolveBridgeInteractables(
@@ -179,9 +228,12 @@ function interactPlansForBeat(beat: RidgeWorldState['beat']): BridgeInteractPlan
 
 function resolveBridgeActors(state: RidgeWorldState): RidgeActorPresence[] {
   const crossingOpen = state.beat === 'bridge_complete';
-  const cickaProgress = crossingOpen ? 0.68 : 0.22;
+  // After the test Cicka settles on the far bank beside the car that proved it.
+  const cickaProgress = crossingOpen ? 0.8 : 0.22;
   const toyCarProgress =
-    state.beat === 'toy_car_shared' ? state.progress : crossingOpen ? 0.7 : 0.24;
+    state.beat === 'toy_car_shared' ? state.progress : crossingOpen ? 0.825 : 0.24;
+  // While drawing, the workbench owns the toy car (it drives the test run).
+  const building = state.mode === 'bridgeBuild';
 
   return [
     {
@@ -210,10 +262,11 @@ function resolveBridgeActors(state: RidgeWorldState): RidgeActorPresence[] {
       label: 'Toy car',
       progress: toyCarProgress,
       visible:
-        state.beat === 'intro' ||
-        state.beat === 'needs_toy_car' ||
-        state.inventory.includes(RIDGE_TOY_CAR_ITEM) ||
-        crossingOpen,
+        !building &&
+        (state.beat === 'intro' ||
+          state.beat === 'needs_toy_car' ||
+          state.inventory.includes(RIDGE_TOY_CAR_ITEM) ||
+          crossingOpen),
       facing: 'right'
     }
   ];
@@ -224,8 +277,11 @@ function resolveBridgeConversation(
   state: RidgeWorldState,
   catalog: BridgeDialogueCatalog
 ): RidgeConversationDefinition | null {
-  const line = (id: string, speakerId: keyof BridgeDialogueCatalog['speakers']) =>
-    makeLine(catalog, id, speakerId);
+  const line = (
+    id: string,
+    speakerId: keyof BridgeDialogueCatalog['speakers'],
+    emotion?: RidgeEmotion
+  ) => makeLine(catalog, id, speakerId, emotion);
 
   switch (conversationId) {
     case 'bridge.cicka.first_meet':
@@ -291,18 +347,33 @@ function resolveBridgeConversation(
         }
       };
     case 'bridge.draftsperson.toy_car_test':
+      // Coming back to an unfinished drawing skips straight to the table.
+      if (state.flags.has(BRIDGE_BUILD_STARTED_FLAG)) {
+        return {
+          id: conversationId,
+          lines: [line('bridge.draftsperson.toy_car_test.resume', 'bridgeDraftsperson', 'determined')],
+          outcome: { openBridgeBuild: true }
+        };
+      }
       return {
         id: conversationId,
         lines: [
           line('bridge.draftsperson.toy_car_test.01', 'prompt'),
-          line('bridge.draftsperson.toy_car_test.02', 'bridgeDraftsperson'),
-          line('bridge.draftsperson.toy_car_test.03', 'prompt'),
-          line('bridge.draftsperson.toy_car_test.04', 'bridgeDraftsperson')
+          line('bridge.draftsperson.toy_car_test.02', 'bridgeDraftsperson', 'thoughtful'),
+          line('bridge.draftsperson.toy_car_test.03', 'bridgeDraftsperson', 'curious'),
+          line('bridge.draftsperson.toy_car_test.04', 'prompt')
         ],
-        outcome: {
-          setBeat: 'bridge_complete',
-          clearFlag: 'toy_car_shared'
-        }
+        outcome: { openBridgeBuild: true }
+      };
+    case 'bridge.draftsperson.bridge_built':
+      return {
+        id: conversationId,
+        lines: [
+          line('bridge.draftsperson.bridge_built.01', 'prompt'),
+          line('bridge.draftsperson.bridge_built.02', 'bridgeDraftsperson', 'surprised'),
+          line('bridge.draftsperson.bridge_built.03', 'bridgeDraftsperson', 'playful'),
+          line('bridge.draftsperson.bridge_built.04', 'prompt')
+        ]
       };
     case 'bridge.exit.opened_crossing':
       return {
@@ -324,19 +395,24 @@ function resolveBridgeConversation(
 function makeLine(
   catalog: BridgeDialogueCatalog,
   id: string,
-  speakerId: keyof BridgeDialogueCatalog['speakers']
+  speakerId: keyof BridgeDialogueCatalog['speakers'],
+  emotion?: RidgeEmotion
 ): RidgeDialogueLine {
   return {
     id,
     speakerId,
     speaker: catalog.speakers[speakerId],
-    text: catalog.lines[id] ?? id
+    text: catalog.lines[id] ?? id,
+    ...(emotion ? { emotion } : {})
   };
 }
 
 function describeBridgeAmbience(state: RidgeWorldState): string {
   if (state.beat === 'bridge_complete') {
     return 'Ink settles into a real crossing. The concert exit is open to the east.';
+  }
+  if (state.mode === 'bridgeBuild') {
+    return 'The blueprint table is unrolled across the gap. Bolts wait on both banks.';
   }
   if (state.beat === 'toy_car_shared') {
     return 'You carry the tiny test car. The draftsperson waits by the blueprint.';

@@ -6,6 +6,12 @@ import {
   leaveConversation,
   startConversation
 } from './conversation';
+import {
+  BLUEPRINT_BRIDGE_PUZZLE,
+  BridgeWorkbench,
+  type BridgeBuildAction,
+  type BridgeDesign
+} from './bridgeBuilder';
 import { getRidgeHelpText, parseRidgeCommand, parseRidgeScript } from './commands';
 import { formatObservation, observeRidgeWorld } from './observe';
 import type {
@@ -23,6 +29,9 @@ import type {
 import { RIDGE_GUITAR_ITEM, RIDGE_INITIAL_BEAT, ridgeNextArea } from './types';
 
 const DEFAULT_STEP = 0.05;
+const BRIDGE_BUILT_CONVERSATION = 'bridge.draftsperson.bridge_built';
+const TOY_CAR_SHARED_FLAG = 'toy_car_shared';
+const BRIDGE_BUILD_STARTED_FLAG = 'bridge_build_started';
 
 export interface RidgeSessionOptions {
   /** Preferred: full multi-area registry for Compact Area Transitions. */
@@ -35,12 +44,15 @@ export interface RidgeSessionOptions {
   facing?: RidgeFacing;
   inventory?: readonly string[];
   flags?: Iterable<string>;
+  /** A span the player already proved, restored when re-entering Ridge. */
+  builtBridge?: BridgeDesign | null;
 }
 
 export class RidgeConsoleSession {
   private state: RidgeWorldState;
   private stage: RidgeStageDefinition;
   private readonly stages: RidgeStageRegistry | null;
+  private workbench: BridgeWorkbench | null = null;
 
   constructor(options: RidgeSessionOptions) {
     if (options.stages) {
@@ -64,12 +76,23 @@ export class RidgeConsoleSession {
       flags: new Set(options.flags ?? []),
       inventory: [...(options.inventory ?? [])],
       conversation: null,
-      lastMessage: null
+      lastMessage: null,
+      builtBridge: options.builtBridge ?? null
     };
   }
 
   observe(): RidgeObservation {
-    return observeRidgeWorld(this.state, this.stage);
+    return observeRidgeWorld(this.state, this.stage, this.workbench);
+  }
+
+  /** Live workbench while the Blueprint Bridge is being drawn, for presentation. */
+  get bridgeWorkbench(): BridgeWorkbench | null {
+    return this.state.mode === 'bridgeBuild' ? this.workbench : null;
+  }
+
+  /** Advance an animated bridge test by one fixed frame (Phaser drives this). */
+  stepBridgeTest(): void {
+    if (this.state.mode === 'bridgeBuild') this.workbench?.stepTest();
   }
 
   format(): string {
@@ -116,6 +139,8 @@ export class RidgeConsoleSession {
         return this.handleSkip();
       case 'warp':
         return this.handleWarp(command.areaId);
+      case 'build':
+        return this.handleBuild(command.action);
       case 'unknown':
         return this.fail(
           command.raw
@@ -126,6 +151,9 @@ export class RidgeConsoleSession {
   }
 
   private handleGo(direction: RidgeFacing, steps: number): RidgeCommandResult {
+    if (this.state.mode === 'bridgeBuild') {
+      return this.fail('You are at the drawing table. build leave to step away.');
+    }
     if (this.state.mode !== 'explore') {
       return this.fail('Movement is halted during conversation. advance or leave.');
     }
@@ -171,6 +199,9 @@ export class RidgeConsoleSession {
   private handleInteract(target?: string): RidgeCommandResult {
     if (this.state.mode === 'conversation') {
       return this.fail('Already in conversation. Use advance / choose / leave.');
+    }
+    if (this.state.mode === 'bridgeBuild') {
+      return this.fail('You are at the drawing table. Use build … or build leave.');
     }
 
     const nearby = [...this.stage.resolveInteractables(this.state)].sort(
@@ -229,6 +260,7 @@ export class RidgeConsoleSession {
   }
 
   private handleLeave(): RidgeCommandResult {
+    if (this.state.mode === 'bridgeBuild') return this.closeBridgeBuild();
     const result = leaveConversation(this.state);
     this.state = result.state;
     return {
@@ -284,6 +316,8 @@ export class RidgeConsoleSession {
       if (event.type === 'area_handoff') {
         this.applyAreaHandoff(event.areaId);
         events.push({ type: 'beat_changed', beat: this.state.beat });
+      } else if (event.type === 'bridge_build_opened') {
+        this.openBridgeBuild();
       } else if (event.type === 'route_reset') {
         this.applyRouteReset();
         events.push({ type: 'beat_changed', beat: this.state.beat });
@@ -300,6 +334,8 @@ export class RidgeConsoleSession {
   }
 
   private applyAreaHandoff(areaId: RidgeAreaId): void {
+    this.workbench = null;
+    if (areaId === 'bridge') this.state = { ...this.state, builtBridge: null };
     if (!this.stages) {
       this.state = {
         ...this.state,
@@ -327,6 +363,7 @@ export class RidgeConsoleSession {
   }
 
   private applyRouteReset(): void {
+    this.workbench = null;
     const bridge = this.stages?.bridge ?? this.stage;
     this.stage = bridge;
     this.state = {
@@ -339,7 +376,88 @@ export class RidgeConsoleSession {
       flags: new Set(),
       inventory: [],
       conversation: null,
-      lastMessage: 'For Cicka. The page begins again at the Bridge.'
+      lastMessage: 'For Cicka. The page begins again at the Bridge.',
+      builtBridge: null
+    };
+  }
+
+  private handleBuild(action: BridgeBuildAction): RidgeCommandResult {
+    const workbench = this.workbench;
+    if (this.state.mode !== 'bridgeBuild' || !workbench) {
+      return this.fail('The drawing table is not open. Bring the toy car to the Draftsperson.');
+    }
+    if (action.kind === 'leave') return this.closeBridgeBuild();
+
+    const result = workbench.apply(action);
+    if (result.ok && action.kind === 'done') return this.finishBridgeBuild(workbench.design);
+    return result.ok ? this.ok(result.message) : this.fail(result.message);
+  }
+
+  private openBridgeBuild(): void {
+    const workbench = (this.workbench ??= new BridgeWorkbench(BLUEPRINT_BRIDGE_PUZZLE));
+    if (workbench.phase === 'testing' || workbench.phase === 'failed') {
+      workbench.apply({ kind: 'edit' });
+    }
+    const flags = new Set(this.state.flags);
+    flags.add(BRIDGE_BUILD_STARTED_FLAG);
+    this.state = {
+      ...this.state,
+      mode: 'bridgeBuild',
+      conversation: null,
+      flags,
+      lastMessage: 'The blueprint table unrolls across the gap.'
+    };
+  }
+
+  /** Step away from the table. The drawing stays for when the player returns. */
+  private closeBridgeBuild(): RidgeCommandResult {
+    if (this.workbench?.phase === 'testing' || this.workbench?.phase === 'failed') {
+      this.workbench.apply({ kind: 'edit' });
+    }
+    this.state = {
+      ...this.state,
+      mode: 'explore',
+      lastMessage: 'You step back from the drawing table.'
+    };
+    return {
+      ok: true,
+      message: 'You step back from the drawing table.',
+      observation: this.observe(),
+      events: [{ type: 'bridge_build_closed' }]
+    };
+  }
+
+  private finishBridgeBuild(design: BridgeDesign): RidgeCommandResult {
+    this.workbench = null;
+    const flags = new Set(this.state.flags);
+    flags.delete(TOY_CAR_SHARED_FLAG);
+    this.state = {
+      ...this.state,
+      mode: 'explore',
+      beat: 'bridge_complete',
+      flags,
+      builtBridge: design
+    };
+
+    const events: RidgeSessionEvent[] = [
+      { type: 'bridge_build_closed' },
+      { type: 'bridge_built', design },
+      { type: 'beat_changed', beat: 'bridge_complete' },
+      { type: 'flag_changed', flag: TOY_CAR_SHARED_FLAG, present: false }
+    ];
+
+    const thanks = this.stage.resolveConversation(BRIDGE_BUILT_CONVERSATION, this.state);
+    if (thanks) {
+      const started = startConversation(this.state, thanks);
+      this.state = started.state;
+      events.push(...started.events);
+    }
+
+    return {
+      ok: true,
+      message: 'The sketch firms into a real bridge.',
+      observation: this.observe(),
+      events
     };
   }
 

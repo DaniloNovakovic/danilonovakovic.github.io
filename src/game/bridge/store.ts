@@ -72,9 +72,18 @@ export type RidgeBridgeAreaBeatState = Extract<
 >;
 export type RidgePostBridgeAreaId = Exclude<RidgeFirstPlayableAreaId, 'bridge'>;
 
+/** A Blueprint Bridge beam, structurally matching the Ridge core design spec. */
+export interface RidgeBridgeBeamState {
+  a: { x: number; y: number };
+  b: { x: number; y: number };
+  material: 'road' | 'wood';
+}
+
 export type RidgeFirstPlayableRouteState = {
   activeAreaId: RidgeFirstPlayableAreaId;
   beat: RidgeRouteBeatState;
+  /** The span the player drew and proved at the Bridge, drawn as the crossing. */
+  bridgeDesign?: readonly RidgeBridgeBeamState[] | null;
 };
 
 export interface BridgeRidgeProgressState {
@@ -314,10 +323,21 @@ function isBridgeProgressUnchanged(previous: BridgeState, candidate: BridgeState
     arraysEqual(previous.progress.ridge.manualPageIds, candidate.progress.ridge.manualPageIds) &&
     previous.progress.ridge.mobility.glidePips === candidate.progress.ridge.mobility.glidePips &&
     arraysEqual(previous.progress.ridge.shortcutIds, candidate.progress.ridge.shortcutIds) &&
-    previous.progress.ridge.firstPlayableRoute.activeAreaId ===
-      candidate.progress.ridge.firstPlayableRoute.activeAreaId &&
-    previous.progress.ridge.firstPlayableRoute.beat ===
-      candidate.progress.ridge.firstPlayableRoute.beat
+    isRidgeRouteUnchanged(
+      previous.progress.ridge.firstPlayableRoute,
+      candidate.progress.ridge.firstPlayableRoute
+    )
+  );
+}
+
+function isRidgeRouteUnchanged(
+  previous: RidgeFirstPlayableRouteState,
+  candidate: RidgeFirstPlayableRouteState
+): boolean {
+  return (
+    previous.activeAreaId === candidate.activeAreaId &&
+    previous.beat === candidate.beat &&
+    previous.bridgeDesign === candidate.bridgeDesign
   );
 }
 
@@ -553,6 +573,21 @@ export const bridgeActions = {
           firstPlayableRoute: {
             ...current.progress.ridge.firstPlayableRoute,
             beat
+          }
+        }
+      }
+    }));
+  },
+  setRidgeBridgeDesign(design: readonly RidgeBridgeBeamState[] | null): void {
+    setState((current) => ({
+      ...current,
+      progress: {
+        ...current.progress,
+        ridge: {
+          ...current.progress.ridge,
+          firstPlayableRoute: {
+            ...current.progress.ridge.firstPlayableRoute,
+            bridgeDesign: design
           }
         }
       }

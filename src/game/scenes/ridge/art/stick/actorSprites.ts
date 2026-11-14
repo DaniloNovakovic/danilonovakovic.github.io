@@ -49,6 +49,24 @@ const HEAD_TOP: Record<RidgeActorId, number> = {
   shuttle: -29
 };
 
+/**
+ * How far below its origin a figure's lowest point (feet, paws, wheels) is
+ * drawn, unscaled. On the lane, figures stand in the trodden band below the
+ * ground line; on a thin bridge deck this offset is lifted out so feet land
+ * on the road instead of dangling in the air under it.
+ */
+const FOOT_DROP: Partial<Record<RidgeActorId, number>> = {
+  cicka: 2.4,
+  'counterpart-cat': 2.4,
+  'toy-car': 4.2
+};
+/** Base person legs end at 0.58 of a 16-unit figure. */
+const PERSON_FOOT_DROP = 0.58 * 16;
+
+export function footDropFor(id: RidgeActorId): number {
+  return (FOOT_DROP[id] ?? PERSON_FOOT_DROP) * FIGURE_SCALE;
+}
+
 export function headTopFor(id: RidgeActorId): number {
   return (HEAD_TOP[id] ?? -44) * FIGURE_SCALE;
 }

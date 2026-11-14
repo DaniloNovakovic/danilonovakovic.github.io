@@ -1,5 +1,6 @@
 // Command parsers are table-driven; remaining branching is intentional CLI surface area.
 // fallow-ignore-file complexity
+import type { BridgeBuildAction } from './bridgeBuilder';
 import type { RidgeCommand, RidgeFacing } from './types';
 
 const HELP_TEXT = [
@@ -12,6 +13,15 @@ const HELP_TEXT = [
   '  advance              continue conversation',
   '  choose <n|id>        pick a conversation reply',
   '  leave                exit conversation without finishing',
+  '',
+  'Bridge workbench (after the toy car test starts):',
+  '  build road|wood X,Y X,Y   draw a beam between grid points',
+  '                       (bolts at 0,0 8,0 0,2 8,2; y<0 is above the deck)',
+  '  build erase <n>      remove beam #n (see build show)',
+  '  build undo | clear | show | hint | sketch',
+  '  build test           send the toy car across',
+  '  build edit           back to drawing after a run',
+  '  build done           celebrate a bridge that held',
   '',
   'Playtest skips:',
   '  skip                 jump to the next area start',
@@ -48,6 +58,23 @@ const LEFT_ALIASES = new Set(['left', 'west', 'a']);
 const RIGHT_ALIASES = new Set(['right', 'east', 'd']);
 const INTERACT_ALIASES = new Set(['interact', 'talk', 'use', 'e', 'x']);
 const CHOOSE_ALIASES = new Set(['choose', 'pick', 'select']);
+const BUILD_ALIASES = new Set(['build', 'b']);
+const BUILD_SIMPLE: Record<string, BridgeBuildAction> = {
+  undo: { kind: 'undo' },
+  clear: { kind: 'clear' },
+  show: { kind: 'show' },
+  list: { kind: 'show' },
+  hint: { kind: 'hint' },
+  sketch: { kind: 'sketch' },
+  trace: { kind: 'sketch' },
+  test: { kind: 'test', instant: true },
+  go: { kind: 'test', instant: true },
+  edit: { kind: 'edit' },
+  fix: { kind: 'edit' },
+  retry: { kind: 'edit' },
+  done: { kind: 'done' },
+  leave: { kind: 'leave' }
+};
 const WARP_ALIASES = new Set(['warp', 'tp', 'goto', 'jump']);
 const AREA_ALIASES: Record<string, import('./types').RidgeAreaId> = {
   bridge: 'bridge',
@@ -87,6 +114,10 @@ export function parseRidgeCommand(rawInput: string): RidgeCommand {
     if (!args[0]) return { type: 'unknown', raw };
     return { type: 'choose', choiceIdOrIndex: args[0] };
   }
+  if (BUILD_ALIASES.has(head)) {
+    const action = parseBuildAction(args);
+    return action ? { type: 'build', action } : { type: 'unknown', raw };
+  }
   if (WARP_ALIASES.has(head)) {
     const areaId = args[0] ? AREA_ALIASES[args[0].replace(/[_-]/g, '')] : undefined;
     if (!areaId) return { type: 'unknown', raw };
@@ -123,4 +154,28 @@ function parseOptionalSteps(value: string | undefined): number {
   if (!value) return 1;
   const steps = Number.parseFloat(value);
   return Number.isFinite(steps) && steps > 0 ? steps : 1;
+}
+
+function parseBuildAction(args: string[]): BridgeBuildAction | null {
+  const [verb, ...rest] = args;
+  if (!verb) return { kind: 'show' };
+  const simple = BUILD_SIMPLE[verb];
+  if (simple) return simple;
+  if (verb === 'erase' || verb === 'remove' || verb === 'rm') {
+    const index = Number.parseInt(rest[0] ?? '', 10);
+    return Number.isFinite(index) ? { kind: 'erase', index: index - 1 } : null;
+  }
+  if (verb === 'road' || verb === 'wood') {
+    const a = parseGridPoint(rest[0]);
+    const b = parseGridPoint(rest[1]);
+    return a && b ? { kind: 'add', material: verb, a, b } : null;
+  }
+  return null;
+}
+
+function parseGridPoint(value: string | undefined): { x: number; y: number } | null {
+  if (!value) return null;
+  const match = /^(-?\d+),(-?\d+)$/.exec(value);
+  if (!match) return null;
+  return { x: Number(match[1]), y: Number(match[2]) };
 }
