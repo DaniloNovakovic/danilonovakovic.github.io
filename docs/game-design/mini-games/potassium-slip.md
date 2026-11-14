@@ -16,7 +16,7 @@ Clear 10 procedural campaign waves, defeat the boss on wave 11, and collect the 
 - **Recall:** Hold anywhere while the banana is flying to pull it back toward the launch pad.
 - **Relaunch:** Keep holding as the banana reaches the launch pad, aim, and release again.
 - **Retry:** Press `R` or choose `Retry` after game over.
-- **Return:** Press `E`, choose `Return to City`, or press `Esc`.
+- **Return:** Press `E` or choose `Return to City` after a run ends, or use the header Back button at any time. `Esc` does nothing, so a stray press cannot end a run.
 - **Endless:** Press `Space` or choose `Endless Mode` after winning.
 
 ## Core Loop

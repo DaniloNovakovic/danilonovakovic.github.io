@@ -55,7 +55,7 @@ describe('stampede result actions', () => {
   it('maps back keys and ignores unrelated keys', () => {
     expect(resolveStampedeResultKeyAction({ key: 'e' })).toBe('backToRidge');
     expect(resolveStampedeResultKeyAction({ key: 'H' })).toBe('backToRidge');
-    expect(resolveStampedeResultKeyAction({ key: 'Escape' })).toBe('backToRidge');
+    expect(resolveStampedeResultKeyAction({ key: 'Escape' })).toBeNull();
     expect(resolveStampedeResultKeyAction({ key: 'w' })).toBeNull();
   });
 

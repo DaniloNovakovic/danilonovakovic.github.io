@@ -37,8 +37,9 @@ export function getSceneHeaderChrome(sceneId: SceneId): SceneHeaderChrome {
     };
   }
 
-  // Ridge has no keyboard exit (Esc belongs to its conversation box), so the
-  // header Back button is the one deliberate way out.
+  // Esc never leaves Ridge (it closes the conversation box), so the header
+  // Back button is the deliberate way out. Potassium and Stampede likewise
+  // ignore Esc so a stray press cannot end a run.
   if (sceneId === RIDGE_SCENE_ID) {
     return {
       left: 'back',

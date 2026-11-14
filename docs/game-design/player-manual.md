@@ -75,7 +75,7 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
 - You start with 5 lives; losing all lives ends the run.
 - After game over, choose `Retry` or `Return to City`. After winning, choose `Endless Mode` or `Return to City`.
 - Potassium keeps a local top-5 records list for finished runs.
-- Press `R` to retry after a terminal screen, `E` to return, `Space` to continue into endless after winning, or `Esc` to return to the city.
+- Press `R` to retry after a terminal screen, `E` to return, or `Space` to continue into endless after winning. `Esc` does nothing, so a stray press cannot end a run; use the header Back button to leave at any time.
 
 ## Headless / AI Console
 

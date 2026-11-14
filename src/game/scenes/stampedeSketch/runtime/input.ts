@@ -56,7 +56,6 @@ class PhaserStampedeInputRuntime implements StampedeInputRuntime {
   private readonly keyD?: Phaser.Input.Keyboard.Key;
   private readonly keyE?: Phaser.Input.Keyboard.Key;
   private readonly keyH?: Phaser.Input.Keyboard.Key;
-  private readonly keyEsc?: Phaser.Input.Keyboard.Key;
   private readonly keyR?: Phaser.Input.Keyboard.Key;
   private readonly keyEnter?: Phaser.Input.Keyboard.Key;
   private readonly keySpace?: Phaser.Input.Keyboard.Key;
@@ -79,7 +78,6 @@ class PhaserStampedeInputRuntime implements StampedeInputRuntime {
     this.keyD = keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.D);
     this.keyE = keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.E);
     this.keyH = keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.H);
-    this.keyEsc = keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
     this.keyR = keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.R);
     this.keyEnter = keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
     this.keySpace = keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
@@ -122,12 +120,12 @@ class PhaserStampedeInputRuntime implements StampedeInputRuntime {
     return keyboardStart || pointerStart;
   }
 
+  /** Esc is deliberately not a close key: it is too easy to hit mid-run. */
   closeRequested(): boolean {
     const justDown = Phaser.Input.Keyboard.JustDown;
     return Boolean(
       (this.keyE && justDown(this.keyE)) ||
-        (this.keyH && justDown(this.keyH)) ||
-        (this.keyEsc && justDown(this.keyEsc))
+        (this.keyH && justDown(this.keyH))
     );
   }
 

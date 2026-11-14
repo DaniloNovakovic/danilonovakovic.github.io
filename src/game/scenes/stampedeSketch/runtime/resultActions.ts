@@ -41,7 +41,6 @@ export function resolveStampedeResultKeyAction({
       return 'retry';
     case 'e':
     case 'h':
-    case 'escape':
       return 'backToRidge';
     default:
       return null;
