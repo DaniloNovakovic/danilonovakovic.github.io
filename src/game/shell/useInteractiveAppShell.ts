@@ -9,6 +9,7 @@ import {
   isSceneId,
   OVERWORLD_SCENE_ID,
   POTASSIUM_SCENE_ID,
+  RIDGE_SCENE_ID,
   type SceneId
 } from '@/game/scenes/sceneIds';
 import { getInteractiveGameShellLayout } from './gameShellLayout';
@@ -30,7 +31,12 @@ export function useInteractiveAppShell() {
       : bridge.activeSceneId;
   const presentationMode: PhaserScenePresentationMode =
     getPhaserScenePresentationMode(presentationSceneId);
-  const gameShellLayout = getInteractiveGameShellLayout(presentationMode, contentRowHeight);
+  // Ridge is side-view exploration with conversations; it gets the room.
+  const gameShellLayout = getInteractiveGameShellLayout(
+    presentationMode,
+    contentRowHeight,
+    presentationSceneId === RIDGE_SCENE_ID ? 'wide' : 'card'
+  );
   const isGameInputBlocked = bridge.isPaused || bridge.loadingSceneId !== null;
   const shouldReserveSceneHint = presentationSceneId === POTASSIUM_SCENE_ID;
   const sceneHintText = bridge.sceneHintText ?? messages.potassiumSlip.hints.start;

@@ -14,6 +14,7 @@ import { getSceneStartResume, prepareSceneStart } from '@/game/sharedSceneRuntim
 import type { RidgeDevControls } from '@/game/scenes/ridge/runtime/ridgeDevControls';
 import { getDevRidgeProgressSeed } from './devRidgeProgressParams';
 import { setPauseOnPausableScenes } from './phaserGamePauseSync';
+import { refreshPhaserScale } from './refreshPhaserScale';
 
 interface UsePhaserGameBootOptions {
   bridgeRef: RefObject<{
@@ -51,7 +52,7 @@ export function usePhaserGameBoot({
       // During fast remount/HMR teardown, Phaser can lose its canvas parent briefly.
       if (gameRef.current !== game) return;
       if (!game.canvas || !game.canvas.parentElement) return;
-      game.scale.refresh();
+      refreshPhaserScale(game);
     };
     const ro = el ? new ResizeObserver(() => refresh()) : null;
     if (el && ro) {

@@ -151,9 +151,10 @@ Sequence after the Bridge Tracer Slice:
    harmless ambient animation can continue. Do not include Ambient Bark Bubbles
    in this first conversation overlay issue beyond preserving a clean data
    boundary between deliberate conversations and later non-blocking barks.
-3. Investigate interactive shell screen usage / fullscreen direction if the
-   conversation overlay or Bridge staging still feels cramped in the current
-   game card.
+3. ~~Investigate interactive shell screen usage / fullscreen direction.~~
+   Done (#92): Ridge now uses a `wide` shell size that fills the screen up to
+   1600×960 instead of the 1000×600 card; real fullscreen was not needed. See
+   `docs/runtime-architecture.md` → Scene presentation and camera.
 4. Begin Concert Area implementation.
 
 Minimum outcomes:

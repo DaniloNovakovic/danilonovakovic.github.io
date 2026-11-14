@@ -61,3 +61,27 @@ describe('getInteractiveGameShellLayout', () => {
     expect(layout.frameStyle['--desktop-game-frame-max-height']).toBe('min(88dvh, 600px)');
   });
 });
+
+describe('getInteractiveGameShellLayout sizing', () => {
+  it('caps the desktop frame by the measured content row so short screens do not overflow', () => {
+    const layout = getInteractiveGameShellLayout('portrait-cover', 326);
+
+    expect(layout.frameStyle['--desktop-game-frame-max-height']).toBe('min(88dvh, 600px, 326px)');
+    expect(layout.shellStyle['--desktop-game-shell-width']).toBe(
+      'min(100%, calc(min(88dvh, 600px, 326px) * 1.666667))'
+    );
+  });
+
+  it('keeps the 1000px card column by default', () => {
+    expect(getInteractiveGameShellLayout('portrait-cover').maxContentWidth).toBe('1000px');
+  });
+
+  it('lets the wide shell grow past the 600px card cap', () => {
+    const layout = getInteractiveGameShellLayout('portrait-cover', 950, 'wide');
+
+    expect(layout.maxContentWidth).toBe('1600px');
+    expect(layout.frameStyle['--desktop-game-frame-max-height']).toBe('min(88dvh, 960px, 950px)');
+    expect(layout.frameStyle['--desktop-game-frame-aspect']).toBe('1000 / 600');
+    expect(layout.frameStyle['--mobile-game-frame-aspect']).toBe('3 / 4');
+  });
+});

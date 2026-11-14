@@ -71,9 +71,19 @@ and scales with `Scale.ENVELOP`. React owns the visible shell aspect ratio:
   Their shell-level control mats can forward pointer events outside the visible
   canvas back to the owning scene in Phaser design coordinates.
 
+The default shell (`InteractiveAppDefaultShell`) is pinned to the viewport
+height, and `gameShellLayout.ts` sizes the frame from the measured content row
+(the space left after header and footer), so short landscape phones never
+scroll. Most scenes use the `card` size: a centered card capped at 1000×600 on
+desktop. Ridge uses the `wide` size, which drops that cap and grows with the
+screen up to 1600×960 so Bridge staging and conversations get the room. Phaser
+still renders at the fixed design size, so a wide frame upscales the canvas.
+
 When a scene changes presentation mode, `src/game/shell/Game.tsx` keeps the
-existing Phaser instance mounted and calls `game.scale.refresh()` after the new
-DOM size lands. Side-view camera runtimes listen for Phaser scale resize and
+existing Phaser instance mounted and refreshes the scale after the new DOM size
+lands. Every refresh goes through `refreshPhaserScale`, which re-reads the
+parent bounds first: Phaser's own `scale.refresh()` uses the cached parent size,
+so a container-only resize would otherwise leave the canvas one size behind. Side-view camera runtimes listen for Phaser scale resize and
 re-apply camera bounds/profile math.
 
 ## Runtime seams for new work
