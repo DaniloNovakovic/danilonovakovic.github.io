@@ -314,10 +314,16 @@ function drawGorge(g: Phaser.GameObjects.Graphics, left: number, right: number):
   // Erase the ground band and lane line inside the gap.
   g.fillStyle(PAPER, 1);
   g.fillRect(left, GROUND_Y - 3, right - left, bottom - GROUND_Y + 3);
-  g.fillStyle(INK, 0.03);
-  g.fillRect(left, GROUND_Y, right - left, waterY - GROUND_Y);
+  // Shaded air, darkening toward the water: the gorge sits in the same grey
+  // family as the banks so it never reads as a blank paper cut-out.
+  const airSteps = 4;
+  const airBand = (waterY - GROUND_Y) / airSteps;
+  for (let i = 0; i < airSteps; i += 1) {
+    g.fillStyle(INK, 0.05 + i * 0.015);
+    g.fillRect(left, GROUND_Y + airBand * i, right - left, airBand + 1);
+  }
 
-  g.fillStyle(INK, 0.1);
+  g.fillStyle(INK, 0.14);
   g.fillRect(left, waterY, right - left, bottom - waterY);
   g.lineStyle(2.4, INK, 0.7);
   g.lineBetween(left, waterY, right, waterY);

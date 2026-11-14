@@ -34,7 +34,8 @@
   can be traced in one tap.
 - Success: brief victory beat, then `bridge.draftsperson.bridge_built` thanks
   the player, beat becomes `bridge_complete`, and the player's own settled
-  bridge is baked into the scenery; walkers follow its deck.
+  bridge is baked into the scenery; walkers follow its deck with their feet on
+  the road (easing up from the lane footing at each bank).
 - Console/AI: `build road|wood X,Y X,Y`, `build test`, `build edit`,
   `build sketch`, `build done` (see `pnpm ridge:console --script "help"`).
 - Physics is a pure deterministic XPBD sim in

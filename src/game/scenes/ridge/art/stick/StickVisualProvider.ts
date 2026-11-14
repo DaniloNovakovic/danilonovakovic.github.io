@@ -7,7 +7,7 @@ import {
   type RidgeFacing
 } from '@/game/core/ridge';
 import type { RidgeVisualProvider, RidgeVisualViewModel } from '../types';
-import { ActorSpritePool, headTopFor, type ActorRenderRequest } from './actorSprites';
+import { ActorSpritePool, footDropFor, headTopFor, type ActorRenderRequest } from './actorSprites';
 import { drawAmbientFar, drawAmbientNear } from './ambientLayer';
 import { drawRidgeAreaLayer, type SceneryLayer } from './areaSets';
 import { drawCrtAtmosphere } from './atmosphere';
@@ -71,6 +71,8 @@ const SPEAKER_PULL = 0.18;
 /** CSS pixels the docked conversation box occupies along the frame bottom. */
 const CONVERSATION_BOX_RESERVE = 165;
 const BYSTANDER_ALPHA = 0.4;
+/** World units over which a walker steps from the lane up onto the bridge deck. */
+const DECK_STEP_ON = 30;
 
 /**
  * Drawing-table framing: the whole gap, the car's start on the near bank, the
@@ -386,7 +388,7 @@ export class StickVisualProvider implements RidgeVisualProvider {
     return {
       id: actor.id,
       x,
-      y: this.groundYAt(view, x),
+      y: this.groundYAt(view, x, actor.id),
       facing: facingFor(actor, frame, x),
       bob: idleBreath(frame, index, isWalking) - (isTalking ? frame.hop : 0),
       alpha: inScene ? 1 : 1 - (1 - BYSTANDER_ALPHA) * frame.fade,
@@ -534,10 +536,19 @@ export class StickVisualProvider implements RidgeVisualProvider {
     this.builtShape = design ? builtBridgeShape(design, origin.x, origin.y) : null;
   }
 
-  /** Walkers follow the deck of the bridge the player drew. */
-  private groundYAt(view: RidgeVisualViewModel, x: number): number {
+  /**
+   * Walkers follow the deck of the bridge the player drew, feet on the road.
+   * Over the first stretch from each bank they ease from the lane's footing up
+   * onto the deck, so stepping on reads as a step rather than a jump.
+   */
+  private groundYAt(view: RidgeVisualViewModel, x: number, id: RidgeActorId): number {
     if (!this.builtShape || view.areaId !== 'bridge') return GROUND_Y;
-    return deckTopAt(this.builtShape, x) ?? GROUND_Y;
+    const deck = deckTopAt(this.builtShape, x);
+    if (deck === null) return GROUND_Y;
+    const left = this.worldXForProgress(BRIDGE_RIVER_PROGRESS.left);
+    const right = this.worldXForProgress(BRIDGE_RIVER_PROGRESS.right);
+    const onto = Math.min(1, Math.max(0, Math.min(x - left, right - x) / DECK_STEP_ON));
+    return GROUND_Y + (deck - footDropFor(id) - GROUND_Y) * onto;
   }
 
   private syncEmote(view: RidgeVisualViewModel, now: number, motion: boolean): void {
