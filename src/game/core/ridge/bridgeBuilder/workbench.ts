@@ -3,12 +3,13 @@
 import {
   addBeam,
   designInk,
+  designJoints,
   DRAFTSPERSON_SKETCH,
   hasRoadAcross,
   removeBeamAt,
   type BridgeDesign
 } from './design';
-import type { BridgeMaterial, BridgePuzzle, GridPoint } from './puzzle';
+import { isAnchor, type BridgeMaterial, type BridgePuzzle, type GridPoint } from './puzzle';
 import { BridgeSim } from './sim';
 
 /**
@@ -25,12 +26,18 @@ export type BridgeBuildPhase = 'editing' | 'testing' | 'failed' | 'passed';
 export type BridgeBuildTip =
   | 'intro'
   | 'drawing'
+  /** Road reaches across, but the preview already sags or snaps. */
+  | 'wobbly'
+  /** Road reaches across and the preview holds its own weight. */
+  | 'steady'
   | 'testing'
   | 'no_road'
   /** Road only, no supports: it folds under its own weight. */
   | 'bare_deck'
   /** Has supports, but the frame still folds before the car rolls. */
   | 'loose_frame'
+  /** Free joints below the deck with nothing to stand on. */
+  | 'hanging_joint'
   | 'snapped_middle'
   | 'snapped_end'
   | 'stuck'
@@ -60,6 +67,10 @@ export interface BridgeActionResult {
 const SKETCH_OFFER_AFTER = 2;
 const UNDO_LIMIT = 60;
 const FLOURISH_SECONDS = 3;
+/** Long enough to show anything that would fold before the car rolls. */
+const PREVIEW_SECONDS = 1;
+/** Freeze the preview just after the first snap: the sag reads, the wreck doesn't. */
+const PREVIEW_AFTER_SNAP = 0.12;
 
 export class BridgeWorkbench {
   readonly puzzle: BridgePuzzle;
@@ -75,6 +86,8 @@ export class BridgeWorkbench {
   lastBreak: { x: number; y: number } | null = null;
   private history: BridgeDesign[] = [];
   private outcomeAt = 0;
+  private previewFor: BridgeDesign | null = null;
+  private previewSim: BridgeSim | null = null;
 
   constructor(puzzle: BridgePuzzle) {
     this.puzzle = puzzle;
@@ -86,6 +99,19 @@ export class BridgeWorkbench {
 
   get sketchOffered(): boolean {
     return this.attempts >= SKETCH_OFFER_AFTER;
+  }
+
+  /**
+   * The current drawing settled under its own weight (no car), so the table can
+   * show what sags or snaps before the player presses Test. Beam indices match
+   * {@link design}. Recomputed only when the design changes.
+   */
+  get preview(): BridgeSim {
+    if (this.previewFor !== this.design || !this.previewSim) {
+      this.previewFor = this.design;
+      this.previewSim = previewSettle(this.puzzle, this.design);
+    }
+    return this.previewSim;
   }
 
   /** After a few misses, the failure remark ends with a nudge toward the sketch. */
@@ -152,7 +178,7 @@ export class BridgeWorkbench {
     if (!result.ok) return { ok: false, message: result.reason };
     this.pushHistory();
     this.design = result.design;
-    this.tip = this.ink > this.puzzle.inkBudget ? 'out_of_ink' : 'drawing';
+    this.tip = this.editTip();
     return {
       ok: true,
       message: result.replaced
@@ -174,7 +200,7 @@ export class BridgeWorkbench {
     const previous = this.history.pop();
     if (!previous) return { ok: false, message: 'Nothing to undo.' };
     this.design = previous;
-    this.tip = 'drawing';
+    this.tip = this.editTip();
     return { ok: true, message: 'Undone.' };
   }
 
@@ -182,7 +208,7 @@ export class BridgeWorkbench {
     if (this.phase !== 'editing') return this.notEditing();
     this.pushHistory();
     this.design = change(this.design);
-    this.tip = 'drawing';
+    this.tip = this.editTip();
     return { ok: true, message };
   }
 
@@ -224,7 +250,7 @@ export class BridgeWorkbench {
     if (this.phase === 'editing') return { ok: true, message: 'Already drawing.' };
     if (this.phase === 'passed') return { ok: false, message: 'It already holds — use build done.' };
     this.phase = 'editing';
-    if (this.tip === 'testing') this.tip = 'drawing';
+    if (this.tip === 'testing') this.tip = this.editTip();
     return { ok: true, message: 'Back to the drawing board.' };
   }
 
@@ -240,15 +266,31 @@ export class BridgeWorkbench {
     return this.phase;
   }
 
+  /** Live coaching while drawing, read off the self-weight preview. */
+  private editTip(): BridgeBuildTip {
+    if (this.ink > this.puzzle.inkBudget) return 'out_of_ink';
+    if (!hasRoadAcross(this.puzzle, this.design)) return 'drawing';
+    return this.preview.beams.some((beam) => beam.broken) ? 'wobbly' : 'steady';
+  }
+
   /** Name what actually went wrong, so the Draftsperson can react to it. */
   private failureTip(sim: BridgeSim): BridgeBuildTip {
     if (!hasRoadAcross(this.puzzle, this.design)) return 'no_road';
     const snap = sim.firstSnap;
     if (!snap) return 'stuck';
     if (!this.design.some((beam) => beam.material === 'wood')) return 'bare_deck';
-    if (snap.time < this.puzzle.car.settleSeconds) return 'loose_frame';
+    if (snap.time < this.puzzle.car.settleSeconds) {
+      return this.hasHangingJoint() ? 'hanging_joint' : 'loose_frame';
+    }
     const along = snap.x / (this.puzzle.columns * this.puzzle.cell);
     return along < 0.25 || along > 0.75 ? 'snapped_end' : 'snapped_middle';
+  }
+
+  /** A drawn joint below the deck that is not a bolt: it only hangs from beams. */
+  private hasHangingJoint(): boolean {
+    return designJoints(this.puzzle, this.design).some(
+      (joint) => joint.y > 0 && !isAnchor(this.puzzle, joint)
+    );
   }
 
   private pushHistory(): void {
@@ -265,6 +307,15 @@ export class BridgeWorkbench {
           : 'Use build edit to get back to drawing.'
     };
   }
+}
+
+function previewSettle(puzzle: BridgePuzzle, design: BridgeDesign): BridgeSim {
+  const sim = new BridgeSim(puzzle, design, { withCar: false });
+  while (sim.time < PREVIEW_SECONDS) {
+    if (sim.firstSnap && sim.time >= sim.firstSnap.time + PREVIEW_AFTER_SNAP) break;
+    sim.step();
+  }
+  return sim;
 }
 
 function formatPoint(point: GridPoint): string {

@@ -105,8 +105,9 @@ State: `bridge:bridge_complete`.
 
 ### bridge.builder.tip.*
 
-Workbench coaching keyed by `BridgeBuildTip`: `intro`, `drawing`, `testing`,
-`no_road`, `bare_deck`, `loose_frame`, `snapped_middle`, `snapped_end`,
+Workbench coaching keyed by `BridgeBuildTip`: `intro`, `drawing`, `wobbly`,
+`steady`, `testing`, `no_road`, `bare_deck`, `loose_frame`, `hanging_joint`,
+`snapped_middle`, `snapped_end`,
 `stuck`, `sketch_shown`, `out_of_ink`, `passed`.
 
 Failure remarks react to *how* the bridge failed, in the Draftsperson's voice

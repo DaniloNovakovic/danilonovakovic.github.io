@@ -26,8 +26,12 @@ const PULSE_MS = 700;
 const DEBRIS_LIFE_MS = 1600;
 const SPLASH_LIFE_MS = 900;
 
+/** Below this many world units of droop, the drawing counts as holding still. */
+const PREVIEW_STILL = 4;
+
 const DEPTH = {
   sheet: 17,
+  preview: 20,
   beams: 22,
   car: 23,
   fx: 24,
@@ -77,6 +81,7 @@ export class BridgeBuilderView {
   private readonly car: Phaser.GameObjects.Graphics;
   private readonly fx: Phaser.GameObjects.Graphics;
   private readonly ghost: Phaser.GameObjects.Graphics;
+  private readonly preview: Phaser.GameObjects.Graphics;
   private workbench: BridgeWorkbench | null = null;
   private tool: RidgeBridgeTool = 'road';
   private drag: Drag | null = null;
@@ -98,6 +103,7 @@ export class BridgeBuilderView {
     this.car = scene.add.graphics().setDepth(DEPTH.car);
     this.fx = scene.add.graphics().setDepth(DEPTH.fx);
     this.ghost = scene.add.graphics().setDepth(DEPTH.ghost);
+    this.preview = scene.add.graphics().setDepth(DEPTH.preview);
     drawToyCar(this.car);
 
     scene.input.on(Phaser.Input.Events.POINTER_DOWN, this.onPointerDown, this);
@@ -141,6 +147,7 @@ export class BridgeBuilderView {
     this.drawSheet(workbench);
     this.beams.clear();
     this.ghost.clear();
+    this.preview.clear();
     this.fx.clear();
 
     const running = workbench.phase !== 'editing' && workbench.sim;
@@ -163,6 +170,7 @@ export class BridgeBuilderView {
     this.car.destroy();
     this.fx.destroy();
     this.ghost.destroy();
+    this.preview.destroy();
   }
 
   // --- drawing ------------------------------------------------------------
@@ -183,8 +191,13 @@ export class BridgeBuilderView {
 
     g.fillStyle(PAPER_WARM, 0.62);
     g.fillRect(left, top, width, height);
+    // No bottom edge: a dashed line there read as a floor. Below the deck is
+    // only air and river; the bolts are the sole ground.
     g.lineStyle(1.6, INK, 0.4);
-    strokeDashedRect(g, left, top, width, height, 7, 5);
+    strokeDashedLine(g, left, top + height, left, top, 7, 5);
+    strokeDashedLine(g, left, top, left + width, top, 7, 5);
+    strokeDashedLine(g, left + width, top, left + width, top + height, 7, 5);
+    drawRiverInk(g, this.originX, this.originY + puzzle.waterDepth, puzzle.columns * puzzle.cell);
     // Tape corners hold the sheet to the page.
     g.fillStyle(PAPER, 0.85);
     g.lineStyle(1.2, INK, 0.35);
@@ -235,10 +248,15 @@ export class BridgeBuilderView {
     const g = this.beams;
     const eraseTarget =
       this.tool === 'eraser' && this.hover ? this.beamIndexAt(design, this.hover.x, this.hover.y) : -1;
+    const snapped = this.drawPreview(workbench);
 
     design.forEach((beam, index) => {
       const ink = this.inkBeam(beam.a, beam.b, beam.material);
-      drawInkBeam(g, ink, { alpha: index === eraseTarget ? 0.3 : 1 });
+      // Members that would snap under their own weight wear strain hatching.
+      drawInkBeam(g, ink, {
+        alpha: index === eraseTarget ? 0.3 : 1,
+        stress: snapped.has(index) ? 1 : 0
+      });
     });
     for (const joint of designJoints(workbench.puzzle, design)) {
       if (workbench.puzzle.anchors.some((a) => a.x === joint.x && a.y === joint.y)) continue;
@@ -251,6 +269,48 @@ export class BridgeBuilderView {
     }
 
     this.drawGhost(workbench, now);
+  }
+
+  /**
+   * Faint pencil of the drawing settled under its own weight, so floppy parts
+   * visibly droop before the test. Returns beams that would snap doing so.
+   */
+  private drawPreview(workbench: BridgeWorkbench): Set<number> {
+    const snapped = new Set<number>();
+    const { design, puzzle } = workbench;
+    if (design.length === 0) return snapped;
+    const sim = workbench.preview;
+    let droop = 0;
+    design.forEach((spec, index) => {
+      const beam = sim.beams[index]!;
+      if (beam.broken) snapped.add(index);
+      for (const [point, joint] of [
+        [spec.a, sim.joints[beam.a]!],
+        [spec.b, sim.joints[beam.b]!]
+      ] as const) {
+        droop = Math.max(droop, Math.hypot(joint.x - point.x * puzzle.cell, joint.y - point.y * puzzle.cell));
+      }
+    });
+    if (droop < PREVIEW_STILL) return snapped;
+
+    const g = this.preview;
+    const floor = puzzle.waterDepth;
+    for (const beam of sim.beams) {
+      if (beam.broken) continue;
+      const a = sim.joints[beam.a]!;
+      const b = sim.joints[beam.b]!;
+      g.lineStyle(beam.material === 'road' ? 3.2 : 2, INK, 0.3);
+      strokeDashedLine(
+        g,
+        this.originX + a.x,
+        this.originY + Math.min(a.y, floor),
+        this.originX + b.x,
+        this.originY + Math.min(b.y, floor),
+        4,
+        4
+      );
+    }
+    return snapped;
   }
 
   private drawGhost(workbench: BridgeWorkbench, now: number): void {
@@ -607,19 +667,20 @@ function strokeDashedLine(
   }
 }
 
-function strokeDashedRect(
-  g: Phaser.GameObjects.Graphics,
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  dash: number,
-  gap: number
-): void {
-  strokeDashedLine(g, x, y, x + w, y, dash, gap);
-  strokeDashedLine(g, x + w, y, x + w, y + h, dash, gap);
-  strokeDashedLine(g, x + w, y + h, x, y + h, dash, gap);
-  strokeDashedLine(g, x, y + h, x, y, dash, gap);
+/** Wavy ink across the gap at the water line: nothing to stand on down there. */
+function drawRiverInk(g: Phaser.GameObjects.Graphics, x: number, y: number, width: number): void {
+  for (const [dy, alpha] of [
+    [0, 0.55],
+    [7, 0.3]
+  ] as const) {
+    g.lineStyle(1.6, INK, alpha);
+    g.beginPath();
+    g.moveTo(x, y + dy);
+    for (let d = 6; d <= width; d += 6) {
+      g.lineTo(x + d, y + dy + (d % 12 === 0 ? 0 : 2.2));
+    }
+    g.strokePath();
+  }
 }
 
 function distanceToSegment(

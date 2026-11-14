@@ -26,10 +26,13 @@ const BRIDGE_BUILD_STARTED_FLAG = 'bridge_build_started';
 const BRIDGE_TIP_IDS: readonly BridgeBuildTip[] = [
   'intro',
   'drawing',
+  'wobbly',
+  'steady',
   'testing',
   'no_road',
   'bare_deck',
   'loose_frame',
+  'hanging_joint',
   'snapped_middle',
   'snapped_end',
   'stuck',

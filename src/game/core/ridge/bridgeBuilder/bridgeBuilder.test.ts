@@ -54,6 +54,22 @@ const UNDER_TRUSS: BridgeDesign = [
   wood(8, 2, 6, 0)
 ];
 
+/** A W hung between the low bolts: its bottom points dangle over the river. */
+const DANGLING_W: BridgeDesign = [
+  road(0, 0, 1, 0),
+  road(1, 0, 2, 0),
+  road(2, 0, 4, 0),
+  road(4, 0, 6, 0),
+  road(6, 0, 7, 0),
+  road(7, 0, 8, 0),
+  wood(0, 2, 1, 0),
+  wood(2, 0, 3, 2),
+  wood(3, 2, 4, 0),
+  wood(4, 0, 5, 2),
+  wood(5, 2, 6, 0),
+  wood(7, 0, 8, 2)
+];
+
 function run(design: BridgeDesign) {
   const sim = new BridgeSim(PUZZLE, design);
   return { status: sim.runToEnd(), sim };
@@ -186,6 +202,7 @@ describe('Blueprint Bridge workbench', () => {
   it.each([
     ['road with no supports', FLAT_DECK, 'bare_deck'],
     ['triangles with loose tops', LOOSE_TRIANGLES, 'loose_frame'],
+    ['a W whose low points dangle', DANGLING_W, 'hanging_joint'],
     // The sketch missing one middle diagonal survives settling, then cracks under the car.
     ['a truss missing a middle brace', DRAFTSPERSON_SKETCH.filter((_, i) => i !== 7), 'snapped_middle']
   ] as const)('reacts to %s', (_name, design, tip) => {
@@ -194,6 +211,24 @@ describe('Blueprint Bridge workbench', () => {
     bench.apply({ kind: 'test', instant: true });
     expect(bench.phase).toBe('failed');
     expect(bench.tip).toBe(tip);
+  });
+
+  it.each([
+    ['a sound truss', DRAFTSPERSON_SKETCH, 'steady', false],
+    ['triangles with loose tops', LOOSE_TRIANGLES, 'wobbly', true],
+    ['a W whose low points dangle', DANGLING_W, 'wobbly', true]
+  ] as const)('previews %s before testing', (_name, design, tip, snaps) => {
+    const bench = new BridgeWorkbench(PUZZLE);
+    for (const beam of design) bench.apply({ kind: 'add', ...beam });
+    expect(bench.tip).toBe(tip);
+    expect(bench.preview.beams.some((beam) => beam.broken)).toBe(snaps);
+    expect(bench.attempts).toBe(0);
+  });
+
+  it('only coaches the preview once road reaches across', () => {
+    const bench = new BridgeWorkbench(PUZZLE);
+    bench.apply({ kind: 'add', material: 'road', a: { x: 0, y: 0 }, b: { x: 2, y: 0 } });
+    expect(bench.tip).toBe('drawing');
   });
 
   it('animates a test one frame at a time', () => {

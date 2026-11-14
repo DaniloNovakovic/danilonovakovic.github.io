@@ -167,8 +167,11 @@ export const sceneMessages = {
         "bridge.draftsperson.bridge_built.04":
           "The pencil lines darken into real timber. Cicka trots over to inspect the far bank.",
         "bridge.builder.tip.intro":
-          "Drag from a bolt to draw a beam. Road for the car, wood to hold it up. Then press Test!",
-        "bridge.builder.tip.drawing": "Looking good! Triangles keep their shape. Flat beams just sag.",
+          "Drag from a bolt to draw. The four bolts are our only solid ground; everything else hangs off them.",
+        "bridge.builder.tip.drawing": "Road for the car, wood to hold it up. Triangles keep their shape.",
+        "bridge.builder.tip.wobbly": "Hmm, see the faint pencil? That's where it droops before the car even rolls.",
+        "bridge.builder.tip.wobbly.2": "The ghost lines are sagging... something in there can still fold.",
+        "bridge.builder.tip.steady": "Ooh, it's holding its own weight. Ready when you are!",
         "bridge.builder.tip.testing": "Go, little car, go...!",
         "bridge.builder.tip.no_road": "Glub. Our car went swimming... the road stops short somewhere.",
         "bridge.builder.tip.no_road.2": "Splash! The road needs to reach bank to bank, no gaps.",
@@ -179,6 +182,10 @@ export const sceneMessages = {
         "bridge.builder.tip.loose_frame": "So close! Those triangle tips wobble loose. Try tying them together.",
         "bridge.builder.tip.loose_frame.2": "Hmm. It folded before the car even moved. Join the peaks along the top?",
         "bridge.builder.tip.loose_frame.3": "The points flap like loose pages. Connect them and they'll hold.",
+        "bridge.builder.tip.hanging_joint":
+          "Those low points are just dangling in the air. Nothing's under them but river.",
+        "bridge.builder.tip.hanging_joint.2": "No ground down there! Tie the low points back with triangles.",
+        "bridge.builder.tip.hanging_joint.3": "A pillar needs something to stand on. Down there it's only water.",
         "bridge.builder.tip.snapped_middle": "Snap! The middle gave way. It's always the loneliest part of a bridge.",
         "bridge.builder.tip.snapped_middle.2": "Ah, right in the belly. One more triangle near my X?",
         "bridge.builder.tip.snapped_middle.3": "It almost made it! The middle just needs a friend near the X.",
