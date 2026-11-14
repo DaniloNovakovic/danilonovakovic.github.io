@@ -12,6 +12,10 @@ export interface StampedeJokeLook {
 const INK = 0x1a1a1a;
 const RING_MS = 420;
 const RING_SEGMENTS = 22;
+/** Bubble tail sits this far above the player's centre. */
+const BUBBLE_LIFT = 46;
+/** Gap between the top of the bubble and the stamp's centre. */
+const STAMP_GAP = 22;
 
 export function createStampedeJokeLook(scene: Phaser.Scene): StampedeJokeLook {
   return new PhaserStampedeJokeLook(scene);
@@ -67,11 +71,11 @@ class PhaserStampedeJokeLook implements StampedeJokeLook {
     this.scene.tweens.killTweensOf(this.stampText);
     this.stampText
       .setText(text)
-      .setPosition(at.x, at.y - 96)
       .setVisible(true)
       .setAlpha(1)
       .setScale(0.4)
       .setAngle(-8);
+    this.placeStamp(at);
     this.scene.tweens.add({
       targets: this.stampText,
       scale: 1,
@@ -89,12 +93,20 @@ class PhaserStampedeJokeLook implements StampedeJokeLook {
   }
 
   follow(player: { x: number; y: number }): void {
-    if (!this.bubble.visible) return;
-    if (this.scene.time.now >= this.bubbleUntilMs) {
+    if (this.bubble.visible && this.scene.time.now >= this.bubbleUntilMs) {
       this.bubble.setVisible(false);
-      return;
     }
-    this.bubble.setPosition(player.x, player.y - 46);
+    if (this.bubble.visible) this.bubble.setPosition(player.x, player.y - BUBBLE_LIFT);
+    if (this.stampText.visible) this.placeStamp(player);
+  }
+
+  /**
+   * The stamp rides with the player, stacked above the joke bubble, so a fast
+   * rider never slides the bubble underneath it.
+   */
+  private placeStamp(player: { x: number; y: number }): void {
+    const bubbleTop = player.y - BUBBLE_LIFT - (this.bubble.visible ? this.bubble.height : 0);
+    this.stampText.setPosition(player.x, bubbleTop - STAMP_GAP);
   }
 
   reset(): void {

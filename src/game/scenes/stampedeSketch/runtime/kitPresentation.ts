@@ -13,7 +13,14 @@ export interface StampedeKitLookFrame {
   selfieRank: 0 | 1 | 2;
   selfieRear: boolean;
   glassesRank: 0 | 1 | 2;
+  guitar: StampedeGuitarLookFrame | null;
   shell: { x: number; y: number; ready: boolean } | null;
+}
+
+export interface StampedeGuitarLookFrame {
+  velocity: { x: number; y: number };
+  notes: readonly { x: number; y: number; bornAtMs: number; untilMs: number; glyph: number }[];
+  chord: { x: number; y: number; atMs: number; radius: number } | null;
 }
 
 export interface StampedeKitLook {
@@ -30,6 +37,11 @@ const AMBER = 0xf0a202;
 const STINK_GROW_MS = 380;
 const TRAIL_LENGTH = 7;
 const TRAIL_EVERY_MS = 45;
+const GUITAR_RED = 0xb91c1c;
+const GUITAR_DARK = 0x7f1d1d;
+const FLAME = 0xf97316;
+const FLAME_HOT = 0xfde047;
+const CHORD_MS = 420;
 
 export function createStampedeKitLook(scene: Phaser.Scene): StampedeKitLook {
   const graphics = scene.add.graphics().setDepth(31);
@@ -44,6 +56,7 @@ export function createStampedeKitLook(scene: Phaser.Scene): StampedeKitLook {
         stink.sync(frame, true);
         drawBeerSplash(graphics, frame.x, frame.y - 16);
       } else {
+        if (frame.guitar) drawGuitar(graphics, ground, frame, frame.guitar);
         drawBreath(graphics, frame);
         stink.sync(frame, false);
         drawGear(graphics, frame);
@@ -102,6 +115,196 @@ class StinkCloudLook {
       [{ x: point.x, y: point.y }, ...(this.trails[index] ?? [])].slice(0, TRAIL_LENGTH)
     ));
   }
+}
+
+function drawGuitar(
+  graphics: Phaser.GameObjects.Graphics,
+  ground: Phaser.GameObjects.Graphics,
+  frame: StampedeKitLookFrame,
+  guitar: StampedeGuitarLookFrame
+): void {
+  guitar.notes.forEach((note) => drawNote(ground, note, frame.nowMs));
+  const speed = Math.hypot(guitar.velocity.x, guitar.velocity.y);
+  if (speed > 160) drawSpeedLines(graphics, frame, guitar.velocity, speed);
+  drawFlyingV(ground, frame.x, frame.y + 19, guitar.velocity, frame.nowMs, speed);
+  if (guitar.chord) drawChord(graphics, guitar.chord, frame.nowMs);
+}
+
+/** The board: a Flying V lying flat under the rider, headstock pointing where you surf. */
+function drawFlyingV(
+  graphics: Phaser.GameObjects.Graphics,
+  x: number,
+  y: number,
+  velocity: { x: number; y: number },
+  nowMs: number,
+  speed: number
+): void {
+  const facing = velocity.x < -1 ? -1 : 1;
+  const tilt = Phaser.Math.Clamp(velocity.y / 260, -0.35, 0.35) * facing;
+  const bob = speed > 40 ? Math.sin(nowMs / 70) * 0.8 : 0;
+  const point = (along: number, side: number) => {
+    const ax = along * facing;
+    return {
+      x: x + ax * Math.cos(tilt) - side * Math.sin(tilt),
+      y: y + bob + ax * Math.sin(tilt) + side * Math.cos(tilt)
+    };
+  };
+
+  graphics.fillStyle(INK, 0.18);
+  graphics.fillEllipse(x, y + 6, 54, 9);
+
+  // V body at the tail, two prongs splayed back.
+  const body = [point(-4, 0), point(-26, -9), point(-22, -3), point(-12, 0), point(-22, 3), point(-26, 9)];
+  graphics.fillStyle(GUITAR_RED, 1);
+  tracePoly(graphics, body).fillPath();
+  graphics.lineStyle(2, INK, 1);
+  tracePoly(graphics, body).strokePath();
+
+  // Neck and headstock up front.
+  const neckA = point(-6, -1.6);
+  const neckB = point(18, -1.6);
+  const neckC = point(18, 1.6);
+  const neckD = point(-6, 1.6);
+  graphics.fillStyle(0x8b5a2b, 1);
+  tracePoly(graphics, [neckA, neckB, neckC, neckD]).fillPath();
+  graphics.lineStyle(1.4, INK, 1);
+  tracePoly(graphics, [neckA, neckB, neckC, neckD]).strokePath();
+  const head = [point(18, -3), point(26, -4.5), point(27, 1), point(18, 3)];
+  graphics.fillStyle(INK, 1);
+  tracePoly(graphics, head).fillPath();
+
+  // Strings catch the light.
+  graphics.lineStyle(0.8, PAPER, 0.85);
+  const s1 = point(-14, -0.6);
+  const s2 = point(20, -0.6);
+  graphics.lineBetween(s1.x, s1.y, s2.x, s2.y);
+  const s3 = point(-14, 0.8);
+  const s4 = point(20, 0.8);
+  graphics.lineBetween(s3.x, s3.y, s4.x, s4.y);
+  graphics.fillStyle(GUITAR_DARK, 1);
+  const pickup = point(-11, 0);
+  graphics.fillCircle(pickup.x, pickup.y, 1.6);
+}
+
+type Pt = { x: number; y: number };
+
+function tracePoly(graphics: Phaser.GameObjects.Graphics, points: readonly Pt[]): Phaser.GameObjects.Graphics {
+  graphics.beginPath();
+  points.forEach((point, index) => {
+    if (index === 0) graphics.moveTo(point.x, point.y);
+    else graphics.lineTo(point.x, point.y);
+  });
+  graphics.closePath();
+  return graphics;
+}
+
+function drawNote(
+  graphics: Phaser.GameObjects.Graphics,
+  note: { x: number; y: number; bornAtMs: number; untilMs: number; glyph: number },
+  nowMs: number
+): void {
+  const life = Phaser.Math.Clamp((note.untilMs - nowMs) / Math.max(1, note.untilMs - note.bornAtMs), 0, 1);
+  const pop = Math.min(1, (nowMs - note.bornAtMs) / 120);
+  const alpha = Math.min(1, life * 2.2) * pop;
+  if (alpha <= 0.02) return;
+  const flicker = Math.sin(nowMs / 55 + note.x * 0.3) * 1.5;
+  const x = note.x;
+  const y = note.y - (1 - life) * 6;
+
+  // Little floor flame under each note.
+  graphics.fillStyle(FLAME, 0.32 * alpha);
+  graphics.fillEllipse(x, y + 5, 20, 7);
+  graphics.fillStyle(FLAME, 0.75 * alpha);
+  graphics.fillTriangle(x - 5, y + 5, x + 5, y + 5, x + flicker * 0.5, y - 6 - flicker);
+  graphics.fillStyle(FLAME_HOT, 0.85 * alpha);
+  graphics.fillTriangle(x - 2.5, y + 5, x + 2.5, y + 5, x, y - 1 - flicker * 0.5);
+
+  graphics.fillStyle(INK, alpha);
+  graphics.lineStyle(1.6, INK, alpha);
+  const glyph = note.glyph % 4;
+  if (glyph === 1) {
+    // Beamed pair.
+    graphics.fillEllipse(x - 5, y + 2, 6, 4.4);
+    graphics.fillEllipse(x + 4, y + 1, 6, 4.4);
+    graphics.lineBetween(x - 2.3, y + 2, x - 2.3, y - 9);
+    graphics.lineBetween(x + 6.7, y + 1, x + 6.7, y - 10);
+    graphics.lineStyle(2.4, INK, alpha);
+    graphics.lineBetween(x - 2.3, y - 9, x + 6.7, y - 10);
+    return;
+  }
+  graphics.fillEllipse(x, y + 2, 6.4, 4.6);
+  graphics.lineBetween(x + 2.8, y + 2, x + 2.8, y - 10);
+  if (glyph === 0 || glyph === 3) {
+    graphics.beginPath();
+    graphics.moveTo(x + 2.8, y - 10);
+    graphics.lineTo(x + 7, y - 6);
+    graphics.lineTo(x + 6, y - 3);
+    graphics.strokePath();
+  }
+  if (glyph === 3) {
+    graphics.beginPath();
+    graphics.moveTo(x + 2.8, y - 7);
+    graphics.lineTo(x + 6.5, y - 3.5);
+    graphics.strokePath();
+  }
+}
+
+function drawSpeedLines(
+  graphics: Phaser.GameObjects.Graphics,
+  frame: StampedeKitLookFrame,
+  velocity: { x: number; y: number },
+  speed: number
+): void {
+  const backX = -velocity.x / speed;
+  const backY = -velocity.y / speed;
+  const sideX = -backY;
+  const sideY = backX;
+  const strength = Phaser.Math.Clamp((speed - 160) / 140, 0, 1);
+  graphics.lineStyle(1.4, INK, 0.45 * strength);
+  [-10, 0, 10].forEach((offset, index) => {
+    const jitter = (Math.floor(frame.nowMs / 60) + index) % 3;
+    const start = 22 + jitter * 3;
+    const length = 10 + strength * 14;
+    const sx = frame.x + backX * start + sideX * offset;
+    const sy = frame.y + backY * start + sideY * offset;
+    graphics.lineBetween(sx, sy, sx + backX * length, sy + backY * length);
+  });
+}
+
+/** Power chord: a jagged ink ring that slams outward with a few lightning ticks. */
+function drawChord(
+  graphics: Phaser.GameObjects.Graphics,
+  chord: { x: number; y: number; atMs: number; radius: number },
+  nowMs: number
+): void {
+  const age = nowMs - chord.atMs;
+  if (age < 0 || age > CHORD_MS) return;
+  const t = age / CHORD_MS;
+  const radius = chord.radius * Phaser.Math.Easing.Cubic.Out(t);
+  const alpha = 1 - t;
+  const points: Array<{ x: number; y: number }> = [];
+  const spikes = 18;
+  for (let index = 0; index < spikes; index += 1) {
+    const angle = (index / spikes) * Math.PI * 2;
+    const r = radius * (index % 2 === 0 ? 1 : 0.88);
+    points.push({ x: chord.x + Math.cos(angle) * r, y: chord.y + Math.sin(angle) * r * 0.82 });
+  }
+  graphics.fillStyle(FLAME, 0.12 * alpha);
+  tracePoly(graphics, points).fillPath();
+  graphics.lineStyle(3, INK, alpha);
+  tracePoly(graphics, points).strokePath();
+  graphics.lineStyle(1.6, GUITAR_RED, alpha);
+  [0.3, 1.9, 3.4, 4.9].forEach((angle) => {
+    const inner = radius * 0.45;
+    const outer = radius * 0.95;
+    const mid = (inner + outer) / 2;
+    graphics.beginPath();
+    graphics.moveTo(chord.x + Math.cos(angle) * inner, chord.y + Math.sin(angle) * inner * 0.82);
+    graphics.lineTo(chord.x + Math.cos(angle + 0.12) * mid, chord.y + Math.sin(angle + 0.12) * mid * 0.82);
+    graphics.lineTo(chord.x + Math.cos(angle - 0.06) * mid, chord.y + Math.sin(angle - 0.06) * mid * 0.82);
+    graphics.lineTo(chord.x + Math.cos(angle) * outer, chord.y + Math.sin(angle) * outer * 0.82);
+    graphics.strokePath();
+  });
 }
 
 function drawBreath(graphics: Phaser.GameObjects.Graphics, frame: StampedeKitLookFrame): void {

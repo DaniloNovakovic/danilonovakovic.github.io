@@ -9,6 +9,7 @@ const BARK_LINES: Partial<Record<StampedeFlockKind, string>> = {
   situationship: "It's complicated.",
   rooster: 'Square up.',
   bartender: 'Last call.',
+  metalhead: 'Sick riff! \\m/',
   ex: 'We need to talk.',
   boyfriend: "Who's this guy?"
 };
@@ -21,6 +22,7 @@ const BARK_RARITY: Partial<Record<StampedeFlockKind, number>> = {
   situationship: 4,
   rooster: 5,
   bartender: 6,
+  metalhead: 2,
   ex: 7
 };
 
@@ -31,6 +33,7 @@ const BARK_DELAY_MS: Partial<Record<StampedeFlockKind, number>> = {
   situationship: 4_600,
   rooster: 8_000,
   bartender: 4_000,
+  metalhead: 1_800,
   ex: 1_200,
   boyfriend: 6_000
 };

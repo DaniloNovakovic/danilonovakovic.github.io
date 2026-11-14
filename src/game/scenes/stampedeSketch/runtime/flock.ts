@@ -7,10 +7,16 @@ export type StampedeFlockKind =
   | 'fixer'
   | 'situationship'
   | 'bartender'
+  | 'metalhead'
   | 'ex'
   | 'boyfriend';
 
-export type StampedeWeaponThreat = 'badSelfie' | 'badBreath' | 'badSmell' | 'fakeGlasses';
+export type StampedeWeaponThreat =
+  | 'badSelfie'
+  | 'badBreath'
+  | 'badSmell'
+  | 'fakeGlasses'
+  | 'metalRiff';
 
 export interface StampedeFlockProfile {
   kind: StampedeFlockKind;
@@ -37,6 +43,8 @@ export const STAMPEDE_FIXER_AT_MS = 28_000;
 export const STAMPEDE_SITUATIONSHIP_AT_MS = 34_000;
 export const STAMPEDE_ROOSTER_AT_MS = 46_000;
 export const STAMPEDE_BARTENDER_AT_MS = 54_000;
+/** Earliest the metalhead can show up, and only once you are riding the guitar. */
+export const STAMPEDE_METALHEAD_AT_MS = 16_000;
 
 type StampedeSpawnKind = Exclude<StampedeFlockKind, 'ex' | 'boyfriend'>;
 
@@ -44,6 +52,13 @@ interface StampedeSpawnRule {
   atMs: number;
   cap: number;
   weight: number;
+  /** Only joins when the run is playing metal. */
+  needsGuitar?: boolean;
+}
+
+export interface StampedeSpawnContext {
+  /** The player owns Guitar Surf, so metalheads hear the riff. */
+  guitar?: boolean;
 }
 
 const SPAWN_RULES: Record<StampedeSpawnKind, StampedeSpawnRule> = {
@@ -54,7 +69,8 @@ const SPAWN_RULES: Record<StampedeSpawnKind, StampedeSpawnRule> = {
   fixer: { atMs: STAMPEDE_FIXER_AT_MS, cap: 1, weight: 1.2 },
   situationship: { atMs: STAMPEDE_SITUATIONSHIP_AT_MS, cap: 2, weight: 1.5 },
   rooster: { atMs: STAMPEDE_ROOSTER_AT_MS, cap: 2, weight: 1.5 },
-  bartender: { atMs: STAMPEDE_BARTENDER_AT_MS, cap: 1, weight: 1 }
+  bartender: { atMs: STAMPEDE_BARTENDER_AT_MS, cap: 1, weight: 1 },
+  metalhead: { atMs: STAMPEDE_METALHEAD_AT_MS, cap: 2, weight: 2.2, needsGuitar: true }
 };
 
 const SPAWN_KINDS = Object.keys(SPAWN_RULES) as StampedeSpawnKind[];
@@ -68,11 +84,14 @@ export function pickStampedeSpawnKind(
   elapsedMs: number,
   activeCounts: Partial<Record<StampedeFlockKind, number>>,
   introduced: ReadonlySet<StampedeFlockKind>,
-  random: () => number = Math.random
+  random: () => number = Math.random,
+  context: StampedeSpawnContext = {}
 ): StampedeSpawnKind {
-  const open = SPAWN_KINDS.filter((kind) => (
-    elapsedMs >= SPAWN_RULES[kind].atMs && (activeCounts[kind] ?? 0) < SPAWN_RULES[kind].cap
-  ));
+  const open = SPAWN_KINDS.filter((kind) => {
+    const rule = SPAWN_RULES[kind];
+    if (rule.needsGuitar && !context.guitar) return false;
+    return elapsedMs >= rule.atMs && (activeCounts[kind] ?? 0) < rule.cap;
+  });
   const debut = open
     .filter((kind) => kind !== 'chick' && !introduced.has(kind))
     .sort((left, right) => SPAWN_RULES[left].atMs - SPAWN_RULES[right].atMs)[0];
@@ -97,6 +116,9 @@ export function getStampedeFlockProfile(kind: StampedeFlockKind): StampedeFlockP
       return { kind, maxHp: 3, scrapValue: 3, speed: 34, radius: 15 };
     case 'rooster':
       return { kind, maxHp: 3, scrapValue: 3, speed: 50, radius: 16 };
+    case 'metalhead':
+      // Fastest of the regular flock: you cannot burn her, so you have to outrun her.
+      return { kind, maxHp: 2, scrapValue: 2, speed: 62, radius: 12 };
     case 'situationship':
       return { kind, maxHp: 2, scrapValue: 2, speed: 58, radius: 12 };
     case 'fixer':
@@ -121,6 +143,7 @@ export function isStampedeWeaponImmune(
   if (kind === 'nerd' && weapon === 'fakeGlasses' && rank < 2) return true;
   if (kind === 'perfume' && weapon === 'badSmell') return true;
   if (kind === 'situationship' && weapon === 'badSelfie') return true;
+  if (kind === 'metalhead' && weapon === 'metalRiff') return true;
   return false;
 }
 
