@@ -2,11 +2,12 @@ import type {
   RidgeActorId,
   RidgeActorPresence,
   RidgeAreaId,
+  RidgeEmotion,
   RidgeInteractable,
   RidgeMode,
   RidgeObservation
 } from '@/game/core/ridge';
-import { actorIdForSpeaker } from '../content/castRegistry';
+import { conversationPartnerId, speakingActorIdFor } from './conversationStaging';
 
 /**
  * Replaceable art seam.
@@ -23,6 +24,12 @@ export interface RidgeVisualViewModel {
   focus: RidgeInteractable | null;
   /** Who is speaking right now, so the world can animate their mouth. */
   speakingActorId: RidgeActorId | null;
+  /** Who the player is talking with, kept in frame while either speaks. */
+  partnerActorId: RidgeActorId | null;
+  /** Authored mood of the current line; drives faces and emote marks. */
+  speakingEmotion: RidgeEmotion | null;
+  /** Changes whenever a new line starts, so one-shot reactions can replay. */
+  lineKey: string | null;
   actors: readonly RidgeActorPresence[];
   crossingOpen: boolean;
 }
@@ -49,8 +56,11 @@ export function toRidgeVisualViewModel(
     beat: observation.beat,
     ambience: observation.ambience,
     focus: observation.nearby[0] ?? null,
-    speakingActorId: observation.conversation
-      ? actorIdForSpeaker(observation.conversation.speakerId)
+    speakingActorId: speakingActorIdFor(observation),
+    partnerActorId: observation.conversation ? conversationPartnerId(observation) : null,
+    speakingEmotion: observation.conversation?.emotion ?? null,
+    lineKey: observation.conversation
+      ? `${observation.conversation.id}:${observation.conversation.lineIndex}`
       : null,
     actors: observation.actors,
     crossingOpen

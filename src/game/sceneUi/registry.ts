@@ -16,7 +16,13 @@ export type SceneUiSurfaceComponent = ComponentType<SceneUiSurfaceProps>;
 export interface SceneUiSurfaceDefinition {
   id: SceneUiSurfaceId;
   component: SceneUiSurfaceComponent;
-  panelChrome?: 'default' | 'overlay';
+  /**
+   * - `default`: centered over the game frame with a padded backdrop.
+   * - `overlay`: a centered floating card (terminals, result sheets).
+   * - `docked`: fills the game frame with no chrome of its own, so a scene can
+   *   stage the surface itself (e.g. a conversation box along the bottom edge).
+   */
+  panelChrome?: 'default' | 'overlay' | 'docked';
 }
 
 const SCENE_UI_DEFINITIONS: readonly SceneUiSurfaceDefinition[] = [

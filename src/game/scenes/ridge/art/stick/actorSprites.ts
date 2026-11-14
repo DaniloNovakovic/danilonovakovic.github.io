@@ -61,6 +61,8 @@ export interface ActorRenderRequest {
   pose: StickPose;
   /** Vertical offset for breathing and walk bounce — applied as a transform. */
   bob: number;
+  /** Bystanders fade back while others talk. */
+  alpha?: number;
 }
 
 /**
@@ -108,6 +110,7 @@ class ActorSprite {
   private poseKey = '';
   private placedX = Number.NaN;
   private placedY = Number.NaN;
+  private placedAlpha = 1;
 
   constructor(scene: Phaser.Scene, id: RidgeActorId) {
     this.id = id;
@@ -115,7 +118,8 @@ class ActorSprite {
   }
 
   sync(request: ActorRenderRequest): void {
-    const key = `${request.facing}|${request.pose.frame}|${request.pose.walking}|${request.pose.talking}`;
+    const { pose } = request;
+    const key = `${request.facing}|${pose.frame}|${pose.walking}|${pose.talking}|${pose.emotion ?? ''}`;
     if (key !== this.poseKey) {
       this.poseKey = key;
       this.graphics.clear();
@@ -128,6 +132,11 @@ class ActorSprite {
       this.placedX = x;
       this.placedY = y;
       this.graphics.setPosition(x, y);
+    }
+    const alpha = Math.round((request.alpha ?? 1) * 100) / 100;
+    if (alpha !== this.placedAlpha) {
+      this.placedAlpha = alpha;
+      this.graphics.setAlpha(alpha);
     }
     this.graphics.setVisible(true);
   }

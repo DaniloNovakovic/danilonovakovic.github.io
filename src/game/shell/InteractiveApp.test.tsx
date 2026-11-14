@@ -699,7 +699,7 @@ describe('InteractiveApp', () => {
     });
   });
 
-  it('keeps Ridge conversation panel in-flow inside the scene UI overlay host', async () => {
+  it('docks the Ridge conversation panel inside the game frame', async () => {
     bridgeActions.enterScene(RIDGE_SCENE_ID);
     bridgeActions.setSceneUiPanel(RIDGE_SCENE_ID, 'ridgeConversation', {
       conversationId: 'cicka-intro',
@@ -710,16 +710,18 @@ describe('InteractiveApp', () => {
       lineCount: 2,
       awaitingChoice: false,
       choices: [],
-      portrait: 'cicka'
+      portrait: 'cicka',
+      speakerSide: 'right'
     });
     render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
 
     const dialog = screen.getByRole('dialog', { name: /cicka/i });
-    const overlayHost = screen.getByTestId('scene-ui-panel-overlay');
+    const dockedHost = screen.getByTestId('scene-ui-panel-docked');
 
-    // Fixed + host transform/overflow clips the dialog into a black strip mid-CRT.
+    // Fixed would escape the frame-sized docked host and its rounded clip.
     expect(dialog.className).not.toMatch(/\bfixed\b/);
-    expect(overlayHost.contains(dialog)).toBe(true);
+    expect(dockedHost.contains(dialog)).toBe(true);
+    expect(document.activeElement).toBe(dialog);
     expect(within(dialog).getByRole('button', { name: /continue/i })).toBeDefined();
     expect(within(dialog).getByRole('button', { name: /step back/i })).toBeDefined();
 

@@ -29,6 +29,7 @@ import {
 import { bindSideViewKeyboard } from '@/game/sharedSceneRuntime/input/sceneKeyboard';
 import { StickVisualProvider } from '../art/stick/StickVisualProvider';
 import { toRidgeVisualViewModel } from '../art/types';
+import { speakerSideFor } from '../art/conversationStaging';
 import { loadRidgePresenceCatalog } from '../content/presenceCatalog';
 import { loadRidgeRouteDialogueCatalog } from '../content/routeCatalog';
 import type { RidgeConversationPanelView } from '../sceneUi/RidgeConversationPanel';
@@ -271,7 +272,8 @@ export class RidgeScene extends Phaser.Scene {
         id: choice.id,
         label: choice.label
       })),
-      portrait: portraitForSpeaker(c.speakerId)
+      portrait: portraitForSpeaker(c.speakerId),
+      speakerSide: speakerSideFor(observation)
     };
 
     bridgeActions.setSceneUiPanel(RIDGE_SCENE_ID, 'ridgeConversation', view);
