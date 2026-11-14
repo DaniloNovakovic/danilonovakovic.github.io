@@ -10,6 +10,7 @@ export const gameShellMessages = {
   backToRidge: "Back to Ridge",
   backToCity: "Back to City",
   backToStreet: "Back to the street",
+  backToOverworld: "Back to the overworld",
   back: "Back",
   devSwitcher: "Dev scene switcher",
   ridgeConsoleHint: "Ridge AI playtest: pnpm ridge:console",

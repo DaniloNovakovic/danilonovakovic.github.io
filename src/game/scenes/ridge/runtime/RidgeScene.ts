@@ -58,7 +58,6 @@ export class RidgeScene extends Phaser.Scene {
   private getRidgeDevControls?: () => RidgeDevControls | undefined;
   private lastConversationKey: string | null = null;
   private lastDevSnapshotKey = '';
-  private escJustHandled = false;
   private nextKey?: Phaser.Input.Keyboard.Key;
   private prevKey?: Phaser.Input.Keyboard.Key;
 
@@ -93,7 +92,9 @@ export class RidgeScene extends Phaser.Scene {
       roles: presence.roles,
       barks: presence.barks
     });
-    this.keys = bindSideViewKeyboard(this.input.keyboard, { includeEscapeKey: true });
+    // No Escape binding: Esc belongs to the conversation box (step back), and
+    // leaving Ridge is the header Back button, so a stray Esc never exits.
+    this.keys = bindSideViewKeyboard(this.input.keyboard);
     if (import.meta.env.DEV && this.input.keyboard) {
       this.nextKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CLOSED_BRACKET);
       this.prevKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.OPEN_BRACKET);
@@ -112,6 +113,10 @@ export class RidgeScene extends Phaser.Scene {
 
     const observation = this.session.observe();
     if (observation.mode === 'conversation') {
+      // Drain edge-triggered input so a press made while talking does not
+      // fire the moment the conversation closes (e.g. E re-opening it).
+      Phaser.Input.Keyboard.JustDown(this.keys.interactKey);
+      bridgeActions.consumeTouchOneShots();
       this.syncPresentation();
       return;
     }
@@ -122,21 +127,11 @@ export class RidgeScene extends Phaser.Scene {
       cursors: this.keys.cursors,
       wasd: this.keys.wasd,
       interactKey: this.keys.interactKey,
-      escapeKey: this.keys.escapeKey,
       touch,
       oneShots: bridgeActions.consumeTouchOneShots(),
       allowJump: false,
       allowSprint: false
     });
-
-    if (commands.exitContext) {
-      if (!this.escJustHandled) {
-        this.escJustHandled = true;
-        this.onClose();
-      }
-      return;
-    }
-    this.escJustHandled = false;
 
     if (commands.moveAxis !== 0) {
       const direction = commands.moveAxis < 0 ? 'left' : 'right';

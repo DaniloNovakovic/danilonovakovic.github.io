@@ -2,6 +2,7 @@ import { useCallback, useEffect, useId, useRef, useState, type RefObject } from 
 import type { SceneUiSurfaceProps } from '@/game/sceneUi/registry';
 import type { RidgeEmotion } from '@/game/core/ridge';
 import { cn } from '@/shared/ui/utils';
+import { useMessages } from '@/shared/i18n';
 import type { RidgePortraitId } from '../content/castRegistry';
 import type { RidgeSpeakerSide } from '../art/conversationStaging';
 import { ConversationBust } from './conversationPortraits';
@@ -25,12 +26,6 @@ export interface RidgeConversationPanelView {
   /** Screen side of the speaker; the box docks under them. Defaults to `left`. */
   speakerSide?: RidgeSpeakerSide;
 }
-
-const COPY = {
-  continue: 'Continue',
-  stepBack: 'Step back',
-  escHint: 'Esc'
-} as const;
 
 const TYPEWRITER_MS = 16;
 
@@ -324,10 +319,11 @@ function ContinueButton({
   ready: boolean;
   onContinue: () => void;
 }) {
+  const copy = useMessages().ridge.conversation;
   return (
     <button
       type="button"
-      aria-label={COPY.continue}
+      aria-label={copy.continue}
       className={cn(
         'absolute -bottom-3 flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#1a1a1a] bg-[#1a1a1a] text-[10px] text-[#fbfbf9] shadow-[2px_2px_0px_0px_rgba(75,67,55,1)] transition-opacity motion-reduce:animate-none',
         side === 'right' ? 'left-4' : 'right-4',
@@ -345,11 +341,12 @@ function ContinueButton({
 
 /** Small ✕ on the far corner from the bust; the Esc hint is keyboard-only. */
 function StepBackButton({ side, onLeave }: { side: RidgeSpeakerSide; onLeave: () => void }) {
+  const copy = useMessages().ridge.conversation;
   return (
     <button
       type="button"
-      aria-label={COPY.stepBack}
-      title={`${COPY.stepBack} (${COPY.escHint})`}
+      aria-label={copy.stepBack}
+      title={`${copy.stepBack} (${copy.escHint})`}
       className={cn(
         'absolute -top-3 z-20 flex items-center gap-1 rounded-full border-2 border-[#1a1a1a] bg-[#fbfbf9] px-1.5 py-0.5 text-[10px] font-black leading-none text-[#1a1a1a] shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] transition-transform hover:-translate-y-0.5',
         side === 'left' ? 'right-3' : 'left-3'
@@ -361,7 +358,7 @@ function StepBackButton({ side, onLeave }: { side: RidgeSpeakerSide; onLeave: ()
     >
       <span aria-hidden="true">✕</span>
       <span aria-hidden="true" className="uppercase tracking-wider opacity-70 pointer-coarse:hidden">
-        {COPY.escHint}
+        {copy.escHint}
       </span>
     </button>
   );
