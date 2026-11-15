@@ -7,6 +7,7 @@ import type {
   BridgeBuildTip,
   BridgeDesign
 } from './bridgeBuilder';
+import type { CickaAttackKind, CickaDuelPhase, CickaStrikeResult } from './cickaDuel';
 
 export type RidgeAreaId = 'bridge' | 'concert' | 'danceFestival' | 'relay';
 
@@ -39,8 +40,11 @@ export type RidgeBridgeAreaBeat = Extract<
 
 export type RidgeFacing = 'left' | 'right';
 
-/** `bridgeBuild` is the Blueprint Bridge workbench: drawing and testing a span. */
-export type RidgeMode = 'explore' | 'conversation' | 'bridgeBuild';
+/**
+ * `bridgeBuild` is the Blueprint Bridge workbench: drawing and testing a span.
+ * `cickaDuel` is Cicka's Standoff: dodging her paw to earn the toy car.
+ */
+export type RidgeMode = 'explore' | 'conversation' | 'bridgeBuild' | 'cickaDuel';
 
 export type RidgeSpotKind = 'landmark' | 'npc' | 'prop' | 'exit';
 
@@ -107,6 +111,8 @@ export interface RidgeConversationOutcome {
   clearFlag?: string;
   /** Open the Blueprint Bridge workbench once the conversation closes. */
   openBridgeBuild?: boolean;
+  /** Start Cicka's Standoff once the conversation closes. */
+  openCickaDuel?: boolean;
 }
 
 export interface RidgeConversationDefinition {
@@ -244,6 +250,18 @@ export interface RidgeObservation {
     hintVisible: boolean;
     sketchOffered: boolean;
   };
+  /** Cicka's Standoff, while dodging her for the toy car. */
+  cickaDuel: null | {
+    phase: CickaDuelPhase;
+    hearts: number;
+    maxHearts: number;
+    strikesDone: number;
+    strikesTotal: number;
+    perfectCount: number;
+    canDodge: boolean;
+    telegraph: null | { kind: CickaAttackKind; framesToImpact: number };
+    lastResult: CickaStrikeResult | null;
+  };
   builtBridge: BridgeDesign | null;
   canMove: boolean;
   blockedAhead: boolean;
@@ -267,7 +285,14 @@ export type RidgeCommand =
   | { type: 'warp'; areaId: RidgeAreaId }
   /** Blueprint Bridge workbench verbs (`build road 0,0 2,0`, `build test`, …). */
   | { type: 'build'; action: BridgeBuildAction }
+  /** Cicka's Standoff verbs (`duel dodge`, `duel wait [n]`, `duel done`). */
+  | { type: 'duel'; action: RidgeDuelAction }
   | { type: 'unknown'; raw: string };
+
+export type RidgeDuelAction =
+  | { kind: 'dodge' }
+  | { kind: 'wait'; frames?: number }
+  | { kind: 'done' };
 
 export type RidgeSessionEvent =
   | { type: 'beat_changed'; beat: RidgeRouteBeat }
@@ -280,7 +305,9 @@ export type RidgeSessionEvent =
   | { type: 'flag_changed'; flag: string; present: boolean }
   | { type: 'bridge_build_opened' }
   | { type: 'bridge_build_closed' }
-  | { type: 'bridge_built'; design: BridgeDesign };
+  | { type: 'bridge_built'; design: BridgeDesign }
+  | { type: 'cicka_duel_opened' }
+  | { type: 'cicka_duel_closed'; won: boolean };
 
 export interface RidgeCommandResult {
   ok: boolean;

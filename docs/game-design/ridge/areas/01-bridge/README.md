@@ -300,6 +300,10 @@ Minimum outcomes:
 - Future optional upgrade: turn Cicka Parallel Play into a tiny toy-car
   back-and-forth game, like a low-stakes ping-pong riff using the car instead of
   a ball.
+- Shipped alternate path: choosing to keep the car starts **Cicka's Standoff**,
+  a timing-dodge mini-game. The player only dodges (never attacks); outlasting
+  her earns her respect and she hands the car over herself. Losing leaves the
+  car with her and offers a rematch; the friendly roll path stays open.
 - Future optional upgrade: add a nearby cabin/treat interaction that lets the
   player bring Cicka food as an alternate way to retrieve the toy car, such as a
   shortcut around the toy-car ping-pong version rather than a required v0 step.

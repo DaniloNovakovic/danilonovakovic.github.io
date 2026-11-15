@@ -12,12 +12,14 @@ import {
   type BridgeBuildAction,
   type BridgeDesign
 } from './bridgeBuilder';
+import { CickaDuel } from './cickaDuel';
 import { getRidgeHelpText, parseRidgeCommand, parseRidgeScript } from './commands';
 import { formatObservation, observeRidgeWorld } from './observe';
 import type {
   RidgeAreaId,
   RidgeCommand,
   RidgeCommandResult,
+  RidgeDuelAction,
   RidgeFacing,
   RidgeObservation,
   RidgeRouteBeat,
@@ -29,9 +31,17 @@ import type {
 import { RIDGE_GUITAR_ITEM, RIDGE_INITIAL_BEAT, ridgeNextArea } from './types';
 
 const DEFAULT_STEP = 0.05;
+/** Stage distance the player keeps from Cicka during the standoff. */
+const DUEL_SPACING = 0.045;
 const BRIDGE_BUILT_CONVERSATION = 'bridge.draftsperson.bridge_built';
 const TOY_CAR_SHARED_FLAG = 'toy_car_shared';
 const BRIDGE_BUILD_STARTED_FLAG = 'bridge_build_started';
+const CICKA_DUEL_WON_CONVERSATION = 'bridge.cicka.duel_won';
+const CICKA_DUEL_LOST_CONVERSATION = 'bridge.cicka.duel_lost';
+/** Set when the player outlasted Cicka's Standoff; she remembers. */
+const CICKA_RESPECT_FLAG = 'bridge_cicka_respect';
+/** Set after losing a standoff, so Cicka offers a rematch. */
+const CICKA_DUEL_LOST_FLAG = 'bridge_cicka_duel_lost';
 
 export interface RidgeSessionOptions {
   /** Preferred: full multi-area registry for Compact Area Transitions. */
@@ -53,6 +63,7 @@ export class RidgeConsoleSession {
   private stage: RidgeStageDefinition;
   private readonly stages: RidgeStageRegistry | null;
   private workbench: BridgeWorkbench | null = null;
+  private duel: CickaDuel | null = null;
 
   constructor(options: RidgeSessionOptions) {
     if (options.stages) {
@@ -82,7 +93,7 @@ export class RidgeConsoleSession {
   }
 
   observe(): RidgeObservation {
-    return observeRidgeWorld(this.state, this.stage, this.workbench);
+    return observeRidgeWorld(this.state, this.stage, this.workbench, this.duel);
   }
 
   /** Live workbench while the Blueprint Bridge is being drawn, for presentation. */
@@ -93,6 +104,16 @@ export class RidgeConsoleSession {
   /** Advance an animated bridge test by one fixed frame (Phaser drives this). */
   stepBridgeTest(): void {
     if (this.state.mode === 'bridgeBuild') this.workbench?.stepTest();
+  }
+
+  /** Live standoff while dodging Cicka, for presentation. */
+  get cickaDuel(): CickaDuel | null {
+    return this.state.mode === 'cickaDuel' ? this.duel : null;
+  }
+
+  /** Advance the standoff by one fixed frame (Phaser drives this). */
+  stepCickaDuel(): void {
+    if (this.state.mode === 'cickaDuel') this.duel?.step();
   }
 
   format(): string {
@@ -141,6 +162,8 @@ export class RidgeConsoleSession {
         return this.handleWarp(command.areaId);
       case 'build':
         return this.handleBuild(command.action);
+      case 'duel':
+        return this.handleDuel(command.action);
       case 'unknown':
         return this.fail(
           command.raw
@@ -153,6 +176,9 @@ export class RidgeConsoleSession {
   private handleGo(direction: RidgeFacing, steps: number): RidgeCommandResult {
     if (this.state.mode === 'bridgeBuild') {
       return this.fail('You are at the drawing table. build leave to step away.');
+    }
+    if (this.state.mode === 'cickaDuel') {
+      return this.fail('Cicka has you pinned with a stare. duel dodge or duel wait.');
     }
     if (this.state.mode !== 'explore') {
       return this.fail('Movement is halted during conversation. advance or leave.');
@@ -202,6 +228,9 @@ export class RidgeConsoleSession {
     }
     if (this.state.mode === 'bridgeBuild') {
       return this.fail('You are at the drawing table. Use build … or build leave.');
+    }
+    if (this.state.mode === 'cickaDuel') {
+      return this.fail('Eyes on the paw. duel dodge or duel wait.');
     }
 
     const nearby = [...this.stage.resolveInteractables(this.state)].sort(
@@ -261,6 +290,7 @@ export class RidgeConsoleSession {
 
   private handleLeave(): RidgeCommandResult {
     if (this.state.mode === 'bridgeBuild') return this.closeBridgeBuild();
+    if (this.state.mode === 'cickaDuel') return this.fail('No backing out now. Cicka is mid-wiggle.');
     const result = leaveConversation(this.state);
     this.state = result.state;
     return {
@@ -318,6 +348,8 @@ export class RidgeConsoleSession {
         events.push({ type: 'beat_changed', beat: this.state.beat });
       } else if (event.type === 'bridge_build_opened') {
         this.openBridgeBuild();
+      } else if (event.type === 'cicka_duel_opened') {
+        this.openCickaDuel();
       } else if (event.type === 'route_reset') {
         this.applyRouteReset();
         events.push({ type: 'beat_changed', beat: this.state.beat });
@@ -335,6 +367,7 @@ export class RidgeConsoleSession {
 
   private applyAreaHandoff(areaId: RidgeAreaId): void {
     this.workbench = null;
+    this.duel = null;
     if (areaId === 'bridge') this.state = { ...this.state, builtBridge: null };
     if (!this.stages) {
       this.state = {
@@ -364,6 +397,7 @@ export class RidgeConsoleSession {
 
   private applyRouteReset(): void {
     this.workbench = null;
+    this.duel = null;
     const bridge = this.stages?.bridge ?? this.stage;
     this.stage = bridge;
     this.state = {
@@ -391,6 +425,73 @@ export class RidgeConsoleSession {
     const result = workbench.apply(action);
     if (result.ok && action.kind === 'done') return this.finishBridgeBuild(workbench.design);
     return result.ok ? this.ok(result.message) : this.fail(result.message);
+  }
+
+  private handleDuel(action: RidgeDuelAction): RidgeCommandResult {
+    const duel = this.duel;
+    if (this.state.mode !== 'cickaDuel' || !duel) {
+      return this.fail('Cicka is not squaring up. Keep the toy car if you want to find out.');
+    }
+    switch (action.kind) {
+      case 'dodge': {
+        const result = duel.dodge();
+        return result.ok ? this.ok(result.message) : this.fail(result.message);
+      }
+      case 'wait': {
+        if (duel.phase !== 'fighting') return this.fail('The standoff is over. duel done.');
+        if (action.frames === undefined) {
+          duel.waitForNextLanding();
+        } else {
+          for (let i = 0; i < action.frames; i += 1) duel.step();
+        }
+        return this.ok(duel.lastResult ? `Last landing: ${duel.lastResult.result}.` : 'You hold still.');
+      }
+      case 'done':
+        if (duel.phase === 'fighting') return this.fail('Cicka is not done with you yet.');
+        return this.finishCickaDuel(duel.phase === 'won');
+    }
+  }
+
+  private openCickaDuel(): void {
+    this.duel = new CickaDuel();
+    // Square up: give Cicka room to lunge, and face her.
+    const cicka = this.stage.resolveActors(this.state).find((actor) => actor.id === 'cicka');
+    const offset = cicka ? this.state.progress - cicka.progress : 0;
+    const side = offset >= 0 ? 1 : -1;
+    const progress = cicka
+      ? clamp01(cicka.progress + side * Math.max(DUEL_SPACING, Math.abs(offset)))
+      : this.state.progress;
+    this.state = {
+      ...this.state,
+      progress,
+      facing: side > 0 ? 'left' : 'right',
+      mode: 'cickaDuel',
+      conversation: null,
+      lastMessage: 'Cicka plants herself on the car. Her tail lashes. This is a test.'
+    };
+  }
+
+  /** Win: she respects you and hands over the car. Loss: she keeps it, for now. */
+  private finishCickaDuel(won: boolean): RidgeCommandResult {
+    this.duel = null;
+    const flags = new Set(this.state.flags);
+    const events: RidgeSessionEvent[] = [{ type: 'cicka_duel_closed', won }];
+    const flag = won ? CICKA_RESPECT_FLAG : CICKA_DUEL_LOST_FLAG;
+    flags.add(flag);
+    events.push({ type: 'flag_changed', flag, present: true });
+    this.state = { ...this.state, mode: 'explore', flags };
+
+    const followUp = this.stage.resolveConversation(
+      won ? CICKA_DUEL_WON_CONVERSATION : CICKA_DUEL_LOST_CONVERSATION,
+      this.state
+    );
+    if (followUp) {
+      const started = startConversation(this.state, followUp);
+      this.state = started.state;
+      events.push(...started.events);
+    }
+    const message = won ? 'Cicka sits back. Something has changed.' : 'Cicka keeps the car. For now.';
+    return { ok: true, message, observation: this.observe(), events };
   }
 
   private openBridgeBuild(): void {

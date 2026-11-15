@@ -237,8 +237,15 @@ function resolveBridgeActors(state: RidgeWorldState): RidgeActorPresence[] {
   const crossingOpen = state.beat === 'bridge_complete';
   // After the test Cicka settles on the far bank beside the car that proved it.
   const cickaProgress = crossingOpen ? 0.8 : 0.22;
-  const toyCarProgress =
-    state.beat === 'toy_car_shared' ? state.progress : crossingOpen ? 0.825 : 0.24;
+  // In the standoff she guards it behind her, away from the player.
+  const guarding = state.mode === 'cickaDuel';
+  const toyCarProgress = guarding
+    ? cickaProgress + (state.progress >= cickaProgress ? -0.04 : 0.02)
+    : state.beat === 'toy_car_shared'
+      ? state.progress
+      : crossingOpen
+        ? 0.825
+        : 0.24;
   // While drawing, the workbench owns the toy car (it drives the test run).
   const building = state.mode === 'bridgeBuild';
 
@@ -286,6 +293,9 @@ type BridgeLineSpec = readonly [suffix: string, speaker: BridgeSpeaker, emotion?
 const FLAG_CICKA_MET = 'bridge_cicka_met';
 /** The player tried to take the car and got the paw. Colors later lines. */
 const FLAG_CICKA_GUARDED = 'bridge_cicka_guarded_car';
+/** Mirrors the session flags Cicka's Standoff sets when it ends. */
+const FLAG_CICKA_RESPECT = 'bridge_cicka_respect';
+const FLAG_CICKA_DUEL_LOST = 'bridge_cicka_duel_lost';
 /** Draftsperson topics stay asked across visits. */
 const askedFlag = (topic: string) => `bridge_asked_${topic}`;
 
@@ -348,7 +358,10 @@ function resolveBridgeConversation(
         [['01', 'prompt'], ['02', 'cicka', 'playful'], ['03', 'prompt'], ['04', 'prompt']],
         { outcome: { setBeat: 'toy_car_shared', addItem: RIDGE_TOY_CAR_ITEM, setFlag: 'toy_car_shared' } }
       );
-      const keep = choice('keep', [['01', 'prompt'], ['02', 'prompt']], { then: 'menu' });
+      // Keeping it is a challenge, not a theft: Cicka tests you (Cicka's Standoff).
+      const keep = choice('keep', [['01', 'prompt'], ['02', 'cicka', 'determined'], ['03', 'prompt']], {
+        outcome: { openCickaDuel: true }
+      });
       const roll = choice('roll', [['01', 'prompt'], ['02', 'cicka', 'curious'], ['03', 'prompt']], {
         choices: [rollAgain, keep]
       });
@@ -360,15 +373,37 @@ function resolveBridgeConversation(
           choice('grab', [['01', 'prompt'], ['02', 'cicka', 'determined']], { then: 'menu', outcome: guarded }),
           choice('ask', [['01', 'prompt']], { then: 'menu', once: true }),
           choice('leaf', [['01', 'prompt'], ['02', 'prompt']], { choices: [pocket, roll] }),
+          ...(state.flags.has(FLAG_CICKA_DUEL_LOST)
+            ? [choice('rematch', [['01', 'prompt']], { outcome: { openCickaDuel: true } })]
+            : []),
           choice('leave', [['01', 'prompt']])
         ]
       };
     }
 
+    // Cicka's Standoff, after the last landing.
+    case 'bridge.cicka.duel_won':
+      return {
+        id: conversationId,
+        lines: [
+          say(['01', 'prompt']),
+          say(['02', 'cicka', 'playful']),
+          say(['03', 'prompt']),
+          say(['04', 'prompt'])
+        ],
+        outcome: { setBeat: 'toy_car_shared', addItem: RIDGE_TOY_CAR_ITEM, setFlag: 'toy_car_shared' }
+      };
+    case 'bridge.cicka.duel_lost':
+      return {
+        id: conversationId,
+        lines: [say(['01', 'prompt']), say(['02', 'cicka', 'playful']), say(['03', 'prompt'])],
+        outcome: guarded
+      };
+
     case 'bridge.cicka.after_share':
       return {
         id: conversationId,
-        lines: [say(['01', 'prompt'])],
+        lines: [say([state.flags.has(FLAG_CICKA_RESPECT) ? '01_respect' : '01', 'prompt'])],
         choices: [choice('pet', [['01', 'cicka', 'sleepy']]), choice('promise', [['01', 'prompt']])]
       };
 
@@ -489,6 +524,9 @@ function makeLine(
 function describeBridgeAmbience(state: RidgeWorldState): string {
   if (state.beat === 'bridge_complete') {
     return 'Ink settles into a real crossing. The concert exit is open to the east.';
+  }
+  if (state.mode === 'cickaDuel') {
+    return 'Cicka crouches over the toy car, tail lashing. Watch the paw.';
   }
   if (state.mode === 'bridgeBuild') {
     return 'The blueprint table is unrolled across the gap. Bolts wait on both banks.';

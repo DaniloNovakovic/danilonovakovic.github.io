@@ -271,6 +271,10 @@ function applyOutcome(
     events.push({ type: 'bridge_build_opened' });
   }
 
+  if (outcome.openCickaDuel) {
+    events.push({ type: 'cicka_duel_opened' });
+  }
+
   return {
     state: {
       ...state,
