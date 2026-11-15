@@ -83,6 +83,16 @@ export interface RidgeDialogueChoice {
   /** Optional follow-up lines before outcome applies. */
   lines?: readonly RidgeDialogueLine[];
   outcome?: RidgeConversationOutcome;
+  /** Follow-up choices offered after this choice's lines (a nested branch). */
+  choices?: readonly RidgeDialogueChoice[];
+  /**
+   * `menu` returns to the conversation's topic menu after this choice's lines,
+   * applying its outcome right away instead of when the conversation ends.
+   * Defaults to ending the conversation (or showing `choices` when present).
+   */
+  then?: 'end' | 'menu';
+  /** Hide this choice from the topic menu once picked in this conversation. */
+  once?: boolean;
 }
 
 export interface RidgeConversationOutcome {
@@ -114,6 +124,10 @@ export interface RidgeConversationState {
   choices: readonly RidgeDialogueChoice[] | null;
   awaitingChoice: boolean;
   outcome: RidgeConversationOutcome | null;
+  /** Root topic menu that `then: 'menu'` choices return to. */
+  menu: readonly RidgeDialogueChoice[] | null;
+  /** `once` choices already picked in this conversation. */
+  asked: readonly string[];
 }
 
 export interface RidgeSpotDefinition {

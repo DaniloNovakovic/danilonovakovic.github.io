@@ -4,6 +4,8 @@ import type { BridgeBuildTip } from '../bridgeBuilder';
 import type {
   RidgeActorPresence,
   RidgeConversationDefinition,
+  RidgeConversationOutcome,
+  RidgeDialogueChoice,
   RidgeDialogueLine,
   RidgeEmotion,
   RidgeInteractable,
@@ -208,6 +210,11 @@ function interactPlansForBeat(beat: RidgeWorldState['beat']): BridgeInteractPlan
     case 'toy_car_shared':
       return [
         {
+          spotId: 'cicka',
+          conversationId: 'bridge.cicka.after_share',
+          prompt: 'bridge.cicka.after_share.prompt'
+        },
+        {
           spotId: 'draftsperson',
           conversationId: 'bridge.draftsperson.toy_car_test',
           prompt: 'bridge.draftsperson.toy_car_test.prompt'
@@ -272,117 +279,189 @@ function resolveBridgeActors(state: RidgeWorldState): RidgeActorPresence[] {
   ];
 }
 
+type BridgeSpeaker = keyof BridgeDialogueCatalog['speakers'];
+type BridgeLineSpec = readonly [suffix: string, speaker: BridgeSpeaker, emotion?: RidgeEmotion];
+
+/** Set once the player has met Cicka at least once. */
+const FLAG_CICKA_MET = 'bridge_cicka_met';
+/** The player tried to take the car and got the paw. Colors later lines. */
+const FLAG_CICKA_GUARDED = 'bridge_cicka_guarded_car';
+/** Draftsperson topics stay asked across visits. */
+const askedFlag = (topic: string) => `bridge_asked_${topic}`;
+
+/**
+ * Small authoring kit for one conversation: lines live at `<conv>.<suffix>`,
+ * choice labels at `<conv>.choice.<id>`, and choice lines at `<conv>.<id>.<nn>`.
+ */
+function conversationKit(conversationId: string, catalog: BridgeDialogueCatalog) {
+  const say = ([suffix, speaker, emotion]: BridgeLineSpec) =>
+    makeLine(catalog, `${conversationId}.${suffix}`, speaker, emotion);
+  const choice = (
+    id: string,
+    lines: readonly BridgeLineSpec[],
+    extra: Omit<RidgeDialogueChoice, 'id' | 'label' | 'lines'> = {}
+  ): RidgeDialogueChoice => ({
+    id,
+    label: catalog.lines[`${conversationId}.choice.${id}`] ?? id,
+    ...(lines.length > 0 ? { lines: lines.map(([suffix, ...rest]) => say([`${id}.${suffix}`, ...rest])) } : {}),
+    ...extra
+  });
+  return { say, choice };
+}
+
 function resolveBridgeConversation(
   conversationId: string,
   state: RidgeWorldState,
   catalog: BridgeDialogueCatalog
 ): RidgeConversationDefinition | null {
-  const line = (
-    id: string,
-    speakerId: keyof BridgeDialogueCatalog['speakers'],
-    emotion?: RidgeEmotion
-  ) => makeLine(catalog, id, speakerId, emotion);
+  const { say, choice } = conversationKit(conversationId, catalog);
+  const met: RidgeConversationOutcome = { setFlag: FLAG_CICKA_MET };
+  const guarded: RidgeConversationOutcome = { setFlag: FLAG_CICKA_GUARDED };
+  const topic = (id: string, lines: readonly BridgeLineSpec[], outcome?: RidgeConversationOutcome) =>
+    choice(id, lines, { then: 'menu', once: true, outcome: outcome ?? { setFlag: askedFlag(id) } });
+  const unasked = (...choices: RidgeDialogueChoice[]) =>
+    choices.filter((option) => !state.flags.has(askedFlag(option.id)));
 
   switch (conversationId) {
+    // Toy Car Play: a first hello. Reaching for the car is allowed, and teaches.
     case 'bridge.cicka.first_meet':
       return {
         id: conversationId,
-        lines: [
-          line('bridge.cicka.first_meet.01', 'prompt'),
-          line('bridge.cicka.first_meet.02', 'cicka'),
-          line('bridge.cicka.first_meet.03', 'prompt')
-        ],
+        lines: [say(['01', 'prompt']), say(['02', 'cicka']), say(['03', 'prompt'])],
         choices: [
-          {
-            id: 'pet',
-            label: 'Pet Cicka gently',
-            lines: [
-              {
-                id: 'bridge.cicka.first_meet.choice.pet',
-                speakerId: 'cicka',
-                speaker: catalog.speakers.cicka,
-                text: 'mrrp.'
-              }
-            ]
-          },
-          {
-            id: 'watch',
-            label: 'Just watch the tiny car',
-            lines: [
-              {
-                id: 'bridge.cicka.first_meet.choice.watch',
-                speakerId: 'prompt',
-                speaker: catalog.speakers.prompt,
-                text: 'The toy car makes another brave loop through the corn.'
-              }
-            ]
-          }
+          choice('pet', [['01', 'cicka', 'playful'], ['02', 'prompt']], { then: 'menu', once: true, outcome: met }),
+          choice('watch', [['01', 'prompt']], { then: 'menu', once: true, outcome: met }),
+          choice('reach', [['01', 'prompt'], ['02', 'cicka', 'determined'], ['03', 'prompt']], {
+            then: 'menu',
+            once: true,
+            outcome: guarded
+          }),
+          choice('leave', [['01', 'prompt']])
+        ],
+        outcome: met
+      };
+
+    // Cicka Parallel Play: grabbing and asking bounce off; joining her game wins.
+    case 'bridge.cicka.parallel_play': {
+      const rollAgain = choice(
+        'roll_again',
+        [['01', 'prompt'], ['02', 'cicka', 'playful'], ['03', 'prompt'], ['04', 'prompt']],
+        { outcome: { setBeat: 'toy_car_shared', addItem: RIDGE_TOY_CAR_ITEM, setFlag: 'toy_car_shared' } }
+      );
+      const keep = choice('keep', [['01', 'prompt'], ['02', 'prompt']], { then: 'menu' });
+      const roll = choice('roll', [['01', 'prompt'], ['02', 'cicka', 'curious'], ['03', 'prompt']], {
+        choices: [rollAgain, keep]
+      });
+      const pocket = choice('pocket', [['01', 'prompt']], { then: 'menu', outcome: guarded });
+      return {
+        id: conversationId,
+        lines: [say(['01', 'prompt']), say(['02', 'prompt'])],
+        choices: [
+          choice('grab', [['01', 'prompt'], ['02', 'cicka', 'determined']], { then: 'menu', outcome: guarded }),
+          choice('ask', [['01', 'prompt']], { then: 'menu', once: true }),
+          choice('leaf', [['01', 'prompt'], ['02', 'prompt']], { choices: [pocket, roll] }),
+          choice('leave', [['01', 'prompt']])
         ]
       };
-    case 'bridge.draftsperson.missing_span':
+    }
+
+    case 'bridge.cicka.after_share':
       return {
         id: conversationId,
-        lines: [
-          line('bridge.draftsperson.missing_span.01', 'bridgeDraftsperson'),
-          line('bridge.draftsperson.missing_span.02', 'bridgeDraftsperson'),
-          line('bridge.draftsperson.missing_span.03', 'prompt')
-        ],
-        outcome: {
-          setBeat: state.beat === 'intro' ? 'needs_toy_car' : undefined
-        }
+        lines: [say(['01', 'prompt'])],
+        choices: [choice('pet', [['01', 'cicka', 'sleepy']]), choice('promise', [['01', 'prompt']])]
       };
-    case 'bridge.cicka.parallel_play':
+
+    // The Draftsperson is a little topic menu, not a cutscene.
+    case 'bridge.draftsperson.missing_span': {
+      const who = topic('who', [['01', 'bridgeDraftsperson', 'playful']]);
+      const why = topic('why', [
+        ['01', 'bridgeDraftsperson'],
+        ['02', 'bridgeDraftsperson', 'thoughtful']
+      ]);
+      if (state.beat === 'intro') {
+        const car = topic(
+          'car',
+          [
+            ['01', 'bridgeDraftsperson', 'playful'],
+            ['02', 'bridgeDraftsperson', 'surprised'],
+            [state.flags.has(FLAG_CICKA_MET) || state.flags.has(FLAG_CICKA_GUARDED) ? '03_cat' : '03', 'prompt']
+          ],
+          { setBeat: 'needs_toy_car' }
+        );
+        return {
+          id: conversationId,
+          lines: [say(['01', 'bridgeDraftsperson', 'thoughtful']), say(['02', 'bridgeDraftsperson'])],
+          choices: [car, ...unasked(who, why), choice('leave', [['01', 'bridgeDraftsperson']])]
+        };
+      }
+      const cickaHasIt = topic('cicka', [
+        [state.flags.has(FLAG_CICKA_GUARDED) ? '01_guarded' : '01', 'bridgeDraftsperson', 'surprised'],
+        ['02', 'bridgeDraftsperson', 'thoughtful']
+      ]);
       return {
         id: conversationId,
-        lines: [
-          line('bridge.cicka.parallel_play.01', 'prompt'),
-          line('bridge.cicka.parallel_play.02', 'prompt'),
-          line('bridge.cicka.parallel_play.03', 'cicka'),
-          line('bridge.cicka.parallel_play.04', 'prompt')
-        ],
-        outcome: {
-          setBeat: 'toy_car_shared',
-          addItem: RIDGE_TOY_CAR_ITEM,
-          setFlag: 'toy_car_shared'
-        }
+        lines: [say(['waiting', 'bridgeDraftsperson', 'curious'])],
+        choices: [
+          ...unasked(cickaHasIt, who, why),
+          choice('still_looking', [['01', 'bridgeDraftsperson']])
+        ]
       };
-    case 'bridge.draftsperson.toy_car_test':
-      // Coming back to an unfinished drawing skips straight to the table.
+    }
+
+    case 'bridge.draftsperson.toy_car_test': {
+      // Coming back to an unfinished drawing: the table is one choice away.
       if (state.flags.has(BRIDGE_BUILD_STARTED_FLAG)) {
         return {
           id: conversationId,
-          lines: [line('bridge.draftsperson.toy_car_test.resume', 'bridgeDraftsperson', 'determined')],
-          outcome: { openBridgeBuild: true }
+          lines: [say(['resume', 'bridgeDraftsperson', 'determined'])],
+          choices: [
+            choice('resume', [], { outcome: { openBridgeBuild: true } }),
+            choice('advice', [['01', 'bridgeDraftsperson'], ['02', 'bridgeDraftsperson', 'playful']], {
+              then: 'menu',
+              once: true
+            }),
+            choice('later', [['01', 'bridgeDraftsperson']])
+          ]
         };
       }
       return {
         id: conversationId,
-        lines: [
-          line('bridge.draftsperson.toy_car_test.01', 'prompt'),
-          line('bridge.draftsperson.toy_car_test.02', 'bridgeDraftsperson', 'thoughtful'),
-          line('bridge.draftsperson.toy_car_test.03', 'bridgeDraftsperson', 'curious'),
-          line('bridge.draftsperson.toy_car_test.04', 'prompt')
-        ],
-        outcome: { openBridgeBuild: true }
+        lines: [say(['01', 'prompt']), say(['02', 'bridgeDraftsperson', 'surprised'])],
+        choices: [
+          choice(
+            'hand_over',
+            [
+              ['01', 'bridgeDraftsperson', 'thoughtful'],
+              ['02', 'bridgeDraftsperson', 'curious'],
+              ['03', 'prompt']
+            ],
+            { outcome: { openBridgeBuild: true } }
+          ),
+          ...unasked(
+            topic('story', [
+              ['01', 'bridgeDraftsperson', 'surprised'],
+              ['02', 'bridgeDraftsperson', 'thoughtful']
+            ])
+          ),
+          choice('not_yet', [['01', 'bridgeDraftsperson']])
+        ]
       };
+    }
     case 'bridge.draftsperson.bridge_built':
       return {
         id: conversationId,
         lines: [
-          line('bridge.draftsperson.bridge_built.01', 'prompt'),
-          line('bridge.draftsperson.bridge_built.02', 'bridgeDraftsperson', 'surprised'),
-          line('bridge.draftsperson.bridge_built.03', 'bridgeDraftsperson', 'playful'),
-          line('bridge.draftsperson.bridge_built.04', 'prompt')
+          say(['01', 'prompt']),
+          say(['02', 'bridgeDraftsperson', 'surprised']),
+          say(['03', 'bridgeDraftsperson', 'playful']),
+          say(['04', 'prompt'])
         ]
       };
     case 'bridge.exit.opened_crossing':
       return {
         id: conversationId,
-        lines: [
-          line('bridge.exit.opened_crossing.01', 'prompt'),
-          line('bridge.exit.opened_crossing.02', 'bridgeDraftsperson'),
-          line('bridge.exit.opened_crossing.03', 'prompt')
-        ],
+        lines: [say(['01', 'prompt']), say(['02', 'bridgeDraftsperson']), say(['03', 'prompt'])],
         outcome: {
           handoffToArea: 'concert'
         }
@@ -395,7 +474,7 @@ function resolveBridgeConversation(
 function makeLine(
   catalog: BridgeDialogueCatalog,
   id: string,
-  speakerId: keyof BridgeDialogueCatalog['speakers'],
+  speakerId: BridgeSpeaker,
   emotion?: RidgeEmotion
 ): RidgeDialogueLine {
   return {

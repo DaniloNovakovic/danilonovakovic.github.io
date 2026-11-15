@@ -226,9 +226,15 @@ function EditingBar({ view, command, pickTool }: BarProps) {
           ▶ {copy.test}
         </PaperButton>
       </div>
-      <p className="pointer-events-none hidden w-full text-[10px] font-bold uppercase tracking-wider text-[#4b4337] opacity-80 pointer-fine:block short:hidden">
-        {copy.keys}
-      </p>
+      {view.hintVisible ? (
+        <p className="pointer-events-none w-full text-[11px] font-bold italic text-[#4b4337] opacity-85">
+          {copy.sketchCaption}
+        </p>
+      ) : (
+        <p className="pointer-events-none hidden w-full text-[10px] font-bold uppercase tracking-wider text-[#4b4337] opacity-80 pointer-fine:block short:hidden">
+          {copy.keys}
+        </p>
+      )}
     </div>
   );
 }
