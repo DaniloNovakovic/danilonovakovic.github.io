@@ -117,7 +117,7 @@ class FocusCard {
   setContent({ key, action, name: rawName, role }: FocusPrompt): void {
     // Called every frame while focused: bail on the raw inputs before any
     // tokenizing so an unchanged card costs one string compare.
-    const contentKey = `${key}|${action}|${rawName ?? ''}|${role ?? ''}`;
+    const contentKey = `${key}|${action}|${rawName}|${role}`;
     if (contentKey === this.contentKey) return;
     this.contentKey = contentKey;
 

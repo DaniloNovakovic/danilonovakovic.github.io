@@ -27,6 +27,9 @@ export interface RidgeBridgeBuilderPanelView {
   tipText: string;
   hintVisible: boolean;
   sketchOffered: boolean;
+  /** Design has at least one beam: gates Test and Clear. */
+  hasBeams: boolean;
+  /** Edit history is non-empty, so a Clear can still be undone. */
   canUndo: boolean;
 }
 
@@ -192,7 +195,7 @@ function FailedBar({ view, command }: BarProps) {
 
 function EditingBar({ view, command, pickTool }: BarProps) {
   const copy = useMessages().ridge.bridgeBuilder;
-  const canTest = view.canUndo && view.ink <= view.inkBudget;
+  const canTest = view.hasBeams && view.ink <= view.inkBudget;
   return (
     <div className="flex flex-wrap items-end gap-1.5 sm:gap-2 short:flex-nowrap short:gap-1">
       <div role="radiogroup" aria-label={copy.toolsLabel} className="flex gap-1.5">
@@ -210,7 +213,7 @@ function EditingBar({ view, command, pickTool }: BarProps) {
         <PaperButton small disabled={!view.canUndo} onClick={() => command('undo')} label={copy.undo} keyHint="Z">
           ↶
         </PaperButton>
-        <PaperButton small disabled={!view.canUndo} onClick={() => command('clear')} label={copy.clear}>
+        <PaperButton small disabled={!view.hasBeams} onClick={() => command('clear')} label={copy.clear}>
           ✕
         </PaperButton>
         <HintButton view={view} command={command} />
