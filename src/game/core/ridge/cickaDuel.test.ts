@@ -68,16 +68,57 @@ describe("Cicka's Standoff", () => {
     duel.step();
     duel.step();
     expect(duel.lastResult?.result).toBe('feinted');
-    // Still recovering when the real wind-up nears its landing.
+    // Still recovering when the real wind-up nears its landing, however hard you press.
     duel.waitForNextLanding(2);
     expect(duel.canDodge).toBe(false);
-    for (let i = 0; i < 10; i += 1) duel.step();
+    for (let i = 0; i < 10; i += 1) {
+      duel.dodge();
+      duel.step();
+    }
     expect(duel.lastResult?.result).toBe('hit');
   });
 
-  it('ignores mashing while recovering', () => {
+  it('recovers at once after evading a real paw, so quick chains stay fair', () => {
+    const duel = new CickaDuel([
+      { kind: 'swipe', at: 40, windup: 30 },
+      { kind: 'swipe', at: 56, windup: 16 }
+    ]);
+    duel.waitForNextLanding(2);
+    duel.dodge();
+    for (let i = 0; i < 3; i += 1) duel.step();
+    expect(duel.lastResult?.result).toBe('perfect');
+    expect(duel.canDodge).toBe(true);
+    duel.waitForNextLanding(2);
+    expect(duel.dodge().ok).toBe(true);
+    for (let i = 0; i < 3; i += 1) duel.step();
+    expect(duel.lastResult?.result).toBe('perfect');
+  });
+
+  it('does not reward mashing', () => {
     const duel = new CickaDuel();
     expect(duel.dodge().ok).toBe(true);
     expect(duel.dodge().ok).toBe(false);
+    for (let i = 0; i < 5000 && duel.phase === 'fighting'; i += 1) {
+      if (duel.canDodge) duel.dodge();
+      duel.step();
+    }
+    expect(duel.phase).toBe('lost');
+  });
+
+  it('is almost never won by pressing to a fixed rhythm', () => {
+    let wins = 0;
+    let tries = 0;
+    for (let period = 1; period <= 60; period += 1) {
+      for (let offset = 0; offset < period; offset += 1) {
+        const duel = new CickaDuel();
+        for (let i = 0; i < 5000 && duel.phase === 'fighting'; i += 1) {
+          if (i % period === offset) duel.dodge();
+          duel.step();
+        }
+        tries += 1;
+        if (duel.phase === 'won') wins += 1;
+      }
+    }
+    expect(wins / tries).toBeLessThan(0.01);
   });
 });

@@ -9,11 +9,21 @@
 export const CICKA_DUEL_DT = 1 / 60;
 /** Frames a dodge keeps you clear after the press. */
 export const CICKA_DODGE_ACTIVE = 12;
-/** Total frames before you can dodge again (active + recovery). */
-export const CICKA_DODGE_LOCKOUT = 16;
+/** Frames the hop animation lasts after a press. */
+export const CICKA_DODGE_HOP = 16;
+/**
+ * Frames before you can dodge again after a whiff (active + recovery). A dodge
+ * that evades a real paw recovers the moment it lands, so quick chains stay
+ * fair while feints and mashing leave you exposed.
+ */
+export const CICKA_DODGE_LOCKOUT = 30;
 /** Dodges this close to the strike count as perfect. */
 const CICKA_PERFECT_FRAMES = 4;
 export const CICKA_DUEL_HEARTS = 3;
+/** Set when the player outlasted Cicka's Standoff; she remembers. */
+export const CICKA_RESPECT_FLAG = 'bridge_cicka_respect';
+/** Set after losing a standoff, so Cicka offers a rematch. */
+export const CICKA_DUEL_LOST_FLAG = 'bridge_cicka_duel_lost';
 
 /**
  * `swipe` a quick paw, `pounce` a long butt-wiggle then a leap, `feint` a
@@ -86,6 +96,7 @@ export class CickaDuel {
   private frameCount = 0;
   private heartsLeft = CICKA_DUEL_HEARTS;
   private dodgedAt: number | null = null;
+  private readyAt = 0;
   private nextAttack = 0;
   private readonly results: CickaStrikeResult[] = [];
   private last: { result: CickaStrikeResult; frame: number } | null = null;
@@ -129,15 +140,15 @@ export class CickaDuel {
     return this.last;
   }
 
-  /** Frames since the dodge press, or null when not dodging or recovering. */
+  /** Frames since the dodge press while the hop plays, else null. */
   get dodgeAge(): number | null {
     if (this.dodgedAt === null) return null;
     const age = this.frameCount - this.dodgedAt;
-    return age < CICKA_DODGE_LOCKOUT ? age : null;
+    return age < CICKA_DODGE_HOP ? age : null;
   }
 
   get canDodge(): boolean {
-    return this.phase === 'fighting' && this.dodgeAge === null;
+    return this.phase === 'fighting' && this.frameCount >= this.readyAt;
   }
 
   /** The wind-up in progress, if any. */
@@ -158,6 +169,7 @@ export class CickaDuel {
     if (this.phase !== 'fighting') return { ok: false, message: 'The standoff is over.' };
     if (!this.canDodge) return { ok: false, message: 'Still landing from the last dodge.' };
     this.dodgedAt = this.frameCount;
+    this.readyAt = this.frameCount + CICKA_DODGE_LOCKOUT;
     return { ok: true, message: 'You hop back.' };
   }
 
@@ -189,6 +201,8 @@ export class CickaDuel {
       result = 'feinted';
     } else if (this.dodgedAt !== null && attack.at - this.dodgedAt < CICKA_DODGE_ACTIVE) {
       result = attack.at - this.dodgedAt <= CICKA_PERFECT_FRAMES ? 'perfect' : 'dodged';
+      // A clean read recovers on the spot: ready for the next paw.
+      this.readyAt = this.frameCount;
     } else {
       result = 'hit';
       this.heartsLeft -= 1;

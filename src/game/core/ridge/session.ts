@@ -12,7 +12,7 @@ import {
   type BridgeBuildAction,
   type BridgeDesign
 } from './bridgeBuilder';
-import { CickaDuel } from './cickaDuel';
+import { CICKA_DUEL_LOST_FLAG, CICKA_RESPECT_FLAG, CickaDuel } from './cickaDuel';
 import { getRidgeHelpText, parseRidgeCommand, parseRidgeScript } from './commands';
 import { formatObservation, observeRidgeWorld } from './observe';
 import type {
@@ -38,10 +38,6 @@ const TOY_CAR_SHARED_FLAG = 'toy_car_shared';
 const BRIDGE_BUILD_STARTED_FLAG = 'bridge_build_started';
 const CICKA_DUEL_WON_CONVERSATION = 'bridge.cicka.duel_won';
 const CICKA_DUEL_LOST_CONVERSATION = 'bridge.cicka.duel_lost';
-/** Set when the player outlasted Cicka's Standoff; she remembers. */
-const CICKA_RESPECT_FLAG = 'bridge_cicka_respect';
-/** Set after losing a standoff, so Cicka offers a rematch. */
-const CICKA_DUEL_LOST_FLAG = 'bridge_cicka_duel_lost';
 
 export interface RidgeSessionOptions {
   /** Preferred: full multi-area registry for Compact Area Transitions. */

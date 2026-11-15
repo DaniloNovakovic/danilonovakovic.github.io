@@ -90,7 +90,8 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
   leaf, then roll the car back and forth) and she shares it. Or keep the car
   and she tests you in **Cicka's Standoff**: you never attack; press Space, E
   or ↑ (or tap Dodge) as the closing ring meets the circle around you. Dashed
-  rings are feints, so hold still. Outlast her with nerve left and she gives you
+  rings are feints, so hold still: a dodge that misses leaves you slow to
+  recover, while one that slips a real paw lets you go again. Outlast her with nerve left and she gives you
   the car out of respect; lose all three and she keeps it until a rematch.
   Console: `duel wait`, `duel dodge`, `duel done`. Bridge
   conversations are small topic menus; ask the Draftsperson whatever you like

@@ -1,6 +1,7 @@
 // Bridge content resolvers encode beat-specific actor presence; branching is data policy.
 // fallow-ignore-file complexity
 import type { BridgeBuildTip } from '../bridgeBuilder';
+import { CICKA_DUEL_LOST_FLAG, CICKA_RESPECT_FLAG } from '../cickaDuel';
 import type {
   RidgeActorPresence,
   RidgeConversationDefinition,
@@ -293,9 +294,8 @@ type BridgeLineSpec = readonly [suffix: string, speaker: BridgeSpeaker, emotion?
 const FLAG_CICKA_MET = 'bridge_cicka_met';
 /** The player tried to take the car and got the paw. Colors later lines. */
 const FLAG_CICKA_GUARDED = 'bridge_cicka_guarded_car';
-/** Mirrors the session flags Cicka's Standoff sets when it ends. */
-const FLAG_CICKA_RESPECT = 'bridge_cicka_respect';
-const FLAG_CICKA_DUEL_LOST = 'bridge_cicka_duel_lost';
+/** Cicka hands over the car, whether by friendship or respect. */
+const SHARE_TOY_CAR = { setBeat: 'toy_car_shared', addItem: RIDGE_TOY_CAR_ITEM, setFlag: 'toy_car_shared' } as const;
 /** Draftsperson topics stay asked across visits. */
 const askedFlag = (topic: string) => `bridge_asked_${topic}`;
 
@@ -356,7 +356,7 @@ function resolveBridgeConversation(
       const rollAgain = choice(
         'roll_again',
         [['01', 'prompt'], ['02', 'cicka', 'playful'], ['03', 'prompt'], ['04', 'prompt']],
-        { outcome: { setBeat: 'toy_car_shared', addItem: RIDGE_TOY_CAR_ITEM, setFlag: 'toy_car_shared' } }
+        { outcome: SHARE_TOY_CAR }
       );
       // Keeping it is a challenge, not a theft: Cicka tests you (Cicka's Standoff).
       const keep = choice('keep', [['01', 'prompt'], ['02', 'cicka', 'determined'], ['03', 'prompt']], {
@@ -373,7 +373,7 @@ function resolveBridgeConversation(
           choice('grab', [['01', 'prompt'], ['02', 'cicka', 'determined']], { then: 'menu', outcome: guarded }),
           choice('ask', [['01', 'prompt']], { then: 'menu', once: true }),
           choice('leaf', [['01', 'prompt'], ['02', 'prompt']], { choices: [pocket, roll] }),
-          ...(state.flags.has(FLAG_CICKA_DUEL_LOST)
+          ...(state.flags.has(CICKA_DUEL_LOST_FLAG)
             ? [choice('rematch', [['01', 'prompt']], { outcome: { openCickaDuel: true } })]
             : []),
           choice('leave', [['01', 'prompt']])
@@ -391,7 +391,7 @@ function resolveBridgeConversation(
           say(['03', 'prompt']),
           say(['04', 'prompt'])
         ],
-        outcome: { setBeat: 'toy_car_shared', addItem: RIDGE_TOY_CAR_ITEM, setFlag: 'toy_car_shared' }
+        outcome: SHARE_TOY_CAR
       };
     case 'bridge.cicka.duel_lost':
       return {
@@ -403,7 +403,7 @@ function resolveBridgeConversation(
     case 'bridge.cicka.after_share':
       return {
         id: conversationId,
-        lines: [say([state.flags.has(FLAG_CICKA_RESPECT) ? '01_respect' : '01', 'prompt'])],
+        lines: [say([state.flags.has(CICKA_RESPECT_FLAG) ? '01_respect' : '01', 'prompt'])],
         choices: [choice('pet', [['01', 'cicka', 'sleepy']]), choice('promise', [['01', 'prompt']])]
       };
 

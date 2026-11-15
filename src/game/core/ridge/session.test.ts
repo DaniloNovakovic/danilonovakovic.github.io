@@ -167,6 +167,13 @@ describe("Cicka's Standoff from keeping the car", () => {
 
     session.exec('interact cicka');
     expect(session.observe().conversation?.lineId).toBe('bridge.cicka.after_share.01_respect');
+    talk(session, 'promise');
+
+    // The won car opens the bridge exactly like the friendly one.
+    walkTo(session, 0.55);
+    session.exec('interact draftsperson');
+    talk(session, 'hand_over');
+    expect(session.observe().mode).toBe('bridgeBuild');
   });
 
   it('keeps the car with Cicka after a loss and offers a rematch', () => {
@@ -185,6 +192,19 @@ describe("Cicka's Standoff from keeping the car", () => {
     expect(choiceIds(session)).toContain('rematch');
     talk(session, 'rematch');
     expect(session.observe().mode).toBe('cickaDuel');
+  });
+
+  it('still lets you roll the car back after a loss', () => {
+    const session = createBridgeOnlySession();
+    reachKeep(session);
+    while (session.observe().cickaDuel?.phase === 'fighting') session.exec('duel wait 30');
+    session.exec('duel done');
+    drainConversation(session);
+
+    session.exec('interact cicka');
+    drainConversation(session);
+    talk(session, 'leaf', 'roll', 'roll_again');
+    expect(session.observe().inventory).toContain('toy-car');
   });
 });
 

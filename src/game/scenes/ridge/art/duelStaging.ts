@@ -1,5 +1,5 @@
 import {
-  CICKA_DODGE_LOCKOUT,
+  CICKA_DODGE_HOP,
   type CickaAttackKind,
   type CickaDuel,
   type CickaStrikeResult,
@@ -100,7 +100,7 @@ function cickaBody(
 /** Hop back and up on a dodge; flinch when the paw connects. */
 function playerBody(duel: CickaDuel, landing: Landing | null, toward: number): { dx: number; dy: number } {
   const age = duel.dodgeAge;
-  const arc = age === null ? 0 : Math.sin((Math.PI * age) / CICKA_DODGE_LOCKOUT);
+  const arc = age === null ? 0 : Math.sin((Math.PI * age) / CICKA_DODGE_HOP);
   const flinch =
     landing?.result === 'hit' && landing.age < HIT_FRAMES
       ? 7 * (1 - landing.age / HIT_FRAMES) * Math.cos(landing.age * 1.9)
