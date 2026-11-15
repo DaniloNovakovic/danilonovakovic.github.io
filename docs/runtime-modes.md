@@ -61,7 +61,8 @@ Use this path when checking pattern refactors:
 6. Boot `?startScene=ridge`; verify the Ridge shell renders the Bridge tracer,
    movement works from the nature/hill entry, Cicka appears with the toy car,
    the Bridge Draftsperson advances the missing-span beat, Cicka Parallel Play
-   shares the toy car, returning it to the Draftsperson opens the Blueprint
+   shares the toy car (or keeping it starts Cicka's Standoff: the ring closes,
+   Space/tap dodges, and winning hands over the car), returning it to the Draftsperson opens the Blueprint
    Bridge drawing table (draw beams by drag/touch, a bare
    deck fails, the traced sketch passes), the passed test visibly opens the
    crossing, and the opened crossing triggers the Bridge-to-Concert handoff.

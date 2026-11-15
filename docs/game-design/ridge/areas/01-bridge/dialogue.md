@@ -73,14 +73,29 @@ paw. Menu:
 | ask (once) | A polite slow blink that means no; back to the menu. |
 | leaf | Cicka pounces, the car rolls loose → follow-ups: |
 | ↳ pocket | She is somehow already sitting on it; back to the menu. |
-| ↳ roll | She bats it back → **roll_again** (earns the car: `toy_car_shared`, item `toy-car`) or **keep** (her eyes go round; you set it down; back to the menu). |
+| ↳ roll | She bats it back → **roll_again** (earns the car: `toy_car_shared`, item `toy-car`) or **keep** (her tail puffs up; starts **Cicka's Standoff**). |
+| rematch | Only after losing a standoff: "Crouch down, ready this time" starts it again. |
 | leave | Ends; Cicka keeps the car. |
 
 Glossary guardrail: **Cicka Parallel Play**, never taking the toy by force.
+**Cicka's Standoff** keeps that rule: the player only dodges, never strikes,
+and Cicka hands the car over herself.
+
+### bridge.cicka.duel_won / bridge.cicka.duel_lost
+
+Spoken right after **Cicka's Standoff** ends (`duel done`).
+
+- `duel_won`: lines `01`–`04`. The last pounce lands on empty corn, she nudges
+  the car over: `toy_car_shared`, item `toy-car`, and session flag
+  `bridge_cicka_respect`.
+- `duel_lost`: lines `01`–`03`. She pins the car and washes her face. Sets the
+  guarded flag plus `bridge_cicka_duel_lost`, which adds **rematch** to
+  `parallel_play`. The friendly roll path stays open.
 
 ### bridge.cicka.after_share
 
-State: `bridge:toy_car_shared`. Line `01`; choices **pet** / **promise** (to
+State: `bridge:toy_car_shared`. Line `01` (`01_respect` after winning the
+standoff: "one champion to another"); choices **pet** / **promise** (to
 bring it back). Both end.
 
 ### bridge.draftsperson.toy_car_test

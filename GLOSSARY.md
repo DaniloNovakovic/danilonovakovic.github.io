@@ -255,6 +255,12 @@ she treats the toy car as shared play and lets it become usable for the bridge
 test.
 _Avoid_: taking the toy by force, obedient quest-item handoff, food-fetch gate
 
+**Cicka's Standoff**:
+The optional timing-dodge mini-game reached by choosing to keep the toy car
+during **Cicka Parallel Play**. Cicka winds up swipes, pounces, and feints; the
+player only dodges. Outlasting her earns her respect and the car.
+_Avoid_: fighting Cicka, attacking, health bars on Cicka, a required gate
+
 **Toy Car Bridge Test**:
 The physics run on the **Blueprint Bridge Workbench** where the retrieved toy
 car drives across the player's drawn span. If it reaches the far bank the

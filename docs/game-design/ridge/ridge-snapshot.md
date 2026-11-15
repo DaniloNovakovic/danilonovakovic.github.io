@@ -75,7 +75,8 @@ Bridge
   -> blocked bridge + unfinished blueprint
   -> Bridge Draftsperson (topic menu; asking about the car opens the hunt)
   -> Cicka Parallel Play (grab/ask bounce off; leaf -> roll -> roll again
-     earns the toy car)
+     earns the toy car, or "keep it" -> Cicka's Standoff: dodge her paw,
+     outlast her, earn her respect and the car; lose and she keeps it)
   -> Draftsperson: hand over the car, chat, or "Not yet"
   -> Blueprint Bridge Workbench (draw road/wood beams, physics toy-car test,
      forgiving retries + traceable sketch)

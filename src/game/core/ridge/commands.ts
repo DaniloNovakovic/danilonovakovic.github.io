@@ -1,7 +1,7 @@
 // Command parsers are table-driven; remaining branching is intentional CLI surface area.
 // fallow-ignore-file complexity
 import type { BridgeBuildAction } from './bridgeBuilder';
-import type { RidgeCommand, RidgeFacing } from './types';
+import type { RidgeCommand, RidgeDuelAction, RidgeFacing } from './types';
 
 const HELP_TEXT = [
   'Ridge Console commands:',
@@ -22,6 +22,11 @@ const HELP_TEXT = [
   '  build test           send the toy car across',
   '  build edit           back to drawing after a run',
   '  build done           celebrate a bridge that held',
+  '',
+  "Cicka's Standoff (keep the toy car and she tests you):",
+  '  duel dodge           hop clear; time it to the paw landing',
+  '  duel wait [n]        let n frames pass (default: until the next landing)',
+  '  duel done            see how Cicka takes it once the standoff ends',
   '',
   'Playtest skips:',
   '  skip                 jump to the next area start',
@@ -59,6 +64,8 @@ const RIGHT_ALIASES = new Set(['right', 'east', 'd']);
 const INTERACT_ALIASES = new Set(['interact', 'talk', 'use', 'e', 'x']);
 const CHOOSE_ALIASES = new Set(['choose', 'pick', 'select']);
 const BUILD_ALIASES = new Set(['build', 'b']);
+const DUEL_ALIASES = new Set(['duel', 'standoff']);
+const DODGE_ALIASES = new Set(['dodge', 'jump', 'hop']);
 const BUILD_SIMPLE: Record<string, BridgeBuildAction> = {
   undo: { kind: 'undo' },
   clear: { kind: 'clear' },
@@ -117,6 +124,11 @@ export function parseRidgeCommand(rawInput: string): RidgeCommand {
   if (BUILD_ALIASES.has(head)) {
     const action = parseBuildAction(args);
     return action ? { type: 'build', action } : { type: 'unknown', raw };
+  }
+  if (DODGE_ALIASES.has(head)) return { type: 'duel', action: { kind: 'dodge' } };
+  if (DUEL_ALIASES.has(head)) {
+    const action = parseDuelAction(args);
+    return action ? { type: 'duel', action } : { type: 'unknown', raw };
   }
   if (WARP_ALIASES.has(head)) {
     const areaId = args[0] ? AREA_ALIASES[args[0].replace(/[_-]/g, '')] : undefined;
@@ -178,4 +190,16 @@ function parseGridPoint(value: string | undefined): { x: number; y: number } | n
   const match = /^(-?\d+),(-?\d+)$/.exec(value);
   if (!match) return null;
   return { x: Number(match[1]), y: Number(match[2]) };
+}
+
+function parseDuelAction(args: string[]): RidgeDuelAction | null {
+  const [verb, count] = args;
+  if (!verb || DODGE_ALIASES.has(verb)) return { kind: 'dodge' };
+  if (verb === 'done' || verb === 'end') return { kind: 'done' };
+  if (verb === 'wait' || verb === 'step') {
+    if (!count) return { kind: 'wait' };
+    const frames = Number.parseInt(count, 10);
+    return Number.isFinite(frames) && frames > 0 ? { kind: 'wait', frames } : null;
+  }
+  return null;
 }
