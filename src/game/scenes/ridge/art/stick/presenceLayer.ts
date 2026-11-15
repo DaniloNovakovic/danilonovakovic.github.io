@@ -115,13 +115,16 @@ class FocusCard {
   }
 
   setContent({ key, action, name: rawName, role }: FocusPrompt): void {
+    // Called every frame while focused: bail on the raw inputs before any
+    // tokenizing so an unchanged card costs one string compare.
+    const contentKey = `${key}|${action}|${rawName ?? ''}|${role ?? ''}`;
+    if (contentKey === this.contentKey) return;
+    this.contentKey = contentKey;
+
     // "Talk to Draftsperson" already says who; the tab only earns its place
     // when the action doesn't ("Practice Riff", "Clear Gate").
     const name = rawName && !mentions(action, rawName) ? rawName : undefined;
     const shownRole = name && role && !sameWords(name, role) ? role : '';
-    const contentKey = `${key}|${action}|${name ?? ''}|${shownRole}`;
-    if (contentKey === this.contentKey) return;
-    this.contentKey = contentKey;
 
     this.actionText.setText(action);
     this.nameText.setText(name ?? '').setVisible(Boolean(name));

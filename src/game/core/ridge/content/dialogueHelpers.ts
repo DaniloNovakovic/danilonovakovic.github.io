@@ -1,15 +1,22 @@
-import type { RidgeDialogueLine, RidgeInteractable, RidgeSpotDefinition } from '../types';
+import type {
+  RidgeDialogueLine,
+  RidgeEmotion,
+  RidgeInteractable,
+  RidgeSpotDefinition
+} from '../types';
 
 export function makeCatalogLine(
   catalog: { speakers: Record<string, string>; lines: Record<string, string> },
   id: string,
-  speakerId: string
+  speakerId: string,
+  emotion?: RidgeEmotion
 ): RidgeDialogueLine {
   return {
     id,
     speakerId,
     speaker: catalog.speakers[speakerId] ?? speakerId,
-    text: catalog.lines[id] ?? id
+    text: catalog.lines[id] ?? id,
+    ...(emotion ? { emotion } : {})
   };
 }
 

@@ -255,6 +255,17 @@ describe('Blueprint Bridge workbench', () => {
     bench.apply({ kind: 'undo' });
     expect(bench.design).toEqual([road(0, 0, 2, 0)]);
   });
+
+  it('keeps undo available after clearing the last beam', () => {
+    const bench = new BridgeWorkbench(PUZZLE);
+    expect(bench.canUndo).toBe(false);
+    bench.apply({ kind: 'add', material: 'road', a: { x: 0, y: 0 }, b: { x: 2, y: 0 } });
+    bench.apply({ kind: 'clear' });
+    expect(bench.design).toEqual([]);
+    expect(bench.canUndo).toBe(true);
+    bench.apply({ kind: 'undo' });
+    expect(bench.design).toEqual([road(0, 0, 2, 0)]);
+  });
 });
 
 describe('Draftsperson remarks', () => {

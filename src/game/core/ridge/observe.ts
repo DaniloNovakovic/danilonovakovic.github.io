@@ -51,6 +51,7 @@ export function observeRidgeWorld(
           phase: workbench.phase,
           attempts: workbench.attempts,
           beamCount: workbench.design.length,
+          canUndo: workbench.canUndo,
           ink: workbench.ink,
           inkBudget: workbench.puzzle.inkBudget,
           tip: workbench.tip,

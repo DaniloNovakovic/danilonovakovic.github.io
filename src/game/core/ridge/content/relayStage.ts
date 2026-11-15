@@ -3,6 +3,7 @@
 import type {
   RidgeActorPresence,
   RidgeConversationDefinition,
+  RidgeEmotion,
   RidgeInteractable,
   RidgeStageDefinition,
   RidgeWorldState
@@ -138,8 +139,11 @@ function resolveRelayConversation(
   _state: RidgeWorldState,
   catalog: RelayDialogueCatalog
 ): RidgeConversationDefinition | null {
-  const line = (id: string, speakerId: keyof RelayDialogueCatalog['speakers']) =>
-    makeCatalogLine(catalog, id, speakerId);
+  const line = (
+    id: string,
+    speakerId: keyof RelayDialogueCatalog['speakers'],
+    emotion?: RidgeEmotion
+  ) => makeCatalogLine(catalog, id, speakerId, emotion);
 
   switch (conversationId) {
     case 'relay.overlook.inspect':
@@ -170,7 +174,7 @@ function resolveRelayConversation(
             label: catalog.lines['relay.guitar.let_song_end.01'] ?? 'Let the song end',
             lines: [
               line('relay.guitar.let_song_end.02', 'prompt'),
-              line('relay.cicka.threshold_meow.01', 'cicka'),
+              line('relay.cicka.threshold_meow.01', 'cicka', 'thoughtful'),
               line('relay.cicka.threshold_meow.02', 'prompt'),
               line('relay.cicka.threshold_meow.03', 'prompt'),
               line('relay.dedication.card.01', 'dedication'),

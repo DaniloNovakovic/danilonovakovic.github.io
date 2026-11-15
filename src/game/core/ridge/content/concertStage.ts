@@ -3,6 +3,7 @@
 import type {
   RidgeActorPresence,
   RidgeConversationDefinition,
+  RidgeEmotion,
   RidgeInteractable,
   RidgeStageDefinition,
   RidgeWorldState
@@ -207,8 +208,11 @@ function resolveConcertConversation(
   state: RidgeWorldState,
   catalog: ConcertDialogueCatalog
 ): RidgeConversationDefinition | null {
-  const line = (id: string, speakerId: keyof ConcertDialogueCatalog['speakers']) =>
-    makeCatalogLine(catalog, id, speakerId);
+  const line = (
+    id: string,
+    speakerId: keyof ConcertDialogueCatalog['speakers'],
+    emotion?: RidgeEmotion
+  ) => makeCatalogLine(catalog, id, speakerId, emotion);
 
   switch (conversationId) {
     case 'concert.crowd.delay_barks':
@@ -224,8 +228,8 @@ function resolveConcertConversation(
       return {
         id: conversationId,
         lines: [
-          line('concert.guitarist.injury.01', 'injuredGuitarist'),
-          line('concert.guitarist.injury.02', 'injuredGuitarist'),
+          line('concert.guitarist.injury.01', 'injuredGuitarist', 'playful'),
+          line('concert.guitarist.injury.02', 'injuredGuitarist', 'determined'),
           line('concert.guitarist.injury.03', 'prompt')
         ],
         outcome: { setFlag: 'met_guitarist' }
@@ -236,7 +240,7 @@ function resolveConcertConversation(
         lines: [
           line('concert.guitarist.practice_riff.01', 'injuredGuitarist'),
           line('concert.guitarist.practice_riff.02', 'prompt'),
-          line('concert.guitarist.practice_riff.03', 'injuredGuitarist')
+          line('concert.guitarist.practice_riff.03', 'injuredGuitarist', 'surprised')
         ],
         outcome: { setBeat: 'concert_practiced' }
       };
@@ -247,7 +251,7 @@ function resolveConcertConversation(
           line('concert.performance.auto_success.01', 'prompt'),
           line('concert.performance.auto_success.02', 'prompt'),
           line('concert.performance.auto_success.03', 'crowd'),
-          line('concert.performance.auto_success.04', 'injuredGuitarist')
+          line('concert.performance.auto_success.04', 'injuredGuitarist', 'playful')
         ],
         outcome: {
           setBeat: 'concert_cleared',
@@ -258,7 +262,7 @@ function resolveConcertConversation(
       return {
         id: conversationId,
         lines: [
-          line('concert.guitarist.guitar_handoff.01', 'injuredGuitarist'),
+          line('concert.guitarist.guitar_handoff.01', 'injuredGuitarist', 'thoughtful'),
           line('concert.guitarist.guitar_handoff.02', 'injuredGuitarist'),
           line('concert.guitarist.guitar_handoff.03', 'prompt')
         ]
@@ -270,11 +274,11 @@ function resolveConcertConversation(
           state.beat === 'concert_cleared'
             ? [
                 line('concert.cicka.band_resting_spot.03', 'prompt'),
-                line('concert.cicka.band_resting_spot.04', 'cicka')
+                line('concert.cicka.band_resting_spot.04', 'cicka', 'sleepy')
               ]
             : [
                 line('concert.cicka.band_resting_spot.01', 'prompt'),
-                line('concert.cicka.band_resting_spot.02', 'cicka')
+                line('concert.cicka.band_resting_spot.02', 'cicka', 'curious')
               ]
       };
     case 'concert.exit.dance_transition':

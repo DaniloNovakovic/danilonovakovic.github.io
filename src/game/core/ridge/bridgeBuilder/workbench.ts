@@ -97,6 +97,11 @@ export class BridgeWorkbench {
     return designInk(this.puzzle, this.design);
   }
 
+  /** True while there is a saved design to step back to (survives Clear). */
+  get canUndo(): boolean {
+    return this.history.length > 0;
+  }
+
   get sketchOffered(): boolean {
     return this.attempts >= SKETCH_OFFER_AFTER;
   }
