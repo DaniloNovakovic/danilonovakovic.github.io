@@ -64,6 +64,76 @@ describe('RidgeConsoleSession Bridge playthrough', () => {
   });
 });
 
+describe('Bridge conversations', () => {
+  const choiceIds = (session: RidgeConsoleSession) =>
+    session.observe().conversation?.choices?.map((choice) => choice.id) ?? [];
+
+  it('lets the player try to grab the car without Cicka handing it over', () => {
+    const session = createBridgeOnlySession();
+    walkTo(session, 0.22);
+    session.exec('interact cicka');
+    talk(session, 'reach');
+    // Back at the topic menu, minus the topic just asked.
+    expect(choiceIds(session)).toEqual(['pet', 'watch', 'leave']);
+    talk(session, 'leave');
+
+    walkTo(session, 0.55);
+    session.exec('interact draftsperson');
+    // The car line remembers meeting Cicka.
+    talk(session, 'car');
+    expect(session.observe().conversation?.lineId).toBe('bridge.draftsperson.missing_span.car.03_cat');
+    expect(session.observe().beat).toBe('needs_toy_car');
+    expect(choiceIds(session)).toEqual(['who', 'why', 'leave']);
+    session.exec('leave');
+
+    walkTo(session, 0.22);
+    session.exec('interact cicka');
+    talk(session, 'grab', 'ask', 'leaf', 'pocket');
+    expect(session.observe().inventory).not.toContain('toy-car');
+    expect(choiceIds(session)).toEqual(['grab', 'leaf', 'leave']);
+    talk(session, 'leaf', 'roll', 'keep');
+    expect(session.observe().inventory).not.toContain('toy-car');
+    talk(session, 'leaf', 'roll', 'roll_again');
+    expect(session.observe().inventory).toContain('toy-car');
+    expect(session.observe().beat).toBe('toy_car_shared');
+  });
+
+  it('remembers asked Draftsperson topics and lets the player hold on to the car', () => {
+    const session = createBridgeOnlySession();
+    walkTo(session, 0.55);
+    session.exec('interact draftsperson');
+    talk(session, 'who', 'car', 'leave');
+
+    session.exec('interact draftsperson');
+    drainConversation(session);
+    expect(choiceIds(session)).toEqual(['cicka', 'why', 'still_looking']);
+    talk(session, 'still_looking');
+
+    walkTo(session, 0.22);
+    session.exec('interact cicka');
+    talk(session, 'leaf', 'roll', 'roll_again');
+    walkTo(session, 0.55);
+    session.exec('interact draftsperson');
+    talk(session, 'not_yet');
+    expect(session.observe().mode).toBe('explore');
+    expect(session.observe().inventory).toContain('toy-car');
+
+    session.exec('interact draftsperson');
+    talk(session, 'hand_over');
+    expect(session.observe().mode).toBe('bridgeBuild');
+    session.exec('build road 0,0 2,0');
+    session.exec('build leave');
+    expect(session.observe().mode).toBe('explore');
+
+    // Returning to an unfinished drawing asks before opening the table.
+    session.exec('interact draftsperson');
+    drainConversation(session);
+    expect(choiceIds(session)).toEqual(['resume', 'advice', 'later']);
+    talk(session, 'advice', 'resume');
+    expect(session.observe().mode).toBe('bridgeBuild');
+  });
+});
+
 describe('RidgeConsoleSession playtest skips', () => {
   it('warps and skips across Compact Ridge Areas with guitar when needed', () => {
     const session = createRouteSession();
@@ -110,13 +180,11 @@ function playBridge(session: RidgeConsoleSession): RidgeSessionEvent[] {
 
   walkTo(session, 0.22);
   expect(session.exec('interact cicka').ok).toBe(true);
-  events.push(...drainConversation(session));
-  expect(session.exec('choose pet').ok).toBe(true);
-  events.push(...drainConversation(session));
+  events.push(...talk(session, 'pet', 'leave'));
 
   walkTo(session, 0.55);
   expect(session.exec('interact draftsperson').ok).toBe(true);
-  events.push(...drainConversation(session));
+  events.push(...talk(session, 'car', 'leave'));
   expect(session.observe().beat).toBe('needs_toy_car');
 
   const blocked = session.exec('go right 5');
@@ -124,12 +192,12 @@ function playBridge(session: RidgeConsoleSession): RidgeSessionEvent[] {
 
   walkTo(session, 0.22);
   expect(session.exec('interact').ok).toBe(true);
-  events.push(...drainConversation(session));
+  events.push(...talk(session, 'leaf', 'roll', 'roll_again'));
   expect(session.observe().inventory).toContain('toy-car');
 
   walkTo(session, 0.55);
-  expect(session.exec('interact').ok).toBe(true);
-  events.push(...drainConversation(session));
+  expect(session.exec('interact draftsperson').ok).toBe(true);
+  events.push(...talk(session, 'hand_over'));
   expect(session.observe().mode).toBe('bridgeBuild');
   expect(session.exec('build test').ok).toBe(false);
 
@@ -225,6 +293,17 @@ function walkTo(session: RidgeConsoleSession, target: number): void {
     const direction = progress < target ? 'right' : 'left';
     session.exec(`go ${direction}`);
   }
+}
+
+/** Advance through lines, picking each choice in order as menus come up. */
+function talk(session: RidgeConsoleSession, ...choices: string[]): RidgeSessionEvent[] {
+  const events = drainConversation(session);
+  for (const choiceId of choices) {
+    const result = session.exec(`choose ${choiceId}`);
+    expect(result.ok, `choose ${choiceId}: ${result.message}`).toBe(true);
+    events.push(...result.events, ...drainConversation(session));
+  }
+  return events;
 }
 
 function drainConversation(session: RidgeConsoleSession) {

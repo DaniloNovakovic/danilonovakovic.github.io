@@ -86,10 +86,15 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
   live drag-banana physics. Winning still grants the Circuit.
 - Ridge conversation uses `advance` / `choose`. `pnpm ridge:console` is an alias
   that starts already inside Ridge.
-- At the Bridge, handing the toy car to the Draftsperson opens the Blueprint
-  Bridge drawing table: drag road and wood beams from the bank bolts, press
-  Test, and the toy car drives across. If it snaps, fix it and try again; Hint
-  shows the Draftsperson's sketch to trace. When it holds, your bridge becomes
+- At the Bridge, Cicka won't just hand over her toy car: join her game (a corn
+  leaf, then roll the car back and forth) and she shares it. Bridge
+  conversations are small topic menus; ask the Draftsperson whatever you like
+  and hand the car over when you're ready.
+- Handing the toy car to the Draftsperson opens the Blueprint
+  Bridge drawing table: drag road and wood beams from the bank bolts (a dashed
+  circle shows how far a beam can reach), press
+  Test, and the toy car drives across. If it snaps, fix it and try again; the `?`
+  button shows the Draftsperson's sketch as gray dashes to trace. When it holds, your bridge becomes
   the crossing. Console: `build road 0,0 2,0`, `build test`, `build done`.
 - Ridge first-playable secret route: Bridge → Concert → Dance Festival → Relay
   farewell (Sit and Play, dedication card), then return to the Overworld street.

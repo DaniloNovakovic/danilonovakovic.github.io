@@ -24,6 +24,8 @@ const GRAB_CELLS = 0.55;
 const BEAM_HIT = 9;
 const PULSE_MS = 700;
 const DEBRIS_LIFE_MS = 1600;
+/** Dashes around the reach circle; even so dash and gap alternate cleanly. */
+const REACH_DASHES = 28;
 const SPLASH_LIFE_MS = 900;
 
 /** Below this many world units of droop, the drawing counts as holding still. */
@@ -92,6 +94,7 @@ export class BridgeBuilderView {
   private lastSim: BridgeSim | null = null;
   private splashed = false;
   private sheetKey = '';
+  private reachCache: { key: string; design: BridgeDesign; points: GridPoint[] } | null = null;
 
   constructor(scene: Phaser.Scene, options: BridgeBuilderViewOptions) {
     this.scene = scene;
@@ -328,6 +331,7 @@ export class BridgeBuilderView {
     const drag = this.drag;
     if (drag?.kind === 'beam') {
       const from = this.toWorld(drag.from);
+      this.drawReach(workbench, drag.from, drag.to, 1);
       g.lineStyle(2, INK, 0.8);
       g.strokeCircle(from.x, from.y, 8);
       if (drag.to) {
@@ -336,18 +340,80 @@ export class BridgeBuilderView {
         drawInkBeam(g, { ax: from.x, ay: from.y, bx: to.x, by: to.y, material }, { alpha: 0.45 });
         g.lineStyle(2, INK, 0.9);
         g.strokeCircle(to.x, to.y, 6);
+        // Dragged past reach: a dotted rubber band shows the beam stopped short.
+        const hover = this.hover;
+        const reach = workbench.puzzle.maxBeamCells * workbench.puzzle.cell;
+        if (hover && Math.hypot(hover.x - from.x, hover.y - from.y) > reach + 6) {
+          g.lineStyle(1.4, INK, 0.45);
+          strokeDashedLine(g, to.x, to.y, hover.x, hover.y, 2, 4);
+          g.strokeCircle(hover.x, hover.y, 3);
+        }
       }
       return;
     }
 
-    // Hover: show what a press would grab.
+    // Hover: show what a press would grab, and how far a beam from it can go.
     if (!this.hover || this.tool === 'eraser') return;
     const joint = this.jointNear(workbench, this.hover.x, this.hover.y);
     if (joint) {
+      this.drawReach(workbench, joint, null, 0.45);
       const p = this.toWorld(joint);
       g.lineStyle(2, INK, 0.55);
       g.strokeCircle(p.x, p.y, 9);
     }
+  }
+
+  /**
+   * Poly-Bridge-style reach: a dashed pencil compass circle at max beam length
+   * around the start joint, plus a small ring on every legal end point.
+   */
+  private drawReach(
+    workbench: BridgeWorkbench,
+    from: GridPoint,
+    target: GridPoint | null,
+    strength: number
+  ): void {
+    const g = this.ghost;
+    const { puzzle } = workbench;
+    const center = this.toWorld(from);
+    const radius = puzzle.maxBeamCells * puzzle.cell;
+
+    g.lineStyle(1.4, INK, 0.38 * strength);
+    const step = (Math.PI * 2) / REACH_DASHES;
+    for (let i = 0; i < REACH_DASHES; i += 2) {
+      g.beginPath();
+      g.arc(center.x, center.y, radius, i * step, (i + 1) * step);
+      g.strokePath();
+    }
+
+    for (const point of this.reachablePoints(workbench, from)) {
+      if (target && point.x === target.x && point.y === target.y) continue;
+      const p = this.toWorld(point);
+      g.lineStyle(1.3, INK, 0.5 * strength);
+      g.strokeCircle(p.x, p.y, 4.5);
+    }
+  }
+
+  /** Grid points a beam from `from` may legally end on. Cached per design. */
+  private reachablePoints(workbench: BridgeWorkbench, from: GridPoint): GridPoint[] {
+    const { puzzle, design } = workbench;
+    const key = `${from.x},${from.y}`;
+    const cached = this.reachCache;
+    if (cached && cached.key === key && cached.design === design) return cached.points;
+
+    const reach = Math.ceil(puzzle.maxBeamCells);
+    const points: GridPoint[] = [];
+    for (let dx = -reach; dx <= reach; dx += 1) {
+      for (let dy = -reach; dy <= reach; dy += 1) {
+        const candidate = { x: from.x + dx, y: from.y + dy };
+        if ((dx === 0 && dy === 0) || !isInBuildArea(puzzle, candidate)) continue;
+        if (cellDistance(from, candidate) > puzzle.maxBeamCells) continue;
+        if (!addBeam(puzzle, design, from, candidate, 'wood').ok) continue;
+        points.push(candidate);
+      }
+    }
+    this.reachCache = { key, design, points };
+    return points;
   }
 
   private drawRun(sim: BridgeSim, now: number, motion: boolean): void {
@@ -536,25 +602,17 @@ export class BridgeBuilderView {
    * slides along the drag direction instead of refusing, like a stretchy rule.
    */
   private snapEnd(workbench: BridgeWorkbench, from: GridPoint, x: number, y: number): GridPoint | null {
-    const { puzzle, design } = workbench;
     const fromWorld = this.toWorld(from);
-    if (Math.hypot(x - fromWorld.x, y - fromWorld.y) < puzzle.cell * 0.4) return null;
+    if (Math.hypot(x - fromWorld.x, y - fromWorld.y) < workbench.puzzle.cell * 0.4) return null;
 
-    const reach = Math.ceil(puzzle.maxBeamCells);
     let best: GridPoint | null = null;
     let bestDistance = Infinity;
-    for (let dx = -reach; dx <= reach; dx += 1) {
-      for (let dy = -reach; dy <= reach; dy += 1) {
-        const candidate = { x: from.x + dx, y: from.y + dy };
-        if ((dx === 0 && dy === 0) || !isInBuildArea(puzzle, candidate)) continue;
-        if (cellDistance(from, candidate) > puzzle.maxBeamCells) continue;
-        if (!addBeam(puzzle, design, from, candidate, 'wood').ok) continue;
-        const p = this.toWorld(candidate);
-        const distance = Math.hypot(p.x - x, p.y - y);
-        if (distance < bestDistance) {
-          bestDistance = distance;
-          best = candidate;
-        }
+    for (const candidate of this.reachablePoints(workbench, from)) {
+      const p = this.toWorld(candidate);
+      const distance = Math.hypot(p.x - x, p.y - y);
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        best = candidate;
       }
     }
     return best;

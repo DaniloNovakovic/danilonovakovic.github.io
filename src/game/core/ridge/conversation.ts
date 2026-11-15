@@ -19,7 +19,9 @@ export function startConversation(
     lines: definition.lines,
     choices: definition.choices ?? null,
     awaitingChoice: false,
-    outcome: definition.outcome ?? null
+    outcome: definition.outcome ?? null,
+    menu: definition.choices ?? null,
+    asked: []
   };
 
   return {
@@ -103,26 +105,79 @@ export function chooseInConversation(
     };
   }
 
+  const asked = choice.once ? [...conversation.asked, choice.id] : conversation.asked;
+  const returnsToMenu = choice.then === 'menu';
+  let next: RidgeWorldState = state;
+  const events: RidgeSessionEvent[] = [];
+  let pendingOutcome = choice.outcome ?? conversation.outcome;
+
+  // Topic choices land their consequences now: the talk keeps going.
+  if (returnsToMenu) {
+    pendingOutcome = conversation.outcome;
+    if (choice.outcome) {
+      const applied = applyOutcome(next, choice.outcome);
+      next = applied.state;
+      events.push(...applied.events);
+    }
+  }
+
+  const followUp =
+    choice.choices && choice.choices.length > 0
+      ? choice.choices
+      : returnsToMenu
+        ? visibleMenu(conversation.menu, asked)
+        : null;
+
   if (choice.lines && choice.lines.length > 0) {
     return {
       state: {
-        ...state,
+        ...next,
         conversation: {
-          id: conversation.id,
+          ...conversation,
           lineIndex: 0,
           lines: choice.lines,
-          choices: null,
+          choices: followUp,
           awaitingChoice: false,
-          outcome: choice.outcome ?? conversation.outcome
+          outcome: pendingOutcome,
+          asked
         },
         lastMessage: choice.label
       },
-      events: [],
+      events,
       message: choice.label
     };
   }
 
-  return finishConversation(state, choice.outcome ?? conversation.outcome);
+  if (followUp) {
+    return {
+      state: {
+        ...next,
+        conversation: {
+          ...conversation,
+          choices: followUp,
+          awaitingChoice: true,
+          outcome: pendingOutcome,
+          asked
+        },
+        lastMessage: choice.label
+      },
+      events,
+      message: choice.label
+    };
+  }
+
+  const finished = finishConversation(next, pendingOutcome);
+  return { ...finished, events: [...events, ...finished.events] };
+}
+
+/** The topic menu minus `once` topics already asked; null when nothing is left. */
+function visibleMenu(
+  menu: readonly RidgeDialogueChoice[] | null,
+  asked: readonly string[]
+): readonly RidgeDialogueChoice[] | null {
+  if (!menu) return null;
+  const remaining = menu.filter((choice) => !asked.includes(choice.id));
+  return remaining.length > 0 ? remaining : null;
 }
 
 export function leaveConversation(

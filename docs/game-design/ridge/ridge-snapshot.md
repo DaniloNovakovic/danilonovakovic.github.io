@@ -71,10 +71,12 @@ Current runtime characteristics:
 ```text
 Bridge
   Nature / hill entry
-  -> Cicka + toy car play spot (optional Persona-style choice)
+  -> Cicka + toy car play spot (pet / watch / reach topic menu)
   -> blocked bridge + unfinished blueprint
-  -> Bridge Draftsperson
-  -> Cicka Parallel Play (receive toy car)
+  -> Bridge Draftsperson (topic menu; asking about the car opens the hunt)
+  -> Cicka Parallel Play (grab/ask bounce off; leaf -> roll -> roll again
+     earns the toy car)
+  -> Draftsperson: hand over the car, chat, or "Not yet"
   -> Blueprint Bridge Workbench (draw road/wood beams, physics toy-car test,
      forgiving retries + traceable sketch)
   -> Draftsperson thanks you; your drawn bridge becomes the crossing
@@ -139,7 +141,7 @@ conversation state, and hints.
 
 - Stick art itself (replace via VisualProvider)
 - Exact progress numbers / interact radii
-- Temporary conversation choice copy on first Cicka meet
+- Bridge conversation copy (topic menus are the shape; wording is placeholder)
 
 ## What Should Survive Area Blueprints
 

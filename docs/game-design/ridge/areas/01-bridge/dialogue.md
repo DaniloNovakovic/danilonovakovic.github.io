@@ -7,88 +7,92 @@
 
 This file owns Bridge Area conversations, prompts, barks, and placeholder lines.
 
-## Planned Conversation Sets
+## Conversation Sets
 
 - `bridge.cicka.first_meet`: peaceful first Cicka encounter around the toy car /
   weight-test prop.
-- `bridge.draftsperson.missing_span`: Bridge Draftsperson introduces the
-  unfinished blueprint and missing middle span.
-- `bridge.cicka.parallel_play`: player joins Cicka's toy-car play until she
-  chooses to share the test car.
-- `bridge.draftsperson.toy_car_test`: Draftsperson asks the player to draw the
-  span; opens the Blueprint Bridge Workbench.
+- `bridge.draftsperson.missing_span`: Bridge Draftsperson topic menu; asking
+  about the test car moves the route to `needs_toy_car`.
+- `bridge.cicka.parallel_play`: a tiny choice game where grabbing and asking
+  bounce off and joining Cicka's game earns the car.
+- `bridge.cicka.after_share`: short sunbathing visit while the player carries
+  the car.
+- `bridge.draftsperson.toy_car_test`: the player chooses when to hand the car
+  over; opens the Blueprint Bridge Workbench.
 - `bridge.draftsperson.bridge_built`: thanks after the toy car crosses.
 - `bridge.builder.tip.*`: Draftsperson coaching shown on the workbench.
 - `bridge.exit.opened_crossing`: smallest prompt or line set after the crossing
   opens.
 
-## Tone-Locked Placeholder Lines
+## Choice Shape
+
+Conversations are small menus, not cutscenes. Copy lives in
+`src/shared/i18n/messages/en/scenes.ts` with these keys:
+
+- lines: `<conversation>.<nn>`
+- choice labels: `<conversation>.choice.<choiceId>`
+- choice lines: `<conversation>.<choiceId>.<nn>`
+
+A choice can end the talk, open nested follow-up choices, or return to the
+topic menu (`then: 'menu'`). A topic choice applies its outcome immediately,
+and `once` topics leave the menu after they are picked. Draftsperson topics
+also set `bridge_asked_<topic>` so they stay asked on later visits. Flags
+`bridge_cicka_met` and `bridge_cicka_guarded_car` (the player reached for the
+car and got the paw) vary later Draftsperson lines.
+
+## Conversations
 
 ### bridge.cicka.first_meet
 
-Purpose: Establish Cicka as a calm field presence before the toy car becomes a
-route object.
-Trigger: Player approaches Cicka at the toy car / weight-test prop.
-State: `bridge:intro`.
-
-| ID | Speaker | Line / Prompt | Notes |
-| --- | --- | --- | --- |
-| bridge.cicka.first_meet.01 | Prompt | Sit near Cicka | Gentle optional-feeling first contact. |
-| bridge.cicka.first_meet.02 | Cicka | Small chirp. | Audio/event placeholder, not written speech. |
-| bridge.cicka.first_meet.03 | Prompt | Cicka bats the tiny car back into place. | Recontextualizes the toy as shared play. |
-
-Outcome: Player has seen Cicka with the toy car before the Bridge Draftsperson
-names it as the missing bridge test prop.
+State: `bridge:intro`. Lines `01`–`03` introduce Cicka testing the toy car.
+Topic menu: **pet** (`mrrp`, a one-second lean), **watch** (the car loops
+through the corn), **reach** (a paw lands on the car first; sets
+`bridge_cicka_guarded_car`), **leave** (ends). Cicka never hands the car over
+here: the toy only matters once the Draftsperson names it.
 
 ### bridge.draftsperson.missing_span
 
-Purpose: Introduce the blocked crossing, unfinished blueprint, and missing toy
-car test.
-Trigger: Player talks to the Bridge Draftsperson at the unfinished blueprint.
 State: `bridge:intro` or `bridge:needs_toy_car`.
 
-| ID | Speaker | Line / Prompt | Notes |
-| --- | --- | --- | --- |
-| bridge.draftsperson.missing_span.01 | Bridge Draftsperson | The middle span keeps looking brave until I imagine someone crossing it. | Nervous practical worry, not magic exposition. |
-| bridge.draftsperson.missing_span.02 | Bridge Draftsperson | I had a tiny test car for this. It was here a minute ago. | Points back to Cicka without making her a quest giver. |
-| bridge.draftsperson.missing_span.03 | Prompt | Look for the tiny test car | Updates player intent without quest-log UI. |
-
-Outcome: Route state can move to `bridge:needs_toy_car`; player understands the
-toy car matters for the bridge test.
+- `intro`: lines `01`–`02` (keeps erasing the middle span). Topics: **car**
+  ("How will you know if it holds?": test car is missing; sets
+  `needs_toy_car`; the last line is `car.03_cat` once the player has met Cicka),
+  **who**, **why** (what if a cow crosses nervously?), **leave**.
+- `needs_toy_car`: line `waiting`. Topics: **cicka** ("Cicka has it."; the hint
+  that cats share a good game, opening with `cicka.01_guarded` if she guarded
+  the car), any unasked **who**/**why**, **still_looking** (ends).
 
 ### bridge.cicka.parallel_play
 
-Purpose: Retrieve the test car through gentle parallel play rather than taking
-it from Cicka.
-Trigger: Player returns to Cicka after learning the test car matters.
-State: `bridge:needs_toy_car`.
+State: `bridge:needs_toy_car`. Lines `01`–`02`: the car sits under one white
+paw. Menu:
 
-| ID | Speaker | Line / Prompt | Notes |
-| --- | --- | --- | --- |
-| bridge.cicka.parallel_play.01 | Prompt | Sit with Cicka | Uses the shared sit/play vocabulary. |
-| bridge.cicka.parallel_play.02 | Prompt | Roll the car back gently | Lets the player join the game, not snatch the prop. |
-| bridge.cicka.parallel_play.03 | Cicka | Quiet purr. | Audio/event placeholder for permission and trust. |
-| bridge.cicka.parallel_play.04 | Prompt | Cicka leaves the tiny car beside you. | Handoff result without making Cicka obedient. |
+| Choice | Result |
+| --- | --- |
+| grab | Thwap, back to the menu (sets guarded flag). |
+| ask (once) | A polite slow blink that means no; back to the menu. |
+| leaf | Cicka pounces, the car rolls loose → follow-ups: |
+| ↳ pocket | She is somehow already sitting on it; back to the menu. |
+| ↳ roll | She bats it back → **roll_again** (earns the car: `toy_car_shared`, item `toy-car`) or **keep** (her eyes go round; you set it down; back to the menu). |
+| leave | Ends; Cicka keeps the car. |
 
-Outcome: Player receives or can carry the toy car test prop; route remains kind
-and local.
+Glossary guardrail: **Cicka Parallel Play**, never taking the toy by force.
+
+### bridge.cicka.after_share
+
+State: `bridge:toy_car_shared`. Line `01`; choices **pet** / **promise** (to
+bring it back). Both end.
 
 ### bridge.draftsperson.toy_car_test
 
-Purpose: Hand the missing span to the player and open the Blueprint Bridge
-Workbench.
-Trigger: Player returns to the blueprint with the toy car.
 State: `bridge:toy_car_shared`.
 
-| ID | Speaker | Line / Prompt | Notes |
-| --- | --- | --- | --- |
-| bridge.draftsperson.toy_car_test.01 | Prompt | You set the tiny test car on the blueprint table. | Narration. |
-| bridge.draftsperson.toy_car_test.02 | Bridge Draftsperson | Every time I draw the middle span, I erase it. | Thoughtful; the overthinking problem. |
-| bridge.draftsperson.toy_car_test.03 | Bridge Draftsperson | Would you draw it with me? The little car will tell us if it holds. | Curious; invitation. |
-| bridge.draftsperson.toy_car_test.04 | Prompt | Road carries the car, wood holds it up. Triangles are your friend. | The only tutorial text. |
-| bridge.draftsperson.toy_car_test.resume | Bridge Draftsperson | Back to the drawing board! | Returning to an unfinished drawing. |
-
-Outcome: Workbench opens. Copy in `src/shared/i18n/messages/en/scenes.ts`.
+- First time: lines `01`–`02` ("Let me guess. The cat?"). Choices:
+  **hand_over** (lines `hand_over.01`–`03`, the only tutorial copy, then the
+  workbench opens), **story** (once: "She's never even made eye contact with
+  me."), **not_yet** (ends; player keeps the car).
+- Returning to an unfinished drawing: line `resume`. Choices: **resume**
+  (opens the table), **advice** (once: triangles, plus Hint), **later**.
 
 ### bridge.draftsperson.bridge_built
 
@@ -134,5 +138,4 @@ Outcome: Bridge-to-Concert Compact Area Transition can fire.
 
 - exact Bridge Draftsperson voice and role label
 - final wording for Cicka prompts and nonverbal audio labels
-- Cicka Parallel Play recovery beats if the player walks away mid-interaction
 - bridge completion reaction polish after the Bridge Tracer Slice proves pacing
