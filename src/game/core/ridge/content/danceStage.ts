@@ -3,6 +3,7 @@
 import type {
   RidgeActorPresence,
   RidgeConversationDefinition,
+  RidgeEmotion,
   RidgeInteractable,
   RidgeStageDefinition,
   RidgeWorldState
@@ -288,15 +289,18 @@ function resolveDanceConversation(
   state: RidgeWorldState,
   catalog: DanceDialogueCatalog
 ): RidgeConversationDefinition | null {
-  const line = (id: string, speakerId: keyof DanceDialogueCatalog['speakers']) =>
-    makeCatalogLine(catalog, id, speakerId);
+  const line = (
+    id: string,
+    speakerId: keyof DanceDialogueCatalog['speakers'],
+    emotion?: RidgeEmotion
+  ) => makeCatalogLine(catalog, id, speakerId, emotion);
 
   switch (conversationId) {
     case 'dance.traveler.relay_wayfinding':
       return {
         id: conversationId,
         lines: [
-          line('dance.traveler.relay_wayfinding.01', 'traveler'),
+          line('dance.traveler.relay_wayfinding.01', 'traveler', 'curious'),
           line('dance.traveler.relay_wayfinding.02', 'traveler'),
           line('dance.traveler.relay_wayfinding.03', 'prompt')
         ]
@@ -305,8 +309,8 @@ function resolveDanceConversation(
       return {
         id: conversationId,
         lines: [
-          line('dance.driver.shuttle_delay.01', 'hillShuttleDriver'),
-          line('dance.driver.shuttle_delay.02', 'hillShuttleDriver'),
+          line('dance.driver.shuttle_delay.01', 'hillShuttleDriver', 'surprised'),
+          line('dance.driver.shuttle_delay.02', 'hillShuttleDriver', 'thoughtful'),
           line('dance.driver.shuttle_delay.03', 'prompt')
         ],
         choices: state.flags.has(FLAG_DRIVER)
@@ -337,7 +341,7 @@ function resolveDanceConversation(
             ]
           : [
               line('dance.operations_helper.handoff_check.01', 'operationsHelper'),
-              line('dance.operations_helper.handoff_check.02', 'operationsHelper'),
+              line('dance.operations_helper.handoff_check.02', 'operationsHelper', 'determined'),
               line('dance.operations_helper.handoff_check.03', 'prompt')
             ],
         outcome: state.flags.has(FLAG_OPS)
@@ -351,9 +355,9 @@ function resolveDanceConversation(
       return {
         id: conversationId,
         lines: [
-          line('dance.locals.triangulated_read.01', 'festivalSteward'),
+          line('dance.locals.triangulated_read.01', 'festivalSteward', 'determined'),
           line('dance.locals.triangulated_read.02', 'festivalSteward'),
-          line('dance.locals.triangulated_read.03', 'danceTeacher')
+          line('dance.locals.triangulated_read.03', 'danceTeacher', 'playful')
         ]
       };
     case 'dance.driver.one_step_practice':
@@ -361,13 +365,13 @@ function resolveDanceConversation(
         id: conversationId,
         lines: state.flags.has(FLAG_DRIVER)
           ? [
-              line('dance.driver.one_step_practice.done.01', 'danceTeacher'),
+              line('dance.driver.one_step_practice.done.01', 'danceTeacher', 'playful'),
               line('dance.driver.one_step_practice.done.02', 'prompt')
             ]
           : [
               line('dance.driver.one_step_practice.01', 'danceTeacher'),
               line('dance.driver.one_step_practice.02', 'prompt'),
-              line('dance.driver.one_step_practice.03', 'hillShuttleDriver')
+              line('dance.driver.one_step_practice.03', 'hillShuttleDriver', 'surprised')
             ],
         outcome: state.flags.has(FLAG_DRIVER)
           ? undefined
@@ -394,7 +398,7 @@ function resolveDanceConversation(
           line('dance.setup_clearance.01', 'prompt'),
           line('dance.setup_clearance.02', 'prompt'),
           line('dance.setup_clearance.03', 'prompt'),
-          line('dance.setup_clearance.04', 'festivalSteward'),
+          line('dance.setup_clearance.04', 'festivalSteward', 'determined'),
           line('dance.setup_clearance.05', 'prompt')
         ],
         outcome: { setBeat: 'dance_cleared' }
@@ -403,7 +407,7 @@ function resolveDanceConversation(
       return {
         id: conversationId,
         lines: [
-          line('dance.shuttle.last_daylight_ride.01', 'hillShuttleDriver'),
+          line('dance.shuttle.last_daylight_ride.01', 'hillShuttleDriver', 'playful'),
           line('dance.shuttle.last_daylight_ride.02', 'prompt'),
           line('dance.shuttle.last_daylight_ride.03', 'prompt')
         ],
@@ -416,11 +420,11 @@ function resolveDanceConversation(
           state.beat === 'dance_cleared'
             ? [
                 line('dance.cicka.resting_spot.02', 'prompt'),
-                line('dance.cicka.resting_spot.03', 'cicka')
+                line('dance.cicka.resting_spot.03', 'cicka', 'curious')
               ]
             : [
                 line('dance.cicka.resting_spot.01', 'prompt'),
-                line('dance.cicka.resting_spot.03', 'cicka')
+                line('dance.cicka.resting_spot.03', 'cicka', 'sleepy')
               ]
       };
     default:

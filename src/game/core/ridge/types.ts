@@ -222,6 +222,7 @@ export interface RidgeObservation {
     phase: BridgeBuildPhase;
     attempts: number;
     beamCount: number;
+    canUndo: boolean;
     ink: number;
     inkBudget: number;
     tip: BridgeBuildTip;

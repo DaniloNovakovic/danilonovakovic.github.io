@@ -398,7 +398,8 @@ export class RidgeScene extends Phaser.Scene {
       tipText: build.tipText,
       hintVisible: build.hintVisible,
       sketchOffered: build.sketchOffered,
-      canUndo: build.beamCount > 0
+      hasBeams: build.beamCount > 0,
+      canUndo: build.canUndo
     };
     const key = `build:${JSON.stringify(view)}`;
     if (key === this.lastPanelKey) return;
