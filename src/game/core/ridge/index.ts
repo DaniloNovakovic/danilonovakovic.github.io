@@ -4,6 +4,7 @@ export * from './observe';
 export * from './conversation';
 export * from './bridgeBuilder';
 export * from './cickaDuel';
+export * from './concertGig';
 export * from './session';
 export * from './content/bridgeStage';
 export * from './content/concertStage';

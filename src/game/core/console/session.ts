@@ -197,8 +197,8 @@ export class GameConsoleSession {
       case 'advance':
       case 'choose':
         return this.handleRidgeTalk(command);
-      case 'build':
-        if (this.state.mode !== 'ridge') return this.fail('build only works inside Ridge.');
+      case 'ridgeVerb':
+        if (this.state.mode !== 'ridge') return this.fail(`${command.raw.split(' ')[0]} only works inside Ridge.`);
         return this.forwardRidge(command.raw);
       case 'skip':
         return this.handleRidgeSkipWarp('skip');

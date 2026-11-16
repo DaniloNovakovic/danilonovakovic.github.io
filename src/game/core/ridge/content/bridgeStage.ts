@@ -7,13 +7,12 @@ import type {
   RidgeConversationDefinition,
   RidgeConversationOutcome,
   RidgeDialogueChoice,
-  RidgeDialogueLine,
-  RidgeEmotion,
   RidgeInteractable,
   RidgeStageDefinition,
   RidgeWorldState
 } from '../types';
 import { RIDGE_TOY_CAR_ITEM } from '../types';
+import { conversationKit, type CatalogLineSpec } from './dialogueHelpers';
 
 /**
  * River banks on the progress line. The Blueprint Bridge puzzle gap (8 cells of
@@ -293,7 +292,7 @@ function resolveBridgeActors(state: RidgeWorldState): RidgeActorPresence[] {
 }
 
 type BridgeSpeaker = keyof BridgeDialogueCatalog['speakers'];
-type BridgeLineSpec = readonly [suffix: string, speaker: BridgeSpeaker, emotion?: RidgeEmotion];
+type BridgeLineSpec = CatalogLineSpec<BridgeSpeaker>;
 
 /** Set once the player has met Cicka at least once. */
 const FLAG_CICKA_MET = 'bridge_cicka_met';
@@ -304,32 +303,12 @@ const SHARE_TOY_CAR = { setBeat: 'toy_car_shared', addItem: RIDGE_TOY_CAR_ITEM, 
 /** Draftsperson topics stay asked across visits. */
 const askedFlag = (topic: string) => `bridge_asked_${topic}`;
 
-/**
- * Small authoring kit for one conversation: lines live at `<conv>.<suffix>`,
- * choice labels at `<conv>.choice.<id>`, and choice lines at `<conv>.<id>.<nn>`.
- */
-function conversationKit(conversationId: string, catalog: BridgeDialogueCatalog) {
-  const say = ([suffix, speaker, emotion]: BridgeLineSpec) =>
-    makeLine(catalog, `${conversationId}.${suffix}`, speaker, emotion);
-  const choice = (
-    id: string,
-    lines: readonly BridgeLineSpec[],
-    extra: Omit<RidgeDialogueChoice, 'id' | 'label' | 'lines'> = {}
-  ): RidgeDialogueChoice => ({
-    id,
-    label: catalog.lines[`${conversationId}.choice.${id}`] ?? id,
-    ...(lines.length > 0 ? { lines: lines.map(([suffix, ...rest]) => say([`${id}.${suffix}`, ...rest])) } : {}),
-    ...extra
-  });
-  return { say, choice };
-}
-
 function resolveBridgeConversation(
   conversationId: string,
   state: RidgeWorldState,
   catalog: BridgeDialogueCatalog
 ): RidgeConversationDefinition | null {
-  const { say, choice } = conversationKit(conversationId, catalog);
+  const { say, choice } = conversationKit<BridgeSpeaker>(conversationId, catalog);
   const met: RidgeConversationOutcome = { setFlag: FLAG_CICKA_MET };
   const guarded: RidgeConversationOutcome = { setFlag: FLAG_CICKA_GUARDED };
   const topic = (id: string, lines: readonly BridgeLineSpec[], outcome?: RidgeConversationOutcome) =>
@@ -509,21 +488,6 @@ function resolveBridgeConversation(
     default:
       return null;
   }
-}
-
-function makeLine(
-  catalog: BridgeDialogueCatalog,
-  id: string,
-  speakerId: BridgeSpeaker,
-  emotion?: RidgeEmotion
-): RidgeDialogueLine {
-  return {
-    id,
-    speakerId,
-    speaker: catalog.speakers[speakerId],
-    text: catalog.lines[id] ?? id,
-    ...(emotion ? { emotion } : {})
-  };
 }
 
 function describeBridgeAmbience(state: RidgeWorldState): string {

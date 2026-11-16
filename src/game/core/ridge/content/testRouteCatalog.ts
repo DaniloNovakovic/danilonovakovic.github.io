@@ -8,40 +8,16 @@ export const TEST_ROUTE_DIALOGUE_CATALOG: RidgeRouteDialogueCatalog = {
     speakers: {
       prompt: 'Prompt',
       cicka: 'Cicka',
-      injuredGuitarist: 'Injured Guitarist',
-      crowd: 'Crowd'
+      injuredGuitarist: 'Dule',
+      crowd: 'Crowd',
+      crowdUncle: 'Uncle',
+      crowdGrandma: 'Grandma',
+      kid: 'Kid'
     },
+    // Unlisted keys fall back to the key itself, which keeps assertions readable.
     lines: {
-      'concert.crowd.delay_barks.prompt': 'Listen to Crowd',
-      'concert.crowd.delay_barks.01': 'Concert is late again.',
-      'concert.crowd.delay_barks.02': 'Someone said the guitarist wiped out.',
-      'concert.crowd.delay_barks.03': 'Maybe check behind the stage props.',
-      'concert.guitarist.injury.prompt': 'Talk to Guitarist',
-      'concert.guitarist.injury.01': 'I tried a one-leg skateboard solo.',
-      'concert.guitarist.injury.02': 'Wrist says no. Pride says louder no.',
-      'concert.guitarist.injury.03': 'Learn the phrase with me',
-      'concert.guitarist.practice_riff.prompt': 'Practice Riff',
-      'concert.guitarist.practice_riff.01': 'Practice the forgiving riff',
-      'concert.guitarist.practice_riff.02': 'You find the phrase without failing.',
-      'concert.guitarist.practice_riff.03': 'That is enough courage for a street.',
-      'concert.performance.auto_success.prompt': 'Play Concert',
-      'concert.performance.auto_success.01': 'Start the concert',
-      'concert.performance.auto_success.02': 'The phrase lands. Soft. True.',
-      'concert.performance.auto_success.03': 'Alright, move—show happened.',
-      'concert.performance.auto_success.04': 'Take the guitar. Carry the comfort.',
-      'concert.guitarist.guitar_handoff.prompt': 'Take Guitar',
-      'concert.guitarist.guitar_handoff.01': 'Keep it for the road ahead.',
-      'concert.guitarist.guitar_handoff.02': 'Play it when quiet needs company.',
-      'concert.guitarist.guitar_handoff.03': 'The guitar rests against your side.',
-      'concert.cicka.band_resting_spot.prompt': 'Pet Cicka',
-      'concert.cicka.band_resting_spot.01': 'Sit near hidden Cicka',
-      'concert.cicka.band_resting_spot.02': 'mrrp.',
-      'concert.cicka.band_resting_spot.03': 'Cicka loafs with the band',
-      'concert.cicka.band_resting_spot.04': 'purr.',
-      'concert.exit.dance_transition.prompt': 'Head Downhill',
-      'concert.exit.dance_transition.01': 'Follow the opened crossing',
-      'concert.exit.dance_transition.02': 'Festival setup waits downhill.',
-      'concert.exit.dance_transition.03': 'The page warms toward afternoon.'
+      'concert.guitarist.injury.prompt': 'Talk to the guitarist',
+      'concert.guitarist.choice.learn': 'Teach me the phrase.'
     }
   },
   dance: {

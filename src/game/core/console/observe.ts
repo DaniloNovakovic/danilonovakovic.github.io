@@ -102,6 +102,15 @@ export function formatGameObservation(observation: GameObservation): string {
       );
       lines.push(`draftsperson: ${b.tipText}`);
     }
+    if (r.concertGig) {
+      const g = r.concertGig;
+      lines.push(
+        `concert ${g.mode}: ${g.phase} ${g.section ?? '-'} hype=${Math.round(g.hype * 100)}% combo=${g.combo} ` +
+          `perfect=${g.counts.perfect} good=${g.counts.good} miss=${g.counts.miss}/${g.notesTotal} grade=${g.grade}`
+      );
+      if (g.practice) lines.push(`practice pass ${g.practice.loop + 1}/${g.practice.loopsTotal}: ${g.practice.hits}/${g.practice.needed}`);
+      if (g.next) lines.push(`next note: lane ${g.next.lane} in ${g.next.inMs}ms`);
+    }
     if (r.conversation) {
       lines.push(
         `talking: ${r.conversation.speaker}: ${r.conversation.text} [${r.conversation.lineIndex + 1}/${r.conversation.lineCount}]`

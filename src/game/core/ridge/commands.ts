@@ -1,7 +1,7 @@
 // Command parsers are table-driven; remaining branching is intentional CLI surface area.
 // fallow-ignore-file complexity
 import type { BridgeBuildAction } from './bridgeBuilder';
-import type { RidgeCommand, RidgeDuelAction, RidgeFacing } from './types';
+import type { RidgeCommand, RidgeDuelAction, RidgeFacing, RidgeGigAction } from './types';
 
 const HELP_TEXT = [
   'Ridge Console commands:',
@@ -27,6 +27,13 @@ const HELP_TEXT = [
   '  duel dodge           hop clear; time it to the paw landing',
   '  duel wait [n]        let n frames pass (default: until the next landing)',
   '  duel done            see how Cicka takes it once the standoff ends',
+  '',
+  'Concert gig (practice the riff with Dule, then play the show):',
+  '  gig hit              strum the next note(s) exactly on time',
+  '  gig hit 0|1|2        strum one lane right now (lanes: low, mid, high)',
+  '  gig wait [ms]        let time pass (default: up to the next note)',
+  '  gig auto | gig skip  play the rest perfectly | let the rest go by',
+  '  gig done             take a bow once the song is over',
   '',
   'Playtest skips:',
   '  skip                 jump to the next area start',
@@ -66,6 +73,7 @@ const CHOOSE_ALIASES = new Set(['choose', 'pick', 'select']);
 const BUILD_ALIASES = new Set(['build', 'b']);
 const DUEL_ALIASES = new Set(['duel', 'standoff']);
 const DODGE_ALIASES = new Set(['dodge', 'jump', 'hop']);
+const GIG_ALIASES = new Set(['gig', 'play', 'strum']);
 const BUILD_SIMPLE: Record<string, BridgeBuildAction> = {
   undo: { kind: 'undo' },
   clear: { kind: 'clear' },
@@ -129,6 +137,10 @@ export function parseRidgeCommand(rawInput: string): RidgeCommand {
   if (DUEL_ALIASES.has(head)) {
     const action = parseDuelAction(args);
     return action ? { type: 'duel', action } : { type: 'unknown', raw };
+  }
+  if (GIG_ALIASES.has(head)) {
+    const action = parseGigAction(head === 'strum' ? ['hit', ...args] : args);
+    return action ? { type: 'gig', action } : { type: 'unknown', raw };
   }
   if (WARP_ALIASES.has(head)) {
     const areaId = args[0] ? AREA_ALIASES[args[0].replace(/[_-]/g, '')] : undefined;
@@ -200,6 +212,23 @@ function parseDuelAction(args: string[]): RidgeDuelAction | null {
     if (!count) return { kind: 'wait' };
     const frames = Number.parseInt(count, 10);
     return Number.isFinite(frames) && frames > 0 ? { kind: 'wait', frames } : null;
+  }
+  return null;
+}
+
+function parseGigAction(args: string[]): RidgeGigAction | null {
+  const [verb, value] = args;
+  if (!verb || verb === 'hit' || verb === 'strum') {
+    if (value === undefined) return { kind: 'hit' };
+    return value === '0' || value === '1' || value === '2' ? { kind: 'hit', lane: Number(value) as 0 | 1 | 2 } : null;
+  }
+  if (verb === 'auto') return { kind: 'auto' };
+  if (verb === 'skip') return { kind: 'skip' };
+  if (verb === 'done' || verb === 'bow' || verb === 'end') return { kind: 'done' };
+  if (verb === 'wait' || verb === 'step') {
+    if (value === undefined) return { kind: 'wait' };
+    const ms = Number.parseFloat(value);
+    return Number.isFinite(ms) && ms > 0 ? { kind: 'wait', ms } : null;
   }
   return null;
 }
