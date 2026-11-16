@@ -64,7 +64,7 @@ describe("Cicka's Standoff", () => {
   it('punishes dodging the feint: the follow-up lands during recovery', () => {
     const duel = new CickaDuel([
       { kind: 'feint', at: 40, windup: 30 },
-      { kind: 'swipe', at: 56, windup: 16 }
+      { kind: 'swipe', at: 64, windup: 24 }
     ]);
     duel.waitForNextLanding(1);
     expect(duel.dodge().ok).toBe(true);

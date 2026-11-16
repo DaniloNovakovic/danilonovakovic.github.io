@@ -16,7 +16,7 @@ export const CICKA_DODGE_HOP = 16;
  * that evades a real paw recovers the moment it lands, so quick chains stay
  * fair while feints and mashing leave you exposed.
  */
-export const CICKA_DODGE_LOCKOUT = 30;
+export const CICKA_DODGE_LOCKOUT = 40;
 /** Dodges this close to the strike count as perfect. */
 const CICKA_PERFECT_FRAMES = 4;
 export const CICKA_DUEL_HEARTS = 3;
@@ -73,12 +73,12 @@ const STANDOFF_SCRIPT: readonly Step[] = [
   ['swipe', 48, 36],
   ['pounce', 72, 44],
   ['feint', 48, 0],
-  ['swipe', 16, 40],
+  ['swipe', 24, 40],
   ['swipe', 40, 0],
-  ['swipe', 22, 40],
+  ['swipe', 32, 40],
   ['feint', 40, 0],
-  ['swipe', 16, 0],
-  ['swipe', 22, 44],
+  ['swipe', 24, 0],
+  ['swipe', 32, 44],
   ['pounce', 64, 0]
 ];
 /** Breath before the first wind-up, so the player can find the key. */
