@@ -4,9 +4,11 @@ import {
   BRIDGE_RIVER_PROGRESS,
   type BridgeDesign,
   type RidgeActorId,
+  type RidgeEmotion,
   type RidgeFacing
 } from '@/game/core/ridge';
 import type { RidgeVisualProvider, RidgeVisualViewModel } from '../types';
+import type { ActorNudge } from '../duelStaging';
 import { ActorSpritePool, footDropFor, headTopFor, type ActorRenderRequest } from './actorSprites';
 import { drawAmbientFar, drawAmbientNear } from './ambientLayer';
 import { drawRidgeAreaLayer, type SceneryLayer } from './areaSets';
@@ -91,6 +93,7 @@ const SHORT_VIEWPORT_CSS = 512;
 const BUILD_RESERVE_TOP_SHORT = 46;
 const BUILD_RESERVE_BOTTOM_SHORT = 50;
 const SURPRISE_HOP_MS = 260;
+const NO_NUDGE: ActorNudge = { dx: 0, dy: 0 };
 const SURPRISE_HOP_HEIGHT = 9;
 
 export interface StickVisualProviderOptions {
@@ -385,18 +388,20 @@ export class StickVisualProvider implements RidgeVisualProvider {
     const isTalking = view.speakingActorId === actor.id;
     const inScene = isPlayer || isTalking || actor.id === view.partnerActorId;
 
+    const nudge = nudgeFor(view, actor.id);
+
     return {
       id: actor.id,
-      x,
+      x: x + nudge.dx,
       y: this.groundYAt(view, x, actor.id),
       facing: facingFor(actor, frame, x),
-      bob: idleBreath(frame, index, isWalking) - (isTalking ? frame.hop : 0),
+      bob: idleBreath(frame, index, isWalking) - (isTalking ? frame.hop : 0) + nudge.dy,
       alpha: inScene ? 1 : 1 - (1 - BYSTANDER_ALPHA) * frame.fade,
       pose: {
         frame: (isWalking ? frame.stepTick : frame.tick) + index,
         walking: isWalking,
         talking: isTalking,
-        emotion: isTalking ? view.speakingEmotion : null
+        emotion: nudge.emotion ?? speakingEmotionFor(view, isTalking)
       }
     };
   }
@@ -408,7 +413,7 @@ export class StickVisualProvider implements RidgeVisualProvider {
     tick: number,
     motion: boolean
   ): void {
-    const inConversation = view.mode === 'conversation' || view.mode === 'bridgeBuild';
+    const inConversation = view.mode !== 'explore';
     if (inConversation) {
       this.barkDirector.interrupt(now);
       this.presence.syncBarks([]);
@@ -508,7 +513,7 @@ export class StickVisualProvider implements RidgeVisualProvider {
     this.lastSyncAt = now;
     this.conversationBlend = approach(
       this.conversationBlend,
-      view.mode === 'conversation' ? 1 : 0,
+      view.mode === 'conversation' || view.mode === 'cickaDuel' ? 1 : 0,
       motion ? dt / CONVERSATION_EASE_MS : 1
     );
     this.buildBlend = approach(
@@ -686,6 +691,15 @@ function facingFor(
   if (actor.id === 'player') return actor.facing;
   if (Math.abs(actor.progress - frame.playerProgress) >= AWARENESS_RANGE) return actor.facing;
   return frame.playerX >= x ? 'right' : 'left';
+}
+
+/** Mini-game body nudge (Cicka's Standoff lunges and hops), or none. */
+function nudgeFor(view: RidgeVisualViewModel, id: RidgeActorId): ActorNudge {
+  return view.actorNudges?.[id] ?? NO_NUDGE;
+}
+
+function speakingEmotionFor(view: RidgeVisualViewModel, isTalking: boolean): RidgeEmotion | null {
+  return isTalking ? view.speakingEmotion : null;
 }
 
 /** Idle breath is a transform, so it never touches the command buffer. */

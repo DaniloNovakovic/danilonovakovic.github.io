@@ -64,10 +64,10 @@ describe('RidgeConsoleSession Bridge playthrough', () => {
   });
 });
 
-describe('Bridge conversations', () => {
-  const choiceIds = (session: RidgeConsoleSession) =>
-    session.observe().conversation?.choices?.map((choice) => choice.id) ?? [];
+const choiceIds = (session: RidgeConsoleSession) =>
+  session.observe().conversation?.choices?.map((choice) => choice.id) ?? [];
 
+describe('Bridge conversations', () => {
   it('lets the player try to grab the car without Cicka handing it over', () => {
     const session = createBridgeOnlySession();
     walkTo(session, 0.22);
@@ -91,8 +91,6 @@ describe('Bridge conversations', () => {
     talk(session, 'grab', 'ask', 'leaf', 'pocket');
     expect(session.observe().inventory).not.toContain('toy-car');
     expect(choiceIds(session)).toEqual(['grab', 'leaf', 'leave']);
-    talk(session, 'leaf', 'roll', 'keep');
-    expect(session.observe().inventory).not.toContain('toy-car');
     talk(session, 'leaf', 'roll', 'roll_again');
     expect(session.observe().inventory).toContain('toy-car');
     expect(session.observe().beat).toBe('toy_car_shared');
@@ -131,6 +129,82 @@ describe('Bridge conversations', () => {
     expect(choiceIds(session)).toEqual(['resume', 'advice', 'later']);
     talk(session, 'advice', 'resume');
     expect(session.observe().mode).toBe('bridgeBuild');
+  });
+});
+
+describe("Cicka's Standoff from keeping the car", () => {
+  function reachKeep(session: RidgeConsoleSession) {
+    walkTo(session, 0.55);
+    session.exec('interact draftsperson');
+    talk(session, 'car', 'leave');
+    walkTo(session, 0.22);
+    session.exec('interact cicka');
+    talk(session, 'leaf', 'roll', 'keep');
+  }
+
+  it('earns the car and her respect by outlasting her', () => {
+    const session = createBridgeOnlySession();
+    reachKeep(session);
+    expect(session.observe().mode).toBe('cickaDuel');
+    expect(session.exec('go right').ok).toBe(false);
+    expect(session.exec('duel done').ok).toBe(false);
+
+    for (let i = 0; i < 40 && session.observe().cickaDuel?.phase === 'fighting'; i += 1) {
+      session.exec('duel wait');
+      const telegraph = session.observe().cickaDuel?.telegraph;
+      if (telegraph && telegraph.kind !== 'feint') session.exec('duel dodge');
+      session.exec('duel wait 3');
+    }
+    while (session.observe().cickaDuel?.phase === 'fighting') session.exec('duel wait 10');
+    expect(session.observe().cickaDuel?.phase).toBe('won');
+
+    const done = session.exec('duel done');
+    expect(done.events.some((event) => event.type === 'cicka_duel_closed' && event.won)).toBe(true);
+    expect(session.observe().conversation?.id).toBe('bridge.cicka.duel_won');
+    drainConversation(session);
+    expect(session.observe().inventory).toContain('toy-car');
+    expect(session.observe().beat).toBe('toy_car_shared');
+
+    session.exec('interact cicka');
+    expect(session.observe().conversation?.lineId).toBe('bridge.cicka.after_share.01_respect');
+    talk(session, 'promise');
+
+    // The won car opens the bridge exactly like the friendly one.
+    walkTo(session, 0.55);
+    session.exec('interact draftsperson');
+    talk(session, 'hand_over');
+    expect(session.observe().mode).toBe('bridgeBuild');
+  });
+
+  it('keeps the car with Cicka after a loss and offers a rematch', () => {
+    const session = createBridgeOnlySession();
+    reachKeep(session);
+    while (session.observe().cickaDuel?.phase === 'fighting') session.exec('duel wait 30');
+    expect(session.observe().cickaDuel?.phase).toBe('lost');
+    session.exec('duel done');
+    expect(session.observe().conversation?.id).toBe('bridge.cicka.duel_lost');
+    drainConversation(session);
+    expect(session.observe().mode).toBe('explore');
+    expect(session.observe().inventory).not.toContain('toy-car');
+
+    session.exec('interact cicka');
+    drainConversation(session);
+    expect(choiceIds(session)).toContain('rematch');
+    talk(session, 'rematch');
+    expect(session.observe().mode).toBe('cickaDuel');
+  });
+
+  it('still lets you roll the car back after a loss', () => {
+    const session = createBridgeOnlySession();
+    reachKeep(session);
+    while (session.observe().cickaDuel?.phase === 'fighting') session.exec('duel wait 30');
+    session.exec('duel done');
+    drainConversation(session);
+
+    session.exec('interact cicka');
+    drainConversation(session);
+    talk(session, 'leaf', 'roll', 'roll_again');
+    expect(session.observe().inventory).toContain('toy-car');
   });
 });
 

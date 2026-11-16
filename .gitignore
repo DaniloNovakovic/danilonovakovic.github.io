@@ -41,8 +41,10 @@ storybook-static
 
 # Local AI/tooling state
 .codex/
-.claude/
+.claude/*
+!.claude/skills
 .playwright-cli/
+.playwright-mcp/
 .antigravitycli/
 
 # Cursor: ignore machine-local state; keep shared project config committable

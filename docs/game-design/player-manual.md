@@ -87,7 +87,13 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
 - Ridge conversation uses `advance` / `choose`. `pnpm ridge:console` is an alias
   that starts already inside Ridge.
 - At the Bridge, Cicka won't just hand over her toy car: join her game (a corn
-  leaf, then roll the car back and forth) and she shares it. Bridge
+  leaf, then roll the car back and forth) and she shares it. Or keep the car
+  and she tests you in **Cicka's Standoff**: you never attack; press Space, E
+  or ↑ (or tap Dodge) as the closing ring meets the circle around you. Dashed
+  rings are feints, so hold still: a dodge that misses leaves you slow to
+  recover, while one that slips a real paw lets you go again. Outlast her with nerve left and she gives you
+  the car out of respect; lose all three and she keeps it until a rematch.
+  Console: `duel wait`, `duel dodge`, `duel done`. Bridge
   conversations are small topic menus; ask the Draftsperson whatever you like
   and hand the car over when you're ready.
 - Handing the toy car to the Draftsperson opens the Blueprint

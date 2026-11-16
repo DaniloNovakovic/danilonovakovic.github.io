@@ -8,7 +8,8 @@ export type SceneUiSurfaceId =
   | 'potassiumUpgradeChoices'
   | 'potassiumTerminal'
   | 'ridgeConversation'
-  | 'ridgeBridgeBuilder';
+  | 'ridgeBridgeBuilder'
+  | 'ridgeCickaDuel';
 
 export type SceneUiActionId =
   | 'start'
@@ -23,7 +24,8 @@ export type SceneUiActionId =
   | 'ridgeConversationChoose'
   | 'ridgeConversationLeave'
   | 'ridgeBridgeTool'
-  | 'ridgeBridgeCommand';
+  | 'ridgeBridgeCommand'
+  | 'ridgeDuelDodge';
 
 export interface SceneUiSurfaceRequest {
   ownerSceneId: SceneId;

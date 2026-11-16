@@ -9,6 +9,7 @@ import type {
   RidgeObservation
 } from '@/game/core/ridge';
 import { conversationPartnerId, speakingActorIdFor } from './conversationStaging';
+import type { DuelActorStaging } from './duelStaging';
 
 /**
  * Replaceable art seam.
@@ -35,6 +36,8 @@ export interface RidgeVisualViewModel {
   crossingOpen: boolean;
   /** The Bridge span the player drew, once proven. */
   builtBridge: BridgeDesign | null;
+  /** Per-frame body nudges while a mini-game (Cicka's Standoff) moves people. */
+  actorNudges?: DuelActorStaging | null;
 }
 
 export interface RidgeVisualProvider {
@@ -60,7 +63,11 @@ export function toRidgeVisualViewModel(
     ambience: observation.ambience,
     focus: observation.nearby[0] ?? null,
     speakingActorId: speakingActorIdFor(observation),
-    partnerActorId: observation.conversation ? conversationPartnerId(observation) : null,
+    partnerActorId: observation.conversation
+      ? conversationPartnerId(observation)
+      : observation.mode === 'cickaDuel'
+        ? 'cicka'
+        : null,
     speakingEmotion: observation.conversation?.emotion ?? null,
     lineKey: observation.conversation
       ? `${observation.conversation.id}:${observation.conversation.lineIndex}`

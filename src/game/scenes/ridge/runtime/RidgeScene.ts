@@ -7,12 +7,15 @@ import {
 } from '@/game/bridge/store';
 import {
   BRIDGE_SIM_DT,
+  CICKA_DUEL_DT,
+  cickaStandoffFlags,
   createRidgeRouteStages,
   RidgeConsoleSession,
   RIDGE_GUITAR_ITEM,
   RIDGE_INITIAL_BEAT,
   ridgePrevArea,
   type BridgeBuildAction,
+  type RidgeActorId,
   type RidgeAreaId,
   type RidgeCommandResult,
   type RidgeObservation,
@@ -31,7 +34,7 @@ import {
 } from '@/game/sharedSceneRuntime/input/readSceneInputCommands';
 import { bindSideViewKeyboard } from '@/game/sharedSceneRuntime/input/sceneKeyboard';
 import { StickVisualProvider } from '../art/stick/StickVisualProvider';
-import { toRidgeVisualViewModel } from '../art/types';
+import { toRidgeVisualViewModel, type RidgeVisualViewModel } from '../art/types';
 import { speakerSideFor } from '../art/conversationStaging';
 import { loadRidgePresenceCatalog } from '../content/presenceCatalog';
 import { loadRidgeRouteDialogueCatalog } from '../content/routeCatalog';
@@ -41,7 +44,10 @@ import type {
   RidgeBridgeCommand,
   RidgeBridgeTool
 } from '../sceneUi/RidgeBridgeBuilderPanel';
+import type { RidgeCickaDuelPanelView } from '../sceneUi/RidgeCickaDuelPanel';
+import { stageCickaDuel } from '../art/duelStaging';
 import { BridgeBuilderView } from './BridgeBuilderView';
+import { CickaDuelView } from './CickaDuelView';
 import type { RidgeDevControls } from './ridgeDevControls';
 
 interface RidgeSceneStartData {
@@ -54,6 +60,8 @@ interface RidgeSceneStartData {
 const WALK_SPEED = 0.18; // progress units per second
 /** How long the toy car's victory lap plays before the Draftsperson speaks. */
 const BRIDGE_CELEBRATE_MS = 2200;
+/** How long the standoff's last moment holds before Cicka reacts. */
+const DUEL_OUTRO_MS = 1300;
 /** Catch-up cap so a hitch never fast-forwards the bridge test. */
 const MAX_SIM_STEPS_PER_FRAME = 4;
 
@@ -85,6 +93,9 @@ export class RidgeScene extends Phaser.Scene {
   private bridgeTool: RidgeBridgeTool = 'road';
   private simAccumulator = 0;
   private celebrateMs = 0;
+  private duelView?: CickaDuelView;
+  private duelAccumulator = 0;
+  private duelOutroMs = 0;
   private lastDevSnapshotKey = '';
   private nextKey?: Phaser.Input.Keyboard.Key;
   private prevKey?: Phaser.Input.Keyboard.Key;
@@ -113,6 +124,7 @@ export class RidgeScene extends Phaser.Scene {
       beat: route.beat,
       progress: 0.05,
       inventory: hasGuitar ? [RIDGE_GUITAR_ITEM] : [],
+      flags: areaId === 'bridge' ? cickaStandoffFlags(route.cickaStandoff) : [],
       builtBridge:
         areaId === 'bridge' && route.beat === 'bridge_complete' ? (route.bridgeDesign ?? null) : null
     });
@@ -130,6 +142,11 @@ export class RidgeScene extends Phaser.Scene {
       this.prevKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.OPEN_BRACKET);
     }
 
+    // Tap anywhere on the page to dodge during Cicka's Standoff.
+    this.input.on(Phaser.Input.Events.POINTER_DOWN, () => {
+      if (!this.isPaused && this.session?.observe().mode === 'cickaDuel') this.dodge();
+    });
+
     this.syncPresentation();
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.cleanup());
     this.events.once(Phaser.Scenes.Events.DESTROY, () => this.cleanup());
@@ -141,17 +158,12 @@ export class RidgeScene extends Phaser.Scene {
     this.handleSceneUiActions();
     this.handleDevSkipKeys();
 
-    const observation = this.session.observe();
-    if (observation.mode === 'bridgeBuild') {
-      this.updateBridgeBuild(delta);
-      Phaser.Input.Keyboard.JustDown(this.keys.interactKey);
-      bridgeActions.consumeTouchOneShots();
-      this.syncPresentation();
-      return;
-    }
-    if (observation.mode === 'conversation') {
-      // Drain edge-triggered input so a press made while talking does not
-      // fire the moment the conversation closes (e.g. E re-opening it).
+    const { mode } = this.session.observe();
+    if (mode !== 'explore') {
+      if (mode === 'cickaDuel') this.updateCickaDuel(delta);
+      if (mode === 'bridgeBuild') this.updateBridgeBuild(delta);
+      // Drain edge-triggered input so a press made while talking or playing
+      // does not fire the moment it closes (e.g. E re-opening a conversation).
       Phaser.Input.Keyboard.JustDown(this.keys.interactKey);
       bridgeActions.consumeTouchOneShots();
       this.syncPresentation();
@@ -234,6 +246,33 @@ export class RidgeScene extends Phaser.Scene {
     }
   }
 
+  /** Fixed-step the standoff so the animated fight matches the console verdict. */
+  private updateCickaDuel(delta: number): void {
+    const session = this.session;
+    const duel = session?.cickaDuel;
+    if (!session || !duel) return;
+
+    if (duel.phase === 'fighting') {
+      this.duelOutroMs = 0;
+      this.duelAccumulator += Math.min(delta, 100) / 1000;
+      for (let i = 0; i < MAX_SIM_STEPS_PER_FRAME && this.duelAccumulator >= CICKA_DUEL_DT; i += 1) {
+        this.duelAccumulator -= CICKA_DUEL_DT;
+        session.stepCickaDuel();
+      }
+      return;
+    }
+    this.duelAccumulator = 0;
+    this.duelOutroMs += delta;
+    if (this.duelOutroMs >= DUEL_OUTRO_MS) {
+      this.duelOutroMs = 0;
+      this.applyResult(session.run({ type: 'duel', action: { kind: 'done' } }));
+    }
+  }
+
+  private dodge(): void {
+    if (this.session) this.applyResult(this.session.run({ type: 'duel', action: { kind: 'dodge' } }));
+  }
+
   private ensureBuilder(): BridgeBuilderView {
     if (!this.builder) {
       const origin = this.visuals!.bridgeGapOrigin();
@@ -256,6 +295,10 @@ export class RidgeScene extends Phaser.Scene {
         this.builder?.setTool(tool);
         this.lastPanelKey = null;
       }
+      return true;
+    }
+    if (action === 'ridgeDuelDodge') {
+      this.dodge();
       return true;
     }
     if (action === 'ridgeBridgeCommand') {
@@ -311,6 +354,12 @@ export class RidgeScene extends Phaser.Scene {
       bridgeActions.setRidgeAreaHandoff(areaId, RIDGE_INITIAL_BEAT[areaId] as RidgeRouteBeatState);
       return;
     }
+    if (event.type === 'cicka_duel_closed') {
+      // A win sticks: a later loss never demotes Cicka's respect.
+      const previous = bridgeStore.getState().progress.ridge.firstPlayableRoute.cickaStandoff;
+      bridgeActions.setRidgeCickaStandoff(event.won || previous === 'won' ? 'won' : 'lost');
+      return;
+    }
     if (event.type === 'bridge_built') {
       bridgeActions.setRidgeBridgeDesign(event.design);
       return;
@@ -330,7 +379,9 @@ export class RidgeScene extends Phaser.Scene {
       this.builder.destroy();
       this.builder = undefined;
     }
-    this.visuals.sync(toRidgeVisualViewModel(observation));
+    const view = toRidgeVisualViewModel(observation);
+    this.syncDuelStaging(observation, view);
+    this.visuals.sync(view);
     this.syncSceneUiPanel(observation);
 
     if (import.meta.env.DEV) {
@@ -348,10 +399,33 @@ export class RidgeScene extends Phaser.Scene {
     }
   }
 
-  /** One docked panel at a time: the conversation box or the drawing-table chrome. */
+  /** Bodies lunge and hop through view nudges; the ring and marks draw on top. */
+  private syncDuelStaging(observation: RidgeObservation, view: RidgeVisualViewModel): void {
+    const duel = this.session?.cickaDuel;
+    if (!duel || !this.visuals) {
+      this.duelView?.destroy();
+      this.duelView = undefined;
+      return;
+    }
+    const xOf = (id: RidgeActorId) =>
+      this.visuals!.worldXForProgress(observation.actors.find((actor) => actor.id === id)?.progress ?? 0);
+    const frame = stageCickaDuel(duel, xOf('player') >= xOf('cicka') ? 1 : -1);
+    view.actorNudges = frame.actors;
+    this.duelView ??= new CickaDuelView(this);
+    this.duelView.sync(frame, {
+      playerX: xOf('player') + frame.actors.player.dx,
+      cickaX: xOf('cicka') + frame.actors.cicka.dx
+    });
+  }
+
+  /** One docked panel at a time: the conversation box or a mini-game's chrome. */
   private syncSceneUiPanel(observation: RidgeObservation): void {
     if (observation.mode === 'bridgeBuild' && observation.bridgeBuild) {
       this.syncBridgeBuilderPanel(observation.bridgeBuild);
+      return;
+    }
+    if (observation.mode === 'cickaDuel' && observation.cickaDuel) {
+      this.syncCickaDuelPanel(observation.cickaDuel);
       return;
     }
     if (observation.mode !== 'conversation' || !observation.conversation) {
@@ -407,7 +481,26 @@ export class RidgeScene extends Phaser.Scene {
     bridgeActions.setSceneUiPanel(RIDGE_SCENE_ID, 'ridgeBridgeBuilder', view);
   }
 
+  private syncCickaDuelPanel(duel: NonNullable<RidgeObservation['cickaDuel']>): void {
+    const view: RidgeCickaDuelPanelView = {
+      phase: duel.phase,
+      hearts: duel.hearts,
+      maxHearts: duel.maxHearts,
+      strikesDone: duel.strikesDone,
+      strikesTotal: duel.strikesTotal,
+      canDodge: duel.canDodge,
+      windup: duel.telegraph?.kind ?? null,
+      lastResult: duel.lastResult
+    };
+    const key = `duel:${JSON.stringify(view)}`;
+    if (key === this.lastPanelKey) return;
+    this.lastPanelKey = key;
+    bridgeActions.setSceneUiPanel(RIDGE_SCENE_ID, 'ridgeCickaDuel', view);
+  }
+
   private cleanup(): void {
+    this.duelView?.destroy();
+    this.duelView = undefined;
     bridgeActions.clearSceneUi(RIDGE_SCENE_ID);
     this.builder?.destroy();
     this.builder = undefined;

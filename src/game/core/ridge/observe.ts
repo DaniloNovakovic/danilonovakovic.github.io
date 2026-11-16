@@ -1,6 +1,7 @@
 // Observation formatting is intentionally branchy for CLI readability.
 // fallow-ignore-file complexity
 import type { BridgeWorkbench } from './bridgeBuilder';
+import type { CickaDuel } from './cickaDuel';
 import type {
   RidgeObservation,
   RidgeStageDefinition,
@@ -10,7 +11,8 @@ import type {
 export function observeRidgeWorld(
   state: RidgeWorldState,
   stage: RidgeStageDefinition,
-  workbench: BridgeWorkbench | null = null
+  workbench: BridgeWorkbench | null = null,
+  duel: CickaDuel | null = null
 ): RidgeObservation {
   const nearby = [...stage.resolveInteractables(state)].sort(
     (a, b) => a.distance - b.distance
@@ -44,7 +46,9 @@ export function observeRidgeWorld(
       })()
     : null;
 
-  const hints = buildHints(state, stage, nearby, blockedAhead, workbench);
+  const hints =
+    state.mode === 'cickaDuel' ? duelHints(duel) : buildHints(state, stage, nearby, blockedAhead, workbench);
+  const cickaDuel = state.mode === 'cickaDuel' && duel ? observeDuel(duel) : null;
   const bridgeBuild =
     state.mode === 'bridgeBuild' && workbench
       ? {
@@ -79,6 +83,7 @@ export function observeRidgeWorld(
     inventory: state.inventory,
     conversation,
     bridgeBuild,
+    cickaDuel,
     builtBridge: state.builtBridge,
     canMove: state.mode === 'explore',
     blockedAhead,
@@ -129,6 +134,29 @@ function buildHints(
   return hints;
 }
 
+function observeDuel(duel: CickaDuel): NonNullable<RidgeObservation['cickaDuel']> {
+  const telegraph = duel.telegraph;
+  return {
+    phase: duel.phase,
+    hearts: duel.hearts,
+    maxHearts: duel.maxHearts,
+    strikesDone: duel.strikesDone,
+    strikesTotal: duel.strikesTotal,
+    perfectCount: duel.perfectCount,
+    canDodge: duel.canDodge,
+    telegraph: telegraph ? { kind: telegraph.kind, framesToImpact: telegraph.framesToImpact } : null,
+    lastResult: duel.lastResult?.result ?? null
+  };
+}
+
+function duelHints(duel: CickaDuel | null): string[] {
+  if (duel && duel.phase !== 'fighting') return ['duel done — see how Cicka takes it'];
+  return [
+    'duel wait — let time pass until the next paw lands',
+    'duel dodge — hop clear (a feint stops short; wait it out)'
+  ];
+}
+
 function bridgeBuildHints(workbench: BridgeWorkbench | null): string[] {
   switch (workbench?.phase) {
     case 'testing':
@@ -164,6 +192,14 @@ export function formatObservation(observation: RidgeObservation): string {
       `--- blueprint bridge: ${b.phase} (attempt ${b.attempts}) ink ${b.ink}/${b.inkBudget} beams=${b.beamCount} ---`
     );
     lines.push(`Bridge Draftsperson: ${b.tipText}`);
+  } else if (observation.cickaDuel) {
+    const d = observation.cickaDuel;
+    lines.push('');
+    lines.push(
+      `--- cicka standoff: ${d.phase} hearts ${d.hearts}/${d.maxHearts} strikes ${d.strikesDone}/${d.strikesTotal} perfect ${d.perfectCount} ---`
+    );
+    if (d.telegraph) lines.push(`Cicka winds up a ${d.telegraph.kind}: lands in ${d.telegraph.framesToImpact} frames`);
+    if (d.lastResult) lines.push(`Last landing: ${d.lastResult}`);
   } else if (observation.conversation) {
     const c = observation.conversation;
     lines.push('');

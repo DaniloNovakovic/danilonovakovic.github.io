@@ -1,5 +1,6 @@
 import type { SceneUiSurfaceDefinition } from '@/game/sceneUi/registry';
 import { RidgeBridgeBuilderPanel } from './RidgeBridgeBuilderPanel';
+import { RidgeCickaDuelPanel } from './RidgeCickaDuelPanel';
 import { RidgeConversationPanel } from './RidgeConversationPanel';
 
 export const RIDGE_SCENE_UI_DEFINITIONS: readonly SceneUiSurfaceDefinition[] = [
@@ -13,5 +14,10 @@ export const RIDGE_SCENE_UI_DEFINITIONS: readonly SceneUiSurfaceDefinition[] = [
     component: RidgeBridgeBuilderPanel,
     panelChrome: 'docked',
     capturesScenePointer: true
+  },
+  {
+    id: 'ridgeCickaDuel',
+    component: RidgeCickaDuelPanel,
+    panelChrome: 'docked'
   }
 ];
