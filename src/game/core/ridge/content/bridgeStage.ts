@@ -23,6 +23,11 @@ export const BRIDGE_RIVER_PROGRESS = { left: 0.58, right: 0.78 } as const;
 
 /** Just short of the near bank edge. */
 const BRIDGE_BLOCKED_PROGRESS = 0.575;
+/**
+ * Stands back from the brink: the player stops at the bank edge, and a
+ * Draftsperson any closer overlaps them there, pack through body.
+ */
+const DRAFTSPERSON_PROGRESS = 0.52;
 /** Mirrors the session flag set once the drawing table has been opened. */
 const BRIDGE_BUILD_STARTED_FLAG = 'bridge_build_started';
 
@@ -83,7 +88,7 @@ const SPOTS = [
     id: 'draftsperson',
     label: 'Bridge Draftsperson',
     kind: 'npc' as const,
-    progress: 0.55,
+    progress: DRAFTSPERSON_PROGRESS,
     interactRadius: 0.08,
     actorId: 'draftsperson' as const,
     description: 'A nervous draftsperson frets over a missing middle span.'
@@ -268,7 +273,7 @@ function resolveBridgeActors(state: RidgeWorldState): RidgeActorPresence[] {
     {
       id: 'draftsperson',
       label: 'Bridge Draftsperson',
-      progress: 0.55,
+      progress: DRAFTSPERSON_PROGRESS,
       visible: true,
       facing: 'left'
     },

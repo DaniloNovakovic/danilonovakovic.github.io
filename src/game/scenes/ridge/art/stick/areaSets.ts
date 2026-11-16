@@ -2,6 +2,7 @@
 // fallow-ignore-file complexity
 import type * as Phaser from 'phaser';
 import { BLUEPRINT_BRIDGE_PUZZLE, type RidgeAreaId } from '@/game/core/ridge';
+import { GAME_DESIGN_HEIGHT, GAME_DESIGN_WIDTH } from '@/game/sharedSceneRuntime/designSize';
 import type { RidgeVisualViewModel } from '../types';
 import {
   drawCornStalk,
@@ -21,11 +22,13 @@ import {
   GROUND_Y,
   HORIZON_Y,
   INK,
+  inkTone,
   LAYERS,
   PAPER,
   PAPER_WARM,
   SKY_TOP,
-  STAGE_WIDTH
+  STAGE_WIDTH,
+  VIEW_HEIGHT
 } from './palette';
 
 /**
@@ -79,12 +82,35 @@ export function drawRidgeAreaLayer(
  */
 const RIDGE_BASE_Y = GROUND_Y - 118;
 
+/** World units across the frame while exploring (zoom is height-driven). */
+const EXPLORE_VIEW_WIDTH = (GAME_DESIGN_WIDTH * VIEW_HEIGHT) / GAME_DESIGN_HEIGHT;
+
+/**
+ * Far-band X that sits mid-frame when the player stands at `progress`.
+ *
+ * The far band scrolls at a fraction of the camera, so only its left ~half is
+ * ever on screen. Landmarks authored in stage coordinates past that (a moon at
+ * x 1360, say) were baked and never seen. Place them by where the player will
+ * be looking instead.
+ *
+ * Phaser applies the scroll factor to `scrollX`, which is the view centre
+ * minus half the *unzoomed* camera width, so that is the width used here.
+ */
+function farXForProgress(progress: number, offset = 0): number {
+  const playerX = 80 + progress * (STAGE_WIDTH - 160);
+  const half = EXPLORE_VIEW_WIDTH / 2;
+  const centre = Math.min(STAGE_WIDTH - half, Math.max(half, playerX));
+  const camHalf = GAME_DESIGN_WIDTH / 2;
+  return camHalf + (centre - camHalf) * LAYERS.far.scrollFactor + offset;
+}
+
 function drawFarBand(g: Phaser.GameObjects.Graphics, areaId: RidgeAreaId): void {
   if (areaId === 'concert') {
     // Night: the sky is the darkest thing behind the lane, not the trees.
     g.fillStyle(INK, 0.13);
     g.fillRect(0, 0, STAGE_WIDTH, RIDGE_BASE_Y);
-    drawSunOrMoon(g, STAGE_WIDTH - 240, SKY_TOP + 40, 26, 'moon');
+    // Moon hangs over the musician-side nook, where the beat turns quiet.
+    drawSunOrMoon(g, farXForProgress(0.6, 120), SKY_TOP + 40, 26, 'moon');
     g.fillStyle(INK, 0.35);
     for (let i = 0; i < 26; i += 1) {
       const sx = jitter(i * 3.1) * STAGE_WIDTH;
@@ -96,7 +122,8 @@ function drawFarBand(g: Phaser.GameObjects.Graphics, areaId: RidgeAreaId): void 
   }
 
   if (areaId === 'relay') {
-    drawSunOrMoon(g, STAGE_WIDTH * 0.66, SKY_TOP + 88, 40, 'sunset');
+    // Setting just off the Relay Spire's shoulder: the ending's backdrop.
+    drawSunOrMoon(g, farXForProgress(0.85, 130), SKY_TOP + 118, 40, 'sunset');
     drawRidges(g, areaId, 0.04, 0.075);
     return;
   }
@@ -107,12 +134,24 @@ function drawFarBand(g: Phaser.GameObjects.Graphics, areaId: RidgeAreaId): void 
   if (areaId === 'bridge') {
     // Distant town on the near ridge — a promise of somewhere to walk toward.
     g.lineStyle(1.6, INK, 0.26);
-    const townY = RIDGE_BASE_Y - 26;
-    for (let i = 0; i < 7; i += 1) {
-      const h = 16 + (i % 3) * 10;
-      g.strokeRect(1180 + i * 15, townY - h, 10, h);
+    // Comes into view past the gorge, where the crossing leads. Pitched roofs
+    // and one steeple: plain rects in a row read as a bar chart.
+    const townY = RIDGE_BASE_Y - 30;
+    const townX = farXForProgress(0.88, 10);
+    g.lineStyle(1.4, INK, 0.3);
+    g.fillStyle(PAPER, 1);
+    for (let i = 0; i < 6; i += 1) {
+      const w = 9 + (i % 2) * 3;
+      const h = 6 + jitter(i * 2.3) * 6;
+      const hx = townX + i * 14;
+      g.fillRect(hx, townY - h, w, h);
+      g.strokeRect(hx, townY - h, w, h);
+      g.fillTriangle(hx - 1, townY - h, hx + w + 1, townY - h, hx + w / 2, townY - h - 6);
+      g.strokeTriangle(hx - 1, townY - h, hx + w + 1, townY - h, hx + w / 2, townY - h - 6);
     }
-    g.lineBetween(1168, townY, 1306, townY);
+    const steeple = townX + 3 * 14 + 5;
+    g.lineBetween(steeple, townY - 14, steeple, townY - 30);
+    g.lineBetween(steeple - 3, townY - 26, steeple + 3, townY - 26);
   }
 }
 
@@ -165,10 +204,16 @@ function ridgeLine(areaId: RidgeAreaId, rank: number): ReadonlyArray<readonly [n
 function drawTreeline(g: Phaser.GameObjects.Graphics, areaId: RidgeAreaId): void {
   // Haze gap: a pale strip separating the distant ridge from the woodland, so
   // the two masses do not merge into one flat slab.
+  // Ramped in fine steps: two flat strips left ruled lines across the sky.
+  const hazeTop = GROUND_Y - 150;
+  const hazeSteps = 10;
+  const hazeStep = 5;
+  for (let i = 0; i < hazeSteps; i += 1) {
+    g.fillStyle(PAPER, (0.72 * (i + 1)) / hazeSteps);
+    g.fillRect(0, hazeTop + i * hazeStep, STAGE_WIDTH, hazeStep);
+  }
   g.fillStyle(PAPER, 0.72);
-  g.fillRect(0, GROUND_Y - 128, STAGE_WIDTH, 46);
-  g.fillStyle(PAPER, 0.4);
-  g.fillRect(0, GROUND_Y - 148, STAGE_WIDTH, 20);
+  g.fillRect(0, hazeTop + hazeSteps * hazeStep, STAGE_WIDTH, GROUND_Y - 82 - (hazeTop + hazeSteps * hazeStep));
 
   const base = areaId === 'concert' ? 0.14 : 0.11;
   drawCanopyBand(g, GROUND_Y - 6, 72, 54, base, 3.1);
@@ -248,9 +293,6 @@ function drawBridgeNear(
   // Grounded timber — trunks meet the lane so crowns never float on haze.
   for (let i = 0; i < 7; i += 1) {
     drawTree(g, 600 + i * 96, GROUND_Y - 2, i % 2 === 0 ? 'pine' : 'round', 1.15, 0.45);
-  }
-  for (let i = 0; i < 4; i += 1) {
-    drawTree(g, 214 + i * 74, GROUND_Y - 2, 'bush', 0.8, 0.26);
   }
 
   drawCornField(g, 30, 470);
@@ -349,10 +391,10 @@ function drawGorge(g: Phaser.GameObjects.Graphics, left: number, right: number):
 function drawCornField(g: Phaser.GameObjects.Graphics, fromX: number, toX: number): void {
   const span = toX - fromX;
 
-  g.fillStyle(INK, 0.09);
-  g.fillRect(fromX, GROUND_Y - 62, span, 62);
-
-  g.fillStyle(INK, 0.26);
+  // Opaque leaf tone: translucent leaves darken wherever they cross, which is
+  // what turned the field into grey blotches. The field's edge is left to the
+  // leaves themselves; a backing rect only drew a ruled box around them.
+  g.fillStyle(inkTone(0.34), 1);
   for (let i = 0; i < 46; i += 1) {
     const x = fromX + jitter(i * 1.9) * span;
     const y = GROUND_Y - 12 - jitter(i * 4.7) * 52;
@@ -537,24 +579,56 @@ function drawRelayNear(
   g.lineBetween(bench + 30, GROUND_Y - 20, bench + 30, GROUND_Y);
   g.lineBetween(bench - 38, GROUND_Y - 34, bench + 38, GROUND_Y - 34);
 
-  const spire = ctx.worldXForProgress(0.85);
-  const complete = beat === 'relay_complete';
-  g.lineStyle(2.6, INK, complete ? 0.2 : 0.8);
-  g.lineBetween(spire - 26, GROUND_Y, spire, GROUND_Y - 132);
-  g.lineBetween(spire + 26, GROUND_Y, spire, GROUND_Y - 132);
-  g.strokeCircle(spire, GROUND_Y - 96, 34);
-  g.lineBetween(spire - 20, GROUND_Y - 96, spire + 20, GROUND_Y - 96);
-  if (!complete) {
-    g.lineStyle(1.5, INK, 0.3);
-    for (let i = 0; i < 6; i += 1) {
-      const a = (i / 6) * Math.PI * 2;
-      g.lineBetween(
-        spire + Math.cos(a) * 42,
-        GROUND_Y - 96 + Math.sin(a) * 42,
-        spire + Math.cos(a) * 58,
-        GROUND_Y - 96 + Math.sin(a) * 58
-      );
-    }
+  drawRelaySpire(g, ctx.worldXForProgress(0.85), beat === 'relay_complete');
+}
+
+/**
+ * Lattice relay mast: tapering legs, cross-braced, a beacon at the tip and
+ * signal arcs while it still has something to send.
+ *
+ * Earlier this was an A-frame inside a ring, which at thumbnail size is the
+ * anarchy symbol, not a tower.
+ */
+function drawRelaySpire(g: Phaser.GameObjects.Graphics, x: number, complete: boolean): void {
+  const alpha = complete ? 0.25 : 0.85;
+  const top = GROUND_Y - 128;
+  const baseHalf = 24;
+  const topHalf = 5;
+  const halfAt = (y: number) => topHalf + ((y - top) / (GROUND_Y - top)) * (baseHalf - topHalf);
+
+  g.lineStyle(2.8, INK, alpha);
+  g.lineBetween(x - baseHalf, GROUND_Y, x - topHalf, top);
+  g.lineBetween(x + baseHalf, GROUND_Y, x + topHalf, top);
+
+  // X-bracing between rungs, thinner than the legs.
+  const rungs = [top, GROUND_Y - 92, GROUND_Y - 58, GROUND_Y - 26, GROUND_Y];
+  g.lineStyle(1.4, INK, alpha * 0.8);
+  for (let i = 0; i < rungs.length - 1; i += 1) {
+    const y0 = rungs[i]!;
+    const y1 = rungs[i + 1]!;
+    g.lineBetween(x - halfAt(y0), y0, x + halfAt(y1), y1);
+    g.lineBetween(x + halfAt(y0), y0, x - halfAt(y1), y1);
+    g.lineBetween(x - halfAt(y1), y1, x + halfAt(y1), y1);
+  }
+
+  // Mast and beacon.
+  g.lineStyle(2.4, INK, alpha);
+  g.lineBetween(x, top, x, top - 22);
+  g.fillStyle(complete ? PAPER : INK, alpha);
+  g.fillCircle(x, top - 26, 4.5);
+  g.lineStyle(2, INK, alpha);
+  g.strokeCircle(x, top - 26, 4.5);
+
+  if (complete) return;
+  g.lineStyle(1.8, INK, 0.38);
+  for (let i = 0; i < 2; i += 1) {
+    const r = 13 + i * 10;
+    g.beginPath();
+    g.arc(x, top - 26, r, -Math.PI * 0.32, Math.PI * 0.32, false);
+    g.strokePath();
+    g.beginPath();
+    g.arc(x, top - 26, r, Math.PI * 0.68, Math.PI * 1.32, false);
+    g.strokePath();
   }
 }
 
@@ -632,7 +706,7 @@ function drawForeCorn(
   base: number,
   height: number
 ): void {
-  g.fillStyle(INK, 0.8);
+  g.fillStyle(inkTone(0.8), 1);
   g.fillTriangle(x - 4, base, x + 4, base, x + 2, base - height);
   g.fillTriangle(x - 1, base - height, x + 4, base - height, x + 4, base - height - 26);
 

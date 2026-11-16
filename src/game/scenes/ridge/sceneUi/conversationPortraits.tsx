@@ -87,6 +87,11 @@ function DraftspersonPortrait({ emotion }: { emotion: RidgeEmotion }) {
   return (
     <g fill="none" stroke="#1a1a1a" strokeWidth="3" strokeLinecap="round">
       <circle cx="40" cy="24" r="10" fill="#fbfbf9" />
+      {/* Hard hat + pencil: the same silhouette as the stage figure. */}
+      <path d="M29 18 A11 11 0 0 1 51 18 Z" fill="#f4f1ea" />
+      <line x1="40" y1="7" x2="40" y2="17" strokeWidth="2" />
+      <line x1="26" y1="18" x2="56" y2="18" />
+      <line x1="27" y1="21" x2="33" y2="27" strokeWidth="2.5" />
       <circle cx="36" cy="24" r="3.5" strokeWidth="2" fill="#fbfbf9" />
       <circle cx="44" cy="24" r="3.5" strokeWidth="2" fill="#fbfbf9" />
       <line x1="39.5" y1="24" x2="40.5" y2="24" strokeWidth="2" />
@@ -176,9 +181,14 @@ function PlayerPortrait({ emotion }: { emotion: RidgeEmotion }) {
   return (
     <g fill="none" stroke="#1a1a1a" strokeWidth="3" strokeLinecap="round">
       <circle cx="40" cy="22" r="10" fill="#fbfbf9" />
-      <path d="M32 16 L28 10" />
-      <path d="M40 13 L42 7" />
-      <path d="M48 16 L52 11" />
+      {/* Capped fringe, matching the stage figure (spikes read as horns). */}
+      <path
+        d="M30 21 L32 14 L40 11 L47 14 L50 21 L45 17 L37 18 Z"
+        fill="#1a1a1a"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <path d="M36 12 L34 8" strokeWidth="2" />
       {emotion === 'determined' ? (
         <>
           <line x1="33" y1="21" x2="38" y2="23" strokeWidth="2" />

@@ -75,8 +75,13 @@ function drawCampSmoke(g: Phaser.GameObjects.Graphics, tick: number): void {
     const climb = t / rise;
     const y = GROUND_Y - 22 - t;
     const lean = Math.sin(climb * 3.1 + tick * 0.08) * 22 * climb;
-    g.lineStyle(2, INK, 0.3 * (1 - climb));
-    g.strokeCircle(x + lean, y, 4 + climb * 13);
+    // Open curls, not closed rings: a closed circle reads as a soap bubble.
+    const r = 4 + climb * 11;
+    const turn = i * 1.7 + climb * 2.4;
+    g.lineStyle(2, INK, 0.34 * (1 - climb));
+    g.beginPath();
+    g.arc(x + lean, y, r, turn, turn + Math.PI * 1.15, false);
+    g.strokePath();
   }
 }
 
@@ -88,8 +93,11 @@ function drawDriftingSeeds(g: Phaser.GameObjects.Graphics, tick: number): void {
     const speed = 1.1 + jitter(i * 2.7) * 1.4;
     const x = (((jitter(i) * span + tick * speed) % span) + span) % span - 80;
     const y = GROUND_Y - 60 - jitter(i * 6.3) * 190 + Math.sin((tick + i * 5) * 0.18) * 14;
-    g.strokeCircle(x, y, 2.4);
-    g.lineBetween(x, y + 2, x - 4, y + 7);
+    // Stem with a parachute fan: a ring on a stick read as a pin or a key.
+    g.lineBetween(x, y, x - 3, y + 8);
+    g.lineBetween(x, y, x - 4, y - 4);
+    g.lineBetween(x, y, x, y - 5.5);
+    g.lineBetween(x, y, x + 4, y - 4);
   }
 }
 

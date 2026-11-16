@@ -56,7 +56,10 @@ export function drawStickPlayer(
 
   const top = y + lift;
 
-  // Signature travel pack, worn on the trailing shoulder.
+  // Signature travel pack, worn on the trailing shoulder; the strap ties it
+  // to the body so it reads as worn rather than as a box floating beside it.
+  g.lineStyle(DETAIL + 0.6, INK, 1);
+  g.lineBetween(x, top - s * 1.08, x - dir * s * 0.32, top - s * 1.14);
   g.lineStyle(CONTOUR - 0.6, INK, 1);
   g.fillStyle(PAPER_WARM, 1);
   g.fillRect(x - dir * s * 0.62, top - s * 1.12, s * 0.4, s * 0.58);
@@ -140,8 +143,10 @@ export function drawStickDraftsperson(
   const s = 17 * scale;
   const dir = facing === 'left' ? -1 : 1;
   drawContactShadow(g, x, y, 32 * scale);
+  // Hard hat, not the player's fringe: the two stand side by side for the
+  // whole Bridge beat and must never read as the same person.
   drawBasePerson(g, x, y, facing, scale, pose, {
-    hair: 'messy',
+    hair: 'hardhat',
     glasses: true,
     eyes: 'thoughtful'
   });
@@ -155,8 +160,12 @@ export function drawStickDraftsperson(
   g.lineBetween(x + dir * s * 0.5, y - s * 0.86, x + dir * s * 1.2, y - s * 0.86);
   g.lineBetween(x + dir * s * 0.5, y - s * 0.72, x + dir * s * 1.05, y - s * 0.72);
 
-  g.lineStyle(2, INK, 1);
-  g.lineBetween(x - dir * s * 0.15, y - s * 1.86, x + dir * s * 0.35, y - s * 1.96);
+  // Pencil tucked behind the ear, under the brim.
+  const ear = y - s * 1.6;
+  g.lineStyle(2.4, INK, 1);
+  g.lineBetween(x - dir * s * 0.42, ear - s * 0.18, x - dir * s * 0.06, ear + s * 0.02);
+  g.fillStyle(INK, 1);
+  g.fillCircle(x - dir * s * 0.06, ear + s * 0.02, 1.4);
 }
 
 export function drawStickToyCar(
@@ -177,7 +186,7 @@ export function drawStickToyCar(
 }
 
 interface PersonStyle {
-  hair?: 'messy' | 'bun' | 'cap' | 'hat' | 'ponytail' | 'beanie';
+  hair?: 'messy' | 'bun' | 'cap' | 'hat' | 'ponytail' | 'beanie' | 'hardhat';
   skirt?: boolean;
   apron?: boolean;
   raisedArm?: boolean;
@@ -251,10 +260,9 @@ function drawBasePerson(
   g.lineBetween(x, y - s * 1.26, x, y - s * 0.15);
 
   if (style.scarf) {
-    g.fillStyle(INK, 0.22);
-    g.fillRect(x - s * 0.26, y - s * 1.34, s * 0.52, s * 0.19);
-    g.lineStyle(DETAIL, INK, 0.8);
-    g.strokeRect(x - s * 0.26, y - s * 1.34, s * 0.52, s * 0.19);
+    // Solid ink: the player's one signature mass, readable at any size.
+    g.fillStyle(INK, 1);
+    g.fillRect(x - s * 0.28, y - s * 1.34, s * 0.56, s * 0.2);
     g.lineStyle(CONTOUR, INK, 1);
   }
 
@@ -410,6 +418,18 @@ function drawHair(
     g.lineStyle(1.8, INK, 0.8);
     g.lineBetween(x - s * 0.2, headY - s * 0.46, x - s * 0.3, headY - s * 0.62);
     g.lineStyle(CONTOUR, INK, 1);
+  } else if (hair === 'hardhat') {
+    // Dome with a ridge and a long brim: a builder at thumbnail size.
+    g.fillStyle(PAPER_WARM, 1);
+    g.beginPath();
+    g.arc(x, headY - s * 0.12, s * 0.5, Math.PI, 0, false);
+    g.closePath();
+    g.fillPath();
+    g.strokePath();
+    g.lineStyle(DETAIL, INK, 0.7);
+    g.lineBetween(x, headY - s * 0.62, x, headY - s * 0.14);
+    g.lineStyle(CONTOUR, INK, 1);
+    g.lineBetween(x - dir * s * 0.56, headY - s * 0.12, x + dir * s * 0.74, headY - s * 0.12);
   } else if (hair === 'bun') {
     g.fillStyle(PAPER, 1);
     g.fillCircle(x - dir * s * 0.34, headY - s * 0.3, s * 0.22);

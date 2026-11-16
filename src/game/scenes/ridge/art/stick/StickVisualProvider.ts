@@ -39,6 +39,10 @@ const SCENERY_TEXTURE_KEY: Record<SceneryLayer, string> = {
   fore: 'ridge-stick-fore'
 };
 const SCENERY_LAYERS: readonly SceneryLayer[] = ['far', 'near', 'fore'];
+/** Supersampling cap for baked scenery; past 2x the gain is invisible. */
+const MAX_BAKE_SCALE = 2;
+/** Widest side a baked band may reach — the WebGL floor every phone meets. */
+const MAX_BAKE_TEXTURE = 4096;
 
 /**
  * Zoom is driven by height, not width: it keeps the ground line, the figures,
@@ -59,6 +63,8 @@ const AWARENESS_RANGE = 0.13;
 const CHROME_CLEARANCE = 12;
 /** Residents this close to the focus card stay quiet so bubbles never stack on it. */
 const BARK_FOCUS_CLEARANCE = 150;
+/** A resident must stand this far inside the frame edge to start a bark. */
+const BARK_EDGE_INSET = 40;
 
 /**
  * Conversation framing. The camera eases in toward the people talking, lifts
@@ -263,10 +269,11 @@ export class StickVisualProvider implements RidgeVisualProvider {
 
   private syncScenery(view: RidgeVisualViewModel): void {
     // Only Relay redresses per beat; elsewhere the crossing state covers it.
-    const key =
+    const content =
       view.areaId === 'relay'
         ? `${view.areaId}|${view.beat}`
         : `${view.areaId}|${view.crossingOpen}|${this.designKey(view.builtBridge)}`;
+    const key = `${content}|${this.bakeScale()}`;
     if (key === this.lastSceneryKey) return;
     this.lastSceneryKey = key;
 
@@ -275,9 +282,22 @@ export class StickVisualProvider implements RidgeVisualProvider {
     }
   }
 
+  /**
+   * Texels per world unit for baked scenery. A 1:1 bake is magnified by the
+   * camera zoom, which staircases every diagonal and smears thin ink into
+   * grey; baking near the zoom keeps a texel at or under a canvas pixel.
+   * Quantised so small viewport changes do not trigger a rebake.
+   */
+  private bakeScale(): number {
+    const widest = Math.max(...SCENERY_LAYERS.map((layer) => LAYERS[layer].width));
+    const ceiling = Math.min(MAX_BAKE_SCALE, MAX_BAKE_TEXTURE / widest);
+    return Math.max(1, Math.min(ceiling, Math.ceil(this.baseZoom * 4) / 4));
+  }
+
   private bakeSceneryLayer(layer: SceneryLayer, view: RidgeVisualViewModel): void {
     const spec = LAYERS[layer];
-    const g = this.scene.make.graphics({ x: 0, y: 0 });
+    const scale = this.bakeScale();
+    const g = this.scene.make.graphics({ x: 0, y: 0 }).setScale(scale);
     drawRidgeAreaLayer(g, layer, view.areaId, view.crossingOpen, view.beat, {
       worldXForProgress: (progress) => this.worldXForProgress(progress),
       bridgeGap: {
@@ -289,7 +309,12 @@ export class StickVisualProvider implements RidgeVisualProvider {
 
     const key = SCENERY_TEXTURE_KEY[layer];
     try {
-      const texture = replaceDynamicTexture(this.scene, key, spec.width, spec.height);
+      const texture = replaceDynamicTexture(
+        this.scene,
+        key,
+        Math.ceil(spec.width * scale),
+        Math.ceil(spec.height * scale)
+      );
       texture.draw(g);
       texture.render();
 
@@ -306,7 +331,7 @@ export class StickVisualProvider implements RidgeVisualProvider {
           .setScrollFactor(spec.scrollFactor, 1);
         this.sceneryImages.set(layer, image);
       }
-      image.setVisible(true);
+      image.setScale(1 / scale).setVisible(true);
     } finally {
       g.destroy();
     }
@@ -445,11 +470,17 @@ export class StickVisualProvider implements RidgeVisualProvider {
     candidates.length = 0;
     const focus = view.focus;
     const focusX = focus ? this.worldXForProgress(focus.progress) : Number.NaN;
+    const frame = this.scene.cameras.main.worldView;
 
     for (const actor of view.actors) {
       if (!actor.visible || !showsPresenceChrome(actor.id)) continue;
       if (Math.abs(actor.progress - playerProgress) > PRESENCE_RANGE) continue;
       if (actor.id === focus?.actorId) continue;
+      // A line from someone off-frame is a bubble with nobody under it.
+      const x = this.worldXForProgress(actor.progress);
+      if (frame.width > 0 && (x < frame.left + BARK_EDGE_INSET || x > frame.right - BARK_EDGE_INSET)) {
+        continue;
+      }
       if (Math.abs(this.worldXForProgress(actor.progress) - focusX) < BARK_FOCUS_CLEARANCE) {
         continue;
       }
@@ -473,7 +504,8 @@ export class StickVisualProvider implements RidgeVisualProvider {
         });
       }
     }
-    this.presence.syncBarks(barks);
+    const frame = this.scene.cameras.main.worldView;
+    this.presence.syncBarks(barks, frame.width > 0 ? { left: frame.left, right: frame.right } : null);
   }
 
   private syncInteractPip(view: RidgeVisualViewModel, tick: number, motion: boolean): void {
