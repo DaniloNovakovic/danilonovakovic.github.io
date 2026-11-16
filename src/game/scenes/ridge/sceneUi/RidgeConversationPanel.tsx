@@ -232,10 +232,12 @@ function SpeakerTag({ id, speaker, side }: { id: string; speaker: string; side: 
   return (
     <div
       className={cn(
-        'absolute -top-4 z-20 rounded border-2 border-[#1a1a1a] bg-[#1a1a1a] px-3 py-0.5 text-xs font-black uppercase tracking-widest text-[#fbfbf9] shadow-[3px_3px_0px_0px_rgba(75,67,55,1)] sm:-top-5 sm:text-sm',
+        // Narrow boxes: the name sits over the bust like a nameplate, so a long
+        // one has the box width to grow into without reaching the ✕ corner.
+        'absolute -top-4 z-20 max-w-[calc(100%-3.5rem)] truncate rounded border-2 border-[#1a1a1a] bg-[#1a1a1a] px-2 py-0.5 text-[11px] font-black uppercase tracking-wider text-[#fbfbf9] shadow-[3px_3px_0px_0px_rgba(75,67,55,1)] sm:-top-5 sm:max-w-none sm:px-3 sm:text-sm sm:tracking-widest',
         side === 'right'
-          ? 'right-[6.25rem] rotate-2 sm:right-[8.75rem] short:right-[6.25rem]'
-          : 'left-[6.25rem] -rotate-2 sm:left-[8.75rem] short:left-[6.25rem]'
+          ? 'right-1 rotate-2 sm:right-[8.75rem] short:right-[6.25rem]'
+          : 'left-1 -rotate-2 sm:left-[8.75rem] short:left-[6.25rem]'
       )}
     >
       <span id={id}>{speaker}</span>
@@ -370,7 +372,7 @@ function StepBackButton({ side, onLeave }: { side: RidgeSpeakerSide; onLeave: ()
       }}
     >
       <span aria-hidden="true">✕</span>
-      <span aria-hidden="true" className="uppercase tracking-wider opacity-70 pointer-coarse:hidden">
+      <span aria-hidden="true" className="uppercase tracking-wider opacity-70 pointer-coarse:hidden max-sm:hidden">
         {copy.escHint}
       </span>
     </button>
