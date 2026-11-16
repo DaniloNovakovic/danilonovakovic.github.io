@@ -12,7 +12,8 @@ import {
   RIDGE_SCENE_ID,
   type SceneId
 } from '@/game/scenes/sceneIds';
-import { getInteractiveGameShellLayout } from './gameShellLayout';
+import { getInteractiveGameShellLayout, type InteractiveGameShellSize } from './gameShellLayout';
+import { sceneUiSurfaceExpandsGameFrame } from '@/game/sceneUi/registry';
 import { getSceneHeaderChrome } from './sceneHeaderChrome';
 import { getNotebookRuntimeShellProfile } from './notebookShellProfile';
 import { useResizeObserver } from '@/shared/hooks/useResizeObserver';
@@ -32,11 +33,13 @@ export function useInteractiveAppShell() {
   const presentationMode: PhaserScenePresentationMode =
     getPhaserScenePresentationMode(presentationSceneId);
   // Ridge is side-view exploration with conversations; it gets the room.
-  const gameShellLayout = getInteractiveGameShellLayout(
-    presentationMode,
-    contentRowHeight,
-    presentationSceneId === RIDGE_SCENE_ID ? 'wide' : 'card'
-  );
+  const shellSize: InteractiveGameShellSize =
+    presentationSceneId !== RIDGE_SCENE_ID
+      ? 'card'
+      : sceneUiSurfaceExpandsGameFrame(bridge.sceneUi.panel?.id)
+        ? 'focus'
+        : 'wide';
+  const gameShellLayout = getInteractiveGameShellLayout(presentationMode, contentRowHeight, shellSize);
   const isGameInputBlocked = bridge.isPaused || bridge.loadingSceneId !== null;
   const shouldReserveSceneHint = presentationSceneId === POTASSIUM_SCENE_ID;
   const sceneHintText = bridge.sceneHintText ?? messages.potassiumSlip.hints.start;

@@ -20,8 +20,11 @@ import type { RidgeBridgeTool } from '../sceneUi/RidgeBridgeBuilderPanel';
 
 /** Joints within this many cells of the pointer can be grabbed. */
 const GRAB_CELLS = 0.55;
+/** A fingertip covers far more of the table than a cursor tip. */
+const GRAB_CELLS_TOUCH = 0.7;
 /** World units of slack when tapping or erasing a beam. */
 const BEAM_HIT = 9;
+const BEAM_HIT_TOUCH = 16;
 const PULSE_MS = 700;
 const DEBRIS_LIFE_MS = 1600;
 /** Dashes around the reach circle; even so dash and gap alternate cleanly. */
@@ -88,6 +91,8 @@ export class BridgeBuilderView {
   private tool: RidgeBridgeTool = 'road';
   private drag: Drag | null = null;
   private hover: { x: number; y: number } | null = null;
+  /** Last press came from a finger, so hit areas widen to fit one. */
+  private touch = false;
   private pulseAt = -Infinity;
   private debris: Debris[] = [];
   private splashes: Splash[] = [];
@@ -530,6 +535,7 @@ export class BridgeBuilderView {
     if (!workbench || workbench.phase !== 'editing') return;
     const world = this.worldPoint(pointer);
     this.hover = world;
+    this.touch = pointer.wasTouch;
 
     if (pointer.rightButtonDown() || this.tool === 'eraser') {
       this.drag = { kind: 'erase' };
@@ -619,7 +625,7 @@ export class BridgeBuilderView {
   }
 
   private jointNear(workbench: BridgeWorkbench, x: number, y: number): GridPoint | null {
-    const limit = workbench.puzzle.cell * GRAB_CELLS;
+    const limit = workbench.puzzle.cell * (this.touch ? GRAB_CELLS_TOUCH : GRAB_CELLS);
     let best: GridPoint | null = null;
     let bestDistance = limit;
     for (const joint of designJoints(workbench.puzzle, workbench.design)) {
@@ -635,7 +641,7 @@ export class BridgeBuilderView {
 
   private beamIndexAt(design: BridgeDesign, x: number, y: number): number {
     let best = -1;
-    let bestDistance = BEAM_HIT;
+    let bestDistance = this.touch ? BEAM_HIT_TOUCH : BEAM_HIT;
     design.forEach((beam, index) => {
       const a = this.toWorld(beam.a);
       const b = this.toWorld(beam.b);

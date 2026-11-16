@@ -13,7 +13,8 @@ export const RIDGE_SCENE_UI_DEFINITIONS: readonly SceneUiSurfaceDefinition[] = [
     id: 'ridgeBridgeBuilder',
     component: RidgeBridgeBuilderPanel,
     panelChrome: 'docked',
-    capturesScenePointer: true
+    capturesScenePointer: true,
+    expandsGameFrame: true
   },
   {
     id: 'ridgeCickaDuel',

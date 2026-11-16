@@ -28,6 +28,11 @@ export interface SceneUiSurfaceDefinition {
    * up (e.g. drawing), so shell touch mats must stand aside.
    */
   capturesScenePointer?: boolean;
+  /**
+   * On phones the game frame drops its portrait card shape and fills the
+   * screen while this surface is up (e.g. a drawing table that needs room).
+   */
+  expandsGameFrame?: boolean;
 }
 
 const SCENE_UI_DEFINITIONS: readonly SceneUiSurfaceDefinition[] = [
@@ -42,6 +47,10 @@ const SCENE_UI_BY_ID: ReadonlyMap<SceneUiSurfaceId, SceneUiSurfaceDefinition> = 
 
 export function sceneUiSurfaceCapturesPointer(id: SceneUiSurfaceId | undefined): boolean {
   return id ? SCENE_UI_BY_ID.get(id)?.capturesScenePointer === true : false;
+}
+
+export function sceneUiSurfaceExpandsGameFrame(id: SceneUiSurfaceId | undefined): boolean {
+  return id ? SCENE_UI_BY_ID.get(id)?.expandsGameFrame === true : false;
 }
 
 export function getSceneUiSurfaceDefinition(

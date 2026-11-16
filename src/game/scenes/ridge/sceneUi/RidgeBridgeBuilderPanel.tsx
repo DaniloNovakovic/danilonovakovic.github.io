@@ -59,9 +59,11 @@ export function RidgeBridgeBuilderPanel({ params, dispatchAction }: SceneUiSurfa
 function TopBar({ view }: { view: RidgeBridgeBuilderPanelView }) {
   const copy = useMessages().ridge.bridgeBuilder;
   return (
-    <div className="flex items-start gap-2">
+    // Narrow (portrait phone): title + ink share a row, the tip card spans the
+    // width beneath so its text is not squeezed into a tall column.
+    <div className="flex flex-col-reverse gap-1.5 sm:flex-row sm:items-start sm:gap-2 short:flex-row short:items-start short:gap-2">
       <TipCard view={view} />
-      <div className="pointer-events-none ml-auto flex shrink-0 flex-col items-end gap-1.5">
+      <div className="pointer-events-none flex shrink-0 flex-row items-center justify-between gap-1.5 sm:ml-auto sm:flex-col sm:items-end short:ml-auto short:flex-col short:items-end">
         <span className="-rotate-2 rounded border-2 border-[#1a1a1a] bg-[#1a1a1a] px-2 py-0.5 text-[10px] font-black uppercase tracking-widest text-[#fbfbf9] shadow-[3px_3px_0px_0px_rgba(75,67,55,1)] sm:text-xs">
           {copy.title}
           {view.attempts > 0 ? <span className="ml-1.5 opacity-70">· {copy.attempt(view.attempts)}</span> : null}
@@ -97,7 +99,7 @@ function TipCard({ view }: { view: RidgeBridgeBuilderPanelView }) {
     <div
       role="status"
       aria-live="polite"
-      className="pointer-events-none flex max-w-[min(30rem,62%)] items-center gap-2 rounded-lg border-[3px] border-[#1a1a1a] bg-[#fbfbf9] p-1.5 pr-3 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] sm:gap-3 sm:p-2 sm:pr-4 short:gap-1.5 short:p-1 short:pr-2"
+      className="pointer-events-none flex items-center sm:max-w-[min(30rem,62%)] short:max-w-[min(30rem,62%)] gap-2 rounded-lg border-[3px] border-[#1a1a1a] bg-[#fbfbf9] p-1.5 pr-3 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] sm:gap-3 sm:p-2 sm:pr-4 short:gap-1.5 short:p-1 short:pr-2"
     >
       <PortraitChip
         portrait="draftsperson"

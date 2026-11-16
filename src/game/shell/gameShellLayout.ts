@@ -19,6 +19,19 @@ const DESIGN_ASPECT_RATIO = `${PHASER_DESIGN_WIDTH} / ${PHASER_DESIGN_HEIGHT}`;
 const DESIGN_WIDTH_PER_HEIGHT = '1.666667';
 const PORTRAIT_WIDTH_PER_HEIGHT = '0.75';
 
+const SHELL_CLASS =
+  'w-full max-w-[var(--mobile-game-shell-height-capped-width)] md:w-[var(--desktop-game-shell-width)] md:max-w-none';
+const FRAME_CLASS =
+  'aspect-[var(--mobile-game-frame-aspect)] md:aspect-[var(--desktop-game-frame-aspect)] md:max-h-[var(--desktop-game-frame-max-height)]';
+/**
+ * Below `md` the shell bleeds into the page gutters (to ~8px from the screen
+ * edge) and the frame takes the full row height; from `md` up it matches `wide`.
+ */
+const FOCUS_SHELL_CLASS =
+  '-mx-6 h-full w-[calc(100%+3rem)] md:mx-0 md:h-auto md:w-[var(--desktop-game-shell-width)] md:max-w-none';
+const FOCUS_FRAME_CLASS =
+  'h-full md:h-auto md:aspect-[var(--desktop-game-frame-aspect)] md:max-h-[var(--desktop-game-frame-max-height)]';
+
 type GameShellStyle = CSSProperties & {
   '--mobile-game-shell-max-width': string;
   '--mobile-game-shell-height-capped-width': string;
@@ -34,8 +47,10 @@ type GameFrameStyle = CSSProperties & {
 /**
  * `card` is the centered notebook card every scene used to share. `wide` is
  * for side-view exploration (Ridge): the frame fills the content row instead.
+ * `focus` is `wide` on desktop, but on phones the frame fills the whole
+ * content row edge to edge, for surfaces like the Blueprint Bridge table.
  */
-export type InteractiveGameShellSize = 'card' | 'wide';
+export type InteractiveGameShellSize = 'card' | 'wide' | 'focus';
 
 interface InteractiveGameShellLayout {
   /** Max width of the shell's centre grid column (header, game, footer). */
@@ -90,7 +105,7 @@ export function getInteractiveGameShellLayout(
   const sizing = PRESENTATION_SIZING[presentationMode];
   const measuredRowHeight =
     contentRowHeight && contentRowHeight > 0 ? contentRowHeight : null;
-  const desktopHeightCap = size === 'wide' ? WIDE_MAX_GAME_HEIGHT : sizing.cardHeightCap;
+  const desktopHeightCap = size === 'card' ? sizing.cardHeightCap : WIDE_MAX_GAME_HEIGHT;
   // The measured row already excludes header/footer, so it keeps short
   // landscape screens from overflowing; 88dvh is the fallback before it lands.
   const desktopFrameMaxHeight = measuredRowHeight
@@ -101,15 +116,15 @@ export function getInteractiveGameShellLayout(
     : sizing.mobileMaxWidth;
 
   return {
-    maxContentWidth: size === 'wide' ? WIDE_MAX_CONTENT_WIDTH : CARD_MAX_CONTENT_WIDTH,
-    shellClassName: 'w-full max-w-[var(--mobile-game-shell-height-capped-width)] md:w-[var(--desktop-game-shell-width)] md:max-w-none',
+    maxContentWidth: size === 'card' ? CARD_MAX_CONTENT_WIDTH : WIDE_MAX_CONTENT_WIDTH,
+    shellClassName: size === 'focus' ? FOCUS_SHELL_CLASS : SHELL_CLASS,
     shellStyle: {
       '--mobile-game-shell-max-width': sizing.mobileMaxWidth,
       '--mobile-game-shell-height-capped-width': mobileHeightCappedWidth,
       '--desktop-game-shell-width':
         `min(100%, calc(${desktopFrameMaxHeight} * ${sizing.desktopWidthPerHeight}))`
     },
-    frameClassName: 'aspect-[var(--mobile-game-frame-aspect)] md:aspect-[var(--desktop-game-frame-aspect)] md:max-h-[var(--desktop-game-frame-max-height)]',
+    frameClassName: size === 'focus' ? FOCUS_FRAME_CLASS : FRAME_CLASS,
     frameStyle: {
       '--mobile-game-frame-aspect': sizing.mobileAspect,
       '--desktop-game-frame-aspect': sizing.desktopAspect,
