@@ -1,7 +1,7 @@
 // Each area authors three parallax bands; the branching is set-dressing data.
 // fallow-ignore-file complexity
 import type * as Phaser from 'phaser';
-import { BLUEPRINT_BRIDGE_PUZZLE, type RidgeAreaId } from '@/game/core/ridge';
+import { BLUEPRINT_BRIDGE_PUZZLE, CONCERT_LAYOUT, type RidgeAreaId } from '@/game/core/ridge';
 import { GAME_DESIGN_HEIGHT, GAME_DESIGN_WIDTH } from '@/game/sharedSceneRuntime/designSize';
 import type { RidgeVisualViewModel } from '../types';
 import {
@@ -19,6 +19,7 @@ import {
 import { drawBuiltBridge, drawInkBolt, type BuiltBridgeShape } from './bridgeInk';
 import {
   BRIDGE_CAMP_X,
+  CONCERT_STAGE_RISE,
   GROUND_Y,
   HORIZON_Y,
   INK,
@@ -61,7 +62,7 @@ export function drawRidgeAreaLayer(
     return;
   }
   if (layer === 'fore') {
-    drawForeBand(g, areaId);
+    drawForeBand(g, areaId, crossingOpen);
     return;
   }
 
@@ -413,72 +414,343 @@ function drawConcertNear(
   crossingOpen: boolean,
   ctx: AreaSetContext
 ): void {
-  for (let i = 0; i < 5; i += 1) {
-    const x = 130 + i * 268;
-    const h = 150 + (i % 2) * 34;
-    g.lineStyle(2.8, INK, 0.9);
+  const at = (progress: number) => ctx.worldXForProgress(progress);
+  drawConcertFacades(g);
+
+  // Street lamps, kept clear of the stage truss.
+  for (const x of [150, 505, 1030, 1330]) drawStreetLamp(g, x);
+
+  drawKafana(g, at(CONCERT_LAYOUT.kid) - 110);
+  drawGigPoster(g, at(CONCERT_LAYOUT.poster));
+  drawBackstageNook(g, at(CONCERT_LAYOUT.guitarist), at(CONCERT_LAYOUT.cicka));
+  drawConcertStage(g, at(CONCERT_LAYOUT.stage), CONCERT_LAYOUT.stageHalfWidth * (STAGE_WIDTH - 160));
+  drawCrosswalk(g, at(0.555), at(0.69), crossingOpen);
+
+  // The band's corner by the exit: an amp to loaf on, a bench, the way downhill.
+  const corner = at(CONCERT_LAYOUT.bandCicka);
+  drawStageAmp(g, corner + 14, 30, 34);
+  g.lineStyle(2.6, INK, 0.85);
+  g.lineBetween(corner - 120, GROUND_Y - 22, corner - 50, GROUND_Y - 22);
+  g.lineBetween(corner - 114, GROUND_Y - 22, corner - 114, GROUND_Y);
+  g.lineBetween(corner - 56, GROUND_Y - 22, corner - 56, GROUND_Y);
+  drawExitSign(g, at(CONCERT_LAYOUT.exit) + 34);
+}
+
+/** Small-town night block: hatched facades with a few warm windows. */
+function drawConcertFacades(g: Phaser.GameObjects.Graphics): void {
+  const facades = [
+    { x: 40, w: 120, h: 176 },
+    { x: 560, w: 180, h: 150 },
+    { x: 900, w: 150, h: 196 },
+    { x: 1080, w: 170, h: 164 },
+    { x: 1290, w: 150, h: 184 },
+    { x: 1450, w: 130, h: 150 }
+  ];
+  facades.forEach(({ x, w, h }, i) => {
+    g.lineStyle(2.6, INK, 0.7);
     g.fillStyle(PAPER, 0.4);
-    g.fillRect(x, GROUND_Y - h, 146, h);
-    g.strokeRect(x, GROUND_Y - h, 146, h);
-    drawHatch(g, x + 2, GROUND_Y - h + 2, 142, h - 4, 22, 0.1, 0.6);
-    // Lit windows read as warm negative space against the hatching.
-    g.fillStyle(PAPER, 0.95);
+    g.fillRect(x, GROUND_Y - h, w, h);
+    g.strokeRect(x, GROUND_Y - h, w, h);
+    drawHatch(g, x + 2, GROUND_Y - h + 2, w - 4, h - 4, 22, 0.1, 0.6);
+    g.lineStyle(2, INK, 0.7);
+    g.lineBetween(x - 6, GROUND_Y - h, x + w + 6, GROUND_Y - h);
+    const cols = Math.max(2, Math.floor((w - 20) / 42));
     for (let row = 0; row < 2; row += 1) {
-      for (let col = 0; col < 3; col += 1) {
-        if (jitter(i * 9 + row * 3 + col) < 0.35) continue;
-        const wx = x + 18 + col * 42;
-        const wy = GROUND_Y - h + 26 + row * 52;
-        g.fillRect(wx, wy, 28, 34);
-        g.lineStyle(2, INK, 0.85);
-        g.strokeRect(wx, wy, 28, 34);
+      for (let col = 0; col < cols; col += 1) {
+        if (jitter(i * 9 + row * 3 + col) < 0.4) continue;
+        const wx = x + 16 + col * 42;
+        const wy = GROUND_Y - h + 24 + row * 50;
+        g.fillStyle(PAPER, 0.95);
+        g.fillRect(wx, wy, 24, 30);
+        g.lineStyle(1.8, INK, 0.75);
+        g.strokeRect(wx, wy, 24, 30);
+        g.lineBetween(wx + 12, wy, wx + 12, wy + 30);
       }
     }
-    g.lineStyle(2.4, INK, 0.85);
-    g.strokeRect(x + 54, GROUND_Y - 62, 40, 62);
-  }
+  });
+}
 
-  // Street lamps with a hatched pool of light beneath each.
-  for (let i = 0; i < 5; i += 1) {
-    const x = 210 + i * 300;
-    g.lineStyle(2.6, INK, 0.85);
-    g.lineBetween(x, GROUND_Y, x, GROUND_Y - 108);
-    g.lineBetween(x, GROUND_Y - 108, x + 16, GROUND_Y - 118);
-    g.fillStyle(PAPER, 0.9);
-    g.fillCircle(x + 22, GROUND_Y - 118, 9);
-    g.strokeCircle(x + 22, GROUND_Y - 118, 9);
-    g.fillStyle(INK, 0.05);
-    g.fillTriangle(x + 22, GROUND_Y - 110, x - 26, GROUND_Y, x + 70, GROUND_Y);
-  }
+function drawStreetLamp(g: Phaser.GameObjects.Graphics, x: number): void {
+  g.lineStyle(2.6, INK, 0.85);
+  g.lineBetween(x, GROUND_Y, x, GROUND_Y - 112);
+  g.lineBetween(x, GROUND_Y - 112, x + 16, GROUND_Y - 122);
+  g.fillStyle(PAPER, 0.95);
+  g.fillCircle(x + 22, GROUND_Y - 122, 9);
+  g.strokeCircle(x + 22, GROUND_Y - 122, 9);
+  // A pool of light: lighter than the hatched night around it.
+  g.fillStyle(PAPER, 0.32);
+  g.fillTriangle(x + 22, GROUND_Y - 114, x - 30, GROUND_Y, x + 74, GROUND_Y);
+}
 
-  const stage = ctx.worldXForProgress(0.4);
+/** The kafana: an awning, a lit window, a café table, and a curb out front. */
+function drawKafana(g: Phaser.GameObjects.Graphics, x: number): void {
+  const w = 230;
+  const h = 168;
   g.lineStyle(3, INK, 0.9);
+  g.fillStyle(PAPER_WARM, 0.9);
+  g.fillRect(x, GROUND_Y - h, w, h);
+  g.strokeRect(x, GROUND_Y - h, w, h);
+  drawHatch(g, x + 2, GROUND_Y - h + 2, w - 4, 38, 10, 0.16, 0.6);
+  // Striped awning.
+  const awningY = GROUND_Y - h + 44;
+  g.fillStyle(PAPER, 1);
+  g.fillRect(x - 12, awningY, w + 24, 22);
+  g.strokeRect(x - 12, awningY, w + 24, 22);
+  g.fillStyle(INK, 0.75);
+  for (let sx = x - 12; sx < x + w + 12; sx += 28) g.fillRect(sx, awningY, 14, 22);
+  for (let sx = x - 12; sx < x + w + 12; sx += 14) {
+    g.fillStyle(sx % 28 === (x - 12) % 28 ? INK : PAPER, 0.75);
+    g.fillTriangle(sx, awningY + 22, sx + 14, awningY + 22, sx + 7, awningY + 30);
+  }
+  // Sign board with squiggle lettering above the awning.
+  g.lineStyle(2.4, INK, 0.9);
+  g.fillStyle(PAPER, 1);
+  g.fillRect(x + 58, GROUND_Y - h + 8, 114, 26);
+  g.strokeRect(x + 58, GROUND_Y - h + 8, 114, 26);
+  g.lineStyle(2.2, INK, 0.85);
+  for (let i = 0; i < 6; i += 1) {
+    const lx = x + 70 + i * 16;
+    g.lineBetween(lx, GROUND_Y - h + 14, lx + (i % 2 === 0 ? 8 : 0), GROUND_Y - h + 28);
+    g.lineBetween(lx, GROUND_Y - h + 14, lx + 8, GROUND_Y - h + 14);
+  }
+  // Warm window and door.
+  g.fillStyle(PAPER, 1);
+  g.fillRect(x + 22, GROUND_Y - 96, 96, 58);
+  g.lineStyle(2.4, INK, 0.9);
+  g.strokeRect(x + 22, GROUND_Y - 96, 96, 58);
+  g.lineBetween(x + 70, GROUND_Y - 96, x + 70, GROUND_Y - 38);
+  g.strokeRect(x + 150, GROUND_Y - 92, 44, 92);
+  g.fillStyle(INK, 1);
+  g.fillCircle(x + 186, GROUND_Y - 46, 2.5);
+  // Café table and a chair on the pavement.
+  g.lineStyle(2.4, INK, 0.85);
+  g.lineBetween(x - 34, GROUND_Y - 30, x - 4, GROUND_Y - 30);
+  g.lineBetween(x - 19, GROUND_Y - 30, x - 19, GROUND_Y);
+  g.lineBetween(x - 46, GROUND_Y, x - 40, GROUND_Y - 20);
+  g.lineBetween(x - 40, GROUND_Y - 20, x - 40, GROUND_Y - 40);
+}
+
+/** The gig poster, argued with in pen. */
+function drawGigPoster(g: Phaser.GameObjects.Graphics, x: number): void {
+  // A stretch of brick wall to stick it on.
+  g.lineStyle(2.4, INK, 0.8);
   g.fillStyle(PAPER_WARM, 0.85);
-  g.fillRect(stage - 90, GROUND_Y - 30, 180, 30);
-  g.strokeRect(stage - 90, GROUND_Y - 30, 180, 30);
-  g.lineBetween(stage - 96, GROUND_Y - 120, stage - 96, GROUND_Y - 30);
-  g.lineBetween(stage + 96, GROUND_Y - 120, stage + 96, GROUND_Y - 30);
-  g.lineBetween(stage - 96, GROUND_Y - 120, stage + 96, GROUND_Y - 120);
-  g.lineStyle(2, INK, 0.45);
-  for (let i = 0; i < 5; i += 1) {
-    const bx = stage - 72 + i * 36;
-    g.lineBetween(bx, GROUND_Y - 120, bx, GROUND_Y - 104);
-    g.strokeRect(bx - 6, GROUND_Y - 104, 12, 10);
+  g.fillRect(x - 54, GROUND_Y - 128, 108, 128);
+  g.strokeRect(x - 54, GROUND_Y - 128, 108, 128);
+  g.lineStyle(1.2, INK, 0.3);
+  for (let row = 0; row < 10; row += 1) {
+    const y = GROUND_Y - 128 + row * 13;
+    g.lineBetween(x - 54, y, x + 54, y);
+    for (let bx = x - 54 + (row % 2) * 13; bx < x + 54; bx += 26) g.lineBetween(bx, y, bx, y + 13);
   }
+  // The poster, a little crooked.
+  g.lineStyle(2.6, INK, 1);
+  g.fillStyle(PAPER, 1);
+  g.beginPath();
+  g.moveTo(x - 26, GROUND_Y - 112);
+  g.lineTo(x + 28, GROUND_Y - 116);
+  g.lineTo(x + 30, GROUND_Y - 44);
+  g.lineTo(x - 24, GROUND_Y - 41);
+  g.closePath();
+  g.fillPath();
+  g.strokePath();
+  // Guitar doodle and headline scribbles.
+  g.lineStyle(2, INK, 0.9);
+  g.strokeCircle(x + 1, GROUND_Y - 66, 9);
+  g.strokeCircle(x + 1, GROUND_Y - 78, 6);
+  g.lineBetween(x + 1, GROUND_Y - 84, x + 1, GROUND_Y - 100);
+  g.lineStyle(2.4, INK, 0.85);
+  g.lineBetween(x - 18, GROUND_Y - 105, x + 20, GROUND_Y - 107);
+  g.lineStyle(1.4, INK, 0.6);
+  g.lineBetween(x - 16, GROUND_Y - 52, x + 22, GROUND_Y - 53);
+  // "still?" crossed out, "ALWAYS" in heavier pen.
+  g.lineStyle(1.6, INK, 0.8);
+  g.lineBetween(x + 10, GROUND_Y - 95, x + 24, GROUND_Y - 96);
+  g.lineBetween(x + 8, GROUND_Y - 92, x + 26, GROUND_Y - 99);
+}
 
-  const gate = ctx.worldXForProgress(0.55);
-  g.lineStyle(3.4, INK, crossingOpen ? 0.18 : 0.95);
-  g.lineBetween(gate, GROUND_Y - 6, gate, GROUND_Y - 84);
-  if (!crossingOpen) {
-    g.lineBetween(gate - 46, GROUND_Y - 44, gate + 46, GROUND_Y - 44);
-    drawHatch(g, gate - 46, GROUND_Y - 44, 92, 38, 10, 0.2, 0.9);
+/** Behind the stage: a tarp backdrop, Dule's guitar case, cables, the amp stack. */
+function drawBackstageNook(g: Phaser.GameObjects.Graphics, duleX: number, cickaX: number): void {
+  g.fillStyle(INK, 0.1);
+  g.fillRect(duleX - 70, GROUND_Y - 132, cickaX - duleX + 120, 132);
+  g.lineStyle(2.2, INK, 0.5);
+  g.strokeRect(duleX - 70, GROUND_Y - 132, cickaX - duleX + 120, 132);
+  drawHatch(g, duleX - 68, GROUND_Y - 130, cickaX - duleX + 116, 128, 14, 0.12, 0.5);
+  // Guitar case leaning on the backdrop.
+  g.lineStyle(2.6, INK, 1);
+  g.fillStyle(INK, 0.8);
+  g.beginPath();
+  g.moveTo(duleX - 48, GROUND_Y);
+  g.lineTo(duleX - 66, GROUND_Y - 30);
+  g.lineTo(duleX - 50, GROUND_Y - 90);
+  g.lineTo(duleX - 36, GROUND_Y - 92);
+  g.lineTo(duleX - 30, GROUND_Y - 32);
+  g.lineTo(duleX - 34, GROUND_Y);
+  g.closePath();
+  g.fillPath();
+  // Coiled cable on the floor.
+  g.lineStyle(1.8, INK, 0.7);
+  g.strokeEllipse(duleX + 34, GROUND_Y - 4, 34, 9);
+  g.strokeEllipse(duleX + 34, GROUND_Y - 5, 26, 6);
+  // The amp stack Cicka hides behind.
+  drawStageAmp(g, cickaX + 26, 34, 64);
+  drawStageAmp(g, cickaX + 26, 30, 32, 64);
+}
+
+function drawStageAmp(
+  g: Phaser.GameObjects.Graphics,
+  x: number,
+  halfW: number,
+  h: number,
+  lift = 0
+): void {
+  const top = GROUND_Y - lift - h;
+  g.lineStyle(2.6, INK, 1);
+  g.fillStyle(PAPER_WARM, 1);
+  g.fillRect(x - halfW, top, halfW * 2, h);
+  g.strokeRect(x - halfW, top, halfW * 2, h);
+  g.fillStyle(INK, 0.7);
+  g.fillRect(x - halfW + 5, top + 6, halfW * 2 - 10, h - 16);
+  g.lineStyle(1, PAPER, 0.5);
+  for (let gx = x - halfW + 9; gx < x + halfW - 5; gx += 6) g.lineBetween(gx, top + 6, gx, top + h - 10);
+}
+
+/** Raised platform, truss, string lights, a mic, a monitor wedge. */
+function drawConcertStage(g: Phaser.GameObjects.Graphics, x: number, halfW: number): void {
+  const deck = GROUND_Y - CONCERT_STAGE_RISE;
+  const left = x - halfW;
+  const right = x + halfW;
+  // Truss and string lights.
+  g.lineStyle(3, INK, 0.9);
+  g.lineBetween(left - 6, deck, left - 6, GROUND_Y - 176);
+  g.lineBetween(right + 6, deck, right + 6, GROUND_Y - 176);
+  g.lineBetween(left - 14, GROUND_Y - 176, right + 14, GROUND_Y - 176);
+  g.lineStyle(1.4, INK, 0.5);
+  for (let tx = left; tx < right; tx += 14) {
+    g.lineBetween(tx, GROUND_Y - 176, tx + 7, GROUND_Y - 168);
+    g.lineBetween(tx + 7, GROUND_Y - 168, tx + 14, GROUND_Y - 176);
   }
+  g.lineStyle(1.6, INK, 0.7);
+  g.beginPath();
+  for (let i = 0; i <= 10; i += 1) {
+    const lx = left + (i / 10) * (right - left);
+    const ly = GROUND_Y - 160 + Math.sin((i / 10) * Math.PI) * 14;
+    if (i === 0) g.moveTo(lx, ly);
+    else g.lineTo(lx, ly);
+  }
+  g.strokePath();
+  for (let i = 1; i < 10; i += 1) {
+    const lx = left + (i / 10) * (right - left);
+    const ly = GROUND_Y - 160 + Math.sin((i / 10) * Math.PI) * 14;
+    g.fillStyle(PAPER, 1);
+    g.fillCircle(lx, ly + 5, 4);
+    g.lineStyle(1.4, INK, 0.9);
+    g.strokeCircle(lx, ly + 5, 4);
+  }
+  // Banner with squiggle lettering hung from the truss.
+  g.fillStyle(PAPER, 1);
+  g.lineStyle(2.4, INK, 0.9);
+  g.fillRect(x - 54, GROUND_Y - 150, 108, 24);
+  g.strokeRect(x - 54, GROUND_Y - 150, 108, 24);
+  g.lineStyle(2.2, INK, 0.8);
+  for (let i = 0; i < 7; i += 1) {
+    const lx = x - 44 + i * 13;
+    g.lineBetween(lx, GROUND_Y - 145, lx + 6, GROUND_Y - 131);
+    g.lineBetween(lx + 6, GROUND_Y - 131, lx + 9, GROUND_Y - 145);
+  }
+  // The platform itself.
+  g.lineStyle(3, INK, 1);
+  g.fillStyle(PAPER_WARM, 1);
+  g.fillRect(left, deck, right - left, CONCERT_STAGE_RISE);
+  g.strokeRect(left, deck, right - left, CONCERT_STAGE_RISE);
+  drawHatch(g, left + 2, deck + 6, right - left - 4, CONCERT_STAGE_RISE - 8, 9, 0.22, 0.7);
+  g.lineStyle(2, INK, 0.9);
+  g.lineBetween(left, deck + 4, right, deck + 4);
+  // Steps up on the near side.
+  g.lineStyle(2.2, INK, 0.9);
+  g.strokeRect(left - 18, GROUND_Y - 12, 18, 12);
+  // Mic stand and a monitor wedge.
+  const mic = x + 26;
+  g.lineStyle(2.4, INK, 1);
+  g.lineBetween(mic, deck, mic, deck - 58);
+  g.lineBetween(mic - 10, deck, mic + 10, deck);
+  g.lineBetween(mic, deck - 58, mic - 12, deck - 64);
+  g.fillStyle(INK, 1);
+  g.fillCircle(mic - 14, deck - 65, 4);
+  g.fillStyle(PAPER, 1);
+  g.lineStyle(2.4, INK, 1);
+  g.beginPath();
+  g.moveTo(right - 34, deck);
+  g.lineTo(right - 8, deck);
+  g.lineTo(right - 12, deck - 16);
+  g.closePath();
+  g.fillPath();
+  g.strokePath();
+  // The setlist taped to the floor.
+  g.fillStyle(PAPER, 1);
+  g.fillRect(left + 18, deck - 3, 18, 4);
+}
 
-  const nook = ctx.worldXForProgress(0.72);
-  g.fillStyle(INK, 0.09);
-  g.fillRect(nook - 38, GROUND_Y - 94, 84, 94);
-  g.lineStyle(2.2, INK, 0.4);
-  g.strokeRect(nook - 38, GROUND_Y - 94, 84, 94);
-  drawHatch(g, nook - 36, GROUND_Y - 92, 80, 90, 14, 0.14, 0.5);
+/** Zebra crossing, traffic light, and (until the show) a barrier. */
+function drawCrosswalk(
+  g: Phaser.GameObjects.Graphics,
+  from: number,
+  to: number,
+  crossingOpen: boolean
+): void {
+  g.fillStyle(PAPER, 0.95);
+  g.lineStyle(1.6, INK, 0.6);
+  for (let x = from; x < to; x += 30) {
+    g.beginPath();
+    g.moveTo(x, GROUND_Y + 2);
+    g.lineTo(x + 18, GROUND_Y + 2);
+    g.lineTo(x + 12, GROUND_Y + 34);
+    g.lineTo(x - 8, GROUND_Y + 34);
+    g.closePath();
+    g.fillPath();
+    g.strokePath();
+  }
+  // Traffic light: red while the crowd holds the street, green once it opens.
+  const pole = to + 20;
+  g.lineStyle(3, INK, 0.9);
+  g.lineBetween(pole, GROUND_Y, pole, GROUND_Y - 118);
+  g.fillStyle(PAPER_WARM, 1);
+  g.fillRect(pole - 10, GROUND_Y - 150, 20, 40);
+  g.strokeRect(pole - 10, GROUND_Y - 150, 20, 40);
+  g.fillStyle(INK, 1);
+  if (crossingOpen) g.fillCircle(pole, GROUND_Y - 120, 6);
+  else g.fillCircle(pole, GROUND_Y - 140, 6);
+  g.lineStyle(1.6, INK, 1);
+  g.strokeCircle(pole, GROUND_Y - 140, 6);
+  g.strokeCircle(pole, GROUND_Y - 120, 6);
+  if (crossingOpen) return;
+  // A striped sawhorse at the near edge of the crossing.
+  g.lineStyle(2.6, INK, 1);
+  g.lineBetween(from - 8, GROUND_Y, from + 2, GROUND_Y - 34);
+  g.lineBetween(from + 46, GROUND_Y, from + 36, GROUND_Y - 34);
+  g.fillStyle(PAPER, 1);
+  g.fillRect(from - 6, GROUND_Y - 40, 56, 12);
+  g.strokeRect(from - 6, GROUND_Y - 40, 56, 12);
+  g.fillStyle(INK, 0.85);
+  for (let x = from - 2; x < from + 46; x += 14) g.fillRect(x, GROUND_Y - 40, 7, 12);
+}
+
+/** Way downhill: a signpost leaning toward the festival. */
+function drawExitSign(g: Phaser.GameObjects.Graphics, x: number): void {
+  g.lineStyle(2.8, INK, 0.9);
+  g.lineBetween(x, GROUND_Y, x, GROUND_Y - 84);
+  g.fillStyle(PAPER, 1);
+  g.beginPath();
+  g.moveTo(x - 30, GROUND_Y - 84);
+  g.lineTo(x + 24, GROUND_Y - 84);
+  g.lineTo(x + 38, GROUND_Y - 74);
+  g.lineTo(x + 24, GROUND_Y - 64);
+  g.lineTo(x - 30, GROUND_Y - 64);
+  g.closePath();
+  g.fillPath();
+  g.strokePath();
+  g.lineStyle(1.8, INK, 0.7);
+  g.lineBetween(x - 22, GROUND_Y - 74, x + 18, GROUND_Y - 74);
 }
 
 function drawDanceNear(
@@ -638,14 +910,16 @@ function drawRelaySpire(g: Phaser.GameObjects.Graphics, x: number, complete: boo
  * Heavy ink silhouettes that frame the playable lane. Drawn in the layer's own
  * space, so y = LAYERS.fore.height is the bottom of the screen.
  */
-function drawForeBand(g: Phaser.GameObjects.Graphics, areaId: RidgeAreaId): void {
+function drawForeBand(g: Phaser.GameObjects.Graphics, areaId: RidgeAreaId, crossingOpen: boolean): void {
   const width = LAYERS.fore.width;
   const base = LAYERS.fore.height;
 
   if (areaId === 'concert') {
     // Backs of heads: you are standing inside the crowd, not watching it.
+    // Once the show is over only a few stragglers are left.
     g.fillStyle(INK, 0.88);
     for (let i = 0; i < 22; i += 1) {
+      if (crossingOpen && i % 4 !== 0) continue;
       const x = 30 + i * 94 + jitter(i * 4.2) * 36;
       const r = 20 + jitter(i * 8.9) * 10;
       const shoulder = base - 30 + jitter(i * 1.9) * 16;

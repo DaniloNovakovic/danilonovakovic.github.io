@@ -11,6 +11,8 @@ const PORTRAITS: Record<BodiedPortraitId, (emotion: RidgeEmotion) => ReactNode> 
   cicka: (emotion) => <CickaPortrait emotion={emotion} />,
   draftsperson: (emotion) => <DraftspersonPortrait emotion={emotion} />,
   guitarist: (emotion) => <GuitaristPortrait emotion={emotion} />,
+  kid: (emotion) => <KidPortrait emotion={emotion} />,
+  crowd: (emotion) => <CrowdPortrait emotion={emotion} />,
   driver: () => <DriverPortrait />,
   traveler: () => <TravelerPortrait />,
   teacher: () => <TeacherPortrait />,
@@ -111,21 +113,93 @@ function DraftspersonPortrait({ emotion }: { emotion: RidgeEmotion }) {
   );
 }
 
+/** Dule: rocker hair past the collar, moustache, leather jacket, wrist in a sling. */
 function GuitaristPortrait({ emotion }: { emotion: RidgeEmotion }) {
   return (
-    <g fill="none" stroke="#1a1a1a" strokeWidth="3" strokeLinecap="round">
-      <circle cx="40" cy="24" r="10" fill="#fbfbf9" />
-      <path d="M30 20 Q40 12 50 20" fill="#1a1a1a" />
-      <circle cx="36" cy="24" r="1.5" fill="#1a1a1a" />
-      <circle cx="44" cy="24" r="1.5" fill="#1a1a1a" />
-      {emotion === 'playful' ? (
-        <path d="M36 28 Q40 33 44 28" strokeWidth="2" />
+    <g fill="none" stroke="#1a1a1a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M26 30 L22 52 L32 48 Z" fill="#1a1a1a" />
+      <circle cx="40" cy="26" r="11" fill="#fbfbf9" />
+      <path d="M29 24 Q30 12 42 13 Q52 14 51 22 Q44 18 36 22 Q32 26 30 34 Z" fill="#1a1a1a" />
+      {emotion === 'surprised' ? (
+        <>
+          <circle cx="44" cy="25" r="2.6" fill="#fbfbf9" strokeWidth="1.6" />
+          <circle cx="44" cy="25" r="1.1" fill="#1a1a1a" stroke="none" />
+          <circle cx="45" cy="34" r="2" strokeWidth="2" />
+        </>
+      ) : emotion === 'playful' ? (
+        <>
+          <path d="M41 25 L44 22 L47 25" strokeWidth="2" />
+          <path d="M40 34 Q44 38 48 34" strokeWidth="2" />
+        </>
       ) : (
-        <line x1="36" y1="29" x2="44" y2="29" strokeWidth="2" />
+        <>
+          <line x1="41" y1="22" x2="47" y2="23.5" strokeWidth="2" />
+          <circle cx="44" cy="26" r="1.5" fill="#1a1a1a" />
+        </>
       )}
-      <path d="M40 34 V56" />
-      <ellipse cx="48" cy="46" rx="10" ry="14" fill="#fbfbf9" />
-      <line x1="48" y1="32" x2="48" y2="60" />
+      <path d="M38 31 L50 29 L50 32 L39 33 Z" fill="#1a1a1a" strokeWidth="1.5" />
+      <path d="M28 40 L52 40 L50 70 L30 70 Z" fill="#1a1a1a" />
+      <path d="M41 41 L44 50" stroke="#fbfbf9" strokeWidth="1.6" />
+      <path d="M38 41 L35 49" stroke="#fbfbf9" strokeWidth="1.6" />
+      <path d="M52 48 L34 54 L46 62 Z" fill="#fbfbf9" />
+      <path d="M36 54 L34 40" strokeWidth="2" />
+    </g>
+  );
+}
+
+/** The skater kid: cap on backwards, a scowl that is mostly bluff. */
+function KidPortrait({ emotion }: { emotion: RidgeEmotion }) {
+  return (
+    <g fill="none" stroke="#1a1a1a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="40" cy="34" r="10" fill="#fbfbf9" />
+      <path d="M30 32 A10 10 0 0 1 50 32 Z" fill="#1a1a1a" />
+      <line x1="31" y1="31" x2="20" y2="33" strokeWidth="3.5" />
+      {emotion === 'playful' ? (
+        <>
+          <path d="M42 36 L44.5 34 L47 36" strokeWidth="2" />
+          <path d="M41 41 Q44 44 47 41" strokeWidth="2" />
+        </>
+      ) : emotion === 'surprised' ? (
+        <>
+          <circle cx="44.5" cy="36" r="2" fill="#1a1a1a" />
+          <circle cx="45" cy="42" r="1.8" strokeWidth="1.8" />
+        </>
+      ) : (
+        <>
+          <line x1="41" y1="33.5" x2="47" y2="35" strokeWidth="2" />
+          <circle cx="44.5" cy="37" r="1.4" fill="#1a1a1a" />
+          <path d="M41 42 L47 41" strokeWidth="2" />
+        </>
+      )}
+      <path d="M40 44 V64" />
+      <path d="M40 50 L28 58" />
+      <path d="M40 50 L54 56" />
+      <rect x="50" y="44" width="7" height="28" rx="3" fill="#1a1a1a" transform="rotate(-12 53 58)" />
+    </g>
+  );
+}
+
+/** Two of the waiting crowd: the grandma's bun and the uncle's cap. */
+function CrowdPortrait({ emotion }: { emotion: RidgeEmotion }) {
+  const cheering = emotion === 'playful' || emotion === 'surprised';
+  return (
+    <g fill="none" stroke="#1a1a1a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="28" cy="34" r="9" fill="#fbfbf9" />
+      <circle cx="22" cy="24" r="4" fill="#fbfbf9" />
+      <circle cx="31" cy="33" r="1.4" fill="#1a1a1a" />
+      <path d="M29 39 Q31 41 33 39" strokeWidth="2" />
+      <path d="M28 43 V66" />
+      <circle cx="52" cy="28" r="10" fill="#fbfbf9" />
+      <path d="M42 24 H60 V19 H44 Z" fill="#1a1a1a" />
+      <line x1="56" y1="23" x2="66" y2="24" />
+      <circle cx="55" cy="28" r="1.5" fill="#1a1a1a" />
+      {cheering ? <circle cx="56" cy="34" r="2.2" strokeWidth="2" /> : <path d="M52 34 H58" strokeWidth="2" />}
+      <path d="M52 38 V66" />
+      {cheering ? (
+        <path d="M52 44 L64 32" />
+      ) : (
+        <path d="M44 48 L60 48" />
+      )}
     </g>
   );
 }

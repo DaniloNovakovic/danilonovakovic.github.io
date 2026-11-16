@@ -7,11 +7,16 @@ import {
   type RidgeEmotion
 } from '@/game/core/ridge';
 
-/** Per-actor nudge from where the stage puts them, in world units (y < 0 is up). */
+/**
+ * Per-actor nudge from where the stage puts them, in world units (y < 0 is up).
+ * Shared by every mini-game that moves bodies: the standoff and the concert.
+ */
 export interface ActorNudge {
   dx: number;
   dy: number;
   emotion?: RidgeEmotion;
+  /** Strum-arm position for a performer (the concert gig). */
+  strum?: number;
 }
 
 export type DuelActorStaging = Partial<Record<RidgeActorId, ActorNudge>>;

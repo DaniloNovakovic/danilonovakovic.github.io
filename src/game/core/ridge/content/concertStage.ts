@@ -27,7 +27,7 @@ export const CONCERT_LAYOUT = {
   stage: 0.49,
   /** Half-width of the stage platform, in progress. */
   stageHalfWidth: 0.048,
-  crowd: 0.61,
+  crowd: 0.635,
   /** After the show: the band waits by the opened exit. */
   bandGuitarist: 0.8,
   bandCicka: 0.835,
@@ -38,7 +38,7 @@ export const CONCERT_LAYOUT = {
 /** Just past the stage: the crowd's back row. */
 const CONCERT_BLOCKED_PROGRESS = 0.545;
 /** The kid went to start a clap in the crowd. Warms the show up. */
-export const CONCERT_KID_HYPE_FLAG = 'concert_kid_hype';
+const CONCERT_KID_HYPE_FLAG = 'concert_kid_hype';
 const FLAG_MET_GUITARIST = 'met_guitarist';
 const FLAG_MET_KID = 'concert_kid_met';
 const FLAG_CICKA_MET = 'concert_cicka_met';
@@ -120,7 +120,7 @@ const SPOTS = [
     label: 'Concert crowd',
     kind: 'npc' as const,
     progress: CONCERT_LAYOUT.crowd,
-    interactRadius: 0.075,
+    interactRadius: 0.1,
     actorId: 'crowd' as const,
     description: 'A patient-impatient crowd packed across the crossing.'
   },
@@ -129,7 +129,8 @@ const SPOTS = [
     label: 'Dule',
     kind: 'npc' as const,
     progress: CONCERT_LAYOUT.bandGuitarist,
-    interactRadius: 0.045,
+    // Wide on purpose: walking past him toward the exit, he calls you back.
+    interactRadius: 0.12,
     actorId: 'guitarist' as const,
     description: 'Dule waits by the opened exit.'
   },
@@ -199,9 +200,10 @@ function interactPlans(state: RidgeWorldState): ConcertPlan[] {
     const plans = [
       poster,
       plan('stage', 'concert.stage.encore'),
-      plan('band-cicka', 'concert.cicka.band_resting_spot'),
       plan('band-guitarist', hasGuitar ? 'concert.guitarist.farewell' : 'concert.guitarist.guitar_handoff')
     ];
+    // Dule's goodbye comes first; then Cicka can be visited on her amp.
+    if (hasGuitar) plans.push(plan('band-cicka', 'concert.cicka.band_resting_spot'));
     plans.push(
       state.flags.has(CONCERT_KID_HYPE_FLAG) ? plan('band-kid', 'concert.kid.after') : plan('kid', 'concert.kid.after')
     );
@@ -256,18 +258,29 @@ function kidProgress(state: RidgeWorldState): number {
 }
 
 function resolveConcertActors(state: RidgeWorldState): RidgeActorPresence[] {
-  const cleared = state.beat === 'concert_cleared';
-  const playing = state.mode === 'concertGig';
+  // Everyone holds their places through the bow, then the street clears.
+  const bowing = state.mode === 'conversation' && state.conversation?.id === 'concert.gig.show_done';
+  const cleared = state.beat === 'concert_cleared' && !bowing;
+  const playing = state.mode === 'concertGig' || bowing;
   const hasGuitar = state.inventory.includes(RIDGE_GUITAR_ITEM);
   // During a show Dule cheers from the wings and stragglers come back for encores.
   const guitaristProgress = playing ? 0.43 : cleared ? CONCERT_LAYOUT.bandGuitarist : CONCERT_LAYOUT.guitarist;
-  const cickaProgress = cleared && !playing ? CONCERT_LAYOUT.bandCicka : CONCERT_LAYOUT.cicka;
+  // A great show coaxes crowd-shy Cicka out to the edge of the stage.
+  const braveCicka =
+    bowing &&
+    state.flags.has(FLAG_CICKA_MET) &&
+    (state.flags.has(concertGradeFlag('legendary')) || state.flags.has(concertGradeFlag('great')));
+  const cickaProgress = braveCicka
+    ? CONCERT_LAYOUT.stage - CONCERT_LAYOUT.stageHalfWidth
+    : cleared && !playing
+      ? CONCERT_LAYOUT.bandCicka
+      : CONCERT_LAYOUT.cicka;
 
   return [
     {
       id: 'player',
       label: 'You',
-      progress: playing ? CONCERT_LAYOUT.stage : state.progress,
+      progress: playing ? CONCERT_LAYOUT.stage : talkingSpot(state, guitaristProgress),
       visible: true,
       facing: playing ? 'right' : state.facing,
       ...(playing ? { prop: 'guitar-playing' as const } : hasGuitar ? { prop: 'guitar-back' as const } : {})
@@ -284,14 +297,18 @@ function resolveConcertActors(state: RidgeWorldState): RidgeActorPresence[] {
       label: 'Skater Kid',
       progress: playing && state.flags.has(CONCERT_KID_HYPE_FLAG) ? 0.565 : kidProgress(state),
       visible: true,
-      facing: playing || (cleared && state.flags.has(CONCERT_KID_HYPE_FLAG)) ? 'left' : 'right'
+      facing: playing || (cleared && state.flags.has(CONCERT_KID_HYPE_FLAG)) ? 'left' : 'right',
+      // Sulking on the curb, until he has a reason to get up.
+      seated: !state.flags.has(CONCERT_KID_HYPE_FLAG) && !playing
     },
     {
       id: 'guitarist',
       label: 'Dule',
       progress: guitaristProgress,
       visible: true,
-      facing: playing ? 'right' : cleared ? 'left' : 'right'
+      facing: playing ? 'right' : cleared ? 'left' : 'right',
+      // On his amp backstage; on his feet for the show and the goodbye.
+      seated: !playing && !cleared
     },
     {
       id: 'cicka',
@@ -301,6 +318,21 @@ function resolveConcertActors(state: RidgeWorldState): RidgeActorPresence[] {
       facing: cleared && !playing ? 'left' : 'right'
     }
   ];
+}
+
+/** Gap kept between the player and whoever they talk to, so bodies never stack. */
+const TALK_GAP = 0.04;
+
+/** While talking with Dule or the kid, stand beside them rather than inside them. */
+function talkingSpot(state: RidgeWorldState, duleProgress: number): number {
+  const id = state.mode === 'conversation' ? state.conversation?.id ?? '' : '';
+  const partner = id.startsWith('concert.guitarist')
+    ? duleProgress
+    : id.startsWith('concert.kid')
+      ? kidProgress(state)
+      : null;
+  if (partner === null || Math.abs(state.progress - partner) >= TALK_GAP) return state.progress;
+  return partner + (state.progress >= partner ? TALK_GAP : -TALK_GAP);
 }
 
 function resolveConcertConversation(

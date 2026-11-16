@@ -8,6 +8,7 @@
 - Generic hooks under `hooks/`.
 - Shared authored content under `content/`.
 - Shared config under `config/`.
+- Pure audio DSP under `audio/` (e.g. Karplus-Strong plucks), used by Hobbies music and the Ridge concert.
 
 ## Depends on
 

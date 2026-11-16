@@ -2,7 +2,7 @@
 // fallow-ignore-file complexity
 import type { BridgeWorkbench } from './bridgeBuilder';
 import type { CickaDuel } from './cickaDuel';
-import type { ConcertGig } from './concertGig';
+import { GIG_START_HYPE, type ConcertGig } from './concertGig';
 import type {
   RidgeObservation,
   RidgeStageDefinition,
@@ -176,7 +176,8 @@ function observeGig(gig: ConcertGig): NonNullable<RidgeObservation['concertGig']
     practice:
       gig.mode === 'practice'
         ? { loop: gig.loop, loopsTotal: gig.loopsTotal, hits: gig.loopHits, needed: gig.loopNeeded, passed: gig.passed }
-        : null
+        : null,
+    warmStart: gig.startHype > GIG_START_HYPE
   };
 }
 

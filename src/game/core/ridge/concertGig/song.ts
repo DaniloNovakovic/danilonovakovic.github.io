@@ -8,7 +8,6 @@
  */
 
 export type GigLane = 0 | 1 | 2;
-export const GIG_LANES: readonly GigLane[] = [0, 1, 2];
 
 export type GigChord = 'Am' | 'F' | 'C' | 'G' | 'Dm';
 

@@ -56,10 +56,23 @@ describe('ConcertGig show', () => {
     const good = gig.strum(first.lane, first.timeMs + 100);
     expect(good.kind === 'hit' && good.hit.judgment).toBe('good');
     const next = gig.nextPendingNote()!;
-    // Wrong lane, nothing there: free, and the combo survives.
+    // Wrong lane, nothing there: the crowd doesn't mind, but the combo breaks.
     const wrongLane = ((next.lane + 1) % 3) as 0 | 1 | 2;
+    const hype = gig.hype;
     expect(gig.strum(wrongLane, next.timeMs).kind).toBe('stray');
-    expect(gig.combo).toBe(1);
+    expect(gig.combo).toBe(0);
+    expect(gig.hype).toBe(hype);
+  });
+
+  it('never rewards mashing every lane over playing the notes', () => {
+    const gig = new ConcertGig({ mode: 'show' });
+    for (let t = 0; t < gig.song.endMs; t += 40) {
+      for (const lane of [0, 1, 2] as const) gig.strum(lane, t);
+    }
+    gig.advance(gig.song.endMs + 1);
+    expect(gig.counts.miss).toBe(0);
+    expect(gig.grade).toBe('rough');
+    expect(gig.bestCombo).toBeLessThan(5);
   });
 
   it('marks notes missed once their window closes and drains hype', () => {

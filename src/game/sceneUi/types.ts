@@ -9,7 +9,8 @@ export type SceneUiSurfaceId =
   | 'potassiumTerminal'
   | 'ridgeConversation'
   | 'ridgeBridgeBuilder'
-  | 'ridgeCickaDuel';
+  | 'ridgeCickaDuel'
+  | 'ridgeConcertGig';
 
 export type SceneUiActionId =
   | 'start'
@@ -25,7 +26,8 @@ export type SceneUiActionId =
   | 'ridgeConversationLeave'
   | 'ridgeBridgeTool'
   | 'ridgeBridgeCommand'
-  | 'ridgeDuelDodge';
+  | 'ridgeDuelDodge'
+  | 'ridgeGigStrum';
 
 export interface SceneUiSurfaceRequest {
   ownerSceneId: SceneId;

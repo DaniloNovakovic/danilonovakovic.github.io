@@ -173,6 +173,8 @@ export interface RidgeActorPresence {
   facing: RidgeFacing;
   /** What the actor is holding: slung on the back, or being played. */
   prop?: 'guitar-back' | 'guitar-playing';
+  /** Sitting (on an amp, a curb) rather than standing. */
+  seated?: boolean;
 }
 
 export interface RidgeStageDefinition {
@@ -287,6 +289,8 @@ export interface RidgeObservation {
     next: null | { lane: GigLane; inMs: number };
     grade: GigGrade;
     practice: null | { loop: number; loopsTotal: number; hits: number; needed: number; passed: boolean };
+    /** The crowd started warmer than usual (someone got them clapping). */
+    warmStart: boolean;
   };
   builtBridge: BridgeDesign | null;
   canMove: boolean;

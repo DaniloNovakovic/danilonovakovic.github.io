@@ -84,10 +84,12 @@ Bridge
   -> Bridge-to-Concert handoff
 
 Concert
-  -> crowd / traffic crossing blocker + night facades
-  -> musician-side nook (hidden Cicka + Injured Guitarist)
-  -> forgiving practice riff
-  -> auto-success concert (crowd clears, guitar received)
+  -> night block: kafana + Skater Kid, gig poster, crowd on the crossing
+  -> backstage nook (Dule on his amp, Cicka behind the amps); topic menus
+  -> optional: talk the kid into being the hype man (warmer crowd)
+  -> Concert Gig practice riff (three-lane rhythm, passes after 3 tries anyway)
+  -> Concert Gig show (never fails; grade colours the reactions; encore later)
+  -> crowd clears; Dule's goodbye at the corner hands over the guitar
   -> Dance transition exit
 
 Dance Festival
@@ -129,6 +131,8 @@ Useful commands:
 | `build road\|wood X,Y X,Y` | Blueprint Bridge: draw a beam (bolts 0,0 8,0 0,2 8,2) |
 | `build test` / `edit` / `done` | Run the toy car, return to drawing, accept a held bridge |
 | `build sketch` / `hint` / `undo` / `erase n` / `show` | Workbench helpers |
+| `duel dodge` / `duel wait [n]` / `duel done` | Cicka's Standoff |
+| `gig hit [0\|1\|2]` / `gig wait [ms]` / `gig auto` / `gig skip` / `gig done` | Concert Gig (practice or show) |
 | `skip` / `next` | Playtest: jump to next area start |
 | `warp bridge\|concert\|dance\|relay` | Playtest: warp to an area |
 | `help` | Command list |

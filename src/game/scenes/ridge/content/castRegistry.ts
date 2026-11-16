@@ -9,6 +9,8 @@ export type RidgePortraitId =
   | 'cicka'
   | 'draftsperson'
   | 'guitarist'
+  | 'kid'
+  | 'crowd'
   | 'driver'
   | 'traveler'
   | 'teacher'
@@ -34,7 +36,10 @@ const SPEAKER_CAST: Readonly<Record<string, CastSpeakerEntry>> = {
   draftsperson: { actorId: 'draftsperson', portrait: 'draftsperson' },
   injuredGuitarist: { actorId: 'guitarist', portrait: 'guitarist' },
   guitarist: { actorId: 'guitarist', portrait: 'guitarist' },
-  crowd: { actorId: 'crowd', portrait: 'player' },
+  kid: { actorId: 'kid', portrait: 'kid' },
+  crowd: { actorId: 'crowd', portrait: 'crowd' },
+  crowdUncle: { actorId: 'crowd', portrait: 'crowd' },
+  crowdGrandma: { actorId: 'crowd', portrait: 'crowd' },
   danceDriver: { actorId: 'driver', portrait: 'driver' },
   hillShuttleDriver: { actorId: 'driver', portrait: 'driver' },
   driver: { actorId: 'driver', portrait: 'driver' },

@@ -4,8 +4,10 @@
  * the console) and feeds it in through `advance` and `strum`, so the console
  * verdict and the played show always agree.
  *
- * Forgiving by design: a stray strum costs nothing, the show never fails, and
- * practice passes on its own after enough honest tries.
+ * Forgiving by design: the show never fails, a stray strum never drains the
+ * crowd, and practice passes on its own after enough honest tries. Strays do
+ * break the combo and count a little against accuracy, so mashing every lane
+ * is never the best way to play.
  */
 import {
   compileGigSong,
@@ -18,15 +20,18 @@ import {
 } from './song';
 
 /** Within this many ms of the note: a perfect strum. */
-export const GIG_PERFECT_MS = 55;
+const GIG_PERFECT_MS = 55;
 /** Within this many ms: still counts. Past it the note is missed. */
 export const GIG_GOOD_MS = 135;
 /** Share of a practice pass that must land to move on. */
 const PRACTICE_PASS_SHARE = 0.7;
-const START_HYPE = 0.5;
+export const GIG_START_HYPE = 0.5;
+const START_HYPE = GIG_START_HYPE;
 const HYPE_GAIN = { perfect: 0.035, good: 0.02 } as const;
 const HYPE_LOSS = 0.06;
 const POINTS = { perfect: 100, good: 60 } as const;
+/** How much a stray strum weighs against accuracy, relative to a note. */
+const STRAY_WEIGHT = 0.5;
 /** Combo steps that raise the score multiplier, up to MAX_MULTIPLIER. */
 const MULTIPLIER_STEP = 10;
 const MAX_MULTIPLIER = 4;
@@ -69,6 +74,8 @@ export interface GigOptions {
 export class ConcertGig {
   readonly mode: GigMode;
   readonly song: GigSong;
+  /** Crowd warmth at the first note (above the default when someone warmed them up). */
+  readonly startHype: number;
   private time = Number.NEGATIVE_INFINITY;
   private readonly judgments: (GigJudgment | null)[];
   /** First note whose miss deadline has not passed yet. */
@@ -79,6 +86,7 @@ export class ConcertGig {
   private points = 0;
   private serial = 0;
   private readonly tally = { perfect: 0, good: 0, miss: 0 };
+  private strays = 0;
   private last: GigHit | null = null;
   private finishedAt: number | null = null;
   private practicePassed = false;
@@ -90,7 +98,8 @@ export class ConcertGig {
     this.song =
       options.song ?? compileGigSong(options.mode === 'practice' ? PRACTICE_RIFF_SPEC : CROSSING_SHOW_SPEC);
     this.judgments = this.song.notes.map(() => null);
-    this.hypeLevel = clamp01(options.startHype ?? START_HYPE);
+    this.startHype = clamp01(options.startHype ?? START_HYPE);
+    this.hypeLevel = this.startHype;
   }
 
   get timeMs(): number {
@@ -130,11 +139,11 @@ export class ConcertGig {
     return this.last;
   }
 
-  /** Notes judged so far over notes in the chart (all of them, for the show). */
+  /** Landed notes over judged notes, with strays weighing against it. */
   get accuracy(): number {
     const judged = this.tally.perfect + this.tally.good + this.tally.miss;
     if (judged === 0) return 0;
-    return (this.tally.perfect + this.tally.good * 0.6) / judged;
+    return (this.tally.perfect + this.tally.good * 0.6) / (judged + this.strays * STRAY_WEIGHT);
   }
 
   get grade(): GigGrade {
@@ -209,7 +218,11 @@ export class ConcertGig {
     if (this.finishedAt !== null) return { kind: 'ignored' };
 
     const note = this.closestOpenNote(lane, atMs);
-    if (!note) return { kind: 'stray', lane };
+    if (!note) {
+      this.strays += 1;
+      this.comboCount = 0;
+      return { kind: 'stray', lane };
+    }
     const offset = atMs - note.timeMs;
     const hit = this.judge(note, Math.abs(offset) <= GIG_PERFECT_MS ? 'perfect' : 'good', offset);
     return { kind: 'hit', hit, chord: note.chord };

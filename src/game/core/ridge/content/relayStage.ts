@@ -115,7 +115,11 @@ function resolveRelayActors(state: RidgeWorldState): RidgeActorPresence[] {
       label: 'You',
       progress: farewell ? 0.58 : state.progress,
       visible: true,
-      facing: state.facing
+      facing: state.facing,
+      // Dule's guitar: carried up the hill, played at the farewell.
+      ...(state.inventory.includes(RIDGE_GUITAR_ITEM)
+        ? { prop: state.beat === 'relay_farewell' ? ('guitar-playing' as const) : ('guitar-back' as const) }
+        : {})
     },
     {
       id: 'cicka',
@@ -123,13 +127,6 @@ function resolveRelayActors(state: RidgeWorldState): RidgeActorPresence[] {
       progress: cickaGone ? 0.85 : 0.55,
       visible: !cickaGone,
       facing: 'left'
-    },
-    {
-      id: 'guitar',
-      label: 'Guitar',
-      progress: farewell ? 0.58 : state.progress,
-      visible: state.inventory.includes(RIDGE_GUITAR_ITEM),
-      facing: 'right'
     }
   ];
 }

@@ -1,7 +1,7 @@
 import { useCallback, useRef } from 'react';
 import { useHobbyAudio } from '../shared/useHobbyAudio';
 import { lowestSoundingIndex } from './grips';
-import { renderPluckedString } from './karplusStrong';
+import { renderPluckedString } from '@/shared/audio/karplusStrong';
 
 /** Guitar string number, 1 = high E (top) ... 6 = low E (bottom). */
 export type StringNumber = 1 | 2 | 3 | 4 | 5 | 6;

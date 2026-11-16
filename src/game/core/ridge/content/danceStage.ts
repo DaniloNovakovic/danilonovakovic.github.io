@@ -8,6 +8,7 @@ import type {
   RidgeStageDefinition,
   RidgeWorldState
 } from '../types';
+import { RIDGE_GUITAR_ITEM } from '../types';
 import { collectNearbyFromPlans, makeCatalogLine } from './dialogueHelpers';
 
 const DANCE_BLOCKED_PROGRESS = 0.68;
@@ -223,7 +224,8 @@ function resolveDanceActors(state: RidgeWorldState): RidgeActorPresence[] {
       label: 'You',
       progress: state.progress,
       visible: true,
-      facing: state.facing
+      facing: state.facing,
+      ...(state.inventory.includes(RIDGE_GUITAR_ITEM) ? { prop: 'guitar-back' as const } : {})
     },
     {
       id: 'traveler',
