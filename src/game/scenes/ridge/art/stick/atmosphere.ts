@@ -1,5 +1,5 @@
 import type * as Phaser from 'phaser';
-import { GROUND_Y, INK, PAPER, PAPER_WARM, STAGE_HEIGHT, WASH } from './palette';
+import { GROUND_Y, INK, inkTone, PAPER, PAPER_WARM, STAGE_HEIGHT, WASH } from './palette';
 
 /** Stable scatter so baked scenery looks hand-placed but never re-rolls. */
 export function jitter(seed: number): number {
@@ -285,13 +285,14 @@ export function drawCornStalk(
   alpha = 0.75
 ): void {
   const top = groundY - height;
-  g.lineStyle(2.4, INK, alpha);
+  // Opaque tones so leaves crossing the stalk or each other never darken.
+  g.lineStyle(2.4, inkTone(alpha), 1);
   g.lineBetween(x, groundY, x + sway, top);
-  g.lineStyle(1.6, INK, alpha * 0.8);
+  g.lineStyle(1.6, inkTone(alpha * 0.8), 1);
   g.lineBetween(x + sway, top, x + sway + 5, top - 11);
   g.lineBetween(x + sway, top, x + sway - 3, top - 9);
 
-  g.fillStyle(INK, alpha * 0.85);
+  g.fillStyle(inkTone(alpha * 0.85), 1);
   for (let i = 0; i < 4; i += 1) {
     const at = groundY - height * (0.3 + i * 0.19);
     strokeLeaf(g, x + sway * 0.5, at, (i % 2 === 0 ? 1 : -1) * (26 + i * 7), 16 + i * 4);
@@ -371,9 +372,10 @@ export function drawSunOrMoon(
   mode: 'sun' | 'moon' | 'sunset'
 ): void {
   if (mode === 'sunset') {
-    g.lineStyle(2, INK, 0.22);
-    for (let i = 0; i < 5; i += 1) {
-      g.strokeCircle(x, y, radius + i * 26);
+    // Three tight halos: five wide rings swallowed half the sky.
+    g.lineStyle(2, INK, 0.2);
+    for (let i = 1; i <= 3; i += 1) {
+      g.strokeCircle(x, y, radius + i * 14);
     }
     g.fillStyle(INK, 0.08);
     g.fillCircle(x, y, radius);

@@ -13,6 +13,14 @@ export interface FocusPrompt {
   y: number;
 }
 
+export interface FrameBounds {
+  left: number;
+  right: number;
+}
+
+/** Gap kept between a bubble and the frame edge, in world units. */
+const FRAME_MARGIN = 8;
+
 export interface ActiveBark {
   id: string;
   text: string;
@@ -52,7 +60,8 @@ export class PresenceLayer {
     this.focus.place(prompt.x, prompt.y + bob);
   }
 
-  syncBarks(active: readonly ActiveBark[]): void {
+  /** `frame` is the camera's world view; bubbles are kept inside it. */
+  syncBarks(active: readonly ActiveBark[], frame: FrameBounds | null = null): void {
     this.seenIds.clear();
 
     for (const bark of active) {
@@ -63,7 +72,7 @@ export class PresenceLayer {
         this.barks.set(bark.id, bubble);
       }
       bubble.setText(bark.text);
-      bubble.place(bark.x, bark.y, bark.alpha);
+      bubble.place(bark.x, bark.y, bark.alpha, frame);
     }
 
     for (const [id, bubble] of this.barks) {
@@ -204,6 +213,10 @@ class SpeechBubble {
   private readonly chrome: Phaser.GameObjects.Graphics;
   private readonly label: Phaser.GameObjects.Text;
   private textKey = '';
+  private width = 0;
+  private height = 0;
+  /** Where the tail meets the speaker, relative to the bubble's centre. */
+  private tailX = Number.NaN;
 
   constructor(scene: Phaser.Scene) {
     this.chrome = scene.add.graphics();
@@ -222,28 +235,50 @@ class SpeechBubble {
     if (text === this.textKey) return;
     this.textKey = text;
     this.label.setText(text);
-
-    const width = this.label.width + 22;
-    const height = Math.ceil(this.label.height) + 12;
-    const top = -height;
-
-    this.chrome.clear();
-    this.chrome.fillStyle(PAPER, 0.96);
-    this.chrome.fillRect(-width / 2, top, width, height);
-    this.chrome.lineStyle(2.2, INK, 0.85);
-    this.chrome.strokeRect(-width / 2, top, width, height);
-    this.chrome.fillStyle(PAPER, 1);
-    this.chrome.fillTriangle(-9, top + height - 2, 5, top + height - 2, -4, top + height + 10);
-    this.chrome.lineStyle(2.2, INK, 0.85);
-    this.chrome.lineBetween(-9, top + height - 1, -4, top + height + 10);
-    this.chrome.lineBetween(-4, top + height + 10, 5, top + height - 1);
-
+    this.width = this.label.width + 22;
+    this.height = Math.ceil(this.label.height) + 12;
+    this.tailX = Number.NaN;
     this.label.setY(-8);
   }
 
-  place(x: number, y: number, alpha: number): void {
+  /**
+   * Paper slip with a hard offset shadow and a tail aimed at the speaker.
+   * Redrawn only when the tail has to move, which is only near frame edges.
+   */
+  private drawChrome(tailX: number): void {
+    if (tailX === this.tailX) return;
+    this.tailX = tailX;
+    const { width, height } = this;
+    const top = -height;
+    const bottom = top + height;
+    const tail = Math.max(-width / 2 + 14, Math.min(width / 2 - 14, tailX));
+
+    this.chrome.clear();
+    this.chrome.fillStyle(INK, 0.85);
+    this.chrome.fillRect(-width / 2 + 3, top + 3, width, height);
+    this.chrome.fillStyle(PAPER, 1);
+    this.chrome.fillRect(-width / 2, top, width, height);
+    this.chrome.lineStyle(2.2, INK, 0.9);
+    this.chrome.strokeRect(-width / 2, top, width, height);
+    this.chrome.fillStyle(PAPER, 1);
+    this.chrome.fillTriangle(tail - 7, bottom - 2, tail + 7, bottom - 2, tailX, bottom + 10);
+    this.chrome.lineStyle(2.2, INK, 0.9);
+    this.chrome.lineBetween(tail - 7, bottom - 1, tailX, bottom + 10);
+    this.chrome.lineBetween(tailX, bottom + 10, tail + 7, bottom - 1);
+  }
+
+  place(x: number, y: number, alpha: number, frame: FrameBounds | null): void {
+    let centerX = x;
+    if (frame) {
+      const half = this.width / 2 + FRAME_MARGIN;
+      const min = frame.left + half;
+      const max = frame.right - half;
+      if (min <= max) centerX = Math.max(min, Math.min(max, x));
+    }
+    centerX = Math.round(centerX);
+    this.drawChrome(Math.round(x) - centerX);
     this.container
-      .setPosition(Math.round(x), Math.round(y))
+      .setPosition(centerX, Math.round(y))
       .setAlpha(alpha)
       .setVisible(alpha > 0.02);
   }

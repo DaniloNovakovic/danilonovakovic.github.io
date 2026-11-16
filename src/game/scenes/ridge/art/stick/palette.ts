@@ -3,6 +3,23 @@ export const PAPER_WARM = 0xf4f1ea;
 export const INK = 0x1a1a1a;
 export const WASH = 0x2a241c;
 
+/**
+ * Opaque grey: {@link INK} laid over {@link PAPER} at `amount` (0..1).
+ *
+ * Translucent ink stacks wherever marks overlap, so a field of leaves turns
+ * into blotchy darker patches. An opaque tone keeps a mass one flat value,
+ * which is how a printed sketchbook grey actually behaves.
+ */
+export function inkTone(amount: number): number {
+  const t = Math.min(1, Math.max(0, amount));
+  const mix = (shift: number) => {
+    const paper = (PAPER >> shift) & 0xff;
+    const ink = (INK >> shift) & 0xff;
+    return Math.round(paper + (ink - paper) * t);
+  };
+  return (mix(16) << 16) | (mix(8) << 8) | mix(0);
+}
+
 /** CSS twins of {@link PAPER} / {@link INK} for Phaser Text styles. */
 export const PAPER_CSS = '#fbfbf9';
 export const INK_CSS = '#1a1a1a';
