@@ -8,6 +8,7 @@ import {
 import {
   BRIDGE_SIM_DT,
   CICKA_DUEL_DT,
+  cickaStandoffFlags,
   createRidgeRouteStages,
   RidgeConsoleSession,
   RIDGE_GUITAR_ITEM,
@@ -123,6 +124,7 @@ export class RidgeScene extends Phaser.Scene {
       beat: route.beat,
       progress: 0.05,
       inventory: hasGuitar ? [RIDGE_GUITAR_ITEM] : [],
+      flags: areaId === 'bridge' ? cickaStandoffFlags(route.cickaStandoff) : [],
       builtBridge:
         areaId === 'bridge' && route.beat === 'bridge_complete' ? (route.bridgeDesign ?? null) : null
     });
@@ -350,6 +352,12 @@ export class RidgeScene extends Phaser.Scene {
     if (event.type === 'area_handoff') {
       const areaId = event.areaId as RidgeAreaId;
       bridgeActions.setRidgeAreaHandoff(areaId, RIDGE_INITIAL_BEAT[areaId] as RidgeRouteBeatState);
+      return;
+    }
+    if (event.type === 'cicka_duel_closed') {
+      // A win sticks: a later loss never demotes Cicka's respect.
+      const previous = bridgeStore.getState().progress.ridge.firstPlayableRoute.cickaStandoff;
+      bridgeActions.setRidgeCickaStandoff(event.won || previous === 'won' ? 'won' : 'lost');
       return;
     }
     if (event.type === 'bridge_built') {

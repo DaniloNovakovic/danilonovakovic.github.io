@@ -25,6 +25,13 @@ export const CICKA_RESPECT_FLAG = 'bridge_cicka_respect';
 /** Set after losing a standoff, so Cicka offers a rematch. */
 export const CICKA_DUEL_LOST_FLAG = 'bridge_cicka_duel_lost';
 
+/** Session flags that restore a remembered standoff outcome on re-entry. */
+export function cickaStandoffFlags(outcome: 'won' | 'lost' | null | undefined): string[] {
+  if (outcome === 'won') return [CICKA_RESPECT_FLAG];
+  if (outcome === 'lost') return [CICKA_DUEL_LOST_FLAG];
+  return [];
+}
+
 /**
  * `swipe` a quick paw, `pounce` a long butt-wiggle then a leap, `feint` a
  * wind-up that stops short. Dodging a feint spends your dodge, and the real

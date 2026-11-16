@@ -304,6 +304,20 @@ describe('bridgeStore', () => {
       });
     });
 
+    it('remembers the Cicka standoff outcome until the route resets', () => {
+      bridgeActions.setRidgeCickaStandoff('lost');
+      expect(bridgeStore.getState().progress.ridge.firstPlayableRoute.cickaStandoff).toBe('lost');
+      bridgeActions.setRidgeRouteBeat('needs_toy_car');
+      bridgeActions.setRidgeCickaStandoff('won');
+      expect(bridgeStore.getState().progress.ridge.firstPlayableRoute).toEqual({
+        activeAreaId: 'bridge',
+        beat: 'needs_toy_car',
+        cickaStandoff: 'won'
+      });
+      bridgeActions.resetRidgeFirstPlayableRoute();
+      expect(bridgeStore.getState().progress.ridge.firstPlayableRoute.cickaStandoff).toBeUndefined();
+    });
+
     it('keeps Potassium Circuit ownership derived from inventory', () => {
       bridgeActions.awardRidgeStamp('stampede-sketch');
       expect(isItemOwned('circuit')).toBe(false);

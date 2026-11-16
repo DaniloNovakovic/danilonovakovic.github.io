@@ -84,7 +84,11 @@ export type RidgeFirstPlayableRouteState = {
   beat: RidgeRouteBeatState;
   /** The span the player drew and proved at the Bridge, drawn as the crossing. */
   bridgeDesign?: readonly RidgeBridgeBeamState[] | null;
+  /** How the last Cicka's Standoff ended, so she remembers across Ridge entries. */
+  cickaStandoff?: RidgeCickaStandoffOutcome | null;
 };
+
+export type RidgeCickaStandoffOutcome = 'won' | 'lost';
 
 export interface BridgeRidgeProgressState {
   stampIds: RidgeStampId[];
@@ -337,7 +341,8 @@ function isRidgeRouteUnchanged(
   return (
     previous.activeAreaId === candidate.activeAreaId &&
     previous.beat === candidate.beat &&
-    previous.bridgeDesign === candidate.bridgeDesign
+    previous.bridgeDesign === candidate.bridgeDesign &&
+    previous.cickaStandoff === candidate.cickaStandoff
   );
 }
 
@@ -588,6 +593,21 @@ export const bridgeActions = {
           firstPlayableRoute: {
             ...current.progress.ridge.firstPlayableRoute,
             bridgeDesign: design
+          }
+        }
+      }
+    }));
+  },
+  setRidgeCickaStandoff(outcome: RidgeCickaStandoffOutcome | null): void {
+    setState((current) => ({
+      ...current,
+      progress: {
+        ...current.progress,
+        ridge: {
+          ...current.progress.ridge,
+          firstPlayableRoute: {
+            ...current.progress.ridge.firstPlayableRoute,
+            cickaStandoff: outcome
           }
         }
       }

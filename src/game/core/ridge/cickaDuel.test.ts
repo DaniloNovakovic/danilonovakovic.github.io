@@ -3,7 +3,10 @@ import {
   buildCickaAttacks,
   CICKA_DODGE_ACTIVE,
   CICKA_DUEL_HEARTS,
-  CickaDuel
+  CICKA_DUEL_LOST_FLAG,
+  CICKA_RESPECT_FLAG,
+  CickaDuel,
+  cickaStandoffFlags
 } from './cickaDuel';
 
 /** Dodge `lead` frames before every real landing; wait out feints. */
@@ -120,5 +123,12 @@ describe("Cicka's Standoff", () => {
       }
     }
     expect(wins / tries).toBeLessThan(0.01);
+  });
+
+  it('restores the remembered outcome as session flags', () => {
+    expect(cickaStandoffFlags('won')).toEqual([CICKA_RESPECT_FLAG]);
+    expect(cickaStandoffFlags('lost')).toEqual([CICKA_DUEL_LOST_FLAG]);
+    expect(cickaStandoffFlags(null)).toEqual([]);
+    expect(cickaStandoffFlags(undefined)).toEqual([]);
   });
 });
