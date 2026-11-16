@@ -43,30 +43,29 @@ export function drawStickPlayer(
   scale = 1,
   pose: StickPose = STILL
 ): void {
-  const s = 18 * scale;
+  // Same unit as the base person, so the pack lands on the body's anatomy.
+  const s = 16 * scale;
   const dir = facing === 'left' ? -1 : 1;
   const lift = bodyLiftOf(pose, s);
+  const top = y + lift;
 
   drawContactShadow(g, x, y, 34 * scale, 0.18);
-  drawBasePerson(g, x, y + lift, facing, scale, pose, {
+  // Pack first: it hangs behind the spine, so torso and arms ink over it.
+  drawTravelPack(g, x, top, dir, s);
+  drawBasePerson(g, x, top, facing, scale, pose, {
     hair: 'messy',
     scarf: true,
     eyes: 'determined'
   });
 
-  const top = y + lift;
-
-  // Signature travel pack, worn on the trailing shoulder; the strap ties it
-  // to the body so it reads as worn rather than as a box floating beside it.
-  g.lineStyle(DETAIL + 0.6, INK, 1);
-  g.lineBetween(x, top - s * 1.08, x - dir * s * 0.32, top - s * 1.14);
-  g.lineStyle(CONTOUR - 0.6, INK, 1);
-  g.fillStyle(PAPER_WARM, 1);
-  g.fillRect(x - dir * s * 0.62, top - s * 1.12, s * 0.4, s * 0.58);
-  g.strokeRect(x - dir * s * 0.62, top - s * 1.12, s * 0.4, s * 0.58);
-  g.lineStyle(DETAIL, INK, 0.6);
-  g.lineBetween(x - dir * s * 0.62, top - s * 0.96, x - dir * s * 0.22, top - s * 0.96);
-  g.strokeCircle(x - dir * s * 0.42, top - s * 0.76, s * 0.06);
+  // Shoulder strap over the near shoulder onto the chest: the mark that says
+  // "worn" rather than "held".
+  g.lineStyle(DETAIL + 0.8, INK, 1);
+  g.beginPath();
+  g.moveTo(x - dir * s * 0.1, top - s * 1.12);
+  g.lineTo(x + dir * s * 0.06, top - s * 1.04);
+  g.lineTo(x + dir * s * 0.14, top - s * 0.66);
+  g.strokePath();
 
   // Scarf tail, trailing further when walking.
   const tail = pose.walking ? 0.85 : 0.62;
@@ -76,6 +75,55 @@ export function drawStickPlayer(
   g.lineTo(x - dir * s * 0.42, top - s * 1.14);
   g.lineTo(x - dir * s * tail, top - s * (pose.walking ? 1.12 : 0.95));
   g.strokePath();
+}
+
+/**
+ * Rucksack hugging the back from shoulder to small of the back, with a rolled
+ * bedroll strapped on top: a traveller at thumbnail size, and nothing a viewer
+ * could mistake for a camera or a radio.
+ */
+function drawTravelPack(
+  g: Phaser.GameObjects.Graphics,
+  x: number,
+  top: number,
+  dir: number,
+  s: number
+): void {
+  const near = -0.06;
+  const far = -0.54;
+  const packTop = top - s * 1.16;
+  const packH = s * 0.74;
+  const left = spanLeft(x, dir, far, near, s);
+  const w = s * (near - far);
+
+  g.lineStyle(CONTOUR - 0.6, INK, 1);
+  g.fillStyle(PAPER_WARM, 1);
+  g.fillRoundedRect(left, packTop, w, packH, s * 0.12);
+  g.strokeRoundedRect(left, packTop, w, packH, s * 0.12);
+
+  // Flap and buckle.
+  g.lineStyle(DETAIL, INK, 0.75);
+  g.lineBetween(left + 2, packTop + packH * 0.3, left + w - 2, packTop + packH * 0.3);
+  const buckle = x + dir * s * (far + (near - far) * 0.45);
+  g.lineBetween(buckle, packTop + packH * 0.3, buckle, packTop + packH * 0.48);
+
+  // Bedroll across the top.
+  const rollH = s * 0.2;
+  const rollLeft = spanLeft(x, dir, far - 0.06, near + 0.02, s);
+  g.lineStyle(CONTOUR - 0.8, INK, 1);
+  g.fillStyle(PAPER, 1);
+  g.fillRoundedRect(rollLeft, packTop - rollH + 1, s * (near - far + 0.08), rollH, rollH / 2);
+  g.strokeRoundedRect(rollLeft, packTop - rollH + 1, s * (near - far + 0.08), rollH, rollH / 2);
+}
+
+/**
+ * Left edge of a box spanning `[from, to]` body units along the facing
+ * direction (negative = behind). Mirroring only the start point and keeping a
+ * positive width throws the box off the far side of the figure when it faces
+ * left, which is how the pack came to float away from the body.
+ */
+function spanLeft(x: number, dir: number, from: number, to: number, s: number): number {
+  return x + Math.min(dir * from, dir * to) * s;
 }
 
 export function drawStickCicka(
@@ -154,8 +202,9 @@ export function drawStickDraftsperson(
   // Blueprint roll tucked under the arm.
   g.lineStyle(CONTOUR - 0.7, INK, 1);
   g.fillStyle(PAPER, 1);
-  g.fillRect(x + dir * s * 0.42, y - s * 1.06, s * 0.92, s * 0.56);
-  g.strokeRect(x + dir * s * 0.42, y - s * 1.06, s * 0.92, s * 0.56);
+  const sheet = spanLeft(x, dir, 0.42, 1.34, s);
+  g.fillRect(sheet, y - s * 1.06, s * 0.92, s * 0.56);
+  g.strokeRect(sheet, y - s * 1.06, s * 0.92, s * 0.56);
   g.lineStyle(DETAIL, INK, 0.45);
   g.lineBetween(x + dir * s * 0.5, y - s * 0.86, x + dir * s * 1.2, y - s * 0.86);
   g.lineBetween(x + dir * s * 0.5, y - s * 0.72, x + dir * s * 1.05, y - s * 0.72);
@@ -525,7 +574,7 @@ export function drawStickGuitarist(
 
   g.lineStyle(CONTOUR - 0.8, INK, 1);
   g.lineBetween(x + dir * s * 0.56, y - s * 0.96, x + dir * s * 0.56, y - s * 1.52);
-  g.strokeRect(x + dir * s * 0.46, y - s * 1.7, s * 0.2, s * 0.18);
+  g.strokeRect(spanLeft(x, dir, 0.46, 0.66, s), y - s * 1.7, s * 0.2, s * 0.18);
 
   g.lineStyle(DETAIL, INK, 0.6);
   g.lineBetween(x - dir * s * 0.3, y - s * 1.16, x + dir * s * 0.62, y - s * 0.36);
@@ -590,8 +639,9 @@ export function drawStickTraveler(
   });
   g.lineStyle(CONTOUR - 0.7, INK, 1);
   g.fillStyle(PAPER_WARM, 1);
-  g.fillRect(x - dir * s * 0.58, y - s * 1.12, s * 0.4, s * 0.58);
-  g.strokeRect(x - dir * s * 0.58, y - s * 1.12, s * 0.4, s * 0.58);
+  const pack = spanLeft(x, dir, -0.58, -0.18, s);
+  g.fillRect(pack, y - s * 1.12, s * 0.4, s * 0.58);
+  g.strokeRect(pack, y - s * 1.12, s * 0.4, s * 0.58);
   g.lineStyle(DETAIL, INK, 0.5);
   g.lineBetween(x - dir * s * 0.58, y - s * 0.86, x - dir * s * 0.18, y - s * 0.86);
 }
@@ -610,10 +660,11 @@ export function drawStickDriver(
   });
   g.lineStyle(CONTOUR - 0.7, INK, 1);
   g.fillStyle(PAPER, 1);
-  g.fillRect(x + dir * s * 0.42, y - s * 1.12, s * 0.58, s * 0.78);
-  g.strokeRect(x + dir * s * 0.42, y - s * 1.12, s * 0.58, s * 0.78);
+  const board = spanLeft(x, dir, 0.42, 1.0, s);
+  g.fillRect(board, y - s * 1.12, s * 0.58, s * 0.78);
+  g.strokeRect(board, y - s * 1.12, s * 0.58, s * 0.78);
   g.fillStyle(INK, 0.8);
-  g.fillRect(x + dir * s * 0.56, y - s * 1.22, s * 0.26, s * 0.13);
+  g.fillRect(spanLeft(x, dir, 0.56, 0.82, s), y - s * 1.22, s * 0.26, s * 0.13);
   g.lineStyle(DETAIL, INK, 0.55);
   g.lineBetween(x + dir * s * 0.5, y - s * 0.88, x + dir * s * 0.9, y - s * 0.88);
   g.lineBetween(x + dir * s * 0.5, y - s * 0.72, x + dir * s * 0.84, y - s * 0.72);
@@ -639,8 +690,9 @@ export function drawStickOperationsHelper(
   g.lineStyle(CONTOUR - 0.7, INK, 1);
   g.lineBetween(x + dir * s * 0.56, y - s * 0.58, x + dir * s * 0.72 + swing, y - s * 1.18);
   g.fillStyle(PAPER, 1);
-  g.fillRect(x + dir * s * 0.52 + swing, y - s * 1.54, s * 0.44, s * 0.44);
-  g.strokeRect(x + dir * s * 0.52 + swing, y - s * 1.54, s * 0.44, s * 0.44);
+  const lantern = spanLeft(x, dir, 0.52, 0.96, s) + swing;
+  g.fillRect(lantern, y - s * 1.54, s * 0.44, s * 0.44);
+  g.strokeRect(lantern, y - s * 1.54, s * 0.44, s * 0.44);
   g.lineBetween(
     x + dir * s * 0.74 + swing,
     y - s * 1.54,
