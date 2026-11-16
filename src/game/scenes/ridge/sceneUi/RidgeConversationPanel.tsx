@@ -188,7 +188,8 @@ function useConversationKeys(
         choose: (choiceId) => dispatchAction('ridgeConversationChoose', { choiceId }),
         advance: () => dispatchAction('ridgeConversationAdvance'),
         skipTypewriter: skip,
-        leave: () => dispatchAction('ridgeConversationLeave')
+        leave: () => dispatchAction('ridgeConversationLeave'),
+        moveChoice: moveChoiceFocus
       });
     };
     window.addEventListener('keydown', onKey);
@@ -279,6 +280,9 @@ function LineText({
   );
 }
 
+/** Menus up to this long show every card; longer ones scroll. */
+const CHOICES_BEFORE_SCROLL = 4;
+
 function ChoiceList({
   choices,
   onChoose
@@ -287,11 +291,20 @@ function ChoiceList({
   onChoose: (choiceId: string) => void;
 }) {
   return (
-    <div className="mt-2.5 grid gap-1.5 sm:mt-3 sm:grid-cols-2 sm:gap-2">
+    <div
+      className={cn(
+        'mt-2.5 flex flex-col gap-1.5 sm:mt-3 sm:gap-2',
+        // Only long menus scroll, capped mid-card so the cut-off row says "more".
+        // The inner padding keeps the hard shadow and hover lift unclipped.
+        choices.length > CHOICES_BEFORE_SCROLL &&
+          '-mx-1 max-h-[7.75rem] overflow-y-auto px-1 pt-1 pr-2 pb-1.5 [scrollbar-color:#1a1a1a_transparent] [scrollbar-width:thin] sm:max-h-[10.25rem] short:max-h-[6rem]'
+      )}
+    >
       {choices.map((choice, index) => (
         <button
           key={choice.id}
           type="button"
+          data-ridge-choice
           className="group relative flex items-center gap-2.5 rounded border-2 border-[#1a1a1a] bg-[#fbfbf9] px-3 py-1.5 text-left shadow-[3px_3px_0px_0px_rgba(26,26,26,1)] transition-all duration-150 hover:-translate-y-0.5 hover:bg-[#f4f1ea] hover:shadow-[5px_5px_0px_0px_rgba(26,26,26,1)] focus:-translate-y-0.5 focus:bg-[#f4f1ea] focus:shadow-[5px_5px_0px_0px_rgba(26,26,26,1)] focus:outline-none sm:py-2"
           onClick={(e) => {
             e.stopPropagation();
@@ -369,9 +382,14 @@ interface ConversationKeyActions {
   advance: () => void;
   skipTypewriter: () => void;
   leave: () => void;
+  /** Move the highlight by `delta` choices; 0 just restores it. */
+  moveChoice: (delta: number) => void;
 }
 
-/** Keyboard contract for the JRPG panel: 1–9 choose, Z/Space/Enter advance, Esc leave. */
+/**
+ * Keyboard contract for the JRPG panel: 1–9 choose, ↑/↓ (or W/S) move the
+ * highlight and Enter/Space pick it, Z/Space/Enter advance, Esc leave.
+ */
 function handleConversationKey(
   event: KeyboardEvent,
   view: RidgeConversationPanelView,
@@ -379,6 +397,7 @@ function handleConversationKey(
   actions: ConversationKeyActions
 ): void {
   if (tryChoiceKey(event, view, actions.choose)) return;
+  if (tryChoiceNavKey(event, view, actions.moveChoice)) return;
   if (tryAdvanceKey(event, view, isTyping, actions)) return;
   if (event.key === 'Escape') {
     event.preventDefault();
@@ -398,6 +417,58 @@ function tryChoiceKey(
   event.preventDefault();
   choose(view.choices[index].id);
   return true;
+}
+
+const CHOICE_NAV_DELTAS: Readonly<Record<string, number>> = {
+  ArrowUp: -1,
+  ArrowDown: 1,
+  w: -1,
+  W: -1,
+  s: 1,
+  S: 1
+};
+
+function tryChoiceNavKey(
+  event: KeyboardEvent,
+  view: RidgeConversationPanelView,
+  moveChoice: (delta: number) => void
+): boolean {
+  if (!view.awaitingChoice || view.choices.length === 0) return false;
+  const delta = CHOICE_NAV_DELTAS[event.key];
+  if (delta !== undefined) {
+    event.preventDefault();
+    moveChoice(delta);
+    return true;
+  }
+  if (event.key !== 'Enter' && event.key !== ' ') return false;
+  // Handled here, not natively: Phaser captures Space, and a held key must not
+  // auto-repeat through the next menu.
+  event.preventDefault();
+  if (event.repeat) return true;
+  const focused = document.activeElement;
+  if (focused instanceof HTMLButtonElement && focused.matches('[data-ridge-choice]')) {
+    focused.click();
+  } else {
+    // The highlight was lost (say, a click on the canvas): restore it, don't pick blind.
+    moveChoice(0);
+  }
+  return true;
+}
+
+function choiceButtons(): HTMLButtonElement[] {
+  return Array.from(document.querySelectorAll<HTMLButtonElement>('button[data-ridge-choice]'));
+}
+
+/** Focus is the highlight: wrap around the list, starting from the first card. */
+function moveChoiceFocus(delta: number): void {
+  const buttons = choiceButtons();
+  if (buttons.length === 0) return;
+  const current = buttons.findIndex((button) => button === document.activeElement);
+  const next = current < 0 ? 0 : (current + delta + buttons.length) % buttons.length;
+  const button = buttons[next];
+  if (!button) return;
+  button.focus({ preventScroll: true });
+  button.scrollIntoView({ block: 'nearest' });
 }
 
 function tryAdvanceKey(
