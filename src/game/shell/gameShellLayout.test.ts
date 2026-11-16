@@ -84,4 +84,17 @@ describe('getInteractiveGameShellLayout sizing', () => {
     expect(layout.frameStyle['--desktop-game-frame-aspect']).toBe('1000 / 600');
     expect(layout.frameStyle['--mobile-game-frame-aspect']).toBe('3 / 4');
   });
+
+  it('fills the phone content row in focus, and matches wide from md up', () => {
+    const focus = getInteractiveGameShellLayout('portrait-cover', 950, 'focus');
+    const wide = getInteractiveGameShellLayout('portrait-cover', 950, 'wide');
+
+    expect(focus.frameClassName).toContain('h-full');
+    expect(focus.frameClassName).not.toContain('--mobile-game-frame-aspect');
+    expect(focus.frameClassName).toContain('md:aspect-[var(--desktop-game-frame-aspect)]');
+    expect(focus.shellClassName).toContain('md:w-[var(--desktop-game-shell-width)]');
+    expect(focus.maxContentWidth).toBe(wide.maxContentWidth);
+    expect(focus.frameStyle).toEqual(wide.frameStyle);
+    expect(focus.shellStyle).toEqual(wide.shellStyle);
+  });
 });

@@ -14,6 +14,7 @@ import { drawAmbientFar, drawAmbientNear } from './ambientLayer';
 import { drawRidgeAreaLayer, type SceneryLayer } from './areaSets';
 import { drawCrtAtmosphere } from './atmosphere';
 import { prefersReducedMotion, sketchTick } from '@/game/sharedSceneRuntime/motion/sketchMotion';
+import { getCoverVisibleRegion } from '@/game/sharedSceneRuntime/camera/sideViewCameraMath';
 import { BarkDirector, type BarkLines } from './barkDirector';
 import { builtBridgeShape, deckTopAt, type BuiltBridgeShape } from './bridgeInk';
 import { EmoteMark, emoteGlyphFor } from './emoteMark';
@@ -92,6 +93,18 @@ const BUILD_RESERVE_BOTTOM = 104;
 const SHORT_VIEWPORT_CSS = 512;
 const BUILD_RESERVE_TOP_SHORT = 46;
 const BUILD_RESERVE_BOTTOM_SHORT = 50;
+/**
+ * Below the Tailwind `sm` breakpoint the tip card takes its own full-width row
+ * under the title, and the toolbar wraps onto two rows.
+ */
+const NARROW_VIEWPORT_CSS = 640;
+const BUILD_RESERVE_TOP_NARROW = 128;
+/** Side margins on narrow screens: just the car's start and the far bank lip. */
+const BUILD_MARGIN_LEFT_NARROW = 86;
+const BUILD_MARGIN_RIGHT_NARROW = 40;
+const BUILD_RESERVE_BOTTOM_NARROW = 144;
+/** Floor so a degenerate frame never inverts or collapses the camera. */
+const BUILD_MIN_ZOOM = 0.3;
 const SURPRISE_HOP_MS = 260;
 const NO_NUDGE: ActorNudge = { dx: 0, dy: 0 };
 const SURPRISE_HOP_HEIGHT = 9;
@@ -610,29 +623,42 @@ export class StickVisualProvider implements RidgeVisualProvider {
     }
 
     if (cam.zoom !== zoom) cam.setZoom(zoom);
+    // Zoomed out on a tall phone the view can outgrow the stage; the table
+    // stays centred and the paper background fills the rest.
+    cam.useBounds = build === 0;
     cam.centerOn(centerX, centerY);
   }
 
-  /** Fit the drawing table between the tip card and the toolbar. */
+  /**
+   * Fit the drawing table between the tip card and the toolbar, inside the
+   * part of the canvas the cover crop actually leaves on screen (a portrait
+   * phone only sees a middle slice of the 1000-wide canvas).
+   */
   private buildFraming(): { zoom: number; centerX: number; centerY: number } {
     const cam = this.scene.cameras.main;
     const { cell, columns, minRow, waterDepth } = BLUEPRINT_BRIDGE_PUZZLE;
     const origin = this.bridgeGapOrigin();
-    const left = origin.x - BUILD_MARGIN_LEFT;
-    const right = origin.x + columns * cell + BUILD_MARGIN_RIGHT;
+    const narrow = window.innerWidth < NARROW_VIEWPORT_CSS;
+    const left = origin.x - (narrow ? BUILD_MARGIN_LEFT_NARROW : BUILD_MARGIN_LEFT);
+    const right = origin.x + columns * cell + (narrow ? BUILD_MARGIN_RIGHT_NARROW : BUILD_MARGIN_RIGHT);
     const top = origin.y + minRow * cell - BUILD_MARGIN_TOP;
     const bottom = origin.y + waterDepth + BUILD_MARGIN_BOTTOM;
 
-    const cssHeight = this.scene.game.canvas?.clientHeight || cam.height;
-    const toCanvas = cam.height / cssHeight;
-    const short = window.innerHeight <= SHORT_VIEWPORT_CSS;
-    const reserveTop = (short ? BUILD_RESERVE_TOP_SHORT : BUILD_RESERVE_TOP) * toCanvas;
-    const reserveBottom = (short ? BUILD_RESERVE_BOTTOM_SHORT : BUILD_RESERVE_BOTTOM) * toCanvas;
-    const usableHeight = Math.max(cam.height * 0.4, cam.height - reserveTop - reserveBottom);
+    const parent = this.scene.scale.parentSize;
+    const visible = getCoverVisibleRegion({
+      viewport: { width: parent.width, height: parent.height },
+      designSize: { width: cam.width, height: cam.height }
+    });
+    const [reserveTopCss, reserveBottomCss] = buildChromeReserve();
+    const reserveTop = reserveTopCss * visible.canvasPerCss;
+    const reserveBottom = reserveBottomCss * visible.canvasPerCss;
+    const usableHeight = Math.max(visible.height * 0.4, visible.height - reserveTop - reserveBottom);
 
+    // Fitting the whole table wins over the readable figure size: a cut-off
+    // bank cannot be drawn to.
     const zoom = clamp(
-      Math.min(cam.width / (right - left), usableHeight / (bottom - top)),
-      this.baseZoom * 0.75,
+      Math.min(visible.width / (right - left), usableHeight / (bottom - top)),
+      BUILD_MIN_ZOOM,
       this.baseZoom * 2.4
     );
     // Centre the table in the band between the chrome, not the whole frame.
@@ -754,4 +780,11 @@ function replaceDynamicTexture(
     throw new Error(`Failed to create DynamicTexture "${key}"`);
   }
   return created;
+}
+
+/** CSS pixels the builder chrome takes at the top and bottom of the frame. */
+function buildChromeReserve(): [number, number] {
+  if (window.innerHeight <= SHORT_VIEWPORT_CSS) return [BUILD_RESERVE_TOP_SHORT, BUILD_RESERVE_BOTTOM_SHORT];
+  if (window.innerWidth < NARROW_VIEWPORT_CSS) return [BUILD_RESERVE_TOP_NARROW, BUILD_RESERVE_BOTTOM_NARROW];
+  return [BUILD_RESERVE_TOP, BUILD_RESERVE_BOTTOM];
 }
