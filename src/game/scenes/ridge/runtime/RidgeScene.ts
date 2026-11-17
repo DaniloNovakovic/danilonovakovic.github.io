@@ -168,8 +168,14 @@ export class RidgeScene extends Phaser.Scene {
     }
 
     // Tap anywhere on the page to dodge during Cicka's Standoff.
-    this.input.on(Phaser.Input.Events.POINTER_DOWN, () => {
-      if (!this.isPaused && this.session?.observe().mode === 'cickaDuel') this.dodge();
+    // During the gig, tapping a lane on the highway card strums it, like its button.
+    this.input.on(Phaser.Input.Events.POINTER_DOWN, (pointer: Phaser.Input.Pointer) => {
+      if (this.isPaused) return;
+      const mode = this.session?.observe().mode;
+      if (mode === 'cickaDuel') this.dodge();
+      if (mode !== 'concertGig') return;
+      const lane = this.gigView?.laneAt(pointer.x, pointer.y);
+      if (lane !== undefined) this.strumGig(lane, pointer.event.timeStamp);
     });
     // Lane keys judge at the key's own timestamp, not the frame it is read on.
     this.input.keyboard?.on(Phaser.Input.Keyboard.Events.ANY_KEY_DOWN, (event: KeyboardEvent) => {

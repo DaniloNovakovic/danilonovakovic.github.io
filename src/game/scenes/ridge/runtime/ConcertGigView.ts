@@ -118,6 +118,13 @@ export class ConcertGigView {
     this.syncFloatingNotes(gig, anchors.performerX);
   }
 
+  /** The lane column under a canvas point on the highway card, if any (touch players tap the targets). */
+  laneAt(x: number, y: number): GigLane | undefined {
+    const l = this.layout();
+    if (x < l.left || x > l.right || y < l.top || y > l.bottom) return undefined;
+    return Math.min(2, Math.floor(((x - l.left) / (l.right - l.left)) * 3)) as GigLane;
+  }
+
   destroy(): void {
     this.hud.destroy();
     this.fx.destroy();
@@ -207,7 +214,7 @@ export class ConcertGigView {
 
     this.drawStrikeLine(gig, frame, l);
     this.drawNotes(gig, now, l, yOf, look);
-    this.syncHudText(gig, frame, l);
+    this.syncHudText(frame, l);
   }
 
   private drawStrikeLine(gig: ConcertGig, frame: GigFrame, l: Layout): void {
@@ -300,7 +307,7 @@ export class ConcertGigView {
     }
   }
 
-  private syncHudText(gig: ConcertGig, frame: GigFrame, l: Layout): void {
+  private syncHudText(frame: GigFrame, l: Layout): void {
     // Count-in: big drummer numbers in the middle of the highway.
     if (frame.countIn !== null) {
       this.countText.setText(String(frame.countIn)).setVisible(true);
@@ -327,12 +334,12 @@ export class ConcertGigView {
       text.setAlpha(1 - t).setVisible(true);
     });
 
-    const showKeys = this.showKeys && (gig.phase === 'countIn' || gig.combo < 4);
+    // Key letters sit inside the hollow targets: big, ink on paper, never clipped by the card edge.
     this.keyText.forEach((text, lane) => {
-      text.setVisible(showKeys);
-      if (!showKeys) return;
-      text.setText(KEY_LABELS[lane]!).setFontSize(`${Math.round(13 * l.k)}px`);
-      this.pin(text, l.laneX[lane], l.strikeY + l.noteR + 13 * l.k);
+      text.setVisible(this.showKeys);
+      if (!this.showKeys) return;
+      text.setText(KEY_LABELS[lane]!).setFontSize(`${Math.round(l.noteR * 1.15)}px`);
+      this.pin(text, l.laneX[lane], l.strikeY);
     });
   }
 

@@ -26,6 +26,8 @@ export const RIDGE_SCENE_UI_DEFINITIONS: readonly SceneUiSurfaceDefinition[] = [
     id: 'ridgeConcertGig',
     component: RidgeConcertGigPanel,
     panelChrome: 'docked',
+    // Taps on the highway strum its lanes, so the move/interact touch mat steps aside.
+    capturesScenePointer: true,
     // Phones get the tall frame: the highway needs height to read ahead.
     expandsGameFrame: true
   }

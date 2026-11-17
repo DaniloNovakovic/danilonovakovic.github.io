@@ -129,7 +129,7 @@ export function RidgeConcertGigPanel({ params, dispatchAction }: SceneUiSurfaceP
             ))}
           </div>
           <div className="flex items-center gap-3">
-            <span className="pointer-events-none hidden text-[10px] font-bold uppercase tracking-wider text-[#4b4337] pointer-fine:inline short:hidden">
+            <span className="pointer-events-none hidden rounded border-2 border-[#1a1a1a] bg-[#fbfbf9] px-1.5 py-0.5 text-[11px] font-black uppercase tracking-wider text-[#1a1a1a] pointer-fine:inline short:hidden">
               {copy.keys}
             </span>
             {view.mode === 'show' ? (
