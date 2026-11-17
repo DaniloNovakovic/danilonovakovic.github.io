@@ -58,6 +58,9 @@ export const LAYERS = {
 /** Bottom of the far band — distant silhouettes rest on this line. */
 export const HORIZON_Y = LAYERS.far.height;
 
+/** Height of the Concert stage deck above the lane; performers stand on it. */
+export const CONCERT_STAGE_RISE = 28;
+
 /** Bridge campfire, in world X. Shared so drifting smoke lands on the tent. */
 export const BRIDGE_CAMP_X = 742;
 

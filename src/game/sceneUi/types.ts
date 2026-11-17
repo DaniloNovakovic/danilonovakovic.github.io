@@ -9,7 +9,8 @@ export type SceneUiSurfaceId =
   | 'potassiumTerminal'
   | 'ridgeConversation'
   | 'ridgeBridgeBuilder'
-  | 'ridgeCickaDuel';
+  | 'ridgeCickaDuel'
+  | 'ridgeConcertGig';
 
 export type SceneUiActionId =
   | 'start'
@@ -25,7 +26,9 @@ export type SceneUiActionId =
   | 'ridgeConversationLeave'
   | 'ridgeBridgeTool'
   | 'ridgeBridgeCommand'
-  | 'ridgeDuelDodge';
+  | 'ridgeDuelDodge'
+  | 'ridgeGigStrum'
+  | 'ridgeGigSkip';
 
 export interface SceneUiSurfaceRequest {
   ownerSceneId: SceneId;
@@ -43,5 +46,9 @@ export interface SceneUiActionRequest {
 export interface SceneUiState {
   status: SceneUiSurfaceRequest | null;
   panel: SceneUiSurfaceRequest | null;
-  lastAction: SceneUiActionRequest | null;
+  /**
+   * Pending one-shot actions, oldest first; the owning scene consumes them.
+   * FIFO, capped (oldest dropped), and cleared with the owner's surfaces.
+   */
+  actions: readonly SceneUiActionRequest[];
 }

@@ -826,10 +826,14 @@ optional chatter, and player wandering instead of a strict breadcrumb chain.
 _Avoid_: over-breadcrumbed objective path, hidden critical clue, giant search space
 
 **Forgiving Practice Riff**:
-The simple guitar phrase the injured Concert guitarist teaches the player so v0
-can resolve the concert through auto-success or highly forgiving prompts before
-a later rhythm mini-game exists.
-_Avoid_: required hard rhythm check, mastery test, full song system in MVP
+The seven-note guitar phrase the injured Concert guitarist teaches the player:
+the Concert Gig's tutorial, which passes on its own after three honest tries.
+_Avoid_: required hard rhythm check, mastery test
+
+**Concert Gig**:
+The Concert Area's three-lane rhythm mini-game (practice riff, then the show)
+that clears the crossing. It never fails; its grade only colours reactions.
+_Avoid_: guitar hero mode, rhythm check, concert minigame gate
 
 **Opening Dance Shuttle Beat**:
 A final-route Resident Beat where daytime festival setup progresses toward late

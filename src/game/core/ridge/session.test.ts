@@ -225,6 +225,83 @@ describe('RidgeConsoleSession playtest skips', () => {
   });
 });
 
+describe('Concert Crossing', () => {
+  function concertSession() {
+    const session = createRouteSession();
+    session.exec('warp concert');
+    return session;
+  }
+
+  function startShow(session: RidgeConsoleSession) {
+    walkTo(session, 0.35);
+    session.exec('interact guitarist');
+    talk(session, 'help', 'learn');
+    session.exec('gig skip');
+    session.exec('gig done');
+    // Running out of practice passes still opens the show; Steve notices.
+    expect(session.observe().beat).toBe('concert_practiced');
+    drainConversation(session);
+    walkTo(session, 0.49);
+    expect(session.exec('interact stage').ok).toBe(true);
+    talk(session, 'show');
+    expect(session.observe().mode).toBe('concertGig');
+  }
+
+  it('judges console strums and never lets the show fail', () => {
+    const session = concertSession();
+    startShow(session);
+    expect(session.exec('gig hit').message).toContain('perfect');
+    expect(session.exec('leave').ok).toBe(false);
+    session.exec('gig skip');
+    expect(session.observe().concertGig?.phase).toBe('finished');
+    expect(session.observe().concertGig?.grade).toBe('rough');
+    session.exec('gig done');
+    expect(session.observe().beat).toBe('concert_cleared');
+    session.exec('advance');
+    // A rough show still gets cheered: nobody remembers the clean notes.
+    expect(session.observe().conversation?.text).toBe('concert.gig.show_done.crowd.rough');
+  });
+
+  it('a kid hype man warms the crowd before the first note', () => {
+    const session = concertSession();
+    walkTo(session, 0.15);
+    session.exec('interact kid');
+    talk(session, 'sticker', 'hype');
+    expect(session.observe().nearby.some((spot) => spot.spotId === 'kid')).toBe(false);
+    startShow(session);
+    expect(session.observe().concertGig?.hype).toBeGreaterThan(0.6);
+  });
+
+  it('lets you put the practice riff down and pick it back up', () => {
+    const session = concertSession();
+    walkTo(session, 0.35);
+    session.exec('interact guitarist');
+    talk(session, 'help', 'learn');
+    expect(session.exec('leave').ok).toBe(true);
+    expect(session.observe().mode).toBe('explore');
+    expect(session.observe().beat).toBe('concert_arrival');
+    session.exec('interact guitarist');
+    talk(session, 'learn');
+    expect(session.observe().concertGig?.mode).toBe('practice');
+  });
+
+  it('offers an encore once the crossing is open', () => {
+    const session = concertSession();
+    startShow(session);
+    session.exec('gig auto');
+    session.exec('gig done');
+    drainConversation(session);
+    walkTo(session, 0.49);
+    session.exec('interact stage');
+    talk(session, 'encore');
+    expect(session.observe().concertGig?.mode).toBe('show');
+    session.exec('gig auto');
+    session.exec('gig done');
+    expect(session.observe().conversation?.id).toBe('concert.gig.show_done');
+    expect(session.observe().conversation?.text).toBe('concert.gig.show_done.encore.01');
+  });
+});
+
 describe('RidgeConsoleSession first-playable full route', () => {
   it('plays Bridge → Concert → Dance → Relay farewell → Bridge reset', () => {
     const session = createRouteSession();
@@ -301,25 +378,46 @@ function playBridge(session: RidgeConsoleSession): RidgeSessionEvent[] {
 }
 
 function playConcert(session: RidgeConsoleSession): void {
+  // The crowd won't budge before the music starts.
   walkTo(session, 0.55);
+  expect(session.exec('go right 3').ok).toBe(false);
   expect(session.exec('interact crowd').ok).toBe(true);
-  drainConversation(session);
+  talk(session, 'holdup', 'leave');
 
-  walkTo(session, 0.28);
+  // Steve teaches the phrase: the forgiving practice riff.
+  walkTo(session, 0.35);
   expect(session.exec('interact guitarist').ok).toBe(true);
-  drainConversation(session);
-
-  expect(session.exec('interact guitarist').ok).toBe(true);
-  drainConversation(session);
+  talk(session, 'help', 'learn');
+  expect(session.observe().mode).toBe('concertGig');
+  expect(session.observe().concertGig?.mode).toBe('practice');
+  expect(session.exec('go right').ok).toBe(false);
+  expect(session.exec('gig auto').ok).toBe(true);
+  const practiced = session.exec('gig done');
+  expect(practiced.events.some((event) => event.type === 'concert_gig_closed')).toBe(true);
   expect(session.observe().beat).toBe('concert_practiced');
-
-  walkTo(session, 0.42);
-  expect(session.exec('interact stage').ok).toBe(true);
+  expect(session.observe().conversation?.id).toBe('concert.gig.practice_done');
   drainConversation(session);
+
+  // The show itself.
+  walkTo(session, 0.35);
+  expect(session.exec('interact guitarist').ok).toBe(true);
+  talk(session, 'show');
+  expect(session.observe().concertGig?.mode).toBe('show');
+  expect(session.exec('gig auto').ok).toBe(true);
+  expect(session.observe().concertGig?.grade).toBe('legendary');
+  session.exec('gig done');
   expect(session.observe().beat).toBe('concert_cleared');
+  expect(session.observe().conversation?.id).toBe('concert.gig.show_done');
+  drainConversation(session);
+  // The guitar is a goodbye gift, not a prize for the show.
+  expect(session.observe().inventory).not.toContain('guitar');
+
+  walkTo(session, 0.8);
+  expect(session.exec('interact steve').ok).toBe(true);
+  talk(session, 'promise');
   expect(session.observe().inventory).toContain('guitar');
 
-  walkTo(session, 0.9);
+  walkTo(session, 0.92);
   expect(session.exec('interact').ok).toBe(true);
   drainConversation(session);
 }

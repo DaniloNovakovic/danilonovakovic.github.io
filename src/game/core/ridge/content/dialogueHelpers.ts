@@ -1,4 +1,5 @@
 import type {
+  RidgeDialogueChoice,
   RidgeDialogueLine,
   RidgeEmotion,
   RidgeInteractable,
@@ -44,4 +45,35 @@ export function collectNearbyFromPlans(
     });
   }
   return result;
+}
+
+/** One authored line: key suffix, speaker, and an optional mood. */
+export type CatalogLineSpec<Speaker extends string = string> = readonly [
+  suffix: string,
+  speaker: Speaker,
+  emotion?: RidgeEmotion
+];
+
+/**
+ * Small authoring kit for a conversation family: lines live at
+ * `<prefix>.<suffix>`, choice labels at `<prefix>.choice.<id>`, and a choice's
+ * own lines at `<prefix>.<id>.<suffix>`.
+ */
+export function conversationKit<Speaker extends string>(
+  prefix: string,
+  catalog: { speakers: Record<Speaker, string>; lines: Record<string, string> }
+) {
+  const say = ([suffix, speaker, emotion]: CatalogLineSpec<Speaker>) =>
+    makeCatalogLine(catalog, `${prefix}.${suffix}`, speaker, emotion);
+  const choice = (
+    id: string,
+    lines: readonly CatalogLineSpec<Speaker>[],
+    extra: Omit<RidgeDialogueChoice, 'id' | 'label' | 'lines'> = {}
+  ): RidgeDialogueChoice => ({
+    id,
+    label: catalog.lines[`${prefix}.choice.${id}`] ?? id,
+    ...(lines.length > 0 ? { lines: lines.map(([suffix, ...rest]) => say([`${id}.${suffix}`, ...rest])) } : {}),
+    ...extra
+  });
+  return { say, choice };
 }

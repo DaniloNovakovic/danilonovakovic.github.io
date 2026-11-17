@@ -8,6 +8,7 @@ import type {
   BridgeDesign
 } from './bridgeBuilder';
 import type { CickaAttackKind, CickaDuelPhase, CickaStrikeResult } from './cickaDuel';
+import type { GigGrade, GigJudgment, GigLane, GigMode, GigPhase, GigSectionKind } from './concertGig';
 
 export type RidgeAreaId = 'bridge' | 'concert' | 'danceFestival' | 'relay';
 
@@ -43,8 +44,9 @@ export type RidgeFacing = 'left' | 'right';
 /**
  * `bridgeBuild` is the Blueprint Bridge workbench: drawing and testing a span.
  * `cickaDuel` is Cicka's Standoff: dodging her paw to earn the toy car.
+ * `concertGig` is the Concert Crossing rhythm show (or Steve's practice riff).
  */
-export type RidgeMode = 'explore' | 'conversation' | 'bridgeBuild' | 'cickaDuel';
+export type RidgeMode = 'explore' | 'conversation' | 'bridgeBuild' | 'cickaDuel' | 'concertGig';
 
 export type RidgeSpotKind = 'landmark' | 'npc' | 'prop' | 'exit';
 
@@ -54,6 +56,7 @@ export type RidgeActorId =
   | 'draftsperson'
   | 'toy-car'
   | 'guitarist'
+  | 'kid'
   | 'crowd'
   | 'guitar'
   | 'traveler'
@@ -113,6 +116,8 @@ export interface RidgeConversationOutcome {
   openBridgeBuild?: boolean;
   /** Start Cicka's Standoff once the conversation closes. */
   openCickaDuel?: boolean;
+  /** Start the concert rhythm game (practice riff or the show) once it closes. */
+  openConcertGig?: GigMode;
 }
 
 export interface RidgeConversationDefinition {
@@ -166,6 +171,10 @@ export interface RidgeActorPresence {
   progress: number;
   visible: boolean;
   facing: RidgeFacing;
+  /** What the actor is holding: slung on the back, or being played. */
+  prop?: 'guitar-back' | 'guitar-playing';
+  /** Sitting (on an amp, a curb) rather than standing. */
+  seated?: boolean;
 }
 
 export interface RidgeStageDefinition {
@@ -186,6 +195,8 @@ export interface RidgeStageDefinition {
     state: RidgeWorldState
   ) => RidgeConversationDefinition | null;
   describeAmbience: (state: RidgeWorldState) => string;
+  /** Concert only: how warm the crowd is when a gig starts. */
+  concertGigStartHype?: (state: RidgeWorldState, mode: GigMode) => number;
   /**
    * Draftsperson remark for the Blueprint Bridge workbench (Bridge only).
    * `variant` rotates between phrasings; `sketchNudge` appends the sketch offer.
@@ -262,6 +273,25 @@ export interface RidgeObservation {
     telegraph: null | { kind: CickaAttackKind; framesToImpact: number };
     lastResult: CickaStrikeResult | null;
   };
+  /** The concert rhythm game, while practicing or playing the show. */
+  concertGig: null | {
+    mode: GigMode;
+    phase: GigPhase;
+    timeMs: number;
+    section: GigSectionKind | null;
+    hype: number;
+    combo: number;
+    bestCombo: number;
+    score: number;
+    counts: { perfect: number; good: number; miss: number };
+    notesTotal: number;
+    lastJudgment: GigJudgment | null;
+    next: null | { lane: GigLane; inMs: number };
+    grade: GigGrade;
+    practice: null | { loop: number; loopsTotal: number; hits: number; needed: number; passed: boolean };
+    /** The crowd started warmer than usual (someone got them clapping). */
+    warmStart: boolean;
+  };
   builtBridge: BridgeDesign | null;
   canMove: boolean;
   blockedAhead: boolean;
@@ -287,11 +317,24 @@ export type RidgeCommand =
   | { type: 'build'; action: BridgeBuildAction }
   /** Cicka's Standoff verbs (`duel dodge`, `duel wait [n]`, `duel done`). */
   | { type: 'duel'; action: RidgeDuelAction }
+  /** Concert rhythm verbs (`gig hit [lane]`, `gig wait [ms]`, `gig auto`, …). */
+  | { type: 'gig'; action: RidgeGigAction }
   | { type: 'unknown'; raw: string };
 
 export type RidgeDuelAction =
   | { kind: 'dodge' }
   | { kind: 'wait'; frames?: number }
+  | { kind: 'done' };
+
+/**
+ * `hit` with no lane strums the next note(s) exactly on time; with a lane it
+ * strums that lane now. `auto` plays the rest perfectly, `skip` lets it pass.
+ */
+export type RidgeGigAction =
+  | { kind: 'hit'; lane?: GigLane }
+  | { kind: 'wait'; ms?: number }
+  | { kind: 'auto' }
+  | { kind: 'skip' }
   | { kind: 'done' };
 
 export type RidgeSessionEvent =
@@ -307,7 +350,9 @@ export type RidgeSessionEvent =
   | { type: 'bridge_build_closed' }
   | { type: 'bridge_built'; design: BridgeDesign }
   | { type: 'cicka_duel_opened' }
-  | { type: 'cicka_duel_closed'; won: boolean };
+  | { type: 'cicka_duel_closed'; won: boolean }
+  | { type: 'concert_gig_opened'; mode: GigMode }
+  | { type: 'concert_gig_closed'; mode: GigMode; grade: GigGrade; passed: boolean };
 
 export interface RidgeCommandResult {
   ok: boolean;

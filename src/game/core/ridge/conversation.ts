@@ -275,6 +275,10 @@ function applyOutcome(
     events.push({ type: 'cicka_duel_opened' });
   }
 
+  if (outcome.openConcertGig) {
+    events.push({ type: 'concert_gig_opened', mode: outcome.openConcertGig });
+  }
+
   return {
     state: {
       ...state,

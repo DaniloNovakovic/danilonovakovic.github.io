@@ -13,6 +13,16 @@ import {
   type BridgeDesign
 } from './bridgeBuilder';
 import { CICKA_DUEL_LOST_FLAG, CICKA_RESPECT_FLAG, CickaDuel } from './cickaDuel';
+import {
+  CONCERT_PRACTICE_ASSISTED_FLAG,
+  ConcertGig,
+  concertGradeFlag,
+  GIG_GRADES,
+  playNextNotePerfectly,
+  type GigLane,
+  type GigMode,
+  type GigStrumResult
+} from './concertGig';
 import { getRidgeHelpText, parseRidgeCommand, parseRidgeScript } from './commands';
 import { formatObservation, observeRidgeWorld } from './observe';
 import type {
@@ -21,6 +31,7 @@ import type {
   RidgeCommandResult,
   RidgeDuelAction,
   RidgeFacing,
+  RidgeGigAction,
   RidgeObservation,
   RidgeRouteBeat,
   RidgeSessionEvent,
@@ -38,6 +49,10 @@ const TOY_CAR_SHARED_FLAG = 'toy_car_shared';
 const BRIDGE_BUILD_STARTED_FLAG = 'bridge_build_started';
 const CICKA_DUEL_WON_CONVERSATION = 'bridge.cicka.duel_won';
 const CICKA_DUEL_LOST_CONVERSATION = 'bridge.cicka.duel_lost';
+const GIG_PRACTICE_DONE_CONVERSATION = 'concert.gig.practice_done';
+const GIG_SHOW_DONE_CONVERSATION = 'concert.gig.show_done';
+/** Song-time step for console waits when no target is given. */
+const GIG_WAIT_LEAD_MS = 1;
 
 export interface RidgeSessionOptions {
   /** Preferred: full multi-area registry for Compact Area Transitions. */
@@ -60,6 +75,7 @@ export class RidgeConsoleSession {
   private readonly stages: RidgeStageRegistry | null;
   private workbench: BridgeWorkbench | null = null;
   private duel: CickaDuel | null = null;
+  private gig: ConcertGig | null = null;
 
   constructor(options: RidgeSessionOptions) {
     if (options.stages) {
@@ -89,7 +105,23 @@ export class RidgeConsoleSession {
   }
 
   observe(): RidgeObservation {
-    return observeRidgeWorld(this.state, this.stage, this.workbench, this.duel);
+    return observeRidgeWorld(this.state, this.stage, this.workbench, this.duel, this.gig);
+  }
+
+  /** Live concert gig while practicing or playing, for presentation. */
+  get concertGig(): ConcertGig | null {
+    return this.state.mode === 'concertGig' ? this.gig : null;
+  }
+
+  /** Move the song playhead to `timeMs` (the adapter's audio clock drives this). */
+  advanceConcertGig(timeMs: number): void {
+    if (this.state.mode === 'concertGig') this.gig?.advance(timeMs);
+  }
+
+  /** Strum a lane at song time `atMs`. The adapter voices the result. */
+  strumConcertGig(lane: GigLane, atMs: number): GigStrumResult {
+    if (this.state.mode !== 'concertGig' || !this.gig) return { kind: 'ignored' };
+    return this.gig.strum(lane, atMs);
   }
 
   /** Live workbench while the Blueprint Bridge is being drawn, for presentation. */
@@ -160,6 +192,8 @@ export class RidgeConsoleSession {
         return this.handleBuild(command.action);
       case 'duel':
         return this.handleDuel(command.action);
+      case 'gig':
+        return this.handleGig(command.action);
       case 'unknown':
         return this.fail(
           command.raw
@@ -175,6 +209,9 @@ export class RidgeConsoleSession {
     }
     if (this.state.mode === 'cickaDuel') {
       return this.fail('Cicka has you pinned with a stare. duel dodge or duel wait.');
+    }
+    if (this.state.mode === 'concertGig') {
+      return this.fail('You are mid-song. gig hit or gig wait.');
     }
     if (this.state.mode !== 'explore') {
       return this.fail('Movement is halted during conversation. advance or leave.');
@@ -227,6 +264,9 @@ export class RidgeConsoleSession {
     }
     if (this.state.mode === 'cickaDuel') {
       return this.fail('Eyes on the paw. duel dodge or duel wait.');
+    }
+    if (this.state.mode === 'concertGig') {
+      return this.fail('Eyes on the notes. gig hit or gig wait.');
     }
 
     const nearby = [...this.stage.resolveInteractables(this.state)].sort(
@@ -287,6 +327,7 @@ export class RidgeConsoleSession {
   private handleLeave(): RidgeCommandResult {
     if (this.state.mode === 'bridgeBuild') return this.closeBridgeBuild();
     if (this.state.mode === 'cickaDuel') return this.fail('No backing out now. Cicka is mid-wiggle.');
+    if (this.state.mode === 'concertGig') return this.leaveConcertGig();
     const result = leaveConversation(this.state);
     this.state = result.state;
     return {
@@ -346,6 +387,8 @@ export class RidgeConsoleSession {
         this.openBridgeBuild();
       } else if (event.type === 'cicka_duel_opened') {
         this.openCickaDuel();
+      } else if (event.type === 'concert_gig_opened') {
+        this.openConcertGig(event.mode);
       } else if (event.type === 'route_reset') {
         this.applyRouteReset();
         events.push({ type: 'beat_changed', beat: this.state.beat });
@@ -364,6 +407,7 @@ export class RidgeConsoleSession {
   private applyAreaHandoff(areaId: RidgeAreaId): void {
     this.workbench = null;
     this.duel = null;
+    this.gig = null;
     if (areaId === 'bridge') this.state = { ...this.state, builtBridge: null };
     if (!this.stages) {
       this.state = {
@@ -394,6 +438,7 @@ export class RidgeConsoleSession {
   private applyRouteReset(): void {
     this.workbench = null;
     this.duel = null;
+    this.gig = null;
     const bridge = this.stages?.bridge ?? this.stage;
     this.stage = bridge;
     this.state = {
@@ -490,6 +535,117 @@ export class RidgeConsoleSession {
     return { ok: true, message, observation: this.observe(), events };
   }
 
+  private handleGig(action: RidgeGigAction): RidgeCommandResult {
+    const gig = this.gig;
+    if (this.state.mode !== 'concertGig' || !gig) {
+      return this.fail('No song is playing. Steve can teach you the riff.');
+    }
+    if (action.kind === 'done') {
+      if (gig.phase !== 'finished') return this.fail('The song is still going.');
+      return this.finishConcertGig(gig);
+    }
+    if (gig.phase === 'finished') return this.fail('The last chord already rang out. gig done.');
+
+    switch (action.kind) {
+      case 'hit': {
+        if (action.lane === undefined) {
+          const results = playNextNotePerfectly(gig);
+          return results.length > 0 ? this.ok(describeStrums(results)) : this.fail('No notes left to play.');
+        }
+        return this.ok(describeStrums([gig.strum(action.lane)]));
+      }
+      case 'wait': {
+        const next = gig.nextPendingNote();
+        const target =
+          action.ms !== undefined
+            ? gig.timeMs + action.ms
+            : next
+              ? next.timeMs - GIG_WAIT_LEAD_MS
+              : gig.song.endMs + 1;
+        gig.advance(Math.max(target, gig.timeMs + GIG_WAIT_LEAD_MS));
+        return this.ok(gigOver(gig) ? 'The last chord rings out.' : 'The band plays on.');
+      }
+      case 'auto':
+        while (!gigOver(gig) && gig.nextPendingNote()) playNextNotePerfectly(gig);
+        gig.finish();
+        return this.ok('Every note lands.');
+      case 'skip':
+        gig.finish();
+        return this.ok('The song plays out around you.');
+    }
+  }
+
+  private openConcertGig(mode: GigMode): void {
+    this.gig = new ConcertGig({
+      mode,
+      startHype: this.stage.concertGigStartHype?.(this.state, mode)
+    });
+    this.state = {
+      ...this.state,
+      mode: 'concertGig',
+      conversation: null,
+      lastMessage: mode === 'practice' ? 'Steve counts you in, slowly.' : 'Lights up. The drummer clicks four.'
+    };
+  }
+
+  /** Practice can be put down; the show goes on. */
+  private leaveConcertGig(): RidgeCommandResult {
+    const gig = this.gig;
+    if (!gig || gig.mode === 'show') return this.fail('The show must go on.');
+    this.gig = null;
+    this.state = { ...this.state, mode: 'explore', lastMessage: 'You set the riff down for now.' };
+    return {
+      ok: true,
+      message: 'You set the riff down for now.',
+      observation: this.observe(),
+      events: [{ type: 'concert_gig_closed', mode: gig.mode, grade: gig.grade, passed: false }]
+    };
+  }
+
+  /** Practice opens the show; the show clears the crossing. Steve reacts either way. */
+  private finishConcertGig(gig: ConcertGig): RidgeCommandResult {
+    // Step off where the performance left you (the stage), not where you stood before.
+    const performer = this.stage.resolveActors(this.state).find((actor) => actor.id === 'player');
+    this.gig = null;
+    const flags = new Set(this.state.flags);
+    const events: RidgeSessionEvent[] = [
+      { type: 'concert_gig_closed', mode: gig.mode, grade: gig.grade, passed: gig.passed }
+    ];
+    let beat = this.state.beat;
+
+    if (gig.mode === 'practice') {
+      if (gig.passed) flags.delete(CONCERT_PRACTICE_ASSISTED_FLAG);
+      else flags.add(CONCERT_PRACTICE_ASSISTED_FLAG);
+      if (beat === 'concert_arrival') beat = 'concert_practiced';
+    } else {
+      for (const grade of GIG_GRADES) flags.delete(concertGradeFlag(grade));
+      flags.add(concertGradeFlag(gig.grade));
+      events.push({ type: 'flag_changed', flag: concertGradeFlag(gig.grade), present: true });
+      beat = 'concert_cleared';
+    }
+    if (beat !== this.state.beat) events.push({ type: 'beat_changed', beat });
+
+    this.state = {
+      ...this.state,
+      mode: 'explore',
+      beat,
+      flags,
+      progress: performer?.progress ?? this.state.progress
+    };
+
+    const followUp = this.stage.resolveConversation(
+      gig.mode === 'practice' ? GIG_PRACTICE_DONE_CONVERSATION : GIG_SHOW_DONE_CONVERSATION,
+      this.state
+    );
+    if (followUp) {
+      const started = startConversation(this.state, followUp);
+      this.state = started.state;
+      events.push(...started.events);
+    }
+    const message = gig.mode === 'practice' ? 'The riff settles into your fingers.' : `The crowd roars. (${gig.grade})`;
+    return { ok: true, message, observation: this.observe(), events };
+  }
+
   private openBridgeBuild(): void {
     const workbench = (this.workbench ??= new BridgeWorkbench(BLUEPRINT_BRIDGE_PUZZLE));
     if (workbench.phase === 'testing' || workbench.phase === 'failed') {
@@ -577,6 +733,23 @@ export class RidgeConsoleSession {
       events: []
     };
   }
+}
+
+/** Read fresh: the playhead moves under a narrowed `phase`. */
+function gigOver(gig: ConcertGig): boolean {
+  return gig.phase === 'finished';
+}
+
+function describeStrums(results: readonly GigStrumResult[]): string {
+  return results
+    .map((result) =>
+      result.kind === 'hit'
+        ? `${result.hit.judgment} (lane ${result.hit.lane})`
+        : result.kind === 'stray'
+          ? `nothing to strum on lane ${result.lane}`
+          : 'ignored'
+    )
+    .join(', ');
 }
 
 function inventoryForArea(areaId: RidgeAreaId): string[] {

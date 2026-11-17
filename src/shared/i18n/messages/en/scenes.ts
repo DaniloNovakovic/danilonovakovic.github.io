@@ -72,7 +72,8 @@ export const sceneMessages = {
         cicka: "road cat",
         "counterpart-cat": "local cat",
         draftsperson: "bridge draftsperson",
-        guitarist: "touring guitarist",
+        guitarist: "local legend",
+        kid: "skater kid",
         crowd: "waiting crowd",
         traveler: "long-way walker",
         driver: "shuttle driver",
@@ -91,15 +92,21 @@ export const sceneMessages = {
           "Paper holds. Paper always holds.",
         ],
         guitarist: [
-          "Two chords. I only need two.",
+          "Seven notes. The whole song is seven notes.",
           "...still can't close my hand around it.",
-          "Hums something unfinished.",
-          "The crowd's been patient. Too patient.",
+          "Twenty summers. Never missed one.",
+          "The ramp won. This time.",
+        ],
+        kid: [
+          "It's NOT my fault.",
+          "*kicks the cracked board*",
+          "Old people shouldn't skate.",
+          "...the chord was good, though.",
         ],
         crowd: [
           "Is it starting?",
           "I walked an hour for this.",
-          "Shh — listen.",
+          "Du-le! Du-le!",
           "Someone play something.",
         ],
         traveler: [
@@ -285,40 +292,237 @@ export const sceneMessages = {
       speakers: {
         prompt: "Prompt",
         cicka: "Cicka",
-        injuredGuitarist: "Injured Guitarist",
+        injuredGuitarist: "Steve",
         crowd: "Crowd",
+        crowdUncle: "Impatient Uncle",
+        crowdGrandma: "Folding-Chair Grandma",
+        kid: "Skater Kid",
       },
       dialogue: {
-        "concert.crowd.delay_barks.prompt": "Listen to Crowd",
-        "concert.crowd.delay_barks.01": "Show's delayed! The crowd's patience is thinner than tracing paper!",
-        "concert.crowd.delay_barks.02": "Word is the lead guitarist tried a kickflip during soundcheck and wiped out!",
-        "concert.crowd.delay_barks.03": "He's hiding behind the stage props nursing his wrist and his ego.",
-        "concert.guitarist.injury.prompt": "Talk to Guitarist",
-        "concert.guitarist.injury.01": "Okay, in my defense... a one-legged skateboard guitar solo sounded epic on paper.",
-        "concert.guitarist.injury.02": "My wrist says 'absolutely not', but the show MUST go on!",
-        "concert.guitarist.injury.03": "Offer to learn his signature chord phrase",
-        "concert.guitarist.practice_riff.prompt": "Practice Riff",
-        "concert.guitarist.practice_riff.01": "You strum the forgiving acoustic chord progression.",
-        "concert.guitarist.practice_riff.02": "Your fingers find the melody naturally—clean, warm, and resonant.",
-        "concert.guitarist.practice_riff.03": "Whoa! You nailed the phrase! That rhythm has enough soul to clear this whole street!",
-        "concert.performance.auto_success.prompt": "Play Concert",
-        "concert.performance.auto_success.01": "You step up to the stage mic and play.",
-        "concert.performance.auto_success.02": "The chord ring out across the night plaza. The crowd goes wild!",
-        "concert.performance.auto_success.03": "Alright! Show was a hit! Path is cleared!",
-        "concert.performance.auto_success.04": "Here, take my guitar. You've earned it, maestro.",
-        "concert.guitarist.guitar_handoff.prompt": "Take Guitar",
-        "concert.guitarist.guitar_handoff.01": "Keep it safe. Let it sing whenever the quiet needs company.",
-        "concert.guitarist.guitar_handoff.02": "Play it out on the open ridge.",
-        "concert.guitarist.guitar_handoff.03": "The acoustic guitar rests comfortably slung across your back.",
-        "concert.cicka.band_resting_spot.prompt": "Pet Cicka",
-        "concert.cicka.band_resting_spot.01": "You sit near Cicka backstage.",
-        "concert.cicka.band_resting_spot.02": "Mrrp!",
-        "concert.cicka.band_resting_spot.03": "Cicka loafs peacefully on an amplifier casing.",
-        "concert.cicka.band_resting_spot.04": "Purrrr...",
-        "concert.exit.dance_transition.prompt": "Head Downhill",
-        "concert.exit.dance_transition.01": "You follow the open street toward the festival lights.",
-        "concert.exit.dance_transition.02": "The Dance Festival setup glimmers downhill.",
-        "concert.exit.dance_transition.03": "Warm festival banners flutter in the evening breeze.",
+        "concert.poster.read.prompt": "Read the poster",
+        "concert.poster.read.01":
+          "A hand-drawn poster on the kafana wall, curling at the corners: STEVE & THE LATE SHOW. TONIGHT, 9PM. THE CROSSING.",
+        "concert.poster.read.02":
+          "Someone has added in pen: \"still?\" Someone else has crossed that out and written: \"ALWAYS.\"",
+        "concert.poster.read.after.01": "Under \"ALWAYS\", in fresh ink: \"tonight it was somebody new.\"",
+
+        "concert.crowd.delay_barks.prompt": "Ask the crowd",
+        "concert.crowd.delay_barks.01":
+          "Nine o'clock, the poster said. Nine! My watch says it's a quarter to never.",
+        "concert.crowd.delay_barks.choice.holdup": "What's the holdup?",
+        "concert.crowd.delay_barks.holdup.01": "Steve took a tumble at soundcheck. On a skateboard. At his age!",
+        "concert.crowd.delay_barks.holdup.02":
+          "Wrist went one way, board went the other. He's been hiding back by the amps ever since.",
+        "concert.crowd.delay_barks.choice.who": "Who's playing?",
+        "concert.crowd.delay_barks.who.01":
+          "Steve and the Late Show! He's played this crossing every summer since they put the traffic light in.",
+        "concert.crowd.delay_barks.who.02": "I saw him play straight through a power cut once. He just sang louder.",
+        "concert.crowd.delay_barks.choice.through": "Can I squeeze past?",
+        "concert.crowd.delay_barks.through.01":
+          "Past? We've held this spot since six. Nobody moves till there's music.",
+        "concert.crowd.delay_barks.through.02":
+          "The crowd is packed shoulder to shoulder across the crossing. It isn't going anywhere.",
+        "concert.crowd.delay_barks.choice.leave": "Never mind.",
+        "concert.crowd.delay_barks.leave.01":
+          "If you see a guitarist, tell him we're old too. We can wait. Grumpily.",
+        "concert.crowd.delay_barks.ready.01": "Was that a guitar? Back by the amps? Somebody's tuning up!",
+        "concert.crowd.delay_barks.ready.02": "Finally. If it's not Steve, it had better be somebody good.",
+
+        "concert.kid.board.prompt": "Talk to the kid",
+        "concert.kid.board.01":
+          "A kid sits on the curb outside the kafana, glaring at a skateboard with a fresh crack down the middle.",
+        "concert.kid.board.02": "If you're here to say it's my fault, it's not. I just said he was too old to rock.",
+        "concert.kid.board.choice.what": "What happened?",
+        "concert.kid.board.what.01":
+          "He grabbed my board to prove he could still shred. One-legged guitar solo, straight down the ramp.",
+        "concert.kid.board.what.02": "Played one chord, did one wobble, and ate the curb.",
+        "concert.kid.board.what.03": "...The chord was actually really good.",
+        "concert.kid.board.choice.harsh": "Calling him old was harsh.",
+        "concert.kid.board.harsh.01": "He IS old.",
+        "concert.kid.board.harsh.02": "He picks at the grip tape. He doesn't look up.",
+        "concert.kid.board.harsh.03": "I didn't think he'd actually try it.",
+        "concert.kid.board.choice.sticker": "Is that a Late Show sticker?",
+        "concert.kid.board.sticker.01": "No. ...Maybe. It came with the board.",
+        "concert.kid.board.sticker.02":
+          "It did not come with the board. It's been carefully peeled off and stuck back on at least twice.",
+        "concert.kid.board.choice.hype": "Then help him out. Get the crowd going.",
+        "concert.kid.board.hype.01": "Like... a hype man?",
+        "concert.kid.board.hype.02":
+          "Fine. But only because the night's boring without music. Not because of him.",
+        "concert.kid.board.hype.03":
+          "The kid tucks the cracked board under his arm and wriggles into the front row of the crowd.",
+        "concert.kid.board.choice.secret": "Your secret's safe with me.",
+        "concert.kid.board.secret.01": "There's no secret. ...Thanks, though.",
+        "concert.kid.board.choice.leave": "See you around.",
+        "concert.kid.board.leave.01": "Whatever. Tell him the board's fine. It's not fine.",
+        "concert.kid.hype_waiting.prompt": "Talk to the kid",
+        "concert.kid.hype_waiting.01": "I'm ready. The second the music starts, I'm clapping. Loud.",
+        "concert.kid.hype_waiting.02": "Wait, YOU'RE playing? Even better. Less pressure on me.",
+        "concert.kid.after.prompt": "Talk to the kid",
+        "concert.kid.after.01":
+          "The kid is still on the curb, but he's nodding along to a song that already ended.",
+        "concert.kid.after.02": "...Okay. That was kind of sick. Don't tell him I said that.",
+        "concert.kid.after.choice.tell": "Go tell him yourself.",
+        "concert.kid.after.tell.01": "...Maybe. Tomorrow. When it's less embarrassing.",
+        "concert.kid.after.choice.nod": "Nod and say nothing.",
+        "concert.kid.after.nod.01": "He nods back. Very serious. A deal between professionals.",
+        "concert.kid.after.hype.01": "Did you hear them? I started that clap. That was all me.",
+        "concert.kid.after.hype.02": "Steve says I can have lessons. On the guitar. Not the board. Probably not the board.",
+
+        "concert.guitarist.injury.prompt": "Talk to the guitarist",
+        "concert.guitarist.injury.01":
+          "Tucked behind the stage, a man in a worn leather jacket sits on an amp, cradling his wrist like a hurt bird.",
+        "concert.guitarist.injury.02": "If you're here for an autograph, it'll have to be left-handed.",
+        "concert.guitarist.practice_riff.prompt": "Talk to Steve",
+        "concert.guitarist.practice_riff.01": "Back? The phrase is still waiting. So is the crowd. Loudly.",
+        "concert.guitarist.choice.wrist": "What happened to your wrist?",
+        "concert.guitarist.wrist.01":
+          "A kid told me I was too old to rock. So naturally, I borrowed his skateboard.",
+        "concert.guitarist.wrist.02": "One-legged solo, straight down the ramp. Big finish.",
+        "concert.guitarist.wrist.03": "The ramp had a bigger finish.",
+        "concert.guitarist.choice.who": "Who are you?",
+        "concert.guitarist.who.01": "Steve. Of Steve and the Late Show. Twenty summers on this crossing.",
+        "concert.guitarist.who.02": "Tonight we're really living up to the name.",
+        "concert.guitarist.choice.cancel": "Can't you just call it off?",
+        "concert.guitarist.cancel.01": "And send them home quiet? No.",
+        "concert.guitarist.cancel.02":
+          "This street gets one loud night a year. It's how we tell each other we're still here.",
+        "concert.guitarist.choice.kid": "About that kid...",
+        "concert.guitarist.kid.01": "He's not wrong. I'm forty-six. My knees play percussion now.",
+        "concert.guitarist.kid.02":
+          "...He's got our sticker on that board, you know. I saw it right before I saw the ground.",
+        "concert.guitarist.choice.help": "Could I play instead?",
+        "concert.guitarist.help.01": "You?",
+        "concert.guitarist.help.02":
+          "...Hm. You've got the hands for it. And honestly, you're the only offer I've had.",
+        "concert.guitarist.help.03":
+          "Every song we play grows out of one phrase. Seven notes. Learn those, and the rest you'll learn on stage.",
+        "concert.guitarist.choice.learn": "Teach me the phrase.",
+        "concert.guitarist.learn.01":
+          "Watch the notes slide down the strings. Strum the moment one touches the line. Low, middle, high.",
+        "concert.guitarist.learn.02": "Don't worry about being perfect. Worry about coming back to it.",
+        "concert.guitarist.choice.later": "Let me look around first.",
+        "concert.guitarist.later.01": "Sure. I'm not going anywhere. Literally. I'm sitting on an amp.",
+        "concert.guitarist.choice.leave": "Hang in there.",
+        "concert.guitarist.leave.01": "Hanging. Mostly by the left hand.",
+        "concert.guitarist.choice.not_yet": "Not yet.",
+        "concert.guitarist.not_yet.01": "No rush. They've only been waiting three hours.",
+        "concert.guitarist.ready.prompt": "Talk to Steve",
+        "concert.guitarist.ready.01":
+          "You've got the phrase. The rest of the song is just the phrase, saying more.",
+        "concert.guitarist.ready.01_assisted":
+          "It wasn't pretty. But you kept coming back to it, and that's the actual skill.",
+        "concert.guitarist.choice.show": "Let's play the show.",
+        "concert.guitarist.show.01": "Plug in. I'll call the changes from the side of the stage.",
+        "concert.guitarist.show.02":
+          "Don't look at the crowd. Look at the notes. The crowd will look after itself.",
+        "concert.guitarist.choice.again": "Run the riff once more.",
+        "concert.guitarist.again.01": "Good instinct. From the top, nice and slow.",
+        "concert.guitarist.choice.nervous": "I'm nervous.",
+        "concert.guitarist.nervous.01": "Good. It means you care.",
+        "concert.guitarist.nervous.02":
+          "I threw up before my first show. Then I played it anyway. Then I threw up again. Great night.",
+        "concert.guitarist.choice.wait": "Give me a minute.",
+        "concert.guitarist.wait.01": "Take two. They've waited this long.",
+        "concert.stage.look.prompt": "Look at the stage",
+        "concert.stage.look.01":
+          "A tiny stage. One mic, one amp, and a setlist taped to the floor that just says PLAY LOUD.",
+        "concert.stage.look.02": "Without a guitarist, it's just a very nice table.",
+        "concert.stage.take.prompt": "Take the stage",
+        "concert.stage.encore.prompt": "Play an encore",
+        "concert.stage.encore.01": "The stage is empty now, but the amp is still warm.",
+        "concert.stage.encore.choice.encore": "Play it again",
+        "concert.stage.encore.encore.01": "A few stragglers turn around at the first note. Somebody whoops.",
+        "concert.stage.encore.choice.leave": "Let it ring",
+        "concert.stage.encore.leave.01": "Some nights only happen once. This one could happen twice. Maybe later.",
+
+        "concert.gig.practice_done.passed.01": "Hey. HEY. That's it! That's the phrase!",
+        "concert.gig.practice_done.passed.02":
+          "Seven notes. Everything tonight is just those seven notes in different hats.",
+        "concert.gig.practice_done.assisted.01": "Okay. Not every note landed.",
+        "concert.gig.practice_done.assisted.02":
+          "But you didn't stop, and that's the whole trick. The rest comes on stage.",
+        "concert.gig.practice_done.cicka.01":
+          "Behind the amp, Cicka's ears have swivelled toward you like two small satellite dishes.",
+        "concert.gig.practice_done.03": "Whenever you're ready, the stage is yours.",
+        "concert.gig.show_done.01":
+          "The last chord rings out over the crossing. For one long second, nobody moves.",
+        "concert.gig.show_done.crowd.legendary": "...STEVE! STEVE! Wait. Who IS that?!",
+        "concert.gig.show_done.crowd.great": "Encore! ENCORE!",
+        "concert.gig.show_done.crowd.good": "Now THAT is what I waited three hours for!",
+        "concert.gig.show_done.crowd.rough": "They played! Music! Wonderful!",
+        "concert.gig.show_done.steve.legendary": "Twenty summers. I have never heard it played like that.",
+        "concert.gig.show_done.steve.great": "You made it yours. That's the only trick there is.",
+        "concert.gig.show_done.steve.good": "A few wobbly bits. Every good night has wobbly bits.",
+        "concert.gig.show_done.steve.rough":
+          "Rough? Sure. But listen to them. Nobody ever remembers the clean notes.",
+        "concert.gig.show_done.cicka.01":
+          "Cicka has crept out from behind the amp to the very edge of the stage. She gives you a long, slow blink.",
+        "concert.gig.show_done.02": "Humming, the crowd drifts off home. The crossing opens.",
+        "concert.gig.show_done.03": "Come find me by the corner before you go. I've got something for you.",
+        "concert.gig.show_done.encore.01": "The last few stragglers clap like a full house.",
+
+        "concert.guitarist.guitar_handoff.prompt": "Talk to Steve",
+        "concert.guitarist.guitar_handoff.01": "So. This wrist needs the whole summer off.",
+        "concert.guitarist.guitar_handoff.02": "And a guitar that sits in its case all summer forgets how to sing.",
+        "concert.guitarist.guitar_handoff.kid.01": "...That was sick, by the way.",
+        "concert.guitarist.guitar_handoff.kid.02": "And sorry. For the old thing.",
+        "concert.guitarist.guitar_handoff.kid.03": "I AM old. Old is how you get good.",
+        "concert.guitarist.guitar_handoff.kid.04":
+          "Lessons, once this heals? Bring the board. We'll fix that too.",
+        "concert.guitarist.guitar_handoff.kid.05": "...Yeah. Okay.",
+        "concert.guitarist.guitar_handoff.03":
+          "So take her. She's been to every summer on this street. Every song I know is still in the wood.",
+        "concert.guitarist.guitar_handoff.choice.promise": "I'll look after her.",
+        "concert.guitarist.guitar_handoff.promise.01":
+          "I know you will. Play her somewhere quiet, for someone who matters. That's what she's for.",
+        "concert.guitarist.guitar_handoff.promise.02":
+          "Steve's guitar settles across your back. It's warmer than you expected.",
+        "concert.guitarist.guitar_handoff.choice.sure": "Are you sure?",
+        "concert.guitarist.guitar_handoff.sure.01": "Sure? No. Right? Yes.",
+        "concert.guitarist.guitar_handoff.sure.02":
+          "Play her somewhere quiet, for someone who matters. That's what she's for.",
+        "concert.guitarist.guitar_handoff.sure.03":
+          "Steve's guitar settles across your back. It's warmer than you expected.",
+        "concert.guitarist.farewell.prompt": "Talk to Steve",
+        "concert.guitarist.farewell.01": "Go on. Next town over, tell them Steve says hi.",
+        "concert.guitarist.farewell.choice.thanks": "Thanks for tonight.",
+        "concert.guitarist.farewell.thanks.01": "Thank YOU. I just sat on an amp and shouted chord names.",
+        "concert.guitarist.farewell.choice.leave": "See you, Steve.",
+        "concert.guitarist.farewell.leave.01": "See you. Mind the curbs.",
+
+        "concert.cicka.band_resting_spot.prompt": "Find Cicka",
+        "concert.cicka.band_resting_spot.01":
+          "Behind the amp: two round eyes. Cicka has found the one quiet square metre on this whole street.",
+        "concert.cicka.band_resting_spot.01_practiced":
+          "Cicka is still behind the amp, but now she's watching the stage.",
+        "concert.cicka.band_resting_spot.choice.sit": "Sit with her a while",
+        "concert.cicka.band_resting_spot.sit.01":
+          "You sit on a cable crate. Back here, the crowd softens into a hum.",
+        "concert.cicka.band_resting_spot.sit.02": "...mrrp.",
+        "concert.cicka.band_resting_spot.sit.03":
+          "She leans against the guitar case. Her tail taps along to a song nobody is playing yet.",
+        "concert.cicka.band_resting_spot.choice.coax": "Coax her toward the crowd",
+        "concert.cicka.band_resting_spot.coax.01": "Hhhk.",
+        "concert.cicka.band_resting_spot.coax.02":
+          "Cicka retreats exactly one inch further behind the amp. That's a no.",
+        "concert.cicka.band_resting_spot.choice.leave": "Leave her be",
+        "concert.cicka.band_resting_spot.leave.01": "She approves of this decision.",
+        "concert.cicka.band_resting_spot.after.01":
+          "Cicka is loafing on top of the warm amp. Steve scratches behind her ears without looking.",
+        "concert.cicka.band_resting_spot.after.02": "Purrrr...",
+        "concert.cicka.band_resting_spot.choice.pet": "Scratch her chin",
+        "concert.cicka.band_resting_spot.pet.01": "Prrrt.",
+        "concert.cicka.band_resting_spot.pet.02": "She has decided the band is acceptable.",
+        "concert.cicka.band_resting_spot.choice.nap": "Let her nap",
+        "concert.cicka.band_resting_spot.nap.01": "Cicka doesn't open her eyes. She doesn't need to.",
+
+        "concert.exit.dance_transition.prompt": "Head downhill",
+        "concert.exit.dance_transition.01":
+          "The crossing is clear. Downhill, festival lanterns are blinking on one by one.",
+        "concert.exit.dance_transition.02": "Go on, then. She likes being played on the move.",
+        "concert.exit.dance_transition.03":
+          "You set off, the guitar tapping against your back in time with your steps.",
       },
     },
     dance: {

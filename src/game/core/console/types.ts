@@ -138,8 +138,8 @@ export type GameCommand =
   | { type: 'cheat'; action: 'give'; itemId: GameItemId }
   | { type: 'skip' }
   | { type: 'warp'; areaId: string }
-  /** Ridge Blueprint Bridge workbench verbs, forwarded verbatim. */
-  | { type: 'build'; raw: string }
+  /** Ridge mini-game verbs (`build …`, `duel …`, `gig …`), forwarded as typed. */
+  | { type: 'ridgeVerb'; raw: string }
   | { type: 'unknown'; raw: string };
 
 export type GameSessionEvent =

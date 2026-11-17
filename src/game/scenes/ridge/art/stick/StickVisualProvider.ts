@@ -2,6 +2,7 @@ import type * as Phaser from 'phaser';
 import {
   BLUEPRINT_BRIDGE_PUZZLE,
   BRIDGE_RIVER_PROGRESS,
+  CONCERT_LAYOUT,
   type BridgeDesign,
   type RidgeActorId,
   type RidgeEmotion,
@@ -20,6 +21,7 @@ import { builtBridgeShape, deckTopAt, type BuiltBridgeShape } from './bridgeInk'
 import { EmoteMark, emoteGlyphFor } from './emoteMark';
 import { PresenceLayer, type ActiveBark } from './presenceLayer';
 import {
+  CONCERT_STAGE_RISE,
   DEPTH,
   GROUND_Y,
   LAYERS,
@@ -112,6 +114,15 @@ const BUILD_RESERVE_BOTTOM_NARROW = 144;
 /** Floor so a degenerate frame never inverts or collapses the camera. */
 const BUILD_MIN_ZOOM = 0.3;
 const SURPRISE_HOP_MS = 260;
+/** World units over which a walker steps up onto the concert stage. */
+const STAGE_STEP_ON = 16;
+/**
+ * Show framing: the performer and the crowd either side of the note highway,
+ * ground low in the frame so the highway has the sky to itself.
+ */
+const GIG_EASE_MS = 520;
+const GIG_SIDE_MARGIN = 70;
+const GIG_GROUND_AT = 0.8;
 const NO_NUDGE: ActorNudge = { dx: 0, dy: 0 };
 const SURPRISE_HOP_HEIGHT = 9;
 
@@ -169,6 +180,8 @@ export class StickVisualProvider implements RidgeVisualProvider {
   private conversationGroundAt = 0.62;
   /** 0 = exploring, 1 = framed on the Blueprint Bridge drawing table. */
   private buildBlend = 0;
+  /** 0 = exploring, 1 = framed on the concert stage for a show. */
+  private gigBlend = 0;
   private builtShape: BuiltBridgeShape | null = null;
   private builtShapeDesign: BridgeDesign | null = null;
   private readonly designIds = new WeakMap<BridgeDesign, number>();
@@ -439,7 +452,8 @@ export class StickVisualProvider implements RidgeVisualProvider {
         frame: (isWalking ? frame.stepTick : frame.tick) + index,
         walking: isWalking,
         talking: isTalking,
-        emotion: nudge.emotion ?? speakingEmotionFor(view, isTalking)
+        emotion: nudge.emotion ?? speakingEmotionFor(view, isTalking),
+        ...heldPoseOf(actor, nudge)
       }
     };
   }
@@ -566,6 +580,7 @@ export class StickVisualProvider implements RidgeVisualProvider {
       view.mode === 'bridgeBuild' ? 1 : 0,
       motion ? dt / BUILD_EASE_MS : 1
     );
+    this.gigBlend = approach(this.gigBlend, view.mode === 'concertGig' ? 1 : 0, motion ? dt / GIG_EASE_MS : 1);
   }
 
   private designKey(design: BridgeDesign | null): number {
@@ -592,6 +607,7 @@ export class StickVisualProvider implements RidgeVisualProvider {
    * onto the deck, so stepping on reads as a step rather than a jump.
    */
   private groundYAt(view: RidgeVisualViewModel, x: number, id: RidgeActorId): number {
+    if (view.areaId === 'concert') return this.concertGroundAt(x, id);
     if (!this.builtShape || view.areaId !== 'bridge') return GROUND_Y;
     const deck = deckTopAt(this.builtShape, x);
     if (deck === null) return GROUND_Y;
@@ -599,6 +615,16 @@ export class StickVisualProvider implements RidgeVisualProvider {
     const right = this.worldXForProgress(BRIDGE_RIVER_PROGRESS.right);
     const onto = Math.min(1, Math.max(0, Math.min(x - left, right - x) / DECK_STEP_ON));
     return GROUND_Y + (deck - footDropFor(id) - GROUND_Y) * onto;
+  }
+
+  /** The stage deck is a step up; only people climb it (Cicka stays off). */
+  private concertGroundAt(x: number, id: RidgeActorId): number {
+    if (id === 'cicka' || id === 'crowd') return GROUND_Y;
+    const centre = this.worldXForProgress(CONCERT_LAYOUT.stage);
+    const half = CONCERT_LAYOUT.stageHalfWidth * (this.stageWidth - 160);
+    const inside = half - Math.abs(x - centre);
+    if (inside <= 0) return GROUND_Y;
+    return GROUND_Y - CONCERT_STAGE_RISE * Math.min(1, inside / STAGE_STEP_ON);
   }
 
   private syncEmote(view: RidgeVisualViewModel, now: number, motion: boolean): void {
@@ -645,6 +671,14 @@ export class StickVisualProvider implements RidgeVisualProvider {
       zoom = lerp(zoom, framing.zoom, blend);
       centerX = lerp(centerX, framing.centerX, blend);
       centerY = lerp(centerY, talkY, blend);
+    }
+
+    const gig = easeInOut(this.gigBlend);
+    if (gig > 0) {
+      const framing = this.gigFraming(view);
+      zoom = lerp(zoom, framing.zoom, gig);
+      centerX = lerp(centerX, framing.centerX, gig);
+      centerY = lerp(centerY, framing.centerY, gig);
     }
 
     if (build > 0) {
@@ -698,6 +732,31 @@ export class StickVisualProvider implements RidgeVisualProvider {
     return { zoom, centerX: (left + right) / 2, centerY: (top + bottom) / 2 - shift };
   }
 
+  /**
+   * Fit performer and crowd in the part of the canvas the cover crop leaves
+   * visible, centred on the gap between them where the highway draws.
+   */
+  private gigFraming(view: RidgeVisualViewModel): { zoom: number; centerX: number; centerY: number } {
+    const cam = this.scene.cameras.main;
+    const xOf = (id: RidgeActorId, fallback: number) =>
+      this.worldXForProgress(view.actors.find((actor) => actor.id === id)?.progress ?? fallback);
+    const left = xOf('player', CONCERT_LAYOUT.stage) - GIG_SIDE_MARGIN;
+    const right = xOf('crowd', CONCERT_LAYOUT.crowd) + GIG_SIDE_MARGIN;
+    const parent = this.scene.scale.parentSize;
+    const visible = getCoverVisibleRegion({
+      viewport: { width: parent.width, height: parent.height },
+      designSize: { width: cam.width, height: cam.height }
+    });
+    const zoom = clamp(visible.width / (right - left), this.baseZoom * 0.72, this.baseZoom * 1.05);
+    const viewHeight = visible.height / zoom;
+    // Centre on the visible slice, not the whole canvas, so the ground sits low on any screen.
+    return {
+      zoom,
+      centerX: (left + right) / 2,
+      centerY: GROUND_Y - viewHeight * (GIG_GROUND_AT - 0.5)
+    };
+  }
+
   private conversationFraming(
     view: RidgeVisualViewModel,
     playerX: number
@@ -749,6 +808,11 @@ function facingFor(
   if (actor.id === 'player') return actor.facing;
   if (Math.abs(actor.progress - frame.playerProgress) >= AWARENESS_RANGE) return actor.facing;
   return frame.playerX >= x ? 'right' : 'left';
+}
+
+/** What the actor holds or sits on, and the strum arm a performance moves. */
+function heldPoseOf(actor: RidgeVisualViewModel['actors'][number], nudge: ActorNudge) {
+  return { prop: actor.prop, seated: actor.seated, strum: nudge.strum };
 }
 
 /** Mini-game body nudge (Cicka's Standoff lunges and hops), or none. */

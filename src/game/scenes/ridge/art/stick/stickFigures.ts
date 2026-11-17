@@ -19,6 +19,12 @@ export interface StickPose {
   talking: boolean;
   /** Mood of the line being spoken; overrides the resting face while set. */
   emotion?: RidgeEmotion | null;
+  /** Strum-arm position while playing; flips on every landed note. */
+  strum?: number;
+  /** A guitar slung on the back, or being played. */
+  prop?: 'guitar-back' | 'guitar-playing' | null;
+  /** Sitting on something (an amp, a curb) instead of standing. */
+  seated?: boolean;
 }
 
 const STILL: StickPose = { frame: 0, walking: false, talking: false };
@@ -52,11 +58,21 @@ export function drawStickPlayer(
   drawContactShadow(g, x, y, 34 * scale, 0.18);
   // Pack first: it hangs behind the spine, so torso and arms ink over it.
   drawTravelPack(g, x, top, dir, s);
+  // Slung across the back, the neck rises behind the head and over the pack.
+  if (pose.prop === 'guitar-back') drawSlungGuitar(g, x, top, dir, s);
+  const playing = pose.prop === 'guitar-playing';
   drawBasePerson(g, x, top, facing, scale, pose, {
     hair: 'messy',
     scarf: true,
-    eyes: 'determined'
+    eyes: 'determined',
+    ...(playing ? { arms: 'none' as const } : {})
   });
+  if (playing) drawPlayedGuitar(g, x, top, dir, s, pose.strum ?? 0);
+  if (pose.prop === 'guitar-back') {
+    // Strap across the chest, over the scarf: worn, not held.
+    g.lineStyle(DETAIL + 0.6, INK, 1);
+    g.lineBetween(x - dir * s * 0.12, top - s * 1.14, x + dir * s * 0.22, top - s * 0.42);
+  }
 
   // Shoulder strap over the near shoulder onto the chest: the mark that says
   // "worn" rather than "held".
@@ -74,6 +90,83 @@ export function drawStickPlayer(
   g.moveTo(x, top - s * 1.26);
   g.lineTo(x - dir * s * 0.42, top - s * 1.14);
   g.lineTo(x - dir * s * tail, top - s * (pose.walking ? 1.12 : 0.95));
+  g.strokePath();
+}
+
+/** Acoustic body outline: two lobes and a waist, centred on (cx, cy). */
+function drawGuitarBody(
+  g: Phaser.GameObjects.Graphics,
+  cx: number,
+  cy: number,
+  s: number,
+  tilt: number
+): void {
+  const along = (d: number) => ({ x: cx + Math.sin(tilt) * d, y: cy - Math.cos(tilt) * d });
+  const lower = along(-s * 0.2);
+  const upper = along(s * 0.2);
+  g.lineStyle(CONTOUR - 0.8, INK, 1);
+  g.fillStyle(PAPER_WARM, 1);
+  g.fillCircle(lower.x, lower.y, s * 0.34);
+  g.fillCircle(upper.x, upper.y, s * 0.26);
+  g.strokeCircle(lower.x, lower.y, s * 0.34);
+  g.strokeCircle(upper.x, upper.y, s * 0.26);
+  // Paint over the seam so the lobes read as one body.
+  g.fillCircle(cx, cy, s * 0.2);
+  g.fillStyle(INK, 1);
+  g.fillCircle(cx, cy, s * 0.09);
+}
+
+function drawSlungGuitar(g: Phaser.GameObjects.Graphics, x: number, top: number, dir: number, s: number): void {
+  // Body low behind the hip; neck up across the back and out above the head.
+  const bodyX = x - dir * s * 0.62;
+  const bodyY = top - s * 0.4;
+  const headX = x - dir * s * 0.02;
+  const headY = top - s * 2.5;
+  g.lineStyle(CONTOUR - 0.4, INK, 1);
+  g.lineBetween(bodyX, bodyY, headX, headY);
+  g.fillStyle(INK, 1);
+  g.fillRect(headX - s * 0.09, headY - s * 0.2, s * 0.18, s * 0.22);
+  drawGuitarBody(g, bodyX, bodyY, s, dir * -0.3);
+}
+
+/**
+ * Held for playing: body at the hip, neck angled up the facing side, the
+ * fretting hand up the neck and the strumming hand over the soundhole.
+ */
+function drawPlayedGuitar(
+  g: Phaser.GameObjects.Graphics,
+  x: number,
+  top: number,
+  dir: number,
+  s: number,
+  strum: number
+): void {
+  const bodyX = x + dir * s * 0.12;
+  const bodyY = top - s * 0.5;
+  const headX = x + dir * s * 1.3;
+  const headY = top - s * 1.22;
+  g.lineStyle(CONTOUR - 0.4, INK, 1);
+  g.lineBetween(bodyX, bodyY, headX, headY);
+  g.fillStyle(INK, 1);
+  g.fillRect(headX - s * 0.08, headY - s * 0.14, s * 0.2, s * 0.16);
+  drawGuitarBody(g, bodyX, bodyY, s, dir * 1.15);
+  g.lineStyle(1, INK, 0.5);
+  g.lineBetween(bodyX + dir * s * 0.1, bodyY - s * 0.02, headX, headY + s * 0.02);
+
+  const shoulder = top - s * 0.98;
+  g.lineStyle(CONTOUR, INK, 1);
+  // Fretting arm up the neck.
+  g.beginPath();
+  g.moveTo(x, shoulder);
+  g.lineTo(x + dir * s * 0.5, top - s * 0.7);
+  g.lineTo(x + dir * s * 0.92, top - s * 0.98);
+  g.strokePath();
+  // Strumming arm: up on one note, down on the next.
+  const hand = strum % 2 === 0 ? -0.66 : -0.38;
+  g.beginPath();
+  g.moveTo(x, shoulder);
+  g.lineTo(x - dir * s * 0.22, top - s * 0.6);
+  g.lineTo(x + dir * s * 0.12, top + s * hand * 0.9);
   g.strokePath();
 }
 
@@ -235,7 +328,12 @@ export function drawStickToyCar(
 }
 
 interface PersonStyle {
-  hair?: 'messy' | 'bun' | 'cap' | 'hat' | 'ponytail' | 'beanie' | 'hardhat';
+  hair?: 'messy' | 'bun' | 'cap' | 'capBack' | 'hat' | 'ponytail' | 'beanie' | 'hardhat' | 'shaggy';
+  /** `none`: the caller draws its own arms (holding something, in a sling). */
+  arms?: 'none';
+  moustache?: boolean;
+  /** Solid ink torso: a leather jacket, the one heavy mass on a rocker. */
+  jacket?: boolean;
   skirt?: boolean;
   apron?: boolean;
   raisedArm?: boolean;
@@ -244,6 +342,9 @@ interface PersonStyle {
   scarf?: boolean;
   eyes?: FaceEyes;
 }
+
+/** How far a seated figure's body drops, in body units. */
+const SEATED_DROP = 0.24;
 
 type FaceEyes = 'determined' | 'thoughtful' | 'happy' | 'focused' | 'wide' | 'closed';
 
@@ -290,6 +391,9 @@ function drawBasePerson(
   const s = 16 * scale;
   const dir = facing === 'left' ? -1 : 1;
   const leg = legPhaseOf(pose);
+  // Sitting drops the body onto a seat; the feet stay on the ground.
+  const ground = y + s * 0.58;
+  if (pose.seated) y += SEATED_DROP * s;
   const headY = y - s * 1.68;
 
   // Shadow mass first, so contour ink always sits on top of it.
@@ -308,6 +412,22 @@ function drawBasePerson(
   g.lineStyle(CONTOUR, INK, 1);
   g.lineBetween(x, y - s * 1.26, x, y - s * 0.15);
 
+  if (style.jacket) {
+    g.fillStyle(INK, 0.88);
+    g.beginPath();
+    g.moveTo(x - s * 0.3, y - s * 1.26);
+    g.lineTo(x + s * 0.3, y - s * 1.26);
+    g.lineTo(x + s * 0.26, y - s * 0.42);
+    g.lineTo(x - s * 0.26, y - s * 0.42);
+    g.closePath();
+    g.fillPath();
+    // Lapels as paper notches, so the mass still reads as clothing.
+    g.lineStyle(DETAIL, PAPER, 0.9);
+    g.lineBetween(x + dir * s * 0.02, y - s * 1.24, x + dir * s * 0.14, y - s * 0.92);
+    g.lineBetween(x - dir * s * 0.06, y - s * 1.24, x - dir * s * 0.14, y - s * 0.98);
+    g.lineStyle(CONTOUR, INK, 1);
+  }
+
   if (style.scarf) {
     // Solid ink: the player's one signature mass, readable at any size.
     g.fillStyle(INK, 1);
@@ -315,11 +435,24 @@ function drawBasePerson(
     g.lineStyle(CONTOUR, INK, 1);
   }
 
-  drawArms(g, x, y, dir, s, style, pose, leg);
+  if (style.arms !== 'none') drawArms(g, x, y, dir, s, style, pose, leg);
 
   // Legs
   g.lineStyle(CONTOUR, INK, 1);
-  if (style.skirt) {
+  if (pose.seated) {
+    // Thigh forward along the seat, shin straight down to the ground.
+    const hip = y - s * 0.15;
+    g.beginPath();
+    g.moveTo(x, hip);
+    g.lineTo(x + dir * s * 0.5, hip);
+    g.lineTo(x + dir * s * 0.56, ground);
+    g.strokePath();
+    g.beginPath();
+    g.moveTo(x, hip);
+    g.lineTo(x + dir * s * 0.38, hip + s * 0.04);
+    g.lineTo(x + dir * s * 0.36, ground);
+    g.strokePath();
+  } else if (style.skirt) {
     g.fillStyle(PAPER, 1);
     g.beginPath();
     g.moveTo(x, y - s * 0.6);
@@ -361,6 +494,16 @@ function drawFace(
   const eyes = (emotion && EMOTION_EYES[emotion]) || style.eyes;
   drawEyes(g, x, headY, dir, s, eyes);
   drawMouth(g, x, headY, dir, s, pose, emotion);
+  if (style.moustache) {
+    g.fillStyle(INK, 1);
+    g.beginPath();
+    g.moveTo(x + dir * s * 0.1, headY + s * 0.16);
+    g.lineTo(x + dir * s * 0.36, headY + s * 0.1);
+    g.lineTo(x + dir * s * 0.38, headY + s * 0.17);
+    g.lineTo(x + dir * s * 0.14, headY + s * 0.2);
+    g.closePath();
+    g.fillPath();
+  }
 
   if (style.glasses) {
     g.lineStyle(2, INK, 1);
@@ -479,6 +622,31 @@ function drawHair(
     g.lineBetween(x, headY - s * 0.62, x, headY - s * 0.14);
     g.lineStyle(CONTOUR, INK, 1);
     g.lineBetween(x - dir * s * 0.56, headY - s * 0.12, x + dir * s * 0.74, headY - s * 0.12);
+  } else if (hair === 'shaggy') {
+    // Rocker hair: a heavy fringe swept back and down past the collar.
+    g.fillStyle(INK, 0.92);
+    g.beginPath();
+    g.moveTo(x + dir * s * 0.42, headY - s * 0.14);
+    g.lineTo(x + dir * s * 0.24, headY - s * 0.46);
+    g.lineTo(x - dir * s * 0.12, headY - s * 0.52);
+    g.lineTo(x - dir * s * 0.46, headY - s * 0.3);
+    g.lineTo(x - dir * s * 0.6, headY + s * 0.3);
+    g.lineTo(x - dir * s * 0.5, headY + s * 0.62);
+    g.lineTo(x - dir * s * 0.3, headY + s * 0.34);
+    g.lineTo(x - dir * s * 0.18, headY - s * 0.1);
+    g.lineTo(x + dir * s * 0.18, headY - s * 0.26);
+    g.closePath();
+    g.fillPath();
+  } else if (hair === 'capBack') {
+    // Cap on backwards: the brim points behind. Unmistakably a kid.
+    g.fillStyle(INK, 0.8);
+    g.beginPath();
+    g.arc(x, headY - s * 0.12, s * 0.44, Math.PI, 0, false);
+    g.closePath();
+    g.fillPath();
+    g.strokePath();
+    g.lineStyle(CONTOUR, INK, 1);
+    g.lineBetween(x - dir * s * 0.3, headY - s * 0.16, x - dir * s * 0.78, headY - s * 0.1);
   } else if (hair === 'bun') {
     g.fillStyle(PAPER, 1);
     g.fillCircle(x - dir * s * 0.34, headY - s * 0.3, s * 0.22);
@@ -551,6 +719,11 @@ function drawArms(
   g.lineBetween(x, shoulder, x - s * (0.46 * dir + 0.3 * leg), shoulder + s * 0.44);
 }
 
+/**
+ * Steve: forty-six, a local legend. Long rocker hair, moustache, leather
+ * jacket, and his strumming wrist strapped in a sling. He sits on his amp
+ * backstage; on show night he stands in the wings and cheers.
+ */
 export function drawStickGuitarist(
   g: Phaser.GameObjects.Graphics,
   x: number,
@@ -559,31 +732,126 @@ export function drawStickGuitarist(
   scale = 1,
   pose: StickPose = STILL
 ): void {
-  const { s, dir } = placeStickPerson(g, x, y, facing, scale, pose, {
-    hair: 'beanie',
+  const s = 16 * scale;
+  const dir = facing === 'left' ? -1 : 1;
+  drawContactShadow(g, x, y, 32 * scale);
+  if (pose.seated) drawAmp(g, x - dir * s * 0.06, y + s * 0.58, s);
+  drawBasePerson(g, x, y, facing, scale, pose, {
+    hair: 'shaggy',
+    moustache: true,
+    jacket: true,
+    arms: 'none',
     eyes: 'thoughtful'
   });
 
-  g.lineStyle(CONTOUR - 0.7, INK, 1);
+  const top = pose.seated ? y + SEATED_DROP * s : y;
+  const shoulder = top - s * 0.98;
+  // Good arm: up in a fist when the night is going well, else at rest.
+  g.lineStyle(CONTOUR, INK, 1);
+  if (pose.emotion === 'playful' && !pose.seated) {
+    const pump = pose.frame % 2 === 0 ? 0 : s * 0.08;
+    g.lineBetween(x, shoulder, x - dir * s * 0.34, shoulder - s * 0.42 - pump);
+    g.lineBetween(x - dir * s * 0.34, shoulder - s * 0.42 - pump, x - dir * s * 0.3, shoulder - s * 0.86 - pump);
+    g.fillStyle(INK, 1);
+    g.fillCircle(x - dir * s * 0.3, shoulder - s * 0.9 - pump, s * 0.1);
+  } else if (pose.talking) {
+    const gesture = pose.frame % 2 === 0 ? 0.3 : 0.16;
+    g.lineBetween(x, shoulder, x - dir * s * 0.56, shoulder + s * gesture);
+  } else {
+    g.lineBetween(x, shoulder, x - dir * s * 0.4, shoulder + s * 0.5);
+  }
+
+  // Bad arm bent across the chest in a paper sling.
+  g.lineBetween(x, shoulder, x + dir * s * 0.24, top - s * 0.62);
+  g.lineBetween(x + dir * s * 0.24, top - s * 0.62, x - dir * s * 0.12, top - s * 0.78);
+  g.lineStyle(CONTOUR - 0.8, INK, 1);
   g.fillStyle(PAPER, 1);
-  drawInkBlob(g, x + dir * s * 0.56, y - s * 0.5, s * 0.36, s * 0.52, 3, 10);
+  g.beginPath();
+  g.moveTo(x + dir * s * 0.32, top - s * 0.56);
+  g.lineTo(x - dir * s * 0.2, top - s * 0.74);
+  g.lineTo(x + dir * s * 0.06, top - s * 0.44);
+  g.closePath();
   g.fillPath();
   g.strokePath();
-  g.fillStyle(INK, 0.9);
-  g.fillCircle(x + dir * s * 0.56, y - s * 0.5, s * 0.13);
-
-  g.lineStyle(CONTOUR - 0.8, INK, 1);
-  g.lineBetween(x + dir * s * 0.56, y - s * 0.96, x + dir * s * 0.56, y - s * 1.52);
-  g.strokeRect(spanLeft(x, dir, 0.46, 0.66, s), y - s * 1.7, s * 0.2, s * 0.18);
-
-  g.lineStyle(DETAIL, INK, 0.6);
-  g.lineBetween(x - dir * s * 0.3, y - s * 1.16, x + dir * s * 0.62, y - s * 0.36);
-
-  // Arm bandage — the reason this whole beat exists.
-  g.lineStyle(3.4, INK, 0.35);
-  g.lineBetween(x + dir * s * 0.34, y - s * 0.72, x + dir * s * 0.56, y - s * 0.56);
+  // Strap up to the far side of the neck.
+  g.lineStyle(DETAIL + 0.4, INK, 0.9);
+  g.lineBetween(x - dir * s * 0.16, top - s * 0.74, x - dir * s * 0.1, top - s * 1.22);
+  g.lineBetween(x + dir * s * 0.3, top - s * 0.58, x + dir * s * 0.08, top - s * 1.24);
 }
 
+/** A little practice amp: box, grille hatching, one knob. */
+function drawAmp(g: Phaser.GameObjects.Graphics, x: number, ground: number, s: number): void {
+  const w = s * 0.86;
+  const h = s * 0.66;
+  g.lineStyle(CONTOUR - 0.6, INK, 1);
+  g.fillStyle(PAPER_WARM, 1);
+  g.fillRect(x - w / 2, ground - h, w, h);
+  g.strokeRect(x - w / 2, ground - h, w, h);
+  g.lineStyle(1.2, INK, 0.45);
+  for (let i = 1; i < 5; i += 1) {
+    g.lineBetween(x - w / 2 + 3, ground - h + (h * i) / 5, x + w / 2 - 3, ground - h + (h * i) / 5);
+  }
+}
+
+/**
+ * The skater kid: small, cap on backwards, with the cracked board. Sulking on
+ * the curb before the show; board under his arm once he is up and about.
+ */
+export function drawStickKid(
+  g: Phaser.GameObjects.Graphics,
+  x: number,
+  y: number,
+  facing: RidgeFacing,
+  scale = 1,
+  pose: StickPose = STILL
+): void {
+  const s = 16 * scale;
+  const dir = facing === 'left' ? -1 : 1;
+  drawContactShadow(g, x, y, 24 * scale);
+  if (pose.seated) {
+    // The curb he is sulking on, and the board face-up at his feet.
+    g.lineStyle(CONTOUR - 0.8, INK, 1);
+    g.fillStyle(PAPER_WARM, 1);
+    g.fillRect(x - s * 0.5, y + s * 0.08, s * 0.92, s * 0.5);
+    g.strokeRect(x - s * 0.5, y + s * 0.08, s * 0.92, s * 0.5);
+    drawSkateboard(g, x + dir * s * 1.2, y + s * 0.46, s, 0);
+  }
+  drawBasePerson(g, x, y, facing, scale, pose, { hair: 'capBack', eyes: 'focused' });
+  if (!pose.seated) {
+    const top = y;
+    drawSkateboard(g, x - dir * s * 0.42, top - s * 0.7, s, dir * 1.35);
+  }
+}
+
+/** Deck, two wheels, and the crack that started all this. */
+function drawSkateboard(
+  g: Phaser.GameObjects.Graphics,
+  cx: number,
+  cy: number,
+  s: number,
+  tilt: number
+): void {
+  const half = s * 0.62;
+  const ax = cx - Math.cos(tilt) * half;
+  const ay = cy - Math.sin(tilt) * half;
+  const bx = cx + Math.cos(tilt) * half;
+  const by = cy + Math.sin(tilt) * half;
+  g.lineStyle(s * 0.16, INK, 1);
+  g.lineBetween(ax, ay, bx, by);
+  g.fillStyle(INK, 1);
+  const nx = -Math.sin(tilt) * s * 0.14;
+  const ny = Math.cos(tilt) * s * 0.14;
+  g.fillCircle(ax + (bx - ax) * 0.2 + nx, ay + (by - ay) * 0.2 + ny, s * 0.08);
+  g.fillCircle(ax + (bx - ax) * 0.8 + nx, ay + (by - ay) * 0.8 + ny, s * 0.08);
+  // The crack: a paper zigzag across the deck.
+  g.lineStyle(1.4, PAPER, 1);
+  g.lineBetween(cx - nx * 0.5, cy - ny * 0.5, cx + Math.cos(tilt) * 2 + nx * 0.2, cy + Math.sin(tilt) * 2 + ny * 0.2);
+}
+
+/**
+ * The waiting crowd, facing the stage: the impatient uncle with folded arms,
+ * the grandma on her folding chair, and the fans. Arms go up as it warms up.
+ */
 export function drawStickCrowd(
   g: Phaser.GameObjects.Graphics,
   x: number,
@@ -591,20 +859,38 @@ export function drawStickCrowd(
   scale = 1,
   pose: StickPose = STILL
 ): void {
-  // Offset frames so the little group never moves in lockstep.
-  const at = (offset: number): StickPose => ({
+  const cheering = pose.emotion === 'playful';
+  // Offset frames so the group never moves in lockstep.
+  const at = (offset: number, seated = false): StickPose => ({
     frame: pose.frame + offset,
     walking: false,
     talking: pose.talking,
-    emotion: pose.emotion
+    emotion: pose.emotion,
+    seated
   });
-  drawBasePerson(g, x - 20 * scale, y, 'left', scale * 0.8, at(1), { hair: 'cap' });
-  drawBasePerson(g, x, y, 'right', scale * 0.92, at(0), {
+  const u = 16 * scale;
+  // Back to front, so the nearer heads ink over the further shoulders.
+  drawBasePerson(g, x + 2.7 * u, y, 'left', scale * 0.78, at(3), { hair: 'beanie', raisedArm: cheering });
+  drawBasePerson(g, x + 1.5 * u, y, 'left', scale * 0.84, at(2), { hair: 'ponytail', raisedArm: true });
+  drawBasePerson(g, x + 0.3 * u, y, 'left', scale * 0.92, at(0), {
     hair: 'messy',
     eyes: 'happy',
-    raisedArm: true
+    raisedArm: cheering
   });
-  drawBasePerson(g, x + 22 * scale, y, 'left', scale * 0.76, at(2), { hair: 'ponytail' });
+  // Grandma on her folding chair: she has been here since six.
+  drawFoldingChair(g, x - 1.05 * u, y + 0.58 * u, u * 0.86);
+  drawBasePerson(g, x - 1.0 * u, y, 'left', scale * 0.82, at(1, true), { hair: 'bun', skirt: false });
+  drawBasePerson(g, x - 2.3 * u, y, 'left', scale * 0.9, at(4), { hair: 'cap', raisedArm: cheering });
+}
+
+function drawFoldingChair(g: Phaser.GameObjects.Graphics, x: number, ground: number, s: number): void {
+  const seat = ground - s * 0.5;
+  g.lineStyle(2.2, INK, 1);
+  g.lineBetween(x - s * 0.36, ground, x + s * 0.3, seat);
+  g.lineBetween(x + s * 0.3, ground, x - s * 0.36, seat);
+  g.lineBetween(x - s * 0.42, seat, x + s * 0.34, seat);
+  // Backrest on the far side from the stage (she faces left).
+  g.lineBetween(x + s * 0.3, seat, x + s * 0.38, seat - s * 0.74);
 }
 
 export function drawStickGuitar(

@@ -10,11 +10,15 @@ import {
   CICKA_DUEL_DT,
   cickaStandoffFlags,
   createRidgeRouteStages,
+  GIG_START_HYPE,
+  isGigLane,
   RidgeConsoleSession,
   RIDGE_GUITAR_ITEM,
   RIDGE_INITIAL_BEAT,
   ridgePrevArea,
   type BridgeBuildAction,
+  type ConcertGig,
+  type GigLane,
   type RidgeActorId,
   type RidgeAreaId,
   type RidgeCommandResult,
@@ -45,7 +49,12 @@ import type {
   RidgeBridgeTool
 } from '../sceneUi/RidgeBridgeBuilderPanel';
 import type { RidgeCickaDuelPanelView } from '../sceneUi/RidgeCickaDuelPanel';
+import type { RidgeConcertGigPanelView } from '../sceneUi/RidgeConcertGigPanel';
+import type { SceneUiActionRequest } from '@/game/sceneUi/types';
 import { stageCickaDuel } from '../art/duelStaging';
+import { stageConcertGig, type GigFrame } from '../art/gigStaging';
+import { ConcertGigAudio } from './concertGigAudio';
+import { ConcertGigView } from './ConcertGigView';
 import { BridgeBuilderView } from './BridgeBuilderView';
 import { CickaDuelView } from './CickaDuelView';
 import type { RidgeDevControls } from './ridgeDevControls';
@@ -62,6 +71,15 @@ const WALK_SPEED = 0.18; // progress units per second
 const BRIDGE_CELEBRATE_MS = 2200;
 /** How long the standoff's last moment holds before Cicka reacts. */
 const DUEL_OUTRO_MS = 1300;
+/** How long the last chord and the cheer ring before Steve reacts. */
+const GIG_OUTRO_MS = 2400;
+/** Keys for the three lanes: home row, arrows, the right hand's home row, digits. */
+const GIG_LANE_KEYS: Record<string, GigLane> = {
+  a: 0, s: 1, d: 2,
+  arrowleft: 0, arrowdown: 1, arrowright: 2,
+  j: 0, k: 1, l: 2,
+  '1': 0, '2': 1, '3': 2
+};
 /** Catch-up cap so a hitch never fast-forwards the bridge test. */
 const MAX_SIM_STEPS_PER_FRAME = 4;
 
@@ -96,6 +114,14 @@ export class RidgeScene extends Phaser.Scene {
   private duelView?: CickaDuelView;
   private duelAccumulator = 0;
   private duelOutroMs = 0;
+  private gigAudio?: ConcertGigAudio;
+  /** Faded-out band from a finished gig, disconnected on the next gig or shutdown. */
+  private releasedGigAudio: ConcertGigAudio[] = [];
+  private gigView?: ConcertGigView;
+  private gigFor: ConcertGig | null = null;
+  private gigSection: number | null = null;
+  private gigOutroMs = 0;
+  private gigCheered = false;
   private lastDevSnapshotKey = '';
   private nextKey?: Phaser.Input.Keyboard.Key;
   private prevKey?: Phaser.Input.Keyboard.Key;
@@ -113,10 +139,9 @@ export class RidgeScene extends Phaser.Scene {
   create(): void {
     const route = bridgeStore.getState().progress.ridge.firstPlayableRoute;
     const areaId = route.activeAreaId;
-    const hasGuitar =
-      route.beat === 'concert_cleared' ||
-      areaId === 'danceFestival' ||
-      areaId === 'relay';
+    // Steve hands the guitar over after the show; re-entering a cleared Concert
+    // replays that goodbye rather than skipping it.
+    const hasGuitar = areaId === 'danceFestival' || areaId === 'relay';
 
     this.session = new RidgeConsoleSession({
       stages: createRidgeRouteStages(loadRidgeRouteDialogueCatalog()),
@@ -143,8 +168,20 @@ export class RidgeScene extends Phaser.Scene {
     }
 
     // Tap anywhere on the page to dodge during Cicka's Standoff.
-    this.input.on(Phaser.Input.Events.POINTER_DOWN, () => {
-      if (!this.isPaused && this.session?.observe().mode === 'cickaDuel') this.dodge();
+    // During the gig, tapping a lane on the highway card strums it, like its button.
+    this.input.on(Phaser.Input.Events.POINTER_DOWN, (pointer: Phaser.Input.Pointer) => {
+      if (this.isPaused) return;
+      const mode = this.session?.observe().mode;
+      if (mode === 'cickaDuel') this.dodge();
+      if (mode !== 'concertGig') return;
+      const lane = this.gigView?.laneAt(pointer.x, pointer.y);
+      if (lane !== undefined) this.strumGig(lane, pointer.event.timeStamp);
+    });
+    // Lane keys judge at the key's own timestamp, not the frame it is read on.
+    this.input.keyboard?.on(Phaser.Input.Keyboard.Events.ANY_KEY_DOWN, (event: KeyboardEvent) => {
+      const lane = GIG_LANE_KEYS[event.key.toLowerCase()];
+      if (lane === undefined || event.repeat || this.isPaused) return;
+      this.strumGig(lane, event.timeStamp);
     });
 
     this.syncPresentation();
@@ -162,6 +199,7 @@ export class RidgeScene extends Phaser.Scene {
     if (mode !== 'explore') {
       if (mode === 'cickaDuel') this.updateCickaDuel(delta);
       if (mode === 'bridgeBuild') this.updateBridgeBuild(delta);
+      if (mode === 'concertGig') this.updateConcertGig(delta);
       // Drain edge-triggered input so a press made while talking or playing
       // does not fire the moment it closes (e.g. E re-opening a conversation).
       Phaser.Input.Keyboard.JustDown(this.keys.interactKey);
@@ -197,6 +235,9 @@ export class RidgeScene extends Phaser.Scene {
 
   setPaused(paused: boolean): void {
     this.isPaused = paused;
+    // The song clock stops with the scene, and the band goes quiet.
+    if (paused) this.gigAudio?.pause();
+    else this.gigAudio?.resume();
   }
 
   private handleDevSkipKeys(): void {
@@ -269,6 +310,86 @@ export class RidgeScene extends Phaser.Scene {
     }
   }
 
+  /** Play the song: the audio clock drives the playhead, then a bow and Steve's verdict. */
+  private updateConcertGig(delta: number): void {
+    const session = this.session;
+    const gig = session?.concertGig;
+    if (!session || !gig) return;
+    const audio = this.ensureGigAudio(gig);
+    audio.update(delta);
+
+    if (gig.phase !== 'finished') {
+      session.advanceConcertGig(audio.nowMs());
+      this.cheerNewSection(gig, audio);
+      this.gigOutroMs = 0;
+      return;
+    }
+    this.takeABow(gig, audio, delta);
+  }
+
+  /** A warm crowd roars into each new section. */
+  private cheerNewSection(gig: ConcertGig, audio: ConcertGigAudio): void {
+    const section = gig.section?.index ?? null;
+    if (section === this.gigSection) return;
+    this.gigSection = section;
+    if (section !== null && section > 0 && gig.mode === 'show' && gig.hype > 0.6) audio.cheer(gig.hype);
+  }
+
+  /** The last chord rings and the crowd roars, then Steve has his say. */
+  private takeABow(gig: ConcertGig, audio: ConcertGigAudio, delta: number): void {
+    if (!this.gigCheered) {
+      this.gigCheered = true;
+      if (gig.mode === 'show') audio.cheer(0.45 + gig.hype * 0.55);
+    }
+    this.gigOutroMs += delta;
+    if (this.gigOutroMs < GIG_OUTRO_MS) return;
+    this.gigOutroMs = 0;
+    this.applyResult(this.session!.run({ type: 'gig', action: { kind: 'done' } }));
+  }
+
+  /** One band per gig: a fresh ConcertGig means a fresh song clock. */
+  private ensureGigAudio(gig: ConcertGig): ConcertGigAudio {
+    if (this.gigAudio && this.gigFor === gig) return this.gigAudio;
+    this.releaseGigAudio();
+    for (const old of this.releasedGigAudio.splice(0)) old.destroy();
+    this.gigFor = gig;
+    this.gigSection = null;
+    this.gigCheered = false;
+    this.gigOutroMs = 0;
+    this.gigAudio = new ConcertGigAudio(ConcertGigAudio.outputFrom(this.sound), gig.song, {
+      frontRowClap: gig.startHype > GIG_START_HYPE
+    });
+    return this.gigAudio;
+  }
+
+  private releaseGigAudio(): void {
+    if (!this.gigAudio) return;
+    this.gigAudio.release();
+    this.releasedGigAudio.push(this.gigAudio);
+    this.gigAudio = undefined;
+    this.gigFor = null;
+  }
+
+  /** The panel's touch buttons send the lane and the press timestamp. */
+  private handleGigStrumAction(params: unknown): void {
+    const lane = readNumberParam(params, 'lane');
+    if (isGigLane(lane)) this.strumGig(lane, readNumberParam(params, 'at') ?? performance.now());
+  }
+
+  /** Strum a lane at a DOM event time (keyboard or the panel's buttons). */
+  private strumGig(lane: GigLane, eventTimeStamp: number): void {
+    const session = this.session;
+    const gig = session?.concertGig;
+    if (!session || !gig || gig.phase === 'finished') return;
+    const audio = this.ensureGigAudio(gig);
+    const at = audio.msAtEventTime(eventTimeStamp);
+    const result = session.strumConcertGig(lane, at);
+    if (result.kind === 'ignored') return;
+    this.gigView?.press(lane, at);
+    if (result.kind === 'hit') audio.strum(result.chord, lane, result.hit.judgment === 'perfect');
+    else audio.chuck();
+  }
+
   private dodge(): void {
     if (this.session) this.applyResult(this.session.run({ type: 'duel', action: { kind: 'dodge' } }));
   }
@@ -310,10 +431,24 @@ export class RidgeScene extends Phaser.Scene {
     return false;
   }
 
+  /** Drain every pending action: a two-lane chord on touch arrives as two taps in one frame. */
   private handleSceneUiActions(): void {
+    for (let action = bridgeActions.consumeSceneUiAction(RIDGE_SCENE_ID); action && this.session; ) {
+      this.handleSceneUiAction(action);
+      action = bridgeActions.consumeSceneUiAction(RIDGE_SCENE_ID);
+    }
+  }
+
+  private handleSceneUiAction(action: SceneUiActionRequest): void {
     if (!this.session) return;
-    const action = bridgeActions.consumeSceneUiAction(RIDGE_SCENE_ID);
-    if (!action) return;
+    if (action.action === 'ridgeGigStrum') {
+      this.handleGigStrumAction(action.params);
+      return;
+    }
+    if (action.action === 'ridgeGigSkip') {
+      this.applyResult(this.session.run({ type: 'gig', action: { kind: 'skip' } }));
+      return;
+    }
     if (this.handleBridgeUiAction(action.action, action.params)) return;
 
     if (action.action === 'ridgeConversationAdvance') {
@@ -360,6 +495,10 @@ export class RidgeScene extends Phaser.Scene {
       bridgeActions.setRidgeCickaStandoff(event.won || previous === 'won' ? 'won' : 'lost');
       return;
     }
+    if (event.type === 'concert_gig_closed') {
+      this.releaseGigAudio();
+      return;
+    }
     if (event.type === 'bridge_built') {
       bridgeActions.setRidgeBridgeDesign(event.design);
       return;
@@ -381,7 +520,10 @@ export class RidgeScene extends Phaser.Scene {
     }
     const view = toRidgeVisualViewModel(observation);
     this.syncDuelStaging(observation, view);
+    const gigFrame = this.stageGig(view);
     this.visuals.sync(view);
+    // After the camera moved: the highway pins itself to this frame's zoom.
+    this.syncGigView(gigFrame);
     this.syncSceneUiPanel(observation);
 
     if (import.meta.env.DEV) {
@@ -418,6 +560,29 @@ export class RidgeScene extends Phaser.Scene {
     });
   }
 
+  /** Bodies bounce and strum through view nudges, like the standoff. */
+  private stageGig(view: RidgeVisualViewModel): GigFrame | null {
+    const gig = this.session?.concertGig;
+    if (!gig) return null;
+    const frame = stageConcertGig(gig);
+    view.actorNudges = frame.actors;
+    return frame;
+  }
+
+  private syncGigView(frame: GigFrame | null): void {
+    const gig = this.session?.concertGig;
+    if (!gig || !frame || !this.visuals) {
+      this.gigView?.destroy();
+      this.gigView = undefined;
+      return;
+    }
+    const actors = this.session!.observe().actors;
+    const xOf = (id: RidgeActorId) =>
+      this.visuals!.worldXForProgress(actors.find((actor) => actor.id === id)?.progress ?? 0);
+    this.gigView ??= new ConcertGigView(this);
+    this.gigView.sync(gig, frame, { performerX: xOf('player'), crowdX: xOf('crowd') });
+  }
+
   /** One docked panel at a time: the conversation box or a mini-game's chrome. */
   private syncSceneUiPanel(observation: RidgeObservation): void {
     if (observation.mode === 'bridgeBuild' && observation.bridgeBuild) {
@@ -426,6 +591,10 @@ export class RidgeScene extends Phaser.Scene {
     }
     if (observation.mode === 'cickaDuel' && observation.cickaDuel) {
       this.syncCickaDuelPanel(observation.cickaDuel);
+      return;
+    }
+    if (observation.mode === 'concertGig' && observation.concertGig) {
+      this.syncConcertGigPanel(observation.concertGig);
       return;
     }
     if (observation.mode !== 'conversation' || !observation.conversation) {
@@ -498,7 +667,31 @@ export class RidgeScene extends Phaser.Scene {
     bridgeActions.setSceneUiPanel(RIDGE_SCENE_ID, 'ridgeCickaDuel', view);
   }
 
+  private syncConcertGigPanel(gig: NonNullable<RidgeObservation['concertGig']>): void {
+    const view: RidgeConcertGigPanelView = {
+      mode: gig.mode,
+      phase: gig.phase,
+      section: gig.section,
+      hype: Math.round(gig.hype * 20) / 20,
+      combo: gig.combo,
+      counts: gig.counts,
+      notesTotal: gig.notesTotal,
+      lastJudgment: gig.lastJudgment,
+      grade: gig.grade,
+      practice: gig.practice,
+      kidHype: gig.warmStart
+    };
+    const key = `gig:${JSON.stringify(view)}`;
+    if (key === this.lastPanelKey) return;
+    this.lastPanelKey = key;
+    bridgeActions.setSceneUiPanel(RIDGE_SCENE_ID, 'ridgeConcertGig', view);
+  }
+
   private cleanup(): void {
+    this.gigView?.destroy();
+    this.gigView = undefined;
+    this.releaseGigAudio();
+    for (const audio of this.releasedGigAudio.splice(0)) audio.destroy();
     this.duelView?.destroy();
     this.duelView = undefined;
     bridgeActions.clearSceneUi(RIDGE_SCENE_ID);
@@ -512,6 +705,12 @@ export class RidgeScene extends Phaser.Scene {
     this.prevKey = undefined;
     this.lastPanelKey = null;
   }
+}
+
+function readNumberParam(params: unknown, key: string): number | undefined {
+  if (!params || typeof params !== 'object' || !(key in params)) return undefined;
+  const value = (params as Record<string, unknown>)[key];
+  return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
 }
 
 function readStringParam(params: unknown, key: string): string | undefined {

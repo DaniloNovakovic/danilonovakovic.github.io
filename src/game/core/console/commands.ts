@@ -28,6 +28,8 @@ const SIMPLE_COMMANDS: Record<string, GameCommand> = {
 };
 
 const GO_ALIASES = new Set(['go', 'walk', 'move']);
+/** Ridge mini-game verbs the Ridge console parses itself. */
+const RIDGE_VERBS = new Set(['build', 'duel', 'dodge', 'gig', 'strum']);
 const LEFT_ALIASES = new Set(['left', 'l']);
 const RIGHT_ALIASES = new Set(['right', 'r']);
 const INTERACT_ALIASES = new Set(['interact', 'use', 'talk']);
@@ -52,6 +54,9 @@ export function getGameHelpText(): string {
     'Ridge Blueprint Bridge (after the toy car test starts):',
     '  build road|wood X,Y X,Y | build test | build edit | build done',
     '  build sketch | hint | undo | erase <n> | show | leave',
+    '',
+    "Ridge Cicka's Standoff: duel dodge | duel wait [frames] | duel done",
+    'Ridge Concert gig: gig hit [0|1|2] | gig wait [ms] | gig auto | gig skip | gig done',
     '',
     'Ridge playtest skips:',
     '  skip                         next area',
@@ -85,8 +90,9 @@ export function parseGameCommand(raw: string): GameCommand {
     return { type: 'look' };
   }
 
-  // Before SIMPLE_COMMANDS: `build clear` must not read as the Potassium `clear`.
-  if (head === 'build') return { type: 'build', raw: trimmed };
+  // Before SIMPLE_COMMANDS: `build clear` must not read as the Potassium `clear`,
+  // nor `gig skip` as the Ridge area skip.
+  if (RIDGE_VERBS.has(head)) return { type: 'ridgeVerb', raw: trimmed };
 
   const simple = SIMPLE_COMMANDS[head];
   if (simple) return simple;

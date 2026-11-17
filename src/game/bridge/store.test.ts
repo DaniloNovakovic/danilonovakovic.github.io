@@ -514,8 +514,27 @@ describe('bridgeStore', () => {
         params
       });
       expect(action?.sequence).toBeGreaterThan(0);
-      expect(bridgeStore.getState().sceneUi.lastAction).toBeNull();
+      expect(bridgeStore.getState().sceneUi.actions).toEqual([]);
       expect(bridgeActions.consumeSceneUiAction(POTASSIUM_SCENE_ID)).toBeNull();
+    });
+
+    it('queues actions dispatched before the scene consumes them, oldest first', () => {
+      // Two fingers on two lanes inside one frame: both strums must reach the scene.
+      bridgeActions.dispatchSceneUiAction(RIDGE_SCENE_ID, 'ridgeGigStrum', { lane: 0 });
+      bridgeActions.dispatchSceneUiAction(RIDGE_SCENE_ID, 'ridgeGigStrum', { lane: 2 });
+
+      expect(bridgeActions.consumeSceneUiAction(RIDGE_SCENE_ID)?.params).toEqual({ lane: 0 });
+      expect(bridgeActions.consumeSceneUiAction(RIDGE_SCENE_ID)?.params).toEqual({ lane: 2 });
+      expect(bridgeActions.consumeSceneUiAction(RIDGE_SCENE_ID)).toBeNull();
+    });
+
+    it('drops the oldest pending actions past the cap when the scene stops consuming', () => {
+      for (let lane = 0; lane < 20; lane += 1) {
+        bridgeActions.dispatchSceneUiAction(RIDGE_SCENE_ID, 'ridgeGigStrum', { lane });
+      }
+
+      expect(bridgeStore.getState().sceneUi.actions).toHaveLength(16);
+      expect(bridgeActions.consumeSceneUiAction(RIDGE_SCENE_ID)?.params).toEqual({ lane: 4 });
     });
 
     it('guards clears and action consumption by owner scene', () => {
@@ -535,7 +554,7 @@ describe('bridgeStore', () => {
       expect(bridgeStore.getState().sceneUi.status?.ownerSceneId).toBe(STAMPEDE_SKETCH_SCENE_ID);
       expect(bridgeStore.getState().sceneUi.panel?.ownerSceneId).toBe(STAMPEDE_SKETCH_SCENE_ID);
       expect(bridgeActions.consumeSceneUiAction(RIDGE_SCENE_ID)).toBeNull();
-      expect(bridgeStore.getState().sceneUi.lastAction?.ownerSceneId).toBe(STAMPEDE_SKETCH_SCENE_ID);
+      expect(bridgeStore.getState().sceneUi.actions[0]?.ownerSceneId).toBe(STAMPEDE_SKETCH_SCENE_ID);
     });
   });
 });

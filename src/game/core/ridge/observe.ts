@@ -2,6 +2,7 @@
 // fallow-ignore-file complexity
 import type { BridgeWorkbench } from './bridgeBuilder';
 import type { CickaDuel } from './cickaDuel';
+import { GIG_START_HYPE, type ConcertGig } from './concertGig';
 import type {
   RidgeObservation,
   RidgeStageDefinition,
@@ -12,7 +13,8 @@ export function observeRidgeWorld(
   state: RidgeWorldState,
   stage: RidgeStageDefinition,
   workbench: BridgeWorkbench | null = null,
-  duel: CickaDuel | null = null
+  duel: CickaDuel | null = null,
+  gig: ConcertGig | null = null
 ): RidgeObservation {
   const nearby = [...stage.resolveInteractables(state)].sort(
     (a, b) => a.distance - b.distance
@@ -47,8 +49,13 @@ export function observeRidgeWorld(
     : null;
 
   const hints =
-    state.mode === 'cickaDuel' ? duelHints(duel) : buildHints(state, stage, nearby, blockedAhead, workbench);
+    state.mode === 'cickaDuel'
+      ? duelHints(duel)
+      : state.mode === 'concertGig'
+        ? gigHints(gig)
+        : buildHints(state, stage, nearby, blockedAhead, workbench);
   const cickaDuel = state.mode === 'cickaDuel' && duel ? observeDuel(duel) : null;
+  const concertGig = state.mode === 'concertGig' && gig ? observeGig(gig) : null;
   const bridgeBuild =
     state.mode === 'bridgeBuild' && workbench
       ? {
@@ -84,6 +91,7 @@ export function observeRidgeWorld(
     conversation,
     bridgeBuild,
     cickaDuel,
+    concertGig,
     builtBridge: state.builtBridge,
     canMove: state.mode === 'explore',
     blockedAhead,
@@ -149,6 +157,39 @@ function observeDuel(duel: CickaDuel): NonNullable<RidgeObservation['cickaDuel']
   };
 }
 
+function observeGig(gig: ConcertGig): NonNullable<RidgeObservation['concertGig']> {
+  const next = gig.nextPendingNote();
+  return {
+    mode: gig.mode,
+    phase: gig.phase,
+    timeMs: Math.round(gig.timeMs),
+    section: gig.section?.kind ?? null,
+    hype: gig.hype,
+    combo: gig.combo,
+    bestCombo: gig.bestCombo,
+    score: gig.score,
+    counts: { ...gig.counts },
+    notesTotal: gig.song.notes.length,
+    lastJudgment: gig.lastHit?.judgment ?? null,
+    next: next ? { lane: next.lane, inMs: Math.round(next.timeMs - gig.timeMs) } : null,
+    grade: gig.grade,
+    practice:
+      gig.mode === 'practice'
+        ? { loop: gig.loop, loopsTotal: gig.loopsTotal, hits: gig.loopHits, needed: gig.loopNeeded, passed: gig.passed }
+        : null,
+    warmStart: gig.startHype > GIG_START_HYPE
+  };
+}
+
+function gigHints(gig: ConcertGig | null): string[] {
+  if (gig?.phase === 'finished') return ['gig done — take a bow and hear what Steve thinks'];
+  return [
+    'gig hit — strum the next note right on time (or gig hit 0|1|2 to strum a lane now)',
+    'gig wait [ms] — let the song play on',
+    'gig auto — play the rest cleanly | gig skip — let it pass'
+  ];
+}
+
 function duelHints(duel: CickaDuel | null): string[] {
   if (duel && duel.phase !== 'fighting') return ['duel done — see how Cicka takes it'];
   return [
@@ -200,6 +241,20 @@ export function formatObservation(observation: RidgeObservation): string {
     );
     if (d.telegraph) lines.push(`Cicka winds up a ${d.telegraph.kind}: lands in ${d.telegraph.framesToImpact} frames`);
     if (d.lastResult) lines.push(`Last landing: ${d.lastResult}`);
+  } else if (observation.concertGig) {
+    const g = observation.concertGig;
+    lines.push('');
+    lines.push(
+      `--- concert ${g.mode}: ${g.phase} ${g.section ?? ''} t=${g.timeMs}ms hype ${Math.round(g.hype * 100)}% combo ${g.combo} score ${g.score} ---`
+    );
+    lines.push(
+      `perfect ${g.counts.perfect} good ${g.counts.good} miss ${g.counts.miss} of ${g.notesTotal} — grade ${g.grade}`
+    );
+    if (g.practice) {
+      lines.push(`practice pass ${g.practice.loop + 1}/${g.practice.loopsTotal}: ${g.practice.hits}/${g.practice.needed} landed`);
+    }
+    if (g.next) lines.push(`Next note: lane ${g.next.lane} in ${g.next.inMs}ms`);
+    if (g.lastJudgment) lines.push(`Last note: ${g.lastJudgment}`);
   } else if (observation.conversation) {
     const c = observation.conversation;
     lines.push('');

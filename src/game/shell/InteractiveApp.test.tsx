@@ -576,7 +576,7 @@ describe('InteractiveApp', () => {
 
     await userEvent.click(screen.getByRole('button', { name: /bad selfie/i }));
 
-    expect(bridgeStore.getState().sceneUi.lastAction).toMatchObject({
+    expect(bridgeStore.getState().sceneUi.actions.at(-1)).toMatchObject({
       ownerSceneId: STAMPEDE_SKETCH_SCENE_ID,
       action: 'stampedeUpgradeChoice',
       params: { upgradeId: 'badSelfie' }
@@ -597,7 +597,7 @@ describe('InteractiveApp', () => {
 
     await userEvent.click(screen.getByRole('button', { name: /bad smell/i }));
 
-    expect(bridgeStore.getState().sceneUi.lastAction).toMatchObject({
+    expect(bridgeStore.getState().sceneUi.actions.at(-1)).toMatchObject({
       ownerSceneId: STAMPEDE_SKETCH_SCENE_ID,
       action: 'stampedeUpgradeChoice',
       params: { upgradeId: 'badSmell' }
@@ -623,13 +623,13 @@ describe('InteractiveApp', () => {
     expect(within(resultDialog).getByRole('button', { name: /back to the street/i })).toBeDefined();
 
     await userEvent.click(within(resultDialog).getByRole('button', { name: /^retry$/i }));
-    expect(bridgeStore.getState().sceneUi.lastAction).toMatchObject({
+    expect(bridgeStore.getState().sceneUi.actions.at(-1)).toMatchObject({
       ownerSceneId: STAMPEDE_SKETCH_SCENE_ID,
       action: 'retry'
     });
 
     await userEvent.click(within(resultDialog).getByRole('button', { name: /back to the street/i }));
-    expect(bridgeStore.getState().sceneUi.lastAction).toMatchObject({
+    expect(bridgeStore.getState().sceneUi.actions.at(-1)).toMatchObject({
       ownerSceneId: STAMPEDE_SKETCH_SCENE_ID,
       action: 'backToRidge'
     });
@@ -665,7 +665,7 @@ describe('InteractiveApp', () => {
 
     await userEvent.click(screen.getByRole('button', { name: /fire trail/i }));
 
-    expect(bridgeStore.getState().sceneUi.lastAction).toMatchObject({
+    expect(bridgeStore.getState().sceneUi.actions.at(-1)).toMatchObject({
       ownerSceneId: POTASSIUM_SCENE_ID,
       action: 'potassiumDraftChoice',
       params: { option }
@@ -692,7 +692,7 @@ describe('InteractiveApp', () => {
 
     await userEvent.click(within(terminalDialog).getByRole('button', { name: /^retry$/i }));
 
-    expect(bridgeStore.getState().sceneUi.lastAction).toMatchObject({
+    expect(bridgeStore.getState().sceneUi.actions.at(-1)).toMatchObject({
       ownerSceneId: POTASSIUM_SCENE_ID,
       action: 'potassiumTerminalAction',
       params: { action: 'retry' }
@@ -735,7 +735,7 @@ describe('InteractiveApp', () => {
     await userEvent.click(within(dialog).getByRole('button', { name: /continue/i }));
     await userEvent.click(within(dialog).getByRole('button', { name: /continue/i }));
 
-    expect(bridgeStore.getState().sceneUi.lastAction).toMatchObject({
+    expect(bridgeStore.getState().sceneUi.actions.at(-1)).toMatchObject({
       ownerSceneId: RIDGE_SCENE_ID,
       action: 'ridgeConversationAdvance'
     });

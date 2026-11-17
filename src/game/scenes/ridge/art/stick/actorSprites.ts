@@ -9,6 +9,7 @@ import {
   drawStickDriver,
   drawStickGuitar,
   drawStickGuitarist,
+  drawStickKid,
   drawStickOperationsHelper,
   drawStickPlayer,
   drawStickShuttle,
@@ -39,6 +40,7 @@ const HEAD_TOP: Record<RidgeActorId, number> = {
   draftsperson: -48,
   'toy-car': -14,
   guitarist: -46,
+  kid: -31,
   crowd: -41,
   guitar: -24,
   traveler: -44,
@@ -137,7 +139,7 @@ class ActorSprite {
 
   sync(request: ActorRenderRequest): void {
     const { pose } = request;
-    const key = `${request.facing}|${pose.frame}|${pose.walking}|${pose.talking}|${pose.emotion ?? ''}`;
+    const key = poseKeyOf(request.facing, pose);
     if (key !== this.poseKey) {
       this.poseKey = key;
       this.graphics.clear();
@@ -168,6 +170,11 @@ class ActorSprite {
   }
 }
 
+/** Everything that changes the drawing; transforms (x, y, alpha) are not in it. */
+function poseKeyOf(facing: RidgeFacing, pose: StickPose): string {
+  return [facing, pose.frame, pose.walking, pose.talking, pose.emotion, pose.prop, pose.strum, pose.seated].join('|');
+}
+
 /** Props sit behind people; the player reads above the crowd. */
 function depthOffsetFor(id: RidgeActorId): number {
   if (id === 'player') return 3;
@@ -191,6 +198,7 @@ const ACTOR_DRAWERS: Record<RidgeActorId, ActorDrawer> = {
   draftsperson: (g, facing, pose, s) => drawStickDraftsperson(g, 0, 0, facing, 1.05 * s, pose),
   'toy-car': (g, _facing, _pose, s) => drawStickToyCar(g, 22, 4, 1.1 * s),
   guitarist: (g, facing, pose, s) => drawStickGuitarist(g, 0, 0, facing, 1.05 * s, pose),
+  kid: (g, facing, pose, s) => drawStickKid(g, 0, 0, facing, 0.74 * s, pose),
   crowd: (g, _facing, pose, s) => drawStickCrowd(g, 0, 0, s, pose),
   guitar: (g, _facing, _pose, s) => drawStickGuitar(g, 20, 2, 1.1 * s),
   traveler: (g, facing, pose, s) => drawStickTraveler(g, 0, 0, facing, s, pose),
