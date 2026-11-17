@@ -53,6 +53,7 @@ export const ridgeMessages = {
     strum: (lane: string) => `Strum ${lane}`,
     keys: "A S D · ← ↓ → · J K L",
     stepAway: "Step away",
+    letBandFinish: "Let the band finish",
     countInPractice: "Watch the notes slide down. Strum as each one touches the line.",
     countInShow: "One, two... one, two, three, four!",
     countInKid: "The kid starts a clap. The whole crowd joins in!",

@@ -72,8 +72,8 @@ export class ConcertGigAudio {
   private lastCheerAt = Number.NEGATIVE_INFINITY;
   private destroyed = false;
 
-  constructor(output: GigAudioOutput | null, song: GigSong) {
-    this.events = buildBandEvents(song);
+  constructor(output: GigAudioOutput | null, song: GigSong, options: BandOptions = {}) {
+    this.events = buildBandEvents(song, options);
     const context = output?.context ?? null;
     this.ctx = context;
     this.audioClock = context?.state === 'running';
@@ -368,12 +368,21 @@ const FEEL: Record<GigSectionKind, { kick: number[]; snare: number[]; hat: numbe
   finale: { kick: [0, 1.5, 2, 3.5], snare: [1, 3], hat: 0.5, bass: [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5] }
 };
 
+interface BandOptions {
+  /** The skater kid got the front row clapping: claps on two and four from the count-in through the intro. */
+  frontRowClap?: boolean;
+}
+
 /** Expand the song into backing-band hits, sorted by time. */
-function buildBandEvents(song: GigSong): BandEvent[] {
+function buildBandEvents(song: GigSong, options: BandOptions): BandEvent[] {
   const events: BandEvent[] = [];
   const beat = song.beatMs;
   // Count-in: the drummer clicks four on the sticks.
   for (let t = 0; t < song.startMs - 1; t += beat) events.push({ timeMs: t, hit: 'click', level: 1 });
+  if (options.frontRowClap) {
+    const introEnd = song.sections.find((section) => section.kind === 'intro')?.endMs ?? song.startMs;
+    for (let t = beat; t < introEnd - 1; t += beat * 2) events.push({ timeMs: t, hit: 'clap', level: 0.8 });
+  }
 
   song.bars.forEach((bar, index) => {
     const kind = song.sections[bar.section]!.kind;

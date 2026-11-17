@@ -528,6 +528,15 @@ describe('bridgeStore', () => {
       expect(bridgeActions.consumeSceneUiAction(RIDGE_SCENE_ID)).toBeNull();
     });
 
+    it('drops the oldest pending actions past the cap when the scene stops consuming', () => {
+      for (let lane = 0; lane < 20; lane += 1) {
+        bridgeActions.dispatchSceneUiAction(RIDGE_SCENE_ID, 'ridgeGigStrum', { lane });
+      }
+
+      expect(bridgeStore.getState().sceneUi.actions).toHaveLength(16);
+      expect(bridgeActions.consumeSceneUiAction(RIDGE_SCENE_ID)?.params).toEqual({ lane: 4 });
+    });
+
     it('guards clears and action consumption by owner scene', () => {
       bridgeActions.setSceneUiStatus(
         STAMPEDE_SKETCH_SCENE_ID,

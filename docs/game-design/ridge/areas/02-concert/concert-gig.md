@@ -25,6 +25,9 @@ style, with the Forgiving Practice Riff as its tutorial.
   the combo and weighs half a note against accuracy, but never drains hype:
   mashing every lane grades Rough.
 - Never fails: the show always plays to the end and always clears the crossing.
+  Non-arcade fallback: "Let the band finish" under the strum buttons plays the
+  rest out without you (unplayed notes count as missed) and still clears it;
+  practice already lets you through after its last pass.
   The grade (Legendary ≥ 90% / Great ≥ 72% / Good ≥ 45% / Rough) changes the
   crowd's and Steve's reaction, and a Great+ show coaxes Cicka to the stage edge
   if you sat with her first.
@@ -33,7 +36,8 @@ style, with the Forgiving Practice Riff as its tutorial.
   Steve says so ("you kept coming back to it"). "Step away" leaves practice.
 - Kid hype man: talk the Skater Kid into it (sticker → "Get the crowd going")
   and the show starts with the crowd warmer (hype 0.68 instead of 0.5) and a
-  front-row clap.
+  front-row clap: claps on two and four from the count-in through the intro,
+  with the kid bouncing on the beat.
 - Presentation: the highway is a paper card pinned in screen space, clear of the
   panel chrome on any screen (the frame expands on phones, like the workbench).
   Stage spotlights warm with hype, notes float off the guitar on hits, lighters
@@ -44,5 +48,8 @@ style, with the Forgiving Practice Riff as its tutorial.
   back from that clock. The lead is a Karplus-Strong pluck voiced by your hits.
   Locked or missing audio runs silently on the frame clock; every cue has a
   visual twin. Overlay pause mutes the band and freezes the song clock.
+- Scene UI actions (strums, "Let the band finish") reach the scene through the
+  bridge's pending-action FIFO (capped at 16, oldest dropped), drained every
+  frame so a two-finger chord lands both lanes.
 - Console: `gig hit` (next note, on time), `gig hit 0|1|2`, `gig wait [ms]`,
   `gig auto`, `gig skip`, `gig done`.

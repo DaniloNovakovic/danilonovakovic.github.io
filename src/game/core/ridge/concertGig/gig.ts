@@ -71,6 +71,9 @@ export interface GigOptions {
   startHype?: number;
 }
 
+/** Narrow an untrusted number (a panel param) to a lane. */
+export const isGigLane = (value: unknown): value is GigLane => value === 0 || value === 1 || value === 2;
+
 export class ConcertGig {
   readonly mode: GigMode;
   readonly song: GigSong;
@@ -209,6 +212,11 @@ export class ConcertGig {
     }
     if (this.mode === 'practice') this.scorePracticeLoops();
     else if (toMs >= this.song.endMs) this.finishedAt = toMs;
+  }
+
+  /** Let the song play out: every unplayed note is a miss, and the show is over. */
+  finish(): void {
+    this.advance(this.song.endMs + 1);
   }
 
   /** Strum a lane at song time `atMs` (defaults to now). */

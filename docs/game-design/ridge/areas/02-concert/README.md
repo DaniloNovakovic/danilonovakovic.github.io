@@ -167,7 +167,8 @@ depth while the playable lane stays mostly left/right.
 
 - A Guitar-Hero-like performance mini-game is allowed as an ideal or optional
   expression.
-- The required route must have a non-arcade fallback.
+- The required route must have a non-arcade fallback (shipped: "Let the band
+  finish" in the gig panel; see [`concert-gig.md`](./concert-gig.md)).
 - Do not block the first route MVP on building the full rhythm mini-game.
 - Do not over-breadcrumb the injured guitarist in v0; compact exploration and
   believable crowd chatter should be enough unless playtests prove otherwise.

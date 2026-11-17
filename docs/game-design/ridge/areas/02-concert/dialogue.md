@@ -20,8 +20,6 @@ Dialogue after the Bridge Tracer Slice proves the dialogue data shape.
   stunt without becoming joke-only.
 - `concert.guitarist.practice_riff`: forgiving practice interaction that teaches
   the player the concert phrase.
-- `concert.performance.auto_success`: minimal concert start and crowd-clearing
-  line/prompt set.
 - `concert.guitarist.guitar_handoff`: post-concert goodbye and guitar reward.
 - `concert.cicka.band_resting_spot`: Cicka before/during/after concert flavor.
 

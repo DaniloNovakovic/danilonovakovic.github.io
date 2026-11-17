@@ -203,6 +203,13 @@ function sceneUiSurfacesEqual(
   );
 }
 
+/**
+ * Pending scene UI actions are a small FIFO, not a command stream: it only has
+ * to absorb a burst (a two-finger chord) between scene frames. A scene that
+ * stops consuming (paused, asleep) drops its oldest presses past this cap.
+ */
+const MAX_PENDING_SCENE_UI_ACTIONS = 16;
+
 /** Queued actions are immutable once dispatched, so the sequence identifies each one. */
 function sceneUiActionsEqual(
   a: readonly SceneUiActionRequest[],
@@ -773,7 +780,9 @@ export const bridgeActions = {
       sceneUi: {
         ...current.sceneUi,
         // Queued, not overwritten: two taps in one frame (a chord) must both land.
-        actions: [...current.sceneUi.actions, { ownerSceneId, action, params, sequence }]
+        actions: [...current.sceneUi.actions, { ownerSceneId, action, params, sequence }].slice(
+          -MAX_PENDING_SCENE_UI_ACTIONS
+        )
       }
     }));
   },

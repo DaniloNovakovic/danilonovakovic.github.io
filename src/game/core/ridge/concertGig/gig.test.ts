@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ConcertGig, GIG_GOOD_MS, playNextNotePerfectly } from './gig';
+import { ConcertGig, GIG_GOOD_MS, isGigLane, playNextNotePerfectly } from './gig';
 import { compileGigSong, CROSSING_SHOW_SPEC, PRACTICE_RIFF_SPEC } from './song';
 
 function playAll(gig: ConcertGig): void {
@@ -91,6 +91,20 @@ describe('ConcertGig show', () => {
     expect(gig.counts.miss).toBe(gig.song.notes.length);
     expect(gig.grade).toBe('rough');
     expect(gig.hype).toBe(0);
+  });
+
+  it('letting the band finish plays out the rest as misses and ends the show', () => {
+    const gig = new ConcertGig({ mode: 'show' });
+    playNextNotePerfectly(gig);
+    gig.finish();
+    expect(gig.phase).toBe('finished');
+    expect(gig.counts.perfect).toBe(1);
+    expect(gig.counts.miss).toBe(gig.song.notes.length - 1);
+  });
+
+  it('only accepts the three lanes from untrusted params', () => {
+    expect([0, 1, 2].every(isGigLane)).toBe(true);
+    expect([3, -1, 0.5, '1', undefined].some(isGigLane)).toBe(false);
   });
 
   it('a clean show is legendary with a full combo', () => {

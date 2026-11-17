@@ -27,7 +27,8 @@ export type SceneUiActionId =
   | 'ridgeBridgeTool'
   | 'ridgeBridgeCommand'
   | 'ridgeDuelDodge'
-  | 'ridgeGigStrum';
+  | 'ridgeGigStrum'
+  | 'ridgeGigSkip';
 
 export interface SceneUiSurfaceRequest {
   ownerSceneId: SceneId;
@@ -45,6 +46,9 @@ export interface SceneUiActionRequest {
 export interface SceneUiState {
   status: SceneUiSurfaceRequest | null;
   panel: SceneUiSurfaceRequest | null;
-  /** Pending one-shot actions, oldest first; the owning scene consumes them. */
+  /**
+   * Pending one-shot actions, oldest first; the owning scene consumes them.
+   * FIFO, capped (oldest dropped), and cleared with the owner's surfaces.
+   */
   actions: readonly SceneUiActionRequest[];
 }

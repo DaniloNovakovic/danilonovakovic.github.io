@@ -132,7 +132,16 @@ export function RidgeConcertGigPanel({ params, dispatchAction }: SceneUiSurfaceP
             <span className="pointer-events-none hidden text-[10px] font-bold uppercase tracking-wider text-[#4b4337] pointer-fine:inline short:hidden">
               {copy.keys}
             </span>
-            {view.mode === 'practice' ? (
+            {view.mode === 'show' ? (
+              // The non-arcade path: the show plays out without you and still clears the crossing.
+              <button
+                type="button"
+                onClick={() => dispatchAction('ridgeGigSkip')}
+                className="pointer-events-auto rounded border-2 border-[#1a1a1a] bg-[#fbfbf9] px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-[#1a1a1a] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1a1a1a]"
+              >
+                {copy.letBandFinish}
+              </button>
+            ) : (
               <button
                 type="button"
                 onClick={() => dispatchAction('ridgeConversationLeave')}
@@ -140,7 +149,7 @@ export function RidgeConcertGigPanel({ params, dispatchAction }: SceneUiSurfaceP
               >
                 {copy.stepAway}
               </button>
-            ) : null}
+            )}
           </div>
         </div>
       )}

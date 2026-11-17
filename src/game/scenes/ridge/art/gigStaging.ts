@@ -1,6 +1,6 @@
 // One frame of staging reads several gig facts per actor; branches are the choreography.
 // fallow-ignore-file complexity
-import type { ConcertGig, GigJudgment, GigLane, RidgeEmotion } from '@/game/core/ridge';
+import { GIG_START_HYPE, type ConcertGig, type GigJudgment, type GigLane, type RidgeEmotion } from '@/game/core/ridge';
 import type { DuelActorStaging } from './duelStaging';
 
 /** How long a judgment word and target flash stay up, in song ms. */
@@ -41,6 +41,9 @@ export function stageConcertGig(gig: ConcertGig): GigFrame {
   // A finished show is a standing ovation: everyone up on their toes.
   const crowdLift = finished ? -6 : -pulse * (1.5 + hype * 7);
   const strum = landedCount(gig) % 2;
+  // The kid who warmed the crowd is already clapping on the count-in.
+  const kidClapping = gig.startHype > GIG_START_HYPE && countIn !== null && beatPhase !== null;
+  const kidLift = kidClapping ? -Math.abs(Math.sin(Math.PI * beatPhase)) * 4 : crowdLift * 1.4;
 
   return {
     timeMs: t,
@@ -56,7 +59,7 @@ export function stageConcertGig(gig: ConcertGig): GigFrame {
         emotion: performerEmotion(gig, flash)
       },
       crowd: { dx: 0, dy: Math.round(crowdLift), emotion: hype > 0.62 || finished ? 'playful' : 'curious' },
-      kid: { dx: 0, dy: Math.round(crowdLift * 1.4), emotion: hype > 0.5 ? 'playful' : 'determined' },
+      kid: { dx: 0, dy: Math.round(kidLift), emotion: hype > 0.5 || kidClapping ? 'playful' : 'determined' },
       guitarist: {
         dx: 0,
         dy: Math.round(-pulse * 2),

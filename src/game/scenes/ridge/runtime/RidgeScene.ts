@@ -10,6 +10,8 @@ import {
   CICKA_DUEL_DT,
   cickaStandoffFlags,
   createRidgeRouteStages,
+  GIG_START_HYPE,
+  isGigLane,
   RidgeConsoleSession,
   RIDGE_GUITAR_ITEM,
   RIDGE_INITIAL_BEAT,
@@ -348,7 +350,9 @@ export class RidgeScene extends Phaser.Scene {
     this.gigSection = null;
     this.gigCheered = false;
     this.gigOutroMs = 0;
-    this.gigAudio = new ConcertGigAudio(ConcertGigAudio.outputFrom(this.sound), gig.song);
+    this.gigAudio = new ConcertGigAudio(ConcertGigAudio.outputFrom(this.sound), gig.song, {
+      frontRowClap: gig.startHype > GIG_START_HYPE
+    });
     return this.gigAudio;
   }
 
@@ -363,7 +367,7 @@ export class RidgeScene extends Phaser.Scene {
   /** The panel's touch buttons send the lane and the press timestamp. */
   private handleGigStrumAction(params: unknown): void {
     const lane = readNumberParam(params, 'lane');
-    if (lane === 0 || lane === 1 || lane === 2) this.strumGig(lane, readNumberParam(params, 'at') ?? performance.now());
+    if (isGigLane(lane)) this.strumGig(lane, readNumberParam(params, 'at') ?? performance.now());
   }
 
   /** Strum a lane at a DOM event time (keyboard or the panel's buttons). */
@@ -433,6 +437,10 @@ export class RidgeScene extends Phaser.Scene {
     if (!this.session) return;
     if (action.action === 'ridgeGigStrum') {
       this.handleGigStrumAction(action.params);
+      return;
+    }
+    if (action.action === 'ridgeGigSkip') {
+      this.applyResult(this.session.run({ type: 'gig', action: { kind: 'skip' } }));
       return;
     }
     if (this.handleBridgeUiAction(action.action, action.params)) return;

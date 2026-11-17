@@ -567,10 +567,10 @@ export class RidgeConsoleSession {
       }
       case 'auto':
         while (!gigOver(gig) && gig.nextPendingNote()) playNextNotePerfectly(gig);
-        gig.advance(gig.song.endMs + 1);
+        gig.finish();
         return this.ok('Every note lands.');
       case 'skip':
-        gig.advance(gig.song.endMs + 1);
+        gig.finish();
         return this.ok('The song plays out around you.');
     }
   }
