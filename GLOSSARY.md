@@ -764,9 +764,14 @@ A previous name for the brief ending montage, now better treated as **Route
 Memory Montage** unless a later design restores a separate proof system.
 _Avoid_: full recap, credits roll, visible checklist, objective summary
 
+**Route Memory Cinematic**:
+The narrated cuts back down the route during the Guitar Farewell: the finished
+Bridge, the opened Concert, then the Dance Festival's night ending on the
+dance. Replaced the three-flash **Route Memory Montage** (Danilo, 2026-11-17).
+
 **Route Memory Montage**:
-A brief three-flash Guitar Farewell montage that wordlessly shows the fixed
-route's changed world states during the final song.
+Superseded by **Route Memory Cinematic**. Was a brief three-flash, captionless
+Guitar Farewell montage of the route's changed world states.
 _Avoid_: full recap, credits roll, visible checklist, objective summary
 
 **Warm Sketchbook Threshold**:
@@ -862,7 +867,21 @@ _Avoid_: confidence speech, therapy puzzle, arbitrary item fetch
 **One-Step Practice**:
 A Readiness Favor where the hill-shuttle driver privately learns one tiny dance
 step so he can offer shared rhythm without pretending to be a good dancer.
+Played as the **Bachata Lesson**.
 _Avoid_: dance mastery, public embarrassment, required rhythm challenge
+
+**Bachata Lesson**:
+The Dance Festival's rhythm mini-game: behind the shuttle shelter the Profe
+counts the bachata basic (step, step, step, hip tap; and back) while the player
+dances it and the driver mirrors them. It never fails; its grade only colours
+reactions, and "Just count it for him" plays it out.
+_Avoid_: dance battle, required rhythm check, dance-floor performance
+
+**Cat Serenade**:
+The optional Dance Festival guitar moment: Steve's guitar, played for the
+Unnamed Counterpart Cat hiding under the chair stacks, coaxes him out to sit
+beside Cicka. Never required.
+_Avoid_: guitar gate, Micka reveal, required second gig
 
 **Folded Song Request**:
 The small paper invitation where the hill-shuttle driver requests a simple,
@@ -893,8 +912,8 @@ _Avoid_: driving mini-game, long travel scene, instant unexplained teleport
 **Unnamed Counterpart Cat**:
 The non-Micka local cat who may quietly interact with Cicka during the Opening
 Dance Shuttle Beat as implied continuity foreshadowing.
-Use only silhouette/color specificity, such as a pale or light-ink contrast to
-Cicka.
+Use only silhouette/color specificity: a coat that contrasts with Cicka (dark
+ink in the stick art, where Cicka reads pale).
 _Avoid_: Micka's dad, explicit parentage reveal, early Micka reveal, exposition,
 named dialogue
 
@@ -982,10 +1001,11 @@ _Avoid_: boss gate, precision climb gate, arbitrary content checklist
   **Agent-Ready Slice Contract**, not just that the area direction is accepted.
 - "last dance" previously meant an after-festival closure gate; resolved: use
   **Opening Dance Shuttle Beat** for the final dance-festival route beat.
-- "bachata" is loose discarded inspiration, not canonical genre; use a simple,
-  cute, guitar-friendly implied request for the **Folded Song Request** while
-  the later **Route Memory Montage** dance image is emotionally scored by the
-  player's guitar.
+- "bachata" is the festival's dance genre (Danilo, 2026-11-17): the **Bachata
+  Lesson** teaches its basic step and the band at Last-Stop Plaza plays to a
+  bachata feel. The **Folded Song Request** itself stays a simple, unheard
+  "something slow", and the **Route Memory Montage** dance image is still
+  scored by the player's guitar.
 - "festival helper" is too generic for the driver's colleague; resolved: use
   **Last-Stop Operations Helper**.
 - "name" or "alias" for Opening Dance residents should mean a **Role Name** for

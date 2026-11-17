@@ -40,11 +40,11 @@ The emotional idea is: **I am ready for Cicka's threshold farewell.**
 - After the player chooses **Sit and Play**, hand off fully into a short
   authored sequence until **First Playable Reset Return**. Remove movement and
   route input during the farewell. The one allowed agency beat is musical
-  pacing: after the montage and a short delay, reveal a soft prompt such as
+  pacing: after the memory cuts and a short delay, reveal a soft prompt such as
   **Let the song end**. If the player does not press it, the guitar phrase
   resolves on its own.
 - The authored sequence should hold the moment in order: sit, camera settles,
-  guitar phrase begins, the three montage flashes play, return to Relay at
+  guitar phrase begins, the Route Memory Cinematic plays, return to Relay at
   sunset while Danilo keeps playing as the sun lowers, the delayed soft prompt
   appears, the player either lets the song end or the phrase resolves naturally,
   a small silence lands, Cicka moves to the threshold, turns back toward the
@@ -52,11 +52,22 @@ The emotional idea is: **I am ready for Cicka's threshold farewell.**
   the scene holds on the empty sunset spot, a restrained non-diegetic dedication
   card appears, the card holds briefly without a button prompt, then auto-fades
   into the clean Bridge Area reset.
-- Include a tiny first-playable **Route Memory Montage** during the guitar:
-  exactly three soft flashes, no interaction, and no captions. Use the changed
-  world states that prove the route: completed Bridge crossing, opened Concert
-  crossing / guitar handoff echo, and Dance Festival night beginning after the
-  player leaves.
+- **Route Memory Cinematic** (Danilo, 2026-11-17, replacing the three-flash
+  montage: after playing the Dance Festival it was disappointing not to see
+  the dance). During the guitar, the view cuts back down the route, one
+  narrated caption per cut: the finished Bridge, the opened Concert crossing
+  (Steve by the exit with the kid, telling him about the ramp again),
+  then the Dance Festival's night in five shots: the lanterns and the
+  traveler's front-row suitcase, the quiet cat on Cicka's crate (or just out
+  from the chairs if you never played for him), the Profe on the radio, the
+  driver and Ops dancing the bachata basic, and on the second song everyone.
+  Cicka is in none of the cuts: she is on the bench beside you. Only sitting
+  down to play moves you to the bench; inspecting the overlook leaves you where
+  you stand, and the bench has the one Sit & Play prompt. Each cut
+  flashes page-white; memories wear a ruled sketchbook border, and night
+  shots an ink wash. Implementation: a `memory` shot on a conversation line
+  (`RidgeMemoryShot`); the core stages that area through its own stage
+  (`observation.memory`), and presentation draws it in place of Relay.
 - Cicka Resting Spot echoes are later polish unless one is visually cheap and
   already established before the ending.
 - **Sit and Play** is the final completion trigger for v0. Do not add **Send the
@@ -143,8 +154,8 @@ Cicka; the threshold belongs beyond the player's path, readable but unreachable.
   threshold departure, Dedication Card, and Bridge reset.
 - Planned prompt/dialogue IDs cover optional overlook inspect, Sit and Play,
   delayed soft prompt, final raw meow, and dedication card text.
-- The Route Memory Montage uses exactly three soft flashes: completed Bridge,
-  opened Concert/guitar handoff echo, and Dance Festival night beginning.
+- The Route Memory Cinematic cuts to the finished Bridge, the opened Concert,
+  and the Dance Festival's night ending on the dance.
 - The warm sketchbook-threshold artifact is beyond the player's path and cannot
   be followed.
 - The First Playable Reset Return goes directly to fresh Bridge progress with no

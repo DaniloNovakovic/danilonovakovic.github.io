@@ -47,6 +47,10 @@ export const ridgeMessages = {
   concertGig: {
     titlePractice: "Steve's Riff",
     titleShow: "Live at the Crossing",
+    titleSerenade: "Requinto for Two",
+    curiosity: "Curiosity",
+    stopPlaying: "Stop playing",
+    countInSerenade: "Soft, now. Let the first note find him.",
     crowd: "Crowd",
     combo: "Combo",
     lanes: ["Low", "Middle", "High"],
@@ -64,6 +68,7 @@ export const ridgeMessages = {
       chorus: "Chorus! Give them everything!",
       breakdown: "Breakdown. Let them sing it back to you.",
       finale: "Last chorus. Bring it home!",
+      serenade: "Root, third, fifth... like asking a question.",
     },
     streak: (n: number) => `${n} in a row!`,
     shakeItOff: "Shake it off. Next one.",
@@ -79,5 +84,39 @@ export const ridgeMessages = {
     },
     gradeNote: (perfect: number, good: number, total: number) =>
       `${perfect} perfect · ${good} nice · ${total} notes`,
+    serenadeGrades: {
+      legendary: "Purrfect.",
+      great: "He's listening.",
+      good: "Ears up.",
+      rough: "...He's curious, at least.",
+    },
+  },
+  bachataLesson: {
+    title: "One Step",
+    subtitle: "Behind the shuttle shelter",
+    nerve: "His nerve",
+    combo: "Clean",
+    steps: ["Step left", "Tap", "Step right"],
+    /** Keyboard keys for each step, in step order (left, tap, right). */
+    keys: ["← or A", "↓, S or Space", "→ or D"],
+    justCount: "Just count it for him",
+    stepAway: "Step away",
+    countIn: "Feet together. Listen... cinco, seis, siete, ocho!",
+    sections: {
+      count: "Uno, dos, tres... and tap! No music yet. Just feet.",
+      basic: "Here's the güira. Same four. Let the hip come along on the tap.",
+      together: "He's joining you. Don't look at him, he'll panic.",
+      flourish: "Last eight. Make it look like you meant it.",
+    },
+    shakeItOff: "Lost the count? Find the one again.",
+    streak: (n: number) => `${n} steps clean!`,
+    grades: {
+      legendary: "¡Eso! Born on the floor",
+      great: "Smooth!",
+      good: "Getting there",
+      rough: "Two left feet (both his)",
+    },
+    gradeNote: (perfect: number, good: number, total: number) =>
+      `${perfect} perfect · ${good} nice · ${total} steps`,
   },
 } as const;

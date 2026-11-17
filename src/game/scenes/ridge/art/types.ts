@@ -38,6 +38,13 @@ export interface RidgeVisualViewModel {
   builtBridge: BridgeDesign | null;
   /** Per-frame body nudges while a mini-game (Cicka's Standoff) moves people. */
   actorNudges?: DuelActorStaging | null;
+  /** Set dressing the stage asks for (a lantern line tied off, the cat hiding). */
+  sceneryMarks: readonly string[];
+  /**
+   * Set while the view shows a remembered scene instead of the current one
+   * (the Relay ending's cuts); changes on every cut.
+   */
+  memoryShot: string | null;
 }
 
 export interface RidgeVisualProvider {
@@ -49,10 +56,9 @@ export interface RidgeVisualProvider {
 export function toRidgeVisualViewModel(
   observation: RidgeObservation
 ): RidgeVisualViewModel {
-  const crossingOpen =
-    observation.beat === 'bridge_complete' ||
-    observation.beat === 'concert_cleared' ||
-    observation.beat === 'dance_cleared';
+  const memory = observation.memory;
+  if (memory) return toMemoryViewModel(observation, memory);
+  const crossingOpen = isCrossingBeat(observation.beat);
 
   return {
     mode: observation.mode,
@@ -74,6 +80,40 @@ export function toRidgeVisualViewModel(
       : null,
     actors: observation.actors,
     crossingOpen,
-    builtBridge: observation.builtBridge
+    builtBridge: observation.builtBridge,
+    sceneryMarks: observation.sceneryMarks,
+    memoryShot: null
+  };
+}
+
+function isCrossingBeat(beat: RidgeObservation['beat']): boolean {
+  return beat === 'bridge_complete' || beat === 'concert_cleared' || beat === 'dance_cleared';
+}
+
+/**
+ * A remembered scene, drawn in place of the current one: that area's set and
+ * cast, framed on the shot's focus. Nobody speaks in it; the line is narration.
+ */
+function toMemoryViewModel(
+  observation: RidgeObservation,
+  memory: NonNullable<RidgeObservation['memory']>
+): RidgeVisualViewModel {
+  return {
+    mode: observation.mode,
+    areaId: memory.areaId,
+    progress: memory.focus,
+    facing: 'right',
+    beat: memory.beat,
+    ambience: observation.ambience,
+    focus: null,
+    speakingActorId: null,
+    partnerActorId: null,
+    speakingEmotion: null,
+    lineKey: memory.shotKey,
+    actors: memory.actors,
+    crossingOpen: isCrossingBeat(memory.beat),
+    builtBridge: observation.builtBridge,
+    sceneryMarks: memory.sceneryMarks,
+    memoryShot: memory.shotKey
   };
 }

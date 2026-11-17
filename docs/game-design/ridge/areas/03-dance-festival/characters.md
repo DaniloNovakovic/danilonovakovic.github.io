@@ -79,9 +79,16 @@ was obvious.
 She can also hang out with the **Unnamed Counterpart Cat** near the operations
 table or service gate: loafing together, staring at the same lantern, or
 briefly playing while the humans work. The counterpart cat can visually contrast
-with Cicka, such as a pale or white cat if Cicka reads dark, so that Micka's
+with Cicka (dark against her pale stick-art read; see Implemented Read), so that Micka's
 later half-and-half design feels quietly prepared. Do not name him, label him
 as Micka's father, or confirm parentage before the post-ending return.
+
+## Implemented Read (2026-11-17)
+
+- Dance Teacher: called "the Profe" by the plaza (a nickname; no proper name).
+- Unnamed Counterpart Cat: drawn with a dark ink coat, since the stick-art Cicka
+  reads pale; same silhouette, paper eyes. He faces Cicka when they loaf.
+- Driver and Operations Helper keep role labels only.
 
 ## Open Character Slots
 

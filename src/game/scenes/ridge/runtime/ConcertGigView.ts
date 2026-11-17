@@ -8,19 +8,17 @@ import {
   type GigLane
 } from '@/game/core/ridge';
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
-import { getCoverVisibleRegion } from '@/game/sharedSceneRuntime/camera/sideViewCameraMath';
-import { GIG_FLASH_MS, type GigFrame } from '../art/gigStaging';
+import { GIG_CARD_EDGE_CSS, GIG_FLASH_MS, gigCardWidthCss, type GigFrame } from '../art/gigStaging';
 import { headTopFor } from '../art/stick/actorSprites';
 import { CONCERT_STAGE_RISE, DEPTH, GROUND_Y, INK, INK_CSS, PAPER, PAPER_CSS } from '../art/stick/palette';
+import { pinToScreen, visibleSlice } from './screenOverlay';
 
 /** Song ms of notes visible above the strike line. Practice scrolls slower. */
-const LOOKAHEAD_MS = { practice: 2300, show: 1750 } as const;
+const LOOKAHEAD_MS = { practice: 2300, show: 1750, serenade: 2100 } as const;
 /** How long hit notes burst and missed notes keep falling past the line. */
 const BURST_MS = 300;
 const MISS_TAIL_MS = 380;
 /** CSS sizes; converted to canvas pixels through the cover crop. */
-const CARD_MIN_CSS = 200;
-const CARD_MAX_CSS = 300;
 const NOTE_CSS = 15;
 const STRIKE_FROM_BOTTOM_CSS = 34;
 /** Matches the `short:` Tailwind variant and the `sm` breakpoint the panel compacts at. */
@@ -71,6 +69,8 @@ export class ConcertGigView {
   private floatSerial = 0;
   private finishedAt: number | null = null;
   private readonly showKeys: boolean;
+  /** Off stage the card docks right, so the performer and the cats stay in view. */
+  private dockRight = false;
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
@@ -111,11 +111,17 @@ export class ConcertGigView {
     this.pressedAt[lane] = songMs;
   }
 
-  sync(gig: ConcertGig, frame: GigFrame, anchors: { performerX: number; crowdX: number }): void {
+  /**
+   * `onStage` is the Concert show: spotlights, lighters, confetti. Off stage
+   * (the serenade under the plaza lanterns) only the notes float up.
+   */
+  sync(gig: ConcertGig, frame: GigFrame, anchors: { performerX: number; crowdX: number; onStage: boolean }): void {
+    this.dockRight = !anchors.onStage;
     const layout = this.layout();
     this.drawHighway(gig, frame, layout);
-    this.drawStageFx(gig, frame, anchors);
-    this.syncFloatingNotes(gig, anchors.performerX);
+    if (anchors.onStage) this.drawStageFx(gig, frame, anchors);
+    else this.fx.clear();
+    this.syncFloatingNotes(gig, anchors.performerX, anchors.onStage ? CONCERT_STAGE_RISE : 0);
   }
 
   /** The lane column under a canvas point on the highway card, if any (touch players tap the targets). */
@@ -137,18 +143,13 @@ export class ConcertGigView {
 
   /** Highway rectangle in canvas px, inside the visible slice and clear of the panel chrome. */
   private layout(): Layout {
-    const cam = this.scene.cameras.main;
-    const parent = this.scene.scale.parentSize;
-    const visible = getCoverVisibleRegion({
-      viewport: { width: parent.width, height: parent.height },
-      designSize: { width: cam.width, height: cam.height }
-    });
-    const k = visible.canvasPerCss;
-    const visLeft = (cam.width - visible.width) / 2;
-    const visTop = (cam.height - visible.height) / 2;
+    const visible = visibleSlice(this.scene);
+    const { k, left: visLeft, top: visTop } = visible;
     const [reserveTop, reserveBottom] = chromeReserveCss();
-    const width = clamp((visible.width / k) * 0.56, CARD_MIN_CSS, CARD_MAX_CSS) * k;
-    const centre = visLeft + visible.width / 2;
+    const width = gigCardWidthCss(visible.width / k) * k;
+    const centre = this.dockRight
+      ? visLeft + visible.width - GIG_CARD_EDGE_CSS * k - width / 2
+      : visLeft + visible.width / 2;
     const top = visTop + reserveTop * k;
     const bottom = Math.max(top + 160 * k, visTop + visible.height - reserveBottom * k);
     const left = centre - width / 2;
@@ -165,17 +166,8 @@ export class ConcertGigView {
     };
   }
 
-  /**
-   * Screen-space objects still feel camera zoom (Phaser zooms about the view
-   * centre). Counter-scale so local coordinates land on canvas pixels.
-   */
   private pin(object: Phaser.GameObjects.Components.Transform, x = 0, y = 0): void {
-    const cam = this.scene.cameras.main;
-    const z = cam.zoom || 1;
-    const cx = cam.width / 2;
-    const cy = cam.height / 2;
-    object.setScale(1 / z);
-    object.setPosition(cx + (x - cx) / z, cy + (y - cy) / z);
+    pinToScreen(this.scene, object, x, y);
   }
 
   // --- highway ------------------------------------------------------------
@@ -401,7 +393,7 @@ export class ConcertGigView {
   }
 
   /** A note glyph drifts off the guitar for every landed strum. */
-  private syncFloatingNotes(gig: ConcertGig, performerX: number): void {
+  private syncFloatingNotes(gig: ConcertGig, performerX: number, rise: number): void {
     const last = gig.lastHit;
     const now = this.scene.time.now;
     if (last && last.judgment !== 'miss' && last.serial !== this.floatSerial) {
@@ -411,7 +403,7 @@ export class ConcertGigView {
       note.bornAt = now;
       note.text.setData('dx', (last.lane - 1) * 14 + (Math.random() - 0.5) * 10);
     }
-    const headY = GROUND_Y - CONCERT_STAGE_RISE + headTopFor('player');
+    const headY = GROUND_Y - rise + headTopFor('player');
     for (const note of this.floating) {
       const age = now - note.bornAt;
       if (age > FLOAT_MS) {

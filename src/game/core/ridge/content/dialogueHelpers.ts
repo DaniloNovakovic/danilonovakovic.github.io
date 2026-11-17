@@ -77,3 +77,12 @@ export function conversationKit<Speaker extends string>(
   });
   return { say, choice };
 }
+
+/** Gap kept between the player and whoever they talk to, so bodies never stack. */
+const TALK_GAP = 0.04;
+
+/** While talking, stand beside your partner rather than inside them. */
+export function standBeside(playerProgress: number, partnerProgress: number): number {
+  if (Math.abs(playerProgress - partnerProgress) >= TALK_GAP) return playerProgress;
+  return partnerProgress + (playerProgress >= partnerProgress ? TALK_GAP : -TALK_GAP);
+}

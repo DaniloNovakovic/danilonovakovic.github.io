@@ -3,13 +3,45 @@
 import type {
   RidgeActorPresence,
   RidgeConversationDefinition,
+  RidgeDialogueLine,
   RidgeEmotion,
   RidgeInteractable,
+  RidgeMemoryShot,
   RidgeStageDefinition,
   RidgeWorldState
 } from '../types';
 import { RIDGE_GUITAR_ITEM } from '../types';
 import { collectNearbyFromPlans, makeCatalogLine } from './dialogueHelpers';
+import { CONCERT_MEMORY_RAMP_FLAG } from './concertStage';
+import { DANCE_CAT_SERENADED_FLAG, DANCE_NIGHT_EVERYONE_FLAG, DANCE_NIGHT_FLAG } from './danceStage';
+
+/**
+ * Route Memory Cinematic: while you play, the song carries back down the route.
+ * One cut each for the Bridge and the Concert, then the Dance Festival's night
+ * in a few shots, ending on the dance you set up.
+ */
+const NIGHT = [DANCE_NIGHT_FLAG];
+const MEMORY_SHOTS = {
+  bridge: { areaId: 'bridge', beat: 'bridge_complete', focus: 0.66 },
+  concert: { areaId: 'concert', beat: 'concert_cleared', focus: 0.785, flags: [CONCERT_MEMORY_RAMP_FLAG] },
+  lanterns: { areaId: 'danceFestival', beat: 'dance_cleared', focus: 0.3, flags: NIGHT },
+  cat: { areaId: 'danceFestival', beat: 'dance_cleared', focus: 0.46, flags: NIGHT },
+  watch: { areaId: 'danceFestival', beat: 'dance_cleared', focus: 0.55, flags: NIGHT },
+  couple: {
+    areaId: 'danceFestival',
+    beat: 'dance_cleared',
+    focus: 0.35,
+    flags: NIGHT,
+    dancers: ['driver', 'operations-helper']
+  },
+  everyone: {
+    areaId: 'danceFestival',
+    beat: 'dance_cleared',
+    focus: 0.36,
+    flags: [DANCE_NIGHT_FLAG, DANCE_NIGHT_EVERYONE_FLAG],
+    dancers: ['driver', 'operations-helper', 'traveler', 'steward']
+  }
+} as const satisfies Record<string, RidgeMemoryShot>;
 
 export interface RelayDialogueCatalog {
   speakers: {
@@ -83,11 +115,6 @@ function resolveRelayInteractables(
       prompt: 'relay.overlook.inspect.prompt'
     },
     {
-      spotId: 'cicka',
-      conversationId: 'relay.sit_and_play.prompt',
-      prompt: 'relay.sit_and_play.prompt.prompt'
-    },
-    {
       spotId: 'sit',
       conversationId: 'relay.sit_and_play.prompt',
       prompt: 'relay.sit_and_play.prompt.prompt'
@@ -103,10 +130,11 @@ function resolveRelayInteractables(
 }
 
 function resolveRelayActors(state: RidgeWorldState): RidgeActorPresence[] {
+  // Only sitting down to play moves you onto the bench; inspecting the view keeps you where you stand.
   const farewell =
     state.beat === 'relay_farewell' ||
     state.beat === 'relay_complete' ||
-    state.mode === 'conversation';
+    (state.mode === 'conversation' && state.conversation?.id === 'relay.sit_and_play.prompt');
   const cickaGone = state.beat === 'relay_complete' || state.flags.has('cicka_crossed');
 
   return [
@@ -133,7 +161,7 @@ function resolveRelayActors(state: RidgeWorldState): RidgeActorPresence[] {
 
 function resolveRelayConversation(
   conversationId: string,
-  _state: RidgeWorldState,
+  state: RidgeWorldState,
   catalog: RelayDialogueCatalog
 ): RidgeConversationDefinition | null {
   const line = (
@@ -141,6 +169,8 @@ function resolveRelayConversation(
     speakerId: keyof RelayDialogueCatalog['speakers'],
     emotion?: RidgeEmotion
   ) => makeCatalogLine(catalog, id, speakerId, emotion);
+  const memory = (id: string, shot: RidgeMemoryShot): RidgeDialogueLine => ({ ...line(id, 'prompt'), memory: shot });
+  const catSerenaded = state.flags.has(DANCE_CAT_SERENADED_FLAG);
 
   switch (conversationId) {
     case 'relay.overlook.inspect':
@@ -158,11 +188,14 @@ function resolveRelayConversation(
           line('relay.sit_and_play.prompt.01', 'prompt'),
           line('relay.sit_and_play.prompt.02', 'prompt'),
           line('relay.sit_and_play.prompt.03', 'prompt'),
-          // Route Memory Montage — three soft flashes, no captions in presentation;
-          // console keeps short readable echoes for AI playtests.
-          line('relay.montage.bridge.01', 'prompt'),
-          line('relay.montage.concert.01', 'prompt'),
-          line('relay.montage.dance.01', 'prompt'),
+          line('relay.montage.lead.01', 'prompt'),
+          memory('relay.montage.bridge.01', MEMORY_SHOTS.bridge),
+          memory('relay.montage.concert.01', MEMORY_SHOTS.concert),
+          memory('relay.montage.dance.01', MEMORY_SHOTS.lanterns),
+          memory(catSerenaded ? 'relay.montage.dance.cat_crate' : 'relay.montage.dance.cat_chairs', MEMORY_SHOTS.cat),
+          memory('relay.montage.dance.watch', MEMORY_SHOTS.watch),
+          memory('relay.montage.dance.couple', MEMORY_SHOTS.couple),
+          memory('relay.montage.dance.everyone', MEMORY_SHOTS.everyone),
           line('relay.guitar.sunset.01', 'prompt')
         ],
         choices: [

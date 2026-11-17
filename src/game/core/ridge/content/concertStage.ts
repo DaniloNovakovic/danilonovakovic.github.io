@@ -11,7 +11,7 @@ import type {
 } from '../types';
 import { RIDGE_GUITAR_ITEM } from '../types';
 import { CONCERT_PRACTICE_ASSISTED_FLAG, concertGradeFlag, GIG_GRADES } from '../concertGig';
-import { collectNearbyFromPlans, conversationKit, type CatalogLineSpec } from './dialogueHelpers';
+import { collectNearbyFromPlans, conversationKit, standBeside, type CatalogLineSpec } from './dialogueHelpers';
 
 /**
  * Stage layout on the progress line, left to right: the kafana curb where the
@@ -45,6 +45,8 @@ const FLAG_CICKA_MET = 'concert_cicka_met';
 /** Set while an encore is being played after the crossing cleared. */
 const FLAG_ENCORE = 'concert_encore';
 const KID_HYPE_START = 0.68;
+/** Relay ending memory: Steve by the exit, telling the kid about the ramp again. */
+export const CONCERT_MEMORY_RAMP_FLAG = 'concert_memory_ramp';
 const asked = (topic: string) => `concert_asked_${topic}`;
 
 export interface ConcertDialogueCatalog {
@@ -263,6 +265,7 @@ function resolveConcertActors(state: RidgeWorldState): RidgeActorPresence[] {
   const cleared = state.beat === 'concert_cleared' && !bowing;
   const playing = state.mode === 'concertGig' || bowing;
   const hasGuitar = state.inventory.includes(RIDGE_GUITAR_ITEM);
+  const rampStory = cleared && state.flags.has(CONCERT_MEMORY_RAMP_FLAG);
   // During a show Steve cheers from the wings and stragglers come back for encores.
   const guitaristProgress = playing ? 0.43 : cleared ? CONCERT_LAYOUT.bandGuitarist : CONCERT_LAYOUT.guitarist;
   // A great show coaxes crowd-shy Cicka out to the edge of the stage.
@@ -295,11 +298,15 @@ function resolveConcertActors(state: RidgeWorldState): RidgeActorPresence[] {
     {
       id: 'kid',
       label: 'Skater Kid',
-      progress: playing && state.flags.has(CONCERT_KID_HYPE_FLAG) ? 0.565 : kidProgress(state),
+      progress: rampStory
+        ? CONCERT_LAYOUT.bandKid
+        : playing && state.flags.has(CONCERT_KID_HYPE_FLAG)
+          ? 0.565
+          : kidProgress(state),
       visible: true,
-      facing: playing || (cleared && state.flags.has(CONCERT_KID_HYPE_FLAG)) ? 'left' : 'right',
+      facing: rampStory ? 'right' : playing || (cleared && state.flags.has(CONCERT_KID_HYPE_FLAG)) ? 'left' : 'right',
       // Sulking on the curb, until he has a reason to get up.
-      seated: !state.flags.has(CONCERT_KID_HYPE_FLAG) && !playing
+      seated: !rampStory && !state.flags.has(CONCERT_KID_HYPE_FLAG) && !playing
     },
     {
       id: 'guitarist',
@@ -320,9 +327,6 @@ function resolveConcertActors(state: RidgeWorldState): RidgeActorPresence[] {
   ];
 }
 
-/** Gap kept between the player and whoever they talk to, so bodies never stack. */
-const TALK_GAP = 0.04;
-
 /** While talking with Steve or the kid, stand beside them rather than inside them. */
 function talkingSpot(state: RidgeWorldState, steveProgress: number): number {
   const id = state.mode === 'conversation' ? state.conversation?.id ?? '' : '';
@@ -331,8 +335,7 @@ function talkingSpot(state: RidgeWorldState, steveProgress: number): number {
     : id.startsWith('concert.kid')
       ? kidProgress(state)
       : null;
-  if (partner === null || Math.abs(state.progress - partner) >= TALK_GAP) return state.progress;
-  return partner + (state.progress >= partner ? TALK_GAP : -TALK_GAP);
+  return partner === null ? state.progress : standBeside(state.progress, partner);
 }
 
 function resolveConcertConversation(

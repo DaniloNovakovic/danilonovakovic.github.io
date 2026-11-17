@@ -50,9 +50,13 @@ import type {
 } from '../sceneUi/RidgeBridgeBuilderPanel';
 import type { RidgeCickaDuelPanelView } from '../sceneUi/RidgeCickaDuelPanel';
 import type { RidgeConcertGigPanelView } from '../sceneUi/RidgeConcertGigPanel';
+import type { RidgeBachataPanelView } from '../sceneUi/RidgeBachataPanel';
 import type { SceneUiActionRequest } from '@/game/sceneUi/types';
 import { stageCickaDuel } from '../art/duelStaging';
 import { stageConcertGig, type GigFrame } from '../art/gigStaging';
+import { stageBachataLesson, stageNightDance, type LessonFrame } from '../art/lessonStaging';
+import { BachataLessonView } from './BachataLessonView';
+import { MemoryFrameView } from './MemoryFrameView';
 import { ConcertGigAudio } from './concertGigAudio';
 import { ConcertGigView } from './ConcertGigView';
 import { BridgeBuilderView } from './BridgeBuilderView';
@@ -73,6 +77,8 @@ const BRIDGE_CELEBRATE_MS = 2200;
 const DUEL_OUTRO_MS = 1300;
 /** How long the last chord and the cheer ring before Steve reacts. */
 const GIG_OUTRO_MS = 2400;
+/** How long the dancers hold the last tap before the Profe has her say. */
+const LESSON_OUTRO_MS = 1600;
 /** Keys for the three lanes: home row, arrows, the right hand's home row, digits. */
 const GIG_LANE_KEYS: Record<string, GigLane> = {
   a: 0, s: 1, d: 2,
@@ -122,6 +128,9 @@ export class RidgeScene extends Phaser.Scene {
   private gigSection: number | null = null;
   private gigOutroMs = 0;
   private gigCheered = false;
+  private lessonView?: BachataLessonView;
+  private memoryFrame?: MemoryFrameView;
+  private lessonOutroMs = 0;
   private lastDevSnapshotKey = '';
   private nextKey?: Phaser.Input.Keyboard.Key;
   private prevKey?: Phaser.Input.Keyboard.Key;
@@ -178,10 +187,14 @@ export class RidgeScene extends Phaser.Scene {
       if (lane !== undefined) this.strumGig(lane, pointer.event.timeStamp);
     });
     // Lane keys judge at the key's own timestamp, not the frame it is read on.
+    // In the lesson the same keys are feet: left, the hip tap, right.
     this.input.keyboard?.on(Phaser.Input.Keyboard.Events.ANY_KEY_DOWN, (event: KeyboardEvent) => {
-      const lane = GIG_LANE_KEYS[event.key.toLowerCase()];
+      const dancing = Boolean(this.session?.bachataLesson);
+      // Space is the hip tap: the big key for the beat everyone feels.
+      const lane = GIG_LANE_KEYS[event.key.toLowerCase()] ?? (dancing && event.key === ' ' ? 1 : undefined);
       if (lane === undefined || event.repeat || this.isPaused) return;
-      this.strumGig(lane, event.timeStamp);
+      if (dancing) this.stepLesson(lane, event.timeStamp);
+      else this.strumGig(lane, event.timeStamp);
     });
 
     this.syncPresentation();
@@ -200,6 +213,7 @@ export class RidgeScene extends Phaser.Scene {
       if (mode === 'cickaDuel') this.updateCickaDuel(delta);
       if (mode === 'bridgeBuild') this.updateBridgeBuild(delta);
       if (mode === 'concertGig') this.updateConcertGig(delta);
+      if (mode === 'bachataLesson') this.updateBachataLesson(delta);
       // Drain edge-triggered input so a press made while talking or playing
       // does not fire the moment it closes (e.g. E re-opening a conversation).
       Phaser.Input.Keyboard.JustDown(this.keys.interactKey);
@@ -327,6 +341,38 @@ export class RidgeScene extends Phaser.Scene {
     this.takeABow(gig, audio, delta);
   }
 
+  /** Dance the lesson: the band's clock drives the count, then the dancers hold the last tap. */
+  private updateBachataLesson(delta: number): void {
+    const session = this.session;
+    const lesson = session?.bachataLesson;
+    if (!session || !lesson) return;
+    const audio = this.ensureGigAudio(lesson);
+    audio.update(delta);
+    if (lesson.phase !== 'finished') {
+      session.advanceBachataLesson(audio.nowMs());
+      this.lessonOutroMs = 0;
+      return;
+    }
+    this.lessonOutroMs += delta;
+    if (this.lessonOutroMs < LESSON_OUTRO_MS) return;
+    this.lessonOutroMs = 0;
+    this.applyResult(session.run({ type: 'dance', action: { kind: 'done' } }));
+  }
+
+  /** Step at a DOM event time (keyboard or the panel's buttons). */
+  private stepLesson(lane: GigLane, eventTimeStamp: number): void {
+    const session = this.session;
+    const lesson = session?.bachataLesson;
+    if (!session || !lesson || lesson.phase === 'finished') return;
+    const audio = this.ensureGigAudio(lesson);
+    const at = audio.msAtEventTime(eventTimeStamp);
+    const result = session.stepBachataLesson(lane, at);
+    if (result.kind === 'ignored') return;
+    this.lessonView?.press(lane, at);
+    if (result.kind === 'hit' && result.hit.judgment !== 'miss') audio.step(lane, result.hit.judgment === 'perfect');
+    else audio.scuff();
+  }
+
   /** A warm crowd roars into each new section. */
   private cheerNewSection(gig: ConcertGig, audio: ConcertGigAudio): void {
     const section = gig.section?.index ?? null;
@@ -439,38 +485,27 @@ export class RidgeScene extends Phaser.Scene {
     }
   }
 
+  /** Panel actions that are not the Blueprint Bridge's. */
+  private readonly sceneUiHandlers: Partial<Record<SceneUiActionRequest['action'], (params: unknown) => void>> = {
+    ridgeGigStrum: (params) => this.handleGigStrumAction(params),
+    ridgeGigSkip: () => this.applyResult(this.session!.run({ type: 'gig', action: { kind: 'skip' } })),
+    ridgeDanceStep: (params) => {
+      const lane = readNumberParam(params, 'lane');
+      if (isGigLane(lane)) this.stepLesson(lane, readNumberParam(params, 'at') ?? performance.now());
+    },
+    ridgeDanceSkip: () => this.applyResult(this.session!.run({ type: 'dance', action: { kind: 'skip' } })),
+    ridgeConversationAdvance: () => this.applyResult(this.session!.exec('advance')),
+    ridgeConversationLeave: () => this.applyResult(this.session!.exec('leave')),
+    ridgeConversationChoose: (params) => {
+      const choiceId = readStringParam(params, 'choiceId');
+      if (choiceId) this.applyResult(this.session!.exec(`choose ${choiceId}`));
+    }
+  };
+
   private handleSceneUiAction(action: SceneUiActionRequest): void {
     if (!this.session) return;
-    if (action.action === 'ridgeGigStrum') {
-      this.handleGigStrumAction(action.params);
-      return;
-    }
-    if (action.action === 'ridgeGigSkip') {
-      this.applyResult(this.session.run({ type: 'gig', action: { kind: 'skip' } }));
-      return;
-    }
     if (this.handleBridgeUiAction(action.action, action.params)) return;
-
-    if (action.action === 'ridgeConversationAdvance') {
-      this.applyResult(this.session.exec('advance'));
-      return;
-    }
-    if (action.action === 'ridgeConversationLeave') {
-      this.applyResult(this.session.exec('leave'));
-      return;
-    }
-    if (action.action === 'ridgeConversationChoose') {
-      const choiceId =
-        action.params &&
-        typeof action.params === 'object' &&
-        'choiceId' in action.params &&
-        typeof (action.params as { choiceId: unknown }).choiceId === 'string'
-          ? (action.params as { choiceId: string }).choiceId
-          : undefined;
-      if (choiceId) {
-        this.applyResult(this.session.exec(`choose ${choiceId}`));
-      }
-    }
+    this.sceneUiHandlers[action.action]?.(action.params);
   }
 
   private applyResult(result: RidgeCommandResult): void {
@@ -495,7 +530,7 @@ export class RidgeScene extends Phaser.Scene {
       bridgeActions.setRidgeCickaStandoff(event.won || previous === 'won' ? 'won' : 'lost');
       return;
     }
-    if (event.type === 'concert_gig_closed') {
+    if (event.type === 'concert_gig_closed' || event.type === 'bachata_lesson_closed') {
       this.releaseGigAudio();
       return;
     }
@@ -521,9 +556,12 @@ export class RidgeScene extends Phaser.Scene {
     const view = toRidgeVisualViewModel(observation);
     this.syncDuelStaging(observation, view);
     const gigFrame = this.stageGig(view);
+    const lessonFrame = this.stageLesson(view);
+    this.stageMemory(view, observation);
     this.visuals.sync(view);
-    // After the camera moved: the highway pins itself to this frame's zoom.
-    this.syncGigView(gigFrame);
+    // After the camera moved: the highway and step strip pin themselves to this frame's zoom.
+    this.syncGigView(gigFrame, observation);
+    this.syncLessonView(lessonFrame, observation);
     this.syncSceneUiPanel(observation);
 
     if (import.meta.env.DEV) {
@@ -569,18 +607,57 @@ export class RidgeScene extends Phaser.Scene {
     return frame;
   }
 
-  private syncGigView(frame: GigFrame | null): void {
+  private syncGigView(frame: GigFrame | null, observation: RidgeObservation): void {
     const gig = this.session?.concertGig;
     if (!gig || !frame || !this.visuals) {
       this.gigView?.destroy();
       this.gigView = undefined;
       return;
     }
-    const actors = this.session!.observe().actors;
+    const { actors } = observation;
     const xOf = (id: RidgeActorId) =>
       this.visuals!.worldXForProgress(actors.find((actor) => actor.id === id)?.progress ?? 0);
     this.gigView ??= new ConcertGigView(this);
-    this.gigView.sync(gig, frame, { performerX: xOf('player'), crowdX: xOf('crowd') });
+    this.gigView.sync(gig, frame, {
+      performerX: xOf('player'),
+      crowdX: xOf('crowd'),
+      onStage: observation.areaId === 'concert'
+    });
+  }
+
+  /** A remembered night dance: the couple (then everyone) loops the basic. */
+  private stageMemory(view: RidgeVisualViewModel, observation: RidgeObservation): void {
+    const memory = observation.memory;
+    if (memory && memory.dancers.length > 0) {
+      view.actorNudges = stageNightDance(
+        this.time.now,
+        memory.dancers.map((id) => ({ id, facing: memory.actors.find((actor) => actor.id === id)?.facing ?? 'right' }))
+      );
+    }
+    this.memoryFrame ??= new MemoryFrameView(this);
+    this.memoryFrame.sync(memory?.shotKey ?? null, memory?.sceneryMarks.includes('sky-night') ?? false, this.time.now);
+  }
+
+  /** Dancers step and tap through view nudges, like the gig. */
+  private stageLesson(view: RidgeVisualViewModel): LessonFrame | null {
+    const lesson = this.session?.bachataLesson;
+    if (!lesson) return null;
+    const frame = stageBachataLesson(lesson);
+    view.actorNudges = frame.actors;
+    return frame;
+  }
+
+  private syncLessonView(frame: LessonFrame | null, observation: RidgeObservation): void {
+    const lesson = this.session?.bachataLesson;
+    if (!lesson || !frame || !this.visuals) {
+      this.lessonView?.destroy();
+      this.lessonView = undefined;
+      return;
+    }
+    const player = observation.actors.find((actor) => actor.id === 'player');
+    const playerX = this.visuals.worldXForProgress(player?.progress ?? observation.progress) + (frame.actors.player?.dx ?? 0);
+    this.lessonView ??= new BachataLessonView(this);
+    this.lessonView.sync(lesson, frame, { playerX });
   }
 
   /** One docked panel at a time: the conversation box or a mini-game's chrome. */
@@ -595,6 +672,10 @@ export class RidgeScene extends Phaser.Scene {
     }
     if (observation.mode === 'concertGig' && observation.concertGig) {
       this.syncConcertGigPanel(observation.concertGig);
+      return;
+    }
+    if (observation.mode === 'bachataLesson' && observation.bachataLesson) {
+      this.syncBachataPanel(observation.bachataLesson);
       return;
     }
     if (observation.mode !== 'conversation' || !observation.conversation) {
@@ -687,7 +768,28 @@ export class RidgeScene extends Phaser.Scene {
     bridgeActions.setSceneUiPanel(RIDGE_SCENE_ID, 'ridgeConcertGig', view);
   }
 
+  private syncBachataPanel(lesson: NonNullable<RidgeObservation['bachataLesson']>): void {
+    const view: RidgeBachataPanelView = {
+      phase: lesson.phase,
+      section: lesson.section,
+      nerve: Math.round(lesson.nerve * 20) / 20,
+      combo: lesson.combo,
+      counts: lesson.counts,
+      notesTotal: lesson.notesTotal,
+      lastJudgment: lesson.lastJudgment,
+      grade: lesson.grade
+    };
+    const key = `dance:${JSON.stringify(view)}`;
+    if (key === this.lastPanelKey) return;
+    this.lastPanelKey = key;
+    bridgeActions.setSceneUiPanel(RIDGE_SCENE_ID, 'ridgeBachataLesson', view);
+  }
+
   private cleanup(): void {
+    this.lessonView?.destroy();
+    this.memoryFrame?.destroy();
+    this.memoryFrame = undefined;
+    this.lessonView = undefined;
     this.gigView?.destroy();
     this.gigView = undefined;
     this.releaseGigAudio();

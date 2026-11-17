@@ -146,6 +146,10 @@ class ActorSprite {
       drawActor(this.graphics, this.id, request.facing, request.pose);
     }
 
+    // The quiet cat turns to face whoever he is looking at (Cicka, mostly).
+    const flip = this.id === 'counterpart-cat' && request.facing === 'left' ? -1 : 1;
+    if (this.graphics.scaleX !== flip) this.graphics.setScale(flip, 1);
+
     const x = Math.round(request.x);
     const y = Math.round(request.y + request.bob);
     if (x !== this.placedX || y !== this.placedY) {
@@ -172,7 +176,7 @@ class ActorSprite {
 
 /** Everything that changes the drawing; transforms (x, y, alpha) are not in it. */
 function poseKeyOf(facing: RidgeFacing, pose: StickPose): string {
-  return [facing, pose.frame, pose.walking, pose.talking, pose.emotion, pose.prop, pose.strum, pose.seated].join('|');
+  return [facing, pose.frame, pose.walking, pose.talking, pose.emotion, pose.prop, pose.strum, pose.seated, pose.dance].join('|');
 }
 
 /** Props sit behind people; the player reads above the crowd. */
@@ -194,7 +198,7 @@ type ActorDrawer = (
 const ACTOR_DRAWERS: Record<RidgeActorId, ActorDrawer> = {
   player: (g, facing, pose, s) => drawStickPlayer(g, 0, 0, facing, 1.15 * s, pose),
   cicka: (g, _facing, pose, s) => drawStickCicka(g, 0, 0, 1.1 * s, pose),
-  'counterpart-cat': (g, _facing, pose, s) => drawStickCicka(g, 0, 0, 0.95 * s, pose),
+  'counterpart-cat': (g, _facing, pose, s) => drawStickCicka(g, 0, 0, 0.95 * s, pose, 'dark'),
   draftsperson: (g, facing, pose, s) => drawStickDraftsperson(g, 0, 0, facing, 1.05 * s, pose),
   'toy-car': (g, _facing, _pose, s) => drawStickToyCar(g, 22, 4, 1.1 * s),
   guitarist: (g, facing, pose, s) => drawStickGuitarist(g, 0, 0, facing, 1.05 * s, pose),

@@ -1,4 +1,5 @@
 import type { SceneUiSurfaceDefinition } from '@/game/sceneUi/registry';
+import { RidgeBachataPanel } from './RidgeBachataPanel';
 import { RidgeBridgeBuilderPanel } from './RidgeBridgeBuilderPanel';
 import { RidgeCickaDuelPanel } from './RidgeCickaDuelPanel';
 import { RidgeConcertGigPanel } from './RidgeConcertGigPanel';
@@ -29,6 +30,15 @@ export const RIDGE_SCENE_UI_DEFINITIONS: readonly SceneUiSurfaceDefinition[] = [
     // Taps on the highway strum its lanes, so the move/interact touch mat steps aside.
     capturesScenePointer: true,
     // Phones get the tall frame: the highway needs height to read ahead.
+    expandsGameFrame: true
+  },
+  {
+    id: 'ridgeBachataLesson',
+    component: RidgeBachataPanel,
+    panelChrome: 'docked',
+    // Taps belong to the step buttons, not the walk mat.
+    capturesScenePointer: true,
+    // The dancers and the step strip share the tall phone frame.
     expandsGameFrame: true
   }
 ];

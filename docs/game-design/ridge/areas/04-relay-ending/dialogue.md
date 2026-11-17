@@ -17,7 +17,10 @@ Bridge Tracer Slice proves the dialogue data shape.
 - `relay.overlook.inspect`: optional single quiet overlook inspect detail, if
   kept in the minimal linger.
 - `relay.sit_and_play.prompt`: final player-triggered Sit and Play prompt.
-- `relay.guitar.let_song_end`: delayed soft prompt after the montage and sunset
+- `relay.montage.*`: Route Memory Cinematic captions, one per memory cut
+  (`lead`, `bridge`, `concert`, then `dance.01`, `dance.cat_crate` or
+  `dance.cat_chairs`, `dance.watch`, `dance.couple`, `dance.everyone`).
+- `relay.guitar.let_song_end`: delayed soft prompt after the memory cuts and sunset
   playing beat.
 - `relay.cicka.threshold_meow`: one tiny raw meow before Cicka crosses the
   threshold.

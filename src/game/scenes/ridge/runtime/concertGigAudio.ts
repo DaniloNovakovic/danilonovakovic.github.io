@@ -1,7 +1,8 @@
 // Band voices and the backing chart are a small synth palette; branching is voicing data.
 // fallow-ignore-file complexity
-import type { GigChord, GigLane, GigSectionKind, GigSong } from '@/game/core/ridge';
+import type { GigChord, GigLane, GigSong } from '@/game/core/ridge';
 import { renderPluckedString } from '@/shared/audio/karplusStrong';
+import { buildBandEvents, laneHz, type BandEvent, type BandOptions } from './bandScore';
 
 /**
  * Sound and song clock for the Concert Crossing gig.
@@ -14,7 +15,9 @@ import { renderPluckedString } from '@/shared/audio/karplusStrong';
  * in the highway and panel, so muted play loses nothing that matters.
  *
  * Synth voices are deliberate here: this is an explicit music toy, voiced as
- * a small street band (plucked lead, bass, kit, a humming crowd).
+ * a small street band (plucked lead, bass, kit, a humming crowd), or at
+ * Last-Stop Plaza as a bachata trio (güira, bongó, bass, requinto). What the
+ * band plays lives in bandScore; this file is only how it sounds.
  */
 
 const LOOKAHEAD_MS = 140;
@@ -25,29 +28,6 @@ const PLUCK_BASE_HZ = 220;
 const MASTER_LEVEL = 0.62;
 /** Crowd cheers never stack closer than this. */
 const CHEER_GAP_MS = 1800;
-
-type BandHit = 'kick' | 'snare' | 'hat' | 'click' | 'crash' | 'clap' | 'bass' | 'hum';
-
-interface BandEvent {
-  timeMs: number;
-  hit: BandHit;
-  /** Bass / hum pitch. */
-  hz?: number;
-  level: number;
-}
-
-/** MIDI-ish semitone of each chord's root, around A3. */
-const CHORD_ROOT: Record<GigChord, number> = { Am: 57, F: 53, C: 60, G: 55, Dm: 62 };
-const MINOR = new Set<GigChord>(['Am', 'Dm']);
-
-const hzOf = (semitone: number) => 440 * 2 ** ((semitone - 69) / 12);
-
-/** Lead voice for a lane: root, third, fifth of the bar's chord. */
-function laneHz(chord: GigChord, lane: GigLane): number {
-  const root = CHORD_ROOT[chord];
-  const offset = lane === 0 ? 0 : lane === 1 ? (MINOR.has(chord) ? 3 : 4) : 7;
-  return hzOf(root + offset);
-}
 
 export interface GigAudioOutput {
   context: AudioContext;
@@ -173,6 +153,29 @@ export class ConcertGigAudio {
     this.oneShot(source, [tone, gain], at, at + 1.4);
   }
 
+  /**
+   * A danced step: the feet scuff the boards, and the hip tap on four is
+   * answered by a bongó slap. Perfect steps land crisper.
+   */
+  step(lane: GigLane, perfect: boolean): void {
+    const ctx = this.ctx;
+    if (!ctx || !this.bus || !this.noise || this.destroyed) return;
+    const at = ctx.currentTime;
+    if (lane === 1) {
+      this.bongo(at, perfect ? 470 : 430, perfect ? 1.3 : 1);
+      this.noiseHit(at, 'highpass', 5200, 0.12, 0.07, 0.9);
+      return;
+    }
+    this.noiseHit(at, 'bandpass', 700 + Math.random() * 160, perfect ? 0.2 : 0.15, 0.06, 1.1);
+  }
+
+  /** A step with nothing under it: a soft stumble on the boards. */
+  scuff(): void {
+    const ctx = this.ctx;
+    if (!ctx || !this.bus || !this.noise || this.destroyed) return;
+    this.noiseHit(ctx.currentTime, 'lowpass', 420, 0.18, 0.09, 0.8);
+  }
+
   /** A strum with nothing under it: a dead-string chuck. */
   chuck(): void {
     const ctx = this.ctx;
@@ -251,7 +254,45 @@ export class ConcertGigAudio {
         return this.bass(when, event.hz ?? 110, event.level);
       case 'hum':
         return this.hum(when, event.hz ?? 220, event.level);
+      case 'guira':
+        // hz 1 marks a long downbeat scrape, 0 a quick offbeat flick.
+        return this.noiseHit(when, 'highpass', 5200, event.level * 0.16, event.hz ? 0.1 : 0.035, 0.9);
+      case 'bongoHigh':
+        return this.bongo(when, 440, event.level);
+      case 'bongoLow':
+        return this.bongo(when, 300, event.level);
+      case 'requinto':
+        return this.pluckAt(when, event.hz ?? 440, event.level, 3600);
     }
+  }
+
+  /** A hand drum: a quick pitch drop on a sine, with a little skin noise on top. */
+  private bongo(at: number, hz: number, level: number): void {
+    const ctx = this.ctx!;
+    const osc = ctx.createOscillator();
+    osc.frequency.setValueAtTime(hz * 1.25, at);
+    osc.frequency.exponentialRampToValueAtTime(hz, at + 0.03);
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(level * 0.32, at);
+    gain.gain.exponentialRampToValueAtTime(0.001, at + 0.16);
+    this.oneShot(osc, [gain], at, at + 0.18);
+    this.noiseHit(at, 'bandpass', hz * 4, level * 0.06, 0.03, 1.5);
+  }
+
+  /** A short requinto pluck on the band's own beat (the lead strum is the player's). */
+  private pluckAt(at: number, hz: number, level: number, brightness: number): void {
+    const ctx = this.ctx!;
+    if (!this.pluck) return;
+    const source = ctx.createBufferSource();
+    source.buffer = this.pluck.buffer;
+    source.playbackRate.value = hz / this.pluck.baseHz;
+    const tone = ctx.createBiquadFilter();
+    tone.type = 'lowpass';
+    tone.frequency.value = brightness;
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(level * 0.5, at);
+    gain.gain.setTargetAtTime(0, at + 0.32, 0.12);
+    this.oneShot(source, [tone, gain], at, at + 0.9);
   }
 
   private kick(at: number, level: number): void {
@@ -355,66 +396,4 @@ function makeNoise(ctx: AudioContext): AudioBuffer {
   const data = buffer.getChannelData(0);
   for (let i = 0; i < data.length; i += 1) data[i] = Math.random() * 2 - 1;
   return buffer;
-}
-
-/** What the band plays under each section. The lead is the player's. */
-const FEEL: Record<GigSectionKind, { kick: number[]; snare: number[]; hat: number; bass: number[]; clap?: number[] }> = {
-  // Beats are 0-based within the bar; eighths as .5.
-  riff: { kick: [0], snare: [], hat: 1, bass: [0, 2] },
-  intro: { kick: [0, 2], snare: [], hat: 1, bass: [0, 2] },
-  verse: { kick: [0, 2], snare: [1, 3], hat: 0.5, bass: [0, 1, 2, 3] },
-  chorus: { kick: [0, 1.5, 2], snare: [1, 3], hat: 0.5, bass: [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5] },
-  breakdown: { kick: [], snare: [], hat: 0, bass: [0], clap: [1, 3] },
-  finale: { kick: [0, 1.5, 2, 3.5], snare: [1, 3], hat: 0.5, bass: [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5] }
-};
-
-interface BandOptions {
-  /** The skater kid got the front row clapping: claps on two and four from the count-in through the intro. */
-  frontRowClap?: boolean;
-}
-
-/** Expand the song into backing-band hits, sorted by time. */
-function buildBandEvents(song: GigSong, options: BandOptions): BandEvent[] {
-  const events: BandEvent[] = [];
-  const beat = song.beatMs;
-  // Count-in: the drummer clicks four on the sticks.
-  for (let t = 0; t < song.startMs - 1; t += beat) events.push({ timeMs: t, hit: 'click', level: 1 });
-  if (options.frontRowClap) {
-    const introEnd = song.sections.find((section) => section.kind === 'intro')?.endMs ?? song.startMs;
-    for (let t = beat; t < introEnd - 1; t += beat * 2) events.push({ timeMs: t, hit: 'clap', level: 0.8 });
-  }
-
-  song.bars.forEach((bar, index) => {
-    const kind = song.sections[bar.section]!.kind;
-    const feel = FEEL[kind];
-    const soft = kind === 'riff' ? 0.6 : 1;
-    const firstOfSection = index === 0 || song.bars[index - 1]!.section !== bar.section;
-    if (firstOfSection && (kind === 'chorus' || kind === 'finale')) {
-      events.push({ timeMs: bar.startMs, hit: 'crash', level: 1 });
-    }
-    const at = (beats: number) => bar.startMs + beats * beat;
-    const rootHz = hzOf(CHORD_ROOT[bar.chord] - 12);
-    for (const b of feel.kick) events.push({ timeMs: at(b), hit: 'kick', level: soft });
-    for (const b of feel.snare) events.push({ timeMs: at(b), hit: 'snare', level: soft });
-    for (const b of feel.clap ?? []) events.push({ timeMs: at(b), hit: 'clap', level: 1 });
-    if (feel.hat > 0) {
-      for (let b = 0; b < 4; b += feel.hat) events.push({ timeMs: at(b), hit: 'hat', level: soft * (b % 1 === 0 ? 1 : 0.6) });
-    }
-    feel.bass.forEach((b, i) => {
-      // Root, with a hop to the fifth on the off-beats in busy feels.
-      const fifth = feel.bass.length > 4 && i % 2 === 1;
-      events.push({ timeMs: at(b), hit: 'bass', hz: fifth ? rootHz * 1.5 : rootHz, level: soft });
-    });
-    if (kind === 'breakdown') {
-      events.push({ timeMs: at(0), hit: 'hum', hz: laneHz(bar.chord, 1), level: 1 });
-      events.push({ timeMs: at(0), hit: 'hum', hz: laneHz(bar.chord, 2), level: 0.8 });
-    }
-  });
-
-  const last = song.bars[song.bars.length - 1];
-  if (last) {
-    events.push({ timeMs: last.startMs, hit: 'crash', level: 1.2 });
-    events.push({ timeMs: last.startMs, hit: 'kick', level: 1.2 });
-  }
-  return events.sort((a, b) => a.timeMs - b.timeMs);
 }

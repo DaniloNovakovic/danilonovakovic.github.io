@@ -163,10 +163,11 @@ Accepted ending outline:
    cozy threshold light. The first playable version should stay short and quiet:
    sit beside Cicka, play the familiar Concert guitar phrase, and let the moment
    breathe without a pass/fail challenge.
-5. The first playable ending includes a brief **Route Memory Montage** during
-   the guitar with exactly three soft flashes, no interaction, and no captions:
-   the completed Bridge crossing, the opened Concert crossing / guitar handoff
-   echo, and Dance Festival night beginning after the player leaves. Cicka
+5. The first playable ending includes a short **Route Memory Cinematic**
+   during the guitar (Danilo, 2026-11-17; it replaced a three-flash, captionless
+   montage): narrated cuts to the completed Bridge crossing and the opened
+   Concert crossing, then the Dance Festival's night after the player leaves,
+   ending on the driver and Ops dancing and then everyone. Cicka
    Resting Spot echoes are later polish unless one is visually cheap and already
    established.
 6. After the montage, return to Relay at sunset while Danilo keeps playing as

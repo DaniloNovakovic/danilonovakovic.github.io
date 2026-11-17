@@ -35,6 +35,13 @@ const HELP_TEXT = [
   '  gig auto | gig skip  play the rest perfectly | let the rest go by',
   '  gig done             take a bow once the song is over',
   '',
+  "Bachata lesson (the Profe's one step, behind the shuttle shelter):",
+  '  dance step           dance the next step exactly on the count',
+  '  dance left|tap|right step that way right now (tap: the hip on four)',
+  '  dance wait [ms]      let the count go on (default: up to the next step)',
+  '  dance auto | dance skip  dance the rest cleanly | just count it for him',
+  '  dance done           hear how the driver feels once the eight is over',
+  '',
   'Playtest skips:',
   '  skip                 jump to the next area start',
   '  warp bridge|concert|dance|relay',
@@ -74,6 +81,8 @@ const BUILD_ALIASES = new Set(['build', 'b']);
 const DUEL_ALIASES = new Set(['duel', 'standoff']);
 const DODGE_ALIASES = new Set(['dodge', 'jump', 'hop']);
 const GIG_ALIASES = new Set(['gig', 'play', 'strum']);
+const DANCE_ALIASES = new Set(['dance', 'bachata']);
+const DANCE_STEP_LANES: Record<string, 0 | 1 | 2> = { left: 0, l: 0, tap: 1, hip: 1, t: 1, right: 2, r: 2, '0': 0, '1': 1, '2': 2 };
 const BUILD_SIMPLE: Record<string, BridgeBuildAction> = {
   undo: { kind: 'undo' },
   clear: { kind: 'clear' },
@@ -141,6 +150,10 @@ export function parseRidgeCommand(rawInput: string): RidgeCommand {
   if (GIG_ALIASES.has(head)) {
     const action = parseGigAction(head === 'strum' ? ['hit', ...args] : args);
     return action ? { type: 'gig', action } : { type: 'unknown', raw };
+  }
+  if (DANCE_ALIASES.has(head)) {
+    const action = parseDanceAction(args);
+    return action ? { type: 'dance', action } : { type: 'unknown', raw };
   }
   if (WARP_ALIASES.has(head)) {
     const areaId = args[0] ? AREA_ALIASES[args[0].replace(/[_-]/g, '')] : undefined;
@@ -231,4 +244,18 @@ function parseGigAction(args: string[]): RidgeGigAction | null {
     return Number.isFinite(ms) && ms > 0 ? { kind: 'wait', ms } : null;
   }
   return null;
+}
+
+/** Dance verbs reuse the rhythm actions: a step is a lane (left, tap, right). */
+function parseDanceAction(args: string[]): RidgeGigAction | null {
+  const [verb, value] = args;
+  if (!verb || verb === 'step' || verb === 'hit') {
+    if (value === undefined) return { kind: 'hit' };
+    const lane = DANCE_STEP_LANES[value];
+    return lane === undefined ? null : { kind: 'hit', lane };
+  }
+  const lane = DANCE_STEP_LANES[verb];
+  if (lane !== undefined) return { kind: 'hit', lane };
+  if (verb === 'wait' || verb === 'count') return parseGigAction(['wait', ...(value === undefined ? [] : [value])]);
+  return parseGigAction(args);
 }

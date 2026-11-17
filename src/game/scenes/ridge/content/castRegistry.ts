@@ -14,6 +14,9 @@ export type RidgePortraitId =
   | 'driver'
   | 'traveler'
   | 'teacher'
+  | 'operations'
+  | 'steward'
+  | 'quietCat'
   | 'prompt';
 
 interface CastSpeakerEntry {
@@ -30,8 +33,8 @@ interface CastSpeakerEntry {
 const SPEAKER_CAST: Readonly<Record<string, CastSpeakerEntry>> = {
   player: { actorId: 'player', portrait: 'player' },
   cicka: { actorId: 'cicka', portrait: 'cicka' },
-  counterpartCat: { actorId: 'counterpart-cat', portrait: 'cicka' },
-  'counterpart-cat': { actorId: 'counterpart-cat', portrait: 'cicka' },
+  counterpartCat: { actorId: 'counterpart-cat', portrait: 'quietCat' },
+  'counterpart-cat': { actorId: 'counterpart-cat', portrait: 'quietCat' },
   bridgeDraftsperson: { actorId: 'draftsperson', portrait: 'draftsperson' },
   draftsperson: { actorId: 'draftsperson', portrait: 'draftsperson' },
   injuredGuitarist: { actorId: 'guitarist', portrait: 'guitarist' },
@@ -43,11 +46,14 @@ const SPEAKER_CAST: Readonly<Record<string, CastSpeakerEntry>> = {
   danceDriver: { actorId: 'driver', portrait: 'driver' },
   hillShuttleDriver: { actorId: 'driver', portrait: 'driver' },
   driver: { actorId: 'driver', portrait: 'driver' },
-  operationsHelper: { actorId: 'operations-helper', portrait: 'driver' },
+  operationsHelper: { actorId: 'operations-helper', portrait: 'operations' },
+  // Voices over the radio: a face in the box, nobody's mouth moving on stage.
+  shuttleRadio: { actorId: null, portrait: 'driver' },
+  opsRadio: { actorId: null, portrait: 'operations' },
   danceTeacher: { actorId: 'dance-teacher', portrait: 'teacher' },
   traveler: { actorId: 'traveler', portrait: 'traveler' },
-  steward: { actorId: 'steward', portrait: 'traveler' },
-  festivalSteward: { actorId: 'steward', portrait: 'traveler' },
+  steward: { actorId: 'steward', portrait: 'steward' },
+  festivalSteward: { actorId: 'steward', portrait: 'steward' },
   prompt: { actorId: null, portrait: 'prompt' },
   dedication: { actorId: null, portrait: 'prompt' }
 };

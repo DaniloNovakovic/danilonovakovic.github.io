@@ -3,6 +3,17 @@
 import { GIG_START_HYPE, type ConcertGig, type GigJudgment, type GigLane, type RidgeEmotion } from '@/game/core/ridge';
 import type { DuelActorStaging } from './duelStaging';
 
+/** Note highway card width bounds, in CSS px. */
+const GIG_CARD_MIN_CSS = 200;
+const GIG_CARD_MAX_CSS = 300;
+/** Gap kept between a side-docked card and the frame edge, in CSS px. */
+export const GIG_CARD_EDGE_CSS = 24;
+
+/** Width of the note highway card for a visible slice this many CSS px wide. */
+export function gigCardWidthCss(visibleWidthCss: number): number {
+  return Math.min(GIG_CARD_MAX_CSS, Math.max(GIG_CARD_MIN_CSS, visibleWidthCss * 0.56));
+}
+
 /** How long a judgment word and target flash stay up, in song ms. */
 export const GIG_FLASH_MS = 420;
 
@@ -65,7 +76,13 @@ export function stageConcertGig(gig: ConcertGig): GigFrame {
         dy: Math.round(-pulse * 2),
         emotion: flash?.judgment === 'miss' ? 'surprised' : hype > 0.7 || finished ? 'playful' : 'determined'
       },
-      cicka: { dx: 0, dy: 0, emotion: hype > 0.8 ? 'curious' : 'sleepy' }
+      cicka: { dx: 0, dy: 0, emotion: hype > 0.8 || gig.mode === 'serenade' ? 'curious' : 'sleepy' },
+      // The serenade: the quiet cat edges out from under the chairs as the song warms.
+      'counterpart-cat': {
+        dx: gig.mode === 'serenade' ? -Math.round(Math.max(0, hype - 0.35) * 46) : 0,
+        dy: 0,
+        emotion: hype > 0.6 ? 'curious' : 'determined'
+      }
     }
   };
 }

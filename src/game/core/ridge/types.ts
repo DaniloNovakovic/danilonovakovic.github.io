@@ -9,6 +9,7 @@ import type {
 } from './bridgeBuilder';
 import type { CickaAttackKind, CickaDuelPhase, CickaStrikeResult } from './cickaDuel';
 import type { GigGrade, GigJudgment, GigLane, GigMode, GigPhase, GigSectionKind } from './concertGig';
+import type { BachataStep } from './bachata';
 
 export type RidgeAreaId = 'bridge' | 'concert' | 'danceFestival' | 'relay';
 
@@ -44,9 +45,11 @@ export type RidgeFacing = 'left' | 'right';
 /**
  * `bridgeBuild` is the Blueprint Bridge workbench: drawing and testing a span.
  * `cickaDuel` is Cicka's Standoff: dodging her paw to earn the toy car.
- * `concertGig` is the Concert Crossing rhythm show (or Steve's practice riff).
+ * `concertGig` is the Concert Crossing rhythm show (or Steve's practice riff),
+ * and the guitar serenade for the shy cat at Last-Stop Plaza.
+ * `bachataLesson` is the Profe's One-Step Practice behind the shuttle shelter.
  */
-export type RidgeMode = 'explore' | 'conversation' | 'bridgeBuild' | 'cickaDuel' | 'concertGig';
+export type RidgeMode = 'explore' | 'conversation' | 'bridgeBuild' | 'cickaDuel' | 'concertGig' | 'bachataLesson';
 
 export type RidgeSpotKind = 'landmark' | 'npc' | 'prop' | 'exit';
 
@@ -82,6 +85,24 @@ export interface RidgeDialogueLine {
   speaker: string;
   text: string;
   emotion?: RidgeEmotion;
+  /** While this line shows, the view cuts away to a remembered scene. */
+  memory?: RidgeMemoryShot;
+}
+
+/**
+ * A cut to another area for one line of a conversation (the Relay ending's
+ * memories). The core stages that area as it would look; presentation draws
+ * it in place of the current one.
+ */
+export interface RidgeMemoryShot {
+  areaId: RidgeAreaId;
+  beat: RidgeRouteBeat;
+  /** Where the camera looks along that area, 0..1. */
+  focus: number;
+  /** Extra flags that area reads to stage the memory (the plaza at night). */
+  flags?: readonly string[];
+  /** Residents dancing the bachata basic in this shot. */
+  dancers?: readonly RidgeActorId[];
 }
 
 export interface RidgeDialogueChoice {
@@ -118,6 +139,8 @@ export interface RidgeConversationOutcome {
   openCickaDuel?: boolean;
   /** Start the concert rhythm game (practice riff or the show) once it closes. */
   openConcertGig?: GigMode;
+  /** Start the Profe's bachata lesson (the driver's One-Step Practice) once it closes. */
+  openBachataLesson?: boolean;
 }
 
 export interface RidgeConversationDefinition {
@@ -197,6 +220,14 @@ export interface RidgeStageDefinition {
   describeAmbience: (state: RidgeWorldState) => string;
   /** Concert only: how warm the crowd is when a gig starts. */
   concertGigStartHype?: (state: RidgeWorldState, mode: GigMode) => number;
+  /** Dance Festival only: how steady the driver is at the lesson's first count, 0..1. */
+  bachataStartNerve?: (state: RidgeWorldState) => number;
+  /**
+   * Set-dressing tokens the scenery should show (a lantern line tied off, a
+   * cable ramp down). Presentation redraws when they change; gameplay never
+   * reads them back.
+   */
+  resolveSceneryMarks?: (state: RidgeWorldState) => readonly string[];
   /**
    * Draftsperson remark for the Blueprint Bridge workbench (Bridge only).
    * `variant` rotates between phrasings; `sketchNudge` appends the sketch offer.
@@ -292,6 +323,34 @@ export interface RidgeObservation {
     /** The crowd started warmer than usual (someone got them clapping). */
     warmStart: boolean;
   };
+  /** The Profe's bachata lesson, while dancing the basic with the driver. */
+  bachataLesson: null | {
+    phase: GigPhase;
+    timeMs: number;
+    section: GigSectionKind | null;
+    /** The driver's nerve, 0..1: the lesson's crowd meter. */
+    nerve: number;
+    combo: number;
+    bestCombo: number;
+    counts: { perfect: number; good: number; miss: number };
+    notesTotal: number;
+    lastJudgment: GigJudgment | null;
+    next: null | { step: BachataStep; inMs: number };
+    grade: GigGrade;
+  };
+  /** Set-dressing tokens from the stage (see RidgeStageDefinition.resolveSceneryMarks). */
+  sceneryMarks: readonly string[];
+  /** The remembered scene the current line cuts to, staged by that area. */
+  memory: null | {
+    areaId: RidgeAreaId;
+    beat: RidgeRouteBeat;
+    focus: number;
+    actors: readonly RidgeActorPresence[];
+    sceneryMarks: readonly string[];
+    dancers: readonly RidgeActorId[];
+    /** Changes on every cut, so presentation can flash between shots. */
+    shotKey: string;
+  };
   builtBridge: BridgeDesign | null;
   canMove: boolean;
   blockedAhead: boolean;
@@ -319,6 +378,8 @@ export type RidgeCommand =
   | { type: 'duel'; action: RidgeDuelAction }
   /** Concert rhythm verbs (`gig hit [lane]`, `gig wait [ms]`, `gig auto`, …). */
   | { type: 'gig'; action: RidgeGigAction }
+  /** Bachata lesson verbs (`dance left|tap|right`, `dance step`, `dance wait`, …). */
+  | { type: 'dance'; action: RidgeGigAction }
   | { type: 'unknown'; raw: string };
 
 export type RidgeDuelAction =
@@ -352,7 +413,9 @@ export type RidgeSessionEvent =
   | { type: 'cicka_duel_opened' }
   | { type: 'cicka_duel_closed'; won: boolean }
   | { type: 'concert_gig_opened'; mode: GigMode }
-  | { type: 'concert_gig_closed'; mode: GigMode; grade: GigGrade; passed: boolean };
+  | { type: 'concert_gig_closed'; mode: GigMode; grade: GigGrade; passed: boolean }
+  | { type: 'bachata_lesson_opened' }
+  | { type: 'bachata_lesson_closed'; grade: GigGrade };
 
 export interface RidgeCommandResult {
   ok: boolean;

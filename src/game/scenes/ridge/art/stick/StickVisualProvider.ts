@@ -3,6 +3,7 @@ import {
   BLUEPRINT_BRIDGE_PUZZLE,
   BRIDGE_RIVER_PROGRESS,
   CONCERT_LAYOUT,
+  DANCE_LAYOUT,
   type BridgeDesign,
   type RidgeActorId,
   type RidgeEmotion,
@@ -11,6 +12,7 @@ import {
 import type { RidgeVisualProvider, RidgeVisualViewModel } from '../types';
 import type { ActorNudge } from '../duelStaging';
 import { ActorSpritePool, footDropFor, headTopFor, type ActorRenderRequest } from './actorSprites';
+import { GIG_CARD_EDGE_CSS, gigCardWidthCss } from '../gigStaging';
 import { drawAmbientFar, drawAmbientNear } from './ambientLayer';
 import { drawRidgeAreaLayer, type SceneryLayer } from './areaSets';
 import { drawCrtAtmosphere } from './atmosphere';
@@ -77,6 +79,8 @@ const CONVERSATION_ZOOM = 1.3;
 const CONVERSATION_EASE_MS = 320;
 /** World units kept clear either side of the outermost speaker. */
 const CONVERSATION_SIDE_MARGIN = 70;
+/** World px either side of a memory's focus whose residents are kept in frame. */
+const MEMORY_FRAME_RANGE = 130;
 /** How far the frame drifts from the pair's midpoint toward whoever is talking. */
 const SPEAKER_PULL = 0.18;
 /** CSS pixels the docked conversation box occupies along the frame bottom. */
@@ -123,6 +127,12 @@ const STAGE_STEP_ON = 16;
 const GIG_EASE_MS = 520;
 const GIG_SIDE_MARGIN = 70;
 const GIG_GROUND_AT = 0.8;
+/**
+ * Lesson framing: the Profe, you, and the driver, ground a little above
+ * centre so the step strip and the touch buttons fit underneath.
+ */
+const LESSON_SIDE_MARGIN = 54;
+const LESSON_GROUND_AT = { fine: 0.56, coarse: 0.48 } as const;
 const NO_NUDGE: ActorNudge = { dx: 0, dy: 0 };
 const SURPRISE_HOP_HEIGHT = 9;
 
@@ -182,6 +192,8 @@ export class StickVisualProvider implements RidgeVisualProvider {
   private buildBlend = 0;
   /** 0 = exploring, 1 = framed on the concert stage for a show. */
   private gigBlend = 0;
+  /** 0 = exploring, 1 = framed on the bachata lesson behind the shelter. */
+  private lessonBlend = 0;
   private builtShape: BuiltBridgeShape | null = null;
   private builtShapeDesign: BridgeDesign | null = null;
   private readonly designIds = new WeakMap<BridgeDesign, number>();
@@ -241,8 +253,9 @@ export class StickVisualProvider implements RidgeVisualProvider {
     this.advanceConversationBlend(view, now, motion);
     this.syncActors(view, playerProgress, now, tick, stepTick, motion, walking);
     this.syncPresence(view, playerProgress, now, tick, motion);
-    // Foreground corn would scribble over the drawing table; let it step aside.
-    this.sceneryImages.get('fore')?.setAlpha(1 - easeInOut(this.buildBlend) * 0.92);
+    // Foreground corn would scribble over the drawing table (and grass over the
+    // Profe's count); let it step aside.
+    this.sceneryImages.get('fore')?.setAlpha(1 - easeInOut(Math.max(this.buildBlend, this.lessonBlend)) * 0.92);
     this.syncEmote(view, now, motion);
     this.followCamera(view, playerProgress);
   }
@@ -281,11 +294,12 @@ export class StickVisualProvider implements RidgeVisualProvider {
   }
 
   private syncScenery(view: RidgeVisualViewModel): void {
-    // Only Relay redresses per beat; elsewhere the crossing state covers it.
+    // Only Relay redresses per beat; elsewhere the crossing state and any
+    // stage-requested set dressing cover it.
     const content =
       view.areaId === 'relay'
         ? `${view.areaId}|${view.beat}`
-        : `${view.areaId}|${view.crossingOpen}|${this.designKey(view.builtBridge)}`;
+        : `${view.areaId}|${view.crossingOpen}|${this.designKey(view.builtBridge)}|${view.sceneryMarks.join(',')}`;
     const key = `${content}|${this.bakeScale()}`;
     if (key === this.lastSceneryKey) return;
     this.lastSceneryKey = key;
@@ -312,6 +326,7 @@ export class StickVisualProvider implements RidgeVisualProvider {
     const scale = this.bakeScale();
     const g = this.scene.make.graphics({ x: 0, y: 0 }).setScale(scale);
     drawRidgeAreaLayer(g, layer, view.areaId, view.crossingOpen, view.beat, {
+      marks: new Set(view.sceneryMarks),
       worldXForProgress: (progress) => this.worldXForProgress(progress),
       bridgeGap: {
         left: this.worldXForProgress(BRIDGE_RIVER_PROGRESS.left),
@@ -437,7 +452,8 @@ export class StickVisualProvider implements RidgeVisualProvider {
     const isPlayer = actor.id === 'player';
     const isWalking = isPlayer && frame.walking;
     const isTalking = view.speakingActorId === actor.id;
-    const inScene = isPlayer || isTalking || actor.id === view.partnerActorId;
+    // A memory is all cast: nobody fades back as a bystander.
+    const inScene = isPlayer || isTalking || actor.id === view.partnerActorId || view.memoryShot !== null;
 
     const nudge = nudgeFor(view, actor.id);
 
@@ -581,6 +597,7 @@ export class StickVisualProvider implements RidgeVisualProvider {
       motion ? dt / BUILD_EASE_MS : 1
     );
     this.gigBlend = approach(this.gigBlend, view.mode === 'concertGig' ? 1 : 0, motion ? dt / GIG_EASE_MS : 1);
+    this.lessonBlend = approach(this.lessonBlend, view.mode === 'bachataLesson' ? 1 : 0, motion ? dt / GIG_EASE_MS : 1);
   }
 
   private designKey(design: BridgeDesign | null): number {
@@ -681,6 +698,14 @@ export class StickVisualProvider implements RidgeVisualProvider {
       centerY = lerp(centerY, framing.centerY, gig);
     }
 
+    const lesson = easeInOut(this.lessonBlend);
+    if (lesson > 0) {
+      const framing = this.lessonFraming();
+      zoom = lerp(zoom, framing.zoom, lesson);
+      centerX = lerp(centerX, framing.centerX, lesson);
+      centerY = lerp(centerY, framing.centerY, lesson);
+    }
+
     if (build > 0) {
       const framing = this.buildFraming();
       zoom = lerp(zoom, framing.zoom, build);
@@ -733,28 +758,53 @@ export class StickVisualProvider implements RidgeVisualProvider {
   }
 
   /**
-   * Fit performer and crowd in the part of the canvas the cover crop leaves
-   * visible, centred on the gap between them where the highway draws.
+   * Fit performer and audience in the part of the canvas the cover crop leaves
+   * visible, centred on the gap between them where the highway draws. The
+   * audience is the crowd at the Concert, or the cats at Last-Stop Plaza.
    */
   private gigFraming(view: RidgeVisualViewModel): { zoom: number; centerX: number; centerY: number } {
     const cam = this.scene.cameras.main;
     const xOf = (id: RidgeActorId, fallback: number) =>
       this.worldXForProgress(view.actors.find((actor) => actor.id === id)?.progress ?? fallback);
-    const left = xOf('player', CONCERT_LAYOUT.stage) - GIG_SIDE_MARGIN;
-    const right = xOf('crowd', CONCERT_LAYOUT.crowd) + GIG_SIDE_MARGIN;
+    const audience = view.areaId === 'concert' ? xOf('crowd', CONCERT_LAYOUT.crowd) : this.worldXForProgress(DANCE_LAYOUT.chairs);
+    const performer = xOf('player', CONCERT_LAYOUT.stage);
+    const left = Math.min(performer, audience) - GIG_SIDE_MARGIN;
+    const right = Math.max(performer, audience) + GIG_SIDE_MARGIN;
     const parent = this.scene.scale.parentSize;
     const visible = getCoverVisibleRegion({
       viewport: { width: parent.width, height: parent.height },
       designSize: { width: cam.width, height: cam.height }
     });
-    const zoom = clamp(visible.width / (right - left), this.baseZoom * 0.72, this.baseZoom * 1.05);
+    // Off stage the highway docks right: fit the performer and the cats in what is left.
+    const cardCanvas =
+      view.areaId === 'concert'
+        ? 0
+        : (gigCardWidthCss(visible.width / visible.canvasPerCss) + GIG_CARD_EDGE_CSS * 2) * visible.canvasPerCss;
+    const zoom = clamp((visible.width - cardCanvas) / (right - left), this.baseZoom * 0.72, this.baseZoom * 1.05);
     const viewHeight = visible.height / zoom;
     // Centre on the visible slice, not the whole canvas, so the ground sits low on any screen.
     return {
       zoom,
-      centerX: (left + right) / 2,
+      centerX: (left + right) / 2 + cardCanvas / 2 / zoom,
       centerY: GROUND_Y - viewHeight * (GIG_GROUND_AT - 0.5)
     };
+  }
+
+  /** The three dancers behind the shuttle shelter, over the step strip. */
+  private lessonFraming(): { zoom: number; centerX: number; centerY: number } {
+    const cam = this.scene.cameras.main;
+    const left = this.worldXForProgress(DANCE_LAYOUT.lesson.teacher) - LESSON_SIDE_MARGIN;
+    const right = this.worldXForProgress(DANCE_LAYOUT.lesson.driver) + LESSON_SIDE_MARGIN;
+    const parent = this.scene.scale.parentSize;
+    const visible = getCoverVisibleRegion({
+      viewport: { width: parent.width, height: parent.height },
+      designSize: { width: cam.width, height: cam.height }
+    });
+    const zoom = clamp(visible.width / (right - left), this.baseZoom * 0.8, this.baseZoom * 1.35);
+    const viewHeight = visible.height / zoom;
+    const fine = window.matchMedia?.('(pointer: fine)').matches ?? false;
+    const groundAt = fine ? LESSON_GROUND_AT.fine : LESSON_GROUND_AT.coarse;
+    return { zoom, centerX: (left + right) / 2, centerY: GROUND_Y - viewHeight * (groundAt - 0.5) };
   }
 
   private conversationFraming(
@@ -769,8 +819,10 @@ export class StickVisualProvider implements RidgeVisualProvider {
     for (const actor of view.actors) {
       if (!actor.visible) continue;
       const isSpeaker = actor.id === view.speakingActorId;
-      if (!isSpeaker && actor.id !== view.partnerActorId) continue;
       const x = this.worldXForProgress(actor.progress);
+      // A memory frames everyone near its focus, not a talking pair.
+      const inShot = view.memoryShot !== null && Math.abs(x - playerX) <= MEMORY_FRAME_RANGE;
+      if (!isSpeaker && actor.id !== view.partnerActorId && !inShot) continue;
       minX = Math.min(minX, x);
       maxX = Math.max(maxX, x);
       if (isSpeaker) speakerX = x;
@@ -806,13 +858,15 @@ function facingFor(
   x: number
 ): RidgeFacing {
   if (actor.id === 'player') return actor.facing;
+  // In a memory the player is not there to turn toward.
+  if (frame.view.memoryShot !== null) return actor.facing;
   if (Math.abs(actor.progress - frame.playerProgress) >= AWARENESS_RANGE) return actor.facing;
   return frame.playerX >= x ? 'right' : 'left';
 }
 
 /** What the actor holds or sits on, and the strum arm a performance moves. */
 function heldPoseOf(actor: RidgeVisualViewModel['actors'][number], nudge: ActorNudge) {
-  return { prop: actor.prop, seated: actor.seated, strum: nudge.strum };
+  return { prop: actor.prop, seated: actor.seated, strum: nudge.strum, dance: nudge.dance };
 }
 
 /** Mini-game body nudge (Cicka's Standoff lunges and hops), or none. */

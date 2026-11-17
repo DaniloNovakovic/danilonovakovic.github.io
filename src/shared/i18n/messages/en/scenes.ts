@@ -75,16 +75,16 @@ export const sceneMessages = {
         guitarist: "local legend",
         kid: "skater kid",
         crowd: "waiting crowd",
-        traveler: "long-way walker",
+        traveler: "postcard traveler",
         driver: "shuttle driver",
         "operations-helper": "festival crew",
-        "dance-teacher": "dance teacher",
+        "dance-teacher": "the profe",
         steward: "festival steward",
         shuttle: "last shuttle",
       },
       barks: {
         cicka: ["mrrp.", "prrt?", "...mrow.", "*tail flick*"],
-        "counterpart-cat": ["mrow.", "*slow blink*", "prrp."],
+        "counterpart-cat": ["...", "*slow blink*", "mrow."],
         draftsperson: [
           "...load-bearing, load-bearing...",
           "It's the middle span. It's always the middle span.",
@@ -110,26 +110,27 @@ export const sceneMessages = {
           "Someone play something.",
         ],
         traveler: [
-          "Long way yet.",
-          "Feet know the road better than I do.",
-          "Which ridge was it again?",
+          "Grandma said the view was worth the hill.",
+          "Postcard: check. Stamp: check. Shuttle: ...",
+          "Ooh. Is that a goat?",
         ],
         driver: [
-          "Schedule says one thing, the road says another.",
-          "Last ride leaves at sundown.",
+          "Start, stop. Nobody improvises.",
+          "...one, two, three, tap.",
           "Everyone accounted for?",
+          "Last daylight ride. After setup.",
         ],
         "operations-helper": [
-          "Lanterns up!",
+          "Forty-six, forty-seven...",
           "Mind the cables, mind the cables.",
-          "Almost set. Almost.",
+          "Ops to steward. Still fine. Over.",
         ],
         "dance-teacher": [
-          "One step. Then the next one.",
-          "Loosen the shoulders.",
-          "You already know this part.",
+          "¡Uno, dos, tres... y tap!",
+          "The hip tells the truth.",
+          "Shoulders down, cariño.",
         ],
-        steward: ["The gate opens when it opens.", "Ticket? Ah — go on.", "Busy night."],
+        steward: ["The gate opens when the lane's safe.", "Ticket? Ah — go on.", "Very serious pocket."],
       },
     },
     bridge: {
@@ -529,85 +530,418 @@ export const sceneMessages = {
       speakers: {
         prompt: "Prompt",
         cicka: "Cicka",
+        counterpartCat: "Quiet cat",
         traveler: "Traveler",
         hillShuttleDriver: "Hill-Shuttle Driver",
-        operationsHelper: "Last-Stop Operations Helper",
-        danceTeacher: "Dance Teacher",
+        shuttleRadio: "Radio · Shuttle",
+        opsRadio: "Radio · Ops",
+        operationsHelper: "Last-Stop Operations",
+        danceTeacher: "The Profe",
         festivalSteward: "Festival Steward",
       },
       dialogue: {
-        "dance.traveler.relay_wayfinding.prompt": "Talk to Traveler",
-        "dance.traveler.relay_wayfinding.01": "The summit Relay Spire is up the hill shuttle route!",
-        "dance.traveler.relay_wayfinding.02":
-          "It's the last ride of the day—boards as soon as festival setup clears.",
-        "dance.traveler.relay_wayfinding.03":
-          "Help Operations with the lantern line, then check on the shuttle driver!",
-        "dance.driver.shuttle_delay.prompt": "Talk to Driver",
-        "dance.driver.shuttle_delay.01":
-          "Can't depart yet! My clipboard has 40 checklist items and two cold feet.",
-        "dance.driver.shuttle_delay.02":
-          "Clipboard says go. My nerves say stay in the bus forever.",
-        "dance.driver.shuttle_delay.03": "He keeps nervously re-reading the exact same checklist item.",
-        "dance.driver.shuttle_delay.choice.help":
-          "Offer to help him practice one private dance step",
-        "dance.driver.shuttle_delay.choice.help_hint":
-          "Check in with the Dance Teacher nearby.",
-        "dance.driver.shuttle_delay.choice.wait":
-          "Give him a moment and inspect the plaza setup",
-        "dance.operations_helper.handoff_check.prompt": "Help Operations",
-        "dance.operations_helper.handoff_check.01":
-          "You help Operations string the festival lanterns.",
-        "dance.operations_helper.handoff_check.02":
-          "If these festoon lights aren't glowing by sunset, the festival is bust!",
-        "dance.operations_helper.handoff_check.03":
-          "You help secure the lantern lines. A warm golden glow illuminates the plaza!",
-        "dance.operations_helper.handoff_check.done.01":
-          "Operations handoff complete! Check on the Dance Teacher next.",
-        "dance.operations_helper.handoff_check.done.02":
-          "The plaza looks vibrant and cozy.",
-        "dance.locals.triangulated_read.prompt": "Check Steward",
-        "dance.locals.triangulated_read.01":
-          "Service gate opens the moment the shuttle is cleared!",
-        "dance.locals.triangulated_read.02":
-          "She's master of the lanterns. He just needs a little push of confidence.",
-        "dance.locals.triangulated_read.03":
-          "Let's teach him one simple dance step away from the crowd.",
-        "dance.driver.one_step_practice.prompt": "Practice Dance Step",
-        "dance.driver.one_step_practice.01": "You guide the driver through one simple step.",
-        "dance.driver.one_step_practice.02":
-          "Side step, tap, turn! No spotlight, no pressure—just smooth rhythm.",
-        "dance.driver.one_step_practice.03":
-          "Hey! I actually did it! That wasn't scary at all!",
-        "dance.driver.one_step_practice.done.prompt": "Clear Gate",
-        "dance.driver.one_step_practice.done.01":
-          "Driver confidence restored! Clear the service gate next.",
-        "dance.driver.one_step_practice.done.02":
-          "Dignity 100%! Ready to roll the shuttle!",
-        "dance.driver.folded_song_request.prompt": "Hand Song Request",
-        "dance.driver.folded_song_request.01":
-          "You hand him a neatly folded paper song request.",
-        "dance.driver.folded_song_request.02":
-          "A quiet request for the opening festival song.",
-        "dance.driver.folded_song_request.03":
-          "He reads it with a smile and nods. 'Consider it played.'",
-        "dance.driver.folded_song_request.04":
-          "All clear! Head to the shuttle service gate on the right.",
-        "dance.setup_clearance.prompt": "Open Service Gate",
-        "dance.setup_clearance.01": "You open the service gate for the final shuttle.",
-        "dance.setup_clearance.02": "Lantern lines secured.",
-        "dance.setup_clearance.03": "Service lane clear of obstacles.",
-        "dance.setup_clearance.04": "Gate swings wide open! Last daylight window active!",
-        "dance.setup_clearance.05":
-          "The shuttle engine hums to life. Board the van!",
-        "dance.shuttle.last_daylight_ride.prompt": "Board Shuttle",
-        "dance.shuttle.last_daylight_ride.01": "All aboard the Ridge Shuttle!",
-        "dance.shuttle.last_daylight_ride.02":
-          "The bus climbs the winding hill into golden sunset light.",
-        "dance.shuttle.last_daylight_ride.03": "The Relay Spire appears atop the quiet ridge.",
-        "dance.cicka.resting_spot.prompt": "Pet Cicka",
-        "dance.cicka.resting_spot.01": "Cicka snoozes happily on the operations crate.",
-        "dance.cicka.resting_spot.02": "Cicka watches the shuttle gate with sleepy curiosity.",
-        "dance.cicka.resting_spot.03": "Purrr... mrreeow.",
+        // Traveler: the practical first read.
+        "dance.traveler.wayfinding.prompt": "Talk to the traveler",
+        "dance.traveler.wayfinding.01":
+          "A woman sits on a battered suitcase, writing a postcard on her knee. She looks up and grins.",
+        "dance.traveler.wayfinding.02":
+          "Heading up to Relay too? Good. I was starting to think I was the only one waiting for that gate.",
+        "dance.traveler.wayfinding.again.01": "Gate still shut? Good. Gives me time for one more postcard.",
+        "dance.traveler.wayfinding.choice.relay": "How do I get up to Relay?",
+        "dance.traveler.wayfinding.relay.01":
+          "The hill shuttle. Last daylight ride, once the steward opens that gate.",
+        "dance.traveler.wayfinding.relay.02":
+          "After that they close the road. Tonight the whole plaza is a dance floor, and the hill just listens.",
+        "dance.traveler.wayfinding.choice.gate": "Why's the gate shut?",
+        "dance.traveler.wayfinding.gate.01":
+          "Setup. Cables, chairs, a lantern line sagging over the lane. The steward won't let a shuttle near it till it's safe.",
+        "dance.traveler.wayfinding.choice.driver": "Who drives the shuttle?",
+        "dance.traveler.wayfinding.driver.01": "Him, under the shelter. With the clipboard.",
+        "dance.traveler.wayfinding.driver.02":
+          "He's read the same page nine times. I counted. I've been sitting here a while.",
+        "dance.traveler.wayfinding.choice.festival": "What's happening tonight?",
+        "dance.traveler.wayfinding.festival.01":
+          "Bachata night. The whole valley comes down. Even people who swear they don't dance.",
+        "dance.traveler.wayfinding.festival.02": "Especially them, usually.",
+        "dance.traveler.wayfinding.choice.you": "What takes you up to Relay?",
+        "dance.traveler.wayfinding.you.01":
+          "My grandma rode that shuttle up once, the summer she was twenty. She talked about the view from the top for sixty years.",
+        "dance.traveler.wayfinding.you.02":
+          "So I'm doing her trip. Bus, plaza, hill shuttle, view. I'm sending her a postcard from every stop.",
+        "dance.traveler.wayfinding.you.03":
+          "She did say the plaza was the best part. I'm not sure what she meant yet.",
+        "dance.traveler.wayfinding.choice.leave": "Thanks.",
+        "dance.traveler.wayfinding.leave.01": "Mind the cables. They've got opinions.",
+        "dance.traveler.staying.prompt": "Talk to the traveler",
+        "dance.traveler.staying.01": "Shuttle's open! Go on. Not me, though.",
+        "dance.traveler.staying.02":
+          "I just worked out what Grandma meant. The view will still be there tomorrow. Tonight there's a dance.",
+        "dance.traveler.staying.choice.spot": "Save me a spot.",
+        "dance.traveler.staying.spot.01": "Front row. I'll put my suitcase on it.",
+        "dance.traveler.staying.choice.enjoy": "Enjoy it.",
+        "dance.traveler.staying.enjoy.01": "Last postcard of the day: 'You were right. Stayed for the dance.'",
+
+        // Hill-Shuttle Driver.
+        "dance.driver.prompt": "Talk to the driver",
+        "dance.driver.clipboard.prompt": "Talk to the driver",
+        "dance.driver.clipboard.01":
+          "Under the shuttle shelter, a big man in a driver's cap turns a page on his clipboard. Then turns it back.",
+        "dance.driver.clipboard.02":
+          "Oh! Passenger? Last daylight ride. Leaves the minute the steward opens the gate. Which is... not yet.",
+        "dance.driver.clipboard.again.01": "Still not yet. I checked. Twice. Well. Nine times.",
+        "dance.driver.clipboard.choice.when": "When do we leave?",
+        "dance.driver.clipboard.when.01":
+          "When setup's safe. Then there's a short window before they close the road for the dance.",
+        "dance.driver.clipboard.when.02": "I like windows. Clear rules. Start, stop. Nobody improvises.",
+        "dance.driver.clipboard.choice.list": "What's on the clipboard?",
+        "dance.driver.clipboard.list.01": "Passengers. You. That traveler, allegedly. Two crates of spare lanterns.",
+        "dance.driver.clipboard.list.02":
+          "And the night list. Volunteer shuttle, after the dance. So I'll be... here. At the dance.",
+        "dance.driver.clipboard.list.03": "Where people dance.",
+        "dance.driver.clipboard.choice.dance": "Are you dancing tonight?",
+        "dance.driver.clipboard.dance.01":
+          "Me? I drive. Driving's like dancing with a road. The road leads, I follow, nobody steps on anybody.",
+        "dance.driver.clipboard.dance.02":
+          "His eyes drift, just for a second, toward the operations table. Then straight back to the clipboard.",
+        "dance.driver.clipboard.dance.03":
+          "...I have two left feet. Both of them are also bad at being left feet.",
+        "dance.driver.clipboard.choice.learn": "What if you learned just one step?",
+        "dance.driver.clipboard.learn.01": "Here? In front of— no. Absolutely not.",
+        "dance.driver.clipboard.learn.02":
+          "...Behind the shelter, maybe. Nobody looks behind a bus shelter. That's what they're for.",
+        "dance.driver.clipboard.learn.03":
+          "If the Profe had a minute. Which she won't. Which is fine. Which is completely fine.",
+        "dance.driver.clipboard.choice.tease": "Two left feet? Show me.",
+        "dance.driver.clipboard.tease.01": "Absolutely not.",
+        "dance.driver.clipboard.tease.02":
+          "He hides behind the clipboard. The clipboard is not nearly big enough.",
+        "dance.driver.clipboard.choice.drop": "Never mind.",
+        "dance.driver.clipboard.drop.01": "Never minded. Already forgotten. Thank you.",
+        "dance.driver.clipboard.choice.leave": "I'll look around.",
+        "dance.driver.clipboard.leave.01": "The gate's not going anywhere. Neither am I. Literally. It's a schedule.",
+        "dance.driver.waiting_lesson.prompt": "Talk to the driver",
+        "dance.driver.waiting_lesson.01":
+          "Did you ask her? You didn't say it was for me. Did you say it was for me?",
+        "dance.driver.waiting_lesson.choice.encourage": "You'll be fine. It's four steps.",
+        "dance.driver.waiting_lesson.encourage.01": "Four. I can count to four. I count passengers all day.",
+        "dance.driver.waiting_lesson.encourage.02": "He stands a little straighter. The clipboard lowers half an inch.",
+        "dance.driver.waiting_lesson.choice.looking": "Still looking for her.",
+        "dance.driver.waiting_lesson.looking.01": "Take your time. Take lots of time. Take until next summer.",
+        "dance.driver.practiced.prompt": "Talk to the driver",
+        "dance.driver.practiced.01": "His feet are moving under the clipboard. Left, left, left, tap.",
+        "dance.driver.practiced.02": "I keep doing it when nobody's looking. Don't tell anyone. Especially— anyone.",
+        "dance.driver.practiced.choice.tonight": "Will you ask her tonight?",
+        "dance.driver.practiced.tonight.01": "Ask WHO?",
+        "dance.driver.practiced.tonight.02":
+          "...She's busy. She's always busy. It's honestly the nicest thing about her. She makes busy look kind.",
+        "dance.driver.practiced.choice.leave": "Keep practising.",
+        "dance.driver.practiced.leave.01": "One, two, three, tap. One, two, three, tap.",
+        "dance.driver.request.prompt": "Talk to the driver",
+        "dance.driver.request.01": "He's dancing the step under the shelter again. He stops dead when he sees you.",
+        "dance.driver.request.02": "So. I have one step now. One step is not nothing.",
+        "dance.driver.request.03":
+          "But I can't just walk up and— she's on the radio. She's always on the radio.",
+        "dance.driver.request.choice.write": "Write her a song request.",
+        "dance.driver.request.write.01": "A request. For tonight. One song, and...",
+        "dance.driver.request.write.02": "...and one dance. Later. On paper, later is a much braver time.",
+        "dance.driver.request.write.03": "He tears the corner off his route sheet and uncaps a pen.",
+        "dance.driver.request.choice.simple": "Keep it simple.",
+        "dance.driver.request.simple.01":
+          "SONG: something slow. FOR: the operations table. ONE DANCE, LATER?  ☐ yes  ☐ maybe",
+        "dance.driver.request.simple.02":
+          "She'll know the handwriting. Everyone knows the handwriting. I write 'shuttle' with three t's.",
+        "dance.driver.request.simple.03":
+          "Put it in her request jar? Don't hand it to her. Just... the jar. Like a normal anonymous person.",
+        "dance.driver.request.choice.novel": "Tell her how you feel.",
+        "dance.driver.request.novel.01": "On a corner of a route sheet? That's not a request, that's a novel.",
+        "dance.driver.request.novel.02": "Simple. Simple is a shuttle schedule. I'm good at schedules.",
+        "dance.driver.request.choice.sign": "Sign your name.",
+        "dance.driver.request.sign.01": "...She'll know. Signing it would just be showing off.",
+        "dance.driver.request.choice.later": "Maybe after the shuttle?",
+        "dance.driver.request.later.01": "After the shuttle, the dance is already happening. Then it's not later. It's now.",
+        "dance.driver.request.later.02": "Now is so much worse than later.",
+        "dance.driver.request_pending.prompt": "Talk to the driver",
+        "dance.driver.request_pending.01": "Is it in the jar? Don't tell me. Tell me. No— don't.",
+        "dance.driver.request_pending.02": "The folded corner of route sheet is warm in your pocket. The jar is on the operations table.",
+        "dance.driver.after_request.prompt": "Talk to the driver",
+        "dance.driver.after_request.01": "She said 'copy that.'",
+        "dance.driver.after_request.02":
+          "Copy that. Two words. I am going to think about those two words for the rest of my life.",
+        "dance.driver.after_request.03":
+          "Right! The lane. The steward's got a few last setup jobs, and then we're rolling.",
+
+        // The Profe: the Dance Teacher.
+        "dance.teacher.floor.prompt": "Talk to the Profe",
+        "dance.teacher.floor.01":
+          "On the empty dance floor, a woman in a long skirt is dancing with nobody, perfectly. She scrapes a güira on every fourth count.",
+        "dance.teacher.floor.02":
+          "You're early, cariño. The floor doesn't open till the lanterns do. But the floor is always open to the feet.",
+        "dance.teacher.floor.back.01": "Feet still yours? Good. Let's keep them that way.",
+        "dance.teacher.floor.after.01": "Look at that sky. Somebody's been busy. I have the watch, go, go.",
+        "dance.teacher.floor.choice.lesson": "The driver wants one step. Privately.",
+        "dance.teacher.floor.lesson.01": "Behind the shelter? Ah. The shy ones always pick the bus stop.",
+        "dance.teacher.floor.lesson.02":
+          "I'll come to him. If you bring him to me, he'll think about it the whole way and arrive as a statue.",
+        "dance.teacher.floor.choice.go": "Let's go.",
+        "dance.teacher.floor.go.01":
+          "You dance it with him. He'll copy you before he copies me. I'm much too good, it frightens people.",
+        "dance.teacher.floor.go.02":
+          "Left, left, left, tap. Right, right, right, tap. Feet on the count, hip on the four.",
+        "dance.teacher.floor.choice.later": "In a minute.",
+        "dance.teacher.floor.later.01": "The count will wait. It always does.",
+        "dance.teacher.floor.choice.watch": "Could you keep watch over the plaza tonight?",
+        "dance.teacher.floor.watch.01": "Me? Run the plaza?",
+        "dance.teacher.floor.watch.02":
+          "I ran this plaza one Saturday with a broken speaker and a güira. Everybody danced. Nobody died.",
+        "dance.teacher.floor.watch.03": "Tell her the Profe has the watch. And tell her to wear shoes she can turn in.",
+        "dance.teacher.floor.choice.what": "What's tonight?",
+        "dance.teacher.floor.what.01":
+          "Bachata. One, two, three, and the one where your hip tells the truth.",
+        "dance.teacher.floor.what.02": "Everybody can do the first three. The fourth is where people get shy.",
+        "dance.teacher.floor.choice.teach": "Can you teach me?",
+        "dance.teacher.floor.teach.01": "I teach everybody. But you're not the one who needs it today.",
+        "dance.teacher.floor.teach.02": "Look at the shelter.",
+        "dance.teacher.floor.teach.03":
+          "Under the shuttle shelter, the driver is mouthing 'one, two, three' at his clipboard.",
+        "dance.teacher.floor.choice.couple": "The driver and the woman at the operations table...?",
+        "dance.teacher.floor.couple.01": "Ah, you noticed. Everybody notices. Except the two of them.",
+        "dance.teacher.floor.couple.02":
+          "They're practising the art of being unavailable. Very advanced. I don't teach it.",
+        "dance.teacher.floor.choice.again": "Can we run the step again?",
+        "dance.teacher.floor.again.01": "Again! The best word in dancing. Come on, before he gets shy.",
+        "dance.teacher.floor.choice.leave": "See you on the floor.",
+        "dance.teacher.floor.leave.01": "You will. Everyone does, eventually.",
+        "dance.lesson.done.teacher.legendary": "¡Eso! Look at the two of you. I'm out of a job.",
+        "dance.lesson.done.teacher.great": "That's bachata. Not perfect. Better than perfect: relaxed.",
+        "dance.lesson.done.teacher.good": "Wobbly. Good. Wobbly means you're really doing it.",
+        "dance.lesson.done.teacher.rough": "Rough? Sure. But he never stopped. That's the actual step.",
+        "dance.lesson.done.driver.legendary": "I did a hip. I did a HIP.",
+        "dance.lesson.done.driver.great": "My feet were where I left them. Every single time.",
+        "dance.lesson.done.driver.good": "I only stepped on my own foot twice. That's a personal best.",
+        "dance.lesson.done.driver.rough": "I think I invented a new dance. It's called 'sorry'.",
+        "dance.lesson.done.01": "One step. I have one whole step.",
+        "dance.lesson.done.02": "He tucks the clipboard under his arm. For the first time all afternoon, he doesn't look at it.",
+        "dance.lesson.done.again.01": "Again tonight. With music, with lanterns, with her. Same four counts.",
+
+        // Last-Stop Operations Helper.
+        "dance.operations.table.prompt": "Talk to Operations",
+        "dance.operations.table.01":
+          "The operations table: a radio, a checklist, a jar labelled SONG REQUESTS, and a woman counting lanterns under her breath.",
+        "dance.operations.table.02": "...forty-six, forty-seven, forty-eight. Oh! Hi! Sorry. Forty-eight. Hi.",
+        "dance.operations.table.again.01": "Hi again! Everything's fine. Probably. Let me check. It's fine.",
+        "dance.operations.table.ready.01": "The Profe's got the watch. I keep putting the radio down and picking it back up.",
+        "dance.operations.table.choice.help": "Need a hand?",
+        "dance.operations.table.help.01": "Could you... check a few things? Just so it's not only me saying it.",
+        "dance.operations.table.help.02": "The lantern line over the floor first. Give it a tug.",
+        "dance.operations.table.choice.tug": "Tug the lantern line.",
+        "dance.operations.table.tug.01": "You tug. Forty-eight paper lanterns bob, sway, and hold.",
+        "dance.operations.table.tug.02": "It holds. Okay. Okay! Cable tape by the speakers?",
+        "dance.operations.table.choice.stamp": "Stamp on the cable tape.",
+        "dance.operations.table.stamp.01": "You stamp along the tape. Flat. Not a wrinkle.",
+        "dance.operations.table.stamp.02": "Flat. Chairs, then.",
+        "dance.operations.table.choice.count": "Count the chair stacks.",
+        "dance.operations.table.count.01": "Twelve stacks of twelve. Neat as a ledger.",
+        "dance.operations.table.count.02": "...So it's all fine. It's been fine for an hour.",
+        "dance.operations.table.count.03":
+          "If it's all done, then tonight I'm just someone standing by the floor. Waiting to see if anyone asks.",
+        "dance.operations.table.count.04":
+          "Her eyes slide, just for a second, to the shuttle shelter, where the driver is very busy with his clipboard.",
+        "dance.operations.table.choice.watch": "Who keeps watch once the dance starts?",
+        "dance.operations.table.watch.01": "Me. That's the plan. Somebody has to have the radio.",
+        "dance.operations.table.watch.02":
+          "Unless somebody else has the radio. Which nobody will. Which is fine. I like the radio.",
+        "dance.operations.table.choice.ask": "You could ask the driver to dance.",
+        "dance.operations.table.ask.01": "Ask WHO? I wasn't— that was a lantern. I was looking at a lantern.",
+        "dance.operations.table.ask.02": "She is suddenly very interested in a lantern.",
+        "dance.operations.table.ask.03": "I have forty-eight lanterns. I am extremely busy with all of them.",
+        "dance.operations.table.choice.tonight": "About tonight...",
+        "dance.operations.table.tonight.01": "Tonight I'm on the radio. Same as every year. It's a good radio.",
+        "dance.operations.table.choice.kept": "The Profe will keep watch tonight.",
+        "dance.operations.table.kept.01": "The Profe? She said that? Out loud?",
+        "dance.operations.table.kept.02": "...Then I could just be at the dance. Like a person.",
+        "dance.operations.table.kept.03": "I don't know what I'd do with my hands.",
+        "dance.operations.table.kept.04": "She sets the radio down. Picks it up. Sets it down again, and leaves it there.",
+        "dance.operations.table.choice.drop": "Drop the folded request in the jar.",
+        "dance.operations.table.drop.01": "You drop the little folded square into the jar. It lands right on top.",
+        "dance.operations.table.drop.02": "Oh, a request! For the DJ, let me just—",
+        "dance.operations.table.drop.03": "She unfolds it. She reads it. She reads it again.",
+        "dance.operations.table.drop.04": "...'Shuttle' with three t's.",
+        "dance.operations.table.drop.05": "She picks up the radio, and holds it for a long moment without pressing anything.",
+        "dance.operations.table.drop.06": "Ops to shuttle.",
+        "dance.operations.table.drop.07": "...Shuttle. Go ahead.",
+        "dance.operations.table.drop.08": "Request received.",
+        "dance.operations.table.drop.09": "...Tick: yes.",
+        "dance.operations.table.drop.10": "...Copy that.",
+        "dance.operations.table.drop.11": "Across the plaza, somebody drops a clipboard.",
+        "dance.operations.table.drop.12":
+          "Right! Lanterns! Gate! The steward needs the lane. Go, go, I'm— I'm working. Go.",
+        "dance.operations.table.choice.job": "What do you do here?",
+        "dance.operations.table.job.01":
+          "Operations. Shuttle questions, lantern tags, chair stacks, cable runs, the steward's radio.",
+        "dance.operations.table.job.02": "If it's on this plaza and it could go wrong, it's mine.",
+        "dance.operations.table.choice.jar": "What's the jar for?",
+        "dance.operations.table.jar.01": "Song requests for the DJ tonight. Mostly people request the same three songs.",
+        "dance.operations.table.jar.02": "Somebody once requested 'something with a trumpet'. I respect that.",
+        "dance.operations.table.choice.leave": "Good luck tonight.",
+        "dance.operations.table.leave.01": "Luck's for people without checklists. ...Thank you, though.",
+        "dance.operations.after.prompt": "Talk to Operations",
+        "dance.operations.after.01": "Don't look at me. I'm working. I am working extremely hard.",
+        "dance.operations.after.open.01":
+          "Shuttle's yours! Bring him back down in one piece. He's got a dance at nine.",
+        "dance.operations.after.choice.happy": "You look happy.",
+        "dance.operations.after.happy.01": "I look like somebody holding a radio.",
+        "dance.operations.after.happy.02": "...Okay. I'm a little happy.",
+        "dance.operations.after.choice.leave": "See you later.",
+        "dance.operations.after.leave.01": "Later. Later's a good time. I've heard.",
+
+        // Festival Steward and the gate.
+        "dance.steward.gate.prompt": "Talk to the steward",
+        "dance.steward.gate.01":
+          "Gate opens when the lane's safe. Lane's safe when Ops signs off, and the driver is on his clipboard instead of under it.",
+        "dance.steward.gate.choice.why": "Why so strict?",
+        "dance.steward.gate.why.01": "Last year someone drove a shuttle through a lantern line.",
+        "dance.steward.gate.why.02": "Very festive. Very expensive.",
+        "dance.steward.gate.choice.open": "Can't you open it just for me?",
+        "dance.steward.gate.open.01": "Can't, won't, and also the key is in a very serious pocket.",
+        "dance.steward.gate.choice.couple": "Those two, at the shelter and the table...",
+        "dance.steward.gate.couple.01": "Oh, you noticed.",
+        "dance.steward.gate.couple.02":
+          "The shuttle waits on the lane. She waits on one perfect lantern. He waits on anything except asking.",
+        "dance.steward.gate.choice.leave": "I'll be back.",
+        "dance.steward.gate.leave.01": "Busy day. Busier night.",
+        "dance.gate.look.prompt": "Look at the gate",
+        "dance.gate.look.01":
+          "A barrier across the service road, a sign that says SETUP · CLOSED, and a lantern line sagging low enough to scalp a shuttle.",
+        "dance.gate.look.02": "Loose speaker cables snake across the lane. The hill road climbs away beyond them.",
+        "dance.steward.clearance.prompt": "Check in with the steward",
+        "dance.gate.clearance.prompt": "Check in with the steward",
+        "dance.steward.clearance.01":
+          "Ops says go. The driver's practically floating. So: two jobs on the lane, then I turn this key.",
+        "dance.steward.clearance.02":
+          "That lantern line has to clear the shuttle, crates on the roof and all. And nothing loose on the road a tyre can grab.",
+        "dance.steward.clearance.again.01": "Key's ready when the lane is.",
+        "dance.steward.clearance.todo.lanterns": "Lantern line: still sagging. Pole's on your left, three hooks.",
+        "dance.steward.clearance.todo.cables": "Cable run: still loose, right in the tyre track.",
+        "dance.steward.clearance.choice.later": "On it.",
+        "dance.steward.clearance.later.01": "Minute's fine. Sunset isn't.",
+        "dance.steward.clearance.ready.01": "Lanterns up. Cables ramped. Look at that lane.",
+        "dance.steward.clearance.ready.02": "Last thing: the sign. Flip it to the side the shuttle needs.",
+        "dance.steward.clearance.choice.party": "Flip it to DANCE TONIGHT · 9.",
+        "dance.steward.clearance.party.01": "You flip the board. DANCE TONIGHT · 9, in big happy letters.",
+        "dance.steward.clearance.party.02": "True. Lovely. Also not something a shuttle can read. Other side.",
+        "dance.steward.clearance.choice.sign": "Flip it to LAST DAYLIGHT RIDE.",
+        "dance.steward.clearance.sign.01": "SETUP · CLOSED flips over: LAST DAYLIGHT RIDE.",
+        "dance.steward.clearance.sign.02": "That's a lane.",
+        "dance.steward.clearance.sign.03":
+          "The steward turns a very serious key. The gate swings wide, and the whole sky goes gold.",
+
+        // The two setup jobs on the lane.
+        "dance.setup.lanterns.prompt": "Fix the lantern line",
+        "dance.setup.lanterns.01":
+          "The lantern line sags across the lane at about head height. The pole has three hooks: low, middle, and one right at the top.",
+        "dance.setup.lanterns.01_mid":
+          "The line hangs from the middle hook. It clears a person. A shuttle with crates on its roof is taller than a person.",
+        "dance.setup.lanterns.choice.low": "Low hook.",
+        "dance.setup.lanterns.low.01": "You hook it low. The lanterns now hang at exactly forehead height.",
+        "dance.setup.lanterns.low.02": "Ha! Perfect, if we were doing limbo. Higher.",
+        "dance.setup.lanterns.choice.middle": "Middle hook.",
+        "dance.setup.lanterns.middle.01": "Middle hook. The line lifts to about roof height. Roughly.",
+        "dance.setup.lanterns.middle.02": "Roof height, sure. Now picture two crates of spare lanterns on that roof.",
+        "dance.setup.lanterns.choice.top": "Top hook.",
+        "dance.setup.lanterns.top.01":
+          "You climb onto a crate, stretch, and hitch the line on the top hook. The lanterns lift clear of the lane.",
+        "dance.setup.lanterns.top.02": "One by one, they blink on early, like they couldn't wait.",
+        "dance.setup.lanterns.choice.leave": "Leave it for now.",
+        "dance.setup.lanterns.leave.01": "The lanterns sway, unimpressed.",
+        "dance.setup.cables.prompt": "Sort out the cable run",
+        "dance.setup.cables.01":
+          "Three loose speaker cables snake across the lane, right where the shuttle's tyres will roll.",
+        "dance.setup.cables.choice.tape": "Tape them flat.",
+        "dance.setup.cables.tape.01":
+          "You tape them flat. It looks tidy for exactly as long as it takes to imagine a shuttle tyre on it.",
+        "dance.setup.cables.tape.02": "Tape's for the dance floor. Tyres eat tape.",
+        "dance.setup.cables.choice.unplug": "Unplug and coil them.",
+        "dance.setup.cables.unplug.01":
+          "You pull the plugs to coil the cables out of the way. Across the plaza, the music stops dead.",
+        "dance.setup.cables.unplug.02": "¡Oye! Who killed my güira?",
+        "dance.setup.cables.unplug.03": "You plug them back in. Sheepishly.",
+        "dance.setup.cables.choice.ramp": "Lay a cable ramp over them.",
+        "dance.setup.cables.ramp.01":
+          "You lay a rubber ramp over the run and tuck every cable under it. Somewhere, a speaker thumps once, testing.",
+        "dance.setup.cables.ramp.02": "Ha. Even the speakers are nervous tonight.",
+        "dance.setup.cables.choice.leave": "Leave it for now.",
+        "dance.setup.cables.leave.01": "The cables keep their opinions to themselves.",
+        "dance.steward.after.prompt": "Talk to the steward",
+        "dance.steward.after.01": "Last daylight window. Don't make me close it on you. Ticket? Ah — go on.",
+
+        // Cicka and the quiet cat.
+        "dance.cicka.crates.prompt": "Visit Cicka",
+        "dance.cicka.crates.01":
+          "Cicka is loafing on a crate of paper lanterns. She is staring, very hard, at the chair stacks.",
+        "dance.cicka.crates.choice.pet": "Scratch behind her ears.",
+        "dance.cicka.crates.pet.01": "prrt.",
+        "dance.cicka.crates.pet.02": "She allows it. She does not stop staring at the chairs.",
+        "dance.cicka.crates.choice.look": "Look where she's looking.",
+        "dance.cicka.crates.look.01": "Under the chair stacks: two dark ears, and a pair of round yellow eyes.",
+        "dance.cicka.crates.look.02":
+          "Another cat. He looks at Cicka. Cicka looks at him. Neither of them blinks first.",
+        "dance.cicka.crates.choice.leave": "Leave her to it.",
+        "dance.cicka.crates.leave.01": "She has important staring to do.",
+        "dance.cats.chairs.prompt": "Look under the chairs",
+        "dance.cats.chairs.01":
+          "Something dark is tucked deep under the chair stacks. Two yellow eyes. A cat, watching Cicka.",
+        "dance.cats.chairs.01_seen":
+          "The dark cat is still under the chairs, watching Cicka like she's the only lantern lit.",
+        "dance.cats.chairs.choice.play": "Play him something soft on Steve's guitar.",
+        "dance.cats.chairs.play.01":
+          "You sit on a lantern crate and swing Steve's guitar round. Cicka's ears turn first.",
+        "dance.cats.chairs.play.02":
+          "Something slow, then. Something bachata, the way the Profe counts it: soft on the four.",
+        "dance.cats.chairs.choice.coax": "Hold out a hand.",
+        "dance.cats.chairs.coax.01": "Hhhk.",
+        "dance.cats.chairs.coax.02": "He retreats exactly one chair further back. That's a no.",
+        "dance.cats.chairs.choice.call": "Psst psst psst.",
+        "dance.cats.chairs.call.01": "Nothing. Cicka gives you a look like you've embarrassed the entire species.",
+        "dance.cats.chairs.choice.leave": "Leave them be.",
+        "dance.cats.chairs.leave.01": "Some things can't be rushed. Cats know this professionally.",
+        "dance.cats.serenade_done.01": "The last note hangs under the lanterns.",
+        "dance.cats.serenade_done.warm.01":
+          "A dark paw. Then a dark nose. The other cat slides out from under the chairs and sits down beside Cicka.",
+        "dance.cats.serenade_done.rough.01":
+          "A few wrong notes. The dark cat comes out anyway, mostly to see what that was, and sits beside Cicka.",
+        "dance.cats.serenade_done.02": "mrrp.",
+        "dance.cats.serenade_done.03": "...prrt.",
+        "dance.cats.serenade_done.04":
+          "They look at the same lantern. Neither of them says anything else. They don't need to.",
+        "dance.cats.together.prompt": "Visit the cats",
+        "dance.cats.together.01": "Cicka and the dark cat are loafing side by side, exactly one paw apart.",
+        "dance.cats.together.choice.pet": "Pet Cicka.",
+        "dance.cats.together.pet.01": "Purrrr...",
+        "dance.cats.together.pet.02": "The other cat purrs too, a beat behind, like he's learning the song.",
+        "dance.cats.together.choice.encore": "Play them the song again.",
+        "dance.cats.together.encore.01": "Two sets of ears turn toward the guitar at once.",
+        "dance.cats.together.choice.leave": "Leave them be.",
+        "dance.cats.together.leave.01": "They don't notice you go. That's the nicest thing a cat can do.",
+        "dance.cats.gate.prompt": "Visit Cicka",
+        "dance.cats.gate.01": "Cicka has settled by the open gate, as if she planned the whole thing.",
+        "dance.cats.gate.together.01": "The dark cat is beside her. When the lanterns blink, they both blink.",
+        "dance.cats.gate.apart.01":
+          "A dark cat has come out from under the chairs too. They are loafing near each other, pretending not to notice.",
+        "dance.cats.gate.02": "mrrp.",
+
+        // The last daylight ride.
+        "dance.shuttle.driver.prompt": "Board the shuttle",
+        "dance.shuttle.last_daylight_ride.prompt": "Board the shuttle",
+        "dance.shuttle.last_daylight_ride.01": "All aboard the last ride! Mind the step. Mind the lanterns. Mind— you're fine.",
+        "dance.shuttle.last_daylight_ride.choice.board": "Let's go.",
+        "dance.shuttle.last_daylight_ride.board.01": "Ops to shuttle.",
+        "dance.shuttle.last_daylight_ride.board.02": "...Come back down after. I'm saving you the slow one.",
+        "dance.shuttle.last_daylight_ride.board.03": "Copy that.",
+        "dance.shuttle.last_daylight_ride.board.04":
+          "The shuttle climbs the hill road into sunset paper. Behind you, the plaza lanterns come on all at once.",
+        "dance.shuttle.last_daylight_ride.board.05": "Up ahead, the Relay Spire stands quiet against the gold.",
+        "dance.shuttle.last_daylight_ride.choice.wait": "One more minute.",
+        "dance.shuttle.last_daylight_ride.wait.01": "Take it. Sunset waits for nobody. But I do.",
       },
     },
     relay: {
@@ -626,11 +960,22 @@ export const sceneMessages = {
         "relay.sit_and_play.prompt.02":
           "You unslung the acoustic guitar. The sunset phrase echoes across the mountain air.",
         "relay.sit_and_play.prompt.03": "The overlook fills with warm, peaceful evening light.",
-        "relay.montage.bridge.01": "(Memory) The blueprint bridge stands strong across the river.",
+        "relay.montage.lead.01": "As you play, the song drifts down the mountain, past every page you crossed.",
+        "relay.montage.bridge.01": "Far below, the blueprint bridge holds. Your bridge.",
         "relay.montage.concert.01":
-          "(Memory) The street crowd cheered as the guitar melody landed true.",
+          "At the crossing, Steve is telling the kid about the ramp again. The kid pretends not to listen.",
         "relay.montage.dance.01":
-          "(Memory) Festival lanterns glow warmly in the twilight below.",
+          "Night comes to Last-Stop Plaza and every lantern wakes. The traveler has the best seat: her suitcase, front row.",
+        "relay.montage.dance.cat_crate":
+          "On the lantern crate, the quiet cat keeps Cicka's warm spot, and watches the hill road.",
+        "relay.montage.dance.cat_chairs":
+          "Out from under the chairs at last, the quiet cat sits by the lanterns, watching the hill road.",
+        "relay.montage.dance.watch":
+          "At the operations table, the Profe has the radio. 'Plaza to everyone,' she says. 'Dance.'",
+        "relay.montage.dance.couple":
+          "The DJ plays something slow. The driver crosses the floor, holds out a hand, and counts under his breath: one, two, three, tap.",
+        "relay.montage.dance.everyone":
+          "By the second song, nobody on the plaza is sitting down. Not even the steward.",
         "relay.guitar.sunset.01":
           "The sun dips below the horizon as your song gently concludes.",
         "relay.guitar.let_song_end.01": "You let the final chord ring out into quiet.",

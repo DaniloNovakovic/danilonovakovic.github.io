@@ -13,9 +13,12 @@ const PORTRAITS: Record<BodiedPortraitId, (emotion: RidgeEmotion) => ReactNode> 
   guitarist: (emotion) => <GuitaristPortrait emotion={emotion} />,
   kid: (emotion) => <KidPortrait emotion={emotion} />,
   crowd: (emotion) => <CrowdPortrait emotion={emotion} />,
-  driver: () => <DriverPortrait />,
-  traveler: () => <TravelerPortrait />,
-  teacher: () => <TeacherPortrait />,
+  driver: (emotion) => <DriverPortrait emotion={emotion} />,
+  traveler: (emotion) => <TravelerPortrait emotion={emotion} />,
+  teacher: (emotion) => <TeacherPortrait emotion={emotion} />,
+  operations: (emotion) => <OperationsPortrait emotion={emotion} />,
+  steward: (emotion) => <StewardPortrait emotion={emotion} />,
+  quietCat: (emotion) => <CickaPortrait emotion={emotion} coat="dark" />,
   player: (emotion) => <PlayerPortrait emotion={emotion} />
 };
 
@@ -55,27 +58,35 @@ export function ConversationBust({
   );
 }
 
-function CickaPortrait({ emotion }: { emotion: RidgeEmotion }) {
+function CickaPortrait({ emotion, coat = 'pale' }: { emotion: RidgeEmotion; coat?: 'pale' | 'dark' }) {
+  const fur = coat === 'dark' ? '#1a1a1a' : '#fbfbf9';
+  // Paper eyes on a dark coat, so the face still reads.
+  const eye = coat === 'dark' ? '#fbfbf9' : '#1a1a1a';
   return (
-    <g fill="none" stroke="#1a1a1a" strokeWidth="3" strokeLinecap="round">
-      <ellipse cx="34" cy="52" rx="18" ry="12" fill="#fbfbf9" />
-      <circle cx="50" cy="40" r="11" fill="#fbfbf9" />
+    <g
+      fill="none"
+      stroke="#1a1a1a"
+      strokeWidth="3"
+      strokeLinecap="round"
+    >
+      <ellipse cx="34" cy="52" rx="18" ry="12" fill={fur} />
+      <circle cx="50" cy="40" r="11" fill={fur} />
       <path d="M42 30 L38 16 L48 28" />
       <path d="M54 30 L58 14 L50 28" />
       {emotion === 'sleepy' ? (
         <>
-          <path d="M46 40 Q49 43 52 40" />
-          <path d="M54 40 Q57 43 60 40" />
+          <path d="M46 40 Q49 43 52 40" stroke={eye} />
+          <path d="M54 40 Q57 43 60 40" stroke={eye} />
         </>
       ) : emotion === 'curious' ? (
         <>
-          <circle cx="48" cy="38" r="2.5" fill="#1a1a1a" />
-          <circle cx="56" cy="38" r="2.5" fill="#1a1a1a" />
+          <circle cx="48" cy="38" r="2.5" fill={eye} />
+          <circle cx="56" cy="38" r="2.5" fill={eye} />
         </>
       ) : (
         <>
-          <circle cx="48" cy="39" r="2" fill="#1a1a1a" />
-          <circle cx="56" cy="39" r="2" fill="#1a1a1a" />
+          <circle cx="48" cy="39" r="2" fill={eye} />
+          <circle cx="56" cy="39" r="2" fill={eye} />
         </>
       )}
       <line x1="58" y1="42" x2="68" y2="40" strokeWidth="2" />
@@ -204,15 +215,14 @@ function CrowdPortrait({ emotion }: { emotion: RidgeEmotion }) {
   );
 }
 
-function DriverPortrait() {
+/** The hill-shuttle driver: big, cap pulled low, clipboard held like a shield. */
+function DriverPortrait({ emotion }: { emotion: RidgeEmotion }) {
   return (
     <g fill="none" stroke="#1a1a1a" strokeWidth="3" strokeLinecap="round">
       <circle cx="40" cy="24" r="10" fill="#fbfbf9" />
       <path d="M28 19 H52" strokeWidth="4" />
       <rect x="32" y="14" width="16" height="6" fill="#fbfbf9" />
-      <circle cx="36" cy="24" r="1.5" fill="#1a1a1a" />
-      <circle cx="44" cy="24" r="1.5" fill="#1a1a1a" />
-      <path d="M37 29 H43" strokeWidth="2" />
+      <FaceMarks emotion={emotion} />
       <path d="M40 34 V58" />
       <rect x="46" y="36" width="16" height="20" fill="#fbfbf9" />
       <line x1="48" y1="42" x2="58" y2="42" strokeWidth="2" />
@@ -221,14 +231,12 @@ function DriverPortrait() {
   );
 }
 
-function TravelerPortrait() {
+function TravelerPortrait({ emotion }: { emotion: RidgeEmotion }) {
   return (
     <g fill="none" stroke="#1a1a1a" strokeWidth="3" strokeLinecap="round">
       <circle cx="40" cy="24" r="10" fill="#fbfbf9" />
       <path d="M32 17 Q40 12 48 17" />
-      <circle cx="36" cy="24" r="1.5" fill="#1a1a1a" />
-      <circle cx="44" cy="24" r="1.5" fill="#1a1a1a" />
-      <path d="M36 28 Q40 32 44 28" strokeWidth="2" />
+      <FaceMarks emotion={emotion === 'neutral' ? 'playful' : emotion} />
       <path d="M40 34 V58" />
       <path d="M40 40 L58 48" />
       <line x1="58" y1="36" x2="58" y2="68" strokeWidth="2.5" />
@@ -236,19 +244,113 @@ function TravelerPortrait() {
   );
 }
 
-function TeacherPortrait() {
+/** The Profe: hair in a high bun, one arm up with the güira, mid-count. */
+function TeacherPortrait({ emotion }: { emotion: RidgeEmotion }) {
   return (
-    <g fill="none" stroke="#1a1a1a" strokeWidth="3" strokeLinecap="round">
+    <g fill="none" stroke="#1a1a1a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="40" cy="24" r="10" fill="#fbfbf9" />
-      <circle cx="40" cy="12" r="4" fill="#fbfbf9" />
-      <circle cx="36" cy="24" r="1.5" fill="#1a1a1a" />
-      <circle cx="44" cy="24" r="1.5" fill="#1a1a1a" />
-      <path d="M35 28 Q40 33 45 28" strokeWidth="2" />
-      <path d="M40 34 V56" />
-      <path d="M40 40 L22 28" />
-      <path d="M40 40 L58 28" />
+      <circle cx="40" cy="12" r="4" fill="#1a1a1a" />
+      <FaceMarks emotion={emotion === 'neutral' ? 'playful' : emotion} />
+      <path d="M40 34 V50" />
+      <path d="M30 50 L50 50 L56 72 L24 72 Z" fill="#fbfbf9" />
+      <path d="M40 40 L24 46" />
+      <path d="M40 40 L56 28" />
+      <rect x="53" y="12" width="7" height="16" fill="#f4f1ea" strokeWidth="2" />
+      <path d="M53 17 H60 M53 21 H60 M53 25 H60" strokeWidth="1" />
     </g>
   );
+}
+
+/** Last-Stop Operations: ponytail, headset, radio at the ready. */
+function OperationsPortrait({ emotion }: { emotion: RidgeEmotion }) {
+  return (
+    <g fill="none" stroke="#1a1a1a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M31 20 Q24 30 27 40" strokeWidth="4" />
+      <circle cx="40" cy="24" r="10" fill="#fbfbf9" />
+      <path d="M30 22 Q32 12 40 13 Q48 13 50 21 Q42 17 34 21 Z" fill="#1a1a1a" />
+      <path d="M30 24 Q40 8 50 24" strokeWidth="1.8" />
+      <circle cx="30" cy="25" r="2.6" fill="#1a1a1a" />
+      <path d="M30 27 Q32 32 37 31" strokeWidth="1.6" />
+      <FaceMarks emotion={emotion} />
+      <path d="M40 34 V58" />
+      <rect x="31" y="40" width="18" height="18" fill="#f4f1ea" strokeWidth="2" />
+      <path d="M40 42 L52 50" />
+      <rect x="50" y="42" width="8" height="14" fill="#fbfbf9" strokeWidth="2" />
+      <line x1="56" y1="42" x2="58" y2="34" strokeWidth="2" />
+    </g>
+  );
+}
+
+/** Festival Steward: brimmed hat, the very serious key on a ring. */
+function StewardPortrait({ emotion }: { emotion: RidgeEmotion }) {
+  return (
+    <g fill="none" stroke="#1a1a1a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="40" cy="25" r="10" fill="#fbfbf9" />
+      <path d="M26 18 H54" strokeWidth="3.5" />
+      <path d="M32 18 L33 9 H47 L48 18 Z" fill="#1a1a1a" />
+      <FaceMarks emotion={emotion === 'neutral' ? 'determined' : emotion} />
+      <path d="M40 35 V60" />
+      <path d="M40 42 L54 52" />
+      <circle cx="56" cy="56" r="4" strokeWidth="2" />
+      <path d="M56 60 V66 M56 64 H59" strokeWidth="2" />
+    </g>
+  );
+}
+
+/** Shared eyes-and-mouth for the plaza cast: one face language for every mood. */
+function FaceMarks({ emotion }: { emotion: RidgeEmotion }) {
+  switch (emotion) {
+    case 'surprised':
+      return (
+        <>
+          <circle cx="36" cy="23" r="2.2" fill="#1a1a1a" />
+          <circle cx="44" cy="23" r="2.2" fill="#1a1a1a" />
+          <circle cx="40" cy="30" r="2" strokeWidth="2" />
+        </>
+      );
+    case 'playful':
+      return (
+        <>
+          <path d="M33.5 24 L36 21.5 L38.5 24" strokeWidth="2" />
+          <path d="M41.5 24 L44 21.5 L46.5 24" strokeWidth="2" />
+          <path d="M35 28 Q40 33 45 28" strokeWidth="2" />
+        </>
+      );
+    case 'thoughtful':
+      return (
+        <>
+          <line x1="34" y1="24" x2="38" y2="24" strokeWidth="2" />
+          <line x1="42" y1="24" x2="46" y2="24" strokeWidth="2" />
+          <path d="M37 30 Q40 29 43 30" strokeWidth="2" />
+        </>
+      );
+    case 'determined':
+      return (
+        <>
+          <line x1="33" y1="20.5" x2="38" y2="22" strokeWidth="2" />
+          <line x1="47" y1="20.5" x2="42" y2="22" strokeWidth="2" />
+          <circle cx="36" cy="24.5" r="1.5" fill="#1a1a1a" />
+          <circle cx="44" cy="24.5" r="1.5" fill="#1a1a1a" />
+          <path d="M37 29.5 H43" strokeWidth="2" />
+        </>
+      );
+    case 'sleepy':
+      return (
+        <>
+          <path d="M34 24 Q36 26 38 24" strokeWidth="2" />
+          <path d="M42 24 Q44 26 46 24" strokeWidth="2" />
+          <path d="M38 29 H42" strokeWidth="2" />
+        </>
+      );
+    default:
+      return (
+        <>
+          <circle cx="36" cy="24" r="1.5" fill="#1a1a1a" />
+          <circle cx="44" cy="24" r="1.5" fill="#1a1a1a" />
+          <path d="M37 29 H43" strokeWidth="2" />
+        </>
+      );
+  }
 }
 
 function PlayerPortrait({ emotion }: { emotion: RidgeEmotion }) {

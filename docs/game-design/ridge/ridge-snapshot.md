@@ -93,17 +93,26 @@ Concert
   -> Dance transition exit
 
 Dance Festival
-  -> Last-Stop Plaza setup + service-road blocker
-  -> traveler wayfinding + triangulated resident reads
-  -> Operations Handoff Check + One-Step Practice
-  -> Folded Song Request
-  -> Setup Clearance montage
+  -> Last-Stop Plaza: van drop-off, traveler on her suitcase, shuttle shelter
+     (driver + clipboard), dance floor (the Profe), lantern crates (Cicka),
+     chair stacks (a shy dark cat), operations table, steward, service gate
+  -> topic menus; the romance is read from residents, never announced
+  -> One-Step Practice = Bachata Lesson behind the shelter (driver mirrors you;
+     never fails; "Just count it for him")
+  -> Operations Handoff Check: checklist -> "who keeps watch?" -> the Profe
+  -> Folded Song Request: driver writes it, you drop it in her jar, radio reply
+  -> Setup Clearance: two tagged jobs on the lane (lantern hook, cable fix; any
+     order, wrong answers visible), then the sign with the steward; sky goes to
+     sunset, gate opens
+  -> optional Cat Serenade on Steve's guitar (dark cat joins Cicka)
   -> last daylight shuttle -> Relay
 
 Relay Ending
   -> tiny sunset overlook linger
   -> Sit and Play beside Cicka
-  -> Route Memory Montage (3 flashes) + Let the song end
+  -> Route Memory Cinematic: Bridge and Concert cuts, then the Dance
+     Festival's night (traveler front row, quiet cat, the Profe on the radio,
+     the driver and Ops dancing, then everyone) + Let the song end
   -> Cicka Threshold Farewell + Dedication Card
   -> return to Overworld (CRT story ends; Circuit kept)
 ```
@@ -132,7 +141,8 @@ Useful commands:
 | `build test` / `edit` / `done` | Run the toy car, return to drawing, accept a held bridge |
 | `build sketch` / `hint` / `undo` / `erase n` / `show` | Workbench helpers |
 | `duel dodge` / `duel wait [n]` / `duel done` | Cicka's Standoff |
-| `gig hit [0\|1\|2]` / `gig wait [ms]` / `gig auto` / `gig skip` / `gig done` | Concert Gig (practice or show) |
+| `gig hit [0\|1\|2]` / `gig wait [ms]` / `gig auto` / `gig skip` / `gig done` | Concert Gig (practice, show, or the Dance Festival cat serenade) |
+| `dance step` / `dance left\|tap\|right` / `dance wait [ms]` / `dance auto` / `dance skip` / `dance done` | Bachata Lesson (Dance Festival) |
 | `skip` / `next` | Playtest: jump to next area start |
 | `warp bridge\|concert\|dance\|relay` | Playtest: warp to an area |
 | `help` | Command list |

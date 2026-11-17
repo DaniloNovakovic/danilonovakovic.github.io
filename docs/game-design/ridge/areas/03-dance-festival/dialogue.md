@@ -14,6 +14,9 @@ shape.
 
 ## Planned Conversation Sets
 
+Pre-implementation plan, kept for history. The shipped IDs in
+"Implemented Conversation IDs" below supersede these.
+
 - `dance.traveler.relay_wayfinding`: practical first read that Relay requires
   the last daylight hill shuttle.
 - `dance.driver.shuttle_delay`: driver explains the setup/lane blocker without
@@ -28,6 +31,29 @@ shape.
   dignity instead of forcing confession.
 - `dance.setup_clearance`: prompt-driven playable montage lines and prompts.
 - `dance.shuttle.last_daylight_ride`: short threshold transition to Relay.
+
+## Implemented Conversation IDs (2026-11-17)
+
+Copy lives in `src/shared/i18n/messages/en/scenes.ts` under `ridge.dance`;
+routing in `src/game/core/ridge/content/danceStage.ts`.
+
+- `dance.traveler.wayfinding` / `dance.traveler.staying`
+- `dance.driver.clipboard` (topic menu; "Are you dancing tonight?" appears
+  once you've asked when the shuttle leaves, and opens the lesson ask), `.waiting_lesson`, `.practiced`, `.request` (the Folded Song
+  Request), `.request_pending`, `.after_request`
+- `dance.teacher.floor` (lesson, watch, topics, replay), `dance.lesson.done`
+  (grade lines for the Profe and the driver)
+- `dance.operations.table` (checklist chain, watch, drop the request),
+  `dance.operations.after`
+- `dance.steward.gate`, `dance.gate.look`, `dance.steward.clearance` (brief,
+  to-do, then the sign), `dance.setup.lanterns` (three hooks),
+  `dance.setup.cables` (tape / unplug / ramp), `dance.steward.after`
+- `dance.cicka.crates`, `dance.cats.chairs`, `dance.cats.serenade_done`,
+  `dance.cats.together`, `dance.cats.gate`
+- `dance.shuttle.last_daylight_ride`
+
+Radio voices use the `shuttleRadio` / `opsRadio` speakers (a portrait, no
+mouth moving on stage).
 
 ## Open Dialogue Slots
 
