@@ -7,6 +7,7 @@ import { bachataStepOf } from './bachata';
 import type {
   RidgeObservation,
   RidgeStageDefinition,
+  RidgeStageRegistry,
   RidgeWorldState
 } from './types';
 
@@ -22,7 +23,8 @@ export interface RidgeMiniGames {
 export function observeRidgeWorld(
   state: RidgeWorldState,
   stage: RidgeStageDefinition,
-  games: RidgeMiniGames = {}
+  games: RidgeMiniGames = {},
+  stages: RidgeStageRegistry | null = null
 ): RidgeObservation {
   const workbench = games.workbench ?? null;
   const duel = games.duel ?? null;
@@ -109,11 +111,54 @@ export function observeRidgeWorld(
     concertGig,
     bachataLesson,
     sceneryMarks: stage.resolveSceneryMarks?.(state) ?? [],
+    memory: observeMemory(state, stage, stages),
     builtBridge: state.builtBridge,
     canMove: state.mode === 'explore',
     blockedAhead,
     lastMessage: state.lastMessage,
     hints
+  };
+}
+
+/**
+ * The remembered scene the current line cuts to. That area stages itself as
+ * it would look at the shot's beat; the player is not in the memory.
+ */
+function observeMemory(
+  state: RidgeWorldState,
+  stage: RidgeStageDefinition,
+  stages: RidgeStageRegistry | null
+): RidgeObservation['memory'] {
+  const conversation = state.conversation;
+  const shot = conversation?.lines[conversation.lineIndex]?.memory;
+  if (!shot) return null;
+  const remembered = stages?.[shot.areaId] ?? (stage.areaId === shot.areaId ? stage : null);
+  if (!remembered) return null;
+  const then: RidgeWorldState = {
+    ...state,
+    areaId: shot.areaId,
+    beat: shot.beat,
+    progress: shot.focus,
+    facing: 'right',
+    mode: 'explore',
+    conversation: null,
+    flags: new Set([...state.flags, ...(shot.flags ?? [])])
+  };
+  return {
+    areaId: shot.areaId,
+    beat: shot.beat,
+    focus: shot.focus,
+    actors: remembered
+      .resolveActors(then)
+      .map((actor) => {
+        // You are up at the overlook, and Cicka is sitting beside you.
+        if (actor.id === 'player') return { ...actor, progress: shot.focus, visible: false };
+        if (actor.id === 'cicka') return { ...actor, visible: false };
+        return actor;
+      }),
+    sceneryMarks: remembered.resolveSceneryMarks?.(then) ?? [],
+    dancers: shot.dancers ?? [],
+    shotKey: `${conversation.id}:${conversation.lineIndex}`
   };
 }
 
@@ -270,6 +315,12 @@ export function formatObservation(observation: RidgeObservation): string {
     `mode=${observation.mode} area=${observation.areaId} beat=${observation.beat} progress=${observation.progressPercent}% facing=${observation.facing}`
   );
   lines.push(observation.ambience);
+  if (observation.memory) {
+    const m = observation.memory;
+    const cast = m.actors.filter((actor) => actor.visible).map((actor) => actor.label).join(', ');
+    const dancing = m.dancers.length > 0 ? `; dancing: ${m.dancers.join(', ')}` : '';
+    lines.push(`(memory) ${m.areaId} at ${Math.round(m.focus * 100)}%: ${cast}${dancing}`);
+  }
 
   if (observation.bridgeBuild) {
     const b = observation.bridgeBuild;

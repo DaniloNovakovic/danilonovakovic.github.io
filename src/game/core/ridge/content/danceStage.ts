@@ -31,10 +31,25 @@ export const DANCE_LAYOUT = {
   steward: 0.625,
   gate: 0.68,
   shuttle: 0.86,
+  /** The last setup jobs, spread along the lane once the request is in. */
+  jobs: { lanterns: 0.605, cables: 0.64 },
+  /** The steward, key in hand, on the road side of the gate while you work. */
+  stewardAtGate: 0.695,
   /** The lesson happens behind the shelter, where nobody looks. */
   lesson: { teacher: 0.155, player: 0.215, driver: 0.275 },
   /** Playing for the cat from a lantern crate. */
   serenadePlayer: 0.405,
+  /**
+   * The night after you leave, as the Relay ending remembers it: the couple on
+   * the floor, the traveler front row, the Profe on the radio.
+   */
+  night: {
+    traveler: 0.27,
+    driver: 0.33,
+    ops: 0.37,
+    steward: 0.41,
+    teacher: 0.555
+  },
   /** After the gate opens. */
   after: {
     traveler: 0.31,
@@ -66,9 +81,18 @@ const FLAG_TEACHER_WATCH = 'dance_teacher_watch';
 const FLAG_SONG_FOLDED = 'song_folded';
 const FLAG_SNAP_LANTERNS = 'dance_snap_lanterns';
 const FLAG_SNAP_CABLES = 'dance_snap_cables';
+/** You tried the middle hook: it clears a person, not a roof load. */
+const FLAG_LANTERNS_MID = 'dance_lanterns_mid';
 const FLAG_CAT_SEEN = 'dance_cat_seen';
 const FLAG_CAT_OUT = 'dance_cat_serenaded';
 const FOLDED_REQUEST_ITEM = 'folded-request';
+
+/** Memory-only flag: stage the plaza on the night of the dance. */
+export const DANCE_NIGHT_FLAG = 'dance_memory_night';
+/** Memory-only flag: second song, and nobody on the plaza is sitting down. */
+export const DANCE_NIGHT_EVERYONE_FLAG = 'dance_memory_everyone';
+/** The quiet cat came out for your song. */
+export const DANCE_CAT_SERENADED_FLAG = FLAG_CAT_OUT;
 const asked = (topic: string) => `dance_asked_${topic}`;
 
 export interface DanceDialogueCatalog {
@@ -108,7 +132,7 @@ const SPOTS = [
     progress: DANCE_LAYOUT.traveler,
     interactRadius: 0.05,
     actorId: 'traveler' as const,
-    description: 'A long-way walker sitting on his suitcase, asking the same question you are.'
+    description: 'A traveler on her suitcase, writing postcards, waiting for the same shuttle you are.'
   },
   {
     id: 'driver',
@@ -164,6 +188,22 @@ const SPOTS = [
     description: 'Holds the service-gate key in a very serious pocket.'
   },
   {
+    id: 'lantern-pole',
+    label: 'Lantern line',
+    kind: 'prop' as const,
+    progress: DANCE_LAYOUT.jobs.lanterns,
+    interactRadius: 0.015,
+    description: 'A lantern line sagging across the lane, tied to a pole with three hooks.'
+  },
+  {
+    id: 'cable-run',
+    label: 'Cable run',
+    kind: 'prop' as const,
+    progress: DANCE_LAYOUT.jobs.cables,
+    interactRadius: 0.015,
+    description: 'Loose speaker cables across the lane, right where the shuttle tyres will go.'
+  },
+  {
     id: 'gate',
     label: 'Service gate',
     kind: 'prop' as const,
@@ -211,16 +251,36 @@ const bothReady = (state: RidgeWorldState) => driverReady(state) && opsReady(sta
 const catOut = (state: RidgeWorldState) => state.flags.has(FLAG_CAT_OUT);
 
 function describeDanceBlock(state: RidgeWorldState): string {
-  if (requested(state)) return 'The steward has the key. A few last setup jobs and the lane is yours.';
+  if (requested(state)) {
+    const left = [
+      state.flags.has(FLAG_SNAP_LANTERNS) ? null : 'lift the lantern line',
+      state.flags.has(FLAG_SNAP_CABLES) ? null : 'sort out the cable run'
+    ].filter((job): job is string => job !== null);
+    return left.length > 0
+      ? `The steward has the key. Still to do: ${left.join(' and ')}.`
+      : 'Lanterns up, cables ramped. The steward is waiting at the gate with the key.';
+  }
   return 'Barriers, a loose cable run, and a sagging lantern line block the service road. The steward will not open it until setup is safe.';
 }
 
 /** Set dressing the plaza wears as the afternoon goes on. */
 function danceSceneryMarks(state: RidgeWorldState): string[] {
+  if (state.flags.has(DANCE_NIGHT_FLAG)) {
+    return ['lanterns-tied', 'cables-ramped', 'sign-flipped', 'request-in-jar', 'sky-night'];
+  }
   const marks: string[] = [];
   const open = cleared(state);
-  if (open || state.flags.has(FLAG_SNAP_LANTERNS)) marks.push('lanterns-tied');
-  if (open || state.flags.has(FLAG_SNAP_CABLES)) marks.push('cables-ramped');
+  const lanterns = open || state.flags.has(FLAG_SNAP_LANTERNS);
+  const cables = open || state.flags.has(FLAG_SNAP_CABLES);
+  if (lanterns) marks.push('lanterns-tied');
+  else if (state.flags.has(FLAG_LANTERNS_MID)) marks.push('lanterns-mid');
+  if (cables) marks.push('cables-ramped');
+  // Ink to-do tags over each open job, then over the gate once only the sign is left.
+  if (requested(state) && !open) {
+    if (!lanterns) marks.push('todo-lanterns');
+    if (!cables) marks.push('todo-cables');
+    if (lanterns && cables) marks.push('todo-gate');
+  }
   if (open) marks.push('sign-flipped', 'sky-sunset');
   else if (requested(state)) marks.push('sky-late');
   if (requested(state)) marks.push('request-in-jar');
@@ -271,6 +331,8 @@ function interactPlans(state: RidgeWorldState): DancePlan[] {
     plans.push(plan('steward', 'dance.steward.after'), plan('shuttle', 'dance.shuttle.last_daylight_ride'));
   } else if (requested(state)) {
     plans.push(plan('steward', 'dance.steward.clearance'), plan('gate', 'dance.steward.clearance', 'dance.gate.clearance.prompt'));
+    if (!state.flags.has(FLAG_SNAP_LANTERNS)) plans.push(plan('lantern-pole', 'dance.setup.lanterns'));
+    if (!state.flags.has(FLAG_SNAP_CABLES)) plans.push(plan('cable-run', 'dance.setup.cables'));
   } else {
     plans.push(plan('steward', 'dance.steward.gate'), plan('gate', 'dance.gate.look'));
   }
@@ -297,6 +359,28 @@ function resolveDanceInteractables(state: RidgeWorldState, catalog: DanceDialogu
 /** Where a resident stands when nothing is being danced or played. */
 function restingProgress(state: RidgeWorldState, id: RidgeActorId): number {
   const open = cleared(state);
+  if (state.flags.has(DANCE_NIGHT_FLAG)) {
+    const night = DANCE_LAYOUT.night;
+    switch (id) {
+      case 'traveler':
+        return night.traveler;
+      case 'driver':
+        return night.driver;
+      case 'operations-helper':
+        return night.ops;
+      case 'steward':
+        return night.steward;
+      case 'dance-teacher':
+        return night.teacher;
+      case 'cicka':
+        return DANCE_LAYOUT.crates;
+      case 'counterpart-cat':
+        // On her crate if your song brought him out; just out from under the chairs if not.
+        return catOut(state) ? DANCE_LAYOUT.crates : DANCE_LAYOUT.chairs - 0.012;
+      default:
+        break;
+    }
+  }
   switch (id) {
     case 'traveler':
       return open ? DANCE_LAYOUT.after.traveler : DANCE_LAYOUT.traveler;
@@ -312,7 +396,8 @@ function restingProgress(state: RidgeWorldState, id: RidgeActorId): number {
     case 'operations-helper':
       return DANCE_LAYOUT.operations;
     case 'steward':
-      return open ? DANCE_LAYOUT.after.steward : DANCE_LAYOUT.steward;
+      if (open) return DANCE_LAYOUT.after.steward;
+      return requested(state) ? DANCE_LAYOUT.stewardAtGate : DANCE_LAYOUT.steward;
     default:
       return state.progress;
   }
@@ -327,6 +412,7 @@ const CONVERSATION_PARTNER: readonly (readonly [string, RidgeActorId])[] = [
   ['dance.lesson', 'dance-teacher'],
   ['dance.operations', 'operations-helper'],
   ['dance.steward', 'steward'],
+  ['dance.setup', 'steward'],
   ['dance.cicka', 'cicka'],
   ['dance.cats', 'cicka']
 ];
@@ -339,6 +425,8 @@ function resolveDanceActors(state: RidgeWorldState): RidgeActorPresence[] {
   const serenadeTalk = state.mode === 'conversation' && state.conversation?.id === 'dance.cats.serenade_done';
   const atLesson = lesson || lessonTalk;
   const open = cleared(state);
+  const night = state.flags.has(DANCE_NIGHT_FLAG);
+  const everyone = state.flags.has(DANCE_NIGHT_EVERYONE_FLAG);
   const hasGuitar = state.inventory.includes(RIDGE_GUITAR_ITEM);
   const rest = (id: RidgeActorId) => restingProgress(state, id);
 
@@ -368,28 +456,31 @@ function resolveDanceActors(state: RidgeWorldState): RidgeActorPresence[] {
       progress: rest('traveler'),
       visible: true,
       facing: 'right',
-      // On his suitcase until he decides to stay for the dance.
-      seated: !open
+      // On her suitcase until she decides to stay; front row on it at night, until the second song.
+      seated: night ? !everyone : !open
     },
     {
       id: 'driver',
       label: 'Driver',
       progress: atLesson ? DANCE_LAYOUT.lesson.driver : rest('driver'),
       visible: true,
-      facing: atLesson || open ? 'left' : 'right'
+      // At night he faces her across the floor.
+      facing: night ? 'right' : atLesson || open ? 'left' : 'right'
     },
     {
       id: 'dance-teacher',
       label: 'Profe',
       progress: atLesson ? DANCE_LAYOUT.lesson.teacher : rest('dance-teacher'),
       visible: true,
-      facing: atLesson || open ? 'right' : 'left'
+      // At night she watches the floor from the operations table.
+      facing: !night && (atLesson || open) ? 'right' : 'left'
     },
     {
       id: 'cicka',
       label: 'Cicka',
       progress: rest('cicka'),
-      visible: true,
+      // She went up the hill with you; the night dance happens without her.
+      visible: !night,
       facing: 'right'
     },
     {
@@ -397,8 +488,8 @@ function resolveDanceActors(state: RidgeWorldState): RidgeActorPresence[] {
       label: 'Quiet cat',
       // While you play he edges out from under the chairs toward Cicka.
       progress: serenade && !catOut(state) ? DANCE_LAYOUT.chairs : rest('counterpart-cat'),
-      // Under the chairs until a song (or the open gate) brings him out.
-      visible: catOut(state) || open || serenade || serenadeTalk,
+      // Under the chairs until a song (or the open gate, or the dance) brings him out.
+      visible: catOut(state) || open || night || serenade || serenadeTalk,
       facing: 'left'
     },
     {
@@ -454,9 +545,13 @@ function resolveDanceConversation(
     case 'dance.traveler.wayfinding': {
       const { say, choice } = kit(conversationId);
       const topic = topicsOf(conversationId, 'traveler');
+      const first = !askedTopic('traveler', 'met');
       return {
         id: conversationId,
-        lines: [say(['01', 'traveler', 'curious'])],
+        lines: first
+          ? [say(['01', 'prompt']), say(['02', 'traveler', 'curious'])]
+          : [say(['again.01', 'traveler', 'playful'])],
+        outcome: first ? { setFlag: asked('traveler_met') } : undefined,
         choices: [
           ...unaskedTopics(
             'traveler',
@@ -475,7 +570,8 @@ function resolveDanceConversation(
             ]),
             topic('you', [
               ['01', 'traveler', 'thoughtful'],
-              ['02', 'traveler']
+              ['02', 'traveler', 'playful'],
+              ['03', 'traveler', 'curious']
             ])
           ),
           choice('leave', [['01', 'traveler']])
@@ -673,7 +769,8 @@ function resolveDanceConversation(
       const again = driverReady(state)
         ? [choice('again', [['01', 'danceTeacher', 'playful']], { outcome: { openBachataLesson: true } })]
         : [];
-      const metEither = flags.has(FLAG_MET_DRIVER) || flags.has(FLAG_MET_OPS);
+      // Only once you have met both of them, so "those two" means somebody.
+      const metBoth = flags.has(FLAG_MET_DRIVER) && flags.has(FLAG_MET_OPS);
       return {
         id: conversationId,
         lines: first
@@ -693,7 +790,7 @@ function resolveDanceConversation(
               ['02', 'danceTeacher'],
               ['03', 'prompt']
             ]),
-            ...(metEither
+            ...(metBoth
               ? [
                   topic('couple', [
                     ['01', 'danceTeacher', 'thoughtful'],
@@ -753,7 +850,8 @@ function resolveDanceConversation(
         [
           ['01', 'prompt'],
           ['02', 'operationsHelper', 'thoughtful'],
-          ['03', 'operationsHelper', 'thoughtful']
+          ['03', 'operationsHelper', 'thoughtful'],
+          ['04', 'prompt']
         ],
         { choices: [watch, askHim] }
       );
@@ -849,7 +947,8 @@ function resolveDanceConversation(
     case 'dance.steward.gate': {
       const { say, choice } = kit(conversationId);
       const topic = topicsOf(conversationId, 'steward');
-      const metEither = flags.has(FLAG_MET_DRIVER) || flags.has(FLAG_MET_OPS);
+      // Only once you have met both of them, so "those two" means somebody.
+      const metBoth = flags.has(FLAG_MET_DRIVER) && flags.has(FLAG_MET_OPS);
       return {
         id: conversationId,
         lines: [say(['01', 'festivalSteward', 'determined'])],
@@ -861,7 +960,7 @@ function resolveDanceConversation(
               ['02', 'festivalSteward', 'playful']
             ]),
             topic('open', [['01', 'festivalSteward', 'determined']]),
-            ...(metEither
+            ...(metBoth
               ? [
                   topic('couple', [
                     ['01', 'festivalSteward', 'thoughtful'],
@@ -878,9 +977,26 @@ function resolveDanceConversation(
       const { say } = kit(conversationId);
       return { id: conversationId, lines: [say(['01', 'prompt']), say(['02', 'prompt'])] };
     }
-    // Setup Clearance: three snaps, each one visible on the plaza as it lands.
+    // Setup Clearance: two jobs on the lane, then the sign. Each one shows on the plaza as it lands.
     case 'dance.steward.clearance': {
       const { say, choice } = kit(conversationId);
+      const lanterns = flags.has(FLAG_SNAP_LANTERNS);
+      const cables = flags.has(FLAG_SNAP_CABLES);
+      const briefed = askedTopic('steward', 'brief');
+      if (!lanterns || !cables) {
+        return {
+          id: conversationId,
+          lines: [
+            ...(briefed
+              ? [say(['again.01', 'festivalSteward'])]
+              : [say(['01', 'festivalSteward', 'playful']), say(['02', 'festivalSteward', 'determined'])]),
+            ...(lanterns ? [] : [say(['todo.lanterns', 'festivalSteward'])]),
+            ...(cables ? [] : [say(['todo.cables', 'festivalSteward'])])
+          ],
+          choices: [choice('later', [['01', 'festivalSteward']])],
+          outcome: briefed ? undefined : { setFlag: asked('steward_brief') }
+        };
+      }
       const sign = choice(
         'sign',
         [
@@ -890,21 +1006,56 @@ function resolveDanceConversation(
         ],
         { outcome: { setBeat: 'dance_cleared' } }
       );
-      const cables = choice('cables', [['01', 'prompt'], ['02', 'festivalSteward', 'playful']], {
+      const party = choice('party', [['01', 'prompt'], ['02', 'festivalSteward', 'playful']], {
         then: 'menu',
-        outcome: { setFlag: FLAG_SNAP_CABLES },
-        choices: [sign]
+        once: true
       });
-      const lanterns = choice('lanterns', [['01', 'prompt']], {
-        then: 'menu',
-        outcome: { setFlag: FLAG_SNAP_LANTERNS },
-        choices: [cables]
-      });
-      const next = flags.has(FLAG_SNAP_CABLES) ? sign : flags.has(FLAG_SNAP_LANTERNS) ? cables : lanterns;
       return {
         id: conversationId,
-        lines: [say(['01', 'festivalSteward', 'playful'])],
-        choices: [next, choice('later', [['01', 'festivalSteward']])]
+        lines: [say(['ready.01', 'festivalSteward', 'playful']), say(['ready.02', 'festivalSteward'])],
+        choices: [party, sign, choice('later', [['01', 'festivalSteward']])]
+      };
+    }
+    // The lantern line: three hooks, and only one clears a shuttle with crates on its roof.
+    case 'dance.setup.lanterns': {
+      const { say, choice } = kit(conversationId);
+      return {
+        id: conversationId,
+        lines: [say([flags.has(FLAG_LANTERNS_MID) ? '01_mid' : '01', 'prompt'])],
+        choices: [
+          choice('low', [['01', 'prompt'], ['02', 'festivalSteward', 'playful']], { then: 'menu', once: true }),
+          choice('middle', [['01', 'prompt'], ['02', 'festivalSteward', 'thoughtful']], {
+            then: 'menu',
+            once: true,
+            outcome: { setFlag: FLAG_LANTERNS_MID }
+          }),
+          choice('top', [['01', 'prompt'], ['02', 'prompt']], { outcome: { setFlag: FLAG_SNAP_LANTERNS } }),
+          choice('leave', [['01', 'prompt']])
+        ]
+      };
+    }
+    // The cable run: tyres eat tape, and the speakers need their cables.
+    case 'dance.setup.cables': {
+      const { say, choice } = kit(conversationId);
+      return {
+        id: conversationId,
+        lines: [say(['01', 'prompt'])],
+        choices: [
+          choice('tape', [['01', 'prompt'], ['02', 'festivalSteward']], { then: 'menu', once: true }),
+          choice(
+            'unplug',
+            [
+              ['01', 'prompt'],
+              ['02', 'danceTeacher', 'surprised'],
+              ['03', 'prompt']
+            ],
+            { then: 'menu', once: true }
+          ),
+          choice('ramp', [['01', 'prompt'], ['02', 'festivalSteward', 'playful']], {
+            outcome: { setFlag: FLAG_SNAP_CABLES }
+          }),
+          choice('leave', [['01', 'prompt']])
+        ]
       };
     }
     case 'dance.steward.after': {
@@ -1022,7 +1173,7 @@ function describeDanceAmbience(state: RidgeWorldState): string {
     return 'The gate is open and the sky has gone gold. The last daylight shuttle idles beyond it.';
   }
   if (requested(state)) {
-    return 'A folded request sits in the jar. The steward is waiting on the last setup jobs at the gate.';
+    return 'A folded request sits in the jar. Ink tags mark the last setup jobs on the lane; the steward waits at the gate.';
   }
   if (bothReady(state)) {
     return 'He has one step. She has someone to keep watch. Neither of them has said a word to the other.';

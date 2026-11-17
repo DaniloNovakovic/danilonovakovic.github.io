@@ -127,6 +127,11 @@ the remaining visible setup details clear the service lane enough for the
 steward to open the barrier and the driver to offer the last daylight ride
 toward Relay.
 
+Implemented (2026-11-17): two small jobs on the lane, each at its own spot
+with an ink to-do tag and one decision (the lantern hook, the cable fix),
+then the sign with the steward at the gate. See the Dance Festival README's
+"Implemented Polish Pass". The original plan follows.
+
 Present this as a **Prompt-Driven Playable Montage**, not a full manual chore
 sequence or pure cutscene. The player chooses a prompt such as "Help with
 remaining preparations," then triggers a few authored interaction snaps.

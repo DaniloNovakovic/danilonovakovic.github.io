@@ -113,18 +113,8 @@ function drawFarBand(g: Phaser.GameObjects.Graphics, areaId: RidgeAreaId, marks:
     return;
   }
   if (areaId === 'concert') {
-    // Night: the sky is the darkest thing behind the lane, not the trees.
-    g.fillStyle(INK, 0.13);
-    g.fillRect(0, 0, STAGE_WIDTH, RIDGE_BASE_Y);
     // Moon hangs over the musician-side nook, where the beat turns quiet.
-    drawSunOrMoon(g, farXForProgress(0.6, 120), SKY_TOP + 40, 26, 'moon');
-    g.fillStyle(INK, 0.35);
-    for (let i = 0; i < 26; i += 1) {
-      const sx = jitter(i * 3.1) * STAGE_WIDTH;
-      const sy = SKY_TOP + 8 + jitter(i * 7.7) * 120;
-      g.fillRect(sx, sy, 2, 2);
-    }
-    drawRidges(g, areaId, 0.05, 0.09);
+    drawNightSky(g, areaId, farXForProgress(0.6, 120));
     return;
   }
 
@@ -167,6 +157,10 @@ function drawFarBand(g: Phaser.GameObjects.Graphics, areaId: RidgeAreaId, marks:
  * and the Relay Spire stands small on the far crest: reachable, not yet.
  */
 function drawDanceSky(g: Phaser.GameObjects.Graphics, marks: ReadonlySet<string>): void {
+  if (marks.has('sky-night')) {
+    drawNightSky(g, 'danceFestival', farXForProgress(0.6, 110));
+    return;
+  }
   const sunset = marks.has('sky-sunset');
   const late = sunset || marks.has('sky-late');
   if (late) {
@@ -192,6 +186,20 @@ function drawDanceSky(g: Phaser.GameObjects.Graphics, marks: ReadonlySet<string>
   g.lineBetween(spire, base - 34, spire, base - 42);
   g.fillStyle(INK, 0.45);
   g.fillCircle(spire, base - 44, 2.2);
+}
+
+/** Night: the sky is the darkest thing behind the lane, with a moon and a scatter of stars. */
+function drawNightSky(g: Phaser.GameObjects.Graphics, areaId: RidgeAreaId, moonX: number): void {
+  g.fillStyle(INK, 0.13);
+  g.fillRect(0, 0, STAGE_WIDTH, RIDGE_BASE_Y);
+  drawSunOrMoon(g, moonX, SKY_TOP + 40, 26, 'moon');
+  g.fillStyle(INK, 0.35);
+  for (let i = 0; i < 26; i += 1) {
+    const sx = jitter(i * 3.1) * STAGE_WIDTH;
+    const sy = SKY_TOP + 8 + jitter(i * 7.7) * 120;
+    g.fillRect(sx, sy, 2, 2);
+  }
+  drawRidges(g, areaId, 0.05, 0.09);
 }
 
 /** Two crests at different heights and tones: the cheapest read of distance. */
@@ -814,11 +822,49 @@ function drawDanceNear(
   drawChairStacks(g, at(DANCE_LAYOUT.chairs), marks.has('cat-hiding'));
   drawOperationsTable(g, at(DANCE_LAYOUT.operations - 0.012), marks.has('request-in-jar'));
 
-  // The three setup snaps at the gate.
+  // The last setup jobs at the gate: the lantern line on its three-hook pole,
+  // the cable run, and the sign. Ink to-do tags sit over whatever is left.
   const tied = marks.has('lanterns-tied');
-  drawLanternLine(g, at(DANCE_LAYOUT.gate - 0.075), at(DANCE_LAYOUT.gate + 0.03), tied ? GROUND_Y - 150 : GROUND_Y - 112, tied ? 18 : 62, tied);
+  const mid = marks.has('lanterns-mid');
+  const pole = at(DANCE_LAYOUT.jobs.lanterns);
+  const hook = tied ? LANTERN_HOOKS.top : mid ? LANTERN_HOOKS.middle : LANTERN_HOOKS.low;
+  drawLanternLine(g, pole, at(DANCE_LAYOUT.gate + 0.03), GROUND_Y - hook, tied ? 18 : mid ? 40 : 62, tied);
+  drawPoleHooks(g, pole);
   drawCableRun(g, at(DANCE_LAYOUT.gate - 0.06), at(DANCE_LAYOUT.gate - 0.01), marks.has('cables-ramped'));
   drawServiceGate(g, at(DANCE_LAYOUT.gate), crossingOpen, marks.has('sign-flipped'));
+  if (marks.has('todo-lanterns')) drawTodoTag(g, pole - 18, GROUND_Y - LANTERN_HOOKS.middle);
+  if (marks.has('todo-cables')) drawTodoTag(g, at(DANCE_LAYOUT.jobs.cables), GROUND_Y - 34);
+  if (marks.has('todo-gate')) drawTodoTag(g, at(DANCE_LAYOUT.gate) - 62, GROUND_Y - 140);
+}
+
+/** Heights above the ground of the lantern pole's three hooks. */
+const LANTERN_HOOKS = { low: 112, middle: 130, top: 150 } as const;
+
+function drawPoleHooks(g: Phaser.GameObjects.Graphics, x: number): void {
+  // The pole runs up past the top hook, whichever hook the line is on.
+  g.lineStyle(2.4, INK, 0.8);
+  g.lineBetween(x, GROUND_Y, x, GROUND_Y - LANTERN_HOOKS.top - 8);
+  g.lineStyle(1.8, INK, 0.8);
+  for (const height of Object.values(LANTERN_HOOKS)) {
+    const y = GROUND_Y - height;
+    g.beginPath();
+    g.arc(x + 4, y, 4, Math.PI, Math.PI * 0.25, true);
+    g.strokePath();
+  }
+}
+
+/** A pinned paper tag with an ink "!": a setup job still waiting for you. */
+function drawTodoTag(g: Phaser.GameObjects.Graphics, x: number, y: number): void {
+  g.lineStyle(1.4, INK, 0.7);
+  g.lineBetween(x, y + 11, x, y + 18);
+  g.fillStyle(PAPER, 1);
+  g.lineStyle(2.4, INK, 0.95);
+  g.fillCircle(x, y, 11);
+  g.strokeCircle(x, y, 11);
+  g.lineStyle(3, INK, 1);
+  g.lineBetween(x, y - 6, x, y + 2);
+  g.fillStyle(INK, 1);
+  g.fillCircle(x, y + 6, 1.8);
 }
 
 function drawDanceBunting(g: Phaser.GameObjects.Graphics): void {

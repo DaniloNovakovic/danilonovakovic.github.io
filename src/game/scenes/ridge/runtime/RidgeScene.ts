@@ -54,8 +54,9 @@ import type { RidgeBachataPanelView } from '../sceneUi/RidgeBachataPanel';
 import type { SceneUiActionRequest } from '@/game/sceneUi/types';
 import { stageCickaDuel } from '../art/duelStaging';
 import { stageConcertGig, type GigFrame } from '../art/gigStaging';
-import { stageBachataLesson, type LessonFrame } from '../art/lessonStaging';
+import { stageBachataLesson, stageNightDance, type LessonFrame } from '../art/lessonStaging';
 import { BachataLessonView } from './BachataLessonView';
+import { MemoryFrameView } from './MemoryFrameView';
 import { ConcertGigAudio } from './concertGigAudio';
 import { ConcertGigView } from './ConcertGigView';
 import { BridgeBuilderView } from './BridgeBuilderView';
@@ -128,6 +129,7 @@ export class RidgeScene extends Phaser.Scene {
   private gigOutroMs = 0;
   private gigCheered = false;
   private lessonView?: BachataLessonView;
+  private memoryFrame?: MemoryFrameView;
   private lessonOutroMs = 0;
   private lastDevSnapshotKey = '';
   private nextKey?: Phaser.Input.Keyboard.Key;
@@ -187,9 +189,11 @@ export class RidgeScene extends Phaser.Scene {
     // Lane keys judge at the key's own timestamp, not the frame it is read on.
     // In the lesson the same keys are feet: left, the hip tap, right.
     this.input.keyboard?.on(Phaser.Input.Keyboard.Events.ANY_KEY_DOWN, (event: KeyboardEvent) => {
-      const lane = GIG_LANE_KEYS[event.key.toLowerCase()];
+      const dancing = Boolean(this.session?.bachataLesson);
+      // Space is the hip tap: the big key for the beat everyone feels.
+      const lane = GIG_LANE_KEYS[event.key.toLowerCase()] ?? (dancing && event.key === ' ' ? 1 : undefined);
       if (lane === undefined || event.repeat || this.isPaused) return;
-      if (this.session?.bachataLesson) this.stepLesson(lane, event.timeStamp);
+      if (dancing) this.stepLesson(lane, event.timeStamp);
       else this.strumGig(lane, event.timeStamp);
     });
 
@@ -553,6 +557,7 @@ export class RidgeScene extends Phaser.Scene {
     this.syncDuelStaging(observation, view);
     const gigFrame = this.stageGig(view);
     const lessonFrame = this.stageLesson(view);
+    this.stageMemory(view, observation);
     this.visuals.sync(view);
     // After the camera moved: the highway and step strip pin themselves to this frame's zoom.
     this.syncGigView(gigFrame, observation);
@@ -618,6 +623,19 @@ export class RidgeScene extends Phaser.Scene {
       crowdX: xOf('crowd'),
       onStage: observation.areaId === 'concert'
     });
+  }
+
+  /** A remembered night dance: the couple (then everyone) loops the basic. */
+  private stageMemory(view: RidgeVisualViewModel, observation: RidgeObservation): void {
+    const memory = observation.memory;
+    if (memory && memory.dancers.length > 0) {
+      view.actorNudges = stageNightDance(
+        this.time.now,
+        memory.dancers.map((id) => ({ id, facing: memory.actors.find((actor) => actor.id === id)?.facing ?? 'right' }))
+      );
+    }
+    this.memoryFrame ??= new MemoryFrameView(this);
+    this.memoryFrame.sync(memory?.shotKey ?? null, memory?.sceneryMarks.includes('sky-night') ?? false, this.time.now);
   }
 
   /** Dancers step and tap through view nudges, like the gig. */
@@ -769,6 +787,8 @@ export class RidgeScene extends Phaser.Scene {
 
   private cleanup(): void {
     this.lessonView?.destroy();
+    this.memoryFrame?.destroy();
+    this.memoryFrame = undefined;
     this.lessonView = undefined;
     this.gigView?.destroy();
     this.gigView = undefined;

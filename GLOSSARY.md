@@ -764,9 +764,14 @@ A previous name for the brief ending montage, now better treated as **Route
 Memory Montage** unless a later design restores a separate proof system.
 _Avoid_: full recap, credits roll, visible checklist, objective summary
 
+**Route Memory Cinematic**:
+The narrated cuts back down the route during the Guitar Farewell: the finished
+Bridge, the opened Concert, then the Dance Festival's night ending on the
+dance. Replaced the three-flash **Route Memory Montage** (Danilo, 2026-11-17).
+
 **Route Memory Montage**:
-A brief three-flash Guitar Farewell montage that wordlessly shows the fixed
-route's changed world states during the final song.
+Superseded by **Route Memory Cinematic**. Was a brief three-flash, captionless
+Guitar Farewell montage of the route's changed world states.
 _Avoid_: full recap, credits roll, visible checklist, objective summary
 
 **Warm Sketchbook Threshold**:

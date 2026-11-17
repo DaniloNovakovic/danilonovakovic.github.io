@@ -113,11 +113,12 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
 - Dance Festival (Last-Stop Plaza): the service gate to the Relay hill is shut
   for tonight's bachata setup, and the last daylight shuttle waits on it. The
   driver has two left feet; bring the Profe to him behind the shuttle shelter
-  and dance the bachata basic with him (`← ↓ →` or `A S D`: step left, hip
-  tap, step right; big buttons on touch). It never fails, and "Just count it
+  and dance the bachata basic with him (`← ↓ →` or `A S D`, `Space` for the
+  tap: step left, hip tap, step right; big buttons on touch). It never fails, and "Just count it
   for him" plays it out. Run the Operations Helper's checklist, get the Profe
   to keep watch tonight, then help the driver fold a song request into her jar.
-  Three last setup jobs at the gate open the road at sunset. Optional: play
+  Two setup jobs on the lane (the lantern line's hook and the cable run, each
+  marked with an ink tag) and the sign at the gate open the road at sunset. Optional: play
   Steve's guitar for the shy cat under the chair stacks. Console: `dance step`,
   `dance left|tap|right`, `dance auto`, `dance done`.
 - Ridge first-playable secret route: Bridge → Concert → Dance Festival → Relay

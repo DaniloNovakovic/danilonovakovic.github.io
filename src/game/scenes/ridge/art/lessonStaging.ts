@@ -10,7 +10,9 @@ import {
   type ConcertGig,
   type GigJudgment,
   type GigSectionKind,
-  type RidgeEmotion
+  type RidgeActorId,
+  type RidgeEmotion,
+  type RidgeFacing
 } from '@/game/core/ridge';
 import type { ActorNudge, DuelActorStaging } from './duelStaging';
 
@@ -92,6 +94,30 @@ export function stageBachataLesson(lesson: ConcertGig): LessonFrame {
         : { dx: 0, dy: Math.round(-pulse * 1.2), emotion: nerve > 0.5 ? 'curious' : 'thoughtful' }
     }
   };
+}
+
+/** The night dance's slow count, a little under the lesson's tempo. */
+const NIGHT_BEAT_MS = 60000 / 100;
+/** One basic each way: "one, two, three, tap; five, six, seven, tap". */
+const NIGHT_EIGHT = BACHATA_LESSON_FOOTWORK.slice(0, 8);
+
+/**
+ * The night dance a memory shows: each dancer loops the basic on a slow
+ * count, mirrored when facing left so partners step toward each other.
+ */
+export function stageNightDance(
+  timeMs: number,
+  dancers: readonly { id: RidgeActorId; facing: RidgeFacing }[]
+): DuelActorStaging {
+  const beat = Math.floor(timeMs / NIGHT_BEAT_MS);
+  const eased: Eased = {
+    from: NIGHT_EIGHT[(beat + 7) % 8]!,
+    to: NIGHT_EIGHT[beat % 8]!,
+    progress: clamp01((timeMs - beat * NIGHT_BEAT_MS) / STEP_EASE_MS)
+  };
+  const staging: DuelActorStaging = {};
+  for (const { id, facing } of dancers) staging[id] = dancer(eased, facing === 'right' ? 1 : -1, 'playful');
+  return staging;
 }
 
 function driverMood(nerve: number, stumbling: boolean, finished: boolean): RidgeEmotion {

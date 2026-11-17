@@ -112,12 +112,12 @@ export class RidgeConsoleSession {
   }
 
   observe(): RidgeObservation {
-    return observeRidgeWorld(this.state, this.stage, {
-      workbench: this.workbench,
-      duel: this.duel,
-      gig: this.gig,
-      lesson: this.lesson
-    });
+    return observeRidgeWorld(
+      this.state,
+      this.stage,
+      { workbench: this.workbench, duel: this.duel, gig: this.gig, lesson: this.lesson },
+      this.stages
+    );
   }
 
   /** Live concert gig while practicing or playing, for presentation. */

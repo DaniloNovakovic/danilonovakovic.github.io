@@ -14,8 +14,10 @@ judge (pure, clock-free, never fails); see
   "Let's go" opens the lesson behind the shuttle shelter. After he has his
   step, the Profe offers "Can we run the step again?" as a replay.
 - Feet, not strings: lane 0 is step left, 1 the hip tap, 2 step right. Keys
-  `← ↓ →`, `A S D`, `J K L`, or `1 2 3`; on touch three big buttons (◀ Step,
-  ★ Tap, Step ▶).
+  `← ↓ →`, `A S D`, `J K L`, or `1 2 3`, and `Space` is also the tap; on touch
+  three big buttons (◀ Step, ★ Tap, Step ▶). On keyboard screens the panel
+  shows one legend chip per step, using the strip's glyph and that step's
+  keys (playtest: the tap key was not obvious).
 - Chart (`src/game/core/ridge/bachata/lesson.ts`), 112 BPM, about half a
   minute: the Profe's count-in "5, 6, 7, 8", then `count` (two eights, claps
   and a güira scrape only), `basic` (güira, bongó martillo, bass), `together`

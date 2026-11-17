@@ -126,8 +126,17 @@ export function RidgeBachataPanel({ params, dispatchAction }: SceneUiSurfaceProp
             ))}
           </div>
           <div className="flex items-center gap-3">
-            <span className="pointer-events-none hidden whitespace-nowrap rounded border-2 border-[#1a1a1a] bg-[#fbfbf9] px-1.5 py-0.5 text-[11px] font-black uppercase tracking-wider text-[#1a1a1a] pointer-fine:inline short:hidden">
-              {copy.keys}
+            {/* Keyboard legend: the same glyphs as the step strip, each with its keys. */}
+            <span className="pointer-events-none hidden items-center gap-1.5 pointer-fine:flex short:hidden">
+              {STEPS.map(({ lane, step }) => (
+                <span
+                  key={lane}
+                  className="flex items-center gap-1 whitespace-nowrap rounded border-2 border-[#1a1a1a] bg-[#fbfbf9] px-1.5 py-0.5 text-[11px] font-black uppercase tracking-wider text-[#1a1a1a]"
+                >
+                  <StepGlyph step={step} size="small" />
+                  {copy.steps[lane]}: {copy.keys[lane]}
+                </span>
+              ))}
             </span>
             {/* The non-arcade path: the Profe counts it out, and the driver still gets his step. */}
             <button
@@ -152,9 +161,13 @@ export function RidgeBachataPanel({ params, dispatchAction }: SceneUiSurfaceProp
 }
 
 /** Same glyphs as the step strip: arrows for the feet, a burst for the hip. */
-function StepGlyph({ step }: { step: BachataStep }) {
+function StepGlyph({ step, size = 'button' }: { step: BachataStep; size?: 'button' | 'small' }) {
   return (
-    <svg viewBox="0 0 24 24" aria-hidden className="h-6 w-6 pointer-coarse:h-8 pointer-coarse:w-8">
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden
+      className={size === 'small' ? 'h-3.5 w-3.5' : 'h-6 w-6 pointer-coarse:h-8 pointer-coarse:w-8'}
+    >
       {step === 'tap' ? (
         <path d="M12 1 L14.5 8.5 L22.5 9 L16 14 L18.5 22 L12 17.5 L5.5 22 L8 14 L1.5 9 L9.5 8.5 Z" fill="currentColor" />
       ) : (

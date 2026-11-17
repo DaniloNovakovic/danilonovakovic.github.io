@@ -79,6 +79,8 @@ const CONVERSATION_ZOOM = 1.3;
 const CONVERSATION_EASE_MS = 320;
 /** World units kept clear either side of the outermost speaker. */
 const CONVERSATION_SIDE_MARGIN = 70;
+/** World px either side of a memory's focus whose residents are kept in frame. */
+const MEMORY_FRAME_RANGE = 130;
 /** How far the frame drifts from the pair's midpoint toward whoever is talking. */
 const SPEAKER_PULL = 0.18;
 /** CSS pixels the docked conversation box occupies along the frame bottom. */
@@ -450,7 +452,8 @@ export class StickVisualProvider implements RidgeVisualProvider {
     const isPlayer = actor.id === 'player';
     const isWalking = isPlayer && frame.walking;
     const isTalking = view.speakingActorId === actor.id;
-    const inScene = isPlayer || isTalking || actor.id === view.partnerActorId;
+    // A memory is all cast: nobody fades back as a bystander.
+    const inScene = isPlayer || isTalking || actor.id === view.partnerActorId || view.memoryShot !== null;
 
     const nudge = nudgeFor(view, actor.id);
 
@@ -816,8 +819,10 @@ export class StickVisualProvider implements RidgeVisualProvider {
     for (const actor of view.actors) {
       if (!actor.visible) continue;
       const isSpeaker = actor.id === view.speakingActorId;
-      if (!isSpeaker && actor.id !== view.partnerActorId) continue;
       const x = this.worldXForProgress(actor.progress);
+      // A memory frames everyone near its focus, not a talking pair.
+      const inShot = view.memoryShot !== null && Math.abs(x - playerX) <= MEMORY_FRAME_RANGE;
+      if (!isSpeaker && actor.id !== view.partnerActorId && !inShot) continue;
       minX = Math.min(minX, x);
       maxX = Math.max(maxX, x);
       if (isSpeaker) speakerX = x;
@@ -853,6 +858,8 @@ function facingFor(
   x: number
 ): RidgeFacing {
   if (actor.id === 'player') return actor.facing;
+  // In a memory the player is not there to turn toward.
+  if (frame.view.memoryShot !== null) return actor.facing;
   if (Math.abs(actor.progress - frame.playerProgress) >= AWARENESS_RANGE) return actor.facing;
   return frame.playerX >= x ? 'right' : 'left';
 }

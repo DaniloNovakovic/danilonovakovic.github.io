@@ -97,7 +97,8 @@ export const ridgeMessages = {
     nerve: "His nerve",
     combo: "Clean",
     steps: ["Step left", "Tap", "Step right"],
-    keys: "← ↓ → · A S D",
+    /** Keyboard keys for each step, in step order (left, tap, right). */
+    keys: ["← or A", "↓, S or Space", "→ or D"],
     justCount: "Just count it for him",
     stepAway: "Step away",
     countIn: "Feet together. Listen... cinco, seis, siete, ocho!",

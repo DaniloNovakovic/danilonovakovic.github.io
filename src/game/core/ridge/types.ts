@@ -85,6 +85,24 @@ export interface RidgeDialogueLine {
   speaker: string;
   text: string;
   emotion?: RidgeEmotion;
+  /** While this line shows, the view cuts away to a remembered scene. */
+  memory?: RidgeMemoryShot;
+}
+
+/**
+ * A cut to another area for one line of a conversation (the Relay ending's
+ * memories). The core stages that area as it would look; presentation draws
+ * it in place of the current one.
+ */
+export interface RidgeMemoryShot {
+  areaId: RidgeAreaId;
+  beat: RidgeRouteBeat;
+  /** Where the camera looks along that area, 0..1. */
+  focus: number;
+  /** Extra flags that area reads to stage the memory (the plaza at night). */
+  flags?: readonly string[];
+  /** Residents dancing the bachata basic in this shot. */
+  dancers?: readonly RidgeActorId[];
 }
 
 export interface RidgeDialogueChoice {
@@ -322,6 +340,17 @@ export interface RidgeObservation {
   };
   /** Set-dressing tokens from the stage (see RidgeStageDefinition.resolveSceneryMarks). */
   sceneryMarks: readonly string[];
+  /** The remembered scene the current line cuts to, staged by that area. */
+  memory: null | {
+    areaId: RidgeAreaId;
+    beat: RidgeRouteBeat;
+    focus: number;
+    actors: readonly RidgeActorPresence[];
+    sceneryMarks: readonly string[];
+    dancers: readonly RidgeActorId[];
+    /** Changes on every cut, so presentation can flash between shots. */
+    shotKey: string;
+  };
   builtBridge: BridgeDesign | null;
   canMove: boolean;
   blockedAhead: boolean;
