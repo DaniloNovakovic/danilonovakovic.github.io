@@ -12,7 +12,8 @@ style, with the Forgiving Practice Riff as its tutorial.
   **encore** for replay.
 - Lanes: low / middle / high, shown as circle / diamond / square glyphs so they
   read without colour. Keys `A S D`, arrows `← ↓ →`, `J K L`, or `1 2 3`; on
-  touch, three big buttons under the highway, or tap a lane on the highway card
+  touch, three big buttons under the highway (hidden on mouse-and-keyboard
+  screens, where the highway gets that height), or tap a lane on the highway card
   itself (the gig panel captures scene pointers, so the walk mat steps aside).
   Key letters sit inside the targets on pointer-fine screens. Keys judge at the
   key event's own timestamp, not the frame it is read on.

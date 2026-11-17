@@ -107,7 +107,9 @@ export function RidgeConcertGigPanel({ params, dispatchAction }: SceneUiSurfaceP
         </div>
       ) : (
         <div className="flex flex-col items-center gap-1">
-          <div className="flex w-full max-w-[22rem] items-stretch justify-center gap-2 sm:gap-3">
+          {/* Touch controls. Mouse-and-keyboard screens play on keys (letters sit in the
+              targets) or click the highway; "Let the band finish" stays as the no-timing path. */}
+          <div className="flex w-full max-w-[22rem] items-stretch justify-center gap-2 sm:gap-3 pointer-fine:hidden">
             {LANES.map((lane) => (
               <button
                 key={lane}

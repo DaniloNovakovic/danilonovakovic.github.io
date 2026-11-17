@@ -451,10 +451,13 @@ function drawGlyph(g: Phaser.GameObjects.Graphics, lane: GigLane, x: number, y: 
 
 /** CSS pixels the gig panel takes at the top (status) and bottom (lane buttons). */
 function chromeReserveCss(): [number, number] {
-  const coarse = window.matchMedia?.('(pointer: coarse)').matches ?? false;
-  if (window.innerHeight <= SHORT_VIEWPORT_CSS) return [48, coarse ? 96 : 76];
-  if (window.innerWidth < NARROW_VIEWPORT_CSS) return [112, coarse ? 136 : 96];
-  return [80, coarse ? 136 : 96];
+  // Mouse-and-keyboard screens hide the strum buttons (keys play), so only the hint row sits below.
+  const fine = window.matchMedia?.('(pointer: fine)').matches ?? false;
+  const short = window.innerHeight <= SHORT_VIEWPORT_CSS;
+  const bottom = fine ? (short ? 36 : 52) : short ? 96 : 136;
+  if (short) return [48, bottom];
+  if (window.innerWidth < NARROW_VIEWPORT_CSS) return [112, bottom];
+  return [80, bottom];
 }
 
 function clamp(value: number, min: number, max: number): number {
