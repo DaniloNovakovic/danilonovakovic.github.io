@@ -48,6 +48,7 @@ import type {
 } from '../sceneUi/RidgeBridgeBuilderPanel';
 import type { RidgeCickaDuelPanelView } from '../sceneUi/RidgeCickaDuelPanel';
 import type { RidgeConcertGigPanelView } from '../sceneUi/RidgeConcertGigPanel';
+import type { SceneUiActionRequest } from '@/game/sceneUi/types';
 import { stageCickaDuel } from '../art/duelStaging';
 import { stageConcertGig, type GigFrame } from '../art/gigStaging';
 import { ConcertGigAudio } from './concertGigAudio';
@@ -420,10 +421,16 @@ export class RidgeScene extends Phaser.Scene {
     return false;
   }
 
+  /** Drain every pending action: a two-lane chord on touch arrives as two taps in one frame. */
   private handleSceneUiActions(): void {
+    for (let action = bridgeActions.consumeSceneUiAction(RIDGE_SCENE_ID); action && this.session; ) {
+      this.handleSceneUiAction(action);
+      action = bridgeActions.consumeSceneUiAction(RIDGE_SCENE_ID);
+    }
+  }
+
+  private handleSceneUiAction(action: SceneUiActionRequest): void {
     if (!this.session) return;
-    const action = bridgeActions.consumeSceneUiAction(RIDGE_SCENE_ID);
-    if (!action) return;
     if (action.action === 'ridgeGigStrum') {
       this.handleGigStrumAction(action.params);
       return;

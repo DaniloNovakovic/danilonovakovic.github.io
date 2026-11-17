@@ -203,18 +203,13 @@ function sceneUiSurfacesEqual(
   );
 }
 
+/** Queued actions are immutable once dispatched, so the sequence identifies each one. */
 function sceneUiActionsEqual(
-  a: SceneUiActionRequest | null,
-  b: SceneUiActionRequest | null
+  a: readonly SceneUiActionRequest[],
+  b: readonly SceneUiActionRequest[]
 ): boolean {
   if (a === b) return true;
-  if (!a || !b) return false;
-  return (
-    a.ownerSceneId === b.ownerSceneId &&
-    a.action === b.action &&
-    a.params === b.params &&
-    a.sequence === b.sequence
-  );
+  return a.length === b.length && a.every((action, index) => action.sequence === b[index]!.sequence);
 }
 
 function sceneControlPointerEventsEqual(
@@ -244,7 +239,7 @@ function clearSceneUiState(): SceneUiState {
   return {
     status: null,
     panel: null,
-    lastAction: null
+    actions: []
   };
 }
 
@@ -306,7 +301,7 @@ function isBridgeSceneShellUnchanged(previous: BridgeState, candidate: BridgeSta
     previous.isPaused === candidate.isPaused &&
     sceneUiSurfacesEqual(previous.sceneUi.status, candidate.sceneUi.status) &&
     sceneUiSurfacesEqual(previous.sceneUi.panel, candidate.sceneUi.panel) &&
-    sceneUiActionsEqual(previous.sceneUi.lastAction, candidate.sceneUi.lastAction) &&
+    sceneUiActionsEqual(previous.sceneUi.actions, candidate.sceneUi.actions) &&
     previous.sceneHintText === candidate.sceneHintText
   );
 }
@@ -756,16 +751,17 @@ export const bridgeActions = {
 
       const keepStatus = current.sceneUi.status?.ownerSceneId !== ownerSceneId;
       const keepPanel = current.sceneUi.panel?.ownerSceneId !== ownerSceneId;
-      const keepAction = current.sceneUi.lastAction?.ownerSceneId !== ownerSceneId;
+      const keptActions = current.sceneUi.actions.filter((action) => action.ownerSceneId !== ownerSceneId);
+      const keepActions = keptActions.length === current.sceneUi.actions.length;
 
-      if (keepStatus && keepPanel && keepAction) return current;
+      if (keepStatus && keepPanel && keepActions) return current;
 
       return {
         ...current,
         sceneUi: {
           status: keepStatus ? current.sceneUi.status : null,
           panel: keepPanel ? current.sceneUi.panel : null,
-          lastAction: keepAction ? current.sceneUi.lastAction : null
+          actions: keepActions ? current.sceneUi.actions : keptActions
         }
       };
     });
@@ -776,12 +772,8 @@ export const bridgeActions = {
       ...current,
       sceneUi: {
         ...current.sceneUi,
-        lastAction: {
-          ownerSceneId,
-          action,
-          params,
-          sequence
-        }
+        // Queued, not overwritten: two taps in one frame (a chord) must both land.
+        actions: [...current.sceneUi.actions, { ownerSceneId, action, params, sequence }]
       }
     }));
   },
@@ -833,16 +825,17 @@ export const bridgeActions = {
       };
     });
   },
+  /** Oldest pending action for this scene, removed from the queue. */
   consumeSceneUiAction(ownerSceneId: SceneId): SceneUiActionRequest | null {
     const current = bridgeStore.getState();
-    const action = current.sceneUi.lastAction;
-    if (!action || action.ownerSceneId !== ownerSceneId) return null;
+    const action = current.sceneUi.actions.find((pending) => pending.ownerSceneId === ownerSceneId);
+    if (!action) return null;
 
     setState((next) => ({
       ...next,
       sceneUi: {
         ...next.sceneUi,
-        lastAction: null
+        actions: next.sceneUi.actions.filter((pending) => pending.sequence !== action.sequence)
       }
     }));
     return action;

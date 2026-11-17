@@ -45,5 +45,6 @@ export interface SceneUiActionRequest {
 export interface SceneUiState {
   status: SceneUiSurfaceRequest | null;
   panel: SceneUiSurfaceRequest | null;
-  lastAction: SceneUiActionRequest | null;
+  /** Pending one-shot actions, oldest first; the owning scene consumes them. */
+  actions: readonly SceneUiActionRequest[];
 }
