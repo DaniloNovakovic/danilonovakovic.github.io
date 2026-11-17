@@ -210,7 +210,9 @@ export function resolvePotassiumEnemySetupFacts(input: {
       shieldSide
     },
     bodyProfile: getPotassiumEnemyBodyProfile(kind),
-    angularVelocityRange: kind === 'scope' ? { min: -70, max: 70 } : undefined,
+    angularVelocityRange: kind === 'scope'
+      ? { min: -70, max: 70 }
+      : kind === 'deadline' ? { min: 160, max: 240 } : undefined,
     immovable: kind === 'wall' || kind === 'hardWall',
     isBoss: kind === 'boss'
   };

@@ -31,7 +31,7 @@ describe('potassium slip boss', () => {
     expect(result.commands).toEqual([
       { type: 'setBossPhase', phase: 2 },
       { type: 'shakeCamera', durationMs: 220, intensity: 0.007 },
-      { type: 'setBossHint', text: 'Boss phase 2 • Orbiting walls hate angles' },
+      { type: 'setBossHint', text: 'Boss phase 2 • His soda cans orbit and hate angles' },
       { type: 'setBossVelocity', velocityY: POTASSIUM_BOSS_PHASE_2_DRIFT, velocityX: POTASSIUM_BOSS_PATROL_SPEED },
       { type: 'spawnOrbitBlockers' },
       { type: 'updateOrbitBlockers', now: 1000 },

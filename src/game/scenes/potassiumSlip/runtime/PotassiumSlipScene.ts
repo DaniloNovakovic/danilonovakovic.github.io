@@ -943,7 +943,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
   private spawnBossOrbitBlockers(boss: EnemySprite): void {
     this.bossBlockers.clear(true, true);
     for (let index = 0; index < 3; index += 1) {
-      const blocker = this.bossBlockers.create(boss.x, boss.y, 'potassium_enemy_hard_wall') as EnemySprite;
+      const blocker = this.bossBlockers.create(boss.x, boss.y, 'potassium_boss_can') as EnemySprite;
       blocker.setDepth(84);
       blocker.setScale(0.54);
       blocker.body.setAllowGravity(false);

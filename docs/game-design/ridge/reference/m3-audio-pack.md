@@ -132,7 +132,7 @@ Allowed sounds:
 
 - Ridge Trail Card hover/open: a tiny rubbery banana squeak under the paper UI.
 - Circuit acknowledgement: short contact-clean chime plus paper stamp thump.
-- Potassium sign/NPC line: muted office intercom tick or clipboard clack.
+- Potassium sign/NPC line: small trash-can lid clang or soda-can rattle.
 - Return from Potassium with Circuit: one celebratory but restrained two-hit
   stinger, then immediately settle back into Ridge loop.
 

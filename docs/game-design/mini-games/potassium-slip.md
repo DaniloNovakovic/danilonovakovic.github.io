@@ -4,7 +4,7 @@
 
 ## Overview
 
-**Potassium Slip** is the first secret mini-game: a tall banana ricochet arena and affectionate **Ball x Pit homage** filtered through office nonsense. The player launches one main banana, recalls it yo-yo style, bounces it through falling enemies, drafts stackable upgrades, defeats the **Potassium Compliance Officer**, and earns the **Circuit** item.
+**Potassium Slip** is the first secret mini-game: a tall banana ricochet arena and affectionate **Ball x Pit homage** set inside a street dumpster. The player launches one main banana, recalls it yo-yo style, bounces it through falling junk, drafts stackable upgrades, defeats **Sir Rummage** (the raccoon who stole the street CRT's Circuit), and wins the **Circuit** back.
 
 ## Goal
 
@@ -21,17 +21,17 @@ Clear 10 procedural campaign waves, defeat the boss on wave 11, and collect the 
 
 ## Core Loop
 
-- Enemies and wall blockers spawn in 5-column rows and fall straight down. Splitter Memos reserve two adjacent columns.
+- Enemies and wall blockers spawn in 5-column rows and fall straight down. Trash Bags reserve two adjacent columns.
 - The banana bounces off arena walls and ricochets off enemies.
-- Regular enemies cost lives if they reach the bottom. Wooden Walls and Hard Filing Walls do not hurt the player. The boss instantly ends the run if it reaches the bottom.
+- Regular enemies cost lives if they reach the bottom. Pizza Boxes and Cinder Blocks do not hurt the player. The boss instantly ends the run if it reaches the bottom.
 - The player starts with 5 lives.
 - After each cleared non-boss wave, the player chooses one of two upgrade drafts.
-- Normal enemies do not show floating HP labels. Characters show cracks/scuffs/bandages as they weaken; wooden walls use crack/splinter-only damage marks.
+- Normal enemies do not show floating HP labels. Characters show cracks/scuffs/bandages as they weaken; pizza boxes use crack/tear-only damage marks.
 
 ## Waves And Modes
 
 - **Campaign:** Waves 1-10 are deterministic procedural row waves that grow denser, tankier, and more mechanically varied over time.
-- **Boss:** Wave 11 is the Potassium Compliance Officer. Defeating it grants the Circuit once.
+- **Boss:** Wave 11 is Sir Rummage. Defeating him grants the Circuit once.
 - **Endless:** Wave 12+ continues the same run with existing score, lives, skills, and escalating procedural waves.
 - **Records:** Finished runs are saved to a local top-5 leaderboard in browser storage.
 
@@ -57,81 +57,99 @@ the Potassium scene.
 
 ## Narrative Contract
 
-Potassium Slip is the Ridge's secret **joy audit**. After Danilo finds the
-Glasses, the overworld becomes readable enough to reveal the hidden banana.
-Peeling it opens a ridiculous compliance test where the sketchbook asks whether
-fun is allowed to count as real progress.
+Potassium Slip is a goofy street-side caper. After Danilo finds the Glasses,
+the overworld becomes readable enough to reveal a banana peel on the sidewalk.
+Stepping on it is the "slip": Danilo tumbles into the dumpster behind it, where
+**Sir Rummage**, a raccoon in a cardboard crown, sits on a hoard of street junk.
 
-The banana is the player's counter-argument: an unserious toy that turns
-pressure into signal through ricochet, recall, and escalating upgrade nonsense.
-The enemies are not literal monsters; they are anxious office artifacts produced
-by the Potassium Compliance Officer to prove that play should be scoped,
-approved, filed, and made sensible before it can help the Ridge.
+The chain should read without explanation:
 
-The campaign reward should stay the **Circuit** in the current/prototype
-runtime. Fictionally, the Compliance Officer has withheld it because the Relay
-Spire signal is "not properly approved." In the active pre-production route,
-this should read as optional side progress unless the route canon explicitly
-makes Potassium part of a later alternate path.
+1. The street CRT is dark because its Circuit is missing.
+2. Raccoons hoard shiny junk; Sir Rummage pried the Circuit out and dragged it
+   home.
+3. The banana peel is the one piece of trash that fights back. Everything else
+   in the dumpster is the raccoon's hoard and defends it.
+4. Beating Sir Rummage wins the Circuit back, and the Circuit boots the CRT.
 
-On return to the Ridge, Potassium should leave a visible memory rather than only
-an inventory flag. Good first candidates are:
+The campaign reward stays the **Circuit**. Potassium remains optional side
+progress unless the route canon explicitly makes it part of a later alternate
+path.
 
+The thematic thread under the joke is unchanged: the playful thing is what
+gets the useful thing back. Danilo does not clean the dumpster or tidy anything
+up; he bounces a banana around until the hoard gives up its treasure.
+
+On return to the street or the Ridge, Potassium should leave a visible memory
+rather than only an inventory flag. Good first candidates are:
+
+- Sir Rummage sulking beside his bin near the street CRT once the Circuit is
+  owned
 - a tiny circuit sticker on or near the Relay route
-- a doodled banana warning sign that has been crossed out or re-captioned
-- one Relay Spire light flickering on after the Circuit is owned
+- a doodled "slippery" warning sign next to the peel, crossed out or
+  re-captioned
 - a Ridge Guide or Cicka margin note quietly acknowledging the nonsense
 
-Tone target: silly substory seriousness. The joke should stay warm and
-practical: Danilo did not defeat paperwork by becoming less playful; he defeated
-it by making the playful thing useful.
+Tone target: cute and goofy, never gross. Pests are cartoon-friendly (dust
+bunnies, roly-polies, pigeons); avoid cockroaches, rats, flies, and grime that
+reads as disgusting rather than funny.
 
 ## Enemies
 
-- **Intern Bug:** Small anxious request. It is easy to clear, but it makes the
-  first rows feel alive.
-- **Scope Blob:** Round multi-hit scope creep. It should read as soft,
-  expanding, and stubborn.
-- **Deadline Drone:** Faster falling hazard.
-- **Wooden Wall:** High-HP one-cell destructible blocker that forces ricochet
-  angles. It shows wood planks and crack/splinter damage, not bandages.
-- **Hard Filing Wall:** Indestructible one-cell blocker introduced later. It
-  never costs lives, but it refuses to become paperwork.
-- **Splitter Memo:** Two-column follow-up memo that splits into two smaller bugs
-  on death, one from each occupied lane.
-- **Shielded Form:** Protected requirement with a visible shield plate. Hits
-  from the shielded side ricochet without damage.
-- **Potassium Compliance Officer:** Campaign boss with patrol phases, orbiting
-  indestructible blockers, stone armor windows, and summons. It owns the audit
-  fiction and the withheld Circuit.
+Runtime enemy kind ids (`intern`, `scope`, `deadline`, `wall`, `hardWall`,
+`splitter`, `shield`, `boss`) are historical and stay unchanged; only the
+player-facing names and art changed.
+
+- **Dust Bunny** (`intern`): tiny fluffball that goes poof. Easy to clear, but
+  it makes the first rows feel alive.
+- **Mystery Leftovers** (`scope`): multi-hit wobbly glob in a cracked
+  container. It should read as soft, jiggly, and stubborn.
+- **Roly-Poly** (`deadline`): faster falling hazard. It is curled into a ball
+  and spins as it rolls down, so the speed has a visible reason.
+- **Pizza Box** (`wall`): high-HP one-cell destructible blocker that forces
+  ricochet angles. Damage shows cracks and tears, not bandages.
+- **Cinder Block** (`hardWall`): indestructible one-cell blocker introduced
+  later. It never costs lives; it just does not care about bananas.
+- **Trash Bag** (`splitter`): two-column tied bag that bursts into two Dust
+  Bunnies on death, one from each occupied lane.
+- **Lid Pigeon** (`shield`): a pigeon holding a trash-can lid. The lid is the
+  visible shield plate; hits from the lid side clang off without damage.
+- **Sir Rummage** (`boss`): the raccoon. Campaign boss with patrol phases,
+  orbiting soda cans, hide-in-the-bin armor windows, and summons. He holds the
+  stolen Circuit.
 
 ## Asset Direction
 
-Future Potassium enemy art should preserve the current hitbox families and make
-the audit fiction legible at silhouette distance. Enemies should read as
-paperwork, office pressure, and over-processed requirements before they read as
-generic monsters.
+Enemy art is generated in `runtime/renderer.ts` with Phaser Graphics and must
+keep the existing texture sizes so hitbox families stay unchanged. Enemies
+should read as cute dumpster junk and friendly pests at silhouette distance.
 
 Useful sprite motifs:
 
-- stamped forms, bent memo corners, binder clips, file tabs, checkboxes, and
-  taped-on shield plates
-- damage states shown through scuffs, cracks, ink leaks, splinters, and loosened
-  stationery rather than gore or heavy facial distress
-- the boss carrying or locking away a small Circuit mark so the reward feels
-  related to the final encounter
-- banana upgrade effects staying joyful and bright enough to contrast the
-  paperwork enemies without breaking the sketchbook style
+- cardboard, pizza grease spots, tied bag knots, soda cans, cinder-block holes,
+  and a dented trash-can lid
+- damage states shown through scuffs, cracks, tears, and loosened bits rather
+  than gore, mess, or heavy facial distress
+- Sir Rummage visibly holding the Circuit so the reward is obviously tied to
+  the final encounter
+- banana upgrade effects staying joyful and bright enough to contrast the gray
+  and brown junk without breaking the sketchbook style
 
 ## Boss Fight
 
-The boss is intentionally more of a fight than a falling target:
+Sir Rummage is intentionally more of a fight than a falling target:
 
-- **Phase 1:** patrols across the upper-middle board and drifts down slowly.
-- **Phase 2:** adds rotating indestructible blockers around itself.
-- **Phase 3:** enters short stone/armored windows and summons extra falling enemies.
+- **Phase 1:** patrols across the upper-middle board, showing off the Circuit,
+  and drifts down slowly.
+- **Phase 2:** three soda cans from his hoard orbit him as indestructible
+  blockers.
+- **Phase 3:** he periodically ducks into his bin (short gray-tinted armored
+  windows) and whistles for backup: extra Mystery Leftovers and Roly-Polies
+  fall in.
 
 The boss is tankier than normal enemies so stacked upgrades have room to shine without instantly ending the encounter.
+
+Future polish candidate: on defeat, Sir Rummage fumbles the Circuit, it bounces
+off the banana, and Danilo catches it.
 
 ## Skill Drafts
 

@@ -3,6 +3,9 @@ import {
   POTASSIUM_COLUMN_COUNT,
   type PotassiumEnemyKind
 } from './waves';
+import { getMessages } from '@/shared/i18n';
+
+const messages = getMessages();
 
 export type PotassiumBossPhase = 1 | 2 | 3;
 
@@ -104,8 +107,8 @@ export function resolvePotassiumBossFrame(input: PotassiumBossFrameInput): Potas
     commands.push({
       type: 'setBossHint',
       text: phase === 2
-        ? 'Boss phase 2 • Orbiting walls hate angles'
-        : 'Boss phase 3 • Stone audits summon witnesses'
+        ? messages.potassiumSlip.hints.bossPhase2
+        : messages.potassiumSlip.hints.bossPhase3
     });
     state = { ...state, phase };
   }

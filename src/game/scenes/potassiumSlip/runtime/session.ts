@@ -513,7 +513,7 @@ function getWaveHint(wave: number): string {
   if (wave === 2) return messages.potassiumSlip.waveHints.multiHitBlobs;
   if (wave === 3) return messages.potassiumSlip.waveHints.wallsBlockAngles;
   if (wave === 4) return messages.potassiumSlip.waveHints.wallsBlockAngles;
-  if (wave === 5) return messages.potassiumSlip.waveHints.splitterMemos;
+  if (wave === 5) return messages.potassiumSlip.waveHints.trashBags;
   if (wave === 6) return messages.potassiumSlip.waveHints.stackChoices;
   if (wave === 7) return messages.potassiumSlip.waveHints.shieldPlates;
   if (wave >= 8 && wave <= 10) return messages.potassiumSlip.waveHints.hardWalls;

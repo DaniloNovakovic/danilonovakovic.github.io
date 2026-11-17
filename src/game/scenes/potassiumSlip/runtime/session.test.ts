@@ -73,7 +73,7 @@ describe('potassium slip session', () => {
       wave: POTASSIUM_BOSS_WAVE
     });
     expect(result.commands).toContainEqual({ type: 'spawnWave', wave: POTASSIUM_ENDLESS_START_WAVE });
-    expect(result.commands).toContainEqual({ type: 'setHint', text: 'Endless audit • The nonsense keeps filing' });
+    expect(result.commands).toContainEqual({ type: 'setHint', text: 'Endless rummage • The dumpster keeps giving' });
   });
 
   it('spawns boss waves without scheduling rows', () => {
@@ -88,7 +88,7 @@ describe('potassium slip session', () => {
       waveAdvancing: false
     });
     expect(commandTypes(result.commands)).toEqual(['spawnBoss', 'setHint', 'updateHud']);
-    expect(result.commands).toContainEqual({ type: 'setHint', text: 'Boss wave • Stop the audit before it lands' });
+    expect(result.commands).toContainEqual({ type: 'setHint', text: 'Boss wave • Sir Rummage wants to keep the Circuit' });
   });
 
   it('waits for pending rows and living enemies before scheduling upgrades', () => {
@@ -197,7 +197,7 @@ describe('potassium slip session', () => {
 
     expect(result.state.lives).toBe(3);
     expect(result.state.genericRanks).toEqual({ bonusLife: 1 });
-    expect(result.commands).toContainEqual({ type: 'setHint', text: 'Bonus Life stacked • Endless paperwork trembles' });
+    expect(result.commands).toContainEqual({ type: 'setHint', text: 'Bonus Life stacked • The whole dumpster trembles' });
     expect(result.commands).toContainEqual({ type: 'advanceWaveAfterDelay', wave: 5 });
     expect(result.commands.at(-1)?.type).toBe('updateHud');
   });
