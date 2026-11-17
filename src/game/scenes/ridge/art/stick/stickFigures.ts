@@ -1,7 +1,7 @@
 // Distinct NPC silhouettes intentionally branch on role props.
 // fallow-ignore-file complexity
 import type * as Phaser from 'phaser';
-import type { RidgeEmotion, RidgeFacing } from '@/game/core/ridge';
+import type { BachataStance, RidgeEmotion, RidgeFacing } from '@/game/core/ridge';
 import { drawContactShadow, drawInkBlob } from './atmosphere';
 import { INK, PAPER, PAPER_WARM } from './palette';
 
@@ -25,6 +25,8 @@ export interface StickPose {
   prop?: 'guitar-back' | 'guitar-playing' | null;
   /** Sitting on something (an amp, a curb) instead of standing. */
   seated?: boolean;
+  /** Mid-bachata: where the feet are after the last step (screen left/right, not facing). */
+  dance?: BachataStance | null;
 }
 
 const STILL: StickPose = { frame: 0, walking: false, talking: false };
@@ -224,13 +226,15 @@ export function drawStickCicka(
   x: number,
   y: number,
   scale = 1,
-  pose: StickPose = STILL
+  pose: StickPose = STILL,
+  coat: 'pale' | 'dark' = 'pale'
 ): void {
   const s = 12 * scale;
+  const dark = coat === 'dark';
   drawContactShadow(g, x, y, 28 * scale, 0.14);
 
   g.lineStyle(CONTOUR - 0.7, INK, 1);
-  g.fillStyle(PAPER, 1);
+  g.fillStyle(dark ? INK : PAPER, dark ? 0.9 : 1);
 
   drawInkBlob(g, x, y - s * 0.4, s * 0.82, s * 0.5, 11, 10);
   g.fillPath();
@@ -252,9 +256,10 @@ export function drawStickCicka(
   g.lineTo(x + s * 0.73, y - s * 1.16);
   g.strokePath();
 
-  g.fillStyle(INK, 1);
-  g.fillCircle(x + s * 0.86, y - s * 0.85, s * 0.09);
-  g.lineStyle(DETAIL, INK, 1);
+  // A dark coat gets paper eyes, so his face still reads.
+  g.fillStyle(dark ? PAPER : INK, 1);
+  g.fillCircle(x + s * 0.86, y - s * 0.85, s * (dark ? 0.12 : 0.09));
+  g.lineStyle(DETAIL, dark ? PAPER : INK, 1);
   g.lineBetween(x + s * 0.96, y - s * 0.8, x + s * 1.03, y - s * 0.77);
   g.lineBetween(x + s * 0.93, y - s * 0.74, x + s * 1.28, y - s * 0.85);
   g.lineBetween(x + s * 0.93, y - s * 0.69, x + s * 1.28, y - s * 0.64);
@@ -453,16 +458,37 @@ function drawBasePerson(
     g.lineTo(x + dir * s * 0.36, ground);
     g.strokePath();
   } else if (style.skirt) {
+    const feet = pose.dance ? danceFeet(pose.dance, x, y, s) : null;
+    // The skirt swings toward the tapping foot.
+    const sway = feet ? feet.hipDx * 2.2 : 0;
     g.fillStyle(PAPER, 1);
     g.beginPath();
     g.moveTo(x, y - s * 0.6);
-    g.lineTo(x - s * 0.58, y + s * 0.2);
-    g.lineTo(x + s * 0.58, y + s * 0.2);
+    g.lineTo(x - s * 0.58 + sway, y + s * 0.2);
+    g.lineTo(x + s * 0.58 + sway, y + s * 0.2);
     g.closePath();
     g.fillPath();
     g.strokePath();
-    g.lineBetween(x - s * 0.2, y + s * 0.2, x - s * 0.24 + s * 0.4 * leg, y + s * 0.58);
-    g.lineBetween(x + s * 0.2, y + s * 0.2, x + s * 0.24 - s * 0.4 * leg, y + s * 0.58);
+    if (feet) {
+      g.lineBetween(x - s * 0.2 + sway, y + s * 0.2, feet.left.x, feet.left.y);
+      g.lineBetween(x + s * 0.2 + sway, y + s * 0.2, feet.right.x, feet.right.y);
+    } else {
+      g.lineBetween(x - s * 0.2, y + s * 0.2, x - s * 0.24 + s * 0.4 * leg, y + s * 0.58);
+      g.lineBetween(x + s * 0.2, y + s * 0.2, x + s * 0.24 - s * 0.4 * leg, y + s * 0.58);
+    }
+  } else if (pose.dance) {
+    const feet = danceFeet(pose.dance, x, y, s);
+    const hip = { x: x + feet.hipDx, y: y - s * 0.15 };
+    g.lineBetween(hip.x, hip.y, feet.left.x, feet.left.y);
+    g.lineBetween(hip.x, hip.y, feet.right.x, feet.right.y);
+    if (feet.tapping) {
+      // Two quick motion ticks off the hip: it popped on the four.
+      g.lineStyle(DETAIL, INK, 0.7);
+      const side = Math.sign(feet.hipDx) || 1;
+      g.lineBetween(hip.x + side * s * 0.3, hip.y - s * 0.2, hip.x + side * s * 0.48, hip.y - s * 0.26);
+      g.lineBetween(hip.x + side * s * 0.32, hip.y, hip.x + side * s * 0.52, hip.y);
+      g.lineStyle(CONTOUR, INK, 1);
+    }
   } else {
     g.lineBetween(x, y - s * 0.15, x + s * (0.34 + 0.28 * leg), y + s * 0.58);
     g.lineBetween(x, y - s * 0.15, x - s * (0.34 - 0.28 * leg), y + s * 0.58);
@@ -478,6 +504,41 @@ function drawBasePerson(
   if (style.walkingStick) {
     g.lineStyle(2.6, INK, 1);
     g.lineBetween(x + dir * s * 0.72, y - s * 0.58, x + dir * s * 0.88, y + s * 0.58);
+  }
+}
+
+/**
+ * Where a dancer's feet land for a bachata stance, in screen left/right:
+ * mid-stride, closed together, or one foot pointed out on the tap with the
+ * hip shifted over the standing leg.
+ */
+function danceFeet(
+  stance: BachataStance,
+  x: number,
+  y: number,
+  s: number
+): { left: { x: number; y: number }; right: { x: number; y: number }; hipDx: number; tapping: boolean } {
+  const ground = y + s * 0.58;
+  switch (stance) {
+    case 'open':
+      return { left: { x: x - s * 0.5, y: ground }, right: { x: x + s * 0.5, y: ground }, hipDx: 0, tapping: false };
+    case 'together':
+      return { left: { x: x - s * 0.12, y: ground }, right: { x: x + s * 0.12, y: ground }, hipDx: 0, tapping: false };
+    case 'tap-left':
+      // Weight on the right; the left toe points out and the hip pops right.
+      return {
+        left: { x: x - s * 0.62, y: ground - s * 0.06 },
+        right: { x: x + s * 0.2, y: ground },
+        hipDx: s * 0.1,
+        tapping: true
+      };
+    case 'tap-right':
+      return {
+        left: { x: x - s * 0.2, y: ground },
+        right: { x: x + s * 0.62, y: ground - s * 0.06 },
+        hipDx: -s * 0.1,
+        tapping: true
+      };
   }
 }
 
@@ -699,6 +760,22 @@ function drawArms(
   const shoulder = y - s * 0.98;
   g.lineStyle(CONTOUR, INK, 1);
 
+  if (pose.dance) {
+    // Elbows soft, hands at the waist; they lift a little on the tap.
+    const lift = pose.dance === 'tap-left' || pose.dance === 'tap-right' ? s * 0.12 : 0;
+    g.beginPath();
+    g.moveTo(x, shoulder);
+    g.lineTo(x + dir * s * 0.34, shoulder + s * 0.36);
+    g.lineTo(x + dir * s * 0.62, shoulder + s * 0.12 - lift);
+    g.strokePath();
+    g.beginPath();
+    g.moveTo(x, shoulder);
+    g.lineTo(x - dir * s * 0.3, shoulder + s * 0.38);
+    g.lineTo(x - dir * s * 0.5, shoulder + s * 0.2 - lift);
+    g.strokePath();
+    return;
+  }
+
   if (style.raisedArm) {
     const wave = pose.frame % 2 === 0 ? 0.1 : -0.06;
     g.lineBetween(x, shoulder, x + dir * s * 0.58, shoulder - s * (0.5 + wave));
@@ -918,9 +995,19 @@ export function drawStickTraveler(
   scale = 1,
   pose: StickPose = STILL
 ): void {
+  if (pose.seated) {
+    const u = 16 * scale;
+    g.lineStyle(CONTOUR - 0.8, INK, 1);
+    g.fillStyle(PAPER_WARM, 1);
+    g.fillRect(x - u * 0.55, y + u * 0.04, u * 1.0, u * 0.54);
+    g.strokeRect(x - u * 0.55, y + u * 0.04, u * 1.0, u * 0.54);
+    g.lineBetween(x - u * 0.2, y + u * 0.04, x - u * 0.2, y - u * 0.06);
+    g.lineBetween(x + u * 0.1, y + u * 0.04, x + u * 0.1, y - u * 0.06);
+    g.lineBetween(x - u * 0.2, y - u * 0.06, x + u * 0.1, y - u * 0.06);
+  }
   const { s, dir } = placeStickPerson(g, x, y, facing, scale, pose, {
     hair: 'ponytail',
-    walkingStick: true,
+    walkingStick: !pose.seated,
     eyes: 'happy'
   });
   g.lineStyle(CONTOUR - 0.7, INK, 1);
@@ -1007,6 +1094,21 @@ export function drawStickDanceTeacher(
     raisedArm: true,
     eyes: 'happy'
   });
+  if (!pose.dance) drawGuira(g, x, y, facing === 'left' ? -1 : 1, 16 * scale * 1.08, pose.frame);
+}
+
+/** A güira: a ridged metal tube held up in the raised hand, scraper and all. */
+function drawGuira(g: Phaser.GameObjects.Graphics, x: number, y: number, dir: number, s: number, frame: number): void {
+  const shoulder = y - s * 0.98;
+  const wave = frame % 2 === 0 ? 0.1 : -0.06;
+  const hx = x + dir * s * 0.58;
+  const hy = shoulder - s * (0.5 + wave);
+  g.lineStyle(CONTOUR - 0.8, INK, 1);
+  g.fillStyle(PAPER_WARM, 1);
+  g.fillRect(hx - s * 0.1, hy - s * 0.46, s * 0.2, s * 0.5);
+  g.strokeRect(hx - s * 0.1, hy - s * 0.46, s * 0.2, s * 0.5);
+  g.lineStyle(1, INK, 0.6);
+  for (let i = 1; i < 5; i += 1) g.lineBetween(hx - s * 0.1, hy - s * 0.46 + i * s * 0.1, hx + s * 0.1, hy - s * 0.46 + i * s * 0.1);
 }
 
 export function drawStickSteward(

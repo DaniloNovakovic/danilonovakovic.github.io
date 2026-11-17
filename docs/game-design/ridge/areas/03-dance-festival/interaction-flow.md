@@ -90,10 +90,11 @@ preserving their dignity.
 After both romantic characters are ready, the connector is **Folded Song
 Request**. The driver writes a tiny folded paper request at the operations
 table, requesting a simple, cute song and asking her for one dance later without
-making a public confession. The request should not lock the beat to bachata or
-any other specific dance genre; it should feel playable on guitar, simple enough
-for a non-dancer, and emotionally compatible with the later Guitar Farewell
-montage.
+making a public confession. The festival is a bachata night (Danilo,
+2026-11-17), and the One-Step Practice teaches the bachata basic, but the
+request itself stays a simple "something slow": playable on guitar, simple
+enough for a non-dancer, and emotionally compatible with the later Guitar
+Farewell montage.
 
 The exact requested song does not need to be shown or heard by the player; the
 only presented music can be the guitar during the farewell. It can use her own
@@ -165,8 +166,9 @@ being literal stand-ins. Protect the intimacy: carry the emotional truth through
 fictional residents, not a private memory exhibit.
 
 The main solution should be conversation, the small object handoffs above, and
-gentle setup. An optional dance/rhythm mini-game can deepen the beat later, but
-the first ending path should not depend on arcade performance.
+gentle setup. The One-Step Practice is played as the never-fail **Bachata
+Lesson** (see [`bachata-lesson.md`](./bachata-lesson.md)); "Just count it for
+him" plays it out, so the first ending path never depends on arcade performance.
 
 ## Relay Transition
 

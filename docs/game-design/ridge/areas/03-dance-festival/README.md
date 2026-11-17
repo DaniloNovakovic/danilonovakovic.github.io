@@ -1,6 +1,8 @@
 # Dance Festival Area
 
-> Status: accepted final-area direction / split local source.
+> Status: accepted final-area direction / split local source; first polish
+> pass implemented 2026-11-17 (cast, topic menus, Bachata Lesson, Cat
+> Serenade). See [Implemented Polish Pass](#implemented-polish-pass).
 > Read [`../../README.md`](../../README.md) and
 > [`../README.md`](../README.md) before editing this folder.
 
@@ -29,6 +31,7 @@ without turning the scene into public matchmaking.
 | [`layout.md`](./layout.md) | Last-Stop Plaza, service-road blocker, shuttle lane, staging, art/audio open slots |
 | [`characters.md`](./characters.md) | Hill-shuttle driver, Last-Stop Operations Helper, Dance Teacher, supporting residents, Cicka, Unnamed Counterpart Cat |
 | [`interaction-flow.md`](./interaction-flow.md) | Practical Wayfinding Loop, Readiness Favors, Folded Song Request, Setup Clearance, Relay transition, conversation rules |
+| [`bachata-lesson.md`](./bachata-lesson.md) | Bachata Lesson (One-Step Practice) and Cat Serenade mechanics, audio, presentation, console verbs |
 
 ## Accepted Local Contract
 
@@ -49,6 +52,48 @@ without turning the scene into public matchmaking.
 - The player catches a **Short Threshold Transition** to Relay under sunset.
 - The night dance can appear later as a Route Memory Montage echo during the
   Guitar Farewell.
+
+## Implemented Polish Pass
+
+> Status: implemented (2026-11-17). Mechanics: [`bachata-lesson.md`](./bachata-lesson.md).
+> Danilo's direction for this pass: dancing is bachata-inspired, and Steve's
+> guitar gets an optional use here.
+
+Stage, left to right: van drop-off → traveler on his suitcase → shuttle shelter
+with the last-daylight timetable (driver, clipboard) → dance floor under a
+lantern line (the Profe with her güira) → lantern crates (Cicka) beside the
+chair stacks (a shy dark cat's eyes underneath) → operations table (radio,
+checklist, SONG REQUESTS jar) → steward → service gate (boom, CLOSED sign,
+sagging lantern line, loose cables) → hill road and the shuttle. A tiny Relay
+Spire sits on the far crest.
+
+- **Traveler** (`candidate` flavor): eleven years "going up" to Relay, always
+  stopping to watch something; after the gate opens he stays for the dance.
+- **Hill-Shuttle Driver**: "Driving's like dancing with a road." Two left feet;
+  would learn one step, but only behind the shelter. Encouraging him first
+  steadies his nerve for the lesson.
+- **The Profe** (Dance Teacher; "Profe" is a nickname, not a proper name):
+  dances alone on the empty floor, counts in Spanish, scrapes a güira on the
+  four. Comes to the driver ("the shy ones always pick the bus stop") and
+  agrees to keep the plaza watch tonight.
+- **Last-Stop Operations Helper**: re-counting forty-eight lanterns. Her
+  checklist (tug the lantern line, stamp the cable tape, count the chairs)
+  proves it's all fine, which is the problem: tonight she'd just be someone
+  waiting by the floor. The Profe taking the watch is her Readiness Favor.
+  Asking her straight out ("ask him to dance") is a recoverable awkward branch.
+- **Folded Song Request**: written on a torn corner of the driver's route sheet
+  ("SONG: something slow. ONE DANCE, LATER? ☐ yes ☐ maybe"), dropped in her jar,
+  not handed over. She knows the handwriting ("'shuttle' with three t's") and
+  answers over the radio: "Request received... Tick: yes." "Copy that."
+- **Setup Clearance**: the steward's three snaps at the gate, each visible as
+  it lands (lantern line tied up and lit, cable ramp, sign flipped to the
+  daylight ride); the sky moves from afternoon to late light to sunset.
+- **Cicka and the Unnamed Counterpart Cat**: Cicka stares at the chair stacks;
+  the dark cat only comes out for a song (the optional **Cat Serenade** on
+  Steve's guitar), then loafs one paw apart from her. Unserenaded, he still
+  turns up near her by the open gate. Unnamed; no parentage.
+- **Last ride**: Ops on the radio, "Come back down after. I'm saving you the
+  slow one." "Copy that."
 
 ## Boundaries
 

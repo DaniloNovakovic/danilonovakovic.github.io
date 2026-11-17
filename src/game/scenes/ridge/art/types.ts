@@ -38,6 +38,8 @@ export interface RidgeVisualViewModel {
   builtBridge: BridgeDesign | null;
   /** Per-frame body nudges while a mini-game (Cicka's Standoff) moves people. */
   actorNudges?: DuelActorStaging | null;
+  /** Set dressing the stage asks for (a lantern line tied off, the cat hiding). */
+  sceneryMarks: readonly string[];
 }
 
 export interface RidgeVisualProvider {
@@ -74,6 +76,7 @@ export function toRidgeVisualViewModel(
       : null,
     actors: observation.actors,
     crossingOpen,
-    builtBridge: observation.builtBridge
+    builtBridge: observation.builtBridge,
+    sceneryMarks: observation.sceneryMarks
   };
 }

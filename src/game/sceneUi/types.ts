@@ -10,7 +10,8 @@ export type SceneUiSurfaceId =
   | 'ridgeConversation'
   | 'ridgeBridgeBuilder'
   | 'ridgeCickaDuel'
-  | 'ridgeConcertGig';
+  | 'ridgeConcertGig'
+  | 'ridgeBachataLesson';
 
 export type SceneUiActionId =
   | 'start'
@@ -28,7 +29,9 @@ export type SceneUiActionId =
   | 'ridgeBridgeCommand'
   | 'ridgeDuelDodge'
   | 'ridgeGigStrum'
-  | 'ridgeGigSkip';
+  | 'ridgeGigSkip'
+  | 'ridgeDanceStep'
+  | 'ridgeDanceSkip';
 
 export interface SceneUiSurfaceRequest {
   ownerSceneId: SceneId;

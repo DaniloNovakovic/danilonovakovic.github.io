@@ -9,13 +9,33 @@
 
 export type GigLane = 0 | 1 | 2;
 
-export type GigChord = 'Am' | 'F' | 'C' | 'G' | 'Dm';
+export type GigChord = 'Am' | 'F' | 'C' | 'G' | 'Dm' | 'E';
 
 /**
  * `riff` is Steve's phrase on its own; the show grows out of it. The kind
  * drives the backing band's feel and the coach's callouts.
  */
-export type GigSectionKind = 'riff' | 'intro' | 'verse' | 'chorus' | 'breakdown' | 'finale';
+export type ConcertSectionKind = 'riff' | 'intro' | 'verse' | 'chorus' | 'breakdown' | 'finale';
+
+/**
+ * Last-Stop Plaza charts, played to a bachata feel: the Profe's lesson
+ * (`count` with no band yet, `basic` once the güira comes in, `together` when
+ * the driver joins, a `flourish` to finish) and the `serenade` you play the
+ * shy cat on Steve's guitar.
+ */
+export type BachataSectionKind = 'count' | 'basic' | 'together' | 'flourish' | 'serenade';
+
+export type GigSectionKind = ConcertSectionKind | BachataSectionKind;
+
+const BACHATA_KINDS: ReadonlySet<GigSectionKind> = new Set<BachataSectionKind>([
+  'count',
+  'basic',
+  'together',
+  'flourish',
+  'serenade'
+]);
+
+export const isBachataSection = (kind: GigSectionKind): kind is BachataSectionKind => BACHATA_KINDS.has(kind);
 
 export interface GigBarSpec {
   chord: GigChord;
@@ -224,6 +244,32 @@ export const CROSSING_SHOW_SPEC: GigSongSpec = {
         { chord: 'C', pattern: '21212...' },
         { chord: 'G', pattern: '0.1.2.1.' },
         { chord: 'C', pattern: 'z.......' }
+      ]
+    }
+  ]
+};
+
+/**
+ * A serenade for the shy cat under the chair stacks: a slow bachata requinto
+ * line in A minor, played on Steve's guitar. Never fails; it only gets warmer.
+ */
+export const CAT_SERENADE_SPEC: GigSongSpec = {
+  id: 'requinto-for-two',
+  bpm: 104,
+  countInBars: 1,
+  outroBeats: 4,
+  sections: [
+    {
+      kind: 'serenade',
+      bars: [
+        { chord: 'Am', pattern: '0.1.2...' },
+        { chord: 'Dm', pattern: '2.1.0...' },
+        { chord: 'E', pattern: '0.1.2.1.' },
+        { chord: 'Am', pattern: '0...2...' },
+        { chord: 'Am', pattern: '0.1.2.12' },
+        { chord: 'Dm', pattern: '2.1.0.1.' },
+        { chord: 'E', pattern: '0.2.1.2.' },
+        { chord: 'Am', pattern: 'z.......' }
       ]
     }
   ]

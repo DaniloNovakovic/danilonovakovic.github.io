@@ -1,5 +1,6 @@
 import {
   CICKA_DODGE_HOP,
+  type BachataStance,
   type CickaAttackKind,
   type CickaDuel,
   type CickaStrikeResult,
@@ -17,6 +18,8 @@ export interface ActorNudge {
   emotion?: RidgeEmotion;
   /** Strum-arm position for a performer (the concert gig). */
   strum?: number;
+  /** Feet mid-bachata (the Profe's lesson). */
+  dance?: BachataStance;
 }
 
 export type DuelActorStaging = Partial<Record<RidgeActorId, ActorNudge>>;

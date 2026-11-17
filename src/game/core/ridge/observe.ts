@@ -3,19 +3,31 @@
 import type { BridgeWorkbench } from './bridgeBuilder';
 import type { CickaDuel } from './cickaDuel';
 import { GIG_START_HYPE, type ConcertGig } from './concertGig';
+import { bachataStepOf } from './bachata';
 import type {
   RidgeObservation,
   RidgeStageDefinition,
   RidgeWorldState
 } from './types';
 
+/** The live mini-game objects a session may be running. */
+export interface RidgeMiniGames {
+  workbench?: BridgeWorkbench | null;
+  duel?: CickaDuel | null;
+  gig?: ConcertGig | null;
+  /** The bachata lesson's judge. */
+  lesson?: ConcertGig | null;
+}
+
 export function observeRidgeWorld(
   state: RidgeWorldState,
   stage: RidgeStageDefinition,
-  workbench: BridgeWorkbench | null = null,
-  duel: CickaDuel | null = null,
-  gig: ConcertGig | null = null
+  games: RidgeMiniGames = {}
 ): RidgeObservation {
+  const workbench = games.workbench ?? null;
+  const duel = games.duel ?? null;
+  const gig = games.gig ?? null;
+  const lesson = games.lesson ?? null;
   const nearby = [...stage.resolveInteractables(state)].sort(
     (a, b) => a.distance - b.distance
   );
@@ -53,9 +65,12 @@ export function observeRidgeWorld(
       ? duelHints(duel)
       : state.mode === 'concertGig'
         ? gigHints(gig)
-        : buildHints(state, stage, nearby, blockedAhead, workbench);
+        : state.mode === 'bachataLesson'
+          ? lessonHints(lesson)
+          : buildHints(state, stage, nearby, blockedAhead, workbench);
   const cickaDuel = state.mode === 'cickaDuel' && duel ? observeDuel(duel) : null;
   const concertGig = state.mode === 'concertGig' && gig ? observeGig(gig) : null;
+  const bachataLesson = state.mode === 'bachataLesson' && lesson ? observeLesson(lesson) : null;
   const bridgeBuild =
     state.mode === 'bridgeBuild' && workbench
       ? {
@@ -92,6 +107,8 @@ export function observeRidgeWorld(
     bridgeBuild,
     cickaDuel,
     concertGig,
+    bachataLesson,
+    sceneryMarks: stage.resolveSceneryMarks?.(state) ?? [],
     builtBridge: state.builtBridge,
     canMove: state.mode === 'explore',
     blockedAhead,
@@ -181,8 +198,36 @@ function observeGig(gig: ConcertGig): NonNullable<RidgeObservation['concertGig']
   };
 }
 
+function observeLesson(lesson: ConcertGig): NonNullable<RidgeObservation['bachataLesson']> {
+  const next = lesson.nextPendingNote();
+  return {
+    phase: lesson.phase,
+    timeMs: Math.round(lesson.timeMs),
+    section: lesson.section?.kind ?? null,
+    nerve: lesson.hype,
+    combo: lesson.combo,
+    bestCombo: lesson.bestCombo,
+    counts: { ...lesson.counts },
+    notesTotal: lesson.song.notes.length,
+    lastJudgment: lesson.lastHit?.judgment ?? null,
+    next: next ? { step: bachataStepOf(next.lane), inMs: Math.round(next.timeMs - lesson.timeMs) } : null,
+    grade: lesson.grade
+  };
+}
+
+function lessonHints(lesson: ConcertGig | null): string[] {
+  if (lesson?.phase === 'finished') return ['dance done — hear how the driver feels about it'];
+  return [
+    'dance step — dance the next step right on the count (or dance left|tap|right now)',
+    'dance wait [ms] — let the Profe keep counting',
+    'dance auto — dance the rest cleanly | dance skip — just count it for him'
+  ];
+}
+
 function gigHints(gig: ConcertGig | null): string[] {
-  if (gig?.phase === 'finished') return ['gig done — take a bow and hear what Steve thinks'];
+  if (gig?.phase === 'finished') {
+    return [gig.mode === 'serenade' ? 'gig done — see if the cat comes out' : 'gig done — take a bow and hear what Steve thinks'];
+  }
   return [
     'gig hit — strum the next note right on time (or gig hit 0|1|2 to strum a lane now)',
     'gig wait [ms] — let the song play on',
@@ -245,7 +290,7 @@ export function formatObservation(observation: RidgeObservation): string {
     const g = observation.concertGig;
     lines.push('');
     lines.push(
-      `--- concert ${g.mode}: ${g.phase} ${g.section ?? ''} t=${g.timeMs}ms hype ${Math.round(g.hype * 100)}% combo ${g.combo} score ${g.score} ---`
+      `--- ${g.mode === 'serenade' ? 'guitar' : 'concert'} ${g.mode}: ${g.phase} ${g.section ?? ''} t=${g.timeMs}ms hype ${Math.round(g.hype * 100)}% combo ${g.combo} score ${g.score} ---`
     );
     lines.push(
       `perfect ${g.counts.perfect} good ${g.counts.good} miss ${g.counts.miss} of ${g.notesTotal} — grade ${g.grade}`
@@ -255,6 +300,17 @@ export function formatObservation(observation: RidgeObservation): string {
     }
     if (g.next) lines.push(`Next note: lane ${g.next.lane} in ${g.next.inMs}ms`);
     if (g.lastJudgment) lines.push(`Last note: ${g.lastJudgment}`);
+  } else if (observation.bachataLesson) {
+    const d = observation.bachataLesson;
+    lines.push('');
+    lines.push(
+      `--- bachata lesson: ${d.phase} ${d.section ?? ''} t=${d.timeMs}ms nerve ${Math.round(d.nerve * 100)}% combo ${d.combo} ---`
+    );
+    lines.push(
+      `perfect ${d.counts.perfect} good ${d.counts.good} miss ${d.counts.miss} of ${d.notesTotal} — grade ${d.grade}`
+    );
+    if (d.next) lines.push(`Next step: ${d.next.step} in ${d.next.inMs}ms`);
+    if (d.lastJudgment) lines.push(`Last step: ${d.lastJudgment}`);
   } else if (observation.conversation) {
     const c = observation.conversation;
     lines.push('');

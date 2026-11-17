@@ -10,6 +10,7 @@
  * is never the best way to play.
  */
 import {
+  CAT_SERENADE_SPEC,
   compileGigSong,
   CROSSING_SHOW_SPEC,
   PRACTICE_RIFF_SPEC,
@@ -36,7 +37,8 @@ const STRAY_WEIGHT = 0.5;
 const MULTIPLIER_STEP = 10;
 const MAX_MULTIPLIER = 4;
 
-export type GigMode = 'practice' | 'show';
+/** `serenade` is the guitar played for the shy cat at Last-Stop Plaza: show rules, no crowd. */
+export type GigMode = 'practice' | 'show' | 'serenade';
 export type GigJudgment = 'perfect' | 'good' | 'miss';
 export type GigPhase = 'countIn' | 'playing' | 'finished';
 export type GigGrade = 'legendary' | 'great' | 'good' | 'rough';
@@ -46,6 +48,8 @@ export const GIG_GRADES: readonly GigGrade[] = ['legendary', 'great', 'good', 'r
 export const CONCERT_PRACTICE_ASSISTED_FLAG = 'concert_practice_assisted';
 /** Session flag for the grade of the most recent show, e.g. `concert_grade_great`. */
 export const concertGradeFlag = (grade: GigGrade): string => `concert_grade_${grade}`;
+/** Session flag for how warmly the shy cat took the most recent serenade. */
+export const serenadeGradeFlag = (grade: GigGrade): string => `serenade_grade_${grade}`;
 
 export interface GigHit {
   noteId: number;
@@ -70,6 +74,12 @@ export interface GigOptions {
   /** Crowd warmth at the first note, 0..1. */
   startHype?: number;
 }
+
+const DEFAULT_SPECS = {
+  practice: PRACTICE_RIFF_SPEC,
+  show: CROSSING_SHOW_SPEC,
+  serenade: CAT_SERENADE_SPEC
+} as const;
 
 /** Narrow an untrusted number (a panel param) to a lane. */
 export const isGigLane = (value: unknown): value is GigLane => value === 0 || value === 1 || value === 2;
@@ -98,8 +108,7 @@ export class ConcertGig {
 
   constructor(options: GigOptions) {
     this.mode = options.mode;
-    this.song =
-      options.song ?? compileGigSong(options.mode === 'practice' ? PRACTICE_RIFF_SPEC : CROSSING_SHOW_SPEC);
+    this.song = options.song ?? compileGigSong(DEFAULT_SPECS[options.mode]);
     this.judgments = this.song.notes.map(() => null);
     this.startHype = clamp01(options.startHype ?? START_HYPE);
     this.hypeLevel = this.startHype;
@@ -159,7 +168,7 @@ export class ConcertGig {
 
   /** Practice only: one pass landed. False means it ran out and passed anyway. */
   get passed(): boolean {
-    return this.mode === 'show' || this.practicePassed;
+    return this.mode !== 'practice' || this.practicePassed;
   }
 
   /** Practice pass the player is on (0-based), clamped to the last. */

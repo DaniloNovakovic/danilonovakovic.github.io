@@ -19,10 +19,12 @@ import {
   concertGradeFlag,
   GIG_GRADES,
   playNextNotePerfectly,
+  serenadeGradeFlag,
   type GigLane,
   type GigMode,
   type GigStrumResult
 } from './concertGig';
+import { BACHATA_START_NERVE, createBachataLesson, danceGradeFlag } from './bachata';
 import { getRidgeHelpText, parseRidgeCommand, parseRidgeScript } from './commands';
 import { formatObservation, observeRidgeWorld } from './observe';
 import type {
@@ -51,6 +53,8 @@ const CICKA_DUEL_WON_CONVERSATION = 'bridge.cicka.duel_won';
 const CICKA_DUEL_LOST_CONVERSATION = 'bridge.cicka.duel_lost';
 const GIG_PRACTICE_DONE_CONVERSATION = 'concert.gig.practice_done';
 const GIG_SHOW_DONE_CONVERSATION = 'concert.gig.show_done';
+const GIG_SERENADE_DONE_CONVERSATION = 'dance.cats.serenade_done';
+const BACHATA_LESSON_DONE_CONVERSATION = 'dance.lesson.done';
 /** Song-time step for console waits when no target is given. */
 const GIG_WAIT_LEAD_MS = 1;
 
@@ -76,6 +80,8 @@ export class RidgeConsoleSession {
   private workbench: BridgeWorkbench | null = null;
   private duel: CickaDuel | null = null;
   private gig: ConcertGig | null = null;
+  /** The Profe's lesson: a dance chart on the same forgiving rhythm judge. */
+  private lesson: ConcertGig | null = null;
 
   constructor(options: RidgeSessionOptions) {
     if (options.stages) {
@@ -105,7 +111,12 @@ export class RidgeConsoleSession {
   }
 
   observe(): RidgeObservation {
-    return observeRidgeWorld(this.state, this.stage, this.workbench, this.duel, this.gig);
+    return observeRidgeWorld(this.state, this.stage, {
+      workbench: this.workbench,
+      duel: this.duel,
+      gig: this.gig,
+      lesson: this.lesson
+    });
   }
 
   /** Live concert gig while practicing or playing, for presentation. */
@@ -122,6 +133,22 @@ export class RidgeConsoleSession {
   strumConcertGig(lane: GigLane, atMs: number): GigStrumResult {
     if (this.state.mode !== 'concertGig' || !this.gig) return { kind: 'ignored' };
     return this.gig.strum(lane, atMs);
+  }
+
+  /** Live bachata lesson while dancing with the driver, for presentation. */
+  get bachataLesson(): ConcertGig | null {
+    return this.state.mode === 'bachataLesson' ? this.lesson : null;
+  }
+
+  /** Move the lesson's count to `timeMs` (the adapter's audio clock drives this). */
+  advanceBachataLesson(timeMs: number): void {
+    if (this.state.mode === 'bachataLesson') this.lesson?.advance(timeMs);
+  }
+
+  /** Dance a step (0 left, 1 tap, 2 right) at lesson time `atMs`. */
+  stepBachataLesson(lane: GigLane, atMs: number): GigStrumResult {
+    if (this.state.mode !== 'bachataLesson' || !this.lesson) return { kind: 'ignored' };
+    return this.lesson.strum(lane, atMs);
   }
 
   /** Live workbench while the Blueprint Bridge is being drawn, for presentation. */
@@ -194,6 +221,8 @@ export class RidgeConsoleSession {
         return this.handleDuel(command.action);
       case 'gig':
         return this.handleGig(command.action);
+      case 'dance':
+        return this.handleDance(command.action);
       case 'unknown':
         return this.fail(
           command.raw
@@ -212,6 +241,9 @@ export class RidgeConsoleSession {
     }
     if (this.state.mode === 'concertGig') {
       return this.fail('You are mid-song. gig hit or gig wait.');
+    }
+    if (this.state.mode === 'bachataLesson') {
+      return this.fail('You are mid-eight. dance step or dance wait.');
     }
     if (this.state.mode !== 'explore') {
       return this.fail('Movement is halted during conversation. advance or leave.');
@@ -267,6 +299,9 @@ export class RidgeConsoleSession {
     }
     if (this.state.mode === 'concertGig') {
       return this.fail('Eyes on the notes. gig hit or gig wait.');
+    }
+    if (this.state.mode === 'bachataLesson') {
+      return this.fail('Eyes on your feet. dance step or dance wait.');
     }
 
     const nearby = [...this.stage.resolveInteractables(this.state)].sort(
@@ -328,6 +363,7 @@ export class RidgeConsoleSession {
     if (this.state.mode === 'bridgeBuild') return this.closeBridgeBuild();
     if (this.state.mode === 'cickaDuel') return this.fail('No backing out now. Cicka is mid-wiggle.');
     if (this.state.mode === 'concertGig') return this.leaveConcertGig();
+    if (this.state.mode === 'bachataLesson') return this.leaveBachataLesson();
     const result = leaveConversation(this.state);
     this.state = result.state;
     return {
@@ -389,6 +425,8 @@ export class RidgeConsoleSession {
         this.openCickaDuel();
       } else if (event.type === 'concert_gig_opened') {
         this.openConcertGig(event.mode);
+      } else if (event.type === 'bachata_lesson_opened') {
+        this.openBachataLesson();
       } else if (event.type === 'route_reset') {
         this.applyRouteReset();
         events.push({ type: 'beat_changed', beat: this.state.beat });
@@ -408,6 +446,7 @@ export class RidgeConsoleSession {
     this.workbench = null;
     this.duel = null;
     this.gig = null;
+    this.lesson = null;
     if (areaId === 'bridge') this.state = { ...this.state, builtBridge: null };
     if (!this.stages) {
       this.state = {
@@ -439,6 +478,7 @@ export class RidgeConsoleSession {
     this.workbench = null;
     this.duel = null;
     this.gig = null;
+    this.lesson = null;
     const bridge = this.stages?.bridge ?? this.stage;
     this.stage = bridge;
     this.state = {
@@ -540,38 +580,66 @@ export class RidgeConsoleSession {
     if (this.state.mode !== 'concertGig' || !gig) {
       return this.fail('No song is playing. Steve can teach you the riff.');
     }
-    if (action.kind === 'done') {
-      if (gig.phase !== 'finished') return this.fail('The song is still going.');
-      return this.finishConcertGig(gig);
+    return this.runRhythm(gig, action, () => this.finishConcertGig(gig), {
+      over: 'The last chord already rang out. gig done.',
+      playing: 'The song is still going.',
+      waiting: 'The band plays on.',
+      ended: 'The last chord rings out.'
+    });
+  }
+
+  private handleDance(action: RidgeGigAction): RidgeCommandResult {
+    const lesson = this.lesson;
+    if (this.state.mode !== 'bachataLesson' || !lesson) {
+      return this.fail('Nobody is counting. The Profe teaches behind the shuttle shelter.');
     }
-    if (gig.phase === 'finished') return this.fail('The last chord already rang out. gig done.');
+    return this.runRhythm(lesson, action, () => this.finishBachataLesson(lesson), {
+      over: 'The last tap landed. dance done.',
+      playing: 'The Profe is still counting.',
+      waiting: 'Uno, dos, tres...',
+      ended: '...and tap. The eight is over.'
+    });
+  }
+
+  /** Shared rhythm verbs: the gig and the lesson run on the same judge. */
+  private runRhythm(
+    judge: ConcertGig,
+    action: RidgeGigAction,
+    finish: () => RidgeCommandResult,
+    copy: { over: string; playing: string; waiting: string; ended: string }
+  ): RidgeCommandResult {
+    if (action.kind === 'done') {
+      if (judge.phase !== 'finished') return this.fail(copy.playing);
+      return finish();
+    }
+    if (judge.phase === 'finished') return this.fail(copy.over);
 
     switch (action.kind) {
       case 'hit': {
         if (action.lane === undefined) {
-          const results = playNextNotePerfectly(gig);
-          return results.length > 0 ? this.ok(describeStrums(results)) : this.fail('No notes left to play.');
+          const results = playNextNotePerfectly(judge);
+          return results.length > 0 ? this.ok(describeStrums(results)) : this.fail('Nothing left to play.');
         }
-        return this.ok(describeStrums([gig.strum(action.lane)]));
+        return this.ok(describeStrums([judge.strum(action.lane)]));
       }
       case 'wait': {
-        const next = gig.nextPendingNote();
+        const next = judge.nextPendingNote();
         const target =
           action.ms !== undefined
-            ? gig.timeMs + action.ms
+            ? judge.timeMs + action.ms
             : next
               ? next.timeMs - GIG_WAIT_LEAD_MS
-              : gig.song.endMs + 1;
-        gig.advance(Math.max(target, gig.timeMs + GIG_WAIT_LEAD_MS));
-        return this.ok(gigOver(gig) ? 'The last chord rings out.' : 'The band plays on.');
+              : judge.song.endMs + 1;
+        judge.advance(Math.max(target, judge.timeMs + GIG_WAIT_LEAD_MS));
+        return this.ok(gigOver(judge) ? copy.ended : copy.waiting);
       }
       case 'auto':
-        while (!gigOver(gig) && gig.nextPendingNote()) playNextNotePerfectly(gig);
-        gig.finish();
-        return this.ok('Every note lands.');
+        while (!gigOver(judge) && judge.nextPendingNote()) playNextNotePerfectly(judge);
+        judge.finish();
+        return this.ok('Every beat lands.');
       case 'skip':
-        gig.finish();
-        return this.ok('The song plays out around you.');
+        judge.finish();
+        return this.ok('It plays out around you.');
     }
   }
 
@@ -584,7 +652,7 @@ export class RidgeConsoleSession {
       ...this.state,
       mode: 'concertGig',
       conversation: null,
-      lastMessage: mode === 'practice' ? 'Steve counts you in, slowly.' : 'Lights up. The drummer clicks four.'
+      lastMessage: GIG_OPENING_LINE[mode]
     };
   }
 
@@ -613,7 +681,11 @@ export class RidgeConsoleSession {
     ];
     let beat = this.state.beat;
 
-    if (gig.mode === 'practice') {
+    if (gig.mode === 'serenade') {
+      for (const grade of GIG_GRADES) flags.delete(serenadeGradeFlag(grade));
+      flags.add(serenadeGradeFlag(gig.grade));
+      events.push({ type: 'flag_changed', flag: serenadeGradeFlag(gig.grade), present: true });
+    } else if (gig.mode === 'practice') {
       if (gig.passed) flags.delete(CONCERT_PRACTICE_ASSISTED_FLAG);
       else flags.add(CONCERT_PRACTICE_ASSISTED_FLAG);
       if (beat === 'concert_arrival') beat = 'concert_practiced';
@@ -633,17 +705,59 @@ export class RidgeConsoleSession {
       progress: performer?.progress ?? this.state.progress
     };
 
-    const followUp = this.stage.resolveConversation(
-      gig.mode === 'practice' ? GIG_PRACTICE_DONE_CONVERSATION : GIG_SHOW_DONE_CONVERSATION,
-      this.state
-    );
+    const followUp = this.stage.resolveConversation(GIG_DONE_CONVERSATION[gig.mode], this.state);
     if (followUp) {
       const started = startConversation(this.state, followUp);
       this.state = started.state;
       events.push(...started.events);
     }
-    const message = gig.mode === 'practice' ? 'The riff settles into your fingers.' : `The crowd roars. (${gig.grade})`;
+    const message = GIG_CLOSING_LINE[gig.mode](gig.grade);
     return { ok: true, message, observation: this.observe(), events };
+  }
+
+  private openBachataLesson(): void {
+    this.lesson = createBachataLesson(this.stage.bachataStartNerve?.(this.state) ?? BACHATA_START_NERVE);
+    this.state = {
+      ...this.state,
+      mode: 'bachataLesson',
+      conversation: null,
+      lastMessage: 'Behind the shelter, the Profe raises one hand. "Feet together. Listen."'
+    };
+  }
+
+  /** The lesson can be put down; nothing is lost but the count. */
+  private leaveBachataLesson(): RidgeCommandResult {
+    const lesson = this.lesson;
+    this.lesson = null;
+    this.state = { ...this.state, mode: 'explore', lastMessage: 'You step out of the count.' };
+    return {
+      ok: true,
+      message: 'You step out of the count.',
+      observation: this.observe(),
+      events: lesson ? [{ type: 'bachata_lesson_closed', grade: lesson.grade }] : []
+    };
+  }
+
+  /** The eight is over: grade it, step off where you danced, and hear the Profe out. */
+  private finishBachataLesson(lesson: ConcertGig): RidgeCommandResult {
+    const dancer = this.stage.resolveActors(this.state).find((actor) => actor.id === 'player');
+    this.lesson = null;
+    const flags = new Set(this.state.flags);
+    for (const grade of GIG_GRADES) flags.delete(danceGradeFlag(grade));
+    flags.add(danceGradeFlag(lesson.grade));
+    const events: RidgeSessionEvent[] = [
+      { type: 'bachata_lesson_closed', grade: lesson.grade },
+      { type: 'flag_changed', flag: danceGradeFlag(lesson.grade), present: true }
+    ];
+    this.state = { ...this.state, mode: 'explore', flags, progress: dancer?.progress ?? this.state.progress };
+
+    const followUp = this.stage.resolveConversation(BACHATA_LESSON_DONE_CONVERSATION, this.state);
+    if (followUp) {
+      const started = startConversation(this.state, followUp);
+      this.state = started.state;
+      events.push(...started.events);
+    }
+    return { ok: true, message: `...and tap. (${lesson.grade})`, observation: this.observe(), events };
   }
 
   private openBridgeBuild(): void {
@@ -734,6 +848,24 @@ export class RidgeConsoleSession {
     };
   }
 }
+
+const GIG_OPENING_LINE: Record<GigMode, string> = {
+  practice: 'Steve counts you in, slowly.',
+  show: 'Lights up. The drummer clicks four.',
+  serenade: 'You sit on a lantern crate and find the first note, soft as you can.'
+};
+
+const GIG_DONE_CONVERSATION: Record<GigMode, string> = {
+  practice: GIG_PRACTICE_DONE_CONVERSATION,
+  show: GIG_SHOW_DONE_CONVERSATION,
+  serenade: GIG_SERENADE_DONE_CONVERSATION
+};
+
+const GIG_CLOSING_LINE: Record<GigMode, (grade: string) => string> = {
+  practice: () => 'The riff settles into your fingers.',
+  show: (grade) => `The crowd roars. (${grade})`,
+  serenade: (grade) => `The last note hangs under the lanterns. (${grade})`
+};
 
 /** Read fresh: the playhead moves under a narrowed `phase`. */
 function gigOver(gig: ConcertGig): boolean {

@@ -93,11 +93,17 @@ Concert
   -> Dance transition exit
 
 Dance Festival
-  -> Last-Stop Plaza setup + service-road blocker
-  -> traveler wayfinding + triangulated resident reads
-  -> Operations Handoff Check + One-Step Practice
-  -> Folded Song Request
-  -> Setup Clearance montage
+  -> Last-Stop Plaza: van drop-off, traveler on his suitcase, shuttle shelter
+     (driver + clipboard), dance floor (the Profe), lantern crates (Cicka),
+     chair stacks (a shy dark cat), operations table, steward, service gate
+  -> topic menus; the romance is read from residents, never announced
+  -> One-Step Practice = Bachata Lesson behind the shelter (driver mirrors you;
+     never fails; "Just count it for him")
+  -> Operations Handoff Check: checklist -> "who keeps watch?" -> the Profe
+  -> Folded Song Request: driver writes it, you drop it in her jar, radio reply
+  -> Setup Clearance at the gate: lantern line, cable ramp, shuttle sign (each
+     visible), sky goes to sunset, gate opens
+  -> optional Cat Serenade on Steve's guitar (dark cat joins Cicka)
   -> last daylight shuttle -> Relay
 
 Relay Ending
@@ -132,7 +138,8 @@ Useful commands:
 | `build test` / `edit` / `done` | Run the toy car, return to drawing, accept a held bridge |
 | `build sketch` / `hint` / `undo` / `erase n` / `show` | Workbench helpers |
 | `duel dodge` / `duel wait [n]` / `duel done` | Cicka's Standoff |
-| `gig hit [0\|1\|2]` / `gig wait [ms]` / `gig auto` / `gig skip` / `gig done` | Concert Gig (practice or show) |
+| `gig hit [0\|1\|2]` / `gig wait [ms]` / `gig auto` / `gig skip` / `gig done` | Concert Gig (practice, show, or the Dance Festival cat serenade) |
+| `dance step` / `dance left\|tap\|right` / `dance wait [ms]` / `dance auto` / `dance skip` / `dance done` | Bachata Lesson (Dance Festival) |
 | `skip` / `next` | Playtest: jump to next area start |
 | `warp bridge\|concert\|dance\|relay` | Playtest: warp to an area |
 | `help` | Command list |

@@ -225,6 +225,71 @@ describe('RidgeConsoleSession playtest skips', () => {
   });
 });
 
+describe('Last-Stop Plaza', () => {
+  function danceSession() {
+    const session = createRouteSession();
+    session.exec('warp dance');
+    return session;
+  }
+
+  it('parses dance verbs as steps', () => {
+    expect(parseRidgeCommand('dance left')).toEqual({ type: 'dance', action: { kind: 'hit', lane: 0 } });
+    expect(parseRidgeCommand('dance tap')).toEqual({ type: 'dance', action: { kind: 'hit', lane: 1 } });
+    expect(parseRidgeCommand('dance step right')).toEqual({ type: 'dance', action: { kind: 'hit', lane: 2 } });
+    expect(parseRidgeCommand('dance step')).toEqual({ type: 'dance', action: { kind: 'hit' } });
+    expect(parseRidgeCommand('dance skip')).toEqual({ type: 'dance', action: { kind: 'skip' } });
+  });
+
+  it('still counts the driver in when you just let the lesson play', () => {
+    const session = danceSession();
+    walkTo(session, 0.22);
+    session.exec('interact driver');
+    talk(session, 'dance', 'learn');
+    walkTo(session, 0.35);
+    session.exec('interact teacher');
+    talk(session, 'lesson', 'go');
+    expect(session.exec('dance skip').ok).toBe(true);
+    expect(session.observe().bachataLesson?.grade).toBe('rough');
+    session.exec('dance done');
+    expect(session.observe().conversation?.text).toBe('dance.lesson.done.teacher.rough');
+    drainConversation(session);
+    // He has his step either way: the driver's talk moves on.
+    session.exec('interact driver');
+    expect(session.observe().conversation?.id).toBe('dance.driver.practiced');
+  });
+
+  it('steadies the driver when you encouraged him first', () => {
+    const session = danceSession();
+    walkTo(session, 0.22);
+    session.exec('interact driver');
+    talk(session, 'dance', 'learn');
+    session.exec('interact driver');
+    talk(session, 'encourage');
+    walkTo(session, 0.35);
+    session.exec('interact teacher');
+    talk(session, 'lesson', 'go');
+    expect(session.observe().bachataLesson?.nerve).toBeCloseTo(0.45);
+  });
+
+  it('serenades the shy cat out from under the chairs', () => {
+    const session = danceSession();
+    const catVisible = () => session.observe().actors.find((actor) => actor.id === 'counterpart-cat')?.visible;
+    expect(catVisible()).toBe(false);
+    expect(session.observe().sceneryMarks).toContain('cat-hiding');
+    walkTo(session, 0.49);
+    expect(session.exec('interact chairs').ok).toBe(true);
+    talk(session, 'play');
+    expect(session.observe().concertGig?.mode).toBe('serenade');
+    session.exec('gig auto');
+    session.exec('gig done');
+    expect(session.observe().conversation?.id).toBe('dance.cats.serenade_done');
+    drainConversation(session);
+    expect(catVisible()).toBe(true);
+    expect(session.observe().sceneryMarks).not.toContain('cat-hiding');
+    expect(session.observe().beat).toBe('dance_arrival');
+  });
+});
+
 describe('Concert Crossing', () => {
   function concertSession() {
     const session = createRouteSession();
@@ -423,29 +488,69 @@ function playConcert(session: RidgeConsoleSession): void {
 }
 
 function playDance(session: RidgeConsoleSession): void {
-  walkTo(session, 0.14);
+  // The service road is shut before anyone explains the romance.
+  walkTo(session, 0.62);
+  expect(session.exec('go right 3').ok).toBe(false);
+
+  walkTo(session, 0.1);
   expect(session.exec('interact traveler').ok).toBe(true);
+  talk(session, 'relay', 'leave');
+
+  // Two left feet: he'd learn one step, but only behind the shelter.
+  walkTo(session, 0.22);
+  expect(session.exec('interact driver').ok).toBe(true);
+  talk(session, 'dance', 'learn');
+
+  // The Profe comes to him: the One-Step Practice.
+  walkTo(session, 0.35);
+  expect(session.exec('interact teacher').ok).toBe(true);
+  talk(session, 'lesson', 'go');
+  expect(session.observe().mode).toBe('bachataLesson');
+  expect(session.exec('go right').ok).toBe(false);
+  expect(session.exec('dance auto').ok).toBe(true);
+  expect(session.observe().bachataLesson?.grade).toBe('legendary');
+  const danced = session.exec('dance done');
+  expect(danced.events.some((event) => event.type === 'bachata_lesson_closed')).toBe(true);
+  expect(session.observe().conversation?.id).toBe('dance.lesson.done');
   drainConversation(session);
 
+  // Operations Handoff Check: everything's fine, so who keeps watch?
   walkTo(session, 0.56);
   expect(session.exec('interact operations').ok).toBe(true);
-  drainConversation(session);
-
-  walkTo(session, 0.4);
+  talk(session, 'help', 'tug', 'stamp', 'count', 'watch');
+  walkTo(session, 0.35);
   expect(session.exec('interact teacher').ok).toBe(true);
-  drainConversation(session);
+  talk(session, 'watch', 'leave');
+  walkTo(session, 0.56);
+  expect(session.exec('interact operations').ok).toBe(true);
+  talk(session, 'kept');
+
+  // The Folded Song Request: written at the shelter, dropped in her jar.
+  walkTo(session, 0.22);
+  expect(session.exec('interact driver').ok).toBe(true);
+  talk(session, 'write', 'simple');
+  expect(session.observe().inventory).toContain('folded-request');
+  walkTo(session, 0.56);
+  expect(session.exec('interact operations').ok).toBe(true);
+  talk(session, 'drop');
+  expect(session.observe().inventory).not.toContain('folded-request');
   expect(session.observe().beat).toBe('dance_ready');
 
-  // Nearest interact at the soft wall should prefer the gate over the steward.
-  walkTo(session, 0.68);
+  // Setup Clearance: three snaps at the gate, each visible as it lands.
+  walkTo(session, 0.66);
   expect(session.exec('interact').ok).toBe(true);
-  expect(session.observe().conversation?.id).toBe('dance.setup_clearance');
+  expect(session.observe().conversation?.id).toBe('dance.steward.clearance');
   drainConversation(session);
+  session.exec('choose lanterns');
+  drainConversation(session);
+  expect(session.observe().sceneryMarks).toContain('lanterns-tied');
+  talk(session, 'cables', 'sign');
   expect(session.observe().beat).toBe('dance_cleared');
+  expect(session.observe().sceneryMarks).toContain('sign-flipped');
 
-  walkTo(session, 0.9);
+  walkTo(session, 0.86);
   expect(session.exec('interact shuttle').ok).toBe(true);
-  drainConversation(session);
+  talk(session, 'board');
 }
 
 function playRelay(session: RidgeConsoleSession): RidgeSessionEvent[] {

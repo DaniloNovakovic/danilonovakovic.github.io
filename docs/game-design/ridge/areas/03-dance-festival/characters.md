@@ -83,6 +83,13 @@ with Cicka, such as a pale or white cat if Cicka reads dark, so that Micka's
 later half-and-half design feels quietly prepared. Do not name him, label him
 as Micka's father, or confirm parentage before the post-ending return.
 
+## Implemented Read (2026-11-17)
+
+- Dance Teacher: called "the Profe" by the plaza (a nickname; no proper name).
+- Unnamed Counterpart Cat: drawn with a dark ink coat, since the stick-art Cicka
+  reads pale; same silhouette, paper eyes. He faces Cicka when they loaf.
+- Driver and Operations Helper keep role labels only.
+
 ## Open Character Slots
 
 - silhouettes and movement style for each resident

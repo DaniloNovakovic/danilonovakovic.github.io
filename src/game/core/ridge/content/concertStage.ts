@@ -11,7 +11,7 @@ import type {
 } from '../types';
 import { RIDGE_GUITAR_ITEM } from '../types';
 import { CONCERT_PRACTICE_ASSISTED_FLAG, concertGradeFlag, GIG_GRADES } from '../concertGig';
-import { collectNearbyFromPlans, conversationKit, type CatalogLineSpec } from './dialogueHelpers';
+import { collectNearbyFromPlans, conversationKit, standBeside, type CatalogLineSpec } from './dialogueHelpers';
 
 /**
  * Stage layout on the progress line, left to right: the kafana curb where the
@@ -320,9 +320,6 @@ function resolveConcertActors(state: RidgeWorldState): RidgeActorPresence[] {
   ];
 }
 
-/** Gap kept between the player and whoever they talk to, so bodies never stack. */
-const TALK_GAP = 0.04;
-
 /** While talking with Steve or the kid, stand beside them rather than inside them. */
 function talkingSpot(state: RidgeWorldState, steveProgress: number): number {
   const id = state.mode === 'conversation' ? state.conversation?.id ?? '' : '';
@@ -331,8 +328,7 @@ function talkingSpot(state: RidgeWorldState, steveProgress: number): number {
     : id.startsWith('concert.kid')
       ? kidProgress(state)
       : null;
-  if (partner === null || Math.abs(state.progress - partner) >= TALK_GAP) return state.progress;
-  return partner + (state.progress >= partner ? TALK_GAP : -TALK_GAP);
+  return partner === null ? state.progress : standBeside(state.progress, partner);
 }
 
 function resolveConcertConversation(

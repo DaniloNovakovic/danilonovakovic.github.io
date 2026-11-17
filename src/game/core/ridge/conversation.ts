@@ -279,6 +279,10 @@ function applyOutcome(
     events.push({ type: 'concert_gig_opened', mode: outcome.openConcertGig });
   }
 
+  if (outcome.openBachataLesson) {
+    events.push({ type: 'bachata_lesson_opened' });
+  }
+
   return {
     state: {
       ...state,

@@ -110,6 +110,16 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
   Talk the skater kid round and he starts the crowd clapping. After the show
   Steve gives you his guitar at the corner, and the stage offers an encore.
   Console: `gig hit`, `gig wait`, `gig auto`, `gig done`.
+- Dance Festival (Last-Stop Plaza): the service gate to the Relay hill is shut
+  for tonight's bachata setup, and the last daylight shuttle waits on it. The
+  driver has two left feet; bring the Profe to him behind the shuttle shelter
+  and dance the bachata basic with him (`← ↓ →` or `A S D`: step left, hip
+  tap, step right; big buttons on touch). It never fails, and "Just count it
+  for him" plays it out. Run the Operations Helper's checklist, get the Profe
+  to keep watch tonight, then help the driver fold a song request into her jar.
+  Three last setup jobs at the gate open the road at sunset. Optional: play
+  Steve's guitar for the shy cat under the chair stacks. Console: `dance step`,
+  `dance left|tap|right`, `dance auto`, `dance done`.
 - Ridge first-playable secret route: Bridge → Concert → Dance Festival → Relay
   farewell (Sit and Play, dedication card), then return to the Overworld street.
   Progress resets so the next CRT entry starts Bridge again.

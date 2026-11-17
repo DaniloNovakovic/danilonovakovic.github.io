@@ -1,7 +1,7 @@
 // Each area authors three parallax bands; the branching is set-dressing data.
 // fallow-ignore-file complexity
 import type * as Phaser from 'phaser';
-import { BLUEPRINT_BRIDGE_PUZZLE, CONCERT_LAYOUT, type RidgeAreaId } from '@/game/core/ridge';
+import { BLUEPRINT_BRIDGE_PUZZLE, CONCERT_LAYOUT, DANCE_LAYOUT, type RidgeAreaId } from '@/game/core/ridge';
 import { GAME_DESIGN_HEIGHT, GAME_DESIGN_WIDTH } from '@/game/sharedSceneRuntime/designSize';
 import type { RidgeVisualViewModel } from '../types';
 import {
@@ -42,6 +42,8 @@ export type SceneryLayer = 'far' | 'near' | 'fore';
 
 export interface AreaSetContext {
   worldXForProgress: (progress: number) => number;
+  /** Set dressing the stage asked for (see RidgeStageDefinition.resolveSceneryMarks). */
+  marks: ReadonlySet<string>;
   /** Bridge river banks, in world X. */
   bridgeGap?: { left: number; right: number };
   /** The span the player drew, settled; replaces the authored crossing. */
@@ -58,7 +60,7 @@ export function drawRidgeAreaLayer(
 ): void {
   if (layer === 'far') {
     drawPaperBase(g, STAGE_WIDTH, HORIZON_Y);
-    drawFarBand(g, areaId);
+    drawFarBand(g, areaId, ctx.marks);
     return;
   }
   if (layer === 'fore') {
@@ -105,7 +107,11 @@ function farXForProgress(progress: number, offset = 0): number {
   return camHalf + (centre - camHalf) * LAYERS.far.scrollFactor + offset;
 }
 
-function drawFarBand(g: Phaser.GameObjects.Graphics, areaId: RidgeAreaId): void {
+function drawFarBand(g: Phaser.GameObjects.Graphics, areaId: RidgeAreaId, marks: ReadonlySet<string>): void {
+  if (areaId === 'danceFestival') {
+    drawDanceSky(g, marks);
+    return;
+  }
   if (areaId === 'concert') {
     // Night: the sky is the darkest thing behind the lane, not the trees.
     g.fillStyle(INK, 0.13);
@@ -154,6 +160,38 @@ function drawFarBand(g: Phaser.GameObjects.Graphics, areaId: RidgeAreaId): void 
     g.lineBetween(steeple, townY - 14, steeple, townY - 30);
     g.lineBetween(steeple - 3, townY - 26, steeple + 3, townY - 26);
   }
+}
+
+/**
+ * Last-Stop Plaza's sky moves from afternoon toward sunset as setup clears,
+ * and the Relay Spire stands small on the far crest: reachable, not yet.
+ */
+function drawDanceSky(g: Phaser.GameObjects.Graphics, marks: ReadonlySet<string>): void {
+  const sunset = marks.has('sky-sunset');
+  const late = sunset || marks.has('sky-late');
+  if (late) {
+    // Warm wash: a few long hatch strokes low in the sky, thicker at sunset.
+    g.lineStyle(1.4, INK, sunset ? 0.12 : 0.07);
+    for (let i = 0; i < (sunset ? 14 : 8); i += 1) {
+      const y = RIDGE_BASE_Y - 20 - i * 9;
+      g.lineBetween(0, y, STAGE_WIDTH, y - 6);
+    }
+  }
+  const sunX = farXForProgress(0.6, 110);
+  const sunY = sunset ? SKY_TOP + 132 : late ? SKY_TOP + 82 : SKY_TOP + 48;
+  drawSunOrMoon(g, sunX, sunY, sunset ? 30 : 26, sunset ? 'sunset' : 'sun');
+  drawRidges(g, 'danceFestival', 0.035, 0.065);
+  // The spire, tiny, on the far crest past the gate.
+  const spire = farXForProgress(0.85, 60);
+  const base = RIDGE_BASE_Y - 46;
+  g.lineStyle(1.6, INK, 0.45);
+  g.lineBetween(spire - 6, base, spire - 1, base - 34);
+  g.lineBetween(spire + 6, base, spire + 1, base - 34);
+  g.lineBetween(spire - 4, base - 10, spire + 4, base - 10);
+  g.lineBetween(spire - 2.5, base - 22, spire + 2.5, base - 22);
+  g.lineBetween(spire, base - 34, spire, base - 42);
+  g.fillStyle(INK, 0.45);
+  g.fillCircle(spire, base - 44, 2.2);
 }
 
 /** Two crests at different heights and tones: the cheapest read of distance. */
@@ -753,69 +791,327 @@ function drawExitSign(g: Phaser.GameObjects.Graphics, x: number): void {
   g.lineBetween(x - 22, GROUND_Y - 74, x + 18, GROUND_Y - 74);
 }
 
+/**
+ * Last-Stop Plaza: the shuttle shelter, the dance floor under a lantern line,
+ * lantern crates and chair stacks, the operations table, and the service
+ * gate with the hill road climbing away behind it. Set dressing changes as
+ * setup clears (the stage's scenery marks).
+ */
 function drawDanceNear(
   g: Phaser.GameObjects.Graphics,
   crossingOpen: boolean,
   ctx: AreaSetContext
 ): void {
-  // Bunting strung between poles, sagging between each pair.
-  g.lineStyle(1.9, INK, 0.45);
+  const at = (progress: number) => ctx.worldXForProgress(progress);
+  const marks = ctx.marks;
+
+  drawDanceBunting(g);
+  drawHillRoad(g, at(DANCE_LAYOUT.gate + 0.04));
+  drawShuttleShelter(g, at(DANCE_LAYOUT.shelter));
+  drawDanceFloor(g, at(DANCE_LAYOUT.floor - 0.06), at(DANCE_LAYOUT.floor + 0.065));
+  drawLanternLine(g, at(DANCE_LAYOUT.floor - 0.07), at(DANCE_LAYOUT.floor + 0.08), GROUND_Y - 150, 22, true);
+  drawLanternCrates(g, at(DANCE_LAYOUT.crates - 0.016));
+  drawChairStacks(g, at(DANCE_LAYOUT.chairs), marks.has('cat-hiding'));
+  drawOperationsTable(g, at(DANCE_LAYOUT.operations - 0.012), marks.has('request-in-jar'));
+
+  // The three setup snaps at the gate.
+  const tied = marks.has('lanterns-tied');
+  drawLanternLine(g, at(DANCE_LAYOUT.gate - 0.075), at(DANCE_LAYOUT.gate + 0.03), tied ? GROUND_Y - 150 : GROUND_Y - 112, tied ? 18 : 62, tied);
+  drawCableRun(g, at(DANCE_LAYOUT.gate - 0.06), at(DANCE_LAYOUT.gate - 0.01), marks.has('cables-ramped'));
+  drawServiceGate(g, at(DANCE_LAYOUT.gate), crossingOpen, marks.has('sign-flipped'));
+}
+
+function drawDanceBunting(g: Phaser.GameObjects.Graphics): void {
+  g.lineStyle(1.9, INK, 0.4);
   g.beginPath();
-  g.moveTo(90, GROUND_Y - 132);
-  for (let x = 90; x < STAGE_WIDTH - 80; x += 110) {
-    g.lineTo(x + 55, GROUND_Y - 112);
-    g.lineTo(x + 110, GROUND_Y - 132);
+  g.moveTo(40, GROUND_Y - 176);
+  for (let x = 40; x < STAGE_WIDTH - 60; x += 120) {
+    g.lineTo(x + 60, GROUND_Y - 160);
+    g.lineTo(x + 120, GROUND_Y - 176);
   }
   g.strokePath();
   g.fillStyle(PAPER_WARM, 0.9);
-  g.lineStyle(1.6, INK, 0.5);
-  for (let i = 0; i < 26; i += 1) {
-    const x = 110 + i * 55;
-    const sag = i % 2 === 0 ? 118 : 128;
-    g.fillTriangle(x - 9, GROUND_Y - sag, x + 9, GROUND_Y - sag, x, GROUND_Y - sag + 20);
-    g.strokeTriangle(x - 9, GROUND_Y - sag, x + 9, GROUND_Y - sag, x, GROUND_Y - sag + 20);
+  g.lineStyle(1.4, INK, 0.45);
+  for (let i = 0; i < 24; i += 1) {
+    const x = 70 + i * 60;
+    const sag = i % 2 === 0 ? 166 : 172;
+    g.fillTriangle(x - 8, GROUND_Y - sag, x + 8, GROUND_Y - sag, x, GROUND_Y - sag + 17);
+    g.strokeTriangle(x - 8, GROUND_Y - sag, x + 8, GROUND_Y - sag, x, GROUND_Y - sag + 17);
   }
+}
 
-  for (let i = 0; i < 6; i += 1) {
-    const x = 170 + i * 224;
-    g.lineStyle(2.4, INK, 0.8);
-    g.lineBetween(x, GROUND_Y, x, GROUND_Y - 134);
-    g.fillStyle(PAPER, 0.9);
-    g.fillRect(x - 9, GROUND_Y - 118, 18, 22);
-    g.strokeRect(x - 9, GROUND_Y - 118, 18, 22);
-    g.lineStyle(1.4, INK, 0.35);
-    g.lineBetween(x - 5, GROUND_Y - 112, x + 5, GROUND_Y - 102);
-  }
-
-  // Trodden dance circle.
-  const circle = ctx.worldXForProgress(0.4);
-  g.lineStyle(2, INK, 0.3);
-  g.strokeEllipse(circle, GROUND_Y - 16, 220, 52, 14);
-  g.lineStyle(1.4, INK, 0.16);
-  g.strokeEllipse(circle, GROUND_Y - 14, 170, 40, 12);
-
-  // Market stall.
-  const stall = ctx.worldXForProgress(0.24);
-  g.lineStyle(2.6, INK, 0.8);
-  g.fillStyle(PAPER_WARM, 0.9);
-  g.fillRect(stall - 54, GROUND_Y - 78, 108, 78);
-  g.strokeRect(stall - 54, GROUND_Y - 78, 108, 78);
+/** The service road leaves the plaza and climbs toward Relay. */
+function drawHillRoad(g: Phaser.GameObjects.Graphics, from: number): void {
+  g.lineStyle(2.6, INK, 0.55);
   g.beginPath();
-  g.moveTo(stall - 66, GROUND_Y - 78);
-  g.lineTo(stall, GROUND_Y - 104);
-  g.lineTo(stall + 66, GROUND_Y - 78);
+  g.moveTo(from, GROUND_Y - 2);
+  g.lineTo(from + 160, GROUND_Y - 8);
+  g.lineTo(STAGE_WIDTH, GROUND_Y - 70);
+  g.strokePath();
+  g.lineStyle(1.6, INK, 0.3);
+  g.beginPath();
+  g.moveTo(from, GROUND_Y - 14);
+  g.lineTo(from + 150, GROUND_Y - 22);
+  g.lineTo(STAGE_WIDTH, GROUND_Y - 92);
+  g.strokePath();
+}
+
+/** Bus shelter with a bench and the last-daylight timetable. */
+function drawShuttleShelter(g: Phaser.GameObjects.Graphics, x: number): void {
+  const left = x - 70;
+  const right = x + 70;
+  g.lineStyle(2.8, INK, 0.85);
+  g.lineBetween(left, GROUND_Y, left, GROUND_Y - 118);
+  g.lineBetween(right, GROUND_Y, right, GROUND_Y - 110);
+  g.fillStyle(PAPER_WARM, 1);
+  g.beginPath();
+  g.moveTo(left - 14, GROUND_Y - 120);
+  g.lineTo(right + 14, GROUND_Y - 108);
+  g.lineTo(right + 14, GROUND_Y - 100);
+  g.lineTo(left - 14, GROUND_Y - 112);
   g.closePath();
+  g.fillPath();
   g.strokePath();
-  drawHatch(g, stall - 52, GROUND_Y - 60, 104, 58, 12, 0.16, 0.7);
+  // Back pane, hatched glass.
+  g.lineStyle(1.6, INK, 0.45);
+  g.strokeRect(left + 6, GROUND_Y - 96, right - left - 12, 58);
+  drawHatch(g, left + 8, GROUND_Y - 94, right - left - 16, 54, 14, 0.1, 0.8);
+  // Bench.
+  g.lineStyle(2.4, INK, 0.75);
+  g.lineBetween(left + 14, GROUND_Y - 26, right - 14, GROUND_Y - 26);
+  g.lineBetween(left + 22, GROUND_Y - 26, left + 22, GROUND_Y);
+  g.lineBetween(right - 22, GROUND_Y - 26, right - 22, GROUND_Y);
+  // Timetable on a post: half a sun over a little bus.
+  const post = left - 30;
+  g.lineStyle(2.4, INK, 0.85);
+  g.lineBetween(post, GROUND_Y, post, GROUND_Y - 96);
+  g.fillStyle(PAPER, 1);
+  g.fillRect(post - 18, GROUND_Y - 132, 36, 36);
+  g.strokeRect(post - 18, GROUND_Y - 132, 36, 36);
+  g.lineStyle(1.6, INK, 0.8);
+  g.beginPath();
+  g.arc(post, GROUND_Y - 112, 8, Math.PI, 0, false);
+  g.strokePath();
+  g.lineBetween(post - 12, GROUND_Y - 112, post + 12, GROUND_Y - 112);
+  g.strokeRect(post - 9, GROUND_Y - 108, 18, 8);
+  g.fillStyle(INK, 1);
+  g.fillCircle(post - 5, GROUND_Y - 99, 1.8);
+  g.fillCircle(post + 5, GROUND_Y - 99, 1.8);
+}
 
-  const gate = ctx.worldXForProgress(0.68);
-  g.lineStyle(3.2, INK, crossingOpen ? 0.2 : 1);
-  g.strokeRect(gate - 38, GROUND_Y - 96, 76, 96);
-  if (crossingOpen) {
-    g.lineStyle(2, INK, 0.35);
-    g.lineBetween(gate + 38, GROUND_Y - 96, gate + 84, GROUND_Y - 42);
+/** A low wooden platform: tonight's floor, empty in the afternoon. */
+function drawDanceFloor(g: Phaser.GameObjects.Graphics, left: number, right: number): void {
+  const top = GROUND_Y - 12;
+  g.fillStyle(PAPER_WARM, 1);
+  g.lineStyle(2.4, INK, 0.75);
+  g.beginPath();
+  g.moveTo(left + 14, top);
+  g.lineTo(right - 14, top);
+  g.lineTo(right, GROUND_Y + 6);
+  g.lineTo(left, GROUND_Y + 6);
+  g.closePath();
+  g.fillPath();
+  g.strokePath();
+  g.lineStyle(1.2, INK, 0.3);
+  for (let x = left + 30; x < right - 10; x += 26) g.lineBetween(x, top + 1, x - 6, GROUND_Y + 5);
+  // A speaker stack at the floor's edge, where the cable run starts.
+  const speaker = right + 18;
+  g.fillStyle(PAPER, 1);
+  g.lineStyle(2.4, INK, 0.85);
+  g.fillRect(speaker - 16, GROUND_Y - 64, 32, 64);
+  g.strokeRect(speaker - 16, GROUND_Y - 64, 32, 64);
+  g.strokeCircle(speaker, GROUND_Y - 44, 9);
+  g.strokeCircle(speaker, GROUND_Y - 16, 6);
+}
+
+/** A string of paper lanterns between two poles. Lit ones get little rays. */
+function drawLanternLine(
+  g: Phaser.GameObjects.Graphics,
+  left: number,
+  right: number,
+  top: number,
+  sag: number,
+  lit: boolean
+): void {
+  g.lineStyle(2.4, INK, 0.8);
+  g.lineBetween(left, GROUND_Y, left, top - 6);
+  g.lineBetween(right, GROUND_Y, right, top - 6);
+  const steps = 8;
+  const point = (t: number) => ({ x: left + (right - left) * t, y: top + Math.sin(Math.PI * t) * sag });
+  g.lineStyle(1.4, INK, 0.6);
+  g.beginPath();
+  g.moveTo(left, top);
+  for (let i = 1; i <= 24; i += 1) {
+    const p = point(i / 24);
+    g.lineTo(p.x, p.y);
+  }
+  g.strokePath();
+  for (let i = 1; i < steps; i += 1) {
+    const p = point(i / steps);
+    g.fillStyle(PAPER, 1);
+    g.lineStyle(1.6, INK, 0.85);
+    g.fillRect(p.x - 5, p.y + 2, 10, 13);
+    g.strokeRect(p.x - 5, p.y + 2, 10, 13);
+    g.lineBetween(p.x - 5, p.y + 8, p.x + 5, p.y + 8);
+    if (lit) {
+      g.lineStyle(1.1, INK, 0.35);
+      g.lineBetween(p.x - 9, p.y + 9, p.x - 13, p.y + 9);
+      g.lineBetween(p.x + 9, p.y + 9, p.x + 13, p.y + 9);
+      g.lineBetween(p.x, p.y + 19, p.x, p.y + 23);
+    }
+  }
+}
+
+function drawLanternCrates(g: Phaser.GameObjects.Graphics, x: number): void {
+  g.fillStyle(PAPER_WARM, 1);
+  g.lineStyle(2.2, INK, 0.8);
+  for (const [dx, dy, w] of [
+    [-26, 0, 40],
+    [16, 0, 34],
+    [-12, 28, 36]
+  ] as const) {
+    const top = GROUND_Y - 28 - dy;
+    g.fillRect(x + dx - w / 2, top, w, 28);
+    g.strokeRect(x + dx - w / 2, top, w, 28);
+    g.lineStyle(1.2, INK, 0.4);
+    g.lineBetween(x + dx - w / 2, top + 10, x + dx + w / 2, top + 10);
+    g.lineStyle(2.2, INK, 0.8);
+  }
+}
+
+/** Twelve stacks of twelve; one leans, and something lives under it. */
+function drawChairStacks(g: Phaser.GameObjects.Graphics, x: number, catHiding: boolean): void {
+  for (let stack = 0; stack < 3; stack += 1) {
+    const sx = x - 34 + stack * 30;
+    const height = 70 + (stack % 2) * 14;
+    g.lineStyle(1.8, INK, 0.75);
+    for (let i = 0; i < 7; i += 1) {
+      const y = GROUND_Y - 30 - i * ((height - 30) / 7);
+      g.lineBetween(sx - 11, y, sx + 11, y - 2);
+    }
+    g.lineStyle(2.2, INK, 0.8);
+    g.lineBetween(sx - 11, GROUND_Y, sx - 9, GROUND_Y - height);
+    g.lineBetween(sx + 11, GROUND_Y, sx + 9, GROUND_Y - height);
+  }
+  if (!catHiding) return;
+  // The gap under the middle stack, and two eyes in it.
+  g.fillStyle(INK, 0.85);
+  g.fillEllipse(x - 4, GROUND_Y - 10, 30, 16);
+  g.fillStyle(PAPER, 1);
+  g.fillCircle(x - 10, GROUND_Y - 12, 2.6);
+  g.fillCircle(x, GROUND_Y - 12, 2.6);
+}
+
+/** Radio, checklist, and the SONG REQUESTS jar. */
+function drawOperationsTable(g: Phaser.GameObjects.Graphics, x: number, requestIn: boolean): void {
+  const top = GROUND_Y - 44;
+  g.fillStyle(PAPER_WARM, 1);
+  g.lineStyle(2.6, INK, 0.85);
+  g.fillRect(x - 46, top, 92, 8);
+  g.strokeRect(x - 46, top, 92, 8);
+  g.lineBetween(x - 38, top + 8, x - 42, GROUND_Y);
+  g.lineBetween(x + 38, top + 8, x + 42, GROUND_Y);
+  // Radio with its antenna.
+  g.fillStyle(PAPER, 1);
+  g.lineStyle(2, INK, 0.85);
+  g.fillRect(x - 38, top - 18, 18, 18);
+  g.strokeRect(x - 38, top - 18, 18, 18);
+  g.lineBetween(x - 24, top - 18, x - 20, top - 34);
+  g.strokeCircle(x - 32, top - 10, 3.5);
+  // Checklist.
+  g.strokeRect(x - 12, top - 4, 20, 4);
+  // The jar.
+  const jar = x + 26;
+  g.lineStyle(2, INK, 0.85);
+  g.strokeRect(jar - 9, top - 24, 18, 24);
+  g.lineBetween(jar - 11, top - 24, jar + 11, top - 24);
+  g.fillStyle(PAPER, 1);
+  for (const [dx, dy] of [
+    [-4, -6],
+    [3, -9],
+    [-1, -13]
+  ] as const) {
+    g.fillRect(jar + dx - 3, top + dy, 6, 4);
+    g.lineStyle(1, INK, 0.5);
+    g.strokeRect(jar + dx - 3, top + dy, 6, 4);
+  }
+  if (requestIn) {
+    // The folded corner of route sheet, on top of the pile.
+    g.fillStyle(PAPER, 1);
+    g.lineStyle(1.6, INK, 1);
+    g.fillTriangle(jar - 4, top - 18, jar + 5, top - 18, jar, top - 25);
+    g.strokeTriangle(jar - 4, top - 18, jar + 5, top - 18, jar, top - 25);
+  }
+}
+
+/** Loose cables across the lane, or tidied under a rubber ramp. */
+function drawCableRun(g: Phaser.GameObjects.Graphics, left: number, right: number, ramped: boolean): void {
+  if (ramped) {
+    g.fillStyle(PAPER_WARM, 1);
+    g.lineStyle(2.2, INK, 0.85);
+    g.beginPath();
+    g.moveTo(left, GROUND_Y + 4);
+    g.lineTo(left + 16, GROUND_Y - 4);
+    g.lineTo(right - 16, GROUND_Y - 4);
+    g.lineTo(right, GROUND_Y + 4);
+    g.closePath();
+    g.fillPath();
+    g.strokePath();
+    g.lineStyle(1.2, INK, 0.4);
+    for (let x = left + 20; x < right - 16; x += 10) g.lineBetween(x, GROUND_Y - 3, x - 3, GROUND_Y + 3);
+    return;
+  }
+  g.lineStyle(2.2, INK, 0.75);
+  for (let k = 0; k < 3; k += 1) {
+    g.beginPath();
+    for (let i = 0; i <= 20; i += 1) {
+      const t = i / 20;
+      const x = left - 30 + (right - left + 40) * t;
+      const y = GROUND_Y + 2 + Math.sin(t * Math.PI * (3 + k) + k) * 4 + k * 2;
+      if (i === 0) g.moveTo(x, y);
+      else g.lineTo(x, y);
+    }
+    g.strokePath();
+  }
+}
+
+/** Barrier gate with its sign: SETUP · CLOSED (a cross) or LAST DAYLIGHT RIDE (sun and bus). */
+function drawServiceGate(g: Phaser.GameObjects.Graphics, x: number, open: boolean, flipped: boolean): void {
+  g.lineStyle(3, INK, 0.9);
+  g.lineBetween(x - 40, GROUND_Y, x - 40, GROUND_Y - 70);
+  g.fillStyle(PAPER, 1);
+  g.fillCircle(x - 40, GROUND_Y - 74, 5);
+  g.strokeCircle(x - 40, GROUND_Y - 74, 5);
+  if (open) {
+    // The boom swung up and out of the lane.
+    g.lineStyle(5, INK, 0.85);
+    g.lineBetween(x - 40, GROUND_Y - 74, x - 8, GROUND_Y - 150);
   } else {
-    drawHatch(g, gate - 36, GROUND_Y - 94, 72, 92, 11, 0.18, 0.8);
+    g.lineStyle(7, INK, 0.9);
+    g.lineBetween(x - 40, GROUND_Y - 60, x + 44, GROUND_Y - 60);
+    g.lineStyle(5, PAPER, 1);
+    for (let i = 0; i < 4; i += 1) g.lineBetween(x - 30 + i * 20, GROUND_Y - 60, x - 22 + i * 20, GROUND_Y - 60);
+    g.lineStyle(2.4, INK, 0.8);
+    g.lineBetween(x + 44, GROUND_Y - 60, x + 44, GROUND_Y);
+  }
+  // The sign, hung on its own post.
+  const sx = x - 62;
+  g.lineStyle(2.4, INK, 0.85);
+  g.lineBetween(sx, GROUND_Y, sx, GROUND_Y - 84);
+  g.fillStyle(PAPER, 1);
+  g.fillRect(sx - 20, GROUND_Y - 120, 40, 36);
+  g.strokeRect(sx - 20, GROUND_Y - 120, 40, 36);
+  g.lineStyle(2, INK, 0.85);
+  if (flipped) {
+    g.beginPath();
+    g.arc(sx, GROUND_Y - 100, 9, Math.PI, 0, false);
+    g.strokePath();
+    g.lineBetween(sx - 14, GROUND_Y - 100, sx + 14, GROUND_Y - 100);
+    g.strokeRect(sx - 10, GROUND_Y - 97, 20, 8);
+    for (const dx of [-12, -6, 0, 6, 12]) g.lineBetween(sx + dx, GROUND_Y - 112, sx + dx * 1.3, GROUND_Y - 116);
+  } else {
+    g.lineBetween(sx - 10, GROUND_Y - 112, sx + 10, GROUND_Y - 92);
+    g.lineBetween(sx + 10, GROUND_Y - 112, sx - 10, GROUND_Y - 92);
   }
 }
 
