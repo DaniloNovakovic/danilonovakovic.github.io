@@ -39,7 +39,7 @@ const HELP_TEXT = [
   '  dance step           dance the next step exactly on the count',
   '  dance left|tap|right step that way right now (tap: the hip on four)',
   '  dance wait [ms]      let the count go on (default: up to the next step)',
-  '  dance auto | skip    dance the rest cleanly | just count it for him',
+  '  dance auto | dance skip  dance the rest cleanly | just count it for him',
   '  dance done           hear how the driver feels once the eight is over',
   '',
   'Playtest skips:',
