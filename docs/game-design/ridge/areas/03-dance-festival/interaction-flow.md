@@ -88,8 +88,8 @@ preserving their dignity.
   he can offer later.
 
 After both romantic characters are ready, the connector is **Folded Song
-Request**. The driver writes a tiny folded paper request at the operations
-table, requesting a simple, cute song and asking her for one dance later without
+Request**. The driver writes a tiny folded paper request at the shuttle
+shelter, and the player drops it in her jar. It requests a simple, cute song and asking her for one dance later without
 making a public confession. The festival is a bachata night (Danilo,
 2026-11-17), and the One-Step Practice teaches the bachata basic, but the
 request itself stays a simple "something slow": playable on guitar, simple

@@ -528,15 +528,20 @@ function resolveDanceConversation(
               ['03', 'hillShuttleDriver', 'surprised']
             ])
           ),
-          choice(
-            'dance',
-            [
-              ['01', 'hillShuttleDriver', 'playful'],
-              ['02', 'prompt'],
-              ['03', 'hillShuttleDriver', 'thoughtful']
-            ],
-            { choices: [learn, tease, drop] }
-          ),
+          // The romance surfaces only once you've asked why the shuttle waits.
+          ...(askedTopic('driver', 'when')
+            ? [
+                choice(
+                  'dance',
+                  [
+                    ['01', 'hillShuttleDriver', 'playful'],
+                    ['02', 'prompt'],
+                    ['03', 'hillShuttleDriver', 'thoughtful']
+                  ],
+                  { choices: [learn, tease, drop] }
+                )
+              ]
+            : []),
           choice('leave', [['01', 'hillShuttleDriver']])
         ],
         outcome: first ? { setFlag: FLAG_MET_DRIVER } : undefined

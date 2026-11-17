@@ -82,7 +82,7 @@ export function conversationKit<Speaker extends string>(
 const TALK_GAP = 0.04;
 
 /** While talking, stand beside your partner rather than inside them. */
-export function standBeside(playerProgress: number, partnerProgress: number, gap = TALK_GAP): number {
-  if (Math.abs(playerProgress - partnerProgress) >= gap) return playerProgress;
-  return partnerProgress + (playerProgress >= partnerProgress ? gap : -gap);
+export function standBeside(playerProgress: number, partnerProgress: number): number {
+  if (Math.abs(playerProgress - partnerProgress) >= TALK_GAP) return playerProgress;
+  return partnerProgress + (playerProgress >= partnerProgress ? TALK_GAP : -TALK_GAP);
 }

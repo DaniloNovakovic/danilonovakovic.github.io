@@ -14,6 +14,9 @@ shape.
 
 ## Planned Conversation Sets
 
+Pre-implementation plan, kept for history. The shipped IDs in
+"Implemented Conversation IDs" below supersede these.
+
 - `dance.traveler.relay_wayfinding`: practical first read that Relay requires
   the last daylight hill shuttle.
 - `dance.driver.shuttle_delay`: driver explains the setup/lane blocker without

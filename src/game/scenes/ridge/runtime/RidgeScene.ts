@@ -189,7 +189,7 @@ export class RidgeScene extends Phaser.Scene {
     this.input.keyboard?.on(Phaser.Input.Keyboard.Events.ANY_KEY_DOWN, (event: KeyboardEvent) => {
       const lane = GIG_LANE_KEYS[event.key.toLowerCase()];
       if (lane === undefined || event.repeat || this.isPaused) return;
-      if (this.session?.observe().mode === 'bachataLesson') this.stepLesson(lane, event.timeStamp);
+      if (this.session?.bachataLesson) this.stepLesson(lane, event.timeStamp);
       else this.strumGig(lane, event.timeStamp);
     });
 
@@ -555,7 +555,7 @@ export class RidgeScene extends Phaser.Scene {
     const lessonFrame = this.stageLesson(view);
     this.visuals.sync(view);
     // After the camera moved: the highway and step strip pin themselves to this frame's zoom.
-    this.syncGigView(gigFrame);
+    this.syncGigView(gigFrame, observation);
     this.syncLessonView(lessonFrame, observation);
     this.syncSceneUiPanel(observation);
 
@@ -602,21 +602,21 @@ export class RidgeScene extends Phaser.Scene {
     return frame;
   }
 
-  private syncGigView(frame: GigFrame | null): void {
+  private syncGigView(frame: GigFrame | null, observation: RidgeObservation): void {
     const gig = this.session?.concertGig;
     if (!gig || !frame || !this.visuals) {
       this.gigView?.destroy();
       this.gigView = undefined;
       return;
     }
-    const actors = this.session!.observe().actors;
+    const { actors } = observation;
     const xOf = (id: RidgeActorId) =>
       this.visuals!.worldXForProgress(actors.find((actor) => actor.id === id)?.progress ?? 0);
     this.gigView ??= new ConcertGigView(this);
     this.gigView.sync(gig, frame, {
       performerX: xOf('player'),
       crowdX: xOf('crowd'),
-      onStage: this.session!.observe().areaId === 'concert'
+      onStage: observation.areaId === 'concert'
     });
   }
 

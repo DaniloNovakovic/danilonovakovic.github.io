@@ -20,6 +20,7 @@ import {
   GIG_GRADES,
   playNextNotePerfectly,
   serenadeGradeFlag,
+  type GigGrade,
   type GigLane,
   type GigMode,
   type GigStrumResult
@@ -682,17 +683,13 @@ export class RidgeConsoleSession {
     let beat = this.state.beat;
 
     if (gig.mode === 'serenade') {
-      for (const grade of GIG_GRADES) flags.delete(serenadeGradeFlag(grade));
-      flags.add(serenadeGradeFlag(gig.grade));
-      events.push({ type: 'flag_changed', flag: serenadeGradeFlag(gig.grade), present: true });
+      events.push(replaceGradeFlag(flags, serenadeGradeFlag, gig.grade));
     } else if (gig.mode === 'practice') {
       if (gig.passed) flags.delete(CONCERT_PRACTICE_ASSISTED_FLAG);
       else flags.add(CONCERT_PRACTICE_ASSISTED_FLAG);
       if (beat === 'concert_arrival') beat = 'concert_practiced';
     } else {
-      for (const grade of GIG_GRADES) flags.delete(concertGradeFlag(grade));
-      flags.add(concertGradeFlag(gig.grade));
-      events.push({ type: 'flag_changed', flag: concertGradeFlag(gig.grade), present: true });
+      events.push(replaceGradeFlag(flags, concertGradeFlag, gig.grade));
       beat = 'concert_cleared';
     }
     if (beat !== this.state.beat) events.push({ type: 'beat_changed', beat });
@@ -743,11 +740,9 @@ export class RidgeConsoleSession {
     const dancer = this.stage.resolveActors(this.state).find((actor) => actor.id === 'player');
     this.lesson = null;
     const flags = new Set(this.state.flags);
-    for (const grade of GIG_GRADES) flags.delete(danceGradeFlag(grade));
-    flags.add(danceGradeFlag(lesson.grade));
     const events: RidgeSessionEvent[] = [
       { type: 'bachata_lesson_closed', grade: lesson.grade },
-      { type: 'flag_changed', flag: danceGradeFlag(lesson.grade), present: true }
+      replaceGradeFlag(flags, danceGradeFlag, lesson.grade)
     ];
     this.state = { ...this.state, mode: 'explore', flags, progress: dancer?.progress ?? this.state.progress };
 
@@ -895,4 +890,15 @@ function clamp01(value: number): number {
   if (value < 0) return 0;
   if (value > 1) return 1;
   return value;
+}
+
+/** Keep exactly one grade flag of a family set, and report the one now held. */
+function replaceGradeFlag(
+  flags: Set<string>,
+  flagOf: (grade: GigGrade) => string,
+  grade: GigGrade
+): RidgeSessionEvent {
+  for (const each of GIG_GRADES) flags.delete(flagOf(each));
+  flags.add(flagOf(grade));
+  return { type: 'flag_changed', flag: flagOf(grade), present: true };
 }

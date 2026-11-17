@@ -30,6 +30,8 @@ judge (pure, clock-free, never fails); see
 - Never fails. "Just count it for him" plays the rest out (unplayed steps count
   as missed) and he still gets his step; "Step away" leaves without it. The
   grade (`dance_grade_*`) picks the Profe's and driver's reactions.
+- The first-ending path needs no rhythm skill: starting the lesson is required
+  (it is how the driver gets his step), but the skip button satisfies it.
 - Presentation: a paper step strip pinned above the panel (steps slide toward
   the mark with the count under each), the Profe's call shown big over it, the
   camera framing the three dancers; foreground grass fades out of the way.

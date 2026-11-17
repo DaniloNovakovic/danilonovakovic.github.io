@@ -240,9 +240,24 @@ describe('Last-Stop Plaza', () => {
     expect(parseRidgeCommand('dance skip')).toEqual({ type: 'dance', action: { kind: 'skip' } });
   });
 
+  it('keeps the dance talk quiet until you ask why the shuttle waits', () => {
+    const session = danceSession();
+    walkTo(session, 0.22);
+    session.exec('interact driver');
+    drainConversation(session);
+    const ids = () => session.observe().conversation?.choices?.map((option) => option.id) ?? [];
+    expect(ids()).not.toContain('dance');
+    talk(session, 'when', 'leave');
+    session.exec('interact driver');
+    drainConversation(session);
+    expect(ids()).toContain('dance');
+  });
+
   it('still counts the driver in when you just let the lesson play', () => {
     const session = danceSession();
     walkTo(session, 0.22);
+    session.exec('interact driver');
+    talk(session, 'when', 'leave');
     session.exec('interact driver');
     talk(session, 'dance', 'learn');
     walkTo(session, 0.35);
@@ -261,6 +276,8 @@ describe('Last-Stop Plaza', () => {
   it('steadies the driver when you encouraged him first', () => {
     const session = danceSession();
     walkTo(session, 0.22);
+    session.exec('interact driver');
+    talk(session, 'when', 'leave');
     session.exec('interact driver');
     talk(session, 'dance', 'learn');
     session.exec('interact driver');
@@ -499,6 +516,8 @@ function playDance(session: RidgeConsoleSession): void {
   // Two left feet: he'd learn one step, but only behind the shelter.
   walkTo(session, 0.22);
   expect(session.exec('interact driver').ok).toBe(true);
+  talk(session, 'when', 'leave');
+  session.exec('interact driver');
   talk(session, 'dance', 'learn');
 
   // The Profe comes to him: the One-Step Practice.
