@@ -22,6 +22,7 @@ import {
   POTASSIUM_DATA_KEYS,
   setPotassiumData
 } from './phaserData';
+import type { PotassiumWallSide } from './wallSuds';
 
 export type PotassiumTerminalAction = 'retry' | 'return' | 'endless';
 
@@ -90,6 +91,14 @@ export interface PotassiumEnemyAttachmentConfig {
   hp: number;
   shieldSide?: PotassiumShieldSide;
 }
+
+/** Unit vectors pointing from each arena wall into the arena. */
+const WALL_NORMALS: Record<PotassiumWallSide, PotassiumRendererPoint> = {
+  left: { x: 1, y: 0 },
+  right: { x: -1, y: 0 },
+  up: { x: 0, y: 1 },
+  down: { x: 0, y: -1 }
+};
 
 export class PotassiumSlipRenderer {
   private readonly scene: Phaser.Scene;
@@ -237,6 +246,66 @@ export class PotassiumSlipRenderer {
       duration: 240,
       onComplete: () => blast.destroy()
     });
+  }
+
+  /**
+   * Dishwasher suds where the sponge smacks an arena wall: a fading wet streak
+   * on the wall plus a few soap bubbles that drift into the arena and pop.
+   * Visual only; never touches physics bodies.
+   */
+  showWallSuds(x: number, y: number, side: PotassiumWallSide): void {
+    const normal = WALL_NORMALS[side];
+    const alongX = normal.y !== 0 ? 1 : 0;
+    const alongY = normal.x !== 0 ? 1 : 0;
+
+    const streak = this.scene.add.graphics().setDepth(5);
+    streak.lineStyle(10, 0xbae6fd, 0.75);
+    streak.beginPath();
+    streak.moveTo(x - alongX * 30, y - alongY * 30);
+    streak.lineTo(x + alongX * 30, y + alongY * 30);
+    streak.strokePath();
+    streak.lineStyle(3, 0xffffff, 0.9);
+    streak.beginPath();
+    streak.moveTo(x - alongX * 18 + normal.x * 2, y - alongY * 18 + normal.y * 2);
+    streak.lineTo(x + alongX * 10 + normal.x * 2, y + alongY * 10 + normal.y * 2);
+    streak.strokePath();
+    this.scene.tweens.add({
+      targets: streak,
+      alpha: 0,
+      duration: 900,
+      ease: 'Sine.easeIn',
+      onComplete: () => streak.destroy()
+    });
+
+    for (let index = 0; index < 7; index += 1) {
+      const spread = Phaser.Math.Between(-24, 24);
+      const radius = Phaser.Math.Between(5, 11);
+      const bubble = this.scene.add.circle(
+        x + alongX * spread + normal.x * 6,
+        y + alongY * spread + normal.y * 6,
+        radius,
+        0xf0f9ff,
+        0.92
+      ).setStrokeStyle(2, 0x1a1a1a, 0.7).setDepth(95).setScale(0.4);
+      const drift = Phaser.Math.Between(22, 52);
+      this.scene.tweens.add({
+        targets: bubble,
+        x: bubble.x + normal.x * drift + alongX * spread * 0.4,
+        y: bubble.y + normal.y * drift + alongY * spread * 0.4 - Phaser.Math.Between(6, 18),
+        scale: 1,
+        duration: Phaser.Math.Between(320, 520),
+        ease: 'Sine.easeOut',
+        onComplete: () => {
+          this.scene.tweens.add({
+            targets: bubble,
+            scale: 1.35,
+            alpha: 0,
+            duration: 90,
+            onComplete: () => bubble.destroy()
+          });
+        }
+      });
+    }
   }
 
   animateEnemyDeath(
@@ -525,7 +594,7 @@ export class PotassiumSlipRenderer {
     const isMain = options.isMain ?? false;
     const isClone = options.isClone ?? !isMain;
     const isRecall = options.isRecall ?? false;
-    projectile.setTexture(getSkillRank(skillRanks, 'poison') > 0 ? 'banana_peel_green' : 'banana_peel_yellow');
+    projectile.setTexture(getSkillRank(skillRanks, 'poison') > 0 ? 'potassium_sponge_poison' : 'potassium_sponge');
     projectile.clearTint();
     projectile.setAlpha(isClone ? 0.82 : isRecall ? 0.68 : 1);
     this.destroyProjectileVisuals(projectile);

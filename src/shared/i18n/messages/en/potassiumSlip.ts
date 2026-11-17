@@ -1,7 +1,7 @@
 export const potassiumSlipMessages = {
   title: "POTASSIUM SLIP",
-  instructions: "DRAG TOWARD A TARGET. RELEASE BANANA.\nHOLD ANYWHERE TO YO-YO IT HOME.\nCLEAR THE DUMPSTER. WIN BACK THE CIRCUIT.",
-  chooseUpgrade: "CHOOSE BANANA NONSENSE",
+  instructions: "DRAG TOWARD A TARGET. RELEASE SPONGE.\nHOLD ANYWHERE TO YO-YO IT HOME.\nCLEAR THE DUMPSTER. WIN BACK THE CIRCUIT.",
+  chooseUpgrade: "CHOOSE SPONGE NONSENSE",
   finalScore: (score: number) => `Final Score: ${score}`,
   hud: {
     score: (score: number) => `Score ${score}`,
@@ -15,14 +15,14 @@ export const potassiumSlipMessages = {
     bossPhase3: "Boss phase 3 • He hides in the bin and whistles for backup",
     bossWave: "Boss wave • Sir Rummage wants to keep the Circuit",
     wave: (title: string, hint: string) => `${title}: ${hint}`,
-    waveClear: "Wave clear • Choose fresh banana nonsense",
+    waveClear: "Wave clear • Choose fresh sponge nonsense",
     devSkip: "Dev skip • Choose a test upgrade",
     genericStacked: (label: string) => `${label} stacked • The whole dumpster trembles`,
     skillApplied: (label: string, action: "unlocked" | "upgraded") => `${label} ${action} • It stacks forever`,
   },
   outcomes: {
     won: "CIRCUIT ACQUIRED",
-    gameOver: "BANANA BANKRUPTCY",
+    gameOver: "SPONGE SQUEEZED OUT",
   },
   terminal: {
     endlessMode: "ENDLESS MODE",
@@ -31,7 +31,7 @@ export const potassiumSlipMessages = {
   },
   leaderboard: {
     title: "RECORDS",
-    empty: "No banana runs on record yet.",
+    empty: "No sponge runs on record yet.",
     modeLabel: (mode: "campaign" | "endless", outcome: "won" | "game_over") => mode === "endless" ? "endless" : outcome,
     recordLine: (rank: number, score: number, wave: number, modeLabel: string) => `${rank}. ${score} • W${wave} • ${modeLabel}`,
   },
@@ -51,7 +51,7 @@ export const potassiumSlipMessages = {
     generic: {
       damage: {
         label: "Damage +",
-        description: "+12% banana and beam damage.",
+        description: "+12% sponge and beam damage.",
       },
       poison: {
         label: "Poison +",
@@ -66,7 +66,7 @@ export const potassiumSlipMessages = {
         description: "+300ms clone lifetime.",
       },
       bananaSpeed: {
-        label: "Banana Speed +",
+        label: "Sponge Speed +",
         description: "+5% launch speed.",
       },
       bonusLife: {
@@ -77,8 +77,8 @@ export const potassiumSlipMessages = {
     skills: {
       fire: {
         label: "Fire Trail",
-        description: "Moving bananas leave hot nonsense.",
-        unlockDescription: "Moving bananas leave fire.",
+        description: "Moving sponges leave hot nonsense.",
+        unlockDescription: "Moving sponges leave fire.",
         upgradeDescription: "Hits drop extra fire patches.",
       },
       poison: {
@@ -95,8 +95,8 @@ export const potassiumSlipMessages = {
       },
       duplicate: {
         label: "Duplicate",
-        description: "Main hits spawn two tiny bananas.",
-        unlockDescription: "Main hits spawn 2 small bananas.",
+        description: "Main hits spawn two tiny sponges.",
+        unlockDescription: "Main hits spawn 2 small sponges.",
         upgradeDescription: "Clones apply half-strength procs and spawn +1.",
       },
       ghostHorizontal: {
@@ -130,7 +130,7 @@ export const potassiumSlipMessages = {
     trashBags: "trash bags burst into dust bunnies",
     stackChoices: "stack your choices",
     shieldPlates: "pigeon lids clang off bad angles",
-    hardWalls: "cinder blocks do not care about bananas",
+    hardWalls: "cinder blocks do not care about sponges",
     bossTime: "the raccoon is home",
   },
 } as const;

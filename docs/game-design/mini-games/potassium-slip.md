@@ -4,7 +4,7 @@
 
 ## Overview
 
-**Potassium Slip** is the first secret mini-game: a tall banana ricochet arena and affectionate **Ball x Pit homage** set inside a street dumpster. The player launches one main banana, recalls it yo-yo style, bounces it through falling junk, drafts stackable upgrades, defeats **Sir Rummage** (the raccoon who stole the street CRT's Circuit), and wins the **Circuit** back.
+**Potassium Slip** is the first secret mini-game: a tall sponge ricochet arena and affectionate **Ball x Pit homage** set inside a street dumpster. A banana peel on the street is the way in; inside, the player launches one main sponge, recalls it yo-yo style, bounces it through falling junk, drafts stackable upgrades, defeats **Sir Rummage** (the raccoon who stole the street CRT's Circuit), and wins the **Circuit** back.
 
 ## Goal
 
@@ -12,9 +12,9 @@ Clear 10 procedural campaign waves, defeat the boss on wave 11, and collect the 
 
 ## Controls
 
-- **Launch:** Click/touch near the banana, drag toward the target, and release.
-- **Recall:** Hold anywhere while the banana is flying to pull it back toward the launch pad.
-- **Relaunch:** Keep holding as the banana reaches the launch pad, aim, and release again.
+- **Launch:** Click/touch near the sponge, drag toward the target, and release.
+- **Recall:** Hold anywhere while the sponge is flying to pull it back toward the launch pad.
+- **Relaunch:** Keep holding as the sponge reaches the launch pad, aim, and release again.
 - **Retry:** Press `R` or choose `Retry` after game over.
 - **Return:** Press `E` or choose `Return to City` after a run ends, or use the header Back button at any time. `Esc` does nothing, so a stray press cannot end a run.
 - **Endless:** Press `Space` or choose `Endless Mode` after winning.
@@ -22,7 +22,7 @@ Clear 10 procedural campaign waves, defeat the boss on wave 11, and collect the 
 ## Core Loop
 
 - Enemies and wall blockers spawn in 5-column rows and fall straight down. Trash Bags reserve two adjacent columns.
-- The banana bounces off arena walls and ricochets off enemies.
+- The sponge bounces off arena walls and ricochets off enemies. Each fast wall hit leaves a little dishwasher splash: a wet streak on the wall and a few soap bubbles that pop (visual only, throttled, skipped while recalling).
 - Regular enemies cost lives if they reach the bottom. Pizza Boxes and Cinder Blocks do not hurt the player. The boss instantly ends the run if it reaches the bottom.
 - The player starts with 5 lives.
 - After each cleared non-boss wave, the player chooses one of two upgrade drafts.
@@ -67,17 +67,22 @@ The chain should read without explanation:
 1. The street CRT is dark because its Circuit is missing.
 2. Raccoons hoard shiny junk; Sir Rummage pried the Circuit out and dragged it
    home.
-3. The banana peel is the one piece of trash that fights back. Everything else
-   in the dumpster is the raccoon's hoard and defends it.
+3. In the dumpster Danilo grabs a smiling kitchen sponge, the one clean thing
+   in there, and starts bouncing it. Everything else in the dumpster is the
+   raccoon's hoard and defends it.
 4. Beating Sir Rummage wins the Circuit back, and the Circuit boots the CRT.
+
+The banana peel only gets Danilo in (it is still the overworld secret and the
+reason for the name "Potassium Slip"); the sponge is the thing he throws.
 
 The campaign reward stays the **Circuit**. Potassium remains optional side
 progress unless the route canon explicitly makes it part of a later alternate
 path.
 
 The thematic thread under the joke is unchanged: the playful thing is what
-gets the useful thing back. Danilo does not clean the dumpster or tidy anything
-up; he bounces a banana around until the hoard gives up its treasure.
+gets the useful thing back. The sponge is a bouncy toy first and a cleaning
+tool second: Danilo is not tidying the dumpster, he is ricocheting a smiling
+sponge around until the hoard gives up its treasure.
 
 On return to the street or the Ridge, Potassium should leave a visible memory
 rather than only an inventory flag. Good first candidates are:
@@ -97,7 +102,9 @@ reads as disgusting rather than funny.
 
 Runtime enemy kind ids (`intern`, `scope`, `deadline`, `wall`, `hardWall`,
 `splitter`, `shield`, `boss`) are historical and stay unchanged; only the
-player-facing names and art changed.
+player-facing names and art changed. Likewise the runtime still calls the
+thrown sponge `banana` (`this.banana`, `bananaSpeed`, `BananaVisuals`); the
+textures are `potassium_sponge` and `potassium_sponge_poison`.
 
 - **Dust Bunny** (`intern`): tiny fluffball that goes poof. Easy to clear, but
   it makes the first rows feel alive.
@@ -108,7 +115,7 @@ player-facing names and art changed.
 - **Pizza Box** (`wall`): high-HP one-cell destructible blocker that forces
   ricochet angles. Damage shows cracks and tears, not bandages.
 - **Cinder Block** (`hardWall`): indestructible one-cell blocker introduced
-  later. It never costs lives; it just does not care about bananas.
+  later. It never costs lives; it just does not care about sponges.
 - **Trash Bag** (`splitter`): two-column tied bag that bursts into two Dust
   Bunnies on death, one from each occupied lane.
 - **Lid Pigeon** (`shield`): a pigeon holding a trash-can lid. The lid is the
@@ -131,7 +138,7 @@ Useful sprite motifs:
   than gore, mess, or heavy facial distress
 - Sir Rummage visibly holding the Circuit so the reward is obviously tied to
   the final encounter
-- banana upgrade effects staying joyful and bright enough to contrast the gray
+- sponge upgrade effects staying joyful and bright enough to contrast the gray
   and brown junk without breaking the sketchbook style
 
 ## Boss Fight
@@ -149,16 +156,16 @@ Sir Rummage is intentionally more of a fight than a falling target:
 The boss is tankier than normal enemies so stacked upgrades have room to shine without instantly ending the encounter.
 
 Future polish candidate: on defeat, Sir Rummage fumbles the Circuit, it bounces
-off the banana, and Danilo catches it.
+off the sponge, and Danilo catches it.
 
 ## Skill Drafts
 
 Each main skill has two ranks: unlock and `+`. Skills stack permanently for the current run.
 
-- **Fire Trail:** Moving bananas leave fire. `Fire Trail +` makes hits drop fire patches.
+- **Fire Trail:** Moving sponges leave fire. `Fire Trail +` makes hits drop fire patches.
 - **Poison Damage:** Hits poison enemies over time. `Poison Damage +` makes poisoned enemies spread poison on death.
 - **Explosion Damage:** Hits explode with falloff damage. `Explosion Damage +` makes bigger blasts apply statuses.
-- **Duplicate:** Main hits spawn small bananas. `Duplicate +` adds one clone and lets clones apply half-strength procs.
+- **Duplicate:** Main hits spawn small sponges. `Duplicate +` adds one clone and lets clones apply half-strength procs.
 - **Horizontal Ghost:** Hits fire a blue row beam. `Horizontal Ghost +` makes row beams apply statuses.
 - **Vertical Ghost:** Hits fire a blue column beam. `Vertical Ghost +` makes column beams apply statuses.
 
@@ -168,16 +175,16 @@ When all six skills are fully upgraded, drafts switch to repeatable generic upgr
 - **Poison +**
 - **Explosion +**
 - **Clone Time +**
-- **Banana Speed +**
+- **Sponge Speed +**
 - **Bonus Life**
 
 ## Presentation
 
 Potassium uses a dedicated `vertical-board` presentation. Phaser still runs at the fixed global design resolution, but the React shell frames a tall portrait board and the playable arena uses the central vertical slice directly. The contextual hint lives below the board like the overworld status panel.
 
-The HUD intentionally stays compact: wave, score, and lives only. Active upgrades are communicated through stacked banana visuals instead of a long text list:
+The HUD intentionally stays compact: wave, score, and lives only. Active upgrades are communicated through stacked sponge visuals instead of a long text list:
 
-- Poison turns the banana green.
+- Poison turns the sponge green and sudsy.
 - Fire adds a warm aura.
 - Explosion adds a red/orange spark.
 - Duplicate adds yellow echo marks.
@@ -186,4 +193,4 @@ The HUD intentionally stays compact: wave, score, and lives only. Active upgrade
 
 ## Current Experimental Feel
 
-The yo-yo recall uses a direct pull-back model: holding recall pulls the banana toward the launch pad and slightly reduces its bounce so it does not chatter against the bottom wall. Releasing recall returns the banana to normal bounce physics.
+The yo-yo recall uses a direct pull-back model: holding recall pulls the sponge toward the launch pad and slightly reduces its bounce so it does not chatter against the bottom wall. Releasing recall returns the sponge to normal bounce physics.

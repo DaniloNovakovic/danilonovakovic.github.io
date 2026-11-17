@@ -51,7 +51,7 @@ describe('potassium slip leaderboard', () => {
 
   it('formats terminal records text for empty and populated leaderboards', () => {
     const storage = new MemoryStorage();
-    expect(getPotassiumLeaderboardOverlayText(3, storage)).toBe('RECORDS\nNo banana runs on record yet.');
+    expect(getPotassiumLeaderboardOverlayText(3, storage)).toBe('RECORDS\nNo sponge runs on record yet.');
 
     const records = [
       makeRecord(80, 0, { mode: 'endless', outcome: 'game_over', wave: 14 }),

@@ -660,7 +660,7 @@ describe('InteractiveApp', () => {
     const overlayHost = screen.getByTestId('scene-ui-panel-overlay');
     expect(overlayHost.className).toContain('w-[min(46rem,calc(100vw-1rem))]');
     expect(overlayHost.className).toContain('overflow-y-auto');
-    expect(screen.getByRole('dialog', { name: /choose banana nonsense/i })).toBeDefined();
+    expect(screen.getByRole('dialog', { name: /choose sponge nonsense/i })).toBeDefined();
     expect(screen.getByRole('button', { name: /horizontal ghost/i })).toBeDefined();
 
     await userEvent.click(screen.getByRole('button', { name: /fire trail/i }));

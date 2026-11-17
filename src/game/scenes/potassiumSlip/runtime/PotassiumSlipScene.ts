@@ -30,6 +30,7 @@ import {
 import {
   PotassiumSlipRenderer
 } from './renderer';
+import { resolvePotassiumWallSuds, shouldShowPotassiumWallSuds } from './wallSuds';
 import {
   createPotassiumBossState,
   POTASSIUM_BOSS_PHASE_1_DRIFT,
@@ -144,6 +145,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
   private trailZones!: Phaser.Physics.Arcade.Group;
   private bossBlockers!: Phaser.Physics.Arcade.Group;
   private potassiumRenderer!: PotassiumSlipRenderer;
+  private lastWallSudsAt = 0;
   private projectileControl: PotassiumProjectileControl;
   private commandAdapter: PotassiumCommandAdapter;
 
@@ -295,7 +297,9 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.createOverlays();
     this.registerCollisions();
     this.registerInput();
+    this.physics.world.on(Phaser.Physics.Arcade.Events.WORLD_BOUNDS, this.handleWorldBounds);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.physics.world.off(Phaser.Physics.Arcade.Events.WORLD_BOUNDS, this.handleWorldBounds);
       bridgeActions.clearSceneUi(POTASSIUM_SCENE_ID);
     });
   }
@@ -343,10 +347,11 @@ export class PotassiumSlipScene extends Phaser.Scene {
   }
 
   private createBanana(): void {
-    this.banana = this.physics.add.sprite(LAUNCH_PAD.x, LAUNCH_PAD.y, 'banana_peel_yellow');
+    this.banana = this.physics.add.sprite(LAUNCH_PAD.x, LAUNCH_PAD.y, 'potassium_sponge');
     this.banana.setDepth(100);
     this.banana.setScale(0.9);
     this.banana.setCollideWorldBounds(true);
+    this.banana.body.onWorldBounds = true;
     this.banana.setBounce(1, 1);
     this.banana.setDrag(12, 12);
     this.banana.body.setAllowGravity(false);
@@ -358,6 +363,31 @@ export class PotassiumSlipScene extends Phaser.Scene {
     });
     this.refreshBananaUpgradeVisuals(this.banana);
   }
+
+  /** Sponge smacks an arena wall: leave a little dishwasher suds splash. */
+  private readonly handleWorldBounds = (
+    body: Phaser.Physics.Arcade.Body,
+    up: boolean,
+    down: boolean,
+    left: boolean,
+    right: boolean
+  ): void => {
+    if (body.gameObject !== this.banana || this.session.gameState !== 'PLAYING') return;
+    const now = this.time.now;
+    if (!shouldShowPotassiumWallSuds({
+      isRecalling: this.projectileControl.isRecalling(),
+      speed: body.velocity.length(),
+      now,
+      lastSudsAt: this.lastWallSudsAt
+    })) return;
+    this.lastWallSudsAt = now;
+    const splash = resolvePotassiumWallSuds({
+      blocked: { up, down, left, right },
+      projectile: this.banana,
+      arena: ARENA
+    });
+    this.potassiumRenderer.showWallSuds(splash.x, splash.y, splash.side);
+  };
 
   private createHud(): void {
     this.potassiumRenderer.createHud();
@@ -808,7 +838,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
 
   private spawnBananaClones(count: number, lifetimeMs: number): void {
     for (let i = 0; i < count; i += 1) {
-      const clone = this.clones.create(this.banana.x, this.banana.y, 'banana_peel_yellow') as ProjectileSprite;
+      const clone = this.clones.create(this.banana.x, this.banana.y, 'potassium_sponge') as ProjectileSprite;
       clone.name = `${this.time.now}-${i}`;
       clone.setDepth(90);
       clone.setScale(0.48);

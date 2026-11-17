@@ -26,7 +26,7 @@ export function startPotassium(state: GameWorldState): PotassiumOutcome {
   };
   return {
     ok: true,
-    message: 'Wave 1 — ink bananas descend. Type fight to clear the wave.',
+    message: 'Wave 1 — dust bunnies tumble into the dumpster. Type fight to clear the wave.',
     events: []
   };
 }
@@ -125,7 +125,7 @@ function winPotassium(state: GameWorldState): PotassiumOutcome {
   return {
     ok: true,
     message:
-      'Boss peel collapses. You win the Circuit — a cassette-bright prize. Back on the street; find the CRT.',
+      'Sir Rummage drops the Circuit and sulks. You win it back. Back on the street; find the CRT.',
     events
   };
 }

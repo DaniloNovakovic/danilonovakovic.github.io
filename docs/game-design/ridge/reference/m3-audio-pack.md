@@ -271,7 +271,7 @@ Volume and mix rules:
 - Should Cicka's raw voice be based on real Cicka-like reference recordings if
   available, or should it stay designed/abstract?
 - How silly should Potassium acknowledgement be on the Ridge: almost hidden,
-  obviously banana-coded, or office-law absurd?
+  obviously banana-coded, or dumpster-raccoon absurd?
 - For Telegraph, should the ideal cue feel more like Muay Thai pad work, a
   rhythm-game click, or a manga impact beat?
 - On return after a first clear, should the permanent Ridge mix change be

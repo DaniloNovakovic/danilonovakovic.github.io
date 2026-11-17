@@ -68,8 +68,8 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
 
 - Potassium Slip is a Phaser mini-game reached from the banana peel beside Abilities.
 - Start a run with `E` on desktop or a tap on mobile.
-- Launch the banana by dragging toward a target and releasing.
-- Hold while the banana is moving to yo-yo it back to the launch pad, then relaunch.
+- Inside the dumpster you throw a sponge. Launch it by dragging toward a target and releasing.
+- Hold while the sponge is moving to yo-yo it back to the launch pad, then relaunch.
 - Clear falling 5-column enemy waves, draft stackable upgrades, and defeat the boss for the Circuit.
 - The Circuit can be inserted into the overworld street CRT to enter Ridge.
 - You start with 5 lives; losing all lives ends the run.
@@ -83,7 +83,7 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
 - Shared commands: `look`, `go left|right [n]`, `interact [name]`, `inventory`,
   `equip` / `unequip`, `close`.
 - Potassium in console mode is discrete (`start`, `fight`, `draft`) — not the
-  live drag-banana physics. Winning still grants the Circuit.
+  live drag-sponge physics. Winning still grants the Circuit.
 - Ridge conversation uses `advance` / `choose`. `pnpm ridge:console` is an alias
   that starts already inside Ridge.
 - At the Bridge, Cicka won't just hand over her toy car: join her game (a corn
