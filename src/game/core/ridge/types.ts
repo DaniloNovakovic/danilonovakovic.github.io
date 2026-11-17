@@ -44,7 +44,7 @@ export type RidgeFacing = 'left' | 'right';
 /**
  * `bridgeBuild` is the Blueprint Bridge workbench: drawing and testing a span.
  * `cickaDuel` is Cicka's Standoff: dodging her paw to earn the toy car.
- * `concertGig` is the Concert Crossing rhythm show (or Dule's practice riff).
+ * `concertGig` is the Concert Crossing rhythm show (or Steve's practice riff).
  */
 export type RidgeMode = 'explore' | 'conversation' | 'bridgeBuild' | 'cickaDuel' | 'concertGig';
 

@@ -45,7 +45,7 @@ export const ridgeMessages = {
     lost: "She pins the car under her paw. Point made.",
   },
   concertGig: {
-    titlePractice: "Dule's Riff",
+    titlePractice: "Steve's Riff",
     titleShow: "Live at the Crossing",
     crowd: "Crowd",
     combo: "Combo",

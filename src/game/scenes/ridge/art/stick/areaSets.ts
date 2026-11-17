@@ -569,29 +569,29 @@ function drawGigPoster(g: Phaser.GameObjects.Graphics, x: number): void {
   g.lineBetween(x + 8, GROUND_Y - 92, x + 26, GROUND_Y - 99);
 }
 
-/** Behind the stage: a tarp backdrop, Dule's guitar case, cables, the amp stack. */
-function drawBackstageNook(g: Phaser.GameObjects.Graphics, duleX: number, cickaX: number): void {
+/** Behind the stage: a tarp backdrop, Steve's guitar case, cables, the amp stack. */
+function drawBackstageNook(g: Phaser.GameObjects.Graphics, steveX: number, cickaX: number): void {
   g.fillStyle(INK, 0.1);
-  g.fillRect(duleX - 70, GROUND_Y - 132, cickaX - duleX + 120, 132);
+  g.fillRect(steveX - 70, GROUND_Y - 132, cickaX - steveX + 120, 132);
   g.lineStyle(2.2, INK, 0.5);
-  g.strokeRect(duleX - 70, GROUND_Y - 132, cickaX - duleX + 120, 132);
-  drawHatch(g, duleX - 68, GROUND_Y - 130, cickaX - duleX + 116, 128, 14, 0.12, 0.5);
+  g.strokeRect(steveX - 70, GROUND_Y - 132, cickaX - steveX + 120, 132);
+  drawHatch(g, steveX - 68, GROUND_Y - 130, cickaX - steveX + 116, 128, 14, 0.12, 0.5);
   // Guitar case leaning on the backdrop.
   g.lineStyle(2.6, INK, 1);
   g.fillStyle(INK, 0.8);
   g.beginPath();
-  g.moveTo(duleX - 48, GROUND_Y);
-  g.lineTo(duleX - 66, GROUND_Y - 30);
-  g.lineTo(duleX - 50, GROUND_Y - 90);
-  g.lineTo(duleX - 36, GROUND_Y - 92);
-  g.lineTo(duleX - 30, GROUND_Y - 32);
-  g.lineTo(duleX - 34, GROUND_Y);
+  g.moveTo(steveX - 48, GROUND_Y);
+  g.lineTo(steveX - 66, GROUND_Y - 30);
+  g.lineTo(steveX - 50, GROUND_Y - 90);
+  g.lineTo(steveX - 36, GROUND_Y - 92);
+  g.lineTo(steveX - 30, GROUND_Y - 32);
+  g.lineTo(steveX - 34, GROUND_Y);
   g.closePath();
   g.fillPath();
   // Coiled cable on the floor.
   g.lineStyle(1.8, INK, 0.7);
-  g.strokeEllipse(duleX + 34, GROUND_Y - 4, 34, 9);
-  g.strokeEllipse(duleX + 34, GROUND_Y - 5, 26, 6);
+  g.strokeEllipse(steveX + 34, GROUND_Y - 4, 34, 9);
+  g.strokeEllipse(steveX + 34, GROUND_Y - 5, 26, 6);
   // The amp stack Cicka hides behind.
   drawStageAmp(g, cickaX + 26, 34, 64);
   drawStageAmp(g, cickaX + 26, 30, 32, 64);

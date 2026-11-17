@@ -12,7 +12,7 @@ export type GigLane = 0 | 1 | 2;
 export type GigChord = 'Am' | 'F' | 'C' | 'G' | 'Dm';
 
 /**
- * `riff` is Dule's phrase on its own; the show grows out of it. The kind
+ * `riff` is Steve's phrase on its own; the show grows out of it. The kind
  * drives the backing band's feel and the coach's callouts.
  */
 export type GigSectionKind = 'riff' | 'intro' | 'verse' | 'chorus' | 'breakdown' | 'finale';
@@ -146,7 +146,7 @@ function lanesFor(slot: string): readonly GigLane[] {
   return chord;
 }
 
-/** Dule's phrase: seven notes, the seed of the whole song. */
+/** Steve's phrase: seven notes, the seed of the whole song. */
 const RIFF_A: GigBarSpec = { chord: 'Am', pattern: '0.1.2.1.' };
 const RIFF_B: GigBarSpec = { chord: 'F', pattern: '2.1.0...' };
 const BREATH: GigBarSpec = { chord: 'G', pattern: '........' };
@@ -167,7 +167,7 @@ export const PRACTICE_RIFF_SPEC: GigSongSpec = {
   ]
 };
 
-/** "Still Here" by Dule & the Late Show, as played over the crossing. */
+/** "Still Here" by Steve & the Late Show, as played over the crossing. */
 export const CROSSING_SHOW_SPEC: GigSongSpec = {
   id: 'still-here',
   bpm: 116,

@@ -182,7 +182,7 @@ function observeGig(gig: ConcertGig): NonNullable<RidgeObservation['concertGig']
 }
 
 function gigHints(gig: ConcertGig | null): string[] {
-  if (gig?.phase === 'finished') return ['gig done — take a bow and hear what Dule thinks'];
+  if (gig?.phase === 'finished') return ['gig done — take a bow and hear what Steve thinks'];
   return [
     'gig hit — strum the next note right on time (or gig hit 0|1|2 to strum a lane now)',
     'gig wait [ms] — let the song play on',

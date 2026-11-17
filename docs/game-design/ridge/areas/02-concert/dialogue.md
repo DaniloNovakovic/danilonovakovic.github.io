@@ -32,7 +32,7 @@ Dialogue after the Bridge Tracer Slice proves the dialogue data shape.
   tuning!" variant once practiced.
 - `concert.kid.board` / `concert.kid.hype_waiting` / `concert.kid.after` — the
   Skater Kid, the hype-man branch, and his after-show line.
-- `concert.guitarist.injury` / `.practice_riff` / `.ready` — Dule's topic menus
+- `concert.guitarist.injury` / `.practice_riff` / `.ready` — Steve's topic menus
   (topics stay asked across visits via `concert_asked_<topic>` flags).
 - `concert.gig.practice_done` / `concert.gig.show_done` — reactions keyed by
   practice pass/assist and show grade, plus an encore variant.
@@ -42,7 +42,7 @@ Dialogue after the Bridge Tracer Slice proves the dialogue data shape.
 
 ## Open Dialogue Slots
 
-- confirm "Dule" and "Dule & the Late Show" (`candidate`) or rename
+- confirm band name "Steve & the Late Show" and song title "Still Here" (`candidate`) or rename
 - how many crowd barks are needed for discovery
 - practice riff prompt wording
 - guitar handoff line that makes the Relay use feel earned

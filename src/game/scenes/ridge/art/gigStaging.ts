@@ -22,7 +22,7 @@ export interface GigFrame {
 /**
  * Pure staging for the concert: the crowd bounces on the beat harder the
  * warmer it is, the performer's strum arm flicks on every landed note, and
- * Dule cheers (or winces) from the wings.
+ * Steve cheers (or winces) from the wings.
  */
 export function stageConcertGig(gig: ConcertGig): GigFrame {
   const t = gig.timeMs;

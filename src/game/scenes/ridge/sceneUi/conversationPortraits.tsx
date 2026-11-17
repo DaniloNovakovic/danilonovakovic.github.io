@@ -113,7 +113,7 @@ function DraftspersonPortrait({ emotion }: { emotion: RidgeEmotion }) {
   );
 }
 
-/** Dule: rocker hair past the collar, moustache, leather jacket, wrist in a sling. */
+/** Steve: rocker hair past the collar, moustache, leather jacket, wrist in a sling. */
 function GuitaristPortrait({ emotion }: { emotion: RidgeEmotion }) {
   return (
     <g fill="none" stroke="#1a1a1a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">

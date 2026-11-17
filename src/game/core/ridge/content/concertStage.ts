@@ -15,7 +15,7 @@ import { collectNearbyFromPlans, conversationKit, type CatalogLineSpec } from '.
 
 /**
  * Stage layout on the progress line, left to right: the kafana curb where the
- * kid sulks, the poster wall, the backstage nook (Dule on his amp, Cicka
+ * kid sulks, the poster wall, the backstage nook (Steve on his amp, Cicka
  * behind it), the tiny stage, then the crowd packed across the crossing.
  */
 export const CONCERT_LAYOUT = {
@@ -91,7 +91,7 @@ const SPOTS = [
   },
   {
     id: 'guitarist',
-    label: 'Dule',
+    label: 'Steve',
     kind: 'npc' as const,
     progress: CONCERT_LAYOUT.guitarist,
     interactRadius: 0.05,
@@ -126,13 +126,13 @@ const SPOTS = [
   },
   {
     id: 'band-guitarist',
-    label: 'Dule',
+    label: 'Steve',
     kind: 'npc' as const,
     progress: CONCERT_LAYOUT.bandGuitarist,
     // Wide on purpose: walking past him toward the exit, he calls you back.
     interactRadius: 0.12,
     actorId: 'guitarist' as const,
-    description: 'Dule waits by the opened exit.'
+    description: 'Steve waits by the opened exit.'
   },
   {
     id: 'band-cicka',
@@ -202,7 +202,7 @@ function interactPlans(state: RidgeWorldState): ConcertPlan[] {
       plan('stage', 'concert.stage.encore'),
       plan('band-guitarist', hasGuitar ? 'concert.guitarist.farewell' : 'concert.guitarist.guitar_handoff')
     ];
-    // Dule's goodbye comes first; then Cicka can be visited on her amp.
+    // Steve's goodbye comes first; then Cicka can be visited on her amp.
     if (hasGuitar) plans.push(plan('band-cicka', 'concert.cicka.band_resting_spot'));
     plans.push(
       state.flags.has(CONCERT_KID_HYPE_FLAG) ? plan('band-kid', 'concert.kid.after') : plan('kid', 'concert.kid.after')
@@ -263,7 +263,7 @@ function resolveConcertActors(state: RidgeWorldState): RidgeActorPresence[] {
   const cleared = state.beat === 'concert_cleared' && !bowing;
   const playing = state.mode === 'concertGig' || bowing;
   const hasGuitar = state.inventory.includes(RIDGE_GUITAR_ITEM);
-  // During a show Dule cheers from the wings and stragglers come back for encores.
+  // During a show Steve cheers from the wings and stragglers come back for encores.
   const guitaristProgress = playing ? 0.43 : cleared ? CONCERT_LAYOUT.bandGuitarist : CONCERT_LAYOUT.guitarist;
   // A great show coaxes crowd-shy Cicka out to the edge of the stage.
   const braveCicka =
@@ -303,7 +303,7 @@ function resolveConcertActors(state: RidgeWorldState): RidgeActorPresence[] {
     },
     {
       id: 'guitarist',
-      label: 'Dule',
+      label: 'Steve',
       progress: guitaristProgress,
       visible: true,
       facing: playing ? 'right' : cleared ? 'left' : 'right',
@@ -323,11 +323,11 @@ function resolveConcertActors(state: RidgeWorldState): RidgeActorPresence[] {
 /** Gap kept between the player and whoever they talk to, so bodies never stack. */
 const TALK_GAP = 0.04;
 
-/** While talking with Dule or the kid, stand beside them rather than inside them. */
-function talkingSpot(state: RidgeWorldState, duleProgress: number): number {
+/** While talking with Steve or the kid, stand beside them rather than inside them. */
+function talkingSpot(state: RidgeWorldState, steveProgress: number): number {
   const id = state.mode === 'conversation' ? state.conversation?.id ?? '' : '';
   const partner = id.startsWith('concert.guitarist')
-    ? duleProgress
+    ? steveProgress
     : id.startsWith('concert.kid')
       ? kidProgress(state)
       : null;
@@ -344,35 +344,35 @@ function resolveConcertConversation(
   const flags = state.flags;
   const unasked = (...choices: RidgeDialogueChoice[]) => choices.filter((option) => !flags.has(asked(option.id)));
 
-  // Dule's topics are shared by every talk with him, so they stay asked.
-  const dule = kit('concert.guitarist');
-  const duleTopic = (id: string, lines: readonly LineSpec[]) =>
-    dule.choice(id, lines, { then: 'menu', once: true, outcome: { setFlag: asked(id) } });
-  const duleTopics = () =>
+  // Steve's topics are shared by every talk with him, so they stay asked.
+  const steve = kit('concert.guitarist');
+  const steveTopic = (id: string, lines: readonly LineSpec[]) =>
+    steve.choice(id, lines, { then: 'menu', once: true, outcome: { setFlag: asked(id) } });
+  const steveTopics = () =>
     unasked(
-      duleTopic('wrist', [
+      steveTopic('wrist', [
         ['01', 'injuredGuitarist'],
         ['02', 'injuredGuitarist', 'playful'],
         ['03', 'injuredGuitarist', 'thoughtful']
       ]),
-      duleTopic('who', [
+      steveTopic('who', [
         ['01', 'injuredGuitarist'],
         ['02', 'injuredGuitarist', 'playful']
       ]),
-      duleTopic('cancel', [
+      steveTopic('cancel', [
         ['01', 'injuredGuitarist', 'thoughtful'],
         ['02', 'injuredGuitarist', 'thoughtful']
       ]),
       ...(flags.has(FLAG_MET_KID) || flags.has(CONCERT_KID_HYPE_FLAG)
         ? [
-            duleTopic('kid', [
+            steveTopic('kid', [
               ['01', 'injuredGuitarist', 'thoughtful'],
               ['02', 'injuredGuitarist']
             ])
           ]
         : [])
     );
-  const learn = dule.choice(
+  const learn = steve.choice(
     'learn',
     [
       ['01', 'injuredGuitarist', 'determined'],
@@ -494,10 +494,10 @@ function resolveConcertConversation(
     case 'concert.guitarist.injury':
       return {
         id: conversationId,
-        lines: [dule.say(['injury.01', 'prompt']), dule.say(['injury.02', 'injuredGuitarist', 'playful'])],
+        lines: [steve.say(['injury.01', 'prompt']), steve.say(['injury.02', 'injuredGuitarist', 'playful'])],
         choices: [
-          ...duleTopics(),
-          dule.choice(
+          ...steveTopics(),
+          steve.choice(
             'help',
             [
               ['01', 'injuredGuitarist', 'surprised'],
@@ -505,31 +505,31 @@ function resolveConcertConversation(
               ['03', 'injuredGuitarist']
             ],
             {
-              choices: [learn, dule.choice('later', [['01', 'injuredGuitarist', 'playful']])]
+              choices: [learn, steve.choice('later', [['01', 'injuredGuitarist', 'playful']])]
             }
           ),
-          dule.choice('leave', [['01', 'injuredGuitarist', 'playful']])
+          steve.choice('leave', [['01', 'injuredGuitarist', 'playful']])
         ],
         outcome: { setFlag: FLAG_MET_GUITARIST }
       };
     case 'concert.guitarist.practice_riff':
       return {
         id: conversationId,
-        lines: [dule.say(['practice_riff.01', 'injuredGuitarist', 'curious'])],
-        choices: [learn, ...duleTopics(), dule.choice('not_yet', [['01', 'injuredGuitarist']])]
+        lines: [steve.say(['practice_riff.01', 'injuredGuitarist', 'curious'])],
+        choices: [learn, ...steveTopics(), steve.choice('not_yet', [['01', 'injuredGuitarist']])]
       };
     case 'concert.guitarist.ready':
       return {
         id: conversationId,
         lines: [
-          dule.say([
+          steve.say([
             flags.has(CONCERT_PRACTICE_ASSISTED_FLAG) ? 'ready.01_assisted' : 'ready.01',
             'injuredGuitarist',
             'playful'
           ])
         ],
         choices: [
-          dule.choice(
+          steve.choice(
             'show',
             [
               ['01', 'injuredGuitarist', 'determined'],
@@ -537,15 +537,15 @@ function resolveConcertConversation(
             ],
             { outcome: { openConcertGig: 'show' } }
           ),
-          dule.choice('again', [['01', 'injuredGuitarist']], { outcome: { openConcertGig: 'practice' } }),
+          steve.choice('again', [['01', 'injuredGuitarist']], { outcome: { openConcertGig: 'practice' } }),
           ...unasked(
-            duleTopic('nervous', [
+            steveTopic('nervous', [
               ['01', 'injuredGuitarist', 'thoughtful'],
               ['02', 'injuredGuitarist', 'playful']
             ])
           ),
-          ...duleTopics(),
-          dule.choice('wait', [['01', 'injuredGuitarist']])
+          ...steveTopics(),
+          steve.choice('wait', [['01', 'injuredGuitarist']])
         ]
       };
 
@@ -583,11 +583,11 @@ function resolveConcertConversation(
       const { say } = kit(conversationId);
       const grade = GIG_GRADES.find((candidate) => flags.has(concertGradeFlag(candidate))) ?? 'good';
       const loved = grade === 'legendary' || grade === 'great';
-      const duleLine = say([`dule.${grade}`, 'injuredGuitarist', grade === 'legendary' ? 'surprised' : grade === 'rough' ? 'thoughtful' : 'playful']);
+      const steveLine = say([`steve.${grade}`, 'injuredGuitarist', grade === 'legendary' ? 'surprised' : grade === 'rough' ? 'thoughtful' : 'playful']);
       if (flags.has(FLAG_ENCORE)) {
         return {
           id: conversationId,
-          lines: [say(['encore.01', 'prompt']), duleLine],
+          lines: [say(['encore.01', 'prompt']), steveLine],
           outcome: { clearFlag: FLAG_ENCORE }
         };
       }
@@ -597,7 +597,7 @@ function resolveConcertConversation(
         lines: [
           say(['01', 'prompt']),
           say([`crowd.${grade}`, crowdVoice, grade === 'legendary' ? 'surprised' : 'playful']),
-          duleLine,
+          steveLine,
           ...(loved && flags.has(FLAG_CICKA_MET) ? [say(['cicka.01', 'prompt'])] : []),
           say(['02', 'prompt']),
           say(['03', 'injuredGuitarist'])
@@ -717,14 +717,14 @@ function describeConcertAmbience(state: RidgeWorldState): string {
   }
   if (state.beat === 'concert_cleared') {
     return state.inventory.includes(RIDGE_GUITAR_ITEM)
-      ? "The crossing is open. Dule's guitar rides on your back; the festival lights wait downhill."
-      : 'The crowd drifts home humming. Dule waits by the corner near the opened exit.';
+      ? "The crossing is open. Steve's guitar rides on your back; the festival lights wait downhill."
+      : 'The crowd drifts home humming. Steve waits by the corner near the opened exit.';
   }
   if (state.beat === 'concert_practiced') {
     return 'You know the phrase. The tiny stage waits, and so does the whole street.';
   }
   if (state.flags.has(FLAG_MET_GUITARIST)) {
-    return 'Night storefronts. A late crowd. Dule sits behind the stage with seven notes to teach.';
+    return 'Night storefronts. A late crowd. Steve sits behind the stage with seven notes to teach.';
   }
   return 'A compact night block. The crossing is packed with people waiting for a concert that will not start.';
 }

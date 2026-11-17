@@ -42,7 +42,7 @@ export type GigPhase = 'countIn' | 'playing' | 'finished';
 export type GigGrade = 'legendary' | 'great' | 'good' | 'rough';
 export const GIG_GRADES: readonly GigGrade[] = ['legendary', 'great', 'good', 'rough'];
 
-/** Session flag: a practice pass ran out rather than landed. Dule reacts to it. */
+/** Session flag: a practice pass ran out rather than landed. Steve reacts to it. */
 export const CONCERT_PRACTICE_ASSISTED_FLAG = 'concert_practice_assisted';
 /** Session flag for the grade of the most recent show, e.g. `concert_grade_great`. */
 export const concertGradeFlag = (grade: GigGrade): string => `concert_grade_${grade}`;

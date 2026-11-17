@@ -6,8 +6,8 @@
 The Concert Crossing rhythm mini-game: three-lane note highway, guitar-hero
 style, with the Forgiving Practice Riff as its tutorial.
 
-- Entry: Dule's "Could I play instead?" → "Teach me the phrase." opens the
-  **practice riff**. Once practiced, Dule (or the stage, "Take the stage")
+- Entry: Steve's "Could I play instead?" → "Teach me the phrase." opens the
+  **practice riff**. Once practiced, Steve (or the stage, "Take the stage")
   offers "Let's play the show." After the crossing clears, the stage offers an
   **encore** for replay.
 - Lanes: low / middle / high, shown as circle / diamond / square glyphs so they
@@ -17,7 +17,7 @@ style, with the Forgiving Practice Riff as its tutorial.
 - Song data: `src/game/core/ridge/concertGig/song.ts`. Bars are eight eighth-note
   slots (`.` rest, `0-2` lane, `x y z` two-lane chords). Lanes are chord tones
   of the bar's chord, so every hit is in key. The show ("Still Here", 116 BPM,
-  about a minute): intro (Dule's phrase), verse, chorus, crowd-sing breakdown,
+  about a minute): intro (Steve's phrase), verse, chorus, crowd-sing breakdown,
   finale.
 - Judging (`concertGig/gig.ts`): perfect within 55 ms, good within 135 ms, past
   that the note is missed. Hits raise crowd hype and the combo (score multiplier
@@ -26,11 +26,11 @@ style, with the Forgiving Practice Riff as its tutorial.
   mashing every lane grades Rough.
 - Never fails: the show always plays to the end and always clears the crossing.
   The grade (Legendary ≥ 90% / Great ≥ 72% / Good ≥ 45% / Rough) changes the
-  crowd's and Dule's reaction, and a Great+ show coaxes Cicka to the stage edge
+  crowd's and Steve's reaction, and a Great+ show coaxes Cicka to the stage edge
   if you sat with her first.
 - Practice: up to three passes of the seven-note phrase at 96 BPM. Landing 5 of
   7 in a pass ends practice; running out of passes lets you through anyway and
-  Dule says so ("you kept coming back to it"). "Step away" leaves practice.
+  Steve says so ("you kept coming back to it"). "Step away" leaves practice.
 - Kid hype man: talk the Skater Kid into it (sticker → "Get the crowd going")
   and the show starts with the crowd warmer (hype 0.68 instead of 0.5) and a
   front-row clap.

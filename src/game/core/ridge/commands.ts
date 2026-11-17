@@ -28,7 +28,7 @@ const HELP_TEXT = [
   '  duel wait [n]        let n frames pass (default: until the next landing)',
   '  duel done            see how Cicka takes it once the standoff ends',
   '',
-  'Concert gig (practice the riff with Dule, then play the show):',
+  'Concert gig (practice the riff with Steve, then play the show):',
   '  gig hit              strum the next note(s) exactly on time',
   '  gig hit 0|1|2        strum one lane right now (lanes: low, mid, high)',
   '  gig wait [ms]        let time pass (default: up to the next note)',

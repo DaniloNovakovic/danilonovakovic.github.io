@@ -33,7 +33,7 @@ const LANES: readonly GigLane[] = [0, 1, 2];
 const STREAK_STEP = 10;
 
 /**
- * Concert gig chrome: Dule coaching from the wings, the crowd meter, and
+ * Concert gig chrome: Steve coaching from the wings, the crowd meter, and
  * three big strum buttons for touch. The note highway itself is drawn by
  * Phaser, so this panel only changes when a note is judged.
  */
@@ -54,7 +54,7 @@ export function RidgeConcertGigPanel({ params, dispatchAction }: SceneUiSurfaceP
         >
           <PortraitChip
             portrait="guitarist"
-            emotion={duleEmotion(view)}
+            emotion={steveEmotion(view)}
             className="h-10 w-10 sm:h-12 sm:w-12 short:h-7 short:w-7 short:border-2"
           />
           <div className="min-w-0">
@@ -198,7 +198,7 @@ function statusText(view: RidgeConcertGigPanelView, copy: Copy): string {
   return view.section ? copy.sections[view.section] : copy.countInShow;
 }
 
-function duleEmotion(view: RidgeConcertGigPanelView): RidgeEmotion {
+function steveEmotion(view: RidgeConcertGigPanelView): RidgeEmotion {
   if (view.phase === 'finished') return view.grade === 'rough' ? 'thoughtful' : 'playful';
   if (view.lastJudgment === 'miss') return 'surprised';
   if (view.combo >= STREAK_STEP || view.hype > 0.75) return 'playful';

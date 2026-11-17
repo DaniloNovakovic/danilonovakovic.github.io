@@ -538,7 +538,7 @@ export class RidgeConsoleSession {
   private handleGig(action: RidgeGigAction): RidgeCommandResult {
     const gig = this.gig;
     if (this.state.mode !== 'concertGig' || !gig) {
-      return this.fail('No song is playing. Dule can teach you the riff.');
+      return this.fail('No song is playing. Steve can teach you the riff.');
     }
     if (action.kind === 'done') {
       if (gig.phase !== 'finished') return this.fail('The song is still going.');
@@ -584,7 +584,7 @@ export class RidgeConsoleSession {
       ...this.state,
       mode: 'concertGig',
       conversation: null,
-      lastMessage: mode === 'practice' ? 'Dule counts you in, slowly.' : 'Lights up. The drummer clicks four.'
+      lastMessage: mode === 'practice' ? 'Steve counts you in, slowly.' : 'Lights up. The drummer clicks four.'
     };
   }
 
@@ -602,7 +602,7 @@ export class RidgeConsoleSession {
     };
   }
 
-  /** Practice opens the show; the show clears the crossing. Dule reacts either way. */
+  /** Practice opens the show; the show clears the crossing. Steve reacts either way. */
   private finishConcertGig(gig: ConcertGig): RidgeCommandResult {
     // Step off where the performance left you (the stage), not where you stood before.
     const performer = this.stage.resolveActors(this.state).find((actor) => actor.id === 'player');

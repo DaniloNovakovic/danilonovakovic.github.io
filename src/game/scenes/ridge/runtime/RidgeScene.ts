@@ -68,7 +68,7 @@ const WALK_SPEED = 0.18; // progress units per second
 const BRIDGE_CELEBRATE_MS = 2200;
 /** How long the standoff's last moment holds before Cicka reacts. */
 const DUEL_OUTRO_MS = 1300;
-/** How long the last chord and the cheer ring before Dule reacts. */
+/** How long the last chord and the cheer ring before Steve reacts. */
 const GIG_OUTRO_MS = 2400;
 /** Keys for the three lanes: home row, arrows, the right hand's home row, digits. */
 const GIG_LANE_KEYS: Record<string, GigLane> = {
@@ -136,7 +136,7 @@ export class RidgeScene extends Phaser.Scene {
   create(): void {
     const route = bridgeStore.getState().progress.ridge.firstPlayableRoute;
     const areaId = route.activeAreaId;
-    // Dule hands the guitar over after the show; re-entering a cleared Concert
+    // Steve hands the guitar over after the show; re-entering a cleared Concert
     // replays that goodbye rather than skipping it.
     const hasGuitar = areaId === 'danceFestival' || areaId === 'relay';
 
@@ -301,7 +301,7 @@ export class RidgeScene extends Phaser.Scene {
     }
   }
 
-  /** Play the song: the audio clock drives the playhead, then a bow and Dule's verdict. */
+  /** Play the song: the audio clock drives the playhead, then a bow and Steve's verdict. */
   private updateConcertGig(delta: number): void {
     const session = this.session;
     const gig = session?.concertGig;
@@ -326,7 +326,7 @@ export class RidgeScene extends Phaser.Scene {
     if (section !== null && section > 0 && gig.mode === 'show' && gig.hype > 0.6) audio.cheer(gig.hype);
   }
 
-  /** The last chord rings and the crowd roars, then Dule has his say. */
+  /** The last chord rings and the crowd roars, then Steve has his say. */
   private takeABow(gig: ConcertGig, audio: ConcertGigAudio, delta: number): void {
     if (!this.gigCheered) {
       this.gigCheered = true;

@@ -116,7 +116,7 @@ function resolveRelayActors(state: RidgeWorldState): RidgeActorPresence[] {
       progress: farewell ? 0.58 : state.progress,
       visible: true,
       facing: state.facing,
-      // Dule's guitar: carried up the hill, played at the farewell.
+      // Steve's guitar: carried up the hill, played at the farewell.
       ...(state.inventory.includes(RIDGE_GUITAR_ITEM)
         ? { prop: state.beat === 'relay_farewell' ? ('guitar-playing' as const) : ('guitar-back' as const) }
         : {})

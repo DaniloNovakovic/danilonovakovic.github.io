@@ -62,19 +62,19 @@ spaces to make the block feel more alive.
 > Status: implemented (2026-11-16). Gig detail: [`concert-gig.md`](./concert-gig.md).
 
 Stage, left to right: kafana curb (Skater Kid) → poster wall → backstage nook
-(Dule on his amp, Cicka behind the amp stack) → tiny stage (truss, string
+(Steve on his amp, Cicka behind the amp stack) → tiny stage (truss, string
 lights, mic) → crowd packed across the zebra crossing (barrier, red light) →
 band corner by the exit (amp, bench) → downhill signpost.
 
-- **Dule** (`candidate` name; the Injured Guitarist): forty-six, long rocker
+- **Steve** (the Injured Guitarist; name confirmed by Danilo 2026-11-17): forty-six, long rocker
   hair, moustache, leather jacket, strumming wrist in a sling. Twenty summers
   playing this crossing; the show is "how the street says we're still here".
   Topic menu: the wrist, who he is, why not cancel, the kid, "Could I play
   instead?". Gentle comedy, never a joke-only drunk.
-- **Skater Kid**: called Dule too old to rock; Dule borrowed his board and ate
+- **Skater Kid**: called Steve too old to rock; Steve borrowed his board and ate
   the curb. Secretly a fan (a peeled-and-restuck Late Show sticker). Talking
   him round makes him the front-row **hype man** (warmer crowd at the first
-  note) and he apologises at the goodbye; Dule offers him lessons. Otherwise he
+  note) and he apologises at the goodbye; Steve offers him lessons. Otherwise he
   stays on the curb and admits the show was "kind of sick".
 - **Crowd**: Impatient Uncle and Folding-Chair Grandma voice a topic menu
   (holdup, who's playing, can I squeeze past) that reads the delay and the
@@ -83,10 +83,10 @@ band corner by the exit (amp, bench) → downhill signpost.
   show someone adds "tonight it was somebody new".
 - **Cicka**: crowd-shy behind the amps; sitting with her colours later lines,
   and a Great+ show coaxes her to the stage edge. After the show she loafs on
-  the corner amp, visitable once Dule's goodbye is done.
+  the corner amp, visitable once Steve's goodbye is done.
 - **Gig**: practice riff, then the show; never fails; encore replay from the
   stage once the crossing is open.
-- **Goodbye**: the guitar is Dule's gift at the corner, not a prize for the
+- **Goodbye**: the guitar is Steve's gift at the corner, not a prize for the
   score ("a guitar that sits in its case all summer forgets how to sing"). It
   rides on the player's back from then on, and is played at Relay.
 

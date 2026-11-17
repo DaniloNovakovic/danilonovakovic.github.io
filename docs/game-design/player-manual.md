@@ -103,12 +103,12 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
   button shows the Draftsperson's sketch as gray dashes to trace. When it holds, your bridge becomes
   the crossing. Console: `build road 0,0 2,0`, `build test`, `build done`.
 - Concert Crossing: the crowd blocks the street because the show is late; its
-  guitarist Dule hurt his wrist showing off on a kid's skateboard. Ask him if
+  guitarist Steve hurt his wrist showing off on a kid's skateboard. Ask him if
   you can play: he teaches a seven-note riff, then you play the show on a
   three-lane note highway (`A S D`, arrows, `J K L`, or the big buttons on
   touch). It never fails; how well you play changes how the street reacts.
   Talk the skater kid round and he starts the crowd clapping. After the show
-  Dule gives you his guitar at the corner, and the stage offers an encore.
+  Steve gives you his guitar at the corner, and the stage offers an encore.
   Console: `gig hit`, `gig wait`, `gig auto`, `gig done`.
 - Ridge first-playable secret route: Bridge → Concert → Dance Festival → Relay
   farewell (Sit and Play, dedication card), then return to the Overworld street.

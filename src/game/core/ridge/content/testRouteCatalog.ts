@@ -8,7 +8,7 @@ export const TEST_ROUTE_DIALOGUE_CATALOG: RidgeRouteDialogueCatalog = {
     speakers: {
       prompt: 'Prompt',
       cicka: 'Cicka',
-      injuredGuitarist: 'Dule',
+      injuredGuitarist: 'Steve',
       crowd: 'Crowd',
       crowdUncle: 'Uncle',
       crowdGrandma: 'Grandma',

@@ -85,11 +85,11 @@ Bridge
 
 Concert
   -> night block: kafana + Skater Kid, gig poster, crowd on the crossing
-  -> backstage nook (Dule on his amp, Cicka behind the amps); topic menus
+  -> backstage nook (Steve on his amp, Cicka behind the amps); topic menus
   -> optional: talk the kid into being the hype man (warmer crowd)
   -> Concert Gig practice riff (three-lane rhythm, passes after 3 tries anyway)
   -> Concert Gig show (never fails; grade colours the reactions; encore later)
-  -> crowd clears; Dule's goodbye at the corner hands over the guitar
+  -> crowd clears; Steve's goodbye at the corner hands over the guitar
   -> Dance transition exit
 
 Dance Festival

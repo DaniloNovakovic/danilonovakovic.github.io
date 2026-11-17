@@ -292,7 +292,7 @@ export const sceneMessages = {
       speakers: {
         prompt: "Prompt",
         cicka: "Cicka",
-        injuredGuitarist: "Dule",
+        injuredGuitarist: "Steve",
         crowd: "Crowd",
         crowdUncle: "Impatient Uncle",
         crowdGrandma: "Folding-Chair Grandma",
@@ -301,7 +301,7 @@ export const sceneMessages = {
       dialogue: {
         "concert.poster.read.prompt": "Read the poster",
         "concert.poster.read.01":
-          "A hand-drawn poster on the kafana wall, curling at the corners: DULE & THE LATE SHOW. TONIGHT, 9PM. THE CROSSING.",
+          "A hand-drawn poster on the kafana wall, curling at the corners: STEVE & THE LATE SHOW. TONIGHT, 9PM. THE CROSSING.",
         "concert.poster.read.02":
           "Someone has added in pen: \"still?\" Someone else has crossed that out and written: \"ALWAYS.\"",
         "concert.poster.read.after.01": "Under \"ALWAYS\", in fresh ink: \"tonight it was somebody new.\"",
@@ -310,12 +310,12 @@ export const sceneMessages = {
         "concert.crowd.delay_barks.01":
           "Nine o'clock, the poster said. Nine! My watch says it's a quarter to never.",
         "concert.crowd.delay_barks.choice.holdup": "What's the holdup?",
-        "concert.crowd.delay_barks.holdup.01": "Dule took a tumble at soundcheck. On a skateboard. At his age!",
+        "concert.crowd.delay_barks.holdup.01": "Steve took a tumble at soundcheck. On a skateboard. At his age!",
         "concert.crowd.delay_barks.holdup.02":
           "Wrist went one way, board went the other. He's been hiding back by the amps ever since.",
         "concert.crowd.delay_barks.choice.who": "Who's playing?",
         "concert.crowd.delay_barks.who.01":
-          "Dule and the Late Show! He's played this crossing every summer since they put the traffic light in.",
+          "Steve and the Late Show! He's played this crossing every summer since they put the traffic light in.",
         "concert.crowd.delay_barks.who.02": "I saw him play straight through a power cut once. He just sang louder.",
         "concert.crowd.delay_barks.choice.through": "Can I squeeze past?",
         "concert.crowd.delay_barks.through.01":
@@ -326,7 +326,7 @@ export const sceneMessages = {
         "concert.crowd.delay_barks.leave.01":
           "If you see a guitarist, tell him we're old too. We can wait. Grumpily.",
         "concert.crowd.delay_barks.ready.01": "Was that a guitar? Back by the amps? Somebody's tuning up!",
-        "concert.crowd.delay_barks.ready.02": "Finally. If it's not Dule, it had better be somebody good.",
+        "concert.crowd.delay_barks.ready.02": "Finally. If it's not Steve, it had better be somebody good.",
 
         "concert.kid.board.prompt": "Talk to the kid",
         "concert.kid.board.01":
@@ -367,13 +367,13 @@ export const sceneMessages = {
         "concert.kid.after.choice.nod": "Nod and say nothing.",
         "concert.kid.after.nod.01": "He nods back. Very serious. A deal between professionals.",
         "concert.kid.after.hype.01": "Did you hear them? I started that clap. That was all me.",
-        "concert.kid.after.hype.02": "Dule says I can have lessons. On the guitar. Not the board. Probably not the board.",
+        "concert.kid.after.hype.02": "Steve says I can have lessons. On the guitar. Not the board. Probably not the board.",
 
         "concert.guitarist.injury.prompt": "Talk to the guitarist",
         "concert.guitarist.injury.01":
           "Tucked behind the stage, a man in a worn leather jacket sits on an amp, cradling his wrist like a hurt bird.",
         "concert.guitarist.injury.02": "If you're here for an autograph, it'll have to be left-handed.",
-        "concert.guitarist.practice_riff.prompt": "Talk to Dule",
+        "concert.guitarist.practice_riff.prompt": "Talk to Steve",
         "concert.guitarist.practice_riff.01": "Back? The phrase is still waiting. So is the crowd. Loudly.",
         "concert.guitarist.choice.wrist": "What happened to your wrist?",
         "concert.guitarist.wrist.01":
@@ -381,7 +381,7 @@ export const sceneMessages = {
         "concert.guitarist.wrist.02": "One-legged solo, straight down the ramp. Big finish.",
         "concert.guitarist.wrist.03": "The ramp had a bigger finish.",
         "concert.guitarist.choice.who": "Who are you?",
-        "concert.guitarist.who.01": "Dule. Of Dule and the Late Show. Twenty summers on this crossing.",
+        "concert.guitarist.who.01": "Steve. Of Steve and the Late Show. Twenty summers on this crossing.",
         "concert.guitarist.who.02": "Tonight we're really living up to the name.",
         "concert.guitarist.choice.cancel": "Can't you just call it off?",
         "concert.guitarist.cancel.01": "And send them home quiet? No.",
@@ -407,7 +407,7 @@ export const sceneMessages = {
         "concert.guitarist.leave.01": "Hanging. Mostly by the left hand.",
         "concert.guitarist.choice.not_yet": "Not yet.",
         "concert.guitarist.not_yet.01": "No rush. They've only been waiting three hours.",
-        "concert.guitarist.ready.prompt": "Talk to Dule",
+        "concert.guitarist.ready.prompt": "Talk to Steve",
         "concert.guitarist.ready.01":
           "You've got the phrase. The rest of the song is just the phrase, saying more.",
         "concert.guitarist.ready.01_assisted":
@@ -447,14 +447,14 @@ export const sceneMessages = {
         "concert.gig.practice_done.03": "Whenever you're ready, the stage is yours.",
         "concert.gig.show_done.01":
           "The last chord rings out over the crossing. For one long second, nobody moves.",
-        "concert.gig.show_done.crowd.legendary": "...DULE! DULE! Wait. Who IS that?!",
+        "concert.gig.show_done.crowd.legendary": "...STEVE! STEVE! Wait. Who IS that?!",
         "concert.gig.show_done.crowd.great": "Encore! ENCORE!",
         "concert.gig.show_done.crowd.good": "Now THAT is what I waited three hours for!",
         "concert.gig.show_done.crowd.rough": "They played! Music! Wonderful!",
-        "concert.gig.show_done.dule.legendary": "Twenty summers. I have never heard it played like that.",
-        "concert.gig.show_done.dule.great": "You made it yours. That's the only trick there is.",
-        "concert.gig.show_done.dule.good": "A few wobbly bits. Every good night has wobbly bits.",
-        "concert.gig.show_done.dule.rough":
+        "concert.gig.show_done.steve.legendary": "Twenty summers. I have never heard it played like that.",
+        "concert.gig.show_done.steve.great": "You made it yours. That's the only trick there is.",
+        "concert.gig.show_done.steve.good": "A few wobbly bits. Every good night has wobbly bits.",
+        "concert.gig.show_done.steve.rough":
           "Rough? Sure. But listen to them. Nobody ever remembers the clean notes.",
         "concert.gig.show_done.cicka.01":
           "Cicka has crept out from behind the amp to the very edge of the stage. She gives you a long, slow blink.",
@@ -462,7 +462,7 @@ export const sceneMessages = {
         "concert.gig.show_done.03": "Come find me by the corner before you go. I've got something for you.",
         "concert.gig.show_done.encore.01": "The last few stragglers clap like a full house.",
 
-        "concert.guitarist.guitar_handoff.prompt": "Talk to Dule",
+        "concert.guitarist.guitar_handoff.prompt": "Talk to Steve",
         "concert.guitarist.guitar_handoff.01": "So. This wrist needs the whole summer off.",
         "concert.guitarist.guitar_handoff.02": "And a guitar that sits in its case all summer forgets how to sing.",
         "concert.guitarist.guitar_handoff.kid.01": "...That was sick, by the way.",
@@ -477,18 +477,18 @@ export const sceneMessages = {
         "concert.guitarist.guitar_handoff.promise.01":
           "I know you will. Play her somewhere quiet, for someone who matters. That's what she's for.",
         "concert.guitarist.guitar_handoff.promise.02":
-          "Dule's guitar settles across your back. It's warmer than you expected.",
+          "Steve's guitar settles across your back. It's warmer than you expected.",
         "concert.guitarist.guitar_handoff.choice.sure": "Are you sure?",
         "concert.guitarist.guitar_handoff.sure.01": "Sure? No. Right? Yes.",
         "concert.guitarist.guitar_handoff.sure.02":
           "Play her somewhere quiet, for someone who matters. That's what she's for.",
         "concert.guitarist.guitar_handoff.sure.03":
-          "Dule's guitar settles across your back. It's warmer than you expected.",
-        "concert.guitarist.farewell.prompt": "Talk to Dule",
-        "concert.guitarist.farewell.01": "Go on. Next town over, tell them Dule says hi.",
+          "Steve's guitar settles across your back. It's warmer than you expected.",
+        "concert.guitarist.farewell.prompt": "Talk to Steve",
+        "concert.guitarist.farewell.01": "Go on. Next town over, tell them Steve says hi.",
         "concert.guitarist.farewell.choice.thanks": "Thanks for tonight.",
         "concert.guitarist.farewell.thanks.01": "Thank YOU. I just sat on an amp and shouted chord names.",
-        "concert.guitarist.farewell.choice.leave": "See you, Dule.",
+        "concert.guitarist.farewell.choice.leave": "See you, Steve.",
         "concert.guitarist.farewell.leave.01": "See you. Mind the curbs.",
 
         "concert.cicka.band_resting_spot.prompt": "Find Cicka",
@@ -509,7 +509,7 @@ export const sceneMessages = {
         "concert.cicka.band_resting_spot.choice.leave": "Leave her be",
         "concert.cicka.band_resting_spot.leave.01": "She approves of this decision.",
         "concert.cicka.band_resting_spot.after.01":
-          "Cicka is loafing on top of the warm amp. Dule scratches behind her ears without looking.",
+          "Cicka is loafing on top of the warm amp. Steve scratches behind her ears without looking.",
         "concert.cicka.band_resting_spot.after.02": "Purrrr...",
         "concert.cicka.band_resting_spot.choice.pet": "Scratch her chin",
         "concert.cicka.band_resting_spot.pet.01": "Prrrt.",

@@ -238,7 +238,7 @@ describe('Concert Crossing', () => {
     talk(session, 'help', 'learn');
     session.exec('gig skip');
     session.exec('gig done');
-    // Running out of practice passes still opens the show; Dule notices.
+    // Running out of practice passes still opens the show; Steve notices.
     expect(session.observe().beat).toBe('concert_practiced');
     drainConversation(session);
     walkTo(session, 0.49);
@@ -384,7 +384,7 @@ function playConcert(session: RidgeConsoleSession): void {
   expect(session.exec('interact crowd').ok).toBe(true);
   talk(session, 'holdup', 'leave');
 
-  // Dule teaches the phrase: the forgiving practice riff.
+  // Steve teaches the phrase: the forgiving practice riff.
   walkTo(session, 0.35);
   expect(session.exec('interact guitarist').ok).toBe(true);
   talk(session, 'help', 'learn');
@@ -413,7 +413,7 @@ function playConcert(session: RidgeConsoleSession): void {
   expect(session.observe().inventory).not.toContain('guitar');
 
   walkTo(session, 0.8);
-  expect(session.exec('interact dule').ok).toBe(true);
+  expect(session.exec('interact steve').ok).toBe(true);
   talk(session, 'promise');
   expect(session.observe().inventory).toContain('guitar');
 

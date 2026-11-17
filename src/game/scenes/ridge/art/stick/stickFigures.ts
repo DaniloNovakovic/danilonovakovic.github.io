@@ -720,7 +720,7 @@ function drawArms(
 }
 
 /**
- * Dule: forty-six, a local legend. Long rocker hair, moustache, leather
+ * Steve: forty-six, a local legend. Long rocker hair, moustache, leather
  * jacket, and his strumming wrist strapped in a sling. He sits on his amp
  * backstage; on show night he stands in the wings and cheers.
  */
