@@ -44,6 +44,9 @@ export function setSceneKeyboardPaused(
     if (opts.pausePhysicsWorld) {
       scene.physics.world.resume();
     }
+    // Key-ups that landed while paused were dropped, so a key used to open the
+    // pause (say, E on a door) would still read as held and never JustDown again.
+    keyboard.resetKeys?.();
     if (typeof keyboard.addCapture === 'function') {
       keyboard.addCapture([...GAMEPLAY_KEYBOARD_CAPTURES]);
     }

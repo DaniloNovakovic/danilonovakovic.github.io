@@ -21,7 +21,7 @@ type ChickFrame = 'idle' | 'peck' | 'run';
 export class StreetChick {
   private readonly g: Phaser.GameObjects.Graphics;
   private readonly bubble: Phaser.GameObjects.Text;
-  private x: number;
+  private chickX: number;
   private readonly homeX: number;
   private frame: ChickFrame | null = null;
   private facing: 1 | -1 = 1;
@@ -30,7 +30,7 @@ export class StreetChick {
 
   constructor(scene: Phaser.Scene, homeX: number) {
     this.homeX = homeX;
-    this.x = homeX;
+    this.chickX = homeX;
     this.g = scene.add.graphics().setDepth(22).setPosition(homeX, FEET_Y);
     this.bubble = createUiText(scene, homeX, FEET_Y - 42, '', {
       fontSize: '13px',
@@ -39,6 +39,10 @@ export class StreetChick {
       padding: { x: 4, y: 2 }
     }).setOrigin(0.5, 1).setDepth(23).setVisible(false);
     this.draw('idle');
+  }
+
+  get x(): number {
+    return this.chickX;
   }
 
   update(
@@ -55,23 +59,23 @@ export class StreetChick {
   }
 
   private fleeFromGlasses(playerX: number, glassesOn: boolean, motion: boolean, dt: number): boolean {
-    if (!glassesOn || Math.abs(playerX - this.x) >= SCARE_PX) return false;
-    const away = playerX >= this.x ? -1 : 1;
+    if (!glassesOn || Math.abs(playerX - this.chickX) >= SCARE_PX) return false;
+    const away = playerX >= this.chickX ? -1 : 1;
     const step = motion ? FLEE_SPEED * dt : FLEE_CLEARANCE_PX;
     this.facing = away;
-    this.x = clamp(this.x + away * step, STREET_MIN_X, STREET_MAX_X);
+    this.chickX = clamp(this.chickX + away * step, STREET_MIN_X, STREET_MAX_X);
     this.place('run');
     this.say('nope!');
     return true;
   }
 
   private walkHome(glassesOn: boolean, motion: boolean, dt: number): boolean {
-    if (glassesOn || Math.abs(this.x - this.homeX) <= 4) return false;
-    const dir = this.homeX > this.x ? 1 : -1;
-    const step = motion ? RETURN_SPEED * dt : Math.abs(this.homeX - this.x);
-    const next = this.x + dir * step;
+    if (glassesOn || Math.abs(this.chickX - this.homeX) <= 4) return false;
+    const dir = this.homeX > this.chickX ? 1 : -1;
+    const step = motion ? RETURN_SPEED * dt : Math.abs(this.homeX - this.chickX);
+    const next = this.chickX + dir * step;
     this.facing = dir;
-    this.x = dir > 0 ? Math.min(next, this.homeX) : Math.max(next, this.homeX);
+    this.chickX = dir > 0 ? Math.min(next, this.homeX) : Math.max(next, this.homeX);
     this.place('run');
     this.hush();
     return true;
@@ -82,7 +86,7 @@ export class StreetChick {
       this.peckUntilMs = timeMs + 320;
       this.nextPeckAtMs = timeMs + 2800;
     }
-    this.facing = playerX >= this.x ? -1 : 1;
+    this.facing = playerX >= this.chickX ? -1 : 1;
     this.place(!glassesOn && timeMs < this.peckUntilMs ? 'peck' : 'idle');
     this.sayForDistance(playerX, glassesOn);
   }
@@ -92,15 +96,15 @@ export class StreetChick {
       this.hush();
       return;
     }
-    const distance = Math.abs(playerX - this.x);
+    const distance = Math.abs(playerX - this.chickX);
     if (distance < 90) this.say('hey. hey.');
     else if (distance < 170) this.say('ooh...');
     else this.hush();
   }
 
   private place(frame: ChickFrame): void {
-    this.g.setPosition(this.x, FEET_Y);
-    this.bubble.setPosition(this.x + this.facing * 18, FEET_Y - 40);
+    this.g.setPosition(this.chickX, FEET_Y);
+    this.bubble.setPosition(this.chickX + this.facing * 18, FEET_Y - 40);
     this.draw(frame);
   }
 
@@ -109,7 +113,8 @@ export class StreetChick {
     this.bubble.setVisible(true);
   }
 
-  private hush(): void {
+  /** Quiet while the chick is in the conversation box instead. */
+  hush(): void {
     this.bubble.setVisible(false);
   }
 

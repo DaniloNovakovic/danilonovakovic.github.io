@@ -17,6 +17,8 @@ export type RidgePortraitId =
   | 'operations'
   | 'steward'
   | 'quietCat'
+  /** The Overworld street chick; it borrows Ridge's conversation box. */
+  | 'chick'
   | 'prompt';
 
 interface CastSpeakerEntry {

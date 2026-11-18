@@ -19,6 +19,7 @@ const PORTRAITS: Record<BodiedPortraitId, (emotion: RidgeEmotion) => ReactNode> 
   operations: (emotion) => <OperationsPortrait emotion={emotion} />,
   steward: (emotion) => <StewardPortrait emotion={emotion} />,
   quietCat: (emotion) => <CickaPortrait emotion={emotion} coat="dark" />,
+  chick: (emotion) => <ChickPortrait emotion={emotion} />,
   player: (emotion) => <PlayerPortrait emotion={emotion} />
 };
 
@@ -351,6 +352,47 @@ function FaceMarks({ emotion }: { emotion: RidgeEmotion }) {
         </>
       );
   }
+}
+
+/** The street chick from the Overworld: round, smug, one red comb. */
+function ChickPortrait({ emotion }: { emotion: RidgeEmotion }) {
+  return (
+    <g fill="none" stroke="#1a1a1a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M15 52 L6 44 M15 57 L5 57" strokeWidth="2.5" />
+      <path d="M28 70 L26 78 M38 70 L40 78" strokeWidth="2.5" />
+      <ellipse cx="31" cy="57" rx="19" ry="14" fill="#fbfbf9" />
+      <path d="M22 55 Q30 64 39 55" strokeWidth="2" />
+      <g fill="#b4533d" strokeWidth="2">
+        <circle cx="44" cy="22" r="3.6" />
+        <circle cx="50" cy="19" r="4" />
+        <circle cx="56" cy="22" r="3.4" />
+      </g>
+      <circle cx="50" cy="35" r="13" fill="#fbfbf9" />
+      <path d="M62 33 L72 36 L62 39 Z" fill="#1a1a1a" strokeWidth="2" />
+      <ChickEye emotion={emotion} />
+    </g>
+  );
+}
+
+function ChickEye({ emotion }: { emotion: RidgeEmotion }) {
+  if (emotion === 'surprised') {
+    return (
+      <>
+        <circle cx="54" cy="32" r="3.4" fill="#fbfbf9" strokeWidth="2" />
+        <circle cx="55" cy="32" r="1.3" fill="#1a1a1a" stroke="none" />
+      </>
+    );
+  }
+  if (emotion === 'playful') {
+    // Heavy-lidded and pleased with itself.
+    return (
+      <>
+        <path d="M50 31 L58 31" strokeWidth="2.5" />
+        <circle cx="55" cy="33" r="1.6" fill="#1a1a1a" stroke="none" />
+      </>
+    );
+  }
+  return <circle cx="55" cy="32" r="2" fill="#1a1a1a" stroke="none" />;
 }
 
 function PlayerPortrait({ emotion }: { emotion: RidgeEmotion }) {
