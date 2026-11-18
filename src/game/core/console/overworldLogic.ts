@@ -37,6 +37,8 @@ export interface OverworldProgress {
 }
 
 const BANANA_CANCEL_EXTRA = 40;
+/** Typed targets that count as the litter pile while its discovery beat is pending. */
+const LITTER_TARGET_WORDS = ['banana', 'peel', 'litter', 'dumpster', 'potassium'];
 
 const SIGNPOST_MESSAGES: Record<OverworldProgressStage, string> = {
   'find-glasses':
@@ -223,12 +225,7 @@ export function interactOverworld(
   if (
     state.overworld.bananaFirstPeelPending &&
     state.discoveredSecretIds.includes(OVERWORLD_BANANA_PEEL.secretId) &&
-    (!target ||
-      target.toLowerCase().includes('banana') ||
-      target.toLowerCase().includes('peel') ||
-      target.toLowerCase().includes('litter') ||
-      target.toLowerCase().includes('dumpster') ||
-      target.toLowerCase().includes('potassium'))
+    (!target || LITTER_TARGET_WORDS.some((word) => target.toLowerCase().includes(word)))
   ) {
     const peelDist = Math.hypot(
       state.overworld.playerX - OVERWORLD_BANANA_PEEL.x,

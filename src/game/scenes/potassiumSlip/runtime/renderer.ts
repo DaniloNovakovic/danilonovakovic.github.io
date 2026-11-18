@@ -237,7 +237,7 @@ export class PotassiumSlipRenderer {
 
   /** Bubble Pop: a soap bubble swells over the hit, then pops into droplets. */
   showExplosionVisual(x: number, y: number, radius: number): void {
-    const bubble = this.scene.add.container(x, y).setDepth(940).setScale(18 / radius);
+    const bubble = this.scene.add.container(x, y).setDepth(940).setScale(18 / Math.max(radius, 1));
     const film = this.scene.add.graphics();
     film.fillStyle(0xe0f2fe, 0.22);
     film.fillCircle(0, 0, radius);
@@ -741,8 +741,8 @@ export class PotassiumSlipRenderer {
     }
     g.fillStyle(0x7dd3fc, 0.9);
     g.lineStyle(1.5, 0x1a1a1a, 0.6);
-    for (let x = -half + 30; x < half; x += 58) {
-      const side = (x / 58) % 2 > 1 ? -1 : 1;
+    for (let i = 0, x = -half + 30; x < half; i++, x += 58) {
+      const side = i % 2 === 0 ? 1 : -1;
       g.fillCircle(x, side * (height / 2 + 7), 3);
       g.strokeCircle(x, side * (height / 2 + 7), 3);
     }

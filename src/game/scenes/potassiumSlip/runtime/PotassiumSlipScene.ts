@@ -34,6 +34,7 @@ import {
   resolvePotassiumWallClones,
   resolvePotassiumWallSuds,
   shouldShowPotassiumWallSuds,
+  type PotassiumWallHit,
   type PotassiumWallSudsSplash
 } from './wallBounce';
 import {
@@ -341,6 +342,8 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.pendingTerminalView = undefined;
     this.externalControlPointer = null;
     this.fireCells.clear();
+    this.lastWallSudsAt = 0;
+    this.lastWallClonesAt = 0;
   }
 
   private createPotassiumTextures(): void {
@@ -382,7 +385,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
       projectile: this.banana,
       arena: ARENA
     });
-    const hit = {
+    const hit: PotassiumWallHit = {
       isRecalling: this.projectileControl.isRecalling(),
       speed: body.velocity.length(),
       now: this.time.now
@@ -393,7 +396,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
 
   private showWallSudsIfReady(
     splash: PotassiumWallSudsSplash,
-    hit: { isRecalling: boolean; speed: number; now: number }
+    hit: PotassiumWallHit
   ): void {
     if (!shouldShowPotassiumWallSuds({ ...hit, lastSudsAt: this.lastWallSudsAt })) return;
     this.lastWallSudsAt = hit.now;
@@ -402,7 +405,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
 
   private spawnWallClonesIfReady(
     splash: PotassiumWallSudsSplash,
-    hit: { isRecalling: boolean; speed: number; now: number }
+    hit: PotassiumWallHit
   ): void {
     const clones = resolvePotassiumWallClones({
       ...hit,

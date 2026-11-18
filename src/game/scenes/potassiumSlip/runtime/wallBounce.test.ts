@@ -4,7 +4,7 @@ import {
   POTASSIUM_WALL_CLONE_MAX_ACTIVE,
   POTASSIUM_WALL_SUDS_COOLDOWN_MS,
   POTASSIUM_WALL_SUDS_INSET,
-  POTASSIUM_WALL_SUDS_MIN_SPEED,
+  POTASSIUM_WALL_HIT_MIN_SPEED,
   resolvePotassiumWallClones,
   resolvePotassiumWallSuds,
   shouldShowPotassiumWallSuds
@@ -27,11 +27,11 @@ describe('potassium wall suds', () => {
   });
 
   it('skips suds while recalling, when slow, or inside the cooldown', () => {
-    const fast = POTASSIUM_WALL_SUDS_MIN_SPEED + 1;
+    const fast = POTASSIUM_WALL_HIT_MIN_SPEED + 1;
     const ready = { isRecalling: false, speed: fast, now: 1000, lastSudsAt: 0 };
     expect(shouldShowPotassiumWallSuds(ready)).toBe(true);
     expect(shouldShowPotassiumWallSuds({ ...ready, isRecalling: true })).toBe(false);
-    expect(shouldShowPotassiumWallSuds({ ...ready, speed: POTASSIUM_WALL_SUDS_MIN_SPEED - 1 })).toBe(false);
+    expect(shouldShowPotassiumWallSuds({ ...ready, speed: POTASSIUM_WALL_HIT_MIN_SPEED - 1 })).toBe(false);
     expect(shouldShowPotassiumWallSuds({
       ...ready,
       lastSudsAt: ready.now - POTASSIUM_WALL_SUDS_COOLDOWN_MS + 1
@@ -44,7 +44,7 @@ describe('potassium wall suds', () => {
       cloneTimeRank: 0,
       side: 'left' as const,
       isRecalling: false,
-      speed: POTASSIUM_WALL_SUDS_MIN_SPEED + 1,
+      speed: POTASSIUM_WALL_HIT_MIN_SPEED + 1,
       now: 5000,
       lastClonesAt: 0,
       activeClones: 0
@@ -65,7 +65,7 @@ describe('potassium wall suds', () => {
     it('skips when locked, recalling, slow, cooling down, or the board is full', () => {
       expect(resolvePotassiumWallClones({ ...ready, duplicateRank: 0 })).toBeNull();
       expect(resolvePotassiumWallClones({ ...ready, isRecalling: true })).toBeNull();
-      expect(resolvePotassiumWallClones({ ...ready, speed: POTASSIUM_WALL_SUDS_MIN_SPEED - 1 })).toBeNull();
+      expect(resolvePotassiumWallClones({ ...ready, speed: POTASSIUM_WALL_HIT_MIN_SPEED - 1 })).toBeNull();
       expect(resolvePotassiumWallClones({
         ...ready,
         lastClonesAt: ready.now - POTASSIUM_WALL_CLONE_COOLDOWN_MS + 1

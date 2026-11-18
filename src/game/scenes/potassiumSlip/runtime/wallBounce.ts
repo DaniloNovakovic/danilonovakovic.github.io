@@ -11,7 +11,19 @@ export interface PotassiumWallSudsSplash {
 /** Pull the splash inside the drawn arena border so it is not clipped. */
 export const POTASSIUM_WALL_SUDS_INSET = 12;
 export const POTASSIUM_WALL_SUDS_COOLDOWN_MS = 120;
-export const POTASSIUM_WALL_SUDS_MIN_SPEED = 140;
+/** Slower wall touches (recall drift, rolling to a stop) trigger neither suds nor mini sponges. */
+export const POTASSIUM_WALL_HIT_MIN_SPEED = 140;
+
+/** Per-hit facts shared by the suds splash and Mini Sponges checks. */
+export interface PotassiumWallHit {
+  isRecalling: boolean;
+  speed: number;
+  now: number;
+}
+
+function isLivelyWallHit(hit: PotassiumWallHit): boolean {
+  return !hit.isRecalling && hit.speed >= POTASSIUM_WALL_HIT_MIN_SPEED;
+}
 
 export interface PotassiumWallSudsInput {
   blocked: { up: boolean; down: boolean; left: boolean; right: boolean };
@@ -59,18 +71,16 @@ export interface PotassiumWallClones {
  * straight back off the same target). Throttled and capped so wall chatter
  * cannot flood the board.
  */
-export function resolvePotassiumWallClones(input: {
-  duplicateRank: PotassiumSkillRank;
-  cloneTimeRank: number;
-  side: PotassiumWallSide;
-  isRecalling: boolean;
-  speed: number;
-  now: number;
-  lastClonesAt: number;
-  activeClones: number;
-}): PotassiumWallClones | null {
-  if (input.duplicateRank <= 0 || input.isRecalling) return null;
-  if (input.speed < POTASSIUM_WALL_SUDS_MIN_SPEED) return null;
+export function resolvePotassiumWallClones(
+  input: PotassiumWallHit & {
+    duplicateRank: PotassiumSkillRank;
+    cloneTimeRank: number;
+    side: PotassiumWallSide;
+    lastClonesAt: number;
+    activeClones: number;
+  }
+): PotassiumWallClones | null {
+  if (input.duplicateRank <= 0 || !isLivelyWallHit(input)) return null;
   if (input.now - input.lastClonesAt < POTASSIUM_WALL_CLONE_COOLDOWN_MS) return null;
   const count = Math.min(getPotassiumDuplicateCloneCount(input.duplicateRank), POTASSIUM_WALL_CLONE_MAX_ACTIVE - input.activeClones);
   if (count <= 0) return null;
@@ -86,13 +96,7 @@ export function resolvePotassiumWallClones(input: {
 }
 
 /** Throttle splashes so recall chatter or corner double-hits do not spam suds. */
-export function shouldShowPotassiumWallSuds(input: {
-  isRecalling: boolean;
-  speed: number;
-  now: number;
-  lastSudsAt: number;
-}): boolean {
-  if (input.isRecalling) return false;
-  if (input.speed < POTASSIUM_WALL_SUDS_MIN_SPEED) return false;
+export function shouldShowPotassiumWallSuds(input: PotassiumWallHit & { lastSudsAt: number }): boolean {
+  if (!isLivelyWallHit(input)) return false;
   return input.now - input.lastSudsAt >= POTASSIUM_WALL_SUDS_COOLDOWN_MS;
 }
