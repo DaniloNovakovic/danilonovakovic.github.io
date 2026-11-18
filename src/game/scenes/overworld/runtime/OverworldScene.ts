@@ -100,7 +100,7 @@ const TALK_EASE_MS = 320;
 
 interface StreetTalk {
   conversation: StreetConversation;
-  onEnd: (outcome: StreetConversationOutcome) => void;
+  onEnd?: (outcome: StreetConversationOutcome) => void;
 }
 
 export class OverworldScene extends Phaser.Scene {
@@ -379,7 +379,7 @@ export class OverworldScene extends Phaser.Scene {
   private openTalk(
     script: StreetConversationScript,
     partnerX: number,
-    onEnd: StreetTalk['onEnd']
+    onEnd?: StreetTalk['onEnd']
   ): void {
     this.talk = { conversation: new StreetConversation(script, partnerX), onEnd };
     this.interactPrompt.setVisible(false);
@@ -426,7 +426,7 @@ export class OverworldScene extends Phaser.Scene {
     this.closeTalkPanel();
     this.camera?.focus(null);
     this.syncPlayerPause();
-    talk.onEnd(outcome);
+    talk.onEnd?.(outcome);
   }
 
   /** Street talks borrow Ridge's docked conversation box. */
@@ -457,7 +457,7 @@ export class OverworldScene extends Phaser.Scene {
       onBananaPeelCancelled: () => this.resetBananaPeelFlow(),
       onSignpostRead: ({ stage, found, total }) => {
         this.signpost?.markRead(stage);
-        this.openTalk(signpostConversation(stage, found, total), OVERWORLD_SIGNPOST_X, () => {});
+        this.openTalk(signpostConversation(stage, found, total), OVERWORLD_SIGNPOST_X);
       }
     });
   }

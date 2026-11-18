@@ -51,7 +51,7 @@ export interface SideViewCameraFocus {
 
 export interface SideViewCameraRuntime {
   refresh(): void;
-  /** Ease into a close-up, or back to following the target with `null`. */
+  /** Ease into a close-up, or back to following the target with `null` (eased over the close-up's own `durationMs`). */
   focus(target: SideViewCameraFocus | null): void;
   destroy(): void;
 }
@@ -75,8 +75,10 @@ export function createSideViewCameraRuntime({
   const camera = scene.cameras.main;
   const focusPoint = new Phaser.Math.Vector2();
   let focused: SideViewCameraFocus | null = null;
-  /** Releasing keeps the deeper bounds until the zoom-out lands, so the view does not jump. */
+  /** Eases the floor back up after a close-up, so the view does not jump. */
   let boundsRestore: Phaser.Tweens.Tween | undefined;
+  /** Sets the bounds with `extra` px below the world; rebuilt on every framing so a resize refits the sides. */
+  let setBounds: (bottomExtra: number) => void = () => {};
 
   const applyFraming = (zoomDurationMs: number) => {
     const viewport = getSceneViewport(scene, designSize);
@@ -94,17 +96,19 @@ export function createSideViewCameraRuntime({
       ? Math.max(0, focused.y + (1 - focused.screenY) * viewHeight - (worldBounds.y + worldBounds.height))
       : 0;
 
-    const setBounds = (bottomExtra: number) =>
+    setBounds = (bottomExtra: number) =>
       camera.setBounds(
         worldBounds.x - cropPaddingX,
         worldBounds.y,
         worldBounds.width + cropPaddingX * 2,
         worldBounds.height + bottomExtra
       );
-    boundsRestore?.remove();
-    boundsRestore = undefined;
     const deepExtra = camera.getBounds().height - worldBounds.height;
-    if (!focused && zoomDurationMs > 0 && deepExtra > 0) {
+    if (!focused && zoomDurationMs === 0 && boundsRestore) {
+      // A resize mid-release: refit the sides but let the floor keep easing up.
+      setBounds(deepExtra);
+    } else if (!focused && zoomDurationMs > 0 && deepExtra > 0) {
+      boundsRestore?.remove();
       // Ease the floor back up alongside the zoom-out. Snapping it, now or
       // later, jerks the view: the follow target sits lower than the world
       // allows, so the camera drifts down into the deep bounds and then jumps.
@@ -120,6 +124,8 @@ export function createSideViewCameraRuntime({
         }
       });
     } else {
+      boundsRestore?.remove();
+      boundsRestore = undefined;
       setBounds(extraBottom);
     }
     if (zoomDurationMs > 0) camera.zoomTo(zoom, zoomDurationMs, 'Sine.easeInOut', true);

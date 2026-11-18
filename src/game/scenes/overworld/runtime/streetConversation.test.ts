@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   CHICK_CHASE_CHOICE,
+  LATER_CHOICE,
   StreetConversation,
   chickConversation,
   litterConversation,
@@ -19,7 +20,7 @@ describe('street conversations', () => {
 
     const last = talk.view(400);
     expect(last.awaitingChoice).toBe(true);
-    expect(last.choices.map((choice) => choice.id)).toEqual([CHICK_CHASE_CHOICE, 'later']);
+    expect(last.choices.map((choice) => choice.id)).toEqual([CHICK_CHASE_CHOICE, LATER_CHOICE]);
     // Advancing a choice line does nothing; only a real choice ends it.
     expect(talk.advance()).toBeNull();
     expect(talk.choose('nonsense')).toBeNull();

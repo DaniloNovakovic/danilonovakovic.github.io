@@ -99,6 +99,8 @@ export class StreetConversation {
 
 export const CHICK_CHASE_CHOICE = 'chase';
 export const CRT_SEAT_CHOICE = 'seat';
+/** Every "not now" answer: the talk just closes. */
+export const LATER_CHOICE = 'later';
 
 /** The chick sizes you up. Coming back after the chase, it remembers. */
 export function chickConversation(hasMetBefore: boolean): StreetConversationScript {
@@ -114,7 +116,7 @@ export function chickConversation(hasMetBefore: boolean): StreetConversationScri
     ],
     choices: [
       { id: CHICK_CHASE_CHOICE, label: copy.chase },
-      { id: 'later', label: copy.later }
+      { id: LATER_CHOICE, label: copy.later }
     ]
   };
 }
@@ -141,7 +143,7 @@ export function crtConversation(): StreetConversationScript {
     lines: [{ speakerId: 'narrator', text: copy.line }],
     choices: [
       { id: CRT_SEAT_CHOICE, label: copy.seat },
-      { id: 'later', label: copy.later }
+      { id: LATER_CHOICE, label: copy.later }
     ]
   };
 }
