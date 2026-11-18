@@ -15,6 +15,7 @@ const FLEE_SPEED = 260;
 const RETURN_SPEED = 110;
 const STREET_MIN_X = 80;
 const STREET_MAX_X = 2920;
+const HOME_SLACK_PX = 4;
 
 type ChickFrame = 'idle' | 'peck' | 'run';
 
@@ -45,6 +46,11 @@ export class StreetChick {
     return this.chickX;
   }
 
+  /** Back on its spot, not fleeing or walking home: ready to talk. */
+  get isHome(): boolean {
+    return Math.abs(this.chickX - this.homeX) <= HOME_SLACK_PX;
+  }
+
   update(
     timeMs: number,
     deltaMs: number,
@@ -70,7 +76,7 @@ export class StreetChick {
   }
 
   private walkHome(glassesOn: boolean, motion: boolean, dt: number): boolean {
-    if (glassesOn || Math.abs(this.chickX - this.homeX) <= 4) return false;
+    if (glassesOn || this.isHome) return false;
     const dir = this.homeX > this.chickX ? 1 : -1;
     const step = motion ? RETURN_SPEED * dt : Math.abs(this.homeX - this.chickX);
     const next = this.chickX + dir * step;

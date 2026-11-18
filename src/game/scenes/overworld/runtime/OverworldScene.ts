@@ -358,6 +358,8 @@ export class OverworldScene extends Phaser.Scene {
    */
   private startTalkFor(nearby: NearbyThing | undefined): boolean {
     if (nearby?.kind === 'npc' && this.chick) {
+      // Still away after a scare: the talk would frame an empty patch of street.
+      if (!this.chick.isHome) return true;
       this.openTalk(chickConversation(isItemOwned('glasses')), this.chick.x, (outcome) => {
         if (outcome === CHICK_CHASE_CHOICE) this.interactAfterTalk();
       });
@@ -463,7 +465,8 @@ export class OverworldScene extends Phaser.Scene {
   }
 
   private applyOverworldNearbyPrompt(nearby: NearbyThing | undefined): void {
-    if (!nearby || this.session?.getState().overworld.bananaFirstPeelPending) {
+    const chickAway = nearby?.kind === 'npc' && this.chick?.isHome === false;
+    if (!nearby || chickAway || this.session?.getState().overworld.bananaFirstPeelPending) {
       this.interactPrompt.setVisible(false);
       return;
     }
