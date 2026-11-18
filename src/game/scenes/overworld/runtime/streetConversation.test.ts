@@ -59,6 +59,13 @@ describe('street conversations', () => {
     expect(talk.advance()).toBe('finished');
   });
 
+  it('dresses the player bust like the street sprite', () => {
+    const talk = new StreetConversation(litterConversation(), 900);
+    talk.advance();
+    expect(talk.view(900).portrait).toBe('streetPlayer');
+    expect(talk.view(900, true).portrait).toBe('streetPlayerGlasses');
+  });
+
   it('greets a returning player differently', () => {
     expect(chickConversation(true).lines[0].text).not.toBe(chickConversation(false).lines[0].text);
   });

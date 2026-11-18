@@ -32,11 +32,10 @@ export interface StreetConversationScript {
 /** How a talk ended: read to the end, stepped away from, or a choice id. */
 export type StreetConversationOutcome = 'finished' | 'left' | (string & {});
 
-const PORTRAITS: Record<StreetSpeakerId, RidgePortraitId> = {
-  player: 'player',
-  chick: 'chick',
-  narrator: 'prompt'
-};
+function portraitFor(speakerId: StreetSpeakerId, glassesOn: boolean): RidgePortraitId {
+  if (speakerId === 'player') return glassesOn ? 'streetPlayerGlasses' : 'streetPlayer';
+  return speakerId === 'chick' ? 'chick' : 'prompt';
+}
 
 export class StreetConversation {
   private lineIndex = 0;
@@ -67,7 +66,8 @@ export class StreetConversation {
     return this.script.choices?.some((choice) => choice.id === choiceId) ? choiceId : null;
   }
 
-  view(playerX: number): RidgeConversationPanelView {
+  /** `glassesOn` dresses the player's bust like the street sprite. */
+  view(playerX: number, glassesOn = false): RidgeConversationPanelView {
     const line = this.script.lines[this.lineIndex];
     const names = getMessages().scenes.overworld.conversation.speakers;
     const playerOnLeft = playerX <= this.partnerX;
@@ -82,7 +82,7 @@ export class StreetConversation {
       lineCount: this.script.lines.length,
       awaitingChoice,
       choices: awaitingChoice ? (this.script.choices ?? []) : [],
-      portrait: PORTRAITS[line.speakerId],
+      portrait: portraitFor(line.speakerId, glassesOn),
       speakerSide:
         line.speakerId === 'narrator'
           ? 'center'

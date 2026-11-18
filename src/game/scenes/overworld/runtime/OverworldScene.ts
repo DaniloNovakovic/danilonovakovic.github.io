@@ -435,7 +435,7 @@ export class OverworldScene extends Phaser.Scene {
     bridgeActions.setSceneUiPanel(
       OVERWORLD_SCENE_ID,
       'ridgeConversation',
-      this.talk.conversation.view(this.player.x)
+      this.talk.conversation.view(this.player.x, isItemEquipped('glasses'))
     );
   }
 

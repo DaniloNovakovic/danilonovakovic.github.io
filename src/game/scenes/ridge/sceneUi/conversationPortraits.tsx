@@ -20,6 +20,8 @@ const PORTRAITS: Record<BodiedPortraitId, (emotion: RidgeEmotion) => ReactNode> 
   steward: (emotion) => <StewardPortrait emotion={emotion} />,
   quietCat: (emotion) => <CickaPortrait emotion={emotion} coat="dark" />,
   chick: (emotion) => <ChickPortrait emotion={emotion} />,
+  streetPlayer: (emotion) => <StreetPlayerPortrait emotion={emotion} />,
+  streetPlayerGlasses: (emotion) => <StreetPlayerPortrait emotion={emotion} glasses />,
   player: (emotion) => <PlayerPortrait emotion={emotion} />
 };
 
@@ -372,6 +374,38 @@ function ChickPortrait({ emotion }: { emotion: RidgeEmotion }) {
       <ChickEye emotion={emotion} />
     </g>
   );
+}
+
+/**
+ * The Overworld player sprite, enlarged: round head, eyes glancing right,
+ * hoodie box and backpack (see TextureGenerator.generatePlayer).
+ */
+function StreetPlayerPortrait({ emotion, glasses = false }: { emotion: RidgeEmotion; glasses?: boolean }) {
+  return (
+    <g fill="#fbfbf9" stroke="#1a1a1a" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="17.5" y="45" width="11" height="22" />
+      <rect x="26" y="39" width="28" height="40" />
+      <circle cx="40" cy="28" r="16.5" />
+      <circle cx="43" cy="25" r="2.8" fill="#1a1a1a" stroke="none" />
+      <circle cx="51" cy="25" r="2.8" fill="#1a1a1a" stroke="none" />
+      {glasses ? (
+        <g fill="none" strokeWidth="2.5">
+          <circle cx="43" cy="25" r="5.5" />
+          <circle cx="51" cy="25" r="5.5" />
+          <path d="M45.5 25 H48.5 M37.5 24 L31.5 22.5" />
+        </g>
+      ) : null}
+      <StreetPlayerMouth emotion={emotion} />
+    </g>
+  );
+}
+
+/** The sprite has no mouth; only a strong feeling earns one. */
+function StreetPlayerMouth({ emotion }: { emotion: RidgeEmotion }) {
+  if (emotion === 'surprised') return <circle cx="48" cy="35" r="2" fill="none" strokeWidth="2.5" />;
+  if (emotion === 'playful') return <path d="M44 34 Q48 37.5 52 34" fill="none" strokeWidth="2.5" />;
+  if (emotion === 'thoughtful') return <path d="M45 35 H51" fill="none" strokeWidth="2.5" />;
+  return null;
 }
 
 function ChickEye({ emotion }: { emotion: RidgeEmotion }) {
