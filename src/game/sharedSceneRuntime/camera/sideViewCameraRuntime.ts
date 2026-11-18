@@ -31,8 +31,8 @@ export interface SideViewCameraRuntimeOptions {
   };
 }
 
-/** Extra wait after a zoom-out before the bounds tighten back to the world. */
-const BOUNDS_RESTORE_SETTLE_MS = 500;
+/** How much longer than the zoom-out the floor takes to ease back to the world. */
+const BOUNDS_RESTORE_SETTLE_MS = 200;
 
 /**
  * A framed close-up, e.g. two people talking: the camera eases toward a world
@@ -76,7 +76,7 @@ export function createSideViewCameraRuntime({
   const focusPoint = new Phaser.Math.Vector2();
   let focused: SideViewCameraFocus | null = null;
   /** Releasing keeps the deeper bounds until the zoom-out lands, so the view does not jump. */
-  let boundsRestore: Phaser.Time.TimerEvent | undefined;
+  let boundsRestore: Phaser.Tweens.Tween | undefined;
 
   const applyFraming = (zoomDurationMs: number) => {
     const viewport = getSceneViewport(scene, designSize);
@@ -103,12 +103,21 @@ export function createSideViewCameraRuntime({
       );
     boundsRestore?.remove();
     boundsRestore = undefined;
-    const keepDeepBounds = !focused && zoomDurationMs > 0 && camera.getBounds().height > worldBounds.height;
-    if (keepDeepBounds) {
-      // The follow lerp trails the zoom a little; wait for the pan to settle too.
-      boundsRestore = scene.time.delayedCall(zoomDurationMs + BOUNDS_RESTORE_SETTLE_MS, () => {
-        boundsRestore = undefined;
-        setBounds(0);
+    const deepExtra = camera.getBounds().height - worldBounds.height;
+    if (!focused && zoomDurationMs > 0 && deepExtra > 0) {
+      // Ease the floor back up alongside the zoom-out. Snapping it, now or
+      // later, jerks the view: the follow target sits lower than the world
+      // allows, so the camera drifts down into the deep bounds and then jumps.
+      boundsRestore = scene.tweens.addCounter({
+        from: deepExtra,
+        to: 0,
+        duration: zoomDurationMs + BOUNDS_RESTORE_SETTLE_MS,
+        ease: 'Sine.easeInOut',
+        onUpdate: (tween) => setBounds(tween.getValue() ?? 0),
+        onComplete: () => {
+          boundsRestore = undefined;
+          setBounds(0);
+        }
       });
     } else {
       setBounds(extraBottom);
