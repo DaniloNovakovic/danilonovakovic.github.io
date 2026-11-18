@@ -148,7 +148,9 @@ const CLONE_EFFECT_MULTIPLIER = 0.5;
 const POISON_DEATH_SPREAD_RADIUS = 76;
 const CELL_FIRE_ROW_HEIGHT = 48;
 const BOSS_ORBIT_RADIUS = 78;
+/** Radians per millisecond. */
 const BOSS_ORBIT_SPEED = 0.0017;
+const BOSS_ORBIT_RADIUS_Y = BOSS_ORBIT_RADIUS * 0.68;
 
 export class PotassiumSlipScene extends Phaser.Scene {
   private banana!: ProjectileSprite;
@@ -157,6 +159,8 @@ export class PotassiumSlipScene extends Phaser.Scene {
   private trailZones!: Phaser.Physics.Arcade.Group;
   private bossBlockers!: Phaser.Physics.Arcade.Group;
   private readonly bounceObstacles: PotassiumBounceObstacle[] = [];
+  /** Scene time of the last orbit placement, so the aim hint can extrapolate the cans. */
+  private bossOrbitTimeMs = 0;
   private potassiumRenderer!: PotassiumSlipRenderer;
   private lastWallSudsAt = 0;
   private lastWallClonesAt = 0;
@@ -687,23 +691,29 @@ export class PotassiumSlipScene extends Phaser.Scene {
 
     const obstacles = this.bounceObstacles;
     obstacles.length = 0;
-    const collect = (gameObject: Phaser.GameObjects.GameObject) => {
-      const sprite = gameObject as EnemySprite;
-      if (!sprite.active || !sprite.body || isPotassiumEnemyDying(sprite)) return;
-      const { body } = sprite;
-      obstacles.push({
-        x: sprite.x,
-        y: sprite.y,
-        left: body.left,
-        top: body.top,
-        right: body.right,
-        bottom: body.bottom,
-        vx: body.velocity.x,
-        vy: body.velocity.y
-      });
-    };
-    this.enemies.getChildren().forEach(collect);
-    this.bossBlockers.getChildren().forEach(collect);
+    this.enemies.getChildren().forEach((gameObject) => {
+      const obstacle = toBounceObstacle(gameObject as EnemySprite);
+      if (obstacle) obstacles.push(obstacle);
+    });
+    const boss = this.activeBoss;
+    this.bossBlockers.getChildren().forEach((gameObject) => {
+      const blocker = gameObject as EnemySprite;
+      const obstacle = toBounceObstacle(blocker);
+      if (!obstacle) return;
+      if (boss?.active) {
+        obstacle.orbit = {
+          centerX: boss.x,
+          centerY: boss.y,
+          centerVx: boss.body.velocity.x,
+          centerVy: boss.body.velocity.y,
+          radiusX: BOSS_ORBIT_RADIUS,
+          radiusY: BOSS_ORBIT_RADIUS_Y,
+          angle: getBossOrbitAngle(blocker, this.bossOrbitTimeMs),
+          angularSpeed: BOSS_ORBIT_SPEED * 1000
+        };
+      }
+      obstacles.push(obstacle);
+    });
 
     const radius = this.banana.body.halfWidth;
     const preview = predictPotassiumBounce({
@@ -1061,13 +1071,13 @@ export class PotassiumSlipScene extends Phaser.Scene {
   }
 
   private updateBossOrbitBlockers(boss: EnemySprite, time: number): void {
+    this.bossOrbitTimeMs = time;
     this.bossBlockers.getChildren().forEach((gameObject) => {
       const blocker = gameObject as EnemySprite;
-      const index = getPotassiumData<number>(blocker, POTASSIUM_DATA_KEYS.orbitIndex) ?? 0;
-      const angle = time * BOSS_ORBIT_SPEED + index * ((Math.PI * 2) / 3);
+      const angle = getBossOrbitAngle(blocker, time);
       blocker.setPosition(
         boss.x + Math.cos(angle) * BOSS_ORBIT_RADIUS,
-        boss.y + Math.sin(angle) * (BOSS_ORBIT_RADIUS * 0.68)
+        boss.y + Math.sin(angle) * BOSS_ORBIT_RADIUS_Y
       );
       blocker.setAngle(Phaser.Math.RadToDeg(angle));
       blocker.setVelocity(0, 0);
@@ -1363,4 +1373,25 @@ function readPotassiumTerminalActionParams(params: unknown): PotassiumTerminalAc
   return action === 'return' || action === 'retry' || action === 'endless'
     ? action
     : null;
+}
+
+/** Where a boss soda can sits on its orbit at scene time `timeMs`; cans are spaced a third of a turn apart. */
+function getBossOrbitAngle(blocker: EnemySprite, timeMs: number): number {
+  const index = getPotassiumData<number>(blocker, POTASSIUM_DATA_KEYS.orbitIndex) ?? 0;
+  return timeMs * BOSS_ORBIT_SPEED + index * ((Math.PI * 2) / 3);
+}
+
+function toBounceObstacle(sprite: EnemySprite): PotassiumBounceObstacle | null {
+  if (!sprite.active || !sprite.body || isPotassiumEnemyDying(sprite)) return null;
+  const { body } = sprite;
+  return {
+    x: sprite.x,
+    y: sprite.y,
+    left: body.left,
+    top: body.top,
+    right: body.right,
+    bottom: body.bottom,
+    vx: body.velocity.x,
+    vy: body.velocity.y
+  };
 }

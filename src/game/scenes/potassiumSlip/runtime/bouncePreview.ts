@@ -19,6 +19,25 @@ export interface PotassiumBounceObstacle {
   /** Current body velocity, so the preview leads falling enemies. */
   vx: number;
   vy: number;
+  /**
+   * Set for boss soda cans: they are placed on an ellipse around the boss
+   * each frame (body velocity stays 0), so `vx`/`vy` say nothing about them.
+   */
+  orbit?: PotassiumBounceOrbit;
+}
+
+/** Sprite center at time T (s): center + centerV*T + (cos, sin)(angle + angularSpeed*T) * radius. */
+export interface PotassiumBounceOrbit {
+  centerX: number;
+  centerY: number;
+  centerVx: number;
+  centerVy: number;
+  radiusX: number;
+  radiusY: number;
+  /** Radians, now. */
+  angle: number;
+  /** Radians per second. */
+  angularSpeed: number;
 }
 
 export interface PotassiumBouncePreviewInput {
@@ -48,7 +67,8 @@ const EPSILON = 1e-6;
 /**
  * Where the sponge's first bounce happens and which way it goes afterwards.
  * Assumes straight-line flight at launch speed, with obstacles moving at
- * their current velocity. Drag and mid-flight enemy steering are ignored.
+ * their current velocity (or along their orbit). Drag and mid-flight enemy
+ * steering are ignored.
  */
 export function predictPotassiumBounce(input: PotassiumBouncePreviewInput): PotassiumBouncePreview | null {
   const { origin, velocity, radius, arena, obstacles } = input;
@@ -123,25 +143,99 @@ function findFirstContact(
   for (let i = 0; i < obstacles.length; i += 1) {
     if (i === skipIndex) continue;
     const obstacle = obstacles[i];
-    // Obstacle box at `startT`, swept in the sponge's frame of reference.
-    const dx = obstacle.vx * startT;
-    const dy = obstacle.vy * startT;
-    const rvx = velocity.x - obstacle.vx;
-    const rvy = velocity.y - obstacle.vy;
-    const t = sweepCircleIntoBox(
-      origin.x, origin.y, rvx, rvy, radius,
-      obstacle.left + dx, obstacle.top + dy, obstacle.right + dx, obstacle.bottom + dy
-    );
+    const t = obstacle.orbit
+      ? sampleOrbitContact(origin, velocity, radius, obstacle, obstacle.orbit, startT, bestT)
+      : sweepLinearContact(origin, velocity, radius, obstacle, startT);
     if (t === null || t >= bestT) continue;
-    const spongeX = origin.x + velocity.x * t;
-    const spongeY = origin.y + velocity.y * t;
-    const centerX = obstacle.x + obstacle.vx * (startT + t);
-    const centerY = obstacle.y + obstacle.vy * (startT + t);
+    const center = obstacleCenterAt(obstacle, startT + t);
     bestT = t;
-    best = { t, normal: unitOr(spongeX - centerX, spongeY - centerY, velocity), obstacleIndex: i };
+    best = {
+      t,
+      normal: unitOr(origin.x + velocity.x * t - center.x, origin.y + velocity.y * t - center.y, velocity),
+      obstacleIndex: i
+    };
   }
 
   return best ? { ...best, t: startT + best.t } : null;
+}
+
+/** Obstacle moving in a straight line: exact sweep in the sponge's frame of reference. */
+function sweepLinearContact(
+  origin: PotassiumPoint,
+  velocity: PotassiumPoint,
+  radius: number,
+  obstacle: PotassiumBounceObstacle,
+  startT: number
+): number | null {
+  const dx = obstacle.vx * startT;
+  const dy = obstacle.vy * startT;
+  return sweepCircleIntoBox(
+    origin.x, origin.y, velocity.x - obstacle.vx, velocity.y - obstacle.vy, radius,
+    obstacle.left + dx, obstacle.top + dy, obstacle.right + dx, obstacle.bottom + dy
+  );
+}
+
+/** Orbit sampling step: ~4px of sponge travel at top speed, well under a can's size. */
+const ORBIT_SAMPLE_SECONDS = 1 / 200;
+const ORBIT_REFINE_STEPS = 10;
+
+/**
+ * Orbiting obstacle: no closed form, so step along the flight until the
+ * sponge overlaps the can's box, then bisect to the touch time.
+ */
+function sampleOrbitContact(
+  origin: PotassiumPoint,
+  velocity: PotassiumPoint,
+  radius: number,
+  obstacle: PotassiumBounceObstacle,
+  orbit: PotassiumBounceOrbit,
+  startT: number,
+  limitT: number
+): number | null {
+  const touches = (t: number) => {
+    const sprite = orbitCenterAt(orbit, startT + t);
+    return circleTouchesBox(
+      origin.x + velocity.x * t, origin.y + velocity.y * t, radius,
+      sprite.x + (obstacle.left - obstacle.x), sprite.y + (obstacle.top - obstacle.y),
+      sprite.x + (obstacle.right - obstacle.x), sprite.y + (obstacle.bottom - obstacle.y)
+    );
+  };
+  if (touches(0)) return null;
+
+  for (let t = ORBIT_SAMPLE_SECONDS; t < limitT + ORBIT_SAMPLE_SECONDS; t += ORBIT_SAMPLE_SECONDS) {
+    if (!touches(t)) continue;
+    let lo = t - ORBIT_SAMPLE_SECONDS;
+    let hi = t;
+    for (let step = 0; step < ORBIT_REFINE_STEPS; step += 1) {
+      const mid = (lo + hi) / 2;
+      if (touches(mid)) hi = mid;
+      else lo = mid;
+    }
+    return hi;
+  }
+  return null;
+}
+
+function obstacleCenterAt(obstacle: PotassiumBounceObstacle, t: number): PotassiumPoint {
+  if (obstacle.orbit) return orbitCenterAt(obstacle.orbit, t);
+  return { x: obstacle.x + obstacle.vx * t, y: obstacle.y + obstacle.vy * t };
+}
+
+function orbitCenterAt(orbit: PotassiumBounceOrbit, t: number): PotassiumPoint {
+  const angle = orbit.angle + orbit.angularSpeed * t;
+  return {
+    x: orbit.centerX + orbit.centerVx * t + Math.cos(angle) * orbit.radiusX,
+    y: orbit.centerY + orbit.centerVy * t + Math.sin(angle) * orbit.radiusY
+  };
+}
+
+function circleTouchesBox(
+  px: number, py: number, r: number,
+  left: number, top: number, right: number, bottom: number
+): boolean {
+  const nearestX = Math.max(left, Math.min(px, right));
+  const nearestY = Math.max(top, Math.min(py, bottom));
+  return (px - nearestX) ** 2 + (py - nearestY) ** 2 <= r * r;
 }
 
 function wallContact(
@@ -180,9 +274,7 @@ function sweepCircleIntoBox(
   px: number, py: number, dx: number, dy: number, r: number,
   left: number, top: number, right: number, bottom: number
 ): number | null {
-  const nearestX = Math.max(left, Math.min(px, right));
-  const nearestY = Math.max(top, Math.min(py, bottom));
-  if ((px - nearestX) ** 2 + (py - nearestY) ** 2 <= r * r) return null;
+  if (circleTouchesBox(px, py, r, left, top, right, bottom)) return null;
 
   // Ray against the box grown by r on every side.
   const xSpan = slabSpan(px, dx, left - r, right + r);

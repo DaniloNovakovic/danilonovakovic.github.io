@@ -93,6 +93,29 @@ describe('potassium bounce preview', () => {
     expect(preview!.contact.y).toBeGreaterThan(240);
   });
 
+  it('follows an orbiting can instead of its zero body velocity', () => {
+    // Can starts right of the path (x=280) and swings counter-clockwise up
+    // across it, so a stationary guess would miss it entirely.
+    const orbit = {
+      centerX: 200, centerY: 200, centerVx: 0, centerVy: 0,
+      radiusX: 80, radiusY: 80, angle: 0, angularSpeed: -2
+    };
+    const can = { ...box(280, 200, 29, 21), orbit };
+
+    expect(predict({ x: 0, y: -400 }, [box(280, 200, 29, 21)])?.hit).toBe('wall');
+
+    const preview = predict({ x: 0, y: -400 }, [can]);
+    expect(preview?.hit).toBe('enemy');
+    // Touching the can's box where the can actually is at that moment.
+    const t = (500 - preview!.contact.y) / 400;
+    const angle = orbit.angle + orbit.angularSpeed * t;
+    const canX = 200 + Math.cos(angle) * 80;
+    const canY = 200 + Math.sin(angle) * 80;
+    const nearestX = Math.max(canX - 29, Math.min(preview!.contact.x, canX + 29));
+    const nearestY = Math.max(canY - 21, Math.min(preview!.contact.y, canY + 21));
+    expect(Math.hypot(preview!.contact.x - nearestX, preview!.contact.y - nearestY)).toBeCloseTo(radius, 0);
+  });
+
   it('cuts the post-bounce line at the next contact', () => {
     // Head-on off the top wall, straight back into a box under it.
     const wallFirst = predictPotassiumBounce({
