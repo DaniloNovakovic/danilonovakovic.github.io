@@ -1,31 +1,30 @@
+import { Backpack } from 'lucide-react';
 import { bridgeActions, type BridgeState } from '@/game/bridge/store';
-import { BackpackDoodle } from '@/game/overlays/inventory/backpackIcons';
 import { useMessages } from '@/shared/i18n';
-import { notebookShadowRoles, sketchFocusVisible } from '@/shared/ui/tokens';
-import { cn } from '@/shared/ui/utils';
+import { Button } from '@/shared/ui';
 import { canOpenBackpack, INVENTORY_OVERLAY_ID } from './useBackpack';
 
+/** Header button beside Dev; shows up once there is something in the backpack. */
 export function BackpackButton({ bridge }: { bridge: BridgeState }) {
   const copy = useMessages().inventory;
-  if (bridge.activeOverlayId !== null || !canOpenBackpack(bridge)) return null;
+  const isOpen = bridge.activeOverlayId === INVENTORY_OVERLAY_ID;
+  if (!isOpen && !canOpenBackpack(bridge)) return null;
   return (
-    <button
-      type="button"
+    <Button
+      variant="floating"
+      size="sm"
       onClick={() => bridgeActions.openOverlay(INVENTORY_OVERLAY_ID)}
+      className="sm:px-3 sm:py-1.5 sm:text-xs"
       aria-haspopup="dialog"
+      aria-expanded={isOpen}
       aria-label={copy.open}
       title={`${copy.open} (${copy.hotkey})`}
-      className={cn(
-        'group absolute right-2 top-2 z-30 flex cursor-pointer items-center gap-1 rounded-md border-2 border-[#1a1a1a] bg-[#fbfbf9]/90 p-1 backdrop-blur-sm transition-transform motion-reduce:transition-none',
-        'hover:-translate-y-0.5 hover:-rotate-3 active:translate-y-px sm:right-3 sm:top-3',
-        notebookShadowRoles.control,
-        sketchFocusVisible
-      )}
     >
-      <BackpackDoodle className="h-8 w-8 sm:h-9 sm:w-9" />
-      <kbd className="mr-1 hidden rounded-sm border border-[#1a1a1a]/50 px-1 font-[inherit] text-[10px] font-bold leading-4 text-[#1a1a1a]/70 md:inline">
+      <Backpack className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+      <span>{copy.title}</span>
+      <kbd className="hidden rounded-sm border border-[#1a1a1a]/40 px-1 font-[inherit] text-[10px] leading-4 text-[#1a1a1a]/60 md:inline">
         {copy.hotkey}
       </kbd>
-    </button>
+    </Button>
   );
 }

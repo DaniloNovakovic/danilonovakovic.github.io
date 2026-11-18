@@ -25,19 +25,6 @@ function Doodle({ children, ...props }: SVGProps<SVGSVGElement> & { children: Re
   );
 }
 
-/** The player's backpack: the box on the street sprite's back, seen from the front. */
-export function BackpackDoodle(props: SVGProps<SVGSVGElement>) {
-  return (
-    <Doodle {...props}>
-      <path d="M18 12c0-5 12-5 12 0" />
-      <path d="M11 17.5c0-3 2.5-5.5 5.5-5.5h15c3 0 5.5 2.5 5.5 5.5V40c0 2-1.5 3.5-3.5 3.5h-19C12.5 43.5 11 42 11 40z" fill={PAPER} />
-      <path d="M16 27h16v11.5H16z" strokeWidth={2.4} />
-      <path d="M16 27c2 3 14 3 16 0" strokeWidth={2} />
-      <path d="M24 30.5v2.5" strokeWidth={2.4} />
-    </Doodle>
-  );
-}
-
 function Glasses() {
   return (
     <>

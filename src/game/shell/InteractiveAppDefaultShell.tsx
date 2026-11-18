@@ -83,6 +83,7 @@ export function InteractiveAppDefaultShell({
                 </Button>
               )
             )}
+            <BackpackButton bridge={bridge} />
           </div>
           <Button
             variant="floating"
@@ -122,7 +123,6 @@ export function InteractiveAppDefaultShell({
             </div>
           </div>
           <SceneUiHost placement="panel" />
-          <BackpackButton bridge={bridge} />
         </div>
       </main>
 
