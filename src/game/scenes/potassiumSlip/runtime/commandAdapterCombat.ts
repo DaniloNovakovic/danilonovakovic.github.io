@@ -27,6 +27,7 @@ import {
 } from './phaserData';
 import type { PotassiumCommandAdapterInternals } from './commandAdapterInternals';
 import type { PotassiumCombatContext, PotassiumCommandObject } from './commandAdapterTypes';
+import { reflectPotassiumRicochet } from './bouncePreview';
 
 export function applyCombatCommands(
   internals: PotassiumCommandAdapterInternals,
@@ -210,7 +211,7 @@ function ricochetProjectileFromEnemy(
     ? ports.getMaxMainProjectileSpeed()
     : options.cloneRicochetMaxSpeed;
   const ricochet = scaledRicochetVelocity(
-    reflectVelocity(velocity, normal),
+    reflectPotassiumRicochet(velocity, normal),
     vectorLength(velocity),
     maxSpeed,
     options
@@ -401,26 +402,6 @@ function collisionNormal(
   return normalize(normal);
 }
 
-function reflectVelocity(
-  velocity: { x: number; y: number },
-  normal: { x: number; y: number }
-): { x: number; y: number } {
-  let ricochet = { ...velocity };
-  const dot = dotProduct(ricochet, normal);
-  if (dot < 0) {
-    ricochet = {
-      x: ricochet.x - normal.x * (2 * dot),
-      y: ricochet.y - normal.y * (2 * dot)
-    };
-  } else {
-    ricochet = { ...normal };
-  }
-  if (vectorLengthSquared(ricochet) <= 0.001) {
-    return { ...normal };
-  }
-  return ricochet;
-}
-
 function scaledRicochetVelocity(
   ricochet: { x: number; y: number },
   currentSpeed: number,
@@ -451,10 +432,6 @@ function normalize(point: { x: number; y: number }): { x: number; y: number } {
   const length = vectorLength(point);
   if (length <= 0) return { x: 0, y: 0 };
   return { x: point.x / length, y: point.y / length };
-}
-
-function dotProduct(a: { x: number; y: number }, b: { x: number; y: number }): number {
-  return a.x * b.x + a.y * b.y;
 }
 
 function distance(a: { x: number; y: number }, b: { x: number; y: number }): number {

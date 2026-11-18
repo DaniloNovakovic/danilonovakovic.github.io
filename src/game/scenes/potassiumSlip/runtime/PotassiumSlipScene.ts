@@ -78,6 +78,10 @@ import {
   type PotassiumProjectileControlCommand
 } from './projectileControl';
 import {
+  predictPotassiumBounce,
+  type PotassiumBounceObstacle
+} from './bouncePreview';
+import {
   PotassiumCommandAdapter,
   type PotassiumCommandObject
 } from './commandAdapter';
@@ -133,6 +137,8 @@ const SIDE_BOUNCE_MARGIN = 32;
 const BANANA_RICOCHET_MIN_SPEED = 360;
 const BANANA_RICOCHET_BOOST = 1.08;
 const CLONE_RICOCHET_MAX_SPEED = 660;
+/** How far the aim hint follows the sponge after its first bounce. */
+const BOUNCE_PREVIEW_AFTER_LENGTH = 150;
 const TRAIL_DROP_INTERVAL_MS = 180;
 const FIRE_TRAIL_LIFETIME_MS = 1500;
 const GHOST_BEAM_LIFETIME_MS = 190;
@@ -142,7 +148,9 @@ const CLONE_EFFECT_MULTIPLIER = 0.5;
 const POISON_DEATH_SPREAD_RADIUS = 76;
 const CELL_FIRE_ROW_HEIGHT = 48;
 const BOSS_ORBIT_RADIUS = 78;
+/** Radians per millisecond. */
 const BOSS_ORBIT_SPEED = 0.0017;
+const BOSS_ORBIT_RADIUS_Y = BOSS_ORBIT_RADIUS * 0.68;
 
 export class PotassiumSlipScene extends Phaser.Scene {
   private banana!: ProjectileSprite;
@@ -150,6 +158,9 @@ export class PotassiumSlipScene extends Phaser.Scene {
   private clones!: Phaser.Physics.Arcade.Group;
   private trailZones!: Phaser.Physics.Arcade.Group;
   private bossBlockers!: Phaser.Physics.Arcade.Group;
+  private readonly bounceObstacles: PotassiumBounceObstacle[] = [];
+  /** Scene time of the last orbit placement, so the aim hint can extrapolate the cans. */
+  private bossOrbitTimeMs = 0;
   private potassiumRenderer!: PotassiumSlipRenderer;
   private lastWallSudsAt = 0;
   private lastWallClonesAt = 0;
@@ -633,6 +644,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
       } else if (command.type === 'clearTether') {
         this.potassiumRenderer.clearTether();
       } else if (command.type === 'drawAim') {
+        this.drawBouncePreview(command.to);
         this.potassiumRenderer.drawAimArrow(command.from, command.to);
       } else if (command.type === 'drawRecallTether') {
         this.potassiumRenderer.drawRecallTether(this.banana);
@@ -665,6 +677,54 @@ export class PotassiumSlipScene extends Phaser.Scene {
         this.physics.moveTo(this.banana, LAUNCH_PAD.x, LAUNCH_PAD.y, command.speed);
       }
     });
+  }
+
+  /** Aim hint: where the sponge would first bounce if released at `pointer`, and which way it goes. */
+  private drawBouncePreview(pointer: { x: number; y: number }): void {
+    const origin = { x: this.banana.x, y: this.banana.y };
+    const velocity = this.projectileControl.getLaunchVelocity({
+      pointer,
+      banana: origin,
+      maxSpeed: this.getMaxBananaSpeed()
+    });
+    if (!velocity) return;
+
+    const obstacles = this.bounceObstacles;
+    obstacles.length = 0;
+    this.enemies.getChildren().forEach((gameObject) => {
+      const obstacle = toBounceObstacle(gameObject as EnemySprite);
+      if (obstacle) obstacles.push(obstacle);
+    });
+    const boss = this.activeBoss;
+    this.bossBlockers.getChildren().forEach((gameObject) => {
+      const blocker = gameObject as EnemySprite;
+      const obstacle = toBounceObstacle(blocker);
+      if (!obstacle) return;
+      if (boss?.active) {
+        obstacle.orbit = {
+          centerX: boss.x,
+          centerY: boss.y,
+          centerVx: boss.body.velocity.x,
+          centerVy: boss.body.velocity.y,
+          radiusX: BOSS_ORBIT_RADIUS,
+          radiusY: BOSS_ORBIT_RADIUS_Y,
+          angle: getBossOrbitAngle(blocker, this.bossOrbitTimeMs),
+          angularSpeed: BOSS_ORBIT_SPEED * 1000
+        };
+      }
+      obstacles.push(obstacle);
+    });
+
+    const radius = this.banana.body.halfWidth;
+    const preview = predictPotassiumBounce({
+      origin,
+      velocity,
+      radius,
+      arena: ARENA,
+      obstacles,
+      afterBounceLength: BOUNCE_PREVIEW_AFTER_LENGTH
+    });
+    if (preview) this.potassiumRenderer.drawBouncePreview(origin, preview, radius);
   }
 
   private updateControlState(): void {
@@ -1011,13 +1071,13 @@ export class PotassiumSlipScene extends Phaser.Scene {
   }
 
   private updateBossOrbitBlockers(boss: EnemySprite, time: number): void {
+    this.bossOrbitTimeMs = time;
     this.bossBlockers.getChildren().forEach((gameObject) => {
       const blocker = gameObject as EnemySprite;
-      const index = getPotassiumData<number>(blocker, POTASSIUM_DATA_KEYS.orbitIndex) ?? 0;
-      const angle = time * BOSS_ORBIT_SPEED + index * ((Math.PI * 2) / 3);
+      const angle = getBossOrbitAngle(blocker, time);
       blocker.setPosition(
         boss.x + Math.cos(angle) * BOSS_ORBIT_RADIUS,
-        boss.y + Math.sin(angle) * (BOSS_ORBIT_RADIUS * 0.68)
+        boss.y + Math.sin(angle) * BOSS_ORBIT_RADIUS_Y
       );
       blocker.setAngle(Phaser.Math.RadToDeg(angle));
       blocker.setVelocity(0, 0);
@@ -1313,4 +1373,25 @@ function readPotassiumTerminalActionParams(params: unknown): PotassiumTerminalAc
   return action === 'return' || action === 'retry' || action === 'endless'
     ? action
     : null;
+}
+
+/** Where a boss soda can sits on its orbit at scene time `timeMs`; cans are spaced a third of a turn apart. */
+function getBossOrbitAngle(blocker: EnemySprite, timeMs: number): number {
+  const index = getPotassiumData<number>(blocker, POTASSIUM_DATA_KEYS.orbitIndex) ?? 0;
+  return timeMs * BOSS_ORBIT_SPEED + index * ((Math.PI * 2) / 3);
+}
+
+function toBounceObstacle(sprite: EnemySprite): PotassiumBounceObstacle | null {
+  if (!sprite.active || !sprite.body || isPotassiumEnemyDying(sprite)) return null;
+  const { body } = sprite;
+  return {
+    x: sprite.x,
+    y: sprite.y,
+    left: body.left,
+    top: body.top,
+    right: body.right,
+    bottom: body.bottom,
+    vx: body.velocity.x,
+    vy: body.velocity.y
+  };
 }
