@@ -30,7 +30,12 @@ import {
 import {
   PotassiumSlipRenderer
 } from './renderer';
-import { resolvePotassiumWallSuds, shouldShowPotassiumWallSuds } from './wallSuds';
+import {
+  resolvePotassiumWallClones,
+  resolvePotassiumWallSuds,
+  shouldShowPotassiumWallSuds,
+  type PotassiumWallSudsSplash
+} from './wallBounce';
 import {
   createPotassiumBossState,
   POTASSIUM_BOSS_PHASE_1_DRIFT,
@@ -146,6 +151,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
   private bossBlockers!: Phaser.Physics.Arcade.Group;
   private potassiumRenderer!: PotassiumSlipRenderer;
   private lastWallSudsAt = 0;
+  private lastWallClonesAt = 0;
   private projectileControl: PotassiumProjectileControl;
   private commandAdapter: PotassiumCommandAdapter;
 
@@ -228,7 +234,6 @@ export class PotassiumSlipScene extends Phaser.Scene {
         },
         clearBoardForOutcome: () => this.clearBoardForOutcome(),
         spawnFirePatch: (x, y, effectMultiplier, lifetimeMs, scale) => this.spawnFirePatch(x, y, effectMultiplier, lifetimeMs, scale),
-        spawnBananaClones: (count, lifetimeMs) => this.spawnBananaClones(count, lifetimeMs),
         spawnSplitterChildren: (enemy) => this.spawnSplitterChildren(enemy as EnemySprite),
         spawnBossOrbitBlockers: (boss) => this.spawnBossOrbitBlockers(boss as EnemySprite),
         updateBossOrbitBlockers: (boss, time) => this.updateBossOrbitBlockers(boss as EnemySprite, time),
@@ -357,14 +362,13 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.banana.body.setAllowGravity(false);
     this.banana.body.setCircle(25, 7, 7);
     setPotassiumProjectileDefaults(this.banana, {
-      canDuplicate: true,
       effectMultiplier: 1,
       canApplyHitProcs: true
     });
     this.refreshBananaUpgradeVisuals(this.banana);
   }
 
-  /** Sponge smacks an arena wall: leave a little dishwasher suds splash. */
+  /** Sponge smacks an arena wall: dishwasher suds, plus Mini Sponges when unlocked. */
   private readonly handleWorldBounds = (
     body: Phaser.Physics.Arcade.Body,
     up: boolean,
@@ -373,21 +377,45 @@ export class PotassiumSlipScene extends Phaser.Scene {
     right: boolean
   ): void => {
     if (body.gameObject !== this.banana || this.session.gameState !== 'PLAYING') return;
-    const now = this.time.now;
-    if (!shouldShowPotassiumWallSuds({
-      isRecalling: this.projectileControl.isRecalling(),
-      speed: body.velocity.length(),
-      now,
-      lastSudsAt: this.lastWallSudsAt
-    })) return;
-    this.lastWallSudsAt = now;
     const splash = resolvePotassiumWallSuds({
       blocked: { up, down, left, right },
       projectile: this.banana,
       arena: ARENA
     });
-    this.potassiumRenderer.showWallSuds(splash.x, splash.y, splash.side);
+    const hit = {
+      isRecalling: this.projectileControl.isRecalling(),
+      speed: body.velocity.length(),
+      now: this.time.now
+    };
+    this.showWallSudsIfReady(splash, hit);
+    this.spawnWallClonesIfReady(splash, hit);
   };
+
+  private showWallSudsIfReady(
+    splash: PotassiumWallSudsSplash,
+    hit: { isRecalling: boolean; speed: number; now: number }
+  ): void {
+    if (!shouldShowPotassiumWallSuds({ ...hit, lastSudsAt: this.lastWallSudsAt })) return;
+    this.lastWallSudsAt = hit.now;
+    this.potassiumRenderer.showWallSuds(splash.x, splash.y, splash.side);
+  }
+
+  private spawnWallClonesIfReady(
+    splash: PotassiumWallSudsSplash,
+    hit: { isRecalling: boolean; speed: number; now: number }
+  ): void {
+    const clones = resolvePotassiumWallClones({
+      ...hit,
+      duplicateRank: this.getSkillRank('duplicate'),
+      cloneTimeRank: this.getGenericRank('cloneTime'),
+      side: splash.side,
+      lastClonesAt: this.lastWallClonesAt,
+      activeClones: this.clones.countActive(true)
+    });
+    if (!clones) return;
+    this.lastWallClonesAt = hit.now;
+    this.spawnBananaClones(splash.x, splash.y, clones.angles, clones.lifetimeMs);
+  }
 
   private createHud(): void {
     this.potassiumRenderer.createHud();
@@ -545,7 +573,6 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.banana.setBounce(1, 1);
     this.banana.setScale(0.9);
     setPotassiumProjectileDefaults(this.banana, {
-      canDuplicate: true,
       nextTrailDropAt: 0,
       effectMultiplier: 1,
       canApplyHitProcs: true,
@@ -613,7 +640,6 @@ export class PotassiumSlipScene extends Phaser.Scene {
         this.banana.setVelocity(0, 0);
         this.banana.setAngularVelocity(0);
         setPotassiumProjectileDefaults(this.banana, {
-          canDuplicate: true,
           nextTrailDropAt: 0,
           effectMultiplier: 1,
           canApplyHitProcs: true
@@ -836,9 +862,9 @@ export class PotassiumSlipScene extends Phaser.Scene {
       });
   }
 
-  private spawnBananaClones(count: number, lifetimeMs: number): void {
-    for (let i = 0; i < count; i += 1) {
-      const clone = this.clones.create(this.banana.x, this.banana.y, 'potassium_sponge') as ProjectileSprite;
+  private spawnBananaClones(x: number, y: number, angles: readonly number[], lifetimeMs: number): void {
+    angles.forEach((angle, i) => {
+      const clone = this.clones.create(x, y, 'potassium_sponge') as ProjectileSprite;
       clone.name = `${this.time.now}-${i}`;
       clone.setDepth(90);
       clone.setScale(0.48);
@@ -847,12 +873,10 @@ export class PotassiumSlipScene extends Phaser.Scene {
       clone.body.setAllowGravity(false);
       clone.body.setCircle(16, 16, 16);
       setPotassiumProjectileDefaults(clone, {
-        canDuplicate: false,
         effectMultiplier: CLONE_EFFECT_MULTIPLIER,
         canApplyHitProcs: this.getSkillRank('duplicate') >= 2,
         nextTrailDropAt: 0
       });
-      const angle = Phaser.Math.FloatBetween(0, Math.PI * 2);
       clone.setVelocity(Math.cos(angle) * 430, Math.sin(angle) * 430);
       clone.setAngularVelocity(Phaser.Math.Between(-600, 600));
       this.refreshBananaUpgradeVisuals(clone, { isClone: true });
@@ -873,7 +897,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
           }
         });
       });
-    }
+    });
   }
 
   private updateFireTrail(time: number): void {
@@ -908,7 +932,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
     const cellKey = this.getFireCellKey(x, y);
     if (this.fireCells.has(cellKey)) return;
     this.fireCells.add(cellKey);
-    const zone = this.trailZones.create(x, y, 'potassium_fire') as ProjectileSprite;
+    const zone = this.trailZones.create(x, y, 'potassium_suds') as ProjectileSprite;
     zone.setDepth(30);
     zone.setAlpha(0.62);
     zone.setScale(scale);

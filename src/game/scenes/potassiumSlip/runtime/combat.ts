@@ -1,5 +1,4 @@
 import {
-  getPotassiumDuplicateCloneCount,
   getPotassiumEnemyHealthState,
   getPotassiumExplosionDamage,
   getPotassiumGenericUpgradeRank,
@@ -46,7 +45,6 @@ export interface PotassiumProjectileCombatFacts {
   y: number;
   effectMultiplier: number;
   canApplyHitProcs: boolean;
-  canDuplicate: boolean;
   explosionRadiusMultiplier: number;
 }
 
@@ -132,7 +130,6 @@ export type PotassiumCombatCommand =
   | { type: 'clearPoison'; enemyId: string }
   | PotassiumSpawnFirePatchCommand
   | { type: 'explodeAt'; x: number; y: number; effectMultiplier: number; radiusMultiplier: number }
-  | { type: 'spawnBananaClones'; count: number; lifetimeMs: number }
   | { type: 'spawnGhostBeam'; x: number; y: number; direction: PotassiumGhostBeamDirection; effectMultiplier: number }
   | { type: 'spawnGhostStatusField'; x: number; y: number; direction: PotassiumGhostBeamDirection; effectMultiplier: number }
   | { type: 'spreadPoisonFrom'; x: number; y: number; effectMultiplier: number; sourceEnemyId: string }
@@ -143,7 +140,6 @@ const POTASSIUM_RECALL_DAMAGE = 0.65;
 const POTASSIUM_FIRE_TICK_COOLDOWN_MS = 420;
 export const POTASSIUM_POISON_TICK_INTERVAL_MS = 500;
 export const POTASSIUM_POISON_DURATION_MS = 2500;
-const POTASSIUM_DUPLICATE_CLONE_LIFETIME_MS = 3000;
 export const POTASSIUM_FIRE_HIT_PATCH_LIFETIME_MS = 900;
 export const POTASSIUM_GHOST_STATUS_FIELD_LIFETIME_MS = 680;
 
@@ -317,13 +313,6 @@ function resolveUnlockedHitEffects(input: PotassiumProjectileHitInput): Potassiu
       y: enemy.y,
       effectMultiplier: projectile.effectMultiplier,
       radiusMultiplier: projectile.explosionRadiusMultiplier
-    });
-  }
-  if (!projectile.isRecall && projectile.canDuplicate && getSkillRank(input.skillRanks, 'duplicate') > 0) {
-    commands.push({
-      type: 'spawnBananaClones',
-      count: getPotassiumDuplicateCloneCount(getSkillRank(input.skillRanks, 'duplicate')),
-      lifetimeMs: POTASSIUM_DUPLICATE_CLONE_LIFETIME_MS + getGenericRank(input.genericRanks, 'cloneTime') * 300
     });
   }
   if (!projectile.isRecall && getSkillRank(input.skillRanks, 'ghostHorizontal') > 0) {

@@ -1,10 +1,10 @@
 export const sceneMessages = {
   overworld: {
     glassesSecretHint: "Something appears in plain sight.",
-    bananaDiscoveredPrompt: "[E] Peel banana",
-    bananaUndiscoveredPrompt: "[E] Peel?",
+    bananaDiscoveredPrompt: "[E] Hop in the dumpster",
+    bananaUndiscoveredPrompt: "[E] Tidy up?",
     bananaDiscovery:
-      "A tiny banana sticker points along the street. This city has stranger shortcuts than doors.",
+      "Litter, and tiny raccoon paw prints leading into the dumpster. You reach to tidy up and step in a soapy puddle...",
     chickPrompt: "[E] The chick is staring",
     circuitCrtLockedPrompt: "A blank CRT. Needs a Circuit.",
     circuitCrtReadyPrompt: "[E] Insert Circuit",
@@ -13,8 +13,8 @@ export const sceneMessages = {
     signpostHints: {
       "find-glasses": "The sign is too blurry to read. A chick is pacing just past Experiences.",
       "wear-glasses": "Glasses off? The street hides things from blurry eyes. That chick will bolt if you put them on.",
-      "find-peel": "Watch your step just past the Abilities shelf. Something slippery is down there.",
-      "win-circuit": "That peel leads somewhere. Win what's down there... or build your own. The hobby house hides spare parts.",
+      "find-peel": "Look down just past the Abilities shelf. Somebody has been littering.",
+      "win-circuit": "Those paw prints lead into a dumpster. Win back what's in there... or build your own. The hobby house hides spare parts.",
       "solder-circuit": "Your pockets rattle with parts. The basement workbench could make something of them.",
       "use-crt": "The blank CRT by Projects is humming. It wants your Circuit.",
     },

@@ -27,8 +27,8 @@ doc about future route intent, the active design docs win.
 Player-facing Ridge entry (secret side game):
 
 ```text
-Overworld banana peel
-  -> win Potassium Slip (earn Circuit)
+Overworld litter pile
+  -> win Scrub Rumble (earn Circuit)
   -> insert Circuit into the street CRT (between Projects and Abilities)
   -> Ridge
 ```

@@ -29,7 +29,7 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
 
 - Walk along the hand-drawn street and interact with buildings to open React portfolio overlays.
 - The building you can enter lifts and wobbles slightly, and its label grows.
-- A `START` signpost sits beside the spawn. Reading it gives a hint for the next step of the secret chain (glasses → hobby spare parts or banana peel → Circuit → CRT) plus a `Secrets found: n/6` tally (glasses, banana peel, Circuit, and three spare parts). A bobbing `!` marks the sign when it has a hint you haven't read yet.
+- A `START` signpost sits beside the spawn. Reading it gives a hint for the next step of the secret chain (glasses → hobby spare parts or litter pile → Circuit → CRT) plus a `Secrets found: n/6` tally (glasses, litter pile, Circuit, and three spare parts). A bobbing `!` marks the sign when it has a hint you haven't read yet.
 - The street "grows up" as secrets are found. With glasses it is the plain kid-drawing street; after three secrets an ink pass adds cast-shadow hatching, daisies, and picket fences; with the Circuit, street lamps with light pools and twinkling stars appear. A short toast announces each upgrade.
 - A billboard near the end of the street reads "This space for rent" until you sign and pin a drawing in the Hobbies art station; the pinned doodle then hangs on the billboard.
 - Doodle birds on the telephone wire scatter when you get close (sooner while sprinting) and return once you've walked away. Landing and sprinting kick up small ink puffs.
@@ -38,7 +38,7 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
 - Closing an overlay returns to the street, unless the overlay was opened from an interior parent scene.
 - The basement entrance is an open hatch with a ladder. The lid rattles and `?` glyphs float up when you walk near it; after collecting the glasses, code glyphs rise instead. Entering plays a short drop-in animation.
 - A chick paces on the sidewalk just past Experiences. With glasses off, interact to start Chick Magnet. Clearing the 2:30 run grants and equips the glasses. The field is a meadow bigger than the screen, with a picnic blanket in the middle and a hedge around it, and the camera follows you. Only two chicks show up at first; more walk in from off-screen as the run goes on. Each kind of bird looks different, and its drawn body is exactly what can peck you; the ring at your feet is your own hitbox. A bird that pecks you bounces off and backs away for a moment. A mirror appears at 0:22, 1:02, and 1:44: stand by it for a pep talk and a free twist. Your ex shows up at 1:26 as a tough boss that charges along a red lane and always drops a gift. Gifts pull in every scrap, make the flock scatter, heal you, or refill your dad joke. The last 20 seconds are a last-call rush. A Joke meter in the status strip fills over time and faster as you clear birds; when it reads Dad joke!, press Space or tap it to tell one, which damages and dazes the nearest birds around you. Let too many chicks swoon over you and Brad, someone's jealous boyfriend, turns up near the end (always by last call). He calls chicks over to shield him, dashes along three bent red lanes, throws protein shakers that leave a slowing pink puddle, and flexes harder once he is below half health. A dad joke only confuses him at first, but below half health it cracks him up and he fights the flock as your wingman for a while before leaving. Arrows on the screen edge point at off-screen mirrors, gifts, hearts, the bartender, the ex, and Brad. Scraps close to you fly in. The run starts by picking one weapon from two or three random offers. The first twist costs 8 scraps, and the next twists stay cheaper than a new weapon. A new weapon waits until after those early twists. A draft can also heal one peck, add room for another, or spin a little shell that catches the next one. At 1 HP a heart sometimes drops on the floor. Drafts are still at least 14 seconds apart, and nothing is a plain damage boost. Bad selfie photographs random nearby chicks and dazes whoever survives it. Bad breath is a lane of green bubbles in the direction you are facing. Bad smell is a grumpy green stink cloud that pops out of you and orbits close. Fake glasses folds the nearest chicks within reach. Each weapon shows on you: a phone, the bubbles, the stink cloud, or lenses. Twists change how that looks and feels: a wider or lingering or snaking breath, a farther or faster or twin or fatter cloud, a group photo or a longer pose or a rear camera, a prescription or a stare or a side eye. A chick hit by breath or stink flashes green. Nerds ignore glasses until the prescription twist, perfume chicks ignore the stink, and a situationship will not pose for a selfie. The special chicks occasionally say one line at a time. A fixer mends wounded birds. Hens take two hits, a rooster stops, shows a red lane, charges along it, and takes three, and a bartender raises a mug before throwing beer that soaks you and shuts your weapons off for a few seconds. During a run, `E`, `H`, and `Esc` do nothing so a stray press cannot end it; use the header Back button to leave. After a run, `E` or `H` returns to the street. With glasses on, the street chick runs away and will not talk. Take the glasses off (inventory) and it comes back; a repeat clear does not grant a second pair. After a clear, Keep going (endless) resumes the same run with no time limit and the clock counting up: the flock keeps growing, newcomers get faster and tougher, a mirror returns every 40 seconds, your ex comes back stronger every 75 seconds, Brad comes back stronger every 90 seconds, and a 15-second rush hits once a minute. The run ends on the last peck, and the longest endless run on this device is shown as your best.
-- A banana peel secret sits on the sidewalk just past Abilities, and only while glasses are on. After discovery, interacting with it enters Potassium Slip.
+- A litter pile secret (crumpled paper, a tipped can, raccoon paw prints) sits on the sidewalk just past Abilities, and only while glasses are on. After discovery, interacting with it ("Tidy up?") slips Danilo into the dumpster and Scrub Rumble.
 - A blank street CRT sits between the Projects and Abilities buildings. It is always drawn, with or without glasses. Without a Circuit it only shows a locked prompt and the occasional flicker of static; once you own the Circuit, a little stick figure waves from the screen. While owning the Circuit, interact with the CRT to insert it and enter Ridge (secret side story).
 
 ## Hobbies Room
@@ -60,21 +60,21 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
 - After glasses are owned, interacting with the computer opens the Developer Console React overlay. Besides `whoami`, `skills`, and `enter <scene>`, it answers `ls`, `cat <file>`, `parts`, and a couple of hidden commands.
 - The corkboard cycles through notes about Danilo's work; read cards are marked on the board.
 - The shelf holds relics of old projects (a uc32 board, a chess piece glued to a Tetris block).
-- The workbench shows a Circuit blueprint with three part slots. With all three hobby spare parts, interacting solders them into a Circuit — a second route to the Circuit besides winning Potassium Slip.
+- The workbench shows a Circuit blueprint with three part slots. With all three hobby spare parts, interacting solders them into a Circuit — a second route to the Circuit besides winning Scrub Rumble.
 - Close the console to return to the basement.
 - Press `H` or `Esc`, or interact with the ladder, to return to the street.
 
-## Potassium Slip
+## Scrub Rumble
 
-- Potassium Slip is a Phaser mini-game reached from the banana peel beside Abilities.
+- Scrub Rumble (formerly Potassium Slip; code id `potassium`) is a Phaser mini-game reached from the litter pile beside Abilities.
 - Start a run with `E` on desktop or a tap on mobile.
 - Inside the dumpster you throw a sponge. Launch it by dragging toward a target and releasing.
 - Hold while the sponge is moving to yo-yo it back to the launch pad, then relaunch.
-- Clear falling 5-column enemy waves, draft stackable upgrades, and defeat the boss for the Circuit.
+- Clear falling 5-column enemy waves, draft stackable cleaning-supply upgrades (Suds Trail, Germ-B-Gone, Bubble Pop, Mini Sponges, Spray Bottle, Shower Head), and defeat Sir Rummage the raccoon for the Circuit.
 - The Circuit can be inserted into the overworld street CRT to enter Ridge.
 - You start with 5 lives; losing all lives ends the run.
 - After game over, choose `Retry` or `Return to City`. After winning, choose `Endless Mode` or `Return to City`.
-- Potassium keeps a local top-5 records list for finished runs.
+- Scrub Rumble keeps a local top-5 records list for finished runs.
 - Press `R` to retry after a terminal screen, `E` to return, or `Space` to continue into endless after winning. `Esc` does nothing, so a stray press cannot end a run; use the header Back button to leave at any time.
 
 ## Headless / AI Console
@@ -82,7 +82,7 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
 - Full interactive route is playable without a browser via `pnpm game:console`.
 - Shared commands: `look`, `go left|right [n]`, `interact [name]`, `inventory`,
   `equip` / `unequip`, `close`.
-- Potassium in console mode is discrete (`start`, `fight`, `draft`) — not the
+- Scrub Rumble (`potassium`) in console mode is discrete (`start`, `fight`, `draft`) — not the
   live drag-sponge physics. Winning still grants the Circuit.
 - Ridge conversation uses `advance` / `choose`. `pnpm ridge:console` is an alias
   that starts already inside Ridge.
@@ -131,4 +131,4 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
 - React overlays should always pause Phaser input.
 - Returning from Hobbies or Basement overlays should restore the parent room, not the overworld.
 - Hobbies, Basement, and the overworld preserve resume position where policy allows it.
-- Potassium starts fresh when entered.
+- Scrub Rumble starts fresh when entered.

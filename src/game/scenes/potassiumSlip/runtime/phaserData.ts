@@ -12,7 +12,6 @@ export interface PotassiumDataObject {
 export const POTASSIUM_DATA_KEYS = {
   bananaVisuals: 'bananaVisuals',
   canApplyHitProcs: 'canApplyHitProcs',
-  canDuplicate: 'canDuplicate',
   columnIndex: 'columnIndex',
   columnSpan: 'columnSpan',
   combatId: 'combatId',
@@ -123,10 +122,6 @@ export function canPotassiumProjectileApplyHitProcs(object: PotassiumDataObject)
   return getPotassiumData<boolean>(object, POTASSIUM_DATA_KEYS.canApplyHitProcs) ?? false;
 }
 
-export function canPotassiumProjectileDuplicate(object: PotassiumDataObject): boolean {
-  return Boolean(getPotassiumData<boolean>(object, POTASSIUM_DATA_KEYS.canDuplicate));
-}
-
 export function getPotassiumProjectileNextTrailDropAt(object: PotassiumDataObject): number {
   return getPotassiumData<number>(object, POTASSIUM_DATA_KEYS.nextTrailDropAt) ?? 0;
 }
@@ -142,14 +137,12 @@ export function isPotassiumProjectileRecallVisual(object: PotassiumDataObject): 
 export function setPotassiumProjectileDefaults(
   object: PotassiumDataObject,
   input: {
-    canDuplicate: boolean;
     effectMultiplier: number;
     canApplyHitProcs: boolean;
     nextTrailDropAt?: number;
     recallVisual?: boolean;
   }
 ): void {
-  setPotassiumData(object, POTASSIUM_DATA_KEYS.canDuplicate, input.canDuplicate);
   setPotassiumData(object, POTASSIUM_DATA_KEYS.effectMultiplier, input.effectMultiplier);
   setPotassiumData(object, POTASSIUM_DATA_KEYS.canApplyHitProcs, input.canApplyHitProcs);
   if (input.nextTrailDropAt !== undefined) {

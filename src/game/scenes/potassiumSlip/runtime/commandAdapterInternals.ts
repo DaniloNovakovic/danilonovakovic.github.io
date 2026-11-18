@@ -4,7 +4,6 @@ import type { PotassiumCombatCommand } from './combat';
 import type { PotassiumSessionResult } from './session';
 import {
   canPotassiumProjectileApplyHitProcs,
-  canPotassiumProjectileDuplicate,
   getPotassiumCombatId,
   getPotassiumData,
   getPotassiumEnemyHp,
@@ -94,7 +93,6 @@ export class PotassiumCommandAdapterInternals {
       y: projectile.y,
       effectMultiplier: getPotassiumProjectileEffectMultiplier(projectile),
       canApplyHitProcs: canPotassiumProjectileApplyHitProcs(projectile),
-      canDuplicate: canPotassiumProjectileDuplicate(projectile),
       explosionRadiusMultiplier: this.ports.getProjectileExplosionRadiusMultiplier(projectile)
     };
   }

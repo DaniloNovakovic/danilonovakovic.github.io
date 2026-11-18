@@ -86,7 +86,7 @@ as a card wrapped around another card.
 | Profile | Scenes | Layout Intent |
 | --- | --- | --- |
 | `sideViewPage` | Current Overworld, legacy/prototype Ridge, possible future Ridge if the active route adopts it | Horizontal trail on paper with sparse prompts and overlays. |
-| `ruledBoardPage` | Potassium Slip | Tall ruled board, drag/recall control mat, board-like rhythm. |
+| `ruledBoardPage` | Scrub Rumble | Tall ruled board, drag/recall control mat, board-like rhythm. |
 | `survivalPage` | Stampede Sketch | Clean open arena, edge status, minimal decoration. |
 | `timingPage` | Telegraph Terrace | One readable timing subject and one obvious parry surface. |
 | `puzzleDeskPage` | Domino Desk | Stable grid, reachable undo, optional desk-paper trim. |

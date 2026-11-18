@@ -313,7 +313,7 @@ export class GameConsoleSession {
       const result = returnToOverworld(
         this.state,
         leavingPotassium
-          ? 'You bail out of Potassium Slip back to the street.'
+          ? 'You climb out of the dumpster back to the street.'
           : 'You return to the street.'
       );
       if (leavingPotassium) {

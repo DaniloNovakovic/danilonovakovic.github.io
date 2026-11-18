@@ -125,7 +125,7 @@ Rules:
 
 ## Potassium Acknowledgement Micro-Pack
 
-This pack acknowledges Potassium Slip from the Ridge without changing
+This pack acknowledges Scrub Rumble from the Ridge without changing
 Potassium's scene-owned run behavior, controls, boss, upgrades, or presentation.
 
 Allowed sounds:

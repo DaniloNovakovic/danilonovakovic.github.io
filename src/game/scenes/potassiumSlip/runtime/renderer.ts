@@ -22,7 +22,7 @@ import {
   POTASSIUM_DATA_KEYS,
   setPotassiumData
 } from './phaserData';
-import type { PotassiumWallSide } from './wallSuds';
+import type { PotassiumWallSide } from './wallBounce';
 
 export type PotassiumTerminalAction = 'retry' | 'return' | 'endless';
 
@@ -142,7 +142,7 @@ export class PotassiumSlipRenderer {
     }
     if (!this.scene.textures.exists('potassium_enemy_boss')) this.createBossTexture();
     if (!this.scene.textures.exists('potassium_boss_can')) this.createBossCanTexture();
-    if (!this.scene.textures.exists('potassium_fire')) this.createFireTexture();
+    if (!this.scene.textures.exists('potassium_suds')) this.createSudsTexture();
   }
 
   drawField(): void {
@@ -235,17 +235,59 @@ export class PotassiumSlipRenderer {
     tetherLine.strokePath();
   }
 
+  /** Bubble Pop: a soap bubble swells over the hit, then pops into droplets. */
   showExplosionVisual(x: number, y: number, radius: number): void {
-    const blast = this.scene.add.circle(x, y, 18, 0xf97316, 0.22)
-      .setStrokeStyle(5, 0x1a1a1a, 1)
-      .setDepth(940);
+    const bubble = this.scene.add.container(x, y).setDepth(940).setScale(18 / radius);
+    const film = this.scene.add.graphics();
+    film.fillStyle(0xe0f2fe, 0.22);
+    film.fillCircle(0, 0, radius);
+    film.lineStyle(4, 0x1a1a1a, 0.85);
+    film.strokeCircle(0, 0, radius);
+    film.lineStyle(3, 0xf9a8d4, 0.7);
+    film.beginPath();
+    film.arc(0, 0, radius - 6, Math.PI * 0.15, Math.PI * 0.75);
+    film.strokePath();
+    film.lineStyle(3, 0x67e8f9, 0.7);
+    film.beginPath();
+    film.arc(0, 0, radius - 6, Math.PI * 0.85, Math.PI * 1.35);
+    film.strokePath();
+    film.fillStyle(0xffffff, 0.85);
+    film.fillEllipse(-radius * 0.38, -radius * 0.42, radius * 0.3, radius * 0.16);
+    bubble.add(film);
     this.scene.tweens.add({
-      targets: blast,
-      radius,
-      alpha: 0,
-      duration: 240,
-      onComplete: () => blast.destroy()
+      targets: bubble,
+      scale: 1,
+      duration: 150,
+      ease: 'Back.easeOut',
+      onComplete: () => {
+        bubble.destroy();
+        this.popBubbleDroplets(x, y, radius);
+      }
     });
+  }
+
+  private popBubbleDroplets(x: number, y: number, radius: number): void {
+    const count = 8;
+    for (let i = 0; i < count; i += 1) {
+      const angle = (i / count) * Math.PI * 2 + 0.2;
+      const drop = this.scene.add.circle(
+        x + Math.cos(angle) * radius * 0.8,
+        y + Math.sin(angle) * radius * 0.8,
+        5.5,
+        i % 2 === 0 ? 0x7dd3fc : 0xf9a8d4,
+        0.95
+      ).setStrokeStyle(2, 0x1a1a1a, 0.75).setDepth(940);
+      this.scene.tweens.add({
+        targets: drop,
+        x: x + Math.cos(angle) * (radius + 16),
+        y: y + Math.sin(angle) * (radius + 16),
+        alpha: 0,
+        scale: 0.5,
+        duration: 260,
+        ease: 'Quad.easeOut',
+        onComplete: () => drop.destroy()
+      });
+    }
   }
 
   /**
@@ -545,9 +587,9 @@ export class PotassiumSlipRenderer {
     const color = source === 'poison'
       ? 0x65a30d
       : source === 'fire'
-        ? 0xf97316
+        ? 0x67e8f9
         : source === 'explosion'
-          ? 0xef4444
+          ? 0xf472b6
           : source === 'ghost'
             ? 0x38bdf8
             : 0x1a1a1a;
@@ -657,20 +699,78 @@ export class PotassiumSlipRenderer {
     const isHorizontal = input.direction === 'horizontal';
     const width = isHorizontal ? this.layout.arena.width - 42 : 24;
     const height = isHorizontal ? 24 : this.layout.arena.height - 128;
-    const beam = this.scene.add.rectangle(
-      isHorizontal ? GAME_DESIGN_WIDTH / 2 : input.x,
-      isHorizontal ? input.y : this.layout.arena.top + 92 + height / 2,
-      width,
-      height,
-      0x38bdf8,
-      0.24
-    ).setStrokeStyle(4, 0x1a1a1a, 0.82).setDepth(935);
+    const cx = isHorizontal ? GAME_DESIGN_WIDTH / 2 : input.x;
+    const cy = isHorizontal ? input.y : this.layout.arena.top + 92 + height / 2;
+    const water = this.scene.add.graphics().setPosition(cx, cy).setDepth(935);
+    if (isHorizontal) this.drawSprayJet(water, width, height);
+    else this.drawShower(water, width, height);
     this.scene.tweens.add({
-      targets: beam,
+      targets: water,
       alpha: 0,
       duration: input.durationMs,
-      onComplete: () => beam.destroy()
+      onComplete: () => water.destroy()
     });
+  }
+
+  /** Spray Bottle: a wobbly water jet across the row with droplets flicking off. */
+  private drawSprayJet(g: Phaser.GameObjects.Graphics, width: number, height: number): void {
+    const half = width / 2;
+    g.fillStyle(0x7dd3fc, 0.34);
+    g.fillRoundedRect(-half, -height / 2, width, height, height / 2);
+    g.lineStyle(3, 0x1a1a1a, 0.7);
+    g.beginPath();
+    for (let x = -half; x <= half; x += 12) {
+      const y = -height / 2 + Math.sin(x * 0.09) * 2.5;
+      if (x === -half) g.moveTo(x, y);
+      else g.lineTo(x, y);
+    }
+    g.strokePath();
+    g.beginPath();
+    for (let x = -half; x <= half; x += 12) {
+      const y = height / 2 + Math.sin(x * 0.09 + 1.6) * 2.5;
+      if (x === -half) g.moveTo(x, y);
+      else g.lineTo(x, y);
+    }
+    g.strokePath();
+    g.lineStyle(3, 0xffffff, 0.85);
+    for (let x = -half + 14; x < half - 30; x += 46) {
+      g.beginPath();
+      g.moveTo(x, -2);
+      g.lineTo(x + 22, -2);
+      g.strokePath();
+    }
+    g.fillStyle(0x7dd3fc, 0.9);
+    g.lineStyle(1.5, 0x1a1a1a, 0.6);
+    for (let x = -half + 30; x < half; x += 58) {
+      const side = (x / 58) % 2 > 1 ? -1 : 1;
+      g.fillCircle(x, side * (height / 2 + 7), 3);
+      g.strokeCircle(x, side * (height / 2 + 7), 3);
+    }
+  }
+
+  /** Shower Head: a little shower head at the top raining streaks down the column. */
+  private drawShower(g: Phaser.GameObjects.Graphics, width: number, height: number): void {
+    const top = -height / 2;
+    g.fillStyle(0x7dd3fc, 0.16);
+    g.fillRect(-width / 2 - 6, top + 10, width + 12, height - 10);
+    g.lineStyle(2.5, 0x38bdf8, 0.85);
+    const lanes = [-width / 2 - 2, -4, 6, width / 2 + 3];
+    lanes.forEach((x, lane) => {
+      for (let y = top + 18 + lane * 9; y < height / 2; y += 34) {
+        g.beginPath();
+        g.moveTo(x, y);
+        g.lineTo(x, y + 16);
+        g.strokePath();
+      }
+    });
+    g.fillStyle(0xd4d4d8, 1);
+    g.lineStyle(3, 0x1a1a1a, 0.9);
+    g.fillRect(-4, top - 22, 8, 14);
+    g.strokeRect(-4, top - 22, 8, 14);
+    g.fillRoundedRect(-width / 2 - 10, top - 10, width + 20, 14, { tl: 10, tr: 10, bl: 3, br: 3 });
+    g.strokeRoundedRect(-width / 2 - 10, top - 10, width + 20, 14, { tl: 10, tr: 10, bl: 3, br: 3 });
+    g.fillStyle(0x1a1a1a, 0.8);
+    [-12, -4, 4, 12].forEach((x) => g.fillCircle(x, top + 1, 1.5));
   }
 
   private createEnemyLabel(
@@ -765,48 +865,10 @@ export class PotassiumSlipRenderer {
       behind.strokeEllipse(16 * scale, -7 * scale, 22 * scale, 13 * scale);
     }
 
-    if (fireRank > 0) {
-      behind.lineStyle((fireRank >= 2 ? 6 : 4) * scale, 0xf97316, 0.55 * alphaScale);
-      behind.strokeCircle(0, 0, (fireRank >= 2 ? 36 : 32) * scale);
-      behind.lineStyle(2 * scale, 0xfacc15, 0.42 * alphaScale);
-      behind.strokeCircle(0, 0, 25 * scale);
-    }
-
-    if (ghostHorizontalRank > 0) {
-      front.lineStyle((ghostHorizontalRank >= 2 ? 5 : 3) * scale, 0x38bdf8, 0.56 * alphaScale);
-      front.beginPath();
-      front.moveTo(-34 * scale, 0);
-      front.lineTo(34 * scale, 0);
-      front.strokePath();
-    }
-
-    if (ghostVerticalRank > 0) {
-      front.lineStyle((ghostVerticalRank >= 2 ? 5 : 3) * scale, 0x60a5fa, 0.5 * alphaScale);
-      front.beginPath();
-      front.moveTo(0, -34 * scale);
-      front.lineTo(0, 34 * scale);
-      front.strokePath();
-    }
-
-    if (explosionRank > 0) {
-      const sparkScale = explosionRank >= 2 ? 1.12 : 1;
-      front.fillStyle(0xef4444, 0.86 * alphaScale);
-      front.lineStyle(2 * scale, 0x1a1a1a, 0.72 * alphaScale);
-      front.beginPath();
-      front.moveTo(22 * scale, -28 * scale);
-      front.lineTo(27 * scale * sparkScale, -14 * scale);
-      front.lineTo(38 * scale, -13 * scale);
-      front.lineTo(29 * scale, -6 * scale * sparkScale);
-      front.lineTo(33 * scale, 6 * scale);
-      front.lineTo(21 * scale, -2 * scale);
-      front.lineTo(11 * scale, 6 * scale);
-      front.lineTo(14 * scale, -8 * scale);
-      front.lineTo(4 * scale, -16 * scale);
-      front.lineTo(18 * scale, -17 * scale);
-      front.closePath();
-      front.fillPath();
-      front.strokePath();
-    }
+    if (fireRank > 0) drawSudsRingAccent(behind, fireRank, scale, alphaScale);
+    if (ghostHorizontalRank > 0) drawDropletAccent(front, 'horizontal', ghostHorizontalRank, scale, alphaScale);
+    if (ghostVerticalRank > 0) drawDropletAccent(front, 'vertical', ghostVerticalRank, scale, alphaScale);
+    if (explosionRank > 0) drawBubbleClusterAccent(front, explosionRank, scale, alphaScale);
   }
 
   /** Dust Bunny: a tiny fluffball that goes poof in one hit. */
@@ -1221,17 +1283,79 @@ export class PotassiumSlipRenderer {
     critical.destroy();
   }
 
-  private createFireTexture(): void {
+  /** Suds Trail puddle: a foamy soap patch with a few bubbles (texture key potassium_suds). */
+  private createSudsTexture(): void {
     const g = this.scene.make.graphics({ x: 0, y: 0 });
-    g.fillStyle(0xf97316, 0.34);
-    g.lineStyle(3, 0x1a1a1a, 0.42);
-    g.fillEllipse(30, 18, 56, 24);
-    g.strokeEllipse(30, 18, 56, 24);
-    g.fillStyle(0xfacc15, 0.38);
-    g.fillEllipse(30, 16, 34, 14);
-    g.generateTexture('potassium_fire', 60, 36);
+    g.fillStyle(0x7dd3fc, 0.3);
+    g.lineStyle(2.5, 0x1a1a1a, 0.38);
+    g.fillEllipse(30, 20, 56, 22);
+    g.strokeEllipse(30, 20, 56, 22);
+    const foam: Array<[number, number, number]> = [[14, 18, 7], [24, 14, 8], [36, 15, 7], [46, 19, 6], [30, 22, 7]];
+    g.fillStyle(0xffffff, 0.72);
+    foam.forEach(([x, y, r]) => g.fillCircle(x, y, r));
+    g.lineStyle(1.5, 0x38bdf8, 0.55);
+    [[20, 7, 3], [40, 6, 2.5], [52, 11, 2]].forEach(([x, y, r]) => g.strokeCircle(x, y, r));
+    g.generateTexture('potassium_suds', 60, 36);
     g.destroy();
   }
+}
+
+/** Suds Trail: a ring of little foam bubbles around the sponge. */
+function drawSudsRingAccent(g: Phaser.GameObjects.Graphics, rank: PotassiumSkillRank, scale: number, alphaScale: number): void {
+  const ringRadius = (rank >= 2 ? 36 : 32) * scale;
+  const count = rank >= 2 ? 10 : 8;
+  for (let i = 0; i < count; i += 1) {
+    const angle = (i / count) * Math.PI * 2;
+    const r = (i % 2 === 0 ? 5 : 3.5) * scale;
+    g.fillStyle(0xffffff, 0.75 * alphaScale);
+    g.fillCircle(Math.cos(angle) * ringRadius, Math.sin(angle) * ringRadius, r);
+    g.lineStyle(1.5 * scale, 0x38bdf8, 0.7 * alphaScale);
+    g.strokeCircle(Math.cos(angle) * ringRadius, Math.sin(angle) * ringRadius, r);
+  }
+}
+
+/** Spray Bottle / Shower Head: water droplets on both sides of the sponge along the beam axis. */
+function drawDropletAccent(
+  g: Phaser.GameObjects.Graphics,
+  direction: 'horizontal' | 'vertical',
+  rank: PotassiumSkillRank,
+  scale: number,
+  alphaScale: number
+): void {
+  const color = direction === 'horizontal' ? 0x38bdf8 : 0x60a5fa;
+  const r = (rank >= 2 ? 4.5 : 3.5) * scale;
+  [-1, 1].forEach((sign) => {
+    [30, 40].forEach((distance, i) => {
+      const along = sign * distance * scale;
+      const x = direction === 'horizontal' ? along : 0;
+      const y = direction === 'horizontal' ? 0 : along;
+      g.fillStyle(color, (i === 0 ? 0.75 : 0.5) * alphaScale);
+      g.fillCircle(x, y, i === 0 ? r : r * 0.7);
+    });
+  });
+}
+
+/** Bubble Pop: a little cluster of soap bubbles riding on the sponge. */
+function drawBubbleClusterAccent(g: Phaser.GameObjects.Graphics, rank: PotassiumSkillRank, scale: number, alphaScale: number): void {
+  const grow = rank >= 2 ? 1.2 : 1;
+  const bubbles: Array<[number, number, number, number]> = [
+    [24, -22, 8, 0xf9a8d4],
+    [34, -10, 5, 0x67e8f9],
+    [16, -32, 4.5, 0x67e8f9]
+  ];
+  bubbles.forEach(([x, y, r, rim]) => {
+    const radius = r * grow * scale;
+    g.fillStyle(0xe0f2fe, 0.45 * alphaScale);
+    g.fillCircle(x * scale, y * scale, radius);
+    g.lineStyle(2 * scale, 0x1a1a1a, 0.7 * alphaScale);
+    g.strokeCircle(x * scale, y * scale, radius);
+    g.lineStyle(1.5 * scale, rim, 0.85 * alphaScale);
+    g.beginPath();
+    g.arc(x * scale, y * scale, radius - 2 * scale, Math.PI * 0.1, Math.PI * 0.8);
+    g.strokePath();
+    g.fillStyle(0xffffff, 0.9 * alphaScale);
+    g.fillCircle((x - r * 0.35) * scale, (y - r * 0.35) * scale, Math.max(1, radius * 0.25));
+  });
 }
 
 function getSkillRank(skillRanks: PotassiumSkillRanks, upgrade: PotassiumUpgradeKind): PotassiumSkillRank {

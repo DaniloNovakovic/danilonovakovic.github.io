@@ -376,53 +376,52 @@ export class OverworldScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * Glasses secret: a little litter pile (crumpled paper + a tipped soda can)
+   * with raccoon paw prints trotting off toward the dumpster. Ids still say
+   * banana for save compatibility.
+   */
   private drawBananaFloorIcon(): void {
     if (!this.bananaFloorIcon) return;
     const g = this.bananaFloorIcon;
     g.clear();
     const ink = 0x1a1a1a;
-    const steps = 32;
+    const paper = 0xfbfbf9;
 
-    // True moon / crescent: two concentric circular arcs + radial segments at the tips (no lens, no fish tail).
-    const cx = 0;
-    const cy = 19;
-    const rOut = 27;
-    const rIn = 16.5;
-    const a0 = Phaser.Math.DegToRad(208);
-    const a1 = Phaser.Math.DegToRad(332);
-
-    const pt = (r: number, a: number) => ({
-      x: cx + r * Math.cos(a),
-      y: cy + r * Math.sin(a)
-    });
-
+    // Crumpled paper ball.
+    g.fillStyle(paper, 1);
     g.lineStyle(3, ink, 0.95);
     g.beginPath();
-    for (let i = 0; i <= steps; i++) {
-      const t = i / steps;
-      const a = Phaser.Math.Linear(a0, a1, t);
-      const p = pt(rOut, a);
-      if (i === 0) g.moveTo(p.x, p.y);
-      else g.lineTo(p.x, p.y);
-    }
-    const tipInnerR = pt(rIn, a1);
-    g.lineTo(tipInnerR.x, tipInnerR.y);
-    for (let i = 0; i <= steps; i++) {
-      const t = i / steps;
-      const a = Phaser.Math.Linear(a1, a0, t);
-      const p = pt(rIn, a);
-      g.lineTo(p.x, p.y);
-    }
-    const tipOutL = pt(rOut, a0);
-    g.lineTo(tipOutL.x, tipOutL.y);
+    const ball = [[-24, 10], [-19, 2], [-11, 1], [-5, 7], [-6, 16], [-13, 21], [-22, 19]];
+    ball.forEach(([x, y], i) => (i === 0 ? g.moveTo(x, y) : g.lineTo(x, y)));
+    g.closePath();
+    g.fillPath();
+    g.strokePath();
+    g.lineStyle(2, ink, 0.7);
+    g.beginPath();
+    g.moveTo(-19, 6); g.lineTo(-14, 11); g.lineTo(-17, 16);
+    g.moveTo(-14, 11); g.lineTo(-8, 10);
     g.strokePath();
 
-    // Stem: one short stroke from the thick crescent tip (no fork).
-    g.lineStyle(3, ink, 0.92);
+    // Soda can tipped on its side.
+    g.fillStyle(paper, 1);
+    g.lineStyle(3, ink, 0.95);
+    g.fillRoundedRect(-3, 10, 22, 11, 3);
+    g.strokeRoundedRect(-3, 10, 22, 11, 3);
+    g.strokeEllipse(19, 15.5, 4, 11);
+    g.lineStyle(2, ink, 0.7);
     g.beginPath();
-    g.moveTo(tipOutL.x, tipOutL.y);
-    g.lineTo(tipOutL.x - 5, tipOutL.y - 6);
+    g.moveTo(4, 13); g.lineTo(12, 13);
     g.strokePath();
+
+    // Raccoon paw prints trotting away.
+    g.fillStyle(ink, 0.85);
+    [[30, 18], [40, 12], [50, 18]].forEach(([x, y]) => {
+      g.fillEllipse(x, y, 6, 5);
+      g.fillCircle(x - 3.5, y - 4, 1.3);
+      g.fillCircle(x, y - 5, 1.3);
+      g.fillCircle(x + 3.5, y - 4, 1.3);
+    });
   }
 
   private setBananaFloorVisible(visible: boolean): void {
@@ -433,10 +432,10 @@ export class OverworldScene extends Phaser.Scene {
     }
     this.bananaFloorIcon
       .setPosition(
-        OVERWORLD_GLASSES_SECRET_SLOTS[0].x + 2,
-        OVERWORLD_GLASSES_SECRET_SLOTS[0].y - 2
+        OVERWORLD_GLASSES_SECRET_SLOTS[0].x - 12,
+        OVERWORLD_GLASSES_SECRET_SLOTS[0].y - 12
       )
-      .setRotation(Phaser.Math.DegToRad(4))
+      .setRotation(0)
       .setVisible(true);
   }
 

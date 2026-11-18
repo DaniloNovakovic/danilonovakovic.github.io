@@ -86,7 +86,7 @@ not replacement, and should not enter the ending sequence itself.
 
 ## Optional Toy Stance
 
-Potassium Slip remains the flagship arcade secret and a useful benchmark for
+Scrub Rumble remains the flagship arcade secret and a useful benchmark for
 mini-game depth. Stampede Sketch, Telegraph Terrace, Cicka Daydream, Domino
 Desk, Neutral Notebook, and similar ideas are candidates, not required proof for
 the first ending unless route canon explicitly reopens that.

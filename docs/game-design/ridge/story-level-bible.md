@@ -543,7 +543,7 @@ Mini-game ideas can attach to the Ridge without holding up the core path.
 
 Current candidates:
 
-- Potassium Slip: polished flagship secret / future alternate-path candidate.
+- Scrub Rumble: polished flagship secret / future alternate-path candidate.
 - Stampede Sketch: optional Vampire Survivors-style homage / future alternate-path candidate.
 - Telegraph / Clair-Obscur-style timing: optional timing/parry future alternate-path candidate.
 - Concert guitar performance: small teaching toy for the guitar, with required

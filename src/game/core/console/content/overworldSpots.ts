@@ -88,7 +88,7 @@ export const OVERWORLD_CHICK = {
 export const OVERWORLD_BANANA_PEEL = {
   id: 'banana-peel',
   secretId: 'banana-peel-clue' as const,
-  label: 'Banana peel (glasses secret)',
+  label: 'Litter pile (glasses secret)',
   x: 2080,
   y: 535,
   radius: 80

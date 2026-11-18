@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
   canPotassiumProjectileApplyHitProcs,
-  canPotassiumProjectileDuplicate,
   getPotassiumCombatId,
   getPotassiumEnemyHp,
   getPotassiumHitCooldownKey,
@@ -31,7 +30,6 @@ describe('potassium slip Phaser data helpers', () => {
     const object = makeDataObject();
 
     setPotassiumProjectileDefaults(object, {
-      canDuplicate: true,
       effectMultiplier: 0.5,
       canApplyHitProcs: false,
       nextTrailDropAt: 1200,
@@ -39,7 +37,6 @@ describe('potassium slip Phaser data helpers', () => {
     });
     setPotassiumCombatId(object, 'main-1');
 
-    expect(canPotassiumProjectileDuplicate(object)).toBe(true);
     expect(getPotassiumProjectileEffectMultiplier(object)).toBe(0.5);
     expect(canPotassiumProjectileApplyHitProcs(object)).toBe(false);
     expect(getPotassiumProjectileNextTrailDropAt(object)).toBe(1200);

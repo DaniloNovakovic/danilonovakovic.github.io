@@ -1,6 +1,6 @@
 import type { GameItemId, GameSessionEvent, GameWorldState } from './types';
 
-const DRAFT_POOL = ['wider peel', 'extra life', 'poison drip', 'shield ink'] as const;
+const DRAFT_POOL = ['bigger sponge', 'extra life', 'germ-b-gone', 'rubber gloves'] as const;
 
 export interface PotassiumOutcome {
   ok: boolean;
@@ -10,7 +10,7 @@ export interface PotassiumOutcome {
 
 export function startPotassium(state: GameWorldState): PotassiumOutcome {
   if (state.mode !== 'potassium') {
-    return { ok: false, message: 'You are not in Potassium Slip.', events: [] };
+    return { ok: false, message: 'You are not in Scrub Rumble.', events: [] };
   }
   if (state.potassium.phase !== 'lobby' && state.potassium.phase !== 'lost') {
     return { ok: false, message: 'Campaign already running. fight or draft.', events: [] };
@@ -33,7 +33,7 @@ export function startPotassium(state: GameWorldState): PotassiumOutcome {
 
 export function fightPotassium(state: GameWorldState): PotassiumOutcome {
   if (state.mode !== 'potassium') {
-    return { ok: false, message: 'You are not in Potassium Slip.', events: [] };
+    return { ok: false, message: 'You are not in Scrub Rumble.', events: [] };
   }
   if (state.potassium.phase !== 'wave') {
     return {
