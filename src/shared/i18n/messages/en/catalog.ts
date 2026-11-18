@@ -55,8 +55,8 @@ export const catalogMessages = {
   },
   potassiumSlip: {
     potassium: {
-      name: "Potassium Slip",
-      description: "Slip the incoming stakeholders and dodge the deadlines in this slippery challenge.",
+      name: "Scrub Rumble",
+      description: "Bounce a smiling sponge through a raccoon's dumpster hoard and win back the Circuit.",
     },
   },
   ridge: {

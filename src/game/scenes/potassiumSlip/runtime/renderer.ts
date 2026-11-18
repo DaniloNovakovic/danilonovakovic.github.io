@@ -22,6 +22,7 @@ import {
   POTASSIUM_DATA_KEYS,
   setPotassiumData
 } from './phaserData';
+import type { PotassiumWallSide } from './wallBounce';
 
 export type PotassiumTerminalAction = 'retry' | 'return' | 'endless';
 
@@ -91,6 +92,14 @@ export interface PotassiumEnemyAttachmentConfig {
   shieldSide?: PotassiumShieldSide;
 }
 
+/** Unit vectors pointing from each arena wall into the arena. */
+const WALL_NORMALS: Record<PotassiumWallSide, PotassiumRendererPoint> = {
+  left: { x: 1, y: 0 },
+  right: { x: -1, y: 0 },
+  up: { x: 0, y: 1 },
+  down: { x: 0, y: -1 }
+};
+
 export class PotassiumSlipRenderer {
   private readonly scene: Phaser.Scene;
   private readonly layout: PotassiumRendererLayout;
@@ -132,7 +141,8 @@ export class PotassiumSlipRenderer {
       this.createWallDamageOverlayTextures();
     }
     if (!this.scene.textures.exists('potassium_enemy_boss')) this.createBossTexture();
-    if (!this.scene.textures.exists('potassium_fire')) this.createFireTexture();
+    if (!this.scene.textures.exists('potassium_boss_can')) this.createBossCanTexture();
+    if (!this.scene.textures.exists('potassium_suds')) this.createSudsTexture();
   }
 
   drawField(): void {
@@ -225,17 +235,119 @@ export class PotassiumSlipRenderer {
     tetherLine.strokePath();
   }
 
+  /** Bubble Pop: a soap bubble swells over the hit, then pops into droplets. */
   showExplosionVisual(x: number, y: number, radius: number): void {
-    const blast = this.scene.add.circle(x, y, 18, 0xf97316, 0.22)
-      .setStrokeStyle(5, 0x1a1a1a, 1)
-      .setDepth(940);
+    const bubble = this.scene.add.container(x, y).setDepth(940).setScale(18 / Math.max(radius, 1));
+    const film = this.scene.add.graphics();
+    film.fillStyle(0xe0f2fe, 0.22);
+    film.fillCircle(0, 0, radius);
+    film.lineStyle(4, 0x1a1a1a, 0.85);
+    film.strokeCircle(0, 0, radius);
+    film.lineStyle(3, 0xf9a8d4, 0.7);
+    film.beginPath();
+    film.arc(0, 0, radius - 6, Math.PI * 0.15, Math.PI * 0.75);
+    film.strokePath();
+    film.lineStyle(3, 0x67e8f9, 0.7);
+    film.beginPath();
+    film.arc(0, 0, radius - 6, Math.PI * 0.85, Math.PI * 1.35);
+    film.strokePath();
+    film.fillStyle(0xffffff, 0.85);
+    film.fillEllipse(-radius * 0.38, -radius * 0.42, radius * 0.3, radius * 0.16);
+    bubble.add(film);
     this.scene.tweens.add({
-      targets: blast,
-      radius,
-      alpha: 0,
-      duration: 240,
-      onComplete: () => blast.destroy()
+      targets: bubble,
+      scale: 1,
+      duration: 150,
+      ease: 'Back.easeOut',
+      onComplete: () => {
+        bubble.destroy();
+        this.popBubbleDroplets(x, y, radius);
+      }
     });
+  }
+
+  private popBubbleDroplets(x: number, y: number, radius: number): void {
+    const count = 8;
+    for (let i = 0; i < count; i += 1) {
+      const angle = (i / count) * Math.PI * 2 + 0.2;
+      const drop = this.scene.add.circle(
+        x + Math.cos(angle) * radius * 0.8,
+        y + Math.sin(angle) * radius * 0.8,
+        5.5,
+        i % 2 === 0 ? 0x7dd3fc : 0xf9a8d4,
+        0.95
+      ).setStrokeStyle(2, 0x1a1a1a, 0.75).setDepth(940);
+      this.scene.tweens.add({
+        targets: drop,
+        x: x + Math.cos(angle) * (radius + 16),
+        y: y + Math.sin(angle) * (radius + 16),
+        alpha: 0,
+        scale: 0.5,
+        duration: 260,
+        ease: 'Quad.easeOut',
+        onComplete: () => drop.destroy()
+      });
+    }
+  }
+
+  /**
+   * Dishwasher suds where the sponge smacks an arena wall: a fading wet streak
+   * on the wall plus a few soap bubbles that drift into the arena and pop.
+   * Visual only; never touches physics bodies.
+   */
+  showWallSuds(x: number, y: number, side: PotassiumWallSide): void {
+    const normal = WALL_NORMALS[side];
+    const alongX = normal.y !== 0 ? 1 : 0;
+    const alongY = normal.x !== 0 ? 1 : 0;
+
+    const streak = this.scene.add.graphics().setDepth(5);
+    streak.lineStyle(10, 0xbae6fd, 0.75);
+    streak.beginPath();
+    streak.moveTo(x - alongX * 30, y - alongY * 30);
+    streak.lineTo(x + alongX * 30, y + alongY * 30);
+    streak.strokePath();
+    streak.lineStyle(3, 0xffffff, 0.9);
+    streak.beginPath();
+    streak.moveTo(x - alongX * 18 + normal.x * 2, y - alongY * 18 + normal.y * 2);
+    streak.lineTo(x + alongX * 10 + normal.x * 2, y + alongY * 10 + normal.y * 2);
+    streak.strokePath();
+    this.scene.tweens.add({
+      targets: streak,
+      alpha: 0,
+      duration: 900,
+      ease: 'Sine.easeIn',
+      onComplete: () => streak.destroy()
+    });
+
+    for (let index = 0; index < 7; index += 1) {
+      const spread = Phaser.Math.Between(-24, 24);
+      const radius = Phaser.Math.Between(5, 11);
+      const bubble = this.scene.add.circle(
+        x + alongX * spread + normal.x * 6,
+        y + alongY * spread + normal.y * 6,
+        radius,
+        0xf0f9ff,
+        0.92
+      ).setStrokeStyle(2, 0x1a1a1a, 0.7).setDepth(95).setScale(0.4);
+      const drift = Phaser.Math.Between(22, 52);
+      this.scene.tweens.add({
+        targets: bubble,
+        x: bubble.x + normal.x * drift + alongX * spread * 0.4,
+        y: bubble.y + normal.y * drift + alongY * spread * 0.4 - Phaser.Math.Between(6, 18),
+        scale: 1,
+        duration: Phaser.Math.Between(320, 520),
+        ease: 'Sine.easeOut',
+        onComplete: () => {
+          this.scene.tweens.add({
+            targets: bubble,
+            scale: 1.35,
+            alpha: 0,
+            duration: 90,
+            onComplete: () => bubble.destroy()
+          });
+        }
+      });
+    }
   }
 
   animateEnemyDeath(
@@ -475,9 +587,9 @@ export class PotassiumSlipRenderer {
     const color = source === 'poison'
       ? 0x65a30d
       : source === 'fire'
-        ? 0xf97316
+        ? 0x67e8f9
         : source === 'explosion'
-          ? 0xef4444
+          ? 0xf472b6
           : source === 'ghost'
             ? 0x38bdf8
             : 0x1a1a1a;
@@ -524,7 +636,7 @@ export class PotassiumSlipRenderer {
     const isMain = options.isMain ?? false;
     const isClone = options.isClone ?? !isMain;
     const isRecall = options.isRecall ?? false;
-    projectile.setTexture(getSkillRank(skillRanks, 'poison') > 0 ? 'banana_peel_green' : 'banana_peel_yellow');
+    projectile.setTexture(getSkillRank(skillRanks, 'poison') > 0 ? 'potassium_sponge_poison' : 'potassium_sponge');
     projectile.clearTint();
     projectile.setAlpha(isClone ? 0.82 : isRecall ? 0.68 : 1);
     this.destroyProjectileVisuals(projectile);
@@ -587,20 +699,78 @@ export class PotassiumSlipRenderer {
     const isHorizontal = input.direction === 'horizontal';
     const width = isHorizontal ? this.layout.arena.width - 42 : 24;
     const height = isHorizontal ? 24 : this.layout.arena.height - 128;
-    const beam = this.scene.add.rectangle(
-      isHorizontal ? GAME_DESIGN_WIDTH / 2 : input.x,
-      isHorizontal ? input.y : this.layout.arena.top + 92 + height / 2,
-      width,
-      height,
-      0x38bdf8,
-      0.24
-    ).setStrokeStyle(4, 0x1a1a1a, 0.82).setDepth(935);
+    const cx = isHorizontal ? GAME_DESIGN_WIDTH / 2 : input.x;
+    const cy = isHorizontal ? input.y : this.layout.arena.top + 92 + height / 2;
+    const water = this.scene.add.graphics().setPosition(cx, cy).setDepth(935);
+    if (isHorizontal) this.drawSprayJet(water, width, height);
+    else this.drawShower(water, width, height);
     this.scene.tweens.add({
-      targets: beam,
+      targets: water,
       alpha: 0,
       duration: input.durationMs,
-      onComplete: () => beam.destroy()
+      onComplete: () => water.destroy()
     });
+  }
+
+  /** Spray Bottle: a wobbly water jet across the row with droplets flicking off. */
+  private drawSprayJet(g: Phaser.GameObjects.Graphics, width: number, height: number): void {
+    const half = width / 2;
+    g.fillStyle(0x7dd3fc, 0.34);
+    g.fillRoundedRect(-half, -height / 2, width, height, height / 2);
+    g.lineStyle(3, 0x1a1a1a, 0.7);
+    g.beginPath();
+    for (let x = -half; x <= half; x += 12) {
+      const y = -height / 2 + Math.sin(x * 0.09) * 2.5;
+      if (x === -half) g.moveTo(x, y);
+      else g.lineTo(x, y);
+    }
+    g.strokePath();
+    g.beginPath();
+    for (let x = -half; x <= half; x += 12) {
+      const y = height / 2 + Math.sin(x * 0.09 + 1.6) * 2.5;
+      if (x === -half) g.moveTo(x, y);
+      else g.lineTo(x, y);
+    }
+    g.strokePath();
+    g.lineStyle(3, 0xffffff, 0.85);
+    for (let x = -half + 14; x < half - 30; x += 46) {
+      g.beginPath();
+      g.moveTo(x, -2);
+      g.lineTo(x + 22, -2);
+      g.strokePath();
+    }
+    g.fillStyle(0x7dd3fc, 0.9);
+    g.lineStyle(1.5, 0x1a1a1a, 0.6);
+    for (let i = 0, x = -half + 30; x < half; i++, x += 58) {
+      const side = i % 2 === 0 ? 1 : -1;
+      g.fillCircle(x, side * (height / 2 + 7), 3);
+      g.strokeCircle(x, side * (height / 2 + 7), 3);
+    }
+  }
+
+  /** Shower Head: a little shower head at the top raining streaks down the column. */
+  private drawShower(g: Phaser.GameObjects.Graphics, width: number, height: number): void {
+    const top = -height / 2;
+    g.fillStyle(0x7dd3fc, 0.16);
+    g.fillRect(-width / 2 - 6, top + 10, width + 12, height - 10);
+    g.lineStyle(2.5, 0x38bdf8, 0.85);
+    const lanes = [-width / 2 - 2, -4, 6, width / 2 + 3];
+    lanes.forEach((x, lane) => {
+      for (let y = top + 18 + lane * 9; y < height / 2; y += 34) {
+        g.beginPath();
+        g.moveTo(x, y);
+        g.lineTo(x, y + 16);
+        g.strokePath();
+      }
+    });
+    g.fillStyle(0xd4d4d8, 1);
+    g.lineStyle(3, 0x1a1a1a, 0.9);
+    g.fillRect(-4, top - 22, 8, 14);
+    g.strokeRect(-4, top - 22, 8, 14);
+    g.fillRoundedRect(-width / 2 - 10, top - 10, width + 20, 14, { tl: 10, tr: 10, bl: 3, br: 3 });
+    g.strokeRoundedRect(-width / 2 - 10, top - 10, width + 20, 14, { tl: 10, tr: 10, bl: 3, br: 3 });
+    g.fillStyle(0x1a1a1a, 0.8);
+    [-12, -4, 4, 12].forEach((x) => g.fillCircle(x, top + 1, 1.5));
   }
 
   private createEnemyLabel(
@@ -633,7 +803,7 @@ export class PotassiumSlipRenderer {
     enemy: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
     side: PotassiumShieldSide
   ): Phaser.GameObjects.Rectangle {
-    const plate = this.scene.add.rectangle(enemy.x, enemy.y, 12, 12, 0x38bdf8, 0.4)
+    const plate = this.scene.add.rectangle(enemy.x, enemy.y, 12, 12, 0xa1a1aa, 0.9)
       .setStrokeStyle(4, 0x1a1a1a, 0.9)
       .setDepth(enemy.depth + 2);
     enemy.once(Phaser.GameObjects.Events.DESTROY, () => plate.destroy());
@@ -695,231 +865,331 @@ export class PotassiumSlipRenderer {
       behind.strokeEllipse(16 * scale, -7 * scale, 22 * scale, 13 * scale);
     }
 
-    if (fireRank > 0) {
-      behind.lineStyle((fireRank >= 2 ? 6 : 4) * scale, 0xf97316, 0.55 * alphaScale);
-      behind.strokeCircle(0, 0, (fireRank >= 2 ? 36 : 32) * scale);
-      behind.lineStyle(2 * scale, 0xfacc15, 0.42 * alphaScale);
-      behind.strokeCircle(0, 0, 25 * scale);
-    }
-
-    if (ghostHorizontalRank > 0) {
-      front.lineStyle((ghostHorizontalRank >= 2 ? 5 : 3) * scale, 0x38bdf8, 0.56 * alphaScale);
-      front.beginPath();
-      front.moveTo(-34 * scale, 0);
-      front.lineTo(34 * scale, 0);
-      front.strokePath();
-    }
-
-    if (ghostVerticalRank > 0) {
-      front.lineStyle((ghostVerticalRank >= 2 ? 5 : 3) * scale, 0x60a5fa, 0.5 * alphaScale);
-      front.beginPath();
-      front.moveTo(0, -34 * scale);
-      front.lineTo(0, 34 * scale);
-      front.strokePath();
-    }
-
-    if (explosionRank > 0) {
-      const sparkScale = explosionRank >= 2 ? 1.12 : 1;
-      front.fillStyle(0xef4444, 0.86 * alphaScale);
-      front.lineStyle(2 * scale, 0x1a1a1a, 0.72 * alphaScale);
-      front.beginPath();
-      front.moveTo(22 * scale, -28 * scale);
-      front.lineTo(27 * scale * sparkScale, -14 * scale);
-      front.lineTo(38 * scale, -13 * scale);
-      front.lineTo(29 * scale, -6 * scale * sparkScale);
-      front.lineTo(33 * scale, 6 * scale);
-      front.lineTo(21 * scale, -2 * scale);
-      front.lineTo(11 * scale, 6 * scale);
-      front.lineTo(14 * scale, -8 * scale);
-      front.lineTo(4 * scale, -16 * scale);
-      front.lineTo(18 * scale, -17 * scale);
-      front.closePath();
-      front.fillPath();
-      front.strokePath();
-    }
+    if (fireRank > 0) drawSudsRingAccent(behind, fireRank, scale, alphaScale);
+    if (ghostHorizontalRank > 0) drawDropletAccent(front, 'horizontal', ghostHorizontalRank, scale, alphaScale);
+    if (ghostVerticalRank > 0) drawDropletAccent(front, 'vertical', ghostVerticalRank, scale, alphaScale);
+    if (explosionRank > 0) drawBubbleClusterAccent(front, explosionRank, scale, alphaScale);
   }
 
+  /** Dust Bunny: a tiny fluffball that goes poof in one hit. */
   private createInternTexture(): void {
     const g = this.scene.make.graphics({ x: 0, y: 0 });
-    g.lineStyle(3, 0x1a1a1a, 1);
-    g.fillStyle(0xfacc15, 0.95);
-    g.fillEllipse(24, 24, 30, 24);
-    g.strokeEllipse(24, 24, 30, 24);
+    const puffs: Array<[number, number, number]> = [
+      [24, 28, 13], [13, 26, 8], [35, 26, 8], [17, 36, 7], [31, 36, 7], [24, 17, 8]
+    ];
     g.fillStyle(0x1a1a1a, 1);
-    g.fillCircle(18, 20, 2);
-    g.fillCircle(30, 20, 2);
-    for (let i = 0; i < 3; i += 1) {
-      g.beginPath();
-      g.moveTo(13 + i * 9, 32);
-      g.lineTo(8 + i * 9, 40);
-      g.moveTo(18 + i * 9, 32);
-      g.lineTo(22 + i * 9, 40);
-      g.strokePath();
-    }
+    g.fillEllipse(17, 10, 8, 16);
+    g.fillEllipse(31, 10, 8, 16);
+    puffs.forEach(([x, y, r]) => g.fillCircle(x, y, r + 2.5));
+    g.fillStyle(0xe7e5e4, 1);
+    g.fillEllipse(17, 10, 4, 12);
+    g.fillEllipse(31, 10, 4, 12);
+    puffs.forEach(([x, y, r]) => g.fillCircle(x, y, r));
+    g.fillStyle(0x1a1a1a, 1);
+    g.fillCircle(19, 26, 2.2);
+    g.fillCircle(29, 26, 2.2);
+    g.fillStyle(0xfda4af, 0.7);
+    g.fillCircle(15, 31, 2.5);
+    g.fillCircle(33, 31, 2.5);
+    g.lineStyle(2, 0x1a1a1a, 0.85);
+    g.beginPath();
+    g.arc(24, 29, 3, 0.2, Math.PI - 0.2);
+    g.strokePath();
     g.generateTexture('potassium_enemy_intern', 48, 46);
     g.destroy();
   }
 
+  /** Mystery Leftovers: a wobbly glob of something in a cracked container. */
   private createScopeTexture(): void {
     const g = this.scene.make.graphics({ x: 0, y: 0 });
-    g.fillStyle(0xa855f7, 0.85);
+    const blobs: Array<[number, number, number]> = [
+      [34, 30, 17], [20, 34, 11], [48, 33, 12], [27, 20, 9], [42, 19, 8]
+    ];
+    g.fillStyle(0x1a1a1a, 1);
+    blobs.forEach(([x, y, r]) => g.fillCircle(x, y, r + 3));
+    g.fillStyle(0xa3e635, 0.95);
+    blobs.forEach(([x, y, r]) => g.fillCircle(x, y, r));
+    g.fillStyle(0xd9f99d, 0.9);
+    g.fillCircle(26, 26, 4);
+    g.fillCircle(46, 28, 3);
+    g.fillStyle(0xbfdbfe, 0.96);
     g.lineStyle(4, 0x1a1a1a, 1);
+    g.fillRoundedRect(8, 38, 52, 20, 5);
+    g.strokeRoundedRect(8, 38, 52, 20, 5);
+    g.lineStyle(2, 0x1a1a1a, 0.6);
     g.beginPath();
-    g.moveTo(34, 8);
-    g.lineTo(54, 14);
-    g.lineTo(61, 34);
-    g.lineTo(50, 56);
-    g.lineTo(28, 58);
-    g.lineTo(8, 46);
-    g.lineTo(10, 24);
-    g.lineTo(22, 10);
-    g.closePath();
-    g.fillPath();
+    g.moveTo(44, 39);
+    g.lineTo(40, 47);
+    g.lineTo(45, 52);
     g.strokePath();
     g.fillStyle(0xffffff, 1);
-    g.fillCircle(28, 30, 8);
+    g.fillCircle(33, 25, 8);
+    g.lineStyle(2, 0x1a1a1a, 1);
+    g.strokeCircle(33, 25, 8);
     g.fillStyle(0x1a1a1a, 1);
-    g.fillCircle(30, 30, 3);
+    g.fillCircle(35, 27, 3.2);
+    g.lineStyle(2, 0x1a1a1a, 0.5);
+    g.beginPath();
+    g.moveTo(14, 12);
+    g.lineTo(11, 6);
+    g.moveTo(56, 12);
+    g.lineTo(59, 5);
+    g.strokePath();
     g.generateTexture('potassium_enemy_scope', 68, 64);
     g.destroy();
   }
 
+  /** Roly-Poly: curled into a ball and rolling down fast. */
   private createDeadlineTexture(): void {
     const g = this.scene.make.graphics({ x: 0, y: 0 });
-    g.fillStyle(0xf97316, 0.9);
+    g.fillStyle(0x94a3b8, 1);
     g.lineStyle(4, 0x1a1a1a, 1);
+    g.fillCircle(28, 31, 22);
+    g.strokeCircle(28, 31, 22);
+    g.lineStyle(2.5, 0x1a1a1a, 0.7);
+    for (let i = -1; i <= 1; i += 1) {
+      g.beginPath();
+      g.moveTo(10 + Math.abs(i) * 3, 31 + i * 11);
+      g.lineTo(46 - Math.abs(i) * 3, 31 + i * 11);
+      g.strokePath();
+    }
+    g.fillStyle(0xcbd5e1, 0.9);
+    g.fillEllipse(19, 18, 10, 5);
+    g.fillStyle(0xfbfbf9, 1);
+    g.lineStyle(3, 0x1a1a1a, 1);
+    g.fillEllipse(28, 31, 20, 14);
+    g.strokeEllipse(28, 31, 20, 14);
+    g.fillStyle(0x1a1a1a, 1);
+    g.fillCircle(24, 30, 2);
+    g.fillCircle(32, 30, 2);
+    g.lineStyle(2, 0x1a1a1a, 0.9);
     g.beginPath();
-    g.moveTo(28, 4);
-    g.lineTo(54, 46);
-    g.lineTo(28, 34);
-    g.lineTo(2, 46);
-    g.closePath();
-    g.fillPath();
-    g.strokePath();
-    g.lineStyle(3, 0x1a1a1a, 0.8);
-    g.beginPath();
-    g.moveTo(28, 34);
-    g.lineTo(28, 58);
+    g.moveTo(24, 6);
+    g.lineTo(20, 1);
+    g.moveTo(32, 6);
+    g.lineTo(36, 1);
     g.strokePath();
     g.generateTexture('potassium_enemy_deadline', 56, 62);
     g.destroy();
   }
 
+  /** Pizza Box: breakable cardboard; damage reads as grease and torn corners. */
   private createWallTexture(): void {
     const g = this.scene.make.graphics({ x: 0, y: 0 });
-    g.fillStyle(0x8b5a2b, 0.96);
+    g.fillStyle(0xd6a76a, 0.98);
     g.lineStyle(5, 0x1a1a1a, 1);
     g.fillRoundedRect(5, 7, 70, 48, 4);
     g.strokeRoundedRect(5, 7, 70, 48, 4);
-    g.fillStyle(0xb7793b, 0.96);
-    g.fillRect(10, 12, 60, 10);
-    g.fillRect(10, 26, 60, 10);
-    g.fillRect(10, 40, 60, 10);
-    g.lineStyle(2, 0x1a1a1a, 0.48);
+    g.lineStyle(3, 0x1a1a1a, 0.6);
     g.beginPath();
-    g.moveTo(18, 13);
-    g.lineTo(12, 21);
-    g.moveTo(48, 26);
-    g.lineTo(60, 35);
-    g.moveTo(26, 42);
-    g.lineTo(18, 50);
+    g.moveTo(9, 44);
+    g.lineTo(71, 44);
     g.strokePath();
-    g.fillStyle(0xfbfbf9, 0.5);
-    g.fillRect(14, 16, 18, 3);
-    g.fillRect(42, 44, 16, 3);
-    g.lineStyle(3, 0x1a1a1a, 0.75);
-    g.beginPath();
-    g.moveTo(12, 31);
-    g.lineTo(68, 31);
-    g.strokePath();
+    g.fillStyle(0xb45309, 0.28);
+    g.fillEllipse(58, 20, 16, 9);
+    g.fillEllipse(17, 36, 11, 7);
+    g.fillStyle(0xfacc15, 1);
+    g.lineStyle(3, 0x1a1a1a, 1);
+    g.fillTriangle(30, 15, 50, 15, 40, 38);
+    g.strokeTriangle(30, 15, 50, 15, 40, 38);
+    g.fillStyle(0xd97706, 1);
+    g.fillRect(31, 15, 18, 3);
+    g.fillStyle(0xdc2626, 1);
+    g.fillCircle(36, 22, 2.5);
+    g.fillCircle(44, 23, 2.5);
+    g.fillCircle(40, 30, 2.2);
     g.generateTexture('potassium_enemy_wall', 80, 62);
     g.destroy();
   }
 
+  /** Cinder Block: unbreakable junk the banana has to bounce around. */
   private createHardWallTexture(): void {
     const g = this.scene.make.graphics({ x: 0, y: 0 });
-    g.fillStyle(0x1a1a1a, 0.08);
-    g.fillRoundedRect(7, 5, 66, 52, 5);
-    g.fillStyle(0xfbfbf9, 1);
+    g.fillStyle(0x1a1a1a, 0.1);
+    g.fillRoundedRect(8, 9, 70, 48, 3);
+    g.fillStyle(0xa8a29e, 1);
     g.lineStyle(5, 0x1a1a1a, 1);
-    g.fillRoundedRect(5, 7, 70, 48, 5);
-    g.strokeRoundedRect(5, 7, 70, 48, 5);
-    g.fillStyle(0x1a1a1a, 0.12);
-    g.fillRoundedRect(11, 13, 58, 36, 4);
-    g.lineStyle(6, 0x1a1a1a, 0.92);
-    g.beginPath();
-    g.moveTo(18, 17);
-    g.lineTo(62, 45);
-    g.moveTo(62, 17);
-    g.lineTo(18, 45);
-    g.strokePath();
+    g.fillRoundedRect(5, 7, 70, 48, 3);
+    g.strokeRoundedRect(5, 7, 70, 48, 3);
+    g.fillStyle(0x44403c, 1);
+    g.lineStyle(3, 0x1a1a1a, 1);
+    g.fillRoundedRect(13, 16, 22, 30, 2);
+    g.strokeRoundedRect(13, 16, 22, 30, 2);
+    g.fillRoundedRect(45, 16, 22, 30, 2);
+    g.strokeRoundedRect(45, 16, 22, 30, 2);
+    g.fillStyle(0x1a1a1a, 0.35);
+    const speckles: Array<[number, number]> = [[10, 12], [40, 12], [70, 50], [40, 50], [10, 50], [70, 12]];
+    speckles.forEach(([x, y]) => g.fillCircle(x, y, 1.4));
     g.generateTexture('potassium_enemy_hard_wall', 80, 62);
     g.destroy();
   }
 
+  /** Tied Trash Bag: bursts into two dust bunnies (one is already peeking out). */
   private createSplitterTexture(): void {
     const g = this.scene.make.graphics({ x: 0, y: 0 });
-    g.fillStyle(0xfde68a, 0.96);
-    g.lineStyle(4, 0x1a1a1a, 1);
-    g.fillRoundedRect(7, 8, 112, 42, 6);
-    g.strokeRoundedRect(7, 8, 112, 42, 6);
-    g.fillStyle(0xfacc15, 0.82);
-    g.fillRoundedRect(12, 13, 48, 32, 4);
-    g.fillRoundedRect(66, 13, 48, 32, 4);
-    g.lineStyle(3, 0x1a1a1a, 0.85);
-    g.beginPath();
-    g.moveTo(63, 10);
-    g.lineTo(63, 50);
-    g.moveTo(24, 24);
-    g.lineTo(50, 24);
-    g.moveTo(76, 34);
-    g.lineTo(104, 34);
-    g.strokePath();
     g.fillStyle(0x1a1a1a, 1);
-    g.fillCircle(29, 31, 3);
-    g.fillCircle(93, 27, 3);
+    g.fillEllipse(63, 34, 118, 44);
+    g.fillTriangle(53, 12, 73, 12, 63, 24);
+    g.fillStyle(0x57534e, 1);
+    g.fillEllipse(63, 34, 110, 36);
+    g.fillTriangle(57, 15, 69, 15, 63, 22);
+    g.lineStyle(4, 0x1a1a1a, 1);
+    g.beginPath();
+    g.moveTo(63, 14);
+    g.lineTo(52, 4);
+    g.moveTo(63, 14);
+    g.lineTo(74, 4);
+    g.strokePath();
+    g.lineStyle(2, 0x1a1a1a, 0.55);
+    g.beginPath();
+    g.moveTo(34, 24);
+    g.lineTo(42, 34);
+    g.moveTo(84, 22);
+    g.lineTo(92, 30);
+    g.moveTo(56, 42);
+    g.lineTo(70, 46);
+    g.strokePath();
+    g.fillStyle(0xa8a29e, 0.55);
+    g.fillEllipse(38, 23, 18, 5);
+    g.fillStyle(0x1a1a1a, 1);
+    g.fillCircle(100, 37, 8);
+    g.fillStyle(0xe7e5e4, 1);
+    g.fillCircle(100, 37, 6);
+    g.fillStyle(0x1a1a1a, 1);
+    g.fillCircle(98, 36, 1.4);
+    g.fillCircle(102, 36, 1.4);
     g.generateTexture('potassium_enemy_splitter', 126, 58);
     g.destroy();
   }
 
+  /** Lid Pigeon: the trash-can lid is drawn by the shield plate attachment. */
   private createShieldTexture(): void {
     const g = this.scene.make.graphics({ x: 0, y: 0 });
-    g.fillStyle(0xdbeafe, 0.96);
+    g.fillStyle(0xa5b4c8, 1);
     g.lineStyle(4, 0x1a1a1a, 1);
+    g.fillEllipse(34, 40, 42, 32);
+    g.strokeEllipse(34, 40, 42, 32);
+    g.fillStyle(0x8193ad, 1);
+    g.fillEllipse(40, 42, 22, 16);
+    g.fillStyle(0xa5b4c8, 1);
+    g.fillCircle(34, 18, 12);
+    g.strokeCircle(34, 18, 12);
+    g.fillStyle(0x5eead4, 0.8);
+    g.fillEllipse(34, 29, 18, 6);
+    g.fillStyle(0xf97316, 1);
+    g.lineStyle(2, 0x1a1a1a, 1);
+    g.fillTriangle(30, 21, 38, 21, 34, 28);
+    g.strokeTriangle(30, 21, 38, 21, 34, 28);
+    g.fillStyle(0xfdba74, 1);
+    g.fillCircle(29, 15, 4);
+    g.fillCircle(39, 15, 4);
+    g.fillStyle(0x1a1a1a, 1);
+    g.fillCircle(29, 15, 1.8);
+    g.fillCircle(39, 15, 1.8);
+    g.lineStyle(3, 0xf97316, 1);
     g.beginPath();
-    g.moveTo(34, 5);
-    g.lineTo(58, 18);
-    g.lineTo(52, 50);
-    g.lineTo(34, 60);
-    g.lineTo(16, 50);
-    g.lineTo(10, 18);
-    g.closePath();
-    g.fillPath();
+    g.moveTo(28, 55);
+    g.lineTo(26, 62);
+    g.moveTo(40, 55);
+    g.lineTo(42, 62);
     g.strokePath();
-    g.fillStyle(0x38bdf8, 0.45);
-    g.fillRoundedRect(18, 38, 32, 10, 4);
-    g.lineStyle(2, 0x1a1a1a, 0.75);
-    g.strokeRoundedRect(18, 38, 32, 10, 4);
     g.generateTexture('potassium_enemy_shield', 68, 66);
     g.destroy();
   }
 
+  /** Sir Rummage: the raccoon in a cardboard crown, Circuit clutched in one paw. */
   private createBossTexture(): void {
     const g = this.scene.make.graphics({ x: 0, y: 0 });
+    g.fillStyle(0x9ca3af, 1);
+    g.lineStyle(5, 0x1a1a1a, 1);
+    g.fillTriangle(22, 34, 30, 8, 46, 26);
+    g.strokeTriangle(22, 34, 30, 8, 46, 26);
+    g.fillTriangle(102, 34, 94, 8, 78, 26);
+    g.strokeTriangle(102, 34, 94, 8, 78, 26);
+    g.fillEllipse(62, 50, 92, 62);
+    g.strokeEllipse(62, 50, 92, 62);
+    g.fillStyle(0x3f3f46, 1);
+    g.fillEllipse(44, 46, 34, 20);
+    g.fillEllipse(80, 46, 34, 20);
+    g.fillRect(44, 41, 36, 9);
     g.fillStyle(0xffffff, 1);
-    g.lineStyle(6, 0x1a1a1a, 1);
-    g.fillRoundedRect(4, 10, 116, 70, 10);
-    g.strokeRoundedRect(4, 10, 116, 70, 10);
-    g.lineStyle(3, 0x1a1a1a, 0.55);
-    g.strokeCircle(34, 44, 14);
-    g.strokeCircle(88, 44, 14);
+    g.fillCircle(44, 46, 7);
+    g.fillCircle(80, 46, 7);
+    g.fillStyle(0x1a1a1a, 1);
+    g.fillCircle(46, 47, 3.4);
+    g.fillCircle(78, 47, 3.4);
+    g.fillStyle(0xf5f5f4, 1);
+    g.lineStyle(3, 0x1a1a1a, 1);
+    g.fillEllipse(62, 66, 34, 22);
+    g.strokeEllipse(62, 66, 34, 22);
+    g.fillStyle(0x1a1a1a, 1);
+    g.fillEllipse(62, 60, 10, 7);
+    g.lineStyle(2.5, 0x1a1a1a, 1);
     g.beginPath();
-    g.moveTo(45, 62);
-    g.lineTo(80, 62);
+    g.moveTo(54, 67);
+    g.lineTo(58, 71);
+    g.lineTo(62, 68);
+    g.lineTo(66, 71);
+    g.lineTo(70, 67);
     g.strokePath();
-    g.fillStyle(0xfacc15, 0.5);
-    g.fillRect(12, 16, 100, 12);
+    g.fillStyle(0xd6a76a, 1);
+    g.lineStyle(3, 0x1a1a1a, 1);
+    g.beginPath();
+    g.moveTo(46, 24);
+    g.lineTo(46, 8);
+    g.lineTo(54, 16);
+    g.lineTo(62, 4);
+    g.lineTo(70, 16);
+    g.lineTo(78, 8);
+    g.lineTo(78, 24);
+    g.closePath();
+    g.fillPath();
+    g.strokePath();
+    g.fillStyle(0x22c55e, 1);
+    g.lineStyle(3, 0x1a1a1a, 1);
+    g.fillRect(96, 62, 22, 16);
+    g.strokeRect(96, 62, 22, 16);
+    g.lineStyle(2, 0xfacc15, 1);
+    g.beginPath();
+    g.moveTo(100, 66);
+    g.lineTo(110, 66);
+    g.lineTo(110, 74);
+    g.moveTo(104, 74);
+    g.lineTo(114, 70);
+    g.strokePath();
+    g.fillStyle(0x9ca3af, 1);
+    g.lineStyle(3, 0x1a1a1a, 1);
+    g.fillCircle(97, 76, 7);
+    g.strokeCircle(97, 76, 7);
     g.generateTexture('potassium_enemy_boss', 124, 90);
+    g.destroy();
+  }
+
+  /** Soda can from Sir Rummage's hoard: his orbiting phase-2 blockers. */
+  private createBossCanTexture(): void {
+    const g = this.scene.make.graphics({ x: 0, y: 0 });
+    g.fillStyle(0xef4444, 1);
+    g.lineStyle(5, 0x1a1a1a, 1);
+    g.fillRoundedRect(12, 12, 56, 38, 6);
+    g.strokeRoundedRect(12, 12, 56, 38, 6);
+    g.fillStyle(0xd4d4d8, 1);
+    g.lineStyle(3, 0x1a1a1a, 1);
+    g.fillEllipse(12, 31, 12, 38);
+    g.strokeEllipse(12, 31, 12, 38);
+    g.lineStyle(4, 0xfbfbf9, 0.95);
+    g.beginPath();
+    g.moveTo(22, 34);
+    g.lineTo(32, 26);
+    g.lineTo(44, 36);
+    g.lineTo(56, 26);
+    g.strokePath();
+    g.lineStyle(2, 0x1a1a1a, 0.5);
+    g.beginPath();
+    g.moveTo(40, 13);
+    g.lineTo(44, 22);
+    g.lineTo(40, 30);
+    g.strokePath();
+    g.generateTexture('potassium_boss_can', 80, 62);
     g.destroy();
   }
 
@@ -1013,17 +1283,79 @@ export class PotassiumSlipRenderer {
     critical.destroy();
   }
 
-  private createFireTexture(): void {
+  /** Suds Trail puddle: a foamy soap patch with a few bubbles (texture key potassium_suds). */
+  private createSudsTexture(): void {
     const g = this.scene.make.graphics({ x: 0, y: 0 });
-    g.fillStyle(0xf97316, 0.34);
-    g.lineStyle(3, 0x1a1a1a, 0.42);
-    g.fillEllipse(30, 18, 56, 24);
-    g.strokeEllipse(30, 18, 56, 24);
-    g.fillStyle(0xfacc15, 0.38);
-    g.fillEllipse(30, 16, 34, 14);
-    g.generateTexture('potassium_fire', 60, 36);
+    g.fillStyle(0x7dd3fc, 0.3);
+    g.lineStyle(2.5, 0x1a1a1a, 0.38);
+    g.fillEllipse(30, 20, 56, 22);
+    g.strokeEllipse(30, 20, 56, 22);
+    const foam: Array<[number, number, number]> = [[14, 18, 7], [24, 14, 8], [36, 15, 7], [46, 19, 6], [30, 22, 7]];
+    g.fillStyle(0xffffff, 0.72);
+    foam.forEach(([x, y, r]) => g.fillCircle(x, y, r));
+    g.lineStyle(1.5, 0x38bdf8, 0.55);
+    [[20, 7, 3], [40, 6, 2.5], [52, 11, 2]].forEach(([x, y, r]) => g.strokeCircle(x, y, r));
+    g.generateTexture('potassium_suds', 60, 36);
     g.destroy();
   }
+}
+
+/** Suds Trail: a ring of little foam bubbles around the sponge. */
+function drawSudsRingAccent(g: Phaser.GameObjects.Graphics, rank: PotassiumSkillRank, scale: number, alphaScale: number): void {
+  const ringRadius = (rank >= 2 ? 36 : 32) * scale;
+  const count = rank >= 2 ? 10 : 8;
+  for (let i = 0; i < count; i += 1) {
+    const angle = (i / count) * Math.PI * 2;
+    const r = (i % 2 === 0 ? 5 : 3.5) * scale;
+    g.fillStyle(0xffffff, 0.75 * alphaScale);
+    g.fillCircle(Math.cos(angle) * ringRadius, Math.sin(angle) * ringRadius, r);
+    g.lineStyle(1.5 * scale, 0x38bdf8, 0.7 * alphaScale);
+    g.strokeCircle(Math.cos(angle) * ringRadius, Math.sin(angle) * ringRadius, r);
+  }
+}
+
+/** Spray Bottle / Shower Head: water droplets on both sides of the sponge along the beam axis. */
+function drawDropletAccent(
+  g: Phaser.GameObjects.Graphics,
+  direction: 'horizontal' | 'vertical',
+  rank: PotassiumSkillRank,
+  scale: number,
+  alphaScale: number
+): void {
+  const color = direction === 'horizontal' ? 0x38bdf8 : 0x60a5fa;
+  const r = (rank >= 2 ? 4.5 : 3.5) * scale;
+  [-1, 1].forEach((sign) => {
+    [30, 40].forEach((distance, i) => {
+      const along = sign * distance * scale;
+      const x = direction === 'horizontal' ? along : 0;
+      const y = direction === 'horizontal' ? 0 : along;
+      g.fillStyle(color, (i === 0 ? 0.75 : 0.5) * alphaScale);
+      g.fillCircle(x, y, i === 0 ? r : r * 0.7);
+    });
+  });
+}
+
+/** Bubble Pop: a little cluster of soap bubbles riding on the sponge. */
+function drawBubbleClusterAccent(g: Phaser.GameObjects.Graphics, rank: PotassiumSkillRank, scale: number, alphaScale: number): void {
+  const grow = rank >= 2 ? 1.2 : 1;
+  const bubbles: Array<[number, number, number, number]> = [
+    [24, -22, 8, 0xf9a8d4],
+    [34, -10, 5, 0x67e8f9],
+    [16, -32, 4.5, 0x67e8f9]
+  ];
+  bubbles.forEach(([x, y, r, rim]) => {
+    const radius = r * grow * scale;
+    g.fillStyle(0xe0f2fe, 0.45 * alphaScale);
+    g.fillCircle(x * scale, y * scale, radius);
+    g.lineStyle(2 * scale, 0x1a1a1a, 0.7 * alphaScale);
+    g.strokeCircle(x * scale, y * scale, radius);
+    g.lineStyle(1.5 * scale, rim, 0.85 * alphaScale);
+    g.beginPath();
+    g.arc(x * scale, y * scale, radius - 2 * scale, Math.PI * 0.1, Math.PI * 0.8);
+    g.strokePath();
+    g.fillStyle(0xffffff, 0.9 * alphaScale);
+    g.fillCircle((x - r * 0.35) * scale, (y - r * 0.35) * scale, Math.max(1, radius * 0.25));
+  });
 }
 
 function getSkillRank(skillRanks: PotassiumSkillRanks, upgrade: PotassiumUpgradeKind): PotassiumSkillRank {

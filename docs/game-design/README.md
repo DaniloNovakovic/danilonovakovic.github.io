@@ -56,8 +56,8 @@ prefer GitHub Issues.
   current-prototype mini-game-specific rules. These docs do not make a
   mini-game required Living Proof unless the Ridge router and active route canon
   explicitly say so.
-- **[Potassium Slip Manual](./mini-games/potassium-slip.md)**: Focused guide for the
-  Potassium Slip mini-game.
+- **[Scrub Rumble Manual](./mini-games/scrub-rumble.md)**: Focused guide for the
+  Scrub Rumble mini-game.
 - **[Stampede Sketch](./mini-games/stampede-sketch.md)**: Purpose, player fantasy, enemy
   intent, and first-slice asset direction for the Stampede mini-game.
 - **[Sketchbook Ridge Summit](./ridge/summit.md)**: Pre-production vision for
@@ -98,7 +98,7 @@ prefer GitHub Issues.
   `ridge/areas/`,
   `ridge/story-level-bible.md`,
   `ridge/summit.md`, and `ridge/milestone-plan.md`.
-- **Optional/current mini-game design:** `mini-games/potassium-slip.md` and
+- **Optional/current mini-game design:** `mini-games/scrub-rumble.md` and
   `mini-games/stampede-sketch.md`. These are local mini-game contracts, not
   required first-ending Living Proof.
 - **Current Ridge runtime/prototype reality:** `ridge/ridge-snapshot.md`.

@@ -125,14 +125,14 @@ Rules:
 
 ## Potassium Acknowledgement Micro-Pack
 
-This pack acknowledges Potassium Slip from the Ridge without changing
+This pack acknowledges Scrub Rumble from the Ridge without changing
 Potassium's scene-owned run behavior, controls, boss, upgrades, or presentation.
 
 Allowed sounds:
 
 - Ridge Trail Card hover/open: a tiny rubbery banana squeak under the paper UI.
 - Circuit acknowledgement: short contact-clean chime plus paper stamp thump.
-- Potassium sign/NPC line: muted office intercom tick or clipboard clack.
+- Potassium sign/NPC line: small trash-can lid clang or soda-can rattle.
 - Return from Potassium with Circuit: one celebratory but restrained two-hit
   stinger, then immediately settle back into Ridge loop.
 
@@ -271,7 +271,7 @@ Volume and mix rules:
 - Should Cicka's raw voice be based on real Cicka-like reference recordings if
   available, or should it stay designed/abstract?
 - How silly should Potassium acknowledgement be on the Ridge: almost hidden,
-  obviously banana-coded, or office-law absurd?
+  obviously banana-coded, or dumpster-raccoon absurd?
 - For Telegraph, should the ideal cue feel more like Muay Thai pad work, a
   rhythm-game click, or a manga impact beat?
 - On return after a first clear, should the permanent Ridge mix change be

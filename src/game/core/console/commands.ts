@@ -36,7 +36,7 @@ const INTERACT_ALIASES = new Set(['interact', 'use', 'talk']);
 
 export function getGameHelpText(): string {
   return [
-    'Game Console — full headless play (Overworld → Basement → Potassium → Ridge)',
+    'Game Console — full headless play (Overworld → Basement → Scrub Rumble → Ridge)',
     '',
     'Shared:',
     '  help | look | status | inventory',
@@ -62,7 +62,7 @@ export function getGameHelpText(): string {
     '  skip                         next area',
     '  warp bridge|concert|dance|relay',
     '',
-    'Potassium (discrete campaign):',
+    'Scrub Rumble (code id potassium, discrete campaign):',
     '  start | fight | draft <id|index>',
     '',
     'AI cheats:',

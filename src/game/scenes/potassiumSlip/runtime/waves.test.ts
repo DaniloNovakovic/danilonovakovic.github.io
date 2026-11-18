@@ -169,7 +169,7 @@ describe('potassium slip waves', () => {
     expect(isPotassiumCampaignBossWave(POTASSIUM_BOSS_WAVE)).toBe(true);
     const endlessWave = getPotassiumWave(POTASSIUM_ENDLESS_START_WAVE);
     expect(isPotassiumBossWave(POTASSIUM_ENDLESS_START_WAVE)).toBe(false);
-    expect(endlessWave.title).toBe('Endless Audit 1');
+    expect(endlessWave.title).toBe('Endless Rummage 1');
     expect(endlessWave.rows.every((row) => row.length === POTASSIUM_COLUMN_COUNT)).toBe(true);
     expect(endlessWave.rows.flat()).not.toContain('boss');
     endlessWave.rows.forEach((row) => {

@@ -211,17 +211,25 @@ export class TextureGenerator {
   }
 
   static generatePotassiumAssets(scene: Phaser.Scene) {
-    if (scene.textures.exists('banana_peel_yellow')) return;
+    if (scene.textures.exists('potassium_sponge')) return;
 
-    const PEEL_SVG = (colorMain: string, colorLight: string) => `
+    /** Potassium's thrown sponge: yellow body, green scrubby top, smiling face. */
+    const SPONGE_PORES: Array<[number, number, number, number]> = [
+      [20, 36, 3, 2], [34, 42, 2.5, 2], [46, 34, 3, 2.2], [26, 48, 2, 1.6],
+      [42, 50, 2.6, 1.8], [16, 46, 1.8, 1.4], [50, 46, 2, 1.6]
+    ];
+    const SPONGE_SVG = (body: string, scrub: string, pore: string, suds: boolean) => `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <path d="M 32 36 C 26 50, 22 62, 32 62 C 42 62, 38 50, 32 36 Z" fill="${colorMain}" stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round"/>
-  <path d="M 28 30 C 10 24, 4 40, 8 48 C 15 52, 22 40, 28 30 Z" fill="${colorMain}" stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round"/>
-  <path d="M 36 30 C 54 24, 60 40, 56 48 C 49 52, 42 40, 36 30 Z" fill="${colorMain}" stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round"/>
-  <path d="M 32 26 C 24 8, 40 8, 32 26 Z" fill="${colorLight}" stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round"/>
-  <circle cx="32" cy="32" r="5" fill="#4a3b32" stroke="#1a1a1a" stroke-width="3"/>
-  <circle cx="32" cy="32" r="2" fill="#2d1c15"/>
-  <path d="M 32 44 L 32 54 M 22 36 L 14 42 M 42 36 L 50 42" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+  <rect x="7" y="22" width="50" height="34" rx="7" fill="${body}" stroke="#1a1a1a" stroke-width="3"/>
+  ${SPONGE_PORES.map(([x, y, rx, ry]) => `<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="${pore}"/>`).join('')}
+  <path d="M 7 29 L 7 19 Q 7 13 13 13 L 51 13 Q 57 13 57 19 L 57 29 Z" fill="${scrub}" stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M 13 18 l 3 3 M 21 17 l 3 3 M 29 18 l 3 3 M 37 17 l 3 3 M 45 18 l 3 3" stroke="#1a1a1a" stroke-width="1.5" opacity="0.35" stroke-linecap="round"/>
+  <circle cx="25" cy="39" r="2.6" fill="#1a1a1a"/>
+  <circle cx="39" cy="39" r="2.6" fill="#1a1a1a"/>
+  <path d="M 28 45 Q 32 49 36 45" stroke="#1a1a1a" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  <circle cx="20" cy="44" r="2.4" fill="#fb923c" opacity="0.45"/>
+  <circle cx="44" cy="44" r="2.4" fill="#fb923c" opacity="0.45"/>
+  ${suds ? `<circle cx="10" cy="12" r="5" fill="#ecfccb" stroke="#1a1a1a" stroke-width="2"/><circle cx="54" cy="9" r="4" fill="#ecfccb" stroke="#1a1a1a" stroke-width="2"/><circle cx="58" cy="56" r="3.5" fill="#ecfccb" stroke="#1a1a1a" stroke-width="2"/>` : ''}
 </svg>`;
 
     const DEADLINE_SVG = `
@@ -270,9 +278,8 @@ export class TextureGenerator {
       return 'data:image/svg+xml;base64,' + window.btoa(unescape(encodeURIComponent(svg)));
     };
 
-    scene.load.svg('banana_peel_yellow', toBase64(PEEL_SVG('#F3DE72', '#FCEE98')));
-    scene.load.svg('banana_peel_green', toBase64(PEEL_SVG('#A4D44D', '#D4F090')));
-    scene.load.svg('banana_peel_brown', toBase64(PEEL_SVG('#8B5A2B', '#A06D3D')));
+    scene.load.svg('potassium_sponge', toBase64(SPONGE_SVG('#F9D84A', '#6CC04A', '#D9A92B', false)));
+    scene.load.svg('potassium_sponge_poison', toBase64(SPONGE_SVG('#A3D65C', '#4D8F2E', '#6E9A36', true)));
     scene.load.svg('enemy_deadline', toBase64(DEADLINE_SVG));
     scene.load.svg('enemy_scope_creeper', toBase64(CREEPER_SVG));
     scene.load.svg('enemy_bug', toBase64(BUG_SVG));

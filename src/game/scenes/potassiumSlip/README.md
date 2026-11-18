@@ -1,6 +1,6 @@
-# Potassium Slip Scene Map
+# Scrub Rumble Scene Map (code id: potassium)
 
-This folder owns the Potassium Slip Phaser scene and its scene-local gameplay modules.
+This folder owns the Scrub Rumble Phaser scene (historically "Potassium Slip"; ids, folders, and keys still say potassium) and its scene-local gameplay modules.
 
 ## Ownership
 

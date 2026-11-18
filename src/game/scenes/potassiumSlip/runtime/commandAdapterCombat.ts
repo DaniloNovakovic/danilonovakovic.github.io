@@ -176,9 +176,6 @@ function applyCombatWorldCommand(
     case 'explodeAt':
       explodeAt(internals, command.x, command.y, command.effectMultiplier, command.radiusMultiplier);
       break;
-    case 'spawnBananaClones':
-      internals.ports.spawnBananaClones(command.count, command.lifetimeMs);
-      break;
     case 'spawnGhostBeam':
       spawnGhostBeam(internals, command.x, command.y, command.direction, command.effectMultiplier);
       break;

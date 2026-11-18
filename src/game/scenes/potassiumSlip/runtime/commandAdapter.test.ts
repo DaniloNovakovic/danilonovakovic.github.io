@@ -66,7 +66,7 @@ function makeAdapter(overrides: Partial<PotassiumCommandAdapterPorts> = {}) {
   const enemies: PotassiumCommandObject[] = [];
   const projectiles: PotassiumCommandObject[] = [];
   const calls: string[] = [];
-  const main = makeObject({ data: { canDuplicate: true, effectMultiplier: 1, canApplyHitProcs: true } });
+  const main = makeObject({ data: { effectMultiplier: 1, canApplyHitProcs: true } });
   projectiles.push(main);
 
   const basePorts: PotassiumCommandAdapterPorts = {
@@ -106,7 +106,6 @@ function makeAdapter(overrides: Partial<PotassiumCommandAdapterPorts> = {}) {
       stopMainProjectile: () => calls.push('stopMainProjectile'),
       clearBoardForOutcome: () => calls.push('clearBoardForOutcome'),
       spawnFirePatch: () => calls.push('spawnFirePatch'),
-      spawnBananaClones: () => calls.push('spawnBananaClones'),
       spawnSplitterChildren: () => calls.push('spawnSplitterChildren'),
       spawnBossOrbitBlockers: () => calls.push('spawnBossOrbitBlockers'),
       updateBossOrbitBlockers: () => calls.push('updateBossOrbitBlockers'),

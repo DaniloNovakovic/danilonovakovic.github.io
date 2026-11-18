@@ -18,14 +18,14 @@ const layout = {
 describe('potassium slip enemy factory', () => {
   it('keeps enemy config facts in one locality point', () => {
     expect(getPotassiumEnemyConfig('intern')).toMatchObject({
-      label: 'Intern Bug',
+      label: 'Dust Bunny',
       hp: 2,
       score: 1,
       texture: 'potassium_enemy_intern',
       scale: 0.92
     });
     expect(getPotassiumEnemyConfig('boss')).toMatchObject({
-      label: 'Potassium Compliance Officer',
+      label: 'Sir Rummage',
       hp: 92,
       score: 12,
       speed: 8
@@ -71,7 +71,7 @@ describe('potassium slip enemy factory', () => {
       isBoss: false,
       attachment: {
         kind: 'wall',
-        label: 'Wooden Wall',
+        label: 'Pizza Box',
         hp: 23
       }
     });

@@ -15,10 +15,10 @@ import type {
 const OVERWORLD_CONSOLE_HINTS: Record<OverworldProgressStage, string> = {
   'find-glasses':
     'Walk to the chick just past Experiences (or the basement hatch) to get glasses.',
-  'wear-glasses': 'equip glasses to reveal the banana peel. The street chick will run.',
-  'find-peel': `With glasses on, walk near x=${OVERWORLD_BANANA_PEEL.x} and interact with the peel.`,
+  'wear-glasses': 'equip glasses to reveal the litter pile. The street chick will run.',
+  'find-peel': `With glasses on, walk near x=${OVERWORLD_BANANA_PEEL.x} and interact with the litter.`,
   'win-circuit':
-    'Interact with the peel again to enter Potassium Slip and win the Circuit — or win music, fitness and dancing parts in Hobbies (perform) and solder them at the basement workbench.',
+    'Interact with the litter again to dive into Scrub Rumble and win the Circuit — or win music, fitness and dancing parts in Hobbies (perform) and solder them at the basement workbench.',
   'solder-circuit': 'Drop into the basement and use the workbench near x=790 to solder the Circuit.',
   'use-crt': 'Walk to the street CRT near x=1650 and insert the Circuit to enter Ridge.'
 };

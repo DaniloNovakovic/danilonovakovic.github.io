@@ -25,7 +25,7 @@ Ridge/Basement characters prefer:
 - transparent final PNGs; keep keyed/source files for rework
 
 Scene-specific art may bend the style only when that scene already does (e.g.
-Potassium Slip arcade color).
+Scrub Rumble arcade color).
 
 ## New Sprite Workflow
 

@@ -31,7 +31,6 @@ describe('potassium slip combat', () => {
         nextTickAt: 1500
       },
       { type: 'explodeAt', x: 300, y: 160, effectMultiplier: 1, radiusMultiplier: 1 },
-      { type: 'spawnBananaClones', count: 2, lifetimeMs: 3600 },
       { type: 'spawnGhostBeam', x: 300, y: 160, direction: 'horizontal', effectMultiplier: 1 }
     ]);
   });
@@ -214,7 +213,6 @@ function projectile(overrides: Partial<PotassiumProjectileCombatFacts> = {}): Po
     y: 150,
     effectMultiplier: 1,
     canApplyHitProcs: true,
-    canDuplicate: true,
     explosionRadiusMultiplier: 1,
     ...overrides
   };

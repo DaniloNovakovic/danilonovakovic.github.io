@@ -37,14 +37,16 @@ export interface OverworldProgress {
 }
 
 const BANANA_CANCEL_EXTRA = 40;
+/** Typed targets that count as the litter pile while its discovery beat is pending. */
+const LITTER_TARGET_WORDS = ['banana', 'peel', 'litter', 'dumpster', 'potassium'];
 
 const SIGNPOST_MESSAGES: Record<OverworldProgressStage, string> = {
   'find-glasses':
     'The sign is a blur. A chick is pacing just past Experiences.',
   'wear-glasses': 'Put your glasses back on. The street hides things from blurry eyes. The chick will bolt.',
-  'find-peel': 'Something slippery lies on the sidewalk just past the Abilities shelf.',
+  'find-peel': 'Somebody has been littering just past the Abilities shelf.',
   'win-circuit':
-    'That peel still leads somewhere. Win what is down there — or build a Circuit from hobby parts.',
+    'Those raccoon paw prints lead into a dumpster. Win back what is in there — or build a Circuit from hobby parts.',
   'solder-circuit': 'Your pockets rattle with parts. The basement workbench could make something of them.',
   'use-crt': 'The blank CRT by Projects is humming. It wants your Circuit.'
 };
@@ -143,7 +145,7 @@ export function listOverworldNearby(state: GameWorldState): NearbyThing[] {
       id: OVERWORLD_BANANA_PEEL.id,
       label: OVERWORLD_BANANA_PEEL.label,
       distance: peelDist,
-      prompt: discovered ? 'Slip into Potassium' : 'Inspect peel',
+      prompt: discovered ? 'Hop in the dumpster' : 'Tidy up the litter',
       kind: 'secret',
       promptX: OVERWORLD_BANANA_PEEL.x,
       promptY: OVERWORLD_BANANA_PEEL.y - 56
@@ -223,10 +225,7 @@ export function interactOverworld(
   if (
     state.overworld.bananaFirstPeelPending &&
     state.discoveredSecretIds.includes(OVERWORLD_BANANA_PEEL.secretId) &&
-    (!target ||
-      target.toLowerCase().includes('banana') ||
-      target.toLowerCase().includes('peel') ||
-      target.toLowerCase().includes('potassium'))
+    (!target || LITTER_TARGET_WORDS.some((word) => target.toLowerCase().includes(word)))
   ) {
     const peelDist = Math.hypot(
       state.overworld.playerX - OVERWORLD_BANANA_PEEL.x,
@@ -278,7 +277,7 @@ export function interactOverworld(
     if (!state.ownedItemIds.includes('circuit')) {
       return {
         message:
-          'The CRT is blank. Win Potassium Slip for a Circuit, or solder one from hobby parts in the basement.',
+          'The CRT is blank. Win the Circuit back in Scrub Rumble, or solder one from hobby parts in the basement.',
         events: []
       };
     }
@@ -300,7 +299,7 @@ export function interactOverworld(
 /** Live Overworld typewriter warp (and console second interact) enter Potassium. */
 export function enterPotassiumFromBananaPeel(state: GameWorldState): OverworldInteractOutcome {
   if (!state.discoveredSecretIds.includes(OVERWORLD_BANANA_PEEL.secretId)) {
-    return { message: 'No banana peel discovery to commit.', events: [] };
+    return { message: 'No litter discovery to commit.', events: [] };
   }
   state.overworld.bananaFirstPeelPending = false;
   state.mode = 'potassium';
@@ -314,7 +313,7 @@ export function enterPotassiumFromBananaPeel(state: GameWorldState): OverworldIn
     draftChoices: []
   };
   return {
-    message: 'You slip on the peel and tumble into Potassium Slip.',
+    message: 'You bend down to tidy up, slip on a soapy puddle, and tumble into the dumpster. Scrub Rumble!',
     events: [{ type: 'scene_entered', sceneId: 'potassium' }]
   };
 }
@@ -328,7 +327,7 @@ function interactBananaPeel(state: GameWorldState): OverworldInteractOutcome {
     state.overworld.bananaFirstPeelPending = true;
     return {
       message:
-        'A banana peel snaps into focus. Secret discovered — interact again (or wait for the warp) to enter Potassium.',
+        'A little pile of litter snaps into focus, with raccoon paw prints leading into a dumpster. Secret discovered — interact again (or wait for the warp) to tidy up.',
       events: [{ type: 'secret_discovered', secretId }]
     };
   }

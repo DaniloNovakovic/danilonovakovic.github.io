@@ -479,11 +479,11 @@ function emptyRow(): PotassiumWaveCell[] {
 }
 
 function getGeneratedWaveTitle(wave: number): string {
-  if (wave > POTASSIUM_BOSS_WAVE) return messages.potassiumSlip.waveTitles.endlessAudit(wave - POTASSIUM_BOSS_WAVE);
-  if (wave <= 2) return messages.potassiumSlip.waveTitles.orientationStack(wave);
-  if (wave <= 4) return messages.potassiumSlip.waveTitles.wallPattern(wave);
-  if (wave <= 6) return messages.potassiumSlip.waveTitles.officePressure(wave);
-  return messages.potassiumSlip.waveTitles.deadlineWeather(wave);
+  if (wave > POTASSIUM_BOSS_WAVE) return messages.potassiumSlip.waveTitles.endlessRummage(wave - POTASSIUM_BOSS_WAVE);
+  if (wave <= 2) return messages.potassiumSlip.waveTitles.curbside(wave);
+  if (wave <= 4) return messages.potassiumSlip.waveTitles.boxPile(wave);
+  if (wave <= 6) return messages.potassiumSlip.waveTitles.dumpsterDive(wave);
+  return messages.potassiumSlip.waveTitles.bottomOfTheBin(wave);
 }
 
 function unique<T>(values: readonly T[]): T[] {

@@ -82,7 +82,6 @@ export interface PotassiumCommandAdapterBoardPorts {
   stopMainProjectile(): void;
   clearBoardForOutcome(): void;
   spawnFirePatch(x: number, y: number, effectMultiplier: number, lifetimeMs: number, scale: number): void;
-  spawnBananaClones(count: number, lifetimeMs: number): void;
   spawnSplitterChildren(enemy: PotassiumCommandObject): void;
   spawnBossOrbitBlockers(boss: PotassiumCommandObject): void;
   updateBossOrbitBlockers(boss: PotassiumCommandObject, time: number): void;

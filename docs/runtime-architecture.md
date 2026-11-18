@@ -49,7 +49,7 @@ game vocabulary is explicit:
   `RidgeScene`. Stick art renders through `RidgeVisualProvider`. See
   [`adr/0005-ridge-console-core-and-stick-visuals.md`](adr/0005-ridge-console-core-and-stick-visuals.md).
 - **Full-game console** - `GameConsoleSession` (`src/game/core/console/`)
-  orchestrates Overworld, Basement, discrete Potassium Slip, overlays, and Ridge
+  orchestrates Overworld, Basement, discrete Scrub Rumble, overlays, and Ridge
   for headless AI/human play via `pnpm game:console`. See
   [`adr/0006-game-console-core.md`](adr/0006-game-console-core.md). Overworld
   street spot coordinates are shared with Phaser through

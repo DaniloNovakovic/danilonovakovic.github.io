@@ -150,7 +150,7 @@ when the issue touches runtime, art, audio, overlays, or legacy/prototype reuse:
 - [`20-game-runtime.md`](../../../../.agents/rules/20-game-runtime.md)
 - [`30-react-overlays.md`](../../../../.agents/rules/30-react-overlays.md)
 
-Use [`potassium-slip.md`](../../mini-games/potassium-slip.md) for Potassium-specific behavior,
+Use [`scrub-rumble.md`](../../mini-games/scrub-rumble.md) for Potassium-specific behavior,
 [`stampede-sketch.md`](../../mini-games/stampede-sketch.md) for Stampede-specific behavior,
 and [`mini-games/README.md`](../../mini-games/README.md) as the mini-game routing
 index.

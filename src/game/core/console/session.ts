@@ -143,7 +143,7 @@ export class GameConsoleSession {
   /** Live Overworld typewriter warp entry into Potassium. */
   commitBananaPeelWarp(): GameCommandResult {
     if (this.state.mode !== 'overworld') {
-      return this.fail('Banana peel warp only applies on the street.');
+      return this.fail('The dumpster is only on the street.');
     }
     const result = enterPotassiumFromBananaPeel(this.state);
     return this.finish(result.message, result.events);
@@ -313,7 +313,7 @@ export class GameConsoleSession {
       const result = returnToOverworld(
         this.state,
         leavingPotassium
-          ? 'You bail out of Potassium Slip back to the street.'
+          ? 'You climb out of the dumpster back to the street.'
           : 'You return to the street.'
       );
       if (leavingPotassium) {

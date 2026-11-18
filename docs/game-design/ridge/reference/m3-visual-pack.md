@@ -51,7 +51,7 @@ are added.
 | --- | --- | --- | --- | --- |
 | Cicka | Small low cat shape, tail doing the sentence, ears sharp | Resident, notice-guide, secret marker | Tail punctuation, loaf mass, tiny paws, blink slits | Mascot face, oversized UI pet, human-like talking poses |
 | Ridge Guide | Upright friendly guide with soft triangle poncho or jacket, signpost lean | Orientation and gentle encouragement | Hiking stick or folded map, slightly worried posture, font-license anxiety in props | Tutorial lecturer, generic park ranger, big dialogue-tree stance |
-| Potassium Compliance Officer | Clipboard rectangle plus banana-law cap, stiff side profile | Absurd authority for Potassium hints | Clipboard, tiny badge, caution tape, one pointing hand | Police realism, threatening authority, second ricochet mascot |
+| Sir Rummage (Potassium raccoon) | Round raccoon head with bandit mask and cardboard crown, sitting on a bin | Cute thief who stole the street CRT's Circuit; Potassium hints | Mask band, crown, Circuit clutched in one paw, trash-can lid | Gross grime, menacing teeth, realistic pest look, second ricochet mascot |
 | TODO: AI | Training dummy with unfinished legs and label area | Telegraph or Neutral sparring partner | Box head, visible TODO tag, taped-on arms, one honorable stance | Robot complexity, full humanoid rig, lore-heavy AI design |
 | Printer Oracle | Tall jammed-printer silhouette with oracle posture | Manual-page hint giver | Paper crown, accordion jam trail, prophetic output slot | Clean office printer, readable paragraphs on body, too many moving parts |
 
@@ -102,7 +102,7 @@ a far silhouette, near/interact composition, and post-reward memory overlay.
 | --- | --- | --- | --- |
 | Relay Spire | Tall thin ink tower with paper antenna forks, visible early above ridge | Base sign half-decoded by manual scrap; cables look hand-taped | Signal stickers climb upward; final "sent" stamp can cap the antenna |
 | Basement hatch | Low rectangular hatch, chunky handle, underground hatching below trail | Familiar current-content bridge, staged as a sketchbook trapdoor | Tape label, glasses mark, small arrow back to known work |
-| Potassium hint | Banana-shaped warning sign or ricochet diagram pinned to rock | Compliance tape, clipboard note, arrow toward arcade secret | Circuit stamp, banana-law seal, rebound arc doodle |
+| Potassium hint | Banana-peel warning sign or ricochet diagram pinned to rock | Raccoon paw prints, a dented trash-can lid, arrow toward arcade secret | Circuit stamp, tiny sponge sticker, rebound arc doodle |
 | Stampede picnic blanket / ink swarm | Blanket diamond with small black swarm cloud rising behind it | Picnic props threatened by overexcited ink ideas; clear Trail Card prop | Glide pip sticker, swarm becomes friendlier background doodles |
 | Telegraph terrace / bag | Cliff ledge with hanging heavy bag and three timing marks | Bag silhouette at readable impact height; TODO: AI may stand nearby | Rhythm ticks, tempo stamp, manual glyph scrap |
 | Domino desk / elevator | Messy desk skyline with domino rectangles and small service elevator | Tape, coffee rings, pushable-looking blocks, elevator gate | Shortcut arrow, elevator permit sticker, deterministic path lines |
