@@ -23,6 +23,7 @@ import {
   setPotassiumData
 } from './phaserData';
 import type { PotassiumWallSide } from './wallBounce';
+import type { PotassiumBouncePreview } from './bouncePreview';
 
 export type PotassiumTerminalAction = 'retry' | 'return' | 'endless';
 
@@ -221,6 +222,41 @@ export class PotassiumSlipRenderer {
     aimLine.lineTo(endX + Math.cos(wingB) * headLength, endY + Math.sin(wingB) * headLength);
     aimLine.closePath();
     aimLine.fillPath();
+    aimLine.strokePath();
+  }
+
+  /**
+   * Faint pencil guide for the first bounce: a dotted line to where the sponge
+   * touches, a ghost sponge there, and a short dashed line for where it goes next.
+   * Drawn under the aim arrow on the same graphics, so `clearAim` wipes both.
+   */
+  drawBouncePreview(from: PotassiumRendererPoint, preview: PotassiumBouncePreview, radius: number): void {
+    const aimLine = this.getAimLine();
+    const { contact, bounceEnd } = preview;
+
+    aimLine.fillStyle(0x1a1a1a, 0.3);
+    drawDots(aimLine, from, contact, 14, 2.2, radius + 6);
+
+    aimLine.lineStyle(2.5, 0x1a1a1a, 0.4);
+    aimLine.strokeCircle(contact.x, contact.y, radius);
+    aimLine.fillStyle(0xfacc15, 0.16);
+    aimLine.fillCircle(contact.x, contact.y, radius);
+
+    const legLength = Phaser.Math.Distance.Between(contact.x, contact.y, bounceEnd.x, bounceEnd.y);
+    if (legLength <= radius + 4) return;
+    const angle = Phaser.Math.Angle.Between(contact.x, contact.y, bounceEnd.x, bounceEnd.y);
+    const legStart = {
+      x: contact.x + Math.cos(angle) * radius,
+      y: contact.y + Math.sin(angle) * radius
+    };
+    aimLine.lineStyle(3, 0x1a1a1a, 0.45);
+    drawDashes(aimLine, legStart, bounceEnd, 10, 7);
+
+    const headLength = 11;
+    aimLine.beginPath();
+    aimLine.moveTo(bounceEnd.x + Math.cos(angle + Math.PI * 0.8) * headLength, bounceEnd.y + Math.sin(angle + Math.PI * 0.8) * headLength);
+    aimLine.lineTo(bounceEnd.x, bounceEnd.y);
+    aimLine.lineTo(bounceEnd.x + Math.cos(angle - Math.PI * 0.8) * headLength, bounceEnd.y + Math.sin(angle - Math.PI * 0.8) * headLength);
     aimLine.strokePath();
   }
 
@@ -1360,4 +1396,49 @@ function drawBubbleClusterAccent(g: Phaser.GameObjects.Graphics, rank: Potassium
 
 function getSkillRank(skillRanks: PotassiumSkillRanks, upgrade: PotassiumUpgradeKind): PotassiumSkillRank {
   return skillRanks[upgrade] ?? 0;
+}
+
+/** Calls `step` at every `spacing` px along from→to, starting `skip` px out, with the unit direction. */
+function walkLine(
+  from: PotassiumRendererPoint,
+  to: PotassiumRendererPoint,
+  spacing: number,
+  skip: number,
+  step: (distance: number, length: number, ux: number, uy: number) => void
+): void {
+  const length = Phaser.Math.Distance.Between(from.x, from.y, to.x, to.y);
+  if (length <= 0) return;
+  const ux = (to.x - from.x) / length;
+  const uy = (to.y - from.y) / length;
+  for (let d = skip; d < length; d += spacing) step(d, length, ux, uy);
+}
+
+/** Evenly spaced dots from `from` to `to`, starting `skip` px out so they clear the sponge. */
+function drawDots(
+  graphics: Phaser.GameObjects.Graphics,
+  from: PotassiumRendererPoint,
+  to: PotassiumRendererPoint,
+  spacing: number,
+  dotRadius: number,
+  skip: number
+): void {
+  walkLine(from, to, spacing, skip, (d, _length, ux, uy) => {
+    graphics.fillCircle(from.x + ux * d, from.y + uy * d, dotRadius);
+  });
+}
+
+function drawDashes(
+  graphics: Phaser.GameObjects.Graphics,
+  from: PotassiumRendererPoint,
+  to: PotassiumRendererPoint,
+  dash: number,
+  gap: number
+): void {
+  graphics.beginPath();
+  walkLine(from, to, dash + gap, 0, (d, length, ux, uy) => {
+    const end = Math.min(d + dash, length);
+    graphics.moveTo(from.x + ux * d, from.y + uy * d);
+    graphics.lineTo(from.x + ux * end, from.y + uy * end);
+  });
+  graphics.strokePath();
 }

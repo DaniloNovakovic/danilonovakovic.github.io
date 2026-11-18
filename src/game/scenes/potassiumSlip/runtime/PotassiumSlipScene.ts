@@ -78,6 +78,10 @@ import {
   type PotassiumProjectileControlCommand
 } from './projectileControl';
 import {
+  predictPotassiumBounce,
+  type PotassiumBounceObstacle
+} from './bouncePreview';
+import {
   PotassiumCommandAdapter,
   type PotassiumCommandObject
 } from './commandAdapter';
@@ -133,6 +137,8 @@ const SIDE_BOUNCE_MARGIN = 32;
 const BANANA_RICOCHET_MIN_SPEED = 360;
 const BANANA_RICOCHET_BOOST = 1.08;
 const CLONE_RICOCHET_MAX_SPEED = 660;
+/** How far the aim hint follows the sponge after its first bounce. */
+const BOUNCE_PREVIEW_AFTER_LENGTH = 150;
 const TRAIL_DROP_INTERVAL_MS = 180;
 const FIRE_TRAIL_LIFETIME_MS = 1500;
 const GHOST_BEAM_LIFETIME_MS = 190;
@@ -150,6 +156,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
   private clones!: Phaser.Physics.Arcade.Group;
   private trailZones!: Phaser.Physics.Arcade.Group;
   private bossBlockers!: Phaser.Physics.Arcade.Group;
+  private readonly bounceObstacles: PotassiumBounceObstacle[] = [];
   private potassiumRenderer!: PotassiumSlipRenderer;
   private lastWallSudsAt = 0;
   private lastWallClonesAt = 0;
@@ -633,6 +640,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
       } else if (command.type === 'clearTether') {
         this.potassiumRenderer.clearTether();
       } else if (command.type === 'drawAim') {
+        this.drawBouncePreview(command.to);
         this.potassiumRenderer.drawAimArrow(command.from, command.to);
       } else if (command.type === 'drawRecallTether') {
         this.potassiumRenderer.drawRecallTether(this.banana);
@@ -665,6 +673,48 @@ export class PotassiumSlipScene extends Phaser.Scene {
         this.physics.moveTo(this.banana, LAUNCH_PAD.x, LAUNCH_PAD.y, command.speed);
       }
     });
+  }
+
+  /** Aim hint: where the sponge would first bounce if released at `pointer`, and which way it goes. */
+  private drawBouncePreview(pointer: { x: number; y: number }): void {
+    const origin = { x: this.banana.x, y: this.banana.y };
+    const velocity = this.projectileControl.getLaunchVelocity({
+      pointer,
+      banana: origin,
+      maxSpeed: this.getMaxBananaSpeed()
+    });
+    if (!velocity) return;
+
+    const obstacles = this.bounceObstacles;
+    obstacles.length = 0;
+    const collect = (gameObject: Phaser.GameObjects.GameObject) => {
+      const sprite = gameObject as EnemySprite;
+      if (!sprite.active || !sprite.body || isPotassiumEnemyDying(sprite)) return;
+      const { body } = sprite;
+      obstacles.push({
+        x: sprite.x,
+        y: sprite.y,
+        left: body.left,
+        top: body.top,
+        right: body.right,
+        bottom: body.bottom,
+        vx: body.velocity.x,
+        vy: body.velocity.y
+      });
+    };
+    this.enemies.getChildren().forEach(collect);
+    this.bossBlockers.getChildren().forEach(collect);
+
+    const radius = this.banana.body.halfWidth;
+    const preview = predictPotassiumBounce({
+      origin,
+      velocity,
+      radius,
+      arena: ARENA,
+      obstacles,
+      afterBounceLength: BOUNCE_PREVIEW_AFTER_LENGTH
+    });
+    if (preview) this.potassiumRenderer.drawBouncePreview(origin, preview, radius);
   }
 
   private updateControlState(): void {

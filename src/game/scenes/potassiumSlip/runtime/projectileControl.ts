@@ -49,6 +49,12 @@ export interface PotassiumProjectileControl {
     banana: PotassiumPoint;
     maxSpeed: number;
   }): PotassiumProjectileControlCommand[];
+  /** Launch velocity a release at `pointer` would give, or null when the drag is too short to throw. */
+  getLaunchVelocity(input: {
+    pointer: PotassiumPoint;
+    banana: PotassiumPoint;
+    maxSpeed: number;
+  }): PotassiumPoint | null;
   cancel(): PotassiumProjectileControlCommand[];
   update(input: {
     banana: PotassiumPoint;
@@ -110,21 +116,27 @@ export function createPotassiumProjectileControl(
       pointerId = nextPointerId;
       return [{ type: 'setRecallVisual', active: true }];
     },
-    release(input) {
+    getLaunchVelocity(input) {
       const dragVector = {
         x: input.pointer.x - input.banana.x,
         y: input.pointer.y - input.banana.y
       };
       const rawDragLength = length(dragVector);
-      if (rawDragLength < 18) {
-        return setIdle();
-      }
+      if (rawDragLength < 18) return null;
 
       const dragLength = clamp(rawDragLength, 20, config.launchMaxDrag);
       const speed = clamp(dragLength * config.launchPower, 210, input.maxSpeed);
       const normalized = normalize(dragVector);
+      return { x: normalized.x * speed, y: normalized.y * speed };
+    },
+    release(input) {
+      const launchVelocity = this.getLaunchVelocity(input);
+      if (!launchVelocity) {
+        return setIdle();
+      }
+
       const commands: PotassiumProjectileControlCommand[] = [
-        { type: 'setBananaVelocity', x: normalized.x * speed, y: normalized.y * speed },
+        { type: 'setBananaVelocity', x: launchVelocity.x, y: launchVelocity.y },
         { type: 'setBananaAngularVelocityRandom', min: -520, max: 520 },
         ...setIdle(),
         { type: 'setRecallVisual', active: false }
