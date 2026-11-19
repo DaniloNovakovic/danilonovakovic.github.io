@@ -146,18 +146,20 @@ describe('InteractiveApp', () => {
     });
   });
 
-  it('opens and closes inventory as a dialog that pauses UI state', async () => {
+  it('opens and closes the backpack as a dialog that pauses UI state', async () => {
     render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
+    expect(screen.queryByRole('button', { name: /open backpack/i })).toBeNull();
 
-    act(() => bridgeActions.openOverlay('inventory'));
+    act(() => bridgeActions.collectGlasses());
+    await userEvent.click(await screen.findByRole('button', { name: /open backpack/i }));
 
-    expect(await screen.findByRole('dialog', { name: /inventory/i })).toBeDefined();
+    expect(await screen.findByRole('dialog', { name: /backpack/i })).toBeDefined();
     expect(bridgeStore.getState().activeOverlayId).toBe('inventory');
     expect(bridgeStore.getState().isPaused).toBe(true);
 
     await userEvent.click(screen.getByRole('button', { name: /close/i }));
 
-    await waitFor(() => expect(screen.queryByRole('dialog', { name: /inventory/i })).toBeNull());
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: /backpack/i })).toBeNull());
     expect(bridgeStore.getState().activeOverlayId).toBeNull();
     expect(bridgeStore.getState().isPaused).toBe(false);
   });

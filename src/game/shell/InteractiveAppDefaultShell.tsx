@@ -1,6 +1,8 @@
 import { sceneUiSurfaceCapturesPointer } from '@/game/sceneUi/registry';
 import { ArrowLeft, BookOpen, Bug } from 'lucide-react';
 import Game from './Game';
+import { BackpackButton } from './BackpackButton';
+import { useBackpackHotkey } from './useBackpack';
 import { bridgeActions } from '@/game/bridge/store';
 import { DEV_SWITCHER_OVERLAY_ID } from '@/game/overlays/overlayIds';
 import { OverlayHost } from '@/game/overlays/OverlayHost';
@@ -34,6 +36,7 @@ export function InteractiveAppDefaultShell({
     returnToOverworld,
     returnToScene
   } = shell;
+  useBackpackHotkey(bridge);
 
   return (
     <div
@@ -80,6 +83,7 @@ export function InteractiveAppDefaultShell({
                 </Button>
               )
             )}
+            <BackpackButton bridge={bridge} />
           </div>
           <Button
             variant="floating"
