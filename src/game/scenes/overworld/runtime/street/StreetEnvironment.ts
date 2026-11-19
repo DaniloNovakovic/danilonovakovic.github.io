@@ -10,7 +10,10 @@ import {
 } from '@/game/sharedSceneRuntime/config';
 import { OVERWORLD_GROUND_ZONE, OVERWORLD_WIDTH } from '../../worldLayout';
 import { getStreetCameraProfile } from './streetCameraProfile';
-import { createSideViewCameraRuntime } from '@/game/sharedSceneRuntime/camera/sideViewCameraRuntime';
+import {
+  createSideViewCameraRuntime,
+  type SideViewCameraRuntime
+} from '@/game/sharedSceneRuntime/camera/sideViewCameraRuntime';
 import { buildStreetWires } from './StreetLife';
 
 export interface StreetEnvironmentHandles {
@@ -45,8 +48,8 @@ export function buildStreetForeground(scene: Phaser.Scene): void {
 export function setupStreetCamera(
   scene: Phaser.Scene,
   followTarget: Phaser.GameObjects.GameObject
-): void {
-  createSideViewCameraRuntime({
+): SideViewCameraRuntime {
+  return createSideViewCameraRuntime({
     scene,
     followTarget,
     worldBounds: {
