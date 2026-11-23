@@ -108,6 +108,10 @@ broken.
   integration and viewport proof, not the default full-level tester.
 - Canonical browser path:
   [`docs/runtime-modes.md#smoke-path`](../../../docs/runtime-modes.md#smoke-path).
+- In the browser, assert positions and bounds through the dev-only
+  `window.__sketchbookDebug` hook
+  ([`docs/runtime-modes.md#dev-debug-hook`](../../../docs/runtime-modes.md#dev-debug-hook))
+  instead of judging screenshots.
 - Escalate to bots, RL, or heavy E2E only after static/unit/harness carry their
   weight.
 - Release confidence comes from journeys, severity, and residual risk — not

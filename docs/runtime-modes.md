@@ -25,6 +25,38 @@ In development, `?startScene=<sceneId>` can boot directly into a Phaser scene
 for fast iteration. Current useful targets include `hobbies`, `basement`,
 `potassium`, `ridge`, and `stampedeSketch`.
 
+Pair it with `?mode=interactive` to skip the path picker. Side-view rooms
+generate the player sprite themselves, so deep links render the real player.
+
+### Dev Debug Hook
+
+In development only, `window.__sketchbookDebug` reads and moves the live game,
+so browser checks can assert numbers instead of eyeballing screenshots. It is
+installed at game boot, removed on teardown, and absent from `vite build`
+output. Source: `src/game/shell/devDebugHook.ts`.
+
+| Call              | Returns                                                                        |
+| ----------------- | ------------------------------------------------------------------------------ |
+| `scene()`         | Topmost running scene with a player, as a scene id (`overworld`, `hobbies`, …) |
+| `scenes()`        | Every running scene id, bottom to top                                          |
+| `player()`        | `{ x, y }` of the player, rounded, or `null`                                   |
+| `worldBounds()`   | Physics world bounds of the active scene                                       |
+| `teleport(x, y?)` | Moves the player (y kept when omitted); `false` if no player                   |
+
+```js
+// Playwright: wait for the room, jump near the wall, sprint, assert.
+await page.goto("/?mode=interactive&startScene=hobbies");
+await page.waitForFunction(
+  () => window.__sketchbookDebug?.scene() === "hobbies",
+);
+await page.evaluate(() => window.__sketchbookDebug.teleport(800));
+// ...hold Shift+ArrowRight...
+const { x } = await page.evaluate(() => window.__sketchbookDebug.player());
+```
+
+Prefer the Game Console Core for progression and state questions; use the hook
+when the answer depends on what Phaser actually renders (bounds, positions).
+
 ## Transition Owners
 
 - `src/game/bridge/store.ts` owns observable cross-boundary state and actions:
