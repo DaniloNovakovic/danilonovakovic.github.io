@@ -20,10 +20,16 @@ function makeFakeAdapter(): FakeAdapter {
   const known = new Set<string>([PHASER_SCENE_KEYS.overworld, PHASER_SCENE_KEYS.hobbies]);
   return {
     hasScene: (k) => known.has(k),
-    registerScene: vi.fn((k: string) => { known.add(k); }),
+    registerScene: vi.fn((k: string) => {
+      known.add(k);
+    }),
     isSceneActive: (k) => active.has(k),
-    startScene: vi.fn((k: string) => { active.add(k); }),
-    stopScene: vi.fn((k: string) => { active.delete(k); }),
+    startScene: vi.fn((k: string) => {
+      active.add(k);
+    }),
+    stopScene: vi.fn((k: string) => {
+      active.delete(k);
+    }),
     listKnownSceneKeys: () => [...known],
     setPauseOnActiveScenes: vi.fn(),
     captureResume: () => null,
@@ -87,9 +93,7 @@ describe('SceneLifecycleController', () => {
     bridgeActions.openOverlay('profile');
     const opened = events.find((e) => e.type === 'OverlayOpened');
     expect(opened).toBeDefined();
-    expect((opened as Extract<SceneLifecycleEvent, { type: 'OverlayOpened' }>).overlayId).toBe(
-      'profile'
-    );
+    expect((opened as Extract<SceneLifecycleEvent, { type: 'OverlayOpened' }>).overlayId).toBe('profile');
   });
 
   it('emits OverlayOpened on initial sync when an overlay is already active', () => {
@@ -118,10 +122,7 @@ describe('SceneLifecycleController', () => {
     bridgeActions.openOverlay('profile');
     const pauseEvents = events.filter((e) => e.type === 'PauseChanged');
     expect(pauseEvents.length).toBeGreaterThanOrEqual(1);
-    const last = pauseEvents[pauseEvents.length - 1] as Extract<
-      SceneLifecycleEvent,
-      { type: 'PauseChanged' }
-    >;
+    const last = pauseEvents[pauseEvents.length - 1] as Extract<SceneLifecycleEvent, { type: 'PauseChanged' }>;
     expect(last.paused).toBe(true);
   });
 
@@ -133,9 +134,7 @@ describe('SceneLifecycleController', () => {
     await Promise.resolve();
     const trans = events.find((e) => e.type === 'SceneTransitionRequested');
     expect(trans).toBeDefined();
-    expect(
-      (trans as Extract<SceneLifecycleEvent, { type: 'SceneTransitionRequested' }>).targetContext
-    ).toBeNull();
+    expect((trans as Extract<SceneLifecycleEvent, { type: 'SceneTransitionRequested' }>).targetContext).toBeNull();
   });
 
   it('enters a Phaser scene when activeSceneId changes', async () => {
@@ -147,9 +146,7 @@ describe('SceneLifecycleController', () => {
 
     const trans = events.find((e) => e.type === 'SceneTransitionRequested');
     expect(trans).toBeDefined();
-    expect(
-      (trans as Extract<SceneLifecycleEvent, { type: 'SceneTransitionRequested' }>).targetContext
-    ).toBe('hobbies');
+    expect((trans as Extract<SceneLifecycleEvent, { type: 'SceneTransitionRequested' }>).targetContext).toBe('hobbies');
     expect(enterSpy).toHaveBeenCalledWith('hobbies', { isCurrent: expect.any(Function) });
     expect(adapter.getActiveScenes()).toEqual(['hobbies']);
   });

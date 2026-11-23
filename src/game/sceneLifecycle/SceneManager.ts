@@ -127,10 +127,7 @@ export class SceneManager {
     return this.adapter.captureResume(sceneKey);
   }
 
-  private async ensureSceneRegistered(
-    context: SceneContextDefinition,
-    guard?: SceneTransitionGuard
-  ): Promise<boolean> {
+  private async ensureSceneRegistered(context: SceneContextDefinition, guard?: SceneTransitionGuard): Promise<boolean> {
     if (this.adapter.hasScene(context.sceneKey)) return false;
     if (!context.loadScene) return false;
 

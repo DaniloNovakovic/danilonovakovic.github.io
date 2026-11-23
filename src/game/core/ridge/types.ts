@@ -1,12 +1,7 @@
 /**
  * Pure Ridge console types. No Phaser, React, or DOM.
  */
-import type {
-  BridgeBuildAction,
-  BridgeBuildPhase,
-  BridgeBuildTip,
-  BridgeDesign
-} from './bridgeBuilder';
+import type { BridgeBuildAction, BridgeBuildPhase, BridgeBuildTip, BridgeDesign } from './bridgeBuilder';
 import type { CickaAttackKind, CickaDuelPhase, CickaStrikeResult } from './cickaDuel';
 import type { GigGrade, GigJudgment, GigLane, GigMode, GigPhase, GigSectionKind } from './concertGig';
 import type { BachataStep } from './bachata';
@@ -70,14 +65,7 @@ export type RidgeActorId =
   | 'counterpart-cat'
   | 'shuttle';
 
-export type RidgeEmotion =
-  | 'neutral'
-  | 'curious'
-  | 'playful'
-  | 'determined'
-  | 'thoughtful'
-  | 'surprised'
-  | 'sleepy';
+export type RidgeEmotion = 'neutral' | 'curious' | 'playful' | 'determined' | 'thoughtful' | 'surprised' | 'sleepy';
 
 export interface RidgeDialogueLine {
   id: string;
@@ -213,10 +201,7 @@ export interface RidgeStageDefinition {
   isCrossingOpen?: (state: RidgeWorldState) => boolean;
   resolveInteractables: (state: RidgeWorldState) => readonly RidgeInteractable[];
   resolveActors: (state: RidgeWorldState) => readonly RidgeActorPresence[];
-  resolveConversation: (
-    conversationId: string,
-    state: RidgeWorldState
-  ) => RidgeConversationDefinition | null;
+  resolveConversation: (conversationId: string, state: RidgeWorldState) => RidgeConversationDefinition | null;
   describeAmbience: (state: RidgeWorldState) => string;
   /** Concert only: how warm the crowd is when a gig starts. */
   concertGigStartHype?: (state: RidgeWorldState, mode: GigMode) => number;
@@ -232,10 +217,7 @@ export interface RidgeStageDefinition {
    * Draftsperson remark for the Blueprint Bridge workbench (Bridge only).
    * `variant` rotates between phrasings; `sketchNudge` appends the sketch offer.
    */
-  describeBridgeTip?: (
-    tip: BridgeBuildTip,
-    context: { variant: number; sketchNudge: boolean }
-  ) => string;
+  describeBridgeTip?: (tip: BridgeBuildTip, context: { variant: number; sketchNudge: boolean }) => string;
 }
 
 export type RidgeStageRegistry = Record<RidgeAreaId, RidgeStageDefinition>;
@@ -382,10 +364,7 @@ export type RidgeCommand =
   | { type: 'dance'; action: RidgeGigAction }
   | { type: 'unknown'; raw: string };
 
-export type RidgeDuelAction =
-  | { kind: 'dodge' }
-  | { kind: 'wait'; frames?: number }
-  | { kind: 'done' };
+export type RidgeDuelAction = { kind: 'dodge' } | { kind: 'wait'; frames?: number } | { kind: 'done' };
 
 /**
  * `hit` with no lane strums the next note(s) exactly on time; with a lane it

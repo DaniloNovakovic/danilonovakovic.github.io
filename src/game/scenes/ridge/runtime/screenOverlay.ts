@@ -35,12 +35,7 @@ export function visibleSlice(scene: Phaser.Scene): VisibleSlice {
  * Screen-space objects still feel camera zoom (Phaser zooms about the view
  * centre). Counter-scale so local coordinates land on canvas pixels.
  */
-export function pinToScreen(
-  scene: Phaser.Scene,
-  object: Phaser.GameObjects.Components.Transform,
-  x = 0,
-  y = 0
-): void {
+export function pinToScreen(scene: Phaser.Scene, object: Phaser.GameObjects.Components.Transform, x = 0, y = 0): void {
   const cam = scene.cameras.main;
   const z = cam.zoom || 1;
   const cx = cam.width / 2;

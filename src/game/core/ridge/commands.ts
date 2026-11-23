@@ -82,7 +82,18 @@ const DUEL_ALIASES = new Set(['duel', 'standoff']);
 const DODGE_ALIASES = new Set(['dodge', 'jump', 'hop']);
 const GIG_ALIASES = new Set(['gig', 'play', 'strum']);
 const DANCE_ALIASES = new Set(['dance', 'bachata']);
-const DANCE_STEP_LANES: Record<string, 0 | 1 | 2> = { left: 0, l: 0, tap: 1, hip: 1, t: 1, right: 2, r: 2, '0': 0, '1': 1, '2': 2 };
+const DANCE_STEP_LANES: Record<string, 0 | 1 | 2> = {
+  left: 0,
+  l: 0,
+  tap: 1,
+  hip: 1,
+  t: 1,
+  right: 2,
+  r: 2,
+  '0': 0,
+  '1': 1,
+  '2': 2
+};
 const BUILD_SIMPLE: Record<string, BridgeBuildAction> = {
   undo: { kind: 'undo' },
   clear: { kind: 'clear' },

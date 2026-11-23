@@ -116,11 +116,7 @@ interface Point {
   y: number;
 }
 
-function clipEdge(
-  from: Point,
-  to: Point,
-  bounds: StampedeBounds
-): { from: Point; to: Point; length: number } | null {
+function clipEdge(from: Point, to: Point, bounds: StampedeBounds): { from: Point; to: Point; length: number } | null {
   const horizontal = from.y === to.y;
   if (horizontal) {
     if (from.y < bounds.safeTop || from.y > bounds.safeBottom) return null;

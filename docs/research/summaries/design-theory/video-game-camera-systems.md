@@ -55,14 +55,14 @@ map than an intimate sketchbook route.
 
 ## Camera Model Taxonomy
 
-| Camera model | Core mechanics | Good for | Main risks |
-| --- | --- | --- | --- |
-| First-person | Camera locked near the character's sensory origin | Precise aiming, close inspection, embodiment | Limited peripheral awareness, motion sickness, weak rear awareness |
-| Over-the-shoulder | Close asymmetric third-person framing | Ranged action, stealth, character visibility | Poor foot visibility and depth judgment for platforming |
-| Orbital third-person | Variable camera offset around a target | 3D traversal, melee, platforming | Collision, occlusion, manual rotation burden |
-| Fixed cinematic | Triggered static viewpoints | Horror, authored composition, narrative beats | Disorienting input changes and abrupt cuts |
-| Isometric / orthographic | Fixed high-angle projection without perspective scaling | Tactical readability, diorama style, strategy | Reduced intimacy, rotation disorientation, weak distance cues |
-| 2D side-scroller | Camera constrained to a 2D plane | Platforming, Metroidvania traversal, readable jumps | Blind hazards if framing and level layout disagree |
+| Camera model             | Core mechanics                                          | Good for                                            | Main risks                                                         |
+| ------------------------ | ------------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------ |
+| First-person             | Camera locked near the character's sensory origin       | Precise aiming, close inspection, embodiment        | Limited peripheral awareness, motion sickness, weak rear awareness |
+| Over-the-shoulder        | Close asymmetric third-person framing                   | Ranged action, stealth, character visibility        | Poor foot visibility and depth judgment for platforming            |
+| Orbital third-person     | Variable camera offset around a target                  | 3D traversal, melee, platforming                    | Collision, occlusion, manual rotation burden                       |
+| Fixed cinematic          | Triggered static viewpoints                             | Horror, authored composition, narrative beats       | Disorienting input changes and abrupt cuts                         |
+| Isometric / orthographic | Fixed high-angle projection without perspective scaling | Tactical readability, diorama style, strategy       | Reduced intimacy, rotation disorientation, weak distance cues      |
+| 2D side-scroller         | Camera constrained to a 2D plane                        | Platforming, Metroidvania traversal, readable jumps | Blind hazards if framing and level layout disagree                 |
 
 ## 2D Camera Patterns
 
@@ -99,12 +99,12 @@ left/right. Smooth or threshold it so small corrections do not yank the frame.
 
 Treat vertical motion differently depending on intent.
 
-| Situation | Better camera behavior |
-| --- | --- |
-| Normal jump | Hold or lightly damp vertical tracking |
-| Long fall or drop | Bias downward early enough to preview landing risk |
-| Climb or sustained ascent | Move camera after the player reaches the upper window |
-| Landing | Ease back to the local composition rather than snapping |
+| Situation                 | Better camera behavior                                  |
+| ------------------------- | ------------------------------------------------------- |
+| Normal jump               | Hold or lightly damp vertical tracking                  |
+| Long fall or drop         | Bias downward early enough to preview landing risk      |
+| Climb or sustained ascent | Move camera after the player reaches the upper window   |
+| Landing                   | Ease back to the local composition rather than snapping |
 
 ### Off-Screen Fairness
 
@@ -122,13 +122,13 @@ Hybrid games often switch cameras based on task. In a 2D Ridge context, that
 does not need to mean switching perspective. It can mean switching camera
 profiles:
 
-| Mode | Possible profile |
-| --- | --- |
-| Exploration | Wider dead zone, soft look-ahead, stable parallax |
-| Precision platforming | Tighter horizontal control, restrained vertical motion |
-| Dialogue or tribute beat | Locked or gently staged composition |
-| Chase / urgency | Stronger forward bias, faster catch-up, wider preview |
-| Interior / tight space | Reduced look-ahead and narrower world bounds |
+| Mode                     | Possible profile                                       |
+| ------------------------ | ------------------------------------------------------ |
+| Exploration              | Wider dead zone, soft look-ahead, stable parallax      |
+| Precision platforming    | Tighter horizontal control, restrained vertical motion |
+| Dialogue or tribute beat | Locked or gently staged composition                    |
+| Chase / urgency          | Stronger forward bias, faster catch-up, wider preview  |
+| Interior / tight space   | Reduced look-ahead and narrower world bounds           |
 
 Treat these as authored camera states with clear triggers and blend rules.
 Camera cuts should be reserved for moments where a blend would be misleading or

@@ -180,8 +180,7 @@ export function createConcertStage(catalog: ConcertDialogueCatalog): RidgeStageD
     isCrossingOpen: (state) => state.beat === 'concert_cleared',
     resolveInteractables: (state) => resolveConcertInteractables(state, catalog),
     resolveActors: (state) => resolveConcertActors(state),
-    resolveConversation: (conversationId, state) =>
-      resolveConcertConversation(conversationId, state, catalog),
+    resolveConversation: (conversationId, state) => resolveConcertConversation(conversationId, state, catalog),
     describeAmbience: (state) => describeConcertAmbience(state),
     concertGigStartHype: (state, mode) =>
       mode === 'show' && state.flags.has(CONCERT_KID_HYPE_FLAG) ? KID_HYPE_START : 0.5
@@ -240,10 +239,7 @@ function promptKeyFor(plan: ConcertPlan): string {
   return `${plan.conversationId}.prompt`;
 }
 
-function resolveConcertInteractables(
-  state: RidgeWorldState,
-  catalog: ConcertDialogueCatalog
-): RidgeInteractable[] {
+function resolveConcertInteractables(state: RidgeWorldState, catalog: ConcertDialogueCatalog): RidgeInteractable[] {
   const plans = interactPlans(state).map((plan) => ({ ...plan, prompt: promptKeyFor(plan) }));
   // The kid moves into the crowd to start the clap; follow him there.
   const kidSpotProgress = kidProgress(state);
@@ -329,7 +325,7 @@ function resolveConcertActors(state: RidgeWorldState): RidgeActorPresence[] {
 
 /** While talking with Steve or the kid, stand beside them rather than inside them. */
 function talkingSpot(state: RidgeWorldState, steveProgress: number): number {
-  const id = state.mode === 'conversation' ? state.conversation?.id ?? '' : '';
+  const id = state.mode === 'conversation' ? (state.conversation?.id ?? '') : '';
   const partner = id.startsWith('concert.guitarist')
     ? steveProgress
     : id.startsWith('concert.kid')
@@ -575,7 +571,10 @@ function resolveConcertConversation(
         id: conversationId,
         lines: [
           ...(assisted
-            ? [say(['assisted.01', 'injuredGuitarist', 'playful']), say(['assisted.02', 'injuredGuitarist', 'thoughtful'])]
+            ? [
+                say(['assisted.01', 'injuredGuitarist', 'playful']),
+                say(['assisted.02', 'injuredGuitarist', 'thoughtful'])
+              ]
             : [say(['passed.01', 'injuredGuitarist', 'surprised']), say(['passed.02', 'injuredGuitarist', 'playful'])]),
           ...(flags.has(FLAG_CICKA_MET) ? [say(['cicka.01', 'prompt'])] : []),
           say(['03', 'injuredGuitarist', 'determined'])
@@ -586,7 +585,11 @@ function resolveConcertConversation(
       const { say } = kit(conversationId);
       const grade = GIG_GRADES.find((candidate) => flags.has(concertGradeFlag(candidate))) ?? 'good';
       const loved = grade === 'legendary' || grade === 'great';
-      const steveLine = say([`steve.${grade}`, 'injuredGuitarist', grade === 'legendary' ? 'surprised' : grade === 'rough' ? 'thoughtful' : 'playful']);
+      const steveLine = say([
+        `steve.${grade}`,
+        'injuredGuitarist',
+        grade === 'legendary' ? 'surprised' : grade === 'rough' ? 'thoughtful' : 'playful'
+      ]);
       if (flags.has(FLAG_ENCORE)) {
         return {
           id: conversationId,

@@ -86,7 +86,6 @@ export function RidgeConcertGigPanel({ params, dispatchAction }: SceneUiSurfaceP
   );
 }
 
-
 /** Who is coaching (Steve, or Cicka at the serenade) and what they are saying. */
 function GigStatusCard({ view, copy, status }: { view: RidgeConcertGigPanelView; copy: Copy; status: string }) {
   const finished = view.phase === 'finished';

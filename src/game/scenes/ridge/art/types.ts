@@ -53,9 +53,7 @@ export interface RidgeVisualProvider {
   destroy(): void;
 }
 
-export function toRidgeVisualViewModel(
-  observation: RidgeObservation
-): RidgeVisualViewModel {
+export function toRidgeVisualViewModel(observation: RidgeObservation): RidgeVisualViewModel {
   const memory = observation.memory;
   if (memory) return toMemoryViewModel(observation, memory);
   const crossingOpen = isCrossingBeat(observation.beat);
@@ -75,9 +73,7 @@ export function toRidgeVisualViewModel(
         ? 'cicka'
         : null,
     speakingEmotion: observation.conversation?.emotion ?? null,
-    lineKey: observation.conversation
-      ? `${observation.conversation.id}:${observation.conversation.lineIndex}`
-      : null,
+    lineKey: observation.conversation ? `${observation.conversation.id}:${observation.conversation.lineIndex}` : null,
     actors: observation.actors,
     crossingOpen,
     builtBridge: observation.builtBridge,

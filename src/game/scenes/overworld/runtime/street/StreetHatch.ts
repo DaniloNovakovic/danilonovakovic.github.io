@@ -113,7 +113,7 @@ export class StreetHatch {
         this.glyphCycle[i] = cycle;
         glyph.setText(pool[(cycle + i * 3) % pool.length]);
       }
-      const sway = ((cycle + i) % 3 - 1) * 10 * progress;
+      const sway = (((cycle + i) % 3) - 1) * 10 * progress;
       glyph
         .setPosition(this.x - 36 + ((i * 29) % 72) + sway, this.y - 6 - progress * GLYPH_RISE_PX)
         .setAlpha(0.85 * (1 - progress))

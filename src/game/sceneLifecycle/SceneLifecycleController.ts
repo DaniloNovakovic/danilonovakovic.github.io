@@ -10,10 +10,7 @@ export class SceneLifecycleController {
   private readonly eventBus: SceneLifecycleEventBus;
   private readonly transitionCoordinator: SceneTransitionCoordinator;
 
-  constructor(
-    sceneManager: SceneManager,
-    eventBus: SceneLifecycleEventBus = new SceneLifecycleEventBus()
-  ) {
+  constructor(sceneManager: SceneManager, eventBus: SceneLifecycleEventBus = new SceneLifecycleEventBus()) {
     this.sceneManager = sceneManager;
     this.eventBus = eventBus;
     this.transitionCoordinator = new SceneTransitionCoordinator(sceneManager, eventBus);

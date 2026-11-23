@@ -6,11 +6,7 @@ import {
   type SceneId
 } from '@/game/scenes/sceneIds';
 
-export type SceneHeaderBackLabelKey =
-  | 'backToCity'
-  | 'backToRidge'
-  | 'backToStreet'
-  | 'backToOverworld';
+export type SceneHeaderBackLabelKey = 'backToCity' | 'backToRidge' | 'backToStreet' | 'backToOverworld';
 
 export type SceneHeaderChrome =
   | { left: 'default' }

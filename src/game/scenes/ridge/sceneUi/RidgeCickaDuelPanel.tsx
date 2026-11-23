@@ -1,10 +1,5 @@
 import { useEffect } from 'react';
-import type {
-  CickaAttackKind,
-  CickaDuelPhase,
-  CickaStrikeResult,
-  RidgeEmotion
-} from '@/game/core/ridge';
+import type { CickaAttackKind, CickaDuelPhase, CickaStrikeResult, RidgeEmotion } from '@/game/core/ridge';
 import type { SceneUiSurfaceProps } from '@/game/sceneUi/registry';
 import { useMessages } from '@/shared/i18n';
 import { cn } from '@/shared/ui/utils';

@@ -7,10 +7,7 @@ export function StampedeStatusStrip({ params, dispatchAction }: SceneUiSurfacePr
   const noise = clamp(snapshot.pageNoise ?? 0, 0, 1);
   const feedback = formatFeedback(snapshot.feedback);
   const contactLimit = Math.max(0, snapshot.contactLimit ?? 0);
-  const healthRemaining = Math.max(
-    0,
-    Math.min(contactLimit, snapshot.healthRemaining ?? contactLimit)
-  );
+  const healthRemaining = Math.max(0, Math.min(contactLimit, snapshot.healthRemaining ?? contactLimit));
 
   return (
     <div className="mx-auto flex h-10 w-full flex-nowrap items-center justify-between gap-x-3 overflow-hidden text-[#1a1a1a] [@media(max-height:420px)]:gap-x-2">
@@ -58,10 +55,7 @@ export function StampedeStatusStrip({ params, dispatchAction }: SceneUiSurfacePr
           aria-valuemax={100}
           aria-valuenow={Math.round(noise * 100)}
         >
-          <div
-            className="h-full bg-[#1a1a1a]"
-            style={{ width: `${Math.round(noise * 100)}%` }}
-          />
+          <div className="h-full bg-[#1a1a1a]" style={{ width: `${Math.round(noise * 100)}%` }} />
         </div>
       </div>
       {snapshot.spellLabel ? (
@@ -85,15 +79,7 @@ export function StampedeStatusStrip({ params, dispatchAction }: SceneUiSurfacePr
   );
 }
 
-function JokeMeter({
-  charge,
-  ready,
-  onTell
-}: {
-  charge: number;
-  ready: boolean;
-  onTell: () => void;
-}) {
+function JokeMeter({ charge, ready, onTell }: { charge: number; ready: boolean; onTell: () => void }) {
   if (ready) {
     return (
       <Button

@@ -7,9 +7,7 @@ interface OverlayHostProps {
   enterScene?: (sceneId: SceneId) => void;
 }
 
-export function OverlayHost({
-  enterScene = bridgeActions.enterScene
-}: OverlayHostProps = {}) {
+export function OverlayHost({ enterScene = bridgeActions.enterScene }: OverlayHostProps = {}) {
   const { activeOverlay } = useBridgeState();
   const ActiveOverlayComponent = activeOverlay ? getOverlayDefinition(activeOverlay.id).component : null;
 

@@ -1,17 +1,7 @@
 // Session dispatch mirrors many console verbs; complexity is the command surface.
 // fallow-ignore-file complexity
-import {
-  advanceConversation,
-  chooseInConversation,
-  leaveConversation,
-  startConversation
-} from './conversation';
-import {
-  BLUEPRINT_BRIDGE_PUZZLE,
-  BridgeWorkbench,
-  type BridgeBuildAction,
-  type BridgeDesign
-} from './bridgeBuilder';
+import { advanceConversation, chooseInConversation, leaveConversation, startConversation } from './conversation';
+import { BLUEPRINT_BRIDGE_PUZZLE, BridgeWorkbench, type BridgeBuildAction, type BridgeDesign } from './bridgeBuilder';
 import { CICKA_DUEL_LOST_FLAG, CICKA_RESPECT_FLAG, CickaDuel } from './cickaDuel';
 import {
   CONCERT_PRACTICE_ASSISTED_FLAG,
@@ -198,9 +188,7 @@ export class RidgeConsoleSession {
         return this.ok(command.type === 'look' ? 'You take in the page.' : 'Status.');
       case 'inventory':
         return this.ok(
-          this.state.inventory.length > 0
-            ? `Inventory: ${this.state.inventory.join(', ')}`
-            : 'Inventory is empty.'
+          this.state.inventory.length > 0 ? `Inventory: ${this.state.inventory.join(', ')}` : 'Inventory is empty.'
         );
       case 'go':
         return this.handleGo(command.direction, command.steps ?? 1);
@@ -225,11 +213,7 @@ export class RidgeConsoleSession {
       case 'dance':
         return this.handleDance(command.action);
       case 'unknown':
-        return this.fail(
-          command.raw
-            ? `Unknown command "${command.raw}". Type help.`
-            : 'Empty command. Type help.'
-        );
+        return this.fail(command.raw ? `Unknown command "${command.raw}". Type help.` : 'Empty command. Type help.');
     }
   }
 
@@ -257,19 +241,12 @@ export class RidgeConsoleSession {
 
     const blockedAt = this.stage.blockedProgress;
     const crossingOpen = this.stage.isCrossingOpen?.(this.state) ?? true;
-    if (
-      blockedAt !== undefined &&
-      !crossingOpen &&
-      direction === 'right' &&
-      nextProgress > blockedAt
-    ) {
+    if (blockedAt !== undefined && !crossingOpen && direction === 'right' && nextProgress > blockedAt) {
       nextProgress = blockedAt;
       blocked = true;
       const blockedMessage = this.stage.blockedMessage;
       message =
-        (typeof blockedMessage === 'function'
-          ? blockedMessage(this.state)
-          : blockedMessage) ??
+        (typeof blockedMessage === 'function' ? blockedMessage(this.state) : blockedMessage) ??
         'Something blocks the way east. Talk to someone nearby.';
     }
 
@@ -305,25 +282,17 @@ export class RidgeConsoleSession {
       return this.fail('Eyes on your feet. dance step or dance wait.');
     }
 
-    const nearby = [...this.stage.resolveInteractables(this.state)].sort(
-      (a, b) => a.distance - b.distance
-    );
+    const nearby = [...this.stage.resolveInteractables(this.state)].sort((a, b) => a.distance - b.distance);
     if (nearby.length === 0) {
       return this.fail('Nothing in reach.');
     }
 
     const selected = target
-      ? nearby.find(
-          (item) =>
-            item.spotId === target ||
-            item.label.toLowerCase().includes(target.toLowerCase())
-        )
+      ? nearby.find((item) => item.spotId === target || item.label.toLowerCase().includes(target.toLowerCase()))
       : nearby[0];
 
     if (!selected) {
-      return this.fail(
-        `No interactable matching "${target}". Nearby: ${nearby.map((n) => n.label).join(', ')}`
-      );
+      return this.fail(`No interactable matching "${target}". Nearby: ${nearby.map((n) => n.label).join(', ')}`);
     }
 
     const definition = this.stage.resolveConversation(selected.conversationId, this.state);
@@ -893,11 +862,7 @@ function clamp01(value: number): number {
 }
 
 /** Keep exactly one grade flag of a family set, and report the one now held. */
-function replaceGradeFlag(
-  flags: Set<string>,
-  flagOf: (grade: GigGrade) => string,
-  grade: GigGrade
-): RidgeSessionEvent {
+function replaceGradeFlag(flags: Set<string>, flagOf: (grade: GigGrade) => string, grade: GigGrade): RidgeSessionEvent {
   for (const each of GIG_GRADES) flags.delete(flagOf(each));
   flags.add(flagOf(grade));
   return { type: 'flag_changed', flag: flagOf(grade), present: true };

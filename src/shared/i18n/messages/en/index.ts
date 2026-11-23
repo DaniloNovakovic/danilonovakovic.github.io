@@ -27,5 +27,5 @@ export const enMessages = {
   miniGames: miniGameMessages,
   potassiumSlip: potassiumSlipMessages,
   ridge: ridgeMessages,
-  trailCard: trailCardMessages,
+  trailCard: trailCardMessages
 } as const;

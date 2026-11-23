@@ -38,7 +38,10 @@ class PhaserStampedeJokeLook implements StampedeJokeLook {
       padding: { x: 7, y: 4 },
       align: 'center',
       wordWrap: { width: 220 }
-    }).setOrigin(0.5, 1).setDepth(34).setVisible(false);
+    })
+      .setOrigin(0.5, 1)
+      .setDepth(34)
+      .setVisible(false);
     this.ring = scene.add.graphics().setDepth(18).setVisible(false);
     this.stampText = createUiText(scene, 0, 0, '', {
       fontSize: '26px',
@@ -46,7 +49,10 @@ class PhaserStampedeJokeLook implements StampedeJokeLook {
       fontStyle: 'bold',
       backgroundColor: '#fbfbf9',
       padding: { x: 8, y: 2 }
-    }).setOrigin(0.5).setDepth(35).setVisible(false);
+    })
+      .setOrigin(0.5)
+      .setDepth(35)
+      .setVisible(false);
   }
 
   tell(line: string, origin: { x: number; y: number }, radius: number): void {
@@ -69,12 +75,7 @@ class PhaserStampedeJokeLook implements StampedeJokeLook {
 
   stamp(text: string, at: { x: number; y: number }): void {
     this.scene.tweens.killTweensOf(this.stampText);
-    this.stampText
-      .setText(text)
-      .setVisible(true)
-      .setAlpha(1)
-      .setScale(0.4)
-      .setAngle(-8);
+    this.stampText.setText(text).setVisible(true).setAlpha(1).setScale(0.4).setAngle(-8);
     this.placeStamp(at);
     this.scene.tweens.add({
       targets: this.stampText,

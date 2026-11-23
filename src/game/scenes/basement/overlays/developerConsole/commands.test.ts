@@ -49,10 +49,7 @@ describe('executeDeveloperConsoleCommand', () => {
     const enterScene = vi.fn();
     const result = executeDeveloperConsoleCommand('enter moon', copy, { enterScene });
 
-    expect(result.responseLines).toEqual([
-      'Unknown scene: moon',
-      "Usage: enter <scene-name> or 'enter -h'"
-    ]);
+    expect(result.responseLines).toEqual(['Unknown scene: moon', "Usage: enter <scene-name> or 'enter -h'"]);
     expect(enterScene).not.toHaveBeenCalled();
   });
 
@@ -66,16 +63,11 @@ describe('executeDeveloperConsoleCommand', () => {
 
   it('cats known files line by line and rejects unknown or prototype keys', () => {
     const deps = { enterScene: () => undefined };
-    expect(executeDeveloperConsoleCommand('cat NOTES.txt', copy, deps).responseLines).toEqual([
-      'line one',
-      'line two'
-    ]);
+    expect(executeDeveloperConsoleCommand('cat NOTES.txt', copy, deps).responseLines).toEqual(['line one', 'line two']);
     expect(executeDeveloperConsoleCommand('cat constructor', copy, deps).responseLines).toEqual([
       'missing constructor'
     ]);
-    expect(executeDeveloperConsoleCommand('cat', copy, deps).responseLines).toEqual([
-      'Usage: cat <file>'
-    ]);
+    expect(executeDeveloperConsoleCommand('cat', copy, deps).responseLines).toEqual(['Usage: cat <file>']);
   });
 
   it('reports circuit part progress from the injected status', () => {

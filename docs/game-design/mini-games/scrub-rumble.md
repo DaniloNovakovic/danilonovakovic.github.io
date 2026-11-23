@@ -4,7 +4,7 @@
 
 ## Overview
 
-**Scrub Rumble** (formerly *Potassium Slip*) is the first secret mini-game: a tall sponge ricochet arena and affectionate **Ball x Pit homage** set inside a street dumpster. A little litter pile on the street is the way in; inside, the player launches one main sponge, recalls it yo-yo style, bounces it through falling junk, drafts stackable upgrades, defeats **Sir Rummage** (the raccoon who stole the street CRT's Circuit), and wins the **Circuit** back.
+**Scrub Rumble** (formerly _Potassium Slip_) is the first secret mini-game: a tall sponge ricochet arena and affectionate **Ball x Pit homage** set inside a street dumpster. A little litter pile on the street is the way in; inside, the player launches one main sponge, recalls it yo-yo style, bounces it through falling junk, drafts stackable upgrades, defeats **Sir Rummage** (the raccoon who stole the street CRT's Circuit), and wins the **Circuit** back.
 
 ## Goal
 

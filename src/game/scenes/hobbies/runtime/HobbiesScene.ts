@@ -35,9 +35,7 @@ import {
   type InteriorInteractionRuntime
 } from '@/game/sharedSceneRuntime/interactions/InteriorInteractionRuntime';
 
-type HobbiesInteractionEffect =
-  | { kind: 'close' }
-  | { kind: 'openOverlay'; id: HobbiesOverlayId };
+type HobbiesInteractionEffect = { kind: 'close' } | { kind: 'openOverlay'; id: HobbiesOverlayId };
 
 type HobbiesInteractionId = 'exit' | HobbiesOverlayId;
 

@@ -24,12 +24,14 @@ describe('flock director', () => {
   it('adds birds for surges and last call without exceeding the pool', () => {
     const base = stampedeFlockTarget({ elapsedMs: 60_000, durationMs: DURATION });
     expect(stampedeFlockTarget({ elapsedMs: 60_000, durationMs: DURATION, surge: true })).toBeGreaterThan(base);
-    expect(stampedeFlockTarget({
-      elapsedMs: DURATION,
-      durationMs: DURATION,
-      surge: true,
-      lastCall: true
-    })).toBeLessThanOrEqual(STAMPEDE_FLOCK_POOL_SIZE);
+    expect(
+      stampedeFlockTarget({
+        elapsedMs: DURATION,
+        durationMs: DURATION,
+        surge: true,
+        lastCall: true
+      })
+    ).toBeLessThanOrEqual(STAMPEDE_FLOCK_POOL_SIZE);
   });
 
   it('spawns faster later and during surges', () => {
@@ -41,8 +43,7 @@ describe('flock director', () => {
     const atClock = stampedeFlockTarget({ elapsedMs: DURATION, durationMs: DURATION });
     const overtime = stampedeFlockTarget({ elapsedMs: DURATION + 60_000, durationMs: DURATION });
     expect(overtime).toBeGreaterThan(atClock);
-    expect(stampedeFlockTarget({ elapsedMs: DURATION * 20, durationMs: DURATION }))
-      .toBe(STAMPEDE_FLOCK_POOL_SIZE);
+    expect(stampedeFlockTarget({ elapsedMs: DURATION * 20, durationMs: DURATION })).toBe(STAMPEDE_FLOCK_POOL_SIZE);
     expect(stampedeSpawnGapMs(DURATION + 120_000, DURATION)).toBeLessThan(stampedeSpawnGapMs(DURATION, DURATION));
     expect(stampedeSpawnGapMs(DURATION * 20, DURATION)).toBeGreaterThan(100);
   });
@@ -59,8 +60,8 @@ describe('flock director', () => {
     const view = { x: 300, y: 200, width: 1000, height: 600 };
     for (let roll = 0; roll < 1; roll += 0.1) {
       const point = pickStampedeSpawnPoint(view, STAMPEDE_WORLD, { x: 800, y: 500 }, () => roll);
-      const onScreen = point.x > view.x && point.x < view.x + view.width
-        && point.y > view.y && point.y < view.y + view.height;
+      const onScreen =
+        point.x > view.x && point.x < view.x + view.width && point.y > view.y && point.y < view.y + view.height;
       expect(onScreen).toBe(false);
       expect(point.x).toBeGreaterThanOrEqual(STAMPEDE_WORLD.safeLeft);
       expect(point.x).toBeLessThanOrEqual(STAMPEDE_WORLD.safeRight);

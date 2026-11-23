@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  getCappedUiTextResolution,
-  MAX_UI_TEXT_RESOLUTION,
-  snapUiTextCoordinate
-} from './createUiText';
+import { getCappedUiTextResolution, MAX_UI_TEXT_RESOLUTION, snapUiTextCoordinate } from './createUiText';
 
 describe('createUiText helpers', () => {
   it('caps HiDPI text resolution to avoid excessive texture memory', () => {

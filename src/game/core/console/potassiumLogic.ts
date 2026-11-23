@@ -124,8 +124,7 @@ function winPotassium(state: GameWorldState): PotassiumOutcome {
 
   return {
     ok: true,
-    message:
-      'Sir Rummage drops the Circuit and sulks. You win it back. Back on the street; find the CRT.',
+    message: 'Sir Rummage drops the Circuit and sulks. You win it back. Back on the street; find the CRT.',
     events
   };
 }

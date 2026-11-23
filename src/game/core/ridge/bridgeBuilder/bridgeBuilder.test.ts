@@ -32,12 +32,7 @@ const LOOSE_TRIANGLES: BridgeDesign = [
   ...[0, 2, 4, 6].flatMap((x) => [wood(x, 0, x + 1, -1), wood(x + 1, -1, x + 2, 0)])
 ];
 /** One-square-deep Warren truss: the cheapest sensible answer. */
-const SHALLOW_TRUSS: BridgeDesign = [
-  ...LOOSE_TRIANGLES,
-  wood(1, -1, 3, -1),
-  wood(3, -1, 5, -1),
-  wood(5, -1, 7, -1)
-];
+const SHALLOW_TRUSS: BridgeDesign = [...LOOSE_TRIANGLES, wood(1, -1, 3, -1), wood(3, -1, 5, -1), wood(5, -1, 7, -1)];
 /** Truss hung below the deck from the low cliff bolts. */
 const UNDER_TRUSS: BridgeDesign = [
   ...FLAT_DECK,

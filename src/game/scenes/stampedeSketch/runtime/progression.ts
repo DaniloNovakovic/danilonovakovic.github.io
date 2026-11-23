@@ -1,15 +1,7 @@
 import type { StampedeFlockKind } from './flock';
 import { clampStampedePosition } from './movement';
-import {
-  STAMPEDE_BONUS_HEART_CAP,
-  STAMPEDE_CLUTCH_HEART_CHANCE
-} from './session';
-import {
-  isStampedeModId,
-  isStampedeWeaponId,
-  type StampedeUpgradeId,
-  type StampedeWeaponId
-} from './upgrades';
+import { STAMPEDE_BONUS_HEART_CAP, STAMPEDE_CLUTCH_HEART_CHANCE } from './session';
+import { isStampedeModId, isStampedeWeaponId, type StampedeUpgradeId, type StampedeWeaponId } from './upgrades';
 
 const STAMPEDE_SCRAP_PICKUP_RADIUS = 10;
 export const STAMPEDE_SCRAP_COLLECTION_RADIUS = 10;
@@ -118,9 +110,7 @@ export function collectStampedePickups(
 
   state.pickups.forEach((pickup) => {
     const distance = Math.hypot(pickup.x - player.x, pickup.y - player.y);
-    const collectionRadius = STAMPEDE_SCRAP_COLLECTION_RADIUS +
-      (player.radius ?? 0) +
-      pickup.radius;
+    const collectionRadius = STAMPEDE_SCRAP_COLLECTION_RADIUS + (player.radius ?? 0) + pickup.radius;
 
     if (distance <= collectionRadius) {
       collected.push(pickup);
@@ -136,16 +126,15 @@ export function collectStampedePickups(
 
   const heartsCollected = collected.filter((pickup) => pickup.kind === 'heart').length;
   const giftsCollected = collected.filter((pickup) => pickup.kind === 'gift').length;
-  const scrapsCollected = state.scrapsCollected +
-    collected.reduce((total, pickup) => (
-      total + (pickup.kind === 'heart' || pickup.kind === 'gift' ? 0 : pickup.value)
-    ), 0);
+  const scrapsCollected =
+    state.scrapsCollected +
+    collected.reduce(
+      (total, pickup) => total + (pickup.kind === 'heart' || pickup.kind === 'gift' ? 0 : pickup.value),
+      0
+    );
   const clockReady = options.elapsedMs === undefined || options.elapsedMs >= state.nextDraftAtMs;
   const upgradeDraftStatus =
-    state.upgradeDraftStatus === 'none' &&
-    state.scrapGoal > 0 &&
-    scrapsCollected >= state.scrapGoal &&
-    clockReady
+    state.upgradeDraftStatus === 'none' && state.scrapGoal > 0 && scrapsCollected >= state.scrapGoal && clockReady
       ? 'pending'
       : state.upgradeDraftStatus;
 
@@ -246,10 +235,7 @@ export function spawnStampedeHeartPickup(
   };
 }
 
-export function openStampedeDraftIfReady(
-  state: StampedeProgressionState,
-  elapsedMs: number
-): StampedeProgressionState {
+export function openStampedeDraftIfReady(state: StampedeProgressionState, elapsedMs: number): StampedeProgressionState {
   if (state.upgradeDraftStatus !== 'none' || state.scrapGoal <= 0) return state;
   if (state.scrapsCollected < state.scrapGoal || elapsedMs < state.nextDraftAtMs) return state;
   return {
@@ -262,10 +248,7 @@ export function grantStampedeStartingWeapon(
   state: StampedeProgressionState,
   weaponId: StampedeWeaponId
 ): StampedeProgressionState {
-  if (
-    state.appliedUpgradeIds.includes(weaponId) ||
-    state.upgradedWeaponIds.includes(weaponId)
-  ) {
+  if (state.appliedUpgradeIds.includes(weaponId) || state.upgradedWeaponIds.includes(weaponId)) {
     return state;
   }
 
@@ -340,9 +323,7 @@ function appendUpgradeId(
   appliedUpgradeIds: readonly StampedeUpgradeId[],
   upgradeId: StampedeUpgradeId
 ): readonly StampedeUpgradeId[] {
-  return appliedUpgradeIds.includes(upgradeId)
-    ? appliedUpgradeIds
-    : [...appliedUpgradeIds, upgradeId];
+  return appliedUpgradeIds.includes(upgradeId) ? appliedUpgradeIds : [...appliedUpgradeIds, upgradeId];
 }
 
 function finishStampedeDraft(

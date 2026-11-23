@@ -11,13 +11,7 @@ interface SceneChoiceGridProps extends HTMLAttributes<HTMLDivElement> {
  * Responsive grid for scene choice cards.
  * Use to lay out `SceneChoiceCard` options inside a panel or choice state.
  */
-export function SceneChoiceGrid({
-  columns = 'auto',
-  children,
-  className,
-  style,
-  ...props
-}: SceneChoiceGridProps) {
+export function SceneChoiceGrid({ columns = 'auto', children, className, style, ...props }: SceneChoiceGridProps) {
   const gridClass = columns === 'row' ? 'grid-cols-2' : columns === 'stack' ? 'grid-cols-1' : '';
 
   return (

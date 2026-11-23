@@ -22,7 +22,10 @@ export class MemoryFrameView {
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
-    this.g = scene.add.graphics().setDepth(DEPTH.presence + 4).setScrollFactor(0);
+    this.g = scene.add
+      .graphics()
+      .setDepth(DEPTH.presence + 4)
+      .setScrollFactor(0);
   }
 
   sync(shotKey: string | null, night: boolean, now: number): void {

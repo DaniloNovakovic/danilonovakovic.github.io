@@ -14,36 +14,28 @@ const BIRD_COUNT = 3;
 const MOTE_COUNT = 14;
 
 /** Sky band: clouds crawling and birds crossing behind the horizon. */
-export function drawAmbientFar(
-  g: Phaser.GameObjects.Graphics,
-  areaId: RidgeAreaId,
-  tick: number
-): void {
+export function drawAmbientFar(g: Phaser.GameObjects.Graphics, areaId: RidgeAreaId, tick: number): void {
   g.clear();
   if (areaId === 'concert') return;
 
   const span = STAGE_WIDTH + 260;
   for (let i = 0; i < CLOUD_COUNT; i += 1) {
     const speed = 0.55 + jitter(i * 3.3) * 0.5;
-    const x = (((jitter(i) * span + tick * speed) % span) + span) % span - 130;
+    const x = ((((jitter(i) * span + tick * speed) % span) + span) % span) - 130;
     const y = SKY_TOP + 22 + jitter(i * 5.5) * 74;
     drawCloud(g, x, y, 0.95 + jitter(i * 2.1) * 0.55, 0.32);
   }
 
   for (let i = 0; i < BIRD_COUNT; i += 1) {
     const speed = 1.6 + jitter(i * 7.1) * 1.1;
-    const x = (((jitter(i * 1.7) * span + tick * speed) % span) + span) % span - 130;
+    const x = ((((jitter(i * 1.7) * span + tick * speed) % span) + span) % span) - 130;
     const drift = Math.sin((tick + i * 9) * 0.12) * 9;
     drawBird(g, x, SKY_TOP + 34 + jitter(i * 4.4) * 66 + drift, tick + i, 0.42);
   }
 }
 
 /** Ground band: the small stuff moving through the playable lane. */
-export function drawAmbientNear(
-  g: Phaser.GameObjects.Graphics,
-  areaId: RidgeAreaId,
-  tick: number
-): void {
+export function drawAmbientNear(g: Phaser.GameObjects.Graphics, areaId: RidgeAreaId, tick: number): void {
   g.clear();
 
   if (areaId === 'bridge') {
@@ -91,7 +83,7 @@ function drawDriftingSeeds(g: Phaser.GameObjects.Graphics, tick: number): void {
   g.lineStyle(1.6, INK, 0.34);
   for (let i = 0; i < MOTE_COUNT; i += 1) {
     const speed = 1.1 + jitter(i * 2.7) * 1.4;
-    const x = (((jitter(i) * span + tick * speed) % span) + span) % span - 80;
+    const x = ((((jitter(i) * span + tick * speed) % span) + span) % span) - 80;
     const y = GROUND_Y - 60 - jitter(i * 6.3) * 190 + Math.sin((tick + i * 5) * 0.18) * 14;
     // Stem with a parachute fan: a ring on a stick read as a pin or a key.
     g.lineBetween(x, y, x - 3, y + 8);
@@ -148,8 +140,7 @@ function drawFallingPetals(g: Phaser.GameObjects.Graphics, tick: number): void {
 function drawSlowMotes(g: Phaser.GameObjects.Graphics, tick: number): void {
   for (let i = 0; i < MOTE_COUNT; i += 1) {
     const x = 80 + jitter(i) * (STAGE_WIDTH - 160) + Math.sin((tick + i * 6) * 0.09) * 26;
-    const y =
-      GROUND_Y - 40 + jitter(i * 3.9) * 60 - ((tick * 0.4 + jitter(i * 8.1) * 200) % 200);
+    const y = GROUND_Y - 40 + jitter(i * 3.9) * 60 - ((tick * 0.4 + jitter(i * 8.1) * 200) % 200);
     g.fillStyle(INK, 0.16 + jitter(i * 2.6) * 0.14);
     g.fillCircle(x, y, 1.8 + jitter(i * 4.1) * 1.6);
   }

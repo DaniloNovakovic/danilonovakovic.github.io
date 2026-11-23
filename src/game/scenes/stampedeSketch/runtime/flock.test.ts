@@ -18,7 +18,13 @@ import {
 
 const NONE = new Set<StampedeFlockKind>();
 const ALL_SPECIALS = new Set<StampedeFlockKind>([
-  'nerd', 'perfume', 'hen', 'fixer', 'situationship', 'rooster', 'bartender'
+  'nerd',
+  'perfume',
+  'hen',
+  'fixer',
+  'situationship',
+  'rooster',
+  'bartender'
 ]);
 
 describe('chick magnet flock', () => {
@@ -40,9 +46,7 @@ describe('chick magnet flock', () => {
       [STAMPEDE_BARTENDER_AT_MS, 'bartender']
     ];
     debuts.forEach(([atMs, kind]) => {
-      const introducedBefore = new Set(
-        debuts.filter(([other]) => other < atMs).map(([, earlier]) => earlier)
-      );
+      const introducedBefore = new Set(debuts.filter(([other]) => other < atMs).map(([, earlier]) => earlier));
       expect(pickStampedeSpawnKind(atMs, {}, introducedBefore, () => 0.99)).toBe(kind);
     });
   });
@@ -70,13 +74,16 @@ describe('chick magnet flock', () => {
     for (let roll = 0; roll < 1; roll += 0.02) {
       expect(pickStampedeSpawnKind(late, {}, ALL_SPECIALS, () => roll)).not.toBe('metalhead');
     }
-    expect(pickStampedeSpawnKind(STAMPEDE_METALHEAD_AT_MS - 1, {}, ALL_SPECIALS, () => 0.99, { guitar: true }))
-      .not.toBe('metalhead');
+    expect(
+      pickStampedeSpawnKind(STAMPEDE_METALHEAD_AT_MS - 1, {}, ALL_SPECIALS, () => 0.99, { guitar: true })
+    ).not.toBe('metalhead');
     // Picking up the guitar mid-run brings her straight in.
     expect(pickStampedeSpawnKind(late, {}, ALL_SPECIALS, () => 0.99, { guitar: true })).toBe('metalhead');
-    expect(pickStampedeSpawnKind(late, { metalhead: 2 }, new Set([...ALL_SPECIALS, 'metalhead']), () => 0.99, {
-      guitar: true
-    })).not.toBe('metalhead');
+    expect(
+      pickStampedeSpawnKind(late, { metalhead: 2 }, new Set([...ALL_SPECIALS, 'metalhead']), () => 0.99, {
+        guitar: true
+      })
+    ).not.toBe('metalhead');
   });
 
   it('makes the metalhead immune to metal and nothing else', () => {
@@ -84,8 +91,7 @@ describe('chick magnet flock', () => {
     expect(isStampedeWeaponImmune('metalhead', 'metalRiff', 2)).toBe(true);
     expect(isStampedeWeaponImmune('metalhead', 'badSelfie', 1)).toBe(false);
     expect(isStampedeWeaponImmune('chick', 'metalRiff', 1)).toBe(false);
-    expect(getStampedeFlockProfile('metalhead').speed)
-      .toBeGreaterThan(getStampedeFlockProfile('situationship').speed);
+    expect(getStampedeFlockProfile('metalhead').speed).toBeGreaterThan(getStampedeFlockProfile('situationship').speed);
   });
 
   it('uses the drawn body as the hitbox, with the ex as the biggest target', () => {
@@ -104,23 +110,20 @@ describe('chick magnet flock', () => {
   });
 
   it('lets the fixer mend the nearest wounded bird', () => {
-    expect(resolveStampedeMendTarget(
-      { id: 'fixer', x: 0, y: 0 },
-      [
+    expect(
+      resolveStampedeMendTarget({ id: 'fixer', x: 0, y: 0 }, [
         { id: 'far', x: 80, y: 0, hp: 1, maxHp: 2, alive: true },
         { id: 'near', x: 20, y: 0, hp: 1, maxHp: 3, alive: true },
         { id: 'full', x: 5, y: 0, hp: 2, maxHp: 2, alive: true },
         { id: 'down', x: 4, y: 0, hp: 0, maxHp: 2, alive: false }
-      ]
-    )).toBe('near');
+      ])
+    ).toBe('near');
   });
 
   it('makes the rooster take more hits than a chick', () => {
     expect(getStampedeFlockProfile('chick').maxHp).toBe(1);
     expect(getStampedeFlockProfile('hen').maxHp).toBe(2);
-    expect(getStampedeFlockProfile('rooster').maxHp).toBeGreaterThan(
-      getStampedeFlockProfile('hen').maxHp
-    );
+    expect(getStampedeFlockProfile('rooster').maxHp).toBeGreaterThan(getStampedeFlockProfile('hen').maxHp);
     expect(getStampedeFlockProfile('rooster').speed).toBeLessThan(ROOSTER_CHARGE.dashSpeed);
     expect(getStampedeFlockProfile('rooster').scrapValue).toBeGreaterThan(1);
   });

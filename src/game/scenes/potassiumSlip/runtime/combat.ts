@@ -131,7 +131,13 @@ export type PotassiumCombatCommand =
   | PotassiumSpawnFirePatchCommand
   | { type: 'explodeAt'; x: number; y: number; effectMultiplier: number; radiusMultiplier: number }
   | { type: 'spawnGhostBeam'; x: number; y: number; direction: PotassiumGhostBeamDirection; effectMultiplier: number }
-  | { type: 'spawnGhostStatusField'; x: number; y: number; direction: PotassiumGhostBeamDirection; effectMultiplier: number }
+  | {
+      type: 'spawnGhostStatusField';
+      x: number;
+      y: number;
+      direction: PotassiumGhostBeamDirection;
+      effectMultiplier: number;
+    }
   | { type: 'spreadPoisonFrom'; x: number; y: number; effectMultiplier: number; sourceEnemyId: string }
   | { type: 'spawnSplitterChildren'; enemyId: string }
   | { type: 'killEnemy'; enemyId: string };
@@ -154,21 +160,28 @@ export function resolvePotassiumProjectileHit(input: PotassiumProjectileHitInput
 
   if (protectedHit) {
     commands.push({ type: 'showDamageCue', enemyId: enemy.id, source: 'ghost' });
-    commands.push(projectile.isRecall
-      ? { type: 'boostRecallVelocity', projectileId: projectile.id }
-      : { type: 'ricochetProjectile', projectileId: projectile.id, enemyId: enemy.id });
+    commands.push(
+      projectile.isRecall
+        ? { type: 'boostRecallVelocity', projectileId: projectile.id }
+        : { type: 'ricochetProjectile', projectileId: projectile.id, enemyId: enemy.id }
+    );
     return commands;
   }
 
   commands.push({
     type: 'damageEnemy',
     enemyId: enemy.id,
-    amount: (projectile.isRecall ? POTASSIUM_RECALL_DAMAGE : 1) * projectile.effectMultiplier * getDamageMultiplier(input.genericRanks),
+    amount:
+      (projectile.isRecall ? POTASSIUM_RECALL_DAMAGE : 1) *
+      projectile.effectMultiplier *
+      getDamageMultiplier(input.genericRanks),
     source: 'banana'
   });
-  commands.push(projectile.isRecall
-    ? { type: 'boostRecallVelocity', projectileId: projectile.id }
-    : { type: 'ricochetProjectile', projectileId: projectile.id, enemyId: enemy.id });
+  commands.push(
+    projectile.isRecall
+      ? { type: 'boostRecallVelocity', projectileId: projectile.id }
+      : { type: 'ricochetProjectile', projectileId: projectile.id, enemyId: enemy.id }
+  );
   commands.push(...resolveUnlockedHitEffects(input));
   return commands;
 }
@@ -180,7 +193,11 @@ export function resolvePotassiumDamage(input: PotassiumDamageInput): PotassiumCo
   const commands: PotassiumCombatCommand[] = [];
   if (input.source === 'fire') {
     if (enemy.fireTickUntil !== undefined && enemy.fireTickUntil > input.now) return [];
-    commands.push({ type: 'setFireTickUntil', enemyId: enemy.id, fireTickUntil: input.now + POTASSIUM_FIRE_TICK_COOLDOWN_MS });
+    commands.push({
+      type: 'setFireTickUntil',
+      enemyId: enemy.id,
+      fireTickUntil: input.now + POTASSIUM_FIRE_TICK_COOLDOWN_MS
+    });
   }
 
   if (enemy.indestructible) {
@@ -219,24 +236,33 @@ export function resolvePotassiumPoisonTick(input: PotassiumPoisonTickInput): Pot
 
 export function resolvePotassiumExplosion(input: PotassiumExplosionInput): PotassiumCombatCommand[] {
   const rank = getSkillRank(input.skillRanks, 'explosion');
-  const radius = getPotassiumScaledExplosionRadius(rank, input.radiusMultiplier * getExplosionRadiusMultiplier(input.genericRanks));
+  const radius = getPotassiumScaledExplosionRadius(
+    rank,
+    input.radiusMultiplier * getExplosionRadiusMultiplier(input.genericRanks)
+  );
   return input.hits.flatMap(({ enemy, distance }) => {
-    const damage = getPotassiumExplosionDamage(distance, radius, input.effectMultiplier * getDamageMultiplier(input.genericRanks));
+    const damage = getPotassiumExplosionDamage(
+      distance,
+      radius,
+      input.effectMultiplier * getDamageMultiplier(input.genericRanks)
+    );
     if (damage <= 0) return [];
     const commands: PotassiumCombatCommand[] = [
       { type: 'damageEnemy', enemyId: enemy.id, amount: damage, source: 'explosion' }
     ];
     if (rank >= 2) {
-      commands.push(...resolveStatusEffects({
-        enemy,
-        x: enemy.x,
-        y: enemy.y,
-        effectMultiplier: input.effectMultiplier,
-        allowExplosionStatus: true,
-        now: input.now,
-        skillRanks: input.skillRanks,
-        genericRanks: input.genericRanks
-      }));
+      commands.push(
+        ...resolveStatusEffects({
+          enemy,
+          x: enemy.x,
+          y: enemy.y,
+          effectMultiplier: input.effectMultiplier,
+          allowExplosionStatus: true,
+          now: input.now,
+          skillRanks: input.skillRanks,
+          genericRanks: input.genericRanks
+        })
+      );
     }
     return commands;
   });
@@ -255,16 +281,18 @@ export function resolvePotassiumGhostBeam(input: PotassiumGhostBeamInput): Potas
       }
     ];
     if (rank >= 2) {
-      hitCommands.push(...resolveStatusEffects({
-        enemy,
-        x: enemy.x,
-        y: enemy.y,
-        effectMultiplier: input.effectMultiplier,
-        allowExplosionStatus: false,
-        now: input.now,
-        skillRanks: input.skillRanks,
-        genericRanks: input.genericRanks
-      }));
+      hitCommands.push(
+        ...resolveStatusEffects({
+          enemy,
+          x: enemy.x,
+          y: enemy.y,
+          effectMultiplier: input.effectMultiplier,
+          allowExplosionStatus: false,
+          now: input.now,
+          skillRanks: input.skillRanks,
+          genericRanks: input.genericRanks
+        })
+      );
     }
     return hitCommands;
   });
@@ -284,16 +312,18 @@ function resolveUnlockedHitEffects(input: PotassiumProjectileHitInput): Potassiu
   const { enemy, projectile } = input;
   const commands: PotassiumCombatCommand[] = [];
   if (projectile.canApplyHitProcs) {
-    commands.push(...resolveStatusEffects({
-      enemy,
-      x: enemy.x,
-      y: enemy.y,
-      effectMultiplier: projectile.effectMultiplier,
-      allowExplosionStatus: false,
-      now: input.now,
-      skillRanks: input.skillRanks,
-      genericRanks: input.genericRanks
-    }));
+    commands.push(
+      ...resolveStatusEffects({
+        enemy,
+        x: enemy.x,
+        y: enemy.y,
+        effectMultiplier: projectile.effectMultiplier,
+        allowExplosionStatus: false,
+        now: input.now,
+        skillRanks: input.skillRanks,
+        genericRanks: input.genericRanks
+      })
+    );
   }
 
   if (projectile.canApplyHitProcs && getSkillRank(input.skillRanks, 'fire') >= 2) {
@@ -316,25 +346,41 @@ function resolveUnlockedHitEffects(input: PotassiumProjectileHitInput): Potassiu
     });
   }
   if (!projectile.isRecall && getSkillRank(input.skillRanks, 'ghostHorizontal') > 0) {
-    commands.push({ type: 'spawnGhostBeam', x: enemy.x, y: enemy.y, direction: 'horizontal', effectMultiplier: projectile.effectMultiplier });
+    commands.push({
+      type: 'spawnGhostBeam',
+      x: enemy.x,
+      y: enemy.y,
+      direction: 'horizontal',
+      effectMultiplier: projectile.effectMultiplier
+    });
   }
   if (!projectile.isRecall && getSkillRank(input.skillRanks, 'ghostVertical') > 0) {
-    commands.push({ type: 'spawnGhostBeam', x: enemy.x, y: enemy.y, direction: 'vertical', effectMultiplier: projectile.effectMultiplier });
+    commands.push({
+      type: 'spawnGhostBeam',
+      x: enemy.x,
+      y: enemy.y,
+      direction: 'vertical',
+      effectMultiplier: projectile.effectMultiplier
+    });
   }
   return commands;
 }
 
-function resolveStatusEffects(input: {
-  enemy: PotassiumEnemyCombatFacts;
-  x: number;
-  y: number;
-  effectMultiplier: number;
-  allowExplosionStatus: boolean;
-  now: number;
-} & PotassiumCombatRanks): PotassiumCombatCommand[] {
+function resolveStatusEffects(
+  input: {
+    enemy: PotassiumEnemyCombatFacts;
+    x: number;
+    y: number;
+    effectMultiplier: number;
+    allowExplosionStatus: boolean;
+    now: number;
+  } & PotassiumCombatRanks
+): PotassiumCombatCommand[] {
   const commands: PotassiumCombatCommand[] = [];
   if (getSkillRank(input.skillRanks, 'poison') > 0) {
-    commands.push(resolveApplyPoison(input.enemy, input.now, input.effectMultiplier, true, input.skillRanks, input.genericRanks));
+    commands.push(
+      resolveApplyPoison(input.enemy, input.now, input.effectMultiplier, true, input.skillRanks, input.genericRanks)
+    );
   }
   if (input.allowExplosionStatus && getSkillRank(input.skillRanks, 'fire') > 0) {
     commands.push({
@@ -357,12 +403,14 @@ function resolveApplyPoison(
   skillRanks: PotassiumSkillRanks,
   genericRanks: PotassiumGenericUpgradeRanks
 ): PotassiumApplyPoisonCommand {
-  const poisonMultiplier = applyRankBonus && getSkillRank(skillRanks, 'poison') >= 2
-    ? effectMultiplier * POISON_UPGRADED_DAMAGE_MULTIPLIER * getPoisonGenericMultiplier(genericRanks)
-    : effectMultiplier;
-  const nextTickAt = enemy.poisonNextTickAt === undefined || enemy.poisonNextTickAt < now
-    ? now + POTASSIUM_POISON_TICK_INTERVAL_MS
-    : undefined;
+  const poisonMultiplier =
+    applyRankBonus && getSkillRank(skillRanks, 'poison') >= 2
+      ? effectMultiplier * POISON_UPGRADED_DAMAGE_MULTIPLIER * getPoisonGenericMultiplier(genericRanks)
+      : effectMultiplier;
+  const nextTickAt =
+    enemy.poisonNextTickAt === undefined || enemy.poisonNextTickAt < now
+      ? now + POTASSIUM_POISON_TICK_INTERVAL_MS
+      : undefined;
   return {
     type: 'applyPoison',
     enemyId: enemy.id,
@@ -375,7 +423,11 @@ function resolveApplyPoison(
 
 function resolveDeathCommands(input: PotassiumDamageInput): PotassiumCombatCommand[] {
   const commands: PotassiumCombatCommand[] = [];
-  if (getSkillRank(input.skillRanks, 'poison') >= 2 && input.enemy.poisonExpiresAt !== undefined && input.enemy.poisonExpiresAt > input.now) {
+  if (
+    getSkillRank(input.skillRanks, 'poison') >= 2 &&
+    input.enemy.poisonExpiresAt !== undefined &&
+    input.enemy.poisonExpiresAt > input.now
+  ) {
     commands.push({
       type: 'spreadPoisonFrom',
       x: input.enemy.x,

@@ -73,10 +73,7 @@ export class PotassiumCommandAdapter {
     return this.internals.createCombatContext(enemies, projectiles);
   }
 
-  applyCombatCommands(
-    commands: readonly PotassiumCombatCommand[],
-    context?: PotassiumCombatContext
-  ): void {
+  applyCombatCommands(commands: readonly PotassiumCombatCommand[], context?: PotassiumCombatContext): void {
     applyCombatCommandsModule(this.internals, commands, context);
   }
 

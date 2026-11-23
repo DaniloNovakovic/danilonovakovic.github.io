@@ -28,11 +28,9 @@ export function readSceneInputCommands(options: ReadSceneInputOptions): InputCom
   const { frame, cursors, wasd, interactKey, hKey, escapeKey, touch, oneShots } = options;
   resetInputCommandFrame(frame);
 
-  const digitalAxis =
-    cursors.left.isDown || wasd.a.isDown ? -1 : cursors.right.isDown || wasd.d.isDown ? 1 : 0;
+  const digitalAxis = cursors.left.isDown || wasd.a.isDown ? -1 : cursors.right.isDown || wasd.d.isDown ? 1 : 0;
   const touchAxis = touch.right - touch.left;
-  const digitalVerticalAxis =
-    cursors.up.isDown || wasd.w.isDown ? -1 : cursors.down.isDown || wasd.s.isDown ? 1 : 0;
+  const digitalVerticalAxis = cursors.up.isDown || wasd.w.isDown ? -1 : cursors.down.isDown || wasd.s.isDown ? 1 : 0;
   const touchVerticalAxis = touch.down - touch.up;
   frame.moveAxis = touchAxis !== 0 ? touchAxis : digitalAxis;
   frame.verticalAxis = touchVerticalAxis !== 0 ? touchVerticalAxis : digitalVerticalAxis;

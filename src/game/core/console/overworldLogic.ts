@@ -16,13 +16,7 @@ import {
 import { CIRCUIT_PART_IDS, countCircuitParts } from './content/circuitParts';
 import { clamp, nearbyMissMessage, pickNearby } from './nearby';
 import { getPortfolioOverlay } from './overlayCatalog';
-import type {
-  GameSecretId,
-  GameSessionEvent,
-  GameWorldState,
-  NearbyThing,
-  OverworldProgressStage
-} from './types';
+import type { GameSecretId, GameSessionEvent, GameWorldState, NearbyThing, OverworldProgressStage } from './types';
 
 export interface OverworldInteractOutcome {
   message: string;
@@ -41,8 +35,7 @@ const BANANA_CANCEL_EXTRA = 40;
 const LITTER_TARGET_WORDS = ['banana', 'peel', 'litter', 'dumpster', 'potassium'];
 
 const SIGNPOST_MESSAGES: Record<OverworldProgressStage, string> = {
-  'find-glasses':
-    'The sign is a blur. A chick is pacing just past Experiences.',
+  'find-glasses': 'The sign is a blur. A chick is pacing just past Experiences.',
   'wear-glasses': 'Put your glasses back on. The street hides things from blurry eyes. The chick will bolt.',
   'find-peel': 'Somebody has been littering just past the Abilities shelf.',
   'win-circuit':
@@ -53,7 +46,6 @@ const SIGNPOST_MESSAGES: Record<OverworldProgressStage, string> = {
 
 /** Glasses, banana peel, three hobby parts, Circuit. */
 const STREET_SECRET_TOTAL = 3 + CIRCUIT_PART_IDS.length;
-
 
 export function getOverworldProgress(
   state: Pick<GameWorldState, 'ownedItemIds' | 'equippedItemIds' | 'discoveredSecretIds'>
@@ -135,11 +127,7 @@ export function listOverworldNearby(state: GameWorldState): NearbyThing[] {
   }
 
   const peelDist = Math.hypot(x - OVERWORLD_BANANA_PEEL.x, y - OVERWORLD_BANANA_PEEL.y);
-  if (
-    glassesOn &&
-    peelDist <= OVERWORLD_BANANA_PEEL.radius &&
-    !state.overworld.bananaFirstPeelPending
-  ) {
+  if (glassesOn && peelDist <= OVERWORLD_BANANA_PEEL.radius && !state.overworld.bananaFirstPeelPending) {
     const discovered = state.discoveredSecretIds.includes(OVERWORLD_BANANA_PEEL.secretId);
     things.push({
       id: OVERWORLD_BANANA_PEEL.id,
@@ -199,28 +187,19 @@ export function moveOverworld(
   const events = maybeCancelBananaPeel(state);
   return {
     message:
-      direction === 'right'
-        ? `You walk right to x=${Math.round(next)}.`
-        : `You walk left to x=${Math.round(next)}.`,
+      direction === 'right' ? `You walk right to x=${Math.round(next)}.` : `You walk left to x=${Math.round(next)}.`,
     events
   };
 }
 
 /** Phaser-authoritative position sync (no movement simulation). */
-export function syncOverworldPosition(
-  state: GameWorldState,
-  x: number,
-  y: number
-): GameSessionEvent[] {
+export function syncOverworldPosition(state: GameWorldState, x: number, y: number): GameSessionEvent[] {
   state.overworld.playerX = x;
   state.overworld.playerY = y;
   return maybeCancelBananaPeel(state);
 }
 
-export function interactOverworld(
-  state: GameWorldState,
-  target: string | undefined
-): OverworldInteractOutcome {
+export function interactOverworld(state: GameWorldState, target: string | undefined): OverworldInteractOutcome {
   // Headless second interact (and explicit peel target) while the discovery beat is pending.
   if (
     state.overworld.bananaFirstPeelPending &&
@@ -335,10 +314,7 @@ function interactBananaPeel(state: GameWorldState): OverworldInteractOutcome {
   return enterPotassiumFromBananaPeel(state);
 }
 
-function enterBuilding(
-  state: GameWorldState,
-  building: OverworldBuildingSpot
-): OverworldInteractOutcome {
+function enterBuilding(state: GameWorldState, building: OverworldBuildingSpot): OverworldInteractOutcome {
   if (building.action.kind === 'enterScene') {
     state.mode = 'hobbies';
     state.sceneId = 'hobbies';
@@ -368,4 +344,3 @@ function maybeCancelBananaPeel(state: GameWorldState): GameSessionEvent[] {
   state.overworld.bananaFirstPeelPending = false;
   return [{ type: 'banana_peel_cancelled' }];
 }
-

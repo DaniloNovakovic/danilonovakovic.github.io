@@ -35,18 +35,17 @@ export function PotassiumTerminalPanel({ params, dispatchAction }: SceneUiSurfac
       padding="md"
       className="max-h-[min(78dvh,calc(100dvh-8rem))] w-full overflow-y-auto p-3 text-center sm:p-5"
     >
-      <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-[#4b4337] sm:text-xs">
-        Run ended
-      </p>
+      <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-[#4b4337] sm:text-xs">Run ended</p>
       <h2 id={titleId} className="mt-1 font-mono text-2xl font-bold uppercase leading-tight text-[#1a1a1a] sm:text-4xl">
         {view.title}
       </h2>
-      <p id={descriptionId} className="mt-3 font-mono text-xs font-bold uppercase tracking-wider text-[#4b4337] sm:text-sm">
+      <p
+        id={descriptionId}
+        className="mt-3 font-mono text-xs font-bold uppercase tracking-wider text-[#4b4337] sm:text-sm"
+      >
         Final Score
       </p>
-      <p className="mt-1 font-mono text-3xl font-bold leading-none text-[#1a1a1a] sm:text-4xl">
-        {view.score}
-      </p>
+      <p className="mt-1 font-mono text-3xl font-bold leading-none text-[#1a1a1a] sm:text-4xl">{view.score}</p>
       <div className="mt-4 grid grid-cols-2 gap-2 sm:gap-3">
         {view.actions.map((action) => (
           <Button

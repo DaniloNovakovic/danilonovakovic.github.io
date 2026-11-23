@@ -66,12 +66,7 @@ export default function StaticPortfolio({ onSwitchToInteractive }: StaticPortfol
         <footer className="mt-16 flex flex-col items-center gap-3 border-t-2 border-dashed border-[#1a1a1a]/30 pt-6 text-center text-xs text-[#1a1a1a]/60 sm:mt-24">
           <p>
             {messages.staticPortfolio.footerPrompt}{' '}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onSwitchToInteractive}
-              className="p-0 text-xs"
-            >
+            <Button variant="ghost" size="sm" onClick={onSwitchToInteractive} className="p-0 text-xs">
               {messages.staticPortfolio.footerCta}
             </Button>
           </p>

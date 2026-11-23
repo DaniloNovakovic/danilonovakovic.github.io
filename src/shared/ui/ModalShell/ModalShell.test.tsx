@@ -38,9 +38,7 @@ describe('ModalShell', () => {
     const dialog = screen.getByRole('dialog', { name: 'Test Modal' });
     expect(dialog.getAttribute('aria-modal')).toBe('true');
     expect(document.getElementById(dialog.getAttribute('aria-labelledby')!)?.textContent).toBe('Test Modal');
-    expect(document.getElementById(dialog.getAttribute('aria-describedby')!)?.textContent).toBe(
-      'Modal description.'
-    );
+    expect(document.getElementById(dialog.getAttribute('aria-describedby')!)?.textContent).toBe('Modal description.');
   });
 
   it('moves focus to the first focusable element', () => {

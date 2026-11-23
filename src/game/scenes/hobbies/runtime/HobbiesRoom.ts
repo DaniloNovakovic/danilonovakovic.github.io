@@ -9,11 +9,7 @@ import { HOBBIES_EXIT_X, HOBBY_STATION_LAYOUT } from '../roomLayout';
 import { getMessages } from '@/shared/i18n';
 import { HOBBIES_RIGHT_WALL_X } from '@/game/core/console';
 import { TextureGenerator } from '@/game/sharedSceneRuntime/textures/TextureGenerator';
-import {
-  HOBBIES_FLOOR_Y,
-  HOBBIES_ROOM_HEIGHT,
-  HOBBIES_ROOM_WIDTH
-} from '@/game/sharedSceneRuntime/config';
+import { HOBBIES_FLOOR_Y, HOBBIES_ROOM_HEIGHT, HOBBIES_ROOM_WIDTH } from '@/game/sharedSceneRuntime/config';
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
 
 const INK = 0x1a1a1a;
@@ -82,7 +78,13 @@ export class HobbiesRoom {
   private drawShell(): void {
     const { scene } = this;
     const floorY = HOBBIES_FLOOR_Y;
-    scene.add.rectangle(HOBBIES_ROOM_WIDTH / 2, HOBBIES_ROOM_HEIGHT / 2, HOBBIES_ROOM_WIDTH, HOBBIES_ROOM_HEIGHT, 0xf4f1ea);
+    scene.add.rectangle(
+      HOBBIES_ROOM_WIDTH / 2,
+      HOBBIES_ROOM_HEIGHT / 2,
+      HOBBIES_ROOM_WIDTH,
+      HOBBIES_ROOM_HEIGHT,
+      0xf4f1ea
+    );
     const bg = scene.add.graphics();
     bg.fillStyle(PAPER, 1);
     bg.fillRect(WALL_LEFT, CEILING_Y, WALL_RIGHT - WALL_LEFT, 500);
@@ -186,7 +188,9 @@ export class HobbiesRoom {
     g.fillStyle(INK, 1);
     g.fillCircle(left + 10, top + 21, 4);
     g.fillCircle(left + 20, top + 21, 4);
-    createUiText(this.scene, x + 40, y + 14, 'Em', { fontSize: '13px', color: '#1a1a1a', fontStyle: 'bold' }).setOrigin(0.5);
+    createUiText(this.scene, x + 40, y + 14, 'Em', { fontSize: '13px', color: '#1a1a1a', fontStyle: 'bold' }).setOrigin(
+      0.5
+    );
   }
 
   /** A framed doodle of the street's first house — the sketchbook sketching itself. */

@@ -293,9 +293,7 @@ export class BridgeWorkbench {
 
   /** A drawn joint below the deck that is not a bolt: it only hangs from beams. */
   private hasHangingJoint(): boolean {
-    return designJoints(this.puzzle, this.design).some(
-      (joint) => joint.y > 0 && !isAnchor(this.puzzle, joint)
-    );
+    return designJoints(this.puzzle, this.design).some((joint) => joint.y > 0 && !isAnchor(this.puzzle, joint));
   }
 
   private pushHistory(): void {
@@ -337,9 +335,6 @@ function describeFailure(sim: BridgeSim): string {
 function describeDesign(design: BridgeDesign): string {
   if (design.length === 0) return 'Blueprint is empty. Bolts: 0,0  8,0  0,2  8,2.';
   return design
-    .map(
-      (beam, index) =>
-        `#${index + 1} ${beam.material} ${formatPoint(beam.a)} → ${formatPoint(beam.b)}`
-    )
+    .map((beam, index) => `#${index + 1} ${beam.material} ${formatPoint(beam.a)} → ${formatPoint(beam.b)}`)
     .join('\n');
 }

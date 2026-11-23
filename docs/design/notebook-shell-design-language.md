@@ -40,18 +40,18 @@ clear during normal play.
 
 ## Shell Primitives
 
-| Primitive | Use |
-| --- | --- |
-| Page | Primary playable surface for a scene. |
-| Spread | Desktop/tablet layout with a playable page and a notes/status page. |
-| Tab | Global navigation such as Back or compact Menu. |
-| Margin note | Low-density status, objective, or reward memory. |
-| Loose sheet | Blocking scene panel such as start, result, upgrade, or Trail Card. |
-| Hint slip | Compact controls/context hint, usually in the reserved footer slot. |
-| Status slip | Live timer, score, phase, feedback, or meter. |
+| Primitive   | Use                                                                              |
+| ----------- | -------------------------------------------------------------------------------- |
+| Page        | Primary playable surface for a scene.                                            |
+| Spread      | Desktop/tablet layout with a playable page and a notes/status page.              |
+| Tab         | Global navigation such as Back or compact Menu.                                  |
+| Margin note | Low-density status, objective, or reward memory.                                 |
+| Loose sheet | Blocking scene panel such as start, result, upgrade, or Trail Card.              |
+| Hint slip   | Compact controls/context hint, usually in the reserved footer slot.              |
+| Status slip | Live timer, score, phase, feedback, or meter.                                    |
 | Choice card | Upgrade, route, or result choice with enough copy to be readable outside canvas. |
-| Menu sheet | Compact shell menu for Static Mode, inventory, dev tools, and settings. |
-| Control mat | Shell-level touch surface larger than the visible canvas. |
+| Menu sheet  | Compact shell menu for Static Mode, inventory, dev tools, and settings.          |
+| Control mat | Shell-level touch surface larger than the visible canvas.                        |
 
 Choice cards are selectable paper options, not floating action cards. Hover
 should clarify that the option is pressable without making the card jump off the
@@ -69,13 +69,13 @@ of copying Storybook mock labels or placeholder marks.
 
 ## Shadow Roles
 
-| Role | Use |
-| --- | --- |
-| `pressed` | Active/pressed state, nearly flush with the page. |
-| `control` | Buttons, tabs, scraps, and compact status slips. |
-| `sheet` | Blocking scene panels and loose sheets. |
-| `page` | Page/spread frames above the notebook paper. |
-| `stage` | Quiet notebook paper behind shell chrome; no heavy card shadow by default. |
+| Role      | Use                                                                        |
+| --------- | -------------------------------------------------------------------------- |
+| `pressed` | Active/pressed state, nearly flush with the page.                          |
+| `control` | Buttons, tabs, scraps, and compact status slips.                           |
+| `sheet`   | Blocking scene panels and loose sheets.                                    |
+| `page`    | Page/spread frames above the notebook paper.                               |
+| `stage`   | Quiet notebook paper behind shell chrome; no heavy card shadow by default. |
 
 The stage is structural, not the main visual card. The strongest ink border
 belongs to the current page, board, or blocking sheet so the shell does not read
@@ -83,13 +83,13 @@ as a card wrapped around another card.
 
 ## Profile Families
 
-| Profile | Scenes | Layout Intent |
-| --- | --- | --- |
-| `sideViewPage` | Current Overworld, legacy/prototype Ridge, possible future Ridge if the active route adopts it | Horizontal trail on paper with sparse prompts and overlays. |
-| `ruledBoardPage` | Scrub Rumble | Tall ruled board, drag/recall control mat, board-like rhythm. |
-| `survivalPage` | Stampede Sketch | Clean open arena, edge status, minimal decoration. |
-| `timingPage` | Telegraph Terrace | One readable timing subject and one obvious parry surface. |
-| `puzzleDeskPage` | Domino Desk | Stable grid, reachable undo, optional desk-paper trim. |
+| Profile          | Scenes                                                                                         | Layout Intent                                                 |
+| ---------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `sideViewPage`   | Current Overworld, legacy/prototype Ridge, possible future Ridge if the active route adopts it | Horizontal trail on paper with sparse prompts and overlays.   |
+| `ruledBoardPage` | Scrub Rumble                                                                                   | Tall ruled board, drag/recall control mat, board-like rhythm. |
+| `survivalPage`   | Stampede Sketch                                                                                | Clean open arena, edge status, minimal decoration.            |
+| `timingPage`     | Telegraph Terrace                                                                              | One readable timing subject and one obvious parry surface.    |
+| `puzzleDeskPage` | Domino Desk                                                                                    | Stable grid, reachable undo, optional desk-paper trim.        |
 
 Potassium is the first runtime proof for `ruledBoardPage`. Stampede is the
 first runtime proof for `survivalPage`. `sideViewPage` should enter runtime

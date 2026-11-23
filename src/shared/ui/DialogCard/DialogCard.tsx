@@ -16,20 +16,11 @@ interface DialogCardProps {
  * Inner card for modal dialogs with a title, optional description, and close button.
  * Use inside `ModalShell`; do not use it alone as a full modal overlay.
  */
-export function DialogCard({
-  title,
-  description,
-  onClose,
-  children,
-  titleId,
-  descriptionId
-}: DialogCardProps) {
+export function DialogCard({ title, description, onClose, children, titleId, descriptionId }: DialogCardProps) {
   const messages = useMessages();
 
   return (
-    <div
-      className="relative max-h-[92dvh] w-full max-w-[600px] overflow-y-auto rounded-t-2xl border-4 border-[#1a1a1a] bg-[#fbfbf9] p-4 text-[#1a1a1a] shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] outline-none animate-in zoom-in-95 fade-in sm:rounded-2xl sm:p-8"
-    >
+    <div className="relative max-h-[92dvh] w-full max-w-[600px] overflow-y-auto rounded-t-2xl border-4 border-[#1a1a1a] bg-[#fbfbf9] p-4 text-[#1a1a1a] shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] outline-none animate-in zoom-in-95 fade-in sm:rounded-2xl sm:p-8">
       <Button
         variant="icon"
         size="sm"
@@ -49,9 +40,13 @@ export function DialogCard({
 
       <div className="mt-4 text-base leading-relaxed [overflow-wrap:anywhere] sm:mt-6 sm:text-xl">
         {description ? (
-          <p id={descriptionId} className="mb-6 font-medium italic opacity-80 sm:mb-8">{description}</p>
+          <p id={descriptionId} className="mb-6 font-medium italic opacity-80 sm:mb-8">
+            {description}
+          </p>
         ) : descriptionId ? (
-          <p id={descriptionId} className="sr-only">{title}</p>
+          <p id={descriptionId} className="sr-only">
+            {title}
+          </p>
         ) : null}
 
         <div className="mt-4">{children}</div>

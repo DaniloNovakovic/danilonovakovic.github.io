@@ -221,7 +221,10 @@ export function useGuitarSynth() {
         const spec = GUITAR_STRINGS[index];
         if (!spec) return;
         const fret = frets[index] ?? null;
-        const when = Math.max(context.currentTime, start + step * STRUM_STAGGER_SECONDS + (Math.random() - 0.5) * 0.004);
+        const when = Math.max(
+          context.currentTime,
+          start + step * STRUM_STAGGER_SECONDS + (Math.random() - 0.5) * 0.004
+        );
         const velocity = fret === null ? 0.35 : Math.max(0.45, 0.84 - step * 0.06);
         pluckAt(context, spec, when, velocity, fret, palm, short);
       });

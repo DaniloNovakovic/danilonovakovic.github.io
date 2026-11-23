@@ -40,103 +40,99 @@ export function usePhaserGameBoot({
   stableOnOpenOverlay,
   stableOnReturnToOverworld
 }: UsePhaserGameBootOptions) {
-  useEffect(function bootPhaserGame() {
-    if (!containerRef.current || gameRef.current) return;
+  useEffect(
+    function bootPhaserGame() {
+      if (!containerRef.current || gameRef.current) return;
 
-    const config = getGameConfig(containerRef.current);
+      const config = getGameConfig(containerRef.current);
 
-    const game = new Phaser.Game(config);
-    gameRef.current = game;
+      const game = new Phaser.Game(config);
+      gameRef.current = game;
 
-    const el = containerRef.current;
-    const refresh = () => {
-      // During fast remount/HMR teardown, Phaser can lose its canvas parent briefly.
-      if (gameRef.current !== game) return;
-      if (!game.canvas || !game.canvas.parentElement) return;
-      refreshPhaserScale(game);
-    };
-    const ro = el ? new ResizeObserver(() => refresh()) : null;
-    if (el && ro) {
-      ro.observe(el);
-      refresh();
-      requestAnimationFrame(() => {
+      const el = containerRef.current;
+      const refresh = () => {
+        // During fast remount/HMR teardown, Phaser can lose its canvas parent briefly.
+        if (gameRef.current !== game) return;
+        if (!game.canvas || !game.canvas.parentElement) return;
+        refreshPhaserScale(game);
+      };
+      const ro = el ? new ResizeObserver(() => refresh()) : null;
+      if (el && ro) {
+        ro.observe(el);
         refresh();
-        requestAnimationFrame(refresh);
-      });
-    }
-
-    // Initial pause comes from ref so this effect does not remount Phaser when pause toggles.
-    game.scene.add(PHASER_SCENE_KEYS.overworld, OverworldScene, false);
-
-    const adapter = new PhaserSceneAdapter({
-      getGame: () => gameRef.current
-    });
-    const sceneManager = new SceneManager(adapter, {
-      onSceneLoadingChange: (contextId) => {
-        bridgeActions.setSceneLoading(contextId && isSceneId(contextId) ? contextId : null);
-      },
-      onSceneStarted: () => {
-        setPauseOnPausableScenes(gameRef.current, bridgeRef.current.isPaused);
-      }
-    });
-    const sceneContexts = createSceneContexts({
-      onEnterScene: stableOnEnterScene,
-      onOpenOverlay: stableOnOpenOverlay,
-      onReturnToOverworld: stableOnReturnToOverworld,
-      getIsPaused: () => bridgeRef.current.isPaused,
-      prepareSceneStart: (sceneKey) => prepareSceneStart(sceneKey),
-      getSceneStartResume: (sceneKey) => getSceneStartResume(sceneKey),
-      getRidgeDevControls: () => bridgeRef.current.ridgeDevControls,
-      loadPhaserScene: (id) => getLoadableScene(id)?.loadScene?.()
-    });
-    sceneContexts.forEach((context) => sceneManager.registerContext(context));
-    const sceneLifecycle = new SceneLifecycleController(sceneManager);
-    sceneLifecycle.start();
-
-    // Dev-only helpers: seed progress and/or start scenes without walking to triggers.
-    let uninstallDevDebugHook: (() => void) | undefined;
-    if (import.meta.env.DEV) {
-      uninstallDevDebugHook = installDevDebugHook(
-        window as unknown as Record<string, unknown>,
-        () => gameRef.current
-      );
-      const url = new URL(window.location.href);
-      let shouldReplaceUrl = false;
-
-      const ridgeProgressSeed = getDevRidgeProgressSeed(url.searchParams);
-      ridgeProgressSeed.stampIds.forEach((stampId) => {
-        bridgeActions.awardRidgeStamp(stampId);
-      });
-      ridgeProgressSeed.consumedParams.forEach((param) => {
-        url.searchParams.delete(param);
-        shouldReplaceUrl = true;
-      });
-
-      const startScene = url.searchParams.get('startScene');
-      if (startScene && isSceneId(startScene)) {
-        bridgeActions.enterScene(startScene);
-        url.searchParams.delete('startScene');
-        shouldReplaceUrl = true;
+        requestAnimationFrame(() => {
+          refresh();
+          requestAnimationFrame(refresh);
+        });
       }
 
-      if (shouldReplaceUrl) {
-        window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
-      }
-    }
+      // Initial pause comes from ref so this effect does not remount Phaser when pause toggles.
+      game.scene.add(PHASER_SCENE_KEYS.overworld, OverworldScene, false);
 
-    return () => {
-      uninstallDevDebugHook?.();
-      ro?.disconnect();
-      sceneLifecycle.stop();
-      game.destroy(true);
-      gameRef.current = null;
-    };
-  }, [
-    bridgeRef,
-    containerRef,
-    gameRef,
-    stableOnEnterScene,
-    stableOnOpenOverlay,
-    stableOnReturnToOverworld
-  ]);
+      const adapter = new PhaserSceneAdapter({
+        getGame: () => gameRef.current
+      });
+      const sceneManager = new SceneManager(adapter, {
+        onSceneLoadingChange: (contextId) => {
+          bridgeActions.setSceneLoading(contextId && isSceneId(contextId) ? contextId : null);
+        },
+        onSceneStarted: () => {
+          setPauseOnPausableScenes(gameRef.current, bridgeRef.current.isPaused);
+        }
+      });
+      const sceneContexts = createSceneContexts({
+        onEnterScene: stableOnEnterScene,
+        onOpenOverlay: stableOnOpenOverlay,
+        onReturnToOverworld: stableOnReturnToOverworld,
+        getIsPaused: () => bridgeRef.current.isPaused,
+        prepareSceneStart: (sceneKey) => prepareSceneStart(sceneKey),
+        getSceneStartResume: (sceneKey) => getSceneStartResume(sceneKey),
+        getRidgeDevControls: () => bridgeRef.current.ridgeDevControls,
+        loadPhaserScene: (id) => getLoadableScene(id)?.loadScene?.()
+      });
+      sceneContexts.forEach((context) => sceneManager.registerContext(context));
+      const sceneLifecycle = new SceneLifecycleController(sceneManager);
+      sceneLifecycle.start();
+
+      // Dev-only helpers: seed progress and/or start scenes without walking to triggers.
+      let uninstallDevDebugHook: (() => void) | undefined;
+      if (import.meta.env.DEV) {
+        uninstallDevDebugHook = installDevDebugHook(
+          window as unknown as Record<string, unknown>,
+          () => gameRef.current
+        );
+        const url = new URL(window.location.href);
+        let shouldReplaceUrl = false;
+
+        const ridgeProgressSeed = getDevRidgeProgressSeed(url.searchParams);
+        ridgeProgressSeed.stampIds.forEach((stampId) => {
+          bridgeActions.awardRidgeStamp(stampId);
+        });
+        ridgeProgressSeed.consumedParams.forEach((param) => {
+          url.searchParams.delete(param);
+          shouldReplaceUrl = true;
+        });
+
+        const startScene = url.searchParams.get('startScene');
+        if (startScene && isSceneId(startScene)) {
+          bridgeActions.enterScene(startScene);
+          url.searchParams.delete('startScene');
+          shouldReplaceUrl = true;
+        }
+
+        if (shouldReplaceUrl) {
+          window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
+        }
+      }
+
+      return () => {
+        uninstallDevDebugHook?.();
+        ro?.disconnect();
+        sceneLifecycle.stop();
+        game.destroy(true);
+        gameRef.current = null;
+      };
+    },
+    [bridgeRef, containerRef, gameRef, stableOnEnterScene, stableOnOpenOverlay, stableOnReturnToOverworld]
+  );
 }

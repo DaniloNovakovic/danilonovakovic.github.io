@@ -7,14 +7,7 @@ import type { OverlayId } from '@/game/overlays/overlayIds';
 import { OverlayHost } from '@/game/overlays/OverlayHost';
 import type { PhaserScenePresentationMode } from '@/game/sharedSceneRuntime/phaserScenePresentation';
 import type { SceneId } from '@/game/scenes/sceneIds';
-import {
-  Button,
-  Card,
-  ControlMat,
-  ControlMatDragIndicator,
-  NotebookPageFrame,
-  NotebookShellStage
-} from '@/shared/ui';
+import { Button, Card, ControlMat, ControlMatDragIndicator, NotebookPageFrame, NotebookShellStage } from '@/shared/ui';
 import { useMessages } from '@/shared/i18n';
 import type { NotebookRuntimeShellProfile } from './notebookShellProfile';
 import { useSceneControlMatPointerBridge } from './useSceneControlMatPointerBridge';
@@ -157,10 +150,7 @@ export function NotebookRuntimeShell({
             </div>
           </NotebookPageFrame>
           {controlMat.showDragIndicator ? (
-            <ControlMatDragIndicator
-              data-testid={`${controlMat.testId}-drag-indicator`}
-              state={pointerVisual}
-            />
+            <ControlMatDragIndicator data-testid={`${controlMat.testId}-drag-indicator`} state={pointerVisual} />
           ) : null}
         </ControlMat>
       </NotebookShellStage>

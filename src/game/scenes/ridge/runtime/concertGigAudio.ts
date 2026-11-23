@@ -346,14 +346,7 @@ export class ConcertGigAudio {
     this.oneShot(osc, [gain], at, at + length + 0.02);
   }
 
-  private noiseHit(
-    at: number,
-    type: BiquadFilterType,
-    hz: number,
-    level: number,
-    length: number,
-    q: number
-  ): void {
+  private noiseHit(at: number, type: BiquadFilterType, hz: number, level: number, length: number, q: number): void {
     const ctx = this.ctx!;
     const source = ctx.createBufferSource();
     source.buffer = this.noise;

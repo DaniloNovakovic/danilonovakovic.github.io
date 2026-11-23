@@ -42,9 +42,10 @@ export function stageConcertGig(gig: ConcertGig): GigFrame {
   const countIn = t >= 0 && t < startMs ? Math.floor(t / beatMs) + 1 : null;
   const hype = gig.hype;
   const last = gig.lastHit;
-  const flash = last && t - last.timeMs < GIG_FLASH_MS
-    ? { lane: last.lane, judgment: last.judgment, age: t - last.timeMs, serial: last.serial }
-    : null;
+  const flash =
+    last && t - last.timeMs < GIG_FLASH_MS
+      ? { lane: last.lane, judgment: last.judgment, age: t - last.timeMs, serial: last.serial }
+      : null;
 
   const playing = gig.phase === 'playing';
   const finished = gig.phase === 'finished';

@@ -5,12 +5,7 @@
  */
 import * as Phaser from 'phaser';
 import { TextureGenerator } from '@/game/sharedSceneRuntime/textures/TextureGenerator';
-import {
-  BASEMENT_SCENE_ID,
-  HOBBIES_SCENE_ID,
-  OVERWORLD_SCENE_ID,
-  type SceneId
-} from '@/game/scenes/sceneIds';
+import { BASEMENT_SCENE_ID, HOBBIES_SCENE_ID, OVERWORLD_SCENE_ID, type SceneId } from '@/game/scenes/sceneIds';
 import type { OverlayId } from '@/game/overlays/overlayIds';
 import {
   BANANA_PEEL_CLUE_ID,
@@ -52,11 +47,7 @@ import {
 } from '@/game/core/console';
 import { loadRidgeRouteDialogueCatalog } from '@/game/scenes/ridge/content/routeCatalog';
 import { applyGameConsoleEvents } from '@/game/scenes/shared/applyGameConsoleEvents';
-import {
-  buildStreetEnvironment,
-  buildStreetForeground,
-  setupStreetCamera
-} from './street/StreetEnvironment';
+import { buildStreetEnvironment, buildStreetForeground, setupStreetCamera } from './street/StreetEnvironment';
 import { buildStreetBuildings, type StreetBuildingLayers } from './street/StreetBuildings';
 import { updateStreetParticles } from './street/StreetParticles';
 import { StreetBirds, StreetFootsteps } from './street/StreetLife';
@@ -254,7 +245,10 @@ export class OverworldScene extends Phaser.Scene {
       color: '#1a1a1a',
       backgroundColor: '#ffffff',
       padding: { x: 5, y: 2 }
-    }).setOrigin(0.5).setVisible(false).setDepth(20);
+    })
+      .setOrigin(0.5)
+      .setVisible(false)
+      .setDepth(20);
     this.bananaFloorIcon = this.add.graphics().setDepth(21).setVisible(false);
     this.drawBananaFloorIcon();
     this.circuitCrt = new StreetCrt(this, OVERWORLD_CIRCUIT_SLOT.x, OVERWORLD_CIRCUIT_SLOT.y, 18);
@@ -294,11 +288,7 @@ export class OverworldScene extends Phaser.Scene {
     updateStreetParticles(this);
 
     const nearby = this.updateOverworldInteraction(step.interactRequested);
-    this.streetBuildings.applyFocus(
-      nearby?.kind === 'building' ? nearby.id : null,
-      tick,
-      this.motion
-    );
+    this.streetBuildings.applyFocus(nearby?.kind === 'building' ? nearby.id : null, tick, this.motion);
     this.updateProgressProps(tick, nearby?.kind === 'prop');
   }
 
@@ -321,7 +311,6 @@ export class OverworldScene extends Phaser.Scene {
     this.signpost?.update(stage, tick, nearProp, this.motion);
     this.streetDetail?.update(getSketchDetailLevel(state), tick, this.motion);
   }
-
 
   private updateOverworldInteraction(interactRequested: boolean): NearbyThing | undefined {
     if (!this.session) return undefined;
@@ -370,11 +359,7 @@ export class OverworldScene extends Phaser.Scene {
     if (this.session) this.applySessionResult(this.session.exec('interact'));
   }
 
-  private openTalk(
-    script: StreetConversationScript,
-    partnerX: number,
-    onEnd?: StreetTalk['onEnd']
-  ): void {
+  private openTalk(script: StreetConversationScript, partnerX: number, onEnd?: StreetTalk['onEnd']): void {
     this.talk = { conversation: new StreetConversation(script, partnerX), onEnd };
     this.interactPrompt.setVisible(false);
     this.chick?.hush();
@@ -394,7 +379,7 @@ export class OverworldScene extends Phaser.Scene {
   private updateTalk(time: number, delta: number): void {
     this.updateStreetProps(time, delta, sketchTick(time));
     this.chick?.hush();
-    for (let action = bridgeActions.consumeSceneUiAction(OVERWORLD_SCENE_ID); action && this.talk; ) {
+    for (let action = bridgeActions.consumeSceneUiAction(OVERWORLD_SCENE_ID); action && this.talk;) {
       this.handleTalkAction(action);
       action = bridgeActions.consumeSceneUiAction(OVERWORLD_SCENE_ID);
     }
@@ -467,10 +452,9 @@ export class OverworldScene extends Phaser.Scene {
     const building = this.buildingSlots.find((slot) => slot.buildingId === nearby.id);
     const promptX =
       nearby.promptX ??
-      (building?.x ?? (nearby.id === 'banana-peel' ? OVERWORLD_GLASSES_SECRET_SLOTS[0].x : this.player.x));
-    const promptY = building
-      ? building.y + OVERWORLD_INTERACT_PROMPT_OFFSET_Y
-      : (nearby.promptY ?? this.player.y - 40);
+      building?.x ??
+      (nearby.id === 'banana-peel' ? OVERWORLD_GLASSES_SECRET_SLOTS[0].x : this.player.x);
+    const promptY = building ? building.y + OVERWORLD_INTERACT_PROMPT_OFFSET_Y : (nearby.promptY ?? this.player.y - 40);
 
     this.interactPrompt.setText(text).setPosition(promptX, promptY).setVisible(true);
   }
@@ -490,9 +474,7 @@ export class OverworldScene extends Phaser.Scene {
       case 'npc':
         return overworld.chickPrompt;
       case 'crt':
-        return isItemOwned('circuit')
-          ? overworld.circuitCrtReadyPrompt
-          : overworld.circuitCrtLockedPrompt;
+        return isItemOwned('circuit') ? overworld.circuitCrtReadyPrompt : overworld.circuitCrtLockedPrompt;
       default:
         return nav.enter;
     }
@@ -514,15 +496,26 @@ export class OverworldScene extends Phaser.Scene {
     g.fillStyle(paper, 1);
     g.lineStyle(3, ink, 0.95);
     g.beginPath();
-    const ball = [[-24, 10], [-19, 2], [-11, 1], [-5, 7], [-6, 16], [-13, 21], [-22, 19]];
+    const ball = [
+      [-24, 10],
+      [-19, 2],
+      [-11, 1],
+      [-5, 7],
+      [-6, 16],
+      [-13, 21],
+      [-22, 19]
+    ];
     ball.forEach(([x, y], i) => (i === 0 ? g.moveTo(x, y) : g.lineTo(x, y)));
     g.closePath();
     g.fillPath();
     g.strokePath();
     g.lineStyle(2, ink, 0.7);
     g.beginPath();
-    g.moveTo(-19, 6); g.lineTo(-14, 11); g.lineTo(-17, 16);
-    g.moveTo(-14, 11); g.lineTo(-8, 10);
+    g.moveTo(-19, 6);
+    g.lineTo(-14, 11);
+    g.lineTo(-17, 16);
+    g.moveTo(-14, 11);
+    g.lineTo(-8, 10);
     g.strokePath();
 
     // Soda can tipped on its side.
@@ -533,12 +526,17 @@ export class OverworldScene extends Phaser.Scene {
     g.strokeEllipse(19, 15.5, 4, 11);
     g.lineStyle(2, ink, 0.7);
     g.beginPath();
-    g.moveTo(4, 13); g.lineTo(12, 13);
+    g.moveTo(4, 13);
+    g.lineTo(12, 13);
     g.strokePath();
 
     // Raccoon paw prints trotting away.
     g.fillStyle(ink, 0.85);
-    [[30, 18], [40, 12], [50, 18]].forEach(([x, y]) => {
+    [
+      [30, 18],
+      [40, 12],
+      [50, 18]
+    ].forEach(([x, y]) => {
       g.fillEllipse(x, y, 6, 5);
       g.fillCircle(x - 3.5, y - 4, 1.3);
       g.fillCircle(x, y - 5, 1.3);
@@ -553,10 +551,7 @@ export class OverworldScene extends Phaser.Scene {
       return;
     }
     this.bananaFloorIcon
-      .setPosition(
-        OVERWORLD_GLASSES_SECRET_SLOTS[0].x - 12,
-        OVERWORLD_GLASSES_SECRET_SLOTS[0].y - 12
-      )
+      .setPosition(OVERWORLD_GLASSES_SECRET_SLOTS[0].x - 12, OVERWORLD_GLASSES_SECRET_SLOTS[0].y - 12)
       .setRotation(0)
       .setVisible(true);
   }

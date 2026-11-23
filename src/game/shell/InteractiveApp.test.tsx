@@ -131,16 +131,13 @@ describe('InteractiveApp', () => {
 
     await waitFor(() => expect(resizeObserverCallback).toBeDefined());
     act(() => {
-      resizeObserverCallback?.(
-        [{ contentRect: { height: 320 } } as ResizeObserverEntry],
-        resizeObserverInstance!
-      );
+      resizeObserverCallback?.([{ contentRect: { height: 320 } } as ResizeObserverEntry], resizeObserverInstance!);
     });
 
     await waitFor(() => {
-      expect(screen.getByTestId('interactive-game-shell').style.getPropertyValue(
-        '--mobile-game-shell-height-capped-width'
-      )).toBe('min(450px, 240px)');
+      expect(
+        screen.getByTestId('interactive-game-shell').style.getPropertyValue('--mobile-game-shell-height-capped-width')
+      ).toBe('min(450px, 240px)');
     });
   });
 
@@ -221,8 +218,7 @@ describe('InteractiveApp', () => {
     expect(screen.queryByTestId('interactive-game-shell')).toBeNull();
     expect(screen.getByTestId('notebook-game-shell').getAttribute('data-profile')).toBe('survivalPage');
     const pageFrame = screen.getByTestId('stampede-notebook-page-frame');
-    const arenaAspect = (STAMPEDE_ARENA.right - STAMPEDE_ARENA.left) /
-      (STAMPEDE_ARENA.bottom - STAMPEDE_ARENA.top);
+    const arenaAspect = (STAMPEDE_ARENA.right - STAMPEDE_ARENA.left) / (STAMPEDE_ARENA.bottom - STAMPEDE_ARENA.top);
     expect(pageFrame.getAttribute('data-arena-aspect')).toBe(String(arenaAspect));
     expect(pageFrame.className).toContain('stampede-notebook-page-frame');
     expect(screen.getByTestId('stampede-control-mat').style.bottom).toBe('0.75rem');

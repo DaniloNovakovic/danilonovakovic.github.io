@@ -12,11 +12,7 @@ export function jitter(seed: number): number {
  * the sky and left to fade out before the horizon, so the sky gets depth
  * without a hard tonal edge anywhere the scenery has to sit against.
  */
-export function drawPaperBase(
-  g: Phaser.GameObjects.Graphics,
-  width: number,
-  height: number
-): void {
+export function drawPaperBase(g: Phaser.GameObjects.Graphics, width: number, height: number): void {
   g.fillStyle(PAPER, 1);
   g.fillRect(0, 0, width, height);
   for (let i = 0; i < 4; i += 1) {
@@ -46,12 +42,7 @@ export function drawHatch(
     const enter = Math.max(0, (topX - (x + width)) / shift);
     const exit = Math.min(1, (topX - x) / shift);
     if (enter >= exit) continue;
-    g.lineBetween(
-      topX - enter * shift,
-      y + enter * height,
-      topX - exit * shift,
-      y + exit * height
-    );
+    g.lineBetween(topX - enter * shift, y + enter * height, topX - exit * shift, y + exit * height);
   }
 }
 
@@ -78,11 +69,7 @@ export function drawInkBlob(
 }
 
 /** CRT-ish vignette + tape corners. No per-scanline loops. */
-export function drawCrtAtmosphere(
-  g: Phaser.GameObjects.Graphics,
-  width: number,
-  height: number
-): void {
+export function drawCrtAtmosphere(g: Phaser.GameObjects.Graphics, width: number, height: number): void {
   g.fillStyle(WASH, 0.1);
   g.fillRect(0, 0, width, 16);
   g.fillRect(0, height - 18, width, 18);
@@ -103,14 +90,7 @@ export function drawCrtAtmosphere(
   drawTape(g, width - 74, height - 28, 50, 12, -6);
 }
 
-function drawTape(
-  g: Phaser.GameObjects.Graphics,
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  tiltHint: number
-): void {
+function drawTape(g: Phaser.GameObjects.Graphics, x: number, y: number, w: number, h: number, tiltHint: number): void {
   g.fillRect(x, y, w, h);
   g.strokeRect(x, y, w, h);
   g.lineStyle(1, INK, 0.2);
@@ -139,11 +119,7 @@ export function drawContactShadow(
  * a pale trodden band, and a scatter of stones. Texture here competes with
  * feet, so it stays under the ground line where nothing else is drawn.
  */
-export function drawGroundBand(
-  g: Phaser.GameObjects.Graphics,
-  width: number,
-  groundY = GROUND_Y
-): void {
+export function drawGroundBand(g: Phaser.GameObjects.Graphics, width: number, groundY = GROUND_Y): void {
   g.fillStyle(INK, 0.04);
   g.fillRect(0, groundY, width, 30);
   g.fillStyle(INK, 0.075);
@@ -173,13 +149,7 @@ export function drawGroundBand(
  * reads as a Venn diagram or a row of chevrons. Sampling the union of the bumps
  * as a height field keeps it a single closed outline.
  */
-export function drawCloud(
-  g: Phaser.GameObjects.Graphics,
-  x: number,
-  y: number,
-  scale = 1,
-  alpha = 0.35
-): void {
+export function drawCloud(g: Phaser.GameObjects.Graphics, x: number, y: number, scale = 1, alpha = 0.35): void {
   const s = 16 * scale;
   const bumps: ReadonlyArray<readonly [number, number]> = [
     [-0.72, 0.5],
@@ -210,13 +180,7 @@ export function drawCloud(
   g.strokePath();
 }
 
-export function drawBird(
-  g: Phaser.GameObjects.Graphics,
-  x: number,
-  y: number,
-  wingPhase: number,
-  alpha = 0.45
-): void {
+export function drawBird(g: Phaser.GameObjects.Graphics, x: number, y: number, wingPhase: number, alpha = 0.45): void {
   const flap = wingPhase % 2 === 0 ? -4 : 3;
   g.lineStyle(2, INK, alpha);
   g.beginPath();
@@ -303,13 +267,7 @@ export function drawCornStalk(
  * Leaf that leaves the stem flat then droops, built from a short polygon so it
  * reads as foliage instead of an arrowhead.
  */
-export function strokeLeaf(
-  g: Phaser.GameObjects.Graphics,
-  x: number,
-  y: number,
-  reach: number,
-  droop: number
-): void {
+export function strokeLeaf(g: Phaser.GameObjects.Graphics, x: number, y: number, reach: number, droop: number): void {
   g.beginPath();
   g.moveTo(x, y - 2);
   g.lineTo(x + reach * 0.55, y - 1 + droop * 0.18);
@@ -410,13 +368,7 @@ export function drawSunOrMoon(
   }
 }
 
-export function drawPaperBacking(
-  g: Phaser.GameObjects.Graphics,
-  x: number,
-  y: number,
-  w: number,
-  h: number
-): void {
+export function drawPaperBacking(g: Phaser.GameObjects.Graphics, x: number, y: number, w: number, h: number): void {
   g.fillStyle(PAPER_WARM, 0.9);
   g.fillRect(x - w * 0.5, y - h, w, h);
   g.lineStyle(2, INK, 0.55);

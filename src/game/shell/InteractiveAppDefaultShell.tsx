@@ -15,10 +15,7 @@ interface InteractiveAppDefaultShellProps {
   onSwitchToStatic: () => void;
 }
 
-export function InteractiveAppDefaultShell({
-  shell,
-  onSwitchToStatic
-}: InteractiveAppDefaultShellProps) {
+export function InteractiveAppDefaultShell({ shell, onSwitchToStatic }: InteractiveAppDefaultShellProps) {
   const {
     bridge,
     messages,
@@ -50,10 +47,7 @@ export function InteractiveAppDefaultShell({
       }}
     >
       <header className="col-start-2 row-start-1 min-w-0">
-        <nav
-          className="flex min-w-0 items-center justify-between gap-2"
-          aria-label={messages.gameShell.controlsLabel}
-        >
+        <nav className="flex min-w-0 items-center justify-between gap-2" aria-label={messages.gameShell.controlsLabel}>
           <div className="flex min-w-0 items-center gap-2">
             {sceneHeaderChrome.left === 'back' ? (
               <Button

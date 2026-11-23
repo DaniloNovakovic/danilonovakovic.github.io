@@ -26,10 +26,7 @@ export const ElevationRoles: Story = {
           {Object.entries(notebookShadowRoles).map(([role, shadow]) => (
             <div
               key={role}
-              className={cn(
-                'rounded border-2 border-[#1a1a1a] bg-[#fbfbf9] p-3 text-center uppercase',
-                shadow
-              )}
+              className={cn('rounded border-2 border-[#1a1a1a] bg-[#fbfbf9] p-3 text-center uppercase', shadow)}
             >
               {role}
             </div>

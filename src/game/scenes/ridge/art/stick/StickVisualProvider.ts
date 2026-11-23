@@ -205,10 +205,7 @@ export class StickVisualProvider implements RidgeVisualProvider {
     this.stageHeight = options.stageHeight ?? STAGE_HEIGHT;
     this.roles = options.roles ?? {};
 
-    this.ambientFar = scene.add
-      .graphics()
-      .setDepth(DEPTH.ambientFar)
-      .setScrollFactor(LAYERS.far.scrollFactor, 1);
+    this.ambientFar = scene.add.graphics().setDepth(DEPTH.ambientFar).setScrollFactor(LAYERS.far.scrollFactor, 1);
     this.ambientNear = scene.add.graphics().setDepth(DEPTH.ambientNear);
 
     this.actorPool = new ActorSpritePool(scene);
@@ -429,10 +426,7 @@ export class StickVisualProvider implements RidgeVisualProvider {
       motion,
       walking,
       fade: easeInOut(this.conversationBlend),
-      hop:
-        motion && view.speakingEmotion === 'surprised'
-          ? surpriseHop(now - this.lineStartedAt)
-          : 0
+      hop: motion && view.speakingEmotion === 'surprised' ? surpriseHop(now - this.lineStartedAt) : 0
     };
 
     view.actors.forEach((actor, index) => {
@@ -545,9 +539,7 @@ export class StickVisualProvider implements RidgeVisualProvider {
       return;
     }
 
-    const anchor = focus.actorId
-      ? view.actors.find((actor) => actor.id === focus.actorId && actor.visible)
-      : undefined;
+    const anchor = focus.actorId ? view.actors.find((actor) => actor.id === focus.actorId && actor.visible) : undefined;
     const x = this.worldXForProgress(anchor ? anchor.progress : focus.progress);
     const y = anchor ? chromeAnchorY(anchor.id) : GROUND_Y - 96;
     const bob = motion ? (tick % 6 < 3 ? 0 : -3) : 0;
@@ -591,11 +583,7 @@ export class StickVisualProvider implements RidgeVisualProvider {
       view.mode === 'conversation' || view.mode === 'cickaDuel' ? 1 : 0,
       motion ? dt / CONVERSATION_EASE_MS : 1
     );
-    this.buildBlend = approach(
-      this.buildBlend,
-      view.mode === 'bridgeBuild' ? 1 : 0,
-      motion ? dt / BUILD_EASE_MS : 1
-    );
+    this.buildBlend = approach(this.buildBlend, view.mode === 'bridgeBuild' ? 1 : 0, motion ? dt / BUILD_EASE_MS : 1);
     this.gigBlend = approach(this.gigBlend, view.mode === 'concertGig' ? 1 : 0, motion ? dt / GIG_EASE_MS : 1);
     this.lessonBlend = approach(this.lessonBlend, view.mode === 'bachataLesson' ? 1 : 0, motion ? dt / GIG_EASE_MS : 1);
   }
@@ -766,7 +754,8 @@ export class StickVisualProvider implements RidgeVisualProvider {
     const cam = this.scene.cameras.main;
     const xOf = (id: RidgeActorId, fallback: number) =>
       this.worldXForProgress(view.actors.find((actor) => actor.id === id)?.progress ?? fallback);
-    const audience = view.areaId === 'concert' ? xOf('crowd', CONCERT_LAYOUT.crowd) : this.worldXForProgress(DANCE_LAYOUT.chairs);
+    const audience =
+      view.areaId === 'concert' ? xOf('crowd', CONCERT_LAYOUT.crowd) : this.worldXForProgress(DANCE_LAYOUT.chairs);
     const performer = xOf('player', CONCERT_LAYOUT.stage);
     const left = Math.min(performer, audience) - GIG_SIDE_MARGIN;
     const right = Math.max(performer, audience) + GIG_SIDE_MARGIN;
@@ -807,10 +796,7 @@ export class StickVisualProvider implements RidgeVisualProvider {
     return { zoom, centerX: (left + right) / 2, centerY: GROUND_Y - viewHeight * (groundAt - 0.5) };
   }
 
-  private conversationFraming(
-    view: RidgeVisualViewModel,
-    playerX: number
-  ): { zoom: number; centerX: number } {
+  private conversationFraming(view: RidgeVisualViewModel, playerX: number): { zoom: number; centerX: number } {
     const cam = this.scene.cameras.main;
     let minX = playerX;
     let maxX = playerX;
@@ -852,11 +838,7 @@ interface ActorFrame {
 }
 
 /** Residents turn to acknowledge you, the way a street does. */
-function facingFor(
-  actor: RidgeVisualViewModel['actors'][number],
-  frame: ActorFrame,
-  x: number
-): RidgeFacing {
+function facingFor(actor: RidgeVisualViewModel['actors'][number], frame: ActorFrame, x: number): RidgeFacing {
   if (actor.id === 'player') return actor.facing;
   // In a memory the player is not there to turn toward.
   if (frame.view.memoryShot !== null) return actor.facing;

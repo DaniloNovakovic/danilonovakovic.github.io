@@ -2,12 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
 
   // Ridge generated artifacts and build output should not skew duplication/health.
-  "ignorePatterns": [
-    "**/*.generated.ts",
-    "dist/**",
-    "storybook-static/**",
-    "coverage/**"
-  ],
+  "ignorePatterns": ["**/*.generated.ts", "dist/**", "storybook-static/**", "coverage/**"],
 
   // Scene barrels and tuning exports are often same-file or test-facing API.
   "ignoreExportsUsedInFile": {

@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  getStampedeSwarmMotion,
-  resolveStampedeSwarmTarget
-} from './swarmMotion';
+import { getStampedeSwarmMotion, resolveStampedeSwarmTarget } from './swarmMotion';
 
 describe('stampede swarm motion', () => {
   it('keeps swarm targets distributed around the player instead of all at center', () => {

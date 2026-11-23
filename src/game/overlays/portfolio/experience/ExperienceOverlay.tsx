@@ -8,7 +8,7 @@ import { Badge, Card, LinkButton } from '@/shared/ui';
 const ExperienceOverlay: React.FC<OverlayControllerProps> = ({ close, titleId, descriptionId }) => {
   const messages = useMessages();
   const { experiences } = getPortfolioData(messages);
-  
+
   return (
     <OverlayDialogFrame
       title={messages.catalog.portfolio.experiences.name}
@@ -23,7 +23,9 @@ const ExperienceOverlay: React.FC<OverlayControllerProps> = ({ close, titleId, d
             <Card key={index}>
               <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 border-b-2 border-gray-100 pb-2">
                 <h3 className="text-xl font-bold">{exp.title}</h3>
-                <Badge shape="pill" className="font-mono text-sm normal-case tracking-normal">{exp.period}</Badge>
+                <Badge shape="pill" className="font-mono text-sm normal-case tracking-normal">
+                  {exp.period}
+                </Badge>
               </div>
               <p className="mb-2 text-lg font-semibold">
                 {exp.companyUrl ? (
@@ -41,9 +43,7 @@ const ExperienceOverlay: React.FC<OverlayControllerProps> = ({ close, titleId, d
                   <span className="text-[#1a1a1a]">{exp.company}</span>
                 )}
               </p>
-              <p className="text-base leading-relaxed text-gray-700">
-                {exp.description}
-              </p>
+              <p className="text-base leading-relaxed text-gray-700">{exp.description}</p>
             </Card>
           ))}
         </div>

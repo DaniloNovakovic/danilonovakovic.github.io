@@ -2,10 +2,7 @@ import { useId } from 'react';
 import type { SceneUiSurfaceProps } from '@/game/sceneUi/registry';
 import { useMessages } from '@/shared/i18n';
 import { Button, Card } from '@/shared/ui';
-import {
-  getStampedeStartingWeaponChoices,
-  type StampedeUpgradeChoiceView
-} from '../runtime/upgrades';
+import { getStampedeStartingWeaponChoices, type StampedeUpgradeChoiceView } from '../runtime/upgrades';
 
 export function StampedeStartPromptPanel({ params, dispatchAction }: SceneUiSurfaceProps) {
   const titleId = useId();
@@ -31,9 +28,7 @@ export function StampedeStartPromptPanel({ params, dispatchAction }: SceneUiSurf
       <p id={descriptionId} className="mx-auto mt-2 max-w-sm font-mono text-sm font-bold leading-snug text-[#4b4337]">
         {copy.body}
       </p>
-      <p className="mt-3 font-mono text-xs font-bold uppercase tracking-widest text-[#4b4337]">
-        {copy.hint}
-      </p>
+      <p className="mt-3 font-mono text-xs font-bold uppercase tracking-widest text-[#4b4337]">{copy.hint}</p>
       <div className={`mt-4 grid gap-2 sm:gap-3 ${weapons.length === 2 ? 'grid-cols-2' : 'sm:grid-cols-3'}`}>
         {weapons.map((weapon) => (
           <Button
@@ -62,5 +57,5 @@ export function StampedeStartPromptPanel({ params, dispatchAction }: SceneUiSurf
 function readChoices(params: unknown): readonly StampedeUpgradeChoiceView[] | null {
   if (!params || typeof params !== 'object' || !('choices' in params)) return null;
   const choices = (params as { choices?: unknown }).choices;
-  return Array.isArray(choices) ? choices as StampedeUpgradeChoiceView[] : null;
+  return Array.isArray(choices) ? (choices as StampedeUpgradeChoiceView[]) : null;
 }

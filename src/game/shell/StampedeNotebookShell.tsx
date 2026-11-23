@@ -7,10 +7,7 @@ import { STAMPEDE_ARENA } from '@/game/scenes/stampedeSketch/runtime/movement';
 import { useMessages } from '@/shared/i18n';
 import type { NotebookRuntimeShellProfile } from './notebookShellProfile';
 import { NotebookRuntimeShell } from './NotebookRuntimeShell';
-import {
-  NOTEBOOK_CONTROL_MAT_TOP_OFFSET_PX,
-  useNotebookFocusPageFrameLayout
-} from './notebookFocusLayout';
+import { NOTEBOOK_CONTROL_MAT_TOP_OFFSET_PX, useNotebookFocusPageFrameLayout } from './notebookFocusLayout';
 
 const STAMPEDE_ARENA_WIDTH = STAMPEDE_ARENA.right - STAMPEDE_ARENA.left;
 const STAMPEDE_ARENA_HEIGHT = STAMPEDE_ARENA.bottom - STAMPEDE_ARENA.top;
@@ -72,7 +69,8 @@ export function StampedeNotebookShell({
           'data-frame-relative-center-y': frameLayout.relativeCenterY,
           'data-frame-width': frameLayout.width
         },
-        className: 'stampede-notebook-page-frame absolute left-1/2 -translate-x-1/2 -translate-y-1/2 shadow-[12px_12px_0px_0px_rgba(26,26,26,1)]',
+        className:
+          'stampede-notebook-page-frame absolute left-1/2 -translate-x-1/2 -translate-y-1/2 shadow-[12px_12px_0px_0px_rgba(26,26,26,1)]',
         gameFrameTestId: 'stampede-notebook-game-frame',
         style: frameLayout.style,
         testId: 'stampede-notebook-page-frame'

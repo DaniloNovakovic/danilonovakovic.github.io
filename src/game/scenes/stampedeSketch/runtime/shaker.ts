@@ -67,8 +67,8 @@ export function stepShakers(
 }
 
 export function puddleSlowFactor(puddles: readonly StampedePuddle[], player: Point): number {
-  const stuck = puddles.some((puddle) => (
-    Math.hypot(puddle.x - player.x, puddle.y - player.y) <= STAMPEDE_PUDDLE_RADIUS
-  ));
+  const stuck = puddles.some(
+    (puddle) => Math.hypot(puddle.x - player.x, puddle.y - player.y) <= STAMPEDE_PUDDLE_RADIUS
+  );
   return stuck ? STAMPEDE_PUDDLE_SLOW : 1;
 }

@@ -35,12 +35,7 @@ export class StreetSignpost {
   }
 
   /** Called every frame with the current chain stage to drive the unread "!" marker. */
-  update(
-    stage: OverworldProgressStage,
-    tick: number,
-    promptShowing: boolean,
-    motion: boolean
-  ): void {
+  update(stage: OverworldProgressStage, tick: number, promptShowing: boolean, motion: boolean): void {
     const unread = stage !== lastReadStage && !promptShowing;
     this.news.setVisible(unread);
     if (unread) {

@@ -23,9 +23,7 @@ export function reduceControlMatDragIndicator(
         currentY: action.point.y
       };
     case 'move':
-      return state
-        ? { ...state, currentX: action.point.x, currentY: action.point.y }
-        : null;
+      return state ? { ...state, currentX: action.point.x, currentY: action.point.y } : null;
     case 'clear':
       return null;
   }

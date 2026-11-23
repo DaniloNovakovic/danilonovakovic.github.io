@@ -14,13 +14,10 @@ import {
 
 describe('stampede progression', () => {
   it('spawns scrap pickups from cleared marks', () => {
-    const state = spawnStampedePickupsFromClearedMarks(
-      createStampedeProgressionState(),
-      [
-        { id: 'mark-a', x: 120, y: 180 },
-        { id: 'mark-b', x: 180, y: 220 }
-      ]
-    );
+    const state = spawnStampedePickupsFromClearedMarks(createStampedeProgressionState(), [
+      { id: 'mark-a', x: 120, y: 180 },
+      { id: 'mark-b', x: 180, y: 220 }
+    ]);
 
     expect(state.pickups).toMatchObject([
       { id: 'scrap-1', sourceId: 'mark-a', x: 120, y: 180, value: 1 },
@@ -30,13 +27,10 @@ describe('stampede progression', () => {
   });
 
   it('collects nearby scraps and leaves distant scraps active', () => {
-    const spawned = spawnStampedePickupsFromClearedMarks(
-      createStampedeProgressionState(),
-      [
-        { id: 'near', x: 100, y: 100 },
-        { id: 'far', x: 260, y: 100 }
-      ]
-    );
+    const spawned = spawnStampedePickupsFromClearedMarks(createStampedeProgressionState(), [
+      { id: 'near', x: 100, y: 100 },
+      { id: 'far', x: 260, y: 100 }
+    ]);
     const frame = collectStampedePickups(spawned, {
       x: 100 + STAMPEDE_SCRAP_COLLECTION_RADIUS,
       y: 100
@@ -48,13 +42,10 @@ describe('stampede progression', () => {
   });
 
   it('opens another attack draft at the next scrap threshold', () => {
-    const spawned = spawnStampedePickupsFromClearedMarks(
-      createStampedeProgressionState({ scrapGoal: 2 }),
-      [
-        { id: 'mark-a', x: 100, y: 100 },
-        { id: 'mark-b', x: 106, y: 100 }
-      ]
-    );
+    const spawned = spawnStampedePickupsFromClearedMarks(createStampedeProgressionState({ scrapGoal: 2 }), [
+      { id: 'mark-a', x: 100, y: 100 },
+      { id: 'mark-b', x: 106, y: 100 }
+    ]);
     const collected = collectStampedePickups(spawned, { x: 100, y: 100 });
 
     expect(collected.state.scrapsCollected).toBe(2);
@@ -65,10 +56,9 @@ describe('stampede progression', () => {
     expect(chosen.appliedUpgradeIds).toEqual(['badBreath']);
     expect(chosen.scrapGoal).toBeGreaterThan(collected.state.scrapsCollected);
 
-    const withMoreScraps = spawnStampedePickupsFromClearedMarks(
-      { ...chosen, scrapsCollected: chosen.scrapGoal - 1 },
-      [{ id: 'mark-c', x: 100, y: 100 }]
-    );
+    const withMoreScraps = spawnStampedePickupsFromClearedMarks({ ...chosen, scrapsCollected: chosen.scrapGoal - 1 }, [
+      { id: 'mark-c', x: 100, y: 100 }
+    ]);
     const collectedAgain = collectStampedePickups(withMoreScraps, { x: 100, y: 100 });
 
     expect(collectedAgain.state.upgradeDraftStatus).toBe('pending');
@@ -76,10 +66,7 @@ describe('stampede progression', () => {
   });
 
   it('keeps the first scrap goal after the starting weapon', () => {
-    const started = grantStampedeStartingWeapon(
-      createStampedeProgressionState(),
-      'badSelfie'
-    );
+    const started = grantStampedeStartingWeapon(createStampedeProgressionState(), 'badSelfie');
 
     expect(started.appliedUpgradeIds).toEqual(['badSelfie']);
     expect(started.draftsTaken).toBe(0);
@@ -130,24 +117,24 @@ describe('stampede progression', () => {
   });
 
   it('pulls nearby scraps toward the player and keeps them homing', () => {
-    const state = spawnStampedePickupsFromClearedMarks(
-      createStampedeProgressionState(),
-      [{ id: 'near', x: 160, y: 100 }, { id: 'far', x: 900, y: 100 }]
-    );
+    const state = spawnStampedePickupsFromClearedMarks(createStampedeProgressionState(), [
+      { id: 'near', x: 160, y: 100 },
+      { id: 'far', x: 900, y: 100 }
+    ]);
     const pulled = attractStampedePickups(state, { x: 100, y: 100 }, 50);
 
     expect(pulled.pickups[0]!.x).toBeLessThan(160);
     expect(pulled.pickups[0]!.homing).toBe(true);
     expect(pulled.pickups[1]!.x).toBe(900);
-    expect(attractStampedePickups(createStampedeProgressionState(), { x: 0, y: 0 }, 16))
-      .toEqual(createStampedeProgressionState());
+    expect(attractStampedePickups(createStampedeProgressionState(), { x: 0, y: 0 }, 16)).toEqual(
+      createStampedeProgressionState()
+    );
   });
 
   it('pulls every scrap during a magnet gift but never moves gifts', () => {
-    const scraps = spawnStampedePickupsFromClearedMarks(
-      createStampedeProgressionState(),
-      [{ id: 'far', x: 900, y: 100 }]
-    );
+    const scraps = spawnStampedePickupsFromClearedMarks(createStampedeProgressionState(), [
+      { id: 'far', x: 900, y: 100 }
+    ]);
     const state = spawnStampedeGiftPickup(scraps, { x: 600, y: 100 });
     const pulled = attractStampedePickups(state, { x: 100, y: 100 }, 50, { pullAll: true });
 

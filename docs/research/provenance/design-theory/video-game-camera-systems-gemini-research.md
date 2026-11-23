@@ -14,15 +14,15 @@ break distance judgment, and disorient player inputs.
 
 ## Camera Taxonomy
 
-| Camera model | Mechanical basis | Typical fit | Advantages | Constraints |
-| --- | --- | --- | --- | --- |
-| First-person | Camera locked to a sensory origin; look input controls pitch/yaw | First-person shooters, immersive sims, horror | Direct aim alignment, strong embodiment, precise close inspection | Limited rear/lateral awareness, motion-sickness risk, weak character visibility |
-| True first-person | Camera attached to a full character skeleton/head rig | Immersive action and simulation | Stronger body presence | Animation noise can make the view uncomfortable without filtering |
-| Over-the-shoulder | Close third-person offset with asymmetric framing | Third-person shooters, stealth, action adventure | Keeps avatar visible while preserving forward aim space | Weak platforming depth cues and foot visibility |
-| Orbital third-person | Camera orbits a target pivot with distance, pitch, yaw, damping, and collision | 3D platformers, action RPGs, melee games | Strong surrounding awareness and depth judgment | Requires occlusion/collision handling and can burden players with manual rotation |
-| Fixed cinematic | Trigger volumes switch between authored static cameras | Survival horror, narrative adventure | Strong composition, suspense, and pre-authored lighting | Input disorientation and abrupt angle changes |
-| Isometric / orthographic | Fixed high-angle projection with no depth scaling | Strategy, tactical RPGs, top-down ARPGs | Excellent tactical readability and uniform object size | Less intimacy, weaker natural depth cues, rotation can disorient |
-| 2D side-scroller | Camera constrained to a 2D play plane | Platformers, Metroidvanias, run-and-gun games | Precise jump readability and low player camera burden | Depends heavily on level layout to avoid blind jumps |
+| Camera model             | Mechanical basis                                                               | Typical fit                                      | Advantages                                                        | Constraints                                                                       |
+| ------------------------ | ------------------------------------------------------------------------------ | ------------------------------------------------ | ----------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| First-person             | Camera locked to a sensory origin; look input controls pitch/yaw               | First-person shooters, immersive sims, horror    | Direct aim alignment, strong embodiment, precise close inspection | Limited rear/lateral awareness, motion-sickness risk, weak character visibility   |
+| True first-person        | Camera attached to a full character skeleton/head rig                          | Immersive action and simulation                  | Stronger body presence                                            | Animation noise can make the view uncomfortable without filtering                 |
+| Over-the-shoulder        | Close third-person offset with asymmetric framing                              | Third-person shooters, stealth, action adventure | Keeps avatar visible while preserving forward aim space           | Weak platforming depth cues and foot visibility                                   |
+| Orbital third-person     | Camera orbits a target pivot with distance, pitch, yaw, damping, and collision | 3D platformers, action RPGs, melee games         | Strong surrounding awareness and depth judgment                   | Requires occlusion/collision handling and can burden players with manual rotation |
+| Fixed cinematic          | Trigger volumes switch between authored static cameras                         | Survival horror, narrative adventure             | Strong composition, suspense, and pre-authored lighting           | Input disorientation and abrupt angle changes                                     |
+| Isometric / orthographic | Fixed high-angle projection with no depth scaling                              | Strategy, tactical RPGs, top-down ARPGs          | Excellent tactical readability and uniform object size            | Less intimacy, weaker natural depth cues, rotation can disorient                  |
+| 2D side-scroller         | Camera constrained to a 2D play plane                                          | Platformers, Metroidvanias, run-and-gun games    | Precise jump readability and low player camera burden             | Depends heavily on level layout to avoid blind jumps                              |
 
 ## First-Person Notes
 
@@ -94,10 +94,10 @@ readability.
 
 ## Transition Patterns
 
-| Transition | Behavior | Use when | Risk |
-| --- | --- | --- | --- |
-| Cut | Switch instantly to a new camera state | Fixed angles, security cameras, large orientation changes, hard narrative beats | Can disorient input and spatial memory |
-| Parametric blend | Interpolate position, framing, zoom, and orientation | Traversal-to-aim, target changes, cinematic pans, camera profile changes | Needs clear curves and collision handling |
+| Transition       | Behavior                                             | Use when                                                                        | Risk                                      |
+| ---------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------- | ----------------------------------------- |
+| Cut              | Switch instantly to a new camera state               | Fixed angles, security cameras, large orientation changes, hard narrative beats | Can disorient input and spatial memory    |
+| Parametric blend | Interpolate position, framing, zoom, and orientation | Traversal-to-aim, target changes, cinematic pans, camera profile changes        | Needs clear curves and collision handling |
 
 Priority-based virtual camera systems can select the active camera by context:
 default traversal, trigger zones, lock-on, dialogue, tight interiors, or
@@ -138,12 +138,12 @@ camera frame reveals the information needed for the next movement choice.
 
 The research lists common visibility optimizations:
 
-| Method | Purpose | Trade-off |
-| --- | --- | --- |
-| Distance culling | Skip far objects | Can cause pop-in if thresholds are short |
-| View-frustum culling | Skip objects outside the camera view | Does not handle hidden objects inside the view |
-| Precomputed visibility | Use baked cells to decide visible geometry | Memory cost and poor dynamic-object handling |
-| Hierarchical Z-buffer | Cull occluded objects with depth data | GPU cost |
+| Method                 | Purpose                                    | Trade-off                                      |
+| ---------------------- | ------------------------------------------ | ---------------------------------------------- |
+| Distance culling       | Skip far objects                           | Can cause pop-in if thresholds are short       |
+| View-frustum culling   | Skip objects outside the camera view       | Does not handle hidden objects inside the view |
+| Precomputed visibility | Use baked cells to decide visible geometry | Memory cost and poor dynamic-object handling   |
+| Hierarchical Z-buffer  | Cull occluded objects with depth data      | GPU cost                                       |
 
 For Ridge, this mostly translates to Phaser scene culling, tile/layer visibility,
 parallax cost, and keeping debug visualizations optional.

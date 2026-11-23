@@ -154,7 +154,9 @@ describe('bridgeStore', () => {
 
     it('does not emit if state is unchanged', () => {
       let calls = 0;
-      const unsub = bridgeStore.subscribe(() => { calls++; });
+      const unsub = bridgeStore.subscribe(() => {
+        calls++;
+      });
       bridgeActions.closeOverlay();
       unsub();
       expect(calls).toBe(0);
@@ -214,7 +216,9 @@ describe('bridgeStore', () => {
     it('does not emit when glasses are already collected', () => {
       bridgeActions.collectGlasses();
       let calls = 0;
-      const unsub = bridgeStore.subscribe(() => { calls++; });
+      const unsub = bridgeStore.subscribe(() => {
+        calls++;
+      });
       bridgeActions.collectGlasses();
       unsub();
       expect(calls).toBe(0);
@@ -379,7 +383,9 @@ describe('bridgeStore', () => {
 
     it('consumeTouchOneShots is a no-op when nothing is queued', () => {
       let calls = 0;
-      const unsub = bridgeStore.subscribe(() => { calls++; });
+      const unsub = bridgeStore.subscribe(() => {
+        calls++;
+      });
       bridgeActions.consumeTouchOneShots();
       unsub();
       expect(calls).toBe(0);
@@ -471,11 +477,7 @@ describe('bridgeStore', () => {
   describe('scene UI', () => {
     it('sets and clears scene-owned status surfaces', () => {
       const params = { timerSeconds: 64 };
-      bridgeActions.setSceneUiStatus(
-        STAMPEDE_SKETCH_SCENE_ID,
-        'stampedeStatus',
-        params
-      );
+      bridgeActions.setSceneUiStatus(STAMPEDE_SKETCH_SCENE_ID, 'stampedeStatus', params);
 
       expect(bridgeStore.getState().sceneUi.status).toEqual({
         ownerSceneId: STAMPEDE_SKETCH_SCENE_ID,
@@ -488,11 +490,7 @@ describe('bridgeStore', () => {
     });
 
     it('sets and clears scene-owned panel surfaces', () => {
-      bridgeActions.setSceneUiPanel(
-        STAMPEDE_SKETCH_SCENE_ID,
-        'stampedeStartPrompt',
-        { title: 'Ready?' }
-      );
+      bridgeActions.setSceneUiPanel(STAMPEDE_SKETCH_SCENE_ID, 'stampedeStartPrompt', { title: 'Ready?' });
 
       expect(bridgeStore.getState().sceneUi.panel).toMatchObject({
         ownerSceneId: STAMPEDE_SKETCH_SCENE_ID,
@@ -538,14 +536,8 @@ describe('bridgeStore', () => {
     });
 
     it('guards clears and action consumption by owner scene', () => {
-      bridgeActions.setSceneUiStatus(
-        STAMPEDE_SKETCH_SCENE_ID,
-        'stampedeStatus'
-      );
-      bridgeActions.setSceneUiPanel(
-        STAMPEDE_SKETCH_SCENE_ID,
-        'stampedeResult'
-      );
+      bridgeActions.setSceneUiStatus(STAMPEDE_SKETCH_SCENE_ID, 'stampedeStatus');
+      bridgeActions.setSceneUiPanel(STAMPEDE_SKETCH_SCENE_ID, 'stampedeResult');
       bridgeActions.dispatchSceneUiAction(STAMPEDE_SKETCH_SCENE_ID, 'retry');
 
       bridgeActions.clearSceneUiStatus(RIDGE_SCENE_ID);

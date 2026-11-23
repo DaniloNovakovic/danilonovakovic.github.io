@@ -6,18 +6,9 @@ import {
   type RidgeRouteDialogueCatalog,
   type RidgeSessionEvent
 } from '../ridge/index';
-import {
-  interactBasement,
-  moveBasement,
-  returnToOverworld,
-  syncBasementPosition
-} from './basementLogic';
+import { interactBasement, moveBasement, returnToOverworld, syncBasementPosition } from './basementLogic';
 import { getGameHelpText, parseGameCommand, parseGameScript } from './commands';
-import {
-  OVERWORLD_GROUND_Y,
-  OVERWORLD_PLAYER_START,
-  type GameSceneId
-} from './content/overworldSpots';
+import { OVERWORLD_GROUND_Y, OVERWORLD_PLAYER_START, type GameSceneId } from './content/overworldSpots';
 import { interactHobbies, moveHobbies, performHobby } from './hobbiesLogic';
 import { formatGameObservation, observeGameWorld } from './observe';
 import { draftPotassium, fightPotassium, startPotassium } from './potassiumLogic';
@@ -132,10 +123,7 @@ export class GameConsoleSession {
   }
 
   /** Live inventory from the bridge, so street gates follow equip toggles. */
-  syncInventory(
-    ownedItemIds: readonly GameItemId[],
-    equippedItemIds: readonly GameItemId[]
-  ): void {
+  syncInventory(ownedItemIds: readonly GameItemId[], equippedItemIds: readonly GameItemId[]): void {
     this.state.ownedItemIds = ownedItemIds;
     this.state.equippedItemIds = equippedItemIds;
   }
@@ -217,11 +205,7 @@ export class GameConsoleSession {
       case 'draft':
         return this.wrapPotassium(draftPotassium(this.state, command.choiceIdOrIndex));
       case 'unknown':
-        return this.fail(
-          command.raw
-            ? `Unknown command "${command.raw}". Type help.`
-            : 'Empty command. Type help.'
-        );
+        return this.fail(command.raw ? `Unknown command "${command.raw}". Type help.` : 'Empty command. Type help.');
     }
   }
 
@@ -299,12 +283,7 @@ export class GameConsoleSession {
       const overlayId = this.state.overlay?.id ?? 'unknown';
       const returnScene = this.state.sceneId;
       this.state.overlay = null;
-      this.state.mode =
-        returnScene === 'basement'
-          ? 'basement'
-          : returnScene === 'hobbies'
-            ? 'hobbies'
-            : 'overworld';
+      this.state.mode = returnScene === 'basement' ? 'basement' : returnScene === 'hobbies' ? 'hobbies' : 'overworld';
       return this.finish(`Closed ${overlayId}.`, [{ type: 'overlay_closed', overlayId }]);
     }
 
@@ -312,9 +291,7 @@ export class GameConsoleSession {
       const leavingPotassium = this.state.mode === 'potassium';
       const result = returnToOverworld(
         this.state,
-        leavingPotassium
-          ? 'You climb out of the dumpster back to the street.'
-          : 'You return to the street.'
+        leavingPotassium ? 'You climb out of the dumpster back to the street.' : 'You return to the street.'
       );
       if (leavingPotassium) {
         this.state.potassium.phase = 'lobby';
@@ -325,9 +302,7 @@ export class GameConsoleSession {
     return this.fail('Nothing to close.');
   }
 
-  private handleRidgeTalk(
-    command: Extract<GameCommand, { type: 'advance' } | { type: 'choose' }>
-  ): GameCommandResult {
+  private handleRidgeTalk(command: Extract<GameCommand, { type: 'advance' } | { type: 'choose' }>): GameCommandResult {
     if (this.state.mode !== 'ridge') {
       return this.fail('Conversation commands only work inside Ridge.');
     }
@@ -381,8 +356,7 @@ export class GameConsoleSession {
       this.state.mode = 'overworld';
       this.state.sceneId = 'overworld';
       this.state.ridgeBeat = null;
-      const message =
-        'For Cicka. The CRT softens — you are back on the street. Circuit stays with you.';
+      const message = 'For Cicka. The CRT softens — you are back on the street. Circuit stays with you.';
       this.state.lastMessage = message;
       return {
         ok: result.ok,
@@ -411,11 +385,7 @@ export class GameConsoleSession {
     return this.ridge;
   }
 
-  private wrapPotassium(result: {
-    ok: boolean;
-    message: string;
-    events: GameSessionEvent[];
-  }): GameCommandResult {
+  private wrapPotassium(result: { ok: boolean; message: string; events: GameSessionEvent[] }): GameCommandResult {
     return result.ok ? this.finish(result.message, result.events) : this.fail(result.message);
   }
 

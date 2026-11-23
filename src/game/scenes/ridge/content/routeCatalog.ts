@@ -1,7 +1,4 @@
-import {
-  loadRouteCatalogFromMessages,
-  type RidgeRouteDialogueCatalog
-} from '@/game/core/ridge';
+import { loadRouteCatalogFromMessages, type RidgeRouteDialogueCatalog } from '@/game/core/ridge';
 import { getMessages } from '@/shared/i18n';
 
 /** Wires i18n copy into the full first-playable Ridge route catalog. */

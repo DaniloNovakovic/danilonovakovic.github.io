@@ -20,9 +20,7 @@
   ],
   "overrides": [
     {
-      "files": [
-        "**/*.{ts,tsx}"
-      ],
+      "files": ["**/*.{ts,tsx}"],
       "rules": {
         "constructor-super": "error",
         "for-direction": "error",
@@ -123,41 +121,28 @@
           }
         ]
       },
-      "plugins": [
-        "typescript",
-        "react"
-      ],
+      "plugins": ["typescript", "react"],
       "env": {
         "es2020": true,
         "browser": true
       }
     },
     {
-      "files": [
-        "**/*.test.{ts,tsx}"
-      ],
+      "files": ["**/*.test.{ts,tsx}"],
       "rules": {
         "typescript/no-explicit-any": "off"
       },
-      "plugins": [
-        "typescript"
-      ]
+      "plugins": ["typescript"]
     },
     {
-      "files": [
-        "src/game/sceneLifecycle/contexts/**/*.{ts,tsx}",
-        "src/game/scenes/**/sceneContext.ts"
-      ],
+      "files": ["src/game/sceneLifecycle/contexts/**/*.{ts,tsx}", "src/game/scenes/**/sceneContext.ts"],
       "rules": {
         "no-restricted-imports": [
           "error",
           {
             "patterns": [
               {
-                "group": [
-                  "**/sharedSceneRuntime",
-                  "**/sharedSceneRuntime/**"
-                ],
+                "group": ["**/sharedSceneRuntime", "**/sharedSceneRuntime/**"],
                 "message": "scene contexts must not import from sharedSceneRuntime; pass shared runtime values through scene context options."
               }
             ]

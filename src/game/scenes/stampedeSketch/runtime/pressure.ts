@@ -50,30 +50,18 @@ export function resolveStampedePressure({
 }: StampedePressureInput): StampedePressureSnapshot {
   const clampedElapsedMs = Math.max(0, elapsedMs);
   const progress = durationMs <= 0 ? 1 : clamp(clampedElapsedMs / durationMs, 0, 1);
-  const nearest = resolveNearestContactDistance(
-    player,
-    candidates,
-    contactRadiusPadding
-  );
-  const withinContactRadius =
-    nearest.nearestContactDistance !== null && nearest.nearestContactDistance <= 0;
+  const nearest = resolveNearestContactDistance(player, candidates, contactRadiusPadding);
+  const withinContactRadius = nearest.nearestContactDistance !== null && nearest.nearestContactDistance <= 0;
   const canContact =
-    withinContactRadius &&
-    canApplyStampedeContact(clampedElapsedMs, lastContactAtMs, contactCooldownMs);
+    withinContactRadius && canApplyStampedeContact(clampedElapsedMs, lastContactAtMs, contactCooldownMs);
   const band = resolvePressureBand(clampedElapsedMs, lastContactAtMs, contactCooldownMs);
   const proximityPressure =
-    nearest.nearestContactDistance === null
-      ? 0
-      : 1 - clamp(nearest.nearestContactDistance / 160, 0, 1);
+    nearest.nearestContactDistance === null ? 0 : 1 - clamp(nearest.nearestContactDistance / 160, 0, 1);
 
   return {
     band,
     cadenceMs: resolvePressureCadenceMs(band),
-    pressure: clamp(
-      resolveBandPressureFloor(band) + progress * 0.2 + proximityPressure * 0.32,
-      0,
-      1
-    ),
+    pressure: clamp(resolveBandPressureFloor(band) + progress * 0.2 + proximityPressure * 0.32, 0, 1),
     nearestContactDistance: nearest.nearestContactDistance,
     nearestContactCandidate: nearest.nearestContactCandidate,
     withinContactRadius,
@@ -86,21 +74,14 @@ export function canApplyStampedeContact(
   lastContactAtMs: number | null | undefined,
   contactCooldownMs: number = STAMPEDE_CONTACT_COOLDOWN_MS
 ): boolean {
-  return (
-    lastContactAtMs === null ||
-    lastContactAtMs === undefined ||
-    nowMs - lastContactAtMs >= contactCooldownMs
-  );
+  return lastContactAtMs === null || lastContactAtMs === undefined || nowMs - lastContactAtMs >= contactCooldownMs;
 }
 
 function resolveNearestContactDistance(
   player: StampedePressurePoint,
   candidates: readonly StampedeContactCandidate[],
   contactRadiusPadding: number
-): Pick<
-  StampedePressureSnapshot,
-  'nearestContactDistance' | 'nearestContactCandidate'
-> {
+): Pick<StampedePressureSnapshot, 'nearestContactDistance' | 'nearestContactCandidate'> {
   let nearestContactDistance: number | null = null;
   let nearestContactCandidate: StampedeContactCandidate | null = null;
 
@@ -111,10 +92,7 @@ function resolveNearestContactDistance(
       candidate.radius -
       contactRadiusPadding;
 
-    if (
-      nearestContactDistance === null ||
-      distance < nearestContactDistance
-    ) {
+    if (nearestContactDistance === null || distance < nearestContactDistance) {
       nearestContactDistance = distance;
       nearestContactCandidate = candidate;
     }

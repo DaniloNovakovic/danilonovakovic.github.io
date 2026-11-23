@@ -70,12 +70,12 @@ Artifact hierarchy:
 
 Work/project artifact examples:
 
-| Source | Possible artifact | Discovery role |
-| --- | --- | --- |
-| Vega IT / Saturn office | Saturn sticker, ringed planet door plate, office keycard, tiny desk planet | Easy major artifact for a job memory |
-| Hummingbird | feather, tiny bird pin, hovering note, nectar-like ink drop | Easy major artifact for current work |
-| Specific projects | broken UI tile, deploy stamp, puzzle component, console log scrap | Medium artifact that can unlock a short story beat |
-| Skills/tools | loose keycaps, syntax scraps, language stickers, tiny CLI flags | Optional hidden scraps, not main route blockers |
+| Source                  | Possible artifact                                                          | Discovery role                                     |
+| ----------------------- | -------------------------------------------------------------------------- | -------------------------------------------------- |
+| Vega IT / Saturn office | Saturn sticker, ringed planet door plate, office keycard, tiny desk planet | Easy major artifact for a job memory               |
+| Hummingbird             | feather, tiny bird pin, hovering note, nectar-like ink drop                | Easy major artifact for current work               |
+| Specific projects       | broken UI tile, deploy stamp, puzzle component, console log scrap          | Medium artifact that can unlock a short story beat |
+| Skills/tools            | loose keycaps, syntax scraps, language stickers, tiny CLI flags            | Optional hidden scraps, not main route blockers    |
 
 Core loop:
 
@@ -135,13 +135,13 @@ Weights used for this spike:
 - Implementation risk: 15
 - Emotional and landmark fit: 10
 
-| Option | Score | Shape | Pros | Risks |
-| --- | ---: | --- | --- | --- |
-| Folded Summit Spine + Overworld absorption | 90 | One calm trail from Outskirts to Relay, with one loopback shortcut | Best M5 target; clear first walk; easy mobile; absorbs boring Overworld cleanly | Movement fun is mostly route compression until later rewards |
-| Main Trail + Cicka Underpath | 86 | Main trail plus one low cat route returning to Cicka Home | Strong personality; Cicka becomes spatial clue; good secret language | Hidden path needs visible paw/scratch/paper-fold tells |
-| Three-Layer Mini Mountain | 78 | Main trail, under-ridge, high ledges | Best long-term topology; lots of future re-reading | Too large for first spike; high layer can become precision platforming |
-| Trailhead Hub + Hobby Spokes | 72 | Outskirts center with short branches to hobby props | Easy Overworld replacement; simple navigation | Can become a menu disguised as a map |
-| Lucky Luna Descent Pocket | 66 | Main trail plus optional vertical drop shaft | Great mobile movement toy; fresh texture | Better as mini-pocket than main overworld; can fight side-view shell |
+| Option                                     | Score | Shape                                                              | Pros                                                                            | Risks                                                                  |
+| ------------------------------------------ | ----: | ------------------------------------------------------------------ | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Folded Summit Spine + Overworld absorption |    90 | One calm trail from Outskirts to Relay, with one loopback shortcut | Best M5 target; clear first walk; easy mobile; absorbs boring Overworld cleanly | Movement fun is mostly route compression until later rewards           |
+| Main Trail + Cicka Underpath               |    86 | Main trail plus one low cat route returning to Cicka Home          | Strong personality; Cicka becomes spatial clue; good secret language            | Hidden path needs visible paw/scratch/paper-fold tells                 |
+| Three-Layer Mini Mountain                  |    78 | Main trail, under-ridge, high ledges                               | Best long-term topology; lots of future re-reading                              | Too large for first spike; high layer can become precision platforming |
+| Trailhead Hub + Hobby Spokes               |    72 | Outskirts center with short branches to hobby props                | Easy Overworld replacement; simple navigation                                   | Can become a menu disguised as a map                                   |
+| Lucky Luna Descent Pocket                  |    66 | Main trail plus optional vertical drop shaft                       | Great mobile movement toy; fresh texture                                        | Better as mini-pocket than main overworld; can fight side-view shell   |
 
 Chosen first direction:
 
@@ -275,15 +275,15 @@ stored gift/checklist state until a concrete interaction needs it.
 
 Possible mementos:
 
-| Source | Home change |
-| --- | --- |
-| Stampede Sketch | calm ink scrap, settled swarm doodle, or paw note |
-| Potassium Slip | banana-law receipt pinned sideways |
-| Vega IT / Saturn office | ringed-planet sticker, tiny Saturn door plate, or office keycard |
-| Hummingbird | small feather, bird pin, or hovering sticky note |
-| Telegraph Terrace | tiny bell string or handwrap ribbon |
-| Domino Desk | domino tile that later becomes a step/shortcut clue |
-| Manual Page / Cicka insight | torn page corner that Cicka chooses as a seat |
+| Source                      | Home change                                                      |
+| --------------------------- | ---------------------------------------------------------------- |
+| Stampede Sketch             | calm ink scrap, settled swarm doodle, or paw note                |
+| Potassium Slip              | banana-law receipt pinned sideways                               |
+| Vega IT / Saturn office     | ringed-planet sticker, tiny Saturn door plate, or office keycard |
+| Hummingbird                 | small feather, bird pin, or hovering sticky note                 |
+| Telegraph Terrace           | tiny bell string or handwrap ribbon                              |
+| Domino Desk                 | domino tile that later becomes a step/shortcut clue              |
+| Manual Page / Cicka insight | torn page corner that Cicka chooses as a seat                    |
 
 Gift rule:
 

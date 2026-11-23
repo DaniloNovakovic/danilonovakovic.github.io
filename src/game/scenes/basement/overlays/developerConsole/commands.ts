@@ -53,7 +53,10 @@ function lines(text: string): DeveloperConsoleCommandResult {
 }
 
 function normalizeSceneToken(value: string): string {
-  return value.trim().toLowerCase().replace(/[\s_-]+/g, '');
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_-]+/g, '');
 }
 
 function getSceneCommandTargets(): readonly SceneCommandTarget[] {
@@ -97,10 +100,7 @@ function handleEnterCommand(
   const sceneId = getSceneAliasMap().get(normalizeSceneToken(sceneArgs));
   if (!sceneId) {
     return {
-      responseLines: [
-        copy.enterUnknownScene(sceneArgs),
-        copy.enterUsage
-      ]
+      responseLines: [copy.enterUnknownScene(sceneArgs), copy.enterUsage]
     };
   }
 
@@ -110,10 +110,7 @@ function handleEnterCommand(
   };
 }
 
-function handleCatCommand(
-  commandArgs: string,
-  copy: DeveloperConsoleCopy
-): DeveloperConsoleCommandResult {
+function handleCatCommand(commandArgs: string, copy: DeveloperConsoleCopy): DeveloperConsoleCommandResult {
   const fileName = commandArgs.toLowerCase();
   if (!fileName) return { responseLines: [copy.catUsage] };
   return Object.hasOwn(copy.files, fileName)

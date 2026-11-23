@@ -111,7 +111,12 @@ export default function MuayThaiOverlay({ close, titleId, descriptionId }: Overl
             className={`absolute inset-0 z-10 cursor-pointer touch-manipulation select-none rounded-lg ${hobbyFocusRing}`}
           />
           <div className="pointer-events-none absolute inset-0 z-20">
-            <SparePartSticker key={reward.stickerKey} partId="battery-cell" outcome={reward.outcome} onDismiss={reward.dismiss} />
+            <SparePartSticker
+              key={reward.stickerKey}
+              partId="battery-cell"
+              outcome={reward.outcome}
+              onDismiss={reward.dismiss}
+            />
           </div>
         </div>
 

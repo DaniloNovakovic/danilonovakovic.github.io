@@ -24,9 +24,7 @@ export interface RidgeRouteMessageBundle {
   };
 }
 
-export function loadRouteCatalogFromMessages(
-  ridge: RidgeRouteMessageBundle
-): RidgeRouteDialogueCatalog {
+export function loadRouteCatalogFromMessages(ridge: RidgeRouteMessageBundle): RidgeRouteDialogueCatalog {
   return {
     bridge: {
       speakers: { ...ridge.bridge.speakers },

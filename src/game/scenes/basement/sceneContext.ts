@@ -17,9 +17,7 @@ interface BasementSceneContextOptions {
  * scene, provide close/interact callbacks, and include a prepared resume
  * position in the scene start data.
  */
-export function createBasementSceneContext(
-  options: BasementSceneContextOptions
-): SceneContextDefinition {
+export function createBasementSceneContext(options: BasementSceneContextOptions): SceneContextDefinition {
   return {
     id: BASEMENT_SCENE_ID,
     sceneKey: PHASER_SCENE_KEYS.basement,

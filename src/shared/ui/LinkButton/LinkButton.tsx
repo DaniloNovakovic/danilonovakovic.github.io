@@ -14,21 +14,14 @@ const variantClasses: Record<LinkButtonVariant, string> = {
     'border-2 border-[#1a1a1a] bg-[#fbfbf9] text-[#1a1a1a] shadow-[3px_3px_0px_0px_rgba(26,26,26,1)] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_rgba(26,26,26,1)]',
   primary:
     'border-2 border-[#1a1a1a] bg-[#1a1a1a] text-[#fbfbf9] shadow-[3px_3px_0px_0px_rgba(26,26,26,1)] hover:bg-[#333333] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_rgba(26,26,26,1)]',
-  quiet:
-    'text-[#1a1a1a] underline decoration-dashed underline-offset-2 hover:opacity-80'
+  quiet: 'text-[#1a1a1a] underline decoration-dashed underline-offset-2 hover:opacity-80'
 };
 
 /**
  * Anchor styled like a sketchbook button.
  * Use for real navigation or external links; use `Button` for non-link actions.
  */
-export function LinkButton({
-  variant = 'secondary',
-  icon,
-  children,
-  className,
-  ...props
-}: LinkButtonProps) {
+export function LinkButton({ variant = 'secondary', icon, children, className, ...props }: LinkButtonProps) {
   return (
     <a
       className={cn(

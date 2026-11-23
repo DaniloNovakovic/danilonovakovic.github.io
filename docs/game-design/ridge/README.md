@@ -21,22 +21,22 @@ runtime reference, not the desired product target.
 
 Use each file for exactly one concern:
 
-| Concern | Source | Notes |
-| --- | --- | --- |
-| Domain language | [`../../../GLOSSARY.md`](../../../GLOSSARY.md) | Use these terms exactly. Add only stable domain terms and ambiguities. |
-| Shipped behavior | [`../player-manual.md`](../player-manual.md) | Update only when behavior ships. |
-| Current Ridge route canon | [`story-level-bible.md`](./story-level-bible.md) | Route spine, area barricade chain, cross-area Cicka/guitar logic, ending order. |
-| Area-specific design canon | [`areas/`](./areas/README.md) | Local geography, blockers, residents, prompts, staging, Cicka Resting Spots, visual/audio notes. |
-| Dialogue conventions | [`dialogue-conventions.md`](./dialogue-conventions.md) | Pre-production dialogue file structure, line IDs, placeholder policy, and migration rules. |
-| Current runtime/prototype truth | [`ridge-snapshot.md`](./ridge-snapshot.md) | What exists now: console core, stick visuals, conversation panel. |
-| Runtime architecture ADR | [`../../adr/0005-ridge-console-core-and-stick-visuals.md`](../../adr/0005-ridge-console-core-and-stick-visuals.md) | Console-first gameplay authority and replaceable VisualProvider. |
-| Active open questions | [`open-questions.md`](./open-questions.md) | True design unknowns and blockout-detail TBD. Area premises may already be accepted even when prompt/topology details remain open. |
-| Product vision | [`summit.md`](./summit.md) | Durable fantasy and pillars, not detailed route implementation. |
-| Implementation sequencing | [`milestone-plan.md`](./milestone-plan.md) | Current route-reset milestones, Bridge Tracer Slice, source stack, Agent-Ready Slice Contract, prototype reuse rules, and agent checklist. Not live backlog. |
-| Historical blockout contract | [`map-language.md`](./map-language.md) | Superseded source format (removed from repo); Bridge stage composition is active. |
-| Legacy prototype history | [`legacy/`](./legacy/README.md) | Superseded folded/Cicka Home plans, old summit/milestone history, map plans, and reviews. Reference only unless an active doc links there. |
-| Art/audio/asset support | [`reference/`](./reference/README.md) | Reference packs that support active docs but do not override route canon. |
-| Live work | GitHub Issues | PRDs, current backlog, triage state, and agent briefs. |
+| Concern                         | Source                                                                                                             | Notes                                                                                                                                                        |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Domain language                 | [`../../../GLOSSARY.md`](../../../GLOSSARY.md)                                                                     | Use these terms exactly. Add only stable domain terms and ambiguities.                                                                                       |
+| Shipped behavior                | [`../player-manual.md`](../player-manual.md)                                                                       | Update only when behavior ships.                                                                                                                             |
+| Current Ridge route canon       | [`story-level-bible.md`](./story-level-bible.md)                                                                   | Route spine, area barricade chain, cross-area Cicka/guitar logic, ending order.                                                                              |
+| Area-specific design canon      | [`areas/`](./areas/README.md)                                                                                      | Local geography, blockers, residents, prompts, staging, Cicka Resting Spots, visual/audio notes.                                                             |
+| Dialogue conventions            | [`dialogue-conventions.md`](./dialogue-conventions.md)                                                             | Pre-production dialogue file structure, line IDs, placeholder policy, and migration rules.                                                                   |
+| Current runtime/prototype truth | [`ridge-snapshot.md`](./ridge-snapshot.md)                                                                         | What exists now: console core, stick visuals, conversation panel.                                                                                            |
+| Runtime architecture ADR        | [`../../adr/0005-ridge-console-core-and-stick-visuals.md`](../../adr/0005-ridge-console-core-and-stick-visuals.md) | Console-first gameplay authority and replaceable VisualProvider.                                                                                             |
+| Active open questions           | [`open-questions.md`](./open-questions.md)                                                                         | True design unknowns and blockout-detail TBD. Area premises may already be accepted even when prompt/topology details remain open.                           |
+| Product vision                  | [`summit.md`](./summit.md)                                                                                         | Durable fantasy and pillars, not detailed route implementation.                                                                                              |
+| Implementation sequencing       | [`milestone-plan.md`](./milestone-plan.md)                                                                         | Current route-reset milestones, Bridge Tracer Slice, source stack, Agent-Ready Slice Contract, prototype reuse rules, and agent checklist. Not live backlog. |
+| Historical blockout contract    | [`map-language.md`](./map-language.md)                                                                             | Superseded source format (removed from repo); Bridge stage composition is active.                                                                            |
+| Legacy prototype history        | [`legacy/`](./legacy/README.md)                                                                                    | Superseded folded/Cicka Home plans, old summit/milestone history, map plans, and reviews. Reference only unless an active doc links there.                   |
+| Art/audio/asset support         | [`reference/`](./reference/README.md)                                                                              | Reference packs that support active docs but do not override route canon.                                                                                    |
+| Live work                       | GitHub Issues                                                                                                      | PRDs, current backlog, triage state, and agent briefs.                                                                                                       |
 
 When docs disagree about future Ridge design, prefer `GLOSSARY.md`,
 `story-level-bible.md`, and the matching `areas/` doc. When docs disagree about
@@ -97,15 +97,15 @@ For Ridge planning changes:
 These are soft caps. When a section crosses them, summarize, split, or delete
 stale material before appending more.
 
-| File type | Soft cap |
-| --- | ---: |
-| Router docs | 120 lines |
-| `GLOSSARY.md` | 700 lines |
+| File type              |  Soft cap |
+| ---------------------- | --------: |
+| Router docs            | 120 lines |
+| `GLOSSARY.md`          | 700 lines |
 | `story-level-bible.md` | 600 lines |
-| Area docs | 300 lines |
-| `ridge-snapshot.md` | 450 lines |
-| Research intake | 150 lines |
-| ADR | 80 lines |
+| Area docs              | 300 lines |
+| `ridge-snapshot.md`    | 450 lines |
+| Research intake        | 150 lines |
+| ADR                    |  80 lines |
 
 If an area doc crosses the soft cap, split only stable subtopics such as
 `layout.md`, `characters.md`, or `staging.md`, and leave a short summary plus

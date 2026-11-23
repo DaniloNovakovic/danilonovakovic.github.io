@@ -10,9 +10,7 @@ export interface StampedePickupRuntime {
   reset(): void;
 }
 
-export function createStampedePickupRuntime(
-  options: StampedePickupRuntimeOptions
-): StampedePickupRuntime {
+export function createStampedePickupRuntime(options: StampedePickupRuntimeOptions): StampedePickupRuntime {
   return new PhaserStampedePickupRuntime(options.scene);
 }
 

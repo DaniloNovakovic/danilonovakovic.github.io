@@ -10,12 +10,12 @@ Hollow Knight’s design philosophy is rooted in a balance between four essentia
 
 In the MDA framework, the mechanics—the rules and basic actions available to the player—give rise to dynamics, which are the behaviors that emerge during gameplay. These dynamics eventually produce aesthetics, the emotional responses elicited in the player. In Hollow Knight, the mechanics of "digital" movement and SOUL-based resource management create dynamics of high-stakes combat and cautious exploration, which ultimately lead to the aesthetics of discovery, challenge, and narrative immersion.
 
-| Elemental Tetrad Component | Function in Hollow Knight | Impact on Player Experience |
-| :---- | :---- | :---- |
-| Mechanics | 2D platforming, SOUL resource management, Charm customization. | Provides the foundational tools for interaction and agency. |
-| Story | Implicit, environmental narrative of a decaying subterranean empire. | Motivates exploration through a sense of mystery and "archaeological" discovery. |
-| Aesthetics | Hand-drawn art, atmospheric lighting, color-coded biomes, and a melancholic score. | Enhances immersion and provides diegetic cues for navigation and threat levels. |
-| Technology | Accessible PC requirements, Unity engine-based 2.5D environment. | Ensures a wide reach and a high level of visual polish across diverse hardware. |
+| Elemental Tetrad Component | Function in Hollow Knight                                                          | Impact on Player Experience                                                      |
+| :------------------------- | :--------------------------------------------------------------------------------- | :------------------------------------------------------------------------------- |
+| Mechanics                  | 2D platforming, SOUL resource management, Charm customization.                     | Provides the foundational tools for interaction and agency.                      |
+| Story                      | Implicit, environmental narrative of a decaying subterranean empire.               | Motivates exploration through a sense of mystery and "archaeological" discovery. |
+| Aesthetics                 | Hand-drawn art, atmospheric lighting, color-coded biomes, and a melancholic score. | Enhances immersion and provides diegetic cues for navigation and threat levels.  |
+| Technology                 | Accessible PC requirements, Unity engine-based 2.5D environment.                   | Ensures a wide reach and a high level of visual polish across diverse hardware.  |
 
 ## **The Kinematics of Agency: Movement and Game Feel**
 
@@ -25,13 +25,13 @@ The primary source of "fun" in an action-oriented platformer is the tactile sens
 
 The precision of Hollow Knight’s movement is not accidental but the result of specific technical decisions regarding the character controller. By maintaining a constant run speed and tying jump height directly to the duration of the button press, the developers provide a predictable baseline for player skill. This predictability is essential for the game’s high-difficulty challenges, as it ensures that any failure is perceived by the player as a lapse in their own execution rather than a fault of the game’s physics.
 
-| Movement Mechanic | Technical Implementation | Impact on Gameplay |
-| :---- | :---- | :---- |
-| Constant Velocity | No acceleration/deceleration phases for running. | Enhances readability of distances and improves timing in combat. |
-| Variable Jump | Y-velocity set to 0 immediately upon releasing the jump button. | Allows for granular control over platforming trajectories. |
-| Wall Jump Timer | Fixed-speed diagonal movement for 0.1-0.3 seconds before control returns. | Prevents "wall hugging" and forces active engagement with the environment. |
-| Dash Mechanic | Fixed-distance horizontal movement with a brief cooldown. | Serves as a primary tool for both traversal and combat evasion. |
-| Coyote Time | Brief window (\<0.1s) to jump after leaving a ledge. | Subtly mitigates frustration by allowing for "impossible" saves at the margin. |
+| Movement Mechanic | Technical Implementation                                                  | Impact on Gameplay                                                             |
+| :---------------- | :------------------------------------------------------------------------ | :----------------------------------------------------------------------------- |
+| Constant Velocity | No acceleration/deceleration phases for running.                          | Enhances readability of distances and improves timing in combat.               |
+| Variable Jump     | Y-velocity set to 0 immediately upon releasing the jump button.           | Allows for granular control over platforming trajectories.                     |
+| Wall Jump Timer   | Fixed-speed diagonal movement for 0.1-0.3 seconds before control returns. | Prevents "wall hugging" and forces active engagement with the environment.     |
+| Dash Mechanic     | Fixed-distance horizontal movement with a brief cooldown.                 | Serves as a primary tool for both traversal and combat evasion.                |
+| Coyote Time       | Brief window (\<0.1s) to jump after leaving a ledge.                      | Subtly mitigates frustration by allowing for "impossible" saves at the margin. |
 
 The interaction between these mechanics creates a state of flow where the avatar becomes an extension of the player’s intent. However, this precision also allows the developers to demand extreme accuracy in areas like the Path of Pain, where platforming obstacles are placed with sub-tile precision. The "essence of fun" here is the satisfaction of mastery—the ability to navigate complex hazards through a series of inputs that feel perfectly synchronized with the player’s reflexes.
 
@@ -43,13 +43,13 @@ While movement provides the foundation, the combat system introduces the tension
 
 This dual-purpose design creates a constant strategic dilemma. When at low health, a player must decide whether to use their gathered SOUL to heal, which requires staying stationary for several seconds, or to use it for a powerful Spell to end the encounter more quickly. This system effectively links aggression with survival; unlike games where healing is a separate resource found in the environment, Hollow Knight requires the player to engage with enemies to earn the right to heal.
 
-| Combat Element | Function and Mechanism | Strategic Implication |
-| :---- | :---- | :---- |
-| The Nail | Primary melee weapon with four-directional attack. | Foundations of combat; allows for "pogoing" off hazards and enemies. |
-| SOUL Meter | Circular HUD element filled via successful Nail strikes. | Bridges the gap between offense (Spells) and defense (Focus). |
-| Focus | Channeling SOUL to restore health (Masks) while stationary. | Creates vulnerability windows that require boss pattern recognition. |
-| Spells | Ranged or AoE attacks fueled by SOUL. | Provides tactical options for distance management and invulnerability frames. |
-| Nail Arts | Charged-up attacks learned from Nailmasters. | Offers high-damage bursts without consuming SOUL, though requiring charge time. |
+| Combat Element | Function and Mechanism                                      | Strategic Implication                                                           |
+| :------------- | :---------------------------------------------------------- | :------------------------------------------------------------------------------ |
+| The Nail       | Primary melee weapon with four-directional attack.          | Foundations of combat; allows for "pogoing" off hazards and enemies.            |
+| SOUL Meter     | Circular HUD element filled via successful Nail strikes.    | Bridges the gap between offense (Spells) and defense (Focus).                   |
+| Focus          | Channeling SOUL to restore health (Masks) while stationary. | Creates vulnerability windows that require boss pattern recognition.            |
+| Spells         | Ranged or AoE attacks fueled by SOUL.                       | Provides tactical options for distance management and invulnerability frames.   |
+| Nail Arts      | Charged-up attacks learned from Nailmasters.                | Offers high-damage bursts without consuming SOUL, though requiring charge time. |
 
 ### **Advanced Combat Mechanics: Pogoing and Parrying**
 
@@ -65,13 +65,13 @@ The "essence of fun" in Hollow Knight is perhaps most prominently found in its a
 The game’s mapping system is famously restrictive, which serves to heighten the sense of discovery and vulnerability. Upon entering a new area, the player is "blind," lacking a map until they locate Cornifer, the cartographer. Even with a map, the Knight’s position is not shown unless the player equips the Wayward Compass charm.  
 This friction is intentional. By forcing players to rely on their own memory and environmental landmarks—such as the sound of Cornifer's humming or the specific color of the walls—the game makes navigation an active skill rather than a passive task. The "aha" moment when a player finds a shortcut connecting two distant areas is a powerful psychological reward that reinforces the interconnectedness of the world.
 
-| Navigational Tool | Function and Acquisition | Psychological Impact |
-| :---- | :---- | :---- |
-| Cornifer's Maps | Rudimentary, hand-drawn sketches of specific biomes. | Provides a sense of relief and a baseline for further exploration. |
-| Quill | Item used to update the map at benches based on exploration. | Incentivizes thorough exploration and rewards revisiting old areas. |
-| Benches | Save points that also serve as the location for map updates. | Acts as a "safe harbor" in a hostile world, creating a rhythmic tension-release cycle. |
-| Stag Stations | Fast travel system connecting major hubs. | Provides a sense of growing mastery over the vast map as more routes are unlocked. |
-| Map Markers | Customizable pins bought from Iselda to track points of interest. | Empowers the player to act as their own cartographer and goal-setter. |
+| Navigational Tool | Function and Acquisition                                          | Psychological Impact                                                                   |
+| :---------------- | :---------------------------------------------------------------- | :------------------------------------------------------------------------------------- |
+| Cornifer's Maps   | Rudimentary, hand-drawn sketches of specific biomes.              | Provides a sense of relief and a baseline for further exploration.                     |
+| Quill             | Item used to update the map at benches based on exploration.      | Incentivizes thorough exploration and rewards revisiting old areas.                    |
+| Benches           | Save points that also serve as the location for map updates.      | Acts as a "safe harbor" in a hostile world, creating a rhythmic tension-release cycle. |
+| Stag Stations     | Fast travel system connecting major hubs.                         | Provides a sense of growing mastery over the vast map as more routes are unlocked.     |
+| Map Markers       | Customizable pins bought from Iselda to track points of interest. | Empowers the player to act as their own cartographer and goal-setter.                  |
 
 ### **The Non-Linearity of Progress**
 
@@ -85,13 +85,13 @@ The secondary systems of Hollow Knight, particularly the Charm system, provide t
 
 The primary balancing mechanic of the Charm system is the "notch" limit. Each charm requires a set number of notches to equip, and the player begins with only three, eventually expanding to eleven. This constraint forces players to consider the opportunity cost of every choice. A "spell build" focusing on maximum damage might leave the player vulnerable, while a "survivability build" might prolong boss fights significantly.
 
-| Popular Charm Combinations | Components | Synergistic Effect |
-| :---- | :---- | :---- |
-| The Spell Master | Shaman Stone, Spell Twister, Soul Eater. | Increases spell size/damage and soul generation, allowing for constant spell spamming. |
-| The Nail Virtuoso | Unbreakable Strength, Quick Slash, Mark of Pride. | Maximizes melee DPS and reach, turning the Knight into a lethal close-range fighter. |
-| The Summoner (Zoo Build) | Weaversong, Glowing Womb, Grimmchild, Grubsong. | Spawns a horde of minions that attack automatically, fueled by passive soul gain. |
-| The Snail Knight | Shape of Unn, Quick Focus, Spore Shroom. | Allows the player to move quickly while healing, lowering their hitbox and dealing passive damage. |
-| The Berserker | Fury of the Fallen, Grubberfly's Elegy, Redback. | Grants massive damage boosts and ranged beams when at 1 health; high risk, high reward. |
+| Popular Charm Combinations | Components                                        | Synergistic Effect                                                                                 |
+| :------------------------- | :------------------------------------------------ | :------------------------------------------------------------------------------------------------- |
+| The Spell Master           | Shaman Stone, Spell Twister, Soul Eater.          | Increases spell size/damage and soul generation, allowing for constant spell spamming.             |
+| The Nail Virtuoso          | Unbreakable Strength, Quick Slash, Mark of Pride. | Maximizes melee DPS and reach, turning the Knight into a lethal close-range fighter.               |
+| The Summoner (Zoo Build)   | Weaversong, Glowing Womb, Grimmchild, Grubsong.   | Spawns a horde of minions that attack automatically, fueled by passive soul gain.                  |
+| The Snail Knight           | Shape of Unn, Quick Focus, Spore Shroom.          | Allows the player to move quickly while healing, lowering their hitbox and dealing passive damage. |
+| The Berserker              | Fury of the Fallen, Grubberfly's Elegy, Redback.  | Grants massive damage boosts and ranged beams when at 1 health; high risk, high reward.            |
 
 ### **Dynamic Adaptation to Challenges**
 
@@ -110,13 +110,13 @@ This surrealist approach creates a world that is "just barely understandable so 
 
 The soundtrack, composed by Christopher Larkin, is a crucial component of this atmospheric "fun." Larkin utilized textural themes, prioritizing the piano and viola to create a melancholic, lonely atmosphere that matches the "faded glory" of the setting. The music is often dynamic, shifting in intensity during boss fights or becoming louder as the player approaches their Shade.
 
-| Key Musical Motifs | Associated Area/Character | Emotional and Narrative Impact |
-| :---- | :---- | :---- |
-| City of Tears Theme | City of Tears | Melancholic piano elegy that captures the tragedy of the fallen capital. |
-| Hornet's Theme | Hornet Battles | High-tempo, frantic strings that emphasize her speed and the intensity of the duel. |
-| Dirtmouth Theme | Dirtmouth (The Hub) | A quiet, fragile melody that provides a sense of sanctuary amidst the ruins. |
-| Dream Battle Themes | Hidden/Optional Bosses | Ethereal and fast-paced, signaling a shift from the physical world to the realm of dreams. |
-| The Shade Motif | Site of Death | A low, pulsing audio cue that guides the player back to their lost currency. |
+| Key Musical Motifs  | Associated Area/Character | Emotional and Narrative Impact                                                             |
+| :------------------ | :------------------------ | :----------------------------------------------------------------------------------------- |
+| City of Tears Theme | City of Tears             | Melancholic piano elegy that captures the tragedy of the fallen capital.                   |
+| Hornet's Theme      | Hornet Battles            | High-tempo, frantic strings that emphasize her speed and the intensity of the duel.        |
+| Dirtmouth Theme     | Dirtmouth (The Hub)       | A quiet, fragile melody that provides a sense of sanctuary amidst the ruins.               |
+| Dream Battle Themes | Hidden/Optional Bosses    | Ethereal and fast-paced, signaling a shift from the physical world to the realm of dreams. |
+| The Shade Motif     | Site of Death             | A low, pulsing audio cue that guides the player back to their lost currency.               |
 
 ## **The Ludic Loop of Mastery: Difficulty, Death, and Flow**
 
@@ -131,13 +131,13 @@ While this may seem punishing, it promotes a "depth-first search" of the environ
 
 Boss encounters in Hollow Knight are designed as "dances" that require the player to learn telegraphs and distinguish between subtly different wind-up animations. The "essence of fun" in these fights is the transition from initial overwhelm to eventual mastery. Fights like the Mantis Lords or Nightmare King Grimm are highly praised because their attacks follow a clear rhythm, allowing the player to enter a "reactive flow" where they respond to inputs with instinctive precision.
 
-| Boss Difficulty Curve | Key Challenges | Learning Outcome |
-| :---- | :---- | :---- |
-| False Knight | Large, slow swings; falling debris. | Teaches basic spacing and the "stagger" mechanic. |
-| Hornet (Protector) | Fast lunges; needle throws; area denial. | Forces the player to react to telegraphs and find safe healing windows. |
-| Mantis Lords | Rhythmic, overlapping attacks from two or three entities. | Demands a state of "flow" and consistent output from the player. |
-| Watcher Knights | Multi-target management; rolling attacks. | Challenges the player to manage camera focus and multi-directional threats. |
-| Pure Vessel / NKG | Near-frame-perfect timing; high damage. | Represents the ultimate test of mechanical mastery and pattern recognition. |
+| Boss Difficulty Curve | Key Challenges                                            | Learning Outcome                                                            |
+| :-------------------- | :-------------------------------------------------------- | :-------------------------------------------------------------------------- |
+| False Knight          | Large, slow swings; falling debris.                       | Teaches basic spacing and the "stagger" mechanic.                           |
+| Hornet (Protector)    | Fast lunges; needle throws; area denial.                  | Forces the player to react to telegraphs and find safe healing windows.     |
+| Mantis Lords          | Rhythmic, overlapping attacks from two or three entities. | Demands a state of "flow" and consistent output from the player.            |
+| Watcher Knights       | Multi-target management; rolling attacks.                 | Challenges the player to manage camera focus and multi-directional threats. |
+| Pure Vessel / NKG     | Near-frame-perfect timing; high damage.                   | Represents the ultimate test of mechanical mastery and pattern recognition. |
 
 The "runback"—the distance from a bench to a boss room—is another debated element. Ludological analysis suggests that these short segments (30-60 seconds) provide a "reflection period" that subconsciously aids the learning process, allowing the player to mentally decompress before the next high-intensity attempt.
 
@@ -153,13 +153,13 @@ The Godhome area, introduced in the Godmaster expansion, serves as the ultimate 
 
 The Hunter's Journal provides a unique incentive for engaging with the game's diverse bestiary. Rather than just being obstacles, enemies become collectibles. Defeating a certain number of a species reveals lore snippets written from the perspective of "The Hunter," a mysterious NPC. This system transforms the repetitive nature of combat into a rewarding quest for knowledge, appealing to the player's desire for both completion and world-building.
 
-| Mastery System | Objective | Key Reward/Outcome |
-| :---- | :---- | :---- |
-| Colosseum of Fools | Wave-based arena combat in three increasingly difficult trials. | Awards Geo, Pale Ore (for weapon upgrades), and Charm Notches. |
-| Pantheons | Boss rush sequences of 10 to 42 consecutive fights. | Unlocks new bosses and the game's "True" endings. |
-| Hunter's Journal | Kill a set number of every enemy type in the game. | Reveals deep lore and awards the Hunter's Mark achievement. |
-| Path of Pain | A hidden, ultra-difficult platforming gauntlet in the White Palace. | Provides a narrative memory of the Pale King and personal bragging rights. |
-| Steel Soul Mode | Permadeath mode where a single death ends the run. | Forces a complete re-evaluation of risk-management and safety-first playstyles. |
+| Mastery System     | Objective                                                           | Key Reward/Outcome                                                              |
+| :----------------- | :------------------------------------------------------------------ | :------------------------------------------------------------------------------ |
+| Colosseum of Fools | Wave-based arena combat in three increasingly difficult trials.     | Awards Geo, Pale Ore (for weapon upgrades), and Charm Notches.                  |
+| Pantheons          | Boss rush sequences of 10 to 42 consecutive fights.                 | Unlocks new bosses and the game's "True" endings.                               |
+| Hunter's Journal   | Kill a set number of every enemy type in the game.                  | Reveals deep lore and awards the Hunter's Mark achievement.                     |
+| Path of Pain       | A hidden, ultra-difficult platforming gauntlet in the White Palace. | Provides a narrative memory of the Pale King and personal bragging rights.      |
+| Steel Soul Mode    | Permadeath mode where a single death ends the run.                  | Forces a complete re-evaluation of risk-management and safety-first playstyles. |
 
 ## **Technical Polish and the "Juice" of Interaction**
 
@@ -181,13 +181,13 @@ The upcoming sequel, Hollow Knight: Silksong, provides a valuable lens through w
 
 This comparison reveals that the "fun" of the original Hollow Knight is specifically tied to the Knight’s relative vulnerability and simplicity. Because the Knight is slower, the world feels larger and more threatening. The "essence of fun" in the original is the struggle of a small, simple being overcoming overwhelming odds in a vast, complex world. The sequel, by contrast, seems to be aiming for a "grand and oppressive" atmosphere where the fun is derived from the "fierce elegance" and speed of the protagonist.
 
-| Comparison Metric | Hollow Knight (The Knight) | Silksong (Hornet) |
-| :---- | :---- | :---- |
-| Movement Style | "Digital," snappy, relatively slow. | Faster, more agile, includes ledge-climbing and mid-air recovery. |
-| Combat Philosophy | Simple melee strikes, SOUL-based spells/healing. | Complex tool usage, silk-based abilities, faster-paced encounters. |
-| World Atmosphere | Lonely, whimsical ruins, "fragile beauty". | Grand, oppressive, "haunted classist industry". |
-| Difficulty Curve | Steeper early spikes, peaks in late-game DLC. | Smoother curve with a higher floor and more "broken" early-game tools. |
-| Progression | Traditional lock-and-key via abilities. | More emphasis on quest-driven exploration and modular upgrades. |
+| Comparison Metric | Hollow Knight (The Knight)                       | Silksong (Hornet)                                                      |
+| :---------------- | :----------------------------------------------- | :--------------------------------------------------------------------- |
+| Movement Style    | "Digital," snappy, relatively slow.              | Faster, more agile, includes ledge-climbing and mid-air recovery.      |
+| Combat Philosophy | Simple melee strikes, SOUL-based spells/healing. | Complex tool usage, silk-based abilities, faster-paced encounters.     |
+| World Atmosphere  | Lonely, whimsical ruins, "fragile beauty".       | Grand, oppressive, "haunted classist industry".                        |
+| Difficulty Curve  | Steeper early spikes, peaks in late-game DLC.    | Smoother curve with a higher floor and more "broken" early-game tools. |
+| Progression       | Traditional lock-and-key via abilities.          | More emphasis on quest-driven exploration and modular upgrades.        |
 
 ## **Psychological Underpinnings: Intrinsic Rewards and the Completionist Mindset**
 
@@ -209,13 +209,13 @@ Finally, the "fun" of Hollow Knight is extended through its community. The game�
 
 The speedrunning community has discovered numerous "unintended" ways to have fun with the game, such as the "explosion pogo" to skip double-jump requirements or the "squit hop" to reach new areas early. These advanced techniques represent the ultimate "essence of fun" for high-skill players—the ability to subvert the game's own rules through deep mechanical knowledge.
 
-| Speedrun Category | Focus and Strategy | Required Mastery Level |
-| :---- | :---- | :---- |
-| Any% | Beating the game as fast as possible, usually in \<35 minutes. | High: requires precise skips and minimal upgrades. |
-| 112% All Pantheons | Full game completion including all DLC content. | Extreme: demands mastery of every boss and platforming challenge. |
-| Low% | Beating the game with the minimum possible items (11%). | Extreme: forces the player to fight endgame bosses with no health or nail upgrades. |
-| True Ending | Beating the Radiance; focuses on "Dream No More" ending. | High: requires navigating the late-game narrative quest as fast as possible. |
-| Path of Pain% | Clearing the Path of Pain gauntlet as fast as possible. | Elite: purely focuses on platforming precision and timing. |
+| Speedrun Category  | Focus and Strategy                                             | Required Mastery Level                                                              |
+| :----------------- | :------------------------------------------------------------- | :---------------------------------------------------------------------------------- |
+| Any%               | Beating the game as fast as possible, usually in \<35 minutes. | High: requires precise skips and minimal upgrades.                                  |
+| 112% All Pantheons | Full game completion including all DLC content.                | Extreme: demands mastery of every boss and platforming challenge.                   |
+| Low%               | Beating the game with the minimum possible items (11%).        | Extreme: forces the player to fight endgame bosses with no health or nail upgrades. |
+| True Ending        | Beating the Radiance; focuses on "Dream No More" ending.       | High: requires navigating the late-game narrative quest as fast as possible.        |
+| Path of Pain%      | Clearing the Path of Pain gauntlet as fast as possible.        | Elite: purely focuses on platforming precision and timing.                          |
 
 The presence of achievements like "Speedrun 2" (beating the game in under 5 hours) serves as a bridge for casual players to enter the world of mastery. These goals provide a structured way to experience the "fun" of efficiency and sequence-breaking, transforming a long journey into a tightly choreographed race.
 

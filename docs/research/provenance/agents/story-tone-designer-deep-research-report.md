@@ -14,7 +14,7 @@ The implementation path under “no specific constraint” is straightforward: s
 
 ## Purpose and scope
 
-The Story/Tone Designer’s purpose is to let a user **intentionally design or transform delivery**, not to replace authorship, editorial judgment, or factual review. In practical terms, the skill should help users specify *how* a piece should sound and feel—calm, urgent, noir, crisp, warm, spare, lyrical, procedural—while preserving *what* the piece is trying to say. The conceptual split between a persistent **voice** and situational **tone** is explicitly articulated in Mailchimp’s style guide, while Biber and Conrad show that writing varieties also differ by **register**, meaning the situational configuration of participants, relationships, formality, channel, production circumstances, purpose, and topic. That combination is the right foundation for a specialized tone skill. citeturn30view0turn36view0
+The Story/Tone Designer’s purpose is to let a user **intentionally design or transform delivery**, not to replace authorship, editorial judgment, or factual review. In practical terms, the skill should help users specify _how_ a piece should sound and feel—calm, urgent, noir, crisp, warm, spare, lyrical, procedural—while preserving _what_ the piece is trying to say. The conceptual split between a persistent **voice** and situational **tone** is explicitly articulated in Mailchimp’s style guide, while Biber and Conrad show that writing varieties also differ by **register**, meaning the situational configuration of participants, relationships, formality, channel, production circumstances, purpose, and topic. That combination is the right foundation for a specialized tone skill. citeturn30view0turn36view0
 
 The skill should be **opt-in by default**. That is not just a UX preference; it is a system-design necessity. Official agent guidance from OpenAI and Anthropic treats skills/subagents as modular specialists with scoped instructions, explicit delegation boundaries, and optional loading rather than invisible, always-on behavior. Microsoft’s agent guidance similarly distinguishes open-ended agent behavior from fixed workflows and recommends using explicit workflow control when the process has well-defined steps. A tone specialist is usually a bounded, intermittent capability, so it should be activated by command, preset, or toggle rather than silently rewriting everything. citeturn41search0turn24view1turn24view0turn26view1
 
@@ -26,13 +26,13 @@ Your uploaded note points in a compatible direction: it emphasizes small moments
 
 ### Representative user and use-case matrix
 
-| User group | Primary job | High-value outcomes | Failure mode to prevent |
-|---|---|---|---|
-| UX/content designers | Adjust product copy tone by state and audience | Clearer onboarding, errors, prompts, help text | Cute but unclear copy |
-| Brand/marketing teams | Maintain stable voice across channels | Brand consistency with situational tone shifts | Brand drift, generic “AI voice” |
-| Fiction/screen writers | Shape narration, dialogue, mood, scene energy | Stronger atmosphere, pacing, emotional contour | Plot distortion, cliché inflation |
-| Knowledge workers | Audience-fit rewriting for memos, emails, summaries | Better readability, stakeholder fit, diplomacy | Loss of meaning, hedging or overstatement |
-| Editing teams | Normalize multi-author output | House-style consistency, review speed | Flattening distinctive but intended voice |
+| User group             | Primary job                                         | High-value outcomes                            | Failure mode to prevent                   |
+| ---------------------- | --------------------------------------------------- | ---------------------------------------------- | ----------------------------------------- |
+| UX/content designers   | Adjust product copy tone by state and audience      | Clearer onboarding, errors, prompts, help text | Cute but unclear copy                     |
+| Brand/marketing teams  | Maintain stable voice across channels               | Brand consistency with situational tone shifts | Brand drift, generic “AI voice”           |
+| Fiction/screen writers | Shape narration, dialogue, mood, scene energy       | Stronger atmosphere, pacing, emotional contour | Plot distortion, cliché inflation         |
+| Knowledge workers      | Audience-fit rewriting for memos, emails, summaries | Better readability, stakeholder fit, diplomacy | Loss of meaning, hedging or overstatement |
+| Editing teams          | Normalize multi-author output                       | House-style consistency, review speed          | Flattening distinctive but intended voice |
 
 The matrix above synthesizes the need patterns documented in official UX/content guidance, voice-and-tone style guides, and story-craft references. citeturn32view1turn32view2turn31view0turn30view0turn15view0turn15view1turn15view2turn15view3
 
@@ -42,16 +42,16 @@ A usable taxonomy has to connect **human-readable craft concepts** to **measurab
 
 ### Operational taxonomy
 
-| Dimension | What it controls | Example signals the skill can measure |
-|---|---|---|
-| Voice | Stable personality and stance | Brand adjectives, recurring rhetorical posture, allowance for humor, directness |
-| Register | Situation-fit language variety | Formality, hedging, pronoun use, contractions, noun density, information density |
-| Pacing | Perceived speed and narrative pressure | Sentence-length variance, clause density, paragraph rhythm, dialogue/action ratio |
-| Imagery | Sensory vividness and figurativeness | Concreteness, sensory lexicon rates, metaphor density, spatial detail |
-| Syntax | Rhythm and structural shape | Parse depth, coordination/subordination, fronting, passive/active balance |
-| Diction | Lexical choice and accessibility | Type-token ratio, function-word profile, jargon load, word frequency, register-specific terms |
-| Emotional arc | Local and global affect trajectory | Sentence- or paragraph-level affect scores, tension/release curve, polarity shifts |
-| Cultural/contextual constraints | Audience safety and portability | Idiom density, culture-bound references, inclusive language, translatability, taboo terms |
+| Dimension                       | What it controls                       | Example signals the skill can measure                                                         |
+| ------------------------------- | -------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Voice                           | Stable personality and stance          | Brand adjectives, recurring rhetorical posture, allowance for humor, directness               |
+| Register                        | Situation-fit language variety         | Formality, hedging, pronoun use, contractions, noun density, information density              |
+| Pacing                          | Perceived speed and narrative pressure | Sentence-length variance, clause density, paragraph rhythm, dialogue/action ratio             |
+| Imagery                         | Sensory vividness and figurativeness   | Concreteness, sensory lexicon rates, metaphor density, spatial detail                         |
+| Syntax                          | Rhythm and structural shape            | Parse depth, coordination/subordination, fronting, passive/active balance                     |
+| Diction                         | Lexical choice and accessibility       | Type-token ratio, function-word profile, jargon load, word frequency, register-specific terms |
+| Emotional arc                   | Local and global affect trajectory     | Sentence- or paragraph-level affect scores, tension/release curve, polarity shifts            |
+| Cultural/contextual constraints | Audience safety and portability        | Idiom density, culture-bound references, inclusive language, translatability, taboo terms     |
 
 This taxonomy is a synthesis of Mailchimp’s voice/tone split, Biber’s situational and feature-based register theory, Google and Microsoft guidance on clarity/globalization/inclusivity, Le Guin’s craft emphasis, and computational work on stylometric features and emotional arcs. citeturn30view0turn36view0turn31view0turn31view1turn31view2turn32view1turn32view0turn15view0turn35view4turn35view0
 
@@ -93,35 +93,35 @@ flowchart TD
 
 ## Reference stack and prioritized sources
 
-A Story/Tone Designer should privilege references in **descending order of authority and specificity**: user-owned references first, official style/UX guides second, editorial standards third, craft manuals fourth, academic papers fifth, and broad corpora last. That ordering reflects a simple principle: the more a source tells the system what *this user or organization* actually wants, the better; the more a source is merely ambient English, the more it should be used for calibration rather than direct imitation. Official guidance from Mailchimp, Google, Microsoft, GOV.UK, APA, AP, Chicago, and major writing-craft authors makes this hierarchy defensible. citeturn30view0turn31view0turn31view1turn31view2turn32view1turn32view0turn33view0turn9search2turn37search0turn37search1turn15view0turn15view1turn15view2turn15view3
+A Story/Tone Designer should privilege references in **descending order of authority and specificity**: user-owned references first, official style/UX guides second, editorial standards third, craft manuals fourth, academic papers fifth, and broad corpora last. That ordering reflects a simple principle: the more a source tells the system what _this user or organization_ actually wants, the better; the more a source is merely ambient English, the more it should be used for calibration rather than direct imitation. Official guidance from Mailchimp, Google, Microsoft, GOV.UK, APA, AP, Chicago, and major writing-craft authors makes this hierarchy defensible. citeturn30view0turn31view0turn31view1turn31view2turn32view1turn32view0turn33view0turn9search2turn37search0turn37search1turn15view0turn15view1turn15view2turn15view3
 
 ### Prioritized source comparison
 
-| Priority | Source class | Why it matters | Best use inside Story/Tone Designer | Main risk |
-|---|---|---|---|---|
-| Highest | User-owned style guides, approved writing samples, product copy archives | Closest to actual desired output | Primary tone extraction and preset creation | Internal inconsistency |
-| High | Official UX/content style guides | Explicit operational rules for clarity, tone, accessibility, localization | Product-writing and documentation modes | Over-optimizes for utilitarian prose |
-| High | Editorial standards and usage references | Reliable grammar, house-style, usage resolution | Copyediting and normalization layer | Can flatten voice if over-applied |
-| Medium | Craft books and screenwriting manuals | Rich treatment of rhythm, POV, scene energy, structure | Narrative and long-form guidance | Less operational unless converted to rules |
-| Medium | Academic controllable-generation and style-transfer papers | Formal methodology for controllable rewriting and evaluation | System design and evaluation framework | Research setups may not map cleanly to production |
-| Medium | Public-domain literature corpora | Dense, analyzable exemplars with low rights friction | Style calibration, narrative exemplars | Temporal mismatch with modern prose |
-| Lower | Large general corpora | Modern language statistics and register baselines | Sanity checks and language-frequency calibration | Noisy or weakly normative |
-| Lowest | Raw web-crawl corpora | Large coverage only | Background language statistics, never first-line style authority | Noise, contamination, topic drift |
+| Priority | Source class                                                             | Why it matters                                                            | Best use inside Story/Tone Designer                              | Main risk                                         |
+| -------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------- |
+| Highest  | User-owned style guides, approved writing samples, product copy archives | Closest to actual desired output                                          | Primary tone extraction and preset creation                      | Internal inconsistency                            |
+| High     | Official UX/content style guides                                         | Explicit operational rules for clarity, tone, accessibility, localization | Product-writing and documentation modes                          | Over-optimizes for utilitarian prose              |
+| High     | Editorial standards and usage references                                 | Reliable grammar, house-style, usage resolution                           | Copyediting and normalization layer                              | Can flatten voice if over-applied                 |
+| Medium   | Craft books and screenwriting manuals                                    | Rich treatment of rhythm, POV, scene energy, structure                    | Narrative and long-form guidance                                 | Less operational unless converted to rules        |
+| Medium   | Academic controllable-generation and style-transfer papers               | Formal methodology for controllable rewriting and evaluation              | System design and evaluation framework                           | Research setups may not map cleanly to production |
+| Medium   | Public-domain literature corpora                                         | Dense, analyzable exemplars with low rights friction                      | Style calibration, narrative exemplars                           | Temporal mismatch with modern prose               |
+| Lower    | Large general corpora                                                    | Modern language statistics and register baselines                         | Sanity checks and language-frequency calibration                 | Noisy or weakly normative                         |
+| Lowest   | Raw web-crawl corpora                                                    | Large coverage only                                                       | Background language statistics, never first-line style authority | Noise, contamination, topic drift                 |
 
 The ranking above synthesizes source quality and applicability across official style guides, corpora, and academic literature. Public-domain literature is especially attractive because Project Gutenberg offers a large, proofread collection of older works with expired U.S. copyright, while modern register baselines are better served by COCA and BNC2014. By contrast, broad web-crawl sources like Common Crawl or C4 are valuable for scale but not ideal as normative tone anchors, and documentation on C4 has specifically noted unexpected source composition. citeturn39view2turn7search0turn39view1turn7search3turn7search10turn7search14
 
 ### Recommended English-first source list
 
-| Category | Prioritized sources |
-|---|---|
-| Brand and voice | Mailchimp Content Style Guide; internal brand voice guides |
-| Developer/technical writing | Google developer documentation style guide; Microsoft writing guidance |
-| Public-sector plain language | GOV.UK content guidance; Digital.gov plain language; ONS plain-language guide |
-| Inclusive language | Google inclusive documentation; Microsoft bias-free communication; APA bias-free language |
-| Editorial house style | AP Stylebook; Chicago Manual of Style; Merriam-Webster grammar/usage resources |
-| Writing craft | Ursula K. Le Guin, *Steering the Craft*; Robert McKee, *Story*; John Truby, *The Anatomy of Story*; John Yorke, *Into the Woods*; Orwell, “Politics and the English Language” |
-| Corpora and datasets | COCA; BNC2014; Project Gutenberg; GYAFC; NRC Emotion Lexicon |
-| Research on control/evaluation | Hu et al. 2017; Ficler & Goldberg 2017; Mir et al. 2019; BERTScore; MAUVE; Reagan et al. 2016 |
+| Category                       | Prioritized sources                                                                                                                                                           |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Brand and voice                | Mailchimp Content Style Guide; internal brand voice guides                                                                                                                    |
+| Developer/technical writing    | Google developer documentation style guide; Microsoft writing guidance                                                                                                        |
+| Public-sector plain language   | GOV.UK content guidance; Digital.gov plain language; ONS plain-language guide                                                                                                 |
+| Inclusive language             | Google inclusive documentation; Microsoft bias-free communication; APA bias-free language                                                                                     |
+| Editorial house style          | AP Stylebook; Chicago Manual of Style; Merriam-Webster grammar/usage resources                                                                                                |
+| Writing craft                  | Ursula K. Le Guin, _Steering the Craft_; Robert McKee, _Story_; John Truby, _The Anatomy of Story_; John Yorke, _Into the Woods_; Orwell, “Politics and the English Language” |
+| Corpora and datasets           | COCA; BNC2014; Project Gutenberg; GYAFC; NRC Emotion Lexicon                                                                                                                  |
+| Research on control/evaluation | Hu et al. 2017; Ficler & Goldberg 2017; Mir et al. 2019; BERTScore; MAUVE; Reagan et al. 2016                                                                                 |
 
 This list privileges official or primary sources wherever possible. AP, Chicago, Mailchimp, Google, Microsoft, GOV.UK, Apple, Adobe, and APA are all official style or writing resources; Le Guin, McKee, Truby, and Yorke are primary craft references from authors or publishers; ACL/PMLR/OpenReview/NeurIPS/ArXiv provide the core academic basis; and COCA, BNC2014, Project Gutenberg, and NRC supply directly usable English-language data resources. citeturn37search0turn37search1turn37search6turn30view0turn31view0turn31view1turn31view2turn32view1turn32view0turn33view0turn33view2turn15view0turn15view1turn15view2turn15view3turn11search0turn39view1turn39view2turn34view2turn39view3turn34view4turn34view3turn34view1turn4search2turn5search2turn35view0
 
@@ -151,13 +151,13 @@ flowchart LR
 
 ### Architecture options comparison
 
-| Option | What it is | Strengths | Weaknesses | Best fit |
-|---|---|---|---|---|
-| Prompt-only transformer | Single prompt with rules and examples | Fastest to ship; low ops overhead | Weak consistency across domains; limited auditability | Prototyping, low volume |
-| Skill plus reference retrieval | Prompted skill with exemplar retrieval and structured outputs | Strong control, auditable, cheaper than training, easy update path | Needs clean reference management | Most teams |
-| Persistent subagent | Dedicated tone specialist with memory or saved presets | Good multi-turn consistency and reusability | More orchestration complexity | Editorial or writing-heavy workflows |
-| Fine-tuned style model | SFT/DPO/RFT or equivalent for stable tone families | High consistency, shorter prompts, lower per-call prompt load | Data burden, evaluation burden, vendor/platform constraints | High-scale, stable internal use |
-| Hybrid recommended | Retrieval + prompt skill now; training only after proof | Best balance of control, cost, and maintainability | More components than prompt-only | Default recommendation |
+| Option                         | What it is                                                    | Strengths                                                          | Weaknesses                                                  | Best fit                             |
+| ------------------------------ | ------------------------------------------------------------- | ------------------------------------------------------------------ | ----------------------------------------------------------- | ------------------------------------ |
+| Prompt-only transformer        | Single prompt with rules and examples                         | Fastest to ship; low ops overhead                                  | Weak consistency across domains; limited auditability       | Prototyping, low volume              |
+| Skill plus reference retrieval | Prompted skill with exemplar retrieval and structured outputs | Strong control, auditable, cheaper than training, easy update path | Needs clean reference management                            | Most teams                           |
+| Persistent subagent            | Dedicated tone specialist with memory or saved presets        | Good multi-turn consistency and reusability                        | More orchestration complexity                               | Editorial or writing-heavy workflows |
+| Fine-tuned style model         | SFT/DPO/RFT or equivalent for stable tone families            | High consistency, shorter prompts, lower per-call prompt load      | Data burden, evaluation burden, vendor/platform constraints | High-scale, stable internal use      |
+| Hybrid recommended             | Retrieval + prompt skill now; training only after proof       | Best balance of control, cost, and maintainability                 | More components than prompt-only                            | Default recommendation               |
 
 This comparison follows current model-optimization guidance from OpenAI, skill/subagent packaging guidance from OpenAI and Anthropic, and agent-orchestration guidance from Microsoft. OpenAI’s optimization docs are especially clear that prompt engineering and evals usually come first, and that DPO is specifically suited to “chat messages with the right tone and style.” citeturn17view0turn17view1turn41search0turn24view1turn24view0turn26view1turn26view2
 
@@ -192,16 +192,16 @@ The opt-in layer should support four activation modes: **one-shot command**, **d
 
 Recommended UX behaviors are listed below.
 
-| UX element | Recommended behavior |
-|---|---|
-| Default state | Off |
-| Activation | `/story-tone`, preset picker, or “Apply tone” button |
-| Preview | Side-by-side diff with changed dimensions |
-| Controls | Audience, genre, preservation level, tone targets, constraints |
-| Provenance | Show which reference pack or preset was used |
-| Safety | Warn when humor, sarcasm, or informality conflicts with task-critical copy |
-| Memory | Save approved Tone Cards as reusable presets |
-| Undo | One-click revert to source text |
+| UX element    | Recommended behavior                                                       |
+| ------------- | -------------------------------------------------------------------------- |
+| Default state | Off                                                                        |
+| Activation    | `/story-tone`, preset picker, or “Apply tone” button                       |
+| Preview       | Side-by-side diff with changed dimensions                                  |
+| Controls      | Audience, genre, preservation level, tone targets, constraints             |
+| Provenance    | Show which reference pack or preset was used                               |
+| Safety        | Warn when humor, sarcasm, or informality conflicts with task-critical copy |
+| Memory        | Save approved Tone Cards as reusable presets                               |
+| Undo          | One-click revert to source text                                            |
 
 These behaviors are consistent with current agent patterns that emphasize explicit delegation, structured state, and human approval for consequential changes. citeturn17view6turn21view0turn24view0turn26view1
 
@@ -211,16 +211,16 @@ The evaluation framework should treat Story/Tone Designer as both a **text trans
 
 ### Metrics comparison
 
-| Metric family | What it measures | Practical method | Why it matters |
-|---|---|---|---|
-| Style adherence | Match to requested Tone Card | Trained style classifier + rubric-based LLM judge + human spot checks | Confirms that the requested tone was actually applied |
-| Semantic preservation | Meaning retained from source | BERTScore; reference-guided judging; contradiction checks | Prevents “beautiful wrongness” |
-| Fluency and coherence | Readability and textual quality | Human ratings; LLM judge; grammar checks; MAUVE when comparing distributions | Catches awkward or over-engineered prose |
-| Register fit | Audience/context appropriateness | Rubric on formality, plain language, task focus, localization fit | Distinguishes literary success from contextual success |
-| Consistency | Stability across turns or assets | Cross-sample variance against same preset | Prevents drift in multi-turn writing sessions |
-| Edit efficiency | Value relative to manual editing | Acceptance rate, number of post-edits, turnaround time | Justifies the product |
-| Safety and bias | Harmful or exclusionary phrasing | Inclusive-language checks, taboo/idiom flags, policy graders | Prevents cultural harm and unsafe outputs |
-| Workflow correctness | Correct skill routing and approvals | Trace grading, handoff accuracy, schema conformity | Required if implemented as agent/subagent |
+| Metric family         | What it measures                    | Practical method                                                             | Why it matters                                         |
+| --------------------- | ----------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------ |
+| Style adherence       | Match to requested Tone Card        | Trained style classifier + rubric-based LLM judge + human spot checks        | Confirms that the requested tone was actually applied  |
+| Semantic preservation | Meaning retained from source        | BERTScore; reference-guided judging; contradiction checks                    | Prevents “beautiful wrongness”                         |
+| Fluency and coherence | Readability and textual quality     | Human ratings; LLM judge; grammar checks; MAUVE when comparing distributions | Catches awkward or over-engineered prose               |
+| Register fit          | Audience/context appropriateness    | Rubric on formality, plain language, task focus, localization fit            | Distinguishes literary success from contextual success |
+| Consistency           | Stability across turns or assets    | Cross-sample variance against same preset                                    | Prevents drift in multi-turn writing sessions          |
+| Edit efficiency       | Value relative to manual editing    | Acceptance rate, number of post-edits, turnaround time                       | Justifies the product                                  |
+| Safety and bias       | Harmful or exclusionary phrasing    | Inclusive-language checks, taboo/idiom flags, policy graders                 | Prevents cultural harm and unsafe outputs              |
+| Workflow correctness  | Correct skill routing and approvals | Trace grading, handoff accuracy, schema conformity                           | Required if implemented as agent/subagent              |
 
 This metric set combines the style-transfer literature with current agent-eval practice. BERTScore was proposed because it correlates better with human judgments than older overlap metrics; MAUVE was proposed for comparing generated and human text distributions; Mir et al. argue for evaluating the tradeoff among style, content, and fluency; and OpenAI’s own eval docs emphasize task-specific metrics, human calibration, trace grading, and automated regression testing. citeturn4search2turn5search2turn34view1turn20view4turn19view0
 
@@ -240,14 +240,14 @@ Assuming **no specific platform or budget constraint**, the most rational plan i
 
 ### Suggested stack choices
 
-| Layer | Low-complexity choice | Higher-control choice |
-|---|---|---|
-| Orchestration | Single API wrapper + prompt templates | Agent SDK / skill runtime + trace logging |
-| Style analysis | Heuristic features + LLM extraction | Heuristics + parser + embeddings + judge models |
-| Storage | Flat preset files | Versioned reference packs + vector store + audit logs |
-| Output control | Prompted JSON | Structured outputs / strict function calling |
-| Evaluation | Manual review spreadsheet | Automated eval runs + judge models + CI regression |
-| Safety | Prompt rules | Guardrails + human approval for sensitive rewrites |
+| Layer          | Low-complexity choice                 | Higher-control choice                                 |
+| -------------- | ------------------------------------- | ----------------------------------------------------- |
+| Orchestration  | Single API wrapper + prompt templates | Agent SDK / skill runtime + trace logging             |
+| Style analysis | Heuristic features + LLM extraction   | Heuristics + parser + embeddings + judge models       |
+| Storage        | Flat preset files                     | Versioned reference packs + vector store + audit logs |
+| Output control | Prompted JSON                         | Structured outputs / strict function calling          |
+| Evaluation     | Manual review spreadsheet             | Automated eval runs + judge models + CI regression    |
+| Safety         | Prompt rules                          | Guardrails + human approval for sensitive rewrites    |
 
 If the implementation is OpenAI-based, structured outputs and strict function-calling materially reduce output-format fragility, while the Agents SDK adds guardrails, handoffs, traces, and approvals. If the implementation is Anthropic-based, the skills/subagents model already matches the packaging pattern closely. Microsoft’s current Agent Framework is a reasonable choice where explicit multi-step workflow control and enterprise telemetry matter more than minimalism. citeturn23view0turn18search4turn41search9turn21view0turn24view1turn24view0turn26view1
 
@@ -351,18 +351,18 @@ Source text:
 
 ### Rule set for production use
 
-| Rule | Default |
-|---|---|
-| Meaning preservation | Strict |
-| Plot/content invention | Off unless requested |
-| Named living-author mimicry | Refuse and convert to attributes |
-| Public/product copy mode | Plain language preferred |
-| Humor | Allowed only when context-safe |
-| Cultural specificity | Flag if audience is broad or global |
-| Jargon | Minimize unless domain-specific and audience-matched |
-| Emotional intensity | Cap in safety-sensitive contexts |
-| Reference conflict | Explain, do not silently merge |
-| Missing reference data | Fall back to neutral controlled rewrite |
+| Rule                        | Default                                              |
+| --------------------------- | ---------------------------------------------------- |
+| Meaning preservation        | Strict                                               |
+| Plot/content invention      | Off unless requested                                 |
+| Named living-author mimicry | Refuse and convert to attributes                     |
+| Public/product copy mode    | Plain language preferred                             |
+| Humor                       | Allowed only when context-safe                       |
+| Cultural specificity        | Flag if audience is broad or global                  |
+| Jargon                      | Minimize unless domain-specific and audience-matched |
+| Emotional intensity         | Cap in safety-sensitive contexts                     |
+| Reference conflict          | Explain, do not silently merge                       |
+| Missing reference data      | Fall back to neutral controlled rewrite              |
 
 ### Before-and-after examples
 
@@ -449,15 +449,15 @@ The user guidance should be short and explicit.
 
 **Customization controls**
 
-| Control | Meaning |
-|---|---|
-| Audience | Who the text is for |
-| Genre | Memo, UX, fiction, screenplay, email, article |
-| Preservation | How strictly to preserve source meaning |
-| Tone targets | Desired tonal traits |
-| Constraints | Plain language, inclusive language, global audience, brand mode |
-| References | Attached examples, preset, or style guide |
-| Output mode | Full rewrite, side-by-side, Tone Card only |
+| Control      | Meaning                                                         |
+| ------------ | --------------------------------------------------------------- |
+| Audience     | Who the text is for                                             |
+| Genre        | Memo, UX, fiction, screenplay, email, article                   |
+| Preservation | How strictly to preserve source meaning                         |
+| Tone targets | Desired tonal traits                                            |
+| Constraints  | Plain language, inclusive language, global audience, brand mode |
+| References   | Attached examples, preset, or style guide                       |
+| Output mode  | Full rewrite, side-by-side, Tone Card only                      |
 
 **Recommended help text**
 

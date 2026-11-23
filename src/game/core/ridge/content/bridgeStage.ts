@@ -125,13 +125,11 @@ export function createBridgeStage(catalog: BridgeDialogueCatalog): RidgeStageDef
     lengthLabel: 'farm river sketch',
     spots: SPOTS,
     blockedProgress: BRIDGE_BLOCKED_PROGRESS,
-    blockedMessage:
-      'The unfinished bridge blocks the way. Talk to the draftsperson or finish the crossing.',
+    blockedMessage: 'The unfinished bridge blocks the way. Talk to the draftsperson or finish the crossing.',
     isCrossingOpen: (state) => state.beat === 'bridge_complete',
     resolveInteractables: (state) => resolveBridgeInteractables(state, catalog),
     resolveActors: (state) => resolveBridgeActors(state),
-    resolveConversation: (conversationId, state) =>
-      resolveBridgeConversation(conversationId, state, catalog),
+    resolveConversation: (conversationId, state) => resolveBridgeConversation(conversationId, state, catalog),
     describeAmbience: (state) => describeBridgeAmbience(state),
     describeBridgeTip: (tip, context) => describeBridgeTip(catalog, tip, context)
   };
@@ -156,10 +154,7 @@ function describeBridgeTip(
   return nudge ? `${line} ${nudge}` : line;
 }
 
-function resolveBridgeInteractables(
-  state: RidgeWorldState,
-  catalog: BridgeDialogueCatalog
-): RidgeInteractable[] {
+function resolveBridgeInteractables(state: RidgeWorldState, catalog: BridgeDialogueCatalog): RidgeInteractable[] {
   const plans = interactPlansForBeat(state.beat);
   const result: RidgeInteractable[] = [];
 
@@ -323,13 +318,28 @@ function resolveBridgeConversation(
         id: conversationId,
         lines: [say(['01', 'prompt']), say(['02', 'cicka']), say(['03', 'prompt'])],
         choices: [
-          choice('pet', [['01', 'cicka', 'playful'], ['02', 'prompt']], { then: 'menu', once: true, outcome: met }),
+          choice(
+            'pet',
+            [
+              ['01', 'cicka', 'playful'],
+              ['02', 'prompt']
+            ],
+            { then: 'menu', once: true, outcome: met }
+          ),
           choice('watch', [['01', 'prompt']], { then: 'menu', once: true, outcome: met }),
-          choice('reach', [['01', 'prompt'], ['02', 'cicka', 'determined'], ['03', 'prompt']], {
-            then: 'menu',
-            once: true,
-            outcome: guarded
-          }),
+          choice(
+            'reach',
+            [
+              ['01', 'prompt'],
+              ['02', 'cicka', 'determined'],
+              ['03', 'prompt']
+            ],
+            {
+              then: 'menu',
+              once: true,
+              outcome: guarded
+            }
+          ),
           choice('leave', [['01', 'prompt']])
         ],
         outcome: met
@@ -339,24 +349,59 @@ function resolveBridgeConversation(
     case 'bridge.cicka.parallel_play': {
       const rollAgain = choice(
         'roll_again',
-        [['01', 'prompt'], ['02', 'cicka', 'playful'], ['03', 'prompt'], ['04', 'prompt']],
+        [
+          ['01', 'prompt'],
+          ['02', 'cicka', 'playful'],
+          ['03', 'prompt'],
+          ['04', 'prompt']
+        ],
         { outcome: SHARE_TOY_CAR }
       );
       // Keeping it is a challenge, not a theft: Cicka tests you (Cicka's Standoff).
-      const keep = choice('keep', [['01', 'prompt'], ['02', 'cicka', 'determined'], ['03', 'prompt']], {
-        outcome: { openCickaDuel: true }
-      });
-      const roll = choice('roll', [['01', 'prompt'], ['02', 'cicka', 'curious'], ['03', 'prompt']], {
-        choices: [rollAgain, keep]
-      });
+      const keep = choice(
+        'keep',
+        [
+          ['01', 'prompt'],
+          ['02', 'cicka', 'determined'],
+          ['03', 'prompt']
+        ],
+        {
+          outcome: { openCickaDuel: true }
+        }
+      );
+      const roll = choice(
+        'roll',
+        [
+          ['01', 'prompt'],
+          ['02', 'cicka', 'curious'],
+          ['03', 'prompt']
+        ],
+        {
+          choices: [rollAgain, keep]
+        }
+      );
       const pocket = choice('pocket', [['01', 'prompt']], { then: 'menu', outcome: guarded });
       return {
         id: conversationId,
         lines: [say(['01', 'prompt']), say(['02', 'prompt'])],
         choices: [
-          choice('grab', [['01', 'prompt'], ['02', 'cicka', 'determined']], { then: 'menu', outcome: guarded }),
+          choice(
+            'grab',
+            [
+              ['01', 'prompt'],
+              ['02', 'cicka', 'determined']
+            ],
+            { then: 'menu', outcome: guarded }
+          ),
           choice('ask', [['01', 'prompt']], { then: 'menu', once: true }),
-          choice('leaf', [['01', 'prompt'], ['02', 'prompt']], { choices: [pocket, roll] }),
+          choice(
+            'leaf',
+            [
+              ['01', 'prompt'],
+              ['02', 'prompt']
+            ],
+            { choices: [pocket, roll] }
+          ),
           ...(state.flags.has(CICKA_DUEL_LOST_FLAG)
             ? [choice('rematch', [['01', 'prompt']], { outcome: { openCickaDuel: true } })]
             : []),
@@ -369,12 +414,7 @@ function resolveBridgeConversation(
     case 'bridge.cicka.duel_won':
       return {
         id: conversationId,
-        lines: [
-          say(['01', 'prompt']),
-          say(['02', 'cicka', 'playful']),
-          say(['03', 'prompt']),
-          say(['04', 'prompt'])
-        ],
+        lines: [say(['01', 'prompt']), say(['02', 'cicka', 'playful']), say(['03', 'prompt']), say(['04', 'prompt'])],
         outcome: SHARE_TOY_CAR
       };
     case 'bridge.cicka.duel_lost':
@@ -421,10 +461,7 @@ function resolveBridgeConversation(
       return {
         id: conversationId,
         lines: [say(['waiting', 'bridgeDraftsperson', 'curious'])],
-        choices: [
-          ...unasked(cickaHasIt, who, why),
-          choice('still_looking', [['01', 'bridgeDraftsperson']])
-        ]
+        choices: [...unasked(cickaHasIt, who, why), choice('still_looking', [['01', 'bridgeDraftsperson']])]
       };
     }
 
@@ -436,10 +473,17 @@ function resolveBridgeConversation(
           lines: [say(['resume', 'bridgeDraftsperson', 'determined'])],
           choices: [
             choice('resume', [], { outcome: { openBridgeBuild: true } }),
-            choice('advice', [['01', 'bridgeDraftsperson'], ['02', 'bridgeDraftsperson', 'playful']], {
-              then: 'menu',
-              once: true
-            }),
+            choice(
+              'advice',
+              [
+                ['01', 'bridgeDraftsperson'],
+                ['02', 'bridgeDraftsperson', 'playful']
+              ],
+              {
+                then: 'menu',
+                once: true
+              }
+            ),
             choice('later', [['01', 'bridgeDraftsperson']])
           ]
         };
@@ -511,4 +555,3 @@ function describeBridgeAmbience(state: RidgeWorldState): string {
   }
   return 'A farm river lowland. An unfinished simple bridge interrupts the walk east.';
 }
-

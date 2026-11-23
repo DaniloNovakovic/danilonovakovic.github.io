@@ -12,8 +12,12 @@ function makeSprite(grounded = true): PhysicsSprite & { vx: number; vy: number }
     vx: 0,
     vy: 0,
     body: { touching: { down: grounded }, blocked: { down: false } },
-    setVelocityX(v: number) { this.vx = v; },
-    setVelocityY(v: number) { this.vy = v; }
+    setVelocityX(v: number) {
+      this.vx = v;
+    },
+    setVelocityY(v: number) {
+      this.vy = v;
+    }
   };
   return sprite;
 }

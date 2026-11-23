@@ -12,10 +12,7 @@ import {
 import { getPotassiumEnemyConfig } from './enemyFactory';
 import { resolvePotassiumEnemyKilled } from './session';
 import { clamp, linear } from '@/shared/math';
-import {
-  getPotassiumExplosionRadius,
-  type PotassiumSkillRank
-} from './waves';
+import { getPotassiumExplosionRadius, type PotassiumSkillRank } from './waves';
 import {
   getPotassiumData,
   getPotassiumEnemyKind,
@@ -43,14 +40,18 @@ export function damageEnemy(
   amount: number,
   source: PotassiumDamageSource
 ): void {
-  applyCombatCommands(internals, resolvePotassiumDamage({
-    now: internals.ports.getNow(),
-    enemy: internals.getEnemyCombatFacts(enemy),
-    amount,
-    source,
-    skillRanks: internals.ports.getSession().skillRanks,
-    genericRanks: internals.ports.getSession().genericRanks
-  }), internals.createCombatContext());
+  applyCombatCommands(
+    internals,
+    resolvePotassiumDamage({
+      now: internals.ports.getNow(),
+      enemy: internals.getEnemyCombatFacts(enemy),
+      amount,
+      source,
+      skillRanks: internals.ports.getSession().skillRanks,
+      genericRanks: internals.ports.getSession().genericRanks
+    }),
+    internals.createCombatContext()
+  );
 }
 
 function applyCombatCommand(
@@ -59,9 +60,7 @@ function applyCombatCommand(
   context: PotassiumCombatContext
 ): void {
   const enemy = 'enemyId' in command ? context.enemies.get(command.enemyId) : undefined;
-  const projectile = 'projectileId' in command
-    ? context.projectiles.get(command.projectileId)
-    : undefined;
+  const projectile = 'projectileId' in command ? context.projectiles.get(command.projectileId) : undefined;
 
   if (applyCombatEnemyCommand(internals, command, enemy)) return;
   if (applyCombatProjectileCommand(internals, command, projectile, enemy)) return;
@@ -166,13 +165,7 @@ function applyCombatWorldCommand(
 ): void {
   switch (command.type) {
     case 'spawnFirePatch':
-      internals.ports.spawnFirePatch(
-        command.x,
-        command.y,
-        command.effectMultiplier,
-        command.lifetimeMs,
-        command.scale
-      );
+      internals.ports.spawnFirePatch(command.x, command.y, command.effectMultiplier, command.lifetimeMs, command.scale);
       break;
     case 'explodeAt':
       explodeAt(internals, command.x, command.y, command.effectMultiplier, command.radiusMultiplier);
@@ -263,9 +256,10 @@ function spreadPoisonFrom(
           getPotassiumData<number>(enemy, POTASSIUM_DATA_KEYS.poisonExpiresAt) ?? 0,
           internals.ports.getNow() + POTASSIUM_POISON_DURATION_MS * effectMultiplier
         ),
-        nextTickAt: (getPotassiumData<number>(enemy, POTASSIUM_DATA_KEYS.poisonNextTickAt) ?? 0) < internals.ports.getNow()
-          ? internals.ports.getNow() + POTASSIUM_POISON_TICK_INTERVAL_MS
-          : undefined
+        nextTickAt:
+          (getPotassiumData<number>(enemy, POTASSIUM_DATA_KEYS.poisonNextTickAt) ?? 0) < internals.ports.getNow()
+            ? internals.ports.getNow() + POTASSIUM_POISON_TICK_INTERVAL_MS
+            : undefined
       });
     }
   });
@@ -312,24 +306,29 @@ function explodeAt(
   radiusMultiplier: number
 ): void {
   const rank = internals.ports.getSkillRank('explosion');
-  const radius = getPotassiumExplosionRadius(rank as PotassiumSkillRank)
-    * radiusMultiplier
-    * internals.ports.getExplosionRadiusMultiplier();
+  const radius =
+    getPotassiumExplosionRadius(rank as PotassiumSkillRank) *
+    radiusMultiplier *
+    internals.ports.getExplosionRadiusMultiplier();
   internals.ports.showExplosionVisual(x, y, radius);
   const hits = internals.ports.getExplosionHits(x, y);
-  applyCombatCommands(internals, resolvePotassiumExplosion({
-    now: internals.ports.getNow(),
-    x,
-    y,
-    effectMultiplier,
-    radiusMultiplier,
-    hits: hits.map((hit) => ({
-      enemy: internals.getEnemyCombatFacts(hit.enemy),
-      distance: hit.distance
-    })),
-    skillRanks: internals.ports.getSession().skillRanks,
-    genericRanks: internals.ports.getSession().genericRanks
-  }), internals.createCombatContext(hits.map((hit) => hit.enemy)));
+  applyCombatCommands(
+    internals,
+    resolvePotassiumExplosion({
+      now: internals.ports.getNow(),
+      x,
+      y,
+      effectMultiplier,
+      radiusMultiplier,
+      hits: hits.map((hit) => ({
+        enemy: internals.getEnemyCombatFacts(hit.enemy),
+        distance: hit.distance
+      })),
+      skillRanks: internals.ports.getSession().skillRanks,
+      genericRanks: internals.ports.getSession().genericRanks
+    }),
+    internals.createCombatContext(hits.map((hit) => hit.enemy))
+  );
   internals.ports.shakeCamera(130, 0.006);
 }
 
@@ -342,19 +341,23 @@ function spawnGhostBeam(
 ): void {
   internals.ports.showGhostBeam({ x, y, direction, durationMs: internals.options.ghostBeamLifetimeMs });
   const hits = internals.ports.getGhostBeamHits(x, y, direction);
-  applyCombatCommands(internals, resolvePotassiumGhostBeam({
-    now: internals.ports.getNow(),
-    x,
-    y,
-    direction,
-    effectMultiplier,
-    hits: hits.map((hit) => ({
-      enemy: internals.getEnemyCombatFacts(hit.enemy),
-      inBeam: hit.inBeam
-    })),
-    skillRanks: internals.ports.getSession().skillRanks,
-    genericRanks: internals.ports.getSession().genericRanks
-  }), internals.createCombatContext(hits.map((hit) => hit.enemy)));
+  applyCombatCommands(
+    internals,
+    resolvePotassiumGhostBeam({
+      now: internals.ports.getNow(),
+      x,
+      y,
+      direction,
+      effectMultiplier,
+      hits: hits.map((hit) => ({
+        enemy: internals.getEnemyCombatFacts(hit.enemy),
+        inBeam: hit.inBeam
+      })),
+      skillRanks: internals.ports.getSession().skillRanks,
+      genericRanks: internals.ports.getSession().genericRanks
+    }),
+    internals.createCombatContext(hits.map((hit) => hit.enemy))
+  );
 }
 
 function spawnGhostStatusField(
@@ -370,12 +373,8 @@ function spawnGhostStatusField(
     const patchCount = isHorizontal ? 5 : 7;
     for (let index = 0; index < patchCount; index += 1) {
       const t = patchCount <= 1 ? 0.5 : index / (patchCount - 1);
-      const patchX = isHorizontal
-        ? linear(options.arena.left + 46, options.arena.right - 46, t)
-        : x;
-      const patchY = isHorizontal
-        ? y
-        : linear(options.arena.top + 112, options.arena.bottom - 92, t);
+      const patchX = isHorizontal ? linear(options.arena.left + 46, options.arena.right - 46, t) : x;
+      const patchY = isHorizontal ? y : linear(options.arena.top + 112, options.arena.bottom - 92, t);
       ports.spawnFirePatch(patchX, patchY, effectMultiplier, options.ghostStatusFieldLifetimeMs, 0.46);
     }
   }

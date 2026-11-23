@@ -6,7 +6,9 @@ import {
 } from './commandAdapter';
 import { createPotassiumSession, type PotassiumSessionState } from './session';
 
-function makeObject(overrides: Partial<PotassiumCommandObject> & { data?: Record<string, unknown> } = {}): PotassiumCommandObject {
+function makeObject(
+  overrides: Partial<PotassiumCommandObject> & { data?: Record<string, unknown> } = {}
+): PotassiumCommandObject {
   const data = new Map<string, unknown>(Object.entries(overrides.data ?? {}));
   const object: PotassiumCommandObject = {
     x: overrides.x ?? 300,
@@ -90,7 +92,7 @@ function makeAdapter(overrides: Partial<PotassiumCommandAdapterPorts> = {}) {
       getMainProjectile: () => main,
       isMainProjectile: (projectile) => projectile === main,
       isMainProjectileRecalling: () => false,
-      getProjectileExplosionRadiusMultiplier: (projectile) => projectile === main ? 1 : 0.5,
+      getProjectileExplosionRadiusMultiplier: (projectile) => (projectile === main ? 1 : 0.5),
       getMaxMainProjectileSpeed: () => 760,
       getExplosionRadiusMultiplier: () => 1,
       getExplosionHits: () => enemies.map((enemy) => ({ enemy, distance: 0 })),
@@ -165,13 +167,7 @@ describe('potassium command adapter', () => {
       { type: 'closeScene' }
     ]);
 
-    expect(calls).toEqual([
-      'hideMainOverlay',
-      'hint:Go',
-      'spawnWave:2',
-      'collectCircuit',
-      'closeScene'
-    ]);
+    expect(calls).toEqual(['hideMainOverlay', 'hint:Go', 'spawnWave:2', 'collectCircuit', 'closeScene']);
   });
 
   it('extracts facts and applies combat damage commands recursively', () => {
@@ -190,9 +186,10 @@ describe('potassium command adapter', () => {
     const facts = adapter.getEnemyCombatFacts(enemy);
     expect(facts).toMatchObject({ id: 'enemy-0', kind: 'intern', hp: 1, maxHp: 3 });
 
-    adapter.applyCombatCommands([
-      { type: 'damageEnemy', enemyId: facts.id, amount: 1, source: 'banana' }
-    ], adapter.createCombatContext([enemy]));
+    adapter.applyCombatCommands(
+      [{ type: 'damageEnemy', enemyId: facts.id, amount: 1, source: 'banana' }],
+      adapter.createCombatContext([enemy])
+    );
 
     expect(enemy.getData('dying')).toBe(true);
     expect(enemy.active).toBe(false);
@@ -210,39 +207,47 @@ describe('potassium command adapter', () => {
     });
     const { adapter, calls } = makeAdapter();
 
-    adapter.applyCombatCommands([
-      {
-        type: 'applyPoison',
-        enemyId: 'boss-id',
-        effectMultiplier: 1,
-        poisonMultiplier: 1.25,
-        expiresAt: 3500,
-        nextTickAt: 1500
-      }
-    ], { enemies: new Map([['boss-id', boss]]), projectiles: new Map() });
+    adapter.applyCombatCommands(
+      [
+        {
+          type: 'applyPoison',
+          enemyId: 'boss-id',
+          effectMultiplier: 1,
+          poisonMultiplier: 1.25,
+          expiresAt: 3500,
+          nextTickAt: 1500
+        }
+      ],
+      { enemies: new Map([['boss-id', boss]]), projectiles: new Map() }
+    );
     expect(boss.getData('poisoned')).toBe(true);
     expect(boss.getData('poisonMultiplier')).toBe(1.25);
 
-    adapter.applyBossCommands([
-      { type: 'setBossPhase', phase: 2 },
-      { type: 'setBossVelocity', velocityY: 16, velocityX: 54 },
-      { type: 'setBossHint', text: 'Boss phase' },
-      { type: 'spawnOrbitBlockers' },
-      { type: 'updateOrbitBlockers', now: 1200 },
-      { type: 'setStoneVisual', active: true },
-      { type: 'spawnSummons', nextSummonAt: 2000, summons: [] },
-      { type: 'clearOrbitBlockers' }
-    ], boss);
+    adapter.applyBossCommands(
+      [
+        { type: 'setBossPhase', phase: 2 },
+        { type: 'setBossVelocity', velocityY: 16, velocityX: 54 },
+        { type: 'setBossHint', text: 'Boss phase' },
+        { type: 'spawnOrbitBlockers' },
+        { type: 'updateOrbitBlockers', now: 1200 },
+        { type: 'setStoneVisual', active: true },
+        { type: 'spawnSummons', nextSummonAt: 2000, summons: [] },
+        { type: 'clearOrbitBlockers' }
+      ],
+      boss
+    );
 
     expect(boss.getData('bossPhase')).toBe(2);
     expect(boss.body.velocity).toMatchObject({ x: 54, y: 16 });
-    expect(calls).toEqual(expect.arrayContaining([
-      'hint:Boss phase',
-      'spawnBossOrbitBlockers',
-      'updateBossOrbitBlockers',
-      'setBossStoneVisual',
-      'spawnBossSummons',
-      'clearOrbitBlockers'
-    ]));
+    expect(calls).toEqual(
+      expect.arrayContaining([
+        'hint:Boss phase',
+        'spawnBossOrbitBlockers',
+        'updateBossOrbitBlockers',
+        'setBossStoneVisual',
+        'spawnBossSummons',
+        'clearOrbitBlockers'
+      ])
+    );
   });
 });

@@ -37,12 +37,8 @@ export function SceneChoiceCard({
       )}
       {...props}
     >
-      <strong className={cn('text-xl font-black leading-tight', choiceToneClasses[tone])}>
-        {title}
-      </strong>
-      <span className="self-end text-sm font-bold leading-relaxed text-[#1a1a1a]">
-        {description}
-      </span>
+      <strong className={cn('text-xl font-black leading-tight', choiceToneClasses[tone])}>{title}</strong>
+      <span className="self-end text-sm font-bold leading-relaxed text-[#1a1a1a]">{description}</span>
     </button>
   );
 }

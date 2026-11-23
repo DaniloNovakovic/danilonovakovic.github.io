@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { STAMPEDE_SKETCH_RIDGE_STAMP_ID } from '@/game/bridge/ridgeProgressIds';
-import {
-  DEV_RIDGE_STAMP_QUERY_PARAM,
-  getDevRidgeProgressSeed
-} from './devRidgeProgressParams';
+import { DEV_RIDGE_STAMP_QUERY_PARAM, getDevRidgeProgressSeed } from './devRidgeProgressParams';
 
 describe('dev Ridge progress params', () => {
   it('derives a known Ridge stamp seed and marks the param for consumption', () => {
@@ -19,9 +16,7 @@ describe('dev Ridge progress params', () => {
   });
 
   it('ignores unknown Ridge stamp ids without consuming the param', () => {
-    const searchParams = new URLSearchParams(
-      `${DEV_RIDGE_STAMP_QUERY_PARAM}=future-stamp`
-    );
+    const searchParams = new URLSearchParams(`${DEV_RIDGE_STAMP_QUERY_PARAM}=future-stamp`);
 
     expect(getDevRidgeProgressSeed(searchParams)).toEqual({
       stampIds: [],

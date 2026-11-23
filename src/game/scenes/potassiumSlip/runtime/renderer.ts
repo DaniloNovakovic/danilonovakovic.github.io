@@ -131,14 +131,24 @@ export class PotassiumSlipRenderer {
     if (!this.scene.textures.exists('potassium_enemy_hard_wall')) this.createHardWallTexture();
     if (!this.scene.textures.exists('potassium_enemy_splitter')) this.createSplitterTexture();
     if (!this.scene.textures.exists('potassium_enemy_shield')) this.createShieldTexture();
-    if (!this.scene.textures.exists('potassium_damage_cracked') || !this.scene.textures.exists('potassium_damage_critical')) {
-      if (this.scene.textures.exists('potassium_damage_cracked')) this.scene.textures.remove('potassium_damage_cracked');
-      if (this.scene.textures.exists('potassium_damage_critical')) this.scene.textures.remove('potassium_damage_critical');
+    if (
+      !this.scene.textures.exists('potassium_damage_cracked') ||
+      !this.scene.textures.exists('potassium_damage_critical')
+    ) {
+      if (this.scene.textures.exists('potassium_damage_cracked'))
+        this.scene.textures.remove('potassium_damage_cracked');
+      if (this.scene.textures.exists('potassium_damage_critical'))
+        this.scene.textures.remove('potassium_damage_critical');
       this.createDamageOverlayTextures();
     }
-    if (!this.scene.textures.exists('potassium_wall_damage_cracked') || !this.scene.textures.exists('potassium_wall_damage_critical')) {
-      if (this.scene.textures.exists('potassium_wall_damage_cracked')) this.scene.textures.remove('potassium_wall_damage_cracked');
-      if (this.scene.textures.exists('potassium_wall_damage_critical')) this.scene.textures.remove('potassium_wall_damage_critical');
+    if (
+      !this.scene.textures.exists('potassium_wall_damage_cracked') ||
+      !this.scene.textures.exists('potassium_wall_damage_critical')
+    ) {
+      if (this.scene.textures.exists('potassium_wall_damage_cracked'))
+        this.scene.textures.remove('potassium_wall_damage_cracked');
+      if (this.scene.textures.exists('potassium_wall_damage_critical'))
+        this.scene.textures.remove('potassium_wall_damage_critical');
       this.createWallDamageOverlayTextures();
     }
     if (!this.scene.textures.exists('potassium_enemy_boss')) this.createBossTexture();
@@ -191,11 +201,7 @@ export class PotassiumSlipRenderer {
     const aimLine = this.getAimLine();
     const angle = Phaser.Math.Angle.Between(from.x, from.y, to.x, to.y);
     const distance = Phaser.Math.Distance.Between(from.x, from.y, to.x, to.y);
-    const arrowLength = Phaser.Math.Clamp(
-      distance,
-      24,
-      POTASSIUM_PROJECTILE_CONTROL_DEFAULTS.launchMaxDrag
-    );
+    const arrowLength = Phaser.Math.Clamp(distance, 24, POTASSIUM_PROJECTILE_CONTROL_DEFAULTS.launchMaxDrag);
     const endX = from.x + Math.cos(angle) * arrowLength;
     const endY = from.y + Math.sin(angle) * arrowLength;
     const headLength = 18;
@@ -254,9 +260,15 @@ export class PotassiumSlipRenderer {
 
     const headLength = 11;
     aimLine.beginPath();
-    aimLine.moveTo(bounceEnd.x + Math.cos(angle + Math.PI * 0.8) * headLength, bounceEnd.y + Math.sin(angle + Math.PI * 0.8) * headLength);
+    aimLine.moveTo(
+      bounceEnd.x + Math.cos(angle + Math.PI * 0.8) * headLength,
+      bounceEnd.y + Math.sin(angle + Math.PI * 0.8) * headLength
+    );
     aimLine.lineTo(bounceEnd.x, bounceEnd.y);
-    aimLine.lineTo(bounceEnd.x + Math.cos(angle - Math.PI * 0.8) * headLength, bounceEnd.y + Math.sin(angle - Math.PI * 0.8) * headLength);
+    aimLine.lineTo(
+      bounceEnd.x + Math.cos(angle - Math.PI * 0.8) * headLength,
+      bounceEnd.y + Math.sin(angle - Math.PI * 0.8) * headLength
+    );
     aimLine.strokePath();
   }
 
@@ -273,7 +285,10 @@ export class PotassiumSlipRenderer {
 
   /** Bubble Pop: a soap bubble swells over the hit, then pops into droplets. */
   showExplosionVisual(x: number, y: number, radius: number): void {
-    const bubble = this.scene.add.container(x, y).setDepth(940).setScale(18 / Math.max(radius, 1));
+    const bubble = this.scene.add
+      .container(x, y)
+      .setDepth(940)
+      .setScale(18 / Math.max(radius, 1));
     const film = this.scene.add.graphics();
     film.fillStyle(0xe0f2fe, 0.22);
     film.fillCircle(0, 0, radius);
@@ -306,13 +321,16 @@ export class PotassiumSlipRenderer {
     const count = 8;
     for (let i = 0; i < count; i += 1) {
       const angle = (i / count) * Math.PI * 2 + 0.2;
-      const drop = this.scene.add.circle(
-        x + Math.cos(angle) * radius * 0.8,
-        y + Math.sin(angle) * radius * 0.8,
-        5.5,
-        i % 2 === 0 ? 0x7dd3fc : 0xf9a8d4,
-        0.95
-      ).setStrokeStyle(2, 0x1a1a1a, 0.75).setDepth(940);
+      const drop = this.scene.add
+        .circle(
+          x + Math.cos(angle) * radius * 0.8,
+          y + Math.sin(angle) * radius * 0.8,
+          5.5,
+          i % 2 === 0 ? 0x7dd3fc : 0xf9a8d4,
+          0.95
+        )
+        .setStrokeStyle(2, 0x1a1a1a, 0.75)
+        .setDepth(940);
       this.scene.tweens.add({
         targets: drop,
         x: x + Math.cos(angle) * (radius + 16),
@@ -358,13 +376,11 @@ export class PotassiumSlipRenderer {
     for (let index = 0; index < 7; index += 1) {
       const spread = Phaser.Math.Between(-24, 24);
       const radius = Phaser.Math.Between(5, 11);
-      const bubble = this.scene.add.circle(
-        x + alongX * spread + normal.x * 6,
-        y + alongY * spread + normal.y * 6,
-        radius,
-        0xf0f9ff,
-        0.92
-      ).setStrokeStyle(2, 0x1a1a1a, 0.7).setDepth(95).setScale(0.4);
+      const bubble = this.scene.add
+        .circle(x + alongX * spread + normal.x * 6, y + alongY * spread + normal.y * 6, radius, 0xf0f9ff, 0.92)
+        .setStrokeStyle(2, 0x1a1a1a, 0.7)
+        .setDepth(95)
+        .setScale(0.4);
       const drift = Phaser.Math.Between(22, 52);
       this.scene.tweens.add({
         targets: bubble,
@@ -386,10 +402,7 @@ export class PotassiumSlipRenderer {
     }
   }
 
-  animateEnemyDeath(
-    enemy: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
-    onComplete: () => void
-  ): void {
+  animateEnemyDeath(enemy: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, onComplete: () => void): void {
     this.scene.tweens.add({
       targets: enemy,
       angle: enemy.angle + 720,
@@ -412,12 +425,16 @@ export class PotassiumSlipRenderer {
       fontSize: '12px',
       color: '#1a1a1a',
       fontStyle: 'bold'
-    }).setOrigin(0.5, 0).setDepth(1000);
+    })
+      .setOrigin(0.5, 0)
+      .setDepth(1000);
     this.livesText = createUiText(this.scene, arena.right - 24, arena.top + 11, '', {
       fontSize: '12px',
       color: '#1a1a1a',
       fontStyle: 'bold'
-    }).setOrigin(1, 0).setDepth(1000);
+    })
+      .setOrigin(1, 0)
+      .setDepth(1000);
   }
 
   updateHud(input: { waveLabel: string; score: number; lives: number }): void {
@@ -435,21 +452,19 @@ export class PotassiumSlipRenderer {
       color: '#1a1a1a',
       fontStyle: 'bold',
       wordWrap: { width: arena.width - 64, useAdvancedWrap: true }
-    }).setOrigin(0.5).setDepth(1010);
+    })
+      .setOrigin(0.5)
+      .setDepth(1010);
 
-    this.subOverlayText = createUiText(
-      this.scene,
-      GAME_DESIGN_WIDTH / 2,
-      320,
-      messages.potassiumSlip.instructions,
-      {
-        fontSize: '14px',
-        color: '#1a1a1a',
-        align: 'center',
-        fontStyle: 'bold',
-        wordWrap: { width: arena.width - 70, useAdvancedWrap: true }
-      }
-    ).setOrigin(0.5).setDepth(1010);
+    this.subOverlayText = createUiText(this.scene, GAME_DESIGN_WIDTH / 2, 320, messages.potassiumSlip.instructions, {
+      fontSize: '14px',
+      color: '#1a1a1a',
+      align: 'center',
+      fontStyle: 'bold',
+      wordWrap: { width: arena.width - 70, useAdvancedWrap: true }
+    })
+      .setOrigin(0.5)
+      .setDepth(1010);
   }
 
   hideMainOverlay(): void {
@@ -459,30 +474,48 @@ export class PotassiumSlipRenderer {
 
   showOutcomeOverlay(input: { title: string; score: number; titleFontSize: number }): void {
     const messages = getMessages();
-    this.overlayText?.setFontSize(input.titleFontSize).setText(input.title).setPosition(GAME_DESIGN_WIDTH / 2, 255).setVisible(true);
-    this.subOverlayText?.setFontSize(15).setText(messages.potassiumSlip.finalScore(input.score)).setPosition(GAME_DESIGN_WIDTH / 2, 308).setVisible(true);
+    this.overlayText
+      ?.setFontSize(input.titleFontSize)
+      .setText(input.title)
+      .setPosition(GAME_DESIGN_WIDTH / 2, 255)
+      .setVisible(true);
+    this.subOverlayText
+      ?.setFontSize(15)
+      .setText(messages.potassiumSlip.finalScore(input.score))
+      .setPosition(GAME_DESIGN_WIDTH / 2, 308)
+      .setVisible(true);
   }
 
   showUpgradeChoices(choices: PotassiumUpgradeChoiceView[]): void {
     const messages = getMessages();
     const { arena } = this.layout;
     this.clearUpgradeChoices();
-    this.upgradeChoiceBackdrop = this.scene.add.rectangle(GAME_DESIGN_WIDTH / 2, 305, arena.width - 76, 176, 0xfbfbf9, 0.96)
+    this.upgradeChoiceBackdrop = this.scene.add
+      .rectangle(GAME_DESIGN_WIDTH / 2, 305, arena.width - 76, 176, 0xfbfbf9, 0.96)
       .setStrokeStyle(5, 0x1a1a1a, 0.9)
       .setDepth(1200);
-    this.upgradeChoiceTitle = createUiText(this.scene, GAME_DESIGN_WIDTH / 2, 238, messages.potassiumSlip.chooseUpgrade, {
-      fontSize: '15px',
-      color: '#1a1a1a',
-      fontStyle: 'bold',
-      align: 'center'
-    }).setOrigin(0.5).setDepth(1201);
+    this.upgradeChoiceTitle = createUiText(
+      this.scene,
+      GAME_DESIGN_WIDTH / 2,
+      238,
+      messages.potassiumSlip.chooseUpgrade,
+      {
+        fontSize: '15px',
+        color: '#1a1a1a',
+        fontStyle: 'bold',
+        align: 'center'
+      }
+    )
+      .setOrigin(0.5)
+      .setDepth(1201);
 
     const buttonWidth = 164;
     const buttonHeight = 82;
     const startX = choices.length === 1 ? GAME_DESIGN_WIDTH / 2 : GAME_DESIGN_WIDTH / 2 - 88;
     this.upgradeChoiceButtons = choices.map((choice, index) => {
       const x = startX + index * 176;
-      const panel = this.scene.add.rectangle(x, 312, buttonWidth, buttonHeight, 0xffffff, 0.92)
+      const panel = this.scene.add
+        .rectangle(x, 312, buttonWidth, buttonHeight, 0xffffff, 0.92)
         .setStrokeStyle(3, 0x1a1a1a, 0.75)
         .setDepth(1201);
       const label = createUiText(this.scene, x, 286, choice.title, {
@@ -491,14 +524,18 @@ export class PotassiumSlipRenderer {
         fontStyle: 'bold',
         align: 'center',
         wordWrap: { width: buttonWidth - 16, useAdvancedWrap: true }
-      }).setOrigin(0.5).setDepth(1202);
+      })
+        .setOrigin(0.5)
+        .setDepth(1202);
       const description = createUiText(this.scene, x, 326, choice.description, {
         fontSize: '8px',
         color: '#1a1a1a',
         fontStyle: 'bold',
         align: 'center',
         wordWrap: { width: buttonWidth - 18, useAdvancedWrap: true }
-      }).setOrigin(0.5).setDepth(1202);
+      })
+        .setOrigin(0.5)
+        .setDepth(1202);
       return { option: choice.option, panel, label, description };
     });
   }
@@ -523,19 +560,21 @@ export class PotassiumSlipRenderer {
   showTerminal(outcome: 'won' | 'game_over', records: string): void {
     const messages = getMessages();
     this.clearTerminal();
-    const buttons: Array<{ action: PotassiumTerminalAction; label: string }> = outcome === 'won'
-      ? [
-        { action: 'endless', label: messages.potassiumSlip.terminal.endlessMode },
-        { action: 'return', label: messages.potassiumSlip.terminal.returnToCity }
-      ]
-      : [
-        { action: 'retry', label: messages.potassiumSlip.terminal.retry },
-        { action: 'return', label: messages.potassiumSlip.terminal.returnToCity }
-      ];
+    const buttons: Array<{ action: PotassiumTerminalAction; label: string }> =
+      outcome === 'won'
+        ? [
+            { action: 'endless', label: messages.potassiumSlip.terminal.endlessMode },
+            { action: 'return', label: messages.potassiumSlip.terminal.returnToCity }
+          ]
+        : [
+            { action: 'retry', label: messages.potassiumSlip.terminal.retry },
+            { action: 'return', label: messages.potassiumSlip.terminal.returnToCity }
+          ];
     const startX = GAME_DESIGN_WIDTH / 2 - 88;
     this.terminalButtons = buttons.map((button, index) => {
       const x = startX + index * 176;
-      const panel = this.scene.add.rectangle(x, 360, 156, 36, 0xffffff, 0.96)
+      const panel = this.scene.add
+        .rectangle(x, 360, 156, 36, 0xffffff, 0.96)
         .setStrokeStyle(3, 0x1a1a1a, 0.88)
         .setDepth(1210);
       const label = createUiText(this.scene, x, 360, button.label, {
@@ -543,7 +582,9 @@ export class PotassiumSlipRenderer {
         color: '#1a1a1a',
         fontStyle: 'bold',
         align: 'center'
-      }).setOrigin(0.5).setDepth(1211);
+      })
+        .setOrigin(0.5)
+        .setDepth(1211);
       return { action: button.action, panel, label };
     });
 
@@ -553,7 +594,9 @@ export class PotassiumSlipRenderer {
       fontStyle: 'bold',
       align: 'center',
       wordWrap: { width: this.layout.arena.width - 72, useAdvancedWrap: true }
-    }).setOrigin(0.5, 0).setDepth(1210);
+    })
+      .setOrigin(0.5, 0)
+      .setDepth(1210);
   }
 
   getTerminalActionAt(x: number, y: number): PotassiumTerminalAction | undefined {
@@ -593,13 +636,20 @@ export class PotassiumSlipRenderer {
       const state = getPotassiumData<PotassiumEnemyHealthState>(enemy, POTASSIUM_DATA_KEYS.damageState);
       const kind = getPotassiumEnemyKind(enemy);
       const isWall = kind === 'wall';
-      overlay.setPosition(enemy.x, enemy.y)
+      overlay
+        .setPosition(enemy.x, enemy.y)
         .setScale(enemy.displayWidth / (isWall ? 80 : 76), enemy.displayHeight / 62)
         .setRotation(enemy.rotation)
         .setVisible(state === 'cracked' || state === 'critical');
-      overlay.setTexture(isWall
-        ? state === 'critical' ? 'potassium_wall_damage_critical' : 'potassium_wall_damage_cracked'
-        : state === 'critical' ? 'potassium_damage_critical' : 'potassium_damage_cracked');
+      overlay.setTexture(
+        isWall
+          ? state === 'critical'
+            ? 'potassium_wall_damage_critical'
+            : 'potassium_wall_damage_cracked'
+          : state === 'critical'
+            ? 'potassium_damage_critical'
+            : 'potassium_damage_cracked'
+      );
     }
     const shieldPlate = getPotassiumData<Phaser.GameObjects.Rectangle>(enemy, POTASSIUM_DATA_KEYS.shieldPlate);
     const shieldSide = getPotassiumShieldSide(enemy);
@@ -620,17 +670,19 @@ export class PotassiumSlipRenderer {
     enemy: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
     source: 'banana' | 'fire' | 'poison' | 'explosion' | 'ghost'
   ): void {
-    const color = source === 'poison'
-      ? 0x65a30d
-      : source === 'fire'
-        ? 0x67e8f9
-        : source === 'explosion'
-          ? 0xf472b6
-          : source === 'ghost'
-            ? 0x38bdf8
-            : 0x1a1a1a;
+    const color =
+      source === 'poison'
+        ? 0x65a30d
+        : source === 'fire'
+          ? 0x67e8f9
+          : source === 'explosion'
+            ? 0xf472b6
+            : source === 'ghost'
+              ? 0x38bdf8
+              : 0x1a1a1a;
     const radius = Math.max(18, enemy.displayWidth * 0.42);
-    const ring = this.scene.add.circle(enemy.x, enemy.y, radius, color, 0.08)
+    const ring = this.scene.add
+      .circle(enemy.x, enemy.y, radius, color, 0.08)
       .setStrokeStyle(3, color, 0.58)
       .setDepth(930);
     this.scene.tweens.add({
@@ -687,8 +739,14 @@ export class PotassiumSlipRenderer {
   positionProjectileVisuals(projectile: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody): void {
     const visuals = getPotassiumData<BananaVisuals>(projectile, POTASSIUM_DATA_KEYS.bananaVisuals);
     if (!visuals) return;
-    visuals.behind.setPosition(projectile.x, projectile.y).setRotation(projectile.rotation).setVisible(projectile.active);
-    visuals.front.setPosition(projectile.x, projectile.y).setRotation(projectile.rotation).setVisible(projectile.active);
+    visuals.behind
+      .setPosition(projectile.x, projectile.y)
+      .setRotation(projectile.rotation)
+      .setVisible(projectile.active);
+    visuals.front
+      .setPosition(projectile.x, projectile.y)
+      .setRotation(projectile.rotation)
+      .setVisible(projectile.active);
   }
 
   destroyProjectileVisuals(projectile?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody): void {
@@ -710,14 +768,17 @@ export class PotassiumSlipRenderer {
     const isHorizontal = input.direction === 'horizontal';
     const width = isHorizontal ? this.layout.arena.width - 42 : 24;
     const height = isHorizontal ? 24 : this.layout.arena.height - 128;
-    const field = this.scene.add.rectangle(
-      input.direction === 'horizontal' ? GAME_DESIGN_WIDTH / 2 : input.x,
-      input.direction === 'horizontal' ? input.y : this.layout.arena.top + 92 + height / 2,
-      width,
-      height,
-      0x65a30d,
-      0.12
-    ).setStrokeStyle(2, 0x65a30d, 0.42).setDepth(934);
+    const field = this.scene.add
+      .rectangle(
+        input.direction === 'horizontal' ? GAME_DESIGN_WIDTH / 2 : input.x,
+        input.direction === 'horizontal' ? input.y : this.layout.arena.top + 92 + height / 2,
+        width,
+        height,
+        0x65a30d,
+        0.12
+      )
+      .setStrokeStyle(2, 0x65a30d, 0.42)
+      .setDepth(934);
     this.scene.tweens.add({
       targets: field,
       alpha: 0,
@@ -726,12 +787,7 @@ export class PotassiumSlipRenderer {
     });
   }
 
-  showGhostBeam(input: {
-    x: number;
-    y: number;
-    direction: 'horizontal' | 'vertical';
-    durationMs: number;
-  }): void {
+  showGhostBeam(input: { x: number; y: number; direction: 'horizontal' | 'vertical'; durationMs: number }): void {
     const isHorizontal = input.direction === 'horizontal';
     const width = isHorizontal ? this.layout.arena.width - 42 : 24;
     const height = isHorizontal ? 24 : this.layout.arena.height - 128;
@@ -815,19 +871,28 @@ export class PotassiumSlipRenderer {
     hp: number
   ): Phaser.GameObjects.Text {
     const messages = getMessages();
-    const label = createUiText(this.scene, enemy.x, enemy.y - 34, messages.potassiumSlip.enemies.labelledHealth(labelText, hp), {
-      fontSize: '9px',
-      color: '#1a1a1a',
-      fontStyle: 'bold',
-      align: 'center'
-    }).setOrigin(0.5).setDepth(900);
+    const label = createUiText(
+      this.scene,
+      enemy.x,
+      enemy.y - 34,
+      messages.potassiumSlip.enemies.labelledHealth(labelText, hp),
+      {
+        fontSize: '9px',
+        color: '#1a1a1a',
+        fontStyle: 'bold',
+        align: 'center'
+      }
+    )
+      .setOrigin(0.5)
+      .setDepth(900);
     enemy.once(Phaser.GameObjects.Events.DESTROY, () => label.destroy());
     return label;
   }
 
   private createDamageOverlay(enemy: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody): Phaser.GameObjects.Sprite {
     const kind = getPotassiumEnemyKind(enemy);
-    const overlay = this.scene.add.sprite(enemy.x, enemy.y, kind === 'wall' ? 'potassium_wall_damage_cracked' : 'potassium_damage_cracked')
+    const overlay = this.scene.add
+      .sprite(enemy.x, enemy.y, kind === 'wall' ? 'potassium_wall_damage_cracked' : 'potassium_damage_cracked')
       .setDepth(enemy.depth + 1)
       .setOrigin(0.5)
       .setVisible(false);
@@ -839,7 +904,8 @@ export class PotassiumSlipRenderer {
     enemy: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
     side: PotassiumShieldSide
   ): Phaser.GameObjects.Rectangle {
-    const plate = this.scene.add.rectangle(enemy.x, enemy.y, 12, 12, 0xa1a1aa, 0.9)
+    const plate = this.scene.add
+      .rectangle(enemy.x, enemy.y, 12, 12, 0xa1a1aa, 0.9)
       .setStrokeStyle(4, 0x1a1a1a, 0.9)
       .setDepth(enemy.depth + 2);
     enemy.once(Phaser.GameObjects.Events.DESTROY, () => plate.destroy());
@@ -911,7 +977,12 @@ export class PotassiumSlipRenderer {
   private createInternTexture(): void {
     const g = this.scene.make.graphics({ x: 0, y: 0 });
     const puffs: Array<[number, number, number]> = [
-      [24, 28, 13], [13, 26, 8], [35, 26, 8], [17, 36, 7], [31, 36, 7], [24, 17, 8]
+      [24, 28, 13],
+      [13, 26, 8],
+      [35, 26, 8],
+      [17, 36, 7],
+      [31, 36, 7],
+      [24, 17, 8]
     ];
     g.fillStyle(0x1a1a1a, 1);
     g.fillEllipse(17, 10, 8, 16);
@@ -939,7 +1010,11 @@ export class PotassiumSlipRenderer {
   private createScopeTexture(): void {
     const g = this.scene.make.graphics({ x: 0, y: 0 });
     const blobs: Array<[number, number, number]> = [
-      [34, 30, 17], [20, 34, 11], [48, 33, 12], [27, 20, 9], [42, 19, 8]
+      [34, 30, 17],
+      [20, 34, 11],
+      [48, 33, 12],
+      [27, 20, 9],
+      [42, 19, 8]
     ];
     g.fillStyle(0x1a1a1a, 1);
     blobs.forEach(([x, y, r]) => g.fillCircle(x, y, r + 3));
@@ -1054,7 +1129,14 @@ export class PotassiumSlipRenderer {
     g.fillRoundedRect(45, 16, 22, 30, 2);
     g.strokeRoundedRect(45, 16, 22, 30, 2);
     g.fillStyle(0x1a1a1a, 0.35);
-    const speckles: Array<[number, number]> = [[10, 12], [40, 12], [70, 50], [40, 50], [10, 50], [70, 12]];
+    const speckles: Array<[number, number]> = [
+      [10, 12],
+      [40, 12],
+      [70, 50],
+      [40, 50],
+      [10, 50],
+      [70, 12]
+    ];
     speckles.forEach(([x, y]) => g.fillCircle(x, y, 1.4));
     g.generateTexture('potassium_enemy_hard_wall', 80, 62);
     g.destroy();
@@ -1326,18 +1408,33 @@ export class PotassiumSlipRenderer {
     g.lineStyle(2.5, 0x1a1a1a, 0.38);
     g.fillEllipse(30, 20, 56, 22);
     g.strokeEllipse(30, 20, 56, 22);
-    const foam: Array<[number, number, number]> = [[14, 18, 7], [24, 14, 8], [36, 15, 7], [46, 19, 6], [30, 22, 7]];
+    const foam: Array<[number, number, number]> = [
+      [14, 18, 7],
+      [24, 14, 8],
+      [36, 15, 7],
+      [46, 19, 6],
+      [30, 22, 7]
+    ];
     g.fillStyle(0xffffff, 0.72);
     foam.forEach(([x, y, r]) => g.fillCircle(x, y, r));
     g.lineStyle(1.5, 0x38bdf8, 0.55);
-    [[20, 7, 3], [40, 6, 2.5], [52, 11, 2]].forEach(([x, y, r]) => g.strokeCircle(x, y, r));
+    [
+      [20, 7, 3],
+      [40, 6, 2.5],
+      [52, 11, 2]
+    ].forEach(([x, y, r]) => g.strokeCircle(x, y, r));
     g.generateTexture('potassium_suds', 60, 36);
     g.destroy();
   }
 }
 
 /** Suds Trail: a ring of little foam bubbles around the sponge. */
-function drawSudsRingAccent(g: Phaser.GameObjects.Graphics, rank: PotassiumSkillRank, scale: number, alphaScale: number): void {
+function drawSudsRingAccent(
+  g: Phaser.GameObjects.Graphics,
+  rank: PotassiumSkillRank,
+  scale: number,
+  alphaScale: number
+): void {
   const ringRadius = (rank >= 2 ? 36 : 32) * scale;
   const count = rank >= 2 ? 10 : 8;
   for (let i = 0; i < count; i += 1) {
@@ -1372,7 +1469,12 @@ function drawDropletAccent(
 }
 
 /** Bubble Pop: a little cluster of soap bubbles riding on the sponge. */
-function drawBubbleClusterAccent(g: Phaser.GameObjects.Graphics, rank: PotassiumSkillRank, scale: number, alphaScale: number): void {
+function drawBubbleClusterAccent(
+  g: Phaser.GameObjects.Graphics,
+  rank: PotassiumSkillRank,
+  scale: number,
+  alphaScale: number
+): void {
   const grow = rank >= 2 ? 1.2 : 1;
   const bubbles: Array<[number, number, number, number]> = [
     [24, -22, 8, 0xf9a8d4],

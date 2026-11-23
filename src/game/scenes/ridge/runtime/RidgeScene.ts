@@ -1,10 +1,5 @@
 import * as Phaser from 'phaser';
-import {
-  bridgeActions,
-  bridgeStore,
-  type OpenOverlayOptions,
-  type RidgeRouteBeatState
-} from '@/game/bridge/store';
+import { bridgeActions, bridgeStore, type OpenOverlayOptions, type RidgeRouteBeatState } from '@/game/bridge/store';
 import {
   BRIDGE_SIM_DT,
   CICKA_DUEL_DT,
@@ -28,14 +23,8 @@ import {
 import { portraitForSpeaker } from '../content/castRegistry';
 import { type OverlayId } from '@/game/overlays/overlayIds';
 import { PHASER_SCENE_KEYS, RIDGE_SCENE_ID } from '@/game/scenes/sceneIds';
-import {
-  createInputCommandFrame,
-  type InputCommandFrame
-} from '@/game/core/input/commands';
-import {
-  readSceneInputCommands,
-  type SceneInputKeys
-} from '@/game/sharedSceneRuntime/input/readSceneInputCommands';
+import { createInputCommandFrame, type InputCommandFrame } from '@/game/core/input/commands';
+import { readSceneInputCommands, type SceneInputKeys } from '@/game/sharedSceneRuntime/input/readSceneInputCommands';
 import { bindSideViewKeyboard } from '@/game/sharedSceneRuntime/input/sceneKeyboard';
 import { StickVisualProvider } from '../art/stick/StickVisualProvider';
 import { toRidgeVisualViewModel, type RidgeVisualViewModel } from '../art/types';
@@ -81,10 +70,18 @@ const GIG_OUTRO_MS = 2400;
 const LESSON_OUTRO_MS = 1600;
 /** Keys for the three lanes: home row, arrows, the right hand's home row, digits. */
 const GIG_LANE_KEYS: Record<string, GigLane> = {
-  a: 0, s: 1, d: 2,
-  arrowleft: 0, arrowdown: 1, arrowright: 2,
-  j: 0, k: 1, l: 2,
-  '1': 0, '2': 1, '3': 2
+  a: 0,
+  s: 1,
+  d: 2,
+  arrowleft: 0,
+  arrowdown: 1,
+  arrowright: 2,
+  j: 0,
+  k: 1,
+  l: 2,
+  '1': 0,
+  '2': 1,
+  '3': 2
 };
 /** Catch-up cap so a hitch never fast-forwards the bridge test. */
 const MAX_SIM_STEPS_PER_FRAME = 4;
@@ -159,8 +156,7 @@ export class RidgeScene extends Phaser.Scene {
       progress: 0.05,
       inventory: hasGuitar ? [RIDGE_GUITAR_ITEM] : [],
       flags: areaId === 'bridge' ? cickaStandoffFlags(route.cickaStandoff) : [],
-      builtBridge:
-        areaId === 'bridge' && route.beat === 'bridge_complete' ? (route.bridgeDesign ?? null) : null
+      builtBridge: areaId === 'bridge' && route.beat === 'bridge_complete' ? (route.bridgeDesign ?? null) : null
     });
 
     const presence = loadRidgePresenceCatalog();
@@ -479,7 +475,7 @@ export class RidgeScene extends Phaser.Scene {
 
   /** Drain every pending action: a two-lane chord on touch arrives as two taps in one frame. */
   private handleSceneUiActions(): void {
-    for (let action = bridgeActions.consumeSceneUiAction(RIDGE_SCENE_ID); action && this.session; ) {
+    for (let action = bridgeActions.consumeSceneUiAction(RIDGE_SCENE_ID); action && this.session;) {
       this.handleSceneUiAction(action);
       action = bridgeActions.consumeSceneUiAction(RIDGE_SCENE_ID);
     }
@@ -655,7 +651,8 @@ export class RidgeScene extends Phaser.Scene {
       return;
     }
     const player = observation.actors.find((actor) => actor.id === 'player');
-    const playerX = this.visuals.worldXForProgress(player?.progress ?? observation.progress) + (frame.actors.player?.dx ?? 0);
+    const playerX =
+      this.visuals.worldXForProgress(player?.progress ?? observation.progress) + (frame.actors.player?.dx ?? 0);
     this.lessonView ??= new BachataLessonView(this);
     this.lessonView.sync(lesson, frame, { playerX });
   }

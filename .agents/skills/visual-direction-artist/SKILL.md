@@ -90,6 +90,7 @@ validation check present.
 [1-3 sentences on the visual job and the main risk or opportunity.]
 
 **Visual Card**
+
 - Surface:
 - Design intent:
 - On-style direction:
@@ -100,11 +101,13 @@ validation check present.
 - Prefer / avoid:
 
 **Specs Or Findings**
+
 - `[severity] [lens] issue or proposed direction`
   Why it matters: [player-experience or production reason]
   Recommendation: [smallest practical revision]
 
 **Validation**
+
 - [style-guide check, mobile/readability check, reduced-motion check, or Danilo taste check]
 ```
 

@@ -25,12 +25,12 @@ While the physics-based combat provides immediate arcade gratification, the long
 
 Progression within a single run is governed by an RNG-determined upgrade system where players select new balls or passives upon leveling up. The depth of this system is revealed when a player reaches the "Level 3" threshold for a specific ball. At this stage, the ball becomes eligible for either a specific "Evolution" or a general "Fusion".
 
-| Ball Class | Development Path | Strategic Outcome |
-| :---- | :---- | :---- |
-| **Base Balls** | Standard Leveling (1-3) | Incremental damage and speed increases. |
-| **Evolved Balls** | Fusion of two specific Level 3 Balls | Unlocks unique, powerful mechanics (e.g., Black Hole, Sun). |
-| **Fusions** | Merging any two balls (General Fusion) | Consolidates inventory space while retaining dual traits. |
-| **Multi-Evolutions** | Fusing two already-evolved balls | The pinnacle of power (e.g., Satan, Nosferatu). |
+| Ball Class           | Development Path                       | Strategic Outcome                                           |
+| :------------------- | :------------------------------------- | :---------------------------------------------------------- |
+| **Base Balls**       | Standard Leveling (1-3)                | Incremental damage and speed increases.                     |
+| **Evolved Balls**    | Fusion of two specific Level 3 Balls   | Unlocks unique, powerful mechanics (e.g., Black Hole, Sun). |
+| **Fusions**          | Merging any two balls (General Fusion) | Consolidates inventory space while retaining dual traits.   |
+| **Multi-Evolutions** | Fusing two already-evolved balls       | The pinnacle of power (e.g., Satan, Nosferatu).             |
 
 The "essence of fun" in this context is the search for "broken" synergies. Players are not merely choosing the strongest individual weapon; they are building a cohesive engine of destruction. For example, the "Maggot" ball is considered mediocre in isolation but becomes an "S-tier" component when fused with area-of-effect (AoE) projectiles like the "Holy Laser" or "Nuke". This creates a feedback loop where kills generate baby balls, which in turn trigger more kills, effectively "deleting" the entire screen of enemies.
 
@@ -38,14 +38,14 @@ The "essence of fun" in this context is the search for "broken" synergies. Playe
 
 The community has identified several "power-tier" evolutions that serve as the benchmark for successful high-level play. These combinations represent the peak of the game’s creative potential, often requiring precise planning to assemble during a chaotic 15-to-30-minute run.
 
-| Evolution Name | Recipe | Primary Mechanics and Tactical Utility |
-| :---- | :---- | :---- |
-| **Sun** | Burn \+ Light | Blinds all enemies and applies massive stacking burn damage; widely considered the most broken evolution in the game. |
-| **Black Hole** | Dark \+ Sun | Multi-evolution that instantly kills non-boss enemies; requires managing a 7-second cooldown. |
-| **Holy Laser** | Laser (V) \+ Laser (H) | Devastating cross-pattern beam that handles row and column clearing simultaneously. |
-| **Hemorrhage** | Bleed \+ Iron | Consumes 12 stacks of bleed to deal 20% of current health as instant damage; vital for high-HP foes. |
-| **Satan** | Incubus \+ Succubus | A legendary multi-evolution requiring the fusion of two separate demon-themed evolved balls. |
-| **Nosferatu** | Vampire Lord \+ Mosquito King \+ Spider Queen | One of the hardest evolutions to obtain, requiring three separate evolved components. |
+| Evolution Name | Recipe                                        | Primary Mechanics and Tactical Utility                                                                                |
+| :------------- | :-------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------- |
+| **Sun**        | Burn \+ Light                                 | Blinds all enemies and applies massive stacking burn damage; widely considered the most broken evolution in the game. |
+| **Black Hole** | Dark \+ Sun                                   | Multi-evolution that instantly kills non-boss enemies; requires managing a 7-second cooldown.                         |
+| **Holy Laser** | Laser (V) \+ Laser (H)                        | Devastating cross-pattern beam that handles row and column clearing simultaneously.                                   |
+| **Hemorrhage** | Bleed \+ Iron                                 | Consumes 12 stacks of bleed to deal 20% of current health as instant damage; vital for high-HP foes.                  |
+| **Satan**      | Incubus \+ Succubus                           | A legendary multi-evolution requiring the fusion of two separate demon-themed evolved balls.                          |
+| **Nosferatu**  | Vampire Lord \+ Mosquito King \+ Spider Queen | One of the hardest evolutions to obtain, requiring three separate evolved components.                                 |
 
 Expert strategies emphasize the importance of "Fusion Timing." Players can toggle a "manual level-up" setting, allowing them to hold onto experience points until they find a Fusion Reactor or the specific ball needed to complete a high-tier recipe. This layer of resource management transforms Ball x Pit from a simple reflex test into a "strategy puzzle".
 
@@ -58,8 +58,8 @@ Diversity in playstyle is further reinforced through the character roster. With 
 The characters are not mere stat-swaps; they are distinct mechanical frameworks. For instance, **The Juggler** changes the firing arc from a straight line to a lobbed projectile, allowing players to aim behind enemy shields or "target bomb" the back walls of the pit. Conversely, **The Cohabitants** present a unique spatial challenge: they are a pair of figures with two distinct hitboxes. While this makes dodging more complex, it allows the player to "thread the needle" by letting enemy projectiles pass between the two characters.
 The "Shadow Update" introduced even more radical departures from the norm:
 
-* **The Tunneller**: A miner whose balls "wrap around" the screen edges, appearing on the opposite side rather than bouncing off the wall. This allows for horizontal trajectories that can clear an entire row of enemies with a single launch.
-* **The Tiptoer**: A "ninja" archetype that remains undetected by enemies at close range. This enables a high-risk, high-reward playstyle where the player stays aggressive in the "danger zone," though this is balanced by significantly lower base health and damage.
+- **The Tunneller**: A miner whose balls "wrap around" the screen edges, appearing on the opposite side rather than bouncing off the wall. This allows for horizontal trajectories that can clear an entire row of enemies with a single launch.
+- **The Tiptoer**: A "ninja" archetype that remains undetected by enemies at close range. This enables a high-risk, high-reward playstyle where the player stays aggressive in the "danger zone," though this is balanced by significantly lower base health and damage.
 
 This character variety ensures that the meta-progression remains fresh. A player who has mastered the game with the **Warrior** may find themselves completely outmatched when trying to pilot the **Physicist** or the **Spendthrift**, as each requires a different understanding of ball speed, bounce decay, and inventory management.
 
@@ -71,13 +71,13 @@ Perhaps the most significant "hook" in Ball x Pit is its meta-progression system
 
 The town-building phase is a "manual, physical process". The yield of a harvest is determined by what the harvester physically touches during its flight time. This transforms the base-building into an "efficiency puzzle" where the placement of buildings matters as much as the upgrades they provide.
 
-| Building Category | Gameplay Impact and Progression Function |
-| :---- | :---- |
-| **Mines** | The primary engine for gold generation; expert players recommend getting gold from mines rather than runs. |
-| **Guildhall** | Added in the Shadow Update; allows players to re-roll character upgrades, providing more control over builds. |
-| **Character Houses** | Placing specific houses unlocks new heroes and provides them with innate stat bonuses. |
+| Building Category           | Gameplay Impact and Progression Function                                                                           |
+| :-------------------------- | :----------------------------------------------------------------------------------------------------------------- |
+| **Mines**                   | The primary engine for gold generation; expert players recommend getting gold from mines rather than runs.         |
+| **Guildhall**               | Added in the Shadow Update; allows players to re-roll character upgrades, providing more control over builds.      |
+| **Character Houses**        | Placing specific houses unlocks new heroes and provides them with innate stat bonuses.                             |
 | **Skill Scaling Buildings** | Upgradable to Levels 2 and 3; provides global scaling for Strength, Speed, and Intelligence across all characters. |
-| **Passive Harvesters** | Incremental game components that gather resources while the game is closed, ensuring constant progress. |
+| **Passive Harvesters**      | Incremental game components that gather resources while the game is closed, ensuring constant progress.            |
 
 The interaction between the "pit" and the "town" creates a compelling long-term loop. Players dive into the pit to find the materials needed to expand New Ballbylon, and the expansion of the town provides the power necessary to survive deeper dives and more difficult boss encounters. However, this system is not without friction; as the town grows, the screen can become cluttered, making it difficult to find specific buildings for upgrades, and leading to occasional performance issues or "softlocks" on certain hardware.
 
@@ -107,27 +107,27 @@ The analysis of "fun" in Ball x Pit must also account for the areas where the me
 
 The Skeleton King is the final boss of the first biome, and he represents a radical shift in gameplay. While the rest of the biome rewards high-volume fire and AoE synergies, the Skeleton King is "mechanically the hardest" because only a small spot on his crown is vulnerable.
 
-* **The Conflict**: Many players find that the builds they have carefully constructed (lifesteal, DoT, AoE) are "basically useless" against him, forcing a return to pure precision aiming.
-* **The Solution**: Community discourse suggests that "piercing" is the only true counter. Players who find the fight tedious are encouraged to prioritize balls or passives (like the **Ethereal Cloak** or **Wind**) that can pass through the boss's frontal armor to hit the crown directly.
-* **Implication**: This boss acts as a "knowledge check." It teaches the player that "more damage" is not always the answer and that specific mechanical counters (like piercing) are essential for late-game success.
+- **The Conflict**: Many players find that the builds they have carefully constructed (lifesteal, DoT, AoE) are "basically useless" against him, forcing a return to pure precision aiming.
+- **The Solution**: Community discourse suggests that "piercing" is the only true counter. Players who find the fight tedious are encouraged to prioritize balls or passives (like the **Ethereal Cloak** or **Wind**) that can pass through the boss's frontal armor to hit the crown directly.
+- **Implication**: This boss acts as a "knowledge check." It teaches the player that "more damage" is not always the answer and that specific mechanical counters (like piercing) are essential for late-game success.
 
 ### **The Automation Debate**
 
 Another point of contention is the role of characters like **The Radical** and **The Cogitator**, who automate gameplay and upgrade selection.
 
-* **Perspective A**: These characters are "accessibility leaps." They allow players to skip over "unfun" characters or grind through trophies while the game essentially "plays itself" in the background.
-* **Perspective B**: Automation "kills the fun." For some, the joy of a roguelite is in the "choice" and the "mentally stimulating" process of pathing out a build tree. Once the player realizes the game can be won without their input, the "magic" of the simulation is broken.
+- **Perspective A**: These characters are "accessibility leaps." They allow players to skip over "unfun" characters or grind through trophies while the game essentially "plays itself" in the background.
+- **Perspective B**: Automation "kills the fun." For some, the joy of a roguelite is in the "choice" and the "mentally stimulating" process of pathing out a build tree. Once the player realizes the game can be won without their input, the "magic" of the simulation is broken.
 
 ## **The Evolution of the Experience: Post-Launch Support**
 
 The ongoing "fun" of Ball x Pit is sustained by a robust content schedule. The "Regal Update" added the much-requested **Endless Mode**, allowing players to push their builds as far as they can survive. This update also introduced "multi-ball" characters like the **Falconer**, further expanding the combinatoric possibilities of the game.
 The "Shadow Update" further leaned into the "time-bending" theme, adding balls that can freeze time (**Timestop**), warp randomly (**Warp**), or drop "timesnares" (**Time Ball**). These additions suggest that the developer, Kenny Sun, is committed to moving beyond simple "damage" upgrades and toward mechanics that fundamentally alter the game's clock and spatial logic.
 
-| Shadow Update Item | Mechanical Innovation | Tactical Implication |
-| :---- | :---- | :---- |
-| **Venom Ball** | Slows and eventually paralyzes targets. | Vital for "stalling" bosses or dense waves. |
-| **Erosion Ball** | Deals percentage-based health damage. | The ultimate "tank-killer" for high-HP elites. |
-| **Sniper Ball** | Pierces enemies but disappears on wall-hit; boosted crit. | Rewards high-precision horizontal aiming. |
+| Shadow Update Item    | Mechanical Innovation                                         | Tactical Implication                                           |
+| :-------------------- | :------------------------------------------------------------ | :------------------------------------------------------------- |
+| **Venom Ball**        | Slows and eventually paralyzes targets.                       | Vital for "stalling" bosses or dense waves.                    |
+| **Erosion Ball**      | Deals percentage-based health damage.                         | The ultimate "tank-killer" for high-HP elites.                 |
+| **Sniper Ball**       | Pierces enemies but disappears on wall-hit; boosted crit.     | Rewards high-precision horizontal aiming.                      |
 | **Full Metal Rapier** | Passive; scales damage based on the total entities on screen. | Encourages letting the screen get "chaotic" to maximize power. |
 
 ## **Conclusion: Synthesizing the Essence of Fun**

@@ -103,8 +103,7 @@ export function getInteractiveGameShellLayout(
   size: InteractiveGameShellSize = 'card'
 ): InteractiveGameShellLayout {
   const sizing = PRESENTATION_SIZING[presentationMode];
-  const measuredRowHeight =
-    contentRowHeight && contentRowHeight > 0 ? contentRowHeight : null;
+  const measuredRowHeight = contentRowHeight && contentRowHeight > 0 ? contentRowHeight : null;
   const desktopHeightCap = size === 'card' ? sizing.cardHeightCap : WIDE_MAX_GAME_HEIGHT;
   // The measured row already excludes header/footer, so it keeps short
   // landscape screens from overflowing; 88dvh is the fallback before it lands.
@@ -121,8 +120,7 @@ export function getInteractiveGameShellLayout(
     shellStyle: {
       '--mobile-game-shell-max-width': sizing.mobileMaxWidth,
       '--mobile-game-shell-height-capped-width': mobileHeightCappedWidth,
-      '--desktop-game-shell-width':
-        `min(100%, calc(${desktopFrameMaxHeight} * ${sizing.desktopWidthPerHeight}))`
+      '--desktop-game-shell-width': `min(100%, calc(${desktopFrameMaxHeight} * ${sizing.desktopWidthPerHeight}))`
     },
     frameClassName: size === 'focus' ? FOCUS_FRAME_CLASS : FRAME_CLASS,
     frameStyle: {

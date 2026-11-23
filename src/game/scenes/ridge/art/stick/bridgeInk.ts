@@ -1,10 +1,5 @@
 import type * as Phaser from 'phaser';
-import {
-  BLUEPRINT_BRIDGE_PUZZLE,
-  settleBridge,
-  type BridgeDesign,
-  type BridgeMaterial
-} from '@/game/core/ridge';
+import { BLUEPRINT_BRIDGE_PUZZLE, settleBridge, type BridgeDesign, type BridgeMaterial } from '@/game/core/ridge';
 import { INK, PAPER, PAPER_WARM } from './palette';
 
 /**
@@ -98,12 +93,7 @@ function drawPlankTicks(g: Phaser.GameObjects.Graphics, beam: InkBeam, alpha: nu
 }
 
 /** Short cross-hatch dashes that crowd a member as it nears its limit. */
-function drawStrainTicks(
-  g: Phaser.GameObjects.Graphics,
-  beam: InkBeam,
-  amount: number,
-  alpha: number
-): void {
+function drawStrainTicks(g: Phaser.GameObjects.Graphics, beam: InkBeam, amount: number, alpha: number): void {
   const dx = beam.bx - beam.ax;
   const dy = beam.by - beam.ay;
   const len = Math.hypot(dx, dy);
@@ -117,7 +107,12 @@ function drawStrainTicks(
     const t = d / len;
     const x = beam.ax + dx * t;
     const y = beam.ay + dy * t;
-    g.lineBetween(x - nx * reach - dx / len * 2, y - ny * reach - dy / len * 2, x + nx * reach + dx / len * 2, y + ny * reach + dy / len * 2);
+    g.lineBetween(
+      x - nx * reach - (dx / len) * 2,
+      y - ny * reach - (dy / len) * 2,
+      x + nx * reach + (dx / len) * 2,
+      y + ny * reach + (dy / len) * 2
+    );
   }
 }
 
@@ -151,11 +146,7 @@ const shapeCache = new WeakMap<BridgeDesign, BuiltBridgeShape>();
  * way it really hangs. Cached per design so scenery rebakes and per-frame deck
  * height lookups do not resimulate.
  */
-export function builtBridgeShape(
-  design: BridgeDesign,
-  originX: number,
-  originY: number
-): BuiltBridgeShape {
+export function builtBridgeShape(design: BridgeDesign, originX: number, originY: number): BuiltBridgeShape {
   const cached = shapeCache.get(design);
   if (cached) return cached;
   const sim = settleBridge(BLUEPRINT_BRIDGE_PUZZLE, design);

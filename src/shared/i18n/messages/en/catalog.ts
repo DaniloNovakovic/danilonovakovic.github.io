@@ -1,74 +1,74 @@
 export const catalogMessages = {
   portfolio: {
     profile: {
-      name: "Profile",
-      description: "About me, my background and location.",
+      name: 'Profile',
+      description: 'About me, my background and location.'
     },
     experiences: {
-      name: "Experiences",
-      description: "My career path and education.",
+      name: 'Experiences',
+      description: 'My career path and education.'
     },
     projects: {
-      name: "Projects",
-      description: "Showcase of my personal and professional projects.",
+      name: 'Projects',
+      description: 'Showcase of my personal and professional projects.'
     },
     abilities: {
-      name: "Abilities",
-      description: "Technical skills, languages and tools.",
+      name: 'Abilities',
+      description: 'Technical skills, languages and tools.'
     },
     contact: {
-      name: "Contact",
-      description: "Get in touch with me.",
-    },
+      name: 'Contact',
+      description: 'Get in touch with me.'
+    }
   },
   basement: {
     basement: {
-      name: "Basement",
-      description: "A hidden developer room where rough sketches become playable.",
+      name: 'Basement',
+      description: 'A hidden developer room where rough sketches become playable.'
     },
     games: {
-      name: "Developer Console",
-      description: "A basement terminal for profile commands, skills, notes and experiments.",
-    },
+      name: 'Developer Console',
+      description: 'A basement terminal for profile commands, skills, notes and experiments.'
+    }
   },
   hobbies: {
     hobbies: {
-      name: "Hobbies",
-      description: "Step inside to see what I do when I am not coding.",
+      name: 'Hobbies',
+      description: 'Step inside to see what I do when I am not coding.'
     },
     art: {
-      name: "Digital Art",
-      description: "Sketching and drawing is how I relax.",
+      name: 'Digital Art',
+      description: 'Sketching and drawing is how I relax.'
     },
     music: {
-      name: "Music Performance",
-      description: "Playing guitar and making music.",
+      name: 'Music Performance',
+      description: 'Playing guitar and making music.'
     },
     fitness: {
-      name: "Muay Thai & Fitness",
-      description: "Keeping active with Muay Thai and exercise.",
+      name: 'Muay Thai & Fitness',
+      description: 'Keeping active with Muay Thai and exercise.'
     },
     dancing: {
-      name: "Dance & rhythm",
-      description: "Repeat the moves, feel the beat-coordination as a mini-game.",
-    },
+      name: 'Dance & rhythm',
+      description: 'Repeat the moves, feel the beat-coordination as a mini-game.'
+    }
   },
   potassiumSlip: {
     potassium: {
-      name: "Scrub Rumble",
-      description: "Bounce a smiling sponge through a raccoon's dumpster hoard and win back the Circuit.",
-    },
+      name: 'Scrub Rumble',
+      description: "Bounce a smiling sponge through a raccoon's dumpster hoard and win back the Circuit."
+    }
   },
   ridge: {
     ridge: {
-      name: "Sketchbook Ridge",
-      description: "A compact ridge route toward the Relay Spire.",
-    },
+      name: 'Sketchbook Ridge',
+      description: 'A compact ridge route toward the Relay Spire.'
+    }
   },
   stampedeSketch: {
     stampedeSketch: {
-      name: "Chick Magnet",
-      description: "A flock of chicks tries to reach you. Outlast them and the street comes into focus.",
-    },
-  },
+      name: 'Chick Magnet',
+      description: 'A flock of chicks tries to reach you. Outlast them and the street comes into focus.'
+    }
+  }
 } as const;

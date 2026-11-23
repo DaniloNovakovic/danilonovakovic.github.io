@@ -16,14 +16,26 @@ const none = { up: false, down: false, left: false, right: false };
 describe('potassium wall suds', () => {
   it('places the splash on the wall the sponge hit, inset from the border', () => {
     const projectile = { x: 420, y: 250 };
-    expect(resolvePotassiumWallSuds({ blocked: { ...none, left: true }, projectile, arena }))
-      .toEqual({ side: 'left', x: arena.left + POTASSIUM_WALL_SUDS_INSET, y: 250 });
-    expect(resolvePotassiumWallSuds({ blocked: { ...none, right: true }, projectile, arena }))
-      .toEqual({ side: 'right', x: arena.right - POTASSIUM_WALL_SUDS_INSET, y: 250 });
-    expect(resolvePotassiumWallSuds({ blocked: { ...none, up: true }, projectile, arena }))
-      .toEqual({ side: 'up', x: 420, y: arena.top + POTASSIUM_WALL_SUDS_INSET });
-    expect(resolvePotassiumWallSuds({ blocked: { ...none, down: true }, projectile, arena }))
-      .toEqual({ side: 'down', x: 420, y: arena.bottom - POTASSIUM_WALL_SUDS_INSET });
+    expect(resolvePotassiumWallSuds({ blocked: { ...none, left: true }, projectile, arena })).toEqual({
+      side: 'left',
+      x: arena.left + POTASSIUM_WALL_SUDS_INSET,
+      y: 250
+    });
+    expect(resolvePotassiumWallSuds({ blocked: { ...none, right: true }, projectile, arena })).toEqual({
+      side: 'right',
+      x: arena.right - POTASSIUM_WALL_SUDS_INSET,
+      y: 250
+    });
+    expect(resolvePotassiumWallSuds({ blocked: { ...none, up: true }, projectile, arena })).toEqual({
+      side: 'up',
+      x: 420,
+      y: arena.top + POTASSIUM_WALL_SUDS_INSET
+    });
+    expect(resolvePotassiumWallSuds({ blocked: { ...none, down: true }, projectile, arena })).toEqual({
+      side: 'down',
+      x: 420,
+      y: arena.bottom - POTASSIUM_WALL_SUDS_INSET
+    });
   });
 
   it('skips suds while recalling, when slow, or inside the cooldown', () => {
@@ -32,10 +44,12 @@ describe('potassium wall suds', () => {
     expect(shouldShowPotassiumWallSuds(ready)).toBe(true);
     expect(shouldShowPotassiumWallSuds({ ...ready, isRecalling: true })).toBe(false);
     expect(shouldShowPotassiumWallSuds({ ...ready, speed: POTASSIUM_WALL_HIT_MIN_SPEED - 1 })).toBe(false);
-    expect(shouldShowPotassiumWallSuds({
-      ...ready,
-      lastSudsAt: ready.now - POTASSIUM_WALL_SUDS_COOLDOWN_MS + 1
-    })).toBe(false);
+    expect(
+      shouldShowPotassiumWallSuds({
+        ...ready,
+        lastSudsAt: ready.now - POTASSIUM_WALL_SUDS_COOLDOWN_MS + 1
+      })
+    ).toBe(false);
   });
 
   describe('mini sponges', () => {
@@ -66,13 +80,16 @@ describe('potassium wall suds', () => {
       expect(resolvePotassiumWallClones({ ...ready, duplicateRank: 0 })).toBeNull();
       expect(resolvePotassiumWallClones({ ...ready, isRecalling: true })).toBeNull();
       expect(resolvePotassiumWallClones({ ...ready, speed: POTASSIUM_WALL_HIT_MIN_SPEED - 1 })).toBeNull();
-      expect(resolvePotassiumWallClones({
-        ...ready,
-        lastClonesAt: ready.now - POTASSIUM_WALL_CLONE_COOLDOWN_MS + 1
-      })).toBeNull();
+      expect(
+        resolvePotassiumWallClones({
+          ...ready,
+          lastClonesAt: ready.now - POTASSIUM_WALL_CLONE_COOLDOWN_MS + 1
+        })
+      ).toBeNull();
       expect(resolvePotassiumWallClones({ ...ready, activeClones: POTASSIUM_WALL_CLONE_MAX_ACTIVE })).toBeNull();
-      expect(resolvePotassiumWallClones({ ...ready, activeClones: POTASSIUM_WALL_CLONE_MAX_ACTIVE - 1 })?.angles)
-        .toHaveLength(1);
+      expect(
+        resolvePotassiumWallClones({ ...ready, activeClones: POTASSIUM_WALL_CLONE_MAX_ACTIVE - 1 })?.angles
+      ).toHaveLength(1);
     });
   });
 });

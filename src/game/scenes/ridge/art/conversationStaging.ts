@@ -35,9 +35,7 @@ export function conversationPartnerId(observation: StagingObservation): RidgeAct
 
 /** Stage actor voicing the current line, or null for narration. */
 export function speakingActorIdFor(observation: StagingObservation): RidgeActorId | null {
-  return observation.conversation
-    ? actorIdForSpeaker(observation.conversation.speakerId)
-    : null;
+  return observation.conversation ? actorIdForSpeaker(observation.conversation.speakerId) : null;
 }
 
 /**

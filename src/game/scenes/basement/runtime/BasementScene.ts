@@ -12,12 +12,7 @@ import {
   SIDE_VIEW_SPRINT_SPEED,
   SIDE_VIEW_WALK_SPEED
 } from '@/game/sharedSceneRuntime/config';
-import {
-  bridgeStore,
-  isItemEquipped,
-  isItemOwned,
-  type OpenOverlayOptions
-} from '@/game/bridge/store';
+import { bridgeStore, isItemEquipped, isItemOwned, type OpenOverlayOptions } from '@/game/bridge/store';
 import {
   CIRCUIT_PART_IDS,
   GameConsoleSession,
@@ -160,7 +155,10 @@ export class BasementScene extends Phaser.Scene {
       color: '#fbfbf9',
       backgroundColor: '#1a1a1a',
       padding: { x: 5, y: 2 }
-    }).setOrigin(0.5).setVisible(false).setDepth(100);
+    })
+      .setOrigin(0.5)
+      .setVisible(false)
+      .setDepth(100);
 
     this.statusText = createUiText(
       this,
@@ -173,7 +171,9 @@ export class BasementScene extends Phaser.Scene {
         backgroundColor: '#1a1a1a',
         padding: { x: 8, y: 4 }
       }
-    ).setOrigin(0.5).setDepth(100);
+    )
+      .setOrigin(0.5)
+      .setDepth(100);
     this.fadeStatusSoon();
 
     this.updateDen(0);

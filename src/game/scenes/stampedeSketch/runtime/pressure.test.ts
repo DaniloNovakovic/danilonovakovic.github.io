@@ -20,22 +20,24 @@ describe('stampede pressure', () => {
 
     expect(resolveStampedePressure({ ...base, elapsedMs: 0 }).band).toBe('calm');
     expect(resolveStampedePressure({ ...base, elapsedMs: STAMPEDE_OPENING_CALM_MS }).band).toBe('build');
-    expect(resolveStampedePressure({
-      ...base,
-      elapsedMs: STAMPEDE_OPENING_CALM_MS + STAMPEDE_BUILD_MS
-    }).band).toBe('surge');
-    expect(resolveStampedePressure({
-      ...base,
-      elapsedMs: STAMPEDE_OPENING_CALM_MS + STAMPEDE_BUILD_MS + STAMPEDE_SURGE_MS
-    }).band).toBe('recover');
-    expect(resolveStampedePressure({
-      ...base,
-      elapsedMs:
-        STAMPEDE_OPENING_CALM_MS +
-        STAMPEDE_BUILD_MS +
-        STAMPEDE_SURGE_MS +
-        STAMPEDE_RECOVER_MS
-    }).band).toBe('build');
+    expect(
+      resolveStampedePressure({
+        ...base,
+        elapsedMs: STAMPEDE_OPENING_CALM_MS + STAMPEDE_BUILD_MS
+      }).band
+    ).toBe('surge');
+    expect(
+      resolveStampedePressure({
+        ...base,
+        elapsedMs: STAMPEDE_OPENING_CALM_MS + STAMPEDE_BUILD_MS + STAMPEDE_SURGE_MS
+      }).band
+    ).toBe('recover');
+    expect(
+      resolveStampedePressure({
+        ...base,
+        elapsedMs: STAMPEDE_OPENING_CALM_MS + STAMPEDE_BUILD_MS + STAMPEDE_SURGE_MS + STAMPEDE_RECOVER_MS
+      }).band
+    ).toBe('build');
     expect(
       resolveStampedePressure({
         ...base,
@@ -107,20 +109,8 @@ describe('stampede pressure', () => {
   });
 
   it('gates contacts until the cooldown boundary', () => {
-    expect(
-      canApplyStampedeContact(
-        STAMPEDE_CONTACT_COOLDOWN_MS - 1,
-        0,
-        STAMPEDE_CONTACT_COOLDOWN_MS
-      )
-    ).toBe(false);
-    expect(
-      canApplyStampedeContact(
-        STAMPEDE_CONTACT_COOLDOWN_MS,
-        0,
-        STAMPEDE_CONTACT_COOLDOWN_MS
-      )
-    ).toBe(true);
+    expect(canApplyStampedeContact(STAMPEDE_CONTACT_COOLDOWN_MS - 1, 0, STAMPEDE_CONTACT_COOLDOWN_MS)).toBe(false);
+    expect(canApplyStampedeContact(STAMPEDE_CONTACT_COOLDOWN_MS, 0, STAMPEDE_CONTACT_COOLDOWN_MS)).toBe(true);
   });
 
   it('uses the exact cooldown boundary in pressure snapshots', () => {

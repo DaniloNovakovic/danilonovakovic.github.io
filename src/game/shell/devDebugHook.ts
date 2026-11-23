@@ -14,8 +14,7 @@ export const DEV_DEBUG_GLOBAL = '__sketchbookDebug';
 const SCENE_ID_BY_PHASER_KEY = new Map<string, string>(
   Object.entries(PHASER_SCENE_KEYS).map(([sceneId, phaserKey]) => [phaserKey, sceneId])
 );
-const sceneName = (scene: Phaser.Scene) =>
-  SCENE_ID_BY_PHASER_KEY.get(scene.scene.key) ?? scene.scene.key;
+const sceneName = (scene: Phaser.Scene) => SCENE_ID_BY_PHASER_KEY.get(scene.scene.key) ?? scene.scene.key;
 
 export interface DebugPoint {
   x: number;
@@ -83,10 +82,7 @@ export function createDevDebugHook(getGame: () => Phaser.Game | null): Sketchboo
 }
 
 /** Installs the hook on `target` and returns the uninstall function. */
-export function installDevDebugHook(
-  target: Record<string, unknown>,
-  getGame: () => Phaser.Game | null
-): () => void {
+export function installDevDebugHook(target: Record<string, unknown>, getGame: () => Phaser.Game | null): () => void {
   const hook = createDevDebugHook(getGame);
   target[DEV_DEBUG_GLOBAL] = hook;
   return () => {

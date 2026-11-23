@@ -12,7 +12,9 @@ function LocaleConsumer({ onRender }: { onRender: (locale: string) => void }) {
     <div>
       <p>{messages.common.loading}</p>
       <p data-testid="locale">{locale}</p>
-      <button type="button" onClick={() => setLocale('en')}>Use English</button>
+      <button type="button" onClick={() => setLocale('en')}>
+        Use English
+      </button>
     </div>
   );
 }

@@ -1,11 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it } from 'vitest';
-import {
-  DEFAULT_LOCALE,
-  LOCALE_STORAGE_KEY,
-  readLocaleFromBrowser,
-  resolveLocale
-} from './locale';
+import { DEFAULT_LOCALE, LOCALE_STORAGE_KEY, readLocaleFromBrowser, resolveLocale } from './locale';
 
 describe('locale resolution', () => {
   afterEach(() => {

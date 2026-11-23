@@ -47,18 +47,44 @@ function staging(
 
 describe('conversation staging', () => {
   it('puts a resident on the side they stand relative to the player', () => {
-    expect(speakerSideFor(staging('cicka', [['player', 0.2], ['cicka', 0.3]]))).toBe('right');
-    expect(speakerSideFor(staging('cicka', [['player', 0.4], ['cicka', 0.3]]))).toBe('left');
+    expect(
+      speakerSideFor(
+        staging('cicka', [
+          ['player', 0.2],
+          ['cicka', 0.3]
+        ])
+      )
+    ).toBe('right');
+    expect(
+      speakerSideFor(
+        staging('cicka', [
+          ['player', 0.4],
+          ['cicka', 0.3]
+        ])
+      )
+    ).toBe('left');
   });
 
   it('seats the player opposite their partner', () => {
-    const view = staging('player', [['player', 0.2], ['cicka', 0.3], ['draftsperson', 0.1]], 'cicka');
+    const view = staging(
+      'player',
+      [
+        ['player', 0.2],
+        ['cicka', 0.3],
+        ['draftsperson', 0.1]
+      ],
+      'cicka'
+    );
     expect(conversationPartnerId(view)).toBe('cicka');
     expect(speakerSideFor(view)).toBe('left');
   });
 
   it('falls back to the nearest visible resident when nothing is focused', () => {
-    const view = staging('player', [['player', 0.5], ['cicka', 0.2], ['draftsperson', 0.45]]);
+    const view = staging('player', [
+      ['player', 0.5],
+      ['cicka', 0.2],
+      ['draftsperson', 0.45]
+    ]);
     expect(conversationPartnerId(view)).toBe('draftsperson');
     expect(speakerSideFor(view)).toBe('right');
   });

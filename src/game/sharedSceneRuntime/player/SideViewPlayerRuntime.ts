@@ -161,9 +161,7 @@ class PhaserSideViewPlayerRuntime implements SideViewPlayerRuntime {
 
     this.player.setFlipX(step.facingLeft);
     this.player.setAngle(
-      step.moving
-        ? Math.sin(this.options.scene.time.now / WALK_BOB_PERIOD_MS) * WALK_BOB_ANGLE_DEGREES
-        : 0
+      step.moving ? Math.sin(this.options.scene.time.now / WALK_BOB_PERIOD_MS) * WALK_BOB_ANGLE_DEGREES : 0
     );
 
     return { paused: false, commands, step };
@@ -175,9 +173,7 @@ class PhaserSideViewPlayerRuntime implements SideViewPlayerRuntime {
     if (hasGlasses === this.hasGlassesSprite) return;
     this.hasGlassesSprite = hasGlasses;
     this.player.setTexture(
-      hasGlasses
-        ? this.options.appearance.glassesTextureKey
-        : this.options.appearance.idleTextureKey
+      hasGlasses ? this.options.appearance.glassesTextureKey : this.options.appearance.idleTextureKey
     );
   }
 }
@@ -202,8 +198,6 @@ function createPlayerCameraRuntime(
  * Creates the shared side-view player runtime. Scenes must create physics colliders
  * after this returns so they can attach colliders to `runtime.player`.
  */
-export function createSideViewPlayerRuntime(
-  options: SideViewPlayerRuntimeOptions
-): SideViewPlayerRuntime {
+export function createSideViewPlayerRuntime(options: SideViewPlayerRuntimeOptions): SideViewPlayerRuntime {
   return new PhaserSideViewPlayerRuntime(options);
 }

@@ -38,7 +38,10 @@ export class StreetChick {
       color: '#1a1a1a',
       backgroundColor: '#fbfbf9',
       padding: { x: 4, y: 2 }
-    }).setOrigin(0.5, 1).setDepth(23).setVisible(false);
+    })
+      .setOrigin(0.5, 1)
+      .setDepth(23)
+      .setVisible(false);
     this.draw('idle');
   }
 
@@ -51,13 +54,7 @@ export class StreetChick {
     return Math.abs(this.chickX - this.homeX) <= HOME_SLACK_PX;
   }
 
-  update(
-    timeMs: number,
-    deltaMs: number,
-    playerX: number,
-    glassesOn: boolean,
-    motion: boolean
-  ): void {
+  update(timeMs: number, deltaMs: number, playerX: number, glassesOn: boolean, motion: boolean): void {
     const dt = Math.min(deltaMs, 50) / 1000;
     if (this.fleeFromGlasses(playerX, glassesOn, motion, dt)) return;
     if (this.walkHome(glassesOn, motion, dt)) return;

@@ -127,12 +127,22 @@ describe('SideViewPlayerRuntime', () => {
 
   it('generates the player textures when a room starts before the street made them', () => {
     const missing = createScene({ hasPlayerTexture: false });
-    createSideViewPlayerRuntime({ scene: missing.scene, start: { x: 0, y: 0 }, movement, input: { allowJump: true, allowSprint: true } });
+    createSideViewPlayerRuntime({
+      scene: missing.scene,
+      start: { x: 0, y: 0 },
+      movement,
+      input: { allowJump: true, allowSprint: true }
+    });
     expect(TextureGenerator.generatePlayer).toHaveBeenCalledWith(missing.scene);
 
     vi.mocked(TextureGenerator.generatePlayer).mockClear();
     const present = createScene();
-    createSideViewPlayerRuntime({ scene: present.scene, start: { x: 0, y: 0 }, movement, input: { allowJump: true, allowSprint: true } });
+    createSideViewPlayerRuntime({
+      scene: present.scene,
+      start: { x: 0, y: 0 },
+      movement,
+      input: { allowJump: true, allowSprint: true }
+    });
     expect(TextureGenerator.generatePlayer).not.toHaveBeenCalled();
   });
 

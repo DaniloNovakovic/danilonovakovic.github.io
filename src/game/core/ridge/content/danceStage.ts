@@ -321,16 +321,16 @@ function interactPlans(state: RidgeWorldState): DancePlan[] {
     plan('driver', driverConversation(state), open ? 'dance.shuttle.driver.prompt' : 'dance.driver.prompt'),
     plan('teacher', 'dance.teacher.floor'),
     plan('operations', requested(state) ? 'dance.operations.after' : 'dance.operations.table'),
-    plan(
-      'cicka',
-      open ? 'dance.cats.gate' : catOut(state) ? 'dance.cats.together' : 'dance.cicka.crates'
-    )
+    plan('cicka', open ? 'dance.cats.gate' : catOut(state) ? 'dance.cats.together' : 'dance.cicka.crates')
   ];
   if (!open && !catOut(state)) plans.push(plan('chairs', 'dance.cats.chairs'));
   if (open) {
     plans.push(plan('steward', 'dance.steward.after'), plan('shuttle', 'dance.shuttle.last_daylight_ride'));
   } else if (requested(state)) {
-    plans.push(plan('steward', 'dance.steward.clearance'), plan('gate', 'dance.steward.clearance', 'dance.gate.clearance.prompt'));
+    plans.push(
+      plan('steward', 'dance.steward.clearance'),
+      plan('gate', 'dance.steward.clearance', 'dance.gate.clearance.prompt')
+    );
     if (!state.flags.has(FLAG_SNAP_LANTERNS)) plans.push(plan('lantern-pole', 'dance.setup.lanterns'));
     if (!state.flags.has(FLAG_SNAP_CABLES)) plans.push(plan('cable-run', 'dance.setup.cables'));
   } else {
@@ -430,9 +430,10 @@ function resolveDanceActors(state: RidgeWorldState): RidgeActorPresence[] {
   const hasGuitar = state.inventory.includes(RIDGE_GUITAR_ITEM);
   const rest = (id: RidgeActorId) => restingProgress(state, id);
 
-  const partnerId = state.mode === 'conversation'
-    ? CONVERSATION_PARTNER.find(([prefix]) => state.conversation?.id.startsWith(prefix))?.[1]
-    : undefined;
+  const partnerId =
+    state.mode === 'conversation'
+      ? CONVERSATION_PARTNER.find(([prefix]) => state.conversation?.id.startsWith(prefix))?.[1]
+      : undefined;
   const playerProgress = atLesson
     ? DANCE_LAYOUT.lesson.player
     : serenade || serenadeTalk
@@ -601,10 +602,14 @@ function resolveDanceConversation(
         ],
         { outcome: { setFlag: FLAG_LESSON_ASKED } }
       );
-      const tease = choice('tease', [
-        ['01', 'hillShuttleDriver', 'determined'],
-        ['02', 'prompt']
-      ], { choices: [learn] });
+      const tease = choice(
+        'tease',
+        [
+          ['01', 'hillShuttleDriver', 'determined'],
+          ['02', 'prompt']
+        ],
+        { choices: [learn] }
+      );
       const drop = choice('drop', [['01', 'hillShuttleDriver']]);
       return {
         id: conversationId,
@@ -649,9 +654,16 @@ function resolveDanceConversation(
         id: conversationId,
         lines: [say(['01', 'hillShuttleDriver', 'surprised'])],
         choices: [
-          choice('encourage', [['01', 'hillShuttleDriver', 'determined'], ['02', 'prompt']], {
-            outcome: { setFlag: FLAG_ENCOURAGED }
-          }),
+          choice(
+            'encourage',
+            [
+              ['01', 'hillShuttleDriver', 'determined'],
+              ['02', 'prompt']
+            ],
+            {
+              outcome: { setFlag: FLAG_ENCOURAGED }
+            }
+          ),
           choice('looking', [['01', 'hillShuttleDriver', 'playful']])
         ]
       };
@@ -682,9 +694,16 @@ function resolveDanceConversation(
         ],
         { outcome: { addItem: FOLDED_REQUEST_ITEM } }
       );
-      const novel = choice('novel', [['01', 'hillShuttleDriver', 'surprised'], ['02', 'hillShuttleDriver']], {
-        choices: [simple]
-      });
+      const novel = choice(
+        'novel',
+        [
+          ['01', 'hillShuttleDriver', 'surprised'],
+          ['02', 'hillShuttleDriver']
+        ],
+        {
+          choices: [simple]
+        }
+      );
       const sign = choice('sign', [['01', 'hillShuttleDriver', 'thoughtful']], { choices: [simple] });
       return {
         id: conversationId,
@@ -703,10 +722,17 @@ function resolveDanceConversation(
             ],
             { choices: [simple, novel, sign] }
           ),
-          choice('later', [['01', 'hillShuttleDriver'], ['02', 'hillShuttleDriver', 'surprised']], {
-            then: 'menu',
-            once: true
-          })
+          choice(
+            'later',
+            [
+              ['01', 'hillShuttleDriver'],
+              ['02', 'hillShuttleDriver', 'surprised']
+            ],
+            {
+              then: 'menu',
+              once: true
+            }
+          )
         ]
       };
     }
@@ -855,12 +881,35 @@ function resolveDanceConversation(
         ],
         { choices: [watch, askHim] }
       );
-      const stamp = choice('stamp', [['01', 'prompt'], ['02', 'operationsHelper']], { choices: [count] });
-      const tug = choice('tug', [['01', 'prompt'], ['02', 'operationsHelper']], { choices: [stamp] });
+      const stamp = choice(
+        'stamp',
+        [
+          ['01', 'prompt'],
+          ['02', 'operationsHelper']
+        ],
+        { choices: [count] }
+      );
+      const tug = choice(
+        'tug',
+        [
+          ['01', 'prompt'],
+          ['02', 'operationsHelper']
+        ],
+        { choices: [stamp] }
+      );
 
       const checklist =
         !flags.has(FLAG_OPS_CHECKED) && !flags.has(FLAG_OPS_NEEDS_WATCH)
-          ? [choice('help', [['01', 'operationsHelper', 'curious'], ['02', 'operationsHelper']], { choices: [tug] })]
+          ? [
+              choice(
+                'help',
+                [
+                  ['01', 'operationsHelper', 'curious'],
+                  ['02', 'operationsHelper']
+                ],
+                { choices: [tug] }
+              )
+            ]
           : [];
       const tonight =
         flags.has(FLAG_OPS_CHECKED) && !flags.has(FLAG_OPS_NEEDS_WATCH)
@@ -909,7 +958,13 @@ function resolveDanceConversation(
         id: conversationId,
         lines: first
           ? [say(['01', 'prompt']), say(['02', 'operationsHelper', 'surprised'])]
-          : [say([opsReady(state) ? 'ready.01' : 'again.01', 'operationsHelper', opsReady(state) ? 'playful' : 'curious'])],
+          : [
+              say([
+                opsReady(state) ? 'ready.01' : 'again.01',
+                'operationsHelper',
+                opsReady(state) ? 'playful' : 'curious'
+              ])
+            ],
         choices: [
           ...drop,
           ...watchKept,
@@ -937,7 +992,10 @@ function resolveDanceConversation(
         id: conversationId,
         lines: [say([cleared(state) ? 'open.01' : '01', 'operationsHelper', 'playful'])],
         choices: [
-          choice('happy', [['01', 'operationsHelper', 'determined'], ['02', 'operationsHelper', 'playful']]),
+          choice('happy', [
+            ['01', 'operationsHelper', 'determined'],
+            ['02', 'operationsHelper', 'playful']
+          ]),
           choice('leave', [['01', 'operationsHelper']])
         ]
       };
@@ -1006,10 +1064,17 @@ function resolveDanceConversation(
         ],
         { outcome: { setBeat: 'dance_cleared' } }
       );
-      const party = choice('party', [['01', 'prompt'], ['02', 'festivalSteward', 'playful']], {
-        then: 'menu',
-        once: true
-      });
+      const party = choice(
+        'party',
+        [
+          ['01', 'prompt'],
+          ['02', 'festivalSteward', 'playful']
+        ],
+        {
+          then: 'menu',
+          once: true
+        }
+      );
       return {
         id: conversationId,
         lines: [say(['ready.01', 'festivalSteward', 'playful']), say(['ready.02', 'festivalSteward'])],
@@ -1023,13 +1088,34 @@ function resolveDanceConversation(
         id: conversationId,
         lines: [say([flags.has(FLAG_LANTERNS_MID) ? '01_mid' : '01', 'prompt'])],
         choices: [
-          choice('low', [['01', 'prompt'], ['02', 'festivalSteward', 'playful']], { then: 'menu', once: true }),
-          choice('middle', [['01', 'prompt'], ['02', 'festivalSteward', 'thoughtful']], {
-            then: 'menu',
-            once: true,
-            outcome: { setFlag: FLAG_LANTERNS_MID }
-          }),
-          choice('top', [['01', 'prompt'], ['02', 'prompt']], { outcome: { setFlag: FLAG_SNAP_LANTERNS } }),
+          choice(
+            'low',
+            [
+              ['01', 'prompt'],
+              ['02', 'festivalSteward', 'playful']
+            ],
+            { then: 'menu', once: true }
+          ),
+          choice(
+            'middle',
+            [
+              ['01', 'prompt'],
+              ['02', 'festivalSteward', 'thoughtful']
+            ],
+            {
+              then: 'menu',
+              once: true,
+              outcome: { setFlag: FLAG_LANTERNS_MID }
+            }
+          ),
+          choice(
+            'top',
+            [
+              ['01', 'prompt'],
+              ['02', 'prompt']
+            ],
+            { outcome: { setFlag: FLAG_SNAP_LANTERNS } }
+          ),
           choice('leave', [['01', 'prompt']])
         ]
       };
@@ -1041,7 +1127,14 @@ function resolveDanceConversation(
         id: conversationId,
         lines: [say(['01', 'prompt'])],
         choices: [
-          choice('tape', [['01', 'prompt'], ['02', 'festivalSteward']], { then: 'menu', once: true }),
+          choice(
+            'tape',
+            [
+              ['01', 'prompt'],
+              ['02', 'festivalSteward']
+            ],
+            { then: 'menu', once: true }
+          ),
           choice(
             'unplug',
             [
@@ -1051,9 +1144,16 @@ function resolveDanceConversation(
             ],
             { then: 'menu', once: true }
           ),
-          choice('ramp', [['01', 'prompt'], ['02', 'festivalSteward', 'playful']], {
-            outcome: { setFlag: FLAG_SNAP_CABLES }
-          }),
+          choice(
+            'ramp',
+            [
+              ['01', 'prompt'],
+              ['02', 'festivalSteward', 'playful']
+            ],
+            {
+              outcome: { setFlag: FLAG_SNAP_CABLES }
+            }
+          ),
           choice('leave', [['01', 'prompt']])
         ]
       };
@@ -1070,12 +1170,26 @@ function resolveDanceConversation(
         id: conversationId,
         lines: [say(['01', 'prompt'])],
         choices: [
-          choice('pet', [['01', 'cicka', 'sleepy'], ['02', 'prompt']], { then: 'menu', once: true }),
-          choice('look', [['01', 'prompt'], ['02', 'prompt']], {
-            then: 'menu',
-            once: true,
-            outcome: { setFlag: FLAG_CAT_SEEN }
-          }),
+          choice(
+            'pet',
+            [
+              ['01', 'cicka', 'sleepy'],
+              ['02', 'prompt']
+            ],
+            { then: 'menu', once: true }
+          ),
+          choice(
+            'look',
+            [
+              ['01', 'prompt'],
+              ['02', 'prompt']
+            ],
+            {
+              then: 'menu',
+              once: true,
+              outcome: { setFlag: FLAG_CAT_SEEN }
+            }
+          ),
           choice('leave', [['01', 'prompt']])
         ]
       };
@@ -1083,14 +1197,30 @@ function resolveDanceConversation(
     case 'dance.cats.chairs': {
       const { say, choice } = kit(conversationId);
       const play = state.inventory.includes(RIDGE_GUITAR_ITEM)
-        ? [choice('play', [['01', 'prompt'], ['02', 'prompt']], { outcome: { openConcertGig: 'serenade' } })]
+        ? [
+            choice(
+              'play',
+              [
+                ['01', 'prompt'],
+                ['02', 'prompt']
+              ],
+              { outcome: { openConcertGig: 'serenade' } }
+            )
+          ]
         : [];
       return {
         id: conversationId,
         lines: [say([flags.has(FLAG_CAT_SEEN) ? '01_seen' : '01', 'prompt'])],
         choices: [
           ...play,
-          choice('coax', [['01', 'counterpartCat', 'determined'], ['02', 'prompt']], { then: 'menu', once: true }),
+          choice(
+            'coax',
+            [
+              ['01', 'counterpartCat', 'determined'],
+              ['02', 'prompt']
+            ],
+            { then: 'menu', once: true }
+          ),
           choice('call', [['01', 'prompt']], { then: 'menu', once: true }),
           choice('leave', [['01', 'prompt']])
         ]
@@ -1117,7 +1247,10 @@ function resolveDanceConversation(
         id: conversationId,
         lines: [say(['01', 'prompt'])],
         choices: [
-          choice('pet', [['01', 'cicka', 'sleepy'], ['02', 'prompt']]),
+          choice('pet', [
+            ['01', 'cicka', 'sleepy'],
+            ['02', 'prompt']
+          ]),
           choice('encore', [['01', 'prompt']], { outcome: { openConcertGig: 'serenade' } }),
           choice('leave', [['01', 'prompt']])
         ]
@@ -1184,5 +1317,5 @@ function describeDanceAmbience(state: RidgeWorldState): string {
   if (opsReady(state)) {
     return 'Ops has set the radio down. At the shelter, the driver still reads the same clipboard line.';
   }
-  return 'Last-Stop Plaza, daytime setup for tonight\'s bachata. The service road to the Relay hill is closed.';
+  return "Last-Stop Plaza, daytime setup for tonight's bachata. The service road to the Relay hill is closed.";
 }

@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  POTASSIUM_SCENE_ID,
-  RIDGE_SCENE_ID,
-  STAMPEDE_SKETCH_SCENE_ID
-} from '@/game/scenes/sceneIds';
+import { POTASSIUM_SCENE_ID, RIDGE_SCENE_ID, STAMPEDE_SKETCH_SCENE_ID } from '@/game/scenes/sceneIds';
 import { getNotebookRuntimeShellProfile } from './notebookShellProfile';
 
 describe('notebook runtime shell profile', () => {

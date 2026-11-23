@@ -50,10 +50,7 @@ function makeFakeAdapter(initialScenes: readonly string[] = ['MainScene']): Fake
   };
 }
 
-function context(
-  id: SceneId,
-  options: Partial<SceneContextDefinition> = {}
-): SceneContextDefinition {
+function context(id: SceneId, options: Partial<SceneContextDefinition> = {}): SceneContextDefinition {
   return {
     id,
     sceneKey: id === OVERWORLD_SCENE_ID ? PHASER_SCENE_KEYS.overworld : id,

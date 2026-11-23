@@ -55,10 +55,7 @@ function drawDoodle(g: Phaser.GameObjects.Graphics, x: number, y: number, random
   else doodleHeart(g, x, y);
 }
 
-function drawBlanket(
-  g: Phaser.GameObjects.Graphics,
-  blanket: { x: number; y: number; w: number; h: number }
-): void {
+function drawBlanket(g: Phaser.GameObjects.Graphics, blanket: { x: number; y: number; w: number; h: number }): void {
   const cell = 26;
   const left = blanket.x - blanket.w / 2;
   const top = blanket.y - blanket.h / 2;

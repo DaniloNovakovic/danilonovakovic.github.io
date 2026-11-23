@@ -25,24 +25,15 @@ describe('stampede result actions', () => {
   ];
 
   it('resolves pointer input inside retry bounds', () => {
-    expect(resolveStampedeResultPointerAction(
-      { x: 140, y: 220 },
-      buttonBounds
-    )).toBe('retry');
+    expect(resolveStampedeResultPointerAction({ x: 140, y: 220 }, buttonBounds)).toBe('retry');
   });
 
   it('resolves pointer input inside back bounds', () => {
-    expect(resolveStampedeResultPointerAction(
-      { x: 300, y: 220 },
-      buttonBounds
-    )).toBe('backToRidge');
+    expect(resolveStampedeResultPointerAction({ x: 300, y: 220 }, buttonBounds)).toBe('backToRidge');
   });
 
   it('ignores pointer input outside result buttons', () => {
-    expect(resolveStampedeResultPointerAction(
-      { x: 99, y: 220 },
-      buttonBounds
-    )).toBeNull();
+    expect(resolveStampedeResultPointerAction({ x: 99, y: 220 }, buttonBounds)).toBeNull();
   });
 
   it('maps retry keys and ignores repeated keydown events', () => {

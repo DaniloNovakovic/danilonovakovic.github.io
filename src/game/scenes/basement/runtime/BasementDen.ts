@@ -54,7 +54,12 @@ export class BasementDen {
     this.steam = scene.add.graphics().setDepth(4);
     this.bulb = scene.add.graphics().setDepth(6);
     this.glassesStand = this.drawGlassesStand();
-    this.glassesLabel = this.addLabel(getBasementSpot('glasses').x, FLOOR_Y + 30, getMessages().scenes.basement.glasses, '#66ff99');
+    this.glassesLabel = this.addLabel(
+      getBasementSpot('glasses').x,
+      FLOOR_Y + 30,
+      getMessages().scenes.basement.glasses,
+      '#66ff99'
+    );
     this.blueprint = scene.add.graphics().setDepth(3);
     this.benchBoard = scene.add.graphics().setDepth(5);
     this.drawWorkbench();
@@ -87,7 +92,9 @@ export class BasementDen {
 
   /** Flip the card that was just read so repeat reads feel like browsing the board. */
   markNoteRead(variant: number): void {
-    this.noteCards.forEach((card, index) => card.setFillStyle(CHALK, index === variant % this.noteCards.length ? 1 : 0.82));
+    this.noteCards.forEach((card, index) =>
+      card.setFillStyle(CHALK, index === variant % this.noteCards.length ? 1 : 0.82)
+    );
   }
 
   /** Little sparkle burst when the Circuit is soldered. */

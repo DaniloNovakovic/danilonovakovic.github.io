@@ -12,9 +12,7 @@ export interface RidgeRouteDialogueCatalog {
 }
 
 /** Build the full first-playable Compact Ridge Stage registry. */
-export function createRidgeRouteStages(
-  catalog: RidgeRouteDialogueCatalog
-): RidgeStageRegistry {
+export function createRidgeRouteStages(catalog: RidgeRouteDialogueCatalog): RidgeStageRegistry {
   return {
     bridge: createBridgeStage(catalog.bridge),
     concert: createConcertStage(catalog.concert),

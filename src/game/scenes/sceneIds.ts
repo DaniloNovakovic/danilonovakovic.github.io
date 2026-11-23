@@ -1,11 +1,4 @@
-export const SCENE_IDS = [
-  'overworld',
-  'hobbies',
-  'basement',
-  'potassium',
-  'ridge',
-  'stampedeSketch'
-] as const;
+export const SCENE_IDS = ['overworld', 'hobbies', 'basement', 'potassium', 'ridge', 'stampedeSketch'] as const;
 
 export type SceneId = (typeof SCENE_IDS)[number];
 

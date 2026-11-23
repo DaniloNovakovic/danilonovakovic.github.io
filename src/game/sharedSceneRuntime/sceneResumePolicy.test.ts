@@ -1,10 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { PHASER_SCENE_KEYS } from '@/game/scenes/sceneIds';
-import {
-  getSceneStartResume,
-  prepareSceneStart,
-  recordSceneExitResume
-} from './sceneResumePolicy';
+import { getSceneStartResume, prepareSceneStart, recordSceneExitResume } from './sceneResumePolicy';
 import { forgetResumePosition, rememberResumePosition } from './sceneResumeStore';
 
 const TEST_SCENE_KEY = 'unknown-test-scene';
@@ -24,18 +20,17 @@ beforeEach(forgetKnownResumePositions);
 afterEach(forgetKnownResumePositions);
 
 describe('sceneResumePolicy', () => {
-  it.each([
-    PHASER_SCENE_KEYS.overworld,
-    PHASER_SCENE_KEYS.hobbies,
-    PHASER_SCENE_KEYS.basement
-  ])('records and restores last-exit resume for %s', (sceneKey) => {
-    const position = { x: 12, y: 34 };
+  it.each([PHASER_SCENE_KEYS.overworld, PHASER_SCENE_KEYS.hobbies, PHASER_SCENE_KEYS.basement])(
+    'records and restores last-exit resume for %s',
+    (sceneKey) => {
+      const position = { x: 12, y: 34 };
 
-    expect(recordSceneExitResume(sceneKey, position)).toEqual(position);
-    prepareSceneStart(sceneKey);
+      expect(recordSceneExitResume(sceneKey, position)).toEqual(position);
+      prepareSceneStart(sceneKey);
 
-    expect(getSceneStartResume(sceneKey)).toEqual(position);
-  });
+      expect(getSceneStartResume(sceneKey)).toEqual(position);
+    }
+  );
 
   it('does not persist potassium captures', () => {
     const position = { x: 5, y: 8 };

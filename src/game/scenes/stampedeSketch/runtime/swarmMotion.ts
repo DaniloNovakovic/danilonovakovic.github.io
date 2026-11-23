@@ -22,10 +22,7 @@ interface ResolveStampedeSwarmTargetInput {
   nowMs: number;
 }
 
-export function getStampedeSwarmMotion(
-  mode: StampedeSwarmMode,
-  pressure: number
-): StampedeSwarmMotion {
+export function getStampedeSwarmMotion(mode: StampedeSwarmMode, pressure: number): StampedeSwarmMotion {
   switch (mode) {
     case 'build':
       return {

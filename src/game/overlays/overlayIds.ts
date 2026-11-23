@@ -1,10 +1,4 @@
-const PORTFOLIO_OVERLAY_IDS = [
-  'profile',
-  'experiences',
-  'projects',
-  'abilities',
-  'contact'
-] as const;
+const PORTFOLIO_OVERLAY_IDS = ['profile', 'experiences', 'projects', 'abilities', 'contact'] as const;
 
 export const HOBBIES_OVERLAY_IDS = ['art', 'music', 'fitness', 'dancing'] as const;
 const BASEMENT_OVERLAY_IDS = ['games'] as const;

@@ -38,10 +38,7 @@ export class EmoteMark {
       color: INK_CSS
     }).setOrigin(0.5, 0.5);
 
-    this.container = scene.add
-      .container(0, 0, [this.chip, this.glyph])
-      .setDepth(DEPTH.presence)
-      .setVisible(false);
+    this.container = scene.add.container(0, 0, [this.chip, this.glyph]).setDepth(DEPTH.presence).setVisible(false);
   }
 
   /**

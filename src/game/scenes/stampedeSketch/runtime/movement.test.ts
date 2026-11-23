@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  STAMPEDE_PLAYER_SPEED,
-  STAMPEDE_WORLD,
-  clampStampedePosition,
-  resolveStampedeVelocity
-} from './movement';
+import { STAMPEDE_PLAYER_SPEED, STAMPEDE_WORLD, clampStampedePosition, resolveStampedeVelocity } from './movement';
 
 describe('stampede movement', () => {
   it('normalizes diagonal keyboard movement', () => {

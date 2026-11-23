@@ -13,20 +13,14 @@ import {
 
 describe('stampede session', () => {
   it('clears when the run timer reaches the duration', () => {
-    const session = advanceStampedeSession(
-      createStampedeSession(),
-      STAMPEDE_SESSION_DURATION_MS
-    );
+    const session = advanceStampedeSession(createStampedeSession(), STAMPEDE_SESSION_DURATION_MS);
 
     expect(session.phase).toBe('cleared');
     expect(session.elapsedMs).toBe(STAMPEDE_SESSION_DURATION_MS);
   });
 
   it('clamps timer advance at the duration', () => {
-    const session = advanceStampedeSession(
-      createStampedeSession({ durationMs: 1_000 }),
-      1_500
-    );
+    const session = advanceStampedeSession(createStampedeSession({ durationMs: 1_000 }), 1_500);
 
     expect(session).toMatchObject({
       phase: 'cleared',
@@ -74,10 +68,7 @@ describe('stampede session', () => {
   });
 
   it('ignores contacts and timer advance after a terminal state', () => {
-    const cleared = advanceStampedeSession(
-      createStampedeSession({ durationMs: 100 }),
-      100
-    );
+    const cleared = advanceStampedeSession(createStampedeSession({ durationMs: 100 }), 100);
     const contacted = resolveStampedeContact(cleared, 100);
     const advanced = advanceStampedeSession(contacted, 500);
 

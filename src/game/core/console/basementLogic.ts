@@ -68,11 +68,7 @@ export function listBasementNearby(state: GameWorldState): NearbyThing[] {
   return things.sort((a, b) => a.distance - b.distance);
 }
 
-export function moveBasement(
-  state: GameWorldState,
-  direction: 'left' | 'right',
-  steps: number
-): string {
+export function moveBasement(state: GameWorldState, direction: 'left' | 'right', steps: number): string {
   const delta = steps * BASEMENT_STEP_PX * (direction === 'right' ? 1 : -1);
   const next = clamp(state.basement.playerX + delta, BASEMENT_WALK_BOUNDS.minX, BASEMENT_WALK_BOUNDS.maxX);
   state.basement.playerX = next;
@@ -86,10 +82,7 @@ export function syncBasementPosition(state: GameWorldState, x: number): void {
   state.basement.playerX = x;
 }
 
-export function interactBasement(
-  state: GameWorldState,
-  target: string | undefined
-): BasementInteractOutcome {
+export function interactBasement(state: GameWorldState, target: string | undefined): BasementInteractOutcome {
   const nearby = listBasementNearby(state);
   const miss = nearbyMissMessage(nearby, target, 'Nothing close enough in the basement.');
   if (miss) return { message: miss, events: [] };

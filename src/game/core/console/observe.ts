@@ -5,16 +5,10 @@ import { listBasementNearby } from './basementLogic';
 import { OVERWORLD_BANANA_PEEL } from './content/overworldSpots';
 import { listHobbiesNearby } from './hobbiesLogic';
 import { getOverworldProgress, listOverworldNearby } from './overworldLogic';
-import type {
-  GameObservation,
-  GameWorldState,
-  NearbyThing,
-  OverworldProgressStage
-} from './types';
+import type { GameObservation, GameWorldState, NearbyThing, OverworldProgressStage } from './types';
 
 const OVERWORLD_CONSOLE_HINTS: Record<OverworldProgressStage, string> = {
-  'find-glasses':
-    'Walk to the chick just past Experiences (or the basement hatch) to get glasses.',
+  'find-glasses': 'Walk to the chick just past Experiences (or the basement hatch) to get glasses.',
   'wear-glasses': 'equip glasses to reveal the litter pile. The street chick will run.',
   'find-peel': `With glasses on, walk near x=${OVERWORLD_BANANA_PEEL.x} and interact with the litter.`,
   'win-circuit':
@@ -23,10 +17,7 @@ const OVERWORLD_CONSOLE_HINTS: Record<OverworldProgressStage, string> = {
   'use-crt': 'Walk to the street CRT near x=1650 and insert the Circuit to enter Ridge.'
 };
 
-export function observeGameWorld(
-  state: GameWorldState,
-  ridge: RidgeObservation | null
-): GameObservation {
+export function observeGameWorld(state: GameWorldState, ridge: RidgeObservation | null): GameObservation {
   const nearby = resolveNearby(state, ridge);
   return {
     mode: state.mode,
@@ -55,51 +46,35 @@ export function formatGameObservation(observation: GameObservation): string {
     lines.push(`overlay: ${observation.overlay.title} — ${observation.overlay.blurb}`);
   }
 
-  lines.push(
-    `inventory: ${observation.ownedItemIds.length ? observation.ownedItemIds.join(', ') : '(empty)'}`
-  );
-  lines.push(
-    `equipped: ${
-      observation.equippedItemIds.length ? observation.equippedItemIds.join(', ') : '(none)'
-    }`
-  );
+  lines.push(`inventory: ${observation.ownedItemIds.length ? observation.ownedItemIds.join(', ') : '(empty)'}`);
+  lines.push(`equipped: ${observation.equippedItemIds.length ? observation.equippedItemIds.join(', ') : '(none)'}`);
   if (observation.discoveredSecretIds.length > 0) {
     lines.push(`secrets: ${observation.discoveredSecretIds.join(', ')}`);
   }
 
   if (observation.overworld) {
-    lines.push(
-      `street x=${Math.round(observation.overworld.playerX)} facing=${observation.overworld.facing}`
-    );
+    lines.push(`street x=${Math.round(observation.overworld.playerX)} facing=${observation.overworld.facing}`);
   }
   if (observation.basement) {
-    lines.push(
-      `basement x=${Math.round(observation.basement.playerX)} facing=${observation.basement.facing}`
-    );
+    lines.push(`basement x=${Math.round(observation.basement.playerX)} facing=${observation.basement.facing}`);
   }
   if (observation.hobbies) {
     lines.push(`hobbies x=${Math.round(observation.hobbies.playerX)}`);
   }
   if (observation.potassium) {
     const k = observation.potassium;
-    lines.push(
-      `potassium phase=${k.phase} wave=${k.wave}/${k.maxWaves} lives=${k.lives} score=${k.score}`
-    );
+    lines.push(`potassium phase=${k.phase} wave=${k.wave}/${k.maxWaves} lives=${k.lives} score=${k.score}`);
     if (k.draftChoices.length > 0) {
       lines.push(`draft: ${k.draftChoices.map((c, i) => `${i + 1}:${c}`).join(', ')}`);
     }
   }
   if (observation.ridge) {
     const r = observation.ridge;
-    lines.push(
-      `ridge beat=${r.beat} progress=${r.progressPercent}% mode=${r.mode} facing=${r.facing}`
-    );
+    lines.push(`ridge beat=${r.beat} progress=${r.progressPercent}% mode=${r.mode} facing=${r.facing}`);
     lines.push(`ambience: ${r.ambience}`);
     if (r.bridgeBuild) {
       const b = r.bridgeBuild;
-      lines.push(
-        `blueprint bridge: ${b.phase} attempt=${b.attempts} ink=${b.ink}/${b.inkBudget} beams=${b.beamCount}`
-      );
+      lines.push(`blueprint bridge: ${b.phase} attempt=${b.attempts} ink=${b.ink}/${b.inkBudget} beams=${b.beamCount}`);
       lines.push(`draftsperson: ${b.tipText}`);
     }
     if (r.concertGig) {
@@ -108,7 +83,10 @@ export function formatGameObservation(observation: GameObservation): string {
         `concert ${g.mode}: ${g.phase} ${g.section ?? '-'} hype=${Math.round(g.hype * 100)}% combo=${g.combo} ` +
           `perfect=${g.counts.perfect} good=${g.counts.good} miss=${g.counts.miss}/${g.notesTotal} grade=${g.grade}`
       );
-      if (g.practice) lines.push(`practice pass ${g.practice.loop + 1}/${g.practice.loopsTotal}: ${g.practice.hits}/${g.practice.needed}`);
+      if (g.practice)
+        lines.push(
+          `practice pass ${g.practice.loop + 1}/${g.practice.loopsTotal}: ${g.practice.hits}/${g.practice.needed}`
+        );
       if (g.next) lines.push(`next note: lane ${g.next.lane} in ${g.next.inMs}ms`);
     }
     if (r.conversation) {
@@ -116,9 +94,7 @@ export function formatGameObservation(observation: GameObservation): string {
         `talking: ${r.conversation.speaker}: ${r.conversation.text} [${r.conversation.lineIndex + 1}/${r.conversation.lineCount}]`
       );
       if (r.conversation.awaitingChoice && r.conversation.choices) {
-        lines.push(
-          `choices: ${r.conversation.choices.map((c, i) => `${i + 1}:${c.id}`).join(', ')}`
-        );
+        lines.push(`choices: ${r.conversation.choices.map((c, i) => `${i + 1}:${c.id}`).join(', ')}`);
       }
     }
   }
@@ -169,11 +145,7 @@ function resolveNearby(state: GameWorldState, ridge: RidgeObservation | null): N
   }
 }
 
-function buildHints(
-  state: GameWorldState,
-  nearby: readonly NearbyThing[],
-  ridge: RidgeObservation | null
-): string[] {
+function buildHints(state: GameWorldState, nearby: readonly NearbyThing[], ridge: RidgeObservation | null): string[] {
   const hints: string[] = [];
 
   if (state.mode === 'overworld') {

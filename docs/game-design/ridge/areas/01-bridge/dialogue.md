@@ -67,15 +67,15 @@ State: `bridge:intro` or `bridge:needs_toy_car`.
 State: `bridge:needs_toy_car`. Lines `01`–`02`: the car sits under one white
 paw. Menu:
 
-| Choice | Result |
-| --- | --- |
-| grab | Thwap, back to the menu (sets guarded flag). |
-| ask (once) | A polite slow blink that means no; back to the menu. |
-| leaf | Cicka pounces, the car rolls loose → follow-ups: |
-| ↳ pocket | She is somehow already sitting on it; back to the menu. |
-| ↳ roll | She bats it back → **roll_again** (earns the car: `toy_car_shared`, item `toy-car`) or **keep** (her tail puffs up; starts **Cicka's Standoff**). |
-| rematch | Only after losing a standoff: "Crouch down, ready this time" starts it again. |
-| leave | Ends; Cicka keeps the car. |
+| Choice     | Result                                                                                                                                            |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| grab       | Thwap, back to the menu (sets guarded flag).                                                                                                      |
+| ask (once) | A polite slow blink that means no; back to the menu.                                                                                              |
+| leaf       | Cicka pounces, the car rolls loose → follow-ups:                                                                                                  |
+| ↳ pocket   | She is somehow already sitting on it; back to the menu.                                                                                           |
+| ↳ roll     | She bats it back → **roll_again** (earns the car: `toy_car_shared`, item `toy-car`) or **keep** (her tail puffs up; starts **Cicka's Standoff**). |
+| rematch    | Only after losing a standoff: "Crouch down, ready this time" starts it again.                                                                     |
+| leave      | Ends; Cicka keeps the car.                                                                                                                        |
 
 Glossary guardrail: **Cicka Parallel Play**, never taking the toy by force.
 **Cicka's Standoff** keeps that rule: the player only dodges, never strikes,
@@ -115,12 +115,12 @@ Purpose: Thank the player and land the visible route change.
 Trigger: The toy car crosses the player's span.
 State: `bridge:bridge_complete`.
 
-| ID | Speaker | Line / Prompt | Notes |
-| --- | --- | --- | --- |
-| bridge.draftsperson.bridge_built.01 | Prompt | Vroom! The toy car rattles across your span. | Narration. |
-| bridge.draftsperson.bridge_built.02 | Bridge Draftsperson | It held?! It HELD! | Surprised. |
+| ID                                  | Speaker             | Line / Prompt                                                  | Notes                                  |
+| ----------------------------------- | ------------------- | -------------------------------------------------------------- | -------------------------------------- |
+| bridge.draftsperson.bridge_built.01 | Prompt              | Vroom! The toy car rattles across your span.                   | Narration.                             |
+| bridge.draftsperson.bridge_built.02 | Bridge Draftsperson | It held?! It HELD!                                             | Surprised.                             |
 | bridge.draftsperson.bridge_built.03 | Bridge Draftsperson | You didn't overthink it, you just drew it. Thank you, partner. | Playful; emotional payoff of the area. |
-| bridge.draftsperson.bridge_built.04 | Prompt | The pencil lines darken into real timber. | Visible world change. |
+| bridge.draftsperson.bridge_built.04 | Prompt              | The pencil lines darken into real timber.                      | Visible world change.                  |
 
 ### bridge.builder.tip.*
 
@@ -129,7 +129,7 @@ Workbench coaching keyed by `BridgeBuildTip`: `intro`, `drawing`, `wobbly`,
 `snapped_middle`, `snapped_end`,
 `stuck`, `sketch_shown`, `out_of_ink`, `passed`.
 
-Failure remarks react to *how* the bridge failed, in the Draftsperson's voice
+Failure remarks react to _how_ the bridge failed, in the Draftsperson's voice
 (a small wince, then one concrete thing to try), never as a manual. A remark
 may have alternates at `<id>.2`, `<id>.3`; retries rotate through them.
 After two failed tests `bridge.builder.tip.sketch_nudge` is tacked onto the
@@ -141,11 +141,11 @@ Purpose: Let the player leave Bridge Area after the visible world change.
 Trigger: Player approaches the completed crossing / exit side.
 State: `bridge:bridge_complete`.
 
-| ID | Speaker | Line / Prompt | Notes |
-| --- | --- | --- | --- |
-| bridge.exit.opened_crossing.01 | Prompt | Cross the finished bridge | Exit prompt after world change. |
+| ID                             | Speaker             | Line / Prompt                                       | Notes                                    |
+| ------------------------------ | ------------------- | --------------------------------------------------- | ---------------------------------------- |
+| bridge.exit.opened_crossing.01 | Prompt              | Cross the finished bridge                           | Exit prompt after world change.          |
 | bridge.exit.opened_crossing.02 | Bridge Draftsperson | Thank you. I think I can leave this line alone now. | Short gratitude; avoids over-explaining. |
-| bridge.exit.opened_crossing.03 | Prompt | The page turns toward evening music. | Bridge-to-Concert transition cue. |
+| bridge.exit.opened_crossing.03 | Prompt              | The page turns toward evening music.                | Bridge-to-Concert transition cue.        |
 
 Outcome: Bridge-to-Concert Compact Area Transition can fire.
 

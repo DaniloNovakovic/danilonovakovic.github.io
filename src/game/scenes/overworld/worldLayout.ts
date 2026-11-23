@@ -46,23 +46,22 @@ export interface OverworldBuildingTrigger {
   action: OverworldTriggerAction;
 }
 
-export const OVERWORLD_BUILDING_TRIGGERS: readonly OverworldBuildingTrigger[] =
-  OVERWORLD_BUILDING_SPOTS.map((spot) => {
-    if (spot.action.kind === 'enterScene') {
-      return {
-        kind: 'overworldBuilding' as const,
-        id: spot.id === 'hobbies' ? HOBBIES_SCENE_ID : spot.id,
-        x: spot.x,
-        action: { kind: 'enterScene' as const, sceneId: HOBBIES_SCENE_ID }
-      };
-    }
+export const OVERWORLD_BUILDING_TRIGGERS: readonly OverworldBuildingTrigger[] = OVERWORLD_BUILDING_SPOTS.map((spot) => {
+  if (spot.action.kind === 'enterScene') {
     return {
       kind: 'overworldBuilding' as const,
-      id: spot.id,
+      id: spot.id === 'hobbies' ? HOBBIES_SCENE_ID : spot.id,
       x: spot.x,
-      action: { kind: 'openOverlay' as const, overlayId: spot.action.overlayId }
+      action: { kind: 'enterScene' as const, sceneId: HOBBIES_SCENE_ID }
     };
-  });
+  }
+  return {
+    kind: 'overworldBuilding' as const,
+    id: spot.id,
+    x: spot.x,
+    action: { kind: 'openOverlay' as const, overlayId: spot.action.overlayId }
+  };
+});
 
 export function getOverworldBuildingTrigger(id: string): OverworldBuildingTrigger | undefined {
   return OVERWORLD_BUILDING_TRIGGERS.find((trigger) => trigger.id === id);
@@ -82,7 +81,6 @@ export const OVERWORLD_SIGNPOST_X = CORE_SIGNPOST.x;
 
 /** Roadside board between Hobbies and Contact that shows the pinned easel doodle. */
 export const OVERWORLD_BILLBOARD_X = 2650;
-
 
 /** Sidewalk chick just past Experiences. Interact rules live in the console. */
 export const OVERWORLD_CHICK = {

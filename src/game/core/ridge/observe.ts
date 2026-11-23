@@ -4,12 +4,7 @@ import type { BridgeWorkbench } from './bridgeBuilder';
 import type { CickaDuel } from './cickaDuel';
 import { GIG_START_HYPE, type ConcertGig } from './concertGig';
 import { bachataStepOf } from './bachata';
-import type {
-  RidgeObservation,
-  RidgeStageDefinition,
-  RidgeStageRegistry,
-  RidgeWorldState
-} from './types';
+import type { RidgeObservation, RidgeStageDefinition, RidgeStageRegistry, RidgeWorldState } from './types';
 
 /** The live mini-game objects a session may be running. */
 export interface RidgeMiniGames {
@@ -30,9 +25,7 @@ export function observeRidgeWorld(
   const duel = games.duel ?? null;
   const gig = games.gig ?? null;
   const lesson = games.lesson ?? null;
-  const nearby = [...stage.resolveInteractables(state)].sort(
-    (a, b) => a.distance - b.distance
-  );
+  const nearby = [...stage.resolveInteractables(state)].sort((a, b) => a.distance - b.distance);
   const actors = stage.resolveActors(state);
   const crossingOpen = stage.isCrossingOpen?.(state) ?? true;
   const blockedAhead =
@@ -54,9 +47,7 @@ export function observeRidgeWorld(
           lineId: line.id,
           lineIndex: state.conversation.lineIndex,
           lineCount: state.conversation.lines.length,
-          choices: state.conversation.awaitingChoice
-            ? state.conversation.choices
-            : null,
+          choices: state.conversation.awaitingChoice ? state.conversation.choices : null,
           awaitingChoice: state.conversation.awaitingChoice
         };
       })()
@@ -148,14 +139,12 @@ function observeMemory(
     areaId: shot.areaId,
     beat: shot.beat,
     focus: shot.focus,
-    actors: remembered
-      .resolveActors(then)
-      .map((actor) => {
-        // You are up at the overlook, and Cicka is sitting beside you.
-        if (actor.id === 'player') return { ...actor, progress: shot.focus, visible: false };
-        if (actor.id === 'cicka') return { ...actor, visible: false };
-        return actor;
-      }),
+    actors: remembered.resolveActors(then).map((actor) => {
+      // You are up at the overlook, and Cicka is sitting beside you.
+      if (actor.id === 'player') return { ...actor, progress: shot.focus, visible: false };
+      if (actor.id === 'cicka') return { ...actor, visible: false };
+      return actor;
+    }),
     sceneryMarks: remembered.resolveSceneryMarks?.(then) ?? [],
     dancers: shot.dancers ?? [],
     shotKey: `${conversation.id}:${conversation.lineIndex}`
@@ -191,9 +180,7 @@ function buildHints(
   if (blockedAhead) {
     const blockedMessage = stage.blockedMessage;
     hints.unshift(
-      (typeof blockedMessage === 'function'
-        ? blockedMessage(state)
-        : blockedMessage) ??
+      (typeof blockedMessage === 'function' ? blockedMessage(state) : blockedMessage) ??
         'The path east is blocked until the local problem clears.'
     );
   }
@@ -271,7 +258,11 @@ function lessonHints(lesson: ConcertGig | null): string[] {
 
 function gigHints(gig: ConcertGig | null): string[] {
   if (gig?.phase === 'finished') {
-    return [gig.mode === 'serenade' ? 'gig done — see if the cat comes out' : 'gig done — take a bow and hear what Steve thinks'];
+    return [
+      gig.mode === 'serenade'
+        ? 'gig done — see if the cat comes out'
+        : 'gig done — take a bow and hear what Steve thinks'
+    ];
   }
   return [
     'gig hit — strum the next note right on time (or gig hit 0|1|2 to strum a lane now)',
@@ -317,7 +308,10 @@ export function formatObservation(observation: RidgeObservation): string {
   lines.push(observation.ambience);
   if (observation.memory) {
     const m = observation.memory;
-    const cast = m.actors.filter((actor) => actor.visible).map((actor) => actor.label).join(', ');
+    const cast = m.actors
+      .filter((actor) => actor.visible)
+      .map((actor) => actor.label)
+      .join(', ');
     const dancing = m.dancers.length > 0 ? `; dancing: ${m.dancers.join(', ')}` : '';
     lines.push(`(memory) ${m.areaId} at ${Math.round(m.focus * 100)}%: ${cast}${dancing}`);
   }
@@ -347,7 +341,9 @@ export function formatObservation(observation: RidgeObservation): string {
       `perfect ${g.counts.perfect} good ${g.counts.good} miss ${g.counts.miss} of ${g.notesTotal} — grade ${g.grade}`
     );
     if (g.practice) {
-      lines.push(`practice pass ${g.practice.loop + 1}/${g.practice.loopsTotal}: ${g.practice.hits}/${g.practice.needed} landed`);
+      lines.push(
+        `practice pass ${g.practice.loop + 1}/${g.practice.loopsTotal}: ${g.practice.hits}/${g.practice.needed} landed`
+      );
     }
     if (g.next) lines.push(`Next note: lane ${g.next.lane} in ${g.next.inMs}ms`);
     if (g.lastJudgment) lines.push(`Last note: ${g.lastJudgment}`);
@@ -380,18 +376,14 @@ export function formatObservation(observation: RidgeObservation): string {
       lines.push('  (nothing in reach)');
     } else {
       for (const item of observation.nearby) {
-        lines.push(
-          `  - ${item.label} [${item.kind}] dist=${item.distance.toFixed(3)} :: ${item.prompt}`
-        );
+        lines.push(`  - ${item.label} [${item.kind}] dist=${item.distance.toFixed(3)} :: ${item.prompt}`);
       }
     }
 
     lines.push('');
     lines.push('Actors:');
     for (const actor of observation.actors.filter((a) => a.visible)) {
-      lines.push(
-        `  - ${actor.label} @ ${(actor.progress * 100).toFixed(0)}% facing=${actor.facing}`
-      );
+      lines.push(`  - ${actor.label} @ ${(actor.progress * 100).toFixed(0)}% facing=${actor.facing}`);
     }
 
     if (observation.inventory.length > 0) {

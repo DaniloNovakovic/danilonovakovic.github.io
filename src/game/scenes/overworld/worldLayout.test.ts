@@ -16,12 +16,8 @@ import {
 describe('overworld world layout', () => {
   it('keeps the player start and resume clamp inside world bounds', () => {
     expect(OVERWORLD_PLAYER_START.x).toBeGreaterThanOrEqual(OVERWORLD_PLAYER_SPAWN_MARGIN_X);
-    expect(OVERWORLD_PLAYER_START.x).toBeLessThanOrEqual(
-      OVERWORLD_WIDTH - OVERWORLD_PLAYER_SPAWN_MARGIN_X
-    );
-    expect(OVERWORLD_PLAYER_START.y).toBeGreaterThanOrEqual(
-      OVERWORLD_PLAYER_RESUME_Y_CLAMP.min
-    );
+    expect(OVERWORLD_PLAYER_START.x).toBeLessThanOrEqual(OVERWORLD_WIDTH - OVERWORLD_PLAYER_SPAWN_MARGIN_X);
+    expect(OVERWORLD_PLAYER_START.y).toBeGreaterThanOrEqual(OVERWORLD_PLAYER_RESUME_Y_CLAMP.min);
     expect(OVERWORLD_PLAYER_START.y).toBeLessThanOrEqual(OVERWORLD_PLAYER_RESUME_Y_CLAMP.max);
 
     expect(OVERWORLD_PLAYER_RESUME_Y_CLAMP.min).toBeGreaterThan(0);
@@ -38,12 +34,8 @@ describe('overworld world layout', () => {
   it('keeps basement and glasses secret facts inside the playable band', () => {
     expect(OVERWORLD_BASEMENT_HOLE.x).toBeGreaterThan(0);
     expect(OVERWORLD_BASEMENT_HOLE.x).toBeLessThan(OVERWORLD_WIDTH);
-    expect(OVERWORLD_BASEMENT_HOLE.y).toBeGreaterThanOrEqual(
-      OVERWORLD_PLAYER_RESUME_Y_CLAMP.min
-    );
-    expect(OVERWORLD_BASEMENT_HOLE.y).toBeLessThanOrEqual(
-      OVERWORLD_PLAYER_RESUME_Y_CLAMP.max
-    );
+    expect(OVERWORLD_BASEMENT_HOLE.y).toBeGreaterThanOrEqual(OVERWORLD_PLAYER_RESUME_Y_CLAMP.min);
+    expect(OVERWORLD_BASEMENT_HOLE.y).toBeLessThanOrEqual(OVERWORLD_PLAYER_RESUME_Y_CLAMP.max);
 
     expect(OVERWORLD_GLASSES_SECRET_SLOTS.length).toBeGreaterThan(0);
     for (const secret of OVERWORLD_GLASSES_SECRET_SLOTS) {

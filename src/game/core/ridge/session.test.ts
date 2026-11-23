@@ -31,11 +31,7 @@ describe('parseRidgeCommand', () => {
       direction: 'left',
       steps: 1
     });
-    expect(parseRidgeScript('look; right 2; interact').map((c) => c.type)).toEqual([
-      'look',
-      'go',
-      'interact'
-    ]);
+    expect(parseRidgeScript('look; right 2; interact').map((c) => c.type)).toEqual(['look', 'go', 'interact']);
   });
 });
 
@@ -413,7 +409,13 @@ describe('Relay memory cinematic', () => {
       session.exec('advance');
     }
     expect(shots.map((shot) => shot.areaId)).toEqual([
-      'bridge', 'concert', 'danceFestival', 'danceFestival', 'danceFestival', 'danceFestival', 'danceFestival'
+      'bridge',
+      'concert',
+      'danceFestival',
+      'danceFestival',
+      'danceFestival',
+      'danceFestival',
+      'danceFestival'
     ]);
     // The player is up the hill; Cicka went with them.
     for (const shot of shots) {

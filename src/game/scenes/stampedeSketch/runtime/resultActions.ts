@@ -1,7 +1,4 @@
-import type {
-  StampedeResultActionId,
-  StampedeResultButtonBounds
-} from './resultPresentation';
+import type { StampedeResultActionId, StampedeResultButtonBounds } from './resultPresentation';
 
 export interface StampedeResultPoint {
   x: number;
@@ -22,9 +19,7 @@ export function resolveStampedeResultPointerAction(
   point: StampedeResultPoint,
   bounds: readonly StampedeResultButtonBounds[]
 ): StampedeResultActionId | null {
-  return bounds.find((buttonBounds) =>
-    pointIsWithinBounds(point, buttonBounds)
-  )?.id ?? null;
+  return bounds.find((buttonBounds) => pointIsWithinBounds(point, buttonBounds))?.id ?? null;
 }
 
 export function resolveStampedeResultKeyAction({
@@ -62,10 +57,7 @@ export function createStampedeResultActionGate(): StampedeResultActionGate {
   };
 }
 
-function pointIsWithinBounds(
-  point: StampedeResultPoint,
-  bounds: StampedeResultButtonBounds
-): boolean {
+function pointIsWithinBounds(point: StampedeResultPoint, bounds: StampedeResultButtonBounds): boolean {
   return (
     point.x >= bounds.x &&
     point.x <= bounds.x + bounds.width &&

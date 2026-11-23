@@ -12,16 +12,11 @@ export interface StampedeFeedbackRuntime {
     player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
     candidate: { x: number; y: number } | null
   ): void;
-  announceTerminal(
-    phase: StampedeSessionPhase,
-    player?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody
-  ): void;
+  announceTerminal(phase: StampedeSessionPhase, player?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody): void;
   reset(): void;
 }
 
-export function createStampedeFeedbackRuntime(
-  options: StampedeFeedbackRuntimeOptions
-): StampedeFeedbackRuntime {
+export function createStampedeFeedbackRuntime(options: StampedeFeedbackRuntimeOptions): StampedeFeedbackRuntime {
   return new PhaserStampedeFeedbackRuntime(options.scene);
 }
 
@@ -41,7 +36,10 @@ class PhaserStampedeFeedbackRuntime implements StampedeFeedbackRuntime {
         color: '#1a1a1a',
         backgroundColor: '#fbfbf9',
         padding: { x: 4, y: 1 }
-      }).setOrigin(0.5).setDepth(40).setVisible(false)
+      })
+        .setOrigin(0.5)
+        .setDepth(40)
+        .setVisible(false)
     );
   }
 
@@ -72,10 +70,7 @@ class PhaserStampedeFeedbackRuntime implements StampedeFeedbackRuntime {
     });
   }
 
-  announceTerminal(
-    phase: StampedeSessionPhase,
-    player?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody
-  ): void {
+  announceTerminal(phase: StampedeSessionPhase, player?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody): void {
     if (phase === 'playing') return;
     if (this.lastAnnouncedPhase === phase) return;
 
@@ -107,7 +102,11 @@ class PhaserStampedeFeedbackRuntime implements StampedeFeedbackRuntime {
     const peep = this.peeps[this.peepCursor];
     if (!peep) return;
     this.scene.tweens.killTweensOf(peep);
-    peep.setText(PECK_LINES[this.peepCursor] ?? 'peck!').setPosition(x, y).setAlpha(1).setVisible(true);
+    peep
+      .setText(PECK_LINES[this.peepCursor] ?? 'peck!')
+      .setPosition(x, y)
+      .setAlpha(1)
+      .setVisible(true);
     this.peepCursor = (this.peepCursor + 1) % this.peeps.length;
     this.scene.tweens.add({
       targets: peep,

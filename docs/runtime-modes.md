@@ -45,10 +45,8 @@ output. Source: `src/game/shell/devDebugHook.ts`.
 
 ```js
 // Playwright: wait for the room, jump near the wall, sprint, assert.
-await page.goto("/?mode=interactive&startScene=hobbies");
-await page.waitForFunction(
-  () => window.__sketchbookDebug?.scene() === "hobbies",
-);
+await page.goto('/?mode=interactive&startScene=hobbies');
+await page.waitForFunction(() => window.__sketchbookDebug?.scene() === 'hobbies');
 await page.evaluate(() => window.__sketchbookDebug.teleport(800));
 // ...hold Shift+ArrowRight...
 const { x } = await page.evaluate(() => window.__sketchbookDebug.player());

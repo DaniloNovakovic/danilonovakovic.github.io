@@ -50,7 +50,10 @@ export function createStampedeKitLook(scene: Phaser.Scene): StampedeKitLook {
 
   return {
     sync(frame) {
-      graphics.clear().setVisible(true).setAlpha(frame.disarmed ? 0.28 : 1);
+      graphics
+        .clear()
+        .setVisible(true)
+        .setAlpha(frame.disarmed ? 0.28 : 1);
       ground.clear().setVisible(true);
       if (frame.disarmed) {
         stink.sync(frame, true);
@@ -111,9 +114,9 @@ class StinkCloudLook {
   private recordTrail(frame: StampedeKitLookFrame): void {
     if (frame.nowMs - this.lastTrailAtMs < TRAIL_EVERY_MS) return;
     this.lastTrailAtMs = frame.nowMs;
-    this.trails = frame.stinkPoints.map((point, index) => (
+    this.trails = frame.stinkPoints.map((point, index) =>
       [{ x: point.x, y: point.y }, ...(this.trails[index] ?? [])].slice(0, TRAIL_LENGTH)
-    ));
+    );
   }
 }
 
@@ -359,7 +362,7 @@ function drawStinkCloud(
 
   graphics.lineStyle(2, STINK_DARK, 0.9);
   [-0.45, 0, 0.45].forEach((offset, line) => {
-    const rise = ((nowMs / 9 + line * 13 + index * 5) % 14);
+    const rise = (nowMs / 9 + line * 13 + index * 5) % 14;
     const lx = x + radius * offset;
     const ly = y - radius - 2 - rise;
     graphics.beginPath();
@@ -420,23 +423,12 @@ function drawBreathBubble(
   const drift = Math.sin(nowMs / pulse.driftMs + index) * pulse.drift;
   const bob = Math.cos(nowMs / pulse.bobMs + index * 0.8) * pulse.bob;
   const radiusBase = linger ? 6 : 7 + (index % 3) * 2;
-  const life = linger
-    ? Math.max(0, Math.min(1, ((point.untilMs ?? nowMs) - nowMs) / 1_100))
-    : 1;
+  const life = linger ? Math.max(0, Math.min(1, ((point.untilMs ?? nowMs) - nowMs) / 1_100)) : 1;
   const alpha = linger ? 0.32 + life * 0.5 : 0.7 + wave * 0.14;
-  drawBubble(
-    graphics,
-    point.x + drift,
-    point.y + bob,
-    radiusBase * (0.8 + wave * 0.22),
-    alpha
-  );
+  drawBubble(graphics, point.x + drift, point.y + bob, radiusBase * (0.8 + wave * 0.22), alpha);
 }
 
-function drawShell(
-  graphics: Phaser.GameObjects.Graphics,
-  shell: { x: number; y: number; ready: boolean }
-): void {
+function drawShell(graphics: Phaser.GameObjects.Graphics, shell: { x: number; y: number; ready: boolean }): void {
   const radius = shell.ready ? 13 : 8;
   graphics.lineStyle(shell.ready ? 2.6 : 1.5, INK, shell.ready ? 0.95 : 0.35);
   graphics.strokeCircle(shell.x, shell.y, radius);
@@ -446,13 +438,7 @@ function drawShell(
   }
 }
 
-function drawBubble(
-  graphics: Phaser.GameObjects.Graphics,
-  x: number,
-  y: number,
-  radius: number,
-  alpha: number
-): void {
+function drawBubble(graphics: Phaser.GameObjects.Graphics, x: number, y: number, radius: number, alpha: number): void {
   graphics.fillStyle(POISON, alpha * 0.5);
   graphics.fillCircle(x, y, radius);
   graphics.lineStyle(1.8, INK, alpha);
@@ -469,10 +455,7 @@ function drawPhone(graphics: Phaser.GameObjects.Graphics, x: number, y: number):
   graphics.strokeCircle(x, y - 1, 2);
 }
 
-function drawLensGlint(
-  graphics: Phaser.GameObjects.Graphics,
-  frame: StampedeKitLookFrame
-): void {
+function drawLensGlint(graphics: Phaser.GameObjects.Graphics, frame: StampedeKitLookFrame): void {
   graphics.lineStyle(1.5, INK, 0.85);
   graphics.strokeCircle(frame.x - 4, frame.y - 18, 3);
   graphics.strokeCircle(frame.x + 4, frame.y - 18, 3);

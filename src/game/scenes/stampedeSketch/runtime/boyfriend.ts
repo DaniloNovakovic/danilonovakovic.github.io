@@ -117,10 +117,7 @@ export function isBradFriendly(brain: BradBrain): boolean {
   return brain.mode.kind === 'ally' || brain.mode.kind === 'leaving';
 }
 
-export function stepBradBrain(
-  brain: BradBrain,
-  input: BradStepInput
-): { brain: BradBrain; action: BradAction } {
+export function stepBradBrain(brain: BradBrain, input: BradStepInput): { brain: BradBrain; action: BradAction } {
   const { mode } = brain;
   const now = input.nowMs;
   switch (mode.kind) {
@@ -135,17 +132,13 @@ export function stepBradBrain(
     case 'rest':
       return now < mode.untilMs ? { brain, action: null } : { brain: stalk(brain), action: null };
     case 'whistle':
-      return now < mode.untilMs
-        ? { brain, action: null }
-        : { brain: stalk(brain), action: { kind: 'whistle' } };
+      return now < mode.untilMs ? { brain, action: null } : { brain: stalk(brain), action: { kind: 'whistle' } };
     case 'shakerWindup':
       return now < mode.untilMs
         ? { brain, action: null }
         : { brain: stalk(brain), action: { kind: 'throwShaker', target: mode.target } };
     case 'comboWindup':
-      return now < mode.untilMs
-        ? { brain, action: null }
-        : { brain: dash(brain, mode.lanes, 0, now), action: null };
+      return now < mode.untilMs ? { brain, action: null } : { brain: dash(brain, mode.lanes, 0, now), action: null };
     case 'comboDash':
       return stepDash(brain, mode, now);
     case 'stalk':
@@ -174,16 +167,12 @@ function stepDash(
 }
 
 function decide(brain: BradBrain, input: BradStepInput): { brain: BradBrain; action: BradAction } {
-  return flexAtHalf(brain, input)
-    ?? whistleForEscorts(brain, input)
-    ?? rangedTrick(brain, input)
-    ?? { brain, action: null };
+  return (
+    flexAtHalf(brain, input) ?? whistleForEscorts(brain, input) ?? rangedTrick(brain, input) ?? { brain, action: null }
+  );
 }
 
-function flexAtHalf(
-  brain: BradBrain,
-  input: BradStepInput
-): { brain: BradBrain; action: BradAction } | null {
+function flexAtHalf(brain: BradBrain, input: BradStepInput): { brain: BradBrain; action: BradAction } | null {
   if (brain.enraged || input.hp > input.maxHp / 2) return null;
   return {
     brain: { ...brain, enraged: true, mode: { kind: 'flex', untilMs: input.nowMs + FLEX_MS } },
@@ -191,10 +180,7 @@ function flexAtHalf(
   };
 }
 
-function whistleForEscorts(
-  brain: BradBrain,
-  input: BradStepInput
-): { brain: BradBrain; action: BradAction } | null {
+function whistleForEscorts(brain: BradBrain, input: BradStepInput): { brain: BradBrain; action: BradAction } | null {
   if (input.escorts > 0 || input.nowMs < brain.nextWhistleAtMs) return null;
   const every = brain.enraged ? WHISTLE_EVERY_ENRAGED_MS : WHISTLE_EVERY_MS;
   return {
@@ -207,10 +193,7 @@ function whistleForEscorts(
   };
 }
 
-function rangedTrick(
-  brain: BradBrain,
-  input: BradStepInput
-): { brain: BradBrain; action: BradAction } | null {
+function rangedTrick(brain: BradBrain, input: BradStepInput): { brain: BradBrain; action: BradAction } | null {
   const distance = Math.hypot(input.player.x - input.self.x, input.player.y - input.self.y);
   if (distance <= COMBO_TRIGGER && input.nowMs >= brain.nextComboAtMs) {
     const tuning = bradComboTuning(brain.enraged);

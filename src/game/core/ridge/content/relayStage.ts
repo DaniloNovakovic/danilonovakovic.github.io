@@ -96,16 +96,12 @@ export function createRelayStage(catalog: RelayDialogueCatalog): RidgeStageDefin
     spots: SPOTS,
     resolveInteractables: (state) => resolveRelayInteractables(state, catalog),
     resolveActors: (state) => resolveRelayActors(state),
-    resolveConversation: (conversationId, state) =>
-      resolveRelayConversation(conversationId, state, catalog),
+    resolveConversation: (conversationId, state) => resolveRelayConversation(conversationId, state, catalog),
     describeAmbience: (state) => describeRelayAmbience(state)
   };
 }
 
-function resolveRelayInteractables(
-  state: RidgeWorldState,
-  catalog: RelayDialogueCatalog
-): RidgeInteractable[] {
+function resolveRelayInteractables(state: RidgeWorldState, catalog: RelayDialogueCatalog): RidgeInteractable[] {
   if (state.beat !== 'relay_linger') return [];
 
   const plans = [
@@ -121,12 +117,7 @@ function resolveRelayInteractables(
     }
   ];
 
-  return collectNearbyFromPlans(
-    state.progress,
-    SPOTS,
-    plans,
-    (key) => catalog.lines[key] ?? key
-  );
+  return collectNearbyFromPlans(state.progress, SPOTS, plans, (key) => catalog.lines[key] ?? key);
 }
 
 function resolveRelayActors(state: RidgeWorldState): RidgeActorPresence[] {
@@ -164,11 +155,8 @@ function resolveRelayConversation(
   state: RidgeWorldState,
   catalog: RelayDialogueCatalog
 ): RidgeConversationDefinition | null {
-  const line = (
-    id: string,
-    speakerId: keyof RelayDialogueCatalog['speakers'],
-    emotion?: RidgeEmotion
-  ) => makeCatalogLine(catalog, id, speakerId, emotion);
+  const line = (id: string, speakerId: keyof RelayDialogueCatalog['speakers'], emotion?: RidgeEmotion) =>
+    makeCatalogLine(catalog, id, speakerId, emotion);
   const memory = (id: string, shot: RidgeMemoryShot): RidgeDialogueLine => ({ ...line(id, 'prompt'), memory: shot });
   const catSerenaded = state.flags.has(DANCE_CAT_SERENADED_FLAG);
 
@@ -176,10 +164,7 @@ function resolveRelayConversation(
     case 'relay.overlook.inspect':
       return {
         id: conversationId,
-        lines: [
-          line('relay.overlook.inspect.01', 'prompt'),
-          line('relay.overlook.inspect.02', 'prompt')
-        ]
+        lines: [line('relay.overlook.inspect.01', 'prompt'), line('relay.overlook.inspect.02', 'prompt')]
       };
     case 'relay.sit_and_play.prompt':
       return {

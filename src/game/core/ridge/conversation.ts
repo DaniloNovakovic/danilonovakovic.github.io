@@ -35,9 +35,11 @@ export function startConversation(
   };
 }
 
-export function advanceConversation(
-  state: RidgeWorldState
-): { state: RidgeWorldState; events: RidgeSessionEvent[]; message: string } {
+export function advanceConversation(state: RidgeWorldState): {
+  state: RidgeWorldState;
+  events: RidgeSessionEvent[];
+  message: string;
+} {
   const conversation = state.conversation;
   if (!conversation) {
     return {
@@ -180,9 +182,11 @@ function visibleMenu(
   return remaining.length > 0 ? remaining : null;
 }
 
-export function leaveConversation(
-  state: RidgeWorldState
-): { state: RidgeWorldState; events: RidgeSessionEvent[]; message: string } {
+export function leaveConversation(state: RidgeWorldState): {
+  state: RidgeWorldState;
+  events: RidgeSessionEvent[];
+  message: string;
+} {
   if (!state.conversation) {
     return { state, events: [], message: 'No active conversation.' };
   }
@@ -210,9 +214,7 @@ function finishConversation(
     conversation: null,
     lastMessage: 'Conversation ended.'
   };
-  const events: RidgeSessionEvent[] = [
-    { type: 'conversation_ended', conversationId }
-  ];
+  const events: RidgeSessionEvent[] = [{ type: 'conversation_ended', conversationId }];
 
   if (outcome) {
     const applied = applyOutcome(next, outcome);

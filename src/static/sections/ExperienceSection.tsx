@@ -13,7 +13,9 @@ export function ExperienceSection() {
           <Card key={`${exp.company}-${exp.period}`}>
             <div className="mb-4 flex flex-col border-b-2 border-gray-100 pb-2 md:flex-row md:items-center md:justify-between">
               <h3 className="text-xl font-bold">{exp.title}</h3>
-              <Badge shape="pill" className="font-mono text-sm normal-case tracking-normal">{exp.period}</Badge>
+              <Badge shape="pill" className="font-mono text-sm normal-case tracking-normal">
+                {exp.period}
+              </Badge>
             </div>
             <p className="mb-2 text-lg font-semibold">
               {exp.companyUrl ? (

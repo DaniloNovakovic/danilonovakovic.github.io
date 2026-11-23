@@ -54,7 +54,10 @@ class PhaserStampedeEventLook implements StampedeEventLook {
       fontStyle: 'bold',
       backgroundColor: '#fbfbf9',
       padding: { x: 4, y: 1 }
-    }).setOrigin(0.5, 1).setDepth(33).setVisible(false);
+    })
+      .setOrigin(0.5, 1)
+      .setDepth(33)
+      .setVisible(false);
     this.arrows = scene.add.graphics().setScrollFactor(0).setDepth(80);
     this.bannerTitle = createUiText(scene, 500, 74, '', {
       fontSize: '30px',
@@ -62,21 +65,33 @@ class PhaserStampedeEventLook implements StampedeEventLook {
       fontStyle: 'bold',
       backgroundColor: '#fbfbf9',
       padding: { x: 12, y: 4 }
-    }).setOrigin(0.5).setScrollFactor(0).setDepth(85).setVisible(false);
+    })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(85)
+      .setVisible(false);
     this.bannerSubtitle = createUiText(scene, 500, 108, '', {
       fontSize: '15px',
       color: '#4b4337',
       fontStyle: 'bold',
       backgroundColor: '#fbfbf9',
       padding: { x: 8, y: 2 }
-    }).setOrigin(0.5).setScrollFactor(0).setDepth(85).setVisible(false);
+    })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(85)
+      .setVisible(false);
   }
 
   showBanner(title: string, subtitle = ''): void {
     const targets = [this.bannerTitle, this.bannerSubtitle];
     targets.forEach((text) => this.scene.tweens.killTweensOf(text));
     this.bannerTitle.setText(title).setVisible(true).setAlpha(1).setScale(0.6).setAngle(-3);
-    this.bannerSubtitle.setText(subtitle).setVisible(subtitle.length > 0).setAlpha(1).setScale(1);
+    this.bannerSubtitle
+      .setText(subtitle)
+      .setVisible(subtitle.length > 0)
+      .setAlpha(1)
+      .setScale(1);
     this.scene.tweens.add({
       targets: this.bannerTitle,
       scale: 1,
@@ -152,8 +167,11 @@ class PhaserStampedeEventLook implements StampedeEventLook {
     beacons.forEach((beacon) => {
       const sx = beacon.x - view.x;
       const sy = beacon.y - view.y;
-      const inside = sx > EDGE_INSET - 16 && sx < view.width - EDGE_INSET + 16
-        && sy > EDGE_INSET - 16 && sy < view.height - EDGE_INSET + 16;
+      const inside =
+        sx > EDGE_INSET - 16 &&
+        sx < view.width - EDGE_INSET + 16 &&
+        sy > EDGE_INSET - 16 &&
+        sy < view.height - EDGE_INSET + 16;
       if (inside) return;
       const dx = sx - cx;
       const dy = sy - cy;

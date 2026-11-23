@@ -33,15 +33,15 @@ Update: Blockout Pass 2 resolved the first hard blockers:
 
 ## Scorecard
 
-| Criterion | Score | Notes |
-| --- | ---: | --- |
-| Cognitive topology / grokking | 17 / 20 | Good vertical route and "above Cicka" promise. Relay works as destination. |
-| Cicka return anchor | 16 / 20 | Strong hub placement, but return routes need to feel physical and immediate after mini-games. |
-| Movement fun | 11 / 20 | Too much generic platforming. Needs named traversal toys: chute, cord, lift, broad jump, drop steer. |
-| Rhythm and density | 12 / 15 | Safe/tense/reorient beats are clear. Some rooms still have empty rows without a purpose. |
-| World-first identity | 13 / 15 | Desk/paper/cord/domino language is strong. Need stronger environmental logic per gap. |
-| Backtracking transformation | 11 / 15 | Shortcuts exist, but Cicka Home should visibly change after more than Stampede. |
-| Technical blockout health | 6 / 15 | Grid dimensions pass, but seamless room placements currently create overlapping non-empty cells. |
+| Criterion                     |   Score | Notes                                                                                                |
+| ----------------------------- | ------: | ---------------------------------------------------------------------------------------------------- |
+| Cognitive topology / grokking | 17 / 20 | Good vertical route and "above Cicka" promise. Relay works as destination.                           |
+| Cicka return anchor           | 16 / 20 | Strong hub placement, but return routes need to feel physical and immediate after mini-games.        |
+| Movement fun                  | 11 / 20 | Too much generic platforming. Needs named traversal toys: chute, cord, lift, broad jump, drop steer. |
+| Rhythm and density            | 12 / 15 | Safe/tense/reorient beats are clear. Some rooms still have empty rows without a purpose.             |
+| World-first identity          | 13 / 15 | Desk/paper/cord/domino language is strong. Need stronger environmental logic per gap.                |
+| Backtracking transformation   | 11 / 15 | Shortcuts exist, but Cicka Home should visibly change after more than Stampede.                      |
+| Technical blockout health     |  6 / 15 | Grid dimensions pass, but seamless room placements currently create overlapping non-empty cells.     |
 
 Initial total: **76 / 100**.
 

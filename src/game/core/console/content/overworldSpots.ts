@@ -10,20 +10,9 @@ export const OVERWORLD_GROUND_Y = 535;
 
 export const OVERWORLD_STEP_PX = 40;
 
-export type GameSceneId =
-  | 'overworld'
-  | 'basement'
-  | 'hobbies'
-  | 'potassium'
-  | 'ridge'
-  | 'stampedeSketch';
+export type GameSceneId = 'overworld' | 'basement' | 'hobbies' | 'potassium' | 'ridge' | 'stampedeSketch';
 
-export type PortfolioOverlayId =
-  | 'profile'
-  | 'experiences'
-  | 'projects'
-  | 'abilities'
-  | 'contact';
+export type PortfolioOverlayId = 'profile' | 'experiences' | 'projects' | 'abilities' | 'contact';
 
 export type OverworldSpotAction =
   | { kind: 'openOverlay'; overlayId: PortfolioOverlayId }

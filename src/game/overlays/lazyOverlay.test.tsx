@@ -16,10 +16,7 @@ const controllerProps: OverlayControllerProps = {
 
 describe('lazyOverlay', () => {
   it('renders the fallback while loading the overlay component', () => {
-    const Overlay = lazyOverlay(
-      () => new Promise(() => undefined),
-      <div>Loading overlay</div>
-    );
+    const Overlay = lazyOverlay(() => new Promise(() => undefined), <div>Loading overlay</div>);
 
     render(<Overlay {...controllerProps} />);
 

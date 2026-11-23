@@ -8,15 +8,15 @@ each claim to one canonical home.
 
 ## Routing Rules
 
-| Claim type | Destination |
-| --- | --- |
-| New stable domain term or ambiguity | [`../../../GLOSSARY.md`](../../../GLOSSARY.md) |
-| Accepted route spine, ending order, area barricade chain, Cicka, guitar, or route-readiness decision | [`story-level-bible.md`](./story-level-bible.md) |
-| Accepted area-local Bridge, Concert, Dance Festival, or Relay detail | matching file or subdoc under [`areas/`](./areas/README.md) |
-| Current implemented/runtime truth | [`ridge-snapshot.md`](./ridge-snapshot.md) or runtime source |
-| Hard-to-reverse surprising trade-off | numbered ADR under [`../../adr/`](../../adr/) |
-| Work to build | GitHub Issue |
-| Raw inspiration, rejected ideas, or source rationale | `docs/research/provenance/` or no repo change |
+| Claim type                                                                                           | Destination                                                  |
+| ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| New stable domain term or ambiguity                                                                  | [`../../../GLOSSARY.md`](../../../GLOSSARY.md)               |
+| Accepted route spine, ending order, area barricade chain, Cicka, guitar, or route-readiness decision | [`story-level-bible.md`](./story-level-bible.md)             |
+| Accepted area-local Bridge, Concert, Dance Festival, or Relay detail                                 | matching file or subdoc under [`areas/`](./areas/README.md)  |
+| Current implemented/runtime truth                                                                    | [`ridge-snapshot.md`](./ridge-snapshot.md) or runtime source |
+| Hard-to-reverse surprising trade-off                                                                 | numbered ADR under [`../../adr/`](../../adr/)                |
+| Work to build                                                                                        | GitHub Issue                                                 |
+| Raw inspiration, rejected ideas, or source rationale                                                 | `docs/research/provenance/` or no repo change                |
 
 Do not update multiple canon docs with the same decision. Link instead.
 
@@ -36,8 +36,8 @@ Reviewer needed: yes/no
 
 ## Candidate Decisions
 
-| ID | Claim | Conflicts with current docs? | Proposed home | Status |
-| --- | --- | --- | --- | --- |
+| ID  | Claim | Conflicts with current docs? | Proposed home | Status |
+| --- | ----- | ---------------------------- | ------------- | ------ |
 
 ## Canon Updates Requested
 

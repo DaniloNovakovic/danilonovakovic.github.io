@@ -21,7 +21,7 @@ This project is built on three core pillars to ensure that adding future complex
 
 - **Entities:** Numeric IDs representing game objects (e.g., The Player, an NPC, a Note).
 - **Components:** Pure Data objects (no methods). Examples: `Transform`, `Velocity`, `Appearance`, `Health`.
-- **Systems:** Logic loops that process entities with specific component sets. 
+- **Systems:** Logic loops that process entities with specific component sets.
 - **Goal:** Use ECS where pure gameplay decision logic benefits from data/logic separation. This is not an "ECS everything" mandate; deep runtime modules remain preferred when they concentrate scene lifecycle, interaction, or policy knowledge behind a small interface.
 
 ### B. Hexagonal (Clean) Architecture

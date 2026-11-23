@@ -46,9 +46,7 @@ describe('stampede auto attack', () => {
     });
 
     expect(frame.attack).not.toBeNull();
-    expect(frame.state.nextFireAtMs).toBe(
-      STAMPEDE_AUTO_ATTACK_COOLDOWN_MS * 5
-    );
+    expect(frame.state.nextFireAtMs).toBe(STAMPEDE_AUTO_ATTACK_COOLDOWN_MS * 5);
   });
 
   it('targets the nearest in-range mark first', () => {
@@ -131,10 +129,11 @@ describe('stampede auto attack', () => {
 
     expect(frame.attack?.hitIds).toHaveLength(2);
     expect(frame.remainingCandidates).toHaveLength(1);
-    expect([
-      ...(frame.attack?.hitIds ?? []),
-      frame.remainingCandidates[0]?.id
-    ].sort()).toEqual(['mark-a', 'mark-b', 'mark-c']);
+    expect([...(frame.attack?.hitIds ?? []), frame.remainingCandidates[0]?.id].sort()).toEqual([
+      'mark-a',
+      'mark-b',
+      'mark-c'
+    ]);
   });
 
   it('is deterministic for the same plain inputs', () => {
@@ -146,9 +145,7 @@ describe('stampede auto attack', () => {
       candidates: [baseCandidate]
     };
 
-    expect(resolveStampedeAutoAttackFrame(input)).toEqual(
-      resolveStampedeAutoAttackFrame(input)
-    );
+    expect(resolveStampedeAutoAttackFrame(input)).toEqual(resolveStampedeAutoAttackFrame(input));
   });
 
   it('will not photograph a situationship', () => {

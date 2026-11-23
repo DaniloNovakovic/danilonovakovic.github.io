@@ -28,15 +28,15 @@ The primary audience is **Danilo on laptop and mobile phone**.
 
 Other people may play it, but the game should be tuned for Danilo's taste first:
 
-- compact exploration like *A Short Hike*
-- readable secrets and manual-page epiphanies like *Tunic*
-- ricochet/run synergy like *Ball x Pit*, already represented by Potassium Slip
-- active timing and parry joy like *Clair Obscur*
-- deterministic toy-system cleverness like *Divinity: Original Sin 2*
-- optional movement mastery like *Hollow Knight*
+- compact exploration like _A Short Hike_
+- readable secrets and manual-page epiphanies like _Tunic_
+- ricochet/run synergy like _Ball x Pit_, already represented by Potassium Slip
+- active timing and parry joy like _Clair Obscur_
+- deterministic toy-system cleverness like _Divinity: Original Sin 2_
+- optional movement mastery like _Hollow Knight_
 - neutral/spacing mind games from fighting games
-- silly substory seriousness like *Yakuza: Like a Dragon*
-- hand-drawn manga intimacy, with *Oyasumi Punpun* as a taste signal for personal, sketchy, funny-sad honesty
+- silly substory seriousness like _Yakuza: Like a Dragon_
+- hand-drawn manga intimacy, with _Oyasumi Punpun_ as a taste signal for personal, sketchy, funny-sad honesty
 
 ## One-Sentence Game
 
@@ -230,8 +230,8 @@ The repeatable pleasure is not just "new content." It is returning to the same p
 - **Mementos**: small memory objects from mini-games that physically change a
   local Cicka Resting Spot or nearby landmark. They are memory and relationship,
   not currency.
-- **Glide Pips**: movement upgrades inspired by *A Short Hike* feathers.
-- **Shortcuts**: route changes inspired by *Hollow Knight* relief moments.
+- **Glide Pips**: movement upgrades inspired by _A Short Hike_ feathers.
+- **Shortcuts**: route changes inspired by _Hollow Knight_ relief moments.
 - **Circuit**: Potassium Slip's major reward and a possible future alternate-path proof. Derive this from the existing inventory item instead of duplicating `potassium.circuitOwned` in progress.
 - **Cicka Notes**: tiny cat-side observations that reinterpret nearby props without becoming a full language system.
 - **Developer Laptop**: a future portable or resting-spot-adjacent terminal that
@@ -284,7 +284,7 @@ Do not:
 
 First new mini-game.
 
-Inspiration: *Vampire Survivors*.
+Inspiration: _Vampire Survivors_.
 
 Theme: Danilo is chased by inky ideas, deadline icons, and overexcited notebook
 creatures around a picnic blanket. Nearby enemies chase Danilo; enemies that
@@ -323,7 +323,7 @@ Why first:
 
 Second priority if Muay Thai / reactive combat becomes the next obsession.
 
-Inspiration: *Clair Obscur* plus Muay Thai pad work.
+Inspiration: _Clair Obscur_ plus Muay Thai pad work.
 
 Theme: a cliffside training terrace where a sketchy coach, heavy bag, or `TODO: AI` dummy treats a tiny sparring session like a world-title bout.
 
@@ -353,7 +353,7 @@ The fun is that enemy turns are not waiting. They are performance.
 
 ### 3. Margin Manual Hunt
 
-Inspiration: *Tunic*.
+Inspiration: _Tunic_.
 
 Theme: torn sketchbook pages explain things the player has been walking past.
 
@@ -377,7 +377,7 @@ Use this to support the Relay Spire gate.
 
 Optional small mini-scene / Ridge modifier.
 
-Inspiration: the wish to understand Cicka for a day, *A Short Hike* low-stakes movement, and *Tunic* re-reading familiar places.
+Inspiration: the wish to understand Cicka for a day, _A Short Hike_ low-stakes movement, and _Tunic_ re-reading familiar places.
 
 Theme: Cicka says "meow" and the whole Ridge briefly admits that this is probably a complete sentence.
 
@@ -421,7 +421,7 @@ Why it belongs:
 
 ### 5. Domino Desk
 
-Inspiration: *Divinity: Original Sin 2* surfaces and deterministic systems.
+Inspiration: _Divinity: Original Sin 2_ surfaces and deterministic systems.
 
 Theme: a messy desk battlefield with coffee rings, tape, staples, sticky notes, and overheated laptop tiles.
 
@@ -475,7 +475,7 @@ This is a later scene because the design tuning is subtle.
 
 ### 7. Shaft of Scratches
 
-Inspiration: *Hollow Knight* pogo mastery.
+Inspiration: _Hollow Knight_ pogo mastery.
 
 Theme: a scratchy utility shaft with doodled hazards.
 
@@ -605,7 +605,7 @@ The manga influence should come through as:
 - funny-sad little observations in margins
 - a handmade feeling that tolerates roughness
 
-Use the *Oyasumi Punpun* taste signal carefully. The goal is not to make the portfolio bleak. The useful ingredient is the contrast: simple drawings can carry real interior feeling.
+Use the _Oyasumi Punpun_ taste signal carefully. The goal is not to make the portfolio bleak. The useful ingredient is the contrast: simple drawings can carry real interior feeling.
 
 ## Level Design Rules
 

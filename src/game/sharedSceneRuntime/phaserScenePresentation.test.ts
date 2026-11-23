@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  getPhaserScenePresentationMode,
-  isFullBoardPhaserScene
-} from './phaserScenePresentation';
+import { getPhaserScenePresentationMode, isFullBoardPhaserScene } from './phaserScenePresentation';
 
 describe('isFullBoardPhaserScene', () => {
   it('marks board-owned scenes as full-board scenes', () => {

@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  BASEMENT_GAMES_OVERLAY_ID,
-  BASEMENT_ROOM_INTERACTABLES,
-  createBasementInteractionTargets
-} from './roomLayout';
+import { BASEMENT_GAMES_OVERLAY_ID, BASEMENT_ROOM_INTERACTABLES, createBasementInteractionTargets } from './roomLayout';
 
 describe('basement room layout', () => {
   it('includes exit, computer, and glasses pickup with unique interactable ids', () => {

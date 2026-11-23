@@ -36,7 +36,11 @@ describe('renderPluckedString', () => {
 
   it('reports a rendered pitch within a semitone of the target for playbackRate correction', () => {
     for (const frequency of [82.41, 110, 146.83, 196, 246.94, 329.63]) {
-      const { renderedFrequency } = renderPluckedString(frequency, { sampleRate, durationSeconds: 0.1, random: seededRandom(3) });
+      const { renderedFrequency } = renderPluckedString(frequency, {
+        sampleRate,
+        durationSeconds: 0.1,
+        random: seededRandom(3)
+      });
       const cents = Math.abs(1200 * Math.log2(renderedFrequency / frequency));
       expect(cents).toBeLessThan(100);
     }

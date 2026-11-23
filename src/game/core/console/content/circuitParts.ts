@@ -14,7 +14,6 @@ export const CIRCUIT_PART_HOBBY: Record<CircuitPartId, CircuitPartHobbyId> = {
   'battery-cell': 'fitness'
 };
 
-
 export function countCircuitParts(ownedItemIds: readonly string[]): number {
   return CIRCUIT_PART_IDS.filter((id) => ownedItemIds.includes(id)).length;
 }

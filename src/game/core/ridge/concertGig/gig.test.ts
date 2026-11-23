@@ -23,13 +23,7 @@ describe('compileGigSong', () => {
     const chords = song.notes.filter((note) => note.chordHit);
     expect(chords.length).toBeGreaterThan(0);
     expect(chords.length % 2).toBe(0);
-    expect(song.sections.map((section) => section.kind)).toEqual([
-      'intro',
-      'verse',
-      'chorus',
-      'breakdown',
-      'finale'
-    ]);
+    expect(song.sections.map((section) => section.kind)).toEqual(['intro', 'verse', 'chorus', 'breakdown', 'finale']);
     // About a minute of music: long enough to feel like a show, not a chore.
     expect(song.endMs / 1000).toBeGreaterThan(55);
     expect(song.endMs / 1000).toBeLessThan(80);

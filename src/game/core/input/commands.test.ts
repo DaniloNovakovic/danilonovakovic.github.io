@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  commandFrameToPlayerStepInput,
-  createInputCommandFrame,
-  resetInputCommandFrame
-} from './commands';
+import { commandFrameToPlayerStepInput, createInputCommandFrame, resetInputCommandFrame } from './commands';
 
 describe('input command frame', () => {
   it('maps movement commands to player step input', () => {

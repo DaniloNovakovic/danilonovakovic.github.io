@@ -38,14 +38,8 @@ export default function Game({
 }: GameProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
-  const shouldUsePortraitCoverTouch =
-    presentationMode === 'portrait-cover' && !isScenePointerCaptured;
-  const {
-    bridgeRef,
-    stableOnEnterScene,
-    stableOnOpenOverlay,
-    stableOnReturnToOverworld
-  } = useGameBridgeCallbacks({
+  const shouldUsePortraitCoverTouch = presentationMode === 'portrait-cover' && !isScenePointerCaptured;
+  const { bridgeRef, stableOnEnterScene, stableOnOpenOverlay, stableOnReturnToOverworld } = useGameBridgeCallbacks({
     onEnterScene,
     onOpenOverlay,
     onReturnToOverworld,
@@ -65,9 +59,10 @@ export default function Game({
   });
   usePhaserGamePauseSync({ activeSceneId, gameRef, isPaused });
 
-  const frameClassName = chrome === 'framed'
-    ? 'relative h-full w-full min-h-0 overflow-hidden rounded-lg border-4 border-neutral-800 bg-[#fbfbf9] shadow-[8px_8px_0px_0px_rgba(26,26,26,1)]'
-    : 'relative h-full w-full min-h-0 overflow-hidden bg-[#fbfbf9]';
+  const frameClassName =
+    chrome === 'framed'
+      ? 'relative h-full w-full min-h-0 overflow-hidden rounded-lg border-4 border-neutral-800 bg-[#fbfbf9] shadow-[8px_8px_0px_0px_rgba(26,26,26,1)]'
+      : 'relative h-full w-full min-h-0 overflow-hidden bg-[#fbfbf9]';
 
   return (
     <div className={frameClassName}>
@@ -84,10 +79,7 @@ export default function Game({
             onPointerMove={touchControls.onPointerMove}
             onPointerUp={touchControls.onPointerUp}
           />
-          <ControlMatDragIndicator
-            className="z-20 md:hidden"
-            state={touchControls.dragIndicator}
-          />
+          <ControlMatDragIndicator className="z-20 md:hidden" state={touchControls.dragIndicator} />
         </>
       )}
     </div>

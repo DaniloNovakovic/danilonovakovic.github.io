@@ -14,10 +14,10 @@ Issues, not in this folder.
 
 ## Current Docs
 
-| Mini-game | Status | Doc | Ridge contract |
-| --- | --- | --- | --- |
-| Scrub Rumble (formerly Potassium Slip) | Shipped / existing flagship; optional for new route | [`scrub-rumble.md`](./scrub-rumble.md) | Potassium owns ricochet and the current Circuit reward. Do not make it required first-ending Living Proof by default. |
-| Stampede Sketch (Chick Magnet) | Shipped street entry; optional for the Ridge route | [`stampede-sketch.md`](./stampede-sketch.md) | Street chick just past Experiences. First clear grants glasses. Not required Living Proof. |
+| Mini-game                              | Status                                              | Doc                                          | Ridge contract                                                                                                        |
+| -------------------------------------- | --------------------------------------------------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Scrub Rumble (formerly Potassium Slip) | Shipped / existing flagship; optional for new route | [`scrub-rumble.md`](./scrub-rumble.md)       | Potassium owns ricochet and the current Circuit reward. Do not make it required first-ending Living Proof by default. |
+| Stampede Sketch (Chick Magnet)         | Shipped street entry; optional for the Ridge route  | [`stampede-sketch.md`](./stampede-sketch.md) | Street chick just past Experiences. First clear grants glasses. Not required Living Proof.                            |
 
 ## Future Docs
 

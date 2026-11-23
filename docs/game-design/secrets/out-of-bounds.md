@@ -10,11 +10,11 @@ Players usually walk right, so the secret is to the left. If you keep walking
 left in the Hobbies room you leave the drawn room and walk into the blank,
 unfinished edge of the sketchbook. Something is waiting out there. You pick it
 up, and the portfolio starts to come apart: bugs crawl over the screen, you
-smash them, the *screen itself* cracks, and you break out of the game. On the
+smash them, the _screen itself_ cracks, and you break out of the game. On the
 other side it turns into a different game. You wake up unplugged aboard an
 alien ship, sneak, arm up, take the ship, fly it home in an arcade shooter, and
 land in a quiet closing scene: playing guitar with Cicka and your wife.
-*Thank you for playing.* That is the **true ending**.
+_Thank you for playing._ That is the **true ending**.
 
 The fun comes from escalation and surprise. Each act should make the player
 ask "wait, how far does this go?"
@@ -36,10 +36,10 @@ ask "wait, how far does this go?"
 
 ## Entry Points
 
-| Entry | Role | Notes |
-| --- | --- | --- |
-| **Hobbies room, far left** | Main entrance | The current bug becomes the feature. Today the physics world is wider than the drawn room, so the player can walk off either side. Make the **left** side intentional and endless-feeling. Fix the **right** side so it stays a wall. |
-| **Street, left of the `START` sign** | Hint / second entrance | The sign is at `x=60`, at the world edge, so the street needs negative-x space. Possible uses: a hint ("the edges aren't finished yet"), a smudge that's only visible later, or a quick return to the void once you've found it. |
+| Entry                                | Role                   | Notes                                                                                                                                                                                                                                 |
+| ------------------------------------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Hobbies room, far left**           | Main entrance          | The current bug becomes the feature. Today the physics world is wider than the drawn room, so the player can walk off either side. Make the **left** side intentional and endless-feeling. Fix the **right** side so it stays a wall. |
+| **Street, left of the `START` sign** | Hint / second entrance | The sign is at `x=60`, at the world edge, so the street needs negative-x space. Possible uses: a hint ("the edges aren't finished yet"), a smudge that's only visible later, or a quick return to the void once you've found it.      |
 
 Reference points in the current code: `src/game/scenes/hobbies/runtime/HobbiesScene.ts`
 (world and camera bounds), `src/game/core/console/hobbiesLogic.ts` (headless
@@ -49,6 +49,7 @@ clamp `60..900`), `src/game/core/console/content/overworldSpots.ts`
 ## The Arc
 
 ### Act 1 — Walk Off the Page
+
 The room's ink lines thin out and stop. The floor turns into a faint pencil
 guideline, then an eraser smudge, then blank paper. The camera keeps following.
 Little things show the world is unfinished: "TODO: draw wall" scribbled in the
@@ -59,6 +60,7 @@ walking?"). The music thins out to one pencil scratch per step.
 **Payoff:** a glowing toolbox on a pedestal made from a sketchbook spine.
 
 ### Act 2 — The Debugging Tools
+
 The artifact is a **Debugging Tools** kit: a beat-up developer's toolbox sitting
 where the room should end. The first tool inside is a **hammer**. The rest of
 the kit unlocks over Act 3, and each tool is a different creative way to wreck
@@ -67,16 +69,17 @@ stapler that pins bugs, a highlighter that burns lines, a rubber-band
 slingshot, a find-and-replace that swaps chunks of the page, a `rm -rf`
 eraser).
 
-The kit goes in the Backpack as a **hidden slot**. It does *not* count toward the
+The kit goes in the Backpack as a **hidden slot**. It does _not_ count toward the
 `START` sign's `Secrets found: n/6` tally, so nothing gives the secret away.
 **Cliffhanger for this slice:** you swing the hammer once in the void, a hairline
-crack appears *across the browser viewport* (not the game canvas), then fades.
+crack appears _across the browser viewport_ (not the game canvas), then fades.
 "...huh."
 
 ### Act 3 — Screen Breaker
+
 With the Debugging Tools equipped, back on the street or in any room, **bugs** start
 showing up: small ink beetles and glitch sprites that crawl over the whole page,
-on top of the canvas *and* the React portfolio chrome. Click or tap to smack
+on top of the canvas _and_ the React portfolio chrome. Click or tap to smack
 them, switching between the kit's tools as they unlock. Every hit leaves damage on the "screen" (cracks, ink splats, pixels
 knocked loose, a corner of the header peeling away). As damage builds, the
 portfolio itself gives way. Building labels slide, the header text falls over.
@@ -85,51 +88,56 @@ portfolio itself gives way. Building labels slide, the header text falls over.
 hole. This is the fourth-wall moment. Treat it like a boss fight against the
 website.
 
-*Implementation note:* this is an app-shell React overlay layer above the Phaser
+_Implementation note:_ this is an app-shell React overlay layer above the Phaser
 canvas and portfolio UI. It is not a Phaser scene. It must pause cleanly, honor
 `prefers-reduced-motion`, and avoid strobe/flash patterns.
 
 ### Act 4 — Unplugged
+
 A black screen, then a slow wake-up. Danilo was in a pod; the whole portfolio
 was a simulation. You are aboard an alien ship drawn as **pencil wireframe 3D**:
 graph-paper corridors, ballpoint-blue construction lines.
 
 ### Act 5 — Sneak
+
 A short first-person or isometric stealth section. Patrol drones sweep their
 view cones, you duck behind crates, and you pick up a keycard or part. You
 can't fight back yet. Getting caught resets you to a nearby checkpoint, never
 the start of the act.
 
 ### Act 6 — Armed
+
 You find a weapon (a doodled blaster, or a Debugging Tool gets upgraded). A short
 corridor fight flips the stealth: now you hunt the drones. It ends at the
 bridge.
 
 ### Act 7 — Take the Ship
+
 You sit in the pilot seat and the game turns into a **vertical arcade shooter**
 home to Earth: waves of enemies, power-ups, one boss. For enemies, reuse our
 own cast: Act 3's ink bugs, alien drones, maybe a callback to the doodle chicks
-from Chick Magnet. *Don't* recreate another game's enemies, waves or look.
+from Chick Magnet. _Don't_ recreate another game's enemies, waves or look.
 
 ### Act 8 — Homecoming (True Ending)
+
 A non-interactive or lightly interactive scene, framed as the **afterlife**:
 Ridge was the memory of the old life, and this is the moment everyone gets to
 share. The ship lands, the art turns back into warm sketch and watercolor, and
 you sit on a porch or rooftop playing guitar with **Cicka** and an unnamed girl
 with long black hair (your wife). No names appear anywhere. Let the player strum along with the
-existing guitar synth if that works. Then: *Thank you for playing.* Credits roll
+existing guitar synth if that works. Then: _Thank you for playing._ Credits roll
 in handwriting.
 
 ## Inspiration Boundaries
 
 These are moods and mechanics. Don't recreate their content.
 
-| Reference | What we take | What we don't |
-| --- | --- | --- |
-| Out-of-bounds / "edge of the map" secrets in games like *Prey* | The unease of walking where you shouldn't be | Anything specific to that game |
-| Desktop-destruction toys | The joy of hitting the screen and seeing damage pile up | Their tools, UI or art |
-| *The Matrix*-style "wake up unplugged" | The reveal that the portfolio was a simulation | Iconography, pods-as-shot, green code rain, characters |
-| Classic vertical shooters | Waves, power-ups, a boss | Another game's enemies, waves or theme |
+| Reference                                                      | What we take                                            | What we don't                                          |
+| -------------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------ |
+| Out-of-bounds / "edge of the map" secrets in games like _Prey_ | The unease of walking where you shouldn't be            | Anything specific to that game                         |
+| Desktop-destruction toys                                       | The joy of hitting the screen and seeing damage pile up | Their tools, UI or art                                 |
+| _The Matrix_-style "wake up unplugged"                         | The reveal that the portfolio was a simulation          | Iconography, pods-as-shot, green code rain, characters |
+| Classic vertical shooters                                      | Waves, power-ups, a boss                                | Another game's enemies, waves or theme                 |
 
 ## Technical Questions to Settle Early
 
@@ -151,7 +159,7 @@ These are moods and mechanics. Don't recreate their content.
 ## Decisions
 
 - **Ridge is the old life; the true ending is the afterlife.** Ridge, seen
-  through the street CRT, is a *memory of an old life*. The true ending is an
+  through the street CRT, is a _memory of an old life_. The true ending is an
   afterlife or heaven where everyone shares one great moment together. That
   makes it a reunion that answers the Cicka Threshold Farewell, not a
   contradiction of it. Ridge canon stays as it is.
@@ -188,16 +196,16 @@ These are moods and mechanics. Don't recreate their content.
 Each milestone ships on its own and ends on a cliffhanger. Turn each one into
 GitHub issues (vertical slices) when it's ready to build.
 
-| # | Milestone | Ships | Cliffhanger |
-| --- | --- | --- | --- |
-| **OB0** | Paper pass | Answer the open questions above. Throwaway prototypes: pseudo-3D look, screen-crack overlay. | — |
+| #       | Milestone         | Ships                                                                                                  | Cliffhanger                        |
+| ------- | ----------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------- |
+| **OB0** | Paper pass        | Answer the open questions above. Throwaway prototypes: pseudo-3D look, screen-crack overlay.           | —                                  |
 | **OB1** | Walk Off the Page | Hobbies left void (Act 1), right-edge bug fixed, Debugging Tools pickup + hidden Backpack slot (Act 2) | One crack across the real viewport |
-| **OB2** | Street hint | Negative-x space left of the `START` sign, first hint | "The edges aren't finished" |
-| **OB3** | Screen Breaker | App-shell bug/damage layer, portfolio chrome falling apart, shatter transition (Act 3) | Falling into black |
-| **OB4** | Unplugged & Sneak | Wake-up + pencil-wireframe ship + stealth section (Acts 4–5) | Weapon spotted behind glass |
-| **OB5** | Armed | Weapon + corridor fight to the bridge (Act 6) | Sitting in the pilot seat |
-| **OB6** | Flight Home | Vertical shooter + boss (Act 7) | Earth in view |
-| **OB7** | Homecoming | Ending scene, credits, true-ending flag (Act 8) | — the end |
+| **OB2** | Street hint       | Negative-x space left of the `START` sign, first hint                                                  | "The edges aren't finished"        |
+| **OB3** | Screen Breaker    | App-shell bug/damage layer, portfolio chrome falling apart, shatter transition (Act 3)                 | Falling into black                 |
+| **OB4** | Unplugged & Sneak | Wake-up + pencil-wireframe ship + stealth section (Acts 4–5)                                           | Weapon spotted behind glass        |
+| **OB5** | Armed             | Weapon + corridor fight to the bridge (Act 6)                                                          | Sitting in the pilot seat          |
+| **OB6** | Flight Home       | Vertical shooter + boss (Act 7)                                                                        | Earth in view                      |
+| **OB7** | Homecoming        | Ending scene, credits, true-ending flag (Act 8)                                                        | — the end                          |
 
 OB2 is independent and can ship any time after OB1. Everything else is in order.
 

@@ -29,7 +29,10 @@ function ChoiceCard({ title, blurb, icon, recommended, recommendedLabel, cta, on
       className="group relative flex w-full max-w-sm flex-col items-center gap-4 rounded-lg border-4 bg-[#fbfbf9] p-6 text-left shadow-[8px_8px_0px_0px_rgba(26,26,26,1)] hover:shadow-[10px_10px_0px_0px_rgba(26,26,26,1)] focus-visible:-translate-x-0.5 focus-visible:-translate-y-0.5 focus-visible:shadow-[10px_10px_0px_0px_rgba(26,26,26,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] sm:p-8"
     >
       {recommended && (
-        <Badge tone="highlight" className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap shadow-[3px_3px_0px_0px_rgba(26,26,26,1)]">
+        <Badge
+          tone="highlight"
+          className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap shadow-[3px_3px_0px_0px_rgba(26,26,26,1)]"
+        >
           {recommendedLabel}
         </Badge>
       )}
@@ -59,9 +62,7 @@ export default function ModePicker({ onChoose }: ModePickerProps) {
             {messages.modePicker.eyebrow}
           </p>
           <h1 className="text-4xl font-bold text-[#1a1a1a] sm:text-5xl">{messages.modePicker.title}</h1>
-          <p className="max-w-md text-sm text-[#1a1a1a]/80 sm:text-base">
-            {messages.modePicker.blurb}
-          </p>
+          <p className="max-w-md text-sm text-[#1a1a1a]/80 sm:text-base">{messages.modePicker.blurb}</p>
         </header>
 
         <div className="grid w-full grid-cols-1 place-items-center gap-8 pt-2 sm:grid-cols-2 sm:gap-6">
@@ -85,9 +86,7 @@ export default function ModePicker({ onChoose }: ModePickerProps) {
           />
         </div>
 
-        <p className="max-w-md text-center text-xs text-[#1a1a1a]/60">
-          {messages.modePicker.switchHint}
-        </p>
+        <p className="max-w-md text-center text-xs text-[#1a1a1a]/60">{messages.modePicker.switchHint}</p>
       </div>
     </div>
   );

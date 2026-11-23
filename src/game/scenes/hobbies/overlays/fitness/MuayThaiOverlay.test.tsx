@@ -27,7 +27,9 @@ afterEach(() => {
 
 describe('MuayThaiOverlay', () => {
   it('awards the battery cell for a full six-strike combo', () => {
-    render(<MuayThaiOverlay close={vi.fn()} enterScene={vi.fn()} openOverlay={vi.fn()} titleId="t" descriptionId="d" />);
+    render(
+      <MuayThaiOverlay close={vi.fn()} enterScene={vi.fn()} openOverlay={vi.fn()} titleId="t" descriptionId="d" />
+    );
     for (let step = 0; step < COMBO_LENGTH; step++) {
       expect(bridgeStore.getState().inventory.ownedItemIds).not.toContain('battery-cell');
       strikeAtZoneCenter(step);
@@ -45,7 +47,9 @@ describe('MuayThaiOverlay', () => {
   });
 
   it('strikes from the page around the bag, which also covers the timing bar', () => {
-    render(<MuayThaiOverlay close={vi.fn()} enterScene={vi.fn()} openOverlay={vi.fn()} titleId="t" descriptionId="d" />);
+    render(
+      <MuayThaiOverlay close={vi.fn()} enterScene={vi.fn()} openOverlay={vi.fn()} titleId="t" descriptionId="d" />
+    );
     const strikePad = screen.getByRole('button', { name: /timing bar/i });
     const bar = screen.getByRole('img', { name: 'Timing bar' });
     expect(strikePad.className).toContain('inset-0');
@@ -58,7 +62,9 @@ describe('MuayThaiOverlay', () => {
   });
 
   it('resets the combo on a mistimed strike', () => {
-    render(<MuayThaiOverlay close={vi.fn()} enterScene={vi.fn()} openOverlay={vi.fn()} titleId="t" descriptionId="d" />);
+    render(
+      <MuayThaiOverlay close={vi.fn()} enterScene={vi.fn()} openOverlay={vi.fn()} titleId="t" descriptionId="d" />
+    );
     strikeAtZoneCenter(0);
     expect(screen.getByText(`Combo 1/${COMBO_LENGTH}`)).toBeDefined();
     clock += sweepPeriodMs(1) / 2 - 1;

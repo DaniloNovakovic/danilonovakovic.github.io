@@ -180,9 +180,7 @@ export function resolvePotassiumEnemySetupFacts(input: {
   const { kind, wave, columnIndex, rowIndex } = input;
   const config = getPotassiumEnemyConfig(kind);
   const hp = kind === 'boss' ? config.hp : getScaledPotassiumEnemyHp(config.hp, wave);
-  const shieldSide = config.shielded
-    ? getPotassiumShieldSide(wave, rowIndex, columnIndex)
-    : undefined;
+  const shieldSide = config.shielded ? getPotassiumShieldSide(wave, rowIndex, columnIndex) : undefined;
 
   return {
     depth: kind === 'boss' ? 80 : 60,
@@ -196,9 +194,8 @@ export function resolvePotassiumEnemySetupFacts(input: {
       [POTASSIUM_DATA_KEYS.columnIndex]: columnIndex,
       [POTASSIUM_DATA_KEYS.rowIndex]: rowIndex,
       [POTASSIUM_DATA_KEYS.columnSpan]: kind === 'splitter' ? 2 : 1,
-      [POTASSIUM_DATA_KEYS.occupiedColumns]: kind === 'splitter'
-        ? getPotassiumSplitterSpawnColumns(columnIndex)
-        : [columnIndex],
+      [POTASSIUM_DATA_KEYS.occupiedColumns]:
+        kind === 'splitter' ? getPotassiumSplitterSpawnColumns(columnIndex) : [columnIndex],
       [POTASSIUM_DATA_KEYS.indestructible]: config.indestructible ?? false,
       [POTASSIUM_DATA_KEYS.splitsOnDeath]: config.splitsOnDeath ?? false,
       ...(kind === 'boss' ? { [POTASSIUM_DATA_KEYS.bossPhase]: 1 } : {})
@@ -210,9 +207,8 @@ export function resolvePotassiumEnemySetupFacts(input: {
       shieldSide
     },
     bodyProfile: getPotassiumEnemyBodyProfile(kind),
-    angularVelocityRange: kind === 'scope'
-      ? { min: -70, max: 70 }
-      : kind === 'deadline' ? { min: 160, max: 240 } : undefined,
+    angularVelocityRange:
+      kind === 'scope' ? { min: -70, max: 70 } : kind === 'deadline' ? { min: 160, max: 240 } : undefined,
     immovable: kind === 'wall' || kind === 'hardWall',
     isBoss: kind === 'boss'
   };

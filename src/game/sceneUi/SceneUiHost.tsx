@@ -19,13 +19,7 @@ export function SceneUiHost({ placement }: SceneUiHostProps) {
   };
 
   if (placement === 'status') {
-    return (
-      <Surface
-        ownerSceneId={request.ownerSceneId}
-        params={request.params}
-        dispatchAction={dispatchAction}
-      />
-    );
+    return <Surface ownerSceneId={request.ownerSceneId} params={request.params} dispatchAction={dispatchAction} />;
   }
 
   if (surface.panelChrome === 'docked') {
@@ -36,11 +30,7 @@ export function SceneUiHost({ placement }: SceneUiHostProps) {
         data-testid="scene-ui-panel-docked"
         className="pointer-events-none absolute inset-[4px] z-30 overflow-hidden rounded-[4px]"
       >
-        <Surface
-          ownerSceneId={request.ownerSceneId}
-          params={request.params}
-          dispatchAction={dispatchAction}
-        />
+        <Surface ownerSceneId={request.ownerSceneId} params={request.params} dispatchAction={dispatchAction} />
       </div>
     );
   }
@@ -58,11 +48,7 @@ export function SceneUiHost({ placement }: SceneUiHostProps) {
       )}
     >
       <div className="pointer-events-auto flex w-full justify-center">
-        <Surface
-          ownerSceneId={request.ownerSceneId}
-          params={request.params}
-          dispatchAction={dispatchAction}
-        />
+        <Surface ownerSceneId={request.ownerSceneId} params={request.params} dispatchAction={dispatchAction} />
       </div>
     </div>
   );

@@ -42,7 +42,10 @@ describe('potassium slip leaderboard', () => {
     const storage = new MemoryStorage();
     const completedAt = '2026-05-03T00:00:00.000Z';
     savePotassiumRunRecord(makeRecord(25, 0, { completedAt, mode: 'campaign', outcome: 'won', wave: 11 }), storage);
-    savePotassiumRunRecord(makeRecord(80, 1, { completedAt, mode: 'endless', outcome: 'game_over', wave: 14 }), storage);
+    savePotassiumRunRecord(
+      makeRecord(80, 1, { completedAt, mode: 'endless', outcome: 'game_over', wave: 14 }),
+      storage
+    );
 
     expect(loadPotassiumLeaderboard(storage)).toEqual([
       makeRecord(80, 1, { completedAt, mode: 'endless', outcome: 'game_over', wave: 14 })
@@ -58,11 +61,9 @@ describe('potassium slip leaderboard', () => {
       makeRecord(40, 1, { mode: 'campaign', outcome: 'won', wave: 11 })
     ];
 
-    expect(formatPotassiumLeaderboardRecords(records)).toBe([
-      'RECORDS',
-      '1. 80 • W14 • endless',
-      '2. 40 • W11 • won'
-    ].join('\n'));
+    expect(formatPotassiumLeaderboardRecords(records)).toBe(
+      ['RECORDS', '1. 80 • W14 • endless', '2. 40 • W11 • won'].join('\n')
+    );
   });
 });
 

@@ -65,9 +65,7 @@ export interface StampedeAutoAttackFrame {
   remainingCandidates: readonly StampedeAutoAttackCandidate[];
 }
 
-export function createStampedeAutoAttackState(
-  options: Partial<StampedeAutoAttackState> = {}
-): StampedeAutoAttackState {
+export function createStampedeAutoAttackState(options: Partial<StampedeAutoAttackState> = {}): StampedeAutoAttackState {
   return {
     nextFireAtMs: options.nextFireAtMs ?? STAMPEDE_AUTO_ATTACK_COOLDOWN_MS,
     lastDirection: normalizeDirection(options.lastDirection ?? { x: 1, y: 0 })
@@ -98,25 +96,22 @@ export function resolveStampedeAutoAttackFrame({
   const hits = resolveSelfieHits(player, candidates, profile, elapsedMs, lastDirection);
   const direction = hits[0]
     ? normalizeDirection({
-      x: hits[0].x - player.x,
-      y: hits[0].y - player.y
-    })
+        x: hits[0].x - player.x,
+        y: hits[0].y - player.y
+      })
     : lastDirection;
   const target = hits[0]
     ? { x: hits[0].x, y: hits[0].y }
     : {
-      x: player.x + direction.x * 36,
-      y: player.y + direction.y * 36
-    };
+        x: player.x + direction.x * 36,
+        y: player.y + direction.y * 36
+      };
   const hitIds = hits.map((candidate) => candidate.id);
   const hitIdSet = new Set(hitIds);
 
   return {
     state: {
-      nextFireAtMs: Math.max(
-        state.nextFireAtMs + profile.cooldownMs,
-        elapsedMs + profile.cooldownMs
-      ),
+      nextFireAtMs: Math.max(state.nextFireAtMs + profile.cooldownMs, elapsedMs + profile.cooldownMs),
       lastDirection
     },
     attack: {
@@ -132,10 +127,8 @@ export function resolveStampedeAutoAttackFrame({
 }
 
 function byDistance(player: StampedeAutoAttackPoint) {
-  return (left: StampedeAutoAttackPoint, right: StampedeAutoAttackPoint) => (
-    Math.hypot(left.x - player.x, left.y - player.y)
-    - Math.hypot(right.x - player.x, right.y - player.y)
-  );
+  return (left: StampedeAutoAttackPoint, right: StampedeAutoAttackPoint) =>
+    Math.hypot(left.x - player.x, left.y - player.y) - Math.hypot(right.x - player.x, right.y - player.y);
 }
 
 function resolveSelfieHits(
@@ -175,9 +168,7 @@ export function resolveGroupDazeIds(
   const hits = candidates.filter((candidate) => hitIds.includes(candidate.id));
   return candidates
     .filter((candidate) => !hitIds.includes(candidate.id))
-    .filter((candidate) => hits.some((hit) => (
-      Math.hypot(candidate.x - hit.x, candidate.y - hit.y) <= radius
-    )))
+    .filter((candidate) => hits.some((hit) => Math.hypot(candidate.x - hit.x, candidate.y - hit.y) <= radius))
     .map((candidate) => candidate.id);
 }
 

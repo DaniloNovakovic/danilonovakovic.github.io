@@ -3,11 +3,7 @@ import type { PotassiumBossSummonFacts } from './boss';
 import type { PotassiumDraftChoiceView, PotassiumHudFacts } from './session';
 import type { PotassiumSessionState, PotassiumSessionResult } from './session';
 import type { PotassiumDamageSource, PotassiumGhostBeamDirection } from './combat';
-import type {
-  PotassiumGenericUpgradeKind,
-  PotassiumScheduledWaveRow,
-  PotassiumUpgradeKind
-} from './waves';
+import type { PotassiumGenericUpgradeKind, PotassiumScheduledWaveRow, PotassiumUpgradeKind } from './waves';
 
 export interface PotassiumCommandBody {
   velocity: { x: number; y: number };
@@ -102,12 +98,7 @@ export interface PotassiumCommandAdapterRendererPorts {
   showDamageCue(enemy: PotassiumCommandObject, source: PotassiumDamageSource): void;
   showExplosionVisual(x: number, y: number, radius: number): void;
   shakeCamera(durationMs: number, intensity: number): void;
-  showGhostBeam(input: {
-    x: number;
-    y: number;
-    direction: PotassiumGhostBeamDirection;
-    durationMs: number;
-  }): void;
+  showGhostBeam(input: { x: number; y: number; direction: PotassiumGhostBeamDirection; durationMs: number }): void;
   showGhostStatusField(input: {
     x: number;
     y: number;
@@ -125,11 +116,10 @@ export interface PotassiumCommandAdapterPorts {
   renderer: PotassiumCommandAdapterRendererPorts;
 }
 
-export type PotassiumCommandAdapterFlatPorts =
-  PotassiumCommandAdapterRuntimePorts
-  & PotassiumCommandAdapterObjectPorts
-  & PotassiumCommandAdapterBoardPorts
-  & PotassiumCommandAdapterRendererPorts;
+export type PotassiumCommandAdapterFlatPorts = PotassiumCommandAdapterRuntimePorts &
+  PotassiumCommandAdapterObjectPorts &
+  PotassiumCommandAdapterBoardPorts &
+  PotassiumCommandAdapterRendererPorts;
 
 export interface PotassiumCommandAdapterOptions {
   arena: {

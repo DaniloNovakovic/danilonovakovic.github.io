@@ -66,11 +66,15 @@ describe('guitar surf', () => {
     expect(cruising.state.notes.length).toBeGreaterThan(5);
     cruising.state.notes.forEach((note) => expect(note.x).toBeLessThan(cruising.player.x));
 
-    const later = run(1, {
-      state: cruising.state,
-      player: cruising.player,
-      elapsedMs: cruising.elapsedMs + 5_000
-    }, { x: 0, y: 0 });
+    const later = run(
+      1,
+      {
+        state: cruising.state,
+        player: cruising.player,
+        elapsedMs: cruising.elapsedMs + 5_000
+      },
+      { x: 0, y: 0 }
+    );
     expect(later.state.notes).toHaveLength(0);
   });
 
@@ -125,7 +129,11 @@ describe('guitar surf', () => {
 
   it('fires a power chord only with the twist, after braking from top speed', () => {
     const plain = run(120, {});
-    const plainBrake = run(80, { state: plain.state, player: plain.player, elapsedMs: plain.elapsedMs }, { x: 0, y: 0 });
+    const plainBrake = run(
+      80,
+      { state: plain.state, player: plain.player, elapsedMs: plain.elapsedMs },
+      { x: 0, y: 0 }
+    );
     expect(plainBrake.chords).toHaveLength(0);
 
     const drop = run(120, { mods: { drop: true } });

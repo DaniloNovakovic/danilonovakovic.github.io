@@ -35,7 +35,9 @@ export const Variants: Story = {
 export const Disabled: Story = {
   render: () => (
     <div className="flex flex-wrap items-center gap-4 p-6">
-      <Button disabled variant="primary">Locked</Button>
+      <Button disabled variant="primary">
+        Locked
+      </Button>
       <Button disabled variant="secondary" icon={<RotateCcw className="h-4 w-4" />}>
         Reset
       </Button>

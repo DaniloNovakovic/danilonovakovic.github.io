@@ -6,10 +6,7 @@ import { SceneHintSlip } from '@/shared/ui';
 import { useMessages } from '@/shared/i18n';
 import type { NotebookRuntimeShellProfile } from './notebookShellProfile';
 import { NotebookRuntimeShell } from './NotebookRuntimeShell';
-import {
-  NOTEBOOK_CONTROL_MAT_TOP_OFFSET_PX,
-  useNotebookFocusPageFrameLayout
-} from './notebookFocusLayout';
+import { NOTEBOOK_CONTROL_MAT_TOP_OFFSET_PX, useNotebookFocusPageFrameLayout } from './notebookFocusLayout';
 
 const POTASSIUM_BOARD_WIDTH = 450;
 const POTASSIUM_BOARD_HEIGHT = 600;
@@ -71,7 +68,8 @@ export function PotassiumNotebookShell({
           'data-frame-relative-center-y': frameLayout.relativeCenterY,
           'data-frame-width': frameLayout.width
         },
-        className: 'potassium-notebook-page-frame absolute left-1/2 -translate-x-1/2 -translate-y-1/2 shadow-[12px_12px_0px_0px_rgba(26,26,26,1)]',
+        className:
+          'potassium-notebook-page-frame absolute left-1/2 -translate-x-1/2 -translate-y-1/2 shadow-[12px_12px_0px_0px_rgba(26,26,26,1)]',
         gameFrameTestId: 'potassium-notebook-game-frame',
         style: frameLayout.style,
         testId: 'potassium-notebook-page-frame'
