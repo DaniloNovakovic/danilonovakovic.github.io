@@ -118,14 +118,12 @@ describe('InteractiveApp', () => {
     expect(screen.getByRole('button', { name: /switch to static portfolio/i }).className).not.toContain('fixed');
   });
 
-  it('renders navigation hints in a normal-flow footer', () => {
+  it('gives the street the footer row instead of a standing controls hint', () => {
     render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
     const messages = getMessages();
 
-    const footer = screen.getByRole('contentinfo');
-    expect(footer.className).not.toContain('fixed');
-    expect(screen.getByText(messages.navigation.hintsCompact)).toBeDefined();
-    expect(screen.getByText(messages.navigation.hintsCompact).closest('.fixed')).toBeNull();
+    expect(screen.queryByRole('contentinfo')).toBeNull();
+    expect(screen.queryByText(messages.navigation.hints)).toBeNull();
   });
 
   it('caps game shell width from the measured content row height', async () => {
