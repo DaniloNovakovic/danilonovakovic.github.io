@@ -1,4 +1,5 @@
 import * as Phaser from 'phaser';
+import { HOBBIES_PLAYER_MAX_X } from '@/game/core/console';
 import { GAME_DESIGN_HEIGHT, GAME_DESIGN_WIDTH } from './designSize';
 
 export { GAME_DESIGN_HEIGHT, GAME_DESIGN_WIDTH } from './designSize';
@@ -17,7 +18,7 @@ export const HOBBIES_PLAYER_START_OFFSET_Y = 50;
 /** Clamp restored player position inside the hobbies room (logical px). */
 export const HOBBIES_RESUME_CLAMP = {
   minX: 40,
-  maxX: HOBBIES_ROOM_WIDTH - 40,
+  maxX: HOBBIES_PLAYER_MAX_X,
   minY: 120,
   maxY: HOBBIES_FLOOR_Y - 20
 } as const;
