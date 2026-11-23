@@ -11,6 +11,7 @@ import { bindSideViewKeyboard } from '../input/sceneKeyboard';
 import type { SceneInputKeys } from '../input/readSceneInputCommands';
 import { readPlayerSceneStep } from '../input/scenePlayerInput';
 import { setSceneKeyboardPaused } from '../sceneKeyboardPause';
+import { TextureGenerator } from '../textures/TextureGenerator';
 import {
   createSideViewCameraRuntime,
   type SideViewCameraDesignSize,
@@ -106,6 +107,11 @@ class PhaserSideViewPlayerRuntime implements SideViewPlayerRuntime {
     const { scene } = options;
     const start = resolveStartPosition(options);
     const textureKey = options.sprite?.textureKey ?? DEFAULT_TEXTURE_KEY;
+    // Deep links (?startScene=hobbies) can start a room before the street ever
+    // generated the player textures.
+    if (textureKey === DEFAULT_TEXTURE_KEY && !scene.textures.exists(DEFAULT_TEXTURE_KEY)) {
+      TextureGenerator.generatePlayer(scene);
+    }
 
     this.player = scene.physics.add.sprite(start.x, start.y, textureKey);
     if (options.sprite?.depth !== undefined) {

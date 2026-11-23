@@ -12,6 +12,7 @@ import { SceneManager } from '@/game/sceneLifecycle/SceneManager';
 import { getGameConfig } from '@/game/sharedSceneRuntime/config';
 import { getSceneStartResume, prepareSceneStart } from '@/game/sharedSceneRuntime/sceneResumePolicy';
 import type { RidgeDevControls } from '@/game/scenes/ridge/runtime/ridgeDevControls';
+import { installDevDebugHook } from './devDebugHook';
 import { getDevRidgeProgressSeed } from './devRidgeProgressParams';
 import { setPauseOnPausableScenes } from './phaserGamePauseSync';
 import { refreshPhaserScale } from './refreshPhaserScale';
@@ -93,7 +94,12 @@ export function usePhaserGameBoot({
     sceneLifecycle.start();
 
     // Dev-only helpers: seed progress and/or start scenes without walking to triggers.
+    let uninstallDevDebugHook: (() => void) | undefined;
     if (import.meta.env.DEV) {
+      uninstallDevDebugHook = installDevDebugHook(
+        window as unknown as Record<string, unknown>,
+        () => gameRef.current
+      );
       const url = new URL(window.location.href);
       let shouldReplaceUrl = false;
 
@@ -119,6 +125,7 @@ export function usePhaserGameBoot({
     }
 
     return () => {
+      uninstallDevDebugHook?.();
       ro?.disconnect();
       sceneLifecycle.stop();
       game.destroy(true);

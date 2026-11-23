@@ -30,7 +30,12 @@ vi.mock('../camera/sideViewCameraRuntime', () => ({
   }))
 }));
 
+vi.mock('../textures/TextureGenerator', () => ({
+  TextureGenerator: { generatePlayer: vi.fn() }
+}));
+
 import { createSideViewPlayerRuntime } from './SideViewPlayerRuntime';
+import { TextureGenerator } from '../textures/TextureGenerator';
 import { createSideViewCameraRuntime } from '../camera/sideViewCameraRuntime';
 
 type FakeKey = Phaser.Input.Keyboard.Key & { justDown?: boolean };
@@ -56,7 +61,7 @@ function createSprite() {
   return sprite as unknown as Phaser.Types.Physics.Arcade.SpriteWithDynamicBody & typeof sprite;
 }
 
-function createScene() {
+function createScene({ hasPlayerTexture = true } = {}) {
   const sprite = createSprite();
   const cursors = {
     left: key(),
@@ -93,6 +98,7 @@ function createScene() {
       }
     },
     input: { keyboard },
+    textures: { exists: vi.fn(() => hasPlayerTexture) },
     time: { now: 100 }
   } as unknown as Phaser.Scene & {
     physics: {
@@ -116,6 +122,18 @@ describe('SideViewPlayerRuntime', () => {
   beforeEach(() => {
     bridgeActions.resetTouch();
     vi.mocked(createSideViewCameraRuntime).mockClear();
+    vi.mocked(TextureGenerator.generatePlayer).mockClear();
+  });
+
+  it('generates the player textures when a room starts before the street made them', () => {
+    const missing = createScene({ hasPlayerTexture: false });
+    createSideViewPlayerRuntime({ scene: missing.scene, start: { x: 0, y: 0 }, movement, input: { allowJump: true, allowSprint: true } });
+    expect(TextureGenerator.generatePlayer).toHaveBeenCalledWith(missing.scene);
+
+    vi.mocked(TextureGenerator.generatePlayer).mockClear();
+    const present = createScene();
+    createSideViewPlayerRuntime({ scene: present.scene, start: { x: 0, y: 0 }, movement, input: { allowJump: true, allowSprint: true } });
+    expect(TextureGenerator.generatePlayer).not.toHaveBeenCalled();
   });
 
   it('spawns at the default start when no resume exists', () => {

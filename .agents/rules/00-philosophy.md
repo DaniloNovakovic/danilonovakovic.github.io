@@ -5,7 +5,7 @@ Applies to all source changes.
 ## Hard Rules
 
 1. **Use the smallest change inside the existing seam.** Before introducing a new store, bus, global, lifecycle mechanism, or shared scene runtime Module, check whether the bridge store, scene lifecycle, SceneManager, ECS, or an existing shared scene runtime Module already covers the job.
-2. **No new globals.** No module-level `window.foo`, no one-off singleton backdoors. If state must cross a boundary, use the bridge store or pass it in.
+2. **No new globals.** No module-level `window.foo`, no one-off singleton backdoors. If state must cross a boundary, use the bridge store or pass it in. The single exception is the dev debug hook `window.__sketchbookDebug` (`src/game/shell/devDebugHook.ts`): installed only behind `import.meta.env.DEV`, absent from production builds, and used only by agents and browser tests. Extend that hook instead of adding another global; game code must never read it.
 3. **Avoid speculative infrastructure.** Do not introduce object pools, spatial indexes, scripting engines, broad event systems, or configuration surfaces without measured need or an explicit ask.
 
 ## Before Adding An Abstraction
