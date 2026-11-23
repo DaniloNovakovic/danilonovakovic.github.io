@@ -22,7 +22,7 @@ import {
 } from '@/game/sharedSceneRuntime/config';
 import { bridgeStore, isItemEquipped, type OpenOverlayOptions } from '@/game/bridge/store';
 import { CIRCUIT_PART_HOBBY, CIRCUIT_PART_IDS } from '@/game/core/console/content/circuitParts';
-import { HOBBIES_RIGHT_WALL_X } from '@/game/core/console/content/hobbiesSpots';
+import { HOBBIES_RIGHT_WALL_X } from '@/game/core/console';
 import { prefersReducedMotion, sketchTick } from '@/game/sharedSceneRuntime/motion/sketchMotion';
 import { HobbiesRoom } from './HobbiesRoom';
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';

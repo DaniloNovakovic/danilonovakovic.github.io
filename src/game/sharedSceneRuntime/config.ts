@@ -1,5 +1,5 @@
 import * as Phaser from 'phaser';
-import { HOBBIES_PLAYER_MAX_X } from '@/game/core/console/content/hobbiesSpots';
+import { HOBBIES_PLAYER_MAX_X } from '@/game/core/console';
 import { GAME_DESIGN_HEIGHT, GAME_DESIGN_WIDTH } from './designSize';
 
 export { GAME_DESIGN_HEIGHT, GAME_DESIGN_WIDTH } from './designSize';

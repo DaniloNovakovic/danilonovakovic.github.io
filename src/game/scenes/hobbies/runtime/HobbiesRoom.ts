@@ -7,7 +7,7 @@ import * as Phaser from 'phaser';
 import { HOBBIES_OVERLAY_IDS, type HobbiesOverlayId } from '@/game/overlays/overlayIds';
 import { HOBBIES_EXIT_X, HOBBY_STATION_LAYOUT } from '../roomLayout';
 import { getMessages } from '@/shared/i18n';
-import { HOBBIES_RIGHT_WALL_X } from '@/game/core/console/content/hobbiesSpots';
+import { HOBBIES_RIGHT_WALL_X } from '@/game/core/console';
 import { TextureGenerator } from '@/game/sharedSceneRuntime/textures/TextureGenerator';
 import {
   HOBBIES_FLOOR_Y,
