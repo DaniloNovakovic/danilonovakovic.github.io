@@ -19,6 +19,9 @@ Do not treat every file here as equally active.
 - **Milestone map:** [`ridge/milestone-plan.md`](./ridge/milestone-plan.md)
   for current route-reset milestones and prototype reuse rules.
 - **Optional/current mini-game routing:** [`mini-games/README.md`](./mini-games/README.md).
+- **Out of Bounds secret arc (idea / pre-production):**
+  [`secrets/out-of-bounds.md`](./secrets/out-of-bounds.md) — Hobbies-left
+  fourth-wall break leading to the true ending. Not shipped, not Ridge canon.
 - **Live PRDs, issues, triage state, and agent briefs:** GitHub Issues, as
   configured in [`../agents/issue-tracker.md`](../agents/issue-tracker.md).
 
