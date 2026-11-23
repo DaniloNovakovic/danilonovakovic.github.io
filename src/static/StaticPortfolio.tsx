@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { Gamepad2 } from 'lucide-react';
 import { getPortfolioData } from '@/shared/portfolio';
 import { useMessages } from '@/shared/i18n';
@@ -15,10 +14,12 @@ interface StaticPortfolioProps {
   onSwitchToInteractive: () => void;
 }
 
+// Read once at load; the footer year doesn't need to update while the page is open.
+const COPYRIGHT_YEAR = new Date().getFullYear();
+
 export default function StaticPortfolio({ onSwitchToInteractive }: StaticPortfolioProps) {
   const messages = useMessages();
   const { profile } = getPortfolioData(messages);
-  const year = useMemo(() => new Date().getFullYear(), []);
 
   return (
     <div className="relative min-h-[100dvh] min-h-dvh w-full overflow-x-hidden bg-[#f4f1ea]">
@@ -74,7 +75,7 @@ export default function StaticPortfolio({ onSwitchToInteractive }: StaticPortfol
               {messages.staticPortfolio.footerCta}
             </Button>
           </p>
-          <p>{messages.staticPortfolio.copyright(year, profile.name)}</p>
+          <p>{messages.staticPortfolio.copyright(COPYRIGHT_YEAR, profile.name)}</p>
         </footer>
       </main>
     </div>

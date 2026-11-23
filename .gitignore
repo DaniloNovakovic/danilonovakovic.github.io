@@ -16,7 +16,6 @@ storybook-static
 .vite
 .turbo
 .cache
-.eslintcache
 .fallow/
 *.local
 *.local.json

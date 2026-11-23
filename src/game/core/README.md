@@ -25,7 +25,7 @@ engine adapters belong to `adapters/`.
 
 ## Related guardrails
 
-- `sceneLifecycle/contexts/` and scene-owned `sceneContext.ts` files must not import `sharedSceneRuntime/` (enforced by ESLint; see `eslint.config.js`).
+- `sceneLifecycle/contexts/` and scene-owned `sceneContext.ts` files must not import `sharedSceneRuntime/` (enforced by oxlint; see `.oxlintrc.json`).
 
 ## Does not own
 
