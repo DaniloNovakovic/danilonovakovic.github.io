@@ -80,10 +80,10 @@ export interface SideViewPlayerRuntime {
 }
 
 const DEFAULT_TEXTURE_KEY = 'player_idle';
-/** Suffix of the walk pose textures: the same drawing a hop higher (TextureGenerator). */
-const WALK_STEP_SUFFIX = '_step';
-/** Sketch-clock ticks per walk cycle: half down, half up (~180ms each, like Ridge's stepped bob). */
-const WALK_STEP_TICKS = 4;
+/** Walk cycle frames drawn by TextureGenerator (`<base>_walk0..3`): stride + lean, pass + hop. */
+const WALK_FRAME_COUNT = 4;
+/** Sketch-clock ticks each walk frame is held (~180ms), the same stepped feel as Ridge. */
+const WALK_TICKS_PER_FRAME = 2;
 
 function resolveStartPosition(options: SideViewPlayerRuntimeOptions): ResumeSnapshot {
   const raw = options.resumePosition ?? options.start;
@@ -107,7 +107,8 @@ class PhaserSideViewPlayerRuntime implements SideViewPlayerRuntime {
   /** Idle or glasses texture, before the walk pose. */
   private baseTextureKey: string;
   private appliedTextureKey: string;
-  private stepping = false;
+  /** Current walk frame, or null when standing. */
+  private walkFrame: number | null = null;
   private readonly motion = !prefersReducedMotion();
 
   constructor(options: SideViewPlayerRuntimeOptions) {
@@ -170,10 +171,10 @@ class PhaserSideViewPlayerRuntime implements SideViewPlayerRuntime {
     });
 
     this.player.setFlipX(step.facingLeft);
-    // Walk as a stepped hop pose, never a tilt: rotating the texture by a new
-    // angle every frame smears its ink lines and disables pixel rounding.
+    // Walk through drawn frames, never a live tilt: rotating the texture by a
+    // new angle every frame smears its ink lines and disables pixel rounding.
     const tick = sketchTick(this.options.scene.time.now);
-    this.stepping = this.motion && step.moving && tick % WALK_STEP_TICKS >= WALK_STEP_TICKS / 2;
+    this.walkFrame = this.motion && step.moving ? Math.floor(tick / WALK_TICKS_PER_FRAME) % WALK_FRAME_COUNT : null;
     this.applyTexture();
 
     return { paused: false, commands, step };
@@ -191,8 +192,8 @@ class PhaserSideViewPlayerRuntime implements SideViewPlayerRuntime {
   }
 
   private applyTexture(force = false): void {
-    const stepKey = this.baseTextureKey + WALK_STEP_SUFFIX;
-    const key = this.stepping && this.options.scene.textures.exists(stepKey) ? stepKey : this.baseTextureKey;
+    const walkKey = this.walkFrame === null ? null : `${this.baseTextureKey}_walk${this.walkFrame}`;
+    const key = walkKey && this.options.scene.textures.exists(walkKey) ? walkKey : this.baseTextureKey;
     if (key === this.appliedTextureKey && !force) return;
     this.appliedTextureKey = key;
     this.player.setTexture(key);

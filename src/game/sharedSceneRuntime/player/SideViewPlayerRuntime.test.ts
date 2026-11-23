@@ -202,8 +202,9 @@ describe('SideViewPlayerRuntime', () => {
     expect(sprite.setFlipX).toHaveBeenCalledWith(false);
   });
 
-  it('walks with a stepped hop pose on the sketch clock and never tilts the sprite', () => {
-    // A tilted texture re-rotated every frame smears its ink lines while walking.
+  it('walks through drawn stride frames on the sketch clock and never tilts the sprite', () => {
+    // A texture re-rotated by a new angle every frame smears its ink lines while walking,
+    // so the waddle and leg stride are drawn into the frames instead.
     const { scene, sprite, cursors } = createScene();
     let equipped = false;
     const runtime = createSideViewPlayerRuntime({
@@ -227,17 +228,25 @@ describe('SideViewPlayerRuntime', () => {
     };
 
     cursors.right.isDown = true;
-    // Sketch clock ticks every 90ms: two ticks down, two ticks up.
+    // Sketch clock ticks every 90ms; each walk frame holds two ticks.
     poseAt(0);
     poseAt(200);
     poseAt(380);
     equipped = true;
     runtime.syncAppearance();
     poseAt(560);
+    poseAt(740);
     cursors.right.isDown = false;
-    poseAt(560);
+    poseAt(740);
 
-    expect(poses).toEqual(['player_idle', 'player_idle_step', 'player_idle', 'player_glasses_step', 'player_glasses']);
+    expect(poses).toEqual([
+      'player_idle_walk0',
+      'player_idle_walk1',
+      'player_idle_walk2',
+      'player_glasses_walk3',
+      'player_glasses_walk0',
+      'player_glasses'
+    ]);
     expect(sprite.setAngle).not.toHaveBeenCalled();
   });
 

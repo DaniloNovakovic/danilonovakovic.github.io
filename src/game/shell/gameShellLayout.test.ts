@@ -52,9 +52,11 @@ describe('getInteractiveGameShellLayout', () => {
   it('keeps desktop sizing tied to the Phaser design resolution', () => {
     const layout = getInteractiveGameShellLayout('portrait-cover');
 
-    expect(layout.shellStyle['--desktop-game-shell-width']).toBe('min(100%, calc(min(88dvh, 600px) * 1.666667))');
+    // The card budgets its two 4px borders (16px) so the canvas inside shows at exactly 1000px:
+    // any other size resamples every frame, and moving line art goes blurry.
+    expect(layout.shellStyle['--desktop-game-shell-width']).toBe('min(100%, calc(min(88dvh, 616px) * 1.666667))');
     expect(layout.frameStyle['--desktop-game-frame-aspect']).toBe('1000 / 600');
-    expect(layout.frameStyle['--desktop-game-frame-max-height']).toBe('min(88dvh, 600px)');
+    expect(layout.frameStyle['--desktop-game-frame-max-height']).toBe('min(88dvh, 616px)');
   });
 });
 
@@ -62,14 +64,14 @@ describe('getInteractiveGameShellLayout sizing', () => {
   it('caps the desktop frame by the measured content row so short screens do not overflow', () => {
     const layout = getInteractiveGameShellLayout('portrait-cover', 326);
 
-    expect(layout.frameStyle['--desktop-game-frame-max-height']).toBe('min(88dvh, 600px, 326px)');
+    expect(layout.frameStyle['--desktop-game-frame-max-height']).toBe('min(88dvh, 616px, 326px)');
     expect(layout.shellStyle['--desktop-game-shell-width']).toBe(
-      'min(100%, calc(min(88dvh, 600px, 326px) * 1.666667))'
+      'min(100%, calc(min(88dvh, 616px, 326px) * 1.666667))'
     );
   });
 
-  it('keeps the 1000px card column by default', () => {
-    expect(getInteractiveGameShellLayout('portrait-cover').maxContentWidth).toBe('1000px');
+  it('keeps a card column that fits the 1000px canvas plus the frame borders', () => {
+    expect(getInteractiveGameShellLayout('portrait-cover').maxContentWidth).toBe('1016px');
   });
 
   it('lets the wide shell grow past the 600px card cap', () => {

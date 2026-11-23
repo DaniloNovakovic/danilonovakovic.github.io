@@ -4,9 +4,11 @@ import { drawOverworldBuildingArt, drawPixelOverworldBuildingArt } from './build
 
 export class TextureGenerator {
   /**
-   * Generates `player_idle` / `player_glasses` textures, plus `_step` walk
-   * poses (the same drawing hopped 2px up, shadow left on the ground) that
-   * SideViewPlayerRuntime swaps in on the sketch clock.
+   * Generates `player_idle` / `player_glasses` textures, plus a four-frame
+   * walk cycle for each (`<key>_walk0..3`: stride leaning one way, pass with a
+   * hop, stride leaning the other way, pass). SideViewPlayerRuntime swaps them
+   * on the sketch clock. The waddle is drawn into the frames rather than
+   * rotating the sprite live, which would resample the ink every frame.
    *
    * `scaleFactor` rasterizes the same drawing larger so scenes that present
    * the player bigger (e.g. the Bridge Walk Rail) can stay crisp; pass a
@@ -15,15 +17,17 @@ export class TextureGenerator {
   static generatePlayer(scene: Phaser.Scene, scaleFactor = 1, keySuffix = '') {
     const k = scaleFactor;
     const pg = scene.make.graphics({ x: 0, y: 0 });
-    for (const [pose, hop] of [
-      ['', 0],
-      ['_step', 2]
-    ] as const) {
+    const poses: readonly [string, PlayerPose][] = [
+      ['', IDLE_POSE],
+      ...WALK_POSES.map((pose, i): [string, PlayerPose] => [`_walk${i}`, pose])
+    ];
+    for (const [suffix, pose] of poses) {
       pg.clear();
-      drawPlayer(pg, k, hop);
-      pg.generateTexture(`player_idle${keySuffix}${pose}`, 48 * k, 65 * k);
-      drawPlayerGlasses(pg, k, hop);
-      pg.generateTexture(`player_glasses${keySuffix}${pose}`, 48 * k, 65 * k);
+      drawPlayer(pg, k, pose, false);
+      pg.generateTexture(`player_idle${keySuffix}${suffix}`, 48 * k, 65 * k);
+      pg.clear();
+      drawPlayer(pg, k, pose, true);
+      pg.generateTexture(`player_glasses${keySuffix}${suffix}`, 48 * k, 65 * k);
     }
     pg.destroy();
   }
@@ -253,57 +257,79 @@ export class TextureGenerator {
   }
 }
 
-/** The side-view player doodle; `hop` lifts everything but the shadow (px at 1x). */
-function drawPlayer(pg: Phaser.GameObjects.Graphics, k: number, hop: number): void {
+interface PlayerPose {
+  /** Body lean in degrees, pivoting at the feet (the waddle). */
+  lean: number;
+  /** Px the body lifts off the ground (shadow stays put). */
+  hop: number;
+  /** Foot x offsets from the hips: 0 = standing, +/- = stride. */
+  backFoot: number;
+  frontFoot: number;
+}
+
+const IDLE_POSE: PlayerPose = { lean: 0, hop: 0, backFoot: 0, frontFoot: 0 };
+const WALK_POSES: readonly PlayerPose[] = [
+  { lean: -4, hop: 0, backFoot: -6, frontFoot: 6 },
+  { lean: 0, hop: 2, backFoot: 0, frontFoot: 0 },
+  { lean: 4, hop: 0, backFoot: -6, frontFoot: 6 },
+  { lean: 0, hop: 2, backFoot: 0, frontFoot: 0 }
+];
+
+/** The side-view player doodle in `pose`; the shadow always stays on the ground. */
+function drawPlayer(pg: Phaser.GameObjects.Graphics, k: number, pose: PlayerPose, glasses: boolean): void {
   const pFill = 0xfbfbf9;
   const pLine = 0x1a1a1a;
-  const y = (v: number) => (v - hop) * k;
 
   // Shadow stays on the ground.
   pg.fillStyle(0x000000, 0.1);
   pg.fillEllipse(24 * k, 60 * k, 20 * k, 6 * k);
 
+  pg.save();
+  // Lean around the feet, then lift: drawn once here, never rotated live.
+  pg.translateCanvas(24 * k, 60 * k);
+  pg.rotateCanvas((pose.lean * Math.PI) / 180);
+  pg.translateCanvas(-24 * k, (-60 - pose.hop) * k);
+
   pg.fillStyle(pFill, 1);
   pg.lineStyle(3 * k, pLine, 1);
 
-  // Legs
+  // Legs: straight down when standing, apart mid-stride.
   pg.beginPath();
-  pg.moveTo(18 * k, y(45));
-  pg.lineTo(18 * k, y(60));
-  pg.moveTo(30 * k, y(45));
-  pg.lineTo(30 * k, y(60));
+  pg.moveTo(18 * k, 45 * k);
+  pg.lineTo((18 + pose.backFoot) * k, 60 * k);
+  pg.moveTo(30 * k, 45 * k);
+  pg.lineTo((30 + pose.frontFoot) * k, 60 * k);
   pg.strokePath();
 
   // Backpack
-  pg.fillRect(8 * k, y(28), 8 * k, 16 * k);
-  pg.strokeRect(8 * k, y(28), 8 * k, 16 * k);
+  pg.fillRect(8 * k, 28 * k, 8 * k, 16 * k);
+  pg.strokeRect(8 * k, 28 * k, 8 * k, 16 * k);
 
   // Body (Hoodie)
-  pg.fillRect(14 * k, y(24), 20 * k, 22 * k);
-  pg.strokeRect(14 * k, y(24), 20 * k, 22 * k);
+  pg.fillRect(14 * k, 24 * k, 20 * k, 22 * k);
+  pg.strokeRect(14 * k, 24 * k, 20 * k, 22 * k);
 
   // Head
-  pg.fillCircle(24 * k, y(16), 12 * k);
-  pg.strokeCircle(24 * k, y(16), 12 * k);
+  pg.fillCircle(24 * k, 16 * k, 12 * k);
+  pg.strokeCircle(24 * k, 16 * k, 12 * k);
 
   // Eyes (facing right)
   pg.fillStyle(pLine, 1);
-  pg.fillCircle(26 * k, y(14), 2 * k);
-  pg.fillCircle(32 * k, y(14), 2 * k);
-}
+  pg.fillCircle(26 * k, 14 * k, 2 * k);
+  pg.fillCircle(32 * k, 14 * k, 2 * k);
 
-function drawPlayerGlasses(pg: Phaser.GameObjects.Graphics, k: number, hop: number): void {
-  const pLine = 0x1a1a1a;
-  const y = (v: number) => (v - hop) * k;
-  pg.lineStyle(2 * k, pLine, 1);
-  pg.strokeCircle(26 * k, y(14), 4 * k);
-  pg.strokeCircle(32 * k, y(14), 4 * k);
-  pg.beginPath();
-  pg.moveTo(28 * k, y(14));
-  pg.lineTo(30 * k, y(14));
-  pg.strokePath();
-  pg.beginPath();
-  pg.moveTo(22 * k, y(13));
-  pg.lineTo(18 * k, y(12));
-  pg.strokePath();
+  if (glasses) {
+    pg.lineStyle(2 * k, pLine, 1);
+    pg.strokeCircle(26 * k, 14 * k, 4 * k);
+    pg.strokeCircle(32 * k, 14 * k, 4 * k);
+    pg.beginPath();
+    pg.moveTo(28 * k, 14 * k);
+    pg.lineTo(30 * k, 14 * k);
+    pg.strokePath();
+    pg.beginPath();
+    pg.moveTo(22 * k, 13 * k);
+    pg.lineTo(18 * k, 12 * k);
+    pg.strokePath();
+  }
+  pg.restore();
 }
