@@ -34,8 +34,7 @@ export function ScenePanelSheet({
   style,
   ...props
 }: ScenePanelSheetProps) {
-  const actionGridClass =
-    actionsLayout === 'row' ? 'grid-cols-2' : actionsLayout === 'stack' ? 'grid-cols-1' : '';
+  const actionGridClass = actionsLayout === 'row' ? 'grid-cols-2' : actionsLayout === 'stack' ? 'grid-cols-1' : '';
 
   return (
     <section
@@ -56,9 +55,7 @@ export function ScenePanelSheet({
       >
         {title}
       </h2>
-      <div className="min-h-0 overflow-y-auto font-mono text-sm font-bold leading-relaxed text-[#5a554f]">
-        {body}
-      </div>
+      <div className="min-h-0 overflow-y-auto font-mono text-sm font-bold leading-relaxed text-[#5a554f]">{body}</div>
       {actions.length > 0 ? (
         <div
           className={cn('grid gap-3', actionGridClass)}

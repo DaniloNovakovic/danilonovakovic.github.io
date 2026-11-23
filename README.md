@@ -21,7 +21,8 @@ pnpm dev
 
 ```bash
 pnpm check              # includes fallow:audit on changed files since main
-pnpm lint
+pnpm lint               # oxlint
+pnpm format             # oxfmt (format:check in CI)
 pnpm test
 pnpm build
 pnpm fallow:health    # complexity + duplication overview
@@ -71,17 +72,17 @@ Fix the inventory overlay spacing bug. Read AGENTS.md first, then implement and 
 
 For larger or fuzzier work, use the workflow skills as planning tools before coding:
 
-| Situation | Ask for | What it produces |
-| --- | --- | --- |
-| You have a broad feature idea and need the shape clarified | `grill-with-docs` | A structured conversation that sharpens terms, checks existing domain docs, and records durable decisions in `GLOSSARY.md` or ADRs when needed. |
-| You want a product-level spec from an already-discussed idea | `to-spec` | A buildable spec (you may know this as a PRD). In this repo it is published as a GitHub issue that captures the problem, solution, user stories, decisions, tests, and out-of-scope items. |
-| You have a spec, plan, or big issue and need buildable work items | `to-tickets` | Tracer-bullet tickets with blocking edges. Each ticket should be a vertical slice with acceptance criteria, not a layer-by-layer task list. |
-| You need to manage or prepare existing issues | `triage` | Issue state changes such as `needs-info`, `ready-for-human`, or `ready-for-agent`. For agent-ready work it can add an agent brief comment that becomes the implementation contract. |
-| You want the implementation to be test-first | `tdd` | A red-green-refactor loop: one behavior test, one small implementation step, then refactor. Best for risky behavior changes and shared logic. |
-| Something is broken or flaky | `diagnosing-bugs` | A tight reproduction loop, hypotheses, instrumentation, fix, and regression test. |
-| You want a standards + spec review of a branch/PR | `dual-lens-code-review` | Parallel Standards and Spec reviews of the diff since a fixed point. |
-| You are worried about architecture drift or parallel work conflicts | `Architect` | A seam review: what should change, what should stay serialized, what can safely be parallelized, and whether the work should become issues. |
-| You need coordination across roles or a next-work recommendation | `Producer` | A short production plan, suggested issue order, role assignment, and handoff notes. |
+| Situation                                                           | Ask for                 | What it produces                                                                                                                                                                           |
+| ------------------------------------------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| You have a broad feature idea and need the shape clarified          | `grill-with-docs`       | A structured conversation that sharpens terms, checks existing domain docs, and records durable decisions in `GLOSSARY.md` or ADRs when needed.                                            |
+| You want a product-level spec from an already-discussed idea        | `to-spec`               | A buildable spec (you may know this as a PRD). In this repo it is published as a GitHub issue that captures the problem, solution, user stories, decisions, tests, and out-of-scope items. |
+| You have a spec, plan, or big issue and need buildable work items   | `to-tickets`            | Tracer-bullet tickets with blocking edges. Each ticket should be a vertical slice with acceptance criteria, not a layer-by-layer task list.                                                |
+| You need to manage or prepare existing issues                       | `triage`                | Issue state changes such as `needs-info`, `ready-for-human`, or `ready-for-agent`. For agent-ready work it can add an agent brief comment that becomes the implementation contract.        |
+| You want the implementation to be test-first                        | `tdd`                   | A red-green-refactor loop: one behavior test, one small implementation step, then refactor. Best for risky behavior changes and shared logic.                                              |
+| Something is broken or flaky                                        | `diagnosing-bugs`       | A tight reproduction loop, hypotheses, instrumentation, fix, and regression test.                                                                                                          |
+| You want a standards + spec review of a branch/PR                   | `dual-lens-code-review` | Parallel Standards and Spec reviews of the diff since a fixed point.                                                                                                                       |
+| You are worried about architecture drift or parallel work conflicts | `Architect`             | A seam review: what should change, what should stay serialized, what can safely be parallelized, and whether the work should become issues.                                                |
+| You need coordination across roles or a next-work recommendation    | `Producer`              | A short production plan, suggested issue order, role assignment, and handoff notes.                                                                                                        |
 
 A useful default flow for a new feature is:
 
@@ -124,4 +125,4 @@ Production build outputs to `dist/`. [`.github/workflows/ci.yml`](.github/workfl
 ## Credits & License
 
 - **Code:** Licensed under the [MIT License](LICENSE).
-- **Character Art:** This project uses "Punpun" from *Oyasumi Punpun* by Inio Asano as a placeholder/mascot for non-commercial, personal portfolio purposes (Fair Use). All rights belong to the original copyright owners.
+- **Character Art:** This project uses "Punpun" from _Oyasumi Punpun_ by Inio Asano as a placeholder/mascot for non-commercial, personal portfolio purposes (Fair Use). All rights belong to the original copyright owners.

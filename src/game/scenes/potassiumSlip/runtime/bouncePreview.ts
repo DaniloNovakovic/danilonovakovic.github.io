@@ -78,9 +78,10 @@ export function predictPotassiumBounce(input: PotassiumBouncePreviewInput): Pota
   if (!first) return null;
 
   const contact = { x: origin.x + velocity.x * first.t, y: origin.y + velocity.y * first.t };
-  const bounced = first.obstacleIndex >= 0
-    ? reflectPotassiumRicochet(velocity, first.normal)
-    : reflectOffWall(velocity, first.normal);
+  const bounced =
+    first.obstacleIndex >= 0
+      ? reflectPotassiumRicochet(velocity, first.normal)
+      : reflectOffWall(velocity, first.normal);
   const bouncedSpeed = Math.hypot(bounced.x, bounced.y);
   if (bouncedSpeed <= EPSILON) return null;
 
@@ -110,9 +111,10 @@ export function predictPotassiumBounce(input: PotassiumBouncePreviewInput): Pota
  */
 export function reflectPotassiumRicochet(velocity: PotassiumPoint, normal: PotassiumPoint): PotassiumPoint {
   const dot = velocity.x * normal.x + velocity.y * normal.y;
-  const ricochet = dot < 0
-    ? { x: velocity.x - normal.x * (2 * dot), y: velocity.y - normal.y * (2 * dot) }
-    : { x: normal.x, y: normal.y };
+  const ricochet =
+    dot < 0
+      ? { x: velocity.x - normal.x * (2 * dot), y: velocity.y - normal.y * (2 * dot) }
+      : { x: normal.x, y: normal.y };
   if (ricochet.x * ricochet.x + ricochet.y * ricochet.y <= 0.001) {
     return { x: normal.x, y: normal.y };
   }
@@ -170,8 +172,15 @@ function sweepLinearContact(
   const dx = obstacle.vx * startT;
   const dy = obstacle.vy * startT;
   return sweepCircleIntoBox(
-    origin.x, origin.y, velocity.x - obstacle.vx, velocity.y - obstacle.vy, radius,
-    obstacle.left + dx, obstacle.top + dy, obstacle.right + dx, obstacle.bottom + dy
+    origin.x,
+    origin.y,
+    velocity.x - obstacle.vx,
+    velocity.y - obstacle.vy,
+    radius,
+    obstacle.left + dx,
+    obstacle.top + dy,
+    obstacle.right + dx,
+    obstacle.bottom + dy
   );
 }
 
@@ -195,9 +204,13 @@ function sampleOrbitContact(
   const touches = (t: number) => {
     const sprite = orbitCenterAt(orbit, startT + t);
     return circleTouchesBox(
-      origin.x + velocity.x * t, origin.y + velocity.y * t, radius,
-      sprite.x + (obstacle.left - obstacle.x), sprite.y + (obstacle.top - obstacle.y),
-      sprite.x + (obstacle.right - obstacle.x), sprite.y + (obstacle.bottom - obstacle.y)
+      origin.x + velocity.x * t,
+      origin.y + velocity.y * t,
+      radius,
+      sprite.x + (obstacle.left - obstacle.x),
+      sprite.y + (obstacle.top - obstacle.y),
+      sprite.x + (obstacle.right - obstacle.x),
+      sprite.y + (obstacle.bottom - obstacle.y)
     );
   };
   if (touches(0)) return null;
@@ -230,8 +243,13 @@ function orbitCenterAt(orbit: PotassiumBounceOrbit, t: number): PotassiumPoint {
 }
 
 function circleTouchesBox(
-  px: number, py: number, r: number,
-  left: number, top: number, right: number, bottom: number
+  px: number,
+  py: number,
+  r: number,
+  left: number,
+  top: number,
+  right: number,
+  bottom: number
 ): boolean {
   const nearestX = Math.max(left, Math.min(px, right));
   const nearestY = Math.max(top, Math.min(py, bottom));
@@ -271,8 +289,15 @@ function reflectOffWall(velocity: PotassiumPoint, flip: PotassiumPoint): Potassi
  * or null if it never does. Circles that already overlap are ignored.
  */
 function sweepCircleIntoBox(
-  px: number, py: number, dx: number, dy: number, r: number,
-  left: number, top: number, right: number, bottom: number
+  px: number,
+  py: number,
+  dx: number,
+  dy: number,
+  r: number,
+  left: number,
+  top: number,
+  right: number,
+  bottom: number
 ): number | null {
   if (circleTouchesBox(px, py, r, left, top, right, bottom)) return null;
 

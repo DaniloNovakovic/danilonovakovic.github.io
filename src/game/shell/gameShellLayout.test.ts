@@ -43,9 +43,7 @@ describe('getInteractiveGameShellLayout', () => {
     expect(layout.shellStyle['--mobile-game-shell-max-width']).toBe('560px');
     expect(layout.shellStyle['--mobile-game-shell-height-capped-width']).toBe('560px');
     expect(layout.shellStyle['--mobile-game-shell-max-width']).not.toContain('7.75rem');
-    expect(layout.shellStyle['--desktop-game-shell-width']).toBe(
-      'min(100%, calc(min(88dvh, 680px) * 0.75))'
-    );
+    expect(layout.shellStyle['--desktop-game-shell-width']).toBe('min(100%, calc(min(88dvh, 680px) * 0.75))');
     expect(layout.frameStyle['--mobile-game-frame-aspect']).toBe('3 / 4');
     expect(layout.frameStyle['--desktop-game-frame-aspect']).toBe('3 / 4');
     expect(layout.frameStyle['--desktop-game-frame-max-height']).toBe('min(88dvh, 680px)');
@@ -54,9 +52,7 @@ describe('getInteractiveGameShellLayout', () => {
   it('keeps desktop sizing tied to the Phaser design resolution', () => {
     const layout = getInteractiveGameShellLayout('portrait-cover');
 
-    expect(layout.shellStyle['--desktop-game-shell-width']).toBe(
-      'min(100%, calc(min(88dvh, 600px) * 1.666667))'
-    );
+    expect(layout.shellStyle['--desktop-game-shell-width']).toBe('min(100%, calc(min(88dvh, 600px) * 1.666667))');
     expect(layout.frameStyle['--desktop-game-frame-aspect']).toBe('1000 / 600');
     expect(layout.frameStyle['--desktop-game-frame-max-height']).toBe('min(88dvh, 600px)');
   });

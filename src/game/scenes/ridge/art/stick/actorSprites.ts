@@ -176,7 +176,17 @@ class ActorSprite {
 
 /** Everything that changes the drawing; transforms (x, y, alpha) are not in it. */
 function poseKeyOf(facing: RidgeFacing, pose: StickPose): string {
-  return [facing, pose.frame, pose.walking, pose.talking, pose.emotion, pose.prop, pose.strum, pose.seated, pose.dance].join('|');
+  return [
+    facing,
+    pose.frame,
+    pose.walking,
+    pose.talking,
+    pose.emotion,
+    pose.prop,
+    pose.strum,
+    pose.seated,
+    pose.dance
+  ].join('|');
 }
 
 /** Props sit behind people; the player reads above the crowd. */
@@ -187,12 +197,7 @@ function depthOffsetFor(id: RidgeActorId): number {
   return 0;
 }
 
-type ActorDrawer = (
-  g: Phaser.GameObjects.Graphics,
-  facing: RidgeFacing,
-  pose: StickPose,
-  s: number
-) => void;
+type ActorDrawer = (g: Phaser.GameObjects.Graphics, facing: RidgeFacing, pose: StickPose, s: number) => void;
 
 /** Per-cast drawer table — avoids a high-cyclomatic switch on every redraw. */
 const ACTOR_DRAWERS: Record<RidgeActorId, ActorDrawer> = {
@@ -207,19 +212,13 @@ const ACTOR_DRAWERS: Record<RidgeActorId, ActorDrawer> = {
   guitar: (g, _facing, _pose, s) => drawStickGuitar(g, 20, 2, 1.1 * s),
   traveler: (g, facing, pose, s) => drawStickTraveler(g, 0, 0, facing, s, pose),
   driver: (g, facing, pose, s) => drawStickDriver(g, 0, 0, facing, 1.05 * s, pose),
-  'operations-helper': (g, facing, pose, s) =>
-    drawStickOperationsHelper(g, 0, 0, facing, 1.05 * s, pose),
+  'operations-helper': (g, facing, pose, s) => drawStickOperationsHelper(g, 0, 0, facing, 1.05 * s, pose),
   'dance-teacher': (g, facing, pose, s) => drawStickDanceTeacher(g, 0, 0, facing, 1.05 * s, pose),
   steward: (g, facing, pose, s) => drawStickSteward(g, 0, 0, facing, s, pose),
   shuttle: (g, _facing, _pose, s) => drawStickShuttle(g, 0, 0, 1.1 * s)
 };
 
 /** Figures draw around a local origin so the pool can move them freely. */
-function drawActor(
-  g: Phaser.GameObjects.Graphics,
-  id: RidgeActorId,
-  facing: RidgeFacing,
-  pose: StickPose
-): void {
+function drawActor(g: Phaser.GameObjects.Graphics, id: RidgeActorId, facing: RidgeFacing, pose: StickPose): void {
   ACTOR_DRAWERS[id](g, facing, pose, FIGURE_SCALE);
 }

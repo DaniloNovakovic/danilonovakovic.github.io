@@ -14,9 +14,7 @@ interface PotassiumSlipSceneContextOptions {
  * context gives scene lifecycle the lazy scene loader plus the close/resume data
  * that lets the game return through the same scene lifecycle path as interiors.
  */
-export function createPotassiumSlipSceneContext(
-  options: PotassiumSlipSceneContextOptions
-): SceneContextDefinition {
+export function createPotassiumSlipSceneContext(options: PotassiumSlipSceneContextOptions): SceneContextDefinition {
   return {
     id: POTASSIUM_SCENE_ID,
     sceneKey: PHASER_SCENE_KEYS.potassium,

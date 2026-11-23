@@ -19,12 +19,7 @@ interface NotebookMenuSheetProps extends HTMLAttributes<HTMLElement> {
  * Compact menu sheet for shell-level scene actions.
  * Use for navigation/settings-style choices, not for scene outcome or upgrade panels.
  */
-export function NotebookMenuSheet({
-  title,
-  items,
-  className,
-  ...props
-}: NotebookMenuSheetProps) {
+export function NotebookMenuSheet({ title, items, className, ...props }: NotebookMenuSheetProps) {
   return (
     <section
       role="dialog"
@@ -36,9 +31,7 @@ export function NotebookMenuSheet({
       )}
       {...props}
     >
-      <h2 className="text-2xl font-black uppercase tracking-widest text-[#1a1a1a]">
-        {title}
-      </h2>
+      <h2 className="text-2xl font-black uppercase tracking-widest text-[#1a1a1a]">{title}</h2>
       <div className="grid gap-2">
         {items.map((item) => (
           <Button

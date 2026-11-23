@@ -21,37 +21,40 @@ export function useResizeObserver<T extends Element>(): UseResizeObserverResult<
     setElement(node);
   }, []);
 
-  useEffect(function observeElementSize() {
-    if (!element) return;
+  useEffect(
+    function observeElementSize() {
+      if (!element) return;
 
-    const updateSize = (nextSize: ResizeObserverSize) => {
-      setSize((current) => {
-        const widthChanged = hasMeaningfulChange(current.width, nextSize.width);
-        const heightChanged = hasMeaningfulChange(current.height, nextSize.height);
-        return widthChanged || heightChanged ? nextSize : current;
-      });
-    };
+      const updateSize = (nextSize: ResizeObserverSize) => {
+        setSize((current) => {
+          const widthChanged = hasMeaningfulChange(current.width, nextSize.width);
+          const heightChanged = hasMeaningfulChange(current.height, nextSize.height);
+          return widthChanged || heightChanged ? nextSize : current;
+        });
+      };
 
-    const initialRect = element.getBoundingClientRect();
-    updateSize({
-      width: initialRect.width,
-      height: initialRect.height
-    });
-
-    if (typeof ResizeObserver === 'undefined') return;
-
-    const observer = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      if (!entry) return;
+      const initialRect = element.getBoundingClientRect();
       updateSize({
-        width: entry.contentRect.width,
-        height: entry.contentRect.height
+        width: initialRect.width,
+        height: initialRect.height
       });
-    });
 
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, [element]);
+      if (typeof ResizeObserver === 'undefined') return;
+
+      const observer = new ResizeObserver((entries) => {
+        const entry = entries[0];
+        if (!entry) return;
+        updateSize({
+          width: entry.contentRect.width,
+          height: entry.contentRect.height
+        });
+      });
+
+      observer.observe(element);
+      return () => observer.disconnect();
+    },
+    [element]
+  );
 
   return {
     ref,

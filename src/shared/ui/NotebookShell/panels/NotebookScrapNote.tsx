@@ -12,12 +12,7 @@ interface NotebookScrapNoteProps extends HTMLAttributes<HTMLElement> {
  * Small rotated note for low-density contextual memory or supporting information.
  * Use sparingly for content-bearing scraps; avoid decorative scraps with no gameplay meaning.
  */
-export function NotebookScrapNote({
-  tone = 'yellow',
-  children,
-  className,
-  ...props
-}: NotebookScrapNoteProps) {
+export function NotebookScrapNote({ tone = 'yellow', children, className, ...props }: NotebookScrapNoteProps) {
   return (
     <aside
       className={cn(

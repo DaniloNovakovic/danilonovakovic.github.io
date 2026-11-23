@@ -4,10 +4,7 @@
  */
 import * as Phaser from 'phaser';
 import { EnvironmentBuilder } from '@/game/sharedSceneRuntime/textures/EnvironmentBuilder';
-import {
-  GAME_DESIGN_HEIGHT,
-  GAME_DESIGN_WIDTH
-} from '@/game/sharedSceneRuntime/config';
+import { GAME_DESIGN_HEIGHT, GAME_DESIGN_WIDTH } from '@/game/sharedSceneRuntime/config';
 import { OVERWORLD_GROUND_ZONE, OVERWORLD_WIDTH } from '../../worldLayout';
 import { getStreetCameraProfile } from './streetCameraProfile';
 import {
@@ -62,9 +59,10 @@ export function setupStreetCamera(
       width: GAME_DESIGN_WIDTH,
       height: GAME_DESIGN_HEIGHT
     },
-    resolveProfile: ({ width, height }) => getStreetCameraProfile({
-      displayWidth: width,
-      displayHeight: height
-    })
+    resolveProfile: ({ width, height }) =>
+      getStreetCameraProfile({
+        displayWidth: width,
+        displayHeight: height
+      })
   });
 }

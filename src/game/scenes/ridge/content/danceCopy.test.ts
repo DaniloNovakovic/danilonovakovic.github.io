@@ -24,17 +24,74 @@ describe('Last-Stop Plaza copy', () => {
 
     // Breadth-first over choice paths from each beat of the plaza. `drain`
     // reads to the next menu; `walk:<p>` walks to a spot.
-    const asked = ['walk:0.22', 'interact driver', 'drain', 'choose when', 'drain', 'choose leave', 'drain',
-      'interact driver', 'drain', 'choose dance', 'drain', 'choose learn', 'drain'];
-    const practiced = [...asked, 'walk:0.35', 'interact teacher', 'drain', 'choose lesson', 'drain', 'choose go', 'drain',
-      'dance auto', 'dance done', 'drain'];
-    const ready = [...practiced,
-      'walk:0.56', 'interact operations', 'drain', 'choose help', 'drain', 'choose tug', 'drain', 'choose stamp', 'drain',
-      'choose count', 'drain', 'choose watch', 'drain',
-      'walk:0.35', 'interact teacher', 'drain', 'choose watch', 'drain', 'choose leave', 'drain',
-      'walk:0.56', 'interact operations', 'drain', 'choose kept', 'drain',
-      'walk:0.22', 'interact driver', 'drain', 'choose write', 'drain', 'choose simple', 'drain',
-      'walk:0.56', 'interact operations', 'drain', 'choose drop', 'drain'];
+    const asked = [
+      'walk:0.22',
+      'interact driver',
+      'drain',
+      'choose when',
+      'drain',
+      'choose leave',
+      'drain',
+      'interact driver',
+      'drain',
+      'choose dance',
+      'drain',
+      'choose learn',
+      'drain'
+    ];
+    const practiced = [
+      ...asked,
+      'walk:0.35',
+      'interact teacher',
+      'drain',
+      'choose lesson',
+      'drain',
+      'choose go',
+      'drain',
+      'dance auto',
+      'dance done',
+      'drain'
+    ];
+    const ready = [
+      ...practiced,
+      'walk:0.56',
+      'interact operations',
+      'drain',
+      'choose help',
+      'drain',
+      'choose tug',
+      'drain',
+      'choose stamp',
+      'drain',
+      'choose count',
+      'drain',
+      'choose watch',
+      'drain',
+      'walk:0.35',
+      'interact teacher',
+      'drain',
+      'choose watch',
+      'drain',
+      'choose leave',
+      'drain',
+      'walk:0.56',
+      'interact operations',
+      'drain',
+      'choose kept',
+      'drain',
+      'walk:0.22',
+      'interact driver',
+      'drain',
+      'choose write',
+      'drain',
+      'choose simple',
+      'drain',
+      'walk:0.56',
+      'interact operations',
+      'drain',
+      'choose drop',
+      'drain'
+    ];
     const plaza = ['traveler', 'driver', 'teacher', 'cicka', 'chairs', 'operations', 'steward', 'gate'];
     // The request in the jar only changes the people and props by the gate.
     const setups: { commands: string[]; spots: string[] }[] = [
@@ -44,8 +101,16 @@ describe('Last-Stop Plaza copy', () => {
       { commands: ready, spots: ['driver', 'operations', 'lantern-pole', 'cable-run', 'steward', 'gate'] }
     ];
     const progressOf: Record<string, number> = {
-      traveler: 0.1, driver: 0.22, teacher: 0.35, cicka: 0.44, chairs: 0.49, operations: 0.56,
-      'lantern-pole': 0.605, 'cable-run': 0.64, steward: 0.625, gate: 0.665
+      traveler: 0.1,
+      driver: 0.22,
+      teacher: 0.35,
+      cicka: 0.44,
+      chairs: 0.49,
+      operations: 0.56,
+      'lantern-pole': 0.605,
+      'cable-run': 0.64,
+      steward: 0.625,
+      gate: 0.665
     };
 
     const drain = (session: RidgeConsoleSession) => {
@@ -82,7 +147,7 @@ describe('Last-Stop Plaza copy', () => {
         }
         const observation = session.observe();
         if (step === null) {
-          const choices = observation.conversation?.awaitingChoice ? observation.conversation.choices ?? [] : [];
+          const choices = observation.conversation?.awaitingChoice ? (observation.conversation.choices ?? []) : [];
           for (const choice of choices) {
             const next = [...path, choice.id];
             const key = `${setup.length}|${spot}|${next.join('>')}`;
@@ -101,7 +166,9 @@ describe('Last-Stop Plaza copy', () => {
     expect([...unwritten]).toEqual([]);
     expect(seen.size).toBeGreaterThan(30);
     // The deepest setup really reaches the last setup jobs.
-    expect([...conversations]).toEqual(expect.arrayContaining(['dance.setup.lanterns', 'dance.setup.cables', 'dance.steward.clearance']));
+    expect([...conversations]).toEqual(
+      expect.arrayContaining(['dance.setup.lanterns', 'dance.setup.cables', 'dance.steward.clearance'])
+    );
     // Replays whole plaza sessions per path; slow under a parallel run.
   }, 20_000);
 });

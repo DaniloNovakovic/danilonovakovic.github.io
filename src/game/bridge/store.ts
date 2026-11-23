@@ -175,10 +175,7 @@ function createInitialRidgeFirstPlayableRoute(): RidgeFirstPlayableRouteState {
   };
 }
 
-function overlayRequestsEqual(
-  a: OverlayRequest | null,
-  b: OverlayRequest | null
-): boolean {
+function overlayRequestsEqual(a: OverlayRequest | null, b: OverlayRequest | null): boolean {
   if (a === b) return true;
   if (!a || !b) return false;
   return (
@@ -190,17 +187,10 @@ function overlayRequestsEqual(
   );
 }
 
-function sceneUiSurfacesEqual(
-  a: SceneUiSurfaceRequest | null,
-  b: SceneUiSurfaceRequest | null
-): boolean {
+function sceneUiSurfacesEqual(a: SceneUiSurfaceRequest | null, b: SceneUiSurfaceRequest | null): boolean {
   if (a === b) return true;
   if (!a || !b) return false;
-  return (
-    a.ownerSceneId === b.ownerSceneId &&
-    a.id === b.id &&
-    a.params === b.params
-  );
+  return a.ownerSceneId === b.ownerSceneId && a.id === b.id && a.params === b.params;
 }
 
 /**
@@ -211,10 +201,7 @@ function sceneUiSurfacesEqual(
 const MAX_PENDING_SCENE_UI_ACTIONS = 16;
 
 /** Queued actions are immutable once dispatched, so the sequence identifies each one. */
-function sceneUiActionsEqual(
-  a: readonly SceneUiActionRequest[],
-  b: readonly SceneUiActionRequest[]
-): boolean {
+function sceneUiActionsEqual(a: readonly SceneUiActionRequest[], b: readonly SceneUiActionRequest[]): boolean {
   if (a === b) return true;
   return a.length === b.length && a.every((action, index) => action.sequence === b[index]!.sequence);
 }
@@ -329,10 +316,7 @@ function isBridgeProgressUnchanged(previous: BridgeState, candidate: BridgeState
     arraysEqual(previous.progress.ridge.manualPageIds, candidate.progress.ridge.manualPageIds) &&
     previous.progress.ridge.mobility.glidePips === candidate.progress.ridge.mobility.glidePips &&
     arraysEqual(previous.progress.ridge.shortcutIds, candidate.progress.ridge.shortcutIds) &&
-    isRidgeRouteUnchanged(
-      previous.progress.ridge.firstPlayableRoute,
-      candidate.progress.ridge.firstPlayableRoute
-    )
+    isRidgeRouteUnchanged(previous.progress.ridge.firstPlayableRoute, candidate.progress.ridge.firstPlayableRoute)
   );
 }
 
@@ -356,10 +340,7 @@ function isBridgeTouchInputUnchanged(previous: BridgeState, candidate: BridgeSta
     previous.touch.down === candidate.touch.down &&
     previous.touch.jumpQueued === candidate.touch.jumpQueued &&
     previous.touch.interactTap === candidate.touch.interactTap &&
-    sceneControlPointerEventsEqual(
-      previous.sceneControlPointerEvents,
-      candidate.sceneControlPointerEvents
-    )
+    sceneControlPointerEventsEqual(previous.sceneControlPointerEvents, candidate.sceneControlPointerEvents)
   );
 }
 
@@ -415,10 +396,7 @@ export const bridgeActions = {
   returnToOverworld(): void {
     bridgeActions.enterScene(OVERWORLD_SCENE_ID);
   },
-  openOverlay(
-    overlayId: OverlayId,
-    options: OpenOverlayOptions = {}
-  ): void {
+  openOverlay(overlayId: OverlayId, options: OpenOverlayOptions = {}): void {
     setState((current) => ({
       ...current,
       activeSceneId: options.returnToSceneId ?? current.activeSceneId,
@@ -450,11 +428,12 @@ export const bridgeActions = {
           : {
               ownedItemIds: [...current.inventory.ownedItemIds, itemId]
             },
-        equipment: autoEquip && !alreadyEquipped
-          ? {
-              equippedItemIds: [...current.equipment.equippedItemIds, itemId]
-            }
-          : current.equipment
+        equipment:
+          autoEquip && !alreadyEquipped
+            ? {
+                equippedItemIds: [...current.equipment.equippedItemIds, itemId]
+              }
+            : current.equipment
       };
     });
   },
@@ -679,11 +658,7 @@ export const bridgeActions = {
       sceneHintText: text
     }));
   },
-  setSceneUiStatus(
-    ownerSceneId: SceneId,
-    id: SceneUiSurfaceId,
-    params?: unknown
-  ): void {
+  setSceneUiStatus(ownerSceneId: SceneId, id: SceneUiSurfaceId, params?: unknown): void {
     setState((current) => ({
       ...current,
       sceneUi: {
@@ -698,10 +673,7 @@ export const bridgeActions = {
   },
   clearSceneUiStatus(ownerSceneId?: SceneId): void {
     setState((current) => {
-      if (
-        ownerSceneId &&
-        current.sceneUi.status?.ownerSceneId !== ownerSceneId
-      ) {
+      if (ownerSceneId && current.sceneUi.status?.ownerSceneId !== ownerSceneId) {
         return current;
       }
       return {
@@ -713,11 +685,7 @@ export const bridgeActions = {
       };
     });
   },
-  setSceneUiPanel(
-    ownerSceneId: SceneId,
-    id: SceneUiSurfaceId,
-    params?: unknown
-  ): void {
+  setSceneUiPanel(ownerSceneId: SceneId, id: SceneUiSurfaceId, params?: unknown): void {
     setState((current) => ({
       ...current,
       sceneUi: {
@@ -732,10 +700,7 @@ export const bridgeActions = {
   },
   clearSceneUiPanel(ownerSceneId?: SceneId): void {
     setState((current) => {
-      if (
-        ownerSceneId &&
-        current.sceneUi.panel?.ownerSceneId !== ownerSceneId
-      ) {
+      if (ownerSceneId && current.sceneUi.panel?.ownerSceneId !== ownerSceneId) {
         return current;
       }
       return {

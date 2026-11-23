@@ -298,14 +298,7 @@ export class BridgeSim {
     }
   }
 
-  private pushWheel(
-    wheel: Wheel,
-    nx: number,
-    ny: number,
-    depth: number,
-    tx: number,
-    ty: number
-  ): void {
+  private pushWheel(wheel: Wheel, nx: number, ny: number, depth: number, tx: number, ty: number): void {
     if (depth <= 0) return;
     wheel.x += nx * depth;
     wheel.y += ny * depth;
@@ -409,11 +402,7 @@ function makeWheel(x: number, y: number): Wheel {
 }
 
 /** Rest shape of a design under its own weight, for drawing the finished crossing. */
-export function settleBridge(
-  puzzle: BridgePuzzle,
-  design: BridgeDesign,
-  seconds = 1.5
-): BridgeSim {
+export function settleBridge(puzzle: BridgePuzzle, design: BridgeDesign, seconds = 1.5): BridgeSim {
   const sim = new BridgeSim(puzzle, design, { withCar: false });
   const frames = Math.ceil(seconds / BRIDGE_SIM_DT);
   for (let i = 0; i < frames; i += 1) sim.step();

@@ -89,9 +89,7 @@ export function resolveStampedeDadJoke({
     .map((candidate) => ({ candidate, distance: Math.hypot(candidate.x - player.x, candidate.y - player.y) }))
     .filter((entry) => entry.distance <= STAMPEDE_JOKE_RADIUS)
     .sort((left, right) => left.distance - right.distance);
-  const bossIds = inRange
-    .filter((entry) => entry.candidate.kind === 'boyfriend')
-    .map((entry) => entry.candidate.id);
+  const bossIds = inRange.filter((entry) => entry.candidate.kind === 'boyfriend').map((entry) => entry.candidate.id);
   const hitIds = inRange
     .filter((entry) => entry.candidate.kind !== 'boyfriend')
     .slice(0, STAMPEDE_JOKE_MAX_TARGETS)

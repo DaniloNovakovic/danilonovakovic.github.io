@@ -65,17 +65,18 @@ export function getPotassiumLeaderboardOverlayText(
 
 export function formatPotassiumLeaderboardRecords(records: readonly PotassiumRunRecord[]): string {
   const messages = getMessages();
-  if (records.length === 0) return `${messages.potassiumSlip.leaderboard.title}\n${messages.potassiumSlip.leaderboard.empty}`;
+  if (records.length === 0)
+    return `${messages.potassiumSlip.leaderboard.title}\n${messages.potassiumSlip.leaderboard.empty}`;
   return [
     messages.potassiumSlip.leaderboard.title,
-    ...records.map((record, index) => (
+    ...records.map((record, index) =>
       messages.potassiumSlip.leaderboard.recordLine(
         index + 1,
         record.score,
         record.wave,
         messages.potassiumSlip.leaderboard.modeLabel(record.mode, record.outcome)
       )
-    ))
+    )
   ].join('\n');
 }
 
@@ -95,14 +96,16 @@ function normalizePotassiumRecords(records: PotassiumRunRecord[]): PotassiumRunR
 function isPotassiumRunRecord(record: unknown): record is PotassiumRunRecord {
   if (typeof record !== 'object' || record === null) return false;
   const candidate = record as Partial<PotassiumRunRecord>;
-  return typeof candidate.score === 'number'
-    && Number.isFinite(candidate.score)
-    && typeof candidate.wave === 'number'
-    && Number.isFinite(candidate.wave)
-    && (candidate.mode === 'campaign' || candidate.mode === 'endless')
-    && (candidate.outcome === 'won' || candidate.outcome === 'game_over')
-    && typeof candidate.completedAt === 'string'
-    && !Number.isNaN(Date.parse(candidate.completedAt));
+  return (
+    typeof candidate.score === 'number' &&
+    Number.isFinite(candidate.score) &&
+    typeof candidate.wave === 'number' &&
+    Number.isFinite(candidate.wave) &&
+    (candidate.mode === 'campaign' || candidate.mode === 'endless') &&
+    (candidate.outcome === 'won' || candidate.outcome === 'game_over') &&
+    typeof candidate.completedAt === 'string' &&
+    !Number.isNaN(Date.parse(candidate.completedAt))
+  );
 }
 
 function getBrowserStorage(): StorageLike | null {

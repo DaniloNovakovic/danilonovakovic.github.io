@@ -7,19 +7,13 @@ import {
   OVERWORLD_BUILDING_SPOTS,
   OVERWORLD_CHICK
 } from './content/overworldSpots';
-import {
-  HOBBIES_PLAYER_MAX_X,
-  HOBBIES_PLAYER_MIN_X,
-  HOBBIES_RIGHT_WALL_X
-} from './content/hobbiesSpots';
+import { HOBBIES_PLAYER_MAX_X, HOBBIES_PLAYER_MIN_X, HOBBIES_RIGHT_WALL_X } from './content/hobbiesSpots';
 import { getSketchDetailLevel } from './overworldLogic';
 import { GameConsoleSession } from './session';
 
 const PROFILE_X = OVERWORLD_BUILDING_SPOTS.find((spot) => spot.id === 'profile')?.x ?? 0;
 
-function createSession(
-  options: Omit<ConstructorParameters<typeof GameConsoleSession>[0], 'dialogue'> = {}
-) {
+function createSession(options: Omit<ConstructorParameters<typeof GameConsoleSession>[0], 'dialogue'> = {}) {
   return new GameConsoleSession({ dialogue: TEST_ROUTE_DIALOGUE_CATALOG, ...options });
 }
 
@@ -32,11 +26,7 @@ describe('parseGameCommand', () => {
     });
     expect(parseGameCommand('equip glasses')).toEqual({ type: 'equip', itemId: 'glasses' });
     expect(parseGameCommand('fight')).toEqual({ type: 'fight' });
-    expect(parseGameScript('look; right 2; interact').map((c) => c.type)).toEqual([
-      'look',
-      'go',
-      'interact'
-    ]);
+    expect(parseGameScript('look; right 2; interact').map((c) => c.type)).toEqual(['look', 'go', 'interact']);
   });
 });
 
@@ -222,9 +212,7 @@ describe('GameConsoleSession full secret route', () => {
     const base = { equippedItemIds: [], discoveredSecretIds: [] } as const;
     expect(getSketchDetailLevel({ ...base, ownedItemIds: [] })).toBe(0);
     expect(getSketchDetailLevel({ ...base, ownedItemIds: ['glasses'] })).toBe(1);
-    expect(
-      getSketchDetailLevel({ ...base, ownedItemIds: ['glasses', 'copper-string', 'battery-cell'] })
-    ).toBe(2);
+    expect(getSketchDetailLevel({ ...base, ownedItemIds: ['glasses', 'copper-string', 'battery-cell'] })).toBe(2);
     expect(getSketchDetailLevel({ ...base, ownedItemIds: ['glasses', 'circuit'] })).toBe(3);
   });
 

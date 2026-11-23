@@ -38,9 +38,7 @@ export interface SceneContextAssemblyDeps {
  * assembly here lets `Game.tsx` boot Phaser once without knowing every scene's
  * constructor data, resume behavior, or close/interact callbacks.
  */
-export function createSceneContexts(
-  deps: SceneContextAssemblyDeps
-): SceneContextDefinition[] {
+export function createSceneContexts(deps: SceneContextAssemblyDeps): SceneContextDefinition[] {
   const loadScene = (id: SceneId) => () => {
     const scene = deps.loadPhaserScene(id);
     if (!scene) {

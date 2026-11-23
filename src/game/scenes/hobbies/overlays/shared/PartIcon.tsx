@@ -25,15 +25,36 @@ const ICON_ART: Record<StickerIconId, ReactNode> = {
   ),
   'clock-crystal': (
     <>
-      <path d="M24 4 L36 16 L30 44 L18 44 L12 16 Z" fill="#fbfbf9" stroke={INK} strokeWidth="3" strokeLinejoin="round" />
+      <path
+        d="M24 4 L36 16 L30 44 L18 44 L12 16 Z"
+        fill="#fbfbf9"
+        stroke={INK}
+        strokeWidth="3"
+        strokeLinejoin="round"
+      />
       <path d="M12 16 L36 16 M24 4 L20 16 L24 44 M24 4 L28 16 L24 44" fill="none" stroke={INK} strokeWidth="1.3" />
       <path d="M29 20 L33 18 M30 26 L33 24 M29 32 L32 30" stroke={INK} strokeWidth="1.2" opacity="0.6" />
     </>
   ),
   pin: (
     <>
-      <rect x="9" y="14" width="30" height="26" fill="#fbfbf9" stroke={INK} strokeWidth="3" transform="rotate(-6 24 27)" />
-      <path d="M14 33 C18 24 22 36 27 26 S33 30 34 24" fill="none" stroke={INK} strokeWidth="1.8" strokeLinecap="round" />
+      <rect
+        x="9"
+        y="14"
+        width="30"
+        height="26"
+        fill="#fbfbf9"
+        stroke={INK}
+        strokeWidth="3"
+        transform="rotate(-6 24 27)"
+      />
+      <path
+        d="M14 33 C18 24 22 36 27 26 S33 30 34 24"
+        fill="none"
+        stroke={INK}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
       <circle cx="24" cy="12" r="5" fill={INK} />
       <path d="M24 16 L24 22" stroke={INK} strokeWidth="2.4" strokeLinecap="round" />
     </>

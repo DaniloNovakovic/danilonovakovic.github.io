@@ -66,12 +66,7 @@ function CickaPortrait({ emotion, coat = 'pale' }: { emotion: RidgeEmotion; coat
   // Paper eyes on a dark coat, so the face still reads.
   const eye = coat === 'dark' ? '#fbfbf9' : '#1a1a1a';
   return (
-    <g
-      fill="none"
-      stroke="#1a1a1a"
-      strokeWidth="3"
-      strokeLinecap="round"
-    >
+    <g fill="none" stroke="#1a1a1a" strokeWidth="3" strokeLinecap="round">
       <ellipse cx="34" cy="52" rx="18" ry="12" fill={fur} />
       <circle cx="50" cy="40" r="11" fill={fur} />
       <path d="M42 30 L38 16 L48 28" />
@@ -209,11 +204,7 @@ function CrowdPortrait({ emotion }: { emotion: RidgeEmotion }) {
       <circle cx="55" cy="28" r="1.5" fill="#1a1a1a" />
       {cheering ? <circle cx="56" cy="34" r="2.2" strokeWidth="2" /> : <path d="M52 34 H58" strokeWidth="2" />}
       <path d="M52 38 V66" />
-      {cheering ? (
-        <path d="M52 44 L64 32" />
-      ) : (
-        <path d="M44 48 L60 48" />
-      )}
+      {cheering ? <path d="M52 44 L64 32" /> : <path d="M44 48 L60 48" />}
     </g>
   );
 }

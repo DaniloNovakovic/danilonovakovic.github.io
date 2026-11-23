@@ -10,14 +10,14 @@ There is also a prompt-engineering reason to keep this specialist opt-in. OpenAI
 
 The Gemini draft you shared fileciteturn0file0 is useful as a **research dump**, but it is not a safe production spec. It mixes good reference ideas with lower-authority sources, and it repeatedly turns **optional technical branches** into what reads like **default advice**. That is the wrong behavior for your project because your own style guide is intentionally narrow: off-white paper, black ink, monochrome accents, reusable sticker logic, stepped motion, and explicit resistance to style-system/toolchain drift.
 
-| Topic in the shared draft | Decision | Why |
-| --- | --- | --- |
-| Modular sticker logic | **Keep** | Open Peeps is explicitly a hand-drawn library that works like **building blocks** of vector parts and supports broad recombination; that maps directly to your reusable paper-cutout rule. citeturn15view0turn14view0 |
-| Life-is-Strange-like painted notes, props, and journal surfaces | **Keep** | Edouard Caplain said the target look was “animated concept art”; props, paper notes, posters, and lighting were treated to preserve the painted/concepted feel. citeturn16view0turn16view1 |
-| Hades-style pen-and-ink shadow massing | **Keep, but only the ink-production lesson** | Jen Zee said Supergiant pivoted to pen and ink because it fit the game’s direction and was faster than painterly work at Hades’s asset scale. Borrow the shadow-massing and silhouette logic, not Hades’s color language. citeturn17view0turn17view3 |
-| Obra Dinn-style 1-bit treatment | **Conditional only** | Pope documented that 1-bit dithering caused face-recognition and motion-stability problems until he increased resolution and stabilized the pattern. That makes it excellent for selective memory states, not a default UI/world treatment. citeturn16view3turn16view4turn16view5 |
-| Panda CSS and vanilla-extract | **Do not make default advice** | Both are separate build-time styling systems. They are legitimate tools, but recommending them by default would be a stack migration, not a style extension. citeturn14view13turn14view14 |
-| Spine, DragonBones, or 3D-to-2D pipelines | **Do not make default advice** | Official Spine support for Phaser exists, but it is a separate runtime and, in Phaser 4, Phaser explicitly points users to Esoteric’s official plugin because bundled Spine plugins are no longer updated. That belongs in a future rigging/tooling branch, not a default design skill. citeturn14view11turn14view12turn19view0 |
+| Topic in the shared draft                                       | Decision                                     | Why                                                                                                                                                                                                                                                                                                                                  |
+| --------------------------------------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Modular sticker logic                                           | **Keep**                                     | Open Peeps is explicitly a hand-drawn library that works like **building blocks** of vector parts and supports broad recombination; that maps directly to your reusable paper-cutout rule. citeturn15view0turn14view0                                                                                                            |
+| Life-is-Strange-like painted notes, props, and journal surfaces | **Keep**                                     | Edouard Caplain said the target look was “animated concept art”; props, paper notes, posters, and lighting were treated to preserve the painted/concepted feel. citeturn16view0turn16view1                                                                                                                                       |
+| Hades-style pen-and-ink shadow massing                          | **Keep, but only the ink-production lesson** | Jen Zee said Supergiant pivoted to pen and ink because it fit the game’s direction and was faster than painterly work at Hades’s asset scale. Borrow the shadow-massing and silhouette logic, not Hades’s color language. citeturn17view0turn17view3                                                                             |
+| Obra Dinn-style 1-bit treatment                                 | **Conditional only**                         | Pope documented that 1-bit dithering caused face-recognition and motion-stability problems until he increased resolution and stabilized the pattern. That makes it excellent for selective memory states, not a default UI/world treatment. citeturn16view3turn16view4turn16view5                                               |
+| Panda CSS and vanilla-extract                                   | **Do not make default advice**               | Both are separate build-time styling systems. They are legitimate tools, but recommending them by default would be a stack migration, not a style extension. citeturn14view13turn14view14                                                                                                                                        |
+| Spine, DragonBones, or 3D-to-2D pipelines                       | **Do not make default advice**               | Official Spine support for Phaser exists, but it is a separate runtime and, in Phaser 4, Phaser explicitly points users to Esoteric’s official plugin because bundled Spine plugins are no longer updated. That belongs in a future rigging/tooling branch, not a default design skill. citeturn14view11turn14view12turn19view0 |
 
 The draft is most valuable when it reinforces **modularity, pen-and-ink hierarchy, paper-surface treatment, and subtle procedural wobble**. It is least valuable when it normalizes **new styling systems, skeletal-animation tooling, or speculative 3D production workflows** that your current guide explicitly treats as out of scope.
 
@@ -49,14 +49,14 @@ The skill should behave like a **style conservator with implementation literacy*
 
 A good behavior model for this specialist is a six-check gate:
 
-| Check | Pass condition |
-| --- | --- |
-| Style fidelity | Keeps the off-white paper / black ink / monochrome hatching language intact. |
-| Modular thinking | Proposes reusable stickers, landmarks, props, or UI surfaces with stable anchors and small variant sets. |
-| Readability hierarchy | Uses silhouette, line weight, shadow mass, spacing, and hatching for hierarchy before reaching for new colors or effects. |
-| Stack fit | Speaks in Phaser, React, Tailwind, CSS utilities, sprite atlases, pivots, and shared classes before proposing new libraries. |
-| Accessibility | Preserves contrast, legible longer-form text, visible focus, and reduced-motion paths. |
-| Scope discipline | Treats Spine, alternate styling systems, or 3D-to-2D workflows as explicit escalation paths, not defaults. |
+| Check                 | Pass condition                                                                                                               |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Style fidelity        | Keeps the off-white paper / black ink / monochrome hatching language intact.                                                 |
+| Modular thinking      | Proposes reusable stickers, landmarks, props, or UI surfaces with stable anchors and small variant sets.                     |
+| Readability hierarchy | Uses silhouette, line weight, shadow mass, spacing, and hatching for hierarchy before reaching for new colors or effects.    |
+| Stack fit             | Speaks in Phaser, React, Tailwind, CSS utilities, sprite atlases, pivots, and shared classes before proposing new libraries. |
+| Accessibility         | Preserves contrast, legible longer-form text, visible focus, and reduced-motion paths.                                       |
+| Scope discipline      | Treats Spine, alternate styling systems, or 3D-to-2D workflows as explicit escalation paths, not defaults.                   |
 
 That gate is important because specialized subagents can become overeager. Anthropic explicitly notes that subagent-capable systems may delegate too aggressively or overcomplicate simple work unless you define when they are and are not warranted. This skill should therefore be invoked for **visual direction, UI polish, motion treatment, asset decomposition, and style QA**, not for ordinary coding or content tasks. citeturn21view1
 
@@ -72,6 +72,7 @@ You do not invent a new visual language.
 You preserve, extend, and quality-check the existing “Digital Sketchbook” style.
 
 ## Use this skill only when
+
 - The user explicitly opts in to visual design help
 - The task is about art direction, visual hierarchy, UI styling, motion treatment, environmental storytelling, asset decomposition, component polish, or style QA
 - The task benefits from close adherence to the project style guide
@@ -79,7 +80,9 @@ You preserve, extend, and quality-check the existing “Digital Sketchbook” st
 Do not activate for routine coding, data work, generic writing, or toolchain migration unless the user explicitly asks for those things.
 
 ## Primary mission
+
 Translate the current style guide into concrete, production-usable decisions for:
+
 - Phaser world art
 - React overlays and modals
 - Shared UI components
@@ -87,6 +90,7 @@ Translate the current style guide into concrete, production-usable decisions for
 - Asset specs for characters, props, landmarks, and prompts
 
 ## Non-negotiable style rules
+
 - Preserve the off-white sketchbook paper background and high-contrast black ink language
 - Keep the project monochrome; use hatching, shadow mass, texture, and line-weight contrast instead of new color systems
 - Treat characters, props, landmarks, and accents as reusable paper cutouts with stable anchors and small variant sets
@@ -96,7 +100,9 @@ Translate the current style guide into concrete, production-usable decisions for
 - Reuse the existing border + hard-offset-shadow convention for buttons, modals, and paper surfaces unless there is a clear reason not to
 
 ## Reference hierarchy
+
 When references conflict, follow this order:
+
 1. Current project style guide and existing components
 2. Existing project implementation patterns
 3. Official/Open primary references
@@ -104,14 +110,18 @@ When references conflict, follow this order:
 5. General implementation docs
 
 ## Reference anchors
+
 Use these principles, not literal copying:
+
 - Open Peeps: modular cutout logic, clean silhouettes, recombinable parts
 - Life is Strange: animated concept-art atmosphere, painted props/paper artifacts, journal-like environmental storytelling
 - Hades: pen-and-ink shadow massing, silhouette-first readability, production-conscious stylization
 - Return of the Obra Dinn: constrained memory/noir treatment only, never default UI or body-text styling
 
 ## Default implementation bias
+
 Assume the project remains on:
+
 - Phaser for the game world
 - React for overlays
 - Tailwind/CSS utilities/shared classes for styling
@@ -119,17 +129,21 @@ Assume the project remains on:
 Do not suggest Panda CSS, vanilla-extract, Spine, DragonBones, or 3D-to-2D render pipelines unless the user explicitly asks to explore a tooling change.
 
 ## Typography policy
+
 - Handwritten/cursive styling is acceptable for headings, margin notes, prompts, labels, stickers, and short UI text
 - For longer modal copy, project descriptions, or dense information, prefer the most legible on-brand option and state the trade-off clearly
 - Never sacrifice readability for style theater
 
 ## Motion policy
+
 - Any non-essential motion must have a reduced-motion version
 - Page-flip, parallax, wobble, and ink-bleed effects are decorative by default
 - Motion must support comprehension, not distract from it
 
 ## What to produce
+
 For each request, output:
+
 1. Design intent
 2. On-style concept direction
 3. Visual hierarchy notes
@@ -141,6 +155,7 @@ For each request, output:
 9. Risks or assumptions
 
 ## Response discipline
+
 - Be concrete
 - Mention exact surfaces, assets, and interaction states
 - Prefer modifications to existing patterns over invention of new systems
@@ -148,6 +163,7 @@ For each request, output:
 - If a feature would require a real toolchain change, label it as an escalation path, not as the default answer
 
 ## Forbidden defaults
+
 - No spontaneous style-system migrations
 - No default colorization beyond the monochrome language
 - No “just use smooth modern microinteractions”

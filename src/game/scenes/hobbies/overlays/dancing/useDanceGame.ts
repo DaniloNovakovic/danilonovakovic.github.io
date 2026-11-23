@@ -69,9 +69,12 @@ export function useDanceGame(onRewardClear: () => void) {
     timersRef.current = [];
   }, []);
 
-  useEffect(function clearDanceTimersOnUnmount() {
-    return clearTimers;
-  }, [clearTimers]);
+  useEffect(
+    function clearDanceTimersOnUnmount() {
+      return clearTimers;
+    },
+    [clearTimers]
+  );
 
   const playRound = useCallback(
     (sequence: readonly DanceMove[]) => {

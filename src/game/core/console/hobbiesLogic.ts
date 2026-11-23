@@ -56,11 +56,7 @@ export function listHobbiesNearby(state: GameWorldState): NearbyThing[] {
   return things.sort((a, b) => a.distance - b.distance);
 }
 
-export function moveHobbies(
-  state: GameWorldState,
-  direction: 'left' | 'right',
-  steps: number
-): string {
+export function moveHobbies(state: GameWorldState, direction: 'left' | 'right', steps: number): string {
   const delta = steps * HOBBIES_STEP_PX * (direction === 'right' ? 1 : -1);
   const next = Math.max(HOBBIES_PLAYER_MIN_X, Math.min(HOBBIES_PLAYER_MAX_X, state.hobbies.playerX + delta));
   state.hobbies.playerX = next;
@@ -73,11 +69,7 @@ export function interactHobbies(
   target: string | undefined
 ): { message: string; events: GameSessionEvent[] } {
   const nearby = listHobbiesNearby(state);
-  const miss = nearbyMissMessage(
-    nearby,
-    target,
-    'Hobbies room — walk to a station or the street door on the left.'
-  );
+  const miss = nearbyMissMessage(nearby, target, 'Hobbies room — walk to a station or the street door on the left.');
   if (miss) return { message: miss, events: [] };
   const picked = pickNearby(nearby, target);
   if (!picked) return { message: 'Nothing close enough in the hobbies room.', events: [] };

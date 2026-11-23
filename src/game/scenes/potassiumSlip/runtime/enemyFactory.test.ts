@@ -37,9 +37,7 @@ describe('potassium slip enemy factory', () => {
     expect(getPotassiumLaneCenterX(layout, POTASSIUM_COLUMN_COUNT - 1)).toBeCloseTo(628.8);
 
     const splitterX = resolvePotassiumEnemySpawnX(layout, 'splitter', 2);
-    expect(splitterX).toBe(
-      (getPotassiumLaneCenterX(layout, 2) + getPotassiumLaneCenterX(layout, 3)) / 2
-    );
+    expect(splitterX).toBe((getPotassiumLaneCenterX(layout, 2) + getPotassiumLaneCenterX(layout, 3)) / 2);
   });
 
   it('resolves spawn facts without requiring Phaser sprite creation', () => {

@@ -11,10 +11,7 @@ export function resolvePortraitCoverHorizontalAxis(
   return Math.abs(normalized) >= deadzone ? normalized : 0;
 }
 
-export function shouldPortraitCoverDragActivate(
-  deltaX: number,
-  threshold = PORTRAIT_COVER_TAP_THRESHOLD_PX
-): boolean {
+export function shouldPortraitCoverDragActivate(deltaX: number, threshold = PORTRAIT_COVER_TAP_THRESHOLD_PX): boolean {
   return Math.abs(deltaX) > threshold;
 }
 
@@ -23,6 +20,5 @@ export function shouldPortraitCoverPointerTravelActivate(
   deltaY: number,
   threshold = PORTRAIT_COVER_TAP_THRESHOLD_PX
 ): boolean {
-  return shouldPortraitCoverDragActivate(deltaX, threshold)
-    || shouldPortraitCoverDragActivate(deltaY, threshold);
+  return shouldPortraitCoverDragActivate(deltaX, threshold) || shouldPortraitCoverDragActivate(deltaY, threshold);
 }

@@ -6,10 +6,7 @@ describe('setPauseOnPausableScenes', () => {
     const setPaused = vi.fn();
     const game = {
       scene: {
-        getScenes: vi.fn(() => [
-          { scene: { key: 'ridge' }, setPaused },
-          { scene: { key: 'decorative-overlay' } }
-        ])
+        getScenes: vi.fn(() => [{ scene: { key: 'ridge' }, setPaused }, { scene: { key: 'decorative-overlay' } }])
       }
     };
 

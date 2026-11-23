@@ -14,7 +14,8 @@ function isTrailCardOverlayParams(params: unknown): params is TrailCardOverlayPa
     typeof candidate.timeEstimate === 'string' &&
     typeof candidate.rewardPreview === 'string' &&
     (candidate.unavailableReason === undefined || typeof candidate.unavailableReason === 'string') &&
-    (candidate.enterSceneId === undefined || (typeof candidate.enterSceneId === 'string' && isSceneId(candidate.enterSceneId)))
+    (candidate.enterSceneId === undefined ||
+      (typeof candidate.enterSceneId === 'string' && isSceneId(candidate.enterSceneId)))
   );
 }
 
@@ -43,12 +44,7 @@ export default function TrailCardOverlay({
   };
 
   return (
-    <OverlayDialogFrame
-      title={trailCard.title}
-      close={close}
-      titleId={titleId}
-      descriptionId={descriptionId}
-    >
+    <OverlayDialogFrame title={trailCard.title} close={close} titleId={titleId} descriptionId={descriptionId}>
       <div className="grid gap-3 text-[#1a1a1a] [overflow-wrap:anywhere]">
         <dl className="grid gap-2">
           <div className="rounded border border-[#1a1a1a]/30 bg-white/45 px-3 py-2">
@@ -62,17 +58,13 @@ export default function TrailCardOverlay({
               <dt className="text-[10px] font-bold uppercase tracking-widest text-[#1a1a1a]/60">
                 {messages.trailCard.time}
               </dt>
-              <dd className="text-xs font-bold uppercase leading-relaxed tracking-wide">
-                {trailCard.timeEstimate}
-              </dd>
+              <dd className="text-xs font-bold uppercase leading-relaxed tracking-wide">{trailCard.timeEstimate}</dd>
             </div>
             <div className="rounded border border-[#1a1a1a]/30 bg-white/45 px-3 py-2">
               <dt className="text-[10px] font-bold uppercase tracking-widest text-[#1a1a1a]/60">
                 {messages.trailCard.reward}
               </dt>
-              <dd className="text-xs font-bold uppercase leading-relaxed tracking-wide">
-                {trailCard.rewardPreview}
-              </dd>
+              <dd className="text-xs font-bold uppercase leading-relaxed tracking-wide">{trailCard.rewardPreview}</dd>
             </div>
           </div>
           {trailCard.unavailableReason && (
@@ -91,13 +83,7 @@ export default function TrailCardOverlay({
           <Button variant="secondary" size="sm" className="w-full sm:w-auto" onClick={close}>
             {messages.trailCard.back}
           </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            className="w-full sm:w-auto"
-            disabled={!canEnter}
-            onClick={enterTrail}
-          >
+          <Button variant="primary" size="sm" className="w-full sm:w-auto" disabled={!canEnter} onClick={enterTrail}>
             {messages.trailCard.enter}
           </Button>
         </div>

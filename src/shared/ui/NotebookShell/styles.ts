@@ -29,8 +29,7 @@ export const profileBackgrounds: Record<NotebookSceneProfile, CSSProperties> = {
       'linear-gradient(90deg, rgba(202,55,55,0.16) 0 2px, transparent 2px 100%) 2.2rem 0 / 100% 100%, linear-gradient(rgba(26,26,26,0.08) 1px, transparent 1px) 0 3.4rem / 100% 3.5rem, #fbfbf9'
   },
   ruledBoardPage: {
-    background:
-      'linear-gradient(rgba(26,26,26,0.14) 2px, transparent 2px) 0 4.4rem / 100% 4.25rem, #fbfbf9'
+    background: 'linear-gradient(rgba(26,26,26,0.14) 2px, transparent 2px) 0 4.4rem / 100% 4.25rem, #fbfbf9'
   },
   survivalPage: {
     background: '#fbfbf9'

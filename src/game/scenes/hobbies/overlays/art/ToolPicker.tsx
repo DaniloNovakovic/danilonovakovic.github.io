@@ -10,7 +10,17 @@ const TOOL_GLYPHS: Record<DoodleTool, ReactNode> = {
   thick: <path d="M4 16 C9 6 15 18 20 8" fill="none" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" />,
   eraser: (
     <>
-      <rect x="5" y="7" width="14" height="10" rx="1.5" fill="none" stroke="currentColor" strokeWidth="2" transform="rotate(-20 12 12)" />
+      <rect
+        x="5"
+        y="7"
+        width="14"
+        height="10"
+        rx="1.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        transform="rotate(-20 12 12)"
+      />
       <path d="M6 14 L12 18" stroke="currentColor" strokeWidth="1.2" transform="rotate(-20 12 12)" />
     </>
   )

@@ -11,9 +11,7 @@ interface StampedeSketchSceneContextOptions {
  *
  * The street chick starts it. Closing returns to the overworld.
  */
-export function createStampedeSketchSceneContext(
-  options: StampedeSketchSceneContextOptions
-): SceneContextDefinition {
+export function createStampedeSketchSceneContext(options: StampedeSketchSceneContextOptions): SceneContextDefinition {
   return {
     id: STAMPEDE_SKETCH_SCENE_ID,
     sceneKey: PHASER_SCENE_KEYS.stampedeSketch,

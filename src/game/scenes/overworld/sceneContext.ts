@@ -17,9 +17,7 @@ interface OverworldSceneContextOptions {
  * scene start data: bridge interaction callback, current pause state, and any
  * prepared resume position.
  */
-export function createOverworldSceneContext(
-  options: OverworldSceneContextOptions
-): SceneContextDefinition {
+export function createOverworldSceneContext(options: OverworldSceneContextOptions): SceneContextDefinition {
   return {
     id: OVERWORLD_SCENE_ID,
     sceneKey: PHASER_SCENE_KEYS.overworld,

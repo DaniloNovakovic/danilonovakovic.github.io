@@ -203,12 +203,7 @@ function drawNightSky(g: Phaser.GameObjects.Graphics, areaId: RidgeAreaId, moonX
 }
 
 /** Two crests at different heights and tones: the cheapest read of distance. */
-function drawRidges(
-  g: Phaser.GameObjects.Graphics,
-  areaId: RidgeAreaId,
-  farAlpha: number,
-  nearAlpha: number
-): void {
+function drawRidges(g: Phaser.GameObjects.Graphics, areaId: RidgeAreaId, farAlpha: number, nearAlpha: number): void {
   drawMountainRange(g, ridgeLine(areaId, 0), farAlpha, RIDGE_BASE_Y);
   drawMountainRange(g, ridgeLine(areaId, 1), nearAlpha, RIDGE_BASE_Y);
 }
@@ -234,9 +229,7 @@ function ridgeLine(areaId: RidgeAreaId, rank: number): ReadonlyArray<readonly [n
     // Two out-of-phase waves plus a little noise: broad hills carrying smaller
     // shoulders, which is what a ridge actually looks like from a distance.
     const shape =
-      Math.sin(t * 0.34 + seed) * 0.6 +
-      Math.sin(t * 0.79 + seed * 2.4) * 0.28 +
-      (jitter(t + seed) - 0.5) * 0.24;
+      Math.sin(t * 0.34 + seed) * 0.6 + Math.sin(t * 0.79 + seed * 2.4) * 0.28 + (jitter(t + seed) - 0.5) * 0.24;
     points.push([x, crest - shape * relief]);
   }
   return points;
@@ -332,11 +325,7 @@ function fadeBelow(g: Phaser.GameObjects.Graphics, y: number, alpha: number): vo
 
 // --- near band ------------------------------------------------------------
 
-function drawBridgeNear(
-  g: Phaser.GameObjects.Graphics,
-  bridgeOpen: boolean,
-  ctx: AreaSetContext
-): void {
+function drawBridgeNear(g: Phaser.GameObjects.Graphics, bridgeOpen: boolean, ctx: AreaSetContext): void {
   // Grounded timber — trunks meet the lane so crowns never float on haze.
   for (let i = 0; i < 7; i += 1) {
     drawTree(g, 600 + i * 96, GROUND_Y - 2, i % 2 === 0 ? 'pine' : 'round', 1.15, 0.45);
@@ -455,11 +444,7 @@ function drawCornField(g: Phaser.GameObjects.Graphics, fromX: number, toX: numbe
   }
 }
 
-function drawConcertNear(
-  g: Phaser.GameObjects.Graphics,
-  crossingOpen: boolean,
-  ctx: AreaSetContext
-): void {
+function drawConcertNear(g: Phaser.GameObjects.Graphics, crossingOpen: boolean, ctx: AreaSetContext): void {
   const at = (progress: number) => ctx.worldXForProgress(progress);
   drawConcertFacades(g);
 
@@ -643,13 +628,7 @@ function drawBackstageNook(g: Phaser.GameObjects.Graphics, steveX: number, cicka
   drawStageAmp(g, cickaX + 26, 30, 32, 64);
 }
 
-function drawStageAmp(
-  g: Phaser.GameObjects.Graphics,
-  x: number,
-  halfW: number,
-  h: number,
-  lift = 0
-): void {
+function drawStageAmp(g: Phaser.GameObjects.Graphics, x: number, halfW: number, h: number, lift = 0): void {
   const top = GROUND_Y - lift - h;
   g.lineStyle(2.6, INK, 1);
   g.fillStyle(PAPER_WARM, 1);
@@ -738,12 +717,7 @@ function drawConcertStage(g: Phaser.GameObjects.Graphics, x: number, halfW: numb
 }
 
 /** Zebra crossing, traffic light, and (until the show) a barrier. */
-function drawCrosswalk(
-  g: Phaser.GameObjects.Graphics,
-  from: number,
-  to: number,
-  crossingOpen: boolean
-): void {
+function drawCrosswalk(g: Phaser.GameObjects.Graphics, from: number, to: number, crossingOpen: boolean): void {
   g.fillStyle(PAPER, 0.95);
   g.lineStyle(1.6, INK, 0.6);
   for (let x = from; x < to; x += 30) {
@@ -805,11 +779,7 @@ function drawExitSign(g: Phaser.GameObjects.Graphics, x: number): void {
  * gate with the hill road climbing away behind it. Set dressing changes as
  * setup clears (the stage's scenery marks).
  */
-function drawDanceNear(
-  g: Phaser.GameObjects.Graphics,
-  crossingOpen: boolean,
-  ctx: AreaSetContext
-): void {
+function drawDanceNear(g: Phaser.GameObjects.Graphics, crossingOpen: boolean, ctx: AreaSetContext): void {
   const at = (progress: number) => ctx.worldXForProgress(progress);
   const marks = ctx.marks;
 
@@ -1161,19 +1131,10 @@ function drawServiceGate(g: Phaser.GameObjects.Graphics, x: number, open: boolea
   }
 }
 
-function drawRelayNear(
-  g: Phaser.GameObjects.Graphics,
-  beat: RidgeVisualViewModel['beat'],
-  ctx: AreaSetContext
-): void {
+function drawRelayNear(g: Phaser.GameObjects.Graphics, beat: RidgeVisualViewModel['beat'], ctx: AreaSetContext): void {
   g.lineStyle(4, INK, 1);
   g.lineBetween(ctx.worldXForProgress(0.12), GROUND_Y, ctx.worldXForProgress(0.9), GROUND_Y);
-  g.lineBetween(
-    ctx.worldXForProgress(0.85),
-    GROUND_Y,
-    ctx.worldXForProgress(0.96),
-    GROUND_Y + 46
-  );
+  g.lineBetween(ctx.worldXForProgress(0.85), GROUND_Y, ctx.worldXForProgress(0.96), GROUND_Y + 46);
 
   // Cairn of stacked stones — a quiet marker for the last walk.
   const cairn = ctx.worldXForProgress(0.3);
@@ -1295,12 +1256,7 @@ function drawForeBand(g: Phaser.GameObjects.Graphics, areaId: RidgeAreaId, cross
 }
 
 /** Dense tuft line. Short and overlapping, so it reads as grass, not spikes. */
-function drawForeGrass(
-  g: Phaser.GameObjects.Graphics,
-  width: number,
-  base: number,
-  alpha: number
-): void {
+function drawForeGrass(g: Phaser.GameObjects.Graphics, width: number, base: number, alpha: number): void {
   g.fillStyle(INK, alpha * 0.55);
   for (let x = -6; x < width; x += 6) {
     const h = 20 + jitter(x * 1.9) * 34;
@@ -1316,12 +1272,7 @@ function drawForeGrass(
 }
 
 /** Tall corn framing the near foreground: stalk, tassel, and drooping leaves. */
-function drawForeCorn(
-  g: Phaser.GameObjects.Graphics,
-  x: number,
-  base: number,
-  height: number
-): void {
+function drawForeCorn(g: Phaser.GameObjects.Graphics, x: number, base: number, height: number): void {
   g.fillStyle(inkTone(0.8), 1);
   g.fillTriangle(x - 4, base, x + 4, base, x + 2, base - height);
   g.fillTriangle(x - 1, base - height, x + 4, base - height, x + 4, base - height - 26);

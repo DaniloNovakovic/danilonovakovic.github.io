@@ -11,12 +11,7 @@ export type StampedeFlockKind =
   | 'ex'
   | 'boyfriend';
 
-export type StampedeWeaponThreat =
-  | 'badSelfie'
-  | 'badBreath'
-  | 'badSmell'
-  | 'fakeGlasses'
-  | 'metalRiff';
+export type StampedeWeaponThreat = 'badSelfie' | 'badBreath' | 'badSmell' | 'fakeGlasses' | 'metalRiff';
 
 export interface StampedeFlockProfile {
   kind: StampedeFlockKind;
@@ -135,11 +130,7 @@ export function getStampedeFlockProfile(kind: StampedeFlockKind): StampedeFlockP
   }
 }
 
-export function isStampedeWeaponImmune(
-  kind: StampedeFlockKind,
-  weapon: StampedeWeaponThreat,
-  rank: 1 | 2
-): boolean {
+export function isStampedeWeaponImmune(kind: StampedeFlockKind, weapon: StampedeWeaponThreat, rank: 1 | 2): boolean {
   if (kind === 'nerd' && weapon === 'fakeGlasses' && rank < 2) return true;
   if (kind === 'perfume' && weapon === 'badSmell') return true;
   if (kind === 'situationship' && weapon === 'badSelfie') return true;

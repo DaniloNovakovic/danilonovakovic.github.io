@@ -1,8 +1,5 @@
 import * as Phaser from 'phaser';
-import {
-  GAME_DESIGN_HEIGHT,
-  GAME_DESIGN_WIDTH
-} from '@/game/sharedSceneRuntime/config';
+import { GAME_DESIGN_HEIGHT, GAME_DESIGN_WIDTH } from '@/game/sharedSceneRuntime/config';
 import { bridgeActions, type SceneControlPointerEvent } from '@/game/bridge/store';
 import { POTASSIUM_SCENE_ID } from '@/game/scenes/sceneIds';
 import { TextureGenerator } from '@/game/sharedSceneRuntime/textures/TextureGenerator';
@@ -22,14 +19,8 @@ import {
   resolvePotassiumPoisonTick,
   resolvePotassiumProjectileHit
 } from './combat';
-import {
-  getPotassiumLeaderboardOverlayText,
-  savePotassiumRunRecord,
-  type PotassiumRunOutcome
-} from './leaderboard';
-import {
-  PotassiumSlipRenderer
-} from './renderer';
+import { getPotassiumLeaderboardOverlayText, savePotassiumRunRecord, type PotassiumRunOutcome } from './leaderboard';
+import { PotassiumSlipRenderer } from './renderer';
 import {
   resolvePotassiumWallClones,
   resolvePotassiumWallSuds,
@@ -77,14 +68,8 @@ import {
   type PotassiumProjectileControl,
   type PotassiumProjectileControlCommand
 } from './projectileControl';
-import {
-  predictPotassiumBounce,
-  type PotassiumBounceObstacle
-} from './bouncePreview';
-import {
-  PotassiumCommandAdapter,
-  type PotassiumCommandObject
-} from './commandAdapter';
+import { predictPotassiumBounce, type PotassiumBounceObstacle } from './bouncePreview';
+import { PotassiumCommandAdapter, type PotassiumCommandObject } from './commandAdapter';
 import {
   getPotassiumCombatId,
   getPotassiumData,
@@ -188,99 +173,107 @@ export class PotassiumSlipScene extends Phaser.Scene {
       launchPad: LAUNCH_PAD,
       ...POTASSIUM_PROJECTILE_CONTROL_DEFAULTS
     });
-    this.commandAdapter = new PotassiumCommandAdapter({
-      runtime: {
-        getNow: () => this.time.now,
-        getSession: () => this.session,
-        applySessionResult: (result) => {
-          this.session = result.state;
+    this.commandAdapter = new PotassiumCommandAdapter(
+      {
+        runtime: {
+          getNow: () => this.time.now,
+          getSession: () => this.session,
+          applySessionResult: (result) => {
+            this.session = result.state;
+          },
+          getSkillRank: (upgrade) => this.getSkillRank(upgrade),
+          getGenericRank: (upgrade) => this.getGenericRank(upgrade),
+          setHint: (text) => bridgeActions.setSceneHintText(text),
+          collectCircuit: () => bridgeActions.collectItem('circuit'),
+          saveRunRecord: (record) => savePotassiumRunRecord(record),
+          closeScene: () => this.onClose?.()
         },
-        getSkillRank: (upgrade) => this.getSkillRank(upgrade),
-        getGenericRank: (upgrade) => this.getGenericRank(upgrade),
-        setHint: (text) => bridgeActions.setSceneHintText(text),
-        collectCircuit: () => bridgeActions.collectItem('circuit'),
-        saveRunRecord: (record) => savePotassiumRunRecord(record),
-        closeScene: () => this.onClose?.()
-      },
-      objects: {
-        getEnemies: () => this.enemies.getChildren() as unknown as PotassiumCommandObject[],
-        getProjectiles: () => [this.banana, ...(this.clones.getChildren() as ProjectileSprite[])] as PotassiumCommandObject[],
-        getMainProjectile: () => this.banana as PotassiumCommandObject,
-        isMainProjectile: (projectile) => projectile === this.banana,
-        isMainProjectileRecalling: () => this.projectileControl.isRecalling(),
-        getProjectileExplosionRadiusMultiplier: (projectile) => this.getProjectileExplosionRadiusMultiplier(projectile as ProjectileSprite),
-        getMaxMainProjectileSpeed: () => this.getMaxBananaSpeed(),
-        getExplosionRadiusMultiplier: () => this.getExplosionRadiusMultiplier(),
-        getExplosionHits: (x, y) => (this.enemies.getChildren() as EnemySprite[]).map((enemy) => ({
-          enemy: enemy as PotassiumCommandObject,
-          distance: Phaser.Math.Distance.Between(x, y, enemy.x, enemy.y)
-        })),
-        getGhostBeamHits: (x, y, direction) => {
-          const isHorizontal = direction === 'horizontal';
-          return (this.enemies.getChildren() as EnemySprite[]).map((enemy) => ({
-            enemy: enemy as PotassiumCommandObject,
-            inBeam: isHorizontal
-              ? Math.abs(enemy.y - y) <= 28
-              : Math.abs(enemy.x - x) <= 28
-          }));
+        objects: {
+          getEnemies: () => this.enemies.getChildren() as unknown as PotassiumCommandObject[],
+          getProjectiles: () =>
+            [this.banana, ...(this.clones.getChildren() as ProjectileSprite[])] as PotassiumCommandObject[],
+          getMainProjectile: () => this.banana as PotassiumCommandObject,
+          isMainProjectile: (projectile) => projectile === this.banana,
+          isMainProjectileRecalling: () => this.projectileControl.isRecalling(),
+          getProjectileExplosionRadiusMultiplier: (projectile) =>
+            this.getProjectileExplosionRadiusMultiplier(projectile as ProjectileSprite),
+          getMaxMainProjectileSpeed: () => this.getMaxBananaSpeed(),
+          getExplosionRadiusMultiplier: () => this.getExplosionRadiusMultiplier(),
+          getExplosionHits: (x, y) =>
+            (this.enemies.getChildren() as EnemySprite[]).map((enemy) => ({
+              enemy: enemy as PotassiumCommandObject,
+              distance: Phaser.Math.Distance.Between(x, y, enemy.x, enemy.y)
+            })),
+          getGhostBeamHits: (x, y, direction) => {
+            const isHorizontal = direction === 'horizontal';
+            return (this.enemies.getChildren() as EnemySprite[]).map((enemy) => ({
+              enemy: enemy as PotassiumCommandObject,
+              inBeam: isHorizontal ? Math.abs(enemy.y - y) <= 28 : Math.abs(enemy.x - x) <= 28
+            }));
+          }
+        },
+        board: {
+          resetBoardObjects: () => this.resetBoardObjects(),
+          spawnWave: (wave) => this.spawnWave(wave),
+          spawnBossDelayed: () => this.time.delayedCall(350, () => this.spawnEnemy('boss', 0)),
+          scheduleWaveRows: (schedule) => this.scheduleWaveRows(schedule),
+          scheduleUpgradeChoices: () =>
+            this.time.delayedCall(UPGRADE_CHOICE_DELAY_MS, () => {
+              if (this.session.gameState === 'PLAYING') {
+                this.showUpgradeChoices();
+              }
+            }),
+          advanceWaveAfterDelay: (wave) =>
+            this.time.delayedCall(WAVE_ADVANCE_DELAY_MS, () => {
+              if (this.session.gameState === 'PLAYING') {
+                this.spawnWave(wave);
+              }
+            }),
+          stopMainProjectile: () => {
+            this.banana.setVelocity(0, 0);
+            this.banana.setAngularVelocity(0);
+          },
+          clearBoardForOutcome: () => this.clearBoardForOutcome(),
+          spawnFirePatch: (x, y, effectMultiplier, lifetimeMs, scale) =>
+            this.spawnFirePatch(x, y, effectMultiplier, lifetimeMs, scale),
+          spawnSplitterChildren: (enemy) => this.spawnSplitterChildren(enemy as EnemySprite),
+          spawnBossOrbitBlockers: (boss) => this.spawnBossOrbitBlockers(boss as EnemySprite),
+          updateBossOrbitBlockers: (boss, time) => this.updateBossOrbitBlockers(boss as EnemySprite, time),
+          setBossStoneVisual: (boss, active) => this.setBossStoneVisual(boss as EnemySprite, active),
+          spawnBossSummons: (summons) => this.spawnBossSummons(summons),
+          clearOrbitBlockers: () => this.bossBlockers.getChildren().forEach((gameObject) => gameObject.destroy())
+        },
+        renderer: {
+          hideMainOverlay: () => this.potassiumRenderer.hideMainOverlay(),
+          clearTerminalOverlay: () => this.clearTerminalOverlay(),
+          clearUpgradeChoiceOverlay: () => this.clearUpgradeChoiceOverlay(),
+          showUpgradeChoices: (choices) => this.showUpgradeChoicesPanel(choices),
+          refreshAllProjectileVisuals: () => this.refreshAllProjectileVisuals(),
+          updateHud: (hud) => this.potassiumRenderer.updateHud(hud),
+          showOutcomeOverlay: (input) => {
+            this.pendingTerminalView = input;
+          },
+          showTerminal: (outcome) => this.createTerminalOverlay(outcome),
+          showDamageCue: (enemy, source) => this.potassiumRenderer.showDamageCue(enemy as EnemySprite, source),
+          showExplosionVisual: (x, y, radius) => this.potassiumRenderer.showExplosionVisual(x, y, radius),
+          shakeCamera: (durationMs, intensity) => this.cameras.main.shake(durationMs, intensity),
+          showGhostBeam: (input) => this.potassiumRenderer.showGhostBeam(input),
+          showGhostStatusField: (input) => this.potassiumRenderer.showGhostStatusField(input),
+          animateEnemyDeath: (enemy, onComplete) =>
+            this.potassiumRenderer.animateEnemyDeath(enemy as EnemySprite, onComplete)
         }
       },
-      board: {
-        resetBoardObjects: () => this.resetBoardObjects(),
-        spawnWave: (wave) => this.spawnWave(wave),
-        spawnBossDelayed: () => this.time.delayedCall(350, () => this.spawnEnemy('boss', 0)),
-        scheduleWaveRows: (schedule) => this.scheduleWaveRows(schedule),
-        scheduleUpgradeChoices: () => this.time.delayedCall(UPGRADE_CHOICE_DELAY_MS, () => {
-          if (this.session.gameState === 'PLAYING') {
-            this.showUpgradeChoices();
-          }
-        }),
-        advanceWaveAfterDelay: (wave) => this.time.delayedCall(WAVE_ADVANCE_DELAY_MS, () => {
-          if (this.session.gameState === 'PLAYING') {
-            this.spawnWave(wave);
-          }
-        }),
-        stopMainProjectile: () => {
-          this.banana.setVelocity(0, 0);
-          this.banana.setAngularVelocity(0);
-        },
-        clearBoardForOutcome: () => this.clearBoardForOutcome(),
-        spawnFirePatch: (x, y, effectMultiplier, lifetimeMs, scale) => this.spawnFirePatch(x, y, effectMultiplier, lifetimeMs, scale),
-        spawnSplitterChildren: (enemy) => this.spawnSplitterChildren(enemy as EnemySprite),
-        spawnBossOrbitBlockers: (boss) => this.spawnBossOrbitBlockers(boss as EnemySprite),
-        updateBossOrbitBlockers: (boss, time) => this.updateBossOrbitBlockers(boss as EnemySprite, time),
-        setBossStoneVisual: (boss, active) => this.setBossStoneVisual(boss as EnemySprite, active),
-        spawnBossSummons: (summons) => this.spawnBossSummons(summons),
-        clearOrbitBlockers: () => this.bossBlockers.getChildren().forEach((gameObject) => gameObject.destroy())
-      },
-      renderer: {
-        hideMainOverlay: () => this.potassiumRenderer.hideMainOverlay(),
-        clearTerminalOverlay: () => this.clearTerminalOverlay(),
-        clearUpgradeChoiceOverlay: () => this.clearUpgradeChoiceOverlay(),
-        showUpgradeChoices: (choices) => this.showUpgradeChoicesPanel(choices),
-        refreshAllProjectileVisuals: () => this.refreshAllProjectileVisuals(),
-        updateHud: (hud) => this.potassiumRenderer.updateHud(hud),
-        showOutcomeOverlay: (input) => {
-          this.pendingTerminalView = input;
-        },
-        showTerminal: (outcome) => this.createTerminalOverlay(outcome),
-        showDamageCue: (enemy, source) => this.potassiumRenderer.showDamageCue(enemy as EnemySprite, source),
-        showExplosionVisual: (x, y, radius) => this.potassiumRenderer.showExplosionVisual(x, y, radius),
-        shakeCamera: (durationMs, intensity) => this.cameras.main.shake(durationMs, intensity),
-        showGhostBeam: (input) => this.potassiumRenderer.showGhostBeam(input),
-        showGhostStatusField: (input) => this.potassiumRenderer.showGhostStatusField(input),
-        animateEnemyDeath: (enemy, onComplete) => this.potassiumRenderer.animateEnemyDeath(enemy as EnemySprite, onComplete)
+      {
+        arena: ARENA,
+        poisonTint: POISON_TINT,
+        cloneRicochetMaxSpeed: CLONE_RICOCHET_MAX_SPEED,
+        bananaRicochetMinSpeed: BANANA_RICOCHET_MIN_SPEED,
+        bananaRicochetBoost: BANANA_RICOCHET_BOOST,
+        poisonDeathSpreadRadius: POISON_DEATH_SPREAD_RADIUS,
+        ghostStatusFieldLifetimeMs: POTASSIUM_GHOST_STATUS_FIELD_LIFETIME_MS,
+        ghostBeamLifetimeMs: GHOST_BEAM_LIFETIME_MS
       }
-    }, {
-      arena: ARENA,
-      poisonTint: POISON_TINT,
-      cloneRicochetMaxSpeed: CLONE_RICOCHET_MAX_SPEED,
-      bananaRicochetMinSpeed: BANANA_RICOCHET_MIN_SPEED,
-      bananaRicochetBoost: BANANA_RICOCHET_BOOST,
-      poisonDeathSpreadRadius: POISON_DEATH_SPREAD_RADIUS,
-      ghostStatusFieldLifetimeMs: POTASSIUM_GHOST_STATUS_FIELD_LIFETIME_MS,
-      ghostBeamLifetimeMs: GHOST_BEAM_LIFETIME_MS
-    });
+    );
   }
 
   preload(): void {
@@ -405,19 +398,13 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.spawnWallClonesIfReady(splash, hit);
   };
 
-  private showWallSudsIfReady(
-    splash: PotassiumWallSudsSplash,
-    hit: PotassiumWallHit
-  ): void {
+  private showWallSudsIfReady(splash: PotassiumWallSudsSplash, hit: PotassiumWallHit): void {
     if (!shouldShowPotassiumWallSuds({ ...hit, lastSudsAt: this.lastWallSudsAt })) return;
     this.lastWallSudsAt = hit.now;
     this.potassiumRenderer.showWallSuds(splash.x, splash.y, splash.side);
   }
 
-  private spawnWallClonesIfReady(
-    splash: PotassiumWallSudsSplash,
-    hit: PotassiumWallHit
-  ): void {
+  private spawnWallClonesIfReady(splash: PotassiumWallSudsSplash, hit: PotassiumWallHit): void {
     const clones = resolvePotassiumWallClones({
       ...hit,
       duplicateRank: this.getSkillRank('duplicate'),
@@ -459,27 +446,42 @@ export class PotassiumSlipScene extends Phaser.Scene {
       const bossBlocker = blocker as EnemySprite;
       const context = this.commandAdapter.createCombatContext([bossBlocker], [this.banana]);
       if (this.projectileControl.isRecalling()) {
-        this.commandAdapter.applyCombatCommands([{
-          type: 'boostRecallVelocity',
-          projectileId: getPotassiumCombatId(this.banana) ?? ''
-        }], context);
+        this.commandAdapter.applyCombatCommands(
+          [
+            {
+              type: 'boostRecallVelocity',
+              projectileId: getPotassiumCombatId(this.banana) ?? ''
+            }
+          ],
+          context
+        );
         return;
       }
-      this.commandAdapter.applyCombatCommands([{
-        type: 'ricochetProjectile',
-        projectileId: getPotassiumCombatId(this.banana) ?? '',
-        enemyId: getPotassiumCombatId(bossBlocker) ?? ''
-      }], context);
+      this.commandAdapter.applyCombatCommands(
+        [
+          {
+            type: 'ricochetProjectile',
+            projectileId: getPotassiumCombatId(this.banana) ?? '',
+            enemyId: getPotassiumCombatId(bossBlocker) ?? ''
+          }
+        ],
+        context
+      );
     });
     this.physics.add.overlap(this.clones, this.bossBlockers, (clone, blocker) => {
       const projectile = clone as ProjectileSprite;
       const bossBlocker = blocker as EnemySprite;
       const context = this.commandAdapter.createCombatContext([bossBlocker], [projectile]);
-      this.commandAdapter.applyCombatCommands([{
-        type: 'ricochetProjectile',
-        projectileId: getPotassiumCombatId(projectile) ?? '',
-        enemyId: getPotassiumCombatId(bossBlocker) ?? ''
-      }], context);
+      this.commandAdapter.applyCombatCommands(
+        [
+          {
+            type: 'ricochetProjectile',
+            projectileId: getPotassiumCombatId(projectile) ?? '',
+            enemyId: getPotassiumCombatId(bossBlocker) ?? ''
+          }
+        ],
+        context
+      );
     });
   }
 
@@ -563,7 +565,10 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.applySessionResult(result);
   }
 
-  private applySessionResult(result: { state: PotassiumSessionState; commands: readonly PotassiumSessionCommand[] }): void {
+  private applySessionResult(result: {
+    state: PotassiumSessionState;
+    commands: readonly PotassiumSessionCommand[];
+  }): void {
     this.commandAdapter.applySessionResult({
       state: result.state,
       commands: [...result.commands]
@@ -620,11 +625,13 @@ export class PotassiumSlipScene extends Phaser.Scene {
   }
 
   private releaseBanana(pointer: PotassiumInputPointer): void {
-    this.applyProjectileControlCommands(this.projectileControl.release({
-      pointer: { x: pointer.x, y: pointer.y },
-      banana: { x: this.banana.x, y: this.banana.y },
-      maxSpeed: this.getMaxBananaSpeed()
-    }));
+    this.applyProjectileControlCommands(
+      this.projectileControl.release({
+        pointer: { x: pointer.x, y: pointer.y },
+        banana: { x: this.banana.x, y: this.banana.y },
+        maxSpeed: this.getMaxBananaSpeed()
+      })
+    );
   }
 
   private cancelControl(): void {
@@ -666,11 +673,9 @@ export class PotassiumSlipScene extends Phaser.Scene {
       } else if (command.type === 'setBananaAngularVelocity') {
         this.banana.setAngularVelocity(command.value);
       } else if (command.type === 'setBananaAngularVelocityFromX') {
-        this.banana.setAngularVelocity(Phaser.Math.Clamp(
-          this.banana.body.velocity.x * command.multiplier,
-          command.min,
-          command.max
-        ));
+        this.banana.setAngularVelocity(
+          Phaser.Math.Clamp(this.banana.body.velocity.x * command.multiplier, command.min, command.max)
+        );
       } else if (command.type === 'setBananaAngularVelocityRandom') {
         this.banana.setAngularVelocity(Phaser.Math.Between(command.min, command.max));
       } else if (command.type === 'moveBananaToLaunchPad') {
@@ -729,18 +734,22 @@ export class PotassiumSlipScene extends Phaser.Scene {
 
   private updateControlState(): void {
     const pointer = this.externalControlPointer ?? this.input.activePointer;
-    this.applyProjectileControlCommands(this.projectileControl.update({
-      banana: { x: this.banana.x, y: this.banana.y },
-      velocity: { x: this.banana.body.velocity.x, y: this.banana.body.velocity.y },
-      activePointer: { id: pointer.id, x: pointer.x, y: pointer.y }
-    }));
+    this.applyProjectileControlCommands(
+      this.projectileControl.update({
+        banana: { x: this.banana.x, y: this.banana.y },
+        velocity: { x: this.banana.body.velocity.x, y: this.banana.body.velocity.y },
+        activePointer: { id: pointer.id, x: pointer.x, y: pointer.y }
+      })
+    );
   }
 
   private updateBananaDrag(delta: number): void {
-    this.applyProjectileControlCommands(this.projectileControl.applyIdleDrag({
-      velocity: { x: this.banana.body.velocity.x, y: this.banana.body.velocity.y },
-      deltaMs: delta
-    }));
+    this.applyProjectileControlCommands(
+      this.projectileControl.applyIdleDrag({
+        velocity: { x: this.banana.body.velocity.x, y: this.banana.body.velocity.y },
+        deltaMs: delta
+      })
+    );
   }
 
   private isBananaInLaunchZone(radius: number = LAUNCH_PAD.radius): boolean {
@@ -834,7 +843,12 @@ export class PotassiumSlipScene extends Phaser.Scene {
     });
   }
 
-  private spawnEnemy(kind: EnemyKind, columnIndex: number = 0, rowIndex: number = 0, yOverride?: number): EnemySprite | undefined {
+  private spawnEnemy(
+    kind: EnemyKind,
+    columnIndex: number = 0,
+    rowIndex: number = 0,
+    yOverride?: number
+  ): EnemySprite | undefined {
     if (this.session.gameState !== 'PLAYING') return;
     const spawn = resolvePotassiumEnemySpawnFacts({
       layout: {
@@ -868,7 +882,13 @@ export class PotassiumSlipScene extends Phaser.Scene {
     return enemy;
   }
 
-  private configureEnemy(enemy: EnemySprite, kind: EnemyKind, wave: number, columnIndex: number, rowIndex: number): void {
+  private configureEnemy(
+    enemy: EnemySprite,
+    kind: EnemyKind,
+    wave: number,
+    columnIndex: number,
+    rowIndex: number
+  ): void {
     const setup = resolvePotassiumEnemySetupFacts({ kind, wave, columnIndex, rowIndex });
     enemy.setDepth(setup.depth);
     enemy.setScale(setup.scale);
@@ -879,9 +899,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
     });
     this.potassiumRenderer.createEnemyAttachments(enemy, setup.attachment);
     if (setup.angularVelocityRange) {
-      enemy.setAngularVelocity(
-        Phaser.Math.Between(setup.angularVelocityRange.min, setup.angularVelocityRange.max)
-      );
+      enemy.setAngularVelocity(Phaser.Math.Between(setup.angularVelocityRange.min, setup.angularVelocityRange.max));
     }
     if (setup.immovable) {
       enemy.setImmovable(true);
@@ -897,13 +915,16 @@ export class PotassiumSlipScene extends Phaser.Scene {
     if (hitUntil !== undefined && hitUntil > this.time.now) return;
     setPotassiumHitCooldownUntil(enemy, hitKey, this.time.now + HIT_COOLDOWN_MS);
 
-    this.commandAdapter.applyCombatCommands(resolvePotassiumProjectileHit({
-      now: this.time.now,
-      enemy: this.commandAdapter.getEnemyCombatFacts(enemy),
-      projectile: this.commandAdapter.getProjectileCombatFacts(projectile),
-      skillRanks: this.session.skillRanks,
-      genericRanks: this.session.genericRanks
-    }), this.commandAdapter.createCombatContext([enemy], [projectile]));
+    this.commandAdapter.applyCombatCommands(
+      resolvePotassiumProjectileHit({
+        now: this.time.now,
+        enemy: this.commandAdapter.getEnemyCombatFacts(enemy),
+        projectile: this.commandAdapter.getProjectileCombatFacts(projectile),
+        skillRanks: this.session.skillRanks,
+        genericRanks: this.session.genericRanks
+      }),
+      this.commandAdapter.createCombatContext([enemy], [projectile])
+    );
   }
 
   private spawnSplitterChildren(enemy: EnemySprite): void {
@@ -911,18 +932,17 @@ export class PotassiumSlipScene extends Phaser.Scene {
     const columnIndex = getPotassiumData<number>(enemy, POTASSIUM_DATA_KEYS.columnIndex) ?? 2;
     const rowIndex = (getPotassiumData<number>(enemy, POTASSIUM_DATA_KEYS.rowIndex) ?? 0) + 1;
     const occupiedColumns = getPotassiumData<number[]>(enemy, POTASSIUM_DATA_KEYS.occupiedColumns) ?? [columnIndex];
-    occupiedColumns
-      .forEach((column) => {
-        const child = this.spawnEnemy('intern', column, rowIndex, enemy.y + 26);
-        if (!child) return;
-        const childFacts = resolvePotassiumSplitterChildFacts({
-          hp: getPotassiumEnemyHp(child) || 1
-        });
-        child.setScale(childFacts.scale);
-        setPotassiumEnemyHp(child, childFacts.hp);
-        setPotassiumEnemyMaxHp(child, childFacts.hp);
-        child.setVelocity(0, childFacts.speed);
+    occupiedColumns.forEach((column) => {
+      const child = this.spawnEnemy('intern', column, rowIndex, enemy.y + 26);
+      if (!child) return;
+      const childFacts = resolvePotassiumSplitterChildFacts({
+        hp: getPotassiumEnemyHp(child) || 1
       });
+      child.setScale(childFacts.scale);
+      setPotassiumEnemyHp(child, childFacts.hp);
+      setPotassiumEnemyMaxHp(child, childFacts.hp);
+      child.setVelocity(0, childFacts.speed);
+    });
   }
 
   private spawnBananaClones(x: number, y: number, angles: readonly number[], lifetimeMs: number): void {
@@ -985,13 +1005,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
     );
   }
 
-  private spawnFirePatch(
-    x: number,
-    y: number,
-    effectMultiplier: number,
-    lifetimeMs: number,
-    scale: number
-  ): void {
+  private spawnFirePatch(x: number, y: number, effectMultiplier: number, lifetimeMs: number, scale: number): void {
     const cellKey = this.getFireCellKey(x, y);
     if (this.fireCells.has(cellKey)) return;
     this.fireCells.add(cellKey);
@@ -1016,23 +1030,31 @@ export class PotassiumSlipScene extends Phaser.Scene {
   }
 
   private getFireCellKey(x: number, y: number): string {
-    return getPotassiumFireCellKey(x, y, {
-      left: SAFE.left,
-      width: SAFE.right - SAFE.left,
-      top: SAFE.top,
-      bottom: SAFE.bottom
-    }, CELL_FIRE_ROW_HEIGHT);
+    return getPotassiumFireCellKey(
+      x,
+      y,
+      {
+        left: SAFE.left,
+        width: SAFE.right - SAFE.left,
+        top: SAFE.top,
+        bottom: SAFE.bottom
+      },
+      CELL_FIRE_ROW_HEIGHT
+    );
   }
 
   private updatePoisonStatuses(time: number): void {
     if (this.getSkillRank('poison') <= 0) return;
     this.enemies.getChildren().forEach((gameObject) => {
       const enemy = gameObject as EnemySprite;
-      this.commandAdapter.applyCombatCommands(resolvePotassiumPoisonTick({
-        now: time,
-        enemy: this.commandAdapter.getEnemyCombatFacts(enemy),
-        poisonUnlocked: this.getSkillRank('poison') > 0
-      }), this.commandAdapter.createCombatContext([enemy]));
+      this.commandAdapter.applyCombatCommands(
+        resolvePotassiumPoisonTick({
+          now: time,
+          enemy: this.commandAdapter.getEnemyCombatFacts(enemy),
+          poisonUnlocked: this.getSkillRank('poison') > 0
+        }),
+        this.commandAdapter.createCombatContext([enemy])
+      );
     });
   }
 
@@ -1075,10 +1097,7 @@ export class PotassiumSlipScene extends Phaser.Scene {
     this.bossBlockers.getChildren().forEach((gameObject) => {
       const blocker = gameObject as EnemySprite;
       const angle = getBossOrbitAngle(blocker, time);
-      blocker.setPosition(
-        boss.x + Math.cos(angle) * BOSS_ORBIT_RADIUS,
-        boss.y + Math.sin(angle) * BOSS_ORBIT_RADIUS_Y
-      );
+      blocker.setPosition(boss.x + Math.cos(angle) * BOSS_ORBIT_RADIUS, boss.y + Math.sin(angle) * BOSS_ORBIT_RADIUS_Y);
       blocker.setAngle(Phaser.Math.RadToDeg(angle));
       blocker.setVelocity(0, 0);
     });
@@ -1179,10 +1198,12 @@ export class PotassiumSlipScene extends Phaser.Scene {
       const enemy = gameObject as EnemySprite;
       return enemy.active && !isPotassiumEnemyDying(enemy);
     });
-    this.applySessionResult(resolvePotassiumWaveClear({
-      state: this.session,
-      hasLivingEnemies
-    }));
+    this.applySessionResult(
+      resolvePotassiumWaveClear({
+        state: this.session,
+        hasLivingEnemies
+      })
+    );
   }
 
   private showUpgradeChoices(): void {
@@ -1219,11 +1240,9 @@ export class PotassiumSlipScene extends Phaser.Scene {
   private createTerminalOverlay(outcome: PotassiumRunOutcome): void {
     const messages = getMessages();
     const pending = this.pendingTerminalView;
-    const title = pending?.title ?? (
-      outcome === 'won'
-        ? messages.potassiumSlip.outcomes.won
-        : messages.potassiumSlip.outcomes.gameOver
-    );
+    const title =
+      pending?.title ??
+      (outcome === 'won' ? messages.potassiumSlip.outcomes.won : messages.potassiumSlip.outcomes.gameOver);
     const score = pending?.score ?? this.session.score;
     const actions: Array<{ action: PotassiumTerminalAction; label: string; priority: 'primary' | 'secondary' }> =
       outcome === 'won'
@@ -1370,9 +1389,7 @@ function readPotassiumDraftChoiceActionParams(params: unknown): PotassiumDraftOp
 function readPotassiumTerminalActionParams(params: unknown): PotassiumTerminalAction | null {
   if (!params || typeof params !== 'object') return null;
   const action = (params as { action?: unknown }).action;
-  return action === 'return' || action === 'retry' || action === 'endless'
-    ? action
-    : null;
+  return action === 'return' || action === 'retry' || action === 'endless' ? action : null;
 }
 
 /** Where a boss soda can sits on its orbit at scene time `timeMs`; cans are spaced a third of a turn apart. */

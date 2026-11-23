@@ -1,7 +1,4 @@
-import {
-  clampStampedePosition,
-  type StampedeVelocity
-} from './movement';
+import { clampStampedePosition, type StampedeVelocity } from './movement';
 import {
   resolveStampedeAutoAttackFrame,
   type StampedeAutoAttackCandidate,
@@ -52,33 +49,33 @@ export interface StampedeRunContactCandidate extends StampedeContactCandidate {
 
 export type StampedeRunFrame =
   | {
-    kind: 'close';
-    session: StampedeSession;
-    autoAttackState?: StampedeAutoAttackState;
-  }
+      kind: 'close';
+      session: StampedeSession;
+      autoAttackState?: StampedeAutoAttackState;
+    }
   | {
-    kind: 'terminal';
-    session: StampedeSession;
-    autoAttackState?: StampedeAutoAttackState;
-    phase: Exclude<StampedeSessionPhase, 'playing'>;
-    player?: StampedePressurePoint;
-    pressure?: StampedePressureSnapshot;
-    contactCandidate?: StampedeContactCandidate | null;
-    attack?: StampedeAutoAttackEvent | null;
-    swarm: StampedeRunSwarmFrame;
-  }
+      kind: 'terminal';
+      session: StampedeSession;
+      autoAttackState?: StampedeAutoAttackState;
+      phase: Exclude<StampedeSessionPhase, 'playing'>;
+      player?: StampedePressurePoint;
+      pressure?: StampedePressureSnapshot;
+      contactCandidate?: StampedeContactCandidate | null;
+      attack?: StampedeAutoAttackEvent | null;
+      swarm: StampedeRunSwarmFrame;
+    }
   | {
-    kind: 'playing';
-    session: StampedeSession;
-    autoAttackState?: StampedeAutoAttackState;
-    velocity: StampedeVelocity;
-    player: StampedePressurePoint;
-    pressure: StampedePressureSnapshot;
-    contactCandidate: StampedeContactCandidate | null;
-    attack?: StampedeAutoAttackEvent | null;
-    shellBlocked?: boolean;
-    swarm: StampedeRunSwarmFrame;
-  };
+      kind: 'playing';
+      session: StampedeSession;
+      autoAttackState?: StampedeAutoAttackState;
+      velocity: StampedeVelocity;
+      player: StampedePressurePoint;
+      pressure: StampedePressureSnapshot;
+      contactCandidate: StampedeContactCandidate | null;
+      attack?: StampedeAutoAttackEvent | null;
+      shellBlocked?: boolean;
+      swarm: StampedeRunSwarmFrame;
+    };
 
 export function resolveStampedeRunFrame({
   session,
@@ -124,13 +121,13 @@ export function resolveStampedeRunFrame({
   };
   const autoAttackFrame = autoAttackState
     ? resolveStampedeAutoAttackFrame({
-      state: autoAttackState,
-      elapsedMs: advancedSession.elapsedMs,
-      player: clampedPlayer,
-      velocity,
-      candidates: contactCandidates.filter(hasStampedeCandidateId),
-      profile: autoAttackProfile
-    })
+        state: autoAttackState,
+        elapsedMs: advancedSession.elapsedMs,
+        player: clampedPlayer,
+        velocity,
+        candidates: contactCandidates.filter(hasStampedeCandidateId),
+        profile: autoAttackProfile
+      })
     : null;
   const pressureCandidates = removeHitCandidates(contactCandidates, [
     ...(autoAttackFrame?.attack?.hitIds ?? []),
@@ -213,15 +210,11 @@ function resolveShellContact({
 
   return {
     shellBlocked: false,
-    session: pressure.canContact
-      ? resolveStampedeContact(session, session.elapsedMs, { contactLimit })
-      : session
+    session: pressure.canContact ? resolveStampedeContact(session, session.elapsedMs, { contactLimit }) : session
   };
 }
 
-function hasStampedeCandidateId(
-  candidate: StampedeRunContactCandidate
-): candidate is StampedeAutoAttackCandidate {
+function hasStampedeCandidateId(candidate: StampedeRunContactCandidate): candidate is StampedeAutoAttackCandidate {
   return typeof candidate.id === 'string';
 }
 
@@ -238,7 +231,5 @@ function removeHitCandidates(
   if (hitIds.length === 0) return candidates;
 
   const hitIdSet = new Set(hitIds);
-  return candidates.filter((candidate) => (
-    !candidate.id || !hitIdSet.has(candidate.id)
-  ));
+  return candidates.filter((candidate) => !candidate.id || !hitIdSet.has(candidate.id));
 }

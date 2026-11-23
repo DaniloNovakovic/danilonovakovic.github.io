@@ -13,13 +13,15 @@ import {
 
 describe('potassium slip combat', () => {
   it('resolves normal hit damage, deflection, and unlocked effects', () => {
-    expect(resolvePotassiumProjectileHit({
-      now: 1000,
-      enemy: enemy({ id: 'enemy-1', x: 300, y: 160 }),
-      projectile: projectile({ id: 'banana', x: 280, y: 150 }),
-      skillRanks: { poison: 1, explosion: 1, duplicate: 1, ghostHorizontal: 1 },
-      genericRanks: { damage: 1, cloneTime: 2 }
-    })).toEqual([
+    expect(
+      resolvePotassiumProjectileHit({
+        now: 1000,
+        enemy: enemy({ id: 'enemy-1', x: 300, y: 160 }),
+        projectile: projectile({ id: 'banana', x: 280, y: 150 }),
+        skillRanks: { poison: 1, explosion: 1, duplicate: 1, ghostHorizontal: 1 },
+        genericRanks: { damage: 1, cloneTime: 2 }
+      })
+    ).toEqual([
       { type: 'damageEnemy', enemyId: 'enemy-1', amount: 1.12, source: 'banana' },
       { type: 'ricochetProjectile', projectileId: 'banana', enemyId: 'enemy-1' },
       {
@@ -36,50 +38,58 @@ describe('potassium slip combat', () => {
   });
 
   it('uses recall damage and recall velocity behavior', () => {
-    expect(resolvePotassiumProjectileHit({
-      now: 1000,
-      enemy: enemy({ id: 'enemy-1' }),
-      projectile: projectile({ id: 'banana', isRecall: true }),
-      skillRanks: { explosion: 1, duplicate: 1, ghostVertical: 1 },
-      genericRanks: {}
-    })).toEqual([
+    expect(
+      resolvePotassiumProjectileHit({
+        now: 1000,
+        enemy: enemy({ id: 'enemy-1' }),
+        projectile: projectile({ id: 'banana', isRecall: true }),
+        skillRanks: { explosion: 1, duplicate: 1, ghostVertical: 1 },
+        genericRanks: {}
+      })
+    ).toEqual([
       { type: 'damageEnemy', enemyId: 'enemy-1', amount: 0.65, source: 'banana' },
       { type: 'boostRecallVelocity', projectileId: 'banana' }
     ]);
   });
 
   it('blocks protected hits with cue and deflection commands', () => {
-    expect(resolvePotassiumProjectileHit({
-      now: 1000,
-      enemy: enemy({ id: 'shield', shieldSide: 'right', x: 300, y: 150 }),
-      projectile: projectile({ id: 'banana', x: 340, y: 152 }),
-      skillRanks: { poison: 1, explosion: 1 },
-      genericRanks: {}
-    })).toEqual([
+    expect(
+      resolvePotassiumProjectileHit({
+        now: 1000,
+        enemy: enemy({ id: 'shield', shieldSide: 'right', x: 300, y: 150 }),
+        projectile: projectile({ id: 'banana', x: 340, y: 152 }),
+        skillRanks: { poison: 1, explosion: 1 },
+        genericRanks: {}
+      })
+    ).toEqual([
       { type: 'showDamageCue', enemyId: 'shield', source: 'ghost' },
       { type: 'ricochetProjectile', projectileId: 'banana', enemyId: 'shield' }
     ]);
 
-    expect(resolvePotassiumProjectileHit({
-      now: 1000,
-      enemy: enemy({ id: 'boss', kind: 'boss', stoneUntil: 1400 }),
-      projectile: projectile({ id: 'banana', isRecall: true }),
-      skillRanks: { poison: 1 },
-      genericRanks: {}
-    })).toEqual([
+    expect(
+      resolvePotassiumProjectileHit({
+        now: 1000,
+        enemy: enemy({ id: 'boss', kind: 'boss', stoneUntil: 1400 }),
+        projectile: projectile({ id: 'banana', isRecall: true }),
+        skillRanks: { poison: 1 },
+        genericRanks: {}
+      })
+    ).toEqual([
       { type: 'showDamageCue', enemyId: 'boss', source: 'ghost' },
       { type: 'boostRecallVelocity', projectileId: 'banana' }
     ]);
   });
 
   it('adds fire patches for upgraded fire hits', () => {
-    expect(resolvePotassiumProjectileHit({
-      now: 1000,
-      enemy: enemy({ id: 'enemy-1', x: 320, y: 180 }),
-      projectile: projectile({ id: 'banana' }),
-      skillRanks: { fire: 2 },
-      genericRanks: {}
-    })).toContainEqual({
+    expect(
+      resolvePotassiumProjectileHit({
+        now: 1000,
+        enemy: enemy({ id: 'enemy-1', x: 320, y: 180 }),
+        projectile: projectile({ id: 'banana' }),
+        skillRanks: { fire: 2 },
+        genericRanks: {}
+      })
+    ).toContainEqual({
       type: 'spawnFirePatch',
       x: 320,
       y: 180,
@@ -90,16 +100,18 @@ describe('potassium slip combat', () => {
   });
 
   it('applies explosion rank 2 status effects through explosion resolution', () => {
-    expect(resolvePotassiumExplosion({
-      now: 1000,
-      x: 300,
-      y: 160,
-      effectMultiplier: 1,
-      radiusMultiplier: 1,
-      hits: [{ enemy: enemy({ id: 'enemy-1', x: 310, y: 160 }), distance: 10 }],
-      skillRanks: { explosion: 2, poison: 1, fire: 1 },
-      genericRanks: {}
-    })).toEqual([
+    expect(
+      resolvePotassiumExplosion({
+        now: 1000,
+        x: 300,
+        y: 160,
+        effectMultiplier: 1,
+        radiusMultiplier: 1,
+        hits: [{ enemy: enemy({ id: 'enemy-1', x: 310, y: 160 }), distance: 10 }],
+        skillRanks: { explosion: 2, poison: 1, fire: 1 },
+        genericRanks: {}
+      })
+    ).toEqual([
       { type: 'damageEnemy', enemyId: 'enemy-1', amount: 2, source: 'explosion' },
       {
         type: 'applyPoison',
@@ -121,16 +133,18 @@ describe('potassium slip combat', () => {
   });
 
   it('applies ghost rank 2 status effects through beam resolution', () => {
-    expect(resolvePotassiumGhostBeam({
-      now: 1000,
-      x: 300,
-      y: 160,
-      direction: 'horizontal',
-      effectMultiplier: 1,
-      hits: [{ enemy: enemy({ id: 'enemy-1', x: 310, y: 160 }), inBeam: true }],
-      skillRanks: { ghostHorizontal: 2, poison: 1 },
-      genericRanks: {}
-    })).toEqual([
+    expect(
+      resolvePotassiumGhostBeam({
+        now: 1000,
+        x: 300,
+        y: 160,
+        direction: 'horizontal',
+        effectMultiplier: 1,
+        hits: [{ enemy: enemy({ id: 'enemy-1', x: 310, y: 160 }), inBeam: true }],
+        skillRanks: { ghostHorizontal: 2, poison: 1 },
+        genericRanks: {}
+      })
+    ).toEqual([
       { type: 'damageEnemy', enemyId: 'enemy-1', amount: 1, source: 'ghost' },
       {
         type: 'applyPoison',
@@ -145,29 +159,35 @@ describe('potassium slip combat', () => {
   });
 
   it('ticks, expires, and spreads poison decisions', () => {
-    expect(resolvePotassiumPoisonTick({
-      now: 1000,
-      poisonUnlocked: true,
-      enemy: enemy({ id: 'enemy-1', poisonExpiresAt: 2000, poisonNextTickAt: 900, poisonMultiplier: 1.25 })
-    })).toEqual([
+    expect(
+      resolvePotassiumPoisonTick({
+        now: 1000,
+        poisonUnlocked: true,
+        enemy: enemy({ id: 'enemy-1', poisonExpiresAt: 2000, poisonNextTickAt: 900, poisonMultiplier: 1.25 })
+      })
+    ).toEqual([
       { type: 'setPoisonNextTickAt', enemyId: 'enemy-1', poisonNextTickAt: 1000 + POTASSIUM_POISON_TICK_INTERVAL_MS },
       { type: 'damageEnemy', enemyId: 'enemy-1', amount: 1.25, source: 'poison' }
     ]);
 
-    expect(resolvePotassiumPoisonTick({
-      now: 2100,
-      poisonUnlocked: true,
-      enemy: enemy({ id: 'enemy-1', poisonExpiresAt: 2000 })
-    })).toEqual([{ type: 'clearPoison', enemyId: 'enemy-1' }]);
+    expect(
+      resolvePotassiumPoisonTick({
+        now: 2100,
+        poisonUnlocked: true,
+        enemy: enemy({ id: 'enemy-1', poisonExpiresAt: 2000 })
+      })
+    ).toEqual([{ type: 'clearPoison', enemyId: 'enemy-1' }]);
 
-    expect(resolvePotassiumDamage({
-      now: 1000,
-      enemy: enemy({ id: 'enemy-1', hp: 1, poisonExpiresAt: 2000, poisonMultiplier: 2 }),
-      amount: 1,
-      source: 'banana',
-      skillRanks: { poison: 2 },
-      genericRanks: {}
-    })).toContainEqual({
+    expect(
+      resolvePotassiumDamage({
+        now: 1000,
+        enemy: enemy({ id: 'enemy-1', hp: 1, poisonExpiresAt: 2000, poisonMultiplier: 2 }),
+        amount: 1,
+        source: 'banana',
+        skillRanks: { poison: 2 },
+        genericRanks: {}
+      })
+    ).toContainEqual({
       type: 'spreadPoisonFrom',
       x: 300,
       y: 150,
@@ -177,14 +197,16 @@ describe('potassium slip combat', () => {
   });
 
   it('cues indestructible enemies without hp loss or death', () => {
-    expect(resolvePotassiumDamage({
-      now: 1000,
-      enemy: enemy({ id: 'wall', indestructible: true, hp: 999 }),
-      amount: 20,
-      source: 'banana',
-      skillRanks: {},
-      genericRanks: {}
-    })).toEqual([{ type: 'showDamageCue', enemyId: 'wall', source: 'banana' }]);
+    expect(
+      resolvePotassiumDamage({
+        now: 1000,
+        enemy: enemy({ id: 'wall', indestructible: true, hp: 999 }),
+        amount: 20,
+        source: 'banana',
+        skillRanks: {},
+        genericRanks: {}
+      })
+    ).toEqual([{ type: 'showDamageCue', enemyId: 'wall', source: 'banana' }]);
   });
 });
 

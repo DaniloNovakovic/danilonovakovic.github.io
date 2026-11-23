@@ -1,4 +1,13 @@
-import { fretsInKey, gripById, slideFrets, type ChordColor, type ChordQuality, type Frets, type GripId, type Voicing } from './grips';
+import {
+  fretsInKey,
+  gripById,
+  slideFrets,
+  type ChordColor,
+  type ChordQuality,
+  type Frets,
+  type GripId,
+  type Voicing
+} from './grips';
 
 /** The five CAGED forms, in the order they walk up a root. */
 export type CagedForm = 'C' | 'A' | 'G' | 'E' | 'D';
@@ -92,7 +101,9 @@ export function cagedVoicings(id: GripId, color: ChordColor, capo: number): Cage
 /** The form closest to a neck region. Ties stay with the lower shape. */
 export function nearestVoicing(shapes: readonly CagedShape[], anchor: number): CagedShape | null {
   if (shapes.length === 0) return null;
-  return shapes.reduce((best, shape) => (Math.abs(shape.center - anchor) < Math.abs(best.center - anchor) ? shape : best));
+  return shapes.reduce((best, shape) =>
+    Math.abs(shape.center - anchor) < Math.abs(best.center - anchor) ? shape : best
+  );
 }
 
 /** The next form up the neck, wrapping back to the lowest. */
@@ -121,7 +132,13 @@ export function fretsForPosition(
 }
 
 /** CAGED letter of the shape on the neck, when one matches. */
-export function positionForm(id: GripId, color: ChordColor, keyCapo: number, slide: number, frets: Frets): CagedForm | null {
+export function positionForm(
+  id: GripId,
+  color: ChordColor,
+  keyCapo: number,
+  slide: number,
+  frets: Frets
+): CagedForm | null {
   const shapes = cagedVoicings(id, color, keyCapo).flatMap((shape) => {
     const moved = slideFrets(shape.frets, slide);
     if (!moved) return [];

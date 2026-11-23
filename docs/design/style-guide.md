@@ -14,7 +14,7 @@ visual spec.
 
 ## 🎨 Visual Identity
 
-The aesthetic is a fusion of **Pablo Stanley’s Open Peeps** (modular, clean character design) and the **hand-drawn journal style** seen in *Life is Strange*. The world should feel like a living illustration on high-quality sketchbook paper.
+The aesthetic is a fusion of **Pablo Stanley’s Open Peeps** (modular, clean character design) and the **hand-drawn journal style** seen in _Life is Strange_. The world should feel like a living illustration on high-quality sketchbook paper.
 
 ### 1. Color Palette
 
@@ -48,15 +48,15 @@ The aesthetic is a fusion of **Pablo Stanley’s Open Peeps** (modular, clean ch
   resting spots, and landmarks should serve the active route instead of
   defaulting to a portfolio street.
 - **Stroke Style:**
-  - *Foreground:* Sharp, dark ink with thicker outlines.
-  - *Background:* Sketchy, lighter lines with cross-hatching for shadows.
+  - _Foreground:_ Sharp, dark ink with thicker outlines.
+  - _Background:_ Sketchy, lighter lines with cross-hatching for shadows.
 - **Interaction:** Buildings, landmarks, props, and resting spots indicate
   interactivity with subtle wobble, paper lift, ink jitter, or a clear
   on-style prompt.
 
 ### 4. UI & Interaction
 
-- **Font:** Handwritten/cursive fonts (e.g., *Comic Neue*, *Caveat*, or scribbled margin style) are for headings, prompts, stickers, and short labels. Dense modal copy, project descriptions, and long body text should use the most legible on-brand option.
+- **Font:** Handwritten/cursive fonts (e.g., _Comic Neue_, _Caveat_, or scribbled margin style) are for headings, prompts, stickers, and short labels. Dense modal copy, project descriptions, and long body text should use the most legible on-brand option.
 - **Buttons/Modals:** Should look like paper cutouts with thick black borders and hard-offset shadows. The current convention is the arbitrary Tailwind class `shadow-[8px_8px_0px_0px_rgba(26,26,26,1)]` applied inline in shared UI and surface components under [`src/shared/ui/`](../../src/shared/ui/), [`src/static/`](../../src/static/), and [`src/game/`](../../src/game/). If this changes, promote it to a shared utility (e.g. a Tailwind plugin or a CSS variable in [`src/index.css`](../../src/index.css)) instead of scattering the literal string across files.
 - **Transitions:** Quick "ink-bleed" or "page-turn" feel, but non-essential wobble, page flips, parallax, and ink effects must have reduced-motion-safe behavior.
 - **Focus:** Keyboard focus must remain visibly on-style across paper, ink, and overlay surfaces; do not rely on color alone.

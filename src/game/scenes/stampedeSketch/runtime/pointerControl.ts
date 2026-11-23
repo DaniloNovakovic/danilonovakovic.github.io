@@ -30,9 +30,7 @@ export function createStampedePointerControlState(): StampedePointerControlState
   };
 }
 
-export function beginStampedePointerControl(
-  point: StampedePointerPoint
-): StampedePointerControlState {
+export function beginStampedePointerControl(point: StampedePointerPoint): StampedePointerControlState {
   return {
     active: true,
     pointerId: point.pointerId,
@@ -63,9 +61,7 @@ export function endStampedePointerControl(
   return createStampedePointerControlState();
 }
 
-export function readStampedePointerInput(
-  state: StampedePointerControlState
-): StampedePointerInputSnapshot {
+export function readStampedePointerInput(state: StampedePointerControlState): StampedePointerInputSnapshot {
   if (!state.active) return { active: false, deltaX: 0, deltaY: 0 };
 
   return {

@@ -16,11 +16,7 @@ import {
   type PotassiumSessionCommand,
   type PotassiumSessionState
 } from './session';
-import {
-  POTASSIUM_BOSS_WAVE,
-  POTASSIUM_ENDLESS_START_WAVE,
-  POTASSIUM_UPGRADES
-} from './waves';
+import { POTASSIUM_BOSS_WAVE, POTASSIUM_ENDLESS_START_WAVE, POTASSIUM_UPGRADES } from './waves';
 
 describe('potassium slip session', () => {
   it('starts a fresh campaign with board reset, hint, wave spawn, and HUD commands', () => {
@@ -58,12 +54,16 @@ describe('potassium slip session', () => {
     const blocked = startPotassiumEndless(createPotassiumSession());
     expect(blocked.commands).toEqual([]);
 
-    const won = resolvePotassiumOutcome({
-      ...createPotassiumSession(),
-      gameState: 'PLAYING',
-      score: 25,
-      wave: POTASSIUM_BOSS_WAVE
-    }, 'won', '2026-05-03T00:00:00.000Z').state;
+    const won = resolvePotassiumOutcome(
+      {
+        ...createPotassiumSession(),
+        gameState: 'PLAYING',
+        score: 25,
+        wave: POTASSIUM_BOSS_WAVE
+      },
+      'won',
+      '2026-05-03T00:00:00.000Z'
+    ).state;
 
     const result = startPotassiumEndless(won);
 
@@ -77,10 +77,13 @@ describe('potassium slip session', () => {
   });
 
   it('spawns boss waves without scheduling rows', () => {
-    const result = spawnPotassiumWave({
-      ...createPotassiumSession(),
-      gameState: 'PLAYING'
-    }, POTASSIUM_BOSS_WAVE);
+    const result = spawnPotassiumWave(
+      {
+        ...createPotassiumSession(),
+        gameState: 'PLAYING'
+      },
+      POTASSIUM_BOSS_WAVE
+    );
 
     expect(result.state).toMatchObject({
       wave: POTASSIUM_BOSS_WAVE,
@@ -88,14 +91,20 @@ describe('potassium slip session', () => {
       waveAdvancing: false
     });
     expect(commandTypes(result.commands)).toEqual(['spawnBoss', 'setHint', 'updateHud']);
-    expect(result.commands).toContainEqual({ type: 'setHint', text: 'Boss wave • Sir Rummage wants to keep the Circuit' });
+    expect(result.commands).toContainEqual({
+      type: 'setHint',
+      text: 'Boss wave • Sir Rummage wants to keep the Circuit'
+    });
   });
 
   it('waits for pending rows and living enemies before scheduling upgrades', () => {
-    const playing = spawnPotassiumWave({
-      ...createPotassiumSession(),
-      gameState: 'PLAYING'
-    }, 1).state;
+    const playing = spawnPotassiumWave(
+      {
+        ...createPotassiumSession(),
+        gameState: 'PLAYING'
+      },
+      1
+    ).state;
     const rowSpawned = markPotassiumRowSpawned(playing).state;
 
     expect(resolvePotassiumWaveClear({ state: rowSpawned, hasLivingEnemies: false }).commands).toEqual([]);
@@ -119,11 +128,7 @@ describe('potassium slip session', () => {
       pendingRows: 0,
       waveAdvancing: true
     });
-    expect(commandTypes(result.commands)).toEqual([
-      'setHint',
-      'scheduleUpgradeChoices',
-      'updateHud'
-    ]);
+    expect(commandTypes(result.commands)).toEqual(['setHint', 'scheduleUpgradeChoices', 'updateHud']);
   });
 
   it('falls back to generic drafts when all skill choices are maxed', () => {
@@ -150,11 +155,14 @@ describe('potassium slip session', () => {
   });
 
   it('updates skill drafts and emits projectile visual refresh, HUD, hint, and wave advance commands', () => {
-    const result = resolvePotassiumDraftChoice({
-      ...createPotassiumSession(),
-      gameState: 'UPGRADE',
-      wave: 2
-    }, { kind: 'fire', action: 'unlock' });
+    const result = resolvePotassiumDraftChoice(
+      {
+        ...createPotassiumSession(),
+        gameState: 'UPGRADE',
+        wave: 2
+      },
+      { kind: 'fire', action: 'unlock' }
+    );
 
     expect(result.state).toMatchObject({
       gameState: 'PLAYING',
@@ -171,11 +179,14 @@ describe('potassium slip session', () => {
   });
 
   it('keeps wave advancement guarded after a draft choice until the next wave spawns', () => {
-    const draft = resolvePotassiumDraftChoice({
-      ...createPotassiumSession(),
-      gameState: 'UPGRADE',
-      wave: 1
-    }, { kind: 'fire', action: 'unlock' });
+    const draft = resolvePotassiumDraftChoice(
+      {
+        ...createPotassiumSession(),
+        gameState: 'UPGRADE',
+        wave: 1
+      },
+      { kind: 'fire', action: 'unlock' }
+    );
 
     expect(draft.state.waveAdvancing).toBe(true);
 
@@ -188,26 +199,36 @@ describe('potassium slip session', () => {
   });
 
   it('updates generic bonus life drafts and emits HUD and hint commands', () => {
-    const result = resolvePotassiumDraftChoice({
-      ...createPotassiumSession(),
-      gameState: 'UPGRADE',
-      wave: 4,
-      lives: 2
-    }, { type: 'generic', kind: 'bonusLife' });
+    const result = resolvePotassiumDraftChoice(
+      {
+        ...createPotassiumSession(),
+        gameState: 'UPGRADE',
+        wave: 4,
+        lives: 2
+      },
+      { type: 'generic', kind: 'bonusLife' }
+    );
 
     expect(result.state.lives).toBe(3);
     expect(result.state.genericRanks).toEqual({ bonusLife: 1 });
-    expect(result.commands).toContainEqual({ type: 'setHint', text: 'Bonus Life stacked • The whole dumpster trembles' });
+    expect(result.commands).toContainEqual({
+      type: 'setHint',
+      text: 'Bonus Life stacked • The whole dumpster trembles'
+    });
     expect(result.commands).toContainEqual({ type: 'advanceWaveAfterDelay', wave: 5 });
     expect(result.commands.at(-1)?.type).toBe('updateHud');
   });
 
   it('adds enemy score and resolves boss kills as wins', () => {
-    const intern = resolvePotassiumEnemyKilled({
-      ...createPotassiumSession(),
-      gameState: 'PLAYING',
-      score: 2
-    }, 3, 'intern');
+    const intern = resolvePotassiumEnemyKilled(
+      {
+        ...createPotassiumSession(),
+        gameState: 'PLAYING',
+        score: 2
+      },
+      3,
+      'intern'
+    );
     expect(intern.state.score).toBe(5);
     expect(intern.commands).toEqual([
       {
@@ -216,22 +237,29 @@ describe('potassium slip session', () => {
       }
     ]);
 
-    const boss = resolvePotassiumEnemyKilled({
-      ...intern.state,
-      wave: POTASSIUM_BOSS_WAVE,
-      runRecordCompletedAt: '2026-05-03T00:00:00.000Z'
-    }, 12, 'boss');
+    const boss = resolvePotassiumEnemyKilled(
+      {
+        ...intern.state,
+        wave: POTASSIUM_BOSS_WAVE,
+        runRecordCompletedAt: '2026-05-03T00:00:00.000Z'
+      },
+      12,
+      'boss'
+    );
     expect(boss.state.gameState).toBe('WON');
     expect(commandTypes(boss.commands)).toContain('collectCircuit');
     expect(boss.commands).toContainEqual({ type: 'showTerminal', outcome: 'won' });
   });
 
   it('decrements lives for normal escapes and resolves boss escapes as game over', () => {
-    const escaped = resolvePotassiumEnemyEscaped({
-      ...createPotassiumSession(),
-      gameState: 'PLAYING',
-      lives: 2
-    }, 'intern');
+    const escaped = resolvePotassiumEnemyEscaped(
+      {
+        ...createPotassiumSession(),
+        gameState: 'PLAYING',
+        lives: 2
+      },
+      'intern'
+    );
     expect(escaped.state.lives).toBe(1);
     expect(escaped.state.gameState).toBe('PLAYING');
 
@@ -239,23 +267,30 @@ describe('potassium slip session', () => {
     expect(lethal.state.gameState).toBe('GAME_OVER');
     expect(lethal.commands).toContainEqual({ type: 'showTerminal', outcome: 'game_over' });
 
-    const boss = resolvePotassiumEnemyEscaped({
-      ...createPotassiumSession(),
-      gameState: 'PLAYING',
-      lives: 5
-    }, 'boss');
+    const boss = resolvePotassiumEnemyEscaped(
+      {
+        ...createPotassiumSession(),
+        gameState: 'PLAYING',
+        lives: 5
+      },
+      'boss'
+    );
     expect(boss.state.lives).toBe(0);
     expect(boss.state.gameState).toBe('GAME_OVER');
   });
 
   it('saves campaign wins and continued endless game overs with the same completedAt', () => {
     const completedAt = '2026-05-03T00:00:00.000Z';
-    const campaign = resolvePotassiumOutcome({
-      ...createPotassiumSession(),
-      gameState: 'PLAYING',
-      score: 25,
-      wave: POTASSIUM_BOSS_WAVE
-    }, 'won', completedAt);
+    const campaign = resolvePotassiumOutcome(
+      {
+        ...createPotassiumSession(),
+        gameState: 'PLAYING',
+        score: 25,
+        wave: POTASSIUM_BOSS_WAVE
+      },
+      'won',
+      completedAt
+    );
 
     expect(campaign.commands).toContainEqual({ type: 'collectCircuit' });
     expect(campaign.commands).toContainEqual({
@@ -269,13 +304,16 @@ describe('potassium slip session', () => {
       }
     });
 
-    const endless = resolvePotassiumOutcome({
-      ...campaign.state,
-      gameState: 'PLAYING',
-      runMode: 'endless',
-      score: 80,
-      wave: 14
-    }, 'game_over');
+    const endless = resolvePotassiumOutcome(
+      {
+        ...campaign.state,
+        gameState: 'PLAYING',
+        runMode: 'endless',
+        score: 80,
+        wave: 14
+      },
+      'game_over'
+    );
 
     expect(endless.commands).not.toContainEqual({ type: 'collectCircuit' });
     expect(endless.commands).toContainEqual({

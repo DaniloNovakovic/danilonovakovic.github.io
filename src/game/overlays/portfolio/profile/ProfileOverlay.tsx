@@ -8,7 +8,7 @@ import { Card } from '@/shared/ui';
 const ProfileOverlay: React.FC<OverlayControllerProps> = ({ close, titleId, descriptionId }) => {
   const messages = useMessages();
   const { profile } = getPortfolioData(messages);
-  
+
   return (
     <OverlayDialogFrame
       title={messages.catalog.portfolio.profile.name}
@@ -20,9 +20,7 @@ const ProfileOverlay: React.FC<OverlayControllerProps> = ({ close, titleId, desc
       <div className="text-[#1a1a1a]">
         <Card className="mb-4">
           <h3 className="text-2xl font-bold mb-4">{messages.portfolio.profile.title}</h3>
-          <p className="text-lg leading-relaxed mb-6 italic">
-            "{profile.about}"
-          </p>
+          <p className="text-lg leading-relaxed mb-6 italic">"{profile.about}"</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <span className="font-bold text-gray-600">{messages.portfolio.profile.name}</span>

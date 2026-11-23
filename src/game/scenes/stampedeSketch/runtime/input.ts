@@ -1,8 +1,5 @@
 import * as Phaser from 'phaser';
-import {
-  resolveStampedeVelocity,
-  type StampedeVelocity
-} from './movement';
+import { resolveStampedeVelocity, type StampedeVelocity } from './movement';
 import {
   beginStampedePointerControl,
   createStampedePointerControlState,
@@ -41,9 +38,7 @@ export interface StampedeInputRuntime {
   updateStickVisuals(): void;
 }
 
-export function createStampedeInputRuntime(
-  options: StampedeInputRuntimeOptions
-): StampedeInputRuntime {
+export function createStampedeInputRuntime(options: StampedeInputRuntimeOptions): StampedeInputRuntime {
   return new PhaserStampedeInputRuntime(options);
 }
 
@@ -82,20 +77,19 @@ class PhaserStampedeInputRuntime implements StampedeInputRuntime {
     this.keyEnter = keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
     this.keySpace = keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
-    this.stickBase = scene.add.circle(0, 0, 34, 0xfbfbf9, 0.72)
+    this.stickBase = scene.add
+      .circle(0, 0, 34, 0xfbfbf9, 0.72)
       .setStrokeStyle(3, 0x1a1a1a, 0.75)
       .setScrollFactor(0)
       .setDepth(90)
       .setVisible(false);
-    this.stickLine = scene.add.line(0, 0, 0, 0, 0, 0, 0x1a1a1a, 0.5)
+    this.stickLine = scene.add
+      .line(0, 0, 0, 0, 0, 0, 0x1a1a1a, 0.5)
       .setLineWidth(4)
       .setScrollFactor(0)
       .setDepth(91)
       .setVisible(false);
-    this.stickKnob = scene.add.circle(0, 0, 12, 0x1a1a1a, 0.72)
-      .setScrollFactor(0)
-      .setDepth(92)
-      .setVisible(false);
+    this.stickKnob = scene.add.circle(0, 0, 12, 0x1a1a1a, 0.72).setScrollFactor(0).setDepth(92).setVisible(false);
 
     this.registerPointerControls();
   }
@@ -111,8 +105,7 @@ class PhaserStampedeInputRuntime implements StampedeInputRuntime {
   startRequested(): boolean {
     const justDown = Phaser.Input.Keyboard.JustDown;
     const keyboardStart = Boolean(
-      (this.keyEnter && justDown(this.keyEnter)) ||
-        (this.keySpace && justDown(this.keySpace))
+      (this.keyEnter && justDown(this.keyEnter)) || (this.keySpace && justDown(this.keySpace))
     );
     const pointerStart = this.startTapQueued;
     this.startTapQueued = false;
@@ -123,18 +116,15 @@ class PhaserStampedeInputRuntime implements StampedeInputRuntime {
   /** Esc is deliberately not a close key; E/H only count once a run ends (see runFlow). */
   closeRequested(): boolean {
     const justDown = Phaser.Input.Keyboard.JustDown;
-    return Boolean(
-      (this.keyE && justDown(this.keyE)) ||
-        (this.keyH && justDown(this.keyH))
-    );
+    return Boolean((this.keyE && justDown(this.keyE)) || (this.keyH && justDown(this.keyH)));
   }
 
   retryRequested(): boolean {
     const justDown = Phaser.Input.Keyboard.JustDown;
     return Boolean(
       (this.keyR && justDown(this.keyR)) ||
-        (this.keyEnter && justDown(this.keyEnter)) ||
-        (this.keySpace && justDown(this.keySpace))
+      (this.keyEnter && justDown(this.keyEnter)) ||
+      (this.keySpace && justDown(this.keySpace))
     );
   }
 

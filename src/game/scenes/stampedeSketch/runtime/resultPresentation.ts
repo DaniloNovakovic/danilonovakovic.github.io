@@ -48,9 +48,7 @@ export interface StampedeResultButtonBounds {
   height: number;
 }
 
-export function createStampedeResultViewModel(
-  input: StampedeResultViewModelInput
-): StampedeResultViewModel {
+export function createStampedeResultViewModel(input: StampedeResultViewModelInput): StampedeResultViewModel {
   const copy = getMessages().scenes.stampedeSketch.result;
   const view = input.endless
     ? createEndlessResultViewModel(input, input.endless, copy)
@@ -71,9 +69,7 @@ function createRunResultViewModel(
     phase: input.phase,
     eyebrow: clear ? copy.eyebrow.cleared : copy.eyebrow.failed,
     title: clear ? copy.title.cleared : copy.title.failed,
-    body: clear
-      ? copy.body.cleared
-      : copy.body.failed,
+    body: clear ? copy.body.cleared : copy.body.failed,
     rewardNote: getRewardNote(input.rewardStatus ?? 'unavailable', clear, copy),
     stats: [
       {
@@ -147,11 +143,7 @@ function createEndlessResultViewModel(
   };
 }
 
-function getRewardNote(
-  status: StampedeRewardStatus,
-  clear: boolean,
-  copy: StampedeResultCopy
-): string {
+function getRewardNote(status: StampedeRewardStatus, clear: boolean, copy: StampedeResultCopy): string {
   if (!clear) {
     return copy.rewardNote.failed;
   }

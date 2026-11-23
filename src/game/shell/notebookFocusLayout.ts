@@ -36,9 +36,7 @@ export function useNotebookFocusPageFrameLayout(aspect: number): NotebookFocusFr
   const minCenterY = headerBottom + halfHeight;
   const maxCenterY = footerTop - halfHeight;
   const centerY = Math.round(
-    minCenterY <= maxCenterY
-      ? clamp(safeCenterY, minCenterY, maxCenterY)
-      : Math.max(safeCenterY, minCenterY)
+    minCenterY <= maxCenterY ? clamp(safeCenterY, minCenterY, maxCenterY) : Math.max(safeCenterY, minCenterY)
   );
   const relativeCenterY = centerY - NOTEBOOK_CONTROL_MAT_TOP_OFFSET_PX;
 

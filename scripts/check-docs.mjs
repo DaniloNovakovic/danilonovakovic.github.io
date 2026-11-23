@@ -2,16 +2,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const repoRoot = process.cwd();
-const ignoredDirs = new Set([
-  '.git',
-  'dist',
-  'node_modules',
-  'storybook-static'
-]);
-const ignoredRelativeDirs = new Set([
-  '.agents/skills'
-]);
-const markdownLinkPattern = /(?<!!)\[[^\]]*]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
+const ignoredDirs = new Set(['.git', 'dist', 'node_modules', 'storybook-static']);
+const ignoredRelativeDirs = new Set(['.agents/skills']);
+// Target is either `<...>` (CommonMark angle form; may hold spaces and parens) or a bare run.
+const markdownLinkPattern = /(?<!!)\[[^\]]*]\((?:<([^>\n]+)>|([^)\s]+))(?:\s+"[^"]*")?\)/g;
 const inlinePathPattern = /(?<![\w./-])(?:src|docs|\.agents)\/[A-Za-z0-9_./*-]+/g;
 const generatedCitationSpanTargetPattern = /^(?:start|end)\\?_span$/;
 const markdownFiles = [];
@@ -70,15 +64,11 @@ function report(filePath, line, message) {
 
 function validateMarkdownLinks(filePath, content) {
   for (const match of content.matchAll(markdownLinkPattern)) {
-    const rawTarget = match[1].replace(/[.,;:!?]+$/, '');
+    const rawTarget = (match[1] ?? match[2]).replace(/[.,;:!?]+$/, '');
     if (shouldSkipTarget(rawTarget)) continue;
     const targetPath = normalizeRelativeTarget(filePath, rawTarget);
     if (!targetPath || pathExists(targetPath)) continue;
-    report(
-      filePath,
-      locationFor(content, match.index ?? 0),
-      `broken markdown link target "${rawTarget}"`
-    );
+    report(filePath, locationFor(content, match.index ?? 0), `broken markdown link target "${rawTarget}"`);
   }
 }
 
@@ -88,11 +78,7 @@ function validateInlinePaths(filePath, content) {
     if (rawTarget.includes('*')) continue;
     const targetPath = path.resolve(repoRoot, rawTarget);
     if (pathExists(targetPath)) continue;
-    report(
-      filePath,
-      locationFor(content, match.index ?? 0),
-      `missing inline path "${rawTarget}"`
-    );
+    report(filePath, locationFor(content, match.index ?? 0), `missing inline path "${rawTarget}"`);
   }
 }
 

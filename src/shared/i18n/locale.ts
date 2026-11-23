@@ -14,10 +14,12 @@ function isLocale(value: string | null | undefined): value is Locale {
   return SUPPORTED_LOCALES.includes(value as Locale);
 }
 
-export function resolveLocale(input: {
-  search?: string;
-  storedLocale?: string | null;
-} = {}): Locale {
+export function resolveLocale(
+  input: {
+    search?: string;
+    storedLocale?: string | null;
+  } = {}
+): Locale {
   const params = new URLSearchParams(input.search ?? '');
   const queryLocale = params.get(LOCALE_QUERY_PARAM);
   if (isLocale(queryLocale)) return queryLocale;
@@ -35,10 +37,7 @@ function readStoredLocale(storage: LocaleStorageLike | null = getBrowserStorage(
   }
 }
 
-export function writeStoredLocale(
-  locale: Locale,
-  storage: LocaleStorageLike | null = getBrowserStorage()
-): void {
+export function writeStoredLocale(locale: Locale, storage: LocaleStorageLike | null = getBrowserStorage()): void {
   if (!storage) return;
   try {
     storage.setItem(LOCALE_STORAGE_KEY, locale);

@@ -61,10 +61,7 @@ export interface PotassiumProjectileControl {
     velocity: PotassiumPoint;
     activePointer: PotassiumPoint & { id: number };
   }): PotassiumProjectileControlCommand[];
-  applyIdleDrag(input: {
-    velocity: PotassiumPoint;
-    deltaMs: number;
-  }): PotassiumProjectileControlCommand[];
+  applyIdleDrag(input: { velocity: PotassiumPoint; deltaMs: number }): PotassiumProjectileControlCommand[];
   isInLaunchZone(point: PotassiumPoint, radius?: number): boolean;
   reset(): void;
 }
@@ -81,9 +78,7 @@ export const POTASSIUM_PROJECTILE_CONTROL_DEFAULTS = {
   dragFactor: 0.9975
 };
 
-export function createPotassiumProjectileControl(
-  config: PotassiumProjectileControlConfig
-): PotassiumProjectileControl {
+export function createPotassiumProjectileControl(config: PotassiumProjectileControlConfig): PotassiumProjectileControl {
   let state: PotassiumProjectileControlState = 'idle';
   let pointerId: number | null = null;
 
@@ -106,10 +101,7 @@ export function createPotassiumProjectileControl(
     beginAiming(nextPointerId) {
       state = 'aiming';
       pointerId = nextPointerId;
-      return [
-        { type: 'setRecallVisual', active: false },
-        { type: 'resetBananaForAim' }
-      ];
+      return [{ type: 'setRecallVisual', active: false }, { type: 'resetBananaForAim' }];
     },
     beginRecall(nextPointerId) {
       state = 'recalling';
@@ -156,10 +148,7 @@ export function createPotassiumProjectileControl(
         }
         commands.push({ type: 'setBananaAngularVelocityFromX', multiplier: 2, min: -520, max: 520 });
         commands.push({ type: 'drawRecallTether' });
-        if (
-          input.banana.y >= config.launchPad.y - 4 &&
-          distance(input.banana, config.launchPad) <= 52
-        ) {
+        if (input.banana.y >= config.launchPad.y - 4 && distance(input.banana, config.launchPad) <= 52) {
           commands.push(
             { type: 'setBananaPosition', x: config.launchPad.x, y: config.launchPad.y },
             { type: 'setBananaVelocity', x: 0, y: 0 }
@@ -188,11 +177,13 @@ export function createPotassiumProjectileControl(
         ];
       }
       const frameFactor = Math.pow(config.dragFactor, input.deltaMs / 16.67);
-      return [{
-        type: 'setBananaVelocity',
-        x: input.velocity.x * frameFactor,
-        y: input.velocity.y * frameFactor
-      }];
+      return [
+        {
+          type: 'setBananaVelocity',
+          x: input.velocity.x * frameFactor,
+          y: input.velocity.y * frameFactor
+        }
+      ];
     },
     isInLaunchZone(point, radius = config.launchPad.radius) {
       return distance(point, config.launchPad) <= radius;
@@ -224,11 +215,13 @@ function resolveElasticRecallCommands(
   const nextSpeed = length(nextVelocity);
   if (nextSpeed > config.recallElasticMaxSpeed) {
     const scaled = normalize(nextVelocity);
-    return [{
-      type: 'setBananaVelocity',
-      x: scaled.x * config.recallElasticMaxSpeed,
-      y: scaled.y * config.recallElasticMaxSpeed
-    }];
+    return [
+      {
+        type: 'setBananaVelocity',
+        x: scaled.x * config.recallElasticMaxSpeed,
+        y: scaled.y * config.recallElasticMaxSpeed
+      }
+    ];
   }
   return [{ type: 'setBananaVelocity', x: nextVelocity.x, y: nextVelocity.y }];
 }

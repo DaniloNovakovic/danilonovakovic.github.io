@@ -15,7 +15,9 @@ export function HeroContactLinks() {
             href={item.link}
             target="_blank"
             rel="noopener noreferrer"
-            icon={<img src={CONTACT_ICON_SRC[item.icon]} alt="" className="h-5 w-5 object-contain" width={20} height={20} />}
+            icon={
+              <img src={CONTACT_ICON_SRC[item.icon]} alt="" className="h-5 w-5 object-contain" width={20} height={20} />
+            }
           >
             {item.name}
           </LinkButton>

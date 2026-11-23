@@ -22,10 +22,12 @@ describe('potassium slip boss', () => {
   });
 
   it('emits phase transition commands with hints and camera shake', () => {
-    const result = resolvePotassiumBossFrame(frame({
-      boss: boss({ hp: 55, maxHp: 100 }),
-      state: createPotassiumBossState(1000)
-    }));
+    const result = resolvePotassiumBossFrame(
+      frame({
+        boss: boss({ hp: 55, maxHp: 100 }),
+        state: createPotassiumBossState(1000)
+      })
+    );
 
     expect(result.state?.phase).toBe(2);
     expect(result.commands).toEqual([
@@ -40,10 +42,12 @@ describe('potassium slip boss', () => {
   });
 
   it('emits phase 1 patrol velocity and drift', () => {
-    const result = resolvePotassiumBossFrame(frame({
-      boss: boss({ x: 360, velocityX: 0 }),
-      state: createPotassiumBossState(1000)
-    }));
+    const result = resolvePotassiumBossFrame(
+      frame({
+        boss: boss({ x: 360, velocityX: 0 }),
+        state: createPotassiumBossState(1000)
+      })
+    );
 
     expect(result.commands).toContainEqual({
       type: 'setBossVelocity',
@@ -53,15 +57,19 @@ describe('potassium slip boss', () => {
   });
 
   it('starts orbit blockers once and updates orbit every phase 2 frame', () => {
-    const first = resolvePotassiumBossFrame(frame({
-      boss: boss({ hp: 55, maxHp: 100, velocityX: 54 }),
-      state: createPotassiumBossState(1000)
-    }));
-    const second = resolvePotassiumBossFrame(frame({
-      now: 1016,
-      boss: boss({ hp: 55, maxHp: 100, velocityX: 54 }),
-      state: first.state
-    }));
+    const first = resolvePotassiumBossFrame(
+      frame({
+        boss: boss({ hp: 55, maxHp: 100, velocityX: 54 }),
+        state: createPotassiumBossState(1000)
+      })
+    );
+    const second = resolvePotassiumBossFrame(
+      frame({
+        now: 1016,
+        boss: boss({ hp: 55, maxHp: 100, velocityX: 54 }),
+        state: first.state
+      })
+    );
 
     expect(first.commands.filter((command) => command.type === 'spawnOrbitBlockers')).toHaveLength(1);
     expect(second.commands.some((command) => command.type === 'spawnOrbitBlockers')).toBe(false);
@@ -74,11 +82,13 @@ describe('potassium slip boss', () => {
       phase: 3 as const,
       nextStoneAt: 5300
     };
-    const started = resolvePotassiumBossFrame(frame({
-      now: 5300,
-      boss: boss({ hp: 25, maxHp: 100 }),
-      state
-    }));
+    const started = resolvePotassiumBossFrame(
+      frame({
+        now: 5300,
+        boss: boss({ hp: 25, maxHp: 100 }),
+        state
+      })
+    );
 
     expect(started.commands).toContainEqual({
       type: 'startStone',
@@ -87,18 +97,22 @@ describe('potassium slip boss', () => {
     });
     expect(started.commands).toContainEqual({ type: 'setStoneVisual', active: false });
 
-    const active = resolvePotassiumBossFrame(frame({
-      now: 5400,
-      boss: boss({ hp: 25, maxHp: 100 }),
-      state: started.state
-    }));
+    const active = resolvePotassiumBossFrame(
+      frame({
+        now: 5400,
+        boss: boss({ hp: 25, maxHp: 100 }),
+        state: started.state
+      })
+    );
     expect(active.commands).toContainEqual({ type: 'setStoneVisual', active: true });
 
-    const ended = resolvePotassiumBossFrame(frame({
-      now: 6650,
-      boss: boss({ hp: 25, maxHp: 100 }),
-      state: active.state
-    }));
+    const ended = resolvePotassiumBossFrame(
+      frame({
+        now: 6650,
+        boss: boss({ hp: 25, maxHp: 100 }),
+        state: active.state
+      })
+    );
     expect(ended.commands).toContainEqual({ type: 'setStoneVisual', active: false });
     expect(ended.commands).toContainEqual({ type: 'endStone' });
     expect(ended.state?.stoneUntil).toBeUndefined();
@@ -110,11 +124,13 @@ describe('potassium slip boss', () => {
       phase: 3 as const,
       nextSummonAt: 4600
     };
-    const result = resolvePotassiumBossFrame(frame({
-      now: 4600,
-      boss: boss({ hp: 25, maxHp: 100, x: 500, y: 220 }),
-      state
-    }));
+    const result = resolvePotassiumBossFrame(
+      frame({
+        now: 4600,
+        boss: boss({ hp: 25, maxHp: 100, x: 500, y: 220 }),
+        state
+      })
+    );
 
     expect(result.commands).toContainEqual({
       type: 'spawnSummons',
@@ -127,24 +143,26 @@ describe('potassium slip boss', () => {
   });
 
   it('clears orbit blockers for missing or dying bosses', () => {
-    expect(resolvePotassiumBossFrame(frame({ boss: undefined })).commands).toEqual([
-      { type: 'clearOrbitBlockers' }
-    ]);
+    expect(resolvePotassiumBossFrame(frame({ boss: undefined })).commands).toEqual([{ type: 'clearOrbitBlockers' }]);
     expect(resolvePotassiumBossFrame(frame({ boss: boss({ dying: true }) })).commands).toEqual([
       { type: 'clearOrbitBlockers' }
     ]);
   });
 
   it('returned state prevents duplicate one-shot phase and orbit commands', () => {
-    const first = resolvePotassiumBossFrame(frame({
-      boss: boss({ hp: 55, maxHp: 100 }),
-      state: createPotassiumBossState(1000)
-    }));
-    const second = resolvePotassiumBossFrame(frame({
-      now: 1032,
-      boss: boss({ hp: 55, maxHp: 100, velocityX: 54 }),
-      state: first.state
-    }));
+    const first = resolvePotassiumBossFrame(
+      frame({
+        boss: boss({ hp: 55, maxHp: 100 }),
+        state: createPotassiumBossState(1000)
+      })
+    );
+    const second = resolvePotassiumBossFrame(
+      frame({
+        now: 1032,
+        boss: boss({ hp: 55, maxHp: 100, velocityX: 54 }),
+        state: first.state
+      })
+    );
 
     expect(second.commands.some((command) => command.type === 'setBossPhase')).toBe(false);
     expect(second.commands.some((command) => command.type === 'setBossHint')).toBe(false);

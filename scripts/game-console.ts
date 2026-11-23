@@ -23,10 +23,7 @@ import {
   type GameSceneId,
   formatGameObservation
 } from '../src/game/core/console/index';
-import {
-  loadRouteCatalogFromMessages,
-  type RidgeRouteDialogueCatalog
-} from '../src/game/core/ridge/index';
+import { loadRouteCatalogFromMessages, type RidgeRouteDialogueCatalog } from '../src/game/core/ridge/index';
 import { enMessages } from '../src/shared/i18n/messages/en';
 
 function loadCatalog(): RidgeRouteDialogueCatalog {
@@ -36,14 +33,7 @@ function loadCatalog(): RidgeRouteDialogueCatalog {
 function parseScene(args: string[]): GameSceneId {
   const index = args.indexOf('--scene');
   const raw = index >= 0 ? args[index + 1] : 'overworld';
-  const allowed: GameSceneId[] = [
-    'overworld',
-    'basement',
-    'hobbies',
-    'potassium',
-    'ridge',
-    'stampedeSketch'
-  ];
+  const allowed: GameSceneId[] = ['overworld', 'basement', 'hobbies', 'potassium', 'ridge', 'stampedeSketch'];
   if (raw && (allowed as string[]).includes(raw)) return raw as GameSceneId;
   return 'overworld';
 }
@@ -76,11 +66,7 @@ function printResult(result: GameCommandResult, asJson: boolean): void {
   output.write(`${formatGameObservation(result.observation)}\n`);
 }
 
-async function runScript(
-  script: string,
-  asJson: boolean,
-  sceneId: GameSceneId
-): Promise<number> {
+async function runScript(script: string, asJson: boolean, sceneId: GameSceneId): Promise<number> {
   const session = createSession(sceneId);
   const results = session.execScript(script);
   for (const result of results) {

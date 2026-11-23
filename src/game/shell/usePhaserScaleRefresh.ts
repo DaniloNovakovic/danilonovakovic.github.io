@@ -11,33 +11,35 @@ interface UsePhaserScaleRefreshOptions {
   presentationMode: PhaserScenePresentationMode;
 }
 
-export function usePhaserScaleRefresh({
-  activeSceneId,
-  gameRef,
-  presentationMode
-}: UsePhaserScaleRefreshOptions) {
-  useEffect(function resetTouchWhenActiveModeChanges() {
-    bridgeActions.resetTouch();
-  }, [activeSceneId]);
+export function usePhaserScaleRefresh({ activeSceneId, gameRef, presentationMode }: UsePhaserScaleRefreshOptions) {
+  useEffect(
+    function resetTouchWhenActiveModeChanges() {
+      bridgeActions.resetTouch();
+    },
+    [activeSceneId]
+  );
 
-  useEffect(function refreshPhaserScaleForPresentationMode() {
-    bridgeActions.resetTouch();
-    const game = gameRef.current;
-    if (!game) return;
+  useEffect(
+    function refreshPhaserScaleForPresentationMode() {
+      bridgeActions.resetTouch();
+      const game = gameRef.current;
+      if (!game) return;
 
-    let secondFrameId: number | undefined;
-    const firstFrameId = requestAnimationFrame(() => {
-      refreshPhaserScale(game);
-      secondFrameId = requestAnimationFrame(() => {
+      let secondFrameId: number | undefined;
+      const firstFrameId = requestAnimationFrame(() => {
         refreshPhaserScale(game);
+        secondFrameId = requestAnimationFrame(() => {
+          refreshPhaserScale(game);
+        });
       });
-    });
 
-    return () => {
-      cancelAnimationFrame(firstFrameId);
-      if (secondFrameId !== undefined) {
-        cancelAnimationFrame(secondFrameId);
-      }
-    };
-  }, [gameRef, presentationMode]);
+      return () => {
+        cancelAnimationFrame(firstFrameId);
+        if (secondFrameId !== undefined) {
+          cancelAnimationFrame(secondFrameId);
+        }
+      };
+    },
+    [gameRef, presentationMode]
+  );
 }

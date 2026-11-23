@@ -96,13 +96,7 @@ export function drawStickPlayer(
 }
 
 /** Acoustic body outline: two lobes and a waist, centred on (cx, cy). */
-function drawGuitarBody(
-  g: Phaser.GameObjects.Graphics,
-  cx: number,
-  cy: number,
-  s: number,
-  tilt: number
-): void {
+function drawGuitarBody(g: Phaser.GameObjects.Graphics, cx: number, cy: number, s: number, tilt: number): void {
   const along = (d: number) => ({ x: cx + Math.sin(tilt) * d, y: cy - Math.cos(tilt) * d });
   const lower = along(-s * 0.2);
   const upper = along(s * 0.2);
@@ -177,13 +171,7 @@ function drawPlayedGuitar(
  * bedroll strapped on top: a traveller at thumbnail size, and nothing a viewer
  * could mistake for a camera or a radio.
  */
-function drawTravelPack(
-  g: Phaser.GameObjects.Graphics,
-  x: number,
-  top: number,
-  dir: number,
-  s: number
-): void {
+function drawTravelPack(g: Phaser.GameObjects.Graphics, x: number, top: number, dir: number, s: number): void {
   const near = -0.06;
   const far = -0.54;
   const packTop = top - s * 1.16;
@@ -315,12 +303,7 @@ export function drawStickDraftsperson(
   g.fillCircle(x - dir * s * 0.06, ear + s * 0.02, 1.4);
 }
 
-export function drawStickToyCar(
-  g: Phaser.GameObjects.Graphics,
-  x: number,
-  y: number,
-  scale = 1
-): void {
+export function drawStickToyCar(g: Phaser.GameObjects.Graphics, x: number, y: number, scale = 1): void {
   const s = 8 * scale;
   g.lineStyle(2.5, INK, 1);
   g.fillStyle(PAPER, 1);
@@ -901,13 +884,7 @@ export function drawStickKid(
 }
 
 /** Deck, two wheels, and the crack that started all this. */
-function drawSkateboard(
-  g: Phaser.GameObjects.Graphics,
-  cx: number,
-  cy: number,
-  s: number,
-  tilt: number
-): void {
+function drawSkateboard(g: Phaser.GameObjects.Graphics, cx: number, cy: number, s: number, tilt: number): void {
   const half = s * 0.62;
   const ax = cx - Math.cos(tilt) * half;
   const ay = cy - Math.sin(tilt) * half;
@@ -970,12 +947,7 @@ function drawFoldingChair(g: Phaser.GameObjects.Graphics, x: number, ground: num
   g.lineBetween(x + s * 0.3, seat, x + s * 0.38, seat - s * 0.74);
 }
 
-export function drawStickGuitar(
-  g: Phaser.GameObjects.Graphics,
-  x: number,
-  y: number,
-  scale = 1
-): void {
+export function drawStickGuitar(g: Phaser.GameObjects.Graphics, x: number, y: number, scale = 1): void {
   const s = 10 * scale;
   g.lineStyle(2.5, INK, 1);
   g.fillStyle(PAPER, 1);
@@ -1066,12 +1038,7 @@ export function drawStickOperationsHelper(
   const lantern = spanLeft(x, dir, 0.52, 0.96, s) + swing;
   g.fillRect(lantern, y - s * 1.54, s * 0.44, s * 0.44);
   g.strokeRect(lantern, y - s * 1.54, s * 0.44, s * 0.44);
-  g.lineBetween(
-    x + dir * s * 0.74 + swing,
-    y - s * 1.54,
-    x + dir * s * 0.74 + swing,
-    y - s * 1.72
-  );
+  g.lineBetween(x + dir * s * 0.74 + swing, y - s * 1.54, x + dir * s * 0.74 + swing, y - s * 1.72);
   g.lineStyle(DETAIL, INK, 0.5);
   g.lineBetween(x + dir * s * 0.6 + swing, y - s * 1.42, x + dir * s * 0.88 + swing, y - s * 1.2);
   g.lineStyle(1.3, INK, 0.32);
@@ -1108,7 +1075,8 @@ function drawGuira(g: Phaser.GameObjects.Graphics, x: number, y: number, dir: nu
   g.fillRect(hx - s * 0.1, hy - s * 0.46, s * 0.2, s * 0.5);
   g.strokeRect(hx - s * 0.1, hy - s * 0.46, s * 0.2, s * 0.5);
   g.lineStyle(1, INK, 0.6);
-  for (let i = 1; i < 5; i += 1) g.lineBetween(hx - s * 0.1, hy - s * 0.46 + i * s * 0.1, hx + s * 0.1, hy - s * 0.46 + i * s * 0.1);
+  for (let i = 1; i < 5; i += 1)
+    g.lineBetween(hx - s * 0.1, hy - s * 0.46 + i * s * 0.1, hx + s * 0.1, hy - s * 0.46 + i * s * 0.1);
 }
 
 export function drawStickSteward(
@@ -1126,12 +1094,7 @@ export function drawStickSteward(
   g.lineBetween(x + dir * s * 0.36, y + s * 0.06, x + dir * s * 0.46, y + s * 0.06);
 }
 
-export function drawStickShuttle(
-  g: Phaser.GameObjects.Graphics,
-  x: number,
-  y: number,
-  scale = 1
-): void {
+export function drawStickShuttle(g: Phaser.GameObjects.Graphics, x: number, y: number, scale = 1): void {
   const s = 14 * scale;
   g.lineStyle(CONTOUR - 0.7, INK, 1);
   g.fillStyle(PAPER_WARM, 1);

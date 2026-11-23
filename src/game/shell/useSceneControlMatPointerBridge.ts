@@ -1,8 +1,5 @@
 import { useCallback, useEffect, useReducer, useRef, type PointerEvent, type RefObject } from 'react';
-import {
-  bridgeActions,
-  type SceneControlPointerEventKind
-} from '@/game/bridge/store';
+import { bridgeActions, type SceneControlPointerEventKind } from '@/game/bridge/store';
 import { GAME_DESIGN_HEIGHT, GAME_DESIGN_WIDTH } from '@/game/sharedSceneRuntime/designSize';
 import type { SceneId } from '@/game/scenes/sceneIds';
 import { reduceControlMatDragIndicator } from '@/shared/ui';
@@ -27,28 +24,28 @@ export function useSceneControlMatPointerBridge({
   const pendingMoveFrameRef = useRef<number | null>(null);
   const [pointerVisual, dispatchPointerVisual] = useReducer(reduceControlMatDragIndicator, null);
 
-  const dispatchPointer = useCallback((
-    kind: SceneControlPointerEventKind,
-    event: SceneControlPointerEventSnapshot
-  ) => {
-    const frame = frameRef.current;
-    if (!frame) return;
-    const rect = frame.getBoundingClientRect();
-    if (rect.width <= 0 || rect.height <= 0) return;
-    const designPoint = mapClientPointToEnvelopedDesignPoint({
-      clientX: event.clientX,
-      clientY: event.clientY,
-      rect
-    });
+  const dispatchPointer = useCallback(
+    (kind: SceneControlPointerEventKind, event: SceneControlPointerEventSnapshot) => {
+      const frame = frameRef.current;
+      if (!frame) return;
+      const rect = frame.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return;
+      const designPoint = mapClientPointToEnvelopedDesignPoint({
+        clientX: event.clientX,
+        clientY: event.clientY,
+        rect
+      });
 
-    bridgeActions.dispatchSceneControlPointerEvent(ownerSceneId, {
-      kind,
-      pointerId: event.pointerId,
-      timestamp: event.timeStamp,
-      x: designPoint.x,
-      y: designPoint.y
-    });
-  }, [frameRef, ownerSceneId]);
+      bridgeActions.dispatchSceneControlPointerEvent(ownerSceneId, {
+        kind,
+        pointerId: event.pointerId,
+        timestamp: event.timeStamp,
+        x: designPoint.x,
+        y: designPoint.y
+      });
+    },
+    [frameRef, ownerSceneId]
+  );
 
   const cancelPendingMove = useCallback(() => {
     if (pendingMoveFrameRef.current !== null) {
@@ -66,11 +63,14 @@ export function useSceneControlMatPointerBridge({
     dispatchPointer('move', event);
   }, [dispatchPointer]);
 
-  const scheduleMove = useCallback((event: SceneControlPointerEventSnapshot) => {
-    pendingMoveRef.current = event;
-    if (pendingMoveFrameRef.current !== null) return;
-    pendingMoveFrameRef.current = requestAnimationFrame(flushPendingMove);
-  }, [flushPendingMove]);
+  const scheduleMove = useCallback(
+    (event: SceneControlPointerEventSnapshot) => {
+      pendingMoveRef.current = event;
+      if (pendingMoveFrameRef.current !== null) return;
+      pendingMoveFrameRef.current = requestAnimationFrame(flushPendingMove);
+    },
+    [flushPendingMove]
+  );
 
   const dispatchActivePointerCancel = useCallback(() => {
     const pointerId = activePointerIdRef.current;
@@ -97,9 +97,12 @@ export function useSceneControlMatPointerBridge({
     if (!showPointerVisual) dispatchPointerVisual({ type: 'clear' });
   }, [showPointerVisual]);
 
-  useEffect(() => () => {
-    cancelPendingMove();
-  }, [cancelPendingMove]);
+  useEffect(
+    () => () => {
+      cancelPendingMove();
+    },
+    [cancelPendingMove]
+  );
 
   const readControlMatPoint = useCallback((event: PointerEvent<HTMLElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -109,74 +112,84 @@ export function useSceneControlMatPointerBridge({
     };
   }, []);
 
-  const onPointerDown = useCallback((event: PointerEvent<HTMLElement>) => {
-    if (disabled || shouldIgnoreControlMatEvent(event.target)) return;
-    const eventSnapshot = readPointerEventSnapshot(event);
-    activePointerIdRef.current = event.pointerId;
-    activePointerTargetRef.current = event.currentTarget;
-    lastPointerEventRef.current = eventSnapshot;
-    event.currentTarget.setPointerCapture?.(event.pointerId);
-    if (showPointerVisual) {
-      const point = readControlMatPoint(event);
-      dispatchPointerVisual({
-        point,
-        type: 'begin'
-      });
-    }
-    cancelPendingMove();
-    dispatchPointer('down', eventSnapshot);
-  }, [cancelPendingMove, disabled, dispatchPointer, readControlMatPoint, showPointerVisual]);
+  const onPointerDown = useCallback(
+    (event: PointerEvent<HTMLElement>) => {
+      if (disabled || shouldIgnoreControlMatEvent(event.target)) return;
+      const eventSnapshot = readPointerEventSnapshot(event);
+      activePointerIdRef.current = event.pointerId;
+      activePointerTargetRef.current = event.currentTarget;
+      lastPointerEventRef.current = eventSnapshot;
+      event.currentTarget.setPointerCapture?.(event.pointerId);
+      if (showPointerVisual) {
+        const point = readControlMatPoint(event);
+        dispatchPointerVisual({
+          point,
+          type: 'begin'
+        });
+      }
+      cancelPendingMove();
+      dispatchPointer('down', eventSnapshot);
+    },
+    [cancelPendingMove, disabled, dispatchPointer, readControlMatPoint, showPointerVisual]
+  );
 
-  const onPointerMove = useCallback((event: PointerEvent<HTMLElement>) => {
-    if (disabled || activePointerIdRef.current !== event.pointerId) return;
-    const eventSnapshot = readPointerEventSnapshot(event);
-    lastPointerEventRef.current = eventSnapshot;
-    if (showPointerVisual) {
-      const point = readControlMatPoint(event);
-      dispatchPointerVisual({
-        point,
-        type: 'move'
-      });
-    }
-    scheduleMove(eventSnapshot);
-  }, [disabled, readControlMatPoint, scheduleMove, showPointerVisual]);
+  const onPointerMove = useCallback(
+    (event: PointerEvent<HTMLElement>) => {
+      if (disabled || activePointerIdRef.current !== event.pointerId) return;
+      const eventSnapshot = readPointerEventSnapshot(event);
+      lastPointerEventRef.current = eventSnapshot;
+      if (showPointerVisual) {
+        const point = readControlMatPoint(event);
+        dispatchPointerVisual({
+          point,
+          type: 'move'
+        });
+      }
+      scheduleMove(eventSnapshot);
+    },
+    [disabled, readControlMatPoint, scheduleMove, showPointerVisual]
+  );
 
-  const onPointerUp = useCallback((event: PointerEvent<HTMLElement>) => {
-    if (activePointerIdRef.current !== event.pointerId) return;
-    const eventSnapshot = readPointerEventSnapshot(event);
-    cancelPendingMove();
-    if (!disabled) {
-      dispatchPointer('up', eventSnapshot);
-    }
-    activePointerIdRef.current = null;
-    activePointerTargetRef.current = null;
-    lastPointerEventRef.current = null;
-    dispatchPointerVisual({ type: 'clear' });
-    releasePointerCapture(event.currentTarget, event.pointerId);
-  }, [cancelPendingMove, disabled, dispatchPointer]);
+  const onPointerUp = useCallback(
+    (event: PointerEvent<HTMLElement>) => {
+      if (activePointerIdRef.current !== event.pointerId) return;
+      const eventSnapshot = readPointerEventSnapshot(event);
+      cancelPendingMove();
+      if (!disabled) {
+        dispatchPointer('up', eventSnapshot);
+      }
+      activePointerIdRef.current = null;
+      activePointerTargetRef.current = null;
+      lastPointerEventRef.current = null;
+      dispatchPointerVisual({ type: 'clear' });
+      releasePointerCapture(event.currentTarget, event.pointerId);
+    },
+    [cancelPendingMove, disabled, dispatchPointer]
+  );
 
-  const onPointerCancel = useCallback((event: PointerEvent<HTMLElement>) => {
-    if (activePointerIdRef.current !== event.pointerId) return;
-    const eventSnapshot = readPointerEventSnapshot(event);
-    cancelPendingMove();
-    if (!disabled) {
-      dispatchPointer('cancel', eventSnapshot);
-    }
-    activePointerIdRef.current = null;
-    activePointerTargetRef.current = null;
-    lastPointerEventRef.current = null;
-    dispatchPointerVisual({ type: 'clear' });
-    releasePointerCapture(event.currentTarget, event.pointerId);
-  }, [cancelPendingMove, disabled, dispatchPointer]);
+  const onPointerCancel = useCallback(
+    (event: PointerEvent<HTMLElement>) => {
+      if (activePointerIdRef.current !== event.pointerId) return;
+      const eventSnapshot = readPointerEventSnapshot(event);
+      cancelPendingMove();
+      if (!disabled) {
+        dispatchPointer('cancel', eventSnapshot);
+      }
+      activePointerIdRef.current = null;
+      activePointerTargetRef.current = null;
+      lastPointerEventRef.current = null;
+      dispatchPointerVisual({ type: 'clear' });
+      releasePointerCapture(event.currentTarget, event.pointerId);
+    },
+    [cancelPendingMove, disabled, dispatchPointer]
+  );
 
   return {
     onPointerCancel,
     onPointerDown,
     onPointerMove,
     onPointerUp,
-    pointerVisual: disabled || !showPointerVisual
-      ? null
-      : pointerVisual
+    pointerVisual: disabled || !showPointerVisual ? null : pointerVisual
   };
 }
 
@@ -202,15 +215,11 @@ function readPointerEventSnapshot(event: PointerEvent<HTMLElement>): SceneContro
   };
 }
 
-function mapClientPointToEnvelopedDesignPoint({
-  clientX,
-  clientY,
-  rect
-}: ClientPointToDesignPointInput): { x: number; y: number } {
-  const scale = Math.max(
-    rect.width / GAME_DESIGN_WIDTH,
-    rect.height / GAME_DESIGN_HEIGHT
-  );
+function mapClientPointToEnvelopedDesignPoint({ clientX, clientY, rect }: ClientPointToDesignPointInput): {
+  x: number;
+  y: number;
+} {
+  const scale = Math.max(rect.width / GAME_DESIGN_WIDTH, rect.height / GAME_DESIGN_HEIGHT);
   const visibleWidth = rect.width / scale;
   const visibleHeight = rect.height / scale;
   const cropX = (GAME_DESIGN_WIDTH - visibleWidth) / 2;
@@ -232,9 +241,5 @@ function releasePointerCapture(target: HTMLElement | null, pointerId: number): v
 
 function shouldIgnoreControlMatEvent(target: EventTarget | null): boolean {
   if (!(target instanceof Element)) return false;
-  return Boolean(
-    target.closest(
-      'button,a,input,select,textarea,[role="button"],[data-scene-control-ignore="true"]'
-    )
-  );
+  return Boolean(target.closest('button,a,input,select,textarea,[role="button"],[data-scene-control-ignore="true"]'));
 }

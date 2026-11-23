@@ -60,9 +60,7 @@ interface Splash {
   born: number;
 }
 
-type Drag =
-  | { kind: 'beam'; from: GridPoint; to: GridPoint | null; moved: boolean }
-  | { kind: 'erase' };
+type Drag = { kind: 'beam'; from: GridPoint; to: GridPoint | null; moved: boolean } | { kind: 'erase' };
 
 export interface BridgeBuilderViewOptions {
   originX: number;
@@ -163,7 +161,11 @@ export class BridgeBuilderView {
       this.drawRun(workbench.sim!, now, motion);
     } else {
       this.drawDesign(workbench, now);
-      this.placeCar(-workbench.puzzle.car.startOffset + workbench.puzzle.car.wheelBase / 2, -workbench.puzzle.car.wheelRadius, 0);
+      this.placeCar(
+        -workbench.puzzle.car.startOffset + workbench.puzzle.car.wheelBase / 2,
+        -workbench.puzzle.car.wheelRadius,
+        0
+      );
     }
     this.drawFx(now, motion, workbench.phase === 'passed' ? workbench.sim : null);
   }
@@ -372,12 +374,7 @@ export class BridgeBuilderView {
    * Poly-Bridge-style reach: a dashed pencil compass circle at max beam length
    * around the start joint, plus a small ring on every legal end point.
    */
-  private drawReach(
-    workbench: BridgeWorkbench,
-    from: GridPoint,
-    target: GridPoint | null,
-    strength: number
-  ): void {
+  private drawReach(workbench: BridgeWorkbench, from: GridPoint, target: GridPoint | null, strength: number): void {
     const g = this.ghost;
     const { puzzle } = workbench;
     const center = this.toWorld(from);
@@ -503,14 +500,7 @@ export class BridgeBuilderView {
     }
   }
 
-  private spawnDebris(
-    ax: number,
-    ay: number,
-    bx: number,
-    by: number,
-    material: 'road' | 'wood',
-    now: number
-  ): void {
+  private spawnDebris(ax: number, ay: number, bx: number, by: number, material: 'road' | 'wood', now: number): void {
     const x = this.originX + (ax + bx) / 2;
     const y = this.originY + (ay + by) / 2;
     const seed = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453;
@@ -747,14 +737,7 @@ function drawRiverInk(g: Phaser.GameObjects.Graphics, x: number, y: number, widt
   }
 }
 
-function distanceToSegment(
-  px: number,
-  py: number,
-  ax: number,
-  ay: number,
-  bx: number,
-  by: number
-): number {
+function distanceToSegment(px: number, py: number, ax: number, ay: number, bx: number, by: number): number {
   const dx = bx - ax;
   const dy = by - ay;
   const len2 = dx * dx + dy * dy;

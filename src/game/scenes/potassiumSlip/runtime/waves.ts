@@ -2,35 +2,15 @@ import { getMessages } from '@/shared/i18n';
 
 const messages = getMessages();
 
-export type PotassiumEnemyKind =
-  | 'intern'
-  | 'scope'
-  | 'deadline'
-  | 'wall'
-  | 'hardWall'
-  | 'splitter'
-  | 'shield'
-  | 'boss';
+export type PotassiumEnemyKind = 'intern' | 'scope' | 'deadline' | 'wall' | 'hardWall' | 'splitter' | 'shield' | 'boss';
 export type PotassiumWaveCell = PotassiumEnemyKind | null;
 export type PotassiumEnemyHealthState = 'healthy' | 'cracked' | 'critical';
 export type PotassiumShieldSide = 'bottom' | 'left' | 'right';
-export type PotassiumUpgradeKind =
-  | 'fire'
-  | 'poison'
-  | 'explosion'
-  | 'duplicate'
-  | 'ghostHorizontal'
-  | 'ghostVertical';
+export type PotassiumUpgradeKind = 'fire' | 'poison' | 'explosion' | 'duplicate' | 'ghostHorizontal' | 'ghostVertical';
 export type PotassiumSkillRank = 0 | 1 | 2;
 export type PotassiumSkillRanks = Partial<Record<PotassiumUpgradeKind, PotassiumSkillRank>>;
 export type PotassiumSkillDraftAction = 'unlock' | 'upgrade';
-export type PotassiumGenericUpgradeKind =
-  | 'damage'
-  | 'poison'
-  | 'explosion'
-  | 'cloneTime'
-  | 'bananaSpeed'
-  | 'bonusLife';
+export type PotassiumGenericUpgradeKind = 'damage' | 'poison' | 'explosion' | 'cloneTime' | 'bananaSpeed' | 'bonusLife';
 export type PotassiumGenericUpgradeRanks = Partial<Record<PotassiumGenericUpgradeKind, number>>;
 
 export interface PotassiumSkillDraftOption {
@@ -110,9 +90,7 @@ export function isPotassiumCampaignBossWave(wave: number): boolean {
 }
 
 export function getPotassiumRowSpawnDelayMs(wave: number): number {
-  return wave >= 5 && wave <= 6
-    ? POTASSIUM_MID_GAME_ROW_SPAWN_DELAY_MS
-    : POTASSIUM_ROW_SPAWN_DELAY_MS;
+  return wave >= 5 && wave <= 6 ? POTASSIUM_MID_GAME_ROW_SPAWN_DELAY_MS : POTASSIUM_ROW_SPAWN_DELAY_MS;
 }
 
 export function getPotassiumWaveRowSchedule(
@@ -128,10 +106,11 @@ export function getPotassiumWaveRowSchedule(
 }
 
 export function getUnlockedPotassiumEnemies(wave: number): PotassiumEnemyKind[] {
-  return unique(POTASSIUM_WAVES
-    .filter((definition) => definition.wave <= Math.min(wave, POTASSIUM_NON_BOSS_WAVE_COUNT))
-    .flatMap((definition) => definition.rows.flat())
-    .filter((enemy): enemy is PotassiumEnemyKind => enemy !== null && enemy !== 'boss'));
+  return unique(
+    POTASSIUM_WAVES.filter((definition) => definition.wave <= Math.min(wave, POTASSIUM_NON_BOSS_WAVE_COUNT))
+      .flatMap((definition) => definition.rows.flat())
+      .filter((enemy): enemy is PotassiumEnemyKind => enemy !== null && enemy !== 'boss')
+  );
 }
 
 export function getPotassiumUpgradeChoices(
@@ -157,7 +136,11 @@ export function getPotassiumDraftChoices(
     POTASSIUM_GENERIC_UPGRADES.map((kind) => ({ type: 'generic' as const, kind })),
     random
   )
-    .sort((left, right) => getPotassiumGenericUpgradeRank(genericRanks, left.kind) - getPotassiumGenericUpgradeRank(genericRanks, right.kind))
+    .sort(
+      (left, right) =>
+        getPotassiumGenericUpgradeRank(genericRanks, left.kind) -
+        getPotassiumGenericUpgradeRank(genericRanks, right.kind)
+    )
     .slice(0, 2);
 }
 
@@ -210,16 +193,16 @@ function getStructuredPotassiumUpgradeChoices(
     getPotassiumDraftPool(skillRanks).filter((option) => option.action === 'unlock'),
     random
   );
-  const choices = [
-    upgradeOptions[0],
-    unlockOptions[0]
-  ].filter((option): option is PotassiumSkillDraftOption => option !== undefined);
+  const choices = [upgradeOptions[0], unlockOptions[0]].filter(
+    (option): option is PotassiumSkillDraftOption => option !== undefined
+  );
 
   if (choices.length >= 2) return choices;
 
   const selectedKeys = new Set(choices.map((option) => `${option.kind}:${option.action}`));
-  const fallbackOptions = shufflePotassiumDraftOptions(getPotassiumDraftPool(skillRanks), random)
-    .filter((option) => !selectedKeys.has(`${option.kind}:${option.action}`));
+  const fallbackOptions = shufflePotassiumDraftOptions(getPotassiumDraftPool(skillRanks), random).filter(
+    (option) => !selectedKeys.has(`${option.kind}:${option.action}`)
+  );
   return [...choices, ...fallbackOptions].slice(0, 2);
 }
 
@@ -243,18 +226,11 @@ export function getPotassiumExplosionRadius(rank: PotassiumSkillRank): number {
   return rank >= 2 ? 86 : 66;
 }
 
-export function getPotassiumScaledExplosionRadius(
-  rank: PotassiumSkillRank,
-  radiusMultiplier: number = 1
-): number {
+export function getPotassiumScaledExplosionRadius(rank: PotassiumSkillRank, radiusMultiplier: number = 1): number {
   return getPotassiumExplosionRadius(rank) * radiusMultiplier;
 }
 
-export function getPotassiumExplosionDamage(
-  distance: number,
-  radius: number,
-  effectMultiplier: number = 1
-): number {
+export function getPotassiumExplosionDamage(distance: number, radius: number, effectMultiplier: number = 1): number {
   if (distance > radius) return 0;
   const normalizedDistance = Math.max(0, Math.min(1, distance / radius));
   const baseDamage = normalizedDistance <= 0.35 ? 2 : 1;
@@ -282,19 +258,11 @@ export function getPotassiumEnemyHealthState(hp: number, maxHp: number): Potassi
   return 'healthy';
 }
 
-export function getPotassiumShieldSide(
-  wave: number,
-  rowIndex: number,
-  columnIndex: number
-): PotassiumShieldSide {
+export function getPotassiumShieldSide(wave: number, rowIndex: number, columnIndex: number): PotassiumShieldSide {
   return (['bottom', 'left', 'right'] as const)[Math.abs(wave + rowIndex * 2 + columnIndex) % 3];
 }
 
-export function isPotassiumShieldedHit(
-  shieldSide: PotassiumShieldSide,
-  deltaX: number,
-  deltaY: number
-): boolean {
+export function isPotassiumShieldedHit(shieldSide: PotassiumShieldSide, deltaX: number, deltaY: number): boolean {
   const absX = Math.abs(deltaX);
   const absY = Math.abs(deltaY);
   if (shieldSide === 'bottom') return deltaY >= absX;
@@ -303,8 +271,7 @@ export function isPotassiumShieldedHit(
 }
 
 export function getPotassiumSplitterSpawnColumns(columnIndex: number): number[] {
-  return [columnIndex, columnIndex + 1]
-    .filter((column) => column >= 0 && column < POTASSIUM_COLUMN_COUNT);
+  return [columnIndex, columnIndex + 1].filter((column) => column >= 0 && column < POTASSIUM_COLUMN_COUNT);
 }
 
 export function getPotassiumFireCellKey(
@@ -421,11 +388,12 @@ function pickBasicEnemy(wave: number, seed: number): PotassiumEnemyKind {
 function pickPressureEnemy(wave: number, seed: number): PotassiumEnemyKind {
   if (wave >= 9 && (wave + seed) % 3 === 0) return 'hardWall';
   if (wave >= 8 && (wave + seed) % 7 === 0) return 'hardWall';
-  const pool: PotassiumEnemyKind[] = wave >= 8
-    ? ['scope', 'deadline', 'wall', 'splitter', 'shield']
-    : wave >= 7
+  const pool: PotassiumEnemyKind[] =
+    wave >= 8
       ? ['scope', 'deadline', 'wall', 'splitter', 'shield']
-      : ['intern', 'scope', 'wall', 'splitter'];
+      : wave >= 7
+        ? ['scope', 'deadline', 'wall', 'splitter', 'shield']
+        : ['intern', 'scope', 'wall', 'splitter'];
   return pool[(seed * 3 + wave) % pool.length];
 }
 
@@ -435,10 +403,7 @@ function getPressureLanes(wave: number, rowIndex: number): number[] {
     .map((_, lane) => lane)
     .filter((lane) => lane !== reservedLane);
   const offset = (wave + rowIndex) % lanes.length;
-  return [
-    ...lanes.slice(offset),
-    ...lanes.slice(0, offset)
-  ].slice(0, wave >= 8 ? 4 : 3);
+  return [...lanes.slice(offset), ...lanes.slice(0, offset)].slice(0, wave >= 8 ? 4 : 3);
 }
 
 function pickLane(wave: number, rowIndex: number, salt: number): number {

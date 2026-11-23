@@ -14,12 +14,7 @@ function isManualPageOverlayParams(params: unknown): params is ManualPageOverlay
   );
 }
 
-export default function ManualPageOverlay({
-  params,
-  close,
-  titleId,
-  descriptionId
-}: OverlayControllerProps) {
+export default function ManualPageOverlay({ params, close, titleId, descriptionId }: OverlayControllerProps) {
   const messages = getMessages();
   const manualPage = isManualPageOverlayParams(params)
     ? params
@@ -30,12 +25,7 @@ export default function ManualPageOverlay({
       };
 
   return (
-    <OverlayDialogFrame
-      title={manualPage.title}
-      close={close}
-      titleId={titleId}
-      descriptionId={descriptionId}
-    >
+    <OverlayDialogFrame title={manualPage.title} close={close} titleId={titleId} descriptionId={descriptionId}>
       <div className="grid gap-3 text-[#1a1a1a] [overflow-wrap:anywhere]">
         <section
           aria-label={messages.manualPage.clue}
@@ -50,9 +40,7 @@ export default function ManualPageOverlay({
           <p className="text-[10px] font-bold uppercase tracking-widest text-[#1a1a1a]/60">
             {messages.manualPage.marginNote}
           </p>
-          <p className="text-xs font-bold uppercase leading-relaxed tracking-wide">
-            {manualPage.marginNote}
-          </p>
+          <p className="text-xs font-bold uppercase leading-relaxed tracking-wide">{manualPage.marginNote}</p>
         </aside>
 
         <div className="grid grid-cols-1 sm:flex sm:justify-end">

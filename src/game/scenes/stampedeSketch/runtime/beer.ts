@@ -17,11 +17,7 @@ export interface StampedeBeerShot {
   expiresAtMs: number;
 }
 
-export function createBeerShot(
-  from: StampedeBeerPoint,
-  to: StampedeBeerPoint,
-  nowMs: number
-): StampedeBeerShot {
+export function createBeerShot(from: StampedeBeerPoint, to: StampedeBeerPoint, nowMs: number): StampedeBeerShot {
   const dx = to.x - from.x;
   const dy = to.y - from.y;
   const length = Math.hypot(dx, dy) || 1;

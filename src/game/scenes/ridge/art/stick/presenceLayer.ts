@@ -204,7 +204,10 @@ function mentions(action: string, name: string): boolean {
 }
 
 function words(text: string): string[] {
-  return text.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+  return text
+    .toLowerCase()
+    .split(/[^\p{L}\p{N}]+/u)
+    .filter(Boolean);
 }
 
 /** Small overheard line — the passing chatter of the street. */

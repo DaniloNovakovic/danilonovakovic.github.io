@@ -15,20 +15,11 @@ const OPENING_CLICK_GRACE_MS = 500;
  * finger slides onto the dialog. Compare the release point with the dialog box.
  * An empty box has no layout, so the backdrop target check decides instead.
  */
-function releasePointIsInsideDialog(
-  dialog: HTMLElement | null,
-  clientX: number,
-  clientY: number
-): boolean {
+function releasePointIsInsideDialog(dialog: HTMLElement | null, clientX: number, clientY: number): boolean {
   if (!dialog) return false;
   const bounds = dialog.getBoundingClientRect();
   if (bounds.width <= 0 || bounds.height <= 0) return false;
-  return (
-    clientX >= bounds.left &&
-    clientX <= bounds.right &&
-    clientY >= bounds.top &&
-    clientY <= bounds.bottom
-  );
+  return clientX >= bounds.left && clientX <= bounds.right && clientY >= bounds.top && clientY <= bounds.bottom;
 }
 
 interface ModalShellRenderProps {
@@ -130,42 +121,45 @@ export function ModalShell({
     };
   }, []);
 
-  useEffect(function bindModalKeyboardControls() {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (modalStack.at(-1) !== modalId.current) return;
+  useEffect(
+    function bindModalKeyboardControls() {
+      const handleKeyDown = (event: KeyboardEvent) => {
+        if (modalStack.at(-1) !== modalId.current) return;
 
-      if (event.key === 'Escape' && closeOnEscape && !event.defaultPrevented) {
-        queueMicrotask(() => {
-          if (event.defaultPrevented || modalStack.at(-1) !== modalId.current) return;
+        if (event.key === 'Escape' && closeOnEscape && !event.defaultPrevented) {
+          queueMicrotask(() => {
+            if (event.defaultPrevented || modalStack.at(-1) !== modalId.current) return;
+            event.preventDefault();
+            onClose();
+          });
+          return;
+        }
+
+        if (event.key !== 'Tab') return;
+        const dialog = dialogRef.current;
+        if (!dialog) return;
+        const focusable = Array.from(dialog.querySelectorAll<HTMLElement>(FOCUSABLE));
+        if (focusable.length === 0) {
           event.preventDefault();
-          onClose();
-        });
-        return;
-      }
+          dialog.focus();
+          return;
+        }
+        const first = focusable[0]!;
+        const last = focusable[focusable.length - 1]!;
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      };
 
-      if (event.key !== 'Tab') return;
-      const dialog = dialogRef.current;
-      if (!dialog) return;
-      const focusable = Array.from(dialog.querySelectorAll<HTMLElement>(FOCUSABLE));
-      if (focusable.length === 0) {
-        event.preventDefault();
-        dialog.focus();
-        return;
-      }
-      const first = focusable[0]!;
-      const last = focusable[focusable.length - 1]!;
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown, { capture: true });
-    return () => window.removeEventListener('keydown', handleKeyDown, { capture: true });
-  }, [closeOnEscape, onClose]);
+      window.addEventListener('keydown', handleKeyDown, { capture: true });
+      return () => window.removeEventListener('keydown', handleKeyDown, { capture: true });
+    },
+    [closeOnEscape, onClose]
+  );
 
   return (
     <div

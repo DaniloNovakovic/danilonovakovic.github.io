@@ -43,9 +43,13 @@ const HOBBIES_INTERACT_PROMPT_Y = 318;
  * Hobby stations: sprite X aligns with interaction X.
  * `spriteMode`: `floor` = sprite origin bottom at floorY + yOffset; `mid` = origin center.
  */
-export const HOBBY_STATION_LAYOUT: readonly HobbyStationTypeObject[] = HOBBY_STATION_SPOTS.map(
-  (spot) => ({ kind: 'hobbyStation', id: spot.id, x: spot.x, spriteMode: 'floor', yOffsetFromFloor: 0 })
-);
+export const HOBBY_STATION_LAYOUT: readonly HobbyStationTypeObject[] = HOBBY_STATION_SPOTS.map((spot) => ({
+  kind: 'hobbyStation',
+  id: spot.id,
+  x: spot.x,
+  spriteMode: 'floor',
+  yOffsetFromFloor: 0
+}));
 
 /**
  * Interaction hotspots inside the Hobbies Phaser room. The scene owns these

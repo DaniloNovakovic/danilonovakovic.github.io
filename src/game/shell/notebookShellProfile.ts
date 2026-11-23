@@ -1,13 +1,5 @@
-import {
-  POTASSIUM_SCENE_ID,
-  STAMPEDE_SKETCH_SCENE_ID,
-  type SceneId
-} from '@/game/scenes/sceneIds';
-import type {
-  NotebookFooterMode,
-  NotebookSceneProfile,
-  NotebookShellLayout
-} from '@/shared/ui';
+import { POTASSIUM_SCENE_ID, STAMPEDE_SKETCH_SCENE_ID, type SceneId } from '@/game/scenes/sceneIds';
+import type { NotebookFooterMode, NotebookSceneProfile, NotebookShellLayout } from '@/shared/ui';
 
 export interface NotebookRuntimeShellProfile {
   ownerSceneId: SceneId;

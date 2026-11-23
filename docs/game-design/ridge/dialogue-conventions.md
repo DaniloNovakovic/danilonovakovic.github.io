@@ -41,8 +41,8 @@ Purpose: Introduce the bridge problem and the missing toy car test.
 Trigger: Player talks to the Bridge Draftsperson at the unfinished blueprint.
 State: Before bridge completion.
 
-| ID | Speaker | Line / Prompt | Notes |
-| --- | --- | --- | --- |
+| ID                                  | Speaker             | Line / Prompt     | Notes      |
+| ----------------------------------- | ------------------- | ----------------- | ---------- |
 | bridge.draftsperson.missing_span.01 | Bridge Draftsperson | Placeholder line. | Tone note. |
 
 Outcome: Player understands the bridge needs a safe middle span and the toy car

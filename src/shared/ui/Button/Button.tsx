@@ -15,18 +15,12 @@ const baseClass =
   'inline-flex cursor-pointer items-center justify-center gap-1.5 font-bold text-[#1a1a1a] transition-all disabled:cursor-not-allowed disabled:opacity-50';
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary:
-    `rounded border-2 border-[#1a1a1a] bg-[#1a1a1a] text-[#fbfbf9] ${notebookShadowRoles.control} hover:bg-[#333333] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_rgba(26,26,26,1)]`,
-  secondary:
-    `rounded border-2 border-[#1a1a1a] bg-[#fbfbf9] ${notebookShadowRoles.control} hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_rgba(26,26,26,1)]`,
-  ghost:
-    'rounded-sm underline decoration-dashed underline-offset-2 hover:text-[#1a1a1a]/75',
-  floating:
-    `rounded border-2 border-[#1a1a1a] bg-[#fbfbf9]/90 text-[11px] uppercase tracking-widest ${notebookShadowRoles.control} backdrop-blur-sm hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_rgba(26,26,26,1)]`,
-  icon:
-    `rounded-full border-2 border-[#1a1a1a] bg-[#f4f1ea] ${notebookShadowRoles.pressed} hover:bg-[#e8e5df] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none`,
-  control:
-    'border-4 border-[#1a1a1a] bg-[#f4f1ea] hover:bg-[#e8e5df] active:bg-[#1a1a1a] active:text-[#fbfbf9]'
+  primary: `rounded border-2 border-[#1a1a1a] bg-[#1a1a1a] text-[#fbfbf9] ${notebookShadowRoles.control} hover:bg-[#333333] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_rgba(26,26,26,1)]`,
+  secondary: `rounded border-2 border-[#1a1a1a] bg-[#fbfbf9] ${notebookShadowRoles.control} hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_rgba(26,26,26,1)]`,
+  ghost: 'rounded-sm underline decoration-dashed underline-offset-2 hover:text-[#1a1a1a]/75',
+  floating: `rounded border-2 border-[#1a1a1a] bg-[#fbfbf9]/90 text-[11px] uppercase tracking-widest ${notebookShadowRoles.control} backdrop-blur-sm hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_rgba(26,26,26,1)]`,
+  icon: `rounded-full border-2 border-[#1a1a1a] bg-[#f4f1ea] ${notebookShadowRoles.pressed} hover:bg-[#e8e5df] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none`,
+  control: 'border-4 border-[#1a1a1a] bg-[#f4f1ea] hover:bg-[#e8e5df] active:bg-[#1a1a1a] active:text-[#fbfbf9]'
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
@@ -39,14 +33,7 @@ const sizeClasses: Record<ButtonSize, string> = {
  * Primary sketchbook button primitive for in-app actions.
  * Use for commands, controls, and menu actions; use `LinkButton` for navigation.
  */
-export function Button({
-  variant = 'secondary',
-  size = 'md',
-  icon,
-  children,
-  className,
-  ...props
-}: ButtonProps) {
+export function Button({ variant = 'secondary', size = 'md', icon, children, className, ...props }: ButtonProps) {
   return (
     <button
       type="button"

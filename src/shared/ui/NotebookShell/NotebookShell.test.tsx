@@ -21,11 +21,7 @@ afterEach(cleanup);
 describe('NotebookShell components', () => {
   it('marks the stage with the chosen scene profile and layout', () => {
     render(
-      <NotebookShellStage
-        profile="ruledBoardPage"
-        layout="focus"
-        data-testid="stage"
-      >
+      <NotebookShellStage profile="ruledBoardPage" layout="focus" data-testid="stage">
         <NotebookPageFrame profile="ruledBoardPage">Board</NotebookPageFrame>
       </NotebookShellStage>
     );
@@ -38,11 +34,7 @@ describe('NotebookShell components', () => {
 
   it('reserves footer space by default and can opt into floating footers', () => {
     const { rerender } = render(
-      <NotebookShellStage
-        profile="survivalPage"
-        footer={<SceneHintSlip label="Tap anywhere" />}
-        data-testid="stage"
-      />
+      <NotebookShellStage profile="survivalPage" footer={<SceneHintSlip label="Tap anywhere" />} data-testid="stage" />
     );
 
     expect(screen.getByTestId('stage').getAttribute('data-footer-mode')).toBe('reserved');
@@ -115,10 +107,7 @@ describe('NotebookShell components', () => {
     );
 
     expect(
-      screen
-        .getByRole('dialog', { name: 'Choose Option' })
-        .querySelector('div:last-child')
-        ?.className.split(' ')
+      screen.getByRole('dialog', { name: 'Choose Option' }).querySelector('div:last-child')?.className.split(' ')
     ).toContain('grid-cols-2');
 
     rerender(
@@ -134,10 +123,7 @@ describe('NotebookShell components', () => {
     );
 
     expect(
-      screen
-        .getByRole('dialog', { name: 'Choose Option' })
-        .querySelector('div:last-child')
-        ?.className.split(' ')
+      screen.getByRole('dialog', { name: 'Choose Option' }).querySelector('div:last-child')?.className.split(' ')
     ).toContain('grid-cols-1');
   });
 

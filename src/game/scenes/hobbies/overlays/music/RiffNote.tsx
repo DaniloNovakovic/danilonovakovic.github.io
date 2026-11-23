@@ -35,11 +35,11 @@ export function RiffNote({
   done,
   onNext
 }: RiffNoteProps) {
-  const paper = rewarded
-    ? 'border-[#1a1a1a] bg-[#f4f1ea]'
-    : 'border-dashed border-[#1a1a1a] bg-[#e6e2d8]';
+  const paper = rewarded ? 'border-[#1a1a1a] bg-[#f4f1ea]' : 'border-dashed border-[#1a1a1a] bg-[#e6e2d8]';
   return (
-    <div className={`hobby-wobble relative w-full max-w-[22rem] rotate-1 border-2 px-3 pb-2 pt-3 shadow-[3px_3px_0px_0px_rgba(26,26,26,1)] ${paper}`}>
+    <div
+      className={`hobby-wobble relative w-full max-w-[22rem] rotate-1 border-2 px-3 pb-2 pt-3 shadow-[3px_3px_0px_0px_rgba(26,26,26,1)] ${paper}`}
+    >
       <div className="hobby-hatch-light absolute -top-2 left-4 h-4 w-12 -rotate-3 border border-[#1a1a1a]/40 bg-[#fbfbf9]/80" />
       <div className="flex items-start justify-between gap-2">
         <button type="button" onClick={onNext} aria-label={nextLabel} className={`text-left ${hobbyFocusRing}`}>
@@ -52,7 +52,10 @@ export function RiffNote({
       </div>
       <ol className="mt-1 flex flex-wrap gap-1 font-mono text-base font-black">
         {steps.map((step, index) => (
-          <li key={`${step}-${index}`} className={`min-w-6 rounded-sm px-1 text-center ${noteClass(index, progress, done)}`}>
+          <li
+            key={`${step}-${index}`}
+            className={`min-w-6 rounded-sm px-1 text-center ${noteClass(index, progress, done)}`}
+          >
             {step}
           </li>
         ))}

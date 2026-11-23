@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useReducer,
-  useRef,
-  type PointerEvent
-} from 'react';
+import { useCallback, useEffect, useReducer, useRef, type PointerEvent } from 'react';
 import { bridgeActions } from '@/game/bridge/store';
 import { reduceControlMatDragIndicator } from '@/shared/ui';
 import {
@@ -57,89 +51,107 @@ export function useGameTouchControls({ isPaused }: UseGameTouchControlsOptions) 
     event.stopPropagation();
   }, []);
 
-  const applyDrag = useCallback((deltaX: number) => {
-    if (isPaused) return;
+  const applyDrag = useCallback(
+    (deltaX: number) => {
+      if (isPaused) return;
 
-    const axisX = resolvePortraitCoverHorizontalAxis(deltaX);
-    bridgeActions.setTouchDirectional('left', Math.max(0, -axisX));
-    bridgeActions.setTouchDirectional('right', Math.max(0, axisX));
-  }, [isPaused]);
+      const axisX = resolvePortraitCoverHorizontalAxis(deltaX);
+      bridgeActions.setTouchDirectional('left', Math.max(0, -axisX));
+      bridgeActions.setTouchDirectional('right', Math.max(0, axisX));
+    },
+    [isPaused]
+  );
 
-  const onPointerDown = useCallback((event: PointerEvent<HTMLDivElement>) => {
-    stopPointer(event);
-    if (isPaused || activePointerIdRef.current !== null) return;
+  const onPointerDown = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      stopPointer(event);
+      if (isPaused || activePointerIdRef.current !== null) return;
 
-    const rect = event.currentTarget.getBoundingClientRect();
-    const containerX = event.clientX - rect.left;
-    const containerY = event.clientY - rect.top;
+      const rect = event.currentTarget.getBoundingClientRect();
+      const containerX = event.clientX - rect.left;
+      const containerY = event.clientY - rect.top;
 
-    dragStartRef.current = {
-      clientX: event.clientX,
-      clientY: event.clientY,
-      containerX,
-      containerY
-    };
-    activePointerIdRef.current = event.pointerId;
-    hasDraggedRef.current = false;
-    try {
-      event.currentTarget.setPointerCapture(event.pointerId);
-    } catch {
-      // Synthetic and some mobile pointers are not active yet at pointerdown.
-    }
-    dispatchDragIndicator({
-      type: 'begin',
-      point: { x: containerX, y: containerY }
-    });
-    clearMovement();
-  }, [clearMovement, isPaused, stopPointer]);
-
-  const onPointerMove = useCallback((event: PointerEvent<HTMLDivElement>) => {
-    if (activePointerIdRef.current !== event.pointerId) return;
-    stopPointer(event);
-
-    const start = dragStartRef.current;
-    const deltaX = event.clientX - start.clientX;
-    const deltaY = event.clientY - start.clientY;
-
-    if (shouldPortraitCoverPointerTravelActivate(deltaX, deltaY)) {
-      hasDraggedRef.current = true;
-    }
-
-    dispatchDragIndicator({
-      type: 'move',
-      point: {
-        x: start.containerX + deltaX,
-        y: start.containerY + deltaY
+      dragStartRef.current = {
+        clientX: event.clientX,
+        clientY: event.clientY,
+        containerX,
+        containerY
+      };
+      activePointerIdRef.current = event.pointerId;
+      hasDraggedRef.current = false;
+      try {
+        event.currentTarget.setPointerCapture(event.pointerId);
+      } catch {
+        // Synthetic and some mobile pointers are not active yet at pointerdown.
       }
-    });
-    applyDrag(deltaX);
-  }, [applyDrag, stopPointer]);
+      dispatchDragIndicator({
+        type: 'begin',
+        point: { x: containerX, y: containerY }
+      });
+      clearMovement();
+    },
+    [clearMovement, isPaused, stopPointer]
+  );
 
-  const onPointerUp = useCallback((event: PointerEvent<HTMLDivElement>) => {
-    if (activePointerIdRef.current !== event.pointerId) return;
-    stopPointer(event);
+  const onPointerMove = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      if (activePointerIdRef.current !== event.pointerId) return;
+      stopPointer(event);
 
-    if (!isPaused && !hasDraggedRef.current) {
-      bridgeActions.tapInteract();
-    }
+      const start = dragStartRef.current;
+      const deltaX = event.clientX - start.clientX;
+      const deltaY = event.clientY - start.clientY;
 
-    releasePointer();
-  }, [isPaused, releasePointer, stopPointer]);
+      if (shouldPortraitCoverPointerTravelActivate(deltaX, deltaY)) {
+        hasDraggedRef.current = true;
+      }
 
-  const onPointerCancel = useCallback((event: PointerEvent<HTMLDivElement>) => {
-    if (activePointerIdRef.current !== event.pointerId) return;
-    stopPointer(event);
-    releasePointer();
-  }, [releasePointer, stopPointer]);
+      dispatchDragIndicator({
+        type: 'move',
+        point: {
+          x: start.containerX + deltaX,
+          y: start.containerY + deltaY
+        }
+      });
+      applyDrag(deltaX);
+    },
+    [applyDrag, stopPointer]
+  );
 
-  const onPointerLeave = useCallback((event: PointerEvent<HTMLDivElement>) => {
-    if (activePointerIdRef.current !== event.pointerId) return;
-    // Capture keeps the gesture alive after the contact point leaves the surface.
-    // Ending it here drops the tap, so the next touch is the one that interacts.
-    if (event.currentTarget.hasPointerCapture?.(event.pointerId)) return;
-    stopPointer(event);
-    releasePointer();
-  }, [releasePointer, stopPointer]);
+  const onPointerUp = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      if (activePointerIdRef.current !== event.pointerId) return;
+      stopPointer(event);
+
+      if (!isPaused && !hasDraggedRef.current) {
+        bridgeActions.tapInteract();
+      }
+
+      releasePointer();
+    },
+    [isPaused, releasePointer, stopPointer]
+  );
+
+  const onPointerCancel = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      if (activePointerIdRef.current !== event.pointerId) return;
+      stopPointer(event);
+      releasePointer();
+    },
+    [releasePointer, stopPointer]
+  );
+
+  const onPointerLeave = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      if (activePointerIdRef.current !== event.pointerId) return;
+      // Capture keeps the gesture alive after the contact point leaves the surface.
+      // Ending it here drops the tap, so the next touch is the one that interacts.
+      if (event.currentTarget.hasPointerCapture?.(event.pointerId)) return;
+      stopPointer(event);
+      releasePointer();
+    },
+    [releasePointer, stopPointer]
+  );
 
   return {
     dragIndicator,

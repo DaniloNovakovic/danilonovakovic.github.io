@@ -33,10 +33,16 @@ export function StampedeUpgradeDraftPanel({ params, dispatchAction }: SceneUiSur
       <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-[#4b4337] sm:text-xs">
         {view.gift ? 'Free twist' : `Scraps ${view.scrapsCollected}/${view.scrapGoal}`}
       </p>
-      <h2 id={titleId} className="mt-1 font-mono text-xl font-bold uppercase leading-tight tracking-wider text-[#1a1a1a] sm:text-3xl">
+      <h2
+        id={titleId}
+        className="mt-1 font-mono text-xl font-bold uppercase leading-tight tracking-wider text-[#1a1a1a] sm:text-3xl"
+      >
         {view.gift ? 'You look great' : 'Pick a weapon'}
       </h2>
-      <p id={descriptionId} className="mx-auto mt-2 max-w-sm font-mono text-xs font-bold leading-snug text-[#4b4337] sm:text-sm">
+      <p
+        id={descriptionId}
+        className="mx-auto mt-2 max-w-sm font-mono text-xs font-bold leading-snug text-[#4b4337] sm:text-sm"
+      >
         {view.gift
           ? 'The mirror believes in you. This one is on the house.'
           : 'Mostly a twist on a weapon you already have. Sometimes you can stay standing instead. A new weapon shows up less often.'}

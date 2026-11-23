@@ -17,11 +17,7 @@ import {
   type PotassiumSkillRanks,
   type PotassiumUpgradeKind
 } from './waves';
-import type {
-  PotassiumRunMode,
-  PotassiumRunOutcome,
-  PotassiumRunRecord
-} from './leaderboard';
+import type { PotassiumRunMode, PotassiumRunOutcome, PotassiumRunRecord } from './leaderboard';
 import { getMessages } from '@/shared/i18n';
 
 const messages = getMessages();
@@ -89,7 +85,10 @@ interface PotassiumWaveClearInput {
 
 const LIVES_INITIAL = 5;
 
-const GENERIC_UPGRADE_CONFIGS: Record<PotassiumGenericUpgradeKind, { label: string; color: string; description: string }> = {
+const GENERIC_UPGRADE_CONFIGS: Record<
+  PotassiumGenericUpgradeKind,
+  { label: string; color: string; description: string }
+> = {
   damage: {
     label: messages.potassiumSlip.upgrades.generic.damage.label,
     color: '#1a1a1a',
@@ -247,10 +246,7 @@ export function resolvePotassiumWaveClear(input: PotassiumWaveClearInput): Potas
   };
   return {
     state: nextState,
-    commands: [
-      { type: 'setHint', text: messages.potassiumSlip.hints.waveClear },
-      { type: 'scheduleUpgradeChoices' }
-    ]
+    commands: [{ type: 'setHint', text: messages.potassiumSlip.hints.waveClear }, { type: 'scheduleUpgradeChoices' }]
   };
 }
 
@@ -300,7 +296,10 @@ export function resolvePotassiumDraftChoice(
       lives: option.kind === 'bonusLife' ? state.lives + 1 : state.lives
     };
     return withHud(advancePotassiumWaveState(nextState), [
-      { type: 'setHint', text: messages.potassiumSlip.hints.genericStacked(GENERIC_UPGRADE_CONFIGS[option.kind].label) },
+      {
+        type: 'setHint',
+        text: messages.potassiumSlip.hints.genericStacked(GENERIC_UPGRADE_CONFIGS[option.kind].label)
+      },
       { type: 'clearUpgradeChoices' },
       { type: 'advanceWaveAfterDelay', wave: state.wave + 1 }
     ]);
@@ -313,7 +312,10 @@ export function resolvePotassiumDraftChoice(
   });
   const actionLabel = option.action === 'unlock' ? 'unlocked' : 'upgraded';
   return withHud(nextState, [
-    { type: 'setHint', text: messages.potassiumSlip.hints.skillApplied(UPGRADE_CONFIGS[option.kind].label, actionLabel) },
+    {
+      type: 'setHint',
+      text: messages.potassiumSlip.hints.skillApplied(UPGRADE_CONFIGS[option.kind].label, actionLabel)
+    },
     { type: 'refreshProjectileVisuals' },
     { type: 'clearUpgradeChoices' },
     { type: 'advanceWaveAfterDelay', wave: state.wave + 1 }
@@ -359,7 +361,7 @@ export function resolvePotassiumOutcome(
 ): PotassiumSessionResult {
   const nextState = {
     ...state,
-    gameState: outcome === 'won' ? 'WON' as const : 'GAME_OVER' as const,
+    gameState: outcome === 'won' ? ('WON' as const) : ('GAME_OVER' as const),
     runRecordCompletedAt: completedAt
   };
   const record: PotassiumRunRecord = {
@@ -369,10 +371,7 @@ export function resolvePotassiumOutcome(
     outcome,
     completedAt
   };
-  const commands: PotassiumSessionCommand[] = [
-    { type: 'clearBoardForOutcome' },
-    { type: 'clearUpgradeChoices' }
-  ];
+  const commands: PotassiumSessionCommand[] = [{ type: 'clearBoardForOutcome' }, { type: 'clearUpgradeChoices' }];
   if (outcome === 'won' && nextState.runMode === 'campaign') {
     commands.push({ type: 'collectCircuit' });
   }
@@ -412,10 +411,7 @@ export function getPotassiumSessionHud(state: PotassiumSessionState): PotassiumH
   };
 }
 
-export function getPotassiumSessionSkillRank(
-  state: PotassiumSessionState,
-  upgrade: PotassiumUpgradeKind
-): 0 | 1 | 2 {
+export function getPotassiumSessionSkillRank(state: PotassiumSessionState, upgrade: PotassiumUpgradeKind): 0 | 1 | 2 {
   return getPotassiumSkillRank(state.skillRanks, upgrade);
 }
 
@@ -442,16 +438,10 @@ function advancePotassiumWaveState(state: PotassiumSessionState): PotassiumSessi
   };
 }
 
-function withHud(
-  state: PotassiumSessionState,
-  commands: PotassiumSessionCommand[] = []
-): PotassiumSessionResult {
+function withHud(state: PotassiumSessionState, commands: PotassiumSessionCommand[] = []): PotassiumSessionResult {
   return {
     state,
-    commands: [
-      ...commands,
-      { type: 'updateHud', hud: getPotassiumSessionHud(state) }
-    ]
+    commands: [...commands, { type: 'updateHud', hud: getPotassiumSessionHud(state) }]
   };
 }
 

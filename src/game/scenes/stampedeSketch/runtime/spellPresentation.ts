@@ -36,22 +36,19 @@ class PhaserStampedeSpellVfx implements StampedeSpellVfx {
     this.aimGraphics = scene.add.graphics().setDepth(26);
     this.burstGraphics = scene.add.graphics().setDepth(27);
     this.rings = [0, 1].map(() =>
-      scene.add.circle(0, 0, 28, 0xfbfbf9, 0)
-        .setStrokeStyle(3, 0x1a1a1a, 0.8)
-        .setDepth(27)
-        .setVisible(false)
+      scene.add.circle(0, 0, 28, 0xfbfbf9, 0).setStrokeStyle(3, 0x1a1a1a, 0.8).setDepth(27).setVisible(false)
     );
-    this.lenses = [ -16, 16 ].map((offset) =>
-      scene.add.circle(offset, 0, 18, 0xfbfbf9, 0.9)
-        .setStrokeStyle(3, 0x1a1a1a, 1)
-        .setDepth(27)
-        .setVisible(false)
+    this.lenses = [-16, 16].map((offset) =>
+      scene.add.circle(offset, 0, 18, 0xfbfbf9, 0.9).setStrokeStyle(3, 0x1a1a1a, 1).setDepth(27).setVisible(false)
     );
     this.bark = createUiText(scene, 0, 0, '', {
       fontSize: '28px',
       color: '#b4533d',
       fontStyle: 'bold'
-    }).setOrigin(0.5, 1).setDepth(32).setVisible(false);
+    })
+      .setOrigin(0.5, 1)
+      .setDepth(32)
+      .setVisible(false);
   }
 
   show(cast: StampedeSpellCast): void {

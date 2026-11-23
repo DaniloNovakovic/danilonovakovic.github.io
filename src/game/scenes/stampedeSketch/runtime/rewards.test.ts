@@ -1,9 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { bridgeActions, bridgeStore, isItemEquipped, isItemOwned } from '@/game/bridge/store';
-import {
-  claimStampedeFirstClearReward,
-  getStampedeFirstClearRewardStatus
-} from './rewards';
+import { claimStampedeFirstClearReward, getStampedeFirstClearRewardStatus } from './rewards';
 
 describe('stampede durable rewards', () => {
   beforeEach(() => {

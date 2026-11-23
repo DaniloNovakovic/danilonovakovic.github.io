@@ -36,15 +36,7 @@ interface ArcadePreviewProps {
   children: ReactElement;
 }
 
-function ArcadePreview({
-  profile,
-  title,
-  status,
-  meterValue,
-  footer,
-  panel,
-  children
-}: ArcadePreviewProps) {
+function ArcadePreview({ profile, title, status, meterValue, footer, panel, children }: ArcadePreviewProps) {
   return (
     <StoryCanvas>
       <NotebookShellStage
@@ -54,9 +46,7 @@ function ArcadePreview({
         footer={<SceneHintSlip label={footer} />}
         panel={panel}
       >
-        <ControlMat
-          label={profile === 'ruledBoardPage' ? 'input mat wider than board' : 'full surface input zone'}
-        >
+        <ControlMat label={profile === 'ruledBoardPage' ? 'input mat wider than board' : 'full surface input zone'}>
           <NotebookPageFrame
             profile={profile}
             className={cn(
@@ -81,29 +71,13 @@ function ArcadePreview({
   );
 }
 
-function StoryCanvas({
-  children,
-  className
-}: {
-  children: ReactElement;
-  className?: string;
-}) {
+function StoryCanvas({ children, className }: { children: ReactElement; className?: string }) {
   return (
-    <div className={cn('flex min-h-dvh w-full items-center justify-center bg-[#f4f1ea]', className)}>
-      {children}
-    </div>
+    <div className={cn('flex min-h-dvh w-full items-center justify-center bg-[#f4f1ea]', className)}>{children}</div>
   );
 }
 
-function NotesBlock({
-  title,
-  lines,
-  scrap
-}: {
-  title: string;
-  lines: readonly string[];
-  scrap: string;
-}) {
+function NotesBlock({ title, lines, scrap }: { title: string; lines: readonly string[]; scrap: string }) {
   return (
     <div className="grid content-start gap-2 font-mono">
       <div className="grid gap-2 text-xs font-bold leading-relaxed text-[#5a554f]">
@@ -162,13 +136,7 @@ function SideViewMockPlayfield() {
 
 export const RuledBoardFocus: Story = {
   render: () => (
-    <ArcadePreview
-      profile="ruledBoardPage"
-      title="Phase"
-      status="stable state"
-      meterValue={42}
-      footer="input hint"
-    >
+    <ArcadePreview profile="ruledBoardPage" title="Phase" status="stable state" meterValue={42} footer="input hint">
       <RuledBoardMockPlayfield />
     </ArcadePreview>
   )
@@ -323,7 +291,15 @@ export const SideViewSpread: Story = {
                 scrap="compact menu holds secondary actions"
               />
             }
-            status={<SceneStatusSlip metric="Status" label="quiet state" meterValue={24} variant="chip" className="absolute left-5 top-5 z-10" />}
+            status={
+              <SceneStatusSlip
+                metric="Status"
+                label="quiet state"
+                meterValue={24}
+                variant="chip"
+                className="absolute left-5 top-5 z-10"
+              />
+            }
           >
             <SideViewMockPlayfield />
           </NotebookSpread>

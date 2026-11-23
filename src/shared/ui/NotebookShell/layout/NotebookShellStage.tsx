@@ -2,11 +2,7 @@ import type { CSSProperties, HTMLAttributes, ReactNode } from 'react';
 import { notebookShadowRoles } from '../../tokens';
 import { cn } from '../../utils';
 import { stageLayoutStyles } from '../styles';
-import type {
-  NotebookFooterMode,
-  NotebookSceneProfile,
-  NotebookShellLayout
-} from '../types';
+import type { NotebookFooterMode, NotebookSceneProfile, NotebookShellLayout } from '../types';
 
 interface NotebookShellStageProps extends HTMLAttributes<HTMLDivElement> {
   profile: NotebookSceneProfile;
@@ -45,13 +41,14 @@ export function NotebookShellStage({
         notebookShadowRoles.stage,
         className
       )}
-      style={{
-        background:
-          'linear-gradient(rgba(26,26,26,0.025) 1px, transparent 1px) 0 0 / 100% 2.5rem, #f4f1ea',
-        '--notebook-footer-space': footerSpace,
-        ...stageLayoutStyles[layout],
-        ...style
-      } as CSSProperties}
+      style={
+        {
+          background: 'linear-gradient(rgba(26,26,26,0.025) 1px, transparent 1px) 0 0 / 100% 2.5rem, #f4f1ea',
+          '--notebook-footer-space': footerSpace,
+          ...stageLayoutStyles[layout],
+          ...style
+        } as CSSProperties
+      }
       {...props}
     >
       {header}

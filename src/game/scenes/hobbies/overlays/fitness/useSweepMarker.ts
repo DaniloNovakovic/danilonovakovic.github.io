@@ -25,10 +25,7 @@ export function useSweepMarker(initialPeriodMs: number) {
     return () => cancelAnimationFrame(frame);
   }, []);
 
-  const readPosition = useCallback(
-    () => markerPosition(performance.now() - startRef.current, periodRef.current),
-    []
-  );
+  const readPosition = useCallback(() => markerPosition(performance.now() - startRef.current, periodRef.current), []);
 
   /** Restarts the sweep from the left edge with a new period. */
   const restart = useCallback((periodMs: number) => {

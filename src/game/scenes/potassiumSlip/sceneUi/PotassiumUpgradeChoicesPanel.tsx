@@ -26,7 +26,10 @@ export function PotassiumUpgradeChoicesPanel({ params, dispatchAction }: SceneUi
       padding="md"
       className="max-h-[min(78dvh,calc(100dvh-8rem))] w-full overflow-y-auto p-3 text-center sm:p-5"
     >
-      <h2 id={titleId} className="font-mono text-xl font-bold uppercase leading-tight tracking-wider text-[#1a1a1a] sm:text-3xl">
+      <h2
+        id={titleId}
+        className="font-mono text-xl font-bold uppercase leading-tight tracking-wider text-[#1a1a1a] sm:text-3xl"
+      >
         {messages.potassiumSlip.chooseUpgrade}
       </h2>
       <div className="mt-4 grid gap-3 sm:mt-5 sm:grid-cols-2 sm:gap-4">

@@ -50,10 +50,9 @@ describe('jealousy', () => {
     const visited = { hearts: 0, foreshadowed: true, visits: 1 };
     expect(stepStampedeJealousy(visited, input({ elapsedMs: DURATION + 59_000 })).event).toBeNull();
     expect(stepStampedeJealousy(visited, input({ elapsedMs: DURATION + 60_000 })).event).toBe('arrive');
-    expect(stepStampedeJealousy(
-      visited,
-      input({ elapsedMs: DURATION + 60_000, boyfriendOnField: true })
-    ).event).toBeNull();
+    expect(
+      stepStampedeJealousy(visited, input({ elapsedMs: DURATION + 60_000, boyfriendOnField: true })).event
+    ).toBeNull();
 
     const twice = { ...visited, visits: 2 };
     expect(stepStampedeJealousy(twice, input({ elapsedMs: DURATION + 100_000 })).event).toBeNull();

@@ -26,12 +26,12 @@ without turning the scene into public matchmaking.
 
 ## Local Source Map
 
-| File | Owns |
-| --- | --- |
-| [`layout.md`](./layout.md) | Last-Stop Plaza, service-road blocker, shuttle lane, staging, art/audio open slots |
-| [`characters.md`](./characters.md) | Hill-shuttle driver, Last-Stop Operations Helper, Dance Teacher, supporting residents, Cicka, Unnamed Counterpart Cat |
+| File                                           | Owns                                                                                                                    |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| [`layout.md`](./layout.md)                     | Last-Stop Plaza, service-road blocker, shuttle lane, staging, art/audio open slots                                      |
+| [`characters.md`](./characters.md)             | Hill-shuttle driver, Last-Stop Operations Helper, Dance Teacher, supporting residents, Cicka, Unnamed Counterpart Cat   |
 | [`interaction-flow.md`](./interaction-flow.md) | Practical Wayfinding Loop, Readiness Favors, Folded Song Request, Setup Clearance, Relay transition, conversation rules |
-| [`bachata-lesson.md`](./bachata-lesson.md) | Bachata Lesson (One-Step Practice) and Cat Serenade mechanics, audio, presentation, console verbs |
+| [`bachata-lesson.md`](./bachata-lesson.md)     | Bachata Lesson (One-Step Practice) and Cat Serenade mechanics, audio, presentation, console verbs                       |
 
 ## Accepted Local Contract
 

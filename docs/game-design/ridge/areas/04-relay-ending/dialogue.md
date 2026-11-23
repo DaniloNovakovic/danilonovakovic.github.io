@@ -28,9 +28,9 @@ Bridge Tracer Slice proves the dialogue data shape.
 
 ## Accepted Text
 
-| ID | Speaker | Line / Prompt | Notes |
-| --- | --- | --- | --- |
-| relay.dedication.card.01 | Non-diegetic card | For Cicka. | First line of dedication card. |
+| ID                       | Speaker           | Line / Prompt          | Notes                           |
+| ------------------------ | ----------------- | ---------------------- | ------------------------------- |
+| relay.dedication.card.01 | Non-diegetic card | For Cicka.             | First line of dedication card.  |
 | relay.dedication.card.02 | Non-diegetic card | Thank you for playing. | Second line of dedication card. |
 
 ## Open Dialogue Slots

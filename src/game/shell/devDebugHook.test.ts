@@ -27,7 +27,11 @@ describe('dev debug hook', () => {
   it('reports the topmost running scene that has a player, by app scene id', () => {
     const game = fakeGame([
       { scene: { key: 'MainScene' }, player: fakePlayer(100, 400) },
-      { scene: { key: 'hobbies' }, player: fakePlayer(926.4, 450), physics: { world: { bounds: { x: 0, y: 0, width: 950, height: 600 } } } },
+      {
+        scene: { key: 'hobbies' },
+        player: fakePlayer(926.4, 450),
+        physics: { world: { bounds: { x: 0, y: 0, width: 950, height: 600 } } }
+      },
       { scene: { key: 'decoration' } }
     ]);
     const hook = createDevDebugHook(() => game);

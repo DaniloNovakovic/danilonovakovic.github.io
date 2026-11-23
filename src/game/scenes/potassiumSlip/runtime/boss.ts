@@ -1,8 +1,4 @@
-import {
-  getPotassiumSplitterSpawnColumns,
-  POTASSIUM_COLUMN_COUNT,
-  type PotassiumEnemyKind
-} from './waves';
+import { getPotassiumSplitterSpawnColumns, POTASSIUM_COLUMN_COUNT, type PotassiumEnemyKind } from './waves';
 import { getMessages } from '@/shared/i18n';
 
 const messages = getMessages();
@@ -106,9 +102,7 @@ export function resolvePotassiumBossFrame(input: PotassiumBossFrameInput): Potas
     commands.push({ type: 'shakeCamera', durationMs: 220, intensity: 0.007 });
     commands.push({
       type: 'setBossHint',
-      text: phase === 2
-        ? messages.potassiumSlip.hints.bossPhase2
-        : messages.potassiumSlip.hints.bossPhase3
+      text: phase === 2 ? messages.potassiumSlip.hints.bossPhase2 : messages.potassiumSlip.hints.bossPhase3
     });
     state = { ...state, phase };
   }

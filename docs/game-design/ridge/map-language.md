@@ -121,14 +121,14 @@ Each blockout source can declare global route logic before room beats:
 
 Global declarations:
 
-| Declaration | Meaning |
-| --- | --- |
-| `spawn` | default player start |
-| `route` | named intended traversal route |
-| `shortcut` | route opened by progress |
-| `future_route` | teased or not-yet-runtime route |
-| `optionalPockets` | parsed small curiosity branch; currently design data |
-| `home_mutation` | Cicka Home change declaration resolved against progress |
+| Declaration       | Meaning                                                 |
+| ----------------- | ------------------------------------------------------- |
+| `spawn`           | default player start                                    |
+| `route`           | named intended traversal route                          |
+| `shortcut`        | route opened by progress                                |
+| `future_route`    | teased or not-yet-runtime route                         |
+| `optionalPockets` | parsed small curiosity branch; currently design data    |
+| `home_mutation`   | Cicka Home change declaration resolved against progress |
 
 Each room beat should have metadata plus a grid:
 
@@ -175,14 +175,14 @@ basement pockets, or scenes that intentionally leave the Ridge world.
 The runtime compiles generated map output into typed facts before callers use it.
 Current fact groups are:
 
-| Fact | Runtime role |
-| --- | --- |
-| Room beats | room id, title, theme/mood, links, props, declarations, bounds, and anchors |
-| Anchors | world-space anchor points with typed common attrs such as `id`, `to`, `requires`, `movement`, and `reward` |
-| Routes | ordered room links for active first-walk topology |
-| Future routes | route promises drawn as inactive future topology |
-| Shortcuts | progress-gated route facts with availability, movement, source anchor, and target landing |
-| Home mutations | Cicka Home mutation facts with `adds`, `opens`, and raw attrs preserved |
+| Fact           | Runtime role                                                                                               |
+| -------------- | ---------------------------------------------------------------------------------------------------------- |
+| Room beats     | room id, title, theme/mood, links, props, declarations, bounds, and anchors                                |
+| Anchors        | world-space anchor points with typed common attrs such as `id`, `to`, `requires`, `movement`, and `reward` |
+| Routes         | ordered room links for active first-walk topology                                                          |
+| Future routes  | route promises drawn as inactive future topology                                                           |
+| Shortcuts      | progress-gated route facts with availability, movement, source anchor, and target landing                  |
+| Home mutations | Cicka Home mutation facts with `adds`, `opens`, and raw attrs preserved                                    |
 
 Shortcut availability is derived from durable Ridge progress, not stored in the
 blockout. The current Stampede shortcut maps `stampede_sketch` to the durable
@@ -200,40 +200,40 @@ The symbol table is versioned. v0 should stay small enough to parse quickly, but
 the format should allow new symbols and anchor types without rewriting existing
 maps.
 
-| Symbol | Meaning | Runtime intent |
-| --- | --- | --- |
-| `.` | empty air | no collider |
-| `#` | solid ground/wall | solid collider |
-| `_` | platform | solid top surface |
-| `1-9` | numbered anchor | details defined by `anchor` lines |
-| `C` | Cicka anchor | NPC/interact anchor |
-| `A` | artifact marker | collectible/inspectable anchor |
-| `*` | mini-game anchor | launch point |
-| `^` | elevator/lift | moving platform anchor |
-| `?` | secret/gated route | hidden or locked anchor |
+| Symbol | Meaning            | Runtime intent                    |
+| ------ | ------------------ | --------------------------------- |
+| `.`    | empty air          | no collider                       |
+| `#`    | solid ground/wall  | solid collider                    |
+| `_`    | platform           | solid top surface                 |
+| `1-9`  | numbered anchor    | details defined by `anchor` lines |
+| `C`    | Cicka anchor       | NPC/interact anchor               |
+| `A`    | artifact marker    | collectible/inspectable anchor    |
+| `*`    | mini-game anchor   | launch point                      |
+| `^`    | elevator/lift      | moving platform anchor            |
+| `?`    | secret/gated route | hidden or locked anchor           |
 
 Runtime-active v0 symbols:
 
-| Symbol | Meaning |
-| --- | --- |
-| `.` | empty air |
-| `#` | solid collider |
-| `_` | platform collider |
-| `1-9` | numbered anchors |
-| `C` | Cicka spawn/interact anchor |
-| `A` | artifact marker |
-| `*` | mini-game marker |
-| `^` | lift marker |
-| `?` | locked/secret marker |
+| Symbol | Meaning                     |
+| ------ | --------------------------- |
+| `.`    | empty air                   |
+| `#`    | solid collider              |
+| `_`    | platform collider           |
+| `1-9`  | numbered anchors            |
+| `C`    | Cicka spawn/interact anchor |
+| `A`    | artifact marker             |
+| `*`    | mini-game marker            |
+| `^`    | lift marker                 |
+| `?`    | locked/secret marker        |
 
 Design-only v0 symbols:
 
-| Symbol | Meaning |
-| --- | --- |
-| `=` | one-way platform |
-| `~` | wind/drop texture |
-| `N` | generic NPC |
-| `M` | memento board | Cicka Home memory anchor |
+| Symbol | Meaning           |
+| ------ | ----------------- |
+| `=`    | one-way platform  |
+| `~`    | wind/drop texture |
+| `N`    | generic NPC       |
+| `M`    | memento board     | Cicka Home memory anchor |
 
 Source compiler rule: unknown symbols should fail with a clear error unless the
 room opts into a newer language version.

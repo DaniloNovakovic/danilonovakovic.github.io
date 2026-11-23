@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  predictPotassiumBounce,
-  reflectPotassiumRicochet,
-  type PotassiumBounceObstacle
-} from './bouncePreview';
+import { predictPotassiumBounce, reflectPotassiumRicochet, type PotassiumBounceObstacle } from './bouncePreview';
 
 const arena = { left: 0, right: 400, top: 0, bottom: 600 };
 const radius = 20;
@@ -97,8 +93,14 @@ describe('potassium bounce preview', () => {
     // Can starts right of the path (x=280) and swings counter-clockwise up
     // across it, so a stationary guess would miss it entirely.
     const orbit = {
-      centerX: 200, centerY: 200, centerVx: 0, centerVy: 0,
-      radiusX: 80, radiusY: 80, angle: 0, angularSpeed: -2
+      centerX: 200,
+      centerY: 200,
+      centerVx: 0,
+      centerVy: 0,
+      radiusX: 80,
+      radiusY: 80,
+      angle: 0,
+      angularSpeed: -2
     };
     const can = { ...box(280, 200, 29, 21), orbit };
 

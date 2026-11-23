@@ -11,12 +11,7 @@ interface SceneHintSlipProps extends HTMLAttributes<HTMLDivElement> {
  * Compact footer or edge hint for current controls/context.
  * Use for instructional text only; live score/timer state belongs in `SceneStatusSlip`.
  */
-export function SceneHintSlip({
-  label,
-  detail,
-  className,
-  ...props
-}: SceneHintSlipProps) {
+export function SceneHintSlip({ label, detail, className, ...props }: SceneHintSlipProps) {
   return (
     <div
       className={cn(

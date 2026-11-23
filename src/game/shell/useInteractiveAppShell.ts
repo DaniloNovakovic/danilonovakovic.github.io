@@ -27,11 +27,8 @@ export function useInteractiveAppShell() {
   const startSceneParam = new URLSearchParams(window.location.search).get('startScene');
   const initialStartSceneId = startSceneParam && isSceneId(startSceneParam) ? startSceneParam : null;
   const presentationSceneId =
-    bridge.activeSceneId === OVERWORLD_SCENE_ID && initialStartSceneId
-      ? initialStartSceneId
-      : bridge.activeSceneId;
-  const presentationMode: PhaserScenePresentationMode =
-    getPhaserScenePresentationMode(presentationSceneId);
+    bridge.activeSceneId === OVERWORLD_SCENE_ID && initialStartSceneId ? initialStartSceneId : bridge.activeSceneId;
+  const presentationMode: PhaserScenePresentationMode = getPhaserScenePresentationMode(presentationSceneId);
   // Ridge is side-view exploration with conversations; it gets the room.
   const shellSize: InteractiveGameShellSize =
     presentationSceneId !== RIDGE_SCENE_ID
@@ -49,19 +46,22 @@ export function useInteractiveAppShell() {
   const sceneHeaderChrome = getSceneHeaderChrome(presentationSceneId);
   const notebookShellProfile = getNotebookRuntimeShellProfile(presentationSceneId);
 
-  const actions = useMemo(() => ({
-    enterScene: (sceneId: SceneId) => bridgeActions.enterScene(sceneId),
-    openOverlay: (overlayId: OverlayId, options?: OpenOverlayOptions) =>
-      bridgeActions.openOverlay(overlayId, options),
-    returnToOverworld: () => bridgeActions.returnToOverworld(),
-    returnToScene: (sceneId: SceneId) => {
-      if (sceneId === OVERWORLD_SCENE_ID) {
-        bridgeActions.returnToOverworld();
-        return;
+  const actions = useMemo(
+    () => ({
+      enterScene: (sceneId: SceneId) => bridgeActions.enterScene(sceneId),
+      openOverlay: (overlayId: OverlayId, options?: OpenOverlayOptions) =>
+        bridgeActions.openOverlay(overlayId, options),
+      returnToOverworld: () => bridgeActions.returnToOverworld(),
+      returnToScene: (sceneId: SceneId) => {
+        if (sceneId === OVERWORLD_SCENE_ID) {
+          bridgeActions.returnToOverworld();
+          return;
+        }
+        bridgeActions.enterScene(sceneId);
       }
-      bridgeActions.enterScene(sceneId);
-    }
-  }), []);
+    }),
+    []
+  );
 
   return {
     bridge,

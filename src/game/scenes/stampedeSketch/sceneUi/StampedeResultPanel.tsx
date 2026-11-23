@@ -30,18 +30,21 @@ export function StampedeResultPanel({ params, dispatchAction }: SceneUiSurfacePr
       <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-[#4b4337] sm:text-xs">
         {view.eyebrow}
       </p>
-      <h2 id={titleId} className="mt-1 font-mono text-2xl font-bold leading-tight text-[#1a1a1a] sm:mt-2 sm:text-3xl md:text-4xl">
+      <h2
+        id={titleId}
+        className="mt-1 font-mono text-2xl font-bold leading-tight text-[#1a1a1a] sm:mt-2 sm:text-3xl md:text-4xl"
+      >
         {view.title}
       </h2>
-      <p id={descriptionId} className="mx-auto mt-1.5 max-w-sm font-mono text-xs font-bold leading-snug text-[#4b4337] sm:mt-3 sm:text-sm">
+      <p
+        id={descriptionId}
+        className="mx-auto mt-1.5 max-w-sm font-mono text-xs font-bold leading-snug text-[#4b4337] sm:mt-3 sm:text-sm"
+      >
         {view.body}
       </p>
       <div className="mt-2.5 grid grid-cols-2 gap-2 sm:mt-4 sm:gap-3">
         {view.stats.map((stat) => (
-          <div
-            key={stat.id}
-            className="rounded border-2 border-[#1a1a1a]/80 bg-white px-2 py-2 text-left sm:px-3"
-          >
+          <div key={stat.id} className="rounded border-2 border-[#1a1a1a]/80 bg-white px-2 py-2 text-left sm:px-3">
             <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-[#4b4337] sm:text-xs">
               {stat.label}
             </p>

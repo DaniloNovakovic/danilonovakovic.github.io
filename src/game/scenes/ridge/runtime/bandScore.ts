@@ -53,7 +53,10 @@ export function laneHz(chord: GigChord, lane: GigLane): number {
 }
 
 /** What the street band plays under each Concert section. The lead is the player's. */
-const FEEL: Record<ConcertSectionKind, { kick: number[]; snare: number[]; hat: number; bass: number[]; clap?: number[] }> = {
+const FEEL: Record<
+  ConcertSectionKind,
+  { kick: number[]; snare: number[]; hat: number; bass: number[]; clap?: number[] }
+> = {
   // Beats are 0-based within the bar; eighths as .5.
   riff: { kick: [0], snare: [], hat: 1, bass: [0, 2] },
   intro: { kick: [0, 2], snare: [], hat: 1, bass: [0, 2] },
@@ -100,7 +103,8 @@ export function buildBandEvents(song: GigSong, options: BandOptions = {}): BandE
     for (const b of feel.snare) events.push({ timeMs: at(b), hit: 'snare', level: soft });
     for (const b of feel.clap ?? []) events.push({ timeMs: at(b), hit: 'clap', level: 1 });
     if (feel.hat > 0) {
-      for (let b = 0; b < 4; b += feel.hat) events.push({ timeMs: at(b), hit: 'hat', level: soft * (b % 1 === 0 ? 1 : 0.6) });
+      for (let b = 0; b < 4; b += feel.hat)
+        events.push({ timeMs: at(b), hit: 'hat', level: soft * (b % 1 === 0 ? 1 : 0.6) });
     }
     feel.bass.forEach((b, i) => {
       // Root, with a hop to the fifth on the off-beats in busy feels.

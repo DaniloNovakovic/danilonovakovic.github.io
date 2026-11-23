@@ -1,10 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createInteriorInteractionRuntime, type InteriorInteractionTarget } from './InteriorInteractionRuntime';
 
-type TestEffect =
-  | { kind: 'close' }
-  | { kind: 'open'; id: string }
-  | { kind: 'blocked' };
+type TestEffect = { kind: 'close' } | { kind: 'open'; id: string } | { kind: 'blocked' };
 
 function target(
   id: string,
@@ -141,10 +138,7 @@ describe('createInteriorInteractionRuntime', () => {
 
   it('supports per-target interaction radii', () => {
     const runtime = createInteriorInteractionRuntime({
-      targets: [
-        target('small', 106, { interactRadius: 5 }),
-        target('large', 130, { interactRadius: 50 })
-      ],
+      targets: [target('small', 106, { interactRadius: 5 }), target('large', 130, { interactRadius: 50 })],
       interactRadius: 10
     });
 

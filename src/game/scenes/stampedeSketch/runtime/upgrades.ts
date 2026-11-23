@@ -1,7 +1,4 @@
-import {
-  DEFAULT_STAMPEDE_AUTO_ATTACK_PROFILE,
-  type StampedeAutoAttackProfile
-} from './autoAttack';
+import { DEFAULT_STAMPEDE_AUTO_ATTACK_PROFILE, type StampedeAutoAttackProfile } from './autoAttack';
 import { STAMPEDE_PLAYER_SPEED } from './movement';
 import {
   getStampedeSpellChoices,
@@ -70,7 +67,8 @@ const SELFIE_COPY = {
 
 const GUITAR_COPY = {
   title: 'Guitar Surf',
-  description: 'Ride your guitar. Faster, but you drift and turn wide. Burning notes trail behind you. Chicks hate metal.',
+  description:
+    'Ride your guitar. Faster, but you drift and turn wide. Burning notes trail behind you. Chicks hate metal.',
   upgradeDescription: 'The riff keeps going.',
   color: '#7f1d1d'
 } as const;
@@ -203,19 +201,17 @@ export function getStampedeUpgradeChoices(
   }
 ): readonly StampedeUpgradeChoiceView[] {
   void upgradedWeaponIds;
-  const mods = STAMPEDE_WEAPON_IDS.flatMap((weaponId) => (
+  const mods = STAMPEDE_WEAPON_IDS.flatMap((weaponId) =>
     ownedUpgradeIds.includes(weaponId)
       ? MODS_BY_WEAPON[weaponId].filter((modId) => !ownedUpgradeIds.includes(modId))
       : []
-  ));
+  );
   const unlocks = STAMPEDE_WEAPON_IDS.filter((id) => !ownedUpgradeIds.includes(id));
   const shuffledMods = shuffle(mods, random);
   const shuffledUnlocks = shuffle(unlocks, random);
   const picked: Array<StampedeModId | StampedeWeaponId> = [];
   const allowNewWeapon = draftsTaken >= 2 || shuffledMods.length === 0;
-  const offerUnlock = allowNewWeapon
-    && shuffledUnlocks.length > 0
-    && (shuffledMods.length === 0 || random() < 0.28);
+  const offerUnlock = allowNewWeapon && shuffledUnlocks.length > 0 && (shuffledMods.length === 0 || random() < 0.28);
   if (offerUnlock && shuffledUnlocks[0]) picked.push(shuffledUnlocks[0]);
   shuffledMods.forEach((modId) => {
     if (picked.length < STAMPEDE_CHOICE_CAP) picked.push(modId);
@@ -226,12 +222,10 @@ export function getStampedeUpgradeChoices(
       picked.push(weaponId);
     });
   }
-  const views = picked.slice(0, STAMPEDE_CHOICE_CAP).map((id) => (
-    isStampedeModId(id) ? modChoice(id) : weaponChoice(id, 'unlock')
-  ));
-  const stay = STAMPEDE_WEAPON_IDS.some((id) => ownedUpgradeIds.includes(id))
-    ? survivalChoice(survival)
-    : null;
+  const views = picked
+    .slice(0, STAMPEDE_CHOICE_CAP)
+    .map((id) => (isStampedeModId(id) ? modChoice(id) : weaponChoice(id, 'unlock')));
+  const stay = STAMPEDE_WEAPON_IDS.some((id) => ownedUpgradeIds.includes(id)) ? survivalChoice(survival) : null;
   if (!stay) return views;
   if (views.length >= STAMPEDE_CHOICE_CAP) return [...views.slice(0, STAMPEDE_CHOICE_CAP - 1), stay];
   return [...views, stay];
@@ -273,10 +267,7 @@ export function isStampedeWeaponId(value: unknown): value is StampedeWeaponId {
 }
 
 export function isStampedeUpgradeId(value: unknown): value is StampedeUpgradeId {
-  return (
-    typeof value === 'string' &&
-    STAMPEDE_UPGRADE_IDS.includes(value as StampedeUpgradeId)
-  );
+  return typeof value === 'string' && STAMPEDE_UPGRADE_IDS.includes(value as StampedeUpgradeId);
 }
 
 export function resolveStampedeAutoAttackProfile(
@@ -287,12 +278,8 @@ export function resolveStampedeAutoAttackProfile(
   const boosted = selfieRank >= 2 || upgrades.includes('quickPencil') || upgrades.includes('wideSwipe');
   return {
     ...DEFAULT_STAMPEDE_AUTO_ATTACK_PROFILE,
-    cooldownMs: boosted
-      ? STAMPEDE_QUICK_PENCIL_COOLDOWN_MS
-      : DEFAULT_STAMPEDE_AUTO_ATTACK_PROFILE.cooldownMs,
-    range: selfieRank >= 2 || upgrades.includes('wideSwipe')
-      ? 250
-      : DEFAULT_STAMPEDE_AUTO_ATTACK_PROFILE.range,
+    cooldownMs: boosted ? STAMPEDE_QUICK_PENCIL_COOLDOWN_MS : DEFAULT_STAMPEDE_AUTO_ATTACK_PROFILE.cooldownMs,
+    range: selfieRank >= 2 || upgrades.includes('wideSwipe') ? 250 : DEFAULT_STAMPEDE_AUTO_ATTACK_PROFILE.range,
     halfWidth: upgrades.includes('wideSwipe')
       ? STAMPEDE_WIDE_SWIPE_HALF_WIDTH
       : DEFAULT_STAMPEDE_AUTO_ATTACK_PROFILE.halfWidth,
@@ -303,9 +290,7 @@ export function resolveStampedeAutoAttackProfile(
   };
 }
 
-export function resolveStampedeGuardianSpeed(
-  upgrades: readonly StampedeUpgradeId[]
-): number {
+export function resolveStampedeGuardianSpeed(upgrades: readonly StampedeUpgradeId[]): number {
   return upgrades.includes('swiftGuardian')
     ? STAMPEDE_PLAYER_SPEED + STAMPEDE_SWIFT_GUARDIAN_SPEED_BONUS
     : STAMPEDE_PLAYER_SPEED;
@@ -401,7 +386,7 @@ function spellWeaponChoice(id: StampedeWeaponId, action: StampedeWeaponAction): 
   return {
     id,
     title: titled(title, action),
-    description: action === 'upgrade' ? UPGRADE_COPY[id] : spell?.description ?? '',
+    description: action === 'upgrade' ? UPGRADE_COPY[id] : (spell?.description ?? ''),
     color: spell?.color ?? '#1a1a1a',
     action
   };

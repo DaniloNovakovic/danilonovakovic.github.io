@@ -30,11 +30,7 @@ export function visibleGlyphCount(fullText: string, visibleCount: number): numbe
  * Runs `redraw` while canvas text draws only the first `glyphLimit` glyphs.
  * The string itself stays complete, so word wrap and alignment are computed once.
  */
-export function applyTypewriterClip(
-  painter: CanvasRenderingContext2D,
-  glyphLimit: number,
-  redraw: () => void
-): void {
+export function applyTypewriterClip(painter: CanvasRenderingContext2D, glyphLimit: number, redraw: () => void): void {
   const originalFill = painter.fillText;
   const originalStroke = painter.strokeText;
   let drawn = 0;

@@ -1,8 +1,4 @@
-import type {
-  PotassiumEnemyHealthState,
-  PotassiumEnemyKind,
-  PotassiumShieldSide
-} from './waves';
+import type { PotassiumEnemyHealthState, PotassiumEnemyKind, PotassiumShieldSide } from './waves';
 
 export interface PotassiumDataObject {
   getData(key: string): unknown;

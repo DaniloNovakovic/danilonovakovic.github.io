@@ -8,7 +8,7 @@ import { Card, LinkButton } from '@/shared/ui';
 const CONTACT_ICON_SRC: Record<ContactIconId, string> = {
   linkedin: '/icons/contact/linkedin.png',
   github: '/icons/contact/github.png',
-  email: '/icons/contact/email.png',
+  email: '/icons/contact/email.png'
 };
 
 function ContactLinkIcon({ icon }: { icon: ContactIconId }) {

@@ -72,9 +72,7 @@ export const SCENE_DEFINITIONS: readonly SceneDefinition[] = [
   }
 ];
 
-const SCENE_BY_ID: ReadonlyMap<SceneId, SceneDefinition> = new Map(
-  SCENE_DEFINITIONS.map((scene) => [scene.id, scene])
-);
+const SCENE_BY_ID: ReadonlyMap<SceneId, SceneDefinition> = new Map(SCENE_DEFINITIONS.map((scene) => [scene.id, scene]));
 
 export function getSceneDefinition(id: SceneId): SceneDefinition {
   const scene = SCENE_BY_ID.get(id);

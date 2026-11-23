@@ -26,10 +26,7 @@ import type {
 
 export interface CommandAdapterDelegates {
   applySessionResult(result: PotassiumSessionResult): void;
-  applyCombatCommands(
-    commands: readonly PotassiumCombatCommand[],
-    context?: PotassiumCombatContext
-  ): void;
+  applyCombatCommands(commands: readonly PotassiumCombatCommand[], context?: PotassiumCombatContext): void;
 }
 
 export class PotassiumCommandAdapterInternals {
@@ -87,8 +84,9 @@ export class PotassiumCommandAdapterInternals {
     return {
       id: this.getCombatId(projectile, this.ports.isMainProjectile(projectile) ? 'main' : 'projectile'),
       isMain: this.ports.isMainProjectile(projectile),
-      isRecall: this.ports.isMainProjectile(projectile)
-        && (this.ports.isMainProjectileRecalling() || isPotassiumProjectileRecallVisual(projectile)),
+      isRecall:
+        this.ports.isMainProjectile(projectile) &&
+        (this.ports.isMainProjectileRecalling() || isPotassiumProjectileRecallVisual(projectile)),
       x: projectile.x,
       y: projectile.y,
       effectMultiplier: getPotassiumProjectileEffectMultiplier(projectile),
@@ -115,10 +113,12 @@ export class PotassiumCommandAdapterInternals {
   ): PotassiumCombatContext {
     return {
       enemies: new Map(enemies.map((enemy) => [this.getCombatId(enemy, 'enemy'), enemy])),
-      projectiles: new Map(projectiles.map((projectile) => [
-        this.getCombatId(projectile, this.ports.isMainProjectile(projectile) ? 'main' : 'projectile'),
-        projectile
-      ]))
+      projectiles: new Map(
+        projectiles.map((projectile) => [
+          this.getCombatId(projectile, this.ports.isMainProjectile(projectile) ? 'main' : 'projectile'),
+          projectile
+        ])
+      )
     };
   }
 }

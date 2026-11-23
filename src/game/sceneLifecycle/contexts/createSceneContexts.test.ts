@@ -2,9 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { PHASER_SCENE_KEYS, type SceneId } from '@/game/scenes/sceneIds';
 import { createSceneContexts, type SceneContextAssemblyDeps } from './createSceneContexts';
 
-function makeDeps(
-  overrides: Partial<SceneContextAssemblyDeps> = {}
-): SceneContextAssemblyDeps {
+function makeDeps(overrides: Partial<SceneContextAssemblyDeps> = {}): SceneContextAssemblyDeps {
   return {
     onEnterScene: vi.fn(),
     onOpenOverlay: vi.fn(),
@@ -35,11 +33,13 @@ describe('createSceneContexts', () => {
     const onEnterScene = vi.fn();
     const onOpenOverlay = vi.fn();
     const getSceneStartResume = vi.fn(() => ({ x: 3, y: 4 }));
-    const contexts = createSceneContexts(makeDeps({
-      onEnterScene,
-      onOpenOverlay,
-      getSceneStartResume
-    }));
+    const contexts = createSceneContexts(
+      makeDeps({
+        onEnterScene,
+        onOpenOverlay,
+        getSceneStartResume
+      })
+    );
 
     expect(contexts[0].getStartData()).toEqual({
       onEnterScene,
@@ -54,11 +54,13 @@ describe('createSceneContexts', () => {
     const onReturnToOverworld = vi.fn();
     const onOpenOverlay = vi.fn();
     const getSceneStartResume = vi.fn((sceneKey: string) => ({ x: sceneKey.length, y: 9 }));
-    const contexts = createSceneContexts(makeDeps({
-      onReturnToOverworld,
-      onOpenOverlay,
-      getSceneStartResume
-    }));
+    const contexts = createSceneContexts(
+      makeDeps({
+        onReturnToOverworld,
+        onOpenOverlay,
+        getSceneStartResume
+      })
+    );
 
     expect(contexts[1].getStartData()).toEqual({
       onClose: onReturnToOverworld,
@@ -105,10 +107,7 @@ describe('createSceneContexts', () => {
       isPaused: false,
       resumePosition: { x: 8, y: 13 }
     });
-    expect(calls).toEqual([
-      `prepare:${PHASER_SCENE_KEYS.potassium}`,
-      `get:${PHASER_SCENE_KEYS.potassium}`
-    ]);
+    expect(calls).toEqual([`prepare:${PHASER_SCENE_KEYS.potassium}`, `get:${PHASER_SCENE_KEYS.potassium}`]);
   });
 
   it('prepares each scene start before reading its resume position', () => {

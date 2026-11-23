@@ -338,11 +338,21 @@ export default function GuitarStrings({ close, titleId, descriptionId }: Overlay
         </div>
 
         <div className="flex flex-wrap justify-center gap-1.5">
-          <button type="button" onClick={() => strum('down')} aria-label={copy.strumDownLabel} className={`${inkKeyClass} bg-[#fbfbf9] px-3 text-[#1a1a1a]`}>
+          <button
+            type="button"
+            onClick={() => strum('down')}
+            aria-label={copy.strumDownLabel}
+            className={`${inkKeyClass} bg-[#fbfbf9] px-3 text-[#1a1a1a]`}
+          >
             <span className="font-black">{copy.strumDown}</span>
             <span className="font-mono text-[9px] opacity-60">space</span>
           </button>
-          <button type="button" onClick={() => strum('up')} aria-label={copy.strumUpLabel} className={`${inkKeyClass} bg-[#fbfbf9] px-3 text-[#1a1a1a]`}>
+          <button
+            type="button"
+            onClick={() => strum('up')}
+            aria-label={copy.strumUpLabel}
+            className={`${inkKeyClass} bg-[#fbfbf9] px-3 text-[#1a1a1a]`}
+          >
             <span className="font-black">{copy.strumUp}</span>
             <span className="font-mono text-[9px] opacity-60">V</span>
           </button>

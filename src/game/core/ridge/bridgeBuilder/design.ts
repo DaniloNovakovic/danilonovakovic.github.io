@@ -16,9 +16,7 @@ export interface BridgeBeamSpec {
 
 export type BridgeDesign = readonly BridgeBeamSpec[];
 
-export type AddBeamResult =
-  | { ok: true; design: BridgeDesign; replaced: boolean }
-  | { ok: false; reason: string };
+export type AddBeamResult = { ok: true; design: BridgeDesign; replaced: boolean } | { ok: false; reason: string };
 
 /** Grid points a new member may start from: anchors and existing joints. */
 export function designJoints(puzzle: BridgePuzzle, design: BridgeDesign): GridPoint[] {
@@ -41,10 +39,7 @@ function samePoint(a: GridPoint, b: GridPoint): boolean {
 }
 
 function sameBeam(beam: BridgeBeamSpec, a: GridPoint, b: GridPoint): boolean {
-  return (
-    (samePoint(beam.a, a) && samePoint(beam.b, b)) ||
-    (samePoint(beam.a, b) && samePoint(beam.b, a))
-  );
+  return (samePoint(beam.a, a) && samePoint(beam.b, b)) || (samePoint(beam.a, b) && samePoint(beam.b, a));
 }
 
 /**
@@ -76,9 +71,7 @@ export function addBeam(
 
   const existing = design.findIndex((beam) => sameBeam(beam, a, b));
   if (existing >= 0) {
-    const next = design.map((beam, index) =>
-      index === existing ? { ...beam, material } : beam
-    );
+    const next = design.map((beam, index) => (index === existing ? { ...beam, material } : beam));
     return { ok: true, design: next, replaced: true };
   }
   return { ok: true, design: [...design, { a, b, material }], replaced: false };

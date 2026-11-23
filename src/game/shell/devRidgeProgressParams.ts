@@ -2,9 +2,7 @@ import { STAMPEDE_SKETCH_RIDGE_STAMP_ID } from '@/game/bridge/ridgeProgressIds';
 
 export const DEV_RIDGE_STAMP_QUERY_PARAM = 'devRidgeStamp';
 
-const DEV_RIDGE_STAMP_IDS = [
-  STAMPEDE_SKETCH_RIDGE_STAMP_ID
-] as const;
+const DEV_RIDGE_STAMP_IDS = [STAMPEDE_SKETCH_RIDGE_STAMP_ID] as const;
 
 export type DevRidgeStampId = (typeof DEV_RIDGE_STAMP_IDS)[number];
 
@@ -13,9 +11,7 @@ export interface DevRidgeProgressSeed {
   consumedParams: readonly string[];
 }
 
-export function getDevRidgeProgressSeed(
-  searchParams: Pick<URLSearchParams, 'get'>
-): DevRidgeProgressSeed {
+export function getDevRidgeProgressSeed(searchParams: Pick<URLSearchParams, 'get'>): DevRidgeProgressSeed {
   const stampId = searchParams.get(DEV_RIDGE_STAMP_QUERY_PARAM);
   if (!stampId || !isDevRidgeStampId(stampId)) {
     return {

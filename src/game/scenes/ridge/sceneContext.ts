@@ -15,9 +15,7 @@ interface RidgeSceneContextOptions {
 /**
  * Scene lifecycle contract for the console-driven Bridge Ridge scene.
  */
-export function createRidgeSceneContext(
-  options: RidgeSceneContextOptions
-): SceneContextDefinition {
+export function createRidgeSceneContext(options: RidgeSceneContextOptions): SceneContextDefinition {
   return {
     id: RIDGE_SCENE_ID,
     sceneKey: PHASER_SCENE_KEYS.ridge,

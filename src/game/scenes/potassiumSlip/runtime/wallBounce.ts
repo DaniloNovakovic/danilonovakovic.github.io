@@ -82,7 +82,10 @@ export function resolvePotassiumWallClones(
 ): PotassiumWallClones | null {
   if (input.duplicateRank <= 0 || !isLivelyWallHit(input)) return null;
   if (input.now - input.lastClonesAt < POTASSIUM_WALL_CLONE_COOLDOWN_MS) return null;
-  const count = Math.min(getPotassiumDuplicateCloneCount(input.duplicateRank), POTASSIUM_WALL_CLONE_MAX_ACTIVE - input.activeClones);
+  const count = Math.min(
+    getPotassiumDuplicateCloneCount(input.duplicateRank),
+    POTASSIUM_WALL_CLONE_MAX_ACTIVE - input.activeClones
+  );
   if (count <= 0) return null;
   const inward = INWARD_ANGLE[input.side];
   const angles = Array.from({ length: count }, (_, i) => {

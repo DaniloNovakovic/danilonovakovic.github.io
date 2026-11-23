@@ -16,16 +16,8 @@ export default function DrawingCanvas({ close, titleId, descriptionId }: Overlay
   const messages = useMessages();
   const copy = messages.miniGames.drawing;
   const pinnedDoodle = useBridgeState().progress.streetDoodle;
-  const {
-    canvasRef,
-    tool,
-    setTool,
-    keyboardCursor,
-    clear,
-    moveKeyboardCursor,
-    toggleKeyboardPen,
-    pointerHandlers
-  } = useDoodleCanvas();
+  const { canvasRef, tool, setTool, keyboardCursor, clear, moveKeyboardCursor, toggleKeyboardPen, pointerHandlers } =
+    useDoodleCanvas();
   const [pinStickerKey, setPinStickerKey] = useState(0);
   const [showEmptyNotice, setShowEmptyNotice] = useState(false);
 
@@ -117,7 +109,11 @@ export default function DrawingCanvas({ close, titleId, descriptionId }: Overlay
         {pinnedDoodle ? (
           <div className="flex w-full items-center gap-3 border-t-2 border-dashed border-[#1a1a1a]/40 pt-2">
             <span className="text-[11px] font-bold opacity-60">{copy.pinnedPreview}</span>
-            <img src={pinnedDoodle} alt="" className="h-10 w-auto -rotate-2 border-2 border-[#1a1a1a] shadow-[2px_2px_0px_0px_rgba(26,26,26,1)]" />
+            <img
+              src={pinnedDoodle}
+              alt=""
+              className="h-10 w-auto -rotate-2 border-2 border-[#1a1a1a] shadow-[2px_2px_0px_0px_rgba(26,26,26,1)]"
+            />
             <Button variant="ghost" size="sm" onClick={unpin} icon={<PinOff size={14} />}>
               {copy.unpin}
             </Button>

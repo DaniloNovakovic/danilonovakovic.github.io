@@ -74,6 +74,7 @@ validation check present.
 [1-3 sentences on the intended emotional beat and whether the current draft hits it.]
 
 **Tone Card**
+
 - Voice:
 - Register:
 - Humor:
@@ -82,11 +83,13 @@ validation check present.
 - Prefer / avoid:
 
 **Findings Or Draft**
+
 - `[severity] [lens] issue or candidate line`
   Why it matters: [emotional or player-experience reason]
   Recommendation: [smallest practical revision]
 
 **Validation**
+
 - [playtest/readback question, return-state check, or Danilo taste check]
 ```
 

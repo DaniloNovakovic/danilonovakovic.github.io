@@ -25,9 +25,9 @@ The current Ridge milestone proves the compact overworld loop:
 This document looks beyond that slice. The goal is to describe how Ridge could
 grow into a denser tiny overworld with:
 
-- *A Short Hike* warmth and summit-focus
-- *Hollow Knight* shortcut relief and route compression
-- *Tunic* reinterpretation secrets and "oh, wait" moments
+- _A Short Hike_ warmth and summit-focus
+- _Hollow Knight_ shortcut relief and route compression
+- _Tunic_ reinterpretation secrets and "oh, wait" moments
 
 The locked long-term world direction is **2D side-view interconnected Ridge**.
 This means Hollow Knight-style topology is the structural reference, not a
@@ -80,7 +80,7 @@ Properties:
 - safe return path after scene exits
 - remains the emotional backbone even after shortcuts open
 
-This layer carries the *A Short Hike* feeling of "I know where I am going,
+This layer carries the _A Short Hike_ feeling of "I know where I am going,
 but I keep getting pleasantly distracted."
 
 ### 2. Under-Ridge Layer
@@ -140,12 +140,12 @@ Likely landmark set:
 9. **Telegraph Terrace**
    Visible sparring landmark with rhythmic identity.
 10. **Potassium Hint Site**
-   Secret-adjacent acknowledgement without turning the Ridge into a second
-   ricochet zone.
+    Secret-adjacent acknowledgement without turning the Ridge into a second
+    ricochet zone.
 11. **High Shelf Outlook**
-   Late mobility payoff node.
+    Late mobility payoff node.
 12. **Relay Spire / Contact Peak**
-   Final destination, visible early and emotionally legible throughout.
+    Final destination, visible early and emotionally legible throughout.
 
 ## Shortcut Vocabulary
 

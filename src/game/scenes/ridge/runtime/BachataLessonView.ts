@@ -1,7 +1,14 @@
 // Per-step drawing branches on judgment state; splitting it would scatter one picture.
 // fallow-ignore-file complexity
 import type * as Phaser from 'phaser';
-import { bachataStepOf, GIG_GOOD_MS, type BachataStep, type ConcertGig, type GigJudgment, type GigLane } from '@/game/core/ridge';
+import {
+  bachataStepOf,
+  GIG_GOOD_MS,
+  type BachataStep,
+  type ConcertGig,
+  type GigJudgment,
+  type GigLane
+} from '@/game/core/ridge';
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
 import { LESSON_FLASH_MS, type LessonFrame } from '../art/lessonStaging';
 import { headTopFor } from '../art/stick/actorSprites';
@@ -68,7 +75,10 @@ export class BachataLessonView {
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
     this.floor = scene.add.graphics().setDepth(DEPTH.actor - 1);
-    this.hud = scene.add.graphics().setDepth(DEPTH.presence + 2).setScrollFactor(0);
+    this.hud = scene.add
+      .graphics()
+      .setDepth(DEPTH.presence + 2)
+      .setScrollFactor(0);
     const text = (size: number, scrollFactor: number) =>
       createUiText(scene, 0, 0, '', {
         fontSize: `${size}px`,
@@ -84,7 +94,8 @@ export class BachataLessonView {
     this.callText = text(40, 0);
     this.wordText = text(18, 1);
     for (let i = 0; i < COUNT_LABELS; i += 1) this.countLabels.push(text(11, 0).setStroke(PAPER_CSS, 0));
-    for (let i = 0; i < FOOTPRINTS; i += 1) this.footprints.push({ x: 0, bornAt: Number.NEGATIVE_INFINITY, tap: false });
+    for (let i = 0; i < FOOTPRINTS; i += 1)
+      this.footprints.push({ x: 0, bornAt: Number.NEGATIVE_INFINITY, tap: false });
   }
 
   /** A step was pressed (landed or not): flash the mark. */
@@ -125,7 +136,7 @@ export class BachataLessonView {
       top,
       bottom,
       strikeX: left + width * STRIKE_AT,
-      midY: top + (CARD_HEIGHT_CSS * k) * 0.42,
+      midY: top + CARD_HEIGHT_CSS * k * 0.42,
       r: GLYPH_CSS * k
     };
   }
@@ -217,7 +228,10 @@ export class BachataLessonView {
       if (text) {
         label += 1;
         const beat = Math.round((note.timeMs - startMs) / beatMs);
-        text.setText(CALL[((beat % 8) + 8) % 8]!).setFontSize(`${Math.round(11 * l.k)}px`).setVisible(true);
+        text
+          .setText(CALL[((beat % 8) + 8) % 8]!)
+          .setFontSize(`${Math.round(11 * l.k)}px`)
+          .setVisible(true);
         this.pin(text, x, l.bottom - 13 * l.k);
       }
     }
@@ -232,7 +246,10 @@ export class BachataLessonView {
       return;
     }
     const big = frame.countIn !== null || value === 'tap!';
-    this.callText.setText(value).setFontSize(`${Math.round((big ? 40 : 30) * l.k)}px`).setVisible(true);
+    this.callText
+      .setText(value)
+      .setFontSize(`${Math.round((big ? 40 : 30) * l.k)}px`)
+      .setVisible(true);
     this.pin(this.callText, l.strikeX, l.top - 28 * l.k);
     this.callText.setAlpha(1 - (frame.beatPhase ?? 0) * 0.6);
   }

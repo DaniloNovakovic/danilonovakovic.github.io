@@ -169,7 +169,10 @@ function StepGlyph({ step, size = 'button' }: { step: BachataStep; size?: 'butto
       className={size === 'small' ? 'h-3.5 w-3.5' : 'h-6 w-6 pointer-coarse:h-8 pointer-coarse:w-8'}
     >
       {step === 'tap' ? (
-        <path d="M12 1 L14.5 8.5 L22.5 9 L16 14 L18.5 22 L12 17.5 L5.5 22 L8 14 L1.5 9 L9.5 8.5 Z" fill="currentColor" />
+        <path
+          d="M12 1 L14.5 8.5 L22.5 9 L16 14 L18.5 22 L12 17.5 L5.5 22 L8 14 L1.5 9 L9.5 8.5 Z"
+          fill="currentColor"
+        />
       ) : (
         <>
           <circle cx="12" cy="12" r="10" fill="currentColor" />

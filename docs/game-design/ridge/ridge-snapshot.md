@@ -129,23 +129,23 @@ area via `StickVisualProvider`.
 
 Useful commands:
 
-| Command | Meaning |
-| --- | --- |
-| `look` / `status` | Surroundings, nearby distances, beat, progress |
-| `go left\|right [n]` | Walk the progress line |
-| `interact [name]` | Start nearest/named conversation |
-| `advance` | Continue halted conversation |
-| `choose <n\|id>` | Persona-style reply |
-| `leave` | Exit conversation early (or step away from the drawing table) |
-| `build road\|wood X,Y X,Y` | Blueprint Bridge: draw a beam (bolts 0,0 8,0 0,2 8,2) |
-| `build test` / `edit` / `done` | Run the toy car, return to drawing, accept a held bridge |
-| `build sketch` / `hint` / `undo` / `erase n` / `show` | Workbench helpers |
-| `duel dodge` / `duel wait [n]` / `duel done` | Cicka's Standoff |
-| `gig hit [0\|1\|2]` / `gig wait [ms]` / `gig auto` / `gig skip` / `gig done` | Concert Gig (practice, show, or the Dance Festival cat serenade) |
-| `dance step` / `dance left\|tap\|right` / `dance wait [ms]` / `dance auto` / `dance skip` / `dance done` | Bachata Lesson (Dance Festival) |
-| `skip` / `next` | Playtest: jump to next area start |
-| `warp bridge\|concert\|dance\|relay` | Playtest: warp to an area |
-| `help` | Command list |
+| Command                                                                                                  | Meaning                                                          |
+| -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `look` / `status`                                                                                        | Surroundings, nearby distances, beat, progress                   |
+| `go left\|right [n]`                                                                                     | Walk the progress line                                           |
+| `interact [name]`                                                                                        | Start nearest/named conversation                                 |
+| `advance`                                                                                                | Continue halted conversation                                     |
+| `choose <n\|id>`                                                                                         | Persona-style reply                                              |
+| `leave`                                                                                                  | Exit conversation early (or step away from the drawing table)    |
+| `build road\|wood X,Y X,Y`                                                                               | Blueprint Bridge: draw a beam (bolts 0,0 8,0 0,2 8,2)            |
+| `build test` / `edit` / `done`                                                                           | Run the toy car, return to drawing, accept a held bridge         |
+| `build sketch` / `hint` / `undo` / `erase n` / `show`                                                    | Workbench helpers                                                |
+| `duel dodge` / `duel wait [n]` / `duel done`                                                             | Cicka's Standoff                                                 |
+| `gig hit [0\|1\|2]` / `gig wait [ms]` / `gig auto` / `gig skip` / `gig done`                             | Concert Gig (practice, show, or the Dance Festival cat serenade) |
+| `dance step` / `dance left\|tap\|right` / `dance wait [ms]` / `dance auto` / `dance skip` / `dance done` | Bachata Lesson (Dance Festival)                                  |
+| `skip` / `next`                                                                                          | Playtest: jump to next area start                                |
+| `warp bridge\|concert\|dance\|relay`                                                                     | Playtest: warp to an area                                        |
+| `help`                                                                                                   | Command list                                                     |
 
 Browser DEV only: `]` skips to the next area; `1`–`4` warp Bridge / Concert / Dance / Relay.
 

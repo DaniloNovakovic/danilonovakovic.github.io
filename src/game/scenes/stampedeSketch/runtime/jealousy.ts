@@ -64,9 +64,7 @@ function shouldArrive(state: StampedeJealousy, input: StampedeJealousyInput): bo
     const earliest = input.durationMs - EARLIEST_BEFORE_END_MS;
     const latest = input.durationMs - LATEST_BEFORE_END_MS;
     if (input.elapsedMs >= latest) return true;
-    return input.elapsedMs >= earliest
-      && state.hearts >= STAMPEDE_JEALOUSY_HEARTS
-      && !input.exOnField;
+    return input.elapsedMs >= earliest && state.hearts >= STAMPEDE_JEALOUSY_HEARTS && !input.exOnField;
   }
   const overtimeMs = input.elapsedMs - input.durationMs;
   return overtimeMs >= OVERTIME_FIRST_MS + (state.visits - 1) * OVERTIME_EVERY_MS;

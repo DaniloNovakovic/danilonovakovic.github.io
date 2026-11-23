@@ -22,10 +22,12 @@ describe('stampede upgrades', () => {
     expect(getStampedeStartingWeaponChoices(() => 0)).toHaveLength(2);
     expect(opening.length).toBeLessThanOrEqual(3);
 
-    expect(getStampedeUpgradeChoices(['badSelfie'], [], steady).map((choice) => ({
-      id: choice.id,
-      action: choice.action
-    }))).toEqual([
+    expect(
+      getStampedeUpgradeChoices(['badSelfie'], [], steady).map((choice) => ({
+        id: choice.id,
+        action: choice.action
+      }))
+    ).toEqual([
       { id: 'selfieGroup', action: 'upgrade' },
       { id: 'selfiePose', action: 'upgrade' },
       { id: 'shell', action: 'survive' }
@@ -59,9 +61,7 @@ describe('stampede upgrades', () => {
     });
 
     expect(frame.attack?.hitIds).toEqual(['mark-a']);
-    expect(frame.state.nextFireAtMs).toBeLessThan(
-      STAMPEDE_AUTO_ATTACK_COOLDOWN_MS * 2
-    );
+    expect(frame.state.nextFireAtMs).toBeLessThan(STAMPEDE_AUTO_ATTACK_COOLDOWN_MS * 2);
   });
 
   it('makes a wider selfie reach marks outside the default range', () => {
@@ -115,21 +115,13 @@ describe('stampede upgrades', () => {
   it('names only the latest weapon on the status strip', () => {
     expect(formatStampedeHudWeaponLabel([])).toBe('Unarmed');
     expect(formatStampedeHudWeaponLabel(['badSelfie'])).toBe('Bad Selfie');
-    const kit = formatStampedeHudWeaponLabel([
-      'badSelfie',
-      'badBreath',
-      'fakeGlasses',
-      'shell',
-      'breathWide'
-    ]);
+    const kit = formatStampedeHudWeaponLabel(['badSelfie', 'badBreath', 'fakeGlasses', 'shell', 'breathWide']);
     expect(kit).toBe('Fake Glasses');
     expect(kit).not.toContain('·');
   });
 
   it('makes lighter shoes increase guardian movement speed', () => {
     expect(resolveStampedeGuardianSpeed([])).toBe(STAMPEDE_PLAYER_SPEED);
-    expect(resolveStampedeGuardianSpeed(['swiftGuardian'])).toBeGreaterThan(
-      STAMPEDE_PLAYER_SPEED
-    );
+    expect(resolveStampedeGuardianSpeed(['swiftGuardian'])).toBeGreaterThan(STAMPEDE_PLAYER_SPEED);
   });
 });

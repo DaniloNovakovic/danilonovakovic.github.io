@@ -8,7 +8,7 @@ import { Card, LinkButton, Badge } from '@/shared/ui';
 const ProjectsOverlay: React.FC<OverlayControllerProps> = ({ close, titleId, descriptionId }) => {
   const messages = useMessages();
   const { projects } = getPortfolioData(messages);
-  
+
   return (
     <OverlayDialogFrame
       title={messages.catalog.portfolio.projects.name}
@@ -25,14 +25,12 @@ const ProjectsOverlay: React.FC<OverlayControllerProps> = ({ close, titleId, des
               <p className="text-base text-gray-700 mb-4">{project.description}</p>
               <div className="flex flex-wrap gap-2 mb-6">
                 {project.tags.map((tag, tIndex) => (
-                  <Badge key={tIndex}>
-                    {tag}
-                  </Badge>
+                  <Badge key={tIndex}>{tag}</Badge>
                 ))}
               </div>
               <LinkButton
-                href={project.link} 
-                target="_blank" 
+                href={project.link}
+                target="_blank"
                 rel="noopener noreferrer"
                 variant="primary"
                 className="mt-auto py-2 text-sm"

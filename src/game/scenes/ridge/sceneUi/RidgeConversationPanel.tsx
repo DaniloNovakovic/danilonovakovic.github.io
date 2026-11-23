@@ -42,13 +42,7 @@ export function RidgeConversationPanel({ params, dispatchAction }: SceneUiSurfac
   return <ConversationStage view={view} dispatchAction={dispatchAction} />;
 }
 
-function ConversationStage({
-  view,
-  dispatchAction
-}: {
-  view: RidgeConversationPanelView;
-  dispatchAction: Dispatch;
-}) {
+function ConversationStage({ view, dispatchAction }: { view: RidgeConversationPanelView; dispatchAction: Dispatch }) {
   const titleId = useId();
   const textId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -135,7 +129,8 @@ const BOX_BASE =
 /** The speaker side leaves room for the bust that overlaps the box. */
 const BOX_LAYOUT: Record<RidgeSpeakerSide, string> = {
   left: 'bg-[#fbfbf9] pb-5 pt-3 pl-[6.5rem] pr-4 sm:py-4 sm:pl-[9rem] sm:pr-6 short:pb-5 short:pt-2.5 short:pl-[6.5rem]',
-  right: 'bg-[#fbfbf9] pb-5 pt-3 pl-4 pr-[6.5rem] sm:py-4 sm:pl-6 sm:pr-[9rem] short:pb-5 short:pt-2.5 short:pr-[6.5rem]',
+  right:
+    'bg-[#fbfbf9] pb-5 pt-3 pl-4 pr-[6.5rem] sm:py-4 sm:pl-6 sm:pr-[9rem] short:pb-5 short:pt-2.5 short:pr-[6.5rem]',
   center: 'border-dashed bg-[#f4f1ea] px-5 pb-5 pt-3'
 };
 
@@ -176,11 +171,7 @@ function useTypewriter(view: RidgeConversationPanelView): Typewriter {
   return { typedLength, isTyping: typedLength < targetLen, skip };
 }
 
-function useConversationKeys(
-  view: RidgeConversationPanelView,
-  typewriter: Typewriter,
-  dispatchAction: Dispatch
-): void {
+function useConversationKeys(view: RidgeConversationPanelView, typewriter: Typewriter, dispatchAction: Dispatch): void {
   const { isTyping, skip } = typewriter;
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -269,10 +260,7 @@ function LineText({
       {/* Unrevealed characters stay in the line so wrap and box height do not jump. */}
       {hiddenText ? (
         <span className="text-transparent">
-          <span
-            aria-hidden="true"
-            className="absolute -translate-x-full animate-pulse font-black text-[#1a1a1a]"
-          >
+          <span aria-hidden="true" className="absolute -translate-x-full animate-pulse font-black text-[#1a1a1a]">
             |
           </span>
           {hiddenText}

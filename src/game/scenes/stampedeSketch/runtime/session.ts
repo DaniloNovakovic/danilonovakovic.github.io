@@ -26,9 +26,7 @@ export interface StampedeSessionOptions {
 
 export type StampedeSessionSnapshot = Readonly<StampedeSession>;
 
-export function createStampedeSession(
-  options: StampedeSessionOptions = {}
-): StampedeSession {
+export function createStampedeSession(options: StampedeSessionOptions = {}): StampedeSession {
   return {
     phase: 'playing',
     elapsedMs: 0,
@@ -46,15 +44,11 @@ export function continueStampedeSessionEndless(session: StampedeSession): Stampe
   return { ...session, phase: 'playing', endless: true, recentContact: false };
 }
 
-export function advanceStampedeSession(
-  session: StampedeSession,
-  deltaMs: number
-): StampedeSession {
+export function advanceStampedeSession(session: StampedeSession, deltaMs: number): StampedeSession {
   if (session.phase !== 'playing') return session;
 
   const elapsedMs = clampElapsed(session, session.elapsedMs + Math.max(0, deltaMs));
-  const phase: StampedeSessionPhase =
-    !session.endless && elapsedMs >= session.durationMs ? 'cleared' : 'playing';
+  const phase: StampedeSessionPhase = !session.endless && elapsedMs >= session.durationMs ? 'cleared' : 'playing';
 
   return {
     ...session,
@@ -99,17 +93,12 @@ export function resolveStampedeContact(
   };
 }
 
-export function readStampedeSessionSnapshot(
-  session: StampedeSession
-): StampedeSessionSnapshot {
+export function readStampedeSessionSnapshot(session: StampedeSession): StampedeSessionSnapshot {
   return { ...session };
 }
 
 function isRecentContact(lastContactAtMs: number | null, elapsedMs: number): boolean {
-  return (
-    lastContactAtMs !== null &&
-    elapsedMs - lastContactAtMs <= STAMPEDE_RECENT_CONTACT_MS
-  );
+  return lastContactAtMs !== null && elapsedMs - lastContactAtMs <= STAMPEDE_RECENT_CONTACT_MS;
 }
 
 function clampElapsed(session: StampedeSession, elapsedMs: number): number {

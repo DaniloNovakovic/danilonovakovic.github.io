@@ -17,9 +17,7 @@ interface HobbiesSceneContextOptions {
  * callbacks for closing back to the overworld, opening hobby overlays, and
  * restoring the last captured player position.
  */
-export function createHobbiesSceneContext(
-  options: HobbiesSceneContextOptions
-): SceneContextDefinition {
+export function createHobbiesSceneContext(options: HobbiesSceneContextOptions): SceneContextDefinition {
   return {
     id: HOBBIES_SCENE_ID,
     sceneKey: PHASER_SCENE_KEYS.hobbies,

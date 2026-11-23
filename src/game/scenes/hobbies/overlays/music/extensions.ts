@@ -1,5 +1,13 @@
 import { fretsForPosition } from './caged';
-import { gripById, lowestSoundingIndex, type ChordColor, type ChordQuality, type Frets, type GripId, type Voicing } from './grips';
+import {
+  gripById,
+  lowestSoundingIndex,
+  type ChordColor,
+  type ChordQuality,
+  type Frets,
+  type GripId,
+  type Voicing
+} from './grips';
 
 /** Added colors. 2 is the 9th, 4 the 11th, 6 the 6th, 7 the 7th. */
 export type Extension = 2 | 4 | 6 | 7;

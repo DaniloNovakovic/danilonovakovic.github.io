@@ -123,8 +123,7 @@ export class CickaDuel {
 
   get phase(): CickaDuelPhase {
     if (this.heartsLeft <= 0) return 'lost';
-    return this.nextAttack >= this.attacks.length && this.endedAt !== null &&
-      this.frameCount >= this.endedAt + OUTRO
+    return this.nextAttack >= this.attacks.length && this.endedAt !== null && this.frameCount >= this.endedAt + OUTRO
       ? 'won'
       : 'fighting';
   }

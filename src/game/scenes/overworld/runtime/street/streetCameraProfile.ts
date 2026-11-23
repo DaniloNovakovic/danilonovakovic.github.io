@@ -20,10 +20,7 @@ export const MOBILE_STREET_CAMERA_PROFILE: StreetCameraProfile = {
 
 const MOBILE_MAX_DISPLAY_WIDTH = 767;
 
-export function getStreetCameraProfile({
-  displayWidth,
-  displayHeight
-}: StreetCameraViewport): StreetCameraProfile {
+export function getStreetCameraProfile({ displayWidth, displayHeight }: StreetCameraViewport): StreetCameraProfile {
   const isPortraitPhone =
     Number.isFinite(displayWidth) &&
     Number.isFinite(displayHeight) &&

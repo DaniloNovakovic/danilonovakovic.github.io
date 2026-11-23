@@ -111,12 +111,12 @@ Use this matrix as the paper-pass exit check before writing implementation
 issues. "Ready" here means the docs are ready to package a slice; only Bridge
 requires immediate runtime/playability proof because it is the tracer.
 
-| Area | Stage sketch | Prompt/dialogue IDs | Cicka placement | Transition/reset | Audio floor | Acceptance checks | Readiness |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| Bridge | In area README | Concrete line/prompt IDs in `dialogue.md` | Before/after resting spot named | Bridge-to-Concert transition named | Bridge ambience, Cicka cue, bridge-change cue, transition cue named | Bridge Tracer Slice definition of done | Ready for tracer slice |
-| Concert | In area README | Planned conversation IDs | Hidden before, band/resting after | Dance transition exit named | Night ambience, guitar phrase, crowd-clearing cue, Cicka/transition cues named | Paper-Level Acceptance Checks | Paper-ready; implement after Bridge |
-| Dance Festival | In area README and `layout.md` | Planned conversation IDs | Operations/shuttle/service-gate before/after options named | Relay sunset transition named | Setup ambience, setup-clearance cue, Cicka/transition cues named | Paper-Level Acceptance Checks | Paper-ready; implement after Bridge |
-| Relay | In area README | Planned prompt IDs plus dedication text | Final field-presence / threshold role named | First Playable Reset Return named | Relay ambience, guitar phrase, raw meow, silence/reset cues named | Paper-Level Acceptance Checks | Paper-ready; implement after Bridge |
+| Area           | Stage sketch                   | Prompt/dialogue IDs                       | Cicka placement                                            | Transition/reset                   | Audio floor                                                                    | Acceptance checks                      | Readiness                           |
+| -------------- | ------------------------------ | ----------------------------------------- | ---------------------------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------ | -------------------------------------- | ----------------------------------- |
+| Bridge         | In area README                 | Concrete line/prompt IDs in `dialogue.md` | Before/after resting spot named                            | Bridge-to-Concert transition named | Bridge ambience, Cicka cue, bridge-change cue, transition cue named            | Bridge Tracer Slice definition of done | Ready for tracer slice              |
+| Concert        | In area README                 | Planned conversation IDs                  | Hidden before, band/resting after                          | Dance transition exit named        | Night ambience, guitar phrase, crowd-clearing cue, Cicka/transition cues named | Paper-Level Acceptance Checks          | Paper-ready; implement after Bridge |
+| Dance Festival | In area README and `layout.md` | Planned conversation IDs                  | Operations/shuttle/service-gate before/after options named | Relay sunset transition named      | Setup ambience, setup-clearance cue, Cicka/transition cues named               | Paper-Level Acceptance Checks          | Paper-ready; implement after Bridge |
+| Relay          | In area README                 | Planned prompt IDs plus dedication text   | Final field-presence / threshold role named                | First Playable Reset Return named  | Relay ambience, guitar phrase, raw meow, silence/reset cues named              | Paper-Level Acceptance Checks          | Paper-ready; implement after Bridge |
 
 ### Implementation Sequencing
 
@@ -185,8 +185,8 @@ Bridge, Concert, and Dance Festival area is blockout-complete when it has:
 10. a visible world change that changes the map, not only dialogue
 11. a Cicka after-state where the local resting spot changes or settles
 12. First Playable Audio Floor cues for the area: placeholder ambience,
-   blocker/world-change cue, Cicka cue if present, and transition/guitar cue
-   where relevant
+    blocker/world-change cue, Cicka cue if present, and transition/guitar cue
+    where relevant
 13. a tiny local beat state that feeds the shared First Playable Route State
 14. a Compact Area Transition that carries the player to the next Ridge Area
     through a short authored handoff, cue/stinger, and framed respawn rather
@@ -216,8 +216,8 @@ small and concrete enough to implement without resolving product taste:
 9. For audio-touching slices, state whether the slice uses the First Playable
    Audio Floor or deliberately defers audio with a silent placeholder.
 10. Include acceptance checks: route reaches the slice start, the slice outcome
-   is visible, the next route state or transition unlocks, and required runtime
-   checks/playability evidence are recorded when code changes.
+    is visible, the next route state or transition unlocks, and required runtime
+    checks/playability evidence are recorded when code changes.
 
 Avoid vague assignments like "make Concert Area" or "add the Dance Festival."
 Prefer vertical route slices such as "Bridge blocker + Bridge Draftsperson +

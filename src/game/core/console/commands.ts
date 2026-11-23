@@ -122,23 +122,13 @@ export function parseGameScript(script: string): GameCommand[] {
     .map(parseGameCommand);
 }
 
-function parseChoiceCommand(
-  kind: 'choose' | 'draft',
-  parts: string[],
-  trimmed: string
-): GameCommand {
+function parseChoiceCommand(kind: 'choose' | 'draft', parts: string[], trimmed: string): GameCommand {
   const choice = parts.slice(1).join(' ');
   if (!choice) return { type: 'unknown', raw: trimmed };
-  return kind === 'choose'
-    ? { type: 'choose', choiceIdOrIndex: choice }
-    : { type: 'draft', choiceIdOrIndex: choice };
+  return kind === 'choose' ? { type: 'choose', choiceIdOrIndex: choice } : { type: 'draft', choiceIdOrIndex: choice };
 }
 
-function parseEquipCommand(
-  head: 'equip' | 'unequip',
-  parts: string[],
-  trimmed: string
-): GameCommand {
+function parseEquipCommand(head: 'equip' | 'unequip', parts: string[], trimmed: string): GameCommand {
   const itemId = parts[1] as GameItemId | undefined;
   if (!itemId || !ITEM_IDS.has(itemId)) return { type: 'unknown', raw: trimmed };
   return head === 'equip' ? { type: 'equip', itemId } : { type: 'unequip', itemId };

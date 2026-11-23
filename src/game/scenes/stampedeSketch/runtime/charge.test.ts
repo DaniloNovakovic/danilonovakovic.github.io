@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  ROOSTER_CHARGE,
-  STAMPEDE_CHARGE_STALK,
-  stepStampedeCharge
-} from './charge';
+import { ROOSTER_CHARGE, STAMPEDE_CHARGE_STALK, stepStampedeCharge } from './charge';
 
 describe('rooster charge', () => {
   it('keeps stalking until the player is within trigger range', () => {
@@ -18,11 +14,7 @@ describe('rooster charge', () => {
     const stillWinding = stepStampedeCharge(windup, { nowMs: 1_100, dx: 100, dy: 0 }, ROOSTER_CHARGE);
     expect(stillWinding).toBe(windup);
 
-    const dash = stepStampedeCharge(
-      windup,
-      { nowMs: 1_000 + ROOSTER_CHARGE.windupMs, dx: 100, dy: 0 },
-      ROOSTER_CHARGE
-    );
+    const dash = stepStampedeCharge(windup, { nowMs: 1_000 + ROOSTER_CHARGE.windupMs, dx: 100, dy: 0 }, ROOSTER_CHARGE);
     expect(dash).toMatchObject({ phase: 'dash', dirX: 0, dirY: 1 });
   });
 

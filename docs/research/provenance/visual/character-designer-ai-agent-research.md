@@ -16,32 +16,32 @@ The practical recommendation is to build the system in three layers: **orchestra
 
 The prompt leaves several important variables unspecified. Those unknowns should be treated as explicit assumptions rather than silently filled in.
 
-| Dimension | Assumption |
-|---|---|
-| Character types | **No specific constraint** |
-| Genres | **No specific constraint** |
-| Art styles | **No specific constraint** |
-| Target engine | Unspecified |
-| Target runtime platforms | Unspecified |
-| Latency targets | Unspecified |
-| Budget | Unspecified |
-| Voice/cloned likeness use | Unspecified |
-| Publishing autonomy | Assumed **human approval required** before downstream asset publication |
+| Dimension                 | Assumption                                                              |
+| ------------------------- | ----------------------------------------------------------------------- |
+| Character types           | **No specific constraint**                                              |
+| Genres                    | **No specific constraint**                                              |
+| Art styles                | **No specific constraint**                                              |
+| Target engine             | Unspecified                                                             |
+| Target runtime platforms  | Unspecified                                                             |
+| Latency targets           | Unspecified                                                             |
+| Budget                    | Unspecified                                                             |
+| Voice/cloned likeness use | Unspecified                                                             |
+| Publishing autonomy       | Assumed **human approval required** before downstream asset publication |
 
 An uploaded project blueprint appears to describe one possible stylistic and systemic direction—stylized NPC work with emphasis on silhouette readability, bark taxonomies, finite-state/reactive behaviors, and animation/event expression—but the current request does not make those constraints binding. In this report, that uploaded material is treated as **contextual inspiration**, not as a hard requirement. fileciteturn0file0
 
 Given those assumptions, the recommended goal is to make the Character Designer a **high-leverage AI team member for pre-production and production support**, able to handle at least these classes of work:
 
-| Supported scope in recommended v1 | Why it belongs in v1 |
-|---|---|
-| Named story NPCs | Highest narrative/design leverage |
-| Systemic NPC archetypes | Useful for merchants, guards, villagers, vendors, ambient roles |
-| Enemy/supporting-character variants | Important for roster scale and faction coherence |
-| Persona and backstory packages | Core design output |
-| Visual concept prompts and turnarounds | Necessary for art pipeline handoff |
-| Dialogue samples and bark sets | Necessary for narrative and encounter design |
-| Behavior-tree/state-machine stubs | Necessary for gameplay implementation handoff |
-| Animation/event cue metadata | Necessary for cinematic and runtime integration |
+| Supported scope in recommended v1      | Why it belongs in v1                                            |
+| -------------------------------------- | --------------------------------------------------------------- |
+| Named story NPCs                       | Highest narrative/design leverage                               |
+| Systemic NPC archetypes                | Useful for merchants, guards, villagers, vendors, ambient roles |
+| Enemy/supporting-character variants    | Important for roster scale and faction coherence                |
+| Persona and backstory packages         | Core design output                                              |
+| Visual concept prompts and turnarounds | Necessary for art pipeline handoff                              |
+| Dialogue samples and bark sets         | Necessary for narrative and encounter design                    |
+| Behavior-tree/state-machine stubs      | Necessary for gameplay implementation handoff                   |
+| Animation/event cue metadata           | Necessary for cinematic and runtime integration                 |
 
 The most important scoping discipline is this: the Character Designer should produce **design packages that downstream humans and tools can approve, edit, compile, and trace**. It should not be the only source of truth for final lore, and it should not publish directly into game content pipelines without validation. That design follows both modern agent practice and the broader lesson from generative-agent research: believable behavior improves when memory, planning, and constraints are structured, but unconstrained generation is not an acceptable substitute for production control. citeturn14search0turn14search1turn17search2turn32search10
 
@@ -49,30 +49,30 @@ The most important scoping discipline is this: the Character Designer should pro
 
 A serious Character Designer agent needs more than “creative writing.” It needs a capability set that maps to actual production artifacts.
 
-| Capability | Minimum deliverable | Preferred machine-readable form |
-|---|---|---|
-| Persona generation | Role, archetype, traits, motivations, fears, relationships, hooks | JSON object with controlled vocabularies |
-| Backstory generation | Timeline, formative events, factions, secrets, goals | JSON + prose summary |
-| Visual concept generation | Hero prompt, negative prompt, ref-sheet prompt, pose/expression variants | JSON prompt bundle + image refs |
-| Behavior authoring | Goals, utility/priority notes, triggers, actions, fallback states | Engine-neutral behavior-tree JSON |
-| Dialogue generation | Barks, greetings, quest lines, emotional variants, taboo lists | JSON dialogue pack |
-| Animation cue generation | Idle loops, gesture cues, viseme/emotion tags, timeline events | JSON events/cues |
-| Metadata/schema management | IDs, versioning, canon refs, licensing, approvals, asset links | JSON Schema-validated envelope |
+| Capability                 | Minimum deliverable                                                      | Preferred machine-readable form          |
+| -------------------------- | ------------------------------------------------------------------------ | ---------------------------------------- |
+| Persona generation         | Role, archetype, traits, motivations, fears, relationships, hooks        | JSON object with controlled vocabularies |
+| Backstory generation       | Timeline, formative events, factions, secrets, goals                     | JSON + prose summary                     |
+| Visual concept generation  | Hero prompt, negative prompt, ref-sheet prompt, pose/expression variants | JSON prompt bundle + image refs          |
+| Behavior authoring         | Goals, utility/priority notes, triggers, actions, fallback states        | Engine-neutral behavior-tree JSON        |
+| Dialogue generation        | Barks, greetings, quest lines, emotional variants, taboo lists           | JSON dialogue pack                       |
+| Animation cue generation   | Idle loops, gesture cues, viseme/emotion tags, timeline events           | JSON events/cues                         |
+| Metadata/schema management | IDs, versioning, canon refs, licensing, approvals, asset links           | JSON Schema-validated envelope           |
 
 That output structure is consistent with how modern engines and avatar systems work. Unreal exposes built-in Behavior Trees for NPC AI; Unity now has a graph-based Behavior package for authoring NPC behaviors and still relies heavily on state machines and animation events for execution; Epic’s MetaHuman Animator and NVIDIA Audio2Face convert captured audio/video into performance or blendshape-oriented animation data. A Character Designer that cannot emit those downstream-friendly structures is not yet a real production teammate. citeturn3search0turn3search1turn3search2turn19search1turn19search3turn19search6
 
 ### Recommended data formats
 
-| Artifact class | Recommended master format | Delivery formats | Notes |
-|---|---|---|---|
-| Design brief / persona / lore bindings | JSON validated by JSON Schema 2020-12 | JSON, Markdown, YAML | Use JSON as source of truth; prose is a view layer. citeturn4search4turn4search20 |
-| 2D vector concepts / icons / callouts | SVG | SVG, PNG, WebP | SVG is open, scalable, stylable, and interoperable for vector assets. citeturn4search3 |
-| 2D concept images / ref sheets | PNG or WebP masters in object store | PNG, WebP, JPEG | Keep prompt/provenance metadata alongside image assets. citeturn11search6turn12search2 |
-| Runtime-friendly 3D packages | glTF 2.0 | glTF/GLB | Good for delivery and app/runtime loading. citeturn4search1 |
-| DCC/master 3D composition | OpenUSD | USDA, USDC, USDZ | Better for richer composition and pipeline interoperability. citeturn4search6turn4search10 |
-| Behavior logic | Engine-neutral JSON tree/state graph | Engine-specific import JSON/assets | Compile to Unity/Unreal assets downstream. citeturn3search0turn3search1 |
-| Dialogue pack | JSON + text renderings | JSON, CSV, localization sheets | Include emotional tags and safety/policy annotations |
-| Animation cue pack | JSON cue/event timeline | JSON, CSV, engine timeline data | Map to Timeline/Event systems or blendshape pipelines. citeturn19search2turn19search6turn19search3 |
+| Artifact class                         | Recommended master format             | Delivery formats                   | Notes                                                                                                   |
+| -------------------------------------- | ------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Design brief / persona / lore bindings | JSON validated by JSON Schema 2020-12 | JSON, Markdown, YAML               | Use JSON as source of truth; prose is a view layer. citeturn4search4turn4search20                   |
+| 2D vector concepts / icons / callouts  | SVG                                   | SVG, PNG, WebP                     | SVG is open, scalable, stylable, and interoperable for vector assets. citeturn4search3               |
+| 2D concept images / ref sheets         | PNG or WebP masters in object store   | PNG, WebP, JPEG                    | Keep prompt/provenance metadata alongside image assets. citeturn11search6turn12search2              |
+| Runtime-friendly 3D packages           | glTF 2.0                              | glTF/GLB                           | Good for delivery and app/runtime loading. citeturn4search1                                          |
+| DCC/master 3D composition              | OpenUSD                               | USDA, USDC, USDZ                   | Better for richer composition and pipeline interoperability. citeturn4search6turn4search10          |
+| Behavior logic                         | Engine-neutral JSON tree/state graph  | Engine-specific import JSON/assets | Compile to Unity/Unreal assets downstream. citeturn3search0turn3search1                             |
+| Dialogue pack                          | JSON + text renderings                | JSON, CSV, localization sheets     | Include emotional tags and safety/policy annotations                                                    |
+| Animation cue pack                     | JSON cue/event timeline               | JSON, CSV, engine timeline data    | Map to Timeline/Event systems or blendshape pipelines. citeturn19search2turn19search6turn19search3 |
 
 ### Sample input schema
 
@@ -108,8 +108,16 @@ The following is a practical, engine-neutral input contract. It uses JSON Schema
         "character_class": {
           "type": "string",
           "enum": [
-            "hero", "companion", "merchant", "quest_giver", "enemy",
-            "boss", "ambient_npc", "faction_leader", "tutorial_npc", "other"
+            "hero",
+            "companion",
+            "merchant",
+            "quest_giver",
+            "enemy",
+            "boss",
+            "ambient_npc",
+            "faction_leader",
+            "tutorial_npc",
+            "other"
           ]
         },
         "genre": { "type": "string", "default": "no specific constraint" },
@@ -424,40 +432,40 @@ flowchart TD
 
 ### Suggested service boundaries
 
-| Service | Responsibility | Notes |
-|---|---|---|
-| Orchestrator | State machine for the whole job | Good fit for Agents SDK, LangGraph, SK, or AutoGen |
-| Retrieval layer | Lore/style retrieval with permissions | Use metadata filters, namespace isolation, and canonical docs |
-| Narrative service | Persona, backstory, hooks, conflict checks | Usually LLM-first |
-| Visual service | Prompt packs and image iteration requests | LLM + image model |
-| Behavior compiler | Author engine-neutral behavior, compile to engine target | Keep engine-specific logic downstream |
-| Dialogue service | Barks, branches, emotional variants | Validate taboo/safety constraints |
-| Animation cue service | Event tags, visemes, gestures, timelines | Optional but valuable |
-| Validator | Schema, canon, rights, safety, duplication, review status | Must gate publishing |
-| Review/publishing | Human approval and asset release | Studio-owned source of truth |
+| Service               | Responsibility                                            | Notes                                                         |
+| --------------------- | --------------------------------------------------------- | ------------------------------------------------------------- |
+| Orchestrator          | State machine for the whole job                           | Good fit for Agents SDK, LangGraph, SK, or AutoGen            |
+| Retrieval layer       | Lore/style retrieval with permissions                     | Use metadata filters, namespace isolation, and canonical docs |
+| Narrative service     | Persona, backstory, hooks, conflict checks                | Usually LLM-first                                             |
+| Visual service        | Prompt packs and image iteration requests                 | LLM + image model                                             |
+| Behavior compiler     | Author engine-neutral behavior, compile to engine target  | Keep engine-specific logic downstream                         |
+| Dialogue service      | Barks, branches, emotional variants                       | Validate taboo/safety constraints                             |
+| Animation cue service | Event tags, visemes, gestures, timelines                  | Optional but valuable                                         |
+| Validator             | Schema, canon, rights, safety, duplication, review status | Must gate publishing                                          |
+| Review/publishing     | Human approval and asset release                          | Studio-owned source of truth                                  |
 
 For retrieval, the simplest option is often **PostgreSQL + pgvector** if canonical metadata already lives in a relational system. If semantic search is central and scale/filtering complexity grows, Qdrant and Weaviate are strong vector-native choices; Milvus is specifically positioned for large-scale GenAI retrieval. citeturn9search6turn9search4turn9search9turn9search15
 
 ### Interaction modes
 
-| Mode | Best use | API pattern | Recommended default |
-|---|---|---|---|
-| Streaming synchronous | Designer chats, iterative revisions, brief clarification, narrative generation | REST + SSE/streaming | Default for interactive authoring citeturn1search8turn1search2 |
-| Batch asynchronous | Bulk NPC roster generation, nightly consistency checks, offline evals, embedding refresh | Batch jobs / queue workers | Default for non-urgent jobs; OpenAI notes Batch pricing at 50% of standard rates for applicable models. citeturn22search0turn22search6 |
-| Realtime | Live voice preview, embodied rehearsal, immediate player-style NPC simulations | WebSocket/WebRTC session | Only if the product extends into runtime preview or voice interaction. citeturn20search6turn1search11turn2search8turn2search21 |
+| Mode                  | Best use                                                                                 | API pattern                | Recommended default                                                                                                                        |
+| --------------------- | ---------------------------------------------------------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Streaming synchronous | Designer chats, iterative revisions, brief clarification, narrative generation           | REST + SSE/streaming       | Default for interactive authoring citeturn1search8turn1search2                                                                         |
+| Batch asynchronous    | Bulk NPC roster generation, nightly consistency checks, offline evals, embedding refresh | Batch jobs / queue workers | Default for non-urgent jobs; OpenAI notes Batch pricing at 50% of standard rates for applicable models. citeturn22search0turn22search6 |
+| Realtime              | Live voice preview, embodied rehearsal, immediate player-style NPC simulations           | WebSocket/WebRTC session   | Only if the product extends into runtime preview or voice interaction. citeturn20search6turn1search11turn2search8turn2search21       |
 
 ### Recommended latency envelopes
 
 Because the prompt states **latency targets unspecified**, the following are **engineering assumptions**, not formal requirements:
 
-| Workflow | Recommended envelope |
-|---|---|
-| Text-first design iteration | Stream first tokens immediately; P95 complete response under 5 s |
-| Retrieval + validation pass | P95 under 2 s when cached/indexed |
-| Thumbnail image concept | Preview under 15–20 s |
-| Full ref-sheet / final comp | 20–60 s depending on model and queue |
-| Bulk roster generation | Overnight or explicit batch window |
-| Live voice preview | End-of-turn response perceived as low-latency; use realtime path only when necessary |
+| Workflow                    | Recommended envelope                                                                 |
+| --------------------------- | ------------------------------------------------------------------------------------ |
+| Text-first design iteration | Stream first tokens immediately; P95 complete response under 5 s                     |
+| Retrieval + validation pass | P95 under 2 s when cached/indexed                                                    |
+| Thumbnail image concept     | Preview under 15–20 s                                                                |
+| Full ref-sheet / final comp | 20–60 s depending on model and queue                                                 |
+| Bulk roster generation      | Overnight or explicit batch window                                                   |
+| Live voice preview          | End-of-turn response perceived as low-latency; use realtime path only when necessary |
 
 ### Packaging the agent as a reusable skill
 
@@ -467,34 +475,34 @@ If the studio wants this capability reusable across projects, package it as a **
 
 ### Agent and orchestration frameworks
 
-| Framework | Best fit for Character Designer | Strengths | Main trade-offs | License / source |
-|---|---|---|---|---|
-| **OpenAI Agents SDK** | Teams that want strong tool use, tracing, MCP integration, and fast path to production | Multi-agent workflows, built-in tracing, tool and handoff support, provider-agnostic SDK framing | Many convenience features are strongest inside the OpenAI ecosystem; API dependency for managed capabilities | MIT SDK; official docs and repos. citeturn16search0turn16search1turn32search0turn16search12 |
-| **LangGraph** | Teams that want explicit state graphs, durable execution, and human approval checkpoints | Durable execution, streaming, persistence, human-in-the-loop | Lower-level than “agent-in-one-call” abstractions; requires more engineering discipline | MIT. citeturn17search2turn17search13turn17search1 |
-| **AutoGen** | Multi-agent research/prototyping and distributed specialist agents | Deterministic/dynamic workflows, distributed agents, strong research heritage | More conversation-centric than pipeline-centric unless carefully constrained | MIT for code; repository docs and content mixed with CC BY. citeturn0search9turn0search17turn0search5turn0search13 |
-| **Semantic Kernel** | Enterprises that need model-agnostic orchestration across Python/.NET/Java | Model-agnostic SDK, enterprise positioning, multi-agent support | Less “opinionated creative stack” out of the box; more assembly required | MIT. citeturn0search11turn0search7 |
-| **CrewAI** | Teams that want role-based crews and simpler workflow layer | Clear “Crews + Flows” mental model, open-source base plus commercial platform | Can become opaque at larger scale unless backed by strong tests/observability | MIT OSS; commercial AMP available. citeturn0search10turn0search6turn0search14 |
+| Framework             | Best fit for Character Designer                                                          | Strengths                                                                                        | Main trade-offs                                                                                              | License / source                                                                                                         |
+| --------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| **OpenAI Agents SDK** | Teams that want strong tool use, tracing, MCP integration, and fast path to production   | Multi-agent workflows, built-in tracing, tool and handoff support, provider-agnostic SDK framing | Many convenience features are strongest inside the OpenAI ecosystem; API dependency for managed capabilities | MIT SDK; official docs and repos. citeturn16search0turn16search1turn32search0turn16search12                        |
+| **LangGraph**         | Teams that want explicit state graphs, durable execution, and human approval checkpoints | Durable execution, streaming, persistence, human-in-the-loop                                     | Lower-level than “agent-in-one-call” abstractions; requires more engineering discipline                      | MIT. citeturn17search2turn17search13turn17search1                                                                   |
+| **AutoGen**           | Multi-agent research/prototyping and distributed specialist agents                       | Deterministic/dynamic workflows, distributed agents, strong research heritage                    | More conversation-centric than pipeline-centric unless carefully constrained                                 | MIT for code; repository docs and content mixed with CC BY. citeturn0search9turn0search17turn0search5turn0search13 |
+| **Semantic Kernel**   | Enterprises that need model-agnostic orchestration across Python/.NET/Java               | Model-agnostic SDK, enterprise positioning, multi-agent support                                  | Less “opinionated creative stack” out of the box; more assembly required                                     | MIT. citeturn0search11turn0search7                                                                                   |
+| **CrewAI**            | Teams that want role-based crews and simpler workflow layer                              | Clear “Crews + Flows” mental model, open-source base plus commercial platform                    | Can become opaque at larger scale unless backed by strong tests/observability                                | MIT OSS; commercial AMP available. citeturn0search10turn0search6turn0search14                                       |
 
 ### Domain platforms and pipeline components
 
-| Tool / platform | Best role in stack | Strengths | Main trade-offs | License / commercial note |
-|---|---|---|---|---|
-| **Inworld** | Runtime or preview layer for interactive AI characters | Full-duplex low-latency speech, tool calling, realtime orientation | Proprietary platform and usage-led pricing | Proprietary; public pricing available, including Developer tier. citeturn2search8turn2search0turn2search12 |
-| **Convai** | Runtime/preview conversational NPC layer with engine plugins | Official docs, Unity/Unreal/web integrations, actions/environment interaction | Proprietary service; governance review needed on service terms | Service proprietary; Unreal plugin Apache-2.0. citeturn2search5turn2search13turn2search21turn2search9turn2search1 |
-| **NVIDIA ACE** | High-end avatar/NPC stack for speech, intelligence, and animation microservices | Suite spans speech, intelligence, and animation; cloud and on-device positioning | Platform complexity and commercial/vendor footprint | Commercial/proprietary suite, with some related components/documentation open. citeturn2search2turn2search6turn19search3turn19search15 |
-| **Adobe Firefly Custom Models** | Consistent visual identity from owned assets | Commercial-safety positioning, custom models trained on own assets, strong enterprise governance | Proprietary; best fit where Adobe ecosystem already exists | Proprietary; qualifying plans can include IP protections. citeturn10search9turn26search2turn31search1turn31search5turn31search7 |
-| **Reallusion Character Creator** | Base 3D character creation, rigging, export, and look-dev | Mature character pipeline, realistic or stylized output, downstream engine support | Separate content/export licensing can complicate workflows | Proprietary with content/export licensing. citeturn26search6turn26search1turn26search7 |
-| **Scenario** | Custom model training and generation for game-art workflows | Studio-oriented custom models; explicit privacy/ownership messaging | Terms explicitly disclaim uniqueness/non-infringement guarantees; still needs legal review | Proprietary SaaS. citeturn27search4turn27search3turn27search1 |
-| **Stability API / self-hosted models** | Higher-control image generation and custom deployment | API plus self-hosting options; more deployment control | Licensing and commercialization terms require review, especially above revenue thresholds | Commercial API + self-host licensing. citeturn10search2turn10search10turn15search3turn15search19 |
+| Tool / platform                        | Best role in stack                                                              | Strengths                                                                                        | Main trade-offs                                                                            | License / commercial note                                                                                                                    |
+| -------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Inworld**                            | Runtime or preview layer for interactive AI characters                          | Full-duplex low-latency speech, tool calling, realtime orientation                               | Proprietary platform and usage-led pricing                                                 | Proprietary; public pricing available, including Developer tier. citeturn2search8turn2search0turn2search12                              |
+| **Convai**                             | Runtime/preview conversational NPC layer with engine plugins                    | Official docs, Unity/Unreal/web integrations, actions/environment interaction                    | Proprietary service; governance review needed on service terms                             | Service proprietary; Unreal plugin Apache-2.0. citeturn2search5turn2search13turn2search21turn2search9turn2search1                     |
+| **NVIDIA ACE**                         | High-end avatar/NPC stack for speech, intelligence, and animation microservices | Suite spans speech, intelligence, and animation; cloud and on-device positioning                 | Platform complexity and commercial/vendor footprint                                        | Commercial/proprietary suite, with some related components/documentation open. citeturn2search2turn2search6turn19search3turn19search15 |
+| **Adobe Firefly Custom Models**        | Consistent visual identity from owned assets                                    | Commercial-safety positioning, custom models trained on own assets, strong enterprise governance | Proprietary; best fit where Adobe ecosystem already exists                                 | Proprietary; qualifying plans can include IP protections. citeturn10search9turn26search2turn31search1turn31search5turn31search7       |
+| **Reallusion Character Creator**       | Base 3D character creation, rigging, export, and look-dev                       | Mature character pipeline, realistic or stylized output, downstream engine support               | Separate content/export licensing can complicate workflows                                 | Proprietary with content/export licensing. citeturn26search6turn26search1turn26search7                                                  |
+| **Scenario**                           | Custom model training and generation for game-art workflows                     | Studio-oriented custom models; explicit privacy/ownership messaging                              | Terms explicitly disclaim uniqueness/non-infringement guarantees; still needs legal review | Proprietary SaaS. citeturn27search4turn27search3turn27search1                                                                           |
+| **Stability API / self-hosted models** | Higher-control image generation and custom deployment                           | API plus self-hosting options; more deployment control                                           | Licensing and commercialization terms require review, especially above revenue thresholds  | Commercial API + self-host licensing. citeturn10search2turn10search10turn15search3turn15search19                                       |
 
 ### Recommended stack patterns
 
-| Pattern | Recommended stack | Best use case |
-|---|---|---|
-| **Fastest pilot** | OpenAI Agents SDK or LangGraph + managed LLM/image APIs + PostgreSQL/pgvector + Unity/Unreal compiler adapters | Shortest path to internal pilot |
-| **Hybrid studio stack** | LangGraph or Semantic Kernel + managed LLM + Adobe Firefly/Scenario/Stability for visual generation + Qdrant/Weaviate + engine adapters | Studios needing stronger control over assets and retrieval |
-| **Runtime-heavy stack** | Separate design-time Character Designer plus Inworld/Convai/ACE for live NPC preview/runtime | Teams where conversational NPC runtime is core product value |
-| **High-control/self-hosted path** | LangGraph/SK + self-hosted image stack + on-prem retrieval + custom gateways | Strongest data-control requirement, highest engineering burden |
+| Pattern                           | Recommended stack                                                                                                                       | Best use case                                                  |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| **Fastest pilot**                 | OpenAI Agents SDK or LangGraph + managed LLM/image APIs + PostgreSQL/pgvector + Unity/Unreal compiler adapters                          | Shortest path to internal pilot                                |
+| **Hybrid studio stack**           | LangGraph or Semantic Kernel + managed LLM + Adobe Firefly/Scenario/Stability for visual generation + Qdrant/Weaviate + engine adapters | Studios needing stronger control over assets and retrieval     |
+| **Runtime-heavy stack**           | Separate design-time Character Designer plus Inworld/Convai/ACE for live NPC preview/runtime                                            | Teams where conversational NPC runtime is core product value   |
+| **High-control/self-hosted path** | LangGraph/SK + self-hosted image stack + on-prem retrieval + custom gateways                                                            | Strongest data-control requirement, highest engineering burden |
 
 ## Data, licensing, security, and ethics
 
@@ -502,16 +510,16 @@ The best training/fine-tuning corpus for a Character Designer is **first-party a
 
 ### Recommended data-source policy
 
-| Data source | Recommended status | Why |
-|---|---|---|
-| Internal lore bibles, approved design docs, canon databases | **Preferred** | Highest control, best consistency, lowest rights ambiguity |
-| Studio-owned concept art and prior shipped assets | **Preferred with provenance tags** | Strong style alignment; maintain version and use-rights metadata |
-| Licensed stock/reference collections | **Allowed with explicit license tracking** | Useful for mood/style grounding if downstream rights are clear |
-| CC-licensed works | **Allowed with license-aware ingestion only** | CC guidance notes training usually involves copying and licenses do not resolve privacy/personality-rights issues. citeturn5search2turn5search9 |
-| Marketplace assets with AI-training restrictions | **Disallow for training unless license permits** | Unity explicitly restricts Asset Store content for AI/ML training. citeturn8search2turn8search11turn8search17 |
-| Performer voices, mocap, likeness captures | **Allowed only with explicit consent and contract specificity** | California and SAG-AFTRA rules increase consent expectations around digital replicas. citeturn8search1turn8search6turn8search3 |
-| Synthetic teacher-model outputs for task distillation | **Useful** | Good for cost/latency optimization when curated and reviewed. citeturn15search1turn15search17 |
-| Uncontrolled public-web scraping | **Avoid for v1** | Highest legal and provenance ambiguity |
+| Data source                                                 | Recommended status                                              | Why                                                                                                                                                 |
+| ----------------------------------------------------------- | --------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Internal lore bibles, approved design docs, canon databases | **Preferred**                                                   | Highest control, best consistency, lowest rights ambiguity                                                                                          |
+| Studio-owned concept art and prior shipped assets           | **Preferred with provenance tags**                              | Strong style alignment; maintain version and use-rights metadata                                                                                    |
+| Licensed stock/reference collections                        | **Allowed with explicit license tracking**                      | Useful for mood/style grounding if downstream rights are clear                                                                                      |
+| CC-licensed works                                           | **Allowed with license-aware ingestion only**                   | CC guidance notes training usually involves copying and licenses do not resolve privacy/personality-rights issues. citeturn5search2turn5search9 |
+| Marketplace assets with AI-training restrictions            | **Disallow for training unless license permits**                | Unity explicitly restricts Asset Store content for AI/ML training. citeturn8search2turn8search11turn8search17                                  |
+| Performer voices, mocap, likeness captures                  | **Allowed only with explicit consent and contract specificity** | California and SAG-AFTRA rules increase consent expectations around digital replicas. citeturn8search1turn8search6turn8search3                 |
+| Synthetic teacher-model outputs for task distillation       | **Useful**                                                      | Good for cost/latency optimization when curated and reviewed. citeturn15search1turn15search17                                                   |
+| Uncontrolled public-web scraping                            | **Avoid for v1**                                                | Highest legal and provenance ambiguity                                                                                                              |
 
 ### Fine-tuning and adaptation strategy
 
@@ -537,15 +545,15 @@ NIST’s AI Risk Management Framework and the OECD AI Principles both center tru
 
 At the system level, the minimum production controls should include:
 
-| Control | Why it matters |
-|---|---|
-| Namespace-isolated retrieval | Prevent one project’s canon/style guides from leaking into another |
-| Rights ledger and consent ledger | Required for IP and performer governance |
-| Policy validation stage before publish | Catch stereotypes, disallowed themes, impersonation, or unsafe prompts |
-| Tool-call approvals for sensitive operations | Prevent uncontrolled agent actions |
-| Secret scoping and service accounts | Reduce blast radius |
-| Trace retention with auditability | Needed for debugging and compliance |
-| Human approval on publish | Required for quality and copyright posture |
+| Control                                      | Why it matters                                                         |
+| -------------------------------------------- | ---------------------------------------------------------------------- |
+| Namespace-isolated retrieval                 | Prevent one project’s canon/style guides from leaking into another     |
+| Rights ledger and consent ledger             | Required for IP and performer governance                               |
+| Policy validation stage before publish       | Catch stereotypes, disallowed themes, impersonation, or unsafe prompts |
+| Tool-call approvals for sensitive operations | Prevent uncontrolled agent actions                                     |
+| Secret scoping and service accounts          | Reduce blast radius                                                    |
+| Trace retention with auditability            | Needed for debugging and compliance                                    |
+| Human approval on publish                    | Required for quality and copyright posture                             |
 
 If the system uses remote MCP tools, apply extra caution. OpenAI’s MCP guidance explicitly warns builders not to put sensitive information into tool definitions and to treat remote servers as privileged integration points. citeturn18search5turn18search2
 
@@ -555,36 +563,36 @@ A Character Designer should be evaluated like a production system, not like a de
 
 ### Recommended evaluation matrix
 
-| Dimension | What to measure | Suggested acceptance bar |
-|---|---|---|
-| Schema validity | JSON passes contract validation | ≥ 99% |
-| Constraint satisfaction | Output respects role/genre/style/lore/safety inputs | ≥ 95% |
-| Lore consistency | No contradictions against canon retrieval set | ≥ 90% on golden set |
-| Visual coherence | Human review score of concept pack consistency | ≥ 4.0 / 5 |
-| Character distinctiveness | Embedding distance from existing roster + designer review | No material collisions without explicit intent |
-| Behavior compilability | Engine-neutral behavior imports or compiles cleanly | ≥ 95% |
-| Dialogue usability | Lines fit tone, purpose, taboo list, and localization bounds | ≥ 90% accepted on golden set |
-| Safety/bias | Toxicity, stereotype, impersonation, policy violations | Near-zero publishable violations |
-| Human acceptance | Draft approved with minor edits | ≥ 70% first pass, ≥ 90% by second pass |
-| Cost efficiency | Cost per approved package | Track and reduce over time |
-| Latency | P50/P95 per workflow mode | Meet chosen internal SLOs |
+| Dimension                 | What to measure                                              | Suggested acceptance bar                       |
+| ------------------------- | ------------------------------------------------------------ | ---------------------------------------------- |
+| Schema validity           | JSON passes contract validation                              | ≥ 99%                                          |
+| Constraint satisfaction   | Output respects role/genre/style/lore/safety inputs          | ≥ 95%                                          |
+| Lore consistency          | No contradictions against canon retrieval set                | ≥ 90% on golden set                            |
+| Visual coherence          | Human review score of concept pack consistency               | ≥ 4.0 / 5                                      |
+| Character distinctiveness | Embedding distance from existing roster + designer review    | No material collisions without explicit intent |
+| Behavior compilability    | Engine-neutral behavior imports or compiles cleanly          | ≥ 95%                                          |
+| Dialogue usability        | Lines fit tone, purpose, taboo list, and localization bounds | ≥ 90% accepted on golden set                   |
+| Safety/bias               | Toxicity, stereotype, impersonation, policy violations       | Near-zero publishable violations               |
+| Human acceptance          | Draft approved with minor edits                              | ≥ 70% first pass, ≥ 90% by second pass         |
+| Cost efficiency           | Cost per approved package                                    | Track and reduce over time                     |
+| Latency                   | P50/P95 per workflow mode                                    | Meet chosen internal SLOs                      |
 
 ### Suggested test scenarios
 
-| Scenario | What it tests | Expected result |
-|---|---|---|
-| Minimal brief with almost no constraints | Assumption handling | Agent marks assumptions explicitly, does not invent canon |
-| Canon-conflict brief | Lore validation | Agent flags contradiction and proposes alternatives |
-| Strong faction style pack | Visual controllability | Outputs remain on-style across multiple variants |
-| Roster generation for 20 merchants | Scale and distinctiveness | High diversity without role drift |
-| Same character across 3 art styles | Style transfer under identity constraint | Core identity preserved, style shifts credible |
-| Sensitive protected-attribute bait prompt | Bias/safety controls | Validator blocks or escalates |
-| Real actor voice/language request without consent ID | Consent enforcement | Agent refuses publishable voice package |
-| Unreal export run | Behavior-tree pipeline | Import-ready output or actionable compile errors |
-| Unity export run | State/animation/event compatibility | Import-ready output or actionable compile errors |
-| Overnight batch on 500 briefs | Queueing, cost, observability | Stable throughput and traceability |
-| Prompt-injection attempt through lore doc | Retrieval/tool security | Untrusted instruction ignored and flagged |
-| Regression suite after model upgrade | Stability | No drop below acceptance bars |
+| Scenario                                             | What it tests                            | Expected result                                           |
+| ---------------------------------------------------- | ---------------------------------------- | --------------------------------------------------------- |
+| Minimal brief with almost no constraints             | Assumption handling                      | Agent marks assumptions explicitly, does not invent canon |
+| Canon-conflict brief                                 | Lore validation                          | Agent flags contradiction and proposes alternatives       |
+| Strong faction style pack                            | Visual controllability                   | Outputs remain on-style across multiple variants          |
+| Roster generation for 20 merchants                   | Scale and distinctiveness                | High diversity without role drift                         |
+| Same character across 3 art styles                   | Style transfer under identity constraint | Core identity preserved, style shifts credible            |
+| Sensitive protected-attribute bait prompt            | Bias/safety controls                     | Validator blocks or escalates                             |
+| Real actor voice/language request without consent ID | Consent enforcement                      | Agent refuses publishable voice package                   |
+| Unreal export run                                    | Behavior-tree pipeline                   | Import-ready output or actionable compile errors          |
+| Unity export run                                     | State/animation/event compatibility      | Import-ready output or actionable compile errors          |
+| Overnight batch on 500 briefs                        | Queueing, cost, observability            | Stable throughput and traceability                        |
+| Prompt-injection attempt through lore doc            | Retrieval/tool security                  | Untrusted instruction ignored and flagged                 |
+| Regression suite after model upgrade                 | Stability                                | No drop below acceptance bars                             |
 
 ### Deployment and monitoring recommendations
 
@@ -596,11 +604,11 @@ For rollout, use a phased path: internal sandbox, trusted-designer pilot, limite
 
 These are **indicative ranges**, because the prompt states **budget unspecified** and because cost depends heavily on chosen vendors, image volume, voice usage, and whether the studio self-hosts any models. The ranges below **exclude payroll unless explicitly noted**.
 
-| Stage | Typical team | Typical monthly infra/vendor spend | Notes |
-|---|---|---|---|
-| Prototype | 2–4 software engineers, 0.5 technical designer, part-time artist/TA | **$500–$5,000/month** | Managed text/image APIs, Postgres/pgvector, object store, basic tracing, no dedicated GPU workers |
-| Production pilot | 4–8 engineers, 1–2 designers, 1 technical artist or MLOps owner | **$5,000–$30,000/month** | Adds eval pipeline, larger retrieval corpora, review UI, autoscaling workers, possibly dedicated image/GPU capacity |
-| High-control hybrid or self-hosted | Add MLE + data engineer | **$15,000–$100,000+/month or per training cycle** | Costs jump with custom training, multiple GPU workers, or private infrastructure |
+| Stage                              | Typical team                                                        | Typical monthly infra/vendor spend                | Notes                                                                                                               |
+| ---------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Prototype                          | 2–4 software engineers, 0.5 technical designer, part-time artist/TA | **$500–$5,000/month**                             | Managed text/image APIs, Postgres/pgvector, object store, basic tracing, no dedicated GPU workers                   |
+| Production pilot                   | 4–8 engineers, 1–2 designers, 1 technical artist or MLOps owner     | **$5,000–$30,000/month**                          | Adds eval pipeline, larger retrieval corpora, review UI, autoscaling workers, possibly dedicated image/GPU capacity |
+| High-control hybrid or self-hosted | Add MLE + data engineer                                             | **$15,000–$100,000+/month or per training cycle** | Costs jump with custom training, multiple GPU workers, or private infrastructure                                    |
 
 Why those ranges are plausible:
 

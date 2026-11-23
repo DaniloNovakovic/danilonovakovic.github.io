@@ -1,118 +1,121 @@
 export const potassiumSlipMessages = {
-  title: "SCRUB RUMBLE",
-  instructions: "DRAG TOWARD A TARGET. RELEASE SPONGE.\nHOLD ANYWHERE TO YO-YO IT HOME.\nCLEAR THE DUMPSTER. WIN BACK THE CIRCUIT.",
-  chooseUpgrade: "CHOOSE SPONGE NONSENSE",
+  title: 'SCRUB RUMBLE',
+  instructions:
+    'DRAG TOWARD A TARGET. RELEASE SPONGE.\nHOLD ANYWHERE TO YO-YO IT HOME.\nCLEAR THE DUMPSTER. WIN BACK THE CIRCUIT.',
+  chooseUpgrade: 'CHOOSE SPONGE NONSENSE',
   finalScore: (score: number) => `Final Score: ${score}`,
   hud: {
     score: (score: number) => `Score ${score}`,
     lives: (lives: number) => `Lives ${lives}`,
-    waveLabel: (wave: number, title: string) => `W${wave} ${title}`,
+    waveLabel: (wave: number, title: string) => `W${wave} ${title}`
   },
   hints: {
-    start: "Drag toward a target • Hold to recall",
-    endlessStart: "Endless rummage • The dumpster keeps giving",
-    bossPhase2: "Boss phase 2 • His soda cans orbit and hate angles",
-    bossPhase3: "Boss phase 3 • He hides in the bin and whistles for backup",
-    bossWave: "Boss wave • Sir Rummage wants to keep the Circuit",
+    start: 'Drag toward a target • Hold to recall',
+    endlessStart: 'Endless rummage • The dumpster keeps giving',
+    bossPhase2: 'Boss phase 2 • His soda cans orbit and hate angles',
+    bossPhase3: 'Boss phase 3 • He hides in the bin and whistles for backup',
+    bossWave: 'Boss wave • Sir Rummage wants to keep the Circuit',
     wave: (title: string, hint: string) => `${title}: ${hint}`,
-    waveClear: "Wave clear • Choose fresh sponge nonsense",
-    devSkip: "Dev skip • Choose a test upgrade",
+    waveClear: 'Wave clear • Choose fresh sponge nonsense',
+    devSkip: 'Dev skip • Choose a test upgrade',
     genericStacked: (label: string) => `${label} stacked • The whole dumpster trembles`,
-    skillApplied: (label: string, action: "unlocked" | "upgraded") => `${label} ${action} • It stacks forever`,
+    skillApplied: (label: string, action: 'unlocked' | 'upgraded') => `${label} ${action} • It stacks forever`
   },
   outcomes: {
-    won: "CIRCUIT ACQUIRED",
-    gameOver: "SPONGE SQUEEZED OUT",
+    won: 'CIRCUIT ACQUIRED',
+    gameOver: 'SPONGE SQUEEZED OUT'
   },
   terminal: {
-    endlessMode: "ENDLESS MODE",
-    returnToCity: "RETURN TO CITY",
-    retry: "RETRY",
+    endlessMode: 'ENDLESS MODE',
+    returnToCity: 'RETURN TO CITY',
+    retry: 'RETRY'
   },
   leaderboard: {
-    title: "RECORDS",
-    empty: "No sponge runs on record yet.",
-    modeLabel: (mode: "campaign" | "endless", outcome: "won" | "game_over") => mode === "endless" ? "endless" : outcome,
-    recordLine: (rank: number, score: number, wave: number, modeLabel: string) => `${rank}. ${score} • W${wave} • ${modeLabel}`,
+    title: 'RECORDS',
+    empty: 'No sponge runs on record yet.',
+    modeLabel: (mode: 'campaign' | 'endless', outcome: 'won' | 'game_over') =>
+      mode === 'endless' ? 'endless' : outcome,
+    recordLine: (rank: number, score: number, wave: number, modeLabel: string) =>
+      `${rank}. ${score} • W${wave} • ${modeLabel}`
   },
   enemies: {
-    intern: "Dust Bunny",
-    scope: "Mystery Leftovers",
-    deadline: "Roly-Poly",
-    wall: "Pizza Box",
-    hardWall: "Cinder Block",
-    splitter: "Trash Bag",
-    shield: "Lid Pigeon",
-    boss: "Sir Rummage",
+    intern: 'Dust Bunny',
+    scope: 'Mystery Leftovers',
+    deadline: 'Roly-Poly',
+    wall: 'Pizza Box',
+    hardWall: 'Cinder Block',
+    splitter: 'Trash Bag',
+    shield: 'Lid Pigeon',
+    boss: 'Sir Rummage',
     health: (hp: number, maxHp: number) => `${hp}/${maxHp}`,
-    labelledHealth: (label: string, hp: number) => `${label} ${hp}/${hp}`,
+    labelledHealth: (label: string, hp: number) => `${label} ${hp}/${hp}`
   },
   upgrades: {
     generic: {
       damage: {
-        label: "Elbow Grease +",
-        description: "+12% sponge and spray damage.",
+        label: 'Elbow Grease +',
+        description: '+12% sponge and spray damage.'
       },
       poison: {
-        label: "Extra Strength +",
-        description: "+10% Germ-B-Gone strength.",
+        label: 'Extra Strength +',
+        description: '+10% Germ-B-Gone strength.'
       },
       explosion: {
-        label: "Bigger Bubbles +",
-        description: "+6% bubble pop radius.",
+        label: 'Bigger Bubbles +',
+        description: '+6% bubble pop radius.'
       },
       cloneTime: {
-        label: "Mini Sponge Time +",
-        description: "+300ms mini sponge lifetime.",
+        label: 'Mini Sponge Time +',
+        description: '+300ms mini sponge lifetime.'
       },
       bananaSpeed: {
-        label: "Sponge Speed +",
-        description: "+5% launch speed.",
+        label: 'Sponge Speed +',
+        description: '+5% launch speed.'
       },
       bonusLife: {
-        label: "Bonus Life",
-        description: "+1 life right now.",
-      },
+        label: 'Bonus Life',
+        description: '+1 life right now.'
+      }
     },
     skills: {
       fire: {
-        label: "Suds Trail",
-        description: "Moving sponges leave stinging suds.",
-        unlockDescription: "Moving sponges leave a trail of stinging suds.",
-        upgradeDescription: "Hits drop extra suds puddles.",
+        label: 'Suds Trail',
+        description: 'Moving sponges leave stinging suds.',
+        unlockDescription: 'Moving sponges leave a trail of stinging suds.',
+        upgradeDescription: 'Hits drop extra suds puddles.'
       },
       poison: {
-        label: "Germ-B-Gone",
-        description: "Hits disinfect for 1 dmg every 500ms.",
-        unlockDescription: "Hits douse junk in extra-strength disinfectant.",
-        upgradeDescription: "Disinfected junk spreads it on death.",
+        label: 'Germ-B-Gone',
+        description: 'Hits disinfect for 1 dmg every 500ms.',
+        unlockDescription: 'Hits douse junk in extra-strength disinfectant.',
+        upgradeDescription: 'Disinfected junk spreads it on death.'
       },
       explosion: {
-        label: "Bubble Pop",
-        description: "Every hit pops a soap bubble on nearby junk.",
-        unlockDescription: "Hits pop a big soap bubble that splashes nearby junk.",
-        upgradeDescription: "Bigger bubbles apply statuses.",
+        label: 'Bubble Pop',
+        description: 'Every hit pops a soap bubble on nearby junk.',
+        unlockDescription: 'Hits pop a big soap bubble that splashes nearby junk.',
+        upgradeDescription: 'Bigger bubbles apply statuses.'
       },
       duplicate: {
-        label: "Mini Sponges",
-        description: "Wall bounces shake loose tiny sponges.",
-        unlockDescription: "Wall bounces spawn 2 mini sponges.",
-        upgradeDescription: "Mini sponges apply half-strength procs and spawn +1.",
+        label: 'Mini Sponges',
+        description: 'Wall bounces shake loose tiny sponges.',
+        unlockDescription: 'Wall bounces spawn 2 mini sponges.',
+        upgradeDescription: 'Mini sponges apply half-strength procs and spawn +1.'
       },
       ghostHorizontal: {
-        label: "Spray Bottle",
-        description: "Hits squirt a water jet across the row.",
-        unlockDescription: "Hits squirt a water jet across the row.",
-        upgradeDescription: "Water jets apply statuses.",
+        label: 'Spray Bottle',
+        description: 'Hits squirt a water jet across the row.',
+        unlockDescription: 'Hits squirt a water jet across the row.',
+        upgradeDescription: 'Water jets apply statuses.'
       },
       ghostVertical: {
-        label: "Shower Head",
-        description: "Hits rain a shower down the column.",
-        unlockDescription: "Hits rain a shower down the column.",
-        upgradeDescription: "Showers apply statuses.",
-      },
+        label: 'Shower Head',
+        description: 'Hits rain a shower down the column.',
+        unlockDescription: 'Hits rain a shower down the column.',
+        upgradeDescription: 'Showers apply statuses.'
+      }
     },
-    upgradedTitle: (label: string) => `${label} +`,
+    upgradedTitle: (label: string) => `${label} +`
   },
   waveTitles: {
     boss: "Sir Rummage's Hoard",
@@ -120,17 +123,17 @@ export const potassiumSlipMessages = {
     curbside: (wave: number) => `Curbside ${wave}`,
     boxPile: (wave: number) => `Box Pile ${wave}`,
     dumpsterDive: (wave: number) => `Dumpster Dive ${wave}`,
-    bottomOfTheBin: (wave: number) => `Bottom of the Bin ${wave}`,
+    bottomOfTheBin: (wave: number) => `Bottom of the Bin ${wave}`
   },
   waveHints: {
-    endlessEscalation: "the hoard keeps growing",
-    launchAndBounce: "launch and bounce",
-    multiHitBlobs: "leftovers take a few hits",
-    wallsBlockAngles: "pizza boxes block angles",
-    trashBags: "trash bags burst into dust bunnies",
-    stackChoices: "stack your choices",
-    shieldPlates: "pigeon lids clang off bad angles",
-    hardWalls: "cinder blocks do not care about sponges",
-    bossTime: "the raccoon is home",
-  },
+    endlessEscalation: 'the hoard keeps growing',
+    launchAndBounce: 'launch and bounce',
+    multiHitBlobs: 'leftovers take a few hits',
+    wallsBlockAngles: 'pizza boxes block angles',
+    trashBags: 'trash bags burst into dust bunnies',
+    stackChoices: 'stack your choices',
+    shieldPlates: 'pigeon lids clang off bad angles',
+    hardWalls: 'cinder blocks do not care about sponges',
+    bossTime: 'the raccoon is home'
+  }
 } as const;

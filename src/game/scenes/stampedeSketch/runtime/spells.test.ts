@@ -1,18 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import {
-  resolveEquippedStampedeSpell,
-  resolveOwnedStampedeSpells,
-  resolveStampedeSpellCast
-} from './spells';
+import { resolveEquippedStampedeSpell, resolveOwnedStampedeSpells, resolveStampedeSpellCast } from './spells';
 
 describe('chick magnet attacks', () => {
   it('starts with no extra attack and keeps every one you pick', () => {
     expect(resolveOwnedStampedeSpells([])).toEqual([]);
     expect(resolveEquippedStampedeSpell([])).toBeNull();
-    expect(resolveOwnedStampedeSpells(['badBreath', 'badSmell'])).toEqual([
-      'badBreath',
-      'badSmell'
-    ]);
+    expect(resolveOwnedStampedeSpells(['badBreath', 'badSmell'])).toEqual(['badBreath', 'badSmell']);
     expect(resolveEquippedStampedeSpell(['badBreath', 'fakeGlasses'])).toBe('fakeGlasses');
   });
 
@@ -85,10 +78,7 @@ describe('chick magnet attacks', () => {
       mods: ['glassesRx', 'glassesSide'],
       player: { x: 400, y: 300 },
       facing: { x: 1, y: 0 },
-      candidates: [
-        ...candidates,
-        { id: 'beside', x: 470, y: 340 }
-      ]
+      candidates: [...candidates, { id: 'beside', x: 470, y: 340 }]
     });
 
     expect(shrugged.hitIds).toEqual(['chick']);

@@ -186,7 +186,12 @@ function drawNerd(g: Graphics, pose: StampedeBirdPose): void {
     g.fillCircle(x, head.y - head.r * 0.05, lens);
     g.strokeCircle(x, head.y - head.r * 0.05, lens);
   });
-  g.lineBetween(head.x + head.r * 0.05 + lens, head.y - head.r * 0.05, head.x + head.r * 0.85 - lens, head.y - head.r * 0.05);
+  g.lineBetween(
+    head.x + head.r * 0.05 + lens,
+    head.y - head.r * 0.05,
+    head.x + head.r * 0.85 - lens,
+    head.y - head.r * 0.05
+  );
   if (pose.mood === 'gag') {
     xEye(g, head.x + head.r * 0.05, head.y - head.r * 0.05, 1.8);
     xEye(g, head.x + head.r * 0.85, head.y - head.r * 0.05, 1.8);
@@ -797,7 +802,11 @@ function polygon(g: Graphics, points: readonly { x: number; y: number }[]): void
 function steam(g: Graphics, x: number, y: number): void {
   g.fillStyle(PAPER, 1);
   g.lineStyle(1.6, INK, 1);
-  [[0, 0, 3.5], [-5, -4, 2.6], [-9, -9, 1.8]].forEach(([dx, dy, size]) => {
+  [
+    [0, 0, 3.5],
+    [-5, -4, 2.6],
+    [-9, -9, 1.8]
+  ].forEach(([dx, dy, size]) => {
     g.fillCircle(x + dx!, y + dy!, size!);
     g.strokeCircle(x + dx!, y + dy!, size!);
   });

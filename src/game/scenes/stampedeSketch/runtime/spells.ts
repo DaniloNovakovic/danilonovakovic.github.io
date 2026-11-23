@@ -54,11 +54,14 @@ const GLASSES_MAX_HITS = 2;
 const GLASSES_COOLDOWN_MS = 5_000;
 const GLASSES_RANGE = 300;
 
-const SPELLS: Record<StampedeSpellId, StampedeSpellChoice & {
-  cooldownMs: number;
-  bark: string;
-  bigBark: string;
-}> = {
+const SPELLS: Record<
+  StampedeSpellId,
+  StampedeSpellChoice & {
+    cooldownMs: number;
+    bark: string;
+    bigBark: string;
+  }
+> = {
   badBreath: {
     id: 'badBreath',
     title: 'Bad Breath',
@@ -92,15 +95,11 @@ export function getStampedeSpellChoices(): readonly StampedeSpellChoice[] {
   return STAMPEDE_SPELL_IDS.map((id) => SPELLS[id]);
 }
 
-export function resolveOwnedStampedeSpells(
-  upgrades: readonly string[]
-): StampedeSpellId[] {
+export function resolveOwnedStampedeSpells(upgrades: readonly string[]): StampedeSpellId[] {
   return STAMPEDE_SPELL_IDS.filter((id) => upgrades.includes(id));
 }
 
-export function resolveEquippedStampedeSpell(
-  upgrades: readonly string[]
-): StampedeSpellId | null {
+export function resolveEquippedStampedeSpell(upgrades: readonly string[]): StampedeSpellId | null {
   const owned = resolveOwnedStampedeSpells(upgrades);
   return owned[owned.length - 1] ?? null;
 }
@@ -130,7 +129,10 @@ export function resolveStampedeSpellCast({
   };
 }
 
-function spellTuning(spellId: StampedeSpellId, rank: 1 | 2): {
+function spellTuning(
+  spellId: StampedeSpellId,
+  rank: 1 | 2
+): {
   range: number;
   dot: number;
   cooldownMs: number;

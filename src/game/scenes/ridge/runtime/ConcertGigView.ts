@@ -1,12 +1,7 @@
 // Per-note drawing branches on judgment state; splitting it would scatter one picture.
 // fallow-ignore-file complexity
 import type * as Phaser from 'phaser';
-import {
-  GIG_GOOD_MS,
-  type ConcertGig,
-  type GigJudgment,
-  type GigLane
-} from '@/game/core/ridge';
+import { GIG_GOOD_MS, type ConcertGig, type GigJudgment, type GigLane } from '@/game/core/ridge';
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
 import { GIG_CARD_EDGE_CSS, GIG_FLASH_MS, gigCardWidthCss, type GigFrame } from '../art/gigStaging';
 import { headTopFor } from '../art/stick/actorSprites';
@@ -75,7 +70,10 @@ export class ConcertGigView {
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
     this.fx = scene.add.graphics().setDepth(DEPTH.actor - 1);
-    this.hud = scene.add.graphics().setDepth(DEPTH.presence + 2).setScrollFactor(0);
+    this.hud = scene.add
+      .graphics()
+      .setDepth(DEPTH.presence + 2)
+      .setScrollFactor(0);
     const hudText = (size: number) =>
       createUiText(scene, 0, 0, '', {
         fontSize: `${size}px`,
@@ -233,17 +231,17 @@ export class ConcertGigView {
     // A slow combo pulse along the line once the crowd is properly warm.
     if (gig.combo >= 10 && frame.beatPhase !== null) {
       g.lineStyle(1.5 * l.k, INK, 0.25 * (1 - frame.beatPhase));
-      g.strokeRoundedRect(l.left - 4 * l.k, l.top - 4 * l.k, l.right - l.left + 8 * l.k, l.bottom - l.top + 8 * l.k, 12 * l.k);
+      g.strokeRoundedRect(
+        l.left - 4 * l.k,
+        l.top - 4 * l.k,
+        l.right - l.left + 8 * l.k,
+        l.bottom - l.top + 8 * l.k,
+        12 * l.k
+      );
     }
   }
 
-  private drawNotes(
-    gig: ConcertGig,
-    now: number,
-    l: Layout,
-    yOf: (t: number) => number,
-    look: number
-  ): void {
+  private drawNotes(gig: ConcertGig, now: number, l: Layout, yOf: (t: number) => number, look: number): void {
     const g = this.hud;
     const notes = gig.song.notes;
     let pendingChordY: number | null = null;
@@ -362,7 +360,7 @@ export class ConcertGigView {
       const head = GROUND_Y + headTopFor('crowd') - 16;
       for (const [i, dx] of [-38, -2, 24, 46].entries()) {
         const x = anchors.crowdX + dx;
-        const y = head - (i % 2) * 8 + (flick + i) % 3;
+        const y = head - (i % 2) * 8 + ((flick + i) % 3);
         g.lineStyle(2, INK, 0.9);
         g.lineBetween(x, y + 16, x, y + 4);
         g.fillStyle(PAPER, 1);

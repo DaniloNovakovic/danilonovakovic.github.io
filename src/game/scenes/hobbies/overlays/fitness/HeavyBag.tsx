@@ -38,7 +38,16 @@ export function HeavyBag({ print, hitId, grade }: HeavyBagProps) {
           <path d="M90 48 Q106 50 106 70 L106 160 Q106 182 90 184 Z" fill={`url(#${hatchId})`} />
           <path d="M52 66 Q80 72 108 66 M52 164 Q80 170 108 164" fill="none" stroke={INK} strokeWidth="2.5" />
           <path d="M60 96 Q66 120 60 140" fill="none" stroke={INK} strokeWidth="1.4" opacity="0.4" />
-          <text x="80" y="122" textAnchor="middle" fontSize="13" fontWeight="900" fill={INK} opacity="0.75" transform="rotate(-90 80 118)">
+          <text
+            x="80"
+            y="122"
+            textAnchor="middle"
+            fontSize="13"
+            fontWeight="900"
+            fill={INK}
+            opacity="0.75"
+            transform="rotate(-90 80 118)"
+          >
             {print}
           </text>
         </g>

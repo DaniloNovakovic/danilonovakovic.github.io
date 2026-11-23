@@ -7,15 +7,7 @@ import { PortraitChip } from './conversationPortraits';
 
 export type RidgeBridgeTool = 'road' | 'wood' | 'eraser';
 
-export type RidgeBridgeCommand =
-  | 'undo'
-  | 'clear'
-  | 'hint'
-  | 'sketch'
-  | 'test'
-  | 'stop'
-  | 'edit'
-  | 'leave';
+export type RidgeBridgeCommand = 'undo' | 'clear' | 'hint' | 'sketch' | 'test' | 'stop' | 'edit' | 'leave';
 
 export interface RidgeBridgeBuilderPanelView {
   phase: BridgeBuildPhase;
@@ -141,7 +133,12 @@ function InkMeter({ ink, budget, label }: { ink: number; budget: number; label: 
           style={{ width: `${used * 100}%` }}
         />
       </span>
-      <span className={cn('min-w-[3.2rem] text-right text-[10px] font-black tabular-nums', over && 'underline decoration-wavy')}>
+      <span
+        className={cn(
+          'min-w-[3.2rem] text-right text-[10px] font-black tabular-nums',
+          over && 'underline decoration-wavy'
+        )}
+      >
         {Math.round(ink)}/{budget}
       </span>
     </div>

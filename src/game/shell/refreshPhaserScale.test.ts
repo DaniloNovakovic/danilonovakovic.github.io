@@ -7,8 +7,13 @@ describe('refreshPhaserScale', () => {
     const calls: string[] = [];
     const game = {
       scale: {
-        getParentBounds: vi.fn(() => { calls.push('bounds'); return true; }),
-        refresh: vi.fn(() => { calls.push('refresh'); })
+        getParentBounds: vi.fn(() => {
+          calls.push('bounds');
+          return true;
+        }),
+        refresh: vi.fn(() => {
+          calls.push('refresh');
+        })
       }
     } as unknown as Phaser.Game;
 

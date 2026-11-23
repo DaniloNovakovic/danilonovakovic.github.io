@@ -92,15 +92,15 @@ Later: "Old scraps now mean something about Danilo."
 
 ## Weighted Options
 
-| Option | Score | Shape | Pros | Risks |
-| --- | ---: | --- | --- | --- |
-| Sketchbook Neighborhood Spine With Folded Shortcuts | 98 | Mostly forward inhabited route with local resident problems, route changes, and folded shortcuts | Best mobile/portfolio fit; keeps Cicka present; makes topology feel lived-in | Must avoid generic fetch quests or explicit objective text |
-| Vertical Folded Ridge With Cicka Switchback | 88 | Stacked shelves, safe drops, lifts, and return folds around Cicka | Good cure for hallway feel; route mastery still matters | Can read as platformer-first and too Cicka-home-centric |
-| Folded Ridge With Cicka Switchback | 84 | Main trail climbs away, shortcuts fold back to Cicka | Strong "aha"; mobile-safe; fits paper theme | Can still feel like rightward trail if too flat |
-| Lucky Luna Descent Ridge | 82 | Progress mostly through vertical drop shafts and horizontal steering | Mobile-native, fresh movement toy | Big control/level-design shift; can fight current side-view runtime |
-| Three-Layer Mini Mountain | 80 | Lower Outskirts, middle trail, upper Relay route | Best long-term map fantasy; many re-read paths | Can overgrow before core loop works |
-| Page Rooms Network | 72 | Linked sketchbook spreads instead of natural ridge | Very thematic; easy to make each area distinct | Risks feeling like menu rooms |
-| Wide Main Trail Plus Branches | 48 | Longer version of current line with side pockets | Easy implementation | Still hallway syndrome |
+| Option                                              | Score | Shape                                                                                            | Pros                                                                         | Risks                                                               |
+| --------------------------------------------------- | ----: | ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Sketchbook Neighborhood Spine With Folded Shortcuts |    98 | Mostly forward inhabited route with local resident problems, route changes, and folded shortcuts | Best mobile/portfolio fit; keeps Cicka present; makes topology feel lived-in | Must avoid generic fetch quests or explicit objective text          |
+| Vertical Folded Ridge With Cicka Switchback         |    88 | Stacked shelves, safe drops, lifts, and return folds around Cicka                                | Good cure for hallway feel; route mastery still matters                      | Can read as platformer-first and too Cicka-home-centric             |
+| Folded Ridge With Cicka Switchback                  |    84 | Main trail climbs away, shortcuts fold back to Cicka                                             | Strong "aha"; mobile-safe; fits paper theme                                  | Can still feel like rightward trail if too flat                     |
+| Lucky Luna Descent Ridge                            |    82 | Progress mostly through vertical drop shafts and horizontal steering                             | Mobile-native, fresh movement toy                                            | Big control/level-design shift; can fight current side-view runtime |
+| Three-Layer Mini Mountain                           |    80 | Lower Outskirts, middle trail, upper Relay route                                                 | Best long-term map fantasy; many re-read paths                               | Can overgrow before core loop works                                 |
+| Page Rooms Network                                  |    72 | Linked sketchbook spreads instead of natural ridge                                               | Very thematic; easy to make each area distinct                               | Risks feeling like menu rooms                                       |
+| Wide Main Trail Plus Branches                       |    48 | Longer version of current line with side pockets                                                 | Easy implementation                                                          | Still hallway syndrome                                              |
 
 Chosen plan uses a mostly forward neighborhood spine as the main structure, then
 adds vertical folds, lifts, drops, and optional descent pockets where they make
@@ -121,16 +121,16 @@ Baseline Ridge v0 controls should stay side-view and mobile-native:
 
 Traversal ingredients:
 
-| Ingredient | First use | Purpose |
-| --- | --- | --- |
-| Wide shelves / bridge crossings | Work Artifact -> Stampede | Adds traversal texture without precision stress |
-| Chunky paper stairs | Outskirts -> Cicka Home | Keeps entry calm and readable without slope physics |
-| Ladders / cords | Cicka Home -> Work Artifact, Telegraph | Adds vertical movement as readable object traversal |
-| Soft drop shafts | Stampede return, later Telegraph return | Lucky Luna-inspired vertical fun; no fall damage |
-| Elevators / lifts | Domino Desk, later Outskirts lift | Route compression and spectacle |
-| Switchback shelves | Cicka -> Guide | Lets player see old places from above |
-| Underpath crawl/low route | Future Cicka secret | Personality and secret language |
-| Future mobility items | Later optional pockets | May add jump-like toys only after the no-jump route grammar works |
+| Ingredient                      | First use                               | Purpose                                                           |
+| ------------------------------- | --------------------------------------- | ----------------------------------------------------------------- |
+| Wide shelves / bridge crossings | Work Artifact -> Stampede               | Adds traversal texture without precision stress                   |
+| Chunky paper stairs             | Outskirts -> Cicka Home                 | Keeps entry calm and readable without slope physics               |
+| Ladders / cords                 | Cicka Home -> Work Artifact, Telegraph  | Adds vertical movement as readable object traversal               |
+| Soft drop shafts                | Stampede return, later Telegraph return | Lucky Luna-inspired vertical fun; no fall damage                  |
+| Elevators / lifts               | Domino Desk, later Outskirts lift       | Route compression and spectacle                                   |
+| Switchback shelves              | Cicka -> Guide                          | Lets player see old places from above                             |
+| Underpath crawl/low route       | Future Cicka secret                     | Personality and secret language                                   |
+| Future mobility items           | Later optional pockets                  | May add jump-like toys only after the no-jump route grammar works |
 
 Main route should be **mostly forward with readable bends, lifts, drops, and
 resident-caused route changes**, not abstract platforming.
@@ -211,21 +211,21 @@ flowchart BT
 Target first version: **10-12 screens**, not 3-5. One screen means roughly one
 camera width of playable space.
 
-| Beat | Purpose | Contents |
-| --- | --- | --- |
-| 1. Outskirts / City Edge | Entry and future Overworld merge | city edge, Basement hatch space, Potassium hint space, distant Relay silhouette above |
-| 2. Cicka Home | Emotional anchor | desk-nest, pinboard, empty memento space, Cicka interaction |
-| 3. Work Artifact Ledge | Learn Danilo through object | short climb; easy major artifact slot: Saturn/Vega or Hummingbird placeholder |
-| 4. Stampede Blanket | First opt-in action | wide bridge/shelf approach; visible future drop/fold back to Cicka |
-| 5. Blueprint Bridge | First required art/drawing soft gate / Resident Help Beat | closed or unsafe crossing; Cicka field presence draws attention to a blank plan; finished bridge sketch becomes the route |
-| 6. Switchback Shelf | First spatial memory test | trail bends upward/back over Cicka; Cicka Home visible below |
-| 7. Telegraph Terrace | Future mini-game teaser | vertical climb/elevator-looking cord; later cord drop to Cicka |
-| 8. Guide Overlook | Reorientation | Relay Spire visible again from above; Guide points without exposition dump |
-| 9. Lucky Luna Drop Pocket | Movement texture | optional safe descent shaft to a scrap, then easy return |
-| 10. Relay Gate | Destination promise | locked gate, proof slots, view back across route |
-| 11. Domino Desk / Lift | Route-compression promise | desk/elevator silhouette; future lift returns to Cicka |
-| 12. High Ledge Tease | Future movement promise | visible unreachable scrap, no required jump verb |
-| 13. Optional Underpath Tease | Cicka secret language | paw marks below Cicka/Stampede, not usable yet |
+| Beat                         | Purpose                                                   | Contents                                                                                                                  |
+| ---------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| 1. Outskirts / City Edge     | Entry and future Overworld merge                          | city edge, Basement hatch space, Potassium hint space, distant Relay silhouette above                                     |
+| 2. Cicka Home                | Emotional anchor                                          | desk-nest, pinboard, empty memento space, Cicka interaction                                                               |
+| 3. Work Artifact Ledge       | Learn Danilo through object                               | short climb; easy major artifact slot: Saturn/Vega or Hummingbird placeholder                                             |
+| 4. Stampede Blanket          | First opt-in action                                       | wide bridge/shelf approach; visible future drop/fold back to Cicka                                                        |
+| 5. Blueprint Bridge          | First required art/drawing soft gate / Resident Help Beat | closed or unsafe crossing; Cicka field presence draws attention to a blank plan; finished bridge sketch becomes the route |
+| 6. Switchback Shelf          | First spatial memory test                                 | trail bends upward/back over Cicka; Cicka Home visible below                                                              |
+| 7. Telegraph Terrace         | Future mini-game teaser                                   | vertical climb/elevator-looking cord; later cord drop to Cicka                                                            |
+| 8. Guide Overlook            | Reorientation                                             | Relay Spire visible again from above; Guide points without exposition dump                                                |
+| 9. Lucky Luna Drop Pocket    | Movement texture                                          | optional safe descent shaft to a scrap, then easy return                                                                  |
+| 10. Relay Gate               | Destination promise                                       | locked gate, proof slots, view back across route                                                                          |
+| 11. Domino Desk / Lift       | Route-compression promise                                 | desk/elevator silhouette; future lift returns to Cicka                                                                    |
+| 12. High Ledge Tease         | Future movement promise                                   | visible unreachable scrap, no required jump verb                                                                          |
+| 13. Optional Underpath Tease | Cicka secret language                                     | paw marks below Cicka/Stampede, not usable yet                                                                            |
 
 ## First-Walk Route
 
@@ -247,13 +247,13 @@ the first shortcut opens. This creates the mental model:
 
 ## Shortcut Plan
 
-| Unlock | Route change | Why it matters |
-| --- | --- | --- |
-| Blueprint Bridge helped | Bridge sketch becomes the main-route crossing | Teaches "help resident -> route changes" with a tiny local art beat |
-| Stampede clear | Safe drop/fold from Switchback back to Cicka Home | First "aha"; Cicka is reachable after first mini-game |
-| Telegraph clear | Cord/drop shaft from Telegraph Terrace to Cicka Home | Lucky Luna-style descent; makes terrace feel above home |
-| Domino future | Desk lift/elevator returns from Domino to Cicka Home | Vertical route compression and puzzle identity |
-| Cicka translator future | Cicka reveals underpath scratches | Secrets become relationship-driven, not map-marker-driven |
+| Unlock                  | Route change                                         | Why it matters                                                      |
+| ----------------------- | ---------------------------------------------------- | ------------------------------------------------------------------- |
+| Blueprint Bridge helped | Bridge sketch becomes the main-route crossing        | Teaches "help resident -> route changes" with a tiny local art beat |
+| Stampede clear          | Safe drop/fold from Switchback back to Cicka Home    | First "aha"; Cicka is reachable after first mini-game               |
+| Telegraph clear         | Cord/drop shaft from Telegraph Terrace to Cicka Home | Lucky Luna-style descent; makes terrace feel above home             |
+| Domino future           | Desk lift/elevator returns from Domino to Cicka Home | Vertical route compression and puzzle identity                      |
+| Cicka translator future | Cicka reveals underpath scratches                    | Secrets become relationship-driven, not map-marker-driven           |
 
 Shortcut rule:
 
@@ -263,13 +263,13 @@ Shortcut rule:
 
 Major artifacts are visible and easy; minor scraps are optional.
 
-| Artifact type | Placement | Example |
-| --- | --- | --- |
-| Major job artifact | Main route, before/after Stampede | Saturn office sticker, Hummingbird feather |
-| Project artifact | Small side shelf near main route | broken UI tile, deploy stamp, puzzle part |
-| Skill/tool scrap | Optional pocket or high ledge | keycap, tiny CLI flag, syntax scrap |
-| Laptop key | Later gated route near Basement/Outskirts | not in first map rebuild |
-| Glasses re-read clue | Existing Basement/Overworld anchor | used later to reinterpret artifacts |
+| Artifact type        | Placement                                 | Example                                    |
+| -------------------- | ----------------------------------------- | ------------------------------------------ |
+| Major job artifact   | Main route, before/after Stampede         | Saturn office sticker, Hummingbird feather |
+| Project artifact     | Small side shelf near main route          | broken UI tile, deploy stamp, puzzle part  |
+| Skill/tool scrap     | Optional pocket or high ledge             | keycap, tiny CLI flag, syntax scrap        |
+| Laptop key           | Later gated route near Basement/Outskirts | not in first map rebuild                   |
+| Glasses re-read clue | Existing Basement/Overworld anchor        | used later to reinterpret artifacts        |
 
 ## Rhythm
 
@@ -302,18 +302,18 @@ major locations needs one clear job:
 
 Filler budget:
 
-| Gap | Fill | Purpose |
-| --- | --- | --- |
-| Outskirts -> Cicka Home | torn city edge, paper stairs, Basement hatch silhouette, Potassium warning tape | transition old Overworld into Ridge without replacing it yet |
-| Cicka Home -> Work Artifact Ledge | desk legs, pinned notes, Saturn/Hummingbird placeholder object, Cicka paw mark | personal object discovery, not resume modal |
-| Work Artifact -> Stampede | wide shelf or bridge, loose pages, swarm flecks getting denser, picnic crumbs | anticipation before mini-game |
-| Stampede -> Taped Bridge | closed/taped bridge or missing plank, tiny resident silhouette, Cicka staring at the unsafe edge | first Resident Help Beat and visible before/after route proof |
-| Stampede -> Switchback Shelf | folded-paper bridge, safe drop preview, Cicka Home visible below | first mental-map "aha" setup |
-| Switchback -> Telegraph Terrace | hanging cord, timing tick marks, small rest shelf | vertical climb with future mechanic signal |
-| Telegraph -> Guide Overlook | windy paper bridge, Relay silhouette reappears | orientation after climb |
-| Guide -> Relay Gate | quieter open shelf, proof-slot shapes, signal lines | destination pressure and awe |
-| Relay -> Domino Desk | desk clutter, coffee rings, elevator rails | route-compression promise |
-| Optional Drop Pocket | falling paper scraps, safe shaft, hidden keycap/syntax scrap | Lucky Luna texture without making it required |
+| Gap                               | Fill                                                                                             | Purpose                                                       |
+| --------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------- |
+| Outskirts -> Cicka Home           | torn city edge, paper stairs, Basement hatch silhouette, Potassium warning tape                  | transition old Overworld into Ridge without replacing it yet  |
+| Cicka Home -> Work Artifact Ledge | desk legs, pinned notes, Saturn/Hummingbird placeholder object, Cicka paw mark                   | personal object discovery, not resume modal                   |
+| Work Artifact -> Stampede         | wide shelf or bridge, loose pages, swarm flecks getting denser, picnic crumbs                    | anticipation before mini-game                                 |
+| Stampede -> Taped Bridge          | closed/taped bridge or missing plank, tiny resident silhouette, Cicka staring at the unsafe edge | first Resident Help Beat and visible before/after route proof |
+| Stampede -> Switchback Shelf      | folded-paper bridge, safe drop preview, Cicka Home visible below                                 | first mental-map "aha" setup                                  |
+| Switchback -> Telegraph Terrace   | hanging cord, timing tick marks, small rest shelf                                                | vertical climb with future mechanic signal                    |
+| Telegraph -> Guide Overlook       | windy paper bridge, Relay silhouette reappears                                                   | orientation after climb                                       |
+| Guide -> Relay Gate               | quieter open shelf, proof-slot shapes, signal lines                                              | destination pressure and awe                                  |
+| Relay -> Domino Desk              | desk clutter, coffee rings, elevator rails                                                       | route-compression promise                                     |
+| Optional Drop Pocket              | falling paper scraps, safe shaft, hidden keycap/syntax scrap                                     | Lucky Luna texture without making it required                 |
 
 Environment rules:
 
@@ -334,13 +334,13 @@ dialogue hubs.
 
 V1 cast for the vertical map:
 
-| NPC | Location | Map function | Interaction size |
-| --- | --- | --- | --- |
-| Cicka | Cicka Home, later paw marks / underpath | emotional anchor, secret language | one-line reactions, no menu |
-| Ridge Guide | Guide Overlook | reorientation, "Relay is above/near" confirmation | one short bark |
-| TODO: AI | Telegraph Terrace | future training/sparring identity | inert silhouette first |
-| Potassium Compliance Officer | Outskirts/Potassium hint later | connects existing Potassium secret to Ridge | sign/NPC cameo |
-| Printer Oracle | later manual-page pocket | paper/manual clue giver | rare, dramatic hint |
+| NPC                          | Location                                | Map function                                      | Interaction size            |
+| ---------------------------- | --------------------------------------- | ------------------------------------------------- | --------------------------- |
+| Cicka                        | Cicka Home, later paw marks / underpath | emotional anchor, secret language                 | one-line reactions, no menu |
+| Ridge Guide                  | Guide Overlook                          | reorientation, "Relay is above/near" confirmation | one short bark              |
+| TODO: AI                     | Telegraph Terrace                       | future training/sparring identity                 | inert silhouette first      |
+| Potassium Compliance Officer | Outskirts/Potassium hint later          | connects existing Potassium secret to Ridge       | sign/NPC cameo              |
+| Printer Oracle               | later manual-page pocket                | paper/manual clue giver                           | rare, dramatic hint         |
 
 NPC placement rules:
 
@@ -632,14 +632,14 @@ Player feeling:
 
 Use a few recurring secret languages:
 
-| Secret tell | Meaning |
-| --- | --- |
-| Cicka paw marks | Cicka noticed a hidden route or object |
-| Coffee rings | desk/Domino territory; puzzle or lift nearby |
-| Yellowed tape | patched shortcut or future route |
-| Signal lines | Relay direction or proof progress |
-| Loose keycaps | skill/tool scraps, optional |
-| Feather / ringed sticker | major work artifact nearby |
+| Secret tell              | Meaning                                      |
+| ------------------------ | -------------------------------------------- |
+| Cicka paw marks          | Cicka noticed a hidden route or object       |
+| Coffee rings             | desk/Domino territory; puzzle or lift nearby |
+| Yellowed tape            | patched shortcut or future route             |
+| Signal lines             | Relay direction or proof progress            |
+| Loose keycaps            | skill/tool scraps, optional                  |
+| Feather / ringed sticker | major work artifact nearby                   |
 
 ### Pacing Walkthrough
 

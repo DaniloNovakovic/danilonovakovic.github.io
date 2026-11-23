@@ -215,8 +215,13 @@ export class TextureGenerator {
 
     /** Potassium's thrown sponge: yellow body, green scrubby top, smiling face. */
     const SPONGE_PORES: Array<[number, number, number, number]> = [
-      [20, 36, 3, 2], [34, 42, 2.5, 2], [46, 34, 3, 2.2], [26, 48, 2, 1.6],
-      [42, 50, 2.6, 1.8], [16, 46, 1.8, 1.4], [50, 46, 2, 1.6]
+      [20, 36, 3, 2],
+      [34, 42, 2.5, 2],
+      [46, 34, 3, 2.2],
+      [26, 48, 2, 1.6],
+      [42, 50, 2.6, 1.8],
+      [16, 46, 1.8, 1.4],
+      [50, 46, 2, 1.6]
     ];
     const SPONGE_SVG = (body: string, scrub: string, pore: string, suds: boolean) => `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">

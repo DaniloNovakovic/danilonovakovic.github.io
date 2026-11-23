@@ -8,10 +8,7 @@ export function applySessionCommands(
   commands.forEach((command) => applySessionCommand(internals, command));
 }
 
-function applySessionCommand(
-  internals: PotassiumCommandAdapterInternals,
-  command: PotassiumSessionCommand
-): void {
+function applySessionCommand(internals: PotassiumCommandAdapterInternals, command: PotassiumSessionCommand): void {
   if (applySessionBoardCommand(internals, command)) return;
   if (applySessionWaveCommand(internals, command)) return;
   if (applySessionHudCommand(internals, command)) return;
@@ -99,10 +96,7 @@ function applySessionHudCommand(
   }
 }
 
-function applySessionFlowCommand(
-  internals: PotassiumCommandAdapterInternals,
-  command: PotassiumSessionCommand
-): void {
+function applySessionFlowCommand(internals: PotassiumCommandAdapterInternals, command: PotassiumSessionCommand): void {
   const { ports } = internals;
   switch (command.type) {
     case 'showUpgradeChoices':

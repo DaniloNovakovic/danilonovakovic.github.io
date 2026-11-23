@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  SceneLifecycleEventBus,
-  SceneLifecycleEventQueue,
-  type SceneLifecycleEvent
-} from './events';
+import { SceneLifecycleEventBus, SceneLifecycleEventQueue, type SceneLifecycleEvent } from './events';
 
 describe('SceneLifecycleEventQueue', () => {
   it('flushes queued events in insertion order', () => {

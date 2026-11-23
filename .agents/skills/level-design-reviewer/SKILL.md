@@ -76,6 +76,7 @@ Use only modes that match the artifact:
 [1-3 sentences on the strongest design risk and strongest existing quality.]
 
 **Findings**
+
 - `[severity] [rule/lens] issue`
   Why it matters: [psychological or flow reason]
   Player impact: [what the player may do or feel]
@@ -83,6 +84,7 @@ Use only modes that match the artifact:
   Optional alternative: [only when useful]
 
 **Validation**
+
 - [playtest question, telemetry check, or screenshot/blockout comparison]
 ```
 

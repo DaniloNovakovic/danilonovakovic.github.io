@@ -84,11 +84,7 @@ export class StreetConversation {
       choices: awaitingChoice ? (this.script.choices ?? []) : [],
       portrait: portraitFor(line.speakerId, glassesOn),
       speakerSide:
-        line.speakerId === 'narrator'
-          ? 'center'
-          : (line.speakerId === 'player') === playerOnLeft
-            ? 'left'
-            : 'right'
+        line.speakerId === 'narrator' ? 'center' : (line.speakerId === 'player') === playerOnLeft ? 'left' : 'right'
     };
   }
 

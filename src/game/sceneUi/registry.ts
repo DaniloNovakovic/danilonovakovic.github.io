@@ -53,9 +53,7 @@ export function sceneUiSurfaceExpandsGameFrame(id: SceneUiSurfaceId | undefined)
   return id ? SCENE_UI_BY_ID.get(id)?.expandsGameFrame === true : false;
 }
 
-export function getSceneUiSurfaceDefinition(
-  id: SceneUiSurfaceId
-): SceneUiSurfaceDefinition {
+export function getSceneUiSurfaceDefinition(id: SceneUiSurfaceId): SceneUiSurfaceDefinition {
   const surface = SCENE_UI_BY_ID.get(id);
   if (!surface) {
     throw new Error(`Unknown scene UI surface "${id}"`);

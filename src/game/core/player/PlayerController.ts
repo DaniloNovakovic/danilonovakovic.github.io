@@ -88,7 +88,11 @@ export class PlayerController {
     this.world.setComponent(this.stores.interaction, this.entityId, { requested: false });
     this.world.setComponent(this.stores.pause, this.entityId, { paused: false });
     this.world.setComponent(this.stores.input, this.entityId, {
-      left: false, right: false, sprint: false, jump: false, interact: false
+      left: false,
+      right: false,
+      sprint: false,
+      jump: false,
+      interact: false
     });
     this.world.setComponent(this.stores.transform, this.entityId, { x: 0, y: 0 });
   }
@@ -129,13 +133,9 @@ export class PlayerController {
 
     const coyoteTimeMs = this.config.coyoteTimeMs ?? 0;
     const hasCoyoteGround =
-      !grounded &&
-      coyoteTimeMs > 0 &&
-      this.lastGroundedAtMs !== null &&
-      nowMs - this.lastGroundedAtMs <= coyoteTimeMs;
+      !grounded && coyoteTimeMs > 0 && this.lastGroundedAtMs !== null && nowMs - this.lastGroundedAtMs <= coyoteTimeMs;
     const hasBufferedJump =
-      input.jump ||
-      (jumpBufferMs > 0 && this.bufferedJumpUntilMs !== null && this.bufferedJumpUntilMs >= nowMs);
+      input.jump || (jumpBufferMs > 0 && this.bufferedJumpUntilMs !== null && this.bufferedJumpUntilMs >= nowMs);
 
     this.world.setComponent(this.stores.jump, this.entityId, {
       enabled: true,
@@ -178,8 +178,6 @@ export class PlayerController {
   }
 
   getPosition(): { x: number; y: number } {
-    return (
-      this.world.getComponent(this.stores.transform, this.entityId) ?? { x: 0, y: 0 }
-    );
+    return this.world.getComponent(this.stores.transform, this.entityId) ?? { x: 0, y: 0 };
   }
 }

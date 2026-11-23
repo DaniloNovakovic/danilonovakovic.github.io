@@ -51,9 +51,5 @@ export function I18nProvider({ children }: I18nProviderProps) {
     messages: getMessages(state.locale)
   };
 
-  return (
-    <I18nContext.Provider value={value}>
-      {children}
-    </I18nContext.Provider>
-  );
+  return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }

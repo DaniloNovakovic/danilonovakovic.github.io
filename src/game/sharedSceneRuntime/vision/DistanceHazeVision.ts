@@ -64,12 +64,7 @@ export class DistanceHazeVision {
       const tileCenterY = y + tileSize / 2;
       for (let x = 0; x < width; x += tileSize) {
         const tileCenterX = x + tileSize / 2;
-        const dist = Phaser.Math.Distance.Between(
-          tileCenterX,
-          tileCenterY,
-          centerScreenX,
-          centerScreenY
-        );
+        const dist = Phaser.Math.Distance.Between(tileCenterX, tileCenterY, centerScreenX, centerScreenY);
         if (dist <= clearRadius) continue;
 
         const t = Phaser.Math.Clamp((dist - clearRadius) / (maxRadius - clearRadius), 0, 1);
@@ -80,4 +75,3 @@ export class DistanceHazeVision {
     }
   }
 }
-

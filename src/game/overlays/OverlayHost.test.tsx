@@ -28,22 +28,19 @@ vi.mock('./overlayRegistry', async () => {
         descriptionId: string;
       }) => {
         overlayRenderSpy(params);
-        return React.createElement(
-          DialogCard,
-          {
-            title: `Mock ${id}`,
-            description: 'Mock description',
-            onClose: close,
-            titleId,
-            descriptionId,
-            children: React.createElement(
-              React.Fragment,
-              null,
-              React.createElement('button', { onClick: close }, 'Child close'),
-              React.createElement('button', { onClick: () => enterScene('ridge') }, 'Child enter')
-            )
-          }
-        );
+        return React.createElement(DialogCard, {
+          title: `Mock ${id}`,
+          description: 'Mock description',
+          onClose: close,
+          titleId,
+          descriptionId,
+          children: React.createElement(
+            React.Fragment,
+            null,
+            React.createElement('button', { onClick: close }, 'Child close'),
+            React.createElement('button', { onClick: () => enterScene('ridge') }, 'Child enter')
+          )
+        });
       }
     })
   };

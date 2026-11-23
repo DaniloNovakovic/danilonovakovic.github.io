@@ -24,11 +24,7 @@ export const Options: Story = {
           tone="blue"
           selected
         />
-        <SceneChoiceCard
-          title="Choice B"
-          description="Unselected option with comparable copy."
-          tone="red"
-        />
+        <SceneChoiceCard title="Choice B" description="Unselected option with comparable copy." tone="red" />
       </SceneChoiceGrid>
     </div>
   )

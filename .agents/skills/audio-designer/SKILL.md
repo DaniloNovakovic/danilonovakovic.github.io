@@ -65,6 +65,7 @@ Default to this compact structure:
 [1-3 sentences on the intended sonic job and the main risk or opportunity.]
 
 **Audio Card**
+
 - Surface:
 - Emotional job:
 - Materials:
@@ -74,11 +75,13 @@ Default to this compact structure:
 - Do not do:
 
 **Findings Or Draft**
+
 - `[severity] [lens] issue or candidate cue`
   Why it matters: [player-experience reason]
   Recommendation: [smallest practical revision]
 
 **Validation**
+
 - [playtest question, muted-play check, asset-budget check, or Danilo taste check]
 ```
 

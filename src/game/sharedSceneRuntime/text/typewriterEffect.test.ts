@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type * as Phaser from 'phaser';
-import {
-  applyTypewriterClip,
-  startTypewriterEffect,
-  visibleGlyphCount
-} from './typewriterEffect';
+import { applyTypewriterClip, startTypewriterEffect, visibleGlyphCount } from './typewriterEffect';
 
 describe('visibleGlyphCount', () => {
   it('skips line breaks that the typewriter steps through but Phaser does not draw', () => {

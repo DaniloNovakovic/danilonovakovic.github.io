@@ -2,11 +2,7 @@
  * Scene-side adapter: GameConsoleSession events → bridge / scene callbacks.
  * Keeps core/console free of bridge imports (ADR-0006).
  */
-import {
-  bridgeActions,
-  type InventoryItemId,
-  type SecretDiscoveryId
-} from '@/game/bridge/store';
+import { bridgeActions, type InventoryItemId, type SecretDiscoveryId } from '@/game/bridge/store';
 import type { GameSessionEvent, GameThoughtId } from '@/game/core/console';
 import type { OverlayId } from '@/game/overlays/overlayIds';
 import type { SceneId } from '@/game/scenes/sceneIds';
@@ -23,10 +19,7 @@ export interface GameConsoleEventPorts {
 
 // Flat one-case-per-event dispatcher; splitting it would only scatter the event map.
 // fallow-ignore-next-line complexity
-export function applyGameConsoleEvents(
-  events: readonly GameSessionEvent[],
-  ports: GameConsoleEventPorts
-): void {
+export function applyGameConsoleEvents(events: readonly GameSessionEvent[], ports: GameConsoleEventPorts): void {
   for (const event of events) {
     switch (event.type) {
       case 'scene_entered':

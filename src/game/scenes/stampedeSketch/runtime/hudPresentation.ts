@@ -1,9 +1,6 @@
 import type { StampedePressureSnapshot } from './pressure';
 import type { StampedeProgressionState } from './progression';
-import {
-  stampedeContactLimit,
-  type StampedeSessionSnapshot
-} from './session';
+import { stampedeContactLimit, type StampedeSessionSnapshot } from './session';
 
 export type StampedeHudFeedback = 'smudged' | 'blanketHeld' | 'crowded' | string;
 
@@ -35,9 +32,7 @@ export function createStampedeHudSnapshot(
   const contactLimit = stampedeContactLimit(progression?.bonusHearts ?? 0);
 
   return {
-    ...(session.endless
-      ? { timerSeconds: session.elapsedMs / 1000 }
-      : { timeRemainingSeconds: remainingMs / 1000 }),
+    ...(session.endless ? { timerSeconds: session.elapsedMs / 1000 } : { timeRemainingSeconds: remainingMs / 1000 }),
     pageNoise: resolveHudNoise(session, pressure),
     phaseLabel: resolvePhaseLabel(session, pressure),
     feedback: resolveHudFeedback(session),
@@ -49,19 +44,13 @@ export function createStampedeHudSnapshot(
   };
 }
 
-function resolveHudNoise(
-  session: StampedeSessionSnapshot,
-  pressure?: StampedePressureSnapshot
-): number {
+function resolveHudNoise(session: StampedeSessionSnapshot, pressure?: StampedePressureSnapshot): number {
   if (session.phase === 'failed') return 1;
   if (session.phase === 'cleared') return 0.08;
   return pressure?.pressure ?? 0.12;
 }
 
-function resolvePhaseLabel(
-  session: StampedeSessionSnapshot,
-  pressure?: StampedePressureSnapshot
-): string {
+function resolvePhaseLabel(session: StampedeSessionSnapshot, pressure?: StampedePressureSnapshot): string {
   if (session.phase === 'failed') return 'Chicks caught up';
   if (session.phase === 'cleared') return 'You got away';
 
@@ -78,9 +67,7 @@ function resolvePhaseLabel(
   }
 }
 
-function resolveHudFeedback(
-  session: StampedeSessionSnapshot
-): StampedeHudFeedback | undefined {
+function resolveHudFeedback(session: StampedeSessionSnapshot): StampedeHudFeedback | undefined {
   if (session.phase === 'failed') return 'crowded';
   if (session.phase === 'cleared') return 'blanketHeld';
   if (session.recentContact) return 'smudged';

@@ -1,10 +1,6 @@
 import { PHASER_SCENE_KEYS } from '@/game/scenes/sceneIds';
 import type { ResumeSnapshot } from '../sceneLifecycle/types';
-import {
-  forgetResumePosition,
-  peekResumePosition,
-  rememberResumePosition
-} from './sceneResumeStore';
+import { forgetResumePosition, peekResumePosition, rememberResumePosition } from './sceneResumeStore';
 
 const FRESH_START_SCENE_KEYS = new Set<string>([PHASER_SCENE_KEYS.potassium]);
 

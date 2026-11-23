@@ -47,13 +47,13 @@ Each NPC should have one neutral silhouette, one interaction pose, and one
 post-reward variant. Sheet should work as black shapes on paper before details
 are added.
 
-| NPC | Silhouette Read | Function Read | Required Motifs | Avoid |
-| --- | --- | --- | --- | --- |
-| Cicka | Small low cat shape, tail doing the sentence, ears sharp | Resident, notice-guide, secret marker | Tail punctuation, loaf mass, tiny paws, blink slits | Mascot face, oversized UI pet, human-like talking poses |
-| Ridge Guide | Upright friendly guide with soft triangle poncho or jacket, signpost lean | Orientation and gentle encouragement | Hiking stick or folded map, slightly worried posture, font-license anxiety in props | Tutorial lecturer, generic park ranger, big dialogue-tree stance |
-| Sir Rummage (Potassium raccoon) | Round raccoon head with bandit mask and cardboard crown, sitting on a bin | Cute thief who stole the street CRT's Circuit; Potassium hints | Mask band, crown, Circuit clutched in one paw, trash-can lid | Gross grime, menacing teeth, realistic pest look, second ricochet mascot |
-| TODO: AI | Training dummy with unfinished legs and label area | Telegraph or Neutral sparring partner | Box head, visible TODO tag, taped-on arms, one honorable stance | Robot complexity, full humanoid rig, lore-heavy AI design |
-| Printer Oracle | Tall jammed-printer silhouette with oracle posture | Manual-page hint giver | Paper crown, accordion jam trail, prophetic output slot | Clean office printer, readable paragraphs on body, too many moving parts |
+| NPC                             | Silhouette Read                                                           | Function Read                                                  | Required Motifs                                                                     | Avoid                                                                    |
+| ------------------------------- | ------------------------------------------------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Cicka                           | Small low cat shape, tail doing the sentence, ears sharp                  | Resident, notice-guide, secret marker                          | Tail punctuation, loaf mass, tiny paws, blink slits                                 | Mascot face, oversized UI pet, human-like talking poses                  |
+| Ridge Guide                     | Upright friendly guide with soft triangle poncho or jacket, signpost lean | Orientation and gentle encouragement                           | Hiking stick or folded map, slightly worried posture, font-license anxiety in props | Tutorial lecturer, generic park ranger, big dialogue-tree stance         |
+| Sir Rummage (Potassium raccoon) | Round raccoon head with bandit mask and cardboard crown, sitting on a bin | Cute thief who stole the street CRT's Circuit; Potassium hints | Mask band, crown, Circuit clutched in one paw, trash-can lid                        | Gross grime, menacing teeth, realistic pest look, second ricochet mascot |
+| TODO: AI                        | Training dummy with unfinished legs and label area                        | Telegraph or Neutral sparring partner                          | Box head, visible TODO tag, taped-on arms, one honorable stance                     | Robot complexity, full humanoid rig, lore-heavy AI design                |
+| Printer Oracle                  | Tall jammed-printer silhouette with oracle posture                        | Manual-page hint giver                                         | Paper crown, accordion jam trail, prophetic output slot                             | Clean office printer, readable paragraphs on body, too many moving parts |
 
 ### Sheet Layout
 
@@ -72,16 +72,16 @@ Cicka gets the smallest real kit because she is a resident, not a menu icon.
 These can be implemented as separate placeholder textures or simple sprite
 frames. Tail shape carries most emotion.
 
-| Piece | Visual Spec | Implementation Need |
-| --- | --- | --- |
-| Perch | Cicka sits on a box, warm laptop vent, sign, or suspicious paper edge | Static body or sprite anchored to prop; no pathing required |
-| Blink | Eyes vanish for 2-3 stepped frames; body does not move | Idle timer swap; keep subtle |
-| Loaf | Body becomes a compact ink oval with ears and tail tucked | Alternate idle pose for warm/rest places |
-| Stretch | Long low curve, front paws extended, tail counter-curve | One-shot idle flourish; non-blocking |
-| Suspicious turn | Head/tail rotate toward player, body stays planted | Interaction acknowledgement before translator |
-| Tiny hop | Small up/down hop from perch to nearby mark | Optional tween; no navigation promise |
-| Paw-print mark | Three-to-four bean marks plus tiny scratch arrow | Reusable sticker/memory decal near hidden details |
-| Pre-translator meow bubble | Paper-cut bubble with only "meow", punctuation, or spacing | React/Phaser text can use plain "meow"; no translated subtitle until translator beat |
+| Piece                      | Visual Spec                                                           | Implementation Need                                                                  |
+| -------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Perch                      | Cicka sits on a box, warm laptop vent, sign, or suspicious paper edge | Static body or sprite anchored to prop; no pathing required                          |
+| Blink                      | Eyes vanish for 2-3 stepped frames; body does not move                | Idle timer swap; keep subtle                                                         |
+| Loaf                       | Body becomes a compact ink oval with ears and tail tucked             | Alternate idle pose for warm/rest places                                             |
+| Stretch                    | Long low curve, front paws extended, tail counter-curve               | One-shot idle flourish; non-blocking                                                 |
+| Suspicious turn            | Head/tail rotate toward player, body stays planted                    | Interaction acknowledgement before translator                                        |
+| Tiny hop                   | Small up/down hop from perch to nearby mark                           | Optional tween; no navigation promise                                                |
+| Paw-print mark             | Three-to-four bean marks plus tiny scratch arrow                      | Reusable sticker/memory decal near hidden details                                    |
+| Pre-translator meow bubble | Paper-cut bubble with only "meow", punctuation, or spacing            | React/Phaser text can use plain "meow"; no translated subtitle until translator beat |
 
 ### Cicka Emotion Grammar
 
@@ -98,14 +98,14 @@ Landmarks must work like map anchors from A Short Hike: the player should
 understand the route by looking, not by opening a map. Each board entry needs
 a far silhouette, near/interact composition, and post-reward memory overlay.
 
-| Landmark | Far Silhouette | Near Composition | Memory / Sticker Hook |
-| --- | --- | --- | --- |
-| Relay Spire | Tall thin ink tower with paper antenna forks, visible early above ridge | Base sign half-decoded by manual scrap; cables look hand-taped | Signal stickers climb upward; final "sent" stamp can cap the antenna |
-| Basement hatch | Low rectangular hatch, chunky handle, underground hatching below trail | Familiar current-content bridge, staged as a sketchbook trapdoor | Tape label, glasses mark, small arrow back to known work |
-| Potassium hint | Banana-peel warning sign or ricochet diagram pinned to rock | Raccoon paw prints, a dented trash-can lid, arrow toward arcade secret | Circuit stamp, tiny sponge sticker, rebound arc doodle |
-| Stampede picnic blanket / ink swarm | Blanket diamond with small black swarm cloud rising behind it | Picnic props threatened by overexcited ink ideas; clear Trail Card prop | Glide pip sticker, swarm becomes friendlier background doodles |
-| Telegraph terrace / bag | Cliff ledge with hanging heavy bag and three timing marks | Bag silhouette at readable impact height; TODO: AI may stand nearby | Rhythm ticks, tempo stamp, manual glyph scrap |
-| Domino desk / elevator | Messy desk skyline with domino rectangles and small service elevator | Tape, coffee rings, pushable-looking blocks, elevator gate | Shortcut arrow, elevator permit sticker, deterministic path lines |
+| Landmark                            | Far Silhouette                                                          | Near Composition                                                        | Memory / Sticker Hook                                                |
+| ----------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Relay Spire                         | Tall thin ink tower with paper antenna forks, visible early above ridge | Base sign half-decoded by manual scrap; cables look hand-taped          | Signal stickers climb upward; final "sent" stamp can cap the antenna |
+| Basement hatch                      | Low rectangular hatch, chunky handle, underground hatching below trail  | Familiar current-content bridge, staged as a sketchbook trapdoor        | Tape label, glasses mark, small arrow back to known work             |
+| Potassium hint                      | Banana-peel warning sign or ricochet diagram pinned to rock             | Raccoon paw prints, a dented trash-can lid, arrow toward arcade secret  | Circuit stamp, tiny sponge sticker, rebound arc doodle               |
+| Stampede picnic blanket / ink swarm | Blanket diamond with small black swarm cloud rising behind it           | Picnic props threatened by overexcited ink ideas; clear Trail Card prop | Glide pip sticker, swarm becomes friendlier background doodles       |
+| Telegraph terrace / bag             | Cliff ledge with hanging heavy bag and three timing marks               | Bag silhouette at readable impact height; TODO: AI may stand nearby     | Rhythm ticks, tempo stamp, manual glyph scrap                        |
+| Domino desk / elevator              | Messy desk skyline with domino rectangles and small service elevator    | Tape, coffee rings, pushable-looking blocks, elevator gate              | Shortcut arrow, elevator permit sticker, deterministic path lines    |
 
 ### Board Rules
 
@@ -120,18 +120,18 @@ a far silhouette, near/interact composition, and post-reward memory overlay.
 Stickers are the visible reward language. They should feel placed by the Ridge,
 not unlocked by a menu.
 
-| Vocabulary Item | Use | Shape Rules |
-| --- | --- | --- |
-| Stamp | Durable hobby clear proof | Thick border, imperfect circle/square, one bold icon |
-| Sticker patch | World changed by reward | Slight paper lift shadow, peeled corner, taped edge |
-| Manual scrap | Knowledge clue or Relay decoding | Torn rectangle, one diagram, one phrase max |
-| Paw mark | Cicka noticed something | Tiny repeated beans, can point with scratch arrow |
-| Ink memory | The world remembers a clear | Faint hatching, ghost doodle, old attempt crossed out |
-| Route arrow | Backtracking or shortcut readability | Hand-drawn arrow, never neon, paired with physical prop |
-| Tape strip | Patch, permit, or construction gag | Two rough strips max per landmark cluster |
-| Impact burst | Parry, stamp, or Stampede hit feedback | Starburst or ink splat; use sparingly so it stays legible |
-| Swarm dot | Stampede enemy/idea language | Small black flecks with varied size; cap density near player |
-| Signal line | Relay/progress motif | Broken upward strokes, can connect stickers toward Spire |
+| Vocabulary Item | Use                                    | Shape Rules                                                  |
+| --------------- | -------------------------------------- | ------------------------------------------------------------ |
+| Stamp           | Durable hobby clear proof              | Thick border, imperfect circle/square, one bold icon         |
+| Sticker patch   | World changed by reward                | Slight paper lift shadow, peeled corner, taped edge          |
+| Manual scrap    | Knowledge clue or Relay decoding       | Torn rectangle, one diagram, one phrase max                  |
+| Paw mark        | Cicka noticed something                | Tiny repeated beans, can point with scratch arrow            |
+| Ink memory      | The world remembers a clear            | Faint hatching, ghost doodle, old attempt crossed out        |
+| Route arrow     | Backtracking or shortcut readability   | Hand-drawn arrow, never neon, paired with physical prop      |
+| Tape strip      | Patch, permit, or construction gag     | Two rough strips max per landmark cluster                    |
+| Impact burst    | Parry, stamp, or Stampede hit feedback | Starburst or ink splat; use sparingly so it stays legible    |
+| Swarm dot       | Stampede enemy/idea language           | Small black flecks with varied size; cap density near player |
+| Signal line     | Relay/progress motif                   | Broken upward strokes, can connect stickers toward Spire     |
 
 ### Memory Layer Priority
 

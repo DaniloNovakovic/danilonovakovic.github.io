@@ -27,15 +27,18 @@ export function useGameBridgeCallbacks({
     ridgeDevControls
   });
 
-  useLayoutEffect(function syncGameBridgeCallbacks() {
-    bridgeRef.current = {
-      onEnterScene,
-      onOpenOverlay,
-      onReturnToOverworld,
-      isPaused,
-      ridgeDevControls
-    };
-  }, [onEnterScene, onOpenOverlay, onReturnToOverworld, isPaused, ridgeDevControls]);
+  useLayoutEffect(
+    function syncGameBridgeCallbacks() {
+      bridgeRef.current = {
+        onEnterScene,
+        onOpenOverlay,
+        onReturnToOverworld,
+        isPaused,
+        ridgeDevControls
+      };
+    },
+    [onEnterScene, onOpenOverlay, onReturnToOverworld, isPaused, ridgeDevControls]
+  );
 
   const stableOnEnterScene = useCallback((sceneId: SceneId) => {
     bridgeRef.current.onEnterScene(sceneId);

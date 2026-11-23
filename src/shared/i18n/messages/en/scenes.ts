@@ -1,1070 +1,1071 @@
 export const sceneMessages = {
   overworld: {
-    glassesSecretHint: "Something appears in plain sight.",
-    bananaDiscoveredPrompt: "[E] Hop in the dumpster",
-    bananaUndiscoveredPrompt: "[E] Tidy up?",
+    glassesSecretHint: 'Something appears in plain sight.',
+    bananaDiscoveredPrompt: '[E] Hop in the dumpster',
+    bananaUndiscoveredPrompt: '[E] Tidy up?',
     conversation: {
       speakers: {
-        player: "You",
-        chick: "Street Chick",
-        narrator: "Street",
+        player: 'You',
+        chick: 'Street Chick',
+        narrator: 'Street'
       },
       chick: {
         first: [
-          "hey. hey.",
-          "Uh... hi?",
+          'hey. hey.',
+          'Uh... hi?',
           "you're cute when you squint.",
-          "the flock is coming over. don't run. ...or do. we like that.",
+          "the flock is coming over. don't run. ...or do. we like that."
         ],
         again: [
-          "you came back.",
+          'you came back.',
           "I'm just walking past. Really.",
-          "you took the glasses off. for us.",
-          "the flock's been asking about you.",
+          'you took the glasses off. for us.',
+          "the flock's been asking about you."
         ],
-        chase: "Run!",
-        later: "Slowly back away",
+        chase: 'Run!',
+        later: 'Slowly back away'
       },
       crt: {
         line: "The blank CRT hums under your hand. There's a slot exactly the shape of your Circuit.",
-        seat: "Seat the Circuit",
-        later: "Not yet",
+        seat: 'Seat the Circuit',
+        later: 'Not yet'
       },
       litter: [
-        "Litter. A crumpled page, a tipped soda can, and tiny raccoon paw prints trotting into the dumpster.",
+        'Litter. A crumpled page, a tipped soda can, and tiny raccoon paw prints trotting into the dumpster.',
         "Who just leaves this here? Fine. I'll tidy up.",
-        "You reach down... and step square in a soapy puddle.",
-      ],
+        'You reach down... and step square in a soapy puddle.'
+      ]
     },
-    chickPrompt: "[E] The chick is staring",
-    circuitCrtLockedPrompt: "A blank CRT. Needs a Circuit.",
-    circuitCrtReadyPrompt: "[E] Insert Circuit",
-    signpostLabel: "START",
-    signpostPrompt: "[E] Read sign",
+    chickPrompt: '[E] The chick is staring',
+    circuitCrtLockedPrompt: 'A blank CRT. Needs a Circuit.',
+    circuitCrtReadyPrompt: '[E] Insert Circuit',
+    signpostLabel: 'START',
+    signpostPrompt: '[E] Read sign',
     signpostHints: {
-      "find-glasses": "The sign is too blurry to read. A chick is pacing just past Experiences.",
-      "wear-glasses": "Glasses off? The street hides things from blurry eyes. That chick will bolt if you put them on.",
-      "find-peel": "Look down just past the Abilities shelf. Somebody has been littering.",
-      "win-circuit": "Those paw prints lead into a dumpster. Win back what's in there... or build your own. The hobby house hides spare parts.",
-      "solder-circuit": "Your pockets rattle with parts. The basement workbench could make something of them.",
-      "use-crt": "The blank CRT by Projects is humming. It wants your Circuit.",
+      'find-glasses': 'The sign is too blurry to read. A chick is pacing just past Experiences.',
+      'wear-glasses': 'Glasses off? The street hides things from blurry eyes. That chick will bolt if you put them on.',
+      'find-peel': 'Look down just past the Abilities shelf. Somebody has been littering.',
+      'win-circuit':
+        "Those paw prints lead into a dumpster. Win back what's in there... or build your own. The hobby house hides spare parts.",
+      'solder-circuit': 'Your pockets rattle with parts. The basement workbench could make something of them.',
+      'use-crt': 'The blank CRT by Projects is humming. It wants your Circuit.'
     },
     signpostTally: (found: number, total: number) => `Secrets found: ${found}/${total}`,
-    billboardEmpty: "This space for rent.\n(Ask the artist in the hobby house.)",
-    sketchUpgrade: "The sketch picks up a little more detail...",
+    billboardEmpty: 'This space for rent.\n(Ask the artist in the hobby house.)',
+    sketchUpgrade: 'The sketch picks up a little more detail...'
   },
   basement: {
-    title: "DEVELOPER BASEMENT",
-    ladderUp: "LADDER UP",
-    glasses: "GLASSES",
-    glassesAcquired: "Glasses acquired. The sketch city flickers into focus.",
+    title: 'DEVELOPER BASEMENT',
+    ladderUp: 'LADDER UP',
+    glasses: 'GLASSES',
+    glassesAcquired: 'Glasses acquired. The sketch city flickers into focus.',
     cannotSeeThought: "ughh... I can't see",
-    glassesOnThought: "*squints* ...okay, glasses back on.",
-    darkStatus: "A forgotten dev room hums under the sketch city.",
-    litStatus: "Lights on. Someone has been building things down here.",
-    corkboard: "NOTES",
-    workbench: "WORKBENCH",
+    glassesOnThought: '*squints* ...okay, glasses back on.',
+    darkStatus: 'A forgotten dev room hums under the sketch city.',
+    litStatus: 'Lights on. Someone has been building things down here.',
+    corkboard: 'NOTES',
+    workbench: 'WORKBENCH',
     corkboardNotes: [
-      "Sticky note: \"Coding since 2016. Still not done.\"",
-      "Index card: \"Import job: 92% faster. Levenshtein fixed the team names.\"",
-      "Napkin sketch: chess + tetris + plants vs zombies = ???",
-      "Printout: \"eslint rule idea — no more magic numbers. (except 42)\"",
-      "Postcard from Serbia: \"Design tokens in Figma = tokens in code. Make it so.\"",
+      'Sticky note: "Coding since 2016. Still not done."',
+      'Index card: "Import job: 92% faster. Levenshtein fixed the team names."',
+      'Napkin sketch: chess + tetris + plants vs zombies = ???',
+      'Printout: "eslint rule idea — no more magic numbers. (except 42)"',
+      'Postcard from Serbia: "Design tokens in Figma = tokens in code. Make it so."'
     ],
-    shelfThought: "An old uc32 board, jumper wires... and a chess piece glued to a Tetris block?",
+    shelfThought: 'An old uc32 board, jumper wires... and a chess piece glued to a Tetris block?',
     workbenchMissing: (owned: number, total: number) =>
       `A Circuit blueprint. Parts ${owned}/${total}. The hobby house might have spares...`,
-    workbenchSoldered: "Copper, crystal, cell... *sizzle* — I built a Circuit!",
-    workbenchDone: "The iron is cold. My Circuit is already humming.",
+    workbenchSoldered: 'Copper, crystal, cell... *sizzle* — I built a Circuit!',
+    workbenchDone: 'The iron is cold. My Circuit is already humming.'
   },
   hobbies: {
     labels: {
-      title: "Hobbies",
-      games: "GAMES",
-      art: "ART",
-      music: "MUSIC",
-      fitness: "FITNESS",
-      dancing: "DANCE",
+      title: 'Hobbies',
+      games: 'GAMES',
+      art: 'ART',
+      music: 'MUSIC',
+      fitness: 'FITNESS',
+      dancing: 'DANCE'
     },
-    posterLimbs: "ART OF 8 LIMBS",
+    posterLimbs: 'ART OF 8 LIMBS'
   },
   ridge: {
     memory: {
-      stampedeFirstClearLabel: "HELD",
-      cickaWalkByBark: "mrrp.",
+      stampedeFirstClearLabel: 'HELD',
+      cickaWalkByBark: 'mrrp.'
     },
     cicka: {
       interaction: {
-        fresh: "meow.",
-        stampedeMemory: "mrrp!",
-      },
+        fresh: 'meow.',
+        stampedeMemory: 'mrrp!'
+      }
     },
     presence: {
       roles: {
-        cicka: "road cat",
-        "counterpart-cat": "local cat",
-        draftsperson: "bridge draftsperson",
-        guitarist: "local legend",
-        kid: "skater kid",
-        crowd: "waiting crowd",
-        traveler: "postcard traveler",
-        driver: "shuttle driver",
-        "operations-helper": "festival crew",
-        "dance-teacher": "the profe",
-        steward: "festival steward",
-        shuttle: "last shuttle",
+        cicka: 'road cat',
+        'counterpart-cat': 'local cat',
+        draftsperson: 'bridge draftsperson',
+        guitarist: 'local legend',
+        kid: 'skater kid',
+        crowd: 'waiting crowd',
+        traveler: 'postcard traveler',
+        driver: 'shuttle driver',
+        'operations-helper': 'festival crew',
+        'dance-teacher': 'the profe',
+        steward: 'festival steward',
+        shuttle: 'last shuttle'
       },
       barks: {
-        cicka: ["mrrp.", "prrt?", "...mrow.", "*tail flick*"],
-        "counterpart-cat": ["...", "*slow blink*", "mrow."],
+        cicka: ['mrrp.', 'prrt?', '...mrow.', '*tail flick*'],
+        'counterpart-cat': ['...', '*slow blink*', 'mrow.'],
         draftsperson: [
-          "...load-bearing, load-bearing...",
+          '...load-bearing, load-bearing...',
           "It's the middle span. It's always the middle span.",
-          "Measure twice. Then measure again.",
-          "Paper holds. Paper always holds.",
+          'Measure twice. Then measure again.',
+          'Paper holds. Paper always holds.'
         ],
         guitarist: [
-          "Seven notes. The whole song is seven notes.",
+          'Seven notes. The whole song is seven notes.',
           "...still can't close my hand around it.",
-          "Twenty summers. Never missed one.",
-          "The ramp won. This time.",
+          'Twenty summers. Never missed one.',
+          'The ramp won. This time.'
         ],
         kid: [
           "It's NOT my fault.",
-          "*kicks the cracked board*",
+          '*kicks the cracked board*',
           "Old people shouldn't skate.",
-          "...the chord was good, though.",
+          '...the chord was good, though.'
         ],
-        crowd: [
-          "Is it starting?",
-          "I walked an hour for this.",
-          "Du-le! Du-le!",
-          "Someone play something.",
-        ],
+        crowd: ['Is it starting?', 'I walked an hour for this.', 'Du-le! Du-le!', 'Someone play something.'],
         traveler: [
-          "Grandma said the view was worth the hill.",
-          "Postcard: check. Stamp: check. Shuttle: ...",
-          "Ooh. Is that a goat?",
+          'Grandma said the view was worth the hill.',
+          'Postcard: check. Stamp: check. Shuttle: ...',
+          'Ooh. Is that a goat?'
         ],
         driver: [
-          "Start, stop. Nobody improvises.",
-          "...one, two, three, tap.",
-          "Everyone accounted for?",
-          "Last daylight ride. After setup.",
+          'Start, stop. Nobody improvises.',
+          '...one, two, three, tap.',
+          'Everyone accounted for?',
+          'Last daylight ride. After setup.'
         ],
-        "operations-helper": [
-          "Forty-six, forty-seven...",
-          "Mind the cables, mind the cables.",
-          "Ops to steward. Still fine. Over.",
+        'operations-helper': [
+          'Forty-six, forty-seven...',
+          'Mind the cables, mind the cables.',
+          'Ops to steward. Still fine. Over.'
         ],
-        "dance-teacher": [
-          "¡Uno, dos, tres... y tap!",
-          "The hip tells the truth.",
-          "Shoulders down, cariño.",
-        ],
-        steward: ["The gate opens when the lane's safe.", "Ticket? Ah — go on.", "Very serious pocket."],
-      },
+        'dance-teacher': ['¡Uno, dos, tres... y tap!', 'The hip tells the truth.', 'Shoulders down, cariño.'],
+        steward: ["The gate opens when the lane's safe.", 'Ticket? Ah — go on.', 'Very serious pocket.']
+      }
     },
     bridge: {
       speakers: {
-        prompt: "Prompt",
-        cicka: "Cicka",
-        bridgeDraftsperson: "Bridge Draftsperson",
+        prompt: 'Prompt',
+        cicka: 'Cicka',
+        bridgeDraftsperson: 'Bridge Draftsperson'
       },
       dialogue: {
-        "bridge.cicka.first_meet.prompt": "Visit Cicka",
-        "bridge.cicka.first_meet.01": "You find Cicka in a sunny patch of corn.",
-        "bridge.cicka.first_meet.02": "Mrreeow! *She swats a tiny wheeled toy back into place with feline precision.*",
-        "bridge.cicka.first_meet.03": "Looks like Cicka is running a very serious quality-assurance test on a toy car.",
-        "bridge.cicka.first_meet.choice.pet": "Pet Cicka gently",
-        "bridge.cicka.first_meet.pet.01": "mrrp.",
-        "bridge.cicka.first_meet.pet.02": "She leans into your hand for exactly one second, then remembers she is busy.",
-        "bridge.cicka.first_meet.choice.watch": "Watch the tiny car",
-        "bridge.cicka.first_meet.watch.01": "Vroom. The car makes another brave loop through the corn. Cicka supervises every inch.",
-        "bridge.cicka.first_meet.choice.reach": "Reach for the toy car",
-        "bridge.cicka.first_meet.reach.01": "Thwap. A white paw lands on the car before your fingers do.",
-        "bridge.cicka.first_meet.reach.02": "Mrrrow.",
-        "bridge.cicka.first_meet.reach.03": "Cicka looks at you like you've misread the rules of a very simple game.",
-        "bridge.cicka.first_meet.choice.leave": "Let her play",
-        "bridge.cicka.first_meet.leave.01": "You leave Cicka to her important testing.",
-        "bridge.draftsperson.missing_span.prompt": "Talk to Draftsperson",
-        "bridge.draftsperson.missing_span.01": "My blueprint looked legendary... until I imagined someone actually walking across the middle.",
-        "bridge.draftsperson.missing_span.02": "So I erase it. Then I draw it again. Then I erase it again.",
-        "bridge.draftsperson.missing_span.choice.car": "How will you know if it holds?",
-        "bridge.draftsperson.missing_span.car.01": "Easy! I roll my tiny test car across. If it holds the car, it'll hold anyone.",
-        "bridge.draftsperson.missing_span.car.02": "...It was right here a minute ago. Where did my car go?",
-        "bridge.draftsperson.missing_span.car.03": "Somewhere back in the corn, something small and wheeled goes vroom.",
-        "bridge.draftsperson.missing_span.car.03_cat": "You think of a certain cat, and a certain very busy toy car.",
-        "bridge.draftsperson.missing_span.choice.who": "Who are you, exactly?",
-        "bridge.draftsperson.missing_span.who.01": "The Bridge Draftsperson! I draft. The 'person' part is still in planning.",
-        "bridge.draftsperson.missing_span.choice.why": "Why not just build it?",
-        "bridge.draftsperson.missing_span.why.01": "What if it wobbles? What if a cow crosses? What if a cow crosses nervously?",
-        "bridge.draftsperson.missing_span.why.02": "A drawing can't fall down. That's what I like about drawings.",
-        "bridge.draftsperson.missing_span.choice.leave": "I'll have a look around.",
-        "bridge.draftsperson.missing_span.leave.01": "Take your time. The river isn't going anywhere. That's... sort of the problem.",
-        "bridge.draftsperson.missing_span.waiting": "Back already? Any sign of my test car?",
-        "bridge.draftsperson.missing_span.choice.cicka": "Cicka has it.",
-        "bridge.draftsperson.missing_span.cicka.01": "The cat? Oh, she's been playing with it all morning.",
-        "bridge.draftsperson.missing_span.cicka.01_guarded": "Let me guess. You reached for it and got the paw?",
-        "bridge.draftsperson.missing_span.cicka.02": "Cats don't hand things over, you know. But they do share a good game.",
-        "bridge.draftsperson.missing_span.choice.still_looking": "Still looking.",
-        "bridge.draftsperson.missing_span.still_looking.01": "I'll keep... not drawing it. Very carefully.",
-        "bridge.cicka.parallel_play.prompt": "Play with Cicka",
-        "bridge.cicka.parallel_play.01": "You sit beside Cicka in the warm corn.",
-        "bridge.cicka.parallel_play.02": "The toy car is parked under one white paw. She is not watching it. She is definitely watching it.",
-        "bridge.cicka.parallel_play.choice.grab": "Grab the car",
-        "bridge.cicka.parallel_play.grab.01": "Your hand gets halfway there. Thwap. The paw was faster.",
-        "bridge.cicka.parallel_play.grab.02": "Mrrrow.",
-        "bridge.cicka.parallel_play.choice.ask": "Ask her nicely for it",
-        "bridge.cicka.parallel_play.ask.01": "Cicka gives you a slow blink. It's a very polite blink. It's also a no.",
-        "bridge.cicka.parallel_play.choice.leaf": "Wiggle a corn leaf in the dirt",
-        "bridge.cicka.parallel_play.leaf.01": "You wiggle a corn leaf. Cicka's ears swivel. Her tail twitches.",
-        "bridge.cicka.parallel_play.leaf.02": "Pounce! She tackles the leaf, and the toy car rolls loose to your knee.",
-        "bridge.cicka.parallel_play.choice.pocket": "Pocket the car while she's busy",
-        "bridge.cicka.parallel_play.pocket.01": "You reach for it... and Cicka is already sitting on it. How? She was over there.",
-        "bridge.cicka.parallel_play.choice.roll": "Roll it back to her",
-        "bridge.cicka.parallel_play.roll.01": "The car bumps gently into her paws. She stares at it. Then at you.",
-        "bridge.cicka.parallel_play.roll.02": "Mrrp?",
-        "bridge.cicka.parallel_play.roll.03": "Bap. She rolls it right back.",
-        "bridge.cicka.parallel_play.choice.roll_again": "Roll it back again",
-        "bridge.cicka.parallel_play.roll_again.01": "Back and forth. Back and forth. The game has rules now, and you're learning them.",
-        "bridge.cicka.parallel_play.roll_again.02": "Purrrr...",
-        "bridge.cicka.parallel_play.roll_again.03": "Cicka nudges the car into your hand and flops over in the sun. Your turn to look after it.",
-        "bridge.cicka.parallel_play.roll_again.04": "Cicka entrusts you with the official Bridge Test Vehicle!",
-        "bridge.cicka.parallel_play.choice.keep": "Keep it this time",
-        "bridge.cicka.parallel_play.keep.01": "You close your hand around the car. Cicka's eyes go very round.",
-        "bridge.cicka.parallel_play.keep.02": "Mrrrrrrow.",
-        "bridge.cicka.parallel_play.keep.03": "Her tail puffs up to twice its size. She crouches low over the car, rear end wiggling. Oh. This is a test.",
-        "bridge.cicka.parallel_play.choice.rematch": "Crouch down, ready this time",
-        "bridge.cicka.parallel_play.rematch.01": "You crouch, eyes on the white paw. Cicka's tail starts to swish. Round two.",
-        "bridge.cicka.duel_won.01": "The last pounce lands on empty corn. Cicka sits up, tail high, and looks at you for a long moment.",
-        "bridge.cicka.duel_won.02": "Mrrp!",
-        "bridge.cicka.duel_won.03": "She nudges the toy car over to your foot. Fair is fair. You were faster than the paw.",
-        "bridge.cicka.duel_won.04": "Cicka respects you. The official Bridge Test Vehicle is yours.",
-        "bridge.cicka.duel_lost.01": "Thwap. Cicka pins the car under one paw and starts washing her face, very pleased with herself.",
-        "bridge.cicka.duel_lost.02": "Mrrow.",
-        "bridge.cicka.duel_lost.03": "She'll take you on again any time. Or maybe there's a gentler game to play.",
-        "bridge.cicka.parallel_play.choice.leave": "Stand up",
-        "bridge.cicka.parallel_play.leave.01": "You stand. Cicka keeps the car. The car keeps Cicka.",
-        "bridge.cicka.after_share.prompt": "Visit Cicka",
-        "bridge.cicka.after_share.01": "Cicka is sunbathing. One eye opens at the toy car in your hand.",
-        "bridge.cicka.after_share.01_respect": "Cicka is sunbathing. She lifts her chin at you: one champion to another.",
-        "bridge.cicka.after_share.choice.pet": "Scratch behind her ears",
-        "bridge.cicka.after_share.pet.01": "Purrrr...",
-        "bridge.cicka.after_share.choice.promise": "Promise to bring it back",
-        "bridge.cicka.after_share.promise.01": "The eye closes again. Deal.",
-        "bridge.draftsperson.toy_car_test.prompt": "Show the toy car",
-        "bridge.draftsperson.toy_car_test.01": "You hold up the tiny test car.",
-        "bridge.draftsperson.toy_car_test.02": "My test car! Where did you... no, wait. Let me guess. The cat?",
-        "bridge.draftsperson.toy_car_test.choice.hand_over": "Set it on the blueprint",
-        "bridge.draftsperson.toy_car_test.hand_over.01": "Every time I draw the middle span, I erase it. What if it sags? What if it snaps?",
-        "bridge.draftsperson.toy_car_test.hand_over.02": "Would you draw it with me? Bolt beams to the banks, and the little car will tell us if it holds.",
-        "bridge.draftsperson.toy_car_test.hand_over.03": "Road beams carry the car. Wood beams hold the road up. Triangles are your friend.",
-        "bridge.draftsperson.toy_car_test.choice.story": "Tell how Cicka shared it",
-        "bridge.draftsperson.toy_car_test.story.01": "She played with you? She's never even made eye contact with me.",
-        "bridge.draftsperson.toy_car_test.story.02": "Maybe I should sit in the corn more. Less drafting, more sitting.",
-        "bridge.draftsperson.toy_car_test.choice.not_yet": "Not yet.",
-        "bridge.draftsperson.toy_car_test.not_yet.01": "Fair. It's a very good car. I'll be here, not drawing anything.",
-        "bridge.draftsperson.toy_car_test.resume": "Back to the drawing board? The little car is still fueled up.",
-        "bridge.draftsperson.toy_car_test.choice.resume": "Back to the table",
-        "bridge.draftsperson.toy_car_test.choice.advice": "Any advice?",
-        "bridge.draftsperson.toy_car_test.advice.01": "Triangles. Always triangles. I dream about triangles.",
-        "bridge.draftsperson.toy_car_test.advice.02": "And if you get stuck, my sketch is behind the ? button. I won't be offended. Much.",
-        "bridge.draftsperson.toy_car_test.choice.later": "In a minute.",
-        "bridge.draftsperson.toy_car_test.later.01": "The drawing will wait. Drawings are very good at waiting.",
-        "bridge.draftsperson.bridge_built.01":
-          "Vroom! The toy car rattles all the way across your span, and the ink holds.",
-        "bridge.draftsperson.bridge_built.02":
-          "It held?! It HELD! I've drawn forty bridges and erased forty-one!",
-        "bridge.draftsperson.bridge_built.03":
+        'bridge.cicka.first_meet.prompt': 'Visit Cicka',
+        'bridge.cicka.first_meet.01': 'You find Cicka in a sunny patch of corn.',
+        'bridge.cicka.first_meet.02': 'Mrreeow! *She swats a tiny wheeled toy back into place with feline precision.*',
+        'bridge.cicka.first_meet.03': 'Looks like Cicka is running a very serious quality-assurance test on a toy car.',
+        'bridge.cicka.first_meet.choice.pet': 'Pet Cicka gently',
+        'bridge.cicka.first_meet.pet.01': 'mrrp.',
+        'bridge.cicka.first_meet.pet.02':
+          'She leans into your hand for exactly one second, then remembers she is busy.',
+        'bridge.cicka.first_meet.choice.watch': 'Watch the tiny car',
+        'bridge.cicka.first_meet.watch.01':
+          'Vroom. The car makes another brave loop through the corn. Cicka supervises every inch.',
+        'bridge.cicka.first_meet.choice.reach': 'Reach for the toy car',
+        'bridge.cicka.first_meet.reach.01': 'Thwap. A white paw lands on the car before your fingers do.',
+        'bridge.cicka.first_meet.reach.02': 'Mrrrow.',
+        'bridge.cicka.first_meet.reach.03': "Cicka looks at you like you've misread the rules of a very simple game.",
+        'bridge.cicka.first_meet.choice.leave': 'Let her play',
+        'bridge.cicka.first_meet.leave.01': 'You leave Cicka to her important testing.',
+        'bridge.draftsperson.missing_span.prompt': 'Talk to Draftsperson',
+        'bridge.draftsperson.missing_span.01':
+          'My blueprint looked legendary... until I imagined someone actually walking across the middle.',
+        'bridge.draftsperson.missing_span.02': 'So I erase it. Then I draw it again. Then I erase it again.',
+        'bridge.draftsperson.missing_span.choice.car': 'How will you know if it holds?',
+        'bridge.draftsperson.missing_span.car.01':
+          "Easy! I roll my tiny test car across. If it holds the car, it'll hold anyone.",
+        'bridge.draftsperson.missing_span.car.02': '...It was right here a minute ago. Where did my car go?',
+        'bridge.draftsperson.missing_span.car.03':
+          'Somewhere back in the corn, something small and wheeled goes vroom.',
+        'bridge.draftsperson.missing_span.car.03_cat': 'You think of a certain cat, and a certain very busy toy car.',
+        'bridge.draftsperson.missing_span.choice.who': 'Who are you, exactly?',
+        'bridge.draftsperson.missing_span.who.01':
+          "The Bridge Draftsperson! I draft. The 'person' part is still in planning.",
+        'bridge.draftsperson.missing_span.choice.why': 'Why not just build it?',
+        'bridge.draftsperson.missing_span.why.01':
+          'What if it wobbles? What if a cow crosses? What if a cow crosses nervously?',
+        'bridge.draftsperson.missing_span.why.02': "A drawing can't fall down. That's what I like about drawings.",
+        'bridge.draftsperson.missing_span.choice.leave': "I'll have a look around.",
+        'bridge.draftsperson.missing_span.leave.01':
+          "Take your time. The river isn't going anywhere. That's... sort of the problem.",
+        'bridge.draftsperson.missing_span.waiting': 'Back already? Any sign of my test car?',
+        'bridge.draftsperson.missing_span.choice.cicka': 'Cicka has it.',
+        'bridge.draftsperson.missing_span.cicka.01': "The cat? Oh, she's been playing with it all morning.",
+        'bridge.draftsperson.missing_span.cicka.01_guarded': 'Let me guess. You reached for it and got the paw?',
+        'bridge.draftsperson.missing_span.cicka.02':
+          "Cats don't hand things over, you know. But they do share a good game.",
+        'bridge.draftsperson.missing_span.choice.still_looking': 'Still looking.',
+        'bridge.draftsperson.missing_span.still_looking.01': "I'll keep... not drawing it. Very carefully.",
+        'bridge.cicka.parallel_play.prompt': 'Play with Cicka',
+        'bridge.cicka.parallel_play.01': 'You sit beside Cicka in the warm corn.',
+        'bridge.cicka.parallel_play.02':
+          'The toy car is parked under one white paw. She is not watching it. She is definitely watching it.',
+        'bridge.cicka.parallel_play.choice.grab': 'Grab the car',
+        'bridge.cicka.parallel_play.grab.01': 'Your hand gets halfway there. Thwap. The paw was faster.',
+        'bridge.cicka.parallel_play.grab.02': 'Mrrrow.',
+        'bridge.cicka.parallel_play.choice.ask': 'Ask her nicely for it',
+        'bridge.cicka.parallel_play.ask.01': "Cicka gives you a slow blink. It's a very polite blink. It's also a no.",
+        'bridge.cicka.parallel_play.choice.leaf': 'Wiggle a corn leaf in the dirt',
+        'bridge.cicka.parallel_play.leaf.01': "You wiggle a corn leaf. Cicka's ears swivel. Her tail twitches.",
+        'bridge.cicka.parallel_play.leaf.02': 'Pounce! She tackles the leaf, and the toy car rolls loose to your knee.',
+        'bridge.cicka.parallel_play.choice.pocket': "Pocket the car while she's busy",
+        'bridge.cicka.parallel_play.pocket.01':
+          'You reach for it... and Cicka is already sitting on it. How? She was over there.',
+        'bridge.cicka.parallel_play.choice.roll': 'Roll it back to her',
+        'bridge.cicka.parallel_play.roll.01': 'The car bumps gently into her paws. She stares at it. Then at you.',
+        'bridge.cicka.parallel_play.roll.02': 'Mrrp?',
+        'bridge.cicka.parallel_play.roll.03': 'Bap. She rolls it right back.',
+        'bridge.cicka.parallel_play.choice.roll_again': 'Roll it back again',
+        'bridge.cicka.parallel_play.roll_again.01':
+          "Back and forth. Back and forth. The game has rules now, and you're learning them.",
+        'bridge.cicka.parallel_play.roll_again.02': 'Purrrr...',
+        'bridge.cicka.parallel_play.roll_again.03':
+          'Cicka nudges the car into your hand and flops over in the sun. Your turn to look after it.',
+        'bridge.cicka.parallel_play.roll_again.04': 'Cicka entrusts you with the official Bridge Test Vehicle!',
+        'bridge.cicka.parallel_play.choice.keep': 'Keep it this time',
+        'bridge.cicka.parallel_play.keep.01': "You close your hand around the car. Cicka's eyes go very round.",
+        'bridge.cicka.parallel_play.keep.02': 'Mrrrrrrow.',
+        'bridge.cicka.parallel_play.keep.03':
+          'Her tail puffs up to twice its size. She crouches low over the car, rear end wiggling. Oh. This is a test.',
+        'bridge.cicka.parallel_play.choice.rematch': 'Crouch down, ready this time',
+        'bridge.cicka.parallel_play.rematch.01':
+          "You crouch, eyes on the white paw. Cicka's tail starts to swish. Round two.",
+        'bridge.cicka.duel_won.01':
+          'The last pounce lands on empty corn. Cicka sits up, tail high, and looks at you for a long moment.',
+        'bridge.cicka.duel_won.02': 'Mrrp!',
+        'bridge.cicka.duel_won.03':
+          'She nudges the toy car over to your foot. Fair is fair. You were faster than the paw.',
+        'bridge.cicka.duel_won.04': 'Cicka respects you. The official Bridge Test Vehicle is yours.',
+        'bridge.cicka.duel_lost.01':
+          'Thwap. Cicka pins the car under one paw and starts washing her face, very pleased with herself.',
+        'bridge.cicka.duel_lost.02': 'Mrrow.',
+        'bridge.cicka.duel_lost.03': "She'll take you on again any time. Or maybe there's a gentler game to play.",
+        'bridge.cicka.parallel_play.choice.leave': 'Stand up',
+        'bridge.cicka.parallel_play.leave.01': 'You stand. Cicka keeps the car. The car keeps Cicka.',
+        'bridge.cicka.after_share.prompt': 'Visit Cicka',
+        'bridge.cicka.after_share.01': 'Cicka is sunbathing. One eye opens at the toy car in your hand.',
+        'bridge.cicka.after_share.01_respect':
+          'Cicka is sunbathing. She lifts her chin at you: one champion to another.',
+        'bridge.cicka.after_share.choice.pet': 'Scratch behind her ears',
+        'bridge.cicka.after_share.pet.01': 'Purrrr...',
+        'bridge.cicka.after_share.choice.promise': 'Promise to bring it back',
+        'bridge.cicka.after_share.promise.01': 'The eye closes again. Deal.',
+        'bridge.draftsperson.toy_car_test.prompt': 'Show the toy car',
+        'bridge.draftsperson.toy_car_test.01': 'You hold up the tiny test car.',
+        'bridge.draftsperson.toy_car_test.02': 'My test car! Where did you... no, wait. Let me guess. The cat?',
+        'bridge.draftsperson.toy_car_test.choice.hand_over': 'Set it on the blueprint',
+        'bridge.draftsperson.toy_car_test.hand_over.01':
+          'Every time I draw the middle span, I erase it. What if it sags? What if it snaps?',
+        'bridge.draftsperson.toy_car_test.hand_over.02':
+          'Would you draw it with me? Bolt beams to the banks, and the little car will tell us if it holds.',
+        'bridge.draftsperson.toy_car_test.hand_over.03':
+          'Road beams carry the car. Wood beams hold the road up. Triangles are your friend.',
+        'bridge.draftsperson.toy_car_test.choice.story': 'Tell how Cicka shared it',
+        'bridge.draftsperson.toy_car_test.story.01': "She played with you? She's never even made eye contact with me.",
+        'bridge.draftsperson.toy_car_test.story.02':
+          'Maybe I should sit in the corn more. Less drafting, more sitting.',
+        'bridge.draftsperson.toy_car_test.choice.not_yet': 'Not yet.',
+        'bridge.draftsperson.toy_car_test.not_yet.01':
+          "Fair. It's a very good car. I'll be here, not drawing anything.",
+        'bridge.draftsperson.toy_car_test.resume': 'Back to the drawing board? The little car is still fueled up.',
+        'bridge.draftsperson.toy_car_test.choice.resume': 'Back to the table',
+        'bridge.draftsperson.toy_car_test.choice.advice': 'Any advice?',
+        'bridge.draftsperson.toy_car_test.advice.01': 'Triangles. Always triangles. I dream about triangles.',
+        'bridge.draftsperson.toy_car_test.advice.02':
+          "And if you get stuck, my sketch is behind the ? button. I won't be offended. Much.",
+        'bridge.draftsperson.toy_car_test.choice.later': 'In a minute.',
+        'bridge.draftsperson.toy_car_test.later.01': 'The drawing will wait. Drawings are very good at waiting.',
+        'bridge.draftsperson.bridge_built.01':
+          'Vroom! The toy car rattles all the way across your span, and the ink holds.',
+        'bridge.draftsperson.bridge_built.02': "It held?! It HELD! I've drawn forty bridges and erased forty-one!",
+        'bridge.draftsperson.bridge_built.03':
           "You didn't overthink it, you just drew it. Thank you, partner. The crossing is open!",
-        "bridge.draftsperson.bridge_built.04":
-          "The pencil lines darken into real timber. Cicka trots over to inspect the far bank.",
-        "bridge.builder.tip.intro":
-          "Drag from a bolt to draw. The four bolts are our only solid ground; everything else hangs off them.",
-        "bridge.builder.tip.drawing": "Road for the car, wood to hold it up. Triangles keep their shape.",
-        "bridge.builder.tip.wobbly": "Hmm, see the faint pencil? That's where it droops before the car even rolls.",
-        "bridge.builder.tip.wobbly.2": "The ghost lines are sagging... something in there can still fold.",
-        "bridge.builder.tip.steady": "Ooh, it's holding its own weight. Ready when you are!",
-        "bridge.builder.tip.testing": "Go, little car, go...!",
-        "bridge.builder.tip.no_road": "Glub. Our car went swimming... the road stops short somewhere.",
-        "bridge.builder.tip.no_road.2": "Splash! The road needs to reach bank to bank, no gaps.",
-        "bridge.builder.tip.no_road.3": "I do that too. Drawing a road that stops halfway. Close the gap?",
-        "bridge.builder.tip.bare_deck": "Ouch... a plank on its own just droops. It needs some wood to lean on.",
-        "bridge.builder.tip.bare_deck.2": "It folded like wet paper. Try wood triangles above or under the road.",
-        "bridge.builder.tip.bare_deck.3": "Even I'd sag holding all that alone. Give the road some support?",
-        "bridge.builder.tip.loose_frame": "So close! Those triangle tips wobble loose. Try tying them together.",
-        "bridge.builder.tip.loose_frame.2": "Hmm. It folded before the car even moved. Join the peaks along the top?",
-        "bridge.builder.tip.loose_frame.3": "The points flap like loose pages. Connect them and they'll hold.",
-        "bridge.builder.tip.hanging_joint":
+        'bridge.draftsperson.bridge_built.04':
+          'The pencil lines darken into real timber. Cicka trots over to inspect the far bank.',
+        'bridge.builder.tip.intro':
+          'Drag from a bolt to draw. The four bolts are our only solid ground; everything else hangs off them.',
+        'bridge.builder.tip.drawing': 'Road for the car, wood to hold it up. Triangles keep their shape.',
+        'bridge.builder.tip.wobbly': "Hmm, see the faint pencil? That's where it droops before the car even rolls.",
+        'bridge.builder.tip.wobbly.2': 'The ghost lines are sagging... something in there can still fold.',
+        'bridge.builder.tip.steady': "Ooh, it's holding its own weight. Ready when you are!",
+        'bridge.builder.tip.testing': 'Go, little car, go...!',
+        'bridge.builder.tip.no_road': 'Glub. Our car went swimming... the road stops short somewhere.',
+        'bridge.builder.tip.no_road.2': 'Splash! The road needs to reach bank to bank, no gaps.',
+        'bridge.builder.tip.no_road.3': 'I do that too. Drawing a road that stops halfway. Close the gap?',
+        'bridge.builder.tip.bare_deck': 'Ouch... a plank on its own just droops. It needs some wood to lean on.',
+        'bridge.builder.tip.bare_deck.2': 'It folded like wet paper. Try wood triangles above or under the road.',
+        'bridge.builder.tip.bare_deck.3': "Even I'd sag holding all that alone. Give the road some support?",
+        'bridge.builder.tip.loose_frame': 'So close! Those triangle tips wobble loose. Try tying them together.',
+        'bridge.builder.tip.loose_frame.2': 'Hmm. It folded before the car even moved. Join the peaks along the top?',
+        'bridge.builder.tip.loose_frame.3': "The points flap like loose pages. Connect them and they'll hold.",
+        'bridge.builder.tip.hanging_joint':
           "Those low points are just dangling in the air. Nothing's under them but river.",
-        "bridge.builder.tip.hanging_joint.2": "No ground down there! Tie the low points back with triangles.",
-        "bridge.builder.tip.hanging_joint.3": "A pillar needs something to stand on. Down there it's only water.",
-        "bridge.builder.tip.snapped_middle": "Snap! The middle gave way. It's always the loneliest part of a bridge.",
-        "bridge.builder.tip.snapped_middle.2": "Ah, right in the belly. One more triangle near my X?",
-        "bridge.builder.tip.snapped_middle.3": "It almost made it! The middle just needs a friend near the X.",
-        "bridge.builder.tip.snapped_end": "Crack, right by the bank! That end could use a diagonal brace.",
-        "bridge.builder.tip.snapped_end.2": "The middle held, but the edge buckled. Brace it near the bolt.",
-        "bridge.builder.tip.snapped_end.3": "The ends do the heaviest pulling. Shore up near my X.",
-        "bridge.builder.tip.stuck": "The little car couldn't climb that. Keep the road nice and gentle.",
-        "bridge.builder.tip.stuck.2": "Wheels spinning... that slope's too steep for a toy.",
-        "bridge.builder.tip.sketch_nudge": "(Psst, my sketch is behind the ? button.)",
-        "bridge.builder.tip.sketch_shown": "That's my doodle. Trace it, or improve it!",
-        "bridge.builder.tip.out_of_ink": "We're out of ink! Erase a few beams to free some up.",
-        "bridge.builder.tip.passed": "IT HOLDS! Look at it go!",
-        "bridge.exit.opened_crossing.prompt": "Cross Bridge",
-        "bridge.exit.opened_crossing.01": "You stride across the freshly completed bridge.",
-        "bridge.exit.opened_crossing.02":
-          "Thanks partner! The path east is officially open!",
-        "bridge.exit.opened_crossing.03":
-          "The sketchbook page folds back, revealing the evening lights of Concert Crossing.",
+        'bridge.builder.tip.hanging_joint.2': 'No ground down there! Tie the low points back with triangles.',
+        'bridge.builder.tip.hanging_joint.3': "A pillar needs something to stand on. Down there it's only water.",
+        'bridge.builder.tip.snapped_middle': "Snap! The middle gave way. It's always the loneliest part of a bridge.",
+        'bridge.builder.tip.snapped_middle.2': 'Ah, right in the belly. One more triangle near my X?',
+        'bridge.builder.tip.snapped_middle.3': 'It almost made it! The middle just needs a friend near the X.',
+        'bridge.builder.tip.snapped_end': 'Crack, right by the bank! That end could use a diagonal brace.',
+        'bridge.builder.tip.snapped_end.2': 'The middle held, but the edge buckled. Brace it near the bolt.',
+        'bridge.builder.tip.snapped_end.3': 'The ends do the heaviest pulling. Shore up near my X.',
+        'bridge.builder.tip.stuck': "The little car couldn't climb that. Keep the road nice and gentle.",
+        'bridge.builder.tip.stuck.2': "Wheels spinning... that slope's too steep for a toy.",
+        'bridge.builder.tip.sketch_nudge': '(Psst, my sketch is behind the ? button.)',
+        'bridge.builder.tip.sketch_shown': "That's my doodle. Trace it, or improve it!",
+        'bridge.builder.tip.out_of_ink': "We're out of ink! Erase a few beams to free some up.",
+        'bridge.builder.tip.passed': 'IT HOLDS! Look at it go!',
+        'bridge.exit.opened_crossing.prompt': 'Cross Bridge',
+        'bridge.exit.opened_crossing.01': 'You stride across the freshly completed bridge.',
+        'bridge.exit.opened_crossing.02': 'Thanks partner! The path east is officially open!',
+        'bridge.exit.opened_crossing.03':
+          'The sketchbook page folds back, revealing the evening lights of Concert Crossing.'
       },
-      handoffNote: "evening music ahead",
+      handoffNote: 'evening music ahead'
     },
     concert: {
       speakers: {
-        prompt: "Prompt",
-        cicka: "Cicka",
-        injuredGuitarist: "Steve",
-        crowd: "Crowd",
-        crowdUncle: "Impatient Uncle",
-        crowdGrandma: "Folding-Chair Grandma",
-        kid: "Skater Kid",
+        prompt: 'Prompt',
+        cicka: 'Cicka',
+        injuredGuitarist: 'Steve',
+        crowd: 'Crowd',
+        crowdUncle: 'Impatient Uncle',
+        crowdGrandma: 'Folding-Chair Grandma',
+        kid: 'Skater Kid'
       },
       dialogue: {
-        "concert.poster.read.prompt": "Read the poster",
-        "concert.poster.read.01":
-          "A hand-drawn poster on the kafana wall, curling at the corners: STEVE & THE LATE SHOW. TONIGHT, 9PM. THE CROSSING.",
-        "concert.poster.read.02":
-          "Someone has added in pen: \"still?\" Someone else has crossed that out and written: \"ALWAYS.\"",
-        "concert.poster.read.after.01": "Under \"ALWAYS\", in fresh ink: \"tonight it was somebody new.\"",
+        'concert.poster.read.prompt': 'Read the poster',
+        'concert.poster.read.01':
+          'A hand-drawn poster on the kafana wall, curling at the corners: STEVE & THE LATE SHOW. TONIGHT, 9PM. THE CROSSING.',
+        'concert.poster.read.02':
+          'Someone has added in pen: "still?" Someone else has crossed that out and written: "ALWAYS."',
+        'concert.poster.read.after.01': 'Under "ALWAYS", in fresh ink: "tonight it was somebody new."',
 
-        "concert.crowd.delay_barks.prompt": "Ask the crowd",
-        "concert.crowd.delay_barks.01":
-          "Nine o'clock, the poster said. Nine! My watch says it's a quarter to never.",
-        "concert.crowd.delay_barks.choice.holdup": "What's the holdup?",
-        "concert.crowd.delay_barks.holdup.01": "Steve took a tumble at soundcheck. On a skateboard. At his age!",
-        "concert.crowd.delay_barks.holdup.02":
+        'concert.crowd.delay_barks.prompt': 'Ask the crowd',
+        'concert.crowd.delay_barks.01': "Nine o'clock, the poster said. Nine! My watch says it's a quarter to never.",
+        'concert.crowd.delay_barks.choice.holdup': "What's the holdup?",
+        'concert.crowd.delay_barks.holdup.01': 'Steve took a tumble at soundcheck. On a skateboard. At his age!',
+        'concert.crowd.delay_barks.holdup.02':
           "Wrist went one way, board went the other. He's been hiding back by the amps ever since.",
-        "concert.crowd.delay_barks.choice.who": "Who's playing?",
-        "concert.crowd.delay_barks.who.01":
+        'concert.crowd.delay_barks.choice.who': "Who's playing?",
+        'concert.crowd.delay_barks.who.01':
           "Steve and the Late Show! He's played this crossing every summer since they put the traffic light in.",
-        "concert.crowd.delay_barks.who.02": "I saw him play straight through a power cut once. He just sang louder.",
-        "concert.crowd.delay_barks.choice.through": "Can I squeeze past?",
-        "concert.crowd.delay_barks.through.01":
+        'concert.crowd.delay_barks.who.02': 'I saw him play straight through a power cut once. He just sang louder.',
+        'concert.crowd.delay_barks.choice.through': 'Can I squeeze past?',
+        'concert.crowd.delay_barks.through.01':
           "Past? We've held this spot since six. Nobody moves till there's music.",
-        "concert.crowd.delay_barks.through.02":
+        'concert.crowd.delay_barks.through.02':
           "The crowd is packed shoulder to shoulder across the crossing. It isn't going anywhere.",
-        "concert.crowd.delay_barks.choice.leave": "Never mind.",
-        "concert.crowd.delay_barks.leave.01":
-          "If you see a guitarist, tell him we're old too. We can wait. Grumpily.",
-        "concert.crowd.delay_barks.ready.01": "Was that a guitar? Back by the amps? Somebody's tuning up!",
-        "concert.crowd.delay_barks.ready.02": "Finally. If it's not Steve, it had better be somebody good.",
+        'concert.crowd.delay_barks.choice.leave': 'Never mind.',
+        'concert.crowd.delay_barks.leave.01': "If you see a guitarist, tell him we're old too. We can wait. Grumpily.",
+        'concert.crowd.delay_barks.ready.01': "Was that a guitar? Back by the amps? Somebody's tuning up!",
+        'concert.crowd.delay_barks.ready.02': "Finally. If it's not Steve, it had better be somebody good.",
 
-        "concert.kid.board.prompt": "Talk to the kid",
-        "concert.kid.board.01":
-          "A kid sits on the curb outside the kafana, glaring at a skateboard with a fresh crack down the middle.",
-        "concert.kid.board.02": "If you're here to say it's my fault, it's not. I just said he was too old to rock.",
-        "concert.kid.board.choice.what": "What happened?",
-        "concert.kid.board.what.01":
-          "He grabbed my board to prove he could still shred. One-legged guitar solo, straight down the ramp.",
-        "concert.kid.board.what.02": "Played one chord, did one wobble, and ate the curb.",
-        "concert.kid.board.what.03": "...The chord was actually really good.",
-        "concert.kid.board.choice.harsh": "Calling him old was harsh.",
-        "concert.kid.board.harsh.01": "He IS old.",
-        "concert.kid.board.harsh.02": "He picks at the grip tape. He doesn't look up.",
-        "concert.kid.board.harsh.03": "I didn't think he'd actually try it.",
-        "concert.kid.board.choice.sticker": "Is that a Late Show sticker?",
-        "concert.kid.board.sticker.01": "No. ...Maybe. It came with the board.",
-        "concert.kid.board.sticker.02":
+        'concert.kid.board.prompt': 'Talk to the kid',
+        'concert.kid.board.01':
+          'A kid sits on the curb outside the kafana, glaring at a skateboard with a fresh crack down the middle.',
+        'concert.kid.board.02': "If you're here to say it's my fault, it's not. I just said he was too old to rock.",
+        'concert.kid.board.choice.what': 'What happened?',
+        'concert.kid.board.what.01':
+          'He grabbed my board to prove he could still shred. One-legged guitar solo, straight down the ramp.',
+        'concert.kid.board.what.02': 'Played one chord, did one wobble, and ate the curb.',
+        'concert.kid.board.what.03': '...The chord was actually really good.',
+        'concert.kid.board.choice.harsh': 'Calling him old was harsh.',
+        'concert.kid.board.harsh.01': 'He IS old.',
+        'concert.kid.board.harsh.02': "He picks at the grip tape. He doesn't look up.",
+        'concert.kid.board.harsh.03': "I didn't think he'd actually try it.",
+        'concert.kid.board.choice.sticker': 'Is that a Late Show sticker?',
+        'concert.kid.board.sticker.01': 'No. ...Maybe. It came with the board.',
+        'concert.kid.board.sticker.02':
           "It did not come with the board. It's been carefully peeled off and stuck back on at least twice.",
-        "concert.kid.board.choice.hype": "Then help him out. Get the crowd going.",
-        "concert.kid.board.hype.01": "Like... a hype man?",
-        "concert.kid.board.hype.02":
-          "Fine. But only because the night's boring without music. Not because of him.",
-        "concert.kid.board.hype.03":
-          "The kid tucks the cracked board under his arm and wriggles into the front row of the crowd.",
-        "concert.kid.board.choice.secret": "Your secret's safe with me.",
-        "concert.kid.board.secret.01": "There's no secret. ...Thanks, though.",
-        "concert.kid.board.choice.leave": "See you around.",
-        "concert.kid.board.leave.01": "Whatever. Tell him the board's fine. It's not fine.",
-        "concert.kid.hype_waiting.prompt": "Talk to the kid",
-        "concert.kid.hype_waiting.01": "I'm ready. The second the music starts, I'm clapping. Loud.",
-        "concert.kid.hype_waiting.02": "Wait, YOU'RE playing? Even better. Less pressure on me.",
-        "concert.kid.after.prompt": "Talk to the kid",
-        "concert.kid.after.01":
-          "The kid is still on the curb, but he's nodding along to a song that already ended.",
-        "concert.kid.after.02": "...Okay. That was kind of sick. Don't tell him I said that.",
-        "concert.kid.after.choice.tell": "Go tell him yourself.",
-        "concert.kid.after.tell.01": "...Maybe. Tomorrow. When it's less embarrassing.",
-        "concert.kid.after.choice.nod": "Nod and say nothing.",
-        "concert.kid.after.nod.01": "He nods back. Very serious. A deal between professionals.",
-        "concert.kid.after.hype.01": "Did you hear them? I started that clap. That was all me.",
-        "concert.kid.after.hype.02": "Steve says I can have lessons. On the guitar. Not the board. Probably not the board.",
+        'concert.kid.board.choice.hype': 'Then help him out. Get the crowd going.',
+        'concert.kid.board.hype.01': 'Like... a hype man?',
+        'concert.kid.board.hype.02': "Fine. But only because the night's boring without music. Not because of him.",
+        'concert.kid.board.hype.03':
+          'The kid tucks the cracked board under his arm and wriggles into the front row of the crowd.',
+        'concert.kid.board.choice.secret': "Your secret's safe with me.",
+        'concert.kid.board.secret.01': "There's no secret. ...Thanks, though.",
+        'concert.kid.board.choice.leave': 'See you around.',
+        'concert.kid.board.leave.01': "Whatever. Tell him the board's fine. It's not fine.",
+        'concert.kid.hype_waiting.prompt': 'Talk to the kid',
+        'concert.kid.hype_waiting.01': "I'm ready. The second the music starts, I'm clapping. Loud.",
+        'concert.kid.hype_waiting.02': "Wait, YOU'RE playing? Even better. Less pressure on me.",
+        'concert.kid.after.prompt': 'Talk to the kid',
+        'concert.kid.after.01': "The kid is still on the curb, but he's nodding along to a song that already ended.",
+        'concert.kid.after.02': "...Okay. That was kind of sick. Don't tell him I said that.",
+        'concert.kid.after.choice.tell': 'Go tell him yourself.',
+        'concert.kid.after.tell.01': "...Maybe. Tomorrow. When it's less embarrassing.",
+        'concert.kid.after.choice.nod': 'Nod and say nothing.',
+        'concert.kid.after.nod.01': 'He nods back. Very serious. A deal between professionals.',
+        'concert.kid.after.hype.01': 'Did you hear them? I started that clap. That was all me.',
+        'concert.kid.after.hype.02':
+          'Steve says I can have lessons. On the guitar. Not the board. Probably not the board.',
 
-        "concert.guitarist.injury.prompt": "Talk to the guitarist",
-        "concert.guitarist.injury.01":
-          "Tucked behind the stage, a man in a worn leather jacket sits on an amp, cradling his wrist like a hurt bird.",
-        "concert.guitarist.injury.02": "If you're here for an autograph, it'll have to be left-handed.",
-        "concert.guitarist.practice_riff.prompt": "Talk to Steve",
-        "concert.guitarist.practice_riff.01": "Back? The phrase is still waiting. So is the crowd. Loudly.",
-        "concert.guitarist.choice.wrist": "What happened to your wrist?",
-        "concert.guitarist.wrist.01":
-          "A kid told me I was too old to rock. So naturally, I borrowed his skateboard.",
-        "concert.guitarist.wrist.02": "One-legged solo, straight down the ramp. Big finish.",
-        "concert.guitarist.wrist.03": "The ramp had a bigger finish.",
-        "concert.guitarist.choice.who": "Who are you?",
-        "concert.guitarist.who.01": "Steve. Of Steve and the Late Show. Twenty summers on this crossing.",
-        "concert.guitarist.who.02": "Tonight we're really living up to the name.",
-        "concert.guitarist.choice.cancel": "Can't you just call it off?",
-        "concert.guitarist.cancel.01": "And send them home quiet? No.",
-        "concert.guitarist.cancel.02":
+        'concert.guitarist.injury.prompt': 'Talk to the guitarist',
+        'concert.guitarist.injury.01':
+          'Tucked behind the stage, a man in a worn leather jacket sits on an amp, cradling his wrist like a hurt bird.',
+        'concert.guitarist.injury.02': "If you're here for an autograph, it'll have to be left-handed.",
+        'concert.guitarist.practice_riff.prompt': 'Talk to Steve',
+        'concert.guitarist.practice_riff.01': 'Back? The phrase is still waiting. So is the crowd. Loudly.',
+        'concert.guitarist.choice.wrist': 'What happened to your wrist?',
+        'concert.guitarist.wrist.01': 'A kid told me I was too old to rock. So naturally, I borrowed his skateboard.',
+        'concert.guitarist.wrist.02': 'One-legged solo, straight down the ramp. Big finish.',
+        'concert.guitarist.wrist.03': 'The ramp had a bigger finish.',
+        'concert.guitarist.choice.who': 'Who are you?',
+        'concert.guitarist.who.01': 'Steve. Of Steve and the Late Show. Twenty summers on this crossing.',
+        'concert.guitarist.who.02': "Tonight we're really living up to the name.",
+        'concert.guitarist.choice.cancel': "Can't you just call it off?",
+        'concert.guitarist.cancel.01': 'And send them home quiet? No.',
+        'concert.guitarist.cancel.02':
           "This street gets one loud night a year. It's how we tell each other we're still here.",
-        "concert.guitarist.choice.kid": "About that kid...",
-        "concert.guitarist.kid.01": "He's not wrong. I'm forty-six. My knees play percussion now.",
-        "concert.guitarist.kid.02":
+        'concert.guitarist.choice.kid': 'About that kid...',
+        'concert.guitarist.kid.01': "He's not wrong. I'm forty-six. My knees play percussion now.",
+        'concert.guitarist.kid.02':
           "...He's got our sticker on that board, you know. I saw it right before I saw the ground.",
-        "concert.guitarist.choice.help": "Could I play instead?",
-        "concert.guitarist.help.01": "You?",
-        "concert.guitarist.help.02":
+        'concert.guitarist.choice.help': 'Could I play instead?',
+        'concert.guitarist.help.01': 'You?',
+        'concert.guitarist.help.02':
           "...Hm. You've got the hands for it. And honestly, you're the only offer I've had.",
-        "concert.guitarist.help.03":
+        'concert.guitarist.help.03':
           "Every song we play grows out of one phrase. Seven notes. Learn those, and the rest you'll learn on stage.",
-        "concert.guitarist.choice.learn": "Teach me the phrase.",
-        "concert.guitarist.learn.01":
-          "Watch the notes slide down the strings. Strum the moment one touches the line. Low, middle, high.",
-        "concert.guitarist.learn.02": "Don't worry about being perfect. Worry about coming back to it.",
-        "concert.guitarist.choice.later": "Let me look around first.",
-        "concert.guitarist.later.01": "Sure. I'm not going anywhere. Literally. I'm sitting on an amp.",
-        "concert.guitarist.choice.leave": "Hang in there.",
-        "concert.guitarist.leave.01": "Hanging. Mostly by the left hand.",
-        "concert.guitarist.choice.not_yet": "Not yet.",
-        "concert.guitarist.not_yet.01": "No rush. They've only been waiting three hours.",
-        "concert.guitarist.ready.prompt": "Talk to Steve",
-        "concert.guitarist.ready.01":
-          "You've got the phrase. The rest of the song is just the phrase, saying more.",
-        "concert.guitarist.ready.01_assisted":
+        'concert.guitarist.choice.learn': 'Teach me the phrase.',
+        'concert.guitarist.learn.01':
+          'Watch the notes slide down the strings. Strum the moment one touches the line. Low, middle, high.',
+        'concert.guitarist.learn.02': "Don't worry about being perfect. Worry about coming back to it.",
+        'concert.guitarist.choice.later': 'Let me look around first.',
+        'concert.guitarist.later.01': "Sure. I'm not going anywhere. Literally. I'm sitting on an amp.",
+        'concert.guitarist.choice.leave': 'Hang in there.',
+        'concert.guitarist.leave.01': 'Hanging. Mostly by the left hand.',
+        'concert.guitarist.choice.not_yet': 'Not yet.',
+        'concert.guitarist.not_yet.01': "No rush. They've only been waiting three hours.",
+        'concert.guitarist.ready.prompt': 'Talk to Steve',
+        'concert.guitarist.ready.01': "You've got the phrase. The rest of the song is just the phrase, saying more.",
+        'concert.guitarist.ready.01_assisted':
           "It wasn't pretty. But you kept coming back to it, and that's the actual skill.",
-        "concert.guitarist.choice.show": "Let's play the show.",
-        "concert.guitarist.show.01": "Plug in. I'll call the changes from the side of the stage.",
-        "concert.guitarist.show.02":
-          "Don't look at the crowd. Look at the notes. The crowd will look after itself.",
-        "concert.guitarist.choice.again": "Run the riff once more.",
-        "concert.guitarist.again.01": "Good instinct. From the top, nice and slow.",
-        "concert.guitarist.choice.nervous": "I'm nervous.",
-        "concert.guitarist.nervous.01": "Good. It means you care.",
-        "concert.guitarist.nervous.02":
-          "I threw up before my first show. Then I played it anyway. Then I threw up again. Great night.",
-        "concert.guitarist.choice.wait": "Give me a minute.",
-        "concert.guitarist.wait.01": "Take two. They've waited this long.",
-        "concert.stage.look.prompt": "Look at the stage",
-        "concert.stage.look.01":
-          "A tiny stage. One mic, one amp, and a setlist taped to the floor that just says PLAY LOUD.",
-        "concert.stage.look.02": "Without a guitarist, it's just a very nice table.",
-        "concert.stage.take.prompt": "Take the stage",
-        "concert.stage.encore.prompt": "Play an encore",
-        "concert.stage.encore.01": "The stage is empty now, but the amp is still warm.",
-        "concert.stage.encore.choice.encore": "Play it again",
-        "concert.stage.encore.encore.01": "A few stragglers turn around at the first note. Somebody whoops.",
-        "concert.stage.encore.choice.leave": "Let it ring",
-        "concert.stage.encore.leave.01": "Some nights only happen once. This one could happen twice. Maybe later.",
+        'concert.guitarist.choice.show': "Let's play the show.",
+        'concert.guitarist.show.01': "Plug in. I'll call the changes from the side of the stage.",
+        'concert.guitarist.show.02': "Don't look at the crowd. Look at the notes. The crowd will look after itself.",
+        'concert.guitarist.choice.again': 'Run the riff once more.',
+        'concert.guitarist.again.01': 'Good instinct. From the top, nice and slow.',
+        'concert.guitarist.choice.nervous': "I'm nervous.",
+        'concert.guitarist.nervous.01': 'Good. It means you care.',
+        'concert.guitarist.nervous.02':
+          'I threw up before my first show. Then I played it anyway. Then I threw up again. Great night.',
+        'concert.guitarist.choice.wait': 'Give me a minute.',
+        'concert.guitarist.wait.01': "Take two. They've waited this long.",
+        'concert.stage.look.prompt': 'Look at the stage',
+        'concert.stage.look.01':
+          'A tiny stage. One mic, one amp, and a setlist taped to the floor that just says PLAY LOUD.',
+        'concert.stage.look.02': "Without a guitarist, it's just a very nice table.",
+        'concert.stage.take.prompt': 'Take the stage',
+        'concert.stage.encore.prompt': 'Play an encore',
+        'concert.stage.encore.01': 'The stage is empty now, but the amp is still warm.',
+        'concert.stage.encore.choice.encore': 'Play it again',
+        'concert.stage.encore.encore.01': 'A few stragglers turn around at the first note. Somebody whoops.',
+        'concert.stage.encore.choice.leave': 'Let it ring',
+        'concert.stage.encore.leave.01': 'Some nights only happen once. This one could happen twice. Maybe later.',
 
-        "concert.gig.practice_done.passed.01": "Hey. HEY. That's it! That's the phrase!",
-        "concert.gig.practice_done.passed.02":
-          "Seven notes. Everything tonight is just those seven notes in different hats.",
-        "concert.gig.practice_done.assisted.01": "Okay. Not every note landed.",
-        "concert.gig.practice_done.assisted.02":
+        'concert.gig.practice_done.passed.01': "Hey. HEY. That's it! That's the phrase!",
+        'concert.gig.practice_done.passed.02':
+          'Seven notes. Everything tonight is just those seven notes in different hats.',
+        'concert.gig.practice_done.assisted.01': 'Okay. Not every note landed.',
+        'concert.gig.practice_done.assisted.02':
           "But you didn't stop, and that's the whole trick. The rest comes on stage.",
-        "concert.gig.practice_done.cicka.01":
+        'concert.gig.practice_done.cicka.01':
           "Behind the amp, Cicka's ears have swivelled toward you like two small satellite dishes.",
-        "concert.gig.practice_done.03": "Whenever you're ready, the stage is yours.",
-        "concert.gig.show_done.01":
-          "The last chord rings out over the crossing. For one long second, nobody moves.",
-        "concert.gig.show_done.crowd.legendary": "...STEVE! STEVE! Wait. Who IS that?!",
-        "concert.gig.show_done.crowd.great": "Encore! ENCORE!",
-        "concert.gig.show_done.crowd.good": "Now THAT is what I waited three hours for!",
-        "concert.gig.show_done.crowd.rough": "They played! Music! Wonderful!",
-        "concert.gig.show_done.steve.legendary": "Twenty summers. I have never heard it played like that.",
-        "concert.gig.show_done.steve.great": "You made it yours. That's the only trick there is.",
-        "concert.gig.show_done.steve.good": "A few wobbly bits. Every good night has wobbly bits.",
-        "concert.gig.show_done.steve.rough":
-          "Rough? Sure. But listen to them. Nobody ever remembers the clean notes.",
-        "concert.gig.show_done.cicka.01":
-          "Cicka has crept out from behind the amp to the very edge of the stage. She gives you a long, slow blink.",
-        "concert.gig.show_done.02": "Humming, the crowd drifts off home. The crossing opens.",
-        "concert.gig.show_done.03": "Come find me by the corner before you go. I've got something for you.",
-        "concert.gig.show_done.encore.01": "The last few stragglers clap like a full house.",
+        'concert.gig.practice_done.03': "Whenever you're ready, the stage is yours.",
+        'concert.gig.show_done.01': 'The last chord rings out over the crossing. For one long second, nobody moves.',
+        'concert.gig.show_done.crowd.legendary': '...STEVE! STEVE! Wait. Who IS that?!',
+        'concert.gig.show_done.crowd.great': 'Encore! ENCORE!',
+        'concert.gig.show_done.crowd.good': 'Now THAT is what I waited three hours for!',
+        'concert.gig.show_done.crowd.rough': 'They played! Music! Wonderful!',
+        'concert.gig.show_done.steve.legendary': 'Twenty summers. I have never heard it played like that.',
+        'concert.gig.show_done.steve.great': "You made it yours. That's the only trick there is.",
+        'concert.gig.show_done.steve.good': 'A few wobbly bits. Every good night has wobbly bits.',
+        'concert.gig.show_done.steve.rough': 'Rough? Sure. But listen to them. Nobody ever remembers the clean notes.',
+        'concert.gig.show_done.cicka.01':
+          'Cicka has crept out from behind the amp to the very edge of the stage. She gives you a long, slow blink.',
+        'concert.gig.show_done.02': 'Humming, the crowd drifts off home. The crossing opens.',
+        'concert.gig.show_done.03': "Come find me by the corner before you go. I've got something for you.",
+        'concert.gig.show_done.encore.01': 'The last few stragglers clap like a full house.',
 
-        "concert.guitarist.guitar_handoff.prompt": "Talk to Steve",
-        "concert.guitarist.guitar_handoff.01": "So. This wrist needs the whole summer off.",
-        "concert.guitarist.guitar_handoff.02": "And a guitar that sits in its case all summer forgets how to sing.",
-        "concert.guitarist.guitar_handoff.kid.01": "...That was sick, by the way.",
-        "concert.guitarist.guitar_handoff.kid.02": "And sorry. For the old thing.",
-        "concert.guitarist.guitar_handoff.kid.03": "I AM old. Old is how you get good.",
-        "concert.guitarist.guitar_handoff.kid.04":
-          "Lessons, once this heals? Bring the board. We'll fix that too.",
-        "concert.guitarist.guitar_handoff.kid.05": "...Yeah. Okay.",
-        "concert.guitarist.guitar_handoff.03":
+        'concert.guitarist.guitar_handoff.prompt': 'Talk to Steve',
+        'concert.guitarist.guitar_handoff.01': 'So. This wrist needs the whole summer off.',
+        'concert.guitarist.guitar_handoff.02': 'And a guitar that sits in its case all summer forgets how to sing.',
+        'concert.guitarist.guitar_handoff.kid.01': '...That was sick, by the way.',
+        'concert.guitarist.guitar_handoff.kid.02': 'And sorry. For the old thing.',
+        'concert.guitarist.guitar_handoff.kid.03': 'I AM old. Old is how you get good.',
+        'concert.guitarist.guitar_handoff.kid.04': "Lessons, once this heals? Bring the board. We'll fix that too.",
+        'concert.guitarist.guitar_handoff.kid.05': '...Yeah. Okay.',
+        'concert.guitarist.guitar_handoff.03':
           "So take her. She's been to every summer on this street. Every song I know is still in the wood.",
-        "concert.guitarist.guitar_handoff.choice.promise": "I'll look after her.",
-        "concert.guitarist.guitar_handoff.promise.01":
+        'concert.guitarist.guitar_handoff.choice.promise': "I'll look after her.",
+        'concert.guitarist.guitar_handoff.promise.01':
           "I know you will. Play her somewhere quiet, for someone who matters. That's what she's for.",
-        "concert.guitarist.guitar_handoff.promise.02":
+        'concert.guitarist.guitar_handoff.promise.02':
           "Steve's guitar settles across your back. It's warmer than you expected.",
-        "concert.guitarist.guitar_handoff.choice.sure": "Are you sure?",
-        "concert.guitarist.guitar_handoff.sure.01": "Sure? No. Right? Yes.",
-        "concert.guitarist.guitar_handoff.sure.02":
+        'concert.guitarist.guitar_handoff.choice.sure': 'Are you sure?',
+        'concert.guitarist.guitar_handoff.sure.01': 'Sure? No. Right? Yes.',
+        'concert.guitarist.guitar_handoff.sure.02':
           "Play her somewhere quiet, for someone who matters. That's what she's for.",
-        "concert.guitarist.guitar_handoff.sure.03":
+        'concert.guitarist.guitar_handoff.sure.03':
           "Steve's guitar settles across your back. It's warmer than you expected.",
-        "concert.guitarist.farewell.prompt": "Talk to Steve",
-        "concert.guitarist.farewell.01": "Go on. Next town over, tell them Steve says hi.",
-        "concert.guitarist.farewell.choice.thanks": "Thanks for tonight.",
-        "concert.guitarist.farewell.thanks.01": "Thank YOU. I just sat on an amp and shouted chord names.",
-        "concert.guitarist.farewell.choice.leave": "See you, Steve.",
-        "concert.guitarist.farewell.leave.01": "See you. Mind the curbs.",
+        'concert.guitarist.farewell.prompt': 'Talk to Steve',
+        'concert.guitarist.farewell.01': 'Go on. Next town over, tell them Steve says hi.',
+        'concert.guitarist.farewell.choice.thanks': 'Thanks for tonight.',
+        'concert.guitarist.farewell.thanks.01': 'Thank YOU. I just sat on an amp and shouted chord names.',
+        'concert.guitarist.farewell.choice.leave': 'See you, Steve.',
+        'concert.guitarist.farewell.leave.01': 'See you. Mind the curbs.',
 
-        "concert.cicka.band_resting_spot.prompt": "Find Cicka",
-        "concert.cicka.band_resting_spot.01":
-          "Behind the amp: two round eyes. Cicka has found the one quiet square metre on this whole street.",
-        "concert.cicka.band_resting_spot.01_practiced":
+        'concert.cicka.band_resting_spot.prompt': 'Find Cicka',
+        'concert.cicka.band_resting_spot.01':
+          'Behind the amp: two round eyes. Cicka has found the one quiet square metre on this whole street.',
+        'concert.cicka.band_resting_spot.01_practiced':
           "Cicka is still behind the amp, but now she's watching the stage.",
-        "concert.cicka.band_resting_spot.choice.sit": "Sit with her a while",
-        "concert.cicka.band_resting_spot.sit.01":
-          "You sit on a cable crate. Back here, the crowd softens into a hum.",
-        "concert.cicka.band_resting_spot.sit.02": "...mrrp.",
-        "concert.cicka.band_resting_spot.sit.03":
-          "She leans against the guitar case. Her tail taps along to a song nobody is playing yet.",
-        "concert.cicka.band_resting_spot.choice.coax": "Coax her toward the crowd",
-        "concert.cicka.band_resting_spot.coax.01": "Hhhk.",
-        "concert.cicka.band_resting_spot.coax.02":
+        'concert.cicka.band_resting_spot.choice.sit': 'Sit with her a while',
+        'concert.cicka.band_resting_spot.sit.01': 'You sit on a cable crate. Back here, the crowd softens into a hum.',
+        'concert.cicka.band_resting_spot.sit.02': '...mrrp.',
+        'concert.cicka.band_resting_spot.sit.03':
+          'She leans against the guitar case. Her tail taps along to a song nobody is playing yet.',
+        'concert.cicka.band_resting_spot.choice.coax': 'Coax her toward the crowd',
+        'concert.cicka.band_resting_spot.coax.01': 'Hhhk.',
+        'concert.cicka.band_resting_spot.coax.02':
           "Cicka retreats exactly one inch further behind the amp. That's a no.",
-        "concert.cicka.band_resting_spot.choice.leave": "Leave her be",
-        "concert.cicka.band_resting_spot.leave.01": "She approves of this decision.",
-        "concert.cicka.band_resting_spot.after.01":
-          "Cicka is loafing on top of the warm amp. Steve scratches behind her ears without looking.",
-        "concert.cicka.band_resting_spot.after.02": "Purrrr...",
-        "concert.cicka.band_resting_spot.choice.pet": "Scratch her chin",
-        "concert.cicka.band_resting_spot.pet.01": "Prrrt.",
-        "concert.cicka.band_resting_spot.pet.02": "She has decided the band is acceptable.",
-        "concert.cicka.band_resting_spot.choice.nap": "Let her nap",
-        "concert.cicka.band_resting_spot.nap.01": "Cicka doesn't open her eyes. She doesn't need to.",
+        'concert.cicka.band_resting_spot.choice.leave': 'Leave her be',
+        'concert.cicka.band_resting_spot.leave.01': 'She approves of this decision.',
+        'concert.cicka.band_resting_spot.after.01':
+          'Cicka is loafing on top of the warm amp. Steve scratches behind her ears without looking.',
+        'concert.cicka.band_resting_spot.after.02': 'Purrrr...',
+        'concert.cicka.band_resting_spot.choice.pet': 'Scratch her chin',
+        'concert.cicka.band_resting_spot.pet.01': 'Prrrt.',
+        'concert.cicka.band_resting_spot.pet.02': 'She has decided the band is acceptable.',
+        'concert.cicka.band_resting_spot.choice.nap': 'Let her nap',
+        'concert.cicka.band_resting_spot.nap.01': "Cicka doesn't open her eyes. She doesn't need to.",
 
-        "concert.exit.dance_transition.prompt": "Head downhill",
-        "concert.exit.dance_transition.01":
-          "The crossing is clear. Downhill, festival lanterns are blinking on one by one.",
-        "concert.exit.dance_transition.02": "Go on, then. She likes being played on the move.",
-        "concert.exit.dance_transition.03":
-          "You set off, the guitar tapping against your back in time with your steps.",
-      },
+        'concert.exit.dance_transition.prompt': 'Head downhill',
+        'concert.exit.dance_transition.01':
+          'The crossing is clear. Downhill, festival lanterns are blinking on one by one.',
+        'concert.exit.dance_transition.02': 'Go on, then. She likes being played on the move.',
+        'concert.exit.dance_transition.03': 'You set off, the guitar tapping against your back in time with your steps.'
+      }
     },
     dance: {
       speakers: {
-        prompt: "Prompt",
-        cicka: "Cicka",
-        counterpartCat: "Quiet cat",
-        traveler: "Traveler",
-        hillShuttleDriver: "Hill-Shuttle Driver",
-        shuttleRadio: "Radio · Shuttle",
-        opsRadio: "Radio · Ops",
-        operationsHelper: "Last-Stop Operations",
-        danceTeacher: "The Profe",
-        festivalSteward: "Festival Steward",
+        prompt: 'Prompt',
+        cicka: 'Cicka',
+        counterpartCat: 'Quiet cat',
+        traveler: 'Traveler',
+        hillShuttleDriver: 'Hill-Shuttle Driver',
+        shuttleRadio: 'Radio · Shuttle',
+        opsRadio: 'Radio · Ops',
+        operationsHelper: 'Last-Stop Operations',
+        danceTeacher: 'The Profe',
+        festivalSteward: 'Festival Steward'
       },
       dialogue: {
         // Traveler: the practical first read.
-        "dance.traveler.wayfinding.prompt": "Talk to the traveler",
-        "dance.traveler.wayfinding.01":
-          "A woman sits on a battered suitcase, writing a postcard on her knee. She looks up and grins.",
-        "dance.traveler.wayfinding.02":
-          "Heading up to Relay too? Good. I was starting to think I was the only one waiting for that gate.",
-        "dance.traveler.wayfinding.again.01": "Gate still shut? Good. Gives me time for one more postcard.",
-        "dance.traveler.wayfinding.choice.relay": "How do I get up to Relay?",
-        "dance.traveler.wayfinding.relay.01":
-          "The hill shuttle. Last daylight ride, once the steward opens that gate.",
-        "dance.traveler.wayfinding.relay.02":
-          "After that they close the road. Tonight the whole plaza is a dance floor, and the hill just listens.",
-        "dance.traveler.wayfinding.choice.gate": "Why's the gate shut?",
-        "dance.traveler.wayfinding.gate.01":
+        'dance.traveler.wayfinding.prompt': 'Talk to the traveler',
+        'dance.traveler.wayfinding.01':
+          'A woman sits on a battered suitcase, writing a postcard on her knee. She looks up and grins.',
+        'dance.traveler.wayfinding.02':
+          'Heading up to Relay too? Good. I was starting to think I was the only one waiting for that gate.',
+        'dance.traveler.wayfinding.again.01': 'Gate still shut? Good. Gives me time for one more postcard.',
+        'dance.traveler.wayfinding.choice.relay': 'How do I get up to Relay?',
+        'dance.traveler.wayfinding.relay.01': 'The hill shuttle. Last daylight ride, once the steward opens that gate.',
+        'dance.traveler.wayfinding.relay.02':
+          'After that they close the road. Tonight the whole plaza is a dance floor, and the hill just listens.',
+        'dance.traveler.wayfinding.choice.gate': "Why's the gate shut?",
+        'dance.traveler.wayfinding.gate.01':
           "Setup. Cables, chairs, a lantern line sagging over the lane. The steward won't let a shuttle near it till it's safe.",
-        "dance.traveler.wayfinding.choice.driver": "Who drives the shuttle?",
-        "dance.traveler.wayfinding.driver.01": "Him, under the shelter. With the clipboard.",
-        "dance.traveler.wayfinding.driver.02":
+        'dance.traveler.wayfinding.choice.driver': 'Who drives the shuttle?',
+        'dance.traveler.wayfinding.driver.01': 'Him, under the shelter. With the clipboard.',
+        'dance.traveler.wayfinding.driver.02':
           "He's read the same page nine times. I counted. I've been sitting here a while.",
-        "dance.traveler.wayfinding.choice.festival": "What's happening tonight?",
-        "dance.traveler.wayfinding.festival.01":
+        'dance.traveler.wayfinding.choice.festival': "What's happening tonight?",
+        'dance.traveler.wayfinding.festival.01':
           "Bachata night. The whole valley comes down. Even people who swear they don't dance.",
-        "dance.traveler.wayfinding.festival.02": "Especially them, usually.",
-        "dance.traveler.wayfinding.choice.you": "What takes you up to Relay?",
-        "dance.traveler.wayfinding.you.01":
-          "My grandma rode that shuttle up once, the summer she was twenty. She talked about the view from the top for sixty years.",
-        "dance.traveler.wayfinding.you.02":
+        'dance.traveler.wayfinding.festival.02': 'Especially them, usually.',
+        'dance.traveler.wayfinding.choice.you': 'What takes you up to Relay?',
+        'dance.traveler.wayfinding.you.01':
+          'My grandma rode that shuttle up once, the summer she was twenty. She talked about the view from the top for sixty years.',
+        'dance.traveler.wayfinding.you.02':
           "So I'm doing her trip. Bus, plaza, hill shuttle, view. I'm sending her a postcard from every stop.",
-        "dance.traveler.wayfinding.you.03":
-          "She did say the plaza was the best part. I'm not sure what she meant yet.",
-        "dance.traveler.wayfinding.choice.leave": "Thanks.",
-        "dance.traveler.wayfinding.leave.01": "Mind the cables. They've got opinions.",
-        "dance.traveler.staying.prompt": "Talk to the traveler",
-        "dance.traveler.staying.01": "Shuttle's open! Go on. Not me, though.",
-        "dance.traveler.staying.02":
+        'dance.traveler.wayfinding.you.03': "She did say the plaza was the best part. I'm not sure what she meant yet.",
+        'dance.traveler.wayfinding.choice.leave': 'Thanks.',
+        'dance.traveler.wayfinding.leave.01': "Mind the cables. They've got opinions.",
+        'dance.traveler.staying.prompt': 'Talk to the traveler',
+        'dance.traveler.staying.01': "Shuttle's open! Go on. Not me, though.",
+        'dance.traveler.staying.02':
           "I just worked out what Grandma meant. The view will still be there tomorrow. Tonight there's a dance.",
-        "dance.traveler.staying.choice.spot": "Save me a spot.",
-        "dance.traveler.staying.spot.01": "Front row. I'll put my suitcase on it.",
-        "dance.traveler.staying.choice.enjoy": "Enjoy it.",
-        "dance.traveler.staying.enjoy.01": "Last postcard of the day: 'You were right. Stayed for the dance.'",
+        'dance.traveler.staying.choice.spot': 'Save me a spot.',
+        'dance.traveler.staying.spot.01': "Front row. I'll put my suitcase on it.",
+        'dance.traveler.staying.choice.enjoy': 'Enjoy it.',
+        'dance.traveler.staying.enjoy.01': "Last postcard of the day: 'You were right. Stayed for the dance.'",
 
         // Hill-Shuttle Driver.
-        "dance.driver.prompt": "Talk to the driver",
-        "dance.driver.clipboard.prompt": "Talk to the driver",
-        "dance.driver.clipboard.01":
+        'dance.driver.prompt': 'Talk to the driver',
+        'dance.driver.clipboard.prompt': 'Talk to the driver',
+        'dance.driver.clipboard.01':
           "Under the shuttle shelter, a big man in a driver's cap turns a page on his clipboard. Then turns it back.",
-        "dance.driver.clipboard.02":
-          "Oh! Passenger? Last daylight ride. Leaves the minute the steward opens the gate. Which is... not yet.",
-        "dance.driver.clipboard.again.01": "Still not yet. I checked. Twice. Well. Nine times.",
-        "dance.driver.clipboard.choice.when": "When do we leave?",
-        "dance.driver.clipboard.when.01":
+        'dance.driver.clipboard.02':
+          'Oh! Passenger? Last daylight ride. Leaves the minute the steward opens the gate. Which is... not yet.',
+        'dance.driver.clipboard.again.01': 'Still not yet. I checked. Twice. Well. Nine times.',
+        'dance.driver.clipboard.choice.when': 'When do we leave?',
+        'dance.driver.clipboard.when.01':
           "When setup's safe. Then there's a short window before they close the road for the dance.",
-        "dance.driver.clipboard.when.02": "I like windows. Clear rules. Start, stop. Nobody improvises.",
-        "dance.driver.clipboard.choice.list": "What's on the clipboard?",
-        "dance.driver.clipboard.list.01": "Passengers. You. That traveler, allegedly. Two crates of spare lanterns.",
-        "dance.driver.clipboard.list.02":
+        'dance.driver.clipboard.when.02': 'I like windows. Clear rules. Start, stop. Nobody improvises.',
+        'dance.driver.clipboard.choice.list': "What's on the clipboard?",
+        'dance.driver.clipboard.list.01': 'Passengers. You. That traveler, allegedly. Two crates of spare lanterns.',
+        'dance.driver.clipboard.list.02':
           "And the night list. Volunteer shuttle, after the dance. So I'll be... here. At the dance.",
-        "dance.driver.clipboard.list.03": "Where people dance.",
-        "dance.driver.clipboard.choice.dance": "Are you dancing tonight?",
-        "dance.driver.clipboard.dance.01":
+        'dance.driver.clipboard.list.03': 'Where people dance.',
+        'dance.driver.clipboard.choice.dance': 'Are you dancing tonight?',
+        'dance.driver.clipboard.dance.01':
           "Me? I drive. Driving's like dancing with a road. The road leads, I follow, nobody steps on anybody.",
-        "dance.driver.clipboard.dance.02":
-          "His eyes drift, just for a second, toward the operations table. Then straight back to the clipboard.",
-        "dance.driver.clipboard.dance.03":
-          "...I have two left feet. Both of them are also bad at being left feet.",
-        "dance.driver.clipboard.choice.learn": "What if you learned just one step?",
-        "dance.driver.clipboard.learn.01": "Here? In front of— no. Absolutely not.",
-        "dance.driver.clipboard.learn.02":
+        'dance.driver.clipboard.dance.02':
+          'His eyes drift, just for a second, toward the operations table. Then straight back to the clipboard.',
+        'dance.driver.clipboard.dance.03': '...I have two left feet. Both of them are also bad at being left feet.',
+        'dance.driver.clipboard.choice.learn': 'What if you learned just one step?',
+        'dance.driver.clipboard.learn.01': 'Here? In front of— no. Absolutely not.',
+        'dance.driver.clipboard.learn.02':
           "...Behind the shelter, maybe. Nobody looks behind a bus shelter. That's what they're for.",
-        "dance.driver.clipboard.learn.03":
+        'dance.driver.clipboard.learn.03':
           "If the Profe had a minute. Which she won't. Which is fine. Which is completely fine.",
-        "dance.driver.clipboard.choice.tease": "Two left feet? Show me.",
-        "dance.driver.clipboard.tease.01": "Absolutely not.",
-        "dance.driver.clipboard.tease.02":
-          "He hides behind the clipboard. The clipboard is not nearly big enough.",
-        "dance.driver.clipboard.choice.drop": "Never mind.",
-        "dance.driver.clipboard.drop.01": "Never minded. Already forgotten. Thank you.",
-        "dance.driver.clipboard.choice.leave": "I'll look around.",
-        "dance.driver.clipboard.leave.01": "The gate's not going anywhere. Neither am I. Literally. It's a schedule.",
-        "dance.driver.waiting_lesson.prompt": "Talk to the driver",
-        "dance.driver.waiting_lesson.01":
-          "Did you ask her? You didn't say it was for me. Did you say it was for me?",
-        "dance.driver.waiting_lesson.choice.encourage": "You'll be fine. It's four steps.",
-        "dance.driver.waiting_lesson.encourage.01": "Four. I can count to four. I count passengers all day.",
-        "dance.driver.waiting_lesson.encourage.02": "He stands a little straighter. The clipboard lowers half an inch.",
-        "dance.driver.waiting_lesson.choice.looking": "Still looking for her.",
-        "dance.driver.waiting_lesson.looking.01": "Take your time. Take lots of time. Take until next summer.",
-        "dance.driver.practiced.prompt": "Talk to the driver",
-        "dance.driver.practiced.01": "His feet are moving under the clipboard. Left, left, left, tap.",
-        "dance.driver.practiced.02": "I keep doing it when nobody's looking. Don't tell anyone. Especially— anyone.",
-        "dance.driver.practiced.choice.tonight": "Will you ask her tonight?",
-        "dance.driver.practiced.tonight.01": "Ask WHO?",
-        "dance.driver.practiced.tonight.02":
+        'dance.driver.clipboard.choice.tease': 'Two left feet? Show me.',
+        'dance.driver.clipboard.tease.01': 'Absolutely not.',
+        'dance.driver.clipboard.tease.02': 'He hides behind the clipboard. The clipboard is not nearly big enough.',
+        'dance.driver.clipboard.choice.drop': 'Never mind.',
+        'dance.driver.clipboard.drop.01': 'Never minded. Already forgotten. Thank you.',
+        'dance.driver.clipboard.choice.leave': "I'll look around.",
+        'dance.driver.clipboard.leave.01': "The gate's not going anywhere. Neither am I. Literally. It's a schedule.",
+        'dance.driver.waiting_lesson.prompt': 'Talk to the driver',
+        'dance.driver.waiting_lesson.01': "Did you ask her? You didn't say it was for me. Did you say it was for me?",
+        'dance.driver.waiting_lesson.choice.encourage': "You'll be fine. It's four steps.",
+        'dance.driver.waiting_lesson.encourage.01': 'Four. I can count to four. I count passengers all day.',
+        'dance.driver.waiting_lesson.encourage.02': 'He stands a little straighter. The clipboard lowers half an inch.',
+        'dance.driver.waiting_lesson.choice.looking': 'Still looking for her.',
+        'dance.driver.waiting_lesson.looking.01': 'Take your time. Take lots of time. Take until next summer.',
+        'dance.driver.practiced.prompt': 'Talk to the driver',
+        'dance.driver.practiced.01': 'His feet are moving under the clipboard. Left, left, left, tap.',
+        'dance.driver.practiced.02': "I keep doing it when nobody's looking. Don't tell anyone. Especially— anyone.",
+        'dance.driver.practiced.choice.tonight': 'Will you ask her tonight?',
+        'dance.driver.practiced.tonight.01': 'Ask WHO?',
+        'dance.driver.practiced.tonight.02':
           "...She's busy. She's always busy. It's honestly the nicest thing about her. She makes busy look kind.",
-        "dance.driver.practiced.choice.leave": "Keep practising.",
-        "dance.driver.practiced.leave.01": "One, two, three, tap. One, two, three, tap.",
-        "dance.driver.request.prompt": "Talk to the driver",
-        "dance.driver.request.01": "He's dancing the step under the shelter again. He stops dead when he sees you.",
-        "dance.driver.request.02": "So. I have one step now. One step is not nothing.",
-        "dance.driver.request.03":
-          "But I can't just walk up and— she's on the radio. She's always on the radio.",
-        "dance.driver.request.choice.write": "Write her a song request.",
-        "dance.driver.request.write.01": "A request. For tonight. One song, and...",
-        "dance.driver.request.write.02": "...and one dance. Later. On paper, later is a much braver time.",
-        "dance.driver.request.write.03": "He tears the corner off his route sheet and uncaps a pen.",
-        "dance.driver.request.choice.simple": "Keep it simple.",
-        "dance.driver.request.simple.01":
-          "SONG: something slow. FOR: the operations table. ONE DANCE, LATER?  ☐ yes  ☐ maybe",
-        "dance.driver.request.simple.02":
+        'dance.driver.practiced.choice.leave': 'Keep practising.',
+        'dance.driver.practiced.leave.01': 'One, two, three, tap. One, two, three, tap.',
+        'dance.driver.request.prompt': 'Talk to the driver',
+        'dance.driver.request.01': "He's dancing the step under the shelter again. He stops dead when he sees you.",
+        'dance.driver.request.02': 'So. I have one step now. One step is not nothing.',
+        'dance.driver.request.03': "But I can't just walk up and— she's on the radio. She's always on the radio.",
+        'dance.driver.request.choice.write': 'Write her a song request.',
+        'dance.driver.request.write.01': 'A request. For tonight. One song, and...',
+        'dance.driver.request.write.02': '...and one dance. Later. On paper, later is a much braver time.',
+        'dance.driver.request.write.03': 'He tears the corner off his route sheet and uncaps a pen.',
+        'dance.driver.request.choice.simple': 'Keep it simple.',
+        'dance.driver.request.simple.01':
+          'SONG: something slow. FOR: the operations table. ONE DANCE, LATER?  ☐ yes  ☐ maybe',
+        'dance.driver.request.simple.02':
           "She'll know the handwriting. Everyone knows the handwriting. I write 'shuttle' with three t's.",
-        "dance.driver.request.simple.03":
+        'dance.driver.request.simple.03':
           "Put it in her request jar? Don't hand it to her. Just... the jar. Like a normal anonymous person.",
-        "dance.driver.request.choice.novel": "Tell her how you feel.",
-        "dance.driver.request.novel.01": "On a corner of a route sheet? That's not a request, that's a novel.",
-        "dance.driver.request.novel.02": "Simple. Simple is a shuttle schedule. I'm good at schedules.",
-        "dance.driver.request.choice.sign": "Sign your name.",
-        "dance.driver.request.sign.01": "...She'll know. Signing it would just be showing off.",
-        "dance.driver.request.choice.later": "Maybe after the shuttle?",
-        "dance.driver.request.later.01": "After the shuttle, the dance is already happening. Then it's not later. It's now.",
-        "dance.driver.request.later.02": "Now is so much worse than later.",
-        "dance.driver.request_pending.prompt": "Talk to the driver",
-        "dance.driver.request_pending.01": "Is it in the jar? Don't tell me. Tell me. No— don't.",
-        "dance.driver.request_pending.02": "The folded corner of route sheet is warm in your pocket. The jar is on the operations table.",
-        "dance.driver.after_request.prompt": "Talk to the driver",
-        "dance.driver.after_request.01": "She said 'copy that.'",
-        "dance.driver.after_request.02":
-          "Copy that. Two words. I am going to think about those two words for the rest of my life.",
-        "dance.driver.after_request.03":
+        'dance.driver.request.choice.novel': 'Tell her how you feel.',
+        'dance.driver.request.novel.01': "On a corner of a route sheet? That's not a request, that's a novel.",
+        'dance.driver.request.novel.02': "Simple. Simple is a shuttle schedule. I'm good at schedules.",
+        'dance.driver.request.choice.sign': 'Sign your name.',
+        'dance.driver.request.sign.01': "...She'll know. Signing it would just be showing off.",
+        'dance.driver.request.choice.later': 'Maybe after the shuttle?',
+        'dance.driver.request.later.01':
+          "After the shuttle, the dance is already happening. Then it's not later. It's now.",
+        'dance.driver.request.later.02': 'Now is so much worse than later.',
+        'dance.driver.request_pending.prompt': 'Talk to the driver',
+        'dance.driver.request_pending.01': "Is it in the jar? Don't tell me. Tell me. No— don't.",
+        'dance.driver.request_pending.02':
+          'The folded corner of route sheet is warm in your pocket. The jar is on the operations table.',
+        'dance.driver.after_request.prompt': 'Talk to the driver',
+        'dance.driver.after_request.01': "She said 'copy that.'",
+        'dance.driver.after_request.02':
+          'Copy that. Two words. I am going to think about those two words for the rest of my life.',
+        'dance.driver.after_request.03':
           "Right! The lane. The steward's got a few last setup jobs, and then we're rolling.",
 
         // The Profe: the Dance Teacher.
-        "dance.teacher.floor.prompt": "Talk to the Profe",
-        "dance.teacher.floor.01":
-          "On the empty dance floor, a woman in a long skirt is dancing with nobody, perfectly. She scrapes a güira on every fourth count.",
-        "dance.teacher.floor.02":
+        'dance.teacher.floor.prompt': 'Talk to the Profe',
+        'dance.teacher.floor.01':
+          'On the empty dance floor, a woman in a long skirt is dancing with nobody, perfectly. She scrapes a güira on every fourth count.',
+        'dance.teacher.floor.02':
           "You're early, cariño. The floor doesn't open till the lanterns do. But the floor is always open to the feet.",
-        "dance.teacher.floor.back.01": "Feet still yours? Good. Let's keep them that way.",
-        "dance.teacher.floor.after.01": "Look at that sky. Somebody's been busy. I have the watch, go, go.",
-        "dance.teacher.floor.choice.lesson": "The driver wants one step. Privately.",
-        "dance.teacher.floor.lesson.01": "Behind the shelter? Ah. The shy ones always pick the bus stop.",
-        "dance.teacher.floor.lesson.02":
+        'dance.teacher.floor.back.01': "Feet still yours? Good. Let's keep them that way.",
+        'dance.teacher.floor.after.01': "Look at that sky. Somebody's been busy. I have the watch, go, go.",
+        'dance.teacher.floor.choice.lesson': 'The driver wants one step. Privately.',
+        'dance.teacher.floor.lesson.01': 'Behind the shelter? Ah. The shy ones always pick the bus stop.',
+        'dance.teacher.floor.lesson.02':
           "I'll come to him. If you bring him to me, he'll think about it the whole way and arrive as a statue.",
-        "dance.teacher.floor.choice.go": "Let's go.",
-        "dance.teacher.floor.go.01":
+        'dance.teacher.floor.choice.go': "Let's go.",
+        'dance.teacher.floor.go.01':
           "You dance it with him. He'll copy you before he copies me. I'm much too good, it frightens people.",
-        "dance.teacher.floor.go.02":
-          "Left, left, left, tap. Right, right, right, tap. Feet on the count, hip on the four.",
-        "dance.teacher.floor.choice.later": "In a minute.",
-        "dance.teacher.floor.later.01": "The count will wait. It always does.",
-        "dance.teacher.floor.choice.watch": "Could you keep watch over the plaza tonight?",
-        "dance.teacher.floor.watch.01": "Me? Run the plaza?",
-        "dance.teacher.floor.watch.02":
-          "I ran this plaza one Saturday with a broken speaker and a güira. Everybody danced. Nobody died.",
-        "dance.teacher.floor.watch.03": "Tell her the Profe has the watch. And tell her to wear shoes she can turn in.",
-        "dance.teacher.floor.choice.what": "What's tonight?",
-        "dance.teacher.floor.what.01":
-          "Bachata. One, two, three, and the one where your hip tells the truth.",
-        "dance.teacher.floor.what.02": "Everybody can do the first three. The fourth is where people get shy.",
-        "dance.teacher.floor.choice.teach": "Can you teach me?",
-        "dance.teacher.floor.teach.01": "I teach everybody. But you're not the one who needs it today.",
-        "dance.teacher.floor.teach.02": "Look at the shelter.",
-        "dance.teacher.floor.teach.03":
+        'dance.teacher.floor.go.02':
+          'Left, left, left, tap. Right, right, right, tap. Feet on the count, hip on the four.',
+        'dance.teacher.floor.choice.later': 'In a minute.',
+        'dance.teacher.floor.later.01': 'The count will wait. It always does.',
+        'dance.teacher.floor.choice.watch': 'Could you keep watch over the plaza tonight?',
+        'dance.teacher.floor.watch.01': 'Me? Run the plaza?',
+        'dance.teacher.floor.watch.02':
+          'I ran this plaza one Saturday with a broken speaker and a güira. Everybody danced. Nobody died.',
+        'dance.teacher.floor.watch.03': 'Tell her the Profe has the watch. And tell her to wear shoes she can turn in.',
+        'dance.teacher.floor.choice.what': "What's tonight?",
+        'dance.teacher.floor.what.01': 'Bachata. One, two, three, and the one where your hip tells the truth.',
+        'dance.teacher.floor.what.02': 'Everybody can do the first three. The fourth is where people get shy.',
+        'dance.teacher.floor.choice.teach': 'Can you teach me?',
+        'dance.teacher.floor.teach.01': "I teach everybody. But you're not the one who needs it today.",
+        'dance.teacher.floor.teach.02': 'Look at the shelter.',
+        'dance.teacher.floor.teach.03':
           "Under the shuttle shelter, the driver is mouthing 'one, two, three' at his clipboard.",
-        "dance.teacher.floor.choice.couple": "The driver and the woman at the operations table...?",
-        "dance.teacher.floor.couple.01": "Ah, you noticed. Everybody notices. Except the two of them.",
-        "dance.teacher.floor.couple.02":
+        'dance.teacher.floor.choice.couple': 'The driver and the woman at the operations table...?',
+        'dance.teacher.floor.couple.01': 'Ah, you noticed. Everybody notices. Except the two of them.',
+        'dance.teacher.floor.couple.02':
           "They're practising the art of being unavailable. Very advanced. I don't teach it.",
-        "dance.teacher.floor.choice.again": "Can we run the step again?",
-        "dance.teacher.floor.again.01": "Again! The best word in dancing. Come on, before he gets shy.",
-        "dance.teacher.floor.choice.leave": "See you on the floor.",
-        "dance.teacher.floor.leave.01": "You will. Everyone does, eventually.",
-        "dance.lesson.done.teacher.legendary": "¡Eso! Look at the two of you. I'm out of a job.",
-        "dance.lesson.done.teacher.great": "That's bachata. Not perfect. Better than perfect: relaxed.",
-        "dance.lesson.done.teacher.good": "Wobbly. Good. Wobbly means you're really doing it.",
-        "dance.lesson.done.teacher.rough": "Rough? Sure. But he never stopped. That's the actual step.",
-        "dance.lesson.done.driver.legendary": "I did a hip. I did a HIP.",
-        "dance.lesson.done.driver.great": "My feet were where I left them. Every single time.",
-        "dance.lesson.done.driver.good": "I only stepped on my own foot twice. That's a personal best.",
-        "dance.lesson.done.driver.rough": "I think I invented a new dance. It's called 'sorry'.",
-        "dance.lesson.done.01": "One step. I have one whole step.",
-        "dance.lesson.done.02": "He tucks the clipboard under his arm. For the first time all afternoon, he doesn't look at it.",
-        "dance.lesson.done.again.01": "Again tonight. With music, with lanterns, with her. Same four counts.",
+        'dance.teacher.floor.choice.again': 'Can we run the step again?',
+        'dance.teacher.floor.again.01': 'Again! The best word in dancing. Come on, before he gets shy.',
+        'dance.teacher.floor.choice.leave': 'See you on the floor.',
+        'dance.teacher.floor.leave.01': 'You will. Everyone does, eventually.',
+        'dance.lesson.done.teacher.legendary': "¡Eso! Look at the two of you. I'm out of a job.",
+        'dance.lesson.done.teacher.great': "That's bachata. Not perfect. Better than perfect: relaxed.",
+        'dance.lesson.done.teacher.good': "Wobbly. Good. Wobbly means you're really doing it.",
+        'dance.lesson.done.teacher.rough': "Rough? Sure. But he never stopped. That's the actual step.",
+        'dance.lesson.done.driver.legendary': 'I did a hip. I did a HIP.',
+        'dance.lesson.done.driver.great': 'My feet were where I left them. Every single time.',
+        'dance.lesson.done.driver.good': "I only stepped on my own foot twice. That's a personal best.",
+        'dance.lesson.done.driver.rough': "I think I invented a new dance. It's called 'sorry'.",
+        'dance.lesson.done.01': 'One step. I have one whole step.',
+        'dance.lesson.done.02':
+          "He tucks the clipboard under his arm. For the first time all afternoon, he doesn't look at it.",
+        'dance.lesson.done.again.01': 'Again tonight. With music, with lanterns, with her. Same four counts.',
 
         // Last-Stop Operations Helper.
-        "dance.operations.table.prompt": "Talk to Operations",
-        "dance.operations.table.01":
-          "The operations table: a radio, a checklist, a jar labelled SONG REQUESTS, and a woman counting lanterns under her breath.",
-        "dance.operations.table.02": "...forty-six, forty-seven, forty-eight. Oh! Hi! Sorry. Forty-eight. Hi.",
-        "dance.operations.table.again.01": "Hi again! Everything's fine. Probably. Let me check. It's fine.",
-        "dance.operations.table.ready.01": "The Profe's got the watch. I keep putting the radio down and picking it back up.",
-        "dance.operations.table.choice.help": "Need a hand?",
-        "dance.operations.table.help.01": "Could you... check a few things? Just so it's not only me saying it.",
-        "dance.operations.table.help.02": "The lantern line over the floor first. Give it a tug.",
-        "dance.operations.table.choice.tug": "Tug the lantern line.",
-        "dance.operations.table.tug.01": "You tug. Forty-eight paper lanterns bob, sway, and hold.",
-        "dance.operations.table.tug.02": "It holds. Okay. Okay! Cable tape by the speakers?",
-        "dance.operations.table.choice.stamp": "Stamp on the cable tape.",
-        "dance.operations.table.stamp.01": "You stamp along the tape. Flat. Not a wrinkle.",
-        "dance.operations.table.stamp.02": "Flat. Chairs, then.",
-        "dance.operations.table.choice.count": "Count the chair stacks.",
-        "dance.operations.table.count.01": "Twelve stacks of twelve. Neat as a ledger.",
-        "dance.operations.table.count.02": "...So it's all fine. It's been fine for an hour.",
-        "dance.operations.table.count.03":
+        'dance.operations.table.prompt': 'Talk to Operations',
+        'dance.operations.table.01':
+          'The operations table: a radio, a checklist, a jar labelled SONG REQUESTS, and a woman counting lanterns under her breath.',
+        'dance.operations.table.02': '...forty-six, forty-seven, forty-eight. Oh! Hi! Sorry. Forty-eight. Hi.',
+        'dance.operations.table.again.01': "Hi again! Everything's fine. Probably. Let me check. It's fine.",
+        'dance.operations.table.ready.01':
+          "The Profe's got the watch. I keep putting the radio down and picking it back up.",
+        'dance.operations.table.choice.help': 'Need a hand?',
+        'dance.operations.table.help.01': "Could you... check a few things? Just so it's not only me saying it.",
+        'dance.operations.table.help.02': 'The lantern line over the floor first. Give it a tug.',
+        'dance.operations.table.choice.tug': 'Tug the lantern line.',
+        'dance.operations.table.tug.01': 'You tug. Forty-eight paper lanterns bob, sway, and hold.',
+        'dance.operations.table.tug.02': 'It holds. Okay. Okay! Cable tape by the speakers?',
+        'dance.operations.table.choice.stamp': 'Stamp on the cable tape.',
+        'dance.operations.table.stamp.01': 'You stamp along the tape. Flat. Not a wrinkle.',
+        'dance.operations.table.stamp.02': 'Flat. Chairs, then.',
+        'dance.operations.table.choice.count': 'Count the chair stacks.',
+        'dance.operations.table.count.01': 'Twelve stacks of twelve. Neat as a ledger.',
+        'dance.operations.table.count.02': "...So it's all fine. It's been fine for an hour.",
+        'dance.operations.table.count.03':
           "If it's all done, then tonight I'm just someone standing by the floor. Waiting to see if anyone asks.",
-        "dance.operations.table.count.04":
-          "Her eyes slide, just for a second, to the shuttle shelter, where the driver is very busy with his clipboard.",
-        "dance.operations.table.choice.watch": "Who keeps watch once the dance starts?",
-        "dance.operations.table.watch.01": "Me. That's the plan. Somebody has to have the radio.",
-        "dance.operations.table.watch.02":
-          "Unless somebody else has the radio. Which nobody will. Which is fine. I like the radio.",
-        "dance.operations.table.choice.ask": "You could ask the driver to dance.",
-        "dance.operations.table.ask.01": "Ask WHO? I wasn't— that was a lantern. I was looking at a lantern.",
-        "dance.operations.table.ask.02": "She is suddenly very interested in a lantern.",
-        "dance.operations.table.ask.03": "I have forty-eight lanterns. I am extremely busy with all of them.",
-        "dance.operations.table.choice.tonight": "About tonight...",
-        "dance.operations.table.tonight.01": "Tonight I'm on the radio. Same as every year. It's a good radio.",
-        "dance.operations.table.choice.kept": "The Profe will keep watch tonight.",
-        "dance.operations.table.kept.01": "The Profe? She said that? Out loud?",
-        "dance.operations.table.kept.02": "...Then I could just be at the dance. Like a person.",
-        "dance.operations.table.kept.03": "I don't know what I'd do with my hands.",
-        "dance.operations.table.kept.04": "She sets the radio down. Picks it up. Sets it down again, and leaves it there.",
-        "dance.operations.table.choice.drop": "Drop the folded request in the jar.",
-        "dance.operations.table.drop.01": "You drop the little folded square into the jar. It lands right on top.",
-        "dance.operations.table.drop.02": "Oh, a request! For the DJ, let me just—",
-        "dance.operations.table.drop.03": "She unfolds it. She reads it. She reads it again.",
-        "dance.operations.table.drop.04": "...'Shuttle' with three t's.",
-        "dance.operations.table.drop.05": "She picks up the radio, and holds it for a long moment without pressing anything.",
-        "dance.operations.table.drop.06": "Ops to shuttle.",
-        "dance.operations.table.drop.07": "...Shuttle. Go ahead.",
-        "dance.operations.table.drop.08": "Request received.",
-        "dance.operations.table.drop.09": "...Tick: yes.",
-        "dance.operations.table.drop.10": "...Copy that.",
-        "dance.operations.table.drop.11": "Across the plaza, somebody drops a clipboard.",
-        "dance.operations.table.drop.12":
+        'dance.operations.table.count.04':
+          'Her eyes slide, just for a second, to the shuttle shelter, where the driver is very busy with his clipboard.',
+        'dance.operations.table.choice.watch': 'Who keeps watch once the dance starts?',
+        'dance.operations.table.watch.01': "Me. That's the plan. Somebody has to have the radio.",
+        'dance.operations.table.watch.02':
+          'Unless somebody else has the radio. Which nobody will. Which is fine. I like the radio.',
+        'dance.operations.table.choice.ask': 'You could ask the driver to dance.',
+        'dance.operations.table.ask.01': "Ask WHO? I wasn't— that was a lantern. I was looking at a lantern.",
+        'dance.operations.table.ask.02': 'She is suddenly very interested in a lantern.',
+        'dance.operations.table.ask.03': 'I have forty-eight lanterns. I am extremely busy with all of them.',
+        'dance.operations.table.choice.tonight': 'About tonight...',
+        'dance.operations.table.tonight.01': "Tonight I'm on the radio. Same as every year. It's a good radio.",
+        'dance.operations.table.choice.kept': 'The Profe will keep watch tonight.',
+        'dance.operations.table.kept.01': 'The Profe? She said that? Out loud?',
+        'dance.operations.table.kept.02': '...Then I could just be at the dance. Like a person.',
+        'dance.operations.table.kept.03': "I don't know what I'd do with my hands.",
+        'dance.operations.table.kept.04':
+          'She sets the radio down. Picks it up. Sets it down again, and leaves it there.',
+        'dance.operations.table.choice.drop': 'Drop the folded request in the jar.',
+        'dance.operations.table.drop.01': 'You drop the little folded square into the jar. It lands right on top.',
+        'dance.operations.table.drop.02': 'Oh, a request! For the DJ, let me just—',
+        'dance.operations.table.drop.03': 'She unfolds it. She reads it. She reads it again.',
+        'dance.operations.table.drop.04': "...'Shuttle' with three t's.",
+        'dance.operations.table.drop.05':
+          'She picks up the radio, and holds it for a long moment without pressing anything.',
+        'dance.operations.table.drop.06': 'Ops to shuttle.',
+        'dance.operations.table.drop.07': '...Shuttle. Go ahead.',
+        'dance.operations.table.drop.08': 'Request received.',
+        'dance.operations.table.drop.09': '...Tick: yes.',
+        'dance.operations.table.drop.10': '...Copy that.',
+        'dance.operations.table.drop.11': 'Across the plaza, somebody drops a clipboard.',
+        'dance.operations.table.drop.12':
           "Right! Lanterns! Gate! The steward needs the lane. Go, go, I'm— I'm working. Go.",
-        "dance.operations.table.choice.job": "What do you do here?",
-        "dance.operations.table.job.01":
+        'dance.operations.table.choice.job': 'What do you do here?',
+        'dance.operations.table.job.01':
           "Operations. Shuttle questions, lantern tags, chair stacks, cable runs, the steward's radio.",
-        "dance.operations.table.job.02": "If it's on this plaza and it could go wrong, it's mine.",
-        "dance.operations.table.choice.jar": "What's the jar for?",
-        "dance.operations.table.jar.01": "Song requests for the DJ tonight. Mostly people request the same three songs.",
-        "dance.operations.table.jar.02": "Somebody once requested 'something with a trumpet'. I respect that.",
-        "dance.operations.table.choice.leave": "Good luck tonight.",
-        "dance.operations.table.leave.01": "Luck's for people without checklists. ...Thank you, though.",
-        "dance.operations.after.prompt": "Talk to Operations",
-        "dance.operations.after.01": "Don't look at me. I'm working. I am working extremely hard.",
-        "dance.operations.after.open.01":
+        'dance.operations.table.job.02': "If it's on this plaza and it could go wrong, it's mine.",
+        'dance.operations.table.choice.jar': "What's the jar for?",
+        'dance.operations.table.jar.01':
+          'Song requests for the DJ tonight. Mostly people request the same three songs.',
+        'dance.operations.table.jar.02': "Somebody once requested 'something with a trumpet'. I respect that.",
+        'dance.operations.table.choice.leave': 'Good luck tonight.',
+        'dance.operations.table.leave.01': "Luck's for people without checklists. ...Thank you, though.",
+        'dance.operations.after.prompt': 'Talk to Operations',
+        'dance.operations.after.01': "Don't look at me. I'm working. I am working extremely hard.",
+        'dance.operations.after.open.01':
           "Shuttle's yours! Bring him back down in one piece. He's got a dance at nine.",
-        "dance.operations.after.choice.happy": "You look happy.",
-        "dance.operations.after.happy.01": "I look like somebody holding a radio.",
-        "dance.operations.after.happy.02": "...Okay. I'm a little happy.",
-        "dance.operations.after.choice.leave": "See you later.",
-        "dance.operations.after.leave.01": "Later. Later's a good time. I've heard.",
+        'dance.operations.after.choice.happy': 'You look happy.',
+        'dance.operations.after.happy.01': 'I look like somebody holding a radio.',
+        'dance.operations.after.happy.02': "...Okay. I'm a little happy.",
+        'dance.operations.after.choice.leave': 'See you later.',
+        'dance.operations.after.leave.01': "Later. Later's a good time. I've heard.",
 
         // Festival Steward and the gate.
-        "dance.steward.gate.prompt": "Talk to the steward",
-        "dance.steward.gate.01":
+        'dance.steward.gate.prompt': 'Talk to the steward',
+        'dance.steward.gate.01':
           "Gate opens when the lane's safe. Lane's safe when Ops signs off, and the driver is on his clipboard instead of under it.",
-        "dance.steward.gate.choice.why": "Why so strict?",
-        "dance.steward.gate.why.01": "Last year someone drove a shuttle through a lantern line.",
-        "dance.steward.gate.why.02": "Very festive. Very expensive.",
-        "dance.steward.gate.choice.open": "Can't you open it just for me?",
-        "dance.steward.gate.open.01": "Can't, won't, and also the key is in a very serious pocket.",
-        "dance.steward.gate.choice.couple": "Those two, at the shelter and the table...",
-        "dance.steward.gate.couple.01": "Oh, you noticed.",
-        "dance.steward.gate.couple.02":
-          "The shuttle waits on the lane. She waits on one perfect lantern. He waits on anything except asking.",
-        "dance.steward.gate.choice.leave": "I'll be back.",
-        "dance.steward.gate.leave.01": "Busy day. Busier night.",
-        "dance.gate.look.prompt": "Look at the gate",
-        "dance.gate.look.01":
-          "A barrier across the service road, a sign that says SETUP · CLOSED, and a lantern line sagging low enough to scalp a shuttle.",
-        "dance.gate.look.02": "Loose speaker cables snake across the lane. The hill road climbs away beyond them.",
-        "dance.steward.clearance.prompt": "Check in with the steward",
-        "dance.gate.clearance.prompt": "Check in with the steward",
-        "dance.steward.clearance.01":
+        'dance.steward.gate.choice.why': 'Why so strict?',
+        'dance.steward.gate.why.01': 'Last year someone drove a shuttle through a lantern line.',
+        'dance.steward.gate.why.02': 'Very festive. Very expensive.',
+        'dance.steward.gate.choice.open': "Can't you open it just for me?",
+        'dance.steward.gate.open.01': "Can't, won't, and also the key is in a very serious pocket.",
+        'dance.steward.gate.choice.couple': 'Those two, at the shelter and the table...',
+        'dance.steward.gate.couple.01': 'Oh, you noticed.',
+        'dance.steward.gate.couple.02':
+          'The shuttle waits on the lane. She waits on one perfect lantern. He waits on anything except asking.',
+        'dance.steward.gate.choice.leave': "I'll be back.",
+        'dance.steward.gate.leave.01': 'Busy day. Busier night.',
+        'dance.gate.look.prompt': 'Look at the gate',
+        'dance.gate.look.01':
+          'A barrier across the service road, a sign that says SETUP · CLOSED, and a lantern line sagging low enough to scalp a shuttle.',
+        'dance.gate.look.02': 'Loose speaker cables snake across the lane. The hill road climbs away beyond them.',
+        'dance.steward.clearance.prompt': 'Check in with the steward',
+        'dance.gate.clearance.prompt': 'Check in with the steward',
+        'dance.steward.clearance.01':
           "Ops says go. The driver's practically floating. So: two jobs on the lane, then I turn this key.",
-        "dance.steward.clearance.02":
-          "That lantern line has to clear the shuttle, crates on the roof and all. And nothing loose on the road a tyre can grab.",
-        "dance.steward.clearance.again.01": "Key's ready when the lane is.",
-        "dance.steward.clearance.todo.lanterns": "Lantern line: still sagging. Pole's on your left, three hooks.",
-        "dance.steward.clearance.todo.cables": "Cable run: still loose, right in the tyre track.",
-        "dance.steward.clearance.choice.later": "On it.",
-        "dance.steward.clearance.later.01": "Minute's fine. Sunset isn't.",
-        "dance.steward.clearance.ready.01": "Lanterns up. Cables ramped. Look at that lane.",
-        "dance.steward.clearance.ready.02": "Last thing: the sign. Flip it to the side the shuttle needs.",
-        "dance.steward.clearance.choice.party": "Flip it to DANCE TONIGHT · 9.",
-        "dance.steward.clearance.party.01": "You flip the board. DANCE TONIGHT · 9, in big happy letters.",
-        "dance.steward.clearance.party.02": "True. Lovely. Also not something a shuttle can read. Other side.",
-        "dance.steward.clearance.choice.sign": "Flip it to LAST DAYLIGHT RIDE.",
-        "dance.steward.clearance.sign.01": "SETUP · CLOSED flips over: LAST DAYLIGHT RIDE.",
-        "dance.steward.clearance.sign.02": "That's a lane.",
-        "dance.steward.clearance.sign.03":
-          "The steward turns a very serious key. The gate swings wide, and the whole sky goes gold.",
+        'dance.steward.clearance.02':
+          'That lantern line has to clear the shuttle, crates on the roof and all. And nothing loose on the road a tyre can grab.',
+        'dance.steward.clearance.again.01': "Key's ready when the lane is.",
+        'dance.steward.clearance.todo.lanterns': "Lantern line: still sagging. Pole's on your left, three hooks.",
+        'dance.steward.clearance.todo.cables': 'Cable run: still loose, right in the tyre track.',
+        'dance.steward.clearance.choice.later': 'On it.',
+        'dance.steward.clearance.later.01': "Minute's fine. Sunset isn't.",
+        'dance.steward.clearance.ready.01': 'Lanterns up. Cables ramped. Look at that lane.',
+        'dance.steward.clearance.ready.02': 'Last thing: the sign. Flip it to the side the shuttle needs.',
+        'dance.steward.clearance.choice.party': 'Flip it to DANCE TONIGHT · 9.',
+        'dance.steward.clearance.party.01': 'You flip the board. DANCE TONIGHT · 9, in big happy letters.',
+        'dance.steward.clearance.party.02': 'True. Lovely. Also not something a shuttle can read. Other side.',
+        'dance.steward.clearance.choice.sign': 'Flip it to LAST DAYLIGHT RIDE.',
+        'dance.steward.clearance.sign.01': 'SETUP · CLOSED flips over: LAST DAYLIGHT RIDE.',
+        'dance.steward.clearance.sign.02': "That's a lane.",
+        'dance.steward.clearance.sign.03':
+          'The steward turns a very serious key. The gate swings wide, and the whole sky goes gold.',
 
         // The two setup jobs on the lane.
-        "dance.setup.lanterns.prompt": "Fix the lantern line",
-        "dance.setup.lanterns.01":
-          "The lantern line sags across the lane at about head height. The pole has three hooks: low, middle, and one right at the top.",
-        "dance.setup.lanterns.01_mid":
-          "The line hangs from the middle hook. It clears a person. A shuttle with crates on its roof is taller than a person.",
-        "dance.setup.lanterns.choice.low": "Low hook.",
-        "dance.setup.lanterns.low.01": "You hook it low. The lanterns now hang at exactly forehead height.",
-        "dance.setup.lanterns.low.02": "Ha! Perfect, if we were doing limbo. Higher.",
-        "dance.setup.lanterns.choice.middle": "Middle hook.",
-        "dance.setup.lanterns.middle.01": "Middle hook. The line lifts to about roof height. Roughly.",
-        "dance.setup.lanterns.middle.02": "Roof height, sure. Now picture two crates of spare lanterns on that roof.",
-        "dance.setup.lanterns.choice.top": "Top hook.",
-        "dance.setup.lanterns.top.01":
-          "You climb onto a crate, stretch, and hitch the line on the top hook. The lanterns lift clear of the lane.",
-        "dance.setup.lanterns.top.02": "One by one, they blink on early, like they couldn't wait.",
-        "dance.setup.lanterns.choice.leave": "Leave it for now.",
-        "dance.setup.lanterns.leave.01": "The lanterns sway, unimpressed.",
-        "dance.setup.cables.prompt": "Sort out the cable run",
-        "dance.setup.cables.01":
+        'dance.setup.lanterns.prompt': 'Fix the lantern line',
+        'dance.setup.lanterns.01':
+          'The lantern line sags across the lane at about head height. The pole has three hooks: low, middle, and one right at the top.',
+        'dance.setup.lanterns.01_mid':
+          'The line hangs from the middle hook. It clears a person. A shuttle with crates on its roof is taller than a person.',
+        'dance.setup.lanterns.choice.low': 'Low hook.',
+        'dance.setup.lanterns.low.01': 'You hook it low. The lanterns now hang at exactly forehead height.',
+        'dance.setup.lanterns.low.02': 'Ha! Perfect, if we were doing limbo. Higher.',
+        'dance.setup.lanterns.choice.middle': 'Middle hook.',
+        'dance.setup.lanterns.middle.01': 'Middle hook. The line lifts to about roof height. Roughly.',
+        'dance.setup.lanterns.middle.02': 'Roof height, sure. Now picture two crates of spare lanterns on that roof.',
+        'dance.setup.lanterns.choice.top': 'Top hook.',
+        'dance.setup.lanterns.top.01':
+          'You climb onto a crate, stretch, and hitch the line on the top hook. The lanterns lift clear of the lane.',
+        'dance.setup.lanterns.top.02': "One by one, they blink on early, like they couldn't wait.",
+        'dance.setup.lanterns.choice.leave': 'Leave it for now.',
+        'dance.setup.lanterns.leave.01': 'The lanterns sway, unimpressed.',
+        'dance.setup.cables.prompt': 'Sort out the cable run',
+        'dance.setup.cables.01':
           "Three loose speaker cables snake across the lane, right where the shuttle's tyres will roll.",
-        "dance.setup.cables.choice.tape": "Tape them flat.",
-        "dance.setup.cables.tape.01":
-          "You tape them flat. It looks tidy for exactly as long as it takes to imagine a shuttle tyre on it.",
-        "dance.setup.cables.tape.02": "Tape's for the dance floor. Tyres eat tape.",
-        "dance.setup.cables.choice.unplug": "Unplug and coil them.",
-        "dance.setup.cables.unplug.01":
-          "You pull the plugs to coil the cables out of the way. Across the plaza, the music stops dead.",
-        "dance.setup.cables.unplug.02": "¡Oye! Who killed my güira?",
-        "dance.setup.cables.unplug.03": "You plug them back in. Sheepishly.",
-        "dance.setup.cables.choice.ramp": "Lay a cable ramp over them.",
-        "dance.setup.cables.ramp.01":
-          "You lay a rubber ramp over the run and tuck every cable under it. Somewhere, a speaker thumps once, testing.",
-        "dance.setup.cables.ramp.02": "Ha. Even the speakers are nervous tonight.",
-        "dance.setup.cables.choice.leave": "Leave it for now.",
-        "dance.setup.cables.leave.01": "The cables keep their opinions to themselves.",
-        "dance.steward.after.prompt": "Talk to the steward",
-        "dance.steward.after.01": "Last daylight window. Don't make me close it on you. Ticket? Ah — go on.",
+        'dance.setup.cables.choice.tape': 'Tape them flat.',
+        'dance.setup.cables.tape.01':
+          'You tape them flat. It looks tidy for exactly as long as it takes to imagine a shuttle tyre on it.',
+        'dance.setup.cables.tape.02': "Tape's for the dance floor. Tyres eat tape.",
+        'dance.setup.cables.choice.unplug': 'Unplug and coil them.',
+        'dance.setup.cables.unplug.01':
+          'You pull the plugs to coil the cables out of the way. Across the plaza, the music stops dead.',
+        'dance.setup.cables.unplug.02': '¡Oye! Who killed my güira?',
+        'dance.setup.cables.unplug.03': 'You plug them back in. Sheepishly.',
+        'dance.setup.cables.choice.ramp': 'Lay a cable ramp over them.',
+        'dance.setup.cables.ramp.01':
+          'You lay a rubber ramp over the run and tuck every cable under it. Somewhere, a speaker thumps once, testing.',
+        'dance.setup.cables.ramp.02': 'Ha. Even the speakers are nervous tonight.',
+        'dance.setup.cables.choice.leave': 'Leave it for now.',
+        'dance.setup.cables.leave.01': 'The cables keep their opinions to themselves.',
+        'dance.steward.after.prompt': 'Talk to the steward',
+        'dance.steward.after.01': "Last daylight window. Don't make me close it on you. Ticket? Ah — go on.",
 
         // Cicka and the quiet cat.
-        "dance.cicka.crates.prompt": "Visit Cicka",
-        "dance.cicka.crates.01":
-          "Cicka is loafing on a crate of paper lanterns. She is staring, very hard, at the chair stacks.",
-        "dance.cicka.crates.choice.pet": "Scratch behind her ears.",
-        "dance.cicka.crates.pet.01": "prrt.",
-        "dance.cicka.crates.pet.02": "She allows it. She does not stop staring at the chairs.",
-        "dance.cicka.crates.choice.look": "Look where she's looking.",
-        "dance.cicka.crates.look.01": "Under the chair stacks: two dark ears, and a pair of round yellow eyes.",
-        "dance.cicka.crates.look.02":
-          "Another cat. He looks at Cicka. Cicka looks at him. Neither of them blinks first.",
-        "dance.cicka.crates.choice.leave": "Leave her to it.",
-        "dance.cicka.crates.leave.01": "She has important staring to do.",
-        "dance.cats.chairs.prompt": "Look under the chairs",
-        "dance.cats.chairs.01":
-          "Something dark is tucked deep under the chair stacks. Two yellow eyes. A cat, watching Cicka.",
-        "dance.cats.chairs.01_seen":
+        'dance.cicka.crates.prompt': 'Visit Cicka',
+        'dance.cicka.crates.01':
+          'Cicka is loafing on a crate of paper lanterns. She is staring, very hard, at the chair stacks.',
+        'dance.cicka.crates.choice.pet': 'Scratch behind her ears.',
+        'dance.cicka.crates.pet.01': 'prrt.',
+        'dance.cicka.crates.pet.02': 'She allows it. She does not stop staring at the chairs.',
+        'dance.cicka.crates.choice.look': "Look where she's looking.",
+        'dance.cicka.crates.look.01': 'Under the chair stacks: two dark ears, and a pair of round yellow eyes.',
+        'dance.cicka.crates.look.02':
+          'Another cat. He looks at Cicka. Cicka looks at him. Neither of them blinks first.',
+        'dance.cicka.crates.choice.leave': 'Leave her to it.',
+        'dance.cicka.crates.leave.01': 'She has important staring to do.',
+        'dance.cats.chairs.prompt': 'Look under the chairs',
+        'dance.cats.chairs.01':
+          'Something dark is tucked deep under the chair stacks. Two yellow eyes. A cat, watching Cicka.',
+        'dance.cats.chairs.01_seen':
           "The dark cat is still under the chairs, watching Cicka like she's the only lantern lit.",
-        "dance.cats.chairs.choice.play": "Play him something soft on Steve's guitar.",
-        "dance.cats.chairs.play.01":
+        'dance.cats.chairs.choice.play': "Play him something soft on Steve's guitar.",
+        'dance.cats.chairs.play.01':
           "You sit on a lantern crate and swing Steve's guitar round. Cicka's ears turn first.",
-        "dance.cats.chairs.play.02":
-          "Something slow, then. Something bachata, the way the Profe counts it: soft on the four.",
-        "dance.cats.chairs.choice.coax": "Hold out a hand.",
-        "dance.cats.chairs.coax.01": "Hhhk.",
-        "dance.cats.chairs.coax.02": "He retreats exactly one chair further back. That's a no.",
-        "dance.cats.chairs.choice.call": "Psst psst psst.",
-        "dance.cats.chairs.call.01": "Nothing. Cicka gives you a look like you've embarrassed the entire species.",
-        "dance.cats.chairs.choice.leave": "Leave them be.",
-        "dance.cats.chairs.leave.01": "Some things can't be rushed. Cats know this professionally.",
-        "dance.cats.serenade_done.01": "The last note hangs under the lanterns.",
-        "dance.cats.serenade_done.warm.01":
-          "A dark paw. Then a dark nose. The other cat slides out from under the chairs and sits down beside Cicka.",
-        "dance.cats.serenade_done.rough.01":
-          "A few wrong notes. The dark cat comes out anyway, mostly to see what that was, and sits beside Cicka.",
-        "dance.cats.serenade_done.02": "mrrp.",
-        "dance.cats.serenade_done.03": "...prrt.",
-        "dance.cats.serenade_done.04":
+        'dance.cats.chairs.play.02':
+          'Something slow, then. Something bachata, the way the Profe counts it: soft on the four.',
+        'dance.cats.chairs.choice.coax': 'Hold out a hand.',
+        'dance.cats.chairs.coax.01': 'Hhhk.',
+        'dance.cats.chairs.coax.02': "He retreats exactly one chair further back. That's a no.",
+        'dance.cats.chairs.choice.call': 'Psst psst psst.',
+        'dance.cats.chairs.call.01': "Nothing. Cicka gives you a look like you've embarrassed the entire species.",
+        'dance.cats.chairs.choice.leave': 'Leave them be.',
+        'dance.cats.chairs.leave.01': "Some things can't be rushed. Cats know this professionally.",
+        'dance.cats.serenade_done.01': 'The last note hangs under the lanterns.',
+        'dance.cats.serenade_done.warm.01':
+          'A dark paw. Then a dark nose. The other cat slides out from under the chairs and sits down beside Cicka.',
+        'dance.cats.serenade_done.rough.01':
+          'A few wrong notes. The dark cat comes out anyway, mostly to see what that was, and sits beside Cicka.',
+        'dance.cats.serenade_done.02': 'mrrp.',
+        'dance.cats.serenade_done.03': '...prrt.',
+        'dance.cats.serenade_done.04':
           "They look at the same lantern. Neither of them says anything else. They don't need to.",
-        "dance.cats.together.prompt": "Visit the cats",
-        "dance.cats.together.01": "Cicka and the dark cat are loafing side by side, exactly one paw apart.",
-        "dance.cats.together.choice.pet": "Pet Cicka.",
-        "dance.cats.together.pet.01": "Purrrr...",
-        "dance.cats.together.pet.02": "The other cat purrs too, a beat behind, like he's learning the song.",
-        "dance.cats.together.choice.encore": "Play them the song again.",
-        "dance.cats.together.encore.01": "Two sets of ears turn toward the guitar at once.",
-        "dance.cats.together.choice.leave": "Leave them be.",
-        "dance.cats.together.leave.01": "They don't notice you go. That's the nicest thing a cat can do.",
-        "dance.cats.gate.prompt": "Visit Cicka",
-        "dance.cats.gate.01": "Cicka has settled by the open gate, as if she planned the whole thing.",
-        "dance.cats.gate.together.01": "The dark cat is beside her. When the lanterns blink, they both blink.",
-        "dance.cats.gate.apart.01":
-          "A dark cat has come out from under the chairs too. They are loafing near each other, pretending not to notice.",
-        "dance.cats.gate.02": "mrrp.",
+        'dance.cats.together.prompt': 'Visit the cats',
+        'dance.cats.together.01': 'Cicka and the dark cat are loafing side by side, exactly one paw apart.',
+        'dance.cats.together.choice.pet': 'Pet Cicka.',
+        'dance.cats.together.pet.01': 'Purrrr...',
+        'dance.cats.together.pet.02': "The other cat purrs too, a beat behind, like he's learning the song.",
+        'dance.cats.together.choice.encore': 'Play them the song again.',
+        'dance.cats.together.encore.01': 'Two sets of ears turn toward the guitar at once.',
+        'dance.cats.together.choice.leave': 'Leave them be.',
+        'dance.cats.together.leave.01': "They don't notice you go. That's the nicest thing a cat can do.",
+        'dance.cats.gate.prompt': 'Visit Cicka',
+        'dance.cats.gate.01': 'Cicka has settled by the open gate, as if she planned the whole thing.',
+        'dance.cats.gate.together.01': 'The dark cat is beside her. When the lanterns blink, they both blink.',
+        'dance.cats.gate.apart.01':
+          'A dark cat has come out from under the chairs too. They are loafing near each other, pretending not to notice.',
+        'dance.cats.gate.02': 'mrrp.',
 
         // The last daylight ride.
-        "dance.shuttle.driver.prompt": "Board the shuttle",
-        "dance.shuttle.last_daylight_ride.prompt": "Board the shuttle",
-        "dance.shuttle.last_daylight_ride.01": "All aboard the last ride! Mind the step. Mind the lanterns. Mind— you're fine.",
-        "dance.shuttle.last_daylight_ride.choice.board": "Let's go.",
-        "dance.shuttle.last_daylight_ride.board.01": "Ops to shuttle.",
-        "dance.shuttle.last_daylight_ride.board.02": "...Come back down after. I'm saving you the slow one.",
-        "dance.shuttle.last_daylight_ride.board.03": "Copy that.",
-        "dance.shuttle.last_daylight_ride.board.04":
-          "The shuttle climbs the hill road into sunset paper. Behind you, the plaza lanterns come on all at once.",
-        "dance.shuttle.last_daylight_ride.board.05": "Up ahead, the Relay Spire stands quiet against the gold.",
-        "dance.shuttle.last_daylight_ride.choice.wait": "One more minute.",
-        "dance.shuttle.last_daylight_ride.wait.01": "Take it. Sunset waits for nobody. But I do.",
-      },
+        'dance.shuttle.driver.prompt': 'Board the shuttle',
+        'dance.shuttle.last_daylight_ride.prompt': 'Board the shuttle',
+        'dance.shuttle.last_daylight_ride.01':
+          "All aboard the last ride! Mind the step. Mind the lanterns. Mind— you're fine.",
+        'dance.shuttle.last_daylight_ride.choice.board': "Let's go.",
+        'dance.shuttle.last_daylight_ride.board.01': 'Ops to shuttle.',
+        'dance.shuttle.last_daylight_ride.board.02': "...Come back down after. I'm saving you the slow one.",
+        'dance.shuttle.last_daylight_ride.board.03': 'Copy that.',
+        'dance.shuttle.last_daylight_ride.board.04':
+          'The shuttle climbs the hill road into sunset paper. Behind you, the plaza lanterns come on all at once.',
+        'dance.shuttle.last_daylight_ride.board.05': 'Up ahead, the Relay Spire stands quiet against the gold.',
+        'dance.shuttle.last_daylight_ride.choice.wait': 'One more minute.',
+        'dance.shuttle.last_daylight_ride.wait.01': 'Take it. Sunset waits for nobody. But I do.'
+      }
     },
     relay: {
       speakers: {
-        prompt: "Prompt",
-        cicka: "Cicka",
-        dedication: "Dedication",
+        prompt: 'Prompt',
+        cicka: 'Cicka',
+        dedication: 'Dedication'
       },
       dialogue: {
-        "relay.overlook.inspect.prompt": "Inspect Overlook",
-        "relay.overlook.inspect.01": "You gaze out over the entire sketchbook route below.",
-        "relay.overlook.inspect.02":
-          "From the blueprint bridge to the festival lights, every page holds your story.",
-        "relay.sit_and_play.prompt.prompt": "Sit & Play Guitar",
-        "relay.sit_and_play.prompt.01": "You sit on the summit bench beside Cicka.",
-        "relay.sit_and_play.prompt.02":
-          "You unslung the acoustic guitar. The sunset phrase echoes across the mountain air.",
-        "relay.sit_and_play.prompt.03": "The overlook fills with warm, peaceful evening light.",
-        "relay.montage.lead.01": "As you play, the song drifts down the mountain, past every page you crossed.",
-        "relay.montage.bridge.01": "Far below, the blueprint bridge holds. Your bridge.",
-        "relay.montage.concert.01":
-          "At the crossing, Steve is telling the kid about the ramp again. The kid pretends not to listen.",
-        "relay.montage.dance.01":
-          "Night comes to Last-Stop Plaza and every lantern wakes. The traveler has the best seat: her suitcase, front row.",
-        "relay.montage.dance.cat_crate":
+        'relay.overlook.inspect.prompt': 'Inspect Overlook',
+        'relay.overlook.inspect.01': 'You gaze out over the entire sketchbook route below.',
+        'relay.overlook.inspect.02': 'From the blueprint bridge to the festival lights, every page holds your story.',
+        'relay.sit_and_play.prompt.prompt': 'Sit & Play Guitar',
+        'relay.sit_and_play.prompt.01': 'You sit on the summit bench beside Cicka.',
+        'relay.sit_and_play.prompt.02':
+          'You unslung the acoustic guitar. The sunset phrase echoes across the mountain air.',
+        'relay.sit_and_play.prompt.03': 'The overlook fills with warm, peaceful evening light.',
+        'relay.montage.lead.01': 'As you play, the song drifts down the mountain, past every page you crossed.',
+        'relay.montage.bridge.01': 'Far below, the blueprint bridge holds. Your bridge.',
+        'relay.montage.concert.01':
+          'At the crossing, Steve is telling the kid about the ramp again. The kid pretends not to listen.',
+        'relay.montage.dance.01':
+          'Night comes to Last-Stop Plaza and every lantern wakes. The traveler has the best seat: her suitcase, front row.',
+        'relay.montage.dance.cat_crate':
           "On the lantern crate, the quiet cat keeps Cicka's warm spot, and watches the hill road.",
-        "relay.montage.dance.cat_chairs":
-          "Out from under the chairs at last, the quiet cat sits by the lanterns, watching the hill road.",
-        "relay.montage.dance.watch":
+        'relay.montage.dance.cat_chairs':
+          'Out from under the chairs at last, the quiet cat sits by the lanterns, watching the hill road.',
+        'relay.montage.dance.watch':
           "At the operations table, the Profe has the radio. 'Plaza to everyone,' she says. 'Dance.'",
-        "relay.montage.dance.couple":
-          "The DJ plays something slow. The driver crosses the floor, holds out a hand, and counts under his breath: one, two, three, tap.",
-        "relay.montage.dance.everyone":
-          "By the second song, nobody on the plaza is sitting down. Not even the steward.",
-        "relay.guitar.sunset.01":
-          "The sun dips below the horizon as your song gently concludes.",
-        "relay.guitar.let_song_end.01": "You let the final chord ring out into quiet.",
-        "relay.guitar.let_song_end.02": "The final acoustic note resolves peacefully.",
-        "relay.cicka.threshold_meow.01": "Mrreeow...",
-        "relay.cicka.threshold_meow.02":
-          "Cicka glances back with a gentle purr, then leaps into the warm paper light.",
-        "relay.cicka.threshold_meow.03":
-          "A quiet moment of serene completion.",
-        "relay.dedication.card.01": "For Cicka.",
-        "relay.dedication.card.02": "Thank you for playing.",
-      },
-    },
+        'relay.montage.dance.couple':
+          'The DJ plays something slow. The driver crosses the floor, holds out a hand, and counts under his breath: one, two, three, tap.',
+        'relay.montage.dance.everyone':
+          'By the second song, nobody on the plaza is sitting down. Not even the steward.',
+        'relay.guitar.sunset.01': 'The sun dips below the horizon as your song gently concludes.',
+        'relay.guitar.let_song_end.01': 'You let the final chord ring out into quiet.',
+        'relay.guitar.let_song_end.02': 'The final acoustic note resolves peacefully.',
+        'relay.cicka.threshold_meow.01': 'Mrreeow...',
+        'relay.cicka.threshold_meow.02': 'Cicka glances back with a gentle purr, then leaps into the warm paper light.',
+        'relay.cicka.threshold_meow.03': 'A quiet moment of serene completion.',
+        'relay.dedication.card.01': 'For Cicka.',
+        'relay.dedication.card.02': 'Thank you for playing.'
+      }
+    }
   },
   stampedeSketch: {
     start: {
-      title: "Ooh. Irresistible.",
+      title: 'Ooh. Irresistible.',
       body: "Don't make eye contact. It only encourages them.",
-      hint: "Pick one weapon. It fires on its own. Scraps mostly twist how it feels. Sometimes they let you stay standing.",
+      hint: 'Pick one weapon. It fires on its own. Scraps mostly twist how it feels. Sometimes they let you stay standing.'
     },
     result: {
       eyebrow: {
-        cleared: "Run complete",
-        failed: "Run ended",
-        endless: "Endless run over",
+        cleared: 'Run complete',
+        failed: 'Run ended',
+        endless: 'Endless run over'
       },
       title: {
-        cleared: "They lost the scent",
-        failed: "Pecked",
-        endless: "Finally caught",
+        cleared: 'They lost the scent',
+        failed: 'Pecked',
+        endless: 'Finally caught'
       },
       body: {
-        cleared: "The flock peels off, offended. A pair of glasses is sitting in the mess.",
-        failed: "The flock got the hug. You got the beak.",
-        endless: "They never stopped coming. You never stopped being irresistible.",
+        cleared: 'The flock peels off, offended. A pair of glasses is sitting in the mess.',
+        failed: 'The flock got the hug. You got the beak.',
+        endless: 'They never stopped coming. You never stopped being irresistible.'
       },
       endless: {
-        newBest: "New best. The flock will talk about this one.",
-        best: (time: string) => `Best ${time}. Keep them chasing longer.`,
+        newBest: 'New best. The flock will talk about this one.',
+        best: (time: string) => `Best ${time}. Keep them chasing longer.`
       },
       rewardNote: {
-        earned: "Glasses acquired. The street snaps into focus. The chick will not forgive this.",
-        alreadyOwned: "Still no second pair. The chicks remain obsessed.",
-        unavailable: "No glasses yet.",
-        failed: "Stay out of beak range. The glasses are the prize.",
+        earned: 'Glasses acquired. The street snaps into focus. The chick will not forgive this.',
+        alreadyOwned: 'Still no second pair. The chicks remain obsessed.',
+        unavailable: 'No glasses yet.',
+        failed: 'Stay out of beak range. The glasses are the prize.'
       },
       stats: {
-        time: "Time",
-        contacts: "Contacts",
-        best: "Best",
-        wingmen: "Wingmen",
+        time: 'Time',
+        contacts: 'Contacts',
+        best: 'Best',
+        wingmen: 'Wingmen'
       },
       actions: {
-        backToRidge: "Back to the street",
-        retry: "Retry",
-        keepGoing: "Keep going (endless)",
-      },
-    },
-  },
+        backToRidge: 'Back to the street',
+        retry: 'Retry',
+        keepGoing: 'Keep going (endless)'
+      }
+    }
+  }
 } as const;

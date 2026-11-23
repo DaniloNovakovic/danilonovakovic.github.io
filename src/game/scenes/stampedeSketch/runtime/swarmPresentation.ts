@@ -1,11 +1,7 @@
 import * as Phaser from 'phaser';
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
 import { STAMPEDE_WORLD, clampStampedePosition } from './movement';
-import {
-  getStampedeSwarmMotion,
-  resolveStampedeSwarmTarget,
-  type StampedeSwarmMotion
-} from './swarmMotion';
+import { getStampedeSwarmMotion, resolveStampedeSwarmTarget, type StampedeSwarmMotion } from './swarmMotion';
 import type { StampedeClearedMarkPoint } from './progression';
 import { pickStampedeBark, stampedeBarkReadyAt } from './barks';
 import {
@@ -35,12 +31,7 @@ import {
   type StampedePuddle,
   type StampedeShakerShot
 } from './shaker';
-import {
-  createBeerShot,
-  stepBeerShots,
-  STAMPEDE_BARTENDER_THROW_MS,
-  type StampedeBeerShot
-} from './beer';
+import { createBeerShot, stepBeerShots, STAMPEDE_BARTENDER_THROW_MS, type StampedeBeerShot } from './beer';
 import {
   getStampedeFlockProfile,
   pickStampedeSpawnKind,
@@ -127,11 +118,7 @@ export interface StampedeSwarmRuntime {
   update(target: { x: number; y: number }, delta: number, options?: StampedeSwarmUpdateOptions): void;
   getContactCandidates(): readonly StampedeSwarmContactCandidate[];
   getSpellCandidates(): readonly StampedeSwarmContactCandidate[];
-  clearMarks(
-    ids: readonly string[],
-    ailment?: 'poison' | 'daze',
-    dazeMs?: number
-  ): readonly StampedeClearedMarkPoint[];
+  clearMarks(ids: readonly string[], ailment?: 'poison' | 'daze', dazeMs?: number): readonly StampedeClearedMarkPoint[];
   dazeMarks(ids: readonly string[], dazeMs?: number): void;
   showResisted(ids: readonly string[]): void;
   /** Knocks a bird back after it pecks, so one bird cannot sit on the player. */
@@ -232,9 +219,7 @@ const LEAVE_FADE_MS = 1_000;
 const INK = 0x1a1a1a;
 const WARN = 0xc0263b;
 
-export function createStampedeSwarmRuntime(
-  options: StampedeSwarmRuntimeOptions
-): StampedeSwarmRuntime {
+export function createStampedeSwarmRuntime(options: StampedeSwarmRuntimeOptions): StampedeSwarmRuntime {
   return new PhaserStampedeSwarmRuntime(options.scene);
 }
 
@@ -325,14 +310,9 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
       drawInkHeart(heart);
       return heart;
     });
-    this.feathers = Array.from({ length: 24 }, () =>
-      scene.add.graphics().setDepth(27).setVisible(false)
-    );
+    this.feathers = Array.from({ length: 24 }, () => scene.add.graphics().setDepth(27).setVisible(false));
     this.poofs = Array.from({ length: 8 }, () =>
-      scene.add.circle(0, 0, 10, 0xfbfbf9, 0)
-        .setStrokeStyle(2.5, INK, 0.8)
-        .setDepth(26)
-        .setVisible(false)
+      scene.add.circle(0, 0, 10, 0xfbfbf9, 0).setStrokeStyle(2.5, INK, 0.8).setDepth(26).setVisible(false)
     );
     this.beerMugs = Array.from({ length: 4 }, () => {
       const mug = scene.add.graphics().setDepth(26).setVisible(false);
@@ -350,14 +330,13 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
       fontStyle: 'bold',
       backgroundColor: '#fbfbf9',
       padding: { x: 5, y: 2 }
-    }).setOrigin(0.5, 1).setDepth(33).setVisible(false);
+    })
+      .setOrigin(0.5, 1)
+      .setDepth(33)
+      .setVisible(false);
   }
 
-  update(
-    target: { x: number; y: number },
-    delta: number,
-    options: StampedeSwarmUpdateOptions = {}
-  ): void {
+  update(target: { x: number; y: number }, delta: number, options: StampedeSwarmUpdateOptions = {}): void {
     const nowMs = this.scene.time.now;
     this.elapsedMs = options.elapsedMs ?? this.elapsedMs;
     this.lastPlayer = target;
@@ -521,11 +500,7 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
     return bird;
   }
 
-  clearMarks(
-    ids: readonly string[],
-    ailment?: 'poison' | 'daze',
-    dazeMs = 880
-  ): readonly StampedeClearedMarkPoint[] {
+  clearMarks(ids: readonly string[], ailment?: 'poison' | 'daze', dazeMs = 880): readonly StampedeClearedMarkPoint[] {
     if (ids.length === 0) return [];
     const cleared: StampedeClearedMarkPoint[] = [];
     ids.forEach((id) => {
@@ -577,11 +552,7 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
     this.candidatesDirty = true;
   }
 
-  private directSpawns(
-    options: StampedeSwarmUpdateOptions,
-    player: { x: number; y: number },
-    nowMs: number
-  ): void {
+  private directSpawns(options: StampedeSwarmUpdateOptions, player: { x: number; y: number }, nowMs: number): void {
     const view = options.view;
     if (!view || nowMs < this.nextSpawnAtMs) return;
     const durationMs = options.durationMs ?? 150_000;
@@ -656,7 +627,10 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
     bird.leaveUntilMs = 0;
     bird.nextAllyHitAtMs = 0;
     bird.body.setVisible(true).setAlpha(1).setAngle(0);
-    bird.shadow.setSize(profile.radius * 2.1, profile.radius * 0.7).setVisible(true).setAlpha(1);
+    bird.shadow
+      .setSize(profile.radius * 2.1, profile.radius * 0.7)
+      .setVisible(true)
+      .setAlpha(1);
     if (popIn) this.poof(point.x, point.y, profile.radius);
     this.candidatesDirty = true;
   }
@@ -809,7 +783,9 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
     if (!smitten || nowMs < bird.nextHeartAtMs) return;
     bird.nextHeartAtMs = nowMs + (bird.kind === 'hen' ? 1_600 : 900) + bird.phase * 60;
     this.popHeart(bird.x, bird.y - bird.radius - 8);
-    this.pushEvent((events) => { events.swoonHearts += 1; });
+    this.pushEvent((events) => {
+      events.swoonHearts += 1;
+    });
   }
 
   private stepCharger(bird: FlockBird, step: FlockStep, tuning: StampedeChargeTuning): void {
@@ -933,15 +909,16 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
   /** The three nearest chicks or hens run to Brad and circle him as a shield. */
   private callEscorts(brad: FlockBird): void {
     const picks = this.birds
-      .filter((bird) => (
-        bird.state === 'active'
-        && (bird.kind === 'chick' || bird.kind === 'hen')
-        && bird.escortOf === null
-        && !isOutOfFight(bird)
-      ))
-      .sort((left, right) => (
-        Math.hypot(left.x - brad.x, left.y - brad.y) - Math.hypot(right.x - brad.x, right.y - brad.y)
-      ))
+      .filter(
+        (bird) =>
+          bird.state === 'active' &&
+          (bird.kind === 'chick' || bird.kind === 'hen') &&
+          bird.escortOf === null &&
+          !isOutOfFight(bird)
+      )
+      .sort(
+        (left, right) => Math.hypot(left.x - brad.x, left.y - brad.y) - Math.hypot(right.x - brad.x, right.y - brad.y)
+      )
       .slice(0, BRAD_ESCORTS);
     picks.forEach((bird, slot) => {
       bird.escortOf = brad.id;
@@ -1089,7 +1066,10 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
       this.telegraphs.lineStyle(2, WARN, 0.6);
       this.telegraphs.strokeEllipse(shot.toX, shot.toY, STAMPEDE_PUDDLE_RADIUS * 2.1, STAMPEDE_PUDDLE_RADIUS * 1.5);
       const at = shakerPosition(shot, nowMs);
-      sprite.setPosition(at.x, at.y).setAngle((nowMs / 2) % 360).setVisible(true);
+      sprite
+        .setPosition(at.x, at.y)
+        .setAngle((nowMs / 2) % 360)
+        .setVisible(true);
     });
   }
 
@@ -1122,12 +1102,15 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
     const endX = lane.x + lane.dirX * lane.length;
     const endY = lane.y + lane.dirY * lane.length;
     this.telegraphs.fillStyle(WARN, 0.08 + progress * 0.14);
-    this.telegraphs.fillPoints([
-      new Phaser.Math.Vector2(lane.x + sideX, lane.y + sideY),
-      new Phaser.Math.Vector2(endX + sideX, endY + sideY),
-      new Phaser.Math.Vector2(endX - sideX, endY - sideY),
-      new Phaser.Math.Vector2(lane.x - sideX, lane.y - sideY)
-    ], true);
+    this.telegraphs.fillPoints(
+      [
+        new Phaser.Math.Vector2(lane.x + sideX, lane.y + sideY),
+        new Phaser.Math.Vector2(endX + sideX, endY + sideY),
+        new Phaser.Math.Vector2(endX - sideX, endY - sideY),
+        new Phaser.Math.Vector2(lane.x - sideX, lane.y - sideY)
+      ],
+      true
+    );
     this.telegraphs.lineStyle(2, WARN, 0.55 + progress * 0.4);
     this.telegraphs.lineBetween(lane.x, lane.y, endX, endY);
   }
@@ -1203,12 +1186,15 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
     const sideY = dirX * bird.radius;
     const progress = 1 - Math.max(0, (bird.charge.untilMs - nowMs) / tuning.windupMs);
     this.telegraphs.fillStyle(WARN, 0.08 + progress * 0.14);
-    this.telegraphs.fillPoints([
-      new Phaser.Math.Vector2(bird.x + sideX, bird.y + sideY),
-      new Phaser.Math.Vector2(bird.x + dirX * length + sideX, bird.y + dirY * length + sideY),
-      new Phaser.Math.Vector2(bird.x + dirX * length - sideX, bird.y + dirY * length - sideY),
-      new Phaser.Math.Vector2(bird.x - sideX, bird.y - sideY)
-    ], true);
+    this.telegraphs.fillPoints(
+      [
+        new Phaser.Math.Vector2(bird.x + sideX, bird.y + sideY),
+        new Phaser.Math.Vector2(bird.x + dirX * length + sideX, bird.y + dirY * length + sideY),
+        new Phaser.Math.Vector2(bird.x + dirX * length - sideX, bird.y + dirY * length - sideY),
+        new Phaser.Math.Vector2(bird.x - sideX, bird.y - sideY)
+      ],
+      true
+    );
     this.telegraphs.lineStyle(2, WARN, 0.55 + progress * 0.4);
     for (let along = 0; along < length; along += 18) {
       const end = Math.min(length, along + 10);
@@ -1244,7 +1230,10 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
         mug.setVisible(false);
         return;
       }
-      mug.setPosition(shot.x, shot.y).setAngle((nowMs / 3) % 360).setVisible(true);
+      mug
+        .setPosition(shot.x, shot.y)
+        .setAngle((nowMs / 3) % 360)
+        .setVisible(true);
     });
   }
 
@@ -1329,7 +1318,12 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
       drawFeather(feather, color);
       const angle = (index / Math.max(1, count)) * Math.PI * 2 + Math.random();
       this.scene.tweens.killTweensOf(feather);
-      feather.setPosition(x, y).setScale(1.4).setAlpha(1).setAngle(angle * 57).setVisible(true);
+      feather
+        .setPosition(x, y)
+        .setScale(1.4)
+        .setAlpha(1)
+        .setAngle(angle * 57)
+        .setVisible(true);
       this.scene.tweens.add({
         targets: feather,
         x: x + Math.cos(angle) * 30,
@@ -1408,13 +1402,14 @@ class PhaserStampedeSwarmRuntime implements StampedeSwarmRuntime {
     this.bark.setVisible(false);
     const pick = pickStampedeBark(
       this.birds
-        .filter((bird) => (
-          bird.state === 'active'
-          && !isOutOfFight(bird)
-          && nowMs >= bird.nextBarkAtMs
-          && nowMs >= bird.stunnedUntilMs
-          && Math.hypot(bird.x - focus.x, bird.y - focus.y) < 460
-        ))
+        .filter(
+          (bird) =>
+            bird.state === 'active' &&
+            !isOutOfFight(bird) &&
+            nowMs >= bird.nextBarkAtMs &&
+            nowMs >= bird.stunnedUntilMs &&
+            Math.hypot(bird.x - focus.x, bird.y - focus.y) < 460
+        )
         .map((bird) => ({ id: bird.id, kind: bird.kind, x: bird.x, y: bird.y })),
       nowMs,
       this.nextBarkGlobalAtMs,
@@ -1540,9 +1535,7 @@ function birdPose(bird: FlockBird, nowMs: number): StampedeBirdPose {
   const bradMode = bird.brad?.mode.kind;
   const windup = bird.charge.phase === 'windup' || bird.throwAtMs !== null || bradMode === 'comboWindup';
   const poisoned = nowMs < bird.poisonUntilMs;
-  const flapStep = isBirdMoving(bird, nowMs)
-    ? (Math.floor(nowMs / 90 + bird.phase * 3) % 3) as 0 | 1 | 2
-    : 0;
+  const flapStep = isBirdMoving(bird, nowMs) ? ((Math.floor(nowMs / 90 + bird.phase * 3) % 3) as 0 | 1 | 2) : 0;
   return {
     kind: bird.kind,
     radius: bird.radius,
@@ -1566,10 +1559,12 @@ function isBirdMoving(bird: FlockBird, nowMs: number): boolean {
     const kind = bird.brad.mode.kind;
     if (kind !== 'stalk' && kind !== 'comboDash') return false;
   }
-  return nowMs >= bird.stunnedUntilMs
-    && bird.throwAtMs === null
-    && bird.charge.phase !== 'windup'
-    && bird.charge.phase !== 'rest';
+  return (
+    nowMs >= bird.stunnedUntilMs &&
+    bird.throwAtMs === null &&
+    bird.charge.phase !== 'windup' &&
+    bird.charge.phase !== 'rest'
+  );
 }
 
 function birdAlpha(bird: FlockBird, nowMs: number): number {
@@ -1610,12 +1605,14 @@ function insetView(view: StampedeViewRect, inset: number): StampedeViewRect {
 }
 
 function heartingKind(kind: StampedeFlockKind): boolean {
-  return kind === 'chick'
-    || kind === 'hen'
-    || kind === 'nerd'
-    || kind === 'perfume'
-    || kind === 'fixer'
-    || kind === 'metalhead';
+  return (
+    kind === 'chick' ||
+    kind === 'hen' ||
+    kind === 'nerd' ||
+    kind === 'perfume' ||
+    kind === 'fixer' ||
+    kind === 'metalhead'
+  );
 }
 
 function moveVector(

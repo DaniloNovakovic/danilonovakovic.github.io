@@ -1,13 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import {
-  STAMPEDE_AUTO_ATTACK_COOLDOWN_MS,
-  createStampedeAutoAttackState
-} from './autoAttack';
+import { STAMPEDE_AUTO_ATTACK_COOLDOWN_MS, createStampedeAutoAttackState } from './autoAttack';
 import { STAMPEDE_WORLD } from './movement';
-import {
-  STAMPEDE_PLAYER_CONTACT_RADIUS,
-  resolveStampedeRunFrame
-} from './runFlow';
+import { STAMPEDE_PLAYER_CONTACT_RADIUS, resolveStampedeRunFrame } from './runFlow';
 import { STAMPEDE_CONTACT_COOLDOWN_MS } from './pressure';
 import {
   STAMPEDE_CONTACT_LIMIT,
@@ -28,9 +22,7 @@ describe('stampede run flow', () => {
     return session;
   }
 
-  function runFrame(
-    overrides: Partial<Parameters<typeof resolveStampedeRunFrame>[0]> = {}
-  ) {
+  function runFrame(overrides: Partial<Parameters<typeof resolveStampedeRunFrame>[0]> = {}) {
     return resolveStampedeRunFrame({
       session: createStampedeSession(),
       deltaMs: 500,
@@ -173,20 +165,20 @@ describe('stampede run flow', () => {
       closeRequested: false,
       velocity: baseVelocity,
       player: basePlayer,
-      contactCandidates: [{
-        id: 'mark-a',
-        x: basePlayer.x + 60,
-        y: basePlayer.y,
-        radius: 10
-      }]
+      contactCandidates: [
+        {
+          id: 'mark-a',
+          x: basePlayer.x + 60,
+          y: basePlayer.y,
+          radius: 10
+        }
+      ]
     });
 
     expect(frame.kind).toBe('playing');
     if (frame.kind !== 'playing') return;
     expect(frame.attack?.hitIds).toEqual(['mark-a']);
-    expect(frame.autoAttackState?.nextFireAtMs).toBe(
-      STAMPEDE_AUTO_ATTACK_COOLDOWN_MS * 2
-    );
+    expect(frame.autoAttackState?.nextFireAtMs).toBe(STAMPEDE_AUTO_ATTACK_COOLDOWN_MS * 2);
   });
 
   it('excludes attack-cleared marks from same-frame contact checks', () => {
@@ -197,11 +189,13 @@ describe('stampede run flow', () => {
       closeRequested: false,
       velocity: baseVelocity,
       player: basePlayer,
-      contactCandidates: [{
-        id: 'mark-a',
-        ...basePlayer,
-        radius: 10
-      }]
+      contactCandidates: [
+        {
+          id: 'mark-a',
+          ...basePlayer,
+          radius: 10
+        }
+      ]
     });
 
     expect(frame.kind).toBe('playing');
@@ -255,11 +249,13 @@ describe('stampede run flow', () => {
       closeRequested: false,
       velocity: baseVelocity,
       player: basePlayer,
-      contactCandidates: [{
-        id: 'mark-a',
-        ...basePlayer,
-        radius: 10
-      }]
+      contactCandidates: [
+        {
+          id: 'mark-a',
+          ...basePlayer,
+          radius: 10
+        }
+      ]
     });
 
     expect(frame.kind).toBe('terminal');

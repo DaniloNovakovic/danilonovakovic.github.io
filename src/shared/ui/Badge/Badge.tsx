@@ -21,12 +21,7 @@ const toneClasses: Record<BadgeTone, string> = {
  * Compact inline label for skills, tags, statuses, and small metadata.
  * Use when the content is descriptive, not an action.
  */
-export function Badge({
-  tone = 'neutral',
-  shape = 'square',
-  className,
-  ...props
-}: BadgeProps) {
+export function Badge({ tone = 'neutral', shape = 'square', className, ...props }: BadgeProps) {
   return (
     <span
       className={cn(

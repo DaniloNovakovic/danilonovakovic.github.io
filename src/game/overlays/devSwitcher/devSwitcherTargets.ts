@@ -1,10 +1,5 @@
 import { getMessages } from '@/shared/i18n';
-import {
-  BASEMENT_SCENE_ID,
-  HOBBIES_SCENE_ID,
-  OVERWORLD_SCENE_ID,
-  type SceneId
-} from '@/game/scenes/sceneIds';
+import { BASEMENT_SCENE_ID, HOBBIES_SCENE_ID, OVERWORLD_SCENE_ID, type SceneId } from '@/game/scenes/sceneIds';
 import type { OverlayId } from '@/game/overlays/overlayIds';
 
 export interface DevSwitcherOverlayTarget {

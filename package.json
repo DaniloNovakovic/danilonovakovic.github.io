@@ -1,22 +1,20 @@
 {
   "name": "danilonovakovic-portfolio",
-  "private": true,
   "version": "0.0.0",
+  "private": true,
   "type": "module",
-  "packageManager": "pnpm@11.1.2",
-  "engines": {
-    "node": ">=22.13.0"
-  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "docs:check": "node scripts/check-docs.mjs",
     "lint": "oxlint",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "typecheck": "tsc -b --noEmit",
-    "check": "pnpm lint && pnpm typecheck && pnpm fallow:audit && pnpm test",
+    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm fallow:audit && pnpm test",
     "fallow": "fallow",
     "fallow:health": "fallow health --report-only",
     "fallow:audit": "fallow audit --changed-since main --fail-on-issues --quiet",
@@ -49,11 +47,16 @@
     "@vitejs/plugin-react": "^6.3.0",
     "fallow": "^3.42.0",
     "jsdom": "^29.1.1",
+    "oxfmt": "0.79.0",
     "oxlint": "1.94.0",
     "storybook": "^10.6.7",
     "tailwindcss": "^4.3.5",
     "typescript": "~7.0.2",
     "vite": "^8.3.8",
     "vitest": "^3.2.7"
-  }
+  },
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "packageManager": "pnpm@11.1.2"
 }

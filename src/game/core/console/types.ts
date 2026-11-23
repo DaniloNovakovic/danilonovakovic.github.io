@@ -28,14 +28,7 @@ export type GameThoughtId =
   | 'workbench_missing_parts'
   | 'workbench_soldered';
 
-
-export type GameMode =
-  | 'overworld'
-  | 'basement'
-  | 'hobbies'
-  | 'potassium'
-  | 'ridge'
-  | 'overlay';
+export type GameMode = 'overworld' | 'basement' | 'hobbies' | 'potassium' | 'ridge' | 'overlay';
 
 export type PotassiumPhase = 'lobby' | 'wave' | 'draft' | 'won' | 'lost';
 

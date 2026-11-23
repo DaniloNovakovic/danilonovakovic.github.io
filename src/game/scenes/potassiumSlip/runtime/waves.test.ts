@@ -35,9 +35,11 @@ import {
 describe('potassium slip waves', () => {
   it('generates deterministic 5-column non-boss waves', () => {
     expect(getPotassiumWave(4)).toEqual(getPotassiumWave(4));
-    expect(POTASSIUM_WAVES.slice(0, POTASSIUM_NON_BOSS_WAVE_COUNT).every((wave) => (
-      wave.rows.every((row) => row.length === POTASSIUM_COLUMN_COUNT)
-    ))).toBe(true);
+    expect(
+      POTASSIUM_WAVES.slice(0, POTASSIUM_NON_BOSS_WAVE_COUNT).every((wave) =>
+        wave.rows.every((row) => row.length === POTASSIUM_COLUMN_COUNT)
+      )
+    ).toBe(true);
   });
 
   it('makes late waves larger and denser than early waves', () => {
@@ -205,9 +207,7 @@ describe('potassium slip waves', () => {
 });
 
 function getNonBossRows(): PotassiumWaveCell[][] {
-  return POTASSIUM_WAVES
-    .slice(0, POTASSIUM_NON_BOSS_WAVE_COUNT)
-    .flatMap((wave) => wave.rows);
+  return POTASSIUM_WAVES.slice(0, POTASSIUM_NON_BOSS_WAVE_COUNT).flatMap((wave) => wave.rows);
 }
 
 function countEnemies(rows: readonly PotassiumWaveCell[][]): number {

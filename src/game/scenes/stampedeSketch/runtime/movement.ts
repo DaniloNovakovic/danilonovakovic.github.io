@@ -1,7 +1,4 @@
-import {
-  GAME_DESIGN_HEIGHT,
-  GAME_DESIGN_WIDTH
-} from '@/game/sharedSceneRuntime/designSize';
+import { GAME_DESIGN_HEIGHT, GAME_DESIGN_WIDTH } from '@/game/sharedSceneRuntime/designSize';
 
 export const STAMPEDE_ARENA = {
   left: 16,
@@ -62,9 +59,7 @@ export function resolveStampedeVelocity({
   pointer,
   speed = STAMPEDE_PLAYER_SPEED
 }: StampedeVelocityInput): StampedeVelocity {
-  const vector = pointer.active
-    ? resolvePointerAxis(pointer)
-    : normalizeAxis(keyboard.x, keyboard.y);
+  const vector = pointer.active ? resolvePointerAxis(pointer) : normalizeAxis(keyboard.x, keyboard.y);
 
   return {
     x: vector.x * speed,
@@ -88,8 +83,7 @@ function resolvePointerAxis(pointer: StampedePointerInput): StampedeAxisInput {
 
   const normalized = normalizeAxis(pointer.deltaX, pointer.deltaY);
   const intensity = clamp(
-    (distance - STAMPEDE_STICK_DEAD_ZONE) /
-      (STAMPEDE_STICK_FULL_DISTANCE - STAMPEDE_STICK_DEAD_ZONE),
+    (distance - STAMPEDE_STICK_DEAD_ZONE) / (STAMPEDE_STICK_FULL_DISTANCE - STAMPEDE_STICK_DEAD_ZONE),
     0,
     1
   );

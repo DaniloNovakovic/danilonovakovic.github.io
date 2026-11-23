@@ -74,9 +74,9 @@ export function pickStampedeBark(
     }
   });
 
-  const ready = [...byKind.values()].sort((left, right) => (
-    (BARK_RARITY[right.kind] ?? 0) - (BARK_RARITY[left.kind] ?? 0)
-  ));
+  const ready = [...byKind.values()].sort(
+    (left, right) => (BARK_RARITY[right.kind] ?? 0) - (BARK_RARITY[left.kind] ?? 0)
+  );
   const chosen = ready[0];
   const line = chosen ? BARK_LINES[chosen.kind] : undefined;
   if (!chosen || !line) return null;
@@ -87,9 +87,6 @@ export function pickStampedeBark(
   };
 }
 
-function distanceTo(
-  speaker: StampedeBarkSpeaker,
-  focus: { x: number; y: number }
-): number {
+function distanceTo(speaker: StampedeBarkSpeaker, focus: { x: number; y: number }): number {
   return Math.hypot(speaker.x - focus.x, speaker.y - focus.y);
 }

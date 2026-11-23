@@ -103,7 +103,12 @@ export default function DancingOverlay({ close, titleId, descriptionId }: Overla
               {state.phase === 'over' ? messages.common.restart : messages.common.start}
             </Button>
           ) : null}
-          <SparePartSticker key={reward.stickerKey} partId="clock-crystal" outcome={reward.outcome} onDismiss={reward.dismiss} />
+          <SparePartSticker
+            key={reward.stickerKey}
+            partId="clock-crystal"
+            outcome={reward.outcome}
+            onDismiss={reward.dismiss}
+          />
         </Panel>
 
         <p className="text-sm font-bold text-[#1a1a1a] opacity-60">{copy.instruction}</p>

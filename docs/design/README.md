@@ -20,4 +20,4 @@ milestone-safe asset adoption are organized lives in
 
 ## Image prompt for character assets
 
-> *"Create 2D character sprites in the Open Peeps style. Hand-drawn ink aesthetic, monochromatic black and white, diverse modern clothing, expressive but simple facial features. Perspective: Profile/Side-view. White background."*
+> _"Create 2D character sprites in the Open Peeps style. Hand-drawn ink aesthetic, monochromatic black and white, diverse modern clothing, expressive but simple facial features. Perspective: Profile/Side-view. White background."_

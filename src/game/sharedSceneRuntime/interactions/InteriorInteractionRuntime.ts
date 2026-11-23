@@ -36,9 +36,7 @@ export interface InteriorInteractionUpdateFrame {
   exitRequested: boolean;
 }
 
-export type InteriorInteractionRuntimePrompt =
-  | { visible: false }
-  | { visible: true; x: number; y: number };
+export type InteriorInteractionRuntimePrompt = { visible: false } | { visible: true; x: number; y: number };
 
 export interface InteriorInteractionRuntimeUpdate<Id extends string, Effect> {
   activeTarget: InteriorInteractionTarget<Id, Effect> | null;

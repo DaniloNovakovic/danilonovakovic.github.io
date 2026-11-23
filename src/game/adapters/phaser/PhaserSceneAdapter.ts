@@ -1,8 +1,5 @@
 import * as Phaser from 'phaser';
-import {
-  isPausableScene,
-  isResumeCaptureScene
-} from '../../sharedSceneRuntime/sceneContracts';
+import { isPausableScene, isResumeCaptureScene } from '../../sharedSceneRuntime/sceneContracts';
 import { recordSceneExitResume } from '../../sharedSceneRuntime/sceneResumePolicy';
 import type { ResumeSnapshot } from '../../sceneLifecycle/types';
 import type { SceneRuntimeAdapter } from '../../sceneLifecycle/SceneManager';
@@ -115,5 +112,4 @@ export class PhaserSceneAdapter implements SceneRuntimeAdapter {
     const position = scene.getResumeCapturePosition();
     return recordSceneExitResume(sceneKey, position);
   }
-
 }

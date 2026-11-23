@@ -76,12 +76,14 @@ regression or charter is named.
 [1-3 sentences on the critical journey and strongest risk.]
 
 **Scope**
+
 - Trigger:
 - Critical journey:
 - Evidence checked:
 - Not checked:
 
 **Findings**
+
 - `[severity] [surface] issue`
   Repro: [steps, route, viewport, or test]
   Expected: [player-visible behavior]
@@ -89,9 +91,11 @@ regression or charter is named.
   Recommendation: [smallest practical fix or next check]
 
 **Regression**
+
 - [automated test to add, existing test to run, or manual charter to keep]
 
 **Residual Risk**
+
 - [what remains unknown, if anything]
 ```
 
