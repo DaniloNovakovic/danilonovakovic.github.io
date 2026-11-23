@@ -67,17 +67,14 @@ export function outOfBoundsSightsNear(x: number): string[] {
   return OUT_OF_BOUNDS_SIGHTS.filter((s) => Math.abs(s.depth - depth) <= SIGHT_RADIUS).map((s) => s.text);
 }
 
-/** Danilo's thoughts carry the walk: a bug at first, then puzzled, then uneasy (~every 2.5s walking). */
+/**
+ * Danilo's thoughts: few and far apart, so most of the walk is quiet. A bug
+ * just past the wall, the first deliberate mark, and the pedestal coming up.
+ */
 const OUT_OF_BOUNDS_THOUGHTS: readonly { depth: number; text: string }[] = [
-  { depth: 150, text: '...did I just walk through the wall?' },
-  { depth: 800, text: 'Okay. That’s a bug.' },
-  { depth: 1500, text: 'Should I go back? ...nah.' },
-  { depth: 2200, text: 'It’s so quiet out here.' },
-  { depth: 2900, text: '...this wasn’t finished.' },
-  { depth: 3600, text: 'Why am I still walking?' },
-  { depth: 4300, text: 'Does this page ever end?' },
-  { depth: 5000, text: 'Wait. There’s something up ahead.' },
-  { depth: 5700, text: 'Something’s out here.' }
+  { depth: 300, text: '...did I just walk through the wall?' },
+  { depth: 2700, text: '...this wasn’t finished.' },
+  { depth: 5300, text: 'Wait. There’s something up ahead.' }
 ];
 
 /**

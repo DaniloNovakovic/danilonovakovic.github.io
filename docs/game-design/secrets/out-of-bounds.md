@@ -55,10 +55,9 @@ right one, but it has no collision: walk into it and you just walk through, like
 a collision bug. The camera, which was framed on the room, comes unstuck and
 follows you out. Outside is blank paper, and the walk is long (about 20 seconds).
 There are only a few marks, far apart: "TODO: fix left wall collision" in the
-margin, a coffee ring, a placeholder labelled `ROOM_END`. What keeps you going is
-Danilo thinking out loud every few seconds, from "...did I just walk through the
-wall?" and "Okay. That's a bug." to "Why am I still walking?" and "Wait. There's
-something up ahead." The only sound is a sparse pencil scratch per few steps.
+margin, a coffee ring, a placeholder labelled `ROOM_END`. Danilo says very little, three short thoughts across the whole walk: "...did I
+just walk through the wall?" just outside, "...this wasn't finished." near the
+first mark, and "Wait. There's something up ahead." before the pedestal. The only sound is a sparse pencil scratch per few steps.
 
 **Payoff:** a glowing toolbox on a pedestal made from a sketchbook spine.
 

@@ -32,7 +32,6 @@ const SCRATCH_STRIDE_MAX = 320;
 
 export interface HobbiesVoidFrame {
   playerX: number;
-  playerY: number;
   /** Player is on the floor and moving horizontally. */
   walking: boolean;
   time: number;
@@ -44,13 +43,20 @@ export class HobbiesVoid {
   private readonly glow: Phaser.GameObjects.Graphics;
   private readonly thought: Phaser.GameObjects.Text;
   private readonly getAudioContext: () => AudioContext | null;
+  /** The player sprite the thought bubble floats above. */
+  private readonly speaker: { readonly x: number; readonly y: number };
   private furthestDepth = 0;
   private thoughtUntil = 0;
   private lastScratchX: number | null = null;
   private lastGlowStep = -1;
 
-  constructor(scene: Phaser.Scene, getAudioContext: () => AudioContext | null) {
+  constructor(
+    scene: Phaser.Scene,
+    speaker: { readonly x: number; readonly y: number },
+    getAudioContext: () => AudioContext | null
+  ) {
     this.scene = scene;
+    this.speaker = speaker;
     this.getAudioContext = getAudioContext;
     const g = scene.add.graphics().setDepth(1);
     for (const sight of OUT_OF_BOUNDS_SIGHTS) this.drawSight(g, sight.id, xAt(sight.depth));
@@ -66,6 +72,17 @@ export class HobbiesVoid {
       .setOrigin(0.5, 1)
       .setDepth(100)
       .setVisible(false);
+    // Follow the speaker after Arcade has synced the sprite to its body this
+    // frame (POST_UPDATE), unrounded, so the bubble moves in lockstep with the
+    // player instead of trailing a frame behind and shimmering.
+    scene.events.on(Phaser.Scenes.Events.POST_UPDATE, this.followSpeaker, this);
+    scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () =>
+      scene.events.off(Phaser.Scenes.Events.POST_UPDATE, this.followSpeaker, this)
+    );
+  }
+
+  private followSpeaker(): void {
+    if (this.thought.visible) this.thought.setPosition(this.speaker.x, this.speaker.y - 70);
   }
 
   update(frame: HobbiesVoidFrame): void {
@@ -82,13 +99,12 @@ export class HobbiesVoid {
   private think(line: string, frame: HobbiesVoidFrame): void {
     this.scene.tweens.killTweensOf(this.thought);
     this.thought.setText(line).setAlpha(1).setVisible(true);
+    this.followSpeaker();
     this.thoughtUntil = frame.time + THOUGHT_MS;
   }
 
   private updateThought(frame: HobbiesVoidFrame): void {
-    if (!this.thought.visible) return;
-    this.thought.setPosition(Math.round(frame.playerX), Math.round(frame.playerY - 70));
-    if (frame.time < this.thoughtUntil) return;
+    if (!this.thought.visible || frame.time < this.thoughtUntil) return;
     this.thoughtUntil = Number.POSITIVE_INFINITY;
     if (!frame.motion) {
       this.thought.setVisible(false);

@@ -108,7 +108,6 @@ export class HobbiesScene extends Phaser.Scene {
 
     this.motion = !prefersReducedMotion();
     this.room = new HobbiesRoom(this);
-    this.outOfBounds = new HobbiesVoid(this, () => this.getAudioContext());
 
     this.playerRuntime = createSideViewPlayerRuntime({
       scene: this,
@@ -148,6 +147,7 @@ export class HobbiesScene extends Phaser.Scene {
       }
     });
     this.player = this.playerRuntime.player;
+    this.outOfBounds = new HobbiesVoid(this, this.player, () => this.getAudioContext());
 
     // The floor keeps going under the void even after its ink line stops.
     const ground = this.add.zone(
@@ -229,7 +229,6 @@ export class HobbiesScene extends Phaser.Scene {
     const { body } = this.player;
     this.outOfBounds?.update({
       playerX: this.player.x,
-      playerY: this.player.y,
       walking: body.blocked.down && Math.abs(body.velocity.x) > 1,
       time,
       motion: this.motion

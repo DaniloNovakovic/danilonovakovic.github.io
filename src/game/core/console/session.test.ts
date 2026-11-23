@@ -385,23 +385,18 @@ describe('out of bounds: past the Hobbies left wall', () => {
     expect(end).toMatch(/pedestal/i);
   });
 
+  // Few and far apart: the walk should mostly be quiet.
   const THOUGHTS = [
     '...did I just walk through the wall?',
-    'Okay. That’s a bug.',
-    'Should I go back? ...nah.',
-    'It’s so quiet out here.',
     '...this wasn’t finished.',
-    'Why am I still walking?',
-    'Does this page ever end?',
-    'Wait. There’s something up ahead.',
-    'Something’s out here.'
+    'Wait. There’s something up ahead.'
   ];
 
   function thoughtsWhileWalking(session: GameConsoleSession, direction: 'left' | 'right', steps: number): string[] {
     const heard: string[] = [];
     for (let i = 0; i < steps; i += 1) {
       const message = session.exec(`go ${direction} 1`).message;
-      for (const line of THOUGHTS) if (message.includes(line)) heard.push(line);
+      for (const match of message.matchAll(/Danilo: "([^"]+)"/g)) heard.push(match[1] ?? '');
     }
     return heard;
   }
