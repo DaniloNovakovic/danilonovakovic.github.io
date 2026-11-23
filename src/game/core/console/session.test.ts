@@ -312,10 +312,90 @@ describe('hobbies room walls', () => {
     expect(session.observe().hobbies?.playerX).toBe(HOBBIES_PLAYER_MAX_X);
     expect(HOBBIES_PLAYER_MAX_X).toBeLessThan(HOBBIES_RIGHT_WALL_X);
   });
+});
 
-  it('keeps the left side where it was', () => {
+describe('out of bounds: past the Hobbies left wall', () => {
+  function enterHobbies() {
+    const session = createSession();
+    walkOverworldTo(session, 2400);
+    session.exec('interact hobbies');
+    return session;
+  }
+
+  it('keeps walking past the left wall into the unfinished page', () => {
     const session = enterHobbies();
-    session.exec('go left 50');
-    expect(session.observe().hobbies?.playerX).toBe(HOBBIES_PLAYER_MIN_X);
+    // Enter at x=200; ten 40px steps left lands at x=-200, 250px past the wall at x=50.
+    session.exec('go left 10');
+    const hobbies = session.observe().hobbies;
+    expect(hobbies?.playerX).toBe(-200);
+    expect(hobbies?.void?.stage).toBe('thinning-ink');
+  });
+
+  it('fades through every ink stage, ends at the empty pedestal, and walks back into the room', () => {
+    const session = enterHobbies();
+    const stages: string[] = [];
+    for (let i = 0; i < 120; i += 1) {
+      session.exec('go left 1');
+      const stage = session.observe().hobbies?.void?.stage;
+      if (stage && stages[stages.length - 1] !== stage) stages.push(stage);
+    }
+    expect(stages).toEqual(['thinning-ink', 'pencil-guideline', 'eraser-smudge', 'blank-paper']);
+
+    const atEnd = session.observe();
+    expect(atEnd.hobbies?.playerX).toBe(HOBBIES_PLAYER_MIN_X);
+    expect(atEnd.nearby[0]?.id).toBe('pedestal');
+    expect(session.exec('interact pedestal').message).toMatch(/empty/i);
+    expect(session.observe().mode).toBe('hobbies');
+
+    session.exec('go right 120');
+    expect(session.observe().hobbies?.void).toBeNull();
+    expect(session.observe().hobbies?.playerX).toBe(HOBBIES_PLAYER_MAX_X);
+  });
+
+  it('describes the unfinished page in the headless look text', () => {
+    const session = enterHobbies();
+    expect(session.format()).not.toMatch(/edge of the page/i);
+
+    session.exec('go left 10');
+    const near = session.format();
+    expect(near).toMatch(/ink lines thin out/i);
+    expect(near).toContain('TODO: draw wall');
+    expect(near).toMatch(/walk right .*room/i);
+
+    session.exec('go left 120');
+    const end = session.format();
+    expect(end).toMatch(/blank paper/i);
+    expect(end).toContain('ROOM_END');
+    expect(end).toMatch(/pedestal/i);
+  });
+
+  const THOUGHTS = [
+    'Huh. The wall just... stops.',
+    '...this wasn’t finished.',
+    'Why am I still walking?',
+    'Something’s out here.'
+  ];
+
+  function thoughtsWhileWalking(session: GameConsoleSession, direction: 'left' | 'right', steps: number): string[] {
+    const heard: string[] = [];
+    for (let i = 0; i < steps; i += 1) {
+      const message = session.exec(`go ${direction} 1`).message;
+      for (const line of THOUGHTS) if (message.includes(line)) heard.push(line);
+    }
+    return heard;
+  }
+
+  it('lets Danilo think out loud by distance, once per line per visit', () => {
+    const session = enterHobbies();
+    expect(thoughtsWhileWalking(session, 'left', 120)).toEqual(THOUGHTS);
+
+    // Pacing back and forth in the same visit repeats nothing.
+    thoughtsWhileWalking(session, 'right', 120);
+    expect(thoughtsWhileWalking(session, 'left', 120)).toEqual([]);
+
+    // A fresh visit hears them again.
+    session.exec('leave');
+    session.exec('interact hobbies');
+    expect(thoughtsWhileWalking(session, 'left', 120)).toEqual(THOUGHTS);
   });
 });

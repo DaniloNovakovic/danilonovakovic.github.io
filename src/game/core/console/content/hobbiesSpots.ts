@@ -1,4 +1,5 @@
 import type { CircuitPartHobbyId } from './circuitParts';
+import { OUT_OF_BOUNDS_WORLD_LEFT_X } from './outOfBoundsVoid';
 
 export type HobbyStationId = 'art' | CircuitPartHobbyId;
 
@@ -11,11 +12,10 @@ const HOBBIES_PLAYER_HALF_WIDTH = 24;
 /** Furthest right the player's centre can go: flush against the right wall. */
 export const HOBBIES_PLAYER_MAX_X = HOBBIES_RIGHT_WALL_X - HOBBIES_PLAYER_HALF_WIDTH;
 /**
- * Furthest left the headless player walks. The left side is deliberately left
- * open past the wall in the Phaser scene: it becomes the Out of Bounds void
- * (docs/game-design/secrets/out-of-bounds.md).
+ * Furthest left the player walks. There is no left wall: past the drawn room
+ * lies the Out of Bounds void, ending at the pedestal (see outOfBoundsVoid.ts).
  */
-export const HOBBIES_PLAYER_MIN_X = 60;
+export const HOBBIES_PLAYER_MIN_X = OUT_OF_BOUNDS_WORLD_LEFT_X + HOBBIES_PLAYER_HALF_WIDTH;
 
 export const HOBBY_STATION_SPOTS: readonly { id: HobbyStationId; label: string; x: number }[] = [
   { id: 'art', label: 'Easel', x: 280 },

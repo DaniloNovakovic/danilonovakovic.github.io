@@ -3,7 +3,8 @@
 import type { RidgeObservation } from '../ridge/types';
 import { listBasementNearby } from './basementLogic';
 import { OVERWORLD_BANANA_PEEL } from './content/overworldSpots';
-import { listHobbiesNearby } from './hobbiesLogic';
+import { outOfBoundsStageAt } from './content/outOfBoundsVoid';
+import { listHobbiesNearby, observeHobbies } from './hobbiesLogic';
 import { getOverworldProgress, listOverworldNearby } from './overworldLogic';
 import type { GameObservation, GameWorldState, NearbyThing, OverworldProgressStage } from './types';
 
@@ -32,7 +33,7 @@ export function observeGameWorld(state: GameWorldState, ridge: RidgeObservation 
     hints: buildHints(state, nearby, ridge),
     overworld: state.mode === 'overworld' || state.mode === 'overlay' ? state.overworld : null,
     basement: state.mode === 'basement' ? state.basement : null,
-    hobbies: state.mode === 'hobbies' ? state.hobbies : null,
+    hobbies: state.mode === 'hobbies' ? observeHobbies(state) : null,
     potassium: state.mode === 'potassium' ? state.potassium : null,
     ridge: state.mode === 'ridge' ? ridge : null
   };
@@ -60,6 +61,11 @@ export function formatGameObservation(observation: GameObservation): string {
   }
   if (observation.hobbies) {
     lines.push(`hobbies x=${Math.round(observation.hobbies.playerX)}`);
+    const edge = observation.hobbies.void;
+    if (edge) {
+      lines.push(`edge of the page: ${edge.stage}, ${edge.depth}px past the left wall — ${edge.description}`);
+      if (edge.sights.length > 0) lines.push(`you notice: ${edge.sights.join('; ')}`);
+    }
   }
   if (observation.potassium) {
     const k = observation.potassium;
@@ -167,7 +173,11 @@ function buildHints(state: GameWorldState, nearby: readonly NearbyThing[], ridge
   }
 
   if (state.mode === 'hobbies') {
-    hints.push('Stations: art x=280, music x=440, fitness x=600, dancing x=760. Interact, then perform.');
+    hints.push(
+      outOfBoundsStageAt(state.hobbies.playerX)
+        ? 'Walk right to get back into the drawn room. leave still works from here.'
+        : 'Stations: art x=280, music x=440, fitness x=600, dancing x=760. Interact, then perform.'
+    );
   }
 
   if (state.mode === 'overlay') {

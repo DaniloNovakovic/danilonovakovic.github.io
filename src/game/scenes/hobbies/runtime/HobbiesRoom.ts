@@ -7,14 +7,14 @@ import * as Phaser from 'phaser';
 import { HOBBIES_OVERLAY_IDS, type HobbiesOverlayId } from '@/game/overlays/overlayIds';
 import { HOBBIES_EXIT_X, HOBBY_STATION_LAYOUT } from '../roomLayout';
 import { getMessages } from '@/shared/i18n';
-import { HOBBIES_RIGHT_WALL_X } from '@/game/core/console';
+import { HOBBIES_LEFT_WALL_X, HOBBIES_RIGHT_WALL_X } from '@/game/core/console';
 import { TextureGenerator } from '@/game/sharedSceneRuntime/textures/TextureGenerator';
 import { HOBBIES_FLOOR_Y, HOBBIES_ROOM_HEIGHT, HOBBIES_ROOM_WIDTH } from '@/game/sharedSceneRuntime/config';
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
 
 const INK = 0x1a1a1a;
 const PAPER = 0xfbfbf9;
-const WALL_LEFT = 50;
+const WALL_LEFT = HOBBIES_LEFT_WALL_X;
 const WALL_RIGHT = HOBBIES_RIGHT_WALL_X;
 const CEILING_Y = 50;
 const BULB_COUNT = 14;
@@ -89,7 +89,12 @@ export class HobbiesRoom {
     bg.fillStyle(PAPER, 1);
     bg.fillRect(WALL_LEFT, CEILING_Y, WALL_RIGHT - WALL_LEFT, 500);
     bg.lineStyle(6, INK, 1);
-    bg.strokeRect(WALL_LEFT, CEILING_Y, WALL_RIGHT - WALL_LEFT, 500);
+    bg.lineBetween(WALL_LEFT, CEILING_Y, WALL_RIGHT, CEILING_Y);
+    bg.lineBetween(WALL_RIGHT, CEILING_Y, WALL_RIGHT, CEILING_Y + 500);
+    bg.lineBetween(WALL_LEFT, CEILING_Y + 500, WALL_RIGHT, CEILING_Y + 500);
+    // The left wall was never inked: a broken pencil underdrawing you can walk through.
+    bg.lineStyle(1.5, INK, 0.3);
+    for (let y = CEILING_Y; y < floorY; y += 26) bg.lineBetween(WALL_LEFT, y, WALL_LEFT + 1, y + 14);
 
     // Floor boards.
     bg.lineStyle(2, INK, 0.2);

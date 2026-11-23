@@ -22,9 +22,10 @@ import {
 } from '@/game/sharedSceneRuntime/config';
 import { bridgeStore, isItemEquipped, type OpenOverlayOptions } from '@/game/bridge/store';
 import { CIRCUIT_PART_HOBBY, CIRCUIT_PART_IDS } from '@/game/core/console/content/circuitParts';
-import { HOBBIES_RIGHT_WALL_X } from '@/game/core/console';
+import { HOBBIES_RIGHT_WALL_X, OUT_OF_BOUNDS_WORLD_LEFT_X } from '@/game/core/console';
 import { prefersReducedMotion, sketchTick } from '@/game/sharedSceneRuntime/motion/sketchMotion';
 import { HobbiesRoom } from './HobbiesRoom';
+import { HobbiesVoid } from './HobbiesVoid';
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
 import {
   createSideViewPlayerRuntime,
@@ -49,6 +50,7 @@ export class HobbiesScene extends Phaser.Scene {
   private onOpenOverlay?: (overlayId: OverlayId, options?: OpenOverlayOptions) => void;
   private isPaused: boolean = false;
   private room?: HobbiesRoom;
+  private outOfBounds?: HobbiesVoid;
   private motion = true;
   private readonly claimedScratch = new Set<HobbiesOverlayId>();
   private resumePosition?: { x: number; y: number };
@@ -84,11 +86,14 @@ export class HobbiesScene extends Phaser.Scene {
     const height = HOBBIES_ROOM_HEIGHT;
     const floorY = HOBBIES_FLOOR_Y;
 
-    // Right edge is the drawn wall. The left stays open on purpose: Out of Bounds void.
-    this.physics.world.setBounds(0, 0, HOBBIES_RIGHT_WALL_X, height);
+    // Right edge is the drawn wall. Left of the room runs the Out of Bounds void,
+    // ending at the pedestal (docs/game-design/secrets/out-of-bounds.md, Act 1).
+    const worldLeft = OUT_OF_BOUNDS_WORLD_LEFT_X;
+    this.physics.world.setBounds(worldLeft, 0, HOBBIES_RIGHT_WALL_X - worldLeft, height);
 
     this.motion = !prefersReducedMotion();
     this.room = new HobbiesRoom(this);
+    this.outOfBounds = new HobbiesVoid(this, () => this.getAudioContext());
 
     this.playerRuntime = createSideViewPlayerRuntime({
       scene: this,
@@ -116,9 +121,9 @@ export class HobbiesScene extends Phaser.Scene {
       },
       camera: {
         worldBounds: {
-          x: 0,
+          x: worldLeft,
           y: 0,
-          width,
+          width: width - worldLeft,
           height
         },
         designSize: {
@@ -133,10 +138,11 @@ export class HobbiesScene extends Phaser.Scene {
     });
     this.player = this.playerRuntime.player;
 
+    // The floor keeps going under the void even after its ink line stops.
     const ground = this.add.zone(
-      width / 2,
+      (worldLeft + width) / 2,
       floorY + HOBBIES_GROUND_ZONE.centerOffsetY,
-      HOBBIES_GROUND_ZONE.width,
+      width - worldLeft,
       HOBBIES_GROUND_ZONE.height
     );
     this.physics.add.existing(ground, true);
@@ -185,6 +191,7 @@ export class HobbiesScene extends Phaser.Scene {
       exitRequested: commands.exitContext
     });
     this.updateRoom(interaction?.activeTarget?.id ?? null, sketchTick(time));
+    this.updateOutOfBounds(time);
 
     if (interaction?.effect?.kind === 'close') {
       this.onClose?.();
@@ -204,6 +211,22 @@ export class HobbiesScene extends Phaser.Scene {
           break;
       }
     }
+  }
+
+  private updateOutOfBounds(time: number): void {
+    const { body } = this.player;
+    this.outOfBounds?.update({
+      playerX: this.player.x,
+      playerY: this.player.y,
+      walking: body.blocked.down && Math.abs(body.velocity.x) > 1,
+      time,
+      motion: this.motion
+    });
+  }
+
+  private getAudioContext(): AudioContext | null {
+    const sound = this.sound as Partial<Phaser.Sound.WebAudioSoundManager>;
+    return sound.context ?? null;
   }
 
   private updateRoom(activeId: HobbiesInteractionId | null, tick: number): void {

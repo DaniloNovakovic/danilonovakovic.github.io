@@ -6,6 +6,7 @@ import type { RidgeObservation, RidgeRouteBeat } from '../ridge/types';
 import type { GameSceneId, PortfolioOverlayId } from './content/overworldSpots';
 import type { CircuitPartId } from './content/circuitParts';
 import type { HobbyStationId } from './content/hobbiesSpots';
+import type { OutOfBoundsStage } from './content/outOfBoundsVoid';
 
 export type GameItemId = 'glasses' | 'circuit' | CircuitPartId;
 export type GameSecretId = 'banana-peel-clue';
@@ -66,6 +67,23 @@ export interface BasementSlice {
 export interface HobbiesSlice {
   playerX: number;
   facing: GameFacing;
+  /** Furthest px past the left wall this visit; Out of Bounds thoughts fire once each. */
+  voidFurthestDepth: number;
+}
+
+/** What the player sees past the Hobbies room's left wall (Out of Bounds, Act 1). */
+export interface OutOfBoundsObservation {
+  stage: OutOfBoundsStage;
+  /** Px walked past the drawn left wall. */
+  depth: number;
+  description: string;
+  /** Unfinished-world details in view. */
+  sights: readonly string[];
+}
+
+export interface HobbiesObservation extends HobbiesSlice {
+  /** Null while inside the drawn room. */
+  void: OutOfBoundsObservation | null;
 }
 
 export interface PotassiumSlice {
@@ -107,7 +125,7 @@ export interface GameObservation {
   hints: readonly string[];
   overworld: OverworldSlice | null;
   basement: BasementSlice | null;
-  hobbies: HobbiesSlice | null;
+  hobbies: HobbiesObservation | null;
   potassium: PotassiumSlice | null;
   ridge: RidgeObservation | null;
 }

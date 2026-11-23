@@ -320,6 +320,7 @@ function enterBuilding(state: GameWorldState, building: OverworldBuildingSpot): 
     state.sceneId = 'hobbies';
     state.hobbies.playerX = 200;
     state.hobbies.facing = 'right';
+    state.hobbies.voidFurthestDepth = 0;
     return {
       message: `You enter ${building.label}.`,
       events: [{ type: 'scene_entered', sceneId: 'hobbies' }]
