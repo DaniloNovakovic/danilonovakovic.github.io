@@ -3,6 +3,7 @@
   "singleQuote": true,
   "trailingComma": "none",
   "printWidth": 120,
+  "sortPackageJson": false,
   "ignorePatterns": [
     "pnpm-lock.yaml",
     "package-lock.json",
