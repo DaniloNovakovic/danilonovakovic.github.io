@@ -16,7 +16,7 @@ export class EnvironmentBuilder {
         m.lineTo(startX + 320 + j*10, 350 + j*5);
       }
       m.strokePath();
-      m.setScrollFactor(0.2);
+      m.setScrollFactor(0.2, 1);
     }
   }
 
@@ -32,7 +32,7 @@ export class EnvironmentBuilder {
       t.moveTo(tx - 15, 475); t.lineTo(tx, 430); t.lineTo(tx + 15, 475);
       t.moveTo(tx - 10, 450); t.lineTo(tx, 410); t.lineTo(tx + 10, 450);
       t.strokePath();
-      t.setScrollFactor(0.5);
+      t.setScrollFactor(0.5, 1);
     }
   }
 
@@ -60,7 +60,7 @@ export class EnvironmentBuilder {
       grass.moveTo(gx, gy);
       grass.lineTo(gx + 5, gy - 15);
       grass.strokePath();
-      grass.setScrollFactor(1.5);
+      grass.setScrollFactor(1.5, 1);
       grass.setDepth(10);
     }
   }
@@ -72,7 +72,7 @@ export class EnvironmentBuilder {
       const cloud = scene.add.graphics();
       cloud.lineStyle(2, 0x1a1a1a, 0.3);
       cloud.strokeEllipse(cx, cy, Phaser.Math.Between(50, 150), Phaser.Math.Between(20, 60));
-      cloud.setScrollFactor(0.5);
+      cloud.setScrollFactor(0.5, 1);
     }
   }
 }

@@ -8,7 +8,7 @@ import { TextureGenerator } from '@/game/sharedSceneRuntime/textures/TextureGene
 import {
   BASEMENT_SCENE_ID,
   HOBBIES_SCENE_ID,
-  POTASSIUM_SCENE_ID,
+  OVERWORLD_SCENE_ID,
   type SceneId
 } from '@/game/scenes/sceneIds';
 import type { OverlayId } from '@/game/overlays/overlayIds';
@@ -36,6 +36,7 @@ import {
   SIDE_VIEW_WALK_SPEED
 } from '@/game/sharedSceneRuntime/config';
 import {
+  bridgeActions,
   bridgeStore,
   isItemEquipped,
   isItemOwned,
@@ -67,20 +68,41 @@ import { StreetBillboard } from './street/StreetBillboard';
 import { StreetChick } from './street/StreetChick';
 import { prefersReducedMotion, sketchTick } from '@/game/sharedSceneRuntime/motion/sketchMotion';
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
-import { startTypewriterEffect, type TypewriterEffectHandle } from '@/game/sharedSceneRuntime/text/typewriterEffect';
 import type { OverworldBuildingSlot } from '@/game/core/ecs/systems/overworldInteractSystems';
 import { DistanceHazeVision, NEARSIGHTED_HAZE } from '@/game/sharedSceneRuntime/vision/DistanceHazeVision';
 import {
   createSideViewPlayerRuntime,
   type SideViewPlayerRuntime
 } from '@/game/sharedSceneRuntime/player/SideViewPlayerRuntime';
+import type { SideViewCameraRuntime } from '@/game/sharedSceneRuntime/camera/sideViewCameraRuntime';
+import type { SceneUiActionRequest } from '@/game/sceneUi/types';
+import {
+  CHICK_CHASE_CHOICE,
+  CRT_SEAT_CHOICE,
+  StreetConversation,
+  chickConversation,
+  crtConversation,
+  litterConversation,
+  signpostConversation,
+  type StreetConversationOutcome,
+  type StreetConversationScript
+} from './streetConversation';
 
-/** Ms between each character for first-peel clue typewriter. */
-const BANANA_PEEL_TYPEWRITER_CHAR_MS = 28;
-/** After the full clue line is typed, wait this long (read time) before opening Potassium. */
-const BANANA_PEEL_POST_TYPEWRITE_WARP_MS = 2000;
-/** How long the clue toast stays visible after typing finishes (ms). */
-const BANANA_PEEL_CLUE_VISIBLE_MS = 4500;
+/** Street ground line; talks frame the speakers' feet. */
+const STREET_GROUND_Y = 550;
+/**
+ * Talk framing, matching Ridge: ease in, and seat the ground line high enough
+ * that the docked box along the bottom leaves both speakers in view.
+ */
+const TALK_ZOOM = 1.3;
+const TALK_GROUND_AT = 0.6;
+const TALK_EASE_MS = 320;
+
+interface StreetTalk {
+  conversation: StreetConversation;
+  onEnd?: (outcome: StreetConversationOutcome) => void;
+}
+
 export class OverworldScene extends Phaser.Scene {
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   streetBuildings!: StreetBuildingLayers;
@@ -107,11 +129,10 @@ export class OverworldScene extends Phaser.Scene {
   private footsteps?: StreetFootsteps;
   private motion = true;
   private glassesSecretHint?: Phaser.GameObjects.Text;
-  private glassesSecretMessage?: Phaser.GameObjects.Text;
-  private glassesSecretMessageHideTimer?: Phaser.Time.TimerEvent;
-  private bananaClueTypewriter?: TypewriterEffectHandle;
-  private bananaPeelWarpTimeoutId?: ReturnType<typeof setTimeout>;
   private session?: GameConsoleSession;
+  private camera?: SideViewCameraRuntime;
+  /** The open street conversation; the player stands still while it runs. */
+  private talk?: StreetTalk;
 
   constructor() {
     super({ key: 'MainScene' });
@@ -127,6 +148,7 @@ export class OverworldScene extends Phaser.Scene {
     this.onOpenOverlay = data.onOpenOverlay;
     this.isPaused = data.isPaused;
     this.resumePosition = data.resumePosition;
+    this.talk = undefined;
     this.resetBananaPeelFlow();
   }
 
@@ -136,15 +158,21 @@ export class OverworldScene extends Phaser.Scene {
   }
 
   shutdown(): void {
+    this.closeTalkPanel();
     this.resetBananaPeelFlow();
   }
 
   setPaused(paused: boolean) {
     this.isPaused = paused;
-    if (paused) {
+    if (paused && !this.talk) {
       this.resetBananaPeelFlow();
     }
-    this.playerRuntime?.setPaused(paused);
+    this.syncPlayerPause();
+  }
+
+  /** Menus and talks both hold the player; either one keeps them still. */
+  private syncPlayerPause(): void {
+    this.playerRuntime?.setPaused(this.isPaused || this.talk !== undefined);
   }
 
   preload() {
@@ -218,7 +246,7 @@ export class OverworldScene extends Phaser.Scene {
     this.physics.add.collider(this.player, groundZone);
 
     buildStreetForeground(this);
-    setupStreetCamera(this, this.player);
+    this.camera = setupStreetCamera(this, this.player);
 
     // --- UI ---
     this.interactPrompt = createUiText(this, 0, 0, messages.navigation.enter, {
@@ -247,6 +275,10 @@ export class OverworldScene extends Phaser.Scene {
     const playerUpdate = this.playerRuntime?.update();
     this.updateLensReveal();
 
+    if (this.talk) {
+      if (!this.isPaused) this.updateTalk(time, delta);
+      return;
+    }
     if (!playerUpdate || playerUpdate.paused) {
       return;
     }
@@ -286,7 +318,7 @@ export class OverworldScene extends Phaser.Scene {
     if (!this.session) return;
     const state = this.session.getState();
     const { stage } = getOverworldProgress(state);
-    this.signpost?.update(stage, tick, this.player.x, nearProp, this.motion);
+    this.signpost?.update(stage, tick, nearProp, this.motion);
     this.streetDetail?.update(getSketchDetailLevel(state), tick, this.motion);
   }
 
@@ -299,18 +331,112 @@ export class OverworldScene extends Phaser.Scene {
     const sync = this.session.syncPlayerPosition(this.player.x, this.player.y);
     this.applySessionResult(sync);
 
-    if (this.bananaPeelWarpTimeoutId !== undefined) {
+    if (interactRequested && !this.startTalkFor(this.session.observe().nearby[0])) {
+      this.applySessionResult(this.session.exec('interact'));
+    }
+    if (this.talk) {
       this.interactPrompt.setVisible(false);
       return undefined;
-    }
-
-    if (interactRequested) {
-      this.applySessionResult(this.session.exec('interact'));
     }
 
     const nearby = this.session.observe().nearby[0];
     this.applyOverworldNearbyPrompt(nearby);
     return nearby;
+  }
+
+  /**
+   * Some street interactions talk first and only act on the player's answer.
+   * The console still owns the act itself: a yes runs the same `interact`.
+   */
+  private startTalkFor(nearby: NearbyThing | undefined): boolean {
+    if (nearby?.kind === 'npc' && this.chick) {
+      // Still away after a scare: the talk would frame an empty patch of street.
+      if (!this.chick.isHome) return true;
+      this.openTalk(chickConversation(isItemOwned('glasses')), this.chick.x, (outcome) => {
+        if (outcome === CHICK_CHASE_CHOICE) this.interactAfterTalk();
+      });
+      return true;
+    }
+    if (nearby?.kind === 'crt' && isItemOwned('circuit')) {
+      this.openTalk(crtConversation(), OVERWORLD_CIRCUIT_SLOT.x, (outcome) => {
+        if (outcome === CRT_SEAT_CHOICE) this.interactAfterTalk();
+      });
+      return true;
+    }
+    return false;
+  }
+
+  private interactAfterTalk(): void {
+    if (this.session) this.applySessionResult(this.session.exec('interact'));
+  }
+
+  private openTalk(
+    script: StreetConversationScript,
+    partnerX: number,
+    onEnd?: StreetTalk['onEnd']
+  ): void {
+    this.talk = { conversation: new StreetConversation(script, partnerX), onEnd };
+    this.interactPrompt.setVisible(false);
+    this.chick?.hush();
+    // Face whoever you are talking to.
+    if (Math.abs(partnerX - this.player.x) > 4) this.player.setFlipX(partnerX < this.player.x);
+    this.syncPlayerPause();
+    this.camera?.focus({
+      x: (this.player.x + partnerX) / 2,
+      y: STREET_GROUND_Y,
+      zoom: TALK_ZOOM,
+      screenY: TALK_GROUND_AT,
+      durationMs: this.motion ? TALK_EASE_MS : 0
+    });
+    this.publishTalk();
+  }
+
+  private updateTalk(time: number, delta: number): void {
+    this.updateStreetProps(time, delta, sketchTick(time));
+    this.chick?.hush();
+    for (let action = bridgeActions.consumeSceneUiAction(OVERWORLD_SCENE_ID); action && this.talk; ) {
+      this.handleTalkAction(action);
+      action = bridgeActions.consumeSceneUiAction(OVERWORLD_SCENE_ID);
+    }
+    // Taps and E presses made while talking must not fire once the box closes.
+    bridgeActions.consumeTouchOneShots();
+  }
+
+  private handleTalkAction(action: SceneUiActionRequest): void {
+    const conversation = this.talk?.conversation;
+    if (!conversation) return;
+    let outcome: StreetConversationOutcome | null = null;
+    if (action.action === 'ridgeConversationAdvance') outcome = conversation.advance();
+    else if (action.action === 'ridgeConversationLeave') outcome = 'left';
+    else if (action.action === 'ridgeConversationChoose') outcome = conversation.choose(readChoiceId(action.params));
+    if (outcome) this.endTalk(outcome);
+    else this.publishTalk();
+  }
+
+  private endTalk(outcome: StreetConversationOutcome): void {
+    const talk = this.talk;
+    if (!talk) return;
+    this.talk = undefined;
+    this.closeTalkPanel();
+    this.camera?.focus(null);
+    this.syncPlayerPause();
+    talk.onEnd?.(outcome);
+  }
+
+  /** Street talks borrow Ridge's docked conversation box. */
+  private publishTalk(): void {
+    if (!this.talk) return;
+    bridgeActions.setSceneUiPanel(
+      OVERWORLD_SCENE_ID,
+      'ridgeConversation',
+      this.talk.conversation.view(this.player.x, isItemEquipped('glasses'))
+    );
+  }
+
+  private closeTalkPanel(): void {
+    if (bridgeStore.getState().sceneUi.panel?.ownerSceneId === OVERWORLD_SCENE_ID) {
+      bridgeActions.clearSceneUiPanel(OVERWORLD_SCENE_ID);
+    }
   }
 
   private applySessionResult(result: GameCommandResult): void {
@@ -322,13 +448,17 @@ export class OverworldScene extends Phaser.Scene {
         this.session?.restoreExploreAfterOverlay();
       },
       onBananaPeelDiscovered: () => this.startBananaPeelDiscovery(),
-      onBananaPeelCancelled: () => this.cancelBananaPeelWarpIfAny(),
-      onSignpostRead: ({ stage, found, total }) => this.signpost?.read(stage, found, total)
+      onBananaPeelCancelled: () => this.resetBananaPeelFlow(),
+      onSignpostRead: ({ stage, found, total }) => {
+        this.signpost?.markRead(stage);
+        this.openTalk(signpostConversation(stage, found, total), OVERWORLD_SIGNPOST_X);
+      }
     });
   }
 
   private applyOverworldNearbyPrompt(nearby: NearbyThing | undefined): void {
-    if (!nearby || this.session?.getState().overworld.bananaFirstPeelPending) {
+    const chickAway = nearby?.kind === 'npc' && this.chick?.isHome === false;
+    if (!nearby || chickAway || this.session?.getState().overworld.bananaFirstPeelPending) {
       this.interactPrompt.setVisible(false);
       return;
     }
@@ -468,22 +598,6 @@ export class OverworldScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setDepth(18)
       .setVisible(false);
-    this.glassesSecretMessage = createUiText(
-      this,
-      bananaSecret.x,
-      bananaSecret.y - 105,
-      '',
-      {
-        fontSize: '13px',
-        color: '#1a1a1a',
-        backgroundColor: '#fbfbf9',
-        padding: { x: 6, y: 3 },
-        wordWrap: { width: 260 }
-      }
-    )
-      .setOrigin(0.5)
-      .setDepth(30)
-      .setVisible(false);
   }
 
   private updateGlassesSecrets(hasGlasses: boolean): void {
@@ -494,83 +608,25 @@ export class OverworldScene extends Phaser.Scene {
     }
   }
 
-  private clearBananaClueMessageTimers(): void {
-    this.bananaClueTypewriter?.cancel();
-    this.bananaClueTypewriter = undefined;
-    this.glassesSecretMessageHideTimer?.destroy();
-    this.glassesSecretMessageHideTimer = undefined;
-  }
-
-  /** Clears first-peel timers, typewriter, and clue UI (safe on every overworld init / shutdown). */
+  /** Clears the first-peel beat (safe on every overworld init / shutdown). */
   private resetBananaPeelFlow(): void {
-    if (this.bananaPeelWarpTimeoutId !== undefined) {
-      globalThis.clearTimeout(this.bananaPeelWarpTimeoutId);
-      this.bananaPeelWarpTimeoutId = undefined;
-    }
     if (this.session) {
       this.session.getState().overworld.bananaFirstPeelPending = false;
     }
-    this.clearBananaClueMessageTimers();
-    this.glassesSecretMessage?.setVisible(false);
   }
 
-  /** Abort first peel if the player walks away or uses another exit while typewriter / warp is pending. */
-  private cancelBananaPeelWarpIfAny(): void {
-    const pending = this.session?.getState().overworld.bananaFirstPeelPending ?? false;
-    if (this.bananaPeelWarpTimeoutId === undefined && !pending) return;
-    this.resetBananaPeelFlow();
-  }
-
+  /**
+   * First find of the litter pile: a short talk, and reading it through slips
+   * you into the dumpster. Stepping back leaves the pile for later.
+   */
   private startBananaPeelDiscovery(): void {
-    const messages = getMessages();
-    this.showBananaClueMessage(
-      messages.scenes.overworld.bananaDiscovery,
-      BANANA_PEEL_CLUE_VISIBLE_MS,
-      {
-        typewriter: true,
-        onTypewriterComplete: () => {
-          this.bananaPeelWarpTimeoutId = globalThis.setTimeout(() => {
-            this.bananaPeelWarpTimeoutId = undefined;
-            if (this.session) {
-              this.applySessionResult(this.session.commitBananaPeelWarp());
-            } else {
-              this.onEnterScene?.(POTASSIUM_SCENE_ID);
-            }
-          }, BANANA_PEEL_POST_TYPEWRITE_WARP_MS);
-        }
+    this.openTalk(litterConversation(), OVERWORLD_GLASSES_SECRET_SLOTS[0].x, (outcome) => {
+      if (outcome === 'finished' && this.session) {
+        this.applySessionResult(this.session.commitBananaPeelWarp());
+      } else {
+        this.resetBananaPeelFlow();
       }
-    );
-  }
-
-  private showBananaClueMessage(
-    message: string,
-    visibleMs: number = 2600,
-    opts?: { typewriter?: boolean; onTypewriterComplete?: () => void }
-  ): void {
-    this.clearBananaClueMessageTimers();
-    if (!this.glassesSecretMessage) return;
-
-    const scheduleHide = (): void => {
-      this.glassesSecretMessageHideTimer = this.time.delayedCall(visibleMs, () => {
-        this.glassesSecretMessage?.setVisible(false);
-        this.glassesSecretMessageHideTimer = undefined;
-      });
-    };
-
-    if (opts?.typewriter && message.length > 0) {
-      this.bananaClueTypewriter = startTypewriterEffect(this, this.glassesSecretMessage, message, {
-        charDelayMs: BANANA_PEEL_TYPEWRITER_CHAR_MS,
-        onComplete: () => {
-          this.bananaClueTypewriter = undefined;
-          scheduleHide();
-          opts.onTypewriterComplete?.();
-        }
-      });
-    } else {
-      this.glassesSecretMessage.setText(message);
-      this.glassesSecretMessage.setVisible(true);
-      scheduleHide();
-    }
+    });
   }
 
   private enterSceneFromStreet(sceneId: SceneId): void {
@@ -583,4 +639,10 @@ export class OverworldScene extends Phaser.Scene {
     this.interactPrompt.setVisible(false);
     this.hatch.dropIn(this.player, this.motion, () => this.onEnterScene?.(sceneId));
   }
+}
+
+function readChoiceId(params: unknown): string {
+  if (!params || typeof params !== 'object') return '';
+  const choiceId = (params as { choiceId?: unknown }).choiceId;
+  return typeof choiceId === 'string' ? choiceId : '';
 }

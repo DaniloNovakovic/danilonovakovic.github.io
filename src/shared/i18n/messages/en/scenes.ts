@@ -3,8 +3,39 @@ export const sceneMessages = {
     glassesSecretHint: "Something appears in plain sight.",
     bananaDiscoveredPrompt: "[E] Hop in the dumpster",
     bananaUndiscoveredPrompt: "[E] Tidy up?",
-    bananaDiscovery:
-      "Litter, and tiny raccoon paw prints leading into the dumpster. You reach to tidy up and step in a soapy puddle...",
+    conversation: {
+      speakers: {
+        player: "You",
+        chick: "Street Chick",
+        narrator: "Street",
+      },
+      chick: {
+        first: [
+          "hey. hey.",
+          "Uh... hi?",
+          "you're cute when you squint.",
+          "the flock is coming over. don't run. ...or do. we like that.",
+        ],
+        again: [
+          "you came back.",
+          "I'm just walking past. Really.",
+          "you took the glasses off. for us.",
+          "the flock's been asking about you.",
+        ],
+        chase: "Run!",
+        later: "Slowly back away",
+      },
+      crt: {
+        line: "The blank CRT hums under your hand. There's a slot exactly the shape of your Circuit.",
+        seat: "Seat the Circuit",
+        later: "Not yet",
+      },
+      litter: [
+        "Litter. A crumpled page, a tipped soda can, and tiny raccoon paw prints trotting into the dumpster.",
+        "Who just leaves this here? Fine. I'll tidy up.",
+        "You reach down... and step square in a soapy puddle.",
+      ],
+    },
     chickPrompt: "[E] The chick is staring",
     circuitCrtLockedPrompt: "A blank CRT. Needs a Circuit.",
     circuitCrtReadyPrompt: "[E] Insert Circuit",

@@ -17,6 +17,13 @@ export type RidgePortraitId =
   | 'operations'
   | 'steward'
   | 'quietCat'
+  /**
+   * Overworld faces; the street borrows Ridge's conversation box but keeps its
+   * own look, so its player is the street sprite, not Ridge's figure.
+   */
+  | 'chick'
+  | 'streetPlayer'
+  | 'streetPlayerGlasses'
   | 'prompt';
 
 interface CastSpeakerEntry {
