@@ -12,6 +12,7 @@ import type { SceneInputKeys } from '../input/readSceneInputCommands';
 import { readPlayerSceneStep } from '../input/scenePlayerInput';
 import { setSceneKeyboardPaused } from '../sceneKeyboardPause';
 import { TextureGenerator } from '../textures/TextureGenerator';
+import { prefersReducedMotion, sketchTick } from '../motion/sketchMotion';
 import {
   createSideViewCameraRuntime,
   type SideViewCameraDesignSize,
@@ -79,8 +80,10 @@ export interface SideViewPlayerRuntime {
 }
 
 const DEFAULT_TEXTURE_KEY = 'player_idle';
-const WALK_BOB_PERIOD_MS = 100;
-const WALK_BOB_ANGLE_DEGREES = 5;
+/** Suffix of the walk pose textures: the same drawing a hop higher (TextureGenerator). */
+const WALK_STEP_SUFFIX = '_step';
+/** Sketch-clock ticks per walk cycle: half down, half up (~180ms each, like Ridge's stepped bob). */
+const WALK_STEP_TICKS = 4;
 
 function resolveStartPosition(options: SideViewPlayerRuntimeOptions): ResumeSnapshot {
   const raw = options.resumePosition ?? options.start;
@@ -101,6 +104,11 @@ class PhaserSideViewPlayerRuntime implements SideViewPlayerRuntime {
   private readonly inputKeys: SceneInputKeys;
   private isPaused = false;
   private hasGlassesSprite: boolean | null = null;
+  /** Idle or glasses texture, before the walk pose. */
+  private baseTextureKey: string;
+  private appliedTextureKey: string;
+  private stepping = false;
+  private readonly motion = !prefersReducedMotion();
 
   constructor(options: SideViewPlayerRuntimeOptions) {
     this.options = options;
@@ -114,6 +122,8 @@ class PhaserSideViewPlayerRuntime implements SideViewPlayerRuntime {
     }
 
     this.player = scene.physics.add.sprite(start.x, start.y, textureKey);
+    this.baseTextureKey = textureKey;
+    this.appliedTextureKey = textureKey;
     if (options.sprite?.depth !== undefined) {
       this.player.setDepth(options.sprite.depth);
     }
@@ -160,9 +170,11 @@ class PhaserSideViewPlayerRuntime implements SideViewPlayerRuntime {
     });
 
     this.player.setFlipX(step.facingLeft);
-    this.player.setAngle(
-      step.moving ? Math.sin(this.options.scene.time.now / WALK_BOB_PERIOD_MS) * WALK_BOB_ANGLE_DEGREES : 0
-    );
+    // Walk as a stepped hop pose, never a tilt: rotating the texture by a new
+    // angle every frame smears its ink lines and disables pixel rounding.
+    const tick = sketchTick(this.options.scene.time.now);
+    this.stepping = this.motion && step.moving && tick % WALK_STEP_TICKS >= WALK_STEP_TICKS / 2;
+    this.applyTexture();
 
     return { paused: false, commands, step };
   }
@@ -172,9 +184,18 @@ class PhaserSideViewPlayerRuntime implements SideViewPlayerRuntime {
     const hasGlasses = this.options.appearance.isGlassesEquipped();
     if (hasGlasses === this.hasGlassesSprite) return;
     this.hasGlassesSprite = hasGlasses;
-    this.player.setTexture(
-      hasGlasses ? this.options.appearance.glassesTextureKey : this.options.appearance.idleTextureKey
-    );
+    this.baseTextureKey = hasGlasses
+      ? this.options.appearance.glassesTextureKey
+      : this.options.appearance.idleTextureKey;
+    this.applyTexture(true);
+  }
+
+  private applyTexture(force = false): void {
+    const stepKey = this.baseTextureKey + WALK_STEP_SUFFIX;
+    const key = this.stepping && this.options.scene.textures.exists(stepKey) ? stepKey : this.baseTextureKey;
+    if (key === this.appliedTextureKey && !force) return;
+    this.appliedTextureKey = key;
+    this.player.setTexture(key);
   }
 }
 

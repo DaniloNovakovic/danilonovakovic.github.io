@@ -200,7 +200,45 @@ describe('SideViewPlayerRuntime', () => {
     }
     expect(sprite.setVelocityX).toHaveBeenCalledWith(300);
     expect(sprite.setFlipX).toHaveBeenCalledWith(false);
-    expect(sprite.setAngle).toHaveBeenCalledWith(Math.sin(1) * 5);
+  });
+
+  it('walks with a stepped hop pose on the sketch clock and never tilts the sprite', () => {
+    // A tilted texture re-rotated every frame smears its ink lines while walking.
+    const { scene, sprite, cursors } = createScene();
+    let equipped = false;
+    const runtime = createSideViewPlayerRuntime({
+      scene,
+      start: { x: 10, y: 20 },
+      sprite: { gravityY: 1000 },
+      movement,
+      input: { allowJump: true, allowSprint: false },
+      appearance: {
+        isGlassesEquipped: () => equipped,
+        idleTextureKey: 'player_idle',
+        glassesTextureKey: 'player_glasses'
+      }
+    });
+    runtime.syncAppearance();
+    const poses: string[] = [];
+    const poseAt = (now: number) => {
+      scene.time.now = now;
+      runtime.update();
+      poses.push(String(vi.mocked(sprite.setTexture).mock.lastCall?.[0]));
+    };
+
+    cursors.right.isDown = true;
+    // Sketch clock ticks every 90ms: two ticks down, two ticks up.
+    poseAt(0);
+    poseAt(200);
+    poseAt(380);
+    equipped = true;
+    runtime.syncAppearance();
+    poseAt(560);
+    cursors.right.isDown = false;
+    poseAt(560);
+
+    expect(poses).toEqual(['player_idle', 'player_idle_step', 'player_idle', 'player_glasses_step', 'player_glasses']);
+    expect(sprite.setAngle).not.toHaveBeenCalled();
   });
 
   it('pauses controller, keyboard, and physics while zeroing velocity', () => {
