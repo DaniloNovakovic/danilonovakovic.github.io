@@ -237,6 +237,23 @@ describe('GameConsoleSession full secret route', () => {
     expect(bench.message).toContain('copper-string');
   });
 
+  it('puts pocketed glasses back on at the basement computer before it boots', () => {
+    const session = createSession({ sceneId: 'basement', ownedItemIds: ['glasses'], equippedItemIds: [] });
+    session.exec('go right 8');
+    expect(session.observe().nearby[0]).toMatchObject({ id: 'computer', prompt: 'Put glasses on' });
+
+    const squint = session.exec('interact computer');
+    expect(squint.events).toEqual([
+      { type: 'item_equipped', itemId: 'glasses' },
+      { type: 'thought', id: 'basement_glasses_on' }
+    ]);
+    expect(session.observe().equippedItemIds).toContain('glasses');
+    expect(session.observe().mode).toBe('basement');
+
+    const boot = session.exec('interact computer');
+    expect(boot.events).toContainEqual({ type: 'overlay_opened', overlayId: 'games' });
+  });
+
   it('starts Chick Magnet from the street chick only while glasses are off', () => {
     const bare = createSession();
     walkOverworldTo(bare, OVERWORLD_CHICK.x);

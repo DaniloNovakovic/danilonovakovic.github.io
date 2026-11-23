@@ -1,6 +1,8 @@
 import { sceneUiSurfaceCapturesPointer } from '@/game/sceneUi/registry';
 import { ArrowLeft, BookOpen, Bug } from 'lucide-react';
 import Game from './Game';
+import { BackpackButton } from './BackpackButton';
+import { useBackpackHotkey } from './useBackpack';
 import { bridgeActions } from '@/game/bridge/store';
 import { DEV_SWITCHER_OVERLAY_ID } from '@/game/overlays/overlayIds';
 import { OverlayHost } from '@/game/overlays/OverlayHost';
@@ -27,13 +29,13 @@ export function InteractiveAppDefaultShell({
     sceneHintText,
     shouldShowFooterHint,
     shouldShowSceneUiStatus,
-    shouldReserveSceneHint,
     sceneHeaderChrome,
     enterScene,
     openOverlay,
     returnToOverworld,
     returnToScene
   } = shell;
+  useBackpackHotkey(bridge);
 
   return (
     <div
@@ -80,6 +82,7 @@ export function InteractiveAppDefaultShell({
                 </Button>
               )
             )}
+            <BackpackButton bridge={bridge} />
           </div>
           <Button
             variant="floating"
@@ -127,19 +130,10 @@ export function InteractiveAppDefaultShell({
           <Panel className="mx-auto w-full max-w-lg bg-[#fbfbf9]/85 px-3 py-2 text-center opacity-80 backdrop-blur-sm transition-opacity hover:opacity-100 md:px-4">
             {shouldShowSceneUiStatus ? (
               <SceneUiHost placement="status" />
-            ) : shouldReserveSceneHint ? (
+            ) : (
               <p className="text-[10px] font-bold uppercase leading-snug tracking-widest text-[#1a1a1a] md:text-xs">
                 {sceneHintText}
               </p>
-            ) : (
-              <>
-                <p className="text-[10px] font-bold uppercase leading-snug tracking-widest text-[#1a1a1a] md:hidden">
-                  {messages.navigation.hintsCompact}
-                </p>
-                <p className="hidden text-sm font-bold uppercase tracking-widest text-[#1a1a1a] md:block">
-                  {messages.navigation.hints}
-                </p>
-              </>
             )}
           </Panel>
         </footer>

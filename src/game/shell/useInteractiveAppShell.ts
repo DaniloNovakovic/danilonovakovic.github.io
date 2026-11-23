@@ -43,11 +43,9 @@ export function useInteractiveAppShell() {
   const isGameInputBlocked = bridge.isPaused || bridge.loadingSceneId !== null;
   const shouldReserveSceneHint = presentationSceneId === POTASSIUM_SCENE_ID;
   const sceneHintText = bridge.sceneHintText ?? messages.potassiumSlip.hints.start;
-  const shouldShowNavigationHint =
-    bridge.activeSceneId === OVERWORLD_SCENE_ID && bridge.activeOverlayId === null;
   const shouldShowSceneUiStatus = bridge.sceneUi.status !== null;
-  const shouldShowFooterHint =
-    shouldShowSceneUiStatus || shouldReserveSceneHint || shouldShowNavigationHint;
+  // No standing controls line: in-world prompts teach E, and the frame gets the room.
+  const shouldShowFooterHint = shouldShowSceneUiStatus || shouldReserveSceneHint;
   const sceneHeaderChrome = getSceneHeaderChrome(presentationSceneId);
   const notebookShellProfile = getNotebookRuntimeShellProfile(presentationSceneId);
 
@@ -76,7 +74,6 @@ export function useInteractiveAppShell() {
     shouldShowFooterHint,
     shouldShowSceneUiStatus,
     shouldReserveSceneHint,
-    shouldShowNavigationHint,
     sceneHeaderChrome,
     notebookShellProfile,
     ...actions

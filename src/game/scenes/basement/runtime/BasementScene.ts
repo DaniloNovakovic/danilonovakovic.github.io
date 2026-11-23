@@ -34,6 +34,7 @@ import {
   createSideViewPlayerRuntime,
   type SideViewPlayerRuntime
 } from '@/game/sharedSceneRuntime/player/SideViewPlayerRuntime';
+import { DistanceHazeVision, NEARSIGHTED_HAZE } from '@/game/sharedSceneRuntime/vision/DistanceHazeVision';
 import { BasementDen } from './BasementDen';
 
 const THOUGHT_VISIBLE_MS = 3200;
@@ -48,6 +49,8 @@ export class BasementScene extends Phaser.Scene {
   private playerRuntime?: SideViewPlayerRuntime;
   private session?: GameConsoleSession;
   private den?: BasementDen;
+  /** Same near-sighted haze as the street, while the glasses are in a pocket. */
+  private pocketedVision?: DistanceHazeVision;
   private motion = true;
   private onClose?: () => void;
   private onOpenOverlay?: (overlayId: OverlayId, options?: OpenOverlayOptions) => void;
@@ -135,6 +138,7 @@ export class BasementScene extends Phaser.Scene {
       }
     });
     this.player = this.playerRuntime.player;
+    this.pocketedVision = new DistanceHazeVision(this, NEARSIGHTED_HAZE);
     this.playerThought = new PlayerThoughtText(this, {
       target: this.player,
       visibleMs: THOUGHT_VISIBLE_MS,
@@ -179,6 +183,7 @@ export class BasementScene extends Phaser.Scene {
 
   update(time: number) {
     this.updateDen(sketchTick(time));
+    this.updatePocketedVision();
 
     const playerUpdate = this.playerRuntime?.update();
     if (!playerUpdate || playerUpdate.paused || !this.session) {
@@ -230,6 +235,12 @@ export class BasementScene extends Phaser.Scene {
     );
   }
 
+  private updatePocketedVision(): void {
+    if (!this.pocketedVision || !this.player) return;
+    const pocketed = isItemOwned('glasses') && !isItemEquipped('glasses');
+    this.pocketedVision.render(pocketed, this.player.x, this.player.y - 45);
+  }
+
   private applySessionResult(result: GameCommandResult): void {
     const messages = getMessages();
     applyGameConsoleEvents(result.events, {
@@ -256,6 +267,7 @@ export class BasementScene extends Phaser.Scene {
     const owned = bridgeStore.getState().inventory.ownedItemIds;
     const text: Record<GameThoughtId, () => string> = {
       basement_cannot_see: () => copy.cannotSeeThought,
+      basement_glasses_on: () => copy.glassesOnThought,
       basement_corkboard: () => copy.corkboardNotes[variant % copy.corkboardNotes.length],
       basement_shelf: () => copy.shelfThought,
       workbench_missing_parts: () => copy.workbenchMissing(countCircuitParts(owned), CIRCUIT_PART_IDS.length),

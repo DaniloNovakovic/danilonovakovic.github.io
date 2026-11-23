@@ -1,7 +1,5 @@
 export const gameShellMessages = {
   controlsLabel: "Interactive controls",
-  openInventory: "Open inventory",
-  inventory: "Inventory",
   openDevSwitcher: "Open dev scene switcher",
   dev: "Dev",
   switchToStatic: "Switch to static portfolio",

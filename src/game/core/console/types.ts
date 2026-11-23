@@ -22,6 +22,7 @@ export type OverworldProgressStage =
 
 export type GameThoughtId =
   | 'basement_cannot_see'
+  | 'basement_glasses_on'
   | 'basement_corkboard'
   | 'basement_shelf'
   | 'workbench_missing_parts'

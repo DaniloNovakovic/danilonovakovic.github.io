@@ -46,10 +46,8 @@ export function applyGameConsoleEvents(
         }
         break;
       case 'item_equipped':
-        if (event.itemId !== 'glasses') {
-          // collectGlasses already equips; other items equip explicitly.
-          bridgeActions.equipItem(event.itemId as InventoryItemId);
-        }
+        // Idempotent, so the equip that follows collectGlasses is a no-op.
+        bridgeActions.equipItem(event.itemId as InventoryItemId);
         break;
       case 'item_unequipped':
         bridgeActions.unequipItem(event.itemId as InventoryItemId);

@@ -40,7 +40,8 @@ function promptFor(state: GameWorldState, id: BasementSpot['id']): string {
     case 'workbench':
       return state.ownedItemIds.includes('circuit') ? 'Admire the bench' : 'Use the workbench';
     case 'computer':
-      return hasGlasses ? 'Open developer console' : 'Peer at the screen';
+      if (!hasGlasses) return 'Peer at the screen';
+      return state.equippedItemIds.includes('glasses') ? 'Open developer console' : 'Put glasses on';
   }
 }
 
@@ -119,6 +120,17 @@ function openComputer(state: GameWorldState): BasementInteractOutcome {
     return {
       message: "ughh... I can't see",
       events: [{ type: 'thought', id: 'basement_cannot_see' }]
+    };
+  }
+  if (!state.equippedItemIds.includes('glasses')) {
+    // Pocketed: put them on first so the player sees the blur clear before the CRT boots.
+    state.equippedItemIds = [...state.equippedItemIds, 'glasses'];
+    return {
+      message: 'You squint at the screen and put your glasses back on.',
+      events: [
+        { type: 'item_equipped', itemId: 'glasses' },
+        { type: 'thought', id: 'basement_glasses_on' }
+      ]
     };
   }
 
