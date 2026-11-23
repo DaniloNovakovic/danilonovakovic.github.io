@@ -58,7 +58,8 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
 - The glasses pickup is in the basement. Collecting it adds and equips the glasses.
 - Without glasses the den is dim; collecting them switches the swinging bulb on.
 - Before glasses are owned, interacting with the computer shows the character thought: `ughh... I can't see`.
-- After glasses are owned, interacting with the computer opens the Developer Console React overlay. Besides `whoami`, `skills`, and `enter <scene>`, it answers `ls`, `cat <file>`, `parts`, and a couple of hidden commands.
+- With the glasses owned but taken off (Backpack), the den shows the same near-sighted haze as the street. Interacting with the computer then puts them back on (`*squints* ...okay, glasses back on.`) and the haze clears; interact again to boot it.
+- With the glasses on, interacting with the computer opens the Developer Console React overlay. Besides `whoami`, `skills`, and `enter <scene>`, it answers `ls`, `cat <file>`, `parts`, and a couple of hidden commands.
 - The corkboard cycles through notes about Danilo's work; read cards are marked on the board.
 - The shelf holds relics of old projects (a uc32 board, a chess piece glued to a Tetris block).
 - The workbench shows a Circuit blueprint with three part slots. With all three hobby spare parts, interacting solders them into a Circuit — a second route to the Circuit besides winning Scrub Rumble.

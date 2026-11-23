@@ -28,6 +28,7 @@ export const sceneMessages = {
     glasses: "GLASSES",
     glassesAcquired: "Glasses acquired. The sketch city flickers into focus.",
     cannotSeeThought: "ughh... I can't see",
+    glassesOnThought: "*squints* ...okay, glasses back on.",
     darkStatus: "A forgotten dev room hums under the sketch city.",
     litStatus: "Lights on. Someone has been building things down here.",
     corkboard: "NOTES",

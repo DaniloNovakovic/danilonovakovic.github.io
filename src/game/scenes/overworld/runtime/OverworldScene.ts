@@ -69,7 +69,7 @@ import { prefersReducedMotion, sketchTick } from '@/game/sharedSceneRuntime/moti
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
 import { startTypewriterEffect, type TypewriterEffectHandle } from '@/game/sharedSceneRuntime/text/typewriterEffect';
 import type { OverworldBuildingSlot } from '@/game/core/ecs/systems/overworldInteractSystems';
-import { DistanceHazeVision } from '@/game/sharedSceneRuntime/vision/DistanceHazeVision';
+import { DistanceHazeVision, NEARSIGHTED_HAZE } from '@/game/sharedSceneRuntime/vision/DistanceHazeVision';
 import {
   createSideViewPlayerRuntime,
   type SideViewPlayerRuntime
@@ -235,15 +235,7 @@ export class OverworldScene extends Phaser.Scene {
     this.chick = new StreetChick(this, OVERWORLD_CHICK.x);
     this.footsteps = new StreetFootsteps(this);
 
-    this.preGlassesVision = new DistanceHazeVision(this, {
-      depth: 15,
-      color: 0xfbfbf9,
-      tileSize: 30,
-      clearRadius: 120,
-      maxRadius: 560,
-      minAlpha: 0.24,
-      maxAlpha: 0.88
-    });
+    this.preGlassesVision = new DistanceHazeVision(this, NEARSIGHTED_HAZE);
     this.createGlassesSecret();
     this.setPaused(this.isPaused);
     this.playerRuntime.syncAppearance();

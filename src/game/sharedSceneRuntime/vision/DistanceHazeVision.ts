@@ -20,6 +20,17 @@ const DEFAULT_OPTIONS: DistanceHazeVisionOptions = {
   color: 0xfbfbf9
 };
 
+/** How the player sees without glasses, on the street and in the basement. */
+export const NEARSIGHTED_HAZE: Partial<DistanceHazeVisionOptions> = {
+  depth: 15,
+  color: 0xfbfbf9,
+  tileSize: 30,
+  clearRadius: 120,
+  maxRadius: 560,
+  minAlpha: 0.24,
+  maxAlpha: 0.88
+};
+
 /**
  * Reusable scene overlay that simulates near-sighted vision:
  * sharp center, progressively hazy farther away.
