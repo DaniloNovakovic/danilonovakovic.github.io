@@ -7,6 +7,11 @@ import {
   OVERWORLD_BUILDING_SPOTS,
   OVERWORLD_CHICK
 } from './content/overworldSpots';
+import {
+  HOBBIES_PLAYER_MAX_X,
+  HOBBIES_PLAYER_MIN_X,
+  HOBBIES_RIGHT_WALL_X
+} from './content/hobbiesSpots';
 import { getSketchDetailLevel } from './overworldLogic';
 import { GameConsoleSession } from './session';
 
@@ -303,3 +308,26 @@ function walkOverworldTo(session: GameConsoleSession, targetX: number): void {
     session.exec(`go ${direction} 2`);
   }
 }
+
+describe('hobbies room walls', () => {
+  function enterHobbies() {
+    const session = createSession();
+    walkOverworldTo(session, 2400);
+    session.exec('interact hobbies');
+    expect(session.observe().mode).toBe('hobbies');
+    return session;
+  }
+
+  it('stops the player flush against the drawn right wall', () => {
+    const session = enterHobbies();
+    session.exec('go right 50');
+    expect(session.observe().hobbies?.playerX).toBe(HOBBIES_PLAYER_MAX_X);
+    expect(HOBBIES_PLAYER_MAX_X).toBeLessThan(HOBBIES_RIGHT_WALL_X);
+  });
+
+  it('keeps the left side where it was', () => {
+    const session = enterHobbies();
+    session.exec('go left 50');
+    expect(session.observe().hobbies?.playerX).toBe(HOBBIES_PLAYER_MIN_X);
+  });
+});

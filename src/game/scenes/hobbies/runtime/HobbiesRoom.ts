@@ -7,6 +7,7 @@ import * as Phaser from 'phaser';
 import { HOBBIES_OVERLAY_IDS, type HobbiesOverlayId } from '@/game/overlays/overlayIds';
 import { HOBBIES_EXIT_X, HOBBY_STATION_LAYOUT } from '../roomLayout';
 import { getMessages } from '@/shared/i18n';
+import { HOBBIES_RIGHT_WALL_X } from '@/game/core/console/content/hobbiesSpots';
 import { TextureGenerator } from '@/game/sharedSceneRuntime/textures/TextureGenerator';
 import {
   HOBBIES_FLOOR_Y,
@@ -18,7 +19,7 @@ import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
 const INK = 0x1a1a1a;
 const PAPER = 0xfbfbf9;
 const WALL_LEFT = 50;
-const WALL_RIGHT = 950;
+const WALL_RIGHT = HOBBIES_RIGHT_WALL_X;
 const CEILING_Y = 50;
 const BULB_COUNT = 14;
 

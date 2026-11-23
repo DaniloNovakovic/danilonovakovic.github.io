@@ -22,6 +22,7 @@ import {
 } from '@/game/sharedSceneRuntime/config';
 import { bridgeStore, isItemEquipped, type OpenOverlayOptions } from '@/game/bridge/store';
 import { CIRCUIT_PART_HOBBY, CIRCUIT_PART_IDS } from '@/game/core/console/content/circuitParts';
+import { HOBBIES_RIGHT_WALL_X } from '@/game/core/console/content/hobbiesSpots';
 import { prefersReducedMotion, sketchTick } from '@/game/sharedSceneRuntime/motion/sketchMotion';
 import { HobbiesRoom } from './HobbiesRoom';
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
@@ -85,7 +86,8 @@ export class HobbiesScene extends Phaser.Scene {
     const height = HOBBIES_ROOM_HEIGHT;
     const floorY = HOBBIES_FLOOR_Y;
 
-    this.physics.world.setBounds(0, 0, width, height);
+    // Right edge is the drawn wall. The left stays open on purpose: Out of Bounds void.
+    this.physics.world.setBounds(0, 0, HOBBIES_RIGHT_WALL_X, height);
 
     this.motion = !prefersReducedMotion();
     this.room = new HobbiesRoom(this);

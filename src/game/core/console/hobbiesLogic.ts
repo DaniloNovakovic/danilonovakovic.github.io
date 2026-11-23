@@ -1,7 +1,13 @@
 import type { GameItemId, GameSessionEvent, GameWorldState, NearbyThing } from './types';
 import { returnToOverworld } from './basementLogic';
 import { CIRCUIT_PART_HOBBY, CIRCUIT_PART_IDS } from './content/circuitParts';
-import { HOBBIES_EXIT_SPOT_X, HOBBY_STATION_SPOTS, type HobbyStationId } from './content/hobbiesSpots';
+import {
+  HOBBIES_EXIT_SPOT_X,
+  HOBBIES_PLAYER_MAX_X,
+  HOBBIES_PLAYER_MIN_X,
+  HOBBY_STATION_SPOTS,
+  type HobbyStationId
+} from './content/hobbiesSpots';
 import { nearbyMissMessage, pickNearby } from './nearby';
 import { getHobbyOverlay } from './overlayCatalog';
 
@@ -56,7 +62,7 @@ export function moveHobbies(
   steps: number
 ): string {
   const delta = steps * HOBBIES_STEP_PX * (direction === 'right' ? 1 : -1);
-  const next = Math.max(60, Math.min(900, state.hobbies.playerX + delta));
+  const next = Math.max(HOBBIES_PLAYER_MIN_X, Math.min(HOBBIES_PLAYER_MAX_X, state.hobbies.playerX + delta));
   state.hobbies.playerX = next;
   state.hobbies.facing = direction;
   return `You wander the hobbies room to x=${Math.round(next)}.`;
