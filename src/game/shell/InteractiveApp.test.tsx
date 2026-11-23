@@ -149,7 +149,8 @@ describe('InteractiveApp', () => {
     expect(screen.queryByRole('button', { name: /open backpack/i })).toBeNull();
 
     act(() => bridgeActions.collectGlasses());
-    await userEvent.click(await screen.findByRole('button', { name: /open backpack/i }));
+    const opener = await screen.findByRole('button', { name: /open backpack/i });
+    await userEvent.click(opener);
 
     expect(await screen.findByRole('dialog', { name: /backpack/i })).toBeDefined();
     expect(bridgeStore.getState().activeOverlayId).toBe('inventory');
@@ -160,6 +161,9 @@ describe('InteractiveApp', () => {
     await waitFor(() => expect(screen.queryByRole('dialog', { name: /backpack/i })).toBeNull());
     expect(bridgeStore.getState().activeOverlayId).toBeNull();
     expect(bridgeStore.getState().isPaused).toBe(false);
+    // The opener stays mounted while the dialog is up, so focus can return to it.
+    expect(opener.isConnected).toBe(true);
+    await waitFor(() => expect(document.activeElement).toBe(opener));
   });
 
   it('renders the dev switcher only in dev builds and closes after selecting a target', async () => {
