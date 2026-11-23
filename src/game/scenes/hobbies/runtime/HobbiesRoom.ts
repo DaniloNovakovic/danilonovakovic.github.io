@@ -88,7 +88,7 @@ export class HobbiesRoom {
     const bg = scene.add.graphics();
     bg.fillStyle(PAPER, 1);
     bg.fillRect(WALL_LEFT, CEILING_Y, WALL_RIGHT - WALL_LEFT, 500);
-    // Both walls look equally solid; the left one only glitches if you keep pushing (HobbiesLeftWall).
+    // Both walls look equally solid; the left one has no collision (Out of Bounds entrance).
     bg.lineStyle(6, INK, 1);
     bg.strokeRect(WALL_LEFT, CEILING_Y, WALL_RIGHT - WALL_LEFT, 500);
 

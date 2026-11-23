@@ -1,14 +1,13 @@
 /**
  * HobbiesVoid — Out of Bounds, Act 1: the unfinished page past the Hobbies
- * room's left wall. Blank at first so it reads as a collision bug, then stray
- * marks, margin notes and the empty sketchbook-spine pedestal; also voices
- * Danilo's thoughts and the sparse pencil-scratch steps.
+ * room's left wall. Mostly blank paper so it reads as a collision bug, with a
+ * few far-apart marks and the empty sketchbook-spine pedestal; Danilo's
+ * thoughts and sparse pencil-scratch steps carry the walk.
  * Geometry and copy come from src/game/core/console/content/outOfBoundsVoid.ts.
  */
 import * as Phaser from 'phaser';
 import {
   HOBBIES_LEFT_WALL_X,
-  OUT_OF_BOUNDS_FIRST_MARK_DEPTH,
   OUT_OF_BOUNDS_PEDESTAL_X,
   OUT_OF_BOUNDS_SIGHTS,
   OUT_OF_BOUNDS_VOID_LENGTH,
@@ -54,7 +53,6 @@ export class HobbiesVoid {
     this.scene = scene;
     this.getAudioContext = getAudioContext;
     const g = scene.add.graphics().setDepth(1);
-    this.drawGuideline(g);
     for (const sight of OUT_OF_BOUNDS_SIGHTS) this.drawSight(g, sight.id, xAt(sight.depth));
     this.glow = scene.add.graphics().setDepth(1);
     this.drawPedestal(scene.add.graphics().setDepth(2));
@@ -143,57 +141,13 @@ export class HobbiesVoid {
     });
   }
 
-  /**
-   * Nothing until the first deliberate mark, so the void first reads as a
-   * collision bug. Then a pencil floor guideline fades in, dashed and faint at
-   * first, with eraser crumbs and construction ticks toward the pedestal.
-   */
-  private drawGuideline(g: Phaser.GameObjects.Graphics): void {
-    // Starts with the first mark, about half a screen past the first-mark depth.
-    const from = OUT_OF_BOUNDS_FIRST_MARK_DEPTH + 440;
-    const span = OUT_OF_BOUNDS_VOID_LENGTH - from;
-    for (let d = from; d < OUT_OF_BOUNDS_VOID_LENGTH; d += 24) {
-      const t = (d - from) / span;
-      // Gaps close up as the line firms: dashed at first, solid near the end.
-      if (t < 0.6 && d % 72 > 24 + t * 60) continue;
-      g.lineStyle(1, INK, 0.08 + 0.3 * t);
-      g.lineBetween(
-        xAt(d),
-        HOBBIES_FLOOR_Y + Math.sin(d / 47) * 1.5,
-        xAt(d + 24),
-        HOBBIES_FLOOR_Y + Math.sin((d + 24) / 47) * 1.5
-      );
-    }
-    g.lineStyle(1, INK, 0.18);
-    for (let d = from + 300; d < OUT_OF_BOUNDS_VOID_LENGTH; d += 220)
-      g.lineBetween(xAt(d), HOBBIES_FLOOR_Y - 6, xAt(d), HOBBIES_FLOOR_Y + 6);
-    g.fillStyle(INK, 0.2);
-    for (let d = from + 200; d < OUT_OF_BOUNDS_VOID_LENGTH; d += 173) {
-      g.fillCircle(xAt(d), HOBBIES_FLOOR_Y + 8 + (d % 5), 1.5);
-      g.fillCircle(xAt(d + 12), HOBBIES_FLOOR_Y + 12 + (d % 3), 1);
-    }
-  }
-
   private drawSight(g: Phaser.GameObjects.Graphics, id: OutOfBoundsSightId, x: number): void {
     const draw: Record<OutOfBoundsSightId, (graphics: Phaser.GameObjects.Graphics, at: number) => void> = {
-      'stray-mark': (graphics, at) => this.drawStrayMark(graphics, at),
       'todo-scribble': (graphics, at) => this.drawTodoScribble(graphics, at),
-      'ruler-line': (graphics, at) => this.drawRulerLine(graphics, at),
       'coffee-ring': (graphics, at) => this.drawCoffeeRing(graphics, at),
       'room-end-label': (graphics, at) => this.drawRoomEndLabel(graphics, at)
     };
     draw[id](g, x);
-  }
-
-  /** The first hint it isn't a bug: one stray pencil tick and a tiny test squiggle. */
-  private drawStrayMark(g: Phaser.GameObjects.Graphics, x: number): void {
-    g.lineStyle(1.5, INK, 0.35);
-    g.lineBetween(x - 6, HOBBIES_FLOOR_Y - 14, x + 4, HOBBIES_FLOOR_Y + 4);
-    g.lineStyle(1, INK, 0.25);
-    g.beginPath();
-    g.moveTo(x + 14, 300);
-    for (let i = 1; i <= 6; i += 1) g.lineTo(x + 14 + i * 6, 300 + (i % 2 === 0 ? -5 : 5));
-    g.strokePath();
   }
 
   private drawTodoScribble(g: Phaser.GameObjects.Graphics, x: number): void {
@@ -208,19 +162,6 @@ export class HobbiesVoid {
     g.lineBetween(x + 122, 214, x + 166, 230);
     g.lineBetween(x + 166, 230, x + 154, 222);
     g.lineBetween(x + 166, 230, x + 156, 236);
-  }
-
-  private drawRulerLine(g: Phaser.GameObjects.Graphics, x: number): void {
-    g.lineStyle(1, INK, 0.45);
-    g.lineBetween(x + 200, 330, x - 200, 330);
-    for (let i = 0; i <= 20; i += 1) {
-      const tick = i % 5 === 0 ? 12 : 6;
-      g.lineBetween(x + 200 - i * 20, 330, x + 200 - i * 20, 330 - tick);
-    }
-    createUiText(this.scene, x - 214, 322, '?', { fontSize: '16px', color: '#1a1a1a' })
-      .setOrigin(0.5)
-      .setAlpha(0.6)
-      .setDepth(1);
   }
 
   private drawCoffeeRing(g: Phaser.GameObjects.Graphics, x: number): void {

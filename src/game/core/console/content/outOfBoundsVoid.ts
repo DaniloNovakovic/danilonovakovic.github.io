@@ -6,33 +6,28 @@
  * "Depth" is how far past the drawn left wall the player has walked, in px.
  */
 
-/** The drawn left wall of the Hobbies room. It looks solid; pushing into it clips you through. */
+/** The drawn left wall of the Hobbies room. It looks solid but has no collision. */
 export const HOBBIES_LEFT_WALL_X = 50;
-/** How far the void runs past the wall (~10s walking at 300px/s). */
-export const OUT_OF_BOUNDS_VOID_LENGTH = 3000;
+/** How far the void runs past the wall (~20s walking at 300px/s, ~10s sprinting). */
+export const OUT_OF_BOUNDS_VOID_LENGTH = 6000;
 /** The empty sketchbook-spine pedestal that ends the void. */
-export const OUT_OF_BOUNDS_PEDESTAL_X = HOBBIES_LEFT_WALL_X - OUT_OF_BOUNDS_VOID_LENGTH + 50;
-/** Physics/camera left edge of the Hobbies scene: a little paper behind the pedestal. */
-export const OUT_OF_BOUNDS_WORLD_LEFT_X = HOBBIES_LEFT_WALL_X - OUT_OF_BOUNDS_VOID_LENGTH;
+export const OUT_OF_BOUNDS_PEDESTAL_X = HOBBIES_LEFT_WALL_X - OUT_OF_BOUNDS_VOID_LENGTH;
+/** Physics left edge of the Hobbies scene: the player stops just beside the pedestal. */
+export const OUT_OF_BOUNDS_WORLD_LEFT_X = OUT_OF_BOUNDS_PEDESTAL_X + 40;
+/** Camera left edge: blank paper beyond the pedestal so it isn't jammed against the screen edge. */
+export const OUT_OF_BOUNDS_CAMERA_LEFT_X = OUT_OF_BOUNDS_PEDESTAL_X - 440;
 
 /**
- * The void reads as a collision bug first: blank paper, nothing drawn. Only
- * once the player keeps walking do deliberate marks build up toward the pedestal.
+ * The void reads as a collision bug: mostly blank paper. A few far-apart marks
+ * and Danilo's thoughts are what keep the player walking to the pedestal.
  */
-export type OutOfBoundsStage = 'past-the-wall' | 'stray-marks' | 'margin-notes' | 'room-end';
+export type OutOfBoundsStage = 'past-the-wall' | 'margin-notes' | 'room-end';
 
 const STAGE_STARTS: readonly { stage: OutOfBoundsStage; depth: number }[] = [
   { stage: 'past-the-wall', depth: 0 },
-  { stage: 'stray-marks', depth: 1000 },
-  { stage: 'margin-notes', depth: 1750 },
-  { stage: 'room-end', depth: 2500 }
+  { stage: 'margin-notes', depth: 2200 },
+  { stage: 'room-end', depth: 5000 }
 ];
-
-/**
- * Depth where the first deliberate mark comes into view (it sits about half a
- * screen further on); before it the void is blank paper.
- */
-export const OUT_OF_BOUNDS_FIRST_MARK_DEPTH = 1000;
 
 export function outOfBoundsDepth(x: number): number {
   return Math.max(0, HOBBIES_LEFT_WALL_X - x);
@@ -49,22 +44,18 @@ export function outOfBoundsStageAt(x: number): OutOfBoundsStage | null {
 
 /** What each stage looks like, for the headless console. */
 export const OUT_OF_BOUNDS_STAGE_TEXT: Record<OutOfBoundsStage, string> = {
-  'past-the-wall':
-    'Outside the room. Nothing is drawn here, just empty paper. Looks like you glitched through the wall.',
-  'stray-marks': 'A faint pencil guideline under your feet, and a few stray marks. Someone was drawing out here.',
-  'margin-notes': 'Margin notes and doodles crowd the blank page. This was left here on purpose.',
+  'past-the-wall': 'Outside the room. Nothing is drawn here, just empty paper. Looks like you walked through the wall.',
+  'margin-notes': 'Still mostly blank, but now and then a mark. Someone left these here on purpose.',
   'room-end': 'The page is running out. Something glows faintly up ahead.'
 };
 
-export type OutOfBoundsSightId = 'stray-mark' | 'todo-scribble' | 'ruler-line' | 'coffee-ring' | 'room-end-label';
+export type OutOfBoundsSightId = 'todo-scribble' | 'coffee-ring' | 'room-end-label';
 
-/** Unfinished-world details along the void; the scene draws them at these depths. */
+/** The few unfinished-world details along the void; the scene draws them at these depths. */
 export const OUT_OF_BOUNDS_SIGHTS: readonly { id: OutOfBoundsSightId; depth: number; text: string }[] = [
-  { id: 'stray-mark', depth: 1500, text: 'a stray pencil tick on the blank paper' },
-  { id: 'todo-scribble', depth: 1850, text: 'a margin scribble: "TODO: fix left wall collision"' },
-  { id: 'ruler-line', depth: 2150, text: 'a ruler line, measured out and abandoned' },
-  { id: 'coffee-ring', depth: 2420, text: 'a coffee ring stain on the paper' },
-  { id: 'room-end-label', depth: 2700, text: 'a placeholder box labelled ROOM_END' }
+  { id: 'todo-scribble', depth: 2600, text: 'a margin scribble: "TODO: fix left wall collision"' },
+  { id: 'coffee-ring', depth: 4100, text: 'a coffee ring stain on the paper' },
+  { id: 'room-end-label', depth: 5550, text: 'a placeholder box labelled ROOM_END' }
 ];
 
 /** About half a screen: how far away a detail still reads in the console. */
@@ -76,12 +67,17 @@ export function outOfBoundsSightsNear(x: number): string[] {
   return OUT_OF_BOUNDS_SIGHTS.filter((s) => Math.abs(s.depth - depth) <= SIGHT_RADIUS).map((s) => s.text);
 }
 
-/** Danilo's thoughts: a bug at first, then more and more puzzled. */
+/** Danilo's thoughts carry the walk: a bug at first, then puzzled, then uneasy (~every 2.5s walking). */
 const OUT_OF_BOUNDS_THOUGHTS: readonly { depth: number; text: string }[] = [
   { depth: 150, text: '...did I just walk through the wall?' },
-  { depth: 1100, text: '...this wasn’t finished.' },
-  { depth: 2000, text: 'Why am I still walking?' },
-  { depth: 2850, text: 'Something’s out here.' }
+  { depth: 800, text: 'Okay. That’s a bug.' },
+  { depth: 1500, text: 'Should I go back? ...nah.' },
+  { depth: 2200, text: 'It’s so quiet out here.' },
+  { depth: 2900, text: '...this wasn’t finished.' },
+  { depth: 3600, text: 'Why am I still walking?' },
+  { depth: 4300, text: 'Does this page ever end?' },
+  { depth: 5000, text: 'Wait. There’s something up ahead.' },
+  { depth: 5700, text: 'Something’s out here.' }
 ];
 
 /**

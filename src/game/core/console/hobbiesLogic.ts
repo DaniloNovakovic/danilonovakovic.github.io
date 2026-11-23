@@ -3,7 +3,6 @@ import { returnToOverworld } from './basementLogic';
 import { CIRCUIT_PART_HOBBY, CIRCUIT_PART_IDS } from './content/circuitParts';
 import {
   HOBBIES_EXIT_SPOT_X,
-  HOBBIES_PLAYER_LEFT_WALL_STOP_X,
   HOBBIES_PLAYER_MAX_X,
   HOBBIES_PLAYER_MIN_X,
   HOBBY_STATION_SPOTS,
@@ -94,27 +93,21 @@ export function listHobbiesNearby(state: GameWorldState): NearbyThing[] {
 export function moveHobbies(state: GameWorldState, direction: 'left' | 'right', steps: number): string {
   const from = state.hobbies.playerX;
   const delta = steps * HOBBIES_STEP_PX * (direction === 'right' ? 1 : -1);
-  let next = Math.max(HOBBIES_PLAYER_MIN_X, Math.min(HOBBIES_PLAYER_MAX_X, from + delta));
-  // The left wall looks and acts solid; only pushing on while pressed against it glitches you through.
-  const pressedOnWall = from === HOBBIES_PLAYER_LEFT_WALL_STOP_X;
-  const bumped =
-    direction === 'left' && from > HOBBIES_PLAYER_LEFT_WALL_STOP_X && next < HOBBIES_PLAYER_LEFT_WALL_STOP_X;
-  if (bumped) next = HOBBIES_PLAYER_LEFT_WALL_STOP_X;
-  const clipped = direction === 'left' && pressedOnWall && next < from;
+  const next = Math.max(HOBBIES_PLAYER_MIN_X, Math.min(HOBBIES_PLAYER_MAX_X, from + delta));
   state.hobbies.playerX = next;
   state.hobbies.facing = direction;
   const depth = outOfBoundsDepth(next);
   const thoughts = outOfBoundsThoughtsReached(state.hobbies.voidFurthestDepth, depth);
   state.hobbies.voidFurthestDepth = Math.max(state.hobbies.voidFurthestDepth, depth);
-  const where = clipped
-    ? 'You jitter against the wall... and slip through the wall, out of the room'
-    : bumped
-      ? 'You bump into the left wall at'
-      : depth > 0
-        ? 'You walk across blank paper'
-        : 'You wander the hobbies room';
+  // The left wall is drawn solid but has no collision: you just walk through it.
+  const wentOut = outOfBoundsDepth(from) <= 0 && depth > 0;
+  const where = wentOut
+    ? 'You walk straight through the wall, out of the room'
+    : depth > 0
+      ? 'You walk across blank paper'
+      : 'You wander the hobbies room';
   const said = thoughts.map((line) => ` Danilo: "${line}"`).join('');
-  return `${where}${bumped ? ' ' : ' to '}x=${Math.round(next)}.${said}`;
+  return `${where} to x=${Math.round(next)}.${said}`;
 }
 
 export function interactHobbies(
