@@ -36,10 +36,10 @@ ask "wait, how far does this go?"
 
 ## Entry Points
 
-| Entry                                | Role                   | Notes                                                                                                                                                                                                                                 |
-| ------------------------------------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Hobbies room, far left**           | Main entrance          | The current bug becomes the feature. Today the physics world is wider than the drawn room, so the player can walk off either side. Make the **left** side intentional and endless-feeling. Fix the **right** side so it stays a wall. |
-| **Street, left of the `START` sign** | Hint / second entrance | The sign is at `x=60`, at the world edge, so the street needs negative-x space. Possible uses: a hint ("the edges aren't finished yet"), a smudge that's only visible later, or a quick return to the void once you've found it.      |
+| Entry                                | Role                   | Notes                                                                                                                                                                                                                                                    |
+| ------------------------------------ | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Hobbies room, far left**           | Main entrance          | The current bug becomes the feature. Today the physics world is wider than the drawn room, so the player can walk off either side. Make the **left** side a disguised collision bug that opens onto the void. Fix the **right** side so it stays a wall. |
+| **Street, left of the `START` sign** | Hint / second entrance | The sign is at `x=60`, at the world edge, so the street needs negative-x space. Possible uses: a hint ("the edges aren't finished yet"), a smudge that's only visible later, or a quick return to the void once you've found it.                         |
 
 Reference points in the current code: `src/game/scenes/hobbies/runtime/HobbiesScene.ts`
 (world and camera bounds), `src/game/core/console/hobbiesLogic.ts` (headless
@@ -50,12 +50,16 @@ clamp `60..900`), `src/game/core/console/content/overworldSpots.ts`
 
 ### Act 1 — Walk Off the Page
 
-The room's ink lines thin out and stop. The floor turns into a faint pencil
-guideline, then an eraser smudge, then blank paper. The camera keeps following.
-Little things show the world is unfinished: "TODO: draw wall" scribbled in the
-margin, a ruler line, a coffee ring, a placeholder labelled `ROOM_END`. Text
-from Danilo gets more confused ("...this wasn't finished", "why am I still
-walking?"). The music thins out to one pencil scratch per step.
+It should look like a bug first, not a secret. The left wall is inked as solid
+as the right one and stops you like a wall. Keep pushing into it and you jitter
+and pop through, like a collision bug. The camera, which was framed on the room,
+comes unstuck and follows you out. Outside there's nothing drawn at all, just
+blank paper, for about the first third of the walk ("...did I just walk through
+the wall?"). Only then do deliberate marks start: a stray pencil tick, a faint
+dashed floor guideline that firms up, "TODO: fix left wall collision" in the
+margin, a ruler line, a coffee ring, a placeholder labelled `ROOM_END`. Danilo's
+thoughts get more puzzled ("...this wasn't finished", "why am I still
+walking?"). The only sound is a sparse pencil scratch per few steps.
 
 **Payoff:** a glowing toolbox on a pedestal made from a sketchbook spine.
 

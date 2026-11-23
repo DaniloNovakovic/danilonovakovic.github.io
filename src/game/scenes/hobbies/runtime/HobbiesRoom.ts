@@ -88,13 +88,9 @@ export class HobbiesRoom {
     const bg = scene.add.graphics();
     bg.fillStyle(PAPER, 1);
     bg.fillRect(WALL_LEFT, CEILING_Y, WALL_RIGHT - WALL_LEFT, 500);
+    // Both walls look equally solid; the left one only glitches if you keep pushing (HobbiesLeftWall).
     bg.lineStyle(6, INK, 1);
-    bg.lineBetween(WALL_LEFT, CEILING_Y, WALL_RIGHT, CEILING_Y);
-    bg.lineBetween(WALL_RIGHT, CEILING_Y, WALL_RIGHT, CEILING_Y + 500);
-    bg.lineBetween(WALL_LEFT, CEILING_Y + 500, WALL_RIGHT, CEILING_Y + 500);
-    // The left wall was never inked: a broken pencil underdrawing you can walk through.
-    bg.lineStyle(1.5, INK, 0.3);
-    for (let y = CEILING_Y; y < floorY; y += 26) bg.lineBetween(WALL_LEFT, y, WALL_LEFT + 1, y + 14);
+    bg.strokeRect(WALL_LEFT, CEILING_Y, WALL_RIGHT - WALL_LEFT, 500);
 
     // Floor boards.
     bg.lineStyle(2, INK, 0.2);

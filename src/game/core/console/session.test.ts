@@ -322,16 +322,34 @@ describe('out of bounds: past the Hobbies left wall', () => {
     return session;
   }
 
-  it('keeps walking past the left wall into the unfinished page', () => {
+  it('stops at the left wall like a real wall, until pushing on glitches you through it', () => {
     const session = enterHobbies();
-    // Enter at x=200; ten 40px steps left lands at x=-200, 250px past the wall at x=50.
-    session.exec('go left 10');
+    // Enter at x=200; the wall at x=50 stops the player's centre at x=74.
+    const bump = session.exec('go left 10');
+    expect(session.observe().hobbies?.playerX).toBe(74);
+    expect(session.observe().hobbies?.void).toBeNull();
+    expect(bump.message).not.toMatch(/edge of the page|through/i);
+
+    // Keep pushing: the player pops through, out of the drawn room.
+    const clip = session.exec('go left 10');
+    expect(clip.message).toMatch(/through the wall/i);
     const hobbies = session.observe().hobbies;
-    expect(hobbies?.playerX).toBe(-200);
-    expect(hobbies?.void?.stage).toBe('thinning-ink');
+    expect(hobbies?.playerX).toBeLessThan(50 - 24);
+    expect(hobbies?.void?.stage).toBe('past-the-wall');
+    expect(hobbies?.void?.sights).toEqual([]);
   });
 
-  it('fades through every ink stage, ends at the empty pedestal, and walks back into the room', () => {
+  it('lets the player walk straight back in through the wall', () => {
+    const session = enterHobbies();
+    session.exec('go left 10');
+    session.exec('go left 10');
+    // From x=-326, twelve steps right: straight through the wall to x=154, no bump.
+    session.exec('go right 12');
+    expect(session.observe().hobbies?.void).toBeNull();
+    expect(session.observe().hobbies?.playerX).toBe(154);
+  });
+
+  it('stays blank like a bug, then builds up marks, ends at the empty pedestal, and walks back into the room', () => {
     const session = enterHobbies();
     const stages: string[] = [];
     for (let i = 0; i < 120; i += 1) {
@@ -339,7 +357,7 @@ describe('out of bounds: past the Hobbies left wall', () => {
       const stage = session.observe().hobbies?.void?.stage;
       if (stage && stages[stages.length - 1] !== stage) stages.push(stage);
     }
-    expect(stages).toEqual(['thinning-ink', 'pencil-guideline', 'eraser-smudge', 'blank-paper']);
+    expect(stages).toEqual(['past-the-wall', 'stray-marks', 'margin-notes', 'room-end']);
 
     const atEnd = session.observe();
     expect(atEnd.hobbies?.playerX).toBe(HOBBIES_PLAYER_MIN_X);
@@ -357,20 +375,26 @@ describe('out of bounds: past the Hobbies left wall', () => {
     expect(session.format()).not.toMatch(/edge of the page/i);
 
     session.exec('go left 10');
-    const near = session.format();
-    expect(near).toMatch(/ink lines thin out/i);
-    expect(near).toContain('TODO: draw wall');
-    expect(near).toMatch(/walk right .*room/i);
+    session.exec('go left 10');
+    const justOut = session.format();
+    expect(justOut).toMatch(/nothing is drawn/i);
+    expect(justOut).not.toMatch(/you notice/i);
+    expect(justOut).toMatch(/walk right .*room/i);
+
+    // ~1500px past the wall the marks start to show it's deliberate.
+    session.exec('go left 30');
+    const middle = session.format();
+    expect(middle).toMatch(/on purpose|someone was drawing/i);
+    expect(middle).toContain('TODO: fix left wall collision');
 
     session.exec('go left 120');
     const end = session.format();
-    expect(end).toMatch(/blank paper/i);
     expect(end).toContain('ROOM_END');
     expect(end).toMatch(/pedestal/i);
   });
 
   const THOUGHTS = [
-    'Huh. The wall just... stops.',
+    '...did I just walk through the wall?',
     '...this wasn’t finished.',
     'Why am I still walking?',
     'Something’s out here.'

@@ -1,12 +1,14 @@
 /**
  * HobbiesVoid — Out of Bounds, Act 1: the unfinished page past the Hobbies
- * room's left wall. Draws the fading-ink stages, the unfinished-world details
- * and the empty sketchbook-spine pedestal, and voices Danilo's thoughts.
+ * room's left wall. Blank at first so it reads as a collision bug, then stray
+ * marks, margin notes and the empty sketchbook-spine pedestal; also voices
+ * Danilo's thoughts and the sparse pencil-scratch steps.
  * Geometry and copy come from src/game/core/console/content/outOfBoundsVoid.ts.
  */
 import * as Phaser from 'phaser';
 import {
   HOBBIES_LEFT_WALL_X,
+  OUT_OF_BOUNDS_FIRST_MARK_DEPTH,
   OUT_OF_BOUNDS_PEDESTAL_X,
   OUT_OF_BOUNDS_SIGHTS,
   OUT_OF_BOUNDS_VOID_LENGTH,
@@ -20,8 +22,6 @@ import { playNoise } from '../overlays/shared/audioVoices';
 
 const INK = 0x1a1a1a;
 const PAPER = 0xfbfbf9;
-const CEILING_Y = 50;
-const STAGE = OUT_OF_BOUNDS_VOID_LENGTH / 4;
 /** World x at `depth` px past the left wall. */
 const xAt = (depth: number) => HOBBIES_LEFT_WALL_X - depth;
 
@@ -54,9 +54,7 @@ export class HobbiesVoid {
     this.scene = scene;
     this.getAudioContext = getAudioContext;
     const g = scene.add.graphics().setDepth(1);
-    this.drawThinningInk(g);
-    this.drawPencilGuideline(g);
-    this.drawEraserSmudge(g);
+    this.drawGuideline(g);
     for (const sight of OUT_OF_BOUNDS_SIGHTS) this.drawSight(g, sight.id, xAt(sight.depth));
     this.glow = scene.add.graphics().setDepth(1);
     this.drawPedestal(scene.add.graphics().setDepth(2));
@@ -145,55 +143,32 @@ export class HobbiesVoid {
     });
   }
 
-  /** Stage 1: the room's ceiling, floor and wainscot lines keep going, thinning out and stopping. */
-  private drawThinningInk(g: Phaser.GameObjects.Graphics): void {
-    const segments = 24;
-    const seg = STAGE / segments;
-    for (let i = 0; i < segments; i += 1) {
-      const fade = 1 - i / segments;
-      const from = xAt(i * seg);
-      const to = xAt((i + 1) * seg - (i > segments / 2 ? seg * (i / segments) : 0));
-      g.lineStyle(Math.max(1, 6 * fade), INK, 0.15 + 0.85 * fade);
-      g.lineBetween(from, CEILING_Y, to, CEILING_Y + i * 0.4);
-      g.lineStyle(Math.max(1, 4 * fade), INK, 0.2 + 0.8 * fade);
-      g.lineBetween(from, HOBBIES_FLOOR_Y, to, HOBBIES_FLOOR_Y);
-      if (i < segments / 3) {
-        g.lineStyle(2, INK, 0.3 * fade);
-        g.lineBetween(from, 420, to, 420);
-      }
-      if (i < segments / 4 && i % 2 === 0) {
-        g.lineStyle(2, INK, 0.2 * fade);
-        g.lineBetween(from, HOBBIES_FLOOR_Y, from - 20, 550);
-      }
+  /**
+   * Nothing until the first deliberate mark, so the void first reads as a
+   * collision bug. Then a pencil floor guideline fades in, dashed and faint at
+   * first, with eraser crumbs and construction ticks toward the pedestal.
+   */
+  private drawGuideline(g: Phaser.GameObjects.Graphics): void {
+    // Starts with the first mark, about half a screen past the first-mark depth.
+    const from = OUT_OF_BOUNDS_FIRST_MARK_DEPTH + 440;
+    const span = OUT_OF_BOUNDS_VOID_LENGTH - from;
+    for (let d = from; d < OUT_OF_BOUNDS_VOID_LENGTH; d += 24) {
+      const t = (d - from) / span;
+      // Gaps close up as the line firms: dashed at first, solid near the end.
+      if (t < 0.6 && d % 72 > 24 + t * 60) continue;
+      g.lineStyle(1, INK, 0.08 + 0.3 * t);
+      g.lineBetween(
+        xAt(d),
+        HOBBIES_FLOOR_Y + Math.sin(d / 47) * 1.5,
+        xAt(d + 24),
+        HOBBIES_FLOOR_Y + Math.sin((d + 24) / 47) * 1.5
+      );
     }
-    // The ink line frays where the pen lifted.
-    const end = xAt(STAGE);
-    g.lineStyle(1, INK, 0.25);
-    for (let i = 0; i < 4; i += 1)
-      g.lineBetween(end + i * 6, HOBBIES_FLOOR_Y, end - 10 - i * 4, HOBBIES_FLOOR_Y + i - 2);
-  }
-
-  /** Stage 2: only a faint, slightly wobbly pencil guideline for a floor, with construction ticks. */
-  private drawPencilGuideline(g: Phaser.GameObjects.Graphics): void {
-    g.lineStyle(1, INK, 0.28);
-    g.beginPath();
-    g.moveTo(xAt(STAGE - 20), HOBBIES_FLOOR_Y);
-    for (let d = STAGE; d <= STAGE * 2; d += 30) g.lineTo(xAt(d), HOBBIES_FLOOR_Y + Math.sin(d / 47) * 1.5);
-    g.strokePath();
     g.lineStyle(1, INK, 0.18);
-    for (let d = STAGE + 60; d < STAGE * 2; d += 180)
+    for (let d = from + 300; d < OUT_OF_BOUNDS_VOID_LENGTH; d += 220)
       g.lineBetween(xAt(d), HOBBIES_FLOOR_Y - 6, xAt(d), HOBBIES_FLOOR_Y + 6);
-  }
-
-  /** Stage 3: the floor line rubbed out into a grey eraser smudge with crumbs. */
-  private drawEraserSmudge(g: Phaser.GameObjects.Graphics): void {
-    for (let d = STAGE * 2; d < STAGE * 3; d += 46) {
-      const fade = 1 - (d - STAGE * 2) / STAGE;
-      g.fillStyle(INK, 0.05 * fade + 0.015);
-      g.fillEllipse(xAt(d), HOBBIES_FLOOR_Y + Math.sin(d) * 2, 70, 10 + (d % 3) * 3);
-    }
     g.fillStyle(INK, 0.2);
-    for (let d = STAGE * 2 + 30; d < STAGE * 3; d += 97) {
+    for (let d = from + 200; d < OUT_OF_BOUNDS_VOID_LENGTH; d += 173) {
       g.fillCircle(xAt(d), HOBBIES_FLOOR_Y + 8 + (d % 5), 1.5);
       g.fillCircle(xAt(d + 12), HOBBIES_FLOOR_Y + 12 + (d % 3), 1);
     }
@@ -201,6 +176,7 @@ export class HobbiesVoid {
 
   private drawSight(g: Phaser.GameObjects.Graphics, id: OutOfBoundsSightId, x: number): void {
     const draw: Record<OutOfBoundsSightId, (graphics: Phaser.GameObjects.Graphics, at: number) => void> = {
+      'stray-mark': (graphics, at) => this.drawStrayMark(graphics, at),
       'todo-scribble': (graphics, at) => this.drawTodoScribble(graphics, at),
       'ruler-line': (graphics, at) => this.drawRulerLine(graphics, at),
       'coffee-ring': (graphics, at) => this.drawCoffeeRing(graphics, at),
@@ -209,18 +185,29 @@ export class HobbiesVoid {
     draw[id](g, x);
   }
 
+  /** The first hint it isn't a bug: one stray pencil tick and a tiny test squiggle. */
+  private drawStrayMark(g: Phaser.GameObjects.Graphics, x: number): void {
+    g.lineStyle(1.5, INK, 0.35);
+    g.lineBetween(x - 6, HOBBIES_FLOOR_Y - 14, x + 4, HOBBIES_FLOOR_Y + 4);
+    g.lineStyle(1, INK, 0.25);
+    g.beginPath();
+    g.moveTo(x + 14, 300);
+    for (let i = 1; i <= 6; i += 1) g.lineTo(x + 14 + i * 6, 300 + (i % 2 === 0 ? -5 : 5));
+    g.strokePath();
+  }
+
   private drawTodoScribble(g: Phaser.GameObjects.Graphics, x: number): void {
-    createUiText(this.scene, x, 210, 'TODO: draw wall', { fontSize: '18px', color: '#1a1a1a' })
+    createUiText(this.scene, x, 210, 'TODO: fix left wall collision', { fontSize: '18px', color: '#1a1a1a' })
       .setOrigin(0.5)
       .setRotation(-0.12)
       .setAlpha(0.75)
       .setDepth(1);
     g.lineStyle(1.5, INK, 0.5);
-    g.lineBetween(x - 62, 228, x + 58, 222);
-    // Arrow pointing back at the missing wall.
-    g.lineBetween(x + 66, 214, x + 110, 230);
-    g.lineBetween(x + 110, 230, x + 98, 222);
-    g.lineBetween(x + 110, 230, x + 100, 236);
+    g.lineBetween(x - 118, 236, x + 112, 222);
+    // Arrow pointing back toward the room's wall.
+    g.lineBetween(x + 122, 214, x + 166, 230);
+    g.lineBetween(x + 166, 230, x + 154, 222);
+    g.lineBetween(x + 166, 230, x + 156, 236);
   }
 
   private drawRulerLine(g: Phaser.GameObjects.Graphics, x: number): void {

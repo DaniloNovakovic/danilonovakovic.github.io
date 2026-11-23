@@ -1,5 +1,5 @@
 import type { CircuitPartHobbyId } from './circuitParts';
-import { OUT_OF_BOUNDS_WORLD_LEFT_X } from './outOfBoundsVoid';
+import { HOBBIES_LEFT_WALL_X, OUT_OF_BOUNDS_WORLD_LEFT_X } from './outOfBoundsVoid';
 
 export type HobbyStationId = 'art' | CircuitPartHobbyId;
 
@@ -11,8 +11,10 @@ export const HOBBIES_RIGHT_WALL_X = 950;
 const HOBBIES_PLAYER_HALF_WIDTH = 24;
 /** Furthest right the player's centre can go: flush against the right wall. */
 export const HOBBIES_PLAYER_MAX_X = HOBBIES_RIGHT_WALL_X - HOBBIES_PLAYER_HALF_WIDTH;
+/** Where the drawn left wall stops the player's centre, before the clip-through glitch. */
+export const HOBBIES_PLAYER_LEFT_WALL_STOP_X = HOBBIES_LEFT_WALL_X + HOBBIES_PLAYER_HALF_WIDTH;
 /**
- * Furthest left the player walks. There is no left wall: past the drawn room
+ * Furthest left the player walks. Past the drawn left wall (once glitched through)
  * lies the Out of Bounds void, ending at the pedestal (see outOfBoundsVoid.ts).
  */
 export const HOBBIES_PLAYER_MIN_X = OUT_OF_BOUNDS_WORLD_LEFT_X + HOBBIES_PLAYER_HALF_WIDTH;
