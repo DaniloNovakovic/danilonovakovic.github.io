@@ -4,7 +4,11 @@ import { drawOverworldBuildingArt, drawPixelOverworldBuildingArt } from './build
 
 export class TextureGenerator {
   /**
-   * Generates `player_idle` / `player_glasses` textures.
+   * Generates `player_idle` / `player_glasses` textures, plus a four-frame
+   * walk cycle for each (`<key>_walk0..3`: stride leaning one way, pass with a
+   * hop, stride leaning the other way, pass). SideViewPlayerRuntime swaps them
+   * on the sketch clock. The waddle is drawn into the frames rather than
+   * rotating the sprite live, which would resample the ink every frame.
    *
    * `scaleFactor` rasterizes the same drawing larger so scenes that present
    * the player bigger (e.g. the Bridge Walk Rail) can stay crisp; pass a
@@ -13,56 +17,14 @@ export class TextureGenerator {
   static generatePlayer(scene: Phaser.Scene, scaleFactor = 1, keySuffix = '') {
     const k = scaleFactor;
     const pg = scene.make.graphics({ x: 0, y: 0 });
-    const pFill = 0xfbfbf9;
-    const pLine = 0x1a1a1a;
-
-    // Shadow
-    pg.fillStyle(0x000000, 0.1);
-    pg.fillEllipse(24 * k, 60 * k, 20 * k, 6 * k);
-
-    pg.fillStyle(pFill, 1);
-    pg.lineStyle(3 * k, pLine, 1);
-
-    // Legs
-    pg.beginPath();
-    pg.moveTo(18 * k, 45 * k);
-    pg.lineTo(18 * k, 60 * k);
-    pg.moveTo(30 * k, 45 * k);
-    pg.lineTo(30 * k, 60 * k);
-    pg.strokePath();
-
-    // Backpack
-    pg.fillRect(8 * k, 28 * k, 8 * k, 16 * k);
-    pg.strokeRect(8 * k, 28 * k, 8 * k, 16 * k);
-
-    // Body (Hoodie)
-    pg.fillRect(14 * k, 24 * k, 20 * k, 22 * k);
-    pg.strokeRect(14 * k, 24 * k, 20 * k, 22 * k);
-
-    // Head
-    pg.fillCircle(24 * k, 16 * k, 12 * k);
-    pg.strokeCircle(24 * k, 16 * k, 12 * k);
-
-    // Eyes (facing right)
-    pg.fillStyle(pLine, 1);
-    pg.fillCircle(26 * k, 14 * k, 2 * k);
-    pg.fillCircle(32 * k, 14 * k, 2 * k);
-
-    pg.generateTexture(`player_idle${keySuffix}`, 48 * k, 65 * k);
-
-    // Glasses variant
-    pg.lineStyle(2 * k, pLine, 1);
-    pg.strokeCircle(26 * k, 14 * k, 4 * k);
-    pg.strokeCircle(32 * k, 14 * k, 4 * k);
-    pg.beginPath();
-    pg.moveTo(28 * k, 14 * k);
-    pg.lineTo(30 * k, 14 * k);
-    pg.strokePath();
-    pg.beginPath();
-    pg.moveTo(22 * k, 13 * k);
-    pg.lineTo(18 * k, 12 * k);
-    pg.strokePath();
-    pg.generateTexture(`player_glasses${keySuffix}`, 48 * k, 65 * k);
+    for (const [suffix, pose] of PLAYER_POSES) {
+      pg.clear();
+      drawPlayer(pg, k, pose, false);
+      pg.generateTexture(`player_idle${keySuffix}${suffix}`, 48 * k, 65 * k);
+      pg.clear();
+      drawPlayer(pg, k, pose, true);
+      pg.generateTexture(`player_glasses${keySuffix}${suffix}`, 48 * k, 65 * k);
+    }
     pg.destroy();
   }
 
@@ -289,4 +251,129 @@ export class TextureGenerator {
     scene.load.svg('enemy_scope_creeper', toBase64(CREEPER_SVG));
     scene.load.svg('enemy_bug', toBase64(BUG_SVG));
   }
+}
+
+/** One leg, relative to its hip: where the foot lands and how far the knee bends. */
+interface LegPose {
+  /** Foot x from the hip; + is the way he faces. */
+  foot: number;
+  /** Px the foot lifts off the ground. */
+  lift: number;
+  /** Knee x from the hip-to-foot midpoint; + bends it forward. */
+  knee: number;
+}
+
+interface PlayerPose {
+  /** Body lean in degrees, pivoting at the feet; + leans the way he faces. */
+  lean: number;
+  /** Px the body lifts off the ground. */
+  hop: number;
+  back: LegPose;
+  front: LegPose;
+  /** Ground shadow; dropped in the air, where it would float under him. */
+  shadow: boolean;
+}
+
+const leg = (foot: number, lift = 0, knee = 0): LegPose => ({ foot, lift, knee });
+
+const IDLE_POSE: PlayerPose = { lean: 0, hop: 0, back: leg(0), front: leg(0), shadow: true };
+/**
+ * Walk: the feet swap on every contact and the swinging foot lifts on the pass,
+ * so the legs read as stepping; the body rocks onto each step for the waddle.
+ */
+const WALK_POSES: readonly PlayerPose[] = [
+  { lean: -3, hop: 0, back: leg(-5), front: leg(5), shadow: true },
+  { lean: 0, hop: 2, back: leg(1, 4, 3), front: leg(0), shadow: true },
+  { lean: 3, hop: 0, back: leg(5), front: leg(-5), shadow: true },
+  { lean: 0, hop: 2, back: leg(0), front: leg(1, 4, 3), shadow: true }
+];
+/**
+ * Run: leaning into it, longer strides, and a flight frame between steps with
+ * one knee driving forward and the trailing foot kicked up behind.
+ */
+const RUN_POSES: readonly PlayerPose[] = [
+  { lean: 7, hop: 0, back: leg(-9, 1, -1), front: leg(8, 0, 1), shadow: true },
+  { lean: 8, hop: 2, back: leg(4, 7, 7), front: leg(-7, 6, -3), shadow: true },
+  { lean: 7, hop: 0, back: leg(8, 0, 1), front: leg(-9, 1, -1), shadow: true },
+  { lean: 8, hop: 2, back: leg(-7, 6, -3), front: leg(4, 7, 7), shadow: true }
+];
+/** Jumping or falling: knees tucked, no ground shadow. */
+const AIR_POSE: PlayerPose = { lean: 3, hop: 0, back: leg(-4, 5, -2), front: leg(5, 7, 7), shadow: false };
+
+const PLAYER_POSES: readonly [string, PlayerPose][] = [
+  ['', IDLE_POSE],
+  ...WALK_POSES.map((pose, i): [string, PlayerPose] => [`_walk${i}`, pose]),
+  ...RUN_POSES.map((pose, i): [string, PlayerPose] => [`_run${i}`, pose]),
+  ['_air', AIR_POSE]
+];
+
+const HIP_Y = 45;
+const GROUND_Y = 60;
+
+/** Hip to knee to foot, so a bent leg reads as a knee rather than a stick. */
+function drawLeg(pg: Phaser.GameObjects.Graphics, k: number, hipX: number, pose: LegPose): void {
+  const footX = hipX + pose.foot;
+  const footY = GROUND_Y - pose.lift;
+  const kneeX = (hipX + footX) / 2 + pose.knee;
+  const kneeY = (HIP_Y + footY) / 2;
+  pg.beginPath();
+  pg.moveTo(hipX * k, HIP_Y * k);
+  pg.lineTo(kneeX * k, kneeY * k);
+  pg.lineTo(footX * k, footY * k);
+  pg.strokePath();
+}
+
+/** The side-view player doodle in `pose`, drawn once per frame texture and never rotated live. */
+function drawPlayer(pg: Phaser.GameObjects.Graphics, k: number, pose: PlayerPose, glasses: boolean): void {
+  const pFill = 0xfbfbf9;
+  const pLine = 0x1a1a1a;
+
+  if (pose.shadow) {
+    pg.fillStyle(0x000000, 0.1);
+    pg.fillEllipse(24 * k, GROUND_Y * k, 20 * k, 6 * k);
+  }
+
+  pg.save();
+  // Lean around the feet, then lift.
+  pg.translateCanvas(24 * k, GROUND_Y * k);
+  pg.rotateCanvas((pose.lean * Math.PI) / 180);
+  pg.translateCanvas(-24 * k, (-GROUND_Y - pose.hop) * k);
+
+  pg.fillStyle(pFill, 1);
+  pg.lineStyle(3 * k, pLine, 1);
+
+  drawLeg(pg, k, 18, pose.back);
+  drawLeg(pg, k, 30, pose.front);
+
+  // Backpack
+  pg.fillRect(8 * k, 28 * k, 8 * k, 16 * k);
+  pg.strokeRect(8 * k, 28 * k, 8 * k, 16 * k);
+
+  // Body (Hoodie)
+  pg.fillRect(14 * k, 24 * k, 20 * k, 22 * k);
+  pg.strokeRect(14 * k, 24 * k, 20 * k, 22 * k);
+
+  // Head
+  pg.fillCircle(24 * k, 16 * k, 12 * k);
+  pg.strokeCircle(24 * k, 16 * k, 12 * k);
+
+  // Eyes (facing right)
+  pg.fillStyle(pLine, 1);
+  pg.fillCircle(26 * k, 14 * k, 2 * k);
+  pg.fillCircle(32 * k, 14 * k, 2 * k);
+
+  if (glasses) {
+    pg.lineStyle(2 * k, pLine, 1);
+    pg.strokeCircle(26 * k, 14 * k, 4 * k);
+    pg.strokeCircle(32 * k, 14 * k, 4 * k);
+    pg.beginPath();
+    pg.moveTo(28 * k, 14 * k);
+    pg.lineTo(30 * k, 14 * k);
+    pg.strokePath();
+    pg.beginPath();
+    pg.moveTo(22 * k, 13 * k);
+    pg.lineTo(18 * k, 12 * k);
+    pg.strokePath();
+  }
+  pg.restore();
 }

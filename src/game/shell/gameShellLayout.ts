@@ -8,12 +8,19 @@ const MOBILE_PORTRAIT_MAX_WIDTH = '450px';
 const VERTICAL_BOARD_MAX_WIDTH = '560px';
 const VERTICAL_BOARD_ASPECT_RATIO = '3 / 4';
 const FULL_BOARD_MAX_WIDTH = `${PHASER_DESIGN_WIDTH}px`;
-const DESKTOP_MAX_GAME_HEIGHT = `${PHASER_DESIGN_HEIGHT}px`;
+/**
+ * The card frame's 4px border plus Game's framed 4px border, on both sides.
+ * The desktop card budgets it so the canvas shows at exactly its design size:
+ * at any other size the browser resamples the canvas, and moving line art
+ * (the walking player) shimmers and reads as blurry.
+ */
+const GAME_FRAME_CHROME_PX = 16;
+const DESKTOP_MAX_GAME_HEIGHT = `${PHASER_DESIGN_HEIGHT + GAME_FRAME_CHROME_PX}px`;
 const VERTICAL_BOARD_DESKTOP_MAX_HEIGHT = '680px';
 const DESKTOP_VIEWPORT_HEIGHT_LIMIT = '88dvh';
 /** Wide shells drop the 600px card cap and grow with the screen up to this. */
 const WIDE_MAX_GAME_HEIGHT = '960px';
-const CARD_MAX_CONTENT_WIDTH = `${PHASER_DESIGN_WIDTH}px`;
+const CARD_MAX_CONTENT_WIDTH = `${PHASER_DESIGN_WIDTH + GAME_FRAME_CHROME_PX}px`;
 const WIDE_MAX_CONTENT_WIDTH = '1600px';
 const DESIGN_ASPECT_RATIO = `${PHASER_DESIGN_WIDTH} / ${PHASER_DESIGN_HEIGHT}`;
 const DESIGN_WIDTH_PER_HEIGHT = '1.666667';

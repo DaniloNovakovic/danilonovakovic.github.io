@@ -200,7 +200,83 @@ describe('SideViewPlayerRuntime', () => {
     }
     expect(sprite.setVelocityX).toHaveBeenCalledWith(300);
     expect(sprite.setFlipX).toHaveBeenCalledWith(false);
-    expect(sprite.setAngle).toHaveBeenCalledWith(Math.sin(1) * 5);
+  });
+
+  it('walks through drawn stride frames on the sketch clock and never tilts the sprite', () => {
+    // A texture re-rotated by a new angle every frame smears its ink lines while walking,
+    // so the waddle and leg stride are drawn into the frames instead.
+    const { scene, sprite, cursors } = createScene();
+    let equipped = false;
+    const runtime = createSideViewPlayerRuntime({
+      scene,
+      start: { x: 10, y: 20 },
+      sprite: { gravityY: 1000 },
+      movement,
+      input: { allowJump: true, allowSprint: false },
+      appearance: {
+        isGlassesEquipped: () => equipped,
+        idleTextureKey: 'player_idle',
+        glassesTextureKey: 'player_glasses'
+      }
+    });
+    runtime.syncAppearance();
+    const poses: string[] = [];
+    const poseAt = (now: number) => {
+      scene.time.now = now;
+      runtime.update();
+      poses.push(String(vi.mocked(sprite.setTexture).mock.lastCall?.[0]));
+    };
+
+    cursors.right.isDown = true;
+    // One walk frame per 90ms sketch-clock tick, like Ridge's stick figures.
+    poseAt(0);
+    poseAt(100);
+    poseAt(190);
+    equipped = true;
+    runtime.syncAppearance();
+    poseAt(280);
+    poseAt(370);
+    cursors.right.isDown = false;
+    poseAt(370);
+
+    expect(poses).toEqual([
+      'player_idle_walk0',
+      'player_idle_walk1',
+      'player_idle_walk2',
+      'player_glasses_walk3',
+      'player_glasses_walk0',
+      'player_glasses'
+    ]);
+    expect(sprite.setAngle).not.toHaveBeenCalled();
+  });
+
+  it('runs through its own stride frames while sprinting and tucks its legs in the air', () => {
+    const { scene, sprite, cursors } = createScene();
+    const runtime = createSideViewPlayerRuntime({
+      scene,
+      start: { x: 10, y: 20 },
+      sprite: { gravityY: 1000 },
+      movement,
+      input: { allowJump: true, allowSprint: true }
+    });
+    const poseAt = (now: number) => {
+      scene.time.now = now;
+      runtime.update();
+      return String(vi.mocked(sprite.setTexture).mock.lastCall?.[0]);
+    };
+
+    cursors.right.isDown = true;
+    cursors.shift.isDown = true;
+    expect([poseAt(0), poseAt(90)]).toEqual(['player_idle_run0', 'player_idle_run1']);
+
+    sprite.body.touching.down = false;
+    expect(poseAt(180)).toBe('player_idle_air');
+    cursors.right.isDown = false;
+    cursors.shift.isDown = false;
+    expect(poseAt(270)).toBe('player_idle_air');
+
+    sprite.body.touching.down = true;
+    expect(poseAt(360)).toBe('player_idle');
   });
 
   it('pauses controller, keyboard, and physics while zeroing velocity', () => {

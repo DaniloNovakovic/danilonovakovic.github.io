@@ -12,6 +12,7 @@ import type { SceneInputKeys } from '../input/readSceneInputCommands';
 import { readPlayerSceneStep } from '../input/scenePlayerInput';
 import { setSceneKeyboardPaused } from '../sceneKeyboardPause';
 import { TextureGenerator } from '../textures/TextureGenerator';
+import { prefersReducedMotion, sketchTick } from '../motion/sketchMotion';
 import {
   createSideViewCameraRuntime,
   type SideViewCameraDesignSize,
@@ -79,8 +80,23 @@ export interface SideViewPlayerRuntime {
 }
 
 const DEFAULT_TEXTURE_KEY = 'player_idle';
-const WALK_BOB_PERIOD_MS = 100;
-const WALK_BOB_ANGLE_DEGREES = 5;
+/**
+ * Stride cycles drawn by TextureGenerator (`<base>_walk0..3`, `<base>_run0..3`):
+ * contact, pass, other foot's contact, pass. One frame per sketch-clock tick
+ * (~90ms), the same stepped cadence as Ridge's stick figures.
+ */
+const STRIDE_FRAME_COUNT = 4;
+
+/**
+ * Deep links (?startScene=hobbies) can start a room before the street ever
+ * generated the player textures.
+ */
+function ensurePlayerTexture(scene: Phaser.Scene, textureKey = DEFAULT_TEXTURE_KEY): string {
+  if (textureKey === DEFAULT_TEXTURE_KEY && !scene.textures.exists(DEFAULT_TEXTURE_KEY)) {
+    TextureGenerator.generatePlayer(scene);
+  }
+  return textureKey;
+}
 
 function resolveStartPosition(options: SideViewPlayerRuntimeOptions): ResumeSnapshot {
   const raw = options.resumePosition ?? options.start;
@@ -101,19 +117,22 @@ class PhaserSideViewPlayerRuntime implements SideViewPlayerRuntime {
   private readonly inputKeys: SceneInputKeys;
   private isPaused = false;
   private hasGlassesSprite: boolean | null = null;
+  /** Idle or glasses texture, before the walk pose. */
+  private baseTextureKey: string;
+  private appliedTextureKey: string;
+  /** Pose suffix on top of the base texture (`_walk2`, `_run0`, `_air`), or '' when standing. */
+  private poseSuffix = '';
+  private readonly motion = !prefersReducedMotion();
 
   constructor(options: SideViewPlayerRuntimeOptions) {
     this.options = options;
     const { scene } = options;
     const start = resolveStartPosition(options);
-    const textureKey = options.sprite?.textureKey ?? DEFAULT_TEXTURE_KEY;
-    // Deep links (?startScene=hobbies) can start a room before the street ever
-    // generated the player textures.
-    if (textureKey === DEFAULT_TEXTURE_KEY && !scene.textures.exists(DEFAULT_TEXTURE_KEY)) {
-      TextureGenerator.generatePlayer(scene);
-    }
+    const textureKey = ensurePlayerTexture(scene, options.sprite?.textureKey);
 
     this.player = scene.physics.add.sprite(start.x, start.y, textureKey);
+    this.baseTextureKey = textureKey;
+    this.appliedTextureKey = textureKey;
     if (options.sprite?.depth !== undefined) {
       this.player.setDepth(options.sprite.depth);
     }
@@ -160,9 +179,10 @@ class PhaserSideViewPlayerRuntime implements SideViewPlayerRuntime {
     });
 
     this.player.setFlipX(step.facingLeft);
-    this.player.setAngle(
-      step.moving ? Math.sin(this.options.scene.time.now / WALK_BOB_PERIOD_MS) * WALK_BOB_ANGLE_DEGREES : 0
-    );
+    // Walk through drawn frames, never a live tilt: rotating the texture by a
+    // new angle every frame smears its ink lines and disables pixel rounding.
+    this.poseSuffix = this.resolvePoseSuffix(step);
+    this.applyTexture();
 
     return { paused: false, commands, step };
   }
@@ -172,9 +192,28 @@ class PhaserSideViewPlayerRuntime implements SideViewPlayerRuntime {
     const hasGlasses = this.options.appearance.isGlassesEquipped();
     if (hasGlasses === this.hasGlassesSprite) return;
     this.hasGlassesSprite = hasGlasses;
-    this.player.setTexture(
-      hasGlasses ? this.options.appearance.glassesTextureKey : this.options.appearance.idleTextureKey
-    );
+    this.baseTextureKey = hasGlasses
+      ? this.options.appearance.glassesTextureKey
+      : this.options.appearance.idleTextureKey;
+    this.applyTexture(true);
+  }
+
+  private resolvePoseSuffix(step: PlayerStepResult): string {
+    const body = this.player.body;
+    const grounded = body.touching.down || body.blocked?.down === true;
+    if (!grounded) return '_air';
+    if (!this.motion || !step.moving) return '';
+    const running = Math.abs(step.velocityX) > this.options.movement.walkSpeed + 1;
+    const frame = sketchTick(this.options.scene.time.now) % STRIDE_FRAME_COUNT;
+    return `${running ? '_run' : '_walk'}${frame}`;
+  }
+
+  private applyTexture(force = false): void {
+    const poseKey = this.poseSuffix ? `${this.baseTextureKey}${this.poseSuffix}` : null;
+    const key = poseKey && this.options.scene.textures.exists(poseKey) ? poseKey : this.baseTextureKey;
+    if (key === this.appliedTextureKey && !force) return;
+    this.appliedTextureKey = key;
+    this.player.setTexture(key);
   }
 }
 
