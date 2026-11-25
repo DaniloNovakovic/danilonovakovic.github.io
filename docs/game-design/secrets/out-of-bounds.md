@@ -9,9 +9,11 @@
 Players usually walk right, so the secret is to the left. If you keep walking
 left in the Hobbies room you leave the drawn room and walk into the blank,
 unfinished edge of the sketchbook. Something is waiting out there. You pick it
-up, and the portfolio starts to come apart: bugs crawl over the screen, you
-smash them, the _screen itself_ cracks, and you break out of the game. On the
-other side it turns into a different game. You wake up unplugged aboard an
+up, an alarm goes off, and there's no way back. You come up through the
+basement onto the street, where the chick that always ran from you is waiting,
+and it's evil now. You fight with a hammer, pigeons dive at you, every smash
+cracks the _screen itself_, and you keep breaking it until nothing is left. On
+the other side it turns into a different game. You wake up unplugged aboard an
 alien ship, sneak, arm up, take the ship, fly it home in an arcade shooter, and
 land in a quiet closing scene: playing guitar with Cicka and your wife.
 _Thank you for playing._ That is the **true ending**.
@@ -57,43 +59,59 @@ follows you out. Outside is blank paper, and the walk is long (about 20 seconds)
 There are only a few marks, far apart: "TODO: fix left wall collision" in the
 margin, a coffee ring, a placeholder labelled `ROOM_END`. Danilo says very little, three short thoughts across the whole walk: "...did I
 just walk through the wall?" just outside, "...this wasn't finished." near the
-first mark, and "Wait. There's something up ahead." before the pedestal. The only sound is a sparse pencil scratch per few steps.
+first mark, and "Wait. There's something up ahead." before the end. The only sound is a sparse pencil scratch per few steps.
 
-**Payoff:** a glowing pedestal made from a sketchbook spine, with an empty dashed slot on
-top. The toolbox that fills it arrives in Act 2 (#148); Act 1 (#147) ships the empty pedestal.
+**Payoff:** something glowing faintly on the floor at the very end of the page.
 
 ### Act 2 — The Debugging Tools
 
-The artifact is a **Debugging Tools** kit: a beat-up developer's toolbox sitting
-where the room should end. The first tool inside is a **hammer**. The rest of
-the kit unlocks over Act 3, and each tool is a different creative way to wreck
-the screen in the spirit of a desktop-destruction toy (ideas to settle: a
-stapler that pins bugs, a highlighter that burns lines, a rubber-band
-slingshot, a find-and-replace that swaps chunks of the page, a `rm -rf`
-eraser).
+The artifact is a **Debugging Tools** kit: a beat-up developer's toolbox lying
+on the floor where the room should end. The first tool inside is a **hammer**.
+More tools may come in the screen-destroyer phase (Act 3).
 
 The kit goes in the Backpack as a **hidden slot**. It does _not_ count toward the
 `START` sign's `Secrets found: n/6` tally, so nothing gives the secret away.
-**Cliffhanger for this slice:** you swing the hammer once in the void, a hairline
-crack appears _across the browser viewport_ (not the game canvas), then fades.
-"...huh."
+As built (#148): the toolbox lies on the floor in a pulsing glow. Press `E` and
+it lifts toward Danilo, a latch clacks, and he thinks "...debugging tools?
+There's a hammer in here." Only a dusty footprint is left. The Backpack lists
+the kit under "Off the page", outside the tally, and owning only the kit is
+enough to show the Backpack button. Like every item today, it lasts for the
+session.
 
-### Act 3 — Screen Breaker
+**Point of no return (#149).** Before the pickup, a clear video-game style
+warning asks whether to go on. Confirming is a choice: from here **the
+simulation is broken** and you are escaping it.
 
-With the Debugging Tools equipped, back on the street or in any room, **bugs** start
-showing up: small ink beetles and glitch sprites that crawl over the whole page,
-on top of the canvas _and_ the React portfolio chrome. Click or tap to smack
-them, switching between the kit's tools as they unlock. Every hit leaves damage on the "screen" (cracks, ink splats, pixels
-knocked loose, a corner of the header peeling away). As damage builds, the
-portfolio itself gives way. Building labels slide, the header text falls over.
+**Cliffhanger (#149):** the pickup becomes a short cinematic (input locked,
+the camera zooms in on Danilo and the toolbox, then back out). Then an
+**alert** goes off. The way back right is shut, and the only way is to keep
+walking **left**.
 
-**Payoff:** at enough damage, the glass shatters inward and you fall through the
-hole. This is the fourth-wall moment. Treat it like a boss fight against the
-website.
+### Act 3 — Breakout
 
-_Implementation note:_ this is an app-shell React overlay layer above the Phaser
-canvas and portfolio UI. It is not a Phaser scene. It must pause cleanly, honor
-`prefers-reduced-motion`, and avoid strobe/flash patterns.
+Danilo's vision (2026-11-25), one continuous sequence:
+
+1. **Through the basement.** Further left the void runs into the side of the
+   real **Developer Basement**. A new **staircase** there climbs up and out onto
+   the street.
+2. **The evil chick.** Outside, the chick that always ran away from you has
+   turned **evil** and confronts you. The first hammer swing is on it.
+3. **Pigeons.** More enemies dive in **from the sky**. Smashing them damages
+   **the screen itself**: cracks across the whole browser viewport, over the
+   game _and_ the portfolio chrome.
+4. **Screen destroyer.** The player keeps wrecking the screen, freely, layer
+   after layer: the header peels, building labels slide, the drawn street
+   falls away, even Danilo's own drawing can vanish, as the illusion of the
+   screen comes apart. New enemies keep coming in from the screen edges. It
+   is inspired by desktop-destruction toys, never a copy.
+
+**Payoff:** once everything is destroyed, the page falls into black and the
+game becomes the first-person 3D alien ship (Act 4).
+
+_Implementation note:_ the screen damage is an app-shell layer above the
+Phaser canvas and portfolio UI (Architect check first). It must never block
+the way out, must honor `prefers-reduced-motion`, and must avoid strobe/flash
+patterns.
 
 ### Act 4 — Unplugged
 
@@ -118,7 +136,7 @@ bridge.
 
 You sit in the pilot seat and the game turns into a **vertical arcade shooter**
 home to Earth: waves of enemies, power-ups, one boss. For enemies, reuse our
-own cast: Act 3's ink bugs, alien drones, maybe a callback to the doodle chicks
+own cast: Act 3's evil chick and pigeons, alien drones, maybe a callback to the doodle chicks
 from Chick Magnet. _Don't_ recreate another game's enemies, waves or look.
 
 ### Act 8 — Homecoming (True Ending)
@@ -177,16 +195,22 @@ These are moods and mechanics. Don't recreate their content.
   **subconscious lore secrets** reached through the computer. Not part of the
   first build.
 - **The artifact is the Debugging Tools kit.** It starts with a hammer, more
-  destruction tools come later, and it sits in a hidden Backpack slot outside
-  the `n/6` tally.
+  destruction tools may come later, and it sits in a hidden Backpack slot
+  outside the `n/6` tally. It lies on the floor at the end of the void.
+- **Picking it up is the point of no return.** A warning asks first. After
+  confirming, the simulation is broken and the escape is the game's state;
+  the header Back button, static mode and `Esc` still leave the page.
+- **Acts 2–3 are one sequence** (2026-11-25): alert, basement, staircase, evil
+  chick, pigeons, screen destroyer, then the 3D ship. This replaced the
+  earlier "ink bugs crawl over the page" idea.
 - **Build it in chunks.** Planning and work items live in GitHub. Open
   decisions go on a wayfinder map, build slices become issues, one milestone
   at a time.
 
 ## Open Questions
 
-1. **The Debugging Tools kit.** Which tools beyond the hammer, how each one
-   wrecks the screen, and when each unlocks.
+1. **The Debugging Tools kit.** Whether the screen-destroyer phase adds tools
+   beyond the hammer, and what each one does.
 2. **Scope ceiling.** Eight acts is a lot. Which acts could merge (5+6, for
    example) without losing the escalation?
 3. **Street left side.** A hint only, a second entrance, or a shortcut back?
@@ -199,18 +223,18 @@ These are moods and mechanics. Don't recreate their content.
 Each milestone ships on its own and ends on a cliffhanger. Turn each one into
 GitHub issues (vertical slices) when it's ready to build.
 
-| #       | Milestone         | Ships                                                                                                  | Cliffhanger                        |
-| ------- | ----------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------- |
-| **OB0** | Paper pass        | Answer the open questions above. Throwaway prototypes: pseudo-3D look, screen-crack overlay.           | —                                  |
-| **OB1** | Walk Off the Page | Hobbies left void (Act 1), right-edge bug fixed, Debugging Tools pickup + hidden Backpack slot (Act 2) | One crack across the real viewport |
-| **OB2** | Street hint       | Negative-x space left of the `START` sign, first hint                                                  | "The edges aren't finished"        |
-| **OB3** | Screen Breaker    | App-shell bug/damage layer, portfolio chrome falling apart, shatter transition (Act 3)                 | Falling into black                 |
-| **OB4** | Unplugged & Sneak | Wake-up + pencil-wireframe ship + stealth section (Acts 4–5)                                           | Weapon spotted behind glass        |
-| **OB5** | Armed             | Weapon + corridor fight to the bridge (Act 6)                                                          | Sitting in the pilot seat          |
-| **OB6** | Flight Home       | Vertical shooter + boss (Act 7)                                                                        | Earth in view                      |
-| **OB7** | Homecoming        | Ending scene, credits, true-ending flag (Act 8)                                                        | — the end                          |
+| #       | Milestone         | Ships                                                                                                                   | Cliffhanger                 |
+| ------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| **OB0** | Paper pass        | Answer the open questions above. Throwaway prototypes: pseudo-3D look, screen-destroyer feel.                           | —                           |
+| **OB1** | Walk Off the Page | Hobbies left void (Act 1), right-edge bug fixed, Debugging Tools pickup + hidden Backpack slot, point of no return      | Alert; the way back is shut |
+| **OB2** | Breakout          | Basement staircase to the street, evil chick + pigeons with the hammer, screen cracks, layered screen destroyer (Act 3) | Falling into black          |
+| **OB3** | Unplugged & Sneak | Wake-up + pencil-wireframe ship + stealth section (Acts 4–5)                                                            | Weapon spotted behind glass |
+| **OB4** | Armed             | Weapon + corridor fight to the bridge (Act 6)                                                                           | Sitting in the pilot seat   |
+| **OB5** | Flight Home       | Vertical shooter + boss (Act 7)                                                                                         | Earth in view               |
+| **OB6** | Homecoming        | Ending scene, credits, true-ending flag (Act 8)                                                                         | — the end                   |
+| —       | Street hint       | Negative-x space left of the `START` sign, first hint                                                                   | "The edges aren't finished" |
 
-OB2 is independent and can ship any time after OB1. Everything else is in order.
+The street hint is independent and can ship any time after OB1. Everything else is in order.
 
 **Later, not scheduled:** the computer cheat (`getmeout`) that gates the walk
 out, plus the wider subconscious lore secrets on the basement computer.

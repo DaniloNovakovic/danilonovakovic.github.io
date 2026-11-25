@@ -90,13 +90,29 @@ function Circuit() {
   );
 }
 
+/** A beat-up toolbox with a hammer handle poking out of the lid. */
+function DebuggingTools() {
+  return (
+    <>
+      <path d="M30 17 37 6" />
+      <path d="M33.5 5.5 40.5 9.5" strokeWidth={4} />
+      <path d="M18 17v-4h12v4" strokeWidth={2.4} />
+      <path d="M7 19h34l-1.5 20h-31z" fill={PAPER} />
+      <path d="M7 25h34" strokeWidth={2} />
+      <rect x="21" y="23" width="6" height="5" rx="1" fill={PAPER} strokeWidth={2} />
+      <path d="M12 31l3 1M33 34l3-2" strokeWidth={1.4} />
+    </>
+  );
+}
+
 const SLOT_DOODLES: Record<BackpackSlotId, () => ReactNode> = {
   glasses: Glasses,
   'litter-clue': PawPrint,
   'copper-string': CopperString,
   'clock-crystal': ClockCrystal,
   'battery-cell': BatteryCell,
-  circuit: Circuit
+  circuit: Circuit,
+  'debugging-tools': DebuggingTools
 };
 
 export function SlotDoodle({ slotId, ...props }: SVGProps<SVGSVGElement> & { slotId: BackpackSlotId }) {

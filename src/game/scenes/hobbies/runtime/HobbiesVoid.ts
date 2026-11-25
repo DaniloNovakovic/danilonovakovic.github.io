@@ -1,14 +1,16 @@
 /**
  * HobbiesVoid — Out of Bounds, Act 1: the unfinished page past the Hobbies
  * room's left wall. Mostly blank paper so it reads as a collision bug, with a
- * few far-apart marks and the empty sketchbook-spine pedestal; Danilo's
- * thoughts and sparse pencil-scratch steps carry the walk.
+ * few far-apart marks, and at the very end the Debugging Tools lying on the
+ * floor in a faint glow (Act 2). Danilo's thoughts and sparse pencil-scratch
+ * steps carry the walk. Once picked up, only a dusty footprint is left.
  * Geometry and copy come from src/game/core/console/content/outOfBoundsVoid.ts.
  */
 import * as Phaser from 'phaser';
 import {
+  DEBUGGING_TOOLS_PICKUP_THOUGHT,
   HOBBIES_LEFT_WALL_X,
-  OUT_OF_BOUNDS_PEDESTAL_X,
+  OUT_OF_BOUNDS_TOOLBOX_X,
   OUT_OF_BOUNDS_SIGHTS,
   OUT_OF_BOUNDS_VOID_LENGTH,
   outOfBoundsDepth,
@@ -29,9 +31,23 @@ const THOUGHT_FADE_MS = 400;
 /** Px walked between pencil-scratch steps; grows sparser with depth. */
 const SCRATCH_STRIDE_MIN = 120;
 const SCRATCH_STRIDE_MAX = 320;
+const TOOLBOX_WIDTH = 70;
+/** Pencil dust around the toolbox's footprint: [dx, dy, radius] from its floor centre. */
+const DUST_SPECKS: readonly (readonly [number, number, number])[] = [
+  [-48, -3, 1.6],
+  [-41, -6, 1],
+  [44, -2, 1.4],
+  [52, -5, 1],
+  [-12, -12, 0.9],
+  [20, -11, 1.1]
+];
+const PICKUP_MS = 420;
+const PICKUP_CAPTION_MS = 2600;
 
 export interface HobbiesVoidFrame {
   playerX: number;
+  /** The Debugging Tools are in the Backpack, so the floor is bare. */
+  kitOwned: boolean;
   /** Player is on the floor and moving horizontally. */
   walking: boolean;
   time: number;
@@ -41,6 +57,10 @@ export interface HobbiesVoidFrame {
 export class HobbiesVoid {
   private readonly scene: Phaser.Scene;
   private readonly glow: Phaser.GameObjects.Graphics;
+  private readonly emptySpot: Phaser.GameObjects.Graphics;
+  private readonly kit: Phaser.GameObjects.Container;
+  /** True while the pickup tween carries the kit off the floor. */
+  private kitLeaving = false;
   private readonly thought: Phaser.GameObjects.Text;
   private readonly getAudioContext: () => AudioContext | null;
   /** The player sprite the thought bubble floats above. */
@@ -61,7 +81,9 @@ export class HobbiesVoid {
     const g = scene.add.graphics().setDepth(1);
     for (const sight of OUT_OF_BOUNDS_SIGHTS) this.drawSight(g, sight.id, xAt(sight.depth));
     this.glow = scene.add.graphics().setDepth(1);
-    this.drawPedestal(scene.add.graphics().setDepth(2));
+    this.drawFloorMark(scene.add.graphics().setDepth(2));
+    this.emptySpot = this.drawEmptySpot(scene.add.graphics().setDepth(2));
+    this.kit = this.createKit();
     this.thought = createUiText(scene, 0, 0, '', {
       fontSize: '15px',
       color: '#1a1a1a',
@@ -85,18 +107,49 @@ export class HobbiesVoid {
     if (this.thought.visible) this.thought.setPosition(this.speaker.x, this.speaker.y - 70);
   }
 
+  /**
+   * The pickup moment: the toolbox lifts off the floor toward Danilo and is
+   * gone, a latch clacks twice, and he says what's inside. Under reduced
+   * motion the kit just disappears.
+   */
+  pickUpKit(frame: Pick<HobbiesVoidFrame, 'time' | 'motion'>): void {
+    this.think(DEBUGGING_TOOLS_PICKUP_THOUGHT, frame);
+    this.showPickupCaption(frame.motion);
+    this.playLatch();
+    if (!frame.motion) {
+      this.kit.setVisible(false);
+      return;
+    }
+    this.kitLeaving = true;
+    this.scene.tweens.add({
+      targets: this.kit,
+      x: this.speaker.x,
+      y: this.speaker.y - 30,
+      scale: 0.2,
+      alpha: 0,
+      duration: PICKUP_MS,
+      ease: 'Quad.easeIn',
+      onComplete: () => {
+        this.kitLeaving = false;
+        this.kit.setVisible(false);
+      }
+    });
+  }
+
   update(frame: HobbiesVoidFrame): void {
+    if (!this.kitLeaving) this.kit.setVisible(!frame.kitOwned);
+    this.emptySpot.setVisible(frame.kitOwned && !this.kitLeaving);
     const depth = outOfBoundsDepth(frame.playerX);
     const reached = outOfBoundsThoughtsReached(this.furthestDepth, depth);
     this.furthestDepth = Math.max(this.furthestDepth, depth);
     const latest = reached[reached.length - 1];
     if (latest) this.think(latest, frame);
     this.updateThought(frame);
-    this.updateGlow(frame);
+    this.updateGlow(frame, !frame.kitOwned);
     this.updateScratch(frame, depth);
   }
 
-  private think(line: string, frame: HobbiesVoidFrame): void {
+  private think(line: string, frame: Pick<HobbiesVoidFrame, 'time'>): void {
     this.scene.tweens.killTweensOf(this.thought);
     this.thought.setText(line).setAlpha(1).setVisible(true);
     this.followSpeaker();
@@ -118,18 +171,22 @@ export class HobbiesVoid {
     });
   }
 
-  /** A slow stepped pulse around the pedestal; held still under reduced motion. */
-  private updateGlow(frame: HobbiesVoidFrame): void {
-    const step = frame.motion ? Math.floor(frame.time / 180) % 12 : 0;
+  /** A slow stepped pulse around the kit; held still under reduced motion, off once the kit is taken. */
+  private updateGlow(frame: HobbiesVoidFrame, lit: boolean): void {
+    const step = !lit ? -2 : frame.motion ? Math.floor(frame.time / 180) % 12 : 0;
     if (step === this.lastGlowStep) return;
     this.lastGlowStep = step;
+    if (!lit) {
+      this.glow.clear();
+      return;
+    }
     const pulse = frame.motion ? Math.abs(6 - step) / 6 : 0.5;
     const g = this.glow.clear();
-    const cx = OUT_OF_BOUNDS_PEDESTAL_X;
-    const cy = HOBBIES_FLOOR_Y - 90;
+    const cx = OUT_OF_BOUNDS_TOOLBOX_X;
+    const cy = HOBBIES_FLOOR_Y - 30;
     for (let ring = 0; ring < 4; ring += 1) {
       g.lineStyle(2, INK, (0.05 + pulse * 0.07) * (1 - ring * 0.2));
-      g.strokeEllipse(cx, cy, 120 + ring * 26 + pulse * 10, 200 + ring * 26 + pulse * 10);
+      g.strokeEllipse(cx, cy, 130 + ring * 26 + pulse * 10, 90 + ring * 20 + pulse * 8);
     }
   }
 
@@ -217,42 +274,99 @@ export class HobbiesVoid {
       .setDepth(1);
   }
 
-  /** A closed sketchbook stood on end, spine out, with an empty dashed slot on top. */
-  private drawPedestal(g: Phaser.GameObjects.Graphics): void {
-    const cx = OUT_OF_BOUNDS_PEDESTAL_X;
-    const w = 64;
-    const h = 130;
-    const left = cx - w / 2;
-    const top = HOBBIES_FLOOR_Y - h;
-    // Cover edge peeking out behind the spine, then the spine itself.
-    g.fillStyle(INK, 1);
-    g.fillRect(left + 6, top - 4, w, h + 4);
-    g.fillStyle(PAPER, 1);
-    g.fillRect(left, top, w, h);
-    g.lineStyle(3, INK, 1);
-    g.strokeRect(left, top, w, h);
-    // Cross-hatched spine cloth.
-    g.lineStyle(1, INK, 0.25);
-    for (let y = top + 8; y < top + h; y += 9) g.lineBetween(left + 4, y + 6, left + w - 4, y);
-    // Stitched binding down both spine edges.
-    g.lineStyle(1.5, INK, 0.8);
-    for (let y = top + 8; y < top + h - 6; y += 12) {
-      g.lineBetween(left + 9, y, left + 9, y + 6);
-      g.lineBetween(left + w - 9, y, left + w - 9, y + 6);
-    }
-    // Elastic band.
-    g.lineStyle(4, INK, 1);
-    g.lineBetween(cx + 14, top - 2, cx + 14, top + h);
-    // Floor shadow.
+  /** A short ink floor line, so the toolbox stands on something in the blank page. */
+  private drawFloorMark(g: Phaser.GameObjects.Graphics): void {
+    const cx = OUT_OF_BOUNDS_TOOLBOX_X;
     g.lineStyle(2, INK, 0.5);
-    g.lineBetween(left - 16, HOBBIES_FLOOR_Y, left + w + 20, HOBBIES_FLOOR_Y);
-    // Empty slot: a dashed outline where something should sit.
-    g.lineStyle(1.5, INK, 0.55);
-    const slotTop = top - 46;
-    for (let dx = 0; dx < 56; dx += 10) g.lineBetween(cx - 28 + dx, slotTop, cx - 22 + dx, slotTop);
-    for (let dy = 0; dy < 40; dy += 10) {
-      g.lineBetween(cx - 28, slotTop + dy, cx - 28, slotTop + dy + 6);
-      g.lineBetween(cx + 28, slotTop + dy, cx + 28, slotTop + dy + 6);
-    }
+    g.lineBetween(cx - 70, HOBBIES_FLOOR_Y, cx + 64, HOBBIES_FLOOR_Y);
+  }
+
+  /** Where the toolbox lay: a clean dashed footprint in a scatter of pencil dust. */
+  private drawEmptySpot(g: Phaser.GameObjects.Graphics): Phaser.GameObjects.Graphics {
+    const cx = OUT_OF_BOUNDS_TOOLBOX_X;
+    const half = TOOLBOX_WIDTH / 2;
+    const top = HOBBIES_FLOOR_Y - 8;
+    g.lineStyle(1.5, INK, 0.5);
+    for (let dx = 0; dx < TOOLBOX_WIDTH; dx += 10) g.lineBetween(cx - half + dx, top, cx - half + dx + 6, top);
+    g.lineBetween(cx - half, top, cx - half, HOBBIES_FLOOR_Y);
+    g.lineBetween(cx + half, top, cx + half, HOBBIES_FLOOR_Y);
+    g.fillStyle(INK, 0.18);
+    for (const [dx, dy, r] of DUST_SPECKS) g.fillCircle(cx + dx, HOBBIES_FLOOR_Y + dy, r);
+    return g.setVisible(false);
+  }
+
+  /**
+   * A beat-up developer's toolbox on the floor, hammer handle poking out of
+   * the lid. Drawn around its bottom-centre so the pickup tween scales it in place.
+   */
+  private createKit(): Phaser.GameObjects.Container {
+    const g = this.scene.add.graphics();
+    const w = TOOLBOX_WIDTH;
+    const h = 36;
+    // Hammer: handle out of the lid, head on top.
+    g.lineStyle(5, INK, 1);
+    g.lineBetween(12, -h - 2, 26, -h - 30);
+    g.fillStyle(INK, 1);
+    g.fillRect(18, -h - 40, 22, 9);
+    // Carry handle.
+    g.lineStyle(3, INK, 1);
+    g.lineBetween(-14, -h, -14, -h - 10);
+    g.lineBetween(-14, -h - 10, 6, -h - 10);
+    g.lineBetween(6, -h - 10, 6, -h);
+    // Body and a slightly crooked lid seam, so it reads hand-drawn and beat-up.
+    g.fillStyle(PAPER, 1);
+    g.fillRect(-w / 2, -h, w, h);
+    g.lineStyle(3, INK, 1);
+    g.strokeRect(-w / 2, -h, w, h);
+    g.lineStyle(2, INK, 0.9);
+    g.lineBetween(-w / 2, -h + 11, w / 2, -h + 9);
+    // Latch, a dent, and a scuff.
+    g.fillStyle(PAPER, 1);
+    g.fillRect(-5, -h + 6, 10, 9);
+    g.lineStyle(2, INK, 1);
+    g.strokeRect(-5, -h + 6, 10, 9);
+    g.lineStyle(1.2, INK, 0.5);
+    g.lineBetween(-28, -8, -20, -5);
+    g.lineBetween(20, -14, 27, -18);
+    const label = createUiText(this.scene, 0, -12, 'DEBUG', {
+      fontSize: '10px',
+      fontFamily: 'monospace',
+      color: '#1a1a1a'
+    }).setOrigin(0.5);
+    return this.scene.add.container(OUT_OF_BOUNDS_TOOLBOX_X, HOBBIES_FLOOR_Y, [g, label]).setDepth(3);
+  }
+
+  private showPickupCaption(motion: boolean): void {
+    const caption = createUiText(
+      this.scene,
+      OUT_OF_BOUNDS_TOOLBOX_X,
+      HOBBIES_FLOOR_Y - 150,
+      '+ Debugging Tools (Backpack)',
+      {
+        fontSize: '14px',
+        color: '#1a1a1a',
+        backgroundColor: '#fbfbf9',
+        padding: { x: 6, y: 3 }
+      }
+    )
+      .setOrigin(0.5)
+      .setDepth(100);
+    this.scene.tweens.add({
+      targets: caption,
+      alpha: 0,
+      y: motion ? caption.y - 16 : caption.y,
+      delay: PICKUP_CAPTION_MS,
+      duration: 500,
+      onComplete: () => caption.destroy()
+    });
+  }
+
+  /** Two dull clacks: the toolbox latch. */
+  private playLatch(): void {
+    const context = this.getAudioContext();
+    if (!context || context.state !== 'running') return;
+    const now = context.currentTime;
+    playNoise(context, { at: now, filter: 'lowpass', filterFrequency: 900, q: 2, gain: 0.12, duration: 0.05 });
+    playNoise(context, { at: now + 0.11, filter: 'lowpass', filterFrequency: 700, q: 2, gain: 0.1, duration: 0.05 });
   }
 }

@@ -16,6 +16,14 @@ describe('backpack view', () => {
     ]);
     expect(view.slots.every((slot) => !slot.found)).toBe(true);
     expect(view).toMatchObject({ found: 0, total: 6 });
+    expect(view.hiddenSlots).toEqual([]);
+  });
+
+  it('shows the Debugging Tools in a hidden slot only once owned, outside the tally', () => {
+    const view = getBackpackView({ ...empty, ownedItemIds: ['glasses', 'debugging-tools'] });
+    expect(view.hiddenSlots).toEqual([{ id: 'debugging-tools', found: true }]);
+    expect(view.slots.map((slot) => slot.id)).not.toContain('debugging-tools');
+    expect(view).toMatchObject({ found: 1, total: 6 });
   });
 
   it('tracks whether the glasses are worn', () => {
