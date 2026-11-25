@@ -73,6 +73,10 @@ export interface HobbiesSlice {
   facing: GameFacing;
   /** Furthest px past the left wall this visit; Out of Bounds thoughts fire once each. */
   voidFurthestDepth: number;
+  /** The point-of-no-return warning is up, waiting for `confirm` or `decline`. */
+  pointOfNoReturnPending: boolean;
+  /** Danilo already remarked on the barrier this visit. */
+  barrierThoughtShown: boolean;
 }
 
 /** What the player sees past the Hobbies room's left wall (Out of Bounds, Act 1). */
@@ -85,9 +89,20 @@ export interface OutOfBoundsObservation {
   sights: readonly string[];
 }
 
+/** The broken simulation (Out of Bounds, Act 2 cliffhanger): the way back is shut. */
+export interface OutOfBoundsEscapeObservation {
+  wayBack: 'blocked';
+  /** Walk limits during the escape: the barrier on the right, the opening on the left. */
+  barrierX: number;
+  openingX: number;
+  description: string;
+}
+
 export interface HobbiesObservation extends HobbiesSlice {
   /** Null while inside the drawn room. */
   void: OutOfBoundsObservation | null;
+  /** Null until the simulation is broken. */
+  escape: OutOfBoundsEscapeObservation | null;
 }
 
 export interface PotassiumSlice {
@@ -149,6 +164,9 @@ export type GameCommand =
   | { type: 'leave' }
   | { type: 'start' }
   | { type: 'perform' }
+  /** Answer a pending point-of-no-return warning. */
+  | { type: 'confirm' }
+  | { type: 'decline' }
   | { type: 'fight' }
   | { type: 'draft'; choiceIdOrIndex: string }
   | { type: 'cheat'; action: 'give'; itemId: GameItemId }
@@ -171,6 +189,9 @@ export type GameSessionEvent =
   | { type: 'signpost_read'; stage: OverworldProgressStage; found: number; total: number }
   | { type: 'thought'; id: GameThoughtId; variant?: number }
   | { type: 'potassium_won' }
+  | { type: 'point_of_no_return_shown' }
+  /** The toolbox was taken: alert, way back shut. */
+  | { type: 'simulation_broken' }
   | { type: 'ridge_beat_changed'; beat: RidgeRouteBeat }
   | { type: 'ridge_area_handoff'; areaId: string }
   | { type: 'ridge_route_reset' };

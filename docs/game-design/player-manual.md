@@ -52,7 +52,10 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
 - Close a hobby overlay to return to the Hobbies room.
 - Press `H` or `Esc`, or interact with the exit, to return to the street.
 - Not every wall in the Hobbies room is as solid as it looks. If you end up somewhere undrawn, walk back right to return; `H` and `Esc` work from anywhere.
-- Something waits at the far end of the undrawn page. Pick it up with `E` and it goes in the Backpack, under its own "Off the page" heading. It doesn't count toward the street secrets, and the spot stays empty after that. Like other items, it lasts until the page is reloaded.
+- Something waits at the far end of the undrawn page. Press `E` (or tap interact) and a **Point of no return** warning asks first: **Leave it** (`N`) changes nothing; **Pick it up** (`Y`) is a choice you can't take back. Keyboard: `←`/`→` move between the two, `Enter`, `Space` or `E` presses the highlighted one. `Esc` still leaves the room.
+- Picking it up plays a short close-up, then an alarm: `OUT_OF_BOUNDS` is stamped across the view and the page edge shakes in pencil (reduced motion: cuts instead of zooms, no shake; nothing flashes, and it all reads with sound off). Behind you the page scribbles itself shut, so the way back right is blocked, and the page now runs on further left to a torn opening.
+- From then on, for the rest of the visit to the site, the Hobbies room _is_ that escape: leaving with `H`, `Esc` or the header and coming back puts you at the end of the page again, with the way back still shut. Reloading the page resets it.
+- What you picked up goes in the Backpack, under its own "Off the page" heading. It doesn't count toward the street secrets.
 
 ## Developer Basement
 

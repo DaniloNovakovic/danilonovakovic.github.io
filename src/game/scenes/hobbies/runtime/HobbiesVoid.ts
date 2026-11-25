@@ -46,7 +46,7 @@ const PICKUP_CAPTION_MS = 2600;
 
 export interface HobbiesVoidFrame {
   playerX: number;
-  /** The Debugging Tools are in the Backpack, so the floor is bare. */
+  /** The Debugging Tools have been lifted off the floor, so it is bare. */
   kitOwned: boolean;
   /** Player is on the floor and moving horizontally. */
   walking: boolean;
@@ -70,14 +70,20 @@ export class HobbiesVoid {
   private lastScratchX: number | null = null;
   private lastGlowStep = -1;
 
+  /**
+   * @param startX Where the player starts this visit. A return visit during
+   * the escape starts deep in the void, past every walk-in thought.
+   */
   constructor(
     scene: Phaser.Scene,
     speaker: { readonly x: number; readonly y: number },
-    getAudioContext: () => AudioContext | null
+    getAudioContext: () => AudioContext | null,
+    startX: number
   ) {
     this.scene = scene;
     this.speaker = speaker;
     this.getAudioContext = getAudioContext;
+    this.furthestDepth = outOfBoundsDepth(startX);
     const g = scene.add.graphics().setDepth(1);
     for (const sight of OUT_OF_BOUNDS_SIGHTS) this.drawSight(g, sight.id, xAt(sight.depth));
     this.glow = scene.add.graphics().setDepth(1);
@@ -113,7 +119,7 @@ export class HobbiesVoid {
    * motion the kit just disappears.
    */
   pickUpKit(frame: Pick<HobbiesVoidFrame, 'time' | 'motion'>): void {
-    this.think(DEBUGGING_TOOLS_PICKUP_THOUGHT, frame);
+    this.say(DEBUGGING_TOOLS_PICKUP_THOUGHT, frame);
     this.showPickupCaption(frame.motion);
     this.playLatch();
     if (!frame.motion) {
@@ -143,13 +149,14 @@ export class HobbiesVoid {
     const reached = outOfBoundsThoughtsReached(this.furthestDepth, depth);
     this.furthestDepth = Math.max(this.furthestDepth, depth);
     const latest = reached[reached.length - 1];
-    if (latest) this.think(latest, frame);
+    if (latest) this.say(latest, frame);
     this.updateThought(frame);
     this.updateGlow(frame, !frame.kitOwned);
     this.updateScratch(frame, depth);
   }
 
-  private think(line: string, frame: Pick<HobbiesVoidFrame, 'time'>): void {
+  /** Danilo thinks out loud in a bubble above his head. */
+  say(line: string, frame: Pick<HobbiesVoidFrame, 'time'>): void {
     this.scene.tweens.killTweensOf(this.thought);
     this.thought.setText(line).setAlpha(1).setVisible(true);
     this.followSpeaker();

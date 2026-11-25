@@ -1,4 +1,11 @@
-import type { GameItemId, GameSessionEvent, GameWorldState, HobbiesObservation, NearbyThing } from './types';
+import type {
+  GameItemId,
+  GameSessionEvent,
+  GameWorldState,
+  HobbiesObservation,
+  NearbyThing,
+  OutOfBoundsEscapeObservation
+} from './types';
 import { returnToOverworld } from './basementLogic';
 import { CIRCUIT_PART_HOBBY, CIRCUIT_PART_IDS } from './content/circuitParts';
 import {
@@ -11,6 +18,14 @@ import {
 import {
   DEBUGGING_TOOLS_ITEM_ID,
   DEBUGGING_TOOLS_PICKUP_THOUGHT,
+  isSimulationBroken,
+  OUT_OF_BOUNDS_ALERT_THOUGHT,
+  OUT_OF_BOUNDS_BARRIER_THOUGHT,
+  OUT_OF_BOUNDS_BARRIER_X,
+  OUT_OF_BOUNDS_ESCAPE_MAX_X,
+  OUT_OF_BOUNDS_ESCAPE_MIN_X,
+  OUT_OF_BOUNDS_ESCAPE_TEXT,
+  OUT_OF_BOUNDS_OPENING_X,
   OUT_OF_BOUNDS_TOOLBOX_TEXT,
   OUT_OF_BOUNDS_TOOLBOX_X,
   OUT_OF_BOUNDS_STAGE_TEXT,
@@ -35,6 +50,15 @@ const STATION_PROMPTS: Record<HobbyStationId, string> = {
 };
 
 /** What clearing each mini-game goal means in the browser build. */
+const ESCAPE_OBSERVATION: OutOfBoundsEscapeObservation = {
+  wayBack: 'blocked',
+  barrierX: OUT_OF_BOUNDS_BARRIER_X,
+  openingX: OUT_OF_BOUNDS_OPENING_X,
+  description: `${OUT_OF_BOUNDS_ESCAPE_TEXT.barrier} ${OUT_OF_BOUNDS_ESCAPE_TEXT.opening}`
+};
+
+type HobbiesOutcome = { message: string; events: GameSessionEvent[] };
+
 const PERFORM_MESSAGES: Record<HobbyStationId, string> = {
   art: 'You sign the doodle and pin it up. Somewhere on the street, a billboard changes.',
   music: 'You strum the song. A spare copper string pings loose — you pocket it.',
@@ -54,7 +78,8 @@ export function observeHobbies(state: GameWorldState): HobbiesObservation {
           description: OUT_OF_BOUNDS_STAGE_TEXT[stage],
           sights: outOfBoundsSightsNear(playerX)
         }
-      : null
+      : null,
+    escape: isSimulationBroken(state.ownedItemIds) ? ESCAPE_OBSERVATION : null
   };
 }
 
@@ -100,9 +125,15 @@ export function listHobbiesNearby(state: GameWorldState): NearbyThing[] {
 export function moveHobbies(state: GameWorldState, direction: 'left' | 'right', steps: number): string {
   const from = state.hobbies.playerX;
   const delta = steps * HOBBIES_STEP_PX * (direction === 'right' ? 1 : -1);
-  const next = Math.max(HOBBIES_PLAYER_MIN_X, Math.min(HOBBIES_PLAYER_MAX_X, from + delta));
+  const escaped = isSimulationBroken(state.ownedItemIds);
+  const [minX, maxX] = escaped
+    ? [OUT_OF_BOUNDS_ESCAPE_MIN_X, OUT_OF_BOUNDS_ESCAPE_MAX_X]
+    : [HOBBIES_PLAYER_MIN_X, HOBBIES_PLAYER_MAX_X];
+  const next = Math.max(minX, Math.min(maxX, from + delta));
   state.hobbies.playerX = next;
   state.hobbies.facing = direction;
+  // Walking away from the toolbox answers the warning with "leave it".
+  state.hobbies.pointOfNoReturnPending = false;
   const depth = outOfBoundsDepth(next);
   const thoughts = outOfBoundsThoughtsReached(state.hobbies.voidFurthestDepth, depth);
   state.hobbies.voidFurthestDepth = Math.max(state.hobbies.voidFurthestDepth, depth);
@@ -113,14 +144,17 @@ export function moveHobbies(state: GameWorldState, direction: 'left' | 'right', 
     : depth > 0
       ? 'You walk across blank paper'
       : 'You wander the hobbies room';
+  const hitBarrier = escaped && direction === 'right' && next >= maxX && from + delta > maxX;
+  if (hitBarrier && !state.hobbies.barrierThoughtShown) {
+    state.hobbies.barrierThoughtShown = true;
+    thoughts.push(OUT_OF_BOUNDS_BARRIER_THOUGHT);
+  }
   const said = thoughts.map((line) => ` Danilo: "${line}"`).join('');
-  return `${where} to x=${Math.round(next)}.${said}`;
+  const blocked = hitBarrier ? ` ${OUT_OF_BOUNDS_ESCAPE_TEXT.barrier}` : '';
+  return `${where} to x=${Math.round(next)}.${blocked}${said}`;
 }
 
-export function interactHobbies(
-  state: GameWorldState,
-  target: string | undefined
-): { message: string; events: GameSessionEvent[] } {
+export function interactHobbies(state: GameWorldState, target: string | undefined): HobbiesOutcome {
   const nearby = listHobbiesNearby(state);
   const miss = nearbyMissMessage(nearby, target, 'Hobbies room — walk to a station or the street door on the left.');
   if (miss) return { message: miss, events: [] };
@@ -141,21 +175,45 @@ export function interactHobbies(
   };
 }
 
-/** Out of Bounds, Act 2: pick the Debugging Tools up off the floor, once. */
-function interactToolbox(state: GameWorldState): { message: string; events: GameSessionEvent[] } {
+/**
+ * Out of Bounds, Act 2: the toolbox first asks "point of no return?". Only
+ * `confirm` takes it; after that the floor is bare.
+ */
+function interactToolbox(state: GameWorldState): HobbiesOutcome {
   if (state.ownedItemIds.includes(DEBUGGING_TOOLS_ITEM_ID)) {
     return { message: OUT_OF_BOUNDS_TOOLBOX_TEXT.empty, events: [] };
   }
+  state.hobbies.pointOfNoReturnPending = true;
+  return {
+    message: `${OUT_OF_BOUNDS_TOOLBOX_TEXT.withKit} ${OUT_OF_BOUNDS_ESCAPE_TEXT.warning}`,
+    events: [{ type: 'point_of_no_return_shown' }]
+  };
+}
+
+/**
+ * Answer the point-of-no-return warning. Confirming takes the Debugging Tools
+ * and breaks the simulation: the alert goes off and the way back is shut.
+ * Null when no warning is up.
+ */
+export function answerPointOfNoReturn(state: GameWorldState, confirmed: boolean): HobbiesOutcome | null {
+  if (!state.hobbies.pointOfNoReturnPending) return null;
+  state.hobbies.pointOfNoReturnPending = false;
+  if (!confirmed) return { message: OUT_OF_BOUNDS_ESCAPE_TEXT.declined, events: [] };
   const itemId: GameItemId = DEBUGGING_TOOLS_ITEM_ID;
   state.ownedItemIds = [...state.ownedItemIds, itemId];
   return {
-    message: `${OUT_OF_BOUNDS_TOOLBOX_TEXT.withKit} You take it. Danilo: "${DEBUGGING_TOOLS_PICKUP_THOUGHT}" (Debugging Tools added to the Backpack.)`,
-    events: [{ type: 'item_collected', itemId }]
+    message: [
+      `You pick it up. Danilo: "${DEBUGGING_TOOLS_PICKUP_THOUGHT}" (Debugging Tools added to the Backpack.)`,
+      OUT_OF_BOUNDS_ESCAPE_TEXT.alert,
+      `Danilo: "${OUT_OF_BOUNDS_ALERT_THOUGHT}"`,
+      OUT_OF_BOUNDS_ESCAPE_TEXT.opening
+    ].join(' '),
+    events: [{ type: 'item_collected', itemId }, { type: 'simulation_broken' }]
   };
 }
 
 /** Headless stand-in for clearing the open hobby mini-game's goal. */
-export function performHobby(state: GameWorldState): { message: string; events: GameSessionEvent[] } | null {
+export function performHobby(state: GameWorldState): HobbiesOutcome | null {
   const stationId = HOBBY_STATION_SPOTS.find((spot) => spot.id === state.overlay?.id)?.id;
   if (!stationId) return null;
 

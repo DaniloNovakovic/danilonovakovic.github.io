@@ -14,6 +14,12 @@ import {
   type OverworldBuildingSpot
 } from './content/overworldSpots';
 import { CIRCUIT_PART_IDS, countCircuitParts } from './content/circuitParts';
+import {
+  hobbiesEntryX,
+  isSimulationBroken,
+  OUT_OF_BOUNDS_ESCAPE_TEXT,
+  outOfBoundsDepth
+} from './content/outOfBoundsVoid';
 import { clamp, nearbyMissMessage, pickNearby } from './nearby';
 import { getPortfolioOverlay } from './overlayCatalog';
 import type { GameSecretId, GameSessionEvent, GameWorldState, NearbyThing, OverworldProgressStage } from './types';
@@ -318,11 +324,17 @@ function enterBuilding(state: GameWorldState, building: OverworldBuildingSpot): 
   if (building.action.kind === 'enterScene') {
     state.mode = 'hobbies';
     state.sceneId = 'hobbies';
-    state.hobbies.playerX = 200;
-    state.hobbies.facing = 'right';
-    state.hobbies.voidFurthestDepth = 0;
+    const escaped = isSimulationBroken(state.ownedItemIds);
+    state.hobbies.playerX = hobbiesEntryX(state.ownedItemIds, 200);
+    state.hobbies.facing = escaped ? 'left' : 'right';
+    // A return visit during the escape starts deep in the void: its walk-in thoughts are long past.
+    state.hobbies.voidFurthestDepth = outOfBoundsDepth(state.hobbies.playerX);
+    state.hobbies.pointOfNoReturnPending = false;
+    state.hobbies.barrierThoughtShown = false;
     return {
-      message: `You enter ${building.label}.`,
+      message: escaped
+        ? `You enter ${building.label}. ${OUT_OF_BOUNDS_ESCAPE_TEXT.entry}`
+        : `You enter ${building.label}.`,
       events: [{ type: 'scene_entered', sceneId: 'hobbies' }]
     };
   }
