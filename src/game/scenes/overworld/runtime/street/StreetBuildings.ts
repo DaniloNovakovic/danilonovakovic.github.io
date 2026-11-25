@@ -9,7 +9,8 @@ import { getMessages } from '@/shared/i18n';
 import { getSceneDefinition } from '@/game/scenes/sceneRegistry';
 import { OVERWORLD_BUILDING_TRIGGERS, type OverworldBuildingTrigger } from '../../worldLayout';
 
-const BUILDING_Y = 395;
+/** Building art ends 10px above its 310px frame; this seats it on the 550 ground line. */
+const BUILDING_Y = 405;
 const LABEL_Y = 150;
 const FOCUS_LIFT_PX = 6;
 const FOCUS_WOBBLE_RAD = 0.008;

@@ -11,7 +11,7 @@ import { bindSideViewKeyboard } from '../input/sceneKeyboard';
 import type { SceneInputKeys } from '../input/readSceneInputCommands';
 import { readPlayerSceneStep } from '../input/scenePlayerInput';
 import { setSceneKeyboardPaused } from '../sceneKeyboardPause';
-import { TextureGenerator } from '../textures/TextureGenerator';
+import { PLAYER_FEET_Y, PLAYER_FRAME_HEIGHT, TextureGenerator } from '../textures/TextureGenerator';
 import { prefersReducedMotion, sketchTick } from '../motion/sketchMotion';
 import {
   createSideViewCameraRuntime,
@@ -131,6 +131,14 @@ class PhaserSideViewPlayerRuntime implements SideViewPlayerRuntime {
     const textureKey = ensurePlayerTexture(scene, options.sprite?.textureKey);
 
     this.player = scene.physics.add.sprite(start.x, start.y, textureKey);
+    // The frame keeps a few px of shadow under the feet; end the body at the
+    // feet so the player stands on the ground line instead of above it.
+    this.player.body.setSize(
+      this.player.width,
+      Math.round((this.player.height * PLAYER_FEET_Y) / PLAYER_FRAME_HEIGHT),
+      false
+    );
+    this.player.body.setOffset(0, 0);
     this.baseTextureKey = textureKey;
     this.appliedTextureKey = textureKey;
     if (options.sprite?.depth !== undefined) {

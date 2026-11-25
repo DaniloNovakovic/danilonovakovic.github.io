@@ -8,7 +8,11 @@ import { HOBBIES_OVERLAY_IDS, type HobbiesOverlayId } from '@/game/overlays/over
 import { HOBBIES_EXIT_X, HOBBY_STATION_LAYOUT } from '../roomLayout';
 import { getMessages } from '@/shared/i18n';
 import { HOBBIES_LEFT_WALL_X, HOBBIES_RIGHT_WALL_X } from '@/game/core/console';
-import { TextureGenerator } from '@/game/sharedSceneRuntime/textures/TextureGenerator';
+import {
+  HOBBY_ITEM_BASE_Y,
+  HOBBY_ITEM_FRAME_SIZE,
+  TextureGenerator
+} from '@/game/sharedSceneRuntime/textures/TextureGenerator';
 import { HOBBIES_FLOOR_Y, HOBBIES_ROOM_HEIGHT, HOBBIES_ROOM_WIDTH } from '@/game/sharedSceneRuntime/config';
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
 
@@ -280,7 +284,8 @@ export class HobbiesRoom {
     for (const station of HOBBY_STATION_LAYOUT) {
       const sprite = this.scene.add
         .sprite(station.x, floorY + station.yOffsetFromFloor, `hobby_${station.id}`)
-        .setOrigin(0.5, station.spriteMode === 'floor' ? 1 : 0.5)
+        // `floor` stands the drawing (not the frame's empty margin) on the floor line.
+        .setOrigin(0.5, station.spriteMode === 'floor' ? HOBBY_ITEM_BASE_Y[station.id] / HOBBY_ITEM_FRAME_SIZE : 0.5)
         .setDepth(3); // Player walks at depth 8, in front of the props.
       const label = createUiText(this.scene, station.x, floorY - 140, messages.scenes.hobbies.labels[station.id], {
         fontSize: '20px',

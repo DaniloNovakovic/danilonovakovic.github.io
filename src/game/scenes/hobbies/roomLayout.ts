@@ -41,7 +41,7 @@ const HOBBIES_INTERACT_PROMPT_Y = 318;
 
 /**
  * Hobby stations: sprite X aligns with interaction X.
- * `spriteMode`: `floor` = sprite origin bottom at floorY + yOffset; `mid` = origin center.
+ * `spriteMode`: `floor` = the prop's drawn base at floorY + yOffset; `mid` = origin center.
  */
 export const HOBBY_STATION_LAYOUT: readonly HobbyStationTypeObject[] = HOBBY_STATION_SPOTS.map((spot) => ({
   kind: 'hobbyStation',

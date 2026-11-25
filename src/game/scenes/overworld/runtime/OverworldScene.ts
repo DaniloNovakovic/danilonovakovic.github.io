@@ -193,7 +193,7 @@ export class OverworldScene extends Phaser.Scene {
     this.streetBuildings = buildStreetBuildings(this);
     this.signpost = new StreetSignpost(this, OVERWORLD_SIGNPOST_X);
     this.droppingIntoHatch = false;
-    this.hatch = new StreetHatch(this, OVERWORLD_BASEMENT_HOLE.x, OVERWORLD_BASEMENT_HOLE.y);
+    this.hatch = new StreetHatch(this, OVERWORLD_BASEMENT_HOLE.x, STREET_GROUND_Y);
     this.buildingSlots.length = 0;
     for (const bldg of this.streetBuildings.interactables.getChildren() as Phaser.GameObjects.Sprite[]) {
       this.buildingSlots.push({
@@ -251,7 +251,7 @@ export class OverworldScene extends Phaser.Scene {
       .setDepth(20);
     this.bananaFloorIcon = this.add.graphics().setDepth(21).setVisible(false);
     this.drawBananaFloorIcon();
-    this.circuitCrt = new StreetCrt(this, OVERWORLD_CIRCUIT_SLOT.x, OVERWORLD_CIRCUIT_SLOT.y, 18);
+    this.circuitCrt = new StreetCrt(this, OVERWORLD_CIRCUIT_SLOT.x, STREET_GROUND_Y, 18);
     this.circuitCrt.update(isItemOwned('circuit'), 0, this.motion);
     this.birds = new StreetBirds(this);
     this.chick = new StreetChick(this, OVERWORLD_CHICK.x);

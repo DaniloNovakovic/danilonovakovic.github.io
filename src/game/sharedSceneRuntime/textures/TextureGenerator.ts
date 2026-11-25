@@ -2,6 +2,16 @@ import * as Phaser from 'phaser';
 import type { HobbiesOverlayId } from '@/game/overlays/overlayIds';
 import { drawOverworldBuildingArt, drawPixelOverworldBuildingArt } from './buildingTextures';
 
+/** Hobby prop frames are 120px square. */
+export const HOBBY_ITEM_FRAME_SIZE = 120;
+/** Where each hobby prop's drawing touches the floor inside its frame. */
+export const HOBBY_ITEM_BASE_Y: Readonly<Record<HobbiesOverlayId, number>> = {
+  art: 110,
+  music: 105,
+  fitness: 100,
+  dancing: 115
+};
+
 export class TextureGenerator {
   /**
    * Generates `player_idle` / `player_glasses` textures, plus a four-frame
@@ -20,10 +30,10 @@ export class TextureGenerator {
     for (const [suffix, pose] of PLAYER_POSES) {
       pg.clear();
       drawPlayer(pg, k, pose, false);
-      pg.generateTexture(`player_idle${keySuffix}${suffix}`, 48 * k, 65 * k);
+      pg.generateTexture(`player_idle${keySuffix}${suffix}`, 48 * k, PLAYER_FRAME_HEIGHT * k);
       pg.clear();
       drawPlayer(pg, k, pose, true);
-      pg.generateTexture(`player_glasses${keySuffix}${suffix}`, 48 * k, 65 * k);
+      pg.generateTexture(`player_glasses${keySuffix}${suffix}`, 48 * k, PLAYER_FRAME_HEIGHT * k);
     }
     pg.destroy();
   }
@@ -168,7 +178,7 @@ export class TextureGenerator {
       bg.strokePath();
     }
 
-    bg.generateTexture(key, 120, 120);
+    bg.generateTexture(key, HOBBY_ITEM_FRAME_SIZE, HOBBY_ITEM_FRAME_SIZE);
     bg.destroy();
   }
 
@@ -309,6 +319,9 @@ const PLAYER_POSES: readonly [string, PlayerPose][] = [
 
 const HIP_Y = 45;
 const GROUND_Y = 60;
+/** Player frame height and where its feet land in it, so bodies can stand on the drawn feet. */
+export const PLAYER_FRAME_HEIGHT = 65;
+export const PLAYER_FEET_Y = GROUND_Y;
 
 /** Hip to knee to foot, so a bent leg reads as a knee rather than a stick. */
 function drawLeg(pg: Phaser.GameObjects.Graphics, k: number, hipX: number, pose: LegPose): void {
