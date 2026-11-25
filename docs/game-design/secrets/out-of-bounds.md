@@ -87,6 +87,36 @@ the camera zooms in on Danilo and the toolbox, then back out). Then an
 **alert** goes off. The way back right is shut, and the only way is to keep
 walking **left**.
 
+As built (#149):
+
+- The warning is the one place the sketchbook flips: an **ink card with
+  cream lettering**, hazard tape top and bottom, and a misprinted
+  `POINT OF NO RETURN` title. It reads as the page itself warning you. "Leave it"
+  has focus first, so a stray `Enter` is safe. `Y`/`N` answer directly. `Esc`
+  is left to the scene and leaves the room, as everywhere else. It is a
+  scene-owned panel (`pointOfNoReturn` in the scene UI registry), so screen
+  readers get an `alertdialog`.
+- Confirming collects the kit immediately (leaving mid-cinematic still
+  counts). The player is held through the controller only, so `Esc` stays
+  live. The camera zooms to 1.7× on Danilo and the toolbox (0.7 s), the kit
+  lifts, and the camera eases back. Then the alert: an `OUT_OF_BOUNDS` rubber
+  stamp slams across the top of the view, the view's border is re-scribbled
+  every ~110 ms for ~3 s, a graphite-scratch alarm whoops six times, the
+  camera shakes once, and an ink **scribble wall** draws itself in just right
+  of the toolbox spot, with the page beyond it hatched out. Danilo: "...okay.
+  That sounds bad." Reduced motion: every camera move is a cut, no shake,
+  the wall and stamp appear whole, the border holds still.
+- Walking into the wall: "It scribbled itself shut. No going back." (once per
+  visit). Left past the toolbox spot the floor runs on as hurried dashes to a
+  **torn opening** with a scratched arrow, 700 px further left. "The page
+  keeps going. Left, then." #162 continues from that opening.
+- **The broken simulation is owning the Debugging Tools.** Confirming the
+  warning is the only way to get them, so no separate flag. A return visit
+  starts just inside the wall, facing left, with the walk-in thoughts already
+  spent. Geometry and copy: `src/game/core/console/content/outOfBoundsVoid.ts`.
+  Headless: `interact toolbox` → `confirm` / `decline`, and `look` reports
+  `escape: way back blocked`.
+
 ### Act 3 — Breakout
 
 Danilo's vision (2026-11-25), one continuous sequence:

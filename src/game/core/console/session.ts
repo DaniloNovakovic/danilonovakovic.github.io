@@ -9,7 +9,7 @@ import {
 import { interactBasement, moveBasement, returnToOverworld, syncBasementPosition } from './basementLogic';
 import { getGameHelpText, parseGameCommand, parseGameScript } from './commands';
 import { OVERWORLD_GROUND_Y, OVERWORLD_PLAYER_START, type GameSceneId } from './content/overworldSpots';
-import { interactHobbies, moveHobbies, performHobby } from './hobbiesLogic';
+import { answerPointOfNoReturn, interactHobbies, moveHobbies, performHobby } from './hobbiesLogic';
 import { formatGameObservation, observeGameWorld } from './observe';
 import { draftPotassium, fightPotassium, startPotassium } from './potassiumLogic';
 import {
@@ -63,7 +63,13 @@ export class GameConsoleSession {
         bananaFirstPeelPending: false
       },
       basement: { playerX: 135, facing: 'right', corkboardNote: 0 },
-      hobbies: { playerX: 200, facing: 'right', voidFurthestDepth: 0 },
+      hobbies: {
+        playerX: 200,
+        facing: 'right',
+        voidFurthestDepth: 0,
+        pointOfNoReturnPending: false,
+        barrierThoughtShown: false
+      },
       potassium: {
         phase: 'lobby',
         wave: 0,
@@ -197,6 +203,11 @@ export class GameConsoleSession {
         return performed
           ? this.finish(performed.message, performed.events)
           : this.fail('perform only works with a hobby mini-game open.');
+      }
+      case 'confirm':
+      case 'decline': {
+        const answered = this.state.mode === 'hobbies' && answerPointOfNoReturn(this.state, command.type === 'confirm');
+        return answered ? this.finish(answered.message, answered.events) : this.fail('Nothing to confirm here.');
       }
       case 'start':
         return this.wrapPotassium(startPotassium(this.state));

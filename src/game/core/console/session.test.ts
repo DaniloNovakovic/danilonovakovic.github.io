@@ -8,6 +8,14 @@ import {
   OVERWORLD_CHICK
 } from './content/overworldSpots';
 import { HOBBIES_PLAYER_MAX_X, HOBBIES_PLAYER_MIN_X, HOBBIES_RIGHT_WALL_X } from './content/hobbiesSpots';
+import {
+  OUT_OF_BOUNDS_BARRIER_X,
+  OUT_OF_BOUNDS_ESCAPE_MAX_X,
+  OUT_OF_BOUNDS_ESCAPE_MIN_X,
+  OUT_OF_BOUNDS_ESCAPE_START_X,
+  OUT_OF_BOUNDS_OPENING_X,
+  OUT_OF_BOUNDS_TOOLBOX_X
+} from './content/outOfBoundsVoid';
 import { getOverworldProgress, getSketchDetailLevel } from './overworldLogic';
 import { GameConsoleSession } from './session';
 
@@ -322,6 +330,15 @@ describe('out of bounds: past the Hobbies left wall', () => {
     return session;
   }
 
+  /** At the void's end with the Debugging Tools taken: the simulation is broken. */
+  function escapedSession() {
+    const session = enterHobbies();
+    session.exec('go left 200');
+    session.exec('interact toolbox');
+    session.exec('confirm');
+    return session;
+  }
+
   it('walks straight through the solid-looking left wall onto blank paper', () => {
     const session = enterHobbies();
     // Enter at x=200; ten 40px steps left: no stop at the wall (x=50), out to x=-200.
@@ -359,25 +376,94 @@ describe('out of bounds: past the Hobbies left wall', () => {
     expect(session.observe().hobbies?.playerX).toBe(HOBBIES_PLAYER_MAX_X);
   });
 
-  it('picks up the Debugging Tools from the floor once, without touching the street tally', () => {
+  it('asks "point of no return?" before the toolbox, and backing out changes nothing', () => {
     const session = enterHobbies();
     session.exec('go left 200');
     expect(session.observe().nearby[0]).toMatchObject({ id: 'toolbox', kind: 'pickup' });
 
-    const pickup = session.exec('interact toolbox');
-    expect(pickup.message).toMatch(/DEBUGGING TOOLS/);
+    const warning = session.exec('interact toolbox');
+    expect(warning.message).toMatch(/DEBUGGING TOOLS/);
+    expect(warning.message).toMatch(/point of no return/i);
+    expect(warning.events).toEqual([{ type: 'point_of_no_return_shown' }]);
+    expect(session.observe().ownedItemIds).not.toContain('debugging-tools');
+    expect(session.format()).toMatch(/confirm or decline/);
+
+    const declined = session.exec('decline');
+    expect(declined.message).toMatch(/leave the toolbox/i);
+    expect(session.observe().ownedItemIds).not.toContain('debugging-tools');
+    expect(session.observe().hobbies?.escape).toBeNull();
+    // Nothing pending any more; walking away also backs out.
+    expect(session.exec('confirm').ok).toBe(false);
+    session.exec('interact toolbox');
+    session.exec('go right 1');
+    expect(session.exec('confirm').ok).toBe(false);
+
+    session.exec('go right 200');
+    expect(session.observe().hobbies?.void).toBeNull();
+  });
+
+  it('confirming takes the Debugging Tools, sets off the alert and shuts the way back', () => {
+    const session = enterHobbies();
+    session.exec('go left 200');
+    session.exec('interact toolbox');
+    const pickup = session.exec('confirm');
     expect(pickup.message).toMatch(/hammer/i);
-    expect(pickup.events).toContainEqual({ type: 'item_collected', itemId: 'debugging-tools' });
-    expect(session.observe().ownedItemIds).toContain('debugging-tools');
+    expect(pickup.message).toContain('OUT_OF_BOUNDS');
+    expect(pickup.events).toEqual([
+      { type: 'item_collected', itemId: 'debugging-tools' },
+      { type: 'simulation_broken' }
+    ]);
     expect(session.format()).toMatch(/inventory: .*debugging-tools/);
     expect(getOverworldProgress(session.observe())).toMatchObject({ found: 0, total: 6 });
+    expect(session.observe().hobbies?.escape).toMatchObject({
+      wayBack: 'blocked',
+      barrierX: OUT_OF_BOUNDS_BARRIER_X,
+      openingX: OUT_OF_BOUNDS_OPENING_X
+    });
 
     // The floor is bare afterwards and gives nothing more.
     expect(session.observe().nearby[0]).toMatchObject({ id: 'toolbox', kind: 'prop' });
     const again = session.exec('interact toolbox');
     expect(again.message).toMatch(/bare floor/i);
     expect(again.events).toEqual([]);
-    expect(session.observe().ownedItemIds.filter((id) => id === 'debugging-tools')).toHaveLength(1);
+  });
+
+  it('blocks the way back right at the barrier, with one thought per visit', () => {
+    const session = escapedSession();
+    const first = session.exec('go right 200');
+    expect(first.message).toMatch(/blocks the way back/i);
+    expect(first.message).toContain('Danilo: "It scribbled itself shut. No going back."');
+    expect(session.observe().hobbies?.playerX).toBe(OUT_OF_BOUNDS_ESCAPE_MAX_X);
+    expect(session.observe().hobbies?.void).not.toBeNull();
+    expect(session.observe().nearby.map((thing) => thing.id)).not.toContain('exit');
+
+    const second = session.exec('go right 5');
+    expect(second.message).toMatch(/blocks the way back/i);
+    expect(second.message).not.toMatch(/Danilo:/);
+    expect(session.format()).toMatch(/way back blocked/);
+  });
+
+  it('lets the page continue left past where the toolbox lay, to the opening', () => {
+    const session = escapedSession();
+    const walk = session.exec('go left 200');
+    expect(walk.message).toContain('Danilo: "The page keeps going. Left, then."');
+    expect(session.observe().hobbies?.playerX).toBe(OUT_OF_BOUNDS_ESCAPE_MIN_X);
+    expect(OUT_OF_BOUNDS_ESCAPE_MIN_X).toBeLessThan(OUT_OF_BOUNDS_TOOLBOX_X);
+    expect(session.observe().hobbies?.void?.stage).toBe('beyond');
+  });
+
+  it('keeps the escape when leaving and coming back in the same session', () => {
+    const session = escapedSession();
+    expect(session.exec('leave').observation.mode).toBe('overworld');
+    const back = session.exec('interact hobbies');
+    expect(back.message).toMatch(/still scribbled shut/);
+    const hobbies = session.observe().hobbies;
+    expect(hobbies?.playerX).toBe(OUT_OF_BOUNDS_ESCAPE_START_X);
+    expect(hobbies?.escape?.wayBack).toBe('blocked');
+    // The walk-in thoughts are long past; nothing fires on arrival.
+    expect(session.exec('go left 1').message).not.toMatch(/Danilo:/);
+    session.exec('go right 200');
+    expect(session.observe().hobbies?.playerX).toBe(OUT_OF_BOUNDS_ESCAPE_MAX_X);
   });
 
   it('can cheat in the Debugging Tools', () => {
@@ -410,6 +496,7 @@ describe('out of bounds: past the Hobbies left wall', () => {
 
     session.exec('go left 200');
     const end = session.format();
+    expect(end).not.toMatch(/escape:/);
     expect(end).toContain('ROOM_END');
     expect(end).toMatch(/toolbox/i);
   });

@@ -3,7 +3,7 @@
 import type { RidgeObservation } from '../ridge/types';
 import { listBasementNearby } from './basementLogic';
 import { OVERWORLD_BANANA_PEEL } from './content/overworldSpots';
-import { outOfBoundsStageAt } from './content/outOfBoundsVoid';
+import { isSimulationBroken, outOfBoundsStageAt } from './content/outOfBoundsVoid';
 import { listHobbiesNearby, observeHobbies } from './hobbiesLogic';
 import { getOverworldProgress, listOverworldNearby } from './overworldLogic';
 import type { GameObservation, GameWorldState, NearbyThing, OverworldProgressStage } from './types';
@@ -66,6 +66,9 @@ export function formatGameObservation(observation: GameObservation): string {
       lines.push(`edge of the page: ${edge.stage}, ${edge.depth}px past the left wall — ${edge.description}`);
       if (edge.sights.length > 0) lines.push(`you notice: ${edge.sights.join('; ')}`);
     }
+    const escape = observation.hobbies.escape;
+    if (escape) lines.push(`escape: way back ${escape.wayBack} at x=${escape.barrierX} — ${escape.description}`);
+    if (observation.hobbies.pointOfNoReturnPending) lines.push('warning: point of no return — confirm or decline');
   }
   if (observation.potassium) {
     const k = observation.potassium;
@@ -174,9 +177,11 @@ function buildHints(state: GameWorldState, nearby: readonly NearbyThing[], ridge
 
   if (state.mode === 'hobbies') {
     hints.push(
-      outOfBoundsStageAt(state.hobbies.playerX)
-        ? 'Walk right to get back into the drawn room. leave still works from here.'
-        : 'Stations: art x=280, music x=440, fitness x=600, dancing x=760. Interact, then perform.'
+      isSimulationBroken(state.ownedItemIds)
+        ? 'The way back right is scribbled shut. Keep walking left. leave still works from here.'
+        : outOfBoundsStageAt(state.hobbies.playerX)
+          ? 'Walk right to get back into the drawn room. leave still works from here.'
+          : 'Stations: art x=280, music x=440, fitness x=600, dancing x=760. Interact, then perform.'
     );
   }
 
