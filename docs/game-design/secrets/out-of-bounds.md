@@ -59,7 +59,8 @@ margin, a coffee ring, a placeholder labelled `ROOM_END`. Danilo says very littl
 just walk through the wall?" just outside, "...this wasn't finished." near the
 first mark, and "Wait. There's something up ahead." before the pedestal. The only sound is a sparse pencil scratch per few steps.
 
-**Payoff:** a glowing toolbox on a pedestal made from a sketchbook spine.
+**Payoff:** a glowing pedestal made from a sketchbook spine, with an empty dashed slot on
+top. The toolbox that fills it arrives in Act 2 (#148); Act 1 (#147) ships the empty pedestal.
 
 ### Act 2 — The Debugging Tools
 
