@@ -10,29 +10,28 @@
 export const HOBBIES_LEFT_WALL_X = 50;
 /** How far the void runs past the wall (~20s walking at 300px/s, ~10s sprinting). */
 export const OUT_OF_BOUNDS_VOID_LENGTH = 6000;
-/** The empty sketchbook-spine pedestal that ends the void. */
-export const OUT_OF_BOUNDS_PEDESTAL_X = HOBBIES_LEFT_WALL_X - OUT_OF_BOUNDS_VOID_LENGTH;
-/** Out of Bounds, Act 2: the kit sitting on the pedestal. Its first tool is a hammer. */
+/** Where the void ends: the Debugging Tools lie on the floor here. */
+export const OUT_OF_BOUNDS_TOOLBOX_X = HOBBIES_LEFT_WALL_X - OUT_OF_BOUNDS_VOID_LENGTH;
+/** Out of Bounds, Act 2: the kit on the floor. Its first tool is a hammer. */
 export const DEBUGGING_TOOLS_ITEM_ID = 'debugging-tools';
 
-/** What the pedestal holds, for the console and the scene. */
-export const OUT_OF_BOUNDS_PEDESTAL_TEXT = {
-  withKit:
-    'A closed sketchbook stood on its end, spine out, faintly glowing. On top sits a beat-up toolbox stencilled DEBUGGING TOOLS.',
-  empty: 'A closed sketchbook stood on its end, spine out. The top is empty: a dashed outline where the toolbox sat.'
+/** The end of the void, before and after the pickup, for the console. */
+export const OUT_OF_BOUNDS_TOOLBOX_TEXT = {
+  withKit: 'A beat-up toolbox lies on the blank floor, faintly glowing, stencilled DEBUGGING TOOLS.',
+  empty: 'Bare floor. A clean rectangle in the pencil dust shows where the toolbox lay.'
 } as const;
 
 /** Danilo's thought as he lifts the lid. */
 export const DEBUGGING_TOOLS_PICKUP_THOUGHT = '...debugging tools? There’s a hammer in here.';
 
-/** Physics left edge of the Hobbies scene: the player stops just beside the pedestal. */
-export const OUT_OF_BOUNDS_WORLD_LEFT_X = OUT_OF_BOUNDS_PEDESTAL_X + 40;
-/** Camera left edge: blank paper beyond the pedestal so it isn't jammed against the screen edge. */
-export const OUT_OF_BOUNDS_CAMERA_LEFT_X = OUT_OF_BOUNDS_PEDESTAL_X - 440;
+/** Physics left edge of the Hobbies scene: the player stops just beside the toolbox. */
+export const OUT_OF_BOUNDS_WORLD_LEFT_X = OUT_OF_BOUNDS_TOOLBOX_X + 60;
+/** Camera left edge: blank paper beyond the toolbox so it isn't jammed against the screen edge. */
+export const OUT_OF_BOUNDS_CAMERA_LEFT_X = OUT_OF_BOUNDS_TOOLBOX_X - 440;
 
 /**
  * The void reads as a collision bug: mostly blank paper. A few far-apart marks
- * and Danilo's thoughts are what keep the player walking to the pedestal.
+ * and Danilo's thoughts are what keep the player walking to the toolbox.
  */
 export type OutOfBoundsStage = 'past-the-wall' | 'margin-notes' | 'room-end';
 
@@ -82,7 +81,7 @@ export function outOfBoundsSightsNear(x: number): string[] {
 
 /**
  * Danilo's thoughts: few and far apart, so most of the walk is quiet. A bug
- * just past the wall, the first deliberate mark, and the pedestal coming up.
+ * just past the wall, the first deliberate mark, and the toolbox coming up.
  */
 const OUT_OF_BOUNDS_THOUGHTS: readonly { depth: number; text: string }[] = [
   { depth: 300, text: '...did I just walk through the wall?' },

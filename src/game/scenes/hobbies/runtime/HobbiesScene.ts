@@ -27,7 +27,7 @@ import {
   HOBBIES_LEFT_WALL_X,
   HOBBIES_RIGHT_WALL_X,
   OUT_OF_BOUNDS_CAMERA_LEFT_X,
-  OUT_OF_BOUNDS_PEDESTAL_X,
+  OUT_OF_BOUNDS_TOOLBOX_X,
   OUT_OF_BOUNDS_WORLD_LEFT_X
 } from '@/game/core/console';
 import { prefersReducedMotion, sketchTick } from '@/game/sharedSceneRuntime/motion/sketchMotion';
@@ -57,17 +57,17 @@ type HobbiesInteractionEffect =
   | { kind: 'openOverlay'; id: HobbiesOverlayId }
   | { kind: 'collectDebuggingTools' };
 
-type HobbiesInteractionId = 'exit' | 'pedestal' | HobbiesOverlayId;
+type HobbiesInteractionId = 'exit' | 'toolbox' | HobbiesOverlayId;
 
-/** Out of Bounds, Act 2: the Debugging Tools on the pedestal at the end of the void. */
-const PEDESTAL_TARGET: InteriorInteractionTarget<HobbiesInteractionId, HobbiesInteractionEffect> = {
-  id: 'pedestal',
-  kind: 'pedestal',
-  x: OUT_OF_BOUNDS_PEDESTAL_X,
+/** Out of Bounds, Act 2: the Debugging Tools on the floor at the end of the void. */
+const TOOLBOX_TARGET: InteriorInteractionTarget<HobbiesInteractionId, HobbiesInteractionEffect> = {
+  id: 'toolbox',
+  kind: 'toolbox',
+  x: OUT_OF_BOUNDS_TOOLBOX_X,
   distanceAnchorY: 450,
-  // The player stops 40px short of the pedestal; reach it from there.
-  interactRadius: 90,
-  prompt: { x: OUT_OF_BOUNDS_PEDESTAL_X, y: HOBBIES_FLOOR_Y - 230 },
+  // The player stops 60px short of the toolbox; reach it from there.
+  interactRadius: 110,
+  prompt: { x: OUT_OF_BOUNDS_TOOLBOX_X, y: HOBBIES_FLOOR_Y - 120 },
   enabled: () => !isItemOwned(DEBUGGING_TOOLS_ITEM_ID),
   effect: { kind: 'collectDebuggingTools' }
 };
@@ -120,7 +120,7 @@ export class HobbiesScene extends Phaser.Scene {
     const floorY = HOBBIES_FLOOR_Y;
 
     // Right edge is the drawn wall. The left wall is drawn just as solid but has
-    // no collision: beyond it runs the Out of Bounds void to the pedestal
+    // no collision: beyond it runs the Out of Bounds void to the toolbox
     // (docs/game-design/secrets/out-of-bounds.md, Act 1).
     const worldLeft = OUT_OF_BOUNDS_WORLD_LEFT_X;
     this.physics.world.setBounds(worldLeft, 0, HOBBIES_RIGHT_WALL_X - worldLeft, height);
@@ -199,7 +199,7 @@ export class HobbiesScene extends Phaser.Scene {
               ? ({ kind: 'close' } satisfies HobbiesInteractionEffect)
               : ({ kind: 'openOverlay', id: target.id } satisfies HobbiesInteractionEffect)
         })),
-        PEDESTAL_TARGET
+        TOOLBOX_TARGET
       ]
     });
 
@@ -224,7 +224,7 @@ export class HobbiesScene extends Phaser.Scene {
       exitRequested: commands.exitContext
     });
     const activeId = interaction?.activeTarget?.id ?? null;
-    this.updateRoom(activeId === 'pedestal' ? null : activeId, sketchTick(time));
+    this.updateRoom(activeId === 'toolbox' ? null : activeId, sketchTick(time));
     this.updateOutOfBounds(time);
 
     if (interaction?.effect?.kind === 'close') {
@@ -291,7 +291,7 @@ export class HobbiesScene extends Phaser.Scene {
     return sound.context ?? null;
   }
 
-  private updateRoom(activeId: Exclude<HobbiesInteractionId, 'pedestal'> | null, tick: number): void {
+  private updateRoom(activeId: Exclude<HobbiesInteractionId, 'toolbox'> | null, tick: number): void {
     const state = bridgeStore.getState();
     this.claimedScratch.clear();
     for (const partId of CIRCUIT_PART_IDS) {

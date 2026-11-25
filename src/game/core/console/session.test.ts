@@ -338,7 +338,7 @@ describe('out of bounds: past the Hobbies left wall', () => {
     expect(session.observe().hobbies?.playerX).toBe(200);
   });
 
-  it('stays blank like a bug, shows a few marks, ends at the pedestal, and walks back into the room', () => {
+  it('stays blank like a bug, shows a few marks, ends at the toolbox, and walks back into the room', () => {
     const session = enterHobbies();
     const stages: string[] = [];
     for (let i = 0; i < 200; i += 1) {
@@ -350,7 +350,7 @@ describe('out of bounds: past the Hobbies left wall', () => {
 
     const atEnd = session.observe();
     expect(atEnd.hobbies?.playerX).toBe(HOBBIES_PLAYER_MIN_X);
-    expect(atEnd.nearby[0]?.id).toBe('pedestal');
+    expect(atEnd.nearby[0]?.id).toBe('toolbox');
     expect(session.exec('look').message).toBeTruthy();
     expect(session.observe().mode).toBe('hobbies');
 
@@ -359,12 +359,12 @@ describe('out of bounds: past the Hobbies left wall', () => {
     expect(session.observe().hobbies?.playerX).toBe(HOBBIES_PLAYER_MAX_X);
   });
 
-  it('picks up the Debugging Tools from the pedestal once, without touching the street tally', () => {
+  it('picks up the Debugging Tools from the floor once, without touching the street tally', () => {
     const session = enterHobbies();
     session.exec('go left 200');
-    expect(session.observe().nearby[0]).toMatchObject({ id: 'pedestal', kind: 'pickup' });
+    expect(session.observe().nearby[0]).toMatchObject({ id: 'toolbox', kind: 'pickup' });
 
-    const pickup = session.exec('interact pedestal');
+    const pickup = session.exec('interact toolbox');
     expect(pickup.message).toMatch(/DEBUGGING TOOLS/);
     expect(pickup.message).toMatch(/hammer/i);
     expect(pickup.events).toContainEqual({ type: 'item_collected', itemId: 'debugging-tools' });
@@ -372,10 +372,10 @@ describe('out of bounds: past the Hobbies left wall', () => {
     expect(session.format()).toMatch(/inventory: .*debugging-tools/);
     expect(getOverworldProgress(session.observe())).toMatchObject({ found: 0, total: 6 });
 
-    // The pedestal is empty afterwards and gives nothing more.
-    expect(session.observe().nearby[0]).toMatchObject({ id: 'pedestal', kind: 'prop' });
-    const again = session.exec('interact pedestal');
-    expect(again.message).toMatch(/empty/i);
+    // The floor is bare afterwards and gives nothing more.
+    expect(session.observe().nearby[0]).toMatchObject({ id: 'toolbox', kind: 'prop' });
+    const again = session.exec('interact toolbox');
+    expect(again.message).toMatch(/bare floor/i);
     expect(again.events).toEqual([]);
     expect(session.observe().ownedItemIds.filter((id) => id === 'debugging-tools')).toHaveLength(1);
   });
@@ -411,7 +411,7 @@ describe('out of bounds: past the Hobbies left wall', () => {
     session.exec('go left 200');
     const end = session.format();
     expect(end).toContain('ROOM_END');
-    expect(end).toMatch(/pedestal/i);
+    expect(end).toMatch(/toolbox/i);
   });
 
   // Few and far apart: the walk should mostly be quiet.

@@ -11,8 +11,8 @@ import {
 import {
   DEBUGGING_TOOLS_ITEM_ID,
   DEBUGGING_TOOLS_PICKUP_THOUGHT,
-  OUT_OF_BOUNDS_PEDESTAL_TEXT,
-  OUT_OF_BOUNDS_PEDESTAL_X,
+  OUT_OF_BOUNDS_TOOLBOX_TEXT,
+  OUT_OF_BOUNDS_TOOLBOX_X,
   OUT_OF_BOUNDS_STAGE_TEXT,
   outOfBoundsDepth,
   outOfBoundsSightsNear,
@@ -24,6 +24,8 @@ import { getHobbyOverlay } from './overlayCatalog';
 
 const HOBBIES_STEP_PX = 40;
 const HOBBIES_REACH_PX = 70;
+/** The player stops beside the toolbox at the void's end, a little further off than a station. */
+const TOOLBOX_REACH_PX = 110;
 
 const STATION_PROMPTS: Record<HobbyStationId, string> = {
   art: 'Doodle at the easel',
@@ -69,14 +71,14 @@ export function listHobbiesNearby(state: GameWorldState): NearbyThing[] {
       kind: 'exit'
     });
   }
-  const pedestalDistance = Math.abs(x - OUT_OF_BOUNDS_PEDESTAL_X);
-  if (pedestalDistance <= HOBBIES_REACH_PX) {
+  const toolboxDistance = Math.abs(x - OUT_OF_BOUNDS_TOOLBOX_X);
+  if (toolboxDistance <= TOOLBOX_REACH_PX) {
     things.push({
-      id: 'pedestal',
-      label: 'Sketchbook-spine pedestal',
-      distance: pedestalDistance,
+      id: 'toolbox',
+      label: state.ownedItemIds.includes(DEBUGGING_TOOLS_ITEM_ID) ? 'Where the toolbox lay' : 'Toolbox',
+      distance: toolboxDistance,
       prompt: state.ownedItemIds.includes(DEBUGGING_TOOLS_ITEM_ID)
-        ? 'Look at the empty pedestal'
+        ? 'Look at the bare floor'
         : 'Pick up the Debugging Tools',
       kind: state.ownedItemIds.includes(DEBUGGING_TOOLS_ITEM_ID) ? 'prop' : 'pickup'
     });
@@ -128,7 +130,7 @@ export function interactHobbies(
   if (picked.id === 'exit') {
     return returnToOverworld(state, 'You step back onto the street.');
   }
-  if (picked.id === 'pedestal') return interactPedestal(state);
+  if (picked.id === 'toolbox') return interactToolbox(state);
 
   const stationId = picked.id as HobbyStationId;
   state.mode = 'overlay';
@@ -139,15 +141,15 @@ export function interactHobbies(
   };
 }
 
-/** Out of Bounds, Act 2: lift the Debugging Tools off the pedestal, once. */
-function interactPedestal(state: GameWorldState): { message: string; events: GameSessionEvent[] } {
+/** Out of Bounds, Act 2: pick the Debugging Tools up off the floor, once. */
+function interactToolbox(state: GameWorldState): { message: string; events: GameSessionEvent[] } {
   if (state.ownedItemIds.includes(DEBUGGING_TOOLS_ITEM_ID)) {
-    return { message: OUT_OF_BOUNDS_PEDESTAL_TEXT.empty, events: [] };
+    return { message: OUT_OF_BOUNDS_TOOLBOX_TEXT.empty, events: [] };
   }
   const itemId: GameItemId = DEBUGGING_TOOLS_ITEM_ID;
   state.ownedItemIds = [...state.ownedItemIds, itemId];
   return {
-    message: `${OUT_OF_BOUNDS_PEDESTAL_TEXT.withKit} You take it. Danilo: "${DEBUGGING_TOOLS_PICKUP_THOUGHT}" (Debugging Tools added to the Backpack.)`,
+    message: `${OUT_OF_BOUNDS_TOOLBOX_TEXT.withKit} You take it. Danilo: "${DEBUGGING_TOOLS_PICKUP_THOUGHT}" (Debugging Tools added to the Backpack.)`,
     events: [{ type: 'item_collected', itemId }]
   };
 }

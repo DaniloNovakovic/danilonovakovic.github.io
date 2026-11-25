@@ -13,7 +13,7 @@ const HOBBIES_PLAYER_HALF_WIDTH = 24;
 export const HOBBIES_PLAYER_MAX_X = HOBBIES_RIGHT_WALL_X - HOBBIES_PLAYER_HALF_WIDTH;
 /**
  * Furthest left the player walks. Past the drawn left wall (which has no collision)
- * lies the Out of Bounds void, ending at the pedestal (see outOfBoundsVoid.ts).
+ * lies the Out of Bounds void, ending at the toolbox (see outOfBoundsVoid.ts).
  */
 export const HOBBIES_PLAYER_MIN_X = OUT_OF_BOUNDS_WORLD_LEFT_X + HOBBIES_PLAYER_HALF_WIDTH;
 
