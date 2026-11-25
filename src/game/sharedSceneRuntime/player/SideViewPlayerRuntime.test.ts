@@ -228,16 +228,16 @@ describe('SideViewPlayerRuntime', () => {
     };
 
     cursors.right.isDown = true;
-    // Sketch clock ticks every 90ms; each walk frame holds two ticks.
+    // One walk frame per 90ms sketch-clock tick, like Ridge's stick figures.
     poseAt(0);
-    poseAt(200);
-    poseAt(380);
+    poseAt(100);
+    poseAt(190);
     equipped = true;
     runtime.syncAppearance();
-    poseAt(560);
-    poseAt(740);
+    poseAt(280);
+    poseAt(370);
     cursors.right.isDown = false;
-    poseAt(740);
+    poseAt(370);
 
     expect(poses).toEqual([
       'player_idle_walk0',
@@ -248,6 +248,35 @@ describe('SideViewPlayerRuntime', () => {
       'player_glasses'
     ]);
     expect(sprite.setAngle).not.toHaveBeenCalled();
+  });
+
+  it('runs through its own stride frames while sprinting and tucks its legs in the air', () => {
+    const { scene, sprite, cursors } = createScene();
+    const runtime = createSideViewPlayerRuntime({
+      scene,
+      start: { x: 10, y: 20 },
+      sprite: { gravityY: 1000 },
+      movement,
+      input: { allowJump: true, allowSprint: true }
+    });
+    const poseAt = (now: number) => {
+      scene.time.now = now;
+      runtime.update();
+      return String(vi.mocked(sprite.setTexture).mock.lastCall?.[0]);
+    };
+
+    cursors.right.isDown = true;
+    cursors.shift.isDown = true;
+    expect([poseAt(0), poseAt(90)]).toEqual(['player_idle_run0', 'player_idle_run1']);
+
+    sprite.body.touching.down = false;
+    expect(poseAt(180)).toBe('player_idle_air');
+    cursors.right.isDown = false;
+    cursors.shift.isDown = false;
+    expect(poseAt(270)).toBe('player_idle_air');
+
+    sprite.body.touching.down = true;
+    expect(poseAt(360)).toBe('player_idle');
   });
 
   it('pauses controller, keyboard, and physics while zeroing velocity', () => {

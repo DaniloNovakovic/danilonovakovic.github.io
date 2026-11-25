@@ -80,10 +80,23 @@ export interface SideViewPlayerRuntime {
 }
 
 const DEFAULT_TEXTURE_KEY = 'player_idle';
-/** Walk cycle frames drawn by TextureGenerator (`<base>_walk0..3`): stride + lean, pass + hop. */
-const WALK_FRAME_COUNT = 4;
-/** Sketch-clock ticks each walk frame is held (~180ms), the same stepped feel as Ridge. */
-const WALK_TICKS_PER_FRAME = 2;
+/**
+ * Stride cycles drawn by TextureGenerator (`<base>_walk0..3`, `<base>_run0..3`):
+ * contact, pass, other foot's contact, pass. One frame per sketch-clock tick
+ * (~90ms), the same stepped cadence as Ridge's stick figures.
+ */
+const STRIDE_FRAME_COUNT = 4;
+
+/**
+ * Deep links (?startScene=hobbies) can start a room before the street ever
+ * generated the player textures.
+ */
+function ensurePlayerTexture(scene: Phaser.Scene, textureKey = DEFAULT_TEXTURE_KEY): string {
+  if (textureKey === DEFAULT_TEXTURE_KEY && !scene.textures.exists(DEFAULT_TEXTURE_KEY)) {
+    TextureGenerator.generatePlayer(scene);
+  }
+  return textureKey;
+}
 
 function resolveStartPosition(options: SideViewPlayerRuntimeOptions): ResumeSnapshot {
   const raw = options.resumePosition ?? options.start;
@@ -107,20 +120,15 @@ class PhaserSideViewPlayerRuntime implements SideViewPlayerRuntime {
   /** Idle or glasses texture, before the walk pose. */
   private baseTextureKey: string;
   private appliedTextureKey: string;
-  /** Current walk frame, or null when standing. */
-  private walkFrame: number | null = null;
+  /** Pose suffix on top of the base texture (`_walk2`, `_run0`, `_air`), or '' when standing. */
+  private poseSuffix = '';
   private readonly motion = !prefersReducedMotion();
 
   constructor(options: SideViewPlayerRuntimeOptions) {
     this.options = options;
     const { scene } = options;
     const start = resolveStartPosition(options);
-    const textureKey = options.sprite?.textureKey ?? DEFAULT_TEXTURE_KEY;
-    // Deep links (?startScene=hobbies) can start a room before the street ever
-    // generated the player textures.
-    if (textureKey === DEFAULT_TEXTURE_KEY && !scene.textures.exists(DEFAULT_TEXTURE_KEY)) {
-      TextureGenerator.generatePlayer(scene);
-    }
+    const textureKey = ensurePlayerTexture(scene, options.sprite?.textureKey);
 
     this.player = scene.physics.add.sprite(start.x, start.y, textureKey);
     this.baseTextureKey = textureKey;
@@ -173,8 +181,7 @@ class PhaserSideViewPlayerRuntime implements SideViewPlayerRuntime {
     this.player.setFlipX(step.facingLeft);
     // Walk through drawn frames, never a live tilt: rotating the texture by a
     // new angle every frame smears its ink lines and disables pixel rounding.
-    const tick = sketchTick(this.options.scene.time.now);
-    this.walkFrame = this.motion && step.moving ? Math.floor(tick / WALK_TICKS_PER_FRAME) % WALK_FRAME_COUNT : null;
+    this.poseSuffix = this.resolvePoseSuffix(step);
     this.applyTexture();
 
     return { paused: false, commands, step };
@@ -191,9 +198,19 @@ class PhaserSideViewPlayerRuntime implements SideViewPlayerRuntime {
     this.applyTexture(true);
   }
 
+  private resolvePoseSuffix(step: PlayerStepResult): string {
+    const body = this.player.body;
+    const grounded = body.touching.down || body.blocked?.down === true;
+    if (!grounded) return '_air';
+    if (!this.motion || !step.moving) return '';
+    const running = Math.abs(step.velocityX) > this.options.movement.walkSpeed + 1;
+    const frame = sketchTick(this.options.scene.time.now) % STRIDE_FRAME_COUNT;
+    return `${running ? '_run' : '_walk'}${frame}`;
+  }
+
   private applyTexture(force = false): void {
-    const walkKey = this.walkFrame === null ? null : `${this.baseTextureKey}_walk${this.walkFrame}`;
-    const key = walkKey && this.options.scene.textures.exists(walkKey) ? walkKey : this.baseTextureKey;
+    const poseKey = this.poseSuffix ? `${this.baseTextureKey}${this.poseSuffix}` : null;
+    const key = poseKey && this.options.scene.textures.exists(poseKey) ? poseKey : this.baseTextureKey;
     if (key === this.appliedTextureKey && !force) return;
     this.appliedTextureKey = key;
     this.player.setTexture(key);
