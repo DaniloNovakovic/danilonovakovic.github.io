@@ -7,3 +7,4 @@ export * from './content/overworldSpots';
 export * from './content/basementSpots';
 export * from './content/circuitParts';
 export * from './content/hobbiesSpots';
+export * from './content/outOfBoundsVoid';

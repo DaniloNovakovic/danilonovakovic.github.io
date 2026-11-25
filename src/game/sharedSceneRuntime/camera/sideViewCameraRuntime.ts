@@ -48,6 +48,8 @@ export interface SideViewCameraFocus {
 
 export interface SideViewCameraRuntime {
   refresh(): void;
+  /** Change the world the follow is clamped to, e.g. when a room opens up into more level. */
+  setWorldBounds(bounds: SideViewCameraWorldBounds): void;
   /** Ease into a close-up, or back to following the target with `null` (eased over the close-up's own `durationMs`). */
   focus(target: SideViewCameraFocus | null): void;
   destroy(): void;
@@ -64,12 +66,13 @@ function getSceneViewport(scene: Phaser.Scene, designSize: SideViewCameraDesignS
 export function createSideViewCameraRuntime({
   scene,
   followTarget,
-  worldBounds,
+  worldBounds: initialWorldBounds,
   designSize,
   resolveProfile,
   lerp = { x: 0.08, y: 0.08 }
 }: SideViewCameraRuntimeOptions): SideViewCameraRuntime {
   const camera = scene.cameras.main;
+  let worldBounds = initialWorldBounds;
   const player = followTarget as Phaser.GameObjects.Sprite;
   const focusPoint = new Phaser.Math.Vector2();
   let focused: SideViewCameraFocus | null = null;
@@ -197,6 +200,11 @@ export function createSideViewCameraRuntime({
     applyFraming(durationMs);
   };
 
+  const setWorldBounds = (bounds: SideViewCameraWorldBounds) => {
+    worldBounds = bounds;
+    refresh();
+  };
+
   const destroy = () => {
     cancelRelease();
     scene.scale.off(Phaser.Scale.Events.RESIZE, refresh);
@@ -207,5 +215,5 @@ export function createSideViewCameraRuntime({
   scene.scale.on(Phaser.Scale.Events.RESIZE, refresh);
   scene.events.once(Phaser.Scenes.Events.SHUTDOWN, destroy);
 
-  return { refresh, focus, destroy };
+  return { refresh, setWorldBounds, focus, destroy };
 }

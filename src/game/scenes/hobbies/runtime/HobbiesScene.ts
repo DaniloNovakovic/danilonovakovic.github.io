@@ -22,9 +22,15 @@ import {
 } from '@/game/sharedSceneRuntime/config';
 import { bridgeStore, isItemEquipped, type OpenOverlayOptions } from '@/game/bridge/store';
 import { CIRCUIT_PART_HOBBY, CIRCUIT_PART_IDS } from '@/game/core/console/content/circuitParts';
-import { HOBBIES_RIGHT_WALL_X } from '@/game/core/console';
+import {
+  HOBBIES_LEFT_WALL_X,
+  HOBBIES_RIGHT_WALL_X,
+  OUT_OF_BOUNDS_CAMERA_LEFT_X,
+  OUT_OF_BOUNDS_WORLD_LEFT_X
+} from '@/game/core/console';
 import { prefersReducedMotion, sketchTick } from '@/game/sharedSceneRuntime/motion/sketchMotion';
 import { HobbiesRoom } from './HobbiesRoom';
+import { HobbiesVoid } from './HobbiesVoid';
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
 import {
   createSideViewPlayerRuntime,
@@ -34,6 +40,14 @@ import {
   createInteriorInteractionRuntime,
   type InteriorInteractionRuntime
 } from '@/game/sharedSceneRuntime/interactions/InteriorInteractionRuntime';
+
+const ROOM_CAMERA_BOUNDS = { x: 0, y: 0, width: HOBBIES_ROOM_WIDTH, height: HOBBIES_ROOM_HEIGHT };
+const VOID_CAMERA_BOUNDS = {
+  x: OUT_OF_BOUNDS_CAMERA_LEFT_X,
+  y: 0,
+  width: HOBBIES_ROOM_WIDTH - OUT_OF_BOUNDS_CAMERA_LEFT_X,
+  height: HOBBIES_ROOM_HEIGHT
+};
 
 type HobbiesInteractionEffect = { kind: 'close' } | { kind: 'openOverlay'; id: HobbiesOverlayId };
 
@@ -49,6 +63,8 @@ export class HobbiesScene extends Phaser.Scene {
   private onOpenOverlay?: (overlayId: OverlayId, options?: OpenOverlayOptions) => void;
   private isPaused: boolean = false;
   private room?: HobbiesRoom;
+  private outOfBounds?: HobbiesVoid;
+  private cameraShowsVoid = false;
   private motion = true;
   private readonly claimedScratch = new Set<HobbiesOverlayId>();
   private resumePosition?: { x: number; y: number };
@@ -84,8 +100,11 @@ export class HobbiesScene extends Phaser.Scene {
     const height = HOBBIES_ROOM_HEIGHT;
     const floorY = HOBBIES_FLOOR_Y;
 
-    // Right edge is the drawn wall. The left stays open on purpose: Out of Bounds void.
-    this.physics.world.setBounds(0, 0, HOBBIES_RIGHT_WALL_X, height);
+    // Right edge is the drawn wall. The left wall is drawn just as solid but has
+    // no collision: beyond it runs the Out of Bounds void to the pedestal
+    // (docs/game-design/secrets/out-of-bounds.md, Act 1).
+    const worldLeft = OUT_OF_BOUNDS_WORLD_LEFT_X;
+    this.physics.world.setBounds(worldLeft, 0, HOBBIES_RIGHT_WALL_X - worldLeft, height);
 
     this.motion = !prefersReducedMotion();
     this.room = new HobbiesRoom(this);
@@ -115,12 +134,8 @@ export class HobbiesScene extends Phaser.Scene {
         glassesTextureKey: 'player_glasses'
       },
       camera: {
-        worldBounds: {
-          x: 0,
-          y: 0,
-          width,
-          height
-        },
+        // Framed on the room until the player glitches out (see updateCameraWorld).
+        worldBounds: ROOM_CAMERA_BOUNDS,
         designSize: {
           width: GAME_DESIGN_WIDTH,
           height: GAME_DESIGN_HEIGHT
@@ -132,11 +147,13 @@ export class HobbiesScene extends Phaser.Scene {
       }
     });
     this.player = this.playerRuntime.player;
+    this.outOfBounds = new HobbiesVoid(this, this.player, () => this.getAudioContext());
 
+    // The floor keeps going under the void even after its ink line stops.
     const ground = this.add.zone(
-      width / 2,
+      (worldLeft + width) / 2,
       floorY + HOBBIES_GROUND_ZONE.centerOffsetY,
-      HOBBIES_GROUND_ZONE.width,
+      width - worldLeft,
       HOBBIES_GROUND_ZONE.height
     );
     this.physics.add.existing(ground, true);
@@ -185,6 +202,7 @@ export class HobbiesScene extends Phaser.Scene {
       exitRequested: commands.exitContext
     });
     this.updateRoom(interaction?.activeTarget?.id ?? null, sketchTick(time));
+    this.updateOutOfBounds(time);
 
     if (interaction?.effect?.kind === 'close') {
       this.onClose?.();
@@ -204,6 +222,40 @@ export class HobbiesScene extends Phaser.Scene {
           break;
       }
     }
+  }
+
+  private updateOutOfBounds(time: number): void {
+    this.updateCameraWorld();
+    const { body } = this.player;
+    this.outOfBounds?.update({
+      playerX: this.player.x,
+      walking: body.blocked.down && Math.abs(body.velocity.x) > 1,
+      time,
+      motion: this.motion
+    });
+  }
+
+  /**
+   * The camera only reveals the void once the player is out in it, so the room
+   * never looks like it has anything beside it. Back inside, it re-frames the
+   * room once the room fills the view again, so the switch never snaps.
+   */
+  private updateCameraWorld(): void {
+    const camera = this.playerRuntime?.cameraRuntime;
+    if (!camera) return;
+    const x = this.player.x;
+    if (!this.cameraShowsVoid && x < HOBBIES_LEFT_WALL_X) {
+      this.cameraShowsVoid = true;
+      camera.setWorldBounds(VOID_CAMERA_BOUNDS);
+    } else if (this.cameraShowsVoid && x > HOBBIES_ROOM_WIDTH / 2) {
+      this.cameraShowsVoid = false;
+      camera.setWorldBounds(ROOM_CAMERA_BOUNDS);
+    }
+  }
+
+  private getAudioContext(): AudioContext | null {
+    const sound = this.sound as Partial<Phaser.Sound.WebAudioSoundManager>;
+    return sound.context ?? null;
   }
 
   private updateRoom(activeId: HobbiesInteractionId | null, tick: number): void {

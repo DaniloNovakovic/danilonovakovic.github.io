@@ -63,7 +63,7 @@ export class GameConsoleSession {
         bananaFirstPeelPending: false
       },
       basement: { playerX: 135, facing: 'right', corkboardNote: 0 },
-      hobbies: { playerX: 200, facing: 'right' },
+      hobbies: { playerX: 200, facing: 'right', voidFurthestDepth: 0 },
       potassium: {
         phase: 'lobby',
         wave: 0,

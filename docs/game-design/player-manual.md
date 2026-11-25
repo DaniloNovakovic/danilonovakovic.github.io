@@ -51,6 +51,7 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
 - Art lets you sign and pin a drawing; it appears on the street billboard.
 - Close a hobby overlay to return to the Hobbies room.
 - Press `H` or `Esc`, or interact with the exit, to return to the street.
+- Not every wall in the Hobbies room is as solid as it looks. If you end up somewhere undrawn, walk back right to return; `H` and `Esc` work from anywhere.
 
 ## Developer Basement
 

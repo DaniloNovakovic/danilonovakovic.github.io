@@ -312,10 +312,106 @@ describe('hobbies room walls', () => {
     expect(session.observe().hobbies?.playerX).toBe(HOBBIES_PLAYER_MAX_X);
     expect(HOBBIES_PLAYER_MAX_X).toBeLessThan(HOBBIES_RIGHT_WALL_X);
   });
+});
 
-  it('keeps the left side where it was', () => {
+describe('out of bounds: past the Hobbies left wall', () => {
+  function enterHobbies() {
+    const session = createSession();
+    walkOverworldTo(session, 2400);
+    session.exec('interact hobbies');
+    return session;
+  }
+
+  it('walks straight through the solid-looking left wall onto blank paper', () => {
     const session = enterHobbies();
-    session.exec('go left 50');
-    expect(session.observe().hobbies?.playerX).toBe(HOBBIES_PLAYER_MIN_X);
+    // Enter at x=200; ten 40px steps left: no stop at the wall (x=50), out to x=-200.
+    const step = session.exec('go left 10');
+    expect(step.message).toMatch(/through the wall/i);
+    const hobbies = session.observe().hobbies;
+    expect(hobbies?.playerX).toBe(-200);
+    expect(hobbies?.void?.stage).toBe('past-the-wall');
+    expect(hobbies?.void?.sights).toEqual([]);
+
+    // And straight back in: ten steps right lands at x=200.
+    session.exec('go right 10');
+    expect(session.observe().hobbies?.void).toBeNull();
+    expect(session.observe().hobbies?.playerX).toBe(200);
+  });
+
+  it('stays blank like a bug, shows a few marks, ends at the empty pedestal, and walks back into the room', () => {
+    const session = enterHobbies();
+    const stages: string[] = [];
+    for (let i = 0; i < 200; i += 1) {
+      session.exec('go left 1');
+      const stage = session.observe().hobbies?.void?.stage;
+      if (stage && stages[stages.length - 1] !== stage) stages.push(stage);
+    }
+    expect(stages).toEqual(['past-the-wall', 'margin-notes', 'room-end']);
+
+    const atEnd = session.observe();
+    expect(atEnd.hobbies?.playerX).toBe(HOBBIES_PLAYER_MIN_X);
+    expect(atEnd.nearby[0]?.id).toBe('pedestal');
+    expect(session.exec('interact pedestal').message).toMatch(/empty/i);
+    expect(session.observe().mode).toBe('hobbies');
+
+    session.exec('go right 200');
+    expect(session.observe().hobbies?.void).toBeNull();
+    expect(session.observe().hobbies?.playerX).toBe(HOBBIES_PLAYER_MAX_X);
+  });
+
+  it('describes the unfinished page in the headless look text', () => {
+    const session = enterHobbies();
+    expect(session.format()).not.toMatch(/edge of the page/i);
+
+    session.exec('go left 10');
+    const justOut = session.format();
+    expect(justOut).toMatch(/nothing is drawn/i);
+    expect(justOut).not.toMatch(/you notice/i);
+    expect(justOut).toMatch(/walk right .*room/i);
+
+    // Still blank ~1500px out: the long walk is carried by Danilo's thoughts.
+    session.exec('go left 30');
+    expect(session.format()).not.toMatch(/you notice/i);
+
+    // ~2650px out, the first deliberate mark shows it isn't just a bug.
+    session.exec('go left 30');
+    const middle = session.format();
+    expect(middle).toMatch(/on purpose/i);
+    expect(middle).toContain('TODO: fix left wall collision');
+
+    session.exec('go left 200');
+    const end = session.format();
+    expect(end).toContain('ROOM_END');
+    expect(end).toMatch(/pedestal/i);
+  });
+
+  // Few and far apart: the walk should mostly be quiet.
+  const THOUGHTS = [
+    '...did I just walk through the wall?',
+    '...this wasn’t finished.',
+    'Wait. There’s something up ahead.'
+  ];
+
+  function thoughtsWhileWalking(session: GameConsoleSession, direction: 'left' | 'right', steps: number): string[] {
+    const heard: string[] = [];
+    for (let i = 0; i < steps; i += 1) {
+      const message = session.exec(`go ${direction} 1`).message;
+      for (const match of message.matchAll(/Danilo: "([^"]+)"/g)) heard.push(match[1] ?? '');
+    }
+    return heard;
+  }
+
+  it('lets Danilo think out loud by distance, once per line per visit', () => {
+    const session = enterHobbies();
+    expect(thoughtsWhileWalking(session, 'left', 200)).toEqual(THOUGHTS);
+
+    // Pacing back and forth in the same visit repeats nothing.
+    thoughtsWhileWalking(session, 'right', 200);
+    expect(thoughtsWhileWalking(session, 'left', 200)).toEqual([]);
+
+    // A fresh visit hears them again.
+    session.exec('leave');
+    session.exec('interact hobbies');
+    expect(thoughtsWhileWalking(session, 'left', 200)).toEqual(THOUGHTS);
   });
 });
