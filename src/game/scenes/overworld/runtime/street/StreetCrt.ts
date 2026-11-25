@@ -12,6 +12,8 @@ const SCREEN_W = 60;
 const SCREEN_H = 44;
 const STATIC_PERIOD_TICKS = 38;
 const STATIC_BURST_TICKS = 3;
+/** The stand's bottom edge sits this far below the drawing's anchor y. */
+const STAND_BOTTOM_PX = 10;
 
 export class StreetCrt {
   private readonly body: Phaser.GameObjects.Graphics;
@@ -21,9 +23,10 @@ export class StreetCrt {
   private readonly x: number;
   private readonly y: number;
 
-  constructor(scene: Phaser.Scene, x: number, y: number, depth: number) {
+  /** `groundY` is the line the stand rests on. */
+  constructor(scene: Phaser.Scene, x: number, groundY: number, depth: number) {
     this.x = x;
-    this.y = y;
+    this.y = groundY - STAND_BOTTOM_PX;
     this.body = scene.add.graphics().setDepth(depth);
     this.screen = scene.add.graphics().setDepth(depth + 0.5);
   }

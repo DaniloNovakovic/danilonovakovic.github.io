@@ -31,7 +31,9 @@ vi.mock('../camera/sideViewCameraRuntime', () => ({
 }));
 
 vi.mock('../textures/TextureGenerator', () => ({
-  TextureGenerator: { generatePlayer: vi.fn() }
+  TextureGenerator: { generatePlayer: vi.fn() },
+  PLAYER_FRAME_HEIGHT: 65,
+  PLAYER_FEET_Y: 60
 }));
 
 import { createSideViewPlayerRuntime } from './SideViewPlayerRuntime';
@@ -48,7 +50,9 @@ function createSprite() {
   const sprite = {
     x: 0,
     y: 0,
-    body: { touching: { down: true } },
+    width: 48,
+    height: 65,
+    body: { touching: { down: true }, setSize: vi.fn(), setOffset: vi.fn() },
     setDepth: vi.fn(),
     setCollideWorldBounds: vi.fn(),
     setGravityY: vi.fn(),
@@ -158,6 +162,9 @@ describe('SideViewPlayerRuntime', () => {
     });
 
     expect(scene.physics.add.sprite).toHaveBeenCalledWith(10, 20, 'player_idle');
+    // The body ends at the drawn feet, not at the shadow margin under them.
+    expect(sprite.body.setSize).toHaveBeenCalledWith(48, 60, false);
+    expect(sprite.body.setOffset).toHaveBeenCalledWith(0, 0);
     expect(sprite.setDepth).toHaveBeenCalledWith(25);
     expect(sprite.setCollideWorldBounds).toHaveBeenCalledWith(true);
     expect(sprite.setGravityY).toHaveBeenCalledWith(800);
