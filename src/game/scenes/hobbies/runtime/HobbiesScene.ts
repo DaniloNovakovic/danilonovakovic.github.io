@@ -247,11 +247,14 @@ export class HobbiesScene extends Phaser.Scene {
     }
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => bridgeActions.clearSceneUi(HOBBIES_SCENE_ID));
 
-    // The floor keeps going under the void even after its ink line stops.
+    // The floor keeps going under the void even after its ink line stops, and
+    // always as far as the escape's opening: confirming the toolbox widens the
+    // world mid-visit, and the player must not fall through the page there.
+    const groundLeft = OUT_OF_BOUNDS_ESCAPE_WORLD_LEFT_X;
     const ground = this.add.zone(
-      (worldLeft + width) / 2,
+      (groundLeft + width) / 2,
       floorY + HOBBIES_GROUND_ZONE.centerOffsetY,
-      width - worldLeft,
+      width - groundLeft,
       HOBBIES_GROUND_ZONE.height
     );
     this.physics.add.existing(ground, true);
