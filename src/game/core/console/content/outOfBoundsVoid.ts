@@ -12,6 +12,19 @@ export const HOBBIES_LEFT_WALL_X = 50;
 export const OUT_OF_BOUNDS_VOID_LENGTH = 6000;
 /** The empty sketchbook-spine pedestal that ends the void. */
 export const OUT_OF_BOUNDS_PEDESTAL_X = HOBBIES_LEFT_WALL_X - OUT_OF_BOUNDS_VOID_LENGTH;
+/** Out of Bounds, Act 2: the kit sitting on the pedestal. Its first tool is a hammer. */
+export const DEBUGGING_TOOLS_ITEM_ID = 'debugging-tools';
+
+/** What the pedestal holds, for the console and the scene. */
+export const OUT_OF_BOUNDS_PEDESTAL_TEXT = {
+  withKit:
+    'A closed sketchbook stood on its end, spine out, faintly glowing. On top sits a beat-up toolbox stencilled DEBUGGING TOOLS.',
+  empty: 'A closed sketchbook stood on its end, spine out. The top is empty: a dashed outline where the toolbox sat.'
+} as const;
+
+/** Danilo's thought as he lifts the lid. */
+export const DEBUGGING_TOOLS_PICKUP_THOUGHT = '...debugging tools? There’s a hammer in here.';
+
 /** Physics left edge of the Hobbies scene: the player stops just beside the pedestal. */
 export const OUT_OF_BOUNDS_WORLD_LEFT_X = OUT_OF_BOUNDS_PEDESTAL_X + 40;
 /** Camera left edge: blank paper beyond the pedestal so it isn't jammed against the screen edge. */

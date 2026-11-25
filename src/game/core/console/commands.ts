@@ -1,9 +1,10 @@
 // Command parsers are table-driven; remaining branching is intentional CLI surface area.
 // fallow-ignore-file complexity
 import { CIRCUIT_PART_IDS } from './content/circuitParts';
+import { DEBUGGING_TOOLS_ITEM_ID } from './content/outOfBoundsVoid';
 import type { GameCommand, GameFacing, GameItemId } from './types';
 
-const ITEM_IDS = new Set<GameItemId>(['glasses', 'circuit', ...CIRCUIT_PART_IDS]);
+const ITEM_IDS = new Set<GameItemId>(['glasses', 'circuit', ...CIRCUIT_PART_IDS, DEBUGGING_TOOLS_ITEM_ID]);
 
 const SIMPLE_COMMANDS: Record<string, GameCommand> = {
   help: { type: 'help' },
@@ -66,7 +67,7 @@ export function getGameHelpText(): string {
     '  start | fight | draft <id|index>',
     '',
     'AI cheats:',
-    '  cheat give glasses|circuit|copper-string|clock-crystal|battery-cell',
+    '  cheat give glasses|circuit|copper-string|clock-crystal|battery-cell|debugging-tools',
     '',
     'Scripts: separate commands with ;',
     'Example smoke:',

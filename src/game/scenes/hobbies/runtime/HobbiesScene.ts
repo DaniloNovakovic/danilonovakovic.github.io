@@ -20,12 +20,14 @@ import {
   SIDE_VIEW_SPRINT_SPEED,
   SIDE_VIEW_WALK_SPEED
 } from '@/game/sharedSceneRuntime/config';
-import { bridgeStore, isItemEquipped, type OpenOverlayOptions } from '@/game/bridge/store';
+import { bridgeActions, bridgeStore, isItemEquipped, isItemOwned, type OpenOverlayOptions } from '@/game/bridge/store';
 import { CIRCUIT_PART_HOBBY, CIRCUIT_PART_IDS } from '@/game/core/console/content/circuitParts';
 import {
+  DEBUGGING_TOOLS_ITEM_ID,
   HOBBIES_LEFT_WALL_X,
   HOBBIES_RIGHT_WALL_X,
   OUT_OF_BOUNDS_CAMERA_LEFT_X,
+  OUT_OF_BOUNDS_PEDESTAL_X,
   OUT_OF_BOUNDS_WORLD_LEFT_X
 } from '@/game/core/console';
 import { prefersReducedMotion, sketchTick } from '@/game/sharedSceneRuntime/motion/sketchMotion';
@@ -38,7 +40,8 @@ import {
 } from '@/game/sharedSceneRuntime/player/SideViewPlayerRuntime';
 import {
   createInteriorInteractionRuntime,
-  type InteriorInteractionRuntime
+  type InteriorInteractionRuntime,
+  type InteriorInteractionTarget
 } from '@/game/sharedSceneRuntime/interactions/InteriorInteractionRuntime';
 
 const ROOM_CAMERA_BOUNDS = { x: 0, y: 0, width: HOBBIES_ROOM_WIDTH, height: HOBBIES_ROOM_HEIGHT };
@@ -49,9 +52,25 @@ const VOID_CAMERA_BOUNDS = {
   height: HOBBIES_ROOM_HEIGHT
 };
 
-type HobbiesInteractionEffect = { kind: 'close' } | { kind: 'openOverlay'; id: HobbiesOverlayId };
+type HobbiesInteractionEffect =
+  | { kind: 'close' }
+  | { kind: 'openOverlay'; id: HobbiesOverlayId }
+  | { kind: 'collectDebuggingTools' };
 
-type HobbiesInteractionId = 'exit' | HobbiesOverlayId;
+type HobbiesInteractionId = 'exit' | 'pedestal' | HobbiesOverlayId;
+
+/** Out of Bounds, Act 2: the Debugging Tools on the pedestal at the end of the void. */
+const PEDESTAL_TARGET: InteriorInteractionTarget<HobbiesInteractionId, HobbiesInteractionEffect> = {
+  id: 'pedestal',
+  kind: 'pedestal',
+  x: OUT_OF_BOUNDS_PEDESTAL_X,
+  distanceAnchorY: 450,
+  // The player stops 40px short of the pedestal; reach it from there.
+  interactRadius: 90,
+  prompt: { x: OUT_OF_BOUNDS_PEDESTAL_X, y: HOBBIES_FLOOR_Y - 230 },
+  enabled: () => !isItemOwned(DEBUGGING_TOOLS_ITEM_ID),
+  effect: { kind: 'collectDebuggingTools' }
+};
 
 export class HobbiesScene extends Phaser.Scene {
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -169,16 +188,19 @@ export class HobbiesScene extends Phaser.Scene {
       .setVisible(false)
       .setDepth(100);
 
-    this.interactionRuntime = createInteriorInteractionRuntime({
+    this.interactionRuntime = createInteriorInteractionRuntime<HobbiesInteractionId, HobbiesInteractionEffect>({
       interactRadius: HOBBIES_INTERACT_RADIUS,
       exitEffect: { kind: 'close' },
-      targets: HOBBIES_ROOM_INTERACTABLES.map((target) => ({
-        ...target,
-        effect:
-          target.kind === 'exit'
-            ? ({ kind: 'close' } satisfies HobbiesInteractionEffect)
-            : ({ kind: 'openOverlay', id: target.id } satisfies HobbiesInteractionEffect)
-      }))
+      targets: [
+        ...HOBBIES_ROOM_INTERACTABLES.map((target) => ({
+          ...target,
+          effect:
+            target.kind === 'exit'
+              ? ({ kind: 'close' } satisfies HobbiesInteractionEffect)
+              : ({ kind: 'openOverlay', id: target.id } satisfies HobbiesInteractionEffect)
+        })),
+        PEDESTAL_TARGET
+      ]
     });
 
     this.cameras.main.setBackgroundColor('#f4f1ea');
@@ -201,7 +223,8 @@ export class HobbiesScene extends Phaser.Scene {
       interactRequested: step.interactRequested,
       exitRequested: commands.exitContext
     });
-    this.updateRoom(interaction?.activeTarget?.id ?? null, sketchTick(time));
+    const activeId = interaction?.activeTarget?.id ?? null;
+    this.updateRoom(activeId === 'pedestal' ? null : activeId, sketchTick(time));
     this.updateOutOfBounds(time);
 
     if (interaction?.effect?.kind === 'close') {
@@ -215,12 +238,21 @@ export class HobbiesScene extends Phaser.Scene {
     }
 
     this.exitPrompt.setPosition(interaction.prompt.x, interaction.prompt.y).setVisible(true);
-    if (interaction.effect) {
-      switch (interaction.effect.kind) {
-        case 'openOverlay':
-          this.onOpenOverlay?.(interaction.effect.id);
-          break;
-      }
+    if (interaction.effect) this.applyInteractionEffect(interaction.effect, time);
+  }
+
+  private applyInteractionEffect(effect: HobbiesInteractionEffect, time: number): void {
+    switch (effect.kind) {
+      case 'openOverlay':
+        this.onOpenOverlay?.(effect.id);
+        break;
+      case 'collectDebuggingTools':
+        bridgeActions.collectItem(DEBUGGING_TOOLS_ITEM_ID);
+        this.exitPrompt.setVisible(false);
+        this.outOfBounds?.pickUpKit({ time, motion: this.motion });
+        break;
+      case 'close':
+        break;
     }
   }
 
@@ -229,6 +261,7 @@ export class HobbiesScene extends Phaser.Scene {
     const { body } = this.player;
     this.outOfBounds?.update({
       playerX: this.player.x,
+      kitOwned: isItemOwned(DEBUGGING_TOOLS_ITEM_ID),
       walking: body.blocked.down && Math.abs(body.velocity.x) > 1,
       time,
       motion: this.motion
@@ -258,7 +291,7 @@ export class HobbiesScene extends Phaser.Scene {
     return sound.context ?? null;
   }
 
-  private updateRoom(activeId: HobbiesInteractionId | null, tick: number): void {
+  private updateRoom(activeId: Exclude<HobbiesInteractionId, 'pedestal'> | null, tick: number): void {
     const state = bridgeStore.getState();
     this.claimedScratch.clear();
     for (const partId of CIRCUIT_PART_IDS) {

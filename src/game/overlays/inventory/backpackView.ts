@@ -1,16 +1,19 @@
 /**
- * What the backpack shows: every street secret in a fixed order, found or not.
- * Pure, so the overlay and the corner button agree on what counts.
+ * What the backpack shows: every street secret in a fixed order, found or not,
+ * plus hidden slots that only appear once owned and never count toward the
+ * tally (the Out of Bounds Debugging Tools). Pure, so the overlay and the
+ * corner button agree on what counts.
  */
 import {
   CIRCUIT_PART_IDS,
+  DEBUGGING_TOOLS_ITEM_ID,
   getOverworldProgress,
   type CircuitPartId,
   type GameItemId,
   type GameWorldState
 } from '@/game/core/console';
 
-export type BackpackSlotId = 'glasses' | 'litter-clue' | CircuitPartId | 'circuit';
+export type BackpackSlotId = 'glasses' | 'litter-clue' | CircuitPartId | 'circuit' | typeof DEBUGGING_TOOLS_ITEM_ID;
 
 export interface BackpackSlot {
   id: BackpackSlotId;
@@ -22,7 +25,10 @@ export interface BackpackSlot {
 }
 
 export interface BackpackView {
+  /** The street secrets: always listed, counted by the tally. */
   slots: readonly BackpackSlot[];
+  /** Owned off-the-books finds: listed only once owned, never counted. */
+  hiddenSlots: readonly BackpackSlot[];
   found: number;
   total: number;
 }
@@ -38,6 +44,9 @@ export function getBackpackView(source: BackpackSource): BackpackView {
     ...CIRCUIT_PART_IDS.map((id) => ({ id, found: owns(id), soldered: hasCircuit && owns(id) })),
     { id: 'circuit', found: hasCircuit }
   ];
+  const hiddenSlots: BackpackSlot[] = owns(DEBUGGING_TOOLS_ITEM_ID)
+    ? [{ id: DEBUGGING_TOOLS_ITEM_ID, found: true }]
+    : [];
   const { found, total } = getOverworldProgress(source);
-  return { slots, found, total };
+  return { slots, hiddenSlots, found, total };
 }

@@ -59,8 +59,8 @@ margin, a coffee ring, a placeholder labelled `ROOM_END`. Danilo says very littl
 just walk through the wall?" just outside, "...this wasn't finished." near the
 first mark, and "Wait. There's something up ahead." before the pedestal. The only sound is a sparse pencil scratch per few steps.
 
-**Payoff:** a glowing pedestal made from a sketchbook spine, with an empty dashed slot on
-top. The toolbox that fills it arrives in Act 2 (#148); Act 1 (#147) ships the empty pedestal.
+**Payoff:** a glowing pedestal made from a sketchbook spine. Act 1 (#147) shipped it
+with an empty dashed slot on top; Act 2 (#148) puts the toolbox in that slot.
 
 ### Act 2 — The Debugging Tools
 
@@ -74,6 +74,13 @@ eraser).
 
 The kit goes in the Backpack as a **hidden slot**. It does _not_ count toward the
 `START` sign's `Secrets found: n/6` tally, so nothing gives the secret away.
+As built (#148): the toolbox sits on the pedestal while the glow pulses. Press
+`E` and it lifts toward Danilo, a latch clacks, and he thinks "...debugging
+tools? There's a hammer in here." The pedestal goes dark and shows its empty
+dashed slot. The Backpack lists the kit under "Off the page", outside the
+tally, and owning only the kit is enough to show the Backpack button. Like every
+item today, it lasts for the session; saving across reloads belongs to the
+open save/resume question.
 **Cliffhanger for this slice:** you swing the hammer once in the void, a hairline
 crack appears _across the browser viewport_ (not the game canvas), then fades.
 "...huh."

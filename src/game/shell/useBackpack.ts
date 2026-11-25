@@ -13,13 +13,12 @@ export function canOpenBackpack(bridge: BridgeState): boolean {
   if (bridge.activeSceneId !== OVERWORLD_SCENE_ID || bridge.loadingSceneId !== null) return false;
   // A street talk owns the frame; the backpack waits.
   if (bridge.sceneUi.panel !== null) return false;
-  return (
-    getBackpackView({
-      ownedItemIds: bridge.inventory.ownedItemIds,
-      equippedItemIds: bridge.equipment.equippedItemIds,
-      discoveredSecretIds: bridge.progress.discoveredSecretIds
-    }).found > 0
-  );
+  const view = getBackpackView({
+    ownedItemIds: bridge.inventory.ownedItemIds,
+    equippedItemIds: bridge.equipment.equippedItemIds,
+    discoveredSecretIds: bridge.progress.discoveredSecretIds
+  });
+  return view.found > 0 || view.hiddenSlots.length > 0;
 }
 
 function isTyping(target: EventTarget | null): boolean {

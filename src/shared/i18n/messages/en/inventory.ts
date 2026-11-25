@@ -8,6 +8,8 @@ export const inventoryMessages = {
   pocketed: 'In pocket',
   wearToggle: 'Wear glasses',
   soldered: 'Soldered in',
+  /** Heading over owned finds that sit outside the street-secret tally. */
+  offThePage: 'Off the page',
   slots: {
     glasses: {
       name: 'Glasses',
@@ -33,6 +35,10 @@ export const inventoryMessages = {
     circuit: {
       name: 'Circuit',
       note: 'Powers the blank CRT by Projects.'
+    },
+    'debugging-tools': {
+      name: 'Debugging Tools',
+      note: 'A beat-up toolbox from past the edge of the page. Inside: a hammer.'
     }
   }
 } as const;

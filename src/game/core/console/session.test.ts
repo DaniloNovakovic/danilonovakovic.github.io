@@ -8,7 +8,7 @@ import {
   OVERWORLD_CHICK
 } from './content/overworldSpots';
 import { HOBBIES_PLAYER_MAX_X, HOBBIES_PLAYER_MIN_X, HOBBIES_RIGHT_WALL_X } from './content/hobbiesSpots';
-import { getSketchDetailLevel } from './overworldLogic';
+import { getOverworldProgress, getSketchDetailLevel } from './overworldLogic';
 import { GameConsoleSession } from './session';
 
 const PROFILE_X = OVERWORLD_BUILDING_SPOTS.find((spot) => spot.id === 'profile')?.x ?? 0;
@@ -338,7 +338,7 @@ describe('out of bounds: past the Hobbies left wall', () => {
     expect(session.observe().hobbies?.playerX).toBe(200);
   });
 
-  it('stays blank like a bug, shows a few marks, ends at the empty pedestal, and walks back into the room', () => {
+  it('stays blank like a bug, shows a few marks, ends at the pedestal, and walks back into the room', () => {
     const session = enterHobbies();
     const stages: string[] = [];
     for (let i = 0; i < 200; i += 1) {
@@ -351,12 +351,41 @@ describe('out of bounds: past the Hobbies left wall', () => {
     const atEnd = session.observe();
     expect(atEnd.hobbies?.playerX).toBe(HOBBIES_PLAYER_MIN_X);
     expect(atEnd.nearby[0]?.id).toBe('pedestal');
-    expect(session.exec('interact pedestal').message).toMatch(/empty/i);
+    expect(session.exec('look').message).toBeTruthy();
     expect(session.observe().mode).toBe('hobbies');
 
     session.exec('go right 200');
     expect(session.observe().hobbies?.void).toBeNull();
     expect(session.observe().hobbies?.playerX).toBe(HOBBIES_PLAYER_MAX_X);
+  });
+
+  it('picks up the Debugging Tools from the pedestal once, without touching the street tally', () => {
+    const session = enterHobbies();
+    session.exec('go left 200');
+    expect(session.observe().nearby[0]).toMatchObject({ id: 'pedestal', kind: 'pickup' });
+
+    const pickup = session.exec('interact pedestal');
+    expect(pickup.message).toMatch(/DEBUGGING TOOLS/);
+    expect(pickup.message).toMatch(/hammer/i);
+    expect(pickup.events).toContainEqual({ type: 'item_collected', itemId: 'debugging-tools' });
+    expect(session.observe().ownedItemIds).toContain('debugging-tools');
+    expect(session.format()).toMatch(/inventory: .*debugging-tools/);
+    expect(getOverworldProgress(session.observe())).toMatchObject({ found: 0, total: 6 });
+
+    // The pedestal is empty afterwards and gives nothing more.
+    expect(session.observe().nearby[0]).toMatchObject({ id: 'pedestal', kind: 'prop' });
+    const again = session.exec('interact pedestal');
+    expect(again.message).toMatch(/empty/i);
+    expect(again.events).toEqual([]);
+    expect(session.observe().ownedItemIds.filter((id) => id === 'debugging-tools')).toHaveLength(1);
+  });
+
+  it('can cheat in the Debugging Tools', () => {
+    const session = createSession();
+    expect(session.exec('cheat give debugging-tools').events).toContainEqual({
+      type: 'item_collected',
+      itemId: 'debugging-tools'
+    });
   });
 
   it('describes the unfinished page in the headless look text', () => {

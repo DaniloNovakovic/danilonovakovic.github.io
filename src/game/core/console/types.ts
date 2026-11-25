@@ -6,9 +6,13 @@ import type { RidgeObservation, RidgeRouteBeat } from '../ridge/types';
 import type { GameSceneId, PortfolioOverlayId } from './content/overworldSpots';
 import type { CircuitPartId } from './content/circuitParts';
 import type { HobbyStationId } from './content/hobbiesSpots';
-import type { OutOfBoundsStage } from './content/outOfBoundsVoid';
+import type { DEBUGGING_TOOLS_ITEM_ID, OutOfBoundsStage } from './content/outOfBoundsVoid';
 
-export type GameItemId = 'glasses' | 'circuit' | CircuitPartId;
+/**
+ * `debugging-tools` is the Out of Bounds kit (Act 2): a hidden Backpack slot
+ * that never counts toward the street-secret tally.
+ */
+export type GameItemId = 'glasses' | 'circuit' | CircuitPartId | typeof DEBUGGING_TOOLS_ITEM_ID;
 export type GameSecretId = 'banana-peel-clue';
 export type GameFacing = 'left' | 'right';
 

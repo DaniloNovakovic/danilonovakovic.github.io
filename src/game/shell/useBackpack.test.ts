@@ -17,6 +17,11 @@ describe('backpack availability', () => {
     expect(canOpenBackpack(bridgeStore.getState())).toBe(true);
   });
 
+  it('opens for the Debugging Tools alone, even with no street secrets found', () => {
+    bridgeActions.collectItem('debugging-tools');
+    expect(canOpenBackpack(bridgeStore.getState())).toBe(true);
+  });
+
   it('only lives on the street', () => {
     bridgeActions.collectGlasses();
     bridgeActions.enterScene(HOBBIES_SCENE_ID);

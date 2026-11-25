@@ -45,6 +45,24 @@ export default function InventoryOverlay({ close, titleId, descriptionId }: Over
             </li>
           ))}
         </ul>
+
+        {view.hiddenSlots.length > 0 && (
+          <section aria-labelledby="backpack-off-the-page" className="grid gap-2">
+            <h3
+              id="backpack-off-the-page"
+              className="border-t-2 border-dashed border-[#1a1a1a]/45 pt-3 text-xs font-bold uppercase tracking-widest"
+            >
+              {copy.offThePage}
+            </h3>
+            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+              {view.hiddenSlots.map((slot) => (
+                <li key={slot.id} className="-rotate-2">
+                  <FoundSlot slot={slot} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
       </div>
     </OverlayDialogFrame>
   );

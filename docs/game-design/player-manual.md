@@ -52,6 +52,7 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
 - Close a hobby overlay to return to the Hobbies room.
 - Press `H` or `Esc`, or interact with the exit, to return to the street.
 - Not every wall in the Hobbies room is as solid as it looks. If you end up somewhere undrawn, walk back right to return; `H` and `Esc` work from anywhere.
+- Something waits at the far end of the undrawn page. Pick it up with `E` and it goes in the Backpack, under its own "Off the page" heading. It doesn't count toward the street secrets, and the spot stays empty after that. Like other items, it lasts until the page is reloaded.
 
 ## Developer Basement
 

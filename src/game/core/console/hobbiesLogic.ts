@@ -9,6 +9,9 @@ import {
   type HobbyStationId
 } from './content/hobbiesSpots';
 import {
+  DEBUGGING_TOOLS_ITEM_ID,
+  DEBUGGING_TOOLS_PICKUP_THOUGHT,
+  OUT_OF_BOUNDS_PEDESTAL_TEXT,
   OUT_OF_BOUNDS_PEDESTAL_X,
   OUT_OF_BOUNDS_STAGE_TEXT,
   outOfBoundsDepth,
@@ -72,8 +75,10 @@ export function listHobbiesNearby(state: GameWorldState): NearbyThing[] {
       id: 'pedestal',
       label: 'Sketchbook-spine pedestal',
       distance: pedestalDistance,
-      prompt: 'Look at the pedestal',
-      kind: 'prop'
+      prompt: state.ownedItemIds.includes(DEBUGGING_TOOLS_ITEM_ID)
+        ? 'Look at the empty pedestal'
+        : 'Pick up the Debugging Tools',
+      kind: state.ownedItemIds.includes(DEBUGGING_TOOLS_ITEM_ID) ? 'prop' : 'pickup'
     });
   }
   for (const station of HOBBY_STATION_SPOTS) {
@@ -123,13 +128,7 @@ export function interactHobbies(
   if (picked.id === 'exit') {
     return returnToOverworld(state, 'You step back onto the street.');
   }
-  if (picked.id === 'pedestal') {
-    return {
-      message:
-        'A closed sketchbook stood on its end, spine out, faintly glowing. The top is empty: a dashed outline where something should sit.',
-      events: []
-    };
-  }
+  if (picked.id === 'pedestal') return interactPedestal(state);
 
   const stationId = picked.id as HobbyStationId;
   state.mode = 'overlay';
@@ -137,6 +136,19 @@ export function interactHobbies(
   return {
     message: `${picked.label}: ${state.overlay.blurb}`,
     events: [{ type: 'overlay_opened', overlayId: stationId }]
+  };
+}
+
+/** Out of Bounds, Act 2: lift the Debugging Tools off the pedestal, once. */
+function interactPedestal(state: GameWorldState): { message: string; events: GameSessionEvent[] } {
+  if (state.ownedItemIds.includes(DEBUGGING_TOOLS_ITEM_ID)) {
+    return { message: OUT_OF_BOUNDS_PEDESTAL_TEXT.empty, events: [] };
+  }
+  const itemId: GameItemId = DEBUGGING_TOOLS_ITEM_ID;
+  state.ownedItemIds = [...state.ownedItemIds, itemId];
+  return {
+    message: `${OUT_OF_BOUNDS_PEDESTAL_TEXT.withKit} You take it. Danilo: "${DEBUGGING_TOOLS_PICKUP_THOUGHT}" (Debugging Tools added to the Backpack.)`,
+    events: [{ type: 'item_collected', itemId }]
   };
 }
 
