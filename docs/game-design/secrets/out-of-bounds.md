@@ -309,6 +309,13 @@ old Acts 7–8 became Acts 5–6 (#140, 2026-11-26).
 simulation. The hammer was a virtual tool and stays behind. The real world is
 first-person 3D for full immersion: low-poly toon with ink outlines (pillar 3).
 
+**Look (#144 prototype, Danilo 2026-11-26).** Leaning towards **ink linework
+over flat colour**: crisp edge lines on flat, barely shaded fills (prototype
+look **C**). Mood references: _Sable_ and _Rollerdrome_ (feelings only, never
+their art). Runner-up: **A**, toon shading with ink outlines. Out: **B**, flat
+low-poly with no lines. The lines are what keeps the real world related to the
+sketchbook.
+
 1. **Wake up.** The black screen's only button is **Wake up** (it replaces
    "Back to the portfolio" in `UnpluggedHandOff`; the click is the gesture
    the browser needs for fullscreen and pointer lock). Danilo wakes in a pod,
@@ -371,6 +378,7 @@ These are moods and mechanics. Don't recreate their content.
 | --------------------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------ |
 | Out-of-bounds / "edge of the map" secrets in games like _Prey_        | The unease of walking where you shouldn't be            | Anything specific to that game                         |
 | Desktop-destruction toys                                              | The joy of hitting the screen and seeing damage pile up | Their tools, UI or art                                 |
+| _Sable_, _Rollerdrome_                                                | Ink linework over flat colour for the real world        | Their characters, palettes, compositions or UI         |
 | _The Matrix_-style "wake up unplugged"                                | The reveal that the portfolio was a simulation          | Iconography, pods-as-shot, green code rain, characters |
 | First-person shooters (_Half-Life_-style immersion)                   | Being inside the world, the gun in your hands           | Their enemies, weapons, levels, look or story          |
 | Invaders-style arcade shooters (_Space Invaders_, _Chicken Invaders_) | Waves coming down, power-ups, a boss                    | Their enemies (no chickens), waves, theme or art       |
