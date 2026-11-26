@@ -24,5 +24,20 @@ export const gameShellMessages = {
   },
   devToolsSection: 'Dev tools',
   city: 'City',
-  loadingScene: 'Loading scene'
+  loadingScene: 'Loading scene',
+  realWorld: {
+    label: 'The real world',
+    loading: 'Opening your eyes…',
+    paused: 'Paused.',
+    keepGoing: 'Click to keep going',
+    hintMouse: 'WASD to walk · mouse to look · Esc pauses',
+    hintTouch: 'Left thumb walks · right thumb looks',
+    noWebGL: 'This browser can’t draw the real world (WebGL is off or missing).',
+    loadFailed: 'The real world didn’t load. Reloading the page starts over.',
+    back: 'Back to the portfolio',
+    promptPickUp: 'Click or E to pick up',
+    promptThrow: 'Click to throw · E to put down',
+    grab: 'Grab',
+    throw: 'Throw'
+  }
 } as const;

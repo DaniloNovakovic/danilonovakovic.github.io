@@ -96,8 +96,7 @@ export const SCREEN_LAYER_BROKEN_THOUGHTS: Record<ScreenLayerId, string> = {
 export const UNPLUGGED_TEXT = {
   title: 'Unplugged',
   lines: ['...signal lost.', 'Somewhere that isn’t a drawing, something opens its eyes.'],
-  cliffhanger: 'Out of Bounds continues in Act 4. It isn’t built yet.',
-  back: 'Back to the portfolio'
+  wakeUp: 'Wake up'
 } as const;
 
 /** The screen destroyer, for the headless console. */

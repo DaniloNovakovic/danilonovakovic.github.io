@@ -19,3 +19,4 @@ override the Ridge pre-production route.
 | [`0004-ridge-stage-composition-source.md`](./0004-ridge-stage-composition-source.md)                     | Historical Stage Composition / Walk Rail staging source; superseded by ADR-0005 for First Playable Route runtime. |
 | [`0005-ridge-console-core-and-stick-visuals.md`](./0005-ridge-console-core-and-stick-visuals.md)         | Active Ridge runtime: console core, stick VisualProvider, Scene UI conversation.                                  |
 | [`0006-game-console-core.md`](./0006-game-console-core.md)                                               | Full-game headless console: Overworld / Basement / discrete Potassium / Ridge.                                    |
+| [`0007-real-world-lazy-three-chunk.md`](./0007-real-world-lazy-three-chunk.md)                           | Out of Bounds real world: lazy Three.js chunk, full-viewport takeover beside Phaser.                              |

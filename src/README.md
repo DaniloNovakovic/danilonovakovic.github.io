@@ -37,6 +37,7 @@ This folder is organized by surface ownership.
 - `game/sceneLifecycle` - Scene lifecycle orchestration, scene manager, lifecycle events, and context assembly.
 - `game/sharedSceneRuntime` - Reusable Phaser-facing machinery shared by multiple scenes.
 - `game/core` - Pure ECS, input, player, and Ridge console decision logic with no Phaser/React/browser imports.
+- `game/realWorld` - Out of Bounds real world: the Three.js adapter, loaded only through a dynamic import from the shell (ADR-0007). Its rules live in `game/core/realWorld`.
 - `game/scenes/ridge/art` - Replaceable Ridge VisualProvider (stick figures by default).
 - `game/scenes/ridge/sceneUi` - Persona-style Character Conversation Panel.
 - `game/adapters` - Concrete adapters to external engines/APIs, such as the Phaser scene adapter.

@@ -19,6 +19,9 @@ vi.mock('./Game', () => ({
   default: () => <div data-testid="game-surface" />
 }));
 
+const realWorld = vi.hoisted(() => ({ boot: vi.fn(() => ({ resume: vi.fn(), dispose: vi.fn() })) }));
+vi.mock('@/game/realWorld', () => ({ bootRealWorld: realWorld.boot }));
+
 let resizeObserverCallback: ResizeObserverCallback | undefined;
 let resizeObserverInstance: ResizeObserver | undefined;
 const originalResizeObserver = globalThis.ResizeObserver;
@@ -781,7 +784,7 @@ describe('InteractiveApp', () => {
       expect(onSwitchToStatic).toHaveBeenCalledTimes(1);
     });
 
-    it('falls into black once every layer is gone, with a calm way back (button or Esc)', async () => {
+    it('falls into black once every layer is gone: no way out, only Wake up', async () => {
       const onSwitchToStatic = vi.fn();
       render(<InteractiveApp onSwitchToStatic={onSwitchToStatic} />);
       dent(27);
@@ -790,17 +793,26 @@ describe('InteractiveApp', () => {
       dent(1);
       const handOff = screen.getByRole('dialog', { name: /unplugged/i });
       expect(handOff.textContent).toMatch(/signal lost/i);
-      expect(handOff.textContent).toMatch(/isn’t built yet/i);
-      const back = within(handOff).getByRole('button', { name: /back to the portfolio/i });
-      expect(document.activeElement).toBe(back);
+      const wake = within(handOff).getByRole('button', { name: /wake up/i });
+      expect(document.activeElement).toBe(wake);
+      expect(within(handOff).getAllByRole('button')).toHaveLength(1);
+      expect(screen.queryByRole('button', { name: /switch to static portfolio/i })).toBeNull();
 
       await userEvent.keyboard('{Escape}');
-      expect(onSwitchToStatic).toHaveBeenCalledTimes(1);
-      await userEvent.click(back);
-      expect(onSwitchToStatic).toHaveBeenCalledTimes(2);
-      // Static mode in the header still works on the black page too.
-      await userEvent.click(screen.getByRole('button', { name: /switch to static portfolio/i }));
-      expect(onSwitchToStatic).toHaveBeenCalledTimes(3);
+      expect(onSwitchToStatic).not.toHaveBeenCalled();
+      expect(screen.getByTestId('unplugged-hand-off')).toBeTruthy();
+    });
+
+    it('wakes up into the real world, which takes over the whole page', async () => {
+      vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({} as never);
+      render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
+      dent(28);
+
+      await userEvent.click(screen.getByRole('button', { name: /wake up/i }));
+
+      expect(screen.queryByTestId('unplugged-hand-off')).toBeNull();
+      expect(screen.getByRole('application', { name: /the real world/i })).toBeTruthy();
+      await waitFor(() => expect(realWorld.boot).toHaveBeenCalledTimes(1));
     });
 
     it('turns a click anywhere on the page into a smash, but never a click on a control', () => {

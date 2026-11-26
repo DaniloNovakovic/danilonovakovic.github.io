@@ -14,22 +14,16 @@ export function TapeStrip() {
 }
 
 /**
- * The page has fallen into black: the Act 4 hand-off placeholder (the alien
- * ship isn't built yet). A slow fade with motion, a cut without; never a
- * flash. `Esc` or the button go calmly back to the portfolio.
+ * The page has fallen into black. A slow fade with motion, a cut without;
+ * never a flash. From here there is no way out (out-of-bounds.md, pillar 4):
+ * the only button is Wake up, and its click is the gesture the browser needs
+ * for fullscreen and pointer lock (ADR-0007).
  */
-export function UnpluggedHandOff({ onBack }: { onBack: () => void }) {
+export function UnpluggedHandOff({ onWakeUp }: { onWakeUp: () => void }) {
   const button = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     button.current?.focus();
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
-      event.preventDefault();
-      onBack();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onBack]);
+  }, []);
 
   return (
     <div
@@ -48,14 +42,13 @@ export function UnpluggedHandOff({ onBack }: { onBack: () => void }) {
             {line}
           </p>
         ))}
-        <p className="text-xs text-[#8a8a8a]">{UNPLUGGED_TEXT.cliffhanger}</p>
         <button
           ref={button}
           type="button"
-          onClick={onBack}
+          onClick={onWakeUp}
           className="mt-4 rounded border-2 border-[#d8d4ca] px-4 py-2 text-sm font-bold uppercase tracking-wider text-[#d8d4ca] hover:bg-[#d8d4ca] hover:text-[#050505] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#d8d4ca]"
         >
-          {UNPLUGGED_TEXT.back}
+          {UNPLUGGED_TEXT.wakeUp}
         </button>
       </div>
     </div>

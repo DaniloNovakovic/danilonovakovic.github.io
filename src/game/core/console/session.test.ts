@@ -846,7 +846,7 @@ describe('out of bounds screen destroyer: the page comes apart (#164)', () => {
       blackout: true
     });
     expect(session.format()).toMatch(/screen: black — every layer gone, unplugged/);
-    expect(session.observe().hints[0]).toMatch(/Static mode is the way back/);
+    expect(session.observe().hints[0]).toMatch(/Wake up opens the real world/);
 
     const more = session.exec('swing');
     expect(more.ok).toBe(false);
