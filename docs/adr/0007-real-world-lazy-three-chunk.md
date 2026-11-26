@@ -12,8 +12,8 @@ the look (ink lines over flat colour) on desktop and on a real phone.
 1. **Three.js is a dependency, but only inside a lazy chunk.** `three` is pinned
    in `package.json`. Only `src/game/realWorld/**` imports it, and the shell
    reaches that folder through a single dynamic `import()` behind the **Wake up**
-   click. Nobody who doesn't reach the black screen downloads it (~135 KB gzip
-   for r187 with the adapter).
+   click. Nobody who doesn't reach the black screen downloads it (~150 KB gzip
+   for r187 with the adapter and the lab).
 2. **The real world is a takeover, not a scene.** It isn't in `sceneIds` or the
    `sceneRegistry`, and it doesn't go through the scene lifecycle. The shell
    mounts `RealWorldTakeover` over the whole viewport once the page has fallen
