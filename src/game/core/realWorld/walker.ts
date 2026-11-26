@@ -1,11 +1,4 @@
-import {
-  findProps,
-  isSolidAt,
-  REAL_WORLD_PLAYER_RADIUS,
-  REAL_WORLD_WALK_SPEED,
-  type RealWorldMap,
-  type RoundProp
-} from './labRoom';
+import { isSolidAt, propsOf, REAL_WORLD_PLAYER_RADIUS, REAL_WORLD_WALK_SPEED, type RealWorldMap } from './labRoom';
 
 /** Someone walking on the floor plan: position and current velocity. */
 export interface Walker {
@@ -27,16 +20,6 @@ export interface WalkInput {
 
 /** How fast velocity catches up with the intent: quick, but never a snap. */
 const ACCELERATION = 14;
-
-const propsByMap = new WeakMap<RealWorldMap, RoundProp[]>();
-function propsOf(map: RealWorldMap): RoundProp[] {
-  let props = propsByMap.get(map);
-  if (!props) {
-    props = findProps(map);
-    propsByMap.set(map, props);
-  }
-  return props;
-}
 
 function isBlocked(map: RealWorldMap, x: number, z: number, edgeX: number, edgeZ: number): boolean {
   const r = REAL_WORLD_PLAYER_RADIUS;

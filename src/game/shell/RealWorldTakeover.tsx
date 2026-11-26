@@ -82,9 +82,11 @@ export function RealWorldTakeover({ onGiveUp }: { onGiveUp: () => void }) {
     import('@/game/realWorld')
       .then(({ bootRealWorld }) => {
         if (cancelled) return;
-        handle.current = bootRealWorld(element, {
-          onPausedChange: (paused) => setStatus(paused ? 'paused' : 'running')
-        });
+        handle.current = bootRealWorld(
+          element,
+          { onPausedChange: (paused) => setStatus(paused ? 'paused' : 'running') },
+          getMessages().gameShell.realWorld
+        );
         setStatus((current) => (current === 'loading' ? 'running' : current));
       })
       .catch(() => {

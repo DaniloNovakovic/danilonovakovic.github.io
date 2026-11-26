@@ -21,9 +21,10 @@ const NORTH = 0;
 const EAST = -Math.PI / 2;
 
 describe('the lab room', () => {
-  it('has one wake-up spot, one pod, a vent and a locked door', () => {
+  it("has one wake-up spot, Danilo's pod, people still plugged in, a vent and a locked door", () => {
     expect(findCells(LAB_ROOM, 'P')).toHaveLength(1);
     expect(findCells(LAB_ROOM, 'O')).toHaveLength(1);
+    expect(findCells(LAB_ROOM, 'H').length).toBeGreaterThanOrEqual(2);
     expect(findCells(LAB_ROOM, 'V')).toHaveLength(1);
     expect(findCells(LAB_ROOM, 'D')).toHaveLength(1);
   });
@@ -54,15 +55,16 @@ describe('stepWalker', () => {
     expect(walker.z).toBeCloseTo(start().z, 5);
   });
 
-  it('stops at the vent wall, a radius short of it', () => {
+  it('stops at the east wall, a radius short of it', () => {
     const walker = walk(start(), { forward: 1, strafe: 0, yaw: EAST }, 8);
-    const wallFace = 8 * REAL_WORLD_CELL;
+    const wallFace = (LAB_ROOM[0].length - 1) * REAL_WORLD_CELL;
     expect(walker.x).toBeLessThanOrEqual(wallFace - REAL_WORLD_PLAYER_RADIUS + 0.1);
     expect(walker.x).toBeGreaterThan(wallFace - REAL_WORLD_PLAYER_RADIUS - 0.2);
   });
 
   it('bumps into the pod instead of walking through it', () => {
-    const [pod] = findProps(LAB_ROOM).filter((prop) => prop.radius > 1);
+    const [podCell] = findCells(LAB_ROOM, 'O');
+    const pod = findProps(LAB_ROOM).find((prop) => prop.x === podCell.x && prop.z === podCell.z)!;
     const walker = walk(start(), { forward: 1, strafe: 0, yaw: NORTH }, 3);
     expect(Math.hypot(walker.x - pod.x, walker.z - pod.z)).toBeGreaterThanOrEqual(
       pod.radius + REAL_WORLD_PLAYER_RADIUS - 0.1

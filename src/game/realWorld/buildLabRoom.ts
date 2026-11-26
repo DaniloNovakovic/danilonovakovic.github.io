@@ -2,24 +2,16 @@ import {
   BoxGeometry,
   CanvasTexture,
   Color,
-  CylinderGeometry,
-  DataTexture,
   DirectionalLight,
-  DoubleSide,
   Group,
   HemisphereLight,
   Mesh,
   MeshBasicMaterial,
-  MeshToonMaterial,
-  NearestFilter,
   PlaneGeometry,
-  RedFormat,
+  PointLight,
   RepeatWrapping,
   SRGBColorSpace,
-  SphereGeometry,
-  TorusGeometry,
   type Material,
-  type MeshToonMaterialParameters,
   type Object3D
 } from 'three';
 import {
@@ -30,29 +22,21 @@ import {
   REAL_WORLD_WALL_HEIGHT as H,
   type RealWorldMap
 } from '@/game/core/realWorld';
-
-/** Night lab (#144): deep navy, near-black ink, warm light strips, pink aliens. Our own colours. */
-export const NIGHT_LAB = {
-  background: 0x141a33,
-  wall: 0x5468a8,
-  floor: 0x2a3566,
-  ceiling: 0x34407a,
-  strip: 0xffd36e,
-  crate: 0x57c4b8,
-  pod: 0x9fb4ff,
-  alert: 0xff5b4a,
-  ink: 0x0b0e1c,
-  panel: 'rgba(11,14,28,.6)'
-} as const;
-
-/** Flat fills with one soft shadow tone: the ink carries the form. */
-function makeToon() {
-  const gradient = new DataTexture(new Uint8Array([205, 255]), 2, 1, RedFormat);
-  gradient.minFilter = gradient.magFilter = NearestFilter;
-  gradient.needsUpdate = true;
-  return (color: number, extra: MeshToonMaterialParameters = {}) =>
-    new MeshToonMaterial({ color, gradientMap: gradient, ...extra });
-}
+import {
+  crateStack,
+  floorCable,
+  jarShelf,
+  lockedDoor,
+  monitor,
+  operatingTable,
+  shatteredPod,
+  sketchPage,
+  sleeperPod,
+  ventGrate,
+  type PropKit
+} from './labProps';
+import { brainScanScreen, oldWorldScreen } from './labScreens';
+import { makeToon, NIGHT_LAB } from './toon';
 
 function floorTexture(map: RealWorldMap) {
   const canvas = document.createElement('canvas');
@@ -86,7 +70,7 @@ const NEIGHBOURS = [
   [0, -1]
 ] as const;
 
-/** A flat panel on the face of wall cell (x, z) that looks into the room. */
+/** Place `object` on the face of wall cell (cx, cz) that looks into the room. */
 function onWallFace(map: RealWorldMap, cx: number, cz: number, object: Object3D, inset: number) {
   for (const [dx, dz] of NEIGHBOURS) {
     if (isSolidAt(map, cx + dx * CELL, cz + dz * CELL)) continue;
@@ -94,64 +78,6 @@ function onWallFace(map: RealWorldMap, cx: number, cz: number, object: Object3D,
     object.rotation.y = Math.atan2(dx, dz);
     return;
   }
-}
-
-function pod(toon: ReturnType<typeof makeToon>, x: number, z: number) {
-  const group = new Group();
-  const base = new Mesh(new CylinderGeometry(0.9, 1.1, 0.4, 10), toon(NIGHT_LAB.wall));
-  base.position.y = 0.2;
-  const glass = new Mesh(
-    new CylinderGeometry(0.85, 0.85, 2.2, 10, 1, true, 0, Math.PI * 1.4),
-    toon(NIGHT_LAB.pod, { transparent: true, opacity: 0.45, side: DoubleSide })
-  );
-  glass.position.y = 1.5;
-  // Opened: the glass slid round, the gap facing where Danilo stepped out.
-  glass.rotation.y = Math.PI * 0.8;
-  const cap = new Mesh(new CylinderGeometry(1.0, 0.9, 0.3, 10), toon(NIGHT_LAB.wall));
-  cap.position.y = 2.75;
-  // The plug that ran the portfolio, hanging loose.
-  const cable = new Mesh(new TorusGeometry(0.5, 0.06, 6, 12, Math.PI), toon(NIGHT_LAB.ink));
-  cable.position.set(0.6, 2.2, 0.6);
-  cable.rotation.set(0, Math.PI / 4, Math.PI / 2);
-  const plug = new Mesh(new SphereGeometry(0.12, 7, 5), new MeshBasicMaterial({ color: NIGHT_LAB.strip }));
-  plug.position.set(0.95, 1.7, 0.95);
-  group.add(base, glass, cap, cable, plug);
-  group.position.set(x, 0, z);
-  return group;
-}
-
-function vent(toon: ReturnType<typeof makeToon>) {
-  const group = new Group();
-  group.add(new Mesh(new BoxGeometry(1.8, 1.1, 0.12), toon(NIGHT_LAB.ceiling)));
-  for (let i = -2; i <= 2; i++) {
-    const slat = new Mesh(new BoxGeometry(1.5, 0.08, 0.1), toon(NIGHT_LAB.wall));
-    slat.position.set(0, i * 0.18, 0.06);
-    slat.rotation.x = -0.5;
-    group.add(slat);
-  }
-  group.position.y = 0.75;
-  return group;
-}
-
-function lockedDoor(toon: ReturnType<typeof makeToon>) {
-  const group = new Group();
-  const frame = new Mesh(new BoxGeometry(2.6, 2.7, 0.15), toon(NIGHT_LAB.ceiling));
-  const halfLeft = new Mesh(new BoxGeometry(1.1, 2.4, 0.1), toon(NIGHT_LAB.wall));
-  halfLeft.position.set(-0.56, -0.05, 0.08);
-  const halfRight = halfLeft.clone();
-  halfRight.position.x = 0.56;
-  const light = new Mesh(new BoxGeometry(0.3, 0.12, 0.08), new MeshBasicMaterial({ color: NIGHT_LAB.alert }));
-  light.position.set(0, 1.5, 0.1);
-  group.add(frame, halfLeft, halfRight, light);
-  group.position.y = 1.35;
-  return group;
-}
-
-interface CellMaterials {
-  toon: ReturnType<typeof makeToon>;
-  wall: Material;
-  trim: Material;
-  strip: Material;
 }
 
 interface Cell {
@@ -162,27 +88,47 @@ interface Cell {
   ribbed: boolean;
 }
 
-function addWallCell(root: Group, map: RealWorldMap, { char, cx, cz }: Cell, materials: CellMaterials) {
+interface CellMaterials {
+  wall: Material;
+  trim: Material;
+  strip: Material;
+}
+
+/** The monitors take turns: the old world, then a mind being read. */
+function wallFixture(kit: PropKit, char: string, monitors: { count: number }): Object3D | null {
+  if (char === 'V') return ventGrate(kit);
+  if (char === 'D') return lockedDoor(kit);
+  if (char !== 'M') return null;
+  monitors.count += 1;
+  return monitor(kit, monitors.count === 1 ? oldWorldScreen(kit.reducedMotion) : brainScanScreen(kit.reducedMotion));
+}
+
+function addWallCell(root: Group, map: RealWorldMap, cell: Cell, materials: CellMaterials, fixture: Object3D | null) {
   const wall = new Mesh(new BoxGeometry(CELL, H, CELL), materials.wall);
-  wall.position.set(cx, H / 2, cz);
+  wall.position.set(cell.cx, H / 2, cell.cz);
   root.add(wall);
-  const fixture = char === 'V' ? vent(materials.toon) : char === 'D' ? lockedDoor(materials.toon) : null;
   if (!fixture) return;
-  onWallFace(map, cx, cz, fixture, char === 'V' ? 0.06 : 0.08);
+  onWallFace(map, cell.cx, cell.cz, fixture, 0.08);
   root.add(fixture);
 }
 
-function addFloorCell(root: Group, map: RealWorldMap, { cx, cz, ribbed }: Cell, materials: CellMaterials) {
+function addFloorCell(
+  root: Group,
+  map: RealWorldMap,
+  { cx, cz, ribbed }: Cell,
+  materials: CellMaterials,
+  strip: Material
+) {
   // A light strip in every cell: the light the aliens will see you in.
-  const strip = new Mesh(new BoxGeometry(1.6, 0.08, 0.35), materials.strip);
-  strip.position.set(cx, H - 0.05, cz);
-  root.add(strip);
+  const light = new Mesh(new BoxGeometry(1.6, 0.08, 0.35), strip);
+  light.position.set(cx, H - 0.05, cz);
+  root.add(light);
   for (const [dx, dz] of NEIGHBOURS) {
     if (!isSolidAt(map, cx + dx * CELL, cz + dz * CELL)) continue;
     const trim = new Mesh(new BoxGeometry(dx ? 0.25 : CELL, 0.35, dz ? 0.25 : CELL), materials.trim);
     trim.position.set(cx + dx * (CELL / 2 - 0.12), 0.17, cz + dz * (CELL / 2 - 0.12));
     root.add(trim);
-    // No rib in front of the vent or the door: they sit mid-face, where a rib would.
+    // No rib in front of a vent, door or monitor: they sit mid-face, where a rib would.
     if (!ribbed || cellAt(map, cx + dx * CELL, cz + dz * CELL) !== '#') continue;
     const rib = new Mesh(new BoxGeometry(dx ? 0.3 : 0.4, H, dz ? 0.3 : 0.4), materials.wall);
     rib.position.set(cx + dx * (CELL / 2 - 0.15), H / 2, cz + dz * (CELL / 2 - 0.15));
@@ -190,69 +136,108 @@ function addFloorCell(root: Group, map: RealWorldMap, { cx, cz, ribbed }: Cell, 
   }
 }
 
+/** One strip light over the table that sags and recovers now and then. Slow, never a strobe. */
+function flickeringStrip(kit: PropKit) {
+  const material = new MeshBasicMaterial({ color: NIGHT_LAB.strip });
+  if (kit.reducedMotion) return material;
+  const lit = new Color(NIGHT_LAB.strip);
+  const dim = new Color(0x6b5a32);
+  let level = 1;
+  let last = 0;
+  kit.animate((t) => {
+    const dt = Math.min(0.1, t - last);
+    last = t;
+    const target = Math.sin(t * 1.9) * Math.sin(t * 0.43) > 0.8 ? 0.15 : 1;
+    level += (target - level) * Math.min(1, dt * 5);
+    material.color.copy(dim).lerp(lit, level);
+  });
+  return material;
+}
+
+function lights(root: Group, map: RealWorldMap) {
+  root.add(new HemisphereLight(0xc8d4ff, 0x2a3566, 1.5));
+  const sun = new DirectionalLight(0xffffff, 0.9);
+  sun.position.set(0.5, 1, 0.3);
+  root.add(sun);
+  // The pods glow from inside.
+  for (const { x, z } of findCells(map, 'H')) {
+    const glow = new PointLight(NIGHT_LAB.fluid, 2.5, 5, 1);
+    glow.position.set(x, 1.6, z + 1.2);
+    root.add(glow);
+  }
+}
+
+function addProps(root: Group, map: RealWorldMap, kit: PropKit) {
+  const [screens] = findCells(map, 'M');
+  findCells(map, 'H').forEach(({ x, z }, i) => {
+    root.add(sleeperPod(kit, x, z, 11 + i * 5));
+    if (screens) root.add(floorCable(kit, { x, z }, { x: CELL, z: screens.z + (i % 2) * 2 }, i - 1.5));
+  });
+  for (const { x, z } of findCells(map, 'O')) {
+    root.add(shatteredPod(kit, x, z));
+    root.add(sketchPage(kit, x - 1.6, z + 2.4));
+  }
+  for (const { x, z } of findCells(map, 'T')) root.add(operatingTable(kit, x, z));
+  findCells(map, 'J').forEach(({ x, z }, i) => root.add(jarShelf(kit, x, z, i + 1)));
+  for (const { x, z } of findCells(map, 'C'))
+    root.add(crateStack(kit, x, z, cellAt(map, x + CELL, z) === '#' ? 0.4 : -0.3));
+}
+
 export interface LabRoom {
   root: Group;
+  /** Advance the room's small motions (bubbles, screens, the flicker) to `seconds`. */
+  update(seconds: number): void;
   dispose(): void;
 }
 
-/** Build the meshes for a floor plan from `@/game/core/realWorld`. */
-export function buildLabRoom(map: RealWorldMap): LabRoom {
-  const toon = makeToon();
+/** Build the lab from a floor plan in `@/game/core/realWorld`. */
+export function buildLabRoom(map: RealWorldMap, reducedMotion: boolean): LabRoom {
+  const updates: Array<(seconds: number) => void> = [];
+  const kit: PropKit = { toon: makeToon(), animate: (update) => updates.push(update), reducedMotion };
   const root = new Group();
-  root.add(new HemisphereLight(0xffffff, 0xffffff, 2.2));
-  const sun = new DirectionalLight(0xffffff, 1.4);
-  sun.position.set(0.5, 1, 0.3);
-  root.add(sun);
+  lights(root, map);
 
   const width = map[0].length * CELL;
   const depth = map.length * CELL;
-  const floor = new Mesh(new PlaneGeometry(width, depth), toon(0xffffff, { map: floorTexture(map) }));
+  const floor = new Mesh(new PlaneGeometry(width, depth), kit.toon(0xffffff, { map: floorTexture(map) }));
   floor.rotation.x = -Math.PI / 2;
   floor.position.set(width / 2, 0, depth / 2);
-  const ceiling = new Mesh(new PlaneGeometry(width, depth), toon(NIGHT_LAB.ceiling));
+  const ceiling = new Mesh(new PlaneGeometry(width, depth), kit.toon(NIGHT_LAB.ceiling));
   ceiling.rotation.x = Math.PI / 2;
   ceiling.position.set(width / 2, H, depth / 2);
   root.add(floor, ceiling);
 
   const materials: CellMaterials = {
-    toon,
-    wall: toon(NIGHT_LAB.wall),
-    trim: toon(NIGHT_LAB.ceiling),
+    wall: kit.toon(NIGHT_LAB.wall),
+    trim: kit.toon(NIGHT_LAB.ceiling),
     strip: new MeshBasicMaterial({ color: NIGHT_LAB.strip })
   };
+  const flicker = flickeringStrip(kit);
+  const monitors = { count: 0 };
   map.forEach((row, zi) => {
     [...row].forEach((char, xi) => {
       const cell = { char, cx: (xi + 0.5) * CELL, cz: (zi + 0.5) * CELL, ribbed: (xi + zi) % 3 === 0 };
-      if (isSolidAt(map, cell.cx, cell.cz)) addWallCell(root, map, cell, materials);
-      else addFloorCell(root, map, cell, materials);
+      if (isSolidAt(map, cell.cx, cell.cz)) addWallCell(root, map, cell, materials, wallFixture(kit, char, monitors));
+      else addFloorCell(root, map, cell, materials, char === 'T' ? flicker : materials.strip);
     });
   });
-
-  for (const { x, z } of findCells(map, 'O')) root.add(pod(toon, x, z));
-  for (const { x, z } of findCells(map, 'C')) {
-    const turn = cellAt(map, x + CELL, z) === '#' ? 0.4 : -0.3;
-    const crate = new Mesh(new BoxGeometry(1.3, 1.3, 1.3), toon(NIGHT_LAB.crate));
-    crate.position.set(x, 0.65, z);
-    crate.rotation.y = turn;
-    const top = new Mesh(new BoxGeometry(0.9, 0.9, 0.9), toon(NIGHT_LAB.crate));
-    top.position.set(x - 0.1, 1.75, z + 0.1);
-    top.rotation.y = -turn;
-    root.add(crate, top);
-  }
+  addProps(root, map, kit);
 
   return {
     root,
+    update(seconds) {
+      for (const update of updates) update(seconds);
+    },
     dispose() {
-      const materials = new Set<Material>();
+      const disposed = new Set<Material>();
       root.traverse((object) => {
         if (!(object instanceof Mesh)) return;
         object.geometry.dispose();
-        for (const material of [object.material].flat() as Material[]) materials.add(material);
+        for (const material of [object.material].flat() as Material[]) disposed.add(material);
       });
-      for (const material of materials) {
-        if (material instanceof MeshToonMaterial) {
-          material.map?.dispose();
-          material.gradientMap?.dispose();
+      for (const material of disposed) {
+        for (const value of Object.values(material)) {
+          if (value && typeof value === 'object' && 'isTexture' in value) (value as { dispose(): void }).dispose();
         }
         material.dispose();
       }

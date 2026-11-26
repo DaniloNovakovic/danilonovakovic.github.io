@@ -24,6 +24,10 @@ export const gameShellMessages = {
     hintTouch: 'Left thumb walks · right thumb looks',
     noWebGL: 'This browser can’t draw the real world (WebGL is off or missing).',
     loadFailed: 'The real world didn’t load. Reloading the page starts over.',
-    back: 'Back to the portfolio'
+    back: 'Back to the portfolio',
+    promptPickUp: 'Click or E to pick up',
+    promptThrow: 'Click to throw · E to put down',
+    grab: 'Grab',
+    throw: 'Throw'
   }
 } as const;
