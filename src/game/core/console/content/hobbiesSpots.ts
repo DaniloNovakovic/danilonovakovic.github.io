@@ -11,6 +11,8 @@ export const HOBBIES_RIGHT_WALL_X = 950;
 const HOBBIES_PLAYER_HALF_WIDTH = 24;
 /** Furthest right the player's centre can go: flush against the right wall. */
 export const HOBBIES_PLAYER_MAX_X = HOBBIES_RIGHT_WALL_X - HOBBIES_PLAYER_HALF_WIDTH;
+export const HOBBIES_FLOOR_Y = 500;
+export const HOBBIES_PLAYER_START_OFFSET_Y = 50;
 /**
  * Furthest left the player walks. Past the drawn left wall (which has no collision)
  * lies the Out of Bounds void, ending at the toolbox (see outOfBoundsVoid.ts).

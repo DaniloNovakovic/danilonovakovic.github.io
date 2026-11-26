@@ -12,6 +12,16 @@ export const gameShellMessages = {
   back: 'Back',
   devSwitcher: 'Dev scene switcher',
   ridgeConsoleHint: 'Ridge AI playtest: pnpm ridge:console',
+  devSwitcherScenes: 'Scenes',
+  devSwitcherOverlays: 'Overlays',
+  devSwitcherOutOfBounds: 'Out of Bounds',
+  devSwitcherOutOfBoundsHint: 'Reloads the page with fresh progress at that point.',
+  outOfBoundsCheckpoints: {
+    pickup: 'Pickup (toolbox)',
+    street: 'Street fight',
+    destroyer: 'Screen destroyer',
+    unplugged: 'Unplugged (black)'
+  },
   devToolsSection: 'Dev tools',
   city: 'City',
   loadingScene: 'Loading scene'
