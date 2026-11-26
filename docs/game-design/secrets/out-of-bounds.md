@@ -15,7 +15,7 @@ and it's evil now. You fight with a hammer, pigeons dive at you, every smash
 cracks the _screen itself_, and you keep breaking it until nothing is left. On
 the other side it turns into a different game, and the first thing in the
 whole portfolio that isn't drawn: you wake up unplugged aboard a real, 3D alien
-ship. You sneak, grab a gun, shoot your way through goofy aliens, take over the
+ship. You sneak, grab a gun, shoot your way through insect-like aliens, take over the
 ship, fly it home in an invaders-style arcade shooter, and land in a quiet
 closing scene: playing guitar with Cicka and your wife.
 _Thank you for playing._ That is the **true ending**.
@@ -33,7 +33,7 @@ ask "wait, how far does this go?"
    (sketch → blank paper → glitch → cracked glass → **real 3D** → warm final
    watercolor). Inside the simulation (Acts 1–3) and in the ending it stays
    hand-drawn. **The exception is the real world** (Acts 4–5): chunky
-   low-poly 3D with flat/toon shading and thick ink outlines, goofy rather
+   low-poly 3D with flat/toon shading and thick ink outlines, stylised rather
    than realistic. It's the first thing that isn't a drawing, on purpose. The
    outlines tie it back to the sketchbook's ink so it never reads as stock
    assets. See [`../../design/style-guide.md`](../../design/style-guide.md).
@@ -378,14 +378,43 @@ the second (pace and swagger only: stuns, no gore).
    to the **shadows**: in the light strips patrolling aliens see you, in the
    dark they don't. You can't fight back yet. Getting caught resets to a
    nearby checkpoint, never the start of the act.
+
+   **The vent** (Danilo, 2026-11-26; first slice). The locked door stays
+   locked (aiming at it says so); the vent is the only way out for now.
+   - **Pry**: aim at the grate behind the crates and hold click / `E` / the
+     touch **Pry** button for about a second. It bends out and rattles, and
+     springs back if you let go too soon. Then it tips flat onto the floor.
+   - **Crawl**: walking into the open vent ducks you down on your own (no
+     crouch button). Inside you crawl, slower, hands busy (no throwing);
+     backing out stands you up again. The duct is dark sheet metal, and the
+     dark closes in (the fog comes near).
+   - **Where it leads**: a short duct through the wall, a bend north in the
+     dark, then east to a **grate in the duct floor**, bolted from below. Warm
+     light comes up through its slats from a lit ship corridor underneath.
+   - **The glimpse**: an alien researcher in a lab coat walks along the
+     corridor below, stops right under the grate with its antennae working
+     the air, then walks on. Mood only: it doesn't see you and doesn't look
+     up (yet). Under reduced motion it just stands there.
+   - Later in this step: getting down into the corridor, the patrols, light
+     and shadow, checkpoints, and more than one way through.
+
+   **The aliens** (Danilo, 2026-11-26). A bit scary, never goofy blobs, and
+   never gore: upright insect people, part ant, part machine. A long chitin
+   head on a thin neck, glowing compound eyes, hooked mandibles, elbowed
+   antennae that twitch, a hunch, claws for hands and a small second pair
+   folded at the chest, reverse-jointed legs, the gaster pushing out behind,
+   and steel bolted on (a plate and a red lens over the skull, cables into
+   the collar). They wear what their job needs: lab coats for researchers,
+   officer or police uniforms for the armed ones.
+
 3. **The gun.** A chunky alien stun blaster (from a weapons locker or a
    stunned guard). The sneak flips into a hunt: from here on it's fast,
    loud action.
 4. **Fight through the ship**, ~3 min, first-person, to the **control room**,
    and take the ship over. The aliens are the ones who kept Danilo in the
-   simulation and want Danilo back in the pod: goofy low-poly blobs with big
-   eyes. The blaster **stuns**: they puff up, spin and flop over with silly
-   sounds. No blood, nobody dies (same tone as Act 3's knock-outs). Each
+   simulation and want Danilo back in the pod: the insect people above, the
+   armed ones in uniform. The blaster **stuns**: they seize up, spin and
+   flop over with a buzz. No blood, nobody dies (same tone as Act 3's knock-outs). Each
    alien shows an alert-red tell before it shoots.
 
 **No way out from here.** The game takes the full viewport: no portfolio
@@ -412,7 +441,7 @@ power-ups, one boss. It stays in the real world's low-poly toon 3D with a
 fixed camera behind or above your ship (gameplay on a flat playfield), and
 reuses the 3D setup from Act 4. Touch: drag to steer, auto-fire.
 
-Enemies are the same goofy aliens in chunky saucers and drones, with one big
+Enemies are the same insect aliens in chunky saucers and drones, with one big
 **mothership** boss. No chickens or birds: that keeps us clearly away from
 _Chicken Invaders_, and the evil chick and pigeons belong to the simulation.
 Wave patterns, power-ups and the boss are our own. Ends with Earth in view.
@@ -492,8 +521,8 @@ These are moods and mechanics. Don't recreate their content.
   Armed merged into **The Ship**; the arcade shooter stays (invaders-style,
   in 3D); Homecoming is its own small milestone.
 - **Real life is 3D.** The hammer was virtual and stays in the simulation;
-  the real world is first-person low-poly toon 3D, goofy aliens, a stun
-  blaster, no gore.
+  the real world is first-person low-poly toon 3D, insect-like aliens
+  (scary, not too scary), a stun blaster, no gore.
 - **No way out after the black.** From the **Wake up** prompt on, the game
   takes the full viewport with no exit UI; `Esc` pauses, reload resets. Act 3
   keeps its Static switch as built.

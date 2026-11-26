@@ -37,7 +37,12 @@ export const gameShellMessages = {
     back: 'Back to the portfolio',
     promptPickUp: 'Click or E to pick up',
     promptThrow: 'Click to throw · E to put down',
+    promptPry: 'Hold click or E to pry the grate off',
+    promptPryTouch: 'Hold to pry',
+    promptLocked: 'Locked',
+    promptBolted: 'Bolted from below',
     grab: 'Grab',
-    throw: 'Throw'
+    throw: 'Throw',
+    pry: 'Pry'
   }
 } as const;

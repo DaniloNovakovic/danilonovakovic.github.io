@@ -19,11 +19,16 @@ import {
   isSolidAt,
   REAL_WORLD_CELL as CELL,
   REAL_WORLD_WALL_HEIGHT as H,
+  grateCentre,
+  mouthOf,
+  VENT_CELL,
   type Facing,
   type FurnitureKind,
   type RealWorldMap,
-  type RealWorldRoom
+  type RealWorldRoom,
+  type VentDuct
 } from '@/game/core/realWorld';
+import { buildVent, type LabVent } from './buildVent';
 import {
   cableTray,
   crateStack,
@@ -38,7 +43,6 @@ import {
   researcherChair,
   shatteredPod,
   sleeperPod,
-  ventGrate,
   watchDesk,
   type PropKit
 } from './labProps';
@@ -101,13 +105,45 @@ interface CellMaterials {
   strip: Material;
 }
 
-/** The monitors take turns: the old world, then a mind being read. */
+/** The monitors take turns: the old world, then a mind being read. The vent's grate comes with the vent. */
 function wallFixture(kit: PropKit, char: string, monitors: { count: number }): Object3D | null {
-  if (char === 'V') return ventGrate(kit);
   if (char === 'D') return lockedDoor(kit);
   if (char !== 'M') return null;
   monitors.count += 1;
   return monitor(kit, monitors.count === 1 ? oldWorldScreen(kit.reducedMotion) : brainScanScreen(kit.reducedMotion));
+}
+
+/** Room left around the duct where it runs through the wall, so the duct's own sides show as a lip. */
+const VENT_HOLE_MARGIN = 0.06;
+
+/**
+ * A wall cell with the vent running through it: blocks above, below and
+ * either side of a crawl-sized hole, all the way through the cell.
+ */
+function addVentWallCell(root: Group, cell: Cell, vent: VentDuct, material: Material) {
+  const mouth = mouthOf(vent);
+  const centre = grateCentre(vent);
+  // The hole runs along the mouth's direction; `across` is the other floor axis.
+  const acrossIsZ = mouth.dx !== 0;
+  const holeMiddle = acrossIsZ ? centre.z - cell.cz : centre.x - cell.cx;
+  const halfHole = VENT_CELL / 2 + VENT_HOLE_MARGIN;
+  const bottom = vent.floor - VENT_HOLE_MARGIN;
+  const top = vent.floor + vent.height + VENT_HOLE_MARGIN;
+  // [across offset, across size, y middle, height]
+  const near = -CELL / 2;
+  const far = CELL / 2;
+  const blocks: Array<[number, number, number, number]> = [
+    [0, CELL, bottom / 2, bottom],
+    [0, CELL, (H + top) / 2, H - top],
+    [(near + holeMiddle - halfHole) / 2, holeMiddle - halfHole - near, (bottom + top) / 2, top - bottom],
+    [(holeMiddle + halfHole + far) / 2, far - holeMiddle - halfHole, (bottom + top) / 2, top - bottom]
+  ];
+  for (const [offset, size, y, height] of blocks) {
+    if (size <= 0 || height <= 0) continue;
+    const block = new Mesh(new BoxGeometry(acrossIsZ ? CELL : size, height, acrossIsZ ? size : CELL), material);
+    block.position.set(cell.cx + (acrossIsZ ? 0 : offset), y, cell.cz + (acrossIsZ ? offset : 0));
+    root.add(block);
+  }
 }
 
 function addWallCell(root: Group, map: RealWorldMap, cell: Cell, materials: CellMaterials, fixture: Object3D | null) {
@@ -131,7 +167,8 @@ const DOOR_WIDTH = 2.6;
 
 /**
  * The skirting along the foot of a wall face, from cell (cx, cz) towards
- * (dx, dz). It stops either side of a door, so the doorway meets the floor.
+ * (dx, dz). It stops either side of a `gap` (a door, the vent), so the
+ * opening meets the floor.
  */
 function addSkirting(
   root: Group,
@@ -139,10 +176,10 @@ function addSkirting(
   cz: number,
   [dx, dz]: readonly [number, number],
   material: Material,
-  door: boolean
+  gap: number
 ) {
-  const length = door ? (CELL - DOOR_WIDTH) / 2 : CELL;
-  const offsets = door ? [-(DOOR_WIDTH + length) / 2, (DOOR_WIDTH + length) / 2] : [0];
+  const length = gap ? (CELL - gap) / 2 : CELL;
+  const offsets = gap ? [-(gap + length) / 2, (gap + length) / 2] : [0];
   for (const offset of offsets) {
     const trim = new Mesh(new BoxGeometry(dx ? 0.25 : length, 0.35, dz ? 0.25 : length), material);
     trim.position.set(
@@ -158,9 +195,11 @@ function addFloorCell(root: Group, map: RealWorldMap, { cx, cz, ribbed }: Cell, 
   for (const side of NEIGHBOURS) {
     const [dx, dz] = side;
     if (!isSolidAt(map, cx + dx * CELL, cz + dz * CELL)) continue;
-    addSkirting(root, cx, cz, side, materials.trim, cellAt(map, cx + dx * CELL, cz + dz * CELL) === 'D');
+    const wall = cellAt(map, cx + dx * CELL, cz + dz * CELL);
+    const gap = wall === 'D' ? DOOR_WIDTH : wall === 'V' ? VENT_CELL + 2 * VENT_HOLE_MARGIN : 0;
+    addSkirting(root, cx, cz, side, materials.trim, gap);
     // No rib in front of a vent, door or monitor: they sit mid-face, where a rib would.
-    if (!ribbed || cellAt(map, cx + dx * CELL, cz + dz * CELL) !== '#') continue;
+    if (!ribbed || wall !== '#') continue;
     const rib = new Mesh(new BoxGeometry(dx ? 0.3 : 0.4, H, dz ? 0.3 : 0.4), materials.wall);
     rib.position.set(cx + dx * (CELL / 2 - 0.15), H / 2, cz + dz * (CELL / 2 - 0.15));
     root.add(rib);
@@ -258,9 +297,24 @@ function addFurniture(root: Group, room: RealWorldRoom, kit: PropKit) {
 
 export interface LabRoom {
   root: Group;
+  /** The vent behind the `V` grate, if the room has one. */
+  vent: LabVent | null;
   /** Advance the room's small motions (bubbles, screens, the flicker) to `seconds`. */
   update(seconds: number): void;
   dispose(): void;
+}
+
+/** The floor tiles and the ceiling over the whole plan. */
+function floorAndCeiling(kit: PropKit, map: RealWorldMap) {
+  const width = map[0].length * CELL;
+  const depth = map.length * CELL;
+  const floor = new Mesh(new PlaneGeometry(width, depth), kit.toon(0xffffff, { map: floorTexture(map) }));
+  floor.rotation.x = -Math.PI / 2;
+  floor.position.set(width / 2, 0, depth / 2);
+  const ceiling = new Mesh(new PlaneGeometry(width, depth), kit.toon(NIGHT_LAB.ceiling));
+  ceiling.rotation.x = Math.PI / 2;
+  ceiling.position.set(width / 2, H, depth / 2);
+  return [floor, ceiling];
 }
 
 /** Build the lab from its plan in `@/game/core/realWorld`. */
@@ -270,16 +324,7 @@ export function buildLabRoom(room: RealWorldRoom, reducedMotion: boolean): LabRo
   const root = new Group();
   const map = room.walls;
   lights(root);
-
-  const width = map[0].length * CELL;
-  const depth = map.length * CELL;
-  const floor = new Mesh(new PlaneGeometry(width, depth), kit.toon(0xffffff, { map: floorTexture(map) }));
-  floor.rotation.x = -Math.PI / 2;
-  floor.position.set(width / 2, 0, depth / 2);
-  const ceiling = new Mesh(new PlaneGeometry(width, depth), kit.toon(NIGHT_LAB.ceiling));
-  ceiling.rotation.x = Math.PI / 2;
-  ceiling.position.set(width / 2, H, depth / 2);
-  root.add(floor, ceiling);
+  root.add(...floorAndCeiling(kit, map));
 
   const materials: CellMaterials = {
     wall: kit.toon(NIGHT_LAB.wall),
@@ -293,6 +338,10 @@ export function buildLabRoom(room: RealWorldRoom, reducedMotion: boolean): LabRo
   map.forEach((row, zi) => {
     [...row].forEach((char, xi) => {
       const cell = { char, cx: (xi + 0.5) * CELL, cz: (zi + 0.5) * CELL, ribbed: (xi + zi) % 3 === 0 };
+      if (char === 'V' && room.vent) {
+        addVentWallCell(root, cell, room.vent, materials.wall);
+        return;
+      }
       if (isSolidAt(map, cell.cx, cell.cz)) {
         addWallCell(root, map, cell, materials, wallFixture(kit, char, monitors));
         return;
@@ -303,11 +352,15 @@ export function buildLabRoom(room: RealWorldRoom, reducedMotion: boolean): LabRo
     });
   });
   addFurniture(root, room, kit);
+  const vent = room.vent ? buildVent(kit, room.vent) : null;
+  if (vent) root.add(vent.root);
 
   return {
     root,
+    vent,
     update(seconds) {
       for (const update of updates) update(seconds);
+      vent?.update(seconds);
     },
     dispose() {
       const disposed = new Set<Material>();
