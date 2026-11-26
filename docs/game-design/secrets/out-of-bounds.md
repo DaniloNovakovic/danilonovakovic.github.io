@@ -13,9 +13,11 @@ up, an alarm goes off, and there's no way back. You come up through the
 basement onto the street, where the chick that always ran from you is waiting,
 and it's evil now. You fight with a hammer, pigeons dive at you, every smash
 cracks the _screen itself_, and you keep breaking it until nothing is left. On
-the other side it turns into a different game. You wake up unplugged aboard an
-alien ship, sneak, arm up, take the ship, fly it home in an arcade shooter, and
-land in a quiet closing scene: playing guitar with Cicka and your wife.
+the other side it turns into a different game, and the first thing in the
+whole portfolio that isn't drawn: you wake up unplugged aboard a real, 3D alien
+ship. You sneak, grab a gun, shoot your way through goofy aliens, take over the
+ship, fly it home in an invaders-style arcade shooter, and land in a quiet
+closing scene: playing guitar with Cicka and your wife.
 _Thank you for playing._ That is the **true ending**.
 
 The fun comes from escalation and surprise. Each act should make the player
@@ -28,11 +30,17 @@ ask "wait, how far does this go?"
 2. **Every act ends on a payoff.** We ship one act at a time, so each slice
    needs a satisfying cliffhanger, never a dead end.
 3. **The style breaks on purpose.** Each act shifts the Digital Sketchbook look
-   (sketch → blank paper → glitch → cracked glass → wireframe → arcade → warm
-   final watercolor). It should still look hand-drawn, never like stock assets.
-   See [`../../design/style-guide.md`](../../design/style-guide.md).
-4. **Always leave a way out.** The header Back button, the static-mode switch
-   and `Esc` keep working, so a recruiter who wanders in is never stuck.
+   (sketch → blank paper → glitch → cracked glass → **real 3D** → warm final
+   watercolor). Inside the simulation (Acts 1–3) and in the ending it stays
+   hand-drawn. **The exception is the real world** (Acts 4–5): chunky
+   low-poly 3D with flat/toon shading and thick ink outlines, goofy rather
+   than realistic. It's the first thing that isn't a drawing, on purpose. The
+   outlines tie it back to the sketchbook's ink so it never reads as stock
+   assets. See [`../../design/style-guide.md`](../../design/style-guide.md).
+4. **A way out until the page falls into black.** Through Act 3 the header
+   Back button, the static-mode switch and `Esc` keep working, so a recruiter
+   who wanders in is never stuck. From the black screen on there is no way
+   out (see Act 4): anyone who got that far is invested.
 5. **Inspired by, never a copy.** The references below are feelings. Characters,
    enemies, art and music are ours.
 
@@ -66,8 +74,9 @@ first mark, and "Wait. There's something up ahead." before the end. The only sou
 ### Act 2 — The Debugging Tools
 
 The artifact is a **Debugging Tools** kit: a beat-up developer's toolbox lying
-on the floor where the room should end. The first tool inside is a **hammer**.
-More tools may come in the screen-destroyer phase (Act 3).
+on the floor where the room should end. The only tool inside is a **hammer**
+(decided 2026-11-26, #139: the screen destroyer plays well with one tool;
+reopen only if a later act needs a new one).
 
 The kit goes in the Backpack as a **hidden slot**. It does _not_ count toward the
 `START` sign's `Secrets found: n/6` tally, so nothing gives the secret away.
@@ -244,8 +253,9 @@ As built (#163, steps 2–3):
   `alarm: doors taped shut` and `fight: <phase> wave=… enemies left=…
   screen damage=… cracks`.
 
-As built (#164, step 4). The #143 feel prototype is still open, so the layer
-order and counts below are this slice's call; revisit them when #143 lands.
+As built (#164, step 4). This build also answered #143 (how the screen
+destroyer should feel): Danilo played it and liked it, so the layer order and
+counts below are the design, not a placeholder.
 
 - **Starts** ~2.2 s after the last raccoon drops, with Danilo's "It's all just
   a drawing. ...what if I keep hitting it?". From then on every smash lands on
@@ -289,33 +299,125 @@ Phaser canvas and portfolio UI (Architect check first). It must never block
 the way out, must honor `prefers-reduced-motion`, and must avoid strobe/flash
 patterns.
 
-### Act 4 — Unplugged
+Acts are numbered as built: Acts 1 and 2 play as one sequence (milestone
+OB1). The old Acts 4–6 (Unplugged, Sneak, Armed) merged into one act, and the
+old Acts 7–8 became Acts 5–6 (#140, 2026-11-26).
 
-A black screen, then a slow wake-up. Danilo was in a pod; the whole portfolio
-was a simulation. You are aboard an alien ship drawn as **pencil wireframe 3D**:
-graph-paper corridors, ballpoint-blue construction lines.
+### Act 4 — The Ship
 
-### Act 5 — Sneak
+**Real life is 3D.** The whole portfolio, hammer included, was a drawn
+simulation. The hammer was a virtual tool and stays behind. The real world is
+first-person 3D for full immersion: low-poly toon with ink outlines (pillar 3).
 
-A short first-person or isometric stealth section. Patrol drones sweep their
-view cones, you duck behind crates, and you pick up a keycard or part. You
-can't fight back yet. Getting caught resets you to a nearby checkpoint, never
-the start of the act.
+**Look (#144 prototype, Danilo 2026-11-26).** Leaning towards **ink linework
+over flat colour**: crisp edge lines on flat, barely shaded fills (prototype
+look **C**). Mood references: _Sable_ and _Rollerdrome_ (feelings only, never
+their art). Runner-up: **A**, toon shading with ink outlines. Out: **B**, flat
+low-poly with no lines. The lines are what keeps the real world related to the
+sketchbook.
+Round 2 (2026-11-26): Danilo likes look C done as a **screen-space ink
+pass** (edges found from depth and normals, so the line keeps one weight at
+any distance, with a slight hand-drawn wobble and thinning into the
+distance). The line should be a little thinner than the prototype's 2.2 CSS px
+(about 1.8). Palette: **Night lab** (deep navy walls and floor, near-black
+ink, warm yellow light strips, pink aliens). A dark ship suits the escape:
+the light strips are where you get seen, the dark between them is where you
+hide. Real-phone check passed: it runs, and the touch controls feel good.
+The look is settled (#144 closed).
 
-### Act 6 — Armed
+The act has two halves, a stealth escape and then an action fight (Danilo,
+2026-11-26). Mood references: _Thief_, _Deus Ex_ and _Vampire: The
+Masquerade – Bloodlines_ for the first half (light and shadow, vents, rooms
+that feel like real places and more than one way through them), _Doom_ for
+the second (pace and swagger only: stuns, no gore).
 
-You find a weapon (a doodled blaster, or a Debugging Tool gets upgraded). A short
-corridor fight flips the stealth: now you hunt the drones. It ends at the
-bridge.
+1. **Wake up.** The black screen's only button is **Wake up** (it replaces
+   "Back to the portfolio" in `UnpluggedHandOff`; the click is the gesture
+   the browser needs for fullscreen and pointer lock). Danilo is unplugged
+   from the VR rig, a pod in an alien **lab**: the portfolio was the
+   simulation running inside it. ~30 s.
 
-### Act 7 — Take the Ship
+   **The lab** (Danilo, 2026-11-26; built in #171). The aliens research the
+   human mind here, and it should feel like it: a little horror, never gore
+   or jump-scare flashes. It is small and full rather than big and empty,
+   and laid out like a room someone works in, in zones (Danilo: "it should
+   make sense layout-wise"):
+   - **The ward** (north): the pods in a row against the wall, cabled up
+     into a ceiling tray that runs to a life-support rack in the corner. One
+     lamp on the rack is dark: Danilo's.
+   - **The watch desk** (west): under the two monitors, a researcher's chair
+     turned to them, a keypad, a drink, a bin of crumpled sketches.
+   - **The procedure bay** (middle): the operating table over a floor drain,
+     an instrument cart beside it, the specimen shelves on the nearest wall.
+     A cable runs from the crown on the table to the desk.
+   - **The way out** (south): the locked door with delivery crates beside
+     it, and the vent half hidden behind a stack of crates in the corner.
+   - The way from Danilo's pod to the door and to the vent stays clear.
+     Heavy things stand against walls; the middle is open floor.
+   - **Other people are still plugged in**: asleep in pods of glowing fluid,
+     reading helmets on their heads, wires up into the pod caps.
+   - **Danilo's pod is smashed open from the inside**: jagged glass teeth,
+     shards across the floor, a puddle, the torn-out plug. It mirrors the
+     hammer smashing the page.
+   - **Ties to the old world**: a monitor shows the drawn street with the
+     screen destroyer's cracks and black hole (the aliens were watching), and
+     a sketchbook page lies on the watch desk under a lamp, being studied (a
+     stick figure swinging a hammer).
+   - **The research**: an operating table with straps, a pronged
+     mind-reading crown and a surgical lamp; shelves of brains in jars (one
+     jar holds an eye); a second monitor reads a sleeping brain.
+   - **Mood**: fog in the far corners, a strip light that sags now and then,
+     a slow red breath on the locked door. All motion stops under reduced
+     motion.
+   - **Toys**: a rubber ball, a crumpled page and a squishy brain can be
+     picked up and thrown (click or `E`; a Grab / Throw button on touch).
+     They bounce off walls and furniture and land on the table, the desk and
+     the crates.
 
-You sit in the pilot seat and the game turns into a **vertical arcade shooter**
-home to Earth: waves of enemies, power-ups, one boss. For enemies, reuse our
-own cast: Act 3's evil chick and pigeons, alien drones, maybe a callback to the doodle chicks
-from Chick Magnet. _Don't_ recreate another game's enemies, waves or look.
+2. **Escape the lab**, ~1–2 min, no weapon. Crawl through **vents** and keep
+   to the **shadows**: in the light strips patrolling aliens see you, in the
+   dark they don't. You can't fight back yet. Getting caught resets to a
+   nearby checkpoint, never the start of the act.
+3. **The gun.** A chunky alien stun blaster (from a weapons locker or a
+   stunned guard). The sneak flips into a hunt: from here on it's fast,
+   loud action.
+4. **Fight through the ship**, ~3 min, first-person, to the **control room**,
+   and take the ship over. The aliens are the ones who kept Danilo in the
+   simulation and want Danilo back in the pod: goofy low-poly blobs with big
+   eyes. The blaster **stuns**: they puff up, spin and flop over with silly
+   sounds. No blood, nobody dies (same tone as Act 3's knock-outs). Each
+   alien shows an alert-red tell before it shoots.
 
-### Act 8 — Homecoming (True Ending)
+**No way out from here.** The game takes the full viewport: no portfolio
+header, no static switch, no Back. Real fullscreen where the browser allows
+it; on iPhone (Safari only allows fullscreen for video) it fills the visible
+viewport with the shell hidden. The browser always lets `Esc` drop
+fullscreen and pointer lock, so `Esc` **pauses** behind a "click to keep
+going" card. Reloading the page is the only reset (nothing is saved across
+reloads yet), and it isn't advertised.
+
+**Controls.** Desktop: WASD + mouse look (pointer lock), click to fire.
+Touch: left thumb stick to move, drag on the right to look, a fire button.
+Comfort: no head bob, a steady crosshair, no camera shake or kick under
+reduced motion. Enemies are slow and readable.
+
+**Cliffhangers.** OB3 ends with the blaster spotted out of reach; OB4 ends
+sitting in the pilot seat.
+
+### Act 5 — Flight Home
+
+From the pilot seat the game becomes an **invaders-style arcade shooter**
+home to Earth: your ship along the bottom, waves of enemy ships coming down,
+power-ups, one boss. It stays in the real world's low-poly toon 3D with a
+fixed camera behind or above your ship (gameplay on a flat playfield), and
+reuses the 3D setup from Act 4. Touch: drag to steer, auto-fire.
+
+Enemies are the same goofy aliens in chunky saucers and drones, with one big
+**mothership** boss. No chickens or birds: that keeps us clearly away from
+_Chicken Invaders_, and the evil chick and pigeons belong to the simulation.
+Wave patterns, power-ups and the boss are our own. Ends with Earth in view.
+
+### Act 6 — Homecoming (True Ending)
 
 A non-interactive or lightly interactive scene, framed as the **afterlife**:
 Ridge was the memory of the old life, and this is the moment everyone gets to
@@ -329,25 +431,31 @@ in handwriting.
 
 These are moods and mechanics. Don't recreate their content.
 
-| Reference                                                      | What we take                                            | What we don't                                          |
-| -------------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------ |
-| Out-of-bounds / "edge of the map" secrets in games like _Prey_ | The unease of walking where you shouldn't be            | Anything specific to that game                         |
-| Desktop-destruction toys                                       | The joy of hitting the screen and seeing damage pile up | Their tools, UI or art                                 |
-| _The Matrix_-style "wake up unplugged"                         | The reveal that the portfolio was a simulation          | Iconography, pods-as-shot, green code rain, characters |
-| Classic vertical shooters                                      | Waves, power-ups, a boss                                | Another game's enemies, waves or theme                 |
+| Reference                                                             | What we take                                                                                      | What we don't                                             |
+| --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| Out-of-bounds / "edge of the map" secrets in games like _Prey_        | The unease of walking where you shouldn't be                                                      | Anything specific to that game                            |
+| Desktop-destruction toys                                              | The joy of hitting the screen and seeing damage pile up                                           | Their tools, UI or art                                    |
+| _Sable_, _Rollerdrome_                                                | Ink linework over flat colour for the real world                                                  | Their characters, palettes, compositions or UI            |
+| _The Matrix_-style "wake up unplugged"                                | The reveal that the portfolio was a simulation                                                    | Iconography, pods-as-shot, green code rain, characters    |
+| First-person shooters (_Half-Life_-style immersion)                   | Being inside the world, the gun in your hands                                                     | Their enemies, weapons, levels, look or story             |
+| _Thief_-style stealth                                                 | Hiding in shadow, crawling through vents (Act 4 escape)                                           | Its world, characters, levels, look or story              |
+| _Deus Ex_, _Vampire: The Masquerade – Bloodlines_                     | Rooms laid out like real places that tell a story; a vent as the other way through (Act 4 escape) | Their worlds, characters, factions, levels, look or story |
+| _Doom_-style action                                                   | Fast, loud fighting once armed (Act 4 fight)                                                      | Its demons, gore, weapons, levels or look                 |
+| Invaders-style arcade shooters (_Space Invaders_, _Chicken Invaders_) | Waves coming down, power-ups, a boss                                                              | Their enemies (no chickens), waves, theme or art          |
 
 ## Technical Questions to Settle Early
 
-- **3D in a Phaser 2D app.** Options: (a) a faked pseudo-3D/raycaster drawn in
-  Phaser or canvas, which stays in-stack and fits the wireframe look;
-  (b) a lazy-loaded Three.js chunk used only for Acts 4–6. Recommendation: try
-  (a) with a throwaway prototype first, because the wireframe-pencil look
-  hides how simple it is.
+- **3D in a Phaser 2D app.** Working default (#140): a **lazy-loaded
+  Three.js chunk** for Acts 4–5, fetched only once the page falls into black
+  so the portfolio's first load is unaffected. A Phaser/canvas raycaster fits
+  wireframe corridors but not free-look first person with low-poly enemies,
+  outlines and a cockpit. It's a new dependency: confirmed or rejected by the
+  Architect review plus the #144/#145 prototype.
 - **Progress saving.** Save each act as it's reached so a return visit picks up
   where you left off. Use the existing session/item store, not ad-hoc
   `localStorage`.
-- **Mobile.** Each act needs a touch control scheme (tap-to-smack works well;
-  stealth and the shooter need thought).
+- **Mobile.** Each act needs a touch control scheme (tap-to-smack in Act 3;
+  twin-stick first person in Act 4 and drag-to-steer in Act 5, see above).
 - **Bundle size.** Load each act lazily. The portfolio's first load must stay
   light.
 - **Accessibility.** No strobe flashes, screen shake toned down under reduced
@@ -370,25 +478,33 @@ These are moods and mechanics. Don't recreate their content.
   "writes an intentional bug" into the room. It belongs to a later group of
   **subconscious lore secrets** reached through the computer. Not part of the
   first build.
-- **The artifact is the Debugging Tools kit.** It starts with a hammer, more
-  destruction tools may come later, and it sits in a hidden Backpack slot
-  outside the `n/6` tally. It lies on the floor at the end of the void.
+- **The artifact is the Debugging Tools kit.** It holds one tool, the hammer
+  (#139), and sits in a hidden Backpack slot outside the `n/6` tally. It lies
+  on the floor at the end of the void.
 - **Picking it up is the point of no return.** A warning asks first. After
   confirming, the simulation is broken and the escape is the game's state;
-  the header Back button, static mode and `Esc` still leave the page.
+  through Act 3 the header Back button, static mode and `Esc` still leave the
+  page.
 - **Acts 2–3 are one sequence** (2026-11-25): alert, basement, ladder, evil
   chick, pigeons, screen destroyer, then the 3D ship. This replaced the
   earlier "ink bugs crawl over the page" idea.
+- **Six acts, four milestones left** (#140, 2026-11-26). Unplugged, Sneak and
+  Armed merged into **The Ship**; the arcade shooter stays (invaders-style,
+  in 3D); Homecoming is its own small milestone.
+- **Real life is 3D.** The hammer was virtual and stays in the simulation;
+  the real world is first-person low-poly toon 3D, goofy aliens, a stun
+  blaster, no gore.
+- **No way out after the black.** From the **Wake up** prompt on, the game
+  takes the full viewport with no exit UI; `Esc` pauses, reload resets. Act 3
+  keeps its Static switch as built.
 - **Build it in chunks.** Planning and work items live in GitHub. Open
   decisions go on a wayfinder map, build slices become issues, one milestone
   at a time.
 
 ## Open Questions
 
-1. **The Debugging Tools kit.** Whether the screen-destroyer phase adds tools
-   beyond the hammer, and what each one does.
-2. **Scope ceiling.** Eight acts is a lot. Which acts could merge (5+6, for
-   example) without losing the escalation?
+1. ~~**The Debugging Tools kit.**~~ Settled (#139): just the hammer.
+2. ~~**Scope ceiling.**~~ Settled (#140): six acts, see the Milestone Plan.
 3. **Street left side.** A hint only, a second entrance, or a shortcut back?
 4. **The afterlife and the alien ship.** How do the ship and the "back to
    Earth" landing read once the ending is heaven? Is the ship the passage
@@ -399,16 +515,16 @@ These are moods and mechanics. Don't recreate their content.
 Each milestone ships on its own and ends on a cliffhanger. Turn each one into
 GitHub issues (vertical slices) when it's ready to build.
 
-| #       | Milestone         | Ships                                                                                                                                             | Cliffhanger                 |
-| ------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
-| **OB0** | Paper pass        | Answer the open questions above. Throwaway prototypes: pseudo-3D look, screen-destroyer feel.                                                     | —                           |
-| **OB1** | Walk Off the Page | Hobbies left void (Act 1), right-edge bug fixed, Debugging Tools pickup + hidden Backpack slot, point of no return                                | Alert; the way back is shut |
-| **OB2** | Breakout          | Through the ransacked Basement up its ladder to the street, evil chick + pigeons with the hammer, screen cracks, layered screen destroyer (Act 3) | Falling into black          |
-| **OB3** | Unplugged & Sneak | Wake-up + pencil-wireframe ship + stealth section (Acts 4–5)                                                                                      | Weapon spotted behind glass |
-| **OB4** | Armed             | Weapon + corridor fight to the bridge (Act 6)                                                                                                     | Sitting in the pilot seat   |
-| **OB5** | Flight Home       | Vertical shooter + boss (Act 7)                                                                                                                   | Earth in view               |
-| **OB6** | Homecoming        | Ending scene, credits, true-ending flag (Act 8)                                                                                                   | — the end                   |
-| —       | Street hint       | Negative-x space left of the `START` sign, first hint                                                                                             | "The edges aren't finished" |
+| #       | Milestone         | Ships                                                                                                                                                                             | Cliffhanger                 |
+| ------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| **OB0** | Paper pass        | Answer the open questions above. Throwaway prototype: low-poly toon first-person look + Three.js fit (#144, #145; the screen-destroyer feel was settled by the #164 build, #143). | —                           |
+| **OB1** | Walk Off the Page | Hobbies left void (Act 1), right-edge bug fixed, Debugging Tools pickup + hidden Backpack slot, point of no return                                                                | Alert; the way back is shut |
+| **OB2** | Breakout          | Through the ransacked Basement up its ladder to the street, evil chick + pigeons with the hammer, screen cracks, layered screen destroyer (Act 3)                                 | Falling into black          |
+| **OB3** | Unplugged         | "Wake up" + fullscreen, pod wake-up, the 3D foundation (lazy Three.js chunk, renderer, controls, pause), no-weapon lab escape through vents and shadows (Act 4, steps 1–2)        | The blaster, out of reach   |
+| **OB4** | Armed             | Stun blaster, first-person fight through the ship to the control room (Act 4, steps 3–4)                                                                                          | Sitting in the pilot seat   |
+| **OB5** | Flight Home       | Invaders-style shooter in low-poly 3D, waves, power-ups, mothership boss (Act 5)                                                                                                  | Earth in view               |
+| **OB6** | Homecoming        | Ending scene, credits, true-ending flag (Act 6)                                                                                                                                   | — the end                   |
+| —       | Street hint       | Negative-x space left of the `START` sign, first hint                                                                                                                             | "The edges aren't finished" |
 
 The street hint is independent and can ship any time after OB1. Everything else is in order.
 
