@@ -17,6 +17,8 @@ engine adapters belong to `adapters/`.
 - Ridge console gameplay (`ridge/`): stage progress, conversation halt, AI/CLI commands
 - Full-game console (`console/`): Overworld / Basement / discrete Potassium / Ridge
   orchestration for `pnpm game:console` (ADR-0006)
+- Out of Bounds real world (`realWorld/`): floor plans and walking rules for the
+  lazy Three.js takeover (ADR-0007)
 
 ## Depends on
 

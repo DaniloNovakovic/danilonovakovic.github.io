@@ -175,7 +175,8 @@ function buildHints(state: GameWorldState, nearby: readonly NearbyThing[], ridge
   if (state.mode === 'overworld' && isStreetInAlarm(state)) {
     const destroyer = observeScreenDestroyer(state);
     if (!destroyer) hints.push('Type swing to smash with the hammer.');
-    else if (destroyer.blackout) hints.push('The page is black: Act 4 is not built yet. Static mode is the way back.');
+    else if (destroyer.blackout)
+      hints.push('The page is black. In the browser, Wake up opens the real world (3D, not playable here).');
     else hints.push(`Type swing to keep smashing the page: ${screenLayerName(destroyer.breaking!)} goes next.`);
   } else if (state.mode === 'overworld') {
     hints.push(OVERWORLD_CONSOLE_HINTS[getOverworldProgress(state).stage]);
@@ -221,7 +222,7 @@ function buildHints(state: GameWorldState, nearby: readonly NearbyThing[], ridge
 
 /** `screen: breaking=street (4/10) layers left=street, danilo`, or the blackout. */
 function formatScreenDestroyer(destroyer: ScreenDestroyerProgress): string {
-  if (destroyer.blackout) return 'screen: black — every layer gone, unplugged (Act 4 not built yet)';
+  if (destroyer.blackout) return 'screen: black — every layer gone, unplugged (Wake up opens the 3D real world)';
   const breaking = destroyer.layers.find((layer) => layer.id === destroyer.breaking)!;
   return `screen: breaking=${breaking.id} (${breaking.hitsTaken}/${breaking.hits}) layers left=${destroyer.remaining.join(', ')}`;
 }

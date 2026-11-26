@@ -271,10 +271,10 @@ order and counts below are this slice's call; revisit them when #143 lands.
   4. **danilo**, 6: Danilo is erased from the top down; then the hammer goes.
 - **Falling into black.** With the last layer gone the fight stops and the
   shell fades to black (1.4 s; a cut under reduced motion) and shows the
-  **Unplugged** placeholder (`src/game/shell/UnpluggedHandOff.tsx`): "...signal
-  lost. Somewhere that isn't a drawing, something opens its eyes." plus
-  "Out of Bounds continues in Act 4. It isn't built yet." **Back to the
-  portfolio** (focused) and `Esc` go to static mode. It holds until reload.
+  **Unplugged** screen (`src/game/shell/UnpluggedHandOff.tsx`): "...signal
+  lost. Somewhere that isn't a drawing, something opens its eyes." Its only
+  button, **Wake up** (focused), opens the real world (Act 4,
+  `RealWorldTakeover`, ADR-0007). The Static switch is gone from here on.
 - Reduced motion: no animated sliding, falling or tearing, no shake, no fade.
   Nothing flashes.
 - Headless: after the fight, `swing` hits the page; `look` reports
