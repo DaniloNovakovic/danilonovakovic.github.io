@@ -232,6 +232,7 @@ export function interactOverworld(state: GameWorldState, target: string | undefi
     state.sceneId = 'basement';
     state.basement.playerX = 135;
     state.basement.facing = 'right';
+    state.basement.breachThoughtShown = false;
     state.overworld.bananaFirstPeelPending = false;
     return {
       message: 'You drop through the hatch into the basement.',

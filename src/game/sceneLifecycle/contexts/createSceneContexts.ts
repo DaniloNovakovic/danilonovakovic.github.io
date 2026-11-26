@@ -61,6 +61,7 @@ export function createSceneContexts(deps: SceneContextAssemblyDeps): SceneContex
     createHobbiesSceneContext({
       onClose: deps.onReturnToOverworld,
       onOpenOverlay: deps.onOpenOverlay,
+      onEnterScene: deps.onEnterScene,
       getResumePosition: getPreparedResume(PHASER_SCENE_KEYS.hobbies),
       loadScene: loadScene(HOBBIES_SCENE_ID)
     }),

@@ -6,7 +6,13 @@ import {
   type RidgeRouteDialogueCatalog,
   type RidgeSessionEvent
 } from '../ridge/index';
-import { interactBasement, moveBasement, returnToOverworld, syncBasementPosition } from './basementLogic';
+import {
+  interactBasement,
+  leaveBasement,
+  moveBasement,
+  returnToOverworld,
+  syncBasementPosition
+} from './basementLogic';
 import { getGameHelpText, parseGameCommand, parseGameScript } from './commands';
 import { OVERWORLD_GROUND_Y, OVERWORLD_PLAYER_START, type GameSceneId } from './content/overworldSpots';
 import { answerPointOfNoReturn, interactHobbies, moveHobbies, performHobby } from './hobbiesLogic';
@@ -62,7 +68,7 @@ export class GameConsoleSession {
         facing: 'right',
         bananaFirstPeelPending: false
       },
-      basement: { playerX: 135, facing: 'right', corkboardNote: 0 },
+      basement: { playerX: 135, facing: 'right', corkboardNote: 0, breachThoughtShown: false },
       hobbies: {
         playerX: 200,
         facing: 'right',
@@ -242,7 +248,8 @@ export class GameConsoleSession {
       return this.ok(moveBasement(this.state, direction, steps));
     }
     if (this.state.mode === 'hobbies') {
-      return this.ok(moveHobbies(this.state, direction, steps));
+      const walked = moveHobbies(this.state, direction, steps);
+      return this.finish(walked.message, walked.events);
     }
     const walked = moveOverworld(this.state, direction, steps);
     return this.finish(walked.message, walked.events);
@@ -298,7 +305,12 @@ export class GameConsoleSession {
       return this.finish(`Closed ${overlayId}.`, [{ type: 'overlay_closed', overlayId }]);
     }
 
-    if (this.state.mode === 'basement' || this.state.mode === 'hobbies' || this.state.mode === 'potassium') {
+    if (this.state.mode === 'basement') {
+      const result = leaveBasement(this.state, 'You return to the street.');
+      return this.finish(result.message, result.events);
+    }
+
+    if (this.state.mode === 'hobbies' || this.state.mode === 'potassium') {
       const leavingPotassium = this.state.mode === 'potassium';
       const result = returnToOverworld(
         this.state,

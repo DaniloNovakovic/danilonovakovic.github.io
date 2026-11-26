@@ -12,6 +12,8 @@ interface PlayerThoughtTextOptions {
 const DEFAULT_OFFSET_Y = -92;
 const DEFAULT_VISIBLE_MS = 1800;
 const DEFAULT_CHAR_DELAY_MS = 34;
+/** Keep the bubble this far inside the view when the player stands at its edge. */
+const VIEW_MARGIN_X = 8;
 
 export class PlayerThoughtText {
   private readonly scene: Phaser.Scene;
@@ -55,8 +57,13 @@ export class PlayerThoughtText {
     });
   }
 
+  /** Follows the player, nudged sideways so the bubble never runs off the view. */
   update(): void {
-    this.text.setPosition(this.target.x, this.target.y + this.offsetY);
+    const view = this.scene.cameras.main.worldView;
+    const half = this.text.displayWidth / 2 + VIEW_MARGIN_X;
+    const x =
+      view.width > half * 2 ? Phaser.Math.Clamp(this.target.x, view.x + half, view.right - half) : this.target.x;
+    this.text.setPosition(x, this.target.y + this.offsetY);
   }
 
   hide(): void {

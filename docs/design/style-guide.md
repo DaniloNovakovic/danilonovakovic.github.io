@@ -21,6 +21,19 @@ The aesthetic is a fusion of **Pablo Stanley’s Open Peeps** (modular, clean ch
 - **Background:** Strict off-white/cream paper texture (`#fbfbf9` or `#f4f1ea`).
 - **Ink:** High-contrast black (`#1a1a1a`).
 - **Accents:** Strictly monochromatic (B&W). Any "color" should be represented via sketchy cross-hatching or varying line weights.
+- **Exception: alert red (`#e5322d`), Out of Bounds escape only.** Once the
+  player breaks the simulation (the Out of Bounds secret,
+  [`../game-design/secrets/out-of-bounds.md`](../game-design/secrets/out-of-bounds.md)),
+  one red is allowed, and only for danger: the `OUT_OF_BOUNDS` stamp and
+  scribble barrier, alarm marks, scrawled warnings, damage. Everything else
+  stays pencil B&W (and the Basement's existing chalk and phosphor). Rules:
+  - Red never carries meaning alone. Pair it with ink/chalk hatching or words,
+    so the scene reads the same in greyscale and to colour-blind players.
+  - Nothing red flashes or pulses.
+  - Contrast is about 3.9:1 on the cream paper and 4.2:1 on the dark Basement,
+    so red text is large and bold (at least 19px, WCAG large text).
+  - Use the shared token, `src/game/sharedSceneRuntime/escapeAlert.ts`; don't
+    introduce other reds.
 
 ### 2. Character Design (The "Peeps" Library)
 

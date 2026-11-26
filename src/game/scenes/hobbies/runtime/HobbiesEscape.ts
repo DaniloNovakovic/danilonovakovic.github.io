@@ -6,7 +6,8 @@
  * OUT_OF_BOUNDS, the page edge jittering in pencil, a graphite alarm.
  *
  * Everything reads with sound off. Reduced motion: the stamp and wall appear
- * whole, the edge frame holds still, no shake. Nothing flashes.
+ * whole, the edge frame holds still, no shake. Nothing flashes. The stamp and
+ * the wall's heavy strokes are alert red, always over ink (see escapeAlert.ts).
  * Geometry and copy come from src/game/core/console/content/outOfBoundsVoid.ts.
  */
 import * as Phaser from 'phaser';
@@ -18,6 +19,7 @@ import {
   OUT_OF_BOUNDS_TOOLBOX_X
 } from '@/game/core/console';
 import { HOBBIES_FLOOR_Y, HOBBIES_ROOM_HEIGHT } from '@/game/sharedSceneRuntime/config';
+import { ALERT_RED, ALERT_RED_CSS, strokeAlertScribble } from '@/game/sharedSceneRuntime/escapeAlert';
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
 import { playNoise } from '../overlays/shared/audioVoices';
 
@@ -141,10 +143,8 @@ export class HobbiesEscape {
 
   private drawBarrier(count: number): void {
     const g = this.barrier.clear().setVisible(count > 0);
-    this.barrierStrokes.slice(0, count).forEach((points, i) => {
-      g.lineStyle(i % 3 === 0 ? 3 : 2, INK, 0.85);
-      g.strokePoints(points);
-    });
+    // Every third stroke is a heavy alert-red one, laid over the ink scribble.
+    strokeAlertScribble(g, this.barrierStrokes.slice(0, count), { color: INK, alpha: 0.85 });
   }
 
   /**
@@ -218,14 +218,14 @@ export class HobbiesEscape {
       fontSize: '44px',
       fontFamily: 'monospace',
       fontStyle: 'bold',
-      color: '#1a1a1a'
+      color: ALERT_RED_CSS
     }).setOrigin(0.5);
     const box = this.scene.add.graphics();
     const w = text.width + 40;
     const h = text.height + 22;
     box.fillStyle(PAPER, 0.92);
     box.fillRect(-w / 2, -h / 2, w, h);
-    box.lineStyle(5, INK, 1);
+    box.lineStyle(5, ALERT_RED, 1);
     box.strokeRect(-w / 2, -h / 2, w, h);
     box.lineStyle(2, INK, 1);
     box.strokeRect(-w / 2 + 7, -h / 2 + 7, w - 14, h - 14);

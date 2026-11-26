@@ -38,9 +38,12 @@ import {
   OUT_OF_BOUNDS_ESCAPE_WORLD_LEFT_X,
   OUT_OF_BOUNDS_ESCAPE_WORLD_RIGHT_X,
   OUT_OF_BOUNDS_TOOLBOX_X,
-  OUT_OF_BOUNDS_WORLD_LEFT_X
+  OUT_OF_BOUNDS_WORLD_LEFT_X,
+  BASEMENT_BREACH_ENTRY,
+  reachesOutOfBoundsOpening
 } from '@/game/core/console';
-import { HOBBIES_SCENE_ID } from '@/game/scenes/sceneIds';
+import { BASEMENT_SCENE_ID, HOBBIES_SCENE_ID, PHASER_SCENE_KEYS, type SceneId } from '@/game/scenes/sceneIds';
+import { placeNextSceneStart } from '@/game/sharedSceneRuntime/sceneResumePolicy';
 import type { SceneUiActionRequest } from '@/game/sceneUi/types';
 import { prefersReducedMotion, sketchTick } from '@/game/sharedSceneRuntime/motion/sketchMotion';
 import { HobbiesRoom } from './HobbiesRoom';
@@ -83,13 +86,17 @@ const CINEMATIC = {
   thoughtAt: 3000
 } as const;
 const CINEMATIC_ZOOM = 1.7;
+/** Stepping into the torn opening: the view sinks into its ink, then the Basement (#162). */
+const THROUGH_OPENING_FADE_MS = 360;
+const INK_RGB = [26, 26, 26] as const;
 
 /**
  * - explore: walking about.
  * - warning: the point-of-no-return panel is up; the player is held.
  * - cinematic: confirmed; the player is held while the camera does the pickup.
+ * - throughOpening: stepped into the torn opening; held while the view sinks into the ink.
  */
-type HobbiesSequence = 'explore' | 'warning' | 'cinematic';
+type HobbiesSequence = 'explore' | 'warning' | 'cinematic' | 'throughOpening';
 
 type HobbiesInteractionEffect =
   | { kind: 'close' }
@@ -123,6 +130,7 @@ export class HobbiesScene extends Phaser.Scene {
   private interactionRuntime?: InteriorInteractionRuntime<HobbiesInteractionId, HobbiesInteractionEffect>;
   private onClose?: () => void;
   private onOpenOverlay?: (overlayId: OverlayId, options?: OpenOverlayOptions) => void;
+  private onEnterScene?: (sceneId: SceneId) => void;
   private isPaused: boolean = false;
   private room?: HobbiesRoom;
   private outOfBounds?: HobbiesVoid;
@@ -145,16 +153,22 @@ export class HobbiesScene extends Phaser.Scene {
   init(data: {
     onClose: () => void;
     onOpenOverlay: (overlayId: OverlayId, options?: OpenOverlayOptions) => void;
+    onEnterScene?: (sceneId: SceneId) => void;
     isPaused?: boolean;
     resumePosition?: { x: number; y: number };
   }) {
     this.onClose = data.onClose;
     this.onOpenOverlay = data.onOpenOverlay;
+    this.onEnterScene = data.onEnterScene;
     this.isPaused = data.isPaused ?? false;
     this.resumePosition = data.resumePosition;
   }
 
   getResumeCapturePosition(): { x: number; y: number } | null {
+    // Gone through the opening: a later visit starts back inside the barrier, not in the tear.
+    if (this.sequence === 'throughOpening') {
+      return { x: OUT_OF_BOUNDS_ESCAPE_START_X, y: HOBBIES_FLOOR_Y - HOBBIES_PLAYER_START_OFFSET_Y };
+    }
     return this.playerRuntime?.captureResume() ?? null;
   }
 
@@ -309,6 +323,7 @@ export class HobbiesScene extends Phaser.Scene {
     this.updateRoom(activeId === 'toolbox' ? null : activeId, sketchTick(time));
     this.updateOutOfBounds(time);
     if (this.sequence === 'warning') this.updateWarning(time);
+    this.updateOpening();
 
     if (interaction?.effect?.kind === 'close') {
       this.onClose?.();
@@ -394,6 +409,30 @@ export class HobbiesScene extends Phaser.Scene {
       this.syncHold();
     });
     at(CINEMATIC.thoughtAt, (now) => this.outOfBounds?.say(OUT_OF_BOUNDS_ALERT_THOUGHT, { time: now }));
+  }
+
+  /**
+   * Out of Bounds, Act 3 (#162): walking into the torn opening breaks through
+   * the right wall of the real Basement. The player lands at the breach; the
+   * view sinks into the opening's ink first (a cut under reduced motion).
+   * Esc stays live throughout.
+   */
+  private updateOpening(): void {
+    if (!this.escaped || this.sequence !== 'explore' || !reachesOutOfBoundsOpening(this.player.x)) return;
+    this.sequence = 'throughOpening';
+    this.syncHold();
+    this.exitPrompt.setVisible(false);
+    const go = () => {
+      placeNextSceneStart(PHASER_SCENE_KEYS.basement, BASEMENT_BREACH_ENTRY);
+      this.onEnterScene?.(BASEMENT_SCENE_ID);
+    };
+    if (!this.motion) {
+      go();
+      return;
+    }
+    this.cameras.main.fadeOut(THROUGH_OPENING_FADE_MS, ...INK_RGB);
+    // Scene clock: dropped if the player leaves (Esc) before it fires.
+    this.time.delayedCall(THROUGH_OPENING_FADE_MS, go);
   }
 
   private setWorldBounds(left: number, right: number): void {

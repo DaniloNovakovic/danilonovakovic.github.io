@@ -1,7 +1,7 @@
 // Observation formatting is intentionally branchy for CLI readability.
 // fallow-ignore-file complexity
 import type { RidgeObservation } from '../ridge/types';
-import { listBasementNearby } from './basementLogic';
+import { listBasementNearby, observeBasement } from './basementLogic';
 import { OVERWORLD_BANANA_PEEL } from './content/overworldSpots';
 import { isSimulationBroken, outOfBoundsStageAt } from './content/outOfBoundsVoid';
 import { listHobbiesNearby, observeHobbies } from './hobbiesLogic';
@@ -32,7 +32,7 @@ export function observeGameWorld(state: GameWorldState, ridge: RidgeObservation 
     lastMessage: state.lastMessage,
     hints: buildHints(state, nearby, ridge),
     overworld: state.mode === 'overworld' || state.mode === 'overlay' ? state.overworld : null,
-    basement: state.mode === 'basement' ? state.basement : null,
+    basement: state.mode === 'basement' ? observeBasement(state) : null,
     hobbies: state.mode === 'hobbies' ? observeHobbies(state) : null,
     potassium: state.mode === 'potassium' ? state.potassium : null,
     ridge: state.mode === 'ridge' ? ridge : null
@@ -58,6 +58,8 @@ export function formatGameObservation(observation: GameObservation): string {
   }
   if (observation.basement) {
     lines.push(`basement x=${Math.round(observation.basement.playerX)} facing=${observation.basement.facing}`);
+    const escape = observation.basement.escape;
+    if (escape) lines.push(`escape: ransacked, way back ${escape.wayBack} — ${escape.description}`);
   }
   if (observation.hobbies) {
     lines.push(`hobbies x=${Math.round(observation.hobbies.playerX)}`);
@@ -161,7 +163,9 @@ function buildHints(state: GameWorldState, nearby: readonly NearbyThing[], ridge
     hints.push(OVERWORLD_CONSOLE_HINTS[getOverworldProgress(state).stage]);
   }
 
-  if (state.mode === 'basement' && !state.ownedItemIds.includes('glasses')) {
+  if (state.mode === 'basement' && isSimulationBroken(state.ownedItemIds)) {
+    hints.push('The breach behind you is shut. The exit ladder on the far left (x=95) climbs out onto the street.');
+  } else if (state.mode === 'basement' && !state.ownedItemIds.includes('glasses')) {
     hints.push('Walk right to the glasses pickup, then interact.');
   }
 
@@ -178,7 +182,7 @@ function buildHints(state: GameWorldState, nearby: readonly NearbyThing[], ridge
   if (state.mode === 'hobbies') {
     hints.push(
       isSimulationBroken(state.ownedItemIds)
-        ? 'The way back right is scribbled shut. Keep walking left. leave still works from here.'
+        ? 'The way back right is scribbled shut. Keep walking left, into the torn opening. leave still works from here.'
         : outOfBoundsStageAt(state.hobbies.playerX)
           ? 'Walk right to get back into the drawn room. leave still works from here.'
           : 'Stations: art x=280, music x=440, fitness x=600, dancing x=760. Interact, then perform.'

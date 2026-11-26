@@ -53,18 +53,22 @@ describe('createSceneContexts', () => {
   it('builds hobbies and basement start data with shared close and overlay deps', () => {
     const onReturnToOverworld = vi.fn();
     const onOpenOverlay = vi.fn();
+    const onEnterScene = vi.fn();
     const getSceneStartResume = vi.fn((sceneKey: string) => ({ x: sceneKey.length, y: 9 }));
     const contexts = createSceneContexts(
       makeDeps({
         onReturnToOverworld,
         onOpenOverlay,
+        onEnterScene,
         getSceneStartResume
       })
     );
 
+    // Hobbies can also enter the Basement (the Out of Bounds opening).
     expect(contexts[1].getStartData()).toEqual({
       onClose: onReturnToOverworld,
       onOpenOverlay,
+      onEnterScene,
       isPaused: false,
       resumePosition: { x: PHASER_SCENE_KEYS.hobbies.length, y: 9 }
     });

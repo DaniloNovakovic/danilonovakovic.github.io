@@ -66,6 +66,20 @@ export interface BasementSlice {
   facing: GameFacing;
   /** Next corkboard note to read; cycles so repeat visits reveal more. */
   corkboardNote: number;
+  /** Danilo already remarked on the scribbled-shut breach this visit (Out of Bounds escape). */
+  breachThoughtShown: boolean;
+}
+
+/** The Basement during the Out of Bounds escape: ransacked, the breach behind you shut. */
+export interface BasementEscapeObservation {
+  ransacked: true;
+  wayBack: 'blocked';
+  description: string;
+}
+
+export interface BasementObservation extends BasementSlice {
+  /** Null unless the simulation is broken. */
+  escape: BasementEscapeObservation | null;
 }
 
 export interface HobbiesSlice {
@@ -143,7 +157,7 @@ export interface GameObservation {
   lastMessage: string | null;
   hints: readonly string[];
   overworld: OverworldSlice | null;
-  basement: BasementSlice | null;
+  basement: BasementObservation | null;
   hobbies: HobbiesObservation | null;
   potassium: PotassiumSlice | null;
   ridge: RidgeObservation | null;

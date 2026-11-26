@@ -8,3 +8,4 @@ export * from './content/basementSpots';
 export * from './content/circuitParts';
 export * from './content/hobbiesSpots';
 export * from './content/outOfBoundsVoid';
+export * from './content/outOfBoundsBreakout';
