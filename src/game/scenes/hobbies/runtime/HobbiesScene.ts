@@ -218,7 +218,8 @@ export class HobbiesScene extends Phaser.Scene {
       resumePosition: this.resumePosition,
       resumeClamp: this.escaped
         ? { ...HOBBIES_RESUME_CLAMP, minX: OUT_OF_BOUNDS_ESCAPE_MIN_X, maxX: OUT_OF_BOUNDS_ESCAPE_MAX_X }
-        : HOBBIES_RESUME_CLAMP,
+        : // The void is part of the room until the pickup: a return (or a dev checkpoint) can start out there.
+          { ...HOBBIES_RESUME_CLAMP, minX: OUT_OF_BOUNDS_WORLD_LEFT_X },
       sprite: {
         depth: 8,
         gravityY: 1000

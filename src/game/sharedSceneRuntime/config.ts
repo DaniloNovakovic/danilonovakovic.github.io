@@ -1,5 +1,7 @@
 import * as Phaser from 'phaser';
-import { HOBBIES_PLAYER_MAX_X } from '@/game/core/console';
+import { HOBBIES_FLOOR_Y, HOBBIES_PLAYER_MAX_X } from '@/game/core/console';
+
+export { HOBBIES_FLOOR_Y, HOBBIES_PLAYER_START_OFFSET_Y } from '@/game/core/console';
 import { GAME_DESIGN_HEIGHT, GAME_DESIGN_WIDTH } from './designSize';
 
 export { GAME_DESIGN_HEIGHT, GAME_DESIGN_WIDTH } from './designSize';
@@ -13,8 +15,6 @@ export const SIDE_VIEW_SPRINT_SPEED = 600;
 /** Hobbies interior uses the same logical height as the canvas. */
 export const HOBBIES_ROOM_WIDTH = GAME_DESIGN_WIDTH;
 export const HOBBIES_ROOM_HEIGHT = GAME_DESIGN_HEIGHT;
-export const HOBBIES_FLOOR_Y = 500;
-export const HOBBIES_PLAYER_START_OFFSET_Y = 50;
 /** Clamp restored player position inside the hobbies room (logical px). */
 export const HOBBIES_RESUME_CLAMP = {
   minX: 40,
