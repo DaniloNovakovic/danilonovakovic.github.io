@@ -434,7 +434,7 @@ export function lockedDoor(kit: PropKit) {
   const group = new Group();
   group.add(mesh(new BoxGeometry(2.6, 2.7, 0.15), kit.toon(NIGHT_LAB.ceiling)));
   for (const side of [-1, 1])
-    group.add(mesh(new BoxGeometry(1.1, 2.4, 0.1), kit.toon(NIGHT_LAB.wall), side * 0.56, -0.05, 0.08));
+    group.add(mesh(new BoxGeometry(1.1, 2.5, 0.1), kit.toon(NIGHT_LAB.wall), side * 0.56, -0.1, 0.08));
   const lampMaterial = new MeshBasicMaterial({ color: NIGHT_LAB.alert });
   group.add(mesh(new BoxGeometry(0.3, 0.12, 0.08), lampMaterial, 0, 1.5, 0.1));
   const light = new PointLight(NIGHT_LAB.alert, 3, 6, 1);

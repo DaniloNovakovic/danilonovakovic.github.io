@@ -126,12 +126,39 @@ function addStrip(root: Group, { cx, cz }: Cell, strip: Material) {
   root.add(light);
 }
 
-function addFloorCell(root: Group, map: RealWorldMap, { cx, cz, ribbed }: Cell, materials: CellMaterials) {
-  for (const [dx, dz] of NEIGHBOURS) {
-    if (!isSolidAt(map, cx + dx * CELL, cz + dz * CELL)) continue;
-    const trim = new Mesh(new BoxGeometry(dx ? 0.25 : CELL, 0.35, dz ? 0.25 : CELL), materials.trim);
-    trim.position.set(cx + dx * (CELL / 2 - 0.12), 0.17, cz + dz * (CELL / 2 - 0.12));
+/** Width of the locked door's frame; the skirting stops at it. */
+const DOOR_WIDTH = 2.6;
+
+/**
+ * The skirting along the foot of a wall face, from cell (cx, cz) towards
+ * (dx, dz). It stops either side of a door, so the doorway meets the floor.
+ */
+function addSkirting(
+  root: Group,
+  cx: number,
+  cz: number,
+  [dx, dz]: readonly [number, number],
+  material: Material,
+  door: boolean
+) {
+  const length = door ? (CELL - DOOR_WIDTH) / 2 : CELL;
+  const offsets = door ? [-(DOOR_WIDTH + length) / 2, (DOOR_WIDTH + length) / 2] : [0];
+  for (const offset of offsets) {
+    const trim = new Mesh(new BoxGeometry(dx ? 0.25 : length, 0.35, dz ? 0.25 : length), material);
+    trim.position.set(
+      cx + dx * (CELL / 2 - 0.12) + (dz ? offset : 0),
+      0.17,
+      cz + dz * (CELL / 2 - 0.12) + (dx ? offset : 0)
+    );
     root.add(trim);
+  }
+}
+
+function addFloorCell(root: Group, map: RealWorldMap, { cx, cz, ribbed }: Cell, materials: CellMaterials) {
+  for (const side of NEIGHBOURS) {
+    const [dx, dz] = side;
+    if (!isSolidAt(map, cx + dx * CELL, cz + dz * CELL)) continue;
+    addSkirting(root, cx, cz, side, materials.trim, cellAt(map, cx + dx * CELL, cz + dz * CELL) === 'D');
     // No rib in front of a vent, door or monitor: they sit mid-face, where a rib would.
     if (!ribbed || cellAt(map, cx + dx * CELL, cz + dz * CELL) !== '#') continue;
     const rib = new Mesh(new BoxGeometry(dx ? 0.3 : 0.4, H, dz ? 0.3 : 0.4), materials.wall);
