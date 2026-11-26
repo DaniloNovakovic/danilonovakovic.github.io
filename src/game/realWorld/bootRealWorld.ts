@@ -1,14 +1,18 @@
 import { Color, Fog, Object3D, PerspectiveCamera, Scene, WebGLRenderer } from 'three';
 import {
   aimedFixture,
-  crawlAmount,
-  eyeHeightFor,
+  eyeOf,
   LAB_ROOM,
+  startExplorer,
+  stepExplorer,
   stepPry,
-  stepWalker,
+  STOREROOM,
+  toRoom,
+  type Explorer,
+  type Fixture,
   type Pry,
-  type View,
-  type Walker
+  type Pryable,
+  type View
 } from '@/game/core/realWorld';
 import { buildLabRoom } from './buildLabRoom';
 import { createInkPass } from './inkPass';
@@ -60,9 +64,18 @@ const CRAWL_HANDS = 0.2;
 const FOG_STANDING = { near: 7, far: 26 };
 const FOG_DUCT = { near: 1.5, far: 11 };
 
+/** What each fixture offers under the crosshair. */
+const FIXTURE_PROMPT: Readonly<Record<Fixture, Prompt>> = {
+  grate: 'pry',
+  dropGrate: 'pry',
+  peekGrate: 'bolted',
+  door: 'locked'
+};
+
 /**
- * The real world (ADR-0007): renders the lab room into `host` and drives
- * first-person walking. Everything it creates goes away with `dispose()`.
+ * The real world (ADR-0007): renders the lab and the storeroom under its vent
+ * into `host` and drives first-person walking, crawling and dropping between
+ * them. Everything it creates goes away with `dispose()`.
  */
 export function bootRealWorld(host: HTMLElement, callbacks: RealWorldCallbacks, text: RealWorldText): RealWorldHandle {
   const isTouch = matchMedia('(pointer: coarse)').matches;
@@ -107,21 +120,26 @@ export function bootRealWorld(host: HTMLElement, callbacks: RealWorldCallbacks, 
   pitch.add(camera);
   scene.add(yaw);
   const room = buildLabRoom(LAB_ROOM, reducedMotion);
-  scene.add(room.root);
+  const storeroom = buildLabRoom(STOREROOM, reducedMotion, { lights: false });
+  scene.add(room.root, storeroom.root);
+  // Loose things stay in the lab: you need both hands to crawl.
   const throwing = createThrowing(room.root, LAB_ROOM, makeToon());
   const ink = createInkPass(renderer, camera, NIGHT_LAB.ink);
   const fog = scene.fog;
 
-  const wakeSpot = LAB_ROOM.wake;
-  let walker: Walker = { x: wakeSpot.x, z: wakeSpot.z, vx: 0, vz: 0 };
+  let explorer: Explorer = startExplorer(LAB_ROOM);
   // Facing the table and the monitors; the pods (and the others) are behind.
-  yaw.rotation.y = wakeSpot.yaw;
+  yaw.rotation.y = LAB_ROOM.wake.yaw;
   let wakeT = reducedMotion ? WAKE_SECONDS : 0;
-  let pry: Pry = { progress: 0, open: false };
-  let crawl = 0;
+  const pries: Record<Pryable, Pry> = {
+    grate: { progress: 0, open: false },
+    dropGrate: { progress: 0, open: false }
+  };
+  const opened = () => ({ grate: pries.grate.open, dropGrate: pries.dropGrate.open });
   let shown: Prompt = null;
-  /** Click, E or the touch button held down on the grate. */
-  let prying = false;
+  /** The grate under the crosshair, if any, and the one click, E or the touch button is holding on. */
+  let aimedPry: Pryable | null = null;
+  let prying: Pryable | null = null;
 
   const resize = () => {
     const { clientWidth: w, clientHeight: h } = host;
@@ -149,7 +167,7 @@ export function bootRealWorld(host: HTMLElement, callbacks: RealWorldCallbacks, 
     keys.clear();
     releaseStick();
     lookId = -1;
-    prying = false;
+    prying = null;
     callbacks.onPausedChange(next);
   };
   const lockPointer = () => {
@@ -174,21 +192,24 @@ export function bootRealWorld(host: HTMLElement, callbacks: RealWorldCallbacks, 
     listeners.push([target, type, handler as EventListener]);
   };
 
+  /** The eye, in the world. */
   const view = (): View => ({
-    x: walker.x,
+    x: yaw.position.x,
     y: yaw.position.y,
-    z: walker.z,
+    z: yaw.position.z,
     yaw: yaw.rotation.y,
     pitch: pitch.rotation.x + camera.rotation.x
   });
+  /** Hands free for loose things: in the lab, standing. */
+  const handsFree = () => explorer.room === LAB_ROOM && explorer.crawl <= CRAWL_HANDS && !explorer.fall;
   /** Pressing the action: `gentle` is E, which puts a held thing down instead of throwing it. */
   const press = (gentle: boolean) => {
-    if (crawl > CRAWL_HANDS) return;
-    if (shown === 'pry') prying = true;
+    if (shown === 'pry') prying = aimedPry;
+    else if (!handsFree()) return;
     else if (gentle) throwing.drop(view());
     else throwing.act(view());
   };
-  const letGo = () => (prying = false);
+  const letGo = () => (prying = null);
   on<KeyboardEvent>(window, 'keydown', (event) => {
     if (event.key === 'Escape' && isTouch) setPaused(true);
     if (paused) return;
@@ -289,16 +310,29 @@ export function bootRealWorld(host: HTMLElement, callbacks: RealWorldCallbacks, 
     action.textContent = entry.button;
     prompt.classList.toggle('hidden', !entry.text || (isTouch && !entry.textOnTouch));
     action.classList.toggle('hidden', !isTouch || !entry.button);
-    prying &&= next === 'pry';
+    if (next !== 'pry') prying = null;
   };
-  /** What the crosshair offers right now: loose things first, then fixtures; nothing for the hands in the duct. */
+  /** What the crosshair offers right now: loose things first (hands free), then fixtures. */
   const choosePrompt = (): Prompt => {
-    const fixture = aimedFixture(LAB_ROOM, view(), pry.open);
-    if (crawl > CRAWL_HANDS) return fixture === 'farGrate' ? 'bolted' : null;
-    if (throwing.prompt) return throwing.prompt;
-    if (fixture === 'grate') return 'pry';
-    if (fixture === 'door') return 'locked';
-    return fixture === 'farGrate' ? 'bolted' : null;
+    const fixture = explorer.fall ? null : aimedFixture(explorer.room, toRoom(explorer.room, view()), opened());
+    aimedPry = fixture === 'grate' || fixture === 'dropGrate' ? fixture : null;
+    if (handsFree() && throwing.prompt) return throwing.prompt;
+    return fixture ? FIXTURE_PROMPT[fixture] : null;
+  };
+  /** Work a held grate loose; when one comes off, show it go. */
+  const stepGrates = (dt: number) => {
+    for (const grate of ['grate', 'dropGrate'] as const) {
+      const was = pries[grate].open;
+      pries[grate] = stepPry(pries[grate], prying === grate, dt);
+      room.vent?.setPry(grate, pries[grate].progress);
+      if (pries[grate].open && !was) {
+        room.vent?.open(grate);
+        prying = null;
+      }
+    }
+    const progress = aimedPry ? pries[aimedPry].progress : 0;
+    pryBar.classList.toggle('hidden', progress <= 0 || progress >= 1);
+    pryFill.style.transform = `scaleX(${progress})`;
   };
 
   // ---- loop ----
@@ -316,36 +350,31 @@ export function bootRealWorld(host: HTMLElement, callbacks: RealWorldCallbacks, 
       yaw.rotation.y -= look.dx;
       pitch.rotation.x = Math.max(-MAX_PITCH, Math.min(MAX_PITCH, pitch.rotation.x - look.dy));
       const canWalk = awake > 0.6;
-      walker = stepWalker(
-        LAB_ROOM,
-        walker,
+      explorer = stepExplorer(
+        explorer,
         {
           forward: canWalk ? axis(['KeyW', 'ArrowUp'], ['KeyS', 'ArrowDown']) - touchStick.y : 0,
           strafe: canWalk ? axis(['KeyD', 'ArrowRight'], ['KeyA', 'ArrowLeft']) + touchStick.x : 0,
           yaw: yaw.rotation.y
         },
         dt,
-        pry.open
+        opened()
       );
-      crawl = crawlAmount(LAB_ROOM.vent, pry.open, walker.x, walker.z);
-      // Waking: from slumped low and looking down, up to standing (or ducking into the vent).
+      const { crawl } = explorer;
+      const eye = eyeOf(explorer);
+      // Waking: from slumped low and looking down, up to standing.
       const ease = 1 - (1 - awake) ** 3;
-      yaw.position.set(walker.x, 0.7 + (eyeHeightFor(LAB_ROOM.vent, crawl) - 0.7) * ease, walker.z);
+      yaw.position.set(eye.x, 0.7 + (eye.y - 0.7) * ease, eye.z);
       camera.rotation.x = -(1 - ease) * 0.9;
       if (fog instanceof Fog) {
         fog.near = FOG_STANDING.near + (FOG_DUCT.near - FOG_STANDING.near) * crawl;
         fog.far = FOG_STANDING.far + (FOG_DUCT.far - FOG_STANDING.far) * crawl;
       }
-      const wasOpen = pry.open;
-      pry = stepPry(pry, prying, dt);
-      room.vent?.setPry(pry.progress);
-      if (pry.open && !wasOpen) {
-        room.vent?.open();
-        prying = false;
-      }
-      pryBar.classList.toggle('hidden', pry.open || pry.progress <= 0);
-      pryFill.style.transform = `scaleX(${pry.progress})`;
+      // Both hands to crawl: whatever was held is set down at the vent's mouth.
+      if (crawl > CRAWL_HANDS && throwing.holding) throwing.putDown({ x: eye.x, y: 0.4, z: eye.z });
+      stepGrates(dt);
       room.update(now / 1000);
+      storeroom.update(now / 1000);
       scene.updateMatrixWorld();
       throwing.update(dt, view(), camera);
       showPrompt(choosePrompt());
@@ -367,6 +396,7 @@ export function bootRealWorld(host: HTMLElement, callbacks: RealWorldCallbacks, 
       for (const [target, type, handler] of listeners) target.removeEventListener(type, handler);
       if (document.pointerLockElement === canvas) document.exitPointerLock();
       room.dispose();
+      storeroom.dispose();
       ink.dispose();
       renderer.dispose();
       renderer.forceContextLoss();

@@ -389,14 +389,26 @@ the second (pace and swagger only: stuns, no gore).
      backing out stands you up again. The duct is dark sheet metal, and the
      dark closes in (the fog comes near).
    - **Where it leads**: a short duct through the wall, a bend north in the
-     dark, then east to a **grate in the duct floor**, bolted from below. Warm
-     light comes up through its slats from a lit ship corridor underneath.
-   - **The glimpse**: an alien researcher in a lab coat walks along the
-     corridor below, stops right under the grate with its antennae working
+     dark, then east over two grates in the duct floor. The pattern (Danilo,
+     2026-11-27): the first gap only shows you what you're up against, a
+     later one lets you through.
+   - **The first grate: the glimpse.** Bolted from below. Warm light comes up
+     through its slats from a lit ship corridor. An alien researcher in a lab
+     coat walks along below, stops right under you with its antennae working
      the air, then walks on. Mood only: it doesn't see you and doesn't look
      up (yet). Under reduced motion it just stands there.
-   - Later in this step: getting down into the corridor, the patrols, light
-     and shadow, checkpoints, and more than one way through.
+   - **The second grate: the way down.** On over the corridor wall and a bend
+     south: this grate pries off like the first one (hold) and falls through.
+     Crawl over the hole and you drop into the **storeroom**: a short fall,
+     landing on your feet. There's no climbing back up.
+   - **The storeroom** (#145): a small, dim supply room next to the corridor.
+     Racks of boxes, canisters of pod fluid and folded spare lab coats, crates
+     by the door, one light strip at the back. Its door, onto the corridor,
+     stays locked for now. The sneaking starts here.
+   - Loose things stay in the lab: crawling takes both hands, so whatever
+     you're holding is put down at the vent's mouth.
+   - Later in this step: through the storeroom door, the patrols, light and
+     shadow, checkpoints, and more than one way through.
 
    **The aliens** (Danilo, 2026-11-26). A bit scary, never goofy blobs, and
    never gore: upright insect people, part ant, part machine. A long chitin

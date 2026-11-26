@@ -408,6 +408,47 @@ export function jarShelf(kit: PropKit, seed: number) {
   return group;
 }
 
+/** A storeroom rack: boxes, canisters, folded spare coats. `seed` varies what's on it. */
+export function supplyShelf(kit: PropKit, seed: number) {
+  const group = new Group();
+  const frame = kit.toon(NIGHT_LAB.steel);
+  for (const side of [-1, 1]) group.add(mesh(new BoxGeometry(0.08, 2.3, 0.7), frame, side * 1.15, 1.15, 0));
+  const levels = [0.15, 0.85, 1.55, 2.2];
+  for (const y of levels) group.add(mesh(new BoxGeometry(2.3, 0.06, 0.7), frame, 0, y, 0));
+  const random = seededRandom(31 + seed * 7);
+  levels.slice(0, 3).forEach((y) => {
+    let x = -1;
+    while (x < 0.85) {
+      const roll = random();
+      const size = 0.3 + random() * 0.25;
+      if (roll < 0.45) {
+        const box = mesh(
+          new BoxGeometry(size, size * 0.8, 0.5),
+          kit.toon(roll < 0.2 ? NIGHT_LAB.crate : NIGHT_LAB.paper)
+        );
+        box.position.set(x + size / 2, y + 0.03 + size * 0.4, 0);
+        box.rotation.y = (random() - 0.5) * 0.3;
+        group.add(box);
+      } else if (roll < 0.8) {
+        // Canisters of the pods' glowing fluid.
+        const can = mesh(new CylinderGeometry(size * 0.35, size * 0.35, size * 1.1, 8), kit.toon(NIGHT_LAB.fluid));
+        can.position.set(x + size / 2, y + 0.03 + size * 0.55, 0);
+        group.add(
+          can,
+          mesh(new CylinderGeometry(size * 0.36, size * 0.36, 0.05, 8), frame, x + size / 2, y + size * 1.1 + 0.05, 0)
+        );
+      } else {
+        // Spare lab coats, folded: the researchers' size, not a person's.
+        const coat = mesh(new BoxGeometry(size * 1.3, 0.12, 0.45), kit.toon(0xe4e2ee));
+        coat.position.set(x + size * 0.65, y + 0.09, 0);
+        group.add(coat);
+      }
+      x += size * 1.3 + 0.08;
+    }
+  });
+  return group;
+}
+
 export function crateStack(kit: PropKit, turn: number) {
   const group = new Group();
   const crate = mesh(new BoxGeometry(1.3, 1.3, 1.3), kit.toon(NIGHT_LAB.crate), 0, 0.65);

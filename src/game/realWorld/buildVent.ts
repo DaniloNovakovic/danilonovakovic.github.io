@@ -1,12 +1,14 @@
 import { BoxGeometry, Group, Mesh, MeshBasicMaterial, PointLight, type Material } from 'three';
 import {
   ductCells,
-  farGrateCentre,
+  floorGrateCentre,
   grateCentre,
   isOpenDuct,
   mouthOf,
+  SHIP_DECK_DROP,
   VENT_CELL,
   type DuctCell,
+  type Pryable,
   type VentDuct
 } from '@/game/core/realWorld';
 import { insectResearcher, type Alien } from './insectAlien';
@@ -17,8 +19,8 @@ import { NIGHT_LAB } from './toon';
 const DUCT = 0x262f5a;
 const DUCT_SEAM = 0x1d2340;
 const SHEET = 0.06;
-/** How far below the duct floor the corridor floor is. */
-const CORRIDOR_DROP = 3.4;
+/** How far below the duct floor the corridor floor is: the ship's deck, like the storeroom's. */
+const CORRIDOR_DROP = SHIP_DECK_DROP;
 const CORRIDOR_WIDTH = 3.2;
 const CORRIDOR_LENGTH = 18;
 const GRATE_FALL_SECONDS = 0.45;
@@ -85,8 +87,8 @@ function duct(kit: PropKit, vent: VentDuct, root: Group) {
   }
 }
 
-/** A floor grate: frame, wide-gapped slats, and the bolts on its underside. */
-function floorGrate(kit: PropKit) {
+/** A floor grate: frame and wide-gapped slats; the bolted one shows its bolt heads underneath. */
+function floorGrate(kit: PropKit, bolted: boolean) {
   const group = new Group();
   const steel = kit.toon(DUCT_SEAM);
   const half = VENT_CELL / 2;
@@ -94,7 +96,7 @@ function floorGrate(kit: PropKit) {
     group.add(box(VENT_CELL, 0.06, 0.12, steel, 0, 0, side * (half - 0.06)));
     group.add(box(0.12, 0.06, VENT_CELL, steel, side * (half - 0.06), 0, 0));
     // Bolted from below: heads you can see but not reach.
-    for (const other of [-1, 1])
+    for (const other of bolted ? [-1, 1] : [])
       group.add(box(0.08, 0.04, 0.08, kit.toon(NIGHT_LAB.steel), side * (half - 0.06), -0.06, other * (half - 0.06)));
   }
   // Wide gaps: enough to see down into the corridor, too narrow to fit through.
@@ -154,9 +156,9 @@ function patrol(alien: Alien, reducedMotion: boolean): ((seconds: number) => voi
 
 /** Below the far grate: the corridor across the duct's last leg, the light coming up, the one walking past. */
 function belowFarGrate(kit: PropKit, vent: VentDuct, root: Group) {
-  const far = farGrateCentre(vent);
+  const far = floorGrateCentre(vent, 'g');
   if (!far) return null;
-  const grate = floorGrate(kit);
+  const grate = floorGrate(kit, true);
   grate.position.set(far.x, vent.floor - 0.03, far.z);
   // Warm light comes up through the slats: the only light in the duct.
   const glow = new PointLight(NIGHT_LAB.strip, 1.1, 3.5, 1.5);
@@ -227,28 +229,101 @@ function hingedGrate(kit: PropKit, vent: VentDuct) {
   };
 }
 
-export interface LabVent {
-  root: Group;
-  /** How far the grate has been worked loose, 0..1: it bends out and rattles. */
+interface GrateView {
   setPry(progress: number): void;
-  /** The grate comes off and drops to the floor. */
   open(): void;
   update(seconds: number): void;
 }
 
-/** The lab vent from its plan: the grate to pry off, the dark duct, and the corridor below its far end. */
+/**
+ * The grate over the storeroom hatch: prying lifts one edge and rattles it,
+ * then it drops through, down to the storeroom floor. A short dark shaft
+ * joins the duct to the storeroom ceiling.
+ */
+function dropGrate(kit: PropKit, vent: VentDuct, root: Group): GrateView | null {
+  const centre = floorGrateCentre(vent, 'o');
+  if (!centre) return null;
+  const shaftDepth = 0.3;
+  const shaft = kit.toon(DUCT_SEAM);
+  for (const side of SIDES) {
+    const wall = box(side[0] ? SHEET : VENT_CELL, shaftDepth, side[1] ? SHEET : VENT_CELL, shaft);
+    wall.position.set(
+      centre.x + side[0] * (VENT_CELL / 2 + SHEET / 2),
+      vent.floor - shaftDepth / 2,
+      centre.z + side[1] * (VENT_CELL / 2 + SHEET / 2)
+    );
+    root.add(wall);
+  }
+  const grate = floorGrate(kit, false);
+  const top = vent.floor - 0.03;
+  const bottom = vent.floor - SHIP_DECK_DROP + 0.04;
+  grate.position.set(centre.x, top, centre.z);
+  root.add(grate);
+  let progress = 0;
+  /** -1 while it's in; then when it started to fall; Infinity once down. */
+  let fellAt = -1;
+  let now = 0;
+  const fall = (t: number) => {
+    grate.position.y = top + (bottom - top) * t * t;
+    grate.rotation.z = 0.12 + Math.sin(t * Math.PI) * 0.5;
+    if (t >= 1) grate.rotation.set(0, 0.4, 0);
+  };
+  return {
+    setPry(next) {
+      if (fellAt >= 0) return;
+      progress = next;
+      grate.rotation.z = progress * 0.12;
+    },
+    open() {
+      if (fellAt >= 0) return;
+      fellAt = kit.reducedMotion ? Infinity : now;
+      if (kit.reducedMotion) fall(1);
+    },
+    update(seconds) {
+      now = seconds;
+      if (fellAt === Infinity) return;
+      if (fellAt < 0) {
+        if (progress > 0 && !kit.reducedMotion)
+          grate.position.y = top + Math.abs(Math.sin(seconds * 41)) * 0.02 * progress;
+        return;
+      }
+      const t = Math.min(1, (seconds - fellAt) / GRATE_FALL_SECONDS);
+      fall(t);
+      if (t >= 1) fellAt = Infinity;
+    }
+  };
+}
+
+export interface LabVent {
+  root: Group;
+  /** How far a grate has been worked loose, 0..1: it bends or lifts, and rattles. */
+  setPry(grate: Pryable, progress: number): void;
+  /** The grate comes off: the lab one tips onto the floor, the drop one falls through. */
+  open(grate: Pryable): void;
+  update(seconds: number): void;
+}
+
+/**
+ * The lab vent from its plan: the grate to pry off, the dark duct, the bolted
+ * grate over the corridor (and who walks there), and the grate that drops
+ * into the storeroom.
+ */
 export function buildVent(kit: PropKit, vent: VentDuct): LabVent {
   const root = new Group();
   duct(kit, vent, root);
-  const grate = hingedGrate(kit, vent);
-  root.add(grate.hinge);
+  const lab = hingedGrate(kit, vent);
+  root.add(lab.hinge);
+  const grates: Partial<Record<Pryable, GrateView>> = { grate: lab };
+  const drop = dropGrate(kit, vent, root);
+  if (drop) grates.dropGrate = drop;
   const below = belowFarGrate(kit, vent, root);
   return {
     root,
-    setPry: grate.setPry,
-    open: grate.open,
+    setPry: (grate, progress) => grates[grate]?.setPry(progress),
+    open: (grate) => grates[grate]?.open(),
     update(seconds) {
-      grate.update(seconds);
+      lab.update(seconds);
+      drop?.update(seconds);
       below?.(seconds);
     }
   };

@@ -1,9 +1,19 @@
 import { aimMiss, type Point3, type View } from './aim';
 import { findCells, isSolidAt, REAL_WORLD_CELL, type RealWorldRoom } from './labRoom';
-import { farGrateCentre, grateCentre } from './vent';
+import { floorGrateCentre, grateCentre } from './vent';
 
-/** What else the crosshair can rest on, besides loose things. */
-export type Fixture = 'grate' | 'farGrate' | 'door';
+/**
+ * What else the crosshair can rest on, besides loose things: the lab's vent
+ * grate, the bolted grate over the corridor, the grate that drops into the
+ * storeroom, and locked doors.
+ */
+export type Fixture = 'grate' | 'peekGrate' | 'dropGrate' | 'door';
+
+/** The fixtures that pry off. */
+export type Pryable = 'grate' | 'dropGrate';
+
+/** Which pryable fixtures are already off: there's nothing left there to aim at. */
+export type Opened = Readonly<Record<Pryable, boolean>>;
 
 interface Target {
   fixture: Fixture;
@@ -38,22 +48,23 @@ function targetsOf(room: RealWorldRoom): Target[] {
   }
   if (room.vent) {
     targets.push({ fixture: 'grate', centre: grateCentre(room.vent), reach: 2.4, slack: 0.75 });
-    const far = farGrateCentre(room.vent);
-    if (far) targets.push({ fixture: 'farGrate', centre: far, reach: 2.2, slack: 0.7 });
+    const peek = floorGrateCentre(room.vent, 'g');
+    if (peek) targets.push({ fixture: 'peekGrate', centre: peek, reach: 2.2, slack: 0.7 });
+    const drop = floorGrateCentre(room.vent, 'o');
+    if (drop) targets.push({ fixture: 'dropGrate', centre: drop, reach: 2.2, slack: 0.7 });
   }
   targetsByRoom.set(room, targets);
   return targets;
 }
 
-/**
- * The fixture under the crosshair and within reach, if any. Once the vent is
- * open its grate is gone, so there is nothing left there to aim at.
- */
-export function aimedFixture(room: RealWorldRoom, view: View, ventOpen: boolean): Fixture | null {
+const isPryable = (fixture: Fixture): fixture is Pryable => fixture === 'grate' || fixture === 'dropGrate';
+
+/** The fixture under the crosshair and within reach, if any; grates already off don't count. */
+export function aimedFixture(room: RealWorldRoom, view: View, opened: Opened): Fixture | null {
   let best: Fixture | null = null;
   let bestMiss = Infinity;
   for (const target of targetsOf(room)) {
-    if (target.fixture === 'grate' && ventOpen) continue;
+    if (isPryable(target.fixture) && opened[target.fixture]) continue;
     const aim = aimMiss(view, target.centre, target.reach);
     if (aim && aim.miss < target.slack && aim.miss < bestMiss) {
       best = target.fixture;

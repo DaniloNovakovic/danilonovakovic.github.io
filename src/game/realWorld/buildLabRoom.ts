@@ -43,6 +43,7 @@ import {
   researcherChair,
   shatteredPod,
   sleeperPod,
+  supplyShelf,
   watchDesk,
   type PropKit
 } from './labProps';
@@ -249,7 +250,8 @@ const BUILD: Readonly<Record<FurnitureKind, (kit: PropKit, nth: number) => Objec
   table: (kit) => operatingTable(kit),
   cart: (kit) => instrumentCart(kit),
   jarShelf: (kit, nth) => jarShelf(kit, nth + 1),
-  crates: (kit, nth) => crateStack(kit, nth % 2 ? -0.3 : 0.3)
+  crates: (kit, nth) => crateStack(kit, nth % 2 ? -0.3 : 0.3),
+  supplyShelf: (kit, nth) => supplyShelf(kit, nth)
 };
 
 function addFurniture(root: Group, room: RealWorldRoom, kit: PropKit) {
@@ -304,27 +306,62 @@ export interface LabRoom {
   dispose(): void;
 }
 
-/** The floor tiles and the ceiling over the whole plan. */
-function floorAndCeiling(kit: PropKit, map: RealWorldMap) {
+/** A ceiling panel over [x0, x1] × [z0, z1], facing down. */
+function ceilingPanel(material: Material, x0: number, x1: number, z0: number, z1: number) {
+  const panel = new Mesh(new PlaneGeometry(x1 - x0, z1 - z0), material);
+  panel.rotation.x = Math.PI / 2;
+  panel.position.set((x0 + x1) / 2, H, (z0 + z1) / 2);
+  return panel;
+}
+
+/** The floor tiles, and the ceiling over the whole plan, with a hole where a hatch is. */
+function floorAndCeiling(kit: PropKit, room: RealWorldRoom) {
+  const map = room.walls;
   const width = map[0].length * CELL;
   const depth = map.length * CELL;
   const floor = new Mesh(new PlaneGeometry(width, depth), kit.toon(0xffffff, { map: floorTexture(map) }));
   floor.rotation.x = -Math.PI / 2;
   floor.position.set(width / 2, 0, depth / 2);
-  const ceiling = new Mesh(new PlaneGeometry(width, depth), kit.toon(NIGHT_LAB.ceiling));
-  ceiling.rotation.x = Math.PI / 2;
-  ceiling.position.set(width / 2, H, depth / 2);
-  return [floor, ceiling];
+  const material = kit.toon(NIGHT_LAB.ceiling);
+  if (!room.hatch) return [floor, ceilingPanel(material, 0, width, 0, depth)];
+  const half = VENT_CELL / 2;
+  const { x, z } = room.hatch;
+  return [
+    floor,
+    ceilingPanel(material, 0, width, 0, z - half),
+    ceilingPanel(material, 0, width, z + half, depth),
+    ceilingPanel(material, 0, x - half, z - half, z + half),
+    ceilingPanel(material, x + half, width, z - half, z + half)
+  ];
 }
 
-/** Build the lab from its plan in `@/game/core/realWorld`. */
-export function buildLabRoom(room: RealWorldRoom, reducedMotion: boolean): LabRoom {
+/** Where the light strips go: the room's own list, or every other floor cell. */
+function hasStrip(room: RealWorldRoom, xi: number, zi: number) {
+  if (!room.strips) return (xi + zi) % 2 === 0;
+  return room.strips.some((strip) => Math.floor(strip.x / CELL) === xi && Math.floor(strip.z / CELL) === zi);
+}
+
+export interface BuildOptions {
+  /** The scene's shared lights; only one room in a scene should bring them. */
+  lights: boolean;
+}
+
+/**
+ * Build a room from its plan in `@/game/core/realWorld`: the lab, or another
+ * ship room, placed in the world at its `offset`.
+ */
+export function buildLabRoom(
+  room: RealWorldRoom,
+  reducedMotion: boolean,
+  options: BuildOptions = { lights: true }
+): LabRoom {
   const updates: Array<(seconds: number) => void> = [];
   const kit: PropKit = { toon: makeToon(), animate: (update) => updates.push(update), reducedMotion };
   const root = new Group();
+  if (room.offset) root.position.set(room.offset.x, room.offset.y, room.offset.z);
   const map = room.walls;
-  lights(root);
-  root.add(...floorAndCeiling(kit, map));
+  if (options.lights) lights(root);
+  root.add(...floorAndCeiling(kit, room));
 
   const materials: CellMaterials = {
     wall: kit.toon(NIGHT_LAB.wall),
@@ -348,7 +385,7 @@ export function buildLabRoom(room: RealWorldRoom, reducedMotion: boolean): LabRo
       }
       addFloorCell(root, map, cell, materials);
       if (`${xi},${zi}` === flickerCell) addStrip(root, cell, flicker);
-      else if ((xi + zi) % 2 === 0) addStrip(root, cell, materials.strip);
+      else if (hasStrip(room, xi, zi)) addStrip(root, cell, materials.strip);
     });
   });
   addFurniture(root, room, kit);

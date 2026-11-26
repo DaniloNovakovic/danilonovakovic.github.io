@@ -16,7 +16,9 @@
  * The route from Danilo's pod to the door stays clear.
  *
  * The door stays locked. The only way out is the vent: pry the grate off and
- * crawl through a short, dark duct that ends at a grate over a ship corridor.
+ * crawl through a short, dark duct. Its first floor grate, bolted, looks down
+ * into a ship corridor where a researcher walks past; the second pries open
+ * and drops into the storeroom next door (`storeroom.ts`).
  */
 export type RealWorldMap = readonly string[];
 
@@ -55,7 +57,8 @@ export type FurnitureKind =
   | 'table'
   | 'cart'
   | 'jarShelf'
-  | 'crates';
+  | 'crates'
+  | 'supplyShelf';
 
 /** Which way a piece's front looks. */
 export type Facing = 'north' | 'east' | 'south' | 'west';
@@ -84,7 +87,8 @@ const SHAPE: Readonly<Record<FurnitureKind, Shape>> = {
   table: { width: 2.6, depth: 1.1, top: 1.05 },
   cart: { width: 0.8, depth: 0.5, top: 1.05 },
   jarShelf: { width: 2.3, depth: 0.75, top: 2.2 },
-  crates: { width: 1.4, depth: 1.4, top: 1.3 }
+  crates: { width: 1.4, depth: 1.4, top: 1.3 },
+  supplyShelf: { width: 2.4, depth: 0.7, top: 2.2 }
 };
 
 /** World units per vent-duct cell: just wide enough to crawl along. */
@@ -94,7 +98,8 @@ export const VENT_CELL = 1.5;
  * A crawl-only duct behind a wall grate, on its own finer grid. `plan` is one
  * character per cell seen from above, north at the top: `m` the mouth (the
  * room floor in front of the grate, where Danilo ducks down), `.` duct, `g`
- * the far grate set in the duct floor, and a space for solid.
+ * a grate in the duct floor bolted from below (a look, not a way), `o` a
+ * floor grate that pries open to drop through, and a space for solid.
  */
 export interface VentDuct {
   plan: RealWorldMap;
@@ -112,18 +117,30 @@ export interface RealWorldRoom {
   wake: { x: number; z: number; yaw: number };
   /** The duct behind the room's `V` grate, if it has one. */
   vent?: VentDuct;
+  /**
+   * Where the room's plan sits in the world (its north-west corner, at floor
+   * level). The lab is the origin; other rooms keep their own plan and rules
+   * in local coordinates and are placed with this.
+   */
+  offset?: { x: number; y: number; z: number };
+  /** A `VENT_CELL`-wide opening in the ceiling, centred here: where a duct drops in. */
+  hatch?: { x: number; z: number };
+  /** Cells (their centres) with a light strip. Without it, every other floor cell has one. */
+  strips?: ReadonlyArray<{ x: number; z: number }>;
 }
 
 /**
- * The lab's vent: in through the east wall, a bend north in the dark, then
- * east to a grate over a lit corridor, where something walks past below.
+ * The lab's vent: in through the east wall, a bend north in the dark, east
+ * over a bolted grate above the lit corridor (something walks past below),
+ * on over the corridor wall, then a bend south to the grate that opens into
+ * the storeroom.
  */
-const LAB_VENT: VentDuct = {
+export const LAB_VENT: VentDuct = {
   plan: [
-    '    ....g', //
-    '    .    ',
-    '    .    ',
-    'm....    '
+    '    ....g.....', //
+    '    .        .',
+    '    .        o',
+    'm....         '
   ],
   origin: { x: 22.5, z: 11.25 },
   floor: 0.2,

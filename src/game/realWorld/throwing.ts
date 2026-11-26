@@ -44,6 +44,9 @@ export interface Throwing {
   act(view: View): void;
   /** `E` while holding: put it down gently. */
   drop(view: View): void;
+  /** Let go of what's held at `at`, at rest (it settles from there). */
+  putDown(at: { x: number; y: number; z: number }): void;
+  readonly holding: boolean;
   readonly prompt: Prompt;
 }
 
@@ -72,6 +75,13 @@ export function createThrowing(parent: Object3D, room: RealWorldRoom, toon: Toon
   };
 
   return {
+    get holding() {
+      return heldId !== null;
+    },
+    putDown(at) {
+      things = things.map((thing) => (thing.id === heldId ? { ...thing, ...at, vx: 0, vy: 0, vz: 0 } : thing));
+      heldId = null;
+    },
     get prompt(): Prompt {
       if (heldId) return 'throw';
       return aimedId ? 'pickUp' : null;

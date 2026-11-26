@@ -4,7 +4,7 @@ import { REAL_WORLD_EYE_HEIGHT, VENT_CELL, type VentDuct } from './labRoom';
 /** Eye height above the duct floor on hands and knees. */
 const CRAWL_EYE = 0.72;
 
-const OPEN_CELLS = new Set(['m', '.', 'g']);
+const OPEN_CELLS = new Set(['m', '.', 'g', 'o']);
 
 function ventCellAt(vent: VentDuct, x: number, z: number): string {
   const column = Math.floor((x - vent.origin.x) / VENT_CELL);
@@ -12,7 +12,7 @@ function ventCellAt(vent: VentDuct, x: number, z: number): string {
   return vent.plan[row]?.[column] ?? ' ';
 }
 
-/** Somewhere a crawler fits: the mouth, the duct, or the far grate. */
+/** Somewhere a crawler fits: the mouth, the duct, or a floor grate. */
 export function isOpenDuct(vent: VentDuct, x: number, z: number): boolean {
   return OPEN_CELLS.has(ventCellAt(vent, x, z));
 }
@@ -82,10 +82,18 @@ export function grateCentre(vent: VentDuct): Point3 {
   };
 }
 
-/** The middle of the far grate, in the duct floor. */
-export function farGrateCentre(vent: VentDuct): Point3 | null {
-  const cell = ductCells(vent).find((candidate) => candidate.char === 'g');
+/** A floor grate in the duct: `g` bolted from below, `o` the one that opens. */
+export type FloorGrate = 'g' | 'o';
+
+/** The middle of a floor grate, in the duct floor. */
+export function floorGrateCentre(vent: VentDuct, kind: FloorGrate): Point3 | null {
+  const cell = ductCells(vent).find((candidate) => candidate.char === kind);
   return cell ? { x: cell.x, y: vent.floor, z: cell.z } : null;
+}
+
+/** Over the opened drop grate: nothing left to hold you up. */
+export function isOverDrop(vent: VentDuct | undefined, dropOpen: boolean, x: number, z: number): boolean {
+  return !!vent && dropOpen && ventCellAt(vent, x, z) === 'o';
 }
 
 const smooth = (t: number) => t * t * (3 - 2 * t);
@@ -98,7 +106,7 @@ const smooth = (t: number) => t * t * (3 - 2 * t);
 export function crawlAmount(vent: VentDuct | undefined, open: boolean, x: number, z: number): number {
   if (!vent || !open) return 0;
   const cell = ventCellAt(vent, x, z);
-  if (cell === '.' || cell === 'g') return 1;
+  if (cell === '.' || cell === 'g' || cell === 'o') return 1;
   if (cell !== 'm') return 0;
   const mouth = mouthOf(vent);
   const depth = ((x - mouth.x) * mouth.dx + (z - mouth.z) * mouth.dz) / VENT_CELL + 0.5;
