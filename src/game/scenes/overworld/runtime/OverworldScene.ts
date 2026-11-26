@@ -376,15 +376,17 @@ export class OverworldScene extends Phaser.Scene {
     if (swung) fight.swing();
   }
 
-  /** A hammer hit or a parried egg knocked something out: tell the console, crack the screen. */
+  /** A hammer hit or a parried egg knocked something out: tell the console; a chick or raccoon cracks the screen. */
   private landSmash(hit: StreetFightHit): void {
     if (!this.session) return;
     const result = this.session.exec(hit.target === 'chick' ? 'swing' : `swing ${hit.target}`);
     for (const event of result.events) {
       if (event.type === 'screen_smashed') {
         const seed = event.smashes * 7919 + Math.floor(Math.random() * 1e6);
-        // The screen breaks at a corner on the side of the hit (top or bottom at random).
-        bridgeActions.crackScreen({ x: this.toViewportFraction(hit).x, y: Math.random(), seed });
+        // The screen breaks at a corner: every other one on the side of the hit, the rest
+        // across from it, so a horde's worth of cracks spreads over all four (top or bottom at random).
+        const hitX = this.toViewportFraction(hit).x;
+        bridgeActions.crackScreen({ x: event.smashes % 2 === 0 ? hitX : 1 - hitX, y: Math.random(), seed });
       }
       if (event.type === 'street_fight_cleared') this.thought?.show(STREET_FIGHT_CLEARED_THOUGHT);
     }

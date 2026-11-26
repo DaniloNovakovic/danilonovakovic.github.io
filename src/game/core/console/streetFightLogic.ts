@@ -56,7 +56,8 @@ export interface SwingOutcome {
 /**
  * One hammer swing. Headless, the enemy comes to you, so a swing during the
  * fight always lands; the live scene only calls this when the hammer connects
- * and says which wave enemy it hit (the chick is always the chick).
+ * and says what it hit. A pigeon is only harassment: it drops, another circles
+ * in, and the fight doesn't move on.
  */
 export function swingHammer(state: GameWorldState, hit?: StreetFightEnemy): SwingOutcome {
   if (!isStreetInAlarm(state))
@@ -69,7 +70,8 @@ export function swingHammer(state: GameWorldState, hit?: StreetFightEnemy): Swin
 
   const next = streetFightTarget(state.screenSmashes);
   if (!next) return { ok: true, message: OUT_OF_BOUNDS_STREET_TEXT.whiff, events: [] };
-  const target: StreetFightTarget = next === 'chick' ? 'chick' : (hit ?? next);
+  if (hit === 'pigeon' && next === 'raccoon') return { ok: true, message: SMASHED_TEXT.pigeon, events: [] };
+  const target: StreetFightTarget = next;
 
   const before = streetFightProgress(state.screenSmashes);
   state.screenSmashes += 1;

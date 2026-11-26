@@ -33,6 +33,12 @@ const SEARCHLIGHT_XS = [350, 1150, 1700, 2600] as const;
 const SEARCHLIGHT_SWAY_RAD = 0.42;
 const HELI_Y = 92;
 const HELI_SPEED = 70;
+/** How far past Danilo it drifts before turning back. */
+const HELI_ORBIT_PX = 280;
+/** Extra speed per pixel it has fallen behind that orbit. */
+const HELI_CATCH_UP = 4;
+/** The spotlight points mostly down: its spot stays within this of the helicopter. */
+const HELI_BEAM_REACH_PX = 240;
 
 export class StreetAlarm {
   private readonly scene: Phaser.Scene;
@@ -144,10 +150,13 @@ export class StreetAlarm {
       this.heliX = Phaser.Math.Clamp(playerX - 220, 120, OVERWORLD_WIDTH - 120);
       return;
     }
-    // Circles the search area: drifts past Danilo, turns, comes back.
-    this.heliX += this.heliDir * HELI_SPEED * (Math.min(deltaMs, 50) / 1000);
-    if (this.heliX > playerX + 420) this.heliDir = -1;
-    else if (this.heliX < playerX - 420) this.heliDir = 1;
+    // Circles the search area: drifts past Danilo, turns, comes back. Left
+    // behind (he ran), it hurries after him instead of losing him.
+    if (this.heliX > playerX + HELI_ORBIT_PX) this.heliDir = -1;
+    else if (this.heliX < playerX - HELI_ORBIT_PX) this.heliDir = 1;
+    const behind = Math.max(0, Math.abs(playerX - this.heliX) - HELI_ORBIT_PX);
+    const speed = HELI_SPEED + behind * HELI_CATCH_UP;
+    this.heliX += this.heliDir * speed * (Math.min(deltaMs, 50) / 1000);
     this.heliX = Phaser.Math.Clamp(this.heliX, 60, OVERWORLD_WIDTH - 60);
   }
 
@@ -155,8 +164,10 @@ export class StreetAlarm {
     const g = this.heliBeam.clear();
     const fromX = this.heliX;
     const fromY = HELI_Y + 18;
-    // Sweeps the ground around where Danilo is, never quite locked on.
-    const aimX = playerX + (motion ? Math.sin(t * 0.8) * 180 : -120);
+    // Sweeps the ground around where Danilo is, never quite locked on, and
+    // never slanted so far it lies across the street.
+    const sweep = playerX + (motion ? Math.sin(t * 0.8) * 180 : -120);
+    const aimX = Phaser.Math.Clamp(sweep, fromX - HELI_BEAM_REACH_PX, fromX + HELI_BEAM_REACH_PX);
     const angle = Math.atan2(GROUND_Y - fromY, aimX - fromX);
     this.cone(g, fromX, fromY, angle, Math.hypot(aimX - fromX, GROUND_Y - fromY), 0.16, 0.18);
     g.fillStyle(BEAM, 0.16);

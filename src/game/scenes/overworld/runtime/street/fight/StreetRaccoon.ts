@@ -2,16 +2,16 @@
 // fallow-ignore-file complexity
 /**
  * A street-fight raccoon (#163): the dumpster raccoons whose paw prints were
- * always on the street. One rushes in along the ground from the edge of the
+ * always on the street, coming in packs. One rushes in along the ground from the edge of the
  * view, stops beside Danilo, raises a claw (a `!` over its head: the tell,
  * readable with sound off), swipes, backs off, and comes again. A parried
  * swipe leaves it dizzy for a moment (stars over its head), wide open. Ink
  * mask with a red eye, striped tail. Knocked out, it spins off into the gutter.
  */
 import type * as Phaser from 'phaser';
-import { ALERT_RED, ALERT_RED_CSS } from '@/game/sharedSceneRuntime/escapeAlert';
-import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
+import { ALERT_RED } from '@/game/sharedSceneRuntime/escapeAlert';
 import {
+  createTell,
   ENEMY_DEPTH,
   FEET_Y,
   GREY,
@@ -27,7 +27,8 @@ import {
 const SCALE = 1.3;
 const RUN_SPEED = 185;
 const BACK_OFF_SPEED = 120;
-const STRIKE_RANGE_PX = 58;
+const STRIKE_RANGE_PX = 48;
+const STRIKE_SPREAD_PX = 26;
 /** A swipe still lands this far away: step back during the tell to dodge it. */
 const SWIPE_REACH_PX = 80;
 const WINDUP_MS = 560;
@@ -39,6 +40,7 @@ type RaccoonState = 'waiting' | 'running' | 'windup' | 'backoff' | 'dazed' | 'hi
 export class StreetRaccoon extends WaveEnemy implements FightEnemy {
   readonly kind = 'raccoon' as const;
   private readonly tell: Phaser.GameObjects.Text;
+  private readonly strikeRange: number;
   private state: RaccoonState = 'waiting';
   private px = 0;
   private vx = 0;
@@ -49,17 +51,10 @@ export class StreetRaccoon extends WaveEnemy implements FightEnemy {
 
   constructor(scene: Phaser.Scene, options: WaveEnemyOptions) {
     super(scene, options);
-    // Alert red: it's danger, and the raised claw carries the same tell in greyscale. 26px bold.
-    this.tell = createUiText(scene, 0, 0, '!', {
-      fontSize: '26px',
-      color: ALERT_RED_CSS,
-      fontStyle: 'bold',
-      stroke: '#1a1a1a',
-      strokeThickness: 3
-    })
-      .setOrigin(0.5, 1)
-      .setDepth(ENEMY_DEPTH + 1)
-      .setVisible(false);
+    // Alert red: it's danger, and the raised claw carries the same tell in greyscale.
+    this.tell = createTell(scene, ENEMY_DEPTH + 1);
+    // A horde doesn't stack on one spot: each stops at its own distance (still inside its swipe).
+    this.strikeRange = STRIKE_RANGE_PX + Math.random() * STRIKE_SPREAD_PX;
   }
 
   get x(): number {
@@ -73,6 +68,10 @@ export class StreetRaccoon extends WaveEnemy implements FightEnemy {
 
   get hittable(): boolean {
     return this.state !== 'waiting' && this.state !== 'hit';
+  }
+
+  get down(): boolean {
+    return this.state === 'hit';
   }
 
   update(frame: FightFrame): FightAttack | null {
@@ -116,12 +115,12 @@ export class StreetRaccoon extends WaveEnemy implements FightEnemy {
   private run(frame: FightFrame): void {
     const gap = frame.playerX - this.px;
     this.facing = gap >= 0 ? 1 : -1;
-    if (Math.abs(gap) <= STRIKE_RANGE_PX) {
+    if (Math.abs(gap) <= this.strikeRange) {
       this.state = 'windup';
       this.timerMs = WINDUP_MS;
       return;
     }
-    this.px += this.facing * Math.min(Math.abs(gap) - STRIKE_RANGE_PX, RUN_SPEED * frame.dt);
+    this.px += this.facing * Math.min(Math.abs(gap) - this.strikeRange, RUN_SPEED * frame.dt);
   }
 
   /** The tell, then the swipe: it lands only if Danilo is still close. */

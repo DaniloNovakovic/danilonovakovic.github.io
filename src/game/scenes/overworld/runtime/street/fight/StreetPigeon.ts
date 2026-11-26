@@ -1,7 +1,7 @@
 // Phaser drawing and a small per-frame state machine; verified in the browser.
 // fallow-ignore-file complexity
 /**
- * A street-fight pigeon (#163): crosses the sky left and right, in a low lane
+ * A street-fight pigeon (#163): harassment, not progress. Crosses the sky left and right, in a low lane
  * (jump and swing) or a high one (out of reach), and lobs an egg (or worse)
  * at Danilo whenever it passes. Parry the egg and it flies back at its sender.
  * Red eye, ink brow, hatched grey belly. Knocked out, it tumbles to the street
@@ -34,7 +34,7 @@ const DROP_LEAD_MAX_PX = 150;
 const BOB_PX = 6;
 const GROUND = FEET_Y - 6;
 
-type PigeonState = 'waiting' | 'flying' | 'hit';
+type PigeonState = 'waiting' | 'flying' | 'hit' | 'left';
 
 export class StreetPigeon extends WaveEnemy implements FightEnemy {
   readonly kind = 'pigeon' as const;
@@ -45,6 +45,7 @@ export class StreetPigeon extends WaveEnemy implements FightEnemy {
   private vx = 0;
   private vy = 0;
   private dropReadyAt = 0;
+  private retiring = false;
   private frame = -1;
 
   constructor(scene: Phaser.Scene, options: WaveEnemyOptions) {
@@ -65,7 +66,18 @@ export class StreetPigeon extends WaveEnemy implements FightEnemy {
     return this.state === 'flying';
   }
 
+  get down(): boolean {
+    return this.state === 'hit' || this.state === 'left';
+  }
+
+  /** The fight is over: finish this pass and don't come back. */
+  retire(): void {
+    this.retiring = true;
+    if (this.state === 'waiting') this.leave();
+  }
+
   update(frame: FightFrame): FightAttack | null {
+    if (this.state === 'left') return null;
     let attack: FightAttack | null = null;
     if (this.state === 'waiting') this.wait(frame);
     else if (this.state === 'flying') attack = this.fly(frame);
@@ -97,6 +109,10 @@ export class StreetPigeon extends WaveEnemy implements FightEnemy {
     const altitude = ALTITUDES[this.pass % ALTITUDES.length];
     this.py = altitude + (frame.motion ? Math.sin(frame.timeMs / 160) * BOB_PX : 0);
     if (this.pastFarEdge(this.px, this.vx, frame)) {
+      if (this.retiring) {
+        this.leave();
+        return null;
+      }
       // Come round again from this side, at the other height.
       this.state = 'waiting';
       this.timerMs = 500 + Math.random() * 900;
@@ -105,11 +121,18 @@ export class StreetPigeon extends WaveEnemy implements FightEnemy {
       return null;
     }
     const lead = (frame.playerX - this.px) * Math.sign(this.vx);
-    if (lead >= DROP_LEAD_MIN_PX && lead <= DROP_LEAD_MAX_PX && frame.timeMs >= this.dropReadyAt) {
+    if (!this.retiring && lead >= DROP_LEAD_MIN_PX && lead <= DROP_LEAD_MAX_PX && frame.timeMs >= this.dropReadyAt) {
       this.dropReadyAt = frame.timeMs + DROP_COOLDOWN_MS;
       return { kind: 'drop', x: this.px, y: this.py + 8 };
     }
     return null;
+  }
+
+  /** Off the page for good: counts as gone once its drawing is cleared away. */
+  private leave(): void {
+    this.state = 'left';
+    this.g.setVisible(false);
+    this.fadeAway();
   }
 
   /** Knocked out: falls to the street (spinning, unless reduced motion) and lies belly up. */

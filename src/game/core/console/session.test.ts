@@ -15,11 +15,7 @@ import {
   OUT_OF_BOUNDS_OPENING_X
 } from './content/outOfBoundsVoid';
 import { BASEMENT_BREACH_ENTRY, OUT_OF_BOUNDS_STREET_ARRIVAL } from './content/outOfBoundsBreakout';
-import {
-  STREET_FIGHT_TOTAL_SMASHES,
-  streetFightProgress,
-  streetFightWaveEnemies
-} from './content/outOfBoundsStreetFight';
+import { STREET_FIGHT_TOTAL_SMASHES, streetFightProgress, streetFightWave } from './content/outOfBoundsStreetFight';
 import { BASEMENT_WALK_BOUNDS, getBasementSpot } from './content/basementSpots';
 import { getOverworldProgress, getSketchDetailLevel } from './overworldLogic';
 import { GameConsoleSession } from './session';
@@ -736,7 +732,7 @@ describe('out of bounds street fight: the street in alarm (#163)', () => {
     expect(up.message).toMatch(/chick that always ran from you/i);
     expect(session.observe().overworld?.alarm?.fight).toMatchObject({
       phase: 'chick',
-      enemiesLeft: 13
+      enemiesLeft: 26
     });
     const first = session.exec('swing');
     expect(first.message).toMatch(/BONK/);
@@ -744,11 +740,11 @@ describe('out of bounds street fight: the street in alarm (#163)', () => {
     expect(session.observe().overworld?.alarm?.fight).toMatchObject({
       phase: 'waves',
       wave: 1,
-      leftInWave: 3
+      leftInWave: 5
     });
   });
 
-  it('pigeons and raccoons come in waves; each smash adds a crack until the screen is badly cracked', () => {
+  it('raccoons come in waves; each smash adds a crack until the screen is badly cracked', () => {
     const { session } = onTheStreet();
     const waves: number[] = [];
     let cleared = false;
@@ -767,19 +763,19 @@ describe('out of bounds street fight: the street in alarm (#163)', () => {
       enemiesLeft: 0,
       screenCracks: STREET_FIGHT_TOTAL_SMASHES
     });
-    expect(session.format()).toMatch(/fight: cleared enemies left=0 screen damage=13 cracks/);
+    expect(session.format()).toMatch(/fight: cleared enemies left=0 screen damage=26 cracks/);
     const after = session.exec('swing');
     expect(after.events).toEqual([]);
     expect(after.message).toMatch(/air/);
   });
 
   it('resumes the fight from the cracks already on the screen', () => {
-    const { session, up } = onTheStreet({ screenSmashes: 5 });
+    const { session, up } = onTheStreet({ screenSmashes: 7 });
     expect(up.message).toMatch(/raccoons coming/i);
     expect(session.observe().overworld?.alarm?.fight).toMatchObject({
       phase: 'waves',
       wave: 2,
-      leftInWave: 3
+      leftInWave: 7
     });
   });
 
@@ -792,62 +788,43 @@ describe('out of bounds street fight: the street in alarm (#163)', () => {
 });
 
 describe('streetFightProgress', () => {
-  it('walks chick, then waves of 3, 4 and 5', () => {
-    expect(streetFightProgress(0)).toMatchObject({
-      phase: 'chick',
-      enemiesLeft: 13
-    });
-    expect(streetFightProgress(1)).toMatchObject({
-      phase: 'waves',
-      wave: 1,
-      leftInWave: 3
-    });
-    expect(streetFightProgress(3)).toMatchObject({
-      phase: 'waves',
-      wave: 1,
-      leftInWave: 1
-    });
-    expect(streetFightProgress(4)).toMatchObject({
-      phase: 'waves',
-      wave: 2,
-      leftInWave: 4
-    });
-    expect(streetFightProgress(8)).toMatchObject({
-      phase: 'waves',
-      wave: 3,
-      leftInWave: 5
-    });
-    expect(streetFightProgress(12)).toMatchObject({
-      phase: 'waves',
-      wave: 3,
-      leftInWave: 1
-    });
-    expect(streetFightProgress(13)).toMatchObject({
-      phase: 'cleared',
-      screenCracks: 13
-    });
-    expect(streetFightProgress(99)).toMatchObject({
-      phase: 'cleared',
-      screenCracks: 13
-    });
+  it('walks chick, then raccoon waves of 5, 8 and 12', () => {
+    expect(streetFightProgress(0)).toMatchObject({ phase: 'chick', enemiesLeft: 26 });
+    expect(streetFightProgress(1)).toMatchObject({ phase: 'waves', wave: 1, leftInWave: 5 });
+    expect(streetFightProgress(5)).toMatchObject({ phase: 'waves', wave: 1, leftInWave: 1 });
+    expect(streetFightProgress(6)).toMatchObject({ phase: 'waves', wave: 2, leftInWave: 8 });
+    expect(streetFightProgress(14)).toMatchObject({ phase: 'waves', wave: 3, leftInWave: 12 });
+    expect(streetFightProgress(25)).toMatchObject({ phase: 'waves', wave: 3, leftInWave: 1 });
+    expect(streetFightProgress(26)).toMatchObject({ phase: 'cleared', screenCracks: 26 });
+    expect(streetFightProgress(99)).toMatchObject({ phase: 'cleared', screenCracks: 26 });
   });
 });
 
-describe('street fight waves: pigeons in the air, raccoons on the ground', () => {
-  it('mixes raccoons into the later waves, ground first so a resumed wave keeps them', () => {
-    expect(streetFightWaveEnemies(1, 3)).toEqual(['pigeon', 'pigeon', 'pigeon']);
-    expect(streetFightWaveEnemies(2, 4)).toEqual(['raccoon', 'raccoon', 'pigeon', 'pigeon']);
-    expect(streetFightWaveEnemies(3, 2)).toEqual(['raccoon', 'raccoon']);
-    expect(streetFightWaveEnemies(9, 2)).toEqual([]);
+describe('street fight waves: raccoon hordes on the ground, pigeons overhead', () => {
+  it('sends the raccoons left in a wave, and more pigeons as the waves go on', () => {
+    expect(streetFightWave(1, 5)).toEqual({ raccoons: 5, pigeons: 1 });
+    expect(streetFightWave(2, 3)).toEqual({ raccoons: 3, pigeons: 2 });
+    expect(streetFightWave(3, 12)).toEqual({ raccoons: 12, pigeons: 3 });
+    expect(streetFightWave(9, 2)).toEqual({ raccoons: 0, pigeons: 0 });
   });
 
-  it('lets the live scene say what the hammer hit', () => {
+  it('lets the live scene say what the hammer hit; a pigeon never counts', () => {
     const session = createSession({ sceneId: 'basement', ownedItemIds: ['debugging-tools'], screenSmashes: 4 });
     session.exec('leave');
+    const pigeon = session.exec('swing pigeon');
+    expect(pigeon.message).toMatch(/THWACK: a pigeon/);
+    expect(pigeon.events).toEqual([]);
+    expect(session.getState().screenSmashes).toBe(4);
     const hit = session.exec('swing raccoon');
     expect(hit.message).toMatch(/WHACK: a raccoon/);
     expect(hit.events).toEqual([{ type: 'screen_smashed', target: 'raccoon', smashes: 5 }]);
     expect(parseGameCommand('smash pigeon')).toEqual({ type: 'swing', target: 'pigeon' });
     expect(parseGameCommand('swing cat')).toEqual({ type: 'unknown', raw: 'swing cat' });
+  });
+
+  it('the chick is always the chick, even if the scene says pigeon', () => {
+    const session = createSession({ sceneId: 'basement', ownedItemIds: ['debugging-tools'] });
+    session.exec('leave');
+    expect(session.exec('swing pigeon').events).toEqual([{ type: 'screen_smashed', target: 'chick', smashes: 1 }]);
   });
 });

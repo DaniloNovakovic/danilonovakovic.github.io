@@ -5,6 +5,7 @@
  */
 import type * as Phaser from 'phaser';
 import type { StreetFightEnemy } from '@/game/core/console';
+import { ALERT_RED_CSS } from '@/game/sharedSceneRuntime/escapeAlert';
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
 import { playNoise } from '@/game/scenes/hobbies/overlays/shared/audioVoices';
 
@@ -32,6 +33,20 @@ export interface FightFrame {
 /** An enemy's attack this frame: a claw swipe from beside Danilo, or something dropped from above. */
 export type FightAttack = { kind: 'swipe'; fromX: number } | { kind: 'drop'; x: number; y: number };
 
+/** A melee tell: a red `!` over an attacker's head (danger red, ink stroke, 26px bold). Hidden until shown. */
+export function createTell(scene: Phaser.Scene, depth: number): Phaser.GameObjects.Text {
+  return createUiText(scene, 0, 0, '!', {
+    fontSize: '26px',
+    color: ALERT_RED_CSS,
+    fontStyle: 'bold',
+    stroke: '#1a1a1a',
+    strokeThickness: 3
+  })
+    .setOrigin(0.5, 1)
+    .setDepth(depth)
+    .setVisible(false);
+}
+
 /** A wave enemy: moves itself, says when it attacks, and goes down when the hammer lands. */
 export interface FightEnemy {
   readonly kind: StreetFightEnemy;
@@ -39,6 +54,8 @@ export interface FightEnemy {
   readonly y: number;
   /** Can the hammer land on it right now. */
   readonly hittable: boolean;
+  /** Knocked out (falling or fading): no longer a threat or a target. */
+  readonly down: boolean;
   /** Knocked out and faded away: safe to forget. */
   readonly gone: boolean;
   update(frame: FightFrame): FightAttack | null;
@@ -46,6 +63,8 @@ export interface FightEnemy {
   knock(away: 1 | -1): void;
   /** Its melee attack met a parry (ground enemies only): left dizzy and open. */
   daze?(): void;
+  /** The fight is over: leave the page instead of coming round again (pigeons). */
+  retire?(): void;
 }
 
 export interface WaveEnemyOptions {

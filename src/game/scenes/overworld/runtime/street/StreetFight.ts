@@ -2,21 +2,23 @@
 // applies live in fight/fightRules.ts, tested. Verified in the browser.
 // fallow-ignore-file complexity
 /**
- * The Out of Bounds street fight (#163), on the Phaser side: the evil chick,
- * then waves of pigeons (crossing the sky, lobbing eggs) and raccoons
- * (rushing in along the ground to swipe), and Danilo's hammer. The console
+ * The Out of Bounds street fight (#163), on the Phaser side: the evil chick
+ * (stalking and pecking), then waves of raccoons (packs rushing in from both
+ * sides to swipe, a few on screen at a time) under pigeons circling overhead
+ * (lobbing eggs; harassment only, a knocked-out one is replaced), and Danilo's
+ * hammer, which flattens everything in front of him at once. The console
  * owns progress (how many smashes have landed); this module draws it, moves
  * the enemies, decides what connects, and lands their attacks.
  *
  * Two moves: **swing** (the hammer, in front of Danilo) and **parry** (a short
  * guard). A parried egg flies back and knocks out the pigeon that dropped it;
- * a parried swipe leaves the raccoon dizzy and open. Getting hit knocks Danilo
+ * a parried swipe or peck leaves the attacker dizzy and open. Getting hit knocks Danilo
  * back and stuns him for a moment; there is no game over. Nothing flashes,
  * and every hit, tell and splat reads with sound off.
  */
 import type * as Phaser from 'phaser';
 import {
-  streetFightWaveEnemies,
+  streetFightWave,
   type StreetFightEnemy,
   type StreetFightProgress,
   type StreetFightTarget
@@ -24,7 +26,16 @@ import {
 import { EvilChick } from './fight/EvilChick';
 import { StreetPigeon } from './fight/StreetPigeon';
 import { StreetRaccoon } from './fight/StreetRaccoon';
-import { ENEMY_DEPTH, FEET_Y, FightFx, INK, PAPER, type FightEnemy, type FightFrame } from './fight/fightKit';
+import {
+  ENEMY_DEPTH,
+  FEET_Y,
+  FightFx,
+  INK,
+  PAPER,
+  type FightAttack,
+  type FightEnemy,
+  type FightFrame
+} from './fight/fightKit';
 import { inHammerReach, lobVelocityX } from './fight/fightRules';
 
 const HAMMER_DEPTH = 26.5;
@@ -32,6 +43,12 @@ const SWING_COOLDOWN_MS = 300;
 const SWING_STRIKE_MS = 70;
 const SWING_RECOVER_MS = 220;
 const CHICK_START_OFFSET_PX = 170;
+
+/** The horde: at most this many raccoons on the street at once, one more every so often. */
+const HORDE_ON_SCREEN = 5;
+const HORDE_GAP_MS = 450;
+/** How soon a knocked-out pigeon is replaced. */
+const PIGEON_GAP_MS = 2200;
 
 /** The guard: open this long, then a rest before the next one. */
 const PARRY_OPEN_MS = 280;
@@ -48,7 +65,7 @@ const DROP_START_VY = 60;
 const DROP_HIT_HALF_WIDTH = 20;
 const RETURN_SPEED = 560;
 
-export type StreetFightHurt = 'swipe' | 'dropping';
+export type StreetFightHurt = 'peck' | 'swipe' | 'dropping';
 
 export interface StreetFightHit {
   target: StreetFightTarget;
@@ -83,6 +100,12 @@ export class StreetFight {
   private droppings: Dropping[] = [];
   private progress: StreetFightProgress;
   private wave = 0;
+  private raccoonsToCome = 0;
+  private nextRaccoonAt = 0;
+  private raccoonFromLeft = false;
+  private pigeonsWanted = 0;
+  private nextPigeonAt = 0;
+  private pigeonFromLeft = false;
   private dropCount = 0;
   private swingStartedAt = -Infinity;
   private parryStartedAt = -Infinity;
@@ -153,25 +176,27 @@ export class StreetFight {
       viewRight: view.right,
       motion: this.motion
     };
-    this.chick.update(timeMs, frame.dt, this.player.x);
+    const peck = this.chick.update(timeMs, frame.dt, this.player.x);
+    if (peck?.kind === 'swipe') this.takeMelee('peck', peck.fromX, () => this.chick.daze());
+    this.feedHorde(timeMs);
+    this.topUpPigeons(timeMs);
     this.updateEnemies(frame);
     this.updateDroppings(frame);
     this.updateStun();
     this.placeHammer(timeMs);
   }
 
-  /** Swing the hammer at the nearest enemy in reach in front of Danilo. */
+  /** Swing the hammer: it flattens everything in reach in front of Danilo at once. */
   swing(): void {
     if (this.nowMs < this.stunnedUntil || this.nowMs - this.swingStartedAt < SWING_COOLDOWN_MS) return;
     this.swingStartedAt = this.nowMs;
-    const hit = this.findHit();
-    if (!hit) {
-      this.fx.whiffSound();
-      return;
+    const hits = this.findHits();
+    if (hits.length === 0) this.fx.whiffSound();
+    for (const hit of hits) {
+      if (hit.enemy) hit.enemy.knock(hit.x >= this.player.x ? 1 : -1);
+      else this.chick.flatten(this.player.x);
+      this.knockedOut({ target: hit.target, x: hit.x, y: hit.y }, HIT_WORDS[hit.target]);
     }
-    if (hit.enemy) hit.enemy.knock(hit.x >= this.player.x ? 1 : -1);
-    else this.chick.flatten(this.player.x);
-    this.knockedOut({ target: hit.target, x: hit.x, y: hit.y }, HIT_WORDS[hit.target]);
   }
 
   /** Raise the guard for a moment: eggs bounce back, swipes glance off. */
@@ -194,18 +219,14 @@ export class StreetFight {
 
   // --- Hitting ---------------------------------------------------------------
 
-  private findHit(): (StreetFightHit & { enemy?: FightEnemy }) | null {
-    if (this.progress.phase === 'chick') return this.findChickHit();
-    const enemy = this.nearest(
-      this.enemies.filter((e) => e.hittable && this.inReach(e.x, e.y)),
-      this.player.x
-    );
-    return enemy ? { target: enemy.kind, x: enemy.x, y: enemy.y, enemy } : null;
-  }
-
-  private findChickHit(): StreetFightHit | null {
-    const y = FEET_Y - 22;
-    return this.chick.standing && this.inReach(this.chick.x, y) ? { target: 'chick', x: this.chick.x, y } : null;
+  private findHits(): (StreetFightHit & { enemy?: FightEnemy })[] {
+    if (this.progress.phase === 'chick') {
+      const y = FEET_Y - 22;
+      return this.chick.standing && this.inReach(this.chick.x, y) ? [{ target: 'chick', x: this.chick.x, y }] : [];
+    }
+    return this.enemies
+      .filter((e) => e.hittable && this.inReach(e.x, e.y))
+      .map((enemy) => ({ target: enemy.kind, x: enemy.x, y: enemy.y, enemy }));
   }
 
   private nearest(candidates: readonly FightEnemy[], x: number): FightEnemy | null {
@@ -223,21 +244,50 @@ export class StreetFight {
 
   // --- Waves -----------------------------------------------------------------
 
-  /** One enemy per one still to smash in this wave, from alternating sides, staggered. */
+  /** A new wave queues its raccoons (one per smash still to land) and sets how many pigeons circle. */
   private syncWave(): void {
     const { phase, wave, leftInWave } = this.progress;
+    if (phase === 'cleared') {
+      this.pigeonsWanted = 0;
+      for (const enemy of this.enemies) enemy.retire?.();
+      return;
+    }
     if (phase !== 'waves' || wave === this.wave) return;
     this.wave = wave;
+    const shape = streetFightWave(wave, leftInWave);
+    this.raccoonsToCome = shape.raccoons;
+    this.pigeonsWanted = shape.pigeons;
     // The first wave waits for the chick to skid off.
-    const startMs = wave === 1 ? 1200 : 500;
-    streetFightWaveEnemies(wave, leftInWave).forEach((kind, i) => {
-      this.enemies.push(this.spawn(kind, startMs + i * 1100, i % 2 === 0));
-    });
+    const now = this.scene.time.now;
+    this.nextRaccoonAt = now + (wave === 1 ? 1200 : 500);
+    this.nextPigeonAt = Math.max(this.nextPigeonAt, now + 900);
   }
 
-  private spawn(kind: StreetFightEnemy, delayMs: number, fromLeft: boolean): FightEnemy {
+  /** Raccoons pour in from alternating sides, a few on the street at a time. */
+  private feedHorde(timeMs: number): void {
+    if (this.raccoonsToCome <= 0 || timeMs < this.nextRaccoonAt) return;
+    if (this.countUp('raccoon') >= HORDE_ON_SCREEN) return;
+    this.raccoonsToCome -= 1;
+    this.nextRaccoonAt = timeMs + HORDE_GAP_MS;
+    this.raccoonFromLeft = !this.raccoonFromLeft;
+    this.enemies.push(this.spawn('raccoon', this.raccoonFromLeft));
+  }
+
+  /** Keeps the wave's pigeons in the sky: one knocked out, another comes round a little later. */
+  private topUpPigeons(timeMs: number): void {
+    if (timeMs < this.nextPigeonAt || this.countUp('pigeon') >= this.pigeonsWanted) return;
+    this.nextPigeonAt = timeMs + PIGEON_GAP_MS;
+    this.pigeonFromLeft = !this.pigeonFromLeft;
+    this.enemies.push(this.spawn('pigeon', this.pigeonFromLeft));
+  }
+
+  private countUp(kind: StreetFightEnemy): number {
+    return this.enemies.filter((enemy) => enemy.kind === kind && !enemy.down).length;
+  }
+
+  private spawn(kind: StreetFightEnemy, fromLeft: boolean): FightEnemy {
     const options = {
-      delayMs,
+      delayMs: 0,
       fromLeft,
       onKnockedOut: (g: Phaser.GameObjects.Graphics) => this.fx.fadeOut(g, {}, 1400)
     };
@@ -245,20 +295,22 @@ export class StreetFight {
   }
 
   private updateEnemies(frame: FightFrame): void {
-    for (const enemy of this.enemies) {
-      const attack = enemy.update(frame);
-      if (attack?.kind === 'swipe') this.takeSwipe(enemy, attack.fromX);
-      else if (attack?.kind === 'drop') this.drop(enemy, attack.x, attack.y);
-    }
+    for (const enemy of this.enemies) this.attackFrom(enemy, enemy.update(frame));
     this.enemies = this.enemies.filter((enemy) => !enemy.gone);
   }
 
-  private takeSwipe(raccoon: FightEnemy, fromX: number): void {
+  private attackFrom(enemy: FightEnemy, attack: FightAttack | null): void {
+    if (attack?.kind === 'swipe') this.takeMelee('swipe', attack.fromX, () => enemy.daze?.());
+    else if (attack?.kind === 'drop') this.drop(enemy, attack.x, attack.y);
+  }
+
+  /** A swipe or a peck: it lands, unless the guard is up, and then the attacker is left dizzy. */
+  private takeMelee(kind: StreetFightHurt, fromX: number, daze: () => void): void {
     if (!this.guarding) {
-      this.hurt('swipe', fromX);
+      this.hurt(kind, fromX);
       return;
     }
-    raccoon.daze?.();
+    daze();
     this.fx.word('PARRY!', this.player.x, this.player.y - 60);
     this.fx.smashSound();
   }
@@ -342,7 +394,7 @@ export class StreetFight {
     this.held = true;
     this.holdPlayer(true);
     this.player.setVelocityY(-180);
-    this.fx.word(kind === 'swipe' ? 'SWIPE!' : 'SPLAT!', this.player.x, this.player.y + 12);
+    this.fx.word(HURT_WORDS[kind], this.player.x, this.player.y + 12);
     if (kind === 'dropping') this.fx.splat(this.player.x, this.player.y - 46);
     this.fx.hurtSound();
     this.onHurt(kind);
@@ -383,6 +435,12 @@ export class StreetFight {
       .setVisible(guarding);
   }
 }
+
+const HURT_WORDS: Record<StreetFightHurt, string> = {
+  peck: 'PECK!',
+  swipe: 'SWIPE!',
+  dropping: 'SPLAT!'
+};
 
 const HIT_WORDS: Record<StreetFightTarget, string> = {
   chick: 'BONK!',

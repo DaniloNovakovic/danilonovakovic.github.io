@@ -175,18 +175,28 @@ As built (#163, steps 2–3):
   is waiting, 2.4× its size, hackles up, a scribble of rage over its head and
   an alert-red eye under a hard ink brow (its conversation portrait gets the
   same eye). Two lines, Danilo's "...is that chick bigger than I remember?",
-  then it stalks him and taunts ("run, little doodle." / "bring it.").
+  then it stalks him and taunts ("run, little doodle." / "bring it."), and
+  pecks (Danilo's direction, 2026-11-26: the chick attacks too): an alert-red
+  `!` for ~0.6 s, then a beak-first lunge that lands within ~108 px (`PECK!`,
+  Danilo: "It PECKED me!"), then ~0.9 s before the next. A parried peck
+  leaves it dizzy (ink stars) for ~1.5 s.
 - **The hammer** is drawn in Danilo's hand during the escape, with two moves
   (Danilo's direction, 2026-11-26): **Swing** (`F`) connects only with an
   enemy in front of him, the way he last walked (the shared player movement
   now keeps the last facing when idle, in every scene); **Parry** (`R`) raises
   a ~0.28 s guard (an ink arc in front of him, hammer held across), ~0.65 s
-  apart. Docked **Swing** and **Parry** touch buttons (`streetFight` scene
+  apart. A swing flattens **everything** in reach at once, so a pack can go
+  down in one hit. Docked **Swing** and **Parry** touch buttons (`streetFight` scene
   panel, which also shows the wave, what's left and the crack count). Whiffs
   are free. Stepped swing, no easing.
-- **Waves** of 3, 4 and 5 (Danilo's direction, 2026-11-26: not only flyers):
-  wave 1 is 3 pigeons, wave 2 is 2 pigeons + 2 raccoons, wave 3 is 3 pigeons +
-  2 raccoons. They enter staggered, from alternating sides of the view.
+- **Waves** are raccoon hordes of 5, 8 and 12 (Danilo's direction,
+  2026-11-26: "a bunch of enemies coming at me, so I can just keep stomping
+  them"), with 1, 2 and 3 pigeons overhead. Raccoons pour in from alternating
+  sides of the view, one every ~0.45 s, at most 5 on the street at once.
+  **Pigeons are not required** (same direction): they're harassment, not
+  progress. Knocking one out never counts or cracks the screen, and another
+  circles in ~2.2 s later; when the last raccoon drops they finish their pass
+  and leave. A fight is 26 smashes: the chick plus 25 raccoons.
   - **Pigeons** cross the sky left and right, alternating between a low lane
     150 px above the street (jump and swing) and a high one 230 px up (out of
     the hammer's reach). As they approach they lob an egg or a dropping on an
@@ -194,14 +204,15 @@ As built (#163, steps 2–3):
     gets hit, stepping aside dodges, and a miss splats on the street and dries
     off the page. **Parried**, it flies back (`RETURN!`) and knocks out the
     pigeon that dropped it (`BOINK!`), or the nearest one if that's gone; that
-    is the only way to bring down the high lane.
+    is the only way to bring down the high lane (never needed).
   - **Raccoons** (the dumpster raccoons from the litter-pile secret) rush in
-    along the ground, stop beside Danilo, raise a claw with an alert-red `!`
+    along the ground, stop beside Danilo (each at its own distance, so a pack
+    doesn't stack on one spot), raise a claw with an alert-red `!`
     over their heads for ~0.56 s (the tell; the claw carries it in
     greyscale), swipe, back off and come again. Stepping back during the tell
     dodges it; a **parried** swipe (`PARRY!`) leaves the raccoon dizzy, stars
     over its head, for ~1.5 s.
-  - **Getting hit** (`SWIPE!` / `SPLAT!`, Danilo: "Ow!" / "Ew. EW.") knocks
+  - **Getting hit** (`PECK!` / `SWIPE!` / `SPLAT!`) knocks
     him back and stuns him for ~0.5 s (no walking, swinging or parrying,
     hammer dropped), then ~0.6 s where nothing else lands, so hits never
     chain. Nothing flickers. There is no game over: the fight only ends by
@@ -213,9 +224,10 @@ As built (#163, steps 2–3):
   over the whole viewport (`fixed`, `z-[70]`, `pointer-events-none`,
   `aria-hidden`), above the game, the header and overlays. Cracks live in the
   bridge (`screenDamage.cracks`: a viewport point plus a seed), one per
-  smash, so they survive scene changes and static-mode round trips; the
+  smash (chick or raccoon; never a pigeon), so they survive scene changes and static-mode round trips; the
   fight's progress derives from their count. Each crack breaks out of a
-  **screen corner** on the side of the hit (top or bottom at random; Danilo's
+  **screen corner**, every other one on the side of the hit and the rest
+  across from it, so 26 spread over all four (top or bottom at random; Danilo's
   direction: keep the middle visible), with an impact star, broken rings and
   branching runs inward that stop at a clear oval in the middle
   (`CRACK_CLEAR_CENTER` in `src/game/shell/screenCracks.ts`), so the street
@@ -225,7 +237,8 @@ As built (#163, steps 2–3):
 - Pure progress and copy: `src/game/core/console/content/outOfBoundsStreetFight.ts`
   and `streetFightLogic.ts`. Phaser: `StreetFight.ts` plus
   `street/fight/` (one module per enemy). Headless: `swing` (or `smash`,
-  optionally `swing pigeon|raccoon`, which is what the live scene sends); the
+  optionally `swing pigeon|raccoon`, which is what the live scene sends;
+  `swing pigeon` during the waves never moves the fight on); the
   headless fight is discrete, so nothing attacks back there. `look` reports
   `alarm: doors taped shut` and `fight: <phase> wave=… enemies left=…
   screen damage=… cracks`.

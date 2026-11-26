@@ -58,7 +58,7 @@ export function getGameHelpText(): string {
     '  confirm | decline   answer the point-of-no-return warning at the toolbox',
     '',
     'Out of Bounds street (simulation broken):',
-    '  swing [pigeon|raccoon]   swing the Debugging Tools hammer: the evil chick, then the waves',
+    '  swing [pigeon|raccoon]   swing the Debugging Tools hammer: the evil chick, then the raccoon waves (pigeons never count)',
     '',
     'Ridge conversation:',
     '  advance | choose <id|index>',
