@@ -52,6 +52,13 @@ describe('PlayerController', () => {
       expect(result.facingLeft).toBe(true);
     });
 
+    it('keeps facing the way it last walked once input stops', () => {
+      controller.step({ ...noInput, left: true });
+      expect(controller.step(noInput).facingLeft).toBe(true);
+      controller.step({ ...noInput, right: true });
+      expect(controller.step(noInput).facingLeft).toBe(false);
+    });
+
     it('applies sprint speed', () => {
       controller.step({ ...noInput, right: true, sprint: true });
       expect(sprite.vx).toBe(SPRINT);

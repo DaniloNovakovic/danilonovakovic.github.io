@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import type { RidgeEmotion } from '@/game/core/ridge';
 import { cn } from '@/shared/ui/utils';
+import { ALERT_RED_CSS } from '@/game/sharedSceneRuntime/escapeAlert';
 import type { RidgePortraitId } from '../content/castRegistry';
 import type { RidgeSpeakerSide } from '../art/conversationStaging';
 
@@ -400,6 +401,15 @@ function StreetPlayerMouth({ emotion }: { emotion: RidgeEmotion }) {
 }
 
 function ChickEye({ emotion }: { emotion: RidgeEmotion }) {
+  if (emotion === 'determined') {
+    // The evil chick (Out of Bounds escape): alert-red eye under a hard ink brow.
+    return (
+      <>
+        <path d="M45 25 L59 30" strokeWidth="3.5" />
+        <circle cx="55" cy="33" r="2.6" fill={ALERT_RED_CSS} strokeWidth="1.5" />
+      </>
+    );
+  }
   if (emotion === 'surprised') {
     return (
       <>

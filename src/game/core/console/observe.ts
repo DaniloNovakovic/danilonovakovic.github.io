@@ -5,6 +5,7 @@ import { listBasementNearby, observeBasement } from './basementLogic';
 import { OVERWORLD_BANANA_PEEL } from './content/overworldSpots';
 import { isSimulationBroken, outOfBoundsStageAt } from './content/outOfBoundsVoid';
 import { listHobbiesNearby, observeHobbies } from './hobbiesLogic';
+import { isStreetInAlarm, observeStreetAlarm } from './streetFightLogic';
 import { getOverworldProgress, listOverworldNearby } from './overworldLogic';
 import type { GameObservation, GameWorldState, NearbyThing, OverworldProgressStage } from './types';
 
@@ -31,7 +32,10 @@ export function observeGameWorld(state: GameWorldState, ridge: RidgeObservation 
     prompt: nearby[0]?.prompt ?? state.overlay?.title ?? null,
     lastMessage: state.lastMessage,
     hints: buildHints(state, nearby, ridge),
-    overworld: state.mode === 'overworld' || state.mode === 'overlay' ? state.overworld : null,
+    overworld:
+      state.mode === 'overworld' || state.mode === 'overlay'
+        ? { ...state.overworld, alarm: observeStreetAlarm(state) }
+        : null,
     basement: state.mode === 'basement' ? observeBasement(state) : null,
     hobbies: state.mode === 'hobbies' ? observeHobbies(state) : null,
     potassium: state.mode === 'potassium' ? state.potassium : null,
@@ -55,6 +59,13 @@ export function formatGameObservation(observation: GameObservation): string {
 
   if (observation.overworld) {
     lines.push(`street x=${Math.round(observation.overworld.playerX)} facing=${observation.overworld.facing}`);
+    const alarm = observation.overworld.alarm;
+    if (alarm) {
+      const f = alarm.fight;
+      const wave = f.phase === 'waves' ? ` wave=${f.wave} (${f.leftInWave} left in it)` : '';
+      lines.push(`alarm: doors ${alarm.doors} — ${alarm.description}`);
+      lines.push(`fight: ${f.phase}${wave} enemies left=${f.enemiesLeft} screen damage=${f.screenCracks} cracks`);
+    }
   }
   if (observation.basement) {
     lines.push(`basement x=${Math.round(observation.basement.playerX)} facing=${observation.basement.facing}`);
@@ -159,7 +170,13 @@ function resolveNearby(state: GameWorldState, ridge: RidgeObservation | null): N
 function buildHints(state: GameWorldState, nearby: readonly NearbyThing[], ridge: RidgeObservation | null): string[] {
   const hints: string[] = [];
 
-  if (state.mode === 'overworld') {
+  if (state.mode === 'overworld' && isStreetInAlarm(state)) {
+    hints.push(
+      observeStreetAlarm(state)?.fight.phase === 'cleared'
+        ? 'The fight is over. The screen is badly cracked.'
+        : 'Type swing to smash with the hammer.'
+    );
+  } else if (state.mode === 'overworld') {
     hints.push(OVERWORLD_CONSOLE_HINTS[getOverworldProgress(state).stage]);
   }
 

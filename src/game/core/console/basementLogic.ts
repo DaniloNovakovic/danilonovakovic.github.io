@@ -14,6 +14,7 @@ import {
   OUT_OF_BOUNDS_STREET_ARRIVAL
 } from './content/outOfBoundsBreakout';
 import { isSimulationBroken } from './content/outOfBoundsVoid';
+import { streetAlarmArrivalText } from './streetFightLogic';
 import { clamp, nearbyMissMessage, pickNearby } from './nearby';
 import { getGamesOverlay } from './overlayCatalog';
 import type { BasementObservation, GameItemId, GameSessionEvent, GameWorldState, NearbyThing } from './types';
@@ -227,7 +228,7 @@ export function leaveBasement(state: GameWorldState, message: string): BasementI
   if (!isSimulationBroken(state.ownedItemIds)) return returnToOverworld(state, message);
   state.overworld.playerX = OUT_OF_BOUNDS_STREET_ARRIVAL.x;
   state.overworld.facing = 'right';
-  return returnToOverworld(state, OUT_OF_BOUNDS_BREAKOUT_TEXT.ladder);
+  return returnToOverworld(state, `${OUT_OF_BOUNDS_BREAKOUT_TEXT.ladder} ${streetAlarmArrivalText(state)}`);
 }
 
 export function returnToOverworld(state: GameWorldState, message: string): BasementInteractOutcome {

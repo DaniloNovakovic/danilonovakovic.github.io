@@ -1,3 +1,5 @@
+// Thin adapter update loop; branching mirrors input, talks and console event application.
+// fallow-ignore-file complexity
 /**
  * OverworldScene — thin orchestrator.
  * Delegates environment/buildings/particles to street view modules,
@@ -39,11 +41,20 @@ import {
   type OpenOverlayOptions
 } from '@/game/bridge/store';
 import {
+  EVIL_CHICK_LINES,
   GameConsoleSession,
   getOverworldProgress,
   getSketchDetailLevel,
+  isStreetInAlarm,
+  OUT_OF_BOUNDS_STREET_TEXT,
+  STREET_ALARM_THOUGHT,
+  STREET_FIGHT_CLEARED_THOUGHT,
+  STREET_FIGHT_HURT_THOUGHTS,
+  STREET_LOCKDOWN_THOUGHT,
+  streetFightProgress,
   type GameCommandResult,
-  type NearbyThing
+  type NearbyThing,
+  type StreetFightProgress
 } from '@/game/core/console';
 import { loadRidgeRouteDialogueCatalog } from '@/game/scenes/ridge/content/routeCatalog';
 import { applyGameConsoleEvents } from '@/game/scenes/shared/applyGameConsoleEvents';
@@ -57,6 +68,9 @@ import { StreetHatch } from './street/StreetHatch';
 import { StreetDetail } from './street/StreetDetail';
 import { StreetBillboard } from './street/StreetBillboard';
 import { StreetChick } from './street/StreetChick';
+import { StreetAlarm } from './street/StreetAlarm';
+import { StreetFight, type StreetFightHit } from './street/StreetFight';
+import { PlayerThoughtText } from '@/game/sharedSceneRuntime/text/PlayerThoughtText';
 import { prefersReducedMotion, sketchTick } from '@/game/sharedSceneRuntime/motion/sketchMotion';
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
 import type { OverworldBuildingSlot } from '@/game/core/ecs/systems/overworldInteractSystems';
@@ -124,6 +138,13 @@ export class OverworldScene extends Phaser.Scene {
   private camera?: SideViewCameraRuntime;
   /** The open street conversation; the player stands still while it runs. */
   private talk?: StreetTalk;
+  /** Out of Bounds escape: the street is a manhunt at night, and the fight is on. */
+  private alarm?: StreetAlarm;
+  private fight?: StreetFight;
+  private swingKey?: Phaser.Input.Keyboard.Key;
+  private parryKey?: Phaser.Input.Keyboard.Key;
+  private thought?: PlayerThoughtText;
+  private confrontPending = false;
 
   constructor() {
     super({ key: 'MainScene' });
@@ -181,8 +202,15 @@ export class OverworldScene extends Phaser.Scene {
       sceneId: 'overworld',
       ownedItemIds: bridge.inventory.ownedItemIds,
       equippedItemIds: bridge.equipment.equippedItemIds,
-      discoveredSecretIds: bridge.progress.discoveredSecretIds
+      discoveredSecretIds: bridge.progress.discoveredSecretIds,
+      screenSmashes: bridge.screenDamage.cracks.length
     });
+    const inAlarm = isStreetInAlarm({
+      ownedItemIds: bridge.inventory.ownedItemIds
+    });
+    this.alarm = undefined;
+    this.fight = undefined;
+    this.confrontPending = false;
 
     this.physics.world.setBounds(0, 0, OVERWORLD_WIDTH, GAME_DESIGN_HEIGHT);
 
@@ -254,20 +282,141 @@ export class OverworldScene extends Phaser.Scene {
     this.circuitCrt = new StreetCrt(this, OVERWORLD_CIRCUIT_SLOT.x, STREET_GROUND_Y, 18);
     this.circuitCrt.update(isItemOwned('circuit'), 0, this.motion);
     this.birds = new StreetBirds(this);
-    this.chick = new StreetChick(this, OVERWORLD_CHICK.x);
+    // During the alarm the chick is the evil one, out in the fight instead.
+    this.chick = inAlarm ? undefined : new StreetChick(this, OVERWORLD_CHICK.x);
     this.footsteps = new StreetFootsteps(this);
+    this.thought = new PlayerThoughtText(this, { target: this.player });
 
     this.preGlassesVision = new DistanceHazeVision(this, NEARSIGHTED_HAZE);
     this.createGlassesSecret();
     this.setPaused(this.isPaused);
     this.playerRuntime.syncAppearance();
     this.updateLensReveal();
+    if (inAlarm) this.startAlarm();
+  }
+
+  /** Up through the hatch while the simulation is broken: night, searchlights, and the evil chick. */
+  private startAlarm(): void {
+    const progress = this.fightProgress();
+    this.alarm = new StreetAlarm(this, this.player.x);
+    const fight = new StreetFight({
+      scene: this,
+      player: this.player,
+      progress,
+      motion: this.motion,
+      getAudioContext: () => (this.sound as Partial<Phaser.Sound.WebAudioSoundManager>).context ?? null,
+      holdPlayer: (held) => this.holdPlayerForFight(held),
+      onSmash: (hit) => this.landSmash(hit),
+      onHurt: (kind) => {
+        this.thought?.show(STREET_FIGHT_HURT_THOUGHTS[kind]);
+        if (this.motion) this.cameras.main.shake(110, 0.004);
+      }
+    });
+    this.fight = fight;
+    this.swingKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.F);
+    this.parryKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.R);
+    if (progress.phase !== 'chick') {
+      this.publishFightPanel(progress);
+      this.thought?.show(progress.phase === 'cleared' ? STREET_FIGHT_CLEARED_THOUGHT : STREET_ALARM_THOUGHT);
+      return;
+    }
+    this.confrontPending = true;
+  }
+
+  /** `H`/`Esc` on the street goes back to Hobbies, except in alarm, when it's taped shut too. */
+  private leaveStreet(): boolean {
+    if (this.alarm) {
+      this.thought?.show(STREET_LOCKDOWN_THOUGHT);
+      return false;
+    }
+    this.onEnterScene?.(HOBBIES_SCENE_ID);
+    return true;
+  }
+
+  /** The evil chick speaks up once Danilo has both feet on the street. */
+  private maybeStartConfrontation(): void {
+    const fight = this.fight;
+    if (!this.confrontPending || !fight || !this.player.body.blocked.down) return;
+    this.confrontPending = false;
+    this.openTalk(evilChickConversation(), fight.evilChickX, () => {
+      fight.startChickAttack();
+      this.publishFightPanel(this.fightProgress());
+    });
+  }
+
+  /** A stun takes Danilo's legs for a moment; menus and talks still hold him as usual. */
+  private holdPlayerForFight(held: boolean): void {
+    const controller = this.playerRuntime?.controller;
+    if (!controller) return;
+    if (held) controller.pause();
+    else if (!this.isPaused && !this.talk) controller.resume();
+  }
+
+  private fightProgress(): StreetFightProgress {
+    return streetFightProgress(this.session?.getState().screenSmashes ?? 0);
+  }
+
+  private publishFightPanel(progress: StreetFightProgress): void {
+    if (this.talk) return;
+    bridgeActions.setSceneUiPanel(OVERWORLD_SCENE_ID, 'streetFight', progress);
+  }
+
+  /** F / R or the touch buttons: swing the hammer, or parry. */
+  private updateFightInput(): void {
+    const fight = this.fight;
+    if (!fight) return;
+    let swung = this.swingKey ? Phaser.Input.Keyboard.JustDown(this.swingKey) : false;
+    let parried = this.parryKey ? Phaser.Input.Keyboard.JustDown(this.parryKey) : false;
+    for (let action = bridgeActions.consumeSceneUiAction(OVERWORLD_SCENE_ID); action;) {
+      if (action.action === 'streetFightSwing') swung = true;
+      if (action.action === 'streetFightParry') parried = true;
+      action = bridgeActions.consumeSceneUiAction(OVERWORLD_SCENE_ID);
+    }
+    if (parried) fight.parry();
+    if (swung) fight.swing();
+  }
+
+  /** A hammer hit or a parried egg knocked something out: tell the console; a chick or raccoon cracks the screen. */
+  private landSmash(hit: StreetFightHit): void {
+    if (!this.session) return;
+    const result = this.session.exec(hit.target === 'chick' ? 'swing' : `swing ${hit.target}`);
+    for (const event of result.events) {
+      if (event.type === 'screen_smashed') {
+        const seed = event.smashes * 7919 + Math.floor(Math.random() * 1e6);
+        // The screen breaks at a corner: every other one on the side of the hit, the rest
+        // across from it, so a horde's worth of cracks spreads over all four (top or bottom at random).
+        const hitX = this.toViewportFraction(hit).x;
+        bridgeActions.crackScreen({ x: event.smashes % 2 === 0 ? hitX : 1 - hitX, y: Math.random(), seed });
+      }
+      if (event.type === 'street_fight_cleared') this.thought?.show(STREET_FIGHT_CLEARED_THOUGHT);
+    }
+    if (this.motion) this.cameras.main.shake(140, 0.006);
+    const progress = this.fightProgress();
+    this.fight?.setProgress(progress);
+    this.publishFightPanel(progress);
+  }
+
+  /** Where a world point sits on the browser viewport, as fractions: the crack starts there. */
+  private toViewportFraction(point: { x: number; y: number }): {
+    x: number;
+    y: number;
+  } {
+    const camera = this.cameras.main;
+    const view = camera.worldView;
+    const canvas = this.game.canvas.getBoundingClientRect();
+    const inCanvasX = (camera.x + ((point.x - view.x) / view.width) * camera.width) / this.scale.width;
+    const inCanvasY = (camera.y + ((point.y - view.y) / view.height) * camera.height) / this.scale.height;
+    return {
+      x: Phaser.Math.Clamp((canvas.left + inCanvasX * canvas.width) / window.innerWidth, 0, 1),
+      y: Phaser.Math.Clamp((canvas.top + inCanvasY * canvas.height) / window.innerHeight, 0, 1)
+    };
   }
 
   update(time: number, delta: number) {
     if (this.droppingIntoHatch) return;
     const playerUpdate = this.playerRuntime?.update();
     this.updateLensReveal();
+    this.thought?.update();
 
     if (this.talk) {
       if (!this.isPaused) this.updateTalk(time, delta);
@@ -278,10 +427,9 @@ export class OverworldScene extends Phaser.Scene {
     }
 
     const { commands, step } = playerUpdate;
-    if (commands.exitContext) {
-      this.onEnterScene?.(HOBBIES_SCENE_ID);
-      return;
-    }
+    if (commands.exitContext && this.leaveStreet()) return;
+    this.maybeStartConfrontation();
+    this.updateFightInput();
 
     const tick = sketchTick(time);
     this.updateStreetProps(time, delta, tick);
@@ -302,6 +450,8 @@ export class OverworldScene extends Phaser.Scene {
     this.hatch?.update({ hasGlasses: isItemOwned('glasses'), hasCircuit }, this.player.x, tick, this.motion);
     this.birds?.update(time, delta, this.player.x, sprinting, this.motion);
     this.footsteps?.update(this.player, time, sprinting, this.motion);
+    this.alarm?.update(time, delta, this.player.x, this.motion);
+    this.fight?.update(time, delta);
   }
 
   private updateProgressProps(tick: number, nearProp: boolean): void {
@@ -320,9 +470,7 @@ export class OverworldScene extends Phaser.Scene {
     const sync = this.session.syncPlayerPosition(this.player.x, this.player.y);
     this.applySessionResult(sync);
 
-    if (interactRequested && !this.startTalkFor(this.session.observe().nearby[0])) {
-      this.applySessionResult(this.session.exec('interact'));
-    }
+    if (interactRequested && !this.startTalkFor(this.session.observe().nearby[0])) this.interactOnStreet();
     if (this.talk) {
       this.interactPrompt.setVisible(false);
       return undefined;
@@ -355,12 +503,23 @@ export class OverworldScene extends Phaser.Scene {
     return false;
   }
 
+  /** The console decides; in alarm a taped-shut door just gets a thought. */
+  private interactOnStreet(): void {
+    if (!this.session) return;
+    const result = this.session.exec('interact');
+    if (result.message === OUT_OF_BOUNDS_STREET_TEXT.lockdown) this.thought?.show(STREET_LOCKDOWN_THOUGHT);
+    this.applySessionResult(result);
+  }
+
   private interactAfterTalk(): void {
     if (this.session) this.applySessionResult(this.session.exec('interact'));
   }
 
   private openTalk(script: StreetConversationScript, partnerX: number, onEnd?: StreetTalk['onEnd']): void {
-    this.talk = { conversation: new StreetConversation(script, partnerX), onEnd };
+    this.talk = {
+      conversation: new StreetConversation(script, partnerX),
+      onEnd
+    };
     this.interactPrompt.setVisible(false);
     this.chick?.hush();
     // Face whoever you are talking to.
@@ -634,6 +793,26 @@ export class OverworldScene extends Phaser.Scene {
     this.interactPrompt.setVisible(false);
     this.hatch.dropIn(this.player, this.motion, () => this.onEnterScene?.(sceneId));
   }
+}
+
+/** The evil chick's confrontation, from the console's copy. */
+function evilChickConversation(): StreetConversationScript {
+  return {
+    id: 'evil-chick',
+    lines: EVIL_CHICK_LINES.map((line) =>
+      line.speaker === 'chick'
+        ? {
+            speakerId: 'chick' as const,
+            text: line.text,
+            emotion: 'determined' as const
+          }
+        : {
+            speakerId: 'player' as const,
+            text: line.text,
+            emotion: 'surprised' as const
+          }
+    )
+  };
 }
 
 function readChoiceId(params: unknown): string {

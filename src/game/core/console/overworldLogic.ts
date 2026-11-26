@@ -20,7 +20,9 @@ import {
   OUT_OF_BOUNDS_ESCAPE_TEXT,
   outOfBoundsDepth
 } from './content/outOfBoundsVoid';
+import { OUT_OF_BOUNDS_STREET_TEXT } from './content/outOfBoundsStreetFight';
 import { clamp, nearbyMissMessage, pickNearby } from './nearby';
+import { isStreetInAlarm } from './streetFightLogic';
 import { getPortfolioOverlay } from './overlayCatalog';
 import type { GameSecretId, GameSessionEvent, GameWorldState, NearbyThing, OverworldProgressStage } from './types';
 
@@ -87,7 +89,16 @@ export function getSketchDetailLevel(
   return state.ownedItemIds.includes('glasses') ? 1 : 0;
 }
 
+/**
+ * What the player can interact with on the street. Nothing, while the street
+ * is in alarm (Out of Bounds escape): every door, the hatch and the CRT are
+ * taped shut, and the chick is out for revenge, not a chat.
+ */
 export function listOverworldNearby(state: GameWorldState): NearbyThing[] {
+  return isStreetInAlarm(state) ? [] : listStreetSpotsInReach(state);
+}
+
+function listStreetSpotsInReach(state: GameWorldState): NearbyThing[] {
   const x = state.overworld.playerX;
   const y = state.overworld.playerY;
   const things: NearbyThing[] = [];
@@ -206,6 +217,13 @@ export function syncOverworldPosition(state: GameWorldState, x: number, y: numbe
 }
 
 export function interactOverworld(state: GameWorldState, target: string | undefined): OverworldInteractOutcome {
+  if (isStreetInAlarm(state)) {
+    const lockedNearby = listStreetSpotsInReach(state).length > 0;
+    return {
+      message: lockedNearby ? OUT_OF_BOUNDS_STREET_TEXT.lockdown : 'Nothing close enough to interact with.',
+      events: []
+    };
+  }
   // Headless second interact (and explicit peel target) while the discovery beat is pending.
   if (
     state.overworld.bananaFirstPeelPending &&

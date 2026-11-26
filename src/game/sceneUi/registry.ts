@@ -5,6 +5,7 @@ import { STAMPEDE_SCENE_UI_DEFINITIONS } from '@/game/scenes/stampedeSketch/scen
 import { POTASSIUM_SCENE_UI_DEFINITIONS } from '@/game/scenes/potassiumSlip/sceneUi/definitions';
 import { RIDGE_SCENE_UI_DEFINITIONS } from '@/game/scenes/ridge/sceneUi/definitions';
 import { HOBBIES_SCENE_UI_DEFINITIONS } from '@/game/scenes/hobbies/sceneUi/definitions';
+import { OVERWORLD_SCENE_UI_DEFINITIONS } from '@/game/scenes/overworld/sceneUi/definitions';
 
 export interface SceneUiSurfaceProps {
   ownerSceneId: SceneId;
@@ -40,7 +41,8 @@ const SCENE_UI_DEFINITIONS: readonly SceneUiSurfaceDefinition[] = [
   ...STAMPEDE_SCENE_UI_DEFINITIONS,
   ...POTASSIUM_SCENE_UI_DEFINITIONS,
   ...RIDGE_SCENE_UI_DEFINITIONS,
-  ...HOBBIES_SCENE_UI_DEFINITIONS
+  ...HOBBIES_SCENE_UI_DEFINITIONS,
+  ...OVERWORLD_SCENE_UI_DEFINITIONS
 ];
 
 const SCENE_UI_BY_ID: ReadonlyMap<SceneUiSurfaceId, SceneUiSurfaceDefinition> = new Map(

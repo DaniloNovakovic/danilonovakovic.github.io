@@ -24,6 +24,7 @@ import {
   moveOverworld,
   syncOverworldPosition
 } from './overworldLogic';
+import { swingHammer } from './streetFightLogic';
 import type {
   GameCommand,
   GameCommandResult,
@@ -41,6 +42,8 @@ export interface GameConsoleSessionOptions {
   ownedItemIds?: readonly GameItemId[];
   equippedItemIds?: readonly GameItemId[];
   discoveredSecretIds?: readonly GameSecretId[];
+  /** Out of Bounds street-fight smashes already landed (the shell keeps their cracks). */
+  screenSmashes?: number;
 }
 
 export class GameConsoleSession {
@@ -68,7 +71,12 @@ export class GameConsoleSession {
         facing: 'right',
         bananaFirstPeelPending: false
       },
-      basement: { playerX: 135, facing: 'right', corkboardNote: 0, breachThoughtShown: false },
+      basement: {
+        playerX: 135,
+        facing: 'right',
+        corkboardNote: 0,
+        breachThoughtShown: false
+      },
       hobbies: {
         playerX: 200,
         facing: 'right',
@@ -84,6 +92,7 @@ export class GameConsoleSession {
         score: 0,
         draftChoices: []
       },
+      screenSmashes: options.screenSmashes ?? 0,
       lastMessage: null,
       ridgeBeat: null
     };
@@ -214,6 +223,10 @@ export class GameConsoleSession {
       case 'decline': {
         const answered = this.state.mode === 'hobbies' && answerPointOfNoReturn(this.state, command.type === 'confirm');
         return answered ? this.finish(answered.message, answered.events) : this.fail('Nothing to confirm here.');
+      }
+      case 'swing': {
+        const swung = swingHammer(this.state, command.target);
+        return swung.ok ? this.finish(swung.message, swung.events) : this.fail(swung.message);
       }
       case 'start':
         return this.wrapPotassium(startPotassium(this.state));

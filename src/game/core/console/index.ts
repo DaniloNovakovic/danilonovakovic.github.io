@@ -9,3 +9,5 @@ export * from './content/circuitParts';
 export * from './content/hobbiesSpots';
 export * from './content/outOfBoundsVoid';
 export * from './content/outOfBoundsBreakout';
+export * from './content/outOfBoundsStreetFight';
+export { isStreetInAlarm, type StreetAlarmObservation } from './streetFightLogic';
