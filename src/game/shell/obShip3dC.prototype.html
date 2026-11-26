@@ -1,0 +1,516 @@
+<!doctype html>
+<!--
+  PROTOTYPE, THROWAWAY (#144, round 2: look C only). Not production.
+  Question: with thick, slightly wobbly ink lines over flat colour (mood refs:
+  Sable, Rollerdrome, feelings only), which palette reads best for the alien
+  ship, and how heavy should the line be on desktop and phone?
+  Lines come from a screen-space edge pass (depth + normals), so they keep a
+  constant pixel weight. ?variant=1|2|3 switches palette; [ and ] change line
+  weight; K toggles wobble.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>OB ship look C</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #050505; overflow: hidden; touch-action: none; }
+      body { font-family: ui-monospace, Menlo, Consolas, monospace; color: #d8d4ca; -webkit-user-select: none; user-select: none; }
+      [hidden] { display: none !important; }
+      canvas { display: block; width: 100vw; height: 100dvh; }
+      .card { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: #050505; z-index: 10; text-align: center; padding: 16px; }
+      .card.dim { background: rgba(5,5,5,.72); }
+      .card p { margin: 0; max-width: 28rem; }
+      .card small { color: #8a8a8a; }
+      .btn { border: 2px solid #d8d4ca; background: none; color: #d8d4ca; padding: 10px 18px; font: inherit; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; cursor: pointer; }
+      .btn:hover, .btn:focus-visible { background: #d8d4ca; color: #050505; outline: none; }
+      #hud { position: fixed; left: 8px; top: 8px; font-size: 11px; line-height: 1.45; background: rgba(0,0,0,.55); padding: 6px 8px; z-index: 5; white-space: pre; pointer-events: none; }
+      #cross { position: fixed; left: 50%; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; z-index: 4; pointer-events: none; }
+      #cross::before, #cross::after { content: ''; position: absolute; background: #fff; box-shadow: 0 0 0 1px #000; }
+      #cross::before { left: 6px; top: 0; width: 2px; height: 14px; }
+      #cross::after { top: 6px; left: 0; height: 2px; width: 14px; }
+      #bar { position: fixed; left: 50%; bottom: max(10px, env(safe-area-inset-bottom)); transform: translateX(-50%); display: flex; gap: 6px; align-items: center; background: #fff; color: #111; border-radius: 999px; padding: 4px 6px; font-size: 12px; z-index: 20; box-shadow: 0 2px 10px rgba(0,0,0,.5); white-space: nowrap; }
+      #bar button { border: 0; background: #111; color: #fff; border-radius: 999px; min-width: 28px; height: 28px; cursor: pointer; font: inherit; padding: 0 8px; }
+      #touch { display: none; }
+      body.touch #touch { display: block; }
+      #stick { position: fixed; width: 110px; height: 110px; margin: -55px 0 0 -55px; border: 2px solid rgba(255,255,255,.7); border-radius: 50%; z-index: 6; display: none; pointer-events: none; }
+      #knob { position: absolute; left: 35px; top: 35px; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,.7); }
+      #fire { position: fixed; right: 24px; bottom: 70px; width: 84px; height: 84px; border-radius: 50%; border: 3px solid #111; background: #ff5b4a; color: #fff; font: inherit; font-weight: 700; z-index: 6; }
+      #hint { position: fixed; left: 50%; top: 18px; transform: translateX(-50%); font-size: 12px; color: #fff; text-shadow: 0 1px 2px #000; z-index: 5; pointer-events: none; white-space: nowrap; }
+    </style>
+  </head>
+  <body>
+    <canvas id="c"></canvas>
+    <div id="hud"></div>
+    <div id="cross" hidden></div>
+    <div id="hint" hidden>WASD move · mouse look · click stun · Esc pause · ←/→ palette · [ ] line · K wobble</div>
+    <div id="touch">
+      <div id="stick"><div id="knob"></div></div>
+      <button id="fire" type="button">ZAP</button>
+    </div>
+    <div class="card" id="wake">
+      <p>...signal lost. Somewhere that isn't a drawing, something opens its eyes.</p>
+      <small>PROTOTYPE #144, round 2: look C, thick ink over flat colour.</small>
+      <button class="btn" id="wakeBtn" type="button" autofocus>Wake up</button>
+    </div>
+    <div class="card dim" id="pause" hidden>
+      <p>Paused.</p>
+      <button class="btn" id="resumeBtn" type="button">Click to keep going</button>
+    </div>
+    <div id="bar">
+      <button id="prev" type="button" aria-label="Previous palette">←</button>
+      <span id="label"></span>
+      <button id="next" type="button" aria-label="Next palette">→</button>
+      <button id="thin" type="button" aria-label="Thinner line">−</button>
+      <button id="thick" type="button" aria-label="Thicker line">+</button>
+    </div>
+
+    <script type="module">
+      const THREE_URL = 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js';
+      // Our own palettes. Mood only: no colours lifted from any game.
+      const PALETTES = {
+        1: { name: 'Ballpoint', bg: 0xf4efe2, wall: 0xf7f2e6, floor: 0xe9e1cc, ceil: 0xefe9da, strip: 0xbfd4ff, alien: 0xd9f2c4, crate: 0xf1dcb2, pod: 0xe6eefc, gun: 0xcfd6e6, coil: 0x9be7b0, ink: 0x2b4cc4, panel: 'rgba(43,76,196,.45)' },
+        2: { name: 'Dusk ship', bg: 0xf6d7b0, wall: 0xf2c6a0, floor: 0x3f7f86, ceil: 0xe3a084, strip: 0xfff1c9, alien: 0x9be7b0, crate: 0xe86f5a, pod: 0xbfe3df, gun: 0x6d6a8c, coil: 0xffe08a, ink: 0x1d2340, panel: 'rgba(29,35,64,.45)' },
+        3: { name: 'Night lab', bg: 0x141a33, wall: 0x5468a8, floor: 0x2a3566, ceil: 0x34407a, strip: 0xffd36e, alien: 0xff9fbf, crate: 0x57c4b8, pod: 0x9fb4ff, gun: 0x8b8fa8, coil: 0xffd36e, ink: 0x0b0e1c, panel: 'rgba(11,14,28,.6)' }
+      };
+      const KEYS = Object.keys(PALETTES);
+      let variant = new URLSearchParams(location.search).get('variant');
+      if (!PALETTES[variant]) variant = '2';
+      let lineCss = 2.2, wobbleOn = true;
+      const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const isTouch = matchMedia('(pointer: coarse)').matches;
+      if (isTouch) document.body.classList.add('touch');
+      const $ = (id) => document.getElementById(id);
+      const label = () => ($('label').textContent = `${variant} ${PALETTES[variant].name} · line ${lineCss.toFixed(1)}`);
+      label();
+
+      let THREE, renderer, scene, gunScene, camera, gunCam, yaw, pitch, world, gun, post, loadMs = 0;
+      let started = false, paused = false, stuns = 0, shots = 0;
+      const aliens = [], solids = [], hideInNormals = [];
+      let PAL, toonGradient;
+
+      function switchVariant(dir) {
+        variant = KEYS[(KEYS.indexOf(variant) + dir + KEYS.length) % KEYS.length];
+        history.replaceState(null, '', `?variant=${variant}`);
+        label();
+        if (THREE) buildWorld();
+      }
+      function setLine(delta) { lineCss = Math.min(5, Math.max(0.5, lineCss + delta)); label(); }
+      const tap = (id, fn) => $(id).addEventListener('click', (e) => { e.stopPropagation(); fn(); });
+      tap('prev', () => switchVariant(-1)); tap('next', () => switchVariant(1));
+      tap('thin', () => setLine(-0.4)); tap('thick', () => setLine(0.4));
+      for (const id of ['prev', 'next', 'thin', 'thick']) $(id).addEventListener('pointerdown', (e) => e.stopPropagation());
+      addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') switchVariant(-1);
+        if (e.key === 'ArrowRight') switchVariant(1);
+        if (e.key === '[') setLine(-0.4);
+        if (e.key === ']') setLine(0.4);
+        if (e.code === 'KeyK') wobbleOn = !wobbleOn;
+      });
+
+      // ---------- map ----------
+      const MAP = [
+        '###########',
+        '#O..#.....#',
+        '#.P.#.##C.#',
+        '#...A..#..#',
+        '##.###.#A.#',
+        '#....C....#',
+        '#.##.####.#',
+        '#A.#...A..#',
+        '###########'
+      ];
+      const CELL = 4, H = 3.2, R = 0.55;
+      const isWall = (x, z) => (MAP[Math.floor(z / CELL)]?.[Math.floor(x / CELL)] ?? '#') === '#';
+      function collide(pos, dx, dz) {
+        const nx = pos.x + dx;
+        if (!isWall(nx + Math.sign(dx) * R, pos.z - R) && !isWall(nx + Math.sign(dx) * R, pos.z + R)) pos.x = nx;
+        const nz = pos.z + dz;
+        if (!isWall(pos.x - R, nz + Math.sign(dz) * R) && !isWall(pos.x + R, nz + Math.sign(dz) * R)) pos.z = nz;
+      }
+
+      // Flat fills with one soft shadow tone: the ink carries the form.
+      const fill = (color, opts = {}) => new THREE.MeshToonMaterial({ color, gradientMap: toonGradient, ...opts });
+
+      function floorTexture() {
+        const c = document.createElement('canvas');
+        c.width = c.height = 128;
+        const g = c.getContext('2d');
+        g.fillStyle = '#' + new THREE.Color(PAL.floor).getHexString(THREE.SRGBColorSpace);
+        g.fillRect(0, 0, 128, 128);
+        g.strokeStyle = PAL.panel; g.lineWidth = 3;
+        g.strokeRect(2, 2, 124, 124);
+        g.beginPath(); g.moveTo(64, 2); g.lineTo(64, 126); g.moveTo(2, 64); g.lineTo(126, 64); g.stroke();
+        const t = new THREE.CanvasTexture(c);
+        t.wrapS = t.wrapT = THREE.RepeatWrapping;
+        t.repeat.set(MAP[0].length, MAP.length);
+        t.colorSpace = THREE.SRGBColorSpace;
+        t.anisotropy = 4;
+        return t;
+      }
+
+      function makeAlien(x, z) {
+        const g = new THREE.Group();
+        const body = new THREE.Mesh(new THREE.SphereGeometry(0.7, 9, 7), fill(PAL.alien));
+        body.scale.set(1, 1.15, 1);
+        g.add(body);
+        for (const side of [-1, 1]) {
+          const eye = new THREE.Mesh(new THREE.SphereGeometry(0.24, 9, 7), fill(0xffffff));
+          eye.position.set(side * 0.25, 0.25, 0.58);
+          const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.11, 7, 5), new THREE.MeshBasicMaterial({ color: PAL.ink }));
+          pupil.position.set(0, 0, 0.17);
+          eye.add(pupil); g.add(eye);
+        }
+        const stalk = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.5, 5), fill(PAL.alien));
+        stalk.position.set(0, 1.0, 0);
+        const tip = new THREE.Mesh(new THREE.SphereGeometry(0.1, 7, 5), fill(0xff5b4a));
+        tip.position.set(0, 1.28, 0);
+        g.add(stalk, tip);
+        const c = document.createElement('canvas'); c.width = c.height = 64;
+        const cx = c.getContext('2d'); cx.font = 'bold 56px sans-serif'; cx.textAlign = 'center';
+        cx.lineWidth = 8; cx.strokeStyle = '#111'; cx.strokeText('!', 32, 54); cx.fillStyle = '#e8392b'; cx.fillText('!', 32, 54);
+        const tell = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthTest: false }));
+        tell.scale.set(0.6, 0.6, 1); tell.position.set(0, 1.75, 0); tell.visible = false;
+        g.add(tell); hideInNormals.push(tell);
+        const stars = new THREE.Group();
+        for (let i = 0; i < 3; i++) {
+          const s = new THREE.Mesh(new THREE.TetrahedronGeometry(0.13), fill(0xffd400));
+          s.position.set(Math.cos((i / 3) * Math.PI * 2) * 0.5, 0, Math.sin((i / 3) * Math.PI * 2) * 0.5);
+          stars.add(s);
+        }
+        stars.position.y = 1.4; stars.visible = false;
+        g.add(stars);
+        g.position.set(x, 0.9, z);
+        return { g, body, tell, stars, state: 'walk', t: 0, phase: Math.random() * 6 };
+      }
+
+      function buildWorld() {
+        if (world) { scene.remove(world); world.traverse((o) => { o.geometry?.dispose(); o.material?.dispose?.(); }); }
+        if (gun) { gunScene.remove(gun); }
+        PAL = PALETTES[variant];
+        aliens.length = 0; solids.length = 0; hideInNormals.length = 0;
+        world = new THREE.Group();
+        scene.background = new THREE.Color(PAL.bg);
+        world.add(new THREE.HemisphereLight(0xffffff, 0xffffff, 2.2));
+        const sun = new THREE.DirectionalLight(0xffffff, 1.4);
+        sun.position.set(0.5, 1, 0.3);
+        world.add(sun);
+
+        const W = MAP[0].length * CELL, D = MAP.length * CELL;
+        const floor = new THREE.Mesh(new THREE.PlaneGeometry(W, D), fill(0xffffff, { map: floorTexture() }));
+        floor.rotation.x = -Math.PI / 2; floor.position.set(W / 2, 0, D / 2);
+        const ceil = new THREE.Mesh(new THREE.PlaneGeometry(W, D), fill(PAL.ceil));
+        ceil.rotation.x = Math.PI / 2; ceil.position.set(W / 2, H, D / 2);
+        world.add(floor, ceil);
+
+        const wallMat = fill(PAL.wall);
+        const stripMat = new THREE.MeshBasicMaterial({ color: PAL.strip });
+        // One box per wall cell, plus a chunky trim and a door frame here and there: shapes for the ink to find.
+        MAP.forEach((row, z) => [...row].forEach((ch, x) => {
+          const cx = x * CELL + CELL / 2, cz = z * CELL + CELL / 2;
+          if (ch === '#') {
+            const m = new THREE.Mesh(new THREE.BoxGeometry(CELL, H, CELL), wallMat);
+            m.position.set(cx, H / 2, cz);
+            world.add(m); solids.push(m);
+            return;
+          }
+          const strip = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.08, 0.35), stripMat);
+          strip.position.set(cx, H - 0.05, cz);
+          world.add(strip);
+          for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+            if (!isWall(cx + dx * CELL, cz + dz * CELL)) continue;
+            // floor trim along every wall face
+            const trim = new THREE.Mesh(new THREE.BoxGeometry(dx ? 0.25 : CELL, 0.35, dz ? 0.25 : CELL), fill(PAL.ceil));
+            trim.position.set(cx + dx * (CELL / 2 - 0.12), 0.17, cz + dz * (CELL / 2 - 0.12));
+            world.add(trim);
+            if ((x + z) % 3 === 0) {
+              const rib = new THREE.Mesh(new THREE.BoxGeometry(dx ? 0.3 : 0.4, H, dz ? 0.3 : 0.4), fill(PAL.wall));
+              rib.position.set(cx + dx * (CELL / 2 - 0.15), H / 2, cz + dz * (CELL / 2 - 0.15));
+              world.add(rib);
+            }
+          }
+          if (ch === 'C') {
+            const crate = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.2, 1.2), fill(PAL.crate));
+            crate.position.set(cx + 1.1, 0.6, cz - 1.1); crate.rotation.y = 0.4;
+            const lid = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.9, 0.9), fill(PAL.crate));
+            lid.position.set(cx + 0.9, 1.65, cz - 1.0); lid.rotation.y = -0.3;
+            world.add(crate, lid); solids.push(crate, lid);
+          }
+          if (ch === 'O') {
+            const base = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 1.1, 0.4, 10), fill(PAL.wall));
+            base.position.set(cx, 0.2, cz);
+            const glass = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.85, 2.2, 10, 1, true), fill(PAL.pod, { transparent: true, opacity: 0.45, side: THREE.DoubleSide }));
+            glass.position.set(cx, 1.5, cz);
+            const cap = new THREE.Mesh(new THREE.CylinderGeometry(1.0, 0.9, 0.3, 10), fill(PAL.wall));
+            cap.position.set(cx, 2.75, cz);
+            world.add(base, glass, cap);
+          }
+          if (ch === 'A') { const a = makeAlien(cx, cz); aliens.push(a); world.add(a.g); }
+        }));
+        scene.add(world);
+
+        gun = new THREE.Group();
+        const gb = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.16, 0.5), fill(PAL.gun));
+        const grip = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.22, 0.12), fill(PAL.gun));
+        grip.position.set(0, -0.15, 0.14); grip.rotation.x = 0.3;
+        const coil = new THREE.Mesh(new THREE.TorusGeometry(0.1, 0.035, 6, 10), fill(PAL.coil));
+        coil.position.set(0, 0, -0.18);
+        const tipG = new THREE.Mesh(new THREE.SphereGeometry(0.06, 7, 5), new THREE.MeshBasicMaterial({ color: PAL.coil }));
+        tipG.position.set(0, 0, -0.28);
+        gun.add(gb, grip, coil, tipG);
+        gun.scale.setScalar(0.45);
+        gun.position.set(0.17, -0.15, -0.33);
+        gunScene.add(gun);
+        if (post) post.material.uniforms.ink.value.set(PAL.ink);
+      }
+
+      // ---------- ink pass: colour + depth, normals, then edges in screen space ----------
+      function makePost() {
+        const size = new THREE.Vector2();
+        const colorRT = new THREE.WebGLRenderTarget(1, 1, { depthTexture: new THREE.DepthTexture(1, 1) });
+        const normalRT = new THREE.WebGLRenderTarget(1, 1);
+        const normalMat = new THREE.MeshNormalMaterial();
+        const material = new THREE.ShaderMaterial({
+          uniforms: {
+            tColor: { value: colorRT.texture }, tDepth: { value: colorRT.depthTexture }, tNormal: { value: normalRT.texture },
+            res: { value: new THREE.Vector2() }, thick: { value: 2 }, wobble: { value: 1 },
+            near: { value: camera.near }, far: { value: camera.far }, ink: { value: new THREE.Color(PAL.ink) }
+          },
+          vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }',
+          fragmentShader: `
+            uniform sampler2D tColor, tDepth, tNormal; uniform vec2 res; uniform float thick, wobble, near, far; uniform vec3 ink;
+            varying vec2 vUv;
+            float lin(float d){ float z = d * 2.0 - 1.0; return (2.0 * near * far) / (far + near - z * (far - near)); }
+            float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+            float noise(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+              return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y); }
+            float d0; vec3 n0;
+            float edgeAt(vec2 uv, vec2 o){
+              float d = lin(texture2D(tDepth, uv + o).x);
+              vec3 n = texture2D(tNormal, uv + o).xyz * 2.0 - 1.0;
+              float depthEdge = step(0.06 * d0 + 0.05, abs(d - d0));
+              float normalEdge = step(0.35, 1.0 - dot(n, n0));
+              return max(depthEdge, normalEdge);
+            }
+            void main(){
+              vec2 px = 1.0 / res;
+              vec2 w = (vec2(noise(vUv * res / 55.0), noise(vUv * res / 55.0 + 17.0)) - 0.5) * wobble * thick * px;
+              vec2 uv = vUv + w;
+              d0 = lin(texture2D(tDepth, uv).x);
+              n0 = texture2D(tNormal, uv).xyz * 2.0 - 1.0;
+              vec2 o = thick * px; float e = 0.0;
+              e = max(e, edgeAt(uv, vec2(o.x, 0.0))); e = max(e, edgeAt(uv, vec2(-o.x, 0.0)));
+              e = max(e, edgeAt(uv, vec2(0.0, o.y))); e = max(e, edgeAt(uv, vec2(0.0, -o.y)));
+              e = max(e, edgeAt(uv, o * 0.7)); e = max(e, edgeAt(uv, -o * 0.7));
+              e = max(e, edgeAt(uv, vec2(o.x, -o.y) * 0.7)); e = max(e, edgeAt(uv, vec2(-o.x, o.y) * 0.7));
+              // ink thins out with distance, like a pen lifting
+              float fade = clamp(1.15 - d0 / 34.0, 0.35, 1.0);
+              vec3 c = texture2D(tColor, vUv).rgb;
+              gl_FragColor = vec4(mix(c, ink, e * fade), 1.0);
+              #include <colorspace_fragment>
+            }`
+        });
+        const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
+        const postScene = new THREE.Scene(); postScene.add(quad);
+        const postCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+        return {
+          material,
+          resize() {
+            renderer.getDrawingBufferSize(size);
+            colorRT.setSize(size.x, size.y); normalRT.setSize(size.x, size.y);
+            material.uniforms.res.value.copy(size);
+          },
+          render() {
+            const dpr = renderer.getPixelRatio();
+            material.uniforms.thick.value = lineCss * dpr;
+            material.uniforms.wobble.value = wobbleOn ? 0.9 : 0;
+            renderer.setRenderTarget(colorRT);
+            renderer.clear(); renderer.render(scene, camera);
+            renderer.autoClear = false; renderer.render(gunScene, gunCam); renderer.autoClear = true;
+            hideInNormals.forEach((o) => (o.userData.was = o.visible, o.visible = false));
+            const bg = scene.background; scene.background = null;
+            scene.overrideMaterial = normalMat; gunScene.overrideMaterial = normalMat;
+            renderer.setRenderTarget(normalRT);
+            renderer.setClearColor(0x8080ff, 1); renderer.clear(); renderer.render(scene, camera);
+            renderer.autoClear = false; renderer.render(gunScene, gunCam); renderer.autoClear = true;
+            scene.overrideMaterial = null; gunScene.overrideMaterial = null; scene.background = bg;
+            hideInNormals.forEach((o) => (o.visible = o.userData.was));
+            renderer.setRenderTarget(null);
+            renderer.render(postScene, postCam);
+          }
+        };
+      }
+
+      // ---------- input ----------
+      const keys = {};
+      addEventListener('keydown', (e) => { keys[e.code] = true; });
+      addEventListener('keyup', (e) => { keys[e.code] = false; });
+      const look = { dx: 0, dy: 0 };
+      const stick = { id: null, ox: 0, oy: 0, x: 0, y: 0 };
+      let lookId = null, lastLX = 0, lastLY = 0;
+      addEventListener('mousemove', (e) => {
+        if (document.pointerLockElement) { look.dx += e.movementX * 0.0022; look.dy += e.movementY * 0.0022; }
+      });
+      addEventListener('pointerdown', (e) => {
+        if (!started || paused || e.pointerType !== 'touch') return;
+        if (e.target.closest('#bar, #fire')) return;
+        if (e.clientX < innerWidth / 2 && stick.id === null) {
+          Object.assign(stick, { id: e.pointerId, ox: e.clientX, oy: e.clientY, x: 0, y: 0 });
+          const s = $('stick'); s.style.display = 'block'; s.style.left = e.clientX + 'px'; s.style.top = e.clientY + 'px';
+        } else if (lookId === null) { lookId = e.pointerId; lastLX = e.clientX; lastLY = e.clientY; }
+      });
+      addEventListener('pointermove', (e) => {
+        if (e.pointerId === stick.id) {
+          let x = e.clientX - stick.ox, y = e.clientY - stick.oy;
+          const len = Math.hypot(x, y), max = 50;
+          if (len > max) { x = (x / len) * max; y = (y / len) * max; }
+          stick.x = x / max; stick.y = y / max;
+          $('knob').style.transform = `translate(${x}px, ${y}px)`;
+        } else if (e.pointerId === lookId) {
+          look.dx += (e.clientX - lastLX) * 0.006; look.dy += (e.clientY - lastLY) * 0.006;
+          lastLX = e.clientX; lastLY = e.clientY;
+        }
+      });
+      const onUp = (e) => {
+        if (e.pointerId === stick.id) { stick.id = null; stick.x = stick.y = 0; $('stick').style.display = 'none'; $('knob').style.transform = ''; }
+        if (e.pointerId === lookId) lookId = null;
+      };
+      addEventListener('pointerup', onUp); addEventListener('pointercancel', onUp);
+      $('fire').addEventListener('pointerdown', (e) => { e.preventDefault(); fire(); });
+      $('c').addEventListener('mousedown', (e) => {
+        if (!started || isTouch || e.button !== 0) return;
+        if (!document.pointerLockElement) { $('c').requestPointerLock(); return; }
+        fire();
+      });
+      document.addEventListener('pointerlockchange', () => {
+        if (!isTouch && started && !document.pointerLockElement) setPaused(true);
+      });
+      function setPaused(p) { paused = p; $('pause').hidden = !p; $('cross').hidden = p; if (p) $('resumeBtn').focus(); }
+      $('resumeBtn').onclick = () => {
+        setPaused(false);
+        if (!isTouch) $('c').requestPointerLock();
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen?.().catch(() => {});
+      };
+
+      // ---------- sound ----------
+      let ac;
+      function blip(type) {
+        try {
+          ac ??= new AudioContext();
+          const o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime;
+          o.connect(g); g.connect(ac.destination);
+          if (type === 'zap') { o.type = 'square'; o.frequency.setValueAtTime(900, t); o.frequency.exponentialRampToValueAtTime(180, t + 0.12); g.gain.setValueAtTime(0.06, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.14); o.stop(t + 0.15); }
+          else { o.type = 'triangle'; o.frequency.setValueAtTime(220, t); o.frequency.exponentialRampToValueAtTime(660, t + 0.12); o.frequency.exponentialRampToValueAtTime(110, t + 0.4); g.gain.setValueAtTime(0.12, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.45); o.stop(t + 0.46); }
+          o.start(t);
+        } catch {}
+      }
+
+      // ---------- fire ----------
+      let recoil = 0, tracer = null;
+      function fire() {
+        if (!started || paused) return;
+        shots++; blip('zap');
+        if (!reduced) recoil = 1;
+        const ray = new THREE.Raycaster();
+        ray.setFromCamera(new THREE.Vector2(0, 0), camera);
+        const targets = [...solids, ...aliens.filter((a) => a.state === 'walk').map((a) => a.body)];
+        const hit = ray.intersectObjects(targets, false)[0];
+        const end = hit ? hit.point : ray.ray.at(30, new THREE.Vector3());
+        const start = new THREE.Vector3(0.17, -0.15, -0.48).applyMatrix4(camera.matrixWorld);
+        if (tracer) world.remove(tracer);
+        tracer = new THREE.Line(new THREE.BufferGeometry().setFromPoints([start, end]), new THREE.LineBasicMaterial({ color: PAL.coil }));
+        tracer.userData.t = 0.08; world.add(tracer); hideInNormals.push(tracer);
+        const a = hit && aliens.find((x) => x.body === hit.object);
+        if (a) { a.state = 'stunned'; a.t = 0; stuns++; setTimeout(() => blip('boing'), 40); }
+      }
+
+      // ---------- loop ----------
+      let last = 0, fps = 60;
+      const vel = { x: 0, z: 0 };
+      function tick(now) {
+        requestAnimationFrame(tick);
+        const dt = Math.min(0.05, (now - last) / 1000 || 0.016);
+        last = now;
+        fps = fps * 0.95 + (1 / dt) * 0.05;
+        if (!paused) {
+          yaw.rotation.y -= look.dx; pitch.rotation.x = Math.max(-1.3, Math.min(1.3, pitch.rotation.x - look.dy));
+          let f = (keys.KeyW ? 1 : 0) - (keys.KeyS ? 1 : 0) - stick.y;
+          let s = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0) + stick.x;
+          const len = Math.hypot(f, s); if (len > 1) { f /= len; s /= len; }
+          const speed = 4.5, ry = yaw.rotation.y;
+          const tx = (-Math.sin(ry) * f + Math.cos(ry) * s) * speed, tz = (-Math.cos(ry) * f - Math.sin(ry) * s) * speed;
+          const k = 1 - Math.exp(-dt * 14);
+          vel.x += (tx - vel.x) * k; vel.z += (tz - vel.z) * k;
+          collide(yaw.position, vel.x * dt, vel.z * dt);
+          const p = yaw.position;
+          for (const a of aliens) {
+            a.t += dt;
+            const dx = p.x - a.g.position.x, dz = p.z - a.g.position.z, d = Math.hypot(dx, dz);
+            if (a.state === 'walk') {
+              a.g.rotation.set(0, Math.atan2(dx, dz), 0);
+              if (d < 14 && d > 1.9) collide(a.g.position, (dx / d) * 1.3 * dt, (dz / d) * 1.3 * dt);
+              a.g.position.y = 0.9 + (reduced ? 0 : Math.sin(a.t * 4 + a.phase) * 0.08);
+              a.tell.visible = d < 3.2;
+              a.stars.visible = false; a.body.scale.set(1, 1.15, 1);
+            } else {
+              a.tell.visible = false;
+              const puff = a.t < 0.15 && !reduced ? 1 + (a.t / 0.15) * 0.35 : 1;
+              a.body.scale.set(puff, 1.15 * puff, puff);
+              const flop = reduced ? 1 : Math.min(1, Math.max(0, (a.t - 0.15) / 0.25));
+              a.g.rotation.x = -flop * Math.PI / 2; a.g.position.y = 0.9 - flop * 0.35;
+              a.stars.visible = a.t > 0.3; a.stars.rotation.y += reduced ? 0 : dt * 4;
+              if (a.t > 5) { a.state = 'walk'; a.t = 0; a.g.rotation.x = 0; }
+            }
+          }
+        }
+        look.dx = look.dy = 0;
+        recoil = Math.max(0, recoil - dt * 8);
+        gun.position.z = -0.33 + recoil * 0.04;
+        gun.rotation.x = recoil * 0.25;
+        if (tracer && (tracer.userData.t -= dt) <= 0) { world.remove(tracer); tracer = null; }
+        post.render();
+        $('hud').textContent =
+          `PROTOTYPE #144 round 2 · look C · palette ${variant} ${PALETTES[variant].name}\n` +
+          `line ${lineCss.toFixed(1)} css px · wobble ${wobbleOn} · three r${THREE.REVISION} loaded in ${loadMs} ms\n` +
+          `fps ${fps.toFixed(0)} · ${renderer.domElement.width}×${renderer.domElement.height} px · input ${isTouch ? 'touch' : 'mouse+WASD'}\n` +
+          `pos ${yaw.position.x.toFixed(1)},${yaw.position.z.toFixed(1)} · shots ${shots} · stuns ${stuns} · reduced-motion ${reduced}`;
+      }
+
+      // ---------- wake up: the lazy boundary ----------
+      $('wakeBtn').onclick = async () => {
+        $('wakeBtn').disabled = true;
+        document.documentElement.requestFullscreen?.().catch(() => {});
+        const t0 = performance.now();
+        THREE = await import(/* @vite-ignore */ THREE_URL);
+        loadMs = Math.round(performance.now() - t0);
+        toonGradient = new THREE.DataTexture(new Uint8Array([205, 255]), 2, 1, THREE.RedFormat);
+        toonGradient.minFilter = toonGradient.magFilter = THREE.NearestFilter; toonGradient.needsUpdate = true;
+        renderer = new THREE.WebGLRenderer({ canvas: $('c'), antialias: false });
+        renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+        scene = new THREE.Scene(); gunScene = new THREE.Scene();
+        gunScene.add(new THREE.HemisphereLight(0xffffff, 0xffffff, 2.2));
+        const gl = new THREE.DirectionalLight(0xffffff, 1.4); gl.position.set(0.5, 1, 0.6); gunScene.add(gl);
+        camera = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, 0.05, 60);
+        gunCam = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, 0.05, 60);
+        yaw = new THREE.Object3D(); pitch = new THREE.Object3D();
+        yaw.add(pitch); pitch.add(camera); scene.add(yaw);
+        const start = MAP.findIndex((r) => r.includes('P'));
+        yaw.position.set(MAP[start].indexOf('P') * CELL + CELL / 2, 1.6, start * CELL + CELL / 2);
+        yaw.rotation.y = Math.PI;
+        PAL = PALETTES[variant];
+        post = makePost();
+        buildWorld();
+        const resize = () => {
+          renderer.setSize(innerWidth, innerHeight, false);
+          for (const cam of [camera, gunCam]) { cam.aspect = innerWidth / innerHeight; cam.updateProjectionMatrix(); }
+          post.resize();
+        };
+        addEventListener('resize', resize); resize();
+        $('wake').hidden = true; $('cross').hidden = false; $('hint').hidden = isTouch;
+        started = true;
+        if (!isTouch) $('c').requestPointerLock();
+        requestAnimationFrame(tick);
+      };
+    </script>
+  </body>
+</html>
