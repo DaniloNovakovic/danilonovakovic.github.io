@@ -251,7 +251,7 @@ As built (#163, steps 2–3):
   `swing pigeon` during the waves never moves the fight on); the
   headless fight is discrete, so nothing attacks back there. `look` reports
   `alarm: doors taped shut` and `fight: <phase> wave=… enemies left=…
-screen damage=… cracks`.
+  screen damage=… cracks`.
 
 As built (#164, step 4). This build also answered #143 (how the screen
 destroyer should feel): Danilo played it and liked it, so the layer order and
@@ -319,19 +319,30 @@ Round 2 (2026-11-26): Danilo likes look C done as a **screen-space ink
 pass** (edges found from depth and normals, so the line keeps one weight at
 any distance, with a slight hand-drawn wobble and thinning into the
 distance). The line should be a little thinner than the prototype's 2.2 CSS px
-(about 1.8). The palette is still open.
+(about 1.8). Palette: **Night lab** (deep navy walls and floor, near-black
+ink, warm yellow light strips, pink aliens). A dark ship suits the escape:
+the light strips are where you get seen, the dark between them is where you
+hide.
+
+The act has two halves, a stealth escape and then an action fight (Danilo,
+2026-11-26). Mood references: _Thief_ for the first half (light and shadow,
+vents), _Doom_ for the second (pace and swagger only: stuns, no gore).
 
 1. **Wake up.** The black screen's only button is **Wake up** (it replaces
    "Back to the portfolio" in `UnpluggedHandOff`; the click is the gesture
-   the browser needs for fullscreen and pointer lock). Danilo wakes in a pod,
-   ~30 s.
-2. **Sneak**, ~1 min, no weapon. Aliens patrol; you can't fight back yet.
-   Getting caught resets to a nearby checkpoint, never the start of the act.
+   the browser needs for fullscreen and pointer lock). Danilo is unplugged
+   from the VR rig, a pod in an alien **lab**: the portfolio was the
+   simulation running inside it. ~30 s.
+2. **Escape the lab**, ~1–2 min, no weapon. Crawl through **vents** and keep
+   to the **shadows**: in the light strips patrolling aliens see you, in the
+   dark they don't. You can't fight back yet. Getting caught resets to a
+   nearby checkpoint, never the start of the act.
 3. **The gun.** A chunky alien stun blaster (from a weapons locker or a
-   stunned guard). The sneak flips into a hunt.
+   stunned guard). The sneak flips into a hunt: from here on it's fast,
+   loud action.
 4. **Fight through the ship**, ~3 min, first-person, to the **control room**,
    and take the ship over. The aliens are the ones who kept Danilo in the
-   simulation and want him back in the pod: goofy low-poly blobs with big
+   simulation and want Danilo back in the pod: goofy low-poly blobs with big
    eyes. The blaster **stuns**: they puff up, spin and flop over with silly
    sounds. No blood, nobody dies (same tone as Act 3's knock-outs). Each
    alien shows an alert-red tell before it shoots.
@@ -386,6 +397,8 @@ These are moods and mechanics. Don't recreate their content.
 | _Sable_, _Rollerdrome_                                                | Ink linework over flat colour for the real world        | Their characters, palettes, compositions or UI         |
 | _The Matrix_-style "wake up unplugged"                                | The reveal that the portfolio was a simulation          | Iconography, pods-as-shot, green code rain, characters |
 | First-person shooters (_Half-Life_-style immersion)                   | Being inside the world, the gun in your hands           | Their enemies, weapons, levels, look or story          |
+| _Thief_-style stealth                                                 | Hiding in shadow, crawling through vents (Act 4 escape) | Its world, characters, levels, look or story           |
+| _Doom_-style action                                                   | Fast, loud fighting once armed (Act 4 fight)            | Its demons, gore, weapons, levels or look              |
 | Invaders-style arcade shooters (_Space Invaders_, _Chicken Invaders_) | Waves coming down, power-ups, a boss                    | Their enemies (no chickens), waves, theme or art       |
 
 ## Technical Questions to Settle Early
@@ -465,7 +478,7 @@ GitHub issues (vertical slices) when it's ready to build.
 | **OB0** | Paper pass        | Answer the open questions above. Throwaway prototype: low-poly toon first-person look + Three.js fit (#144, #145; the screen-destroyer feel was settled by the #164 build, #143). | —                           |
 | **OB1** | Walk Off the Page | Hobbies left void (Act 1), right-edge bug fixed, Debugging Tools pickup + hidden Backpack slot, point of no return                                                                | Alert; the way back is shut |
 | **OB2** | Breakout          | Through the ransacked Basement up its ladder to the street, evil chick + pigeons with the hammer, screen cracks, layered screen destroyer (Act 3)                                 | Falling into black          |
-| **OB3** | Unplugged         | "Wake up" + fullscreen, pod wake-up, the 3D foundation (lazy Three.js chunk, renderer, controls, pause), short no-weapon sneak (Act 4, steps 1–2)                                 | The blaster, out of reach   |
+| **OB3** | Unplugged         | "Wake up" + fullscreen, pod wake-up, the 3D foundation (lazy Three.js chunk, renderer, controls, pause), no-weapon lab escape through vents and shadows (Act 4, steps 1–2)        | The blaster, out of reach   |
 | **OB4** | Armed             | Stun blaster, first-person fight through the ship to the control room (Act 4, steps 3–4)                                                                                          | Sitting in the pilot seat   |
 | **OB5** | Flight Home       | Invaders-style shooter in low-poly 3D, waves, power-ups, mothership boss (Act 5)                                                                                                  | Earth in view               |
 | **OB6** | Homecoming        | Ending scene, credits, true-ending flag (Act 6)                                                                                                                                   | — the end                   |
