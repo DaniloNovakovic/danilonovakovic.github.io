@@ -1,3 +1,4 @@
+import { aimMiss, lookDirection, type View } from './aim';
 import {
   distanceTo,
   footprintsOf,
@@ -142,39 +143,18 @@ export function stepThrowable(room: RealWorldRoom, from: Throwable, dt: number):
   return body;
 }
 
-/** Where the eye looks: `yaw` as for walking, `pitch` up is positive. */
-export interface View {
-  x: number;
-  y: number;
-  z: number;
-  yaw: number;
-  pitch: number;
-}
-
-function lookDirection({ yaw, pitch }: View) {
-  return {
-    x: -Math.sin(yaw) * Math.cos(pitch),
-    y: Math.sin(pitch),
-    z: -Math.cos(yaw) * Math.cos(pitch)
-  };
-}
-
 /**
  * The thing under the crosshair and within reach, if any: the one the look
  * ray passes closest to. Forgiving on purpose, so a ball by your feet is easy
  * to grab.
  */
 export function aimedThrowable(things: readonly Throwable[], view: View): Throwable | null {
-  const look = lookDirection(view);
   let best: Throwable | null = null;
   let bestMiss = Infinity;
   for (const thing of things) {
-    const dx = thing.x - view.x;
-    const dy = thing.y - view.y;
-    const dz = thing.z - view.z;
-    const along = dx * look.x + dy * look.y + dz * look.z;
-    if (along <= 0 || Math.hypot(dx, dy, dz) > REACH) continue;
-    const miss = Math.sqrt(Math.max(0, dx * dx + dy * dy + dz * dz - along * along));
+    const aim = aimMiss(view, thing, REACH);
+    if (!aim) continue;
+    const { miss, along } = aim;
     if (miss < AIM_SLACK + along * AIM_SLACK_PER_UNIT && miss < bestMiss) {
       best = thing;
       bestMiss = miss;

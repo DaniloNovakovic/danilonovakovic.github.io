@@ -14,6 +14,11 @@
  * - south, **the way out**: the locked door, delivery crates beside it, and
  *   the vent, half hidden behind crates in the corner.
  * The route from Danilo's pod to the door stays clear.
+ *
+ * The door stays locked. The only way out is the vent: pry the grate off and
+ * crawl through a short, dark duct. Its first floor grate, bolted, looks down
+ * into a ship corridor where a researcher walks past; the second pries open
+ * and drops into the storeroom next door (`storeroom.ts`).
  */
 export type RealWorldMap = readonly string[];
 
@@ -52,7 +57,13 @@ export type FurnitureKind =
   | 'table'
   | 'cart'
   | 'jarShelf'
-  | 'crates';
+  | 'crates'
+  | 'supplyShelf'
+  | 'lampShelf'
+  | 'drums'
+  | 'mopBucket'
+  | 'cleanerBot'
+  | 'janitorCart';
 
 /** Which way a piece's front looks. */
 export type Facing = 'north' | 'east' | 'south' | 'west';
@@ -81,15 +92,78 @@ const SHAPE: Readonly<Record<FurnitureKind, Shape>> = {
   table: { width: 2.6, depth: 1.1, top: 1.05 },
   cart: { width: 0.8, depth: 0.5, top: 1.05 },
   jarShelf: { width: 2.3, depth: 0.75, top: 2.2 },
-  crates: { width: 1.4, depth: 1.4, top: 1.3 }
+  crates: { width: 1.4, depth: 1.4, top: 1.3 },
+  supplyShelf: { width: 2.4, depth: 0.7, top: 2.2 },
+  lampShelf: { width: 2.4, depth: 0.7, top: 2.2 },
+  drums: { width: 1.5, depth: 0.8, top: 1.0 },
+  mopBucket: { radius: 0.5, top: 0.7 },
+  cleanerBot: { radius: 0.6, top: 0.7 },
+  janitorCart: { width: 1.3, depth: 0.7, top: 1.1 }
 };
+
+/** The four grid neighbours, as (dx, dz) steps: east, west, south, north. */
+export const NEIGHBOURS = [
+  [1, 0],
+  [-1, 0],
+  [0, 1],
+  [0, -1]
+] as const;
+
+/** World units per vent-duct cell: just wide enough to crawl along. */
+export const VENT_CELL = 1.5;
+
+/**
+ * A crawl-only duct behind a wall grate, on its own finer grid. `plan` is one
+ * character per cell seen from above, north at the top: `m` the mouth (the
+ * room floor in front of the grate, where Danilo ducks down), `.` duct, `g`
+ * a grate in the duct floor bolted from below (a look, not a way), `o` a
+ * floor grate that pries open to drop through, and a space for solid.
+ */
+export interface VentDuct {
+  plan: RealWorldMap;
+  /** World position of the plan's north-west corner. */
+  origin: { x: number; z: number };
+  /** Height of the duct floor, and from there to its ceiling. */
+  floor: number;
+  height: number;
+}
 
 export interface RealWorldRoom {
   walls: RealWorldMap;
   furniture: readonly Furniture[];
   /** Where Danilo stands after waking, and which way the view starts facing. */
   wake: { x: number; z: number; yaw: number };
+  /** The duct behind the room's `V` grate, if it has one. */
+  vent?: VentDuct;
+  /**
+   * Where the room's plan sits in the world (its north-west corner, at floor
+   * level). The lab is the origin; other rooms keep their own plan and rules
+   * in local coordinates and are placed with this.
+   */
+  offset?: { x: number; y: number; z: number };
+  /** A `VENT_CELL`-wide opening in the ceiling, centred here: where a duct drops in. */
+  hatch?: { x: number; z: number };
+  /** Cells (their centres) with a light strip. Without it, every other floor cell has one. */
+  strips?: ReadonlyArray<{ x: number; z: number }>;
 }
+
+/**
+ * The lab's vent: in through the east wall, a bend north in the dark, east
+ * over a bolted grate above the lit corridor (something walks past below),
+ * on over the corridor wall, then a bend south to the grate that opens into
+ * the storeroom.
+ */
+export const LAB_VENT: VentDuct = {
+  plan: [
+    '    ....g.....', //
+    '    .        .',
+    '    .        o',
+    'm....         '
+  ],
+  origin: { x: 22.5, z: 11.25 },
+  floor: 0.2,
+  height: 1.1
+};
 
 export const LAB_ROOM: RealWorldRoom = {
   walls: LAB_WALLS,
@@ -114,7 +188,8 @@ export const LAB_ROOM: RealWorldRoom = {
     { kind: 'crates', x: 20.6, z: 17.2, facing: 'west' }
   ],
   // Facing the procedure bay and the watch desk; the pods (and the others) behind.
-  wake: { x: 13.5, z: 7.7, yaw: Math.PI - 0.4 }
+  wake: { x: 13.5, z: 7.7, yaw: Math.PI - 0.4 },
+  vent: LAB_VENT
 };
 
 export function cellAt(map: RealWorldMap, x: number, z: number): string {
