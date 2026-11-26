@@ -322,7 +322,8 @@ distance). The line should be a little thinner than the prototype's 2.2 CSS px
 (about 1.8). Palette: **Night lab** (deep navy walls and floor, near-black
 ink, warm yellow light strips, pink aliens). A dark ship suits the escape:
 the light strips are where you get seen, the dark between them is where you
-hide.
+hide. Real-phone check passed: it runs, and the touch controls feel good.
+The look is settled (#144 closed).
 
 The act has two halves, a stealth escape and then an action fight (Danilo,
 2026-11-26). Mood references: _Thief_ for the first half (light and shadow,
