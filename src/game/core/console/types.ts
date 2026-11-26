@@ -7,6 +7,8 @@ import type { GameSceneId, PortfolioOverlayId } from './content/overworldSpots';
 import type { CircuitPartId } from './content/circuitParts';
 import type { HobbyStationId } from './content/hobbiesSpots';
 import type { DEBUGGING_TOOLS_ITEM_ID, OutOfBoundsStage } from './content/outOfBoundsVoid';
+import type { StreetFightEnemy, StreetFightTarget } from './content/outOfBoundsStreetFight';
+import type { StreetAlarmObservation } from './streetFightLogic';
 
 /**
  * `debugging-tools` is the Out of Bounds kit (Act 2): a hidden Backpack slot
@@ -59,6 +61,12 @@ export interface OverworldSlice {
   playerY: number;
   facing: GameFacing;
   bananaFirstPeelPending: boolean;
+}
+
+/** The street, plus its alarm while the simulation is broken (Out of Bounds escape). */
+export interface OverworldObservation extends OverworldSlice {
+  /** Null unless the simulation is broken. */
+  alarm: StreetAlarmObservation | null;
 }
 
 export interface BasementSlice {
@@ -140,6 +148,11 @@ export interface GameWorldState {
   basement: BasementSlice;
   hobbies: HobbiesSlice;
   potassium: PotassiumSlice;
+  /**
+   * Hammer smashes landed in the Out of Bounds street fight; each one cracked
+   * the screen. The whole fight's progress derives from it.
+   */
+  screenSmashes: number;
   lastMessage: string | null;
   /** Ridge is hosted separately; beat mirrored for observation. */
   ridgeBeat: RidgeRouteBeat | null;
@@ -156,7 +169,7 @@ export interface GameObservation {
   prompt: string | null;
   lastMessage: string | null;
   hints: readonly string[];
-  overworld: OverworldSlice | null;
+  overworld: OverworldObservation | null;
   basement: BasementObservation | null;
   hobbies: HobbiesObservation | null;
   potassium: PotassiumSlice | null;
@@ -181,6 +194,8 @@ export type GameCommand =
   /** Answer a pending point-of-no-return warning. */
   | { type: 'confirm' }
   | { type: 'decline' }
+  /** Swing the Debugging Tools hammer (Out of Bounds street fight). */
+  | { type: 'swing'; target?: StreetFightEnemy }
   | { type: 'fight' }
   | { type: 'draft'; choiceIdOrIndex: string }
   | { type: 'cheat'; action: 'give'; itemId: GameItemId }
@@ -200,12 +215,20 @@ export type GameSessionEvent =
   | { type: 'item_unequipped'; itemId: GameItemId }
   | { type: 'secret_discovered'; secretId: GameSecretId }
   | { type: 'banana_peel_cancelled' }
-  | { type: 'signpost_read'; stage: OverworldProgressStage; found: number; total: number }
+  | {
+      type: 'signpost_read';
+      stage: OverworldProgressStage;
+      found: number;
+      total: number;
+    }
   | { type: 'thought'; id: GameThoughtId; variant?: number }
   | { type: 'potassium_won' }
   | { type: 'point_of_no_return_shown' }
   /** The toolbox was taken: alert, way back shut. */
   | { type: 'simulation_broken' }
+  /** A hammer smash landed: one more crack across the screen. */
+  | { type: 'screen_smashed'; target: StreetFightTarget; smashes: number }
+  | { type: 'street_fight_cleared' }
   | { type: 'ridge_beat_changed'; beat: RidgeRouteBeat }
   | { type: 'ridge_area_handoff'; areaId: string }
   | { type: 'ridge_route_reset' };

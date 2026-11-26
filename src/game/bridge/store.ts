@@ -108,6 +108,22 @@ export interface BridgeProgressState {
   ridge: BridgeRidgeProgressState;
 }
 
+/**
+ * One crack across the whole browser viewport (Out of Bounds street fight):
+ * where the smash landed, as fractions of the viewport, plus a seed for its
+ * hand-drawn shape. One crack per landed smash.
+ */
+export interface ScreenCrack {
+  x: number;
+  y: number;
+  seed: number;
+}
+
+/** Damage to the screen itself, drawn above the game and the portfolio chrome. */
+export interface BridgeScreenDamageState {
+  cracks: readonly ScreenCrack[];
+}
+
 export interface OverlayRequest {
   id: OverlayId;
   params?: unknown;
@@ -133,6 +149,7 @@ export interface BridgeState {
   inventory: BridgeInventoryState;
   equipment: BridgeEquipmentState;
   progress: BridgeProgressState;
+  screenDamage: BridgeScreenDamageState;
   sceneHintText: string | null;
   touch: TouchBridgeState;
   sceneControlPointerEvents: SceneControlPointerEvent[];
@@ -256,6 +273,7 @@ let state: BridgeState = {
     streetDoodle: null,
     ridge: createInitialRidgeProgress()
   },
+  screenDamage: { cracks: [] },
   sceneHintText: null,
   touch: {
     left: 0,
@@ -349,6 +367,7 @@ function isBridgeStateUnchanged(previous: BridgeState, candidate: BridgeState): 
     isBridgeSceneShellUnchanged(previous, candidate) &&
     isBridgeInventoryUnchanged(previous, candidate) &&
     isBridgeProgressUnchanged(previous, candidate) &&
+    previous.screenDamage === candidate.screenDamage &&
     isBridgeTouchInputUnchanged(previous, candidate)
   );
 }
@@ -643,7 +662,15 @@ export const bridgeActions = {
         discoveredSecretIds: [],
         streetDoodle: null,
         ridge: createInitialRidgeProgress()
-      }
+      },
+      screenDamage: { cracks: [] }
+    }));
+  },
+  /** One more crack across the screen; cracks only pile up until progress resets. */
+  crackScreen(crack: ScreenCrack): void {
+    setState((current) => ({
+      ...current,
+      screenDamage: { cracks: [...current.screenDamage.cracks, crack] }
     }));
   },
   setSceneLoading(sceneId: SceneId | null): void {

@@ -152,12 +152,83 @@ As built (#162, step 1):
   the #149 stamp and barrier use it.
 - Every way out of the Basement during the escape (ladder, `Esc`, header Back)
   comes up through the **hatch onto the street** (x=280), where #163 takes
-  over. A later Hobbies visit starts back inside the barrier, so the void and
-  the room stay shut.
+  over.
 - Geometry and copy: `src/game/core/console/content/outOfBoundsBreakout.ts`.
   Headless: walking `go left` into the opening enters the basement; `look`
   reports `escape: ransacked, way back blocked`; `interact exit` lands on the
   street at the hatch.
+
+As built (#163, steps 2–3):
+
+- **The street in alarm** (Danilo's direction, 2026-11-26): whenever the
+  simulation is broken, the street is a prison-break manhunt at night. It is
+  still the street: a dark wash over the same drawing, a hatched moon,
+  searchlight cones sweeping up behind the buildings, an ink helicopter
+  circling with a spotlight that sweeps near Danilo, and every door crossed
+  with red, ink-chevroned tape. The helicopter's nav light is a steady red,
+  never blinking. Reduced motion: lights and helicopter hold still.
+- **Lockdown.** Nothing on the street can be entered (buildings, the hatch,
+  the CRT, the litter pile, the chick talk) and `H`/`Esc` no longer go back to
+  Hobbies: "Taped shut. Nowhere to hide now." Static mode is the way out. So a
+  later Hobbies visit can't happen any more during the escape.
+- **The evil chick.** Up the hatch (once Danilo has landed), the street chick
+  is waiting, 2.4× its size, hackles up, a scribble of rage over its head and
+  an alert-red eye under a hard ink brow (its conversation portrait gets the
+  same eye). Two lines, Danilo's "...is that chick bigger than I remember?",
+  then it stalks him and taunts ("run, little doodle." / "bring it.").
+- **The hammer** is drawn in Danilo's hand during the escape, with two moves
+  (Danilo's direction, 2026-11-26): **Swing** (`F`) connects only with an
+  enemy in front of him, the way he last walked (the shared player movement
+  now keeps the last facing when idle, in every scene); **Parry** (`R`) raises
+  a ~0.28 s guard (an ink arc in front of him, hammer held across), ~0.65 s
+  apart. Docked **Swing** and **Parry** touch buttons (`streetFight` scene
+  panel, which also shows the wave, what's left and the crack count). Whiffs
+  are free. Stepped swing, no easing.
+- **Waves** of 3, 4 and 5 (Danilo's direction, 2026-11-26: not only flyers):
+  wave 1 is 3 pigeons, wave 2 is 2 pigeons + 2 raccoons, wave 3 is 3 pigeons +
+  2 raccoons. They enter staggered, from alternating sides of the view.
+  - **Pigeons** cross the sky left and right, alternating between a low lane
+    150 px above the street (jump and swing) and a high one 230 px up (out of
+    the hammer's reach). As they approach they lob an egg or a dropping on an
+    arc that lands where Danilo is standing at that moment: standing still
+    gets hit, stepping aside dodges, and a miss splats on the street and dries
+    off the page. **Parried**, it flies back (`RETURN!`) and knocks out the
+    pigeon that dropped it (`BOINK!`), or the nearest one if that's gone; that
+    is the only way to bring down the high lane.
+  - **Raccoons** (the dumpster raccoons from the litter-pile secret) rush in
+    along the ground, stop beside Danilo, raise a claw with an alert-red `!`
+    over their heads for ~0.56 s (the tell; the claw carries it in
+    greyscale), swipe, back off and come again. Stepping back during the tell
+    dodges it; a **parried** swipe (`PARRY!`) leaves the raccoon dizzy, stars
+    over its head, for ~1.5 s.
+  - **Getting hit** (`SWIPE!` / `SPLAT!`, Danilo: "Ow!" / "Ew. EW.") knocks
+    him back and stuns him for ~0.5 s (no walking, swinging or parrying,
+    hammer dropped), then ~0.6 s where nothing else lands, so hits never
+    chain. Nothing flickers. There is no game over: the fight only ends by
+    winning.
+  - Hits read muted: `BONK!`/`THWACK!`/`WHACK!` in ink, the chick folds flat
+    and skids off, pigeons tumble with crossed-out eyes and feathers,
+    raccoons spin off into the gutter.
+- **Screen damage layer** (`src/game/shell/ScreenDamageLayer.tsx`): one SVG
+  over the whole viewport (`fixed`, `z-[70]`, `pointer-events-none`,
+  `aria-hidden`), above the game, the header and overlays. Cracks live in the
+  bridge (`screenDamage.cracks`: a viewport point plus a seed), one per
+  smash, so they survive scene changes and static-mode round trips; the
+  fight's progress derives from their count. Each crack breaks out of a
+  **screen corner** on the side of the hit (top or bottom at random; Danilo's
+  direction: keep the middle visible), with an impact star, broken rings and
+  branching runs inward that stop at a clear oval in the middle
+  (`CRACK_CLEAR_CENTER` in `src/game/shell/screenCracks.ts`), so the street
+  and Danilo always stay visible. Ink with a pale edge so it reads on cream
+  and on dark. The newest runs out in 260 ms; reduced motion shows it whole,
+  and there is no camera shake. #164 grows from this layer.
+- Pure progress and copy: `src/game/core/console/content/outOfBoundsStreetFight.ts`
+  and `streetFightLogic.ts`. Phaser: `StreetFight.ts` plus
+  `street/fight/` (one module per enemy). Headless: `swing` (or `smash`,
+  optionally `swing pigeon|raccoon`, which is what the live scene sends); the
+  headless fight is discrete, so nothing attacks back there. `look` reports
+  `alarm: doors taped shut` and `fight: <phase> wave=… enemies left=…
+  screen damage=… cracks`.
 
 **Payoff:** once everything is destroyed, the page falls into black and the
 game becomes the first-person 3D alien ship (Act 4).

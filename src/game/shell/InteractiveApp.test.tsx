@@ -108,7 +108,9 @@ describe('InteractiveApp', () => {
     render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
 
     const header = screen.getByRole('banner');
-    const toolbar = screen.getByRole('navigation', { name: /interactive controls/i });
+    const toolbar = screen.getByRole('navigation', {
+      name: /interactive controls/i
+    });
     expect(header.contains(toolbar)).toBe(true);
     expect(header.className).not.toContain('fixed');
     expect(toolbar).toBeDefined();
@@ -116,6 +118,25 @@ describe('InteractiveApp', () => {
     expect(screen.queryByRole('button', { name: /open inventory/i })).toBeNull();
     expect(screen.getByRole('button', { name: /open dev scene switcher/i }).className).not.toContain('fixed');
     expect(screen.getByRole('button', { name: /switch to static portfolio/i }).className).not.toContain('fixed');
+  });
+
+  it('draws screen cracks over the whole page without taking clicks or focus', async () => {
+    const onSwitchToStatic = vi.fn();
+    render(<InteractiveApp onSwitchToStatic={onSwitchToStatic} />);
+    expect(screen.queryByTestId('screen-damage-layer')).toBeNull();
+
+    act(() => {
+      bridgeActions.crackScreen({ x: 0.9, y: 0.05, seed: 3 });
+      bridgeActions.crackScreen({ x: 0.2, y: 0.5, seed: 4 });
+    });
+
+    const layer = screen.getByTestId('screen-damage-layer');
+    expect(layer.getAttribute('aria-hidden')).toBe('true');
+    expect(layer.getAttribute('class')).toContain('pointer-events-none');
+    expect(layer.getAttribute('class')).toContain('fixed');
+    expect(layer.querySelectorAll('g')).toHaveLength(2);
+    await userEvent.click(screen.getByRole('button', { name: /switch to static portfolio/i }));
+    expect(onSwitchToStatic).toHaveBeenCalledTimes(1);
   });
 
   it('gives the street the footer row instead of a standing controls hint', () => {
@@ -146,7 +167,9 @@ describe('InteractiveApp', () => {
     expect(screen.queryByRole('button', { name: /open backpack/i })).toBeNull();
 
     act(() => bridgeActions.collectGlasses());
-    const opener = await screen.findByRole('button', { name: /open backpack/i });
+    const opener = await screen.findByRole('button', {
+      name: /open backpack/i
+    });
     await userEvent.click(opener);
 
     expect(await screen.findByRole('dialog', { name: /backpack/i })).toBeDefined();
@@ -166,7 +189,9 @@ describe('InteractiveApp', () => {
   it('renders the dev switcher only in dev builds and closes after selecting a target', async () => {
     render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
 
-    const devButton = screen.queryByRole('button', { name: /open dev scene switcher/i });
+    const devButton = screen.queryByRole('button', {
+      name: /open dev scene switcher/i
+    });
     expect(devButton).not.toBeNull();
     if (!devButton) return;
 
@@ -685,7 +710,9 @@ describe('InteractiveApp', () => {
     });
     render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
 
-    const terminalDialog = screen.getByRole('dialog', { name: /banana bankruptcy/i });
+    const terminalDialog = screen.getByRole('dialog', {
+      name: /banana bankruptcy/i
+    });
     expect(screen.getByTestId('scene-ui-panel-overlay').contains(terminalDialog)).toBe(true);
     expect(terminalDialog.className).toContain('max-h-[min(78dvh,calc(100dvh-8rem))]');
     expect(within(terminalDialog).getByRole('button', { name: /return to city/i })).toBeDefined();

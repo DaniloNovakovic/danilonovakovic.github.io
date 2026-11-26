@@ -34,7 +34,8 @@ export function runPlayerInputAndMovementSystems(
     world.setComponent(stores.interaction, entityId, { requested: false });
     return {
       velocityX: 0,
-      facingLeft: false,
+      // Held still (a cutscene, a stun): he stays turned the way he was.
+      facingLeft: world.getComponent(stores.facing, entityId)?.flipX ?? false,
       moving: false,
       shouldJump: false,
       interactRequested: false
@@ -43,7 +44,8 @@ export function runPlayerInputAndMovementSystems(
 
   const speed = input.sprint ? movement.sprintSpeed : movement.walkSpeed;
   let velocityX = 0;
-  let facingLeft = false;
+  // Standing still keeps the last facing: Danilo stays turned the way he walked.
+  let facingLeft = world.getComponent(stores.facing, entityId)?.flipX ?? false;
   let moving = false;
 
   if (input.analogX !== undefined && input.analogX !== 0) {

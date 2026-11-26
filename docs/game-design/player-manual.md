@@ -12,7 +12,7 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
 
 ### Desktop
 
-- **Move:** `A` / `D` or left / right arrows.
+- **Move:** `A` / `D` or left / right arrows. Danilo keeps facing the way he last walked when you let go.
 - **Sprint:** hold `Shift`.
 - **Jump:** up arrow.
 - **Interact:** `E` when a prompt appears.
@@ -54,14 +54,25 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
 - Not every wall in the Hobbies room is as solid as it looks. If you end up somewhere undrawn, walk back right to return; `H` and `Esc` work from anywhere.
 - Something waits at the far end of the undrawn page. Press `E` (or tap interact) and a **Point of no return** warning asks first: **Leave it** (`N`) changes nothing; **Pick it up** (`Y`) is a choice you can't take back. Keyboard: `←`/`→` move between the two, `Enter`, `Space` or `E` presses the highlighted one. `Esc` still leaves the room.
 - Picking it up plays a short close-up, then an alarm: `OUT_OF_BOUNDS` is stamped across the view in alert red and the page edge shakes in pencil (reduced motion: cuts instead of zooms, no shake; nothing flashes, and it all reads with sound off). Behind you the page scribbles itself shut, so the way back right is blocked, and the page now runs on further left to a torn opening.
-- From then on, for the rest of the visit to the site, the Hobbies room _is_ that escape: leaving with `H`, `Esc` or the header and coming back puts you at the end of the page again, with the way back still shut. Reloading the page resets it.
+- From then on, for the rest of the visit to the site, you are escaping: leaving with `H`, `Esc` or the header puts you on the street in alarm (see below), and the Hobbies room stays taped shut. Reloading the page resets it.
 - What you picked up goes in the Backpack, under its own "Off the page" heading. It doesn't count toward the street secrets.
 - Walk into the torn opening and the blank page gives way: you come through the right wall of the Developer Basement (reduced motion: a cut instead of the fade into ink).
+
+## The street in alarm (Out of Bounds escape)
+
+- Once you are escaping, the street is a manhunt at night: the same drawn street under a dark wash, a moon, searchlights sweeping the buildings and a helicopter circling with its spotlight (reduced motion: they hold still). Every door is crossed with red, ink-hatched tape.
+- Nothing can be entered: no buildings, no hatch, no CRT, no litter pile, and `H`/`Esc` no longer go back to the Hobbies room. Trying gets "Taped shut. Nowhere to hide now." The header `Static mode` button still works.
+- Coming up through the hatch, the chick that always ran away from you is waiting, evil now (red eyes, hackles up). It says its piece, then comes for you.
+- You have the hammer from the Debugging Tools, and two moves: **Swing** (`F`) hits the enemy right in front of you, the way you last walked; **Parry** (`R`) raises a short guard. On touch, tap the round **Swing** and **Parry** buttons in the corner of the game. The first swing flattens the chick (`BONK!`).
+- Then the street comes for you in three waves (3, 4, then 5). Pigeons cross the sky left and right, in a low lane you can reach by jumping (up arrow) and swinging, and a high one out of the hammer's reach. As they pass they lob eggs and worse at the spot where you're standing: keep still and you get hit, step aside and it splats on the street. **Parry** an egg as it reaches you and it flies back and knocks out the pigeon that dropped it (`RETURN!` … `BOINK!`); that's the only way to bring down the high ones. From the second wave, raccoons rush in from the edges of the screen, raise a claw with a red `!` over their heads, and swipe: step back before it lands, or **parry** it (`PARRY!`) and the raccoon stands there dizzy, stars over its head, for you to hit.
+- A hit pigeon tumbles with `THWACK!` and feathers; a raccoon spins off with `WHACK!`. Getting hit knocks you back with `SWIPE!` or `SPLAT!` and stuns you for half a second (no walking, no swinging), then there's a moment where nothing else can hit you. There is no game over. A corner card shows the wave, what is left in it, and how many cracks the screen has.
+- Every smash cracks the screen itself: the glass breaks at a corner of the whole browser window (on the side of the hit) and the cracks run in over the game, the header and the buttons, stopping short of the middle so you can always see the street and Danilo. Cracks pile up (13 by the end) and never block a click, `Esc` or static mode. Reduced motion: no camera shake, and each crack appears whole instead of running out. Nothing flashes.
+- After the last enemy the street goes quiet and the screen stays badly cracked. Cracks last until the page is reloaded.
 
 ## Developer Basement
 
 - Enter through the overworld basement hole.
-- After you have picked up what waits off the page, the basement has been ransacked: desk tipped over, corkboard torn down, papers on the floor, the shelf knocked over, claw marks and red `WANTED` scrawls around Danilo's things. Every station still works where it always was. The hole you came in through is scribbled shut behind you; the exit ladder on the far left is the way out, and any way of leaving (ladder, `Esc`, the header) brings you up through the hatch onto the street.
+- After you have picked up what waits off the page, the basement has been ransacked: desk tipped over, corkboard torn down, papers on the floor, the shelf knocked over, claw marks and red `WANTED` scrawls around Danilo's things. Every station still works where it always was. The hole you came in through is scribbled shut behind you; the exit ladder on the far left is the way out, and any way of leaving (ladder, `Esc`, the header) brings you up through the hatch onto the street in alarm. The hatch is taped shut behind you.
 - The glasses pickup is in the basement. Collecting it adds and equips the glasses.
 - Without glasses the den is dim; collecting them switches the swinging bulb on.
 - Before glasses are owned, interacting with the computer shows the character thought: `ughh... I can't see`.

@@ -12,10 +12,14 @@ import {
   OUT_OF_BOUNDS_BARRIER_X,
   OUT_OF_BOUNDS_ESCAPE_MAX_X,
   OUT_OF_BOUNDS_ESCAPE_MIN_X,
-  OUT_OF_BOUNDS_ESCAPE_START_X,
   OUT_OF_BOUNDS_OPENING_X
 } from './content/outOfBoundsVoid';
 import { BASEMENT_BREACH_ENTRY, OUT_OF_BOUNDS_STREET_ARRIVAL } from './content/outOfBoundsBreakout';
+import {
+  STREET_FIGHT_TOTAL_SMASHES,
+  streetFightProgress,
+  streetFightWaveEnemies
+} from './content/outOfBoundsStreetFight';
 import { BASEMENT_WALK_BOUNDS, getBasementSpot } from './content/basementSpots';
 import { getOverworldProgress, getSketchDetailLevel } from './overworldLogic';
 import { GameConsoleSession } from './session';
@@ -23,7 +27,10 @@ import { GameConsoleSession } from './session';
 const PROFILE_X = OVERWORLD_BUILDING_SPOTS.find((spot) => spot.id === 'profile')?.x ?? 0;
 
 function createSession(options: Omit<ConstructorParameters<typeof GameConsoleSession>[0], 'dialogue'> = {}) {
-  return new GameConsoleSession({ dialogue: TEST_ROUTE_DIALOGUE_CATALOG, ...options });
+  return new GameConsoleSession({
+    dialogue: TEST_ROUTE_DIALOGUE_CATALOG,
+    ...options
+  });
 }
 
 describe('parseGameCommand', () => {
@@ -33,7 +40,10 @@ describe('parseGameCommand', () => {
       direction: 'right',
       steps: 3
     });
-    expect(parseGameCommand('equip glasses')).toEqual({ type: 'equip', itemId: 'glasses' });
+    expect(parseGameCommand('equip glasses')).toEqual({
+      type: 'equip',
+      itemId: 'glasses'
+    });
     expect(parseGameCommand('fight')).toEqual({ type: 'fight' });
     expect(parseGameScript('look; right 2; interact').map((c) => c.type)).toEqual(['look', 'go', 'interact']);
   });
@@ -116,7 +126,10 @@ describe('GameConsoleSession full secret route', () => {
     });
     session.syncPlayerPosition(1650, 520);
     const result = session.exec('interact');
-    expect(result.events).toContainEqual({ type: 'scene_entered', sceneId: 'ridge' });
+    expect(result.events).toContainEqual({
+      type: 'scene_entered',
+      sceneId: 'ridge'
+    });
     expect(session.observe().mode).toBe('ridge');
   });
 
@@ -153,7 +166,10 @@ describe('GameConsoleSession full secret route', () => {
       total: 6
     });
 
-    const unequipped = createSession({ ownedItemIds: ['glasses'], equippedItemIds: [] });
+    const unequipped = createSession({
+      ownedItemIds: ['glasses'],
+      equippedItemIds: []
+    });
     expect(unequipped.exec('interact signpost').events).toContainEqual(
       expect.objectContaining({ stage: 'wear-glasses', found: 1 })
     );
@@ -178,7 +194,10 @@ describe('GameConsoleSession full secret route', () => {
   });
 
   it('builds the Circuit from hobby parts and solders it at the basement workbench', () => {
-    const session = createSession({ ownedItemIds: ['glasses'], equippedItemIds: ['glasses'] });
+    const session = createSession({
+      ownedItemIds: ['glasses'],
+      equippedItemIds: ['glasses']
+    });
     walkOverworldTo(session, 2400);
     session.exec('interact hobbies');
     expect(session.observe().mode).toBe('hobbies');
@@ -213,7 +232,10 @@ describe('GameConsoleSession full secret route', () => {
     session.exec('go right 19');
     expect(session.observe().nearby[0]?.id).toBe('workbench');
     const soldered = session.exec('interact workbench');
-    expect(soldered.events).toContainEqual({ type: 'item_collected', itemId: 'circuit' });
+    expect(soldered.events).toContainEqual({
+      type: 'item_collected',
+      itemId: 'circuit'
+    });
     expect(session.observe().ownedItemIds).toContain('circuit');
   });
 
@@ -221,28 +243,55 @@ describe('GameConsoleSession full secret route', () => {
     const base = { equippedItemIds: [], discoveredSecretIds: [] } as const;
     expect(getSketchDetailLevel({ ...base, ownedItemIds: [] })).toBe(0);
     expect(getSketchDetailLevel({ ...base, ownedItemIds: ['glasses'] })).toBe(1);
-    expect(getSketchDetailLevel({ ...base, ownedItemIds: ['glasses', 'copper-string', 'battery-cell'] })).toBe(2);
+    expect(
+      getSketchDetailLevel({
+        ...base,
+        ownedItemIds: ['glasses', 'copper-string', 'battery-cell']
+      })
+    ).toBe(2);
     expect(getSketchDetailLevel({ ...base, ownedItemIds: ['glasses', 'circuit'] })).toBe(3);
   });
 
   it('cycles corkboard notes and reports missing workbench parts', () => {
-    const session = createSession({ sceneId: 'basement', ownedItemIds: ['glasses'] });
+    const session = createSession({
+      sceneId: 'basement',
+      ownedItemIds: ['glasses']
+    });
     session.exec('go right 3');
     const first = session.exec('interact corkboard');
     const second = session.exec('interact corkboard');
-    expect(first.events).toContainEqual({ type: 'thought', id: 'basement_corkboard', variant: 0 });
-    expect(second.events).toContainEqual({ type: 'thought', id: 'basement_corkboard', variant: 1 });
+    expect(first.events).toContainEqual({
+      type: 'thought',
+      id: 'basement_corkboard',
+      variant: 0
+    });
+    expect(second.events).toContainEqual({
+      type: 'thought',
+      id: 'basement_corkboard',
+      variant: 1
+    });
 
     session.exec('go right 16');
     const bench = session.exec('interact workbench');
-    expect(bench.events).toContainEqual({ type: 'thought', id: 'workbench_missing_parts', variant: 0 });
+    expect(bench.events).toContainEqual({
+      type: 'thought',
+      id: 'workbench_missing_parts',
+      variant: 0
+    });
     expect(bench.message).toContain('copper-string');
   });
 
   it('puts pocketed glasses back on at the basement computer before it boots', () => {
-    const session = createSession({ sceneId: 'basement', ownedItemIds: ['glasses'], equippedItemIds: [] });
+    const session = createSession({
+      sceneId: 'basement',
+      ownedItemIds: ['glasses'],
+      equippedItemIds: []
+    });
     session.exec('go right 8');
-    expect(session.observe().nearby[0]).toMatchObject({ id: 'computer', prompt: 'Put glasses on' });
+    expect(session.observe().nearby[0]).toMatchObject({
+      id: 'computer',
+      prompt: 'Put glasses on'
+    });
 
     const squint = session.exec('interact computer');
     expect(squint.events).toEqual([
@@ -253,21 +302,33 @@ describe('GameConsoleSession full secret route', () => {
     expect(session.observe().mode).toBe('basement');
 
     const boot = session.exec('interact computer');
-    expect(boot.events).toContainEqual({ type: 'overlay_opened', overlayId: 'games' });
+    expect(boot.events).toContainEqual({
+      type: 'overlay_opened',
+      overlayId: 'games'
+    });
   });
 
   it('starts Chick Magnet from the street chick only while glasses are off', () => {
     const bare = createSession();
     walkOverworldTo(bare, OVERWORLD_CHICK.x);
     const started = bare.exec('interact chick');
-    expect(started.events).toContainEqual({ type: 'scene_entered', sceneId: 'stampedeSketch' });
+    expect(started.events).toContainEqual({
+      type: 'scene_entered',
+      sceneId: 'stampedeSketch'
+    });
     expect(bare.observe().mode).toBe('overworld');
 
-    const wearing = createSession({ ownedItemIds: ['glasses'], equippedItemIds: ['glasses'] });
+    const wearing = createSession({
+      ownedItemIds: ['glasses'],
+      equippedItemIds: ['glasses']
+    });
     wearing.syncPlayerPosition(OVERWORLD_CHICK.x, OVERWORLD_CHICK.y);
     expect(wearing.observe().nearby.some((thing) => thing.id === 'chick')).toBe(false);
 
-    const pocketed = createSession({ ownedItemIds: ['glasses'], equippedItemIds: [] });
+    const pocketed = createSession({
+      ownedItemIds: ['glasses'],
+      equippedItemIds: []
+    });
     pocketed.syncPlayerPosition(OVERWORLD_CHICK.x, OVERWORLD_CHICK.y);
     expect(pocketed.observe().nearby[0]?.id).toBe('chick');
 
@@ -380,7 +441,10 @@ describe('out of bounds: past the Hobbies left wall', () => {
   it('asks "point of no return?" before the toolbox, and backing out changes nothing', () => {
     const session = enterHobbies();
     session.exec('go left 200');
-    expect(session.observe().nearby[0]).toMatchObject({ id: 'toolbox', kind: 'pickup' });
+    expect(session.observe().nearby[0]).toMatchObject({
+      id: 'toolbox',
+      kind: 'pickup'
+    });
 
     const warning = session.exec('interact toolbox');
     expect(warning.message).toMatch(/DEBUGGING TOOLS/);
@@ -415,7 +479,10 @@ describe('out of bounds: past the Hobbies left wall', () => {
       { type: 'simulation_broken' }
     ]);
     expect(session.format()).toMatch(/inventory: .*debugging-tools/);
-    expect(getOverworldProgress(session.observe())).toMatchObject({ found: 0, total: 6 });
+    expect(getOverworldProgress(session.observe())).toMatchObject({
+      found: 0,
+      total: 6
+    });
     expect(session.observe().hobbies?.escape).toMatchObject({
       wayBack: 'blocked',
       barrierX: OUT_OF_BOUNDS_BARRIER_X,
@@ -423,7 +490,10 @@ describe('out of bounds: past the Hobbies left wall', () => {
     });
 
     // The floor is bare afterwards and gives nothing more.
-    expect(session.observe().nearby[0]).toMatchObject({ id: 'toolbox', kind: 'prop' });
+    expect(session.observe().nearby[0]).toMatchObject({
+      id: 'toolbox',
+      kind: 'prop'
+    });
     const again = session.exec('interact toolbox');
     expect(again.message).toMatch(/bare floor/i);
     expect(again.events).toEqual([]);
@@ -456,18 +526,14 @@ describe('out of bounds: past the Hobbies left wall', () => {
     expect(session.observe().hobbies?.void?.stage).toBe('beyond');
   });
 
-  it('keeps the escape when leaving and coming back in the same session', () => {
+  it('leaving the escape comes out onto the street in alarm, with the Hobbies room taped shut', () => {
     const session = escapedSession();
     expect(session.exec('leave').observation.mode).toBe('overworld');
+    expect(session.observe().overworld?.alarm).not.toBeNull();
     const back = session.exec('interact hobbies');
-    expect(back.message).toMatch(/still scribbled shut/);
-    const hobbies = session.observe().hobbies;
-    expect(hobbies?.playerX).toBe(OUT_OF_BOUNDS_ESCAPE_START_X);
-    expect(hobbies?.escape?.wayBack).toBe('blocked');
-    // The walk-in thoughts are long past; nothing fires on arrival.
-    expect(session.exec('go left 1').message).not.toMatch(/Danilo:/);
-    session.exec('go right 200');
-    expect(session.observe().hobbies?.playerX).toBe(OUT_OF_BOUNDS_ESCAPE_MAX_X);
+    expect(back.message).toMatch(/taped shut/i);
+    expect(back.events).toEqual([]);
+    expect(session.observe().mode).toBe('overworld');
   });
 
   it('can cheat in the Debugging Tools', () => {
@@ -559,8 +625,14 @@ describe('out of bounds breakout: through the ransacked basement (#162)', () => 
     expect(through.events).toEqual([{ type: 'scene_entered', sceneId: 'basement' }]);
     const basement = session.observe().basement;
     expect(session.observe().mode).toBe('basement');
-    expect(basement).toMatchObject({ playerX: BASEMENT_BREACH_ENTRY.x, facing: 'left' });
-    expect(basement?.escape).toMatchObject({ ransacked: true, wayBack: 'blocked' });
+    expect(basement).toMatchObject({
+      playerX: BASEMENT_BREACH_ENTRY.x,
+      facing: 'left'
+    });
+    expect(basement?.escape).toMatchObject({
+      ransacked: true,
+      wayBack: 'blocked'
+    });
     expect(session.format()).toMatch(/escape: ransacked, way back blocked/);
     expect(session.format()).toMatch(/WANTED/);
   });
@@ -573,7 +645,10 @@ describe('out of bounds breakout: through the ransacked basement (#162)', () => 
       while ((session.observe().basement?.playerX ?? 0) - target > 30) session.exec('go left 1');
       expect(session.observe().nearby.map((thing) => thing.id)).toContain(id);
       if (id === 'glasses') {
-        expect(session.exec('interact glasses').events).toContainEqual({ type: 'item_collected', itemId: 'glasses' });
+        expect(session.exec('interact glasses').events).toContainEqual({
+          type: 'item_collected',
+          itemId: 'glasses'
+        });
       }
     }
     expect(session.exec('interact corkboard').ok).toBe(true);
@@ -600,7 +675,7 @@ describe('out of bounds breakout: through the ransacked basement (#162)', () => 
     expect(up.events).toEqual([{ type: 'scene_returned', sceneId: 'overworld' }]);
     expect(session.observe().mode).toBe('overworld');
     expect(session.observe().overworld?.playerX).toBe(OUT_OF_BOUNDS_STREET_ARRIVAL.x);
-    expect(session.observe().nearby.map((thing) => thing.id)).toContain(OVERWORLD_BASEMENT_HOLE.id);
+    expect(session.observe().overworld?.alarm).not.toBeNull();
   });
 
   it('leave from the escape basement also comes up at the hatch', () => {
@@ -608,16 +683,6 @@ describe('out of bounds breakout: through the ransacked basement (#162)', () => 
     throughOpening(session);
     session.exec('leave');
     expect(session.observe().overworld?.playerX).toBe(OUT_OF_BOUNDS_STREET_ARRIVAL.x);
-  });
-
-  it('a later Hobbies visit starts back inside the barrier, not in the opening', () => {
-    const session = escapedSession();
-    throughOpening(session);
-    session.exec('leave');
-    walkOverworldTo(session, 2400);
-    session.exec('interact hobbies');
-    expect(session.observe().mode).toBe('hobbies');
-    expect(session.observe().hobbies?.playerX).toBe(OUT_OF_BOUNDS_ESCAPE_START_X);
   });
 
   it('leaves the basement as it always was outside the escape', () => {
@@ -629,5 +694,160 @@ describe('out of bounds breakout: through the ransacked basement (#162)', () => 
     session.exec('go left 50');
     const up = session.exec('interact exit');
     expect(up.message).toBe('You climb back to the street.');
+  });
+});
+
+describe('out of bounds street fight: the street in alarm (#163)', () => {
+  function onTheStreet(options: { screenSmashes?: number } = {}) {
+    const session = createSession({
+      sceneId: 'basement',
+      ownedItemIds: ['debugging-tools'],
+      ...options
+    });
+    const up = session.exec('leave');
+    return { session, up };
+  }
+
+  it('comes up into a manhunt: night, searchlights, every door taped shut', () => {
+    const { session, up } = onTheStreet();
+    expect(up.message).toMatch(/searchlights sweep the buildings/i);
+    expect(session.observe().overworld?.alarm).toMatchObject({
+      doors: 'taped shut'
+    });
+    expect(session.format()).toMatch(/alarm: doors taped shut/);
+  });
+
+  it('locks every street interaction: buildings, the hatch and the Hobbies room', () => {
+    const { session } = onTheStreet();
+    expect(session.observe().nearby).toEqual([]);
+    expect(session.exec('interact').message).toMatch(/taped shut/i);
+    expect(session.observe().mode).toBe('overworld');
+    for (const x of [PROFILE_X, 2400]) {
+      walkOverworldTo(session, x);
+      const tried = session.exec('interact');
+      expect(tried.events).toEqual([]);
+      expect(tried.message).toMatch(/taped shut/i);
+      expect(session.observe().mode).toBe('overworld');
+    }
+  });
+
+  it('the evil chick confronts Danilo, and the first swing is on it', () => {
+    const { session, up } = onTheStreet();
+    expect(up.message).toMatch(/chick that always ran from you/i);
+    expect(session.observe().overworld?.alarm?.fight).toMatchObject({
+      phase: 'chick',
+      enemiesLeft: 13
+    });
+    const first = session.exec('swing');
+    expect(first.message).toMatch(/BONK/);
+    expect(first.events).toEqual([{ type: 'screen_smashed', target: 'chick', smashes: 1 }]);
+    expect(session.observe().overworld?.alarm?.fight).toMatchObject({
+      phase: 'waves',
+      wave: 1,
+      leftInWave: 3
+    });
+  });
+
+  it('pigeons and raccoons come in waves; each smash adds a crack until the screen is badly cracked', () => {
+    const { session } = onTheStreet();
+    const waves: number[] = [];
+    let cleared = false;
+    for (let i = 0; i < STREET_FIGHT_TOTAL_SMASHES; i++) {
+      const result = session.exec('swing');
+      const fight = session.observe().overworld?.alarm?.fight;
+      if (fight?.phase === 'waves' && !waves.includes(fight.wave)) waves.push(fight.wave);
+      cleared ||= result.events.some((event) => event.type === 'street_fight_cleared');
+    }
+    expect(waves).toEqual([1, 2, 3]);
+    expect(cleared).toBe(true);
+    expect(session.observe().overworld?.alarm?.fight).toEqual({
+      phase: 'cleared',
+      wave: 0,
+      leftInWave: 0,
+      enemiesLeft: 0,
+      screenCracks: STREET_FIGHT_TOTAL_SMASHES
+    });
+    expect(session.format()).toMatch(/fight: cleared enemies left=0 screen damage=13 cracks/);
+    const after = session.exec('swing');
+    expect(after.events).toEqual([]);
+    expect(after.message).toMatch(/air/);
+  });
+
+  it('resumes the fight from the cracks already on the screen', () => {
+    const { session, up } = onTheStreet({ screenSmashes: 5 });
+    expect(up.message).toMatch(/raccoons coming/i);
+    expect(session.observe().overworld?.alarm?.fight).toMatchObject({
+      phase: 'waves',
+      wave: 2,
+      leftInWave: 3
+    });
+  });
+
+  it('has no hammer and no alarm outside the escape', () => {
+    const session = createSession();
+    expect(session.observe().overworld?.alarm).toBeNull();
+    expect(session.exec('swing').ok).toBe(false);
+    expect(parseGameCommand('smash')).toEqual({ type: 'swing' });
+  });
+});
+
+describe('streetFightProgress', () => {
+  it('walks chick, then waves of 3, 4 and 5', () => {
+    expect(streetFightProgress(0)).toMatchObject({
+      phase: 'chick',
+      enemiesLeft: 13
+    });
+    expect(streetFightProgress(1)).toMatchObject({
+      phase: 'waves',
+      wave: 1,
+      leftInWave: 3
+    });
+    expect(streetFightProgress(3)).toMatchObject({
+      phase: 'waves',
+      wave: 1,
+      leftInWave: 1
+    });
+    expect(streetFightProgress(4)).toMatchObject({
+      phase: 'waves',
+      wave: 2,
+      leftInWave: 4
+    });
+    expect(streetFightProgress(8)).toMatchObject({
+      phase: 'waves',
+      wave: 3,
+      leftInWave: 5
+    });
+    expect(streetFightProgress(12)).toMatchObject({
+      phase: 'waves',
+      wave: 3,
+      leftInWave: 1
+    });
+    expect(streetFightProgress(13)).toMatchObject({
+      phase: 'cleared',
+      screenCracks: 13
+    });
+    expect(streetFightProgress(99)).toMatchObject({
+      phase: 'cleared',
+      screenCracks: 13
+    });
+  });
+});
+
+describe('street fight waves: pigeons in the air, raccoons on the ground', () => {
+  it('mixes raccoons into the later waves, ground first so a resumed wave keeps them', () => {
+    expect(streetFightWaveEnemies(1, 3)).toEqual(['pigeon', 'pigeon', 'pigeon']);
+    expect(streetFightWaveEnemies(2, 4)).toEqual(['raccoon', 'raccoon', 'pigeon', 'pigeon']);
+    expect(streetFightWaveEnemies(3, 2)).toEqual(['raccoon', 'raccoon']);
+    expect(streetFightWaveEnemies(9, 2)).toEqual([]);
+  });
+
+  it('lets the live scene say what the hammer hit', () => {
+    const session = createSession({ sceneId: 'basement', ownedItemIds: ['debugging-tools'], screenSmashes: 4 });
+    session.exec('leave');
+    const hit = session.exec('swing raccoon');
+    expect(hit.message).toMatch(/WHACK: a raccoon/);
+    expect(hit.events).toEqual([{ type: 'screen_smashed', target: 'raccoon', smashes: 5 }]);
+    expect(parseGameCommand('smash pigeon')).toEqual({ type: 'swing', target: 'pigeon' });
+    expect(parseGameCommand('swing cat')).toEqual({ type: 'unknown', raw: 'swing cat' });
   });
 });

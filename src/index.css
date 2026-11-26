@@ -18,6 +18,26 @@ body {
   min-height: 100dvh;
 }
 
+/*
+ * Screen damage (Out of Bounds): the newest crack runs out from the hit.
+ * Reduced motion: it is simply there, whole.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .screen-crack-new path {
+    stroke-dasharray: 1;
+    animation: screen-crack-run 260ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
+  }
+}
+
+@keyframes screen-crack-run {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
 /* Ridge conversation staging: letterbox bars and the speaker-side box. */
 @theme {
   --animate-ridge-letterbox-top: ridge-letterbox-top 280ms ease-out both;

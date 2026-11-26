@@ -34,6 +34,7 @@ const SIMPLE_COMMANDS: Record<string, GameCommand> = {
   next: { type: 'skip' }
 };
 
+const SWING_ALIASES = new Set(['swing', 'smash', 'hammer']);
 const GO_ALIASES = new Set(['go', 'walk', 'move']);
 /** Ridge mini-game verbs the Ridge console parses itself. */
 const RIDGE_VERBS = new Set(['build', 'duel', 'dodge', 'gig', 'strum']);
@@ -55,6 +56,9 @@ export function getGameHelpText(): string {
     'Hobbies room:',
     '  perform | play      clear the open mini-game goal (music/fitness/dancing award Circuit parts)',
     '  confirm | decline   answer the point-of-no-return warning at the toolbox',
+    '',
+    'Out of Bounds street (simulation broken):',
+    '  swing [pigeon|raccoon]   swing the Debugging Tools hammer: the evil chick, then the waves',
     '',
     'Ridge conversation:',
     '  advance | choose <id|index>',
@@ -105,6 +109,7 @@ export function parseGameCommand(raw: string): GameCommand {
   const simple = SIMPLE_COMMANDS[head];
   if (simple) return simple;
 
+  if (SWING_ALIASES.has(head)) return parseSwingCommand(parts, trimmed);
   if (head === 'choose') return parseChoiceCommand('choose', parts, trimmed);
   if (head === 'draft') return parseChoiceCommand('draft', parts, trimmed);
   if (head === 'equip' || head === 'unequip') return parseEquipCommand(head, parts, trimmed);
@@ -134,6 +139,12 @@ function parseChoiceCommand(kind: 'choose' | 'draft', parts: string[], trimmed: 
   const choice = parts.slice(1).join(' ');
   if (!choice) return { type: 'unknown', raw: trimmed };
   return kind === 'choose' ? { type: 'choose', choiceIdOrIndex: choice } : { type: 'draft', choiceIdOrIndex: choice };
+}
+
+function parseSwingCommand(parts: string[], trimmed: string): GameCommand {
+  const target = parts[1];
+  if (target === undefined) return { type: 'swing' };
+  return target === 'pigeon' || target === 'raccoon' ? { type: 'swing', target } : { type: 'unknown', raw: trimmed };
 }
 
 function parseEquipCommand(head: 'equip' | 'unequip', parts: string[], trimmed: string): GameCommand {
