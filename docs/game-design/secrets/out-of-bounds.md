@@ -334,6 +334,28 @@ vents), _Doom_ for the second (pace and swagger only: stuns, no gore).
    the browser needs for fullscreen and pointer lock). Danilo is unplugged
    from the VR rig, a pod in an alien **lab**: the portfolio was the
    simulation running inside it. ~30 s.
+
+   **The lab** (Danilo, 2026-11-26; built in #171). The aliens research the
+   human mind here, and it should feel like it: a little horror, never gore
+   or jump-scare flashes.
+   - **Other people are still plugged in**: asleep in pods of glowing fluid,
+     reading helmets on their heads, wires up into the pod caps.
+   - **Danilo's pod is smashed open from the inside**: jagged glass teeth,
+     shards across the floor, a puddle, the torn-out plug. It mirrors the
+     hammer smashing the page.
+   - **Ties to the old world**: a monitor shows the drawn street with the
+     screen destroyer's cracks and black hole (the aliens were watching), and
+     a sketchbook page lies on the floor (a stick figure swinging a hammer).
+   - **The research**: an operating table with straps, a pronged
+     mind-reading crown and a surgical lamp; shelves of brains in jars (one
+     jar holds an eye); a second monitor reads a sleeping brain.
+   - **Mood**: fog in the far corners, a strip light that sags now and then,
+     a slow red breath on the locked door. All motion stops under reduced
+     motion.
+   - **Toys**: a rubber ball, a crumpled page and a squishy brain can be
+     picked up and thrown (click or `E`; a Grab / Throw button on touch).
+     They bounce off walls and land on the table and crates.
+
 2. **Escape the lab**, ~1–2 min, no weapon. Crawl through **vents** and keep
    to the **shadows**: in the light strips patrolling aliens see you, in the
    dark they don't. You can't fight back yet. Getting caught resets to a
