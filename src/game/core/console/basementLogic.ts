@@ -8,9 +8,15 @@ import {
   type BasementSpot
 } from './content/basementSpots';
 import { CIRCUIT_PART_IDS, countCircuitParts } from './content/circuitParts';
+import {
+  BASEMENT_BREACH_SHUT_THOUGHT,
+  OUT_OF_BOUNDS_BREAKOUT_TEXT,
+  OUT_OF_BOUNDS_STREET_ARRIVAL
+} from './content/outOfBoundsBreakout';
+import { isSimulationBroken } from './content/outOfBoundsVoid';
 import { clamp, nearbyMissMessage, pickNearby } from './nearby';
 import { getGamesOverlay } from './overlayCatalog';
-import type { GameItemId, GameSessionEvent, GameWorldState, NearbyThing } from './types';
+import type { BasementObservation, GameItemId, GameSessionEvent, GameWorldState, NearbyThing } from './types';
 
 export interface BasementInteractOutcome {
   message: string;
@@ -68,14 +74,35 @@ export function listBasementNearby(state: GameWorldState): NearbyThing[] {
   return things.sort((a, b) => a.distance - b.distance);
 }
 
+export function observeBasement(state: GameWorldState): BasementObservation {
+  return {
+    ...state.basement,
+    escape: isSimulationBroken(state.ownedItemIds)
+      ? {
+          ransacked: true,
+          wayBack: 'blocked',
+          description: `${OUT_OF_BOUNDS_BREAKOUT_TEXT.ransacked} ${OUT_OF_BOUNDS_BREAKOUT_TEXT.breachShut}`
+        }
+      : null
+  };
+}
+
 export function moveBasement(state: GameWorldState, direction: 'left' | 'right', steps: number): string {
+  const from = state.basement.playerX;
   const delta = steps * BASEMENT_STEP_PX * (direction === 'right' ? 1 : -1);
-  const next = clamp(state.basement.playerX + delta, BASEMENT_WALK_BOUNDS.minX, BASEMENT_WALK_BOUNDS.maxX);
+  const next = clamp(from + delta, BASEMENT_WALK_BOUNDS.minX, BASEMENT_WALK_BOUNDS.maxX);
   state.basement.playerX = next;
   state.basement.facing = direction;
-  return direction === 'right'
-    ? `You shuffle right to x=${Math.round(next)}.`
-    : `You shuffle left to x=${Math.round(next)}.`;
+  const walked =
+    direction === 'right'
+      ? `You shuffle right to x=${Math.round(next)}.`
+      : `You shuffle left to x=${Math.round(next)}.`;
+  // During the escape the right wall is the breach you came through, scribbled shut.
+  const intoBreach = isSimulationBroken(state.ownedItemIds) && direction === 'right' && from + delta > next;
+  if (!intoBreach) return walked;
+  const thought = state.basement.breachThoughtShown ? '' : ` Danilo: "${BASEMENT_BREACH_SHUT_THOUGHT}"`;
+  state.basement.breachThoughtShown = true;
+  return `${walked} ${OUT_OF_BOUNDS_BREAKOUT_TEXT.breachShut}${thought}`;
 }
 
 export function syncBasementPosition(state: GameWorldState, x: number): void {
@@ -91,7 +118,7 @@ export function interactBasement(state: GameWorldState, target: string | undefin
 
   switch (picked.id as BasementSpot['id']) {
     case 'exit':
-      return returnToOverworld(state, 'You climb back to the street.');
+      return leaveBasement(state, 'You climb back to the street.');
     case 'glasses':
       return collectGlasses(state);
     case 'corkboard':
@@ -190,6 +217,17 @@ function collectGlasses(state: GameWorldState): BasementInteractOutcome {
       { type: 'item_equipped', itemId }
     ]
   };
+}
+
+/**
+ * Up the ladder (or `leave`). During the Out of Bounds escape the player always
+ * comes up through the hatch, even if they arrived through the breach.
+ */
+export function leaveBasement(state: GameWorldState, message: string): BasementInteractOutcome {
+  if (!isSimulationBroken(state.ownedItemIds)) return returnToOverworld(state, message);
+  state.overworld.playerX = OUT_OF_BOUNDS_STREET_ARRIVAL.x;
+  state.overworld.facing = 'right';
+  return returnToOverworld(state, OUT_OF_BOUNDS_BREAKOUT_TEXT.ladder);
 }
 
 export function returnToOverworld(state: GameWorldState, message: string): BasementInteractOutcome {

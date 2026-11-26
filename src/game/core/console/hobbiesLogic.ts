@@ -24,6 +24,7 @@ import {
   OUT_OF_BOUNDS_BARRIER_X,
   OUT_OF_BOUNDS_ESCAPE_MAX_X,
   OUT_OF_BOUNDS_ESCAPE_MIN_X,
+  OUT_OF_BOUNDS_ESCAPE_START_X,
   OUT_OF_BOUNDS_ESCAPE_TEXT,
   OUT_OF_BOUNDS_OPENING_X,
   OUT_OF_BOUNDS_TOOLBOX_TEXT,
@@ -34,6 +35,12 @@ import {
   outOfBoundsStageAt,
   outOfBoundsThoughtsReached
 } from './content/outOfBoundsVoid';
+import {
+  BASEMENT_BREACH_ARRIVAL_THOUGHT,
+  BASEMENT_BREACH_ENTRY,
+  OUT_OF_BOUNDS_BREAKOUT_TEXT,
+  reachesOutOfBoundsOpening
+} from './content/outOfBoundsBreakout';
 import { nearbyMissMessage, pickNearby } from './nearby';
 import { getHobbyOverlay } from './overlayCatalog';
 
@@ -122,7 +129,7 @@ export function listHobbiesNearby(state: GameWorldState): NearbyThing[] {
   return things.sort((a, b) => a.distance - b.distance);
 }
 
-export function moveHobbies(state: GameWorldState, direction: 'left' | 'right', steps: number): string {
+export function moveHobbies(state: GameWorldState, direction: 'left' | 'right', steps: number): HobbiesOutcome {
   const from = state.hobbies.playerX;
   const delta = steps * HOBBIES_STEP_PX * (direction === 'right' ? 1 : -1);
   const escaped = isSimulationBroken(state.ownedItemIds);
@@ -151,7 +158,33 @@ export function moveHobbies(state: GameWorldState, direction: 'left' | 'right', 
   }
   const said = thoughts.map((line) => ` Danilo: "${line}"`).join('');
   const blocked = hitBarrier ? ` ${OUT_OF_BOUNDS_ESCAPE_TEXT.barrier}` : '';
-  return `${where} to x=${Math.round(next)}.${blocked}${said}`;
+  const walked = `${where} to x=${Math.round(next)}.${blocked}${said}`;
+  if (escaped && direction === 'left' && reachesOutOfBoundsOpening(next)) {
+    return breakIntoBasement(state, walked);
+  }
+  return { message: walked, events: [] };
+}
+
+/**
+ * Out of Bounds, Act 3 (#162): the torn opening leads through the right wall
+ * of the real Basement. A later Hobbies visit starts back inside the barrier.
+ */
+function breakIntoBasement(state: GameWorldState, walked: string): HobbiesOutcome {
+  state.hobbies.playerX = OUT_OF_BOUNDS_ESCAPE_START_X;
+  state.mode = 'basement';
+  state.sceneId = 'basement';
+  state.basement.playerX = BASEMENT_BREACH_ENTRY.x;
+  state.basement.facing = 'left';
+  state.basement.breachThoughtShown = false;
+  return {
+    message: [
+      walked,
+      OUT_OF_BOUNDS_BREAKOUT_TEXT.throughOpening,
+      OUT_OF_BOUNDS_BREAKOUT_TEXT.ransacked,
+      `Danilo: "${BASEMENT_BREACH_ARRIVAL_THOUGHT}"`
+    ].join(' '),
+    events: [{ type: 'scene_entered', sceneId: 'basement' }]
+  };
 }
 
 export function interactHobbies(state: GameWorldState, target: string | undefined): HobbiesOutcome {

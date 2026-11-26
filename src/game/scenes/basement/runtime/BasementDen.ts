@@ -2,6 +2,11 @@
  * BasementDen — draws the Developer Basement as a cozy, slightly messy dev den.
  * Dark and scribbly until the glasses are picked up; then the bulb comes on
  * and the line work firms up. Positions come from core basement spots.
+ *
+ * Ransacked (Out of Bounds escape, #162): the same den knocked about. The desk
+ * is tipped up, the corkboard hangs off one pin with its notes on the floor,
+ * the shelf leans over. Stations stay where they are. BasementBreakout adds
+ * the rest of the damage.
  */
 import * as Phaser from 'phaser';
 import { getBasementSpot } from '@/game/core/console/content/basementSpots';
@@ -19,6 +24,30 @@ const BULB_X = 520;
 const BULB_Y = 150;
 const CODE_ROWS = 5;
 const MOTE_COUNT = 10;
+
+/** Ransacked: [pivotX, pivotY, angle] each knocked-over drawing turns about. */
+const DESK_TIP = [300, FLOOR_Y, -0.3] as const;
+const CORKBOARD_SAG = [174, 270, 0.5] as const;
+const SHELF_LEAN = [879, FLOOR_Y, -0.42] as const;
+/** Ransacked: where the torn-down notes landed, [x, y, rotation]. */
+const FALLEN_NOTES: readonly (readonly [number, number, number])[] = [
+  [196, FLOOR_Y + 14, 0.5],
+  [244, FLOOR_Y + 30, -0.3],
+  [282, FLOOR_Y + 12, 1.2],
+  [170, FLOOR_Y + 40, -0.9],
+  [312, FLOOR_Y + 38, 0.2]
+];
+
+export interface BasementDenOptions {
+  /** Out of Bounds escape: the den has been turned over. */
+  ransacked?: boolean;
+}
+
+/** Turn everything drawn into `g` from here on about a pivot (the drawing is in world coords). */
+function knockOver(g: Phaser.GameObjects.Graphics, [x, y, angle]: readonly [number, number, number]): void {
+  g.setPosition(x, y).setRotation(angle);
+  g.translateCanvas(-x, -y);
+}
 
 export interface BasementDenState {
   lit: boolean;
@@ -41,9 +70,11 @@ export class BasementDen {
   private lastTick = -1;
   private lastLit: boolean | null = null;
   private lastPartsMask = -1;
+  private readonly ransacked: boolean;
 
-  constructor(scene: Phaser.Scene) {
+  constructor(scene: Phaser.Scene, options: BasementDenOptions = {}) {
     this.scene = scene;
+    this.ransacked = options.ransacked ?? false;
     scene.cameras.main.setBackgroundColor('#151515');
     this.drawShell();
     this.lightCone = scene.add.graphics().setDepth(1);
@@ -51,7 +82,9 @@ export class BasementDen {
     this.drawCorkboard();
     this.drawDesk();
     this.screen = scene.add.graphics().setDepth(4);
-    this.steam = scene.add.graphics().setDepth(4);
+    if (this.ransacked) this.screen.setPosition(DESK_TIP[0], DESK_TIP[1]).setRotation(DESK_TIP[2]);
+    // The mug went over with the desk: no steam.
+    this.steam = scene.add.graphics().setDepth(4).setVisible(!this.ransacked);
     this.bulb = scene.add.graphics().setDepth(6);
     this.glassesStand = this.drawGlassesStand();
     this.glassesLabel = this.addLabel(
@@ -211,6 +244,7 @@ export class BasementDen {
     const { x } = getBasementSpot('corkboard');
     const top = 270;
     const g = this.dimmableGraphics(2);
+    if (this.ransacked) knockOver(g, CORKBOARD_SAG);
     g.fillStyle(0x2a2a2a, 1);
     g.fillRect(x - 64, top, 128, 92);
     g.lineStyle(3, CHALK, 0.85);
@@ -224,15 +258,16 @@ export class BasementDen {
       { dx: -20, dy: 62, r: 0.1 },
       { dx: 26, dy: 64, r: -0.1 }
     ];
-    for (const card of cards) {
+    cards.forEach((card, index) => {
+      const fallen = this.ransacked ? FALLEN_NOTES[index] : undefined;
       const rect = this.scene.add
-        .rectangle(x + card.dx, top + card.dy, 30, 24, CHALK, 0.82)
-        .setRotation(card.r)
-        .setDepth(3);
+        .rectangle(fallen?.[0] ?? x + card.dx, fallen?.[1] ?? top + card.dy, 30, 24, CHALK, 0.82)
+        .setRotation(fallen?.[2] ?? card.r)
+        .setDepth(fallen ? 6 : 3);
       this.noteCards.push(rect);
       g.fillStyle(PHOSPHOR, 0.9);
       g.fillCircle(x + card.dx, top + card.dy - 10, 2.5);
-    }
+    });
     g.lineStyle(1, PHOSPHOR, 0.5);
     g.lineBetween(x - 38, top + 24, x + 26, top + 64);
     this.addLabel(x, top - 14, getMessages().scenes.basement.corkboard);
@@ -241,6 +276,7 @@ export class BasementDen {
   private drawDesk(): void {
     const { x, y } = getBasementSpot('computer');
     const g = this.dimmableGraphics(3);
+    if (this.ransacked) knockOver(g, DESK_TIP);
     // Desk top + legs.
     g.fillStyle(0x101010, 1);
     g.fillRect(x - 110, y + 46, 220, 14);
@@ -285,6 +321,8 @@ export class BasementDen {
     const { x, y } = getBasementSpot('computer');
     const g = this.screen;
     g.clear();
+    // Tipped with the desk (position/rotation set once in the constructor).
+    if (this.ransacked) g.translateCanvas(-DESK_TIP[0], -DESK_TIP[1]);
     g.fillStyle(PHOSPHOR, lit ? 0.12 : 0.05);
     g.fillRect(x - 49, y - 39, 98, 62);
     g.lineStyle(2, PHOSPHOR, lit ? 0.7 : 0.3);
@@ -433,6 +471,7 @@ export class BasementDen {
   private drawShelf(): void {
     const { x } = getBasementSpot('shelf');
     const g = this.dimmableGraphics(2);
+    if (this.ransacked) knockOver(g, SHELF_LEAN);
     const left = x - 46;
     g.lineStyle(3, CHALK, 0.8);
     g.strokeRect(left, 230, 92, FLOOR_Y - 230);

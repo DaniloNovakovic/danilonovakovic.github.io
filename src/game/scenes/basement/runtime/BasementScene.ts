@@ -14,12 +14,20 @@ import {
 } from '@/game/sharedSceneRuntime/config';
 import { bridgeStore, isItemEquipped, isItemOwned, type OpenOverlayOptions } from '@/game/bridge/store';
 import {
+  BASEMENT_BREACH_ARRIVAL_THOUGHT,
+  BASEMENT_BREACH_SHUT_THOUGHT,
   CIRCUIT_PART_IDS,
   GameConsoleSession,
+  OUT_OF_BOUNDS_STREET_ARRIVAL,
   countCircuitParts,
+  awayFromBasementBreach,
+  isBasementBreachArrival,
+  isSimulationBroken,
   type GameCommandResult,
   type GameThoughtId
 } from '@/game/core/console';
+import { PHASER_SCENE_KEYS } from '@/game/scenes/sceneIds';
+import { placeNextSceneStart } from '@/game/sharedSceneRuntime/sceneResumePolicy';
 import { loadRidgeRouteDialogueCatalog } from '@/game/scenes/ridge/content/routeCatalog';
 import { applyGameConsoleEvents } from '@/game/scenes/shared/applyGameConsoleEvents';
 import { createUiText } from '@/game/sharedSceneRuntime/text/createUiText';
@@ -30,10 +38,16 @@ import {
   type SideViewPlayerRuntime
 } from '@/game/sharedSceneRuntime/player/SideViewPlayerRuntime';
 import { DistanceHazeVision, NEARSIGHTED_HAZE } from '@/game/sharedSceneRuntime/vision/DistanceHazeVision';
+import { BasementBreakout } from './BasementBreakout';
 import { BasementDen } from './BasementDen';
 
 const THOUGHT_VISIBLE_MS = 3200;
 const STATUS_VISIBLE_MS = 4500;
+/** Out of Bounds breach arrival: the view comes up out of the opening's ink. */
+const BREACH_FADE_IN_MS = 360;
+const BREACH_THOUGHT_DELAY_MS = 700;
+/** The player's centre this close to the right edge is pressing into the shut breach. */
+const BREACH_PRESS_X = GAME_DESIGN_WIDTH - 32;
 
 export class BasementScene extends Phaser.Scene {
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -44,6 +58,9 @@ export class BasementScene extends Phaser.Scene {
   private playerRuntime?: SideViewPlayerRuntime;
   private session?: GameConsoleSession;
   private den?: BasementDen;
+  /** Out of Bounds escape (#162): the simulation is broken, so the den is ransacked. */
+  private ransacked = false;
+  private breachThoughtShown = false;
   /** Same near-sighted haze as the street, while the glasses are in a pocket. */
   private pocketedVision?: DistanceHazeVision;
   private motion = true;
@@ -69,7 +86,8 @@ export class BasementScene extends Phaser.Scene {
   }
 
   getResumeCapturePosition(): { x: number; y: number } | null {
-    return this.playerRuntime?.captureResume() ?? null;
+    const position = this.playerRuntime?.captureResume();
+    return position ? awayFromBasementBreach(position) : null;
   }
 
   setPaused(paused: boolean) {
@@ -90,7 +108,9 @@ export class BasementScene extends Phaser.Scene {
 
     this.physics.world.setBounds(0, 0, GAME_DESIGN_WIDTH, GAME_DESIGN_HEIGHT);
     this.motion = !prefersReducedMotion();
-    this.den = new BasementDen(this);
+    this.ransacked = isSimulationBroken(bridge.inventory.ownedItemIds);
+    this.breachThoughtShown = false;
+    this.den = new BasementDen(this, { ransacked: this.ransacked });
 
     this.playerRuntime = createSideViewPlayerRuntime({
       scene: this,
@@ -176,9 +196,36 @@ export class BasementScene extends Phaser.Scene {
       .setDepth(100);
     this.fadeStatusSoon();
 
+    if (this.ransacked) this.startEscape();
+
     this.updateDen(0);
     this.setPaused(this.isPaused);
     this.playerRuntime.syncAppearance();
+  }
+
+  /**
+   * Out of Bounds escape (#162). However the player leaves (ladder, Esc, the
+   * header Back button) they come up through the hatch onto the street. If
+   * they just came through the breach, it scribbles shut behind them.
+   */
+  private startEscape(): void {
+    placeNextSceneStart(PHASER_SCENE_KEYS.overworld, OUT_OF_BOUNDS_STREET_ARRIVAL);
+    const breakout = new BasementBreakout(this);
+    if (!isBasementBreachArrival(this.player.x)) {
+      breakout.showSealed();
+      return;
+    }
+    this.player.setFlipX(true);
+    breakout.sealBehind(this.motion);
+    if (this.motion) this.cameras.main.fadeIn(BREACH_FADE_IN_MS, 26, 26, 26);
+    this.time.delayedCall(BREACH_THOUGHT_DELAY_MS, () => this.playerThought.show(BASEMENT_BREACH_ARRIVAL_THOUGHT));
+  }
+
+  /** Pressing into the shut breach: Danilo notices, once a visit. */
+  private updateBreach(): void {
+    if (!this.ransacked || this.breachThoughtShown || this.player.x < BREACH_PRESS_X) return;
+    this.breachThoughtShown = true;
+    this.playerThought.show(BASEMENT_BREACH_SHUT_THOUGHT);
   }
 
   update(time: number) {
@@ -200,6 +247,7 @@ export class BasementScene extends Phaser.Scene {
     }
 
     this.playerThought.update();
+    this.updateBreach();
 
     if (step.interactRequested) {
       this.applySessionResult(this.session.exec('interact'));

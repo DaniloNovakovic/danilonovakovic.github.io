@@ -32,3 +32,13 @@ export function prepareSceneStart(sceneKey: string): void {
 export function getSceneStartResume(sceneKey: string): ResumeSnapshot | undefined {
   return peekResumePosition(sceneKey);
 }
+
+/**
+ * Chooses where a scene's next start places the player, replacing its last
+ * exit position. For one-way doors into a scene (the Out of Bounds breach into
+ * the Basement, the hatch arrival on the street). Call it right before the
+ * transition: the scene being left records its own exit afterwards, as usual.
+ */
+export function placeNextSceneStart(sceneKey: string, position: ResumeSnapshot): void {
+  rememberResumePosition(sceneKey, position);
+}

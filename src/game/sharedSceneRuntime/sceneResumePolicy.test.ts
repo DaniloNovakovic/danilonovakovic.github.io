@@ -1,6 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { PHASER_SCENE_KEYS } from '@/game/scenes/sceneIds';
-import { getSceneStartResume, prepareSceneStart, recordSceneExitResume } from './sceneResumePolicy';
+import {
+  getSceneStartResume,
+  placeNextSceneStart,
+  prepareSceneStart,
+  recordSceneExitResume
+} from './sceneResumePolicy';
 import { forgetResumePosition, rememberResumePosition } from './sceneResumeStore';
 
 const TEST_SCENE_KEY = 'unknown-test-scene';
@@ -63,5 +68,16 @@ describe('sceneResumePolicy', () => {
     expect(recordSceneExitResume(PHASER_SCENE_KEYS.hobbies, position)).toBeNull();
 
     expect(getSceneStartResume(PHASER_SCENE_KEYS.hobbies)).toEqual({ x: 7, y: 9 });
+  });
+
+  it('places the next start over the last exit, and a later exit replaces it again', () => {
+    recordSceneExitResume(PHASER_SCENE_KEYS.basement, { x: 95, y: 450 });
+
+    placeNextSceneStart(PHASER_SCENE_KEYS.basement, { x: 950, y: 450 });
+    prepareSceneStart(PHASER_SCENE_KEYS.basement);
+    expect(getSceneStartResume(PHASER_SCENE_KEYS.basement)).toEqual({ x: 950, y: 450 });
+
+    recordSceneExitResume(PHASER_SCENE_KEYS.basement, { x: 100, y: 450 });
+    expect(getSceneStartResume(PHASER_SCENE_KEYS.basement)).toEqual({ x: 100, y: 450 });
   });
 });

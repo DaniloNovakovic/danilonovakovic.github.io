@@ -13,9 +13,10 @@ import {
   OUT_OF_BOUNDS_ESCAPE_MAX_X,
   OUT_OF_BOUNDS_ESCAPE_MIN_X,
   OUT_OF_BOUNDS_ESCAPE_START_X,
-  OUT_OF_BOUNDS_OPENING_X,
-  OUT_OF_BOUNDS_TOOLBOX_X
+  OUT_OF_BOUNDS_OPENING_X
 } from './content/outOfBoundsVoid';
+import { BASEMENT_BREACH_ENTRY, OUT_OF_BOUNDS_STREET_ARRIVAL } from './content/outOfBoundsBreakout';
+import { BASEMENT_WALK_BOUNDS, getBasementSpot } from './content/basementSpots';
 import { getOverworldProgress, getSketchDetailLevel } from './overworldLogic';
 import { GameConsoleSession } from './session';
 
@@ -445,10 +446,13 @@ describe('out of bounds: past the Hobbies left wall', () => {
 
   it('lets the page continue left past where the toolbox lay, to the opening', () => {
     const session = escapedSession();
-    const walk = session.exec('go left 200');
+    // Every step short of the opening itself (stepping into it leads on, see #162).
+    const startX = session.observe().hobbies?.playerX ?? 0;
+    const walk = session.exec(`go left ${Math.ceil((startX - OUT_OF_BOUNDS_OPENING_X) / 40) - 1}`);
     expect(walk.message).toContain('Danilo: "The page keeps going. Left, then."');
-    expect(session.observe().hobbies?.playerX).toBe(OUT_OF_BOUNDS_ESCAPE_MIN_X);
-    expect(OUT_OF_BOUNDS_ESCAPE_MIN_X).toBeLessThan(OUT_OF_BOUNDS_TOOLBOX_X);
+    expect(session.observe().mode).toBe('hobbies');
+    expect(session.observe().hobbies?.playerX).toBeGreaterThan(OUT_OF_BOUNDS_OPENING_X);
+    expect(OUT_OF_BOUNDS_ESCAPE_MIN_X).toBeLessThan(OUT_OF_BOUNDS_OPENING_X);
     expect(session.observe().hobbies?.void?.stage).toBe('beyond');
   });
 
@@ -529,5 +533,101 @@ describe('out of bounds: past the Hobbies left wall', () => {
     session.exec('leave');
     session.exec('interact hobbies');
     expect(thoughtsWhileWalking(session, 'left', 200)).toEqual(THOUGHTS);
+  });
+});
+
+describe('out of bounds breakout: through the ransacked basement (#162)', () => {
+  function escapedSession() {
+    const session = createSession();
+    walkOverworldTo(session, 2400);
+    session.exec('interact hobbies');
+    session.exec('go left 200');
+    session.exec('interact toolbox');
+    session.exec('confirm');
+    return session;
+  }
+
+  function throughOpening(session: GameConsoleSession) {
+    return session.exec('go left 200');
+  }
+
+  it('walks through the torn opening into the basement at its right wall', () => {
+    const session = escapedSession();
+    const through = throughOpening(session);
+    expect(through.message).toMatch(/right wall of your own basement/i);
+    expect(through.message).toContain('Danilo: "...my basement? Someone’s been through here."');
+    expect(through.events).toEqual([{ type: 'scene_entered', sceneId: 'basement' }]);
+    const basement = session.observe().basement;
+    expect(session.observe().mode).toBe('basement');
+    expect(basement).toMatchObject({ playerX: BASEMENT_BREACH_ENTRY.x, facing: 'left' });
+    expect(basement?.escape).toMatchObject({ ransacked: true, wayBack: 'blocked' });
+    expect(session.format()).toMatch(/escape: ransacked, way back blocked/);
+    expect(session.format()).toMatch(/WANTED/);
+  });
+
+  it('keeps every station where it was, reachable as before', () => {
+    const session = escapedSession();
+    throughOpening(session);
+    for (const id of ['shelf', 'workbench', 'glasses', 'computer', 'corkboard'] as const) {
+      const target = getBasementSpot(id).x;
+      while ((session.observe().basement?.playerX ?? 0) - target > 30) session.exec('go left 1');
+      expect(session.observe().nearby.map((thing) => thing.id)).toContain(id);
+      if (id === 'glasses') {
+        expect(session.exec('interact glasses').events).toContainEqual({ type: 'item_collected', itemId: 'glasses' });
+      }
+    }
+    expect(session.exec('interact corkboard').ok).toBe(true);
+  });
+
+  it('keeps the breach shut: no way back into the void', () => {
+    const session = escapedSession();
+    throughOpening(session);
+    const first = session.exec('go right 5');
+    expect(first.message).toMatch(/scribbled shut/i);
+    expect(first.message).toContain('Danilo: "Shut behind me too. Up the ladder, then."');
+    expect(session.observe().basement?.playerX).toBe(BASEMENT_WALK_BOUNDS.maxX);
+    expect(session.observe().mode).toBe('basement');
+    expect(session.exec('go right 5').message).not.toMatch(/Danilo:/);
+  });
+
+  it('climbs the exit ladder out onto the street at the hatch', () => {
+    const session = escapedSession();
+    throughOpening(session);
+    session.exec('go left 30');
+    expect(session.observe().nearby[0]?.id).toBe('exit');
+    const up = session.exec('interact exit');
+    expect(up.message).toMatch(/through the hatch, onto the street/i);
+    expect(up.events).toEqual([{ type: 'scene_returned', sceneId: 'overworld' }]);
+    expect(session.observe().mode).toBe('overworld');
+    expect(session.observe().overworld?.playerX).toBe(OUT_OF_BOUNDS_STREET_ARRIVAL.x);
+    expect(session.observe().nearby.map((thing) => thing.id)).toContain(OVERWORLD_BASEMENT_HOLE.id);
+  });
+
+  it('leave from the escape basement also comes up at the hatch', () => {
+    const session = escapedSession();
+    throughOpening(session);
+    session.exec('leave');
+    expect(session.observe().overworld?.playerX).toBe(OUT_OF_BOUNDS_STREET_ARRIVAL.x);
+  });
+
+  it('a later Hobbies visit starts back inside the barrier, not in the opening', () => {
+    const session = escapedSession();
+    throughOpening(session);
+    session.exec('leave');
+    walkOverworldTo(session, 2400);
+    session.exec('interact hobbies');
+    expect(session.observe().mode).toBe('hobbies');
+    expect(session.observe().hobbies?.playerX).toBe(OUT_OF_BOUNDS_ESCAPE_START_X);
+  });
+
+  it('leaves the basement as it always was outside the escape', () => {
+    const session = createSession({ sceneId: 'basement' });
+    expect(session.observe().basement?.escape).toBeNull();
+    expect(session.format()).not.toMatch(/ransacked/);
+    session.exec('go right 50');
+    expect(session.exec('go right 1').message).not.toMatch(/scribbled shut/);
+    session.exec('go left 50');
+    const up = session.exec('interact exit');
+    expect(up.message).toBe('You climb back to the street.');
   });
 });

@@ -53,13 +53,15 @@ Current shipped behavior for interactive mode. Concept and future-design notes l
 - Press `H` or `Esc`, or interact with the exit, to return to the street.
 - Not every wall in the Hobbies room is as solid as it looks. If you end up somewhere undrawn, walk back right to return; `H` and `Esc` work from anywhere.
 - Something waits at the far end of the undrawn page. Press `E` (or tap interact) and a **Point of no return** warning asks first: **Leave it** (`N`) changes nothing; **Pick it up** (`Y`) is a choice you can't take back. Keyboard: `←`/`→` move between the two, `Enter`, `Space` or `E` presses the highlighted one. `Esc` still leaves the room.
-- Picking it up plays a short close-up, then an alarm: `OUT_OF_BOUNDS` is stamped across the view and the page edge shakes in pencil (reduced motion: cuts instead of zooms, no shake; nothing flashes, and it all reads with sound off). Behind you the page scribbles itself shut, so the way back right is blocked, and the page now runs on further left to a torn opening.
+- Picking it up plays a short close-up, then an alarm: `OUT_OF_BOUNDS` is stamped across the view in alert red and the page edge shakes in pencil (reduced motion: cuts instead of zooms, no shake; nothing flashes, and it all reads with sound off). Behind you the page scribbles itself shut, so the way back right is blocked, and the page now runs on further left to a torn opening.
 - From then on, for the rest of the visit to the site, the Hobbies room _is_ that escape: leaving with `H`, `Esc` or the header and coming back puts you at the end of the page again, with the way back still shut. Reloading the page resets it.
 - What you picked up goes in the Backpack, under its own "Off the page" heading. It doesn't count toward the street secrets.
+- Walk into the torn opening and the blank page gives way: you come through the right wall of the Developer Basement (reduced motion: a cut instead of the fade into ink).
 
 ## Developer Basement
 
 - Enter through the overworld basement hole.
+- After you have picked up what waits off the page, the basement has been ransacked: desk tipped over, corkboard torn down, papers on the floor, the shelf knocked over, claw marks and red `WANTED` scrawls around Danilo's things. Every station still works where it always was. The hole you came in through is scribbled shut behind you; the exit ladder on the far left is the way out, and any way of leaving (ladder, `Esc`, the header) brings you up through the hatch onto the street.
 - The glasses pickup is in the basement. Collecting it adds and equips the glasses.
 - Without glasses the den is dim; collecting them switches the swinging bulb on.
 - Before glasses are owned, interacting with the computer shows the character thought: `ughh... I can't see`.

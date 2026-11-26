@@ -122,7 +122,7 @@ As built (#149):
 Danilo's vision (2026-11-25), one continuous sequence:
 
 1. **Through the basement.** Further left the void runs into the side of the
-   real **Developer Basement**. A new **staircase** there climbs up and out onto
+   real **Developer Basement**, and the old exit ladder climbs up and out onto
    the street.
 2. **The evil chick.** Outside, the chick that always ran away from you has
    turned **evil** and confronts you. The first hammer swing is on it.
@@ -134,6 +134,30 @@ Danilo's vision (2026-11-25), one continuous sequence:
    falls away, even Danilo's own drawing can vanish, as the illusion of the
    screen comes apart. New enemies keep coming in from the screen edges. It
    is inspired by desktop-destruction toys, never a copy.
+
+As built (#162, step 1):
+
+- Walking into the torn opening (past its middle) fades the view into its ink
+  and lands Danilo at the **right wall of the real Basement**, facing left,
+  through a ragged hole showing the blank page. It scribbles itself shut
+  behind him (ink with alert-red strokes). "...my basement? Someone's been
+  through here." Pressing into the shut hole: "Shut behind me too. Up the
+  ladder, then." (once per visit). Reduced motion: cuts, the hole is shown shut.
+- **Ransacked den** whenever the simulation is broken: desk tipped up, the
+  corkboard hanging off one pin with its notes on the floor, the shelf
+  leaning over, papers everywhere, claw marks, a `WANTED` poster and red
+  circles scrawled around "his PC" and "his bench". Same stations, same spots.
+- **Alert red** is now a shared escape token
+  (`src/game/sharedSceneRuntime/escapeAlert.ts`, rules in the style guide);
+  the #149 stamp and barrier use it.
+- Every way out of the Basement during the escape (ladder, `Esc`, header Back)
+  comes up through the **hatch onto the street** (x=280), where #163 takes
+  over. A later Hobbies visit starts back inside the barrier, so the void and
+  the room stay shut.
+- Geometry and copy: `src/game/core/console/content/outOfBoundsBreakout.ts`.
+  Headless: walking `go left` into the opening enters the basement; `look`
+  reports `escape: ransacked, way back blocked`; `interact exit` lands on the
+  street at the hatch.
 
 **Payoff:** once everything is destroyed, the page falls into black and the
 game becomes the first-person 3D alien ship (Act 4).
@@ -230,7 +254,7 @@ These are moods and mechanics. Don't recreate their content.
 - **Picking it up is the point of no return.** A warning asks first. After
   confirming, the simulation is broken and the escape is the game's state;
   the header Back button, static mode and `Esc` still leave the page.
-- **Acts 2–3 are one sequence** (2026-11-25): alert, basement, staircase, evil
+- **Acts 2–3 are one sequence** (2026-11-25): alert, basement, ladder, evil
   chick, pigeons, screen destroyer, then the 3D ship. This replaced the
   earlier "ink bugs crawl over the page" idea.
 - **Build it in chunks.** Planning and work items live in GitHub. Open
@@ -253,16 +277,16 @@ These are moods and mechanics. Don't recreate their content.
 Each milestone ships on its own and ends on a cliffhanger. Turn each one into
 GitHub issues (vertical slices) when it's ready to build.
 
-| #       | Milestone         | Ships                                                                                                                   | Cliffhanger                 |
-| ------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------- | --------------------------- |
-| **OB0** | Paper pass        | Answer the open questions above. Throwaway prototypes: pseudo-3D look, screen-destroyer feel.                           | —                           |
-| **OB1** | Walk Off the Page | Hobbies left void (Act 1), right-edge bug fixed, Debugging Tools pickup + hidden Backpack slot, point of no return      | Alert; the way back is shut |
-| **OB2** | Breakout          | Basement staircase to the street, evil chick + pigeons with the hammer, screen cracks, layered screen destroyer (Act 3) | Falling into black          |
-| **OB3** | Unplugged & Sneak | Wake-up + pencil-wireframe ship + stealth section (Acts 4–5)                                                            | Weapon spotted behind glass |
-| **OB4** | Armed             | Weapon + corridor fight to the bridge (Act 6)                                                                           | Sitting in the pilot seat   |
-| **OB5** | Flight Home       | Vertical shooter + boss (Act 7)                                                                                         | Earth in view               |
-| **OB6** | Homecoming        | Ending scene, credits, true-ending flag (Act 8)                                                                         | — the end                   |
-| —       | Street hint       | Negative-x space left of the `START` sign, first hint                                                                   | "The edges aren't finished" |
+| #       | Milestone         | Ships                                                                                                                                             | Cliffhanger                 |
+| ------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| **OB0** | Paper pass        | Answer the open questions above. Throwaway prototypes: pseudo-3D look, screen-destroyer feel.                                                     | —                           |
+| **OB1** | Walk Off the Page | Hobbies left void (Act 1), right-edge bug fixed, Debugging Tools pickup + hidden Backpack slot, point of no return                                | Alert; the way back is shut |
+| **OB2** | Breakout          | Through the ransacked Basement up its ladder to the street, evil chick + pigeons with the hammer, screen cracks, layered screen destroyer (Act 3) | Falling into black          |
+| **OB3** | Unplugged & Sneak | Wake-up + pencil-wireframe ship + stealth section (Acts 4–5)                                                                                      | Weapon spotted behind glass |
+| **OB4** | Armed             | Weapon + corridor fight to the bridge (Act 6)                                                                                                     | Sitting in the pilot seat   |
+| **OB5** | Flight Home       | Vertical shooter + boss (Act 7)                                                                                                                   | Earth in view               |
+| **OB6** | Homecoming        | Ending scene, credits, true-ending flag (Act 8)                                                                                                   | — the end                   |
+| —       | Street hint       | Negative-x space left of the `START` sign, first hint                                                                                             | "The edges aren't finished" |
 
 The street hint is independent and can ship any time after OB1. Everything else is in order.
 
