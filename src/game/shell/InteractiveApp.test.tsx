@@ -120,25 +120,6 @@ describe('InteractiveApp', () => {
     expect(screen.getByRole('button', { name: /switch to static portfolio/i }).className).not.toContain('fixed');
   });
 
-  it('draws screen cracks over the whole page without taking clicks or focus', async () => {
-    const onSwitchToStatic = vi.fn();
-    render(<InteractiveApp onSwitchToStatic={onSwitchToStatic} />);
-    expect(screen.queryByTestId('screen-damage-layer')).toBeNull();
-
-    act(() => {
-      bridgeActions.crackScreen({ x: 0.9, y: 0.05, seed: 3 });
-      bridgeActions.crackScreen({ x: 0.2, y: 0.5, seed: 4 });
-    });
-
-    const layer = screen.getByTestId('screen-damage-layer');
-    expect(layer.getAttribute('aria-hidden')).toBe('true');
-    expect(layer.getAttribute('class')).toContain('pointer-events-none');
-    expect(layer.getAttribute('class')).toContain('fixed');
-    expect(layer.querySelectorAll('g')).toHaveLength(2);
-    await userEvent.click(screen.getByRole('button', { name: /switch to static portfolio/i }));
-    expect(onSwitchToStatic).toHaveBeenCalledTimes(1);
-  });
-
   it('gives the street the footer row instead of a standing controls hint', () => {
     render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
     const messages = getMessages();

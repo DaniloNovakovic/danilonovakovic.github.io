@@ -220,8 +220,9 @@ As built (#163, steps 2–3):
   - Hits read muted: `BONK!`/`THWACK!`/`WHACK!` in ink, the chick folds flat
     and skids off, pigeons tumble with crossed-out eyes and feathers,
     raccoons spin off into the gutter.
-- **Screen damage layer** (`src/game/shell/ScreenDamageLayer.tsx`): one SVG
-  over the whole viewport (`fixed`, `z-[70]`, `pointer-events-none`,
+- **Screen damage layer** (`src/game/shell/ScreenDamageLayer.tsx`, mounted in
+  `src/App.tsx` so it stays over the interactive shell, Static mode and the
+  mode picker alike): one SVG over the whole viewport (`fixed`, `z-[70]`, `pointer-events-none`,
   `aria-hidden`), above the game, the header and overlays. Cracks live in the
   bridge (`screenDamage.cracks`: a viewport point plus a seed), one per
   smash (chick or raccoon; never a pigeon), so they survive scene changes and static-mode round trips; the

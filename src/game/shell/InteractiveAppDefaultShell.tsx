@@ -2,7 +2,6 @@ import { sceneUiSurfaceCapturesPointer } from '@/game/sceneUi/registry';
 import { ArrowLeft, BookOpen, Bug } from 'lucide-react';
 import Game from './Game';
 import { BackpackButton } from './BackpackButton';
-import { ScreenDamageLayer } from './ScreenDamageLayer';
 import { useBackpackHotkey } from './useBackpack';
 import { bridgeActions } from '@/game/bridge/store';
 import { DEV_SWITCHER_OVERLAY_ID } from '@/game/overlays/overlayIds';
@@ -135,7 +134,6 @@ export function InteractiveAppDefaultShell({ shell, onSwitchToStatic }: Interact
       )}
 
       <OverlayHost />
-      <ScreenDamageLayer />
 
       {bridge.loadingSceneId && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
