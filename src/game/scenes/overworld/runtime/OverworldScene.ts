@@ -220,7 +220,8 @@ export class OverworldScene extends Phaser.Scene {
       ownedItemIds: bridge.inventory.ownedItemIds,
       equippedItemIds: bridge.equipment.equippedItemIds,
       discoveredSecretIds: bridge.progress.discoveredSecretIds,
-      screenSmashes: bridge.screenDamage.cracks.length
+      // The fight's cracks, then the destroyer's dents: together they are every smash so far.
+      screenSmashes: bridge.screenDamage.cracks.length + bridge.screenDamage.dents.length
     });
     const inAlarm = isStreetInAlarm({
       ownedItemIds: bridge.inventory.ownedItemIds
