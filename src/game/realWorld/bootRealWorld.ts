@@ -4,7 +4,9 @@ import {
   eyeOf,
   LAB_ROOM,
   startExplorer,
+  startGlimpse,
   stepExplorer,
+  stepGlimpse,
   stepPry,
   STOREROOM,
   toRoom,
@@ -128,6 +130,8 @@ export function bootRealWorld(host: HTMLElement, callbacks: RealWorldCallbacks, 
   const fog = scene.fog;
 
   let explorer: Explorer = startExplorer(LAB_ROOM);
+  // The researcher below the bolted grate waits until Danilo is in the duct.
+  let glimpse = startGlimpse();
   // Facing the table and the monitors; the pods (and the others) are behind.
   yaw.rotation.y = LAB_ROOM.wake.yaw;
   let wakeT = reducedMotion ? WAKE_SECONDS : 0;
@@ -373,6 +377,8 @@ export function bootRealWorld(host: HTMLElement, callbacks: RealWorldCallbacks, 
       // Both hands to crawl: whatever was held is set down at the vent's mouth.
       if (crawl > CRAWL_HANDS && throwing.holding) throwing.putDown({ x: eye.x, y: 0.4, z: eye.z });
       stepGrates(dt);
+      glimpse = stepGlimpse(glimpse, explorer, dt);
+      room.vent?.showGlimpse(glimpse);
       room.update(now / 1000);
       storeroom.update(now / 1000);
       scene.updateMatrixWorld();

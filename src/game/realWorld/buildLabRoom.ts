@@ -48,6 +48,7 @@ import {
   type PropKit
 } from './labProps';
 import { brainScanScreen, oldWorldScreen } from './labScreens';
+import { cleanerBot, drums, janitorCart, lampShelf, mopBucket } from './storeProps';
 import { makeToon, NIGHT_LAB } from './toon';
 
 function floorTexture(map: RealWorldMap) {
@@ -251,7 +252,12 @@ const BUILD: Readonly<Record<FurnitureKind, (kit: PropKit, nth: number) => Objec
   cart: (kit) => instrumentCart(kit),
   jarShelf: (kit, nth) => jarShelf(kit, nth + 1),
   crates: (kit, nth) => crateStack(kit, nth % 2 ? -0.3 : 0.3),
-  supplyShelf: (kit, nth) => supplyShelf(kit, nth)
+  supplyShelf: (kit, nth) => supplyShelf(kit, nth),
+  lampShelf: (kit) => lampShelf(kit),
+  drums: (kit) => drums(kit),
+  mopBucket: (kit) => mopBucket(kit),
+  cleanerBot: (kit, nth) => cleanerBot(kit, nth),
+  janitorCart: (kit) => janitorCart(kit)
 };
 
 function addFurniture(root: Group, room: RealWorldRoom, kit: PropKit) {

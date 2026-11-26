@@ -1,5 +1,6 @@
 export type { Point3, View } from './aim';
 export { eyeOf, startExplorer, stepExplorer, toRoom, type Explorer } from './explorer';
+export { startGlimpse, stepGlimpse, GLIMPSE, type Glimpse } from './glimpse';
 export { aimedFixture, stepPry, type Fixture, type Opened, type Pry, type Pryable } from './interactions';
 export * from './labRoom';
 export { SHIP_DECK_DROP, STOREROOM } from './storeroom';

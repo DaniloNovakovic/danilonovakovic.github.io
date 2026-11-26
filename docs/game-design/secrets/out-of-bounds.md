@@ -395,15 +395,21 @@ the second (pace and swagger only: stuns, no gore).
    - **The first grate: the glimpse.** Bolted from below. Warm light comes up
      through its slats from a lit ship corridor. An alien researcher in a lab
      coat walks along below, stops right under you with its antennae working
-     the air, then walks on. Mood only: it doesn't see you and doesn't look
+     the air, then walks on. Its first round is cued: it waits out of sight
+     until you crawl into the duct, arrives as you reach the grate, and stays
+     under it until you've had a few seconds' look, so the first look down
+     always finds it. After that it comes round every so often. Mood only: it doesn't see you and doesn't look
      up (yet). Under reduced motion it just stands there.
    - **The second grate: the way down.** On over the corridor wall and a bend
      south: this grate pries off like the first one (hold) and falls through.
      Crawl over the hole and you drop into the **storeroom**: a short fall,
      landing on your feet. There's no climbing back up.
-   - **The storeroom** (#145): a small, dim supply room next to the corridor.
-     Racks of boxes, canisters of pod fluid and folded spare lab coats, crates
-     by the door, one light strip at the back. Its door, onto the corridor,
+   - **The storeroom** (#145): a cramped, dim supply closet next to the
+     corridor, where the ship's cleaners live. Racks down the back (spare
+     light tubes and bulbs; boxes, pod fluid, folded spare lab coats), a mop
+     bucket and a pegboard of tools by the door, drums of cleaning fluid, a
+     cleaner's cart left out in the middle, and two cleaning drones asleep on
+     their docks, standby lights breathing. One light strip at the back. Its door, onto the corridor,
      stays locked for now. The sneaking starts here.
    - Loose things stay in the lab: crawling takes both hands, so whatever
      you're holding is put down at the vent's mouth.

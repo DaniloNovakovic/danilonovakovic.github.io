@@ -2,12 +2,14 @@ import { BoxGeometry, Group, Mesh, MeshBasicMaterial, PointLight, type Material 
 import {
   ductCells,
   floorGrateCentre,
+  GLIMPSE,
   grateCentre,
   isOpenDuct,
   mouthOf,
   SHIP_DECK_DROP,
   VENT_CELL,
   type DuctCell,
+  type Glimpse,
   type Pryable,
   type VentDuct
 } from '@/game/core/realWorld';
@@ -126,31 +128,26 @@ function corridor(kit: PropKit) {
 }
 
 /**
- * A researcher's round below the far grate: walks in, stops right under it
- * with its antennae working the air, walks on. It never looks up (yet).
+ * A researcher's round below the far grate, as the core `Glimpse` has it:
+ * walks in, stops right under it with its antennae working the air, walks
+ * on. It never looks up (yet).
  */
-function patrol(alien: Alien, reducedMotion: boolean): ((seconds: number) => void) | null {
-  const start = -CORRIDOR_LENGTH / 2 - 1;
-  const stop = 0.4;
-  const speed = 1.1;
-  const arrive = (stop - start) / speed;
-  const leave = arrive + 3.2;
-  const round = leave + (CORRIDOR_LENGTH / 2 + 1 - stop) / speed + 2;
+function patrol(alien: Alien, reducedMotion: boolean) {
   const place = (along: number, stride: number, twitch: number, seconds: number) => {
     alien.root.position.z = along;
     alien.root.visible = Math.abs(along) < CORRIDOR_LENGTH / 2 + 0.5;
     alien.pose(stride, twitch, seconds);
   };
   // Under reduced motion it just stands there, reading the clipboard.
-  if (reducedMotion) {
-    place(stop, 0, 0, 0);
-    return null;
-  }
-  return (seconds) => {
-    const t = seconds % round;
-    if (t < arrive) place(start + t * speed, t * 6, 0.2, seconds);
-    else if (t < leave) place(stop, 0, 1, seconds);
-    else place(stop + (t - leave) * speed, (t - leave) * 6, 0.2, seconds);
+  if (reducedMotion) place(GLIMPSE.stop, 0, 0, 0);
+  let glimpse: Glimpse | null = null;
+  return {
+    show: (next: Glimpse) => (glimpse = next),
+    update(seconds: number) {
+      if (reducedMotion || !glimpse) return;
+      const standing = glimpse.phase === 'lingering';
+      place(glimpse.along, standing ? 0 : glimpse.along * 5.5, standing ? 1 : 0.2, seconds);
+    }
   };
 }
 
@@ -300,6 +297,8 @@ export interface LabVent {
   setPry(grate: Pryable, progress: number): void;
   /** The grate comes off: the lab one tips onto the floor, the drop one falls through. */
   open(grate: Pryable): void;
+  /** Where the researcher below the bolted grate is on its round. */
+  showGlimpse(glimpse: Glimpse): void;
   update(seconds: number): void;
 }
 
@@ -321,10 +320,11 @@ export function buildVent(kit: PropKit, vent: VentDuct): LabVent {
     root,
     setPry: (grate, progress) => grates[grate]?.setPry(progress),
     open: (grate) => grates[grate]?.open(),
+    showGlimpse: (glimpse) => below?.show(glimpse),
     update(seconds) {
       lab.update(seconds);
       drop?.update(seconds);
-      below?.(seconds);
+      below?.update(seconds);
     }
   };
 }

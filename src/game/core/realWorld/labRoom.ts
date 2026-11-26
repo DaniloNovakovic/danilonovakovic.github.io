@@ -58,7 +58,12 @@ export type FurnitureKind =
   | 'cart'
   | 'jarShelf'
   | 'crates'
-  | 'supplyShelf';
+  | 'supplyShelf'
+  | 'lampShelf'
+  | 'drums'
+  | 'mopBucket'
+  | 'cleanerBot'
+  | 'janitorCart';
 
 /** Which way a piece's front looks. */
 export type Facing = 'north' | 'east' | 'south' | 'west';
@@ -88,7 +93,12 @@ const SHAPE: Readonly<Record<FurnitureKind, Shape>> = {
   cart: { width: 0.8, depth: 0.5, top: 1.05 },
   jarShelf: { width: 2.3, depth: 0.75, top: 2.2 },
   crates: { width: 1.4, depth: 1.4, top: 1.3 },
-  supplyShelf: { width: 2.4, depth: 0.7, top: 2.2 }
+  supplyShelf: { width: 2.4, depth: 0.7, top: 2.2 },
+  lampShelf: { width: 2.4, depth: 0.7, top: 2.2 },
+  drums: { width: 1.5, depth: 0.8, top: 1.0 },
+  mopBucket: { radius: 0.5, top: 0.7 },
+  cleanerBot: { radius: 0.6, top: 0.7 },
+  janitorCart: { width: 1.3, depth: 0.7, top: 1.1 }
 };
 
 /** World units per vent-duct cell: just wide enough to crawl along. */

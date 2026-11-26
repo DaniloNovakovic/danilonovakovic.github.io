@@ -70,6 +70,24 @@ describe('the storeroom under the vent', () => {
     expect(aimedFixture(STOREROOM, view, { grate: true, dropGrate: true })).toBe('door');
   });
 
+  it('is a cramped closet, stocked like one: spares on racks, cleaning things, the sleeping drones', () => {
+    const floorCells = STOREROOM.walls.join('').split('.').length - 1;
+    expect(floorCells).toBeLessThanOrEqual(6);
+    const kinds = new Set(STOREROOM.furniture.map((piece) => piece.kind));
+    for (const kind of ['lampShelf', 'supplyShelf', 'mopBucket', 'drums', 'cleanerBot'] as const) {
+      expect(kinds.has(kind)).toBe(true);
+    }
+    // Every wall but the door's has something against it.
+    const near = (axis: 'x' | 'z', value: number) =>
+      STOREROOM.furniture.some((piece) => Math.abs(piece[axis] - value) < 1.2);
+    const inner = { west: REAL_WORLD_CELL, east: (STOREROOM.walls[0].length - 1) * REAL_WORLD_CELL };
+    const north = REAL_WORLD_CELL;
+    const south = (STOREROOM.walls.length - 1) * REAL_WORLD_CELL;
+    expect(near('x', inner.east)).toBe(true);
+    expect(near('z', north)).toBe(true);
+    expect(near('z', south)).toBe(true);
+  });
+
   it('opens its door onto the corridor: west, towards the bolted grate', () => {
     const [door] = findCells(STOREROOM.walls, 'D');
     const peek = floorGrateCentre(vent, 'g')!;
