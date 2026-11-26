@@ -4,6 +4,12 @@ export function requestFullscreenQuietly() {
   document.documentElement.requestFullscreen?.().catch(() => {});
 }
 
+/** Leave fullscreen if Wake up entered it, so the way back is the page as it was. */
+export function exitFullscreenQuietly() {
+  if (typeof document === 'undefined' || !document.fullscreenElement) return;
+  document.exitFullscreen?.().catch(() => {});
+}
+
 export function hasWebGL(): boolean {
   try {
     const canvas = document.createElement('canvas');

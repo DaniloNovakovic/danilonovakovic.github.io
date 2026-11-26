@@ -74,4 +74,17 @@ describe('RealWorldTakeover', () => {
     await userEvent.click(screen.getByRole('button', { name: /back to the portfolio/i }));
     expect(onGiveUp).toHaveBeenCalledTimes(1);
   });
+
+  it('leaves fullscreen on the way back, since Wake up entered it', async () => {
+    withWebGL(false);
+    const exitFullscreen = vi.fn(() => Promise.resolve());
+    Object.defineProperty(document, 'fullscreenElement', { value: document.documentElement, configurable: true });
+    Object.defineProperty(document, 'exitFullscreen', { value: exitFullscreen, configurable: true });
+    render(<RealWorldTakeover onGiveUp={vi.fn()} />);
+
+    await userEvent.click(screen.getByRole('button', { name: /back to the portfolio/i }));
+    expect(exitFullscreen).toHaveBeenCalledTimes(1);
+    Reflect.deleteProperty(document, 'fullscreenElement');
+    Reflect.deleteProperty(document, 'exitFullscreen');
+  });
 });

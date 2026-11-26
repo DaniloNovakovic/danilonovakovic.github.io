@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { RealWorldHandle } from '@/game/realWorld';
 import { getMessages } from '@/shared/i18n';
-import { hasWebGL, requestFullscreenQuietly } from './realWorldBrowser';
+import { exitFullscreenQuietly, hasWebGL, requestFullscreenQuietly } from './realWorldBrowser';
 
 type Status = 'loading' | 'running' | 'paused' | 'noWebGL' | 'loadFailed';
 
@@ -103,6 +103,10 @@ export function RealWorldTakeover({ onGiveUp }: { onGiveUp: () => void }) {
     requestFullscreenQuietly();
     handle.current?.resume();
   };
+  const giveUp = () => {
+    exitFullscreenQuietly();
+    onGiveUp();
+  };
 
   return (
     <div
@@ -116,8 +120,8 @@ export function RealWorldTakeover({ onGiveUp }: { onGiveUp: () => void }) {
       {status === 'running' && <RunningHud hint={isTouchScreen() ? text.hintTouch : text.hintMouse} />}
       {status === 'loading' && <Card message={text.loading} />}
       {status === 'paused' && <Card message={text.paused} action={text.keepGoing} onAction={resume} dim />}
-      {status === 'noWebGL' && <Card alert message={text.noWebGL} action={text.back} onAction={onGiveUp} />}
-      {status === 'loadFailed' && <Card alert message={text.loadFailed} action={text.back} onAction={onGiveUp} />}
+      {status === 'noWebGL' && <Card alert message={text.noWebGL} action={text.back} onAction={giveUp} />}
+      {status === 'loadFailed' && <Card alert message={text.loadFailed} action={text.back} onAction={giveUp} />}
     </div>
   );
 }
