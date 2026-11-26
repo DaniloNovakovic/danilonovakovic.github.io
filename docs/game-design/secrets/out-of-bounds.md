@@ -326,8 +326,10 @@ hide. Real-phone check passed: it runs, and the touch controls feel good.
 The look is settled (#144 closed).
 
 The act has two halves, a stealth escape and then an action fight (Danilo,
-2026-11-26). Mood references: _Thief_ for the first half (light and shadow,
-vents), _Doom_ for the second (pace and swagger only: stuns, no gore).
+2026-11-26). Mood references: _Thief_, _Deus Ex_ and _Vampire: The
+Masquerade – Bloodlines_ for the first half (light and shadow, vents, rooms
+that feel like real places and more than one way through them), _Doom_ for
+the second (pace and swagger only: stuns, no gore).
 
 1. **Wake up.** The black screen's only button is **Wake up** (it replaces
    "Back to the portfolio" in `UnpluggedHandOff`; the click is the gesture
@@ -337,7 +339,21 @@ vents), _Doom_ for the second (pace and swagger only: stuns, no gore).
 
    **The lab** (Danilo, 2026-11-26; built in #171). The aliens research the
    human mind here, and it should feel like it: a little horror, never gore
-   or jump-scare flashes.
+   or jump-scare flashes. It is small and full rather than big and empty,
+   and laid out like a room someone works in, in zones (Danilo: "it should
+   make sense layout-wise"):
+   - **The ward** (north): the pods in a row against the wall, cabled up
+     into a ceiling tray that runs to a life-support rack in the corner. One
+     lamp on the rack is dark: Danilo's.
+   - **The watch desk** (west): under the two monitors, a researcher's chair
+     turned to them, a keypad, a drink, a bin of crumpled sketches.
+   - **The procedure bay** (middle): the operating table over a floor drain,
+     an instrument cart beside it, the specimen shelves on the nearest wall.
+     A cable runs from the crown on the table to the desk.
+   - **The way out** (south): the locked door with delivery crates beside
+     it, and the vent half hidden behind a stack of crates in the corner.
+   - The way from Danilo's pod to the door and to the vent stays clear.
+     Heavy things stand against walls; the middle is open floor.
    - **Other people are still plugged in**: asleep in pods of glowing fluid,
      reading helmets on their heads, wires up into the pod caps.
    - **Danilo's pod is smashed open from the inside**: jagged glass teeth,
@@ -345,7 +361,8 @@ vents), _Doom_ for the second (pace and swagger only: stuns, no gore).
      hammer smashing the page.
    - **Ties to the old world**: a monitor shows the drawn street with the
      screen destroyer's cracks and black hole (the aliens were watching), and
-     a sketchbook page lies on the floor (a stick figure swinging a hammer).
+     a sketchbook page lies on the watch desk under a lamp, being studied (a
+     stick figure swinging a hammer).
    - **The research**: an operating table with straps, a pronged
      mind-reading crown and a surgical lamp; shelves of brains in jars (one
      jar holds an eye); a second monitor reads a sleeping brain.
@@ -354,7 +371,8 @@ vents), _Doom_ for the second (pace and swagger only: stuns, no gore).
      motion.
    - **Toys**: a rubber ball, a crumpled page and a squishy brain can be
      picked up and thrown (click or `E`; a Grab / Throw button on touch).
-     They bounce off walls and land on the table and crates.
+     They bounce off walls and furniture and land on the table, the desk and
+     the crates.
 
 2. **Escape the lab**, ~1–2 min, no weapon. Crawl through **vents** and keep
    to the **shadows**: in the light strips patrolling aliens see you, in the
@@ -413,16 +431,17 @@ in handwriting.
 
 These are moods and mechanics. Don't recreate their content.
 
-| Reference                                                             | What we take                                            | What we don't                                          |
-| --------------------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------ |
-| Out-of-bounds / "edge of the map" secrets in games like _Prey_        | The unease of walking where you shouldn't be            | Anything specific to that game                         |
-| Desktop-destruction toys                                              | The joy of hitting the screen and seeing damage pile up | Their tools, UI or art                                 |
-| _Sable_, _Rollerdrome_                                                | Ink linework over flat colour for the real world        | Their characters, palettes, compositions or UI         |
-| _The Matrix_-style "wake up unplugged"                                | The reveal that the portfolio was a simulation          | Iconography, pods-as-shot, green code rain, characters |
-| First-person shooters (_Half-Life_-style immersion)                   | Being inside the world, the gun in your hands           | Their enemies, weapons, levels, look or story          |
-| _Thief_-style stealth                                                 | Hiding in shadow, crawling through vents (Act 4 escape) | Its world, characters, levels, look or story           |
-| _Doom_-style action                                                   | Fast, loud fighting once armed (Act 4 fight)            | Its demons, gore, weapons, levels or look              |
-| Invaders-style arcade shooters (_Space Invaders_, _Chicken Invaders_) | Waves coming down, power-ups, a boss                    | Their enemies (no chickens), waves, theme or art       |
+| Reference                                                             | What we take                                                                                      | What we don't                                             |
+| --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| Out-of-bounds / "edge of the map" secrets in games like _Prey_        | The unease of walking where you shouldn't be                                                      | Anything specific to that game                            |
+| Desktop-destruction toys                                              | The joy of hitting the screen and seeing damage pile up                                           | Their tools, UI or art                                    |
+| _Sable_, _Rollerdrome_                                                | Ink linework over flat colour for the real world                                                  | Their characters, palettes, compositions or UI            |
+| _The Matrix_-style "wake up unplugged"                                | The reveal that the portfolio was a simulation                                                    | Iconography, pods-as-shot, green code rain, characters    |
+| First-person shooters (_Half-Life_-style immersion)                   | Being inside the world, the gun in your hands                                                     | Their enemies, weapons, levels, look or story             |
+| _Thief_-style stealth                                                 | Hiding in shadow, crawling through vents (Act 4 escape)                                           | Its world, characters, levels, look or story              |
+| _Deus Ex_, _Vampire: The Masquerade – Bloodlines_                     | Rooms laid out like real places that tell a story; a vent as the other way through (Act 4 escape) | Their worlds, characters, factions, levels, look or story |
+| _Doom_-style action                                                   | Fast, loud fighting once armed (Act 4 fight)                                                      | Its demons, gore, weapons, levels or look                 |
+| Invaders-style arcade shooters (_Space Invaders_, _Chicken Invaders_) | Waves coming down, power-ups, a boss                                                              | Their enemies (no chickens), waves, theme or art          |
 
 ## Technical Questions to Settle Early
 
