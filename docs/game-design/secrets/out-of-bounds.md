@@ -331,6 +331,17 @@ Masquerade – Bloodlines_ for the first half (light and shadow, vents, rooms
 that feel like real places and more than one way through them), _Doom_ for
 the second (pace and swagger only: stuns, no gore).
 
+**The aliens are non-lethal** (Danilo, 2026-11-26). They look insect-like and
+frightening, but they never kill: getting downed always leaves Danilo alive,
+and their blasters only stun (so does Danilo's, once he has one). They keep
+humans plugged in for containment and study: they are trying to understand
+why humans are aggressive, what makes them commit evil and destroy other
+species. The lab is that research. Hint at it quietly and never spell it out:
+you always wake up unharmed, the lab is clinical rather than cruel, and the
+aliens react to things goofily. Until the true ending ships, failure here is
+"Try again" from the latest checkpoint. The alternate failure path that
+builds on this (the Coop, `disconnect --all`) is parked in #173.
+
 1. **Wake up.** The black screen's only button is **Wake up** (it replaces
    "Back to the portfolio" in `UnpluggedHandOff`; the click is the gesture
    the browser needs for fullscreen and pointer lock). Danilo is unplugged
