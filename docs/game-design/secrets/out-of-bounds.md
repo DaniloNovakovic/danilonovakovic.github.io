@@ -66,8 +66,9 @@ first mark, and "Wait. There's something up ahead." before the end. The only sou
 ### Act 2 — The Debugging Tools
 
 The artifact is a **Debugging Tools** kit: a beat-up developer's toolbox lying
-on the floor where the room should end. The first tool inside is a **hammer**.
-More tools may come in the screen-destroyer phase (Act 3).
+on the floor where the room should end. The only tool inside is a **hammer**
+(decided 2026-11-26, #139: the screen destroyer plays well with one tool;
+reopen only if a later act needs a new one).
 
 The kit goes in the Backpack as a **hidden slot**. It does _not_ count toward the
 `START` sign's `Secrets found: n/6` tally, so nothing gives the secret away.
@@ -244,8 +245,9 @@ As built (#163, steps 2–3):
   `alarm: doors taped shut` and `fight: <phase> wave=… enemies left=…
   screen damage=… cracks`.
 
-As built (#164, step 4). The #143 feel prototype is still open, so the layer
-order and counts below are this slice's call; revisit them when #143 lands.
+As built (#164, step 4). This build also answered #143 (how the screen
+destroyer should feel): Danilo played it and liked it, so the layer order and
+counts below are the design, not a placeholder.
 
 - **Starts** ~2.2 s after the last raccoon drops, with Danilo's "It's all just
   a drawing. ...what if I keep hitting it?". From then on every smash lands on
@@ -370,9 +372,9 @@ These are moods and mechanics. Don't recreate their content.
   "writes an intentional bug" into the room. It belongs to a later group of
   **subconscious lore secrets** reached through the computer. Not part of the
   first build.
-- **The artifact is the Debugging Tools kit.** It starts with a hammer, more
-  destruction tools may come later, and it sits in a hidden Backpack slot
-  outside the `n/6` tally. It lies on the floor at the end of the void.
+- **The artifact is the Debugging Tools kit.** It holds one tool, the hammer
+  (#139), and sits in a hidden Backpack slot outside the `n/6` tally. It lies
+  on the floor at the end of the void.
 - **Picking it up is the point of no return.** A warning asks first. After
   confirming, the simulation is broken and the escape is the game's state;
   the header Back button, static mode and `Esc` still leave the page.
@@ -385,8 +387,7 @@ These are moods and mechanics. Don't recreate their content.
 
 ## Open Questions
 
-1. **The Debugging Tools kit.** Whether the screen-destroyer phase adds tools
-   beyond the hammer, and what each one does.
+1. ~~**The Debugging Tools kit.**~~ Settled (#139): just the hammer.
 2. **Scope ceiling.** Eight acts is a lot. Which acts could merge (5+6, for
    example) without losing the escalation?
 3. **Street left side.** A hint only, a second entrance, or a shortcut back?
@@ -401,7 +402,7 @@ GitHub issues (vertical slices) when it's ready to build.
 
 | #       | Milestone         | Ships                                                                                                                                             | Cliffhanger                 |
 | ------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
-| **OB0** | Paper pass        | Answer the open questions above. Throwaway prototypes: pseudo-3D look, screen-destroyer feel.                                                     | —                           |
+| **OB0** | Paper pass        | Answer the open questions above. Throwaway prototype: pseudo-3D look (the screen-destroyer feel was settled by the #164 build, #143).              | —                           |
 | **OB1** | Walk Off the Page | Hobbies left void (Act 1), right-edge bug fixed, Debugging Tools pickup + hidden Backpack slot, point of no return                                | Alert; the way back is shut |
 | **OB2** | Breakout          | Through the ransacked Basement up its ladder to the street, evil chick + pigeons with the hammer, screen cracks, layered screen destroyer (Act 3) | Falling into black          |
 | **OB3** | Unplugged & Sneak | Wake-up + pencil-wireframe ship + stealth section (Acts 4–5)                                                                                      | Weapon spotted behind glass |
