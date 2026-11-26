@@ -10,4 +10,5 @@ export * from './content/hobbiesSpots';
 export * from './content/outOfBoundsVoid';
 export * from './content/outOfBoundsBreakout';
 export * from './content/outOfBoundsStreetFight';
-export { isStreetInAlarm, type StreetAlarmObservation } from './streetFightLogic';
+export * from './content/outOfBoundsScreenDestroyer';
+export { isStreetInAlarm, observeScreenDestroyer, type StreetAlarmObservation } from './streetFightLogic';

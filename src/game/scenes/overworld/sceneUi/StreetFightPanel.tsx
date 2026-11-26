@@ -1,18 +1,33 @@
-import type { StreetFightProgress } from '@/game/core/console';
+import { useEffect, useRef } from 'react';
+import { screenLayerName, type ScreenDestroyerProgress, type StreetFightProgress } from '@/game/core/console';
+import { bridgeStore } from '@/game/bridge/store';
 import type { SceneUiSurfaceProps } from '@/game/sceneUi/registry';
 import { ALERT_RED_CSS } from '@/game/sharedSceneRuntime/escapeAlert';
 import { cn } from '@/shared/ui/utils';
 
-export type StreetFightPanelView = StreetFightProgress;
+export interface StreetFightPanelView extends StreetFightProgress {
+  /** The screen destroyer once the fight is won (#164); null before. */
+  destroyer?: ScreenDestroyerProgress | null;
+}
+
+/** Things on the page that keep their own click: never a smash. */
+const NOT_A_SMASH = 'button, a, input, select, textarea, label, [role="button"], [role="dialog"], [data-no-smash]';
+const DESTROYER_CURSOR_CLASS = 'screen-destroyer-active';
 
 /**
  * Out of Bounds street fight (#163): what's left to smash, how cracked the
  * screen is, and big Swing and Parry buttons for touch. `F` swings and `R`
  * parries on a keyboard (the scene reads them). Nothing here moves or
  * flashes; the fight lives in the scene.
+ *
+ * After the fight (the screen destroyer, #164), a click or tap anywhere on
+ * the page is a smash too, except on a control (Static mode, the Swing
+ * button...), which keeps its own click. The cursor is a hammer meanwhile.
  */
 export function StreetFightPanel({ params, dispatchAction }: SceneUiSurfaceProps) {
   const view = readParams(params);
+  const smashing = Boolean(view?.destroyer && !view.destroyer.blackout);
+  usePageSmash(smashing, dispatchAction);
   if (!view) return null;
   const swing = () => dispatchAction('streetFightSwing');
   const parry = () => dispatchAction('streetFightParry');
@@ -24,13 +39,15 @@ export function StreetFightPanel({ params, dispatchAction }: SceneUiSurfaceProps
           className="-rotate-2 rounded border-2 border-[#1a1a1a] px-2 py-0.5 text-[19px] font-black uppercase leading-none tracking-widest text-[#1a1a1a] shadow-[3px_3px_0px_0px_rgba(26,26,26,1)]"
           style={{ backgroundColor: ALERT_RED_CSS }}
         >
-          {view.phase === 'cleared' ? 'Quiet' : 'Under attack'}
+          {badge(view)}
         </span>
         <span className="rounded border-2 border-[#1a1a1a] bg-[#fbfbf9] px-1.5 py-0.5 text-[11px] font-black uppercase tracking-wider text-[#1a1a1a] tabular-nums sm:text-xs">
           {statusLine(view)}
         </span>
         <span className="rounded border-2 border-[#1a1a1a] bg-[#fbfbf9] px-1.5 py-0.5 text-[11px] font-black uppercase tracking-wider text-[#1a1a1a] tabular-nums sm:text-xs">
-          Screen cracks {view.screenCracks}
+          {view.destroyer
+            ? `Smash anywhere · ${view.destroyer.remaining.length} layers left`
+            : `Screen cracks ${view.screenCracks}`}
         </span>
       </div>
 
@@ -82,7 +99,42 @@ function FightButton({
   );
 }
 
+/** Clicks and taps on the page, while the screen destroyer runs, go to the scene as smashes. */
+function usePageSmash(active: boolean, dispatchAction: SceneUiSurfaceProps['dispatchAction']): void {
+  // The host hands a new callback every render; listen once per destroyer run.
+  const dispatch = useRef(dispatchAction);
+  useEffect(() => {
+    dispatch.current = dispatchAction;
+  });
+  useEffect(() => {
+    if (!active) return;
+    const onPointerDown = (event: PointerEvent) => {
+      if (event.pointerType === 'mouse' && event.button !== 0) return;
+      if (event.target instanceof Element && event.target.closest(NOT_A_SMASH)) return;
+      // A menu (the Backpack) is open: the game is paused, the page isn't a target.
+      if (bridgeStore.getState().activeOverlayId) return;
+      dispatch.current('streetFightSmashPage', {
+        x: event.clientX / window.innerWidth,
+        y: event.clientY / window.innerHeight
+      });
+    };
+    window.addEventListener('pointerdown', onPointerDown, true);
+    document.documentElement.classList.add(DESTROYER_CURSOR_CLASS);
+    return () => {
+      window.removeEventListener('pointerdown', onPointerDown, true);
+      document.documentElement.classList.remove(DESTROYER_CURSOR_CLASS);
+    };
+  }, [active]);
+}
+
+function badge(view: StreetFightPanelView): string {
+  if (view.destroyer) return view.destroyer.blackout ? 'Unplugged' : 'Break it all';
+  return view.phase === 'cleared' ? 'Quiet' : 'Under attack';
+}
+
 function statusLine(view: StreetFightPanelView): string {
+  if (view.destroyer?.breaking) return `Breaking ${screenLayerName(view.destroyer.breaking)}`;
+  if (view.destroyer) return 'Nothing left';
   if (view.phase === 'chick') return 'Evil chick';
   if (view.phase === 'waves') return `Wave ${view.wave}: ${view.leftInWave} left`;
   return 'All smashed';

@@ -37,4 +37,14 @@ describe('App screen damage (#163)', () => {
     expect(window.location.search).toBe('?mode=interactive');
     expect(screen.getByTestId('screen-damage-layer')).toBeDefined();
   });
+
+  it('keeps the screen destroyer dents (#164) off the static portfolio, so it stays readable', () => {
+    render(<App />);
+    act(() => {
+      bridgeActions.crackScreen({ x: 0.9, y: 0.05, seed: 3 });
+      bridgeActions.dentScreen({ x: 0.5, y: 0.5, seed: 5 });
+    });
+    expect(screen.getByTestId('screen-damage-layer').querySelectorAll('g')).toHaveLength(1);
+    expect(screen.queryByTestId('screen-dent')).toBeNull();
+  });
 });

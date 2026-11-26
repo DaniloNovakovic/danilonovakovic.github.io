@@ -16,6 +16,7 @@ import {
 } from './content/outOfBoundsVoid';
 import { BASEMENT_BREACH_ENTRY, OUT_OF_BOUNDS_STREET_ARRIVAL } from './content/outOfBoundsBreakout';
 import { STREET_FIGHT_TOTAL_SMASHES, streetFightProgress, streetFightWave } from './content/outOfBoundsStreetFight';
+import { SCREEN_DESTROYER_TOTAL_HITS, screenDestroyerProgress } from './content/outOfBoundsScreenDestroyer';
 import { BASEMENT_WALK_BOUNDS, getBasementSpot } from './content/basementSpots';
 import { getOverworldProgress, getSketchDetailLevel } from './overworldLogic';
 import { GameConsoleSession } from './session';
@@ -765,8 +766,8 @@ describe('out of bounds street fight: the street in alarm (#163)', () => {
     });
     expect(session.format()).toMatch(/fight: cleared enemies left=0 screen damage=26 cracks/);
     const after = session.exec('swing');
-    expect(after.events).toEqual([]);
-    expect(after.message).toMatch(/air/);
+    expect(after.events).toEqual([{ type: 'screen_layer_hit', layer: 'header', hits: 1 }]);
+    expect(after.message).toMatch(/header at the top of the page tears loose/);
   });
 
   it('resumes the fight from the cracks already on the screen', () => {
@@ -784,6 +785,102 @@ describe('out of bounds street fight: the street in alarm (#163)', () => {
     expect(session.observe().overworld?.alarm).toBeNull();
     expect(session.exec('swing').ok).toBe(false);
     expect(parseGameCommand('smash')).toEqual({ type: 'swing' });
+  });
+});
+
+describe('out of bounds screen destroyer: the page comes apart (#164)', () => {
+  function afterTheFight(extraHits = 0) {
+    const session = createSession({
+      sceneId: 'basement',
+      ownedItemIds: ['debugging-tools'],
+      screenSmashes: STREET_FIGHT_TOTAL_SMASHES + extraHits
+    });
+    session.exec('leave');
+    return session;
+  }
+
+  it('starts once the fight is won, with every layer still on the page', () => {
+    const session = afterTheFight();
+    expect(session.observe().overworld?.alarm?.destroyer).toMatchObject({
+      hits: 0,
+      breaking: 'header',
+      remaining: ['header', 'labels', 'street', 'danilo'],
+      blackout: false
+    });
+    expect(session.format()).toMatch(/screen: breaking=header \(0\/6\) layers left=header, labels, street, danilo/);
+    expect(session.observe().hints).toContain('Type swing to keep smashing the page: the header goes next.');
+  });
+
+  it('has no destroyer while the fight is still on', () => {
+    const session = afterTheFight(-3);
+    expect(session.observe().overworld?.alarm?.destroyer).toBeNull();
+    expect(session.format()).not.toMatch(/screen:/);
+  });
+
+  it('any smash counts, a pigeon or the bare glass, and every swing lands on the page', () => {
+    const session = afterTheFight();
+    expect(session.exec('swing pigeon').events).toEqual([{ type: 'screen_layer_hit', layer: 'header', hits: 1 }]);
+    expect(session.exec('swing raccoon').events).toEqual([{ type: 'screen_layer_hit', layer: 'header', hits: 2 }]);
+    expect(session.exec('smash').events).toEqual([{ type: 'screen_layer_hit', layer: 'header', hits: 3 }]);
+  });
+
+  it('drives the headless console to the end: layer after layer, Danilo last, then black', () => {
+    const session = afterTheFight();
+    const broken: string[] = [];
+    let blackout = 0;
+    for (let i = 0; i < SCREEN_DESTROYER_TOTAL_HITS; i++) {
+      const result = session.exec('swing');
+      expect(result.ok).toBe(true);
+      for (const event of result.events) {
+        if (event.type === 'screen_layer_broken') broken.push(event.layer);
+        if (event.type === 'screen_blackout') blackout += 1;
+      }
+      if (i < SCREEN_DESTROYER_TOTAL_HITS - 1)
+        expect(session.observe().overworld?.alarm?.destroyer?.blackout).toBe(false);
+    }
+    expect(broken).toEqual(['header', 'labels', 'street', 'danilo']);
+    expect(blackout).toBe(1);
+    expect(session.observe().overworld?.alarm?.destroyer).toMatchObject({
+      remaining: [],
+      breaking: null,
+      blackout: true
+    });
+    expect(session.format()).toMatch(/screen: black — every layer gone, unplugged/);
+    expect(session.observe().hints[0]).toMatch(/Static mode is the way back/);
+
+    const more = session.exec('swing');
+    expect(more.ok).toBe(false);
+    expect(more.events).toEqual([]);
+    expect(more.message).toMatch(/nothing left to hit/i);
+  });
+
+  it('reports which layers remain part-way through', () => {
+    const session = afterTheFight(6 + 6 + 3);
+    expect(session.format()).toMatch(/screen: breaking=street \(3\/10\) layers left=street, danilo/);
+  });
+});
+
+describe('screenDestroyerProgress', () => {
+  it('breaks the layers in order, outside in, each at its own pace', () => {
+    expect(screenDestroyerProgress(0).breaking).toBe('header');
+    expect(screenDestroyerProgress(3).layers[0]).toMatchObject({
+      id: 'header',
+      hitsTaken: 3,
+      damage: 0.5,
+      gone: false
+    });
+    expect(screenDestroyerProgress(6)).toMatchObject({ breaking: 'labels', remaining: ['labels', 'street', 'danilo'] });
+    expect(screenDestroyerProgress(12)).toMatchObject({ breaking: 'street', remaining: ['street', 'danilo'] });
+    expect(screenDestroyerProgress(22)).toMatchObject({ breaking: 'danilo', remaining: ['danilo'] });
+    expect(screenDestroyerProgress(27)).toMatchObject({ breaking: 'danilo', blackout: false });
+  });
+
+  it('ends in black once every layer is gone, and never past it', () => {
+    expect(SCREEN_DESTROYER_TOTAL_HITS).toBe(28);
+    expect(screenDestroyerProgress(28)).toMatchObject({ breaking: null, remaining: [], blackout: true, hits: 28 });
+    expect(screenDestroyerProgress(99)).toMatchObject({ blackout: true, hits: 28 });
+    expect(screenDestroyerProgress(-4)).toMatchObject({ hits: 0, blackout: false });
+    expect(screenDestroyerProgress(28).layers.every((layer) => layer.gone && layer.damage === 1)).toBe(true);
   });
 });
 

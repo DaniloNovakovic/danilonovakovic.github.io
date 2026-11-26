@@ -5,6 +5,10 @@
  * broken rings in the corner, and jagged runs that branch inward. Runs stop
  * at a clear oval in the middle of the screen, so the game and Danilo always
  * stay visible. Same crack + same viewport size, same drawing.
+ *
+ * Dents (the screen destroyer, #164) are different: once the fight is won the
+ * page itself is the target, so a dent is a small impact star right where the
+ * smash landed, anywhere on the page.
  */
 import type { ScreenCrack } from '@/game/bridge/store';
 
@@ -56,16 +60,23 @@ export function inClearCenter([x, y]: Point, viewport: Viewport): boolean {
  * A jagged run from `from` heading `angle`, up to `length` px, with a kink
  * every few dozen px. It stops short of the clear middle.
  */
-function jaggedRun(rand: () => number, from: Point, angle: number, length: number, viewport: Viewport): Point[] {
+function jaggedRun(
+  rand: () => number,
+  from: Point,
+  angle: number,
+  length: number,
+  viewport: Viewport | null,
+  stepRange: Point = [18, 34]
+): Point[] {
   const points: Point[] = [from];
   let travelled = 0;
   let heading = angle;
   let [px, py] = from;
   while (travelled < length) {
-    const step = 18 + rand() * 34;
+    const step = stepRange[0] + rand() * stepRange[1];
     heading += (rand() - 0.5) * 0.55;
     const next: Point = [px + Math.cos(heading) * step, py + Math.sin(heading) * step];
-    if (inClearCenter(next, viewport)) break;
+    if (viewport && inClearCenter(next, viewport)) break;
     [px, py] = next;
     travelled += step;
     points.push(next);
@@ -139,4 +150,21 @@ function fanRuns(rand: () => number, origin: Point, inward: number, reach: numbe
     }
   }
   return runs;
+}
+
+/** Half-size of a dent's impact star, in px. */
+const DENT_REACH = 34;
+
+/** A dent from the screen destroyer: a small impact star and a broken ring, right at the smash. */
+export function drawScreenDent(dent: ScreenCrack, viewport: Viewport): string[] {
+  const rand = random(dent.seed);
+  const center: Point = [dent.x * viewport.width, dent.y * viewport.height];
+  const marks: string[] = [];
+  const splinters = 6 + Math.floor(rand() * 3);
+  for (let i = 0; i < splinters; i++) {
+    const angle = (i / splinters) * Math.PI * 2 + rand() * 0.5;
+    marks.push(polyline(jaggedRun(rand, center, angle, DENT_REACH * (0.5 + rand() * 0.6), null, [7, 9])));
+  }
+  marks.push(...brokenRing(rand, center, DENT_REACH * (0.35 + rand() * 0.15)));
+  return marks;
 }

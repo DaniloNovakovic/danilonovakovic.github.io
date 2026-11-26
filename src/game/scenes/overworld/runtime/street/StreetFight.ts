@@ -49,6 +49,16 @@ const HORDE_ON_SCREEN = 5;
 const HORDE_GAP_MS = 450;
 /** How soon a knocked-out pigeon is replaced. */
 const PIGEON_GAP_MS = 2200;
+/**
+ * The screen destroyer (#164): after the fight, enemies keep coming in from
+ * the edges of the view, fewer at once, for as long as there's a page left.
+ */
+const DESTROYER_RACCOONS_ON_SCREEN = 3;
+const DESTROYER_RACCOON_GAP_MS = 1500;
+const DESTROYER_PIGEONS = 2;
+const DESTROYER_FIRST_ENEMY_MS = 2600;
+/** A smash on the page lands on any enemy this close to it. */
+const PAGE_SMASH_RADIUS_PX = 56;
 
 /** The guard: open this long, then a rest before the next one. */
 const PARRY_OPEN_MS = 280;
@@ -114,6 +124,9 @@ export class StreetFight {
   private knockDir: 1 | -1 = 1;
   private held = false;
   private nowMs = 0;
+  /** Screen destroyer: enemies keep coming until the page falls into black (`stopped`). */
+  private destroyer = false;
+  private stopped = false;
 
   constructor(options: {
     scene: Phaser.Scene;
@@ -164,6 +177,51 @@ export class StreetFight {
     this.syncWave();
   }
 
+  /** The fight is won and the page is the target now: keep enemies coming in from the edges. */
+  startDestroyer(): void {
+    if (this.destroyer || this.stopped) return;
+    this.destroyer = true;
+    const now = this.scene.time.now;
+    this.raccoonsToCome = Number.POSITIVE_INFINITY;
+    this.pigeonsWanted = DESTROYER_PIGEONS;
+    this.nextRaccoonAt = now + DESTROYER_FIRST_ENEMY_MS;
+    this.nextPigeonAt = now + DESTROYER_FIRST_ENEMY_MS + 900;
+  }
+
+  /** Nothing left of the page (or of Danilo): the hammer goes, and no one else comes. */
+  stop(): void {
+    this.stopped = true;
+    this.raccoonsToCome = 0;
+    this.pigeonsWanted = 0;
+    for (const enemy of this.enemies) enemy.retire?.();
+    this.hammer.setVisible(false);
+    this.guard.setVisible(false);
+  }
+
+  /** World point just in front of Danilo, where a swing that meets nothing hits the glass. */
+  get hammerHead(): { x: number; y: number } {
+    return { x: this.player.x + (this.player.flipX ? -1 : 1) * 44, y: this.player.y - 24 };
+  }
+
+  /** A smash on the page (a click or a tap) landed here: anything close by is knocked out. Returns how many. */
+  smashAt(x: number, y: number): number {
+    if (this.stopped) return 0;
+    const hits = this.enemies.filter(
+      (enemy) => enemy.hittable && Math.hypot(enemy.x - x, enemy.y - y) <= PAGE_SMASH_RADIUS_PX
+    );
+    for (const enemy of hits) {
+      enemy.knock(enemy.x >= x ? 1 : -1);
+      this.knockedOut({ target: enemy.kind, x: enemy.x, y: enemy.y }, HIT_WORDS[enemy.kind]);
+    }
+    return hits.length;
+  }
+
+  /** The hammer met bare glass (screen destroyer): it still lands. */
+  glassHit(x: number, y: number): void {
+    this.fx.word('CRASH!', x, y);
+    this.fx.smashSound();
+  }
+
   update(timeMs: number, deltaMs: number): void {
     this.nowMs = timeMs;
     const view = this.scene.cameras.main.worldView;
@@ -186,17 +244,23 @@ export class StreetFight {
     this.placeHammer(timeMs);
   }
 
-  /** Swing the hammer: it flattens everything in reach in front of Danilo at once. */
-  swing(): void {
-    if (this.nowMs < this.stunnedUntil || this.nowMs - this.swingStartedAt < SWING_COOLDOWN_MS) return;
+  /**
+   * Swing the hammer: it flattens everything in reach in front of Danilo at
+   * once. Returns how many it hit, or null when it couldn't swing (stunned,
+   * still recovering, or nothing left of him).
+   */
+  swing(): number | null {
+    if (this.stopped) return null;
+    if (this.nowMs < this.stunnedUntil || this.nowMs - this.swingStartedAt < SWING_COOLDOWN_MS) return null;
     this.swingStartedAt = this.nowMs;
     const hits = this.findHits();
-    if (hits.length === 0) this.fx.whiffSound();
+    if (hits.length === 0 && !this.destroyer) this.fx.whiffSound();
     for (const hit of hits) {
       if (hit.enemy) hit.enemy.knock(hit.x >= this.player.x ? 1 : -1);
       else this.chick.flatten(this.player.x);
       this.knockedOut({ target: hit.target, x: hit.x, y: hit.y }, HIT_WORDS[hit.target]);
     }
+    return hits.length;
   }
 
   /** Raise the guard for a moment: eggs bounce back, swipes glance off. */
@@ -247,6 +311,7 @@ export class StreetFight {
   /** A new wave queues its raccoons (one per smash still to land) and sets how many pigeons circle. */
   private syncWave(): void {
     const { phase, wave, leftInWave } = this.progress;
+    if (this.destroyer) return;
     if (phase === 'cleared') {
       this.pigeonsWanted = 0;
       for (const enemy of this.enemies) enemy.retire?.();
@@ -266,9 +331,9 @@ export class StreetFight {
   /** Raccoons pour in from alternating sides, a few on the street at a time. */
   private feedHorde(timeMs: number): void {
     if (this.raccoonsToCome <= 0 || timeMs < this.nextRaccoonAt) return;
-    if (this.countUp('raccoon') >= HORDE_ON_SCREEN) return;
+    if (this.countUp('raccoon') >= (this.destroyer ? DESTROYER_RACCOONS_ON_SCREEN : HORDE_ON_SCREEN)) return;
     this.raccoonsToCome -= 1;
-    this.nextRaccoonAt = timeMs + HORDE_GAP_MS;
+    this.nextRaccoonAt = timeMs + (this.destroyer ? DESTROYER_RACCOON_GAP_MS : HORDE_GAP_MS);
     this.raccoonFromLeft = !this.raccoonFromLeft;
     this.enemies.push(this.spawn('raccoon', this.raccoonFromLeft));
   }
@@ -416,6 +481,7 @@ export class StreetFight {
   // --- The hammer and the guard -----------------------------------------------
 
   private placeHammer(timeMs: number): void {
+    if (this.stopped) return;
     const facing = this.player.flipX ? -1 : 1;
     const since = timeMs - this.swingStartedAt;
     const guarding = this.guarding;

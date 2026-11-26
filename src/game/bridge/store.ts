@@ -122,6 +122,11 @@ export interface ScreenCrack {
 /** Damage to the screen itself, drawn above the game and the portfolio chrome. */
 export interface BridgeScreenDamageState {
   cracks: readonly ScreenCrack[];
+  /**
+   * Screen destroyer (#164): one dent per smash on the page after the fight
+   * was won, where it landed. Their count is how far the page has come apart.
+   */
+  dents: readonly ScreenCrack[];
 }
 
 export interface OverlayRequest {
@@ -273,7 +278,7 @@ let state: BridgeState = {
     streetDoodle: null,
     ridge: createInitialRidgeProgress()
   },
-  screenDamage: { cracks: [] },
+  screenDamage: { cracks: [], dents: [] },
   sceneHintText: null,
   touch: {
     left: 0,
@@ -663,14 +668,21 @@ export const bridgeActions = {
         streetDoodle: null,
         ridge: createInitialRidgeProgress()
       },
-      screenDamage: { cracks: [] }
+      screenDamage: { cracks: [], dents: [] }
     }));
   },
   /** One more crack across the screen; cracks only pile up until progress resets. */
   crackScreen(crack: ScreenCrack): void {
     setState((current) => ({
       ...current,
-      screenDamage: { cracks: [...current.screenDamage.cracks, crack] }
+      screenDamage: { ...current.screenDamage, cracks: [...current.screenDamage.cracks, crack] }
+    }));
+  },
+  /** One more dent in the page (screen destroyer); like cracks, only a progress reset clears them. */
+  dentScreen(dent: ScreenCrack): void {
+    setState((current) => ({
+      ...current,
+      screenDamage: { ...current.screenDamage, dents: [...current.screenDamage.dents, dent] }
     }));
   },
   setSceneLoading(sceneId: SceneId | null): void {

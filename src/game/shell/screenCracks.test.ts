@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { drawScreenCrack, inClearCenter } from './screenCracks';
+import { drawScreenCrack, drawScreenDent, inClearCenter } from './screenCracks';
 
 const VIEWPORT = { width: 1280, height: 800 };
 
@@ -34,5 +34,18 @@ describe('drawScreenCrack', () => {
     const a = drawScreenCrack({ x: 0.5, y: 0.5, seed: 1 }, VIEWPORT);
     const b = drawScreenCrack({ x: 0.5, y: 0.5, seed: 2 }, VIEWPORT);
     expect(a.runs).not.toEqual(b.runs);
+  });
+});
+
+describe('drawScreenDent', () => {
+  it('lands right where the smash was, even in the middle of the page', () => {
+    const dent = { x: 0.5, y: 0.5, seed: 99 };
+    const marks = points(drawScreenDent(dent, VIEWPORT));
+    expect(marks.length).toBeGreaterThan(6);
+    for (const [x, y] of marks) {
+      expect(Math.abs(x - 640)).toBeLessThan(60);
+      expect(Math.abs(y - 400)).toBeLessThan(60);
+    }
+    expect(drawScreenDent(dent, VIEWPORT)).toEqual(drawScreenDent(dent, VIEWPORT));
   });
 });

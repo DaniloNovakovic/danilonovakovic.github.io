@@ -8,6 +8,7 @@ import type { CircuitPartId } from './content/circuitParts';
 import type { HobbyStationId } from './content/hobbiesSpots';
 import type { DEBUGGING_TOOLS_ITEM_ID, OutOfBoundsStage } from './content/outOfBoundsVoid';
 import type { StreetFightEnemy, StreetFightTarget } from './content/outOfBoundsStreetFight';
+import type { ScreenLayerId } from './content/outOfBoundsScreenDestroyer';
 import type { StreetAlarmObservation } from './streetFightLogic';
 
 /**
@@ -229,6 +230,11 @@ export type GameSessionEvent =
   /** A hammer smash landed: one more crack across the screen. */
   | { type: 'screen_smashed'; target: StreetFightTarget; smashes: number }
   | { type: 'street_fight_cleared' }
+  /** After the fight, a smash on the page itself (#164): `hits` since the fight was won. */
+  | { type: 'screen_layer_hit'; layer: ScreenLayerId; hits: number }
+  | { type: 'screen_layer_broken'; layer: ScreenLayerId }
+  /** Every layer is gone: the page falls into black. */
+  | { type: 'screen_blackout' }
   | { type: 'ridge_beat_changed'; beat: RidgeRouteBeat }
   | { type: 'ridge_area_handoff'; areaId: string }
   | { type: 'ridge_route_reset' };

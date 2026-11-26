@@ -37,7 +37,9 @@ export type SceneUiActionId =
   | 'pointOfNoReturnConfirm'
   | 'pointOfNoReturnDecline'
   | 'streetFightSwing'
-  | 'streetFightParry';
+  | 'streetFightParry'
+  /** Screen destroyer: a click or tap on the page; params `{ x, y }` as viewport fractions. */
+  | 'streetFightSmashPage';
 
 export interface SceneUiSurfaceRequest {
   ownerSceneId: SceneId;
