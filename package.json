@@ -28,7 +28,8 @@
     "test:changed": "vitest run --changed",
     "test:watch": "vitest",
     "game:console": "vite-node scripts/game-console.ts",
-    "ridge:console": "vite-node scripts/game-console.ts --scene ridge"
+    "ridge:console": "vite-node scripts/game-console.ts --scene ridge",
+    "proto:ship": "vite --open /src/game/shell/obShip3d.prototype.html"
   },
   "dependencies": {
     "clsx": "^2.1.1",
