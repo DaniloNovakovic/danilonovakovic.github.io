@@ -75,8 +75,8 @@
       };
       const KEYS = Object.keys(PALETTES);
       let variant = new URLSearchParams(location.search).get('variant');
-      if (!PALETTES[variant]) variant = '2';
-      let lineCss = 2.2, wobbleOn = true;
+      if (!PALETTES[variant]) variant = '3';
+      let lineCss = 1.8, wobbleOn = true;
       const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
       const isTouch = matchMedia('(pointer: coarse)').matches;
       if (isTouch) document.body.classList.add('touch');
