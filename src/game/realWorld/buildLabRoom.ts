@@ -182,7 +182,8 @@ function addFloorCell(root: Group, map: RealWorldMap, { cx, cz, ribbed }: Cell, 
     const trim = new Mesh(new BoxGeometry(dx ? 0.25 : CELL, 0.35, dz ? 0.25 : CELL), materials.trim);
     trim.position.set(cx + dx * (CELL / 2 - 0.12), 0.17, cz + dz * (CELL / 2 - 0.12));
     root.add(trim);
-    if (!ribbed) continue;
+    // No rib in front of the vent or the door: they sit mid-face, where a rib would.
+    if (!ribbed || cellAt(map, cx + dx * CELL, cz + dz * CELL) !== '#') continue;
     const rib = new Mesh(new BoxGeometry(dx ? 0.3 : 0.4, H, dz ? 0.3 : 0.4), materials.wall);
     rib.position.set(cx + dx * (CELL / 2 - 0.15), H / 2, cz + dz * (CELL / 2 - 0.15));
     root.add(rib);
