@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { findCells, isSolidAt, LAB_ROOM, REAL_WORLD_WALL_HEIGHT } from './labRoom';
+import { footprintOf, furnitureOf, isSolidAt, LAB_ROOM, REAL_WORLD_WALL_HEIGHT } from './labRoom';
 import {
   aimedThrowable,
   LAB_THROWABLES,
@@ -17,15 +17,15 @@ function fly(thing: Throwable, seconds: number): Throwable[] {
 
 const ball = () => ({ ...LAB_THROWABLES.find((thing) => thing.kind === 'ball')! });
 const EAST = -Math.PI / 2;
-const [wake] = findCells(LAB_ROOM, 'P');
-const eye = { x: wake.x, y: 1.6, z: wake.z };
+const eye = { x: LAB_ROOM.wake.x, y: 1.6, z: LAB_ROOM.wake.z };
+const walls = LAB_ROOM.walls;
 
 describe('loose things in the lab', () => {
   it('all start at rest on something, inside the room', () => {
     for (const thing of LAB_THROWABLES) {
       const settled = fly(thing, 0.5).at(-1)!;
       expect(settled.y).toBeCloseTo(thing.y, 1);
-      expect(isSolidAt(LAB_ROOM, thing.x, thing.z)).toBe(false);
+      expect(isSolidAt(walls, thing.x, thing.z)).toBe(false);
     }
   });
 
@@ -44,13 +44,13 @@ describe('loose things in the lab', () => {
     const path = fly(thrown, 6);
     expect(path.some((p) => p.vx < 0)).toBe(true);
     for (const p of path) {
-      expect(isSolidAt(LAB_ROOM, p.x, p.z)).toBe(false);
+      expect(isSolidAt(walls, p.x, p.z)).toBe(false);
       expect(p.y).toBeLessThanOrEqual(REAL_WORLD_WALL_HEIGHT);
     }
   });
 
   it('paper barely bounces', () => {
-    const paper = { ...LAB_THROWABLES.find((thing) => thing.kind === 'paper')!, y: 2.5 };
+    const paper = { ...LAB_THROWABLES.find((thing) => thing.kind === 'paper')!, x: 10, z: 10, y: 2.5 };
     const path = fly(paper, 3);
     const landed = path.findIndex((p, i) => i > 0 && path[i - 1].vy < 0 && p.vy >= 0);
     expect(landed).toBeGreaterThan(0);
@@ -59,9 +59,17 @@ describe('loose things in the lab', () => {
   });
 
   it('lands on the operating table, not through it', () => {
-    const [table] = findCells(LAB_ROOM, 'T');
-    const settled = fly({ ...ball(), x: table.x, z: table.z, y: 2.5 }, 6).at(-1)!;
+    const table = footprintOf(furnitureOf(LAB_ROOM, 'table')!);
+    const settled = fly({ ...ball(), x: table.x + 1, z: table.z, y: 2.5 }, 6).at(-1)!;
     expect(settled.y).toBeGreaterThan(1);
+  });
+
+  it('bounces off the side of the watch desk, a box', () => {
+    const desk = footprintOf(furnitureOf(LAB_ROOM, 'desk')!);
+    const low = { ...ball(), x: desk.x + 3, y: 0.3, z: desk.z + 1.5, vx: -8, vy: 0, vz: 0 };
+    const path = fly(low, 1);
+    expect(path.some((p) => p.vx > 0)).toBe(true);
+    expect(Math.min(...path.map((p) => p.x))).toBeGreaterThan(desk.x);
   });
 });
 

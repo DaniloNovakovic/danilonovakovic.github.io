@@ -5,7 +5,7 @@ import {
   stepThrowable,
   throwableRadius,
   throwThrowable,
-  type RealWorldMap,
+  type RealWorldRoom,
   type Throwable,
   type ThrowableKind,
   type View
@@ -48,7 +48,7 @@ export interface Throwing {
 }
 
 /** Loose things live under `parent`, so they're freed with it. */
-export function createThrowing(parent: Object3D, map: RealWorldMap, toon: Toon): Throwing {
+export function createThrowing(parent: Object3D, room: RealWorldRoom, toon: Toon): Throwing {
   let things: Throwable[] = LAB_THROWABLES.map((thing) => ({ ...thing }));
   const meshes = new Map(things.map((thing) => [thing.id, throwableMesh(thing.kind, toon)]));
   const squash = new Map<string, number>();
@@ -89,7 +89,7 @@ export function createThrowing(parent: Object3D, map: RealWorldMap, toon: Toon):
       things = things.map((thing) => {
         if (thing.id === heldId)
           return { ...thing, x: handPosition.x, y: handPosition.y, z: handPosition.z, vx: 0, vy: 0, vz: 0 };
-        const next = stepThrowable(map, thing, dt);
+        const next = stepThrowable(room, thing, dt);
         if (thing.vy < -2 && next.vy >= 0) squash.set(thing.id, SQUASH_SECONDS);
         return next;
       });

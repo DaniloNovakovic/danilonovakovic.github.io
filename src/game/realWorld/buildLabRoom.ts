@@ -8,7 +8,6 @@ import {
   Mesh,
   MeshBasicMaterial,
   PlaneGeometry,
-  PointLight,
   RepeatWrapping,
   SRGBColorSpace,
   type Material,
@@ -16,23 +15,31 @@ import {
 } from 'three';
 import {
   cellAt,
-  findCells,
+  furnitureOf,
   isSolidAt,
   REAL_WORLD_CELL as CELL,
   REAL_WORLD_WALL_HEIGHT as H,
-  type RealWorldMap
+  type Facing,
+  type FurnitureKind,
+  type RealWorldMap,
+  type RealWorldRoom
 } from '@/game/core/realWorld';
 import {
+  cableTray,
   crateStack,
   floorCable,
+  instrumentCart,
   jarShelf,
+  lifeSupport,
   lockedDoor,
   monitor,
   operatingTable,
+  paperBin,
+  researcherChair,
   shatteredPod,
-  sketchPage,
   sleeperPod,
   ventGrate,
+  watchDesk,
   type PropKit
 } from './labProps';
 import { brainScanScreen, oldWorldScreen } from './labScreens';
@@ -112,17 +119,14 @@ function addWallCell(root: Group, map: RealWorldMap, cell: Cell, materials: Cell
   root.add(fixture);
 }
 
-function addFloorCell(
-  root: Group,
-  map: RealWorldMap,
-  { cx, cz, ribbed }: Cell,
-  materials: CellMaterials,
-  strip: Material
-) {
-  // A light strip in every cell: the light the aliens will see you in.
+/** Light strips over every other cell: the light the aliens will see you in, and the dark between. */
+function addStrip(root: Group, { cx, cz }: Cell, strip: Material) {
   const light = new Mesh(new BoxGeometry(1.6, 0.08, 0.35), strip);
   light.position.set(cx, H - 0.05, cz);
   root.add(light);
+}
+
+function addFloorCell(root: Group, map: RealWorldMap, { cx, cz, ribbed }: Cell, materials: CellMaterials) {
   for (const [dx, dz] of NEIGHBOURS) {
     if (!isSolidAt(map, cx + dx * CELL, cz + dz * CELL)) continue;
     const trim = new Mesh(new BoxGeometry(dx ? 0.25 : CELL, 0.35, dz ? 0.25 : CELL), materials.trim);
@@ -154,33 +158,75 @@ function flickeringStrip(kit: PropKit) {
   return material;
 }
 
-function lights(root: Group, map: RealWorldMap) {
+function lights(root: Group) {
   root.add(new HemisphereLight(0xc8d4ff, 0x2a3566, 1.5));
   const sun = new DirectionalLight(0xffffff, 0.9);
   sun.position.set(0.5, 1, 0.3);
   root.add(sun);
-  // The pods glow from inside.
-  for (const { x, z } of findCells(map, 'H')) {
-    const glow = new PointLight(NIGHT_LAB.fluid, 2.5, 5, 1);
-    glow.position.set(x, 1.6, z + 1.2);
-    root.add(glow);
-  }
 }
 
-function addProps(root: Group, map: RealWorldMap, kit: PropKit) {
-  const [screens] = findCells(map, 'M');
-  findCells(map, 'H').forEach(({ x, z }, i) => {
-    root.add(sleeperPod(kit, x, z, 11 + i * 5));
-    if (screens) root.add(floorCable(kit, { x, z }, { x: CELL, z: screens.z + (i % 2) * 2 }, i - 1.5));
-  });
-  for (const { x, z } of findCells(map, 'O')) {
-    root.add(shatteredPod(kit, x, z));
-    root.add(sketchPage(kit, x - 1.6, z + 2.4));
+/** Builders turn their front to +z; this turns it the way the piece faces. */
+const FACING_TURN: Readonly<Record<Facing, number>> = {
+  south: 0,
+  east: Math.PI / 2,
+  north: Math.PI,
+  west: -Math.PI / 2
+};
+
+const BUILD: Readonly<Record<FurnitureKind, (kit: PropKit, nth: number) => Object3D>> = {
+  myPod: (kit) => shatteredPod(kit),
+  sleeperPod: (kit, nth) => sleeperPod(kit, 11 + nth * 5),
+  lifeSupport: (kit) => lifeSupport(kit),
+  desk: (kit) => watchDesk(kit),
+  chair: (kit) => researcherChair(kit),
+  bin: (kit) => paperBin(kit),
+  table: (kit) => operatingTable(kit),
+  cart: (kit) => instrumentCart(kit),
+  jarShelf: (kit, nth) => jarShelf(kit, nth + 1),
+  crates: (kit, nth) => crateStack(kit, nth % 2 ? -0.3 : 0.3)
+};
+
+function addFurniture(root: Group, room: RealWorldRoom, kit: PropKit) {
+  const counts = new Map<FurnitureKind, number>();
+  for (const piece of room.furniture) {
+    const nth = counts.get(piece.kind) ?? 0;
+    counts.set(piece.kind, nth + 1);
+    const object = BUILD[piece.kind](kit, nth);
+    object.position.set(piece.x, 0, piece.z);
+    object.rotation.y = FACING_TURN[piece.facing];
+    root.add(object);
   }
-  for (const { x, z } of findCells(map, 'T')) root.add(operatingTable(kit, x, z));
-  findCells(map, 'J').forEach(({ x, z }, i) => root.add(jarShelf(kit, x, z, i + 1)));
-  for (const { x, z } of findCells(map, 'C'))
-    root.add(crateStack(kit, x, z, cellAt(map, x + CELL, z) === '#' ? 0.4 : -0.3));
+  // Cables you could follow: each sleeper up into the tray, along to life
+  // support; the crown on the table along the floor to the watch desk.
+  const pods = room.furniture.filter((piece) => piece.kind === 'sleeperPod');
+  const support = furnitureOf(room, 'lifeSupport');
+  if (pods.length && support) {
+    const trayZ = (pods[0].z + support.z) / 2 - 0.2;
+    root.add(
+      cableTray(
+        kit,
+        pods[0].x - 1,
+        support.x - 0.8,
+        trayZ,
+        pods.map((pod) => pod.x),
+        pods[0].z
+      )
+    );
+  }
+  const table = furnitureOf(room, 'table');
+  const desk = furnitureOf(room, 'desk');
+  if (table && desk) {
+    const deskFront = desk.x + 0.7;
+    root.add(
+      floorCable(kit, [
+        [table.x + 0.1, table.z],
+        [table.x - 1.2, table.z + 0.5],
+        [(table.x + deskFront) / 2, table.z + 1.1],
+        [deskFront + 0.6, desk.z + 1.1],
+        [deskFront, desk.z + 1.0]
+      ])
+    );
+  }
 }
 
 export interface LabRoom {
@@ -190,12 +236,13 @@ export interface LabRoom {
   dispose(): void;
 }
 
-/** Build the lab from a floor plan in `@/game/core/realWorld`. */
-export function buildLabRoom(map: RealWorldMap, reducedMotion: boolean): LabRoom {
+/** Build the lab from its plan in `@/game/core/realWorld`. */
+export function buildLabRoom(room: RealWorldRoom, reducedMotion: boolean): LabRoom {
   const updates: Array<(seconds: number) => void> = [];
   const kit: PropKit = { toon: makeToon(), animate: (update) => updates.push(update), reducedMotion };
   const root = new Group();
-  lights(root, map);
+  const map = room.walls;
+  lights(root);
 
   const width = map[0].length * CELL;
   const depth = map.length * CELL;
@@ -213,15 +260,22 @@ export function buildLabRoom(map: RealWorldMap, reducedMotion: boolean): LabRoom
     strip: new MeshBasicMaterial({ color: NIGHT_LAB.strip })
   };
   const flicker = flickeringStrip(kit);
+  const table = furnitureOf(room, 'table');
+  const flickerCell = table ? `${Math.floor(table.x / CELL)},${Math.floor(table.z / CELL)}` : '';
   const monitors = { count: 0 };
   map.forEach((row, zi) => {
     [...row].forEach((char, xi) => {
       const cell = { char, cx: (xi + 0.5) * CELL, cz: (zi + 0.5) * CELL, ribbed: (xi + zi) % 3 === 0 };
-      if (isSolidAt(map, cell.cx, cell.cz)) addWallCell(root, map, cell, materials, wallFixture(kit, char, monitors));
-      else addFloorCell(root, map, cell, materials, char === 'T' ? flicker : materials.strip);
+      if (isSolidAt(map, cell.cx, cell.cz)) {
+        addWallCell(root, map, cell, materials, wallFixture(kit, char, monitors));
+        return;
+      }
+      addFloorCell(root, map, cell, materials);
+      if (`${xi},${zi}` === flickerCell) addStrip(root, cell, flicker);
+      else if ((xi + zi) % 2 === 0) addStrip(root, cell, materials.strip);
     });
   });
-  addProps(root, map, kit);
+  addFurniture(root, room, kit);
 
   return {
     root,

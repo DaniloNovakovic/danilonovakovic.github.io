@@ -165,17 +165,20 @@ function bubbles(kit: PropKit, seed: number) {
 }
 
 /** A pod with someone still plugged in: what Danilo looked like a minute ago. */
-export function sleeperPod(kit: PropKit, x: number, z: number, seed: number) {
+export function sleeperPod(kit: PropKit, seed: number) {
   const group = podFrame(kit);
   group.add(sleeper(kit, seed));
   const fluid = noInk(mesh(new CylinderGeometry(0.88, 0.88, 2.4, 14, 1, true), glass(NIGHT_LAB.fluid, 0.3), 0, 1.6));
   group.add(fluid, bubbles(kit, seed + 1));
-  group.position.set(x, 0, z);
+  // The pod glows from inside.
+  const glow = new PointLight(NIGHT_LAB.fluid, 2.2, 4.5, 1);
+  glow.position.set(0, 1.6, 1.2);
+  group.add(glow);
   return group;
 }
 
 /** Danilo's pod: smashed open from the inside, glass everywhere, the plug hanging loose. */
-export function shatteredPod(kit: PropKit, x: number, z: number) {
+export function shatteredPod(kit: PropKit) {
   const random = seededRandom(7);
   const group = podFrame(kit);
   const shardMaterial = kit.toon(NIGHT_LAB.glass, { transparent: true, opacity: 0.75 });
@@ -237,7 +240,6 @@ export function shatteredPod(kit: PropKit, x: number, z: number) {
     )
   );
   group.add(mesh(new SphereGeometry(0.12, 7, 5), new MeshBasicMaterial({ color: NIGHT_LAB.strip }), 1.95, 0.1, 2.25));
-  group.position.set(x, 0, z);
   return group;
 }
 
@@ -284,15 +286,15 @@ function sketchTexture() {
   return texture;
 }
 
-/** A sketchbook page on the lab floor: proof the drawn world was real enough to leak out. */
-export function sketchPage(kit: PropKit, x: number, z: number) {
-  const page = mesh(new PlaneGeometry(0.5, 0.62), kit.toon(0xffffff, { map: sketchTexture() }), x, 0.02, z);
-  page.rotation.set(-Math.PI / 2, 0, 0.5);
+/** A sketchbook page: proof the drawn world was real enough to leak out. */
+function sketchPage(kit: PropKit, x: number, y: number, z: number, turn: number) {
+  const page = mesh(new PlaneGeometry(0.5, 0.62), kit.toon(0xffffff, { map: sketchTexture() }), x, y, z);
+  page.rotation.set(-Math.PI / 2, 0, turn);
   return page;
 }
 
 /** A slab with straps, a mind-reading crown and a surgical lamp: where the research happens. */
-export function operatingTable(kit: PropKit, x: number, z: number) {
+export function operatingTable(kit: PropKit) {
   const group = new Group();
   const steel = kit.toon(NIGHT_LAB.steel);
   group.add(mesh(new CylinderGeometry(0.25, 0.45, 0.9, 8), steel, 0, 0.45));
@@ -325,18 +327,37 @@ export function operatingTable(kit: PropKit, x: number, z: number) {
   const light = new PointLight(0xfff1c9, 3, 6, 1);
   light.position.set(0, 2.0, 0);
   group.add(light);
-  // A tray of instruments.
-  const tray = new Group();
-  tray.position.set(-0.6, 0, 0.95);
-  tray.add(mesh(new CylinderGeometry(0.03, 0.03, 1.0, 5), steel, 0, 0.5));
-  tray.add(mesh(new BoxGeometry(0.7, 0.04, 0.4), steel, 0, 1.02));
-  const probe = mesh(new ConeGeometry(0.04, 0.3, 5), kit.toon(NIGHT_LAB.alert), -0.2, 1.07, 0);
+  // A drain under the slab. Someone hosed this floor.
+  const drain = mesh(new CircleGeometry(0.32, 12), kit.toon(NIGHT_LAB.cable), 0, 0.012, 0);
+  drain.rotation.x = -Math.PI / 2;
+  group.add(drain);
+  for (const dx of [-0.16, 0, 0.16]) group.add(mesh(new BoxGeometry(0.03, 0.01, 0.46), steel, dx, 0.02, 0));
+  return group;
+}
+
+/** A steel cart of instruments, parked by the table. */
+export function instrumentCart(kit: PropKit) {
+  const group = new Group();
+  const steel = kit.toon(NIGHT_LAB.steel);
+  for (const y of [0.35, 1.0]) group.add(mesh(new BoxGeometry(0.8, 0.04, 0.5), steel, 0, y));
+  for (const [sx, sz] of [
+    [-1, -1],
+    [1, -1],
+    [-1, 1],
+    [1, 1]
+  ]) {
+    group.add(mesh(new CylinderGeometry(0.02, 0.02, 0.95, 4), steel, sx * 0.37, 0.53, sz * 0.22));
+    group.add(mesh(new SphereGeometry(0.05, 6, 4), kit.toon(NIGHT_LAB.cable), sx * 0.37, 0.05, sz * 0.22));
+  }
+  const probe = mesh(new ConeGeometry(0.04, 0.3, 5), kit.toon(NIGHT_LAB.alert), -0.2, 1.05, 0);
   probe.rotation.z = Math.PI / 2;
-  const needle = mesh(new CylinderGeometry(0.015, 0.015, 0.35, 4), steel, 0.05, 1.06, 0.05);
+  const needle = mesh(new CylinderGeometry(0.015, 0.015, 0.35, 4), steel, 0.05, 1.04, 0.08);
   needle.rotation.z = Math.PI / 2;
-  tray.add(probe, needle, mesh(new SphereGeometry(0.07, 7, 5), kit.toon(NIGHT_LAB.brain), 0.22, 1.1, -0.05));
-  group.add(tray);
-  group.position.set(x, 0, z);
+  const saw = mesh(new CylinderGeometry(0.12, 0.12, 0.02, 12), steel, 0.25, 1.03, -0.08);
+  group.add(probe, needle, saw);
+  // A bowl on the lower shelf, the colour of what was in it.
+  group.add(mesh(new CylinderGeometry(0.16, 0.1, 0.1, 10), steel, 0.1, 0.42, 0));
+  group.add(mesh(new CylinderGeometry(0.13, 0.13, 0.02, 10), kit.toon(NIGHT_LAB.brain), 0.1, 0.46, 0));
   return group;
 }
 
@@ -371,7 +392,7 @@ function jar(kit: PropKit, seed: number) {
 }
 
 /** Shelves of specimens against the wall: brains, mostly. One jar keeps an eye on you. */
-export function jarShelf(kit: PropKit, x: number, z: number, seed: number) {
+export function jarShelf(kit: PropKit, seed: number) {
   const group = new Group();
   const frame = kit.toon(NIGHT_LAB.steel);
   for (const side of [-1, 1]) group.add(mesh(new BoxGeometry(0.08, 2.3, 0.7), frame, side * 1.05, 1.15, 0));
@@ -384,19 +405,16 @@ export function jarShelf(kit: PropKit, x: number, z: number, seed: number) {
       group.add(specimen);
     }
   });
-  // Shelves stand against the south wall.
-  group.position.set(x, 0, z + 1.0);
   return group;
 }
 
-export function crateStack(kit: PropKit, x: number, z: number, turn: number) {
+export function crateStack(kit: PropKit, turn: number) {
   const group = new Group();
   const crate = mesh(new BoxGeometry(1.3, 1.3, 1.3), kit.toon(NIGHT_LAB.crate), 0, 0.65);
   crate.rotation.y = turn;
   const top = mesh(new BoxGeometry(0.9, 0.9, 0.9), kit.toon(NIGHT_LAB.crate), -0.1, 1.75, 0.1);
   top.rotation.y = -turn;
   group.add(crate, top);
-  group.position.set(x, 0, z);
   return group;
 }
 
@@ -433,33 +451,183 @@ export function lockedDoor(kit: PropKit) {
 /** A wall monitor; the picture comes from `labScreens`. */
 export function monitor(kit: PropKit, screen: LabScreen) {
   const group = new Group();
-  group.add(mesh(new BoxGeometry(3.3, 2.1, 0.2), kit.toon(NIGHT_LAB.cable)));
-  group.add(mesh(new PlaneGeometry(3.0, 1.85), new MeshBasicMaterial({ map: screen.texture }), 0, 0, 0.11));
+  group.add(mesh(new BoxGeometry(2.7, 1.7, 0.2), kit.toon(NIGHT_LAB.cable)));
+  group.add(mesh(new PlaneGeometry(2.45, 1.5), new MeshBasicMaterial({ map: screen.texture }), 0, 0, 0.11));
   group.add(
     cable(
       kit,
       [
-        [-1.2, -1.05, 0.05],
-        [-1.3, -1.5, 0.2],
-        [-1.2, -1.75, 0.5]
+        [-1.0, -0.85, 0.05],
+        [-1.05, -1.0, 0.25],
+        [-1.0, -1.1, 0.5]
       ],
       0.05
     )
   );
   kit.animate((t) => screen.tick(t));
-  group.position.y = 1.75;
+  group.position.y = 2.05;
   return group;
 }
 
-/** Floor cables, from a pod to the monitors that watch it. */
-export function floorCable(kit: PropKit, from: { x: number; z: number }, to: { x: number; z: number }, bend: number) {
-  const midX = (from.x + to.x) / 2;
-  const midZ = (from.z + to.z) / 2 + bend;
-  return cable(kit, [
-    [from.x, 0.3, from.z + 0.9],
-    [from.x - 0.3, 0.06, from.z + 1.6],
-    [midX, 0.06, midZ],
-    [to.x + 0.6, 0.06, to.z],
-    [to.x, 0.5, to.z]
-  ]);
+/**
+ * The researcher's desk, under the monitors: a keypad, a cold drink, and the
+ * sketchbook page from Danilo's world under a lamp, being studied. Front to
+ * +z, length along x; the old-world monitor is above +x.
+ */
+export function watchDesk(kit: PropKit) {
+  const group = new Group();
+  const body = kit.toon(NIGHT_LAB.ceiling);
+  const steel = kit.toon(NIGHT_LAB.steel);
+  group.add(mesh(new BoxGeometry(5, 0.08, 1.3), kit.toon(NIGHT_LAB.wall), 0, 0.91));
+  for (const sx of [-2.1, 2.1]) group.add(mesh(new BoxGeometry(0.7, 0.87, 1.2), body, sx, 0.435));
+  group.add(mesh(new BoxGeometry(3.5, 0.6, 0.06), body, 0, 0.55, -0.55));
+  // The keypad: too many keys, in a layout nobody human would pick.
+  const keys = new MeshBasicMaterial({ color: NIGHT_LAB.fluid });
+  group.add(mesh(new BoxGeometry(1.1, 0.05, 0.42), kit.toon(NIGHT_LAB.cable), -1.2, 0.975, 0.15));
+  for (let i = 0; i < 14; i++)
+    group.add(
+      mesh(new BoxGeometry(0.09, 0.02, 0.07), keys, -1.65 + (i % 7) * 0.15, 1.01, 0.05 + Math.floor(i / 7) * 0.17)
+    );
+  // The page, flattened under a weight, a lamp bent over it.
+  group.add(sketchPage(kit, 1.4, 0.96, 0.15, 0.25));
+  group.add(mesh(new CylinderGeometry(0.09, 0.09, 0.07, 8), steel, 1.65, 0.99, 0.35));
+  group.add(mesh(new CylinderGeometry(0.12, 0.14, 0.05, 8), steel, 2.0, 0.975, -0.35));
+  group.add(
+    cable(
+      kit,
+      [
+        [2.0, 1.0, -0.35],
+        [1.95, 1.55, -0.3],
+        [1.65, 1.65, -0.05],
+        [1.45, 1.5, 0.1]
+      ],
+      0.03
+    )
+  );
+  group.add(mesh(new ConeGeometry(0.14, 0.18, 8, 1, true), steel, 1.45, 1.44, 0.12));
+  const lamp = new PointLight(0xfff1c9, 1.6, 2.5, 1);
+  lamp.position.set(1.42, 1.3, 0.14);
+  group.add(lamp);
+  // Their drink: a tall cup, a bent straw.
+  group.add(mesh(new CylinderGeometry(0.07, 0.06, 0.26, 8), kit.toon(NIGHT_LAB.glass), 0.3, 1.08, -0.3));
+  const straw = mesh(new CylinderGeometry(0.012, 0.012, 0.3, 4), kit.toon(NIGHT_LAB.alert), 0.33, 1.27, -0.3);
+  straw.rotation.z = -0.35;
+  group.add(straw);
+  // Pages already gone through.
+  for (let i = 0; i < 4; i++) {
+    const page = mesh(
+      new BoxGeometry(0.45, 0.012, 0.58),
+      kit.toon(NIGHT_LAB.paper),
+      0.4 + i * 0.03,
+      0.96 + i * 0.012,
+      0.25
+    );
+    page.rotation.y = 0.3 - i * 0.2;
+    group.add(page);
+  }
+  return group;
+}
+
+/** The researcher's chair: tall, narrow, made for a longer back than ours. Front to +z. */
+export function researcherChair(kit: PropKit) {
+  const group = new Group();
+  const body = kit.toon(NIGHT_LAB.cable);
+  const steel = kit.toon(NIGHT_LAB.steel);
+  group.add(mesh(new CylinderGeometry(0.38, 0.34, 0.08, 10), body, 0, 0.58));
+  group.add(mesh(new CylinderGeometry(0.05, 0.05, 0.55, 6), steel, 0, 0.29));
+  for (let i = 0; i < 3; i++) {
+    const angle = (i / 3) * Math.PI * 2;
+    const foot = mesh(new BoxGeometry(0.06, 0.05, 0.42), steel, Math.sin(angle) * 0.2, 0.03, Math.cos(angle) * 0.2);
+    foot.rotation.y = angle;
+    group.add(foot);
+  }
+  const back = mesh(new BoxGeometry(0.42, 1.5, 0.08), body, 0, 1.35, -0.32);
+  back.rotation.x = -0.12;
+  group.add(back);
+  return group;
+}
+
+/** A bin of crumpled pages: the sketches they have finished with. */
+export function paperBin(kit: PropKit) {
+  const group = new Group();
+  group.add(
+    mesh(new CylinderGeometry(0.3, 0.24, 0.6, 10, 1, true), kit.toon(NIGHT_LAB.steel, { side: DoubleSide }), 0, 0.3)
+  );
+  const bottom = mesh(new CircleGeometry(0.24, 10), kit.toon(NIGHT_LAB.cable), 0, 0.02);
+  bottom.rotation.x = -Math.PI / 2;
+  group.add(bottom);
+  for (let i = 0; i < 4; i++)
+    group.add(
+      mesh(
+        lumpyGeometry(0.13, 0.3, 0, i + 2),
+        kit.toon(NIGHT_LAB.paper),
+        Math.sin(i * 2.1) * 0.12,
+        0.5 + (i % 2) * 0.08,
+        Math.cos(i * 2.1) * 0.12
+      )
+    );
+  return group;
+}
+
+/** What keeps the sleepers asleep: a cabinet of slow lights, fed from the ceiling tray. Front to +z. */
+export function lifeSupport(kit: PropKit) {
+  const group = new Group();
+  group.add(mesh(new BoxGeometry(2.2, 2.4, 1.1), kit.toon(NIGHT_LAB.ceiling), 0, 1.2));
+  group.add(mesh(new BoxGeometry(1.9, 1.2, 0.04), kit.toon(NIGHT_LAB.cable), 0, 1.45, 0.56));
+  const random = seededRandom(31);
+  const lit = new MeshBasicMaterial({ color: NIGHT_LAB.fluid });
+  const dark = kit.toon(NIGHT_LAB.alert);
+  const lamps: Mesh[] = [];
+  for (let row = 0; row < 4; row++) {
+    for (let col = 0; col < 3; col++) {
+      // One dark red lamp among the lit ones: Danilo's.
+      const lamp = mesh(
+        new BoxGeometry(0.4, 0.14, 0.03),
+        row === 1 && col === 2 ? dark : lit,
+        -0.55 + col * 0.55,
+        1.88 - row * 0.28,
+        0.59
+      );
+      if (lamp.material === lit) lamps.push(lamp);
+      group.add(lamp);
+    }
+  }
+  // A gauge, its needle at nothing.
+  group.add(mesh(new CircleGeometry(0.18, 12), kit.toon(NIGHT_LAB.paper), 0.6, 0.6, 0.56));
+  group.add(mesh(new BoxGeometry(0.02, 0.15, 0.01), kit.toon(NIGHT_LAB.ink), 0.6, 0.66, 0.57));
+  if (!kit.reducedMotion) {
+    const phases = lamps.map(() => random() * 6);
+    kit.animate((t) => lamps.forEach((lamp, i) => (lamp.visible = Math.sin(t * 0.7 + phases[i]) > -0.8)));
+  }
+  return group;
+}
+
+/**
+ * A cable tray along the ceiling at `z`, from `fromX` to `toX`, with a bundle
+ * dropping to the cap of each pod at `drops`. In world space.
+ */
+export function cableTray(kit: PropKit, fromX: number, toX: number, z: number, drops: readonly number[], podZ: number) {
+  const group = new Group();
+  const y = 3.05;
+  const steel = kit.toon(NIGHT_LAB.steel);
+  group.add(mesh(new BoxGeometry(toX - fromX, 0.08, 0.5), steel, (fromX + toX) / 2, y, z));
+  for (let x = fromX + 1; x < toX; x += 2) group.add(mesh(new BoxGeometry(0.04, 0.15, 0.04), steel, x, y + 0.1, z));
+  drops.forEach((x, i) => {
+    group.add(
+      cable(kit, [
+        [x - 0.3, y - 0.02, z],
+        [x - 0.15 + (i % 2) * 0.1, y - 0.2, (z + podZ) / 2],
+        [x, 3.0, podZ - 0.3]
+      ])
+    );
+  });
+  return group;
+}
+
+/** A cable along the floor through `points` ([x, z] pairs, world space), rising at both ends. */
+export function floorCable(kit: PropKit, points: ReadonlyArray<readonly [number, number]>, rise = 0.5) {
+  const path: Array<[number, number, number]> = points.map(([x, z]) => [x, 0.06, z]);
+  path[0][1] = rise;
+  path[path.length - 1][1] = rise;
+  return cable(kit, path);
 }

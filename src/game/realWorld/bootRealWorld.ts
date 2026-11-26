@@ -1,5 +1,5 @@
 import { Color, Fog, Object3D, PerspectiveCamera, Scene, WebGLRenderer } from 'three';
-import { findCells, LAB_ROOM, REAL_WORLD_EYE_HEIGHT, stepWalker, type View, type Walker } from '@/game/core/realWorld';
+import { LAB_ROOM, REAL_WORLD_EYE_HEIGHT, stepWalker, type View, type Walker } from '@/game/core/realWorld';
 import { buildLabRoom } from './buildLabRoom';
 import { createInkPass } from './inkPass';
 import { createThrowing, type Prompt } from './throwing';
@@ -66,7 +66,7 @@ export function bootRealWorld(host: HTMLElement, callbacks: RealWorldCallbacks, 
   const scene = new Scene();
   scene.background = new Color(NIGHT_LAB.background);
   // The far end of the lab sinks into the dark.
-  scene.fog = new Fog(NIGHT_LAB.background, 9, 34);
+  scene.fog = new Fog(NIGHT_LAB.background, 7, 26);
   const camera = new PerspectiveCamera(75, 1, 0.05, 60);
   const yaw = new Object3D();
   const pitch = new Object3D();
@@ -78,10 +78,10 @@ export function bootRealWorld(host: HTMLElement, callbacks: RealWorldCallbacks, 
   const throwing = createThrowing(room.root, LAB_ROOM, makeToon());
   const ink = createInkPass(renderer, camera, NIGHT_LAB.ink);
 
-  const [wakeSpot] = findCells(LAB_ROOM, 'P');
+  const wakeSpot = LAB_ROOM.wake;
   let walker: Walker = { x: wakeSpot.x, z: wakeSpot.z, vx: 0, vz: 0 };
   // Facing the table and the monitors; the pods (and the others) are behind.
-  yaw.rotation.y = Math.PI / 2 + 0.35;
+  yaw.rotation.y = wakeSpot.yaw;
   let wakeT = reducedMotion ? WAKE_SECONDS : 0;
 
   const resize = () => {

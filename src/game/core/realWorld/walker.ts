@@ -1,4 +1,11 @@
-import { isSolidAt, propsOf, REAL_WORLD_PLAYER_RADIUS, REAL_WORLD_WALK_SPEED, type RealWorldMap } from './labRoom';
+import {
+  distanceTo,
+  footprintsOf,
+  isSolidAt,
+  REAL_WORLD_PLAYER_RADIUS,
+  REAL_WORLD_WALK_SPEED,
+  type RealWorldRoom
+} from './labRoom';
 
 /** Someone walking on the floor plan: position and current velocity. */
 export interface Walker {
@@ -21,17 +28,16 @@ export interface WalkInput {
 /** How fast velocity catches up with the intent: quick, but never a snap. */
 const ACCELERATION = 14;
 
-function isBlocked(map: RealWorldMap, x: number, z: number, edgeX: number, edgeZ: number): boolean {
-  const r = REAL_WORLD_PLAYER_RADIUS;
-  if (isSolidAt(map, edgeX, edgeZ)) return true;
-  return propsOf(map).some((prop) => Math.hypot(x - prop.x, z - prop.z) < prop.radius + r);
+function isBlocked(room: RealWorldRoom, x: number, z: number, edgeX: number, edgeZ: number): boolean {
+  if (isSolidAt(room.walls, edgeX, edgeZ)) return true;
+  return footprintsOf(room).some((footprint) => distanceTo(footprint, x, z) < REAL_WORLD_PLAYER_RADIUS);
 }
 
 /**
  * Advance a walker by `dt` seconds. Each axis moves on its own, so walking
  * into a wall at an angle slides along it instead of sticking.
  */
-export function stepWalker(map: RealWorldMap, walker: Walker, input: WalkInput, dt: number): Walker {
+export function stepWalker(room: RealWorldRoom, walker: Walker, input: WalkInput, dt: number): Walker {
   let { forward, strafe } = input;
   const length = Math.hypot(forward, strafe);
   if (length > 1) {
@@ -50,10 +56,10 @@ export function stepWalker(map: RealWorldMap, walker: Walker, input: WalkInput, 
   let { x, z } = walker;
   const nextX = x + vx * dt;
   const edgeX = nextX + Math.sign(vx) * r;
-  if (!isBlocked(map, nextX, z, edgeX, z - r) && !isBlocked(map, nextX, z, edgeX, z + r)) x = nextX;
+  if (!isBlocked(room, nextX, z, edgeX, z - r) && !isBlocked(room, nextX, z, edgeX, z + r)) x = nextX;
   const nextZ = z + vz * dt;
   const edgeZ = nextZ + Math.sign(vz) * r;
-  if (!isBlocked(map, x, nextZ, x - r, edgeZ) && !isBlocked(map, x, nextZ, x + r, edgeZ)) z = nextZ;
+  if (!isBlocked(room, x, nextZ, x - r, edgeZ) && !isBlocked(room, x, nextZ, x + r, edgeZ)) z = nextZ;
 
   return { x, z, vx, vz };
 }

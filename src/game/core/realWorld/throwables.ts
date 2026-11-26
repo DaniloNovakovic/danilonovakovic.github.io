@@ -1,4 +1,12 @@
-import { isSolidAt, propsOf, REAL_WORLD_WALL_HEIGHT, type RealWorldMap } from './labRoom';
+import {
+  distanceTo,
+  footprintsOf,
+  isSolidAt,
+  nearestPoint,
+  REAL_WORLD_WALL_HEIGHT,
+  type Footprint,
+  type RealWorldRoom
+} from './labRoom';
 
 /** What can be picked up in the lab, and how it bounces. */
 export type ThrowableKind = 'ball' | 'paper' | 'brain';
@@ -36,48 +44,69 @@ const REACH = 3;
 const AIM_SLACK = 0.4;
 const AIM_SLACK_PER_UNIT = 0.15;
 
-/** Where the loose things start: around the table and Danilo's pod. */
+/**
+ * Where the loose things start: a rubber ball by the researcher's chair, a
+ * crumpled page on the watch desk, a brain on the operating table.
+ */
 export const LAB_THROWABLES: readonly Throwable[] = [
-  { id: 'ball', kind: 'ball', x: 17.5, y: 0.2, z: 11.5, vx: 0, vy: 0, vz: 0 },
-  { id: 'paper', kind: 'paper', x: 24.2, y: 0.16, z: 7.4, vx: 0, vy: 0, vz: 0 },
-  { id: 'brain', kind: 'brain', x: 23.1, y: 1.25, z: 14, vx: 0, vy: 0, vz: 0 }
+  { id: 'ball', kind: 'ball', x: 7.4, y: 0.2, z: 9.6, vx: 0, vy: 0, vz: 0 },
+  { id: 'paper', kind: 'paper', x: 3.9, y: 1.11, z: 13.9, vx: 0, vy: 0, vz: 0 },
+  { id: 'brain', kind: 'brain', x: 14.4, y: 1.25, z: 12.4, vx: 0, vy: 0, vz: 0 }
 ];
 
-/** The highest surface under (x, z): the floor, or the top of a prop. */
-function groundAt(map: RealWorldMap, x: number, z: number): number {
+/** The highest surface under (x, z): the floor, or the top of a piece of furniture. */
+function groundAt(room: RealWorldRoom, x: number, z: number): number {
   let ground = 0;
-  for (const prop of propsOf(map)) {
-    if (Math.hypot(x - prop.x, z - prop.z) < prop.radius) ground = Math.max(ground, prop.top);
+  for (const footprint of footprintsOf(room)) {
+    if (distanceTo(footprint, x, z) === 0) ground = Math.max(ground, footprint.top);
   }
   return ground;
 }
 
-/** A prop side the thing would pass into at height `y`, if any. */
-function propHit(map: RealWorldMap, x: number, y: number, z: number, radius: number) {
-  return propsOf(map).find(
-    (prop) => y - radius < prop.top - 0.05 && Math.hypot(x - prop.x, z - prop.z) < prop.radius + radius
+/** A furniture side the thing would pass into at height `y`, if any. */
+function furnitureHit(room: RealWorldRoom, x: number, y: number, z: number, radius: number) {
+  return footprintsOf(room).find(
+    (footprint) => y - radius < footprint.top - 0.05 && distanceTo(footprint, x, z) < radius
   );
 }
 
-function bounceOffWalls(map: RealWorldMap, body: Throwable, dt: number) {
+/** Which way out of `footprint` (x, z) is: away from its nearest edge. */
+function outward(footprint: Footprint, x: number, z: number) {
+  const nearest = nearestPoint(footprint, x, z);
+  const distance = Math.hypot(x - nearest.x, z - nearest.z);
+  if (distance > 0) return { nx: (x - nearest.x) / distance, nz: (z - nearest.z) / distance, nearest };
+  // Inside (a fast throw got in between frames): out the closest side.
+  if ('radius' in footprint) {
+    const fromCentre = Math.hypot(x - footprint.x, z - footprint.z) || 1;
+    const nx = (x - footprint.x) / fromCentre;
+    const nz = (z - footprint.z) / fromCentre;
+    return { nx, nz, nearest: { x: footprint.x + nx * footprint.radius, z: footprint.z + nz * footprint.radius } };
+  }
+  const dx = x - footprint.x;
+  const dz = z - footprint.z;
+  if (footprint.halfX - Math.abs(dx) < footprint.halfZ - Math.abs(dz)) {
+    const nx = Math.sign(dx) || 1;
+    return { nx, nz: 0, nearest: { x: footprint.x + nx * footprint.halfX, z } };
+  }
+  const nz = Math.sign(dz) || 1;
+  return { nx: 0, nz, nearest: { x, z: footprint.z + nz * footprint.halfZ } };
+}
+
+function bounceOffWalls(room: RealWorldRoom, body: Throwable, dt: number) {
   const { radius, bounce } = SHAPE[body.kind];
   const nextX = body.x + body.vx * dt;
-  if (isSolidAt(map, nextX + Math.sign(body.vx) * radius, body.z)) body.vx = -body.vx * bounce;
+  if (isSolidAt(room.walls, nextX + Math.sign(body.vx) * radius, body.z)) body.vx = -body.vx * bounce;
   else body.x = nextX;
   const nextZ = body.z + body.vz * dt;
-  if (isSolidAt(map, body.x, nextZ + Math.sign(body.vz) * radius)) body.vz = -body.vz * bounce;
+  if (isSolidAt(room.walls, body.x, nextZ + Math.sign(body.vz) * radius)) body.vz = -body.vz * bounce;
   else body.z = nextZ;
 
-  const prop = propHit(map, body.x, body.y, body.z, radius);
-  if (!prop) return;
-  // Push out to the prop's edge and reflect off it.
-  const dx = body.x - prop.x;
-  const dz = body.z - prop.z;
-  const distance = Math.hypot(dx, dz) || 1;
-  const nx = dx / distance;
-  const nz = dz / distance;
-  body.x = prop.x + nx * (prop.radius + radius);
-  body.z = prop.z + nz * (prop.radius + radius);
+  const hit = furnitureHit(room, body.x, body.y, body.z, radius);
+  if (!hit) return;
+  // Push out to the edge and reflect off it.
+  const { nx, nz, nearest } = outward(hit, body.x, body.z);
+  body.x = nearest.x + nx * radius;
+  body.z = nearest.z + nz * radius;
   const along = body.vx * nx + body.vz * nz;
   if (along < 0) {
     body.vx -= (1 + bounce) * along * nx;
@@ -85,7 +114,7 @@ function bounceOffWalls(map: RealWorldMap, body: Throwable, dt: number) {
   }
 }
 
-function bounceVertically(map: RealWorldMap, body: Throwable, dt: number) {
+function bounceVertically(room: RealWorldRoom, body: Throwable, dt: number) {
   const { radius, bounce, drag } = SHAPE[body.kind];
   body.vy -= GRAVITY * dt;
   body.y += body.vy * dt;
@@ -94,7 +123,7 @@ function bounceVertically(map: RealWorldMap, body: Throwable, dt: number) {
     body.y = ceiling;
     body.vy = -Math.abs(body.vy) * bounce;
   }
-  const ground = groundAt(map, body.x, body.z) + radius;
+  const ground = groundAt(room, body.x, body.z) + radius;
   if (body.y > ground) return;
   body.y = ground;
   body.vy = Math.abs(body.vy) < SETTLE_SPEED ? 0 : -body.vy * bounce;
@@ -105,11 +134,11 @@ function bounceVertically(map: RealWorldMap, body: Throwable, dt: number) {
   if (Math.hypot(body.vx, body.vz) < 0.05) body.vx = body.vz = 0;
 }
 
-/** Advance a loose thing by `dt` seconds: gravity, bounces off walls, props, floor and ceiling. */
-export function stepThrowable(map: RealWorldMap, from: Throwable, dt: number): Throwable {
+/** Advance a loose thing by `dt` seconds: gravity, bounces off walls, furniture, floor and ceiling. */
+export function stepThrowable(room: RealWorldRoom, from: Throwable, dt: number): Throwable {
   const body = { ...from };
-  bounceOffWalls(map, body, dt);
-  bounceVertically(map, body, dt);
+  bounceOffWalls(room, body, dt);
+  bounceVertically(room, body, dt);
   return body;
 }
 
