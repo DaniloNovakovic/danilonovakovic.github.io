@@ -5,7 +5,8 @@ import { listBasementNearby, observeBasement } from './basementLogic';
 import { OVERWORLD_BANANA_PEEL } from './content/overworldSpots';
 import { isSimulationBroken, outOfBoundsStageAt } from './content/outOfBoundsVoid';
 import { listHobbiesNearby, observeHobbies } from './hobbiesLogic';
-import { isStreetInAlarm, observeStreetAlarm } from './streetFightLogic';
+import { screenLayerName, type ScreenDestroyerProgress } from './content/outOfBoundsScreenDestroyer';
+import { isStreetInAlarm, observeScreenDestroyer, observeStreetAlarm } from './streetFightLogic';
 import { getOverworldProgress, listOverworldNearby } from './overworldLogic';
 import type { GameObservation, GameWorldState, NearbyThing, OverworldProgressStage } from './types';
 
@@ -65,6 +66,7 @@ export function formatGameObservation(observation: GameObservation): string {
       const wave = f.phase === 'waves' ? ` wave=${f.wave} (${f.leftInWave} left in it)` : '';
       lines.push(`alarm: doors ${alarm.doors} — ${alarm.description}`);
       lines.push(`fight: ${f.phase}${wave} enemies left=${f.enemiesLeft} screen damage=${f.screenCracks} cracks`);
+      if (alarm.destroyer) lines.push(formatScreenDestroyer(alarm.destroyer));
     }
   }
   if (observation.basement) {
@@ -171,11 +173,10 @@ function buildHints(state: GameWorldState, nearby: readonly NearbyThing[], ridge
   const hints: string[] = [];
 
   if (state.mode === 'overworld' && isStreetInAlarm(state)) {
-    hints.push(
-      observeStreetAlarm(state)?.fight.phase === 'cleared'
-        ? 'The fight is over. The screen is badly cracked.'
-        : 'Type swing to smash with the hammer.'
-    );
+    const destroyer = observeScreenDestroyer(state);
+    if (!destroyer) hints.push('Type swing to smash with the hammer.');
+    else if (destroyer.blackout) hints.push('The page is black: Act 4 is not built yet. Static mode is the way back.');
+    else hints.push(`Type swing to keep smashing the page: ${screenLayerName(destroyer.breaking!)} goes next.`);
   } else if (state.mode === 'overworld') {
     hints.push(OVERWORLD_CONSOLE_HINTS[getOverworldProgress(state).stage]);
   }
@@ -216,4 +217,11 @@ function buildHints(state: GameWorldState, nearby: readonly NearbyThing[], ridge
   }
 
   return hints;
+}
+
+/** `screen: breaking=street (4/10) layers left=street, danilo`, or the blackout. */
+function formatScreenDestroyer(destroyer: ScreenDestroyerProgress): string {
+  if (destroyer.blackout) return 'screen: black — every layer gone, unplugged (Act 4 not built yet)';
+  const breaking = destroyer.layers.find((layer) => layer.id === destroyer.breaking)!;
+  return `screen: breaking=${breaking.id} (${breaking.hitsTaken}/${breaking.hits}) layers left=${destroyer.remaining.join(', ')}`;
 }

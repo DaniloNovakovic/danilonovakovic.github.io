@@ -4,7 +4,13 @@
  */
 import { isSimulationBroken } from './content/outOfBoundsVoid';
 import {
+  SCREEN_DESTROYER_TEXT,
+  screenDestroyerProgress,
+  type ScreenDestroyerProgress
+} from './content/outOfBoundsScreenDestroyer';
+import {
   OUT_OF_BOUNDS_STREET_TEXT,
+  STREET_FIGHT_TOTAL_SMASHES,
   streetFightProgress,
   streetFightTarget,
   type StreetFightEnemy,
@@ -27,7 +33,20 @@ export function isStreetInAlarm(state: Pick<GameWorldState, 'ownedItemIds'>): bo
 export interface StreetAlarmObservation {
   doors: 'taped shut';
   fight: StreetFightProgress;
+  /** The page coming apart once the fight is won (#164); null before that. */
+  destroyer: ScreenDestroyerProgress | null;
   description: string;
+}
+
+/** Smashes landed on the page itself, after the fight was won. */
+function destroyerHits(screenSmashes: number): number {
+  return Math.max(0, screenSmashes - STREET_FIGHT_TOTAL_SMASHES);
+}
+
+/** The screen destroyer's progress, or null while the fight is still on. */
+export function observeScreenDestroyer(state: Pick<GameWorldState, 'screenSmashes'>): ScreenDestroyerProgress | null {
+  if (streetFightProgress(state.screenSmashes).phase !== 'cleared') return null;
+  return screenDestroyerProgress(destroyerHits(state.screenSmashes));
 }
 
 export function observeStreetAlarm(state: GameWorldState): StreetAlarmObservation | null {
@@ -35,6 +54,7 @@ export function observeStreetAlarm(state: GameWorldState): StreetAlarmObservatio
   return {
     doors: 'taped shut',
     fight: streetFightProgress(state.screenSmashes),
+    destroyer: observeScreenDestroyer(state),
     description: OUT_OF_BOUNDS_STREET_TEXT.alarm
   };
 }
@@ -69,7 +89,7 @@ export function swingHammer(state: GameWorldState, hit?: StreetFightEnemy): Swin
   if (state.mode !== 'overworld') return { ok: true, message: OUT_OF_BOUNDS_STREET_TEXT.whiff, events: [] };
 
   const next = streetFightTarget(state.screenSmashes);
-  if (!next) return { ok: true, message: OUT_OF_BOUNDS_STREET_TEXT.whiff, events: [] };
+  if (!next) return smashThePage(state);
   if (hit === 'pigeon' && next === 'raccoon') return { ok: true, message: SMASHED_TEXT.pigeon, events: [] };
   const target: StreetFightTarget = next;
 
@@ -86,6 +106,31 @@ export function swingHammer(state: GameWorldState, hit?: StreetFightEnemy): Swin
     lines.push(OUT_OF_BOUNDS_STREET_TEXT.wavesIncoming);
   } else if (after.wave !== before.wave) {
     lines.push(OUT_OF_BOUNDS_STREET_TEXT.nextWave);
+  }
+  return { ok: true, message: lines.join(' '), events };
+}
+
+/**
+ * After the fight, the hammer lands on the page itself (#164): anything hit,
+ * an enemy or the bare glass, takes the next layer apart, until the page
+ * falls into black.
+ */
+function smashThePage(state: GameWorldState): SwingOutcome {
+  const before = screenDestroyerProgress(destroyerHits(state.screenSmashes));
+  const layer = before.breaking;
+  if (!layer) return { ok: false, message: SCREEN_DESTROYER_TEXT.nothingLeft, events: [] };
+
+  state.screenSmashes += 1;
+  const after = screenDestroyerProgress(destroyerHits(state.screenSmashes));
+  const events: GameSessionEvent[] = [{ type: 'screen_layer_hit', layer, hits: after.hits }];
+  const lines: string[] = [SCREEN_DESTROYER_TEXT.hit[layer]];
+  if (after.breaking !== layer) {
+    events.push({ type: 'screen_layer_broken', layer });
+    lines.push(SCREEN_DESTROYER_TEXT.broken[layer]);
+  }
+  if (after.blackout) {
+    events.push({ type: 'screen_blackout' });
+    lines.push(SCREEN_DESTROYER_TEXT.blackout);
   }
   return { ok: true, message: lines.join(' '), events };
 }

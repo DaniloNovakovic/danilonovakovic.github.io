@@ -9,6 +9,8 @@ import { OverlayHost } from '@/game/overlays/OverlayHost';
 import { SceneUiHost } from '@/game/sceneUi/SceneUiHost';
 import { Button, Card, Panel } from '@/shared/ui';
 import type { InteractiveAppShellState } from './useInteractiveAppShell';
+import { headerPeel } from './screenDestroyerHeader';
+import { TapeStrip, UnpluggedHandOff } from './UnpluggedHandOff';
 
 interface InteractiveAppDefaultShellProps {
   shell: InteractiveAppShellState;
@@ -33,6 +35,8 @@ export function InteractiveAppDefaultShell({ shell, onSwitchToStatic }: Interact
     returnToScene
   } = shell;
   useBackpackHotkey(bridge);
+  // Out of Bounds screen destroyer (#164): the header peels off, then the page falls into black.
+  const peel = headerPeel(bridge.screenDamage);
 
   return (
     <div
@@ -48,7 +52,12 @@ export function InteractiveAppDefaultShell({ shell, onSwitchToStatic }: Interact
     >
       <header className="col-start-2 row-start-1 min-w-0">
         <nav className="flex min-w-0 items-center justify-between gap-2" aria-label={messages.gameShell.controlsLabel}>
-          <div className="flex min-w-0 items-center gap-2">
+          <div
+            className={`flex min-w-0 items-center gap-2 ${peel.leftClassName}`}
+            style={peel.leftStyle}
+            aria-hidden={peel.fallen || undefined}
+            inert={peel.fallen || undefined}
+          >
             {sceneHeaderChrome.left === 'back' ? (
               <Button
                 variant="floating"
@@ -78,17 +87,21 @@ export function InteractiveAppDefaultShell({ shell, onSwitchToStatic }: Interact
             )}
             <BackpackButton bridge={bridge} />
           </div>
-          <Button
-            variant="floating"
-            size="sm"
-            onClick={onSwitchToStatic}
-            className="sm:px-3 sm:py-1.5 sm:text-xs"
-            aria-label={messages.gameShell.switchToStatic}
-          >
-            <BookOpen className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
-            <span className="hidden sm:inline">{messages.gameShell.staticMode}</span>
-            <span className="sm:hidden">{messages.gameShell.static}</span>
-          </Button>
+          {/* The way out: taped on while the header peels, above the dents and the black. */}
+          <span className={peel.torn ? 'relative z-[80]' : 'contents'}>
+            <Button
+              variant="floating"
+              size="sm"
+              onClick={onSwitchToStatic}
+              className="sm:px-3 sm:py-1.5 sm:text-xs"
+              aria-label={messages.gameShell.switchToStatic}
+            >
+              <BookOpen className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+              <span className="hidden sm:inline">{messages.gameShell.staticMode}</span>
+              <span className="sm:hidden">{messages.gameShell.static}</span>
+            </Button>
+            {peel.torn && <TapeStrip />}
+          </span>
         </nav>
       </header>
 
@@ -134,6 +147,8 @@ export function InteractiveAppDefaultShell({ shell, onSwitchToStatic }: Interact
       )}
 
       <OverlayHost />
+
+      {peel.blackout && <UnpluggedHandOff onBack={onSwitchToStatic} />}
 
       {bridge.loadingSceneId && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">

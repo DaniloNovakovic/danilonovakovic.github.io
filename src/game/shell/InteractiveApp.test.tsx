@@ -757,4 +757,82 @@ describe('InteractiveApp', () => {
 
     expect(onSwitchToStatic).toHaveBeenCalledTimes(1);
   });
+
+  describe('screen destroyer (#164)', () => {
+    function dent(times: number) {
+      act(() => {
+        for (let i = 0; i < times; i++) bridgeActions.dentScreen({ x: 0.3, y: 0.4, seed: i + 1 });
+      });
+    }
+
+    it('peels the header off, but Static mode hangs on and keeps working', async () => {
+      const onSwitchToStatic = vi.fn();
+      render(<InteractiveApp onSwitchToStatic={onSwitchToStatic} />);
+      const devButton = screen.getByRole('button', { name: /open dev scene switcher/i });
+      expect(devButton.parentElement?.getAttribute('style') ?? '').not.toContain('rotate');
+
+      dent(3);
+      expect(devButton.parentElement?.getAttribute('style')).toContain('rotate(4deg)');
+
+      dent(3);
+      expect(screen.queryByRole('button', { name: /open dev scene switcher/i })).toBeNull();
+      expect(screen.queryByTestId('unplugged-hand-off')).toBeNull();
+      await userEvent.click(screen.getByRole('button', { name: /switch to static portfolio/i }));
+      expect(onSwitchToStatic).toHaveBeenCalledTimes(1);
+    });
+
+    it('falls into black once every layer is gone, with a calm way back (button or Esc)', async () => {
+      const onSwitchToStatic = vi.fn();
+      render(<InteractiveApp onSwitchToStatic={onSwitchToStatic} />);
+      dent(27);
+      expect(screen.queryByTestId('unplugged-hand-off')).toBeNull();
+
+      dent(1);
+      const handOff = screen.getByRole('dialog', { name: /unplugged/i });
+      expect(handOff.textContent).toMatch(/signal lost/i);
+      expect(handOff.textContent).toMatch(/isn’t built yet/i);
+      const back = within(handOff).getByRole('button', { name: /back to the portfolio/i });
+      expect(document.activeElement).toBe(back);
+
+      await userEvent.keyboard('{Escape}');
+      expect(onSwitchToStatic).toHaveBeenCalledTimes(1);
+      await userEvent.click(back);
+      expect(onSwitchToStatic).toHaveBeenCalledTimes(2);
+      // Static mode in the header still works on the black page too.
+      await userEvent.click(screen.getByRole('button', { name: /switch to static portfolio/i }));
+      expect(onSwitchToStatic).toHaveBeenCalledTimes(3);
+    });
+
+    it('turns a click anywhere on the page into a smash, but never a click on a control', () => {
+      const fightPanel = { phase: 'cleared', wave: 0, leftInWave: 0, enemiesLeft: 0, screenCracks: 26 };
+      act(() => {
+        bridgeActions.setSceneUiPanel(OVERWORLD_SCENE_ID, 'streetFight', {
+          ...fightPanel,
+          destroyer: { hits: 0, layers: [], breaking: 'header', remaining: ['header'], blackout: false }
+        });
+      });
+      render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
+      expect(document.documentElement.classList.contains('screen-destroyer-active')).toBe(true);
+
+      fireEvent.pointerDown(screen.getByTestId('game-surface'), { clientX: 512, clientY: 192 });
+      expect(bridgeStore.getState().sceneUi.actions.at(-1)).toMatchObject({
+        ownerSceneId: OVERWORLD_SCENE_ID,
+        action: 'streetFightSmashPage',
+        params: { x: 0.5, y: 0.25 }
+      });
+
+      const before = bridgeStore.getState().sceneUi.actions.length;
+      fireEvent.pointerDown(screen.getByRole('button', { name: /switch to static portfolio/i }));
+      fireEvent.pointerDown(screen.getByRole('button', { name: /swing the hammer/i }));
+      expect(
+        bridgeStore
+          .getState()
+          .sceneUi.actions.slice(before)
+          .filter((a) => a.action === 'streetFightSmashPage')
+      ).toEqual([]);
+
+      act(() => bridgeActions.setSceneUiPanel(OVERWORLD_SCENE_ID, 'streetFight', fightPanel));
+      expect(document.documentElement.classList.contains('screen-destroyer-active')).toBe(false);
+    });
+  });
 });

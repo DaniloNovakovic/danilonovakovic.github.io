@@ -244,6 +244,43 @@ As built (#163, steps 2–3):
   `alarm: doors taped shut` and `fight: <phase> wave=… enemies left=…
   screen damage=… cracks`.
 
+As built (#164, step 4). The #143 feel prototype is still open, so the layer
+order and counts below are this slice's call; revisit them when #143 lands.
+
+- **Starts** ~2.2 s after the last raccoon drops, with Danilo's "It's all just
+  a drawing. ...what if I keep hitting it?". From then on every smash lands on
+  the page: a click or tap anywhere (a scene UI action from the `streetFight`
+  panel; anything that is a control keeps its own click; the cursor is a
+  hammer), or a hammer swing that meets nothing (it hits the glass in front of
+  him, `CRASH!`). Each one leaves a **dent** where it landed
+  (`screenDamage.dents` in the bridge, drawn by `ScreenDamageLayer` in the
+  interactive mode only, so static mode stays readable).
+- **Enemies keep coming** from the edges of the view: raccoons (at most 3 at
+  once, one every ~1.5 s) and 2 pigeons. Clicking one or swinging at it knocks
+  it out and counts as a smash; pigeons count now.
+- **Layers**, outside in (`SCREEN_LAYERS` in
+  `src/game/core/console/content/outOfBoundsScreenDestroyer.ts`):
+  1. **header**, 6 smashes: the Dev/Backpack group tilts off its corner and
+     drops away; Static mode stays, held by an alert-red tape strip and lifted
+     above the dents and the black (`src/game/shell/screenDestroyerHeader.ts`).
+  2. **labels**, 6: the building labels slide and tilt down their buildings,
+     then tumble off.
+  3. **street**, 10: the street's own drawing stops moving (helicopter,
+     searchlights, props), and everything drawn before the fight falls away
+     front to back into blank paper (`street/StreetComingApart.ts`).
+  4. **danilo**, 6: Danilo is erased from the top down; then the hammer goes.
+- **Falling into black.** With the last layer gone the fight stops and the
+  shell fades to black (1.4 s; a cut under reduced motion) and shows the
+  **Unplugged** placeholder (`src/game/shell/UnpluggedHandOff.tsx`): "...signal
+  lost. Somewhere that isn't a drawing, something opens its eyes." plus
+  "Out of Bounds continues in Act 4. It isn't built yet." **Back to the
+  portfolio** (focused) and `Esc` go to static mode. It holds until reload.
+- Reduced motion: no animated sliding, falling or tearing, no shake, no fade.
+  Nothing flashes.
+- Headless: after the fight, `swing` hits the page; `look` reports
+  `screen: breaking=<layer> (<hits>/<of>) layers left=…`, then
+  `screen: black — every layer gone, unplugged`. 28 swings reach the end.
+
 **Payoff:** once everything is destroyed, the page falls into black and the
 game becomes the first-person 3D alien ship (Act 4).
 

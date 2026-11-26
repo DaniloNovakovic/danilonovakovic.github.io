@@ -38,6 +38,29 @@ body {
   }
 }
 
+/*
+ * Screen destroyer (Out of Bounds, #164): the cursor is the hammer while the
+ * page is the target. Controls keep their own pointer.
+ */
+html.screen-destroyer-active,
+html.screen-destroyer-active body,
+html.screen-destroyer-active canvas {
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cg stroke='%231a1a1a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 13 L28 28' stroke-width='3.5'/%3E%3Crect x='3' y='5' width='17' height='9' rx='1' transform='rotate(45 11.5 9.5)' fill='%23fbfbf9'/%3E%3C/g%3E%3C/svg%3E")
+      6 6,
+    crosshair;
+}
+
+/* The page falling into black (#164): a slow fade, never a flash; reduced motion cuts. */
+@keyframes unplugged-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* Ridge conversation staging: letterbox bars and the speaker-side box. */
 @theme {
   --animate-ridge-letterbox-top: ridge-letterbox-top 280ms ease-out both;
