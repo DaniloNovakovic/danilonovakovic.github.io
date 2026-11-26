@@ -315,6 +315,11 @@ look **C**). Mood references: _Sable_ and _Rollerdrome_ (feelings only, never
 their art). Runner-up: **A**, toon shading with ink outlines. Out: **B**, flat
 low-poly with no lines. The lines are what keeps the real world related to the
 sketchbook.
+Round 2 (2026-11-26): Danilo likes look C done as a **screen-space ink
+pass** (edges found from depth and normals, so the line keeps one weight at
+any distance, with a slight hand-drawn wobble and thinning into the
+distance). The line should be a little thinner than the prototype's 2.2 CSS px
+(about 1.8). The palette is still open.
 
 1. **Wake up.** The black screen's only button is **Wake up** (it replaces
    "Back to the portfolio" in `UnpluggedHandOff`; the click is the gesture
