@@ -101,6 +101,14 @@ const SHAPE: Readonly<Record<FurnitureKind, Shape>> = {
   janitorCart: { width: 1.3, depth: 0.7, top: 1.1 }
 };
 
+/** The four grid neighbours, as (dx, dz) steps: east, west, south, north. */
+export const NEIGHBOURS = [
+  [1, 0],
+  [-1, 0],
+  [0, 1],
+  [0, -1]
+] as const;
+
 /** World units per vent-duct cell: just wide enough to crawl along. */
 export const VENT_CELL = 1.5;
 

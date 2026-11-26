@@ -4,13 +4,11 @@ import {
   ConeGeometry,
   CylinderGeometry,
   Group,
-  Mesh,
   MeshBasicMaterial,
   SphereGeometry,
-  TorusGeometry,
-  type Material
+  TorusGeometry
 } from 'three';
-import type { PropKit } from './labProps';
+import { mesh, type PropKit } from './labProps';
 import { NIGHT_LAB, seededRandom } from './toon';
 
 /** The cleaners' colours: hazard yellow plastic, the drones' worn enamel, unlit tube glass. */
@@ -19,12 +17,6 @@ const DRONE = 0x6f7d9e;
 const DRONE_DARK = 0x3a4466;
 const TUBE = 0xe9e4cf;
 const DRUM = 0x7b5a96;
-
-function mesh(geometry: ConstructorParameters<typeof Mesh>[0], material: Material, x = 0, y = 0, z = 0) {
-  const object = new Mesh(geometry, material);
-  object.position.set(x, y, z);
-  return object;
-}
 
 /** A plain steel rack: four shelves, uprights at the ends. */
 function rack(kit: PropKit) {

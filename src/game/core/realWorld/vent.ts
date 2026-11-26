@@ -1,5 +1,5 @@
 import type { Point3 } from './aim';
-import { REAL_WORLD_EYE_HEIGHT, VENT_CELL, type VentDuct } from './labRoom';
+import { NEIGHBOURS, REAL_WORLD_EYE_HEIGHT, VENT_CELL, type VentDuct } from './labRoom';
 
 /** Eye height above the duct floor on hands and knees. */
 const CRAWL_EYE = 0.72;
@@ -58,14 +58,9 @@ export function mouthOf(vent: VentDuct): VentMouth {
   if (!mouth) {
     const cell = ductCells(vent).find((candidate) => candidate.char === 'm');
     if (!cell) throw new Error('A vent duct needs a mouth (m) in its plan.');
-    const [dx, dz] = (
-      [
-        [1, 0],
-        [-1, 0],
-        [0, 1],
-        [0, -1]
-      ] as const
-    ).find(([sx, sz]) => isOpenDuct(vent, cell.x + sx * VENT_CELL, cell.z + sz * VENT_CELL)) ?? [1, 0];
+    const [dx, dz] = NEIGHBOURS.find(([sx, sz]) =>
+      isOpenDuct(vent, cell.x + sx * VENT_CELL, cell.z + sz * VENT_CELL)
+    ) ?? [1, 0];
     mouth = { x: cell.x, z: cell.z, dx, dz };
     mouths.set(vent, mouth);
   }

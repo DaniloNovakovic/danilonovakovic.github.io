@@ -5,6 +5,7 @@ import {
   stepThrowable,
   throwableRadius,
   throwThrowable,
+  type Point3,
   type RealWorldRoom,
   type Throwable,
   type ThrowableKind,
@@ -45,7 +46,7 @@ export interface Throwing {
   /** `E` while holding: put it down gently. */
   drop(view: View): void;
   /** Let go of what's held at `at`, at rest (it settles from there). */
-  putDown(at: { x: number; y: number; z: number }): void;
+  putDown(at: Point3): void;
   readonly holding: boolean;
   readonly prompt: Prompt;
 }

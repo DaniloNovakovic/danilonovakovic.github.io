@@ -6,6 +6,7 @@ import {
   grateCentre,
   isOpenDuct,
   mouthOf,
+  NEIGHBOURS,
   SHIP_DECK_DROP,
   VENT_CELL,
   type DuctCell,
@@ -28,13 +29,6 @@ const CORRIDOR_LENGTH = 18;
 const GRATE_FALL_SECONDS = 0.45;
 /** How far prying bends the grate's top out, in radians. */
 const PRY_BEND = 0.28;
-
-const SIDES = [
-  [1, 0],
-  [-1, 0],
-  [0, 1],
-  [0, -1]
-] as const;
 
 function box(width: number, height: number, depth: number, material: Material, x = 0, y = 0, z = 0) {
   const mesh = new Mesh(new BoxGeometry(width, height, depth), material);
@@ -82,7 +76,7 @@ function duct(kit: PropKit, vent: VentDuct, root: Group) {
   for (const cell of ductCells(vent).filter((candidate) => candidate.char !== 'm')) {
     if (cell.char === '.') root.add(box(VENT_CELL, SHEET, VENT_CELL, parts.sheet, cell.x, floor - SHEET / 2, cell.z));
     root.add(box(VENT_CELL, SHEET, VENT_CELL, parts.sheet, cell.x, floor + height + SHEET / 2, cell.z));
-    for (const side of SIDES) {
+    for (const side of NEIGHBOURS) {
       const piece = ductSide(parts, cell, side);
       if (piece) root.add(piece);
     }
@@ -242,7 +236,7 @@ function dropGrate(kit: PropKit, vent: VentDuct, root: Group): GrateView | null 
   if (!centre) return null;
   const shaftDepth = 0.3;
   const shaft = kit.toon(DUCT_SEAM);
-  for (const side of SIDES) {
+  for (const side of NEIGHBOURS) {
     const wall = box(side[0] ? SHEET : VENT_CELL, shaftDepth, side[1] ? SHEET : VENT_CELL, shaft);
     wall.position.set(
       centre.x + side[0] * (VENT_CELL / 2 + SHEET / 2),

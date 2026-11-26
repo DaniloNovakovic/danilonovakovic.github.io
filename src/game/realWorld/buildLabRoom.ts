@@ -17,6 +17,7 @@ import {
   cellAt,
   furnitureOf,
   isSolidAt,
+  NEIGHBOURS,
   REAL_WORLD_CELL as CELL,
   REAL_WORLD_WALL_HEIGHT as H,
   grateCentre,
@@ -75,13 +76,6 @@ function floorTexture(map: RealWorldMap) {
   texture.anisotropy = 4;
   return texture;
 }
-
-const NEIGHBOURS = [
-  [1, 0],
-  [-1, 0],
-  [0, 1],
-  [0, -1]
-] as const;
 
 /** Place `object` on the face of wall cell (cx, cz) that looks into the room. */
 function onWallFace(map: RealWorldMap, cx: number, cz: number, object: Object3D, inset: number) {

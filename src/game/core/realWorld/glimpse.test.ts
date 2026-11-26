@@ -3,6 +3,7 @@ import { startExplorer, stepExplorer, type Explorer } from './explorer';
 import { GLIMPSE, startGlimpse, stepGlimpse, type Glimpse } from './glimpse';
 import type { Opened } from './interactions';
 import { LAB_ROOM, LAB_VENT } from './labRoom';
+import { STOREROOM } from './storeroom';
 import { floorGrateCentre } from './vent';
 
 const DT = 1 / 60;
@@ -66,12 +67,29 @@ describe('the researcher under the bolted grate', () => {
     expect(wait(explorer, round, GLIMPSE.seenSeconds + 0.1).phase).toBe('leaving');
   });
 
+  it('still waits after Danilo ducks in, backs out and stays in the lab a long while', () => {
+    const { explorer } = crawlToPeek(standing(), startGlimpse());
+    const ducked = { ...explorer, walker: { x: 25, z: 16.5, vx: 0, vz: 0 } };
+    const backedOut = wait(standing(), stepGlimpse(startGlimpse(), ducked, DT), 120);
+    expect(backedOut.phase).toBe('lingering');
+    expect(wait(explorer, backedOut, GLIMPSE.seenSeconds + 0.1).phase).toBe('leaving');
+  });
+
+  it('moves on once Danilo has dropped out of the vent', () => {
+    const { explorer, round } = crawlToPeek(standing(), startGlimpse());
+    const below = { ...startExplorer(STOREROOM), crawl: 0 };
+    const waiting = wait({ ...explorer, walker: { x: 29.25, z: 15, vx: 0, vz: 0 } }, round, 12);
+    expect(waiting.phase).toBe('lingering');
+    expect(stepGlimpse(waiting, below, DT).phase).toBe('leaving');
+  });
+
   it('comes round again later, with only a short stop', () => {
     const { explorer, round } = crawlToPeek(standing(), startGlimpse());
     const away = { ...explorer, walker: { x: 29.25, z: 15, vx: 0, vz: 0 } };
-    let next = wait(explorer, round, GLIMPSE.seenSeconds + 0.1);
+    let next = wait(explorer, round, GLIMPSE.seenSeconds + 2);
+    expect(next.phase).toBe('leaving');
     while (next.phase !== 'gone') next = stepGlimpse(next, away, DT);
-    expect(next.rounds).toBe(true);
+    expect(next.firstRoundDone).toBe(true);
     while (next.phase !== 'lingering') next = stepGlimpse(next, away, DT);
     // Nobody looking this time, and it still moves on after its short stop.
     const stopped = wait(away, next, GLIMPSE.pauseSeconds + 0.1);

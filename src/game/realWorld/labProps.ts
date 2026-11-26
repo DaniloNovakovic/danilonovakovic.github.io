@@ -32,7 +32,7 @@ export interface PropKit {
   reducedMotion: boolean;
 }
 
-function mesh(geometry: ConstructorParameters<typeof Mesh>[0], material: Material, x = 0, y = 0, z = 0) {
+export function mesh(geometry: ConstructorParameters<typeof Mesh>[0], material: Material, x = 0, y = 0, z = 0) {
   const result = new Mesh(geometry, material);
   result.position.set(x, y, z);
   return result;

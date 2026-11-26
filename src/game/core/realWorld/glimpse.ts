@@ -19,8 +19,6 @@ export const GLIMPSE = {
   speed: 1.1,
   /** How long Danilo gets to look before it moves on. */
   seenSeconds: 3.5,
-  /** If nobody ever comes to look, it gives up waiting. */
-  giveUpSeconds: 25,
   /** Later rounds: a short stop, a while between. */
   pauseSeconds: 3.2,
   betweenRounds: 8
@@ -35,8 +33,8 @@ export interface Glimpse {
   waited: number;
   /** Seconds Danilo has spent looking down through the grate while it stood there. */
   seen: number;
-  /** Has it already done its first, waiting round? */
-  rounds: boolean;
+  /** Has it already done its first round, the one that waits to be seen? */
+  firstRoundDone: boolean;
 }
 
 /** Close enough over the bolted grate to be looking through it. */
@@ -47,26 +45,35 @@ export const startGlimpse = (): Glimpse => ({
   along: GLIMPSE.start,
   waited: 0,
   seen: 0,
-  rounds: false
+  firstRoundDone: false
 });
 
 function cue(explorer: Explorer) {
   const peek = floorGrateCentre(LAB_VENT, 'g');
   const entered = explorer.room === LAB_ROOM && explorer.crawl >= 0.5;
   const { x, z } = explorer.walker;
-  return { entered, watching: entered && !!peek && Math.hypot(x - peek.x, z - peek.z) < WATCH_RADIUS };
+  return {
+    entered,
+    watching: entered && !!peek && Math.hypot(x - peek.x, z - peek.z) < WATCH_RADIUS,
+    left: explorer.room !== LAB_ROOM
+  };
 }
 
-function lingerOver(glimpse: Glimpse) {
-  if (glimpse.rounds) return glimpse.waited >= GLIMPSE.pauseSeconds;
-  return glimpse.seen >= GLIMPSE.seenSeconds || glimpse.waited >= GLIMPSE.giveUpSeconds;
+/**
+ * Later rounds stop briefly. The first waits as long as it takes for Danilo
+ * to have a look (backing out into the lab and coming back included), unless
+ * nobody ever will: Danilo has dropped out of the vent.
+ */
+function lingerOver(glimpse: Glimpse, left: boolean) {
+  if (glimpse.firstRoundDone) return glimpse.waited >= GLIMPSE.pauseSeconds;
+  return glimpse.seen >= GLIMPSE.seenSeconds || left;
 }
 
 const enter = (glimpse: Glimpse, phase: GlimpsePhase): Glimpse => ({ ...glimpse, phase, waited: 0 });
 
 /** One frame of the round, cued by where Danilo is. */
 export function stepGlimpse(glimpse: Glimpse, explorer: Explorer, dt: number): Glimpse {
-  const { entered, watching } = cue(explorer);
+  const { entered, watching, left } = cue(explorer);
   const waited = glimpse.waited + dt;
   switch (glimpse.phase) {
     case 'offstage':
@@ -77,12 +84,12 @@ export function stepGlimpse(glimpse: Glimpse, explorer: Explorer, dt: number): G
     }
     case 'lingering': {
       const next = { ...glimpse, waited, seen: glimpse.seen + (watching ? dt : 0) };
-      return lingerOver(next) ? enter(next, 'leaving') : next;
+      return lingerOver(next, left) ? enter(next, 'leaving') : next;
     }
     case 'leaving': {
       const along = glimpse.along + GLIMPSE.speed * dt;
       return along >= GLIMPSE.end
-        ? enter({ ...glimpse, along: GLIMPSE.end, rounds: true }, 'gone')
+        ? enter({ ...glimpse, along: GLIMPSE.end, firstRoundDone: true }, 'gone')
         : { ...glimpse, along };
     }
     case 'gone':

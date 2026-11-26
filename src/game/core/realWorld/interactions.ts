@@ -1,5 +1,5 @@
 import { aimMiss, type Point3, type View } from './aim';
-import { findCells, isSolidAt, REAL_WORLD_CELL, type RealWorldRoom } from './labRoom';
+import { findCells, isSolidAt, NEIGHBOURS, REAL_WORLD_CELL, type RealWorldRoom } from './labRoom';
 import { floorGrateCentre, grateCentre } from './vent';
 
 /**
@@ -25,12 +25,7 @@ interface Target {
 
 /** The middle of a wall cell's face that looks into the room, at height `y`. */
 function wallFace(room: RealWorldRoom, cell: { x: number; z: number }, y: number): Point3 | null {
-  for (const [dx, dz] of [
-    [1, 0],
-    [-1, 0],
-    [0, 1],
-    [0, -1]
-  ] as const) {
+  for (const [dx, dz] of NEIGHBOURS) {
     if (isSolidAt(room.walls, cell.x + dx * REAL_WORLD_CELL, cell.z + dz * REAL_WORLD_CELL)) continue;
     return { x: cell.x + (dx * REAL_WORLD_CELL) / 2, y, z: cell.z + (dz * REAL_WORLD_CELL) / 2 };
   }
@@ -57,7 +52,11 @@ function targetsOf(room: RealWorldRoom): Target[] {
   return targets;
 }
 
-const isPryable = (fixture: Fixture): fixture is Pryable => fixture === 'grate' || fixture === 'dropGrate';
+/** The grates that pry off, in the order they're met. */
+export const PRYABLES = ['grate', 'dropGrate'] as const satisfies readonly Pryable[];
+
+export const isPryable = (fixture: Fixture | null): fixture is Pryable =>
+  fixture === 'grate' || fixture === 'dropGrate';
 
 /** The fixture under the crosshair and within reach, if any; grates already off don't count. */
 export function aimedFixture(room: RealWorldRoom, view: View, opened: Opened): Fixture | null {
@@ -79,7 +78,7 @@ export const PRY_SECONDS = 1.1;
 /** Letting go: the grate springs back, faster than it gave. */
 const PRY_SPRING_BACK = 2;
 
-/** The lab grate: how far it has been worked loose (0..1), and whether it's off. */
+/** A grate: how far it has been worked loose (0..1), and whether it's off. */
 export interface Pry {
   progress: number;
   open: boolean;

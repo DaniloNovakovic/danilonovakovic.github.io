@@ -3,6 +3,8 @@ import {
   aimedFixture,
   eyeOf,
   LAB_ROOM,
+  isPryable,
+  PRYABLES,
   startExplorer,
   startGlimpse,
   stepExplorer,
@@ -66,6 +68,9 @@ const CRAWL_HANDS = 0.2;
 const FOG_STANDING = { near: 7, far: 26 };
 const FOG_DUCT = { near: 1.5, far: 11 };
 
+/** Where a held thing is let go of at the vent's mouth: about hand height on hands and knees. */
+const PUT_DOWN_HEIGHT = 0.4;
+
 /** What each fixture offers under the crosshair. */
 const FIXTURE_PROMPT: Readonly<Record<Fixture, Prompt>> = {
   grate: 'pry',
@@ -114,7 +119,8 @@ export function bootRealWorld(host: HTMLElement, callbacks: RealWorldCallbacks, 
   const scene = new Scene();
   scene.background = new Color(NIGHT_LAB.background);
   // The far end of the lab sinks into the dark.
-  scene.fog = new Fog(NIGHT_LAB.background, FOG_STANDING.near, FOG_STANDING.far);
+  const fog = new Fog(NIGHT_LAB.background, FOG_STANDING.near, FOG_STANDING.far);
+  scene.fog = fog;
   const camera = new PerspectiveCamera(75, 1, 0.05, 60);
   const yaw = new Object3D();
   const pitch = new Object3D();
@@ -127,7 +133,6 @@ export function bootRealWorld(host: HTMLElement, callbacks: RealWorldCallbacks, 
   // Loose things stay in the lab: you need both hands to crawl.
   const throwing = createThrowing(room.root, LAB_ROOM, makeToon());
   const ink = createInkPass(renderer, camera, NIGHT_LAB.ink);
-  const fog = scene.fog;
 
   let explorer: Explorer = startExplorer(LAB_ROOM);
   // The researcher below the bolted grate waits until Danilo is in the duct.
@@ -139,7 +144,8 @@ export function bootRealWorld(host: HTMLElement, callbacks: RealWorldCallbacks, 
     grate: { progress: 0, open: false },
     dropGrate: { progress: 0, open: false }
   };
-  const opened = () => ({ grate: pries.grate.open, dropGrate: pries.dropGrate.open });
+  /** Which grates are off: changed only when one comes off. */
+  const opened: Record<Pryable, boolean> = { grate: false, dropGrate: false };
   let shown: Prompt = null;
   /** The grate under the crosshair, if any, and the one click, E or the touch button is holding on. */
   let aimedPry: Pryable | null = null;
@@ -318,18 +324,20 @@ export function bootRealWorld(host: HTMLElement, callbacks: RealWorldCallbacks, 
   };
   /** What the crosshair offers right now: loose things first (hands free), then fixtures. */
   const choosePrompt = (): Prompt => {
-    const fixture = explorer.fall ? null : aimedFixture(explorer.room, toRoom(explorer.room, view()), opened());
-    aimedPry = fixture === 'grate' || fixture === 'dropGrate' ? fixture : null;
-    if (handsFree() && throwing.prompt) return throwing.prompt;
+    const fixture = explorer.fall ? null : aimedFixture(explorer.room, toRoom(explorer.room, view()), opened);
+    aimedPry = isPryable(fixture) ? fixture : null;
+    // Holding something up to a grate: prying wins (crawling in puts it down anyway).
+    if (handsFree() && throwing.prompt && !(throwing.holding && aimedPry)) return throwing.prompt;
     return fixture ? FIXTURE_PROMPT[fixture] : null;
   };
   /** Work a held grate loose; when one comes off, show it go. */
   const stepGrates = (dt: number) => {
-    for (const grate of ['grate', 'dropGrate'] as const) {
+    for (const grate of PRYABLES) {
       const was = pries[grate].open;
       pries[grate] = stepPry(pries[grate], prying === grate, dt);
       room.vent?.setPry(grate, pries[grate].progress);
       if (pries[grate].open && !was) {
+        opened[grate] = true;
         room.vent?.open(grate);
         prying = null;
       }
@@ -354,6 +362,7 @@ export function bootRealWorld(host: HTMLElement, callbacks: RealWorldCallbacks, 
       yaw.rotation.y -= look.dx;
       pitch.rotation.x = Math.max(-MAX_PITCH, Math.min(MAX_PITCH, pitch.rotation.x - look.dy));
       const canWalk = awake > 0.6;
+      const wasIn = explorer.room;
       explorer = stepExplorer(
         explorer,
         {
@@ -362,20 +371,23 @@ export function bootRealWorld(host: HTMLElement, callbacks: RealWorldCallbacks, 
           yaw: yaw.rotation.y
         },
         dt,
-        opened()
+        opened
       );
+      if (explorer.room !== wasIn) {
+        // Dropped into the room below: land facing its door; no fall under reduced motion.
+        yaw.rotation.y = explorer.room.wake.yaw;
+        if (reducedMotion) explorer = { ...explorer, fall: null };
+      }
       const { crawl } = explorer;
       const eye = eyeOf(explorer);
       // Waking: from slumped low and looking down, up to standing.
       const ease = 1 - (1 - awake) ** 3;
       yaw.position.set(eye.x, 0.7 + (eye.y - 0.7) * ease, eye.z);
       camera.rotation.x = -(1 - ease) * 0.9;
-      if (fog instanceof Fog) {
-        fog.near = FOG_STANDING.near + (FOG_DUCT.near - FOG_STANDING.near) * crawl;
-        fog.far = FOG_STANDING.far + (FOG_DUCT.far - FOG_STANDING.far) * crawl;
-      }
+      fog.near = FOG_STANDING.near + (FOG_DUCT.near - FOG_STANDING.near) * crawl;
+      fog.far = FOG_STANDING.far + (FOG_DUCT.far - FOG_STANDING.far) * crawl;
       // Both hands to crawl: whatever was held is set down at the vent's mouth.
-      if (crawl > CRAWL_HANDS && throwing.holding) throwing.putDown({ x: eye.x, y: 0.4, z: eye.z });
+      if (crawl > CRAWL_HANDS && throwing.holding) throwing.putDown({ ...eye, y: PUT_DOWN_HEIGHT });
       stepGrates(dt);
       glimpse = stepGlimpse(glimpse, explorer, dt);
       room.vent?.showGlimpse(glimpse);
