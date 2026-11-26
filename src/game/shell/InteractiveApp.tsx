@@ -3,7 +3,7 @@ import { PotassiumNotebookShell } from './PotassiumNotebookShell';
 import { StampedeNotebookShell } from './StampedeNotebookShell';
 import { InteractiveAppDefaultShell } from './InteractiveAppDefaultShell';
 import { useInteractiveAppShell } from './useInteractiveAppShell';
-import { useState } from 'react';
+import { useLayoutEffect } from 'react';
 import { applyOutOfBoundsCheckpointFromUrl } from '@/game/overlays/devSwitcher/outOfBoundsCheckpoints';
 
 interface InteractiveAppProps {
@@ -11,8 +11,11 @@ interface InteractiveAppProps {
 }
 
 export default function InteractiveApp({ onSwitchToStatic }: InteractiveAppProps) {
-  // Dev only: `?oob=<checkpoint>` sets up the Out of Bounds arc before Phaser boots.
-  useState(applyOutOfBoundsCheckpointFromUrl);
+  // Dev only: `?oob=<checkpoint>` sets up the Out of Bounds arc. A layout effect runs before
+  // Phaser boots (a passive effect) without changing game state during render.
+  useLayoutEffect(() => {
+    applyOutOfBoundsCheckpointFromUrl();
+  }, []);
   const shell = useInteractiveAppShell();
   const {
     bridge,
