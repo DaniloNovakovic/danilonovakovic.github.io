@@ -3,12 +3,12 @@ import { startExplorer, stepExplorer, type Explorer } from './explorer';
 import { GLIMPSE, startGlimpse, stepGlimpse, type Glimpse } from './glimpse';
 import type { Opened } from './interactions';
 import { LAB_ROOM, LAB_VENT } from './labRoom';
-import { STOREROOM } from './storeroom';
+import { SHIP_DECK } from './shipDeck';
 import { floorGrateCentre } from './vent';
 
 const DT = 1 / 60;
 const peek = floorGrateCentre(LAB_VENT, 'g')!;
-const OPEN: Opened = { grate: true, dropGrate: false };
+const OPEN: Opened = { grate: true, dropGrate: false, serviceDoor: false };
 const ROUTE = [
   [23, 16.5],
   [29.25, 16.5],
@@ -77,7 +77,7 @@ describe('the researcher under the bolted grate', () => {
 
   it('moves on once Danilo has dropped out of the vent', () => {
     const { explorer, round } = crawlToPeek(standing(), startGlimpse());
-    const below = { ...startExplorer(STOREROOM), crawl: 0 };
+    const below = { ...startExplorer(SHIP_DECK), crawl: 0 };
     const waiting = wait({ ...explorer, walker: { x: 29.25, z: 15, vx: 0, vz: 0 } }, round, 12);
     expect(waiting.phase).toBe('lingering');
     expect(stepGlimpse(waiting, below, DT).phase).toBe('leaving');

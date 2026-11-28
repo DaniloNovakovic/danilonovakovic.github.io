@@ -25,7 +25,9 @@ export type RealWorldMap = readonly string[];
 /**
  * Walls and what's set into them, one character per cell, seen from above,
  * north at the top: `#` wall, `V` vent grate, `D` locked door, `M` monitor,
- * `.` floor.
+ * `S` a service door (shut until something with access opens it), `A` the
+ * armoury cage set into the wall, a space for solid ship with nothing to
+ * draw (between rooms), `.` floor.
  */
 const LAB_WALLS: RealWorldMap = [
   '#########',
@@ -63,7 +65,18 @@ export type FurnitureKind =
   | 'drums'
   | 'mopBucket'
   | 'cleanerBot'
-  | 'janitorCart';
+  | 'janitorCart'
+  | 'messTable'
+  | 'vending'
+  | 'washer'
+  | 'coatRack'
+  | 'lockers'
+  | 'securityDesk'
+  | 'dryerStack'
+  | 'foldingTable'
+  | 'hamper'
+  | 'linenLine'
+  | 'noticeBoard';
 
 /** Which way a piece's front looks. */
 export type Facing = 'north' | 'east' | 'south' | 'west';
@@ -98,7 +111,20 @@ const SHAPE: Readonly<Record<FurnitureKind, Shape>> = {
   drums: { width: 1.5, depth: 0.8, top: 1.0 },
   mopBucket: { radius: 0.5, top: 0.7 },
   cleanerBot: { radius: 0.6, top: 0.7 },
-  janitorCart: { width: 1.3, depth: 0.7, top: 1.1 }
+  janitorCart: { width: 1.3, depth: 0.7, top: 1.1 },
+  messTable: { width: 3, depth: 1.2, top: 0.8 },
+  vending: { width: 1.3, depth: 0.9, top: 2.3 },
+  washer: { width: 1.1, depth: 1, top: 1.1 },
+  coatRack: { width: 2.6, depth: 0.6, top: 2 },
+  lockers: { width: 2.4, depth: 0.6, top: 2.3 },
+  securityDesk: { width: 2.6, depth: 1, top: 0.95 },
+  dryerStack: { width: 1.1, depth: 1, top: 2.2 },
+  foldingTable: { width: 2.2, depth: 0.9, top: 0.9 },
+  hamper: { width: 0.9, depth: 0.7, top: 0.9 },
+  // Sheets hung out to dry: you can't walk through them, and nobody sees through them.
+  linenLine: { width: 3.6, depth: 0.2, top: 2.1 },
+  // Pinned flat to a wall: a notice board, nothing to bump into.
+  noticeBoard: { width: 1.4, depth: 0.05, top: 2.1 }
 };
 
 /** The four grid neighbours, as (dx, dz) steps: east, west, south, north. */
@@ -143,9 +169,31 @@ export interface RealWorldRoom {
   offset?: { x: number; y: number; z: number };
   /** A `VENT_CELL`-wide opening in the ceiling, centred here: where a duct drops in. */
   hatch?: { x: number; z: number };
+  /** More `VENT_CELL`-wide openings in the ceiling, under duct grates you can only look down through. */
+  skylights?: ReadonlyArray<{ x: number; z: number }>;
   /** Cells (their centres) with a light strip. Without it, every other floor cell has one. */
   strips?: ReadonlyArray<{ x: number; z: number }>;
+  /**
+   * How the walls of an area are done up, so each room reads as its own
+   * place: the floor cells inside `area` get `finish` on the walls round them.
+   */
+  finishes?: ReadonlyArray<{ area: Area; finish: WallFinish }>;
 }
+
+/** A rectangle of the floor, in room coordinates. */
+export interface Area {
+  x0: number;
+  z0: number;
+  x1: number;
+  z1: number;
+}
+
+/** Tiled for the wet rooms, warm panelling where the crew eat, a red band where security sits. */
+export type WallFinish = 'tiles' | 'panelling' | 'security' | 'service';
+
+/** Whether (x, z) is inside `area`. */
+export const isInside = (area: Area, x: number, z: number) =>
+  x >= area.x0 && x <= area.x1 && z >= area.z0 && z <= area.z1;
 
 /**
  * The lab's vent: in through the east wall, a bend north in the dark, east
@@ -196,11 +244,15 @@ export function cellAt(map: RealWorldMap, x: number, z: number): string {
   return map[Math.floor(z / REAL_WORLD_CELL)]?.[Math.floor(x / REAL_WORLD_CELL)] ?? '#';
 }
 
-const SOLID_CELLS = new Set(['#', 'V', 'D', 'M']);
+const SOLID_CELLS = new Set(['#', 'V', 'D', 'M', 'A', ' ']);
 
-/** Off the map counts as wall, so nothing walks out of the world. */
-export function isSolidAt(map: RealWorldMap, x: number, z: number): boolean {
-  return SOLID_CELLS.has(cellAt(map, x, z));
+/**
+ * Off the map counts as wall, so nothing walks out of the world. A service
+ * door (`S`) is solid until `doorsOpen`.
+ */
+export function isSolidAt(map: RealWorldMap, x: number, z: number, doorsOpen = false): boolean {
+  const cell = cellAt(map, x, z);
+  return cell === 'S' ? !doorsOpen : SOLID_CELLS.has(cell);
 }
 
 export interface CellCenter {

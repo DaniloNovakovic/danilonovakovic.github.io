@@ -1,5 +1,5 @@
 import type { Explorer } from './explorer';
-import { LAB_ROOM, LAB_VENT } from './labRoom';
+import { LAB_ROOM, type RealWorldRoom } from './labRoom';
 import { floorGrateCentre } from './vent';
 
 /**
@@ -48,14 +48,15 @@ export const startGlimpse = (): Glimpse => ({
   firstRoundDone: false
 });
 
-function cue(explorer: Explorer) {
-  const peek = floorGrateCentre(LAB_VENT, 'g');
-  const entered = explorer.room === LAB_ROOM && explorer.crawl >= 0.5;
+/** `room` is the one whose vent has the bolted grate. */
+function cue(explorer: Explorer, room: RealWorldRoom) {
+  const peek = room.vent && floorGrateCentre(room.vent, 'g');
+  const entered = explorer.room === room && explorer.crawl >= 0.5;
   const { x, z } = explorer.walker;
   return {
     entered,
     watching: entered && !!peek && Math.hypot(x - peek.x, z - peek.z) < WATCH_RADIUS,
-    left: explorer.room !== LAB_ROOM
+    left: explorer.room !== room
   };
 }
 
@@ -71,9 +72,9 @@ function lingerOver(glimpse: Glimpse, left: boolean) {
 
 const enter = (glimpse: Glimpse, phase: GlimpsePhase): Glimpse => ({ ...glimpse, phase, waited: 0 });
 
-/** One frame of the round, cued by where Danilo is. */
-export function stepGlimpse(glimpse: Glimpse, explorer: Explorer, dt: number): Glimpse {
-  const { entered, watching, left } = cue(explorer);
+/** One frame of the round, cued by where Danilo is in the duct of `room` (the lab's, by default). */
+export function stepGlimpse(glimpse: Glimpse, explorer: Explorer, dt: number, room: RealWorldRoom = LAB_ROOM): Glimpse {
+  const { entered, watching, left } = cue(explorer, room);
   const waited = glimpse.waited + dt;
   switch (glimpse.phase) {
     case 'offstage':

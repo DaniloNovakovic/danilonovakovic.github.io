@@ -39,11 +39,11 @@ export function mesh(geometry: ConstructorParameters<typeof Mesh>[0], material: 
 }
 
 /** See-through glass: no depth and no ink, so whatever is inside gets the outlines. */
-function glass(color: number, opacity = 0.28) {
+export function glass(color: number, opacity = 0.28) {
   return new MeshToonMaterial({ color, transparent: true, opacity, depthWrite: false, side: DoubleSide });
 }
 
-function noInk<T extends Object3D>(object: T): T {
+export function noInk<T extends Object3D>(object: T): T {
   object.userData.noInk = true;
   return object;
 }

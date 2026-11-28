@@ -1,20 +1,18 @@
-import { BoxGeometry, Group, Mesh, MeshBasicMaterial, PointLight, type Material } from 'three';
+import { BoxGeometry, Group, Mesh, PointLight, type Material } from 'three';
 import {
   ductCells,
   floorGrateCentre,
-  GLIMPSE,
   grateCentre,
   isOpenDuct,
   mouthOf,
   NEIGHBOURS,
+  REAL_WORLD_WALL_HEIGHT,
   SHIP_DECK_DROP,
   VENT_CELL,
   type DuctCell,
-  type Glimpse,
   type Pryable,
   type VentDuct
 } from '@/game/core/realWorld';
-import { insectResearcher, type Alien } from './insectAlien';
 import { ventGrate, type PropKit } from './labProps';
 import { NIGHT_LAB } from './toon';
 
@@ -22,10 +20,6 @@ import { NIGHT_LAB } from './toon';
 const DUCT = 0x262f5a;
 const DUCT_SEAM = 0x1d2340;
 const SHEET = 0.06;
-/** How far below the duct floor the corridor floor is: the ship's deck, like the storeroom's. */
-const CORRIDOR_DROP = SHIP_DECK_DROP;
-const CORRIDOR_WIDTH = 3.2;
-const CORRIDOR_LENGTH = 18;
 const GRATE_FALL_SECONDS = 0.45;
 /** How far prying bends the grate's top out, in radians. */
 const PRY_BEND = 0.28;
@@ -100,72 +94,35 @@ function floorGrate(kit: PropKit, bolted: boolean) {
   return group;
 }
 
-/** The ship corridor, lit, running along its local z with its floor `CORRIDOR_DROP` below the group. */
-function corridor(kit: PropKit) {
-  const group = new Group();
-  const bottom = -CORRIDOR_DROP;
-  const strip = new MeshBasicMaterial({ color: NIGHT_LAB.strip });
-  group.add(box(CORRIDOR_WIDTH, 0.1, CORRIDOR_LENGTH, kit.toon(0x3e4c8f), 0, bottom - 0.05));
-  // A yellow line down the middle, light strips along the foot of the walls.
-  group.add(box(0.12, 0.02, CORRIDOR_LENGTH, strip, 0, bottom + 0.01));
-  // The walls stop short of the duct floor, so the two never share a face.
-  const wallHeight = CORRIDOR_DROP - 0.15;
-  for (const side of [-1, 1]) {
-    const wall = box(0.2, wallHeight, CORRIDOR_LENGTH, kit.toon(NIGHT_LAB.wall), 0, bottom + wallHeight / 2);
-    wall.position.x = side * (CORRIDOR_WIDTH / 2 + 0.1);
-    group.add(wall, box(0.06, 0.12, CORRIDOR_LENGTH, strip, side * (CORRIDOR_WIDTH / 2 - 0.02), bottom + 0.35));
+/** A short dark shaft under a floor grate, down to the deck's ceiling, so nothing shows round its edges. */
+function shaftUnder(kit: PropKit, vent: VentDuct, centre: { x: number; z: number }, root: Group) {
+  const depth = SHIP_DECK_DROP - REAL_WORLD_WALL_HEIGHT;
+  const material = kit.toon(DUCT_SEAM);
+  for (const side of NEIGHBOURS) {
+    const wall = box(side[0] ? SHEET : VENT_CELL, depth, side[1] ? SHEET : VENT_CELL, material);
+    wall.position.set(
+      centre.x + side[0] * (VENT_CELL / 2 + SHEET / 2),
+      vent.floor - depth / 2,
+      centre.z + side[1] * (VENT_CELL / 2 + SHEET / 2)
+    );
+    root.add(wall);
   }
-  const light = new PointLight(NIGHT_LAB.strip, 6, 7, 1);
-  light.position.y = bottom + 2.2;
-  group.add(light);
-  return group;
 }
 
 /**
- * A researcher's round below the far grate, as the core `Glimpse` has it:
- * walks in, stops right under it with its antennae working the air, walks
- * on. It never looks up (yet).
+ * The bolted grate over the corridor: warm light comes up through its slats,
+ * the only light in the duct. Below is the real ship deck (built with its own
+ * room), where the researcher walks its round.
  */
-function patrol(alien: Alien, reducedMotion: boolean) {
-  const place = (along: number, stride: number, twitch: number, seconds: number) => {
-    alien.root.position.z = along;
-    alien.root.visible = Math.abs(along) < CORRIDOR_LENGTH / 2 + 0.5;
-    alien.pose(stride, twitch, seconds);
-  };
-  // Under reduced motion it just stands there, reading the clipboard.
-  if (reducedMotion) place(GLIMPSE.stop, 0, 0, 0);
-  let glimpse: Glimpse | null = null;
-  return {
-    show: (next: Glimpse) => (glimpse = next),
-    update(seconds: number) {
-      if (reducedMotion || !glimpse) return;
-      const standing = glimpse.phase === 'lingering';
-      place(glimpse.along, standing ? 0 : glimpse.along * 5.5, standing ? 1 : 0.2, seconds);
-    }
-  };
-}
-
-/** Below the far grate: the corridor across the duct's last leg, the light coming up, the one walking past. */
-function belowFarGrate(kit: PropKit, vent: VentDuct, root: Group) {
-  const far = floorGrateCentre(vent, 'g');
-  if (!far) return null;
+function peekGrate(kit: PropKit, vent: VentDuct, root: Group) {
+  const peek = floorGrateCentre(vent, 'g');
+  if (!peek) return;
   const grate = floorGrate(kit, true);
-  grate.position.set(far.x, vent.floor - 0.03, far.z);
-  // Warm light comes up through the slats: the only light in the duct.
+  grate.position.set(peek.x, vent.floor - 0.03, peek.z);
   const glow = new PointLight(NIGHT_LAB.strip, 1.1, 3.5, 1.5);
-  glow.position.set(far.x, vent.floor + 0.25, far.z);
-  // The corridor runs across the last leg: along z when that leg runs along x.
-  const lastLegAlongX = isOpenDuct(vent, far.x - VENT_CELL, far.z) || isOpenDuct(vent, far.x + VENT_CELL, far.z);
-  const hall = new Group();
-  hall.position.set(far.x, vent.floor, far.z);
-  hall.rotation.y = lastLegAlongX ? 0 : Math.PI / 2;
-  hall.add(corridor(kit));
-  const alien = insectResearcher(kit);
-  // A little off to one side of the grate, so it shows past the slats.
-  alien.root.position.set(0.5, -CORRIDOR_DROP, 0);
-  hall.add(alien.root);
-  root.add(grate, glow, hall);
-  return patrol(alien, kit.reducedMotion);
+  glow.position.set(peek.x, vent.floor + 0.25, peek.z);
+  root.add(grate, glow);
+  shaftUnder(kit, vent, peek, root);
 }
 
 /** The lab-side grate, hinged at its foot: prying bends its top out, opening tips it flat onto the floor. */
@@ -234,17 +191,7 @@ interface GrateView {
 function dropGrate(kit: PropKit, vent: VentDuct, root: Group): GrateView | null {
   const centre = floorGrateCentre(vent, 'o');
   if (!centre) return null;
-  const shaftDepth = 0.3;
-  const shaft = kit.toon(DUCT_SEAM);
-  for (const side of NEIGHBOURS) {
-    const wall = box(side[0] ? SHEET : VENT_CELL, shaftDepth, side[1] ? SHEET : VENT_CELL, shaft);
-    wall.position.set(
-      centre.x + side[0] * (VENT_CELL / 2 + SHEET / 2),
-      vent.floor - shaftDepth / 2,
-      centre.z + side[1] * (VENT_CELL / 2 + SHEET / 2)
-    );
-    root.add(wall);
-  }
+  shaftUnder(kit, vent, centre, root);
   const grate = floorGrate(kit, false);
   const top = vent.floor - 0.03;
   const bottom = vent.floor - SHIP_DECK_DROP + 0.04;
@@ -291,15 +238,12 @@ export interface LabVent {
   setPry(grate: Pryable, progress: number): void;
   /** The grate comes off: the lab one tips onto the floor, the drop one falls through. */
   open(grate: Pryable): void;
-  /** Where the researcher below the bolted grate is on its round. */
-  showGlimpse(glimpse: Glimpse): void;
   update(seconds: number): void;
 }
 
 /**
  * The lab vent from its plan: the grate to pry off, the dark duct, the bolted
- * grate over the corridor (and who walks there), and the grate that drops
- * into the storeroom.
+ * grate over the corridor, and the grate that drops into the storeroom.
  */
 export function buildVent(kit: PropKit, vent: VentDuct): LabVent {
   const root = new Group();
@@ -309,16 +253,14 @@ export function buildVent(kit: PropKit, vent: VentDuct): LabVent {
   const grates: Partial<Record<Pryable, GrateView>> = { grate: lab };
   const drop = dropGrate(kit, vent, root);
   if (drop) grates.dropGrate = drop;
-  const below = belowFarGrate(kit, vent, root);
+  peekGrate(kit, vent, root);
   return {
     root,
     setPry: (grate, progress) => grates[grate]?.setPry(progress),
     open: (grate) => grates[grate]?.open(),
-    showGlimpse: (glimpse) => below?.show(glimpse),
     update(seconds) {
       lab.update(seconds);
       drop?.update(seconds);
-      below?.update(seconds);
     }
   };
 }

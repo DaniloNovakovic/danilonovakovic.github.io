@@ -198,42 +198,83 @@ export function janitorCart(kit: PropKit) {
   return group;
 }
 
-/**
- * A cleaning drone asleep on its dock: a low shell on six folded legs, a
- * brush skirt, a dark lens, and a dim standby light breathing slowly. One day
- * they'll wake up.
- */
-export function cleanerBot(kit: PropKit, seed: number) {
+/** A cleaning drone's dock: a plate on the floor, a charging post at the wall behind. */
+export function droneDock(kit: PropKit) {
   const group = new Group();
-  group.scale.setScalar(1.25);
+  group.scale.setScalar(DRONE_SCALE);
+  group.add(mesh(new BoxGeometry(1.05, 0.04, 1.05), kit.toon(NIGHT_LAB.cable), 0, 0.02, -0.05));
+  group.add(mesh(new BoxGeometry(0.5, 0.55, 0.12), kit.toon(DRONE_DARK), 0, 0.3, -0.52));
+  return group;
+}
+
+const DRONE_SCALE = 1.25;
+const DRONE_AWAKE = 0x7fe0c8;
+
+export interface DroneBody {
+  root: Group;
+  /** Awake: the standby light goes steady and the lens lights up. */
+  wake(): void;
+  /** Rolling: the legs paddle. */
+  pose(seconds: number, moving: boolean): void;
+}
+
+/**
+ * A cleaning drone: a low shell on six folded legs, a brush skirt, a dark
+ * lens, and a dim standby light breathing slowly while it sleeps on its dock.
+ * Woken, it lights up and rolls off on its round.
+ */
+export function droneBody(kit: PropKit, seed: number): DroneBody {
+  const root = new Group();
+  root.scale.setScalar(DRONE_SCALE);
   const shell = kit.toon(DRONE);
   const dark = kit.toon(DRONE_DARK);
-  // The dock: a plate on the floor, a charging post at the wall behind.
-  group.add(mesh(new BoxGeometry(1.05, 0.04, 1.05), kit.toon(NIGHT_LAB.cable), 0, 0.02, -0.05));
-  group.add(mesh(new BoxGeometry(0.5, 0.55, 0.12), dark, 0, 0.3, -0.52));
   const body = new Group();
   body.position.y = 0.06;
   // Settled a little off-true on its legs, each one differently.
-  body.rotation.set((seed % 2 ? 1 : -1) * 0.04, (seed - 0.5) * 0.3, 0.03);
+  const slump = { x: (seed % 2 ? 1 : -1) * 0.04, y: (seed - 0.5) * 0.3, z: 0.03 };
+  body.rotation.set(slump.x, slump.y, slump.z);
   const dome = mesh(new SphereGeometry(0.45, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2), shell, 0, 0.14);
   dome.scale.y = 0.6;
   body.add(dome, mesh(new CylinderGeometry(0.47, 0.42, 0.14, 14), dark, 0, 0.07));
   // A seam down the back, like wing cases.
   body.add(mesh(new BoxGeometry(0.03, 0.03, 0.8), dark, 0, 0.42, -0.02));
+  const legs: Group[] = [];
   for (const side of [-1, 1]) {
     for (const along of [-0.25, 0, 0.25]) {
-      const leg = mesh(new BoxGeometry(0.22, 0.04, 0.05), dark, side * 0.5, 0.05, along);
-      leg.rotation.z = side * -0.5;
+      const leg = new Group();
+      leg.position.set(side * 0.42, 0.05, along);
+      const piece = mesh(new BoxGeometry(0.22, 0.04, 0.05), dark, side * 0.08, 0);
+      piece.rotation.z = side * -0.5;
+      leg.add(piece);
+      leg.userData.side = side;
+      legs.push(leg);
       body.add(leg);
     }
   }
   // The lens in front, dead dark; the standby light above it.
-  body.add(mesh(new SphereGeometry(0.1, 10, 8), kit.toon(NIGHT_LAB.ink), 0, 0.2, 0.38));
+  const lens = kit.toon(NIGHT_LAB.ink, {});
+  body.add(mesh(new SphereGeometry(0.1, 10, 8), lens, 0, 0.2, 0.38));
   const standby = new MeshBasicMaterial({ color: NIGHT_LAB.alert });
   body.add(mesh(new SphereGeometry(0.025, 6, 4), standby, 0, 0.33, 0.33));
+  let awake = false;
   if (!kit.reducedMotion) {
-    kit.animate((t) => standby.color.setHex(Math.sin(t * 0.8 + seed * 2) > 0.6 ? NIGHT_LAB.alert : DRONE_DARK));
+    kit.animate((t) => {
+      if (!awake) standby.color.setHex(Math.sin(t * 0.8 + seed * 2) > 0.6 ? NIGHT_LAB.alert : DRONE_DARK);
+    });
   }
-  group.add(body);
-  return group;
+  root.add(body);
+  return {
+    root,
+    wake() {
+      awake = true;
+      standby.color.setHex(DRONE_AWAKE);
+      lens.color.setHex(DRONE_AWAKE);
+      body.rotation.set(0, 0, 0);
+    },
+    pose(seconds, moving) {
+      if (kit.reducedMotion || !moving) return;
+      legs.forEach((leg, i) => (leg.rotation.y = Math.sin(seconds * 9 + i * 1.3) * 0.35 * leg.userData.side));
+      body.position.y = 0.06 + Math.abs(Math.sin(seconds * 9)) * 0.012;
+    }
+  };
 }

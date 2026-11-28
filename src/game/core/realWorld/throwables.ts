@@ -9,8 +9,8 @@ import {
   type RealWorldRoom
 } from './labRoom';
 
-/** What can be picked up in the lab, and how it bounces. */
-export type ThrowableKind = 'ball' | 'paper' | 'brain';
+/** What can be picked up, in the lab and on the deck, and how it bounces. */
+export type ThrowableKind = 'ball' | 'paper' | 'brain' | 'can' | 'spanner';
 
 /** A loose thing in the room: position, velocity, size. */
 export interface Throwable {
@@ -24,13 +24,18 @@ export interface Throwable {
   vz: number;
 }
 
-const SHAPE: Readonly<Record<ThrowableKind, { radius: number; bounce: number; drag: number }>> = {
-  // A rubber ball from somebody's old life: very bouncy.
-  ball: { radius: 0.2, bounce: 0.78, drag: 0.6 },
-  // A sketchbook page, crumpled: barely bounces, slows fast.
-  paper: { radius: 0.16, bounce: 0.25, drag: 2.5 },
+/** `loudness`: how far off an alien hears it land (0: not at all). */
+const SHAPE: Readonly<Record<ThrowableKind, { radius: number; bounce: number; drag: number; loudness: number }>> = {
+  // A rubber ball from somebody's old life: very bouncy, a soft thud.
+  ball: { radius: 0.2, bounce: 0.78, drag: 0.6, loudness: 5 },
+  // A sketchbook page, crumpled: barely bounces, slows fast, makes no sound.
+  paper: { radius: 0.16, bounce: 0.25, drag: 2.5, loudness: 0 },
   // Squishy: lands with a flop.
-  brain: { radius: 0.2, bounce: 0.35, drag: 1.6 }
+  brain: { radius: 0.2, bounce: 0.35, drag: 1.6, loudness: 2 },
+  // An empty drinks can: rattles off everything.
+  can: { radius: 0.1, bounce: 0.45, drag: 1.2, loudness: 9 },
+  // A spanner off the cleaners' cart: one loud clang.
+  spanner: { radius: 0.14, bounce: 0.2, drag: 2.2, loudness: 11 }
 };
 
 export const throwableRadius = (kind: ThrowableKind) => SHAPE[kind].radius;
@@ -54,6 +59,39 @@ export const LAB_THROWABLES: readonly Throwable[] = [
   { id: 'paper', kind: 'paper', x: 3.9, y: 1.11, z: 13.9, vx: 0, vy: 0, vz: 0 },
   { id: 'brain', kind: 'brain', x: 14.4, y: 1.25, z: 12.4, vx: 0, vy: 0, vz: 0 }
 ];
+
+/**
+ * Where the deck's loose things start (room coordinates): a spanner on the
+ * cleaners' cart in the storeroom, empty cans in the break room, one on the
+ * laundry's folding table. Thrown, they clatter, and the aliens come to look.
+ */
+export const DECK_THROWABLES: readonly Throwable[] = [
+  { id: 'spanner', kind: 'spanner', x: 21.4, y: 1.24, z: 24.4, vx: 0, vy: 0, vz: 0 },
+  { id: 'can-table', kind: 'can', x: 8.9, y: 0.9, z: 5.6, vx: 0, vy: 0, vz: 0 },
+  { id: 'can-machine', kind: 'can', x: 15.3, y: 0.1, z: 4.6, vx: 0, vy: 0, vz: 0 },
+  { id: 'can-laundry', kind: 'can', x: 8.1, y: 1, z: 14.8, vx: 0, vy: 0, vz: 0 }
+];
+
+/** A sound something made, where it made it, and how far off it carries. */
+export interface Noise {
+  x: number;
+  z: number;
+  reach: number;
+}
+
+/** Hitting something faster than this makes a sound. */
+const CLATTER_SPEED = 2.5;
+
+/**
+ * The sound a step from `before` to `after` made, if it hit something hard
+ * enough: its velocity changed by more than gravity and friction account for.
+ */
+export function clatter(before: Throwable, after: Throwable, dt: number): Noise | null {
+  const { loudness } = SHAPE[after.kind];
+  if (!loudness) return null;
+  const hit = Math.hypot(after.vx - before.vx, after.vy - before.vy + GRAVITY * dt, after.vz - before.vz);
+  return hit > CLATTER_SPEED ? { x: after.x, z: after.z, reach: loudness } : null;
+}
 
 /** The highest surface under (x, z): the floor, or the top of a piece of furniture. */
 function groundAt(room: RealWorldRoom, x: number, z: number): number {

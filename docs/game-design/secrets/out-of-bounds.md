@@ -420,12 +420,77 @@ builds on this (the Coop, `disconnect --all`) is parked in #173.
      light tubes and bulbs; boxes, pod fluid, folded spare lab coats), a mop
      bucket and a pegboard of tools by the door, drums of cleaning fluid, a
      cleaner's cart left out in the middle, and two cleaning drones asleep on
-     their docks, standby lights breathing. One light strip at the back. Its door, onto the corridor,
-     stays locked for now. The sneaking starts here.
+     their docks, standby lights breathing. One light strip at the back. Its
+     door, onto the corridor, is a service door with a drone on its sign:
+     aiming at it says it opens for cleaning drones. The sneaking starts here.
    - Loose things stay in the lab: crawling takes both hands, so whatever
      you're holding is put down at the vent's mouth.
-   - Later in this step: through the storeroom door, the patrols, light and
-     shadow, checkpoints, and more than one way through.
+
+   **The ship deck** (Danilo, 2026-11-28; the corridor slice). The storeroom
+   is one room of a deck laid out like a working place, rooms off the
+   corridor Danilo looked down into from the vent (same corridor, same strips,
+   the researcher on the same round):
+   - **Out of the storeroom: wake a drone.** Aim at a sleeping drone and hold
+     (click / `E` / the touch **Wake** button). Its lens lights up, it rolls
+     off its dock to the door, the door slides open for it (lamp red to
+     green), and it trundles out on its cleaning beat up and down the
+     corridor. The door stays open; the other drone sleeps on.
+   - **The rooms.** The corridor runs north–south past the storeroom. North:
+     the crew's **break room** (mess table, drinks machine, lockers, a notice
+     board with the crew's mascot). West, alongside the corridor: the
+     **laundry**, laid out the way it's used: washers, a dryer stack and a
+     folding table under the one light; sheets drying across the middle, one
+     line from each wall, a dark zig-zag nobody sees through; racks of clean
+     coats (one officer's jacket among them) at the far end. Each room's walls
+     are done up as its own place: tiles in the laundry, warm panelling in
+     the break room, a red band and hazard chevrons at security. South: the **security
+     post**, where both ways meet: the officer's desk with camera screens
+     (one shows the lab, Danilo's pod empty), lockers, and the **armoury
+     cage** in the south wall with the stun blaster behind bars.
+   - **More than one way through.** Straight down the lit corridor past the
+     researcher, or the long way round: north behind it, through the break
+     room and the dark laundry, in along the lockers.
+   - **Light and shadow.** Each strip throws a pool of light on the floor,
+     drawn exactly as the rules have it. An alien sees you far off in a pool
+     and only right up close in the dark, and only ahead of it (unless you
+     walk into it). Dark spots: between the corridor's pools, the storeroom
+     doorway, a nook at the corridor's south end. A light gem at the bottom
+     of the screen shows how lit you are.
+   - **Two aliens.** The **researcher** from the glimpse (lab coat): a drink
+     at the machine, down the corridor, a sniff under the grate, a look
+     towards security, and back. The **officer** (police-style uniform, cap,
+     holstered blaster): stands at the security desk, watches the corridor
+     door, the room, then the camera screens for a while (the window to
+     slip past). The officer makes up its mind faster.
+   - **Distractions.** Loose things on the deck: a spanner on the cleaners'
+     cart (the first thing you find), empty cans in the break room and on the
+     laundry's folding table. Thrown, they clatter where they land: a ring
+     spreads on the floor out to how far the noise carries (through open
+     doorways, hardly through walls). An alien inside it shows a "?", walks
+     over the way anyone would (round the walls), looks round for a few
+     seconds, and walks back to where it left off. It still sees you on the
+     way. Holding one on the deck, the prompt says it: "the clatter draws
+     them over". The officer is the one this is for: a can lobbed up the
+     corridor's end from the laundry door takes it off the desk.
+   - **Being seen is readable.** A faint pink cone on the floor shows where
+     each alien looks, as long as it would spot you where you stand now. Seen,
+     a "?" fills over its head; past a third it stops and turns to look; full
+     is "!". Out of sight, it calms down and goes back to its round.
+   - **Caught.** "It saw you. A sting in the neck, then nothing…" and **Try
+     again** puts you at the latest checkpoint (the storeroom, then the
+     laundry or the corridor nook), the aliens back on their rounds, the door
+     still open. Non-lethal, as always.
+   - **The end of OB3: the blaster, out of reach.** Reach the cage: the
+     blaster hangs there behind bars, charged and humming, locked in. "To be
+     continued."
+   - Dev: `?mode=interactive&oob=unplugged&rw=deck` wakes up in the storeroom.
+
+   **After the blaster** (Danilo, 2026-11-28): OB4 stays Deus Ex-like. The
+   blaster opens a way, it doesn't close the others: every encounter keeps a
+   sneaking route, a hacking or tool option (a computer that turns cameras
+   off, distractions), waiting it out, and going in blasting. The instinct
+   will be to shoot; letting a player notice that, and that they didn't have
+   to, quietly answers what the aliens are studying.
 
    **The aliens** (Danilo, 2026-11-26). A bit scary, never goofy blobs, and
    never gore: upright insect people, part ant, part machine. A long chitin

@@ -19,12 +19,15 @@ import { NIGHT_LAB } from './toon';
  * forward on a thin neck, glowing compound eyes, hooked mandibles, twitching
  * elbowed antennae, a hunch, claws for hands, reverse-jointed legs, the
  * gaster pushing out behind, and bolted-on steel. They wear what their job
- * needs: researchers a lab coat (later, guards a uniform).
+ * needs: researchers a lab coat, officers a uniform and a cap.
  */
 const CHITIN = 0x3b2440;
 const CHITIN_DARK = 0x24162a;
 const EYE = 0xe0306a;
 const COAT = 0xe4e2ee;
+const UNIFORM = 0x26305c;
+const UNIFORM_TRIM = 0x161c3a;
+const BADGE = 0xd9a63a;
 
 function part(geometry: ConstructorParameters<typeof Mesh>[0], material: Material, x = 0, y = 0, z = 0) {
   const mesh = new Mesh(geometry, material);
@@ -219,5 +222,51 @@ export function insectResearcher(kit: PropKit): Alien {
   const board = part(new BoxGeometry(0.32, 0.02, 0.42), kit.toon(NIGHT_LAB.paper), 0, 0.3, 0.42);
   board.rotation.x = 0.6;
   torso.add(board);
+  return { root: insect.root, pose: poser(insect) };
+}
+
+/**
+ * An officer: a dark uniform buttoned to the collar, shoulder boards and a
+ * badge, a peaked cap pushed back between the antennae, a stun blaster in a
+ * holster, one claw resting on it. Bulkier and more upright than a researcher.
+ */
+export function insectOfficer(kit: PropKit): Alien {
+  const insect = insectBody(kit);
+  const { torso, face } = insect;
+  torso.rotation.x = 0.1;
+  const uniform = kit.toon(UNIFORM);
+  const trim = kit.toon(UNIFORM_TRIM);
+  const badge = kit.toon(BADGE);
+  torso.add(part(new CylinderGeometry(0.26, 0.34, 0.8, 10), uniform, 0, 0.3));
+  torso.add(part(new CylinderGeometry(0.17, 0.26, 0.2, 10), uniform, 0, 0.78));
+  // The belt, the holster on the right, the blaster's grip sticking out of it.
+  torso.add(part(new CylinderGeometry(0.35, 0.35, 0.08, 10), trim, 0, -0.06));
+  const holster = part(new BoxGeometry(0.1, 0.24, 0.16), trim, 0.36, -0.1, 0.02);
+  holster.add(part(new BoxGeometry(0.08, 0.12, 0.1), kit.toon(NIGHT_LAB.steel), 0, 0.16, -0.02));
+  holster.add(part(new SphereGeometry(0.03, 6, 4), new MeshBasicMaterial({ color: NIGHT_LAB.fluid }), 0, 0.2, 0.06));
+  torso.add(holster);
+  // Badge, buttons, shoulder boards.
+  torso.add(part(new BoxGeometry(0.09, 0.1, 0.02), badge, -0.12, 0.55, 0.27));
+  for (let i = 0; i < 3; i++) torso.add(part(new SphereGeometry(0.018, 5, 4), badge, 0, 0.62 - i * 0.18, 0.29));
+  for (const side of [-1, 1]) torso.add(part(new BoxGeometry(0.16, 0.04, 0.12), badge, side * 0.24, 0.8, 0));
+  // Arms: sleeves to the elbow; the right claw rests on the holster, the left hangs.
+  for (const side of [-1, 1]) {
+    const arm = limb(uniform, kit.toon(CHITIN), 0.4, 0.42, 0.07);
+    arm.hip.position.set(side * 0.3, 0.72, 0);
+    arm.hip.rotation.set(side > 0 ? 0.05 : -0.15, 0, side * 0.18);
+    arm.knee.rotation.x = side > 0 ? -0.45 : -0.6;
+    arm.knee.add(claws(kit.toon(CHITIN_DARK), 0.12).translateY(-0.42));
+    torso.add(arm.hip);
+  }
+  // The cap: a crown, a peak, a badge; perched behind the antennae.
+  const cap = new Group();
+  cap.position.set(0, 0.2, -0.04);
+  cap.rotation.x = -0.25;
+  cap.add(part(new CylinderGeometry(0.2, 0.17, 0.12, 12), uniform));
+  cap.add(part(new CylinderGeometry(0.21, 0.21, 0.03, 12), trim, 0, -0.06));
+  const peak = part(new BoxGeometry(0.26, 0.02, 0.14), trim, 0, -0.06, 0.2);
+  peak.rotation.x = 0.25;
+  cap.add(peak, part(new BoxGeometry(0.07, 0.06, 0.02), badge, 0, 0.0, 0.2));
+  face.add(cap);
   return { root: insect.root, pose: poser(insect) };
 }

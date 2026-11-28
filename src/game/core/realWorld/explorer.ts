@@ -1,12 +1,12 @@
 import type { Point3 } from './aim';
 import type { Opened } from './interactions';
 import { LAB_ROOM, type RealWorldRoom } from './labRoom';
-import { STOREROOM } from './storeroom';
+import { SHIP_DECK } from './shipDeck';
 import { crawlAmount, eyeHeightFor, isOverDrop } from './vent';
 import { stepWalker, type Walker, type WalkInput } from './walker';
 
 /** Which room a room's vent drops into. */
-const DROPS_INTO: ReadonlyMap<RealWorldRoom, RealWorldRoom> = new Map([[LAB_ROOM, STOREROOM]]);
+const DROPS_INTO: ReadonlyMap<RealWorldRoom, RealWorldRoom> = new Map([[LAB_ROOM, SHIP_DECK]]);
 
 /** Dropping through a hatch: a short fall, no control. */
 export const FALL_SECONDS = 0.5;
@@ -39,8 +39,8 @@ export function eyeOf(explorer: Explorer): Point3 {
 }
 
 /**
- * One frame: walk or crawl (with the vent grate off, the duct is open), and
- * over the opened drop grate, fall through into the room below, landing
+ * One frame: walk or crawl (with the vent grate off, the duct is open; with
+ * the service door open, it's a doorway), and over the opened drop grate, fall through into the room below, landing
  * under its hatch. A fall plays out before control comes back.
  */
 export function stepExplorer(explorer: Explorer, input: WalkInput, dt: number, opened: Opened): Explorer {
@@ -49,7 +49,7 @@ export function stepExplorer(explorer: Explorer, input: WalkInput, dt: number, o
     return { ...explorer, fall: t >= 1 ? null : { ...explorer.fall, t } };
   }
   const { room } = explorer;
-  const walker = stepWalker(room, explorer.walker, input, dt, opened.grate);
+  const walker = stepWalker(room, explorer.walker, input, dt, { vent: opened.grate, doors: opened.serviceDoor });
   const moved = { ...explorer, walker, crawl: crawlAmount(room.vent, opened.grate, walker.x, walker.z) };
   const below = DROPS_INTO.get(room);
   if (below && isOverDrop(room.vent, opened.dropGrate, walker.x, walker.z)) {

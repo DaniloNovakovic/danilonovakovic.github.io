@@ -31,8 +31,16 @@ const ACCELERATION = 14;
 /** On hands and knees, world units per second. */
 export const REAL_WORLD_CRAWL_SPEED = 1.8;
 
-function isBlockedInRoom(room: RealWorldRoom, x: number, z: number, edgeX: number, edgeZ: number): boolean {
-  if (isSolidAt(room.walls, edgeX, edgeZ)) return true;
+/** What's open for walking through: the vent's grate, and the room's service doors. */
+export interface Ways {
+  vent: boolean;
+  doors: boolean;
+}
+
+const SHUT: Ways = { vent: false, doors: false };
+
+function isBlockedInRoom(room: RealWorldRoom, ways: Ways, x: number, z: number, edgeX: number, edgeZ: number) {
+  if (isSolidAt(room.walls, edgeX, edgeZ, ways.doors)) return true;
   return footprintsOf(room).some((footprint) => distanceTo(footprint, x, z) < REAL_WORLD_PLAYER_RADIUS);
 }
 
@@ -43,29 +51,24 @@ function isBlockedInRoom(room: RealWorldRoom, x: number, z: number, edgeX: numbe
  */
 function isBlocked(
   room: RealWorldRoom,
-  ventOpen: boolean,
+  ways: Ways,
   x: number,
   z: number,
   a: readonly [number, number],
   b: readonly [number, number]
 ): boolean {
-  if (!isBlockedInRoom(room, x, z, ...a) && !isBlockedInRoom(room, x, z, ...b)) return false;
+  if (!isBlockedInRoom(room, ways, x, z, ...a) && !isBlockedInRoom(room, ways, x, z, ...b)) return false;
   const vent = room.vent;
-  return !(ventOpen && vent && isOpenDuct(vent, ...a) && isOpenDuct(vent, ...b));
+  return !(ways.vent && vent && isOpenDuct(vent, ...a) && isOpenDuct(vent, ...b));
 }
 
 /**
  * Advance a walker by `dt` seconds. Each axis moves on its own, so walking
  * into a wall at an angle slides along it instead of sticking. With the vent
- * open, the walker can duck into the duct and crawls, slower, inside it.
+ * open, the walker can duck into the duct and crawls, slower, inside it;
+ * an open service door is a doorway.
  */
-export function stepWalker(
-  room: RealWorldRoom,
-  walker: Walker,
-  input: WalkInput,
-  dt: number,
-  ventOpen = false
-): Walker {
+export function stepWalker(room: RealWorldRoom, walker: Walker, input: WalkInput, dt: number, ways = SHUT): Walker {
   let { forward, strafe } = input;
   const length = Math.hypot(forward, strafe);
   if (length > 1) {
@@ -74,7 +77,7 @@ export function stepWalker(
   }
   const sin = Math.sin(input.yaw);
   const cos = Math.cos(input.yaw);
-  const crawl = crawlAmount(room.vent, ventOpen, walker.x, walker.z);
+  const crawl = crawlAmount(room.vent, ways.vent, walker.x, walker.z);
   const speed = REAL_WORLD_WALK_SPEED + (REAL_WORLD_CRAWL_SPEED - REAL_WORLD_WALK_SPEED) * crawl;
   const targetVx = (-sin * forward + cos * strafe) * speed;
   const targetVz = (-cos * forward - sin * strafe) * speed;
@@ -86,10 +89,10 @@ export function stepWalker(
   let { x, z } = walker;
   const nextX = x + vx * dt;
   const edgeX = nextX + Math.sign(vx) * r;
-  if (!isBlocked(room, ventOpen, nextX, z, [edgeX, z - r], [edgeX, z + r])) x = nextX;
+  if (!isBlocked(room, ways, nextX, z, [edgeX, z - r], [edgeX, z + r])) x = nextX;
   const nextZ = z + vz * dt;
   const edgeZ = nextZ + Math.sign(vz) * r;
-  if (!isBlocked(room, ventOpen, x, nextZ, [x - r, edgeZ], [x + r, edgeZ])) z = nextZ;
+  if (!isBlocked(room, ways, x, nextZ, [x - r, edgeZ], [x + r, edgeZ])) z = nextZ;
 
   return { x, z, vx, vz };
 }
