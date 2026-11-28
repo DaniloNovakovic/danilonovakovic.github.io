@@ -1,0 +1,34 @@
+/*
+ * The static page's doodle waves hello: two stepped (paper-like) waves, then a
+ * rest. Only with `prefers-reduced-motion: no-preference`; otherwise the arm
+ * just stays raised.
+ */
+.player-doodle-arm {
+  transform-box: view-box;
+  transform-origin: 34px 29px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .player-doodle-arm {
+    animation: player-doodle-wave 3.2s step-end infinite;
+  }
+}
+
+@keyframes player-doodle-wave {
+  0% {
+    transform: rotate(0deg);
+  }
+  8% {
+    transform: rotate(18deg);
+  }
+  16% {
+    transform: rotate(0deg);
+  }
+  24% {
+    transform: rotate(18deg);
+  }
+  32%,
+  100% {
+    transform: rotate(0deg);
+  }
+}
