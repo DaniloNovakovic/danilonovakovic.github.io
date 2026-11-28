@@ -1,16 +1,17 @@
 /*
- * The static page's doodle waves hello: two stepped (paper-like) waves, then a
- * rest. Only with `prefers-reduced-motion: no-preference`; otherwise the arm
- * just stays raised.
+ * The static page's doodle waves hello once when it scrolls into view, in
+ * stepped (paper-like) frames, then drops its arm. Under reduced motion the arm
+ * just hangs at its side.
  */
 .player-doodle-arm {
   transform-box: view-box;
   transform-origin: 34px 29px;
+  transform: rotate(128deg);
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .player-doodle-arm {
-    animation: player-doodle-wave 3.2s step-end infinite;
+  .player-doodle[data-waving] .player-doodle-arm {
+    animation: player-doodle-wave 1.6s step-end both;
   }
 }
 
@@ -18,17 +19,22 @@
   0% {
     transform: rotate(0deg);
   }
-  8% {
+  18% {
     transform: rotate(18deg);
   }
-  16% {
+  36% {
     transform: rotate(0deg);
   }
-  24% {
+  54% {
     transform: rotate(18deg);
   }
-  32%,
+  72% {
+    transform: rotate(0deg);
+  }
+  86% {
+    transform: rotate(65deg);
+  }
   100% {
-    transform: rotate(0deg);
+    transform: rotate(128deg);
   }
 }
