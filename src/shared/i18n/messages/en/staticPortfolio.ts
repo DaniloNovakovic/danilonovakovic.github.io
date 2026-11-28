@@ -4,7 +4,6 @@ export const staticPortfolioMessages = {
   interactive: 'Interactive',
   eyebrow: 'Portfolio - Static edition',
   role: 'Software Engineer · Frontend focus · Design Systems',
-  avatarCaption: 'Me, in sketch form',
   basedIn: (location: string) => `Based in ${location}`,
   closingTitle: 'Thanks for reading!',
   closingText: 'Have a project, a problem worth solving, or just want to chat? Pick whichever is easiest.',
