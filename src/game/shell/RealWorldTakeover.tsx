@@ -3,9 +3,13 @@ import type { RealWorldHandle } from '@/game/realWorld';
 import { getMessages } from '@/shared/i18n';
 import { exitFullscreenQuietly, hasWebGL, requestFullscreenQuietly } from './realWorldBrowser';
 
-type Status = 'loading' | 'running' | 'paused' | 'noWebGL' | 'loadFailed';
+type Status = 'loading' | 'running' | 'paused' | 'caught' | 'reached' | 'noWebGL' | 'loadFailed';
 
 const HINT_MS = 6000;
+
+/** Dev only: `?rw=deck` wakes up on the ship deck, skipping the lab and the vent. */
+const devStart = () =>
+  import.meta.env.DEV && new URLSearchParams(window.location.search).get('rw') === 'deck' ? 'deck' : 'lab';
 
 const isTouchScreen = () => typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
 
@@ -84,8 +88,13 @@ export function RealWorldTakeover({ onGiveUp }: { onGiveUp: () => void }) {
         if (cancelled) return;
         handle.current = bootRealWorld(
           element,
-          { onPausedChange: (paused) => setStatus(paused ? 'paused' : 'running') },
-          getMessages().gameShell.realWorld
+          {
+            onPausedChange: (paused) => setStatus(paused ? 'paused' : 'running'),
+            onCaught: () => setStatus('caught'),
+            onReached: () => setStatus('reached')
+          },
+          getMessages().gameShell.realWorld,
+          { start: devStart() }
         );
         setStatus((current) => (current === 'loading' ? 'running' : current));
       })
@@ -102,6 +111,11 @@ export function RealWorldTakeover({ onGiveUp }: { onGiveUp: () => void }) {
   const resume = () => {
     requestFullscreenQuietly();
     handle.current?.resume();
+  };
+  const tryAgain = () => {
+    requestFullscreenQuietly();
+    handle.current?.retry();
+    setStatus('running');
   };
   const giveUp = () => {
     exitFullscreenQuietly();
@@ -120,6 +134,8 @@ export function RealWorldTakeover({ onGiveUp }: { onGiveUp: () => void }) {
       {status === 'running' && <RunningHud hint={isTouchScreen() ? text.hintTouch : text.hintMouse} />}
       {status === 'loading' && <Card message={text.loading} />}
       {status === 'paused' && <Card message={text.paused} action={text.keepGoing} onAction={resume} dim />}
+      {status === 'caught' && <Card alert message={text.caught} action={text.tryAgain} onAction={tryAgain} dim />}
+      {status === 'reached' && <Card alert message={text.reached} dim />}
       {status === 'noWebGL' && <Card alert message={text.noWebGL} action={text.back} onAction={giveUp} />}
       {status === 'loadFailed' && <Card alert message={text.loadFailed} action={text.back} onAction={giveUp} />}
     </div>

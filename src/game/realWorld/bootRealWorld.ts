@@ -1,24 +1,27 @@
 import { Color, Fog, Object3D, PerspectiveCamera, Scene, WebGLRenderer } from 'three';
 import {
+  aimedDock,
   aimedFixture,
+  DECK_ESCAPE,
   eyeOf,
   LAB_ROOM,
-  isPryable,
-  PRYABLES,
+  retry,
+  SHIP_DECK,
+  startEscape,
   startExplorer,
   startGlimpse,
+  stepEscape,
   stepExplorer,
   stepGlimpse,
-  stepPry,
-  STOREROOM,
   toRoom,
+  wakeDrone,
+  type Escape,
   type Explorer,
-  type Fixture,
-  type Pry,
-  type Pryable,
   type View
 } from '@/game/core/realWorld';
-import { buildLabRoom } from './buildLabRoom';
+import { buildRoom } from './buildRoom';
+import { createDeckActors } from './deckActors';
+import { createFixtures, type PromptText } from './fixtures';
 import { createInkPass } from './inkPass';
 import { createThrowing } from './throwing';
 import { makeToon, NIGHT_LAB } from './toon';
@@ -26,32 +29,20 @@ import { makeToon, NIGHT_LAB } from './toon';
 export interface RealWorldCallbacks {
   /** The game paused itself (lost pointer lock, `Esc`, tab hidden) or resumed. */
   onPausedChange(paused: boolean): void;
+  /** An alien caught Danilo: everything holds still until `retry()`. */
+  onCaught(): void;
+  /** Danilo reached the armoury cage: the end of this stretch. */
+  onReached(): void;
 }
 
 /** Words the real world shows, from the i18n messages. */
-export interface RealWorldText {
-  /** Under the crosshair, aiming at something loose (desktop). */
-  promptPickUp: string;
-  /** Under the crosshair, holding something (desktop). */
-  promptThrow: string;
-  /** Under the crosshair, on the vent grate (desktop, then touch). */
-  promptPry: string;
-  promptPryTouch: string;
-  /** Under the crosshair, on the door / the far grate in the duct. */
-  promptLocked: string;
-  promptBolted: string;
-  /** Touch button labels. */
-  grab: string;
-  throw: string;
-  pry: string;
-}
-
-/** What the crosshair offers. */
-type Prompt = 'pickUp' | 'throw' | 'pry' | 'locked' | 'bolted' | null;
+export type RealWorldText = PromptText;
 
 export interface RealWorldHandle {
   /** Call from a click: unpauses and takes pointer lock back (desktop). */
   resume(): void;
+  /** Call from a click after being caught: back to the latest checkpoint, the aliens back on their rounds. */
+  retry(): void;
   /** Frees the WebGL context and every listener. */
   dispose(): void;
 }
@@ -71,20 +62,23 @@ const FOG_DUCT = { near: 1.5, far: 11 };
 /** Where a held thing is let go of at the vent's mouth: about hand height on hands and knees. */
 const PUT_DOWN_HEIGHT = 0.4;
 
-/** What each fixture offers under the crosshair. */
-const FIXTURE_PROMPT: Readonly<Record<Fixture, Prompt>> = {
-  grate: 'pry',
-  dropGrate: 'pry',
-  peekGrate: 'bolted',
-  door: 'locked'
-};
-
 /**
- * The real world (ADR-0007): renders the lab and the storeroom under its vent
- * into `host` and drives first-person walking, crawling and dropping between
- * them. Everything it creates goes away with `dispose()`.
+ * The real world (ADR-0007): renders the lab and the ship deck under its vent
+ * into `host` and drives first-person walking, crawling, dropping between
+ * them, and sneaking across the deck. Everything it creates goes away with
+ * `dispose()`.
  */
-export function bootRealWorld(host: HTMLElement, callbacks: RealWorldCallbacks, text: RealWorldText): RealWorldHandle {
+export interface RealWorldOptions {
+  /** Dev only: wake up on the ship deck, in the storeroom, skipping the lab and the vent. */
+  start?: 'lab' | 'deck';
+}
+
+export function bootRealWorld(
+  host: HTMLElement,
+  callbacks: RealWorldCallbacks,
+  text: RealWorldText,
+  options: RealWorldOptions = {}
+): RealWorldHandle {
   const isTouch = matchMedia('(pointer: coarse)').matches;
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const canvas = document.createElement('canvas');
@@ -97,22 +91,7 @@ export function bootRealWorld(host: HTMLElement, callbacks: RealWorldCallbacks, 
   const knob = document.createElement('div');
   knob.className = 'absolute left-[35px] top-[35px] h-10 w-10 rounded-full bg-white/70';
   stick.append(knob);
-  const prompt = document.createElement('p');
-  prompt.className =
-    'pointer-events-none absolute left-1/2 top-[calc(50%+22px)] hidden -translate-x-1/2 whitespace-nowrap text-xs text-white [text-shadow:0_1px_2px_#000]';
-  // How far the grate has given, under the prompt.
-  const pryBar = document.createElement('div');
-  pryBar.className =
-    'pointer-events-none absolute left-1/2 top-[calc(50%+42px)] hidden h-1.5 w-24 -translate-x-1/2 overflow-hidden rounded-full border border-[#0b0e1c] bg-white/30';
-  const pryFill = document.createElement('div');
-  pryFill.className = 'h-full origin-left bg-[#ffd36e]';
-  pryFill.style.transform = 'scaleX(0)';
-  pryBar.append(pryFill);
-  const action = document.createElement('button');
-  action.type = 'button';
-  action.className =
-    'absolute bottom-[max(5rem,env(safe-area-inset-bottom))] right-6 hidden h-20 w-20 rounded-full border-[3px] border-[#0b0e1c] bg-[#ff9fbf] text-sm font-bold uppercase text-[#0b0e1c]';
-  host.append(stick, prompt, pryBar, action);
+  host.append(stick);
 
   const renderer = new WebGLRenderer({ canvas, antialias: false });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -127,29 +106,30 @@ export function bootRealWorld(host: HTMLElement, callbacks: RealWorldCallbacks, 
   yaw.add(pitch);
   pitch.add(camera);
   scene.add(yaw);
-  const room = buildLabRoom(LAB_ROOM, reducedMotion);
-  const storeroom = buildLabRoom(STOREROOM, reducedMotion, { lights: false });
-  scene.add(room.root, storeroom.root);
+  const lab = buildRoom(LAB_ROOM, reducedMotion);
+  const deck = buildRoom(SHIP_DECK, reducedMotion, { lights: false });
+  scene.add(lab.root, deck.root);
   // Loose things stay in the lab: you need both hands to crawl.
-  const throwing = createThrowing(room.root, LAB_ROOM, makeToon());
+  const throwing = createThrowing(lab.root, LAB_ROOM, makeToon());
+  const actors = createDeckActors(deck, DECK_ESCAPE, host);
   const ink = createInkPass(renderer, camera, NIGHT_LAB.ink);
 
-  let explorer: Explorer = startExplorer(LAB_ROOM);
+  const startRoom = options.start === 'deck' ? SHIP_DECK : LAB_ROOM;
+  let explorer: Explorer = startExplorer(startRoom);
   // The researcher below the bolted grate waits until Danilo is in the duct.
   let glimpse = startGlimpse();
+  let escape: Escape = startEscape(DECK_ESCAPE);
+  const fixtures = createFixtures(host, text, isTouch, lab.vent, {
+    onWake(dock) {
+      escape = wakeDrone(DECK_ESCAPE, escape, dock);
+      actors.wakeDrone(dock);
+    }
+  });
   // Facing the table and the monitors; the pods (and the others) are behind.
-  yaw.rotation.y = LAB_ROOM.wake.yaw;
+  yaw.rotation.y = startRoom.wake.yaw;
   let wakeT = reducedMotion ? WAKE_SECONDS : 0;
-  const pries: Record<Pryable, Pry> = {
-    grate: { progress: 0, open: false },
-    dropGrate: { progress: 0, open: false }
-  };
-  /** Which grates are off: changed only when one comes off. */
-  const opened: Record<Pryable, boolean> = { grate: false, dropGrate: false };
-  let shown: Prompt = null;
-  /** The grate under the crosshair, if any, and the one click, E or the touch button is holding on. */
-  let aimedPry: Pryable | null = null;
-  let prying: Pryable | null = null;
+  /** Caught or at the cage: the game holds still behind a card until a click. */
+  let stopped: 'caught' | 'reached' | null = null;
 
   const resize = () => {
     const { clientWidth: w, clientHeight: h } = host;
@@ -171,13 +151,16 @@ export function bootRealWorld(host: HTMLElement, callbacks: RealWorldCallbacks, 
   let lookId = -1;
   let lastLook = { x: 0, y: 0 };
 
-  const setPaused = (next: boolean) => {
-    if (paused === next) return;
-    paused = next;
+  const releaseInput = () => {
     keys.clear();
     releaseStick();
     lookId = -1;
-    prying = null;
+    fixtures.letGo();
+  };
+  const setPaused = (next: boolean) => {
+    if (paused === next || stopped) return;
+    paused = next;
+    releaseInput();
     callbacks.onPausedChange(next);
   };
   const lockPointer = () => {
@@ -188,6 +171,14 @@ export function bootRealWorld(host: HTMLElement, callbacks: RealWorldCallbacks, 
     } catch {
       setPaused(true);
     }
+  };
+  /** Caught, or at the cage: hold still and hand the pointer back for the card's button. */
+  const stop = (why: 'caught' | 'reached') => {
+    stopped = why;
+    releaseInput();
+    if (document.pointerLockElement === canvas) document.exitPointerLock();
+    if (why === 'caught') callbacks.onCaught();
+    else callbacks.onReached();
   };
   const releaseStick = () => {
     touchStick.id = -1;
@@ -210,19 +201,19 @@ export function bootRealWorld(host: HTMLElement, callbacks: RealWorldCallbacks, 
     yaw: yaw.rotation.y,
     pitch: pitch.rotation.x + camera.rotation.x
   });
+  const onDeck = () => explorer.room === SHIP_DECK;
   /** Hands free for loose things: in the lab, standing. */
   const handsFree = () => explorer.room === LAB_ROOM && explorer.crawl <= CRAWL_HANDS && !explorer.fall;
   /** Pressing the action: `gentle` is E, which puts a held thing down instead of throwing it. */
   const press = (gentle: boolean) => {
-    if (shown === 'pry') prying = aimedPry;
-    else if (!handsFree()) return;
-    else if (gentle) throwing.drop(view());
+    if (stopped || fixtures.press() || !handsFree()) return;
+    if (gentle) throwing.drop(view());
     else throwing.act(view());
   };
-  const letGo = () => (prying = null);
+  const letGo = () => fixtures.letGo();
   on<KeyboardEvent>(window, 'keydown', (event) => {
     if (event.key === 'Escape' && isTouch) setPaused(true);
-    if (paused) return;
+    if (paused || stopped) return;
     keys.add(event.code);
     if (event.code === 'KeyE' && !event.repeat) press(true);
   });
@@ -247,13 +238,14 @@ export function bootRealWorld(host: HTMLElement, callbacks: RealWorldCallbacks, 
     look.dy += event.movementY * MOUSE_LOOK;
   });
   on<MouseEvent>(canvas, 'mousedown', (event) => {
-    if (isTouch || paused || event.button !== 0) return;
+    if (isTouch || paused || stopped || event.button !== 0) return;
     if (document.pointerLockElement === canvas) press(false);
     else lockPointer();
   });
   on<MouseEvent>(window, 'mouseup', (event) => {
     if (event.button === 0) letGo();
   });
+  const { action } = fixtures;
   on<PointerEvent>(action, 'pointerdown', (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -263,7 +255,7 @@ export function bootRealWorld(host: HTMLElement, callbacks: RealWorldCallbacks, 
   on(action, 'pointercancel', letGo);
   on(action, 'pointerleave', letGo);
   on<PointerEvent>(canvas, 'pointerdown', (event) => {
-    if (paused || event.pointerType !== 'touch') return;
+    if (paused || stopped || event.pointerType !== 'touch') return;
     if (event.clientX < host.clientWidth / 2 && touchStick.id === -1) {
       Object.assign(touchStick, { id: event.pointerId, ox: event.clientX, oy: event.clientY, x: 0, y: 0 });
       stick.style.left = `${event.clientX}px`;
@@ -299,52 +291,34 @@ export function bootRealWorld(host: HTMLElement, callbacks: RealWorldCallbacks, 
   on(canvas, 'pointerup', onPointerUp);
   on(canvas, 'pointercancel', onPointerUp);
 
-  /**
-   * Each prompt's words, and its touch button if it's something to do. On
-   * touch the button says it all, unless there's no button or prying needs
-   * telling to hold.
-   */
-  const prompts: Record<Exclude<Prompt, null> | 'none', { text: string; button: string; textOnTouch: boolean }> = {
-    none: { text: '', button: '', textOnTouch: false },
-    pickUp: { text: text.promptPickUp, button: text.grab, textOnTouch: false },
-    throw: { text: text.promptThrow, button: text.throw, textOnTouch: false },
-    pry: { text: isTouch ? text.promptPryTouch : text.promptPry, button: text.pry, textOnTouch: true },
-    locked: { text: text.promptLocked, button: '', textOnTouch: true },
-    bolted: { text: text.promptBolted, button: '', textOnTouch: true }
+  /** What the crosshair rests on: loose things first (hands free), then fixtures and sleeping drones. */
+  const aim = () => {
+    const standing = !explorer.fall && !stopped;
+    const local = toRoom(explorer.room, view());
+    fixtures.aim({
+      loose: handsFree() ? throwing.prompt : null,
+      holdingLoose: throwing.holding,
+      fixture: standing ? aimedFixture(explorer.room, local, fixtures.opened) : null,
+      dock: standing && onDeck() ? aimedDock(DECK_ESCAPE, escape, local) : null
+    });
   };
-  const showPrompt = (next: Prompt) => {
-    if (next === shown) return;
-    shown = next;
-    const entry = prompts[next ?? 'none'];
-    prompt.textContent = entry.text;
-    action.textContent = entry.button;
-    prompt.classList.toggle('hidden', !entry.text || (isTouch && !entry.textOnTouch));
-    action.classList.toggle('hidden', !isTouch || !entry.button);
-    if (next !== 'pry') prying = null;
-  };
-  /** What the crosshair offers right now: loose things first (hands free), then fixtures. */
-  const choosePrompt = (): Prompt => {
-    const fixture = explorer.fall ? null : aimedFixture(explorer.room, toRoom(explorer.room, view()), opened);
-    aimedPry = isPryable(fixture) ? fixture : null;
-    // Holding something up to a grate: prying wins (crawling in puts it down anyway).
-    if (handsFree() && throwing.prompt && !(throwing.holding && aimedPry)) return throwing.prompt;
-    return fixture ? FIXTURE_PROMPT[fixture] : null;
-  };
-  /** Work a held grate loose; when one comes off, show it go. */
-  const stepGrates = (dt: number) => {
-    for (const grate of PRYABLES) {
-      const was = pries[grate].open;
-      pries[grate] = stepPry(pries[grate], prying === grate, dt);
-      room.vent?.setPry(grate, pries[grate].progress);
-      if (pries[grate].open && !was) {
-        opened[grate] = true;
-        room.vent?.open(grate);
-        prying = null;
-      }
+
+  /** The deck's aliens and drones: watching for Danilo once he's down there, or the glimpse from the duct. */
+  const stepDeck = (dt: number, seconds: number) => {
+    if (!onDeck()) {
+      glimpse = stepGlimpse(glimpse, explorer, dt);
+      actors.showGlimpse(glimpse, seconds);
+      return;
     }
-    const progress = aimedPry ? pries[aimedPry].progress : 0;
-    pryBar.classList.toggle('hidden', progress <= 0 || progress >= 1);
-    pryFill.style.transform = `scaleX(${progress})`;
+    if (!stopped) sneak(dt);
+    actors.show(escape, explorer.walker, seconds, dt);
+  };
+  /** One frame of the escape across the deck: the door opening, being caught, reaching the cage. */
+  const sneak = (dt: number) => {
+    escape = stepEscape(DECK_ESCAPE, escape, explorer.fall ? null : explorer.walker, dt);
+    if (escape.doorOpen && !fixtures.opened.serviceDoor) fixtures.openDoor();
+    if (escape.caught) stop('caught');
+    else if (escape.reached) stop('reached');
   };
 
   // ---- loop ----
@@ -361,7 +335,7 @@ export function bootRealWorld(host: HTMLElement, callbacks: RealWorldCallbacks, 
       const awake = wakeT / WAKE_SECONDS;
       yaw.rotation.y -= look.dx;
       pitch.rotation.x = Math.max(-MAX_PITCH, Math.min(MAX_PITCH, pitch.rotation.x - look.dy));
-      const canWalk = awake > 0.6;
+      const canWalk = awake > 0.6 && !stopped;
       const wasIn = explorer.room;
       explorer = stepExplorer(
         explorer,
@@ -371,7 +345,7 @@ export function bootRealWorld(host: HTMLElement, callbacks: RealWorldCallbacks, 
           yaw: yaw.rotation.y
         },
         dt,
-        opened
+        fixtures.opened
       );
       if (explorer.room !== wasIn) {
         // Dropped into the room below, still facing the way you crawled; no fall under reduced motion.
@@ -387,14 +361,15 @@ export function bootRealWorld(host: HTMLElement, callbacks: RealWorldCallbacks, 
       fog.far = FOG_STANDING.far + (FOG_DUCT.far - FOG_STANDING.far) * crawl;
       // Both hands to crawl: whatever was held is set down at the vent's mouth.
       if (crawl > CRAWL_HANDS && throwing.holding) throwing.putDown({ ...eye, y: PUT_DOWN_HEIGHT });
-      stepGrates(dt);
-      glimpse = stepGlimpse(glimpse, explorer, dt);
-      room.vent?.showGlimpse(glimpse);
-      room.update(now / 1000);
-      storeroom.update(now / 1000);
+      fixtures.step(dt);
+      const seconds = now / 1000;
+      stepDeck(dt, seconds);
+      lab.update(seconds);
+      deck.update(seconds);
       scene.updateMatrixWorld();
       throwing.update(dt, view(), camera);
-      showPrompt(choosePrompt());
+      aim();
+      actors.project(camera, host.clientWidth, host.clientHeight);
     }
     look.dx = look.dy = 0;
     ink.render(scene, camera);
@@ -407,21 +382,29 @@ export function bootRealWorld(host: HTMLElement, callbacks: RealWorldCallbacks, 
       setPaused(false);
       lockPointer();
     },
+    retry() {
+      if (stopped !== 'caught') return;
+      const again = retry(DECK_ESCAPE, escape);
+      escape = again.escape;
+      // Back at the checkpoint, still facing the way you were: no turning the camera for you.
+      explorer = { ...explorer, walker: { x: again.spawn.x, z: again.spawn.z, vx: 0, vz: 0 }, fall: null };
+      stopped = null;
+      lockPointer();
+    },
     dispose() {
       cancelAnimationFrame(frame);
       resizeObserver.disconnect();
       for (const [target, type, handler] of listeners) target.removeEventListener(type, handler);
       if (document.pointerLockElement === canvas) document.exitPointerLock();
-      room.dispose();
-      storeroom.dispose();
+      lab.dispose();
+      deck.dispose();
+      actors.dispose();
+      fixtures.dispose();
       ink.dispose();
       renderer.dispose();
       renderer.forceContextLoss();
       canvas.remove();
       stick.remove();
-      prompt.remove();
-      pryBar.remove();
-      action.remove();
     }
   };
 }

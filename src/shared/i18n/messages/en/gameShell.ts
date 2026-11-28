@@ -41,8 +41,17 @@ export const gameShellMessages = {
     promptPryTouch: 'Hold to pry',
     promptLocked: 'Locked',
     promptBolted: 'Bolted from below',
+    promptWake: 'Hold click or E to wake the drone',
+    promptWakeTouch: 'Hold to wake',
+    promptDronesOnly: 'Locked · opens for cleaning drones',
+    promptCage: 'Locked in the armoury cage',
     grab: 'Grab',
     throw: 'Throw',
-    pry: 'Pry'
+    pry: 'Pry',
+    wake: 'Wake',
+    caught: 'It saw you. A sting in the neck, then nothing… You come to back where you were hiding.',
+    tryAgain: 'Try again',
+    reached:
+      'The blaster. Right there behind the bars, charged and humming, and locked in. Out of reach, for now. To be continued.'
   }
 } as const;

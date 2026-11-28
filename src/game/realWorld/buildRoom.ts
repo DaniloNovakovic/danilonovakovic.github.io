@@ -1,6 +1,8 @@
 import {
+  AdditiveBlending,
   BoxGeometry,
   CanvasTexture,
+  CircleGeometry,
   Color,
   DirectionalLight,
   Group,
@@ -22,6 +24,7 @@ import {
   REAL_WORLD_WALL_HEIGHT as H,
   grateCentre,
   mouthOf,
+  STEALTH,
   VENT_CELL,
   type Facing,
   type FurnitureKind,
@@ -30,6 +33,17 @@ import {
   type VentDuct
 } from '@/game/core/realWorld';
 import { buildVent, type LabVent } from './buildVent';
+import {
+  armouryCage,
+  coatRack,
+  lockers,
+  messTable,
+  securityDesk,
+  serviceDoor,
+  vendingMachine,
+  washer,
+  type ServiceDoorView
+} from './deckProps';
 import {
   cableTray,
   crateStack,
@@ -49,7 +63,7 @@ import {
   type PropKit
 } from './labProps';
 import { brainScanScreen, oldWorldScreen } from './labScreens';
-import { cleanerBot, drums, janitorCart, lampShelf, mopBucket } from './storeProps';
+import { droneDock, drums, janitorCart, lampShelf, mopBucket } from './storeProps';
 import { makeToon, NIGHT_LAB } from './toon';
 
 function floorTexture(map: RealWorldMap) {
@@ -77,14 +91,18 @@ function floorTexture(map: RealWorldMap) {
   return texture;
 }
 
+/** The way out of wall cell (cx, cz) into the room: its first open side. */
+function openSide(map: RealWorldMap, cx: number, cz: number): readonly [number, number] | null {
+  return NEIGHBOURS.find(([dx, dz]) => !isSolidAt(map, cx + dx * CELL, cz + dz * CELL)) ?? null;
+}
+
 /** Place `object` on the face of wall cell (cx, cz) that looks into the room. */
 function onWallFace(map: RealWorldMap, cx: number, cz: number, object: Object3D, inset: number) {
-  for (const [dx, dz] of NEIGHBOURS) {
-    if (isSolidAt(map, cx + dx * CELL, cz + dz * CELL)) continue;
-    object.position.set(cx + dx * (CELL / 2 + inset), object.position.y, cz + dz * (CELL / 2 + inset));
-    object.rotation.y = Math.atan2(dx, dz);
-    return;
-  }
+  const side = openSide(map, cx, cz);
+  if (!side) return;
+  const [dx, dz] = side;
+  object.position.set(cx + dx * (CELL / 2 + inset), object.position.y, cz + dz * (CELL / 2 + inset));
+  object.rotation.y = Math.atan2(dx, dz);
 }
 
 interface Cell {
@@ -142,6 +160,39 @@ function addVentWallCell(root: Group, cell: Cell, vent: VentDuct, material: Mate
   }
 }
 
+/** The armoury cage's recess: how wide, tall and deep it is cut into its wall cell. */
+const CAGE = { width: 2.4, height: 2.5, depth: 0.6 };
+
+/**
+ * A wall cell with the armoury cage set into it: the wall stands back by the
+ * recess's depth, pillars either side and a lintel over it, the cage inside.
+ */
+function addCageWallCell(root: Group, map: RealWorldMap, cell: Cell, material: Material, kit: PropKit) {
+  const side = openSide(map, cell.cx, cell.cz);
+  if (!side) return;
+  const frame = new Group();
+  frame.position.set(cell.cx, 0, cell.cz);
+  frame.rotation.y = Math.atan2(side[0], side[1]);
+  const face = CELL / 2;
+  const pillar = (CELL - CAGE.width) / 2;
+  // [x, y, z, width, height, depth] in the frame, +z towards the room.
+  const blocks: Array<[number, number, number, number, number, number]> = [
+    [0, H / 2, -CAGE.depth / 2, CELL, H, CELL - CAGE.depth],
+    [-(CAGE.width + pillar) / 2, H / 2, face - CAGE.depth / 2, pillar, H, CAGE.depth],
+    [(CAGE.width + pillar) / 2, H / 2, face - CAGE.depth / 2, pillar, H, CAGE.depth],
+    [0, (H + CAGE.height) / 2, face - CAGE.depth / 2, CAGE.width, H - CAGE.height, CAGE.depth]
+  ];
+  for (const [x, y, z, width, height, depth] of blocks) {
+    const block = new Mesh(new BoxGeometry(width, height, depth), material);
+    block.position.set(x, y, z);
+    frame.add(block);
+  }
+  const cage = armouryCage(kit, CAGE.width, CAGE.height, CAGE.depth);
+  cage.position.z = face;
+  frame.add(cage);
+  root.add(frame);
+}
+
 function addWallCell(root: Group, map: RealWorldMap, cell: Cell, materials: CellMaterials, fixture: Object3D | null) {
   const wall = new Mesh(new BoxGeometry(CELL, H, CELL), materials.wall);
   wall.position.set(cell.cx, H / 2, cell.cz);
@@ -151,14 +202,58 @@ function addWallCell(root: Group, map: RealWorldMap, cell: Cell, materials: Cell
   root.add(fixture);
 }
 
-/** Light strips over every other cell: the light the aliens will see you in, and the dark between. */
-function addStrip(root: Group, { cx, cz }: Cell, strip: Material) {
+/** A light strip in the ceiling at (x, z): the light the aliens see you in, and the dark between. */
+function addStrip(root: Group, x: number, z: number, strip: Material) {
   const light = new Mesh(new BoxGeometry(1.6, 0.08, 0.35), strip);
-  light.position.set(cx, H - 0.05, cz);
+  light.position.set(x, H - 0.05, z);
   root.add(light);
 }
 
-/** Width of the locked door's frame; the skirting stops at it. */
+/**
+ * The pool of light a strip throws on the floor, shaped like the core's
+ * `lightAt`: full under it, fading out to its reach. What you see is what
+ * they see you by.
+ */
+function poolTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 128;
+  const g = canvas.getContext('2d');
+  if (g) {
+    const gradient = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+    const core = STEALTH.poolCore / STEALTH.poolReach;
+    gradient.addColorStop(0, 'rgba(255,211,110,1)');
+    for (let i = 0; i <= 6; i++) {
+      const t = i / 6;
+      const light = 1 - t * t * (3 - 2 * t);
+      gradient.addColorStop(core + (1 - core) * t, `rgba(255,211,110,${light.toFixed(3)})`);
+    }
+    g.fillStyle = gradient;
+    g.fillRect(0, 0, 128, 128);
+  }
+  const texture = new CanvasTexture(canvas);
+  texture.colorSpace = SRGBColorSpace;
+  return texture;
+}
+
+function addPools(root: Group, strips: ReadonlyArray<{ x: number; z: number }>) {
+  const material = new MeshBasicMaterial({
+    map: poolTexture(),
+    transparent: true,
+    opacity: 0.3,
+    depthWrite: false,
+    blending: AdditiveBlending
+  });
+  const geometry = new CircleGeometry(STEALTH.poolReach, 32);
+  for (const { x, z } of strips) {
+    const pool = new Mesh(geometry, material);
+    pool.rotation.x = -Math.PI / 2;
+    pool.position.set(x, 0.015, z);
+    pool.userData.noInk = true;
+    root.add(pool);
+  }
+}
+
+/** Width of a door's frame; the skirting stops at it. */
 const DOOR_WIDTH = 2.6;
 
 /**
@@ -187,14 +282,21 @@ function addSkirting(
   }
 }
 
+/** How much of a wall face is left open for what's set in it. */
+function skirtingGap(wall: string) {
+  if (wall === 'D' || wall === 'S') return DOOR_WIDTH;
+  if (wall === 'A') return CAGE.width;
+  if (wall === 'V') return VENT_CELL + 2 * VENT_HOLE_MARGIN;
+  return 0;
+}
+
 function addFloorCell(root: Group, map: RealWorldMap, { cx, cz, ribbed }: Cell, materials: CellMaterials) {
   for (const side of NEIGHBOURS) {
     const [dx, dz] = side;
     if (!isSolidAt(map, cx + dx * CELL, cz + dz * CELL)) continue;
     const wall = cellAt(map, cx + dx * CELL, cz + dz * CELL);
-    const gap = wall === 'D' ? DOOR_WIDTH : wall === 'V' ? VENT_CELL + 2 * VENT_HOLE_MARGIN : 0;
-    addSkirting(root, cx, cz, side, materials.trim, gap);
-    // No rib in front of a vent, door or monitor: they sit mid-face, where a rib would.
+    addSkirting(root, cx, cz, side, materials.trim, skirtingGap(wall));
+    // No rib in front of a vent, door, cage or monitor: they sit mid-face, where a rib would.
     if (!ribbed || wall !== '#') continue;
     const rib = new Mesh(new BoxGeometry(dx ? 0.3 : 0.4, H, dz ? 0.3 : 0.4), materials.wall);
     rib.position.set(cx + dx * (CELL / 2 - 0.15), H / 2, cz + dz * (CELL / 2 - 0.15));
@@ -250,8 +352,15 @@ const BUILD: Readonly<Record<FurnitureKind, (kit: PropKit, nth: number) => Objec
   lampShelf: (kit) => lampShelf(kit),
   drums: (kit) => drums(kit),
   mopBucket: (kit) => mopBucket(kit),
-  cleanerBot: (kit, nth) => cleanerBot(kit, nth),
-  janitorCart: (kit) => janitorCart(kit)
+  // The dock only: the drone on it is an actor, so it can wake and roll away.
+  cleanerBot: (kit) => droneDock(kit),
+  janitorCart: (kit) => janitorCart(kit),
+  messTable: (kit) => messTable(kit),
+  vending: (kit) => vendingMachine(kit),
+  washer: (kit) => washer(kit),
+  coatRack: (kit, nth) => coatRack(kit, nth),
+  lockers: (kit) => lockers(kit),
+  securityDesk: (kit) => securityDesk(kit)
 };
 
 function addFurniture(root: Group, room: RealWorldRoom, kit: PropKit) {
@@ -297,11 +406,15 @@ function addFurniture(root: Group, room: RealWorldRoom, kit: PropKit) {
   }
 }
 
-export interface LabRoom {
+export interface BuiltRoom {
   root: Group;
   /** The vent behind the `V` grate, if the room has one. */
   vent: LabVent | null;
-  /** Advance the room's small motions (bubbles, screens, the flicker) to `seconds`. */
+  /** The service door (`S`), if the room has one. */
+  serviceDoor: ServiceDoorView | null;
+  /** For adding moving things to the room: they share its materials and its clock. */
+  kit: PropKit;
+  /** Advance the room's small motions (bubbles, screens, the flicker, the door) to `seconds`. */
   update(seconds: number): void;
   dispose(): void;
 }
@@ -314,7 +427,28 @@ function ceilingPanel(material: Material, x0: number, x1: number, z0: number, z1
   return panel;
 }
 
-/** The floor tiles, and the ceiling over the whole plan, with a hole where a hatch is. */
+type Hole = { x: number; z: number };
+
+/** The ceiling over one cell, cut round a `VENT_CELL`-wide hole in it if there is one. */
+function ceilingOver(material: Material, x0: number, z0: number, holes: readonly Hole[]): Mesh[] {
+  const x1 = x0 + CELL;
+  const z1 = z0 + CELL;
+  const hole = holes.find(({ x, z }) => x > x0 && x < x1 && z > z0 && z < z1);
+  if (!hole) return [ceilingPanel(material, x0, x1, z0, z1)];
+  const half = VENT_CELL / 2;
+  const [hx0, hx1, hz0, hz1] = [hole.x - half, hole.x + half, hole.z - half, hole.z + half];
+  const pieces: Array<[number, number, number, number]> = [
+    [x0, x1, z0, hz0],
+    [x0, x1, hz1, z1],
+    [x0, hx0, hz0, hz1],
+    [hx1, x1, hz0, hz1]
+  ];
+  return pieces
+    .filter(([ax, bx, az, bz]) => bx - ax > 0.01 && bz - az > 0.01)
+    .map(([ax, bx, az, bz]) => ceilingPanel(material, ax, bx, az, bz));
+}
+
+/** The floor tiles, and the ceiling over every open cell, with holes for hatches and skylights. */
 function floorAndCeiling(kit: PropKit, room: RealWorldRoom) {
   const map = room.walls;
   const width = map[0].length * CELL;
@@ -323,22 +457,14 @@ function floorAndCeiling(kit: PropKit, room: RealWorldRoom) {
   floor.rotation.x = -Math.PI / 2;
   floor.position.set(width / 2, 0, depth / 2);
   const material = kit.toon(NIGHT_LAB.ceiling);
-  if (!room.hatch) return [floor, ceilingPanel(material, 0, width, 0, depth)];
-  const half = VENT_CELL / 2;
-  const { x, z } = room.hatch;
-  return [
-    floor,
-    ceilingPanel(material, 0, width, 0, z - half),
-    ceilingPanel(material, 0, width, z + half, depth),
-    ceilingPanel(material, 0, x - half, z - half, z + half),
-    ceilingPanel(material, x + half, width, z - half, z + half)
-  ];
-}
-
-/** Where the light strips go: the room's own list, or every other floor cell. */
-function hasStrip(room: RealWorldRoom, xi: number, zi: number) {
-  if (!room.strips) return (xi + zi) % 2 === 0;
-  return room.strips.some((strip) => Math.floor(strip.x / CELL) === xi && Math.floor(strip.z / CELL) === zi);
+  const holes = [...(room.hatch ? [room.hatch] : []), ...(room.skylights ?? [])];
+  const ceiling: Mesh[] = [];
+  map.forEach((row, zi) => {
+    [...row].forEach((char, xi) => {
+      if (char === '.' || char === 'S') ceiling.push(...ceilingOver(material, xi * CELL, zi * CELL, holes));
+    });
+  });
+  return [floor, ...ceiling];
 }
 
 export interface BuildOptions {
@@ -347,14 +473,44 @@ export interface BuildOptions {
 }
 
 /**
- * Build a room from its plan in `@/game/core/realWorld`: the lab, or another
- * ship room, placed in the world at its `offset`.
+ * The service door in its `S` cell: a doorway through the wall, the door
+ * itself on the face of the room it belongs to (the cell's first open side).
  */
-export function buildLabRoom(
+function addServiceDoor(root: Group, map: RealWorldMap, cell: Cell, kit: PropKit): ServiceDoorView {
+  const view = serviceDoor(kit, CELL);
+  const [dx, dz] = openSide(map, cell.cx, cell.cz) ?? [1, 0];
+  view.root.position.set(cell.cx + dx * (CELL / 2 - 0.2), 0, cell.cz + dz * (CELL / 2 - 0.2));
+  view.root.rotation.y = Math.atan2(dx, dz);
+  root.add(view.root);
+  return view;
+}
+
+function dispose(root: Group) {
+  const disposed = new Set<Material>();
+  root.traverse((object) => {
+    if (!(object instanceof Mesh)) return;
+    object.geometry.dispose();
+    for (const material of [object.material].flat() as Material[]) disposed.add(material);
+  });
+  for (const material of disposed) {
+    for (const value of Object.values(material)) {
+      if (value && typeof value === 'object' && 'isTexture' in value) (value as { dispose(): void }).dispose();
+    }
+    material.dispose();
+  }
+}
+
+/**
+ * Build a room from its plan in `@/game/core/realWorld`: the lab, or the ship
+ * deck, placed in the world at its `offset`. A room with its own strips gets
+ * them where it says, with pools of light under them; otherwise every other
+ * floor cell has one.
+ */
+export function buildRoom(
   room: RealWorldRoom,
   reducedMotion: boolean,
   options: BuildOptions = { lights: true }
-): LabRoom {
+): BuiltRoom {
   const updates: Array<(seconds: number) => void> = [];
   const kit: PropKit = { toon: makeToon(), animate: (update) => updates.push(update), reducedMotion };
   const root = new Group();
@@ -372,46 +528,56 @@ export function buildLabRoom(
   const table = furnitureOf(room, 'table');
   const flickerCell = table ? `${Math.floor(table.x / CELL)},${Math.floor(table.z / CELL)}` : '';
   const monitors = { count: 0 };
+  const doors: ServiceDoorView[] = [];
+  const duct = room.vent;
+  /** Cells with something built into them; the rest are plain wall or floor. */
+  const special: Partial<Record<string, (cell: Cell) => void>> = {
+    // Solid ship between rooms: nothing to draw.
+    ' ': () => {},
+    V: (cell) =>
+      duct ? addVentWallCell(root, cell, duct, materials.wall) : addWallCell(root, map, cell, materials, null),
+    A: (cell) => addCageWallCell(root, map, cell, materials.wall, kit),
+    S: (cell) => {
+      addFloorCell(root, map, cell, materials);
+      doors.push(addServiceDoor(root, map, cell, kit));
+    }
+  };
+  /** Without its own strips, a room gets one over every other floor cell (the lab's over the table flickers). */
+  const gridStrip = (cell: Cell, xi: number, zi: number) => {
+    const flickers = `${xi},${zi}` === flickerCell;
+    if (room.strips || (!flickers && (xi + zi) % 2)) return;
+    addStrip(root, cell.cx, cell.cz, flickers ? flicker : materials.strip);
+  };
   map.forEach((row, zi) => {
     [...row].forEach((char, xi) => {
       const cell = { char, cx: (xi + 0.5) * CELL, cz: (zi + 0.5) * CELL, ribbed: (xi + zi) % 3 === 0 };
-      if (char === 'V' && room.vent) {
-        addVentWallCell(root, cell, room.vent, materials.wall);
-        return;
-      }
-      if (isSolidAt(map, cell.cx, cell.cz)) {
-        addWallCell(root, map, cell, materials, wallFixture(kit, char, monitors));
-        return;
-      }
+      const build = special[char];
+      if (build) return build(cell);
+      if (isSolidAt(map, cell.cx, cell.cz))
+        return addWallCell(root, map, cell, materials, wallFixture(kit, char, monitors));
       addFloorCell(root, map, cell, materials);
-      if (`${xi},${zi}` === flickerCell) addStrip(root, cell, flicker);
-      else if (hasStrip(room, xi, zi)) addStrip(root, cell, materials.strip);
+      gridStrip(cell, xi, zi);
     });
   });
+  if (room.strips) {
+    for (const strip of room.strips) addStrip(root, strip.x, strip.z, materials.strip);
+    addPools(root, room.strips);
+  }
   addFurniture(root, room, kit);
   const vent = room.vent ? buildVent(kit, room.vent) : null;
   if (vent) root.add(vent.root);
+  const serviceDoorView = doors[0] ?? null;
 
   return {
     root,
     vent,
+    serviceDoor: serviceDoorView,
+    kit,
     update(seconds) {
       for (const update of updates) update(seconds);
       vent?.update(seconds);
+      serviceDoorView?.update(seconds);
     },
-    dispose() {
-      const disposed = new Set<Material>();
-      root.traverse((object) => {
-        if (!(object instanceof Mesh)) return;
-        object.geometry.dispose();
-        for (const material of [object.material].flat() as Material[]) disposed.add(material);
-      });
-      for (const material of disposed) {
-        for (const value of Object.values(material)) {
-          if (value && typeof value === 'object' && 'isTexture' in value) (value as { dispose(): void }).dispose();
-        }
-        material.dispose();
-      }
-    }
+    dispose: () => dispose(root)
   };
 }

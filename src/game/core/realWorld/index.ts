@@ -12,7 +12,9 @@ export {
   type Pryable
 } from './interactions';
 export * from './labRoom';
-export { SHIP_DECK_DROP, STOREROOM } from './storeroom';
+export { aimedDock, retry, startEscape, stepEscape, wakeDrone, type Escape, type EscapePlan } from './escape';
+export { DECK_ESCAPE, SHIP_DECK, SHIP_DECK_DROP } from './shipDeck';
+export { lightAt, SIGHT, sightRange, STEALTH, type GuardKind } from './stealth';
 export { ductCells, floorGrateCentre, grateCentre, isOpenDuct, mouthOf, type DuctCell } from './vent';
 export type { Walker, WalkInput } from './walker';
 export {

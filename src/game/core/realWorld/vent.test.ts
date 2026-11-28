@@ -35,7 +35,10 @@ function crawlAlong(from: Walker, points: ReadonlyArray<readonly [number, number
       const dx = tx - walker.x;
       const dz = tz - walker.z;
       if (Math.hypot(dx, dz) < 0.1) break;
-      walker = stepWalker(LAB_ROOM, walker, { forward: 1, strafe: 0, yaw: Math.atan2(-dx, -dz) }, DT, ventOpen);
+      walker = stepWalker(LAB_ROOM, walker, { forward: 1, strafe: 0, yaw: Math.atan2(-dx, -dz) }, DT, {
+        vent: ventOpen,
+        doors: false
+      });
       seconds += DT;
     }
   }
@@ -158,7 +161,7 @@ describe('prying a grate off', () => {
 
 describe('what the crosshair rests on', () => {
   const grate = grateCentre(vent);
-  const shut: Opened = { grate: false, dropGrate: false };
+  const shut: Opened = { grate: false, dropGrate: false, serviceDoor: false };
   const lookAt = (eye: { x: number; y: number; z: number }, at: { x: number; y: number; z: number }) => {
     const dx = at.x - eye.x;
     const dy = at.y - eye.y;
@@ -183,11 +186,13 @@ describe('what the crosshair rests on', () => {
     expect(aimedFixture(LAB_ROOM, lookAt({ x: door.x, y: REAL_WORLD_EYE_HEIGHT, z: 16.5 }, doorFace), shut)).toBe(
       'door'
     );
-    const open = { grate: true, dropGrate: false };
+    const open = { grate: true, dropGrate: false, serviceDoor: false };
     const overPeek = { x: peek.x - 1, y: eyeHeightFor(vent, 1), z: peek.z };
     expect(aimedFixture(LAB_ROOM, lookAt(overPeek, peek), open)).toBe('peekGrate');
     const overDrop = { x: drop.x, y: eyeHeightFor(vent, 1), z: drop.z - 1 };
     expect(aimedFixture(LAB_ROOM, lookAt(overDrop, drop), open)).toBe('dropGrate');
-    expect(aimedFixture(LAB_ROOM, lookAt(overDrop, drop), { grate: true, dropGrate: true })).toBeNull();
+    expect(
+      aimedFixture(LAB_ROOM, lookAt(overDrop, drop), { grate: true, dropGrate: true, serviceDoor: false })
+    ).toBeNull();
   });
 });
