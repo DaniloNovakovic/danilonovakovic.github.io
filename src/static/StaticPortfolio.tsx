@@ -1,11 +1,9 @@
-import { Gamepad2 } from 'lucide-react';
+import { Gamepad2, MapPin } from 'lucide-react';
 import { getPortfolioData } from '@/shared/portfolio';
 import { useMessages } from '@/shared/i18n';
 import { Button } from '@/shared/ui';
 import { HeroContactLinks } from './HeroContactLinks';
 import { AbilitiesSection } from './sections/AbilitiesSection';
-import { AboutSection } from './sections/AboutSection';
-import { ContactSection } from './sections/ContactSection';
 import { ExperienceSection } from './sections/ExperienceSection';
 import { HobbiesSection } from './sections/HobbiesSection';
 import { ProjectsSection } from './sections/ProjectsSection';
@@ -43,11 +41,11 @@ export default function StaticPortfolio({ onSwitchToInteractive }: StaticPortfol
             {messages.staticPortfolio.eyebrow}
           </p>
           <h1 className="text-4xl font-bold text-[#1a1a1a] sm:text-6xl">{profile.name}</h1>
-          <p className="text-sm font-bold uppercase tracking-widest text-[#1a1a1a]/70 sm:text-base">
-            {profile.location}
-          </p>
-          <p className="mt-2 max-w-xl text-sm italic leading-relaxed text-[#1a1a1a]/80 sm:text-base">
-            "{profile.about}"
+          <p className="text-base font-bold text-[#1a1a1a] sm:text-lg">{messages.staticPortfolio.role}</p>
+          <p className="mt-2 max-w-xl text-base leading-relaxed text-[#1a1a1a]/80">{profile.about}</p>
+          <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-[#1a1a1a]/60">
+            <MapPin className="h-3.5 w-3.5" strokeWidth={2.5} aria-hidden />
+            {messages.staticPortfolio.basedIn(profile.location)}
           </p>
           <div className="mt-2">
             <HeroContactLinks />
@@ -55,12 +53,10 @@ export default function StaticPortfolio({ onSwitchToInteractive }: StaticPortfol
         </header>
 
         <div className="flex flex-col gap-14 sm:gap-20">
-          <AboutSection />
           <ExperienceSection />
           <ProjectsSection />
           <AbilitiesSection />
           <HobbiesSection />
-          <ContactSection />
         </div>
 
         <footer className="mt-16 flex flex-col items-center gap-3 border-t-2 border-dashed border-[#1a1a1a]/30 pt-6 text-center text-xs text-[#1a1a1a]/60 sm:mt-24">
