@@ -374,8 +374,7 @@ export function bootRealWorld(host: HTMLElement, callbacks: RealWorldCallbacks, 
         opened
       );
       if (explorer.room !== wasIn) {
-        // Dropped into the room below: land facing its door; no fall under reduced motion.
-        yaw.rotation.y = explorer.room.wake.yaw;
+        // Dropped into the room below, still facing the way you crawled; no fall under reduced motion.
         if (reducedMotion) explorer = { ...explorer, fall: null };
       }
       const { crawl } = explorer;

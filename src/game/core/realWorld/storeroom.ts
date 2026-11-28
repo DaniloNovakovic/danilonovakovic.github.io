@@ -37,7 +37,7 @@ export const STOREROOM: RealWorldRoom = {
     // Left out in the middle, half in the way: someone's round isn't finished.
     { kind: 'janitorCart', x: 6.6, z: 9.5, facing: 'west' }
   ],
-  // Landing under the hatch, facing the door.
+  // Landing under the hatch. Dropping in keeps the way Danilo was crawling; the yaw is for starting here.
   wake: { x: 5.75, z: 7.5, yaw: Math.PI / 2 },
   offset: { x: 37, y: LAB_VENT.floor - SHIP_DECK_DROP, z: 7.5 },
   hatch: { x: 5.75, z: 7.5 },
