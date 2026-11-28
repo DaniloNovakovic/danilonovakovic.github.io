@@ -9,23 +9,20 @@ export function ProjectsSection() {
 
   return (
     <SketchSection id="projects" title={messages.portfolio.projects.title}>
-      <ol className="border-t-2 border-[#1a1a1a]">
-        {projects.map((project, index) => (
+      <ul>
+        {projects.map((project) => (
           <li
             key={project.title}
-            className="border-b-2 border-dashed border-[#1a1a1a]/30 last:border-solid last:border-[#1a1a1a]"
+            className="border-b-2 border-dashed border-[#1a1a1a]/30 py-5 first:pt-0 last:border-b-0 last:pb-0"
           >
             <a
               href={project.link}
               target="_blank"
               rel="noopener noreferrer"
               aria-label={messages.navigation.opensInNewTab(project.title)}
-              className="group grid grid-cols-[2.5rem_1fr_auto] gap-x-3 py-5 outline-none focus-visible:bg-white sm:grid-cols-[3.5rem_1fr_auto] sm:gap-x-4"
+              className="group flex gap-4 outline-none focus-visible:bg-white"
             >
-              <span aria-hidden className="pt-1 font-mono text-sm text-[#1a1a1a]/50">
-                {String(index + 1).padStart(2, '0')}
-              </span>
-              <span className="min-w-0">
+              <span className="min-w-0 flex-1">
                 <span className="block text-lg font-bold text-[#1a1a1a] underline-offset-4 group-hover:underline sm:text-xl">
                   {project.title}
                 </span>
@@ -39,12 +36,12 @@ export function ProjectsSection() {
               <ArrowUpRight
                 aria-hidden
                 strokeWidth={2.5}
-                className="mt-1 h-5 w-5 text-[#1a1a1a]/50 motion-safe:transition-transform group-hover:text-[#1a1a1a] motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:translate-x-0.5"
+                className="mt-1 h-5 w-5 shrink-0 text-[#1a1a1a]/50 motion-safe:transition-transform group-hover:text-[#1a1a1a] motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:translate-x-0.5"
               />
             </a>
           </li>
         ))}
-      </ol>
+      </ul>
     </SketchSection>
   );
 }
