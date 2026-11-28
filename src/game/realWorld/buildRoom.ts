@@ -18,6 +18,7 @@ import {
 import {
   cellAt,
   furnitureOf,
+  isInside,
   isSolidAt,
   NEIGHBOURS,
   REAL_WORLD_CELL as CELL,
@@ -30,7 +31,8 @@ import {
   type FurnitureKind,
   type RealWorldMap,
   type RealWorldRoom,
-  type VentDuct
+  type VentDuct,
+  type WallFinish
 } from '@/game/core/realWorld';
 import { buildVent, type LabVent } from './buildVent';
 import {
@@ -63,6 +65,7 @@ import {
   type PropKit
 } from './labProps';
 import { brainScanScreen, oldWorldScreen } from './labScreens';
+import { dryerStack, foldingTable, hamper, linenLine, noticeBoard } from './laundryProps';
 import { droneDock, drums, janitorCart, lampShelf, mopBucket } from './storeProps';
 import { makeToon, NIGHT_LAB } from './toon';
 
@@ -255,6 +258,7 @@ function addPools(root: Group, strips: ReadonlyArray<{ x: number; z: number }>) 
 
 /** Width of a door's frame; the skirting stops at it. */
 const DOOR_WIDTH = 2.6;
+const SKIRTING_HEIGHT = 0.35;
 
 /**
  * The skirting along the foot of a wall face, from cell (cx, cz) towards
@@ -272,7 +276,7 @@ function addSkirting(
   const length = gap ? (CELL - gap) / 2 : CELL;
   const offsets = gap ? [-(gap + length) / 2, (gap + length) / 2] : [0];
   for (const offset of offsets) {
-    const trim = new Mesh(new BoxGeometry(dx ? 0.25 : length, 0.35, dz ? 0.25 : length), material);
+    const trim = new Mesh(new BoxGeometry(dx ? 0.25 : length, SKIRTING_HEIGHT, dz ? 0.25 : length), material);
     trim.position.set(
       cx + dx * (CELL / 2 - 0.12) + (dz ? offset : 0),
       0.17,
@@ -290,12 +294,124 @@ function skirtingGap(wall: string) {
   return 0;
 }
 
-function addFloorCell(root: Group, map: RealWorldMap, { cx, cz, ribbed }: Cell, materials: CellMaterials) {
+/**
+ * How each finish is painted, bottom to top of a wall face (above the
+ * skirting): a lower band, a rail, the wall above. Muted, it's night.
+ */
+const FINISH: Readonly<
+  Record<
+    WallFinish,
+    { lower: string; rail: string; upper: string; band: number; draw?: 'tiles' | 'boards' | 'chevrons' }
+  >
+> = {
+  // The laundry: pale tiles to shoulder height, a teal wall above.
+  tiles: { lower: '#7fa9b4', rail: '#3d5f73', upper: '#4b6f8c', band: 0.5, draw: 'tiles' },
+  // The break room: warm boards to the dado rail, a dusky mauve above.
+  panelling: { lower: '#7a5a5c', rail: '#4a3540', upper: '#5d5584', band: 0.36, draw: 'boards' },
+  // Security: cold grey, a red band at eye height, hazard chevrons at the foot.
+  security: { lower: '#4b557a', rail: '#b3443f', upper: '#47507a', band: 0.42, draw: 'chevrons' },
+  // The storeroom: bare service paint, a yellow stripe.
+  service: { lower: '#4a5b92', rail: '#c9a24a', upper: '#4a5b92', band: 0.45 }
+};
+
+/** A finish's pattern on its lower band, from `railY` down. */
+const PATTERNS: Readonly<
+  Record<'tiles' | 'boards' | 'chevrons', (g: CanvasRenderingContext2D, railY: number) => void>
+> = {
+  tiles(g, railY) {
+    for (let y = railY; y < 128; y += 10) g.strokeRect(0, y, 128, 10);
+    for (let x = 0; x <= 128; x += 16) line(g, x, railY, x, 128);
+  },
+  boards(g, railY) {
+    for (let x = 8; x < 128; x += 16) line(g, x, railY, x, 128);
+  },
+  chevrons(g) {
+    g.fillStyle = '#c9a24a';
+    for (let x = -16; x < 128; x += 16) {
+      g.beginPath();
+      g.moveTo(x, 128);
+      g.lineTo(x + 8, 118);
+      g.lineTo(x + 16, 118);
+      g.lineTo(x + 8, 128);
+      g.fill();
+    }
+  }
+};
+
+function line(g: CanvasRenderingContext2D, x0: number, y0: number, x1: number, y1: number) {
+  g.beginPath();
+  g.moveTo(x0, y0);
+  g.lineTo(x1, y1);
+  g.stroke();
+}
+
+/** One wall face's worth (a cell wide, skirting to ceiling) of `finish`, as a texture. */
+function finishTexture(finish: WallFinish) {
+  const { lower, rail, upper, band, draw } = FINISH[finish];
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 128;
+  const g = canvas.getContext('2d');
+  if (g) {
+    const railY = Math.round(128 * (1 - band));
+    g.fillStyle = upper;
+    g.fillRect(0, 0, 128, railY);
+    g.fillStyle = lower;
+    g.fillRect(0, railY, 128, 128 - railY);
+    g.strokeStyle = 'rgba(11,14,28,.35)';
+    g.lineWidth = 1.5;
+    if (draw) PATTERNS[draw](g, railY);
+    g.fillStyle = rail;
+    g.fillRect(0, railY - 3, 128, 6);
+  }
+  const texture = new CanvasTexture(canvas);
+  texture.colorSpace = SRGBColorSpace;
+  return texture;
+}
+
+/** Each finish's material, made the first time a room needs it. */
+function finishMaterials(kit: PropKit) {
+  const made = new Map<WallFinish, Material>();
+  return (finish: WallFinish) => {
+    let material = made.get(finish);
+    if (!material) {
+      material = kit.toon(0xffffff, { map: finishTexture(finish) });
+      made.set(finish, material);
+    }
+    return material;
+  };
+}
+
+/** How far in front of the wall a finish sits: clear of it, behind the skirting and ribs. */
+const FINISH_INSET = 0.02;
+
+/** A finish on the wall face from cell (cx, cz) towards (dx, dz), skirting to ceiling. */
+function addFinish(root: Group, cx: number, cz: number, [dx, dz]: readonly [number, number], material: Material) {
+  const height = H - SKIRTING_HEIGHT;
+  const face = new Mesh(new PlaneGeometry(CELL, height), material);
+  face.position.set(
+    cx + dx * (CELL / 2 - FINISH_INSET),
+    SKIRTING_HEIGHT + height / 2,
+    cz + dz * (CELL / 2 - FINISH_INSET)
+  );
+  // A plane faces +z; turn it to face back into the room.
+  face.rotation.y = Math.atan2(-dx, -dz);
+  root.add(face);
+}
+
+function addFloorCell(
+  root: Group,
+  map: RealWorldMap,
+  { cx, cz, ribbed }: Cell,
+  materials: CellMaterials,
+  finish: Material | null = null
+) {
   for (const side of NEIGHBOURS) {
     const [dx, dz] = side;
     if (!isSolidAt(map, cx + dx * CELL, cz + dz * CELL)) continue;
     const wall = cellAt(map, cx + dx * CELL, cz + dz * CELL);
     addSkirting(root, cx, cz, side, materials.trim, skirtingGap(wall));
+    if (finish && wall === '#') addFinish(root, cx, cz, side, finish);
     // No rib in front of a vent, door, cage or monitor: they sit mid-face, where a rib would.
     if (!ribbed || wall !== '#') continue;
     const rib = new Mesh(new BoxGeometry(dx ? 0.3 : 0.4, H, dz ? 0.3 : 0.4), materials.wall);
@@ -360,7 +476,12 @@ const BUILD: Readonly<Record<FurnitureKind, (kit: PropKit, nth: number) => Objec
   washer: (kit) => washer(kit),
   coatRack: (kit, nth) => coatRack(kit, nth),
   lockers: (kit) => lockers(kit),
-  securityDesk: (kit) => securityDesk(kit)
+  securityDesk: (kit) => securityDesk(kit),
+  dryerStack: (kit) => dryerStack(kit),
+  foldingTable: (kit) => foldingTable(kit),
+  hamper: (kit) => hamper(kit),
+  linenLine: (kit, nth) => linenLine(kit, nth),
+  noticeBoard: (kit, nth) => noticeBoard(kit, nth)
 };
 
 function addFurniture(root: Group, room: RealWorldRoom, kit: PropKit) {
@@ -542,6 +663,12 @@ export function buildRoom(
       doors.push(addServiceDoor(root, map, cell, kit));
     }
   };
+  const finishMaterial = finishMaterials(kit);
+  /** How the walls round a floor cell are done up, if its room says. */
+  const finishOf = (cell: Cell) => {
+    const found = room.finishes?.find(({ area }) => isInside(area, cell.cx, cell.cz));
+    return found ? finishMaterial(found.finish) : null;
+  };
   /** Without its own strips, a room gets one over every other floor cell (the lab's over the table flickers). */
   const gridStrip = (cell: Cell, xi: number, zi: number) => {
     const flickers = `${xi},${zi}` === flickerCell;
@@ -555,7 +682,7 @@ export function buildRoom(
       if (build) return build(cell);
       if (isSolidAt(map, cell.cx, cell.cz))
         return addWallCell(root, map, cell, materials, wallFixture(kit, char, monitors));
-      addFloorCell(root, map, cell, materials);
+      addFloorCell(root, map, cell, materials, finishOf(cell));
       gridStrip(cell, xi, zi);
     });
   });

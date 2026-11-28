@@ -2,7 +2,7 @@ import type { EscapePlan } from './escape';
 import { LAB_VENT, type RealWorldRoom } from './labRoom';
 
 /** How far below the duct floor the ship deck is. */
-export const SHIP_DECK_DROP = 3.4;
+export const SHIP_DECK_DROP = 3.6;
 
 const NORTH = 0;
 const WEST = Math.PI / 2;
@@ -21,8 +21,10 @@ const CORRIDOR_DOOR = Math.atan2(2.5, 5.1);
  *   round runs along it.
  * - **the break room** (north): a mess table, a drinks machine the
  *   researcher stops at, the crew's lockers.
- * - **the laundry** (west, alongside the corridor): washers, racks of spare
- *   lab coats, mostly dark. The long way round.
+ * - **the laundry** (west, alongside the corridor): laid out the way it's
+ *   used, north to south: washers and a folding table under the one light,
+ *   sheets drying across the middle (a dark zig-zag nobody sees through),
+ *   racks of clean uniforms at the far end. The long way round.
  * - **the security post** (south): where both ways meet. An officer watches
  *   the room from the desk, and the stun blaster hangs in the armoury cage
  *   (`A`) in the south wall, out of reach.
@@ -66,18 +68,28 @@ export const SHIP_DECK: RealWorldRoom = {
     { kind: 'messTable', x: 8.5, z: 5.8, facing: 'south' },
     { kind: 'vending', x: 16.5, z: 3.6, facing: 'south' },
     { kind: 'lockers', x: 20.6, z: 6, facing: 'west' },
-    // The laundry: washers down the west wall, spare coats on racks opposite, linen, bags.
-    { kind: 'washer', x: 3.6, z: 14.5, facing: 'east' },
-    { kind: 'washer', x: 3.6, z: 15.7, facing: 'east' },
-    { kind: 'washer', x: 3.6, z: 16.9, facing: 'east' },
-    { kind: 'coatRack', x: 8.6, z: 20, facing: 'west' },
-    { kind: 'coatRack', x: 8.6, z: 24.5, facing: 'west' },
-    { kind: 'supplyShelf', x: 3.5, z: 26, facing: 'east' },
-    { kind: 'crates', x: 4.0, z: 30.5, facing: 'east' },
+    { kind: 'noticeBoard', x: 12, z: 3.05, facing: 'south' },
+    // The laundry, north to south as it's used: wash, dry, put away. The washers and a dryer
+    // stack down the west wall, a folding table opposite under the one light.
+    { kind: 'washer', x: 3.9, z: 14, facing: 'east' },
+    { kind: 'washer', x: 3.9, z: 15.2, facing: 'east' },
+    { kind: 'washer', x: 3.9, z: 16.4, facing: 'east' },
+    { kind: 'dryerStack', x: 3.9, z: 17.7, facing: 'east' },
+    { kind: 'foldingTable', x: 8.15, z: 14.6, facing: 'west' },
+    { kind: 'hamper', x: 8.2, z: 17.2, facing: 'west' },
+    { kind: 'noticeBoard', x: 8.95, z: 12.95, facing: 'west' },
+    // Sheets hung to dry across the middle, one from each wall: a dark zig-zag nobody sees through.
+    { kind: 'linenLine', x: 4.85, z: 20.2, facing: 'south' },
+    { kind: 'linenLine', x: 7.15, z: 24.2, facing: 'north' },
+    // Put away: clean coats and uniforms on racks, linen on a shelf, a full hamper waiting.
+    { kind: 'coatRack', x: 8.6, z: 28.2, facing: 'west' },
+    { kind: 'supplyShelf', x: 3.4, z: 28.6, facing: 'east' },
+    { kind: 'hamper', x: 7.9, z: 31.8, facing: 'west' },
     // The security post: the officer's desk and its camera screens, lockers, a delivery.
     { kind: 'securityDesk', x: 16.5, z: 41.3, facing: 'north' },
     { kind: 'lockers', x: 3.4, z: 39, facing: 'east' },
-    { kind: 'crates', x: 7.4, z: 37, facing: 'south' }
+    { kind: 'crates', x: 7.4, z: 37, facing: 'south' },
+    { kind: 'noticeBoard', x: 10.5, z: 36.05, facing: 'south' }
   ],
   // Landing under the hatch. Dropping in keeps the way Danilo was crawling; the yaw is for starting here.
   wake: { x: 20.75, z: 22.5, yaw: WEST },
@@ -85,6 +97,13 @@ export const SHIP_DECK: RealWorldRoom = {
   hatch: { x: 20.75, z: 22.5 },
   // Over the corridor, under the bolted grate Danilo looked down through.
   skylights: [{ x: 13.25, z: 19.5 }],
+  // Each room done up as its own place.
+  finishes: [
+    { area: { x0: 3, z0: 3, x1: 24, z1: 9 }, finish: 'panelling' },
+    { area: { x0: 3, z0: 9, x1: 9, z1: 33 }, finish: 'tiles' },
+    { area: { x0: 18, z0: 18, x1: 24, z1: 27 }, finish: 'service' },
+    { area: { x0: 3, z0: 33, x1: 18, z1: 42 }, finish: 'security' }
+  ],
   strips: [
     // The break room: over the table, by the drinks machine.
     { x: 7.5, z: 5.5 },
@@ -96,8 +115,8 @@ export const SHIP_DECK: RealWorldRoom = {
     { x: 13.5, z: 32.4 },
     // One at the back of the storeroom: the door side stays dark.
     { x: 22.5, z: 25.5 },
-    // The laundry, by the washers; the rest is dark.
-    { x: 4.5, z: 22.5 },
+    // The laundry: over the folding table; the drying lines and the racks are dark.
+    { x: 7, z: 14.6 },
     // The security post: inside the corridor door (whoever comes in that way is lit), and over the cage.
     { x: 13.5, z: 37.6 },
     { x: 10.5, z: 40.5 }

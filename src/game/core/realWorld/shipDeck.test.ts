@@ -16,6 +16,7 @@ import {
   VENT_CELL
 } from './labRoom';
 import { DECK_ESCAPE, SHIP_DECK, SHIP_DECK_DROP } from './shipDeck';
+import { hasLineOfSight } from './stealth';
 import { floorGrateCentre } from './vent';
 import { stepWalker, type Walker } from './walker';
 
@@ -60,8 +61,9 @@ describe('the ship deck under the vent', () => {
     expect(toWorld(skylight.x, skylight.z).x).toBeCloseTo(peek.x);
     expect(toWorld(skylight.x, skylight.z).z).toBeCloseTo(peek.z);
     expect(offset.y).toBeCloseTo(vent.floor - SHIP_DECK_DROP);
-    // Its walls stop below the duct floor.
+    // Its walls stop below the duct floor, and its ceiling clear of the lab's floor: nothing flickers between them.
     expect(offset.y + REAL_WORLD_WALL_HEIGHT).toBeLessThan(vent.floor - 0.05);
+    expect(offset.y + REAL_WORLD_WALL_HEIGHT).toBeLessThan(-0.1);
   });
 
   it('puts the corridor right under the bolted grate, lit there, with the researcher’s glimpse along it', () => {
@@ -147,6 +149,9 @@ describe('the ship deck under the vent', () => {
       'messTable',
       'vending',
       'washer',
+      'dryerStack',
+      'foldingTable',
+      'linenLine',
       'coatRack',
       'lockers',
       'securityDesk'
@@ -154,6 +159,11 @@ describe('the ship deck under the vent', () => {
       expect(kinds.has(kind)).toBe(true);
     }
     expect(findCells(SHIP_DECK.walls, 'A')).toHaveLength(1);
+  });
+
+  it('hangs the laundry’s sheets so nobody sees down its length', () => {
+    expect(hasLineOfSight(SHIP_DECK, false, { x: 6, z: 15 }, { x: 6, z: 30 })).toBe(false);
+    expect(hasLineOfSight(SHIP_DECK, false, { x: 7.5, z: 15 }, { x: 4.5, z: 30 })).toBe(false);
   });
 
   it('has more than one way from the storeroom to the cage: down the corridor, or round through the laundry', () => {
@@ -170,6 +180,10 @@ describe('the ship deck under the vent', () => {
       [13.5, 7.8],
       [4.5, 7.8],
       [6, 13],
+      [7.4, 18.6],
+      [7.4, 21.8],
+      [4.5, 22.2],
+      [4.5, 26],
       [6, 32],
       [4.5, 35],
       [4.5, 41],

@@ -80,7 +80,8 @@ export function washer(kit: PropKit) {
   const group = new Group();
   const white = kit.toon(0xc9cde0);
   group.add(mesh(new BoxGeometry(1, 1.05, 1), white, 0, 0.525));
-  group.add(mesh(new BoxGeometry(1, 0.14, 0.1), kit.toon(LOCKER_DARK), 0, 0.98, 0.46));
+  // The control strip sits proud of the front and below the top, so it never shares a face with the body.
+  group.add(mesh(new BoxGeometry(0.9, 0.12, 0.06), kit.toon(LOCKER_DARK), 0, 0.95, 0.52));
   const door = new Group();
   door.position.set(0, 0.5, 0.5);
   door.add(mesh(new TorusGeometry(0.32, 0.05, 6, 18), kit.toon(NIGHT_LAB.steel)));

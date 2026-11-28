@@ -3,6 +3,7 @@ import { aimedDock, checkpointAt, retry, startEscape, stepEscape, wakeDrone, typ
 import { REAL_WORLD_EYE_HEIGHT } from './labRoom';
 import { angleBetween } from './patrol';
 import { DECK_ESCAPE as PLAN } from './shipDeck';
+import type { Noise } from './throwables';
 import { stepWalker, type Walker } from './walker';
 
 const DT = 1 / 30;
@@ -13,9 +14,9 @@ function sneak() {
   let escape = startEscape(PLAN);
   let walker: Walker = { x: PLAN.room.wake.x, z: PLAN.room.wake.z, vx: 0, vz: 0 };
   let caughtEver = false;
-  const tick = (input = { forward: 0, strafe: 0, yaw: 0 }) => {
+  const tick = (input = { forward: 0, strafe: 0, yaw: 0 }, noises: Noise[] = []) => {
     walker = stepWalker(PLAN.room, walker, input, DT, { vent: false, doors: escape.doorOpen });
-    escape = stepEscape(PLAN, escape, walker, DT);
+    escape = stepEscape(PLAN, escape, walker, DT, noises);
     caughtEver ||= escape.caught;
   };
   const bot = {
@@ -40,6 +41,11 @@ function sneak() {
           tick({ forward: 1, strafe: 0, yaw: Math.atan2(-dx, -dz) });
         }
       }
+      return bot;
+    },
+    /** Something thrown clatters down at (x, z). */
+    clatter(x: number, z: number, reach = 9) {
+      tick(undefined, [{ x, z, reach }]);
       return bot;
     },
     idle(seconds: number) {
@@ -137,10 +143,49 @@ describe('sneaking to the blaster', () => {
     bot.waitUntil((escape) => escape.doorOpen, 12);
     bot.walk([16.8, 22.5]);
     bot.waitUntil((escape) => researcher(escape).z > 25 && researcher(escape).moving);
-    bot.walk([13.5, 22.5], [13.5, 7.8], [4.5, 7.8], [6, 13], [6, 32], [4.5, 35], [4.5, 38.5]);
+    bot.walk(
+      [13.5, 22.5],
+      [13.5, 7.8],
+      [4.5, 7.8],
+      [6, 13],
+      [7.4, 18.6],
+      [7.4, 21.8],
+      [4.5, 22.2],
+      [4.5, 26],
+      [6, 32],
+      [4.5, 35],
+      [4.5, 38.5]
+    );
     expect(PLAN.checkpoints[bot.escape.checkpoint].id).toBe('laundry');
     bot.waitUntil(officerFacingAway);
     bot.walk([4.5, 41], [PLAN.cage.x, PLAN.cage.z]);
+    expect(bot.caughtEver).toBe(false);
+    expect(bot.escape.reached).toBe(true);
+  });
+
+  it('works with a distraction: a can thrown up the corridor draws the officer off the desk', () => {
+    const bot = sneak();
+    bot.set(wakeDrone(PLAN, bot.escape, 1));
+    bot.waitUntil((escape) => escape.doorOpen, 12);
+    bot.walk([16.8, 22.5]);
+    bot.waitUntil((escape) => researcher(escape).z > 25 && researcher(escape).moving);
+    bot.walk(
+      [13.5, 22.5],
+      [13.5, 7.8],
+      [4.5, 7.8],
+      [6, 13],
+      [7.4, 18.6],
+      [7.4, 21.8],
+      [4.5, 22.2],
+      [4.5, 26],
+      [6, 32],
+      [4.5, 34.5]
+    );
+    // From the laundry's doorway, lob it over towards the corridor's end: the officer goes to look.
+    bot.clatter(13.5, 31);
+    expect(bot.escape.guards[1].state).toBe('investigating');
+    bot.waitUntil(({ guards: [, officer] }) => officer.patrol.z < 36);
+    bot.walk([4.5, 38.5], [4.5, 41], [PLAN.cage.x, PLAN.cage.z]);
     expect(bot.caughtEver).toBe(false);
     expect(bot.escape.reached).toBe(true);
   });

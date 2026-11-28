@@ -1,6 +1,17 @@
 import type { CellCenter, RealWorldRoom } from './labRoom';
 import { distanceTo, footprintsOf, isSolidAt } from './labRoom';
-import { angleBetween, startPatrol, stepPatrol, turnTowards, yawTowards, type Patrol, type Route } from './patrol';
+import { clearAlong, hears, wayTo } from './hearing';
+import {
+  angleBetween,
+  startPatrol,
+  stepPatrol,
+  turnTowards,
+  walkToward,
+  yawTowards,
+  type Patrol,
+  type Route
+} from './patrol';
+import type { Noise } from './throwables';
 
 /**
  * Light and shadow (#145): the light strips throw pools of light, the dark
@@ -60,16 +71,13 @@ export const sightRange = (kind: GuardKind, light: number) => SIGHT[kind].range 
 
 /** Nothing in between: no wall, no shut door, nothing tall. */
 export function hasLineOfSight(room: RealWorldRoom, doorsOpen: boolean, from: CellCenter, to: CellCenter): boolean {
-  const distance = Math.hypot(to.x - from.x, to.z - from.z);
-  const steps = Math.ceil(distance / STEALTH.sightStep);
   const tall = footprintsOf(room).filter((footprint) => footprint.top > STEALTH.blocksSight);
-  for (let i = 1; i < steps; i++) {
-    const x = from.x + ((to.x - from.x) * i) / steps;
-    const z = from.z + ((to.z - from.z) * i) / steps;
-    if (isSolidAt(room.walls, x, z, doorsOpen)) return false;
-    if (tall.some((footprint) => distanceTo(footprint, x, z) === 0)) return false;
-  }
-  return true;
+  return clearAlong(
+    from,
+    to,
+    STEALTH.sightStep,
+    (x, z) => isSolidAt(room.walls, x, z, doorsOpen) || tall.some((footprint) => distanceTo(footprint, x, z) === 0)
+  );
 }
 
 /** Where an alien stands and which way it faces. */
@@ -106,8 +114,24 @@ export interface GuardPlan {
   route: Route;
 }
 
-/** Walking its round; stopped and turned to look (something's there); caught you. */
-export type GuardState = 'patrol' | 'suspicious' | 'caught';
+/**
+ * Walking its round; gone to look at a noise; stopped and turned to look
+ * (something's there); caught you.
+ */
+export type GuardState = 'patrol' | 'investigating' | 'suspicious' | 'caught';
+
+/** Off its round to see what made a noise: there, a look round, and back. */
+export interface Investigation {
+  /** Where the sound came from. */
+  noise: CellCenter;
+  phase: 'going' | 'looking' | 'returning';
+  /** The points still to walk, there or back. */
+  way: CellCenter[];
+  /** Seconds spent looking round. */
+  looked: number;
+  /** Where it left its round, and which way it faced. */
+  left: Eye;
+}
 
 export interface Guard {
   patrol: Patrol;
@@ -116,25 +140,82 @@ export interface Guard {
   state: GuardState;
   /** Where it last saw you. */
   lookAt: CellCenter | null;
+  investigation: Investigation | null;
 }
 
 export const startGuard = (plan: GuardPlan): Guard => ({
   patrol: startPatrol(plan.route),
   alert: 0,
   state: 'patrol',
-  lookAt: null
+  lookAt: null,
+  investigation: null
 });
 
-function nextState(guard: Guard, alert: number): GuardState {
+/** Going to look at a noise, it hurries a little; it stops this short of it, and looks round this long. */
+const INVESTIGATE = { hurry: 1.3, stopShort: 1, lookSeconds: 4.5, sweep: 0.9 } as const;
+
+function nextState(guard: Guard, alert: number, investigating: boolean): GuardState {
   if (alert >= 1) return 'caught';
   if (alert >= STEALTH.suspicious || (guard.state === 'suspicious' && alert > 0)) return 'suspicious';
-  return 'patrol';
+  return investigating ? 'investigating' : 'patrol';
+}
+
+/** Short of the noise by `INVESTIGATE.stopShort`, along the last stretch of the way. */
+function shortOf(way: CellCenter[], from: CellCenter): CellCenter[] {
+  const end = way[way.length - 1];
+  const before = way[way.length - 2] ?? from;
+  const length = Math.hypot(end.x - before.x, end.z - before.z);
+  if (length <= INVESTIGATE.stopShort) return way.length > 1 ? way.slice(0, -1) : [before];
+  const keep = (length - INVESTIGATE.stopShort) / length;
+  return [...way.slice(0, -1), { x: before.x + (end.x - before.x) * keep, z: before.z + (end.z - before.z) * keep }];
+}
+
+/** The noise it hears, if any (the last one, if more than one): it goes to look, from wherever it is. */
+function hearNoise(room: RealWorldRoom, guard: Guard, noises: readonly Noise[], doorsOpen: boolean) {
+  const { patrol } = guard;
+  const heard = noises.filter((noise) => hears(room.walls, patrol, noise, doorsOpen)).pop();
+  if (!heard) return guard.investigation;
+  const way = wayTo(room.walls, patrol, heard, doorsOpen);
+  if (!way) return guard.investigation;
+  const left = guard.investigation?.left ?? { x: patrol.x, z: patrol.z, yaw: patrol.yaw };
+  return { noise: { x: heard.x, z: heard.z }, phase: 'going', way: shortOf(way, patrol), looked: 0, left } as const;
+}
+
+/** One frame off its round: walk there, look round, walk back; null once it's back where it left off. */
+function investigate(
+  room: RealWorldRoom,
+  route: Route,
+  patrol: Patrol,
+  investigation: Investigation,
+  doorsOpen: boolean,
+  dt: number
+): { patrol: Patrol; investigation: Investigation | null } {
+  const pace = { speed: route.speed * INVESTIGATE.hurry, turnSpeed: route.turnSpeed * INVESTIGATE.hurry };
+  if (investigation.phase === 'looking') {
+    const looked = investigation.looked + dt;
+    const towards = yawTowards(patrol.x, patrol.z, investigation.noise.x, investigation.noise.z);
+    const yaw = towards + Math.sin(looked * 1.4) * INVESTIGATE.sweep;
+    const turned = { ...patrol, yaw: turnTowards(patrol.yaw, yaw, pace.turnSpeed * dt), moving: false };
+    if (looked < INVESTIGATE.lookSeconds) return { patrol: turned, investigation: { ...investigation, looked } };
+    const way = wayTo(room.walls, patrol, investigation.left, doorsOpen) ?? [investigation.left];
+    return { patrol: turned, investigation: { ...investigation, phase: 'returning', way } };
+  }
+  const [next, ...rest] = investigation.way;
+  if (next) {
+    const walked = walkToward(patrol, next, pace, dt);
+    return { patrol: walked ?? patrol, investigation: walked ? investigation : { ...investigation, way: rest } };
+  }
+  if (investigation.phase === 'going') return { patrol, investigation: { ...investigation, phase: 'looking' } };
+  // Back where it left off: face the way it was facing, then carry on.
+  const yaw = turnTowards(patrol.yaw, investigation.left.yaw, route.turnSpeed * dt);
+  const settled = Math.abs(angleBetween(yaw, investigation.left.yaw)) < 1e-3;
+  return { patrol: { ...patrol, yaw, moving: false }, investigation: settled ? null : investigation };
 }
 
 /**
  * One frame: look for the player (null: not on this deck), fill or drain the
- * alert, and walk the round, or stand and turn towards where it saw them.
- * Caught stays caught.
+ * alert, listen for `noises`, and walk the round, go and look at a noise, or
+ * stand and turn towards where it saw them. Caught stays caught.
  */
 export function stepGuard(
   room: RealWorldRoom,
@@ -142,16 +223,29 @@ export function stepGuard(
   guard: Guard,
   player: CellCenter | null,
   doorsOpen: boolean,
-  dt: number
+  dt: number,
+  noises: readonly Noise[] = []
 ): Guard {
   if (guard.state === 'caught') return guard;
   const rate = player ? noticeRate(room, doorsOpen, plan.kind, guard.patrol, player) : 0;
   const alert = rate ? Math.min(1, guard.alert + rate * dt) : Math.max(0, guard.alert - STEALTH.drain * dt);
   const lookAt = rate && player ? { x: player.x, z: player.z } : guard.lookAt;
-  const state = nextState(guard, alert);
-  if (state === 'patrol') return { patrol: stepPatrol(plan.route, guard.patrol, dt), alert, state, lookAt };
+  const heard = hearNoise(room, guard, noises, doorsOpen);
+  const state = nextState(guard, alert, !!heard);
   const { patrol } = guard;
+  if (state === 'patrol')
+    return { patrol: stepPatrol(plan.route, patrol, dt), alert, state, lookAt, investigation: null };
+  if (state === 'investigating' && heard) {
+    const next = investigate(room, plan.route, patrol, heard, doorsOpen, dt);
+    return { ...next, alert, state: next.investigation ? state : 'patrol', lookAt };
+  }
   const towards = lookAt ? yawTowards(patrol.x, patrol.z, lookAt.x, lookAt.z) : patrol.yaw;
   const turn = state === 'caught' ? Math.PI : plan.route.turnSpeed * dt;
-  return { patrol: { ...patrol, yaw: turnTowards(patrol.yaw, towards, turn), moving: false }, alert, state, lookAt };
+  return {
+    patrol: { ...patrol, yaw: turnTowards(patrol.yaw, towards, turn), moving: false },
+    alert,
+    state,
+    lookAt,
+    investigation: heard
+  };
 }

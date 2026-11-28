@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { findCells } from './labRoom';
+import { findCells, isSolidAt } from './labRoom';
 import { DECK_ESCAPE, SHIP_DECK } from './shipDeck';
 import { hasLineOfSight, lightAt, noticeRate, SIGHT, STEALTH, startGuard, stepGuard, type Guard } from './stealth';
 
@@ -93,5 +93,44 @@ describe('an alien on its round', () => {
     const looking = run(atEnd, offside, 0.9);
     expect(looking.state).toBe('suspicious');
     expect(looking.patrol.yaw).not.toBeCloseTo(SOUTH);
+  });
+});
+
+describe('a noise', () => {
+  const [, officer] = DECK_ESCAPE.guards;
+  const clang = { x: 13.5, z: 31, reach: 11 };
+
+  it('draws the officer off the desk to look, then back to the desk', () => {
+    let guard = startGuard(officer);
+    const desk = { x: guard.patrol.x, z: guard.patrol.z };
+    guard = stepGuard(SHIP_DECK, officer, guard, null, false, DT, [clang]);
+    expect(guard.state).toBe('investigating');
+    let closest = Infinity;
+    let looked = false;
+    for (let t = 0; t < 40 && guard.state !== 'patrol'; t += DT) {
+      guard = stepGuard(SHIP_DECK, officer, guard, null, false, DT);
+      closest = Math.min(closest, Math.hypot(guard.patrol.x - clang.x, guard.patrol.z - clang.z));
+      looked ||= guard.investigation?.phase === 'looking';
+      // Never walks through a wall.
+      expect(isSolidAt(SHIP_DECK.walls, guard.patrol.x, guard.patrol.z)).toBe(false);
+    }
+    expect(looked).toBe(true);
+    expect(closest).toBeLessThan(1.3);
+    expect(guard.state).toBe('patrol');
+    expect(guard.patrol.x).toBeCloseTo(desk.x);
+    expect(guard.patrol.z).toBeCloseTo(desk.z);
+  });
+
+  it('isn’t heard from too far off', () => {
+    const guard = stepGuard(SHIP_DECK, officer, startGuard(officer), null, false, DT, [{ x: 6, z: 14, reach: 9 }]);
+    expect(guard.state).toBe('patrol');
+  });
+
+  it('still lets it see you on the way: it can catch you while it goes to look', () => {
+    let guard = stepGuard(SHIP_DECK, officer, startGuard(officer), null, false, DT, [clang]);
+    // Standing lit at the corridor door, in its way.
+    for (let t = 0; t < 6 && guard.state !== 'caught'; t += DT)
+      guard = stepGuard(SHIP_DECK, officer, guard, { x: 13.5, z: 37.6 }, false, DT);
+    expect(guard.state).toBe('caught');
   });
 });

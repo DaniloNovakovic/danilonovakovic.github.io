@@ -1,11 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { footprintOf, furnitureOf, isSolidAt, LAB_ROOM, REAL_WORLD_WALL_HEIGHT } from './labRoom';
+import { SHIP_DECK } from './shipDeck';
 import {
   aimedThrowable,
+  clatter,
+  DECK_THROWABLES,
   LAB_THROWABLES,
   stepThrowable,
   throwableRadius,
   throwThrowable,
+  type Noise,
   type Throwable
 } from './throwables';
 
@@ -89,5 +93,49 @@ describe('aiming at the floor', () => {
     // Straight at it would be about -0.86 rad; a bit off still counts.
     expect(aimedThrowable([atFeet], { ...eye, yaw: EAST, pitch: -0.7 })?.id).toBe('ball');
     expect(aimedThrowable([atFeet], { ...eye, yaw: EAST, pitch: 0 })).toBeNull();
+  });
+});
+
+describe('loose things on the deck, and the noise they make', () => {
+  const flyOnDeck = (thing: Throwable, seconds: number) => {
+    const path = [thing];
+    const noises: Noise[] = [];
+    for (let t = 0; t < seconds; t += 1 / 60) {
+      const next = stepThrowable(SHIP_DECK, path.at(-1)!, 1 / 60);
+      const noise = clatter(path.at(-1)!, next, 1 / 60);
+      if (noise) noises.push(noise);
+      path.push(next);
+    }
+    return { path, noises };
+  };
+
+  it('all start at rest on something, inside the deck, and silent', () => {
+    for (const thing of DECK_THROWABLES) {
+      const { path, noises } = flyOnDeck(thing, 0.5);
+      expect(path.at(-1)!.y, thing.id).toBeCloseTo(thing.y, 1);
+      expect(isSolidAt(SHIP_DECK.walls, thing.x, thing.z)).toBe(false);
+      expect(noises, thing.id).toEqual([]);
+    }
+  });
+
+  it('a can thrown down the corridor clatters where it lands, loud enough to carry', () => {
+    const can = { ...DECK_THROWABLES.find((thing) => thing.kind === 'can')! };
+    const thrown = throwThrowable(
+      can,
+      { x: 13.5, y: 1.4, z: 22.5 },
+      { x: 13.5, y: 1.6, z: 22.5, yaw: Math.PI, pitch: 0.1 }
+    );
+    const { path, noises } = flyOnDeck(thrown, 4);
+    expect(noises.length).toBeGreaterThan(0);
+    const [first] = noises;
+    expect(first.z).toBeGreaterThan(24);
+    expect(first.reach).toBeGreaterThan(8);
+    expect(path.at(-1)).toMatchObject({ vx: 0, vy: 0, vz: 0 });
+  });
+
+  it('a crumpled page makes no sound at all', () => {
+    const page = { ...LAB_THROWABLES.find((thing) => thing.kind === 'paper')!, y: 2.5 };
+    const before = { ...page, vy: -8 };
+    expect(clatter(before, { ...before, vy: 2 }, 1 / 60)).toBeNull();
   });
 });

@@ -436,9 +436,14 @@ builds on this (the Coop, `disconnect --all`) is parked in #173.
      green), and it trundles out on its cleaning beat up and down the
      corridor. The door stays open; the other drone sleeps on.
    - **The rooms.** The corridor runs north–south past the storeroom. North:
-     the crew's **break room** (mess table, drinks machine, lockers). West,
-     alongside the corridor: the dim **laundry** (washers, racks of spare lab
-     coats with one officer's jacket among them). South: the **security
+     the crew's **break room** (mess table, drinks machine, lockers, a notice
+     board with the crew's mascot). West, alongside the corridor: the
+     **laundry**, laid out the way it's used: washers, a dryer stack and a
+     folding table under the one light; sheets drying across the middle, one
+     line from each wall, a dark zig-zag nobody sees through; racks of clean
+     coats (one officer's jacket among them) at the far end. Each room's walls
+     are done up as its own place: tiles in the laundry, warm panelling in
+     the break room, a red band and hazard chevrons at security. South: the **security
      post**, where both ways meet: the officer's desk with camera screens
      (one shows the lab, Danilo's pod empty), lockers, and the **armoury
      cage** in the south wall with the stun blaster behind bars.
@@ -457,6 +462,16 @@ builds on this (the Coop, `disconnect --all`) is parked in #173.
      holstered blaster): stands at the security desk, watches the corridor
      door, the room, then the camera screens for a while (the window to
      slip past). The officer makes up its mind faster.
+   - **Distractions.** Loose things on the deck: a spanner on the cleaners'
+     cart (the first thing you find), empty cans in the break room and on the
+     laundry's folding table. Thrown, they clatter where they land: a ring
+     spreads on the floor out to how far the noise carries (through open
+     doorways, hardly through walls). An alien inside it shows a "?", walks
+     over the way anyone would (round the walls), looks round for a few
+     seconds, and walks back to where it left off. It still sees you on the
+     way. Holding one on the deck, the prompt says it: "the clatter draws
+     them over". The officer is the one this is for: a can lobbed up the
+     corridor's end from the laundry door takes it off the desk.
    - **Being seen is readable.** A faint pink cone on the floor shows where
      each alien looks, as long as it would spot you where you stand now. Seen,
      a "?" fills over its head; past a third it stops and turns to look; full

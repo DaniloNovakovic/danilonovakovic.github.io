@@ -37,6 +37,8 @@ export const gameShellMessages = {
     back: 'Back to the portfolio',
     promptPickUp: 'Click or E to pick up',
     promptThrow: 'Click to throw · E to put down',
+    promptThrowNoise: 'Click to throw: the clatter draws them over · E to put down',
+    promptThrowNoiseTouch: 'Throw it: the clatter draws them over',
     promptPry: 'Hold click or E to pry the grate off',
     promptPryTouch: 'Hold to pry',
     promptLocked: 'Locked',

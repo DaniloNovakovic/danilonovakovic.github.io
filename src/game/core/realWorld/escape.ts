@@ -2,6 +2,7 @@ import { aimMiss, type View } from './aim';
 import type { CellCenter, RealWorldRoom } from './labRoom';
 import { startPatrol, stepPatrol, type Patrol, type Route } from './patrol';
 import { startGuard, stepGuard, type Guard, type GuardPlan } from './stealth';
+import type { Noise } from './throwables';
 
 /**
  * The run across the ship deck (#145), from the storeroom to the blaster in
@@ -125,17 +126,26 @@ export function checkpointAt(plan: EscapePlan, current: number, player: CellCent
 
 /**
  * One frame on the deck: the drone rolls (and opens the door), the aliens look
- * for `player` (null: not on the deck yet), checkpoints are passed, and either
+ * for `player` (null: not on the deck yet) and listen for `noises` (things
+ * Danilo threw clattering down), checkpoints are passed, and either
  * one of them has caught you or you've reached the cage. Then it all holds
  * still until `retry`.
  */
-export function stepEscape(plan: EscapePlan, escape: Escape, player: CellCenter | null, dt: number): Escape {
+export function stepEscape(
+  plan: EscapePlan,
+  escape: Escape,
+  player: CellCenter | null,
+  dt: number,
+  noises: readonly Noise[] = []
+): Escape {
   if (escape.caught || escape.reached) return escape;
   const drone = escape.drone && stepDrone(plan.drones, escape.drone, dt);
   const { door } = plan.drones;
   const doorOpen =
     escape.doorOpen || (!!drone && Math.hypot(drone.patrol.x - door.x, drone.patrol.z - door.z) <= DOOR_REACH);
-  const guards = escape.guards.map((guard, i) => stepGuard(plan.room, plan.guards[i], guard, player, doorOpen, dt));
+  const guards = escape.guards.map((guard, i) =>
+    stepGuard(plan.room, plan.guards[i], guard, player, doorOpen, dt, noises)
+  );
   const caught = guards.some((guard) => guard.state === 'caught');
   const checkpoint = player && !caught ? checkpointAt(plan, escape.checkpoint, player) : escape.checkpoint;
   const reached = !caught && !!player && Math.hypot(player.x - plan.cage.x, player.z - plan.cage.z) <= plan.cage.reach;

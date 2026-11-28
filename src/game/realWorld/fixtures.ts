@@ -6,6 +6,9 @@ export interface PromptText {
   /** Under the crosshair, aiming at something loose / holding something (desktop). */
   promptPickUp: string;
   promptThrow: string;
+  /** On the deck, holding something: throwing it is a distraction (desktop, then touch). */
+  promptThrowNoise: string;
+  promptThrowNoiseTouch: string;
   /** Under the crosshair, on a grate (desktop, then touch). */
   promptPry: string;
   promptPryTouch: string;
@@ -25,7 +28,17 @@ export interface PromptText {
 }
 
 /** What the crosshair offers. */
-export type Prompt = 'pickUp' | 'throw' | 'pry' | 'wake' | 'locked' | 'bolted' | 'dronesOnly' | 'cage' | null;
+export type Prompt =
+  | 'pickUp'
+  | 'throw'
+  | 'throwNoise'
+  | 'pry'
+  | 'wake'
+  | 'locked'
+  | 'bolted'
+  | 'dronesOnly'
+  | 'cage'
+  | null;
 
 /** Things worked by holding the action: the grates, and waking a drone. */
 type Hold = Pryable | 'wake';
@@ -113,6 +126,11 @@ export function createFixtures(
     none: { text: '', button: '', textOnTouch: false },
     pickUp: { text: text.promptPickUp, button: text.grab, textOnTouch: false },
     throw: { text: text.promptThrow, button: text.throw, textOnTouch: false },
+    throwNoise: {
+      text: isTouch ? text.promptThrowNoiseTouch : text.promptThrowNoise,
+      button: text.throw,
+      textOnTouch: true
+    },
     pry: { text: isTouch ? text.promptPryTouch : text.promptPry, button: text.pry, textOnTouch: true },
     wake: { text: isTouch ? text.promptWakeTouch : text.promptWake, button: text.wake, textOnTouch: true },
     locked: { text: text.promptLocked, button: '', textOnTouch: true },

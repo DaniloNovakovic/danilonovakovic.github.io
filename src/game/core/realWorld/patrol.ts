@@ -73,21 +73,34 @@ function nextTarget(route: Route, patrol: Patrol): Pick<Patrol, 'target' | 'dire
 /** Facing a heading this closely, it walks; any more off, it turns on the spot first. */
 const WALK_WHILE_TURNING = 0.6;
 
+/**
+ * One frame of walking to `to`: turn to face the way, then walk, at `speed`
+ * and `turnSpeed`. Null once it's there.
+ */
+export function walkToward(
+  patrol: Patrol,
+  to: { x: number; z: number },
+  { speed, turnSpeed }: Pick<Route, 'speed' | 'turnSpeed'>,
+  dt: number
+): Patrol | null {
+  const dx = to.x - patrol.x;
+  const dz = to.z - patrol.z;
+  const distance = Math.hypot(dx, dz);
+  if (distance <= 1e-3) return null;
+  const heading = yawTowards(patrol.x, patrol.z, to.x, to.z);
+  const yaw = turnTowards(patrol.yaw, heading, turnSpeed * dt);
+  if (Math.abs(angleBetween(yaw, heading)) > WALK_WHILE_TURNING) return { ...patrol, yaw, moving: false };
+  const step = Math.min(distance, speed * dt);
+  return { ...patrol, yaw, x: patrol.x + (dx / distance) * step, z: patrol.z + (dz / distance) * step, moving: true };
+}
+
 /** One frame: walk to the next post, turning to face the way; stand and look; move on. */
 export function stepPatrol(route: Route, patrol: Patrol, dt: number): Patrol {
   if (patrol.done) return { ...patrol, moving: false };
   const post = route.posts[patrol.target];
-  const dx = post.x - patrol.x;
-  const dz = post.z - patrol.z;
-  const distance = Math.hypot(dx, dz);
+  const walked = walkToward(patrol, post, route, dt);
+  if (walked) return walked;
   const turn = route.turnSpeed * dt;
-  if (distance > 1e-3) {
-    const heading = yawTowards(patrol.x, patrol.z, post.x, post.z);
-    const yaw = turnTowards(patrol.yaw, heading, turn);
-    if (Math.abs(angleBetween(yaw, heading)) > WALK_WHILE_TURNING) return { ...patrol, yaw, moving: false };
-    const step = Math.min(distance, route.speed * dt);
-    return { ...patrol, yaw, x: patrol.x + (dx / distance) * step, z: patrol.z + (dz / distance) * step, moving: true };
-  }
   const yaw = post.look === undefined ? patrol.yaw : turnTowards(patrol.yaw, post.look, turn);
   const waited = patrol.waited + dt;
   if (waited < (post.wait ?? 0)) return { ...patrol, yaw, waited, moving: false };

@@ -3,8 +3,10 @@ import {
   aimedDock,
   aimedFixture,
   DECK_ESCAPE,
+  DECK_THROWABLES,
   eyeOf,
   LAB_ROOM,
+  LAB_THROWABLES,
   retry,
   SHIP_DECK,
   startEscape,
@@ -17,6 +19,7 @@ import {
   wakeDrone,
   type Escape,
   type Explorer,
+  type Noise,
   type View
 } from '@/game/core/realWorld';
 import { buildRoom } from './buildRoom';
@@ -109,8 +112,12 @@ export function bootRealWorld(
   const lab = buildRoom(LAB_ROOM, reducedMotion);
   const deck = buildRoom(SHIP_DECK, reducedMotion, { lights: false });
   scene.add(lab.root, deck.root);
-  // Loose things stay in the lab: you need both hands to crawl.
-  const throwing = createThrowing(lab.root, LAB_ROOM, makeToon());
+  // Loose things stay in their room: you need both hands to crawl.
+  const toon = makeToon();
+  const labThings = createThrowing(lab.root, LAB_ROOM, toon, LAB_THROWABLES);
+  const deckThings = createThrowing(deck.root, SHIP_DECK, toon, DECK_THROWABLES);
+  /** What landed with a clatter last frame, on the deck: the aliens hear it this one. */
+  let noises: Noise[] = [];
   const actors = createDeckActors(deck, DECK_ESCAPE, host);
   const ink = createInkPass(renderer, camera, NIGHT_LAB.ink);
 
@@ -202,13 +209,17 @@ export function bootRealWorld(
     pitch: pitch.rotation.x + camera.rotation.x
   });
   const onDeck = () => explorer.room === SHIP_DECK;
-  /** Hands free for loose things: in the lab, standing. */
-  const handsFree = () => explorer.room === LAB_ROOM && explorer.crawl <= CRAWL_HANDS && !explorer.fall;
+  /** The eye, in the room's own coordinates. */
+  const localView = () => toRoom(explorer.room, view());
+  /** The loose things in the room you're in. */
+  const throwing = () => (onDeck() ? deckThings : labThings);
+  /** Hands free for loose things: standing, not falling. */
+  const handsFree = () => explorer.crawl <= CRAWL_HANDS && !explorer.fall;
   /** Pressing the action: `gentle` is E, which puts a held thing down instead of throwing it. */
   const press = (gentle: boolean) => {
     if (stopped || fixtures.press() || !handsFree()) return;
-    if (gentle) throwing.drop(view());
-    else throwing.act(view());
+    if (gentle) throwing().drop(localView());
+    else throwing().act(localView());
   };
   const letGo = () => fixtures.letGo();
   on<KeyboardEvent>(window, 'keydown', (event) => {
@@ -294,10 +305,12 @@ export function bootRealWorld(
   /** What the crosshair rests on: loose things first (hands free), then fixtures and sleeping drones. */
   const aim = () => {
     const standing = !explorer.fall && !stopped;
-    const local = toRoom(explorer.room, view());
+    const local = localView();
+    const { prompt, holding } = throwing();
     fixtures.aim({
-      loose: handsFree() ? throwing.prompt : null,
-      holdingLoose: throwing.holding,
+      // On the deck, a throw is a distraction: the prompt says so.
+      loose: handsFree() ? (prompt === 'throw' && onDeck() ? 'throwNoise' : prompt) : null,
+      holdingLoose: holding,
       fixture: standing ? aimedFixture(explorer.room, local, fixtures.opened) : null,
       dock: standing && onDeck() ? aimedDock(DECK_ESCAPE, escape, local) : null
     });
@@ -315,10 +328,18 @@ export function bootRealWorld(
   };
   /** One frame of the escape across the deck: the door opening, being caught, reaching the cage. */
   const sneak = (dt: number) => {
-    escape = stepEscape(DECK_ESCAPE, escape, explorer.fall ? null : explorer.walker, dt);
+    escape = stepEscape(DECK_ESCAPE, escape, explorer.fall ? null : explorer.walker, dt, noises);
+    for (const noise of noises) actors.showNoise(noise);
+    noises = [];
     if (escape.doorOpen && !fixtures.opened.serviceDoor) fixtures.openDoor();
     if (escape.caught) stop('caught');
     else if (escape.reached) stop('reached');
+  };
+
+  /** The loose things in the room you're in; on the deck, what clatters down is heard next frame. */
+  const stepLoose = (dt: number) => {
+    const landed = throwing().update(dt, localView(), camera);
+    if (onDeck() && !stopped) noises.push(...landed);
   };
 
   // ---- loop ----
@@ -328,7 +349,8 @@ export function bootRealWorld(
   let last = performance.now();
   const tick = (now: number) => {
     frame = requestAnimationFrame(tick);
-    const dt = Math.min(0.05, (now - last) / 1000);
+    // The first frame's timestamp can come before the one taken at boot: never step backwards.
+    const dt = Math.max(0, Math.min(0.05, (now - last) / 1000));
     last = now;
     if (!paused) {
       wakeT = Math.min(WAKE_SECONDS, wakeT + dt);
@@ -360,14 +382,14 @@ export function bootRealWorld(
       fog.near = FOG_STANDING.near + (FOG_DUCT.near - FOG_STANDING.near) * crawl;
       fog.far = FOG_STANDING.far + (FOG_DUCT.far - FOG_STANDING.far) * crawl;
       // Both hands to crawl: whatever was held is set down at the vent's mouth.
-      if (crawl > CRAWL_HANDS && throwing.holding) throwing.putDown({ ...eye, y: PUT_DOWN_HEIGHT });
+      if (crawl > CRAWL_HANDS && labThings.holding) labThings.putDown({ ...eye, y: PUT_DOWN_HEIGHT });
       fixtures.step(dt);
       const seconds = now / 1000;
       stepDeck(dt, seconds);
       lab.update(seconds);
       deck.update(seconds);
       scene.updateMatrixWorld();
-      throwing.update(dt, view(), camera);
+      stepLoose(dt);
       aim();
       actors.project(camera, host.clientWidth, host.clientHeight);
     }

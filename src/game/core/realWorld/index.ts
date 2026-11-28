@@ -15,10 +15,13 @@ export * from './labRoom';
 export { aimedDock, retry, startEscape, stepEscape, wakeDrone, type Escape, type EscapePlan } from './escape';
 export { DECK_ESCAPE, SHIP_DECK, SHIP_DECK_DROP } from './shipDeck';
 export { lightAt, SIGHT, sightRange, STEALTH, type GuardKind } from './stealth';
+export type { Noise } from './throwables';
 export { ductCells, floorGrateCentre, grateCentre, isOpenDuct, mouthOf, type DuctCell } from './vent';
 export type { Walker, WalkInput } from './walker';
 export {
   aimedThrowable,
+  clatter,
+  DECK_THROWABLES,
   LAB_THROWABLES,
   stepThrowable,
   throwableRadius,
