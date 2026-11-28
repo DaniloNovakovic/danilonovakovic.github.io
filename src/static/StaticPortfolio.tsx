@@ -3,6 +3,8 @@ import { getPortfolioData } from '@/shared/portfolio';
 import { useMessages } from '@/shared/i18n';
 import { Button } from '@/shared/ui';
 import { HeroContactLinks } from './HeroContactLinks';
+import { PlayerDoodle } from './PlayerDoodle';
+import { AboutSection } from './sections/AboutSection';
 import { AbilitiesSection } from './sections/AbilitiesSection';
 import { ExperienceSection } from './sections/ExperienceSection';
 import { HobbiesSection } from './sections/HobbiesSection';
@@ -42,7 +44,6 @@ export default function StaticPortfolio({ onSwitchToInteractive }: StaticPortfol
           </p>
           <h1 className="text-4xl font-bold text-[#1a1a1a] sm:text-6xl">{profile.name}</h1>
           <p className="text-base font-bold text-[#1a1a1a] sm:text-lg">{messages.staticPortfolio.role}</p>
-          <p className="mt-2 max-w-xl text-base leading-relaxed text-[#1a1a1a]/80">{profile.about}</p>
           <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-[#1a1a1a]/60">
             <MapPin className="h-3.5 w-3.5" strokeWidth={2.5} aria-hidden />
             {messages.staticPortfolio.basedIn(profile.location)}
@@ -53,6 +54,7 @@ export default function StaticPortfolio({ onSwitchToInteractive }: StaticPortfol
         </header>
 
         <div className="flex flex-col gap-14 sm:gap-20">
+          <AboutSection />
           <ExperienceSection />
           <ProjectsSection />
           <AbilitiesSection />
@@ -61,7 +63,7 @@ export default function StaticPortfolio({ onSwitchToInteractive }: StaticPortfol
 
         <section
           aria-labelledby="closing-title"
-          className="mt-20 flex flex-col items-center gap-4 border-2 border-[#1a1a1a] bg-white px-5 py-10 text-center shadow-[6px_6px_0px_0px_rgba(26,26,26,1)] sm:mt-28 sm:px-10"
+          className="mt-20 flex flex-col items-center gap-4 text-center sm:mt-28"
         >
           <h2 id="closing-title" className="text-3xl font-bold text-[#1a1a1a] sm:text-4xl">
             {messages.staticPortfolio.closingTitle}
@@ -70,12 +72,15 @@ export default function StaticPortfolio({ onSwitchToInteractive }: StaticPortfol
           <div className="mt-2">
             <HeroContactLinks />
           </div>
-          <p className="mt-4 -rotate-2 text-2xl font-bold text-[#1a1a1a]/80">
-            {messages.staticPortfolio.signOff(profile.name.split(' ')[0])}
-          </p>
+          <div className="mt-6 flex items-end gap-3">
+            <PlayerDoodle className="h-16 w-auto" />
+            <p className="mb-2 -rotate-3 text-2xl font-bold text-[#1a1a1a]/80">
+              {messages.staticPortfolio.signOff(profile.name.split(' ')[0])}
+            </p>
+          </div>
         </section>
 
-        <footer className="mt-12 flex flex-col items-center gap-3 border-t-2 border-dashed border-[#1a1a1a]/30 pt-6 text-center text-xs text-[#1a1a1a]/60 sm:mt-16">
+        <footer className="mt-16 flex flex-col items-center gap-3 border-t-2 border-dashed border-[#1a1a1a]/30 pt-6 text-center text-xs text-[#1a1a1a]/60 sm:mt-16">
           <p>
             {messages.staticPortfolio.footerPrompt}{' '}
             <Button variant="ghost" size="sm" onClick={onSwitchToInteractive} className="p-0 text-xs">
