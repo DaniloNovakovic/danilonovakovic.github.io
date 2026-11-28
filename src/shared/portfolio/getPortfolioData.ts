@@ -9,7 +9,18 @@ export interface Experience {
   /** Employer site; when set, the company name is shown as an external link in overlays. */
   companyUrl?: string;
   period: string;
+  /** Short, scannable points; the static page lists them as bullets. */
+  highlights: readonly string[];
+  /** The highlights as one paragraph, for overlays that show running text. */
   description: string;
+  /** Early, minor role: the static page shows it as a single line. */
+  compact?: boolean;
+}
+
+type ExperienceMessage = Pick<Experience, 'title' | 'company' | 'period' | 'highlights'>;
+
+function toExperience(entry: ExperienceMessage, extra: Pick<Experience, 'companyUrl' | 'compact'>): Experience {
+  return { ...entry, ...extra, description: entry.highlights.join(' ') };
 }
 
 export interface Project {
@@ -34,22 +45,13 @@ export function getPortfolioData(messages: Messages = getMessages()) {
       about: messages.portfolio.profile.about
     },
     experiences: [
-      {
-        ...messages.portfolio.experiences.hummingbird,
-        companyUrl: 'https://hummingbird.rs/'
-      },
-      {
-        ...messages.portfolio.experiences.vegaEngineer,
-        companyUrl: 'https://www.vegaitglobal.com/'
-      },
-      {
-        ...messages.portfolio.experiences.vegaIntern,
-        companyUrl: 'https://www.vegaitglobal.com/'
-      },
-      {
-        ...messages.portfolio.experiences.facultyAssistant,
-        companyUrl: 'https://ftn.uns.ac.rs/engfaculty-of-technical-sciences-eng/'
-      }
+      toExperience(messages.portfolio.experiences.hummingbird, { companyUrl: 'https://hummingbird.rs/' }),
+      toExperience(messages.portfolio.experiences.vegaEngineer, { companyUrl: 'https://www.vegaitglobal.com/' }),
+      toExperience(messages.portfolio.experiences.vegaIntern, { companyUrl: 'https://www.vegaitglobal.com/' }),
+      toExperience(messages.portfolio.experiences.facultyAssistant, {
+        companyUrl: 'https://ftn.uns.ac.rs/engfaculty-of-technical-sciences-eng/',
+        compact: true
+      })
     ] satisfies Experience[],
     projects: [
       {
@@ -104,23 +106,23 @@ export function getPortfolioData(messages: Messages = getMessages()) {
     ] satisfies ContactLink[],
     hobbies: [
       {
-        id: 'games',
+        id: 'games' as const,
         ...messages.portfolio.hobbiesData.games
       },
       {
-        id: 'art',
+        id: 'art' as const,
         ...messages.portfolio.hobbiesData.art
       },
       {
-        id: 'music',
+        id: 'music' as const,
         ...messages.portfolio.hobbiesData.music
       },
       {
-        id: 'fitness',
+        id: 'fitness' as const,
         ...messages.portfolio.hobbiesData.fitness
       },
       {
-        id: 'dancing',
+        id: 'dancing' as const,
         ...messages.portfolio.hobbiesData.dancing
       }
     ]

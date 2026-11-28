@@ -35,29 +35,41 @@ export const portfolioMessages = {
       title: 'Software Engineer',
       company: 'Hummingbird',
       period: 'April 2024 - Present',
-      description:
-        'Built web applications in the financial sector for US clients. Led the implementation of a shared UI design system (Storybook, Theme Provider, Figma tokens). Developed core UI components and ensured WCAG-compliant accessibility. Contributed to innovative features like a finance AI chatbot and real-time collaboration using Liveblocks.'
+      highlights: [
+        'Built web applications in the financial sector for US clients.',
+        'Led the implementation of a shared UI design system (Storybook, Theme Provider, Figma tokens).',
+        'Developed core UI components and ensured WCAG-compliant accessibility.',
+        'Contributed to innovative features like a finance AI chatbot and real-time collaboration using Liveblocks.'
+      ]
     },
     vegaEngineer: {
       title: 'Software Engineer',
       company: 'Vega IT',
       period: 'October 2019 - April 2024',
-      description:
-        'Played a pivotal role in feature development for a social network app (Timeline, Chat, Teams). Collaborated on an apartment reservation app. Developed a custom UI library and enhanced code quality with custom eslint plugins and advanced TypeScript rules. Mentored in React to foster team growth.'
+      highlights: [
+        'Played a pivotal role in feature development for a social network app (Timeline, Chat, Teams).',
+        'Collaborated on an apartment reservation app.',
+        'Developed a custom UI library and enhanced code quality with custom eslint plugins and advanced TypeScript rules.',
+        'Mentored in React to foster team growth.'
+      ]
     },
     vegaIntern: {
       title: 'Software Engineer Intern',
       company: 'Vega IT',
       period: 'September 2019 - October 2019',
-      description:
-        'Worked on a Recreational Basketball League app. Optimized import algorithm for large data sets (92% faster) and improved team name correction using Levenshtein distance algorithm.'
+      highlights: [
+        'Worked on a Recreational Basketball League app.',
+        'Optimized import algorithm for large data sets (92% faster) and improved team name correction using Levenshtein distance algorithm.'
+      ]
     },
     facultyAssistant: {
       title: 'Student Assistant',
       company: 'Faculty of Technical Sciences',
       period: 'February 2018 - June 2018',
-      description:
-        'Demonstrator in Object-Oriented-Programming course. Provided assistance to students under the guidance of academic staff.'
+      highlights: [
+        'Demonstrator in Object-Oriented-Programming course.',
+        'Provided assistance to students under the guidance of academic staff.'
+      ]
     }
   },
   projectsData: {

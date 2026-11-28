@@ -1,0 +1,83 @@
+/*
+ * The static page's doodle waves hello once when the visitor first scrolls to
+ * it, in stepped (paper-like) frames, then drops its arm. Hovering makes him
+ * shy: blush, fluster marks, face turned away, a small shrink. Under reduced
+ * motion the arm just hangs and the shy face appears without movement.
+ */
+.player-doodle-arm {
+  transform-box: view-box;
+  transform-origin: 34px 29px;
+  transform: rotate(128deg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .player-doodle[data-waving] .player-doodle-arm {
+    animation: player-doodle-wave 1.6s step-end both;
+  }
+}
+
+@keyframes player-doodle-wave {
+  0% {
+    transform: rotate(0deg);
+  }
+  18% {
+    transform: rotate(18deg);
+  }
+  36% {
+    transform: rotate(0deg);
+  }
+  54% {
+    transform: rotate(18deg);
+  }
+  72% {
+    transform: rotate(0deg);
+  }
+  86% {
+    transform: rotate(65deg);
+  }
+  100% {
+    transform: rotate(128deg);
+  }
+}
+
+.player-doodle-blush,
+.player-doodle-fluster {
+  opacity: 0;
+}
+
+.player-doodle-body,
+.player-doodle-face {
+  transform-box: view-box;
+}
+
+.player-doodle-body {
+  transform-origin: 24px 60px;
+}
+
+.player-doodle:hover .player-doodle-blush,
+.player-doodle:hover .player-doodle-fluster {
+  opacity: 1;
+}
+
+.player-doodle:hover .player-doodle-face {
+  transform: translate(-3px, 2px);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .player-doodle:hover .player-doodle-body {
+    transform: scale(0.94, 0.9);
+  }
+
+  .player-doodle:hover .player-doodle-fluster {
+    animation: player-doodle-fluster 0.5s steps(2, jump-none) infinite;
+  }
+}
+
+@keyframes player-doodle-fluster {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-1px);
+  }
+}
