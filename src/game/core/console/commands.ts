@@ -61,7 +61,7 @@ export function getGameHelpText(): string {
     '',
     'Out of Bounds street (simulation broken):',
     '  swing [pigeon|raccoon]   swing the Debugging Tools hammer: the evil chick, then the endless horde (never moves on)',
-    '  swing page               past the horde, at the page itself: the building labels, the buildings, the card',
+    '  swing page               past the horde, at the page itself: the labels, the buildings, the poles, the card',
     '                           around the game, then the screen, until it falls into black',
     '',
     'Ridge conversation:',

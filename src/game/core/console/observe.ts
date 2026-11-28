@@ -177,7 +177,7 @@ function buildHints(state: GameWorldState, nearby: readonly NearbyThing[], ridge
       hints.push('The page is black. In the browser, Wake up opens the real world (3D, not playable here).');
     else if (destroyer.hits === 0)
       hints.push('The horde never ends: swing smashes a raccoon, swing page hits the building behind them.');
-    else hints.push(`Type swing page to keep smashing the page: ${screenLayerName(destroyer.breaking!)} goes next.`);
+    else hints.push(`Type swing page to keep smashing the page. Next: ${screenLayerName(destroyer.breaking!)}.`);
   } else if (state.mode === 'overworld') {
     hints.push(OVERWORLD_CONSOLE_HINTS[getOverworldProgress(state).stage]);
   }

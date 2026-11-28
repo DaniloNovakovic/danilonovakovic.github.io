@@ -27,9 +27,6 @@ const NIGHT_DEPTH = 24;
 const TAPE_DEPTH = 24.2;
 const LIGHT_DEPTH = 24.4;
 const HELI_DEPTH = 24.6;
-/** Building labels sit over the night, lit pale, so the hammer has something to hit first (#164). */
-const LABEL_DEPTH = 24.3;
-const LABEL_LIT = '#f4f1ea';
 
 /** Searchlight bases (world x), set behind the street. */
 const SEARCHLIGHT_XS = [350, 1150, 1700, 2600] as const;
@@ -48,11 +45,13 @@ export class StreetAlarm {
   private readonly lights: Phaser.GameObjects.Graphics;
   private readonly heli: Phaser.GameObjects.Graphics;
   private readonly heliBeam: Phaser.GameObjects.Graphics;
+  /** The tape across the doors: it goes down with the buildings (#164). */
+  readonly tape: Phaser.GameObjects.Graphics;
   private heliX: number;
   private heliDir: 1 | -1 = 1;
   private rotorFrame = -1;
 
-  constructor(scene: Phaser.Scene, startX: number, labels: readonly Phaser.GameObjects.Text[] = []) {
+  constructor(scene: Phaser.Scene, startX: number) {
     this.scene = scene;
     this.heliX = startX - 260;
 
@@ -68,9 +67,8 @@ export class StreetAlarm {
       )
       .setScrollFactor(0)
       .setDepth(NIGHT_DEPTH);
-    for (const label of labels) label.setDepth(LABEL_DEPTH).setColor(LABEL_LIT);
     this.drawMoon();
-    this.drawTape();
+    this.tape = this.drawTape();
     this.lights = scene.add.graphics().setDepth(LIGHT_DEPTH).setBlendMode(Phaser.BlendModes.ADD);
     this.heliBeam = scene.add.graphics().setDepth(LIGHT_DEPTH).setBlendMode(Phaser.BlendModes.ADD);
     this.heli = scene.add.graphics().setDepth(HELI_DEPTH);
@@ -102,12 +100,13 @@ export class StreetAlarm {
   }
 
   /** Red tape crossed over each door, hatched in ink so it reads without colour. */
-  private drawTape(): void {
+  private drawTape(): Phaser.GameObjects.Graphics {
     const g = this.scene.add.graphics().setDepth(TAPE_DEPTH);
     for (const spot of OVERWORLD_BUILDING_SPOTS) {
       this.tapeBand(g, spot.x - 70, GROUND_Y - 118, spot.x + 70, GROUND_Y - 22);
       this.tapeBand(g, spot.x + 70, GROUND_Y - 112, spot.x - 70, GROUND_Y - 28);
     }
+    return g;
   }
 
   private tapeBand(g: Phaser.GameObjects.Graphics, x0: number, y0: number, x1: number, y1: number): void {

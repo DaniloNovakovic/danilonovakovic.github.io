@@ -31,12 +31,6 @@ export function streetFightProgress(smashes: number): StreetFightProgress {
   return { phase: Math.floor(smashes) >= 1 ? 'horde' : 'chick' };
 }
 
-/**
- * Raccoons smashed (live) before Danilo notices it's going nowhere, if the
- * hammer hasn't found the street yet.
- */
-export const STREET_HORDE_ENDLESS_AFTER = 12;
-
 /** The evil chick's confrontation, said once Danilo is up the ladder. */
 export const EVIL_CHICK_LINES = [
   {
@@ -50,14 +44,13 @@ export const EVIL_CHICK_LINES = [
   { speaker: 'danilo', text: '...is that chick bigger than I remember?' }
 ] as const;
 
-/** Danilo, when the street turns out to be a manhunt (once per visit). */
-export const STREET_ALARM_THOUGHT = 'Searchlights. A helicopter. ...they’re looking for me.';
-/** Trying a taped-shut door, the hatch or the way back (`Esc`) during the alarm. */
-export const STREET_LOCKDOWN_THOUGHT = 'Taped shut. Nowhere to hide now.';
-/** Once the horde has gone on long enough without the hammer finding anything else. */
-export const STREET_HORDE_ENDLESS_THOUGHT = 'They just keep coming. ...this is going nowhere.';
-/** Pecked by the chick / clawed by a raccoon / hit by something a pigeon dropped. */
-export const STREET_FIGHT_HURT_THOUGHTS = { peck: 'It PECKED me!', swipe: 'Ow!', dropping: 'Ew. EW.' } as const;
+/**
+ * Trying a taped-shut door, the hatch or the way back (`Esc`) during the
+ * alarm: the one thing the picture can't say on its own. Danilo keeps quiet
+ * otherwise; the searchlights, the helicopter and the horde speak for
+ * themselves (Danilo's direction, 2026-11-28).
+ */
+export const STREET_LOCKDOWN_THOUGHT = 'Taped shut.';
 
 /** The street fight and the alarm, for the headless console. */
 export const OUT_OF_BOUNDS_STREET_TEXT = {

@@ -784,11 +784,13 @@ describe('out of bounds screen destroyer: the street, then the screen, comes apa
     expect(session.observe().overworld?.alarm?.destroyer).toMatchObject({
       hits: 0,
       breaking: 'labels',
-      remaining: ['labels', 'street', 'card', 'glass'],
+      remaining: ['labels', 'buildings', 'street', 'card', 'glass'],
       onTheScreen: false,
       blackout: false
     });
-    expect(session.format()).toMatch(/screen: breaking=labels \(0\/3\) layers left=labels, street, card, glass/);
+    expect(session.format()).toMatch(
+      /screen: breaking=labels \(0\/2\) layers left=labels, buildings, street, card, glass/
+    );
   });
 
   it('has no destroyer while the evil chick still stands', () => {
@@ -798,27 +800,30 @@ describe('out of bounds screen destroyer: the street, then the screen, comes apa
     expect(session.format()).not.toMatch(/screen:/);
   });
 
-  it('a swing past the horde hits the building behind: the labels tilt, then a building crashes down', () => {
+  it('a swing past the horde hits the buildings behind: every label, then every building at once', () => {
     const session = inTheHorde();
     const first = session.exec('swing page');
     expect(first.message).toMatch(/hits the building behind them/);
     expect(first.events).toEqual([{ type: 'screen_layer_hit', layer: 'labels', hits: 1 }]);
-    session.exec('swing building');
-    const third = session.exec('swing street');
-    expect(third.events).toEqual([
-      { type: 'screen_layer_hit', layer: 'labels', hits: 3 },
+    const second = session.exec('swing building');
+    expect(second.events).toEqual([
+      { type: 'screen_layer_hit', layer: 'labels', hits: 2 },
       { type: 'screen_layer_broken', layer: 'labels' }
     ]);
+    expect(session.exec('swing street').message).toMatch(/every building on the street shudders/);
     const collapse = session.exec('swing page');
-    expect(collapse.message).toMatch(/crashes down/);
-    expect(collapse.events).toEqual([{ type: 'screen_layer_hit', layer: 'street', hits: 4 }]);
-    expect(session.observe().hints[0]).toMatch(/the street goes next/);
+    expect(collapse.message).toMatch(/crashes down at once/);
+    expect(collapse.events).toEqual([
+      { type: 'screen_layer_hit', layer: 'buildings', hits: 4 },
+      { type: 'screen_layer_broken', layer: 'buildings' }
+    ]);
+    expect(session.observe().hints[0]).toMatch(/Next: the poles and signs/);
     expect(parseGameCommand('smash screen')).toEqual({ type: 'swing', target: 'page' });
     expect(parseGameCommand('swing cat')).toEqual({ type: 'unknown', raw: 'swing cat' });
   });
 
   it('once the street is gone, the hammer is on the screen: the card, then the glass', () => {
-    const session = inTheHorde(3 + 5);
+    const session = inTheHorde(2 + 2 + 1);
     const last = session.exec('swing page');
     expect(last.message).toMatch(/what if/i);
     expect(last.events.at(-1)).toEqual({ type: 'screen_layer_broken', layer: 'street' });
@@ -826,7 +831,7 @@ describe('out of bounds screen destroyer: the street, then the screen, comes apa
     expect(session.exec('swing page').message).toMatch(/card framing the game cracks/);
   });
 
-  it('drives the headless console to the end: labels, street, card, glass, then black', () => {
+  it('drives the headless console to the end: labels, buildings, street, card, glass, then black', () => {
     const session = inTheHorde();
     const broken: string[] = [];
     let blackout = 0;
@@ -840,7 +845,7 @@ describe('out of bounds screen destroyer: the street, then the screen, comes apa
       if (i < SCREEN_DESTROYER_TOTAL_HITS - 1)
         expect(session.observe().overworld?.alarm?.destroyer?.blackout).toBe(false);
     }
-    expect(broken).toEqual(['labels', 'street', 'card', 'glass']);
+    expect(broken).toEqual(['labels', 'buildings', 'street', 'card', 'glass']);
     expect(blackout).toBe(1);
     expect(session.observe().overworld?.alarm?.destroyer).toMatchObject({
       remaining: [],
@@ -857,7 +862,7 @@ describe('out of bounds screen destroyer: the street, then the screen, comes apa
   });
 
   it('reports which layers remain part-way through', () => {
-    const session = inTheHorde(3 + 6 + 2);
+    const session = inTheHorde(2 + 2 + 2 + 2);
     expect(session.format()).toMatch(/screen: breaking=card \(2\/4\) layers left=card, glass/);
   });
 });
@@ -865,19 +870,20 @@ describe('out of bounds screen destroyer: the street, then the screen, comes apa
 describe('screenDestroyerProgress', () => {
   it('breaks the layers in order, the street first, then the screen around it', () => {
     expect(screenDestroyerProgress(0)).toMatchObject({ breaking: 'labels', onTheScreen: false });
-    expect(screenDestroyerProgress(2).layers[0]).toMatchObject({ id: 'labels', hitsTaken: 2, gone: false });
-    expect(screenDestroyerProgress(3)).toMatchObject({ breaking: 'street', remaining: ['street', 'card', 'glass'] });
-    // One hit per building on the street.
-    expect(screenDestroyerProgress(3).layers[1]).toMatchObject({ id: 'street', hits: 6 });
-    expect(screenDestroyerProgress(9)).toMatchObject({ breaking: 'card', onTheScreen: true });
-    expect(screenDestroyerProgress(13)).toMatchObject({ breaking: 'glass', remaining: ['glass'], onTheScreen: true });
-    expect(screenDestroyerProgress(18)).toMatchObject({ breaking: 'glass', blackout: false });
+    expect(screenDestroyerProgress(1).layers[0]).toMatchObject({ id: 'labels', hitsTaken: 1, gone: false });
+    // A hit on any building is a hit on them all: two to shake them, then down they all go.
+    expect(screenDestroyerProgress(2)).toMatchObject({ breaking: 'buildings' });
+    expect(screenDestroyerProgress(2).layers[1]).toMatchObject({ id: 'buildings', hits: 2 });
+    expect(screenDestroyerProgress(4)).toMatchObject({ breaking: 'street', remaining: ['street', 'card', 'glass'] });
+    expect(screenDestroyerProgress(6)).toMatchObject({ breaking: 'card', onTheScreen: true });
+    expect(screenDestroyerProgress(10)).toMatchObject({ breaking: 'glass', remaining: ['glass'], onTheScreen: true });
+    expect(screenDestroyerProgress(15)).toMatchObject({ breaking: 'glass', blackout: false });
   });
 
   it('ends in black once every layer is gone, and never past it', () => {
-    expect(SCREEN_DESTROYER_TOTAL_HITS).toBe(19);
-    expect(screenDestroyerProgress(19)).toMatchObject({ breaking: null, remaining: [], blackout: true, hits: 19 });
-    expect(screenDestroyerProgress(99)).toMatchObject({ blackout: true, hits: 19 });
+    expect(SCREEN_DESTROYER_TOTAL_HITS).toBe(16);
+    expect(screenDestroyerProgress(16)).toMatchObject({ breaking: null, remaining: [], blackout: true, hits: 16 });
+    expect(screenDestroyerProgress(99)).toMatchObject({ blackout: true, hits: 16 });
     expect(screenDestroyerProgress(-4)).toMatchObject({ hits: 0, blackout: false });
     expect(screenDestroyerProgress(19).layers.every((layer) => layer.gone && layer.damage === 1)).toBe(true);
   });

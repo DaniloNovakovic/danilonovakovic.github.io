@@ -178,7 +178,7 @@ As built (#163, steps 2–3):
   never blinking. Reduced motion: lights and helicopter hold still.
 - **Lockdown.** Nothing on the street can be entered (buildings, the hatch,
   the CRT, the litter pile, the chick talk) and `H`/`Esc` no longer go back to
-  Hobbies: "Taped shut. Nowhere to hide now." Static mode is the way out. So a
+  Hobbies: "Taped shut." Static mode is the way out. So a
   later Hobbies visit can't happen any more during the escape.
 - **The evil chick.** Up the hatch (once Danilo has landed), the street chick
   is waiting, 2.4× its size, hackles up, a scribble of rage over its head and
@@ -186,8 +186,8 @@ As built (#163, steps 2–3):
   same eye). Two lines, Danilo's "...is that chick bigger than I remember?",
   then it stalks him and taunts ("run, little doodle." / "bring it."), and
   pecks (Danilo's direction, 2026-11-26: the chick attacks too): an alert-red
-  `!` for ~0.6 s, then a beak-first lunge that lands within ~108 px (`PECK!`,
-  Danilo: "It PECKED me!"), then ~0.9 s before the next. A parried peck
+  `!` for ~0.6 s, then a beak-first lunge that lands within ~108 px
+  (`PECK!`), then ~0.9 s before the next. A parried peck
   leaves it dizzy (ink stars) for ~1.5 s.
 - **The hammer** is drawn in Danilo's hand during the escape, with two moves
   (Danilo's direction, 2026-11-26): **Swing** (`F`) connects only with an
@@ -245,22 +245,33 @@ it out a step at a time. One number drives it: the smashes the shell keeps
 (`screenDamage.smashes` in the bridge: the chick, then every smash on the
 page), so it resumes after any remount.
 
+Danilo keeps quiet through it (Danilo's direction, 2026-11-28: the player
+can have their own thoughts, and the searchlights, the helicopter and the
+horde are plain to see). The street gives no thoughts at all except
+"Taped shut." on a taped-shut door and the one beat below, "Wait a
+second... what if...". Getting hit is a shake and a knock-back, not a line.
+
+One kind of thing breaks at a time, and a hit on any one of them is a hit on
+them all, so there's no walking the street to find the right building. The
+damage spreads out along the street from where the hammer landed.
+
 - **Layers**, in order (`SCREEN_LAYERS` in
-  `src/game/core/console/content/outOfBoundsScreenDestroyer.ts`):
-  1. **labels**, 3 smashes: a swing that meets no enemy, in front of a
-     standing building, hits the building (`CLANG!`, "...did that sign just
-     move?"). Every label tilts on its bolts (the hit one jolts), then they
-     tumble off ("They were only ever labels. ...I can break this stuff?").
-     During the alarm the labels sit over the night wash, lit pale, so they
-     read.
-  2. **street**, 6 (one per building): now the building he hits crashes down
-     (`CRASH!`, a shudder, it folds over and drops; "It just... fell over."),
-     and with each one a share of the rest of the street (props, pavement,
-     the alarm, the sky) comes loose and falls, front to back. The street's
-     own drawing stops moving from the first collapse. The last building
-     takes everything else: blank paper ("There was never a street. Just
-     paper.") (`street/StreetComingApart.ts`).
-  3. **card**, 4: ~2.6 s later, "Wait a second... what if...", and the hammer
+  `src/game/core/console/content/outOfBoundsScreenDestroyer.ts`; Phaser in
+  `street/StreetComingApart.ts`):
+  1. **labels**, 2 smashes: a swing that meets no enemy, in front of any
+     building, hits it (`CLANG!`). Every label on the street jolts and tilts
+     on its bolts; on the 2nd they all tumble off. The labels stay dark
+     under the night wash.
+  2. **buildings**, 2: every building shudders and is left leaning
+     (`CRUNCH!`); on the 2nd they all fold over and crash down, the door tape
+     with them, and the first third of the rest of the street (the alarm,
+     front to back) comes loose. The street's own drawing stops moving from
+     the first building hit.
+  3. **street**, 2: what's left to hit is the poles and signs (the telegraph
+     poles, the START sign, the billboard, the CRT). Any of them: every one
+     wobbles and another third of the street falls; on the 2nd they topple
+     and the rest goes with them: blank paper.
+  4. **card**, 4: ~2.6 s later, "Wait a second... what if...", and the hammer
      is on the screen: a click or tap anywhere is a smash (a scene UI action
      from the `streetFight` panel; controls keep their own click; the cursor
      is a hammer), and a swing at nothing hits the glass in front of him
@@ -272,9 +283,9 @@ page), so it resumes after any remount.
      alert-red tape. On the 4th the cracked card (border, shadow, cracks)
      drops out of the picture, the header group and footer hint go with it,
      and the game is left on the page's own paper (`#f4f1ea`) edge to edge,
-     the frame keeping its size so the canvas never resamples ("There was a
-     box around me the whole time.") (`src/game/shell/screenDestroyerShell.ts`).
-  4. **glass**, 6: each smash cracks the **browser viewport itself**, bursting
+     the frame keeping its size so the canvas never resamples
+     (`src/game/shell/screenDestroyerShell.ts`).
+  5. **glass**, 6: each smash cracks the **browser viewport itself**, bursting
      from where it landed and running across the whole screen, middle
      included (`screenDamage.cracks`, `ScreenDamageLayer` mounted in
      `src/App.tsx`: one SVG, `fixed`, `z-[70]`, `pointer-events-none`,
@@ -292,7 +303,7 @@ page), so it resumes after any remount.
 - Headless: `swing page` (or `building`, `street`, `screen`, `glass`, `card`)
   aims past the horde at the page; `look` reports
   `screen: breaking=<layer> (<hits>/<of>) layers left=…`, then
-  `screen: black — every layer gone, unplugged`. 19 page swings reach the end.
+  `screen: black — every layer gone, unplugged`. 16 page swings reach the end.
 - Dev switcher checkpoints: `street` (the chick), `destroyer` (endless horde,
   nothing hit), `screen` (street gone), `unplugged`.
 

@@ -10,6 +10,7 @@ import {
   RIDGE_SCENE_ID,
   STAMPEDE_SKETCH_SCENE_ID
 } from '@/game/scenes/sceneIds';
+import { SCREEN_DESTROYER_TOTAL_HITS, screenHitsBefore } from '@/game/core/console';
 import { STAMPEDE_ARENA } from '@/game/scenes/stampedeSketch/runtime/movement';
 import { createStampedeResultViewModel } from '@/game/scenes/stampedeSketch/runtime/resultPresentation';
 import { getStampedeUpgradeChoices } from '@/game/scenes/stampedeSketch/runtime/upgrades';
@@ -762,8 +763,10 @@ describe('InteractiveApp', () => {
   });
 
   describe('screen destroyer (#164)', () => {
-    /** The chick, the labels and the street: the hammer is on the card next. */
-    const STREET_GONE = 1 + 3 + 6;
+    /** The chick, then the whole street: the hammer is on the card next. */
+    const STREET_GONE = 1 + screenHitsBefore('card');
+    /** The chick, then every layer: the last smash shatters the glass. */
+    const EVERY_SMASH = 1 + SCREEN_DESTROYER_TOTAL_HITS;
 
     function smash(times: number) {
       act(() => {
@@ -799,7 +802,7 @@ describe('InteractiveApp', () => {
     it('shatters into black once every layer is gone: no way out, only Wake up', async () => {
       const onSwitchToStatic = vi.fn();
       render(<InteractiveApp onSwitchToStatic={onSwitchToStatic} />);
-      smash(19);
+      smash(EVERY_SMASH - 1);
       expect(screen.queryByTestId('unplugged-hand-off')).toBeNull();
 
       smash(1);
@@ -819,7 +822,7 @@ describe('InteractiveApp', () => {
     it('wakes up into the real world, which takes over the whole page', async () => {
       vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({} as never);
       render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
-      smash(20);
+      smash(EVERY_SMASH);
 
       await userEvent.click(screen.getByRole('button', { name: /wake up/i }));
 
