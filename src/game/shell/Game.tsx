@@ -19,7 +19,8 @@ interface GameProps {
   activeSceneId: SceneId;
   presentationMode: PhaserScenePresentationMode;
   onReturnToOverworld: () => void;
-  chrome?: 'framed' | 'bare';
+  /** `unframed`: the framed box, with its ink gone (the Out of Bounds card has fallen away). */
+  chrome?: 'framed' | 'bare' | 'unframed';
   ridgeDevControls?: RidgeDevControls;
   /** A scene UI surface needs raw canvas pointer input (e.g. drawing), so the swipe mat stands aside. */
   isScenePointerCaptured?: boolean;
@@ -59,10 +60,12 @@ export default function Game({
   });
   usePhaserGamePauseSync({ activeSceneId, gameRef, isPaused });
 
-  const frameClassName =
-    chrome === 'framed'
-      ? 'relative h-full w-full min-h-0 overflow-hidden rounded-lg border-4 border-neutral-800 bg-[#fbfbf9] shadow-[8px_8px_0px_0px_rgba(26,26,26,1)]'
-      : 'relative h-full w-full min-h-0 overflow-hidden bg-[#fbfbf9]';
+  const frameClassName = {
+    framed:
+      'relative h-full w-full min-h-0 overflow-hidden rounded-lg border-4 border-neutral-800 bg-[#fbfbf9] shadow-[8px_8px_0px_0px_rgba(26,26,26,1)]',
+    unframed: 'relative h-full w-full min-h-0 overflow-hidden border-4 border-transparent bg-[#f4f1ea]',
+    bare: 'relative h-full w-full min-h-0 overflow-hidden bg-[#fbfbf9]'
+  }[chrome];
 
   return (
     <div className={frameClassName}>

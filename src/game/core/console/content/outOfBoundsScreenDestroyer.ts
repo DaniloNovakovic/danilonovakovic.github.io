@@ -1,18 +1,31 @@
 /**
- * Out of Bounds, Act 3 step 4 (#164): the screen destroyer. Once the street
- * fight is won, every smash lands on the page itself, and the portfolio comes
- * apart layer after layer, from the chrome around the game inward: the header
- * peels, the building labels slide, the drawn street falls away, and last of
- * all Danilo's own drawing is erased. When nothing is left the page falls
- * into black (the Act 4 hand-off, not built yet: an "unplugged" placeholder).
+ * Out of Bounds, Act 3 step 4 (#164, reworked 2026-11-28): the screen
+ * destroyer. Danilo's direction: the horde never ends, so the way on is to
+ * hit what's behind it. It escalates outward, so the player works it out a
+ * step at a time:
  *
- * Like the fight, it is one number: how many smashes have landed since the
- * fight was cleared. The shell keeps one dent per smash, so it resumes from
- * them after any remount.
+ * 1. **labels**: a swing that misses the raccoons hits the building behind
+ *    Danilo, and every building label on the street tilts on its bolts, then
+ *    they all tumble off.
+ * 2. **buildings**: the next hit on any building shakes every building on the
+ *    street; the one after brings them all crashing down, and bits of the
+ *    sky come loose with them.
+ * 3. **street**: what's left standing is the poles and signs. Hitting any of
+ *    them wobbles them all, then topples them, and the rest of the street
+ *    goes with them: blank paper. "Wait a second... what if..."
+ * 4. **card**: the hammer hits the screen. The card that frames the game
+ *    cracks, then falls away, and the page is paper edge to edge.
+ * 5. **glass**: the browser viewport itself cracks, hit after hit, until it
+ *    shatters into black (the Act 4 hand-off).
+ *
+ * One kind of thing breaks at a time, and a hit on any one of them hits them
+ * all, so nobody has to walk the street hunting for the right building.
+ *
+ * One number again: smashes on the page so far. The shell keeps the count,
+ * so it resumes after any remount.
  * Design source: docs/game-design/secrets/out-of-bounds.md (Act 3, step 4).
  */
-
-export type ScreenLayerId = 'header' | 'labels' | 'street' | 'danilo';
+export type ScreenLayerId = 'labels' | 'buildings' | 'street' | 'card' | 'glass';
 
 interface ScreenLayerShape {
   id: ScreenLayerId;
@@ -22,15 +35,17 @@ interface ScreenLayerShape {
   name: string;
 }
 
-/** The layers, in the order they break: outside in, Danilo last. */
+/** The layers, in the order they break: the street first, then the screen around it. */
 const SCREEN_LAYERS: readonly ScreenLayerShape[] = [
-  { id: 'header', hits: 6, name: 'the header' },
-  { id: 'labels', hits: 6, name: 'the building labels' },
-  { id: 'street', hits: 10, name: 'the drawn street' },
-  { id: 'danilo', hits: 6, name: "Danilo's drawing" }
+  { id: 'labels', hits: 2, name: 'the building labels' },
+  { id: 'buildings', hits: 2, name: 'the buildings' },
+  // The poles and signs, and the rest of the street with them.
+  { id: 'street', hits: 2, name: 'the poles and signs' },
+  { id: 'card', hits: 4, name: 'the card around the game' },
+  { id: 'glass', hits: 6, name: 'the screen' }
 ];
 
-/** Smashes from a cleared fight to the page falling into black. */
+/** Smashes on the page from the first label hit to the page falling into black. */
 export const SCREEN_DESTROYER_TOTAL_HITS = SCREEN_LAYERS.reduce((sum, layer) => sum + layer.hits, 0);
 
 export interface ScreenLayerState {
@@ -43,13 +58,18 @@ export interface ScreenLayerState {
 }
 
 export interface ScreenDestroyerProgress {
-  /** Smashes landed on the page since the fight was cleared. */
+  /** Smashes landed on the page so far. */
   hits: number;
   layers: readonly ScreenLayerState[];
   /** The layer the next smash lands on; null once everything is gone. */
   breaking: ScreenLayerId | null;
-  /** Layers still (at least partly) on the page, outermost first. */
+  /** Layers still (at least partly) there, in breaking order. */
   remaining: readonly ScreenLayerId[];
+  /**
+   * The hammer hits the screen now, not the drawing: a click or tap anywhere
+   * is a smash, and a swing at nothing hits the glass in front of Danilo.
+   */
+  onTheScreen: boolean;
   /** Every layer is gone: the page has fallen into black. */
   blackout: boolean;
 }
@@ -69,7 +89,21 @@ export function screenDestroyerProgress(destroyerHits: number): ScreenDestroyerP
     };
   });
   const remaining = layers.filter((layer) => !layer.gone).map((layer) => layer.id);
-  return { hits, layers, breaking: remaining[0] ?? null, remaining, blackout: remaining.length === 0 };
+  const breaking = remaining[0] ?? null;
+  return {
+    hits,
+    layers,
+    breaking,
+    remaining,
+    onTheScreen: breaking === 'card' || breaking === 'glass',
+    blackout: remaining.length === 0
+  };
+}
+
+/** Smashes on the page before this layer takes its first. */
+export function screenHitsBefore(id: ScreenLayerId): number {
+  const index = SCREEN_LAYERS.findIndex((layer) => layer.id === id);
+  return SCREEN_LAYERS.slice(0, index).reduce((sum, layer) => sum + layer.hits, 0);
 }
 
 /** One layer's state, by id. */
@@ -81,18 +115,13 @@ export function screenLayerName(id: ScreenLayerId): string {
   return SCREEN_LAYERS.find((layer) => layer.id === id)!.name;
 }
 
-/** Danilo, once the fight is won: the screen is just a drawing, so... (once per visit). */
-export const SCREEN_DESTROYER_START_THOUGHT = "It's all just a drawing. ...what if I keep hitting it?";
+/**
+ * Danilo, a beat after the last of the street is gone: the screen is next.
+ * His only line in the whole destroyer: the rest is there to see.
+ */
+export const SCREEN_WHAT_IF_THOUGHT = 'Wait a second... what if...';
 
-/** Danilo, as each layer goes. */
-export const SCREEN_LAYER_BROKEN_THOUGHTS: Record<ScreenLayerId, string> = {
-  header: 'The header came right off.',
-  labels: 'They were only ever labels.',
-  street: 'There was never a street. Just paper.',
-  danilo: ''
-};
-
-/** The Act 4 hand-off placeholder, once the page has fallen into black. */
+/** The Act 4 hand-off, once the page has fallen into black. */
 export const UNPLUGGED_TEXT = {
   title: 'Unplugged',
   lines: ['...signal lost.', 'Somewhere that isn’t a drawing, something opens its eyes.'],
@@ -102,19 +131,23 @@ export const UNPLUGGED_TEXT = {
 /** The screen destroyer, for the headless console. */
 export const SCREEN_DESTROYER_TEXT = {
   hit: {
-    header: 'CRASH. The hammer goes through the glass and the header at the top of the page tears loose.',
-    labels: 'CRASH. The building labels shudder and slide down their buildings.',
-    street: 'CRASH. A chunk of the drawn street falls away, into blank paper.',
-    danilo: 'CRASH. Your own outline starts to go, erased from the top down.'
+    labels:
+      'CLANG. The hammer misses the raccoons and hits the building behind them. Every sign on the street tilts on its bolts.',
+    buildings: 'CRUNCH. The building shudders, and every building on the street shudders with it.',
+    street: 'CLANG. The hammer hits a pole, and every pole and sign on the street wobbles.',
+    card: 'CRACK. The hammer hits the screen: the card framing the game cracks from its corner.',
+    glass: 'CRACK. The hammer hits the glass itself. Cracks run across the whole screen.'
   },
   broken: {
-    header: 'The header peels off the page and drops away. Only the static-mode button hangs on, by a strip of tape.',
-    labels: 'The labels slide off the buildings and tumble out of the picture.',
-    street: 'The street is gone: buildings, sky and pavement. Just blank paper, and you.',
-    danilo: 'The last line of you is gone.'
+    labels: 'Every label slides off its building and tumbles out of the picture.',
+    buildings:
+      'Every building on the street folds up like paper and crashes down at once. Bits of the sky come loose with them.',
+    street:
+      'The poles and signs topple, and the rest of the street goes with them: sky, pavement, everything. Just blank paper, and you. Wait a second... what if...',
+    card: 'The card around the game cracks apart and falls away. It’s paper edge to edge now. Only the static-mode button hangs on, by a strip of tape.',
+    glass: 'The screen shatters.'
   },
-  blackout:
-    'The page falls into black. ...signal lost. Somewhere that isn’t a drawing, something opens its eyes. (Act 4 isn’t built yet.)',
+  blackout: 'The page falls into black. ...signal lost. Somewhere that isn’t a drawing, something opens its eyes.',
   nothingLeft: 'There is nothing left to hit. Only black.'
 } satisfies {
   hit: Record<ScreenLayerId, string>;

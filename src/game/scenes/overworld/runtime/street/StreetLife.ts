@@ -10,7 +10,8 @@ const INK = 0x1a1a1a;
 const PAPER = 0xfbfbf9;
 const GROUND_Y = 550;
 
-const POLE_XS = [150, 650, 1150, 2150, 2650] as const;
+/** The telegraph poles along the street (world x). */
+export const POLE_XS = [150, 650, 1150, 2150, 2650] as const;
 const POLE_TOP_Y = 200;
 const WIRE_Y = 214;
 const WIRE_SAG_PER_PX = 0.06;
@@ -40,7 +41,7 @@ function wireYAt(x: number): number {
 }
 
 /** Poles and sagging wire, drawn behind the buildings. */
-export function buildStreetWires(scene: Phaser.Scene): void {
+export function buildStreetWires(scene: Phaser.Scene): Phaser.GameObjects.Graphics {
   const g = scene.add.graphics();
 
   for (const x of POLE_XS) {
@@ -66,6 +67,7 @@ export function buildStreetWires(scene: Phaser.Scene): void {
     }
     g.strokePath();
   }
+  return g;
 }
 
 type BirdFrame = 'perch' | 'peck' | 'flapUp' | 'flapDown';

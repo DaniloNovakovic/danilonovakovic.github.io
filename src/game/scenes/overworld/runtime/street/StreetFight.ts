@@ -3,12 +3,12 @@
 // fallow-ignore-file complexity
 /**
  * The Out of Bounds street fight (#163), on the Phaser side: the evil chick
- * (stalking and pecking), then waves of raccoons (packs rushing in from both
- * sides to swipe, a few on screen at a time) under pigeons circling overhead
- * (lobbing eggs; harassment only, a knocked-out one is replaced), and Danilo's
- * hammer, which flattens everything in front of him at once. The console
- * owns progress (how many smashes have landed); this module draws it, moves
- * the enemies, decides what connects, and lands their attacks.
+ * (stalking and pecking), then the endless horde: raccoons rushing in from
+ * both sides to swipe, a few on screen at a time, under pigeons circling
+ * overhead (lobbing eggs). Every one knocked out is replaced; the horde never
+ * ends (the way on is the page behind it, which the scene handles). Danilo's
+ * hammer flattens everything in front of him at once. This module moves the
+ * enemies, decides what connects, and lands their attacks.
  *
  * Two moves: **swing** (the hammer, in front of Danilo) and **parry** (a short
  * guard). A parried egg flies back and knocks out the pigeon that dropped it;
@@ -17,12 +17,7 @@
  * and every hit, tell and splat reads with sound off.
  */
 import type * as Phaser from 'phaser';
-import {
-  streetFightWave,
-  type StreetFightEnemy,
-  type StreetFightProgress,
-  type StreetFightTarget
-} from '@/game/core/console';
+import type { StreetFightEnemy, StreetFightPhase, StreetFightTarget } from '@/game/core/console';
 import { EvilChick } from './fight/EvilChick';
 import { StreetPigeon } from './fight/StreetPigeon';
 import { StreetRaccoon } from './fight/StreetRaccoon';
@@ -44,19 +39,23 @@ const SWING_STRIKE_MS = 70;
 const SWING_RECOVER_MS = 220;
 const CHICK_START_OFFSET_PX = 170;
 
-/** The horde: at most this many raccoons on the street at once, one more every so often. */
-const HORDE_ON_SCREEN = 5;
-const HORDE_GAP_MS = 450;
+interface HordeShape {
+  raccoons: number;
+  raccoonGapMs: number;
+  pigeons: number;
+}
+/**
+ * The endless horde: at most this many raccoons on the street at once, one
+ * more every so often, under this many pigeons. Gaps are left on purpose, so
+ * a swing can miss them and find the building behind.
+ */
+const HORDE: HordeShape = { raccoons: 4, raccoonGapMs: 750, pigeons: 2 };
+/** Once the hammer is on the screen itself (#164): fewer, so the page is the target. */
+const SCREEN_HORDE: HordeShape = { raccoons: 3, raccoonGapMs: 1500, pigeons: 2 };
+/** The first raccoons wait for the chick to skid off. */
+const HORDE_FIRST_ENEMY_MS = 1200;
 /** How soon a knocked-out pigeon is replaced. */
 const PIGEON_GAP_MS = 2200;
-/**
- * The screen destroyer (#164): after the fight, enemies keep coming in from
- * the edges of the view, fewer at once, for as long as there's a page left.
- */
-const DESTROYER_RACCOONS_ON_SCREEN = 3;
-const DESTROYER_RACCOON_GAP_MS = 1500;
-const DESTROYER_PIGEONS = 2;
-const DESTROYER_FIRST_ENEMY_MS = 2600;
 /** A smash on the page lands on any enemy this close to it. */
 const PAGE_SMASH_RADIUS_PX = 56;
 
@@ -108,12 +107,10 @@ export class StreetFight {
   private readonly guard: Phaser.GameObjects.Graphics;
   private enemies: FightEnemy[] = [];
   private droppings: Dropping[] = [];
-  private progress: StreetFightProgress;
-  private wave = 0;
-  private raccoonsToCome = 0;
+  private phase: StreetFightPhase;
+  private horde: HordeShape | null = null;
   private nextRaccoonAt = 0;
   private raccoonFromLeft = false;
-  private pigeonsWanted = 0;
   private nextPigeonAt = 0;
   private pigeonFromLeft = false;
   private dropCount = 0;
@@ -124,20 +121,19 @@ export class StreetFight {
   private knockDir: 1 | -1 = 1;
   private held = false;
   private nowMs = 0;
-  /** Screen destroyer: enemies keep coming until the page falls into black (`stopped`). */
-  private destroyer = false;
+  /** The page has fallen into black: no one else comes. */
   private stopped = false;
 
   constructor(options: {
     scene: Phaser.Scene;
     player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
-    progress: StreetFightProgress;
+    phase: StreetFightPhase;
     motion: boolean;
     getAudioContext: () => AudioContext | null;
     /** Stops (or gives back) the player's own movement while stunned. */
     holdPlayer: (held: boolean) => void;
     onHurt: (kind: StreetFightHurt) => void;
-    /** Something was knocked out (by the hammer or a returned egg): one smash. */
+    /** Something was knocked out (by the hammer, a click or a returned egg). */
     onSmash: (hit: StreetFightHit) => void;
   }) {
     this.scene = options.scene;
@@ -146,19 +142,14 @@ export class StreetFight {
     this.holdPlayer = options.holdPlayer;
     this.onHurt = options.onHurt;
     this.onSmash = options.onSmash;
-    this.progress = options.progress;
+    this.phase = options.phase;
     this.fx = new FightFx(this.scene, this.motion, options.getAudioContext);
-    this.chick = new EvilChick(
-      this.scene,
-      this.player.x + CHICK_START_OFFSET_PX,
-      this.motion,
-      this.progress.phase === 'chick'
-    );
+    this.chick = new EvilChick(this.scene, this.player.x + CHICK_START_OFFSET_PX, this.motion, this.phase === 'chick');
     this.hammer = this.scene.add.graphics().setDepth(HAMMER_DEPTH);
     drawHammer(this.hammer);
     this.guard = this.scene.add.graphics().setDepth(HAMMER_DEPTH).setVisible(false);
     drawGuard(this.guard);
-    this.syncWave();
+    if (this.phase === 'horde') this.startHorde(400);
   }
 
   /** World x of the evil chick, for framing its confrontation. */
@@ -171,31 +162,33 @@ export class StreetFight {
     this.chick.startAttack();
   }
 
-  /** Progress moved on (a smash landed): bring in the next wave. */
-  setProgress(progress: StreetFightProgress): void {
-    this.progress = progress;
-    this.syncWave();
+  /** The chick is down: the horde comes, and never stops. */
+  chickDown(): void {
+    if (this.phase === 'horde') return;
+    this.phase = 'horde';
+    this.startHorde(HORDE_FIRST_ENEMY_MS);
   }
 
-  /** The fight is won and the page is the target now: keep enemies coming in from the edges. */
-  startDestroyer(): void {
-    if (this.destroyer || this.stopped) return;
-    this.destroyer = true;
-    const now = this.scene.time.now;
-    this.raccoonsToCome = Number.POSITIVE_INFINITY;
-    this.pigeonsWanted = DESTROYER_PIGEONS;
-    this.nextRaccoonAt = now + DESTROYER_FIRST_ENEMY_MS;
-    this.nextPigeonAt = now + DESTROYER_FIRST_ENEMY_MS + 900;
+  /** The hammer is on the screen now (#164): the horde thins out, so the page is the target. */
+  thinOut(): void {
+    if (this.horde) this.horde = SCREEN_HORDE;
   }
 
-  /** Nothing left of the page (or of Danilo): the hammer goes, and no one else comes. */
+  /** The page has fallen into black: the hammer goes, and no one else comes. */
   stop(): void {
     this.stopped = true;
-    this.raccoonsToCome = 0;
-    this.pigeonsWanted = 0;
+    this.horde = null;
     for (const enemy of this.enemies) enemy.retire?.();
     this.hammer.setVisible(false);
     this.guard.setVisible(false);
+  }
+
+  private startHorde(firstInMs: number): void {
+    if (this.stopped) return;
+    const now = this.scene.time.now;
+    this.horde = HORDE;
+    this.nextRaccoonAt = now + firstInMs;
+    this.nextPigeonAt = now + firstInMs + 900;
   }
 
   /** World point just in front of Danilo, where a swing that meets nothing hits the glass. */
@@ -203,7 +196,7 @@ export class StreetFight {
     return { x: this.player.x + (this.player.flipX ? -1 : 1) * 44, y: this.player.y - 24 };
   }
 
-  /** A smash on the page (a click or a tap) landed here: anything close by is knocked out. Returns how many. */
+  /** A smash on the screen (a click or a tap) landed here: anything close by is knocked out too. Returns how many. */
   smashAt(x: number, y: number): number {
     if (this.stopped) return 0;
     const hits = this.enemies.filter(
@@ -216,10 +209,15 @@ export class StreetFight {
     return hits.length;
   }
 
-  /** The hammer met bare glass (screen destroyer): it still lands. */
-  glassHit(x: number, y: number): void {
-    this.fx.word('CRASH!', x, y);
+  /** The hammer met the page (a building, the card, the glass): it still lands. */
+  pageHit(word: string, x: number, y: number): void {
+    this.fx.word(word, x, y);
     this.fx.smashSound();
+  }
+
+  /** The hammer met nothing at all. */
+  whiff(): void {
+    this.fx.whiffSound();
   }
 
   update(timeMs: number, deltaMs: number): void {
@@ -254,7 +252,6 @@ export class StreetFight {
     if (this.nowMs < this.stunnedUntil || this.nowMs - this.swingStartedAt < SWING_COOLDOWN_MS) return null;
     this.swingStartedAt = this.nowMs;
     const hits = this.findHits();
-    if (hits.length === 0 && !this.destroyer) this.fx.whiffSound();
     for (const hit of hits) {
       if (hit.enemy) hit.enemy.knock(hit.x >= this.player.x ? 1 : -1);
       else this.chick.flatten(this.player.x);
@@ -284,7 +281,7 @@ export class StreetFight {
   // --- Hitting ---------------------------------------------------------------
 
   private findHits(): (StreetFightHit & { enemy?: FightEnemy })[] {
-    if (this.progress.phase === 'chick') {
+    if (this.phase === 'chick') {
       const y = FEET_Y - 22;
       return this.chick.standing && this.inReach(this.chick.x, y) ? [{ target: 'chick', x: this.chick.x, y }] : [];
     }
@@ -306,41 +303,21 @@ export class StreetFight {
     return inHammerReach(this.player, this.player.flipX, { x, y });
   }
 
-  // --- Waves -----------------------------------------------------------------
+  // --- The horde -------------------------------------------------------------
 
-  /** A new wave queues its raccoons (one per smash still to land) and sets how many pigeons circle. */
-  private syncWave(): void {
-    const { phase, wave, leftInWave } = this.progress;
-    if (this.destroyer) return;
-    if (phase === 'cleared') {
-      this.pigeonsWanted = 0;
-      for (const enemy of this.enemies) enemy.retire?.();
-      return;
-    }
-    if (phase !== 'waves' || wave === this.wave) return;
-    this.wave = wave;
-    const shape = streetFightWave(wave, leftInWave);
-    this.raccoonsToCome = shape.raccoons;
-    this.pigeonsWanted = shape.pigeons;
-    // The first wave waits for the chick to skid off.
-    const now = this.scene.time.now;
-    this.nextRaccoonAt = now + (wave === 1 ? 1200 : 500);
-    this.nextPigeonAt = Math.max(this.nextPigeonAt, now + 900);
-  }
-
-  /** Raccoons pour in from alternating sides, a few on the street at a time. */
+  /** Raccoons pour in from alternating sides, a few on the street at a time, forever. */
   private feedHorde(timeMs: number): void {
-    if (this.raccoonsToCome <= 0 || timeMs < this.nextRaccoonAt) return;
-    if (this.countUp('raccoon') >= (this.destroyer ? DESTROYER_RACCOONS_ON_SCREEN : HORDE_ON_SCREEN)) return;
-    this.raccoonsToCome -= 1;
-    this.nextRaccoonAt = timeMs + (this.destroyer ? DESTROYER_RACCOON_GAP_MS : HORDE_GAP_MS);
+    const horde = this.horde;
+    if (!horde || timeMs < this.nextRaccoonAt || this.countUp('raccoon') >= horde.raccoons) return;
+    this.nextRaccoonAt = timeMs + horde.raccoonGapMs;
     this.raccoonFromLeft = !this.raccoonFromLeft;
     this.enemies.push(this.spawn('raccoon', this.raccoonFromLeft));
   }
 
-  /** Keeps the wave's pigeons in the sky: one knocked out, another comes round a little later. */
+  /** Keeps the pigeons in the sky: one knocked out, another comes round a little later. */
   private topUpPigeons(timeMs: number): void {
-    if (timeMs < this.nextPigeonAt || this.countUp('pigeon') >= this.pigeonsWanted) return;
+    const horde = this.horde;
+    if (!horde || timeMs < this.nextPigeonAt || this.countUp('pigeon') >= horde.pigeons) return;
     this.nextPigeonAt = timeMs + PIGEON_GAP_MS;
     this.pigeonFromLeft = !this.pigeonFromLeft;
     this.enemies.push(this.spawn('pigeon', this.pigeonFromLeft));

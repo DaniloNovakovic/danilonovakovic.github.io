@@ -6,7 +6,7 @@ import App from './App';
 import { bridgeActions } from '@/game/bridge/store';
 import { getMessages } from '@/shared/i18n';
 
-describe('App screen damage (#163)', () => {
+describe('App screen damage (#164)', () => {
   beforeEach(() => {
     window.history.replaceState({}, '', '/?mode=static');
     bridgeActions.resetProgress();
@@ -38,13 +38,10 @@ describe('App screen damage (#163)', () => {
     expect(screen.getByTestId('screen-damage-layer')).toBeDefined();
   });
 
-  it('keeps the screen destroyer dents (#164) off the static portfolio, so it stays readable', () => {
+  it('keeps the card cracks with the card, off the static portfolio', () => {
     render(<App />);
-    act(() => {
-      bridgeActions.crackScreen({ x: 0.9, y: 0.05, seed: 3 });
-      bridgeActions.dentScreen({ x: 0.5, y: 0.5, seed: 5 });
-    });
-    expect(screen.getByTestId('screen-damage-layer').querySelectorAll('g')).toHaveLength(1);
-    expect(screen.queryByTestId('screen-dent')).toBeNull();
+    act(() => bridgeActions.crackCard({ x: 0.5, y: 0.5, seed: 5 }));
+    expect(screen.queryByTestId('screen-damage-layer')).toBeNull();
+    expect(screen.queryByTestId('screen-destroyer-card')).toBeNull();
   });
 });

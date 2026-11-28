@@ -7,8 +7,8 @@ import type { GameSceneId, PortfolioOverlayId } from './content/overworldSpots';
 import type { CircuitPartId } from './content/circuitParts';
 import type { HobbyStationId } from './content/hobbiesSpots';
 import type { DEBUGGING_TOOLS_ITEM_ID, OutOfBoundsStage } from './content/outOfBoundsVoid';
-import type { StreetFightEnemy, StreetFightTarget } from './content/outOfBoundsStreetFight';
 import type { ScreenLayerId } from './content/outOfBoundsScreenDestroyer';
+import type { HammerTarget } from './streetFightLogic';
 import type { StreetAlarmObservation } from './streetFightLogic';
 
 /**
@@ -196,7 +196,7 @@ export type GameCommand =
   | { type: 'confirm' }
   | { type: 'decline' }
   /** Swing the Debugging Tools hammer (Out of Bounds street fight). */
-  | { type: 'swing'; target?: StreetFightEnemy }
+  | { type: 'swing'; target?: HammerTarget }
   | { type: 'fight' }
   | { type: 'draft'; choiceIdOrIndex: string }
   | { type: 'cheat'; action: 'give'; itemId: GameItemId }
@@ -227,10 +227,9 @@ export type GameSessionEvent =
   | { type: 'point_of_no_return_shown' }
   /** The toolbox was taken: alert, way back shut. */
   | { type: 'simulation_broken' }
-  /** A hammer smash landed: one more crack across the screen. */
-  | { type: 'screen_smashed'; target: StreetFightTarget; smashes: number }
-  | { type: 'street_fight_cleared' }
-  /** After the fight, a smash on the page itself (#164): `hits` since the fight was won. */
+  /** The evil chick is down: the endless horde comes next. */
+  | { type: 'evil_chick_smashed' }
+  /** A smash on the page itself (#164): `hits` on it so far. */
   | { type: 'screen_layer_hit'; layer: ScreenLayerId; hits: number }
   | { type: 'screen_layer_broken'; layer: ScreenLayerId }
   /** Every layer is gone: the page falls into black. */

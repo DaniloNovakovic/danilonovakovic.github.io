@@ -178,7 +178,7 @@ As built (#163, steps 2–3):
   never blinking. Reduced motion: lights and helicopter hold still.
 - **Lockdown.** Nothing on the street can be entered (buildings, the hatch,
   the CRT, the litter pile, the chick talk) and `H`/`Esc` no longer go back to
-  Hobbies: "Taped shut. Nowhere to hide now." Static mode is the way out. So a
+  Hobbies: "Taped shut." Static mode is the way out. So a
   later Hobbies visit can't happen any more during the escape.
 - **The evil chick.** Up the hatch (once Danilo has landed), the street chick
   is waiting, 2.4× its size, hackles up, a scribble of rage over its head and
@@ -186,8 +186,8 @@ As built (#163, steps 2–3):
   same eye). Two lines, Danilo's "...is that chick bigger than I remember?",
   then it stalks him and taunts ("run, little doodle." / "bring it."), and
   pecks (Danilo's direction, 2026-11-26: the chick attacks too): an alert-red
-  `!` for ~0.6 s, then a beak-first lunge that lands within ~108 px (`PECK!`,
-  Danilo: "It PECKED me!"), then ~0.9 s before the next. A parried peck
+  `!` for ~0.6 s, then a beak-first lunge that lands within ~108 px
+  (`PECK!`), then ~0.9 s before the next. A parried peck
   leaves it dizzy (ink stars) for ~1.5 s.
 - **The hammer** is drawn in Danilo's hand during the escape, with two moves
   (Danilo's direction, 2026-11-26): **Swing** (`F`) connects only with an
@@ -196,16 +196,17 @@ As built (#163, steps 2–3):
   a ~0.28 s guard (an ink arc in front of him, hammer held across), ~0.65 s
   apart. A swing flattens **everything** in reach at once, so a pack can go
   down in one hit. Docked **Swing** and **Parry** touch buttons (`streetFight` scene
-  panel, which also shows the wave, what's left and the crack count). Whiffs
+  panel, which also says what's going on). Whiffs
   are free. Stepped swing, no easing.
-- **Waves** are raccoon hordes of 5, 8 and 12 (Danilo's direction,
-  2026-11-26: "a bunch of enemies coming at me, so I can just keep stomping
-  them"), with 1, 2 and 3 pigeons overhead. Raccoons pour in from alternating
-  sides of the view, one every ~0.45 s, at most 5 on the street at once.
-  **Pigeons are not required** (same direction): they're harassment, not
-  progress. Knocking one out never counts or cracks the screen, and another
-  circles in ~2.2 s later; when the last raccoon drops they finish their pass
-  and leave. A fight is 26 smashes: the chick plus 25 raccoons.
+- **The horde is endless** (reworked 2026-11-28, Danilo's direction: the
+  screen cracking on every enemy hit got annoying on replays). After the
+  chick, raccoons pour in from alternating sides of the view, one every
+  ~0.75 s, at most 4 on the street at once, under 2 pigeons; every one
+  knocked out is replaced, forever. Smashing them is fun and never moves
+  anything on, and nothing cracks. Gaps are left on purpose, so a swing can
+  miss them and find the building behind (step 4). After 12 enemies smashed
+  with nothing else hit, Danilo: "They just keep coming. ...this is going
+  nowhere."
   - **Pigeons** cross the sky left and right, alternating between a low lane
     150 px above the street (jump and swing) and a high one 230 px up (out of
     the hammer's reach). As they approach they lob an egg or a dropping on an
@@ -229,67 +230,82 @@ As built (#163, steps 2–3):
   - Hits read muted: `BONK!`/`THWACK!`/`WHACK!` in ink, the chick folds flat
     and skids off, pigeons tumble with crossed-out eyes and feathers,
     raccoons spin off into the gutter.
-- **Screen damage layer** (`src/game/shell/ScreenDamageLayer.tsx`, mounted in
-  `src/App.tsx` so it stays over the interactive shell, Static mode and the
-  mode picker alike): one SVG over the whole viewport (`fixed`, `z-[70]`, `pointer-events-none`,
-  `aria-hidden`), above the game, the header and overlays. Cracks live in the
-  bridge (`screenDamage.cracks`: a viewport point plus a seed), one per
-  smash (chick or raccoon; never a pigeon), so they survive scene changes and static-mode round trips; the
-  fight's progress derives from their count. Each crack breaks out of a
-  **screen corner**, every other one on the side of the hit and the rest
-  across from it, so 26 spread over all four (top or bottom at random; Danilo's
-  direction: keep the middle visible), with an impact star, broken rings and
-  branching runs inward that stop at a clear oval in the middle
-  (`CRACK_CLEAR_CENTER` in `src/game/shell/screenCracks.ts`), so the street
-  and Danilo always stay visible. Ink with a pale edge so it reads on cream
-  and on dark. The newest runs out in 260 ms; reduced motion shows it whole,
-  and there is no camera shake. #164 grows from this layer.
 - Pure progress and copy: `src/game/core/console/content/outOfBoundsStreetFight.ts`
   and `streetFightLogic.ts`. Phaser: `StreetFight.ts` plus
-  `street/fight/` (one module per enemy). Headless: `swing` (or `smash`,
-  optionally `swing pigeon|raccoon`, which is what the live scene sends;
-  `swing pigeon` during the waves never moves the fight on); the
-  headless fight is discrete, so nothing attacks back there. `look` reports
-  `alarm: doors taped shut` and `fight: <phase> wave=… enemies left=…
-  screen damage=… cracks`.
+  `street/fight/` (one module per enemy). Headless: `swing` (or `smash`) hits
+  the chick, then a raccoon of the horde (`swing pigeon|raccoon` is what the
+  live scene sends; neither moves anything on); the headless fight is
+  discrete, so nothing attacks back there. `look` reports `alarm: doors taped
+  shut` and `fight: evil chick` / `fight: horde (endless)`.
 
-As built (#164, step 4). This build also answered #143 (how the screen
-destroyer should feel): Danilo played it and liked it, so the layer order and
-counts below are the design, not a placeholder.
+As built (#164, step 4; reworked 2026-11-28 into an escalation, Danilo's
+direction: "wait a second... what if..."). The horde never ends, so the way
+on is to hit what's behind it, and it escalates outward so the player works
+it out a step at a time. One number drives it: the smashes the shell keeps
+(`screenDamage.smashes` in the bridge: the chick, then every smash on the
+page), so it resumes after any remount.
 
-- **Starts** ~2.2 s after the last raccoon drops, with Danilo's "It's all just
-  a drawing. ...what if I keep hitting it?". From then on every smash lands on
-  the page: a click or tap anywhere (a scene UI action from the `streetFight`
-  panel; anything that is a control keeps its own click; the cursor is a
-  hammer), or a hammer swing that meets nothing (it hits the glass in front of
-  him, `CRASH!`). Each one leaves a **dent** where it landed
-  (`screenDamage.dents` in the bridge, drawn by `ScreenDamageLayer` in the
-  interactive mode only, so static mode stays readable).
-- **Enemies keep coming** from the edges of the view: raccoons (at most 3 at
-  once, one every ~1.5 s) and 2 pigeons. Clicking one or swinging at it knocks
-  it out and counts as a smash; pigeons count now.
-- **Layers**, outside in (`SCREEN_LAYERS` in
-  `src/game/core/console/content/outOfBoundsScreenDestroyer.ts`):
-  1. **header**, 6 smashes: the Dev/Backpack group tilts off its corner and
-     drops away; Static mode stays, held by an alert-red tape strip and lifted
-     above the dents and the black (`src/game/shell/screenDestroyerHeader.ts`).
-  2. **labels**, 6: the building labels slide and tilt down their buildings,
-     then tumble off.
-  3. **street**, 10: the street's own drawing stops moving (helicopter,
-     searchlights, props), and everything drawn before the fight falls away
-     front to back into blank paper (`street/StreetComingApart.ts`).
-  4. **danilo**, 6: Danilo is erased from the top down; then the hammer goes.
-- **Falling into black.** With the last layer gone the fight stops and the
-  shell fades to black (1.4 s; a cut under reduced motion) and shows the
-  **Unplugged** screen (`src/game/shell/UnpluggedHandOff.tsx`): "...signal
-  lost. Somewhere that isn't a drawing, something opens its eyes." Its only
-  button, **Wake up** (focused), opens the real world (Act 4,
-  `RealWorldTakeover`, ADR-0007). The Static switch is gone from here on.
-- Reduced motion: no animated sliding, falling or tearing, no shake, no fade.
-  Nothing flashes.
-- Headless: after the fight, `swing` hits the page; `look` reports
+Danilo keeps quiet through it (Danilo's direction, 2026-11-28: the player
+can have their own thoughts, and the searchlights, the helicopter and the
+horde are plain to see). The street gives no thoughts at all except
+"Taped shut." on a taped-shut door and the one beat below, "Wait a
+second... what if...". Getting hit is a shake and a knock-back, not a line.
+
+One kind of thing breaks at a time, and a hit on any one of them is a hit on
+them all, so there's no walking the street to find the right building. The
+damage spreads out along the street from where the hammer landed.
+
+- **Layers**, in order (`SCREEN_LAYERS` in
+  `src/game/core/console/content/outOfBoundsScreenDestroyer.ts`; Phaser in
+  `street/StreetComingApart.ts`):
+  1. **labels**, 2 smashes: a swing that meets no enemy, in front of any
+     building, hits it (`CLANG!`). Every label on the street jolts and tilts
+     on its bolts; on the 2nd they all tumble off. The labels stay dark
+     under the night wash.
+  2. **buildings**, 2: every building shudders and is left leaning
+     (`CRUNCH!`); on the 2nd they all fold over and crash down, the door tape
+     with them, and the first third of the rest of the street (the alarm,
+     front to back) comes loose. The street's own drawing stops moving from
+     the first building hit.
+  3. **street**, 2: what's left to hit is the poles and signs (the telegraph
+     poles, the START sign, the billboard, the CRT). Any of them: every one
+     wobbles and another third of the street falls; on the 2nd they topple
+     and the rest goes with them: blank paper.
+  4. **card**, 4: ~2.6 s later, "Wait a second... what if...", and the hammer
+     is on the screen: a click or tap anywhere is a smash (a scene UI action
+     from the `streetFight` panel; controls keep their own click; the cursor
+     is a hammer), and a swing at nothing hits the glass in front of him
+     (`CRACK!`). The horde thins (3 raccoons, one every ~1.5 s). Each smash
+     cracks the **card that frames the game** from its nearest corner, runs
+     stopping short of the middle so Danilo stays in view
+     (`screenDamage.cardCracks`, drawn by `src/game/shell/ScreenDestroyerCard.tsx`).
+     The Dev/Backpack header group tilts with it; Static mode gets its
+     alert-red tape. On the 4th the cracked card (border, shadow, cracks)
+     drops out of the picture, the header group and footer hint go with it,
+     and the game is left on the page's own paper (`#f4f1ea`) edge to edge,
+     the frame keeping its size so the canvas never resamples
+     (`src/game/shell/screenDestroyerShell.ts`).
+  5. **glass**, 6: each smash cracks the **browser viewport itself**, bursting
+     from where it landed and running across the whole screen, middle
+     included (`screenDamage.cracks`, `ScreenDamageLayer` mounted in
+     `src/App.tsx`: one SVG, `fixed`, `z-[70]`, `pointer-events-none`,
+     `aria-hidden`, over every mode until reload). The newest runs out in
+     260 ms.
+- **Shattering into black.** The last smash shatters the screen: it cuts
+  into jagged pieces that fall away into black, nearest the last smash first
+  (~1.3 s), then the **Unplugged** screen fades in
+  (`src/game/shell/UnpluggedHandOff.tsx`): "...signal lost. Somewhere that
+  isn't a drawing, something opens its eyes." Its only button, **Wake up**
+  (focused), opens the real world (Act 4, `RealWorldTakeover`, ADR-0007). The
+  Static switch is gone from here on.
+- Reduced motion: no animated sliding, falling, shuddering or shattering, no
+  shake; the card is just gone and the black is a cut. Nothing flashes.
+- Headless: `swing page` (or `building`, `street`, `screen`, `glass`, `card`)
+  aims past the horde at the page; `look` reports
   `screen: breaking=<layer> (<hits>/<of>) layers left=…`, then
-  `screen: black — every layer gone, unplugged`. 28 swings reach the end.
+  `screen: black — every layer gone, unplugged`. 16 page swings reach the end.
+- Dev switcher checkpoints: `street` (the chick), `destroyer` (endless horde,
+  nothing hit), `screen` (street gone), `unplugged`.
 
 **Payoff:** once everything is destroyed, the page falls into black and the
 game becomes the first-person 3D alien ship (Act 4).

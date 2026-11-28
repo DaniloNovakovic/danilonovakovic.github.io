@@ -109,9 +109,9 @@ export interface BridgeProgressState {
 }
 
 /**
- * One crack across the whole browser viewport (Out of Bounds street fight):
- * where the smash landed, as fractions of the viewport, plus a seed for its
- * hand-drawn shape. One crack per landed smash.
+ * One crack (Out of Bounds screen destroyer): where the smash landed, as
+ * fractions of what it cracked (the game card, or the browser viewport), plus
+ * a seed for its hand-drawn shape.
  */
 export interface ScreenCrack {
   x: number;
@@ -121,12 +121,15 @@ export interface ScreenCrack {
 
 /** Damage to the screen itself, drawn above the game and the portfolio chrome. */
 export interface BridgeScreenDamageState {
-  cracks: readonly ScreenCrack[];
   /**
-   * Screen destroyer (#164): one dent per smash on the page after the fight
-   * was won, where it landed. Their count is how far the page has come apart.
+   * Hammer smashes that moved Out of Bounds on: the evil chick, then every
+   * one on the page (#164). How far the page has come apart derives from it.
    */
-  dents: readonly ScreenCrack[];
+  smashes: number;
+  /** Cracks across the card that frames the game, one per smash on it. */
+  cardCracks: readonly ScreenCrack[];
+  /** Cracks across the whole browser viewport, one per smash on the glass. */
+  cracks: readonly ScreenCrack[];
 }
 
 export interface OverlayRequest {
@@ -278,7 +281,7 @@ let state: BridgeState = {
     streetDoodle: null,
     ridge: createInitialRidgeProgress()
   },
-  screenDamage: { cracks: [], dents: [] },
+  screenDamage: { smashes: 0, cardCracks: [], cracks: [] },
   sceneHintText: null,
   touch: {
     left: 0,
@@ -668,21 +671,28 @@ export const bridgeActions = {
         streetDoodle: null,
         ridge: createInitialRidgeProgress()
       },
-      screenDamage: { cracks: [], dents: [] }
+      screenDamage: { smashes: 0, cardCracks: [], cracks: [] }
     }));
   },
-  /** One more crack across the screen; cracks only pile up until progress resets. */
+  /** One more Out of Bounds smash landed; like the cracks, only a progress reset clears them. */
+  landScreenSmash(): void {
+    setState((current) => ({
+      ...current,
+      screenDamage: { ...current.screenDamage, smashes: current.screenDamage.smashes + 1 }
+    }));
+  },
+  /** One more crack across the card that frames the game. */
+  crackCard(crack: ScreenCrack): void {
+    setState((current) => ({
+      ...current,
+      screenDamage: { ...current.screenDamage, cardCracks: [...current.screenDamage.cardCracks, crack] }
+    }));
+  },
+  /** One more crack across the whole screen. */
   crackScreen(crack: ScreenCrack): void {
     setState((current) => ({
       ...current,
       screenDamage: { ...current.screenDamage, cracks: [...current.screenDamage.cracks, crack] }
-    }));
-  },
-  /** One more dent in the page (screen destroyer); like cracks, only a progress reset clears them. */
-  dentScreen(dent: ScreenCrack): void {
-    setState((current) => ({
-      ...current,
-      screenDamage: { ...current.screenDamage, dents: [...current.screenDamage.dents, dent] }
     }));
   },
   setSceneLoading(sceneId: SceneId | null): void {

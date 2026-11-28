@@ -45,6 +45,8 @@ export class StreetAlarm {
   private readonly lights: Phaser.GameObjects.Graphics;
   private readonly heli: Phaser.GameObjects.Graphics;
   private readonly heliBeam: Phaser.GameObjects.Graphics;
+  /** The tape across the doors: it goes down with the buildings (#164). */
+  readonly tape: Phaser.GameObjects.Graphics;
   private heliX: number;
   private heliDir: 1 | -1 = 1;
   private rotorFrame = -1;
@@ -66,7 +68,7 @@ export class StreetAlarm {
       .setScrollFactor(0)
       .setDepth(NIGHT_DEPTH);
     this.drawMoon();
-    this.drawTape();
+    this.tape = this.drawTape();
     this.lights = scene.add.graphics().setDepth(LIGHT_DEPTH).setBlendMode(Phaser.BlendModes.ADD);
     this.heliBeam = scene.add.graphics().setDepth(LIGHT_DEPTH).setBlendMode(Phaser.BlendModes.ADD);
     this.heli = scene.add.graphics().setDepth(HELI_DEPTH);
@@ -98,12 +100,13 @@ export class StreetAlarm {
   }
 
   /** Red tape crossed over each door, hatched in ink so it reads without colour. */
-  private drawTape(): void {
+  private drawTape(): Phaser.GameObjects.Graphics {
     const g = this.scene.add.graphics().setDepth(TAPE_DEPTH);
     for (const spot of OVERWORLD_BUILDING_SPOTS) {
       this.tapeBand(g, spot.x - 70, GROUND_Y - 118, spot.x + 70, GROUND_Y - 22);
       this.tapeBand(g, spot.x + 70, GROUND_Y - 112, spot.x - 70, GROUND_Y - 28);
     }
+    return g;
   }
 
   private tapeBand(g: Phaser.GameObjects.Graphics, x0: number, y0: number, x1: number, y1: number): void {

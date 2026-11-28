@@ -15,6 +15,8 @@ import { buildStreetWires } from './StreetLife';
 
 export interface StreetEnvironmentHandles {
   groundZone: Phaser.GameObjects.Zone;
+  /** The telegraph poles and their wires. */
+  wires: Phaser.GameObjects.Graphics;
 }
 
 export function buildStreetEnvironment(scene: Phaser.Scene): StreetEnvironmentHandles {
@@ -23,7 +25,7 @@ export function buildStreetEnvironment(scene: Phaser.Scene): StreetEnvironmentHa
   EnvironmentBuilder.buildMountains(scene);
   EnvironmentBuilder.buildTrees(scene);
   EnvironmentBuilder.buildGround(scene, worldWidth);
-  buildStreetWires(scene);
+  const wires = buildStreetWires(scene);
 
   const groundZone = scene.add.zone(
     worldWidth / 2,
@@ -33,7 +35,7 @@ export function buildStreetEnvironment(scene: Phaser.Scene): StreetEnvironmentHa
   );
   scene.physics.add.existing(groundZone, true);
 
-  return { groundZone };
+  return { groundZone, wires };
 }
 
 export function buildStreetForeground(scene: Phaser.Scene): void {

@@ -10,6 +10,7 @@ import {
   RIDGE_SCENE_ID,
   STAMPEDE_SKETCH_SCENE_ID
 } from '@/game/scenes/sceneIds';
+import { SCREEN_DESTROYER_TOTAL_HITS, screenHitsBefore } from '@/game/core/console';
 import { STAMPEDE_ARENA } from '@/game/scenes/stampedeSketch/runtime/movement';
 import { createStampedeResultViewModel } from '@/game/scenes/stampedeSketch/runtime/resultPresentation';
 import { getStampedeUpgradeChoices } from '@/game/scenes/stampedeSketch/runtime/upgrades';
@@ -762,35 +763,50 @@ describe('InteractiveApp', () => {
   });
 
   describe('screen destroyer (#164)', () => {
-    function dent(times: number) {
+    /** The chick, then the whole street: the hammer is on the card next. */
+    const STREET_GONE = 1 + screenHitsBefore('card');
+    /** The chick, then every layer: the last smash shatters the glass. */
+    const EVERY_SMASH = 1 + SCREEN_DESTROYER_TOTAL_HITS;
+
+    function smash(times: number) {
       act(() => {
-        for (let i = 0; i < times; i++) bridgeActions.dentScreen({ x: 0.3, y: 0.4, seed: i + 1 });
+        for (let i = 0; i < times; i++) bridgeActions.landScreenSmash();
       });
     }
 
-    it('peels the header off, but Static mode hangs on and keeps working', async () => {
+    it('cracks the card and drops it (the header buttons with it), but Static mode hangs on', async () => {
       const onSwitchToStatic = vi.fn();
       render(<InteractiveApp onSwitchToStatic={onSwitchToStatic} />);
       const devButton = screen.getByRole('button', { name: /open dev scene switcher/i });
+      smash(STREET_GONE);
       expect(devButton.parentElement?.getAttribute('style') ?? '').not.toContain('rotate');
+      expect(screen.queryByTestId('screen-destroyer-card')).toBeNull();
 
-      dent(3);
-      expect(devButton.parentElement?.getAttribute('style')).toContain('rotate(4deg)');
+      act(() => {
+        bridgeActions.landScreenSmash();
+        bridgeActions.crackCard({ x: 0.3, y: 0.4, seed: 1 });
+      });
+      expect(devButton.parentElement?.getAttribute('style')).toContain('rotate(2deg)');
+      // Drawn once the card has a size (no layout here); it never takes a click.
+      expect(screen.getByTestId('screen-destroyer-card').className).toContain('pointer-events-none');
+      expect(screen.getByTestId('interactive-game-shell').className).toContain('shadow-');
 
-      dent(3);
+      smash(3);
       expect(screen.queryByRole('button', { name: /open dev scene switcher/i })).toBeNull();
+      expect(screen.getByTestId('interactive-game-shell').className).not.toContain('shadow-');
       expect(screen.queryByTestId('unplugged-hand-off')).toBeNull();
       await userEvent.click(screen.getByRole('button', { name: /switch to static portfolio/i }));
       expect(onSwitchToStatic).toHaveBeenCalledTimes(1);
     });
 
-    it('falls into black once every layer is gone: no way out, only Wake up', async () => {
+    it('shatters into black once every layer is gone: no way out, only Wake up', async () => {
       const onSwitchToStatic = vi.fn();
       render(<InteractiveApp onSwitchToStatic={onSwitchToStatic} />);
-      dent(27);
+      smash(EVERY_SMASH - 1);
       expect(screen.queryByTestId('unplugged-hand-off')).toBeNull();
 
-      dent(1);
+      smash(1);
+      expect(screen.getByTestId('screen-shards').getAttribute('aria-hidden')).toBe('true');
       const handOff = screen.getByRole('dialog', { name: /unplugged/i });
       expect(handOff.textContent).toMatch(/signal lost/i);
       const wake = within(handOff).getByRole('button', { name: /wake up/i });
@@ -806,7 +822,7 @@ describe('InteractiveApp', () => {
     it('wakes up into the real world, which takes over the whole page', async () => {
       vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({} as never);
       render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
-      dent(28);
+      smash(EVERY_SMASH);
 
       await userEvent.click(screen.getByRole('button', { name: /wake up/i }));
 
@@ -815,15 +831,21 @@ describe('InteractiveApp', () => {
       await waitFor(() => expect(realWorld.boot).toHaveBeenCalledTimes(1));
     });
 
-    it('turns a click anywhere on the page into a smash, but never a click on a control', () => {
-      const fightPanel = { phase: 'cleared', wave: 0, leftInWave: 0, enemiesLeft: 0, screenCracks: 26 };
-      act(() => {
-        bridgeActions.setSceneUiPanel(OVERWORLD_SCENE_ID, 'streetFight', {
-          ...fightPanel,
-          destroyer: { hits: 0, layers: [], breaking: 'header', remaining: ['header'], blackout: false }
-        });
-      });
+    it('turns a click anywhere on the page into a smash once the hammer is on the screen, never on a control', () => {
+      const destroyer = {
+        hits: 9,
+        layers: [],
+        breaking: 'card',
+        remaining: ['card'],
+        onTheScreen: true,
+        blackout: false
+      };
+      const fightPanel = { phase: 'horde', destroyer, onTheScreen: false };
+      act(() => bridgeActions.setSceneUiPanel(OVERWORLD_SCENE_ID, 'streetFight', fightPanel));
       render(<InteractiveApp onSwitchToStatic={vi.fn()} />);
+      // Still on the street (or before "what if"): a click is just a click.
+      expect(document.documentElement.classList.contains('screen-destroyer-active')).toBe(false);
+      act(() => bridgeActions.setSceneUiPanel(OVERWORLD_SCENE_ID, 'streetFight', { ...fightPanel, onTheScreen: true }));
       expect(document.documentElement.classList.contains('screen-destroyer-active')).toBe(true);
 
       fireEvent.pointerDown(screen.getByTestId('game-surface'), { clientX: 512, clientY: 192 });

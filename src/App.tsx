@@ -13,8 +13,8 @@ function App() {
   return (
     <>
       <AppRoute route={route} setMode={setMode} />
-      {/* Screen cracks (#163) are on the glass, not the game: they stay over every mode until reload. */}
-      <ScreenDamageLayer withDents={route === 'interactive'} />
+      {/* Screen cracks (#164) are on the glass, not the game: they stay over every mode until reload. */}
+      <ScreenDamageLayer />
     </>
   );
 }
