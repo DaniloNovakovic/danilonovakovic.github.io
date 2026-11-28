@@ -59,7 +59,23 @@ export default function StaticPortfolio({ onSwitchToInteractive }: StaticPortfol
           <HobbiesSection />
         </div>
 
-        <footer className="mt-16 flex flex-col items-center gap-3 border-t-2 border-dashed border-[#1a1a1a]/30 pt-6 text-center text-xs text-[#1a1a1a]/60 sm:mt-24">
+        <section
+          aria-labelledby="closing-title"
+          className="mt-20 flex flex-col items-center gap-4 border-2 border-[#1a1a1a] bg-white px-5 py-10 text-center shadow-[6px_6px_0px_0px_rgba(26,26,26,1)] sm:mt-28 sm:px-10"
+        >
+          <h2 id="closing-title" className="text-3xl font-bold text-[#1a1a1a] sm:text-4xl">
+            {messages.staticPortfolio.closingTitle}
+          </h2>
+          <p className="max-w-md text-base leading-relaxed text-[#1a1a1a]/80">{messages.staticPortfolio.closingText}</p>
+          <div className="mt-2">
+            <HeroContactLinks />
+          </div>
+          <p className="mt-4 -rotate-2 text-2xl font-bold text-[#1a1a1a]/80">
+            {messages.staticPortfolio.signOff(profile.name.split(' ')[0])}
+          </p>
+        </section>
+
+        <footer className="mt-12 flex flex-col items-center gap-3 border-t-2 border-dashed border-[#1a1a1a]/30 pt-6 text-center text-xs text-[#1a1a1a]/60 sm:mt-16">
           <p>
             {messages.staticPortfolio.footerPrompt}{' '}
             <Button variant="ghost" size="sm" onClick={onSwitchToInteractive} className="p-0 text-xs">

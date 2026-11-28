@@ -16,7 +16,7 @@ const HOBBY_DOODLE: Record<HobbyId, LucideIcon> = {
   dancing: Footprints
 };
 
-/** Polaroids sit slightly crooked, like prints taped into a sketchbook. */
+/** Polaroids sit slightly crooked, like prints taped into a sketchbook. Static on purpose: they aren't links. */
 const TILTS = ['-rotate-2', 'rotate-1', '-rotate-1', 'rotate-2', '-rotate-1'];
 
 export function HobbiesSection() {
@@ -32,10 +32,14 @@ export function HobbiesSection() {
             <li
               key={hobby.id}
               className={cn(
-                'w-[calc(50%-0.5rem)] border-2 border-[#1a1a1a] bg-white p-2 pb-3 sm:w-[calc((100%-3rem)/3)] shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] motion-safe:transition-transform motion-safe:hover:rotate-0',
+                'relative w-[calc(50%-0.5rem)] border border-[#1a1a1a]/30 bg-white p-2 pb-3 shadow-sm sm:w-[calc((100%-3rem)/3)]',
                 TILTS[index % TILTS.length]
               )}
             >
+              <span
+                aria-hidden
+                className="absolute -top-2.5 left-1/2 h-5 w-14 -translate-x-1/2 rotate-2 bg-[#e8dcb8]/80 shadow-sm"
+              />
               <div className="flex aspect-[4/3] items-center justify-center bg-[#f4f1ea]">
                 <Doodle className="h-10 w-10 text-[#1a1a1a]/70" strokeWidth={1.5} aria-hidden />
               </div>

@@ -1,7 +1,7 @@
 import { ArrowUpRight } from 'lucide-react';
 import { useMessages } from '@/shared/i18n';
 import { getPortfolioData } from '@/shared/portfolio';
-import { Badge, Card, LinkButton, SketchSection } from '@/shared/ui';
+import { SketchSection } from '@/shared/ui';
 
 export function ProjectsSection() {
   const messages = useMessages();
@@ -9,30 +9,42 @@ export function ProjectsSection() {
 
   return (
     <SketchSection id="projects" title={messages.portfolio.projects.title}>
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3">
-        {projects.map((project) => (
-          <Card as="article" key={project.title} padding="md" border="medium" shadow="md" className="flex flex-col">
-            <h3 className="mb-2 text-lg font-bold">{project.title}</h3>
-            <p className="mb-4 text-sm leading-relaxed text-gray-700">{project.description}</p>
-            <div className="mb-4 flex flex-wrap gap-1.5">
-              {project.tags.map((tag) => (
-                <Badge key={tag}>{tag}</Badge>
-              ))}
-            </div>
-            <LinkButton
+      <ol className="border-t-2 border-[#1a1a1a]">
+        {projects.map((project, index) => (
+          <li
+            key={project.title}
+            className="border-b-2 border-dashed border-[#1a1a1a]/30 last:border-solid last:border-[#1a1a1a]"
+          >
+            <a
               href={project.link}
               target="_blank"
               rel="noopener noreferrer"
-              variant="quiet"
-              className="mt-auto self-start p-0 text-sm"
               aria-label={messages.navigation.opensInNewTab(project.title)}
+              className="group grid grid-cols-[2.5rem_1fr_auto] gap-x-3 py-5 outline-none focus-visible:bg-white sm:grid-cols-[3.5rem_1fr_auto] sm:gap-x-4"
             >
-              {messages.staticPortfolio.viewProject}
-              <ArrowUpRight className="h-4 w-4" strokeWidth={2.5} aria-hidden />
-            </LinkButton>
-          </Card>
+              <span aria-hidden className="pt-1 font-mono text-sm text-[#1a1a1a]/50">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <span className="min-w-0">
+                <span className="block text-lg font-bold text-[#1a1a1a] underline-offset-4 group-hover:underline sm:text-xl">
+                  {project.title}
+                </span>
+                <span className="mt-1 block text-sm leading-relaxed text-gray-700 sm:text-base">
+                  {project.description}
+                </span>
+                <span className="mt-2 block font-mono text-xs lowercase text-[#1a1a1a]/60">
+                  {project.tags.join(' · ')}
+                </span>
+              </span>
+              <ArrowUpRight
+                aria-hidden
+                strokeWidth={2.5}
+                className="mt-1 h-5 w-5 text-[#1a1a1a]/50 motion-safe:transition-transform group-hover:text-[#1a1a1a] motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:translate-x-0.5"
+              />
+            </a>
+          </li>
         ))}
-      </div>
+      </ol>
     </SketchSection>
   );
 }
