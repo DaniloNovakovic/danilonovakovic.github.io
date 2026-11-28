@@ -1,6 +1,8 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef, type CSSProperties } from 'react';
+import type { ScreenCrack } from '@/game/bridge/store';
 import { UNPLUGGED_TEXT } from '@/game/core/console';
 import { ALERT_RED_CSS } from '@/game/sharedSceneRuntime/escapeAlert';
+import { shatterShards } from './screenCracks';
 
 /** A strip of alert-red tape holding the way out on the page. */
 export function TapeStrip() {
@@ -14,12 +16,13 @@ export function TapeStrip() {
 }
 
 /**
- * The page has fallen into black. A slow fade with motion, a cut without;
- * never a flash. From here there is no way out (out-of-bounds.md, pillar 4):
- * the only button is Wake up, and its click is the gesture the browser needs
- * for fullscreen and pointer lock (ADR-0007).
+ * The screen has shattered into black. With motion, the pieces of the page
+ * fall away (nearest the last smash first) and the words fade in; without, it
+ * is a cut. Never a flash. From here there is no way out (out-of-bounds.md,
+ * pillar 4): the only button is Wake up, and its click is the gesture the
+ * browser needs for fullscreen and pointer lock (ADR-0007).
  */
-export function UnpluggedHandOff({ onWakeUp }: { onWakeUp: () => void }) {
+export function UnpluggedHandOff({ onWakeUp, lastSmash }: { onWakeUp: () => void; lastSmash: ScreenCrack | null }) {
   const button = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     button.current?.focus();
@@ -31,9 +34,10 @@ export function UnpluggedHandOff({ onWakeUp }: { onWakeUp: () => void }) {
       aria-modal="true"
       aria-labelledby="unplugged-title"
       data-testid="unplugged-hand-off"
-      className="fixed inset-0 z-[75] flex items-center justify-center bg-[#050505] px-4 motion-safe:animate-[unplugged-fade_1400ms_ease-in_both]"
+      className="fixed inset-0 z-[75] flex items-center justify-center bg-[#050505] px-4"
     >
-      <div className="flex max-w-md flex-col items-center gap-4 text-center motion-safe:animate-[unplugged-fade_1200ms_ease-out_1400ms_both]">
+      <ShatteredScreen impact={lastSmash ?? { x: 0.5, y: 0.5, seed: 1 }} />
+      <div className="relative flex max-w-md flex-col items-center gap-4 text-center motion-safe:animate-[unplugged-fade_1200ms_ease-out_1400ms_both]">
         <h2 id="unplugged-title" className="text-xs font-bold uppercase tracking-[0.5em] text-[#8a8a8a]">
           {UNPLUGGED_TEXT.title}
         </h2>
@@ -52,5 +56,42 @@ export function UnpluggedHandOff({ onWakeUp }: { onWakeUp: () => void }) {
         </button>
       </div>
     </div>
+  );
+}
+
+/** The shattered page, falling away piece by piece. Drawn only with motion. */
+function ShatteredScreen({ impact }: { impact: ScreenCrack }) {
+  const shards = useMemo(
+    () => shatterShards(impact, { width: window.innerWidth, height: window.innerHeight }),
+    [impact]
+  );
+  return (
+    <svg
+      aria-hidden="true"
+      focusable="false"
+      data-testid="screen-shards"
+      className="pointer-events-none absolute inset-0 h-full w-full select-none motion-reduce:hidden"
+      viewBox={`0 0 ${window.innerWidth} ${window.innerHeight}`}
+      preserveAspectRatio="none"
+    >
+      {shards.map((shard, i) => (
+        <polygon
+          key={i}
+          className="screen-shard"
+          points={shard.points}
+          fill="#f4f1ea"
+          stroke="#1a1a1a"
+          strokeWidth={1.4}
+          strokeLinejoin="round"
+          style={
+            {
+              '--shard-drift-x': `${shard.driftX}px`,
+              '--shard-turn': `${shard.turn}deg`,
+              animationDelay: `${shard.delayMs}ms`
+            } as CSSProperties
+          }
+        />
+      ))}
+    </svg>
   );
 }

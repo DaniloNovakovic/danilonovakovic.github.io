@@ -62,10 +62,8 @@ export function formatGameObservation(observation: GameObservation): string {
     lines.push(`street x=${Math.round(observation.overworld.playerX)} facing=${observation.overworld.facing}`);
     const alarm = observation.overworld.alarm;
     if (alarm) {
-      const f = alarm.fight;
-      const wave = f.phase === 'waves' ? ` wave=${f.wave} (${f.leftInWave} left in it)` : '';
       lines.push(`alarm: doors ${alarm.doors} — ${alarm.description}`);
-      lines.push(`fight: ${f.phase}${wave} enemies left=${f.enemiesLeft} screen damage=${f.screenCracks} cracks`);
+      lines.push(alarm.fight.phase === 'chick' ? 'fight: evil chick' : 'fight: horde (endless)');
       if (alarm.destroyer) lines.push(formatScreenDestroyer(alarm.destroyer));
     }
   }
@@ -177,7 +175,9 @@ function buildHints(state: GameWorldState, nearby: readonly NearbyThing[], ridge
     if (!destroyer) hints.push('Type swing to smash with the hammer.');
     else if (destroyer.blackout)
       hints.push('The page is black. In the browser, Wake up opens the real world (3D, not playable here).');
-    else hints.push(`Type swing to keep smashing the page: ${screenLayerName(destroyer.breaking!)} goes next.`);
+    else if (destroyer.hits === 0)
+      hints.push('The horde never ends: swing smashes a raccoon, swing page hits the building behind them.');
+    else hints.push(`Type swing page to keep smashing the page: ${screenLayerName(destroyer.breaking!)} goes next.`);
   } else if (state.mode === 'overworld') {
     hints.push(OVERWORLD_CONSOLE_HINTS[getOverworldProgress(state).stage]);
   }
@@ -220,7 +220,7 @@ function buildHints(state: GameWorldState, nearby: readonly NearbyThing[], ridge
   return hints;
 }
 
-/** `screen: breaking=street (4/10) layers left=street, danilo`, or the blackout. */
+/** `screen: breaking=street (4/6) layers left=street, card, glass`, or the blackout. */
 function formatScreenDestroyer(destroyer: ScreenDestroyerProgress): string {
   if (destroyer.blackout) return 'screen: black — every layer gone, unplugged (Wake up opens the 3D real world)';
   const breaking = destroyer.layers.find((layer) => layer.id === destroyer.breaking)!;

@@ -48,18 +48,23 @@ import {
   isStreetInAlarm,
   observeScreenDestroyer,
   OUT_OF_BOUNDS_STREET_TEXT,
-  SCREEN_DESTROYER_START_THOUGHT,
+  SCREEN_FIRST_COLLAPSE_THOUGHT,
+  SCREEN_FIRST_HIT_THOUGHT,
   SCREEN_LAYER_BROKEN_THOUGHTS,
+  SCREEN_WHAT_IF_THOUGHT,
   type ScreenDestroyerProgress,
   STREET_ALARM_THOUGHT,
-  STREET_FIGHT_CLEARED_THOUGHT,
   STREET_FIGHT_HURT_THOUGHTS,
+  STREET_HORDE_ENDLESS_AFTER,
+  STREET_HORDE_ENDLESS_THOUGHT,
   STREET_LOCKDOWN_THOUGHT,
   streetFightProgress,
   type GameCommandResult,
+  type GameSessionEvent,
   type NearbyThing,
   type StreetFightProgress
 } from '@/game/core/console';
+import type { StreetFightPanelView } from '../sceneUi/StreetFightPanel';
 import { loadRidgeRouteDialogueCatalog } from '@/game/scenes/ridge/content/routeCatalog';
 import { applyGameConsoleEvents } from '@/game/scenes/shared/applyGameConsoleEvents';
 import { buildStreetEnvironment, buildStreetForeground, setupStreetCamera } from './street/StreetEnvironment';
@@ -98,8 +103,8 @@ import {
   type StreetConversationScript
 } from './streetConversation';
 
-/** Screen destroyer: the fight's last smash, a beat, then the page itself is the target. */
-const DESTROYER_START_DELAY_MS = 2200;
+/** Screen destroyer: the last of the street falls, a beat on blank paper, then the screen is the target. */
+const SCREEN_WHAT_IF_DELAY_MS = 2600;
 /** Clicks and taps on the page land at most this often (a desktop toy, not a click-counter race). */
 const PAGE_SMASH_GAP_MS = 140;
 /** Game objects at or above this depth are UI floating over the drawing (thoughts), not the street. */
@@ -157,10 +162,12 @@ export class OverworldScene extends Phaser.Scene {
   private parryKey?: Phaser.Input.Keyboard.Key;
   private thought?: PlayerThoughtText;
   private confrontPending = false;
-  /** Screen destroyer (#164): the page coming apart, and whether it's begun / fallen into black. */
+  /** Screen destroyer (#164): the street coming apart, the hammer on the screen, the page fallen into black. */
   private comingApart?: StreetComingApart;
-  private destroyerOn = false;
+  private screenTarget = false;
   private blackedOut = false;
+  /** Raccoons and pigeons smashed this visit (they never move anything on). */
+  private hordeSmashes = 0;
   private lastPageSmashAt = -Infinity;
 
   constructor() {
@@ -220,8 +227,8 @@ export class OverworldScene extends Phaser.Scene {
       ownedItemIds: bridge.inventory.ownedItemIds,
       equippedItemIds: bridge.equipment.equippedItemIds,
       discoveredSecretIds: bridge.progress.discoveredSecretIds,
-      // The fight's cracks, then the destroyer's dents: together they are every smash so far.
-      screenSmashes: bridge.screenDamage.cracks.length + bridge.screenDamage.dents.length
+      // The chick, then every smash on the page: the shell keeps the count.
+      screenSmashes: bridge.screenDamage.smashes
     });
     const inAlarm = isStreetInAlarm({
       ownedItemIds: bridge.inventory.ownedItemIds
@@ -229,7 +236,8 @@ export class OverworldScene extends Phaser.Scene {
     this.alarm = undefined;
     this.fight = undefined;
     this.comingApart = undefined;
-    this.destroyerOn = false;
+    this.screenTarget = false;
+    this.hordeSmashes = 0;
     this.blackedOut = false;
     this.confrontPending = false;
 
@@ -318,10 +326,10 @@ export class OverworldScene extends Phaser.Scene {
 
   /** Up through the hatch while the simulation is broken: night, searchlights, and the evil chick. */
   private startAlarm(): void {
-    const progress = this.fightProgress();
-    this.alarm = new StreetAlarm(this, this.player.x);
-    // Everything drawn so far is the street that can come apart later (#164).
+    const { phase } = this.fightProgress();
     const labels = this.streetBuildings.faces.map((face) => face.label);
+    this.alarm = new StreetAlarm(this, this.player.x, labels);
+    // Everything drawn so far is the street that can come apart later (#164).
     this.comingApart = new StreetComingApart({
       scene: this,
       motion: this.motion,
@@ -331,13 +339,17 @@ export class OverworldScene extends Phaser.Scene {
           !labels.includes(obj as Phaser.GameObjects.Text) &&
           ((obj as Partial<{ depth: number }>).depth ?? 0) < UI_DEPTH
       ),
-      labels,
-      danilo: this.player
+      buildings: this.streetBuildings.faces.map((face) => ({
+        buildingId: face.buildingId,
+        x: face.x,
+        sprites: [face.sketch, face.pixel],
+        label: face.label
+      }))
     });
     const fight = new StreetFight({
       scene: this,
       player: this.player,
-      progress,
+      phase,
       motion: this.motion,
       getAudioContext: () => (this.sound as Partial<Phaser.Sound.WebAudioSoundManager>).context ?? null,
       holdPlayer: (held) => this.holdPlayerForFight(held),
@@ -350,16 +362,20 @@ export class OverworldScene extends Phaser.Scene {
     this.fight = fight;
     this.swingKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.F);
     this.parryKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.R);
-    if (progress.phase === 'cleared') {
-      this.beginDestroyer(false);
+    if (phase === 'chick') {
+      this.confrontPending = true;
       return;
     }
-    if (progress.phase !== 'chick') {
-      this.publishFightPanel(progress);
-      this.thought?.show(STREET_ALARM_THOUGHT);
+    // A remount part-way through: show the damage so far at once.
+    const destroyer = this.destroyerProgress();
+    this.comingApart.apply(destroyer, false);
+    if (destroyer?.blackout) {
+      this.fallIntoBlack();
       return;
     }
-    this.confrontPending = true;
+    if (destroyer?.onTheScreen) this.hammerOnTheScreen(false);
+    if (!destroyer || destroyer.hits === 0) this.thought?.show(STREET_ALARM_THOUGHT);
+    this.publishFightPanel();
   }
 
   private destroyerProgress(): ScreenDestroyerProgress | null {
@@ -367,22 +383,16 @@ export class OverworldScene extends Phaser.Scene {
   }
 
   /**
-   * The fight is won: from here every smash lands on the page itself (#164).
-   * Live (`fresh`), Danilo wonders about it first; on a remount the damage so
-   * far is shown at once.
+   * The street is gone and the hammer is on the screen now (#164): clicks and
+   * taps anywhere are smashes, and a swing at nothing hits the glass. Live
+   * (`fresh`), Danilo works it out first.
    */
-  private beginDestroyer(fresh: boolean): void {
-    const destroyer = this.destroyerProgress();
-    if (!destroyer || this.destroyerOn) return;
-    this.destroyerOn = true;
-    this.comingApart?.apply(destroyer, false);
-    if (destroyer.blackout) {
-      this.fallIntoBlack();
-      return;
-    }
-    this.fight?.startDestroyer();
-    if (fresh || destroyer.hits === 0) this.thought?.show(SCREEN_DESTROYER_START_THOUGHT);
-    this.publishFightPanel(this.fightProgress());
+  private hammerOnTheScreen(fresh: boolean): void {
+    if (this.screenTarget || this.blackedOut) return;
+    this.screenTarget = true;
+    this.fight?.thinOut();
+    if (fresh) this.thought?.show(SCREEN_WHAT_IF_THOUGHT);
+    this.publishFightPanel();
   }
 
   /** Nothing left: the fight stops and Danilo with it; the shell shows the page falling into black. */
@@ -392,7 +402,7 @@ export class OverworldScene extends Phaser.Scene {
     this.fight?.stop();
     this.playerRuntime?.controller?.pause();
     this.player.setVelocity(0, 0);
-    this.publishFightPanel(this.fightProgress());
+    this.publishFightPanel();
   }
 
   /** `H`/`Esc` on the street goes back to Hobbies, except in alarm, when it's taped shut too. */
@@ -412,7 +422,7 @@ export class OverworldScene extends Phaser.Scene {
     this.confrontPending = false;
     this.openTalk(evilChickConversation(), fight.evilChickX, () => {
       fight.startChickAttack();
-      this.publishFightPanel(this.fightProgress());
+      this.publishFightPanel();
     });
   }
 
@@ -428,10 +438,14 @@ export class OverworldScene extends Phaser.Scene {
     return streetFightProgress(this.session?.getState().screenSmashes ?? 0);
   }
 
-  private publishFightPanel(progress: StreetFightProgress): void {
+  private publishFightPanel(): void {
     if (this.talk) return;
-    const destroyer = this.destroyerOn ? this.destroyerProgress() : null;
-    bridgeActions.setSceneUiPanel(OVERWORLD_SCENE_ID, 'streetFight', { ...progress, destroyer });
+    const view: StreetFightPanelView = {
+      ...this.fightProgress(),
+      destroyer: this.destroyerProgress(),
+      onTheScreen: this.screenTarget
+    };
+    bridgeActions.setSceneUiPanel(OVERWORLD_SCENE_ID, 'streetFight', view);
   }
 
   /** F / R or the touch buttons: swing the hammer, or parry. */
@@ -443,67 +457,108 @@ export class OverworldScene extends Phaser.Scene {
     for (let action = bridgeActions.consumeSceneUiAction(OVERWORLD_SCENE_ID); action;) {
       if (action.action === 'streetFightSwing') swung = true;
       if (action.action === 'streetFightParry') parried = true;
-      if (action.action === 'streetFightSmashPage') this.smashPage(action.params);
+      if (action.action === 'streetFightSmashPage') this.smashScreenAt(action.params);
       action = bridgeActions.consumeSceneUiAction(OVERWORLD_SCENE_ID);
     }
     if (parried) fight.parry();
-    // After the fight, a swing that meets nothing still hits the glass in front of him.
-    if (swung && fight.swing() === 0 && this.destroyerOn) this.smashGlass(fight.hammerHead);
-  }
-
-  /** A click or tap anywhere on the page (screen destroyer): an enemy there, or the page itself. */
-  private smashPage(params: unknown): void {
-    const fight = this.fight;
-    const at = readViewportPoint(params);
-    if (!fight || !at || !this.destroyerOn || this.blackedOut) return;
-    if (this.time.now - this.lastPageSmashAt < PAGE_SMASH_GAP_MS) return;
-    this.lastPageSmashAt = this.time.now;
-    const world = this.fromViewportFraction(at);
-    if (world && fight.smashAt(world.x, world.y) > 0) return;
-    this.smashGlass(world, at);
-  }
-
-  /** The hammer on bare glass: one more smash on the page, dented right there. */
-  private smashGlass(world: { x: number; y: number } | null, at?: { x: number; y: number }): void {
-    if (world) this.fight?.glassHit(world.x, world.y);
-    this.landSmash('swing', at ?? (world ? this.toViewportFraction(world) : { x: 0.5, y: 0.5 }));
-  }
-
-  /** A hammer hit or a parried egg knocked something out: one smash. */
-  private landHit(hit: StreetFightHit): void {
-    this.landSmash(hit.target === 'chick' ? 'swing' : `swing ${hit.target}`, this.toViewportFraction(hit));
+    // A swing that meets no enemy lands on whatever is behind them.
+    if (swung && fight.swing() === 0) this.swingPastTheHorde(fight);
   }
 
   /**
-   * Tell the console a smash landed (`at`: where, on the browser viewport).
-   * In the fight a chick or raccoon cracks the screen; after it, every smash
-   * dents the page and takes the next layer apart.
+   * The hammer missed every enemy: it hits the building behind Danilo (the
+   * labels, then the buildings themselves), or, once the street is gone, the
+   * glass in front of him. Otherwise it's just air.
    */
-  private landSmash(command: string, at: { x: number; y: number }): void {
+  private swingPastTheHorde(fight: StreetFight): void {
+    const destroyer = this.destroyerProgress();
+    const head = fight.hammerHead;
+    if (!destroyer || destroyer.blackout || !destroyer.breaking) {
+      fight.whiff();
+      return;
+    }
+    if (destroyer.onTheScreen) {
+      if (!this.screenTarget) fight.whiff();
+      else this.smashTheScreen(head, this.toViewportFraction(head));
+      return;
+    }
+    const building = this.comingApart?.standingBuildingAt(this.player.x);
+    if (!building) {
+      fight.whiff();
+      return;
+    }
+    fight.pageHit(destroyer.breaking === 'labels' ? 'CLANG!' : 'CRASH!', head.x, head.y);
+    this.landSmash('swing page', this.toViewportFraction(head), building.buildingId);
+  }
+
+  /** A click or tap anywhere on the page, once the hammer is on the screen: it cracks right there. */
+  private smashScreenAt(params: unknown): void {
+    const fight = this.fight;
+    const at = readViewportPoint(params);
+    if (!fight || !at || !this.screenTarget || this.blackedOut) return;
+    if (this.time.now - this.lastPageSmashAt < PAGE_SMASH_GAP_MS) return;
+    this.lastPageSmashAt = this.time.now;
+    const world = this.fromViewportFraction(at);
+    // Anything under the hammer goes down too.
+    if (world) fight.smashAt(world.x, world.y);
+    this.smashTheScreen(world, at);
+  }
+
+  /** The hammer on the screen itself: the card, then the glass, cracks where it landed. */
+  private smashTheScreen(world: { x: number; y: number } | null, at: { x: number; y: number }): void {
+    if (world) this.fight?.pageHit('CRACK!', world.x, world.y);
+    this.landSmash('swing page', at);
+  }
+
+  /** The hammer (or a parried egg) knocked something out. Only the chick moves anything on. */
+  private landHit(hit: StreetFightHit): void {
+    if (hit.target === 'chick') {
+      this.landSmash('swing', this.toViewportFraction(hit));
+      return;
+    }
+    this.session?.exec(`swing ${hit.target}`);
+    this.hordeSmashes += 1;
+    const destroyer = this.destroyerProgress();
+    if (this.hordeSmashes === STREET_HORDE_ENDLESS_AFTER && destroyer?.hits === 0) {
+      this.thought?.show(STREET_HORDE_ENDLESS_THOUGHT);
+    }
+  }
+
+  /**
+   * Tell the console a smash landed (`at`: where, on the browser viewport;
+   * `building`: the one it hit, if any). The chick sets the horde off; on the
+   * page, each smash takes the next layer apart.
+   */
+  private landSmash(command: string, at: { x: number; y: number }, building?: string): void {
     if (!this.session) return;
     const result = this.session.exec(command);
-    for (const event of result.events) {
-      const seed = Math.floor(Math.random() * 1e9);
-      if (event.type === 'screen_smashed') {
-        // The screen breaks at a corner: every other one on the side of the hit, the rest
-        // across from it, so a horde's worth of cracks spreads over all four (top or bottom at random).
-        bridgeActions.crackScreen({ x: event.smashes % 2 === 0 ? at.x : 1 - at.x, y: Math.random(), seed });
-      }
-      if (event.type === 'street_fight_cleared') {
-        this.thought?.show(STREET_FIGHT_CLEARED_THOUGHT);
-        this.time.delayedCall(DESTROYER_START_DELAY_MS, () => this.beginDestroyer(true));
-      }
-      if (event.type === 'screen_layer_hit') bridgeActions.dentScreen({ ...at, seed });
-      if (event.type === 'screen_layer_broken' && SCREEN_LAYER_BROKEN_THOUGHTS[event.layer]) {
-        this.thought?.show(SCREEN_LAYER_BROKEN_THOUGHTS[event.layer]);
-      }
-    }
+    for (const event of result.events) this.onSmashEvent(event, at);
     if (this.motion) this.cameras.main.shake(140, 0.006);
-    const progress = this.fightProgress();
-    this.fight?.setProgress(progress);
-    if (this.destroyerOn) this.comingApart?.apply(this.destroyerProgress(), true);
+    this.comingApart?.apply(this.destroyerProgress(), true, building);
     if (result.events.some((event) => event.type === 'screen_blackout')) this.fallIntoBlack();
-    this.publishFightPanel(progress);
+    this.publishFightPanel();
+  }
+
+  private onSmashEvent(event: GameSessionEvent, at: { x: number; y: number }): void {
+    const seed = Math.floor(Math.random() * 1e9);
+    if (event.type === 'evil_chick_smashed') {
+      bridgeActions.landScreenSmash();
+      this.fight?.chickDown();
+      return;
+    }
+    if (event.type === 'screen_layer_hit') {
+      bridgeActions.landScreenSmash();
+      if (event.layer === 'card') bridgeActions.crackCard({ ...at, seed });
+      if (event.layer === 'glass') bridgeActions.crackScreen({ ...at, seed });
+      if (event.hits === 1) this.thought?.show(SCREEN_FIRST_HIT_THOUGHT);
+      const street = this.destroyerProgress()?.layers.find((layer) => layer.id === 'street');
+      if (event.layer === 'street' && street?.hitsTaken === 1) this.thought?.show(SCREEN_FIRST_COLLAPSE_THOUGHT);
+      return;
+    }
+    if (event.type !== 'screen_layer_broken') return;
+    if (SCREEN_LAYER_BROKEN_THOUGHTS[event.layer]) this.thought?.show(SCREEN_LAYER_BROKEN_THOUGHTS[event.layer]);
+    // A beat on the blank paper, then he works out what's left to hit.
+    if (event.layer === 'street') this.time.delayedCall(SCREEN_WHAT_IF_DELAY_MS, () => this.hammerOnTheScreen(true));
   }
 
   /** The world point under a browser-viewport point (fractions), or null when it's off the game canvas. */
@@ -543,7 +598,6 @@ export class OverworldScene extends Phaser.Scene {
     const playerUpdate = this.playerRuntime?.update();
     const frozen = this.comingApart?.frozen ?? false;
     if (!frozen) this.updateLensReveal();
-    this.comingApart?.update();
     this.thought?.update();
 
     if (this.talk) {

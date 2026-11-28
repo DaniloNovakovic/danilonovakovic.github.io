@@ -19,7 +19,8 @@ export const gameShellMessages = {
   outOfBoundsCheckpoints: {
     pickup: 'Pickup (toolbox)',
     street: 'Street fight',
-    destroyer: 'Screen destroyer',
+    destroyer: 'Endless horde (hit the buildings)',
+    screen: 'Screen (street gone)',
     unplugged: 'Unplugged (black)'
   },
   devToolsSection: 'Dev tools',

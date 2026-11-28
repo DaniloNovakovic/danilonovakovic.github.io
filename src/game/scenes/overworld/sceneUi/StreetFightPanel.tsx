@@ -6,8 +6,10 @@ import { ALERT_RED_CSS } from '@/game/sharedSceneRuntime/escapeAlert';
 import { cn } from '@/shared/ui/utils';
 
 export interface StreetFightPanelView extends StreetFightProgress {
-  /** The screen destroyer once the fight is won (#164); null before. */
+  /** The page coming apart (#164), from the moment the chick is down; null before. */
   destroyer?: ScreenDestroyerProgress | null;
+  /** The hammer is on the screen itself: a click or tap anywhere is a smash. */
+  onTheScreen?: boolean;
 }
 
 /** Things on the page that keep their own click: never a smash. */
@@ -15,18 +17,18 @@ const NOT_A_SMASH = 'button, a, input, select, textarea, label, [role="button"],
 const DESTROYER_CURSOR_CLASS = 'screen-destroyer-active';
 
 /**
- * Out of Bounds street fight (#163): what's left to smash, how cracked the
- * screen is, and big Swing and Parry buttons for touch. `F` swings and `R`
- * parries on a keyboard (the scene reads them). Nothing here moves or
- * flashes; the fight lives in the scene.
+ * Out of Bounds street fight (#163): what's going on, and big Swing and Parry
+ * buttons for touch. `F` swings and `R` parries on a keyboard (the scene reads
+ * them). Nothing here moves or flashes; the fight lives in the scene. It never
+ * gives away that the street can be hit: that is for the player to find.
  *
- * After the fight (the screen destroyer, #164), a click or tap anywhere on
+ * Once the hammer is on the screen itself (#164), a click or tap anywhere on
  * the page is a smash too, except on a control (Static mode, the Swing
  * button...), which keeps its own click. The cursor is a hammer meanwhile.
  */
 export function StreetFightPanel({ params, dispatchAction }: SceneUiSurfaceProps) {
   const view = readParams(params);
-  const smashing = Boolean(view?.destroyer && !view.destroyer.blackout);
+  const smashing = Boolean(view?.onTheScreen && view.destroyer && !view.destroyer.blackout);
   usePageSmash(smashing, dispatchAction);
   if (!view) return null;
   const swing = () => dispatchAction('streetFightSwing');
@@ -44,11 +46,11 @@ export function StreetFightPanel({ params, dispatchAction }: SceneUiSurfaceProps
         <span className="rounded border-2 border-[#1a1a1a] bg-[#fbfbf9] px-1.5 py-0.5 text-[11px] font-black uppercase tracking-wider text-[#1a1a1a] tabular-nums sm:text-xs">
           {statusLine(view)}
         </span>
-        <span className="rounded border-2 border-[#1a1a1a] bg-[#fbfbf9] px-1.5 py-0.5 text-[11px] font-black uppercase tracking-wider text-[#1a1a1a] tabular-nums sm:text-xs">
-          {view.destroyer
-            ? `Smash anywhere · ${view.destroyer.remaining.length} layers left`
-            : `Screen cracks ${view.screenCracks}`}
-        </span>
+        {smashing && (
+          <span className="rounded border-2 border-[#1a1a1a] bg-[#fbfbf9] px-1.5 py-0.5 text-[11px] font-black uppercase tracking-wider text-[#1a1a1a] tabular-nums sm:text-xs">
+            Smash anywhere
+          </span>
+        )}
       </div>
 
       <div className="flex items-end justify-end gap-2 sm:gap-3">
@@ -128,22 +130,18 @@ function usePageSmash(active: boolean, dispatchAction: SceneUiSurfaceProps['disp
 }
 
 function badge(view: StreetFightPanelView): string {
-  if (view.destroyer) return view.destroyer.blackout ? 'Unplugged' : 'Break it all';
-  return view.phase === 'cleared' ? 'Quiet' : 'Under attack';
+  if (view.destroyer?.blackout) return 'Unplugged';
+  return view.onTheScreen ? 'Break it all' : 'Under attack';
 }
 
 function statusLine(view: StreetFightPanelView): string {
-  if (view.destroyer?.breaking) return `Breaking ${screenLayerName(view.destroyer.breaking)}`;
-  if (view.destroyer) return 'Nothing left';
-  if (view.phase === 'chick') return 'Evil chick';
-  if (view.phase === 'waves') return `Wave ${view.wave}: ${view.leftInWave} left`;
-  return 'All smashed';
+  if (view.destroyer?.blackout) return 'Nothing left';
+  if (view.onTheScreen && view.destroyer?.breaking) return `Breaking ${screenLayerName(view.destroyer.breaking)}`;
+  return view.phase === 'chick' ? 'Evil chick' : 'They keep coming';
 }
 
 function readParams(params: unknown): StreetFightPanelView | null {
   if (!params || typeof params !== 'object') return null;
   const view = params as Partial<StreetFightPanelView>;
-  return typeof view.phase === 'string' && typeof view.screenCracks === 'number'
-    ? (view as StreetFightPanelView)
-    : null;
+  return view.phase === 'chick' || view.phase === 'horde' ? (view as StreetFightPanelView) : null;
 }

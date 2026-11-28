@@ -15,7 +15,7 @@ import {
   OUT_OF_BOUNDS_OPENING_X
 } from './content/outOfBoundsVoid';
 import { BASEMENT_BREACH_ENTRY, OUT_OF_BOUNDS_STREET_ARRIVAL } from './content/outOfBoundsBreakout';
-import { STREET_FIGHT_TOTAL_SMASHES, streetFightProgress, streetFightWave } from './content/outOfBoundsStreetFight';
+import { streetFightProgress } from './content/outOfBoundsStreetFight';
 import { SCREEN_DESTROYER_TOTAL_HITS, screenDestroyerProgress } from './content/outOfBoundsScreenDestroyer';
 import { BASEMENT_WALK_BOUNDS, getBasementSpot } from './content/basementSpots';
 import { getOverworldProgress, getSketchDetailLevel } from './overworldLogic';
@@ -731,53 +731,33 @@ describe('out of bounds street fight: the street in alarm (#163)', () => {
   it('the evil chick confronts Danilo, and the first swing is on it', () => {
     const { session, up } = onTheStreet();
     expect(up.message).toMatch(/chick that always ran from you/i);
-    expect(session.observe().overworld?.alarm?.fight).toMatchObject({
-      phase: 'chick',
-      enemiesLeft: 26
-    });
+    expect(session.observe().overworld?.alarm?.fight).toEqual({ phase: 'chick' });
+    expect(session.format()).toMatch(/fight: evil chick/);
     const first = session.exec('swing');
     expect(first.message).toMatch(/BONK/);
-    expect(first.events).toEqual([{ type: 'screen_smashed', target: 'chick', smashes: 1 }]);
-    expect(session.observe().overworld?.alarm?.fight).toMatchObject({
-      phase: 'waves',
-      wave: 1,
-      leftInWave: 5
-    });
+    expect(first.message).toMatch(/more than you can count/);
+    expect(first.events).toEqual([{ type: 'evil_chick_smashed' }]);
+    expect(session.observe().overworld?.alarm?.fight).toEqual({ phase: 'horde' });
+    expect(session.format()).toMatch(/fight: horde \(endless\)/);
   });
 
-  it('raccoons come in waves; each smash adds a crack until the screen is badly cracked', () => {
-    const { session } = onTheStreet();
-    const waves: number[] = [];
-    let cleared = false;
-    for (let i = 0; i < STREET_FIGHT_TOTAL_SMASHES; i++) {
-      const result = session.exec('swing');
-      const fight = session.observe().overworld?.alarm?.fight;
-      if (fight?.phase === 'waves' && !waves.includes(fight.wave)) waves.push(fight.wave);
-      cleared ||= result.events.some((event) => event.type === 'street_fight_cleared');
+  it('the horde never ends: smashing raccoons and pigeons never moves anything on', () => {
+    const { session } = onTheStreet({ screenSmashes: 1 });
+    for (let i = 0; i < 50; i++) {
+      const result = session.exec(i % 3 === 0 ? 'swing pigeon' : 'swing');
+      expect(result.ok).toBe(true);
+      expect(result.events).toEqual([]);
     }
-    expect(waves).toEqual([1, 2, 3]);
-    expect(cleared).toBe(true);
-    expect(session.observe().overworld?.alarm?.fight).toEqual({
-      phase: 'cleared',
-      wave: 0,
-      leftInWave: 0,
-      enemiesLeft: 0,
-      screenCracks: STREET_FIGHT_TOTAL_SMASHES
-    });
-    expect(session.format()).toMatch(/fight: cleared enemies left=0 screen damage=26 cracks/);
-    const after = session.exec('swing');
-    expect(after.events).toEqual([{ type: 'screen_layer_hit', layer: 'header', hits: 1 }]);
-    expect(after.message).toMatch(/header at the top of the page tears loose/);
+    expect(session.getState().screenSmashes).toBe(1);
+    expect(session.observe().overworld?.alarm?.destroyer).toMatchObject({ hits: 0, breaking: 'labels' });
+    expect(session.observe().hints[0]).toMatch(/swing page hits the building behind them/);
   });
 
-  it('resumes the fight from the cracks already on the screen', () => {
-    const { session, up } = onTheStreet({ screenSmashes: 7 });
+  it('resumes the fight from the smashes the shell kept', () => {
+    const { session, up } = onTheStreet({ screenSmashes: 5 });
     expect(up.message).toMatch(/raccoons coming/i);
-    expect(session.observe().overworld?.alarm?.fight).toMatchObject({
-      phase: 'waves',
-      wave: 2,
-      leftInWave: 7
-    });
+    expect(session.observe().overworld?.alarm?.fight).toEqual({ phase: 'horde' });
+    expect(session.observe().overworld?.alarm?.destroyer).toMatchObject({ hits: 4, breaking: 'street' });
   });
 
   it('has no hammer and no alarm outside the escape', () => {
@@ -788,48 +768,70 @@ describe('out of bounds street fight: the street in alarm (#163)', () => {
   });
 });
 
-describe('out of bounds screen destroyer: the page comes apart (#164)', () => {
-  function afterTheFight(extraHits = 0) {
+describe('out of bounds screen destroyer: the street, then the screen, comes apart (#164)', () => {
+  function inTheHorde(pageHits = 0) {
     const session = createSession({
       sceneId: 'basement',
       ownedItemIds: ['debugging-tools'],
-      screenSmashes: STREET_FIGHT_TOTAL_SMASHES + extraHits
+      screenSmashes: 1 + pageHits
     });
     session.exec('leave');
     return session;
   }
 
-  it('starts once the fight is won, with every layer still on the page', () => {
-    const session = afterTheFight();
+  it('starts as soon as the chick is down, with every layer still there', () => {
+    const session = inTheHorde();
     expect(session.observe().overworld?.alarm?.destroyer).toMatchObject({
       hits: 0,
-      breaking: 'header',
-      remaining: ['header', 'labels', 'street', 'danilo'],
+      breaking: 'labels',
+      remaining: ['labels', 'street', 'card', 'glass'],
+      onTheScreen: false,
       blackout: false
     });
-    expect(session.format()).toMatch(/screen: breaking=header \(0\/6\) layers left=header, labels, street, danilo/);
-    expect(session.observe().hints).toContain('Type swing to keep smashing the page: the header goes next.');
+    expect(session.format()).toMatch(/screen: breaking=labels \(0\/3\) layers left=labels, street, card, glass/);
   });
 
-  it('has no destroyer while the fight is still on', () => {
-    const session = afterTheFight(-3);
+  it('has no destroyer while the evil chick still stands', () => {
+    const session = createSession({ sceneId: 'basement', ownedItemIds: ['debugging-tools'] });
+    session.exec('leave');
     expect(session.observe().overworld?.alarm?.destroyer).toBeNull();
     expect(session.format()).not.toMatch(/screen:/);
   });
 
-  it('any smash counts, a pigeon or the bare glass, and every swing lands on the page', () => {
-    const session = afterTheFight();
-    expect(session.exec('swing pigeon').events).toEqual([{ type: 'screen_layer_hit', layer: 'header', hits: 1 }]);
-    expect(session.exec('swing raccoon').events).toEqual([{ type: 'screen_layer_hit', layer: 'header', hits: 2 }]);
-    expect(session.exec('smash').events).toEqual([{ type: 'screen_layer_hit', layer: 'header', hits: 3 }]);
+  it('a swing past the horde hits the building behind: the labels tilt, then a building crashes down', () => {
+    const session = inTheHorde();
+    const first = session.exec('swing page');
+    expect(first.message).toMatch(/hits the building behind them/);
+    expect(first.events).toEqual([{ type: 'screen_layer_hit', layer: 'labels', hits: 1 }]);
+    session.exec('swing building');
+    const third = session.exec('swing street');
+    expect(third.events).toEqual([
+      { type: 'screen_layer_hit', layer: 'labels', hits: 3 },
+      { type: 'screen_layer_broken', layer: 'labels' }
+    ]);
+    const collapse = session.exec('swing page');
+    expect(collapse.message).toMatch(/crashes down/);
+    expect(collapse.events).toEqual([{ type: 'screen_layer_hit', layer: 'street', hits: 4 }]);
+    expect(session.observe().hints[0]).toMatch(/the street goes next/);
+    expect(parseGameCommand('smash screen')).toEqual({ type: 'swing', target: 'page' });
+    expect(parseGameCommand('swing cat')).toEqual({ type: 'unknown', raw: 'swing cat' });
   });
 
-  it('drives the headless console to the end: layer after layer, Danilo last, then black', () => {
-    const session = afterTheFight();
+  it('once the street is gone, the hammer is on the screen: the card, then the glass', () => {
+    const session = inTheHorde(3 + 5);
+    const last = session.exec('swing page');
+    expect(last.message).toMatch(/what if/i);
+    expect(last.events.at(-1)).toEqual({ type: 'screen_layer_broken', layer: 'street' });
+    expect(session.observe().overworld?.alarm?.destroyer).toMatchObject({ breaking: 'card', onTheScreen: true });
+    expect(session.exec('swing page').message).toMatch(/card framing the game cracks/);
+  });
+
+  it('drives the headless console to the end: labels, street, card, glass, then black', () => {
+    const session = inTheHorde();
     const broken: string[] = [];
     let blackout = 0;
     for (let i = 0; i < SCREEN_DESTROYER_TOTAL_HITS; i++) {
-      const result = session.exec('swing');
+      const result = session.exec('swing page');
       expect(result.ok).toBe(true);
       for (const event of result.events) {
         if (event.type === 'screen_layer_broken') broken.push(event.layer);
@@ -838,7 +840,7 @@ describe('out of bounds screen destroyer: the page comes apart (#164)', () => {
       if (i < SCREEN_DESTROYER_TOTAL_HITS - 1)
         expect(session.observe().overworld?.alarm?.destroyer?.blackout).toBe(false);
     }
-    expect(broken).toEqual(['header', 'labels', 'street', 'danilo']);
+    expect(broken).toEqual(['labels', 'street', 'card', 'glass']);
     expect(blackout).toBe(1);
     expect(session.observe().overworld?.alarm?.destroyer).toMatchObject({
       remaining: [],
@@ -848,80 +850,49 @@ describe('out of bounds screen destroyer: the page comes apart (#164)', () => {
     expect(session.format()).toMatch(/screen: black — every layer gone, unplugged/);
     expect(session.observe().hints[0]).toMatch(/Wake up opens the real world/);
 
-    const more = session.exec('swing');
+    const more = session.exec('swing page');
     expect(more.ok).toBe(false);
     expect(more.events).toEqual([]);
     expect(more.message).toMatch(/nothing left to hit/i);
   });
 
   it('reports which layers remain part-way through', () => {
-    const session = afterTheFight(6 + 6 + 3);
-    expect(session.format()).toMatch(/screen: breaking=street \(3\/10\) layers left=street, danilo/);
+    const session = inTheHorde(3 + 6 + 2);
+    expect(session.format()).toMatch(/screen: breaking=card \(2\/4\) layers left=card, glass/);
   });
 });
 
 describe('screenDestroyerProgress', () => {
-  it('breaks the layers in order, outside in, each at its own pace', () => {
-    expect(screenDestroyerProgress(0).breaking).toBe('header');
-    expect(screenDestroyerProgress(3).layers[0]).toMatchObject({
-      id: 'header',
-      hitsTaken: 3,
-      damage: 0.5,
-      gone: false
-    });
-    expect(screenDestroyerProgress(6)).toMatchObject({ breaking: 'labels', remaining: ['labels', 'street', 'danilo'] });
-    expect(screenDestroyerProgress(12)).toMatchObject({ breaking: 'street', remaining: ['street', 'danilo'] });
-    expect(screenDestroyerProgress(22)).toMatchObject({ breaking: 'danilo', remaining: ['danilo'] });
-    expect(screenDestroyerProgress(27)).toMatchObject({ breaking: 'danilo', blackout: false });
+  it('breaks the layers in order, the street first, then the screen around it', () => {
+    expect(screenDestroyerProgress(0)).toMatchObject({ breaking: 'labels', onTheScreen: false });
+    expect(screenDestroyerProgress(2).layers[0]).toMatchObject({ id: 'labels', hitsTaken: 2, gone: false });
+    expect(screenDestroyerProgress(3)).toMatchObject({ breaking: 'street', remaining: ['street', 'card', 'glass'] });
+    // One hit per building on the street.
+    expect(screenDestroyerProgress(3).layers[1]).toMatchObject({ id: 'street', hits: 6 });
+    expect(screenDestroyerProgress(9)).toMatchObject({ breaking: 'card', onTheScreen: true });
+    expect(screenDestroyerProgress(13)).toMatchObject({ breaking: 'glass', remaining: ['glass'], onTheScreen: true });
+    expect(screenDestroyerProgress(18)).toMatchObject({ breaking: 'glass', blackout: false });
   });
 
   it('ends in black once every layer is gone, and never past it', () => {
-    expect(SCREEN_DESTROYER_TOTAL_HITS).toBe(28);
-    expect(screenDestroyerProgress(28)).toMatchObject({ breaking: null, remaining: [], blackout: true, hits: 28 });
-    expect(screenDestroyerProgress(99)).toMatchObject({ blackout: true, hits: 28 });
+    expect(SCREEN_DESTROYER_TOTAL_HITS).toBe(19);
+    expect(screenDestroyerProgress(19)).toMatchObject({ breaking: null, remaining: [], blackout: true, hits: 19 });
+    expect(screenDestroyerProgress(99)).toMatchObject({ blackout: true, hits: 19 });
     expect(screenDestroyerProgress(-4)).toMatchObject({ hits: 0, blackout: false });
-    expect(screenDestroyerProgress(28).layers.every((layer) => layer.gone && layer.damage === 1)).toBe(true);
+    expect(screenDestroyerProgress(19).layers.every((layer) => layer.gone && layer.damage === 1)).toBe(true);
   });
 });
 
 describe('streetFightProgress', () => {
-  it('walks chick, then raccoon waves of 5, 8 and 12', () => {
-    expect(streetFightProgress(0)).toMatchObject({ phase: 'chick', enemiesLeft: 26 });
-    expect(streetFightProgress(1)).toMatchObject({ phase: 'waves', wave: 1, leftInWave: 5 });
-    expect(streetFightProgress(5)).toMatchObject({ phase: 'waves', wave: 1, leftInWave: 1 });
-    expect(streetFightProgress(6)).toMatchObject({ phase: 'waves', wave: 2, leftInWave: 8 });
-    expect(streetFightProgress(14)).toMatchObject({ phase: 'waves', wave: 3, leftInWave: 12 });
-    expect(streetFightProgress(25)).toMatchObject({ phase: 'waves', wave: 3, leftInWave: 1 });
-    expect(streetFightProgress(26)).toMatchObject({ phase: 'cleared', screenCracks: 26 });
-    expect(streetFightProgress(99)).toMatchObject({ phase: 'cleared', screenCracks: 26 });
-  });
-});
-
-describe('street fight waves: raccoon hordes on the ground, pigeons overhead', () => {
-  it('sends the raccoons left in a wave, and more pigeons as the waves go on', () => {
-    expect(streetFightWave(1, 5)).toEqual({ raccoons: 5, pigeons: 1 });
-    expect(streetFightWave(2, 3)).toEqual({ raccoons: 3, pigeons: 2 });
-    expect(streetFightWave(3, 12)).toEqual({ raccoons: 12, pigeons: 3 });
-    expect(streetFightWave(9, 2)).toEqual({ raccoons: 0, pigeons: 0 });
-  });
-
-  it('lets the live scene say what the hammer hit; a pigeon never counts', () => {
-    const session = createSession({ sceneId: 'basement', ownedItemIds: ['debugging-tools'], screenSmashes: 4 });
-    session.exec('leave');
-    const pigeon = session.exec('swing pigeon');
-    expect(pigeon.message).toMatch(/THWACK: a pigeon/);
-    expect(pigeon.events).toEqual([]);
-    expect(session.getState().screenSmashes).toBe(4);
-    const hit = session.exec('swing raccoon');
-    expect(hit.message).toMatch(/WHACK: a raccoon/);
-    expect(hit.events).toEqual([{ type: 'screen_smashed', target: 'raccoon', smashes: 5 }]);
-    expect(parseGameCommand('smash pigeon')).toEqual({ type: 'swing', target: 'pigeon' });
-    expect(parseGameCommand('swing cat')).toEqual({ type: 'unknown', raw: 'swing cat' });
+  it('is the chick, then the endless horde', () => {
+    expect(streetFightProgress(0)).toEqual({ phase: 'chick' });
+    expect(streetFightProgress(1)).toEqual({ phase: 'horde' });
+    expect(streetFightProgress(99)).toEqual({ phase: 'horde' });
   });
 
   it('the chick is always the chick, even if the scene says pigeon', () => {
     const session = createSession({ sceneId: 'basement', ownedItemIds: ['debugging-tools'] });
     session.exec('leave');
-    expect(session.exec('swing pigeon').events).toEqual([{ type: 'screen_smashed', target: 'chick', smashes: 1 }]);
+    expect(session.exec('swing pigeon').events).toEqual([{ type: 'evil_chick_smashed' }]);
   });
 });

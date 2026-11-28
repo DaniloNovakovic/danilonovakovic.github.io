@@ -6,29 +6,32 @@ import {
   OUT_OF_BOUNDS_STREET_ARRIVAL,
   OUT_OF_BOUNDS_TOOLBOX_X,
   SCREEN_DESTROYER_TOTAL_HITS,
-  STREET_FIGHT_TOTAL_SMASHES
+  screenHitsBefore
 } from '@/game/core/console';
 import { HOBBIES_SCENE_ID, OVERWORLD_SCENE_ID, PHASER_SCENE_KEYS, type SceneId } from '@/game/scenes/sceneIds';
 import { placeNextSceneStart } from '@/game/sharedSceneRuntime/sceneResumePolicy';
 
 /**
  * Dev-only jump points into the Out of Bounds arc. Every escape fact is derived
- * from bridge state (owning the Debugging Tools, crack count, dent count), so a
+ * from bridge state (owning the Debugging Tools, the smash count), so a
  * checkpoint is just that state plus where Danilo starts. It is applied on page
  * load (`?oob=<id>`), before Phaser boots, so every scene starts fresh.
  */
 const OUT_OF_BOUNDS_CHECKPOINT_PARAM = 'oob';
 
-export type OutOfBoundsCheckpointId = 'pickup' | 'street' | 'destroyer' | 'unplugged';
+export type OutOfBoundsCheckpointId = 'pickup' | 'street' | 'destroyer' | 'screen' | 'unplugged';
 
 export interface OutOfBoundsCheckpoint {
   id: OutOfBoundsCheckpointId;
   sceneId: SceneId;
   start: { sceneKey: string; x: number; y: number };
   ownsDebuggingTools: boolean;
-  cracks: number;
-  dents: number;
+  /** Smashes that moved it on: the chick (1), then every one on the page. */
+  smashes: number;
 }
+
+/** The chick, then this many smashes on the page. */
+const afterTheChick = (pageHits: number) => 1 + pageHits;
 
 const STREET_START = { sceneKey: PHASER_SCENE_KEYS.overworld, ...OUT_OF_BOUNDS_STREET_ARRIVAL };
 
@@ -43,37 +46,42 @@ export const OUT_OF_BOUNDS_CHECKPOINTS: readonly OutOfBoundsCheckpoint[] = [
       y: HOBBIES_FLOOR_Y - HOBBIES_PLAYER_START_OFFSET_Y
     },
     ownsDebuggingTools: false,
-    cracks: 0,
-    dents: 0
+    smashes: 0
   },
   {
     id: 'street',
     sceneId: OVERWORLD_SCENE_ID,
     start: STREET_START,
     ownsDebuggingTools: true,
-    cracks: 0,
-    dents: 0
+    smashes: 0
   },
   {
+    // The chick is down: the endless horde, and the buildings to hit.
     id: 'destroyer',
     sceneId: OVERWORLD_SCENE_ID,
     start: STREET_START,
     ownsDebuggingTools: true,
-    cracks: STREET_FIGHT_TOTAL_SMASHES,
-    dents: 0
+    smashes: afterTheChick(0)
+  },
+  {
+    // The street is gone: the hammer is on the card, then the glass.
+    id: 'screen',
+    sceneId: OVERWORLD_SCENE_ID,
+    start: STREET_START,
+    ownsDebuggingTools: true,
+    smashes: afterTheChick(screenHitsBefore('card'))
   },
   {
     id: 'unplugged',
     sceneId: OVERWORLD_SCENE_ID,
     start: STREET_START,
     ownsDebuggingTools: true,
-    cracks: STREET_FIGHT_TOTAL_SMASHES,
-    dents: SCREEN_DESTROYER_TOTAL_HITS
+    smashes: afterTheChick(SCREEN_DESTROYER_TOTAL_HITS)
   }
 ];
 
 /** Smash points spread left and right of the middle, like a real fight. */
-function smashes(count: number, seedOffset: number): ScreenCrack[] {
+function smashPoints(count: number, seedOffset: number): ScreenCrack[] {
   return Array.from({ length: count }, (_, i) => ({
     x: i % 2 === 0 ? 0.3 : 0.7,
     y: 0.35 + ((i * 7) % 5) * 0.08,
@@ -89,8 +97,13 @@ export function findOutOfBoundsCheckpoint(id: string | null): OutOfBoundsCheckpo
 export function applyOutOfBoundsCheckpoint(checkpoint: OutOfBoundsCheckpoint): void {
   bridgeActions.resetProgress();
   if (checkpoint.ownsDebuggingTools) bridgeActions.collectItem(DEBUGGING_TOOLS_ITEM_ID);
-  smashes(checkpoint.cracks, 0).forEach((crack) => bridgeActions.crackScreen(crack));
-  smashes(checkpoint.dents, 1000).forEach((dent) => bridgeActions.dentScreen(dent));
+  for (let i = 0; i < checkpoint.smashes; i++) bridgeActions.landScreenSmash();
+  // The cracks those smashes left on the card and the glass.
+  const pageHits = Math.max(0, checkpoint.smashes - 1);
+  const onCard = Math.min(4, Math.max(0, pageHits - screenHitsBefore('card')));
+  const onGlass = Math.max(0, pageHits - screenHitsBefore('glass'));
+  smashPoints(onCard, 0).forEach((crack) => bridgeActions.crackCard(crack));
+  smashPoints(onGlass, 1000).forEach((crack) => bridgeActions.crackScreen(crack));
   const { sceneKey, x, y } = checkpoint.start;
   placeNextSceneStart(sceneKey, { x, y });
   bridgeActions.enterScene(checkpoint.sceneId);

@@ -27,6 +27,9 @@ const NIGHT_DEPTH = 24;
 const TAPE_DEPTH = 24.2;
 const LIGHT_DEPTH = 24.4;
 const HELI_DEPTH = 24.6;
+/** Building labels sit over the night, lit pale, so the hammer has something to hit first (#164). */
+const LABEL_DEPTH = 24.3;
+const LABEL_LIT = '#f4f1ea';
 
 /** Searchlight bases (world x), set behind the street. */
 const SEARCHLIGHT_XS = [350, 1150, 1700, 2600] as const;
@@ -49,7 +52,7 @@ export class StreetAlarm {
   private heliDir: 1 | -1 = 1;
   private rotorFrame = -1;
 
-  constructor(scene: Phaser.Scene, startX: number) {
+  constructor(scene: Phaser.Scene, startX: number, labels: readonly Phaser.GameObjects.Text[] = []) {
     this.scene = scene;
     this.heliX = startX - 260;
 
@@ -65,6 +68,7 @@ export class StreetAlarm {
       )
       .setScrollFactor(0)
       .setDepth(NIGHT_DEPTH);
+    for (const label of labels) label.setDepth(LABEL_DEPTH).setColor(LABEL_LIT);
     this.drawMoon();
     this.drawTape();
     this.lights = scene.add.graphics().setDepth(LIGHT_DEPTH).setBlendMode(Phaser.BlendModes.ADD);

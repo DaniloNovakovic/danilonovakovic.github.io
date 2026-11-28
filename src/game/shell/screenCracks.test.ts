@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { drawScreenCrack, drawScreenDent, inClearCenter } from './screenCracks';
+import { drawImpactCrack, drawScreenCrack, inClearCenter, shatterShards } from './screenCracks';
 
 const VIEWPORT = { width: 1280, height: 800 };
 
@@ -37,15 +37,29 @@ describe('drawScreenCrack', () => {
   });
 });
 
-describe('drawScreenDent', () => {
-  it('lands right where the smash was, even in the middle of the page', () => {
-    const dent = { x: 0.5, y: 0.5, seed: 99 };
-    const marks = points(drawScreenDent(dent, VIEWPORT));
-    expect(marks.length).toBeGreaterThan(6);
-    for (const [x, y] of marks) {
-      expect(Math.abs(x - 640)).toBeLessThan(60);
-      expect(Math.abs(y - 400)).toBeLessThan(60);
-    }
-    expect(drawScreenDent(dent, VIEWPORT)).toEqual(drawScreenDent(dent, VIEWPORT));
+describe('drawImpactCrack', () => {
+  it('bursts from right where the smash was, even in the middle, and runs far across the screen', () => {
+    const crack = { x: 0.5, y: 0.5, seed: 99 };
+    const { runs, impact } = drawImpactCrack(crack, VIEWPORT);
+    expect(points(runs)[0]).toEqual([640, 400]);
+    expect(points(impact).every(([x, y]) => Math.hypot(x - 640, y - 400) < 110)).toBe(true);
+    const reach = Math.max(...points(runs).map(([x, y]) => Math.hypot(x - 640, y - 400)));
+    expect(reach).toBeGreaterThan(300);
+    expect(drawImpactCrack(crack, VIEWPORT)).toEqual(drawImpactCrack(crack, VIEWPORT));
+  });
+});
+
+describe('shatterShards', () => {
+  it('cuts the whole screen into pieces, the ones nearest the last smash falling first', () => {
+    const impact = { x: 0.1, y: 0.1, seed: 5 };
+    const shards = shatterShards(impact, VIEWPORT);
+    expect(shards.length).toBeGreaterThan(12);
+    const corners = shards.flatMap((s) => s.points.split(' ').map((p) => p.split(',').map(Number)));
+    expect(corners).toContainEqual([0, 0]);
+    expect(corners).toContainEqual([1280, 800]);
+    const near = shards[0]!;
+    const far = shards.at(-1)!;
+    expect(near.delayMs).toBeLessThan(far.delayMs);
+    expect(shatterShards(impact, VIEWPORT)).toEqual(shards);
   });
 });

@@ -35,6 +35,8 @@ const SIMPLE_COMMANDS: Record<string, GameCommand> = {
 };
 
 const SWING_ALIASES = new Set(['swing', 'smash', 'hammer']);
+/** `swing page`: past the horde, at the page itself (a building, then the screen). */
+const SWING_AT_PAGE = new Set(['page', 'building', 'street', 'screen', 'glass', 'card']);
 const GO_ALIASES = new Set(['go', 'walk', 'move']);
 /** Ridge mini-game verbs the Ridge console parses itself. */
 const RIDGE_VERBS = new Set(['build', 'duel', 'dodge', 'gig', 'strum']);
@@ -58,8 +60,9 @@ export function getGameHelpText(): string {
     '  confirm | decline   answer the point-of-no-return warning at the toolbox',
     '',
     'Out of Bounds street (simulation broken):',
-    '  swing [pigeon|raccoon]   swing the Debugging Tools hammer: the evil chick, then the raccoon waves (pigeons never count),',
-    '                           then the page itself, layer by layer, until it falls into black',
+    '  swing [pigeon|raccoon]   swing the Debugging Tools hammer: the evil chick, then the endless horde (never moves on)',
+    '  swing page               past the horde, at the page itself: the building labels, the buildings, the card',
+    '                           around the game, then the screen, until it falls into black',
     '',
     'Ridge conversation:',
     '  advance | choose <id|index>',
@@ -145,7 +148,8 @@ function parseChoiceCommand(kind: 'choose' | 'draft', parts: string[], trimmed: 
 function parseSwingCommand(parts: string[], trimmed: string): GameCommand {
   const target = parts[1];
   if (target === undefined) return { type: 'swing' };
-  return target === 'pigeon' || target === 'raccoon' ? { type: 'swing', target } : { type: 'unknown', raw: trimmed };
+  if (target === 'pigeon' || target === 'raccoon') return { type: 'swing', target };
+  return SWING_AT_PAGE.has(target) ? { type: 'swing', target: 'page' } : { type: 'unknown', raw: trimmed };
 }
 
 function parseEquipCommand(head: 'equip' | 'unequip', parts: string[], trimmed: string): GameCommand {
